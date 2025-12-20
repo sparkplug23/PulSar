@@ -91,26 +91,14 @@ bool mAnimatorLight::requestJSONBufferLock(uint16_t moduleID)
   }
 
   jsonBufferLock = moduleID ? moduleID : 255;
-  DEBUG_PRINTF_P(PSTR("JSON buffer locked. (%d)\n"), jsonBufferLock);
+  DEBUG_PRINTF_P(PSTR("JSON locked (%d)\n\r"), jsonBufferLock);
   tkr_mfile->pDoc->clear();
   return true;
 }
 
-
-// void mAnimatorLight::releaseJSONBufferLock()
-// {
-//   // DEBUG_PRINT(F("UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUNLOCKED JSON buffer released. ("));
-//   // DEBUG_PRINT(jsonBufferLock);
-//   // DEBUG_PRINTLN(")");
-//   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
-//   tkr_mfile->gDoc = nullptr;
-//   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
-//   jsonBufferLock = 0;
-// }
-
 void  mAnimatorLight::releaseJSONBufferLock()
 {
-  DEBUG_PRINTF_P(PSTR("JSON buffer released. (%d)\n"), jsonBufferLock);
+  DEBUG_PRINTF_P(PSTR("JSON released (%d)\n\r"), jsonBufferLock);
   jsonBufferLock = 0;
 #ifdef ARDUINO_ARCH_ESP32
   xSemaphoreGiveRecursive(tkr_mfile->jsonBufferLockMutex);
@@ -461,20 +449,6 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 {
   ALOG_INF(PSTR("deserializeState"));
 
-  #ifdef ENABLE_DEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
-  ALOG_INF(PSTR("Checking for PSN/PD in JSON - cant do here, too slow. will cause crash. needs done outside of here.maybe add a hook in edit"));
-
-  // a flag of "filechange" and "its name"
-  //  and send Tasker out, so anything that cares can be triggered by it.
-
-  // Any time a preset/playlist select command comes in, refresh ps from psn
-  // in presets.json. This uses its own JSON doc and does NOT touch the global one.
-  // if (!root["ps"].isNull() || !root["pd"].isNull()) {
-  //   ScanPresetsFile_GeneratePlaylistIDsFromPSN();
-  // }
-#endif
-
-
   bool stateResponse = root[F("v")] | false;
 
   #if defined(WLED_DEBUG) && defined(WLED_DEBUG_HOST)
@@ -659,7 +633,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
     }
   }
 
-  ALOG_INF(PSTR("deserializeState end =>> does my normal commandjson need done here?"));
+  // ALOG_INF(PSTR("deserializeState end =>> does my normal commandjson need done here?"));
 
   stateUpdated(callMode);
   if (presetToRestore) currentPreset = presetToRestore;

@@ -1,0 +1,4 @@
+As playlists/presets are still being heavily edited, I will use a single source here and share among 3 trees (whitehall, 2x meadows)
+
+Edits:
+* make playlists work by name, not just index

@@ -94,12 +94,12 @@ void mAnimatorLight::setUpMatrix() {
         DEBUG_PRINT(F("Reading LED gap from "));
         DEBUG_PRINTLN(fileName);
         // read the array into global JSON buffer
-        if (tkr_mfile->readObjectFromFile(fileName, nullptr, &doc)) {
+        if (tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_mfile->pDoc)) {
           // the array is similar to ledmap, except it has only 3 values:
           // -1 ... missing pixel (do not increase pixel count)
           //  0 ... inactive pixel (it does count, but should be mapped out (-1))
           //  1 ... active pixel (it will count and will be mapped)
-          JsonArray map = doc.as<JsonArray>();
+          JsonArray map = tkr_mfile->pDoc->as<JsonArray>();
           gapSize = map.size();
           if (!map.isNull() && gapSize >= customMappingSize) { // not an empty map
             gapTable = new int8_t[gapSize];

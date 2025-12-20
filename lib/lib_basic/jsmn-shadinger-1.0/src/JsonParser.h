@@ -75,6 +75,8 @@ const extern jsmntok_t token_bad;
 // Warning: this makes code non-reentrant.
 extern const char * k_current_json_buffer;
 
+
+
 /*********************************************************************************************\
  * Read-only JSON token object, fits in 32 bits
 \*********************************************************************************************/
@@ -365,6 +367,28 @@ protected:
   // post-process parsing: insert NULL chars to split strings, compute a more precise token type
   void postProcess(size_t json_len);
 };
+
+
+// Date Modified: 15Dec25
+static inline JsonParserToken getTokAlias(const JsonParserObject& obj,
+                                         const char* keyPrimary,
+                                         const char* keyAlias)
+{
+  JsonParserToken t = obj[keyPrimary];
+  if (t) return t;
+  return obj[keyAlias];
+}
+
+// PROGMEM keys (PSTR / FPSTR)
+static inline JsonParserToken getTokAlias_P(const JsonParserObject& obj,
+                                           PGM_P keyPrimary_P,
+                                           PGM_P keyAlias_P)
+{
+  JsonParserToken t = obj[keyPrimary_P];
+  if (t) return t;
+  return obj[keyAlias_P];
+}
+
 
 #endif // __JSON_PARSER__
 

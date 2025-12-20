@@ -45,7 +45,6 @@
 
 // #define DEVICE_MEADOWS__BED_ALARM_LIGHT
 
-
 // #define DEVICE_CHRISTMAS25__FINAL__16X_SNOW_TREE
 
 // #define DEVICE_XMAS25__MEADOWS__HALLWAY_TREE
@@ -114,10 +113,12 @@
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
 
 
+  // #define ENABLE_DEVFEATURE_LIGHTING__CANSHOW_BACKOFF
+
  /***********************************
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
  ************************************/  
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
 
 //  /***********************************
 //   * SECTION: Sensor Configs
@@ -479,7 +480,7 @@
   #define ENABLE_DEVFEATURE_LIGHT__GRADIENT_PATCH_4DEC25
 
   #define ENABLE_DEVFEATURE_LIGHTS__FIX_MULTISEGMENT_DMA_FLICKER
-  #define MIN_SHOW_DELAY 25
+  // #define MIN_SHOW_DELAY 25
   
 
   #define ENABLE_DEVFEATURE_LIGHTS__FIX_MULTISEGMENT_DMA_FLICKER
@@ -2542,12 +2543,120 @@
   #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
 
 
-  #define ENABLE_BUSCONFIG_7X_2100
-  // #define ENABLE_BUSCONFIG_8X_2400
-  // #define ENABLE_BUSCONFIG_16X_3200
-  // #define ENABLE_BUSCONFIG_10X_2000
+  #define ENABLE_BUSCONFIG_7X_2100_ON_AT_BOOT                     // NORMAL 2025 Operation
+  // #define ENABLE_BUSCONFIG_7X_2100_FORCED_OFF_ON_BOOT  // Failsafe when powerloss of sonoff
   
-  #ifdef ENABLE_BUSCONFIG_7X_2100
+
+
+  #ifdef ENABLE_BUSCONFIG_7X_2100_ON_AT_BOOT
+
+  
+  
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":300
+      },
+      {
+        "Pin":18,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":300,
+        "Length":300
+      },
+      {
+        "Pin":19,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":600,
+        "Length":300
+      },
+      {
+        "Pin":21,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":900,
+        "Length":300
+      },
+      {
+        "Pin":16,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1200,
+        "Length":300
+      },
+      {
+        "Pin":17,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1500,
+        "Length":300
+      },
+      {
+        "Pin":22,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1800,
+        "Length":300
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        2100
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Static",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100,
+      "Preset":{"Load":200}
+    },
+    "BrightnessRGB": 100
+  }
+  )=====";
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"12\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"26\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"32\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"14\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"27\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"25\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"33\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"28\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #endif // ENABLE_BUSCONFIG_7X_2100
+
+  
+  #ifdef ENABLE_BUSCONFIG_7X_2100_FORCED_OFF_ON_BOOT
 
   
 
@@ -2621,7 +2730,7 @@
       },
       "BrightnessRGB": 100
     },
-    "BrightnessRGB": 100
+    "BrightnessRGB": 0
   }
   )=====";
 
@@ -2987,6 +3096,8 @@
    * SECTION: Lighting Configs
   ************************************/   
 
+  #define ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+
 
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
@@ -3008,7 +3119,7 @@
   #define MIN_SHOW_DELAY 25
 
 
-  
+
   #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
 
   #define ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_STRIP // Testing playlists on smaller strips
@@ -3049,7 +3160,8 @@
       },
       "BrightnessRGB": 100
     },
-    "BrightnessRGB": 6
+    "BrightnessRGB": 6,
+    "Preset":{"Load":200}
   }
   )=====";
  
@@ -3259,6 +3371,127 @@
 
 
 
+#ifdef DEVICE_XMAS25__MEADOWS__WS2815_PANEL_12V
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+
+  /***********************************
+  * SECTION: Enable Grouped
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+  #define ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  #define ENABLE_BUSCONFG__OUTPUTS_1X_100
+  // #define ENABLE_BUSCONFG__OUTPUTS_1X_2000 // Just for testing larger compute times
+
+  #define ENABLE_DEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
+  #define ENABLEDEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
+  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
+  #define ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLIST_BY_NAME_AUTOGENERATE_ID_LIST
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__PLAYLIST_PSN_TO_PS_CREATE_BACKUP_FILE
+  #define ENABLE_DEVFEATURE_LIGHT__GRADIENT_PATCH_4DEC25
+  #define ENABLE_DEVFEATURE_LIGHTS__FIX_MULTISEGMENT_DMA_FLICKER
+  #define MIN_SHOW_DELAY 25
+
+
+
+  #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
+
+  #define ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_STRIP // Testing playlists on smaller strips
+  // #define ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_BRIGHTNESS_BLOCKED // Testing playlists on smaller strips
+
+
+  #ifdef ENABLE_BUSCONFG__OUTPUTS_1X_100
+
+  /**
+   * @brief tree physical wiring connections
+   * 16 outputs
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":256
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        256
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Static",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "BrightnessRGB": 100,
+      "Preset":{"Load":200}
+    },
+    "BrightnessRGB": 100
+  }
+  )=====";
+ 
+      
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      // "\"28\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"12\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"26\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"32\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"14\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"27\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"25\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"33\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  #endif  
+
+#endif // END DEVICE
+
+
+
 
 
 #ifdef DEVICE_MEADOWS__BED_ALARM_LIGHT
@@ -3334,9 +3567,9 @@
         0,
         100
       ],
-      "ColourPalette":"Snowy 02",
+      "ColourPalette":"Cold White",
       "Effects": {
-        "Function":"Static",
+        "Function":"Solid",
         "Speed":127,
         "Intensity":127,
         "Grouping":1,
@@ -3344,7 +3577,7 @@
       },
       "BrightnessRGB": 100
     },
-    "BrightnessRGB": 0
+    "BrightnessRGB": 100
   }
   )=====";
  
@@ -3374,178 +3607,6 @@
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
   #endif
-  #ifdef ENABLE_BUSCONFG__OUTPUTS_1X_2000
-
-  /**
-   * @brief tree physical wiring connections
-   * 16 outputs
-   */
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "BusConfig":[
-      {
-        "Pin":4,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":0,
-        "Length":250
-      },
-      {
-        "Pin":18,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":250,
-        "Length":250
-      },
-      {
-        "Pin":19,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":500,
-        "Length":250
-      },
-      {
-        "Pin":21,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":750,
-        "Length":250
-      },
-      {
-        "Pin":16,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":1000,
-        "Length":250
-      },
-      {
-        "Pin":17,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":1250,
-        "Length":250
-      },
-      {
-        "Pin":22,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":1500,
-        "Length":250
-      },
-      {
-        "Pin":23,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":1750,
-        "Length":250
-      },
-      {
-        "Pin":13,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":2000,
-        "Length":250
-      },
-      {
-        "Pin":12,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":2250,
-        "Length":250
-      },
-      {
-        "Pin":26,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":2500,
-        "Length":250
-      },
-      {
-        "Pin":32,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":2750,
-        "Length":250
-      },
-      {
-        "Pin":14,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":3000,
-        "Length":250
-      },
-      {
-        "Pin":27,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":3250,
-        "Length":250
-      }
-    ],
-    "Segment0": {
-      "PixelRange": [
-        0,
-        3500
-      ],
-      "ColourPalette":"Snowy 02",
-      "Effects": {
-        "Function":"Static",
-        "Speed":255,
-        "Intensity":127,
-        "Grouping":1,
-        "RateMs": 1000
-      },
-      "BrightnessRGB": 100,
-      "BrightnessCCT": 0
-    },
-    "BrightnessRGB": 100,
-    "BrightnessCCT": 0
-  }
-  )=====";
-
- 
-  //     {
-  //       "Pin":25,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":3500,
-  //       "Length":250
-  //     },
-  //     {
-  //       "Pin":33,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":3750,
-  //       "Length":250
-  //     }
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIO_NUMBER "\":{"    
-      // "\"28\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
-      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"12\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"26\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"32\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"14\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"25\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"33\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
-      #endif
-    "},"
-    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-  #endif // END CONFIG OPTION
   
 
 #endif // END DEVICE

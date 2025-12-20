@@ -5673,7 +5673,8 @@ uint16_t mAnimatorLight::EffectAnim__Fireworks_Starburst()
 }
 #undef STARBURST_MAX_FRAG
 static const char PM_EFFECT_CONFIG__STARBURST[] PROGMEM =
-"Fireworks Starburst@"
+"Starburst@"
+// "Fireworks Starburst@"
 "Change,Fragments,,,,Use Palette,Overlay,,,"   // sx, ix (others unused)
 ";"
 "Overlay"                    // label for O2 toggle (overlay/trails)
@@ -8349,19 +8350,75 @@ static const char PM_EFFECT_DESCRI__BPM[] PROGMEM =
  *
  * @note        : Converted from WLED effect "mode_twinkle_colour".
  ********************************************************************************************************************************************************************************************************************/
+// uint16_t mAnimatorLight::EffectAnim__Twinkle_Colour()
+// {
+//   unsigned dataSize = (SEGLEN+7) >> 3; //1 bit per LED
+//   if (!SEGMENT.allocateData(dataSize)) return EFFECT_DEFAULT(); //allocation failed
+
+//   CRGBW col, prev;
+//   fract8 fadeUpAmount = getBrightness()>28 ? 8 + (SEGMENT.speed>>2) : 68-getBrightness();
+//   fract8 fadeDownAmount = getBrightness()>28 ? 8 + (SEGMENT.speed>>3) : 68-getBrightness();
+//   for (unsigned i = 0; i < SEGLEN; i++) {
+//     CRGBW cur = SEGMENT.getPixelColor(i);
+//     prev = cur;
+//     unsigned index = i >> 3;
+//     unsigned  bitNum = i & 0x07;
+//     bool fadeUp = bitRead(SEGMENT.data[index], bitNum);
+
+//     if (fadeUp) {
+//       CRGBW incrementalColor = SEGMENT.color_fade(cur, fadeUpAmount, true);
+//       col = SEGMENT.color_add(cur, incrementalColor);
+
+//       if (col.r == 255 || col.g == 255 || col.b == 255) {
+//         bitWrite(SEGMENT.data[index], bitNum, false);
+//       }
+
+//       if (cur == prev) {  //fix "stuck" pixels
+//         SEGMENT.color_add(col, col);
+//         SEGMENT.setPixelColor(i, col);
+//       }
+//       else SEGMENT.setPixelColor(i, col);
+//     }
+//     else {
+//       col = SEGMENT.color_fade(cur, 255 - fadeDownAmount);
+//       SEGMENT.setPixelColor(i, col);
+//     }
+//   }
+
+//   for (unsigned j = 0; j <= SEGLEN / 50; j++) {
+//     if (hw_random8() <= SEGMENT.intensity) {
+//       for (unsigned times = 0; times < 5; times++) { //attempt to spawn a new pixel 5 times
+//         int i = hw_random16(SEGLEN);
+//         if (SEGMENT.getPixelColor(i) == 0) {
+//           unsigned index = i >> 3;
+//           unsigned  bitNum = i & 0x07;
+//           bitWrite(SEGMENT.data[index], bitNum, true);
+//           SEGMENT.setPixelColor(i, ColorFromPaletteRedirect(SEGPALETTE, hw_random8(), 64, NOBLEND));         
+//           break; //only spawn 1 new pixel per frame per 50 LEDs
+//         }
+//       }
+//     }
+//   }
+//   return FRAMETIME;
+  
+// }
+// Modified 17Dec25: Added first-run behaviour to avoid draining previous effect's brightness (ie initial draw fading to black)
 uint16_t mAnimatorLight::EffectAnim__Twinkle_Colour()
 {
   unsigned dataSize = (SEGLEN+7) >> 3; //1 bit per LED
   if (!SEGMENT.allocateData(dataSize)) return EFFECT_DEFAULT(); //allocation failed
 
   CRGBW col, prev;
-  fract8 fadeUpAmount = getBrightness()>28 ? 8 + (SEGMENT.speed>>2) : 68-getBrightness();
+
+  fract8 fadeUpAmount   = getBrightness()>28 ? 8 + (SEGMENT.speed>>2) : 68-getBrightness();
   fract8 fadeDownAmount = getBrightness()>28 ? 8 + (SEGMENT.speed>>3) : 68-getBrightness();
+
   for (unsigned i = 0; i < SEGLEN; i++) {
     CRGBW cur = SEGMENT.getPixelColor(i);
     prev = cur;
+
     unsigned index = i >> 3;
-    unsigned  bitNum = i & 0x07;
+    unsigned bitNum = i & 0x07;
     bool fadeUp = bitRead(SEGMENT.data[index], bitNum);
 
     if (fadeUp) {
@@ -8372,7 +8429,7 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle_Colour()
         bitWrite(SEGMENT.data[index], bitNum, false);
       }
 
-      if (cur == prev) {  //fix "stuck" pixels
+      if (cur == prev) {  //fix "stuck" pixels (kept as-is per your original)
         SEGMENT.color_add(col, col);
         SEGMENT.setPixelColor(i, col);
       }
@@ -8384,26 +8441,61 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle_Colour()
     }
   }
 
+  // -------------------- SPAWN LOGIC --------------------
+  // When check1 is enabled, for the first ~1s after effect init, relax the spawn condition.
+  // This avoids waiting for the whole previous frame to reach exactly 0 before twinkles begin.
+  const uint32_t now_ms = millis();
+  const bool preloadWindowActive =
+      (SEGMENT.check1) &&
+      (SEGMENT.effect_init_runtime != 0) &&
+      ((now_ms - SEGMENT.effect_init_runtime) < 1000UL);
+
+  // Near-black threshold during preload window:
+  // - tied to intensity (higher intensity => allow spawning onto brighter/dimmer remnants)
+  // - clamp to sane range
+  uint8_t nearBlackTh = 0;
+  if (preloadWindowActive) {
+    // 8..48 typical range
+    nearBlackTh = 8 + (SEGMENT.intensity >> 3);   // intensity/8
+    if (nearBlackTh > 48) nearBlackTh = 48;
+  }
+
   for (unsigned j = 0; j <= SEGLEN / 50; j++) {
     if (hw_random8() <= SEGMENT.intensity) {
       for (unsigned times = 0; times < 5; times++) { //attempt to spawn a new pixel 5 times
         int i = hw_random16(SEGLEN);
-        if (SEGMENT.getPixelColor(i) == 0) {
-          unsigned index = i >> 3;
-          unsigned  bitNum = i & 0x07;
-          bitWrite(SEGMENT.data[index], bitNum, true);
-          SEGMENT.setPixelColor(i, ColorFromPaletteRedirect(SEGPALETTE, hw_random8(), 64, NOBLEND));         
-          break; //only spawn 1 new pixel per frame per 50 LEDs
+
+        if (!preloadWindowActive) {
+          // Original behaviour: only spawn on fully black
+          if (SEGMENT.getPixelColor(i) == 0) {
+            unsigned index = i >> 3;
+            unsigned bitNum = i & 0x07;
+            bitWrite(SEGMENT.data[index], bitNum, true);
+            SEGMENT.setPixelColor(i, ColorFromPaletteRedirect(SEGPALETTE, hw_random8(), 64, NOBLEND));
+            break;
+          }
+        } else {
+          // Preload behaviour: allow spawn on "near black" pixels (breaks the 1+ sec dead zone)
+          CRGBW c = SEGMENT.getPixelColor(i);
+          uint8_t m = max(c.r, max(c.g, c.b)); // ignore W channel for gating (matches your clip logic)
+
+          if (m <= nearBlackTh) {
+            unsigned index = i >> 3;
+            unsigned bitNum = i & 0x07;
+            bitWrite(SEGMENT.data[index], bitNum, true);
+            SEGMENT.setPixelColor(i, ColorFromPaletteRedirect(SEGPALETTE, hw_random8(), 64, NOBLEND));
+            break;
+          }
         }
       }
     }
   }
+
   return FRAMETIME;
-  
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_COLOUR[] PROGMEM =
 "Twinkle Colours@"                             // Name
-"Fade speed,Spawn rate,,,,,,,,"
+"Fade speed,Spawn rate,,,,PreSpawn,,,,"
 ";"
 ""                                             // no segment colour labels
 ";"
@@ -21122,7 +21214,7 @@ static const char PM_EFFECT_CONFIG__2D__SUN_RADIATION[] PROGMEM =
 ";"                                   // ----------------------------------------- Sliders/SegCols
 ""                                    // segment color names (none)
 ";"                                   // ----------------------------------------- SegCols/PalPicker
-"!"                                   // palette picker (unused by HeatColor but kept for UI consistency)
+""                                    // palette picker (unused by HeatColor but kept for UI consistency)
 ";"                                   // ----------------------------------------- PalPicker/is1D2D
 "2"                                   // icon flags: 2D
 ";"                                   // ----------------------------------------- is1D2D/Defaults

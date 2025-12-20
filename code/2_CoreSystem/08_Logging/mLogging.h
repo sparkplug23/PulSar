@@ -50,6 +50,8 @@ enum LoggingLevels {
    *  Used to pad a message in logging to emphasis in a busy log, used only when required
    **/
   LOG_LEVEL_HIGHLIGHT,
+  LOG_LEVEL_HIGHLIGHT_TOP, // Coupled with BOT, they pad a section of debug
+  LOG_LEVEL_HIGHLIGHT_BOT,
 
   /**
    *  Show critical information, such as during boot for easy at a glance that the system is working as expected
@@ -118,6 +120,8 @@ enum LoggingLevels {
   #define DEBUG_CHECK_AND_PRINT_NULLPTR   //nothing, no code
 #endif
 
+
+#define USE_DEBUG_PRINT
 
 #ifdef USE_DEBUG_PRINT
   #define DEBUG_PRINT(x) SERIAL_DEBUG.print(x)
@@ -502,6 +506,16 @@ enum LoggingLevels {
 #else
 #define ALOG_HGL(...)
 #endif
+#ifdef ENABLE_LOG_LEVEL_HIGHLIGHT
+#define ALOG_HGLT(...) AddLog(LOG_LEVEL_HIGHLIGHT_TOP, __VA_ARGS__)
+#else
+#define ALOG_HGL(...)
+#endif
+#ifdef ENABLE_LOG_LEVEL_HIGHLIGHT
+#define ALOG_HGLB(...) AddLog(LOG_LEVEL_HIGHLIGHT_BOT, __VA_ARGS__)
+#else
+#define ALOG_HGL(...)
+#endif
 
 #ifdef ENABLE_LOG_LEVEL_TEST
 #define ALOG_TST(...) AddLog(LOG_LEVEL_DEV_TEST, __VA_ARGS__)
@@ -878,27 +892,6 @@ void AddLog_Array_P(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
 }
 
 
-
-// template<typename T>
-// void AddLog_Array(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, const char* name_ctr, T* arr, T arr_len)//}, uint8_t fWithIndex = 0, uint8_t fVertical = 0)
-// {
-//   uint32_t time_now = *tSaved; //to allow compile of newer esp32
-//   if(abs(
-    
-//     static_cast<long long>(millis()-time_now)
-    
-//     )>=limit_ms){ *tSaved=millis();
-//     AddLog_Array(loglevel,name_ctr,arr,arr_len);
-//   }
-// }
-
-
-// #define TEST_SINGLETON
-
-#ifdef TEST_SINGLETON
-// mLogging* mLogging::mso3 = nullptr;
-#endif
-
 #include "1_TaskerManager/mTaskerInterface.h"
 
 class mLogging :
@@ -906,11 +899,7 @@ class mLogging :
 {
 public:
     mLogging(){}; // Class constructor
-    
-    void init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-
-
     static constexpr const char* PM_MODULE_CORE_LOGGING_CTR = D_MODULE_CORE_LOGGING_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_LOGGING_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_LOGGING_ID; }
@@ -955,47 +944,23 @@ public:
     void AddLogSerial(uint8_t loglevel);
     void AddLogMissed(char *sensor, uint8_t misses);
 
+    /****
+     * Internal buffers, should I move these elsewhere? They are not settings, logs??
+    */
 
-
-    
-/****
- * Internal buffers, should I move these elsewhere? They are not settings, logs??
-*/
-
-#ifndef WEB_LOG_SIZE
-#define WEB_LOG_SIZE 200       // Max number of characters in weblog
-#endif // WEB_LOG_SIZE
-#ifndef LOG_BUFFER_SIZE
-#ifdef ESP8266
-#define LOG_BUFFER_SIZE 400 //if debug is enabled, push this to 1000, if not, keep at much smaller 300
-#else //esp32
-#define LOG_BUFFER_SIZE 1000
-#endif
-#endif // LOG_BUFFER_SIZE
-char log_data[LOG_BUFFER_SIZE];                       // Logging
-char web_log[WEB_LOG_SIZE] = {'\0'};        // Web log buffer - REMEMBERS EVERYTHING for new load
-uint8_t web_log_index = 1;                  // Index in Web log buffer (should never be 0)
-
-// template<typename T, typename U>
-// void AddLog_Array4(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len);
-
-// template<typename T, typename U>
-// void AddLog_Array4(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
-// {
-
-
-//   char buffer[100] = {0}; // short buffer
-//   uint16_t buflen = 0;
-
-//   buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array4 %s = ", name_ctr);
-
-//   AddLog(loglevel, buffer);
-
-
-
-// }
-
-
+    #ifndef WEB_LOG_SIZE
+    #define WEB_LOG_SIZE 200       // Max number of characters in weblog
+    #endif // WEB_LOG_SIZE
+    #ifndef LOG_BUFFER_SIZE
+    #ifdef ESP8266
+    #define LOG_BUFFER_SIZE 400 //if debug is enabled, push this to 1000, if not, keep at much smaller 300
+    #else //esp32
+    #define LOG_BUFFER_SIZE 1000
+    #endif
+    #endif // LOG_BUFFER_SIZE
+    char log_data[LOG_BUFFER_SIZE];                       // Logging
+    char web_log[WEB_LOG_SIZE] = {'\0'};        // Web log buffer - REMEMBERS EVERYTHING for new load
+    uint8_t web_log_index = 1;                  // Index in Web log buffer (should never be 0)
 
     const char* GetLogLevelNamebyID(uint8_t id);
     uint8_t GetLogLevelIDbyName(const char* name);
@@ -1010,51 +975,6 @@ uint8_t web_log_index = 1;                  // Index in Web log buffer (should n
     bool telnet_started = false;
     
 };
-
-// // need to work out type for this to be generic using json methods
-// template<typename T, typename U>
-// void AddLog_Array5(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
-// {
-  
-//   char buffer[100] = {0}; // short buffer
-//   uint16_t buflen = 0;
-
-//   buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array4 %s = ", name_ctr);
-
-//   for(T index=0;index<arr_len;index++)
-//   {
-//     buflen += snprintf(buffer+buflen, sizeof(buffer), "%d%s", 
-//       arr[index], 
-//       index==arr_len ? "," : ""      
-//     );
-//   }
-
-//   AddLog(loglevel, "%s", buffer);
-
-// }
-
-
-// template<typename T, typename U>
-// void AddLog_Array_Int(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
-// {
-  
-//   char buffer[100] = {0}; // short buffer
-//   uint16_t buflen = 0;
-
-//   buflen += snprintf(buffer+buflen, sizeof(buffer), "Array_Int %s = ", name_ctr);
-
-//   for(T index=0;index<arr_len;index++)
-//   {
-//     buflen += snprintf(buffer+buflen, sizeof(buffer), "%d%s", 
-//       arr[index], 
-//       index<(arr_len-1) ? "," : ""      
-//     );
-//   }
-
-//   AddLog(loglevel, "%s", buffer);
-
-// }
-
 
 
 #endif // header guard

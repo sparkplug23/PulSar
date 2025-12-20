@@ -106,14 +106,14 @@ class JsonBuilder{
       if (millis()-now >= 1000) {
         DEBUG_PRINT(F("ERROR: Locking JSON buffer failed! ("));
         DEBUG_PRINT(locked_by_module_unique_id);
-        DEBUG_PRINTLN(")");
+        DEBUG_PRINT(")\n\r");
         return false; // waiting time-outed
       }
 
       locked_by_module_unique_id = module_unique_id;
-      DEBUG_PRINT(F("JSON buffer locked. ("));
+      DEBUG_PRINT(F("JSON locked ("));
       DEBUG_PRINT(locked_by_module_unique_id);
-      DEBUG_PRINTLN(")");
+      DEBUG_PRINT(")\n\r");
 
       // gDoc = &doc;  // used for applying presets (presets.cpp)
       // doc.clear();
@@ -125,9 +125,9 @@ class JsonBuilder{
     void ReleaseLock()
     {
 
-      DEBUG_PRINT(F("JSON buffer released. ("));
+      DEBUG_PRINT(F("JSON released ("));
       DEBUG_PRINT(locked_by_module_unique_id);
-      DEBUG_PRINTLN(")");
+      DEBUG_PRINT(")\n\r");
 
       locked_by_module_unique_id = 0;
     }

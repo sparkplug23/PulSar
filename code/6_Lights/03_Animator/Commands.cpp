@@ -317,7 +317,7 @@ void mAnimatorLight::subparse_MatrixConfig(JsonParserObject obj)
  */
 void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index)
 {
-  ALOG_HGL(PSTR("subparse_JSONCommand for segment %d"), segment_index);
+  ALOG_HGLT(PSTR("subparse_JSONCommand for segment %d"), segment_index);
 
   JsonParserToken jtok = 0; 
   JsonParserToken jtok_sub = 0; 
@@ -351,7 +351,11 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   }
 
   
+  #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+  if(jtok = getTokAlias(obj, PM_COLOUR_PALETTE, "Pal"))
+  #else
   if(jtok = obj[PM_COLOUR_PALETTE])
+  #endif
   {
     if(jtok.isStr())
     {
@@ -375,7 +379,11 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     data_buffer.isserviced++;
   }
 
+  #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+  if(jtok = getTokAlias(obj, "Palette2", "Pal2"))
+  #else
   if(jtok = obj["Palette2"])
+  #endif
   {
     if(jtok.isStr())
     {
@@ -478,7 +486,11 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   {    
     JsonParserObject jobj = jtok_sub.getObject();
 
+    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+    if(jtok = getTokAlias(jobj, PM_FUNCTION, "FX"))
+    #else
     if(jtok = jobj[PM_FUNCTION])
+    #endif
     { 
       if(jtok.isStr())
       {
@@ -499,57 +511,77 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     /**
     EFFECT_SUBTYPE removed, replaced by colourtype
     **/
-    if(jtok = jobj[PM_EFFECT_COLOUR_TYPE])
+    if(jtok = jobj[PM_COLOUR_TYPE])
     {
       CommandSet_Effect_ColourTypeID(jtok.getInt(), segment_index);
       data_buffer.isserviced++;
     }
     
+    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+    if(jtok = getTokAlias(jobj, PM_INTENSITY, "IX"))
+    #else
     if(jtok = jobj[PM_INTENSITY])
+    #endif
     { 
       CommandSet_Effect_Intensity(jtok.getInt(), segment_index);
-      ALOG_COM( PSTR(D_LOG_PIXEL D_COMMAND_2KEY_NVALUE_K(D_EFFECTS, D_INTENSITY)), jtok.getInt() );
+      ALOG_INF( PSTR(D_LOG_PIXEL D_COMMAND_2KEY_NVALUE_K(D_EFFECTS, D_INTENSITY)), jtok.getInt() );
       data_buffer.isserviced++;
     }
     
 
+    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+    if(jtok = getTokAlias(jobj, PM_SPEED, "SX"))
+    #else
     if(jtok = jobj[PM_SPEED])
+    #endif
     { 
       CommandSet_Effect_Speed(jtok.getInt(), segment_index);
-      ALOG_COM( PSTR(D_LOG_PIXEL D_COMMAND_2KEY_NVALUE_K(D_EFFECTS, D_SPEED)), jtok.getInt() );
+      ALOG_INF( PSTR(D_LOG_PIXEL D_COMMAND_2KEY_NVALUE_K(D_EFFECTS, D_SPEED)), jtok.getInt() );
       data_buffer.isserviced++;
     }
     
 
+    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+    if(jtok = getTokAlias(jobj, PM_REVERSE, "RV"))
+    #else
     if(jtok = jobj[PM_REVERSE])
+    #endif
     { 
       SEGMENT_I(segment_index).setOption(SEG_OPTION_REVERSED, jtok.getInt());  
-      ALOG_COM( PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_REVERSE)), SEGMENT_I(segment_index).reverse);
+      ALOG_INF( PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_REVERSE)), SEGMENT_I(segment_index).reverse);
       data_buffer.isserviced++;
     }
 
 
+    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+    if(jtok = getTokAlias(jobj, PM_MIRROR, "MR"))
+    #else
     if(jtok = jobj[PM_MIRROR])
+    #endif
     { 
       SEGMENT_I(segment_index).setOption(SEG_OPTION_MIRROR, jtok.getInt());  
-      ALOG_COM( PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_MIRROR)), SEGMENT_I(segment_index).mirror);
+      ALOG_INF( PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_MIRROR)), SEGMENT_I(segment_index).mirror);
       data_buffer.isserviced++;
     }
 
 
+    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+    if(jtok = getTokAlias(jobj, PM_GROUPING, "GP"))
+    #else
     if(jtok = jobj[PM_GROUPING])
+    #endif
     { 
       SEGMENT_I(segment_index).grouping = jtok.getInt();  
-      ALOG_COM( PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_GROUPING)), SEGMENT_I(segment_index).grouping);
+      ALOG_INF( PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_GROUPING)), SEGMENT_I(segment_index).grouping);
       #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_STRIP
-      if(SEGMENT_I(segment_index).grouping > (SEGMENT_I(segment_index).length()/2))
-      {
-        SEGMENT_I(segment_index).grouping = SEGMENT_I(segment_index).length()/2;
+      if(SEGMENT_I(segment_index).grouping > (SEGMENT_I(segment_index).length()/4)){
+        SEGMENT_I(segment_index).grouping = SEGMENT_I(segment_index).length()/4;
         ALOG_WRN(PSTR(D_LOG_PIXEL "Grouping overridden to %d to fit segment length"), SEGMENT_I(segment_index).grouping);
       }
       #endif
       data_buffer.isserviced++;
     }
+
     
     if(jtok = jobj["GroupingPerc"])
     {
@@ -560,7 +592,11 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
 
     
-    if (jtok = jobj[PM_DECIMATE])
+    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+    if(jtok = getTokAlias(jobj, PM_DECIMATE, "DC"))
+    #else
+    if(jtok = jobj[PM_DECIMATE])
+    #endif
     {
       SEGMENT_I(segment_index).decimate = jtok.getInt();  
       ALOG_COM(PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_DECIMATE)), SEGMENT_I(segment_index).decimate);
@@ -616,15 +652,13 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
 
 
-
-
-
     if(jtok = jobj[PM_SPACING])
     { 
       SEGMENT_I(segment_index).spacing = jtok.getInt();  
       ALOG_COM( PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_SPACING)), SEGMENT_I(segment_index).spacing);
       data_buffer.isserviced++;
     }
+
       
     if(jtok = jobj[PM_OFFSET])
     { 
@@ -639,7 +673,12 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       ALOG_COM( PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_RATE)), SEGMENT_I(segment_index).cycle_time__rate_ms);
       data_buffer.isserviced++;
     }else
-    if(jtok = jobj[PM_RATE_MS]){
+    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+    if(jtok = getTokAlias(jobj, PM_RATE_MS, "RA"))
+    #else
+    if(jtok = jobj[PM_RATE_MS])
+    #endif
+    {
       CommandSet_Animation_Transition_Rate_Ms(jtok.getInt(), segment_index);
       ALOG_COM( PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_RATE_MS)), SEGMENT_I(segment_index).cycle_time__rate_ms);  
       data_buffer.isserviced++;
@@ -721,7 +760,6 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
 
 
-
     if (jtok = jobj["PalIX"]) 
     {
       SEGMENT_I(segment_index).palette_live_intensity = jtok.getInt();
@@ -729,8 +767,6 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       data_buffer.isserviced++;
     }
     
-
-
 
   } // PM_EFFECTS
 
@@ -778,15 +814,8 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     {
       if(jtok_sub.isStr())
       {
-        if(strcmp(jtok_sub.getStr(),"RGB")==0)
-        {
-          encoding = {PALETTE_ENCODING_TYPE_RGB_NO_INDEX};
-        }
-        else
-        if(strcmp(jtok_sub.getStr(),"gRGB")==0)
-        {
-          encoding = {PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT};
-        }
+        if(strcmp(jtok_sub.getStr(),"RGB")==0){ encoding = {PALETTE_ENCODING_TYPE_RGB_NO_INDEX}; }
+        else if(strcmp(jtok_sub.getStr(),"gRGB")==0){ encoding = {PALETTE_ENCODING_TYPE_RGB_WITHINDEX_GRADIENT}; }
       }
       else
       {
@@ -890,23 +919,22 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   #endif
 
 
-
-
   #ifdef ENABLE_DEVFEATURE_LIGHT__HEATMAP_PALETTES
-/**
- * @brief Construct a new if object
- * {
-  "HeatmapPalettes": {
-    "Data": [1,2,3,4],
-    "Gradient": [0,100,200,255],
-    "Max":4,
-    "Min":1,
-    "Palette":"Jet 16"
+  /**
+   * @brief Construct a new if object
+   * {
+    "HeatmapPalettes": {
+      "Data": [1,2,3,4],
+      "Gradient": [0,100,200,255],
+      "Max":4,
+      "Min":1,
+      "Palette":"Jet 16"
+    }
   }
-}
- * 
- */
-  if (jtok = obj["HeatmapPalettes"]) {
+  * 
+  */
+  if (jtok = obj["HeatmapPalettes"]) 
+  {
       JsonParserToken jtok_sub = 0;
       
       // Read float array (data points)
@@ -1031,10 +1059,6 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       // // Command to set the heatmap palette using the computed final_palette_data
       // CommandSet_HeatmapPalette(palette_index, encoding.data, final_palette_data);
   }
-
-
-
-
   #endif // ENABLE_DEVFEATURE_LIGHT__HEATMAP_PALETTES
   
 
@@ -1095,7 +1119,6 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
     #endif // ENABLE_DEVFEATURE_LIGHTING__COMMANDS_NOTIFICATION
 
-
     #ifdef ENABLE_DEVFEATURE_LIGHTING__COMMANDS_CHANGE_ANIMATION_MODE
     if(jtok = obj[PM_ANIMATIONMODE]){
       if(jtok.isStr()){
@@ -1116,6 +1139,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   
   #endif // FIRMWARE_VERSION_MIN
   
+
   #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
   if(jtok = obj[PM_RGB_CLOCK].getObject()[PM_MANUAL_NUMBER]){
     lcd_display_show_number = jtok.getInt();
@@ -1129,6 +1153,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     ALOG_COM(PSTR(D_LOG_PIXEL  D_COMMAND_SVALUE_K("ManualString")), lcd_display_show_string);
   }
   #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+
 
   #ifdef ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
   /**
@@ -1175,8 +1200,8 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
                     // Get the color from the palette
                     colour = SEGMENT.GetPaletteColour_Legacy(pixel++, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
 
-brightness = 255;
-// colour = RgbcctColor(255,255,255,255,255);
+                    brightness = 255;
+                    // colour = RgbcctColor(255,255,255,255,255);
                     // Set the pixel color with brightness
                     SEGMENT.SetPixelColor(pixelIndex, colour.WithBrightness(brightness));
 
@@ -1197,51 +1222,47 @@ brightness = 255;
             show();
         }
     }
-
-
   }
   #endif // ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
+
+
   #ifdef ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
-/**
- * @brief Handles MQTT commands for setting pixel arrays with row mappings.
- * 
- * {
-  "BrightnessRGB": 255,
-  "Effects":{
-    "Param0":1605,
-    "Param1":1610
-  },
-  "MQTTPixel": {
-    "OnPixels": [
-      [1605],   // left side
-      [1606,1607,1608,1609,1611], //centres
-      [2100] //right side
-    ]
+  /**
+   * @brief Handles MQTT commands for setting pixel arrays with row mappings.
+   * 
+   * {
+    "BrightnessRGB": 255,
+    "Effects":{
+      "Param0":1605,
+      "Param1":1610
+    },
+    "MQTTPixel": {
+      "OnPixels": [
+        [1605],   // left side
+        [1606,1607,1608,1609,1611], //centres
+        [2100] //right side
+      ]
+    }
   }
-}
 
-
-{
-  "BrightnessRGB": 255,
-  "MQTTPixel": {
-    "OnPixels": [
-        [0, 31, 63, 98, 134, 173, 214, 257, 302, 352, 400, 451, 502, 553, 604, 658, 710, 763, 815, 867, 920, 971, 
-        1022, 1071, 1119, 1168, 1215, 1260, 1303, 1345, 1385, 1423, 1461, 1498, 1535, 1572, 1607, 1640, 1671, 1702, 1732, 1759, 1785, 1820, 1841, 1860, 
-        1877, 1892, 1904, 1913, 1922, 1930, 1938, 1945, 1952, 1958, 1964, 1969, 1974, 1978],
-        [15, 47, 80, 116, 153, 193, 235, 279, 327, 376, 425, 476, 527, 578, 631, 684, 736, 789, 841, 893, 945, 996, 1046, 1095, 1144, 1191, 1237, 1281, 
-        1324, 1365, 1404, 1442, 1480, 1516, 1553, 1589, 1623, 1655, 1686, 1717, 1745, 
-        1772, 1802, 1829, 1850, 1868, 1884, 1898, 1917, 1926, 1934, 1941, 1948, 1955, 1961, 1967, 1971],
-        [30, 62, 97, 133, 172, 213, 256, 301, 351, 399, 450, 501, 552, 603, 657, 709, 762, 814, 866, 919, 970, 1021, 1070, 1118, 1167, 1214, 1259, 1302, 1344,
-        1384, 1422, 1460, 1497, 1534, 1571, 1606, 1639, 1670, 1701, 1731, 1758, 1784, 1819, 1840, 1859, 
-        1876, 1891, 1903, 1912, 1921, 1929, 1937, 1944, 1951, 1957, 1963, 1968, 1973, 2099]
-    ]
+  {
+    "BrightnessRGB": 255,
+    "MQTTPixel": {
+      "OnPixels": [
+          [0, 31, 63, 98, 134, 173, 214, 257, 302, 352, 400, 451, 502, 553, 604, 658, 710, 763, 815, 867, 920, 971, 
+          1022, 1071, 1119, 1168, 1215, 1260, 1303, 1345, 1385, 1423, 1461, 1498, 1535, 1572, 1607, 1640, 1671, 1702, 1732, 1759, 1785, 1820, 1841, 1860, 
+          1877, 1892, 1904, 1913, 1922, 1930, 1938, 1945, 1952, 1958, 1964, 1969, 1974, 1978],
+          [15, 47, 80, 116, 153, 193, 235, 279, 327, 376, 425, 476, 527, 578, 631, 684, 736, 789, 841, 893, 945, 996, 1046, 1095, 1144, 1191, 1237, 1281, 
+          1324, 1365, 1404, 1442, 1480, 1516, 1553, 1589, 1623, 1655, 1686, 1717, 1745, 
+          1772, 1802, 1829, 1850, 1868, 1884, 1898, 1917, 1926, 1934, 1941, 1948, 1955, 1961, 1967, 1971],
+          [30, 62, 97, 133, 172, 213, 256, 301, 351, 399, 450, 501, 552, 603, 657, 709, 762, 814, 866, 919, 970, 1021, 1070, 1118, 1167, 1214, 1259, 1302, 1344,
+          1384, 1422, 1460, 1497, 1534, 1571, 1606, 1639, 1670, 1701, 1731, 1758, 1784, 1819, 1840, 1859, 
+          1876, 1891, 1903, 1912, 1921, 1929, 1937, 1944, 1951, 1957, 1963, 1968, 1973, 2099]
+      ]
+    }
   }
-}
-
-
-
- */
-if (jtok = obj["MQTTPixelArrays"]) {
+  */
+  if (jtok = obj["MQTTPixelArrays"]) {
 
     JsonParserToken jtok_sub = 0;
 
@@ -1250,111 +1271,108 @@ if (jtok = obj["MQTTPixelArrays"]) {
     realtimeMode = ANIMATION_MODE__REALTIME_MQTT_SETPIXEL;
 
     if (jtok.isArray()) {
-        ALOG_INF(PSTR("Processing MQTTPixelArrays"));
+      ALOG_INF(PSTR("Processing MQTTPixelArrays"));
 
-        SEGMENT.fill(0); // Clear all pixels
+      SEGMENT.fill(0); // Clear all pixels
 
-        uint8_t brightness = SEGMENT.getBrightnessRGB_WithGlobalApplied(); // Prefetch brightness
+      uint8_t brightness = SEGMENT.getBrightnessRGB_WithGlobalApplied(); // Prefetch brightness
 
-        JsonParserArray arrayOfArrays = jtok;
-        JsonParserToken outerToken = arrayOfArrays;
+      JsonParserArray arrayOfArrays = jtok;
+      JsonParserToken outerToken = arrayOfArrays;
 
-        outerToken.nextOne(); // Move to the first array in the array of arrays
-        ALOG_INF(PSTR("Iterating over outer array of MQTTPixelArrays"));
+      outerToken.nextOne(); // Move to the first array in the array of arrays
+      ALOG_INF(PSTR("Iterating over outer array of MQTTPixelArrays"));
 
-        uint16_t outerCount = 0; // Track outer array items processed
-        uint16_t paletteIndex = 0; // Start from palette index 0
+      uint16_t outerCount = 0; // Track outer array items processed
+      uint16_t paletteIndex = 0; // Start from palette index 0
 
-        while (outerToken.isValid()) { // Iterate through the outer array
-            ALOG_INF(PSTR("Outer token type: %d"), outerToken.getType());
+      while (outerToken.isValid()) { // Iterate through the outer array
+        ALOG_INF(PSTR("Outer token type: %d"), outerToken.getType());
 
-            // Process only valid arrays
-            if (outerToken.isArray()) {
-                JsonParserArray innerArray = outerToken;
-                JsonParserToken innerToken = innerArray;
+        // Process only valid arrays
+        if (outerToken.isArray()) {
+          JsonParserArray innerArray = outerToken;
+          JsonParserToken innerToken = innerArray;
 
-                innerToken.nextOne(); // Move to the first element in the inner array
+          innerToken.nextOne(); // Move to the first element in the inner array
 
-                int startPixel = -1, midPixel = -1, endPixel = -1;
-                uint16_t pixelCount = 0;
+          int startPixel = -1, midPixel = -1, endPixel = -1;
+          uint16_t pixelCount = 0;
 
-                ALOG_INF(PSTR("Processing inner array"));
+          ALOG_INF(PSTR("Processing inner array"));
 
-                // Process inner array tokens to get start, middle, and end pixels
-                while (innerToken.isValid()) {
-                    if (innerToken.isNum()) { // Check if the token is a number
-                        int pixelIndex = innerToken.getInt();
-                        ALOG_INF(PSTR("Inner token type: %d, value: %d"), innerToken.getType(), pixelIndex);
+          // Process inner array tokens to get start, middle, and end pixels
+          while (innerToken.isValid()) {
+            if (innerToken.isNum()) { // Check if the token is a number
+              int pixelIndex = innerToken.getInt();
+              ALOG_INF(PSTR("Inner token type: %d, value: %d"), innerToken.getType(), pixelIndex);
 
-                        if (pixelCount == 0)
-                            startPixel = pixelIndex; // Start pixel
-                        else if (pixelCount == 1)
-                            midPixel = pixelIndex; // Mid (center) pixel
-                        else if (pixelCount == 2)
-                            endPixel = pixelIndex; // End pixel
+              if (pixelCount == 0)
+                  startPixel = pixelIndex; // Start pixel
+              else if (pixelCount == 1)
+                  midPixel = pixelIndex; // Mid (center) pixel
+              else if (pixelCount == 2)
+                  endPixel = pixelIndex; // End pixel
 
-                        pixelCount++;
-                    }
-
-                    // Stop processing after three valid elements
-                    if (pixelCount == 3)
-                        break;
-
-                    innerToken.nextOne(); // Move to the next token in the inner array
-                }
-
-                if (pixelCount == 3) { // Ensure all three points are provided
-                    ALOG_INF(PSTR("Setting row: Start %d, Mid %d, End %d using palette index %d"),
-                             startPixel, midPixel, endPixel, paletteIndex);
-
-                    // Set pixels for the row
-                    for (int i = startPixel; i <= endPixel; i++) {
-                        RgbcctColor colour;
-
-                        if (i == midPixel) {
-                            // Center pixel is white
-                            colour = RgbcctColor(255, 255, 255, 255, 255);
-                        }else
-                        if (i == endPixel) {
-                            // Right pixel is white, is easier contrast between start of row and end of row
-                            colour = RgbcctColor(255, 255, 255, 255, 255);
-                        } else {
-                            // Get color from the palette using the current palette index
-                            colour = SEGMENT.GetPaletteColour_Legacy(paletteIndex, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
-                        }
-
-                        // Apply brightness and set the pixel
-                        SEGMENT.SetPixelColor(i, colour.WithBrightness(brightness));
-                    }
-
-                    paletteIndex++; // Increment palette index for the next row
-
-                } else {
-                    ALOG_ERR(PSTR("Invalid row format. Expected exactly 3 pixels (start, mid, end). Parsed Count=%d, Start=%d, Mid=%d, End=%d"),
-                             pixelCount, startPixel, midPixel, endPixel);
-                }
-
-                outerCount++;
-            } else {
-                ALOG_INF(PSTR("Skipping non-array token in outer array: Type=%d"), outerToken.getType());
+              pixelCount++;
             }
 
-            outerToken.nextOne(); // Move to the next token in the outer array
+            // Stop processing after three valid elements
+            if (pixelCount == 3)
+              break;
+
+            innerToken.nextOne(); // Move to the next token in the inner array
+          }
+
+          if (pixelCount == 3) { // Ensure all three points are provided
+            ALOG_INF(PSTR("Setting row: Start %d, Mid %d, End %d using palette index %d"), startPixel, midPixel, endPixel, paletteIndex);
+
+            // Set pixels for the row
+            for (int i = startPixel; i <= endPixel; i++) {
+              RgbcctColor colour;
+
+              if (i == midPixel) {
+                // Center pixel is white
+                colour = RgbcctColor(255, 255, 255, 255, 255);
+              }else
+              if (i == endPixel) {
+                // Right pixel is white, is easier contrast between start of row and end of row
+                colour = RgbcctColor(255, 255, 255, 255, 255);
+              } else {
+                // Get color from the palette using the current palette index
+                colour = SEGMENT.GetPaletteColour_Legacy(paletteIndex, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
+              }
+
+              // Apply brightness and set the pixel
+              SEGMENT.SetPixelColor(i, colour.WithBrightness(brightness));
+            }
+
+            paletteIndex++; // Increment palette index for the next row
+
+          } else {
+              ALOG_ERR(PSTR("Invalid row format. Expected exactly 3 pixels (start, mid, end). Parsed Count=%d, Start=%d, Mid=%d, End=%d"),
+                      pixelCount, startPixel, midPixel, endPixel);
+          }
+
+          outerCount++;
+        } else {
+            ALOG_INF(PSTR("Skipping non-array token in outer array: Type=%d"), outerToken.getType());
         }
 
-        ALOG_INF(PSTR("Processed %d rows in total"), outerCount);
+        outerToken.nextOne(); // Move to the next token in the outer array
+      }
 
-        SEGMENT.cycle_time__rate_ms = FRAMETIME_MS;
-        SET_DIRECT_MODE();
+      ALOG_INF(PSTR("Processed %d rows in total"), outerCount);
 
-        show();
+      SEGMENT.cycle_time__rate_ms = FRAMETIME_MS;
+      SET_DIRECT_MODE();
+
+      show();
     } else {
-        ALOG_ERR(PSTR("MQTTPixelArrays is not a valid array"));
+      ALOG_ERR(PSTR("MQTTPixelArrays is not a valid array"));
     }
-}
-#endif // ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
-
-
+  }
+  #endif // ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
 
 
   #if FIRMWARE_VERSION_MIN(0,126)
@@ -1409,26 +1427,7 @@ if (jtok = obj["MQTTPixelArrays"]) {
       data_buffer.isserviced++;
     }
 
-  }else{
-    ALOG_ERR(PSTR("Override object missing"));
   }
-
-
-  /**
-   * @brief Phasing out to effect ColourType which is defined above in effect subcommands
-   **/    
-  #if FIRMWARE_VERSION_MAX(0, 240)
-  if(jtok = obj[PM_COLOUR_TYPE])
-  {
-    ALOG_WRN(PSTR("Phase out ColourType"));
-    if(jtok.isNum()){
-      CommandSet_Effect_ColourTypeID(jtok.getInt(), segment_index);
-      data_buffer.isserviced++;
-    }
-  }
-  #else
-  #error "removed"
-  #endif
 
 
   if(jtok = obj[PM_BRIGHTNESS_RGB]){ // Range 0-100
@@ -1460,32 +1459,17 @@ if (jtok = obj["MQTTPixelArrays"]) {
   }
 
 
-/**
- * @brief 
- * This should be extended to
- * "TimeOnSecs"
- * "TimeOff":"HHMM" as hh and mm of the day
- * 
- */
-  if(jtok = obj["Preset"].getObject()["Load"]){ // Range 0-100
-  //   SEGMENT_I(segment_index).setBrightnessCCT( map(jtok.getInt(), 0,100, 0,255) );
-  //   ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessCCT());
-  //   data_buffer.isserviced++;
-  // }
-    uint8_t ps = jtok.getInt();//presetCycCurr;
-    // if (root["win"].isNull() && getVal(root["ps"], &ps, 0, 0) && ps > 0 && ps < 251 && ps != currentPreset) {
-      // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
-      // presetCycCurr = ps;
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
-      unloadPlaylist();          // applying a preset unloads the playlist
-      #endif
-      applyPreset(ps, CALL_MODE_DIRECT_CHANGE); // async load from file system (only preset ID was specified)
-      // return stateResponse;
-    // }
-
+  if(jtok = obj["Preset"].getObject()["Load"]){
+    uint8_t ps = jtok.getInt();
+    // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+    unloadPlaylist();          // applying a preset unloads the playlist, to stop any already running playlist
+    #endif
+    applyPreset(ps, CALL_MODE_DIRECT_CHANGE); // async load from file system (only preset ID was specified)
   }
 
-  // Per segment timer
+
+  // Per segment time off
   if(jtok = obj["TimeOnSecs"]){
     SEGMENT_I(segment_index).auto_timeoff.Start(jtok.getInt());
     ALOG_INF(PSTR("auto_timeoff %d"), SEGMENT_I(segment_index).auto_timeoff.Value());
@@ -1495,7 +1479,7 @@ if (jtok = obj["MQTTPixelArrays"]) {
   /**
    * @brief Segment Colours (ie 1-5)
    **/
-  for(uint8_t colour_index=0;colour_index<6;colour_index++)
+  for(uint8_t colour_index=0;colour_index<5;colour_index++)
   {
     JsonParserObject seg_obj = 0;
 
@@ -1606,50 +1590,6 @@ if (jtok = obj["MQTTPixelArrays"]) {
 
     JsonParserObject jObj_debug = jtok.getObject();
 
-    if(jtok = jObj_debug["Option0"])
-    { 
-      SEGMENT_I(segment_index).params_user[0] = jtok.getInt();  
-    }
-    if(jtok = jObj_debug["Option1"])
-    { 
-      SEGMENT_I(segment_index).params_user[1] = jtok.getInt();  
-    }
-    if(jtok = jObj_debug["Option2"])
-    { 
-      SEGMENT_I(segment_index).params_user[2] = jtok.getInt();  
-    }
-    if(jtok = jObj_debug["Option3"])
-    {
-      SEGMENT_I(segment_index).params_user[3] = jtok.getInt();  
-    }
-
-    if(jtok = jObj_debug["Options"]){ 
-      if(jtok.isArray()){
-        uint8_t array[4];
-        uint8_t arrlen = 0;
-        JsonParserArray arrobj = jtok;
-        for(auto v : arrobj) {
-          if(arrlen > 4){ break; }
-          switch(arrlen)
-          {
-            case 0: SEGMENT_I(segment_index).params_user[0] = v.getInt(); break;
-            case 1: SEGMENT_I(segment_index).params_user[1] = v.getInt(); break;
-            case 2: SEGMENT_I(segment_index).params_user[2] = v.getInt(); break;
-            case 3: SEGMENT_I(segment_index).params_user[3] = v.getInt(); break;
-          }
-          arrlen++;        
-        }
-        SEGMENT_I(segment_index).reset = false; // Do not reset if options have been set
-        ALOG_COM(PSTR(D_LOG_PIXEL "AuxOptions Segment[%d] flag%d = %d,%d,%d,%d"), segment_index, 
-        SEGMENT_I(segment_index).reset, 
-        SEGMENT_I(segment_index).params_user[0], 
-        SEGMENT_I(segment_index).params_user[1], 
-        SEGMENT_I(segment_index).params_user[2], 
-        SEGMENT_I(segment_index).params_user[3] );
-        data_buffer.isserviced++;
-      }
-    }
-
     #ifdef ENABLE_DEVFEATURE_LIGHTING__DEVELOPING_CODE
     if(jtok = obj["Bus"].getObject()["Init"])
     { 
@@ -1666,18 +1606,11 @@ if (jtok = obj["MQTTPixelArrays"]) {
     
       
     if(jtok = jObj_debug["addSegment"]){
-
       uint8_t id = jtok.getInt();
-
       uint16_t start = id;
-      uint16_t stop = 100;//STRIP_SIZE_MAX;
-
-      Serial.println();
-
+      uint16_t stop = 100;
       ALOG_INF(PSTR("getSegmentsNum() %d|%d"), id, getSegmentsNum());
-
       Segment_AppendNew(start, stop, jtok.getInt());
-
     }
 
 
@@ -1687,8 +1620,6 @@ if (jtok = obj["MQTTPixelArrays"]) {
       uint8_t stop = 100;
       uint8_t id = jtok.getInt();
       uint8_t force = 0;
-
-      Serial.println();
 
       segments[jtok.getInt()].stop = 0; // to disable segment
 
@@ -1747,573 +1678,142 @@ if (jtok = obj["MQTTPixelArrays"]) {
   #endif // ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS options above to be moved into debug methods
 
   #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
-  // if (jtok = obj["Standby"])
-  // {
-  //   ALOG_INF(PSTR("Standby command FOUND"));
-
-  //   JsonParserObject jDbg = jtok.getObject();
-  //   JsonParserToken jtok2 = 0; 
-
-  //   // Optional fade override from this command (bounded to uint16_t)
-  //   uint16_t fadeMs = 0;
-  //   if (jtok2 = jDbg["FadeMs"]) {
-  //     int v = jtok2.getInt();
-  //     if (v < 0) v = 0;
-  //     if (v > 65535) v = 65535;
-  //     fadeMs = (uint16_t)v;
-  //     ALOG_INF(PSTR("FadeMs=%u"), (unsigned)fadeMs);
-  //   }
-
-  //   // ---------------- Standby control (uses virtual preset profile) -------------
-  //   if (jtok2 = jDbg["Start"]) {
-  //     uint8_t callMode = CALL_MODE_NO_NOTIFY;
-  //     ALOG_INF(PSTR("Debug:StandbyStart fade=%u callMode=%u"), (unsigned)fadeMs, callMode);
-  //     if (jtok2.getInt()) Standby_Start(fadeMs, callMode);
-  //   } else {
-  //     ALOG_INF(PSTR("Debug:StandbyStart not found"));
-  //   }
-
-  //   if (jtok2 = jDbg["Stop"]) {
-  //     uint8_t callMode = CALL_MODE_NO_NOTIFY;
-  //     if (jtok2.getInt()) Standby_Stop(fadeMs, callMode);
-  //   }
-
-  //   // ---------------- Standby Wake (1 = resume now; >1 = resume now & re-enter after N sec) ----------------
-  //   if (jtok2 = jDbg["Wake"]) {
-  //     int32_t secs = jtok2.getInt();
-  //     constexpr uint32_t STANDBY_DELAY_MAX_MS = 0x7FFFFFFFul; // ~24.85 days rollover-safe
-
-  //     if (!standby.active) {
-  //       // Not in standby:
-  //       //  - Wake==1: no-op
-  //       //  - Wake>1: schedule future enter-standby only (no state change)
-  //       if (secs > 1) {
-  //         uint64_t ms64 = (uint64_t)secs * 1000ull;
-  //         uint32_t ms   = (ms64 > STANDBY_DELAY_MAX_MS) ? STANDBY_DELAY_MAX_MS : (uint32_t)ms64;
-  //         ALOG_INF(PSTR("Standby: Wake while not active — schedule enter in %u ms"), (unsigned)ms);
-  //         Standby_ScheduleStart(ms, CALL_MODE_NO_NOTIFY);
-  //       } else if (secs <= 0) {
-  //         ALOG_INF(PSTR("Standby: Wake<=0 while not active — cancel any pending schedule"));
-  //         Standby_CancelScheduledStart();
-  //       } else {
-  //         ALOG_INF(PSTR("Standby: Wake==1 while not active — no-op"));
-  //       }
-  //     } else {
-  //       // In standby now:
-  //       //  - Wake==1: leave now (restore), no auto-return.
-  //       //  - Wake>1: leave now (restore) and schedule re-enter after N sec.
-  //       if (secs <= 1) {
-  //         ALOG_INF(PSTR("Standby: Wake immediate"));
-  //         Standby_Stop(fadeMs, CALL_MODE_NO_NOTIFY);
-  //         Standby_CancelScheduledStart();
-  //       } else {
-  //         uint64_t ms64 = (uint64_t)secs * 1000ull;
-  //         uint32_t ms   = (ms64 > STANDBY_DELAY_MAX_MS) ? STANDBY_DELAY_MAX_MS : (uint32_t)ms64;
-  //         ALOG_INF(PSTR("Standby: Wake %ld s -> %u ms (auto re-enter scheduled)"), (long)secs, (unsigned)ms);
-  //         Standby_Stop(fadeMs, CALL_MODE_NO_NOTIFY);
-  //         Standby_ScheduleStart(ms, CALL_MODE_NO_NOTIFY);
-  //       }
-  //     }
-  //   }
-
-  //   // Init
-  //   if (jtok2 = jDbg["Init"]) {
-  //     if (jtok2.getInt()) Standby_Init();
-  //   }
-
-  //   // Replace profile from raw JSON string (validated; saved to FS)
-  //   if (jDbg["SetProfile"]) {
-  //     const char* s = nullptr;
-  //     auto t = jDbg["SetProfile"]; JsonParserObject o = t.getObject();
-  //     if (o && o["json"]) s = o["json"].getStr();
-  //     if (s) {
-  //       ALOG_INF(PSTR("Debug:SetProfile len=%u"), (unsigned)strlen(s));
-  //       Standby_SetProfileFromJson(s);
-  //     }
-  //   }
-
-  //   // Convenience: snapshot current scene and store as standby profile
-  //   if (jDbg["StandbySaveCurrentAsProfile"]) {
-  //     DynamicJsonDocument d(12*1024);
-  //     JsonObject root = d.to<JsonObject>();
-  //     serializeState(root, /*forPreset=*/true, /*includeBri=*/true, /*segmentBounds=*/true, /*selectedOnly=*/false);
-  //     String tmp; serializeJson(d, tmp);
-  //     Standby_SetProfileFromJson(tmp.c_str());
-  //     ALOG_INF(PSTR("Debug:StandbySaveCurrentAsProfile saved (%u bytes)"), (unsigned)tmp.length());
-  //   }
-
-  // } else {
-  //   ALOG_INF(PSTR("Standby not found"));
-  // }
-  // #endif
-
+  
   if (jtok = obj["Standby"]) {
-  ALOG_INF(PSTR("Standby command FOUND"));
-  JsonParserObject jDbg = jtok.getObject();
-  JsonParserToken  jtok2 = 0;
+    ALOG_INF(PSTR("Standby command FOUND"));
+    JsonParserObject jDbg = jtok.getObject();
+    JsonParserToken  jtok2 = 0;
 
-  uint16_t fadeMs = 0;
-  if (jtok2 = jDbg["FadeMs"]) {
-    fadeMs = (uint16_t)jtok2.getInt();
-    standby.fade_override_ms = fadeMs;   // store override for this wake cycle
-    ALOG_INF(PSTR("Standby: FadeMs=%u"), (unsigned)fadeMs);
-  }
-
-  if (jtok2 = jDbg["Start"]) {
-    uint8_t callMode = CALL_MODE_NO_NOTIFY;
-    if (jtok2.getInt()) {
-      Standby_Start(/*fadeMs=*/0, callMode);
-      // If you want: cancel remain-awake because we explicitly entered standby
-      Standby_CancelRemainAwake();
+    uint16_t fadeMs = 0;
+    if (jtok2 = jDbg["FadeMs"]) {
+      fadeMs = (uint16_t)jtok2.getInt();
+      standby.fade_override_ms = fadeMs;   // store override for this wake cycle
+      ALOG_INF(PSTR("Standby: FadeMs=%u"), (unsigned)fadeMs);
     }
-  }
 
-  if (jtok2 = jDbg["Stop"]) {
-    uint8_t callMode = CALL_MODE_NO_NOTIFY;
-    if (jtok2.getInt()) {
-      // Use fade override if provided in this command
-      uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
-      Standby_Stop(f, callMode);
-      // Do NOT start any timer here; Stop is a pure "leave standby"
+    if (jtok2 = jDbg["Start"]) {
+      uint8_t callMode = CALL_MODE_NO_NOTIFY;
+      if (jtok2.getInt()) {
+        Standby_Start(/*fadeMs=*/0, callMode);
+        // If you want: cancel remain-awake because we explicitly entered standby
+        Standby_CancelRemainAwake();
+      }
     }
-  }
 
-  // Wake semantics:
-  //   0  → cancel any pending remain-awake (no state change)
-  //   1  → if in standby, leave now (with optional FadeMs), no auto return
-  //   >1 → leave standby if active (with FadeMs), then stay awake for N seconds, auto-enter standby
-  if (jtok2 = jDbg["Wake"]) {
-    uint32_t secs = jtok2.getInt();
-
-    if (secs == 0) {
-      ALOG_INF(PSTR("Standby: Wake<=0 → cancel remain-awake"));
-      Standby_CancelRemainAwake();
-      // no state change
-    } else if (secs == 1) {
-      if (standby.active) {
+    if (jtok2 = jDbg["Stop"]) {
+      uint8_t callMode = CALL_MODE_NO_NOTIFY;
+      if (jtok2.getInt()) {
+        // Use fade override if provided in this command
         uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
-        ALOG_INF(PSTR("Standby: Wake==1 → leave standby now (fade=%u)"), (unsigned)f);
-        Standby_Stop(f, CALL_MODE_NO_NOTIFY);
-      } else {
-        ALOG_INF(PSTR("Standby: Wake==1 while already awake → no-op"));
+        Standby_Stop(f, callMode);
+        // Do NOT start any timer here; Stop is a pure "leave standby"
       }
-      Standby_CancelRemainAwake(); // no auto return
-    } else { // secs > 1
-      ALOG_INF(PSTR("Wake s>1 "));
-      uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
-      if (standby.active) {
-        ALOG_INF(PSTR("Standby: Wake %ld s → leave standby now (fade=%u)"), (long)secs, (unsigned)f);
-        Standby_Stop(f, CALL_MODE_NO_NOTIFY);
-      } else {
-        ALOG_INF(PSTR("Standby: Wake %ld s while already awake"), (long)secs);
-      }
-      //Serial.println("here3");Serial.flush();
-      Standby_SetRemainAwake(secs);
-      ALOG_INF(PSTR("Standby: remain-awake started: %u s"), (unsigned)secs);
     }
 
-    SEGMENT_I(0).single_animation_override.time_ms = 2000;
+    // Wake semantics:
+    //   0  → cancel any pending remain-awake (no state change)
+    //   1  → if in standby, leave now (with optional FadeMs), no auto return
+    //   >1 → leave standby if active (with FadeMs), then stay awake for N seconds, auto-enter standby
+    if (jtok2 = jDbg["Wake"]) {
+      uint32_t secs = jtok2.getInt();
 
-  }
+      if (secs == 0) {
+        ALOG_INF(PSTR("Standby: Wake<=0 → cancel remain-awake"));
+        Standby_CancelRemainAwake();
+        // no state change
+      } else if (secs == 1) {
+        if (standby.active) {
+          uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
+          ALOG_INF(PSTR("Standby: Wake==1 → leave standby now (fade=%u)"), (unsigned)f);
+          Standby_Stop(f, CALL_MODE_NO_NOTIFY);
+        } else {
+          ALOG_INF(PSTR("Standby: Wake==1 while already awake → no-op"));
+        }
+        Standby_CancelRemainAwake(); // no auto return
+      } else { // secs > 1
+        ALOG_INF(PSTR("Wake s>1 "));
+        uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
+        if (standby.active) {
+          ALOG_INF(PSTR("Standby: Wake %ld s → leave standby now (fade=%u)"), (long)secs, (unsigned)f);
+          Standby_Stop(f, CALL_MODE_NO_NOTIFY);
+        } else {
+          ALOG_INF(PSTR("Standby: Wake %ld s while already awake"), (long)secs);
+        }
+        //Serial.println("here3");Serial.flush();
+        Standby_SetRemainAwake(secs);
+        ALOG_INF(PSTR("Standby: remain-awake started: %u s"), (unsigned)secs);
+      }
 
-  if (jtok2 = jDbg["Init"]) {
-    if (jtok2.getInt()) Standby_Init();
-  }
+      SEGMENT_I(0).single_animation_override.time_ms = 2000;
 
-  if (jDbg["SetProfile"]) {
-    const char* s = nullptr;
-    auto t = jDbg["SetProfile"]; JsonParserObject o = t.getObject();
-    if (o && o["json"]) s = o["json"].getStr();
-    if (s) {
-      ALOG_INF(PSTR("Debug:SetProfile len=%u"), (unsigned)strlen(s));
-      Standby_SetProfileFromJson(s);
     }
+
+    if (jtok2 = jDbg["Init"]) {
+      if (jtok2.getInt()) Standby_Init();
+    }
+
+    if (jDbg["SetProfile"]) {
+      const char* s = nullptr;
+      auto t = jDbg["SetProfile"]; JsonParserObject o = t.getObject();
+      if (o && o["json"]) s = o["json"].getStr();
+      if (s) {
+        ALOG_INF(PSTR("Debug:SetProfile len=%u"), (unsigned)strlen(s));
+        Standby_SetProfileFromJson(s);
+      }
+    }
+
+    if (jDbg["StandbySaveCurrentAsProfile"]) {
+      DynamicJsonDocument d(12*1024);
+      JsonObject root = d.to<JsonObject>();
+      serializeState(root, /*forPreset=*/true, /*includeBri=*/true, /*segmentBounds=*/true, /*selectedOnly=*/false);
+      String tmp; serializeJson(d, tmp);
+      Standby_SetProfileFromJson(tmp.c_str());
+      ALOG_INF(PSTR("Debug:StandbySaveCurrentAsProfile saved (%u bytes)"), (unsigned)tmp.length());
+    }
+
+    Serial.println("ABOUT TO WAIT FOR STABILITY");
+    //delay(4000);
   }
 
-  if (jDbg["StandbySaveCurrentAsProfile"]) {
-    DynamicJsonDocument d(12*1024);
-    JsonObject root = d.to<JsonObject>();
-    serializeState(root, /*forPreset=*/true, /*includeBri=*/true, /*segmentBounds=*/true, /*selectedOnly=*/false);
-    String tmp; serializeJson(d, tmp);
-    Standby_SetProfileFromJson(tmp.c_str());
-    ALOG_INF(PSTR("Debug:StandbySaveCurrentAsProfile saved (%u bytes)"), (unsigned)tmp.length());
+  if (jtok = obj["Debug"])
+  {
+
+    ALOG_INF(PSTR("Debug command FOUND"));
+
+    JsonParserObject jDbg = jtok.getObject();
+    JsonParserToken jtok2 = 0; 
+  // ---------------- Save/Load full STATE snapshot (debug only) ----------------
+    if (jtok2 = jDbg["SaveState"]) {
+      bool includeBounds = true;
+      bool includeBri    = true;
+      bool selectedOnly  = false;
+      bool fullGlobals   = false;
+
+    //   auto t = jDbg["SaveState"]; JsonParserObject o = t.getObject();
+    //   if (o) {
+    //     if (o["includeBounds"]) includeBounds = (bool)o["includeBounds"].getInt();
+    //     if (o["includeBri"])    includeBri    = (bool)o["includeBri"].getInt();
+    //     if (o["selectedOnly"])  selectedOnly  = (bool)o["selectedOnly"].getInt();
+    //     if (o["fullGlobals"])   fullGlobals   = (bool)o["fullGlobals"].getInt();
+    //   }
+    //   ALOG_DBG(PSTR("Debug:SaveState bounds=%d bri=%d sel=%d full=%d"),
+    //            includeBounds, includeBri, selectedOnly, fullGlobals);
+      if(jtok2.getInt())
+      FileSave__State(includeBounds, includeBri, selectedOnly, fullGlobals);
+    }
+
+    if (jtok2 = jDbg["LoadState"]) {
+      uint8_t callMode = CALL_MODE_NO_NOTIFY;
+    //   auto t = jDbg["LoadState"]; JsonParserObject o = t.getObject();
+    //   if (o && o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
+    //   ALOG_DBG(PSTR("Debug:LoadState callMode=%u"), callMode);
+      if(jtok2.getInt())
+      FileLoad__State(callMode);
+    }
+
   }
-
-  Serial.println("ABOUT TO WAIT FOR STABILITY");
-  //delay(4000);
-}
-
-
-#endif // ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
-
-  // #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
-  // if (jtok = obj["Standby"])
-  // {
-
-  //   ALOG_INF(PSTR("Standby command FOUND"));
-    
-  //   JsonParserObject jDbg = jtok.getObject();
-  //   JsonParserToken jtok2 = 0; 
-
-  //   uint16_t fadeMs = 0;
-  //   if(jtok2 = jDbg["FadeMs"])
-  //   {
-  //     fadeMs = jtok2.getInt();
-  //     ALOG_INF(PSTR("FadeMs=%d"),fadeMs);
-  //   }
-
-  //   // // ---------------- Standby control (uses virtual preset profile) -------------
-  //   if (jtok2 = jDbg["Start"]) {
-  //     uint8_t  callMode= CALL_MODE_NO_NOTIFY;
-  //   //   auto t = jDbg["StandbyStart"]; JsonParserObject o = t.getObject();
-  //   //   if (o) {
-  //   //     if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
-  //   //     if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
-  //   //   }
-  //     ALOG_INF(PSTR("Debug:StandbyStart fade=%u callMode=%u"), fadeMs, callMode);
-  //     if(jtok2.getInt())
-  //     Standby_Start(fadeMs, callMode);
-  //   }else{
-  //     ALOG_INF(PSTR("Debug:StandbyStart not found"));
-  //   }
-
-  //   if (jtok2 = jDbg["Stop"]) {
-  //     uint8_t  callMode= CALL_MODE_NO_NOTIFY;
-  //   //   auto t = jDbg["StandbyStop"]; JsonParserObject o = t.getObject();
-  //   //   if (o) {
-  //   //     if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
-  //   //     if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
-  //   //   }
-  //   //   ALOG_INF(PSTR("Debug:StandbyStop fade=%u callMode=%u"), fadeMs, callMode);
-  //     if(jtok2.getInt())
-  //     Standby_Stop(fadeMs, callMode);
-  //   }
-
-  //     // ---------------- Standby delayed start (X = seconds) ----------------
-  //     // Usage examples:
-  //     // - {"StandbyDelayedStart": 300} → schedule start in 5 minutes
-  //     // - {"StandbyDelayedStart": 0} → cancel any pending delayed start
-
-
-  //   if (jtok2 = jDbg["DelayedStart"]) {
-  //     int32_t secs = jtok2.getInt();   // X in seconds
-      
-  //     // Max safe delay for rollover-safe compare ~ 2^31-1 ms ≈ 24.85 days.
-  //     constexpr uint32_t STANDBY_DELAY_MAX_MS = 0x7FFFFFFFul;
-
-  //     if (secs > 0) {
-  //       uint64_t ms64 = (uint64_t)secs * 1000ull;   // convert to ms
-  //       uint32_t ms   = (ms64 > STANDBY_DELAY_MAX_MS)
-  //                         ? STANDBY_DELAY_MAX_MS
-  //                         : (uint32_t)ms64;
-
-  //       ALOG_INF(PSTR("Debug:StandbyDelayedStart %ld s -> %u ms (scheduled)"),
-  //               (long)secs, (unsigned)ms);
-  //       Standby_ScheduleStart(ms, CALL_MODE_NO_NOTIFY);
-  //     } else {
-  //       // X <= 0 cancels any pending delayed start
-  //       ALOG_INF(PSTR("Debug:StandbyDelayedStart <=0 (cancel pending)"));
-  //       Standby_CancelScheduledStart();
-  //     }
-  //   }
-
-
-  //   // ---------------- Standby Wake (1 = immediate resume; >1 = resume now, re-enter after N sec) ----------------
-  //   if (jtok2 = jDbg["Wake"]) {
-  //     int32_t secs = jtok2.getInt();
-  //     constexpr uint32_t STANDBY_DELAY_MAX_MS = 0x7FFFFFFFul; // ~24.85 days rollover-safe
-
-  //     // If not in standby:
-  //     //  - Wake==1: do nothing (already awake).
-  //     //  - Wake>1: only (re)schedule a future standby start; do NOT change current state.
-  //     if (!standby.active) {
-  //       if (secs > 1) {
-  //         uint64_t ms64 = (uint64_t)secs * 1000ull;
-  //         uint32_t ms   = (ms64 > STANDBY_DELAY_MAX_MS) ? STANDBY_DELAY_MAX_MS : (uint32_t)ms64;
-  //         ALOG_INF(PSTR("Standby: Wake while not active — schedule enter in %u ms"), (unsigned)ms);
-  //         Standby_ScheduleStart(ms, CALL_MODE_NO_NOTIFY);
-  //       } else if (secs <= 0) {
-  //         ALOG_INF(PSTR("Standby: Wake<=0 while not active — cancel any pending schedule"));
-  //         Standby_CancelScheduledStart();
-  //       } else {
-  //         ALOG_INF(PSTR("Standby: Wake==1 while not active — no-op"));
-  //       }
-  //     } else {
-  //       // Currently in standby:
-  //       //  - Wake==1: leave now (restore), no auto-return.
-  //       //  - Wake>1: leave now (restore) AND schedule re-enter after N sec.
-  //       if (secs <= 1) {
-  //         ALOG_INF(PSTR("Standby: Wake immediate"));
-  //         Standby_Stop(fadeMs, CALL_MODE_NO_NOTIFY);
-  //         Standby_CancelScheduledStart();
-  //       } else {
-  //         uint64_t ms64 = (uint64_t)secs * 1000ull;
-  //         uint32_t ms   = (ms64 > STANDBY_DELAY_MAX_MS) ? STANDBY_DELAY_MAX_MS : (uint32_t)ms64;
-  //         ALOG_INF(PSTR("Standby: Wake %ld s -> %u ms (auto re-enter scheduled)"), (long)secs, (unsigned)ms);
-  //         Standby_Stop(fadeMs, CALL_MODE_NO_NOTIFY);
-  //         Standby_ScheduleStart(ms, CALL_MODE_NO_NOTIFY);
-  //       }
-  //     }
-  //   }
-
-
-    
-
-  //   // // Force reload the PROGMEM template → RAM (and FS if persist=true)
-  //   // if (jDbg["StandbyReloadTemplate"]) {
-  //   //   bool persist = true;
-  //   //   auto t = jDbg["StandbyReloadTemplate"]; JsonParserObject o = t.getObject();
-  //   //   if (o && o["persist"]) persist = (bool)o["persist"].getInt();
-  //   //   ALOG_INF(PSTR("Debug:StandbyReloadTemplate persist=%d"), persist);
-  //   //   Standby_ReloadTemplate(persist);   // <-- single explicit function; do NOT call Standby_Init() here
-  //   // }
-
-  //   // Replace profile from raw JSON string (validated; saved to FS)
-  //   if (jtok2 = jDbg["Init"]) {
-  //     if(jtok2.getInt())
-  //     Standby_Init();
-  //   }
-
-
-  //   // Replace profile from raw JSON string (validated; saved to FS)
-  //   if (jDbg["SetProfile"]) {
-  //     const char* s = nullptr;
-  //     auto t = jDbg["SetProfile"]; JsonParserObject o = t.getObject();
-  //     if (o && o["json"]) s = o["json"].getStr();
-  //     if (s) {
-  //       ALOG_INF(PSTR("Debug:SetProfile len=%u"), (unsigned)strlen(s));
-  //       Standby_SetProfileFromJson(s);
-  //     }
-  //   }
-
-  //   // Convenience: snapshot current scene and store as standby profile
-  //   if (jDbg["StandbySaveCurrentAsProfile"]) {
-  //     // Serialize a *compact* state and store as standby.profileRAM (+ FS)
-  //     DynamicJsonDocument d(12*1024);
-  //     JsonObject root = d.to<JsonObject>();
-  //     serializeState(root, /*forPreset=*/true, /*includeBri=*/true, /*segmentBounds=*/true, /*selectedOnly=*/false);
-  //     String tmp; serializeJson(d, tmp);
-  //     Standby_SetProfileFromJson(tmp.c_str());
-  //     ALOG_INF(PSTR("Debug:StandbySaveCurrentAsProfile saved (%u bytes)"), (unsigned)tmp.length());
-  //   }
-
-  // }else{
-  //   ALOG_INF(PSTR("Standby not found"));
-  // }
-
-
-  // if(jtok = obj["Debug"].getObject()["SaveSegment"])
-  // {
-  //   ALOG_DBG(PSTR("Debug:SaveSegment"));
-  //   FileSave__Segment();
-  // }
-  // if(jtok = obj["Debug"].getObject()["LoadSegment"])
-  // {
-  //   ALOG_DBG(PSTR("Debug:LoadSegment"));
-  //   FileLoad__Segment();
-  // }
-
-  // if(jtok = obj["Debug"])
-  // {
-
-  //   JsonParserObject jObj = jtok.getObject();
-
-  //   if (jObj["SaveState"]) {
-  //     bool includeBounds = jObj["SaveState"]["includeBounds"] | true;
-  //     bool includeBri    = jObj["SaveState"]["includeBri"]    | true;
-  //     bool selectedOnly  = jObj["SaveState"]["selectedOnly"]  | false;
-  //     bool fullGlobals   = jObj["SaveState"]["fullGlobals"]   | false;
-  //     ALOG_DBG(PSTR("Debug:SaveState bounds=%d bri=%d sel=%d full=%d"),
-  //             includeBounds, includeBri, selectedOnly, fullGlobals);
-  //     FileSave__State(includeBounds, includeBri, selectedOnly, fullGlobals);
-  //   }
-
-  //   if (jObj["LoadState"]) {
-  //     uint8_t callMode = jObj["LoadState"]["callMode"] | CALL_MODE_NO_NOTIFY;
-  //     ALOG_DBG(PSTR("Debug:LoadState callMode=%u"), callMode);
-  //     FileLoad__State(callMode);
-  //   }
-  // }
-  // Debug command handler — lightweight parser style (no `| default`)
-#ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
-if (jtok = obj["Debug"])
-{
-
-  ALOG_INF(PSTR("Debug command FOUND"));
-
-  JsonParserObject jDbg = jtok.getObject();
-  JsonParserToken jtok2 = 0; 
-// ---------------- Save/Load full STATE snapshot (debug only) ----------------
-  if (jtok2 = jDbg["SaveState"]) {
-    bool includeBounds = true;
-    bool includeBri    = true;
-    bool selectedOnly  = false;
-    bool fullGlobals   = false;
-
-  //   auto t = jDbg["SaveState"]; JsonParserObject o = t.getObject();
-  //   if (o) {
-  //     if (o["includeBounds"]) includeBounds = (bool)o["includeBounds"].getInt();
-  //     if (o["includeBri"])    includeBri    = (bool)o["includeBri"].getInt();
-  //     if (o["selectedOnly"])  selectedOnly  = (bool)o["selectedOnly"].getInt();
-  //     if (o["fullGlobals"])   fullGlobals   = (bool)o["fullGlobals"].getInt();
-  //   }
-  //   ALOG_DBG(PSTR("Debug:SaveState bounds=%d bri=%d sel=%d full=%d"),
-  //            includeBounds, includeBri, selectedOnly, fullGlobals);
-    if(jtok2.getInt())
-    FileSave__State(includeBounds, includeBri, selectedOnly, fullGlobals);
-  }
-
-  if (jtok2 = jDbg["LoadState"]) {
-    uint8_t callMode = CALL_MODE_NO_NOTIFY;
-  //   auto t = jDbg["LoadState"]; JsonParserObject o = t.getObject();
-  //   if (o && o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
-  //   ALOG_DBG(PSTR("Debug:LoadState callMode=%u"), callMode);
-    if(jtok2.getInt())
-    FileLoad__State(callMode);
-  }
-
-//   // ---------- SaveState ----------
-//   if (jDbg["SaveState"])
-//   {
-//     // defaults first
-//     bool includeBounds = true;
-//     bool includeBri    = true;
-//     bool selectedOnly  = false;
-//     bool fullGlobals   = false;
-
-//     // if SaveState is an object, read optional fields
-//     {
-//       auto tSave = jDbg["SaveState"];
-//       JsonParserObject oSave = tSave.getObject(); // if not an object, this will be "invalid"
-//       if (oSave) {
-//         if (oSave["includeBounds"]) includeBounds = (bool)oSave["includeBounds"].getInt();
-//         if (oSave["includeBri"])    includeBri    = (bool)oSave["includeBri"].getInt();
-//         if (oSave["selectedOnly"])  selectedOnly  = (bool)oSave["selectedOnly"].getInt();
-//         if (oSave["fullGlobals"])   fullGlobals   = (bool)oSave["fullGlobals"].getInt();
-//       }
-//       // if SaveState is just `true`, we keep defaults; if `false`, this block won't run
-//     }
-
-//     ALOG_DBG(PSTR("Debug:SaveState bounds=%d bri=%d sel=%d full=%d"),
-//              includeBounds, includeBri, selectedOnly, fullGlobals);
-//     FileSave__State(includeBounds, includeBri, selectedOnly, fullGlobals);
-//   }
-// // StandbyStart
-//   if (jDbg["StandbyStart"])
-//   {
-//     uint16_t fadeMs = 0; uint8_t callMode = CALL_MODE_NO_NOTIFY;
-//     auto t = jDbg["StandbyStart"]; JsonParserObject o = t.getObject();
-//     if (o) {
-//       if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
-//       if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
-//     }
-//     Standby_Start(fadeMs, callMode);
-//   }
-
-//   // StandbyStop
-//   if (jDbg["StandbyStop"])
-//   {
-//     uint16_t fadeMs = 0; uint8_t callMode = CALL_MODE_NO_NOTIFY;
-//     auto t = jDbg["StandbyStop"]; JsonParserObject o = t.getObject();
-//     if (o) {
-//       if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
-//       if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
-//     }
-//     Standby_Stop(fadeMs, callMode);
-//   }
-
-//   // (optional) force reload template/holder gate
-//   if (jDbg["StandbyReloadTemplate"]) {
-//     Standby_Init(); // runs holder/version gate and loads to RAM (and FS if needed)
-//   }
-
-//   if (jDbg["StandbyReloadTemplate"]) {
-//   bool persist = true;
-//   auto t = jDbg["StandbyReloadTemplate"]; JsonParserObject o = t.getObject();
-//   if (o && o["persist"]) persist = (bool)o["persist"].getInt();
-//   Standby_ReloadTemplate(persist);
-// }
-
-//   // (optional) set profile from raw JSON string
-//   if (jDbg["StandbySetProfile"]) {
-//     auto t = jDbg["StandbySetProfile"]; JsonParserObject o = t.getObject();
-//     const char* s = nullptr; if (o && o["json"]) s = o["json"].getStr();
-//     if (s) Standby_SetProfileFromJson(s);
-//   }
-//   // ---------- LoadState ----------
-//   if (jDbg["LoadState"])
-//   {
-//     uint8_t callMode = CALL_MODE_NO_NOTIFY;  // default
-
-//     {
-//       auto tLoad = jDbg["LoadState"];
-//       JsonParserObject oLoad = tLoad.getObject();
-//       if (oLoad) {
-//         if (oLoad["callMode"]) callMode = oLoad["callMode"].getInt();
-//       }
-//       // if LoadState is just `true`, we keep default callMode
-//     }
-
-//     ALOG_DBG(PSTR("Debug:LoadState callMode=%u"), callMode);
-//     FileLoad__State(callMode);
-//   }
-  
-  
-
-//   // StandbyStart
-//   if (jDbg["StandbyStart"])
-//   {
-//     uint16_t fadeMs  = 0;
-//     uint8_t  callMode= CALL_MODE_NO_NOTIFY;
-
-//     auto t = jDbg["StandbyStart"];
-//     JsonParserObject o = t.getObject();
-//     if (o) {
-//       if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
-//       if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
-//     }
-
-//     ALOG_INF(PSTR("Debug:StandbyStart fade=%u callMode=%u"), fadeMs, callMode);
-//     Standby_Start(fadeMs, callMode);
-//   }
-
-//   // StandbyStop
-//   if (jDbg["StandbyStop"])
-//   {
-//     uint16_t fadeMs  = 0;
-//     uint8_t  callMode= CALL_MODE_NO_NOTIFY;
-
-//     auto t = jDbg["StandbyStop"];
-//     JsonParserObject o = t.getObject();
-//     if (o) {
-//       if (o["fadeMs"])   fadeMs   = (uint16_t)o["fadeMs"].getInt();
-//       if (o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
-//     }
-
-//     ALOG_INF(PSTR("Debug:StandbyStop fade=%u callMode=%u"), fadeMs, callMode);
-//     Standby_Stop(fadeMs, callMode);
-//   }
-
-//   // StandbySetProfile (optional): push a new JSON profile string
-//   if (jDbg["StandbySetProfile"])
-//   {
-//     // Expect raw JSON string in field "json"
-//     const char* profile = nullptr;
-//     auto t = jDbg["StandbySetProfile"];
-//     JsonParserObject o = t.getObject();
-//     if (o && o["json"]) profile = o["json"].getStr();
-
-//     if (profile) {
-//       ALOG_INF(PSTR("Debug:StandbySetProfile len=%u"), (unsigned)strlen(profile));
-//       Standby_SetProfileFromJson(profile);
-//     }
-//   }
-}else{
-  ALOG_INF(PSTR("Debug command NOT found"));
-}
 
   #endif
-
 
   /**
    * @brief 
@@ -2333,7 +1833,7 @@ if (jtok = obj["Debug"])
     // segment_animation_override.time_ms = 100;
   }
 
-  ALOG_HGL(PSTR("REACHED END OF SEGMENT PARSING %d"), data_buffer.isserviced);
+  ALOG_HGLB(PSTR("REACHED END OF SEGMENT PARSING %d"), data_buffer.isserviced);
   
 } // END PARSE COMMANDS
 
@@ -2516,6 +2016,7 @@ void mAnimatorLight::CommandSet_Palette2ID(uint16_t value, uint8_t segment_index
 
 void mAnimatorLight::CommandSet_Animation_Transition_Rate_Ms(uint16_t value, uint8_t segment_index)
 {    
+  if(!value) value = MIN_SHOW_DELAY; // default to MIN_SHOW_DELAY when zero
   SEGMENT_I(segment_index).cycle_time__rate_ms = value;
   ALOG_DBM( PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_NVALUE_K(D_TRANSITION, D_RATE_MS)), SEGMENT_I(segment_index).cycle_time__rate_ms );  
 }

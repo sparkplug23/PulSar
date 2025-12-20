@@ -763,6 +763,22 @@ function populatePresets(fromls)
 	populateQL();
 }
 
+function presetRefresh() {
+  // Clear preset local storage only
+  localStorage.removeItem('wledP');     // presets blob
+  localStorage.removeItem('wledPmt');   // preset modified time cache (you already use this)
+
+  // Clear in-memory cache used by populatePresets()
+  pJson = null;
+
+  // Re-fetch presets and repopulate UI
+  loadPresets();
+  setTimeout(function(){
+    populatePresets(false);
+  }, 250);
+}
+
+
 function parseInfo(i) {
 	lastinfo = i;
 	var name = i.name;

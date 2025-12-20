@@ -90,11 +90,6 @@ class mPalette
       PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FOUR_1234__ID,
       PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FIVE_12345__ID,
       PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID,
-      // PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_01_RANDOM_HUE__ID,      
-      // PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_02_RANDOM_HUE_80TO100_SATURATIONS__ID,
-      // PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_03_RANDOM_HUE_60TO100_SATURATIONS__ID,
-      // PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_04_RANDOM_HUE_60TO85_SATURATIONS__ID,
-      // PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID,
       PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID    
     };
 
@@ -344,13 +339,6 @@ class mPalette
     #define PALETTELIST_DYNAMIC__COLOUR__ID_START PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID
     enum PALETTELIST_DYNAMIC__COLOUR__IDS
     {
-      // PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01_RANDOM_HUE__ID = PALETTELIST_STATIC_LENGTH__ID,      
-      // PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_02_RANDOM_HUE_80TO100_SATURATIONS__ID,
-      // PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_03_RANDOM_HUE_60TO100_SATURATIONS__ID,
-      // PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_04_RANDOM_HUE_60TO85_SATURATIONS__ID,
-      // PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05_RANDOM_HUE_00TO100_SATURATIONS__ID,
-
-
       PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID = PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID, // dawndusk to ELEVATION_DAY_TRESHOLD
 
       PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAYTIME_01__ID,         // elevation > 0 to elev < ELEVATION_DAY_TRESHOLD      ie sun above horizon seg colour transitions, ELEVATION_DAY_TRESHOLD==0 means consider daily range (hard coded define options)
@@ -383,11 +371,6 @@ class mPalette
     uint16_t GetPaletteListLength(){ return PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED + user_defined_palette_count; }
 
     bool IsPaletteGradient(uint16_t palette_id);
-
-    // #define PALETTE_ENCODING_OVERRIDE__NONE            0
-    // #define PALETTE_ENCODING_OVERRIDE__FORCED_DISCRETE 1
-    // #define PALETTE_ENCODING_OVERRIDE__FORCED_GRADIENT 2
-
 
     /**
      * @brief IMPORTANT
@@ -542,76 +525,3 @@ class mPalette
 #endif
 
 #endif // _M_PALETTE_H
-
-
-/**
- * @brief 
- * 
-        | ID | Descriptive Name Ideas                                              |
-| -- | ------------------------------------------------------------------- |
-| 01 | Chroma Pulse, Hue Cyclone, Vibe Glow, Spectra Drift, Colour Flux    |
-| 02 | Prisma Haze, Soft Shift, Pastel Bloom, Vivid Whisper, Silk Spectrum |
-| 03 | Sunkissed Flow, Tinted Dance, Citrus Flash, Radiant Fade, Neon Ease |
-| 04 | Muted Spark, Pastel Spin, Warm Mist, Subtle Prism, Faint Glow       |
-| 05 | Washed Spectrum, Color Cloud, Whisper Wheel, Ghost Fade, Hazy Loop  |
-Live Spectrum Drift
-
-Live Chroma Pulse
-
-Live Hue Cyclone
-
-Live Prism Glow
-
-Live Neon Mist
-
-Live Vibe Radiance
-
-Live Pulse Stream
-
-Live Tinted Flux
-
-Live Colour Fader
-
-Live Soft Fade
-
-Live Saturation Spin
-
-Live Dream Loop
-
-Live Bloom Flux
-
-Live Pastel Wash
-
-Live Whisper Hue
-
-Live Lightshift
-
-Live Aurora Thread
-
-Live Silk Spiral
-
-Live Glowline
-
-Live Mist Shimmer
-
-Live Driftfield
-
-Live Huewave
-
-Live Tone Cascade
-
-Live Prism Roll
-
-Live Flowing Ink
-
-Live Moodstream
-
-Live Gossamer Shift
-
-Live Colour Whisper
-
-Live Intensity Breeze
-
-Live Fluxband
- * 
- */

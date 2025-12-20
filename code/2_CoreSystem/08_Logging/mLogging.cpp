@@ -79,31 +79,27 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 
   memset(mxtime,0,sizeof(mxtime));
   // if time is short, ie debugging, them only show uptime (not RTCTime)
-  // if(tkr_set->Settings.logging.time_isshort){
-  //   #ifdef ENABLE_FEATURE_LOGGING__INCLUDE_RTC_IN_LOGS
-  //     // Only show hour
-  //     if(tkr_time->uptime.hour<1){
-  //       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d "), tkr_time->RtcTime.hour,tkr_time->RtcTime.minute,tkr_time->RtcTime.second, tkr_time->uptime.minute,tkr_time->uptime.second);
-  //     }else{
-  //       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d:%02d "), tkr_time->RtcTime.hour,tkr_time->RtcTime.minute,tkr_time->RtcTime.second, tkr_time->uptime.hour,tkr_time->uptime.minute,tkr_time->uptime.second);
-  //     }
-  //   #else
-  //     if(tkr_time->uptime.hour<1){
-  //       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d "),
-  //         tkr_time->uptime.minute,tkr_time->uptime.second
-  //       );
-  //     }else{
-  //       snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d "), //add hour
-  //         tkr_time->uptime.hour,tkr_time->uptime.minute,tkr_time->uptime.second);
-  //     }
-  //   #endif
-    
-  // }else{
-    snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %s "),
-    // sprintf(mxtime, PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),
-      tkr_time->RtcTime.hour,tkr_time->RtcTime.minute,tkr_time->RtcTime.second,
-      tkr_time->GetUptime().c_str());
-  // }
+  if(tkr_set->Settings.logging.time_isshort){
+    #ifdef ENABLE_FEATURE_LOGGING__INCLUDE_RTC_IN_LOGS
+      // Only show hour
+      if(tkr_time->uptime.hour<1){
+        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d "), tkr_time->RtcTime.hour,tkr_time->RtcTime.minute,tkr_time->RtcTime.second, tkr_time->uptime.minute,tkr_time->uptime.second);
+      }else{
+        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d:%02d "), tkr_time->RtcTime.hour,tkr_time->RtcTime.minute,tkr_time->RtcTime.second, tkr_time->uptime.hour,tkr_time->uptime.minute,tkr_time->uptime.second);
+      }
+    #else
+      if(tkr_time->UpTime()<3600){
+        char dt[16]; 
+        datetime_t ut;
+        tkr_time->BreakTime(tkr_time->UpTime(), ut);
+        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d"), ut.minute, ut.second);
+      }else{
+        snprintf_P(mxtime, sizeof(mxtime), PSTR("%s"), tkr_time->GetUptime().c_str());
+      }
+    #endif    
+  }else{
+    snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d %s"),tkr_time->RtcTime.hour, tkr_time->RtcTime.minute, tkr_time->RtcTime.second, tkr_time->GetUptime().c_str());
+  }
 
   // SERIAL_DEBUG.printf("%s %d\r\n","serail",millis());
 
@@ -116,50 +112,32 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   // LOG : SERIAL
   if (loglevel <= tkr_set->Settings.logging.serial_level) 
   {
+
+    if((loglevel == LOG_LEVEL_HIGHLIGHT)||(loglevel == LOG_LEVEL_HIGHLIGHT_TOP)){ SERIAL_DEBUG.printf("HIGHLIGHT START >>>>>>>>>>>>>>>>>\n\r"); }
+    #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
+    if(loglevel == LOG_LEVEL_ERROR){ SERIAL_DEBUG.printf("\n\rERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r"); }
+    #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
+
     #ifdef ENABLE_FREERAM_APPENDING_SERIAL
-      // register uint32_t *sp asm("a1"); 
-      // SERIAL_DEBUG.printf("R%05d S%04d U%02d%02d %s %s\r\n", 
-      SERIAL_DEBUG.printf(PSTR("R%05d%c %s %S %s\r\n"), 
-        ESP.getFreeHeap(), // 4 * (sp - g_pcont->stack), 
-        isconnected ? 'Y' : 'N',
-        tkr_time->GetUptime().c_str(),
-        tkr_log->GetLogLevelNamebyID(loglevel),
-        tkr_log->log_data
-      );
-      
-      if(loglevel == LOG_LEVEL_DEBUG_LOWLEVEL)
-      {
-        SERIAL_DEBUG.flush();
-      }
+      SERIAL_DEBUG.printf(PSTR("R%05d%c %s %S %s\r\n"),ESP.getFreeHeap(),isconnected ? 'Y' : 'N',tkr_time->GetUptime().c_str(),tkr_log->GetLogLevelNamebyID(loglevel),tkr_log->log_data);      
     #else
-
-      if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r>>HIGHLIGHT START<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\r"); }
-      #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
-      if(loglevel == LOG_LEVEL_ERROR){ SERIAL_DEBUG.printf("\n\rERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r"); }
-      #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
-
-
-      SERIAL_DEBUG.printf(PSTR("%s%S %s\r\n"), mxtime, tkr_log->GetLogLevelNamebyID(loglevel), tkr_log->log_data);
-
-      if(loglevel == LOG_LEVEL_HIGHLIGHT){ SERIAL_DEBUG.printf("\n\r>>HIGHLIGHT END<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\r"); }
-      #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
-      if(loglevel == LOG_LEVEL_ERROR){ SERIAL_DEBUG.printf("\n\rERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r"); }
-      #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
-
+      SERIAL_DEBUG.printf(PSTR("%s %S %s\r\n"), mxtime, tkr_log->GetLogLevelNamebyID(loglevel), tkr_log->log_data);
     #endif
-    //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
-    // Only flush if we all doing all for debugging
+
+    if((loglevel == LOG_LEVEL_HIGHLIGHT)||(loglevel == LOG_LEVEL_HIGHLIGHT_BOT)){ SERIAL_DEBUG.printf("HIGHLIGHT END   <<<<<<<<<<<<<<<<<\n\r"); }
+    #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
+    if(loglevel == LOG_LEVEL_ERROR){ SERIAL_DEBUG.printf("\n\rERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r"); }
+    #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
     
     //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
     // IMPORTANT!!! The code will pause here if flush is set, only for ms until the serial print has been sent
     // Normally, serial is passed to hardware internal the the chip, and serial is printed in the background. However, if a problem/bug with forced reseting exists,
     // you want to print all serial BEFORE tripping the reset, so only enable when fault tracing
-    // #ifdef ENABLE_SERIAL_DEBUG_FLUSH
     #ifdef ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
     SERIAL_DEBUG.flush(); // To ensure all serial is sent before a reset
     #endif
 
-    if((tkr_set->Settings.logging.serial_level == LOG_LEVEL_DEBUG)||(tkr_set->Settings.logging.serial_level == LOG_LEVEL_ALL)){ SERIAL_DEBUG.flush(); } 
+    if((tkr_set->Settings.logging.serial_level == LOG_LEVEL_DEBUG)||(tkr_set->Settings.logging.serial_level == LOG_LEVEL_DEBUG_LOWLEVEL)||(tkr_set->Settings.logging.serial_level == LOG_LEVEL_ALL)){ SERIAL_DEBUG.flush(); } 
   } 
   #endif //DISABLE_SERIAL_LOGGING
 
@@ -175,7 +153,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       tkr_log->Telnet.printf( "%s%S %s\r\n", mxtime, tkr_log->GetLogLevelNamebyID(loglevel), tkr_log->log_data);
     }
   }
-  // DEBUG_LINE_HERE3
+  
   // LOG : WEBSERVER
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   // if(tkr_web->fConsole_active && !tkr_web->fConsole_history){ //only append values when active, however, this stops history
@@ -210,15 +188,10 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
    * It should get elevated previledges outside of device_name/status/ so it can be viewed as its own issue. Perhaps just logging.
    * device_name/logging/message/LOG_LEVEL  so LOG_LEVEL can be identified
    * device_name/logging/alert/LOG_LEVEL    alerts are reserved for special messages, and depending on the openhab may be broadcast as notifications on my phone
-   * 
-   * 
-   * 
-   */
+   **/
   #ifdef ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
-  DEBUG_LINE_HERE3
   if (loglevel <= tkr_set->Settings.logging.mqtt_level) 
-  {    
-    DEBUG_LINE_HERE3
+  {
     char topic[100] = {0};
     snprintf_P(topic, sizeof(topic), "logging/message/%S", tkr_log->GetLogLevelNamebyID(loglevel));
     if(tkr_time->uptime_seconds_nonreset>60)
@@ -227,7 +200,6 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   }
   #endif // ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
   
-  // DEBUG_LINE_HERE3
 }
 
 
@@ -371,67 +343,6 @@ void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
 }
 
 
-
-// void AddLog_Basic(uint8_t loglevel, PGM_P formatP, ...)
-// {
-
-//   // Speed/stability improvements, check log level and return early if it doesnt apply to any log events
-//   if(
-//     (loglevel>tkr_set->Settings.logging.serial_level)&&
-//     (loglevel>tkr_set->Settings.logging.web_level)
-//     ){
-//     return;
-//   }
-
-//   va_list arg;
-//   va_start(arg, formatP);
-//   vsnprintf_P(log_data, sizeof(log_data), formatP, arg);
-//   va_end(arg);
-
-//   char level_buffer[10];
-
-//   // LOG : SERIAL
-//   if (loglevel <= tkr_set->Settings.logging.serial_level) {
-//     SERIAL_DEBUG.printf("%s%s %s\r\n", 
-//       mxtime,
-//       tkr_log->GetLogLevelNamebyID(loglevel, level_buffer),  
-//       log_data
-//     );
-//   }
-
-// }
-
-// uint8_t seriallog_level = LOG_LEVEL_DEBUG;
-// char log_data[300];
-
-// void AddLog_Basic(uint8_t loglevel, PGM_P formatP, ...)
-// {
-
-//   // Speed/stability improvements, check log level and return early if it doesnt apply to any log events
-//   if(loglevel>seriallog_level){
-//     return;
-//   }
-
-//   va_list arg;
-//   va_start(arg, formatP);
-//   vsnprintf_P(log_data, sizeof(log_data), formatP, arg);
-//   va_end(arg);
-
-//   // LOG : SERIAL
-//   if (loglevel <= seriallog_level) {
-//     SERIAL_DEBUG.printf("%s %s\r\n", 
-//       "INF: ",  
-//       log_data
-//     );
-//   }
-
-// }
-
-
-
-
-
-
 /*********************************************************************************************\
  * Syslog
  *
@@ -499,35 +410,6 @@ void mLogging::Syslog(void)
   // }
 }
 
-void mLogging::AddLogAddLog(uint8_t loglevel)
-{
-//   char mxtime[10];  // "13:45:21 "
-
-//   snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d "), RtcTime.hour, RtcTime.minute, RtcTime.second);
-
-//   if (loglevel <= seriallog_level) {
-//     SERIAL_DEBUG.printf("%s%s\r\n", mxtime, log_data);
-//   }
-// #ifdef USE_MODULE_NETWORK_WEBSERVER
-//   if (Settings.webserver && (loglevel <= Settings.weblog_level)) {
-//     // Delimited, zero-terminated buffer of log lines.
-//     // Each entry has this format: [index][log data]['\1']
-//     if (!web_log_index) web_log_index++;   // Index 0 is not allowed as it is the end of char string
-//     while (web_log_index == web_log[0] ||  // If log already holds the next index, remove it
-//            strlen(web_log) + strlen(log_data) + 13 > WEB_LOG_SIZE)  // 13 = web_log_index + mxtime + '\1' + '\0'
-//     {
-//       char* it = web_log;
-//       it++;                                // Skip web_log_index
-//       it += strchrspn(it, '\1');           // Skip log line
-//       it++;                                // Skip delimiting "\1"
-//       memmove(web_log, it, WEB_LOG_SIZE -(it-web_log));  // Move buffer forward to remove oldest log line
-//     }
-//     snprintf_P(web_log, sizeof(web_log), PSTR("%s%c%s%s\1"), web_log, web_log_index++, mxtime, log_data);
-//     if (!web_log_index) web_log_index++;   // Index 0 is not allowed as it is the end of char string
-//   }
-// #endif  // USE_MODULE_NETWORK_WEBSERVER
-//   if (!global_state.wifi_down && (loglevel <= syslog_level)) { Syslog(); }
-}
 
 // Static wrapper
 void mLogging::AddLog_Static(uint8_t loglevel, PGM_P formatP, ...) {
@@ -541,52 +423,6 @@ void mLogging::AddLog_Static(uint8_t loglevel, PGM_P formatP, ...) {
 }
 
 
-void mLogging::AddLog(uint8_t loglevel, const char *formatP)
-{
-  // snprintf_P(log_data, sizeof(log_data), formatP);
-  // AddLogAddLog(loglevel);
-}
-
-void mLogging::AddLog(uint8_t loglevel, const char *formatP, const char *formatP2)
-{
-  // char message[100];
-
-  // snprintf_P(log_data, sizeof(log_data), formatP);
-  // snprintf_P(message, sizeof(message), formatP2);
-  // strncat(log_data, message, sizeof(log_data) - strlen(log_data) -1);
-  // AddLogAddLog(loglevel);
-}
-
-void mLogging::AddLog_P2(uint8_t loglevel, PGM_P formatP, ...)
-{
-  // va_list arg;
-  // va_start(arg, formatP);
-  // vsnprintf_P(log_data, sizeof(log_data), formatP, arg);
-  // va_end(arg);
-
-  // AddLogAddLog(loglevel);
-}
-
-void mLogging::AddLogBuffer(uint8_t loglevel, uint8_t *buffer, int count)
-{
-  // snprintf_P(log_data, sizeof(log_data), PSTR("DMP:"));
-  // for (int i = 0; i < count; i++) {
-  //   snprintf_P(log_data, sizeof(log_data), PSTR("%s %02X"), log_data, *(buffer++));
-  // }
-  // AddLogAddLog(loglevel);
-}
-
-void mLogging::AddLogSerial(uint8_t loglevel)
-{
-  //AddLogBuffer(loglevel, (uint8_t*)serial_in_buffer, serial_in_byte_counter);
-}
-
-void mLogging::AddLogMissed(char *sensor, uint8_t misses)
-{
-  // ALOG_DBG(PSTR("SNS: %s missed %d"), sensor, SENSOR_MAX_MISS - misses);
-}
-
-
 /*********************************************************************************************\
  * Response data handling -- "AddLog" that are pushed to mqtt channel "status/response"
 \*********************************************************************************************/
@@ -595,8 +431,6 @@ void mLogging::AddLogMissed(char *sensor, uint8_t misses)
 int Response_mP(const char* format, ...)     // Content send snprintf_P char data
 {
   
-  // if(tkr_time->uptime_seconds_nonreset<60){ return 0 ;}
-
   memset(&tkr_set->response_msg,0,sizeof(tkr_set->response_msg));
 
   // This uses char strings. Be aware of sending %% if % is needed
@@ -637,11 +471,6 @@ void mLogging::StartTelnetServer()
   // if(seriallog)
   // ALOG_INF(PSTR("Telnet server started on port %d"),(uint8_t)TELNET_PORT);
 }
-
-
-
-//enum LoggingLevels {LOG_LEVEL_NONE, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, 
-//LOG_LEVEL_DEBUG, LOG_LEVEL_DEBUG_MORE, LOG_LEVEL_DEBUG_LOWLEVEL, LOG_LEVEL_ALL};
 
 
 const char* mLogging::GetLogLevelNamebyID(uint8_t id) {
@@ -775,10 +604,3 @@ void mLogging::parse_JSONCommand(JsonParserObject obj)
   
 
 }
-
-void mLogging::init(void)
-{
-  
-}
-
-

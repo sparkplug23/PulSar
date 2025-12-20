@@ -1343,18 +1343,8 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
   //     PollDnsWebserver();
   //   break; 
   case TASK_WIFI_CONNECTED:
-
-  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
-  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
-  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
-  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
-  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
-  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
-  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
-  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
-  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
-  ALOG_HGL(PSTR(D_LOG_HTTP "Starting web server"));
-
+    
+    ALOG_HGLT(PSTR(D_LOG_HTTP "Starting web server"));
 
     #ifdef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
 
@@ -1364,6 +1354,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 
     ALOG_INF(PSTR(D_LOG_HTTP "Webserver started on http://%s.local or http://%s"), cmDNS, tkr_set->runtime.my_hostname);
 
+    ALOG_HGLB(PSTR(D_LOG_HTTP "Started web server"));
     #endif
 // DEBUG_LINE_HERE;
 // return 0;

@@ -324,7 +324,7 @@ extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 
 #define FLASH_COUNT 4 
 #define LED_SKIP_AMOUNT  0
-#define MIN_SHOW_DELAY  15
+// #define MIN_SHOW_DELAY  15
 #define DEFAULT_LED_COUNT 30
 
 #define DEFAULT_BRIGHTNESS (uint8_t)127
@@ -2986,9 +2986,15 @@ typedef struct Segment
     uint8_t _brightness_cct_combined = 255;
     IRAM_ATTR void UpdateBrightness();
 
-    IRAM_ATTR void setBrightnessRGB(uint8_t bri_rgb)
+    IRAM_ATTR void setBrightnessRGB(uint8_t b)
     {
-      _brightness_rgb = bri_rgb;
+      #ifdef ENABLE_DEBUGFEATURE_LIGHTS__SEGMENT_BRIGHTNESS_LIMIT_VALUE
+      if(b > ENABLE_DEBUGFEATURE_LIGHTS__SEGMENT_BRIGHTNESS_LIMIT_VALUE)
+      {
+        b = ENABLE_DEBUGFEATURE_LIGHTS__SEGMENT_BRIGHTNESS_LIMIT_VALUE;
+      }
+      #endif
+      _brightness_rgb = b;
     }
 
     IRAM_ATTR void setBrightnessCCT(uint8_t bri_cct)
@@ -3114,6 +3120,7 @@ typedef struct Segment
     uint32_t tSaved_EffectStartReferenceTime = 0;
     uint32_t step;  // custom "step" var
     uint32_t call;  // call counter
+    uint32_t effect_init_runtime = 0; // when effect was initialised
 
     uint32_t tSaved_AnimateRunTime = 0; //tmp fix ofr xmas24 then remove
 

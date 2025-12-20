@@ -1369,9 +1369,11 @@ void BusManager::show()
 
 
 bool BusManager::canAllShow() {
-  // for (unsigned i = 0; i < numBusses; i++) {
-  //   if (!busses[i]->canShow()) return false;
-  // }
+  // #ifdef ENABLE_DEVFEATURE_LIGHTING__CANSHOW_BACKOFF
+  for (unsigned i = 0; i < numBusses; i++) {
+    if (!busses[i]->canShow()) return false;
+  }
+  // #endif
   return true;
 }
 

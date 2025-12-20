@@ -44,17 +44,9 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       EverySecond_Standby();
       #endif
 
-      // ALOG_INF(PSTR("AnimatorLight TASK_EVERY_SECOND %d"), tkr_iLight->bus_manager->canAllShow());
-
-      // if (!tkr_iLight->bus_manager->canAllShow()) {      // or strip.CanShow() if you wrap it there
-      //   return;                           // try again on next scheduler tick
-      // }
-
     }break;
-    case TASK_LOOP:     
-      // ALOG_INF(PSTR("Loop1"));Serial.flush();
+    case TASK_LOOP:
       EveryLoop();
-      // ALOG_INF(PSTR("Loop2"));Serial.flush();
     break;     
     case TASK_EVERY_250_MSECOND:
     break;   
@@ -151,6 +143,11 @@ void mAnimatorLight::Handle_FileSave_Edits()
 
 
 #ifdef ENABLE_FEATURE_LIGHTS__KEY_INPUT_CONTROLS
+/**
+ * @brief KeySet1: single button, palette and brightness
+ * KeySet2: dual button (as??)
+ * 
+ */
 void mAnimatorLight::KeyInput__ControlLights()
 {
   ALOG_INF(PSTR("KeyInput__ControlLights"));
@@ -2432,50 +2429,6 @@ mAnimatorLight& mAnimatorLight::SetSegment_AnimFunctionCallback(uint8_t segment_
 }
 
 
-/**
- * Begin at "StartingColor" at 0% then return to "DesiredColor" at 100%
- * */
-// void mAnimatorLight::StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t segment_index)
-// { 
-
-//   uint16_t time_tmp = 0;    
-//   time_tmp = SEGMENT_I(segment_index).animator_blend_time_ms();//    SEGMENT_I(segment_index).time_ms; 
-
-//   /**
-//    * @brief Testing as a temp solution, if neopixelbus gamma is not being used 
-//    * then to avoid needing complex apply brightness is the effects, the brightness is applied here
-//    * once to the starting position
-//    * 
-//    */
-//   #ifdef ENABLE_FEATURE_LIGHTING__USE_NEOPIXELBUS_LIGHT_GAMMA_LG_BRIGHTNESS_ON_START_OF_ANIMATION //does nto work for firefly
-//   error
-//   ALOG_INF(PSTR("Adjusting Brightness %d %d"), SEGMENT.getBrightnessRGB_WithGlobalApplied(), SEGMENT.getBrightnessCCT_WithGlobalApplied());
-//   SEGMENT.Update_DynamicBuffer_DesiredColour_Brightness( SEGMENT.getBrightnessRGB_WithGlobalApplied(), SEGMENT.getBrightnessCCT_WithGlobalApplied() );
-//   #endif
-
-//   /**
-//    * @brief Before starting animation, check the override states to see if they are active
-//    **/
-//   // Overwriting single SEGMENT_I(0) methods, set, then clear
-//   if(SEGMENT_I(segment_index).single_animation_override.time_ms>0)
-//   {
-//     time_tmp = SEGMENT_I(segment_index).single_animation_override.time_ms;
-//     SEGMENT_I(segment_index).single_animation_override.time_ms = 0; // reset overwrite
-//     ALOG_HGL(PSTR("Override: TimeMs: %d"), time_tmp);
-//     // Also requires setting the rate, so the next time it is called is not before the animation is finished
-//     SEGMENT_I(segment_index).cycle_time__rate_ms = time_tmp > 1000 ? time_tmp + 500 : time_tmp +10; // add a bit of buffer, make it short if frame time is < 1 second.
-//     ALOG_HGL(PSTR("Override: cycle_time__rate_ms: %d"), time_tmp); // need to add into the code, that returns this when animation ends.
-//   }
-
-//   if(SEGMENT_I(segment_index).animation_has_anim_callback == true)
-//   {
-//     SEGMENT_I(segment_index).animator->StartAnimation(0, time_tmp, SEGMENT_I(segment_index).anim_function_callback);
-//   }
-
-//   SEGMENT_I(segment_index).transitional = true;
-
-// } //end function
-
 void mAnimatorLight::StartSegmentAnimation_AsAnimUpdateMemberFunction(uint8_t segment_index)
 {
   uint16_t time_tmp = SEGMENT_I(segment_index).animator_blend_time_ms();
@@ -2827,18 +2780,16 @@ bool mAnimatorLight::Segment::allocateData(size_t len)
   return true;
 }
 
+
 void mAnimatorLight::Segment::deallocateData()
 {
-      // 
   if (!data) return;
-      // 
   free(data);
   data = nullptr;
-      // 
   addUsedSegmentData(-_dataLen);
-      // 
   _dataLen = 0;
 }
+
 
 bool mAnimatorLight::Segment::allocateColourData(uint16_t len) {
     DEBUG_LINE_HERE;
@@ -2922,6 +2873,7 @@ void mAnimatorLight::Segment::resetIfRequired() {
     // if (leds && !mAnimatorLight::Segment::_globalLeds) { free(leds); leds = nullptr; }
     //if (_t) { delete _t; _t = nullptr; transitional = false; }
     next_time = 0; step = 0; call = 0; 
+    effect_init_runtime = millis(); // save when an effect first started
     
     /**
      * @brief Potential issue with WLED effects, but removing aux options from reset since they may be used as config options
@@ -3174,7 +3126,6 @@ int16_t mAnimatorLight::extractModeDefaults(uint8_t mode, const char *segVar)
 // - odd length  => 1 hex per channel:  [R][G][B][W][C]
 // - even length => 2 hex per channel: [RR][GG][BB][WW][CW]
 // - up to 5 channels; missing channels default to 0
-
 // - special case: "0" => all black (0,0,0,0,0)
 bool mAnimatorLight::Segment::parseSegColorHex(const char* in,
                                                uint8_t& R, uint8_t& G,
@@ -3231,7 +3182,6 @@ bool mAnimatorLight::Segment::parseSegColorHex(const char* in,
   }
   return true;
 }
-
 
 
 bool mAnimatorLight::extractModeDefaults(uint8_t mode, const char *segVar, char *outBuffer, size_t bufferSize)
@@ -6223,48 +6173,6 @@ float mAnimatorLight::asin_t(float x) {
   return res;
 }
 
-// // declare a template with no implementation, and only one specialization
-// // this allows hiding the constants, while ensuring ODR causes optimizations
-// // to still apply.  (Fixes issues with conflicting 3rd party #define's)
-// template <typename T> T mAnimatorLight::atan_t(T x);
-// template<>
-// float mAnimatorLight::atan_t(float x) {
-//   //For A/B/C, see https://stackoverflow.com/a/42542593
-//   static const double A { 0.0776509570923569 };
-//   static const double B { -0.287434475393028 };
-//   static const double C { ((HALF_PI/2) - A - B) };
-//   // polynominal factors for approximation between 1 and 5
-//   static const float C0 {  0.089494f };
-//   static const float C1 {  0.974207f };
-//   static const float C2 { -0.326175f };
-//   static const float C3 {  0.05375f  };
-//   static const float C4 { -0.003445f };
-
-//   #ifdef WLED_DEBUG_MATH
-//   float xinput = x;
-//   #endif
-//   bool neg = (x < 0);
-//   x = std::abs(x);
-//   float res;
-//   if (x > 5.0f) { // atan(x) converges to pi/2 - (1/x) for large values
-//     res = HALF_PI - (1.0f/x);
-//   } else if (x > 1.0f) { //1 < x < 5
-//     float xx = x * x;
-//     res = (C4*xx*xx)+(C3*xx*x)+(C2*xx)+(C1*x)+C0;
-//   } else { // this approximation is only for x <= 1
-//     float xx = x * x;
-//     res = ((A*xx + B)*xx + C)*x;
-//   }
-//   if (neg) {
-//     res = -res;
-//   }
-//   #ifdef WLED_DEBUG_MATH
-//   Serial.printf("atan: %f,%f,%f,(%f)\n",xinput,res,atan(xinput),res-atan(xinput));
-//   #endif
-//   return res;
-// }
-
-
 
 //gamma 2.8 lookup table used for color correction
 uint8_t mAnimatorLight::NeoGammaWLEDMethod::gammaT[256] = {
@@ -7031,9 +6939,9 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool js
 {
   JBI->Start();
 
-  JBI->Add("Brightness_Master",    tkr_iLight->getBri_Global());
-  JBI->Add("BrightnessRGB_Master", tkr_iLight->getBriRGB_Global());
-  JBI->Add("BrightnessCCT_Master", tkr_iLight->getBriCCT_Global());
+  JBI->Add("Brightness",    tkr_iLight->getBri_Global());
+  JBI->Add("BrightnessRGB", tkr_iLight->getBriRGB_Global());
+  JBI->Add("BrightnessCCT", tkr_iLight->getBriCCT_Global());
   
   uint8_t seg_count = getSegmentsNum();
   seg_count = seg_count < 3 ? seg_count : 3; //limit memory overrun, or else later instead of reducing the seg count, reduce the data shared in another topic as overview

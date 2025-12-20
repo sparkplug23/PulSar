@@ -90,6 +90,8 @@
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__BASE
 
 
+#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H_MAPS
+
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__BASE
@@ -1530,6 +1532,90 @@
 
 #endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H
 
+
+
+#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H_MAPS
+
+// For developing gap/map files, and testing 2d over xmas25 with new 12v matrix panel
+
+// REmove these, should be in defaults
+#define ENABLE_EFFECT_DESCRIPTIONS
+#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
+#define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+#define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
+#define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+// #define ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+
+#define ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+
+#define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":256
+      }
+    ],
+    "MatrixConfig":[
+      {
+        "Width":16,
+        "Height":16,
+        "BottomStart":0,
+        "RightStart":0,
+        "Vertical":1,
+        "Serpentine":1,
+        "xOffset":0,
+        "yOffset":0
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,16,
+        0,16
+      ],
+      "ColourPalette":"Orange & Teal",
+      "PaletteMappingValues":[10,15,20],
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":0,
+        "BrightnessRGB":100
+      },
+      "SegColour1": {
+        "Hue": 120,
+        "Sat":0,
+        "BrightnessRGB":100
+      },
+      "SegColour2": {
+        "Hue": 240,
+        "Sat":100,
+        "BrightnessRGB":100
+      },
+      "Effects": {
+          "Function":"GEQ",
+          "Speed":141,
+          "Intensity":203,
+          "Custom1":255,
+          "Custom2":128,
+          "Custom3":128,
+          "Grouping":1,
+          "Decimate":0,
+          "RateMs": 25
+        },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 5,
+    "BrightnessCCT": 0
+  }
+  )=====";
+          // "Function":"Black Hole",
+
+#endif // DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H
 
 
 

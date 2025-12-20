@@ -1241,31 +1241,27 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state)
 }
 
 
-void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
+void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new)
+{
     
-  // tkr_anim->SEGMENT_I(0).rgbcct_controller->setBrightness255(brt_new);
-
-  // if(!tkr_anim->segments.size()){ return; } // Global does not rely on segments, and will be called before segments are created
-
   tkr_anim->force_update();
   
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTS__GLOBAL_BRIGHTNESS_LIMIT_VALUE
+  if(brt_new > ENABLE_DEBUGFEATURE_LIGHTS__GLOBAL_BRIGHTNESS_LIMIT_VALUE)
+  {
+    brt_new = ENABLE_DEBUGFEATURE_LIGHTS__GLOBAL_BRIGHTNESS_LIMIT_VALUE;
+  }
+  #endif
   
  if(tkr_anim->segments.size())
   {
     tkr_anim->SEGMENT_I(0).effect_anim_section = 0; // for effects that are only generated once, we need to trigger it again to make the brightness dim down
   }
-   setBriRGB_Global(brt_new);
-  // probably needs to check if they are linked here, or internally
+  setBriRGB_Global(brt_new);
   setBriCT_Global(brt_new);
-
   
-    bus_manager->setBrightness( getBriRGB_Global() ); // fix re-initialised bus' brightness
+  bus_manager->setBrightness( getBriRGB_Global() ); // fix re-initialised bus' brightness
 
-
-
-  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // ALOG_INF(PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_BRIGHTNESS)), tkr_anim->SEGMENT_I(0).rgbcct_controller->getBrightness255());
-  // #endif // ENABLE_LOG_LEVEL_COMMANDS
 }
 
 /******************************************************************************************************************************
@@ -1276,21 +1272,17 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new){
 
 void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_index)
 {
-  // if(!tkr_anim->segments.size()){ return; } // Global does not rely on segments, and will be called before segments are created
 
-  // SEGMENT_I(segment_index).rgbcct_controller->setBrightnessRGB255(bri);
- tkr_anim->force_update();
+  tkr_anim->force_update();
  
- if(tkr_anim->segments.size())
+  if(tkr_anim->segments.size())
   {
     tkr_anim->SEGMENT_I(0).effect_anim_section = 0; // for effects that are only generated once, we need to trigger it again to make the brightness dim down
   }
 
   _briRGB_Global = bri;
   setBriRGB_Global(bri);
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // ALOG_INF(PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_BRIGHTNESS)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessRGB());
-  #endif // ENABLE_LOG_LEVEL_COMMANDS
+  
 }
 
 /******************************************************************************************************************************
@@ -1301,10 +1293,9 @@ void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_
 
 void mInterfaceLight::CommandSet_Global_BrtCCT_255(uint8_t bri, uint8_t segment_index) 
 {
-  // if(!tkr_anim->segments.size()){ return; }
   tkr_anim->force_update();
   
- if(tkr_anim->segments.size())
+  if(tkr_anim->segments.size())
   {
     tkr_anim->SEGMENT_I(0).effect_anim_section = 0; // for effects that are only generated once, we need to trigger it again to make the brightness dim down
   }
