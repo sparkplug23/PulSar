@@ -15,6 +15,8 @@
 
 #include "DynamicBuffer.h"
 
+#define ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Should nearly always be enabled as default/minimal cases
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
@@ -783,6 +785,35 @@ class mAnimatorLight :
 
     uint8_t GetNumberOfColoursInUNLOADEDPalette(uint16_t palette_id);
 
+    // 1:1 replacement of fastled function optimized for ESP, slightly faster, more accurate and uses less flash (~ -200bytes)
+    uint32_t ColorFromPaletteCRGB16Fast(const CRGBPalette16& pal, unsigned index, uint8_t brightness, TBlendType blendType) {
+      if (blendType == LINEARBLEND_NOWRAP) {
+        index = (index * 0xF0) >> 8; // Blend range is affected by lo4 blend of values, remap to avoid wrapping
+      }
+      unsigned hi4 = byte(index) >> 4;
+      unsigned lo4 = (index & 0x0F);
+      const CRGB* entry = (CRGB*)&(pal[0]) + hi4;
+      unsigned red1   = entry->r;
+      unsigned green1 = entry->g;
+      unsigned blue1  = entry->b;
+      if (lo4 && blendType != NOBLEND) {
+        if (hi4 == 15) entry = &(pal[0]);
+        else ++entry;
+        unsigned f2 = (lo4 << 4);
+        unsigned f1 = 256 - f2;
+        red1   = (red1   * f1 + (unsigned)entry->r * f2) >> 8; // note: using color_blend() is slower
+        green1 = (green1 * f1 + (unsigned)entry->g * f2) >> 8;
+        blue1  = (blue1  * f1 + (unsigned)entry->b * f2) >> 8;
+      }
+      if (brightness < 255) { // note: zero checking could be done to return black but that is hardly ever used so it is omitted
+        // actually same as color_fade(), using color_fade() is slower
+        uint32_t scale = brightness + 1; // adjust for rounding (bitshift)
+        red1   = (red1   * scale) >> 8;
+        green1 = (green1 * scale) >> 8;
+        blue1  = (blue1  * scale) >> 8;
+      }
+      return RGBW32(red1,green1,blue1,0);
+    }
     
     // WLED-compat wrapper: ignores 'pal' and uses SEGMENT.palette_id via SEGMENT.GetPaletteColour()
     // Keeps WLED call-sites working: ColorFromPalette(SEGPALETTE, idx, bri, blend)
@@ -792,6 +823,11 @@ class mAnimatorLight :
       uint8_t brightness = 255,
       TBlendType blendType = NOBLEND
     ){
+
+      // WARNING: Forced fast redirect
+      // Bypassing complex palette handling to improve performance. Will only work on already loaded CRGB16Palettes 
+      // return ColorFromPaletteCRGB16Fast(SEGMENT.palette->CRGB16Palette16_Palette.data, index, brightness, blendType);
+
       // Map WLED blend to your palette mode
       const uint8_t force_mode = (blendType == NOBLEND) 
                                  ? PALETTE_MODE__FORCE_DISCRETE
@@ -2876,7 +2912,6 @@ typedef struct Segment
     uint8_t effect_id = 0;    
     uint8_t effect_id_next = 0;   //e.g. For rotating effect, preload the initial animation and then rotate it/
 
-    uint8_t palette_live_intensity = 127;
 
     /**
      * @brief Note with union here not having a name, all options are accesible directly in Segment
@@ -3136,7 +3171,18 @@ typedef struct Segment
     uint32_t aux3 = 0; // Also used for random CRGBPALETTE16 timing
     uint16_t aux4 = 0; // New when it is needed but not worth a struct data
 
-    uint32_t live_pal_timing = 0; //for live palette updates was previously aux3
+
+    // uint32_t live_pal_timing = 0; //for live palette updates was previously aux3
+    // uint8_t palette_live_intensity = 127;
+   struct LivePalette{
+    uint32_t timing1 = 0;   // shared: randomise last-update OR segcol-cycle anchor
+    uint8_t  intensity = 127;
+  } live_palette;
+
+
+    
+
+
 
     Decounter<uint16_t> auto_timeoff = Decounter<uint16_t>();
 

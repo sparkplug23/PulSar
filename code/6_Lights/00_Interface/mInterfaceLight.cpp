@@ -1273,6 +1273,10 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new)
 void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_index)
 {
 
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTS__GLOBAL_BRIGHTNESS_LIMIT_VALUE
+  if(bri > ENABLE_DEBUGFEATURE_LIGHTS__GLOBAL_BRIGHTNESS_LIMIT_VALUE) bri = ENABLE_DEBUGFEATURE_LIGHTS__GLOBAL_BRIGHTNESS_LIMIT_VALUE;
+  #endif
+
   tkr_anim->force_update();
  
   if(tkr_anim->segments.size())

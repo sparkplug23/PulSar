@@ -90,7 +90,7 @@
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__BASE
 
 
-#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H_MAPS
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H_MAPS
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

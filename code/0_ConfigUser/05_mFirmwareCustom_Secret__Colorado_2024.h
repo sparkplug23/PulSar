@@ -1134,8 +1134,6 @@ USE 2A BLACK WITH BLACK SONOFF FOR WREATH
   #define USE_MODULE_NETWORK_WEBSERVER
   #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
 
-  #define ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025 // Use WLED methods instead of Tas, make my own
-
   /***********************************
    * SECTION: Sensor Configs
   ************************************/  

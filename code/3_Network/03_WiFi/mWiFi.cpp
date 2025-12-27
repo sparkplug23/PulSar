@@ -22,12 +22,13 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     case TASK_INIT:
-      #ifndef ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
-      WifiConnect();
-      #endif // ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
-      #ifdef ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
 
+      #ifdef ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
+      WifiConnect(); // new SoftAP + multiSSID method
+      #else
+      WifiConnect(); // Old method from Tas
       #endif 
+
     break;
     case TASK_LOOP: 
     
@@ -40,38 +41,31 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
       
       AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "network_wifi=%d"), tkr_set->Settings.flag_network.network_wifi);
 
-      #ifndef ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
-      if (tkr_set->Settings.flag_network.network_wifi) 
-      {
-        WifiCheck(tkr_set->runtime.wifi_state_flag);
-        tkr_set->runtime.wifi_state_flag = WIFI_RESTART;
-      }
+      #ifdef ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
+        Handle_WiFiConnection(); // new SoftAP + multiSSID method  
+        // if (tkr_set->Settings.flag_network.network_wifi) 
+        // {
+        //   WifiCheck(tkr_set->runtime.wifi_state_flag);// Old method from Tas
+        //   tkr_set->runtime.wifi_state_flag = WIFI_RESTART;
+        // } // new SoftAP + multiSSID method
+      #else
+        if (tkr_set->Settings.flag_network.network_wifi) 
+        {
+          WifiCheck(tkr_set->runtime.wifi_state_flag);// Old method from Tas
+          tkr_set->runtime.wifi_state_flag = WIFI_RESTART;
+        }
+      #endif // ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
 
-      #ifdef ENABLE_LOG_LEVEL_INFO
       AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_ssid[%d]=%s"),tkr_set->Settings.sta_active, tkr_set->SettingsText(SET_STASSID1 + tkr_set->Settings.sta_active) );
       AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_pwd[%d]=%s"), tkr_set->Settings.sta_active, tkr_set->SettingsText(SET_STAPWD1 + tkr_set->Settings.sta_active) );
-      #endif
-      #endif // ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
 
     }
     break;
     case TASK_EVERY_MINUTE:
     
-// #ifdef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-//       if (tkr_set->Settings.flag_network.network_wifi) 
-//       {
-//         WifiCheck(tkr_set->wifi_state_flag);
-//         tkr_set->wifi_state_flag = WIFI_RESTART;
-//       }
-// #endif // ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-
-// #ifdef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-
       ALOG_INF( PSTR("WL_CONNECTED %s"), WiFi.localIP().toString().c_str() );
 
-// #endif
-
-    break;
+      break;
     case TASK_EVERY_FIVE_MINUTE:
       // ALOG_INF( PSTR("WL_CONNECTED %s"), WiFi.localIP().toString().c_str() );
       
@@ -133,95 +127,95 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 } // END function
 
 
-#ifdef ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
+// #ifdef ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
 
 
-void mWiFi::initConnection()
-{
-  DEBUG_PRINTLN(F("initConnection() called."));
+// void mWiFi::initConnection()
+// {
+//   DEBUG_PRINTLN(F("initConnection() called."));
 
-  #ifdef WLED_ENABLE_WEBSOCKETS
-  ws.onEvent(wsEvent);
-  #endif
+//   #ifdef WLED_ENABLE_WEBSOCKETS
+//   ws.onEvent(wsEvent);
+//   #endif
 
-#ifndef WLED_DISABLE_ESPNOW
-  if (statusESPNow == ESP_NOW_STATE_ON) {
-    DEBUG_PRINTLN(F("ESP-NOW stopping."));
-    quickEspNow.stop();
-    statusESPNow = ESP_NOW_STATE_UNINIT;
-  }
-#endif
+// #ifndef WLED_DISABLE_ESPNOW
+//   if (statusESPNow == ESP_NOW_STATE_ON) {
+//     DEBUG_PRINTLN(F("ESP-NOW stopping."));
+//     quickEspNow.stop();
+//     statusESPNow = ESP_NOW_STATE_UNINIT;
+//   }
+// #endif
 
-  WiFi.disconnect(true); // close old connections
-#ifdef ESP8266
-  WiFi.setPhyMode(force802_3g ? WIFI_PHY_MODE_11G : WIFI_PHY_MODE_11N);
-#endif
+//   WiFi.disconnect(true); // close old connections
+// #ifdef ESP8266
+//   WiFi.setPhyMode(force802_3g ? WIFI_PHY_MODE_11G : WIFI_PHY_MODE_11N);
+// #endif
 
-  if (multiWiFi[selectedWiFi].staticIP != 0U && multiWiFi[selectedWiFi].staticGW != 0U) {
-    WiFi.config(multiWiFi[selectedWiFi].staticIP, multiWiFi[selectedWiFi].staticGW, multiWiFi[selectedWiFi].staticSN, dnsAddress);
-  } else {
-    WiFi.config(IPAddress((uint32_t)0), IPAddress((uint32_t)0), IPAddress((uint32_t)0));
-  }
+//   if (multiWiFi[selectedWiFi].staticIP != 0U && multiWiFi[selectedWiFi].staticGW != 0U) {
+//     WiFi.config(multiWiFi[selectedWiFi].staticIP, multiWiFi[selectedWiFi].staticGW, multiWiFi[selectedWiFi].staticSN, dnsAddress);
+//   } else {
+//     WiFi.config(IPAddress((uint32_t)0), IPAddress((uint32_t)0), IPAddress((uint32_t)0));
+//   }
 
-  lastReconnectAttempt = millis();
+//   lastReconnectAttempt = millis();
 
-  if (!WLED_WIFI_CONFIGURED) {
-    DEBUG_PRINTLN(F("No connection configured."));
-    if (!apActive) initAP();        // instantly go to ap mode
-  } else if (!apActive) {
-    if (apBehavior == AP_BEHAVIOR_ALWAYS) {
-      DEBUG_PRINTLN(F("Access point ALWAYS enabled."));
-      initAP();
-    } else {
-      DEBUG_PRINTLN(F("Access point disabled (init)."));
-      WiFi.softAPdisconnect(true);
-      WiFi.mode(WIFI_STA);
-    }
-  }
+//   if (!WLED_WIFI_CONFIGURED) {
+//     DEBUG_PRINTLN(F("No connection configured."));
+//     if (!apActive) initAP();        // instantly go to ap mode
+//   } else if (!apActive) {
+//     if (apBehavior == AP_BEHAVIOR_ALWAYS) {
+//       DEBUG_PRINTLN(F("Access point ALWAYS enabled."));
+//       initAP();
+//     } else {
+//       DEBUG_PRINTLN(F("Access point disabled (init)."));
+//       WiFi.softAPdisconnect(true);
+//       WiFi.mode(WIFI_STA);
+//     }
+//   }
 
-  if (WLED_WIFI_CONFIGURED) {
-    showWelcomePage = false;
+//   if (WLED_WIFI_CONFIGURED) {
+//     showWelcomePage = false;
     
-    DEBUG_PRINT(F("Connecting to "));
-    DEBUG_PRINT(multiWiFi[selectedWiFi].clientSSID);
-    DEBUG_PRINTLN(F("..."));
+//     DEBUG_PRINT(F("Connecting to "));
+//     DEBUG_PRINT(multiWiFi[selectedWiFi].clientSSID);
+//     DEBUG_PRINTLN(F("..."));
 
-    // convert the "serverDescription" into a valid DNS hostname (alphanumeric)
-    char hostname[25];
-    prepareHostname(hostname);
-    WiFi.begin(multiWiFi[selectedWiFi].clientSSID, multiWiFi[selectedWiFi].clientPass); // no harm if called multiple times
+//     // convert the "serverDescription" into a valid DNS hostname (alphanumeric)
+//     char hostname[25];
+//     prepareHostname(hostname);
+//     WiFi.begin(multiWiFi[selectedWiFi].clientSSID, multiWiFi[selectedWiFi].clientPass); // no harm if called multiple times
 
-#ifdef ARDUINO_ARCH_ESP32
-    WiFi.setTxPower(wifi_power_t(txPower));
-    WiFi.setSleep(!noWifiSleep);
-    WiFi.setHostname(hostname);
-#else
-    wifi_set_sleep_type((noWifiSleep) ? NONE_SLEEP_T : MODEM_SLEEP_T);
-    WiFi.hostname(hostname);
-#endif
-  }
+// #ifdef ARDUINO_ARCH_ESP32
+//     WiFi.setTxPower(wifi_power_t(txPower));
+//     WiFi.setSleep(!noWifiSleep);
+//     WiFi.setHostname(hostname);
+// #else
+//     wifi_set_sleep_type((noWifiSleep) ? NONE_SLEEP_T : MODEM_SLEEP_T);
+//     WiFi.hostname(hostname);
+// #endif
+//   }
 
-#ifndef WLED_DISABLE_ESPNOW
-  if (enableESPNow) {
-    quickEspNow.onDataSent(espNowSentCB);     // see udp.cpp
-    quickEspNow.onDataRcvd(espNowReceiveCB);  // see udp.cpp
-    bool espNowOK;
-    if (apActive) {
-      DEBUG_PRINTLN(F("ESP-NOW initing in AP mode."));
-      #ifdef ESP32
-      quickEspNow.setWiFiBandwidth(WIFI_IF_AP, WIFI_BW_HT20); // Only needed for ESP32 in case you need coexistence with ESP8266 in the same network
-      #endif //ESP32
-      espNowOK = quickEspNow.begin(apChannel, WIFI_IF_AP);  // Same channel must be used for both AP and ESP-NOW
-    } else {
-      DEBUG_PRINTLN(F("ESP-NOW initing in STA mode."));
-      espNowOK = quickEspNow.begin(); // Use no parameters to start ESP-NOW on same channel as WiFi, in STA mode
-    }
-    statusESPNow = espNowOK ? ESP_NOW_STATE_ON : ESP_NOW_STATE_ERROR;
-  }
-#endif
-}
+// #ifndef WLED_DISABLE_ESPNOW
+//   if (enableESPNow) {
+//     quickEspNow.onDataSent(espNowSentCB);     // see udp.cpp
+//     quickEspNow.onDataRcvd(espNowReceiveCB);  // see udp.cpp
+//     bool espNowOK;
+//     if (apActive) {
+//       DEBUG_PRINTLN(F("ESP-NOW initing in AP mode."));
+//       #ifdef ESP32
+//       quickEspNow.setWiFiBandwidth(WIFI_IF_AP, WIFI_BW_HT20); // Only needed for ESP32 in case you need coexistence with ESP8266 in the same network
+//       #endif //ESP32
+//       espNowOK = quickEspNow.begin(apChannel, WIFI_IF_AP);  // Same channel must be used for both AP and ESP-NOW
+//     } else {
+//       DEBUG_PRINTLN(F("ESP-NOW initing in STA mode."));
+//       espNowOK = quickEspNow.begin(); // Use no parameters to start ESP-NOW on same channel as WiFi, in STA mode
+//     }
+//     statusESPNow = espNowOK ? ESP_NOW_STATE_ON : ESP_NOW_STATE_ERROR;
+//   }
+// #endif
+// }
 
-#endif // ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
+// #endif // ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
 
 
 
@@ -308,18 +302,18 @@ void mWiFi::WifiConnectAP(uint8_t ap_index){
 }
 
 
-void mWiFi::WifiBegin(uint8_t flag, uint8_t channel)
+void mWiFi::WifiBegin__OldTasMethod(uint8_t flag, uint8_t channel)
 {
 
 
-  ALOG_HGL(PSTR("mWiFi::WifiBegin %d:%d"), flag, channel);
+  ALOG_HGL(PSTR("mWiFi::WifiBegin__OldTasMethod %d:%d"), flag, channel);
 
   // delay(2000);
 
   // DEBUG_LINE_HERE_PAUSE;
   pCONT->Tasker_Interface(TASK_WIFI_STARTING_CONNECTION);
 
-  ALOG_INF(PSTR(D_LOG_WIFI "mWiFi::WifiBegin TASK_WIFI_STARTING_CONNECTION over")); Serial.flush();
+  ALOG_INF(PSTR(D_LOG_WIFI "mWiFi::WifiBegin__OldTasMethod TASK_WIFI_STARTING_CONNECTION over")); Serial.flush();
 
   const char kWifiPhyMode[] = " BGN";
 
@@ -632,7 +626,7 @@ if(WiFi.scanComplete() == WIFI_SCAN_RUNNING){
       if (last_bssid[i] != connection.bssid[i]) 
       {
         AddLog(log, PSTR(D_LOG_WIFI "last_bssid[i] != connection.bssid[i]"));
-        WifiBegin(ap, channel);                     // 0 (AP1), 1 (AP2) or 3 (default AP)
+        WifiBegin__OldTasMethod(ap, channel);                     // 0 (AP1), 1 (AP2) or 3 (default AP)
         break;
       }
       else
@@ -953,7 +947,7 @@ Retry Attempt:
 If connection.retry is still nonzero, the function will:
 Log the remaining retries.
 Depending on whether scanning is enabled:
-It might call WifiBegin() to attempt reconnection (with different parameters based on the retry count).
+It might call WifiBegin__OldTasMethod() to attempt reconnection (with different parameters based on the retry count).
 It then resets the counter to 1 so that the next check occurs after 1 second:
 cpp
 Copy
@@ -1105,12 +1099,12 @@ void mWiFi::WifiCheckIp(void)
       } else {
         if (connection.retry_init == connection.retry) 
         {          
-          WifiBegin(WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID, tkr_set->Settings.wifi_channel);        // Select alternate SSID
+          WifiBegin__OldTasMethod(WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID, tkr_set->Settings.wifi_channel);        // Select alternate SSID
           ALOG_INF(PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "Select default SSID"));          
         }
         if ((tkr_set->Settings.sta_config != WIFI_WAIT) && ((connection.retry_init / 2) == connection.retry)) 
         {
-          WifiBegin(WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID, 0);        // Select alternate SSID
+          WifiBegin__OldTasMethod(WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID, 0);        // Select alternate SSID
           ALOG_INF(PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "Select alternate SSID"));          
         }
       }
@@ -1322,14 +1316,14 @@ void mWiFi::WifiCheckIp(void)
         if (connection.retry_init == connection.retry) 
         {
           
-          WifiBegin(WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID, tkr_set->Settings.wifi_channel);        // Select alternate SSID
+          WifiBegin__OldTasMethod(WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID, tkr_set->Settings.wifi_channel);        // Select alternate SSID
           ALOG_INF(PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "Select default SSID"));
           
         }
         if ((tkr_set->Settings.sta_config != WIFI_WAIT) && ((connection.retry_init / 2) == connection.retry)) 
         {
 
-          WifiBegin(WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID, 0);        // Select alternate SSID
+          WifiBegin__OldTasMethod(WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID, 0);        // Select alternate SSID
           ALOG_INF(PSTR(D_LOG_WIFI D_ATTEMPTING_CONNECTION "Select alternate SSID"));
           
         }
@@ -1342,10 +1336,10 @@ void mWiFi::WifiCheckIp(void)
         }
       } else {
         if (Wifi.retry_init == Wifi.retry) {
-          WifiBegin(3, Settings.connection.channel);  // Select default SSID
+          WifiBegin__OldTasMethod(3, Settings.connection.channel);  // Select default SSID
         }
         if ((Settings.sta_config != WIFI_WAIT) && ((Wifi.retry_init / 2) == Wifi.retry)) {
-          WifiBegin(2, 0);        // Select alternate SSID
+          WifiBegin__OldTasMethod(2, 0);        // Select alternate SSID
         }
       }*/
       connection.counter = 1;

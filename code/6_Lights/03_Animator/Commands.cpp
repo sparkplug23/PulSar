@@ -579,6 +579,12 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
         ALOG_WRN(PSTR(D_LOG_PIXEL "Grouping overridden to %d to fit segment length"), SEGMENT_I(segment_index).grouping);
       }
       #endif
+      #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_MAX_COUNT
+      if(SEGMENT_I(segment_index).grouping > (SEGMENT_I(segment_index).length()/ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_MAX_COUNT)){
+        SEGMENT_I(segment_index).grouping = SEGMENT_I(segment_index).length()/ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_MAX_COUNT;
+        ALOG_WRN(PSTR(D_LOG_PIXEL "Grouping overridden to %d to fit segment length"), SEGMENT_I(segment_index).grouping);
+      }
+      #endif
       data_buffer.isserviced++;
     }
 
@@ -762,8 +768,8 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
 
     if (jtok = jobj["PalIX"]) 
     {
-      SEGMENT_I(segment_index).palette_live_intensity = jtok.getInt();
-      ALOG_INF(PSTR(D_LOG_PIXEL "PalIX %d"), SEGMENT_I(segment_index).palette_live_intensity );
+      SEGMENT_I(segment_index).live_palette.intensity = jtok.getInt();
+      ALOG_INF(PSTR(D_LOG_PIXEL "PalIX %d"), SEGMENT_I(segment_index).live_palette.intensity );
       data_buffer.isserviced++;
     }
     
@@ -1156,74 +1162,617 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
 
 
   #ifdef ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
-  /**
-   * @brief When these are commanded, the "animation_mode" is switched and the setpixel will be set here directly
-   */
-  if(jtok = obj["MQTTPixel"])
-  {
+  // /**
+  //  * @brief When these are commanded, the "animation_mode" is switched and the setpixel will be set here directly
+  //  */
+  // if(jtok = obj["MQTTPixel"])
+  // {
 
-    JsonParserToken jtok_sub = 0;
+  //   JsonParserToken jtok_sub = 0;
 
-    realtimeMode = ANIMATION_MODE__REALTIME_MQTT_SETPIXEL;
+  //   realtimeMode = ANIMATION_MODE__REALTIME_MQTT_SETPIXEL;
     
-    // Method 1: RGB control
-    // if(jtok_sub = jtok.getObject()["Index"])
-    // {
-    //   index = jtok_sub.getInt();
-    //   ALOG_DBM(PSTR("Index %d"), index);
-    // }
+  //   // Method 1: RGB control
+  //   // if(jtok_sub = jtok.getObject()["Index"])
+  //   // {
+  //   //   index = jtok_sub.getInt();
+  //   //   ALOG_DBM(PSTR("Index %d"), index);
+  //   // }
 
-    // Method 2: Set the "on pixels", which uses the configured palette on repeat
-    uint8_t index = 0;
-    if (jtok_sub = jtok.getObject()["OnPixels"]) {
-        if (jtok_sub.isArray()) {
-            ALOG_COM(PSTR("is ARRAY"));
+  //   ALOG_INF(PSTR("Add command which switches to pad below"));// so left/middle/row or whatever, [[fill out min/max],[fill out min/max]]
 
-            SEGMENT.fill(0); // Clear all to off
+  //   // Method 2: Set the "on pixels", which uses the configured palette on repeat
+  //   uint8_t index = 0;
+  //   if (jtok_sub = jtok.getObject()["OnPixels"]) {
+  //       if (jtok_sub.isArray()) {
+  //           ALOG_COM(PSTR("is ARRAY"));
 
-            uint8_t brightness = SEGMENT.getBrightnessRGB_WithGlobalApplied(); // Prefetch brightness
-            ALOG_INF(PSTR("brightness %d"), brightness);
+  //           SEGMENT.fill(0); // Clear all to off
 
-            RgbcctColor colour;
-            uint16_t pixel = 0;
-            JsonParserArray array = jtok_sub;
+  //           uint8_t brightness = SEGMENT.getBrightnessRGB_WithGlobalApplied(); // Prefetch brightness
+  //           ALOG_INF(PSTR("brightness %d"), brightness);
 
-            JsonParserToken token = array;
-            token.nextOne(); // Skip the array itself and move to the first element
+  //           uint32_t colour;
+  //           uint16_t pixel = 0;
+  //           JsonParserArray array = jtok_sub;
 
-            uint16_t count = 0; // Keep track of processed items
-            while (token.isValid()) { // Process tokens while valid
-                if (token.isNum()) { // Ensure the token is a number
-                    int pixelIndex = token.getInt();
-                    ALOG_INF(PSTR("OnPixel %d (processed %d)"), pixelIndex, count);
+  //           JsonParserToken token = array;
+  //           token.nextOne(); // Skip the array itself and move to the first element
 
-                    // Get the color from the palette
-                    colour = SEGMENT.GetPaletteColour_Legacy(pixel++, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
+  //           uint16_t count = 0; // Keep track of processed items
+  //           while (token.isValid()) { // Process tokens while valid
+  //               if (token.isNum()) { // Ensure the token is a number
+  //                   int pixelIndex = token.getInt();
+  //                   ALOG_INF(PSTR("OnPixel %d (processed %d)"), pixelIndex, count);
 
-                    brightness = 255;
-                    // colour = RgbcctColor(255,255,255,255,255);
-                    // Set the pixel color with brightness
-                    SEGMENT.SetPixelColor(pixelIndex, colour.WithBrightness(brightness));
+  //                   // Get the color from the palette
+  //                   colour = SEGMENT.GetPaletteColour_Legacy(pixel++, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
 
-                    count++;
-                } else {
-                    ALOG_ERR(PSTR("Invalid token type inside array"));
-                }
+  //                   brightness = 255;
+  //                   // colour = RgbcctColor(255,255,255,255,255);
+  //                   // Set the pixel color with brightness
+  //                   SEGMENT.setPixelColor(pixelIndex, AdjustColourWithBrightness(colour,brightness));
 
-                // Move to the next token
-                token.nextOne();
-            }
 
-            ALOG_INF(PSTR("Processed %d pixels in total"), count);
 
-            SEGMENT.cycle_time__rate_ms = FRAMETIME_MS;
-            SET_DIRECT_MODE();
+  //                   count++;
+  //               } else {
+  //                   ALOG_ERR(PSTR("Invalid token type inside array"));
+  //               }
 
-            show();
-        }
+  //               // Move to the next token
+  //               token.nextOne();
+  //           }
+
+  //           ALOG_INF(PSTR("Processed %d pixels in total"), count);
+
+  //           SEGMENT.cycle_time__rate_ms = FRAMETIME;
+  //           SET_DIRECT_MODE();
+
+  //           show();
+  //       }
+  //   }
+
+    
+  // }
+ 
+  
+//   // #ifdef ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
+// /**
+//  * @brief Realtime pixel debug via MQTT.
+//  * When these are commanded, animation_mode is switched and pixels are written directly.
+//  * 
+//   "MQTTPixel": {
+//     "OnPixelsWithIndex": [
+//       [0, 0, 65],        // paletteIndex=0, range 0..65
+//       [1, 66, 131],      // paletteIndex=1, range 66..131
+//       [0, 132, 134],     // paletteIndex=0, range 132..134
+//       [2, 136]           // paletteIndex=2, single pixel 136
+//     ],
+//     "OnPixelsFill": true
+//   }
+
+
+//   "MQTTPixel": {
+//   "BrightnessRGB": 255,
+//   "ColourPalette":"Colour and White Stripe",
+//   "Effects":{"Grouping":1},
+//     "OnPixelsWithIndex": [
+//       [0, 0, 65],
+//       [1, 66, 131],
+//       [0, 132, 134],
+//       [2, 136]
+//     ],
+//     "OnPixelsFill": true
+//   }
+
+//  */
+if (jtok = obj["MQTTPixel"])
+{
+  JsonParserToken jtok_sub = 0;
+  JsonParserToken jtok_sub2 = 0;
+
+  realtimeMode = ANIMATION_MODE__REALTIME_MQTT_SETPIXEL;
+
+  // ============================================================
+  // Method 2: OnPixels (legacy)
+  // Format:
+  //   "MQTTPixel": { "OnPixels": [ 1, 5, 10, ... ] }
+  // Each pixel is set using the configured palette on repeat.
+  // ============================================================
+  uint8_t index = 0;
+  if ((jtok_sub = jtok.getObject()["OnPixels"]) && jtok_sub.isArray())
+  {
+    ALOG_COM(PSTR("OnPixels is ARRAY"));
+
+    SEGMENT.fill(0); // Clear all to off
+
+    uint8_t brightness = SEGMENT.getBrightnessRGB_WithGlobalApplied(); // Prefetch brightness
+    ALOG_INF(PSTR("brightness %d"), brightness);
+
+    uint32_t colour;
+    uint16_t pixel = 0;
+
+    JsonParserArray array = jtok_sub;
+    JsonParserToken token = array;
+    token.nextOne(); // move to first element
+
+    uint16_t count = 0;
+    while (token.isValid())
+    {
+      if (token.isNum())
+      {
+        int pixelIndex = token.getInt();
+        ALOG_INF(PSTR("OnPixel %d (processed %d)"), pixelIndex, count);
+
+        // Palette-driven colour, repeats across selected pixels
+        colour = SEGMENT.GetPaletteColour_Legacy(
+          pixel++,
+          PALETTE_INDEX__IS_SEGLEN_RANGE,
+          PALETTE_WRAP_HARDEDGE,
+          PALETTE_MODE__FORCE_DISCRETE,
+          NO_ENCODED_VALUE
+        );
+
+        // If you want global brightness applied here, keep AdjustColourWithBrightness()
+        // If you want raw palette values, remove the adjust call.
+        SEGMENT.setPixelColor(pixelIndex, AdjustColourWithBrightness(colour, brightness));
+
+        count++;
+      }
+      else
+      {
+        ALOG_ERR(PSTR("Invalid token type inside OnPixels array"));
+      }
+
+      token.nextOne();
     }
+
+    ALOG_INF(PSTR("Processed %d pixels in total"), count);
+
+    SEGMENT.cycle_time__rate_ms = FRAMETIME;
+    SET_DIRECT_MODE();
+    show();
   }
-  #endif // ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
+
+//   // ============================================================
+//   // Method 3: OnPixelsWithIndex (new)
+//   //
+//   // New payload format
+//   //
+//   // OnPixelsWithIndex: array of groups
+//   // each group: [paletteIndex, ...pixelsOrRange...]
+//   //
+//   // OnPixelsFill: true (optional): treat each group’s pixels as min..max fill,
+//   // so you don’t have to list everything
+//   //
+//   // Examples:
+//   //
+//   // "MQTTPixel": {
+//   //   "OnPixelsWithIndex": [
+//   //     [0, 0, 65],        // paletteIndex=0, range 0..65
+//   //     [1, 66, 131],      // paletteIndex=1, range 66..131
+//   //     [0, 132, 134],     // paletteIndex=0, range 132..134
+//   //     [2, 136]           // paletteIndex=2, single pixel 136
+//   //   ],
+//   //   "OnPixelsFill": true
+//   // }
+//   //
+//   // If OnPixelsFill is false / missing, you can still do:
+//   //   [idx, p]                 single pixel
+//   //   [idx, a, b]              range (min..max)
+//   //   [idx, p1, p2, p3, ...]   explicit list (each is a pixel index)
+//   // ============================================================
+
+//   // Allows grouped pixel selection with an explicit palette index per group.
+//   // Optional fill mode enables fast section colouring / wiring debug tags.
+//   JsonParserToken jtok_pwi = jtok.getObject()["OnPixelsWithIndex"];
+
+//   if (jtok_pwi && jtok_pwi.isArray())
+//   {
+//     // Optional fill flag
+//     bool flag_fill = false;
+//     if ((jtok_sub2 = jtok.getObject()["OnPixelsFill"]))
+//     {
+//       if (jtok_sub2.isBool()) flag_fill = jtok_sub2.getBool();
+//       else if (jtok_sub2.isNum()) flag_fill = (jtok_sub2.getInt() != 0);
+//     }
+
+//     ALOG_COM(PSTR("OnPixelsWithIndex is ARRAY, fill=%d"), flag_fill);
+
+//     SEGMENT.fill(0); // Clear all to off
+
+//     uint8_t brightness = SEGMENT.getBrightnessRGB_WithGlobalApplied(); // Prefetch brightness
+//     ALOG_INF(PSTR("brightness %d"), brightness);
+
+//     JsonParserArray outer = jtok_pwi;
+//     JsonParserToken outerTok = outer;
+//     outerTok.nextOne(); // first group
+
+//     uint16_t groups = 0;
+//     uint32_t pixels_set = 0;
+
+//     while (outerTok.isValid())
+//     {
+//       if (!outerTok.isArray())
+//       {
+//         ALOG_ERR(PSTR("OnPixelsWithIndex entry not an array"));
+//         outerTok.nextOne();
+//         continue;
+//       }
+
+//       JsonParserArray groupArr = outerTok;
+
+//       // First element in group: paletteIndex
+//       JsonParserToken groupTok = groupArr;
+//       groupTok.nextOne();
+
+//       if (!groupTok.isValid() || !groupTok.isNum())
+//       {
+//         ALOG_ERR(PSTR("Group missing paletteIndex"));
+//         outerTok.nextOne();
+//         continue;
+//       }
+
+//       const uint8_t palIdx = (uint8_t)groupTok.getInt();
+
+//       // Fetch the colour ONCE per group (exact palette entry)
+//       uint32_t colour = SEGMENT.GetPaletteColour_Legacy(
+//         palIdx,
+//         PALETTE_INDEX__IS_EXACT_COLOUR,
+//         PALETTE_WRAP_HARDEDGE,
+//         PALETTE_MODE__FORCE_DISCRETE,
+//         NO_ENCODED_VALUE
+//       );
+
+//       colour = AdjustColourWithBrightness(colour, brightness);
+
+//       // Scan remaining numeric tokens to determine min/max and count
+//       int32_t v_min =  2147483647;
+//       int32_t v_max = -2147483647;
+//       uint16_t v_count = 0;
+
+//       groupTok.nextOne(); // move to first pixel/range value
+
+//       while (groupTok.isValid())
+//       {
+//         if (groupTok.isNum())
+//         {
+//           int32_t v = groupTok.getInt();
+//           if (v < v_min) v_min = v;
+//           if (v > v_max) v_max = v;
+//           v_count++;
+//         }
+//         else
+//         {
+//           ALOG_ERR(PSTR("Invalid token type in group (expected number)"));
+//         }
+//         groupTok.nextOne();
+//       }
+
+//       if (v_count == 0)
+//       {
+//         ALOG_ERR(PSTR("Group has no pixel/range values"));
+//         outerTok.nextOne();
+//         continue;
+//       }
+
+//       if (flag_fill)
+//       {
+//         // Fill min..max
+//         for (int32_t p = v_min; p <= v_max; p++)
+//         {
+//           SEGMENT.setPixelColor((uint16_t)p, colour);
+//           pixels_set++;
+//         }
+//         ALOG_INF(PSTR("Group %d palIdx=%d fill %d..%d"), groups, palIdx, (int)v_min, (int)v_max);
+//       }
+//       else
+//       {
+//         if (v_count == 1)
+//         {
+//           // Single pixel (v_min==v_max)
+//           SEGMENT.setPixelColor((uint16_t)v_min, colour);
+//           pixels_set++;
+//           ALOG_INF(PSTR("Group %d palIdx=%d pix %d"), groups, palIdx, (int)v_min);
+//         }
+//         else if (v_count == 2)
+//         {
+//           // Range min..max
+//           for (int32_t p = v_min; p <= v_max; p++)
+//           {
+//             SEGMENT.setPixelColor((uint16_t)p, colour);
+//             pixels_set++;
+//           }
+//           ALOG_INF(PSTR("Group %d palIdx=%d range %d..%d"), groups, palIdx, (int)v_min, (int)v_max);
+//         }
+//         else
+//         {
+//           // Explicit list: re-iterate group tokens and set each pixel index
+//           JsonParserToken groupTok2 = groupArr;
+//           groupTok2.nextOne(); // paletteIndex
+//           groupTok2.nextOne(); // first value after paletteIndex
+
+//           while (groupTok2.isValid())
+//           {
+//             if (groupTok2.isNum())
+//             {
+//               int32_t p = groupTok2.getInt();
+//               SEGMENT.setPixelColor((uint16_t)p, colour);
+//               pixels_set++;
+//             }
+//             groupTok2.nextOne();
+//           }
+
+//           ALOG_INF(PSTR("Group %d palIdx=%d explicit count=%d"), groups, palIdx, v_count);
+//         }
+//       }
+
+//       groups++;
+//       outerTok.nextOne();
+//     }
+
+//     ALOG_INF(PSTR("OnPixelsWithIndex groups=%d pixels_set=%d"), groups, (int)pixels_set);
+
+//     SEGMENT.cycle_time__rate_ms = FRAMETIME;
+//     SET_DIRECT_MODE();
+//     show();
+//   }
+// }
+
+
+
+/**
+New payload format
+
+OnPixelsWithIndex: array of groups
+Each group: [paletteIndex, ...pixelsOrRange...]
+
+OnPixelsFill: true (optional)
+- When true, each group is treated as min..max fill
+- Avoids listing every pixel manually
+
+Example (copy/paste directly into MQTT explorer):
+
+{
+  "MQTTPixel": {
+    "OnPixelsWithIndex": [
+      [0, 0, 10],
+      [1, 10, 20],
+      [2, 30, 40],
+      [3, 50, 60]
+    ],
+    "OnPixelsFill": true
+  }
+}
+
+ {
+  "BrightnessRGB": 100,
+  "ColourPalette":"Colour and White Stripe",
+  "Effects":{"Grouping":1},
+   "MQTTPixel": {
+    "OnPixelsWithIndex": [
+      [0, 0, 65],
+      [2, 66, 131],
+      [1, 132, 134],
+      [4, 135, 199],
+      [6, 200, 264],
+      [1, 265, 269],
+      [8, 270, 335],
+      [10, 336, 401],
+      [1, 402, 406],
+      [12, 407, 450]
+    ],
+    "OnPixelsFill": false
+  }
+ }
+
+
+  {
+  "BrightnessRGB": 100,
+  "ColourPalette":"RGPBY",
+  "Effects":{"Grouping":1},
+   "MQTTPixel": {
+    "OnPixelsWithIndex": [
+      [0, 0, 65],
+      [4, 66, 131],
+      [1, 132, 134],
+      [4, 135, 199],
+      [6, 200, 264],
+      [4, 265, 269],
+      [8, 270, 335],
+      [10, 336, 401],
+      [4, 402, 406],
+      [12, 407, 450]
+    ],
+    "OnPixelsFill": false
+  }
+ }
+
+{
+  "BrightnessRGB": 100,
+  "ColourPalette":"RGPBY",
+  "Effects":{"Grouping":1},
+   "MQTTPixel": {
+    "OnPixelsWithIndex": [
+      [0, 0, 65],
+      [1, 66, 131],
+      [4, 132, 134],
+      [0, 135, 199],
+      [1, 200, 264],
+      [4, 265, 269],
+      [0, 270, 335],
+      [1, 336, 401],
+      [4, 402, 406],
+      [0, 407, 471],
+      [1, 472, 537],
+      [4, 538, 541],
+      [0, 542, 607],
+      [1, 608, 673],
+      [4, 674, 677],
+      [0, 678, 743],
+      [1, 744, 809],
+      [4, 810, 814],
+      [0, 815, 880],
+      [1, 881, 946],
+      [4, 947, 949],
+      [0, 950, 1000]
+    ],
+    "OnPixelsFill": false
+  }
+ }
+
+If OnPixelsFill is false or missing:
+[idx, p]               -> single pixel
+[idx, a, b]            -> range (min..max)
+[idx, p1, p2, p3...]   -> explicit pixel list
+*/
+
+JsonParserToken jtok_pwi = jtok.getObject()["OnPixelsWithIndex"];
+if (jtok_pwi && jtok_pwi.isArray())
+{
+  // Optional fill flag
+  bool flag_fill = false;
+  JsonParserToken jtok_fill = jtok.getObject()["OnPixelsFill"];
+  if (jtok_fill)
+  {
+    if (jtok_fill.isBool()) flag_fill = jtok_fill.getBool();
+    else if (jtok_fill.isNum()) flag_fill = (jtok_fill.getInt() != 0);
+  }
+
+  ALOG_COM(PSTR("OnPixelsWithIndex is ARRAY, fill=%d"), flag_fill);
+
+  SEGMENT.fill(0); // clear all pixels
+
+  uint8_t brightness = 10;//SEGMENT.getBrightnessRGB_WithGlobalApplied();
+  ALOG_INF(PSTR("brightness %d"), brightness);
+
+  JsonParserArray outer = jtok_pwi;
+
+  uint16_t groups = 0;
+  uint32_t pixels_set = 0;
+
+  const uint16_t outer_len = outer.size();
+  for (uint16_t gi = 0; gi < outer_len; gi++)
+  {
+    JsonParserToken groupTok = outer[gi];
+    if (!groupTok || !groupTok.isArray())
+    {
+      ALOG_ERR(PSTR("OnPixelsWithIndex[%d] not an array"), gi);
+      continue;
+    }
+
+    JsonParserArray group = groupTok;
+    const uint16_t glen = group.size();
+    if (glen < 2)
+    {
+      ALOG_ERR(PSTR("Group[%d] too short (need >=2), len=%d"), gi, glen);
+      continue;
+    }
+
+    JsonParserToken tokPal = group[0];
+    if (!tokPal || !tokPal.isNum())
+    {
+      ALOG_ERR(PSTR("Group[%d] missing paletteIndex"), gi);
+      continue;
+    }
+
+    const uint8_t palIdx = (uint8_t)tokPal.getInt();
+
+    uint32_t colour = SEGMENT.GetPaletteColour_Legacy(
+      palIdx,
+      PALETTE_INDEX__IS_EXACT_COLOUR,
+      PALETTE_WRAP_HARDEDGE,
+      PALETTE_MODE__FORCE_DISCRETE,
+      NO_ENCODED_VALUE
+    );
+    colour = AdjustColourWithBrightness(colour, brightness);
+
+    int32_t v_min =  2147483647;
+    int32_t v_max = -2147483647;
+    uint16_t v_count = 0;
+
+    for (uint16_t k = 1; k < glen; k++)
+    {
+      JsonParserToken tv = group[k];
+      if (tv && tv.isNum())
+      {
+        int32_t v = tv.getInt();
+        if (v < v_min) v_min = v;
+        if (v > v_max) v_max = v;
+        v_count++;
+      }
+      else
+      {
+        ALOG_ERR(PSTR("Group[%d] invalid value at k=%d (expected number)"), gi, k);
+      }
+    }
+
+    if (v_count == 0)
+    {
+      ALOG_ERR(PSTR("Group[%d] has no numeric pixel values"), gi);
+      continue;
+    }
+
+    if (flag_fill)
+    {
+      for (int32_t p = v_min; p <= v_max; p++)
+      {
+        SEGMENT.setPixelColor((uint16_t)p, colour);
+        pixels_set++;
+      }
+      ALOG_INF(PSTR("Group %d palIdx=%d fill %d..%d"), groups, palIdx, (int)v_min, (int)v_max);
+    }
+    else
+    {
+      if (v_count == 1)
+      {
+        SEGMENT.setPixelColor((uint16_t)v_min, colour);
+        pixels_set++;
+        ALOG_INF(PSTR("Group %d palIdx=%d pix %d"), groups, palIdx, (int)v_min);
+      }
+      else if (v_count == 2)
+      {
+        for (int32_t p = v_min; p <= v_max; p++)
+        {
+          SEGMENT.setPixelColor((uint16_t)p, colour);
+          pixels_set++;
+        }
+        ALOG_INF(PSTR("Group %d palIdx=%d range %d..%d"), groups, palIdx, (int)v_min, (int)v_max);
+      }
+      else
+      {
+        uint16_t set_count = 0;
+        for (uint16_t k = 1; k < glen; k++)
+        {
+          JsonParserToken tv = group[k];
+          if (tv && tv.isNum())
+          {
+            int32_t p = tv.getInt();
+            SEGMENT.setPixelColor((uint16_t)p, colour);
+            pixels_set++;
+            set_count++;
+          }
+        }
+        ALOG_INF(PSTR("Group %d palIdx=%d explicit count=%d"), groups, palIdx, set_count);
+      }
+    }
+
+    groups++;
+  }
+
+  ALOG_INF(PSTR("OnPixelsWithIndex groups=%d pixels_set=%d"), groups, (int)pixels_set);
+
+  SEGMENT.cycle_time__rate_ms = FRAMETIME;
+  SET_DIRECT_MODE();
+  show();
+}
+
+}
+
+#endif // ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
+
+  // #endif // ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
 
 
   #ifdef ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
@@ -1328,23 +1877,25 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
             ALOG_INF(PSTR("Setting row: Start %d, Mid %d, End %d using palette index %d"), startPixel, midPixel, endPixel, paletteIndex);
 
             // Set pixels for the row
-            for (int i = startPixel; i <= endPixel; i++) {
-              RgbcctColor colour;
+            for (int i = startPixel; i <= endPixel; i++) 
+            {
+              
+              uint32_t colour = 0;
 
               if (i == midPixel) {
                 // Center pixel is white
-                colour = RgbcctColor(255, 255, 255, 255, 255);
+                colour = RGBW32(255, 255, 255, 255);
               }else
               if (i == endPixel) {
                 // Right pixel is white, is easier contrast between start of row and end of row
-                colour = RgbcctColor(255, 255, 255, 255, 255);
+                colour = RGBW32(255, 255, 255, 255);
               } else {
                 // Get color from the palette using the current palette index
                 colour = SEGMENT.GetPaletteColour_Legacy(paletteIndex, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
               }
 
               // Apply brightness and set the pixel
-              SEGMENT.SetPixelColor(i, colour.WithBrightness(brightness));
+              SEGMENT.setPixelColor(i, AdjustColourWithBrightness(colour,brightness));
             }
 
             paletteIndex++; // Increment palette index for the next row
@@ -1364,7 +1915,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
 
       ALOG_INF(PSTR("Processed %d rows in total"), outerCount);
 
-      SEGMENT.cycle_time__rate_ms = FRAMETIME_MS;
+      SEGMENT.cycle_time__rate_ms = FRAMETIME;
       SET_DIRECT_MODE();
 
       show();
@@ -2003,11 +2554,13 @@ void mAnimatorLight::CommandSet_PaletteID(uint16_t value, uint8_t segment_index)
   char buffer[50];
   SEGMENT_I(segment_index).palette_id = value < mPaletteI->GetPaletteListLength() ? value : 0;  
   segment_current_index = segment_index;
+  SEGMENT_I(segment_index).live_palette.timing1 = 0; // reset timing to force immediate load
   SEGMENT.LoadPalette(segments[segment_index].palette_id);
 }
 
 void mAnimatorLight::CommandSet_Palette2ID(uint16_t value, uint8_t segment_index)
 {
+  SEGMENT_I(segment_index).live_palette.timing1 = 0; // reset timing to force immediate load
   char buffer[50];
   SEGMENT_I(segment_index).palette2_id = value < mPaletteI->GetPaletteListLength() ? value : 0;  
   // No Load

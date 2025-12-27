@@ -1673,22 +1673,56 @@ function updatePA()
  *
  * Live palette IDs = 155..166 inclusive.
  */
-function updatePalLiveIXView() {
+// function updatePalLiveIXView() {
+//   const wrap   = gId('palixwrap');
+//   const slider = gId('sliderpalix');
+//   if (!wrap || !slider) return;
+
+//   // live palette ids: 155..166
+//   const inRange = v => Number.isFinite(v) && v >= 155 && v <= 170;
+
+//   const pid1 = Number(selectedPal);
+//   const pid2 = Number(typeof selectedPal2 === 'number' ? selectedPal2 : NaN);
+
+//   const show = inRange(pid1) || inRange(pid2);
+//   wrap.style.display = show ? '' : 'none';
+
+//   if (show && typeof updateTrail === 'function') updateTrail(slider);
+// }
+// function updatePalLiveIXView() { // If "Live" is active palette, then show palette IX slider
+//   const wrap   = gId('palixwrap');
+//   const slider = gId('sliderpalix');
+//   if (!wrap || !slider || !palettesData || !palettesData.p) return;
+
+//   const isLive = pid =>
+//     Number.isFinite(pid) &&
+//     palettesData.p[pid] &&
+//     palettesData.p[pid].includes("Live");
+
+//   const show = isLive(selectedPal) || isLive(selectedPal2);
+
+//   wrap.style.display = show ? '' : 'none';
+//   if (show) updateTrail(slider);
+// }
+function updatePalLiveIXView() { // If "Live" is active palette, then show palette IX slider
   const wrap   = gId('palixwrap');
   const slider = gId('sliderpalix');
-  if (!wrap || !slider) return;
-
-  // live palette ids: 155..166
-  const inRange = v => Number.isFinite(v) && v >= 155 && v <= 166;
+  if (!wrap || !slider || !palettesData || !palettesData.p) return;
 
   const pid1 = Number(selectedPal);
-  const pid2 = Number(typeof selectedPal2 === 'number' ? selectedPal2 : NaN);
+  const pid2 = Number((typeof selectedPal2 === 'number') ? selectedPal2 : NaN);
 
-  const show = inRange(pid1) || inRange(pid2);
+  const isLive = pid =>
+    Number.isFinite(pid) &&
+    palettesData.p[pid] &&
+    palettesData.p[pid].includes("Live");
+
+  const show = isLive(pid1) || isLive(pid2);
+
   wrap.style.display = show ? '' : 'none';
-
   if (show && typeof updateTrail === 'function') updateTrail(slider);
 }
+
 
 
 

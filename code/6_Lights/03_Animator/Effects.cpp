@@ -1756,7 +1756,7 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette()
   const uint8_t n = SEGMENT.palette->colours_in_palette;
   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
-  if (n == 0) {
+  if (n == 0) { //ERROR STATE, REMOVE!
     for (uint16_t i = 0; i < len; ++i) SEGMENT.Set_DynamicBuffer_DesiredColour(i, 0);
     SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& p){
       SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_ifdef(p);
@@ -2305,8 +2305,185 @@ static const char PM_EFFECT_DESCRI__BLEND_TWO_PALETTES[] PROGMEM =
 "IX: pulse shape (linear→back-loaded)";
 
 
+// /**********************************************************************************************************************************************************************************
+//  * EFFECT: Twinkle – Secondary Palette Over Primary Palette
+//  *
+//  * SUMMARY
+//  * - Draw the PRIMARY palette (SEGMENT.palette_id) as the base/background across the strip.
+//  * - Each frame, randomly overdraw a subset of pixels with colours from the SECONDARY palette (SEGMENT.palette2_id).
+//  * - Result: persistent base + constantly changing “sparkle/twinkle” flecks.
+//  *
+//  * CONTROLS (UI order; 1..10)
+//  * 1) SX (Speed)      : Frame cadence (non-animator path; effect returns FRAMETIME).
+//  * 2) IX (Intensity)  : Twinkle density (0..255 → 0..100% per-pixel chance each frame).
+//  * 3) C1 (Custom1)    : Twinkle brightness scale (0..255; default 255).
+//  * 4) C2 (Custom2)    : Base brightness scale    (0..255; default 200).
+//  * 5) C3 (Custom3)    : Unused.
+//  * 6) cbPal           : Primary palette picker (base layer).
+//  * 7) cbLay / 8) cbFav: Standard UI toggles (not used by logic).
+//  * 9) EP (EffectPeriod): ! (default handling; not used here).
+//  * 10) GRP (Group)     : ! (renderer handles grouping).
+//  *
+//  * DETAILS
+//  * - Base layer:
+//  *   • Sample primary palette with PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE.
+//  *   • Scale by base brightness (C2), write directly (no animator).
+//  * - Twinkle layer:
+//  *   • A 16-bit per-frame seed (aux1) evolves for spatial variety.
+//  *   • For each pixel i, hash(i, seed) ≤ threshold(IX) → draw twinkle colour.
+//  *   • Twinkle colour = secondary palette at i (spanned), scaled by C1, overwrites base pixel.
+//  *
+//  * PERFORMANCE / NOTES
+//  * - Non-animator effect: direct writes; returns FRAMETIME.
+//  * - Optionally prefetch secondary colours into a temp buffer per frame (freed before return).
+//  * - Brightness scaling is applied inside the effect per pixel.
+//  *
+//  * previously? Twinkle Palette Two on One??
+//  * STATE
+//  * - aux1: evolving 16-bit seed for the spatial hash.
+//  **********************************************************************************************************************************************************************************/
+// uint16_t mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
+// {
+//   // Date Modified: 17Aug2025
+//   // Non-animator twinkle: draw primary (preloaded) palette as background, then randomly overdraw pixels from a secondary (unloaded) palette.
+//   // Controls:
+//   //   - SEGMENT.palette_id     : base palette
+//   //   - SEGMENT.palette2_id (uint8): twinkle palette ID (secondary)
+//   //   - SEGMENT.custom1 (uint8): twinkle brightness (0..255, default 255)
+//   //   - SEGMENT.custom2 (uint8): base brightness    (0..255, default 100)
+//   //   - SEGMENT.intensity      : twinkle density per frame (0..255)
+
+//   const uint16_t len = SEGMENT.length();
+//   if (len == 0) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
+
+//   // --- Controls ---
+//   const uint8_t pid_primary   = SEGMENT.palette_id;         // background
+//   const uint8_t pid_secondary = (uint8_t)SEGMENT.palette2_id;   // twinkle
+//   const uint8_t bri_twinkle   = SEGMENT.custom1 ? (uint8_t)SEGMENT.custom1 : 255;
+//   const uint8_t bri_base      = SEGMENT.custom2 ? (uint8_t)SEGMENT.custom2 : 255;
+
+//   // Intensity → probability threshold (16-bit) per pixel this frame
+//   const uint16_t twinkle_thresh = (uint16_t)((uint32_t)SEGMENT.intensity * 257u); // 0..65535
+
+//   // --- Evolving per-frame seed for variety (stored in aux1) ---
+//   uint16_t &seed = SEGMENT.aux1;
+//   if (SEGMENT.flags.animator_first_run) {
+//     seed = (uint16_t)random16();
+//   } else {
+//     seed ^= (uint16_t)((seed << 7) | (seed >> 9));
+//     seed = (uint16_t)(seed * 0x9E37u);
+//   }
+
+//   auto hash16 = [](uint16_t i, uint16_t s)->uint16_t {
+//     uint16_t x = (uint16_t)(i ^ s);
+//     x ^= (uint16_t)((x << 7) | (x >> 9));
+//     x = (uint16_t)(x * 0x9E37u);
+//     x ^= (uint16_t)((x << 5) | (x >> 11));
+//     return x;
+//   };
+
+//   auto scale_rgb_u32 = [](uint32_t c, uint8_t b)->uint32_t {
+//     uint8_t r = (c >> 16) & 0xFF, g = (c >> 8) & 0xFF, bl = c & 0xFF;
+//     r  = (uint8_t)((uint16_t)r  * b / 255u);
+//     g  = (uint8_t)((uint16_t)g  * b / 255u);
+//     bl = (uint8_t)((uint16_t)bl * b / 255u);
+//     return (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(bl);
+//   };
+
+//   // --- 1) Draw BACKGROUND (primary, PRELOADED palette) ---
+//   for (uint16_t i = 0; i < len; ++i) {
+//     uint8_t dummy_enc = 0;
+//     uint32_t colour = SEGMENT.GetPaletteColour(
+//         i,
+//         PALETTE_INDEX__IS_SEGLEN_RANGE,
+//         PALETTE_MODE__DEFAULT,
+//         PALETTE_WRAP_HARDEDGE,
+//         NO_ENCODED_VALUE);
+//     // Apply base brightness inside the effect (per NPBLg constraint)
+//     colour = scale_rgb_u32(colour, bri_base);
+//     SEGMENT.setPixelColor(i, colour);  // direct write (no animator)
+//   }
+
+//   // --- 2) Preload SECONDARY palette colours (optional; falls back to on-demand if allocation fails) ---
+//   uint32_t *tw_buf = nullptr;
+// #if defined(ARDUINO) || defined(ESP8266) || defined(ESP32)
+//   tw_buf = (uint32_t*)malloc((size_t)len * sizeof(uint32_t));
+// #else
+//   try { tw_buf = new (std::nothrow) uint32_t[len]; } catch (...) { tw_buf = nullptr; }
+// #endif
+
+//   if (tw_buf) {
+//     for (uint16_t i = 0; i < len; ++i) {
+//       uint8_t enc2 = 0;
+//       RgbwwColor tw = GetUnloadedPaletteColour(
+//           pid_secondary,
+//           /*_pixel_position*/ i,
+//           /*flag_spanned_segment*/ true,   // span across segment for gradients
+//           /*flag_wrap_hard_edge*/ false,
+//           /*flag_crgb_exact_colour*/ false,
+//           &enc2,
+//           /*flag_request_is_for_full_visual_output*/ true);
+//       uint32_t tw_u32 = (uint32_t(tw.R) << 16) | (uint32_t(tw.G) << 8) | uint32_t(tw.B);
+//       tw_buf[i] = scale_rgb_u32(tw_u32, bri_twinkle);
+//     }
+//   }
+
+//   // --- 3) Randomly overdraw TWINKLE pixels (direct writes) ---
+//   for (uint16_t i = 0; i < len; ++i) {
+//     if (hash16(i, seed) <= twinkle_thresh) {
+//       uint32_t tw_u32;
+//       if (tw_buf) {
+//         tw_u32 = tw_buf[i];
+//       } else {
+//         uint8_t enc2 = 0;
+//         RgbwwColor tw = GetUnloadedPaletteColour(
+//             pid_secondary,
+//             i,
+//             /*flag_spanned_segment*/ true,
+//             /*flag_wrap_hard_edge*/ false,
+//             /*flag_crgb_exact_colour*/ false,
+//             &enc2,
+//             /*flag_request_is_for_full_visual_output*/ true);
+//         tw_u32 = (uint32_t(tw.R) << 16) | (uint32_t(tw.G) << 8) | uint32_t(tw.B);
+//         tw_u32 = scale_rgb_u32(tw_u32, bri_twinkle);
+//       }
+//       SEGMENT.setPixelColor(i, tw_u32);
+//     }
+//   }
+
+//   // Free temporary buffer if it was allocated
+//   if (tw_buf) {
+// #if defined(ARDUINO) || defined(ESP8266) || defined(ESP32)
+//     free(tw_buf);
+// #else
+//     delete[] tw_buf;
+// #endif
+//   }
+
+//   // Fixed frame time (non-animator path)
+//   SEGMENT.cycle_time__rate_ms = FRAMETIME;  // run at FPS speed
+//   return FRAMETIME;
+// }
+
+// /**********************************************************************************************************************************************************************************
+//  * EFFECT: Twinkle – Secondary Palette Over Primary Palette (persistent buffer via allocateData)
+//  *
+//  * SUMMARY
+//  * - Draw PRIMARY palette (SEGMENT.palette_id) as base across strip (spanned).
+//  * - Randomly overdraw pixels with SECONDARY palette (SEGMENT.palette2_id) each frame.
+//  * - Uses SEGMENT.allocateData() for a persistent per-segment cache of the secondary palette row (no per-frame malloc/free).
+//  *
+//  * CONTROLS (UI order; 1..10)
+//  * 1) SX (Speed)       : ! (not used; effect runs at FRAMETIME)
+//  * 2) IX (Intensity)   : Twinkle density (0..255)
+//  * 3) C1 (Custom1)     : Twinkle brightness scale (0..255; default 255)
+//  * 4) C2 (Custom2)     : Base brightness scale    (0..255; default 255)
+//  *
+//  * CHANGED
+//  * 27Dec25 - Replaced malloc/free with SEGMENT.allocateData() persistent cache for secondary row.
+//  **********************************************************************************************************************************************************************************/
 /**********************************************************************************************************************************************************************************
- * EFFECT: Twinkle – Secondary Palette Over Primary Palette
+ * EFFECT: Twinkle – Secondary Palette Over Primary Palette (persistent cache)
  *
  * SUMMARY
  * - Draw the PRIMARY palette (SEGMENT.palette_id) as the base/background across the strip.
@@ -2314,53 +2491,57 @@ static const char PM_EFFECT_DESCRI__BLEND_TWO_PALETTES[] PROGMEM =
  * - Result: persistent base + constantly changing “sparkle/twinkle” flecks.
  *
  * CONTROLS (UI order; 1..10)
- * 1) SX (Speed)      : Frame cadence (non-animator path; effect returns FRAMETIME).
- * 2) IX (Intensity)  : Twinkle density (0..255 → 0..100% per-pixel chance each frame).
- * 3) C1 (Custom1)    : Twinkle brightness scale (0..255; default 255).
- * 4) C2 (Custom2)    : Base brightness scale    (0..255; default 200).
- * 5) C3 (Custom3)    : Unused.
- * 6) cbPal           : Primary palette picker (base layer).
- * 7) cbLay / 8) cbFav: Standard UI toggles (not used by logic).
- * 9) EP (EffectPeriod): ! (default handling; not used here).
- * 10) GRP (Group)     : ! (renderer handles grouping).
+ * 1) SX (Speed)        : — (unused; this effect runs at fixed FRAMETIME cadence).
+ * 2) IX (Intensity)    : Twinkle density per frame (0..255 → 0..100% chance per pixel per frame).
+ * 3) C1 (Custom1)      : Twinkle brightness scale (0..255; 0 treated as 255).
+ * 4) C2 (Custom2)      : Base brightness scale    (0..255; 0 treated as 255).
+ * 5) C3 (Custom3)      : — (unused).
+ * 6) cbPal             : Primary palette picker (base layer; SEGMENT.palette_id).
+ * 7) cbLay             : — (unused).
+ * 8) cbFav             : — (unused).
+ * 9) EP (EffectPeriod) : — (unused; timing is fixed FRAMETIME here).
+ * 10) GRP (Group)      : — (unused in logic; grouping handled by renderer).
  *
  * DETAILS
- * - Base layer:
- *   • Sample primary palette with PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE.
- *   • Scale by base brightness (C2), write directly (no animator).
- * - Twinkle layer:
- *   • A 16-bit per-frame seed (aux1) evolves for spatial variety.
- *   • For each pixel i, hash(i, seed) ≤ threshold(IX) → draw twinkle colour.
- *   • Twinkle colour = secondary palette at i (spanned), scaled by C1, overwrites base pixel.
+ * - Base layer (PRIMARY / preloaded palette):
+ *   • For each pixel i, sample SEGMENT.GetPaletteColour(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE).
+ *   • Apply base brightness scaling (C2) inside the effect (per-pixel scale of RGB channels).
+ *   • Write directly via SEGMENT.setPixelColor(i, colour). No animator blending.
+ *
+ * - Twinkle layer (SECONDARY / unloaded palette):
+ *   • A 16-bit per-frame seed is kept in SEGMENT.aux1 and evolves each frame to vary the spatial pattern.
+ *   • For each pixel i, compute hash16(i, seed). If hash ≤ threshold(IX), that pixel “twinkles” this frame.
+ *   • Twinkle colour is sampled from the secondary palette using GetUnloadedPaletteColour(..., flag_spanned_segment=true, ...),
+ *     then brightness-scaled by C1 and overwrites the base pixel at i.
  *
  * PERFORMANCE / NOTES
- * - Non-animator effect: direct writes; returns FRAMETIME.
- * - Optionally prefetch secondary colours into a temp buffer per frame (freed before return).
- * - Brightness scaling is applied inside the effect per pixel.
+ * - Persistent cache (key change vs malloc/free versions):
+ *   • A per-segment buffer is allocated using SEGMENT.allocateData() and retained while the effect runs.
+ *   • The buffer stores a cached “secondary palette row”: len * uint32 RGB values already scaled by C1.
+ *   • Cache rebuild occurs only when required (first-run, length change, palette2 change, C1 change, or cache invalid).
+ *   • This removes per-frame heap churn, avoiding periodic allocator stalls and fragmentation.
  *
- * previously? Twinkle Palette Two on One??
+ * - Timing:
+ *   • Effect returns FRAMETIME and sets SEGMENT.cycle_time__rate_ms = FRAMETIME (fixed cadence).
+ *   • SX/EP are currently not used; if you later want cadence control, wire it at the scheduler level or add a skip-rate here.
+ *
  * STATE
- * - aux1: evolving 16-bit seed for the spatial hash.
+ * - SEGMENT.aux1 : evolving 16-bit seed for the spatial hash (pattern changes each frame).
+ * - SEGMENT.data : persistent cache blob (header + cached secondary RGB row).
+ *
+ * CHANGED
+ * - 27Dec25 : Replaced per-frame malloc/free of secondary palette buffer with SEGMENT.allocateData() persistent cache.
  **********************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
 {
-  // Date Modified: 17Aug2025
-  // Non-animator twinkle: draw primary (preloaded) palette as background, then randomly overdraw pixels from a secondary (unloaded) palette.
-  // Controls:
-  //   - SEGMENT.palette_id     : base palette
-  //   - SEGMENT.palette2_id (uint8): twinkle palette ID (secondary)
-  //   - SEGMENT.custom1 (uint8): twinkle brightness (0..255, default 255)
-  //   - SEGMENT.custom2 (uint8): base brightness    (0..255, default 100)
-  //   - SEGMENT.intensity      : twinkle density per frame (0..255)
+  // Date Modified: 27Dec2025
 
-  const uint16_t len = SEGMENT.length();
-  if (len == 0) { SEGMENT.cycle_time__rate_ms = FRAMETIME; return FRAMETIME; }
+  const uint16_t len = SEGLEN;
 
   // --- Controls ---
-  const uint8_t pid_primary   = SEGMENT.palette_id;         // background
-  const uint8_t pid_secondary = (uint8_t)SEGMENT.palette2_id;   // twinkle
-  const uint8_t bri_twinkle   = SEGMENT.custom1 ? (uint8_t)SEGMENT.custom1 : 255;
-  const uint8_t bri_base      = SEGMENT.custom2 ? (uint8_t)SEGMENT.custom2 : 255;
+  const uint8_t pid_secondary = (uint8_t)SEGMENT.palette2_id;           // twinkle palette ID (secondary)
+  const uint8_t bri_twinkle   = (SEGMENT.custom1 == 0) ? 255 : (uint8_t)SEGMENT.custom1;
+  const uint8_t bri_base      = (SEGMENT.custom2 == 0) ? 255 : (uint8_t)SEGMENT.custom2;
 
   // Intensity → probability threshold (16-bit) per pixel this frame
   const uint16_t twinkle_thresh = (uint16_t)((uint32_t)SEGMENT.intensity * 257u); // 0..65535
@@ -2382,91 +2563,101 @@ uint16_t mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
     return x;
   };
 
-  auto scale_rgb_u32 = [](uint32_t c, uint8_t b)->uint32_t {
-    uint8_t r = (c >> 16) & 0xFF, g = (c >> 8) & 0xFF, bl = c & 0xFF;
-    r  = (uint8_t)((uint16_t)r  * b / 255u);
-    g  = (uint8_t)((uint16_t)g  * b / 255u);
-    bl = (uint8_t)((uint16_t)bl * b / 255u);
+  auto scale8_u8 = [](uint8_t v, uint8_t s)->uint8_t {
+    return (uint8_t)(((uint16_t)v * (uint16_t)s) / 255u);
+  };
+
+  auto scale_rgb_u32 = [&](uint32_t c, uint8_t b)->uint32_t {
+    if (b == 255) return c;
+    uint8_t r  = (c >> 16) & 0xFF;
+    uint8_t g  = (c >> 8)  & 0xFF;
+    uint8_t bl = (c)       & 0xFF;
+    r  = scale8_u8(r,  b);
+    g  = scale8_u8(g,  b);
+    bl = scale8_u8(bl, b);
     return (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(bl);
   };
 
+  // ------------------------------------------------------------------------------------------------
+  // Persistent per-segment cache (secondary palette row)
+  // Layout:
+  //   TwCacheHeader + len * uint32_t RGB (twinkle colors already brightness-scaled)
+  // ------------------------------------------------------------------------------------------------
+  struct TwCacheHeader {
+    uint16_t len;
+    uint8_t  pal2;
+    uint8_t  flags;   // bit0 = valid
+    uint8_t  bri_tw;
+    uint8_t  _pad;
+  };
+
+  const size_t dataSize = sizeof(TwCacheHeader) + (size_t)len * sizeof(uint32_t);
+  if (!SEGMENT.allocateData(dataSize)) return EFFECT_DEFAULT();
+
+  auto *hdr      = reinterpret_cast<TwCacheHeader*>(SEGMENT.data);
+  uint32_t *tw_buf = reinterpret_cast<uint32_t*>(SEGMENT.data + sizeof(TwCacheHeader));
+
+  const bool first = SEGMENT.flags.animator_first_run;
+  const bool cache_mismatch =
+      (hdr->len    != len) ||
+      (hdr->pal2   != pid_secondary) ||
+      (hdr->bri_tw != bri_twinkle) ||
+      ((hdr->flags & 0x01u) == 0);
+
+  // Rebuild cached secondary row only when needed
+  if (first || cache_mismatch)
+  {
+    hdr->len    = len;
+    hdr->pal2   = pid_secondary;
+    hdr->bri_tw = bri_twinkle;
+    hdr->flags  = 0x01u;
+
+    for (uint16_t i = 0; i < len; ++i)
+    {
+      uint8_t enc2 = 0;
+      RgbwwColor tw = GetUnloadedPaletteColour(
+          pid_secondary,
+          /*_pixel_position*/ i,
+          /*flag_spanned_segment*/ true,
+          /*flag_wrap_hard_edge*/ false,
+          /*flag_crgb_exact_colour*/ false,
+          &enc2,
+          /*flag_request_is_for_full_visual_output*/ true);
+
+      uint32_t tw_u32 = (uint32_t(tw.R) << 16) | (uint32_t(tw.G) << 8) | uint32_t(tw.B);
+      tw_buf[i] = scale_rgb_u32(tw_u32, bri_twinkle);
+    }
+  }
+
   // --- 1) Draw BACKGROUND (primary, PRELOADED palette) ---
-  for (uint16_t i = 0; i < len; ++i) {
-    uint8_t dummy_enc = 0;
+  for (uint16_t i = 0; i < len; ++i)
+  {
     uint32_t colour = SEGMENT.GetPaletteColour(
         i,
         PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_MODE__DEFAULT,
         PALETTE_WRAP_HARDEDGE,
         NO_ENCODED_VALUE);
-    // Apply base brightness inside the effect (per NPBLg constraint)
+
     colour = scale_rgb_u32(colour, bri_base);
-    SEGMENT.setPixelColor(i, colour);  // direct write (no animator)
+    SEGMENT.setPixelColor(i, colour);
   }
 
-  // --- 2) Preload SECONDARY palette colours (optional; falls back to on-demand if allocation fails) ---
-  uint32_t *tw_buf = nullptr;
-#if defined(ARDUINO) || defined(ESP8266) || defined(ESP32)
-  tw_buf = (uint32_t*)malloc((size_t)len * sizeof(uint32_t));
-#else
-  try { tw_buf = new (std::nothrow) uint32_t[len]; } catch (...) { tw_buf = nullptr; }
-#endif
-
-  if (tw_buf) {
-    for (uint16_t i = 0; i < len; ++i) {
-      uint8_t enc2 = 0;
-      RgbwwColor tw = GetUnloadedPaletteColour(
-          pid_secondary,
-          /*_pixel_position*/ i,
-          /*flag_spanned_segment*/ true,   // span across segment for gradients
-          /*flag_wrap_hard_edge*/ false,
-          /*flag_crgb_exact_colour*/ false,
-          &enc2,
-          /*flag_request_is_for_full_visual_output*/ true);
-      uint32_t tw_u32 = (uint32_t(tw.R) << 16) | (uint32_t(tw.G) << 8) | uint32_t(tw.B);
-      tw_buf[i] = scale_rgb_u32(tw_u32, bri_twinkle);
-    }
-  }
-
-  // --- 3) Randomly overdraw TWINKLE pixels (direct writes) ---
-  for (uint16_t i = 0; i < len; ++i) {
+  // --- 2) Randomly overdraw TWINKLE pixels using cached secondary row ---
+  for (uint16_t i = 0; i < len; ++i)
+  {
     if (hash16(i, seed) <= twinkle_thresh) {
-      uint32_t tw_u32;
-      if (tw_buf) {
-        tw_u32 = tw_buf[i];
-      } else {
-        uint8_t enc2 = 0;
-        RgbwwColor tw = GetUnloadedPaletteColour(
-            pid_secondary,
-            i,
-            /*flag_spanned_segment*/ true,
-            /*flag_wrap_hard_edge*/ false,
-            /*flag_crgb_exact_colour*/ false,
-            &enc2,
-            /*flag_request_is_for_full_visual_output*/ true);
-        tw_u32 = (uint32_t(tw.R) << 16) | (uint32_t(tw.G) << 8) | uint32_t(tw.B);
-        tw_u32 = scale_rgb_u32(tw_u32, bri_twinkle);
-      }
-      SEGMENT.setPixelColor(i, tw_u32);
+      SEGMENT.setPixelColor(i, tw_buf[i]);
     }
   }
 
-  // Free temporary buffer if it was allocated
-  if (tw_buf) {
-#if defined(ARDUINO) || defined(ESP8266) || defined(ESP32)
-    free(tw_buf);
-#else
-    delete[] tw_buf;
-#endif
-  }
-
-  // Fixed frame time (non-animator path)
-  SEGMENT.cycle_time__rate_ms = FRAMETIME;  // run at FPS speed
+  SEGMENT.cycle_time__rate_ms = FRAMETIME;
   return FRAMETIME;
 }
+// after christmas, grouping AND decimating need to form new sliders, persistent ones, maybe hide/shown by clicking something.
 static const char PM_EFFECT_CONFIG__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI[] PROGMEM =
 "Flicker Palettes@"
-"Speed,Intensity,Twinkle Brightness,Base Brightness,,,,,!"  // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
+"Speed,Intensity,Twinkle Brightness,Base Brightness,,,,,,"  // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
 ";"
 ""                                                          // segment colour names (none)
 ";"
@@ -2475,7 +2666,7 @@ static const char PM_EFFECT_CONFIG__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI[]
 "1p"                                                        // 1D strip icon
 ";"
 "sx=127,"
-"ix=96,"
+"ix=5,"
 "c1=255,"
 "c2=200,"
 "paln=Snowy 02"
@@ -5714,24 +5905,23 @@ static const char PM_EFFECT_DESCRI__STARBURST[] PROGMEM =
  ************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Exploding_Fireworks()
 {
-
   if (SEGLEN == 1) return EFFECT_DEFAULT();
   const int cols = SEGMENT.is2D() ? SEG_W : 1;
   const int rows = SEGMENT.is2D() ? SEG_H : SEGLEN;
 
-  //allocate segment data
-  unsigned maxData = FAIR_DATA_PER_SEG; //ESP8266: 256 ESP32: 640
+  // allocate segment data
+  unsigned maxData = FAIR_DATA_PER_SEG;
   unsigned segs = getActiveSegmentsNum();
-  if (segs <= (getMaxSegments() /2)) maxData *= 2; //ESP8266: 512 if <= 8 segs ESP32: 1280 if <= 16 segs
-  if (segs <= (getMaxSegments() /4)) maxData *= 2; //ESP8266: 1024 if <= 4 segs ESP32: 2560 if <= 8 segs
-  int maxSparks = maxData / sizeof(spark); //ESP8266: max. 21/42/85 sparks/seg, ESP32: max. 53/106/213 sparks/seg
+  if (segs <= (getMaxSegments() /2)) maxData *= 2;
+  if (segs <= (getMaxSegments() /4)) maxData *= 2;
+  int maxSparks = maxData / sizeof(spark);
 
   unsigned numSparks = min(5 + ((rows*cols) >> 1), maxSparks);
   unsigned dataSize = sizeof(spark) * numSparks;
-  if (!SEGMENT.allocateData(dataSize + sizeof(float))) return EFFECT_DEFAULT(); //allocation failed
+  if (!SEGMENT.allocateData(dataSize + sizeof(float))) return EFFECT_DEFAULT();
   float *dying_gravity = reinterpret_cast<float*>(SEGMENT.data + dataSize);
 
-  if (dataSize != SEGMENT.aux1) { //reset to flare if sparks were reallocated (it may be good idea to reset segment if bounds change)
+  if (dataSize != SEGMENT.aux1) {
     *dying_gravity = 0.0f;
     SEGMENT.aux0 = 0;
     SEGMENT.aux1 = dataSize;
@@ -5740,71 +5930,89 @@ uint16_t mAnimatorLight::EffectAnim__Exploding_Fireworks()
   SEGMENT.fade_out(252);
 
   Spark* sparks = reinterpret_cast<Spark*>(SEGMENT.data);
-  Spark* flare = sparks; //first spark is flare data
+  Spark* flare  = sparks;
 
-  float gravity = -0.0004f - (SEGMENT.speed/800000.0f); // m/s/s
+  float gravity = -0.0004f - (SEGMENT.speed/800000.0f);
   gravity *= rows;
 
-  if (SEGMENT.aux0 < 2) { //FLARE
-    if (SEGMENT.aux0 == 0) { //init flare
-      flare->pos = 0;
-      flare->posX = SEGMENT.is2D() ? hw_random16(2,cols-3) : (SEGMENT.intensity > hw_random8()); // will enable random firing side on 1D
-      unsigned peakHeight = 75 + hw_random8(180); //0-255
+  // === helper lambda: map physics Y -> render Y ===
+  auto mapY = [&](int pos) -> int {
+    if (SEGMENT.check2) {
+      // original WLED orientation (top-origin)
+      return rows - pos - 1;
+    } else {
+      // inverted (bottom-origin)
+      return pos;
+    }
+  };
+
+  if (SEGMENT.aux0 < 2) { // FLARE
+    if (SEGMENT.aux0 == 0) {
+      flare->pos  = 0;
+      flare->posX = SEGMENT.is2D() ? hw_random16(2, cols-3)
+                                   : (SEGMENT.intensity > hw_random8());
+      unsigned peakHeight = 75 + hw_random8(180);
       peakHeight = (peakHeight * (rows -1)) >> 8;
-      flare->vel = sqrtf(-2.0f * gravity * peakHeight);
-      flare->velX = SEGMENT.is2D() ? (hw_random8(9)-4)/64.0f : 0; // no X velocity on 1D
-      flare->col = 255; //brightness
+      flare->vel  = sqrtf(-2.0f * gravity * peakHeight);
+      flare->velX = SEGMENT.is2D() ? (hw_random8(9)-4)/64.0f : 0;
+      flare->col  = 255;
       SEGMENT.aux0 = 1;
     }
 
-    // launch
     if (flare->vel > 12 * gravity) {
-      // flare
-      if (SEGMENT.is2D()) SEGMENT.setPixelColorXY(unsigned(flare->posX), rows - uint16_t(flare->pos) - 1, flare->col, flare->col, flare->col);
-      else                SEGMENT.setPixelColor((flare->posX > 0.0f) ? rows - int(flare->pos) - 1 : int(flare->pos), flare->col, flare->col, flare->col);
-      flare->pos  += flare->vel;
+      if (SEGMENT.is2D()) {
+        SEGMENT.setPixelColorXY(
+          unsigned(flare->posX),
+          mapY(uint16_t(flare->pos)),
+          flare->col, flare->col, flare->col
+        );
+      } else {
+        SEGMENT.setPixelColor(
+          mapY(int(flare->pos)),
+          flare->col, flare->col, flare->col
+        );
+      }
+
+      flare->pos += flare->vel;
       flare->pos  = constrain(flare->pos, 0, rows-1);
+
       if (SEGMENT.is2D()) {
         flare->posX += flare->velX;
-        flare->posX = constrain(flare->posX, 0, cols-1);
+        flare->posX  = constrain(flare->posX, 0, cols-1);
       }
-      flare->vel  += gravity;
-      flare->col  -= 2;
+
+      flare->vel += gravity;
+      flare->col -= 2;
     } else {
-      SEGMENT.aux0 = 2;  // ready to explode
+      SEGMENT.aux0 = 2;
     }
+
   } else if (SEGMENT.aux0 < 4) {
-    /*
-     * Explode!
-     *
-     * Explosion happens where the flare ended.
-     * Size is proportional to the height.
-     */
+    // === EXPLOSION ===
     unsigned nSparks = flare->pos + hw_random8(4);
-    nSparks = std::max(nSparks, 4U);  // This is not a standard constrain; numSparks is not guaranteed to be at least 4
+    nSparks = std::max(nSparks, 4U);
     nSparks = std::min(nSparks, numSparks);
 
-    // initialize sparks
     if (SEGMENT.aux0 == 2) {
       for (unsigned i = 1; i < nSparks; i++) {
         sparks[i].pos  = flare->pos;
         sparks[i].posX = flare->posX;
-        sparks[i].vel  = (float(hw_random16(20001)) / 10000.0f) - 0.9f; // from -0.9 to 1.1
-        sparks[i].vel *= rows<32 ? 0.5f : 1; // reduce velocity for smaller strips
-        sparks[i].velX = SEGMENT.is2D() ? (float(hw_random16(20001)) / 10000.0f) - 1.0f : 0; // from -1 to 1
-        sparks[i].col  = 345;//abs(sparks[i].vel * 750.0); // set colors before scaling velocity to keep them bright
-        //sparks[i].col = constrain(sparks[i].col, 0, 345);
+        sparks[i].vel  = (float(hw_random16(20001)) / 10000.0f) - 0.9f;
+        sparks[i].vel *= rows < 32 ? 0.5f : 1;
+        sparks[i].velX = SEGMENT.is2D()
+                         ? (float(hw_random16(20001)) / 10000.0f) - 1.0f
+                         : 0;
+        sparks[i].col      = 345;
         sparks[i].colIndex = hw_random8();
-        sparks[i].vel  *= flare->pos/rows; // proportional to height
-        sparks[i].velX *= SEGMENT.is2D() ? flare->posX/cols : 0; // proportional to width
-        sparks[i].vel  *= -gravity *50;
+        sparks[i].vel  *= flare->pos / rows;
+        sparks[i].velX *= SEGMENT.is2D() ? flare->posX / cols : 0;
+        sparks[i].vel  *= -gravity * 50;
       }
-      //sparks[1].col = 345; // this will be our known spark
-      *dying_gravity = gravity/2;
+      *dying_gravity = gravity / 2;
       SEGMENT.aux0 = 3;
     }
 
-    if (sparks[1].col > 4) {//&& sparks[1].pos > 0) { // as long as our known spark is lit, work with all the sparks
+    if (sparks[1].col > 4) {
       for (unsigned i = 1; i < nSparks; i++) {
         sparks[i].pos  += sparks[i].vel;
         sparks[i].posX += sparks[i].velX;
@@ -5813,47 +6021,67 @@ uint16_t mAnimatorLight::EffectAnim__Exploding_Fireworks()
         if (sparks[i].col > 3) sparks[i].col -= 4;
 
         if (sparks[i].pos > 0 && sparks[i].pos < rows) {
-          if (SEGMENT.is2D() && !(sparks[i].posX >= 0 && sparks[i].posX < cols)) continue;
-          unsigned prog = sparks[i].col;
-          
+          if (SEGMENT.is2D() &&
+              !(sparks[i].posX >= 0 && sparks[i].posX < cols)) continue;
+
           uint32_t spColor;
-          if(SEGMENT.check1){
-            spColor = SEGMENT.GetPaletteColour(sparks[i].colIndex, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH);
-          }else{
-            spColor = (SEGMENT.palette_id) ? SEGMENT.color_wheel(sparks[i].colIndex) : SEGCOLOR(0); // Original was random colour wheel
+          if (SEGMENT.check1) {
+            spColor = SEGMENT.GetPaletteColour(
+              sparks[i].colIndex,
+              PALETTE_INDEX__IS_SEGLEN_RANGE,
+              PALETTE_MODE__DEFAULT,
+              PALETTE_WRAP_SMOOTH
+            );
+          } else {
+            spColor = (SEGMENT.palette_id)
+                      ? SEGMENT.color_wheel(sparks[i].colIndex)
+                      : SEGCOLOR(0);
           }
-          CRGBW c = BLACK; //HeatColor(sparks[i].col);
-          if (prog > 300) { //fade from white to spark color
-            c = color_blend(spColor, WHITE, uint8_t((prog - 300)*5));
-          } else if (prog > 45) { //fade from spark color to black
+
+          CRGBW c = BLACK;
+          unsigned prog = sparks[i].col;
+          if (prog > 300) {
+            c = color_blend(spColor, WHITE, uint8_t((prog - 300) * 5));
+          } else if (prog > 45) {
             c = color_blend(BLACK, spColor, uint8_t(prog - 45));
             unsigned cooling = (300 - prog) >> 5;
             c.g = qsub8(c.g, cooling);
             c.b = qsub8(c.b, cooling * 2);
           }
-          if (SEGMENT.is2D()) SEGMENT.setPixelColorXY(int(sparks[i].posX), rows - int(sparks[i].pos) - 1, c);
-          else                SEGMENT.setPixelColor(int(sparks[i].posX) ? rows - int(sparks[i].pos) - 1 : int(sparks[i].pos), c);
+
+          if (SEGMENT.is2D()) {
+            SEGMENT.setPixelColorXY(
+              int(sparks[i].posX),
+              mapY(int(sparks[i].pos)),
+              c
+            );
+          } else {
+            SEGMENT.setPixelColor(
+              mapY(int(sparks[i].pos)),
+              c
+            );
+          }
         }
       }
+
       if (SEGMENT.check3) SEGMENT.blur(16);
-      *dying_gravity *= .8f; // as sparks burn out they fall slower
+      *dying_gravity *= .8f;
     } else {
-      SEGMENT.aux0 = 6 + hw_random8(10); //wait for this many frames
+      SEGMENT.aux0 = 6 + hw_random8(10);
     }
+
   } else {
     SEGMENT.aux0--;
-    if (SEGMENT.aux0 < 4) {
-      SEGMENT.aux0 = 0; //back to flare
-    }
+    if (SEGMENT.aux0 < 4) SEGMENT.aux0 = 0;
   }
 
   return FRAMETIME;
-
 }
+
 #undef MAX_SPARKS
 static const char PM_EFFECT_CONFIG__EXPLODING_FIREWORKS[] PROGMEM =
 "Exploding Fireworks@"
-"Gravity,Firing side,,,,Use Palette,,Blur,,,"   // SX, IX, (CB3=Blur)
+"Gravity,Firing side,,,,Use Palette,Flip 2D Direction,Blur,,,"   // SX, IX, (CB3=Blur)
 ";"
 "Spark,Bkg"                          // segment colour labels: SEGCOLOR(0)=spark, SEGCOLOR(1)=background
 ";"
@@ -10366,11 +10594,13 @@ static const char PM_EFFECT_DESCRI__TRISEGCOL_LIT_PATTERN[] PROGMEM =
 "Repeating bands of SegColor(1), SegColor(2), SegColor(3).\n\r"
 "IX: band width (coarse step).";
 
-
 /*******************************************************************************************************************************************************************************************************************
  * @description : Palettes Interleaved (Lit Pattern) — using *_ModeWrap APIs
- *                C1=0: SX/IX are per-band lengths (px). Alternate pal1/pal2 bands; each band maps that palette’s full 0→255.
- *                C1=1: Both palettes span the full segment (0→255 over SEGLEN); SX/IX only switch which palette shows.
+ *                SX/IX = pixels of pal1 / pal2 bands (lit/unlit runs).
+ *                C1/C2 = pal1_brt / pal2_brt (0–255) applied after palette lookup.
+ *                Check1 (Span per band):
+ *                  0 = palettes span the *whole segment* (0→255 across SEGLEN). Bands only choose which palette shows.
+ *                  1 = palettes span *each band* (0→255 within each lit/unlit run), so gradients/discretes repeat per band.
  *                Primary palette via SEGMENT.GetPaletteColour; secondary via GetUnloadedPaletteColour_ModeWrap.
  ********************************************************************************************************************************************************************************************************************/
 uint16_t mAnimatorLight::EffectAnim__Palettes_Interleaved_Lit_Pattern()
@@ -10379,117 +10609,271 @@ uint16_t mAnimatorLight::EffectAnim__Palettes_Interleaved_Lit_Pattern()
 
   const uint16_t len1 = (uint16_t)max<int>(1, SEGMENT.speed);     // Pal1 band length (px)
   const uint16_t len2 = (uint16_t)max<int>(1, SEGMENT.intensity); // Pal2 band length (px)
-  const bool span_segment = SEGMENT.check1;                       // C1: 0=per-band index, 1=span full segment
 
-  if (!span_segment)
+  const uint8_t pal1_brt = (uint8_t)SEGMENT.custom1;              // C1: Pal1 brightness (0–255)
+  const uint8_t pal2_brt = (uint8_t)SEGMENT.custom2;              // C2: Pal2 brightness (0–255)
+
+  const bool span_per_band = SEGMENT.check1;                      // Check1: 0=span whole segment, 1=span per band
+
+  auto scale8_u8 = [](uint8_t v, uint8_t s) -> uint8_t {
+    // exact 0..255 scale (no float)
+    return (uint8_t)(((uint16_t)v * (uint16_t)s) / 255u);
+  };
+
+  auto apply_brt_u32_rgbw = [&](uint32_t c, uint8_t brt) -> uint32_t {
+    if (brt == 255) return c;
+    uint8_t r = scale8_u8(R(c), brt);
+    uint8_t g = scale8_u8(G(c), brt);
+    uint8_t b = scale8_u8(B(c), brt);
+    uint8_t w = scale8_u8(W(c), brt);
+    return RGBW32(r, g, b, w);
+  };
+
+  const uint16_t cycle_len = len1 + len2;
+  uint16_t pos_in_cycle = 0;
+
+  // State for per-band spanning
+  bool     use_pal1      = true;
+  uint16_t run_left      = len1;
+  uint16_t offset_in_run = 0;
+
+  for (uint16_t i = 0; i < SEGLEN; ++i)
   {
-    // Per-band indexing: pal1(len1) then pal2(len2), repeating
-    bool use_pal1 = true;
-    uint16_t run_left = len1;
-    uint16_t offset_in_run = 0;
+    // Decide which palette this pixel uses (always based on SX/IX bands)
+    if (pos_in_cycle < len1) {
+      use_pal1 = true;
+    } else {
+      use_pal1 = false;
+    }
 
-    for (uint16_t i = 0; i < SEGLEN; ++i)
+    // Choose the index scaling domain
+    uint8_t idx8;
+    if (!span_per_band)
     {
+      // Default: palette spans whole segment (0..255 over SEGLEN)
+      idx8 = (SEGLEN <= 1) ? 0 : (uint8_t)((i * 256u) / SEGLEN);
+    }
+    else
+    {
+      // Span within each band (0..255 over run_len)
       const uint16_t run_len = use_pal1 ? len1 : len2;
+      idx8 = (run_len <= 1) ? 0 : (uint8_t)((offset_in_run * 256u) / run_len);
+    }
 
-      // exclusive-top mapping: 0..run_len-1 -> 0..255
-      const uint8_t idx8 = (run_len <= 1) ? 0 : (uint8_t)((offset_in_run * 256u) / run_len);
+    uint32_t col;
+    if (use_pal1)
+    {
+      col = SEGMENT.GetPaletteColour(
+        idx8,
+        PALETTE_INDEX__IS_255_RANGE,
+        PALETTE_MODE__DEFAULT,
+        PALETTE_WRAP_HARDEDGE,
+        NO_ENCODED_VALUE
+      );
 
-      uint32_t col;
-      if (use_pal1) {
-        col = SEGMENT.GetPaletteColour(
-          idx8,
-          PALETTE_INDEX__IS_255_RANGE,   // we generated a 0–255 index
-          PALETTE_MODE__DEFAULT,
-          PALETTE_WRAP_HARDEDGE,
-          NO_ENCODED_VALUE
-        );
-      } else {
-        const RgbwwColor c2 = GetUnloadedPaletteColour_ModeWrap(
-          SEGMENT.palette2_id,
-          idx8,
-          PALETTE_INDEX__IS_255_RANGE,
-          PALETTE_MODE__DEFAULT,
-          PALETTE_WRAP_HARDEDGE,
-          NO_ENCODED_VALUE
-        );
-        col = RGBW32(c2.R, c2.G, c2.B, c2.CW);
+      col = apply_brt_u32_rgbw(col, pal1_brt);
+    }
+    else
+    {
+      RgbwwColor c2 = GetUnloadedPaletteColour_ModeWrap(
+        SEGMENT.palette2_id,
+        idx8,
+        PALETTE_INDEX__IS_255_RANGE,
+        PALETTE_MODE__DEFAULT,
+        PALETTE_WRAP_HARDEDGE,
+        NO_ENCODED_VALUE,
+        /*full_visual*/ true
+      );
+
+      if (pal2_brt != 255) {
+        c2.R  = scale8_u8(c2.R,  pal2_brt);
+        c2.G  = scale8_u8(c2.G,  pal2_brt);
+        c2.B  = scale8_u8(c2.B,  pal2_brt);
+        c2.CW = scale8_u8(c2.CW, pal2_brt);
+        // (leave WW alone unless you intentionally want it too; swap if you’re using WW)
       }
 
-      SEGMENT.setPixelColor(i, col);
+      col = RGBW32(c2.R, c2.G, c2.B, c2.CW);
+    }
 
+    SEGMENT.setPixelColor(i, col);
+
+    // Advance band position
+    if (!span_per_band)
+    {
+      // only cycle chooser matters
+      if (++pos_in_cycle >= cycle_len) pos_in_cycle = 0;
+    }
+    else
+    {
+      // per-band spanning needs run-local counters too
       ++offset_in_run;
       if (--run_left == 0) {
+        // move to next band
         use_pal1 = !use_pal1;
         run_left = use_pal1 ? len1 : len2;
         offset_in_run = 0;
       }
-    }
-  }
-  else
-  {
-    // Span full segment: both palettes map 0..255 over SEGLEN; SX/IX only switch which palette is active
-    const uint16_t cycle_len = len1 + len2;
-    uint16_t pos_in_cycle = 0;
 
-    for (uint16_t i = 0; i < SEGLEN; ++i)
-    {
-      // map 0..SEGLEN-1 -> 0..255
-      const uint8_t gidx = (SEGLEN <= 1) ? 0 : (uint8_t)((i * 256u) / SEGLEN);
-
-      uint32_t col;
-      if (pos_in_cycle < len1) {
-        col = SEGMENT.GetPaletteColour(
-          gidx,
-          PALETTE_INDEX__IS_255_RANGE,   // already scaled to 0–255
-          PALETTE_MODE__DEFAULT,
-          PALETTE_WRAP_HARDEDGE,
-          NO_ENCODED_VALUE
-        );
-      } else {
-        const RgbwwColor c2 = GetUnloadedPaletteColour_ModeWrap(
-          SEGMENT.palette2_id,
-          gidx,
-          PALETTE_INDEX__IS_255_RANGE,
-          PALETTE_MODE__DEFAULT,
-          PALETTE_WRAP_HARDEDGE,
-          NO_ENCODED_VALUE,
-          /*full_visual*/ true
-        );
-        col = RGBW32(c2.R, c2.G, c2.B, c2.CW);
-      }
-
-      SEGMENT.setPixelColor(i, col);
-
-      if (++pos_in_cycle >= cycle_len) pos_in_cycle = 0;
+      if (++pos_in_cycle >= cycle_len) pos_in_cycle = 0; // keep consistent palette switching
     }
   }
 
   return FRAMETIME;
 }
+
 static const char PM_EFFECT_CONFIG__PALETTES_INTERLEAVED_LIT_PATTERN[] PROGMEM =
-"Palettes InterLit@"                        // Name
-"Pal1 size,Pal2 size,,,,Span segment,,,,,"     // 10 fields after '@'
+"Palettes InterLit@"
+"Pal1 px,Pal2 px,Pal1 brt,Pal2 brt,,Span per band,,,,"
 ";"
-""                                             // no seg colours
+""
 ";"
-"!"                                            // primary palette picker
+"!"
 ";"
-"1p"                                            // 1D strip icon & Pal+
+"1p"
 ";"
 "paln=Rainbow 16,"
 "pal2n=Cold White,"
 "sx=20,"
 "ix=8,"
-"c1=0,"
+"c1=255,"
+"c2=255,"
+"c3=0,"
+"o1=0,"    // if your config uses ch1 for check1; else keep your existing c1=0 mapping and remove this
 "ep=500"
 ;
+
 static const char PM_EFFECT_DESCRI__PALETTES_INTERLEAVED_LIT_PATTERN[] PROGMEM =
 "Interleave two palettes along the strip."
-"\n\rC1=0: SX/IX are per-band lengths (pixels). Each band compresses its palette over that run."
-"\n\rC1=1: Both palettes span the full segment; SX/IX only switch which palette is active."
-"\n\rSX: Pal1 band length   IX: Pal2 band length"
+"\n\rSX/IX: Pal1/Pal2 band length (pixels)."
+"\n\rC1/C2: Pal1/Pal2 brightness (0–255)."
+"\n\rCheck1=0: palettes span the whole segment; bands only switch palette."
+"\n\rCheck1=1: palettes span each band; gradients/discretes repeat per band."
 "\n\rPrimary palette via picker; secondary = palette2_id.";
+
+// /*******************************************************************************************************************************************************************************************************************
+//  * @description : Palettes Interleaved (Lit Pattern) — using *_ModeWrap APIs
+//  *                C1=0: SX/IX are per-band lengths (px). Alternate pal1/pal2 bands; each band maps that palette’s full 0→255.
+//  *                C1=1: Both palettes span the full segment (0→255 over SEGLEN); SX/IX only switch which palette shows.
+//  *                Primary palette via SEGMENT.GetPaletteColour; secondary via GetUnloadedPaletteColour_ModeWrap.
+//  ********************************************************************************************************************************************************************************************************************/
+// uint16_t mAnimatorLight::EffectAnim__Palettes_Interleaved_Lit_Pattern()
+// {
+//   if (SEGLEN == 0) return EFFECT_DEFAULT();
+
+//   const uint16_t len1 = (uint16_t)max<int>(1, SEGMENT.speed);     // Pal1 band length (px)
+//   const uint16_t len2 = (uint16_t)max<int>(1, SEGMENT.intensity); // Pal2 band length (px)
+//   const bool span_segment = SEGMENT.check1;                       // C1: 0=per-band index, 1=span full segment
+
+//   if (!span_segment)
+//   {
+//     // Per-band indexing: pal1(len1) then pal2(len2), repeating
+//     bool use_pal1 = true;
+//     uint16_t run_left = len1;
+//     uint16_t offset_in_run = 0;
+
+//     for (uint16_t i = 0; i < SEGLEN; ++i)
+//     {
+//       const uint16_t run_len = use_pal1 ? len1 : len2;
+
+//       // exclusive-top mapping: 0..run_len-1 -> 0..255
+//       const uint8_t idx8 = (run_len <= 1) ? 0 : (uint8_t)((offset_in_run * 256u) / run_len);
+
+//       uint32_t col;
+//       if (use_pal1) {
+//         col = SEGMENT.GetPaletteColour(
+//           idx8,
+//           PALETTE_INDEX__IS_255_RANGE,   // we generated a 0–255 index
+//           PALETTE_MODE__DEFAULT,
+//           PALETTE_WRAP_HARDEDGE,
+//           NO_ENCODED_VALUE
+//         );
+//       } else {
+//         const RgbwwColor c2 = GetUnloadedPaletteColour_ModeWrap(
+//           SEGMENT.palette2_id,
+//           idx8,
+//           PALETTE_INDEX__IS_255_RANGE,
+//           PALETTE_MODE__DEFAULT,
+//           PALETTE_WRAP_HARDEDGE,
+//           NO_ENCODED_VALUE
+//         );
+//         col = RGBW32(c2.R, c2.G, c2.B, c2.CW);
+//       }
+
+//       SEGMENT.setPixelColor(i, col);
+
+//       ++offset_in_run;
+//       if (--run_left == 0) {
+//         use_pal1 = !use_pal1;
+//         run_left = use_pal1 ? len1 : len2;
+//         offset_in_run = 0;
+//       }
+//     }
+//   }
+//   else
+//   {
+//     // Span full segment: both palettes map 0..255 over SEGLEN; SX/IX only switch which palette is active
+//     const uint16_t cycle_len = len1 + len2;
+//     uint16_t pos_in_cycle = 0;
+
+//     for (uint16_t i = 0; i < SEGLEN; ++i)
+//     {
+//       // map 0..SEGLEN-1 -> 0..255
+//       const uint8_t gidx = (SEGLEN <= 1) ? 0 : (uint8_t)((i * 256u) / SEGLEN);
+
+//       uint32_t col;
+//       if (pos_in_cycle < len1) {
+//         col = SEGMENT.GetPaletteColour(
+//           gidx,
+//           PALETTE_INDEX__IS_255_RANGE,   // already scaled to 0–255
+//           PALETTE_MODE__DEFAULT,
+//           PALETTE_WRAP_HARDEDGE,
+//           NO_ENCODED_VALUE
+//         );
+//       } else {
+//         const RgbwwColor c2 = GetUnloadedPaletteColour_ModeWrap(
+//           SEGMENT.palette2_id,
+//           gidx,
+//           PALETTE_INDEX__IS_255_RANGE,
+//           PALETTE_MODE__DEFAULT,
+//           PALETTE_WRAP_HARDEDGE,
+//           NO_ENCODED_VALUE,
+//           /*full_visual*/ true
+//         );
+//         col = RGBW32(c2.R, c2.G, c2.B, c2.CW);
+//       }
+
+//       SEGMENT.setPixelColor(i, col);
+
+//       if (++pos_in_cycle >= cycle_len) pos_in_cycle = 0;
+//     }
+//   }
+
+//   return FRAMETIME;
+// }
+// static const char PM_EFFECT_CONFIG__PALETTES_INTERLEAVED_LIT_PATTERN[] PROGMEM =
+// "Palettes InterLit@"                        // Name
+// "Pal1 size,Pal2 size,,,,Span segment,,,,,"     // 10 fields after '@'
+// ";"
+// ""                                             // no seg colours
+// ";"
+// "!"                                            // primary palette picker
+// ";"
+// "1p"                                            // 1D strip icon & Pal+
+// ";"
+// "paln=Rainbow 16,"
+// "pal2n=Cold White,"
+// "sx=20,"
+// "ix=8,"
+// "c1=0,"
+// "ep=500"
+// ;
+// static const char PM_EFFECT_DESCRI__PALETTES_INTERLEAVED_LIT_PATTERN[] PROGMEM =
+// "Interleave two palettes along the strip."
+// "\n\rC1=0: SX/IX are per-band lengths (pixels). Each band compresses its palette over that run."
+// "\n\rC1=1: Both palettes span the full segment; SX/IX only switch which palette is active."
+// "\n\rSX: Pal1 band length   IX: Pal2 band length"
+// "\n\rPrimary palette via picker; secondary = palette2_id.";
 
 
 /*******************************************************************************************************************************************************************************************************************

@@ -163,7 +163,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   root["rgbbri"] = seg.getBrightnessRGB();
   root["cctbri"] = seg.getBrightnessCCT();
 
-  root["PalIX"] = seg.palette_live_intensity;
+  root["PalIX"] = seg.live_palette.intensity;
 
   root["fx"]  = seg.effect_id;
   root["sx"]  = seg.speed;
@@ -1390,7 +1390,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   seg.setBrightnessRGB(elem["rgbbri"] | seg._brightness_rgb);
   seg.setBrightnessCCT(elem["cctbri"] | seg._brightness_cct);
 
-  seg.palette_live_intensity  = elem["PalIX"] | seg.palette_live_intensity;
+  seg.live_palette.intensity  = elem["PalIX"] | seg.live_palette.intensity;
 
   seg.setCCT(elem["cct"] | seg.cct_slider);
 

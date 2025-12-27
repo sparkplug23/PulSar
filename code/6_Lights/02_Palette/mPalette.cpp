@@ -514,6 +514,19 @@ void mPalette::Init_Palettes()
     PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__ENCODING
   );
   
+  addDynamicPalette(
+    PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID, 
+    PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__DATA, 
+    sizeof(PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__DATA),
+    PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ENCODING
+  );
+  addDynamicPalette(
+    PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID, 
+    PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__DATA, 
+    sizeof(PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__DATA),
+    PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ENCODING
+  );
+  
 
   /****************
    * CustomPalettes
@@ -1323,7 +1336,351 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
         #endif
 
       }
-      break;
+      break;      
+//       case PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID:
+//       {
+//         // Live SegCol Cycle (Immediate)
+//         // - Period set by PalIX (palette_live_intensity), up to 25s
+//         // - Split into 5 equal slots, instant jump between segcol[0..4]
+//         //
+//         // Preview:
+//         // - When flag_request_is_for_full_visual_output, treat desired_index (0..255) as phase across the cycle.
+
+//         const uint32_t T_max_ms = 25000UL; // 25s max
+//         uint32_t T_ms = (uint32_t)pSEGMENT.live_palette.intensity * T_max_ms / 255UL;
+//         if (T_ms < 1000UL) T_ms = 1000UL; // avoid silly-fast UI noise
+
+//         uint32_t t_ms;
+//         if (flag_request_is_for_full_visual_output) {
+//           // desired_index is typically 0..255 for preview; map across full period
+//           t_ms = ((uint32_t)desired_index * T_ms) / 255UL;
+//         } else {
+//           t_ms = millis() % T_ms;
+//         }
+
+//         const uint32_t slot_ms = T_ms / 5UL;
+//         uint8_t k = (slot_ms > 0) ? (uint8_t)(t_ms / slot_ms) : 0;
+//         if (k > 4) k = 4;
+
+//         colourRGBWW = pSEGMENT.segcol[k].colour;
+//         colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+//         #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+//         colour32_white_cold = colourRGBWW.CW;
+//         #endif
+//       }
+//       break;      
+// case PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID:
+// {
+//   // Live SegCol Cycle (Blending + dwell) anchored to effect_start_time.
+//   // - PalIX sets total period up to 25s.
+//   // - 5 slots (segcol[0..4]) per cycle.
+//   // - Cadence inside each slot defined by *_PCT weights (sum to 100).
+//   // - Optional start lock: first SEGCOLOUR_CYCLE_START_LOCK_MS after effect start => force segcol0 solid.
+
+//   const uint32_t T_max_ms = 25000UL;
+//   uint32_t T_ms = (uint32_t)pSEGMENT.live_palette.intensity * T_max_ms / 255UL;
+//   if (T_ms < 1000UL) T_ms = 1000UL;
+
+//   const uint32_t now_ms = millis();
+
+//   // Compute t_ms within cycle
+//   uint32_t t_ms;
+//   if (flag_request_is_for_full_visual_output) {
+//     // UI preview sweep across full cycle
+//     t_ms = ((uint32_t)desired_index * T_ms) / 255UL;
+//   } else {
+//     const uint32_t anchor_ms  = tkr_anim->effect_start_time; // your anchor
+//     const uint32_t elapsed_ms = now_ms - anchor_ms;
+//     t_ms = (T_ms > 0) ? (elapsed_ms % T_ms) : 0UL;
+
+//     // Start lock: ensure initial “seg0 full” for a short time after effect start
+//     if (elapsed_ms < (uint32_t)SEGCOLOUR_CYCLE_START_LOCK_MS) {
+//       const RgbwwColor out0 = pSEGMENT.segcol[0].colour;
+//       colourRGBWW = out0;
+//       colour32 = RGBW32(out0.R, out0.G, out0.B, out0.WW);
+//       #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+//       colour32_white_cold = out0.CW;
+//       #endif
+//       break;
+//     }
+//   }
+
+//   // Slot selection using integer math with exact boundaries
+//   // slot k covers [k*T/5, (k+1)*T/5)
+//   const uint32_t s0 = (0UL * T_ms) / 5UL;
+//   const uint32_t s1 = (1UL * T_ms) / 5UL;
+//   const uint32_t s2 = (2UL * T_ms) / 5UL;
+//   const uint32_t s3 = (3UL * T_ms) / 5UL;
+//   const uint32_t s4 = (4UL * T_ms) / 5UL;
+//   const uint32_t s5 = (5UL * T_ms) / 5UL; // == T_ms
+
+//   uint8_t k;
+//   uint32_t slot_start, slot_end;
+//   if      (t_ms < s1) { k=0; slot_start=s0; slot_end=s1; }
+//   else if (t_ms < s2) { k=1; slot_start=s1; slot_end=s2; }
+//   else if (t_ms < s3) { k=2; slot_start=s2; slot_end=s3; }
+//   else if (t_ms < s4) { k=3; slot_start=s3; slot_end=s4; }
+//   else                { k=4; slot_start=s4; slot_end=s5; }
+
+//   const uint32_t slot_ms   = slot_end - slot_start;
+//   const uint32_t within_ms = t_ms - slot_start;
+
+//   const uint8_t k_prev = (k == 0) ? 4 : (uint8_t)(k - 1);
+//   const uint8_t k_next = (k == 4) ? 0 : (uint8_t)(k + 1);
+
+//   const RgbwwColor c_prev = pSEGMENT.segcol[k_prev].colour;
+//   const RgbwwColor c_curr = pSEGMENT.segcol[k].colour;
+//   const RgbwwColor c_next = pSEGMENT.segcol[k_next].colour;
+
+//   // Cadence split points inside this slot (integer ms)
+//   // weights must sum to 100 (assumed)
+//   const uint32_t t_blend_in_end = (slot_ms * (uint32_t)SEGCOLOUR_CYCLE_BLENDIN_PCT)  / 100UL;
+//   const uint32_t t_hold1_end    = t_blend_in_end + (slot_ms * (uint32_t)SEGCOLOUR_CYCLE_HOLD1_PCT) / 100UL;
+//   const uint32_t t_hold2_end    = t_hold1_end    + (slot_ms * (uint32_t)SEGCOLOUR_CYCLE_HOLD2_PCT) / 100UL;
+//   // remaining time is blend-out (includes rounding remainder)
+
+//   RgbwwColor out = c_curr;
+
+//   if (slot_ms == 0) {
+//     out = c_curr;
+//   }
+//   else if (within_ms < t_blend_in_end) {
+//     // Blend prev -> curr
+//     const uint32_t denom = (t_blend_in_end > 0) ? t_blend_in_end : 1UL;
+//     float p = (float)within_ms / (float)denom;
+//     if (p > 1.0f) p = 1.0f;
+//     out = RgbwwColor::LinearBlend(c_prev, c_curr, p);
+//   }
+//   else if (within_ms < t_hold2_end) {
+//     // Hold curr (covers both hold phases)
+//     out = c_curr;
+//   }
+//   else {
+//     // Blend curr -> next over the remainder
+//     const uint32_t start = t_hold2_end;
+//     const uint32_t denom = (slot_ms > start) ? (slot_ms - start) : 1UL;
+//     float p = (float)(within_ms - start) / (float)denom;
+//     if (p > 1.0f) p = 1.0f;
+//     out = RgbwwColor::LinearBlend(c_curr, c_next, p);
+//   }
+
+//   colourRGBWW = out;
+//   colour32 = RGBW32(out.R, out.G, out.B, out.WW);
+//   #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+//   colour32_white_cold = out.CW;
+//   #endif
+// }
+// break;
+
+/**********************************************************************************************************************************************************************************
+ * LIVE PALETTE: SegCol Cycle (Immediate) — PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID
+ *
+ * INTENT
+ *   Provide a “single-colour live palette” whose returned colour is one of SEGMENT.segcol[0..4], selected by time.
+ *   This lets any effect that samples the PRIMARY palette use the segment’s 5 UI colours as a time-cycling palette
+ *   without needing separate effects (“twinkle over red”, “twinkle over blue”, …).
+ *
+ * STATE / ANCHOR
+ *   pSEGMENT.live_palette.timing1 is used as the *anchor* for this live palette.
+ *   - It MUST be reset to 0 when the active palette/effect is changed (pal, pal2, fx), so the cycle restarts cleanly.
+ *   - If timing1==0 on entry, we initialise it to millis(), meaning “cycle starts now at segcol[0]”.
+ *
+ * PERIOD (PalIX)
+ *   pSEGMENT.live_palette.intensity maps 0..255 -> 1s..25s total cycle time T_ms.
+ *   Example: PalIX=255 => T_ms=25000ms => 5 slots => ~5000ms per segcol.
+ *
+ * SLOT SELECTION (NO BLEND)
+ *   We split the cycle into 5 contiguous slots:
+ *     slot k covers [k*T/5, (k+1)*T/5)
+ *   Returned colour is exactly segcol[k] (instant jump at boundaries).
+ *
+ * UI PREVIEW
+ *   When flag_request_is_for_full_visual_output==true, desired_index (0..255) is treated as phase across T_ms
+ *   so the palette preview shows the full cycle deterministically (no millis()).
+ **********************************************************************************************************************************************************************************/
+case PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID:
+{
+  const uint32_t T_max_ms = 25000UL;                        // 25s max
+  uint32_t T_ms = (uint32_t)pSEGMENT.live_palette.intensity * T_max_ms / 255UL;
+  if (T_ms < 1000UL) T_ms = 1000UL;                         // clamp low end
+
+  const uint32_t now_ms = millis();
+
+  // Anchor initialisation (restart point). External code resets timing1=0 on pal/pal2/fx changes.
+  if (!flag_request_is_for_full_visual_output) {
+    if (pSEGMENT.live_palette.timing1 == 0) pSEGMENT.live_palette.timing1 = now_ms;
+  }
+
+  // Phase within cycle
+  uint32_t t_ms;
+  if (flag_request_is_for_full_visual_output) {
+    t_ms = ((uint32_t)desired_index * T_ms) / 255UL;
+  } else {
+    const uint32_t elapsed_ms = now_ms - pSEGMENT.live_palette.timing1;
+    t_ms = (T_ms > 0) ? (elapsed_ms % T_ms) : 0UL;
+  }
+
+  // Slot boundaries (exact integer boundaries; avoids “k=5 then clamp” artefacts)
+  const uint32_t s1 = (1UL * T_ms) / 5UL;
+  const uint32_t s2 = (2UL * T_ms) / 5UL;
+  const uint32_t s3 = (3UL * T_ms) / 5UL;
+  const uint32_t s4 = (4UL * T_ms) / 5UL;
+
+  uint8_t k;
+  if      (t_ms < s1) k = 0;
+  else if (t_ms < s2) k = 1;
+  else if (t_ms < s3) k = 2;
+  else if (t_ms < s4) k = 3;
+  else                k = 4;
+
+  colourRGBWW = pSEGMENT.segcol[k].colour;
+  colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+  #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+  colour32_white_cold = colourRGBWW.CW;
+  #endif
+}
+break;
+
+
+
+/**********************************************************************************************************************************************************************************
+ * LIVE PALETTE: SegCol Cycle (Blending with controllable dwell) — PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID
+ *
+ * INTENT
+ *   Same as the Immediate version, but transitions between segcol[k] are blended with “rest time” on each colour.
+ *
+ * CRITICAL DESIGN CHOICE (FIXES YOUR “random start” + “double blend”)
+ *   - DO NOT use millis()%T_ms as the anchor. That ties phase to uptime and will start “somewhere random”.
+ *   - Use pSEGMENT.live_palette.timing1 as the anchor, initialised once per activation and reset to 0 when pal/pal2/fx changes.
+ *
+ * PERIOD (PalIX)
+ *   pSEGMENT.live_palette.intensity maps 0..255 -> 1s..25s total cycle time T_ms.
+ *   Example: PalIX=255 => T_ms=25000ms => each colour slot ≈ 5000ms.
+ *
+ * SLOT STRUCTURE
+ *   Cycle is split into 5 slots, one per segcol[k].
+ *   slot k covers [k*T/5, (k+1)*T/5).
+ *
+ * CADENCE INSIDE A SLOT (DEFINE-DRIVEN)
+ *   We allow you to tune how much time is “solid” vs “blend”.
+ *
+ *   We implement a 3-part model:
+ *     1) HOLD curr        (solid colour)
+ *     2) BLEND curr->next (transition)
+ *     3) HOLD next (optional “pre-hold” inside slot is NOT needed because the next slot starts as curr anyway)
+ *
+ *   Why this model?
+ *     - It matches your observation: the next period already begins with “BE the next colour”.
+ *     - If you also blend prev->curr at the start of each slot, you effectively create two transitions per boundary
+ *       (end of previous slot + start of next slot), which is exactly how you get “double blend / flashing”.
+ *
+ *   So we do ONE blend per boundary: curr->next at the END of slot k.
+ *   The start of slot k is solid curr by definition (anchor ensures slot0 begins at segcol0 solid).
+ *
+ * DEFINES
+ *   SEGCOLOUR_CYCLE_HOLD_PCT      : percent of slot spent holding curr (solid)
+ *   SEGCOLOUR_CYCLE_BLEND_PCT     : percent of slot spent blending curr->next
+ *   They must sum to <= 100. Any remainder is added to HOLD (more solid time).
+ *
+ * UI PREVIEW
+ *   When flag_request_is_for_full_visual_output==true, desired_index (0..255) is treated as phase across T_ms.
+ **********************************************************************************************************************************************************************************/
+
+#ifndef SEGCOLOUR_CYCLE_HOLD_PCT
+#define SEGCOLOUR_CYCLE_HOLD_PCT   70   // default: 70% solid
+#endif
+#ifndef SEGCOLOUR_CYCLE_BLEND_PCT
+#define SEGCOLOUR_CYCLE_BLEND_PCT  30   // default: 30% blend
+#endif
+
+case PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID:
+{
+  const uint32_t T_max_ms = 25000UL;
+  uint32_t T_ms = (uint32_t)pSEGMENT.live_palette.intensity * T_max_ms / 255UL;
+  if (T_ms < 1000UL) T_ms = 1000UL;
+
+  const uint32_t now_ms = millis();
+
+  // Anchor init (restart point). External code resets timing1=0 on pal/pal2/fx changes.
+  if (!flag_request_is_for_full_visual_output) {
+    if (pSEGMENT.live_palette.timing1 == 0) pSEGMENT.live_palette.timing1 = now_ms;
+  }
+
+  // Phase within cycle
+  uint32_t t_ms;
+  if (flag_request_is_for_full_visual_output) {
+    t_ms = ((uint32_t)desired_index * T_ms) / 255UL;
+  } else {
+    const uint32_t elapsed_ms = now_ms - pSEGMENT.live_palette.timing1;
+    t_ms = (T_ms > 0) ? (elapsed_ms % T_ms) : 0UL;
+  }
+
+  // Slot boundaries
+  const uint32_t s1 = (1UL * T_ms) / 5UL;
+  const uint32_t s2 = (2UL * T_ms) / 5UL;
+  const uint32_t s3 = (3UL * T_ms) / 5UL;
+  const uint32_t s4 = (4UL * T_ms) / 5UL;
+
+  uint8_t k;
+  uint32_t slot_start, slot_end;
+  if      (t_ms < s1) { k=0; slot_start=0;  slot_end=s1; }
+  else if (t_ms < s2) { k=1; slot_start=s1; slot_end=s2; }
+  else if (t_ms < s3) { k=2; slot_start=s2; slot_end=s3; }
+  else if (t_ms < s4) { k=3; slot_start=s3; slot_end=s4; }
+  else                { k=4; slot_start=s4; slot_end=T_ms; }
+
+  const uint32_t slot_ms   = slot_end - slot_start;
+  const uint32_t within_ms = t_ms - slot_start;
+
+  const uint8_t k_next = (k == 4) ? 0 : (uint8_t)(k + 1);
+
+  const RgbwwColor c_curr = pSEGMENT.segcol[k].colour;
+  const RgbwwColor c_next = pSEGMENT.segcol[k_next].colour;
+
+  // Compute hold/blend split inside this slot
+  // If HOLD+BLEND < 100 due to defines, remainder goes to HOLD (more solid time).
+  uint32_t hold_pct  = (uint32_t)SEGCOLOUR_CYCLE_HOLD_PCT;
+  uint32_t blend_pct = (uint32_t)SEGCOLOUR_CYCLE_BLEND_PCT;
+  if (hold_pct > 100UL) hold_pct = 100UL;
+  if (blend_pct > 100UL) blend_pct = 100UL;
+  if (hold_pct + blend_pct > 100UL) {
+    // clamp blend to fit
+    blend_pct = 100UL - hold_pct;
+  }
+  const uint32_t hold_end_ms = (slot_ms * hold_pct) / 100UL;   // [0..hold_end_ms) solid curr
+  // blend is [hold_end_ms..slot_ms) curr->next
+
+  RgbwwColor out;
+
+  if (slot_ms == 0) {
+    out = c_curr;
+  }
+  else if (within_ms < hold_end_ms || (slot_ms <= hold_end_ms)) {
+    // Solid “BE this colour” region
+    out = c_curr;
+  }
+  else {
+    // Blend curr -> next over the remainder (includes rounding remainder)
+    const uint32_t start = hold_end_ms;
+    const uint32_t denom = (slot_ms > start) ? (slot_ms - start) : 1UL;
+    const uint32_t w     = within_ms - start;
+
+    // Use float only for the blend fraction; denom is stable per slot.
+    float p = (float)w / (float)denom;
+    if (p > 1.0f) p = 1.0f;
+    out = RgbwwColor::LinearBlend(c_curr, c_next, p);
+  }
+
+  colourRGBWW = out;
+  colour32 = RGBW32(out.R, out.G, out.B, out.WW);
+  #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+  colour32_white_cold = out.CW;
+  #endif
+}
+break;
+
+
+
       
       
       default:

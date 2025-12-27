@@ -101,7 +101,7 @@ struct {
     uint16_t WifiLinkCount();
     //String WifiDowntime();
     void WifiSetState(uint8_t state);
-    void WifiBegin(uint8_t flag, uint8_t channel = 0);
+    void WifiBegin__OldTasMethod(uint8_t flag, uint8_t channel = 0);
     void WifiCheckIp(void);
     void WifiCheck(uint8_t param);
     int WifiState(void);

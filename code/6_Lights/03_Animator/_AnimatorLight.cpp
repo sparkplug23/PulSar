@@ -722,8 +722,7 @@ void mAnimatorLight::EveryLoop()
       DEBUG_LIGHTING__START_TIME_RECORDING(1)
       SubTask_Effects();
       DEBUG_LIGHTING__SAVE_TIME_RECORDING(1, lighting_time_critical_logging.segment_effects); 
-      #endif  
-      
+      #endif
       // ALOG_INF(PSTR("Loop1c"));Serial.flush();
 
       #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
@@ -735,7 +734,7 @@ void mAnimatorLight::EveryLoop()
       #endif
 
     }break;
-    #ifdef ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
+    #ifdef ENABLE_FEATURE_LIGHTING__REALTIME_MODES
     case ANIMATION_MODE__REALTIME_MQTT_SETPIXEL:
       SubTask_RealTime_SetPixel();
     break;
@@ -1467,10 +1466,10 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             Minimum: 1000 + 0 = 1000 ms (1 second).
             Maximum: 1000 + 25500 = 26500 ms (26.5 seconds).
         */
-        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-palette_live_intensity))*100);
-        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(palette_live_intensity*100);
-        // ALOG_INF(PSTR("palix%d,new_colour_rate_ms=%d"),palette_live_intensity,new_colour_rate_ms);
-        if (millis() - live_pal_timing > new_colour_rate_ms)        
+        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-live_palette.intensity))*100);
+        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(live_palette.intensity*100);
+        // ALOG_INF(PSTR("palix%d,new_colour_rate_ms=%d"),live_palette.intensity,new_colour_rate_ms);
+        if (millis() - live_palette.timing1 > new_colour_rate_ms)        
         {
           // palette->CRGB16Palette16_Palette.data = CRGBPalette16(
           //                 CHSV(random8(), 255, random8(128, 255)),
@@ -1485,8 +1484,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), 255, 255)
           );
           ALOG_INF(PSTR("new_colour_rate_ms=%d"), new_colour_rate_ms);
-          // ALOG_INF(PSTR("new_colour_rate_ms=%d - %d > %d"), millis() , live_pal_timing , new_colour_rate_ms);
-          live_pal_timing = millis();
+          // ALOG_INF(PSTR("new_colour_rate_ms=%d - %d > %d"), millis() , live_palette.timing1 , new_colour_rate_ms);
+          live_palette.timing1 = millis();
 
           
           _palette_container->encoded_colour_width = 3;
@@ -1496,10 +1495,10 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       break;
       case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_02__ID: // Random Hue, Slight Random Saturation (80 to 100%) ie 200/255 is 80%
       {        
-        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-palette_live_intensity))*100);
-        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(palette_live_intensity*100);
+        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-live_palette.intensity))*100);
+        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(live_palette.intensity*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - live_pal_timing > new_colour_rate_ms)        
+        if (millis() - live_palette.timing1 > new_colour_rate_ms)        
         {
           // palette->CRGB16Palette16_Palette.data = CRGBPalette16(  // currentPalette needs moved into the segment? not palette, since each segment needs its own. 
           //                 CHSV(random8(), random8(204, 255), 255),
@@ -1513,7 +1512,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), random8(40, 100), random8(220, 255)),
             CHSV(random8(), random8(40, 100), random8(220, 255))
           );               
-          live_pal_timing = millis();
+          live_palette.timing1 = millis();
           _palette_container->encoded_colour_width = 3;
           _palette_container->colours_in_palette = 16;
         }
@@ -1521,10 +1520,10 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       break;
       case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_03__ID: // S60-S100%
       {        
-        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-palette_live_intensity))*100);
-        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(palette_live_intensity*100);
+        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-live_palette.intensity))*100);
+        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(live_palette.intensity*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - live_pal_timing > new_colour_rate_ms)        
+        if (millis() - live_palette.timing1 > new_colour_rate_ms)        
         {
           // palette->CRGB16Palette16_Palette.data = CRGBPalette16(
           //                 CHSV(random8(), random8(153, 255), 255),
@@ -1541,7 +1540,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), (pastel_index == 2) ? random8(40, 100) : random8(153, 255), 255),
             CHSV(random8(), (pastel_index == 3) ? random8(40, 100) : random8(153, 255), 255)
           );
-          live_pal_timing = millis();
+          live_palette.timing1 = millis();
           _palette_container->encoded_colour_width = 3;
           _palette_container->colours_in_palette = 16;
         }
@@ -1549,10 +1548,10 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       break;
       case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_04__ID: // S60-S85%
       {        
-        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-palette_live_intensity))*100);
-        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(palette_live_intensity*100);
+        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-live_palette.intensity))*100);
+        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(live_palette.intensity*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - live_pal_timing > new_colour_rate_ms)        
+        if (millis() - live_palette.timing1 > new_colour_rate_ms)        
         {
           // palette->CRGB16Palette16_Palette.data = CRGBPalette16(
           //                 CHSV(random8(), random8(153, 217), 255),
@@ -1566,7 +1565,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), random8(100, 217), random8(10, 255)),
             CHSV(random8(), random8(100, 217), random8(10, 255))
           );                        
-          live_pal_timing = millis();
+          live_palette.timing1 = millis();
           _palette_container->encoded_colour_width = 3;
           _palette_container->colours_in_palette = 16;
         }
@@ -1574,10 +1573,10 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       break;
       case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID: // S0-S100%
       {        
-        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-palette_live_intensity))*100);
-        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(palette_live_intensity*100);
+        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-live_palette.intensity))*100);
+        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(live_palette.intensity*100);
         // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - live_pal_timing > new_colour_rate_ms)        
+        if (millis() - live_palette.timing1 > new_colour_rate_ms)        
         {
         //   palette->CRGB16Palette16_Palette.data = CRGBPalette16(
         //                   CHSV(random8(), random8(0, 255), 255),
@@ -1591,7 +1590,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
             CHSV(random8(), random8(153, 217), random8(127, 190)),
             CHSV(random8(), random8(153, 217), random8(190, 255))
           );                                                  
-          live_pal_timing = millis();
+          live_palette.timing1 = millis();
           _palette_container->encoded_colour_width = 3;
           _palette_container->colours_in_palette = 16;
         }
@@ -1609,8 +1608,8 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
       (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID) ||
       (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID)
     ){
-        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-palette_live_intensity))*100);
-        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(palette_live_intensity*100);
+        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-live_palette.intensity))*100);
+        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(live_palette.intensity*100);
         if(new_colour_rate_ms > cycle_time__rate_ms) cycle_time__rate_ms = new_colour_rate_ms + 100;
     }
 
@@ -2248,6 +2247,12 @@ uint8_t mAnimatorLight::GetNumberOfColoursInUNLOADEDPalette(uint16_t palette_id)
       case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAYTIME_01__ID:
         palette_colour_count = 1;
       break;
+      case mPalette::PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID:
+        palette_colour_count = 1;
+      break;
+      case mPalette::PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID:
+        palette_colour_count = 1;
+      break;
     //   case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__RGBCCT_PRIMARY_TO_SECONDARY_01__ID:
     //     palette_colour_count = 16;
     //  break;
@@ -2808,6 +2813,7 @@ bool mAnimatorLight::Segment::allocateColourData(uint16_t len) {
     if (mAnimatorLight::Segment::getUsedSegmentData() + len > MAX_SEGMENT_DATA) {
         DEBUG_LINE_HERE;
         ALOG_ERR(PM_MEMORY_INSUFFICIENT); // Log memory insufficient error
+        tkr_mqtt->brokers[0]->Send_Prefixed_P(PSTR("/logerror"),String("Segment colour data allocation failed: insufficient memory" + effect_id).c_str());
         effect_id = 0; // Reset effect ID
         return false; // Not enough memory
     }
@@ -2879,8 +2885,9 @@ void mAnimatorLight::Segment::resetIfRequired() {
      * @brief Potential issue with WLED effects, but removing aux options from reset since they may be used as config options
      * 
      */
-    aux0 = 0; aux1 = 0;  aux2 = 0;  aux3 = 0;   aux4 = 0;  live_pal_timing = 0;
+    aux0 = 0; aux1 = 0;  aux2 = 0;  aux3 = 0;   aux4 = 0;  
     
+    live_palette.timing1 = 0;
     
     reset = false; // setOption(SEG_OPTION_RESET, false);
     // Serial.println(DEBUG_INSERT_PAGE_BREAK "mAnimatorLight::Segment::resetIfRequired()"); //delay(5000);
@@ -4828,61 +4835,6 @@ void mAnimatorLight::loadCustomPalettes()
   //     break;
   //   }
   // }
-}
-
-
-bool mAnimatorLight::deserializeMap(uint8_t n) {
-  // 2D support creates its own ledmap (on the fly) if a ledmap.json exists it will overwrite built one.
-
-  char fileName[32];
-  strcpy_P(fileName, PSTR("/ledmap"));
-  if (n) sprintf(fileName +7, "%d", n);
-  strcat_P(fileName, PSTR(".json"));
-  bool isFile = FILE_SYSTEM.exists(fileName);
-
-  customMappingSize = 0; // prevent use of mapping if anything goes wrong
-  currentLedmap = 0;
-  if (n == 0 || isFile) interfaceUpdateCallMode = CALL_MODE_WS_SEND; // schedule WS update (to inform UI)
-
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-  if (!isFile && n==0 && isMatrix) {
-    setUpMatrix();
-    return false;
-  }
-  #endif
-
-  if (!isFile || !requestJSONBufferLock(7)) return false;
-
-  if (!tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_mfile->pDoc)) {
-    DEBUG_PRINT(F("ERROR Invalid ledmap in ")); DEBUG_PRINTLN(fileName);
-    releaseJSONBufferLock();
-    return false; // if file does not load properly then exit
-  }
-
-  JsonObject root = tkr_mfile->pDoc->as<JsonObject>();
-  // if we are loading default ledmap (at boot) set matrix width and height from the ledmap (compatible with WLED MM ledmaps)
-  if (isMatrix && n == 0 && (!root[F("width")].isNull() || !root[F("height")].isNull())) {
-    Segment::maxWidth  = min(max(root[F("width")].as<int>(), 1), 128);
-    Segment::maxHeight = min(max(root[F("height")].as<int>(), 1), 128);
-  }
-
-  if (customMappingTable) delete[] customMappingTable;
-  customMappingTable = new uint16_t[getLengthTotal()];
-
-  if (customMappingTable) {
-    DEBUG_PRINT(F("Reading LED map from ")); DEBUG_PRINTLN(fileName);
-    JsonArray map = root[F("map")];
-    if (!map.isNull() && map.size()) {  // not an empty map
-      customMappingSize = min((unsigned)map.size(), (unsigned)getLengthTotal());
-      for (unsigned i=0; i<customMappingSize; i++) customMappingTable[i] = (uint16_t) (map[i]<0 ? 0xFFFFU : map[i]);
-      currentLedmap = n;
-    }
-  } else {
-    DEBUG_PRINTLN(F("ERROR LED map allocation error."));
-  }
-
-  releaseJSONBufferLock();
-  return (customMappingSize > 0);
 }
 
 /*WrapEdge and Discrete should be flipped*/
@@ -8351,15 +8303,6 @@ void mAnimatorLight::updateInterfaces(uint8_t callMode)
 
   if (callMode == CALL_MODE_WS_SEND) return;
 
-  // #ifndef WLED_DISABLE_ALEXA
-  // if (espalexaDevice != nullptr && callMode != CALL_MODE_ALEXA) {
-  //   espalexaDevice->setValue(bri);
-  //   espalexaDevice->setColor(col[0], col[1], col[2]);
-  // }
-  // #endif
-  // #ifndef WLED_DISABLE_MQTT
-  // publishMqtt();
-  // #endif
 }
 
 

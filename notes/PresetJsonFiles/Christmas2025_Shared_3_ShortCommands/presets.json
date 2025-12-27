@@ -1,0 +1,677 @@
+
+{
+  "0": {},
+  "1": {
+    "n":"27aDEC Static Snowy02",
+    "Pal":"Snowy 02",
+    "Effects": {
+      "FX":"Static",
+      "IX":127,
+      "SX":0,
+      "GP":1,
+      "DC":0,
+      "Reverse":0,
+      "RA": 4000
+    },
+    "BrightnessRGB": 100
+  },
+  "2": {
+    "n":"FastPops Snowy02",
+    "Pal":"Snowy 02",
+    "Effects": {
+      "FX":"Firefly",
+      "IX":20,
+      "SX":255,
+      "GP":1,
+      "DC":7,
+      "RA": 50
+    },
+    "BrightnessRGB": 100
+  },
+  "3": {
+    "n":"Steps 2ColG1",
+    "Pal":"Colourful Pairs 01",
+    "Effects": {
+      "FX":"Stepping Palette",
+      "IX":1,
+      "SX":50,
+      "GP":1,
+      "DC":0,
+      "RA": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "4": {
+    "n":"*Steps 2ColG150",
+    "Pal":"Colourful Pairs 01",
+    "Effects": {
+      "FX":"Stepping Palette",
+      "IX":0,
+      "SX":20,
+      "GP":150,
+      "DC":0,
+      "RA": 1500
+    },
+    "BrightnessRGB": 100
+  },
+  "5": {
+    "n":"*Static ColG150",
+    "Pal":"Snowy 02",
+    "Effects": {
+      "FX":"Static",
+      "IX":20,
+      "SX":200,
+      "GP":150,
+      "DC":0,
+      "RA": 4000
+    },
+    "BrightnessRGB": 100
+  },  
+  "6": {
+    "n":"*Rotate Previous",    
+    "Effects": {
+      "FX":"Rotate Previous",
+      "IX":1,
+      "SX":10,
+      "GP":1,
+      "DC":0,
+      "Custom1":0,
+      "Check2":1,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+
+  "7": {
+    "n":"Spanned Random Gradient",    
+    "Pal":"Hue Cyclone",
+    "Effects": {
+      "FX":"Gradient",
+      "PalIX":10,
+      "IX":255,
+      "SX":1,
+      "GP":1,
+      "Custom1":255,
+      "DC":0,
+      "RA": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "8": {
+    "n":"Sweep Random",    
+    "Pal":"Snowy 02",
+    "Effects": {
+      "FX":"Sweep Random",
+      "SX":80,
+      "IX":50,
+      "GP":1,
+      "DC":0,
+      "RA": 25
+    },
+    "BrightnessRGB": 100
+  },
+
+
+
+  "10": {
+    "n":"*Twinkle Colours",    
+    "Pal":"Snowy 02",
+    "Pal2":"Cold White",
+    "Effects": {
+      "FX":"Twinkle Colours",
+      "IX":255,
+      "SX":255,
+      "GP":1,
+      "DC":6,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "11": {
+    "n":"*Candles Snowy 02",    
+    "Pal":"Snowy 02",
+    "Effects": {
+      "FX":"Candles",
+      "IX":255,
+      "SX":255,
+      "GP":1,
+      "DC":6,
+      "RA": 0
+    },
+    "BrightnessRGB": 100
+  },
+  "12": {
+    "n":"*Meteor Orange&Teal",    
+    "Pal":"Orange & Teal",
+    "Effects": {
+      "FX":"Meteor",
+      "IX":50,
+      "SX":255,
+      "GP":1,
+      "Check1":1,
+      "Check2":1,
+      "Check3":1,
+      "DC":0,
+      "RA": 25
+    },
+    "BrightnessRGB": 100
+  },
+  "13": {
+    "n":"*Meteor Colours Warm",    
+    "Pal":"Colours Warm",
+    "Effects": {
+      "FX":"Meteor",
+      "IX":50,
+      "SX":255,
+      "GP":1,
+      "Check1":1,
+      "Check2":1,
+      "Check3":1,
+      "DC":0,
+      "RA": 23
+    },
+    "BrightnessRGB": 100
+  },
+
+
+  "23": {
+    "n":"Juggle Snowy 02",    
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Juggle",
+      "RA":0,
+      "SX":255,
+      "IX":49,
+      "DC":5,
+      "GP":1
+    },
+    "BrightnessRGB": 100
+  },
+  "24": {
+    "n":"Colour Waves Snowy02",    
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Colour Waves",
+      "RA":0,
+      "SX":255,
+      "IX":49,
+      "DC":0,
+      "GP":1
+    },
+    "BrightnessRGB": 100
+  },
+  "25": {
+    "n":"FastPops C&W",    
+    "Pal": "Colour and White Swipe",
+    "Effects": {
+      "FX": "Firefly",
+      "RA":0,
+      "SX":255,
+      "IX":49,
+      "DC":0,
+      "GP":1
+    },
+    "BrightnessRGB": 100
+  },
+
+
+  "40": {
+    "n":"Twinkle W/Snow",    
+    "Pal":"Snowy 02",
+    "Pal2":"Cold White",
+    "Effects": {
+      "FX":"Flicker Palettes",
+      "IX":1,
+      "SX":0,
+      "GP":1,
+      "DC":10,
+      "Custom1":255,
+      "Custom2":200,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "41": {
+    "n":"Twinkle W/Blue",    
+    "Pal":"Blue",
+    "Pal2":"Cold White",
+    "Effects": {
+      "FX":"Flicker Palettes",
+      "IX":1,
+      "SX":0,
+      "GP":1,
+      "DC":10,
+      "Custom1":255,
+      "Custom2":36,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "42": {
+    "n":"Twinkle W/Green",    
+    "Pal":"Green",
+    "Pal2":"Cold White",
+    "Effects": {
+      "FX":"Flicker Palettes",
+      "IX":1,
+      "SX":0,
+      "GP":1,
+      "DC":10,
+      "Custom1":255,
+      "Custom2":36,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "43": {
+    "n":"Twinkle W/DOrange",    
+    "Pal":"Orange",
+    "Pal2":"Cold White",
+    "Effects": {
+      "FX":"Flicker Palettes",
+      "IX":1,
+      "SX":0,
+      "GP":1,
+      "DC":10,
+      "Custom1":255,
+      "Custom2":36,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "44": {
+    "n":"Twinkle W/Red",    
+    "Pal":"Red",
+    "Pal2":"Cold White",
+    "Effects": {
+      "FX":"Flicker Palettes",
+      "IX":1,
+      "SX":0,
+      "GP":1,
+      "DC":10,
+      "Custom1":255,
+      "Custom2":36,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+
+
+  "50": {
+    "n":"Day: B&W,Gp",    
+    "Pal":"Blue and White",
+    "Effects": {
+      "FX":"Static",
+      "IX":20,
+      "SX":255,
+      "GroupingPerc":16,
+      "DC":0,
+      "RA":20
+    },
+    "BrightnessRGB":100
+  },
+
+
+  "52": {
+    "n":"Day: C&W,G210",    
+    "Pal":"Colour and White Stripe",
+    "Effects": {
+      "FX":"Static",
+      "IX":20,
+      "SX":255,
+      "GP":10,
+      "DC":0,
+      "RA":20
+    },
+    "BrightnessRGB":100
+  },
+  "53": {
+    "n":"#Rotate",
+    "Effects": {
+      "FX":"Rotate Previous",
+      "IX":12,
+      "SX":255,
+      "GP":1,
+      "DC":0,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "54": {
+    "n":"Day: C&W,G210",    
+    "Pal":"IceCream Floats",
+    "Effects": {
+      "FX":"Tri Wipe",
+      "IX":255,
+      "SX":151,
+      "GP":1,
+      "DC":0
+    },
+    "Transition": {
+      "TimeMs": 0,
+      "RA": 23
+    },
+    "SegColour0":{
+      "RGBWC":[255,0,0,0,0],
+      "BrightnessRGB":100
+    },
+    "SegColour1":{
+      "RGBWC":[0,255,0,0,0],
+      "BrightnessRGB":100
+    },
+    "BrightnessRGB": 100
+  },
+  "55": {
+    "n":"Rot Prev Fast",    
+    "Pal":"Snowy 02",
+    "Effects": {
+      "FX":"Rotate Previous",
+      "IX":5,
+      "SX":255,
+      "GP":1,
+      "DC":0,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "56": {
+    "n":"Tri Wipe",    
+    "Pal":"Snowy 01",
+    "Effects": {
+      "FX":"Tri Wipe",
+      "IX":255,
+      "SX":151,
+      "GP":1,
+      "DC":0,
+      "RA":23
+    },
+    "SegColour0":{
+      "RGBWC":[255,0,0,0,0],
+      "BrightnessRGB":100
+    },
+    "SegColour1":{
+      "RGBWC":[0,255,0,0,0],
+      "BrightnessRGB":100
+    },
+    "BrightnessRGB": 100
+  },
+
+  "58": {
+    "n":"Twinkle FastIn/SlowOut",    
+    "Pal":"Party 16",
+    "Effects": {
+      "FX":"Twinkle FastIn/SlowOut",
+      "IX":255,
+      "SX":213,
+      "GP":1,
+      "DC":5,
+      "RA":23
+    },
+    "BrightnessRGB": 100
+  },
+  "59": {
+    "n":"Running Dual",    
+    "Pal":"Snowy 02",
+    "Effects": {
+      "FX":"Running Dual",
+      "IX":255,
+      "SX":64,
+      "GP":1,
+      "DC":0,
+      "RA":23
+    },
+    "SegColour1":{
+      "RGBWC":[53,49,53,0,0],
+      "BrightnessRGB":20
+    },
+    "BrightnessRGB": 100
+  },
+
+
+
+
+ 
+  "67": {
+    "n":"Saw Colour/white",    
+    "Pal":"Snowy 01",
+    "Effects": {
+      "FX":"Saw",
+      "IX":134,
+      "SX":64,
+      "GP":1,
+      "RA": 0
+    },
+    "SegColour0":{
+      "RGBWC":[40,40,40,0,0]
+    },
+    "SegColour1":{
+      "RGBWC":[40,40,40,0,0]
+    },
+    "BrightnessRGB": 100
+  },
+  "68": {
+    "n":"Rainbow Runner",
+    "SegColour0":{
+      "RGBWC":[20,20,20,0,0]
+    },
+    "Effects": {
+      "FX":"Rainbow Runner",
+      "IX":133,
+      "SX":11,
+      "GP":1,
+      "RA": 40
+    },
+    "BrightnessRGB": 100
+  },
+    
+  "110": {
+    "n":"Bands C&W D2",
+    "Pal":"Colour and White Stripe",
+    "Effects": {
+      "FX":"Bands",
+      "IX":1,
+      "SX":127,
+      "GP":1,
+      "DC":0,
+      "RA": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  
+  "111": {
+    "n":"Palettes InterLit RetroClown/dW",
+    "Pal":"Retro Clown",
+    "Effects": {
+      "FX":"Palettes InterLit",
+      "IX":44,
+      "SX":20,
+      "Custom1":255,
+      "Custom2":3,
+      "Check1":1,
+      "GP":1,
+      "DC":0,
+      "RA": 5000
+    },
+    "BrightnessRGB": 100
+  },
+
+
+
+  "112": {
+    "n":"RotatePrev 1pix",
+    "Effects": {
+      "FX":"Rotate Previous",
+      "IX":0,
+      "SX":255,
+      "GP":1,
+      "Custom1":0,
+      "DC":0,
+      "RA": 30
+    },
+    "BrightnessRGB": 100
+  },
+  
+
+
+  "83": {
+    "n":"Rot Prev Fast",    
+    "Pal":"Snowy 02",
+    "Effects": {
+      "FX":"Rotate Previous",
+      "IX":2,
+      "SX":255,
+      "GP":1,
+      "DC":0,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+
+
+  "163": {
+    "n":"Steps 2ColG1b",
+    "Pal":"Colourful Pairs 01",
+    "Effects": {
+      "FX":"Stepping Palette",
+      "IX":1,
+      "SX":80,
+      "GP":1,
+      "DC":5,
+      "RA": 3000
+    },
+    "BrightnessRGB": 100
+  },
+
+  
+  "151": {
+    "n":"Saw C/W",
+    "Pal":"Snowy 02",
+    "Effects": {
+      "FX":"Saw",
+      "IX":212,
+      "SX":64,
+      "GP":1,
+      "DC":5,
+      "RA": 0
+    },
+    "SegColour0":{
+      "RGBWC":[20,20,20,0,0]
+    },
+    "SegColour1":{
+      "RGBWC":[20,20,20,0,0]
+    },
+    "BrightnessRGB": 100
+  },
+
+  "152": {
+    "n":"*Twinkle Colours",    
+    "Pal":"Snowy 02",
+    "Pal2":"Cold White",
+    "Effects": {
+      "FX":"Twinkle Colours",
+      "IX":255,
+      "SX":255,
+      "GP":1,
+      "DC":50,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+
+
+  "91":{"playlist":{"ps":
+  [1,    2,  3,  4, 5,  6, 55,  7,  40, 10],"dur":
+  [100,100,200,100,50,200,100,200,200,200],"repeat":0,"end":0,"r":1},"on":true,"n":"N1 Init Test"},
+
+  "93":{"playlist":{"ps":
+  [1,    2,  3,  4, 5,  6, 55,  7,  40, 10, 41, 42],"dur":
+  [100,100,200,100,50,200,100,200,200,200,100,100],"repeat":0,"end":0,"r":1},"on":true,"n":"N2 Night"},
+
+  "96":{"playlist":{"ps":
+  [1,    2,  3,  4, 5,  6, 55,  7,  40, 10, 41, 42],"dur":
+  [100,100,400,400,50,200,100,200,200,200,100,100],"repeat":0,"end":0,"r":1},"on":true,"n":"N3 Night"},
+
+  "92":{"playlist":{"ps":
+  [50,    53, 42,  43,  44, 52, 53,   42,  43,  44],"dur":
+  [20,20, 200,100,50,   20,20, 200,100,50],"repeat":0,"end":0,"r":1},"on":true,"n":"D1 Init Test"},
+
+
+  
+  "100":{"playlist":{"ps":
+  [1,    2,  3,  4, 5,  6, 55,  7,  40, 10],"dur":
+  [100,100,200,100,50,200,100,200,200,200],"repeat":0,"end":0,"r":1},"on":true,"n":"2025 N1 Test"},
+
+  
+  "200":{"playlist":{"ps":
+  [1,    2,  3,  4, 5,  6, 55,  1, 7,  40, 10],"dur":
+  [100,100,200,100,50,200,100,50,200,200,200],"repeat":0,"end":0,"r":1},"on":true,"n":"2025 Whitehall N1"},
+  "210":{"playlist":{"ps":
+  [1,    2,  3,  4, 5,  6, 55,  7,  40, 10, 41, 42],"dur":
+  [100,100,400,400,50,200,100,200,200,200,100,100],"repeat":0,"end":0,"r":1},"on":true,"n":"25WhiteN2"},
+
+ 
+  
+  "201":{"playlist":{"psn":
+  [
+    "*FastPops Snowy02","*Steps 2ColG1","*Steps 2ColG150"
+    ],
+  "dur":[100,100,200],"repeat":0,"end":0,"r":1},"on":true,"n":"2025 Test 201"},
+
+
+
+  "204":{"playlist":{"ps":
+  [2,    1,  163,  4, 5,  112, 83,  7, 10],"dur":
+  [100,100,200,200,100,200,80,200,400],"repeat":0,"end":0,"r":1},"on":true,"n":"MeFront N1"},
+
+  
+  "205":{"playlist":{"ps":
+  [2,1,  163,4,5,112,83,  7,152, 
+    68, 151, 
+    41,42,43,44,
+    110,112,
+    111,112
+  ],"dur":
+  [100,100,  200,200,200,200,100,  300,300,
+    300,200,
+    100,100,100,100,
+    100,100,
+    100,100
+  ],"repeat":0,"end":0,"r":1},"on":true,"n":"ME BoxingDay N2"},
+
+
+  
+  
+  "153": {
+    "n":"Static Override",
+    "Pal":"Snowy 02",
+    "Effects": {
+      "FX":"Static",
+      "IX":127,
+      "SX":0,
+      "GP":1,
+      "DC":0,
+      "Reverse":0,
+      "RA": 4000
+    },
+    "BrightnessRGB": 100,
+    "Override":{"Animation":{"TimeMs":2000}}
+  },
+
+  "206":{"playlist":{"ps":
+  [153,  163,4,5,112,83,  7,152, 
+    68, 151, 
+    41,42,43,44,
+    111,112,
+    2,
+    110,112
+  ],"dur":
+  [100,  200,200,200,200,100,  300,300,
+    300,200,
+    100,100,100,100,
+    100,100,
+    100,
+    100,100
+  ],"repeat":0,"end":0,"r":1},"on":true,"n":"ME3"}
+
+  
+}

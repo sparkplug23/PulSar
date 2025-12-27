@@ -1,0 +1,17 @@
+{
+  "pixels_LeftMiddleRight": [
+    ["rowtype", "left", "middle", "right"], // header/descriptor row (index 0)
+
+    [1, 0,   26,  42],   // vertical row (included in cone surface)
+    [0, 43,  66,  82],   // traveller/across segment (can be skipped)
+    [1, 83, 106, 121]    // next vertical row
+  ],
+
+  // optional knobs (still minimal, not your big split config)
+  "options": {
+    "serpentine": true,          // alternate direction for each *vertical* row
+    "across_mode": "exclude"     // "exclude" | "append_rows"
+  },
+
+  "output": "ledmap.json"
+}

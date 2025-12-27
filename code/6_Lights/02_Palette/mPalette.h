@@ -351,6 +351,9 @@ class mPalette
       PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SOLID_COLOUR_OF_SKY__ID,
       PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__ID,
 
+      PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID,
+      PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID,
+
       PALETTELIST_DYNAMIC__LENGTH__ID
     };
 
@@ -426,6 +429,25 @@ class mPalette
     uint16_t tracked_previous_palette_index = 0; // current slot cursor 0..(N-1)
     uint8_t  tracked_prev_v                = 0; // last 0..255 input
     uint8_t  tracked_frac                  = 0; // fractional accumulator (Bresenham-style)
+
+// Cadence weights per slot (must sum to 100)
+#ifndef SEGCOLOUR_CYCLE_BLENDIN_PCT
+#define SEGCOLOUR_CYCLE_BLENDIN_PCT   20
+#endif
+#ifndef SEGCOLOUR_CYCLE_HOLD1_PCT
+#define SEGCOLOUR_CYCLE_HOLD1_PCT     30
+#endif
+#ifndef SEGCOLOUR_CYCLE_HOLD2_PCT
+#define SEGCOLOUR_CYCLE_HOLD2_PCT     30
+#endif
+#ifndef SEGCOLOUR_CYCLE_BLENDOUT_PCT
+#define SEGCOLOUR_CYCLE_BLENDOUT_PCT  20
+#endif
+
+// Start behaviour: if within this many ms of effect start, force segcol0 solid
+#ifndef SEGCOLOUR_CYCLE_START_LOCK_MS
+#define SEGCOLOUR_CYCLE_START_LOCK_MS 500
+#endif
 
 
      [[gnu::hot]] static uint32_t ColorFromPaletteU32(const CRGBPalette16 &pal, unsigned index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND);
