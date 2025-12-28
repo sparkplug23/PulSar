@@ -1108,142 +1108,106 @@ const TProgmemRGBPalette16 *const fastledPalettes[] PROGMEM = {
 /**
  * @brief Loads a palette into RAM for the segment, handling multiple palette types.
  *
- * This function loads the specified palette ID into RAM for active use within a segment. Depending on the type of the palette,
- * the function determines how to process and store the palette data. Supported palette types include:
+ * Loads the specified palette ID into RAM for active use within a segment. This is an event-driven
+ * construction step (not per-frame). Any temporal/sensor-driven changes belong in Update_LivePalettes().
  *
- * - **Static CRGBPalette16 Palettes**: Predefined palettes like Rainbow, Party, and Heat, which are directly assigned from
- *   flash (PROGMEM) to RAM.
- * - **Gradient Palettes**: Palettes containing gradient information that are processed dynamically from flash into RAM.
- * - **Static Custom Palettes**: Custom-defined palettes stored in flash, loaded directly into the segment's palette container.
- * - **Dynamic Palettes**: Palettes that are computed at runtime, such as solar azimuth palettes or dynamically generated color gradients.
- * - **Segment-Specific Palettes**: Palettes generated from segment-defined colors, including random colors or combinations of segment colors.
- *
- * The function also supports:
- * - Ensuring palette loading is thread-safe using an asynchronous lock.
- * - Using CRGBPalette16 for efficient rendering of effects that require fast access.
- * - Conversion from encoded gradient palettes into CRGBPalette16 to preserve gradient fidelity.
- * - Generation of random palettes based on parameters like intensity or hue ranges.
+ * Palette families handled here:
+ * - Static CRGBPalette16 palettes (FastLED PROGMEM pointers)
+ * - FastLED gradient palettes (parsed into CRGBPalette16 + stop indices)
+ * - Static encoded palettes (byte-packed)
+ * - Custom encoded palettes (user-defined, already in RAM)
+ * - Segment-colour derived palettes (built from segcol[])
+ * - Live palettes (dynamic):
+ *    A) Byte-packed live palettes  : PALETTELIST_DYNAMIC__COLOUR__ID_START..__LENGTH__ID
+ *       - Data buffer is owned by mPaletteI->dynamic_palettes[] and refreshed by Update_LivePalettes()
+ *    B) CRGBPalette16 live palettes: PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__...
+ *       - Palette data is generated/updated by Update_LivePalettes()
  *
  * @param palette_id The ID of the palette to load.
  * @param _palette_container The palette container to store the loaded data. If null, the segment's default container is used.
- *
- * @note This function assumes the palette data will be used exclusively from RAM after loading.
- *       For palette types with dynamic runtime behavior, updates are handled internally.
- *
- * @warning Ensure that palettes requiring gradient fidelity are loaded correctly, especially when converting from 
- *          gradient palettes to CRGBPalette16.
- *
- * @details 
- * - CRGBPalette16 palettes are directly assigned from predefined PROGMEM pointers.
- * - Gradient palettes are dynamically parsed into RAM, with gradient indices encoded for efficient lookups.
- * - Randomized palettes are generated based on the effect's intensity or timing requirements.
- *
- * @remarks The function releases the asynchronous lock upon completion and ensures that loaded palettes are 
- *          consistent and ready for use.
  */
 void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPaletteLoaded* _palette_container)
 {
-
   #ifdef ENABLE_DEVFEATURE_LIGHTING__LOAD_PALETTE_ASYNC_LOCK
-  while(LoadPalette_AsyncLock){ delay(1); }
-  LoadPalette_AsyncLock = true; // take control of the lock
+  while (LoadPalette_AsyncLock) { delay(1); }
+  LoadPalette_AsyncLock = true;
   #endif
 
   DEBUG_LINE_HERE_TRACE
-  uint8_t segment_index = 0;
-
   DEBUG_PRINT_F("Palette ID: %d", palette_id);
 
-
-  if (_palette_container == nullptr) 
-  {
-    if (palette == nullptr) 
-    {
+  // Resolve target container
+  if (_palette_container == nullptr) {
+    if (palette == nullptr) {
       ALOG_ERR(PSTR("No palette container passed and no default container set"));
+      #ifdef ENABLE_DEVFEATURE_LIGHTING__LOAD_PALETTE_ASYNC_LOCK
+      LoadPalette_AsyncLock = false;
+      #endif
       return;
     }
     _palette_container = palette;
   }
 
-  DEBUG_LINE_HERE_TRACE
-
+  // Track loaded ID (keep behaviour identical)
   palette->loaded_palette_id = palette_id;
-  DEBUG_LINE_HERE_TRACE
 
-  if(
-    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID))
-  ){   
+  // ---- Helpers (local, no ABI impact) ----
+  auto setPackedPtrAndMeta = [&](mPalette::PALETTE_DATA* ptr) {
+    _palette_container->pData                = ptr->data;
+    _palette_container->encoded_colour_width = mPaletteI->GetEncodedColourWidth(ptr->encoding);
+    _palette_container->colours_in_palette   = ptr->data.size() / _palette_container->encoded_colour_width;
+  };
 
-    // DEBUG_PRINT_F("Palette ID: %d", palette_id);
+  auto mirrorPackedIntoCRGB16 = [&]() {
+    #ifdef ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+    _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
+    buildCRGB16FromPacked(_palette_container->pData,
+                          _palette_container->encoded_colour_width,
+                          _palette_container->colours_in_palette,
+                          _palette_container->CRGB16Palette16_Palette.data);
+    #endif
+  };
 
-    
-    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID;
+  // ------------------------------------------------------------------
+  // 1) Static CRGBPalette16 (FastLED)
+  // ------------------------------------------------------------------
+  if ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) &&
+      (palette_id <  mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID))
+  {
+    const uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID;
     _palette_container->CRGB16Palette16_Palette.data = *fastledPalettes[palette_id_adj];
-
-
-    /******************************************************
-     * PALETTELIST_STATIC_CRGBPALETTE16__IDS
-     * No gradient information in palette bytes, CRGB16 will scale equally
-     ******************************************************/
-    // switch (palette_id)
-    // {
-    //   default:
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID:        _palette_container->CRGB16Palette16_Palette.data = RainbowColors_p; break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID:          _palette_container->CRGB16Palette16_Palette.data = PartyColors_p;   break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID:         _palette_container->CRGB16Palette16_Palette.data = CloudColors_p;   break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID:          _palette_container->CRGB16Palette16_Palette.data = LavaColors_p;    break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID:          _palette_container->CRGB16Palette16_Palette.data = OceanColors_p;   break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID:         _palette_container->CRGB16Palette16_Palette.data = ForestColors_p;  break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIPE_COLOUR__ID: _palette_container->CRGB16Palette16_Palette.data = RainbowStripeColors_p; break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__HEAT_COLOUR__ID:           _palette_container->CRGB16Palette16_Palette.data = HeatColors_p; break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_PARULA__ID:      _palette_container->CRGB16Palette16_Palette.data = Matlab_Purula_p; break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_TURBO__ID:       _palette_container->CRGB16Palette16_Palette.data = Matlab_Turbo_p; break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_HOT__ID:         _palette_container->CRGB16Palette16_Palette.data = Matlab_Hot_p; break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_COOL__ID:        _palette_container->CRGB16Palette16_Palette.data = Matlab_Cool_p; break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_SPRING__ID:      _palette_container->CRGB16Palette16_Palette.data = Matlab_Spring_p; break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_AUTUMN__ID:      _palette_container->CRGB16Palette16_Palette.data = Matlab_Autumn_p; break;
-    //   case mPalette::PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_JET__ID:         _palette_container->CRGB16Palette16_Palette.data = Matlab_Jet_p; break;
-    // }
-
-
-    _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
-    for(uint8_t i=0;i<16;i++){
-      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
-    }
-    
+    _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
     _palette_container->colours_in_palette = 16;
+  }
+  // ------------------------------------------------------------------
+  // 2) Static CRGBPalette16 Gradient (FastLED gradient table)
+  // ------------------------------------------------------------------
+  else if ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID) &&
+           (palette_id <  mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
+  {
+    const uint16_t gradient_id = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
 
-  }else
-  if(
-    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
-  ){   
-  // DEBUG_LINE_HERE
+    byte tcp[72]; // up to 18 entries
+    memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[gradient_id])), sizeof(tcp));
 
-    uint16_t gradient_id = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
-    byte tcp[72]; //support gradient palettes with up to 18 entries
-    memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[gradient_id])), 72);
-
-    /**
-     * @brief Loading uses the CRGBPalette to get the colours
-     **/
+    // Build CRGBPalette16 from gradient
     _palette_container->CRGB16Palette16_Palette.data.loadDynamicGradientPalette(tcp);
 
-    /**
-     * @brief To get the gradients data exactly, manually parse them 
-     * 
-     */    
+    // Parse gradient stop indices exactly
     _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
     TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(tcp);
     TRGBGradientPaletteEntryUnion u;
-    // Count entries
+
+    // Count entries (kept for parity; not required otherwise)
     uint16_t count = 0;
     do {
-        u = *(ent + count);
-        count++;
-    } while ( u.index != 255);
+      u = *(ent + count);
+      count++;
+    } while (u.index != 255);
+
     u = *ent;
     int indexstart = 0;
-    while( indexstart < 255) {
+    while (indexstart < 255) {
       indexstart = u.index;
       _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(u.index);
       ent++;
@@ -1251,385 +1215,755 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     }
 
     _palette_container->colours_in_palette = 16;
-    // ALOG_INF(PSTR("palette%d (seg%d) %d %d %d"), gradient_id, seg_i, _palette_container->CRGB16Palette16_Palette.data[0].r, _palette_container->CRGB16Palette16_Palette.data[0].g, _palette_container->CRGB16Palette16_Palette.data[0].b );
-   
-  }else
-  if(
-    ((palette_id >= mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID))     
-  ){      
-    DEBUG_LINE_HERE_TRACE
-    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;
-    // ALOG_HGL(PSTR("ERROR HERE palette_id_adj %d"),palette_id_adj); 
+  }
+  // ------------------------------------------------------------------
+  // 3) Static byte-packed palettes
+  // ------------------------------------------------------------------
+  else if ((palette_id >= mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID) &&
+           (palette_id <  mPalette::PALETTELIST_STATIC_LENGTH__ID))
+  {
+    const uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;
 
-    mPalette::PALETTE_DATA *ptr = &mPaletteI->static_palettes[palette_id_adj];
-    _palette_container->pData = ptr->data;
-    _palette_container->encoded_colour_width = mPaletteI->GetEncodedColourWidth(ptr->encoding);
-    _palette_container->colours_in_palette = ptr->data.size() / _palette_container->encoded_colour_width;
-
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
-    // Mirror into CRGBPalette16 for 2D/WLED effects
-    _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
-    for (uint8_t i = 0; i < 16; i++) {
-      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0, 15, 0, 255));
-    }
-    buildCRGB16FromPacked(_palette_container->pData,
-                          _palette_container->encoded_colour_width,
-                          _palette_container->colours_in_palette,
-                      _palette_container->CRGB16Palette16_Palette.data);
-
-    #endif
-
-
-    
-//     #ifdef ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS
-// // Gradient palettes are loaded into CRGB16Palettes in such a way
-//     // that, if possible, every color represented in the gradient palette
-//     // is also represented in the CRGBPalette16.
-//     // For example, consider a gradient palette that is all black except
-//     // for a single, one-element-wide (1/256th!) spike of red in the middle:
-//     //     0,   0,0,0
-//     //   124,   0,0,0
-//     //   125, 255,0,0  // one 1/256th-palette-wide red stripe
-//     //   126,   0,0,0
-//     //   255,   0,0,0
-//     // A naive conversion of this 256-element palette to a 16-element palette
-//     // might accidentally completely eliminate the red spike, rendering the
-//     // palette completely black.
-//     // However, the conversions provided here would attempt to include a
-//     // the red stripe in the output, more-or-less as faithfully as possible.
-//     // So in this case, the resulting CRGBPalette16 palette would have a red
-//     // stripe in the middle which was 1/16th of a palette wide -- the
-//     // narrowest possible in a CRGBPalette16.
-//     // This means that the relative width of stripes in a CRGBPalette16
-//     // will be, by definition, different from the widths in the gradient
-//     // palette.  This code attempts to preserve "all the colors", rather than
-//     // the exact stripe widths at the expense of dropping some colors.
-
-
-//     // Lets to show its possible with a default RGBP
-
-//     _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
-//     for(uint8_t i=0;i<16;i++){
-//       _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
-//     }
-
-//     _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(
-//                       CRGB(255,0,0),
-//                       CRGB(0,255,0),
-//                       CRGB(0,0,255),
-//                       CRGB(255,0,255)
-//       );
-//       // loadDynamicGradientPalette should enable with one (of 255) width to define edges of my palettes, and hence give them as non gradients when not a gradient, or as gradient when they are.
-
-
-
-    // #endif // ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS
-
-  }else
-  // Only some dynamic needs loading
-  // The colours should have been placed into the dynamic_palette memory, then here it gets copied/loaded again
-  if(
-    ((palette_id >= mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START) && (palette_id < mPalette::PALETTELIST_DYNAMIC__LENGTH__ID))     
-  ){      
-    DEBUG_LINE_HERE_TRACE
-    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START;
-    
     #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-    ALOG_HGL(PSTR("LOADING PALETTELIST_DYNAMIC palette_id_adj %d %d %d"),palette_id_adj, palette_id, mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START); 
-    #endif
-    
-  DEBUG_LINE_HERE_TRACE
-    mPalette::PALETTE_DATA *ptr = &mPaletteI->dynamic_palettes[palette_id_adj];
-    _palette_container->pData = ptr->data;
-    
-    _palette_container->encoded_colour_width = mPaletteI->GetEncodedColourWidth(ptr->encoding);
-    _palette_container->colours_in_palette = ptr->data.size() / _palette_container->encoded_colour_width;
-    DEBUG_LINE_HERE_TRACE
-
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
-    // Mirror into CRGBPalette16 for 2D/WLED effects
-    // Mirror into CRGBPalette16
-    _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
-    for (uint8_t i = 0; i < 16; i++) {
-      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0, 15, 0, 255));
-    }
-    buildCRGB16FromPacked(_palette_container->pData,
-                          _palette_container->encoded_colour_width,
-                          _palette_container->colours_in_palette,
-                          _palette_container->CRGB16Palette16_Palette.data);
-    #endif
-    
-  }else
-  if(
-    ((palette_id >= mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)  && (palette_id < mPaletteI->GetPaletteListLength())) // Custom palettes
-  ){
-    // Preloading is not needed, already in ram
-    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
-    mPalette::PALETTE_DATA *ptr = &mPaletteI->custom_palettes[palette_id_adj];
-    _palette_container->pData = ptr->data;
-    _palette_container->encoded_colour_width = mPaletteI->GetEncodedColourWidth(ptr->encoding);
-    _palette_container->colours_in_palette = ptr->data.size() / _palette_container->encoded_colour_width;
-
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
-    // Mirror into CRGBPalette16 for 2D/WLED effects
-    _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
-    for (uint8_t i = 0; i < 16; i++) {
-      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0, 15, 0, 255));
-    }
-    buildCRGB16FromPacked(_palette_container->pData,
-                          _palette_container->encoded_colour_width,
-                          _palette_container->colours_in_palette,
-                          _palette_container->CRGB16Palette16_Palette.data);
-
+    ALOG_HGL(PSTR("LOADING PALETTELIST_STATIC palette_id_adj %d %d %d"),
+             palette_id_adj, palette_id, mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID);
     #endif
 
-  }else
-  if(
-    (palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID)
-  ){
-    // Preloading is not needed, already in ram
-          _palette_container->colours_in_palette = 1;
+    mPalette::PALETTE_DATA* ptr = &mPaletteI->static_palettes[palette_id_adj];
+    setPackedPtrAndMeta(ptr);
+    mirrorPackedIntoCRGB16();
   }
-  else
-  if(
-    (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID) ||
-    (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID)
-  ){  
-  // DEBUG_LINE_HERE
+  // ------------------------------------------------------------------
+  // 4) Custom palettes (user-defined, already in RAM)
+  // ------------------------------------------------------------------
+  else if ((palette_id >= mPalette::PALETTELIST_DYNAMIC__LENGTH__ID) &&
+           (palette_id <  mPaletteI->GetPaletteListLength()))
+  {
+    const uint16_t palette_id_adj =
+      palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
 
-    // ALOG_ERR(PSTR("Dynamic Palette  NEEDS MOVES WITH OTHER DYANMIC %d"), palette_id);
-    
-    _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
-    for(uint8_t i=0;i<16;i++){
-      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(map(i, 0,15, 0, 255));
-    }
-          _palette_container->colours_in_palette = 16;
-
-    switch(palette_id)
-    {
-      case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID:
-      { //primary + secondary
-        CRGB prim = segcol[0].getU32();
-        CRGB sec  = segcol[1].getU32();
-        _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,prim,sec,sec); 
-      }
-      break;
-      case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_THREE_123__ID:
-      { //primary + secondary + tertiary
-        CRGB prim = segcol[0].getU32();
-        CRGB sec  = segcol[1].getU32();
-        CRGB ter  = segcol[2].getU32();
-        _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,sec,ter); 
-      }
-      break;    
-      case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FOUR_1234__ID:
-      { //primary + secondary + tertiary
-        CRGB prim = segcol[0].getU32();
-        CRGB sec  = segcol[1].getU32();
-        CRGB ter  = segcol[2].getU32();
-        CRGB four = segcol[3].getU32();
-        _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,sec,ter,four); 
-      }
-      break;    
-      case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FIVE_12345__ID:
-      { //primary + secondary + tertiary
-        CRGB prim = segcol[0].getU32();
-        CRGB sec  = segcol[1].getU32();
-        CRGB ter  = segcol[2].getU32();
-        CRGB four = segcol[3].getU32();
-        CRGB five = segcol[4].getU32();
-        _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,prim,prim, sec,sec,sec, ter,ter,ter, four,four,four, five,five,five,five); 
-      }
-      break;    
-      case mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID:
-      { //primary + secondary + tertiary
-        CRGB prim = segcol[0].getU32();
-        CRGB sec  = segcol[1].getU32();
-        CRGB ter  = segcol[2].getU32();
-        CRGB four  = segcol[3].getU32();
-        CRGB five  = segcol[4].getU32();
-        _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim,sec,ter,four,five, prim,sec,ter,four,five, prim,sec,ter,four,five, five); 
-      }
-      break;    
-      /**
-       * Keep these here, because a palette "loads" this once, and not with the GetColourFromPalette
-       * 
-       * 
-       */
-      case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID:
-      {        
-        /*
-        intensity ranges from 0 to 255.
-        The term (255 - intensity) ranges from 255 (when intensity = 0) to 0 (when intensity = 255).
-        The multiplication ((255 - intensity) * 100) ranges from 255 * 100 = 25500 ms to 0 * 100 = 0 ms.
-        Adding 1000 gives the final range for new_colour_rate_ms:
-            Minimum: 1000 + 0 = 1000 ms (1 second).
-            Maximum: 1000 + 25500 = 26500 ms (26.5 seconds).
-        */
-        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-live_palette.intensity))*100);
-        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(live_palette.intensity*100);
-        // ALOG_INF(PSTR("palix%d,new_colour_rate_ms=%d"),live_palette.intensity,new_colour_rate_ms);
-        if (millis() - live_palette.timing1 > new_colour_rate_ms)        
-        {
-          // palette->CRGB16Palette16_Palette.data = CRGBPalette16(
-          //                 CHSV(random8(), 255, random8(128, 255)),
-          //                 CHSV(random8(), 255, random8(128, 255)),
-          //                 CHSV(random8(), 192, random8(128, 255)),
-          //                 CHSV(random8(), 255, random8(128, 255))
-          // );
-          palette->CRGB16Palette16_Palette.data = CRGBPalette16(
-            CHSV(random8(), 255, 255),
-            CHSV(random8(), 255, 255),
-            CHSV(random8(), 255, 255),
-            CHSV(random8(), 255, 255)
-          );
-          ALOG_INF(PSTR("new_colour_rate_ms=%d"), new_colour_rate_ms);
-          // ALOG_INF(PSTR("new_colour_rate_ms=%d - %d > %d"), millis() , live_palette.timing1 , new_colour_rate_ms);
-          live_palette.timing1 = millis();
-
-          
-          _palette_container->encoded_colour_width = 3;
-          _palette_container->colours_in_palette = 16;
-        }
-      }
-      break;
-      case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_02__ID: // Random Hue, Slight Random Saturation (80 to 100%) ie 200/255 is 80%
-      {        
-        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-live_palette.intensity))*100);
-        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(live_palette.intensity*100);
-        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - live_palette.timing1 > new_colour_rate_ms)        
-        {
-          // palette->CRGB16Palette16_Palette.data = CRGBPalette16(  // currentPalette needs moved into the segment? not palette, since each segment needs its own. 
-          //                 CHSV(random8(), random8(204, 255), 255),
-          //                 CHSV(random8(), random8(204, 255), 255),
-          //                 CHSV(random8(), random8(204, 255), 255),
-          //                 CHSV(random8(), random8(204, 255), 255)
-          // );                  
-          palette->CRGB16Palette16_Palette.data = CRGBPalette16(
-            CHSV(random8(), random8(40, 100), random8(220, 255)),
-            CHSV(random8(), random8(40, 100), random8(220, 255)),
-            CHSV(random8(), random8(40, 100), random8(220, 255)),
-            CHSV(random8(), random8(40, 100), random8(220, 255))
-          );               
-          live_palette.timing1 = millis();
-          _palette_container->encoded_colour_width = 3;
-          _palette_container->colours_in_palette = 16;
-        }
-      }
-      break;
-      case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_03__ID: // S60-S100%
-      {        
-        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-live_palette.intensity))*100);
-        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(live_palette.intensity*100);
-        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - live_palette.timing1 > new_colour_rate_ms)        
-        {
-          // palette->CRGB16Palette16_Palette.data = CRGBPalette16(
-          //                 CHSV(random8(), random8(153, 255), 255),
-          //                 CHSV(random8(), random8(153, 255), 255),
-          //                 CHSV(random8(), random8(153, 255), 255),
-          //                 CHSV(random8(), random8(153, 255), 255)
-          // );         
-          
-          uint8_t pastel_index = random8(4);  // force 1 entry to be pastel
-
-          palette->CRGB16Palette16_Palette.data = CRGBPalette16(
-            CHSV(random8(), (pastel_index == 0) ? random8(40, 100) : random8(153, 255), 255),
-            CHSV(random8(), (pastel_index == 1) ? random8(40, 100) : random8(153, 255), 255),
-            CHSV(random8(), (pastel_index == 2) ? random8(40, 100) : random8(153, 255), 255),
-            CHSV(random8(), (pastel_index == 3) ? random8(40, 100) : random8(153, 255), 255)
-          );
-          live_palette.timing1 = millis();
-          _palette_container->encoded_colour_width = 3;
-          _palette_container->colours_in_palette = 16;
-        }
-      }
-      break;
-      case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_04__ID: // S60-S85%
-      {        
-        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-live_palette.intensity))*100);
-        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(live_palette.intensity*100);
-        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - live_palette.timing1 > new_colour_rate_ms)        
-        {
-          // palette->CRGB16Palette16_Palette.data = CRGBPalette16(
-          //                 CHSV(random8(), random8(153, 217), 255),
-          //                 CHSV(random8(), random8(153, 217), 255),
-          //                 CHSV(random8(), random8(153, 217), 255),
-          //                 CHSV(random8(), random8(153, 217), 255)
-          // );                          
-          palette->CRGB16Palette16_Palette.data = CRGBPalette16(
-            CHSV(random8(), random8(100, 217), random8(10, 255)),
-            CHSV(random8(), random8(100, 217), random8(10, 255)),
-            CHSV(random8(), random8(100, 217), random8(10, 255)),
-            CHSV(random8(), random8(100, 217), random8(10, 255))
-          );                        
-          live_palette.timing1 = millis();
-          _palette_container->encoded_colour_width = 3;
-          _palette_container->colours_in_palette = 16;
-        }
-      }
-      break;
-      case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID: // S0-S100%
-      {        
-        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-live_palette.intensity))*100);
-        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(live_palette.intensity*100);
-        // ALOG_INF(PSTR("new_colour_rate_ms=%d"),new_colour_rate_ms);
-        if (millis() - live_palette.timing1 > new_colour_rate_ms)        
-        {
-        //   palette->CRGB16Palette16_Palette.data = CRGBPalette16(
-        //                   CHSV(random8(), random8(0, 255), 255),
-        //                   CHSV(random8(), random8(0, 255), 255),
-        //                   CHSV(random8(), random8(0, 255), 255),
-        //                   CHSV(random8(), random8(0, 255), 255)
-        //                   );
-          palette->CRGB16Palette16_Palette.data = CRGBPalette16(
-            CHSV(random8(), random8(153, 217), random8(0, 68)),
-            CHSV(random8(), random8(153, 217), random8(69, 127)),
-            CHSV(random8(), random8(153, 217), random8(127, 190)),
-            CHSV(random8(), random8(153, 217), random8(190, 255))
-          );                                                  
-          live_palette.timing1 = millis();
-          _palette_container->encoded_colour_width = 3;
-          _palette_container->colours_in_palette = 16;
-        }
-      }
-      break;    
-    }
-    
-    
-    /**
-     * To allow smooth transitions, effect period must be longer than intensity driven update rate
-     * This is only need when speed (blending) is active
-     **/
-    if(
-      (speed != 255) &&
-      (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID) ||
-      (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID)
-    ){
-        // uint32_t new_colour_rate_ms = 1000 + (((uint32_t)(255-live_palette.intensity))*100);
-        uint32_t new_colour_rate_ms = 1000 + (uint32_t)(live_palette.intensity*100);
-        if(new_colour_rate_ms > cycle_time__rate_ms) cycle_time__rate_ms = new_colour_rate_ms + 100;
-    }
-
+    mPalette::PALETTE_DATA* ptr = &mPaletteI->custom_palettes[palette_id_adj];
+    setPackedPtrAndMeta(ptr);
+    mirrorPackedIntoCRGB16();
   }
+  // ------------------------------------------------------------------
+  // 5) Single segment colour (no preload needed)
+  // ------------------------------------------------------------------
+  else if ((palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) &&
+           (palette_id <  mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID))
+  {
+    _palette_container->colours_in_palette = 1;
+  }
+  // ------------------------------------------------------------------
+  // Segment-colour derived CRGBPalette16 palettes
+  // ------------------------------------------------------------------
+  else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)
+  {
+    _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
+    _palette_container->colours_in_palette = 16;
 
-  // ALOG_INF(PSTR("ColLen %d"), _palette_container->colours_in_palette);
+    const CRGB prim = segcol[0].getU32();
+    const CRGB sec  = segcol[1].getU32();
+    _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim, prim, sec, sec);
+  }
+  else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_THREE_123__ID)
+  {
+    _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
+    _palette_container->colours_in_palette = 16;
 
-  // On load now, number of pixels in palette MUST be set here
-  // No longer reloading in realtime, but only calculating on Load to improve performance. 
-  // Calling function here now, but should roll it into the above code directly.
-  // pSEGMENT.Get
+    const CRGB prim = segcol[0].getU32();
+    const CRGB sec  = segcol[1].getU32();
+    const CRGB ter  = segcol[2].getU32();
+    _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim, sec, ter);
+  }
+  else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FOUR_1234__ID)
+  {
+    _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
+    _palette_container->colours_in_palette = 16;
 
-  // DEBUG_LINE_HERE
+    const CRGB prim = segcol[0].getU32();
+    const CRGB sec  = segcol[1].getU32();
+    const CRGB ter  = segcol[2].getU32();
+    const CRGB four = segcol[3].getU32();
+    _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim, sec, ter, four);
+  }
+  else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FIVE_12345__ID)
+  {
+    _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
+    _palette_container->colours_in_palette = 16;
+
+    const CRGB prim = segcol[0].getU32();
+    const CRGB sec  = segcol[1].getU32();
+    const CRGB ter  = segcol[2].getU32();
+    const CRGB four = segcol[3].getU32();
+    const CRGB five = segcol[4].getU32();
+    _palette_container->CRGB16Palette16_Palette.data =
+      CRGBPalette16(prim, prim, prim, sec, sec, sec, ter, ter, ter, four, four, four, five, five, five, five);
+  }
+  else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID)
+  {
+    _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
+    _palette_container->colours_in_palette = 16;
+
+    const CRGB prim = segcol[0].getU32();
+    const CRGB sec  = segcol[1].getU32();
+    const CRGB ter  = segcol[2].getU32();
+    const CRGB four = segcol[3].getU32();
+    const CRGB five = segcol[4].getU32();
+
+    _palette_container->CRGB16Palette16_Palette.data =
+      CRGBPalette16(prim, sec, ter, four, five,
+                    prim, sec, ter, four, five,
+                    prim, sec, ter, four, five,
+                    five);
+  }
+  // ------------------------------------------------------------------
+  // 7) Live palettes (dynamic) - BYTE PACKED
+  //    (Update_LivePalettes() owns refresh; Load just points at the buffer)
+  // ------------------------------------------------------------------
+  else if ((palette_id >= mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START) &&
+           (palette_id <  mPalette::PALETTELIST_DYNAMIC__LENGTH__ID))
+  {
+    const uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START;
+
+    #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+    ALOG_HGL(PSTR("LOADING LIVE(BYTEPACK) palette_id_adj %d %d %d"),
+             palette_id_adj, palette_id, mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START);
+    #endif
+
+    mPalette::PALETTE_DATA* ptr = &mPaletteI->dynamic_palettes[palette_id_adj];
+    setPackedPtrAndMeta(ptr);
+    mirrorPackedIntoCRGB16();
+  }
+  // ------------------------------------------------------------------
+  // 8) Live palettes (dynamic) - CRGBPALETTE16 (randomised etc.)
+  //    (Seed once here; periodic refresh is only Update_LivePalettes)
+  // ------------------------------------------------------------------
+  else if ((palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) &&
+           (palette_id <  mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID))
+  {
+    _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
+    _palette_container->encoded_colour_width = 3;
+    _palette_container->colours_in_palette   = 16;
+
+    // Seed once via the single source of truth (no periodic timing here).
+    Update_LivePalettes(palette_id);
+  }
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING__LOAD_PALETTE_ASYNC_LOCK
-  LoadPalette_AsyncLock = false; // release lock
+  LoadPalette_AsyncLock = false;
   #endif
-  
+}
+
+
+
+void mAnimatorLight::Segment::Update_LivePalettes(uint16_t pal_id, uint16_t preview_index, bool preview_mode)
+{
+  // Default: use current runtime palette if pal_id == 0xFFFF
+  const uint16_t pid = (pal_id == 0xFFFF) ? palette_id : pal_id;
+
+    // ------------------------------------------------------------------
+// LIVE: CRGBPalette16 Randomise (Elapsed time)
+// - Single source of truth for refresh timing and palette generation
+// - Also enforces cycle_time__rate_ms guard each call (avoid overruns)
+// ------------------------------------------------------------------
+if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) &&
+    (pid <  mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID))
+{
+  // Web preview: safest is to freeze whatever is currently loaded,
+  // otherwise preview "moves" while you’re in UI.
+  if (preview_mode) {
+    return;
+  }
+
+  // --- Guard: ensure effect cycle time >= palette refresh interval when blending is active ---
+  // (This needs to run each time, because speed/intensity can change live.)
+  if (speed != 255) {
+    const uint32_t new_colour_rate_ms = 1000UL + (uint32_t)(live_palette.intensity * 100UL);
+    if (new_colour_rate_ms >= cycle_time__rate_ms) {
+      cycle_time__rate_ms = new_colour_rate_ms + 100UL;
+    }
+  }
+
+  const uint32_t now_ms = millis();
+
+  // Seed exactly once after load/reset
+  if (live_palette.timing1 == 0) {
+    live_palette.timing1 = now_ms;
+    // fallthrough: generate immediately on first call
+  } else {
+    const uint32_t new_colour_rate_ms = 1000UL + (uint32_t)(live_palette.intensity * 100UL);
+    // ALOG_INF(PSTR("palix%d,new_colour_rate_ms=%d"),live_palette.intensity,new_colour_rate_ms);
+    if ((now_ms - live_palette.timing1) < new_colour_rate_ms) return;
+    live_palette.timing1 = now_ms;
+  }
+
+  // ALOG_INF(PSTR("Updating LIVE palette ID %d\t%d"), pid, live_palette.timing1);
+
+  switch (pid)
+  {
+    default:
+    case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID:
+      palette->CRGB16Palette16_Palette.data = CRGBPalette16(
+        CHSV(random8(), 255, 255),
+        CHSV(random8(), 255, 255),
+        CHSV(random8(), 255, 255),
+        CHSV(random8(), 255, 255)
+      );
+      break;
+
+    case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_02__ID:
+      palette->CRGB16Palette16_Palette.data = CRGBPalette16(
+        CHSV(random8(), random8(40, 100), random8(220, 255)),
+        CHSV(random8(), random8(40, 100), random8(220, 255)),
+        CHSV(random8(), random8(40, 100), random8(220, 255)),
+        CHSV(random8(), random8(40, 100), random8(220, 255))
+      );
+      break;
+
+    case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_03__ID: {
+      const uint8_t pastel_index = random8(4);
+      palette->CRGB16Palette16_Palette.data = CRGBPalette16(
+        CHSV(random8(), (pastel_index == 0) ? random8(40, 100) : random8(153, 255), 255),
+        CHSV(random8(), (pastel_index == 1) ? random8(40, 100) : random8(153, 255), 255),
+        CHSV(random8(), (pastel_index == 2) ? random8(40, 100) : random8(153, 255), 255),
+        CHSV(random8(), (pastel_index == 3) ? random8(40, 100) : random8(153, 255), 255)
+      );
+    } break;
+
+    case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_04__ID:
+      palette->CRGB16Palette16_Palette.data = CRGBPalette16(
+        CHSV(random8(), random8(100, 217), random8(10, 255)),
+        CHSV(random8(), random8(100, 217), random8(10, 255)),
+        CHSV(random8(), random8(100, 217), random8(10, 255)),
+        CHSV(random8(), random8(100, 217), random8(10, 255))
+      );
+      break;
+
+    case mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID:
+      palette->CRGB16Palette16_Palette.data = CRGBPalette16(
+        CHSV(random8(), random8(153, 217), random8(0, 68)),
+        CHSV(random8(), random8(153, 217), random8(69, 127)),
+        CHSV(random8(), random8(153, 217), random8(127, 190)),
+        CHSV(random8(), random8(153, 217), random8(190, 255))
+      );
+      break;
+  }
+
+  return;
+}
+
+  // ------------------------------------------------------------------
+  // LIVE: TimeReactive SegCol Blend (Minute sawtooth)
+  // ------------------------------------------------------------------
+  if (pid == mPalette::PALETTELIST_DYNAMIC__TIMEREACTIVE__SEGMENT_COLOUR__MINUTE_BLEND__ID)
+  {
+    float progress;
+
+    if (preview_mode) {
+      // Expect preview_index = 0 or 1 only
+      progress = (preview_index == 0) ? 0.0f : 1.0f;
+    } else {
+      uint8_t s = tkr_time->RtcTime.second;
+      progress = (s < 30) ? mSupport::mapfloat(s, 0, 29, 0.0f, 1.0f) : mSupport::mapfloat(s, 30, 59, 1.0f, 0.0f);
+    }
+
+    const RgbwwColor c1  = segcol[0].colour;
+    const RgbwwColor c2  = segcol[1].colour;
+    const RgbwwColor out = RgbwwColor::LinearBlend(c1, c2, progress);
+
+    palette->solid_colour.colourRGBW = RGBW32(out.R, out.G, out.B, out.WW);
+    palette->solid_colour.whiteWW    = out.CW;
+    return;
+  }
+
+
+  // ------------------------------------------------------------------
+  // LIVE: TimeReactive SegCol Blend (Hour sawtooth)
+  // ------------------------------------------------------------------
+  if (pid == mPalette::PALETTELIST_DYNAMIC__TIMEREACTIVE__SEGMENT_COLOUR__HOUR_BLEND__ID)
+  {
+    float progress;
+
+    if (preview_mode) {
+      // Expect preview_index = 0 or 1 only
+      progress = (preview_index == 0) ? 0.0f : 1.0f;
+    } else {
+      uint8_t s = tkr_time->RtcTime.hour;
+      progress = (s < 30) ? mSupport::mapfloat(s, 0, 29, 0.0f, 1.0f) : mSupport::mapfloat(s, 30, 59, 1.0f, 0.0f);
+    }
+
+    const RgbwwColor c1  = segcol[0].colour;
+    const RgbwwColor c2  = segcol[1].colour;
+    const RgbwwColor out = RgbwwColor::LinearBlend(c1, c2, progress);
+
+    palette->solid_colour.colourRGBW = RGBW32(out.R, out.G, out.B, out.WW);
+    palette->solid_colour.whiteWW    = out.CW;
+    return;
+  }
+
+  // ------------------------------------------------------------------
+  // LIVE: SegCol Cycle (Immediate)
+  // ------------------------------------------------------------------
+  if (pid == mPalette::PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID)
+  {
+    uint8_t k = 0;
+
+    if (preview_mode) {
+      // serializer iterates 0..4 (after your colours_in_palette override)
+      k = (uint8_t)preview_index;
+      if (k > 4) k = 4;
+    } else {
+      const uint32_t now_ms = millis();
+      if (live_palette.timing1 == 0) live_palette.timing1 = now_ms;
+
+      const uint32_t T_max_ms = 25000UL;
+      uint32_t T_ms = (uint32_t)live_palette.intensity * T_max_ms / 255UL;
+      if (T_ms < 1000UL) T_ms = 1000UL;
+
+      const uint32_t t_ms = (now_ms - live_palette.timing1) % T_ms;
+
+      const uint32_t s1 = (1UL * T_ms) / 5UL;
+      const uint32_t s2 = (2UL * T_ms) / 5UL;
+      const uint32_t s3 = (3UL * T_ms) / 5UL;
+      const uint32_t s4 = (4UL * T_ms) / 5UL;
+
+      if      (t_ms < s1) k = 0;
+      else if (t_ms < s2) k = 1;
+      else if (t_ms < s3) k = 2;
+      else if (t_ms < s4) k = 3;
+      else                k = 4;
+    }
+
+    const RgbwwColor c = segcol[k].colour;
+    palette->solid_colour.colourRGBW = RGBW32(c.R, c.G, c.B, c.WW);
+    palette->solid_colour.whiteWW    = c.CW;
+    return;
+  }
+
+  // ------------------------------------------------------------------
+  // LIVE: SegCol Cycle (Blending + controllable dwell)
+  // ------------------------------------------------------------------
+  if (pid == mPalette::PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID)
+  {
+    if (preview_mode) {
+      // For preview you asked for 5 discrete colours (not blended)
+      uint8_t k = (uint8_t)preview_index;
+      if (k > 4) k = 4;
+
+      const RgbwwColor c = segcol[k].colour;
+      palette->solid_colour.colourRGBW = RGBW32(c.R, c.G, c.B, c.WW);
+      palette->solid_colour.whiteWW    = c.CW;
+      return;
+    }
+
+    // Runtime: cached once per frame (your blending “HOW”)
+    const uint32_t now_ms = millis();
+    if (live_palette.timing1 == 0) live_palette.timing1 = now_ms;
+
+    const uint32_t T_max_ms = 25000UL;
+    uint32_t T_ms = (uint32_t)live_palette.intensity * T_max_ms / 255UL;
+    if (T_ms < 1000UL) T_ms = 1000UL;
+
+    const uint32_t t_ms = (T_ms > 0) ? ((now_ms - live_palette.timing1) % T_ms) : 0UL;
+
+    const uint32_t s1 = (1UL * T_ms) / 5UL;
+    const uint32_t s2 = (2UL * T_ms) / 5UL;
+    const uint32_t s3 = (3UL * T_ms) / 5UL;
+    const uint32_t s4 = (4UL * T_ms) / 5UL;
+
+    uint8_t  k;
+    uint32_t slot_start, slot_end;
+    if      (t_ms < s1) { k=0; slot_start=0;  slot_end=s1; }
+    else if (t_ms < s2) { k=1; slot_start=s1; slot_end=s2; }
+    else if (t_ms < s3) { k=2; slot_start=s2; slot_end=s3; }
+    else if (t_ms < s4) { k=3; slot_start=s3; slot_end=s4; }
+    else                { k=4; slot_start=s4; slot_end=T_ms; }
+
+    const uint32_t slot_ms   = slot_end - slot_start;
+    const uint32_t within_ms = t_ms - slot_start;
+
+    const uint8_t k_next = (k == 4) ? 0 : (uint8_t)(k + 1);
+
+    const RgbwwColor c_curr = segcol[k].colour;
+    const RgbwwColor c_next = segcol[k_next].colour;
+
+    #ifndef SEGCOLOUR_CYCLE_HOLD_PCT
+    #define SEGCOLOUR_CYCLE_HOLD_PCT   70
+    #endif
+    #ifndef SEGCOLOUR_CYCLE_BLEND_PCT
+    #define SEGCOLOUR_CYCLE_BLEND_PCT  30
+    #endif
+
+    uint32_t hold_pct  = (uint32_t)SEGCOLOUR_CYCLE_HOLD_PCT;
+    uint32_t blend_pct = (uint32_t)SEGCOLOUR_CYCLE_BLEND_PCT;
+    if (hold_pct > 100UL)  hold_pct  = 100UL;
+    if (blend_pct > 100UL) blend_pct = 100UL;
+    if (hold_pct + blend_pct > 100UL) blend_pct = 100UL - hold_pct;
+
+    const uint32_t hold_end_ms = (slot_ms * hold_pct) / 100UL;
+
+    RgbwwColor out = c_curr;
+    if (!(slot_ms == 0 || within_ms < hold_end_ms || slot_ms <= hold_end_ms)) {
+      const uint32_t start = hold_end_ms;
+      const uint32_t denom = (slot_ms > start) ? (slot_ms - start) : 1UL;
+      const uint32_t w     = within_ms - start;
+
+      float p = (float)w / (float)denom;
+      if (p > 1.0f) p = 1.0f;
+      out = RgbwwColor::LinearBlend(c_curr, c_next, p);
+    }
+
+    palette->solid_colour.colourRGBW = RGBW32(out.R, out.G, out.B, out.WW);
+    palette->solid_colour.whiteWW    = out.CW;
+    return;
+  }
+
+  // other live palettes later...
+  // ------------------------------------------------------------------
+  // LIVE: Solar Elevation -> Segment colour blend (Daytime)
+  // ------------------------------------------------------------------
+  if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAYTIME_01__ID)
+  {
+    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+      const float elevation = tkr_solar->Get_Elevation();
+      const float el_min = 0.0f;
+      const float el_max = (ELEVATION_DAY_THRESHOLD != 0) ? ELEVATION_DAY_THRESHOLD : tkr_solar->Get_Elevation_Max();
+    #else
+      const float elevation = 0.0f;
+      const float el_min = 0.0f;
+      const float el_max = 10.0f;
+    #endif
+
+    float eval_elevation = elevation;
+
+    if (preview_mode)
+    {
+      const uint16_t N = (palette && palette->colours_in_palette) ? palette->colours_in_palette : 16;
+      const float x = (N <= 1) ? 0.0f : ((float)preview_index / (float)(N - 1));
+      eval_elevation = mSupport::mapfloat(x, 0.0f, 1.0f, el_min, el_max);
+    }
+
+    eval_elevation = constrain(eval_elevation, el_min, el_max);
+    const float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
+
+    const RgbwwColor c1 = segcol[0].colour;
+    const RgbwwColor c2 = segcol[1].colour;
+    const RgbwwColor out = RgbwwColor::LinearBlend(c1, c2, progress);
+
+    palette->solid_colour.colourRGBW = RGBW32(out.R, out.G, out.B, out.WW);
+    palette->solid_colour.whiteWW    = out.CW;
+    return;
+  }
+
+  // ------------------------------------------------------------------
+  // LIVE: Solar Elevation -> Segment colour blend (Dawn/Dusk)
+  // ------------------------------------------------------------------
+  if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAWNDUSKTIME_01__ID)
+  {
+    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+      const float elevation = tkr_solar->Get_Elevation();
+      const float el_min = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : tkr_solar->Get_Elevation_Min();
+      const float el_max = (ELEVATION_DAY_THRESHOLD   != 0) ? ELEVATION_DAY_THRESHOLD   : tkr_solar->Get_Elevation_Max();
+    #else
+      const float elevation = 0.0f;
+      const float el_min = -10.0f;
+      const float el_max =  10.0f;
+    #endif
+
+    float eval_elevation = elevation;
+
+    if (preview_mode)
+    {
+      const uint16_t N = (palette && palette->colours_in_palette) ? palette->colours_in_palette : 16;
+      const float x = (N <= 1) ? 0.0f : ((float)preview_index / (float)(N - 1));
+      eval_elevation = mSupport::mapfloat(x, 0.0f, 1.0f, el_min, el_max);
+    }
+
+    eval_elevation = constrain(eval_elevation, el_min, el_max);
+    const float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
+
+    const RgbwwColor c1 = segcol[0].colour;
+    const RgbwwColor c2 = segcol[1].colour;
+    const RgbwwColor out = RgbwwColor::LinearBlend(c1, c2, progress);
+
+    palette->solid_colour.colourRGBW = RGBW32(out.R, out.G, out.B, out.WW);
+    palette->solid_colour.whiteWW    = out.CW;
+    return;
+  }
+  // ------------------------------------------------------------------
+  // LIVE: Solar Elevation -> White colour temperature (warm<->cold) + RGB tint
+  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------
+// LIVE: Solar Elevation White Colour Temperature (RGBWW/CW)
+//   * runtime: keep true RGBWW/CW
+//   * preview: WebUI is RGB-only, so fold WW+CW into RGB and zero whites
+// ------------------------------------------------------------------
+if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID)
+{
+  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+    const float elevation = tkr_solar->Get_Elevation();
+    const float el_min = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : tkr_solar->Get_Elevation_Min();
+    const float el_max = (ELEVATION_DAY_THRESHOLD   != 0) ? ELEVATION_DAY_THRESHOLD   : tkr_solar->Get_Elevation_Max();
+  #else
+    const float elevation = 0.0f;
+    const float el_min = -10.0f;
+    const float el_max =  10.0f;
+  #endif
+
+  float eval_elevation = elevation;
+
+  if (preview_mode)
+  {
+    // preview_index is expected 0..(N-1). map to elevation range.
+    const uint16_t N = (palette && palette->colours_in_palette) ? palette->colours_in_palette : 16;
+    const float x = (N <= 1) ? 0.0f : ((float)preview_index / (float)(N - 1)); // 0..1
+    eval_elevation = mSupport::mapfloat(x, 0.0f, 1.0f, el_min, el_max);
+  }
+
+  mAnimatorLight::SegmentColour colour_out = 0;
+
+  if (eval_elevation <= el_min) {
+    colour_out.setCCT_Kelvin(CCT_MAX_DEFAULT);
+    colour_out.setRGB(0xFF, 0x52, 0x18);
+  } else if (eval_elevation >= el_max) {
+    colour_out.setCCT_Kelvin(CCT_MIN_DEFAULT);
+    colour_out.setRGB(255, 255, 255);
+  } else {
+    const float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
+
+    mAnimatorLight::SegmentColour warm = 0;
+    warm.setCCT_Kelvin(CCT_MAX_DEFAULT);
+    warm.setRGB(0xFF, 0x52, 0x18);
+
+    mAnimatorLight::SegmentColour cold = 0;
+    cold.setCCT_Kelvin(CCT_MIN_DEFAULT);
+    cold.setRGB(255, 255, 255);
+
+    colour_out.colour = RgbwwColor::LinearBlend(warm.colour, cold.colour, progress);
+  }
+
+  const RgbwwColor out = colour_out.colour;
+
+  // WebUI preview is RGB-only: fold WW+CW into RGB and zero whites
+  if (preview_mode)
+  {
+    uint8_t r = out.R;
+    uint8_t g = out.G;
+    uint8_t b = out.B;
+
+    const uint8_t ww = out.WW;
+    const uint8_t cw = out.CW;
+
+    // Warm white contribution (warm bias)
+    r = qadd8(r, scale8(ww, 255));
+    g = qadd8(g, scale8(ww, 200));
+    b = qadd8(b, scale8(ww, 120));
+
+    // Cold white contribution (cool bias)
+    r = qadd8(r, scale8(cw, 120));
+    g = qadd8(g, scale8(cw, 200));
+    b = qadd8(b, scale8(cw, 255));
+
+    palette->solid_colour.colourRGBW = RGBW32(r, g, b, 0);
+    palette->solid_colour.whiteWW    = 0;
+    return;
+  }
+
+  // Runtime: keep real channels
+  palette->solid_colour.colourRGBW = RGBW32(out.R, out.G, out.B, out.WW);
+  palette->solid_colour.whiteWW    = out.CW;
+  return;
+}
+
+
+  // ------------------------------------------------------------------
+  // LIVE: Solar Elevation -> Segment colour blend (Nighttime)
+  // ------------------------------------------------------------------
+  if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_NIGHTTIME_01__ID)
+  {
+    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+      const float elevation = tkr_solar->Get_Elevation();
+      const float el_max = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : -10.0f;
+      const float el_min = tkr_solar->Get_Elevation_Min();
+    #else
+      const float elevation = 0.0f;
+      const float el_min = -30.0f;
+      const float el_max = -10.0f;
+    #endif
+
+    float eval_elevation = elevation;
+
+    if (preview_mode)
+    {
+      const uint16_t N = (palette && palette->colours_in_palette) ? palette->colours_in_palette : 16;
+      const float x = (N <= 1) ? 0.0f : ((float)preview_index / (float)(N - 1));
+      eval_elevation = mSupport::mapfloat(x, 0.0f, 1.0f, el_min, el_max);
+    }
+
+    eval_elevation = constrain(eval_elevation, el_min, el_max);
+    const float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
+
+    const RgbwwColor c1 = segcol[0].colour;
+    const RgbwwColor c2 = segcol[1].colour;
+    const RgbwwColor out = RgbwwColor::LinearBlend(c1, c2, progress);
+
+    palette->solid_colour.colourRGBW = RGBW32(out.R, out.G, out.B, out.WW);
+    palette->solid_colour.whiteWW    = out.CW;
+    return;
+  }
+
+  // ------------------------------------------------------------------
+  // LIVE: Solar Elevation -> Solid colour of sky (samples dynamic palette at one index)
+  // ------------------------------------------------------------------
+  if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SOLID_COLOUR_OF_SKY__ID)
+  {
+    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+      const float elevation = tkr_solar->Get_Elevation();
+      const float el_min = tkr_solar->Get_Elevation_Min();
+      const float el_max = tkr_solar->Get_Elevation_Max();
+    #else
+      const float elevation = 0.0f;
+      const float el_min = -45.0f;
+      const float el_max =  45.0f;
+    #endif
+
+    uint16_t pal_index = 0;
+
+    if (preview_mode)
+    {
+      const uint16_t N = (palette && palette->colours_in_palette) ? palette->colours_in_palette : 16;
+      pal_index = (N <= 1) ? 0 : (uint16_t)((uint32_t)preview_index * 255UL / (uint32_t)(N - 1));
+    }
+    else
+    {
+      float eval_elevation = constrain(elevation, el_min, el_max);
+      pal_index = (uint16_t)mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 255.0f);
+      pal_index = constrain(pal_index, 0, 255);
+    }
+
+    // Uses your existing "data" palette + encoder path (same as old switch case)
+    const uint16_t palette_adjusted_id_rel0 = pid - mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START;
+    uint8_t* data_local = &mPaletteI->dynamic_palettes[palette_adjusted_id_rel0].data[0];
+
+    bool force_palette_mode = false;
+
+    uint32_t c32 = mPaletteI->SubGet_Encoded_Palette_Colour_U32(
+      data_local,
+      pal_index,
+      palette->encoded_colour_width,
+      palette->colours_in_palette,
+      mPaletteI->dynamic_palettes[palette_adjusted_id_rel0].encoding,
+      nullptr,
+      false,
+      /*rescale wrap*/ 0,
+      /*force*/ force_palette_mode,
+      false
+    );
+
+    palette->solid_colour.colourRGBW = c32;
+    palette->solid_colour.whiteWW    = 0;
+    return;
+  }
+
+    // ------------------------------------------------------------------
+  // LIVE: Solar Elevation -> Gradient colour of sky (preview only)
+  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------
+// LIVE: Solar Elevation - Gradient Colour Of Sky (CRGBPalette16 preloaded)
+// ------------------------------------------------------------------
+if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__ID)
+{
+  // Ensure these are sane for your CRGBPalette16 path
+  // palette->colours_in_palette = 16;
+  // palette->encoded_colour_width = 3; // RGB
+
+  // Preview: just emit a single slice into solid_colour (serializer GET path reads solid_colour)
+  if (preview_mode)
+  {
+    // preview_index is 0..(N-1) from serializer. If your WebUI sets "2", it'll be 0/1.
+    const uint16_t N = (palette && palette->colours_in_palette) ? palette->colours_in_palette : 16;
+    const uint8_t  idx255 = (N <= 1) ? 0 : (uint8_t)((preview_index * 255U) / (uint16_t)(N - 1));
+
+    // For preview you can either:
+    // A) sample the already-built CRGB16 palette (preferred if runtime has built it)
+    // B) build it here too (safe). We'll do B for correctness.
+  }
+
+  // --- compute el_min/el_max/elevation as you already do ---
+  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+    const float elevation = tkr_solar->Get_Elevation();
+    const float el_min = tkr_solar->Get_Elevation_Min();
+    const float el_max = tkr_solar->Get_Elevation_Max();
+  #else
+    const float elevation = 0.0f;
+    const float el_min = -45.0f;
+    const float el_max =  45.0f;
+  #endif
+
+  // Zoom window (same logic you had)
+  float zoom_ratio = custom1 / 255.0f;
+  zoom_ratio = constrain(zoom_ratio, 0.01f, 1.0f);
+
+  float zoom_range = (el_max - el_min) * zoom_ratio;
+  float el_start = elevation - (zoom_range * 0.5f);
+  float el_end   = elevation + (zoom_range * 0.5f);
+
+  el_start = constrain(el_start, el_min, el_max);
+  el_end   = constrain(el_end,   el_min, el_max);
+
+  uint16_t palette_start = (uint16_t)mSupport::mapfloat(el_start, el_min, el_max, 0.0f, 255.0f);
+  uint16_t palette_end   = (uint16_t)mSupport::mapfloat(el_end,   el_min, el_max, 0.0f, 255.0f);
+
+  if (palette_start >= palette_end) palette_start = (palette_end > 0) ? (palette_end - 1) : 0;
+
+  // Build CRGBPalette16: 16 samples across the zoomed region
+  for (uint8_t i = 0; i < 16; i++)
+  {
+    const uint16_t idx = (uint16_t)((i * 255U) / 15U); // 0..255
+    const uint16_t pal_idx = (uint16_t)mSupport::mapfloat((float)idx, 0.0f, 255.0f, (float)palette_start, (float)palette_end);
+
+    // Your existing encoded palette data lives in `data` for this dynamic palette.
+    // Use your existing decoder to fetch RGB at pal_idx.
+    // NOTE: flag_request_is_for_full_visual_output=false here; we’re generating the underlying palette.
+    uint8_t dummy_enc = 0;
+    const uint16_t rel = (uint16_t)(pid - mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START);
+    uint8_t* data_2 = &mPaletteI->dynamic_palettes[rel].data[0];
+
+    const uint32_t c32 = mPaletteI->SubGet_Encoded_Palette_Colour_U32(
+      data_2,
+      (uint16_t)constrain(pal_idx, 0, 255),
+      palette->encoded_colour_width,
+      palette->colours_in_palette,
+      mPaletteI->dynamic_palettes[rel].encoding,
+      &dummy_enc,
+      false,
+      0,
+      PALETTE_MODE__FORCE_GRADIENT,
+      false
+    );
+
+    // Store into CRGBPalette16
+    palette->CRGB16Palette16_Palette.data[i] = CRGB(R(c32), G(c32), B(c32));
+  }
+
+  if (preview_mode)
+  {
+    const uint16_t N = (palette && palette->colours_in_palette) ? palette->colours_in_palette : 16;
+    const uint8_t idx255 = (N <= 1) ? 0 : (uint8_t)((preview_index * 255U) / (uint16_t)(N - 1));
+
+    const CRGB c = mPaletteI->ColorFromPaletteU32(palette->CRGB16Palette16_Palette.data, idx255, 255, LINEARBLEND);
+    palette->solid_colour.colourRGBW = RGBW32(c.r, c.g, c.b, 0);
+    palette->solid_colour.whiteWW    = 0;
+  }
+
+  return;
+}
 
 }
+
+
+
 
 
 /**
@@ -1998,6 +2332,8 @@ void mAnimatorLight::SubTask_Effects()
       _virtualSegmentLength = seg.virtualLength();
 
       seg.UpdateBrightness();
+
+      seg.Update_LivePalettes();
 
       #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PERFORMANCE_METRICS_SAFE_IN_RELEASE_MODE
       seg.performance.effect_build_us = micros();
@@ -4240,6 +4576,7 @@ void mAnimatorLight::Segment::UpdateBrightness()
   _brightness_cct_combined = scale8(_brightness_cct, tkr_iLight->getBriCCT_Global());
 
 }
+
 
 
 

@@ -3020,6 +3020,14 @@ typedef struct Segment
     uint8_t _brightness_rgb_combined = 255;
     uint8_t _brightness_cct_combined = 255;
     IRAM_ATTR void UpdateBrightness();
+    
+    
+    void Update_LivePalettes(
+      uint16_t pal_id        = 0xFFFF,  // default: use segment.palette_id
+      uint16_t preview_index = 0,       // default: unused unless preview_mode=true
+      bool     preview_mode  = false    // default: normal runtime update
+    );
+    
 
     IRAM_ATTR void setBrightnessRGB(uint8_t b)
     {

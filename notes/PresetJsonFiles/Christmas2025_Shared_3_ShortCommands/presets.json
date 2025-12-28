@@ -2,7 +2,7 @@
 {
   "0": {},
   "1": {
-    "n":"27aDEC Static Snowy02",
+    "n":"27bDEC Static Snowy02",
     "Pal":"Snowy 02",
     "Effects": {
       "FX":"Static",
@@ -200,19 +200,6 @@
     },
     "BrightnessRGB": 100
   },
-  "25": {
-    "n":"FastPops C&W",    
-    "Pal": "Colour and White Swipe",
-    "Effects": {
-      "FX": "Firefly",
-      "RA":0,
-      "SX":255,
-      "IX":49,
-      "DC":0,
-      "GP":1
-    },
-    "BrightnessRGB": 100
-  },
 
 
   "40": {
@@ -298,7 +285,7 @@
 
 
   "50": {
-    "n":"Day: B&W,Gp",    
+    "n":"B&W,Gp16",    
     "Pal":"Blue and White",
     "Effects": {
       "FX":"Static",
@@ -313,43 +300,29 @@
 
 
   "52": {
-    "n":"Day: C&W,G210",    
+    "n":"Col&W,Gp16",    
     "Pal":"Colour and White Stripe",
     "Effects": {
       "FX":"Static",
       "IX":20,
       "SX":255,
-      "GP":10,
+      "GroupingPerc":16,
       "DC":0,
       "RA":20
     },
     "BrightnessRGB":100
   },
-  "53": {
-    "n":"#Rotate",
-    "Effects": {
-      "FX":"Rotate Previous",
-      "IX":12,
-      "SX":255,
-      "GP":1,
-      "DC":0,
-      "RA": 20
-    },
-    "BrightnessRGB": 100
-  },
+  
   "54": {
-    "n":"Day: C&W,G210",    
+    "n":"IceCream,TwiWipe",    
     "Pal":"IceCream Floats",
     "Effects": {
       "FX":"Tri Wipe",
       "IX":255,
       "SX":151,
       "GP":1,
-      "DC":0
-    },
-    "Transition": {
-      "TimeMs": 0,
-      "RA": 23
+      "DC":0,
+      "RA":23
     },
     "SegColour0":{
       "RGBWC":[255,0,0,0,0],
@@ -374,27 +347,7 @@
     },
     "BrightnessRGB": 100
   },
-  "56": {
-    "n":"Tri Wipe",    
-    "Pal":"Snowy 01",
-    "Effects": {
-      "FX":"Tri Wipe",
-      "IX":255,
-      "SX":151,
-      "GP":1,
-      "DC":0,
-      "RA":23
-    },
-    "SegColour0":{
-      "RGBWC":[255,0,0,0,0],
-      "BrightnessRGB":100
-    },
-    "SegColour1":{
-      "RGBWC":[0,255,0,0,0],
-      "BrightnessRGB":100
-    },
-    "BrightnessRGB": 100
-  },
+  
 
   "58": {
     "n":"Twinkle FastIn/SlowOut",    
@@ -590,10 +543,6 @@
   "96":{"playlist":{"ps":
   [1,    2,  3,  4, 5,  6, 55,  7,  40, 10, 41, 42],"dur":
   [100,100,400,400,50,200,100,200,200,200,100,100],"repeat":0,"end":0,"r":1},"on":true,"n":"N3 Night"},
-
-  "92":{"playlist":{"ps":
-  [50,    53, 42,  43,  44, 52, 53,   42,  43,  44],"dur":
-  [20,20, 200,100,50,   20,20, 200,100,50],"repeat":0,"end":0,"r":1},"on":true,"n":"D1 Init Test"},
 
 
   

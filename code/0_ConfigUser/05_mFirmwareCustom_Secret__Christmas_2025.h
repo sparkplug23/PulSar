@@ -51,7 +51,7 @@
 
 // #define DEVICE_CHRISTMAS25__FINAL__16X_OUTSIDE_TREE
 
-// #define DEVICE_XMAS25__MEADOWS__PEBBLE_CONE
+// #define DEVICE_XMAS25__MEADOWS__PEBBLE_CONE_1D
 
 
 
@@ -2038,11 +2038,10 @@
 
   #define ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
 
-
  /***********************************
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
  ************************************/  
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
 
 //  /***********************************
 //   * SECTION: Sensor Configs
@@ -2083,12 +2082,12 @@
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
-        "Length":1000
+        "Length":1010
       }
     ],
     "Segments":[
       {
-        "PixelRange":[0,1000],
+        "PixelRange":[0,1010],
         "ColourPalette":"RGPBY",
         "ColourType":3,
         "Effects": {
