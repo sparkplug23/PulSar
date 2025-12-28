@@ -2502,6 +2502,24 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
         ALOG_DBM(PSTR(DEBUG_INSERT_PAGE_BREAK "palette_id=%d"),palette_id);
         #endif
 
+        // ------------------------------------------------------------------
+        // LIVE palette preview override: force 5 slots for segcol cycling
+        // ------------------------------------------------------------------
+        if (
+          palette_id == mPalette::PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID ||
+          palette_id == mPalette::PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID
+        ) {
+          colours_in_palette = 5;
+        }
+        if (
+          palette_id == mPalette::PALETTELIST_DYNAMIC__TIMEREACTIVE__SEGMENT_COLOUR__MINUTE_BLEND__ID ||
+          palette_id == mPalette::PALETTELIST_DYNAMIC__TIMEREACTIVE__SEGMENT_COLOUR__HOUR_BLEND__ID || 
+          palette_id == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID
+        ) {
+          colours_in_palette = 2;
+        }
+
+
         for (int j = 0; j < colours_in_palette; j++) 
         {
           DEBUG_LINE_HERE_TRACE
@@ -2599,6 +2617,8 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
     ) {  
         palette_display_as_banded_gradient = false; // These palettes use gradients
     }
+    else if (palette_id == mPalette::PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID)  palette_display_as_banded_gradient = true;
+    else if (palette_id == mPalette::PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID)  palette_display_as_banded_gradient = false;
     else // Custom Palettes
     if (palette_id >= mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED && palette_id < mPaletteI->GetPaletteListLength()) {
       uint8_t adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;

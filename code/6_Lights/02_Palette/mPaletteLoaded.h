@@ -42,8 +42,24 @@ class mPaletteLoaded
 	{
 		CRGBPalette16 data;                 
 		std::vector<uint8_t> encoded_index;
+
+		// Helper function to set default indexing
+		inline void SetDefaultIndexing()
+		{
+			encoded_index.clear();
+			encoded_index.reserve(16);
+			for (uint8_t i = 0; i < 16; ++i) {
+			encoded_index.push_back(map(i, 0, 15, 0, 255));
+			}
+		}
 	};
 	CRGB16Palette16_PALETTE CRGB16Palette16_Palette;
+
+	struct SolidPalette{
+		uint32_t colourRGBW = 0; // packed RGBW
+		uint8_t  whiteWW = 0;    // white warmth
+	};
+	SolidPalette solid_colour;
 
     void deallocateData()
     {	// Clear vector by replacing it with an empty vector. The destructor for vector will properly remove the previous instance

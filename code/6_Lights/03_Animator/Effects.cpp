@@ -190,7 +190,7 @@ static const char PM_EFFECT_CONFIG__STATIC_PALETTE[] PROGMEM =
 "Static@"                                      // Name
 "Speed,,,,,,,,!,!"                              // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                           // ----------------------------------------- Sliders/SegCols
-",,,,"                                        // Segment Colour Names
+"!"                                        // Segment Colour Names
 ";"                                           // ----------------------------------------- SegCols/PalPicker
 "!"                                           // palette picker (primary palette)
 ";"                                           // ----------------------------------------- PalPicker/is1D2D
@@ -374,7 +374,7 @@ uint16_t mAnimatorLight::EffectAnim__Bands_Palette_SegWidth()
 
     uint8_t palette_index = band % colours_in_palette;
 
-    ALOG_INF(PSTR("pali %d/%d"), palette_index, colours_in_palette);
+    // ALOG_INF(PSTR("pali %d/%d"), palette_index, colours_in_palette);
 
     for (uint16_t i = 0; i < this_band_width && pixel < SEGLEN; ++i, ++pixel)
     {

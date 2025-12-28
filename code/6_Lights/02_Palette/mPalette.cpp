@@ -15,13 +15,6 @@ mPalette* mPalette::GetInstance()
 }
 
 
-/*********************************************************************************************************************************************************************************
- *********************************************************************************************************************************************************************************
- * SECTION: Init
- *********************************************************************************************************************************************************************************
- *********************************************************************************************************************************************************************************/
-
-
 void mPalette::Init_Palettes()
 {
   
@@ -823,7 +816,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
 ){
 
   RgbwwColor colourRGBWW;
-  uint32_t      colour32;
+  uint32_t      colour32 = 0;
 
   /**************************************************************
    * 
@@ -1020,672 +1013,51 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
 
     switch(id) 
     {
-      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID: {
-
-        #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
-          float elevation = tkr_solar->Get_Elevation();
-          float el_min = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : tkr_solar->Get_Elevation_Min();
-          float el_max = (ELEVATION_DAY_THRESHOLD != 0)   ? ELEVATION_DAY_THRESHOLD   : tkr_solar->Get_Elevation_Max();
-        #else
-          float elevation = 0;
-          float el_min = -10;
-          float el_max = 10;
-        #endif
-
-        mAnimatorLight::SegmentColour colour_out = 0;
-        float eval_elevation;
-
-        if (flag_request_is_for_full_visual_output) {
-          uint16_t pixel_length = tkr_anim->_virtualSegmentLength;
-          eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
-          ALOG_INF(PSTR("Full Visual Output: Pixel Position: %d, Mapped Elevation: %d"), desired_index, (int)eval_elevation);
-        } else {
-          eval_elevation = elevation;
-        }
-
-        if (eval_elevation <= el_min) {
-          colour_out.setCCT_Kelvin(CCT_MAX_DEFAULT);         // Warm white
-          colour_out.setRGB(0xFF, 0x52, 0x18);
-        } else if (eval_elevation >= el_max) {
-          colour_out.setCCT_Kelvin(CCT_MIN_DEFAULT);         // Cold white
-          colour_out.setRGB(255, 255, 255);
-        } else {
-          float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
-
-          mAnimatorLight::SegmentColour warm = 0;
-          warm.setCCT_Kelvin(CCT_MAX_DEFAULT);
-          warm.setRGB(0xFF, 0x52, 0x18);
-
-          mAnimatorLight::SegmentColour cold = 0;
-          cold.setCCT_Kelvin(CCT_MIN_DEFAULT);
-          cold.setRGB(255, 255, 255);
-
-          colour_out.colour = RgbwwColor::LinearBlend(warm.colour, cold.colour, progress);
-        }
-
-        #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-          // Serial.println(eval_elevation);
-          // colour_out.debug_print("colour_out");
-        #endif
-
-        colourRGBWW = colour_out.colour;
-        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
-        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-        colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
-        #endif
-
-      break;
-      }
-      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAYTIME_01__ID: {
-
-        #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
-          float elevation = tkr_solar->Get_Elevation();
-          float el_min = 0.0f;
-          float el_max = (ELEVATION_DAY_THRESHOLD != 0) ? ELEVATION_DAY_THRESHOLD : tkr_solar->Get_Elevation_Max();
-        #else
-          float elevation = 0;
-          float el_min = 0;
-          float el_max = 10;
-        #endif
-      
-        float eval_elevation;
-        if (flag_request_is_for_full_visual_output) {
-          eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
-        } else {
-          eval_elevation = elevation;
-        }
-    
-        eval_elevation = constrain(eval_elevation, el_min, el_max);
-        float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
-    
-        RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-        RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-        colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);
-        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
-        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-        colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
-        #endif
-          
-      break;
-      }
-      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAWNDUSKTIME_01__ID: {
-
-        #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
-          float elevation = tkr_solar->Get_Elevation();
-          float el_min = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : tkr_solar->Get_Elevation_Min();
-          float el_max = (ELEVATION_DAY_THRESHOLD != 0) ? ELEVATION_DAY_THRESHOLD : tkr_solar->Get_Elevation_Max();
-        #else
-          float elevation = 0;
-          float el_min = -10;
-          float el_max = 10;
-        #endif
-      
-        float eval_elevation;
-        if (flag_request_is_for_full_visual_output) {
-          eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
-        } else {
-          eval_elevation = elevation;
-        }
-    
-        eval_elevation = constrain(eval_elevation, el_min, el_max);
-        float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
-    
-        RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-        RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-        colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);
-        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
-        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-        colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
-        #endif
-          
-      break;
-      }
-      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_NIGHTTIME_01__ID: {
-
-        #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
-          float elevation = tkr_solar->Get_Elevation();
-          float el_max = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : -10.0f;
-          float el_min = tkr_solar->Get_Elevation_Min();
-        #else
-          float elevation = 0;
-          float el_min = -30;
-          float el_max = -10;
-        #endif
-      
-        float eval_elevation;
-        if (flag_request_is_for_full_visual_output) {
-          eval_elevation = mSupport::mapfloat(desired_index, 0.0f, 16.0f, el_min, el_max);
-        } else {
-          eval_elevation = elevation;
-        }
-    
-        eval_elevation = constrain(eval_elevation, el_min, el_max);
-        float progress = mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 1.0f);
-    
-        RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-        RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-        colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);
-        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
-        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-        colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
-        #endif
-    
-      break;
-      }    
       case PALETTELIST_DYNAMIC__TIMEREACTIVE__SEGMENT_COLOUR__MINUTE_BLEND__ID:
-      {
-        /***
-         * Sawtooth style blending, from 0->1->0 of segment colours. Stops hard transition of time rollover
-         */
-        float progress;
-        if (tkr_time->RtcTime.second < 30) {
-          progress = mSupport::mapfloat(tkr_time->RtcTime.second, 0, 29, 0.0f, 1.0f);
-        } else {
-          progress = mSupport::mapfloat(tkr_time->RtcTime.second, 30, 59, 1.0f, 0.0f);
-        }       
-        #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-        Serial.println(progress);
-        #endif        
-        RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-        RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-        colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);   
-        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
-        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-        colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
-        #endif
-      }
-      break;
       case PALETTELIST_DYNAMIC__TIMEREACTIVE__SEGMENT_COLOUR__HOUR_BLEND__ID:
+      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID:
+      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAYTIME_01__ID:
+      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAWNDUSKTIME_01__ID:
+      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_NIGHTTIME_01__ID:
+      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SOLID_COLOUR_OF_SKY__ID:
+      case PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID:
+      case PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID:
       {
-        /***
-         * Sawtooth style blending, from 0->1->0 of segment colours. Stops hard transition of time rollover
-         */
-        float progress;
-        if (tkr_time->RtcTime.hour < 30) {
-          progress = mSupport::mapfloat(tkr_time->RtcTime.hour, 0, 29, 0.0f, 1.0f);
-        } else {
-          progress = mSupport::mapfloat(tkr_time->RtcTime.hour, 30, 59, 1.0f, 0.0f);
-        }
-        #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-        Serial.println(progress);
-        #endif        
-        RgbwwColor colour1 = pSEGMENT.segcol[0].colour;
-        RgbwwColor colour2 = pSEGMENT.segcol[1].colour;
-        colourRGBWW = RgbwwColor::LinearBlend(colour1, colour2, progress);    
-        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
-        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-        colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
-        #endif
-      }
-      break;
-      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__ID: {
-        #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
-          float elevation = tkr_solar->Get_Elevation();
-          float el_min = tkr_solar->Get_Elevation_Min();
-          float el_max = tkr_solar->Get_Elevation_Max();
-        #else
-          float elevation = 0.0f;
-          float el_min = -45.0f;
-          float el_max = 45.0f;
-        #endif
-      
-        uint16_t pixel_length = tkr_anim->_virtualSegmentLength;
-        uint16_t rescaled_palette_index;
-      
         if (flag_request_is_for_full_visual_output) {
-          rescaled_palette_index = desired_index;
+          pSEGMENT.Update_LivePalettes(id, desired_index, true);
         } else {
-          float zoom_ratio = pSEGMENT.custom1 / 255.0f;
-          zoom_ratio = constrain(zoom_ratio, 0.01f, 1.0f);  // Prevent zero or too narrow
-      
-          float zoom_range = (el_max - el_min) * zoom_ratio;
-          float el_start = elevation - (zoom_range / 2.0f);
-          float el_end   = elevation + (zoom_range / 2.0f);
-      
-          el_start = constrain(el_start, el_min, el_max);
-          el_end   = constrain(el_end, el_min, el_max);
-
-          uint16_t pixel_position_adjust = (pixel_length > 1) ? (desired_index * 255) / (pixel_length - 1) : 0;
-          uint16_t palette_start = (uint16_t)mSupport::mapfloat(el_start, el_min, el_max, 0.0f, 255.0f);
-          uint16_t palette_end   = (uint16_t)mSupport::mapfloat(el_end,   el_min, el_max, 0.0f, 255.0f);
-      
-          if (palette_start >= palette_end)
-            palette_start = (palette_end > 0) ? palette_end - 1 : 0;
-      
-          rescaled_palette_index = (uint16_t)mSupport::mapfloat(
-            pixel_position_adjust, 0.0f, 255.0f, palette_start, palette_end);
-          rescaled_palette_index = constrain(rescaled_palette_index, 0, 255);
+          pSEGMENT.Update_LivePalettes(id, 0, false); // once-per-frame call site should do this instead; keep if you must
         }
-      
-        bool flag_force_gradient = false;// missing as it was in 
-      
-        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS    
-        colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW(
-          data,
-          rescaled_palette_index,
-          pSEGMENT.palette->encoded_colour_width,
-          pSEGMENT.palette->colours_in_palette,
-          dynamic_palettes[palette_adjusted_id_rel0].encoding,
-          encoded_index,
-          false,
-          rescale_index_wrap_for_hardedge,
-          override_default_encoding,
-          flag_force_gradient
-        );
-        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW); colour32_white_cold = colourRGBWW.CW;
-        #else        
-        colourRGBWW = SubGet_Encoded_Palette_Colour_U32(
-          data,
-          rescaled_palette_index,
-          pSEGMENT.palette->encoded_colour_width,
-          pSEGMENT.palette->colours_in_palette,
-          dynamic_palettes[palette_adjusted_id_rel0].encoding,
-          encoded_index,
-          false,
-          rescale_index_wrap_for_hardedge,
-          force_palette_mode,
-          flag_force_gradient
-        );
+
+        colour32 = pSEGMENT.palette->solid_colour.colourRGBW;
+        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+        colour32_white_cold = pSEGMENT.palette->solid_colour.whiteWW;
         #endif
       }
       break;
-      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SOLID_COLOUR_OF_SKY__ID: {
-        #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
-          float elevation = tkr_solar->Get_Elevation();
-          float el_min = tkr_solar->Get_Elevation_Min();
-          float el_max = tkr_solar->Get_Elevation_Max();
-        #else
-          float elevation = 0.0f;
-          float el_min = -45.0f;
-          float el_max = 45.0f;
-        #endif
-      
-        float eval_elevation = constrain(elevation, el_min, el_max);
-        uint16_t palette_index = (uint16_t)mSupport::mapfloat(eval_elevation, el_min, el_max, 0.0f, 255.0f);
-        palette_index = constrain(palette_index, 0, 255);
-      
-        bool flag_force_gradient = false;// missing as it was in 
-      
-        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS    
-        colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW(
-          data,
-          palette_index,
-          pSEGMENT.palette->encoded_colour_width,
-          pSEGMENT.palette->colours_in_palette,
-          dynamic_palettes[palette_adjusted_id_rel0].encoding,
-          encoded_index,
-          false,
-          rescale_index_wrap_for_hardedge,
-          override_default_encoding,
-          flag_force_gradient
-        );
-        colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW); colour32_white_cold = colourRGBWW.CW;
-        #else // Fast RGBW support only        
-        colour32 = SubGet_Encoded_Palette_Colour_U32(
-          data,
-          palette_index,
-          pSEGMENT.palette->encoded_colour_width,
-          pSEGMENT.palette->colours_in_palette,
-          dynamic_palettes[palette_adjusted_id_rel0].encoding,
-          encoded_index,
-          false,
-          rescale_index_wrap_for_hardedge,
-          force_palette_mode,
-          flag_force_gradient
-        );
-        #endif
+      case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__ID:
+      {
+        if (flag_request_is_for_full_visual_output) {
+          // serializer calls this repeatedly; Update builds palette + emits preview slice into solid_colour
+          pSEGMENT.Update_LivePalettes(id, desired_index, true);
 
+          colour32 = pSEGMENT.palette->solid_colour.colourRGBW;
+          #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+          colour32_white_cold = pSEGMENT.palette->solid_colour.whiteWW;
+          #endif
+          break;
+        }
+
+        // Runtime GET: just read CRGBPalette16 (assumes Update_LivePalettes() was called once-per-frame elsewhere)
+        uint8_t idx255 = (tkr_anim->_virtualSegmentLength <= 1) ? 0 : (uint8_t)((desired_index * 255U) / (uint16_t)(tkr_anim->_virtualSegmentLength - 1));
+        CRGB c = ColorFromPaletteU32(pSEGMENT.palette->CRGB16Palette16_Palette.data, idx255, 255, LINEARBLEND);
+
+        colour32 = RGBW32(c.r, c.g, c.b, 0);
+        #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+        colour32_white_cold = 0;
+        #endif
       }
-      break;      
-//       case PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID:
-//       {
-//         // Live SegCol Cycle (Immediate)
-//         // - Period set by PalIX (palette_live_intensity), up to 25s
-//         // - Split into 5 equal slots, instant jump between segcol[0..4]
-//         //
-//         // Preview:
-//         // - When flag_request_is_for_full_visual_output, treat desired_index (0..255) as phase across the cycle.
-
-//         const uint32_t T_max_ms = 25000UL; // 25s max
-//         uint32_t T_ms = (uint32_t)pSEGMENT.live_palette.intensity * T_max_ms / 255UL;
-//         if (T_ms < 1000UL) T_ms = 1000UL; // avoid silly-fast UI noise
-
-//         uint32_t t_ms;
-//         if (flag_request_is_for_full_visual_output) {
-//           // desired_index is typically 0..255 for preview; map across full period
-//           t_ms = ((uint32_t)desired_index * T_ms) / 255UL;
-//         } else {
-//           t_ms = millis() % T_ms;
-//         }
-
-//         const uint32_t slot_ms = T_ms / 5UL;
-//         uint8_t k = (slot_ms > 0) ? (uint8_t)(t_ms / slot_ms) : 0;
-//         if (k > 4) k = 4;
-
-//         colourRGBWW = pSEGMENT.segcol[k].colour;
-//         colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
-//         #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-//         colour32_white_cold = colourRGBWW.CW;
-//         #endif
-//       }
-//       break;      
-// case PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID:
-// {
-//   // Live SegCol Cycle (Blending + dwell) anchored to effect_start_time.
-//   // - PalIX sets total period up to 25s.
-//   // - 5 slots (segcol[0..4]) per cycle.
-//   // - Cadence inside each slot defined by *_PCT weights (sum to 100).
-//   // - Optional start lock: first SEGCOLOUR_CYCLE_START_LOCK_MS after effect start => force segcol0 solid.
-
-//   const uint32_t T_max_ms = 25000UL;
-//   uint32_t T_ms = (uint32_t)pSEGMENT.live_palette.intensity * T_max_ms / 255UL;
-//   if (T_ms < 1000UL) T_ms = 1000UL;
-
-//   const uint32_t now_ms = millis();
-
-//   // Compute t_ms within cycle
-//   uint32_t t_ms;
-//   if (flag_request_is_for_full_visual_output) {
-//     // UI preview sweep across full cycle
-//     t_ms = ((uint32_t)desired_index * T_ms) / 255UL;
-//   } else {
-//     const uint32_t anchor_ms  = tkr_anim->effect_start_time; // your anchor
-//     const uint32_t elapsed_ms = now_ms - anchor_ms;
-//     t_ms = (T_ms > 0) ? (elapsed_ms % T_ms) : 0UL;
-
-//     // Start lock: ensure initial “seg0 full” for a short time after effect start
-//     if (elapsed_ms < (uint32_t)SEGCOLOUR_CYCLE_START_LOCK_MS) {
-//       const RgbwwColor out0 = pSEGMENT.segcol[0].colour;
-//       colourRGBWW = out0;
-//       colour32 = RGBW32(out0.R, out0.G, out0.B, out0.WW);
-//       #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-//       colour32_white_cold = out0.CW;
-//       #endif
-//       break;
-//     }
-//   }
-
-//   // Slot selection using integer math with exact boundaries
-//   // slot k covers [k*T/5, (k+1)*T/5)
-//   const uint32_t s0 = (0UL * T_ms) / 5UL;
-//   const uint32_t s1 = (1UL * T_ms) / 5UL;
-//   const uint32_t s2 = (2UL * T_ms) / 5UL;
-//   const uint32_t s3 = (3UL * T_ms) / 5UL;
-//   const uint32_t s4 = (4UL * T_ms) / 5UL;
-//   const uint32_t s5 = (5UL * T_ms) / 5UL; // == T_ms
-
-//   uint8_t k;
-//   uint32_t slot_start, slot_end;
-//   if      (t_ms < s1) { k=0; slot_start=s0; slot_end=s1; }
-//   else if (t_ms < s2) { k=1; slot_start=s1; slot_end=s2; }
-//   else if (t_ms < s3) { k=2; slot_start=s2; slot_end=s3; }
-//   else if (t_ms < s4) { k=3; slot_start=s3; slot_end=s4; }
-//   else                { k=4; slot_start=s4; slot_end=s5; }
-
-//   const uint32_t slot_ms   = slot_end - slot_start;
-//   const uint32_t within_ms = t_ms - slot_start;
-
-//   const uint8_t k_prev = (k == 0) ? 4 : (uint8_t)(k - 1);
-//   const uint8_t k_next = (k == 4) ? 0 : (uint8_t)(k + 1);
-
-//   const RgbwwColor c_prev = pSEGMENT.segcol[k_prev].colour;
-//   const RgbwwColor c_curr = pSEGMENT.segcol[k].colour;
-//   const RgbwwColor c_next = pSEGMENT.segcol[k_next].colour;
-
-//   // Cadence split points inside this slot (integer ms)
-//   // weights must sum to 100 (assumed)
-//   const uint32_t t_blend_in_end = (slot_ms * (uint32_t)SEGCOLOUR_CYCLE_BLENDIN_PCT)  / 100UL;
-//   const uint32_t t_hold1_end    = t_blend_in_end + (slot_ms * (uint32_t)SEGCOLOUR_CYCLE_HOLD1_PCT) / 100UL;
-//   const uint32_t t_hold2_end    = t_hold1_end    + (slot_ms * (uint32_t)SEGCOLOUR_CYCLE_HOLD2_PCT) / 100UL;
-//   // remaining time is blend-out (includes rounding remainder)
-
-//   RgbwwColor out = c_curr;
-
-//   if (slot_ms == 0) {
-//     out = c_curr;
-//   }
-//   else if (within_ms < t_blend_in_end) {
-//     // Blend prev -> curr
-//     const uint32_t denom = (t_blend_in_end > 0) ? t_blend_in_end : 1UL;
-//     float p = (float)within_ms / (float)denom;
-//     if (p > 1.0f) p = 1.0f;
-//     out = RgbwwColor::LinearBlend(c_prev, c_curr, p);
-//   }
-//   else if (within_ms < t_hold2_end) {
-//     // Hold curr (covers both hold phases)
-//     out = c_curr;
-//   }
-//   else {
-//     // Blend curr -> next over the remainder
-//     const uint32_t start = t_hold2_end;
-//     const uint32_t denom = (slot_ms > start) ? (slot_ms - start) : 1UL;
-//     float p = (float)(within_ms - start) / (float)denom;
-//     if (p > 1.0f) p = 1.0f;
-//     out = RgbwwColor::LinearBlend(c_curr, c_next, p);
-//   }
-
-//   colourRGBWW = out;
-//   colour32 = RGBW32(out.R, out.G, out.B, out.WW);
-//   #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-//   colour32_white_cold = out.CW;
-//   #endif
-// }
-// break;
-
-/**********************************************************************************************************************************************************************************
- * LIVE PALETTE: SegCol Cycle (Immediate) — PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID
- *
- * INTENT
- *   Provide a “single-colour live palette” whose returned colour is one of SEGMENT.segcol[0..4], selected by time.
- *   This lets any effect that samples the PRIMARY palette use the segment’s 5 UI colours as a time-cycling palette
- *   without needing separate effects (“twinkle over red”, “twinkle over blue”, …).
- *
- * STATE / ANCHOR
- *   pSEGMENT.live_palette.timing1 is used as the *anchor* for this live palette.
- *   - It MUST be reset to 0 when the active palette/effect is changed (pal, pal2, fx), so the cycle restarts cleanly.
- *   - If timing1==0 on entry, we initialise it to millis(), meaning “cycle starts now at segcol[0]”.
- *
- * PERIOD (PalIX)
- *   pSEGMENT.live_palette.intensity maps 0..255 -> 1s..25s total cycle time T_ms.
- *   Example: PalIX=255 => T_ms=25000ms => 5 slots => ~5000ms per segcol.
- *
- * SLOT SELECTION (NO BLEND)
- *   We split the cycle into 5 contiguous slots:
- *     slot k covers [k*T/5, (k+1)*T/5)
- *   Returned colour is exactly segcol[k] (instant jump at boundaries).
- *
- * UI PREVIEW
- *   When flag_request_is_for_full_visual_output==true, desired_index (0..255) is treated as phase across T_ms
- *   so the palette preview shows the full cycle deterministically (no millis()).
- **********************************************************************************************************************************************************************************/
-case PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID:
-{
-  const uint32_t T_max_ms = 25000UL;                        // 25s max
-  uint32_t T_ms = (uint32_t)pSEGMENT.live_palette.intensity * T_max_ms / 255UL;
-  if (T_ms < 1000UL) T_ms = 1000UL;                         // clamp low end
-
-  const uint32_t now_ms = millis();
-
-  // Anchor initialisation (restart point). External code resets timing1=0 on pal/pal2/fx changes.
-  if (!flag_request_is_for_full_visual_output) {
-    if (pSEGMENT.live_palette.timing1 == 0) pSEGMENT.live_palette.timing1 = now_ms;
-  }
-
-  // Phase within cycle
-  uint32_t t_ms;
-  if (flag_request_is_for_full_visual_output) {
-    t_ms = ((uint32_t)desired_index * T_ms) / 255UL;
-  } else {
-    const uint32_t elapsed_ms = now_ms - pSEGMENT.live_palette.timing1;
-    t_ms = (T_ms > 0) ? (elapsed_ms % T_ms) : 0UL;
-  }
-
-  // Slot boundaries (exact integer boundaries; avoids “k=5 then clamp” artefacts)
-  const uint32_t s1 = (1UL * T_ms) / 5UL;
-  const uint32_t s2 = (2UL * T_ms) / 5UL;
-  const uint32_t s3 = (3UL * T_ms) / 5UL;
-  const uint32_t s4 = (4UL * T_ms) / 5UL;
-
-  uint8_t k;
-  if      (t_ms < s1) k = 0;
-  else if (t_ms < s2) k = 1;
-  else if (t_ms < s3) k = 2;
-  else if (t_ms < s4) k = 3;
-  else                k = 4;
-
-  colourRGBWW = pSEGMENT.segcol[k].colour;
-  colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
-  #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-  colour32_white_cold = colourRGBWW.CW;
-  #endif
-}
-break;
-
-
-
-/**********************************************************************************************************************************************************************************
- * LIVE PALETTE: SegCol Cycle (Blending with controllable dwell) — PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID
- *
- * INTENT
- *   Same as the Immediate version, but transitions between segcol[k] are blended with “rest time” on each colour.
- *
- * CRITICAL DESIGN CHOICE (FIXES YOUR “random start” + “double blend”)
- *   - DO NOT use millis()%T_ms as the anchor. That ties phase to uptime and will start “somewhere random”.
- *   - Use pSEGMENT.live_palette.timing1 as the anchor, initialised once per activation and reset to 0 when pal/pal2/fx changes.
- *
- * PERIOD (PalIX)
- *   pSEGMENT.live_palette.intensity maps 0..255 -> 1s..25s total cycle time T_ms.
- *   Example: PalIX=255 => T_ms=25000ms => each colour slot ≈ 5000ms.
- *
- * SLOT STRUCTURE
- *   Cycle is split into 5 slots, one per segcol[k].
- *   slot k covers [k*T/5, (k+1)*T/5).
- *
- * CADENCE INSIDE A SLOT (DEFINE-DRIVEN)
- *   We allow you to tune how much time is “solid” vs “blend”.
- *
- *   We implement a 3-part model:
- *     1) HOLD curr        (solid colour)
- *     2) BLEND curr->next (transition)
- *     3) HOLD next (optional “pre-hold” inside slot is NOT needed because the next slot starts as curr anyway)
- *
- *   Why this model?
- *     - It matches your observation: the next period already begins with “BE the next colour”.
- *     - If you also blend prev->curr at the start of each slot, you effectively create two transitions per boundary
- *       (end of previous slot + start of next slot), which is exactly how you get “double blend / flashing”.
- *
- *   So we do ONE blend per boundary: curr->next at the END of slot k.
- *   The start of slot k is solid curr by definition (anchor ensures slot0 begins at segcol0 solid).
- *
- * DEFINES
- *   SEGCOLOUR_CYCLE_HOLD_PCT      : percent of slot spent holding curr (solid)
- *   SEGCOLOUR_CYCLE_BLEND_PCT     : percent of slot spent blending curr->next
- *   They must sum to <= 100. Any remainder is added to HOLD (more solid time).
- *
- * UI PREVIEW
- *   When flag_request_is_for_full_visual_output==true, desired_index (0..255) is treated as phase across T_ms.
- **********************************************************************************************************************************************************************************/
-
-#ifndef SEGCOLOUR_CYCLE_HOLD_PCT
-#define SEGCOLOUR_CYCLE_HOLD_PCT   70   // default: 70% solid
-#endif
-#ifndef SEGCOLOUR_CYCLE_BLEND_PCT
-#define SEGCOLOUR_CYCLE_BLEND_PCT  30   // default: 30% blend
-#endif
-
-case PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID:
-{
-  const uint32_t T_max_ms = 25000UL;
-  uint32_t T_ms = (uint32_t)pSEGMENT.live_palette.intensity * T_max_ms / 255UL;
-  if (T_ms < 1000UL) T_ms = 1000UL;
-
-  const uint32_t now_ms = millis();
-
-  // Anchor init (restart point). External code resets timing1=0 on pal/pal2/fx changes.
-  if (!flag_request_is_for_full_visual_output) {
-    if (pSEGMENT.live_palette.timing1 == 0) pSEGMENT.live_palette.timing1 = now_ms;
-  }
-
-  // Phase within cycle
-  uint32_t t_ms;
-  if (flag_request_is_for_full_visual_output) {
-    t_ms = ((uint32_t)desired_index * T_ms) / 255UL;
-  } else {
-    const uint32_t elapsed_ms = now_ms - pSEGMENT.live_palette.timing1;
-    t_ms = (T_ms > 0) ? (elapsed_ms % T_ms) : 0UL;
-  }
-
-  // Slot boundaries
-  const uint32_t s1 = (1UL * T_ms) / 5UL;
-  const uint32_t s2 = (2UL * T_ms) / 5UL;
-  const uint32_t s3 = (3UL * T_ms) / 5UL;
-  const uint32_t s4 = (4UL * T_ms) / 5UL;
-
-  uint8_t k;
-  uint32_t slot_start, slot_end;
-  if      (t_ms < s1) { k=0; slot_start=0;  slot_end=s1; }
-  else if (t_ms < s2) { k=1; slot_start=s1; slot_end=s2; }
-  else if (t_ms < s3) { k=2; slot_start=s2; slot_end=s3; }
-  else if (t_ms < s4) { k=3; slot_start=s3; slot_end=s4; }
-  else                { k=4; slot_start=s4; slot_end=T_ms; }
-
-  const uint32_t slot_ms   = slot_end - slot_start;
-  const uint32_t within_ms = t_ms - slot_start;
-
-  const uint8_t k_next = (k == 4) ? 0 : (uint8_t)(k + 1);
-
-  const RgbwwColor c_curr = pSEGMENT.segcol[k].colour;
-  const RgbwwColor c_next = pSEGMENT.segcol[k_next].colour;
-
-  // Compute hold/blend split inside this slot
-  // If HOLD+BLEND < 100 due to defines, remainder goes to HOLD (more solid time).
-  uint32_t hold_pct  = (uint32_t)SEGCOLOUR_CYCLE_HOLD_PCT;
-  uint32_t blend_pct = (uint32_t)SEGCOLOUR_CYCLE_BLEND_PCT;
-  if (hold_pct > 100UL) hold_pct = 100UL;
-  if (blend_pct > 100UL) blend_pct = 100UL;
-  if (hold_pct + blend_pct > 100UL) {
-    // clamp blend to fit
-    blend_pct = 100UL - hold_pct;
-  }
-  const uint32_t hold_end_ms = (slot_ms * hold_pct) / 100UL;   // [0..hold_end_ms) solid curr
-  // blend is [hold_end_ms..slot_ms) curr->next
-
-  RgbwwColor out;
-
-  if (slot_ms == 0) {
-    out = c_curr;
-  }
-  else if (within_ms < hold_end_ms || (slot_ms <= hold_end_ms)) {
-    // Solid “BE this colour” region
-    out = c_curr;
-  }
-  else {
-    // Blend curr -> next over the remainder (includes rounding remainder)
-    const uint32_t start = hold_end_ms;
-    const uint32_t denom = (slot_ms > start) ? (slot_ms - start) : 1UL;
-    const uint32_t w     = within_ms - start;
-
-    // Use float only for the blend fraction; denom is stable per slot.
-    float p = (float)w / (float)denom;
-    if (p > 1.0f) p = 1.0f;
-    out = RgbwwColor::LinearBlend(c_curr, c_next, p);
-  }
-
-  colourRGBWW = out;
-  colour32 = RGBW32(out.R, out.G, out.B, out.WW);
-  #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-  colour32_white_cold = out.CW;
-  #endif
-}
-break;
-
-
-
-      
-      
-      default:
-        ALOG_ERR(PSTR("Bad Palette ID %d"), id);
-        return 0; // Default to black if palette is not found
+      break;
     }
   }
   else {
@@ -2299,36 +1671,6 @@ uint8_t mPalette::GetColoursInPalette(uint16_t palette_id)
 
 #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
 
-IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Colour_ReadBuffer_RGBWW(
-  uint8_t* palette_buffer,
-  uint16_t pixel_position,  
-  uint8_t* return_encoded_value,
-  PALETTE_ENCODING_DATA encoding,
-  uint8_t encoded_colour_width
-) {
-  // Precompute the index where the color starts (considering the gradient byte)
-  uint16_t index_relative = pixel_position * encoded_colour_width;
-
-  // Handle the gradient byte if gradient is enabled
-  if (encoding.index_gradient) {
-    // If the gradient is enabled, read it and skip over it to access the color data
-    if (return_encoded_value != nullptr) {
-      *return_encoded_value = palette_buffer[index_relative];  // store gradient value
-    }
-    index_relative++; // Move past the gradient byte to reach color data
-  }
-
-  // Fetch the color components based on the encoding flags
-  uint8_t red        = (encoding.red_enabled)        ? palette_buffer[index_relative]   : 0;
-  uint8_t green      = (encoding.green_enabled)      ? palette_buffer[index_relative+1] : 0;
-  uint8_t blue       = (encoding.blue_enabled)       ? palette_buffer[index_relative+2] : 0;
-  uint8_t white_cold = (encoding.white_cold_enabled) ? palette_buffer[index_relative+3] : 0;
-  uint8_t white_warm = (encoding.white_warm_enabled) ? palette_buffer[index_relative+4] : 0;
-
-  return RgbwwColor(red, green, blue, white_cold, white_warm);
-}
-
-
 /*
 Simplified branching:
     Consolidated the logic for determining if the palette should act as a gradient or a discrete sequence into fewer branches.
@@ -2481,36 +1823,6 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Palette_Colour_R
 }
 
 #else
-
-IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::SubGet_Encoded_Colour_ReadBuffer_U32(
-  uint8_t* palette_buffer,
-  uint16_t pixel_position,  
-  uint8_t* return_encoded_value,
-  PALETTE_ENCODING_DATA encoding,
-  uint8_t encoded_colour_width
-) {
-  // Precompute the index where the color starts (considering the gradient byte)
-  uint16_t index_relative = pixel_position * encoded_colour_width;
-
-  // Handle the gradient byte if gradient is enabled
-  if (encoding.index_gradient) {
-    // If the gradient is enabled, read it and skip over it to access the color data
-    if (return_encoded_value != nullptr) {
-      *return_encoded_value = palette_buffer[index_relative];  // store gradient value
-    }
-    index_relative++; // Move past the gradient byte to reach color data
-  }
-
-  // Fetch the color components based on the encoding flags
-  uint8_t red        = (encoding.red_enabled)        ? palette_buffer[index_relative]   : 0;
-  uint8_t green      = (encoding.green_enabled)      ? palette_buffer[index_relative+1] : 0;
-  uint8_t blue       = (encoding.blue_enabled)       ? palette_buffer[index_relative+2] : 0;
-  uint8_t white_cold = (encoding.white_cold_enabled) ? palette_buffer[index_relative+3] : 0;
-  // uint8_t white_warm = (encoding.white_warm_enabled) ? palette_buffer[index_relative+4] : 0; // IGNORED IN RGBWW
-
-  return RGBW32(red, green, blue, white_cold);
-}
-
 
 IRAM_ATTR [[gnu::hot]] uint32_t mPalette::SubGet_Encoded_Palette_Colour_U32(
   uint8_t* palette_buffer,
