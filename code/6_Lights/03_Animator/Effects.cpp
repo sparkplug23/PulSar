@@ -788,7 +788,7 @@ uint16_t mAnimatorLight::EffectAnim__Firefly()
 }
 static const char PM_EFFECT_CONFIG__FIREFLY[] PROGMEM =
 "Firefly@"                           // name
-"Blend Speed,Pixels Changing,,,,DrawOver FirstRun,,!,"  // 1sx,2ix,3c1,4c2,5c3
+"Blend Speed,Pixels Changing,,,,DrawOver FirstRun,,,!,"  // 1sx,2ix,3c1,4c2,5c3
 ";"
 ""                                     // no segment colour names
 ";"
@@ -805,6 +805,7 @@ static const char PM_EFFECT_DESCRI__FIREFLY[] PROGMEM =
 "Blend Random PalCols\n\r"
 "IX:Pixels Changing\n\r"
 "SX:Blend Speed\n\r"
+"EP:!\n\r"
 "C1:Skip first full repaint\n\r"
 "EP:!\n\r"
 "GP:!";
@@ -1232,6 +1233,11 @@ static const char PM_EFFECT_DESCRI__SHIMMERING_PALETTE_SATURATION[] PROGMEM =
 //   // Frame timing unchanged; effect above is pure buffer shuffle
 //   return FRAMETIME_WITH_SPEED(5, 1000);
 // }
+
+
+
+#define ENABLE_DEVFEATURE_LIGHTING__NEW_ROTATE_FIX_DEC25
+
 /*******************************************************************************************************************************************************************************************************************
  * @description : Rotates by getting and setting segment pixel colours in *virtual index* space, with wrap-around.
  *                - Uses SEGMENT.vLength() as the valid index range for get/setPixelColor.
@@ -1240,7 +1246,7 @@ static const char PM_EFFECT_DESCRI__SHIMMERING_PALETTE_SATURATION[] PROGMEM =
  *                direction = false → rotate left   (toward lower virtual indices)
  *              : Old bug was using SEGLEN (physical length) as if it were the virtual index range; this breaks when grouping/decimate≠1.
  ********************************************************************************************************************************************************************************************************************/
-uint16_t IRAM_ATTR mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool direction)
+uint16_t mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool direction)
 {
 //     static bool logged_once = false;
 // if (!logged_once) {
@@ -1250,21 +1256,55 @@ uint16_t IRAM_ATTR mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amo
 //   logged_once = true;
 // }
 
+#ifdef ENABLE_DEVFEATURE_LIGHTING__NEW_ROTATE_FIX_DEC25
 
-  if (SEGLEN == 0) return EFFECT_DEFAULT();
+ // // Work in virtual index space: [0 .. vLen-1] is what getPixelColor()/setPixelColor() expect.
+  const uint16_t vLen = SEGLEN;
+  // if (vLen == 0) return EFFECT_DEFAULT();
 
-  // Work in virtual index space: [0 .. vLen-1] is what getPixelColor()/setPixelColor() expect.
-  const uint16_t vLen = SEGMENT.vLength();
-  if (vLen == 0) return EFFECT_DEFAULT();
-
-  // Normalize movement to [0 .. vLen-1]
-  const uint16_t move = (movement_amount % vLen);
-  if (move == 0) return FRAMETIME_WITH_SPEED(5, 1000);
+  // // Normalize movement to [0 .. vLen-1]
+  const uint16_t move = (movement_amount);// % vLen);
+  // if (move == 0) return FRAMETIME_WITH_SPEED(5, 1000);
 
   // Temp buffer for the wrapped edge in virtual space
   std::vector<uint32_t> edge(move);
 
-  if (direction) {
+  // if (direction) {
+    // ------------------------ Rotate right: pixels move toward higher virtual indices ------------------------
+    // Save tail [vLen-move .. vLen-1]
+    for (uint16_t j = 0; j < move; ++j) {
+      edge[j] = tkr_iLight->bus_manager->busses[0]->getPixelColor(SEGMENT.start + (vLen - move + j));
+    }
+
+    // Shift block up: [0 .. vLen-move-1] → [move .. vLen-1]
+    for (int32_t i = (int32_t)vLen - 1; i >= (int32_t)move; --i) {
+      uint32_t srcCol = tkr_iLight->bus_manager->busses[0]->getPixelColor(SEGMENT.start + (i - move));
+      tkr_iLight->bus_manager->busses[0]->setPixelColor(SEGMENT.start + i, srcCol);
+    }
+
+    // Wrap saved tail into head [0 .. move-1]
+    for (uint16_t j = 0; j < move; ++j) {
+      tkr_iLight->bus_manager->busses[0]->setPixelColor(SEGMENT.start + j, edge[j]);
+    }
+
+
+#else
+
+
+  // if (SEGLEN == 0) return EFFECT_DEFAULT();
+
+  // // Work in virtual index space: [0 .. vLen-1] is what getPixelColor()/setPixelColor() expect.
+  const uint16_t vLen = SEGLEN;
+  // if (vLen == 0) return EFFECT_DEFAULT();
+
+  // // Normalize movement to [0 .. vLen-1]
+  const uint16_t move = (movement_amount);// % vLen);
+  // if (move == 0) return FRAMETIME_WITH_SPEED(5, 1000);
+
+  // Temp buffer for the wrapped edge in virtual space
+  std::vector<uint32_t> edge(move);
+
+  // if (direction) {
     // ------------------------ Rotate right: pixels move toward higher virtual indices ------------------------
     // Save tail [vLen-move .. vLen-1]
     for (uint16_t j = 0; j < move; ++j) {
@@ -1282,28 +1322,170 @@ uint16_t IRAM_ATTR mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amo
       SEGMENT.setPixelColor((int)j, edge[j], BRIGHTNESS_ALREADY_SET);
     }
 
-  } else {
-    // ------------------------ Rotate left: pixels move toward lower virtual indices -------------------------
-    // Save head [0 .. move-1]
-    for (uint16_t j = 0; j < move; ++j) {
-      edge[j] = SEGMENT.getPixelColor((int)j);
-    }
+  // } else {
+  //   // ------------------------ Rotate left: pixels move toward lower virtual indices -------------------------
+  //   // Save head [0 .. move-1]
+  //   for (uint16_t j = 0; j < move; ++j) {
+  //     edge[j] = SEGMENT.getPixelColor((int)j);
+  //   }
 
-    // Shift block down: [move .. vLen-1] → [0 .. vLen-move-1]
-    for (uint16_t i = 0; i < vLen - move; ++i) {
-      uint32_t srcCol = SEGMENT.getPixelColor((int)(i + move));
-      SEGMENT.setPixelColor((int)i, srcCol, BRIGHTNESS_ALREADY_SET);
-    }
+  //   // Shift block down: [move .. vLen-1] → [0 .. vLen-move-1]
+  //   for (uint16_t i = 0; i < vLen - move; ++i) {
+  //     uint32_t srcCol = SEGMENT.getPixelColor((int)(i + move));
+  //     SEGMENT.setPixelColor((int)i, srcCol, BRIGHTNESS_ALREADY_SET);
+  //   }
 
-    // Wrap saved head into tail [vLen-move .. vLen-1]
-    for (uint16_t j = 0; j < move; ++j) {
-      SEGMENT.setPixelColor((int)(vLen - move + j), edge[j], BRIGHTNESS_ALREADY_SET);
-    }
-  }
+  //   // Wrap saved head into tail [vLen-move .. vLen-1]
+  //   for (uint16_t j = 0; j < move; ++j) {
+  //     SEGMENT.setPixelColor((int)(vLen - move + j), edge[j], BRIGHTNESS_ALREADY_SET);
+  //   }
+  // }
+
+  #endif
 
   // Frame timing unchanged; this is pure virtual-buffer shuffle.
-  return FRAMETIME_WITH_SPEED(5, 1000);
+  return FRAMETIME;// FRAMETIME_WITH_SPEED(5, 1000);
 }
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : TEMP PATCH (Christmas): Rotate using direct physical bus_manager pixel access.
+ *                - Bypasses SEGMENT.getPixelColor()/setPixelColor() and ALL virtual mapping.
+ *                - Operates on physical indices [SEGMENT.start .. SEGMENT.stop] inclusive.
+ *                - If this is stable while virtual version corrupts, bug is in virtual mapping / SEGMENT access, not NeoPixelBus.
+ * @note        : direction = true  → rotate right  (toward higher physical indices)
+ *                direction = false → rotate left   (toward lower physical indices)
+ * @warning     : Ignores grouping/spacing/decimate/mirror/2D map/reverse/offset. Pure physical rotate.
+ ********************************************************************************************************************************************************************************************************************/
+// uint16_t IRAM_ATTR mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool direction)
+// {
+//   if (SEGLEN == 0) return EFFECT_DEFAULT();
+
+//   // Physical range (inclusive)
+//   const uint16_t start = SEGMENT.start;
+//   const uint16_t stop  = SEGMENT.stop;
+//   if (stop < start) return EFFECT_DEFAULT();
+
+//   const uint32_t len32 = (uint32_t)stop - (uint32_t)start + 1u;
+//   const uint16_t len   = (len32 > 0xFFFFu) ? 0xFFFFu : (uint16_t)len32;
+//   if (len == 0) return EFFECT_DEFAULT();
+
+//   // Normalize movement to [0 .. len-1]
+//   const uint16_t move = (movement_amount % len);
+//   if (move == 0) return FRAMETIME_WITH_SPEED(5, 1000);
+
+//   // Temp buffer for wrapped edge (physical)
+//   std::vector<uint32_t> edge;
+//   edge.resize(move);
+
+//   auto* bm = tkr_iLight->bus_manager;
+//   if (!bm) return EFFECT_DEFAULT();
+
+//   if (direction) {
+//     // ------------------------ Rotate right (toward higher physical indices) ------------------------
+//     // Save tail [stop-move+1 .. stop]
+//     for (uint16_t j = 0; j < move; ++j) {
+//       const uint16_t p = (uint16_t)(stop - (move - 1u) + j);
+//       edge[j] = bm->getPixelColor(p);
+//     }
+
+//     // Shift block up: [start .. stop-move] → [start+move .. stop]
+//     // i goes downward to avoid overwrite
+//     for (int32_t p = (int32_t)stop; p >= (int32_t)start + (int32_t)move; --p) {
+//       const uint16_t srcP = (uint16_t)(p - (int32_t)move);
+//       const uint32_t col  = bm->getPixelColor(srcP);
+//       bm->setPixelColor((uint16_t)p, col);
+//     }
+
+//     // Wrap saved tail into head [start .. start+move-1]
+//     for (uint16_t j = 0; j < move; ++j) {
+//       bm->setPixelColor((uint16_t)(start + j), edge[j]);
+//     }
+
+//   } else {
+//     // ------------------------ Rotate left (toward lower physical indices) -------------------------
+//     // Save head [start .. start+move-1]
+//     for (uint16_t j = 0; j < move; ++j) {
+//       const uint16_t p = (uint16_t)(start + j);
+//       edge[j] = bm->getPixelColor(p);
+//     }
+
+//     // Shift block down: [start+move .. stop] → [start .. stop-move]
+//     for (uint16_t p = start; p <= (uint16_t)(stop - move); ++p) {
+//       const uint16_t srcP = (uint16_t)(p + move);
+//       const uint32_t col  = bm->getPixelColor(srcP);
+//       bm->setPixelColor(p, col);
+//     }
+
+//     // Wrap saved head into tail [stop-move+1 .. stop]
+//     for (uint16_t j = 0; j < move; ++j) {
+//       bm->setPixelColor((uint16_t)(stop - (move - 1u) + j), edge[j]);
+//     }
+//   }
+
+//   return FRAMETIME_WITH_SPEED(5, 1000);
+// }
+
+// uint16_t mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool direction)
+// {
+//   // if (movement_amount == 0) 
+//   // {
+//   //   ALOG_ERR(PSTR("I should not be here"));
+//   //   return SPEED_FORMULA_L; // No rotation needed
+//   // }
+
+//   // ALOG_INF(PSTR("EffectAnim__Rotate_Base(%d,%d)"), movement_amount, direction);
+//   // Save the edge colours to handle larger rotations
+//   std::vector<uint32_t> edgePixels(movement_amount);
+
+//   // if (direction) // Forward (right) rotation
+//   // {
+//     for (uint16_t step = 0; step < movement_amount; step++)
+//     {
+//       // Save the last pixel(s) being rotated out
+//       for (uint16_t j = 0; j < movement_amount; j++)
+//       {
+//         edgePixels[j] = SEGMENT.getPixelColor(SEGLEN - 1 - j);
+//       }
+
+//       // Shift pixels forward
+//       for (int16_t i = SEGLEN - 1; i >= movement_amount; i--)
+//       {
+//         SEGMENT.setPixelColor((uint16_t)i, SEGMENT.getPixelColor(i - movement_amount), BRIGHTNESS_ALREADY_SET);
+//       }
+
+//       // Wrap the saved edge pixels to the start
+//       for (uint16_t j = 0; j < movement_amount; j++)
+//       {
+//         SEGMENT.setPixelColor((uint16_t)j, edgePixels[movement_amount - 1 - j], BRIGHTNESS_ALREADY_SET);
+//       }
+//     }
+//   // }
+//   // else // Backward (left) rotation
+//   // {
+//   //   for (uint16_t step = 0; step < movement_amount; step++)
+//   //   {
+//   //     // Save the first pixel(s) being rotated out
+//   //     for (uint16_t j = 0; j < movement_amount; j++)
+//   //     {
+//   //       edgePixels[j] = SEGMENT.getPixelColor(j);
+//   //     }
+
+//   //     // Shift pixels backward
+//   //     for (uint16_t i = 0; i < SEGLEN - movement_amount; i++)
+//   //     {
+//   //       SEGMENT.setPixelColor(i, SEGMENT.getPixelColor(i + movement_amount));
+//   //     }
+
+//   //     // Wrap the saved edge pixels to the end
+//   //     for (uint16_t j = 0; j < movement_amount; j++)
+//   //     {
+//   //       SEGMENT.setPixelColor(SEGLEN - movement_amount + j, edgePixels[j]);
+//   //     }
+//   //   }
+//   // }
+
+//   return FRAMETIME_WITH_SPEED(5,1000); // from 5ms to 1000ms per frame
+// }
 
 
 
@@ -1325,6 +1507,16 @@ uint16_t IRAM_ATTR mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amo
 uint16_t mAnimatorLight::EffectAnim__Rotating_Previous_Animation()
 {
   if (SEGLEN == 0) return EFFECT_DEFAULT();
+
+  const uint16_t move_px_base2 = map(SEGMENT.intensity, 0, 255, 1,
+                                    (uint16_t)max<uint16_t>(1, SEGLEN/2)); // IX → pixels/frame
+  EffectAnim__Rotate_Base(move_px_base2, 1);  // ignore its return
+
+  
+        // SEGMENT.setPixelColor(0, RGBW32(255,0,0,0)); // Debug: mark start pixel
+        // SEGMENT.setPixelColor(1, RGBW32(0,255,0,0)); // Debug: mark start pixel
+
+  return 25;
 
   const uint32_t now          = effect_start_time;          // ms tick source
   const uint16_t move_px_base = map(SEGMENT.intensity, 0, 255, 1,

@@ -224,7 +224,7 @@ void mTelemetry::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Reboot;
   mqtthandler_list.push_back(ptr);
   
-  ptr = &mqtthandler_reboot_event;
+  ptr = &mqtthandler_reboot_event; //I think this needs phased away, and only ever is sent on boot
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
@@ -235,7 +235,6 @@ void mTelemetry::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_ALL;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_REBOOT_EVENT_CTR;
   ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Reboot;
-  mqtthandler_list.push_back(ptr);
 
   // #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
   

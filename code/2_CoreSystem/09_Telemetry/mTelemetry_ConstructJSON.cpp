@@ -441,36 +441,81 @@ uint8_t mTelemetry::ConstructJSON_Debug_Devices(uint8_t json_level, bool json_ap
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level, bool json_appending){ // 
+// uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level, bool json_appending){ // 
 
-  JBI->Start();
+//   JBI->Start();
   
-  JBI->Add(PM_DEVICE, tkr_set->Settings.system_name.device);
+//   JBI->Add(PM_DEVICE, tkr_set->Settings.system_name.device);
+//   JBI->Add(PM_DEVICEFRIENDLYNAME, tkr_set->Settings.system_name.friendly);
+//   JBI->Add_FV(PM_DATETIME, PSTR("\"%02d-%02d-%02d %02d:%02d:%02d\""),
+//                       tkr_time->RtcTime.day_of_month, tkr_time->RtcTime.month, tkr_time->RtcTime.year,
+//                       tkr_time->RtcTime.hour, tkr_time->RtcTime.minute, tkr_time->RtcTime.second
+//                     );
+//   JBI->Object_Start(PM_COUNTER);
+//     JBI->Add("All", (uint8_t)0);
+//     // JBI->Add("WDT", (uint8_t)0);
+//   JBI->Object_End();
+
+//   // if (tkr_sup->CrashFlag()) {
+    
+//   JBI->Object_Start(PM_CRASHDUMP);
+//     tkr_sup->WriteBuffer_P(PSTR(","));
+//     tkr_sup->CrashDump_AddJson();
+//   JBI->Object_End();
+
+//   // } else {
+//   //   char buffer[30];
+//   //   JBI->Add("Reason", tkr_sup->GetResetReason(buffer, sizeof(buffer)));
+//   // }
+
+//   return JBI->End();
+
+// }
+
+
+uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level, bool json_appending)
+{
+  JBI->Start();
+
+  JBI->Add(PM_DEVICE,             tkr_set->Settings.system_name.device);
   JBI->Add(PM_DEVICEFRIENDLYNAME, tkr_set->Settings.system_name.friendly);
+
   JBI->Add_FV(PM_DATETIME, PSTR("\"%02d-%02d-%02d %02d:%02d:%02d\""),
-                      tkr_time->RtcTime.day_of_month, tkr_time->RtcTime.month, tkr_time->RtcTime.year,
-                      tkr_time->RtcTime.hour, tkr_time->RtcTime.minute, tkr_time->RtcTime.second
-                    );
+              tkr_time->RtcTime.day_of_month, tkr_time->RtcTime.month, tkr_time->RtcTime.year,
+              tkr_time->RtcTime.hour, tkr_time->RtcTime.minute, tkr_time->RtcTime.second);
+
+  // Reset reason (ESP8266 string / ESP32 enum mapped by GetResetReason)
+  char reset_reason[64] = {0};
+  tkr_sup->GetResetReason(reset_reason, sizeof(reset_reason));
+  if (reset_reason[0] == '\0') {
+    strncpy(reset_reason, "Unknown", sizeof(reset_reason) - 1);
+    reset_reason[sizeof(reset_reason) - 1] = '\0';
+  }
+  JBI->Add("ResetReason", reset_reason);
+
+  // OTA boot flag (same behaviour as your LWT)
+  #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
+  JBI->Add("OTABootReason", (RtcSettings.boot_was_completed_ota_event == 1) ? "OTAYes" : "OTANo");
+  #else
+  JBI->Add("OTABootReason", "Unknown");
+  #endif
+
+  // Distinguish “crash-loop on boot” vs “long-running then rebooted”
+  JBI->Add("UptimeSeconds", tkr_time->UpTime());
+
+  // Existing blocks (leave as-is)
   JBI->Object_Start(PM_COUNTER);
     JBI->Add("All", (uint8_t)0);
-    // JBI->Add("WDT", (uint8_t)0);
   JBI->Object_End();
 
-  // if (tkr_sup->CrashFlag()) {
-    
   JBI->Object_Start(PM_CRASHDUMP);
     tkr_sup->WriteBuffer_P(PSTR(","));
     tkr_sup->CrashDump_AddJson();
   JBI->Object_End();
 
-  // } else {
-  //   char buffer[30];
-  //   JBI->Add("Reason", tkr_sup->GetResetReason(buffer, sizeof(buffer)));
-  // }
-
   return JBI->End();
-
 }
+
 
 
 

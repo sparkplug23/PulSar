@@ -261,7 +261,10 @@
 				<output class="sliderbubble"></output>
 			</div>
 			<div id="slider1" class="slider">
-				<i class="icons slider-icon" title="Toggle labels" onclick="tglLabels()">&#xe409;</i>
+				<!-- <i class="icons slider-icon" title="Toggle labels" onclick="tglLabels()">&#xe409;</i> -->
+				<i class="icons slider-icon" onclick="tglPerfControls()">&#xe409;</i>
+				<!-- was: onclick="tglLabels()"  (leave tglLabels in JS, just stop calling it here) -->
+
 				<div title="Effect intensity" class="sliderwrap il">
 					<input id="sliderIntensity" class="noslide" onchange="setIntensity()" oninput="updateTrail(this)" max="255" min="0" type="range" value="128" />
 					<div class="sliderdisplay"></div>
@@ -308,6 +311,17 @@
 				</div>
 				<output class="sliderbubble"></output>
 			</div>
+			<div id="slider7" class="slider hide">
+				<i class="icons slider-icon" onclick="tglFreeze()">D</i>
+				<div title="Decimate" class="sliderwrap il">
+					<input id="sliderDecimate" class="noslide"
+					onchange="setDecimate()" oninput="updateTrail(this)"
+					max="15" min="1" type="range" value="1" />
+					<div class="sliderdisplay"></div>
+				</div>
+				<output class="sliderbubble"></output>
+			</div>
+
 			<div id="fxopt" class="option fade">
 				<label id="opt0" title="Check 1" class="check ochkl hide"><i class="icons">&#xe2b3;</i>
 					<input id="checkO1" type="checkbox" onchange="setOption(1, this.checked)">

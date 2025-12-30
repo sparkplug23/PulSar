@@ -1246,18 +1246,84 @@ String mSupport::GetResetReason(void)
   #endif
 }
 
+// const char* mSupport::GetResetReason(char* buffer, uint8_t buflen)
+// {
+//   #ifdef ESP8266
+//   // if (oswatch_blocked_loop) {
+//   //   strncpy_P(buffer, PSTR(D_BLOCKED_LOOP), buflen);
+//   // } else {
+//     sprintf(buffer, "%s", ESP.getResetReason().c_str());
+//   // }
+//   #else
+//     sprintf(buffer, "%s", "Unsupported");
+//   #endif
+//   return buffer;
+// }
+#include "mSupport.h"
+
+#ifdef ESP32
+  #include "esp_system.h"   // esp_reset_reason_t, esp_reset_reason()
+#endif
+
 const char* mSupport::GetResetReason(char* buffer, uint8_t buflen)
 {
-  #ifdef ESP8266
-  // if (oswatch_blocked_loop) {
-  //   strncpy_P(buffer, PSTR(D_BLOCKED_LOOP), buflen);
-  // } else {
-    sprintf(buffer, "%s", ESP.getResetReason().c_str());
-  // }
-  #else
-    sprintf(buffer, "%s", "Unsupported");
-  #endif
+  if (!buffer || buflen == 0) {
+    return "";
+  }
+  buffer[0] = '\0';
+
+#ifdef ESP8266
+
+  // ESP8266: already provides a human-readable string
+  // (Example outputs: "Power On", "External System", "Exception", "Software Watchdog", etc.)
+  snprintf(buffer, buflen, "%s", ESP.getResetReason().c_str());
+  buffer[buflen - 1] = '\0';
   return buffer;
+
+#elif defined(ESP32)
+
+  // ESP32: enum reset reason
+  const esp_reset_reason_t reason = esp_reset_reason();
+
+  // Map enum to a stable short code + readable string.
+  // Keep strings short so you can use them as tags/codes in MQTT.
+  switch (reason)
+  {
+    case ESP_RST_UNKNOWN:   snprintf(buffer, buflen, "Unknown"); break;
+    case ESP_RST_POWERON:   snprintf(buffer, buflen, "PowerOn"); break;
+    case ESP_RST_EXT:       snprintf(buffer, buflen, "ExternalReset"); break;
+    case ESP_RST_SW:        snprintf(buffer, buflen, "SoftwareReset"); break;
+    case ESP_RST_PANIC:     snprintf(buffer, buflen, "Panic"); break;
+    case ESP_RST_INT_WDT:   snprintf(buffer, buflen, "IntWDT"); break;
+    case ESP_RST_TASK_WDT:  snprintf(buffer, buflen, "TaskWDT"); break;
+    case ESP_RST_WDT:       snprintf(buffer, buflen, "OtherWDT"); break;
+    case ESP_RST_DEEPSLEEP: snprintf(buffer, buflen, "DeepSleep"); break;
+    case ESP_RST_BROWNOUT:  snprintf(buffer, buflen, "Brownout"); break;
+    case ESP_RST_SDIO:      snprintf(buffer, buflen, "SDIO"); break;
+
+    // Some ESP-IDF / core versions have extra reasons. Guard if your compile complains.
+    #ifdef ESP_RST_USB
+    case ESP_RST_USB:       snprintf(buffer, buflen, "USB"); break;
+    #endif
+    #ifdef ESP_RST_JTAG
+    case ESP_RST_JTAG:      snprintf(buffer, buflen, "JTAG"); break;
+    #endif
+
+    default:
+      snprintf(buffer, buflen, "Unknown(%d)", (int)reason);
+      break;
+  }
+
+  buffer[buflen - 1] = '\0';
+  return buffer;
+
+#else
+
+  snprintf(buffer, buflen, "Unsupported");
+  buffer[buflen - 1] = '\0';
+  return buffer;
+
+#endif
 }
 
 

@@ -872,9 +872,6 @@ class mAnimatorLight :
     *****************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
 
-    void fill(uint32_t c);
-    void fill(RgbwwColor c);
-    void fill_ranged(uint32_t c);
 
 // legacy to remove
     static uint32_t ColourBlend(uint32_t color1, uint32_t color2, uint8_t blend);
@@ -3551,6 +3548,9 @@ typedef struct Segment
     // 1D support functions (some implement 2D as well)
     void blur(uint8_t blur_amount, bool smear = false);
     void fill(uint32_t c);
+    void fill(RgbwwColor c);
+    void fill_ranged(uint32_t c);
+
     void fade_out(uint8_t r);
     void fadeToBlackBy(uint8_t fadeBy);
     void blendPixelColor(int n, uint32_t color, uint8_t blend);

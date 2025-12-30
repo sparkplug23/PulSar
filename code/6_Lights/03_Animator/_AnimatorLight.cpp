@@ -717,6 +717,23 @@ void mAnimatorLight::EveryLoop()
       SubTask_Demo();
       #endif
 
+      /**
+       * @brief Issue fix?
+       * When a playlist change happens, it will request a load.
+       * This load happens in preset, which must occur prior to Effect being called.
+       * This may fix the corruption issue when changing playlist while in effects mode.
+       * 
+       * ie grp 150 tto 1 (via jsoncommand), but effect happened before this completed since preset to load is a flag, not a hard change
+       * 
+       */
+      #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+      SubTask_Playlist();
+      #endif
+
+      #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+      SubTask_Presets();
+      #endif
+
       // ALOG_INF(PSTR("Loop1b"));Serial.flush();
       #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS
       DEBUG_LIGHTING__START_TIME_RECORDING(1)
@@ -725,13 +742,6 @@ void mAnimatorLight::EveryLoop()
       #endif
       // ALOG_INF(PSTR("Loop1c"));Serial.flush();
 
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
-      SubTask_Playlist();
-      #endif
-
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
-      SubTask_Presets();
-      #endif
 
     }break;
     #ifdef ENABLE_FEATURE_LIGHTING__REALTIME_MODES
@@ -2479,17 +2489,8 @@ void mAnimatorLight::SubTask_Effects()
 
 uint8_t mAnimatorLight::GetNumberOfColoursInUNLOADEDPalette(uint16_t palette_id)
 {
-  // ah, unloaded one needs called this way.
-
-  // Serial.println("PO");//PHASE OUT!!!! OR MAKE SURE NEVER REALTIME CALL NEVER CALLED?? why");
-  // return SEGMENT.palette->colours_in_palette;// GetNumberOfColoursInUNLOADEDPalette(palette_id);
-
-
-// when preloaded, use mPalette.colours_in_palette
 
   uint8_t palette_colour_count = 0;
-
-  // Pass pointer to memory location to load, so I can have additional palettes. If none passed, assume primary storage of segment
 
   // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, 0, tkr_anim->segment_current_index);
 
@@ -2498,9 +2499,6 @@ uint8_t mAnimatorLight::GetNumberOfColoursInUNLOADEDPalette(uint16_t palette_id)
    **/
   if(
     ((palette_id >= mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID))
-    //  ||
-    // ((palette_id >= mPalette::PALETTELIST_VARIABLE_HSBID_01__ID)    && (palette_id < mPalette::PALETTELIST_VARIABLE_HSBID_LENGTH__ID)) ||
-    // ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_STATIC_IDS)  && (palette_id < mPaletteI->GetPaletteListLength()))
   ){   
 
     uint16_t encoded_colour_width = 0;
@@ -2589,83 +2587,9 @@ uint8_t mAnimatorLight::GetNumberOfColoursInUNLOADEDPalette(uint16_t palette_id)
       case mPalette::PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID:
         palette_colour_count = 1;
       break;
-    //   case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__RGBCCT_PRIMARY_TO_SECONDARY_01__ID:
-    //     palette_colour_count = 16;
-    //  break;
       case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__ID:
         palette_colour_count = sizeof(PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__DATA)/6;
       break;
-      // case mPalette::PALETTELIST_DYNAMIC__ENCODED_GENERIC__ID:{
-      //   // if(SEGMENT.palette->pData.size())
-      //   // {
-      //   //   palette_colour_count = (SEGMENT.palette->pData.size()-2)/3;
-      //   // }else{
-      //     palette_colour_count = 1;
-      //   // }
-            
-      //   uint16_t encoded_colour_width = 0;
-
-      //   uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__SOLAR_AZIMUTH__WHITE_COLOUR_TEMPERATURE_01__ID;
-      //   uint8_t index = constrain(palette_id_adj,0,mPaletteI->dynamic_palettes.size()-1);
-        
-      //   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-      //   ALOG_INF(PSTR("addDynamicPalette bytes added[3] %d"), mPaletteI->dynamic_palettes[3].data.size());
-      //   for(int i=0;i<mPaletteI->dynamic_palettes[3].data.size();i++){ Serial.print( mPaletteI->dynamic_palettes[3].data[i]); Serial.print( "," ); } Serial.println();
-      //   ALOG_INF(PSTR("index = %d"), index);
-      //   #endif
-
-      //   mPalette::PALETTE_DATA pal = mPaletteI->dynamic_palettes[index];
-
-      //   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-      //   for(int i=0;i<pal.data.size();i++)
-      //   {
-      //     Serial.print(i, DEC);
-      //     Serial.print("\t");
-      //     Serial.print(pal.data[i], DEC);
-      //     Serial.println();
-      //   }
-      //   Serial.println();
-      //   Serial.println(pal.encoding.data, BIN);
-      //   #endif // ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-
-      //   if(pal.encoding.red_enabled){ encoded_colour_width++; }
-      //   if(pal.encoding.green_enabled){ encoded_colour_width++; }
-      //   if(pal.encoding.blue_enabled){ encoded_colour_width++; }
-      //   if(pal.encoding.white_warm_enabled){ encoded_colour_width++; }
-
-      //   if(pal.encoding.white_cold_enabled){ encoded_colour_width++; }
-      //   if(pal.encoding.encoded_value_byte_width){ encoded_colour_width += pal.encoding.encoded_value_byte_width; }
-
-      //   // if(pal.encoding.index_exact){ encoded_colour_width++; }
-      //   if(pal.encoding.index_gradient){ encoded_colour_width++; }
-      //   if(pal.encoding.index_is_trigger_value_exact){ encoded_colour_width++; }
-      //   if(pal.encoding.index_is_trigger_value_scaled100){ encoded_colour_width++; }
-        
-      //   // if(pal.encoding.encoded_as_hsb_ids){ encoded_colour_width++; }
-      //   if(pal.encoding.encoded_as_crgb_palette_16){ encoded_colour_width++; }
-      //   if(pal.encoding.encoded_as_crgb_palette_256){ encoded_colour_width++; }
-      //   if(pal.encoding.palette_can_be_modified){ encoded_colour_width++; }
-
-
-      //   if(encoded_colour_width==0)
-      //   {
-      //     // ALOG_ERR(PSTR("encoded_colour_width==0, crash errorAA =%S"), pal.friendly_name_ctr);
-      //     return palette_colour_count;
-      //   }
-
-            
-      
-      //   palette_colour_count = pal.data.size()/encoded_colour_width; 
-
-      //   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-      //   ALOG_INF(PSTR("============  pal.data.SIZE/width/count %d %d %D"),  pal.data.size(), encoded_colour_width, palette_colour_count);
-      //   #endif
-
-
-      // }break;
-      // case mPalette::PALETTELIST_DYNAMIC__TIMEREACTIVE__RGBCCT_PRIMARY_TO_SECONDARY_WITH_SECONDS_IN_MINUTE_01__ID:
-      //   palette_colour_count = 1;
-      // break;
     }
   }
   else
@@ -2685,50 +2609,16 @@ uint8_t mAnimatorLight::GetNumberOfColoursInUNLOADEDPalette(uint16_t palette_id)
   ){  
 
     uint16_t palette_adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED; // adjust back into correct indexing
-
-
     uint8_t colour_width  = mPaletteI->GetEncodedColourWidth(mPaletteI->custom_palettes[palette_adjusted_id].encoding); 
-    palette_colour_count = mPaletteI->custom_palettes[palette_adjusted_id].data.size()/colour_width;
-
-    
+    palette_colour_count = mPaletteI->custom_palettes[palette_adjusted_id].data.size()/colour_width;    
     ALOG_INF(PSTR("LoadPalette %d %d %d %d"),palette_id, palette_adjusted_id, colour_width, palette_colour_count); delay(3000);
 
   }
-
     
   return palette_colour_count;
 
 }
 
-
-/*
- * Fills segment with color
- */
-void mAnimatorLight::fill(uint32_t c)//, bool apply_brightness) 
-{
-  for(uint16_t i = 0; i < _virtualSegmentLength; i++) 
-  {
-    SEGMENT.setPixelColor(i, c);//, apply_brightness);
-  }
-}
-
-void mAnimatorLight::fill(RgbwwColor c)//, bool apply_brightness) 
-{
-  for(uint16_t i = 0; i < _virtualSegmentLength; i++) 
-  {
-    SEGMENT.setPixelColor(i, c);//, apply_brightness);
-  }
-}
-
-
-void mAnimatorLight::fill_ranged(uint32_t c)//, bool apply_brightness) 
-{
-
-  for(uint16_t i = SEGMENT.start; i <= SEGMENT.stop; i++) {
-    SEGMENT.setPixelColor(i, c);//, apply_brightness);
-  }
-
-}
 
 
 
@@ -4114,6 +4004,26 @@ void mAnimatorLight::Segment::fill(uint32_t c) {
   _colorScaled = false;
 }
 
+
+void mAnimatorLight::Segment::fill(RgbwwColor c)//, bool apply_brightness) 
+{
+  for(uint16_t i = 0; i < length(); i++) 
+  {
+    setPixelColor(i, c);//, apply_brightness);
+  }
+}
+
+
+void mAnimatorLight::Segment::fill_ranged(uint32_t c)//, bool apply_brightness) 
+{
+
+  for(uint16_t i = start; i <= stop; i++) {
+    setPixelColor(i, c);//, apply_brightness);
+  }
+
+}
+
+
 /*
  * fade out function, higher rate = quicker fade
  */
@@ -4202,6 +4112,7 @@ void mAnimatorLight::Segment::fade_out(uint8_t rate) {
   }
 }
 #endif
+
 
 // fades all pixels to black using nscale8()
 void mAnimatorLight::Segment::fadeToBlackBy(uint8_t fadeBy) {
@@ -5952,6 +5863,16 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
           }
         }
       }
+
+/**
+ * @brief 
+ * #Issue on the rotate junk buffer
+ * What if the decimate, is not pushing the full length?
+ * Leaving junk segments?
+ * 
+ */
+
+
       #endif
 
 

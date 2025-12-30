@@ -2887,7 +2887,7 @@
         "RateMs": 1000
       },
       "BrightnessRGB": 100,
-      "Preset":{"Load":200}
+      "Preset":{"Load":208}
     },
     "BrightnessRGB": 100
   }

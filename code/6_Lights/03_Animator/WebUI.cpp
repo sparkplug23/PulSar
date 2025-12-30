@@ -120,6 +120,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   }
   if (!forPreset) root["len"] = seg.stop - seg.start;
   root["grp"]    = seg.grouping;
+  root["dec"]    = seg.decimate;
   root[F("spc")] = seg.spacing;
   root[F("of")]  = seg.offset;
   root["on"]     = seg.on;
@@ -1503,8 +1504,6 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
 
 
-
-
   //getVal also supports inc/decrementing and random
   getVal(elem["sx"], &seg.speed);
   getVal(elem["ix"], &seg.intensity);
@@ -1599,6 +1598,11 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   seg.check3 = elem["o3"] | seg.check3;
   
   ALOG_INF(PSTR("o1 %d"), seg.check1);
+
+  
+
+  getVal(elem["dec"], &seg.decimate);
+
 
   JsonArray iarr = elem[F("i")]; //set individual LEDs
   if (!iarr.isNull()) {

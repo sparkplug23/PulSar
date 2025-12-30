@@ -1,14 +1,4 @@
 /**
- * @file mPalette_Progmem.h
- * @author your name (you@domain.com)
- * @brief 
- * @version 0.1
- * @date 2022-12-11
- * 
- * @copyright Copyright (c) 2023
- * 
- */
-/**
  * @brief Notes
  * 
  * https://gist.github.com/kriegsman/8281905786e8b2632aeb
@@ -24,9 +14,6 @@
 #include "2_CoreSystem/mGlobalMacros.h"
 
 #include "internal/mPalette_Encoding_Options.h"
-
-// #include "6_Lights\00_Interface\FastLED\colorpalettes.h"
-
 
 #define ELEVATION_DAY_THRESHOLD 10
 #define ELEVATION_NIGHT_THRESHOLD -10
@@ -211,6 +198,7 @@ typedef enum {
 #define DARKSLATEGRAY (uint32_t)0x2F4F4F
 #define DARKSLATEGREY (uint32_t)0x2F4F4F
 
+
 #define RGB_RED                         255,0,0, // Hue=0
 #define RGB_RED_SATURATION95            255,13,13,
 #define RGB_RED_SATURATION90            255,25,25,
@@ -370,6 +358,7 @@ typedef enum {
 #define RGB_WARMWHITE_SATURATION0         255,255,255,
 #define RGB_WHITE                         255,255,255,
 #define RGB_BLACK                         0,0,0,
+
 
 /** List of generic colours to build rgb palettes
  * Key words

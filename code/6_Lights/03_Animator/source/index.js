@@ -104,6 +104,12 @@ function applyCfg()
 	sCol('--t-b', cfg.theme.alpha.tab);
 	sCol('--sgp', !cfg.comp.segpwr ? "block":"none"); // show/hide segment power
 	size();
+
+	// after cfg is loaded/parsed
+	if (!cfg.comp) cfg.comp = {};
+	if (cfg.comp.perfctrl == null) cfg.comp.perfctrl = false; // persist "show perf sliders"
+
+
 	localStorage.setItem('wledUiCfg', JSON.stringify(cfg));
 	if (lastinfo.leds) updateUI(); // update component visibility
 }
@@ -125,6 +131,26 @@ function tglLabels()
 	cfg.comp.labels = !cfg.comp.labels;
 	applyCfg();
 }
+
+function shouldShowPerfControls() {
+  // Auto-enable for big segments, OR user-forced toggle
+//   return (cfg.comp && cfg.comp.perfctrl) || (segLmax > 1000);
+  return (cfg.comp && cfg.comp.perfctrl) || (segLmax > 2000); //tmp force higher for testing
+}
+
+function tglPerfControls() {
+  if (!cfg.comp) cfg.comp = {};
+  cfg.comp.perfctrl = !cfg.comp.perfctrl;
+
+  // persist
+  try { localStorage.setItem('wledUiCfg', JSON.stringify(cfg)); } catch(e){}
+
+  // refresh effect slider visibility immediately
+  updateSelectedFx();
+  var pr = "Performance controls: ";
+  showToast(cfg.comp.perfctrl ? pr + "ON" : pr + "AUTO", false);
+}
+
 
 function tglRgb()
 {
@@ -1748,6 +1774,8 @@ function updateUI()
 	
 	updateTrail(gId('sliderEffectTimePeriod'));
 	updateTrail(gId('sliderGrouping'));
+	updateTrail(gId('sliderDecimate'));
+
 
 	if (hasRGB) {
 		updateTrail(gId('sliderR'));
@@ -2085,6 +2113,9 @@ function readState(s,command=false)
 	gId('sliderC3').value  = i.c3 ? i.c3 : 0;
 	gId('sliderEffectTimePeriod').value = i.ep;
 	gId('sliderGrouping').value = i.grp;
+
+	if (gId('sliderDecimate')) gId('sliderDecimate').value = (i.dec != null) ? i.dec : 1;
+
 	gId('checkO1').checked = !(!i.o1);
 	gId('checkO2').checked = !(!i.o2);
 	gId('checkO3').checked = !(!i.o3);
@@ -2203,6 +2234,7 @@ function setEffectParameters(idx) {
  * Checkbox 2: Option 3
  * Slider 5: Effect Time Period (ie Cycle Time, previously rate_ms)
  * Slider 6: Grouping 
+ * Slider 7: Decimate (Not controlled by effect data, toggled separately)
 	 */
 	if (!(Array.isArray(fxdata) && fxdata.length > idx)) return;
 	var controlDefined = fxdata[idx].length;
@@ -2264,6 +2296,29 @@ function setEffectParameters(idx) {
 		}
 		}
 	});
+
+	// --------------------------------------------------------------------
+	// Perf controls override (Grouping + Decimate)
+	// Must be AFTER the effect-driven hide/show logic above
+	// --------------------------------------------------------------------
+	const forcePerf = shouldShowPerfControls();
+
+	// Grouping container: show if effect asked OR forced
+	const grpWrap = gId('sliderGrouping');           // <input>
+	const grpRow  = grpWrap ? grpWrap.closest('.slider') : null; // container div
+	if (grpRow) {
+		if (forcePerf) grpRow.classList.remove('hide');
+		// else leave whatever effect logic decided (do nothing)
+	}
+
+	// Decimate container: only controlled by forcePerf (not effect data)
+	const decWrap = gId('sliderDecimate'); 
+	const decRow  = decWrap ? decWrap.closest('.slider') : null;
+	if (decRow) {
+		if (forcePerf) decRow.classList.remove('hide');
+		else           decRow.classList.add('hide');
+	}
+
   
   
 	// Set the bottom position of selected effect (sticky) as the top of sliders div
@@ -3230,6 +3285,8 @@ function setFX(ind = null)
 	requestJson(obj);
 }
 
+
+
 // function setPalette(paletteId = null)
 // {
 // 	if (paletteId === null) {
@@ -3396,6 +3453,11 @@ function setGrouping()
 	requestJson(obj);
 }
 
+function setDecimate()
+{
+  var obj = {"seg": {"dec": parseInt(gId('sliderDecimate').value)}};
+  requestJson(obj);
+}
 
 
 

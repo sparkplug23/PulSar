@@ -2060,7 +2060,25 @@ if (jtok_pwi && jtok_pwi.isArray())
         data_buffer.isserviced++;
         // ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K("Raw")), SEGMENT_I(segment_index).segcol[colour_index].getHue360());
       }
-      
+      if(jtok = seg_obj["RGB"])
+      {
+                
+        if(jtok.isArray()){
+          uint8_t array[3];
+          uint8_t arrlen = 0;
+          JsonParserArray arrobj = jtok;
+          for(auto v : arrobj){
+            if(arrlen > 3){ break; }
+            array[arrlen++] = v.getInt();
+          }
+          RgbwwColor current = SEGMENT_I(segment_index).segcol[colour_index].colour; // Keep current WW/CW
+          SEGMENT_I(segment_index).segcol[colour_index].colour = RgbwwColor(array[0],array[1],array[2],current.CW, current.WW);
+        }
+
+        data_buffer.isserviced++;
+        // ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K("Raw")), SEGMENT_I(segment_index).segcol[colour_index].getHue360());
+      }
+
       #if FIRMWARE_VERSION_MAX(0, 230)
       if(jtok = seg_obj["Manual"]){ // Needs renamed, setting colour RGBCW directly
         ALOG_ERR(PSTR("Use RGBCW command"));

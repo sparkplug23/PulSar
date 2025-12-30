@@ -2,7 +2,7 @@
 {
   "0": {},
   "1": {
-    "n":"27bDEC Static Snowy02",
+    "n":"29cDEC Static Snowy02",
     "Pal":"Snowy 02",
     "Effects": {
       "FX":"Static",
@@ -282,6 +282,74 @@
     },
     "BrightnessRGB": 100
   },
+  "45": {
+    "n":"Twinkle W/cycleIM",    
+    "Pal":"SegCol Cycle Immediate",
+    "Pal2":"Cold White",
+    "SegColour0":{"RGB":[255,0,0]},
+    "SegColour1":{"RGB":[0,255,0]},
+    "SegColour2":{"RGB":[0,0,255]},
+    "SegColour3":{"RGB":[255,100,0]},
+    "SegColour4":{"RGB":[21,0,26]},
+    "Effects": {
+      "FX":"Flicker Palettes",
+      "IX":1,
+      "SX":0,
+      "GP":1,
+      "DC":10,
+      "PalIX":255,
+      "Custom1":255,
+      "Custom2":36,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "46": {
+    "n":"Twinkle W/cycleBL",    
+    "Pal":"SegCol Cycle Blending",
+    "Pal2":"Cold White",
+    "SegColour0":{"RGB":[255,0,0]},
+    "SegColour1":{"RGB":[0,255,0]},
+    "SegColour2":{"RGB":[0,0,255]},
+    "SegColour3":{"RGB":[255,100,0]},
+    "SegColour4":{"RGB":[255,0,255]},
+    "Effects": {
+      "FX":"Flicker Palettes",
+      "IX":1,
+      "SX":0,
+      "GP":1,
+      "DC":10,
+      "PalIX":255,
+      "Custom1":255,
+      "Custom2":36,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+
+  
+  "47": {
+    "n":"Twinkle W/cycleBL",    
+    "Pal":"SegCol Cycle Blending",
+    "Pal2":"Cold White",
+    "SegColour0":{"RGB":[255,0,0]},
+    "SegColour1":{"RGB":[0,255,0]},
+    "SegColour2":{"RGB":[0,0,255]},
+    "SegColour3":{"RGB":[255,100,0]},
+    "SegColour4":{"RGB":[255,0,255]},
+    "Effects": {
+      "FX":"Flicker Palettes",
+      "IX":1,
+      "SX":0,
+      "GP":1,
+      "DC":10,
+      "PalIX":255,
+      "Custom1":255,
+      "Custom2":100,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
 
 
   "50": {
@@ -383,25 +451,6 @@
 
 
 
- 
-  "67": {
-    "n":"Saw Colour/white",    
-    "Pal":"Snowy 01",
-    "Effects": {
-      "FX":"Saw",
-      "IX":134,
-      "SX":64,
-      "GP":1,
-      "RA": 0
-    },
-    "SegColour0":{
-      "RGBWC":[40,40,40,0,0]
-    },
-    "SegColour1":{
-      "RGBWC":[40,40,40,0,0]
-    },
-    "BrightnessRGB": 100
-  },
   "68": {
     "n":"Rainbow Runner",
     "SegColour0":{
@@ -507,11 +556,8 @@
       "DC":5,
       "RA": 0
     },
-    "SegColour0":{
-      "RGBWC":[20,20,20,0,0]
-    },
     "SegColour1":{
-      "RGBWC":[20,20,20,0,0]
+      "RGBWC":[5,5,5,0,0]
     },
     "BrightnessRGB": 100
   },
@@ -620,7 +666,96 @@
     100,100,
     100,
     100,100
-  ],"repeat":0,"end":0,"r":1},"on":true,"n":"ME3"}
+  ],"repeat":0,"end":0,"r":1},"on":true,"n":"ME3"},
+
+  
+  "207":{"playlist":{"ps":
+  [153,  163,4,5,112,83,  7,152, 
+    68, 151, 
+    46,
+    111,112,
+    2,
+    110,112
+  ],"dur":
+  [100,  200,200,200,200,100,  300,300,
+    300,200,
+    500,
+    100,300,
+    100,
+    100,100
+  ],"repeat":0,"end":0,"r":1},"on":true,"n":"ME4-29Dec"},
+
+  "208":{"playlist":{"ps":
+  [153,  163,4,5,112,83,  7,152, 
+    68, 151, 
+    47,
+    111,112,
+    2,
+    110,112
+  ],"dur":
+  [100,  200,200,200,200,100,  300,300,
+    300,200,
+    500,
+    100,300,
+    100,
+    100,100
+  ],"repeat":0,"end":0,"r":1},"on":true,"n":"WH4-29Dec"},
+  
+  "220":{"playlist":{"ps":
+  [5,223
+  ],"dur":
+  [50,50
+  ],"repeat":0,"end":0,"r":1},"on":true,"n":"TBRotate Grp150"},
+
+
+  "223": {
+    "n":"RotatePrev 1pix TEST",
+    "Effects": {
+      "FX":"Rotate Previous",
+      "IX":1,
+      "SX":255,
+      "GP":1,
+      "Custom1":0,
+      "DC":0,
+      "RA": 30
+    },
+    "BrightnessRGB": 100
+  },
+  "224": {
+    "n":"RotatePrev 40IX TEST",
+    "Effects": {
+      "FX":"Rotate Previous",
+      "IX":40,
+      "SX":255,
+      "GP":1,
+      "Custom1":0,
+      "DC":0,
+      "RA": 30
+    },
+    "BrightnessRGB": 100
+  },
+  
+  "222": {
+    "n":"Rainbow Gradient",    
+    "Pal":"Rainbow",
+    "Effects": {
+      "FX":"Gradient",
+      "PalIX":10,
+      "IX":255,
+      "SX":1,
+      "GP":1,
+      "Custom1":255,
+      "DC":0,
+      "RA": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "221":{"playlist":{"ps":
+  [222,224
+  ],"dur":
+  [50,50
+  ],"repeat":0,"end":0,"r":1},"on":true,"n":"TBRotate NoGrp"}
+
 
   
 }
