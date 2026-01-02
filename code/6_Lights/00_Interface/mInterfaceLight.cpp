@@ -144,7 +144,7 @@ void mInterfaceLight::Template_Load()
       template_loaded = true;
           
       ALOG_INF(PSTR("buffer_writer Template_Load ------- A >>>>>>>>>> %d"),JBI->GetBufferSize());
-      D_DATA_BUFFER_CLEAR();
+      data_buffer.ClearDeep();
 
 
       ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------F- >>>>>>>>>> %d"),JBI->GetBufferSize());
@@ -191,7 +191,7 @@ void mInterfaceLight::Template_Load()
   if(!template_loaded)
   {
     ALOG_INF(PSTR("buffer_writer Template_Load ------- A >>>>>>>>>> %d"),JBI->GetBufferSize());
-    D_DATA_BUFFER_CLEAR();
+    data_buffer.ClearDeep();
     ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------F- >>>>>>>>>> %d"),JBI->GetBufferSize());
     // memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
     // strncpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(data_buffer.payload.ctr));
@@ -218,7 +218,7 @@ void mInterfaceLight::Template_Load()
 
     #ifdef USE_LIGHTING_TEMPLATE_ANOTHER
     ALOG_INF(PSTR("buffer_writer Template_Load ------- A >>>>>>>>>> %d"),JBI->GetBufferSize());
-    D_DATA_BUFFER_CLEAR();
+    data_buffer.ClearDeep();
     ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------F- >>>>>>>>>> %d"),JBI->GetBufferSize());
     // memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
     // strncpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(data_buffer.payload.ctr));
@@ -326,7 +326,7 @@ void mInterfaceLight::Template_Load_DefaultConfig()
   }
 
   // load from progmem into local
-  D_DATA_BUFFER_CLEAR();
+  data_buffer.ClearDeep();
   memcpy_P(data_buffer.payload.ctr, LIGHTING_TEMPLATE_DEFAULT, sizeof(LIGHTING_TEMPLATE_DEFAULT));
   data_buffer.payload.len = strlen(data_buffer.payload.ctr);
 

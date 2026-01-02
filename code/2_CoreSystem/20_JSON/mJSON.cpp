@@ -169,6 +169,7 @@ void JsonBuilder::Start_NoMemClear()
 }
 bool JsonBuilder::End()
 {
+  // Serial.println("JsonBuilder::End()");
   if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return false; }  
   writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"%s","}");
   return strlen(writer.buffer)>3?true:false; //isvalid

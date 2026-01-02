@@ -541,6 +541,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "de
     #include "webpages_generated/html_pxmagic.h"
   #endif
   #include "webpages_generated/html_cpal.h"
+  #include "webpages_generated/pages_2025.h"   // <-- added for web console
 #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 //wled_math.cpp

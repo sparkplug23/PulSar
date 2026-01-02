@@ -1,5 +1,20 @@
 #include "mRuleEngine.h"
 
+/**
+ * @brief 
+ * 
+ * 
+ * Create new method that uses filesystem to load rules from a file
+ * Append rules to existing ones, or clear existing ones
+ * 
+ * Hence, I can change them, without needing to reflash firmware
+ * 
+ * 
+ * 
+ * 
+ */
+
+
 #ifdef USE_MODULE_CORE_RULES
 
 
@@ -134,7 +149,7 @@ void mRuleEngine::RulesLoad_From_Progmem()
   
   #ifdef USE_RULES_TEMPLATE
   // Read into local
-  D_DATA_BUFFER_CLEAR();
+  data_buffer.ClearDeep();
   memcpy_P(data_buffer.payload.ctr,RULES_TEMPLATE,sizeof(RULES_TEMPLATE));
   data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
@@ -431,7 +446,7 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
           if(rules[rule_index].command.json_commands_dlist_id>=0)
           {
 
-            D_DATA_BUFFER_CLEAR();
+            data_buffer.ClearDeep();
             tkr_sup->GetTextIndexed(
               data_buffer.payload.ctr, 
               sizeof(data_buffer.payload.ctr), 

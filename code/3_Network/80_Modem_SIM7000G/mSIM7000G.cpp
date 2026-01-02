@@ -1591,7 +1591,7 @@ void mSIM7000G::SMS_CommandIntoJSONCommand(char* sms_command)
     ALOG_INF(PSTR(D_LOG_CELLULAR "value=%s"),value);
 
     // Read into local
-    D_DATA_BUFFER_CLEAR();
+    data_buffer.ClearDeep();
 
     sprintf(data_buffer.payload.ctr, "{\"%s\":%s}", key, value);
 

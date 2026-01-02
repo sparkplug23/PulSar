@@ -3,6 +3,678 @@
 
 #include "mWebServer.h"
 
+
+
+
+
+/*************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+   * Console Page
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+  ************************************************************************************************************************************************************************************
+*/
+
+
+#ifdef ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI
+
+// // void mWebServer::HandlePage_Console(AsyncWebServerRequest *request){
+
+// //   fConsole_active = true;
+
+// //   // if (!HttpCheckPriviledgedAccess()) { return; }
+  
+// //   if (request->hasParam("c2")) {      // Console refresh requested
+// //     HandleConsoleRefresh(request);
+// //     return;
+// //   }
+
+// //   // request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
+// //   // return;
+
+// //   AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_ROOT, PAGE_ROOT_L);
+
+// //   response->addHeader("Content-Encoding","gzip");
+  
+// //   request->send(response);
+
+// // }
+
+void mWebServer::HandlePage_Console(AsyncWebServerRequest *request)
+{
+  fConsole_active = true;
+
+  if (request->hasParam("c2")) { HandleConsoleRefresh(request); return; }
+
+  // FS override for development
+  if (tkr_mfile->handleFileRead(request, "/console.htm")) return;
+
+  if (tkr_web->handleIfNoneMatchCacheHeader(request, 200)) return;
+
+  AsyncWebServerResponse *response =
+    request->beginResponse_P(200, "text/html", PAGE_console, PAGE_console_length);
+
+  response->addHeader("Content-Encoding", "gzip");
+  tkr_web->setStaticContentCacheHeaders(response);
+  request->send(response);
+}
+
+// Date Modified: 01Jan26
+void mWebServer::HandlePage_Console2(AsyncWebServerRequest *request)
+{
+
+  fConsole_active = true;
+
+
+  AsyncWebServerResponse *response =
+    request->beginResponse_P(
+      200,
+      "text/html",
+      PAGE_console2,
+      PAGE_console2_length
+    );
+
+  response->addHeader(F("Content-Encoding"), F("gzip"));
+  response->addHeader(F("Cache-Control"), F("no-store"));
+
+  request->send(response);
+}
+
+
+// // void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
+// // {
+// //   bool cflg = true;
+// //   uint8_t counter = 0;                // Initial start, should never be 0 again
+
+// //   // String svalue = request->arg("c1");
+// //   // if (svalue.length() && (svalue.length() < INPUT_BUFFER_SIZE)) {
+// //   //   ALOG_INF(PSTR(D_LOG_COMMAND "%s"), svalue.c_str());
+// //   //   ExecuteWebCommand((char*)svalue.c_str(), SRC_WEBCONSOLE);
+// //   // }
+
+// //   char stmp[8];
+// //   WebGetArg(request,"c2", stmp, sizeof(stmp));
+// //   if (strlen(stmp)) { counter = atoi(stmp); }
+
+// //   BufferWriterI->Start();
+
+// //   BufferWriterI->Append_P(
+// //     PSTR(
+// //       "%d" //web_log_index
+// //       "}1"
+// //       "%d" //reset_web_log_flag
+// //       "}1")
+// //     , tkr_log->web_log_index, reset_web_log_flag);
+
+// //   if (!reset_web_log_flag) {
+// //     counter = 0;                  //reset counter from webpage 
+// //     reset_web_log_flag = true;
+// //   }
+// //   if (counter != tkr_log->web_log_index) {   //if webpage counter does not match internal counter
+// //     if (!counter) {    //and counter is not FIRST position
+// //       counter = tkr_log->web_log_index;  //use internal counter
+// //       cflg = false;     //no NEW line
+// //     }
+
+// //     // get the webindex, and get all internal indexes until internal catches up with web
+// //     do {
+// //       char* tmp;
+// //       size_t len;
+// //       tkr_log->GetLog(counter, &tmp, &len);
+// //       if (len) { //if there is new log data
+// //       // and is not larger than buffer
+// //         if (len > sizeof(data_buffer.payload.ctr) -2) { len = sizeof(data_buffer.payload.ctr); }
+// //         char stemp[len +1]; //leak!
+// //         strlcpy(stemp, tmp, len);
+// //         // add new line if not first, then text
+// //         BufferWriterI->Append_P(PSTR("%s%s"), (cflg) ? "\n" : "", stemp);
+// //         cflg = true;
+// //       }
+// //       counter++; //internal counter
+// //       if (!counter) { counter++; }  // Skip log index 0 as it is not allowed
+// //       if(counter>100) break;
+// //     } while (counter != tkr_log->web_log_index);
+
+// //   }
+
+// //   BufferWriterI->Append_P(PSTR("}1"));
+  
+// //   // request->send(200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer.payload.ctr);
+// //   request->send(200, "text/plain", data_buffer.payload.ctr);
+
+ 
+// // }
+
+
+// // void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
+// // {
+// //   static uint32_t fakeCounter = 1;
+
+// //   char reply[64];
+
+// //   // Format matches existing JS split logic:
+// //   // <counter>}1<reset>}1<payload>}1
+// //   snprintf(
+// //     reply,
+// //     sizeof(reply),
+// //     "%lu}1%d}1uptime=%lu ms}1",
+// //     (unsigned long)fakeCounter++,
+// //     0,
+// //     (unsigned long)millis()
+// //   );
+
+// //   request->send(200, "text/plain", reply);
+// // }
+
+// // Date Modified: 30Dec25
+// void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
+// {
+//   // Keep semantics compatible with your JS polling:
+//   // response: "<idx>}1<reset>}1<lines>}1"
+
+//   Serial.println(__LINE__); Serial.flush();
+
+//   static uint32_t fakeCounter = 1;
+
+//   char reply[100];
+
+//   // Format matches existing JS split logic:
+//   // <counter>}1<reset>}1<payload>}1
+//   // snprintf(
+//   //   reply,
+//   //   sizeof(reply),
+//   //   "%lu}1%d}1uptime=%lu ms%s}1",
+//   //   (unsigned long)fakeCounter++,
+//   //   0,
+//   //   (unsigned long)millis(),
+//   //   tkr_time->GetUptime().c_str()
+//   // );
+
+
+//  snprintf(
+//     reply,
+//     sizeof(reply),
+//     "%lu}1%d}1uptime=%lu ms%s|%s}1",
+//     (unsigned long)fakeCounter++,
+//     0,
+//     (unsigned long)millis(),
+//     tkr_time->GetUptime().c_str(),
+//     tkr_set->Settings.system_name.friendly
+//   );
+
+
+//   request->send(200, "text/plain", reply);
+
+//   Serial.println(__LINE__); //Serial.flush();
+
+//   // tkr_log->TestGet();
+
+// Serial.println(tkr_tel->web_log_index++);
+// Serial.println(tkr_set->Settings.system_name.friendly);
+// Serial.println(tkr_set->Settings.system_name.friendly);
+// Serial.println(tkr_set->Settings.system_name.friendly);
+
+//   Serial.println(__LINE__);// Serial.flush();
+
+// Serial.println(tkr_set->Settings.system_name.friendly);
+// Serial.println(tkr_set->Settings.system_name.friendly);
+
+//   // --- Parse c2 safely (accept missing / invalid / _cb etc) ---
+//   uint32_t counter = 0; // 0 means "initial sync" from webpage side
+//   // {
+//   //   char stmp[16] = {0};
+//   //   WebGetArg(request, "c2", stmp, sizeof(stmp));
+//   //   if (stmp[0]) {
+//   //     // atoi is fine here, but guard against negatives in case
+//   //     long v = atol(stmp);
+//   //     if (v > 0) counter = (uint32_t)v;
+//   //   }
+//   // }
+
+//   Serial.println(__LINE__); //Serial.flush();
+//   // tkr_log->web_log_index=2;
+//   Serial.println(__LINE__); //Serial.flush();
+//   Serial.println(__LINE__); //Serial.flush();
+
+//   // tkr_log->TestGet();
+//   // Serial.println(tkr_log->web_log_index); //Serial.flush();
+//   Serial.println(__LINE__); //Serial.flush();
+//   // delay(1000);
+// return;
+
+//   tkr_log->TestGet();
+
+//   Serial.println(__LINE__); Serial.flush();
+//   Serial.println(tkr_log->web_log_index); Serial.flush();
+
+//   Serial.println(__LINE__); Serial.flush();
+
+
+//   // --- Prepare streamed response (no shared buffers) ---
+//   AsyncResponseStream *response = request->beginResponseStream("text/plain");
+
+//   Serial.println(__LINE__); Serial.flush();
+
+//   // Your current code uses reset_web_log_flag as a one-shot.
+//   // Keep that behaviour, but do it deterministically.
+//   if (!reset_web_log_flag) {
+//     // First ever refresh after boot/page-load
+//     reset_web_log_flag = true;
+//     counter = 0; // force "sync" behaviour below
+//   }
+//   Serial.println(__LINE__); Serial.flush();
+
+
+//   const uint32_t web_idx = (uint32_t)tkr_log->web_log_index;
+
+//   Serial.println(__LINE__); Serial.flush();
+
+//   // Header: "<web_idx>}1<reset_flag>}1"
+//   response->printf("%lu}1%u}1", (unsigned long)web_idx, (unsigned)reset_web_log_flag);
+
+//   Serial.println(__LINE__); Serial.flush();
+
+//   // If client counter is 0, treat as initial sync:
+//   // set it to current index and return no log body.
+//   // This prevents walking huge history and matches your old intent.
+//   if (counter == 0) {
+//     // No log payload, just terminator
+//     response->print("}1");
+//     request->send(response);
+//     return;
+//   }
+
+//   // If client's counter is ahead (or nonsense), resync it to current.
+//   // Also avoids wrap/underflow behaviour.
+//   if (counter > web_idx) {
+//     response->print("}1");
+//     request->send(response);
+//     return;
+//   }
+
+//   // If counters match, no new lines.
+//   if (counter == web_idx) {
+//     response->print("}1");
+//     request->send(response);
+//     return;
+//   }
+
+//   Serial.println(__LINE__); Serial.flush();
+
+//   // --- Stream log lines from counter up to web_idx with hard caps ---
+//   // Caps stop runaway loops and oversized replies that can destabilise ESPAsyncWebServer.
+//   const size_t   MAX_BYTES = 2048;  // tune as needed
+//   const uint16_t MAX_LINES = 64;    // tune as needed
+
+//   size_t bytes_written = 0;
+//   uint16_t lines_written = 0;
+
+//   // Walk forward until we catch up.
+//   // Note: if your log index is ring-based, this still works as long as
+//   // GetLog(counter, ...) returns something sensible across the range.
+//   while (counter != web_idx) {
+
+//   Serial.println(__LINE__); Serial.flush();
+
+//     char*  tmp = nullptr;
+//     size_t len = 0;
+//     tkr_log->GetLog((uint8_t)counter, &tmp, &len); // keep your signature if it expects uint8_t
+//                                                    // If GetLog can take wider types, pass counter directly.
+
+//     if (tmp && len) {
+//       // Add newline if not first appended log chunk
+//       if (lines_written > 0) {
+//         if (bytes_written + 1 > MAX_BYTES) break;
+//         response->write('\n');
+//         bytes_written += 1;
+//       }
+
+//       // Bound write length to remaining budget
+//       size_t room = (bytes_written < MAX_BYTES) ? (MAX_BYTES - bytes_written) : 0;
+//       if (room == 0) break;
+
+//       size_t wlen = (len <= room) ? len : room;
+//       response->write((const uint8_t*)tmp, wlen);
+//       bytes_written += wlen;
+//       lines_written++;
+
+//       if (lines_written >= MAX_LINES) break;
+//       if (bytes_written >= MAX_BYTES) break;
+//     }
+
+//     counter++;
+
+//     // Avoid "0 is not allowed" behaviour if your ring index uses 1..255
+//     if (counter == 0) counter = 1;
+
+//     // Safety: if counter somehow runs away (should not happen if web_idx is sane)
+//     if (lines_written >= MAX_LINES) break;
+//   }
+
+//   Serial.println(__LINE__); Serial.flush();
+
+//   // Trailer terminator
+//   response->print("}1");
+
+//   request->send(response);
+// }
+
+
+
+
+// Date Modified: 31Dec25
+void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
+{
+
+  // -------- Pass 1: Handle Web Console Command (c1) --------
+  if (request->hasParam("c1")) {
+
+    const String cmd = request->arg("c1");
+    const size_t len = cmd.length();
+
+    if (len && len < DATA_BUFFER_PAYLOAD_MAX_LENGTH) {
+
+      #ifdef ENABLE_FEATURE_WEBSERVER__DELAYED_JSONLOCKED_COMMAND_PROCESSING
+      if (data_buffer.tryLock(GetModuleUniqueID())) {
+      #else
+      if (data_buffer.requestLock(GetModuleUniqueID())) {
+      #endif
+
+        data_buffer.ClearSoft();
+        data_buffer.payload.length_used = (uint16_t)len;
+        memcpy(data_buffer.payload.ctr, cmd.c_str(), len);
+        data_buffer.payload.ctr[len] = '\0';
+
+        #ifdef ENABLE_FEATURE_WEBSERVER__DELAYED_JSONLOCKED_COMMAND_PROCESSING        
+        data_buffer.delayedJSONCommandWaiting = true;
+        #else
+        pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+        data_buffer.releaseLock();
+        #endif
+
+      } else {
+        ALOG_WRN(PSTR("WebConsole c1: buffer busy, command ignored"));
+      }
+
+    } else if (len) {
+      ALOG_ERR(PSTR("WebConsole c1: payload too large (%u)"), (unsigned)len);
+    }
+  }
+
+
+
+  // Parse c2 as uint8 (Tasmota-style). 0 means "initial sync"
+  uint8_t counter = 0;
+  {
+    char stmp[12] = {0};
+    WebGetArg(request, "c2", stmp, sizeof(stmp));   // stable even with _cb present
+    if (stmp[0]) {
+      const int v = atoi(stmp);
+      if (v > 0 && v < 256) counter = (uint8_t)v;
+    }
+  }
+
+  // Stream reply (no shared JSON buffer)
+  AsyncResponseStream *response = request->beginResponseStream("text/plain");
+
+  const uint8_t web_idx = tkr_log->web_log_index;
+
+  // Header: "<idx>}1<reset_flag>}1"
+  response->printf("%u}1%u}1", (unsigned)web_idx, (unsigned)reset_web_log_flag);
+
+  // One-shot reset flag (same semantics as you had)
+  if (!reset_web_log_flag) {
+    reset_web_log_flag = true;
+    counter = 0;
+  }
+
+  // If counter==0: sync only (no history dump)
+  if (counter == 0) {
+    response->print("}1");
+    request->send(response);
+    return;
+  }
+
+  // If nothing new
+  if (counter == web_idx) {
+    response->print("}1");
+    request->send(response);
+    return;
+  }
+
+  bool need_newline = false;
+
+  // Walk forward until we reach the current index
+  while (counter != web_idx) {
+    char*  line = nullptr;
+    size_t len  = 0;
+
+    tkr_log->GetLog(counter, &line, &len);
+
+    if (line && len) {
+      if (need_newline) response->write('\n');
+      response->write((const uint8_t*)line, len);
+      need_newline = true;
+    }
+
+    counter++;
+    if (counter == 0) counter = 1; // skip 0 (matches your “0 not allowed” rule)
+  }
+
+  response->print("}1");
+  request->send(response);
+}
+
+// // Date Modified: 31Dec25
+// void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
+// {
+//   bool cflg = true;
+
+//   // --- Handle command input (c1) ---
+//     if (request->hasParam("c1")) {
+//       String cmd = request->arg("c1");
+//       if (cmd.length()) {
+//         // Mirror Tasmota behaviour
+//         ALOG_INF(PSTR("WebCmd: %s"), cmd.c_str());
+//         // ExecuteWebCommand((char*)cmd.c_str(), SRC_WEBCONSOLE);
+//         //ToDo later
+//       }
+//     }
+
+
+//   // NOTE: Tasmota-style console uses uint8 counter (ring-ish behaviour).
+//   // c2=0 means "initial sync" from webpage.
+//   uint8_t counter = 0;
+
+//   // Parse c2 (safe even if missing)
+//   {
+//     char stmp[12] = {0};
+//     WebGetArg(request, "c2", stmp, sizeof(stmp));
+//     if (stmp[0]) {
+//       int v = atoi(stmp);
+//       if (v > 0 && v < 256) counter = (uint8_t)v;
+//     }
+//   }
+
+
+//   // Stream reply (no shared global buffer)
+//   AsyncResponseStream *response = request->beginResponseStream("text/plain");
+
+//   const uint8_t web_idx = (uint8_t)tkr_log->web_log_index;
+
+//   // Header: "<web_idx>}1<reset_flag>}1"
+//   response->printf("%u}1%u}1", (unsigned)web_idx, (unsigned)reset_web_log_flag);
+
+  
+//   if (!reset_web_log_flag) {
+//     counter = 0;                  //reset counter from webpage 
+//     reset_web_log_flag = true;
+//   }
+//   if (counter != tkr_log->web_log_index) {   //if webpage counter does not match internal counter
+//     if (!counter) {    //and counter is not FIRST position
+//       counter = tkr_log->web_log_index;  //use internal counter
+//       cflg = false;     //no NEW line
+//     }
+
+//     // get the webindex, and get all internal indexes until internal catches up with web
+//     do {
+//       char* tmp;
+//       size_t len;
+//       tkr_log->GetLog(counter, &tmp, &len);
+//       if (len) { //if there is new log data
+//       // and is not larger than buffer
+//         if (len > sizeof(data_buffer.payload.ctr) -2) { len = sizeof(data_buffer.payload.ctr); }
+//         char stemp[len +1]; //leak!
+//         strlcpy(stemp, tmp, len);
+//         // add new line if not first, then text
+//         BufferWriterI->Append_P(PSTR("%s%s"), (cflg) ? "\n" : "", stemp);
+//         cflg = true;
+//       }
+//       counter++; //internal counter
+//       if (!counter) { counter++; }  // Skip log index 0 as it is not allowed
+//       if(counter>100) break;
+//     } while (counter != tkr_log->web_log_index);
+
+
+
+//   // // First ever refresh after boot/page-load: force a resync behaviour once
+//   // if (!reset_web_log_flag) {
+//   //   reset_web_log_flag = true;
+//   //   counter = 0;
+//   // }
+
+//   // // If client counter is 0, do not dump history; just sync header and terminate
+//   // if (counter == 0) {
+//   //   response->print("}1");
+//   //   request->send(response);
+//   //   return;
+//   // }
+
+//   // // If nothing new, terminate
+//   // if (counter == web_idx) {
+//   //   response->print("}1");
+//   //   request->send(response);
+//   //   return;
+//   // }
+
+//   // // Walk from counter up to (but not including) web_idx
+//   // do {
+//   //   char*  tmp = nullptr;
+//   //   size_t len = 0;
+
+//   //   tkr_log->GetLog(counter, &tmp, &len);
+
+//   //   if (tmp && len) {
+//   //     // Newline between appended entries (not before first)
+//   //     if (cflg) {
+//   //       response->write('\n');
+//   //     }
+//   //     response->write((const uint8_t*)tmp, len);
+//   //     cflg = true;
+//   //   } else {
+//   //     // If no content, don't emit a leading newline on next valid chunk
+//   //     cflg = false;
+//   //   }
+
+//   //   counter++;
+//   //   if (counter == 0) counter = 1;  // Skip 0 if your log index forbids it
+
+//   // } while (counter != web_idx);
+
+//   // Trailer terminator
+//   response->print("}1");
+//   request->send(response);
+// }
+
+
+#endif
+
+
+
+
+// void mWebServer::Web_Console_Draw(AsyncWebServerRequest *request){
+        
+//   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
+  
+//   JBI->Start();
+    
+//   JBI->Array_Start("container_1");// Class name
+//     JBI->Object_Start();
+//       JBI->AddKey("ihr");           // function
+//         JBI->AppendBuffer("\"");
+//         JBI->AppendBuffer(PSTR("<fieldset><legend><b>&nbsp;Web Commands&nbsp;</b></legend>"));
+//         JBI->AppendBuffer(PSTR("<textarea readonly='' id='console_textbox' cols='340' wrap='off' name='console_textbox'></textarea>"
+//           "<br><br>"
+//           "<form method='get' onsubmit='return l(1);'>"
+//               "<input id='c1'  style='background:#1d1d1d' placeholder='Enter Module Name eg pixels' autofocus='' name='c1'>"
+//               "<br>"
+//           "</form>")
+//         );
+//         JBI->AppendBuffer(PSTR(
+//           "<form method='get' onsubmit='return l(1);'>"
+//           "<input id='com_web' name='com_web' style='background:#1d1d1d' placeholder='" "Enter command eg {name:value} or name value'" "' autofocus><br/>"
+//             "<button  class='buttonh bform1' type='submit'>Execute command</button>"
+//           "</form>"
+//         ));            
+//       JBI->AppendBuffer(PSTR("</fieldset>"));
+//       // topic = module name only, in code, add "set/modulename"
+//       //payload = json message for multple inputs, OR, single input where {"a":"b"} can simply be "a b"
+
+//       JBI->AppendBuffer(PSTR("<fieldset>"));
+//         JBI->AppendBuffer(PSTR("<legend><b>&nbsp;MQTT Commands&nbsp;</b></legend>"));
+//         JBI->AppendBuffer(PSTR(
+//         "<form method='get' onsubmit='return l(1);'>"
+//         "<input id='com_top' name='com_top' style='background:#1d1d1d' placeholder='" "Enter topic" "' autofocus><br/>"
+//         "</form>" ));
+//         JBI->AppendBuffer(PSTR(
+//         "<form method='get' onsubmit='return l(1);'>"
+//         "<input id='com_pay' name='com_pay' style='background:#1d1d1d' placeholder='" "Enter payload" "' autofocus><br/>"
+//         "<button class='buttonh bform1' type='submit'>Execute Command</button>"
+//         "</form>"  ));
+//       JBI->AppendBuffer(PSTR("</fieldset>"));
+
+//       JBI->AppendBuffer("\"");
+//     JBI->Object_End();
+//   JBI->Array_End();
+
+//   JBI->Array_Start("container_5");// Class name
+//     JBI->Object_Start();
+//       JBI->AddKey("ihr");           // function
+//         JBI->AppendBuffer("\"");
+//         WebAppend_Button_Spaced(BUTTON_MAIN);
+//       JBI->AppendBuffer("\"");
+//     JBI->Object_End();
+//   JBI->Array_End();
+    
+//   JBI->Array_Start("function");// Class name
+//     JBI->Object_Start();
+//       JBI->AddKey("Parse_AddScript");
+//         JBI->AppendBuffer("\"");
+//         JBI->AppendBuffer(PSTR(
+//           "set_console_as_page();"
+//           "enable_get_console_data();"
+//         )
+//       );
+//       JBI->AppendBuffer("\"");
+//     JBI->Object_End();
+//   JBI->Array_End();
+    
+//   JBI->End();
+
+//   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
+
+// } //end function
+
+
 #ifdef USE_MODULE_NETWORK_WEBSERVER21
 
 // /*************************************************************************************************************************************************************************************
@@ -370,181 +1042,6 @@
 
 // }
 
-
-/*************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-   * Console Page
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-*/
-
-void mWebServer::HandlePage_Console(AsyncWebServerRequest *request){
-
-  fConsole_active = true;
-
-  if (!HttpCheckPriviledgedAccess()) { return; }
-  
-  if (request->hasParam("c2")) {      // Console refresh requested
-    HandleConsoleRefresh(request);
-    return;
-  }
-
-  // request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
-  // return;
-
-  AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_ROOT, PAGE_ROOT_L);
-
-  response->addHeader("Content-Encoding","gzip");
-  
-  request->send(response);
-
-}
-
-
-// void mWebServer::Web_Console_Draw(AsyncWebServerRequest *request){
-        
-//   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
-  
-//   JBI->Start();
-    
-//   JBI->Array_Start("container_1");// Class name
-//     JBI->Object_Start();
-//       JBI->AddKey("ihr");           // function
-//         JBI->AppendBuffer("\"");
-//         JBI->AppendBuffer(PSTR("<fieldset><legend><b>&nbsp;Web Commands&nbsp;</b></legend>"));
-//         JBI->AppendBuffer(PSTR("<textarea readonly='' id='console_textbox' cols='340' wrap='off' name='console_textbox'></textarea>"
-//           "<br><br>"
-//           "<form method='get' onsubmit='return l(1);'>"
-//               "<input id='c1'  style='background:#1d1d1d' placeholder='Enter Module Name eg pixels' autofocus='' name='c1'>"
-//               "<br>"
-//           "</form>")
-//         );
-//         JBI->AppendBuffer(PSTR(
-//           "<form method='get' onsubmit='return l(1);'>"
-//           "<input id='com_web' name='com_web' style='background:#1d1d1d' placeholder='" "Enter command eg {name:value} or name value'" "' autofocus><br/>"
-//             "<button  class='buttonh bform1' type='submit'>Execute command</button>"
-//           "</form>"
-//         ));            
-//       JBI->AppendBuffer(PSTR("</fieldset>"));
-//       // topic = module name only, in code, add "set/modulename"
-//       //payload = json message for multple inputs, OR, single input where {"a":"b"} can simply be "a b"
-
-//       JBI->AppendBuffer(PSTR("<fieldset>"));
-//         JBI->AppendBuffer(PSTR("<legend><b>&nbsp;MQTT Commands&nbsp;</b></legend>"));
-//         JBI->AppendBuffer(PSTR(
-//         "<form method='get' onsubmit='return l(1);'>"
-//         "<input id='com_top' name='com_top' style='background:#1d1d1d' placeholder='" "Enter topic" "' autofocus><br/>"
-//         "</form>" ));
-//         JBI->AppendBuffer(PSTR(
-//         "<form method='get' onsubmit='return l(1);'>"
-//         "<input id='com_pay' name='com_pay' style='background:#1d1d1d' placeholder='" "Enter payload" "' autofocus><br/>"
-//         "<button class='buttonh bform1' type='submit'>Execute Command</button>"
-//         "</form>"  ));
-//       JBI->AppendBuffer(PSTR("</fieldset>"));
-
-//       JBI->AppendBuffer("\"");
-//     JBI->Object_End();
-//   JBI->Array_End();
-
-//   JBI->Array_Start("container_5");// Class name
-//     JBI->Object_Start();
-//       JBI->AddKey("ihr");           // function
-//         JBI->AppendBuffer("\"");
-//         WebAppend_Button_Spaced(BUTTON_MAIN);
-//       JBI->AppendBuffer("\"");
-//     JBI->Object_End();
-//   JBI->Array_End();
-    
-//   JBI->Array_Start("function");// Class name
-//     JBI->Object_Start();
-//       JBI->AddKey("Parse_AddScript");
-//         JBI->AppendBuffer("\"");
-//         JBI->AppendBuffer(PSTR(
-//           "set_console_as_page();"
-//           "enable_get_console_data();"
-//         )
-//       );
-//       JBI->AppendBuffer("\"");
-//     JBI->Object_End();
-//   JBI->Array_End();
-    
-//   JBI->End();
-
-//   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
-
-// } //end function
-
-void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
-{
-  bool cflg = true;
-  uint8_t counter = 0;                // Initial start, should never be 0 again
-
-  // String svalue = request->arg("c1");
-  // if (svalue.length() && (svalue.length() < INPUT_BUFFER_SIZE)) {
-  //   ALOG_INF(PSTR(D_LOG_COMMAND "%s"), svalue.c_str());
-  //   ExecuteWebCommand((char*)svalue.c_str(), SRC_WEBCONSOLE);
-  // }
-
-  char stmp[8];
-  WebGetArg(request,"c2", stmp, sizeof(stmp));
-  if (strlen(stmp)) { counter = atoi(stmp); }
-
-  BufferWriterI->Start();
-
-  BufferWriterI->Append_P(
-    PSTR(
-      "%d" //web_log_index
-      "}1"
-      "%d" //reset_web_log_flag
-      "}1")
-    , tkr_set->web_log_index, reset_web_log_flag);
-
-  if (!reset_web_log_flag) {
-    counter = 0;                  //reset counter from webpage 
-    reset_web_log_flag = true;
-  }
-  if (counter != tkr_set->web_log_index) {   //if webpage counter does not match internal counter
-    if (!counter) {    //and counter is not FIRST position
-      counter = tkr_set->web_log_index;  //use internal counter
-      cflg = false;     //no NEW line
-    }
-
-    // get the webindex, and get all internal indexes until internal catches up with web
-    do {
-      char* tmp;
-      size_t len;
-      tkr_log->GetLog(counter, &tmp, &len);
-      if (len) { //if there is new log data
-      // and is not larger than buffer
-        if (len > sizeof(data_buffer.payload.ctr) -2) { len = sizeof(data_buffer.payload.ctr); }
-        char stemp[len +1]; //leak!
-        strlcpy(stemp, tmp, len);
-        // add new line if not first, then text
-        BufferWriterI->Append_P(PSTR("%s%s"), (cflg) ? "\n" : "", stemp);
-        cflg = true;
-      }
-      counter++; //internal counter
-      if (!counter) { counter++; }  // Skip log index 0 as it is not allowed
-      if(counter>100) break;
-    } while (counter != tkr_set->web_log_index);
-
-  }
-
-  BufferWriterI->Append_P(PSTR("}1"));
-  
-  request->send(200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer.payload.ctr);
- 
-}
 
 // void mWebServer::Console_JSON_Data(AsyncWebServerRequest *request){
 
@@ -1317,7 +1814,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
   
 //   // ALOG_DBG(S_LOG_HTTP, S_SYSTEM_SETTINGS);
 
-//   // D_DATA_BUFFER_CLEAR();
+//   // data_buffer.ClearDeep();
 //   // char *buf = data_buffer.payload.ctr;
 //   // char **buffer = &buf;
 //   // buffer_writer_len = 0;
@@ -1992,7 +2489,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 
 // //   // // Serial.println(WEB_HANDLER_SCRIPT_INFROMATION_DATA_FETCHER_URLS_RATES_VAR); Serial.flush();      
 
-// //   // D_DATA_BUFFER_CLEAR();
+// //   // data_buffer.ClearDeep();
 // //   // char *buf = data_buffer.payload.ctr;
 // //   // char **iter = &buf;
 // //   // buffer_writer_internal = iter;
@@ -2047,7 +2544,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //   // if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
 // //   // uint16_t freemem_start = ESP.getFreeHeap();  
   
-// //   // D_DATA_BUFFER_CLEAR();
+// //   // data_buffer.ClearDeep();
 // //   // char *buf = data_buffer.payload.ctr;
 // //   // char **buffer = &buf;
 

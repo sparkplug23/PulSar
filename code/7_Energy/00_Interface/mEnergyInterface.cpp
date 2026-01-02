@@ -1257,7 +1257,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 // uint8_t mTelemetry::ConstructJSON_PowerMonitor(uint8_t json_level){ 
 
 //   // // clear entire mqtt packet
-//   // D_DATA_BUFFER_CLEAR();
+//   // data_buffer.ClearDeep();
 
 
 //   // root[F("tbd")] = 0;
@@ -1840,7 +1840,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //     // JBI->Add(D_CHANNELCOUNT"232",         0);
   
 //   return JBI->End();
-//   // D_DATA_BUFFER_CLEAR();
+//   // data_buffer.ClearDeep();
 
 //   // // StaticJsonDocument<1000> doc;
 //   // // JsonObject root = doc.to<JsonObject>();

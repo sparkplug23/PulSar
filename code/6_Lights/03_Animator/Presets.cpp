@@ -569,12 +569,12 @@ void mAnimatorLight::SubTask_Presets()
    * @brief Run through my command structure.
    * 
    */
-  if(requestDataBufferLock(GetModuleUniqueID()))
+  if(data_buffer.requestLock(GetModuleUniqueID()))
   {
 
 
 
-    D_DATA_BUFFER_SOFT_CLEAR();
+    data_buffer.ClearSoft();
 
     // Serialise from ArduinoJson into buffer for parser to load
     serializeJson(*tkr_mfile->pDoc, data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr));
@@ -589,7 +589,7 @@ void mAnimatorLight::SubTask_Presets()
 
     pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
-    releaseDataBufferLock();
+    data_buffer.releaseLock();
 
   }
 

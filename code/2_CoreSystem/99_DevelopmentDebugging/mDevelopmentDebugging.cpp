@@ -69,15 +69,15 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_EVERY_SECOND:{
 
       #ifdef ENABLE_DEBUG_SPLASH__PSRAM_USAGE
-      
-AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d", 
-  SupportESP32::FoundPSRAM(), 
-  SupportESP32::UsePSRAM());
-  AddLog(LOG_LEVEL_INFO, "Heap free: %d, PSRAM free: %d", 
-    ESP.getFreeHeap(), 
-    ESP.getFreePsram());
-    #endif
+        AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d", 
+        SupportESP32::FoundPSRAM(), 
+        SupportESP32::UsePSRAM());
+        AddLog(LOG_LEVEL_INFO, "Heap free: %d, PSRAM free: %d", 
+        ESP.getFreeHeap(), 
+        ESP.getFreePsram());
+      #endif
 
+      // Serial.printf("moduleLock %d\r\n", (unsigned)data_buffer.moduleLock);
 
       #ifdef ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
         ALOG_INF( PSTR(PM_COMMAND_SVALUE_NVALUE), PM_LOOPSSEC, tkr_sup->activity.cycles_per_sec);

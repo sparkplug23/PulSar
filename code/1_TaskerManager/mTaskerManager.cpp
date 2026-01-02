@@ -27,6 +27,10 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
   if(task == TASK_JSON_COMMAND_ID)
   { 
 
+    #ifdef ENABLE_DEBUGFEATURE_TASKER__SPLASH_JSON_BUFFER
+      Serial.printf(PSTR(D_LOG_TASKER "JSON Command Payload: %s\r\n"), data_buffer.payload.ctr);
+    #endif
+
     JsonParser parser(data_buffer.payload.ctr);
     obj = parser.getRootObject();   
     if (!obj) {
@@ -313,7 +317,7 @@ void mTaskerManager::JSONCommand_Run(char* json)
 
   #ifdef USE_LIGHTING_TEMPLATE
   
-    D_DATA_BUFFER_CLEAR();
+    data_buffer.ClearDeep();
 
     sprintf(data_buffer.payload.ctr, "%s", json);
     data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);

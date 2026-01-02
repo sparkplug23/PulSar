@@ -231,6 +231,13 @@ writeHtmlGzipped(source_path + "/index.htm", destination_path + "html_ui.h", 'in
 writeHtmlGzipped(source_path + "/pixart/pixart.htm", destination_path + "html_pixart.h", 'pixart');
 writeHtmlGzipped(source_path + "/cpal/cpal.htm", destination_path + "html_cpal.h", 'cpal');
 writeHtmlGzipped(source_path + "/pxmagic/pxmagic.htm", destination_path + "html_pxmagic.h", 'pxmagic');
+
+
+
+// writeHtmlGzipped(source_path + "/console.htm", destination_path + "console.h", 'console');
+
+
+
 /*
 writeChunks(
   "code/data23",
@@ -417,7 +424,7 @@ const char PAGE_dmxmap[] PROGMEM = R"=====()=====";
       filter: "html-minify",
     },
     {
-      file: "favicon.ico",
+      file: "favicon_pulsar.ico",
       name: "favicon",
       method: "binary",
     }
@@ -434,4 +441,26 @@ const char PAGE_dmxmap[] PROGMEM = R"=====()=====";
     // }
   ],
   destination_path + "html_other.h"
+);
+
+
+
+
+writeChunks(
+  source_path,
+  [
+    {
+      file: "console.htm",
+      name: "PAGE_console",
+      method: "gzip",
+      filter: "html-minify-ui",
+    },
+    {
+      file: "console2.htm",
+      name: "PAGE_console2",
+      method: "gzip",
+      filter: "html-minify-ui",
+    }
+  ],
+  destination_path + "pages_2025.h"
 );

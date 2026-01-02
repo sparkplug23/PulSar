@@ -491,7 +491,7 @@ void mUltraSonicSensor::MQQTSendObjectDetected(void)
 
   if(motion_detect.ischanged){ motion_detect.ischanged=false;
 
-    D_DATA_BUFFER_CLEAR();
+    data_buffer.ClearDeep();
 
     char buffer[50];
       
@@ -790,7 +790,7 @@ uint8_t mUltraSonicSensor::ConstructJSON_SensorsAveraged(uint8_t json_level){
   JBI->Start();  
   // Serial.println("ConstructJSON_SensorsAveraged");
 
-  // D_DATA_BUFFER_CLEAR();
+  // data_buffer.ClearDeep();
   // DynamicJsonDocument doc(200);
   // JsonObject root = doc.to<JsonObject>();
 

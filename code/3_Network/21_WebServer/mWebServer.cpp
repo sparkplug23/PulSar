@@ -19,8 +19,6 @@ byte optionType;
 //   freemem_usage_json_shared.name_ptr = freemem_usage_name_json_shared;
 //   #endif
 
-
-
 // }
 
 #ifdef ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
@@ -341,7 +339,7 @@ void mWebServer::WebPage_Root_AddHandlers(){
 //     {
 
 //       //copy into buffer
-//       D_DATA_BUFFER_CLEAR();
+//       data_buffer.ClearDeep();
 //       memcpy(data_buffer.payload.ctr,data,sizeof(char)*total);
 //       data_buffer.payload.len = strlen(data_buffer.payload.ctr);
 //       data_buffer.flags.source_id = DATA_BUFFER_FLAG_SOURCE_WEBUI;
@@ -375,9 +373,17 @@ void mWebServer::WebPage_Root_AddHandlers(){
   /**
    * Console Page
    * */
-  tkr_web->server->on(D_WEB_HANDLE_CONSOLE_PAGE, [this](AsyncWebServerRequest *request){
-    HandlePage_Console(request);
+  // tkr_web->server->on(D_WEB_HANDLE_CONSOLE_PAGE, [this](AsyncWebServerRequest *request){
+  //   HandlePage_Console(request);
+  // });
+  tkr_web->server->on("/console", HTTP_GET, [this](AsyncWebServerRequest *request){
+    this->HandlePage_Console(request);
   });
+// Date Modified: 01Jan26
+tkr_web->server->on("/console2", HTTP_GET, [this](AsyncWebServerRequest *request){
+  this->HandlePage_Console2(request);
+});
+
 #endif // ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
   // tkr_web->server->on(D_WEB_HANDLE_CONSOLE "/page_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
   //   Web_Console_Draw(request);
@@ -645,7 +651,7 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 
 // void mWebServer::send_mP(AsyncWebServerRequest *request, int code, uint8_t content_type, const char* formatP, ...)     // Content send snprintf_P char data
 // {
-//   D_DATA_BUFFER_CLEAR();
+//   data_buffer.ClearDeep();
 //   va_list arg;
 //   va_start(arg, formatP);
 //   vsnprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), formatP, arg);
@@ -1236,6 +1242,377 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 
 
 
+#ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+
+// -----------------------------------------------------------------------------
+// WebSocket Console2: push any NEW log lines since last send
+// -----------------------------------------------------------------------------
+// Date Modified: 02Jan26
+//
+// PURPOSE
+//   Streams Tasmota-style "web_log" content to the Console2 WebUI over WebSocket.
+//
+// IMPORTANT DETAILS (matches your logging ring format)
+//   - tkr_log->web_log is a delimited char buffer storing many log entries.
+//   - Each entry is stored as: [index byte][text ...]['\1']
+//   - tkr_log->web_log_index is the NEXT index to be used (i.e., current "head").
+//   - Index 0 is reserved/invalid (used as terminator rules), so we skip 0.
+//
+// CURSOR RULES
+//   - wsConsole2LastIdx == 0 means "not synced yet" (first connect / reset).
+//     On first call we align wsConsole2LastIdx to current head and DO NOT dump history.
+//   - Thereafter we walk indices from wsConsole2LastIdx up to (but not including) head,
+//     collecting any lines that exist in the buffer.
+//   - At end we always align wsConsole2LastIdx = head, even if nothing was added,
+//     to prevent repeated re-walking.
+//
+// SENDING
+//   - If 'client' is provided, send only to that client (and respect queueLength()).
+//   - Else, broadcast to all clients.
+//
+// NOTES
+//   - If GetLog() returns empty while idx is advancing, it usually means
+//     the ring buffer has already dropped those indices due to overflow/eviction,
+//     or the producer gate flags (fConsole_active / fConsole_history) prevented
+//     those log lines from being captured into web_log in the first place.
+// -----------------------------------------------------------------------------
+void mWebServer::sendConsole2Ws(AsyncWebSocketClient *client /*= nullptr*/)
+{
+  // ---------------------------------------------------------------------------
+  // Guards: websocket must exist and have at least one connected client.
+  // ---------------------------------------------------------------------------
+  if (!tkr_web->websocket_console) return;
+
+  if (!tkr_web->websocket_console->count()) {
+    // Useful during debugging; can be commented later.
+    // Serial.println("console2ws: no clients");
+    return;
+  }
+
+  // Current "head" index of the web log ring.
+  // This is the next value the logger will write.
+  const uint8_t head_idx = tkr_log->web_log_index;
+
+  // ---------------------------------------------------------------------------
+  // First sync behaviour:
+  //   - Align cursor to head
+  //   - Do NOT dump history (keeps WS light and avoids large initial burst)
+  // ---------------------------------------------------------------------------
+  if (wsConsole2LastIdx == 0) {
+    wsConsole2LastIdx = head_idx;
+    // Serial.printf("console2ws: sync lastIdx=%u\n\r", (unsigned)wsConsole2LastIdx);
+    return;
+  }
+
+  // Nothing new since last push.
+  if (wsConsole2LastIdx == head_idx) {
+    // Serial.printf("console2ws: no new logs (%u)\n\r", (unsigned)head_idx);
+    return;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Build a payload containing as many NEW log lines as fit into 'out'.
+  // This is intentionally stack-based (no heap allocations).
+  // ---------------------------------------------------------------------------
+  char   out[1400];
+  size_t pos     = 0;
+  bool   need_nl = false;
+
+  // Start from the last cursor and walk forward until we reach head.
+  uint8_t  idx   = wsConsole2LastIdx;
+  uint16_t tried = 0;   // how many indices we attempted
+  uint16_t added = 0;   // how many lines we actually appended
+
+  while (idx != head_idx) {
+    char*  line = nullptr;
+    size_t len  = 0;
+
+    // GetLog() searches for an entry with the index byte == idx.
+    // If that entry has already been evicted from the ring, it returns nullptr/0.
+    tkr_log->GetLog(idx, &line, &len);
+    tried++;
+
+    if (line && len) {
+      // Ensure we have enough room for: optional '\n' + line bytes.
+      // (We keep a small safety margin by reserving +2.)
+      if (pos + len + 2 >= sizeof(out)) {
+        // If truncation happens often, reduce WS interval, increase buffer,
+        // or send multiple frames per call.
+        // Serial.println("console2ws: tx buffer full, truncating");
+        break;
+      }
+
+      if (need_nl) out[pos++] = '\n';
+      memcpy(out + pos, line, len);
+      pos += len;
+      need_nl = true;
+      added++;
+    }
+
+    // Advance index, skipping 0 (reserved).
+    idx++;
+    if (idx == 0) idx = 1;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Always align cursor to the head after walking.
+  // This prevents repeatedly re-walking old indices in case of gaps/eviction.
+  // ---------------------------------------------------------------------------
+  wsConsole2LastIdx = head_idx;
+
+  // If we walked indices but appended nothing, GetLog() did not find any entries.
+  // Typical reasons:
+  //   - ring buffer evicted those indices due to size pressure
+  //   - logging gate flags prevented capture into web_log
+  //   - idx bookkeeping mismatch vs how web_log_index is inserted
+  if (pos == 0) {
+    // Serial.printf("console2ws: walked %u slots, got 0 lines; head=%u\n\r",
+    //               (unsigned)tried, (unsigned)head_idx);
+    return;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Transmit:
+  //   - if single client mode, only send if its TX queue is empty
+  //   - else broadcast
+  // ---------------------------------------------------------------------------
+  if (client) {
+    if (client->queueLength() == 0) {
+      client->text(out, pos);
+    } else {
+      // This is not an error; it simply means the browser is not draining fast enough.
+      // Serial.println("console2ws: client queue busy, drop");
+    }
+  } else {
+    tkr_web->websocket_console->textAll(out, pos);
+  }
+
+  // Serial.printf("console2ws: sent %u lines (%u bytes) head=%u\n\r",
+  //               (unsigned)added, (unsigned)pos, (unsigned)head_idx);
+}
+
+
+// -----------------------------------------------------------------------------
+// WebSocket: Console2 event handler
+// -----------------------------------------------------------------------------
+// Date Modified: 02Jan26
+//
+// PURPOSE
+//   Handles the /ws_console2 WebSocket endpoint used by /console2.htm.
+//   This is intentionally a free function (not a class member) so it can be
+//   registered with AsyncWebSocket::onEvent() without std::function, lambdas,
+//   or trampolines. This keeps it deterministic (no heap alloc, no lifetime
+//   coupling to a C++ object), and mirrors the WLED/Tasmota style.
+//
+// BEHAVIOUR
+//   - WS_EVT_CONNECT:
+//       * Acknowledge connection.
+//       * Reset the console cursor so the next periodic push can resync.
+//   - WS_EVT_DISCONNECT:
+//       * Clear live-client tracking if it was this client.
+//   - WS_EVT_DATA (single-frame WS_TEXT only):
+//       * Heartbeat: "p" -> "pong"
+//       * Otherwise treat payload as a raw JSON command.
+//
+// COMMAND INJECTION MODES
+//   A) Normal (non-delayed):
+//       - Uses shared data_buffer with locking, then immediately calls
+//         Tasker_Interface(TASK_JSON_COMMAND_ID).
+//       - Preferred for simplicity if JSON/log pipelines are already correctly
+//         lock-protected everywhere.
+//
+//   B) Delayed (ENABLE_FEATURE_WEBSERVER__DELAYED_JSONLOCKED_COMMAND_PROCESSING):
+//       - Avoids touching the shared JSON/mqtt buffer by copying the WS payload
+//         into a dedicated heap buffer (pending_cmd). The main loop later parses
+//         it in a safe context.
+//       - This exists to avoid timing overlap where other producers overwrite
+//         shared buffers between the WS callback and the later parse.
+//
+// NOTES
+//   - This function does NOT push log frames itself. Log streaming should be
+//     done by handleConsole2Ws() at a controlled rate, to avoid flooding WS
+//     queues and starving the networking task.
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// WebSocket: Console2 event handler (free function)
+// -----------------------------------------------------------------------------
+// Date Modified: 02Jan26
+//
+// This handler services /ws_console2 for the Console2 WebUI.
+// It is intentionally NOT a class method so it can be registered
+// directly with AsyncWebSocket::onEvent() without lambdas or trampolines.
+//
+// The owning mWebServer instance is resolved ONCE at entry via tkr_web
+// and then used through the local `web` pointer.
+//
+// Supports two execution paths:
+//   1) Immediate execution using shared data_buffer (locked)
+//   2) Delayed execution using PendingJsonCommand (heap-backed)
+// -----------------------------------------------------------------------------
+
+void wsEventConsole2(AsyncWebSocket *server,
+                     AsyncWebSocketClient *client,
+                     AwsEventType type,
+                     void *arg,
+                     uint8_t *data,
+                     size_t len)
+{
+
+  // Resolve owning webserver ONCE
+  mWebServer* web = tkr_web;
+  if (!web) return;
+
+  // ---------------------------------------------------------------------------
+  // CONNECT
+  // ---------------------------------------------------------------------------
+  if (type == WS_EVT_CONNECT) {
+    DEBUG_PRINTLN(F("WS console2 client connected"));
+    client->text(F("ACK connected"));
+
+    web->wsConsole2LastIdx = 0;   // force resync on next periodic push
+    return;
+  }
+
+  // ---------------------------------------------------------------------------
+  // DISCONNECT
+  // ---------------------------------------------------------------------------
+  if (type == WS_EVT_DISCONNECT) {
+    DEBUG_PRINTLN(F("WS console2 client disconnected"));
+    if (client->id() == web->wsConsole2LiveClientId) {
+      web->wsConsole2LiveClientId = 0;
+    }
+    return;
+  }
+
+  // ---------------------------------------------------------------------------
+  // DATA
+  // ---------------------------------------------------------------------------
+  if (type != WS_EVT_DATA) return;
+
+  AwsFrameInfo *info = (AwsFrameInfo*)arg;
+  if (!info || !info->final || info->index != 0 || info->len != len) return;
+  if (info->opcode != WS_TEXT) return;
+
+  // Heartbeat
+  if (len > 0 && len < 10 && data[0] == 'p') {
+    client->text(F("pong"));
+    return;
+  }
+
+  // Bounds
+  if (len == 0 || len >= DATA_BUFFER_PAYLOAD_MAX_LENGTH) {
+    client->text(F("ERR len"));
+    return;
+  }
+
+  // ---------------------------------------------------------------------------
+  // DELAYED JSON MODE (heap-backed, no shared buffer touch)
+  // ---------------------------------------------------------------------------
+#ifdef ENABLE_FEATURE_WEBSERVER__DELAYED_JSONLOCKED_COMMAND_PROCESSING
+
+  if (web->pending_cmd.has()) {
+    client->text(F("BUSY"));
+    return;
+  }
+
+  if (!web->pending_cmd.create((uint16_t)len)) {
+    client->text(F("ERR mem"));
+    return;
+  }
+
+  memcpy(web->pending_cmd.ptr, data, len);
+  web->pending_cmd.ptr[len] = '\0';
+
+  client->text(F("OK"));
+  return;
+
+#else
+  // ---------------------------------------------------------------------------
+  // IMMEDIATE MODE (shared buffer + lock)
+  // ---------------------------------------------------------------------------
+
+  if (!data_buffer.requestLock(web->GetModuleUniqueID())) {
+    client->text(F("BUSY"));
+    return;
+  }
+
+  data_buffer.ClearSoft();
+  data_buffer.payload.length_used = (uint16_t)len;
+  memcpy(data_buffer.payload.ctr, data, len);
+  data_buffer.payload.ctr[len] = '\0';
+
+  // Execute immediately
+  pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+
+  data_buffer.releaseLock();
+
+  client->text(F("OK"));
+  return;
+
+#endif
+}
+
+
+// -----------------------------------------------------------------------------
+// WebSocket Console2: periodic service loop
+// -----------------------------------------------------------------------------
+// Date Modified: 02Jan26
+//
+// PURPOSE
+//   This must be called regularly (TASK_LOOP or similar).
+//   It does two jobs:
+//
+//   1) Gates web-ring logging capture:
+//        Your logger only appends to web_log when tkr_web->fConsole_active==true.
+//        With Console2 using WebSocket (not HTTP polling), nothing else will
+//        automatically toggle that flag, so we enable it here whenever a WS
+//        client is connected.
+//
+//      Without this, web_idx will still increment for Serial, but web_log will
+//      not capture the lines, so GetLog() returns empty.
+//
+//   2) Pushes new log deltas over WS at a controlled interval.
+//      Uses WS_CONSOLE2_INTERVAL as a rate limit to avoid flooding.
+// -----------------------------------------------------------------------------
+void mWebServer::handleConsole2Ws()
+{
+  // Guard: feature may be compiled out or websocket not created
+  if (!tkr_web->websocket_console) return;
+
+  // ---------------------------------------------------------------------------
+  // Enable/disable web-log capture based on live WS clients.
+  // This is the critical piece for WS mode (poll mode used to imply "active").
+  // ---------------------------------------------------------------------------
+  const bool active_now = (tkr_web->websocket_console->count() > 0);
+  tkr_web->fConsole_active = active_now;
+
+  // If no clients, do nothing else.
+  if (!active_now) return;
+
+  // ---------------------------------------------------------------------------
+  // Rate limit WS pushes (simple elapsed-ms check).
+  // ---------------------------------------------------------------------------
+  const unsigned long now = millis();
+  if ((unsigned long)(now - wsConsole2LastPushTime) < (unsigned long)WS_CONSOLE2_INTERVAL) return;
+  wsConsole2LastPushTime = now;
+
+  // ---------------------------------------------------------------------------
+  // Maintain WS client list and push delta logs.
+  // ---------------------------------------------------------------------------
+  tkr_web->websocket_console->cleanupClients();
+
+  // Broadcast mode (delta sender uses wsConsole2LastIdx cursor)
+  sendConsole2Ws();
+}
+
+
+#endif // ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+
+
+
+
+
+
 // *********************************************************************************************
 //  * Interface
 // *********************************************************************************************
@@ -1252,8 +1629,16 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
       server = new AsyncWebServer(80);
 
       #ifdef ENABLE_DEVFEATURE_LIGHTING__JSONLIVE_WEBSOCKETS
-      ws = new AsyncWebSocket("/ws");
+      websocket_lights = new AsyncWebSocket("/ws");
       #endif
+      #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+      websocket_console = new AsyncWebSocket("/ws2");
+      #endif
+
+      #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+      websocket_console->onEvent(wsEventConsole2);
+      #endif
+
 
       // generate module IDs must be done before AP setup
       String escapedMac;
@@ -1339,9 +1724,47 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 //     server.begin();
 
     break;
-  //   case TASK_LOOP:
-  //     PollDnsWebserver();
-  //   break; 
+    case TASK_LOOP:
+    {
+      // PollDnsWebserver();
+
+    // Serial.printf("Bctr %s [%d]\n\r", data_buffer.payload.ctr, strlen(data_buffer.payload.ctr));
+      #ifdef ENABLE_FEATURE_WEBSERVER__DELAYED_JSONLOCKED_COMMAND_PROCESSING
+    //   if(data_buffer.IsDelayedJSONCommandWaiting())
+    //   {
+    // Serial.printf("Cctr %s [%d]\n\r", data_buffer.payload.ctr, strlen(data_buffer.payload.ctr));
+    //     ALOG_INF(PSTR(D_LOG_HTTP "Processing delayed JSON locked command %d"), strlen(data_buffer.payload.ctr));
+    //     pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+    //     data_buffer.releaseLock();
+    //   }
+
+    if (pending_cmd.has()) {
+
+      if (data_buffer.requestLock(tkr_web->GetModuleUniqueID())) {
+
+        data_buffer.ClearSoft();
+        data_buffer.payload.length_used = pending_cmd.len;
+        memcpy(data_buffer.payload.ctr, pending_cmd.ptr, pending_cmd.len);
+        data_buffer.payload.ctr[pending_cmd.len] = '\0';
+
+        pending_cmd.clear();
+
+        pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+        data_buffer.releaseLock();
+      }
+    }
+
+
+
+      #endif
+
+      #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+      handleConsole2Ws();
+      #endif
+
+
+    }
+    break; 
   case TASK_WIFI_CONNECTED:
     
     ALOG_HGLT(PSTR(D_LOG_HTTP "Starting web server"));
@@ -1454,13 +1877,65 @@ void mWebServer::handleStaticContent(AsyncWebServerRequest *request, const Strin
 
 
 
+// void mWebServer::initServer()
+// {
+//   //CORS compatiblity
+//   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
+//   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Methods"), "*");
+//   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), "*");
+
+//   tkr_web->server->on("/root", HTTP_GET, [this](AsyncWebServerRequest *request){
+//     this->webHandleRoot(request);
+//   });
+
+//   tkr_web->server->on("/version", HTTP_GET, [](AsyncWebServerRequest *request){
+//     request->send(200, "text/plain", (String)PROJECT_VERSION);
+//   });
+
+//   tkr_web->server->on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request){
+//     request->send(200, "text/plain", (String)millis());
+//   });
+
+//   tkr_web->server->on("/reboot", HTTP_GET, [this](AsyncWebServerRequest *request){
+//     this->webHandleReboot(request);
+//   });
+//   tkr_web->server->on("/reset", HTTP_GET, [this](AsyncWebServerRequest *request){
+//     tkr_web->serveMessage(request, 200,F("Rebooting now..."),F("Please wait ~10 seconds..."),129);
+//     #ifdef USE_MODULE_LIGHTS_INTERFACE
+//     tkr_anim->doReboot = true;
+//     #endif
+//   });
+
+//   createEditHandler(true);
+
+//   #ifdef WLED_ENABLE_WEBSOCKETS2
+//   tkr_web->server->addHandler(ws);
+//   #endif
+
+//   pCONT->Tasker_Interface(TASK_WEB_ADD_HANDLER);
+
+// }
+
+
 void mWebServer::initServer()
 {
-  //CORS compatiblity
+  // CORS compatiblity
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Methods"), "*");
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), "*");
 
+  // ------------------------------------------------------------------
+  // Date Modified: 30Dec25
+  // Core landing page ownership ("/") for redesigned WebUI
+  // ------------------------------------------------------------------
+  #ifdef ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI
+  tkr_web->server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
+    if (captivePortal(request)) return;
+    this->webHandleLanding(request);
+  });
+  #endif
+
+  // Existing root/debug page (kept)
   tkr_web->server->on("/root", HTTP_GET, [this](AsyncWebServerRequest *request){
     this->webHandleRoot(request);
   });
@@ -1476,8 +1951,9 @@ void mWebServer::initServer()
   tkr_web->server->on("/reboot", HTTP_GET, [this](AsyncWebServerRequest *request){
     this->webHandleReboot(request);
   });
+
   tkr_web->server->on("/reset", HTTP_GET, [this](AsyncWebServerRequest *request){
-    tkr_web->serveMessage(request, 200,F("Rebooting now..."),F("Please wait ~10 seconds..."),129);
+    tkr_web->serveMessage(request, 200, F("Rebooting now..."), F("Please wait ~10 seconds..."), 129);
     #ifdef USE_MODULE_LIGHTS_INTERFACE
     tkr_anim->doReboot = true;
     #endif
@@ -1486,12 +1962,17 @@ void mWebServer::initServer()
   createEditHandler(true);
 
   #ifdef WLED_ENABLE_WEBSOCKETS2
-  tkr_web->server->addHandler(ws);
+  tkr_web->server->addHandler(websocket_lights);
+  #endif
+  #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+  tkr_web->server->addHandler(websocket_console);
   #endif
 
+  // Let modules add their own URLs
   pCONT->Tasker_Interface(TASK_WEB_ADD_HANDLER);
-
 }
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 void mWebServer::webHandleReboot(AsyncWebServerRequest* request)
@@ -1542,11 +2023,104 @@ void mWebServer::webHandleRoot(AsyncWebServerRequest* request)
   conv += (F("<hr><form method='get' action='resetConfig'>"));
   conv += (F("<button type='submit'>factory reset settings</button></form>"));
 
+
+  // Date Modified: 30Dec25
+
+#ifdef ENABLE_DEVFEATURE_WEBSERVER__ROOT_DEBUG_LINKS
+
+conv += F("<hr><h3>Debug Links</h3>");
+
+auto addLink = [&](const __FlashStringHelper* name, const __FlashStringHelper* url){
+  conv += F("<div style='margin:6px 0;'>");
+  conv += F("<a href='");
+  conv += url;
+  conv += F("'>");
+  conv += name;
+  conv += F("</a></div>");
+};
+
+// Core
+addLink(F("Version"), F("/version"));
+addLink(F("Uptime"),  F("/uptime"));
+addLink(F("Reboot"),  F("/reboot"));
+addLink(F("Reset"),   F("/reset"));
+addLink(F("Edit"),    F("/edit"));      // if present
+addLink(F("Root"),    F("/root"));
+
+// Lights (if compiled)
+#ifdef USE_MODULE_LIGHTS_INTERFACE
+addLink(F("Lights UI"), F("/lights"));  // or "/" if legacy mode
+addLink(F("JSON"),      F("/json"));
+addLink(F("Presets"),   F("/presets.json")); // only if you serve it
+#endif
+
+// Add your new basics
+addLink(F("Basic Relays"), F("/basic/relays")); // when it exists
+
+#endif
+
+
   conv += FPSTR(HTTP_END3);
   
   request->send(200, "text/html", conv);
 
 }
+
+// Date Modified: 30Dec25
+#ifdef ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI
+
+void mWebServer::webHandleLanding(AsyncWebServerRequest* request)
+{
+  #ifdef ESP32
+  ALOG_INF(PSTR("HTTP: Sending landing page to client from: %s"), request->host());
+  #endif
+
+  String conv;
+  conv.reserve(2048);
+
+  String httpHeader = FPSTR(HTTP_HEAD_START);
+  httpHeader.replace("{v}", "PulSar ");
+  conv += httpHeader;
+  conv += FPSTR(HTTP_SCRIPT3);
+  conv += FPSTR(HTTP_STYLE3);
+  conv += FPSTR(HASP_STYLE);
+  conv += FPSTR(HTTP_HEAD_END3);
+
+  conv += F("<h2>PulSar</h2>");
+  conv += F("<div style='margin:12px 0;'>");
+
+  // Primary entry points
+  conv += F("<hr><h3>Pages</h3>");
+
+  // Lights
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  conv += F("<div style='margin:6px 0;'><a href='/lights'><button style='width:220px;'>Lights</button></a></div>");
+  #endif
+
+  // Basic controls (add as you create them)
+  conv += F("<div style='margin:6px 0;'><a href='/basic/relays'><button style='width:220px;'>Relays</button></a></div>");
+
+  // Nextion / Displays (existing upload tooling)
+  conv += F("<div style='margin:6px 0;'><a href='/root'><button style='width:220px;'>Root / Debug</button></a></div>");
+
+  conv += F("</div>");
+
+  // Quick system links
+  conv += F("<hr><h3>System</h3>");
+  conv += F("<div style='margin:6px 0;'><a href='/version'>/version</a></div>");
+  conv += F("<div style='margin:6px 0;'><a href='/uptime'>/uptime</a></div>");
+  conv += F("<div style='margin:6px 0;'><a href='/edit'>/edit</a></div>");
+  conv += F("<div style='margin:6px 0;'><a href='/reboot'>/reboot</a></div>");
+  conv += F("<div style='margin:6px 0;'><a href='/reset'>/reset</a></div>");
+
+  conv += FPSTR(HTTP_END3);
+
+  request->send(200, "text/html", conv);
+}
+
+#endif
+
+
 
 
 bool  mWebServer::captivePortal(AsyncWebServerRequest *request)

@@ -22,6 +22,16 @@ void ErrorMessage(uint8_t error_type, const char* message)
 
 void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 {
+  #ifdef ESP32
+    if (xPortInIsrContext()) {
+      // When called from an ISR, you should not send out logs.
+      // Allocating memory from within an ISR is a big no-no.
+      // Also long-time blocking like sending logs (especially to a syslog server) 
+      // is also really not a good idea from an ISR call.
+      return;
+    }
+  #endif
+
   // DEBUG_LINE_HERE3
   #ifdef ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE
   uint16_t unique_module_ids[] = { ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE }; // Single number or "1, 2, 3"  
@@ -156,28 +166,29 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   
   // LOG : WEBSERVER
   #ifdef USE_MODULE_NETWORK_WEBSERVER
-  // if(tkr_web->fConsole_active && !tkr_web->fConsole_history){ //only append values when active, however, this stops history
-  //   if (tkr_set->Settings.webserver && (loglevel <= tkr_set->Settings.logging.web_level)) {
-  //     // Delimited, zero-terminated buffer of log lines.
-  //     // Each entry has this format: [index][log data]['\1']
-  //     if (!web_log_index) web_log_index++;   // Index 0 is not allowed as it is the end of char string
+  if(tkr_web->fConsole_active){ //only append values when active, however, this stops history
+    if (tkr_set->Settings.webserver && (loglevel <= tkr_set->Settings.logging.web_level)) {
+      // Delimited, zero-terminated buffer of log lines.
+      // Each entry has this format: [index][log data]['\1']
+      if (!tkr_log->web_log_index) tkr_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
       
-  //     while (web_log_index == web_log[0] ||  // If log already holds the next index, remove it
-  //           strlen(web_log) + strlen(log_data) + 13 > WEB_LOG_SIZE)  // 13 = web_log_index + mxtime + '\1' + '\0'
-  //     {
-  //       char* it = web_log;
-  //       it++;                                  // Skip web_log_index
-  //       it += tkr_sup->strchrspn(it, '\1'); // Skip log line
-  //       it++;                                  // Skip delimiting "\1"
-  //       // circle uffer
-  //       memmove(web_log, it, WEB_LOG_SIZE -(it-web_log));  // Move buffer forward to remove oldest log line
-  //     }
-  //     // creates line formatted with \1 meaning EOL
-  //     snprintf_P(web_log, sizeof(web_log), PSTR("%s%c%s%S %s\1"), web_log, web_log_index++, mxtime, tkr_log->GetLogLevelNamebyID(loglevel), log_data);
-  //     if (!web_log_index) web_log_index++;   // Index 0 is not allowed as it is the end of char string
+      while (tkr_log->web_log_index == tkr_log->web_log[0] ||  // If log already holds the next index, remove it
+            strlen(tkr_log->web_log) + strlen(tkr_log->log_data) + 13 > WEB_LOG_SIZE)  // 13 = web_log_index + mxtime + '\1' + '\0'
+      {
+        char* it = tkr_log->web_log;
+        it++;                                  // Skip web_log_index
+        it += tkr_sup->strchrspn(it, '\1'); // Skip log line
+        it++;                                  // Skip delimiting "\1"
+        // circle uffer
+        memmove(tkr_log->web_log, it, WEB_LOG_SIZE -(it-tkr_log->web_log));  // Move buffer forward to remove oldest log line
+      }
+      // creates line formatted with \1 meaning EOL
+      snprintf_P(tkr_log->web_log, sizeof(tkr_log->web_log), PSTR("%s%c%s %S %s\1"), tkr_log->web_log, tkr_log->web_log_index++, mxtime, tkr_log->GetLogLevelNamebyID(loglevel), tkr_log->log_data);
+      if (!tkr_log->web_log_index) tkr_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
     
-  //   }
-  // }
+    }
+  }
+  // Serial.printf("log%d\n\r",tkr_log->web_log_index);
   #endif  // USE_MODULE_NETWORK_WEBSERVER
 
   

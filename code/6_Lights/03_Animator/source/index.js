@@ -247,9 +247,59 @@ function loadSkinCSS(cId)
 	}
 }
 
+// function getURL(path) {
+// 	return (loc ? locproto + "//" + locip : "") + path;
+// }
+// function getURL(path) {
+//   // Date Modified: 30Dec25
+//   // If UI is served from /lights, ensure API/static paths still resolve at root.
+
+//   console.log("getURL1:", path); //patch while redesigning web
+//   // Ensure path is absolute
+//   if (path && path[0] !== "/") path = "/" + path;
+
+//   // Strip "/lights" prefix if present (document mounted under /lights)
+//   // Handles "/lights/json/..." and "/lights/..." etc
+//   if (path.startsWith("/lights/")) {
+//     path = path.substring("/lights".length); // keeps leading "/" from "/lights/..."
+//   } else if (path === "/lights") {
+//     path = "/"; // edge-case
+//   }
+//   console.log("getURL2:", path); //patch while redesigning web
+
+//   var newp = (loc ? locproto + "//" + locip : "") + path;
+
+//   console.log("getURL3:", newp); 
+//   return newp;
+// }
 function getURL(path) {
-	return (loc ? locproto + "//" + locip : "") + path;
+  // Date Modified: 30Dec25
+  // Robust: remove mount prefix from BOTH base (locip) and path.
+
+  // Ensure path is absolute
+  if (path && path[0] !== "/") path = "/" + path;
+
+  // Normalise base
+  let base = "";
+  if (loc) {
+    let ip = (locip || "");
+
+    // If locip accidentally includes "/lights" (or "/lights/.."), strip it.
+    // Works for: "192.168.2.109/lights" or "192.168.2.109/lights/anything"
+    ip = ip.replace(/\/lights(\/.*)?$/i, "");
+
+    base = locproto + "//" + ip;
+  }
+
+  // Strip "/lights" prefix from path as well (covers any hardcoded calls)
+  if (path === "/lights") path = "/";
+  else if (path.startsWith("/lights/")) path = path.substring(7); // remove "/lights"
+
+  console.log("loc:", loc, "locproto:", locproto, "locip:", locip, "pathname:", location.pathname);
+
+  return base + path;
 }
+
 
 function onLoad()
 {

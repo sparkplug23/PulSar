@@ -766,7 +766,7 @@
 
 // uint8_t mTankVolumeUltrasonic::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-//     // D_DATA_BUFFER_CLEAR();
+//     // data_buffer.ClearDeep();
 //     // StaticJsonDocument<400> doc;
 //     // JsonObject root = doc.to<JsonObject>();
 
@@ -786,7 +786,7 @@
 
 // uint8_t mTankVolumeUltrasonic::ConstructJSON_Furnace(uint8_t json_level, bool json_appending){
 
-// //     D_DATA_BUFFER_CLEAR();
+// //     data_buffer.ClearDeep();
 // //     StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 // //     JsonObject root = doc.to<JsonObject>();
 

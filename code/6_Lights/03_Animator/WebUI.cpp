@@ -334,7 +334,7 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   }
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING__JSONLIVE_WEBSOCKETS
-  root[F("ws")] = tkr_web->ws->count();
+  root[F("ws")] = tkr_web->websocket_lights->count();
   #else
   root[F("ws")] = -1;
   #endif
@@ -2738,7 +2738,7 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
   #ifdef WLED_ENABLE_WEBSOCKETS2
   AsyncWebSocketClient * wsc = nullptr;
   if (!request) { //not HTTP, use Websockets
-    wsc = tkr_web->ws->client(wsClient);
+    wsc = tkr_web->websocket_lights->client(wsClient);
     if (!wsc || wsc->queueLength() > 0) return false; //only send if queue free
   }
   #endif
@@ -3401,9 +3401,9 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
          * @brief LOAD TO PARSE
          * 
          */
-        if(requestDataBufferLock(GetModuleUniqueID()))
+        if(data_buffer.requestLock(GetModuleUniqueID()))
         {
-          D_DATA_BUFFER_SOFT_CLEAR();
+          data_buffer.ClearSoft();
 
           char* jsonBuffer = (char*)request->_tempObject;
 
@@ -3421,7 +3421,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
           pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
-          releaseDataBufferLock();
+          data_buffer.releaseLock();
 
         }
 
@@ -3464,9 +3464,9 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
     // #ifdef ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
 
-    // if(requestDataBufferLock(GetModuleUniqueID()))
+    // if(data_buffer.requestLock(GetModuleUniqueID()))
     //     {
-    //       D_DATA_BUFFER_SOFT_CLEAR();
+    //       data_buffer.ClearSoft();
 
     //       char* jsonBuffer = (char*)request->_tempObject;
 
@@ -3484,7 +3484,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
     //       pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
-    //       releaseDataBufferLock();
+    //       data_buffer.releaseLock();
 
     //     }
     //     #endif
@@ -3552,14 +3552,62 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   });
   #endif
 
-  tkr_web->server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
+
+  // -----------------------------------------------------------------------------
+// Lights UI entrypoint registration (Animator / WLED-derived module)
+// Date Modified: 30Dec25
+// -----------------------------------------------------------------------------
+//
+// Goal:
+//  - Legacy: lights owns "/" (current behaviour)
+//  - New (ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI): lights owns "/lights"
+//    and "/" is reserved for the new landing page in Network/mWebServer.
+//
+// Notes:
+//  - Do NOT register "/" in the lights module when redesign flag is enabled.
+//  - Keep the handler body identical to avoid behavioural regressions.
+//
+
+  #ifdef ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI
+
+  tkr_web->server->on("/lights", HTTP_GET, [this](AsyncWebServerRequest *request){
     if (captivePortal(request)) return;
+
     if (!showWelcomePage || request->hasArg(F("sliders"))) {
-      tkr_web->handleStaticContent(request, F("/index.htm"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_index, PAGE_index_L);
+      tkr_web->handleStaticContent(
+        request,
+        F("/index.htm"),
+        200,
+        FPSTR(CONTENT_TYPE_HTML),
+        PAGE_index,
+        PAGE_index_L
+      );
     } else {
       serveSettings(request);
     }
   });
+
+  #else
+
+  tkr_web->server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
+    if (captivePortal(request)) return;
+
+    if (!showWelcomePage || request->hasArg(F("sliders"))) {
+      tkr_web->handleStaticContent(
+        request,
+        F("/index.htm"),
+        200,
+        FPSTR(CONTENT_TYPE_HTML),
+        PAGE_index,
+        PAGE_index_L
+      );
+    } else {
+      serveSettings(request);
+    }
+  });
+
+  #endif
+
 
   #ifdef WLED_ENABLE_PIXART
   static const char _pixart_htm[] PROGMEM = "/pixart.htm";

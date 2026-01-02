@@ -1,5 +1,5 @@
-#ifndef _MSTREAMOUT_H
-#define _MSTREAMOUT_H 0.5
+#ifndef _LOGGING_H
+#define _LOGGING_H 0.5
 
 #define D_UNIQUE_MODULE_CORE_LOGGING_ID   2008 // [(Folder_Number*100)+ID_File]
 
@@ -890,6 +890,7 @@ void AddLog_Array_P(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
     // Pass the formatted string to AddLog
     AddLog(loglevel, PSTR("%s"), logBuffer);
 }
+
 
 
 #include "1_TaskerManager/mTaskerInterface.h"

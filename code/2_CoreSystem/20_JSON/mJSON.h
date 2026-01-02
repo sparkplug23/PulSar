@@ -3,7 +3,7 @@
 #ifndef _MMYJSON_H_
 #define _MMYJSON_H_
 
-#define D_UNIQUE_MODULE_CORE_LOGGING_ID 2020 // [(Folder_Number*100)+ID_File]
+#define D_UNIQUE_MODULE_CORE_JSON_ID 2020 // [(Folder_Number*100)+ID_File]
 
 #include <stdint.h>
 

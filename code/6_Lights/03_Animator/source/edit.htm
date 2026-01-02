@@ -138,6 +138,11 @@ see https://github.com/me-no-dev/ESPAsyncWebServer -->
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Date Modified: 30Dec25 */
+#editor, #editor * { background-color: #1e1e1e !important; color: #e0e0e0 !important; }
+
+
 </style>
 <script>
 function ge(a){
@@ -495,7 +500,8 @@ function createEditor(element, file, lang, theme, type){
     lang = getLangFromFilename(file);
   }
 
-  if(typeof theme === "undefined") theme = "monokai";
+  // if(typeof theme === "undefined") 
+  theme = "twilight";
 
   if(typeof type === "undefined"){
     type = "text/"+lang;
@@ -574,6 +580,9 @@ function onBodyLoad(){
 };
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/theme-monokai.js" type="text/javascript" charset="utf-8"></script>
+<!-- added the above for new dark theme -->
+
 </head>
 <body onload="onBodyLoad();">
   <div id="loader" class="loader"></div>

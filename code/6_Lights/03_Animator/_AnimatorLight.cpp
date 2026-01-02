@@ -261,7 +261,7 @@ void sendDataWs(AsyncWebSocketClient * client = nullptr);
 
 void sendDataWs(AsyncWebSocketClient * client)
 {
-  if (!tkr_web->ws->count())
+  if (!tkr_web->websocket_lights->count())
   {
     ALOG_ERR(PSTR("No WS clients connected"));
     return;
@@ -272,7 +272,7 @@ void sendDataWs(AsyncWebSocketClient * client)
     if (client) {
       client->text(FPSTR(error)); // ERR_NOBUF
     } else {
-      tkr_web->ws->textAll(FPSTR(error)); // ERR_NOBUF
+      tkr_web->websocket_lights->textAll(FPSTR(error)); // ERR_NOBUF
     }
     return;
   }
@@ -304,8 +304,8 @@ void sendDataWs(AsyncWebSocketClient * client)
   if (!buffer || heap1-heap2<len) {
     tkr_anim->releaseJSONBufferLock();
     DEBUG_PRINTLN(F("WS buffer allocation failed."));
-    tkr_web->ws->closeAll(1013); //code 1013 = temporary overload, try again later
-    tkr_web->ws->cleanupClients(0); //disconnect all clients to release memory
+    tkr_web->websocket_lights->closeAll(1013); //code 1013 = temporary overload, try again later
+    tkr_web->websocket_lights->cleanupClients(0); //disconnect all clients to release memory
     return; //out of memory
   }
   serializeJson(*tkr_mfile->pDoc, (char *)buffer.data(), len);
@@ -316,7 +316,7 @@ void sendDataWs(AsyncWebSocketClient * client)
     client->text(std::move(buffer));
   } else {
     DEBUG_PRINTLN(F("to multiple clients."));
-    tkr_web->ws->textAll(std::move(buffer));
+    tkr_web->websocket_lights->textAll(std::move(buffer));
   }
 
   tkr_anim->releaseJSONBufferLock();
@@ -326,6 +326,8 @@ void sendDataWs(AsyncWebSocketClient * client)
 void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len)
 {
   uint8_t log = LOG_LEVEL_INFO;
+
+  Serial.println("wsEvent called");
 
   if (type == WS_EVT_CONNECT) {
     DEBUG_PRINTLN(F("WS client connected."));
@@ -355,8 +357,8 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
         // -------- Pass 1: ALWAYS run Tasker on raw WS payload (pre-parse, no JSON lock) --------
         if (len < DATA_BUFFER_PAYLOAD_MAX_LENGTH) {
           ALOG_INF(PSTR("wsEvent:: len < DATA_BUFFER_PAYLOAD_MAX_LENGTH"));
-          if (requestDataBufferLock(tkr_anim->GetModuleUniqueID())) {
-            D_DATA_BUFFER_SOFT_CLEAR();
+          if (data_buffer.requestLock(tkr_anim->GetModuleUniqueID())) {
+            data_buffer.ClearSoft();
             data_buffer.payload.length_used = (uint16_t)len;
             memcpy(data_buffer.payload.ctr, data, len);
             data_buffer.payload.ctr[len] = '\0'; // NUL terminate for logging/consumers
@@ -365,7 +367,7 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
                    data_buffer.payload.length_used, data_buffer.payload.ctr);
 
             pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
-            releaseDataBufferLock();
+            data_buffer.releaseLock();
           } else {
             ALOG_WRN(PSTR("WS Tasker: buffer lock busy; skipping Tasker pass"));
           }
@@ -442,7 +444,7 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
 
 bool sendLiveLedsWs(uint32_t wsClient)
 {
-  AsyncWebSocketClient * wsc = tkr_web->ws->client(wsClient);
+  AsyncWebSocketClient * wsc = tkr_web->websocket_lights->client(wsClient);
   if (!wsc || wsc->queueLength() > 0) return false; //only send if queue free
 
   size_t used = tkr_anim->getLengthTotal();
@@ -515,9 +517,9 @@ void handleWs()
   if (millis() - wsLastLiveTime > WS_LIVE_INTERVAL)
   {
     #ifdef ESP8266
-    tkr_web->ws->cleanupClients(3);
+    tkr_web->websocket_lights->cleanupClients(3);
     #else
-    tkr_web->ws->cleanupClients();
+    tkr_web->websocket_lights->cleanupClients();
     #endif
     bool success = true;
     if (wsLiveClientId) success = sendLiveLedsWs(wsLiveClientId);
@@ -898,7 +900,7 @@ void mAnimatorLight::Init(void)
   WAIT_WITH_PRINT_TICK(1000);
   DEBUG_LINE_HERE4
   #ifdef WLED_ENABLE_WEBSOCKETS2
-  tkr_web->ws->onEvent(wsEvent);
+  tkr_web->websocket_lights->onEvent(wsEvent);
   #endif
   
   DEBUG_LINE_HERE4
@@ -4607,7 +4609,7 @@ void mAnimatorLight::reset()
 {
   // briT = 0;
   #ifdef WLED_ENABLE_WEBSOCKETS2
-  tkr_web->ws->closeAll(1012);
+  tkr_web->websocket_lights->closeAll(1012);
   #endif
   long dly = millis();
   while (millis() - dly < 450) {

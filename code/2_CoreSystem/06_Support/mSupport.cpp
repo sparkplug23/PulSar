@@ -1187,7 +1187,7 @@ void mSupport::removeTrailingComma(char* buffer) {
 int mSupport::Response_P(const char* format, ...)     // Content send snprintf_P char data
 {
   //BufferWriter
-  D_DATA_BUFFER_CLEAR();
+  data_buffer.ClearDeep();
 
   // This uses char strings. Be aware of sending %% if % is needed
   va_list args;

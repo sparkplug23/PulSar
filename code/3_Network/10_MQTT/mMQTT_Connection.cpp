@@ -184,10 +184,10 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
     return;
   }
   
-  if(requestDataBufferLock(D_UNIQUE_MODULE_NETWORK_MQTT_ID))
+  if(data_buffer.requestLock(D_UNIQUE_MODULE_NETWORK_MQTT_ID))
   {
 
-    D_DATA_BUFFER_SOFT_CLEAR();
+    data_buffer.ClearSoft();
 
     data_buffer.topic.length_used = strlen(mqtt_topic);
     strlcpy(data_buffer.topic.ctr, mqtt_topic, data_buffer.topic.length_used);
@@ -237,7 +237,7 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
       }
       
     }
-    releaseDataBufferLock();
+    data_buffer.releaseLock();
 
   }
 

@@ -122,7 +122,7 @@ bool mFileSystem::JsonFile_Load__Stored_Module()
   }
  
   // Read into local buffer, this should be locked from async access using buffer class method
-  D_DATA_BUFFER_CLEAR();
+  data_buffer.ClearDeep();
   uint8_t* buffer_p = (uint8_t*)data_buffer.payload.ctr;
   file.read(buffer_p, file.available());
   file.close();
@@ -210,7 +210,7 @@ void mFileSystem::JsonFile_Load__Stored_Secure()
   }
  
   // Read into local buffer, this should be locked from async access using buffer class method
-  D_DATA_BUFFER_CLEAR();
+  data_buffer.ClearDeep();
   uint8_t* buffer_p = (uint8_t*)data_buffer.payload.ctr;
   file.read(buffer_p, file.available());
   file.close();

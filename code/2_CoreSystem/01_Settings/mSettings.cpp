@@ -112,7 +112,7 @@ void mSettings::Function_Template_Load(){
 
   #ifdef USE_FUNCTION_TEMPLATE  
   // Read into local
-  D_DATA_BUFFER_CLEAR();
+  data_buffer.ClearDeep();
   memcpy_P(data_buffer.payload.ctr,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
   data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 

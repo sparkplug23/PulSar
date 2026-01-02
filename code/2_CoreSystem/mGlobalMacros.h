@@ -151,6 +151,7 @@
                         Serial.flush();
 
 #define DEBUG_INSERT_PAGE_BREAK "\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r"
+#define DEBUG_INSERT_SECTION_BREAK "\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r"
 #define D_DEBUG_FUNCTION_NAME_CTR __func__
 
                       

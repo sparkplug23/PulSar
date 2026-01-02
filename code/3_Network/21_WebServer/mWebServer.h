@@ -1368,9 +1368,67 @@ void initServer();
 // server library objects
 AsyncWebServer* server = nullptr; //(80);
 #ifdef ENABLE_DEVFEATURE_LIGHTING__JSONLIVE_WEBSOCKETS
-AsyncWebSocket* ws = nullptr;
+AsyncWebSocket* websocket_lights = nullptr;
 #endif
+
+#ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+AsyncWebSocket* websocket_console = nullptr;
+#endif
+
 AsyncWebHandler *editHandler = nullptr;
+
+#ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+void sendConsole2Ws(AsyncWebSocketClient *client = nullptr);
+void handleConsole2Ws();
+
+// Date Modified: 02Jan26
+struct PendingJsonCommand
+{
+  char*    ptr = nullptr;
+  uint16_t len = 0;
+
+  inline bool has() const { return (ptr != nullptr) && (len > 0); }
+
+  inline bool create(uint16_t new_len)
+  {
+    clear();
+    if (!new_len) return false;
+
+    ptr = (char*)malloc(new_len + 1);
+    if (!ptr) {
+      len = 0;
+      return false;
+    }
+
+    len = new_len;
+    ptr[len] = '\0';
+    return true;
+  }
+
+  inline void clear()
+  {
+    if (ptr) {
+      free(ptr);
+      ptr = nullptr;
+    }
+    len = 0;
+  }
+};
+
+
+static PendingJsonCommand pending_cmd;
+
+
+// Date Modified: 01Jan26
+
+uint16_t      wsConsole2LiveClientId = 0;
+unsigned long wsConsole2LastPushTime = 0;
+
+#define WS_CONSOLE2_INTERVAL 50  // ms
+uint8_t wsConsole2LastIdx = 0;   // 0 = sync pending
+
+#endif
+
 
 
 void serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& headl, const String& subl, byte optionT);
@@ -1404,9 +1462,11 @@ void handleStaticContent(AsyncWebServerRequest *request, const String &path, int
     // const char*     freemem_usage_name_json_shared = "json_shared";
     // freemem_usage_t freemem_usage_json_shared;
     // #endif // DEBUG_WEBSERVER_MEMORY
-    // bool reset_web_log_flag = false;                  // Reset web console log
+    bool reset_web_log_flag = false;                  // Reset web console log
     uint8_t fConsole_active = false;
-    // uint8_t fConsole_history = false;
+    // Date Modified: 01Jan26
+bool reset_web_log_flag_console2 = true;
+
 
     // // FUNCTIONS
     // void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) override;
@@ -1432,9 +1492,13 @@ void handleStaticContent(AsyncWebServerRequest *request, const String &path, int
     // void Web_Root_UpdateURLs(AsyncWebServerRequest *request);
     // void Web_Base_Page_Draw(AsyncWebServerRequest *request);
     // void WebSend_JSON_RootStatus_Table(AsyncWebServerRequest *request);    
-    #ifdef ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
+    
+    #ifdef ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI
     void HandlePage_Console(AsyncWebServerRequest *request);
-    #endif // ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
+    void HandleConsoleRefresh(AsyncWebServerRequest *request);
+    void HandlePage_Console2(AsyncWebServerRequest *request);
+    #endif
+
     // void Web_Console_Draw(AsyncWebServerRequest *request);
     // void Console_JSON_Data(AsyncWebServerRequest *request);
     // bool RespondWebSendFreeMemoryTooLow(AsyncWebServerRequest *request, uint16_t memory_needed = 0);
@@ -1458,7 +1522,6 @@ void handleStaticContent(AsyncWebServerRequest *request, const String &path, int
     // void WebAppend_Root_Draw_PageButtons();
     // void WebAppend_Root_Draw_ModuleButtons();
     // void HandleConsole(AsyncWebServerRequest *request);
-    void HandleConsoleRefresh(AsyncWebServerRequest *request);
     // void HandleInformation(AsyncWebServerRequest *request);
     // void WebAppend_Start_Head_P(const char* title, bool auth);
     // void WebAppend_Start_Head_P(const char* title);
@@ -1502,6 +1565,10 @@ bool isIp(String str);
 
 
 void webHandleRoot(AsyncWebServerRequest* request);
+
+#ifdef ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI
+void webHandleLanding(AsyncWebServerRequest* request);
+#endif
 
 #endif // ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
 

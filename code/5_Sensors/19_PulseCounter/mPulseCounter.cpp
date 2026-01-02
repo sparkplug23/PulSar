@@ -368,7 +368,7 @@ void mPulseCounter::WebPage_Root_AddHandlers(){
 
 uint8_t mPulseCounter::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-    D_DATA_BUFFER_CLEAR();
+    data_buffer.ClearDeep();
     StaticJsonDocument<400> doc;
     JsonObject root = doc.to<JsonObject>();
 
@@ -395,7 +395,7 @@ uint8_t mPulseCounter::ConstructJSON_Settings(uint8_t json_level, bool json_appe
 uint8_t mPulseCounter::ConstructJSON_Sensor(uint8_t json_level){
 
   // clear entire mqtt packet
-  D_DATA_BUFFER_CLEAR();
+  data_buffer.ClearDeep();
 
   uint8_t ischanged=false;
 

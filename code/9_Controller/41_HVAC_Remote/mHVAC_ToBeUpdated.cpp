@@ -181,7 +181,7 @@ int mHVAC::mapHeatingTempToBrightness(int temp){
 
 //   // StaticJsonDocument<800> doc;
 //   // JsonObject obj = doc.to<JsonObject>();
-//   // D_DATA_BUFFER_CLEAR();
+//   // data_buffer.ClearDeep();
 
 //   // uint8_t ischanged = false;
 

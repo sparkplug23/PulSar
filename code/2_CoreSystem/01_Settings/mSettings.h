@@ -58,82 +58,188 @@ typedef union
 } DATA_BUFFER_FLAGS;
 
 
-struct DATA_BUFFER{
-  struct TOPIC{
-    char ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
-    uint16_t length_used = 0;
-  }topic;
-  struct PAYLOAD{
-    char ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
-    uint16_t length_used = 0;
-  }payload;
-  uint16_t isserviced = 0; // Set to 0 on new mqtt
-  uint16_t moduleLock = 0;
-  DATA_BUFFER_FLAGS flags;
-};
-extern struct DATA_BUFFER data_buffer;
+#pragma once
+#include <Arduino.h>  // millis(), delay(), Serial
 
-#include <Arduino.h> // Include Arduino header for millis() and delay()
-
+// Keep your existing macros
 #define ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+// #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
 
-#ifdef ENABLE_DEVFEATURE_DATABUFFER_LOCK
+struct DATA_BUFFER {
+  struct TOPIC {
+    char     ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
+    uint16_t length_used = 0;
+  } topic;
 
-//threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
-inline bool requestDataBufferLock(uint16_t module)
-{
-  unsigned long now = millis();
+  struct PAYLOAD {
+    char     ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
+    uint16_t length_used = 0;
+  } payload;
 
-  // This assumption here is another http thread must release itself to permit this function to proceed
-  while (data_buffer.moduleLock && millis()-now < 1000) delay(1); // wait for a second for buffer lock
+  uint16_t isserviced  = 0;   // Set to 0 on new mqtt
+  uint16_t moduleLock  = 0;
+  bool     delayedJSONCommandWaiting  = false;
+  DATA_BUFFER_FLAGS flags;
 
-  if (millis()-now >= 1000) 
-  {
+  // ---------- Lock API ----------
+  inline bool requestLock(uint16_t module, uint32_t timeout_ms = 1000) {
+  #ifdef ENABLE_DEVFEATURE_DATABUFFER_LOCK
+    const unsigned long now = millis();
+
+    // This assumption here is another http thread must release itself to permit this function to proceed
+    while (moduleLock && millis()-now < 1000) delay(1); // wait for a second for buffer lock
+
+    if (millis() - now >= timeout_ms) {
+      #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+        Serial.printf(PSTR("ERROR: Locking data buffer failed! (%u)\r\n"), (unsigned)moduleLock);
+      #endif
+      return false;
+    }
+
+    moduleLock = module ? module : 255;
+
     #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
-    Serial.printf(PSTR("ERROR: Locking data buffer failed! (%d)\n\r"),data_buffer.moduleLock);
+      Serial.printf(PSTR("DATA buffer requestLock =======================================> (%u)\r\n" DEBUG_INSERT_SECTION_BREAK), (unsigned)moduleLock);
     #endif
-    return false; // waiting time-outed
+
+    return true;
+  #else
+    (void)module; (void)timeout_ms;
+    return true;
+  #endif
   }
 
-  data_buffer.moduleLock = module ? module : 255;
-
-  #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
-  Serial.printf(PSTR("DATA buffer locked (%d)\n\r"), data_buffer.moduleLock);
-  #endif
-
-  return true;
-}
-
-inline void releaseDataBufferLock()
-{
-  #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
-  Serial.printf(PSTR("DATA buffer released (%d)\n\r"), data_buffer.moduleLock);
-  #endif
-  data_buffer.moduleLock = 0;
-}
-
-#else
-
-//threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
-inline bool requestDataBufferLock(uint16_t module){ return true; };
-inline void releaseDataBufferLock(){};
-
-#endif
+  inline bool tryLock(uint16_t module)
+  {
+    if (moduleLock != 0)
+    {      
+      #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+        Serial.printf(PSTR("DATA buffer tryLock BLOCKED <<<<<<<<<<< (%u)\r\n"), (unsigned)moduleLock);
+      #endif
+      return false;
+    }
+    moduleLock = module ? module : 255;
+    #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+      Serial.printf(PSTR("DATA buffer tryLock =======================================> (%u)\r\n" DEBUG_INSERT_SECTION_BREAK), (unsigned)moduleLock);
+    #endif
+    return true;
+  }
 
 
-/**
- * @brief Complete, slow
- **/
-#define D_DATA_BUFFER_CLEAR()             \
-    memset(&data_buffer,0,sizeof(data_buffer))
-/**
- * @brief Minimal, fast
- **/
-#define D_DATA_BUFFER_SOFT_CLEAR()             \
-    data_buffer.topic.ctr[0]=0;           \
-    data_buffer.topic.length_used = 0;    \
-    data_buffer.payload.ctr[0]=0;         \
-    data_buffer.payload.length_used = 0; 
+  inline void releaseLock() {
+    #ifdef ENABLE_DEVFEATURE_DATABUFFER_LOCK
+      #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+        Serial.printf(PSTR("DATA buffer released (%u)\r\n"), (unsigned)moduleLock);
+      #endif
+      moduleLock = 0;
+      delayedJSONCommandWaiting = 0;
+    #endif
+  }
+
+  bool IsDelayedJSONCommandWaiting() {
+    return delayedJSONCommandWaiting;
+  }
+
+  void ClearDeep() {
+    // memset(this, 0, sizeof(DATA_BUFFER)); // cant do this, its destroying itself
+    memset(&topic, 0, sizeof(TOPIC));
+    memset(&payload, 0, sizeof(PAYLOAD));
+    ClearSoft();
+  }
+
+  void ClearSoft() {
+    Serial.printf("DATA buffer ClearSoft <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\r\n");
+    topic.ctr[0] = 0;
+    topic.length_used = 0;
+    payload.ctr[0] = 0;
+    payload.length_used = 0;
+    isserviced = 0;
+  }
+
+};
+
+
+// Keep your existing global instance
+extern DATA_BUFFER data_buffer;
+
+
+// struct DATA_BUFFER{
+//   struct TOPIC{
+//     char ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
+//     uint16_t length_used = 0;
+//   }topic;
+//   struct PAYLOAD{
+//     char ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
+//     uint16_t length_used = 0;
+//   }payload;
+//   uint16_t isserviced = 0; // Set to 0 on new mqtt
+//   uint16_t moduleLock = 0;
+//   DATA_BUFFER_FLAGS flags;
+// };
+// extern struct DATA_BUFFER data_buffer;
+
+// #include <Arduino.h> // Include Arduino header for millis() and delay()
+
+// #define ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+
+// #ifdef ENABLE_DEVFEATURE_DATABUFFER_LOCK
+
+// //threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
+// inline bool requestDataBufferLock(uint16_t module)
+// {
+//   unsigned long now = millis();
+
+//   // This assumption here is another http thread must release itself to permit this function to proceed
+//   while (data_buffer.moduleLock && millis()-now < 1000) delay(1); // wait for a second for buffer lock
+
+//   if (millis()-now >= 1000) 
+//   {
+//     #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+//     Serial.printf(PSTR("ERROR: Locking data buffer failed! (%d)\n\r"),data_buffer.moduleLock);
+//     #endif
+//     return false; // waiting time-outed
+//   }
+
+//   data_buffer.moduleLock = module ? module : 255;
+
+//   #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+//   Serial.printf(PSTR("DATA buffer locked (%d)\n\r"), data_buffer.moduleLock);
+//   #endif
+
+//   return true;
+// }
+
+// inline void releaseDataBufferLock()
+// {
+//   #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+//   Serial.printf(PSTR("DATA buffer released (%d)\n\r"), data_buffer.moduleLock);
+//   #endif
+//   data_buffer.moduleLock = 0;
+// }
+
+// #else
+
+// //threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
+// inline bool requestDataBufferLock(uint16_t module){ return true; };
+// inline void releaseDataBufferLock(){};
+
+// #endif
+
+
+// /**
+//  * @brief Complete, slow
+//  **/
+// #define D_DATA_BUFFER_CLEAR()             \
+//     memset(&data_buffer,0,sizeof(data_buffer))
+// // data_buffer.ClearDeep()          
+// /**
+//  * @brief Minimal, fast
+//  **/
+// #define D_DATA_BUFFER_SOFT_CLEAR()             \
+//     data_buffer.topic.ctr[0]=0;           \
+//     data_buffer.topic.length_used = 0;    \
+//     data_buffer.payload.ctr[0]=0;         \
+//     data_buffer.payload.length_used = 0; 
 
 
 // Easy way to add to the counter

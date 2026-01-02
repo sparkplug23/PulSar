@@ -119,7 +119,7 @@ uint8_t mTankVolume::ConstructJSON_Litres(uint8_t json_level, bool json_appendin
 
 uint8_t mTankVolume::ConstructJSON_Furnace(uint8_t json_level, bool json_appending){
 
-//     D_DATA_BUFFER_CLEAR();
+//     data_buffer.ClearDeep();
 //     StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 //     JsonObject root = doc.to<JsonObject>();
 

@@ -433,34 +433,42 @@ void mMQTTManager::Load_New_Subscriptions_From_Function_Template()
 
   DEBUG_LINE_HERE
 
-  #ifdef USE_FUNCTION_TEMPLATE  
-  D_DATA_BUFFER_CLEAR();
-  memcpy_P(data_buffer.payload.ctr, FUNCTION_TEMPLATE, sizeof(FUNCTION_TEMPLATE));
-  data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
-  ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK  "Load_New_Subscriptions_From_Function_Template READ = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
-  #endif //USE_FUNCTION_TEMPLATE
+  // if(data_buffer.requestLock(GetModuleUniqueID())) {
+  //   ALOG_ERR(PSTR("Load_New_Subscriptions_From_Function_Template could not get data buffer lock"));
+  //   return;
+  // }
 
-  JsonParser parser(data_buffer.payload.ctr);
-  JsonParserObject obj = parser.getRootObject();   
-  JsonParserToken jtok = 0; 
+  // #ifdef USE_FUNCTION_TEMPLATE  
+  // data_buffer.ClearDeep();
+  // memcpy_P(data_buffer.payload.ctr, FUNCTION_TEMPLATE, sizeof(FUNCTION_TEMPLATE));
+  // data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
+  // ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK  "Load_New_Subscriptions_From_Function_Template READ = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
+  // #endif //USE_FUNCTION_TEMPLATE
 
-  if(jtok = obj["MQTTSubscribe"])
-  {
-    if(jtok.isArray())
-    {
+  // JsonParser parser(data_buffer.payload.ctr);
+  // JsonParserObject obj = parser.getRootObject();   
+  // JsonParserToken jtok = 0; 
 
-      JsonParserArray arrobj = jtok;
-      for(auto v : arrobj) 
-      {
-        const char* new_topic = v.getStr();
-        ALOG_DBM(PSTR("New Subscribe = \"%s\""), new_topic);
+  // if(jtok = obj["MQTTSubscribe"])
+  // {
+  //   if(jtok.isArray())
+  //   {
+
+  //     JsonParserArray arrobj = jtok;
+  //     for(auto v : arrobj) 
+  //     {
+  //       const char* new_topic = v.getStr();
+  //       ALOG_DBM(PSTR("New Subscribe = \"%s\""), new_topic);
         
 
-      }
+  //     }
 
-    }
+  //   }
 
-  }
+  // }
+
+  // data_buffer.releaseLock();
+
 }
 
 
