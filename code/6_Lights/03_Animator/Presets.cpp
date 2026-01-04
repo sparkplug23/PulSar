@@ -603,7 +603,7 @@ void mAnimatorLight::SubTask_Presets()
     apireq += F("&IN&"); // internal call
     apireq += httpwin;
     #ifdef ENABLE_DEVFEATURE_LIGHTING__SETTINGS
-    handleSet(nullptr, apireq, false); // may call applyPreset() via PL=
+    handle__HTTP__GET_QueryAPI(nullptr, apireq, false); // may call applyPreset() via PL=
     setValuesFromFirstSelectedSeg(); // fills legacy values
     #endif // ENABLE_DEVFEATURE_LIGHTING__SETTINGS
     changePreset = true;
@@ -658,7 +658,7 @@ void mAnimatorLight::SubTask_Demo()
 #endif
 
 
-//called from handleSet(PS=) [network callback (gDoc==nullptr), IR (irrational), deserializeState, UDP] and deserializeState() [network callback (filedoc!=nullptr)]
+//called from handle__HTTP__GET_QueryAPI(PS=) [network callback (gDoc==nullptr), IR (irrational), deserializeState, UDP] and deserializeState() [network callback (filedoc!=nullptr)]
 void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
 {
 

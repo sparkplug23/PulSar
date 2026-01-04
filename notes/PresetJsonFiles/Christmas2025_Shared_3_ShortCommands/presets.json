@@ -2,7 +2,7 @@
 {
   "0": {},
   "1": {
-    "n":"29cDEC Static Snowy02",
+    "n":"3Jan26a Static Snowy02",
     "Pal":"Snowy 02",
     "Effects": {
       "FX":"Static",
@@ -754,8 +754,24 @@
   [222,224
   ],"dur":
   [50,50
-  ],"repeat":0,"end":0,"r":1},"on":true,"n":"TBRotate NoGrp"}
+  ],"repeat":0,"end":0,"r":1},"on":true,"n":"TBRotate NoGrp"},
 
+
+  
+  "225": {
+    "n":"Soft Warm White 60%",
+    "Pal":"Warm White",
+    "Effects": {
+      "FX":"Static",
+      "IX":127,
+      "SX":255,
+      "GP":1,
+      "DC":0,
+      "Reverse":0,
+      "RA": 4000
+    },
+    "BrightnessRGB": 60
+  }
 
   
 }

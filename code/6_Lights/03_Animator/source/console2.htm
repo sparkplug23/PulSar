@@ -102,7 +102,7 @@
 ------------------------------ */
 function wsUrl(){
   const proto = (location.protocol === "https:") ? "wss://" : "ws://";
-  return proto + location.host + "/ws2";
+  return proto + location.host + "/ws/console";
 }
 
 let ws = null;

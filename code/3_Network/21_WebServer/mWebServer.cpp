@@ -10,16 +10,6 @@
 String messageHead, messageSub;
 byte optionType;
 
-// uint8_t webserver_state = HTTP_OFF;
-
-// void mWebServer::init(void){
-
-  
-//   #ifdef DEBUG_WEBSERVER_MEMORY
-//   freemem_usage_json_shared.name_ptr = freemem_usage_name_json_shared;
-//   #endif
-
-// }
 
 #ifdef ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
 
@@ -384,7 +374,41 @@ tkr_web->server->on("/console2", HTTP_GET, [this](AsyncWebServerRequest *request
   this->HandlePage_Console2(request);
 });
 
-#endif // ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
+#endif
+
+
+
+#ifdef ENABLE_DEVFEATURE_WEBSERVER__SETTINGS_WEBPAGES
+
+
+
+tkr_web->server->on("/settings2", HTTP_GET, [this](AsyncWebServerRequest *request){
+    this->SettingsPages_GET(request);
+  });
+
+tkr_web->server->on("/settings2", HTTP_POST, [this](AsyncWebServerRequest *request){
+    this->SettingsPages_POST(request);
+  });
+
+  tkr_web->server->on("/json2", HTTP_GET, [this](AsyncWebServerRequest *request){
+    this->serveJson(request);
+  });
+
+ static const char _common_js[] PROGMEM = "/common.js";
+  tkr_web->server->on(_common_js, HTTP_GET, [this](AsyncWebServerRequest *request){    
+    this->handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common, JS_common_length);
+  });
+
+#endif
+
+
+
+
+
+
+
+
+
   // tkr_web->server->on(D_WEB_HANDLE_CONSOLE "/page_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
   //   Web_Console_Draw(request);
   // });
@@ -534,10 +558,6 @@ void mWebServer::WebSend_Response(AsyncWebServerRequest *request, int code, uint
   // Work out memory needed relative to body we want to send?
   // Serial.println("HERE"); Serial.flush();
 
-  // char content_type[30]; // Should exist until send completes, might not as its async though
-  #ifdef DEBUG_WEBSERVER_MEMORY
-    FreeMem_Usage_Before(&freemem_usage_json_shared);
-  #endif
   // WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
  
   // Check if there is enough RAM space, or else respond with 
@@ -545,25 +565,8 @@ void mWebServer::WebSend_Response(AsyncWebServerRequest *request, int code, uint
   // Contine to send requested data 
   // request->send(code, contentType_id, content_ptr); 
 
-   #ifdef DEBUG_WEBSERVER_MEMORY
-    FreeMem_Usage_After(&freemem_usage_json_shared);
-  #endif 
 
 }
-
-
-// #ifdef DEBUG_WEBSERVER_MEMORY
-// void mWebServer::FreeMem_Usage_Before(freemem_usage_t* freemem){
-//   freemem->free_bytes = ESP.getFreeHeap();
-// }
-// void mWebServer::FreeMem_Usage_After(freemem_usage_t* freemem){
-//   freemem->bytes_used = freemem->free_bytes - ESP.getFreeHeap();
-//   AddLog(LOG_LEVEL_DEBUG_MORE,PSTR(D_LOG_ASYNC "Free \"%s\"=%d/%d %d space"), //used of previously free, additional space that remained free
-//     freemem->name_ptr,
-//     freemem->bytes_used,freemem->free_bytes,
-//     ESP.getFreeHeap());
-// }
-// #endif
 
 
 
@@ -1632,7 +1635,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
       websocket_lights = new AsyncWebSocket("/ws");
       #endif
       #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-      websocket_console = new AsyncWebSocket("/ws2");
+      websocket_console = new AsyncWebSocket("/ws/console");
       #endif
 
       #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
@@ -1707,7 +1710,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 // //       // }
 
 // // DEBUG_LINE_HERE;
-// //       // if(handleSet(request, request->url())) return;
+// //       // if(handle__HTTP__GET_QueryAPI(request, request->url())) return;
 // //       // #ifndef WLED_DISABLE_ALEXA
 // //       // if(espalexa.handleAlexaApiCall(request)) return;
 // //       // #endif

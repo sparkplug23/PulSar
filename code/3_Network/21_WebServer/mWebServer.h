@@ -7,14 +7,6 @@
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 
-#ifdef DEBUG_WEBSERVER_MEMORY
-typedef struct  FREEMEM_HANDLER{
-  uint16_t      bytes_used;
-  uint16_t      free_bytes;
-  const char*   name_ptr;
-}freemem_usage_t;
-#endif
-
 #include <Arduino.h>
 #include "2_CoreSystem/08_Logging/mLogging.h"
 
@@ -43,7 +35,7 @@ DEFINE_PGM_CTR(PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT) "application/jso
 const char PM_WEB_CONTENT_TYPE_TEXT_CSS[] PROGMEM = "text/css";
 
 // define flash strings once (saves flash memory)
-// static const char s_redirecting[] PROGMEM = "Redirecting...";
+static const char s_redirecting[] PROGMEM = "Redirecting...";
 static const char s_content_enc[] PROGMEM = "Content-Encoding";
 static const char s_unlock_ota [] PROGMEM = "Please unlock OTA in security settings!";
 static const char s_unlock_cfg [] PROGMEM = "Please unlock settings using PIN code!";
@@ -1290,6 +1282,7 @@ DEFINE_PGM_CTR(PM_BUTTON_NAME_CONSOLE_CTR) D_BUTTON_NAME_CONSOLE_CTR;
 #ifdef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
 
 #include "6_Lights/03_Animator/webpages_generated/html_settings.h"
+#include "6_Lights/03_Animator/webpages_generated/html_settings2.h"
 #include "6_Lights/03_Animator/webpages_generated/html_other.h"
 
 static const char HTTP_HEAD_START[] PROGMEM = "<!DOCTYPE html><html lang=\"en\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><title>{v}</title>";
@@ -1322,6 +1315,9 @@ const char HTTP_END3[] PROGMEM             = "</div></body></html>";
 #include "1_TaskerManager/mTaskerInterface.h"
 
 
+    #define ARDUINOJSON_DECODE_UNICODE 0
+    #include "3_Network/21_WebServer/AsyncJson-v6.h"
+    #include "3_Network/21_WebServer/ArduinoJson-v6.h"
 
 class mWebServer : 
 // public AsyncWebHandler, 
@@ -1430,6 +1426,43 @@ uint8_t wsConsole2LastIdx = 0;   // 0 = sync pending
 #endif
 
 
+#ifdef ENABLE_DEVFEATURE_WEBSERVER__SETTINGS_WEBPAGES
+
+
+
+
+void serveSettingsJS(AsyncWebServerRequest* request);
+void serveJson(AsyncWebServerRequest* request);
+
+static void extractPin(Print& settingsScript, JsonObject &obj, const char *key);
+void XML_response(Print& dest);
+static void fillUMPins(Print& settingsScript, JsonObject &mods);
+void appendGPIOinfo(Print& settingsScript);
+void getSettingsJS(byte subPage, Print& settingsScript);
+
+
+size_t printSetFormCheckbox(Print& settingsScript, const char* key, int val);
+size_t printSetFormValue(Print& settingsScript, const char* key, int val);
+size_t printSetFormIndex(Print& settingsScript, const char* key, int index);
+size_t printSetFormValue(Print& settingsScript, const char* key, const char* val);
+size_t printSetClassElementHTML(Print& settingsScript, const char* key, const int index, const char* val);
+size_t printSetFormInput(Print& settingsScript, const char* key, const char* selector, int value) ;
+
+    void SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage);
+
+
+
+/**
+ * @brief WebUI: Settings Pages (POST)
+void serveSettings(AsyncWebServerRequest* request, bool post = false);
+ */
+void SettingsPages_POST(AsyncWebServerRequest* request);
+void SettingsPages_GET(AsyncWebServerRequest* request);
+
+
+#endif
+
+
 
 void serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& headl, const String& subl, byte optionT);
 
@@ -1437,31 +1470,6 @@ void serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& h
 void handleStaticContent(AsyncWebServerRequest *request, const String &path, int code, const String &contentType, const uint8_t *content, size_t len, bool gzip = true, uint16_t eTagSuffix = 0);
 
 
-
-    // /***************
-    //  * 
-    //  * 
-    //  * CLEANED needed things START
-    //  * 
-    //  * *********/
-
-    // // PARAMETERS
-    // DNSServer *DnsServer;
-
-    // #ifdef ESP8266
-    //   AsyncWebServer *pWebServer;
-    // #endif
-    // #ifdef ESP32
-    // // WebServer *pWebServer;
-    //   AsyncWebServer *pWebServer;
-    // #endif
-    
-    // #ifdef DEBUG_WEBSERVER_MEMORY
-    // void FreeMem_Usage_Before(freemem_usage_t* memory_location);
-    // void FreeMem_Usage_After(freemem_usage_t* memory_location);
-    // const char*     freemem_usage_name_json_shared = "json_shared";
-    // freemem_usage_t freemem_usage_json_shared;
-    // #endif // DEBUG_WEBSERVER_MEMORY
     bool reset_web_log_flag = false;                  // Reset web console log
     uint8_t fConsole_active = false;
     // Date Modified: 01Jan26
@@ -1702,22 +1710,7 @@ void webHandleReboot(AsyncWebServerRequest* request);
 // void WebAppend_Root_Draw_Controls();
 
     
-// // For debugging only
-// // struct FREEMEM_USAGE{
-// //   uint16_t WebSend_JSON_WebServer_TopBar;
-// //   uint16_t WebSend_SendRuntimeURLs;
-// //   uint16_t Handle_Style_WebMinimalRoot;
-// // }freemem_usage;
 
-
-// #ifdef DEBUG_WEBSERVER_MEMORY
-
-  
-
-
-
-  
-// #endif
 
 // 
 

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <title>PulSar WiFi Settings CDATA LIGHTS2</title>
+
+  <!-- Keep WLED dependencies as-is for now, but with "2" suffix to isolate this stack -->
+  <script src="common.js" async type="text/javascript"></script>
+
+  <script>
+    // Date Modified: 02Jan26
+
+    var scanLoops = 0, preScanSSID = "";
+    var maxNetworks = 3;
+
+    function N() {
+      const button = gId("scan");
+      button.disabled = true;
+      button.textContent = "Scanning...";
+
+      // NOTE: WLED expects {"networks":[...]} under /json/net
+      // For settings2 isolation, we use /json2/net2.
+      fetch(getURL("/json2/net2")).then((response) => {
+        return response.json();
+      }).then((json) => {
+        return Object.assign({}, {"networks": []}, json).networks.sort(
+          (a, b) => b.rssi - a.rssi
+        ).reduce(
+          (unique, other) => {
+            if(!unique.some(obj => obj.ssid === other.ssid)) unique.push(other);
+            return unique;
+          }, []
+        );
+      }).then((networks) => {
+        if (networks.length === 0 && scanLoops < 10) {
+          scanLoops++;
+          setTimeout(N, 1000);
+          return;
+        }
+        scanLoops = 0;
+
+        if (networks.length > 0) {
+          let cs = d.querySelectorAll("#wifi_entries input[type=text]");
+          for (let input of (cs||[])) {
+            let found = false;
+            let select = cE("select");
+            select.id = input.id;
+            select.name = input.name;
+            select.setAttribute("onchange", "T(this)");
+            preScanSSID = input.value;
+
+            for (let i = select.children.length; i > 0; i--) {
+              select.removeChild(select.children[i-1]);
+            }
+
+            for (let i = 0; i < networks.length; i++) {
+              const option = cE("option");
+              option.setAttribute("value", networks[i].ssid);
+              option.textContent = `${networks[i].ssid} (${networks[i].rssi} dBm)`;
+              if (networks[i].ssid === input.value) {
+                option.setAttribute("selected", "selected");
+                found = true;
+              }
+              select.appendChild(option);
+            }
+
+            const option = cE("option");
+            option.setAttribute("value", "!Cs");
+            option.textContent = "Other network.";
+            select.appendChild(option);
+
+            if (input.value === "" || input.value === "Your_Network" || found) input.replaceWith(select);
+            else select.remove();
+          }
+        }
+
+        button.disabled = false;
+        button.textContent = "Scan";
+      });
+    }
+
+    function T(cs) {
+      if (!cs || cs.value != "!Cs") return;
+      let input = cE("input");
+      input.type = "text";
+      input.id = cs.id;
+      input.name = cs.name;
+      input.setAttribute("maxlength",32);
+      input.value = preScanSSID;
+      cs.replaceWith(input);
+    }
+
+    function resetWiFi(maxN = undefined) {
+      if (maxN) maxNetworks = maxN;
+      let entries = gId("wifi_entries").children
+      for (let i = entries.length; i > 0; i--) entries[i-1].remove();
+      btnWiFi(0);
+    }
+
+    function btnWiFi(i) {
+      gId("wifi_add").style.display = (i<maxNetworks) ? "inline":"none";
+      gId("wifi_rem").style.display = (i>1) ? "inline":"none";
+    }
+
+    function addWiFi(ssid="",pass="",ip=0,gw=0,sn=0x00ffffff) { // little endian
+      var i = gId("wifi_entries").childNodes.length;
+      if (i >= maxNetworks) return;
+
+      var b = `<div id="net${i}"><hr class="sml">
+Network name (SSID${i==0?", empty to not connect":""}):<br><input type="text" id="CS${i}" name="CS${i}" maxlength="32" value="${ssid}" ${i>0?"required":""}><br>
+Network password:<br><input type="password" name="PW${i}" maxlength="64" value="${pass}"><br>
+Static IP (leave at 0.0.0.0 for DHCP)${i==0?"<br>Also used by Ethernet":""}:<br>
+<input name="IP${i}0" type="number" class="s" min="0" max="255" value="${ip&0xFF}" required>.<input name="IP${i}1" type="number" class="s" min="0" max="255" value="${(ip>>8)&0xFF}" required>.<input name="IP${i}2" type="number" class="s" min="0" max="255" value="${(ip>>16)&0xFF}" required>.<input name="IP${i}3" type="number" class="s" min="0" max="255" value="${(ip>>24)&0xFF}" required><br>
+Static gateway:<br>
+<input name="GW${i}0" type="number" class="s" min="0" max="255" value="${gw&0xFF}" required>.<input name="GW${i}1" type="number" class="s" min="0" max="255" value="${(gw>>8)&0xFF}" required>.<input name="GW${i}2" type="number" class="s" min="0" max="255" value="${(gw>>16)&0xFF}" required>.<input name="GW${i}3" type="number" class="s" min="0" max="255" value="${(gw>>24)&0xFF}" required><br>
+Static subnet mask:<br>
+<input name="SN${i}0" type="number" class="s" min="0" max="255" value="${sn&0xFF}" required>.<input name="SN${i}1" type="number" class="s" min="0" max="255" value="${(sn>>8)&0xFF}" required>.<input name="SN${i}2" type="number" class="s" min="0" max="255" value="${(sn>>16)&0xFF}" required>.<input name="SN${i}3" type="number" class="s" min="0" max="255" value="${(sn>>24)&0xFF}" required></div>`;
+      gId("wifi_entries").insertAdjacentHTML("beforeend", b);
+      btnWiFi(i+1);
+    }
+
+    function remWiFi() {
+      const entries = gId("wifi_entries").children;
+      const i = entries.length;
+      if (i < 2) return;
+      entries[i-1].remove();
+      btnWiFi(i-1);
+    }
+
+    function S() {
+      getLoc();
+
+      // WLED pattern: load settings JS synchronously so it can call resetWiFi()/addWiFi()
+      loadJS(getURL("/settings2/s2.js?p=1"), false);
+
+      // Post target for the WiFi subpage in the isolated settings2 stack
+      if (loc) d.Sf.action = getURL("/settings2/wifi");
+    }
+  </script>
+
+  <style>@import url("style2.css");</style>
+</head>
+
+<body onload="S()">
+  <form id="form_s" name="Sf" method="post">
+    <div class="toprow">
+      <div class="helpB"><button type="button" onclick="H('features/settings2/#wifi-settings')">?</button></div>
+      <button type="button" onclick="B2()">Back</button><button type="submit">Save & Connect</button><hr>
+    </div>
+
+    <h2>WiFi setup</h2>
+    <h3>Connect to existing network</h3>
+    <button type="button" id="scan" onclick="N()">Scan</button><br>
+
+    <div id="wifi">
+      Wireless networks
+      <div id="wifi_entries"></div>
+      <hr class="sml">
+      <button type="button" id="wifi_add" onclick="addWiFi()">+</button>
+      <button type="button" id="wifi_rem" onclick="remWiFi()">-</button><br>
+    </div>
+
+    DNS server address:<br>
+    <input name="D0" type="number" class="s" min="0" max="255" required>.<input name="D1" type="number" class="s" min="0" max="255" required>.<input name="D2" type="number" class="s" min="0" max="255" required>.<input name="D3" type="number" class="s" min="0" max="255" required><br><br>
+
+    mDNS address (leave empty for no mDNS):<br>
+    http:// <input type="text" name="CM" maxlength="32"> .local<br>
+    Client IP: <span class="sip"> Not connected </span> <br>
+
+    <h3>Configure Access Point</h3>
+    AP SSID (leave empty for no AP):<br> <input type="text" name="AS" maxlength="32"><br>
+    Hide AP name: <input type="checkbox" name="AH"><br>
+    AP password (leave empty for open):<br>
+    <input type="password" name="AP" maxlength="63" pattern="(.{1,63})|()" title="Empty or min. 8 characters"><br>
+    Access Point WiFi channel: <input name="AC" type="number" class="xs" min="1" max="8" required><br>
+    AP opens:
+    <select name="AB">
+      <option value="0">No connection after boot</option>
+      <option value="1">Disconnected</option>
+      <option value="2">Always</option>
+      <option value="3">Never (not recommended)</option>
+      <option value="4">Temporary (no connection after boot)</option>
+    </select><br>
+    AP IP: <span class="sip"> Not active </span><br>
+
+    <h3>Experimental</h3>
+    Force 802.11g mode (ESP8266 only): <input type="checkbox" name="FG"><br>
+    Disable WiFi sleep: <input type="checkbox" name="WS"><br>
+    <i>Can help with connectivity issues and Audioreactive sync.<br>
+    Disabling WiFi sleep increases power consumption.</i><br>
+
+    <div id="tx">TX power: <select name="TX">
+      <option value="78">19.5 dBm</option>
+      <option value="76">19 dBm</option>
+      <option value="74">18.5 dBm</option>
+      <option value="68">17 dBm</option>
+      <option value="60">15 dBm</option>
+      <option value="52">13 dBm</option>
+      <option value="44">11 dBm</option>
+      <option value="34">8.5 dBm</option>
+      <option value="28">7 dBm</option>
+      <option value="20">5 dBm</option>
+      <option value="8">2 dBm</option>
+      <option value="0">DELETE ME</option>
+    </select><br>
+      <i class="warn">WARNING: Modifying TX power may render device unreachable.</i>
+    </div>
+
+    <hr>
+    <button type="button" onclick="B2()">Back</button><button type="submit">Save & Connect</button>
+  </form>
+</body>
+</html>

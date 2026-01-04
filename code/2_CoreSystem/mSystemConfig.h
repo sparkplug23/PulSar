@@ -162,8 +162,6 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define ENABLE_LOG_LEVEL_DYNAMIC_LEVELS
 
 #define DEBUG_WEBSERVER_LIB  //used in improving core lib
-// #define DEBUG_WEBSERVER_MEMORY
-
 
 // // Muted blue/green
 // #define COLOR_BUTTON_HIGHLIGHT      "#1be7f1"

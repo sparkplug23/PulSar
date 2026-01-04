@@ -1,4 +1,4 @@
-#include "_AnimatorLight.h"
+#include "mWebServer.h"
 
 /**
  * @brief 
@@ -86,7 +86,7 @@ Summary
  */
 
 //called upon POST settings form submit
-void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage)
+void mWebServer::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage)
 {
 
   if (subPage == SUBPAGE_PINREQ)
@@ -98,21 +98,151 @@ void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, by
   }
 
   //0: menu 1: wifi 2: leds 3: ui 4: sync 5: time 6: sec 7: DMX 8: usermods 9: N/A 10: 2D
-  if (subPage < 1 || subPage > 10 || !correctPIN) return;
+  // if (subPage < 1 || subPage > 10 || !correctPIN) return;
 
   //WIFI SETTINGS
   if (subPage == SUBPAGE_WIFI)
   {
+  #define WLED_MAX_WIFI_COUNT 3
+    
     #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_WIFI
-    unsigned cnt = 0;
+  // -----------------------------------------------------------------------------
+// WIFI SETTINGS (DUMMY PARSE) : Log incoming POST args only, do not apply/save
+// Date Modified: 02Jan26
+// -----------------------------------------------------------------------------
+{
+  ALOG_INF(PSTR("---- WIFI SETTINGS (dummy parse) ----"));
+
+  // Helper for presence/checkbox-type fields (WLED checkboxes are typically presence-based)
+  ALOG_INF(PSTR("hasArg(FG) Force 802.11g (ESP8266)    = %d"), request->hasArg(F("FG")) ? 1 : 0);
+  ALOG_INF(PSTR("hasArg(WS) Disable WiFi sleep         = %d"), request->hasArg(F("WS")) ? 1 : 0);
+  ALOG_INF(PSTR("hasArg(AH) Hide AP name               = %d"), request->hasArg(F("AH")) ? 1 : 0);
+
+  // DNS
+  if (request->hasArg(F("D0")) && request->hasArg(F("D1")) && request->hasArg(F("D2")) && request->hasArg(F("D3"))) {
+    ALOG_INF(PSTR("DNS | D0.D1.D2.D3 = %d.%d.%d.%d"),
+      request->arg(F("D0")).toInt(),
+      request->arg(F("D1")).toInt(),
+      request->arg(F("D2")).toInt(),
+      request->arg(F("D3")).toInt()
+    );
+  } else {
+    ALOG_INF(PSTR("DNS | D0..D3 not fully present"));
+  }
+
+  // mDNS
+  if (request->hasArg(F("CM"))) {
+    ALOG_INF(PSTR("cmDNS | CM = %s"), request->arg(F("CM")).c_str());
+  } else {
+    ALOG_INF(PSTR("cmDNS | CM not present"));
+  }
+
+  // AP behaviour + settings
+  if (request->hasArg(F("AB"))) {
+    ALOG_INF(PSTR("AP Behaviour | AB = %d"), request->arg(F("AB")).toInt());
+  } else {
+    ALOG_INF(PSTR("AP Behaviour | AB not present"));
+  }
+
+  if (request->hasArg(F("AS"))) {
+    ALOG_INF(PSTR("AP SSID | AS = %s"), request->arg(F("AS")).c_str());
+  } else {
+    ALOG_INF(PSTR("AP SSID | AS not present"));
+  }
+
+  if (request->hasArg(F("AP"))) {
+    // IMPORTANT: do not print passwords in production; for dummy wiring test only.
+    // If you want safe logging, log length or asterisks instead.
+    ALOG_INF(PSTR("AP Pass | AP = %s"), request->arg(F("AP")).c_str());
+  } else {
+    ALOG_INF(PSTR("AP Pass | AP not present"));
+  }
+
+  if (request->hasArg(F("AC"))) {
+    ALOG_INF(PSTR("AP Channel | AC = %d"), request->arg(F("AC")).toInt());
+  } else {
+    ALOG_INF(PSTR("AP Channel | AC not present"));
+  }
+
+  // TX power (ESP32)
+  if (request->hasArg(F("TX"))) {
+    ALOG_INF(PSTR("TX Power | TX = %d"), request->arg(F("TX")).toInt());
+  } else {
+    ALOG_INF(PSTR("TX Power | TX not present"));
+  }
+
+  // -----------------------------------------------------------------------------
+  // Single-network (SSID/pass + static IPv4) logging only.
+  // Your page still uses CS0/PW0 and IP0{0..3}, GW0{0..3}, SN0{0..3}.
+  // -----------------------------------------------------------------------------
+  if (request->hasArg(F("CS0"))) ALOG_INF(PSTR("Client SSID | CS0 = %s"), request->arg(F("CS0")).c_str());
+  else                          ALOG_INF(PSTR("Client SSID | CS0 not present"));
+
+  if (request->hasArg(F("PW0"))) {
+    // IMPORTANT: do not print passwords in production; for dummy wiring test only.
+    ALOG_INF(PSTR("Client Pass | PW0 = %s"), request->arg(F("PW0")).c_str());
+  } else {
+    ALOG_INF(PSTR("Client Pass | PW0 not present"));
+  }
+
+  // Static IP fields (little-endian in your JS builder, but POST fields are explicit octets)
+  auto logIPv4 = [&](const __FlashStringHelper* label, const char* baseName) {
+    char k0[8]; char k1[8]; char k2[8]; char k3[8];
+    // baseName is like "IP00" "GW00" "SN00" but we construct "IP00".."IP03"
+    // Here we expect baseName with last char being the octet index placeholder.
+    // We will overwrite last char with '0'..'3'.
+    strlcpy(k0, baseName, sizeof(k0));
+    strlcpy(k1, baseName, sizeof(k1));
+    strlcpy(k2, baseName, sizeof(k2));
+    strlcpy(k3, baseName, sizeof(k3));
+    k0[strlen(k0)-1] = '0';
+    k1[strlen(k1)-1] = '1';
+    k2[strlen(k2)-1] = '2';
+    k3[strlen(k3)-1] = '3';
+
+    if (request->hasArg(k0) && request->hasArg(k1) && request->hasArg(k2) && request->hasArg(k3)) {
+      ALOG_INF(PSTR("%S | %s.%s.%s.%s = %d.%d.%d.%d"),
+        label,
+        k0, k1, k2, k3,
+        request->arg(k0).toInt(),
+        request->arg(k1).toInt(),
+        request->arg(k2).toInt(),
+        request->arg(k3).toInt()
+      );
+    } else {
+      ALOG_INF(PSTR("%S | missing one or more octets (%s*)"), label, baseName);
+    }
+  };
+
+  // Expecting IP00..IP03, GW00..GW03, SN00..SN03 from your HTML
+  logIPv4(F("Static IP"),      "IP00");
+  logIPv4(F("Static Gateway"), "GW00");
+  logIPv4(F("Static Subnet"),  "SN00");
+
+  // Optional: dump all args (useful once, then delete)
+  ALOG_INF(PSTR("Args count = %u"), (unsigned)request->args());
+  for (size_t i = 0; i < request->args(); i++) {
+    ALOG_INF(PSTR("ARG[%u] %s = %s"),
+      (unsigned)i,
+      request->argName(i).c_str(),
+      request->arg(i).c_str()
+    );
+  }
+
+  ALOG_INF(PSTR("---- WIFI SETTINGS (dummy parse) end ----"));
+}
+
+
+    // unsigned cnt = 0;
     // for (size_t n = 0; n < WLED_MAX_WIFI_COUNT; n++) {
     //   char cs[4] = "CS"; cs[2] = 48+n; cs[3] = 0; //client SSID
     //   char pw[4] = "PW"; pw[2] = 48+n; pw[3] = 0; //client password
+    //   char bs[4] = "BS"; bs[2] = 48+n; bs[3] = 0; //BSSID
     //   char ip[5] = "IP"; ip[2] = 48+n; ip[4] = 0; //IP address
     //   char gw[5] = "GW"; gw[2] = 48+n; gw[4] = 0; //GW address
     //   char sn[5] = "SN"; sn[2] = 48+n; sn[4] = 0; //subnet mask
     //   if (request->hasArg(cs)) {
-    //     if (n >= multiWiFi.size()) multiWiFi.push_back(WiFiConfig()); // expand vector by one
+    //     if (n >= multiWiFi.size()) multiWiFi.emplace_back(); // expand vector by one
     //     char oldSSID[33]; strcpy(oldSSID, multiWiFi[n].clientSSID);
     //     char oldPass[65]; strcpy(oldPass, multiWiFi[n].clientPass);
 
@@ -124,6 +254,7 @@ void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, by
     //       strlcpy(multiWiFi[n].clientPass, request->arg(pw).c_str(), 65);
     //       forceReconnect = true;
     //     }
+    //     fillStr2MAC(multiWiFi[n].bssid, request->arg(bs).c_str());
     //     for (size_t i = 0; i < 4; i++) {
     //       ip[3] = 48+i;
     //       gw[3] = 48+i;
@@ -170,19 +301,10 @@ void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, by
     // force802_3g = request->hasArg(F("FG"));
     // noWifiSleep = request->hasArg(F("WS"));
 
-    // #ifndef WLED_DISABLE_ESPNOW
-    // bool oldESPNow = enableESPNow;
-    // enableESPNow = request->hasArg(F("RE"));
-    // if (oldESPNow != enableESPNow) forceReconnect = true;
-    // strlcpy(linked_remote, request->arg(F("RMAC")).c_str(), 13);
-    // strlwr(linked_remote);  //Normalize MAC format to lowercase
-    // #endif
-
-    // #ifdef WLED_USE_ETHERNET
-    // ethernetType = request->arg(F("ETH")).toInt();
-    // WLED::instance().initEthernet();
-    // #endif
-
+    #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_ETHERNET)
+    ethernetType = request->arg(F("ETH")).toInt();
+    initEthernet();
+    #endif
     #endif // ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_WIFI
   }
 
@@ -894,10 +1016,10 @@ void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, by
   }
   #endif
 
-  lastEditTime = millis();
+  tkr_anim->lastEditTime = millis();
   // do not save if factory reset or LED settings (which are saved after LED re-init)
-  doSerializeConfig = subPage != SUBPAGE_LEDS && !(subPage == SUBPAGE_SEC && doReboot);
-  if (subPage == SUBPAGE_UM) doReboot = request->hasArg(F("RBT")); // prevent race condition on dual core system (set reboot here, after doSerializeConfig has been set)
+  tkr_anim->doSerializeConfig = subPage != SUBPAGE_LEDS && !(subPage == SUBPAGE_SEC && tkr_anim->doReboot);
+  if (subPage == SUBPAGE_UM) tkr_anim->doReboot = request->hasArg(F("RBT")); // prevent race condition on dual core system (set reboot here, after doSerializeConfig has been set)
   #ifndef WLED_DISABLE_ALEXA
   #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_SYNC
   if (subPage == SUBPAGE_SYNC) alexaInit();
@@ -906,406 +1028,6 @@ void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, by
 }
 
 
-//HTTP API request parser
-bool mAnimatorLight::handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, const String& req, bool apply)
-{
-
-  ALOG_ERR(PSTR("LEGACY: we will removed!"));
-
-
-  if (!(req.indexOf("win") >= 0)) return false;
-
-  int pos = 0;
-  DEBUG_PRINTF_P(PSTR("API req: %s\n"), req.c_str());
-
-  //segment select (sets main segment)
-  pos = req.indexOf(F("SM="));
-  if (pos > 0 && !realtimeMode) {
-    setMainSegmentId(getNumVal(&req, pos));
-  }
-
-  byte selectedSeg = getFirstSelectedSegId();
-
-  bool singleSegment = false;
-
-  pos = req.indexOf(F("SS="));
-  if (pos > 0) {
-    unsigned t = getNumVal(&req, pos);
-    if (t < getSegmentsNum()) {
-      selectedSeg = t;
-      singleSegment = true;
-    }
-  }
-
-  Segment& selseg = getSegment(selectedSeg);
-  pos = req.indexOf(F("SV=")); //segment selected
-  if (pos > 0) {
-    unsigned t = getNumVal(&req, pos);
-    if (t == 2) for (unsigned i = 0; i < getSegmentsNum(); i++) getSegment(i).selected = false; // unselect other segments
-    selseg.selected = t;
-  }
-
-  // temporary values, write directly to segments, globals are updated by setValuesFromFirstSelectedSeg()
-  uint32_t col0    = selseg.segcol[0].getU32();
-  uint32_t col1    = selseg.segcol[1].getU32();
-  uint32_t col2    = selseg.segcol[2].getU32();
-  byte colIn[4]    = {R(col0), G(col0), B(col0), W(col0)};
-  byte colInSec[4] = {R(col1), G(col1), B(col1), W(col1)};
-  byte effectIn    = selseg.effect_id;
-  byte speedIn     = selseg.speed;
-  byte intensityIn = selseg.intensity;
-  byte paletteIn   = selseg.palette_id;
-  byte custom1In   = selseg.custom1;
-  byte custom2In   = selseg.custom2;
-  byte custom3In   = selseg.custom3;
-  byte check1In    = selseg.check1;
-  byte check2In    = selseg.check2;
-  byte check3In    = selseg.check3;
-  uint16_t startI  = selseg.start;
-  uint16_t stopI   = selseg.stop;
-  uint16_t startY  = selseg.startY;
-  uint16_t stopY   = selseg.stopY;
-  uint8_t  grpI    = selseg.grouping;
-  uint16_t spcI    = selseg.spacing;
-  pos = req.indexOf(F("&S=")); //segment start
-  if (pos > 0) {
-    startI = std::abs(getNumVal(&req, pos));
-  }
-  pos = req.indexOf(F("S2=")); //segment stop
-  if (pos > 0) {
-    stopI = std::abs(getNumVal(&req, pos));
-  }
-  pos = req.indexOf(F("GP=")); //segment grouping
-  if (pos > 0) {
-    grpI = std::max(1,getNumVal(&req, pos));
-  }
-  pos = req.indexOf(F("SP=")); //segment spacing
-  if (pos > 0) {
-    spcI = std::max(0,getNumVal(&req, pos));
-  }
-  // suspend(); // must suspend strip operations before changing geometry
-  // selseg.setGeometry(startI, stopI, grpI, spcI, UINT16_MAX, startY, stopY, selseg.map1D2D);
-  // resume();
-
-  pos = req.indexOf(F("RV=")); //Segment reverse
-  if (pos > 0) selseg.reverse = req.charAt(pos+3) != '0';
-
-  pos = req.indexOf(F("MI=")); //Segment mirror
-  if (pos > 0) selseg.mirror = req.charAt(pos+3) != '0';
-
-  pos = req.indexOf(F("SB=")); //Segment brightness/opacity
-  if (pos > 0) {
-    byte segbri = getNumVal(&req, pos);
-    selseg.setOption(SEG_OPTION_ON, segbri); // use transition
-    if (segbri) {
-      // selseg.setOpacity(segbri);
-    }
-  }
-
-  pos = req.indexOf(F("SW=")); //segment power
-  if (pos > 0) {
-    switch (getNumVal(&req, pos)) {
-      case 0:  selseg.setOption(SEG_OPTION_ON, false);      break; // use transition
-      case 1:  selseg.setOption(SEG_OPTION_ON, true);       break; // use transition
-      default: selseg.setOption(SEG_OPTION_ON, !selseg.on); break; // use transition
-    }
-  }
-
-  pos = req.indexOf(F("PS=")); //saves current in preset
-  if (pos > 0) savePreset(getNumVal(&req, pos));
-
-  pos = req.indexOf(F("P1=")); //sets first preset for cycle
-  if (pos > 0) presetCycMin = getNumVal(&req, pos);
-
-  pos = req.indexOf(F("P2=")); //sets last preset for cycle
-  if (pos > 0) presetCycMax = getNumVal(&req, pos);
-
-  //apply preset
-  if (updateVal(req.c_str(), "PL=", &presetCycCurr, presetCycMin, presetCycMax)) {
-    applyPreset(presetCycCurr);
-  }
-
-  pos = req.indexOf(F("NP")); //advances to next preset in a playlist
-  if (pos > 0) doAdvancePlaylist = true;
-  
-  //set brightness
-  updateVal(req.c_str(), "&A=", &tkr_iLight->_briRGB_Global);
-
-  bool col0Changed = false, col1Changed = false, col2Changed = false;
-  //set colors
-  col0Changed |= updateVal(req.c_str(), "&R=", &colIn[0]);
-  col0Changed |= updateVal(req.c_str(), "&G=", &colIn[1]);
-  col0Changed |= updateVal(req.c_str(), "&B=", &colIn[2]);
-  col0Changed |= updateVal(req.c_str(), "&W=", &colIn[3]);
-
-  col1Changed |= updateVal(req.c_str(), "R2=", &colInSec[0]);
-  col1Changed |= updateVal(req.c_str(), "G2=", &colInSec[1]);
-  col1Changed |= updateVal(req.c_str(), "B2=", &colInSec[2]);
-  col1Changed |= updateVal(req.c_str(), "W2=", &colInSec[3]);
-
-  #ifdef WLED_ENABLE_LOXONE
-  //lox parser
-  pos = req.indexOf(F("LX=")); // Lox primary color
-  if (pos > 0) {
-    int lxValue = getNumVal(&req, pos);
-    if (parseLx(lxValue, colIn)) {
-      bri = 255;
-      nightlightActive = false; //always disable nightlight when toggling
-      col0Changed = true;
-    }
-  }
-  pos = req.indexOf(F("LY=")); // Lox secondary color
-  if (pos > 0) {
-    int lxValue = getNumVal(&req, pos);
-    if(parseLx(lxValue, colInSec)) {
-      bri = 255;
-      nightlightActive = false; //always disable nightlight when toggling
-      col1Changed = true;
-    }
-  }
-  #endif
-
-  //set hue
-  pos = req.indexOf(F("HU="));
-  if (pos > 0) {
-    uint16_t temphue = getNumVal(&req, pos);
-    byte tempsat = 255;
-    pos = req.indexOf(F("SA="));
-    if (pos > 0) {
-      tempsat = getNumVal(&req, pos);
-    }
-    byte sec = req.indexOf(F("H2"));
-    // colorHStoRGB(temphue, tempsat, (sec>0) ? colInSec : colIn);
-    col0Changed |= (!sec); col1Changed |= sec;
-  }
-
-  //set white spectrum (kelvin)
-  pos = req.indexOf(F("&K="));
-  if (pos > 0) {
-    byte sec = req.indexOf(F("K2"));
-    colorKtoRGB(getNumVal(&req, pos), (sec>0) ? colInSec : colIn);
-    col0Changed |= (!sec); col1Changed |= sec;
-  }
-
-  //set color from HEX or 32bit DEC
-  pos = req.indexOf(F("CL="));
-  if (pos > 0) {
-    // colorFromDecOrHexString(colIn, (char*)req.substring(pos + 3).c_str());
-    col0Changed = true;
-  }
-  pos = req.indexOf(F("C2="));
-  if (pos > 0) {
-    // colorFromDecOrHexString(colInSec, (char*)req.substring(pos + 3).c_str());
-    col1Changed = true;
-  }
-  pos = req.indexOf(F("C3="));
-  if (pos > 0) {
-    byte tmpCol[4];
-    // colorFromDecOrHexString(tmpCol, (char*)req.substring(pos + 3).c_str());
-    col2 = RGBW32(tmpCol[0], tmpCol[1], tmpCol[2], tmpCol[3]);
-    selseg.setColor(2, col2); // defined above (SS= or main)
-    col2Changed = true;
-  }
-
-  //set to random hue SR=0->1st SR=1->2nd
-  pos = req.indexOf(F("SR"));
-  if (pos > 0) {
-    byte sec = getNumVal(&req, pos);
-    // setRandomColor(sec? colInSec : colIn);
-    col0Changed |= (!sec); col1Changed |= sec;
-  }
-
-  // apply colors to selected segment, and all selected segments if applicable
-  if (col0Changed) {
-    col0 = RGBW32(colIn[0], colIn[1], colIn[2], colIn[3]);
-    selseg.setColor(0, col0);
-  }
-
-  if (col1Changed) {
-    col1 = RGBW32(colInSec[0], colInSec[1], colInSec[2], colInSec[3]);
-    selseg.setColor(1, col1);
-  }
-
-  //swap 2nd & 1st
-  pos = req.indexOf(F("SC"));
-  if (pos > 0) {
-    std::swap(col0,col1);
-    col0Changed = col1Changed = true;
-  }
-
-  bool fxModeChanged = false, speedChanged = false, intensityChanged = false, paletteChanged = false;
-  bool custom1Changed = false, custom2Changed = false, custom3Changed = false, check1Changed = false, check2Changed = false, check3Changed = false;
-  // set effect parameters
-  if (updateVal(req.c_str(), "FX=", &effectIn, 0, getModeCount()-1)) {
-    if (request != nullptr) unloadPlaylist(); // unload playlist if changing FX using web request
-    fxModeChanged = true;
-  }
-  speedChanged     = updateVal(req.c_str(), "SX=", &speedIn);
-  intensityChanged = updateVal(req.c_str(), "IX=", &intensityIn);
-  paletteChanged   = updateVal(req.c_str(), "FP=", &paletteIn, 0, getPaletteCount()-1);
-  custom1Changed   = updateVal(req.c_str(), "X1=", &custom1In);
-  custom2Changed   = updateVal(req.c_str(), "X2=", &custom2In);
-  custom3Changed   = updateVal(req.c_str(), "X3=", &custom3In);
-  check1Changed    = updateVal(req.c_str(), "M1=", &check1In);
-  check2Changed    = updateVal(req.c_str(), "M2=", &check2In);
-  check3Changed    = updateVal(req.c_str(), "M3=", &check3In);
-
-  stateChanged |= (fxModeChanged || speedChanged || intensityChanged || paletteChanged || custom1Changed || custom2Changed || custom3Changed || check1Changed || check2Changed || check3Changed);
-
-  // apply to main and all selected segments to prevent #1618.
-  for (unsigned i = 0; i < getSegmentsNum(); i++) {
-    Segment& seg = getSegment(i);
-    if (i != selectedSeg && (singleSegment || !seg.isActive() || !seg.isSelected())) continue; // skip non main segments if not applying to all
-    if (fxModeChanged)    seg.setEffect(effectIn, req.indexOf(F("FXD="))>0);  // apply defaults if FXD= is specified
-    if (speedChanged)     seg.speed     = speedIn;
-    if (intensityChanged) seg.intensity = intensityIn;
-    if (paletteChanged)   seg.setPalette(paletteIn);
-    if (col0Changed)      seg.setColor(0, col0);
-    if (col1Changed)      seg.setColor(1, col1);
-    if (col2Changed)      seg.setColor(2, col2);
-    if (custom1Changed)   seg.custom1   = custom1In;
-    if (custom2Changed)   seg.custom2   = custom2In;
-    if (custom3Changed)   seg.custom3   = custom3In;
-    if (check1Changed)    seg.check1    = (bool)check1In;
-    if (check2Changed)    seg.check2    = (bool)check2In;
-    if (check3Changed)    seg.check3    = (bool)check3In;
-  }
-
-  //set advanced overlay
-  pos = req.indexOf(F("OL="));
-  if (pos > 0) {
-    overlayCurrent = getNumVal(&req, pos);
-  }
-
-  //apply macro (deprecated, added for compatibility with pre-0.11 automations)
-  pos = req.indexOf(F("&M="));
-  if (pos > 0) {
-    applyPreset(getNumVal(&req, pos) + 16);
-  }
-
-  //toggle send UDP direct notifications
-  pos = req.indexOf(F("SN="));
-  if (pos > 0) notifyDirect = (req.charAt(pos+3) != '0');
-
-  //toggle receive UDP direct notifications
-  pos = req.indexOf(F("RN="));
-  if (pos > 0) receiveGroups = (req.charAt(pos+3) != '0') ? receiveGroups | 1 : receiveGroups & 0xFE;
-
-  //receive live data via UDP/Hyperion
-  pos = req.indexOf(F("RD="));
-  if (pos > 0) receiveDirect = (req.charAt(pos+3) != '0');
-
-  //main toggle on/off (parse before nightlight, #1214)
-  pos = req.indexOf(F("&T="));
-  if (pos > 0) {
-    nightlightActive = false; //always disable nightlight when toggling
-    switch (getNumVal(&req, pos))
-    {
-      case 0: if (tkr_iLight->_briRGB_Global != 0){briLast = tkr_iLight->_briRGB_Global; tkr_iLight->_briRGB_Global = 0;} break; //off, only if it was previously on
-      case 1: if (tkr_iLight->_briRGB_Global == 0) tkr_iLight->_briRGB_Global = briLast; break; //on, only if it was previously off
-      default: toggleOnOff(); //toggle
-    }
-  }
-
-  //toggle nightlight mode
-  bool aNlDef = false;
-  if (req.indexOf(F("&ND")) > 0) aNlDef = true;
-  pos = req.indexOf(F("NL="));
-  if (pos > 0)
-  {
-    if (req.charAt(pos+3) == '0')
-    {
-      nightlightActive = false;
-    } else {
-      nightlightActive = true;
-      if (!aNlDef) nightlightDelayMins = getNumVal(&req, pos);
-      else         nightlightDelayMins = nightlightDelayMinsDefault;
-      nightlightStartTime = millis();
-    }
-  } else if (aNlDef)
-  {
-    nightlightActive = true;
-    nightlightDelayMins = nightlightDelayMinsDefault;
-    nightlightStartTime = millis();
-  }
-
-  //set nightlight target brightness
-  pos = req.indexOf(F("NT="));
-  if (pos > 0) {
-    nightlightTargetBri = getNumVal(&req, pos);
-    nightlightActiveOld = false; //re-init
-  }
-
-  //toggle nightlight fade
-  pos = req.indexOf(F("NF="));
-  if (pos > 0)
-  {
-    nightlightMode = getNumVal(&req, pos);
-
-    nightlightActiveOld = false; //re-init
-  }
-  if (nightlightMode > NL_MODE_SUN) nightlightMode = NL_MODE_SUN;
-
-  pos = req.indexOf(F("TT="));
-  if (pos > 0) transitionDelay = getNumVal(&req, pos);
-  // if (fadeTransition) setTransition(transitionDelay);
-
-  //set time (unix timestamp)
-  pos = req.indexOf(F("ST="));
-  if (pos > 0) {
-    // setTimeFromAPI(getNumVal(&req, pos));
-  }
-
-  //set countdown goal (unix timestamp)
-  pos = req.indexOf(F("CT="));
-  if (pos > 0) {
-    countdownTime = getNumVal(&req, pos);
-    if (countdownTime - toki.second() > 0) countdownOverTriggered = false;
-  }
-
-  pos = req.indexOf(F("LO="));
-  if (pos > 0) {
-    realtimeOverride = getNumVal(&req, pos);
-    if (realtimeOverride > 2) realtimeOverride = REALTIME_OVERRIDE_ALWAYS;
-    if (realtimeMode && useMainSegmentOnly) {
-      getMainSegment().freeze = !realtimeOverride;
-    }
-  }
-
-  pos = req.indexOf(F("RB"));
-  if (pos > 0) doReboot = true;
-
-  // clock mode, 0: normal, 1: countdown
-  pos = req.indexOf(F("NM="));
-  if (pos > 0) countdownMode = (req.charAt(pos+3) != '0');
-
-  pos = req.indexOf(F("U0=")); //user var 0
-  if (pos > 0) {
-    userVar0 = getNumVal(&req, pos);
-  }
-
-  pos = req.indexOf(F("U1=")); //user var 1
-  if (pos > 0) {
-    userVar1 = getNumVal(&req, pos);
-  }
-  // you can add more if you need
-
-  // global col[], effectCurrent, ... are updated in stateChanged()
-  if (!apply) return true; // when called by JSON API, do not call colorUpdated() here
-
-  pos = req.indexOf(F("&NN")); //do not send UDP notifications this time
-  stateUpdated((pos > 0) ? CALL_MODE_NO_NOTIFY : CALL_MODE_DIRECT_CHANGE);
-
-  // internal call, does not send XML response
-  pos = req.indexOf(F("IN"));
-  if ((request != nullptr) && (pos < 1)) {
-    auto response = request->beginResponseStream("text/xml");
-    XML_response(*response);
-    request->send(response);
-  }
-
-  return true;
-}
 
 
 #endif // ENABLE_DEVFEATURE_LIGHTING__SETTINGS

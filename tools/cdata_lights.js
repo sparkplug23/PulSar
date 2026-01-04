@@ -137,8 +137,6 @@ function writeHtmlGzipped(sourceFile, resultFile, page) {
  * Binary array for the Web UI.
  * gzip is used for smaller size and improved speeds.
  * 
- * Please see https://kno.wled.ge/advanced/custom-features/#changing-web-ui
- * to find out how to easily modify the web UI source!
  */
 
 #pragma once
@@ -203,10 +201,7 @@ ${result}
 
 function writeChunks(srcDir, specs, resultFile) {
   let src = `/*
- * More web UI HTML source arrays.
- * This file is auto generated, please don't make any changes manually.
- * Instead, see https://kno.wled.ge/advanced/custom-features/#changing-web-ui
- * to find out how to easily modify the web UI source!
+ * This file is auto generated, please don't make any changes manually via "cdata_lights.js and npm run"
  */ 
   #pragma once
 `;
@@ -464,3 +459,94 @@ writeChunks(
   ],
   destination_path + "pages_2025.h"
 );
+
+
+writeChunks(
+  source_path,
+  [
+    // {
+    //   file: "style.css",
+    //   name: "PAGE_settingsCss",
+    //   method: "gzip",
+    //   filter: "css-minify",
+    //   mangle: (str) =>
+    //     str
+    //       .replace("%%","%")
+    // },
+    // {
+    //   file: "common.js",
+    //   name: "JS_common",
+    //   method: "gzip",
+    //   filter: "js-minify",
+    // },
+    {
+      file: "settings2.htm",
+      name: "PAGE_settings2",
+      method: "gzip",
+      filter: "html-minify",
+    },
+    {
+      file: "settings_wifi2.htm",
+      name: "PAGE_settings_wifi2",
+      method: "gzip",
+      filter: "html-minify",
+    }
+    // ,
+    // {
+    //   file: "settings_leds.htm",
+    //   name: "PAGE_settings_leds",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
+    // {
+    //   file: "settings_dmx.htm",
+    //   name: "PAGE_settings_dmx",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
+    // {
+    //   file: "settings_ui.htm",
+    //   name: "PAGE_settings_ui",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
+    // {
+    //   file: "settings_sync.htm",
+    //   name: "PAGE_settings_sync",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
+    // {
+    //   file: "settings_time.htm",
+    //   name: "PAGE_settings_time",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
+    // {
+    //   file: "settings_sec.htm",
+    //   name: "PAGE_settings_sec",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
+    // {
+    //   file: "settings_um.htm",
+    //   name: "PAGE_settings_um",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
+    // {
+    //   file: "settings_2D.htm",
+    //   name: "PAGE_settings_2D",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
+    // {
+    //   file: "settings_pin.htm",
+    //   name: "PAGE_settings_pin",
+    //   method: "gzip",
+    //   filter: "html-minify"
+    // }
+  ],
+  destination_path + "html_settings2.h"
+);
+

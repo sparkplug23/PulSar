@@ -542,6 +542,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "de
   #endif
   #include "webpages_generated/html_cpal.h"
   #include "webpages_generated/pages_2025.h"   // <-- added for web console
+  #include "webpages_generated/html_settings2.h"
 #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 //wled_math.cpp
@@ -1102,8 +1103,8 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
 
 
     #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
-    void handleSettingsSet(AsyncWebServerRequest *request, byte subPage);
-    bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=true);
+    void SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage);
+    bool handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, const String& req, bool apply=true);
     #endif // ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
 
     /******************************************************************************************************************************************************************************
