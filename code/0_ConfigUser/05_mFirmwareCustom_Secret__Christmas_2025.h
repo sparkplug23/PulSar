@@ -38,7 +38,7 @@
  * Tree at side of house at the fence
  * 8X output with redboard
 **/
-// #define DEVICE_XMAS25__MEADOWS__SIDE_TREE
+#define DEVICE_XMAS25__MEADOWS__SIDE_TREE
 // #define DEVICE_XMAS25__MEADOWS__FRONT_TREE
 
 // #define DEVICE_XMAS25__MEADOWS__DESK_PLAYLIST
@@ -146,7 +146,8 @@
 
   // #define ENABLE_BUSCONFG__OUTPUTS_ALL_300
   // #define ENABLE_BUSCONFG__OUTPUTS_MAKE_EACH_BUS_A_SEGMENT // useful for testing
-  #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE
+  // #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE
+  #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE_TAKING_DOWN_EACH_BUS_SEGMENT
 
   #define ENABLE_DEVFEATURE_LIGHT__GRADIENT_PATCH_4DEC25
 
@@ -400,6 +401,85 @@
   )=====";
   #endif
   
+
+  
+  #ifdef ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE_TAKING_DOWN_EACH_BUS_SEGMENT
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":16,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":300
+      },
+      {
+        "Pin":17,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":300,
+        "Length":300
+      },
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":600,
+        "Length":300
+      },
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":900,
+        "Length":300
+      },
+      {
+        "Pin":5,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1200,
+        "Length":300
+      },
+      {
+        "Pin":12,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1500,
+        "Length":300
+      },
+      {
+        "Pin":14,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1800,
+        "Length":200
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange":"MatchBus",
+        "ColourPalette":"Snowy 02",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 100
+  }
+  )=====";
+  #endif
 
   /***********************************
    * SECTION: Template Configs
