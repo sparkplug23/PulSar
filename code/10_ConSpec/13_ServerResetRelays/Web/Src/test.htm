@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>PulSar Module: Server Reset Relays</title>
+
+  <!-- Shared WebServer helpers (absolute paths). DO NOT use async (WLED-style dependency). -->
+  <script src="/common.js"></script>
+  <style>@import url("/style.css");</style>
+
+  <script>
+    // Date Modified: 05Jan26
+
+    function S() {
+      getLoc();
+
+      // Load module-specific settings JS (sync, WLED pattern)
+      loadJS(getURL("/m/serverresetrelays/s.js?p=1"), false);
+
+      // POST target (same path)
+      if (loc) d.Sf.action = getURL("/m/serverresetrelays");
+    }
+
+    // Example action without extra endpoints:
+    // set hidden field and submit the same form POST.
+    function DoAction(action) {
+      gId("A").value = action;
+      d.Sf.submit();
+    }
+  </script>
+</head>
+
+<body onload="S()">
+<form id="form_s" name="Sf" method="post">
+
+  <div class="toprow">
+    <button type="button" onclick="B()">Back</button>
+    <button type="submit">Save</button><hr>
+  </div>
+
+  <h2>Server Reset Relays</h2>
+
+  <!-- Hidden action selector -->
+  <input type="hidden" id="A" name="A" value="save">
+
+  <h3>Relay mapping</h3>
+  Relay 1 name:<br><input type="text" name="R1" maxlength="32"><br>
+  Relay 2 name:<br><input type="text" name="R2" maxlength="32"><br>
+  Relay 3 name:<br><input type="text" name="R3" maxlength="32"><br>
+  Relay 4 name:<br><input type="text" name="R4" maxlength="32"><br>
+
+  <h3>Actions</h3>
+  <button type="button" onclick="DoAction('pulse1')">Pulse Relay 1</button>
+  <button type="button" onclick="DoAction('pulse2')">Pulse Relay 2</button>
+  <button type="button" onclick="DoAction('pulse3')">Pulse Relay 3</button>
+  <button type="button" onclick="DoAction('pulse4')">Pulse Relay 4</button><br><br>
+
+  Pulse time (ms):<br>
+  <input type="number" name="PT" min="50" max="5000" value="300"><br>
+
+  <hr>
+  <button type="button" onclick="B()">Back</button>
+  <button type="submit">Save</button>
+</form>
+</body>
+</html>

@@ -129,6 +129,12 @@ struct handler {
   #endif
   Handler_Flags flags = {0};
   uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level, bool json_appending); // member-function to sender with two args. Extra "json_appending" will allow calling constructjsons directly and adding them to another without closing the main json object
+
+  void Send()
+  {
+    flags.SendNow = true;
+  }
+
 };
 
 #include "PubSubClient.h"

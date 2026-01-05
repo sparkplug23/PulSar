@@ -721,6 +721,9 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER
   addTasker(new mTreadmillLogger());
   #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__SERVER_RESET_RELAYS
+  addTasker(new mServerResetRelays());
+  #endif
   #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
   addTasker(new mSDLoggerIMURadiationPattern());
   #endif

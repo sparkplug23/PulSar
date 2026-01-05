@@ -22,8 +22,16 @@ const CleanCSS = require("clean-css");
 const MinifyHTML = require("html-minifier-terser").minify; // npm install html-minifier-terser
 const packageJson = require("../package.json");
 
-let source_path      = "code/6_Lights/03_Animator/source"
-let destination_path = "code/6_Lights/03_Animator/webpages_generated/"
+
+let source_path      = "code/3_Network/21_WebServer/Webpages/Source"
+let destination_path = "code/3_Network/21_WebServer/Webpages/Generated/"
+
+
+function ensureDir(p) {
+  if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
+}
+
+ensureDir(destination_path)
 
 /**
  *
@@ -64,8 +72,8 @@ function adoptVersionAndRepo(html) {
     repoUrl = repoUrl.replace(/^git\+/, "");
     repoUrl = repoUrl.replace(/\.git$/, "");
     // Replace we
-    html = strReplace(html, "https://github.com/atuline/WLED", repoUrl);
-    html = strReplace(html, "https://github.com/Aircoookie/WLED", repoUrl);
+    html = strReplace(html, "https://github.com/sparkplug23/HACSDocsBasic", repoUrl);
+    html = strReplace(html, "https://github.com/sparkplug23/PulSar", repoUrl);
   }
   let version = packageJson.version;
   if (version) {
@@ -201,7 +209,7 @@ ${result}
 
 function writeChunks(srcDir, specs, resultFile) {
   let src = `/*
- * This file is auto generated, please don't make any changes manually via "cdata_lights.js and npm run"
+ * This file is auto generated, please don't make any changes manually via "cdata_webserver.js and npm run"
  */ 
   #pragma once
 `;

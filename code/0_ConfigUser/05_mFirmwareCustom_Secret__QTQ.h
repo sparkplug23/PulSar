@@ -140,6 +140,8 @@
 
   #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS_HTTP_API
 
+
+
   #define ENABLE_DEVFEATURE_WEBSERVER__SETTINGS_WEBPAGES
   #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_WIFI
 
@@ -233,6 +235,8 @@
   /***********************************
    * SECTION: Controller Configs
   ************************************/  
+
+  #define USE_MODULE_CONTROLLER_CUSTOM__SERVER_RESET_RELAYS
 
   /***********************************
    * SECTION: MQTT Template Test Loading

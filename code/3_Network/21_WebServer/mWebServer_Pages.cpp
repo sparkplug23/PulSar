@@ -990,139 +990,6 @@ void mWebServer::serveSettingsJS(AsyncWebServerRequest* request)
 }
 
 
-
-// /**
-//  * @brief WebUI: Settings Pages 
-//  * 
-//  */
-// void mWebServer::serveSettings(AsyncWebServerRequest* request, bool post)
-// {
-//   byte subPage = 0, originalSubPage = 0;
-//   const String& url = request->url();
-
-//   /**
-//    * SECTION: Get subPage index from url name
-//    **/
-//   if (url.indexOf("sett") >= 0)
-//   {
-//     if      (url.indexOf(".js")  > 0) subPage = SUBPAGE_JS;
-//     else if (url.indexOf(".css") > 0) subPage = SUBPAGE_CSS;
-//     else if (url.indexOf("wifi") > 0) subPage = SUBPAGE_WIFI;
-//     else if (url.indexOf("leds") > 0) subPage = SUBPAGE_LEDS;
-//     else if (url.indexOf("ui")   > 0) subPage = SUBPAGE_UI;
-//     else if (url.indexOf("sync") > 0) subPage = SUBPAGE_SYNC;
-//     else if (url.indexOf("time") > 0) subPage = SUBPAGE_TIME;
-//     else if (url.indexOf("sec")  > 0) subPage = SUBPAGE_SEC;
-//     #ifdef ENABLE_FEATURE_LIGHTING__DMX
-//     else if (url.indexOf("dmx")  > 0) subPage = SUBPAGE_DMX;
-//     #endif
-//     else if (url.indexOf("um")   > 0) subPage = SUBPAGE_UM;
-//     #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
-//     else if (url.indexOf("2D")   > 0) subPage = SUBPAGE_2D;
-//     #endif
-//     else if (url.indexOf("lock") > 0) subPage = SUBPAGE_LOCK;
-//   }
-//   else if (url.indexOf("/update") >= 0) subPage = SUBPAGE_UPDATE; // update page, for PIN check
-//   else subPage = SUBPAGE_WELCOME;
-
-//   /**
-//    * SECTION: Admin protection. Block if pin is not supplied
-//    **/
-//   #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-//   if(!correctPIN && strlen(settingsPIN) > 0 && (subPage > 0 && subPage < 11))
-//   {
-//     originalSubPage = subPage;
-//     subPage = SUBPAGE_PINREQ; // require PIN
-//   }
-//   // if OTA locked or too frequent PIN entry requests fail hard
-//   if ((subPage == SUBPAGE_WIFI && wifiLock && otaLock) || (post && !correctPIN && millis()-lastEditTime < PIN_RETRY_COOLDOWN))
-//   {
-//     serveMessage(request, 401, FPSTR(s_accessdenied), FPSTR(s_unlock_ota), 254); return;
-//   }
-//   #endif
-
-//   /**
-//    * SECTION: Request was HTTP_POST, so webpage is sending status to be parsed
-//    **/
-//   if (post) { //settings/set POST request, saving
-
-//     // Since locks have been removed, the if must be removed so WiFi POST is always handled
-//     SettingsPages__ParseForm(request, subPage);
-
-
-//     char s[32];
-//     char s2[45] = "";
-
-//     switch (subPage) {
-//       case SUBPAGE_WIFI   : strcpy_P(s, PSTR("WiFi")); strcpy_P(s2, PSTR("Please connect to the new IP (if changed)")); break;
-//       case SUBPAGE_LEDS   : strcpy_P(s, PSTR("LED")); break;
-//       case SUBPAGE_UI     : strcpy_P(s, PSTR("UI")); break;
-//       case SUBPAGE_SYNC   : strcpy_P(s, PSTR("Sync")); break;
-//       case SUBPAGE_TIME   : strcpy_P(s, PSTR("Time")); break;
-//       case SUBPAGE_SEC    : strcpy_P(s, PSTR("Security")); if (tkr_anim->doReboot) strcpy_P(s2, PSTR("Rebooting, please wait ~10 seconds...")); break;
-//       #ifdef ENABLE_FEATURE_LIGHTING__DMX
-//       case SUBPAGE_DMX    : strcpy_P(s, PSTR("DMX")); break;
-//       #endif
-//       case SUBPAGE_UM     : strcpy_P(s, PSTR("Usermods")); break;
-//       #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
-//       case SUBPAGE_2D     : strcpy_P(s, PSTR("2D")); break;
-//       #endif
-//       #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-//       case SUBPAGE_PINREQ : strcpy_P(s, correctPIN ? PSTR("PIN accepted") : PSTR("PIN rejected")); break;
-//       #endif
-//     }
-
-//     #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-//     if (subPage != SUBPAGE_PINREQ) strcat_P(s, PSTR(" settings saved."));
-
-//     if (subPage == SUBPAGE_PINREQ ){//&& correctPIN) {
-//       subPage = originalSubPage; // on correct PIN load settings page the user intended
-//     } else {
-//       // if (!s2[0]) strcpy_P(s2, s_redirecting);
-
-//       // bool redirectAfter9s = (subPage == SUBPAGE_WIFI || ((subPage == SUBPAGE_SEC || subPage == SUBPAGE_UM) && doReboot));
-//       // serveMessage(request, 200, s, s2, redirectAfter9s ? 129 : (correctPIN ? 1 : 3));
-//       return;
-//     }
-//     #endif
-//   }
-
-//   AsyncWebServerResponse *response;
-//   switch (subPage)
-//   {
-//     case SUBPAGE_WIFI    : response = request->beginResponse_P(200, "text/html", PAGE_settings_wifi2, PAGE_settings_wifi2_length); break;
-//     case SUBPAGE_LEDS    : response = request->beginResponse_P(200, "text/html", PAGE_settings_leds, PAGE_settings_leds_length); break;
-//     case SUBPAGE_UI      : response = request->beginResponse_P(200, "text/html", PAGE_settings_ui,   PAGE_settings_ui_length);   break;
-//     case SUBPAGE_SYNC    : response = request->beginResponse_P(200, "text/html", PAGE_settings_sync, PAGE_settings_sync_length); break;
-//     case SUBPAGE_TIME    : response = request->beginResponse_P(200, "text/html", PAGE_settings_time, PAGE_settings_time_length); break;
-//     case SUBPAGE_SEC     : response = request->beginResponse_P(200, "text/html", PAGE_settings_sec,  PAGE_settings_sec_length);  break;
-//     #ifdef ENABLE_FEATURE_LIGHTING__DMX
-//     case SUBPAGE_DMX     : response = request->beginResponse_P(200, "text/html", PAGE_settings_dmx,  PAGE_settings_dmx_length);  break;
-//     #endif
-//     case SUBPAGE_UM      : response = request->beginResponse_P(200, "text/html", PAGE_settings_um,   PAGE_settings_um_length);   break;
-//     case SUBPAGE_UPDATE  : response = request->beginResponse_P(200, "text/html", PAGE_update,        PAGE_update_length);        break;
-//     #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-//     case SUBPAGE_2D      : response = request->beginResponse_P(200, "text/html", PAGE_settings_2D,   PAGE_settings_2D_length);   break;
-//     #endif
-//     #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-//     case SUBPAGE_LOCK    : {
-//       correctPIN = !strlen(settingsPIN); // lock if a pin is set
-//       createEditHandler(correctPIN);
-//       serveMessage(request, 200, strlen(settingsPIN) > 0 ? PSTR("Settings locked") : PSTR("No PIN set"), FPSTR(s_redirecting), 1);
-//       return;
-//     }
-//     #endif
-//     case SUBPAGE_PINREQ  : response = request->beginResponse_P(200, "text/html", PAGE_settings_pin,  PAGE_settings_pin_length);  break;
-//     case SUBPAGE_CSS     : response = request->beginResponse_P(200, "text/css",  PAGE_settingsCss,   PAGE_settingsCss_length);   break;
-//     case SUBPAGE_JS      : serveSettingsJS(request); return;
-//     case SUBPAGE_WELCOME : response = request->beginResponse_P(200, "text/html", PAGE_welcome,       PAGE_welcome_length);       break;
-//     default:  response = request->beginResponse_P(200, "text/html", PAGE_settings,      PAGE_settings_length);      break;
-//   }
-//   response->addHeader(FPSTR(s_content_enc),"gzip");
-//   tkr_web->setStaticContentCacheHeaders(response);
-//   request->send(response);
-// }
-
 /**
  * @brief Resolve settings subpage ID from URL path
  */
@@ -1154,6 +1021,7 @@ static inline uint8_t GetSubPageID_FromURLPath(const String& url)
 
   return SUBPAGE_WELCOME;
 }
+
 
 /**
  * @brief WebUI: Settings Pages (POST)
@@ -1254,78 +1122,6 @@ void mWebServer::SettingsPages_POST(AsyncWebServerRequest* request)
   return;
 }
 
-// void mWebServer::SettingsPages_POST(AsyncWebServerRequest* request)
-// {
-//   const String& url = request->url();
-//   uint8_t subPage   = GetSubPageID_FromURLPath(url);
-//   uint8_t originalSubPage = subPage;
-
-//   #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-//   if(!correctPIN && strlen(settingsPIN) > 0 && (subPage > 0 && subPage < 11))
-//   {
-//     subPage = SUBPAGE_PINREQ;
-//   }
-
-//   if ((subPage == SUBPAGE_WIFI && wifiLock && otaLock) ||
-//       (!correctPIN && millis() - lastEditTime < PIN_RETRY_COOLDOWN))
-//   {
-//     serveMessage(request, 401, FPSTR(s_accessdenied), FPSTR(s_unlock_ota), 254);
-//     return;
-//   }
-//   #endif
-
-//   // Locks removed → always process POST
-//   SettingsPages__ParseForm(request, subPage);
-
-//   char s[32];
-//   char s2[45] = "";
-
-//   switch (subPage)
-//   {
-//     case SUBPAGE_WIFI: strcpy_P(s, PSTR("WiFi")); strcpy_P(s2, PSTR("Please connect to the new IP (if changed)")); break;
-//     case SUBPAGE_LEDS: strcpy_P(s, PSTR("LED")); break;
-//     case SUBPAGE_UI:   strcpy_P(s, PSTR("UI")); break;
-//     case SUBPAGE_SYNC: strcpy_P(s, PSTR("Sync")); break;
-//     case SUBPAGE_TIME: strcpy_P(s, PSTR("Time")); break;
-//     case SUBPAGE_SEC:
-//       strcpy_P(s, PSTR("Security"));
-//       if (tkr_anim->doReboot) strcpy_P(s2, PSTR("Rebooting, please wait ~10 seconds..."));
-//       break;
-//     #ifdef ENABLE_FEATURE_LIGHTING__DMX
-//     case SUBPAGE_DMX:  strcpy_P(s, PSTR("DMX")); break;
-//     #endif
-//     case SUBPAGE_UM:   strcpy_P(s, PSTR("Usermods")); break;
-//     #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
-//     case SUBPAGE_2D:   strcpy_P(s, PSTR("2D")); break;
-//     #endif
-//     #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-//     case SUBPAGE_PINREQ:
-//       strcpy_P(s, correctPIN ? PSTR("PIN accepted") : PSTR("PIN rejected"));
-//       subPage = originalSubPage;
-//       break;
-//     #endif
-//   }
-
-//   #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-//   if (subPage != SUBPAGE_PINREQ) strcat_P(s, PSTR(" settings saved."));
-//   #endif
-  
-
-//   if (subPage == SUBPAGE_PINREQ && correctPIN) {
-//     subPage = originalSubPage; // on correct PIN load settings page the user intended
-//     request->redirect(url);    // or redirect to mapped intended URL
-//     return;
-//   } else {
-//     if (!s2[0]) strcpy_P(s2, s_redirecting);
-
-//     bool redirectAfter9s = (subPage == SUBPAGE_WIFI || ((subPage == SUBPAGE_SEC || subPage == SUBPAGE_UM) && doReboot));
-//     serveMessage(request, (!pinRequired ? 200 : 401), s, s2, redirectAfter9s ? 129 : (!pinRequired ? 1 : 3));
-//     return;
-//   }
-
-//   // POST ends request lifecycle
-//   return;
-// }
 
 /**
  * @brief WebUI: Settings Pages (GET)
@@ -1342,7 +1138,7 @@ void mWebServer::SettingsPages_GET(AsyncWebServerRequest* request)
 
   switch (subPage)
   {
-    case SUBPAGE_WIFI:    content = PAGE_settings_wifi2; len = PAGE_settings_wifi2_length; break;
+    case SUBPAGE_WIFI:    content = PAGE_settings_wifi; len = PAGE_settings_wifi_length; break;
     case SUBPAGE_LEDS:    content = PAGE_settings_leds;  len = PAGE_settings_leds_length;  break;
     case SUBPAGE_UI:      content = PAGE_settings_ui;    len = PAGE_settings_ui_length;    break;
     case SUBPAGE_SYNC:    content = PAGE_settings_sync;  len = PAGE_settings_sync_length;  break;
@@ -1360,23 +1156,11 @@ void mWebServer::SettingsPages_GET(AsyncWebServerRequest* request)
     case SUBPAGE_CSS:     content = PAGE_settingsCss;    len = PAGE_settingsCss_length;    contentType = FPSTR(CONTENT_TYPE_CSS); break;
     case SUBPAGE_JS:      serveSettingsJS(request); return;
     case SUBPAGE_WELCOME: content = PAGE_welcome;        len = PAGE_welcome_length;        break;
-    default:              content = PAGE_settings2;       len = PAGE_settings2_length;       break;
+    default:              content = PAGE_settings;       len = PAGE_settings_length;       break;
   }
 
   handleStaticContent(request, "", code, contentType, content, len);
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #endif

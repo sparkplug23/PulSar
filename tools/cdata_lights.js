@@ -25,6 +25,12 @@ const packageJson = require("../package.json");
 let source_path      = "code/6_Lights/03_Animator/source"
 let destination_path = "code/6_Lights/03_Animator/webpages_generated/"
 
+function ensureDir(p) {
+  if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
+}
+
+ensureDir(destination_path)
+
 /**
  *
  */
@@ -112,7 +118,11 @@ function filter(str, type) {
   }
 }
 
-function writeHtmlGzipped(sourceFile, resultFile, page) {
+function writeHtmlGzipped(sourceFile, resultFile, page2) {
+
+   const page = page2 + "_lights" // fix for duplicate webserver/lights
+
+
   console.info("Reading " + sourceFile);
   new inliner(sourceFile, function (error, html) {
     console.info("Inlined " + html.length + " characters");
@@ -205,7 +215,12 @@ function writeChunks(srcDir, specs, resultFile) {
  */ 
   #pragma once
 `;
+
   specs.forEach((s) => {
+
+    s.name = s.name + "_lights" // 
+
+
     try {
       console.info("Reading " + srcDir + "/" + s.file + " as " + s.name);
       src += specToChunk(srcDir, s);
@@ -378,7 +393,7 @@ writeChunks(
 #ifdef ENABLE_FEATURE_LIGHTING__DMX
 ${str.replace(/function FM\(\)[ ]?\{/gms, "function FM() {%DMXVARS%\n")}
 #else
-const char PAGE_dmxmap[] PROGMEM = R"=====()=====";
+const char PAGETEST_dmxmap_lights[] PROGMEM = R"=====()=====";
 #endif
 `,
     },
@@ -436,117 +451,5 @@ const char PAGE_dmxmap[] PROGMEM = R"=====()=====";
     // }
   ],
   destination_path + "html_other.h"
-);
-
-
-
-
-writeChunks(
-  source_path,
-  [
-    {
-      file: "console.htm",
-      name: "PAGE_console",
-      method: "gzip",
-      filter: "html-minify-ui",
-    },
-    {
-      file: "console2.htm",
-      name: "PAGE_console2",
-      method: "gzip",
-      filter: "html-minify-ui",
-    }
-  ],
-  destination_path + "pages_2025.h"
-);
-
-
-writeChunks(
-  source_path,
-  [
-    // {
-    //   file: "style.css",
-    //   name: "PAGE_settingsCss",
-    //   method: "gzip",
-    //   filter: "css-minify",
-    //   mangle: (str) =>
-    //     str
-    //       .replace("%%","%")
-    // },
-    // {
-    //   file: "common.js",
-    //   name: "JS_common",
-    //   method: "gzip",
-    //   filter: "js-minify",
-    // },
-    {
-      file: "settings2.htm",
-      name: "PAGE_settings2",
-      method: "gzip",
-      filter: "html-minify",
-    },
-    {
-      file: "settings_wifi2.htm",
-      name: "PAGE_settings_wifi2",
-      method: "gzip",
-      filter: "html-minify",
-    }
-    // ,
-    // {
-    //   file: "settings_leds.htm",
-    //   name: "PAGE_settings_leds",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_dmx.htm",
-    //   name: "PAGE_settings_dmx",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_ui.htm",
-    //   name: "PAGE_settings_ui",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_sync.htm",
-    //   name: "PAGE_settings_sync",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_time.htm",
-    //   name: "PAGE_settings_time",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_sec.htm",
-    //   name: "PAGE_settings_sec",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_um.htm",
-    //   name: "PAGE_settings_um",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_2D.htm",
-    //   name: "PAGE_settings_2D",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_pin.htm",
-    //   name: "PAGE_settings_pin",
-    //   method: "gzip",
-    //   filter: "html-minify"
-    // }
-  ],
-  destination_path + "html_settings2.h"
 );
 

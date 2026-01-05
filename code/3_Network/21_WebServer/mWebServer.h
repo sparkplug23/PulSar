@@ -1281,9 +1281,10 @@ DEFINE_PGM_CTR(PM_BUTTON_NAME_CONSOLE_CTR) D_BUTTON_NAME_CONSOLE_CTR;
 
 #ifdef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
 
-#include "6_Lights/03_Animator/webpages_generated/html_settings.h"
-#include "6_Lights/03_Animator/webpages_generated/html_settings2.h"
-#include "6_Lights/03_Animator/webpages_generated/html_other.h"
+#include "3_Network/21_WebServer/Webpages/Generated/html_settings.h"
+#include "3_Network/21_WebServer/Webpages/Generated/html_settings2.h"
+#include "3_Network/21_WebServer/Webpages/Generated/html_other.h"
+#include "3_Network/21_WebServer/Webpages/Generated/pages_2025.h"
 
 static const char HTTP_HEAD_START[] PROGMEM = "<!DOCTYPE html><html lang=\"en\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><title>{v}</title>";
 

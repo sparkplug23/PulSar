@@ -711,6 +711,10 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "10_ConSpec/12_TreadmillLogger/mTreadmillLogger.h"
   #define tkr_treadmill        static_cast<mTreadmillLogger*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_ID))
 #endif
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__SERVER_RESET_RELAYS
+  #include "10_ConSpec/13_ServerResetRelays/mServerResetRelays.h"
+  #define tkr_server_reset_relays        static_cast<mServerResetRelays*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLER_CUSTOM__SERVER_RESET_RELAYS_ID))
+#endif
 #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
   #include "9_Controller/SDLoggerIMURadiationPattern/mSDLogger.h"
   #define tkr_cont_imu_rad                static_cast<mSDLoggerIMURadiationPattern*>(pCONT->pModule[EM_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID])

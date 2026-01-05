@@ -1715,7 +1715,7 @@ void mAnimatorLight::serveIndex(AsyncWebServerRequest* request)
     response = request->beginResponse_P(200, "text/html", PAGE_simple, PAGE_simple_L);
   else
   #endif
-    response = request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
+    response = request->beginResponse_P(200, "text/html", PAGE_index_lights, PAGE_index_lights_L);
 
   response->addHeader(FPSTR(s_content_enc),"gzip");
   tkr_web->setStaticContentCacheHeaders(response);
@@ -3308,7 +3308,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   #endif
 
   //settings page for LEDs, UI, sync, time, security, usermods, update
-  tkr_web->server->on("/settings", HTTP_GET, [this](AsyncWebServerRequest *request){
+  tkr_web->server->on("/lights/settings", HTTP_GET, [this](AsyncWebServerRequest *request){
     this->serveSettings(request);
   });
 
@@ -3335,7 +3335,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   });
 
 
-  tkr_web->server->on("/settings", HTTP_POST, [this](AsyncWebServerRequest *request){
+  tkr_web->server->on("/lights/settings", HTTP_POST, [this](AsyncWebServerRequest *request){
     this->serveSettings(request, true);
   });
 
@@ -3561,8 +3561,8 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
         F("/index.htm"),
         200,
         FPSTR(CONTENT_TYPE_HTML),
-        PAGE_index,
-        PAGE_index_L
+        PAGE_index_lights,
+        PAGE_index_lights_L
       );
     } else {
       serveSettings(request);
@@ -3594,20 +3594,20 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   #ifdef WLED_ENABLE_PIXART
   static const char _pixart_htm[] PROGMEM = "/pixart.htm";
   tkr_web->server->on(_pixart_htm, HTTP_GET, [](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(request, FPSTR(_pixart_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_pixart, PAGE_pixart_L);
+    tkr_web->handleStaticContent(request, FPSTR(_pixart_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_pixart_lights, PAGE_pixart_lights_L);
   });
   #endif
 
   #ifndef WLED_DISABLE_PXMAGIC
   static const char _pxmagic_htm[] PROGMEM = "/pxmagic.htm";
   tkr_web->server->on(_pxmagic_htm, HTTP_GET, [](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(request, FPSTR(_pxmagic_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_pxmagic, PAGE_pxmagic_L);
+    tkr_web->handleStaticContent(request, FPSTR(_pxmagic_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_pxmagic_lights, PAGE_pxmagic_lights_L);
   });
   #endif
 
   static const char _cpal_htm[] PROGMEM = "/cpal.htm";
   tkr_web->server->on(_cpal_htm, HTTP_GET, [](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(request, FPSTR(_cpal_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_cpal, PAGE_cpal_L);
+    tkr_web->handleStaticContent(request, FPSTR(_cpal_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_cpal_lights, PAGE_cpal_lights_L);
   });
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
@@ -3630,7 +3630,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
     ALOG_INF(PSTR("is it here?2"));
     if(handle__HTTP__GET_QueryAPI(request, request->url())) return;
     #endif
-    tkr_web->handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404, PAGE_404_length);
+    tkr_web->handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404_lights, PAGE_404_lights_length);
   });
 
   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
