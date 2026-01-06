@@ -12,6 +12,33 @@
   <script>
     // Date Modified: 05Jan26
 
+    // ------------------------------------------------------------------------
+    // Contract
+    //   - Single POST endpoint: /m/serverresetrelays
+    //   - Module JS endpoint:   /m/serverresetrelays/s.js?p=1
+    //
+    // POST fields:
+    //   - A   : action selector ("save" by default)
+    //   - R0..R7 : relay display names (optional rename)
+    //   - C   : command selector (string token)
+    //
+    // Command token format (example):
+    //   RB0_0  => Relay 0, Button 0 (Off)
+    //   RB3_1  => Relay 3, Button 1 (On)
+    //   RB5_2  => Relay 5, Button 2 (Toggle 7s)
+    //
+    // Talk-back fields (via GetV JS):
+    //   - R0..R7  names
+    //   - S0..S7  state (0/1) for styling
+    //   - T0..T7  text feedback (countdown/status)
+    //   - UT      update-time string
+    // ------------------------------------------------------------------------
+
+    const RELAY_COUNT = 8;
+    const CMD_OFF     = 0;
+    const CMD_ON      = 1;
+    const CMD_TOGGLE5 = 2;
+
     function S() {
       getLoc();
 
@@ -22,11 +49,34 @@
       if (loc) d.Sf.action = getURL("/m/serverresetrelays");
     }
 
-    // Example action without extra endpoints:
-    // set hidden field and submit the same form POST.
-    function DoAction(action) {
-      gId("A").value = action;
+    function SendCmd(relayIndex, cmdIndex) {
+      // Encode command token RB<relay>_<cmd>
+      gId("C").value = "RB" + relayIndex + "_" + cmdIndex;
+      gId("A").value = "cmd";
       d.Sf.submit();
+    }
+
+    // Styling helper: called by GetV() talk-back (optional)
+    function SetRelayState(relayIndex, isOn) {
+      const row = gId("row" + relayIndex);
+      if (!row) return;
+
+      // If you later add real CSS classes in /style.css, you can switch to classList.
+      // For now keep inline: robust and local.
+      row.style.borderLeft = isOn ? "6px solid #2ecc71" : "6px solid #e74c3c";
+
+      // Button emphasis (optional)
+      const bOff = gId("b" + relayIndex + "_0");
+      const bOn  = gId("b" + relayIndex + "_1");
+      if (bOff) bOff.style.opacity = isOn ? "0.55" : "1.0";
+      if (bOn)  bOn.style.opacity  = isOn ? "1.0"  : "0.55";
+    }
+
+    // Text feedback helper: called by GetV() talk-back (optional)
+    function SetRelayText(relayIndex, text) {
+      const e = gId("T" + relayIndex);
+      if (!e) return;
+      e.value = (text === undefined || text === null) ? "" : String(text);
     }
   </script>
 </head>
@@ -36,32 +86,198 @@
 
   <div class="toprow">
     <button type="button" onclick="B()">Back</button>
-    <button type="submit">Save</button><hr>
+    <button type="submit" onclick="gId('A').value='save'">Save</button><hr>
   </div>
 
   <h2>Server Reset Relays</h2>
 
-  <!-- Hidden action selector -->
+  <!-- Hidden selectors -->
   <input type="hidden" id="A" name="A" value="save">
-
-  <h3>Relay mapping</h3>
-  Relay 1 name:<br><input type="text" name="R1" maxlength="32"><br>
-  Relay 2 name:<br><input type="text" name="R2" maxlength="32"><br>
-  Relay 3 name:<br><input type="text" name="R3" maxlength="32"><br>
-  Relay 4 name:<br><input type="text" name="R4" maxlength="32"><br>
-
-  <h3>Actions</h3>
-  <button type="button" onclick="DoAction('pulse1')">Pulse Relay 1</button>
-  <button type="button" onclick="DoAction('pulse2')">Pulse Relay 2</button>
-  <button type="button" onclick="DoAction('pulse3')">Pulse Relay 3</button>
-  <button type="button" onclick="DoAction('pulse4')">Pulse Relay 4</button><br><br>
-
-  Pulse time (ms):<br>
-  <input type="number" name="PT" min="50" max="5000" value="300"><br>
+  <input type="hidden" id="C" name="C" value="">
 
   <hr>
-  <button type="button" onclick="B()">Back</button>
-  <button type="submit">Save</button>
+
+  <!-- Relay rows -->
+  <div id="rows">
+
+    <!-- ROW 0 -->
+    <div id="row0" style="padding:10px 8px;margin:8px 0;border-left:6px solid #666;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="min-width:190px;">
+          <b>Relay 1:</b><br>
+          <input type="text" name="R0" maxlength="32" style="width:180px;">
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="b0_0" type="button" onclick="SendCmd(0,0)">Off</button>
+          <button id="b0_1" type="button" onclick="SendCmd(0,1)">On</button>
+          <button id="b0_2" type="button" onclick="SendCmd(0,2)">Toggle 7s</button>
+        </div>
+
+        <div style="flex:1;min-width:220px;">
+          <b>Status:</b><br>
+          <input id="T0" name="T0" type="text" readonly value="" style="width:100%;">
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 1 -->
+    <div id="row1" style="padding:10px 8px;margin:8px 0;border-left:6px solid #666;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="min-width:190px;">
+          <b>Relay 2:</b><br>
+          <input type="text" name="R1" maxlength="32" style="width:180px;">
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="b1_0" type="button" onclick="SendCmd(1,0)">Off</button>
+          <button id="b1_1" type="button" onclick="SendCmd(1,1)">On</button>
+          <button id="b1_2" type="button" onclick="SendCmd(1,2)">Toggle 7s</button>
+        </div>
+
+        <div style="flex:1;min-width:220px;">
+          <b>Status:</b><br>
+          <input id="T1" name="T1" type="text" readonly value="" style="width:100%;">
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2 -->
+    <div id="row2" style="padding:10px 8px;margin:8px 0;border-left:6px solid #666;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="min-width:190px;">
+          <b>Relay 3:</b><br>
+          <input type="text" name="R2" maxlength="32" style="width:180px;">
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="b2_0" type="button" onclick="SendCmd(2,0)">Off</button>
+          <button id="b2_1" type="button" onclick="SendCmd(2,1)">On</button>
+          <button id="b2_2" type="button" onclick="SendCmd(2,2)">Toggle 7s</button>
+        </div>
+
+        <div style="flex:1;min-width:220px;">
+          <b>Status:</b><br>
+          <input id="T2" name="T2" type="text" readonly value="" style="width:100%;">
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 3 -->
+    <div id="row3" style="padding:10px 8px;margin:8px 0;border-left:6px solid #666;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="min-width:190px;">
+          <b>Relay 4:</b><br>
+          <input type="text" name="R3" maxlength="32" style="width:180px;">
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="b3_0" type="button" onclick="SendCmd(3,0)">Off</button>
+          <button id="b3_1" type="button" onclick="SendCmd(3,1)">On</button>
+          <button id="b3_2" type="button" onclick="SendCmd(3,2)">Toggle 7s</button>
+        </div>
+
+        <div style="flex:1;min-width:220px;">
+          <b>Status:</b><br>
+          <input id="T3" name="T3" type="text" readonly value="" style="width:100%;">
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 4 -->
+    <div id="row4" style="padding:10px 8px;margin:8px 0;border-left:6px solid #666;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="min-width:190px;">
+          <b>Relay 5:</b><br>
+          <input type="text" name="R4" maxlength="32" style="width:180px;">
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="b4_0" type="button" onclick="SendCmd(4,0)">Off</button>
+          <button id="b4_1" type="button" onclick="SendCmd(4,1)">On</button>
+          <button id="b4_2" type="button" onclick="SendCmd(4,2)">Toggle 7s</button>
+        </div>
+
+        <div style="flex:1;min-width:220px;">
+          <b>Status:</b><br>
+          <input id="T4" name="T4" type="text" readonly value="" style="width:100%;">
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 5 -->
+    <div id="row5" style="padding:10px 8px;margin:8px 0;border-left:6px solid #666;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="min-width:190px;">
+          <b>Relay 6:</b><br>
+          <input type="text" name="R5" maxlength="32" style="width:180px;">
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="b5_0" type="button" onclick="SendCmd(5,0)">Off</button>
+          <button id="b5_1" type="button" onclick="SendCmd(5,1)">On</button>
+          <button id="b5_2" type="button" onclick="SendCmd(5,2)">Toggle 7s</button>
+        </div>
+
+        <div style="flex:1;min-width:220px;">
+          <b>Status:</b><br>
+          <input id="T5" name="T5" type="text" readonly value="" style="width:100%;">
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 6 -->
+    <div id="row6" style="padding:10px 8px;margin:8px 0;border-left:6px solid #666;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="min-width:190px;">
+          <b>Relay 7:</b><br>
+          <input type="text" name="R6" maxlength="32" style="width:180px;">
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="b6_0" type="button" onclick="SendCmd(6,0)">Off</button>
+          <button id="b6_1" type="button" onclick="SendCmd(6,1)">On</button>
+          <button id="b6_2" type="button" onclick="SendCmd(6,2)">Toggle 7s</button>
+        </div>
+
+        <div style="flex:1;min-width:220px;">
+          <b>Status:</b><br>
+          <input id="T6" name="T6" type="text" readonly value="" style="width:100%;">
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 7 -->
+    <div id="row7" style="padding:10px 8px;margin:8px 0;border-left:6px solid #666;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div style="min-width:190px;">
+          <b>Relay 8:</b><br>
+          <input type="text" name="R7" maxlength="32" style="width:180px;">
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="b7_0" type="button" onclick="SendCmd(7,0)">Off</button>
+          <button id="b7_1" type="button" onclick="SendCmd(7,1)">On</button>
+          <button id="b7_2" type="button" onclick="SendCmd(7,2)">Toggle 7s</button>
+        </div>
+
+        <div style="flex:1;min-width:220px;">
+          <b>Status:</b><br>
+          <input id="T7" name="T7" type="text" readonly value="" style="width:100%;">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <hr>
+
+  <h3>Update time</h3>
+  <input type="text" name="UT" readonly value="" style="width:220px;">
+
+  <hr>
+
+  <!-- Keep only top Back/Save. -->
 </form>
 </body>
 </html>

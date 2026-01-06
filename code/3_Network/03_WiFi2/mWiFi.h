@@ -6,7 +6,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifndef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+#ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
 
 // Included in baseconfig
 enum WifiConfigOptions {WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL, WIFI_MANAGER_RESET_ONLY, MAX_WIFI_OPTION};
@@ -83,7 +83,10 @@ class mWiFi :
     uint32_t tSavedWiFiCheckIP;
     uint32_t tSavedWiFiReconnect;
 
-    WiFiClient* mqtt_client = nullptr;
+    
+
+
+
     WiFiClient* mqtt_client2 = nullptr;
     
     uint16_t wifi_counter_tester = 0;

@@ -321,7 +321,11 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #define tkr_interface_network                                static_cast<mInterfaceNetwork*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__NETWORK_INTERFACE__ID))
 #endif 
 #ifdef USE_MODULE_NETWORK_WIFI
+  #ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+  #include "3_Network/03_WiFi2/mWiFi.h"
+  #else
   #include "3_Network/03_WiFi/mWiFi.h"
+  #endif
   #define tkr_wifi                                 static_cast<mWiFi*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_NETWORK_WIFI_ID))
 #endif 
 #ifdef USE_MODULE_NETWORK_ETHERNET

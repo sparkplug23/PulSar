@@ -16,7 +16,7 @@
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-// #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__TESTBOARD
+#define DEVICE_QTQ__SERVER_RESET_CONTROLLER__TESTBOARD
 
 
 
@@ -149,6 +149,8 @@
 
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
 
+  #define ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+
   /***********************************
    * SECTION: Sensor Configs
   ************************************/  
@@ -172,6 +174,7 @@
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
 //   // #define USE_MODULE_DRIVERS_LEDS
+#define MAX_RELAYS 8
  
   /***********************************
    * SECTION: Lighting Configs
@@ -283,7 +286,11 @@
       "\"2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
       "\"4\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
       "\"12\":\"" D_GPIO_FUNCTION_REL3_CTR  "\","
-      "\"13\":\"" D_GPIO_FUNCTION_REL4_CTR  "\""
+      "\"5\":\"" D_GPIO_FUNCTION_REL4_CTR  "\","
+      "\"26\":\"" D_GPIO_FUNCTION_REL5_CTR  "\","
+      "\"15\":\"" D_GPIO_FUNCTION_REL6_CTR  "\","
+      "\"22\":\"" D_GPIO_FUNCTION_REL7_CTR  "\","
+      "\"23\":\"" D_GPIO_FUNCTION_REL8_CTR  "\""
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -307,9 +314,9 @@
   #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Radiator"
   #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,143,81,7,51,20,1,189]"
 
-  #define D_DEVICE_HEATER_0_NAME "Dryer"
-  #define D_DEVICE_HEATER_1_NAME "FloorMat"
-  #define D_DEVICE_HEATER_2_NAME "FanHeater"
+  #define D_DEVICE_HEATER_0_NAME "ECIT1752"
+  #define D_DEVICE_HEATER_1_NAME "ECIT1820"
+  #define D_DEVICE_HEATER_2_NAME "ECIT1840"
   #define D_DEVICE_HEATER_3_NAME "OilRadiator"
 
   #define USE_FUNCTION_TEMPLATE

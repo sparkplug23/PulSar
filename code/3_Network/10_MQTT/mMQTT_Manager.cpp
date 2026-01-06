@@ -14,6 +14,44 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
     case TASK_INIT:
       Init();
     break;
+    case TASK_WIFI_CONNECTED:{ // moved from wifi jan2026
+
+      #ifndef ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+        ALOG_HGL(PSTR("Start MQTTConnection with WiFi"));
+
+        #ifdef USE_MODULE_NETWORK_MQTT
+
+        DEBUG_LINE_HERE3
+
+          mqtt_client = new WiFiClient();
+          DEBUG_LINE_HERE3
+
+          tkr_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
+          DEBUG_LINE_HERE3
+          
+          tkr_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
+          DEBUG_LINE_HERE3
+
+          tkr_mqtt->brokers.back()->SetReConnectBackoffTime(MQTT_RETRY_SECS);
+          DEBUG_LINE_HERE3
+          
+          // char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%s"), tkr_set->Settings.system_name.device, WiFi.macAddress().c_str()); 
+          
+          uint8_t mac[6];           WiFi.macAddress(mac);
+          DEBUG_LINE_HERE3
+          char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%02X:%02X:%02X"), tkr_set->Settings.system_name.device, mac[3], mac[4], mac[5]); 
+          DEBUG_LINE_HERE3
+          tkr_mqtt->brokers.back()->SetClientName(client_name);
+          DEBUG_LINE_HERE3
+
+          tkr_mqtt->brokers.back()->SetTopicPrefix(tkr_set->Settings.system_name.device);
+          DEBUG_LINE_HERE3
+
+        #endif // USE_MODULE_NETWORK_MQTT
+      #endif // ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+    }
+    break;
   }
 
   if(!tkr_set->Settings.flag_system.mqtt_enabled){ return 0; }

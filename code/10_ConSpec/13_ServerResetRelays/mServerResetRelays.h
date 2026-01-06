@@ -72,7 +72,7 @@ class mServerResetRelays :
       struct RELAY_CONTROLS{
         uint32_t time_last_changed = 0;
       };
-      RELAY_CONTROLS rel[4];
+      RELAY_CONTROLS rel[8];
     }rt;
     
     
@@ -83,6 +83,9 @@ class mServerResetRelays :
     #ifdef USE_MODULE_NETWORK_WEBSERVER
     void WebPage_Root_AddHandlers();
     void Serve_Submodule_ServerResetRelays(AsyncWebServerRequest* request);
+    void Serve_Submodule_ServerResetRelays_Post(AsyncWebServerRequest* request);
+    void Serve_Submodule_ServerResetRelays_JS(AsyncWebServerRequest* request);
+    void Serve_Submodule_ServerResetRelays_Page(AsyncWebServerRequest* request);
     #endif
 
 

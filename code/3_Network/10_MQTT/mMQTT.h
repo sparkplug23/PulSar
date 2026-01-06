@@ -377,6 +377,10 @@ class mMQTTManager :
 
     std::vector<MQTTConnection*> brokers;
 
+    #ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+    WiFiClient* mqtt_client = nullptr;
+    #endif
+
     /************************************************************************************************
      * SECTION: Internal Functions
      ************************************************************************************************/

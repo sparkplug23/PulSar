@@ -1467,6 +1467,15 @@ void SettingsPages_GET(AsyncWebServerRequest* request);
 
 void serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& headl, const String& subl, byte optionT);
 
+void serveRedirectMessage(AsyncWebServerRequest* request,
+                                      int httpCode,
+                                      const __FlashStringHelper* msg,
+                                      const __FlashStringHelper* detail,
+                                      const char* redirectUrl,
+                                      uint32_t delayMs);
+
+
+
 
 void handleStaticContent(AsyncWebServerRequest *request, const String &path, int code, const String &contentType, const uint8_t *content, size_t len, bool gzip = true, uint16_t eTagSuffix = 0);
 

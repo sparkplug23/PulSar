@@ -237,46 +237,225 @@ void mServerResetRelays::WebPage_Root_AddHandlers()
 
 void mServerResetRelays::Serve_Submodule_ServerResetRelays(AsyncWebServerRequest* request)
 {
-  const bool post = (request->method() == HTTP_POST);
-
-  // 1) POST: parse + apply
-  if (post)
-  {
-    // Use shared parsing helpers later (tkr_web->...)
-    // For now: direct param example
-
-    String action = request->hasParam("A", true) ? request->getParam("A", true)->value() : "save";
-
-    if (action.startsWith("pulse"))
-    {
-      int relay = action.substring(5).toInt(); // pulse1..pulse4
-      int pulse_ms = request->hasParam("PT", true) ? request->getParam("PT", true)->value().toInt() : 300;
-
-      rt.rel[relay].time_last_changed = millis();
-      mqtthandler_state_ifchanged.Send();
-
-      // TODO: call your relay driver here
-      // tkr_relays->Pulse(relay, pulse_ms);
-
-      tkr_web->serveMessage(request, 200, PSTR("Action executed"), PSTR("Redirecting..."), 1);
-      return;
-    }
-
-    // Save config example
-    // String r1 = request->hasParam("R1", true) ? request->getParam("R1", true)->value() : "";
-    // ...
-
-    tkr_web->serveMessage(request, 200, PSTR("Settings saved."), FPSTR(s_redirecting), 1);
+  // 1) POST: apply settings / actions
+  if (request->method() == HTTP_POST) {
+    Serve_Submodule_ServerResetRelays_Post(request);
     return;
   }
 
-  // 2) GET: serve page
-  AsyncWebServerResponse* response =
-      request->beginResponse_P(200, FPSTR(CONTENT_TYPE_HTML), WEB_10_ConSpec_13_ServerResetRelays_test_htm, WEB_10_ConSpec_13_ServerResetRelays_test_htm_length);
-  response->addHeader(F("Content-Encoding"), F("gzip"));
-  request->send(response);
+  // 2) GET JS: WLED-style settings JS
+  if (request->url().endsWith(F("/s.js"))) {
+    Serve_Submodule_ServerResetRelays_JS(request);
+    return;
+  }
 
+  // 3) GET page (default)
+  Serve_Submodule_ServerResetRelays_Page(request);
 }
+
+
+void mServerResetRelays::Serve_Submodule_ServerResetRelays_Post(AsyncWebServerRequest* request)
+{
+  const String action = request->hasParam("A", true)
+                          ? request->getParam("A", true)->value()
+                          : "save";
+
+  ALOG_INF(PSTR("post started! %s"), action.c_str());
+
+  // -------------------------------------------------------------------
+  // 1) Command path (buttons)
+  //   - A=cmd
+  //   - C="RB<relay>_<cmd>"
+  //     cmd: 0=Off, 1=On, 2=Toggle 5s
+  // -------------------------------------------------------------------
+  if (action == "cmd")
+  {
+    ALOG_INF(PSTR("cmd started! %s"), action.c_str());
+
+    const String cmdTok = request->hasParam("C", true)
+                            ? request->getParam("C", true)->value()
+                            : "";
+
+    ALOG_INF(PSTR("cmdTok: %s"), cmdTok.c_str());
+
+    if (!cmdTok.startsWith("RB"))
+    {
+      ALOG_INF(PSTR("cmd invalid token (no RB)"));
+      request->redirect("/m/serverresetrelays");
+      return;
+    }
+
+    const int us = cmdTok.indexOf('_');
+    if (us < 0)
+    {
+      ALOG_INF(PSTR("cmd invalid token (no underscore)"));
+      request->redirect("/m/serverresetrelays");
+      return;
+    }
+
+    const int relay_id = cmdTok.substring(2, us).toInt();
+    const int cmd_id   = cmdTok.substring(us + 1).toInt();
+
+    ALOG_INF(PSTR("relay_id=%d cmd_id=%d"), relay_id, cmd_id);
+
+    if (relay_id < 0 || relay_id >= 8)
+    {
+      ALOG_INF(PSTR("relay out of range"));
+      request->redirect("/m/serverresetrelays");
+      return;
+    }
+
+    #ifdef USE_MODULE_DRIVERS_RELAY
+    switch (cmd_id)
+    {
+      default:
+      case 0: // Off
+        // Preferred: explicit OFF API if you have it
+        // tkr_relay->CommandSet_State(false, relay_id);
+
+        // Fallback: if Timer_Decounter(0) means cancel and OFF in your implementation
+        tkr_relay->CommandSet_Relay_Power(0, relay_id);
+        break;
+
+      case 1: // On
+        // Preferred: explicit ON API if you have it
+        // tkr_relay->CommandSet_State(true, relay_id);
+
+        // If you do NOT have an "indefinite on" concept via timer,
+        // do NOT guess with -1. Keep it explicit and replace this line
+        // with your actual API.
+        tkr_relay->CommandSet_Relay_Power(1, relay_id); // TODO: replace with proper ON
+        break;
+
+      case 2: // Toggle 5s (pulse on then auto-off)
+        tkr_relay->CommandSet_Timer_Decounter(7, relay_id);
+        break;
+    }
+    #endif
+
+    rt.rel[relay_id].time_last_changed = millis();
+    mqtthandler_state_ifchanged.Send();
+
+    request->redirect("/m/serverresetrelays");
+    return;
+  }
+
+  // -------------------------------------------------------------------
+  // 2) Save path (names, etc.)
+  //   - A=save (default)
+  //   - R0..R7
+  // -------------------------------------------------------------------
+  if (action == "save")
+  {
+    #ifdef USE_MODULE_DRIVERS_RELAY
+    char key[4];
+
+    for (uint8_t relay_id = 0; relay_id < 8; relay_id++)
+    {
+      snprintf(key, sizeof(key), "R%u", relay_id);
+
+      if (!request->hasParam(key, true))
+        continue;
+
+      const String name = request->getParam(key, true)->value();
+
+      // TODO: wire to your naming store (DLI), matching your GetDeviceName_WithModuleUniqueID usage:
+      // DLI->SetDeviceName_WithModuleUniqueID(tkr_relay->GetModuleUniqueID(), relay_id, name.c_str());
+
+      rt.rel[relay_id].time_last_changed = millis();
+    }
+
+    mqtthandler_state_ifchanged.Send();
+    #endif
+
+    request->redirect("/m/serverresetrelays");
+    return;
+  }
+
+  // -------------------------------------------------------------------
+  // 3) Unknown action
+  // -------------------------------------------------------------------
+  ALOG_INF(PSTR("unknown action: %s"), action.c_str());
+  request->redirect("/m/serverresetrelays");
+}
+
+
+
+void mServerResetRelays::Serve_Submodule_ServerResetRelays_JS(AsyncWebServerRequest* request)
+{
+  // Start Create Head
+  AsyncResponseStream *response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JAVASCRIPT));
+  response->addHeader(F("Cache-Control"), F("no-store"));
+  response->addHeader(F("Expires"), F("0"));
+
+  response->print(F("function GetV(){var d=document;"));
+
+  // -------------------------------------------------------------------
+  // Talk-back values for the page
+  // -------------------------------------------------------------------
+  char buffer[96];
+
+  // Update time (string)
+  snprintf(buffer, sizeof(buffer), "%s", tkr_time->GetDateAndTime(DT_UTC).c_str());
+  tkr_web->printSetFormValue(*response, PSTR("UT"), buffer);
+
+  char key[10];
+  char val[120];
+
+  #ifdef USE_MODULE_DRIVERS_RELAY
+  // Relay names (R0..R7) and optional state/feedback (S0..S7 / T0..T7)
+  uint8_t relay_count = (8 > MAX_RELAYS) ? MAX_RELAYS : 8; // limit to 8
+  for (uint8_t relay_id = 0; relay_id < 8; relay_id++)
+  {
+    // Names
+    snprintf(key, sizeof(key), "R%u", relay_id);
+    DLI->GetDeviceName_WithModuleUniqueID(tkr_relay->GetModuleUniqueID(), relay_id, buffer, sizeof(buffer));
+    tkr_web->printSetFormValue(*response, key, buffer);
+
+    // -------------------------------------------------------------------
+    // Status strings: T0..T7
+    //   "TimeOnRemaining %u (On:%02d:%02d:%02d|Off:%02d:%02d:%02d)"
+    // -------------------------------------------------------------------
+    const uint32_t sec_on_remaining = tkr_relay->CommandGet_SecondsToRemainOn(relay_id);
+
+    const auto &last = tkr_relay->rt.relay_status[relay_id].last;
+
+    // NOTE: if you prefer to suppress times when unset, add guards here.
+    snprintf(
+      val, sizeof(val),
+      "TimeOnRemaining %lu (Last On:%02u:%02u:%02u|Off:%02u:%02u:%02u)",
+      sec_on_remaining,
+      last.ontime.hour,  last.ontime.minute,  last.ontime.second,
+      last.offtime.hour, last.offtime.minute, last.offtime.second
+    );
+    snprintf(key, sizeof(key), "T%u", relay_id);
+    tkr_web->printSetFormValue(*response, key, val);
+    
+  }
+  #endif
+
+  response->print(F("}"));
+  request->send(response);
+}
+
+
+void mServerResetRelays::Serve_Submodule_ServerResetRelays_Page(AsyncWebServerRequest* request)
+{
+  AsyncWebServerResponse* response =
+    request->beginResponse_P(
+      200,
+      FPSTR(CONTENT_TYPE_HTML),
+      WEB_10_ConSpec_13_ServerResetRelays_test_htm,
+      WEB_10_ConSpec_13_ServerResetRelays_test_htm_length
+    );
+
+  response->addHeader(F("Content-Encoding"), F("gzip"));
+  tkr_web->setStaticContentCacheHeaders(response);
+  request->send(response);
+}
+
+
+
 
 #endif
 

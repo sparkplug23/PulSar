@@ -38,7 +38,7 @@
  * Tree at side of house at the fence
  * 8X output with redboard
 **/
-#define DEVICE_XMAS25__MEADOWS__SIDE_TREE
+// #define DEVICE_XMAS25__MEADOWS__SIDE_TREE
 // #define DEVICE_XMAS25__MEADOWS__FRONT_TREE
 
 // #define DEVICE_XMAS25__MEADOWS__DESK_PLAYLIST

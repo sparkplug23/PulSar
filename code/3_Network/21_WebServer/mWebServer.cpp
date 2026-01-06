@@ -106,6 +106,72 @@ void mWebServer::serveMessage(AsyncWebServerRequest* request, uint16_t code, con
 
 
 
+// -----------------------------------------------------------------------------
+// serveRedirectMessage
+//
+// SUMMARY
+//   Sends a minimal HTML response which optionally displays a message and then
+//   redirects the browser to a specified absolute URL.
+//
+// ARGUMENTS
+//   request      AsyncWebServerRequest*
+//   httpCode     e.g. 200
+//   msg          short message (may be nullptr)
+//   detail       optional detail (may be nullptr)
+//   redirectUrl  absolute URL recommended (e.g. "/m/serverresetrelays")
+//   delayMs      delay before redirect (e.g. 750)
+//
+// RETURNS
+//   void
+//
+// CHANGED
+//   05Jan26  Initial.
+// -----------------------------------------------------------------------------
+void mWebServer::serveRedirectMessage(AsyncWebServerRequest* request,
+                                      int httpCode,
+                                      const __FlashStringHelper* msg,
+                                      const __FlashStringHelper* detail,
+                                      const char* redirectUrl,
+                                      uint32_t delayMs)
+{
+  if (!request) return;
+
+  // Must be a valid absolute-ish URL. You can relax this later if you want.
+  if (!redirectUrl || redirectUrl[0] == '\0') {
+    request->send(500, FPSTR(CONTENT_TYPE_HTML), PSTR("Missing redirectUrl"));
+    return;
+  }
+
+  AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_HTML));
+  response->setCode(httpCode);
+
+  // Cache policy: align with WLED message behavior (no-store)
+  response->addHeader(F("Cache-Control"), F("no-store"));
+  response->addHeader(F("Expires"), F("0"));
+
+  // Minimal HTML. Use absolute /style.css to avoid /m/style.css mistakes.
+  response->print(F("<!DOCTYPE html><html><head>"
+                    "<meta charset='utf-8'>"
+                    "<meta content='width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no' name='viewport'>"
+                    "<title>PulSar</title>"
+                    "<style>@import url('/style.css');</style>"
+                    "<script>"));
+
+  // Emit redirect JS (delay optional)
+  response->print(F("function Go(){var u='"));
+  response->print(redirectUrl);              // assume you pass safe URL (no quotes). If not, escape it.
+  response->print(F("';var d="));
+  response->print(delayMs);
+  response->print(F(";if(!u)return;setTimeout(function(){location.href=u;},d);}"));
+  response->print(F("</script></head><body onload='Go()'>"));
+
+  // Optional message. If you want “empty body”, delete this section.
+  if (msg)    { response->print(F("<h2>")); response->print(msg);    response->print(F("</h2>")); }
+  if (detail) { response->print(F("<div>")); response->print(detail); response->print(F("</div>")); }
+
+  response->print(F("</body></html>"));
+  request->send(response);
+}
 
 
 
