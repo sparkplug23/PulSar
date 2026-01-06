@@ -560,7 +560,8 @@
   // #define ENABLE_BUSCONFIG_16X_BUS_EACH_A_SEGMENT
   // #define ENABLE_BUSCONFIG_16X_TEST_MANUAL_BUS_PINS
   // #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE
-  #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE_TAKING_DOWN_EACH_BUS_SEGMENT
+  // #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE_TAKING_DOWN_EACH_BUS_SEGMENT
+  #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE_TAKING_DOWN_HUE_VISUALISE
 
   
   #define ENABLE_DEVFEATURE_LIGHT__GRADIENT_PATCH_4DEC25
@@ -1258,6 +1259,213 @@
   "}";
   #endif
 
+  #ifdef ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE_TAKING_DOWN_HUE_VISUALISE
+
+  #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
+  #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
+  #define MAX_LED_MEMORY 64000*5
+  
+  #define MAX_NUM_SEGMENTS 16
+
+  /**
+   * @brief tree physical wiring connections
+   * 16 outputs
+   * 
+   * C1L1 
+   * 
+   * 13g,12g,14g,27g,26g,25g,33g,32g
+   * 4g,16g,17g,-,1,18g,19g,21g,-,-,22g,23g
+   * 
+   * 17T
+   * 16R
+   * 
+   * 
+   * Grouped by shifter clusters
+   * 1  3         9   11
+   * 2  4         10  12
+   * -  -  ESP32  -    -
+   * 5  7         13  15
+   * 6  8         14  16
+   * 
+   * Grouped by shifter clusters (PINS)
+   * 4   16R      13  14
+   * 18  17T      12  27
+   * -  -  ESP32  -    -
+   * 19  22       26  25*
+   * 21  23       32  33*
+   * * are not being used on this tree
+   */
+
+  /**
+   * @brief tree physical wiring connections
+   * 16 outputs
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "n":"L1",
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":250
+      },
+      {
+        "n":"L1",
+        "Pin":18,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":250,
+        "Length":250
+      },
+      {
+        "n":"L1",
+        "Pin":16,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":500,
+        "Length":250
+      },
+      {
+        "n":"L1",
+        "Pin":17,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":750,
+        "Length":250
+      },
+      {
+        "n":"L1",
+        "Pin":19,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1000,
+        "Length":200
+      },
+      {
+        "n":"L1",
+        "Pin":21,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1200,
+        "Length":200
+      },
+      {
+        "n":"L1",
+        "Pin":22,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1400,
+        "Length":200
+      },
+      {
+        "n":"L1",
+        "Pin":23,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1600,
+        "Length":200
+      },
+      {
+        "n":"L1",
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1800,
+        "Length":200
+      },
+      {
+        "n":"L1",
+        "Pin":12,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2000,
+        "Length":200
+      },
+      {
+        "n":"L1",
+        "Pin":14,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2200,
+        "Length":200
+      },
+      {
+        "n":"L1",
+        "Pin":27,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2400,
+        "Length":200
+      },
+      {
+        "n":"L1",
+        "Pin":26,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2600,
+        "Length":200
+      },
+      {
+        "n":"L1",
+        "Pin":32,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2800,
+        "Length":200
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        3000
+      ],
+      "ColourPalette":"Snowy 02",
+      "Palette2":"Cold White",
+      "Effects": {
+        "Function":"DB Visualize Busses (Hue)",
+        "Check1":0,
+        "Check2":0,
+        "Intensity":255,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      // "\"28\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"12\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"26\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"32\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"14\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"27\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"25\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"33\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  #endif
   
   #ifdef ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE_TAKING_DOWN_EACH_BUS_SEGMENT
 
@@ -1427,9 +1635,9 @@
         "ColourPalette":"Snowy 02",
         "ColourType":3,
         "Effects": {
-          "Function":"Static",
-          "Speed":255,
-          "Intensity":127,
+          "Function":"Random Colors",
+          "Speed":0,
+          "Intensity":0,
           "Grouping":1,
           "RateMs": 20
         },

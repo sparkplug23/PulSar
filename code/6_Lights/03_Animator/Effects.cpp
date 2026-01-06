@@ -14476,6 +14476,90 @@ static const char PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS[] PROGMEM =
 "CB1: White start marker\n\r"
 "CB2: Alternate saturation";
 
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Debug: Visualize Busses (Dotted Hue)
+ *                Colors each physical bus with a unique hue, and inserts repeating white "dot" runs to encode the bus index.
+ *                Pattern per bus:
+ *                  • bus0 : 0 whites, 1 hue, repeat  (solid hue)
+ *                  • bus1 : 1 white, 1 hue, repeat
+ *                  • bus2 : 2 whites, 1 hue, repeat
+ *                  • ...
+ *                  • busN : N whites, 1 hue, repeat  (may become all white when N >= pattern period / bus length)
+ *
+ *                Controls
+ *                  • IX (Intensity) : saturation for alternating buses (when CB2 is ON).
+ *                  • SX (Speed)     : not used.
+ *                  • CB1            : highlight bus start pixel in white (forces first pixel white).
+ *                  • CB2            : alternate saturation between buses.
+ *
+ *                Notes
+ *                  • Ignores palette/segment colors; assigns hues directly.
+ *                  • Safe for any 1D arrangement; does not honor reverse/mirror/grouping.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Hardware__Show_Bus_Dotted()
+{
+  const uint8_t buscount = tkr_iLight->bus_manager->getNumBusses();
+  if (buscount == 0) return FRAMETIME;
+
+  const bool    useAlternateSat = SEGMENT.check2;
+  const uint8_t altSat          = SEGMENT.intensity;
+
+  for (uint8_t bus_i = 0; bus_i < buscount; ++bus_i)
+  {
+    const uint16_t start  = tkr_iLight->bus_manager->getBus(bus_i)->getStart();
+    const uint16_t length = tkr_iLight->bus_manager->getBus(bus_i)->getLength();
+
+    const uint16_t hue = map(bus_i, 0, buscount, 0, 360);
+    const uint8_t  sat = (useAlternateSat && (bus_i & 0x01)) ? altSat : 255;
+
+    const uint32_t colHue   = HueSatBrt(hue, sat, 255);
+    const uint32_t colWhite = 0xFFFFFF;
+
+    // Pattern: (bus_i whites) + (1 hue) repeating
+    const uint16_t whites = bus_i;              // bus0 => 0 whites, bus1 => 1, ...
+    const uint16_t period = whites + 1u;        // +1 for the hue pixel
+
+    const uint32_t end = (uint32_t)start + (uint32_t)length;
+    for (uint32_t p = start; p < end; ++p)
+    {
+      const uint32_t idx = p - start;
+      const bool isHue = (period == 1u) ? true : ((idx % period) == whites); // last slot in period is hue
+
+      SEGMENT.setPixelColor((int)p, isHue ? colHue : colWhite);
+    }
+
+    // Optional explicit bus start marker
+    if (SEGMENT.check1) SEGMENT.setPixelColor((int)start, colWhite);
+  }
+
+  return FRAMETIME;
+}
+
+static const char PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS_DOTTED[] PROGMEM =
+"DB VisBus Dotted@"
+",Saturation,,,,StartPiX,Alternate,,,"
+";"
+""
+";"
+""
+";"
+"1"
+";"
+"ix=255,"
+"o2=1"
+"o1=1"
+;
+
+static const char PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS_DOTTED[] PROGMEM =
+"Colors each bus with a unique hue, plus white dot runs encoding bus index.\n\r"
+"Pattern: busN = N whites then 1 hue, repeat.\n\r"
+"IX: Alt-bus saturation\n\r"
+"CB1: White start marker\n\r"
+"CB2: Alternate saturation";
+
+
+
 #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
 
 #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
@@ -28083,6 +28167,14 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS,
+            #endif
+            Effect_DevStage::Release);
+
+  addEffect(EFFECTS_FUNCTION__HARDWARE__SHOW_BUS_DOTTED__ID,
+            &mAnimatorLight::EffectAnim__Hardware__Show_Bus_Dotted,
+            PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS_DOTTED,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS_DOTTED,
             #endif
             Effect_DevStage::Release);
 
