@@ -179,13 +179,13 @@
 
 //       // Check to within 5 seconds
 //       if(tkr_time->CheckBetweenSOD(tkr_time->ConvertHHMMSStoSOD(14,0,0),tkr_time->ConvertHHMMSStoSOD(14,0,11))){ // MIDNIGHT
-//       //  for(int i=0;i<5;i++){pCONT->mso->MessagePrint("\t INSIDE TIME");pCONT->mso->MessagePrintln(tkr_time->RtcTime.Wday);}
+//       //  for(int i=0;i<5;i++){tkr->mso->MessagePrint("\t INSIDE TIME");tkr->mso->MessagePrintln(tkr_time->RtcTime.Wday);}
 //         if(oiltank.smooth_1m.isvalid){
 //         EEPROM.put(EEPROM_GET_DAYS_ADDRESS(tkr_time->RtcTime.Wday),(int)oiltank.smooth_1m.final.litres_in_tank); //add,int
 //         EEPROM.commit();
 //         }
 //       }else{
-//       //  pCONT->mso->MessagePrint("\t OUTSIDE TIME");
+//       //  tkr->mso->MessagePrint("\t OUTSIDE TIME");
 //       }
 
 //   }
@@ -238,7 +238,7 @@
 // //   // Check if instruction is for me
 // //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/oilfurnace")>=0){
 // //       ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_PIXELS));
-// //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+// //       tkr->fExitTaskerWithCompletion = true; // set true, we have found our handler
 // //   }else{
 // //     return; // not meant for here
 // //   }
@@ -795,7 +795,7 @@
 
 // //   // #ifdef USE_MODULE_SENSORS_DS18X
 // //   // for(int i=0;i<tkr_db18->db18_sensors_active;i++){
-// //   //   if((tkr_db18->db18_sensor[i].reading.ischanged)||(pCONT->mqt->fSendSingleFunctionData)){
+// //   //   if((tkr_db18->db18_sensor[i].reading.ischanged)||(tkr->mqt->fSendSingleFunctionData)){
 // //   //     JsonObject sensorobj = root.createNestedObject(tkr_db18->db18_sensor[i].name.ctr);
 // //   //     sensorobj["temp", tkr_db18->db18_sensor[i].reading.val;
 // //   //     sensorobj["isvalid"]= tkr_db18->db18_sensor[i].reading.isvalid;
@@ -804,7 +804,7 @@
 // //   // #endif
 
 // // // #ifdef FURNACE_MONITOR_PIN
-// // //   if(furnace_detect.ischanged||(pCONT->mqt->fSendSingleFunctionData)){ furnace_detect.ischanged = false;// TEMP FIX
+// // //   if(furnace_detect.ischanged||(tkr->mqt->fSendSingleFunctionData)){ furnace_detect.ischanged = false;// TEMP FIX
 // //     root["furnace_onoff", FURNACEACTIVECTR;//mdio_mqt->input_state_detect[0].isactive;
 // //     root["furnace_state", FURNACEACTIVE()?1:0;//mdio_mqt->input_state_detect[0].isactive;
 // //     // data_buffer.payload.json_pairs++;

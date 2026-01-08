@@ -152,7 +152,7 @@ int8_t mSIM800L::Tasker(uint8_t function, JsonParserObject obj)
       ALOG_INF(PSTR(D_LOG_CELLULAR "isGprsConnected %d"), modem->isGprsConnected());   
       ALOG_INF(PSTR(D_LOG_CELLULAR "Sim Connected %d"), modem->isNetworkConnected()); 
       ALOG_INF(PSTR(D_LOG_CELLULAR "smsauto_gps_messages.rate_seconds %d"), smsauto_gps_messages.rate_seconds);       
-      ALOG_INF(PSTR(D_LOG_CELLULAR "function_event_queue %d"), pCONT->function_event_queue.size()); 
+      ALOG_INF(PSTR(D_LOG_CELLULAR "function_event_queue %d"), tkr->function_event_queue.size()); 
       Serial.printf(PSTR("=========================EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n\r\n\r")); 
       #endif // ENABLE_DEBUGFEATURE__CELLULAR_CONNECTION_ISSUES
 
@@ -172,7 +172,7 @@ int8_t mSIM800L::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_EVERY_FIVE_SECOND:   
     {
       
-      // pCONT->function_event_queue.push_back(pCONT->FunctionEvent(TASK_LOG__SHOW_UPTIME,1000));
+      // tkr->function_event_queue.push_back(tkr->FunctionEvent(TASK_LOG__SHOW_UPTIME,1000));
   
       #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
       ALOG_INF(PSTR(D_LOG_CELLULAR "GPS u/v_sat %d/%d Fix (%d cm)"), gps.usat, gps.vsat, (int)(gps.accuracy*100)); 
@@ -1692,7 +1692,7 @@ void mSIM800L::SMS_CommandIntoJSONCommand(char* sms_command)
 
     ALOG_COM( PSTR(DEBUG_INSERT_PAGE_BREAK  "SMS->JsonCommandBuffer = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
 
-    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+    tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
     ALOG_INF(PSTR(D_LOG_CELLULAR "JsonCommand Finished"));
 
@@ -2019,18 +2019,18 @@ void mSIM800L::GPRS_UpdateConnectionState(bool state)
     if(state)
     {
   DEBUG_LINE_HERE;
-      pCONT->function_event_queue.push_back(pCONT->FunctionEvent(TASK_CELLULAR_CONNECTION_ESTABLISHED));
+      tkr->function_event_queue.push_back(tkr->FunctionEvent(TASK_CELLULAR_CONNECTION_ESTABLISHED));
   DEBUG_LINE_HERE;
-      pCONT->function_event_queue.push_back(pCONT->FunctionEvent(TASK_NETWORK_CONNECTION_ESTABLISHED));
+      tkr->function_event_queue.push_back(tkr->FunctionEvent(TASK_NETWORK_CONNECTION_ESTABLISHED));
   DEBUG_LINE_HERE;
       gprs.reconnect_init_counts++;
     }
     else
     {
   DEBUG_LINE_HERE;
-      pCONT->function_event_queue.push_back(pCONT->FunctionEvent(TASK_CELLULAR_CONNECTION_LOST));
+      tkr->function_event_queue.push_back(tkr->FunctionEvent(TASK_CELLULAR_CONNECTION_LOST));
   DEBUG_LINE_HERE;
-      pCONT->function_event_queue.push_back(pCONT->FunctionEvent(TASK_NETWORK_CONNECTION_LOST));
+      tkr->function_event_queue.push_back(tkr->FunctionEvent(TASK_NETWORK_CONNECTION_LOST));
   DEBUG_LINE_HERE;
     }
     #endif //ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE

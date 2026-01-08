@@ -255,13 +255,13 @@ void mTankVolume::SubTask_RecordLitresOverDays(void){
 
   //     // Check to within 5 seconds
   //     if(tkr_time->CheckBetweenSOD(tkr_time->ConvertHHMMSStoSOD(14,0,0),tkr_time->ConvertHHMMSStoSOD(14,0,11))){ // MIDNIGHT
-  //     //  for(int i=0;i<5;i++){pCONT->mso->MessagePrint("\t INSIDE TIME");pCONT->mso->MessagePrintln(tkr_time->RtcTime.Wday);}
+  //     //  for(int i=0;i<5;i++){tkr->mso->MessagePrint("\t INSIDE TIME");tkr->mso->MessagePrintln(tkr_time->RtcTime.Wday);}
   //       if(oiltank.smooth_1m.isvalid){
   //       EEPROM.put(EEPROM_GET_DAYS_ADDRESS(tkr_time->RtcTime.Wday),(int)oiltank.smooth_1m.final.litres_in_tank); //add,int
   //       EEPROM.commit();
   //       }
   //     }else{
-  //     //  pCONT->mso->MessagePrint("\t OUTSIDE TIME");
+  //     //  tkr->mso->MessagePrint("\t OUTSIDE TIME");
   //     }
 
   // }

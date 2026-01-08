@@ -469,7 +469,7 @@ Add sunelevation palette that is actually left on overnight, and is black when i
 
 #FI-130
     Add new system (with vectors) that does delayed commands.
-    For example, the typical "pCONT->Tasker_Interface(TASK_WIFI_CONNECTED)". This would need to called within the connection function leading to possible recursive calls.
+    For example, the typical "tkr->Tasker_Interface(TASK_WIFI_CONNECTED)". This would need to called within the connection function leading to possible recursive calls.
     Instead, have this command added to a vector that holds them all, and calls any at the end of the loop after connections are finished.
     If it is done with a vectorised struct, then other parameters such as delays can be used to added wait times.
 

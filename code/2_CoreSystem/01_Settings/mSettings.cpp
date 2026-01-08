@@ -118,7 +118,7 @@ void mSettings::Function_Template_Load(){
 
   ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
   
-  pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+  tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
   runtime.template_loading.status.function = TemplateSource::HEADER_TEMPLATE;
 
@@ -392,7 +392,7 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
     uint16_t module_id = 0;
 
     // Search across all module names
-    for(auto& module : pCONT->pModule){
+    for(auto& module : tkr->pModule){
 
       sprintf_P(module_friendlyname_buffer,"%S", module->GetModuleName());
 
@@ -456,7 +456,7 @@ void mSettings::CommandSet_SystemRestartID(uint8_t value){
   #ifdef USE_MODULE_NETWORK_WIFI   
   if(value == 1)
   {
-    tkr_wifi->EspRestart();
+    tkr_sup->EspRestart();
   }
   else
   if(value == 2)
@@ -477,7 +477,7 @@ void mSettings::CommandSet_SystemRestartID(uint8_t value){
     tkr_set->TestSettings_ShowLocal_Header();
     tkr_set->TestSettingsLoad();
 
-    tkr_wifi->EspRestart();
+    tkr_sup->EspRestart();
 
   }  
   #endif // ifdef USE_MODULE_NETWORK_WIFI

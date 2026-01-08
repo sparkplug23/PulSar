@@ -36,10 +36,10 @@ DEBUG_LINE_HERE2
 
   // Clear module defaults  
   DEBUG_LINE_HERE;
-  pCONT->Tasker_Interface(TASK_SETTINGS_DEFAULT); // replace with below?
+  tkr->Tasker_Interface(TASK_SETTINGS_DEFAULT); // replace with below?
   DEBUG_LINE_HERE;
   
-  pCONT->Tasker_Interface(TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT);
+  tkr->Tasker_Interface(TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT);
       
   DEBUG_LINE_HERE;
   #ifdef ENABLE_LOG_LEVEL_INFO
@@ -171,18 +171,27 @@ void mSettings::SystemSettings_DefaultBody(void)
   tkr_sup->ParseIPv4(&Settings.ipv4_address[4], PSTR(WIFI_DNS2));
   tkr_sup->ParseIPv4(&Settings.ipv4_rgx_address, PSTR(WIFI_RGX_IP_ADDRESS));
   tkr_sup->ParseIPv4(&Settings.ipv4_rgx_subnetmask, PSTR(WIFI_RGX_SUBNETMASK));
+
+  #ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+
+  Settings.network.sta_config = WIFI_CONFIG_TOOL;
+  Settings.network.sta_active = 0;
+
+  Settings.network.flag.network_wifi = 1;
+  Settings.network.flag.sleep_normal = true; // USE DYNAMIC sleep
   
+  Settings.network.flag.timers_enable = 0;
+  Settings.network.flag.use_wifi_rescan = 1;
+  Settings.flag_system.stop_flash_rotate = true;
+
+  Settings.network.flag.mdns_enabled = 1;
+
+  #else
+
   Settings.sta_config = WIFI_CONFIG_TOOL;
   Settings.sta_active = 0;
-  SettingsUpdateText(SET_STASSID1, PSTR(STA_SSID1));
-  SettingsUpdateText(SET_STASSID2, PSTR(STA_SSID2));
-  SettingsUpdateText(SET_STAPWD1, PSTR(STA_PASS1));
-  SettingsUpdateText(SET_STAPWD2, PSTR(STA_PASS2));
-  SettingsUpdateText(SET_HOSTNAME, WIFI_HOSTNAME);
-  SettingsUpdateText(SET_RGX_SSID, PSTR(WIFI_RGX_SSID));
-  SettingsUpdateText(SET_RGX_PASSWORD, PSTR(WIFI_RGX_PASSWORD));
 
-  Settings.flag_network.network_wifi = 1;
+  Settings.network.flag.network_wifi = 1;
   Settings.flag_network.sleep_normal = true; // USE DYNAMIC sleep
   
   Settings.flag_network.timers_enable = 0;
@@ -190,6 +199,28 @@ void mSettings::SystemSettings_DefaultBody(void)
   Settings.flag_system.stop_flash_rotate = true;
 
   Settings.flag_network.mdns_enabled = 1;
+  #endif
+  
+  // Settings.sta_config = WIFI_CONFIG_TOOL;
+  // Settings.sta_active = 0;
+  #ifndef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+  SettingsUpdateText(SET_STASSID1, PSTR(STA_SSID1));
+  SettingsUpdateText(SET_STASSID2, PSTR(STA_SSID2));
+  SettingsUpdateText(SET_STAPWD1, PSTR(STA_PASS1));
+  SettingsUpdateText(SET_STAPWD2, PSTR(STA_PASS2));
+  #endif
+  SettingsUpdateText(SET_HOSTNAME, WIFI_HOSTNAME);
+  SettingsUpdateText(SET_RGX_SSID, PSTR(WIFI_RGX_SSID));
+  SettingsUpdateText(SET_RGX_PASSWORD, PSTR(WIFI_RGX_PASSWORD));
+
+  // Settings.network.flag.network_wifi = 1;
+  // Settings.flag_network.sleep_normal = true; // USE DYNAMIC sleep
+  
+  // Settings.flag_network.timers_enable = 0;
+  // Settings.flag_network.use_wifi_rescan = 1;
+  // Settings.flag_system.stop_flash_rotate = true;
+
+  // Settings.flag_network.mdns_enabled = 1;
   runtime.mdns_delayed_start = 60;
   snprintf(runtime.my_hostname, sizeof(runtime.my_hostname),"%s",tkr_set->Settings.system_name.device);
 
@@ -274,7 +305,11 @@ void mSettings::SystemSettings_DefaultBody(void)
   Settings.flag_system.button_restrict = 0;
   Settings.flag_system.button_swap = 0;
   Settings.flag_system.button_single_press_only = 0; // support only single press to support faster button recognition (disable to allow multipress)
+  #ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+  Settings.network.flag.button_switch_force_local =0;
+  #else
   Settings.flag_network.button_switch_force_local =0;
+  #endif
 
   Settings.flag_system.mqtt_switches = 0; // false default
 

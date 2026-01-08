@@ -30,6 +30,34 @@ size_t mWebServer::printSetFormValue(Print& settingsScript, const char* key, con
 size_t mWebServer::printSetClassElementHTML(Print& settingsScript, const char* key, const int index, const char* val) {
   return settingsScript.printf_P(PSTR("d.getElementsByClassName(\"%s\")[%d].innerHTML=\"%s\";"), key, index, val);
 }
+size_t mWebServer::printSetElementStyle(
+  Print& settingsScript,
+  const char* element_id,
+  const char* css_prop,
+  const char* css_val
+) {
+  return settingsScript.printf_P(
+    PSTR("var e=d.getElementById(\"%s\");if(e)e.style.%s=\"%s\";"),
+    element_id, css_prop, css_val
+  );
+}
+
+size_t mWebServer::printToggleElementClass(
+  Print& settingsScript,
+  const char* element_id,
+  const char* class_name,
+  bool enable
+) {
+  return settingsScript.printf_P(
+    PSTR(
+      "var e=d.getElementById(\"%s\");"
+      "if(e){e.classList.%s(\"%s\");}"
+    ),
+    element_id,
+    enable ? "add" : "remove",
+    class_name
+  );
+}
 
 
 
@@ -47,14 +75,14 @@ class LockedJsonResponse2: public AsyncJsonResponse {
     size_t result = AsyncJsonResponse::_fillBuffer(buf, maxLen);
     // Release lock as soon as we're done filling content
     if (((result + _sentLength) >= (_contentLength)) && _holding_lock) {
-      tkr_anim->releaseJSONBufferLock();
+      JBI->releaseJSONBufferLock();
       _holding_lock = false;
     }
     return result;
   }
 
   // destructor will remove JSON buffer lock when response is destroyed in AsyncWebServer
-  virtual ~LockedJsonResponse2() { if (_holding_lock) tkr_anim->releaseJSONBufferLock(); };
+  virtual ~LockedJsonResponse2() { if (_holding_lock) JBI->releaseJSONBufferLock(); };
 };
 
 
@@ -66,6 +94,7 @@ class LockedJsonResponse2: public AsyncJsonResponse {
 //build XML response to HTTP /win API request
 void mWebServer::XML_response(Print& dest)
 {
+  #ifdef USE_MODULE_LIGHTS_ANIMATOR
   dest.printf_P(PSTR("<?xml version=\"1.0\" ?><vs><ac>%d</ac>"), ( tkr_anim->nightlightActive && tkr_anim->nightlightMode > NL_MODE_SET) ? tkr_anim->briT : tkr_anim->getBrightness());
   for (int i = 0; i < 3; i++)
   {
@@ -82,6 +111,7 @@ void mWebServer::XML_response(Print& dest)
     tkr_anim->serverDescription, tkr_anim->realtimeMode ? PSTR(" (live)") : "",
     tkr_anim->getFirstSelectedSegId()
   );
+  #endif
 }
 
 void mWebServer::extractPin(Print& settingsScript, JsonObject &obj, const char *key) {
@@ -143,12 +173,12 @@ void mWebServer::appendGPIOinfo(Print& settingsScript) {
     settingsScript.printf_P(PSTR(",%d,%d"), spi_mosi, spi_sclk);
   }
   // usermod pin reservations will become unnecessary when settings pages will read cfg.json directly
-  if (tkr_anim->requestJSONBufferLock(6)) {
+  if (JBI->requestJSONBufferLock(6)) {
     // if we can't allocate JSON buffer ignore usermod pins
     JsonObject mods = tkr_mfile->pDoc->createNestedObject("um");
     // UsermodManager::addToConfig(mods);
     if (!mods.isNull()) fillUMPins(settingsScript, mods);
-    tkr_anim->releaseJSONBufferLock();
+    JBI->releaseJSONBufferLock();
   }
   settingsScript.print(F("];"));
 
@@ -257,6 +287,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
     printSetFormValue(settingsScript,PSTR("D2"),dnsAddress[2]);
     printSetFormValue(settingsScript,PSTR("D3"),dnsAddress[3]);
 
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
     printSetFormValue(settingsScript,PSTR("CM"), tkr_web->cmDNS);
     printSetFormIndex(settingsScript,PSTR("AB"),tkr_anim->apBehavior);
     printSetFormValue(settingsScript,PSTR("AS"),tkr_anim->apSSID);
@@ -291,6 +322,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
     //hide ethernet setting if not compiled in
     settingsScript.print(F("gId('ethd').style.display='none';"));
     #endif
+  #endif
 
     if (Network.isConnected()) //is connected
     {
@@ -318,15 +350,15 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
       printSetClassElementHTML(settingsScript,PSTR("sip"),1,(char*)F("Not active"));
     }
 
-    #ifndef WLED_DISABLE_ESPNOW
-    if (strlen(tkr_anim->last_signal_src) > 0) { //Have seen an ESP-NOW Remote
-      printSetClassElementHTML(settingsScript,PSTR("rlid"),0,tkr_anim->last_signal_src);
-    } else if (!0){//enableESPNow) {
-      printSetClassElementHTML(settingsScript,PSTR("rlid"),0,(char*)F("(Enable ESP-NOW to listen)"));
-    } else {
-      printSetClassElementHTML(settingsScript,PSTR("rlid"),0,(char*)F("None"));
-    }
-    #endif
+    // #ifndef WLED_DISABLE_ESPNOW
+    // if (strlen(tkr_anim->last_signal_src) > 0) { //Have seen an ESP-NOW Remote
+    //   printSetClassElementHTML(settingsScript,PSTR("rlid"),0,tkr_anim->last_signal_src);
+    // } else if (!0){//enableESPNow) {
+    //   printSetClassElementHTML(settingsScript,PSTR("rlid"),0,(char*)F("(Enable ESP-NOW to listen)"));
+    // } else {
+    //   printSetClassElementHTML(settingsScript,PSTR("rlid"),0,(char*)F("None"));
+    // }
+    // #endif
   }
 
   if (subPage == SUBPAGE_LEDS)
@@ -775,100 +807,51 @@ void mWebServer::serveJson(AsyncWebServerRequest* request)
   else if (url.indexOf("net")   > 0) subJson = JSON_PATH_NETWORKS;
   #ifdef WLED_ENABLE_JSONLIVE
   else if (url.indexOf("live")  > 0) { 
-    tkr_anim->serveLiveLeds(request);
+    // tkr_anim->serveLiveLeds(request);
     return;
   }
   #endif
-  // else if (url.indexOf("pal") > 0) { // "/json/palettes"
+  else if (url.indexOf("pal") > 0) { // "/json/palettes" - names only (flat array)
+  // // Build JSON into a local String to avoid races with the global JBI buffer
+  // String out;
+  // out.reserve(64 + 24 * mPaletteI->GetPaletteListLength()); // rough reserve
 
-  //   JBI->Start();
-  //     JBI->Array_Start();
+  // out += '[';
 
-  //     char lineBuffer[100] = {0};
-  //     bool flag_get_first_name_only = true;
-        
-  //     for(uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++)
-  //     {
+  // char nameBuf[96];
+  // bool first = true;
+  // const bool firstNameOnly = true; // keep your current behavior
 
-  //       GetPaletteNameByID(i, lineBuffer, sizeof(lineBuffer));
-  //       if(flag_get_first_name_only)
-  //       {    
-  //         char* dataPtr = strchr(lineBuffer, PALETTE_MULTIPLE_NAME_DELIMETER);
-  //         if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
-  //       }
-  //       ALOG_DBM(PSTR("pal[%d]=\"%s\""), i, lineBuffer);
-  //       JBI->Add(lineBuffer);
-  //     }
+  // for (uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++) {
+  //   tkr_anim->GetPaletteNameByID(i, nameBuf, sizeof(nameBuf));
+  //   if (firstNameOnly) {
+  //     if (char* p = strchr(nameBuf, PALETTE_MULTIPLE_NAME_DELIMETER)) *p = '\0';
+  //   }
 
-  //     JBI->Array_End();
-  //   JBI->End();
+  //   // minimal JSON string escape (quotes + backslashes); names are simple, but be safe
+  //   String nm; nm.reserve(strlen(nameBuf) + 8);
+  //   for (const char* s = nameBuf; *s; ++s) {
+  //     char c = *s;
+  //     if (c == '\"' || c == '\\') { nm += '\\'; nm += c; }
+  //     else                         { nm += c; }
+  //   }
 
-  //   // remove leading and trailing json parts as temp measure
-  //   char* data = JBI->GetBufferPtr();
-  //   uint16_t data_len = strlen(data);
-  //   if(data) data[data_len-1] = '\0';
-  //   Serial.println();
+  //   if (!first) out += ',';
+  //   first = false;
+  //   out += '\"'; out += nm; out += '\"';
+  // }
 
-  //   #ifdef ENABLE_DEVFEATURE_WEBSERVER__ETAGS_ENABLED_FOR_RELOADING_PALETTES_ON_FRESH_COMPILE    
-  //   /**
-  //    * @brief It actually makes perfect sense to embedded the ETag into the names of palettes, 
-  //    * since its this that forces the reload of the palette colours if needed too.
-  //    * 
-  //    */
-  //   // Generate the ETag
+  // out += ']';
+
+  // #ifdef ENABLE_DEVFEATURE_WEBSERVER__ETAGS_ENABLED_FOR_RELOADING_PALETTES_ON_FRESH_COMPILE
   //   char etag[32];
   //   tkr_web->generateEtag(etag, JSON_PATH_PALETTES);
-  //   // Send the response with the ETag header
-  //   AsyncWebServerResponse *response = request->beginResponse_P(200, "application/json", &data[1]);   [1] possible cause of toast#1] SyntaxError: Unexpected token '}', "}
-  //   response->addHeader(F("ETag"), etag); // Add the ETag header to the response
-  //   request->send(response);
-  //   #else
-  //   request->send_P(200, "application/json", &data[1]);
-  //   #endif
-
-  //   return;
-  // }
-  else if (url.indexOf("pal") > 0) { // "/json/palettes" - names only (flat array)
-  // Build JSON into a local String to avoid races with the global JBI buffer
-  String out;
-  out.reserve(64 + 24 * mPaletteI->GetPaletteListLength()); // rough reserve
-
-  out += '[';
-
-  char nameBuf[96];
-  bool first = true;
-  const bool firstNameOnly = true; // keep your current behavior
-
-  for (uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++) {
-    tkr_anim->GetPaletteNameByID(i, nameBuf, sizeof(nameBuf));
-    if (firstNameOnly) {
-      if (char* p = strchr(nameBuf, PALETTE_MULTIPLE_NAME_DELIMETER)) *p = '\0';
-    }
-
-    // minimal JSON string escape (quotes + backslashes); names are simple, but be safe
-    String nm; nm.reserve(strlen(nameBuf) + 8);
-    for (const char* s = nameBuf; *s; ++s) {
-      char c = *s;
-      if (c == '\"' || c == '\\') { nm += '\\'; nm += c; }
-      else                         { nm += c; }
-    }
-
-    if (!first) out += ',';
-    first = false;
-    out += '\"'; out += nm; out += '\"';
-  }
-
-  out += ']';
-
-  #ifdef ENABLE_DEVFEATURE_WEBSERVER__ETAGS_ENABLED_FOR_RELOADING_PALETTES_ON_FRESH_COMPILE
-    char etag[32];
-    tkr_web->generateEtag(etag, JSON_PATH_PALETTES);
-    AsyncWebServerResponse* resp = request->beginResponse(200, "application/json", out);
-    resp->addHeader(F("ETag"), etag);
-    request->send(resp);
-  #else
-    request->send(200, "application/json", out);
-  #endif
+  //   AsyncWebServerResponse* resp = request->beginResponse(200, "application/json", out);
+  //   resp->addHeader(F("ETag"), etag);
+  //   request->send(resp);
+  // #else
+  //   request->send(200, "application/json", out);
+  // #endif
 
   return;
 }
@@ -880,10 +863,10 @@ void mWebServer::serveJson(AsyncWebServerRequest* request)
     return;
   }
 
-  if (!tkr_anim->requestJSONBufferLock(17)) {
+  // if (!tkr_anim->requestJSONBufferLock(17)) {
     request->send(503, "application/json", F("{\"error\":3}"));
     return;
-  }
+  // }
 
   // AsyncJsonResponse *response = new AsyncJsonResponse(tkr_mfile->pDoc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
 
@@ -895,57 +878,57 @@ void mWebServer::serveJson(AsyncWebServerRequest* request)
 
   JsonVariant lDoc = response->getRoot();
 
-  switch (subJson)
-  {
-    case JSON_PATH_STATE:
-      tkr_anim->serializeState(lDoc); 
-    break;
-    case JSON_PATH_INFO:
-      tkr_anim->serializeInfo(lDoc);     
-    break;
-    case JSON_PATH_PALETTES:
-      tkr_anim->serializePalettes(lDoc, request->hasParam("page") ? request->getParam("page")->value().toInt() : 0); 
-    break;
-    case JSON_PATH_EFFECTS:
-      tkr_anim->serializeModeNames(lDoc); 
-    break;
-    case JSON_PATH_FXDATA:
-      tkr_anim->serializeModeData(lDoc); 
-    break;
-    case JSON_PATH_NETWORKS:
-      tkr_anim->serializeNetworks(lDoc); 
-    break;
-    default: // All
-      JsonObject state = lDoc.createNestedObject("state");
-      tkr_anim->serializeState(state);
-      JsonObject info = lDoc.createNestedObject("info");
-      tkr_anim->serializeInfo(info);
+  // switch (subJson)
+  // {
+  //   case JSON_PATH_STATE:
+  //     tkr_anim->serializeState(lDoc); 
+  //   break;
+  //   case JSON_PATH_INFO:
+  //     tkr_anim->serializeInfo(lDoc);     
+  //   break;
+  //   case JSON_PATH_PALETTES:
+  //     tkr_anim->serializePalettes(lDoc, request->hasParam("page") ? request->getParam("page")->value().toInt() : 0); 
+  //   break;
+  //   case JSON_PATH_EFFECTS:
+  //     tkr_anim->serializeModeNames(lDoc); 
+  //   break;
+  //   case JSON_PATH_FXDATA:
+  //     tkr_anim->serializeModeData(lDoc); 
+  //   break;
+  //   case JSON_PATH_NETWORKS:
+  //     tkr_anim->serializeNetworks(lDoc); 
+  //   break;
+  //   default: // All
+  //     JsonObject state = lDoc.createNestedObject("state");
+  //     tkr_anim->serializeState(state);
+  //     JsonObject info = lDoc.createNestedObject("info");
+  //     tkr_anim->serializeInfo(info);
 
-      tkr_anim->force_update(); // New data in, so we should update
+  //     tkr_anim->force_update(); // New data in, so we should update
 
-      if (subJson != JSON_PATH_STATE_INFO)
-      {
-        JsonArray effects = lDoc.createNestedArray(F("effects"));
-        tkr_anim->serializeModeNames(effects);
+  //     if (subJson != JSON_PATH_STATE_INFO)
+  //     {
+  //       JsonArray effects = lDoc.createNestedArray(F("effects"));
+  //       tkr_anim->serializeModeNames(effects);
 
-        bool flag_get_first_name_only = true;        
-        char lineBuffer[100] = {0};
-        JsonArray pal = lDoc.createNestedArray(F("palettes"));
-        for(uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++)
-        {
-          tkr_anim->GetPaletteNameByID(i, lineBuffer, sizeof(lineBuffer));
-          if(flag_get_first_name_only)
-          {    
-            char* dataPtr = strchr(lineBuffer,'|');
-            if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
-            // Serial.println(lineBuffer);
-          }
-          pal.add(lineBuffer);
-        }
+  //       bool flag_get_first_name_only = true;        
+  //       char lineBuffer[100] = {0};
+  //       JsonArray pal = lDoc.createNestedArray(F("palettes"));
+  //       for(uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++)
+  //       {
+  //         tkr_anim->GetPaletteNameByID(i, lineBuffer, sizeof(lineBuffer));
+  //         if(flag_get_first_name_only)
+  //         {    
+  //           char* dataPtr = strchr(lineBuffer,'|');
+  //           if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
+  //           // Serial.println(lineBuffer);
+  //         }
+  //         pal.add(lineBuffer);
+  //       }
 
-      }
-      lDoc["m"] = lDoc.memoryUsage(); // JSON buffer usage, for remote debugging
-  }
+  //     }
+  //     lDoc["m"] = lDoc.memoryUsage(); // JSON buffer usage, for remote debugging
+  // }
 
   ALOG_DBG(PSTR("JSON buffer size: %u for request: %d\n"), lDoc.memoryUsage(), subJson);
 
@@ -953,7 +936,7 @@ void mWebServer::serveJson(AsyncWebServerRequest* request)
   ALOG_DBG(PSTR("JSON content length: %d"), len);
 
   request->send(response);
-  tkr_anim->releaseJSONBufferLock();
+  // tkr_anim->releaseJSONBufferLock();
 }
 
 
@@ -1066,7 +1049,7 @@ void mWebServer::SettingsPages_POST(AsyncWebServerRequest* request)
     case SUBPAGE_TIME: strcpy_P(s, PSTR("Time")); break;
     case SUBPAGE_SEC:
       strcpy_P(s, PSTR("Security"));
-      if (tkr_anim->doReboot) strcpy_P(s2, PSTR("Rebooting, please wait ~10 seconds..."));
+      if (tkr_sup->ESP_Restart_Scheduled()) strcpy_P(s2, PSTR("Rebooting, please wait ~10 seconds..."));
       break;
 
     #ifdef ENABLE_FEATURE_LIGHTING__DMX
@@ -1108,7 +1091,7 @@ void mWebServer::SettingsPages_POST(AsyncWebServerRequest* request)
 
   if (!s2[0]) strcpy_P(s2, s_redirecting);
 
-  bool doReboot = tkr_anim->doReboot; // keep semantics consistent with your switch text above
+  bool doReboot = tkr_sup->ESP_Restart_Scheduled(); // keep semantics consistent with your switch text above
   bool redirectAfter9s = (subPage == SUBPAGE_WIFI ||
                           ((subPage == SUBPAGE_SEC || subPage == SUBPAGE_UM) && doReboot));
 
@@ -1166,672 +1149,7 @@ void mWebServer::SettingsPages_GET(AsyncWebServerRequest* request)
 #endif
 
 
-/*************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-   * Console Page
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-  ************************************************************************************************************************************************************************************
-*/
 
-
-#ifdef ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI
-
-// // void mWebServer::HandlePage_Console(AsyncWebServerRequest *request){
-
-// //   fConsole_active = true;
-
-// //   // if (!HttpCheckPriviledgedAccess()) { return; }
-  
-// //   if (request->hasParam("c2")) {      // Console refresh requested
-// //     HandleConsoleRefresh(request);
-// //     return;
-// //   }
-
-// //   // request->send_P(200,CONTENT_TYPE_TEXT_HTML_ID,PAGE_ROOT);
-// //   // return;
-
-// //   AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_ROOT, PAGE_ROOT_L);
-
-// //   response->addHeader("Content-Encoding","gzip");
-  
-// //   request->send(response);
-
-// // }
-
-void mWebServer::HandlePage_Console(AsyncWebServerRequest *request)
-{
-  fConsole_active = true;
-
-  if (request->hasParam("c2")) { HandleConsoleRefresh(request); return; }
-
-  // FS override for development
-  if (tkr_mfile->handleFileRead(request, "/console.htm")) return;
-
-  if (tkr_web->handleIfNoneMatchCacheHeader(request, 200)) return;
-
-  AsyncWebServerResponse *response =
-    request->beginResponse_P(200, "text/html", PAGE_console, PAGE_console_length);
-
-  response->addHeader("Content-Encoding", "gzip");
-  tkr_web->setStaticContentCacheHeaders(response);
-  request->send(response);
-}
-
-// Date Modified: 01Jan26
-void mWebServer::HandlePage_Console2(AsyncWebServerRequest *request)
-{
-
-  fConsole_active = true;
-
-
-  AsyncWebServerResponse *response =
-    request->beginResponse_P(
-      200,
-      "text/html",
-      PAGE_console2,
-      PAGE_console2_length
-    );
-
-  response->addHeader(F("Content-Encoding"), F("gzip"));
-  response->addHeader(F("Cache-Control"), F("no-store"));
-
-  request->send(response);
-}
-
-
-// // void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
-// // {
-// //   bool cflg = true;
-// //   uint8_t counter = 0;                // Initial start, should never be 0 again
-
-// //   // String svalue = request->arg("c1");
-// //   // if (svalue.length() && (svalue.length() < INPUT_BUFFER_SIZE)) {
-// //   //   ALOG_INF(PSTR(D_LOG_COMMAND "%s"), svalue.c_str());
-// //   //   ExecuteWebCommand((char*)svalue.c_str(), SRC_WEBCONSOLE);
-// //   // }
-
-// //   char stmp[8];
-// //   WebGetArg(request,"c2", stmp, sizeof(stmp));
-// //   if (strlen(stmp)) { counter = atoi(stmp); }
-
-// //   BufferWriterI->Start();
-
-// //   BufferWriterI->Append_P(
-// //     PSTR(
-// //       "%d" //web_log_index
-// //       "}1"
-// //       "%d" //reset_web_log_flag
-// //       "}1")
-// //     , tkr_log->web_log_index, reset_web_log_flag);
-
-// //   if (!reset_web_log_flag) {
-// //     counter = 0;                  //reset counter from webpage 
-// //     reset_web_log_flag = true;
-// //   }
-// //   if (counter != tkr_log->web_log_index) {   //if webpage counter does not match internal counter
-// //     if (!counter) {    //and counter is not FIRST position
-// //       counter = tkr_log->web_log_index;  //use internal counter
-// //       cflg = false;     //no NEW line
-// //     }
-
-// //     // get the webindex, and get all internal indexes until internal catches up with web
-// //     do {
-// //       char* tmp;
-// //       size_t len;
-// //       tkr_log->GetLog(counter, &tmp, &len);
-// //       if (len) { //if there is new log data
-// //       // and is not larger than buffer
-// //         if (len > sizeof(data_buffer.payload.ctr) -2) { len = sizeof(data_buffer.payload.ctr); }
-// //         char stemp[len +1]; //leak!
-// //         strlcpy(stemp, tmp, len);
-// //         // add new line if not first, then text
-// //         BufferWriterI->Append_P(PSTR("%s%s"), (cflg) ? "\n" : "", stemp);
-// //         cflg = true;
-// //       }
-// //       counter++; //internal counter
-// //       if (!counter) { counter++; }  // Skip log index 0 as it is not allowed
-// //       if(counter>100) break;
-// //     } while (counter != tkr_log->web_log_index);
-
-// //   }
-
-// //   BufferWriterI->Append_P(PSTR("}1"));
-  
-// //   // request->send(200,CONTENT_TYPE_TEXT_HTML_ID,data_buffer.payload.ctr);
-// //   request->send(200, "text/plain", data_buffer.payload.ctr);
-
- 
-// // }
-
-
-// // void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
-// // {
-// //   static uint32_t fakeCounter = 1;
-
-// //   char reply[64];
-
-// //   // Format matches existing JS split logic:
-// //   // <counter>}1<reset>}1<payload>}1
-// //   snprintf(
-// //     reply,
-// //     sizeof(reply),
-// //     "%lu}1%d}1uptime=%lu ms}1",
-// //     (unsigned long)fakeCounter++,
-// //     0,
-// //     (unsigned long)millis()
-// //   );
-
-// //   request->send(200, "text/plain", reply);
-// // }
-
-// // Date Modified: 30Dec25
-// void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
-// {
-//   // Keep semantics compatible with your JS polling:
-//   // response: "<idx>}1<reset>}1<lines>}1"
-
-//   Serial.println(__LINE__); Serial.flush();
-
-//   static uint32_t fakeCounter = 1;
-
-//   char reply[100];
-
-//   // Format matches existing JS split logic:
-//   // <counter>}1<reset>}1<payload>}1
-//   // snprintf(
-//   //   reply,
-//   //   sizeof(reply),
-//   //   "%lu}1%d}1uptime=%lu ms%s}1",
-//   //   (unsigned long)fakeCounter++,
-//   //   0,
-//   //   (unsigned long)millis(),
-//   //   tkr_time->GetUptime().c_str()
-//   // );
-
-
-//  snprintf(
-//     reply,
-//     sizeof(reply),
-//     "%lu}1%d}1uptime=%lu ms%s|%s}1",
-//     (unsigned long)fakeCounter++,
-//     0,
-//     (unsigned long)millis(),
-//     tkr_time->GetUptime().c_str(),
-//     tkr_set->Settings.system_name.friendly
-//   );
-
-
-//   request->send(200, "text/plain", reply);
-
-//   Serial.println(__LINE__); //Serial.flush();
-
-//   // tkr_log->TestGet();
-
-// Serial.println(tkr_tel->web_log_index++);
-// Serial.println(tkr_set->Settings.system_name.friendly);
-// Serial.println(tkr_set->Settings.system_name.friendly);
-// Serial.println(tkr_set->Settings.system_name.friendly);
-
-//   Serial.println(__LINE__);// Serial.flush();
-
-// Serial.println(tkr_set->Settings.system_name.friendly);
-// Serial.println(tkr_set->Settings.system_name.friendly);
-
-//   // --- Parse c2 safely (accept missing / invalid / _cb etc) ---
-//   uint32_t counter = 0; // 0 means "initial sync" from webpage side
-//   // {
-//   //   char stmp[16] = {0};
-//   //   WebGetArg(request, "c2", stmp, sizeof(stmp));
-//   //   if (stmp[0]) {
-//   //     // atoi is fine here, but guard against negatives in case
-//   //     long v = atol(stmp);
-//   //     if (v > 0) counter = (uint32_t)v;
-//   //   }
-//   // }
-
-//   Serial.println(__LINE__); //Serial.flush();
-//   // tkr_log->web_log_index=2;
-//   Serial.println(__LINE__); //Serial.flush();
-//   Serial.println(__LINE__); //Serial.flush();
-
-//   // tkr_log->TestGet();
-//   // Serial.println(tkr_log->web_log_index); //Serial.flush();
-//   Serial.println(__LINE__); //Serial.flush();
-//   // delay(1000);
-// return;
-
-//   tkr_log->TestGet();
-
-//   Serial.println(__LINE__); Serial.flush();
-//   Serial.println(tkr_log->web_log_index); Serial.flush();
-
-//   Serial.println(__LINE__); Serial.flush();
-
-
-//   // --- Prepare streamed response (no shared buffers) ---
-//   AsyncResponseStream *response = request->beginResponseStream("text/plain");
-
-//   Serial.println(__LINE__); Serial.flush();
-
-//   // Your current code uses reset_web_log_flag as a one-shot.
-//   // Keep that behaviour, but do it deterministically.
-//   if (!reset_web_log_flag) {
-//     // First ever refresh after boot/page-load
-//     reset_web_log_flag = true;
-//     counter = 0; // force "sync" behaviour below
-//   }
-//   Serial.println(__LINE__); Serial.flush();
-
-
-//   const uint32_t web_idx = (uint32_t)tkr_log->web_log_index;
-
-//   Serial.println(__LINE__); Serial.flush();
-
-//   // Header: "<web_idx>}1<reset_flag>}1"
-//   response->printf("%lu}1%u}1", (unsigned long)web_idx, (unsigned)reset_web_log_flag);
-
-//   Serial.println(__LINE__); Serial.flush();
-
-//   // If client counter is 0, treat as initial sync:
-//   // set it to current index and return no log body.
-//   // This prevents walking huge history and matches your old intent.
-//   if (counter == 0) {
-//     // No log payload, just terminator
-//     response->print("}1");
-//     request->send(response);
-//     return;
-//   }
-
-//   // If client's counter is ahead (or nonsense), resync it to current.
-//   // Also avoids wrap/underflow behaviour.
-//   if (counter > web_idx) {
-//     response->print("}1");
-//     request->send(response);
-//     return;
-//   }
-
-//   // If counters match, no new lines.
-//   if (counter == web_idx) {
-//     response->print("}1");
-//     request->send(response);
-//     return;
-//   }
-
-//   Serial.println(__LINE__); Serial.flush();
-
-//   // --- Stream log lines from counter up to web_idx with hard caps ---
-//   // Caps stop runaway loops and oversized replies that can destabilise ESPAsyncWebServer.
-//   const size_t   MAX_BYTES = 2048;  // tune as needed
-//   const uint16_t MAX_LINES = 64;    // tune as needed
-
-//   size_t bytes_written = 0;
-//   uint16_t lines_written = 0;
-
-//   // Walk forward until we catch up.
-//   // Note: if your log index is ring-based, this still works as long as
-//   // GetLog(counter, ...) returns something sensible across the range.
-//   while (counter != web_idx) {
-
-//   Serial.println(__LINE__); Serial.flush();
-
-//     char*  tmp = nullptr;
-//     size_t len = 0;
-//     tkr_log->GetLog((uint8_t)counter, &tmp, &len); // keep your signature if it expects uint8_t
-//                                                    // If GetLog can take wider types, pass counter directly.
-
-//     if (tmp && len) {
-//       // Add newline if not first appended log chunk
-//       if (lines_written > 0) {
-//         if (bytes_written + 1 > MAX_BYTES) break;
-//         response->write('\n');
-//         bytes_written += 1;
-//       }
-
-//       // Bound write length to remaining budget
-//       size_t room = (bytes_written < MAX_BYTES) ? (MAX_BYTES - bytes_written) : 0;
-//       if (room == 0) break;
-
-//       size_t wlen = (len <= room) ? len : room;
-//       response->write((const uint8_t*)tmp, wlen);
-//       bytes_written += wlen;
-//       lines_written++;
-
-//       if (lines_written >= MAX_LINES) break;
-//       if (bytes_written >= MAX_BYTES) break;
-//     }
-
-//     counter++;
-
-//     // Avoid "0 is not allowed" behaviour if your ring index uses 1..255
-//     if (counter == 0) counter = 1;
-
-//     // Safety: if counter somehow runs away (should not happen if web_idx is sane)
-//     if (lines_written >= MAX_LINES) break;
-//   }
-
-//   Serial.println(__LINE__); Serial.flush();
-
-//   // Trailer terminator
-//   response->print("}1");
-
-//   request->send(response);
-// }
-
-
-
-
-// Date Modified: 31Dec25
-void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
-{
-
-  // -------- Pass 1: Handle Web Console Command (c1) --------
-  if (request->hasParam("c1")) {
-
-    const String cmd = request->arg("c1");
-    const size_t len = cmd.length();
-
-    if (len && len < DATA_BUFFER_PAYLOAD_MAX_LENGTH) {
-
-      #ifdef ENABLE_FEATURE_WEBSERVER__DELAYED_JSONLOCKED_COMMAND_PROCESSING
-      if (data_buffer.tryLock(GetModuleUniqueID())) {
-      #else
-      if (data_buffer.requestLock(GetModuleUniqueID())) {
-      #endif
-
-        data_buffer.ClearSoft();
-        data_buffer.payload.length_used = (uint16_t)len;
-        memcpy(data_buffer.payload.ctr, cmd.c_str(), len);
-        data_buffer.payload.ctr[len] = '\0';
-
-        #ifdef ENABLE_FEATURE_WEBSERVER__DELAYED_JSONLOCKED_COMMAND_PROCESSING        
-        data_buffer.delayedJSONCommandWaiting = true;
-        #else
-        pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
-        data_buffer.releaseLock();
-        #endif
-
-      } else {
-        ALOG_WRN(PSTR("WebConsole c1: buffer busy, command ignored"));
-      }
-
-    } else if (len) {
-      ALOG_ERR(PSTR("WebConsole c1: payload too large (%u)"), (unsigned)len);
-    }
-  }
-
-
-
-  // Parse c2 as uint8 (Tasmota-style). 0 means "initial sync"
-  uint8_t counter = 0;
-  {
-    char stmp[12] = {0};
-    WebGetArg(request, "c2", stmp, sizeof(stmp));   // stable even with _cb present
-    if (stmp[0]) {
-      const int v = atoi(stmp);
-      if (v > 0 && v < 256) counter = (uint8_t)v;
-    }
-  }
-
-  // Stream reply (no shared JSON buffer)
-  AsyncResponseStream *response = request->beginResponseStream("text/plain");
-
-  const uint8_t web_idx = tkr_log->web_log_index;
-
-  // Header: "<idx>}1<reset_flag>}1"
-  response->printf("%u}1%u}1", (unsigned)web_idx, (unsigned)reset_web_log_flag);
-
-  // One-shot reset flag (same semantics as you had)
-  if (!reset_web_log_flag) {
-    reset_web_log_flag = true;
-    counter = 0;
-  }
-
-  // If counter==0: sync only (no history dump)
-  if (counter == 0) {
-    response->print("}1");
-    request->send(response);
-    return;
-  }
-
-  // If nothing new
-  if (counter == web_idx) {
-    response->print("}1");
-    request->send(response);
-    return;
-  }
-
-  bool need_newline = false;
-
-  // Walk forward until we reach the current index
-  while (counter != web_idx) {
-    char*  line = nullptr;
-    size_t len  = 0;
-
-    tkr_log->GetLog(counter, &line, &len);
-
-    if (line && len) {
-      if (need_newline) response->write('\n');
-      response->write((const uint8_t*)line, len);
-      need_newline = true;
-    }
-
-    counter++;
-    if (counter == 0) counter = 1; // skip 0 (matches your “0 not allowed” rule)
-  }
-
-  response->print("}1");
-  request->send(response);
-}
-
-// // Date Modified: 31Dec25
-// void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
-// {
-//   bool cflg = true;
-
-//   // --- Handle command input (c1) ---
-//     if (request->hasParam("c1")) {
-//       String cmd = request->arg("c1");
-//       if (cmd.length()) {
-//         // Mirror Tasmota behaviour
-//         ALOG_INF(PSTR("WebCmd: %s"), cmd.c_str());
-//         // ExecuteWebCommand((char*)cmd.c_str(), SRC_WEBCONSOLE);
-//         //ToDo later
-//       }
-//     }
-
-
-//   // NOTE: Tasmota-style console uses uint8 counter (ring-ish behaviour).
-//   // c2=0 means "initial sync" from webpage.
-//   uint8_t counter = 0;
-
-//   // Parse c2 (safe even if missing)
-//   {
-//     char stmp[12] = {0};
-//     WebGetArg(request, "c2", stmp, sizeof(stmp));
-//     if (stmp[0]) {
-//       int v = atoi(stmp);
-//       if (v > 0 && v < 256) counter = (uint8_t)v;
-//     }
-//   }
-
-
-//   // Stream reply (no shared global buffer)
-//   AsyncResponseStream *response = request->beginResponseStream("text/plain");
-
-//   const uint8_t web_idx = (uint8_t)tkr_log->web_log_index;
-
-//   // Header: "<web_idx>}1<reset_flag>}1"
-//   response->printf("%u}1%u}1", (unsigned)web_idx, (unsigned)reset_web_log_flag);
-
-  
-//   if (!reset_web_log_flag) {
-//     counter = 0;                  //reset counter from webpage 
-//     reset_web_log_flag = true;
-//   }
-//   if (counter != tkr_log->web_log_index) {   //if webpage counter does not match internal counter
-//     if (!counter) {    //and counter is not FIRST position
-//       counter = tkr_log->web_log_index;  //use internal counter
-//       cflg = false;     //no NEW line
-//     }
-
-//     // get the webindex, and get all internal indexes until internal catches up with web
-//     do {
-//       char* tmp;
-//       size_t len;
-//       tkr_log->GetLog(counter, &tmp, &len);
-//       if (len) { //if there is new log data
-//       // and is not larger than buffer
-//         if (len > sizeof(data_buffer.payload.ctr) -2) { len = sizeof(data_buffer.payload.ctr); }
-//         char stemp[len +1]; //leak!
-//         strlcpy(stemp, tmp, len);
-//         // add new line if not first, then text
-//         BufferWriterI->Append_P(PSTR("%s%s"), (cflg) ? "\n" : "", stemp);
-//         cflg = true;
-//       }
-//       counter++; //internal counter
-//       if (!counter) { counter++; }  // Skip log index 0 as it is not allowed
-//       if(counter>100) break;
-//     } while (counter != tkr_log->web_log_index);
-
-
-
-//   // // First ever refresh after boot/page-load: force a resync behaviour once
-//   // if (!reset_web_log_flag) {
-//   //   reset_web_log_flag = true;
-//   //   counter = 0;
-//   // }
-
-//   // // If client counter is 0, do not dump history; just sync header and terminate
-//   // if (counter == 0) {
-//   //   response->print("}1");
-//   //   request->send(response);
-//   //   return;
-//   // }
-
-//   // // If nothing new, terminate
-//   // if (counter == web_idx) {
-//   //   response->print("}1");
-//   //   request->send(response);
-//   //   return;
-//   // }
-
-//   // // Walk from counter up to (but not including) web_idx
-//   // do {
-//   //   char*  tmp = nullptr;
-//   //   size_t len = 0;
-
-//   //   tkr_log->GetLog(counter, &tmp, &len);
-
-//   //   if (tmp && len) {
-//   //     // Newline between appended entries (not before first)
-//   //     if (cflg) {
-//   //       response->write('\n');
-//   //     }
-//   //     response->write((const uint8_t*)tmp, len);
-//   //     cflg = true;
-//   //   } else {
-//   //     // If no content, don't emit a leading newline on next valid chunk
-//   //     cflg = false;
-//   //   }
-
-//   //   counter++;
-//   //   if (counter == 0) counter = 1;  // Skip 0 if your log index forbids it
-
-//   // } while (counter != web_idx);
-
-//   // Trailer terminator
-//   response->print("}1");
-//   request->send(response);
-// }
-
-
-#endif
-
-
-
-
-// void mWebServer::Web_Console_Draw(AsyncWebServerRequest *request){
-        
-//   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
-  
-//   JBI->Start();
-    
-//   JBI->Array_Start("container_1");// Class name
-//     JBI->Object_Start();
-//       JBI->AddKey("ihr");           // function
-//         JBI->AppendBuffer("\"");
-//         JBI->AppendBuffer(PSTR("<fieldset><legend><b>&nbsp;Web Commands&nbsp;</b></legend>"));
-//         JBI->AppendBuffer(PSTR("<textarea readonly='' id='console_textbox' cols='340' wrap='off' name='console_textbox'></textarea>"
-//           "<br><br>"
-//           "<form method='get' onsubmit='return l(1);'>"
-//               "<input id='c1'  style='background:#1d1d1d' placeholder='Enter Module Name eg pixels' autofocus='' name='c1'>"
-//               "<br>"
-//           "</form>")
-//         );
-//         JBI->AppendBuffer(PSTR(
-//           "<form method='get' onsubmit='return l(1);'>"
-//           "<input id='com_web' name='com_web' style='background:#1d1d1d' placeholder='" "Enter command eg {name:value} or name value'" "' autofocus><br/>"
-//             "<button  class='buttonh bform1' type='submit'>Execute command</button>"
-//           "</form>"
-//         ));            
-//       JBI->AppendBuffer(PSTR("</fieldset>"));
-//       // topic = module name only, in code, add "set/modulename"
-//       //payload = json message for multple inputs, OR, single input where {"a":"b"} can simply be "a b"
-
-//       JBI->AppendBuffer(PSTR("<fieldset>"));
-//         JBI->AppendBuffer(PSTR("<legend><b>&nbsp;MQTT Commands&nbsp;</b></legend>"));
-//         JBI->AppendBuffer(PSTR(
-//         "<form method='get' onsubmit='return l(1);'>"
-//         "<input id='com_top' name='com_top' style='background:#1d1d1d' placeholder='" "Enter topic" "' autofocus><br/>"
-//         "</form>" ));
-//         JBI->AppendBuffer(PSTR(
-//         "<form method='get' onsubmit='return l(1);'>"
-//         "<input id='com_pay' name='com_pay' style='background:#1d1d1d' placeholder='" "Enter payload" "' autofocus><br/>"
-//         "<button class='buttonh bform1' type='submit'>Execute Command</button>"
-//         "</form>"  ));
-//       JBI->AppendBuffer(PSTR("</fieldset>"));
-
-//       JBI->AppendBuffer("\"");
-//     JBI->Object_End();
-//   JBI->Array_End();
-
-//   JBI->Array_Start("container_5");// Class name
-//     JBI->Object_Start();
-//       JBI->AddKey("ihr");           // function
-//         JBI->AppendBuffer("\"");
-//         WebAppend_Button_Spaced(BUTTON_MAIN);
-//       JBI->AppendBuffer("\"");
-//     JBI->Object_End();
-//   JBI->Array_End();
-    
-//   JBI->Array_Start("function");// Class name
-//     JBI->Object_Start();
-//       JBI->AddKey("Parse_AddScript");
-//         JBI->AppendBuffer("\"");
-//         JBI->AppendBuffer(PSTR(
-//           "set_console_as_page();"
-//           "enable_get_console_data();"
-//         )
-//       );
-//       JBI->AppendBuffer("\"");
-//     JBI->Object_End();
-//   JBI->Array_End();
-    
-//   JBI->End();
-
-//   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
-
-// } //end function
 
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER21
@@ -1858,7 +1176,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;}  
   
 //   JBI->Start();
-//     pCONT->Tasker_Interface(TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED);
+//     tkr->Tasker_Interface(TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED);
 //   JBI->End();
 
 //   WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
@@ -2055,7 +1373,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // JBI->Start();
 //   //   JBI->Object_Start("function");
 //   //     JBI->Object_Start("Parse_Urls");
-//   //       // pCONT->Tasker_Interface(TASK_WEB_APPEND_RUNTIME_ROOT_URLS);
+//   //       // tkr->Tasker_Interface(TASK_WEB_APPEND_RUNTIME_ROOT_URLS);
 //   //     JBI->Object_End();
 //   //   JBI->Object_End();
 //   // JBI->End();
@@ -2105,7 +1423,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //     JBI->Object_Start();
 //       JBI->AddKey("ihr");           // function
 //         JBI->AppendBuffer("\"");
-//         pCONT->Tasker_Interface(TASK_WEB_APPEND_ROOT_BUTTONS);
+//         tkr->Tasker_Interface(TASK_WEB_APPEND_ROOT_BUTTONS);
 //       JBI->AppendBuffer("\"");
 //     JBI->Object_End();
 //   JBI->Array_End();
@@ -2132,7 +1450,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   JBI->Start();
 //     JBI->Object_Start("function");
 //       JBI->Object_Start("Parse_Urls");
-//         pCONT->Tasker_Interface(TASK_WEB_APPEND_RUNTIME_ROOT_URLS);
+//         tkr->Tasker_Interface(TASK_WEB_APPEND_RUNTIME_ROOT_URLS);
 //       JBI->Object_End();
 //     JBI->Object_End();
 //   JBI->End();
@@ -2180,7 +1498,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //     JBI->Object_Start();
 //       JBI->AddKey("ihr");           // function
 //         JBI->AppendBuffer("\"{t}");
-//         pCONT->Tasker_Interface(TASK_WEB_ADD_ROOT_TABLE_ROWS);
+//         tkr->Tasker_Interface(TASK_WEB_ADD_ROOT_TABLE_ROWS);
 //       JBI->AppendBuffer("{t2}\"");
 //     JBI->Object_End();
 //   JBI->Array_End();
@@ -2194,7 +1512,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //     JBI->Object_Start();
 //       JBI->AddKey("ihr");           // function
 //         JBI->AppendBuffer("\"");
-//         pCONT->Tasker_Interface(TASK_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER);
+//         tkr->Tasker_Interface(TASK_WEB_ADD_ROOT_MODULE_TABLE_CONTAINER);
 //       JBI->AppendBuffer("\"");
 //     JBI->Object_End();
 //   JBI->Array_End();
@@ -2668,7 +1986,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // WSContentButton(request, BUTTON_MODULE);
 //   // WSContentButton(request, BUTTON_WIFI);
 
-//   // pCONT->Tasker_Interface(TASK_WEB_ADD_BUTTON);
+//   // tkr->Tasker_Interface(TASK_WEB_ADD_BUTTON);
 
 //   // WSContentButton(request, BUTTON_LOGGING);
 //   // WSContentButton(request, BUTTON_OTHER);
@@ -3000,7 +2318,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   //   //PROJECT_NAME_CTR, 
 //   //   tkr_set->Settings.system_name.friendly
 //   // );
-//   //   // pCONT->Tasker_Interface(TASK_WEB_ADD_BUTTON_SYSTEM_SETTINGS);
+//   //   // tkr->Tasker_Interface(TASK_WEB_ADD_BUTTON_SYSTEM_SETTINGS);
 
 //   //   WSButtonAppend2(buffer, BUTTON_CONFIGURATION);
 //   //   WSButtonAppend2(buffer, BUTTON_INFORMATION);
@@ -3114,7 +2432,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 //   // char command[sizeof(tkr_set->Settings.ota_url) + 10];  // OtaUrl
 
 //   // ALOG_DBG(PSTR(D_LOG_HTTP D_UPGRADE_STARTED));
-//   // tkr_wifi->WifiConfigCounter();
+//   // tkr_wifi->WiFi_Config_ConnectWindow_Expired();
 
 //   // char otaurl[sizeof(tkr_set->Settings.ota_url)];
 //   // WebGetArg(request,"o", otaurl, sizeof(otaurl));
@@ -3143,7 +2461,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 
 // //   char error[100];
 
-// //   tkr_wifi->WifiConfigCounter();
+// //   tkr_wifi->WiFi_Config_ConnectWindow_Expired();
 // //   tkr_set->restart_flag = 0;
 // //   //MqttRetryCounter(0);
 
@@ -3659,7 +2977,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //   //     // AppendBuffer_PI2(PSTR("\"%s\","),WEB_HANDLER_SCRIPT_ROOT_MICHAEL);
 // //   //     // AppendBuffer_PI2(PSTR("\"%s\","),"/runtime/data_urls.json");
     
-// //   //   // pCONT->Tasker_Interface(TASK_WEB_APPEND_LOADTIME_ROOT_URLS);
+// //   //   // tkr->Tasker_Interface(TASK_WEB_APPEND_LOADTIME_ROOT_URLS);
 // //   //   *buffer_writer_internal = (*buffer_writer_internal) - 1;// remove extra comma
 // //   // AppendBuffer_PI2(PSTR("];var dfrates=["));
 
@@ -3671,7 +2989,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //   //     AppendBuffer_PI2(PSTR("%d,"),-100);
 // //   //     // AppendBuffer_PI2(PSTR("%d,"),-1500);
 // //   //     // AppendBuffer_PI2(PSTR("%d,"),-2500);
-// //   //   // pCONT->Tasker_Interface(TASK_WEB_APPEND_LOADTIME_ROOT_RATES);
+// //   //   // tkr->Tasker_Interface(TASK_WEB_APPEND_LOADTIME_ROOT_RATES);
 // //   //   *buffer_writer_internal = (*buffer_writer_internal) - 1;// remove extra comma
 // //   // AppendBuffer_PI2(PSTR("];"));
 
@@ -3694,7 +3012,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 
 // //   // AppendBuffer_P2(buffer,PSTR("{"));
 // //   //   buffer_writer_internal = buffer;
-// //   //   // pCONT->Tasker_Interface(TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED);
+// //   //   // tkr->Tasker_Interface(TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED);
 // //   //   // WebAppend_Root_Draw_TopBar();
 // //   //   WebAppend_Page_InformationTable();
 // //   //   // extra "," is automatically appending for repeated cases across modules, and should be removed
@@ -3770,7 +3088,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //   // AppendBuffer_PI2(PSTR("}1" "Module Config" "}2"));//,       ESP.getChipId());
 // //   // // Class/Tasks info
 // //   // // buffer_writer_internal = buffer;
-// //   // // pCONT->Tasker_Interface(TASK_WEB_PAGEINFORMATION_SEND_MODULE);
+// //   // // tkr->Tasker_Interface(TASK_WEB_PAGEINFORMATION_SEND_MODULE);
 // //   // AppendBuffer_PI2(PSTR("}1}2&nbsp;"));  // Empty line
 
 // //   // #ifdef ESP8266
@@ -3901,7 +3219,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //   //   ExecuteWebCommand(svalue, SRC_WEBGUI);
 // //   // }
 
-// //   pCONT->Tasker_Interface(TASK_WEB_COMMAND); //parse any webcommands
+// //   tkr->Tasker_Interface(TASK_WEB_COMMAND); //parse any webcommands
 
 
 // //   if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return true;} 
@@ -3910,7 +3228,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // //     JBI->AppendBuffer(PSTR("t}")); //temp fix
 // //     // all but phased out 
 // //     // REMOVE html part
-// //     // pCONT->Tasker_Interface(TASK_WEB_SHOW_PARAMETERS);
+// //     // tkr->Tasker_Interface(TASK_WEB_SHOW_PARAMETERS);
 // //     JBI->AppendBuffer(PSTR("{t2")); //temp fix
 // //   JBI->End();
 

@@ -233,7 +233,6 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   MODULE_SUBTYPE_ENERGY_ID,
 };
 
-#define pCONT mTaskerManager::GetInstance()
 #define tkr mTaskerManager::GetInstance()
 
 
@@ -295,7 +294,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 // #ifdef USE_MODULE_CORE_SERIAL_UART
 //   #include "2_CoreSystem/04b_SerialUART/mSerialUART.h"
-//   #define tkr_uart                                static_cast<mSerialUART*>(pCONT->pModule[EM_MODULE_CORE_SERIAL_UART_ID])
+//   #define tkr_uart                                static_cast<mSerialUART*>(tkr->pModule[EM_MODULE_CORE_SERIAL_UART_ID])
 // #endif
 #ifdef USE_MODULE_CORE_I2C
   #include "2_CoreSystem/31_I2C/mI2C.h"
@@ -333,7 +332,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif 
 #ifdef USE_MODULE_NETWORK_CELLULAR
 #include "3_Network/05_Cellular/mCellular.h"
-  #define tkr_cell                               static_cast<mCellular*>(pCONT->pModule[EM_MODULE__NETWORK_CELLULAR__ID])
+  #define tkr_cell                               static_cast<mCellular*>(tkr->pModule[EM_MODULE__NETWORK_CELLULAR__ID])
 #endif
 #ifdef USE_MODULE_NETWORK_MQTT
   #include "3_Network/10_MQTT/mMQTT.h"
@@ -352,7 +351,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_DRIVERS_LEDS
 #include "4_Drivers/03_LEDs/mLEDs.h"
-  #define tkr_led                                static_cast<mLEDs*>(pCONT->pModule[EM_MODULE_DRIVERS_LEDS_ID])
+  #define tkr_led                                static_cast<mLEDs*>(tkr->pModule[EM_MODULE_DRIVERS_LEDS_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_RELAY
   #include "4_Drivers/04_Relays/mRelays.h"
@@ -360,35 +359,35 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_DRIVERS_PWM
   #include "4_Drivers/PWM/mPWM.h"
-  #define tkr_pwm                                 static_cast<mPWM*>(pCONT->pModule[EM_MODULE_DRIVERS_PWM_ID])
+  #define tkr_pwm                                 static_cast<mPWM*>(tkr->pModule[EM_MODULE_DRIVERS_PWM_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
   #include "4_Drivers/IRDevices/mIRtransceiver.h"
-  #define tkr_mdirt                               static_cast<mIRtransceiver*>(pCONT->pModule[EM_MODULE_DRIVERS_IRTRANSCEIVER_ID])
+  #define tkr_mdirt                               static_cast<mIRtransceiver*>(tkr->pModule[EM_MODULE_DRIVERS_IRTRANSCEIVER_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_IRREMOTE
 #include "4_Drivers/IRRemote/mIRRemote.h"
-  #define tkr_ir_remote                           static_cast<mIRRemote*>(pCONT->pModule[EM_MODULE_DRIVERS_IRREMOTE_ID])
+  #define tkr_ir_remote                           static_cast<mIRRemote*>(tkr->pModule[EM_MODULE_DRIVERS_IRREMOTE_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
   #include "4_Drivers/09_RCSwitch/mRCSwitch.h"
-  #define tkr_rcswitch                            static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID])
+  #define tkr_rcswitch                            static_cast<mBuzzer*>(tkr->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
   #include "4_Drivers/10_RCSwitch_Extended/mRCSwitch_Extended.h"
-  #define tkr_rcswitch                            static_cast<mRCSwitch*>(pCONT->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID])
+  #define tkr_rcswitch                            static_cast<mRCSwitch*>(tkr->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_HBRIDGE
   #include "4_Drivers/Motors/HBridgeL9110/mHBridge.h"
-  #define tkr_mdhbridge                           static_cast<mHBridge*>(pCONT->pModule[EM_MODULE_DRIVERS_HBRIDGE_ID])
+  #define tkr_mdhbridge                           static_cast<mHBridge*>(tkr->pModule[EM_MODULE_DRIVERS_HBRIDGE_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_SDCARD
   #include "4_Drivers/SD/mSDCard.h"
-  #define tkr_sdcard                              static_cast<mSDCard*>(pCONT->pModule[EM_MODULE_DRIVERS_SDCARD_ID])
+  #define tkr_sdcard                              static_cast<mSDCard*>(tkr->pModule[EM_MODULE_DRIVERS_SDCARD_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
   #include "4_Drivers/15_ShellyDimmer/mShellyDimmer.h"
-  #define tkr_shelly                              static_cast<mShellyDimmer*>(pCONT->pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID])
+  #define tkr_shelly                              static_cast<mShellyDimmer*>(tkr->pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID])
 #endif
 #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
   #include "4_Drivers/20_Buzzer_Basic/mBuzzer.h"
@@ -396,7 +395,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE__DRIVERS_BUZZER_TONES
   #include "4_Drivers/21_Buzzer_Tones/mBuzzer.h"
-  #define tkr_buzzer                              static_cast<mBuzzer*>(pCONT->pModule[EM_MODULE__DRIVERS_BUZZER_TONES__ID])
+  #define tkr_buzzer                              static_cast<mBuzzer*>(tkr->pModule[EM_MODULE__DRIVERS_BUZZER_TONES__ID])
 #endif
 #ifdef USE_MODULE_DRIVERS__CAMERA_2025
   #include "4_Drivers/50_Camera_2025/mCamera.h"
@@ -404,11 +403,11 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
   #include "4_Drivers/52_WebCamera/mWebCamera.h"
-  #define tkr_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_ID])
+  #define tkr_camera                              static_cast<mWebCamera*>(tkr->pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_ID])
 #endif
 #ifdef USE_MODULE_DRIVERS__CAMERA_ARDUINO
   #include "4_Drivers/60_WebCam_Arduino/mWebCam.h"
-  #define tkr_camera                              static_cast<mWebCamera*>(pCONT->pModule[EM_MODULE_DRIVERS__CAMERA_ARDUINO__ID])
+  #define tkr_camera                              static_cast<mWebCamera*>(tkr->pModule[EM_MODULE_DRIVERS__CAMERA_ARDUINO__ID])
 #endif
 #ifdef USE_MODULE_DRIVERS__CAMERA_TAS25
   #include "4_Drivers/63_WebCam_Tas25/mCamera.h"
@@ -416,23 +415,23 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   #include "4_Drivers/70_MAVLink_Decoder/mMAVLink_Decoder.h"
-  #define tkr_mavlink                              static_cast<mMAVLink_Decoder*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID])
+  #define tkr_mavlink                              static_cast<mMAVLink_Decoder*>(tkr->pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID])
 #endif
 #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
   #include "4_Drivers/71_MAVLink_Telemetry_WiFi/mMAVLink_Telemetry_WiFi.h"
-  #define tkr_mavlink                              static_cast<mMAVLink_Telemetry_WiFi*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID])
+  #define tkr_mavlink                              static_cast<mMAVLink_Telemetry_WiFi*>(tkr->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID])
 #endif
 #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
   #include "4_Drivers/72_MAVLink_Telemetry_Cellular/mMAVLink_Telemetry_Cellular.h"
-  #define tkr_mavlink                              static_cast<mMAVLink_Telemetry_Cellular*>(pCONT->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID])
+  #define tkr_mavlink                              static_cast<mMAVLink_Telemetry_Cellular*>(tkr->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_MODEM_7000G
 #include "4_Drivers/80_Modem_SIM7000G/mSIM7000G.h"
-  #define tkr_sim7000g                           static_cast<mSIM7000G*>(pCONT->pModule[EM_MODULE_DRIVERS__MODEM_7000G__ID])
+  #define tkr_sim7000g                           static_cast<mSIM7000G*>(tkr->pModule[EM_MODULE_DRIVERS__MODEM_7000G__ID])
 #endif
 #ifdef USE_MODULE_DRIVERS_MODEM_800L
 #include "4_Drivers/81_Modem_SIM800L/mSIM800L.h"
-  #define tkr_sim800l                           static_cast<mSIM800L*>(pCONT->pModule[EM_MODULE_DRIVERS__MODEM_800L__ID])
+  #define tkr_sim800l                           static_cast<mSIM800L*>(tkr->pModule[EM_MODULE_DRIVERS__MODEM_800L__ID])
 #endif
 /**
  * @brief Sensors
@@ -459,7 +458,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_SENSORS_DHT
   #include "5_Sensors/05_DHT/mSensorsDHT.h"
-  #define tkr_dht                             static_cast<mSensorsDHT*>(pCONT->pModule[EM_MODULE_SENSORS_DHT_ID])
+  #define tkr_dht                             static_cast<mSensorsDHT*>(tkr->pModule[EM_MODULE_SENSORS_DHT_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_BH1750
   #include "5_Sensors/06_BH1750Light/mBH1750.h"
@@ -471,43 +470,43 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_SENSORS_DOOR
   #include "5_Sensors/11_Door/mDoorSensor.h"
-  #define tkr_sdoor                           static_cast<mDoorSensor*>(pCONT->pModule[EM_MODULE_SENSORS_DOOR_ID])
+  #define tkr_sdoor                           static_cast<mDoorSensor*>(tkr->pModule[EM_MODULE_SENSORS_DOOR_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_L3G
   #include "5_Sensors/L3GD20_3Axis_Gryo/mSensorsL3G.h"
-  #define tkr_L3G                      static_cast<mSensorsL3G*>(pCONT->pModule[EM_MODULE_SENSORS_L3G_ID])
+  #define tkr_L3G                      static_cast<mSensorsL3G*>(tkr->pModule[EM_MODULE_SENSORS_L3G_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_LDR_BASIC
   #include "5_Sensors/14_LDRBasic/mLDRBasic.h"
-  #define tkr_ldr_basic                      static_cast<mLDRBasic*>(pCONT->pModule[EM_MODULE_SENSORS_LDR_BASIC_ID])
+  #define tkr_ldr_basic                      static_cast<mLDRBasic*>(tkr->pModule[EM_MODULE_SENSORS_LDR_BASIC_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_LSM303D
   #include "5_Sensors/LSM303D_3Axis_AccMag/mSensorsLSM303D.h"
-  #define tkr_LSM303D                      static_cast<mSensorsLSM303D*>(pCONT->pModule[EM_MODULE_SENSORS_LSM303D_ID])
+  #define tkr_LSM303D                      static_cast<mSensorsLSM303D*>(tkr->pModule[EM_MODULE_SENSORS_LSM303D_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_MOISTURE
   #include "5_Sensors/Moisture/mMoistureSensor.h"
-  #define tkr_srmoisture                      static_cast<mMoistureSensor*>(pCONT->pModule[EM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID])
+  #define tkr_srmoisture                      static_cast<mMoistureSensor*>(tkr->pModule[EM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_SR04
   #include "5_Sensors/17_SR04/mSR04.h"
-  #define tkr_sr04                              static_cast<mSR04*>(pCONT->pModule[EM_MODULE_SENSORS_SR04_ID])
+  #define tkr_sr04                              static_cast<mSR04*>(tkr->pModule[EM_MODULE_SENSORS_SR04_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_MPU9250
   #include "5_Sensors/MPU9250/mSensorsMPU9250.h"
-  #define tkr_MPU9250                      static_cast<mSensorsMPU9250*>(pCONT->pModule[EM_MODULE_SENSORS_MPU9250_ID])
+  #define tkr_MPU9250                      static_cast<mSensorsMPU9250*>(tkr->pModule[EM_MODULE_SENSORS_MPU9250_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
   #include "5_Sensors/PulseCounter/mPulseCounter.h"
-  #define tkr_spulse                          static_cast<mPulseCounter*>(pCONT->pModule[EM_MODULE_SENSORS_PULSECOUNTER_ID])
+  #define tkr_spulse                          static_cast<mPulseCounter*>(tkr->pModule[EM_MODULE_SENSORS_PULSECOUNTER_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_REMOTE_DEVICE
   #include "5_Sensors/20_RemoteDevice/mRemoteDevice.h"
-  #define tkr_sremote                           static_cast<mRemoteDevice*>(pCONT->pModule[EM_MODULE_SENSORS_REMOTE_DEVICE_ID])
+  #define tkr_sremote                           static_cast<mRemoteDevice*>(tkr->pModule[EM_MODULE_SENSORS_REMOTE_DEVICE_ID])
 #endif
 #ifdef USE_MODULE_SENSORS_ROTARY_ENCODER
   #include "5_Sensors/21_RotaryEncoder/mRotaryEncoder.h"
-  #define tkr_rotary_encoder               static_cast<mRotaryEncoder*>(pCONT->pModule[EM_MODULE_SENSORS_ROTARY_ENCODER_ID])
+  #define tkr_rotary_encoder               static_cast<mRotaryEncoder*>(tkr->pModule[EM_MODULE_SENSORS_ROTARY_ENCODER_ID])
 #endif
 #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
   #include "5_Sensors/22_SunTracking/mSunTracking.h"
@@ -515,7 +514,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
   #include "5_Sensors/UltraSonic/mUltraSonicSensor.h"
-  #define tkr_ult                             static_cast<mUltraSonicSensor*>(pCONT->pModule[EM_MODULE_SENSORS_ULTRASONIC_ID])
+  #define tkr_ult                             static_cast<mUltraSonicSensor*>(tkr->pModule[EM_MODULE_SENSORS_ULTRASONIC_ID])
 #endif
 #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
   #include "5_Sensors/26_TOF_VL53L0X/mTOF_VL53L0X.h"
@@ -539,11 +538,11 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_SENSORS_GPS_MODEM
   #include "5_Sensors/51_GPS_Modem/mGPS_Modem.h"
-  #define tkr_gps                                 static_cast<mGPS_Modem*>(pCONT->pModule[EM_MODULE__SENSORS_GPS_MODEM__ID])
+  #define tkr_gps                                 static_cast<mGPS_Modem*>(tkr->pModule[EM_MODULE__SENSORS_GPS_MODEM__ID])
 #endif
 #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
   #include "5_Sensors/52_Battery_Modem/mBattery_Modem.h"
-  #define tkr_batt_modem                                 static_cast<mBattery_Modem*>(pCONT->pModule[EM_MODULE__SENSORS_BATTERY_MODEM__ID])
+  #define tkr_batt_modem                                 static_cast<mBattery_Modem*>(tkr->pModule[EM_MODULE__SENSORS_BATTERY_MODEM__ID])
 #endif
 /**
  * @brief Lights
@@ -574,7 +573,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_ENERGY_ADE7953
   #include "7_Energy/02_ADE7953/mADE7953.h"
-  #define tkr_ade7953                         static_cast<mEnergyADE7953*>(pCONT->pModule[EM_MODULE_ENERGY_ADE7953_ID])
+  #define tkr_ade7953                         static_cast<mEnergyADE7953*>(tkr->pModule[EM_MODULE_ENERGY_ADE7953_ID])
 #endif
 #ifdef USE_MODULE_ENERGY_INA219
   #include "7_Energy/03_INA219/mINA219.h"
@@ -593,7 +592,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
   #include "8_Displays/02_OLED_SSD1606/mOLED_SSD1306.h"
-  #define tkr_oled1306                            static_cast<mOLED_SSD1306*>(pCONT->pModule[EM_MODULE_DISPLAYS_OLED_SSD1306_ID])
+  #define tkr_oled1306                            static_cast<mOLED_SSD1306*>(tkr->pModule[EM_MODULE_DISPLAYS_OLED_SSD1306_ID])
 #endif
 #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
   #include "8_Displays/03_OLED_SH1106/mOLED_SH1106.h"
@@ -604,37 +603,37 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
  **/
 #ifdef USE_MODULE_CONTROLLER_SONOFF_IFAN
   #include "9_Controller/03_Sonoff_iFan/mSonoffIFan.h"
-  #define tkr_ifan                            static_cast<mSonoffIFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_SONOFF_IFAN_ID])
+  #define tkr_ifan                            static_cast<mSonoffIFan*>(tkr->pModule[EM_MODULE_CONTROLLER_SONOFF_IFAN_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_FAN
   #include "9_Controller/Fan/mFan.h"
-  #define tkr_mfan                            static_cast<mFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_FAN_ID])
+  #define tkr_mfan                            static_cast<mFan*>(tkr->pModule[EM_MODULE_CONTROLLER_FAN_ID])
 #endif
 // 3d printer encoder here
 #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
   #include "9_Controller/08_TankVolume/mTankVolume.h"
-  #define tkr_tankvolume                      static_cast<mTankVolume*>(pCONT->pModule[EM_MODULE_CONTROLLER_TANKVOLUME_ID])
+  #define tkr_tankvolume                      static_cast<mTankVolume*>(tkr->pModule[EM_MODULE_CONTROLLER_TANKVOLUME_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_BLINDS
   #include "9_Controller/Blinds/mBlinds.h"
-  #define tkr_sbut                            static_cast<mBlinds*>(pCONT->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
+  #define tkr_sbut                            static_cast<mBlinds*>(tkr->pModule[EM_MODULE_SENSORS_BUTTONS_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
   #include "9_Controller/BucketWaterLevel/mBucketWaterLevel.h"
-  #define tkr_bucket_water_level                static_cast<mBucketWaterLevel*>(pCONT->pModule[EM_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID])
+  #define tkr_bucket_water_level                static_cast<mBucketWaterLevel*>(tkr->pModule[EM_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_DOORCHIME
   #include "9_Controller/DoorBell/mDoorBell.h"
-  #define tkr_doorbell                        static_cast<mDoorBell*>(pCONT->pModule[EM_MODULE_CONTROLLER_DOORBELL_ID])
+  #define tkr_doorbell                        static_cast<mDoorBell*>(tkr->pModule[EM_MODULE_CONTROLLER_DOORBELL_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_GPS_SD_LOGGER
   #include "9_Controller/GPS_SD_Logger/mGPS_SD_Logger.h"
-  #define tkr_gps_sd_log                  static_cast<mGPS_SD_Logger*>(pCONT->pModule[EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID])
+  #define tkr_gps_sd_log                  static_cast<mGPS_SD_Logger*>(tkr->pModule[EM_MODULE_CONTROLLER_GPS_SD_LOGGER_ID])
   #define tkr_serial_pos_log  tkr_gps_sd_log
 #endif
 #ifdef USE_MODULE_CONTROLLER_SDCARDLOGGER
   #include "9_Controller/SDCardLogger/mSDCardLogger.h"
-  #define tkr_sdcardlogger                    static_cast<mDoorBell*>(pCONT->pModule[EM_MODULE_CONTROLLER_SDCARDLOGGER_ID])
+  #define tkr_sdcardlogger                    static_cast<mDoorBell*>(tkr->pModule[EM_MODULE_CONTROLLER_SDCARDLOGGER_ID])
 #endif
 // USE_MODULE_CONTROLLER_UARTLOGGER
 // USE_MODULE_CONTROLLER_INTERNAL_CLOCK
@@ -644,7 +643,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_CONTROLLER_HVAC_REMOTE
   #include "9_Controller/41_HVAC_Remote/mHVAC.h"
-  #define tkr_hvac_remote                        static_cast<mHVAC_Remote*>(pCONT->pModule[EM_MODULE_CONTROLLER__HVAC_REMOTE__ID])
+  #define tkr_hvac_remote                        static_cast<mHVAC_Remote*>(tkr->pModule[EM_MODULE_CONTROLLER__HVAC_REMOTE__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR
   #include "9_Controller/42_SensorColourBar/mSensorColourBar.h"
@@ -658,58 +657,58 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 // 51_Animator_Playlists
 #ifdef USE_MODULE_CONTROLLER__ENERGY_OLED
   #include "9_Controller/60_EnergyOnOLED/mEnergyOnOLED.h"
-  #define tkr_mEnergyOnOLED        static_cast<mEnergyOnOLED*>(pCONT->pModule[EM_MODULE_CONTROLLER__ENERGY_OLED__ID])
+  #define tkr_mEnergyOnOLED        static_cast<mEnergyOnOLED*>(tkr->pModule[EM_MODULE_CONTROLLER__ENERGY_OLED__ID])
 #endif
 /**
  * @brief 10 Controller Custom
  **/  
 #ifdef USE_MODULE_CONTROLLER_RADIATORFAN
   #include "10_ConSpec/00_RadiatorFan/mRadiatorFan.h"
-  #define tkr_sbut                            static_cast<mRadiatorFan*>(pCONT->pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID])
+  #define tkr_sbut                            static_cast<mRadiatorFan*>(tkr->pModule[EM_MODULE_CONTROLLER_RADIATORFAN_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR
   #include "10_ConSpec/01_ImmersionTankColour/mImmersionTankColour.h"
-  #define tkr_msenscol                        static_cast<mImmersionTankColour*>(pCONT->pModule[EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID])
+  #define tkr_msenscol                        static_cast<mImmersionTankColour*>(tkr->pModule[EM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_FURNACE_SENSOR
   #include "10_ConSpec/03_FurnaceSensor/mFurnaceSensor.h"
-  #define tkr_furnace_sensor                static_cast<mFurnaceSensor*>(pCONT->pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID])
+  #define tkr_furnace_sensor                static_cast<mFurnaceSensor*>(tkr->pModule[EM_MODULE_CONTROLLER_FURNACE_SENSOR_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
   #include "10_ConSpec/04_LouvoliteHub/mLouvoliteHub.h"
-  #define tkr_louv                static_cast<mLouvoliteHub*>(pCONT->pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID])
+  #define tkr_louv                static_cast<mLouvoliteHub*>(tkr->pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2
   #include "10_ConSpec/04v2_LouvoliteHub/mLouvoliteHub.h"
-  #define tkr_louv                static_cast<mLouvoliteHub*>(pCONT->pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID])
+  #define tkr_louv                static_cast<mLouvoliteHub*>(tkr->pModule[EM_MODULE_CONTROLLER__LOUVOLITE_HUB__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHTS
   #include "10_ConSpec/05_SideDoorLight/mSideDoorLight.h"
-  #define tkr_sdlight                static_cast<mSideDoorLight*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHT__ID])
+  #define tkr_sdlight                static_cast<mSideDoorLight*>(tkr->pModule[EM_MODULE_CONTROLLER_CUSTOM__SIDEDOOR_LIGHT__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL
   #include "10_ConSpec/06_ImmersionPanel/mImmersionPanel.h"
-  #define tkr_immersion_cont         static_cast<mImmersionPanel*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID])
+  #define tkr_immersion_cont         static_cast<mImmersionPanel*>(tkr->pModule[EM_MODULE_CONTROLLER_CUSTOM__IMMERSION_PANEL__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
   #include "10_ConSpec/07_TempSensorOnOLED/mTempSensorOLEDBath.h"
-  #define tkr_immersion_cont         static_cast<mTempSensorOLEDBath*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID])
+  #define tkr_immersion_cont         static_cast<mTempSensorOLEDBath*>(tkr->pModule[EM_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
   #include "10_ConSpec/08_CellularBlackBox/mCellularBlackBox.h"
-  #define tkr_immersion_cont         static_cast<mCellularBlackBox*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID])
+  #define tkr_immersion_cont         static_cast<mCellularBlackBox*>(tkr->pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
   #include "10_ConSpec/09_mMAVLink_Decoder_OLED/mMAVLink_Decoder_OLED.h"
-  #define tkr_cont_mavlinoled         static_cast<mMAVLink_Decoder_OLED*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED__ID])
+  #define tkr_cont_mavlinoled         static_cast<mMAVLink_Decoder_OLED*>(tkr->pModule[EM_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED
   #include "10_ConSpec/10_EnergyOnOLED/mEnergyOnOLED.h"
-  #define tkr_mEnergyOnOLED        static_cast<mEnergyOnOLED*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED__ID])
+  #define tkr_mEnergyOnOLED        static_cast<mEnergyOnOLED*>(tkr->pModule[EM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE
   #include "10_ConSpec/11_3DPrinterEnclosure/Printer3D.h"
-  #define tkr_3dprinter        static_cast<mPrinter3D*>(pCONT->pModule[EM_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE__ID])
+  #define tkr_3dprinter        static_cast<mPrinter3D*>(tkr->pModule[EM_MODULE_CONTROLLER_CUSTOM__3DPRINTER_ENCLOSURE__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER
   #include "10_ConSpec/12_TreadmillLogger/mTreadmillLogger.h"
@@ -721,19 +720,19 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
   #include "9_Controller/SDLoggerIMURadiationPattern/mSDLogger.h"
-  #define tkr_cont_imu_rad                static_cast<mSDLoggerIMURadiationPattern*>(pCONT->pModule[EM_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID])
+  #define tkr_cont_imu_rad                static_cast<mSDLoggerIMURadiationPattern*>(tkr->pModule[EM_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER
   #include "9_Controller/SerialPositionalLogger/mSerialPositionalLogger.h"
-  #define tkr_serial_pos_log                  static_cast<mSerialPositionalLogger*>(pCONT->pModule[EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID])
+  #define tkr_serial_pos_log                  static_cast<mSerialPositionalLogger*>(tkr->pModule[EM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER
   #include "9_Controller/SerialCalibrationMeasurmentLogger/mSerialCalibrationMeasurmentLogger.h"
-  #define tkr_serial_calibration_log                  static_cast<mSerialCalibrationMeasurmentLogger*>(pCONT->pModule[EM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID])
+  #define tkr_serial_calibration_log                  static_cast<mSerialCalibrationMeasurmentLogger*>(tkr->pModule[EM_MODULE_CONTROLLER_SERIAL_CALIBRATION_PIC32_LOGGER_ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS
   #include "10_ConSpec/19_MAVLinkFlyingLEDS/mMAVLinkFlyingLEDS.h"
-  #define tkr_mavlink_leds                            static_cast<mMavlinkFlyingLEDS*>(pCONT->pModule[TaskerID::CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS__ID])
+  #define tkr_mavlink_leds                            static_cast<mMavlinkFlyingLEDS*>(tkr->pModule[TaskerID::CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS__ID])
 #endif
 #ifdef USE_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED
   #include "10_ConSpec/20_DeskSensorsOnOLED/mDeskSensorsOnOLED.h"
@@ -749,7 +748,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
   #include "9_Controller/UserMod_01/mUserMod_01.h"
-  #define tkr_usermod_01                  static_cast<mUserMod_01*>(pCONT->pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID])
+  #define tkr_usermod_01                  static_cast<mUserMod_01*>(tkr->pModule[EM_MODULE_CONTROLLER_USERMOD_01_ID])
 #endif
 
 

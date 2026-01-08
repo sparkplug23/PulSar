@@ -1,5 +1,7 @@
 #include "_AnimatorLight.h"
 
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
+
 /**
  * @brief 
  * 
@@ -103,87 +105,7 @@ void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, by
   //WIFI SETTINGS
   if (subPage == SUBPAGE_WIFI)
   {
-    #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_WIFI
-    unsigned cnt = 0;
-    // for (size_t n = 0; n < WLED_MAX_WIFI_COUNT; n++) {
-    //   char cs[4] = "CS"; cs[2] = 48+n; cs[3] = 0; //client SSID
-    //   char pw[4] = "PW"; pw[2] = 48+n; pw[3] = 0; //client password
-    //   char ip[5] = "IP"; ip[2] = 48+n; ip[4] = 0; //IP address
-    //   char gw[5] = "GW"; gw[2] = 48+n; gw[4] = 0; //GW address
-    //   char sn[5] = "SN"; sn[2] = 48+n; sn[4] = 0; //subnet mask
-    //   if (request->hasArg(cs)) {
-    //     if (n >= multiWiFi.size()) multiWiFi.push_back(WiFiConfig()); // expand vector by one
-    //     char oldSSID[33]; strcpy(oldSSID, multiWiFi[n].clientSSID);
-    //     char oldPass[65]; strcpy(oldPass, multiWiFi[n].clientPass);
-
-    //     strlcpy(multiWiFi[n].clientSSID, request->arg(cs).c_str(), 33);
-    //     if (strlen(oldSSID) == 0 || !strncmp(multiWiFi[n].clientSSID, oldSSID, 32)) {
-    //       forceReconnect = true;
-    //     }
-    //     if (!isAsterisksOnly(request->arg(pw).c_str(), 65)) {
-    //       strlcpy(multiWiFi[n].clientPass, request->arg(pw).c_str(), 65);
-    //       forceReconnect = true;
-    //     }
-    //     for (size_t i = 0; i < 4; i++) {
-    //       ip[3] = 48+i;
-    //       gw[3] = 48+i;
-    //       sn[3] = 48+i;
-    //       multiWiFi[n].staticIP[i] = request->arg(ip).toInt();
-    //       multiWiFi[n].staticGW[i] = request->arg(gw).toInt();
-    //       multiWiFi[n].staticSN[i] = request->arg(sn).toInt();
-    //     }
-    //     cnt++;
-    //   }
-    // }
-    // // remove unused
-    // if (cnt < multiWiFi.size()) {
-    //   cnt = multiWiFi.size() - cnt;
-    //   while (cnt--) multiWiFi.pop_back();
-    //   multiWiFi.shrink_to_fit(); // release memory
-    // }
-
-    // if (request->hasArg(F("D0"))) {
-    //   dnsAddress = IPAddress(request->arg(F("D0")).toInt(),request->arg(F("D1")).toInt(),request->arg(F("D2")).toInt(),request->arg(F("D3")).toInt());
-    // }
-
-    // strlcpy(cmDNS, request->arg(F("CM")).c_str(), 33);
-
-    // apBehavior = request->arg(F("AB")).toInt();
-    // char oldSSID[33]; strcpy(oldSSID, apSSID);
-    // strlcpy(apSSID, request->arg(F("AS")).c_str(), 33);
-    // if (!strcmp(oldSSID, apSSID) && apActive) forceReconnect = true;
-    // apHide = request->hasArg(F("AH"));
-    // int passlen = request->arg(F("AP")).length();
-    // if (passlen == 0 || (passlen > 7 && !isAsterisksOnly(request->arg(F("AP")).c_str(), 65))) {
-    //   strlcpy(apPass, request->arg(F("AP")).c_str(), 65);
-    //   forceReconnect = true;
-    // }
-    // int t = request->arg(F("AC")).toInt();
-    // if (t != apChannel) forceReconnect = true;
-    // if (t > 0 && t < 14) apChannel = t;
-
-    // #ifdef ARDUINO_ARCH_ESP32
-    // int tx = request->arg(F("TX")).toInt();
-    // txPower = min(max(tx, (int)WIFI_POWER_2dBm), (int)WIFI_POWER_19_5dBm);
-    // #endif
-
-    // force802_3g = request->hasArg(F("FG"));
-    // noWifiSleep = request->hasArg(F("WS"));
-
-    // #ifndef WLED_DISABLE_ESPNOW
-    // bool oldESPNow = enableESPNow;
-    // enableESPNow = request->hasArg(F("RE"));
-    // if (oldESPNow != enableESPNow) forceReconnect = true;
-    // strlcpy(linked_remote, request->arg(F("RMAC")).c_str(), 13);
-    // strlwr(linked_remote);  //Normalize MAC format to lowercase
-    // #endif
-
-    // #ifdef WLED_USE_ETHERNET
-    // ethernetType = request->arg(F("ETH")).toInt();
-    // WLED::instance().initEthernet();
-    // #endif
-
-    #endif // ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_WIFI
+    ALOG_ERR(PSTR("REMOVED from /lights"));
   }
 
   //LED SETTINGS
@@ -1309,3 +1231,5 @@ bool mAnimatorLight::handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, 
 
 
 #endif // ENABLE_DEVFEATURE_LIGHTING__SETTINGS
+
+#endif

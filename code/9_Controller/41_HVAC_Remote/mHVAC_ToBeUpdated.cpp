@@ -13,11 +13,11 @@ int8_t mHVAC::Tasker_PredictManualHeating(){
 
 //if ROC > X with programs off = on
 
-// /if(pCONT->mhs->watertemps.tank_top.ischanged){
+// /if(tkr->mhs->watertemps.tank_top.ischanged){
 //
 //   // test for rising tank temps
 //   if(watertemps.tank_top.roc1m.val>0.2){
-//     pCONT->mso->MessagePrintln("watertemps.tank_top.roc1m.val>0.2");
+//     tkr->mso->MessagePrintln("watertemps.tank_top.roc1m.val>0.2");
 //   }
 //
 // }
@@ -188,18 +188,18 @@ int mHVAC::mapHeatingTempToBrightness(int temp){
 //   // for(uint8_t device_id=0;device_id<8;device_id++){
 
 //   //   switch(device_id){
-//   //     case ID_DB18_DS: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.downstairs_pipe; break;
-//   //     case ID_DB18_US: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.upstairs_pipe; break;
-//   //     case ID_DB18_WB: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.boiler_pipe; break;
-//   //     case ID_DB18_IH: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.immersion_heater; break;
-//   //     case ID_DB18_TT: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_top; break;
-//   //     case ID_DB18_TM: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_middle; break;
-//   //     case ID_DB18_TB: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_bottom; break;
-//   //     case ID_DB18_TO: default: pCONT->mhs->watertemps.ptr = &pCONT->mhs->watertemps.tank_out; break;
+//   //     case ID_DB18_DS: tkr->mhs->watertemps.ptr = &tkr->mhs->watertemps.downstairs_pipe; break;
+//   //     case ID_DB18_US: tkr->mhs->watertemps.ptr = &tkr->mhs->watertemps.upstairs_pipe; break;
+//   //     case ID_DB18_WB: tkr->mhs->watertemps.ptr = &tkr->mhs->watertemps.boiler_pipe; break;
+//   //     case ID_DB18_IH: tkr->mhs->watertemps.ptr = &tkr->mhs->watertemps.immersion_heater; break;
+//   //     case ID_DB18_TT: tkr->mhs->watertemps.ptr = &tkr->mhs->watertemps.tank_top; break;
+//   //     case ID_DB18_TM: tkr->mhs->watertemps.ptr = &tkr->mhs->watertemps.tank_middle; break;
+//   //     case ID_DB18_TB: tkr->mhs->watertemps.ptr = &tkr->mhs->watertemps.tank_bottom; break;
+//   //     case ID_DB18_TO: default: tkr->mhs->watertemps.ptr = &tkr->mhs->watertemps.tank_out; break;
 //   //   }
 
-//   //   if(stored_new.temp[device_id] != pCONT->mhs->watertemps.ptr->raw.val){
-//   //     stored_new.temp[device_id] = pCONT->mhs->watertemps.ptr->raw.val;
+//   //   if(stored_new.temp[device_id] != tkr->mhs->watertemps.ptr->raw.val){
+//   //     stored_new.temp[device_id] = tkr->mhs->watertemps.ptr->raw.val;
 //   //     ischanged = 1;
 //   //   }
 //   //   #ifdef DEBUG_SENDALL
@@ -208,12 +208,12 @@ int mHVAC::mapHeatingTempToBrightness(int temp){
 //   //   if(ischanged){ ischanged = 0;
 //   //     //data_buffer.payload.json_pairs++;
 //   //     JsonObject json1 = obj.createNestedObject(GetSensorNameByID(device_id));
-//   //     json1[D_TEMP] = pCONT->mhs->watertemps.ptr->raw.val;
-//   //     json1[D_HUE] = mapHeatingTempToHueColour(pCONT->mhs->watertemps.ptr->raw.val);
-//   //     json1[D_BRT] = mapHeatingTempToBrightness(pCONT->mhs->watertemps.ptr->raw.val);
+//   //     json1[D_TEMP] = tkr->mhs->watertemps.ptr->raw.val;
+//   //     json1[D_HUE] = mapHeatingTempToHueColour(tkr->mhs->watertemps.ptr->raw.val);
+//   //     json1[D_BRT] = mapHeatingTempToBrightness(tkr->mhs->watertemps.ptr->raw.val);
 
 //   //     char tmpctr[10];  memset(tmpctr,0,sizeof(tmpctr));
-//   //     RgbColor c = HsbColor(mapHeatingTempToHueColour(pCONT->mhs->watertemps.ptr->raw.val)/360.0f,100/100.0f,100/100.0f);
+//   //     RgbColor c = HsbColor(mapHeatingTempToHueColour(tkr->mhs->watertemps.ptr->raw.val)/360.0f,100/100.0f,100/100.0f);
 //   //     sprintf(tmpctr,"%02X%02X%02X",c.R,c.G,c.B);
 //   //     json1[D_RGB] = tmpctr;
 

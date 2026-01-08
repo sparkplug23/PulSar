@@ -168,7 +168,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
   {
     ALOG_DBM(PSTR("mod %d %d"), out_module_id, out_sensor_id );
     sensors_reading_t val;
-    pCONT->GetModule(out_module_id)->GetSensorReading(&val, out_sensor_id);
+    tkr->GetModule(out_module_id)->GetSensorReading(&val, out_sensor_id);
     if(val.Valid())
     {
       sensor_data = val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);   
@@ -190,7 +190,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
   {
     ALOG_DBM(PSTR("mod %d %d"), out_module_id, out_sensor_id );
     sensors_reading_t val;
-    pCONT->GetModule(out_module_id)->GetSensorReading(&val, out_sensor_id);
+    tkr->GetModule(out_module_id)->GetSensorReading(&val, out_sensor_id);
     if(val.Valid())
     {
       sensor_data = val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);  
@@ -212,7 +212,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
   {
     ALOG_DBM(PSTR("mod %d %d"), out_module_id, out_sensor_id );
     sensors_reading_t val;
-    pCONT->GetModule(out_module_id)->GetSensorReading(&val, out_sensor_id);
+    tkr->GetModule(out_module_id)->GetSensorReading(&val, out_sensor_id);
     if(val.Valid())
     {
       sensor_data = val.GetFloat(SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID);   
@@ -234,7 +234,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
   {
     ALOG_DBM(PSTR("mod %d %d"), out_module_id, out_sensor_id );
     sensors_reading_t val;
-    pCONT->GetModule(out_module_id)->GetSensorReading(&val, out_sensor_id);
+    tkr->GetModule(out_module_id)->GetSensorReading(&val, out_sensor_id);
     if(val.Valid())
     {
       sensor_data = val.GetFloat(SENSOR_TYPE_CURRENT_ID);   
@@ -280,12 +280,12 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page2()
     line = -1;
     sensors_reading_t val;
     #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
-    pCONT->GetModule_P(D_MODULE_SENSORS_DB18S20_CTR)->GetSensorReading(&val, sensor_id);   
+    tkr->GetModule_P(D_MODULE_SENSORS_DB18S20_CTR)->GetSensorReading(&val, sensor_id);   
     if(val.Valid())
     {
 
       sensor_data = val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);        
-      DLI->GetDeviceName_WithModuleUniqueID( pCONT->GetModule_P(D_MODULE_SENSORS_DB18S20_CTR)->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
+      DLI->GetDeviceName_WithModuleUniqueID( tkr->GetModule_P(D_MODULE_SENSORS_DB18S20_CTR)->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
 
       /**
        * @brief Check for name and replace with OLED friendly short name

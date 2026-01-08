@@ -86,6 +86,7 @@ class mServerResetRelays :
     void Serve_Submodule_ServerResetRelays_Post(AsyncWebServerRequest* request);
     void Serve_Submodule_ServerResetRelays_JS(AsyncWebServerRequest* request);
     void Serve_Submodule_ServerResetRelays_Page(AsyncWebServerRequest* request);
+    uint8_t poll_rate_s = 10; // default idle rate
     #endif
 
 

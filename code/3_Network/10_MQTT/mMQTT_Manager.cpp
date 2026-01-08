@@ -6,14 +6,32 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
 
   // ALOG_INF(PSTR("M0host_address===================: %s"), dt.connection[0].host_address);
 
-
   switch(function){
     /************
      * INIT SECTION * 
     *******************/
     case TASK_INIT:
       Init();
+    break;    
+  }
+
+  if(!tkr_set->Settings.flag_system.mqtt_enabled){ return 0; }
+
+  if(!tkr_interface_network->Network_HasExternalConnectivity()) return 0;
+
+  switch(function){
+  /************
+   * PERIODIC SECTION * 
+  *******************/
+    case TASK_LOOP:
+      MM_EveryLoop();
+      CallMQTTSenders();
     break;
+    case TASK_MQTT_CONNECTED:
+    // ALOG_ERR(PSTR("MQTT_CONNECTED hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"));
+      Load_New_Subscriptions_From_Function_Template();
+    break;
+    
     case TASK_WIFI_CONNECTED:{ // moved from wifi jan2026
 
       #ifndef ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
@@ -52,22 +70,7 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
       #endif // ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
     }
     break;
-  }
 
-  if(!tkr_set->Settings.flag_system.mqtt_enabled){ return 0; }
-
-  switch(function){
-  /************
-   * PERIODIC SECTION * 
-  *******************/
-    case TASK_LOOP:
-      MM_EveryLoop();
-      CallMQTTSenders();
-    break;
-    case TASK_MQTT_CONNECTED:
-    // ALOG_ERR(PSTR("MQTT_CONNECTED hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"));
-      Load_New_Subscriptions_From_Function_Template();
-    break;
     case TASK_NETWORK_CONNECTION_ESTABLISHED:
 
       /**
@@ -565,7 +568,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj["MQTT"].getObject()["StatusAll"]) //change all to be value
   {    
-    pCONT->Tasker_Interface(TASK_MQTT_STATUS_REFRESH_SEND_ALL);
+    tkr->Tasker_Interface(TASK_MQTT_STATUS_REFRESH_SEND_ALL);
   }
 
 
@@ -587,7 +590,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
       dt.configperiod_secs = jtok_sub.getInt();
       ALOG_TST(PSTR("MQTTUpdateSeconds ConfigPeriod %d"), dt.configperiod_secs);
     }
-    pCONT->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
+    tkr->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   }
 
 }//end function
@@ -609,7 +612,7 @@ void mMQTTManager::CallMQTTSenders()
   {
     if(brokers[0]->uptime_seconds && brokers[0]->downtime_counter==0)
     {
-      pCONT->Tasker_Interface(TASK_MQTT_SENDER);
+      tkr->Tasker_Interface(TASK_MQTT_SENDER);
     }
   }
 

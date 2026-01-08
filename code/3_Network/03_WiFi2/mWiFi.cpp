@@ -10,122 +10,163 @@ extern "C" {
 }
 #endif
 
-int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj){
 
-  // DEBUG_LINE_HERE3
-  #ifdef ENABLE_DEVFEATURE_NETWORK__BLOCK_CONNECT_PUSH_BACKOFF_LONG_AS_TEMP_SOLUTION_TO_NO_WIFI
-  return 0;
-  #endif
-
-  #ifdef ENABLE_DEBUGFEATURE_LIGHTS__ESP32C3_FLICKER_TEST
-  return 0;
-  #endif
-
-  switch(function){
+int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj)
+{
+  switch (function)
+  {
     case TASK_INIT:
+    {
+      Init_Preload_Wifi2_Settings();
 
-      #ifdef ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
-      WifiConnect(); // new SoftAP + multiSSID method
-      #else
-      WifiConnect(); // Old method from Tas
-      #endif 
-
+      // Simple delayed start for both STA/AP.
+      // (Later you will replace 10 with chip-id derived jitter.)
+      connection.seconds_to_wait_for_fresh_connection_attempt = 10;
+    }
     break;
-    case TASK_LOOP: 
-    
+
+    case TASK_LOOP:
+    {
+      // DNS captive portal needs frequent polling
+      WiFi2_Ap_Dns_Tick();
+
       #if defined(USE_NETWORK_MDNS) && defined(ESP8266)
-        MdnsUpdate();
-      #endif // USE_NETWORK_MDNS
-    
-    break;
-    case TASK_EVERY_SECOND:{
-      
-      AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "network_wifi=%d"), tkr_set->Settings.flag_network.network_wifi);
-
-      #ifdef ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
-        Handle_WiFiConnection(); // new SoftAP + multiSSID method  
-        // if (tkr_set->Settings.flag_network.network_wifi) 
-        // {
-        //   WifiCheck(tkr_set->runtime.wifi_state_flag);// Old method from Tas
-        //   tkr_set->runtime.wifi_state_flag = WIFI_RESTART;
-        // } // new SoftAP + multiSSID method
-      #else
-        if (tkr_set->Settings.flag_network.network_wifi) 
-        {
-          WifiCheck(tkr_set->runtime.wifi_state_flag);// Old method from Tas
-          tkr_set->runtime.wifi_state_flag = WIFI_RESTART;
-        }
-      #endif // ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025
-
-      AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_ssid[%d]=%s"),tkr_set->Settings.sta_active, tkr_set->SettingsText(SET_STASSID1 + tkr_set->Settings.sta_active) );
-      AddLog(loglevel_with_connection_status, PSTR(D_LOG_WIFI "sta_pwd[%d]=%s"), tkr_set->Settings.sta_active, tkr_set->SettingsText(SET_STAPWD1 + tkr_set->Settings.sta_active) );
-
+        WiFi_Mdns_Tick();
+      #endif
     }
     break;
+
+    case TASK_EVERY_SECOND:
+    {
+      Task_EverySecond();
+    }
+    break;
+
     case TASK_EVERY_MINUTE:
-    
-      ALOG_INF( PSTR("WL_CONNECTED %s"), WiFi.localIP().toString().c_str() );
-
-      break;
-    case TASK_EVERY_FIVE_MINUTE:
-      // ALOG_INF( PSTR("WL_CONNECTED %s"), WiFi.localIP().toString().c_str() );
-      
-      #ifdef USE_NETWORK_MDNS
-        StartMdns();
-      #endif  // USE_NETWORK_MDNS
-
-    break;
-    case TASK_WIFI_CONNECTED:{
-
-      #ifdef USE_NETWORK_MDNS
-        StartMdns();
-      #endif  // USE_NETWORK_MDNS
-
-      // #ifndef ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-
-      //   ALOG_HGL(PSTR("Start MQTTConnection with WiFi"));
-
-      //   #ifdef USE_MODULE_NETWORK_MQTT
-
-      //   DEBUG_LINE_HERE3
-
-      //     mqtt_client = new WiFiClient();
-      //     DEBUG_LINE_HERE3
-
-      //     tkr_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
-      //     DEBUG_LINE_HERE3
-          
-      //     tkr_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
-      //     DEBUG_LINE_HERE3
-
-      //     tkr_mqtt->brokers.back()->SetReConnectBackoffTime(MQTT_RETRY_SECS);
-      //     DEBUG_LINE_HERE3
-          
-      //     // char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%s"), tkr_set->Settings.system_name.device, WiFi.macAddress().c_str()); 
-          
-      //     uint8_t mac[6];           WiFi.macAddress(mac);
-      //     DEBUG_LINE_HERE3
-      //     char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%02X:%02X:%02X"), tkr_set->Settings.system_name.device, mac[3], mac[4], mac[5]); 
-      //     DEBUG_LINE_HERE3
-      //     tkr_mqtt->brokers.back()->SetClientName(client_name);
-      //     DEBUG_LINE_HERE3
-
-      //     tkr_mqtt->brokers.back()->SetTopicPrefix(tkr_set->Settings.system_name.device);
-      //     DEBUG_LINE_HERE3
-
-      //   #endif // USE_MODULE_NETWORK_MQTT
-      // #endif // ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-      
-      DEBUG_LINE_HERE;
+    {
+      // ALOG_INF(PSTR("WL_CONNECTED=%d IP=%s"),
+      //          (WiFi.status() == WL_CONNECTED),
+      //          WiFi.localIP().toString().c_str());
     }
     break;
+
+    case TASK_EVERY_FIVE_MINUTE:
+    {
+      #ifdef USE_NETWORK_MDNS
+        WiFi_Mdns_StartOrRestart();
+      #endif
+    }
+    break;
+
+    case TASK_WIFI_CONNECTED:
+    {
+      #ifdef USE_NETWORK_MDNS
+        WiFi_Mdns_StartOrRestart();
+      #endif
+    }
+    break;
+
+    default:
+      break;
   }
 
-  // DEBUG_LINE_HERE3
-  return FUNCTION_RESULT_UNKNOWN_ID;
+  return FUNCTION_RESULT_SUCCESS_ID;
+}
+
+void mWiFi::Task_EverySecond()
+{
+  // If already started chosen mode, do nothing here.
+  if (connection.seconds_to_wait_for_fresh_connection_attempt == -1)
+  {
+    const wifi_mode_t mode_now = WiFi.getMode();
+    const bool ap_only_now = (mode_now == WIFI_AP);
+
+    if (!ap_only_now)
+    {
+      WiFi_Sta_Maintain_Periodic();
+    }
+    return;
+  }
+
+  // Count down to next attempt
+  if (connection.seconds_to_wait_for_fresh_connection_attempt > 0)
+  {
+    connection.seconds_to_wait_for_fresh_connection_attempt--;
+    return;
+  }
+
+  // When we hit zero, attempt a "fresh start" of either STA or AP.
+  bool ok = false;
+
+  if (WiFi2_HasAnyStaProfileConfigured())
+  {
+    WiFi_Sta_Connect_Start();
+    ok = true; // async initiation treated as success
+  }
+  else
+  {
+    ok = WiFi2_Ap_EnsureStarted();
+  }
+
+  // Retry delay on failure
+  connection.seconds_to_wait_for_fresh_connection_attempt = ok ? -1 : 15;
+
+  // Re-sample mode AFTER any start attempt
+  const wifi_mode_t mode_now = WiFi.getMode();
+  const bool ap_only_now = (mode_now == WIFI_AP);
+
+  // Maintain STA unless we are AP-only
+  if (!ap_only_now)
+  {
+    WiFi_Sta_Maintain_Periodic();
+  }
+}
 
 
-} // END function
+void mWiFi::Init_Preload_Wifi2_Settings()
+{
+ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+  memset(tkr_set->Settings.network.wifi[0].ssid, 0, sizeof(tkr_set->Settings.network.wifi[0].ssid));
+  memset(tkr_set->Settings.network.wifi[0].pass, 0, sizeof(tkr_set->Settings.network.wifi[0].pass));
+  memset(tkr_set->Settings.network.wifi[1].ssid, 0, sizeof(tkr_set->Settings.network.wifi[1].ssid));
+  memset(tkr_set->Settings.network.wifi[1].pass, 0, sizeof(tkr_set->Settings.network.wifi[1].pass));
+  memset(tkr_set->Settings.network.wifi[2].ssid, 0, sizeof(tkr_set->Settings.network.wifi[2].ssid));
+  memset(tkr_set->Settings.network.wifi[2].pass, 0, sizeof(tkr_set->Settings.network.wifi[2].pass));
+
+  #ifndef ENABLE_DEVFEATURE_WIFI__FORCE_SOFTAP_MODE_BY_BLOCKING_SSIDS
+  // Slot 0
+  snprintf(tkr_set->Settings.network.wifi[0].ssid,
+           sizeof(tkr_set->Settings.network.wifi[0].ssid),
+           "%s", STA_SSID1);
+
+  snprintf(tkr_set->Settings.network.wifi[0].pass,
+           sizeof(tkr_set->Settings.network.wifi[0].pass),
+           "%s", STA_PASS1);
+
+  // Slot 1
+  snprintf(tkr_set->Settings.network.wifi[1].ssid,
+           sizeof(tkr_set->Settings.network.wifi[1].ssid),
+           "%s", STA_SSID2);
+
+  snprintf(tkr_set->Settings.network.wifi[1].pass,
+           sizeof(tkr_set->Settings.network.wifi[1].pass),
+           "%s", STA_PASS2);
+  // Slot 2
+  snprintf(tkr_set->Settings.network.wifi[2].ssid,
+           sizeof(tkr_set->Settings.network.wifi[2].ssid),
+           "%s", STA_SSID3);
+
+  snprintf(tkr_set->Settings.network.wifi[2].pass,
+           sizeof(tkr_set->Settings.network.wifi[2].pass),
+           "%s", STA_PASS3);
+
+  #endif
+}
+
+
+
+
+
 
 
 #endif // ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2

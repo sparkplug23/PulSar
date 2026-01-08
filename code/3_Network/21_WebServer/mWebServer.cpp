@@ -11,8 +11,6 @@ String messageHead, messageSub;
 byte optionType;
 
 
-#ifdef ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
-
 // Helper function to avoid code duplication (saves 4k Flash)
 void mWebServer::WebGetArg(AsyncWebServerRequest *request, const char* arg, char* out, size_t max)
 {
@@ -26,11 +24,6 @@ void mWebServer::WebGetArg(AsyncWebServerRequest *request, const char* arg, char
 
 }
 
-#endif // ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
-
-
-
-
 
 
 
@@ -38,24 +31,24 @@ void mWebServer::WebGetArg(AsyncWebServerRequest *request, const char* arg, char
 
 void mWebServer::createEditHandler(bool enable) 
 {
-  if (editHandler != nullptr) tkr_web->server->removeHandler(editHandler);
+  if (editHandler != nullptr) server->removeHandler(editHandler);
   if (enable) 
   {
     #ifdef WLED_ENABLE_FS_EDITOR
       #ifdef ARDUINO_ARCH_ESP32
-      editHandler = &tkr_web->server->addHandler(new SPIFFSEditor(FILE_SYSTEM));
+      editHandler = &server->addHandler(new SPIFFSEditor(FILE_SYSTEM));
       #else
-      editHandler = &tkr_web->server->addHandler(new SPIFFSEditor("","",FILE_SYSTEM));
+      editHandler = &server->addHandler(new SPIFFSEditor("","",FILE_SYSTEM));
       #endif
     #else
-      editHandler = &tkr_web->server->on("/edit", HTTP_GET, [this](AsyncWebServerRequest *request){
+      editHandler = &server->on("/edit", HTTP_GET, [this](AsyncWebServerRequest *request){
         this->serveMessage(request, 501, "Not implemented", F("The FS editor is disabled in this build."), 254);
       });
     #endif
   } 
   else 
   {
-    editHandler = &tkr_web->server->on("/edit", HTTP_ANY, [this](AsyncWebServerRequest *request){
+    editHandler = &server->on("/edit", HTTP_ANY, [this](AsyncWebServerRequest *request){
       this->serveMessage(request, 500, "Access Denied", FPSTR(s_unlock_cfg), 254);
     });
   }
@@ -177,529 +170,145 @@ void mWebServer::serveRedirectMessage(AsyncWebServerRequest* request,
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-// bool mWebServer::WifiIsInManagerMode(){
-//   return (HTTP_MANAGER == webserver_state || HTTP_MANAGER_RESET_ONLY == webserver_state);
-// }
-
-// // void mWebServer::ShowWebSource(int source)
-// // {
-// //   // if ((source > 0) && (source < SRC_MAX)) {
-// //   //   char stemp1[20];
-// //   //   ALOG_DBG(PSTR("SRC: %s from %s"), 
-// //   //   tkr_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), source, kCommandSource), request->client().remoteIP().toString().c_str());
-// //   // }
-// // }
-
-// // void mWebServer::ExecuteWebCommand(char* svalue, int source)
-// // {
-// //   ShowWebSource(source);
-// //   //ALOG_DBG(PSTR("CODE NOT DONE %s"),"ExecuteCommand(svalue, SRC_IGNORE);");
-// //   ExecuteCommand(svalue, SRC_IGNORE);
-// // }
-
-
-// void mWebServer::handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len,
-//     size_t index, size_t total) {
-//   // ESP_LOGD(TAG, "handleBody [len=%u, index=%u, total=%u]", len, index, total);
-
-//   Serial.println("mWebServer::handleBody");
-
-//   // If whole data is not available, do not botter making sense of it.
-//   if (!data || len != total) {
-//     return;
-//   }
-
-//   // `POST /sys/master`
-//   if (request->method() == HTTP_POST && request->url() == "/setmaster") {
-//     // if (this->set_master_(data, len)) {
-//     //   request->send(200, APPLICATION_JSON, bool_response(true).c_str());
-//     // } else  {
-//       request->send(500);
-//     // }
-//     return;
-//   }
-// }
-
-
-// void mWebServer::StartWebserver(int type, IPAddress ipweb)
-// {
-//   // Ensure valid refresh values
-//   // if(!tkr_set->Settings.web_refresh){ tkr_set->Settings.web_refresh = HTTP_REFRESH_TIME; }
-
-//   ALOG_INF(PSTR(D_LOG_DEBUG "StartWebserver"));
-  
-//   if(!webserver_state){
-//     if(!server){    
-
-//       #ifdef ESP8266
-//         server = new AsyncWebServer((HTTP_MANAGER == type || HTTP_MANAGER_RESET_ONLY == type) ? 80 : WEB_PORT);
-//       #else
-//         server = new AsyncWebServer((HTTP_MANAGER == type || HTTP_MANAGER_RESET_ONLY == type) ? 80 : WEB_PORT);
-//       #endif
-            
-//       DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*"); // ALLOW CROSS SITE JAVASCRIPT ACCESS (CORS) BY DEFAULT
-//       DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST");
-//       DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "authorization");    
-
-//       // Must add handlers BEFORE begin
-//       pCONT->Tasker_Interface(TASK_WEB_ADD_HANDLER);
-//     }
-//     reset_web_log_flag = false;
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//     ALOG_INF(PSTR(D_LOG_HTTP "StartWebserver starting..."));
-//     #endif// ENABLE_LOG_LEVEL_INFO
-//     server->begin();
-//   }
-//   if(webserver_state != type){
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//     ALOG_INF(PSTR(D_LOG_HTTP D_WEBSERVER " %s%s " D_IPADDRESS " %s"), tkr_set->my_hostname, 1 ? ".local" : "", ipweb.toString().c_str());
-    
-//     #endif// ENABLE_LOG_LEVEL_INFO
-//     // tkr_set->rules_flag.http_init = 1;
-//   }
-//   if(type){ webserver_state = type; }
-// }
-
-
-// void mWebServer::WebAppend_Root_Draw_Table_dList(uint8_t row_count, char const* value_handle, const char* dList_titles){
-//   char listheading[50];
-
-//   //row_count=2;
-
-//   BufferWriterI->Append_P(PSTR("{t}"));
-//   for(int ii=0;ii<row_count;ii++){
-//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//       BufferWriterI->Append_P(PSTR("<td>%s</td>"), tkr_sup->GetTextIndexed(listheading, sizeof(listheading), ii, dList_titles));
-//       BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),value_handle);   
-//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-//   }    
-//   BufferWriterI->Append_P(PSTR("{t2}"));
-// }
-
-
-// void mWebServer::WebAppend_Root_Draw_Table_dList_P(uint8_t row_count, char const* value_handle, const char* dList_titles){
-//   char listheading[50];
-
-//   //row_count=2;
-
-//   BufferWriterI->Append_P(PSTR("{t}"));
-//   for(int ii=0;ii<row_count;ii++){
-//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//       BufferWriterI->Append_P(PSTR("<td>%s</td>"), tkr_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, dList_titles));
-//       BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),value_handle);   
-//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-//   }    
-//   BufferWriterI->Append_P(PSTR("{t2}"));
-// }
-
-// void mWebServer::WebAppend_Root_Draw_Table_Repeat_Row_Name_Numbers(uint8_t row_count, char const* value_handle, const char* dList_titles){
-  
-//   BufferWriterI->Append_P(PSTR("{t}"));
-//   for(int ii=0;ii<row_count;ii++){
-//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//       BufferWriterI->Append_P(PSTR("<td>%s %d</td>"), dList_titles);
-//       BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),value_handle);   
-//     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-//   }    
-//   BufferWriterI->Append_P(PSTR("{t2}"));
-// }
-
-// //pass row title using array/arrlen, include prefix format
-// //leave contents blank
-
-// // void mWebServer::WebAppend_Draw_Table_FP(uint8_t row_count, char const* value_handle, const char* dList_titles){
-// //   char listheading[50];
-// //   BufferWriterI->Append_P(PSTR("{t}"));
-// //   for(int ii=0;ii<row_count;ii++){
-// //     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-// //       BufferWriterI->Append_P(PSTR("<td>%s</td>"), tkr_sup->GetTextIndexed_P(listheading, sizeof(listheading), ii, dList_titles));
-// //       BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),value_handle);   
-// //     BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-// //   }    
-// //   BufferWriterI->Append_P(PSTR("{t2}"));
-// // }
-
-
-
-// void mWebServer::WebAppend_Draw_Table_FP(const char* table_class_col2, const char* formatP_row1, ...)
-// {
-//   char* buff = BufferWriterI->GetBufferPtr();
-//   uint16_t* len = BufferWriterI->GetLengthPtr();
-//   uint16_t size = BufferWriterI->GetBufferSize();
-
-//   BufferWriterI->Append_P(PSTR("{t}"));
-//   va_list arg;
-//   va_start(arg, formatP_row1);
-//   //Write cell 1
-//   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-//   BufferWriterI->Append_P(PSTR("<td>"));
-//     *len += vsnprintf_P(&buff[*len], size, formatP_row1, arg);
-//   BufferWriterI->Append_P(PSTR("</td>"));
-//   //Write cell 2
-//   BufferWriterI->Append_P(PSTR("<td><div class='%s'></div></td>"),table_class_col2);
-//   BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-//   va_end(arg);
-//   BufferWriterI->Append_P(PSTR("{t2}"));
-
-// }
-
-
-
-
 void mWebServer::WebPage_Root_AddHandlers(){
 
-//   /**
-//    * Shared resources
-//    * */
-//   tkr_web->server->on("/base_page_fill.json", HTTP_GET, [this](AsyncWebServerRequest *request){
-//     Web_Base_Page_Draw(request);
-//   });   
-//   server->on(WEB_HANLDE_JSON_WEB_TOP_BAR, HTTP_GET, [this](AsyncWebServerRequest *request){ 
-//     WebSend_JSON_WebServer_TopBar(request);    
-//   });  
-//   server->on(WEB_HANLDE_JSON_WEB_STATUS_POPOUT_DATA, HTTP_GET, [this](AsyncWebServerRequest *request){ 
-//     WebSend_JSON_WebServer_StatusPopoutData(request);    
-//   });
-//   tkr_web->server->on(WEB_HANDLE_JSON_ROOT_STATUS_ANY, HTTP_GET, [this](AsyncWebServerRequest *request){
-//     WebSend_JSON_RootStatus_Table(request);
-//   });
+  server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
+    if (captivePortal(request)) return;
+    this->handleStaticContent(request, F("/"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_root_basic, PAGE_root_basic_length, true);
+  });
 
-//   tkr_web->server->on("/console_test.json", HTTP_GET, [this](AsyncWebServerRequest *request){
-//     Console_JSON_Data(request);
-//   });  
-      
-//   tkr_web->server->onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
-//     if(!index)
-//       Serial.printf("BodyStart: %u\n", total);
-//     Serial.printf("%s", (const char*)data);
-//     if(index + len == total)
-//       Serial.printf("BodyEnd: %u\n", total);
-//   });
+  server->on("/version", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/plain", (String)PROJECT_VERSION);
+  });
 
-  
-//   tkr_web->server->on("/json_command.json", HTTP_POST, [](AsyncWebServerRequest *request){}, NULL, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
-//     Serial.println("onRequestBody " "/json_command.json" );
-//     if ((request->url() == "/json_command.json") && (request->method() == HTTP_POST))
-//     {
+  server->on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(200, "text/plain", (String)millis());
+  });
 
-//       //copy into buffer
-//       data_buffer.ClearDeep();
-//       memcpy(data_buffer.payload.ctr,data,sizeof(char)*total);
-//       data_buffer.payload.len = strlen(data_buffer.payload.ctr);
-//       data_buffer.flags.source_id = DATA_BUFFER_FLAG_SOURCE_WEBUI;
+  server->on("/reboot", HTTP_GET, [this](AsyncWebServerRequest *request){
+    request->redirect("/reset");
+  });
 
-//       pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);     
-        
-//       request->send(200, CONTENT_TYPE_APPLICATION_JSON_ID, "{\"status\":\"success\"}");
+  server->on("/reset", HTTP_GET, [this](AsyncWebServerRequest *request){
+    serveMessage(request, 200, F("Rebooting now..."), F("Please wait ~10 seconds..."), 129);
+    #ifdef USE_MODULE_LIGHTS_INTERFACE
+    tkr_sup->ESP_Restart_InSeconds(1);
+    #endif
+  });
 
-//     }
-//   });
+#ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+server->on("/generate_204", HTTP_GET, [this](AsyncWebServerRequest *request){
+  if (this->captivePortal(request)) return;
+  request->redirect("/");
+});
 
-//   /**
-//    * Root Page
-//    * */
-//   // server->redirect("/", "/main/page");
-//   // tkr_web->server->rewrite("/", WEB_HANDLE_ROOT);
-//   tkr_web->server->on(WEB_HANDLE_ROOT "/", [this](AsyncWebServerRequest *request){
-//     HandlePage_Root(request);
-//   });
-//   tkr_web->server->on(WEB_HANDLE_ROOT "/page_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
-//     Web_Root_Draw(request);
-//   });
-//   tkr_web->server->on(WEB_HANDLE_ROOT "/module_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
-//     Web_Root_Draw_Modules(request);
-//   });
-//   tkr_web->server->on(WEB_HANDLE_ROOT "/update_urls.json", HTTP_GET, [this](AsyncWebServerRequest *request){ 
-//     Web_Root_UpdateURLs(request);
-//   }); 
+server->on("/hotspot-detect.html", HTTP_GET, [this](AsyncWebServerRequest *request){
+  if (this->captivePortal(request)) return;
+  request->redirect("/");
+});
 
-#ifdef ENABLE_DEVFEATURE_WEBUI__INCLUDE_URI_PRE2023
+server->on("/ncsi.txt", HTTP_GET, [this](AsyncWebServerRequest *request){
+  if (this->captivePortal(request)) return;
+  request->send(200, "text/plain", "Microsoft NCSI");
+});
+
+server->on("/connecttest.txt", HTTP_GET, [this](AsyncWebServerRequest *request){
+  if (this->captivePortal(request)) return;
+  request->send(200, "text/plain", "Microsoft Connect Test");
+});
+#endif
+
   /**
    * Console Page
    * */
-  // tkr_web->server->on(D_WEB_HANDLE_CONSOLE_PAGE, [this](AsyncWebServerRequest *request){
-  //   HandlePage_Console(request);
-  // });
-  tkr_web->server->on("/console", HTTP_GET, [this](AsyncWebServerRequest *request){
+  #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+  server->on("/console", HTTP_GET, [this](AsyncWebServerRequest *request){
     this->HandlePage_Console(request);
   });
-// Date Modified: 01Jan26
-tkr_web->server->on("/console2", HTTP_GET, [this](AsyncWebServerRequest *request){
-  this->HandlePage_Console2(request);
-});
-
-#endif
-
+  #endif
+  #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+  server->on("/console_poll", HTTP_GET, [this](AsyncWebServerRequest *request){
+    this->HandlePage_Console_Poll(request);
+  });
+  #endif
 
 
 #ifdef ENABLE_DEVFEATURE_WEBSERVER__SETTINGS_WEBPAGES
 
 
 
-tkr_web->server->on("/settings2", HTTP_GET, [this](AsyncWebServerRequest *request){
+server->on("/settings2", HTTP_GET, [this](AsyncWebServerRequest *request){
     this->SettingsPages_GET(request);
   });
 
-tkr_web->server->on("/settings2", HTTP_POST, [this](AsyncWebServerRequest *request){
+server->on("/settings2", HTTP_POST, [this](AsyncWebServerRequest *request){
     this->SettingsPages_POST(request);
   });
 
-  tkr_web->server->on("/json2", HTTP_GET, [this](AsyncWebServerRequest *request){
+  server->on("/json2", HTTP_GET, [this](AsyncWebServerRequest *request){
     this->serveJson(request);
-  });
-
- static const char _common_js[] PROGMEM = "/common.js";
-  tkr_web->server->on(_common_js, HTTP_GET, [this](AsyncWebServerRequest *request){    
-    this->handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common, JS_common_length);
   });
 
 #endif
 
 
-
-
-
-
-
-
-
-  // tkr_web->server->on(D_WEB_HANDLE_CONSOLE "/page_draw.json", HTTP_GET, [this](AsyncWebServerRequest *request){
-  //   Web_Console_Draw(request);
-  // });
-  // tkr_web->server->on(D_WEB_HANDLE_CONSOLE "/update_urls.json", HTTP_GET, [this](AsyncWebServerRequest *request){ 
-  //   // Web_Root_UpdateURLs(request);
-  // }); 
-  // tkr_web->server->on(D_WEB_HANDLE_CONSOLE "/update_data.json", HTTP_GET, [this](AsyncWebServerRequest *request){
-  //   // Web_Root_Draw_Modules(request); //get console log
-  // });
-
-//   /**
-//    * Information Page
-//    * */
-//   // server->on(PM_WEBURL_PAGE_INFO, [this](AsyncWebServerRequest *request){
-//   //   HandleInformation(request); 
-//   // });
-//   // server->on(PM_WEBURL_PAGE_INFO_LOAD_URLS, HTTP_GET, [this](AsyncWebServerRequest *request){  
-//   //   Web_All_LoadTime_Minimum_URLs(request);
-//   // });  
-//   // server->on(PM_WEBURL_PAGE_INFO_DRAW_TABLE, [this](AsyncWebServerRequest *request){
-//   //   HandleInformation_TableDraw(request); 
-//   // });
-//   // server->on(PM_WEBURL_PAGE_INFO_LOAD_SCRIPT, HTTP_GET, [this](AsyncWebServerRequest *request){ 
-//   //   //Web_Info_LoadScript(request);
-//   //   HandleNotFound(request);
-//   // });
-
-//   /**
-//    * Upgrades
-//    * */  
-//   // server->on("/up", [this](AsyncWebServerRequest *request){HandleUpgradeFirmware(request); });
-//   // server->on("/u1", [this](AsyncWebServerRequest *request){HandleUpgradeFirmwareStart(request); });  // OTA
-//   // // server->on("/u2", HTTP_POST,
-//   // //     [this](AsyncWebServerRequest *request){HandleUploadDone(request); },
-//   // //     [this](AsyncWebServerRequest *request){HandleUploadLoop(request); });
-//   // server->on("/u2", HTTP_OPTIONS, [this](AsyncWebServerRequest *request){HandlePreflightRequest(request); });
-
-//   /**
-//    * System Settings
-//    * */  
-//   // server->on("/ss", [this](AsyncWebServerRequest *request){
-//   //   HandleSystemSettings(request); 
-//   // });
-
-
-//   /**
-//    * Resources Settings
-//    * */ 
-//   // server->on("/favicon.ico", HTTP_GET, [this](AsyncWebServerRequest *request){
-//   //   // HandleFavicon(request);
-//   // });
-          
-// //       server->on("/cm", [this](AsyncWebServerRequest *request){HandleHttpCommand(request); });
   
-// // #ifndef FIRMWARE_MINIMAL
-// //       server->on("/cn", [this](AsyncWebServerRequest *request){HandleConfiguration(request); });
-// //       server->on("/md", [this](AsyncWebServerRequest *request){HandleModuleConfiguration(request); });
-// //       server->on("/wi", [this](AsyncWebServerRequest *request){HandleWifiConfiguration(request); });
-// //       server->on("/lg", [this](AsyncWebServerRequest *request){HandleLoggingConfiguration(request); });
-// //       server->on("/tp", [this](AsyncWebServerRequest *request){HandleTemplateConfiguration(request); });
-// //       server->on("/co", [this](AsyncWebServerRequest *request){HandleOtherConfiguration(request); });
-// //       server->on("/dl", [this](AsyncWebServerRequest *request){HandleBackupConfiguration(request); });
-// //       server->on("/rs", [this](AsyncWebServerRequest *request){HandleRestoreConfiguration(request); });
-//       // server->on("/rt", [this](AsyncWebServerRequest *request){HandleResetConfiguration(request); });
-//       server->on("/reset", [this](AsyncWebServerRequest *request){HandleReset(request); });
-// //#endif
+  #ifdef ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+  static const char _style_css[] PROGMEM = "/style.css";
+  server->on("/style.css", HTTP_GET, [this](AsyncWebServerRequest *request){
+    handleStaticContent(request, FPSTR(_style_css), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss2, PAGE_settingsCss2_length);
+  });
+
+  static const char _favicon_ico[] PROGMEM = "/favicon.ico";
+  server->on(_favicon_ico, HTTP_GET, [this](AsyncWebServerRequest *request){
+    this->handleStaticContent(request, FPSTR(_favicon_ico), 200, F("image/x-icon"), favicon2, favicon2_length, false);
+  });
+
+  static const char _skin_css[] PROGMEM = "/skin.css";
+  server->on(_skin_css, HTTP_GET, [](AsyncWebServerRequest *request){
+    if (tkr_mfile->handleFileRead(request, FPSTR(_skin_css))) return;
+    AsyncWebServerResponse *response = request->beginResponse(200, FPSTR(CONTENT_TYPE_CSS));
+    request->send(response);
+  });
+  #endif
+
+ static const char _common_js[] PROGMEM = "/common.js";
+  server->on(_common_js, HTTP_GET, [this](AsyncWebServerRequest *request){    
+    this->handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common2, JS_common2_length);
+  });
+  
+  server->on("/debug/main", HTTP_GET, [this](AsyncWebServerRequest *request){
+    if (captivePortal(request)) return;
+    this->handleStaticContent(request, F("/debug/main"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_debug_main, PAGE_debug_main_length, true);
+  });
+
+  //called when the url is not defined here, ajax-in; get-settings
+  server->onNotFound([this](AsyncWebServerRequest *request)
+  {
+    ALOG_ERR(PSTR("HTTP URI Not-Found: %s"), request->url());    
+    if (captivePortal(request)) return;
+
+    //make API CORS compatible
+    if (request->method() == HTTP_OPTIONS)
+    {
+      AsyncWebServerResponse *response = request->beginResponse(200);
+      response->addHeader(F("Access-Control-Max-Age"), F("7200"));
+      request->send(response);
+      return;
+    }
+    #ifdef USE_MODULE_LIGHTS_ANIMATOR
+    ALOG_ERR(PSTR("Not sure this needs to stay or not"));
+    if(handle__HTTP__GET_QueryAPI(request, request->url())) return;
+    #endif
+    handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404, PAGE_404_length);
+  });
+
+
 //   server->onNotFound([this](AsyncWebServerRequest *request){HandleNotFound(request); });
   
 }
 
 
-// bool mWebServer::CheckWebSendFreeMemoryTooLow(uint16_t memory_needed){
-//   if(!memory_needed){
-//     memory_needed = 3000;
-//   }
-//   if(ESP.getFreeHeap()>memory_needed){
-//     return true;
-//   }
-//   return false;
-// }
-
-// bool mWebServer::RespondWebSendFreeMemoryTooLow(AsyncWebServerRequest *request, uint16_t memory_needed){
-//   if(!memory_needed){
-//     memory_needed = 2000;
-//   }
-//   if(ESP.getFreeHeap()<memory_needed){
-//     char message[45];
-//     sprintf(message,PSTR("Memory too low - %d needed (%d free)"),memory_needed,ESP.getFreeHeap());
-//     request->send(413, CONTENT_TYPE_TEXT_HTML_ID, message);
-//     return true;
-//   }
-//   return false;
-// }
-
-// bool mWebServer::RespondWebSend_UnableToAllocateBuffer(AsyncWebServerRequest *request){
-//   char message[45];
-//   sprintf(message,PSTR("Unable to allocate buffer (FreeHeap %d)"),ESP.getFreeHeap());
-//   request->send(413, CONTENT_TYPE_TEXT_HTML_ID, message);
-// }
-
-
-/**
- * @brief 
- * 
- * @param id 
- * @param buffer 
- * @param buflen 
- * @return char* 
- * 
- * I dont need to copy as its progmem
- */
-const char* mWebServer::GetContentTypeCtrP_By_ID(uint8_t id)
-{
-  
-  // switch(_contentType_id){
-  //   default:
-  //   case CONTENT_TYPE_TEXT_HTML_ID: 
-  //     // snprintf_P(buffer, sizeof(PM_WEB_CONTENT_TYPE_TEXT_HTML), PM_WEB_CONTENT_TYPE_TEXT_HTML); 
-  //     return PM_WEB_CONTENT_TYPE_TEXT_HTML;
-  //   break; // Necessary casts and dereferencing, just copy.
-  //   case CONTENT_TYPE_TEXT_JAVASCRIPT_ID: 
-  //     // memcpy_P(buffer, PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT, sizeof(PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT)); 
-  //     return PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT;
-  //   break;
-  //   case CONTENT_TYPE_APPLICATION_JSON_ID: 
-  //     // memcpy_P(buffer, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, sizeof(PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT));
-  //     return PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT;
-  //   break;
-  //   case CONTENT_TYPE_TEXT_CSS_ID: 
-  //     // memcpy_P(buffer, PM_WEB_CONTENT_TYPE_TEXT_CSS, sizeof(PM_WEB_CONTENT_TYPE_TEXT_CSS)); 
-  //     return PM_WEB_CONTENT_TYPE_TEXT_CSS;
-  //   break;
-
-  // }
-  
-
-  // return buffer;
-
-}
-
-
-
-
-// Handle all webpage sends to allow for checking of freespace
-void mWebServer::WebSend_Response(AsyncWebServerRequest *request, int code, uint8_t contentType_id, char* content_ptr){
-
-  // Work out memory needed relative to body we want to send?
-  // Serial.println("HERE"); Serial.flush();
-
-  // WebSend_Response(request,200,CONTENT_TYPE_APPLICATION_JSON_ID,data_buffer.payload.ctr);  
- 
-  // Check if there is enough RAM space, or else respond with 
-  // if(RespondWebSendFreeMemoryTooLow(request,WEBSEND_FREEMEMORY_START_LIMIT)){return;} 
-  // Contine to send requested data 
-  // request->send(code, contentType_id, content_ptr); 
-
-
-}
-
-
-
-
-// void mWebServer::StopWebserver(void)
-// {
-//   //if(webserver_state) {
-//     server->reset(); // asyncedit
-//     webserver_state = HTTP_OFF;
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//     ALOG_INF(PSTR(D_LOG_HTTP D_WEBSERVER_STOPPED));
-//     #endif// ENABLE_LOG_LEVEL_INFO
-//   //}
-// }
-
-// void mWebServer::WifiManagerBegin(bool reset_only)
-// {
-  
-//   ALOG_INF(PSTR(D_LOG_DEBUG "mWebServer::WifiManagerBegin"));
-
-//   // setup AP
-//   if (!tkr_set->global_state.wifi_down) {
-//     WiFi.mode(WIFI_AP_STA);
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//     ALOG_INF(PSTR(D_LOG_WIFI D_WIFIMANAGER_SET_ACCESSPOINT_AND_STATION));
-//     #endif// ENABLE_LOG_LEVEL_INFO
-//   } else {
-//     WiFi.mode(WIFI_AP);
-//     #ifdef ENABLE_LOG_LEVEL_INFO
-//     ALOG_INF(PSTR(D_LOG_WIFI D_WIFIMANAGER_SET_ACCESSPOINT));
-//     #endif// ENABLE_LOG_LEVEL_INFO
-//   }
-
-//   StopWebserver();
-
-//   DnsServer = new DNSServer();
-
-//   int channel = WIFI_SOFT_AP_CHANNEL;
-//   if ((channel < 1) || (channel > 13)) { channel = 1; }
-//   WiFi.softAP(tkr_set->my_hostname, nullptr, channel);
-
-//   delay(500); // Without delay I've seen the IP address blank
-//   /* Setup the DNS server redirecting all the domains to the apIP */
-//   DnsServer->setErrorReplyCode(DNSReplyCode::NoError);
-//   DnsServer->start(DNS_PORT, "*", WiFi.softAPIP());
-
-//   StartWebserver((reset_only ? HTTP_MANAGER_RESET_ONLY : HTTP_MANAGER), WiFi.softAPIP());
-
-// }
-
-// void mWebServer::PollDnsWebserver(void)
-// {
-//   if (DnsServer) { DnsServer->processNextRequest(); }
-// }
-
-// /*********************************************************************************************/
-
-// bool mWebServer::WebAuthenticate(void)
-// {
-//   // if (tkr_set->Settings.web_password[0] != 0 && HTTP_MANAGER_RESET_ONLY != webserver_state) {
-//   //   // return server->authenticate(WEB_USERNAME, tkr_set->Settings.web_password);
-//   // } else {
-//     return true;
-//   // }
-// }
-
-//bool mWebServer::HttpCheckPriviledgedAccess(bool autorequestauth = true)
 bool mWebServer::HttpCheckPriviledgedAccess()
 {
 
@@ -718,964 +327,6 @@ bool mWebServer::HttpCheckPriviledgedAccess()
 
 
 
-// void mWebServer::send_mP(AsyncWebServerRequest *request, int code, uint8_t content_type, const char* formatP, ...)     // Content send snprintf_P char data
-// {
-//   data_buffer.ClearDeep();
-//   va_list arg;
-//   va_start(arg, formatP);
-//   vsnprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), formatP, arg);
-//   va_end(arg);  
-//   request->send_P(code, content_type, data_buffer.payload.ctr);
-// }
-
-// // void mWebServer::WSContentSend_PD(AsyncWebServerRequest *request, const char* formatP, ...)    // Content send snprintf_P char data checked for decimal separator
-// // {
-
-// //   // This uses char strings. Be aware of sending %% if % is needed
-// //   va_list arg;
-// //   va_start(arg, formatP);
-// //   int len = vsnprintf_P(data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr), formatP, arg);
-// //   va_end(arg);
-
-// //   if (D_DECIMAL_SEPARATOR[0] != '.') {
-// //     for (int i = 0; i < len; i++) {
-// //       if ('.' == data_buffer.payload.ctr[i]) {
-// //         data_buffer.payload.ctr[i] = D_DECIMAL_SEPARATOR[0];
-// //       }
-// //     }
-// //   }
-// // }
-
-
-
-
-
-
-
-// // void mWebServer::WebHexCode(uint8_t i, const char* code)
-// // {
-// //   char scolor[10];
-
-// //   strlcpy(scolor, code, sizeof(scolor));
-// //   char* p = scolor;
-// //   if ('#' == p[0]) { p++; }  // Skip
-
-// //   if (3 == strlen(p)) {  // Convert 3 character to 6 character color code
-// //     p[6] = p[3];  // \0
-// //     p[5] = p[2];  // 3
-// //     p[4] = p[2];  // 3
-// //     p[3] = p[1];  // 2
-// //     p[2] = p[1];  // 2
-// //     p[1] = p[0];  // 1
-// //   }
-
-// //   uint32_t color = strtol(p, nullptr, 16);
-// // /*
-// //   if (3 == strlen(p)) {  // Convert 3 character to 6 character color code
-// //     uint32_t w = ((color & 0xF00) << 8) | ((color & 0x0F0) << 4) | (color & 0x00F);  // 00010203
-// //     color = w | (w << 4);                                                            // 00112233
-// //   }
-// // */
-
-// //   tkr_set->Settings.web_color[i][0] = (color >> 16) & 0xFF;  // Red
-// //   tkr_set->Settings.web_color[i][1] = (color >> 8) & 0xFF;   // Green
-// //   tkr_set->Settings.web_color[i][2] = color & 0xFF;          // Blue
-// // }
-
-// // uint32_t mWebServer::WebColor(uint8_t i)
-// // {
-// //   return (tkr_set->Settings.web_color[i][0] << 16) | (tkr_set->Settings.web_color[i][1] << 8) | tkr_set->Settings.web_color[i][2];
-// // }
-
-// uint32_t mWebServer::WebColor(uint8_t r, uint8_t g, uint8_t b){
-//   return (r << 16) | (g << 8) | b;
-// }
-
-// const char* mWebServer::WebColorCtr(uint8_t r, uint8_t g, uint8_t b, char* buffer, uint8_t buflen){
-//   snprintf_P(buffer, buflen, PSTR("#%02X%02X%02X"), r, g, b);
-//   return buffer;
-// }
-
-// // const char* mWebServer::WebColorCtr(char* buffer, uint8_t r,uint8_t g,uint8_t b){
-// //   sprintf(buffer,PSTR("#%02X%02X%02X\0"),r,g,b);
-// //   return buffer;
-// // }
-
-
-
-
-
-
-// /*-------------------------------------------------------------------------------------------*/
-
-// void mWebServer::HandleFavicon(AsyncWebServerRequest *request){
-//   // request->send_P(200, "image/x-icon", (char*)favicon, 156);
-//   // request->send_P(200, "image/x-icon", (char*)favicon, sizeof(favicon));  
-//   // request->send_P(200, "image/x-icon", favicon, 156);
-// }
-
-
-
-
-
-
-
-// /*-------------------------------------------------------------------------------------------*/
-
-// // String mWebServer::htmlEscape(String s)
-// // {
-// //   s.replace("&", "&amp;");
-// //   s.replace("<", "&lt;");
-// //   s.replace(">", "&gt;");
-// //   s.replace("\"", "&quot;");
-// //   s.replace("'", "&#x27;");
-// //   s.replace("/", "&#x2F;");
-// //   return s;
-// // }
-// /*-------------------------------------------------------------------------------------------*/
-
-// /*-------------------------------------------------------------------------------------------*/
-
-// void mWebServer::HandleHttpCommand(AsyncWebServerRequest *request)
-// {
-//   // //if (!HttpCheckPriviledgedAccess(false)) { return; }
-
-//   // ALOG_DBG(PSTR(D_LOG_HTTP D_COMMAND));
-
-//   // uint8_t valid = 1;
-//   // if (tkr_set->Settings.web_password[0] != 0) {
-//   //   char tmp1[sizeof(tkr_set->Settings.web_password)];
-//   //   WebGetArg(request,"user", tmp1, sizeof(tmp1));
-//   //   char tmp2[sizeof(tkr_set->Settings.web_password)];
-//   //   WebGetArg(request,"password", tmp2, sizeof(tmp2));
-//   //   if (!(!strcmp(tmp1, WEB_USERNAME) && !strcmp(tmp2, tkr_set->Settings.web_password))) { valid = 0; }
-//   // }
-
-//   // WSContentBegin(request, 200, CT_JSON);
-//   // if (valid) {
-//   //   uint8_t curridx = tkr_set->web_log_index;
-//   //   String svalue = request->arg("cmnd");
-//   //   if (svalue.length() && (svalue.length() < INPUT_BUFFER_SIZE)) {
-//   //     ExecuteWebCommand((char*)svalue.c_str(), SRC_WEBCOMMAND);
-//   //     if (tkr_set->web_log_index != curridx) {
-//   //       uint8_t counter = curridx;
-//   //       WSBufferAppend_P(response, PSTR("{"));
-//   //       bool cflg = false;
-//   //       do {
-//   //         char* tmp;
-//   //         size_t len;
-//   //         pCONT->mso->GetLog(counter, &tmp, &len);
-//   //         if (len) {
-//   //           // [14:49:36 MQTT: stat/wemos5/RESULT = {"POWER":"OFF"}] > [{"POWER":"OFF"}]
-//   //           char* JSON = (char*)memchr(tmp, '{', len);
-//   //           if (JSON) { // Is it a JSON message (and not only [15:26:08 MQT: stat/wemos5/POWER = O])
-//   //             size_t JSONlen = len - (JSON - tmp);
-//   //             if (JSONlen > sizeof(data_buffer.payload.ctr)) { JSONlen = sizeof(data_buffer.payload.ctr); }
-//   //             char stemp[JSONlen];
-//   //             strlcpy(stemp, JSON +1, JSONlen -2);
-//   //             WSBufferAppend_P(response, PSTR("%s%s"), (cflg) ? "," : "", stemp);
-//   //             cflg = true;
-//   //           }
-//   //         }
-//   //         counter++;
-//   //         if (!counter) counter++;  // Skip 0 as it is not allowed
-//   //       } while (counter != tkr_set->web_log_index);
-//   //       WSBufferAppend_P(response, PSTR("}"));
-//   //     } else {
-//   //       WSBufferAppend_P(response, PSTR("{\"" D_RSLT_WARNING "\":\"" D_ENABLE_WEBLOG_FOR_RESPONSE "\"}"));
-//   //     }
-//   //   } else {
-//   //     WSBufferAppend_P(response, PSTR("{\"" D_RSLT_WARNING "\":\"" D_ENTER_COMMAND " cmnd=\"}"));
-//   //   }
-//   // } else {
-//   //   WSBufferAppend_P(response, PSTR("{\"" D_RSLT_WARNING "\":\"" D_NEED_USER_AND_PASSWORD "\"}"));
-//   // }
-//   // WSContentEnd(request);
-// }
-
-// /*-------------------------------------------------------------------------------------------*/
-
-
-
-
-// /*************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//    * Other helpers
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-//   ************************************************************************************************************************************************************************************
-// */
-
-// /* Redirect to captive portal if we got a request for another domain. Return true in that case so the page handler do not try to handle the request again. */
-// bool mWebServer::CaptivePortal(AsyncWebServerRequest *request)
-// {
-//   // Possible hostHeader: connectivitycheck.gstatic.com or 192.168.4.1
-//   if ((WifiIsInManagerMode())){//} && !tkr_sup->ValidIpAddress(request->hostHeader().c_str())) {
-//     // ALOG_DBG(PSTR(D_LOG_HTTP D_REDIRECTED));
-//     // request->sendHeader(F("Location"), String("http://") + request->client().localIP().toString(), true);
-
-
-//     // WSSend(302, CT_PLAIN, "");  // Empty content inhibits Content-length header so we have to close the socket ourselves.
-    
-//     // AsyncWebServerResponse *response = request->beginResponse(302);
-//     // response->addHeader("Location", "http://4.3.2.1");
-//     // request->send(response);
-
-//     // request->client().stop();  // Stop is needed because we sent no content length
-//     return true;
-//   }
-//   return false;
-// }
-
-// /*********************************************************************************************/
-
-// // String mWebServer::UrlEncode(const String& text)
-// // {
-// //   // #ifndef DISABLE_SERIAL_LOGGING
-// //   // P_PHASE_OUT();
-// //   // #endif
-// //   const char hex[] = "0123456789ABCDEF";
-
-// // 	String encoded = "";
-// // 	int len = text.length();
-// // 	int i = 0;
-// // 	while (i < len)	{
-// // 		char decodedChar = text.charAt(i++);
-
-// // /*
-// //     if (('a' <= decodedChar && decodedChar <= 'z') ||
-// //         ('A' <= decodedChar && decodedChar <= 'Z') ||
-// //         ('0' <= decodedChar && decodedChar <= '9') ||
-// //         ('=' == decodedChar)) {
-// //       encoded += decodedChar;
-// // 		} else {
-// //       encoded += '%';
-// // 			encoded += hex[decodedChar >> 4];
-// // 			encoded += hex[decodedChar & 0xF];
-// //     }
-// // */
-// //     if (' ' == decodedChar) {
-// //       encoded += '%';
-// // 			encoded += hex[decodedChar >> 4];
-// // 			encoded += hex[decodedChar & 0xF];
-// //     } else {
-// //       encoded += decodedChar;
-// //     }
-
-// // 	}
-// // 	return encoded;
-// // }
-
-// // int mWebServer::WebSend(char *buffer)
-// // {
-// //   // [sonoff] POWER1 ON                                               --> Sends http://sonoff/cm?cmnd=POWER1 ON
-// //   // [192.168.178.86:80,admin:joker] POWER1 ON                        --> Sends http://hostname:80/cm?user=admin&password=joker&cmnd=POWER1 ON
-// //   // [sonoff] /any/link/starting/with/a/slash.php?log=123             --> Sends http://sonoff/any/link/starting/with/a/slash.php?log=123
-// //   // [sonoff,admin:joker] /any/link/starting/with/a/slash.php?log=123 --> Sends http://sonoff/any/link/starting/with/a/slash.php?log=123
-
-// //   char *host;
-// //   char *user;
-// //   char *password;
-// //   char *command;
-// //   int status = 1;                             // Wrong parameters
-
-// //                                               // buffer = |  [  192.168.178.86  :  80  ,  admin  :  joker  ]    POWER1 ON   |
-// //   host = strtok_r(buffer, "]", &command);     // host = |  [  192.168.178.86  :  80  ,  admin  :  joker  |, command = |    POWER1 ON   |
-// //   if (host && command) {
-// //     tkr_sup->RemoveSpace(host);                        // host = |[192.168.178.86:80,admin:joker|
-// //     host++;                                   // host = |192.168.178.86:80,admin:joker| - Skip [
-// //     host = strtok_r(host, ",", &user);        // host = |192.168.178.86:80|, user = |admin:joker|
-// //     String url = F("http://");                // url = |http://|
-// //     url += host;                              // url = |http://192.168.178.86:80|
-
-// //     command = tkr_sup->Trim(command);                  // command = |POWER1 ON| or |/any/link/starting/with/a/slash.php?log=123|
-// //     if (command[0] != '/') {
-// //       url += F("/cm?");                       // url = |http://192.168.178.86/cm?|
-// //       if (user) {
-// //         user = strtok_r(user, ":", &password);  // user = |admin|, password = |joker|
-// //         if (user && password) {
-// //           char userpass[128];
-// //           snprintf_P(userpass, sizeof(userpass), PSTR("user=%s&password=%s&"), user, password);
-// //           url += userpass;                    // url = |http://192.168.178.86/cm?user=admin&password=joker&|
-// //         }
-// //       }
-// //       url += F("cmnd=");                      // url = |http://192.168.178.86/cm?cmnd=| or |http://192.168.178.86/cm?user=admin&password=joker&cmnd=|
-// //     }
-// //     url += command;                           // url = |http://192.168.178.86/cm?cmnd=POWER1 ON|
-
-// // //ALOG_DBG(PSTR("DBG: Uri |%s|"), url.c_str());
-
-// // #if defined(ARDUINO_ESP8266_RELEASE_2_3_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_0) || defined(ARDUINO_ESP8266_RELEASE_2_4_1) || defined(ARDUINO_ESP8266_RELEASE_2_4_2)
-// //     HTTPClient http;
-// //     if (http.begin(UrlEncode(url))) {         // UrlEncode(url) = |http://192.168.178.86/cm?cmnd=POWER1%20ON|
-// // #else
-// //     WiFiClient http_client;
-// //     HTTPClient http;
-// //     if (http.begin(http_client, UrlEncode(url))) {  // UrlEncode(url) = |http://192.168.178.86/cm?cmnd=POWER1%20ON|
-// // #endif
-// //       int http_code = http.GET();             // Start connection and send HTTP header
-// //       if (http_code > 0) {                    // http_code will be negative on error
-// //         if (http_code == HTTP_CODE_OK || http_code == HTTP_CODE_MOVED_PERMANENTLY) {
-// // /*
-// //           // Return received data to the user - Adds 900+ bytes to the code
-// //           String result = http.getString();   // File found at server - may need lot of ram or trigger out of memory!
-// //           uint16_t j = 0;
-// //           for (uint16_t i = 0; i < result.length(); i++) {
-// //             char text = result.charAt(i);
-// //             if (text > 31) {                  // Remove control characters like linefeed
-// //               data_buffer.payload.ctr[j++] = text;
-// //               if (j == sizeof(data_buffer.payload.ctr) -2) { break; }
-// //             }
-// //           }
-// //           data_buffer.payload.ctr[j] = '\0';
-// //           MqttPublishPrefixTopic_P(RESULT_OR_STAT, PSTR(D_WEBSEND));
-// // */
-// //         }
-// //         status = 0;                           // No error - Done
-// //       } else {
-// //         status = 2;                           // Connection failed
-// //       }
-// //       http.end();                             // Clean up connection data
-// //     } else {
-// //       status = 3;                             // Host not found or connection error
-// //     }
-// //   }
-// //   return status;
-// // }
-
-// /*********************************************************************************************/
-
-// // bool mWebServer::JsonWebColor(const char* dataBuf)
-// // {
-// //   // Default (light)
-// //   // {"WebColor":["#000000","#ffffff","#f2f2f2","#000000","#ffffff","#000000","#ffffff","#ff0000","#008000","#ffffff","#1fa3ec","#0e70a4","#d43535","#931f1f","#47c266","#5aaf6f","#ffffff","#999999","#000000"]}
-// //   // Alternative (Dark)
-// //   // {"webcolor":["#eeeeee","#181818","#4f4f4f","#000000","#dddddd","#008000","#222222","#ff0000","#008000","#ffffff","#1fa3ec","#0e70a4","#d43535","#931f1f","#47c266","#5aaf6f","#ffffff","#999999","#000000"]}
-
-// //   // char dataBufLc[strlen(dataBuf) +1];
-// //   // tkr_sup->LowerCase(dataBufLc, dataBuf);
-// //   // tkr_sup->RemoveSpace(dataBufLc);
-// //   // if (strlen(dataBufLc) < 9) { return false; }  // Workaround exception if empty JSON like {} - Needs checks
-
-// //   // StaticJsonDocument<450>  doc;
-// //   // DeserializationError error =  deserializeJson(doc, dataBuf);
-// //   // JsonObject obj = doc.to<JsonObject>();
-// //   // if (error) { return false; }
-
-// //   // // StaticJsonBuffer<450> jb;  // 421 from https://arduinojson.org/v5/assistant/
-// //   // // JsonObject& obj = jb.parseObject(dataBufLc);
-// //   // // if (!obj.success()) { return false; }
-
-// //   // char parm_lc[10];
-// //   // if (obj[tkr_sup->LowerCase(parm_lc, D_WEBCOLOR)].isNull()) {
-// //   //   for (uint8_t i = 0; i < tkr_set->COL_LAST; i++) {
-// //   //     const char* color = obj[parm_lc][i];
-// //   //     if (color != nullptr) {
-// //   //       WebHexCode(i, color);
-// //   //     }
-// //   //   }
-// //   // }
-// //   return true;
-// // }
-
-// enum WebCommands { CMND_WEBSERVER, CMND_WEBPASSWORD, CMND_WEBLOG, CMND_WEBREFRESH, CMND_WEBSEND, CMND_WEBCOLOR, CMND_EMULATION };
-// // const char kWebCommands[] PROGMEM = D_WEBSERVER "|" D_WEBPASSWORD "|" D_WEBLOG "|" D_WEBREFRESH "|" D_WEBSEND "|" D_WEBCOLOR "|" D_EMULATION ;
-// // const char kWebSendStatus[] PROGMEM = D_DONE "|" D_WRONG_PARAMETERS "|" D_CONNECT_FAILED "|" D_HOST_NOT_FOUND ;
-
-// // bool mWebServer::WebCommand(void)
-// // {
-// //   char command[CMDSZ];
-// //   bool serviced = true;
-
-// // //   int command_code = tkr_sup->GetCommandCode(command, sizeof(command), tkr_events->XdrvMailbox.topic, kWebCommands);
-// // //   if (-1 == command_code) {
-// // //     serviced = false;  // Unknown command
-// // //   }
-// // //   if (CMND_WEBSERVER == command_code) {
-// // //     if ((tkr_events->XdrvMailbox.payload >= 0) && (tkr_events->XdrvMailbox.payload <= 2)) { tkr_set->Settings.webserver = tkr_events->XdrvMailbox.payload; }
-// // //     if (tkr_set->Settings.webserver) {
-// // //       tkr_sup->Response_P(PSTR("{\"" D_WEBSERVER "\":\"" D_ACTIVE_FOR " %s " D_ON_DEVICE " %s " D_WITH_IP_ADDRESS " %s\"}"),
-// // //         (2 == tkr_set->Settings.webserver) ? D_ADMIN : D_USER, tkr_set->my_hostname, WiFi.localIP().toString().c_str());
-// // //     } else {
-// // //       tkr_sup->Response_P(S_JSON_COMMAND_SVALUE, command, tkr_sup->GetStateText(0));
-// // //     }
-// // //   }
-// // //   else if (CMND_WEBPASSWORD == command_code) {
-// // //     if ((tkr_events->XdrvMailbox.data_len > 0) && (tkr_events->XdrvMailbox.data_len < sizeof(tkr_set->Settings.web_password))) {
-// // //       strlcpy(tkr_set->Settings.web_password, (SC_CLEAR == tkr_sup->Shortcut(tkr_events->XdrvMailbox.data)) ? "" : (SC_DEFAULT == tkr_sup->Shortcut(tkr_events->XdrvMailbox.data)) ? WEB_PASSWORD : tkr_events->XdrvMailbox.data, sizeof(tkr_set->Settings.web_password));
-// // //       tkr_sup->Response_P(S_JSON_COMMAND_SVALUE, command, tkr_set->Settings.web_password);
-// // //     } else {
-// // //       tkr_sup->Response_P(S_JSON_COMMAND_ASTERIX, command);
-// // //     }
-// // //   }
-// // //   else if (CMND_WEBLOG == command_code) {
-// // //     if ((tkr_events->XdrvMailbox.payload >= LOG_LEVEL_NONE) && (tkr_events->XdrvMailbox.payload <= LOG_LEVEL_ALL)) { tkr_set->Settings.logging.web_level = tkr_events->XdrvMailbox.payload; }
-// // //     tkr_sup->Response_P(S_JSON_COMMAND_NVALUE, command, tkr_set->Settings.logging.web_level);
-// // //   }
-// // //   else if (CMND_WEBREFRESH == command_code) {
-// // //     if ((tkr_events->XdrvMailbox.payload > 999) && (tkr_events->XdrvMailbox.payload <= 10000)) { tkr_set->Settings.web_refresh = tkr_events->XdrvMailbox.payload; }
-// // //     tkr_sup->Response_P(S_JSON_COMMAND_NVALUE, command, tkr_set->Settings.web_refresh);
-// // //   }
-// // //   else if (CMND_WEBSEND == command_code) {
-// // //     if (tkr_events->XdrvMailbox.data_len > 0) {
-// // //       uint8_t result = WebSend(request, tkr_events->XdrvMailbox.data);
-// // //       char stemp1[20];
-// // //       tkr_sup->Response_P(S_JSON_COMMAND_SVALUE, command, tkr_sup->GetTextIndexed_P(stemp1, sizeof(stemp1), result, kWebSendStatus));
-// // //     }
-// // //   }
-// // //   else if (CMND_WEBCOLOR == command_code) {
-// // //     if (tkr_events->XdrvMailbox.data_len > 0) {
-// // //       if (strstr(tkr_events->XdrvMailbox.data, "{") == nullptr) {  // If no JSON it must be parameter
-// // //         if ((tkr_events->XdrvMailbox.data_len > 3) && (tkr_events->XdrvMailbox.index > 0) && (tkr_events->XdrvMailbox.index <= tkr_set->COL_LAST)) {
-// // //           tkr_sup->WebHexCode(tkr_events->XdrvMailbox.index -1, tkr_events->XdrvMailbox.data);
-// // //         }
-// // //         else if (0 == tkr_events->XdrvMailbox.payload) {
-// // //           tkr_set->SettingsDefaultWebColor();
-// // //         }
-// // //       }
-// // //       else {
-// // //         JsonWebColor(tkr_events->XdrvMailbox.data);
-// // //       }
-// // //     }
-// // //     tkr_sup->Response_P(PSTR("{\"" D_WEBCOLOR "\":["));
-// // //     for (uint8_t i = 0; i < tkr_set->COL_LAST; i++) {
-// // //       if (i) { tkr_sup->ResponseAppend_P(PSTR(",")); }
-// // //       tkr_sup->ResponseAppend_P(PSTR("\"#%06x\""), WebColor(i));
-// // //     }
-// // //     tkr_sup->ResponseAppend_P(PSTR("]}"));
-// // //   }
-// // // #ifdef USE_EMULATION
-// // //   else if (CMND_EMULATION == command_code) {
-// // //     if ((XdrvMailbox.payload >= EMUL_NONE) && (XdrvMailbox.payload < EMUL_MAX)) {
-// // //       tkr_set->Settings.flag_power.emulation = XdrvMailbox.payload;
-// // //       restart_flag = 2;
-// // //     }
-// // //     Response_P(S_JSON_COMMAND_NVALUE, command, tkr_set->Settings.flag_power.emulation);
-// // //   }
-// // // #endif  // USE_EMULATION
-// // //   else serviced = false;  // Unknown command
-
-// //   return serviced;
-// // }
-
-
-
-// // void mWebServer::ExecuteCommand(char *cmnd, int source)
-// // {
-// // //   char stopic[CMDSZ];
-// // //   char svalue[INPUT_BUFFER_SIZE];
-// // //   char *start;
-// // //   char *token;
-
-// // //  //ShowFreeMem(PSTR("ExecuteCommand"));
-// // //   tkr_sup->ShowSource(source);
-
-// // // //In the first call to the strtok() function for a given string1, the strtok() function searches for the first token in string1, 
-// // // //skipping over leading delimiters. A pointer to the first token is returned.
-
-// // //   token = strtok(cmnd, " "); // split, on each call returns next split
-// // //   if (token != NULL) { //if end is not reached
-// // //     start = strrchr(token, '/');   // Skip possible cmnd/sonoff/ preamble
-// // //     if (start) { token = start +1; }
-// // //   }
-// // //   snprintf_P(stopic, sizeof(stopic), PSTR("%s"), (token == NULL) ? "" : token);
-// // //   token = strtok(NULL, "");
-// // // //  snprintf_P(svalue, sizeof(svalue), (token == NULL) ? "" : token);  // Fails with command FullTopic home/%prefix%/%topic% as it processes %p of %prefix%
-// // //   strlcpy(svalue, (token == NULL) ? "" : token, sizeof(svalue));       // Fixed 5.8.0b
-// // //   ALOG_INF(PSTR(D_LOG_COMMAND "ExecuteCommand" " stopic %s" " svalue %s" " strlen(svalue) %d" ),stopic,svalue,strlen(svalue));
-
-// // //   //MqttDataHandler(stopic, (uint8_t*)svalue, strlen(svalue));
-// // //   ParseAndExecuteWebCommands(stopic, (uint8_t*)svalue, strlen(svalue));
- 
-// // }
-
-
-// /**
-//  Commands have form: "<name><index> <value>" e.g."button2 1" or "slider3 123"
-//  <name> is in format classname::command but can contain NO numbers (ascii string only)
-// */
-// // void mWebServer::ParseAndExecuteWebCommands(char* topic, uint8_t* data, unsigned int data_len)
-// // {
-
-// // //   if (data_len > MQTT_MAX_PACKET_SIZE) { return; }  // Do not allow more data than would be feasable within stack space
-
-// // //   char *str;
-
-// // //   char topicBuf[TOPSZ];
-// // //   char dataBuf[data_len+1];
-// // //   char command [CMDSZ];
-// // //   char stemp1[TOPSZ];
-// // //   char *p;
-// // //   char *type = nullptr;
-// // //   uint8_t lines = 1;
-// // //   bool jsflg = false;
-// // //   bool grpflg = false;
-// // //   bool user_append_index = false;
-// // //   uint32_t i = 0;
-// // //   uint32_t index;
-// // //   uint32_t address;
-  
-// // //   // memset(&webcommand,0,sizeof(webcommand));
-
-// // // /******************************************************************************************************
-// // //  *******Extract <name><index> as topicBuf, <value> as dataBuf using space delimeter ***********************************************************************************************
-// // //  ******************************************************************************************************/
- 
-// // //   // "string numbervalue" - split into topic and data buffers
-// // //   strlcpy(topicBuf, topic, sizeof(topicBuf));
-// // //   for (i = 0; i < data_len; i++) {
-// // //     if (!isspace(data[i])) { break; } 
-// // //   }
-// // //   data_len -= i;
-// // //   memcpy(dataBuf, data +i, sizeof(dataBuf));
-// // //   dataBuf[sizeof(dataBuf)-1] = 0;
-  
-// // //   //copy command value
-// // //   memcpy(&webcommand.command_value,dataBuf,sizeof(dataBuf));
-
-// // //   //if (topicBuf[0] != '/') { ShowSource(SRC_MQTT); } //?
-
-// // //   ALOG_INF(PSTR(D_LOG_RESULT D_RECEIVED_TOPIC " %s, " D_DATA_SIZE " %d, " D_DATA " %s"), topicBuf, data_len, dataBuf);
- 
-// // //   // Check classname exists
-// // //   if(strstr(topicBuf,"::")){
-// // //     // copy classname
-// // //     for (i = 0; i < strlen(topicBuf); i++) {
-// // //       if (topicBuf[i]==':') { break; } 
-// // //       webcommand.classname[i] = topicBuf[i];
-// // //     }
-// // //   }
-
-// // //   //from i, we have the command_key_short (skip :: values)
-// // //   memcpy(&webcommand.command_key_short,&topicBuf[i+2],sizeof(char)*(strlen(topicBuf)-i-2));
-
-// // // /******************************************************************************************************
-// // //  *******Extract <index> from topicBuf with isdigit ***********************************************************************************************
-// // //  ******************************************************************************************************/
- 
-// // //   //type = strrchr(topicBuf, '/');  // Last part of received topic is always the command (type)
-// // //   type = topicBuf;//, '/');  // Last part of received topic is always the command (type)
-
-// // //   index = 1;
-// // //   if (type != nullptr) {
-// // //     type++;
-// // //     // Convert everything to same case
-// // //     for (i = 0; i < strlen(type); i++) {
-// // //       //type[i] = toupper(type[i]);
-// // //     }
-// // //     // From end of array, move backwards checking for numbers (ie stops when it hits " " space)
-// // //     while (isdigit(type[i-1])) {
-// // //       i--;
-// // //     }
-// // //     // Move from start of number to end of array to get number
-// // //     if (i < strlen(type)) {
-// // //       index = atoi(type +i);
-// // //       user_append_index = true;
-// // //     }
-// // //     type[i] = '\0';
-// // //   }
-
-// // //   // remove index from 
-// // //   if(user_append_index){
-// // //     webcommand.command_key_short[strlen(webcommand.command_key_short)-mSupport::NumDigits(index)] = 0;
-// // //   }
-
-// // //   //copy index
-// // //   webcommand.command_index = index;
-
-// // //   webcommand.fWaiting = true;
-  
-// // //   ALOG_DBG(PSTR(D_LOG_RESULT D_GROUP " %d, " D_INDEX " %d, " 
-// // //     D_COMMAND " %s, " D_DATA " %s"),
-// // //    grpflg, index, type, dataBuf);
-
-
-// // //   ALOG_INF(PSTR(D_LOG_RESULT "WEBCOMMANDS " "classname %s"),webcommand.classname);
-// // //   ALOG_INF(PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_key_short %s"),webcommand.command_key_short);
-// // //   ALOG_INF(PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_value %s"),webcommand.command_value);
-// // //   ALOG_INF(PSTR(D_LOG_RESULT "WEBCOMMANDS " "command_index %d"),webcommand.command_index);
-  
-// // //   pCONT->Tasker_Interface(TASK_WEB_COMMAND);
-
-// // } // END function
-
-
-
-
-#ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-
-// -----------------------------------------------------------------------------
-// WebSocket Console2: push any NEW log lines since last send
-// -----------------------------------------------------------------------------
-// Date Modified: 02Jan26
-//
-// PURPOSE
-//   Streams Tasmota-style "web_log" content to the Console2 WebUI over WebSocket.
-//
-// IMPORTANT DETAILS (matches your logging ring format)
-//   - tkr_log->web_log is a delimited char buffer storing many log entries.
-//   - Each entry is stored as: [index byte][text ...]['\1']
-//   - tkr_log->web_log_index is the NEXT index to be used (i.e., current "head").
-//   - Index 0 is reserved/invalid (used as terminator rules), so we skip 0.
-//
-// CURSOR RULES
-//   - wsConsole2LastIdx == 0 means "not synced yet" (first connect / reset).
-//     On first call we align wsConsole2LastIdx to current head and DO NOT dump history.
-//   - Thereafter we walk indices from wsConsole2LastIdx up to (but not including) head,
-//     collecting any lines that exist in the buffer.
-//   - At end we always align wsConsole2LastIdx = head, even if nothing was added,
-//     to prevent repeated re-walking.
-//
-// SENDING
-//   - If 'client' is provided, send only to that client (and respect queueLength()).
-//   - Else, broadcast to all clients.
-//
-// NOTES
-//   - If GetLog() returns empty while idx is advancing, it usually means
-//     the ring buffer has already dropped those indices due to overflow/eviction,
-//     or the producer gate flags (fConsole_active / fConsole_history) prevented
-//     those log lines from being captured into web_log in the first place.
-// -----------------------------------------------------------------------------
-void mWebServer::sendConsole2Ws(AsyncWebSocketClient *client /*= nullptr*/)
-{
-  // ---------------------------------------------------------------------------
-  // Guards: websocket must exist and have at least one connected client.
-  // ---------------------------------------------------------------------------
-  if (!tkr_web->websocket_console) return;
-
-  if (!tkr_web->websocket_console->count()) {
-    // Useful during debugging; can be commented later.
-    // Serial.println("console2ws: no clients");
-    return;
-  }
-
-  // Current "head" index of the web log ring.
-  // This is the next value the logger will write.
-  const uint8_t head_idx = tkr_log->web_log_index;
-
-  // ---------------------------------------------------------------------------
-  // First sync behaviour:
-  //   - Align cursor to head
-  //   - Do NOT dump history (keeps WS light and avoids large initial burst)
-  // ---------------------------------------------------------------------------
-  if (wsConsole2LastIdx == 0) {
-    wsConsole2LastIdx = head_idx;
-    // Serial.printf("console2ws: sync lastIdx=%u\n\r", (unsigned)wsConsole2LastIdx);
-    return;
-  }
-
-  // Nothing new since last push.
-  if (wsConsole2LastIdx == head_idx) {
-    // Serial.printf("console2ws: no new logs (%u)\n\r", (unsigned)head_idx);
-    return;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Build a payload containing as many NEW log lines as fit into 'out'.
-  // This is intentionally stack-based (no heap allocations).
-  // ---------------------------------------------------------------------------
-  char   out[1400];
-  size_t pos     = 0;
-  bool   need_nl = false;
-
-  // Start from the last cursor and walk forward until we reach head.
-  uint8_t  idx   = wsConsole2LastIdx;
-  uint16_t tried = 0;   // how many indices we attempted
-  uint16_t added = 0;   // how many lines we actually appended
-
-  while (idx != head_idx) {
-    char*  line = nullptr;
-    size_t len  = 0;
-
-    // GetLog() searches for an entry with the index byte == idx.
-    // If that entry has already been evicted from the ring, it returns nullptr/0.
-    tkr_log->GetLog(idx, &line, &len);
-    tried++;
-
-    if (line && len) {
-      // Ensure we have enough room for: optional '\n' + line bytes.
-      // (We keep a small safety margin by reserving +2.)
-      if (pos + len + 2 >= sizeof(out)) {
-        // If truncation happens often, reduce WS interval, increase buffer,
-        // or send multiple frames per call.
-        // Serial.println("console2ws: tx buffer full, truncating");
-        break;
-      }
-
-      if (need_nl) out[pos++] = '\n';
-      memcpy(out + pos, line, len);
-      pos += len;
-      need_nl = true;
-      added++;
-    }
-
-    // Advance index, skipping 0 (reserved).
-    idx++;
-    if (idx == 0) idx = 1;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Always align cursor to the head after walking.
-  // This prevents repeatedly re-walking old indices in case of gaps/eviction.
-  // ---------------------------------------------------------------------------
-  wsConsole2LastIdx = head_idx;
-
-  // If we walked indices but appended nothing, GetLog() did not find any entries.
-  // Typical reasons:
-  //   - ring buffer evicted those indices due to size pressure
-  //   - logging gate flags prevented capture into web_log
-  //   - idx bookkeeping mismatch vs how web_log_index is inserted
-  if (pos == 0) {
-    // Serial.printf("console2ws: walked %u slots, got 0 lines; head=%u\n\r",
-    //               (unsigned)tried, (unsigned)head_idx);
-    return;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Transmit:
-  //   - if single client mode, only send if its TX queue is empty
-  //   - else broadcast
-  // ---------------------------------------------------------------------------
-  if (client) {
-    if (client->queueLength() == 0) {
-      client->text(out, pos);
-    } else {
-      // This is not an error; it simply means the browser is not draining fast enough.
-      // Serial.println("console2ws: client queue busy, drop");
-    }
-  } else {
-    tkr_web->websocket_console->textAll(out, pos);
-  }
-
-  // Serial.printf("console2ws: sent %u lines (%u bytes) head=%u\n\r",
-  //               (unsigned)added, (unsigned)pos, (unsigned)head_idx);
-}
-
-
-// -----------------------------------------------------------------------------
-// WebSocket: Console2 event handler
-// -----------------------------------------------------------------------------
-// Date Modified: 02Jan26
-//
-// PURPOSE
-//   Handles the /ws_console2 WebSocket endpoint used by /console2.htm.
-//   This is intentionally a free function (not a class member) so it can be
-//   registered with AsyncWebSocket::onEvent() without std::function, lambdas,
-//   or trampolines. This keeps it deterministic (no heap alloc, no lifetime
-//   coupling to a C++ object), and mirrors the WLED/Tasmota style.
-//
-// BEHAVIOUR
-//   - WS_EVT_CONNECT:
-//       * Acknowledge connection.
-//       * Reset the console cursor so the next periodic push can resync.
-//   - WS_EVT_DISCONNECT:
-//       * Clear live-client tracking if it was this client.
-//   - WS_EVT_DATA (single-frame WS_TEXT only):
-//       * Heartbeat: "p" -> "pong"
-//       * Otherwise treat payload as a raw JSON command.
-//
-// COMMAND INJECTION MODES
-//   A) Normal (non-delayed):
-//       - Uses shared data_buffer with locking, then immediately calls
-//         Tasker_Interface(TASK_JSON_COMMAND_ID).
-//       - Preferred for simplicity if JSON/log pipelines are already correctly
-//         lock-protected everywhere.
-//
-//   B) Delayed (ENABLE_FEATURE_WEBSERVER__DELAYED_JSONLOCKED_COMMAND_PROCESSING):
-//       - Avoids touching the shared JSON/mqtt buffer by copying the WS payload
-//         into a dedicated heap buffer (pending_cmd). The main loop later parses
-//         it in a safe context.
-//       - This exists to avoid timing overlap where other producers overwrite
-//         shared buffers between the WS callback and the later parse.
-//
-// NOTES
-//   - This function does NOT push log frames itself. Log streaming should be
-//     done by handleConsole2Ws() at a controlled rate, to avoid flooding WS
-//     queues and starving the networking task.
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
-// WebSocket: Console2 event handler (free function)
-// -----------------------------------------------------------------------------
-// Date Modified: 02Jan26
-//
-// This handler services /ws_console2 for the Console2 WebUI.
-// It is intentionally NOT a class method so it can be registered
-// directly with AsyncWebSocket::onEvent() without lambdas or trampolines.
-//
-// The owning mWebServer instance is resolved ONCE at entry via tkr_web
-// and then used through the local `web` pointer.
-//
-// Supports two execution paths:
-//   1) Immediate execution using shared data_buffer (locked)
-//   2) Delayed execution using PendingJsonCommand (heap-backed)
-// -----------------------------------------------------------------------------
-
-void wsEventConsole2(AsyncWebSocket *server,
-                     AsyncWebSocketClient *client,
-                     AwsEventType type,
-                     void *arg,
-                     uint8_t *data,
-                     size_t len)
-{
-
-  // Resolve owning webserver ONCE
-  mWebServer* web = tkr_web;
-  if (!web) return;
-
-  // ---------------------------------------------------------------------------
-  // CONNECT
-  // ---------------------------------------------------------------------------
-  if (type == WS_EVT_CONNECT) {
-    DEBUG_PRINTLN(F("WS console2 client connected"));
-    client->text(F("ACK connected"));
-
-    web->wsConsole2LastIdx = 0;   // force resync on next periodic push
-    return;
-  }
-
-  // ---------------------------------------------------------------------------
-  // DISCONNECT
-  // ---------------------------------------------------------------------------
-  if (type == WS_EVT_DISCONNECT) {
-    DEBUG_PRINTLN(F("WS console2 client disconnected"));
-    if (client->id() == web->wsConsole2LiveClientId) {
-      web->wsConsole2LiveClientId = 0;
-    }
-    return;
-  }
-
-  // ---------------------------------------------------------------------------
-  // DATA
-  // ---------------------------------------------------------------------------
-  if (type != WS_EVT_DATA) return;
-
-  AwsFrameInfo *info = (AwsFrameInfo*)arg;
-  if (!info || !info->final || info->index != 0 || info->len != len) return;
-  if (info->opcode != WS_TEXT) return;
-
-  // Heartbeat
-  if (len > 0 && len < 10 && data[0] == 'p') {
-    client->text(F("pong"));
-    return;
-  }
-
-  // Bounds
-  if (len == 0 || len >= DATA_BUFFER_PAYLOAD_MAX_LENGTH) {
-    client->text(F("ERR len"));
-    return;
-  }
-
-  // ---------------------------------------------------------------------------
-  // DELAYED JSON MODE (heap-backed, no shared buffer touch)
-  // ---------------------------------------------------------------------------
-#ifdef ENABLE_FEATURE_WEBSERVER__DELAYED_JSONLOCKED_COMMAND_PROCESSING
-
-  if (web->pending_cmd.has()) {
-    client->text(F("BUSY"));
-    return;
-  }
-
-  if (!web->pending_cmd.create((uint16_t)len)) {
-    client->text(F("ERR mem"));
-    return;
-  }
-
-  memcpy(web->pending_cmd.ptr, data, len);
-  web->pending_cmd.ptr[len] = '\0';
-
-  client->text(F("OK"));
-  return;
-
-#else
-  // ---------------------------------------------------------------------------
-  // IMMEDIATE MODE (shared buffer + lock)
-  // ---------------------------------------------------------------------------
-
-  if (!data_buffer.requestLock(web->GetModuleUniqueID())) {
-    client->text(F("BUSY"));
-    return;
-  }
-
-  data_buffer.ClearSoft();
-  data_buffer.payload.length_used = (uint16_t)len;
-  memcpy(data_buffer.payload.ctr, data, len);
-  data_buffer.payload.ctr[len] = '\0';
-
-  // Execute immediately
-  pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
-
-  data_buffer.releaseLock();
-
-  client->text(F("OK"));
-  return;
-
-#endif
-}
-
-
-// -----------------------------------------------------------------------------
-// WebSocket Console2: periodic service loop
-// -----------------------------------------------------------------------------
-// Date Modified: 02Jan26
-//
-// PURPOSE
-//   This must be called regularly (TASK_LOOP or similar).
-//   It does two jobs:
-//
-//   1) Gates web-ring logging capture:
-//        Your logger only appends to web_log when tkr_web->fConsole_active==true.
-//        With Console2 using WebSocket (not HTTP polling), nothing else will
-//        automatically toggle that flag, so we enable it here whenever a WS
-//        client is connected.
-//
-//      Without this, web_idx will still increment for Serial, but web_log will
-//      not capture the lines, so GetLog() returns empty.
-//
-//   2) Pushes new log deltas over WS at a controlled interval.
-//      Uses WS_CONSOLE2_INTERVAL as a rate limit to avoid flooding.
-// -----------------------------------------------------------------------------
-void mWebServer::handleConsole2Ws()
-{
-  // Guard: feature may be compiled out or websocket not created
-  if (!tkr_web->websocket_console) return;
-
-  // ---------------------------------------------------------------------------
-  // Enable/disable web-log capture based on live WS clients.
-  // This is the critical piece for WS mode (poll mode used to imply "active").
-  // ---------------------------------------------------------------------------
-  const bool active_now = (tkr_web->websocket_console->count() > 0);
-  tkr_web->fConsole_active = active_now;
-
-  // If no clients, do nothing else.
-  if (!active_now) return;
-
-  // ---------------------------------------------------------------------------
-  // Rate limit WS pushes (simple elapsed-ms check).
-  // ---------------------------------------------------------------------------
-  const unsigned long now = millis();
-  if ((unsigned long)(now - wsConsole2LastPushTime) < (unsigned long)WS_CONSOLE2_INTERVAL) return;
-  wsConsole2LastPushTime = now;
-
-  // ---------------------------------------------------------------------------
-  // Maintain WS client list and push delta logs.
-  // ---------------------------------------------------------------------------
-  tkr_web->websocket_console->cleanupClients();
-
-  // Broadcast mode (delta sender uses wsConsole2LastIdx cursor)
-  sendConsole2Ws();
-}
-
-
-#endif // ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
 
 
 
@@ -1700,12 +351,20 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
       #ifdef ENABLE_DEVFEATURE_LIGHTING__JSONLIVE_WEBSOCKETS
       websocket_lights = new AsyncWebSocket("/ws");
       #endif
-      #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-      websocket_console = new AsyncWebSocket("/ws/console");
-      #endif
 
       #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-      websocket_console->onEvent(wsEventConsole2);
+      websocket_console = new AsyncWebSocket("/ws/console");
+      websocket_console->onEvent(
+        [this](AsyncWebSocket *server,
+              AsyncWebSocketClient *client,
+              AwsEventType type,
+              void *arg,
+              uint8_t *data,
+              size_t len)
+        {
+          this->wsEventConsole(server, client, type, arg, data, len);
+        }
+      );
       #endif
 
 
@@ -1723,74 +382,22 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 
 
   switch(function){
+    /************
+     * SYSTEM SECTION * 
+    *******************/    
+    case TASK_RESTART_SET_DO_FINAL_CLEANUP:       
+      #ifdef WLED_ENABLE_WEBSOCKETS2
+      websocket_lights->closeAll(1012);
+      #endif
+    break;
+    /************
+     * PERIODIC SECTION * 
+    *******************/
+
     case TASK_INIT:
       // init();
 
 
-// DEBUG_LINE_HERE;
-          
-//       //CORS compatiblity
-//       DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
-//       DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Methods"), "*");
-//       DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), "*");
-
-// DEBUG_LINE_HERE;
-//       server.on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request){
-//         request->send(200, "text/plain", (String)millis());
-//       });
-
-// DEBUG_LINE_HERE;
-//       server.on("/config", HTTP_GET, [](AsyncWebServerRequest *request){ 
-//         handleConfig(request);
-//       });
-
-//   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-//     // if (captivePortal(request)) return;
-//     // if (!showWelcomePage || request->hasArg(F("sliders"))){
-//     //   serveIndex(request);
-//     // } else {
-//     //   serveSettings(request);
-//     // }
-
-//       AsyncWebServerResponse *response = request->beginResponse_P(404, "text/html", PAGE_404, PAGE_404_length);
-    
-// DEBUG_LINE_HERE;
-//       request->send(response);
-//   });
-
-//     server.onNotFound(notFound);
-// DEBUG_LINE_HERE;
-// //     //called when the url is not defined here, ajax-in; get-settings
-// //     server.onNotFound([](AsyncWebServerRequest *request){
-// //       // DEBUG_PRINTLN("Not-Found HTTP call:");
-// //       // DEBUG_PRINTLN("URI: " + request->url());
-// //       // if (captivePortal(request)) return;
-
-// //       // //make API CORS compatible
-// //       // if (request->method() == HTTP_OPTIONS)
-// //       // {
-// //       //   AsyncWebServerResponse *response = request->beginResponse(200);
-// //       //   response->addHeader(F("Access-Control-Max-Age"), F("7200"));
-// //       //   request->send(response);
-// //       //   return;
-// //       // }
-
-// // DEBUG_LINE_HERE;
-// //       // if(handle__HTTP__GET_QueryAPI(request, request->url())) return;
-// //       // #ifndef WLED_DISABLE_ALEXA
-// //       // if(espalexa.handleAlexaApiCall(request)) return;
-// //       // #endif
-// //       // if(handleFileRead(request, request->url())) return;
-// //       AsyncWebServerResponse *response = request->beginResponse_P(404, "text/html", PAGE_404, PAGE_404_length);
-// //       // response->addHeader(FPSTR(s_content_enc),"gzip");
-// //       // setStaticContentCacheHeaders(response);
-// // DEBUG_LINE_HERE;
-// //       request->send(response);
-// //     });
-
-// DEBUG_LINE_HERE;
-
-//     server.begin();
 
     break;
     case TASK_LOOP:
@@ -1803,13 +410,13 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
     //   {
     // Serial.printf("Cctr %s [%d]\n\r", data_buffer.payload.ctr, strlen(data_buffer.payload.ctr));
     //     ALOG_INF(PSTR(D_LOG_HTTP "Processing delayed JSON locked command %d"), strlen(data_buffer.payload.ctr));
-    //     pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+    //     tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
     //     data_buffer.releaseLock();
     //   }
 
     if (pending_cmd.has()) {
 
-      if (data_buffer.requestLock(tkr_web->GetModuleUniqueID())) {
+      if (data_buffer.requestLock(GetModuleUniqueID())) {
 
         data_buffer.ClearSoft();
         data_buffer.payload.length_used = pending_cmd.len;
@@ -1818,7 +425,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 
         pending_cmd.clear();
 
-        pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+        tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
         data_buffer.releaseLock();
       }
     }
@@ -1828,68 +435,22 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
       #endif
 
       #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-      handleConsole2Ws();
+      handleConsoleWs();
       #endif
 
 
     }
     break; 
-  case TASK_WIFI_CONNECTED:
+    case TASK_NETWORK_CONNECTED: //tmp icnclude as fallthrough
+    case TASK_WEBSERVER_START:
+      Server_Start();
+    break;
     
-    ALOG_HGLT(PSTR(D_LOG_HTTP "Starting web server"));
-
-    #ifdef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
-
-    initServer();
-
-    tkr_web->server->begin();
-
-    ALOG_INF(PSTR(D_LOG_HTTP "Webserver started on http://%s.local or http://%s"), cmDNS, tkr_set->runtime.my_hostname);
-
-    ALOG_HGLB(PSTR(D_LOG_HTTP "Started web server"));
-    #endif
-// DEBUG_LINE_HERE;
-// return 0;
-    // server.begin();
-    
-// DEBUG_LINE_HERE;
-          
-//       //CORS compatiblity
-//       DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
-//       DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Methods"), "*");
-//       DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), "*");
-
-// DEBUG_LINE_HERE;
-//       server.on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request){
-//         request->send(200, "text/plain", (String)millis());
-//       });
-
-// DEBUG_LINE_HERE;
-//       server.on("/config", HTTP_GET, [](AsyncWebServerRequest *request){ 
-//         handleConfig(request);
-//       });
-
-
-
-  break;
-  //   case TASK_EVERY_SECOND:
-
-  //   break;
     case TASK_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
-  //   case TASK_WEB_APPEND_RUNTIME_ROOT_URLS:
-  //       JBI->Add("/module_draw.json",-1); 
-  //       // JBI->Add("/web_top_bar.json",1000); 
-  //       JBI->Add("/root_status_any.json",1100);
-  //   break;
-  //   case TASK_WEB_APPEND_ROOT_STATUS_TABLE_FORCED:
-  //     //set value to force sending all below
-  //   //no break
-  //   case TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
 
-
-  //   break;
+ 
   }
 
 
@@ -1899,378 +460,32 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 }
 
 
-
-
-#ifdef ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
-
-
-bool mWebServer::handleIfNoneMatchCacheHeader(AsyncWebServerRequest *request, int code, uint16_t eTagSuffix) {
-  // Only send 304 (Not Modified) if response code is 200 (OK)
-  if (code != 200) return false;
-
-  AsyncWebHeader *header = request->getHeader(F("If-None-Match"));
-  char etag[32];
-  tkr_web->generateEtag(etag, eTagSuffix);
-  if (header && header->value() == etag) {
-    AsyncWebServerResponse *response = request->beginResponse(304);
-    tkr_web->setStaticContentCacheHeaders(response, code, eTagSuffix);
-    request->send(response);
-    return true;
-  }
-  return false;
-}
-
-/**
- * Handles the request for a static file.
- * If the file was found in the filesystem, it will be sent to the client.
- * Otherwise it will be checked if the browser cached the file and if so, a 304 response will be sent.
- * If the file was not found in the filesystem and not in the browser cache, the request will be handled as a 200 response with the content of the page.
- *
- * @param request The request object
- * @param path If a file with this path exists in the filesystem, it will be sent to the client. Set to "" to skip this check.
- * @param code The HTTP status code
- * @param contentType The content type of the web page
- * @param content Content of the web page
- * @param len Length of the content
- * @param gzip Optional. Defaults to true. If false, the gzip header will not be added.
- * @param eTagSuffix Optional. Defaults to 0. A suffix that will be added to the ETag header. This can be used to invalidate the cache for a specific page.
- */
-void mWebServer::handleStaticContent(AsyncWebServerRequest *request, const String &path, int code, const String &contentType, const uint8_t *content, size_t len, bool gzip, uint16_t eTagSuffix) {
-  if (path != "" && tkr_mfile->handleFileRead(request, path)) return;
-  if (handleIfNoneMatchCacheHeader(request, code, eTagSuffix)) return;
-  AsyncWebServerResponse *response = request->beginResponse_P(code, contentType, content, len);
-  if (gzip) response->addHeader(FPSTR(s_content_enc), F("gzip"));
-  setStaticContentCacheHeaders(response, code, eTagSuffix);
-  request->send(response);
-}
-
-
-
-// void mWebServer::initServer()
-// {
-//   //CORS compatiblity
-//   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
-//   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Methods"), "*");
-//   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), "*");
-
-//   tkr_web->server->on("/root", HTTP_GET, [this](AsyncWebServerRequest *request){
-//     this->webHandleRoot(request);
-//   });
-
-//   tkr_web->server->on("/version", HTTP_GET, [](AsyncWebServerRequest *request){
-//     request->send(200, "text/plain", (String)PROJECT_VERSION);
-//   });
-
-//   tkr_web->server->on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request){
-//     request->send(200, "text/plain", (String)millis());
-//   });
-
-//   tkr_web->server->on("/reboot", HTTP_GET, [this](AsyncWebServerRequest *request){
-//     this->webHandleReboot(request);
-//   });
-//   tkr_web->server->on("/reset", HTTP_GET, [this](AsyncWebServerRequest *request){
-//     tkr_web->serveMessage(request, 200,F("Rebooting now..."),F("Please wait ~10 seconds..."),129);
-//     #ifdef USE_MODULE_LIGHTS_INTERFACE
-//     tkr_anim->doReboot = true;
-//     #endif
-//   });
-
-//   createEditHandler(true);
-
-//   #ifdef WLED_ENABLE_WEBSOCKETS2
-//   tkr_web->server->addHandler(ws);
-//   #endif
-
-//   pCONT->Tasker_Interface(TASK_WEB_ADD_HANDLER);
-
-// }
-
-
-void mWebServer::initServer()
+void mWebServer::Server_Start()
 {
+  ALOG_HGLT(PSTR(D_LOG_HTTP "Starting web server")); 
+    
   // CORS compatiblity
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Methods"), "*");
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), "*");
-
-  // ------------------------------------------------------------------
-  // Date Modified: 30Dec25
-  // Core landing page ownership ("/") for redesigned WebUI
-  // ------------------------------------------------------------------
-  #ifdef ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI
-  tkr_web->server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
-    if (captivePortal(request)) return;
-    this->webHandleLanding(request);
-  });
-  #endif
-
-  // Existing root/debug page (kept)
-  tkr_web->server->on("/root", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->webHandleRoot(request);
-  });
-
-  tkr_web->server->on("/version", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/plain", (String)PROJECT_VERSION);
-  });
-
-  tkr_web->server->on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/plain", (String)millis());
-  });
-
-  tkr_web->server->on("/reboot", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->webHandleReboot(request);
-  });
-
-  tkr_web->server->on("/reset", HTTP_GET, [this](AsyncWebServerRequest *request){
-    tkr_web->serveMessage(request, 200, F("Rebooting now..."), F("Please wait ~10 seconds..."), 129);
-    #ifdef USE_MODULE_LIGHTS_INTERFACE
-    tkr_anim->doReboot = true;
-    #endif
-  });
-
+ 
   createEditHandler(true);
 
   #ifdef WLED_ENABLE_WEBSOCKETS2
-  tkr_web->server->addHandler(websocket_lights);
+  server->addHandler(websocket_lights);
   #endif
   #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-  tkr_web->server->addHandler(websocket_console);
+  server->addHandler(websocket_console);
   #endif
 
   // Let modules add their own URLs
-  pCONT->Tasker_Interface(TASK_WEB_ADD_HANDLER);
-}
+  tkr->Tasker_Interface(TASK_WEB_ADD_HANDLER);
 
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-void mWebServer::webHandleReboot(AsyncWebServerRequest* request)
-{ 
-
-  // CAUTION: This is an async file, and may cause unknown behavior so needs testing
-
-  pCONT->Tasker_Interface(TASK_RESTART_STABLE);
+  server->begin();
   
-  request->redirect("/"); // redirect to root, to avoid webui forever requested a reboot
+  ALOG_INF(PSTR(D_LOG_HTTP "Webserver started on http://%s.local or http://%s"), cmDNS, tkr_set->runtime.my_hostname);
 
-  delay(2000); // Allow redirect to be sent
-
-#ifdef ESP32
-  esp_restart();
-#else
-
-#endif
+  ALOG_HGLB(PSTR(D_LOG_HTTP "Started web server"));
 }
-
-// Might be needed for NEXTION
-void mWebServer::webHandleRoot(AsyncWebServerRequest* request)
-{ 
-
-#ifdef ESP32
-  ALOG_INF(PSTR(D_LOG_NEXTION DEBUG_INSERT_PAGE_BREAK "HTTP: Sending root page to client connected from: %s"), request->host());
-#endif
-
-
-  String conv = String();
-
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", "HASPone ");
-  conv += httpHeader;
-  conv += FPSTR(HTTP_SCRIPT3);
-  conv += FPSTR(HTTP_STYLE3);
-  conv += FPSTR(HASP_STYLE);
-  conv += FPSTR(HTTP_HEAD_END3);
-
-  conv += (F("<br/><hr><button type='submit'>save settings</button></form>"));
-
-  conv += (F("<hr><form method='get' action='firmware'>"));
-  conv += (F("<button type='submit'>update firmware</button></form>"));
-
-  conv += (F("<hr><form method='get' action='reboot'>"));
-  conv += (F("<button type='submit'>reboot device</button></form>"));
-
-  conv += (F("<hr><form method='get' action='resetConfig'>"));
-  conv += (F("<button type='submit'>factory reset settings</button></form>"));
-
-
-  // Date Modified: 30Dec25
-
-#ifdef ENABLE_DEVFEATURE_WEBSERVER__ROOT_DEBUG_LINKS
-
-conv += F("<hr><h3>Debug Links</h3>");
-
-auto addLink = [&](const __FlashStringHelper* name, const __FlashStringHelper* url){
-  conv += F("<div style='margin:6px 0;'>");
-  conv += F("<a href='");
-  conv += url;
-  conv += F("'>");
-  conv += name;
-  conv += F("</a></div>");
-};
-
-// Core
-addLink(F("Version"), F("/version"));
-addLink(F("Uptime"),  F("/uptime"));
-addLink(F("Reboot"),  F("/reboot"));
-addLink(F("Reset"),   F("/reset"));
-addLink(F("Edit"),    F("/edit"));      // if present
-addLink(F("Root"),    F("/root"));
-
-// Lights (if compiled)
-#ifdef USE_MODULE_LIGHTS_INTERFACE
-addLink(F("Lights UI"), F("/lights"));  // or "/" if legacy mode
-addLink(F("JSON"),      F("/json"));
-addLink(F("Presets"),   F("/presets.json")); // only if you serve it
-#endif
-
-// Add your new basics
-addLink(F("Basic Relays"), F("/basic/relays")); // when it exists
-
-#endif
-
-
-  conv += FPSTR(HTTP_END3);
-  
-  request->send(200, "text/html", conv);
-
-}
-
-// Date Modified: 30Dec25
-#ifdef ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI
-
-void mWebServer::webHandleLanding(AsyncWebServerRequest* request)
-{
-  #ifdef ESP32
-  ALOG_INF(PSTR("HTTP: Sending landing page to client from: %s"), request->host());
-  #endif
-
-  String conv;
-  conv.reserve(2048);
-
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", "PulSar ");
-  conv += httpHeader;
-  conv += FPSTR(HTTP_SCRIPT3);
-  conv += FPSTR(HTTP_STYLE3);
-  conv += FPSTR(HASP_STYLE);
-  conv += FPSTR(HTTP_HEAD_END3);
-
-  conv += F("<h2>PulSar</h2>");
-  conv += F("<div style='margin:12px 0;'>");
-
-  // Primary entry points
-  conv += F("<hr><h3>Pages</h3>");
-
-  // Lights
-  #ifdef USE_MODULE_LIGHTS_INTERFACE
-  conv += F("<div style='margin:6px 0;'><a href='/lights'><button style='width:220px;'>Lights</button></a></div>");
-  #endif
-
-  // Basic controls (add as you create them)
-  conv += F("<div style='margin:6px 0;'><a href='/basic/relays'><button style='width:220px;'>Relays</button></a></div>");
-
-  // Nextion / Displays (existing upload tooling)
-  conv += F("<div style='margin:6px 0;'><a href='/root'><button style='width:220px;'>Root / Debug</button></a></div>");
-
-  conv += F("</div>");
-
-  // Quick system links
-  conv += F("<hr><h3>System</h3>");
-  conv += F("<div style='margin:6px 0;'><a href='/version'>/version</a></div>");
-  conv += F("<div style='margin:6px 0;'><a href='/uptime'>/uptime</a></div>");
-  conv += F("<div style='margin:6px 0;'><a href='/edit'>/edit</a></div>");
-  conv += F("<div style='margin:6px 0;'><a href='/reboot'>/reboot</a></div>");
-  conv += F("<div style='margin:6px 0;'><a href='/reset'>/reset</a></div>");
-
-  conv += FPSTR(HTTP_END3);
-
-  request->send(200, "text/html", conv);
-}
-
-#endif
-
-
-
-
-bool  mWebServer::captivePortal(AsyncWebServerRequest *request)
-{
-  if (ON_STA_FILTER(request)) return false; //only serve captive in AP mode
-  String hostH;
-  if (!request->hasHeader("Host")) return false;
-  hostH = request->getHeader("Host")->value();
-
-  if (!isIp(hostH) && hostH.indexOf("wled.me") < 0 && hostH.indexOf(tkr_set->Settings.system_name.device) < 0) {
-    DEBUG_PRINTLN("Captive portal");
-    AsyncWebServerResponse *response = request->beginResponse(302);
-    response->addHeader(F("Location"), F("http://4.3.2.1"));
-    request->send(response);
-    return true;
-  }
-  return false;
-}
-
-/*
-  cacheInvalidate this causes the presets to reload!!
-  The ETag (or Entity Tag) is a string that serves as a cache validation token.
-  To enable better cache detection, I am adding the build time to this as each new compile should force a new load
-*/
-void mWebServer::generateEtag(char *etag, uint16_t eTagSuffix) {
-  snprintf_P(etag, 32, PSTR("%7d-%02x-%04x-BT%S"), PROJECT_VERSION, cacheInvalidate, eTagSuffix, PSTR(__TIME__));
-}
-
-// void mWebServer::setStaticContentCacheHeaders(AsyncWebServerResponse *response)
-// {
-//   // char tmp[40];
-//   // https://medium.com/@codebyamir/a-web-developers-guide-to-browser-caching-cc41f3b73e7c
-//   #ifndef ENABLE_DEBUGFEATURE_NETWORK__DISABLE_CACHE
-//   // This header name is misleading, "no-cache" will not disable cache,
-//   // it just revalidates on every load using the "If-None-Match" header with the last ETag value
-//   response->addHeader(F("Cache-Control"),"no-cache");
-//   #else
-//   response->addHeader(F("Cache-Control"),"no-store,max-age=0"); // prevent caching if debug build
-//   #endif
-//   char etag[32]; // limit is 32 bytes
-//   tkr_web->generateEtag(etag);
-//   // snprintf_P(tmp, sizeof(tmp), PSTR("%d-%02x"), PROJECT_VERSION, false);// tkr_anim->cacheInvalidate);
-//   response->addHeader(F("ETag"), etag);
-// }
-
-
-void mWebServer::setStaticContentCacheHeaders(AsyncWebServerResponse *response, int code, uint16_t eTagSuffix ) 
-{
-
-  // Only send ETag for 200 (OK) responses
-  if (code != 200) return;
-
-  // https://medium.com/@codebyamir/a-web-developers-guide-to-browser-caching-cc41f3b73e7c
-  #ifndef ENABLE_DEBUGFEATURE_NETWORK__DISABLE_CACHE
-  // this header name is misleading, "no-cache" will not disable cache,
-  // it just revalidates on every load using the "If-None-Match" header with the last ETag value
-  response->addHeader(F("Cache-Control"), F("no-cache"));
-  #else
-  response->addHeader(F("Cache-Control"), F("no-store,max-age=0"));  // prevent caching if debug build
-  #endif
-  char etag[32];
-  tkr_web->generateEtag(etag, eTagSuffix);
-  response->addHeader(F("ETag"), etag);
-}
-
-//Is this an IP?
-bool mWebServer::isIp(String str) {
-  for (size_t i = 0; i < str.length(); i++) {
-    int c = str.charAt(i);
-    if (c != '.' && (c < '0' || c > '9')) {
-      return false;
-    }
-  }
-  return true;
-}
-
-
-
-#endif // ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE
-
-
-
 
 #endif

@@ -5077,8 +5077,6 @@ void serializePalettes(JsonObject root, int page);
 
 void serializeModeNames(JsonArray arr, bool flag_get_first_name_only = true);
 
-bool requestJSONBufferLock(uint16_t module);
-void releaseJSONBufferLock();
 
     #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
 void handleUpload(AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final);
@@ -5086,7 +5084,7 @@ bool serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient = 0);
 
 void serveJson(AsyncWebServerRequest* request);
 
-bool  captivePortal(AsyncWebServerRequest *request);
+// bool  captivePortal(AsyncWebServerRequest *request);
 // void  notFound(AsyncWebServerRequest *request);
 
 
@@ -5125,8 +5123,6 @@ bool isIp(String str);
 #define JSON_PATH_NETWORKS   7
 #define JSON_PATH_EFFECTS    8
 
-// global ArduinoJson buffer
-volatile uint16_t jsonBufferLock = 0;
 
 bool doReboot = false;
 
@@ -5590,11 +5586,6 @@ bool showWelcomePage _INIT(false);
 byte presetCycCurr _INIT(0);
 byte presetCycMin _INIT(1);
 byte presetCycMax _INIT(5);
-
-#ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
-// dns server
-DNSServer dnsServer;
-#endif // ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
 
 
 //realtime override modes

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="theme-color" content="#141414">
+<title>PulSar – Debug</title>
+
+<style>
+  /* Date Modified: 08Jan26 */
+
+  :root{
+    --bg:#111;
+    --panel:#1a1a1a;
+    --panel2:#171717;
+    --border:#2b2b2b;
+    --text:#e8e8e8;
+    --muted:#a6a6a6;
+    --btn:#232323;
+    --btnh:#2c2c2c;
+    --accent:#ffb84d;
+    --bad:#ff5c5c;
+    --radius:14px;
+  }
+
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
+    font-family:Segoe UI,Roboto,Arial,sans-serif;}
+  a{color:inherit;text-decoration:none;}
+
+  .wrap{
+    min-height:100%;
+    padding:14px;
+    box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  .head{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+  }
+  .dot{
+    width:10px;height:10px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 4px rgba(255,184,77,0.15);
+  }
+  .head .t{
+    font-size:18px;font-weight:700;
+  }
+  .head .s{
+    font-size:12px;color:var(--muted);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:12px;
+  }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .card h3{
+    margin:0;
+    font-size:13px;
+    color:var(--muted);
+    letter-spacing:0.4px;
+    text-transform:uppercase;
+  }
+
+  .link{
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:var(--btn);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    cursor:pointer;
+    font-size:14px;
+  }
+  .link:hover{background:var(--btnh);}
+  .link .p{font-size:12px;color:var(--muted);}
+
+  .warn{border-color:#5a3a00;background:#241a00;}
+  .warn:hover{background:#302200;}
+  .bad{border-color:#552222;background:#2a1717;}
+  .bad:hover{background:#3a2020;}
+
+  .foot{
+    margin-top:auto;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    font-size:12px;
+    color:var(--muted);
+  }
+  .pill{
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:#101010;
+  }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div class="dot"></div>
+    <div>
+      <div class="t">PulSar – Debug</div>
+      <div class="s">Full system entry points & diagnostics</div>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <h3>Core</h3>
+      <div class="link" onclick="go('/')">Landing<span class="p">/</span></div>
+      <div class="link" onclick="go('/version')">Version<span class="p">/version</span></div>
+      <div class="link" onclick="go('/uptime')">Uptime<span class="p">/uptime</span></div>
+      <div class="link" onclick="go('/json')">JSON API<span class="p">/json</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Interfaces</h3>
+      <div class="link" onclick="go('/lights')">Lights UI<span class="p">/lights</span></div>
+      <div class="link" onclick="go('/console')">Console Poll<span class="p">/console</span></div>
+      <div class="link" onclick="go('/console')">Console WS<span class="p">/console2</span></div>
+      <div class="link" onclick="go('/nextion')">Nextion<span class="p">/nextion</span></div>
+      <div class="link" onclick="go('/edit')">Filesystem<span class="p">/edit</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Controls</h3>
+      <div class="link" onclick="go('/basic/relays')">Relays<span class="p">/basic/relays</span></div>
+      <div class="link" onclick="go('/wifi')">Wi-Fi<span class="p">/wifi</span></div>
+      <div class="link" onclick="go('/info')">Info<span class="p">/info</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Danger Zone</h3>
+      <div class="link warn" onclick="go('/reboot')">Reboot<span class="p">/reboot</span></div>
+      <div class="link bad" onclick="go('/reset')">Factory Reset<span class="p">/reset</span></div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <span class="pill">debug</span>
+    <span class="pill" id="host">host:—</span>
+    <span class="pill" id="path">path:—</span>
+  </div>
+
+</div>
+
+<script>
+function go(p){
+  if (!p) return;
+  if (p[0] !== "/") p = "/" + p;
+  location.href = p;
+}
+document.getElementById("host").textContent = "host:" + location.host;
+document.getElementById("path").textContent = "path:" + location.pathname;
+</script>
+</body>
+</html>

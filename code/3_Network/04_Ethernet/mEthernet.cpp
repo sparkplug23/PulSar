@@ -13,12 +13,12 @@ int8_t mEthernet::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
     case TASK_INIT:
-      WifiConnect();
+      WiFi_Sta_Connect_Start();
     break;
     case TASK_LOOP: 
     
       #if defined(USE_NETWORK_MDNS) && defined(ESP8266)
-        MdnsUpdate();
+        WiFi_Mdns_Tick();
       #endif // USE_NETWORK_MDNS
     
     break;
@@ -32,11 +32,11 @@ int8_t mEthernet::Tasker(uint8_t function, JsonParserObject obj){
 
       if (tkr_set->Settings.flag_network.network_wifi) 
       {
-        WifiCheck(tkr_set->wifi_state_flag);
+        WiFi_Sta_Maintain_Periodic(tkr_set->wifi_state_flag);
         tkr_set->wifi_state_flag = ETHERNET_RESTART;
       }
             
-      //ALOG_DBG(PSTR(D_LOG_ETHERNET "WifiCheck(tkr_set->wifi_state_flag=%d)"),tkr_set->wifi_state_flag);
+      //ALOG_DBG(PSTR(D_LOG_ETHERNET "WiFi_Sta_Maintain_Periodic(tkr_set->wifi_state_flag=%d)"),tkr_set->wifi_state_flag);
 
     break;
     case TASK_EVERY_MINUTE:
@@ -51,7 +51,7 @@ int8_t mEthernet::Tasker(uint8_t function, JsonParserObject obj){
       DEBUG_LINE_HERE;
     
       #ifdef USE_NETWORK_MDNS
-        StartMdns();
+        WiFi_Mdns_StartOrRestart();
       #endif  // USE_NETWORK_MDNS
 
       if(tkr_mqtt->connection_maintainer.mqtt_client_type == mMQTTManager::CLIENT_TYPE_ETHERNET_ID)

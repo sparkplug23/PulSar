@@ -16,7 +16,7 @@ extern "C" {
 
 #ifdef ESP8266
 // Function prototypes
-void WifiWpsStatusCallback(wps_cb_status status);
+void WiFi_Wps_StatusCallback(wps_cb_status status);
 #endif
 
 #ifdef __cplusplus

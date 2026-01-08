@@ -16,7 +16,7 @@ enum TaskerID
 
 
 #include "2_CoreSystem/01_Settings/mSettings.h"
-#define   tkr_set                               static_cast<mSettings*>(pCONT->pModule[EM_MODULE_CORE_SETTINGS_ID])
+#define   tkr_set                               static_cast<mSettings*>(tkr->pModule[EM_MODULE_CORE_SETTINGS_ID])
 
 This gives me a global way of accessing this class from inside any other class tkr_set
 
@@ -77,7 +77,7 @@ class mTaskerInterface
   
 };
 
-pCONT
+tkr
 An example of one of the classes 
 
 

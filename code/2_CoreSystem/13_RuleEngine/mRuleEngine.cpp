@@ -89,7 +89,7 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
       // // DefaultRuleForModule();
       // MQTTHandler_RefreshAll();
 
-      // if(){ pCONT->Tasker_Interface(TASK_RULES_LOAD_FROM_PROGMEM_ID) };
+      // if(){ tkr->Tasker_Interface(TASK_RULES_LOAD_FROM_PROGMEM_ID) };
       if(tkr_time->uptime_seconds_nonreset == D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND){ RulesLoad_From_Progmem(); }
 
     break;
@@ -157,7 +157,7 @@ void mRuleEngine::RulesLoad_From_Progmem()
   ALOG_INF( PSTR("RULES_TEMPLATE Load = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
   #endif // ENABLE_LOG_LEVEL_INFO
 
-  pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+  tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
   
   //IF TASKER RESULT WAS TRUE, THEN SUCCESS
   // tkr_set->runtime.boot_status.rules_template_parse_success = 1;
@@ -289,7 +289,7 @@ void mRuleEngine::NewEventRun(uint16_t _module_id, uint16_t function_event, uint
    *  */
 
   // Legacy option, pass to all tasker_interfaces. This allows hard coded things to happen. ie Time runs out, turn relay off
-  pCONT->Tasker_Interface(function_event);
+  tkr->Tasker_Interface(function_event);
   // New method to check the rules
   Tasker_Rules_Interface(function_event);
 
@@ -320,8 +320,8 @@ bool mRuleEngine::NewEventRun_NumArg(uint16_t _module_id, uint16_t function_even
 
 
   ALOG_INF( PSTR(D_LOG_RULES "NewEventRun_NumArg\n\r\t\t\t\tModule [%d\t%S],\n\r\t\t\t\tTask   [%d\t%S],\n\r\t\t\t\tIndex  [%d\t%s]"), 
-    event_triggered.module_id,   pCONT->GetModuleName(event_triggered.module_id),
-    event_triggered.function_id, pCONT->GetTaskName(event_triggered.function_id),
+    event_triggered.module_id,   tkr->GetModuleName(event_triggered.module_id),
+    event_triggered.function_id, tkr->GetTaskName(event_triggered.function_id),
     event_triggered.device_id,   buffer
   );
  
@@ -348,7 +348,7 @@ bool mRuleEngine::NewEventRun_NumArg(uint16_t _module_id, uint16_t function_even
   /**
    * @brief Call all Taskers for hardcoded triggers
    **/
-  pCONT->Tasker_Interface(function_event);
+  tkr->Tasker_Interface(function_event);
 
   return task_handled ? true : false;
 
@@ -457,7 +457,7 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 
             ALOG_INF( PSTR("TASK_JSON_COMMAND_ID mrules=%s"), data_buffer.payload.ctr );
     
-            pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+            tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
           }
           else // Execute normal state/value method if no jsoncommand was used
@@ -471,7 +471,7 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
                     );
             #endif // ENABLE_LOG_LEVEL_INFO
             
-            pCONT->Tasker_Interface(
+            tkr->Tasker_Interface(
               rules[rule_index].command.function_id
               // , // function the previous trigger is linked to
               // rules[rule_index].command.module_id //target module
@@ -598,8 +598,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
 
     if(jtok = jobj["Module"]){
       if(jtok.isStr()){
-        // if((matched_id=pCONT->GetModule_UniqueID_byName(jtok.getStr()))>=0){
-        if((matched_id=pCONT->GetModuleID(jtok.getStr(), true))>0){
+        // if((matched_id=tkr->GetModule_UniqueID_byName(jtok.getStr()))>=0){
+        if((matched_id=tkr->GetModuleID(jtok.getStr(), true))>0){
           event->module_id = matched_id;
           data_buffer.isserviced++;
         }
@@ -984,7 +984,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
     // if(jtok = jobj["Command"].getObject()["Module"]){
 
     //   if(jtok.isStr()){
-    //     if((tmp_id=pCONT->GetModuleIDbyFriendlyName(jtok.getStr()))>=0){
+    //     if((tmp_id=tkr->GetModuleIDbyFriendlyName(jtok.getStr()))>=0){
     //       ALOG_INF(PSTR("22JTOK FOUND Trigger Module tmp_id = %d"),tmp_id);
     //       p_event->module_id = tmp_id;
     //       data_buffer.isserviced++;

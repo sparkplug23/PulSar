@@ -100,7 +100,7 @@ int mUltraSonicSensor::GetDurationReading(void)
   //if outside possible range
   if((duration>ultrasonic.settings.duration_limit_min)&&(duration<ultrasonic.settings.duration_limit_max)){ 
     
-    //pCONT->mso->MessagePrintln("[ULTRA] SAMPLING");
+    //tkr->mso->MessagePrintln("[ULTRA] SAMPLING");
     
     ALOG_INF(PSTR(D_LOG_ULTRASONIC "INSIDE DURATION"));
 
@@ -187,7 +187,7 @@ int mUltraSonicSensor::GetDurationReading(void)
   ALOG_INF(PSTR(D_LOG_ULTRASONIC "OUTSIDE DURATION %d"),duration);
   
     //ALOG_INF(PSTR(D_LOG_ULTRASONIC "[ULTRA] Outside viable range"));
-    //pCONT->mso->MessagePrintln("[ULTRA] Outside viable range");
+    //tkr->mso->MessagePrintln("[ULTRA] Outside viable range");
     ultrasonic.isvalid = false;
     ultrasonic.ischanged = false;
     ultrasonic.accuracy.outsidecount++;
@@ -552,7 +552,7 @@ int8_t mUltraSonicSensor::Tasker(uint8_t function, JsonParserObject obj)
 
       if(ultrasonic.isvalid){
         SubTask_UltraSonicAverage();
-        pCONT->Tasker_Interface(TASK_SENSOR_UPDATED); // Tell other dependent modules we have changed
+        tkr->Tasker_Interface(TASK_SENSOR_UPDATED); // Tell other dependent modules we have changed
       }
 
      // SubTask_DetectMotion();
@@ -702,7 +702,7 @@ void mUltraSonicSensor::parse_JSONCommand(){
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/ultrasonic")>=0){
       ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+      tkr->fExitTaskerWithCompletion = true; // set true, we have found our handler
   }else{
     return; // not meant for here
   } 

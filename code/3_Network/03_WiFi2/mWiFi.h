@@ -1,6 +1,5 @@
-#ifndef _MWIFI1_H
-#define _MWIFI1_H
-
+#ifndef _MWIFI_H
+#define _MWIFI_H
 
 #define D_UNIQUE_MODULE_NETWORK_WIFI_ID  3003 // [(Folder_Number*100)+ID_File]
 
@@ -46,6 +45,8 @@ enum WifiConfigOptions {WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCO
   #include "2_CoreSystem/06_Support/SupportESP32.h"
   #define mSupportHardware SupportESP32
 #endif
+#include <DNSServer.h>
+
 
 
 #include "1_TaskerManager/mTaskerInterface.h"
@@ -67,10 +68,11 @@ class mWiFi :
 
     void parse_JSONCommand(JsonParserObject obj);
    
-    void WifiConnectAP(uint8_t ap_index);
+    void WiFi_Sta_ProfileIndex_Connect(uint8_t ap_index);
     int8_t GetRSSdBm();
     uint8_t GetRSSPercentage();
 
+    // void WifiConnect(void);
     
     const uint8_t WIFI_CONFIG_SEC = 180;       // seconds before restart
     const uint8_t WIFI_CHECK_SEC = 20;         // seconds
@@ -81,9 +83,7 @@ class mWiFi :
 
     uint32_t tSavedWiFi;
     uint32_t tSavedWiFiCheckIP;
-    uint32_t tSavedWiFiReconnect;
-
-    
+    uint32_t tSavedWiFiReconnect;  
 
 
 
@@ -92,8 +92,14 @@ class mWiFi :
     uint16_t wifi_counter_tester = 0;
     
     uint8_t loglevel_with_connection_status = 10; // When connected
+
     
-    bool WifiCheckIpConnected();
+
+bool     s_wifi2_scanned_on_boot = false;
+bool     s_wifi2_scanned_on_this_outage = false;
+
+    
+    bool WiFi_Link_IsIpRoutable();
 
     #ifndef WIFI_RSSI_THRESHOLD
       #define WIFI_RSSI_THRESHOLD     10         // Difference in dB between current network and scanned network
@@ -101,6 +107,36 @@ class mWiFi :
     #ifndef WIFI_RESCAN_MINUTES
       #define WIFI_RESCAN_MINUTES     44         // Number of minutes between wifi network rescan
     #endif
+
+    // struct wifi_profile_t
+    // {
+    //   char    ssid[33] = {0};
+    //   char    pass[65] = {0};
+
+    //   bool    has_bssid = false;
+    //   uint8_t bssid[6]  = {0};
+
+    //   bool    use_static = false;
+    //   uint32_t ip   = 0;          // host endian ok internally; document it
+    //   uint32_t gw   = 0;
+    //   uint32_t sn   = 0x00FFFFFF; // 255.255.255.0 default, per your WLED example
+    //   uint32_t dns1 = 0;
+    //   uint32_t dns2 = 0;
+
+    //   uint8_t connect_attempt_priority = 0;       // lower = earlier
+    //   bool    ssid_hidden   = false;
+
+    // };
+
+
+
+#ifndef WIFI_RSSI_THRESHOLD
+#define WIFI_RSSI_THRESHOLD 10 // dB
+#endif
+
+#ifndef WIFI_OUTAGE_RESCAN_SECONDS
+#define WIFI_OUTAGE_RESCAN_SECONDS (10UL * 60UL) // 10 minutes
+#endif
 
 
 
@@ -119,15 +155,24 @@ class mWiFi :
       uint8_t bssid[6];
       uint8_t fConnected = false;
       uint8_t fReconnect = false;
+
+      int8_t seconds_to_wait_for_fresh_connection_attempt = 0;
+
+
     }connection;
+// WiFi2 scan/select helpers
+uint8_t WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured(void) const;
+uint8_t WiFi_Sta_SelectProfileIndex_WithScanPreference(bool force_scan);
+bool    WiFi_Sta_ShouldScanNow_OnBootOrOutage(void);
+void    WiFi_Sta_OnConnected_ResetOutageScanFlags(void);
 
 
-    void StartMdns(void);
-    void MqttDiscoverServer(void);
-    void MdnsAddServiceHttp(void);
-    void MdnsUpdate(void);
+    void WiFi_Mdns_StartOrRestart(void);
+    void WiFi_Mdns_DiscoverMqttBroker(void);
+    void WiFi_Mdns_AdvertiseHttpService(void);
+    void WiFi_Mdns_Tick(void);
 
-    bool WifiHostByName(const char* aHostname, IPAddress& aResult);
+    bool WiFi_Dns_ResolveHostname(const char* aHostname, IPAddress& aResult);
 
     
     struct {
@@ -136,41 +181,82 @@ class mWiFi :
 
     uint8_t wps_result;
 
-    #ifdef ENABLE_DEVFEATURE_WIFI__CHECK_CONNECTION_2025
-    // Check to see if we have any routable IP address
-    // IPv4 has always priority
-    // Copy the value of the IP if pointer provided (optional)
-    // `exclude_ap` allows to exlude AP IP address and focus only on local STA
-    bool WifiGetIP(IPAddress *ip, bool exclude_ap = false);
-    bool WifiHasIP(void);
-    String WifiGetIPStr(void);
-    bool HasIP(void); // Has a routable IP, whether IPv4 or IPv6, Wifi or Ethernet  
-    #endif
+ 
+    // ----------------------------------------------------------------------------------
+// WiFi2 orchestration (uses Settings.network_settings, preserves legacy variables)
+// ----------------------------------------------------------------------------------
+// void Handle_WiFiConnection(void);          // called every second from Tasker
+void WiFi2_Init_FromSettings(void);        // build internal caches once
+bool WiFi2_HasAnyStaProfileConfigured(void) const;
+uint8_t WiFi2_GetFirstConfiguredProfileIndex(void) const;
+
+void WiFi2_Sta_BeginProfile(uint8_t profile_i);
+void WiFi2_Sta_EnsureConnecting(void);
+void WiFi2_Sta_Connected_Enter(void);
+void WiFi2_Sta_Disconnected_Enter(void);
+
+void Init_Preload_Wifi2_Settings();
+
+bool WiFi2_Ap_EnsureStarted(void);
 
 
-    void SplashWifiScan();
-    void WifiConnectForced();
-    int WifiGetRssiAsQuality(int rssi);
-    bool WifiConfigCounter(void);
-    #ifndef ESP32
-    void WifiWpsStatusCallback(wps_cb_status status);
-    #endif
-    bool WifiWpsConfigDone(void);
-    bool WifiWpsConfigBegin(void);
-    void WifiConfig(uint8_t type);
-    void WiFiSetSleepMode(void);
-    void ScanBestAndBeginWifi();
-    uint16_t WifiLinkCount();
-    //String WifiDowntime();
-    void WifiSetState(uint8_t state);
-    void WifiBegin__OldTasMethod(uint8_t flag, uint8_t channel = 0);
-    void WifiCheckIp(void);
-    void WifiCheck(uint8_t param);
-    int WifiState(void);
-    void WifiConnect(void);
-    // void WifiDisconnect(void);
-    void WifiShutdown(bool option = false);
-    void EspRestart(void);
+#ifdef ENABLE_DEVFEATURE_NETWORK__WIFI_DUPLICATED_WRITEBACK
+void WiFi2_LegacyWriteback_FromNetworkSettings(void);
+#endif
+
+static IPAddress IPv4ArrayToIP(const uint8_t a[4]);
+
+void Task_EverySecond();
+
+// ------------------------------------------------------------------
+// WiFi mode helpers (AP/STA/AP+STA)
+// ------------------------------------------------------------------
+bool WiFi_IsAPMode(void) ;
+bool WiFi_IsSTAMode(void) ;
+bool WiFi_IsAPSTAMode(void);
+
+// ------------------------------------------------------------------
+// Connectivity helpers
+//   - Local: device is reachable on some WiFi interface (AP or STA w/ IP)
+//   - External: safe for MQTT/NTP etc. (STA connected + routable gateway)
+// ------------------------------------------------------------------
+bool WiFi_HasLocalConnectivity(void) ;
+bool WiFi_HasExternalConnectivity(void) ;
+
+
+
+DNSServer dnsServer;
+bool      dnsServerRunning = false;
+
+void WiFi2_Ap_Dns_Start(void);
+void WiFi2_Ap_Dns_Stop(void);
+void WiFi2_Ap_Dns_Tick(void);
+
+
+
+void WiFi_Sta_Maintain_Periodic();
+//     void WiFi_Sta_Scan_LogSummary();
+//     void WiFi_Sta_Connect_ForceRestart();
+//     int WifiGetRssiAsQuality(int rssi);
+//     bool WiFi_Config_ConnectWindow_Expired(void);
+//     #ifndef ESP32
+//     void WiFi_Wps_StatusCallback(wps_cb_status status);
+//     #endif
+//     bool WiFi_Wps_IsComplete(void);
+//     bool WiFi_Wps_Start(void);
+//     void WiFi_Config_Mode_Set(uint8_t type);
+    
+//     void WiFi_Sta_Scan_SelectBest_AndBegin();
+//     uint16_t WiFi_Link_ReconnectCount_Get();
+//     //String WifiDowntime();
+    void WiFi_Sta_State_Set(uint8_t state);
+//     void WiFi_Sta_Begin_LegacyTasmota(uint8_t flag, uint8_t channel = 0);
+//     void WiFi_Link_CheckIp_AndHandleTransitions(void);
+//     void WiFi_Sta_Maintain_Periodic(uint8_t param);
+//     int WiFi_Sta_State_Get(void);
+    void WiFi_Sta_Connect_Start(void);
+//     // void WifiDisconnect(void);
+    void WiFi_Radio_Shutdown(bool option = false);
 
     const char* GetWiFiStatusCtr(void);
     const char* GetWiFiConfigTypeCtr(void);
@@ -181,6 +267,12 @@ class mWiFi :
       // WIFIBEGIN_FLAG_SSID2_ID,
       WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID
     };
+
+    static inline float WiFiPower_To_dBm(wifi_power_t p)
+    {
+      return (float)p * 0.25f; // ie 19.5dBm = 78enum -> 78*0.25f => 19.5
+    }
+
 
 };
 

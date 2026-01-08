@@ -843,7 +843,7 @@ const char* mTaskerManager::GetTaskName_Full(uint16_t task)
     case TASK_UPTIME_10_MINUTES:                      return PM_TASK_UPTIME_10_MINUTES_CTR;
     case TASK_UPTIME_60_MINUTES:                      return PM_TASK_UPTIME_60_MINUTES_CTR;
     case TASK_JSON_APPEND:                            return PM_TASK_JSON_APPEND_CTR;
-    case TASK_SAVE_BEFORE_RESTART:                    return PM_TASK_SAVE_BEFORE_RESTART_CTR;
+    // case TASK_SAVE_BEFORE_RESTART:                    return PM_TASK_SAVE_BEFORE_RESTART_CTR;
     case TASK_SETTINGS_DEFAULT:                       return PM_TASK_SETTINGS_DEFAULT_CTR;
     case TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:    return PM_TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR;
     case TASK_SETTINGS_LOAD_VALUES_INTO_MODULE:       return PM_TASK_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR;

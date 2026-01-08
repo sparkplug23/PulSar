@@ -12,7 +12,7 @@ Add this to the respective group section
 ```cpp
 #ifdef USE_MODULE_DRIVERS_EXAMPLE
   #include "#_Drivers/Example/mExample.h"
-  #define tkr_example                        static_cast<mExample*>(pCONT->pModule[EM_MODULE_DRIVERS_EXAMPLE_ID])
+  #define tkr_example                        static_cast<mExample*>(tkr->pModule[EM_MODULE_DRIVERS_EXAMPLE_ID])
 #endif
 ```
 
@@ -24,7 +24,7 @@ Add to enum list the name
 ```
 
 
-"tkr_example" naming convention is `pCONT`, abbrevaited from "pointer to tasker controller"
+"tkr_example" naming convention is `tkr`, abbrevaited from "pointer to tasker controller"
 
 
 

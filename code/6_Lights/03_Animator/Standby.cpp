@@ -511,7 +511,7 @@ bool mAnimatorLight::Standby_JsonCommand_Run(const char* json, size_t len, uint8
     AddLog(level, PSTR(D_LOG_LIGHT "State Payload [len:%d] %s"),
            data_buffer.payload.length_used, data_buffer.payload.ctr);
 
-    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+    tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
     data_buffer.releaseLock();
   } else {
     ALOG_WRN(PSTR("Standby_JsonCommand_Run: Tasker buffer busy; skipping Tasker pass"));

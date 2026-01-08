@@ -125,9 +125,28 @@
 #endif
 
 
-uint32_t ResetReason_g(void)
-{
-  DEBUG_LINE_HERE
+// uint32_t ResetReason_g(void)
+// {
+//   DEBUG_LINE_HERE
+// //   /*
+// //     user_interface.h
+// //     REASON_DEFAULT_RST      = 0,  // "Power on"                normal startup by power on
+// //     REASON_WDT_RST          = 1,  // "Hardware Watchdog"       hardware watch dog reset
+// //     REASON_EXCEPTION_RST    = 2,  // "Exception"               exception reset, GPIO status won’t change
+// //     REASON_SOFT_WDT_RST     = 3,  // "Software Watchdog"       software watch dog reset, GPIO status won’t change
+// //     REASON_SOFT_RESTART     = 4,  // "Software/System restart" software restart ,system_restart , GPIO status won’t change
+// //     REASON_DEEP_SLEEP_AWAKE = 5,  // "Deep-Sleep Wake"         wake up from deep-sleep
+// //     REASON_EXT_SYS_RST      = 6   // "External System"         external system reset
+// //   */
+ 
+// // #ifdef ESP8266
+// //   return resetInfo.reason;
+// // #else
+// //   return 0;
+
+// // #endif// ESP8266
+
+
 //   /*
 //     user_interface.h
 //     REASON_DEFAULT_RST      = 0,  // "Power on"                normal startup by power on
@@ -138,58 +157,129 @@ uint32_t ResetReason_g(void)
 //     REASON_DEEP_SLEEP_AWAKE = 5,  // "Deep-Sleep Wake"         wake up from deep-sleep
 //     REASON_EXT_SYS_RST      = 6   // "External System"         external system reset
 //   */
- 
+
+//   DEBUG_LINE_HERE
+// #ifdef ESP32
+
+//  RESET_REASON reason = rtc_get_reset_reason(0);
+//  Serial.println(reason); Serial.flush();
+//  DEBUG_LINE_HERE
+//   if (1  == reason) { return REASON_DEFAULT_RST; }       // POWERON_RESET
+//   if (12 == reason) { return REASON_SOFT_RESTART; }      // SW_CPU_RESET / RTC_SW_CPU_RESET
+//   if (5  == reason) { return REASON_DEEP_SLEEP_AWAKE; }  // DEEPSLEEP_RESET
+//   if (3  == reason) { return REASON_EXT_SYS_RST; }       // SW_RESET / RTC_SW_SYS_RESET
+//   return -1; // no "official error code", but should work with the current code base
+
+  
+//   // #ifdef DEBUG_FASTBOOT
+//   // Serial.printf("ResetReason() = %d\n\r", ResetReason_g()); 
+//   // #endif
+  
+
+// #endif 
+
+//   DEBUG_LINE_HERE
 // #ifdef ESP8266
-//   return resetInfo.reason;
-// #else
-//   return 0;
+//  return 0;// resetInfo.reason;  // causing crasg exception 3
 
-// #endif// ESP8266
+// #endif
 
+// return 0;
+//   DEBUG_LINE_HERE
+
+
+//   // return ESP_ResetInfoReason();
+// }
+
+
+
+uint32_t ResetReason_g(void)
+{
+  DEBUG_LINE_HERE
 
   /*
-    user_interface.h
-    REASON_DEFAULT_RST      = 0,  // "Power on"                normal startup by power on
-    REASON_WDT_RST          = 1,  // "Hardware Watchdog"       hardware watch dog reset
-    REASON_EXCEPTION_RST    = 2,  // "Exception"               exception reset, GPIO status won’t change
-    REASON_SOFT_WDT_RST     = 3,  // "Software Watchdog"       software watch dog reset, GPIO status won’t change
-    REASON_SOFT_RESTART     = 4,  // "Software/System restart" software restart ,system_restart , GPIO status won’t change
-    REASON_DEEP_SLEEP_AWAKE = 5,  // "Deep-Sleep Wake"         wake up from deep-sleep
-    REASON_EXT_SYS_RST      = 6   // "External System"         external system reset
+    user_interface.h (ESP8266 style)
+    REASON_DEFAULT_RST      = 0,  // "Power on"
+    REASON_WDT_RST          = 1,  // "Hardware Watchdog"
+    REASON_EXCEPTION_RST    = 2,  // "Exception"
+    REASON_SOFT_WDT_RST     = 3,  // "Software Watchdog"
+    REASON_SOFT_RESTART     = 4,  // "Software/System restart"
+    REASON_DEEP_SLEEP_AWAKE = 5,  // "Deep-Sleep Wake"
+    REASON_EXT_SYS_RST      = 6   // "External System reset"
   */
 
-  DEBUG_LINE_HERE
 #ifdef ESP32
+  // Use IDF API (correct for ESP32 / S2 / S3 / C3 etc.)
+  // Arduino core provides this via esp_system.h
+  const esp_reset_reason_t rr = esp_reset_reason();
 
- RESET_REASON reason = rtc_get_reset_reason(0);
- Serial.println(reason); Serial.flush();
- DEBUG_LINE_HERE
-  if (1  == reason) { return REASON_DEFAULT_RST; }       // POWERON_RESET
-  if (12 == reason) { return REASON_SOFT_RESTART; }      // SW_CPU_RESET / RTC_SW_CPU_RESET
-  if (5  == reason) { return REASON_DEEP_SLEEP_AWAKE; }  // DEEPSLEEP_RESET
-  if (3  == reason) { return REASON_EXT_SYS_RST; }       // SW_RESET / RTC_SW_SYS_RESET
-  return -1; // no "official error code", but should work with the current code base
+  // Optional debug print (safe early)
+  Serial.printf("esp_reset_reason()=%d\r\n", (int)rr);
 
-  
-  // #ifdef DEBUG_FASTBOOT
-  // Serial.printf("ResetReason() = %d\n\r", ResetReason_g()); 
-  // #endif
-  
+  switch (rr)
+  {
+    case ESP_RST_POWERON:
+      return REASON_DEFAULT_RST;
 
-#endif 
+    case ESP_RST_SW:
+      // includes esp_restart(), software reset
+      return REASON_SOFT_RESTART;
 
-  DEBUG_LINE_HERE
+    case ESP_RST_PANIC:
+      // abort(), assert(), stack smashing, etc.
+      return REASON_EXCEPTION_RST;
+
+    case ESP_RST_INT_WDT:
+    case ESP_RST_TASK_WDT:
+      // WDT reset (task watchdog / interrupt watchdog)
+      // You may prefer REASON_SOFT_WDT_RST for TASK_WDT and REASON_WDT_RST for INT_WDT;
+      // if you want that split, see note below.
+      return REASON_WDT_RST;
+
+    case ESP_RST_WDT:
+      // generic watchdog reset
+      return REASON_WDT_RST;
+
+    case ESP_RST_DEEPSLEEP:
+      return REASON_DEEP_SLEEP_AWAKE;
+
+    case ESP_RST_BROWNOUT:
+      // No direct equivalent in your enum; closest operationally is "power on / external"
+      // I recommend treating brownout as "default/power" for user-facing messaging.
+      return REASON_DEFAULT_RST;
+
+    case ESP_RST_SDIO:
+      // Rare; treat as external/system
+      return REASON_EXT_SYS_RST;
+
+    case ESP_RST_EXT:
+      // External reset pin
+      return REASON_EXT_SYS_RST;
+
+    case ESP_RST_UNKNOWN:
+    default:
+      // Fail safe: treat unknown as power-on/default
+      return REASON_DEFAULT_RST;
+  }
+#endif // ESP32
+
+
 #ifdef ESP8266
- return 0;// resetInfo.reason;  // causing crasg exception 3
+  // Use SDK reset info (safe in Arduino-ESP8266)
+  // Note: if your old path crashed, it was likely due to accessing an invalid pointer;
+  // this is the standard safe call.
+  const rst_info* ri = ESP.getResetInfoPtr();
+  if (ri)
+  {
+    return (uint32_t)ri->reason;  // already matches REASON_* values
+  }
+  return REASON_DEFAULT_RST;
+#endif // ESP8266
 
-#endif
-
-return 0;
-  DEBUG_LINE_HERE
-
-
-  // return ESP_ResetInfoReason();
+  return REASON_DEFAULT_RST;
 }
+
+
 
 #ifdef ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -521,6 +611,12 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
     }break;
     case TASK_EVERY_SECOND:{
 
+      /***
+       * Scheduled reboot ticker
+       */
+      if(restart_delayed_seconds_ticks > 1) restart_delayed_seconds_ticks--;
+      if(restart_delayed_seconds_ticks == 0) ESP_Restart_Safe();
+
 #ifdef ENABLE_DEBUGFEATURE_RELAY__TEMP_FORCE_ON_FOR_5_MINS
 // bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 1 : 0;
 bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 0 : 1;
@@ -572,7 +668,7 @@ digitalWrite(26,!digitalRead(26));
     case TASK_ON_BOOT_SUCCESSFUL:
 
       #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES)
-      memset(&pCONT->debug_module_time,0,sizeof(pCONT->debug_module_time));
+      memset(&tkr->debug_module_time,0,sizeof(tkr->debug_module_time));
       ALOG_INF(PSTR("Reset: debug_module_time"));
       #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 
@@ -589,6 +685,7 @@ digitalWrite(26,!digitalRead(26));
       parse_JSONCommand(obj);
     break;
 
+    case TASK_NETWORK_CONNECTED:
     case TASK_WIFI_CONNECTED:
       ArduinoOTAInit();
     break;
@@ -762,7 +859,7 @@ void mSupport::ArduinoOTAInit(void)
     RtcSettings.boot_was_completed_ota_event = false;
 
     // Disable parts (e.g. RF receive interrupts) before starting update
-    pCONT->Tasker_Interface(TASK_UPDATE_OTA_BEFORE_ON_START);
+    tkr->Tasker_Interface(TASK_UPDATE_OTA_BEFORE_ON_START);
 
     tkr_set->Settings.logging.serial_level = LOG_LEVEL_NONE; // Disable serial logging
     tkr_set->Settings.logging.web_level = LOG_LEVEL_NONE; // Disable web logging
@@ -2390,13 +2487,7 @@ void mSupport::CheckResetConditions()
         ALOG_INF(PSTR(D_LOG_APPLICATION "tkr_set->restart_flag <= 0 " D_RESTARTING));
         #endif// ENABLE_LOG_LEVEL_INFO
     
-        #ifdef USE_MODULE_NETWORK_WIFI   
-#ifndef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-        // THIS should be moved into this class
-        tkr_wifi->EspRestart();        
-#endif // ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-        #endif USE_MODULE_NETWORK_WIFI
-
+        EspRestart();        
       }
     }
 
@@ -2454,3 +2545,90 @@ float mSupport::FastPrecisePowf(const float x, const float y)
 }
 
 
+/**
+ * @brief Includes safe stopping any processes
+ * 
+ */
+void mSupport::ESP_Restart_Safe(void)
+{
+  ALOG_INF(PSTR(D_LOG_SUPPORT "ESP_Restart_Safe: Modules instructed to cleanup" ));
+
+  tkr->Tasker_Interface(TASK_RESTART_SET_DO_FINAL_CLEANUP);
+
+  ALOG_INF(PSTR(D_LOG_SUPPORT "Complete. Waiting" ));
+
+  long dly = millis();
+  while (millis() - dly < 2000) {
+    yield();        // enough time to send response to client
+  }
+
+  Serial.println("Restart"); Serial.flush();
+
+  ESP.restart();
+
+}
+
+/**
+ * @brief Hard shutdown
+ * Only used in error cases
+ * Splash on serial (no logs), immediate forced restart
+ */
+void mSupport::ESP_Restart_Immediate(void)
+{
+    ESP.restart();
+}
+
+
+
+void mSupport::EspRestart(void)
+{
+
+#ifdef ENABLE_DEVFEATURE_BLOCK_RESTART
+
+  AddLog(LOG_LEVEL_ERROR, PSTR("ENABLE_DEVFEATURE_BLOCK_RESTART"));
+
+#else
+
+  //ResetPwm();
+  tkr_wifi->WiFi_Radio_Shutdown(true);
+  // CrashDumpClear();           // Clear the stack dump in RTC
+
+  // if (restart_halt) {
+  //   while (1) {
+  //     OsWatchLoop();          // Feed OsWatch timer to prevent restart
+  //     SetLedLink(1);          // Wifi led on
+  //     delay(200);             // Satisfy SDK
+  //     SetLedLink(0);          // Wifi led off
+  //     delay(800);             // Satisfy SDK
+  //   }
+  // } else {
+    ESP.restart(); //ESP_Restart();
+  // }
+
+  //  ResetPwm();
+  // WiFi_Radio_Shutdown(true);
+  // CrashDumpClear();           // Clear the stack dump in RTC
+
+  // if (restart_halt) {
+  //   while (1) {
+  //     OsWatchLoop();          // Feed OsWatch timer to prevent restart
+  //     SetLedLink(1);          // Wifi led on
+  //     delay(200);             // Satisfy SDK
+  //     SetLedLink(0);          // Wifi led off
+  //     delay(800);             // Satisfy SDK
+  //   }
+  // } else {
+  //   ESP_Restart();
+  // }
+  // delay(100);                 // Allow time for message xfer - disabled v6.1.0b
+  // //if (Settings.flag_system.mqtt_enabled) MqttDisconnect();
+  // WifiDisconnect();
+  // //tkr_sup->CrashDumpClear();
+  // ESP.restart();            // This results in exception 3 on restarts on core 2.3.0
+  // #ifdef ESP8266
+  //   ESP.reset();
+  // #endif
+
+#endif // ENABLE_DEVFEATURE_BLOCK_RESTART
+
+}

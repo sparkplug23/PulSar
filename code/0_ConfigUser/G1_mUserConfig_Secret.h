@@ -50,6 +50,14 @@
 #define STA_PASS2            "af4d8bc9ab"                // [Password2] Optional alternate AP Wifi password
 #endif
 
+// Dedicated SSID for home controllers
+#ifndef  STA_SSID3
+#define STA_SSID3            "fallback"                // [Ssid2] Optional alternate AP Wifi SSID
+#endif
+#ifndef  STA_PASS3
+#define STA_PASS3            "af4d8bc9ab"                // [Password2] Optional alternate AP Wifi password
+#endif
+
 #endif
 
 

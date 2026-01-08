@@ -142,7 +142,7 @@ void mDriverInterface::parse_JSONCommand(JsonParserObject obj)
 	{
 		JBI->Start();
 
-		pCONT->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
+		tkr->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
 
 		bool ready_to_send = JBI->End();
 
@@ -222,7 +222,7 @@ uint8_t mDriverInterface::ConstructJson_DriverStatus(uint8_t json_method, bool j
    * 
    */
   // #ifndef ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_COMPILE_FOR_SONOFF_BASIC_DEC2023
-  pCONT->Tasker_Interface(TASK_APPEND_RESPONSE_JSON_DRIVERS_STATUS_ID);
+  tkr->Tasker_Interface(TASK_APPEND_RESPONSE_JSON_DRIVERS_STATUS_ID);
   // #endif 
 
 
@@ -238,7 +238,7 @@ uint8_t mDriverInterface::ConstructJson_DriverStatus(uint8_t json_method, bool j
   //   /**
   //    * @brief Check by sensor reported type
   //    **/
-  //   for(auto& pmod:pCONT->pModule)
+  //   for(auto& pmod:tkr->pModule)
   //   {
   //     //Get any sensors in module
   //     uint8_t sensors_available = pmod->GetSensorCount();

@@ -30,9 +30,9 @@ void MQTTConnection::MqttConnected(void)
   flag_start_reconnect = false;
   
   #ifndef ENABLE_DEVFEATURE__MQTT_STOP_SENDING_EVERYTHING_ON_RECONNECT
-  pCONT->Tasker_Interface(TASK_MQTT_CONNECTED);
-  pCONT->Tasker_Interface(TASK_MQTT_SUBSCRIBE);
-  pCONT->Tasker_Interface(TASK_MQTT_STATUS_REFRESH_SEND_ALL);
+  tkr->Tasker_Interface(TASK_MQTT_CONNECTED);
+  tkr->Tasker_Interface(TASK_MQTT_SUBSCRIBE);
+  tkr->Tasker_Interface(TASK_MQTT_STATUS_REFRESH_SEND_ALL);
   #endif
 
 }
@@ -223,7 +223,7 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
       ALOG_DBM(PSTR("estimated_commands %d"), estimated_commands);
       #endif
 
-      pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+      tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
       
       ALOG_DBM( PSTR(D_LOG_MQTT "{\"CommandsMatched\":%d}"), data_buffer.isserviced);
 
@@ -295,7 +295,7 @@ void MQTTConnection::Send_Prefixed_P(const char* topic, PGM_P formatP, ...)
 bool MQTTConnection::MQTTHandler_Send_Formatted_UniqueID(uint8_t topic_type, uint16_t unique_id, const char* postfix_topic_ctr, bool retain_flag)
 {
 
-  PGM_P module_ctr = pCONT->GetModuleName(unique_id);
+  PGM_P module_ctr = tkr->GetModuleName(unique_id);
 
   #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
   Serial.printf("buffer length = %d\n\r", strlen(data_buffer.payload.ctr));

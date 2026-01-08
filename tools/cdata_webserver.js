@@ -428,7 +428,7 @@ const char PAGE_dmxmap[] PROGMEM = R"=====()=====";
     },
     {
       file: "favicon_pulsar.ico",
-      name: "favicon",
+      name: "favicon2",
       method: "binary",
     }
     // ,
@@ -453,14 +453,14 @@ writeChunks(
   source_path,
   [
     {
-      file: "console.htm",
+      file: "console_ws.htm",
       name: "PAGE_console",
       method: "gzip",
       filter: "html-minify-ui",
     },
     {
-      file: "console2.htm",
-      name: "PAGE_console2",
+      file: "console_polling.htm",
+      name: "PAGE_console_polling",
       method: "gzip",
       filter: "html-minify-ui",
     }
@@ -472,21 +472,41 @@ writeChunks(
 writeChunks(
   source_path,
   [
-    // {
-    //   file: "style.css",
-    //   name: "PAGE_settingsCss",
-    //   method: "gzip",
-    //   filter: "css-minify",
-    //   mangle: (str) =>
-    //     str
-    //       .replace("%%","%")
-    // },
-    // {
-    //   file: "common.js",
-    //   name: "JS_common",
-    //   method: "gzip",
-    //   filter: "js-minify",
-    // },
+    {
+      file: "root_basic.htm",
+      name: "PAGE_root_basic",
+      method: "gzip",
+      filter: "html-minify-ui",
+    },
+    {
+      file: "debug_main.htm",
+      name: "PAGE_debug_main",
+      method: "gzip",
+      filter: "html-minify-ui",
+    }
+  ],
+  destination_path + "root_basic.h"
+);
+
+
+writeChunks(
+  source_path,
+  [
+    {
+      file: "style.css",
+      name: "PAGE_settingsCss2",
+      method: "gzip",
+      filter: "css-minify",
+      mangle: (str) =>
+        str
+          .replace("%%","%")
+    },
+    {
+      file: "common.js",
+      name: "JS_common2",
+      method: "gzip",
+      filter: "js-minify",
+    },
     {
       file: "settings2.htm",
       name: "PAGE_settings2",

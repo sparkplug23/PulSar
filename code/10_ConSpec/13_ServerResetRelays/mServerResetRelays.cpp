@@ -381,56 +381,252 @@ void mServerResetRelays::Serve_Submodule_ServerResetRelays_Post(AsyncWebServerRe
 
 
 
+// void mServerResetRelays::Serve_Submodule_ServerResetRelays_JS(AsyncWebServerRequest* request)
+// {
+//   // Start Create Head
+//   AsyncResponseStream *response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JAVASCRIPT));
+//   response->addHeader(F("Cache-Control"), F("no-store"));
+//   response->addHeader(F("Expires"), F("0"));
+
+//   response->print(F("function GetV(){var d=document;"));
+
+//   // -------------------------------------------------------------------
+//   // Talk-back values for the page
+//   // -------------------------------------------------------------------
+//   char buffer[96];
+
+//   // Update time (string)
+//   snprintf(buffer, sizeof(buffer), "%s", tkr_time->GetDateAndTime(DT_UTC).c_str());
+//   tkr_web->printSetFormValue(*response, PSTR("UT"), buffer);
+
+//   char key[10];
+//   char val[120];
+
+//   #ifdef USE_MODULE_DRIVERS_RELAY
+//   // Relay names (R0..R7) and optional state/feedback (S0..S7 / T0..T7)
+//   uint8_t relay_count = (8 > MAX_RELAYS) ? MAX_RELAYS : 8; // limit to 8
+//   for (uint8_t relay_id = 0; relay_id < 8; relay_id++)
+//   {
+//     // Names
+//     snprintf(key, sizeof(key), "R%u", relay_id);
+//     DLI->GetDeviceName_WithModuleUniqueID(tkr_relay->GetModuleUniqueID(), relay_id, buffer, sizeof(buffer));
+//     tkr_web->printSetFormValue(*response, key, buffer);
+
+//     // -------------------------------------------------------------------
+//     // Status strings: T0..T7
+//     //   "TimeOnRemaining %u (On:%02d:%02d:%02d|Off:%02d:%02d:%02d)"
+//     // -------------------------------------------------------------------
+//     const uint32_t sec_on_remaining = tkr_relay->CommandGet_SecondsToRemainOn(relay_id);
+
+//     const auto &last = tkr_relay->rt.relay_status[relay_id].last;
+
+//     // NOTE: if you prefer to suppress times when unset, add guards here.
+//     snprintf(
+//       val, sizeof(val),
+//       "TimeOnRemaining %lu (Last On:%02u:%02u:%02u|Off:%02u:%02u:%02u)",
+//       sec_on_remaining,
+//       last.ontime.hour,  last.ontime.minute,  last.ontime.second,
+//       last.offtime.hour, last.offtime.minute, last.offtime.second
+//     );
+//     snprintf(key, sizeof(key), "T%u", relay_id);
+//     tkr_web->printSetFormValue(*response, key, val);
+    
+//   }
+      
+//   #endif
+
+//   response->print(F("}"));
+//   request->send(response);
+// }
+
+
+// void mServerResetRelays::Serve_Submodule_ServerResetRelays_JS(AsyncWebServerRequest* request)
+// {
+//   AsyncResponseStream *response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JAVASCRIPT));
+//   response->addHeader(F("Cache-Control"), F("no-store"));
+//   response->addHeader(F("Expires"), F("0"));
+
+//   response->print(F("function GetV(){var d=document;"));
+
+//   // Update time
+//   char buffer[96];
+//   snprintf(buffer, sizeof(buffer), "%s", tkr_time->GetDateAndTime(DT_UTC).c_str());
+//   tkr_web->printSetFormValue(*response, PSTR("UT"), buffer);
+
+//   #ifdef USE_MODULE_DRIVERS_RELAY
+//   char key[10];
+//   char val[160];
+
+//   for (uint8_t relay_id = 0; relay_id < 8; relay_id++)
+//   {
+//     // ------------------------------------------------------------
+//     // Names: R0..R7
+//     // ------------------------------------------------------------
+//     snprintf(key, sizeof(key), "R%u", relay_id);
+//     DLI->GetDeviceName_WithModuleUniqueID(
+//       tkr_relay->GetModuleUniqueID(),
+//       relay_id,
+//       buffer,
+//       sizeof(buffer)
+//     );
+//     tkr_web->printSetFormValue(*response, key, buffer);
+
+//     // ------------------------------------------------------------
+//     // State: S0..S7 (0/1)
+//     // ------------------------------------------------------------
+//     const uint8_t isOn = tkr_relay->CommandGet_Relay_Power(relay_id) ? 1 : 0;
+//     snprintf(key, sizeof(key), "S%u", relay_id);
+//     tkr_web->printSetFormValue(*response, key, (int)isOn);
+
+//     // ------------------------------------------------------------
+//     // Status text: T0..T7
+//     // ------------------------------------------------------------
+//     const uint32_t sec_on_remaining = tkr_relay->CommandGet_SecondsToRemainOn(relay_id);
+//     const auto &last = tkr_relay->rt.relay_status[relay_id].last;
+
+//     snprintf(
+//       val, sizeof(val),
+//       "TimeOnRemaining %lu (On:%02u:%02u:%02u|Off:%02u:%02u:%02u)",
+//       (unsigned long)sec_on_remaining,
+//       last.ontime.hour,  last.ontime.minute,  last.ontime.second,
+//       last.offtime.hour, last.offtime.minute, last.offtime.second
+//     );
+//     snprintf(key, sizeof(key), "T%u", relay_id);
+//     tkr_web->printSetFormValue(*response, key, val);
+
+//     // ------------------------------------------------------------
+//     // UI: class toggles for OFF/ON buttons
+//     //
+//     // We set className directly:
+//     //   "rb_btn rb_off rb_active" / "rb_btn rb_off rb_inactive"
+//     //   "rb_btn rb_on  rb_active" / "rb_btn rb_on  rb_inactive"
+//     // ------------------------------------------------------------
+//     {
+//       char idbuf[12];
+
+//       // Off button class
+//       snprintf(idbuf, sizeof(idbuf), "b%u_0", relay_id);
+//       response->printf_P(
+//         PSTR("d.getElementById('%s').className='rb_btn rb_off %s';"),
+//         idbuf,
+//         isOn ? "rb_inactive" : "rb_active"
+//       );
+
+//       // On button class
+//       snprintf(idbuf, sizeof(idbuf), "b%u_1", relay_id);
+//       response->printf_P(
+//         PSTR("d.getElementById('%s').className='rb_btn rb_on %s';"),
+//         idbuf,
+//         isOn ? "rb_active" : "rb_inactive"
+//       );
+
+//       // Toggle button: keep it orange using STYLE (your requested test case)
+//       // If you added a helper, use it here. Otherwise this direct JS is fine:
+//       snprintf(idbuf, sizeof(idbuf), "b%u_2", relay_id);
+//       response->printf_P(
+//         PSTR("d.getElementById('%s').style.backgroundColor='#9a5a00';d.getElementById('%s').style.color='#fff';"),
+//         idbuf, idbuf
+//       );
+//     }
+
+//     // Optional: row left border based on state (matches your earlier look)
+//     response->printf_P(
+//       PSTR("d.getElementById('row%u').style.borderLeft='%s';"),
+//       relay_id,
+//       isOn ? "6px solid #0b5a1a" : "6px solid #7a0b0b"
+//     );
+//   }
+//   #endif
+
+//   response->print(F("}"));
+//   request->send(response);
+// }
+
 void mServerResetRelays::Serve_Submodule_ServerResetRelays_JS(AsyncWebServerRequest* request)
 {
-  // Start Create Head
   AsyncResponseStream *response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JAVASCRIPT));
   response->addHeader(F("Cache-Control"), F("no-store"));
   response->addHeader(F("Expires"), F("0"));
 
+  // WLED-style: ONLY this opener
   response->print(F("function GetV(){var d=document;"));
 
-  // -------------------------------------------------------------------
-  // Talk-back values for the page
-  // -------------------------------------------------------------------
+  // ------------------------------------------------------------
+  // Update time (UT)
+  // ------------------------------------------------------------
   char buffer[96];
-
-  // Update time (string)
   snprintf(buffer, sizeof(buffer), "%s", tkr_time->GetDateAndTime(DT_UTC).c_str());
   tkr_web->printSetFormValue(*response, PSTR("UT"), buffer);
 
-  char key[10];
-  char val[120];
-
+  // ------------------------------------------------------------
+  // Per-relay talkback
+  // ------------------------------------------------------------
   #ifdef USE_MODULE_DRIVERS_RELAY
-  // Relay names (R0..R7) and optional state/feedback (S0..S7 / T0..T7)
-  uint8_t relay_count = (8 > MAX_RELAYS) ? MAX_RELAYS : 8; // limit to 8
+  char key[10];
+  char val[160];
+
   for (uint8_t relay_id = 0; relay_id < 8; relay_id++)
   {
-    // Names
+    // -----------------------
+    // Name: R0..R7
+    // -----------------------
     snprintf(key, sizeof(key), "R%u", relay_id);
-    DLI->GetDeviceName_WithModuleUniqueID(tkr_relay->GetModuleUniqueID(), relay_id, buffer, sizeof(buffer));
+    DLI->GetDeviceName_WithModuleUniqueID(
+      tkr_relay->GetModuleUniqueID(),
+      relay_id,
+      buffer,
+      sizeof(buffer)
+    );
     tkr_web->printSetFormValue(*response, key, buffer);
 
-    // -------------------------------------------------------------------
-    // Status strings: T0..T7
-    //   "TimeOnRemaining %u (On:%02d:%02d:%02d|Off:%02d:%02d:%02d)"
-    // -------------------------------------------------------------------
+    // -----------------------
+    // Status text: T0..T7
+    // -----------------------
     const uint32_t sec_on_remaining = tkr_relay->CommandGet_SecondsToRemainOn(relay_id);
+    const uint8_t  isOn            = tkr_relay->CommandGet_Relay_Power(relay_id) ? 1 : 0;
 
     const auto &last = tkr_relay->rt.relay_status[relay_id].last;
 
-    // NOTE: if you prefer to suppress times when unset, add guards here.
-    snprintf(
-      val, sizeof(val),
-      "TimeOnRemaining %lu (Last On:%02u:%02u:%02u|Off:%02u:%02u:%02u)",
-      sec_on_remaining,
-      last.ontime.hour,  last.ontime.minute,  last.ontime.second,
-      last.offtime.hour, last.offtime.minute, last.offtime.second
-    );
+    if(sec_on_remaining)
+    {
+      snprintf(
+        val, sizeof(val),
+        "%lu Seconds On (On:%02u:%02u:%02u|Off:%02u:%02u:%02u)",
+        (unsigned long)sec_on_remaining,
+        last.ontime.hour,  last.ontime.minute,  last.ontime.second,
+        last.offtime.hour, last.offtime.minute, last.offtime.second
+      );
+    }else
+    {
+      snprintf(
+        val, sizeof(val),
+        "%s (On:%02u:%02u:%02u|Off:%02u:%02u:%02u)",
+        isOn ? "ON" : "OFF",
+        last.ontime.hour,  last.ontime.minute,  last.ontime.second,
+        last.offtime.hour, last.offtime.minute, last.offtime.second
+      );
+    }
+
+
     snprintf(key, sizeof(key), "T%u", relay_id);
     tkr_web->printSetFormValue(*response, key, val);
-    
+
+    // -----------------------
+    // Status text colour (your rule)
+    //   - timer active  -> orange
+    //   - else if on    -> green
+    //   - else          -> red
+    // -----------------------
+    const char* col =
+      (sec_on_remaining > 0) ? "#ff9500ff" :   // orange
+      (isOn)                 ? "#00ff00ff" :   // green
+                               "#ff0000ff";    // red
+
+    response->printf_P(
+      PSTR("d.getElementById('T%u').style.color='%s';"),
+      relay_id,
+      col
+    );
   }
   #endif
 
@@ -439,17 +635,22 @@ void mServerResetRelays::Serve_Submodule_ServerResetRelays_JS(AsyncWebServerRequ
 }
 
 
+
+
+
 void mServerResetRelays::Serve_Submodule_ServerResetRelays_Page(AsyncWebServerRequest* request)
 {
   AsyncWebServerResponse* response =
     request->beginResponse_P(
       200,
       FPSTR(CONTENT_TYPE_HTML),
-      WEB_10_ConSpec_13_ServerResetRelays_test_htm,
-      WEB_10_ConSpec_13_ServerResetRelays_test_htm_length
+      WEB_10_ConSpec_13_ServerResetRelays_server_relay_controls_htm,
+      WEB_10_ConSpec_13_ServerResetRelays_server_relay_controls_htm_length
     );
 
   response->addHeader(F("Content-Encoding"), F("gzip"));
+  response->addHeader(F("Cache-Control"), F("no-store"));
+  response->addHeader(F("Expires"), F("0"));
   tkr_web->setStaticContentCacheHeaders(response);
   request->send(response);
 }

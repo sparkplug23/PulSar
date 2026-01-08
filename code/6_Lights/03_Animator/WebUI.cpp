@@ -33,78 +33,6 @@ using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
 #endif
 
 
-//threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
-// bool mAnimatorLight::requestJSONBufferLock(uint16_t module)
-// {
-//   unsigned long now = millis();
-
-//   // This assumption here is another http thread must release itself to permit this function to proceed
-//   while (jsonBufferLock && millis()-now < 1000) delay(1); // wait for a second for buffer lock
-
-//   if (millis()-now >= 1000) {
-//     // DEBUG_PRINT(F("ERROR: Locking JSON buffer failed! ("));
-//     // DEBUG_PRINT(jsonBufferLock);
-//     // DEBUG_PRINTLN(")");
-//     return false; // waiting time-outed
-//   }
-
-//   jsonBufferLock = module ? module : 255;
-//   // DEBUG_PRINT(F("LOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOCKED    JSON buffer locked. ("));
-//   // DEBUG_PRINT(jsonBufferLock);
-//   // DEBUG_PRINTLN(")");
-//   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
-//   // tkr_mfile->gDoc = &doc;  // used for applying presets (presets.cpp)
-//   tkr_mfile->pDoc->clear();
-//   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
-//   return true;
-// }
-//threading/network callback details: https://github.com/wled-dev/WLED/pull/2336#discussion_r762276994
-bool mAnimatorLight::requestJSONBufferLock(uint16_t moduleID)
-{
-  if (tkr_mfile->pDoc == nullptr) {
-    DEBUG_PRINTLN(F("ERROR: JSON buffer not allocated!"));
-    return false;
-  }
-
-#if defined(ARDUINO_ARCH_ESP32)
-  // Use a recursive mutex type in case our task is the one holding the JSON buffer.
-  // This can happen during large JSON web transactions.  In this case, we continue immediately
-  // and then will return out below if the lock is still held.
-  if (xSemaphoreTakeRecursive(tkr_mfile->jsonBufferLockMutex, 250) == pdFALSE) return false;  // timed out waiting
-#elif defined(ARDUINO_ARCH_ESP8266)
-  // If we're in system context, delay() won't return control to the user context, so there's
-  // no point in waiting.
-  if (can_yield()) {
-    unsigned long now = millis();
-    while (jsonBufferLock && (millis()-now < 250)) delay(1); // wait for fraction for buffer lock
-  }
-#else
-  #error Unsupported task framework - fix requestJSONBufferLock
-#endif  
-  // If the lock is still held - by us, or by another task
-  if (jsonBufferLock) {
-    DEBUG_PRINTF_P(PSTR("ERROR: Locking JSON buffer (%d) failed! (still locked by %d)\n"), moduleID, jsonBufferLock);
-#ifdef ARDUINO_ARCH_ESP32
-    xSemaphoreGiveRecursive(tkr_mfile->jsonBufferLockMutex);
-#endif
-    return false;
-  }
-
-  jsonBufferLock = moduleID ? moduleID : 255;
-  DEBUG_PRINTF_P(PSTR("JSON locked (%d)\n\r"), jsonBufferLock);
-  tkr_mfile->pDoc->clear();
-  return true;
-}
-
-void  mAnimatorLight::releaseJSONBufferLock()
-{
-  DEBUG_PRINTF_P(PSTR("JSON released (%d)\n\r"), jsonBufferLock);
-  jsonBufferLock = 0;
-#ifdef ARDUINO_ARCH_ESP32
-  xSemaphoreGiveRecursive(tkr_mfile->jsonBufferLockMutex);
-#endif  
-}
-
 
 
 void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment& seg, byte id, bool forPreset, bool segmentBounds)
@@ -577,7 +505,6 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
   if (ps > 0 && ps < 251) deletePreset(ps);
 
   // HTTP API commands (must be handled before "ps")
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__SETTINGS_HTTP_API   // setting with URL args, not what I want
   const char* httpwin = root["win"];
   if (httpwin) {
     String apireq = "win"; apireq += '&'; // reduce flash string usage
@@ -585,7 +512,6 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
     ALOG_INF(PSTR("Did I enter here 1?"));
     handle__HTTP__GET_QueryAPI(nullptr, apireq, false);    // may set stateChanged
   }
-  #endif // ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
   // applying preset (2 cases: a) API call includes all preset values ("pd"), b) API only specifies preset ID ("ps"))
   byte presetToRestore = 0;
@@ -2886,14 +2812,14 @@ class LockedJsonResponse: public AsyncJsonResponse {
     size_t result = AsyncJsonResponse::_fillBuffer(buf, maxLen);
     // Release lock as soon as we're done filling content
     if (((result + _sentLength) >= (_contentLength)) && _holding_lock) {
-      tkr_anim->releaseJSONBufferLock();
+      JBI->releaseJSONBufferLock();
       _holding_lock = false;
     }
     return result;
   }
 
   // destructor will remove JSON buffer lock when response is destroyed in AsyncWebServer
-  virtual ~LockedJsonResponse() { if (_holding_lock) tkr_anim->releaseJSONBufferLock(); };
+  virtual ~LockedJsonResponse() { if (_holding_lock) JBI->releaseJSONBufferLock(); };
 };
 
 
@@ -3017,7 +2943,7 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
     return;
   }
 
-  if (!requestJSONBufferLock(17)) {
+  if (!JBI->requestJSONBufferLock(17)) {
     request->send(503, "application/json", F("{\"error\":3}"));
     return;
   }
@@ -3090,7 +3016,7 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
   ALOG_DBG(PSTR("JSON content length: %d"), len);
 
   request->send(response);
-  releaseJSONBufferLock();
+  JBI->releaseJSONBufferLock();
 }
 
 
@@ -3265,27 +3191,27 @@ bool mAnimatorLight::isIp(String str) {
 }
 
 
-bool  mAnimatorLight::captivePortal(AsyncWebServerRequest *request)
-{
-  if (!apActive) return false; //only serve captive in AP mode
-  if (!request->hasHeader(F("Host"))) return false;
+// bool  mAnimatorLight::captivePortal(AsyncWebServerRequest *request)
+// {
+//   if (!apActive) return false; //only serve captive in AP mode
+//   if (!request->hasHeader(F("Host"))) return false;
 
-  String hostH = request->getHeader(F("Host"))->value();
-  if (!isIp(hostH) && hostH.indexOf(F("wled.me")) < 0 && hostH.indexOf(tkr_web->cmDNS) < 0 && hostH.indexOf(':') < 0) {
-    DEBUG_PRINTLN(F("Captive portal"));
-    AsyncWebServerResponse *response = request->beginResponse(302);
-    response->addHeader(F("Location"), F("http://4.3.2.1"));
-    request->send(response);
-    return true;
-  }
-  return false;
-}
+//   String hostH = request->getHeader(F("Host"))->value();
+//   if (!isIp(hostH) && hostH.indexOf(F("wled.me")) < 0 && hostH.indexOf(tkr_web->cmDNS) < 0 && hostH.indexOf(':') < 0) {
+//     DEBUG_PRINTLN(F("Captive portal"));
+//     AsyncWebServerResponse *response = request->beginResponse(302);
+//     response->addHeader(F("Location"), F("http://4.3.2.1"));
+//     request->send(response);
+//     return true;
+//   }
+//   return false;
+// }
 
 
 void mAnimatorLight::WebPage_Root_AddHandlers()
 {
 
-  releaseJSONBufferLock();
+  JBI->releaseJSONBufferLock();
 
   #ifdef ENABLE_FEATURE_LIGHTING__WEBSOCKETS
   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
@@ -3299,20 +3225,17 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
     tkr_web->handleStaticContent(request, "", 200, FPSTR(CONTENT_TYPE_HTML), PAGE_liveview, PAGE_liveview_length);
   });
 
-  #ifndef ENABLE_DEVFEATURE_WEBSERVER__SETTINGS_WEBPAGES
-  // Moved into mWebServer as shared resource
-  static const char _common_js[] PROGMEM = "/common.js";
-  tkr_web->server->on(_common_js, HTTP_GET, [this](AsyncWebServerRequest *request){    
-    tkr_web->handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common, JS_common_length);
-  });
-  #endif
-
   //settings page for LEDs, UI, sync, time, security, usermods, update
   tkr_web->server->on("/lights/settings", HTTP_GET, [this](AsyncWebServerRequest *request){
     this->serveSettings(request);
   });
 
+
   // "/settings/settings.js&p=x" request also handled by serveSettings()
+  
+  
+  
+  #ifndef ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
   static const char _style_css[] PROGMEM = "/style.css";
   tkr_web->server->on("/style.css", HTTP_GET, [this](AsyncWebServerRequest *request){
     tkr_web->handleStaticContent(request, FPSTR(_style_css), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss, PAGE_settingsCss_length);
@@ -3329,6 +3252,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
     AsyncWebServerResponse *response = request->beginResponse(200, FPSTR(CONTENT_TYPE_CSS));
     request->send(response);
   });
+  #endif
 
   tkr_web->server->on("/welcome", HTTP_GET, [this](AsyncWebServerRequest *request){
     this->serveSettings(request);
@@ -3352,7 +3276,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
     Serial.println((char*)request->_tempObject);
 
-    if (!this->requestJSONBufferLock(14)) return;
+    if (!JBI->requestJSONBufferLock(14)) return;
 
     
       #ifdef ENABLE_DEVFEATURE_LIGHT__PLAYLISTS_2024
@@ -3401,7 +3325,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
           AddLog(level, PSTR(D_LOG_LIGHT "State Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
           #endif// ENABLE_LOG_LEVEL_INFO
 
-          pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+          tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
           data_buffer.releaseLock();
 
@@ -3415,7 +3339,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
     DeserializationError error = deserializeJson(*tkr_mfile->pDoc, (uint8_t*)(request->_tempObject));
     JsonObject root = tkr_mfile->pDoc->as<JsonObject>();
     if (error || root.isNull()) {
-      this->releaseJSONBufferLock();
+      JBI->releaseJSONBufferLock();
       request->send(400, "application/json", F("{\"error\":9}")); // ERR_JSON
       return;
     }
@@ -3442,7 +3366,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
     }
 
 
-    this->releaseJSONBufferLock();
+    JBI->releaseJSONBufferLock();
 
     // #ifdef ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
 
@@ -3464,7 +3388,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
     //       AddLog(level, PSTR(D_LOG_LIGHT "State Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
     //       #endif// ENABLE_LOG_LEVEL_INFO
 
-    //       pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+    //       tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
     //       data_buffer.releaseLock();
 
@@ -3553,7 +3477,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   #ifdef ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI
 
   tkr_web->server->on("/lights", HTTP_GET, [this](AsyncWebServerRequest *request){
-    if (captivePortal(request)) return;
+    if (tkr_web->captivePortal(request)) return;
 
     if (!showWelcomePage || request->hasArg(F("sliders"))) {
       tkr_web->handleStaticContent(
@@ -3572,7 +3496,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   #else
 
   tkr_web->server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
-    if (captivePortal(request)) return;
+    if (tkr_web->captivePortal(request)) return;
 
     if (!showWelcomePage || request->hasArg(F("sliders"))) {
       tkr_web->handleStaticContent(
@@ -3609,32 +3533,6 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   tkr_web->server->on(_cpal_htm, HTTP_GET, [](AsyncWebServerRequest *request){
     tkr_web->handleStaticContent(request, FPSTR(_cpal_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_cpal_lights, PAGE_cpal_lights_L);
   });
-
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  
-  //called when the url is not defined here, ajax-in; get-settings
-  tkr_web->server->onNotFound([this](AsyncWebServerRequest *request)
-  {
-    ALOG_ERR(PSTR("HTTP URI Not-Found: %s"), request->url());    
-    if (this->captivePortal(request)) return;
-
-    //make API CORS compatible
-    if (request->method() == HTTP_OPTIONS)
-    {
-      AsyncWebServerResponse *response = request->beginResponse(200);
-      response->addHeader(F("Access-Control-Max-Age"), F("7200"));
-      request->send(response);
-      return;
-    }
-    #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
-    ALOG_INF(PSTR("is it here?2"));
-    if(handle__HTTP__GET_QueryAPI(request, request->url())) return;
-    #endif
-    tkr_web->handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404_lights, PAGE_404_lights_length);
-  });
-
-  #endif // ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-
   
 }
 

@@ -128,7 +128,7 @@ uint8_t mTankVolume::ConstructJSON_Furnace(uint8_t json_level, bool json_appendi
 
 //   // #ifdef USE_MODULE_SENSORS_DS18X
 //   // for(int i=0;i<tkr_db18->db18_sensors_active;i++){
-//   //   if((tkr_db18->db18_sensor[i].reading.ischanged)||(pCONT->mqt->fSendSingleFunctionData)){
+//   //   if((tkr_db18->db18_sensor[i].reading.ischanged)||(tkr->mqt->fSendSingleFunctionData)){
 //   //     JsonObject sensorobj = root.createNestedObject(tkr_db18->db18_sensor[i].name.ctr);
 //   //     sensorobj["temp", tkr_db18->db18_sensor[i].reading.val;
 //   //     sensorobj["isvalid"]= tkr_db18->db18_sensor[i].reading.isvalid;
@@ -137,7 +137,7 @@ uint8_t mTankVolume::ConstructJSON_Furnace(uint8_t json_level, bool json_appendi
 //   // #endif
 
 // // #ifdef FURNACE_MONITOR_PIN
-// //   if(furnace_detect.ischanged||(pCONT->mqt->fSendSingleFunctionData)){ furnace_detect.ischanged = false;// TEMP FIX
+// //   if(furnace_detect.ischanged||(tkr->mqt->fSendSingleFunctionData)){ furnace_detect.ischanged = false;// TEMP FIX
 //     root["furnace_onoff", FURNACEACTIVECTR;//mdio_mqt->input_state_detect[0].isactive;
 //     root["furnace_state", FURNACEACTIVE()?1:0;//mdio_mqt->input_state_detect[0].isactive;
 //     // data_buffer.payload.json_pairs++;

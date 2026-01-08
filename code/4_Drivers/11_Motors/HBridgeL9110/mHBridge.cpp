@@ -183,7 +183,7 @@ void mHBridge::MoveMotorPulse(uint8_t direction, uint16_t milliseconds){
 //   // Check if instruction is for me
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/motor")>=0){
 //     ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
-//     pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+//     tkr->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   }else{
 //     return 0; // not meant for here
 //   }
@@ -199,28 +199,28 @@ void mHBridge::MoveMotorPulse(uint8_t direction, uint16_t milliseconds){
 
 //   uint8_t name_num=-1,state=-1;
 
-//   if(obj.containsKey("manual")){ //pCONT->mso->println("obj[\"manual\"] int");
+//   if(obj.containsKey("manual")){ //tkr->mso->println("obj[\"manual\"] int");
 //     const char* command = obj["manual"];
     
-//     if(strstr(command,"up")){  //pCONT->mso->println("MATCHED>> up");
+//     if(strstr(command,"up")){  //tkr->mso->println("MATCHED>> up");
 //       digitalWrite(pin_A_IA,LOW);
 //       digitalWrite(pin_A_IB,HIGH);
 //       delay(300);
 //       SetStop();
-//     }else if(strstr(command,"down")){ // pCONT->mso->println("MATCHED>> down");
+//     }else if(strstr(command,"down")){ // tkr->mso->println("MATCHED>> down");
 //       digitalWrite(pin_A_IA,HIGH);
 //       digitalWrite(pin_A_IB,LOW);
 //       delay(300);
 //       SetStop();
-//     }else if(strstr(command,"vals")){ //pCONT->mso->print("MATCHED>> vals");  
+//     }else if(strstr(command,"vals")){ //tkr->mso->print("MATCHED>> vals");  
 
 //       int motorspeed = obj["speed"];
 //       int motordirection = obj["direction"];
 //       int motorduration = obj["duration"];
 
-//       // pCONT->mso->print("speed = ");   pCONT->mso->println(motorspeed);  
-//       // pCONT->mso->print("direction = ");   pCONT->mso->println(motordirection);  
-//       // pCONT->mso->print("duration = ");   pCONT->mso->println(motorduration);  
+//       // tkr->mso->print("speed = ");   tkr->mso->println(motorspeed);  
+//       // tkr->mso->print("direction = ");   tkr->mso->println(motordirection);  
+//       // tkr->mso->print("duration = ");   tkr->mso->println(motorduration);  
 
 //       if(motordirection){
 //         SetMotorUp(motorspeed);
@@ -235,17 +235,17 @@ void mHBridge::MoveMotorPulse(uint8_t direction, uint16_t milliseconds){
 //     }
 
 //   }else 
-//   if(obj.containsKey("percentage")){// pCONT->mso->println("MATCHED>> obj[\"percentage\"]");
+//   if(obj.containsKey("percentage")){// tkr->mso->println("MATCHED>> obj[\"percentage\"]");
     
-//     // pCONT->mso->print("percentageBEFORE");
+//     // tkr->mso->print("percentageBEFORE");
 //     int percentage = obj["percentage"];
-//     // pCONT->mso->print("percentage=");
-//     // pCONT->mso->println(percentage);
+//     // tkr->mso->print("percentage=");
+//     // tkr->mso->println(percentage);
     
 //     // SetBlindPosition(percentage);    
     
 //   }else{
-//     // pCONT->mso->println("NOT obj[\"name\"] int");
+//     // tkr->mso->println("NOT obj[\"name\"] int");
 //   }
 
 

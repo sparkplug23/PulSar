@@ -84,7 +84,7 @@ void mDisplaysInterface::Pre_Init(void)
 {
   module_state.mode = ModuleStatus::Initialising;
   
-  pCONT->Tasker_Interface(TASK_DISPLAY_INIT_DRIVER);
+  tkr->Tasker_Interface(TASK_DISPLAY_INIT_DRIVER);
 
   #ifdef USE_MULTI_DISPLAY
     Set_display(0);
@@ -157,7 +157,7 @@ void mDisplaysInterface::Init(uint8_t mode) // this is not my normal init, move 
   }
   else {
     dsp_init = mode;
-    pCONT->Tasker_Interface(TASK_DISPLAY_INIT);
+    tkr->Tasker_Interface(TASK_DISPLAY_INIT);
   }
 }
 
@@ -177,7 +177,7 @@ void mDisplaysInterface::EveryLoop()
 
 void mDisplaysInterface::Clear(void)
 {
-  pCONT->Tasker_Interface(TASK_DISPLAY_CLEAR);
+  tkr->Tasker_Interface(TASK_DISPLAY_CLEAR);
 }
 
 void mDisplaysInterface::DrawStringAt(uint16_t x, uint16_t y, char *str, uint16_t color, uint8_t flag)
@@ -187,7 +187,7 @@ void mDisplaysInterface::DrawStringAt(uint16_t x, uint16_t y, char *str, uint16_
   dsp_str = str;
   dsp_color = color;
   dsp_flag = flag;
-  pCONT->Tasker_Interface(TASK_DISPLAY_DRAW_STRING);
+  tkr->Tasker_Interface(TASK_DISPLAY_DRAW_STRING);
 }
 
 void mDisplaysInterface::DisplayOnOff(uint8_t on)
@@ -335,7 +335,7 @@ void mDisplaysInterface::SetPower(void)
 
   if (tkr_set->Settings.display.model) {
     if (!renderer) {
-      pCONT->Tasker_Interface(TASK_DISPLAY_POWER);
+      tkr->Tasker_Interface(TASK_DISPLAY_POWER);
     } else {
       renderer->DisplayOnff(disp_power);
     }
@@ -345,7 +345,7 @@ void mDisplaysInterface::SetPower(void)
 
 
 // void DisplayReInitDriver(void) {
-//   pCONT->Tasker_Interface(TASK_DISPLAY_INIT_DRIVER);
+//   tkr->Tasker_Interface(TASK_DISPLAY_INIT_DRIVER);
 // #ifdef USE_MULTI_DISPLAY
 //   Set_display(0);
 // #endif // USE_MULTI_DISPLAY
@@ -1568,7 +1568,7 @@ void mDisplaysInterface::CommandSet_DisplayAddLog(const char* c)
   LogBuffer_Add((char*)c);
 
   // Change to flag method later, so this function will not be called for every command
-  pCONT->Tasker_Interface(TASK_DISPLAY_REFRESH_SHOW_ID);
+  tkr->Tasker_Interface(TASK_DISPLAY_REFRESH_SHOW_ID);
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),c);//D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
@@ -1616,7 +1616,7 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 //   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < DISPLAY_MAX_DRIVERS)) {
 //     uint32_t last_display_model = tkr_set->Settings.display.model;
 //     tkr_set->Settings.display.model = XdrvMailbox.payload;
-//     if (pCONT->Tasker_Interface(TASK_DISPLAY_MODEL)) {
+//     if (tkr->Tasker_Interface(TASK_DISPLAY_MODEL)) {
 //       tkr_set->runtime_var.restart_flag = 2;  // Restart to re-init interface and add/Remove MQTT subscribe
 //     } else {
 //       tkr_set->Settings.display.model = last_display_model;
@@ -1695,7 +1695,7 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 //     if (renderer) {
 //       renderer->dim(tkr_set->Settings.display.dimmer);
 //     } else {
-//       pCONT->Tasker_Interface(TASK_DISPLAY_DIM);
+//       tkr->Tasker_Interface(TASK_DISPLAY_DIM);
 //     }
 //   }
 //   ResponseCmndNumber(changeUIntScale(tkr_set->Settings.display.dimmer, 0, 15, 0, 100));
@@ -1796,7 +1796,7 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 // void CmndDisplayBlinkrate(void) {
 //   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 3)) {
 //     if (!renderer) {
-//       pCONT->Tasker_Interface(TASK_DISPLAY_BLINKRATE);
+//       tkr->Tasker_Interface(TASK_DISPLAY_BLINKRATE);
 //     }
 //   }
 //   ResponseCmndNumber(XdrvMailbox.payload);
@@ -1820,7 +1820,7 @@ void mDisplaysInterface::CmndDisplayText(const char* buffer) {
 //     DisplayText();
 // #else
 //     if(tkr_set->Settings.display.model == 15) {
-//       pCONT->Tasker_Interface(TASK_DISPLAY_SEVENSEG_TEXT);
+//       tkr->Tasker_Interface(TASK_DISPLAY_SEVENSEG_TEXT);
 //     } else if (!tkr_set->Settings.display.mode) {
 #ifdef ENABLE_DISPLAY_MODE_USER_TEXT_SERIALISED
       DisplayText(buffer);
@@ -1926,41 +1926,41 @@ void mDisplaysInterface::CommandSet_DisplayText_Advanced_JSON(JsonParserObject j
 
 // void CmndDisplayClear(void) {
 //   if (!renderer)
-//     pCONT->Tasker_Interface(TASK_DISPLAY_CLEAR);
+//     tkr->Tasker_Interface(TASK_DISPLAY_CLEAR);
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayNumber(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(TASK_DISPLAY_NUMBER);
+//     tkr->Tasker_Interface(TASK_DISPLAY_NUMBER);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayFloat(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(TASK_DISPLAY_FLOAT);
+//     tkr->Tasker_Interface(TASK_DISPLAY_FLOAT);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayNumberNC(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(TASK_DISPLAY_NUMBERNC);
+//     tkr->Tasker_Interface(TASK_DISPLAY_NUMBERNC);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayFloatNC(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(TASK_DISPLAY_FLOATNC);
+//     tkr->Tasker_Interface(TASK_DISPLAY_FLOATNC);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayRaw(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(TASK_DISPLAY_RAW);
+//     tkr->Tasker_Interface(TASK_DISPLAY_RAW);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
@@ -1968,42 +1968,42 @@ void mDisplaysInterface::CommandSet_DisplayText_Advanced_JSON(JsonParserObject j
 // void CmndDisplayLevel(void) {
 //   bool result = false;
 //   if (!renderer) {
-//     result = pCONT->Tasker_Interface(TASK_DISPLAY_LEVEL);
+//     result = tkr->Tasker_Interface(TASK_DISPLAY_LEVEL);
 //   }
 //   if(result) ResponseCmndNumber(XdrvMailbox.payload);
 // }
 
 // void CmndDisplaySevensegText(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(TASK_DISPLAY_SEVENSEG_TEXT);
+//     tkr->Tasker_Interface(TASK_DISPLAY_SEVENSEG_TEXT);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayTextNC(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(TASK_DISPLAY_SEVENSEG_TEXTNC);
+//     tkr->Tasker_Interface(TASK_DISPLAY_SEVENSEG_TEXTNC);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplaySevensegTextNC(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(TASK_DISPLAY_SEVENSEG_TEXTNC);
+//     tkr->Tasker_Interface(TASK_DISPLAY_SEVENSEG_TEXTNC);
 //   }
 //   ResponseCmndChar(XdrvMailbox.data);
 // }
 
 // void CmndDisplayScrollDelay(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(TASK_DISPLAY_SCROLLDELAY);
+//     tkr->Tasker_Interface(TASK_DISPLAY_SCROLLDELAY);
 //   }
 //   ResponseCmndNumber(XdrvMailbox.payload);
 // }
 
 // void CmndDisplayClock(void) {
 //   if (!renderer) {
-//     pCONT->Tasker_Interface(TASK_DISPLAY_CLOCK);
+//     tkr->Tasker_Interface(TASK_DISPLAY_CLOCK);
 //   }
 //   ResponseCmndNumber(XdrvMailbox.payload);
 // }
@@ -2011,7 +2011,7 @@ void mDisplaysInterface::CommandSet_DisplayText_Advanced_JSON(JsonParserObject j
 // void CmndDisplayScrollText(void) {
 //   bool result = false;
 //   if (!renderer) {
-//     result = pCONT->Tasker_Interface(TASK_DISPLAY_SCROLLTEXT);
+//     result = tkr->Tasker_Interface(TASK_DISPLAY_SCROLLTEXT);
 //   }
 //   if(result) ResponseCmndChar(XdrvMailbox.data);
 // }

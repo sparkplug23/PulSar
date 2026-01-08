@@ -105,13 +105,14 @@ void mWebServer::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte s
   {
   #define WLED_MAX_WIFI_COUNT 3
     
-    #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_WIFI
   // -----------------------------------------------------------------------------
 // WIFI SETTINGS (DUMMY PARSE) : Log incoming POST args only, do not apply/save
 // Date Modified: 02Jan26
 // -----------------------------------------------------------------------------
 {
   ALOG_INF(PSTR("---- WIFI SETTINGS (dummy parse) ----"));
+
+  ALOG_INF(PSTR("in here later, if new SSID/PW list DOES NOT MATCH what has been stored, a flag must be set to cause a device reset to enable STA connection"));
 
   // Helper for presence/checkbox-type fields (WLED checkboxes are typically presence-based)
   ALOG_INF(PSTR("hasArg(FG) Force 802.11g (ESP8266)    = %d"), request->hasArg(F("FG")) ? 1 : 0);
@@ -305,7 +306,7 @@ void mWebServer::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte s
     ethernetType = request->arg(F("ETH")).toInt();
     initEthernet();
     #endif
-    #endif // ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_WIFI
+    
   }
 
   //LED SETTINGS
@@ -1016,15 +1017,15 @@ void mWebServer::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte s
   }
   #endif
 
-  tkr_anim->lastEditTime = millis();
+  lastEditTime = millis();
   // do not save if factory reset or LED settings (which are saved after LED re-init)
-  tkr_anim->doSerializeConfig = subPage != SUBPAGE_LEDS && !(subPage == SUBPAGE_SEC && tkr_anim->doReboot);
-  if (subPage == SUBPAGE_UM) tkr_anim->doReboot = request->hasArg(F("RBT")); // prevent race condition on dual core system (set reboot here, after doSerializeConfig has been set)
-  #ifndef WLED_DISABLE_ALEXA
-  #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_SYNC
-  if (subPage == SUBPAGE_SYNC) alexaInit();
-  #endif
-  #endif
+  // tkr_anim->doSerializeConfig = subPage != SUBPAGE_LEDS && !(subPage == SUBPAGE_SEC && tkr_anim->doReboot);
+  // if (subPage == SUBPAGE_UM) tkr_anim->doReboot = request->hasArg(F("RBT")); // prevent race condition on dual core system (set reboot here, after doSerializeConfig has been set)
+  // #ifndef WLED_DISABLE_ALEXA
+  // #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_SYNC
+  // if (subPage == SUBPAGE_SYNC) alexaInit();
+  // #endif
+  // #endif
 }
 
 

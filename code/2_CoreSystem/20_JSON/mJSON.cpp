@@ -98,6 +98,85 @@ void JsonBuilder::Add<float>(const char* key, float value) {
 #endif // ENABLE_DEVFEATURE_MJSON__FLOAT_SPECIALIZATION
 
 
+
+
+
+
+//threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
+// bool mAnimatorLight::requestJSONBufferLock(uint16_t module)
+// {
+//   unsigned long now = millis();
+
+//   // This assumption here is another http thread must release itself to permit this function to proceed
+//   while (jsonBufferLock && millis()-now < 1000) delay(1); // wait for a second for buffer lock
+
+//   if (millis()-now >= 1000) {
+//     // DEBUG_PRINT(F("ERROR: Locking JSON buffer failed! ("));
+//     // DEBUG_PRINT(jsonBufferLock);
+//     // DEBUG_PRINTLN(")");
+//     return false; // waiting time-outed
+//   }
+
+//   jsonBufferLock = module ? module : 255;
+//   // DEBUG_PRINT(F("LOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOCKED    JSON buffer locked. ("));
+//   // DEBUG_PRINT(jsonBufferLock);
+//   // DEBUG_PRINTLN(")");
+//   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+//   // tkr_mfile->gDoc = &doc;  // used for applying presets (presets.cpp)
+//   tkr_mfile->pDoc->clear();
+//   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+//   return true;
+// }
+//threading/network callback details: https://github.com/wled-dev/WLED/pull/2336#discussion_r762276994
+bool JsonBuilder::requestJSONBufferLock(uint16_t moduleID)
+{
+  if (tkr_mfile->pDoc == nullptr) {
+    DEBUG_PRINTLN(F("ERROR: JSON buffer not allocated!"));
+    return false;
+  }
+
+#if defined(ARDUINO_ARCH_ESP32)
+  // Use a recursive mutex type in case our task is the one holding the JSON buffer.
+  // This can happen during large JSON web transactions.  In this case, we continue immediately
+  // and then will return out below if the lock is still held.
+  if (xSemaphoreTakeRecursive(tkr_mfile->jsonBufferLockMutex, 250) == pdFALSE) return false;  // timed out waiting
+#elif defined(ARDUINO_ARCH_ESP8266)
+  // If we're in system context, delay() won't return control to the user context, so there's
+  // no point in waiting.
+  if (can_yield()) {
+    unsigned long now = millis();
+    while (jsonBufferLock && (millis()-now < 250)) delay(1); // wait for fraction for buffer lock
+  }
+#else
+  #error Unsupported task framework - fix requestJSONBufferLock
+#endif  
+  // If the lock is still held - by us, or by another task
+  if (jsonBufferLock) {
+    DEBUG_PRINTF_P(PSTR("ERROR: Locking JSON buffer (%d) failed! (still locked by %d)\n"), moduleID, jsonBufferLock);
+#ifdef ARDUINO_ARCH_ESP32
+    xSemaphoreGiveRecursive(tkr_mfile->jsonBufferLockMutex);
+#endif
+    return false;
+  }
+
+  jsonBufferLock = moduleID ? moduleID : 255;
+  DEBUG_PRINTF_P(PSTR("JSON locked (%d)\n\r"), jsonBufferLock);
+  tkr_mfile->pDoc->clear();
+  return true;
+}
+
+void  JsonBuilder::releaseJSONBufferLock()
+{
+  DEBUG_PRINTF_P(PSTR("JSON released (%d)\n\r"), jsonBufferLock);
+  jsonBufferLock = 0;
+#ifdef ARDUINO_ARCH_ESP32
+  xSemaphoreGiveRecursive(tkr_mfile->jsonBufferLockMutex);
+#endif  
+}
+
+
+
+
 void JsonBuilder::Write(const char* buff)
 {
   if(writer.buffer == nullptr) { return; }  

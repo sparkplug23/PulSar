@@ -37,7 +37,7 @@ static const char* getPresetsMetaFileName() { //likely not needed, do direct lat
 // Load metadata from /presets_meta.json
 bool mAnimatorLight::LoadPresetFileMeta(PresetFileMeta &meta)
 {
-  if (!requestJSONBufferLock(21)) {
+  if (!JBI->requestJSONBufferLock(21)) {
     ALOG_WRN(PSTR("LoadPresetFileMeta: failed to get JSON buffer lock"));
     return false;
   }
@@ -53,14 +53,14 @@ bool mAnimatorLight::LoadPresetFileMeta(PresetFileMeta &meta)
     meta.enablePsn     = true;
     meta.parserVersion = kPresetMetaParserVersion;
     meta.lastScanMs    = 0;
-    releaseJSONBufferLock();
+    JBI->releaseJSONBufferLock();
     return false;
   }
 
   File f = FILE_SYSTEM.open(fname, "r");
   if (!f) {
     ALOG_WRN(PSTR("LoadPresetFileMeta: failed to open %s"), fname);
-    releaseJSONBufferLock();
+    JBI->releaseJSONBufferLock();
     return false;
   }
 
@@ -69,7 +69,7 @@ bool mAnimatorLight::LoadPresetFileMeta(PresetFileMeta &meta)
 
   if (err) {
     ALOG_WRN(PSTR("LoadPresetFileMeta: JSON parse error (%d)"), (int)err.code());
-    releaseJSONBufferLock();
+    JBI->releaseJSONBufferLock();
     return false;
   }
 
@@ -80,14 +80,14 @@ bool mAnimatorLight::LoadPresetFileMeta(PresetFileMeta &meta)
   meta.parserVersion          = (uint8_t)(m["ParserVersion"]       | kPresetMetaParserVersion);
   meta.lastScanMs             = (uint32_t)(m["LastScanMs"]         | 0U);
 
-  releaseJSONBufferLock();
+  JBI->releaseJSONBufferLock();
   return true;
 }
 
 // Save metadata into /presets_meta.json
 bool mAnimatorLight::SavePresetFileMeta(const PresetFileMeta &meta)
 {
-  if (!requestJSONBufferLock(22)) {
+  if (!JBI->requestJSONBufferLock(22)) {
     ALOG_WRN(PSTR("SavePresetFileMeta: failed to get JSON buffer lock"));
     return false;
   }
@@ -107,7 +107,7 @@ bool mAnimatorLight::SavePresetFileMeta(const PresetFileMeta &meta)
   File f = FILE_SYSTEM.open(fname, "w");
   if (!f) {
     ALOG_WRN(PSTR("SavePresetFileMeta: failed to open %s for write"), fname);
-    releaseJSONBufferLock();
+    JBI->releaseJSONBufferLock();
     return false;
   }
 
@@ -116,12 +116,12 @@ bool mAnimatorLight::SavePresetFileMeta(const PresetFileMeta &meta)
 
   if (written == 0) {
     ALOG_WRN(PSTR("SavePresetFileMeta: serializeJson wrote 0 bytes"));
-    releaseJSONBufferLock();
+    JBI->releaseJSONBufferLock();
     return false;
   }
 
   tkr_mfile->updateFSInfo();
-  releaseJSONBufferLock();
+  JBI->releaseJSONBufferLock();
   return true;
 }
 
@@ -299,7 +299,7 @@ void mAnimatorLight::doSaveState()
   bool persist = (presetToSave < 251);
   const char *filename = getPresetsFileName(persist);
   
-  if (!requestJSONBufferLock(10)) return; // will set gDoc
+  if (!JBI->requestJSONBufferLock(10)) return; // will set gDoc
 
   initPresetsFile(); // just in case if someone deleted presets.json using /edit
 
@@ -387,7 +387,7 @@ void mAnimatorLight::doSaveState()
   
   
 
-  releaseJSONBufferLock();
+  JBI->releaseJSONBufferLock();
 
   
 
@@ -413,7 +413,7 @@ void mAnimatorLight::doSaveState()
 bool mAnimatorLight::getPresetName(byte index, String& name)
 {
 
-  if (!requestJSONBufferLock(9))
+  if (!JBI->requestJSONBufferLock(9))
   {
     ALOG_INF(PSTR("getPresetName() failed to get JSON buffer lock"));
     return false;  
@@ -428,7 +428,7 @@ bool mAnimatorLight::getPresetName(byte index, String& name)
       presetExists = true;
     }
   }
-  releaseJSONBufferLock();
+  JBI->releaseJSONBufferLock();
   return presetExists;
 
 }
@@ -507,7 +507,7 @@ void mAnimatorLight::SubTask_Presets()
     return;
   }
 
-  if (presetToApply == 0 || !requestJSONBufferLock(9))
+  if (presetToApply == 0 || !JBI->requestJSONBufferLock(9))
   {
     // ALOG_INF(PSTR("(presetToApply == 0 || gDoc)()"));    
     return; // no preset waiting to apply, or JSON buffer is already allocated, return to loop until free
@@ -587,7 +587,7 @@ void mAnimatorLight::SubTask_Presets()
     AddLog(level, PSTR(D_LOG_LIGHT "My parser payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
     #endif// ENABLE_LOG_LEVEL_INFO
 
-    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+    tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
     data_buffer.releaseLock();
 
@@ -639,7 +639,7 @@ void mAnimatorLight::SubTask_Presets()
 
   
 
-  releaseJSONBufferLock(); // will also clear gDoc
+  JBI->releaseJSONBufferLock(); // will also clear gDoc
 
   if (changePreset) notify(tmpMode); // force UDP notification
 

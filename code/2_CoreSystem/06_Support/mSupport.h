@@ -549,6 +549,19 @@ public:
     bool NewerVersion(char* version_str);
     #endif
     
+    void EspRestart(void);
+
+    int8_t restart_delayed_seconds_ticks = -1;
+    void ESP_Restart_InSeconds(int8_t seconds = 1){ restart_delayed_seconds_ticks = seconds; }
+    bool ESP_Restart_Scheduled(){ return (bool)(restart_delayed_seconds_ticks > -1); }
+    void ESP_Restart_Safe();
+    void ESP_Restart_Immediate();
+
+
+
+
+
+
     float ModulusRangef(float f, float a, float b);
     double FastPrecisePow(double a, double b);
     float FastPrecisePowf(const float x, const float y);

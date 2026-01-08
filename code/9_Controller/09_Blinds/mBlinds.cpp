@@ -63,7 +63,7 @@ int8_t mBlinds::CheckAndExecute_JSONCommands(JsonObjectConst obj){
   // Check if instruction is for me
   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/blinds")>=0){
       ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CONTROLLER_BLINDS_FRIENDLY_CTR));
-      pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+      tkr->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parsesub_TopicCheck_JSONCommand(obj);
       return FUNCTION_RESULT_HANDLED_ID;
   }else{
@@ -75,54 +75,54 @@ int8_t mBlinds::CheckAndExecute_JSONCommands(JsonObjectConst obj){
 void mBlinds::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
   // for(int j=0;j<data_buffer.payload.len;j++){
-  //   pCONT->mso->MessagePrintchar(data_buffer.payload.ctr[j]);
+  //   tkr->mso->MessagePrintchar(data_buffer.payload.ctr[j]);
   // }
 
-  // pCONT->mso->println();
-  // pCONT->mso->print("\tiTOPIC[len:");
-  // pCONT->mso->print(data_buffer.topic.len);
-  // pCONT->mso->print("]> ");
-  // pCONT->mso->print(data_buffer.topic.ctr);
-  // pCONT->mso->println();
-  // pCONT->mso->print("\tiPAYLOAD[len:");
-  // pCONT->mso->print(data_buffer.payload.len);
-  // pCONT->mso->print("]> ");
-  // pCONT->mso->print(data_buffer.payload.ctr);  
-  // pCONT->mso->println();
+  // tkr->mso->println();
+  // tkr->mso->print("\tiTOPIC[len:");
+  // tkr->mso->print(data_buffer.topic.len);
+  // tkr->mso->print("]> ");
+  // tkr->mso->print(data_buffer.topic.ctr);
+  // tkr->mso->println();
+  // tkr->mso->print("\tiPAYLOAD[len:");
+  // tkr->mso->print(data_buffer.payload.len);
+  // tkr->mso->print("]> ");
+  // tkr->mso->print(data_buffer.payload.ctr);  
+  // tkr->mso->println();
 
-  // pCONT->mso->println();
-  // pCONT->mso->print("\tpTOPIC[len:");
-  // pCONT->mso->print("]> ");
-  // //pCONT->mso->print(topic);
-  // pCONT->mso->println();
-  // pCONT->mso->print("\tpPAYLOAD[len:");
-  // pCONT->mso->print("]> ");
-  // pCONT->mso->print(payload);  
-  // pCONT->mso->println();
+  // tkr->mso->println();
+  // tkr->mso->print("\tpTOPIC[len:");
+  // tkr->mso->print("]> ");
+  // //tkr->mso->print(topic);
+  // tkr->mso->println();
+  // tkr->mso->print("\tpPAYLOAD[len:");
+  // tkr->mso->print("]> ");
+  // tkr->mso->print(payload);  
+  // tkr->mso->println();
 
-//  pCONT->mqt->publish_device("payload/mrelays",data_buffer.payload.ctr,false);
+//  tkr->mqt->publish_device("payload/mrelays",data_buffer.payload.ctr,false);
 
   uint8_t name_num=-1,state=-1;
 
-  if(obj.containsKey("manual")){ //pCONT->mso->println("obj[\"manual\"] int");
+  if(obj.containsKey("manual")){ //tkr->mso->println("obj[\"manual\"] int");
     const char* command = obj["manual"];
     
-    if(strstr(command,"up")){  //pCONT->mso->println("MATCHED>> up");
+    if(strstr(command,"up")){  //tkr->mso->println("MATCHED>> up");
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BLINDS "Matched %s"),"UP");
-      pCONT->mdhb->MoveMotorPulse(1,300);// 1=up,300ms
-    }else if(strstr(command,"down")){  //pCONT->mso->println("MATCHED>> down");
+      tkr->mdhb->MoveMotorPulse(1,300);// 1=up,300ms
+    }else if(strstr(command,"down")){  //tkr->mso->println("MATCHED>> down");
       AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BLINDS "Matched %s"),"DOWN");
-      pCONT->mdhb->MoveMotorPulse(0,300);// 1=up,300ms
+      tkr->mdhb->MoveMotorPulse(0,300);// 1=up,300ms
     }
-    // else if(strstr(command,"vals")){ pCONT->mso->print("MATCHED>> vals");  
+    // else if(strstr(command,"vals")){ tkr->mso->print("MATCHED>> vals");  
 
     //   // int motorspeed = obj["speed"];
     //   // int motordirection = obj["direction"];
     //   // int motorduration = obj["duration"];
 
-    //   // pCONT->mso->print("speed = ");   pCONT->mso->println(motorspeed);  
-    //   // pCONT->mso->print("direction = ");   pCONT->mso->println(motordirection);  
-    //   // pCONT->mso->print("duration = ");   pCONT->mso->println(motorduration);  
+    //   // tkr->mso->print("speed = ");   tkr->mso->println(motorspeed);  
+    //   // tkr->mso->print("direction = ");   tkr->mso->println(motordirection);  
+    //   // tkr->mso->print("duration = ");   tkr->mso->println(motorduration);  
 
     //   // if(motordirection){
     //   //   SetMotorUp(motorspeed);
@@ -138,18 +138,18 @@ void mBlinds::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
 
   }
   // else 
-  // if(obj.containsKey("percentage")){ pCONT->mso->println("MATCHED>> obj[\"percentage\"]");
+  // if(obj.containsKey("percentage")){ tkr->mso->println("MATCHED>> obj[\"percentage\"]");
     
-  //   pCONT->mso->print("percentageBEFORE");
+  //   tkr->mso->print("percentageBEFORE");
   //   int percentage = obj["percentage"];
-  //   pCONT->mso->print("percentage=");
-  //   pCONT->mso->println(percentage);
+  //   tkr->mso->print("percentage=");
+  //   tkr->mso->println(percentage);
     
   //   SetBlindPosition(percentage);    
     
   // }
   else{
-    // pCONT->mso->println("NOT obj[\"name\"] int");
+    // tkr->mso->println("NOT obj[\"name\"] int");
   }
 
 
@@ -167,11 +167,11 @@ void mBlinds::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
   Serial.println(mpt->payload.len);
 
   for(int j=0;j<data_buffer.payload.len;j++){
-    pCONT->mso->MessagePrintchar(data_buffer.payload.ctr[j]);
+    tkr->mso->MessagePrintchar(data_buffer.payload.ctr[j]);
   }
 
-  pCONT->mqt->publish_device("results/topic",data_buffer.topic.ctr,false);
-  pCONT->mqt->publish_device("results/payload",data_buffer.payload.ctr,false);
+  tkr->mqt->publish_device("results/topic",data_buffer.topic.ctr,false);
+  tkr->mqt->publish_device("results/payload",data_buffer.payload.ctr,false);
 
   uint8_t name_num=-1,state=-1;
 
@@ -180,7 +180,7 @@ void mBlinds::parsesub_TopicCheck_JSONCommand(JsonObjectConst obj){
   Serial.print(data_buffer.payload.ctr);
 
 
-// Serial.print("topic>> "); Serial.println(pCONT->mqt->mqqt_mqt->mpkt.topic.ctr);
+// Serial.print("topic>> "); Serial.println(tkr->mqt->mqqt_mqt->mpkt.topic.ctr);
 // Serial.print("Payload>> "); Serial.println(data_buffer.payload.ctr);
 
 
@@ -221,7 +221,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
   //if onoff set, remember change mode, or set via mode
 
   // fan.ischanged=true;
-  //pCONT->mso->MessagePrint("[MATCHED] fan.ischanged to onoff = ");pCONT->mso->MessagePrintln(onoff);
+  //tkr->mso->MessagePrint("[MATCHED] fan.ischanged to onoff = ");tkr->mso->MessagePrintln(onoff);
 
 
 }
@@ -347,7 +347,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 // void mBlinds::MQQTSendFanStatus(void){
 //     ConstructJSON_FanStatus();
 //     if(data_buffer.payload.len){ // if something to send
-//       pCONT->mqt->publish_device("status/blinds", data_buffer.payload.ctr,false);
+//       tkr->mqt->publish_device("status/blinds", data_buffer.payload.ctr,false);
 //     }
 // }
 // void mBlinds::ConstructJSON_FanStatus(){
@@ -399,7 +399,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 //   serializeJson(doc,data_buffer.payload.ctr);
 
 //   if(data_buffer.payload.len){ // if something to send
-//     pCONT->mqt->publish_device("status/event/blinds", data_buffer.payload.ctr,false);
+//     tkr->mqt->publish_device("status/event/blinds", data_buffer.payload.ctr,false);
 //   }
 
 // }
@@ -419,7 +419,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 //   serializeJson(doc,data_buffer.payload.ctr);
 
 //   if(data_buffer.payload.len){ // if something to send
-//     pCONT->mqt->publish_device("status/event/blinds", data_buffer.payload.ctr,false);
+//     tkr->mqt->publish_device("status/event/blinds", data_buffer.payload.ctr,false);
 //   }
 
 // }
@@ -459,7 +459,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 //   serializeJson(doc,data_buffer.payload.ctr);
 
 //   if(data_buffer.payload.len){ // if something to send
-//     pCONT->mqt->publish_device("status/blinds", data_buffer.payload.ctr,false);
+//     tkr->mqt->publish_device("status/blinds", data_buffer.payload.ctr,false);
 //   }
 
 // }
@@ -532,22 +532,22 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 //   digitalWrite(BLINDS_MOTOR_IB_PIN,LOW);
 // }
 
-// void mBlinds::SetBlindPosition(uint8_t percentage){ pCONT->mso->println("f::SetBlindPosition");
+// void mBlinds::SetBlindPosition(uint8_t percentage){ tkr->mso->println("f::SetBlindPosition");
 
 //   int max_time = 7000;
 //   uint32_t tSaved = millis();
 //   float pos_now = 0;
 //   float pos_error = 0;
 
-//     pCONT->mso->println("pos_now\tpos_error\t");
+//     tkr->mso->println("pos_now\tpos_error\t");
 //   // Limit motor on time
 //   do{
 
 //     pos_now = PositionPercentage();
 //     pos_error = pos_now - percentage;
 
-//     pCONT->mso->print(pos_now); pCONT->mso->print("\t");
-//     pCONT->mso->print(pos_error); pCONT->mso->println("\t");
+//     tkr->mso->print(pos_now); tkr->mso->print("\t");
+//     tkr->mso->print(pos_error); tkr->mso->println("\t");
 
 //     //end within limit
 //     if(fabs(pos_error)<BLINDS_PERCENTAGE_ACCURACY){
@@ -597,7 +597,7 @@ if(mSupport::mSearchCtrIndexOf(data_buffer.payload.ctr,"test2")>=0){
 //   // Check if instruction is for me
 //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/blinds")>=0){
 //       ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_BLINDS));
-//       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+//       tkr->fExitTaskerWithCompletion = true; // set true, we have found our handler
 //   }else{
 //     return 0; // not meant for here
 //   }

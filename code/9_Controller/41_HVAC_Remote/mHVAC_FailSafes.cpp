@@ -42,7 +42,7 @@ return;
   //   //   obj[D_MESSAGE] = tmpctr;
   //   //   data_buffer.payload.len = measureJson(obj)+1;
   //   //   serializeJson(doc,data_buffer.payload.ctr);
-  //   //   pCONT->mqt->publish_device("status/alert",data_buffer.payload.ctr,false);
+  //   //   tkr->mqt->publish_device("status/alert",data_buffer.payload.ctr,false);
   //   // }
   }
 

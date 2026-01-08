@@ -152,7 +152,7 @@ uint8_t mEnergyInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_app
     /**
      * @brief Check by sensor reported type
      **/
-    for(auto& pmod:pCONT->pModule)
+    for(auto& pmod:tkr->pModule)
     {
       if( IS_MODULE_ENERGY_SUBMODULE( pmod->GetModuleUniqueID() ) )
       {
@@ -929,7 +929,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //   if (!data_valid) {
 //     if (!isnan(Energy.export_active)) { Energy.export_active = 0; }
 //     Energy.start_energy = 0;
-//     pCONT->Tasker_Interface(TASK_ENERGY_RESET);
+//     tkr->Tasker_Interface(TASK_ENERGY_RESET);
 //   }
 
 //   // #ifdef USE_ENERGY_MARGIN_DETECTION
@@ -1085,7 +1085,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 // // 	// {
 // // 	// 	JBI->Start();
 
-// // 	// 	pCONT->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
+// // 	// 	tkr->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
 
 // // 	// 	bool ready_to_send = JBI->End();
 

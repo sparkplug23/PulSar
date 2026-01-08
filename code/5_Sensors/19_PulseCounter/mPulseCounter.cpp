@@ -204,7 +204,7 @@ void mPulseCounter::EveryLoop(){
     if(Change_Detected(sensor_id)!=sensor[sensor_id].instant.state){
   // AddLog(LOG_LEVEL_DEV_TEST,PSTR(D_LOG_PIR "PIR %s %d"),"Change_Detected_Ctr(sensor_id)",sensor_id);
       //if(tkr_time->RtcTime.seconds_nonreset<20){ break; }
-      // pCONT->mqt->publish_device("status/motion/event",Change_Detected_Ctr(sensor_id),false);
+      // tkr->mqt->publish_device("status/motion/event",Change_Detected_Ctr(sensor_id),false);
 
       sensor[sensor_id].instant.state = Change_Detected(sensor_id);
 
@@ -421,7 +421,7 @@ for(uint8_t sensor_id=0;sensor_id<fSensorCount;sensor_id++){
   
 
 
-  //if(ischanged||pCONT->mqt->fSendAllData||pCONT->mqt->fSendSingleFunctionData){
+  //if(ischanged||tkr->mqt->fSendAllData||tkr->mqt->fSendSingleFunctionData){
     if(sensor[sensor_id].instant.isvalid){
       JsonObject sens1 = root.createNestedObject(name_buffer_tmp);//sensor[sensor_id].name_ptr);
       sens1["rise_ms"] = sensor[sensor_id].instant.timing_rise_ms;
@@ -543,7 +543,7 @@ void mPulseCounter::MQTTHandler_Sender(uint8_t mqtt_handler_id){
     } // switch
 
     // Pass handlers into command to test and (ifneeded) execute
-    if(handler_found){ pCONT->mqt->MQTTHandler_Comm and(*this,D_MODULE_SENSORS_PULSECOUNTER_ID,ptr); }
+    if(handler_found){ tkr->mqt->MQTTHandler_Comm and(*this,D_MODULE_SENSORS_PULSECOUNTER_ID,ptr); }
     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
 
     // stop searching

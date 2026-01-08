@@ -54,6 +54,13 @@ int8_t mInterfaceNetwork::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
+
+// network hooks for others
+    case TASK_WIFI_CONNECTED:
+    case TASK_ETHERNET_CONNECTED:
+      tkr->Tasker_Interface(TASK_NETWORK_CONNECTED);
+    break;
+
     /************
      * MQTT SECTION * 
     *******************/
@@ -99,6 +106,58 @@ void mInterfaceNetwork::EveryLoop()
 
 }
 
+bool mInterfaceNetwork::Network_HasLocalConnectivity(void)
+{
+  bool local = false;
+
+  // ---- WiFi ----
+  #ifdef USE_MODULE_NETWORK_WIFI
+  if (tkr_wifi)
+  {
+    local |= tkr_wifi->WiFi_HasLocalConnectivity();
+  }
+  #endif
+
+  // ---- Ethernet (future) ----
+  #ifdef USE_MODULE_NETWORK_ETHERNET
+  // local |= tkr_eth->Eth_HasLocalConnectivity();
+  #endif
+
+  return local;
+}
+
+bool mInterfaceNetwork::Network_HasExternalConnectivity(void)
+{
+  bool external = false;
+
+  // ---- WiFi ----
+  #ifdef USE_MODULE_NETWORK_WIFI
+  if (tkr_wifi)
+  {
+    external |= tkr_wifi->WiFi_HasExternalConnectivity();
+  }
+  #endif
+
+  // ---- Ethernet (future) ----
+  #ifdef USE_MODULE_NETWORK_ETHERNET
+  // external |= tkr_eth->Eth_HasExternalConnectivity();
+  #endif
+
+  return external;
+}
+
+bool mInterfaceNetwork::Network_IsLocalOnly(void)
+{
+  // Local-only means:
+  //  - some local connectivity exists, AND
+  //  - no external connectivity exists
+  bool local    = Network_HasLocalConnectivity();
+  bool external = Network_HasExternalConnectivity();
+
+  return (local && !external);
+}
+
+
 /**
  * @brief Probably not to be used for mqtt, as the socket can now be checked within instance
  * Adding a debug message so I know its being called, though it will be used later as general connection agent
@@ -116,7 +175,7 @@ bool mInterfaceNetwork::Connected(uint8_t type)
     (type == NETWORK_TYPE_WIFI) ||
     (type == NETWORK_TYPE_ANY)
   ){
-    if(tkr_wifi->WifiCheckIpConnected())
+    if(tkr_wifi->WiFi_Link_IsIpRoutable())
     {
       return true;
     }

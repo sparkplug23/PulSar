@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="theme-color" content="#222222">
+<title>PulSar Console</title>
+
+<style>
+  /* Date Modified: 08Jan26 */
+  :root{
+    --bg:#141414;
+    --panel:#1d1d1d;
+    --border:#333;
+    --text:#e6e6e6;
+    --muted:#a8a8a8;
+    --btn:#2a2a2a;
+    --btn2:#3a3a3a;
+    --accent:#4da3ff;
+    --danger:#ff5c5c;
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Segoe UI,Roboto,Arial,sans-serif;}
+  .top{
+    position:fixed;left:0;right:0;top:0;
+    display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+    padding:8px 10px;background:var(--panel);border-bottom:1px solid var(--border);
+    z-index:10;
+  }
+  .top .sp{flex:1}
+  button{
+    background:var(--btn);color:var(--text);
+    border:1px solid var(--border);border-radius:6px;
+    padding:7px 10px;font-size:14px;cursor:pointer;
+  }
+  button:hover{background:var(--btn2)}
+  button:active{transform:translateY(1px)}
+  button.danger{border-color:#552222;background:#2a1717}
+  button.danger:hover{background:#3a2020}
+  .pill{
+    border:1px solid var(--border);border-radius:999px;
+    padding:6px 10px;font-size:12px;color:var(--muted);
+    background:#101010;
+    white-space:nowrap;
+  }
+  .main{
+    position:fixed;left:0;right:0;top:58px;bottom:54px;
+    padding:10px;
+  }
+  #log{
+    width:100%;height:100%;
+    box-sizing:border-box;
+    background:#0f0f0f;color:var(--text);
+    border:1px solid var(--border);border-radius:8px;
+    padding:10px;
+    font-family:Consolas,Menlo,Monaco,monospace;
+    font-size:12px;line-height:1.35;
+    white-space:pre-wrap;word-break:break-word;
+    overflow:auto;
+  }
+  .bottom{
+    position:fixed;left:0;right:0;bottom:0;
+    display:flex;gap:8px;align-items:center;
+    padding:8px 10px;background:var(--panel);border-top:1px solid var(--border);
+  }
+  #cmd{
+    flex:1;
+    background:#0f0f0f;color:var(--text);
+    border:1px solid var(--border);border-radius:8px;
+    padding:9px 10px;font-size:14px;
+    outline:none;
+  }
+  #cmd::placeholder{color:#777}
+  .hint{color:var(--muted);font-size:12px}
+  .chk{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;user-select:none}
+  input[type="checkbox"]{width:16px;height:16px}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+  <button id="btnRefresh">Refresh</button>
+  <button id="btnClear" class="danger">Clear</button>
+  <button id="btnClearHist">Clear Cmd History</button>
+
+  <label class="chk"><input id="chkScroll" type="checkbox" checked>Scroll</label>
+
+  <span class="pill" id="stat">idx:0, last:—</span>
+  <span class="sp"></span>
+  <span class="hint" id="urlHint"></span>
+</div>
+
+<div class="main">
+  <div id="log"></div>
+</div>
+
+<div class="bottom">
+  <input id="cmd" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+         placeholder="Command, e.g. status, restart, loglevel 3 ...">
+  <button id="btnSend">Send</button>
+</div>
+
+<script>
+/* Date Modified: 08Jan26 */
+
+/**
+ * Endpoint:
+ * - If served at /console it will call /console?c2=...
+ * - If served at /dev/console it will call /dev/console?c2=...
+ */
+let CONSOLE_URL = location.pathname || "/console";
+
+/**
+ * Protocol: GET ?c2=<counter> returns:
+ *   <web_log_index>}1<reset_flag>}1<log lines...>}1
+ *
+ * Always polls at 1 Hz.
+ */
+let counter = 0;
+
+// one in-flight request only (prevents stacking / hammering)
+let inflight = false;
+
+// fixed poll timer id
+let pollIntervalId = 0;
+
+const elLog  = document.getElementById("log");
+const elCmd  = document.getElementById("cmd");
+const elStat = document.getElementById("stat");
+const elHint = document.getElementById("urlHint");
+
+const chkScroll = document.getElementById("chkScroll");
+
+/* -----------------------------
+   Command history (persisted)
+------------------------------ */
+const HISTORY_KEY = "pulsarConsoleHistory";
+const HISTORY_MAX = 20;
+
+const hc = [];   // history commands (most recent first)
+let cn = 0;      // 0 means "no history selected"
+
+function historyLoad(){
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (!raw) return;
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return;
+    hc.length = 0;
+    for (const s of arr) {
+      if (typeof s === "string" && s.trim().length) hc.push(s);
+      if (hc.length >= HISTORY_MAX) break;
+    }
+    cn = 0;
+  } catch(e) {}
+}
+
+function historySave(){
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(hc.slice(0, HISTORY_MAX)));
+  } catch(e) {}
+}
+
+function historyClear(){
+  hc.length = 0;
+  cn = 0;
+  try { localStorage.removeItem(HISTORY_KEY); } catch(e) {}
+}
+
+function historyPush(cmd){
+  cmd = (cmd || "").trim();
+  if (!cmd) return;
+
+  // de-dup: if same as most recent, do nothing
+  if (hc.length && hc[0] === cmd) {
+    cn = 0;
+    return;
+  }
+
+  // remove existing occurrence (keep list unique-ish)
+  const i = hc.indexOf(cmd);
+  if (i >= 0) hc.splice(i, 1);
+
+  hc.unshift(cmd);
+  if (hc.length > HISTORY_MAX) hc.length = HISTORY_MAX;
+
+  cn = 0;
+  historySave();
+}
+
+function historyApply(){
+  const v = hc[cn - 1] || "";
+  elCmd.value = v;
+
+  // move caret to end (chrome needs async)
+  setTimeout(() => {
+    elCmd.focus();
+    const n = elCmd.value.length;
+    elCmd.setSelectionRange(n, n);
+  }, 0);
+}
+
+function historyUp(){
+  if (!hc.length) return;
+  cn++;
+  if (cn > hc.length) cn = hc.length;
+  historyApply();
+}
+
+function historyDown(){
+  if (!hc.length) return;
+  cn--;
+  if (cn < 0) cn = 0;
+  if (cn === 0) {
+    elCmd.value = "";
+    return;
+  }
+  historyApply();
+}
+
+/* -----------------------------
+   Console view helpers
+------------------------------ */
+function nowStr(){
+  return new Date().toLocaleTimeString();
+}
+
+function setStatus(idx){
+  elStat.textContent = `idx:${idx}, last:${nowStr()}`;
+}
+
+function atBottom(){
+  return (elLog.scrollTop + elLog.clientHeight + 5) >= elLog.scrollHeight;
+}
+
+function appendLog(text){
+  if (!text) return;
+
+  // Strip SOH (0x01) if it ever leaks through.
+  text = text.replace(/\u0001/g, "");
+
+  const wasAtBottom = atBottom();
+  elLog.textContent += (elLog.textContent.length ? "\n" : "") + text;
+
+  if (chkScroll.checked && wasAtBottom) {
+    elLog.scrollTop = elLog.scrollHeight;
+  }
+}
+
+function clearLog(){
+  elLog.textContent = "";
+}
+
+function buildUrl(params){
+  const u = new URL(CONSOLE_URL, location.origin);
+  for (const k of Object.keys(params)) u.searchParams.set(k, params[k]);
+  // cache-bust
+  u.searchParams.set("_cb", Date.now());
+  return u.toString();
+}
+
+/* -----------------------------
+   Poll once (1 Hz background)
+------------------------------ */
+async function pollOnce(){
+  if (inflight) return;
+
+  inflight = true;
+
+  const ctrl = new AbortController();
+  const timeoutMs = 5000;
+  const tmo = setTimeout(() => ctrl.abort(), timeoutMs);
+
+  try {
+    const url = buildUrl({ c2: String(counter) });
+    const r = await fetch(url, { method:"GET", cache:"no-store", signal: ctrl.signal });
+    if (!r.ok) return;
+
+    const t = await r.text();
+
+    // Expect: idx}1reset}1log}1
+    const parts = t.split("}1");
+    if (parts.length < 3) return;
+
+    const idx   = parseInt(parts[0] || "0", 10) || 0;
+    const rflag = parseInt(parts[1] || "0", 10) || 0;
+
+    let logText = parts.slice(2, parts.length - 1).join("}1");
+    logText = (logText || "").trim();
+
+    // Server one-shot reset semantics
+    if (rflag === 0) {
+      clearLog();
+      counter = 0;
+    }
+
+    // Move forward to server's current index
+    counter = (idx > 0) ? idx : 0;
+
+    setStatus(counter);
+
+    if (logText) appendLog(logText);
+
+  } catch (e) {
+    // no-op
+  } finally {
+    clearTimeout(tmo);
+    inflight = false;
+  }
+}
+
+/* -----------------------------
+   Send command
+------------------------------ */
+async function sendCommand(){
+  const cmd = (elCmd.value || "").trim();
+  if (!cmd) return;
+
+  historyPush(cmd);
+
+  const ctrl = new AbortController();
+  const timeoutMs = 5000;
+  const tmo = setTimeout(() => ctrl.abort(), timeoutMs);
+
+  // If a poll is in-flight, do not start a second fetch. Retry shortly.
+  if (inflight) {
+    clearTimeout(tmo);
+    setTimeout(() => sendCommand(), 50);
+    return;
+  }
+
+  inflight = true;
+  try {
+    const url = buildUrl({ c1: cmd, c2: String(counter) });
+    await fetch(url, { method:"GET", cache:"no-store", signal: ctrl.signal });
+  } catch (e) {
+  } finally {
+    clearTimeout(tmo);
+    inflight = false;
+  }
+
+  elCmd.value = "";
+
+  // Force immediate pull after sending (does not stack; respects inflight)
+  await pollOnce();
+}
+
+/* -----------------------------
+   UI hooks
+------------------------------ */
+document.getElementById("btnRefresh").onclick = () => pollOnce();
+document.getElementById("btnClear").onclick   = () => clearLog();
+document.getElementById("btnClearHist").onclick = () => {
+  historyClear();
+  elCmd.value = "";
+};
+
+document.getElementById("btnSend").onclick = () => sendCommand();
+
+elCmd.addEventListener("keydown", (ev) => {
+  if (ev.key === "Enter") {
+    ev.preventDefault();
+    sendCommand();
+    return;
+  }
+  if (ev.key === "ArrowUp") {
+    ev.preventDefault();
+    historyUp();
+    return;
+  }
+  if (ev.key === "ArrowDown") {
+    ev.preventDefault();
+    historyDown();
+    return;
+  }
+});
+
+elHint.textContent = `endpoint: ${CONSOLE_URL}`;
+
+// restore history on load
+historyLoad();
+
+// initial: poll once, then fixed 1 Hz forever
+pollOnce();
+pollIntervalId = setInterval(() => {
+  if (inflight) return;
+  pollOnce();
+}, 1000);
+</script>
+
+</body>
+</html>

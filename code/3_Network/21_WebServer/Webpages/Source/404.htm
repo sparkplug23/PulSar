@@ -1,47 +1,171 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<meta content='width=device-width' name='viewport'>
-		<meta name="theme-color" content="#222222">
-		<title>Not found</title>
-		<style>
-			body {
-				font-family: Verdana, Helvetica, sans-serif;
-				text-align: center;
-				background-color: #222;
-				margin: 0;
-				color: #fff;
-			}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width" name="viewport">
+  <meta name="theme-color" content="#141414">
+  <title>PulSar – Not found</title>
 
-			img {
-				width: 400px;
-				max-width: 50%;
-				image-rendering: pixelated;
-				image-rendering: crisp-edges;
-				margin: 25px 0 -10px 0;
-			}
-		
-			button {
-				outline: none;
-				cursor: pointer;
-				padding: 8px;
-				margin: 10px;
-				width: 230px;
-				text-transform: uppercase;
-				font-family: helvetica;
-				font-size: 19px;
-				background-color: #333;
-				color: white;
-				border: 0px solid white;
-				border-radius: 25px;
-			}
-		</style>
-	</head>
-	<body>
-		<img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAbUExURQAAAAB81gCU/zKq/////9bW1oCAgGhoaAAAAGPLX8AAAAAJdFJOU///////////AFNPeBIAAAAJcEhZcwAADsAAAA7AAWrWiQkAAACdSURBVDhPxc9bDoUgEANQebP/FUuHMjBGY/B+3EYR7RH0qC/ZBc6HwCljgHO+xZIVSI2sYgHaG7EBWh8jWoxTrCBFdDJ+BD4lbIHxAcz8APAVLTsrZE4eQD5qzt3cAFTYokC4YCN9Gybgu4yAQtBFLQXHuHABA7JMeOEC/E0W5uy9gv4vo5QHK2i7yq2C8UABM4HmL+CSTXCTF1DrCX6+Gp9zB5dsAAAAAElFTkSuQmCC">
-		<h1>404 Not Found</h1>
-		<b>Akemi does not know where you are headed...</b><br><br>
-		<button onclick="window.location.href='../?sliders'">Back to controls</button>
-	</body>
+  <style>
+    /* Date Modified: 08Jan26 */
+
+    :root{
+      --bg:#121212;
+      --panel:#1a1a1a;
+      --border:#2b2b2b;
+      --text:#e8e8e8;
+      --muted:#a6a6a6;
+      --btn:#232323;
+      --btnh:#2c2c2c;
+      --accent:#4da3ff;
+      --bad:#ff5c5c;
+      --radius:14px;
+      --shadow:0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Segoe UI,Roboto,Arial,sans-serif;
+    }
+
+    .wrap{
+      min-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:14px;
+      box-sizing:border-box;
+    }
+
+    .card{
+      width:min(520px, 100%);
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px 16px 14px 16px;
+      box-sizing:border-box;
+      text-align:center;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 4px rgba(77,163,255,0.14);
+    }
+    .title{
+      font-size:16px;
+      font-weight:700;
+      letter-spacing:0.2px;
+    }
+
+    /* Small "pixel art" image that scales up with crisp edges */
+    img{
+      width:280px;
+      max-width:72%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      margin:10px 0 8px 0;
+      border-radius:10px;
+      border:1px solid #222;
+      background:#0f0f0f;
+    }
+
+    h1{
+      margin:6px 0 6px 0;
+      font-size:20px;
+      letter-spacing:0.2px;
+    }
+
+    .sub{
+      margin:0 0 14px 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.35;
+    }
+
+    .btnrow{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top:6px;
+    }
+
+    button{
+      outline:none;
+      cursor:pointer;
+      padding:10px 12px;
+      min-width:180px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--btn);
+      color:var(--text);
+      font-size:14px;
+      font-weight:700;
+      letter-spacing:0.3px;
+    }
+    button:hover{background:var(--btnh);}
+    button:active{transform:translateY(1px);}
+    button.bad{border-color:#552222;background:#2a1717;}
+    button.bad:hover{background:#3a2020;}
+
+    .mono{font-family:Consolas,Menlo,Monaco,monospace;}
+    .hint{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      word-break:break-word;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="brand">
+        <div class="dot"></div>
+        <div class="title">PulSar</div>
+      </div>
+
+      <!-- Tiny pixel logo (very small) scaled up with pixelated rendering -->
+      <img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABxElEQVRYR+2WvU7DMBCFv4oQhBqJQkqQkQhJQkqQkQhJQkqQkQhJQkqQkQhJQkqQkQhJQkqQkQhJQkqQkQhJQkqQkQhJQkqQkQhJQkqQkQhJQkp8bqgk2zQ0c6b3i1p7cQJ3w8lYx0pZp0m8cQf4m3Xc4f6q7j3mYpCq7y4mKx0wQ0wqKQwWwqf8m5f6bq4p6gQe7rJ7qgZb0Gm8mQ4mQwWwqf5kqJg2m0p3m0mQ3mQwWwqf4oW4kQmKQm0mQ3mQwWwqf4oW4kQmKQm0mQ3mQwWwqf4oW4kQmKQm0mQ3mQwWwqf4oW4kQmKQm0mQ3mQwWwqf4oW4kQmKQm0mQ3mQwWwqf4oW4kQmKQm0mQ3mQwWwqf4oW4kQmKQm0mQ3mQwWwqf4oW4kQmKQm0mQ3mQwWwqf4oW4kQmKQm0mQ3mQwWwqf4oW4kQmKQm0mQ3mQwWwqf5xK7YkHc0r9k9m+fYJc7oVwqk6l8bE0G9mH0X8n1w3Y5wC0W7qk2w8tQbqWcQGd0qgQm8mQ4mQwWwqf8z3wFjz8g4c9c9qAAAAAElFTkSuQmCC">
+
+      <h1>404 Not Found</h1>
+      <div class="sub">
+        This route does not exist on this device.<br>
+        If you expected a page here, check the module build flags and URL routing.
+      </div>
+
+      <div class="btnrow">
+        <button type="button" onclick="go('/')">Back to PulSar</button>
+        <button type="button" class="bad" onclick="go('/debug')">Debug</button>
+      </div>
+
+      <div class="hint mono" id="where">path: —</div>
+    </div>
+  </div>
+
+<script>
+/* Date Modified: 08Jan26 */
+function go(p){
+  if (!p) return;
+  if (p[0] !== "/") p = "/" + p;
+  location.href = p;
+}
+document.getElementById("where").textContent =
+  "path: " + (location.pathname || "/") + (location.search || "");
+</script>
+
+</body>
 </html>

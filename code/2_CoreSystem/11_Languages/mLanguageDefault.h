@@ -213,7 +213,7 @@
 #define D_TASK_RESTART_SPLASH_INFORMATION_CTR               "RESTART_SPLASH_INFORMATION"
 #define D_TASK_PREP_BEFORE_TELEPERIOD_CTR                   "PREP_BEFORE_TELEPERIOD"
 #define D_TASK_JSON_APPEND_CTR                              "JSON_APPEND"
-#define D_TASK_SAVE_BEFORE_RESTART_CTR                      "SAVE_BEFORE_RESTART"
+// #define D_TASK_SAVE_BEFORE_RESTART_CTR                      "SAVE_BEFORE_RESTART"
 #define D_TASK_SETTINGS_DEFAULT_CTR                         "SETTINGS_DEFAULT"
 #define D_TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR      "SETTINGS_OVERWRITE_SAVED_TO_DEFAULT"
 #define D_TASK_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR         "SETTINGS_LOAD_VALUES_INTO_MODULE"
@@ -1450,6 +1450,7 @@
   #define D_LOG_SR04 "SR4: "
   #define D_LOG_SUBCOMMAND "SUB: " // Subcommand
   #define D_LOG_SUN_TRACKING "SUN: "
+  #define D_LOG_SUPPORT "SUP: "
   #define D_LOG_SWITCHES "SWH: "
   #define D_LOG_TELEMETRY "TEL: "
   #define D_LOG_TASKER "TSK: "
@@ -2072,7 +2073,7 @@
 #define D_SSID_NUMBERED "SSID_Number"
 #define D_PASSWORD "Password"
 #define D_HOSTNAME "Hostname"
-#define D_WIFICONFIG "WifiConfig"
+#define D_WIFICONFIG "WiFi_Config_Mode_Set"
   #define WCFG_MAX_STRING_LENGTH 12
   #define D_WCFG_0_RESTART "Restart"
   #define D_WCFG_1_SMARTCONFIG "SmartConfig"

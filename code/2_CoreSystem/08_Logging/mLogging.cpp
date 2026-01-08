@@ -187,8 +187,8 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
       if (!tkr_log->web_log_index) tkr_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
     
     }
+    // Serial.printf("WebLog Added=%d\n\r",tkr_log->web_log_index);
   }
-  // Serial.printf("log%d\n\r",tkr_log->web_log_index);
   #endif  // USE_MODULE_NETWORK_WEBSERVER
 
   

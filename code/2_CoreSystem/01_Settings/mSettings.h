@@ -296,8 +296,10 @@ const uint16_t VL53LXX_MAX_SENSORS = 8;     // Max number of VL53L0X sensors
  */
 enum SettingsTextIndex { 
     SET_OTAURL,
+    #ifndef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
     SET_STASSID1, SET_STASSID2,  // MAX_SSIDS
     SET_STAPWD1, SET_STAPWD2,  // MAX_SSIDS
+    #endif
     SET_HOSTNAME, SET_SYSLOG_HOST,
     SET_WEBPWD, SET_CORS,
     SET_STATE_TXT1, SET_STATE_TXT2, SET_STATE_TXT3, SET_STATE_TXT4,  // MAX_STATE_TEXT
@@ -1154,6 +1156,69 @@ struct LoggingSettings{
   uint8_t       time_isshort;  
 };
 
+// ---------------------------------------------------------------------------------------------------------------------
+// NetworkSettings (Settings-persisted config)
+// - Covers WiFi + Ethernet via a shared profile slot model.
+// - Cellular stays module-owned (filesystem JSON).
+// ---------------------------------------------------------------------------------------------------------------------
+
+struct WiFiProfile
+{
+  char    ssid[33] = {0};
+  char    pass[65] = {0};
+  uint8_t ssid_hidden = 0;
+  uint8_t has_bssid = 0;
+  uint8_t bssid[6]  = {0};
+};
+
+struct IPv4Config
+{
+  uint8_t is_static = false;               // 0 = DHCP, 1 = Static
+
+  uint8_t ip[4]   = {0,0,0,0};
+  uint8_t gw[4]   = {0,0,0,0};
+  uint8_t sn[4]   = {255,255,255,0};
+  uint8_t dns1[4] = {0,0,0,0};
+  uint8_t dns2[4] = {0,0,0,0};
+};
+
+#ifdef USE_MODULE_NETWORK_ETHERNET
+struct EthernetSettings
+{
+  IPv4Config ipv4;
+};
+#endif
+
+struct NetworkSettings
+{
+  // Preserve existing semantics if you still need these:
+  uint8_t sta_config = 0;              // e.g., config mode / portal policy
+  uint8_t sta_active = 0;              // currently selected WiFi slot (optional; can be deprecated)
+
+  SysBitfield_Network flag;
+
+  // WiFi profiles in priority order (index 0 tried first, etc.)
+  WiFiProfile wifi[WIFI_MAXIMUM_CONNECTIONS];
+
+  // Global WiFi IPv4 config (applies to active WiFi STA connection if you use static)
+  // If you do NOT support static on WiFi, omit this.
+  IPv4Config wifi_ipv4;
+
+  
+  uint32_t      ip_address[5];             // TEMPORARY for Wifi1
+  uint8_t       wifi_channel;              // TEMPORARY for Wifi1
+  uint8_t       wifi_bssid[6];             // F0A
+
+  #ifdef USE_MODULE_NETWORK_ETHERNET
+  EthernetSettings ethernet;
+  #endif
+};
+
+
+
+
+
+
 
 struct SETTINGS {
   // Header (Minimal data load required to validate settings - order must never change)
@@ -1187,12 +1252,16 @@ struct SETTINGS {
   // Core
   uint16_t      unified_interface_reporting_invalid_reading_timeout_seconds; // 0 is ignored, anything else is the seconds of age above which a sensor should not be reporting (ie is invalid)
   // Network
+  #ifndef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
   uint8_t       sta_config;                // 09F
   uint8_t       sta_active;                // 0A0
   uint32_t      ip_address[5];             // 544
   uint8_t       wifi_channel;
   uint8_t       wifi_bssid[6];             // F0A
   SysBitfield_Network  flag_network;                     // 3A0
+  #else
+  NetworkSettings network;
+  #endif
   // Webserver
   uint8_t       webserver;                 // 1AB
   uint16_t      web_refresh;               // 7CC

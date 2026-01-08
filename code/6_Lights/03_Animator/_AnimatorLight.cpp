@@ -27,6 +27,14 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
   
   switch(function){
     /************
+     * SYSTEM SECTION * 
+    *******************/    
+    case TASK_RESTART_SET_DO_FINAL_CLEANUP:       
+      #ifdef WLED_ENABLE_WEBSOCKETS2
+      // tkr_web->websocket_lights->closeAll(1012);
+      #endif
+    break;
+    /************
      * PERIODIC SECTION * 
     *******************/
     case TASK_EVERY_SECOND:{
@@ -267,7 +275,7 @@ void sendDataWs(AsyncWebSocketClient * client)
     return;
   }
 
-  if (!tkr_anim->requestJSONBufferLock(12)) {
+  if (!JBI->requestJSONBufferLock(12)) {
     const char* error = PSTR("{\"error\":3}");
     if (client) {
       client->text(FPSTR(error)); // ERR_NOBUF
@@ -302,7 +310,7 @@ void sendDataWs(AsyncWebSocketClient * client)
   size_t heap2 = 0; // ESP32 variants do not have the same issue and will work without checking heap allocation
   #endif
   if (!buffer || heap1-heap2<len) {
-    tkr_anim->releaseJSONBufferLock();
+    JBI->releaseJSONBufferLock();
     DEBUG_PRINTLN(F("WS buffer allocation failed."));
     tkr_web->websocket_lights->closeAll(1013); //code 1013 = temporary overload, try again later
     tkr_web->websocket_lights->cleanupClients(0); //disconnect all clients to release memory
@@ -319,7 +327,7 @@ void sendDataWs(AsyncWebSocketClient * client)
     tkr_web->websocket_lights->textAll(std::move(buffer));
   }
 
-  tkr_anim->releaseJSONBufferLock();
+  JBI->releaseJSONBufferLock();
 }
 
 
@@ -366,7 +374,7 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
             AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "WS State Payload [len:%d] %s"),
                    data_buffer.payload.length_used, data_buffer.payload.ctr);
 
-            pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+            tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
             data_buffer.releaseLock();
           } else {
             ALOG_WRN(PSTR("WS Tasker: buffer lock busy; skipping Tasker pass"));
@@ -379,7 +387,7 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
         // -------- Pass 2: ArduinoJson parse + lighting state (with JSON buffer lock) -----------
         bool verboseResponse = false;
 
-        if (!tkr_anim->requestJSONBufferLock(11)) {
+        if (!JBI->requestJSONBufferLock(11)) {
           client->text(F("{\"error\":3}")); // ERR_NOBUF
           return;
         }
@@ -387,7 +395,7 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
         DeserializationError error = deserializeJson(*tkr_mfile->pDoc, data, len);
         JsonObject root = tkr_mfile->pDoc->as<JsonObject>();
         if (error || root.isNull()) {
-          tkr_anim->releaseJSONBufferLock();
+          JBI->releaseJSONBufferLock();
           ALOG(log, PSTR("{\"error\":2}")); // ERR_JSON
           return;
         }
@@ -401,7 +409,7 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
           verboseResponse = tkr_anim->deserializeState(root);
         }
 
-        tkr_anim->releaseJSONBufferLock();
+        JBI->releaseJSONBufferLock();
 
         // Per-client response if no broadcast queued
         if (!tkr_anim->interfaceUpdateCallMode) {
@@ -710,10 +718,6 @@ void mAnimatorLight::EveryLoop()
   switch(realtimeMode)
   {
     case ANIMATION_MODE__EFFECTS:{ // Effects created on device, local control
-
-      #ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
-      if (apActive) dnsServer.processNextRequest();
-      #endif 
 
       #ifdef ENABLE_FEATURE_LIGHTS__DEMO_MODE
       SubTask_Demo();

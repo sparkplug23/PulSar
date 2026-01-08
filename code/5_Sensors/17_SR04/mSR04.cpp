@@ -537,7 +537,7 @@ void mSR04::SubTask_UpdateAmbientTemperature()
   uint8_t  device_id = 0; //ambient tank should be 0
 
   sensors_reading_t reading;
-  pCONT->GetModule(tkr_db18->GetModuleUniqueID())->GetSensorReading(&reading, device_id);
+  tkr->GetModule(tkr_db18->GetModuleUniqueID())->GetSensorReading(&reading, device_id);
   temperature = reading.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
 
   Serial.printf("temperature=%f\n\r", temperature);

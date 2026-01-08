@@ -4,7 +4,6 @@
 
 int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 {
-  DEBUG_LINE_HERE3
   int8_t function_result = 0;
 
   // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
@@ -23,7 +22,6 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  DEBUG_LINE_HERE3
   if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
@@ -85,7 +83,6 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 
   return function_result;
   
-  DEBUG_LINE_HERE3
 } // END function
 
 
@@ -171,7 +168,7 @@ void mInterfaceLight::Template_Load()
 
       // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
-      pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+      tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
       ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
       
@@ -210,7 +207,7 @@ void mInterfaceLight::Template_Load()
 
     // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
-    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+    tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
     Serial.println("we are here");
 
@@ -237,7 +234,7 @@ void mInterfaceLight::Template_Load()
 
     // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
-    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+    tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
     ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
     #endif // USE_LIGHTING_TEMPLATE_ANOTHER
@@ -332,7 +329,7 @@ void mInterfaceLight::Template_Load_DefaultConfig()
 
   ALOG_DBM( PSTR("LIGHTING_TEMPLATE_DEFAULT" " READ = \"%s\""), data_buffer.payload.ctr);
 
-  pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+  tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
   JBI->ReleaseLock();
 

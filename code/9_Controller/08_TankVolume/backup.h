@@ -116,7 +116,7 @@
 // //     }furnace_detect;
 // //  #endif
 
-//     // void (* const mof_Handlers[])(void) = { &pCONT->mof->init } ;
+//     // void (* const mof_Handlers[])(void) = { &tkr->mof->init } ;
 
 
 
