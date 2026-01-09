@@ -13,11 +13,41 @@ bool mWiFi::WiFi2_Ap_EnsureStarted(void)
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(IPAddress(4,3,2,1), IPAddress(4,3,2,1), IPAddress(255,255,255,0));
 
-  const bool ok = WiFi.softAP("PulSar-Setup", nullptr);
+  // const bool ok = WiFi.softAP("PulSar-Setup", nullptr);
+  // if (!ok)
+  // {
+  //   return false;
+  // }
+  const char* ap_ssid = SOFTAP_SSID;
+  const char* ap_pass = SOFTAP_PASSWORD;
+
+  bool ok = false;
+
+  // Empty password => open AP
+  if ((ap_pass == nullptr) || (ap_pass[0] == '\0'))
+  {
+    ok = WiFi.softAP(ap_ssid); // open
+  }
+  else
+  {
+    // ESP32 requires >= 8 chars for WPA2
+    const size_t pass_len = strlen(ap_pass);
+    if (pass_len < 8)
+    {
+      ALOG_ERR(PSTR(D_LOG_WIFI "SoftAP password too short (<8), starting OPEN AP"));
+      ok = WiFi.softAP(ap_ssid); // open fallback
+    }
+    else
+    {
+      ok = WiFi.softAP(ap_ssid, ap_pass); // protected
+    }
+  }
+
   if (!ok)
   {
     return false;
   }
+
 
   // Captive portal support (DNS hijack) is OPTIONAL
   #ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL

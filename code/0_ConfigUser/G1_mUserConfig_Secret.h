@@ -58,6 +58,20 @@
 #define STA_PASS3            "af4d8bc9ab"                // [Password2] Optional alternate AP Wifi password
 #endif
 
+// ------------------------------------------------------------------
+// SoftAP defaults (override in user config / ini later)
+//   - If SOFTAP_PASSWORD == ""  => open AP (no password)
+//   - If non-empty              => WPA2, must be >= 8 chars
+// ------------------------------------------------------------------
+#ifndef SOFTAP_SSID
+  #define SOFTAP_SSID      "PulSar-Setup"
+#endif
+
+#ifndef SOFTAP_PASSWORD
+  #define SOFTAP_PASSWORD  ""
+#endif
+
+
 #endif
 
 
