@@ -918,76 +918,57 @@ void mWiFi::WiFi_Radio_Shutdown(bool option)
 
 #ifdef USE_DISCOVERY
 
-// void mWiFi::WiFi_Mdns_StartOrRestart(void) {
-//   // if (Settings.flag3.mdns_enabled) {  // SetOption55 - Control mDNS service
-//       DEBUG_LINE_HERE;
-//   if (!Mdns.begun) {
-//     // close existing or MDNS.begin will fail
-//     MDNS.end(); 
-//       DEBUG_LINE_HERE;
-
-
-//       /***
-//        * Underscores are invalid in hostnames, so we replace them with dashes.
-//        */
-//     // Begin with devicename
-//     Mdns.begun = (uint8_t)MDNS.begin(tkr_set->Settings.system_name.device);
-    
-//       DEBUG_LINE_HERE;
-//     ALOG_INF( PSTR(D_LOG_MDNS "%s" " with %s"), (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED), tkr_set->Settings.system_name.device);
-
-//     #ifdef ESP32
-//     // Add service to MDNS-SD
-//     MDNS.addService("_http", "_tcp", 80);
-//     #endif
-  
-//   }
-//       DEBUG_LINE_HERE;
-// }
-
-
-void mWiFi::WiFi_Mdns_StartOrRestart(void) { 
-
-  if(Mdns.begun) return;
+void mWiFi::WiFi_Mdns_StartOrRestart(void)
+{
+  if (Mdns.begun) return;
 
   const char* originalName = tkr_set->Settings.system_name.device;
-  
+
   // Define a temporary buffer (max 64 bytes: 63 + null terminator)
-  char hostname[64]; 
-  strncpy(hostname, originalName, 63); // Copy with max length
-  hostname[63] = '\0'; // Ensure null termination
+  char hostname[64];
+  strncpy(hostname, originalName, 63);
+  hostname[63] = '\0';
 
   // Replace invalid underscores with dashes
-  for (char* p = hostname; *p; ++p) {
-      if (*p == '_') *p = '-';
+  for (char* p = hostname; *p; ++p)
+  {
+    if (*p == '_') *p = '-';
   }
 
-  WiFi.setHostname(hostname); // For USERNAME in omada
-  ArduinoOTA.setHostname(hostname);  // Same as MDNS.begin(hostname)
+  // Platform-specific hostname setter
+  #if defined(ESP8266)
+    WiFi.hostname(hostname);
+  #elif defined(ESP32)
+    WiFi.setHostname(hostname);
+  #endif
+
+  // OTA hostname
+  ArduinoOTA.setHostname(hostname);
 
   // Close existing session to prevent failure
-  MDNS.end(); 
+  MDNS.end();
 
   // Begin with sanitized hostname
   Mdns.begun = (uint8_t)MDNS.begin(hostname);
-  
-  ALOG_INF(PSTR(D_LOG_MDNS "%s" " with %s"), 
-      (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED), hostname);
 
-  #ifdef ESP32
-  MDNS.addService("_http", "_tcp", 80); // Register service
+  ALOG_INF(PSTR(D_LOG_MDNS "%s with %s"),
+           (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED),
+           hostname);
 
-  String escapedMac;
-  escapedMac = WiFi.macAddress();
-  escapedMac.replace(":", "");
-  escapedMac.toLowerCase();
+  #if defined(ESP32)
+    // Register service
+    MDNS.addService("_http", "_tcp", 80);
 
-  
-  MDNS.addService("http", "tcp", 80);
-  MDNS.addService("pulsar", "tcp", 80);
-  MDNS.addServiceTxt("pulsar", "tcp", "mac", escapedMac.c_str());
+    String escapedMac = WiFi.macAddress();
+    escapedMac.replace(":", "");
+    escapedMac.toLowerCase();
+
+    MDNS.addService("http", "tcp", 80);
+    MDNS.addService("pulsar", "tcp", 80);
+    MDNS.addServiceTxt("pulsar", "tcp", "mac", escapedMac.c_str());
   #endif
 }
+
 
 
 

@@ -17,7 +17,7 @@
 *******************************************************************************************************************************************/
 
 // #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__TESTBOARD
-#define DEVICE_QTQ__SERVER_RESET_CONTROLLER__INSTALLED_BOARD
+// #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__INSTALLED_BOARD
 
 
 
@@ -145,7 +145,7 @@
   // #define ENABLE_DEVFEATURE_WIFI__FORCE_SOFTAP_MODE_BY_BLOCKING_SSIDS
 
 
-  #define   D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/m/serverresetrelays"
+  #define   D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/m/serverrelays"
 
   /***********************************
    * SECTION: Sensor Configs
@@ -402,8 +402,9 @@
 
   // #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
 
-  // #define ENABLE_TEMPLATE_SECTION__ENERGY
-  // #define ENABLE_TEMPLATE_SECTION__ENERGY__PZEM
+  #define ENABLE_TEMPLATE_SECTION__DISPLAYS__OLED
+
+  #define ENABLE_TEMPLATE_SECTIONS__LIGHTS
 
  
   /***********************************
@@ -456,7 +457,7 @@
 
 
 
-
+// lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
   #define ENABLE_DEVFEATURE_WEBSERVER__ROOT_DEBUG_LINKS
@@ -477,7 +478,7 @@
   // #define ENABLE_DEVFEATURE_WIFI__FORCE_SOFTAP_MODE_BY_BLOCKING_SSIDS
 
 
-  #define   D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/m/serverresetrelays"
+  #define   D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/m/serverrelays"
 
   /***********************************
    * SECTION: Sensor Configs
@@ -490,9 +491,14 @@
   // #define USE_MODULE_SENSORS_SWITCHES
     
 
-  /***********************************
-   * SECTION: Display Configs
-  ************************************/  
+ /***********************************
+  * SECTION: Display Configs
+ ************************************/  
+ #ifdef ENABLE_TEMPLATE_SECTION__DISPLAYS__OLED
+   #define USE_MODULE_DISPLAYS_INTERFACE
+   #define USE_MODULE_DISPLAYS_OLED_SH1106
+     #define SHOW_SPLASH
+ #endif
 
  
   /***********************************
@@ -508,58 +514,61 @@
    * SECTION: Lighting Configs
   ************************************/  
         
+  #ifdef ENABLE_TEMPLATE_SECTIONS__LIGHTS
   
-//   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
-//   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
 
-//   // #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
-//   // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
 
-//   // #define ENABLE_BUSCONFG__NEW_BUSCONFIG_RANGING
-//   #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE
-//   // #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE_ONE_SEGMENT
+  // #define ENABLE_BUSCONFG__NEW_BUSCONFIG_RANGING
+  #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE
+  // #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE_ONE_SEGMENT
 
-// #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
-//    #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+#define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+   #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
 
 
-//    // r8=13?
+   // r8=13?
   
-//   #define USE_LIGHTING_TEMPLATE
-//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-//   R"=====(
-//   {
-//     "BusConfig":[     
-//       {
-//         "Name":"Star",
-//         "Pin":19,
-//         "ColourOrder":"RGB",
-//         "BusType":"WS2812_RGB",
-//         "Start":0,
-//         "Length":100
-//       }
-//     ],
-//     "Segments":[
-//       {
-//         "PixelRange":[0,100],
-//         "ColourPalette":"RGPBY",
-//         "ColourType":3,
-//         "Effects": {
-//           "Function":"Static",
-//           "Speed":255,
-//           "Intensity":127,
-//           "Grouping":1,
-//           "RateMs": 20
-//         },
-//         "BrightnessRGB": 100
-//       }
-//     ],
-//     "BrightnessRGB": 100
-//   }
-//   )=====";
-//   #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
-//   #define MAX_LED_MEMORY 64000*5
-//   #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[     
+      {
+        "Name":"Star",
+        "Pin":19,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,100],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 100
+  }
+  )=====";
+  #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
+  #define MAX_LED_MEMORY 64000*5
+  #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
+
+  #endif
 
   /***********************************
    * SECTION: Energy Configs
@@ -592,12 +601,16 @@
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"23\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
-      #endif  
       #ifdef USE_MODULE_SENSORS_BUTTONS
       "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
       #endif
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      #endif   
+      #ifdef USE_MODULE_DRIVERS_LEDS
+      "\"23\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
+      #endif  
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"32\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
       "\"33\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","

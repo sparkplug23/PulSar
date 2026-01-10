@@ -8,7 +8,7 @@
 	<script>
 		function S() {
 			getLoc();
-			loadJS(getURL('/lights/settings2/s.js?p=0'), false);	// If we set async false, file is loaded and executed, then next statement is processed
+			loadJS(getURL('/lights/settings/s.js?p=0'), false);	// If we set async false, file is loaded and executed, then next statement is processed
 		}
 	</script>
 	<style>
@@ -38,14 +38,14 @@
 </head>
 <body onload="S()">
 <button type=submit id="b" onclick="window.location=getURL('/lights')">Back to /lights</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings2/wifi')">WiFi Setup</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings2/leds')">LED Preferences</button>
-<button id="2dbtn" type="submit" onclick="window.location=getURL('/lights/settings2/2D')">2D Configuration</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings2/ui')">User Interface</button>
+<button type="submit" onclick="window.location=getURL('/lights/settings/wifi')">WiFi Setup</button>
+<button type="submit" onclick="window.location=getURL('/lights/settings/leds')">LED Preferences</button>
+<button id="2dbtn" type="submit" onclick="window.location=getURL('/lights/settings/2D')">2D Configuration</button>
+<button type="submit" onclick="window.location=getURL('/lights/settings/ui')">User Interface</button>
 <button id="dmxbtn" style="display:none;" type="submit" onclick="window.location=getURL('/settings2/dmx')">DMX Output</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings2/sync')">Sync Interfaces</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings2/time')">Time & Macros</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings2/um')">Usermods</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings2/sec')">Security & Updates</button>
+<button type="submit" onclick="window.location=getURL('/lights/settings/sync')">Sync Interfaces</button>
+<button type="submit" onclick="window.location=getURL('/lights/settings/time')">Time & Macros</button>
+<button type="submit" onclick="window.location=getURL('/lights/settings/um')">Usermods</button>
+<button type="submit" onclick="window.location=getURL('/lights/settings/sec')">Security & Updates</button>
 </body>
 </html>

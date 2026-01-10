@@ -3025,7 +3025,7 @@ void mAnimatorLight::serveSettingsJS(AsyncWebServerRequest* request)
 
   ALOG_INF(PSTR("serveSettingsJS url %s"), request->url().c_str());
 
-  static const char _common_js[] PROGMEM = "/common.js";
+  static const char _common_js[] PROGMEM = "/lights/common.js";
   if (request->url().indexOf(FPSTR(_common_js)) > 0) {
     tkr_web->handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common, JS_common_length);
     return;
@@ -3078,7 +3078,7 @@ void mAnimatorLight::serveSettings(AsyncWebServerRequest* request, bool post)
     else if (url.indexOf("lock") > 0) subPage = SUBPAGE_LOCK;
   }
   else if (url.indexOf("/update") >= 0) subPage = SUBPAGE_UPDATE; // update page, for PIN check
-  else subPage = SUBPAGE_WELCOME;
+  else subPage = SUBPAGE_MENU;
 
   if(
   #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
@@ -3171,7 +3171,6 @@ void mAnimatorLight::serveSettings(AsyncWebServerRequest* request, bool post)
     case SUBPAGE_PINREQ  : response = request->beginResponse_P(200, "text/html", PAGE_settings_pin,  PAGE_settings_pin_length);  break;
     case SUBPAGE_CSS     : response = request->beginResponse_P(200, "text/css",  PAGE_settingsCss,   PAGE_settingsCss_length);   break;
     case SUBPAGE_JS      : serveSettingsJS(request); return;
-    case SUBPAGE_WELCOME : response = request->beginResponse_P(200, "text/html", PAGE_welcome,       PAGE_welcome_length);       break;
     default:  response = request->beginResponse_P(200, "text/html", PAGE_settings,      PAGE_settings_length);      break;
   }
   response->addHeader(FPSTR(s_content_enc),"gzip");
@@ -3233,6 +3232,10 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
   // "/settings/settings.js&p=x" request also handled by serveSettings()
   
+ static const char _common_js[] PROGMEM = "/lights/common.js";
+  tkr_web->server->on(_common_js, HTTP_GET, [this](AsyncWebServerRequest *request){    
+    tkr_web->handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common, JS_common_length);
+  });
   
   
   #ifndef ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED

@@ -253,7 +253,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   if (subPage <0 || subPage >10) return;
   char nS[32];
 
-  if (subPage == SUBPAGE_MENU)
+  if (subPage == SUBPAGE_WEB_MENU)
   {
   #ifndef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS // include only if 2D is not compiled in
     settingsScript.print(F("gId('2dbtn').style.display='none';"));
@@ -263,7 +263,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   #endif
   }
 
-  if (subPage == SUBPAGE_WIFI)
+  if (subPage == SUBPAGE_WEB_WIFI)
   {
     size_t l;
     settingsScript.printf_P(PSTR("resetWiFi(%d);"), 0);//WLED_MAX_WIFI_COUNT);
@@ -361,10 +361,10 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
     // #endif
   }
 
-  if (subPage == SUBPAGE_LEDS)
+  if (subPage == SUBPAGE_WEB_LEDS)
   {
     
-//     #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
+//     #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_WEB_LEDS
 
 //     appendGPIOinfo(settingsScript);
 
@@ -495,18 +495,18 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
 // #endif    
 //     printSetFormCheckbox(settingsScript,PSTR("MSO"),!irApplyToAllSelected);
 
-//     #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
+//     #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_WEB_LEDS
   }
 
-  if (subPage == SUBPAGE_UI)
+  if (subPage == SUBPAGE_WEB_UI)
   {
     // printSetFormValue(settingsScript,PSTR("DS"),serverDescription);
     // printSetFormCheckbox(settingsScript,PSTR("SU"),simplifiedUI);
   }
 
-  if (subPage == SUBPAGE_SYNC)
+  if (subPage == SUBPAGE_WEB_SYNC)
   {
-  //   #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
+  //   #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_WEB_SYNC
 
   //   printSetFormValue(settingsScript,PSTR("UP"),tkr_anim->udpPort);
   //   printSetFormValue(settingsScript,PSTR("U2"),udpPort2);
@@ -613,7 +613,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   //   #endif
   }
 
-  if (subPage == SUBPAGE_TIME)
+  if (subPage == SUBPAGE_WEB_TIME)
   {
     // printSetFormCheckbox(settingsScript,PSTR("NT"),ntpEnabled);
     // printSetFormValue(settingsScript,PSTR("NS"),ntpServerName);
@@ -673,10 +673,10 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
     //   }
     // }
 
-    // #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
+    // #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_WEB_SYNC
   }
 
-  if (subPage == SUBPAGE_SEC)
+  if (subPage == SUBPAGE_WEB_SEC)
   {
     // byte l = strlen(settingsPIN);
     // char fpass[l+1]; //fill PIN field with 0000
@@ -693,7 +693,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   }
 
   #ifdef ENABLE_FEATURE_LIGHTING__DMX // include only if DMX is enabled
-  if (subPage == SUBPAGE_DMX)
+  if (subPage == SUBPAGE_WEB_DMX)
   {
     printSetFormValue(settingsScript,PSTR("PU"),e131ProxyUniverse);
 
@@ -720,7 +720,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   }
   #endif
 
-  if (subPage == SUBPAGE_UM) //usermods
+  if (subPage == SUBPAGE_WEB_UM) //usermods
   {
     appendGPIOinfo(settingsScript);
     // settingsScript.printf_P(PSTR("numM=%d;"), UsermodManager::getModCount());
@@ -739,7 +739,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
     // UsermodManager::appendConfigData(settingsScript);
   }
 
-  if (subPage == SUBPAGE_UPDATE) // update
+  if (subPage == SUBPAGE_WEB_UPDATE) // update
   {
     // char tmp_buf[128];
     // snprintf_P(tmp_buf,sizeof(tmp_buf),PSTR("WLED %s<br>%s<br>(%s build %d)"),
@@ -755,7 +755,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
     // printSetClassElementHTML(settingsScript,PSTR("sip"),0,tmp_buf);
   }
 
-  if (subPage == SUBPAGE_2D) // 2D matrices
+  if (subPage == SUBPAGE_WEB_2D) // 2D matrices
   {
     // printSetFormValue(settingsScript,PSTR("SOMP"),isMatrix);
     // #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
@@ -980,29 +980,29 @@ static inline uint8_t GetSubPageID_FromURLPath(const String& url)
 {
   if (url.indexOf("sett") >= 0)
   {
-    if      (url.indexOf(".js")  > 0) return SUBPAGE_JS;
-    else if (url.indexOf(".css") > 0) return SUBPAGE_CSS;
-    else if (url.indexOf("wifi") > 0) return SUBPAGE_WIFI;
-    else if (url.indexOf("leds") > 0) return SUBPAGE_LEDS;
-    else if (url.indexOf("ui")   > 0) return SUBPAGE_UI;
-    else if (url.indexOf("sync") > 0) return SUBPAGE_SYNC;
-    else if (url.indexOf("time") > 0) return SUBPAGE_TIME;
-    else if (url.indexOf("sec")  > 0) return SUBPAGE_SEC;
+    if      (url.indexOf(".js")  > 0) return SUBPAGE_WEB_JS;
+    else if (url.indexOf(".css") > 0) return SUBPAGE_WEB_CSS;
+    else if (url.indexOf("wifi") > 0) return SUBPAGE_WEB_WIFI;
+    else if (url.indexOf("leds") > 0) return SUBPAGE_WEB_LEDS;
+    else if (url.indexOf("ui")   > 0) return SUBPAGE_WEB_UI;
+    else if (url.indexOf("sync") > 0) return SUBPAGE_WEB_SYNC;
+    else if (url.indexOf("time") > 0) return SUBPAGE_WEB_TIME;
+    else if (url.indexOf("sec")  > 0) return SUBPAGE_WEB_SEC;
     #ifdef ENABLE_FEATURE_LIGHTING__DMX
-    else if (url.indexOf("dmx")  > 0) return SUBPAGE_DMX;
+    else if (url.indexOf("dmx")  > 0) return SUBPAGE_WEB_DMX;
     #endif
-    else if (url.indexOf("um")   > 0) return SUBPAGE_UM;
+    else if (url.indexOf("um")   > 0) return SUBPAGE_WEB_UM;
     #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
-    else if (url.indexOf("2D")   > 0) return SUBPAGE_2D;
+    else if (url.indexOf("2D")   > 0) return SUBPAGE_WEB_2D;
     #endif
-    else if (url.indexOf("lock") > 0) return SUBPAGE_LOCK;
+    else if (url.indexOf("lock") > 0) return SUBPAGE_WEB_LOCK;
   }
   else if (url.indexOf("/update") >= 0)
   {
-    return SUBPAGE_UPDATE;
+    return SUBPAGE_WEB_UPDATE;
   }
 
-  return SUBPAGE_WELCOME;
+  return SUBPAGE_WEB_WELCOME;
 }
 
 
@@ -1020,11 +1020,11 @@ void mWebServer::SettingsPages_POST(AsyncWebServerRequest* request)
   bool pinRequired = (!correctPIN && (strlen(settingsPIN) > 0) && (subPage > 0 && subPage < 11));
   if (pinRequired) {
     originalSubPage = subPage;
-    subPage = SUBPAGE_PINREQ;
+    subPage = SUBPAGE_WEB_PINREQ;
   }
 
   // if OTA locked or too frequent PIN entry requests fail hard
-  if ((subPage == SUBPAGE_WIFI && wifiLock && otaLock) ||
+  if ((subPage == SUBPAGE_WEB_WIFI && wifiLock && otaLock) ||
       (pinRequired && !correctPIN && (millis() - lastEditTime < PIN_RETRY_COOLDOWN)))
   {
     serveMessage(request, 401, FPSTR(s_accessdenied), FPSTR(s_unlock_ota), 254);
@@ -1042,28 +1042,28 @@ void mWebServer::SettingsPages_POST(AsyncWebServerRequest* request)
 
   switch (subPage)
   {
-    case SUBPAGE_WIFI: strcpy_P(s, PSTR("WiFi")); strcpy_P(s2, PSTR("Please connect to the new IP (if changed)")); break;
-    case SUBPAGE_LEDS: strcpy_P(s, PSTR("LED")); break;
-    case SUBPAGE_UI:   strcpy_P(s, PSTR("UI")); break;
-    case SUBPAGE_SYNC: strcpy_P(s, PSTR("Sync")); break;
-    case SUBPAGE_TIME: strcpy_P(s, PSTR("Time")); break;
-    case SUBPAGE_SEC:
+    case SUBPAGE_WEB_WIFI: strcpy_P(s, PSTR("WiFi")); strcpy_P(s2, PSTR("Please connect to the new IP (if changed)")); break;
+    case SUBPAGE_WEB_LEDS: strcpy_P(s, PSTR("LED")); break;
+    case SUBPAGE_WEB_UI:   strcpy_P(s, PSTR("UI")); break;
+    case SUBPAGE_WEB_SYNC: strcpy_P(s, PSTR("Sync")); break;
+    case SUBPAGE_WEB_TIME: strcpy_P(s, PSTR("Time")); break;
+    case SUBPAGE_WEB_SEC:
       strcpy_P(s, PSTR("Security"));
       if (tkr_sup->ESP_Restart_Scheduled()) strcpy_P(s2, PSTR("Rebooting, please wait ~10 seconds..."));
       break;
 
     #ifdef ENABLE_FEATURE_LIGHTING__DMX
-    case SUBPAGE_DMX:  strcpy_P(s, PSTR("DMX")); break;
+    case SUBPAGE_WEB_DMX:  strcpy_P(s, PSTR("DMX")); break;
     #endif
 
-    case SUBPAGE_UM:   strcpy_P(s, PSTR("Usermods")); break;
+    case SUBPAGE_WEB_UM:   strcpy_P(s, PSTR("Usermods")); break;
 
     #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
-    case SUBPAGE_2D:   strcpy_P(s, PSTR("2D")); break;
+    case SUBPAGE_WEB_2D:   strcpy_P(s, PSTR("2D")); break;
     #endif
 
     #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-    case SUBPAGE_PINREQ:
+    case SUBPAGE_WEB_PINREQ:
       strcpy_P(s, correctPIN ? PSTR("PIN accepted") : PSTR("PIN rejected"));
       break;
     #endif
@@ -1075,12 +1075,12 @@ void mWebServer::SettingsPages_POST(AsyncWebServerRequest* request)
   }
 
   #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-  if (subPage != SUBPAGE_PINREQ) strcat_P(s, PSTR(" settings saved."));
+  if (subPage != SUBPAGE_WEB_PINREQ) strcat_P(s, PSTR(" settings saved."));
   #endif
 
   // --- Critical fix: always terminate POST with a response ---
   #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-  if (subPage == SUBPAGE_PINREQ && correctPIN) {
+  if (subPage == SUBPAGE_WEB_PINREQ && correctPIN) {
     // Correct PIN: redirect to the settings page the user originally intended (POST/Redirect/GET)
     // If your PIN form posts to a different URL than the intended page, replace 'url' with a mapper:
     // request->redirect(GetURL_FromSubPageID(originalSubPage));
@@ -1092,8 +1092,8 @@ void mWebServer::SettingsPages_POST(AsyncWebServerRequest* request)
   if (!s2[0]) strcpy_P(s2, s_redirecting);
 
   bool doReboot = tkr_sup->ESP_Restart_Scheduled(); // keep semantics consistent with your switch text above
-  bool redirectAfter9s = (subPage == SUBPAGE_WIFI ||
-                          ((subPage == SUBPAGE_SEC || subPage == SUBPAGE_UM) && doReboot));
+  bool redirectAfter9s = (subPage == SUBPAGE_WEB_WIFI ||
+                          ((subPage == SUBPAGE_WEB_SEC || subPage == SUBPAGE_WEB_UM) && doReboot));
 
   // If PIN was required and not yet satisfied, keep 401 to force the PIN flow.
   // Otherwise standard 200.
@@ -1121,24 +1121,24 @@ void mWebServer::SettingsPages_GET(AsyncWebServerRequest* request)
 
   switch (subPage)
   {
-    case SUBPAGE_WIFI:    content = PAGE_settings_wifi; len = PAGE_settings_wifi_length; break;
-    case SUBPAGE_LEDS:    content = PAGE_settings_leds;  len = PAGE_settings_leds_length;  break;
-    case SUBPAGE_UI:      content = PAGE_settings_ui;    len = PAGE_settings_ui_length;    break;
-    case SUBPAGE_SYNC:    content = PAGE_settings_sync;  len = PAGE_settings_sync_length;  break;
-    case SUBPAGE_TIME:    content = PAGE_settings_time;  len = PAGE_settings_time_length;  break;
-    case SUBPAGE_SEC:     content = PAGE_settings_sec;   len = PAGE_settings_sec_length;   break;
+    case SUBPAGE_WEB_WIFI:    content = PAGE_settings_wifi; len = PAGE_settings_wifi_length; break;
+    case SUBPAGE_WEB_LEDS:    content = PAGE_settings_leds;  len = PAGE_settings_leds_length;  break;
+    case SUBPAGE_WEB_UI:      content = PAGE_settings_ui;    len = PAGE_settings_ui_length;    break;
+    case SUBPAGE_WEB_SYNC:    content = PAGE_settings_sync;  len = PAGE_settings_sync_length;  break;
+    case SUBPAGE_WEB_TIME:    content = PAGE_settings_time;  len = PAGE_settings_time_length;  break;
+    case SUBPAGE_WEB_SEC:     content = PAGE_settings_sec;   len = PAGE_settings_sec_length;   break;
     #ifdef ENABLE_FEATURE_LIGHTING__DMX
-    case SUBPAGE_DMX:     content = PAGE_settings_dmx;   len = PAGE_settings_dmx_length;   break;
+    case SUBPAGE_WEB_DMX:     content = PAGE_settings_dmx;   len = PAGE_settings_dmx_length;   break;
     #endif
-    case SUBPAGE_UM:      content = PAGE_settings_um;    len = PAGE_settings_um_length;    break;
-    case SUBPAGE_UPDATE:  content = PAGE_update;         len = PAGE_update_length;         break;
+    case SUBPAGE_WEB_UM:      content = PAGE_settings_um;    len = PAGE_settings_um_length;    break;
+    case SUBPAGE_WEB_UPDATE:  content = PAGE_update;         len = PAGE_update_length;         break;
     #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
-    case SUBPAGE_2D:      content = PAGE_settings_2D;    len = PAGE_settings_2D_length;    break;
+    case SUBPAGE_WEB_2D:      content = PAGE_settings_2D;    len = PAGE_settings_2D_length;    break;
     #endif
-    case SUBPAGE_PINREQ:  content = PAGE_settings_pin;   len = PAGE_settings_pin_length;   code = 401; break;
-    case SUBPAGE_CSS:     content = PAGE_settingsCss;    len = PAGE_settingsCss_length;    contentType = FPSTR(CONTENT_TYPE_CSS); break;
-    case SUBPAGE_JS:      serveSettingsJS(request); return;
-    case SUBPAGE_WELCOME: content = PAGE_welcome;        len = PAGE_welcome_length;        break;
+    case SUBPAGE_WEB_PINREQ:  content = PAGE_settings_pin;   len = PAGE_settings_pin_length;   code = 401; break;
+    case SUBPAGE_WEB_CSS:     content = PAGE_settingsCss;    len = PAGE_settingsCss_length;    contentType = FPSTR(CONTENT_TYPE_CSS); break;
+    case SUBPAGE_WEB_JS:      serveSettingsJS(request); return;
+    case SUBPAGE_WEB_WELCOME: content = PAGE_welcome;        len = PAGE_welcome_length;        break;
     default:              content = PAGE_settings;       len = PAGE_settings_length;       break;
   }
 

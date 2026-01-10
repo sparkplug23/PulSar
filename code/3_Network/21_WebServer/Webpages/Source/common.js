@@ -1,5 +1,6 @@
 var d=document;
 var loc = false, locip, locproto = "http:";
+var __alertActive = false;
 
 function H(pg="")   { window.open("https://kno.wled.ge/"+pg); }
 function GH()       { window.open("https://github.com/Aircoookie/WLED"); }
@@ -66,10 +67,20 @@ function loadJS(FILE_URL, async = true, preGetV = undefined, postGetV = undefine
 		if (postGetV) postGetV();
 	});
 	// error event
+	// scE.addEventListener("error", (ev) => {
+	// 	console.log("Error on loading file", ev);
+	// 	alert("Loading of configuration script failed.\nIncomplete page data!");
+	// });
 	scE.addEventListener("error", (ev) => {
-		console.log("Error on loading file", ev);
-		alert("Loading of configuration script failed.\nIncomplete page data!");
+		console.log("Error on loading file", FILE_URL, ev);
+
+		// Show alert only once
+		if (!__alertActive) {
+			__alertActive = true;
+			alert("Loading of configuration script failed.\nIncomplete page data!");
+		}
 	});
+
 }
 function getLoc() {
 	let l = window.location;

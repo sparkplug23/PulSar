@@ -82,31 +82,31 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 
 // Settings sub page IDs
 // THESE ALL NEED IMMEDIATE RENAMES
-#define SUBPAGE_MENU              0
-#define SUBPAGE_WIFI              1
-#define SUBPAGE_LEDS              2
-#define SUBPAGE_UI                3
-#define SUBPAGE_SYNC              4
-#define SUBPAGE_TIME              5
-#define SUBPAGE_SEC               6
-#define SUBPAGE_DMX               7
-#define SUBPAGE_UM                8
-#define SUBPAGE_UPDATE            9
-#define SUBPAGE_2D               10
-#define SUBPAGE_LOCK            251
-#define SUBPAGE_PINREQ          252
-#define SUBPAGE_CSS             253
-#define SUBPAGE_JS              254
-#define SUBPAGE_WELCOME         255
+#define SUBPAGE_WEB_MENU              0
+#define SUBPAGE_WEB_WIFI              1
+#define SUBPAGE_WEB_LEDS              2
+#define SUBPAGE_WEB_UI                3
+#define SUBPAGE_WEB_SYNC              4
+#define SUBPAGE_WEB_TIME              5
+#define SUBPAGE_WEB_SEC               6
+#define SUBPAGE_WEB_DMX               7
+#define SUBPAGE_WEB_UM                8
+#define SUBPAGE_WEB_UPDATE            9
+#define SUBPAGE_WEB_2D               10
+#define SUBPAGE_WEB_LOCK            251
+#define SUBPAGE_WEB_PINREQ          252
+#define SUBPAGE_WEB_CSS             253
+#define SUBPAGE_WEB_JS              254
+#define SUBPAGE_WEB_WELCOME         255
 
-#define JSON_PATH_STATE      1
-#define JSON_PATH_INFO       2
-#define JSON_PATH_STATE_INFO 3
-#define JSON_PATH_NODES      4
-#define JSON_PATH_PALETTES   5
-#define JSON_PATH_FXDATA     6
-#define JSON_PATH_NETWORKS   7
-#define JSON_PATH_EFFECTS    8
+#define JSON_PATH_WEB_STATE      1
+#define JSON_PATH_WEB_INFO       2
+#define JSON_PATH_WEB_STATE_INFO 3
+#define JSON_PATH_WEB_NODES      4
+#define JSON_PATH_WEB_PALETTES   5
+#define JSON_PATH_WEB_FXDATA     6
+#define JSON_PATH_WEB_NETWORKS   7
+#define JSON_PATH_WEB_EFFECTS    8
 
 
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
 	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
 	<title>WiFi Settings</title>
-	<script src="common.js" async type="text/javascript"></script>
+	<script src="/lights/common.js" async type="text/javascript"></script>
 	<script>
 		var scanLoops = 0, preScanSSID = "";
 		var maxNetworks = 3;
@@ -143,7 +143,7 @@ Static subnet mask:<br>
 	<form id="form_s" name="Sf" method="post">
 		<div class="toprow">
 		<div class="helpB"><button type="button" onclick="H('features/settings/#wifi-settings')">?</button></div>
-		<button type="button" onclick="B()">Back</button><button type="submit">Save & Connect</button><hr>
+		<button type="button" onclick="BL()">Back</button><button type="submit">Save & Connect</button><hr>
 		</div>
 		<h2>WiFi setup</h2>
 		<h3>Connect to existing network</h3>
@@ -227,7 +227,7 @@ Static subnet mask:<br>
 			</select><br><br>
 		</div>
 		<hr>
-		<button type="button" onclick="B()">Back</button><button type="submit">Save & Connect</button>
+		<button type="button" onclick="BL()">Back</button><button type="submit">Save & Connect</button>
 	</form>
 </body>
 </html>

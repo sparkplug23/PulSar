@@ -100,6 +100,11 @@ void mServerResetRelays::EverySecond()
   
   SubTask_UpdateOLED();
 
+  for(int i=0;i<8;i++)
+  {
+    ALOG_INF(PSTR("relay %d,%d"), i, tkr_relay->CommandGet_Relay_Power(i));
+  }
+
 }
 
 
@@ -118,90 +123,37 @@ void mServerResetRelays::EverySecond()
 void mServerResetRelays::SubTask_UpdateOLED()
 {
 
-// ALOG_INF(PSTR("SubTask_UpdateOLED"));
-
-//     DEBUG_LINE_HERE_MILLIS
-
-//   tkr_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
-//   char buffer[100] = {0};
-//   char buffer_f[100] = {0};
-//   char buffer_n[100] = {0};
+  tkr_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
+  char buffer[100] = {0};
   
-//   snprintf(buffer, sizeof(buffer), "%s", tkr_time->GetTime().c_str() );
+  /**
+   * @brief 
+   * 
+   * Lines
+   * 1     : "I:4.3.2.1 " IPAddress
+   * 2     : "U:12:34:56" Uptime
+   * 3     : "R:01000000"  Relay states as binary 00000010 ie relays 7 is on
+   * 4     : 
+   * 
+   */
 
-//   float sensor_data = -1;
+  memset(buffer,0,sizeof(buffer));
+  // sprintf(buffer, "U:");
+  sprintf(&buffer[0], "%s", tkr_time->GetUptime().c_str());
+  tkr_iDisp->LogBuffer_AddRow(buffer, 0);
 
-//   /**
-//    * @brief Add each sensor on new line
-//    */
-   
-//   uint8_t sensors_available = 4;//tkr_db18->GetSensorCount();
+  memset(buffer,0,sizeof(buffer));
+  sprintf(buffer, "I:");
+  IPAddress localip   = WiFi.localIP();
+  sprintf(&buffer[2], "%d.%d.%d.%d", localip[0],localip[1],localip[2],localip[3] );
+  tkr_iDisp->LogBuffer_AddRow(buffer, 1);
 
-//   int8_t line = -1;
-
-//   for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
-//   {
-//     line = -1;
-//     sensors_reading_t val;
-//     #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-//     tkr_pzem->GetSensorReading(&val, sensor_id);
-//     if(val.Valid())
-//     {
-
-//       sensor_data = val.GetFloat(SENSOR_TYPE_ACTIVE_POWER_ID);        
-//       DLI->GetDeviceName_WithModuleUniqueID( tkr_pzem->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
-
-//       /**
-//        * @brief Check for name and replace with OLED friendly short name
-//        * 
-//        */
-//       if(strcmp(buffer_n, D_DEVICE_HEATER_0_NAME)==0)
-//       {
-//         memset(buffer_n, 0, sizeof(buffer_n));
-//         sprintf(buffer_n, "%s", "Hai");
-//         line = 0;
-//       }else 
-//       if(strcmp(buffer_n, D_DEVICE_HEATER_1_NAME)==0)
-//       {
-//         memset(buffer_n, 0, sizeof(buffer_n));
-//         sprintf(buffer_n, "%s", "Flr");
-//         line = 1;
-//       }
-//       else 
-//       if(strcmp(buffer_n, D_DEVICE_HEATER_2_NAME)==0)
-//       {
-//         memset(buffer_n, 0, sizeof(buffer_n));
-//         sprintf(buffer_n, "%s", "Fan");
-//         line = 2;
-//       }else 
-//       if(strcmp(buffer_n, D_DEVICE_HEATER_3_NAME)==0)
-//       {
-//         memset(buffer_n, 0, sizeof(buffer_n));
-//         sprintf(buffer_n, "%s", "Oil");
-//         line = 3;
-//       }
-
-//       if(line >= 0)
-//       {
-//         snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
-//         tkr_iDisp->LogBuffer_AddRow(buffer, line);
-//       }
-
-//     }
-//     #endif
-
-//   }
-
-//   if(line =- 1) // no valid readings
-//   {
-//     memset(buffer_n, 0, sizeof(buffer_n));
-//     sprintf(buffer_n, "%s", "PZEM d/c");
-//     line = 0;
-//     tkr_iDisp->LogBuffer_AddRow(buffer, line);
-
-//   }
-
-//   DEBUG_LINE_HERE_MILLIS
+  memset(buffer,0,sizeof(buffer));
+  sprintf(buffer, "R:");
+  for(int i=0;i<tkr_relay->rt.devices_present;i++){
+    sprintf(&buffer[i+2], "%d", tkr_relay->CommandGet_Relay_Power(i));
+  }
+  tkr_iDisp->LogBuffer_AddRow(buffer, 2);
 
 }
 
@@ -229,7 +181,7 @@ void mServerResetRelays::parse_JSONCommand(JsonParserObject obj)
 
 void mServerResetRelays::WebPage_Root_AddHandlers()
 {
-  tkr_web->server->on("/m/serverresetrelays", HTTP_ANY, [this](AsyncWebServerRequest *request){
+  tkr_web->server->on("/m/serverrelays", HTTP_ANY, [this](AsyncWebServerRequest *request){
     this->Serve_Submodule_ServerResetRelays(request);
   });
 
@@ -281,7 +233,7 @@ void mServerResetRelays::Serve_Submodule_ServerResetRelays_Post(AsyncWebServerRe
     if (!cmdTok.startsWith("RB"))
     {
       ALOG_INF(PSTR("cmd invalid token (no RB)"));
-      request->redirect("/m/serverresetrelays");
+      request->redirect("/m/serverrelays");
       return;
     }
 
@@ -289,7 +241,7 @@ void mServerResetRelays::Serve_Submodule_ServerResetRelays_Post(AsyncWebServerRe
     if (us < 0)
     {
       ALOG_INF(PSTR("cmd invalid token (no underscore)"));
-      request->redirect("/m/serverresetrelays");
+      request->redirect("/m/serverrelays");
       return;
     }
 
@@ -301,7 +253,7 @@ void mServerResetRelays::Serve_Submodule_ServerResetRelays_Post(AsyncWebServerRe
     if (relay_id < 0 || relay_id >= 8)
     {
       ALOG_INF(PSTR("relay out of range"));
-      request->redirect("/m/serverresetrelays");
+      request->redirect("/m/serverrelays");
       return;
     }
 
@@ -336,7 +288,7 @@ void mServerResetRelays::Serve_Submodule_ServerResetRelays_Post(AsyncWebServerRe
     rt.rel[relay_id].time_last_changed = millis();
     mqtthandler_state_ifchanged.Send();
 
-    request->redirect("/m/serverresetrelays");
+    request->redirect("/m/serverrelays");
     return;
   }
 
@@ -368,7 +320,7 @@ void mServerResetRelays::Serve_Submodule_ServerResetRelays_Post(AsyncWebServerRe
     mqtthandler_state_ifchanged.Send();
     #endif
 
-    request->redirect("/m/serverresetrelays");
+    request->redirect("/m/serverrelays");
     return;
   }
 
@@ -376,171 +328,9 @@ void mServerResetRelays::Serve_Submodule_ServerResetRelays_Post(AsyncWebServerRe
   // 3) Unknown action
   // -------------------------------------------------------------------
   ALOG_INF(PSTR("unknown action: %s"), action.c_str());
-  request->redirect("/m/serverresetrelays");
+  request->redirect("/m/serverrelays");
 }
 
-
-
-// void mServerResetRelays::Serve_Submodule_ServerResetRelays_JS(AsyncWebServerRequest* request)
-// {
-//   // Start Create Head
-//   AsyncResponseStream *response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JAVASCRIPT));
-//   response->addHeader(F("Cache-Control"), F("no-store"));
-//   response->addHeader(F("Expires"), F("0"));
-
-//   response->print(F("function GetV(){var d=document;"));
-
-//   // -------------------------------------------------------------------
-//   // Talk-back values for the page
-//   // -------------------------------------------------------------------
-//   char buffer[96];
-
-//   // Update time (string)
-//   snprintf(buffer, sizeof(buffer), "%s", tkr_time->GetDateAndTime(DT_UTC).c_str());
-//   tkr_web->printSetFormValue(*response, PSTR("UT"), buffer);
-
-//   char key[10];
-//   char val[120];
-
-//   #ifdef USE_MODULE_DRIVERS_RELAY
-//   // Relay names (R0..R7) and optional state/feedback (S0..S7 / T0..T7)
-//   uint8_t relay_count = (8 > MAX_RELAYS) ? MAX_RELAYS : 8; // limit to 8
-//   for (uint8_t relay_id = 0; relay_id < 8; relay_id++)
-//   {
-//     // Names
-//     snprintf(key, sizeof(key), "R%u", relay_id);
-//     DLI->GetDeviceName_WithModuleUniqueID(tkr_relay->GetModuleUniqueID(), relay_id, buffer, sizeof(buffer));
-//     tkr_web->printSetFormValue(*response, key, buffer);
-
-//     // -------------------------------------------------------------------
-//     // Status strings: T0..T7
-//     //   "TimeOnRemaining %u (On:%02d:%02d:%02d|Off:%02d:%02d:%02d)"
-//     // -------------------------------------------------------------------
-//     const uint32_t sec_on_remaining = tkr_relay->CommandGet_SecondsToRemainOn(relay_id);
-
-//     const auto &last = tkr_relay->rt.relay_status[relay_id].last;
-
-//     // NOTE: if you prefer to suppress times when unset, add guards here.
-//     snprintf(
-//       val, sizeof(val),
-//       "TimeOnRemaining %lu (Last On:%02u:%02u:%02u|Off:%02u:%02u:%02u)",
-//       sec_on_remaining,
-//       last.ontime.hour,  last.ontime.minute,  last.ontime.second,
-//       last.offtime.hour, last.offtime.minute, last.offtime.second
-//     );
-//     snprintf(key, sizeof(key), "T%u", relay_id);
-//     tkr_web->printSetFormValue(*response, key, val);
-    
-//   }
-      
-//   #endif
-
-//   response->print(F("}"));
-//   request->send(response);
-// }
-
-
-// void mServerResetRelays::Serve_Submodule_ServerResetRelays_JS(AsyncWebServerRequest* request)
-// {
-//   AsyncResponseStream *response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JAVASCRIPT));
-//   response->addHeader(F("Cache-Control"), F("no-store"));
-//   response->addHeader(F("Expires"), F("0"));
-
-//   response->print(F("function GetV(){var d=document;"));
-
-//   // Update time
-//   char buffer[96];
-//   snprintf(buffer, sizeof(buffer), "%s", tkr_time->GetDateAndTime(DT_UTC).c_str());
-//   tkr_web->printSetFormValue(*response, PSTR("UT"), buffer);
-
-//   #ifdef USE_MODULE_DRIVERS_RELAY
-//   char key[10];
-//   char val[160];
-
-//   for (uint8_t relay_id = 0; relay_id < 8; relay_id++)
-//   {
-//     // ------------------------------------------------------------
-//     // Names: R0..R7
-//     // ------------------------------------------------------------
-//     snprintf(key, sizeof(key), "R%u", relay_id);
-//     DLI->GetDeviceName_WithModuleUniqueID(
-//       tkr_relay->GetModuleUniqueID(),
-//       relay_id,
-//       buffer,
-//       sizeof(buffer)
-//     );
-//     tkr_web->printSetFormValue(*response, key, buffer);
-
-//     // ------------------------------------------------------------
-//     // State: S0..S7 (0/1)
-//     // ------------------------------------------------------------
-//     const uint8_t isOn = tkr_relay->CommandGet_Relay_Power(relay_id) ? 1 : 0;
-//     snprintf(key, sizeof(key), "S%u", relay_id);
-//     tkr_web->printSetFormValue(*response, key, (int)isOn);
-
-//     // ------------------------------------------------------------
-//     // Status text: T0..T7
-//     // ------------------------------------------------------------
-//     const uint32_t sec_on_remaining = tkr_relay->CommandGet_SecondsToRemainOn(relay_id);
-//     const auto &last = tkr_relay->rt.relay_status[relay_id].last;
-
-//     snprintf(
-//       val, sizeof(val),
-//       "TimeOnRemaining %lu (On:%02u:%02u:%02u|Off:%02u:%02u:%02u)",
-//       (unsigned long)sec_on_remaining,
-//       last.ontime.hour,  last.ontime.minute,  last.ontime.second,
-//       last.offtime.hour, last.offtime.minute, last.offtime.second
-//     );
-//     snprintf(key, sizeof(key), "T%u", relay_id);
-//     tkr_web->printSetFormValue(*response, key, val);
-
-//     // ------------------------------------------------------------
-//     // UI: class toggles for OFF/ON buttons
-//     //
-//     // We set className directly:
-//     //   "rb_btn rb_off rb_active" / "rb_btn rb_off rb_inactive"
-//     //   "rb_btn rb_on  rb_active" / "rb_btn rb_on  rb_inactive"
-//     // ------------------------------------------------------------
-//     {
-//       char idbuf[12];
-
-//       // Off button class
-//       snprintf(idbuf, sizeof(idbuf), "b%u_0", relay_id);
-//       response->printf_P(
-//         PSTR("d.getElementById('%s').className='rb_btn rb_off %s';"),
-//         idbuf,
-//         isOn ? "rb_inactive" : "rb_active"
-//       );
-
-//       // On button class
-//       snprintf(idbuf, sizeof(idbuf), "b%u_1", relay_id);
-//       response->printf_P(
-//         PSTR("d.getElementById('%s').className='rb_btn rb_on %s';"),
-//         idbuf,
-//         isOn ? "rb_active" : "rb_inactive"
-//       );
-
-//       // Toggle button: keep it orange using STYLE (your requested test case)
-//       // If you added a helper, use it here. Otherwise this direct JS is fine:
-//       snprintf(idbuf, sizeof(idbuf), "b%u_2", relay_id);
-//       response->printf_P(
-//         PSTR("d.getElementById('%s').style.backgroundColor='#9a5a00';d.getElementById('%s').style.color='#fff';"),
-//         idbuf, idbuf
-//       );
-//     }
-
-//     // Optional: row left border based on state (matches your earlier look)
-//     response->printf_P(
-//       PSTR("d.getElementById('row%u').style.borderLeft='%s';"),
-//       relay_id,
-//       isOn ? "6px solid #0b5a1a" : "6px solid #7a0b0b"
-//     );
-//   }
-//   #endif
-
-//   response->print(F("}"));
-//   request->send(response);
-// }
 
 void mServerResetRelays::Serve_Submodule_ServerResetRelays_JS(AsyncWebServerRequest* request)
 {

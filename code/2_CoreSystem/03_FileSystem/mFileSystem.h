@@ -13,6 +13,8 @@
 
 
 #ifdef ESP8266
+  #include <SPIFFSEditor.h>
+  #include <FS.h>
   #include <LittleFS.h>
   #include <SPI.h>
   #ifdef USE_SDCARD

@@ -214,7 +214,7 @@
 	<form id="form_s" name="Sf" method="post">
 		<div class="toprow">
 		<div class="helpB"><button type="button" onclick="H('features/settings/#user-interface-settings')">?</button></div>
-		<button type="button" onclick="B()">Back</button><button type="button" onclick="Save()">Save</button><br>
+		<button type="button" onclick="BL()">Back</button><button type="button" onclick="Save()">Save</button><br>
 		<span id="lssuc" style="color:green; display:none">&#10004; Local UI settings saved!</span>
 		<span id="lserr" style="color:red; display:none">&#9888; Could not access local storage. Make sure it is enabled in your browser.</span><hr>
 		</div>
@@ -263,7 +263,7 @@
 		<div id="holidays">Holidays: <input type="file" name="data2" accept=".json"> <input type="button" value="Upload" onclick="uploadFile(d.Sf.data2,'/holidays.json');"><br></div>
 		<div id="toast"></div>
 		<hr><button type="button" onclick="cLS()">Clear local storage</button>
-		<hr><button type="button" onclick="B()">Back</button><button type="button" onclick="Save()">Save</button>
+		<hr><button type="button" onclick="BL()">Back</button><button type="button" onclick="Save()">Save</button>
 	</form>
 </body>
 </html>

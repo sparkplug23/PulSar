@@ -410,12 +410,6 @@ const char PAGETEST_dmxmap_lights[] PROGMEM = R"=====()=====";
           )
     },
     {
-      file: "welcome.htm",
-      name: "PAGE_welcome",
-      method: "gzip",
-      filter: "html-minify",
-    },
-    {
       file: "liveview.htm",
       name: "PAGE_liveview",
       method: "gzip",

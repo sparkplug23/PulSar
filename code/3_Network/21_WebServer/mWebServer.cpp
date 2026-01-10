@@ -111,7 +111,7 @@ void mWebServer::serveMessage(AsyncWebServerRequest* request, uint16_t code, con
 //   httpCode     e.g. 200
 //   msg          short message (may be nullptr)
 //   detail       optional detail (may be nullptr)
-//   redirectUrl  absolute URL recommended (e.g. "/m/serverresetrelays")
+//   redirectUrl  absolute URL recommended (e.g. "/m/serverrelays")
 //   delayMs      delay before redirect (e.g. 750)
 //
 // RETURNS
@@ -298,7 +298,7 @@ server->on("/settings2", HTTP_POST, [this](AsyncWebServerRequest *request){
     }
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
     ALOG_ERR(PSTR("Not sure this needs to stay or not"));
-    if(handle__HTTP__GET_QueryAPI(request, request->url())) return;
+    if(tkr_anim->handle__HTTP__GET_QueryAPI(request, request->url())) return;
     #endif
     handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404, PAGE_404_length);
   });

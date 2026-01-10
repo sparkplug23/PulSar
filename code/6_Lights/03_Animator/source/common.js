@@ -95,7 +95,7 @@ function getLoc() {
 }
 function getURL(path) { return (loc ? locproto + "//" + locip : "") + path; }
 function B()          { window.open(getURL("/settings"),"_self"); }
-function B2()          { window.open(getURL("/settings2"),"_self"); }
+function BL()          { window.open(getURL("/lights/settings"),"_self"); }
 var timeout;
 function showToast(text, error = false) {
 	var x = gId("toast");

@@ -14,8 +14,8 @@
 
     // ------------------------------------------------------------------------
     // Contract
-    //   - Single POST endpoint: /m/serverresetrelays
-    //   - Module JS endpoint:   /m/serverresetrelays/s.js?p=1
+    //   - Single POST endpoint: /m/serverrelays
+    //   - Module JS endpoint:   /m/serverrelays/s.js?p=1
     //
     // POST fields:
     //   - A   : action selector ("save" by default)
@@ -43,10 +43,10 @@
       getLoc();
 
       // Load module-specific settings JS (sync, WLED pattern)
-      loadJS(getURL("/m/serverresetrelays/s.js?p=1"), false);
+      loadJS(getURL("/m/serverrelays/s.js?p=1"), false);
 
       // POST target (same path)
-      if (loc) d.Sf.action = getURL("/m/serverresetrelays");
+      if (loc) d.Sf.action = getURL("/m/serverrelays");
     }
 
     function SendCmd(relayIndex, cmdIndex) {

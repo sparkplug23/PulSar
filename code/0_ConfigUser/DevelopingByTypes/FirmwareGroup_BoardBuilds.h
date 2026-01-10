@@ -22,6 +22,7 @@
 
 //--------------------------------[Enable Device]-------------------------------------
 
+  #define ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
 // ======================== ESP8266 ========================
 // #define DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU
 // ======================== ESP8285 ========================
@@ -92,11 +93,11 @@
 
   #define SETTINGS_HOLDER 1239
 
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
-  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
       
   /***********************************
   * SECTION: Enable Sections
@@ -108,6 +109,8 @@
   /***********************************
   * SECTION: Network Configs
   ************************************/    
+
+  #define ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
 
   /***********************************
   * SECTION: Drivers Configs
@@ -207,7 +210,6 @@
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
   #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_HOST     MQTT_HOST
     #define MQTT_PORT     1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER

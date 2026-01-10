@@ -5259,7 +5259,6 @@ void getSettingsJS(byte subPage, Print& settingsScript);
 #define SUBPAGE_PINREQ          252
 #define SUBPAGE_CSS             253
 #define SUBPAGE_JS              254
-#define SUBPAGE_WELCOME         255
 
 // string temp buffer (now stored in stack locally)
 #ifdef ESP8266

@@ -268,10 +268,12 @@ void WiFi_Sta_Maintain_Periodic();
       WIFIBEGIN_FLAG_TOGGLE_SSIDS_ID
     };
 
+    #ifdef ESP32
     static inline float WiFiPower_To_dBm(wifi_power_t p)
     {
       return (float)p * 0.25f; // ie 19.5dBm = 78enum -> 78*0.25f => 19.5
     }
+    #endif
 
 
 };

@@ -127,14 +127,24 @@ void JsonBuilder::Add<float>(const char* key, float value) {
 //   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
 //   return true;
 // }
+
+#if defined(ESP8266)
+  #include <Arduino.h>
+  #include <coredecls.h>   // declares can_yield()
+#endif
+
+
+
 //threading/network callback details: https://github.com/wled-dev/WLED/pull/2336#discussion_r762276994
 bool JsonBuilder::requestJSONBufferLock(uint16_t moduleID)
 {
+  #ifdef USE_MODULE_CORE_FILESYSTEM
   if (tkr_mfile->pDoc == nullptr) {
     DEBUG_PRINTLN(F("ERROR: JSON buffer not allocated!"));
     return false;
   }
-
+  #endif
+  
 #if defined(ARDUINO_ARCH_ESP32)
   // Use a recursive mutex type in case our task is the one holding the JSON buffer.
   // This can happen during large JSON web transactions.  In this case, we continue immediately
@@ -161,7 +171,9 @@ bool JsonBuilder::requestJSONBufferLock(uint16_t moduleID)
 
   jsonBufferLock = moduleID ? moduleID : 255;
   DEBUG_PRINTF_P(PSTR("JSON locked (%d)\n\r"), jsonBufferLock);
+  #ifdef USE_MODULE_CORE_FILESYSTEM
   tkr_mfile->pDoc->clear();
+  #endif
   return true;
 }
 

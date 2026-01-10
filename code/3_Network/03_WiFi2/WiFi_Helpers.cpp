@@ -7,28 +7,31 @@
 
 bool mWiFi::WiFi_IsAPMode(void)
 {
-  wifi_mode_t mode = WiFi.getMode();
+  const auto mode = WiFi.getMode();
   return (mode == WIFI_AP);
 }
 
+
 bool mWiFi::WiFi_IsSTAMode(void)
 {
-  wifi_mode_t mode = WiFi.getMode();
+  const auto mode = WiFi.getMode();
   return (mode == WIFI_STA);
 }
 
+
 bool mWiFi::WiFi_IsAPSTAMode(void)
 {
-  wifi_mode_t mode = WiFi.getMode();
+  const auto mode = WiFi.getMode();
   return (mode == WIFI_AP_STA);
 }
+
 
 bool mWiFi::WiFi_HasLocalConnectivity(void)
 {
   // Local reachability exists if:
   //  - AP is active (clients can connect to SoftAP IP), OR
   //  - STA is connected and has a non-zero IP.
-  wifi_mode_t mode = WiFi.getMode();
+  const auto mode = WiFi.getMode();
 
   if ((mode == WIFI_AP) || (mode == WIFI_AP_STA))
   {
@@ -48,11 +51,13 @@ bool mWiFi::WiFi_HasLocalConnectivity(void)
   return false;
 }
 
+
 bool mWiFi::WiFi_HasExternalConnectivity(void)
 {
   // External connectivity means "safe for MQTT/NTP":
   // STA connected AND your routable check passes (gateway/upstream usable).
-  wifi_mode_t mode = WiFi.getMode();
+  const auto mode = WiFi.getMode();
+
   if ((mode != WIFI_STA) && (mode != WIFI_AP_STA))
   {
     return false;
@@ -65,6 +70,7 @@ bool mWiFi::WiFi_HasExternalConnectivity(void)
 
   return WiFi_Link_IsIpRoutable();
 }
+
 
 
 bool mWiFi::WiFi_Link_IsIpRoutable()

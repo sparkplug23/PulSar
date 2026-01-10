@@ -73,12 +73,13 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj)
   return FUNCTION_RESULT_SUCCESS_ID;
 }
 
+
 void mWiFi::Task_EverySecond()
 {
   // If already started chosen mode, do nothing here.
   if (connection.seconds_to_wait_for_fresh_connection_attempt == -1)
   {
-    const wifi_mode_t mode_now = WiFi.getMode();
+    const auto mode_now = WiFi.getMode();
     const bool ap_only_now = (mode_now == WIFI_AP);
 
     if (!ap_only_now)
@@ -112,7 +113,7 @@ void mWiFi::Task_EverySecond()
   connection.seconds_to_wait_for_fresh_connection_attempt = ok ? -1 : 15;
 
   // Re-sample mode AFTER any start attempt
-  const wifi_mode_t mode_now = WiFi.getMode();
+  const auto mode_now = WiFi.getMode();
   const bool ap_only_now = (mode_now == WIFI_AP);
 
   // Maintain STA unless we are AP-only
@@ -121,6 +122,8 @@ void mWiFi::Task_EverySecond()
     WiFi_Sta_Maintain_Periodic();
   }
 }
+
+
 
 
 void mWiFi::Init_Preload_Wifi2_Settings()
