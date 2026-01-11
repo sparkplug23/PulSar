@@ -3,7 +3,7 @@
 
 #define D_UNIQUE_MODULE_NETWORK_MQTT_ID  3010 // [(Folder_Number*100)+ID_File]
 
-#include "2_CoreSystem/mFirmwareDefaults.h"
+#include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h" 
 
 #ifdef USE_MODULE_NETWORK_MQTT
 #include <stdint.h>
@@ -377,9 +377,7 @@ class mMQTTManager :
 
     std::vector<MQTTConnection*> brokers;
 
-    #ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
     WiFiClient* mqtt_client = nullptr;
-    #endif
 
     /************************************************************************************************
      * SECTION: Internal Functions

@@ -3785,7 +3785,7 @@
   #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 1000
   #define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  100
   #define DB18_SENSOR_MAX                     15
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH      3000 //needed for db sensosrs, but currently causes crash in lighting
+  //#define DATA_BUFFER_PAYLOAD_MAX_LENGTH      3000 //needed for db sensosrs, but currently causes crash in lighting
   #define MQTT_MAX_PACKET_SIZE                3000
 
   #define DISABLE_WEBSERVER

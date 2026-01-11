@@ -1,7 +1,7 @@
 // File contains the formation of pages, while "mWebServer" contains all parsing and commands
 // Mostly for refactoring
 
-#include "mWebServer.h"
+#include "_WebServer.h"
 
 
 
@@ -797,14 +797,14 @@ void mWebServer::serveJson(AsyncWebServerRequest* request)
 
   byte subJson = 0;
   const String& url = request->url();
-  if      (url.indexOf("state") > 0) subJson = JSON_PATH_STATE;
-  else if (url.indexOf("info")  > 0) subJson = JSON_PATH_INFO;
-  else if (url.indexOf("si")    > 0) subJson = JSON_PATH_STATE_INFO;
-  else if (url.indexOf("nodes") > 0) subJson = JSON_PATH_NODES;
-  else if (url.indexOf("eff")   > 0) subJson = JSON_PATH_EFFECTS;
-  else if (url.indexOf("palx")  > 0) subJson = JSON_PATH_PALETTES;
-  else if (url.indexOf("fxda")  > 0) subJson = JSON_PATH_FXDATA;
-  else if (url.indexOf("net")   > 0) subJson = JSON_PATH_NETWORKS;
+  if      (url.indexOf("state") > 0) subJson = JSON_PATH_WEB_STATE;
+  else if (url.indexOf("info")  > 0) subJson = JSON_PATH_WEB_INFO;
+  else if (url.indexOf("si")    > 0) subJson = JSON_PATH_WEB_STATE_INFO;
+  else if (url.indexOf("nodes") > 0) subJson = JSON_PATH_WEB_NODES;
+  else if (url.indexOf("eff")   > 0) subJson = JSON_PATH_WEB_EFFECTS;
+  else if (url.indexOf("palx")  > 0) subJson = JSON_PATH_WEB_PALETTES;
+  else if (url.indexOf("fxda")  > 0) subJson = JSON_PATH_WEB_FXDATA;
+  else if (url.indexOf("net")   > 0) subJson = JSON_PATH_WEB_NETWORKS;
   #ifdef WLED_ENABLE_JSONLIVE
   else if (url.indexOf("live")  > 0) { 
     // tkr_anim->serveLiveLeds(request);
@@ -872,7 +872,7 @@ void mWebServer::serveJson(AsyncWebServerRequest* request)
 
   // releaseJSONBufferLock() will be called when "response" is destroyed (from AsyncWebServer)
   // make sure you delete "response" if no "request->send(response);" is made
-  LockedJsonResponse2 *response = new LockedJsonResponse2(tkr_mfile->pDoc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
+  LockedJsonResponse2 *response = new LockedJsonResponse2(tkr_mfile->pDoc, subJson==JSON_PATH_WEB_FXDATA || subJson==JSON_PATH_WEB_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
 
 
 

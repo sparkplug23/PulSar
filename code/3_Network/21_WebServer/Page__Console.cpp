@@ -1,12 +1,33 @@
-#include "mWebServer.h"
-
+#include "_WebServer.h"
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 
+// ============================================================================
+// Page__Console.cpp
+//
+// Platform partitioning (explicit and easy to follow)
+//
+//   ESP32:
+//     - WebSocket console handlers + WS service
+//     - Polling console handlers (testing only)
+//
+//   ESP8266 (and others):
+//     - Polling console handlers only (lightweight page mapped to PAGE_console)
+// ============================================================================
+
+
+// ============================================================================
+// ESP32
+// ============================================================================
+#ifdef ESP32
+
+
+// -----------------------------------------------------------------------------
+// WebSocket Console (ESP32)
+// -----------------------------------------------------------------------------
 #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
 
-
-void mWebServer::HandlePage_Console(AsyncWebServerRequest *request)
+void mWebServer::HandlePage_Console_WebSocket(AsyncWebServerRequest *request)
 {
 
   fConsole_active = true;
@@ -16,8 +37,8 @@ void mWebServer::HandlePage_Console(AsyncWebServerRequest *request)
     request->beginResponse_P(
       200,
       "text/html",
-      PAGE_console,
-      PAGE_console_length
+      PAGE_console_ws,
+      PAGE_console_ws_length
     );
 
   response->addHeader(F("Content-Encoding"), F("gzip"));
@@ -386,9 +407,14 @@ void mWebServer::handleConsoleWs()
   sendConsoleWs();
 }
 
+
 #endif // ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
 
 
+
+// -----------------------------------------------------------------------------
+// Polling Console (ESP32) - testing only
+// -----------------------------------------------------------------------------
 #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
 
 void mWebServer::HandlePage_Console_Poll(AsyncWebServerRequest *request)
@@ -397,13 +423,12 @@ void mWebServer::HandlePage_Console_Poll(AsyncWebServerRequest *request)
 
   if (request->hasParam("c2")) { HandleConsoleRefresh(request); return; }
 
-  // FS override for development
-  if (tkr_mfile->handleFileRead(request, "/console.htm")) return;
+  ALOG_INF(PSTR("Loading: Console Poll"));
 
   if (handleIfNoneMatchCacheHeader(request, 200)) return;
 
   AsyncWebServerResponse *response =
-    request->beginResponse_P(200, "text/html", PAGE_console, PAGE_console_length);
+    request->beginResponse_P(200, "text/html", PAGE_console_polling, PAGE_console_polling_length);
 
   response->addHeader("Content-Encoding", "gzip");
   setStaticContentCacheHeaders(response);
@@ -458,10 +483,11 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
     if (stmp[0]) {
       const int v = atoi(stmp);
       if (v > 0 && v < 256) counter = (uint8_t)v;
-      // Serial.printf("Initial Sync c2=%d\n\r",counter);
+      Serial.printf("Initial Sync c2=%d\n\r",counter);
     }
   }
   
+  Serial.printf("Sync c2=%d\n\r",counter);
   // Stream reply (no shared JSON buffer)
   AsyncResponseStream *response = request->beginResponseStream("text/plain");
 
@@ -516,4 +542,144 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 #endif // ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
 
 
+// End ESP32
+// ============================================================================
+#else  // ESP8266 (and others)
+
+
+// ============================================================================
+// ESP8266 (Polling only, lightweight page mapped to PAGE_console)
+// ============================================================================
+#ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+
+void mWebServer::HandlePage_Console_Poll(AsyncWebServerRequest *request)
+{
+  fConsole_active = true;
+
+  if (request->hasParam("c2")) { HandleConsoleRefresh(request); return; }
+
+  ALOG_INF(PSTR("Loading: Console Poll"));
+
+  if (handleIfNoneMatchCacheHeader(request, 200)) return;
+
+  AsyncWebServerResponse *response =
+    request->beginResponse_P(200, "text/html", PAGE_console_polling, PAGE_console_polling_length);
+
+  response->addHeader("Content-Encoding", "gzip");
+  setStaticContentCacheHeaders(response);
+  request->send(response);
+}
+
+void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
+{
+
+  // -------- Pass 1: Handle Web Console Command (c1) --------
+  if (request->hasParam("c1")) {
+
+    const String cmd = request->arg("c1");
+    const size_t len = cmd.length();
+
+    if (len && len < DATA_BUFFER_PAYLOAD_MAX_LENGTH) {
+
+      #ifdef ENABLE_FEATURE_WEBSERVER__DELAYED_JSONLOCKED_COMMAND_PROCESSING
+      if (data_buffer.tryLock(GetModuleUniqueID())) {
+      #else
+      if (data_buffer.requestLock(GetModuleUniqueID())) {
+      #endif
+
+        data_buffer.ClearSoft();
+        data_buffer.payload.length_used = (uint16_t)len;
+        memcpy(data_buffer.payload.ctr, cmd.c_str(), len);
+        data_buffer.payload.ctr[len] = '\0';
+
+        #ifdef ENABLE_FEATURE_WEBSERVER__DELAYED_JSONLOCKED_COMMAND_PROCESSING        
+        data_buffer.delayedJSONCommandWaiting = true;
+        #else
+        tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
+        data_buffer.releaseLock();
+        #endif
+
+      } else {
+        ALOG_WRN(PSTR("WebConsole c1: buffer busy, command ignored"));
+      }
+
+    } else if (len) {
+      ALOG_ERR(PSTR("WebConsole c1: payload too large (%u)"), (unsigned)len);
+    }
+  }
+
+
+
+
+  // Parse c2 as uint8 (Tasmota-style). 0 means "initial sync"
+  uint8_t counter = 0;
+  {
+    char stmp[12] = {0};
+    WebGetArg(request, "c2", stmp, sizeof(stmp));   // stable even with _cb present
+    if (stmp[0]) {
+      const int v = atoi(stmp);
+      if (v > 0 && v < 256) counter = (uint8_t)v;
+      // Serial.printf("Initial Sync c2=%d\n\r",counter);
+    }
+  }
+  
+  // Serial.printf("Sync c2=%d\n\r",counter);
+  // Stream reply (no shared JSON buffer)
+  AsyncResponseStream *response = request->beginResponseStream("text/plain");
+
+  const uint8_t web_idx = tkr_log->web_log_index;
+
+  // Header: "<idx>}1<reset_flag>}1"
+  response->printf("%u}1%u}1", (unsigned)web_idx, (unsigned)reset_web_log_flag);
+
+  // One-shot reset flag (same semantics as you had)
+  if (!reset_web_log_flag) {
+    reset_web_log_flag = true;
+    counter = 0;
+  }
+
+  // If counter==0: sync only (no history dump)
+  if (counter == 0) {
+    response->print("}1");
+    request->send(response);
+    return;
+  }
+
+  // If nothing new
+  if (counter == web_idx) {
+    response->print("}1");
+    request->send(response);
+    return;
+  }
+
+  bool need_newline = false;
+
+  // Walk forward until we reach the current index
+  while (counter != web_idx) {
+    char*  line = nullptr;
+    size_t len  = 0;
+
+    tkr_log->GetLog(counter, &line, &len);
+
+    if (line && len) {
+      if (need_newline) response->write('\n');
+      response->write((const uint8_t*)line, len);
+      need_newline = true;
+    }
+
+    counter++;
+    if (counter == 0) counter = 1; // skip 0 (matches your “0 not allowed” rule)
+  }
+
+  response->print("}1");
+  request->send(response);
+}
+
+#endif // ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+
+#endif // ESP32
+
+
+
 #endif // USE_MODULE_NETWORK_WEBSERVER
+

@@ -109,6 +109,8 @@ enum LoggingLevels {
 #endif
 
 
+#define DEBUG_CRITICAL_STOP_CODE_PRINT while(1);{ delay(1000);  Serial.println("STOPPED: while(1)");}
+
 // Can only be used when hardware serial is enabled
 #if defined(USE_DEBUG_CHECK_AND_PRINT_NULLPTR) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
   #define DEBUG_CHECK_AND_PRINT_NULLPTR(X)    if(X==nullptr){ \
@@ -176,6 +178,7 @@ enum LoggingLevels {
 #else
   #define DEBUG_LINE_HERE   //nothing, no code
 #endif
+// Serial.printf("DEBUG HERE: "); Serial.print(__FILE__); Serial.println(__LINE__); Serial.flush();
 
 #if defined(ENABLE_DEBUG_LINE_HERE2)
   #define DEBUG_LINE_HERE2    SERIAL_DEBUG.printf("DEBUG HERE2: ");\

@@ -5420,7 +5420,7 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Ensuite"
   #define MQTT_HOST   "192.168.1.70" // Whitehall
   // #define MQTT_HOST   "192.168.3.70" // Meadows for testing
-    #define MQTT_HOST     MQTT_HOST
+    
     #define MQTT_PORT     1883
 
   #define ESP8266
@@ -6045,7 +6045,7 @@ Bathroom
   #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 1000
   #define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  100
   #define DB18_SENSOR_MAX                     15
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH      3000 //needed for db sensosrs, but currently causes crash in lighting
+  //#define DATA_BUFFER_PAYLOAD_MAX_LENGTH      3000 //needed for db sensosrs, but currently causes crash in lighting
   #define MQTT_MAX_PACKET_SIZE                3000
 
   #define USE_MODULE_SENSORS_INTERFACE
@@ -6788,7 +6788,7 @@ HVAC controllers here
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
   #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_HOST     MQTT_HOST
+    
     #define MQTT_PORT     1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER

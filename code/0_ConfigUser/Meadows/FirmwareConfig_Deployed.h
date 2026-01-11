@@ -884,7 +884,7 @@ R"=====(
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
 #define MQTT_HOST   "192.168.3.70"
-   #define MQTT_HOST     MQTT_HOST
+   
    #define MQTT_PORT     1883
 
 
@@ -4470,7 +4470,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #endif
   // #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
   // #define MQTT_HOST   "192.168.3.70"
-  //   #define MQTT_HOST     MQTT_HOST
+  //   
   //   #define MQTT_PORT     1883
 
  /***********************************
@@ -5227,7 +5227,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 1000
   // #define DEVICENAMEBUFFER_NAME_INDEX_LENGTH  100
   // #define DB18_SENSOR_MAX                     15
-  #define DATA_BUFFER_PAYLOAD_MAX_LENGTH      3000 //needed for db sensosrs, but currently causes crash in lighting
+  //#define DATA_BUFFER_PAYLOAD_MAX_LENGTH      3000 //needed for db sensosrs, but currently causes crash in lighting
   // #define MQTT_MAX_PACKET_SIZE                3000
 
   #define USE_MODULE_SENSORS_INTERFACE
@@ -6320,7 +6320,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
 #define MQTT_HOST   "192.168.3.70"
-  #define MQTT_HOST     MQTT_HOST
+  
   #define MQTT_PORT     1883
   
   // #define USE_MODULE_DRIVERS_INTERFACE
@@ -6390,7 +6390,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   // #endif
   // #define DEVICENAME_ROOMHINT_CTR "testgroup"
   // #define MQTT_HOST   "192.168.3.70"
-  //   #define MQTT_HOST     MQTT_HOST
+  //   
   //   #define MQTT_PORT     1883
 
 
@@ -6747,7 +6747,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   // #endif
   // #define DEVICENAME_ROOMHINT_CTR "testgroup"
   // #define MQTT_HOST   "192.168.3.70"
-  //   #define MQTT_HOST     MQTT_HOST
+  //   
   //   #define MQTT_PORT     1883
 
 

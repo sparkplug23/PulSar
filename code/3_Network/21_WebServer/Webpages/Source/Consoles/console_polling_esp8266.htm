@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="theme-color" content="#222222">
+<title>PulSar Console</title>
+
+<style>
+  /* Date Modified: 10Jan26 */
+  html,body{height:100%;margin:0;background:#141414;color:#e6e6e6;font-family:Arial,Helvetica,sans-serif}
+  .top,.bot{position:fixed;left:0;right:0;background:#1d1d1d;border-color:#333;border-style:solid}
+  .top{top:0;border-width:0 0 1px 0;padding:8px 10px;display:flex;gap:8px;align-items:center}
+  .bot{bottom:0;border-width:1px 0 0 0;padding:8px 10px;display:flex;gap:8px;align-items:center}
+  .main{position:fixed;left:0;right:0;top:44px;bottom:52px;padding:8px 10px}
+  #log{width:100%;height:100%;box-sizing:border-box;background:#0f0f0f;border:1px solid #333;border-radius:8px;
+       padding:8px;font-family:Consolas,Menlo,monospace;font-size:12px;line-height:1.35;white-space:pre-wrap;overflow:auto}
+  #cmd{flex:1;background:#0f0f0f;color:#e6e6e6;border:1px solid #333;border-radius:8px;padding:9px 10px;font-size:14px;outline:none}
+  button{background:#2a2a2a;color:#e6e6e6;border:1px solid #333;border-radius:6px;padding:7px 10px;font-size:14px;cursor:pointer}
+  button:active{transform:translateY(1px)}
+  .pill{margin-left:auto;border:1px solid #333;border-radius:999px;padding:6px 10px;font-size:12px;color:#a8a8a8;background:#101010;white-space:nowrap}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+  <button id="btnClear">Clear</button>
+  <span class="pill" id="stat">idx:0</span>
+</div>
+
+<div class="main">
+  <div id="log"></div>
+</div>
+
+<div class="bot">
+  <input id="cmd" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Command...">
+  <button id="btnSend">Send</button>
+</div>
+
+<script>
+/* Date Modified: 10Jan26 */
+
+/*
+ * Endpoint:
+ *  - Page served at /console -> polls /console?c2=...
+ *  - Page served elsewhere   -> polls that same path
+ */
+let CONSOLE_URL = location.pathname || "/console";
+
+// Backend protocol (same as existing polling page):
+// GET ?c2=<counter> returns: <idx>}1<reset_flag>}1<log lines...>}1
+let counter = 0;
+let inflight = false;
+
+const elLog  = document.getElementById("log");
+const elCmd  = document.getElementById("cmd");
+const elStat = document.getElementById("stat");
+
+function atBottom(){
+  return (elLog.scrollTop + elLog.clientHeight + 5) >= elLog.scrollHeight;
+}
+
+function appendLog(text){
+  if (!text) return;
+  text = String(text).replace(/\u0001/g,"").trim();
+  if (!text) return;
+  const wasBottom = atBottom();
+  elLog.textContent += (elLog.textContent ? "\n" : "") + text;
+  if (wasBottom) elLog.scrollTop = elLog.scrollHeight;
+}
+
+function clearLog(){
+  elLog.textContent = "";
+}
+
+function setStatus(idx){
+  elStat.textContent = "idx:" + String(idx || 0);
+}
+
+function buildUrl(params){
+  const u = new URL(CONSOLE_URL, location.origin);
+  for (const k in params) u.searchParams.set(k, params[k]);
+  u.searchParams.set("_cb", Date.now()); // cache-bust
+  return u.toString();
+}
+
+async function pollOnce(){
+  if (inflight) return;
+  inflight = true;
+
+  try{
+    const r = await fetch(buildUrl({ c2: String(counter) }), { method:"GET", cache:"no-store" });
+    if (!r.ok) return;
+
+    const t = await r.text();
+
+    // Expect: idx}1reset}1log}1
+    const parts = t.split("}1");
+    if (parts.length < 3) return;
+
+    const idx   = parseInt(parts[0] || "0", 10) || 0;
+    const rflag = parseInt(parts[1] || "0", 10) || 0;
+
+    let logText = parts.slice(2, parts.length - 1).join("}1");
+    logText = (logText || "").trim();
+
+    if (rflag === 0) { // server one-shot reset semantics
+      clearLog();
+      counter = 0;
+    }
+
+    counter = (idx > 0) ? idx : counter;
+    setStatus(counter);
+
+    if (logText) appendLog(logText);
+  } catch(e){
+    // no-op (lightweight)
+  } finally {
+    inflight = false;
+  }
+}
+
+async function sendCommand(){
+  const cmd = (elCmd.value || "").trim();
+  if (!cmd) return;
+
+  // Ensure we don't stack on top of poll
+  if (inflight) return;
+
+  inflight = true;
+  try{
+    await fetch(buildUrl({ c1: cmd, c2: String(counter) }), { method:"GET", cache:"no-store" });
+  } catch(e){
+  } finally {
+    inflight = false;
+  }
+
+  elCmd.value = "";
+  pollOnce(); // immediate refresh after send
+}
+
+document.getElementById("btnClear").onclick = () => { clearLog(); };
+
+document.getElementById("btnSend").onclick = () => { sendCommand(); };
+
+elCmd.addEventListener("keydown", (ev) => {
+  if (ev.key === "Enter") {
+    ev.preventDefault();
+    sendCommand();
+  }
+});
+
+// Init: poll once, then every 5 seconds
+pollOnce();
+setInterval(() => { pollOnce(); }, 5000);
+</script>
+
+</body>
+</html>

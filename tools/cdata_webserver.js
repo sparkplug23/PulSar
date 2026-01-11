@@ -293,7 +293,7 @@ writeChunks(
     },
     {
       file: "settings_wifi.htm",
-      name: "PAGE_settings_wifi",
+      name: "PAGE_settings_wifi2",
       method: "gzip",
       filter: "html-minify",
     },
@@ -449,23 +449,55 @@ const char PAGE_dmxmap[] PROGMEM = R"=====()=====";
 
 
 
+// writeChunks(
+//   source_path,
+//   [
+//     {
+//       file: "console_ws.htm",
+//       name: "PAGE_console",
+//       method: "gzip",
+//       filter: "html-minify-ui",
+//     },
+//     {
+//       file: "console_polling.htm",
+//       name: "PAGE_console_polling",
+//       method: "gzip",
+//       filter: "html-minify-ui",
+//     }
+//   ],
+//   destination_path + "pages_2025.h"
+// );
+
+
 writeChunks(
   source_path,
   [
     {
-      file: "console_ws.htm",
-      name: "PAGE_console",
+      file: "Consoles/console_ws.htm",
+      name: "PAGE_console_ws",
       method: "gzip",
       filter: "html-minify-ui",
     },
     {
-      file: "console_polling.htm",
+      file: "Consoles/console_polling.htm",
       name: "PAGE_console_polling",
       method: "gzip",
       filter: "html-minify-ui",
     }
   ],
-  destination_path + "pages_2025.h"
+  destination_path + "pages_console_esp32.h"
+);
+writeChunks(
+  source_path,
+  [
+    {
+      file: "Consoles/console_polling_esp8266.htm",
+      name: "PAGE_console_polling",
+      method: "gzip",
+      filter: "html-minify-ui",
+    }
+  ],
+  destination_path + "pages_console_esp8266.h"
 );
 
 
@@ -514,8 +546,8 @@ writeChunks(
       filter: "html-minify",
     },
     {
-      file: "settings_wifi2.htm",
-      name: "PAGE_settings_wifi2",
+      file: "settings_wifi.htm",
+      name: "PAGE_settings_wifi",
       method: "gzip",
       filter: "html-minify",
     }

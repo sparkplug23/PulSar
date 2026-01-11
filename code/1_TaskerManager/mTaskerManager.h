@@ -38,7 +38,7 @@
   /**
    * In order of importance
    * */
-  #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
+  #include "0_ConfigUser/Whitehall/Firmware__Home__Secret.h"
   #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
   #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
   #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
@@ -66,7 +66,7 @@
 // #include "2_CoreSystem/10_RuleEngine/mRuleEngine.h"
 // #endif
 
-#include "2_CoreSystem/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
+#include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
 
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"                           // Language support configured by .h
 #include "2_CoreSystem/05_HardwarePins/mPins_Templates.h"                // Hardware configuration
@@ -168,7 +168,7 @@ enum ModuleStatus{
 };
 
 
-#include "2_CoreSystem/mFirmwareDefaults.h" // moving feb2025
+#include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h" // moving feb2025
 #include "2_CoreSystem/mSystemConfig.h"
 
 
@@ -339,7 +339,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #define tkr_mqtt                                static_cast<mMQTTManager*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_NETWORK_MQTT_ID))
 #endif 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
-  #include "3_Network/21_WebServer/mWebServer.h"
+  #include "3_Network/21_WebServer/_WebServer.h"
   #define tkr_web                                 static_cast<mWebServer*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_NETWORK_WEBSERVER_ID))
 #endif
 /**

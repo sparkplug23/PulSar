@@ -90,7 +90,7 @@ class mEnergyInterface :
 // #include <vector>
 // // #include "2_CoreSystem/mBaseConfig.h"
 
-// // #include "2_CoreSystem/mFirmwareDefaults.h"
+// // ##include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h" 
 // // #include "0_ConfigUser/mFirmwareCustom_Secret.h"
 // // #include "2_CoreSystem/mSystemConfig.h"
 

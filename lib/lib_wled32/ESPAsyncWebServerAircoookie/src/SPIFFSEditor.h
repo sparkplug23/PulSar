@@ -17,9 +17,6 @@ class SPIFFSEditor: public AsyncWebHandler {
     uint32_t _startTime;
 
     
-    // --- global change tracking ---
-    static volatile bool s_fileChanged;
-    static String        s_lastFile;
 
 
   public:
@@ -36,6 +33,9 @@ class SPIFFSEditor: public AsyncWebHandler {
 
     // --- NEW: generic helpers ---
 
+    // --- global change tracking ---
+    static volatile bool s_fileChanged;
+    static String        s_lastFile;
     // Has *any* file been edited since last clear?
     static bool Check_AnyFilesEdited() {
       return s_fileChanged;

@@ -29,7 +29,7 @@ With latest version, all longer term shared debug features should be added here 
 #include "2_CoreSystem/mSystemConfig.h"
 #include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
 #ifdef USE_USER_MICHAEL
-#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
+#include "0_ConfigUser/Whitehall/Firmware__Home__Secret.h"
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
 #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
@@ -49,7 +49,8 @@ With latest version, all longer term shared debug features should be added here 
   #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
 #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_CellularDatalinks.h"
   #include "0_ConfigUser/Meadows/FirmwareConfig_Deployed.h"
-#include "2_CoreSystem/mFirmwareDefaults.h" //addded feb2025
+
+#include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h" //addded feb2025
 #else
 // #error "here"
 #endif // USE_USER_MICHAEL

@@ -1,14 +1,13 @@
-#include "mWebServer.h"
+#include "_WebServer.h"
 
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 
 
-
 bool mWebServer::captivePortal(AsyncWebServerRequest *request)
 {
   // Captive portal redirect only when AP is active
-  const wifi_mode_t mode = WiFi.getMode();
+  const auto mode = WiFi.getMode();
   const bool ap_active = (mode == WIFI_AP) || (mode == WIFI_AP_STA);
   if (!ap_active) return false;
 
@@ -35,7 +34,7 @@ bool mWebServer::captivePortal(AsyncWebServerRequest *request)
 
   // Redirect to Wi-Fi setup page on AP IP (avoid hardcoding AP IP)
   const IPAddress apIP = WiFi.softAPIP();
-  const String url = String("http://") + apIP.toString() + D_CAPTIVE_PORTAL_URL_REDIRECT_PATH;
+  const String url = String(F("http://")) + apIP.toString() + D_CAPTIVE_PORTAL_URL_REDIRECT_PATH;
 
   AsyncWebServerResponse *response = request->beginResponse(302);
   response->addHeader(F("Location"), url);
@@ -125,5 +124,132 @@ bool mWebServer::isIp(String str) {
   }
   return true;
 }
+
+
+bool mWebServer::WebGetArg(AsyncWebServerRequest* request,
+                           const char* arg,
+                           char* out,
+                           size_t max)
+{
+  out[0] = '\0';
+
+  if (!request->hasArg(arg)) {
+    Serial.printf("WebGetArg: not found '%s'\n", arg);
+    return false;
+  }
+
+  const String& v = request->arg(arg);  // minimal extra copies
+  // Serial.printf("WebGetArg: '%s'='%s'\n", arg, v.c_str());
+  strlcpy(out, v.c_str(), max);
+  return true;
+}
+
+
+
+bool mWebServer::HttpCheckPriviledgedAccess()
+{
+
+//     bool autorequestauth = true;
+
+//   if (HTTP_USER == webserver_state) {
+//     HandleRoot();
+//     return false;
+//   }
+//   if (autorequestauth && !WebAuthenticate()) {
+//     server->requestAuthentication();
+//     return false;
+//   }
+  return true; // admin by default
+}
+
+
+
+void mWebServer::createEditHandler(bool enable) 
+{
+  if (editHandler != nullptr) server->removeHandler(editHandler);
+  if (enable) 
+  {
+    #ifdef WLED_ENABLE_FS_EDITOR
+      #ifdef ARDUINO_ARCH_ESP32
+      editHandler = &server->addHandler(new SPIFFSEditor(FILE_SYSTEM));
+      #else
+      editHandler = &server->addHandler(new SPIFFSEditor("","",FILE_SYSTEM));
+      #endif
+    #else
+      editHandler = &server->on("/edit", HTTP_GET, [this](AsyncWebServerRequest *request){
+        this->serveMessage(request, 501, "Not implemented", F("The FS editor is disabled in this build."), 254);
+      });
+    #endif
+  } 
+  else 
+  {
+    editHandler = &server->on("/edit", HTTP_ANY, [this](AsyncWebServerRequest *request){
+      this->serveMessage(request, 500, "Access Denied", FPSTR(s_unlock_cfg), 254);
+    });
+  }
+}
+
+
+
+void mWebServer::serveMessage(AsyncWebServerRequest* request,
+                              uint16_t code,
+                              const String& headl,
+                              const String& subl,
+                              uint8_t optionT)
+{
+  // Capture per-request copies so concurrent requests cannot interfere.
+  const String headCopy = headl;
+  const String subCopy  = subl;
+  const uint8_t optCopy = optionT;
+
+  request->send_P(
+    code,
+    PSTR("text/html"),
+    PAGE_msg,
+    [headCopy, subCopy, optCopy](const String& var) -> String
+    {
+      if (var != F("MSG")) return String();
+
+      String messageBody;
+      messageBody.reserve(headCopy.length() + subCopy.length() + 96);
+
+      messageBody += headCopy;
+      messageBody += F("</h2>");
+      messageBody += subCopy;
+
+      const uint32_t optt = optCopy;
+
+      if (optt < 60) // redirect to settings after optionType seconds
+      {
+        messageBody += F("<script>setTimeout(RS,");
+        messageBody += String(optt * 1000UL);
+        messageBody += F(")</script>");
+      }
+      else if (optt < 120) // redirect back after optionType-60 seconds (unused)
+      {
+        // messageBody += F("<script>setTimeout(B,");
+        // messageBody += String((optt - 60UL) * 1000UL);
+        // messageBody += F(")</script>");
+      }
+      else if (optt < 180) // reload parent after optionType-120 seconds
+      {
+        messageBody += F("<script>setTimeout(RP,");
+        messageBody += String((optt - 120UL) * 1000UL);
+        messageBody += F(")</script>");
+      }
+      else if (optt == 253)
+      {
+        messageBody += F("<br><br><form action=/settings><button class=\"bt\" type=submit>Back</button></form>");
+      }
+      else if (optt == 254)
+      {
+        messageBody += F("<br><br><button type=\"button\" class=\"bt\" onclick=\"B()\">Back</button>");
+      }
+
+      return messageBody;
+    }
+  );
+}
+
 
 #endif // USE_MODULE_NETWORK_WEBSERVER

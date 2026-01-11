@@ -28,7 +28,7 @@ void WiFi_Wps_StatusCallback(wps_cb_status status);
 /***** SECTION REMOVED DECEMBER 2024 */
 #include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
 #ifdef USE_USER_MICHAEL
-#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
+#include "0_ConfigUser/Whitehall/Firmware__Home__Secret.h"
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
 #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
@@ -625,7 +625,7 @@ This enables switching to newer firmware versions, but falling back when an issu
 //   #endif
 //   #define DEVICENAME_ROOMHINT_CTR "testgroup"
 //   #define MQTT_HOST   "192.168.3.70"
-//     #define MQTT_HOST     MQTT_HOST
+//     
 //     #define MQTT_PORT     1883
     
 // //   #define SETTINGS_HOLDER 1239
@@ -2626,6 +2626,80 @@ This enables switching to newer firmware versions, but falling back when an issu
 
 
 #endif // ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING
+
+
+/**
+ * @brief Added 10Jan26
+ * Working on new softAP/Web, all features should become included as standard
+ * 
+ * 
+ * 
+ */
+#ifdef ENABLE_FEATURE_BUILD__10JAN25_SOFTAP_WEBUI
+// #error "ere"
+  #ifndef ESP8266
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  #endif
+
+  #define ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+
+  //filesystem to become standard!
+  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
+  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+
+  #define USE_MODULE_CORE_FILESYSTEM
+    #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
+    #define WLED_ENABLE_FS_EDITOR
+    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+    #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+
+
+
+  //webserver?
+  
+  #ifndef ENABLE_DEBUGFEATURE_LIGHTS__ESP32C3_FLICKER_TEST
+  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+  #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+
+  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS
+  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
+  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
+
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
+
+  #define WLED_ENABLE_WEBSOCKETS2
+  #define ENABLE_DEVFEATURE_LIGHTING__JSONLIVE_WEBSOCKETS
+  #define WLED_ENABLE_JSONLIVE
+  #endif
+
+
+
+// lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
+
+
+  #define ENABLE_DEVFEATURE_WEBSERVER__ROOT_DEBUG_LINKS
+  #define ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI
+  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+  // #define ENABLE_FEATURE_WEBSERVER__DELAYED_JSONLOCKED_COMMAND_PROCESSING
+  #define ENABLE_DEVFEATURE_WEBSERVER__SETTINGS_WEBPAGES
+  #define ENABLE_DEBUGFEATURE_TASKER__SPLASH_JSON_BUFFER
+  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+  
+  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+  #define ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+  #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+
+  #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+
+
+
+#endif // ENABLE_FEATURE_BUILD__10JAN25_SOFTAP_WEBUI
 
 
 #endif

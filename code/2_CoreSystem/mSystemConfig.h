@@ -18,7 +18,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 
 /**@@@@@ Minor Changes - aim to make these quarterly
- * #132 : 24Dec25 During Christmas, towards to new softAP. Live palettes refactored.
+ * #132 : 24Dec25 During Christmas, Live palettes refactored. New Wifi2, webserver.
  * #131 : Oct25 In Colorado
  * #130 : Aug25 Moving towards FIRMWARE_DEFAULT__LIGHTING_CONFIG__## and merging longterm working lighting options. From now on, unless testing a new feature inside FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA (where it, then inside it will be a test ifdef to keep it centralised) all lighting will be defined in the ini, and use FIRMWARE_DEFAULT__LIGHTING_CONFIG__## to define the lighting config. 
  * #129 : Jun25 Esp32, c3, s3, pin mapping templates updated

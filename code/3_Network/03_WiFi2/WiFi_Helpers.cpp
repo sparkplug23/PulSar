@@ -201,6 +201,177 @@ const char* mWiFi::GetWiFiConfigTypeCtr(void){
 }
 
 
+void mWiFi::parse_JSONCommand(JsonParserObject obj){};
+   
+
+
+
+void mWiFi::init(void){
+  
+//  AddLog(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_RELAYS D_DEBUG_FUNCTION "\"%s\""),"mRelays::init");
+
+}
+
+
+
+
+
+void mWiFi::WiFi_Radio_Shutdown(bool option)
+{
+  // option = false - Legacy disconnect also used by DeepSleep
+  // option = true  - Disconnect with SDK wifi calibrate sector erase when WIFI_FORCE_RF_CAL_ERASE enabled
+  delay(100);                 // Allow time for message xfer - disabled v6.1.0b
+
+// #ifdef USE_EMULATION
+//   UdpDisconnect();
+//   delay(100);                 // Flush anything in the network buffers.
+// #endif  // USE_EMULATION
+
+  // if (Settings.flag.mqtt_enabled) {  // SetOption3 - Enable MQTT
+  //   MqttDisconnect();
+  //   delay(100);               // Flush anything in the network buffers.
+  // }
+
+// #ifdef WIFI_FORCE_RF_CAL_ERASE
+//   if (option) {
+//     WiFi.disconnect(false);   // Disconnect wifi
+//     SettingsErase(4);         // Delete SDK wifi config and calibrate data
+//   } else
+// #endif  // WIFI_FORCE_RF_CAL_ERASE
+  // {
+    // Enable from 6.0.0a until 6.1.0a - disabled due to possible cause of bad wifi connect on core 2.3.0
+    // Re-enabled from 6.3.0.7 with ESP.restart replaced by ESP.reset
+    // Courtesy of EspEasy
+    // WiFi.persistent(true);    // use SDK storage of SSID/WPA parameters
+    ETS_UART_INTR_DISABLE();
+
+  //tmp fix
+#ifdef ESP8266
+    wifi_station_disconnect();  // this will store empty ssid/wpa into sdk storage
+    #else
+
+    // erase ap: empty ssid, ...
+    WiFi.disconnect(true, true); //inside compat
+    #endif
+    ETS_UART_INTR_ENABLE();
+    // WiFi.persistent(false);   // Do not use SDK storage of SSID/WPA parameters
+  // }
+  delay(100);                 // Flush anything in the network buffers.
+
+}
+
+/*********************************************************************************************\
+ * MDNS
+\*********************************************************************************************/
+
+#ifdef USE_DISCOVERY
+
+void mWiFi::WiFi_Mdns_StartOrRestart(void)
+{
+  if (Mdns.begun) return;
+
+  const char* originalName = tkr_set->Settings.system_name.device;
+
+  // Define a temporary buffer (max 64 bytes: 63 + null terminator)
+  char hostname[64];
+  strncpy(hostname, originalName, 63);
+  hostname[63] = '\0';
+
+  // Replace invalid underscores with dashes
+  for (char* p = hostname; *p; ++p)
+  {
+    if (*p == '_') *p = '-';
+  }
+
+  // Platform-specific hostname setter
+  #if defined(ESP8266)
+    WiFi.hostname(hostname);
+  #elif defined(ESP32)
+    WiFi.setHostname(hostname);
+  #endif
+
+  // OTA hostname
+  ArduinoOTA.setHostname(hostname);
+
+  // Close existing session to prevent failure
+  MDNS.end();
+
+  // Begin with sanitized hostname
+  Mdns.begun = (uint8_t)MDNS.begin(hostname);
+
+  ALOG_INF(PSTR(D_LOG_MDNS "%s with %s"),
+           (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED),
+           hostname);
+
+  #if defined(ESP32)
+    // Register service
+    MDNS.addService("_http", "_tcp", 80);
+
+    String escapedMac = WiFi.macAddress();
+    escapedMac.replace(":", "");
+    escapedMac.toLowerCase();
+
+    MDNS.addService("http", "tcp", 80);
+    MDNS.addService("pulsar", "tcp", 80);
+    MDNS.addServiceTxt("pulsar", "tcp", "mac", escapedMac.c_str());
+  #endif
+}
+
+
+
+
+
+
+#ifdef MQTT_HOST_DISCOVERY
+void mWiFi::WiFi_Mdns_DiscoverMqttBroker(void)
+{
+  if (!Mdns.begun) { return; }
+
+  int n = MDNS.queryService("mqtt", "tcp");  // Search for mqtt service
+
+  ALOG_INF( PSTR(D_LOG_MDNS D_QUERY_DONE " %d"), n);
+
+  if (n > 0) {
+    uint32_t i = 0;            // If the hostname isn't set, use the first record found.
+    #ifdef MDNS_HOSTNAME
+    for (i = n; i > 0; i--) {  // Search from last to first and use first if not found
+      if (!strcmp(MDNS.hostname(i).c_str(), MDNS_HOSTNAME)) {
+        break;                 // Stop at matching record
+      }
+    }
+    #endif  // MDNS_HOSTNAME
+    // SettingsUpdateText(SET_MQTT_HOST, MDNS.hostname(i).c_str());
+    // Settings.mqtt_port = MDNS.port(i);
+    // ALOG_INF(PSTR(D_LOG_MDNS D_MQTT_SERVICE_FOUND " %s," D_PORT " %d"), SettingsText(SET_MQTT_HOST), Settings.mqtt_port);
+  }
+}
+#endif  // MQTT_HOST_DISCOVERY
+
+#ifdef WEBSERVER_HOST_DISCOVERY
+void mWiFi::WiFi_Mdns_AdvertiseHttpService(void) {
+  if (1 == Mdns.begun) {
+    Mdns.begun = 2;
+    MDNS.addService("http", "tcp", WEB_PORT);
+    MDNS.addServiceTxt("http", "tcp", "devicetype", "tasmota");
+  }
+}
+#endif  // WEBSERVER_HOST_DISCOVERY
+#endif  // USE_DISCOVERY
+
+
+
+#if defined(USE_NETWORK_MDNS) && defined(ESP8266) //Not needed with esp32 mdns
+void mWiFi::WiFi_Mdns_Tick(void) 
+{
+  MDNS.update();
+  if (2 == Mdns.begun) {
+    MDNS.update(); // this is basically passpacket like a webserver
+   // ALOG_DBM( PSTR(D_LOG_MDNS "MDNS.update"));
+  }
+}
+#endif  // ESP8266
+
+
 
 
 

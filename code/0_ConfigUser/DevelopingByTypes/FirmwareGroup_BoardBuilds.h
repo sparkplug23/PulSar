@@ -22,7 +22,7 @@
 
 //--------------------------------[Enable Device]-------------------------------------
 
-  #define ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+
 // ======================== ESP8266 ========================
 // #define DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU
 // ======================== ESP8285 ========================
@@ -93,11 +93,25 @@
 
   #define SETTINGS_HOLDER 1239
 
-  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
+
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_LINE_HERE
+
+  #define ENABLE_FEATURE_BUILD__10JAN25_SOFTAP_WEBUI
+
+
+  // #define DEBUG_FASTBOOT
+
+  // #define ENABLE_DEVFEATURE_WIFI__FORCE_SOFTAP_MODE_BY_BLOCKING_SSIDS
+
+
+  #define   D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/m/serverrelays"
       
   /***********************************
   * SECTION: Enable Sections
@@ -110,7 +124,6 @@
   * SECTION: Network Configs
   ************************************/    
 
-  #define ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
 
   /***********************************
   * SECTION: Drivers Configs
@@ -301,7 +314,7 @@
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
 #define MQTT_HOST   "192.168.3.70"
-   #define MQTT_HOST     MQTT_HOST
+   
    #define MQTT_PORT     1883
     
 /***********************************
@@ -463,7 +476,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
 #define MQTT_HOST   "192.168.3.70"
-   #define MQTT_HOST     MQTT_HOST
+   
    #define MQTT_PORT     1883
   
 
@@ -889,7 +902,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
 #define MQTT_HOST   "192.168.3.70"
-   #define MQTT_HOST     MQTT_HOST
+   
    #define MQTT_PORT     1883
   
 

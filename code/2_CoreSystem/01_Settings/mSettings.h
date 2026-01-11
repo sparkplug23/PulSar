@@ -7,19 +7,19 @@
 
 #define DATA_BUFFER_TOPIC_MAX_LENGTH    100
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER
-  #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
+// #ifdef USE_MODULE_NETWORK_WEBSERVER
+//   #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
     #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
-  #endif
-#else
-  #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
-    #ifdef ESP32
-      #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
-    #else
-      #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 2000
-    #endif
-  #endif
-#endif //USE_MODULE_NETWORK_WEBSERVER
+//   #endif
+// #else
+//   #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
+//     #ifdef ESP32
+//       //#define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+//     #else
+//       //#define DATA_BUFFER_PAYLOAD_MAX_LENGTH 2000
+//     #endif
+//   #endif
+// #endif //USE_MODULE_NETWORK_WEBSERVER
 
 
 typedef union {
@@ -166,7 +166,7 @@ extern DATA_BUFFER data_buffer;
 // struct DATA_BUFFER{
 //   struct TOPIC{
 //     char ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
-//     uint16_t length_used = 0;
+//     uint16_t length_used = 0; 
 //   }topic;
 //   struct PAYLOAD{
 //     char ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
@@ -257,7 +257,7 @@ const uint16_t VL53LXX_MAX_SENSORS = 8;     // Max number of VL53L0X sensors
 
 #include "2_CoreSystem/05_HardwarePins/mPins.h"
 
-#include "2_CoreSystem/mFirmwareDefaults.h"
+#include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h" 
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 #include "2_CoreSystem/11_Languages/mLanguageProgmem.h"
 #include "1_TaskerManager/mTaskerManager.h"

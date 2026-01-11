@@ -14,6 +14,7 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
   // Good link if connected AND routable
   if (connected && WiFi_Link_IsIpRoutable())
   {
+    // If previously not connected, we are now connected and should broadcast that
     if (!connection.fConnected)
     {
       WiFi2_Sta_Connected_Enter();
@@ -22,6 +23,8 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
     WiFi_Sta_OnConnected_ResetOutageScanFlags();
     return;
   }
+
+  // If we preceed beyond this point, connection above was not establashed and we will attempt reconnects
 
   // Not good (either not connected, or no routable IP)
   if (connection.fConnected)
@@ -42,6 +45,7 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
   // Backoff window using your existing counter
   if (connection.counter > 0)
   {
+    ALOG_INF(PSTR(D_LOG_WIFI "Reconnecting in %d seconds"),connection.counter);
     connection.counter--;
     return;
   }
@@ -303,7 +307,9 @@ uint8_t mWiFi::WiFi2_GetFirstConfiguredProfileIndex(void) const
 
 
 void mWiFi::WiFi2_Sta_Connected_Enter(void)
-{ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+{
+  ALOG_INF(PSTR(D_LOG_WIFI "%s"),"WiFi2_Sta_Connected_Enter");
+  
   connection.fConnected = true;
   connection.fReconnect = false;
   connection.link_count++;

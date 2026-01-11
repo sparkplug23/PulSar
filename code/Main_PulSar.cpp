@@ -295,8 +295,33 @@ void setup(void)
  ** Init Pointers ***************************************************************************
  ********************************************************************************************/
  
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+
   // Init Json builder with memory address and size
   JsonBuilderI ->Start(data_buffer.payload.ctr, data_buffer.payload.length_used, DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+  
+  DEBUG_LINE_HERE
+
+  if(data_buffer.payload.ctr){
+    DEBUG_LINE_HERE
+  }else{
+    DEBUG_LINE_HERE
+  }
+  
+  
+Serial.print(F("payload.ctr addr = 0x"));
+Serial.println((uintptr_t)data_buffer.payload.ctr, HEX);
+
+Serial.print(F("len_used addr   = 0x"));
+Serial.println((uintptr_t)&data_buffer.payload.length_used, HEX);
+
+Serial.print(F("DATA_BUFFER addr= 0x"));
+Serial.println((uintptr_t)&data_buffer, HEX);
+
+Serial.print(F("size = "));
+Serial.println((unsigned)DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+
   BufferWriterI->Start(data_buffer.payload.ctr, data_buffer.payload.length_used, DATA_BUFFER_PAYLOAD_MAX_LENGTH); //length prob doesnt need to be set either after its defined in the class
   
   /**
@@ -309,7 +334,7 @@ void setup(void)
   DEBUG_LINE_HERE
   Serial.printf("time %dms\n\r", millis());
   DEBUG_LINE_HERE
-  
+  // DEBUG_CRITICAL_STOP_CODE_PRINT
 /********************************************************************************************
  ** LOGGING: Set boot log levels *********************************************************************
  ********************************************************************************************/

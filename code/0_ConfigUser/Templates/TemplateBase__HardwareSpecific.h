@@ -41,7 +41,7 @@
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
   #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_HOST     MQTT_HOST
+    
     #define MQTT_PORT     1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -102,7 +102,7 @@
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
   #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_HOST     MQTT_HOST
+    
     #define MQTT_PORT     1883
 
 
@@ -164,7 +164,7 @@
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
   #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_HOST     MQTT_HOST
+    
     #define MQTT_PORT     1883
 
   //#define FORCE_TEMPLATE_LOADING
@@ -257,7 +257,7 @@
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
   #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_HOST     MQTT_HOST
+    
     #define MQTT_PORT     1883
   
   #define USE_MODULE_CORE_RULES
@@ -298,7 +298,7 @@
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
   #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_HOST     MQTT_HOST
+    
     #define MQTT_PORT     1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER

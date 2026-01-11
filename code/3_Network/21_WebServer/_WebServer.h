@@ -75,8 +75,15 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 #include "3_Network/21_WebServer/Webpages/Generated/html_settings.h"
 #include "3_Network/21_WebServer/Webpages/Generated/html_settings2.h"
 #include "3_Network/21_WebServer/Webpages/Generated/html_other.h"
-#include "3_Network/21_WebServer/Webpages/Generated/pages_2025.h"
 #include "3_Network/21_WebServer/Webpages/Generated/root_basic.h"
+
+
+// pages_console_select.h
+#if defined(ESP8266)
+  #include "3_Network/21_WebServer/Webpages/Generated/pages_console_esp8266.h"
+#else
+  #include "3_Network/21_WebServer/Webpages/Generated/pages_console_esp32.h"
+#endif
 
 
 
@@ -145,18 +152,19 @@ class mWebServer :
 // public AsyncWebHandler, 
 public mTaskerInterface{
   public:
-    mWebServer(){};
+    mWebServer(){
+
+
+      
+    };
     
     static constexpr const char* PM_MODULE_NETWORK_WEBSERVER_CTR = D_MODULE_NETWORK_WEBSERVER_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_NETWORK_WEBSERVER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_WEBSERVER_ID; }
 
+    void createEditHandler(bool enable);
 
-void createEditHandler(bool enable);
-static String msgProcessor(const String& var);
-
-
-void Server_Start();
+    void Server_Start();
 
     
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
@@ -165,7 +173,7 @@ void Server_Start();
     #ifndef MDNS_NAME
       #define MDNS_NAME DEFAULT_MDNS_NAME
     #endif
-    char cmDNS[33] = MDNS_NAME;                // mDNS address (*.local, replaced by wledXXXXXX if default is used)
+    char cmDNS[33];// = MDNS_NAME;                // mDNS address (*.local, replaced by wledXXXXXX if default is used)
 
 
 
@@ -186,66 +194,68 @@ AsyncWebServer* server = nullptr; //(80);
 AsyncWebSocket* websocket_lights = nullptr;
 #endif
 
-#ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-AsyncWebSocket* websocket_console = nullptr;
-#endif
-
 AsyncWebHandler *editHandler = nullptr;
 
-#ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-void sendConsoleWs(AsyncWebSocketClient *client = nullptr);
-void handleConsoleWs();
+  #ifndef ESP8266
+    #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
 
-void wsEventConsole(AsyncWebSocket *server,
-                     AsyncWebSocketClient *client,
-                     AwsEventType type,
-                     void *arg,
-                     uint8_t *data,
-                     size_t len);
+    void HandlePage_Console_WebSocket(AsyncWebServerRequest *request);
 
-// Date Modified: 02Jan26
-struct PendingJsonCommand
-{
-  char*    ptr = nullptr;
-  uint16_t len = 0;
+    AsyncWebSocket* websocket_console = nullptr;
+    void sendConsoleWs(AsyncWebSocketClient *client = nullptr);
+    void handleConsoleWs();
 
-  inline bool has() const { return (ptr != nullptr) && (len > 0); }
+    void wsEventConsole(AsyncWebSocket *server,
+                        AsyncWebSocketClient *client,
+                        AwsEventType type,
+                        void *arg,
+                        uint8_t *data,
+                        size_t len);
 
-  inline bool create(uint16_t new_len)
-  {
-    clear();
-    if (!new_len) return false;
+    // Date Modified: 02Jan26
+    struct PendingJsonCommand
+    {
+      char*    ptr = nullptr;
+      uint16_t len = 0;
 
-    ptr = (char*)malloc(new_len + 1);
-    if (!ptr) {
-      len = 0;
-      return false;
-    }
+      inline bool has() const { return (ptr != nullptr) && (len > 0); }
 
-    len = new_len;
-    ptr[len] = '\0';
-    return true;
-  }
+      inline bool create(uint16_t new_len)
+      {
+        clear();
+        if (!new_len) return false;
 
-  inline void clear()
-  {
-    if (ptr) {
-      free(ptr);
-      ptr = nullptr;
-    }
-    len = 0;
-  }
-};
+        ptr = (char*)malloc(new_len + 1);
+        if (!ptr) {
+          len = 0;
+          return false;
+        }
+
+        len = new_len;
+        ptr[len] = '\0';
+        return true;
+      }
+
+      inline void clear()
+      {
+        if (ptr) {
+          free(ptr);
+          ptr = nullptr;
+        }
+        len = 0;
+      }
+    };
 
 
-static PendingJsonCommand pending_cmd;
+    static PendingJsonCommand pending_cmd;
 
-uint16_t      wsConsoleLiveClientId = 0;
-unsigned long wsConsoleLastPushTime = 0;
-uint8_t wsConsoleLastIdx = 0;   // 0 = sync pending
-#define WS_CONSOLE_INTERVAL 50
+    uint16_t      wsConsoleLiveClientId = 0;
+    unsigned long wsConsoleLastPushTime = 0;
+    uint8_t wsConsoleLastIdx = 0;   // 0 = sync pending
+    #define WS_CONSOLE_INTERVAL 50
 
-#endif
+    #endif
+  #endif
 
 
 #ifdef ENABLE_DEVFEATURE_WEBSERVER__SETTINGS_WEBPAGES
@@ -292,13 +302,6 @@ void SettingsPages_GET(AsyncWebServerRequest* request);
 
 void serveMessage(AsyncWebServerRequest* request, uint16_t code, const String& headl, const String& subl, byte optionT);
 
-void serveRedirectMessage(AsyncWebServerRequest* request,
-                                      int httpCode,
-                                      const __FlashStringHelper* msg,
-                                      const __FlashStringHelper* detail,
-                                      const char* redirectUrl,
-                                      uint32_t delayMs);
-
 
 
 
@@ -322,11 +325,8 @@ bool HttpCheckPriviledgedAccess();
     void HandlePage_Console_Poll(AsyncWebServerRequest *request);
     void HandleConsoleRefresh(AsyncWebServerRequest *request);
     #endif
-    #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-    void HandlePage_Console(AsyncWebServerRequest *request);
-    #endif
 
-    void WebGetArg(AsyncWebServerRequest *request, const char* arg, char* out, size_t max);
+    bool WebGetArg(AsyncWebServerRequest *request, const char* arg, char* out, size_t max);
     
 
 bool captivePortal(AsyncWebServerRequest *request);

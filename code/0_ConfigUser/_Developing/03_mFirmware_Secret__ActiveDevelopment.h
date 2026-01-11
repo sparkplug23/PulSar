@@ -1127,7 +1127,7 @@ new 26GHz radar sensor
 
       #define ENABLE_DEBUG_FEATURE__MAVLINK_FLYING_LEDS__FORCED_TESTBED_MODE 3
 
-      // #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3500
+      // //#define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3500
 
 
   #endif
@@ -1740,7 +1740,7 @@ new 26GHz radar sensor
 
       // #define ENABLE_DEBUG_FEATURE__MAVLINK_FLYING_LEDS__FORCED_TESTBED_MODE 2
 
-      // #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3500
+      // //#define DATA_BUFFER_PAYLOAD_MAX_LENGTH 3500
 
 
   #endif
@@ -6162,7 +6162,7 @@ new 26GHz radar sensor
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
 #define MQTT_HOST   "192.168.3.70"
-   #define MQTT_HOST     MQTT_HOST
+   
    #define MQTT_PORT     1883
   
 
@@ -6515,7 +6515,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
 #define MQTT_HOST   "192.168.3.70"
-   #define MQTT_HOST     MQTT_HOST
+   
    #define MQTT_PORT     1883
   
 
@@ -6911,7 +6911,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
 #define MQTT_HOST   "192.168.3.70"
-  #define MQTT_HOST     MQTT_HOST
+  
   #define MQTT_PORT     1883
   
 /***********************************
@@ -7093,7 +7093,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
 #define MQTT_HOST   "192.168.3.70"
-   #define MQTT_HOST     MQTT_HOST
+   
    #define MQTT_PORT     1883
   
 
