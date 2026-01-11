@@ -187,6 +187,7 @@ void mSettings::SystemSettings_DefaultBody(void)
   Settings.network.flag.mdns_enabled = 1;
 
   #else
+  #error "should never be reaching here now"
 
   Settings.sta_config = WIFI_CONFIG_TOOL;
   Settings.sta_active = 0;

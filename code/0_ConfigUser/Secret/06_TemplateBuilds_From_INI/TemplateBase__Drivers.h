@@ -7,8 +7,8 @@
  * Aiming to move these into the garage on a shelf, with a camera looking at them. Everything should be OTA flashed and debugged.
 \*********************************************************************************************/
 
-#include "2_CoreSystem/mGlobalMacros.h"
-#include "2_CoreSystem/11_Languages/mLanguageDefault.h"
+// #include "2_CoreSystem/mGlobalMacros.h"
+// #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 
 //--------------------------------[Devices]-------------------------------------
 

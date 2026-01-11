@@ -17,7 +17,7 @@ TRtcFastboot RtcFastboot;
 // #ifdef ESP32
 // RTC_NOINIT_ATTR TRtcFastboot RtcDataFastboot;
 // #endif  // ESP32
-#if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
+#if defined(ESP32)// && !defined(CONFIG_IDF_TARGET_ESP32C3)
 RTC_NOINIT_ATTR TRtcFastboot RtcDataFastboot;
 #endif
 

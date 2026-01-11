@@ -30,44 +30,36 @@
 #include "2_CoreSystem/esp32_compat.h"
 #include "2_CoreSystem/mGlobalMacros.h"
 
+/**
+ * SECTION: Minimal/Inital States
+ */
 #include "2_CoreSystem/mBaseConfig.h"           //DEFAULTS
-#ifndef USE_USER_MICHAEL // Include my personally named secret file
-  #include "0_ConfigUser/mFirmwareCustom_Secret.h"
-#endif // USE_USER_MICHAEL // Include my personally named secret file
-#ifdef USE_USER_MICHAEL // Include my personally named secret file
-  /**
-   * In order of importance
-   * */
-  #include "0_ConfigUser/Whitehall/Firmware__Home__Secret.h"
-  #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
-  #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
-  #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_LightingEffects.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_MotionDetectors.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_BoardBuilds.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_Cameras.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_HVAC.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_PZEM.h"
-  #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_CellularDatalinks.h"
-  #include "0_ConfigUser/Meadows/FirmwareConfig_Deployed.h"
-#endif // USE_USER_MICHAEL
+#include "2_CoreSystem/mSystemConfig.h"
 
-#include "0_ConfigUser/Templates/TemplateBase__HardwareSpecific.h"
+/**
+ * SECTION: User defined options/build patterns 
+ */
+#ifdef USE_USER_MICHAEL
+#include "0_ConfigUser/Secret/ConfigUser.h"
+#else
+#include "0_ConfigUser/mFirmwareCustom_Secret.h"  // Fallback to generic as endpoint users
+#endif
 
-#include "2_CoreSystem/06_Support/mSensorType.h"
+#include "0_ConfigUser/G1_mUserConfig_Secret.h"
 
-#include "0_ConfigUser/G1_mUserConfig_Secret.h"  //wrong place??
-// #include "2_CoreSystem/16_Events/mEvents.h"
-
-#include <DeCounter.h>
-
-// #ifdef USE_MODULE_CORE_RULES
-// #include "2_CoreSystem/10_RuleEngine/mRuleEngine.h"
-// #endif
-
+/**
+ * SECTION: Based on user options, expand these into the completed patterns
+ */
 #include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
 
+// INCLUDE ORDER TO HERE OKAY
+
+
+/**
+ * SECTION: General Helpers
+ */
+#include "2_CoreSystem/06_Support/mSensorType.h"
+#include <DeCounter.h>
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"                           // Language support configured by .h
 #include "2_CoreSystem/05_HardwarePins/mPins_Templates.h"                // Hardware configuration
 #include "2_CoreSystem/06_Support/BufferWriter.h"
@@ -168,8 +160,6 @@ enum ModuleStatus{
 };
 
 
-#include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h" // moving feb2025
-#include "2_CoreSystem/mSystemConfig.h"
 
 
 // Libraries

@@ -21,6 +21,9 @@
 With latest version, all longer term shared debug features should be added here as defaults
 
 
+SHOULD NOT rely on other files for pre-defines, other than INI
+
+
 **/
 #ifndef MUSERCONFIG_DEFAULTS_H
 #define MUSERCONFIG_DEFAULTS_H
@@ -28,34 +31,11 @@ With latest version, all longer term shared debug features should be added here 
 #include "stdint.h"
 #include "2_CoreSystem/mSystemConfig.h"
 #include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
-#ifdef USE_USER_MICHAEL
-#include "0_ConfigUser/Whitehall/Firmware__Home__Secret.h"
-#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
-#include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
-#include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
-#include "0_ConfigUser/03_mFirmware_Secret__ActiveDevelopment.h"
-#include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2023.h"
-#include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2024.h"
-#include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2024.h"
-#include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2025.h"
-#include "0_ConfigUser/05_mFirmwareCustom_Secret__Christmas_2025.h"
-#include "0_ConfigUser/05_mFirmwareCustom_Secret__QTQ.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_LightingEffects.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_MotionDetectors.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_BoardBuilds.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_Cameras.h"  
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_HVAC.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_PZEM.h"
-  #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
-#include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_CellularDatalinks.h"
-  #include "0_ConfigUser/Meadows/FirmwareConfig_Deployed.h"
 
-#include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h" //addded feb2025
-#else
-// #error "here"
-#endif // USE_USER_MICHAEL
+// #ifdef USE_USER_MICHAEL
+// #include "0_ConfigUser/Secret/ConfigUser.h"
+// #endif
 
-#include "0_ConfigUser/Templates/TemplateBase__HardwareSpecific.h"
 
 /*********************************************************************************************\
  *

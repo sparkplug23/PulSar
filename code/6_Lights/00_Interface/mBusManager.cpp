@@ -444,6 +444,7 @@ void IRAM_ATTR BusDigital::setPixelColor(uint32_t pix, ColourBaseType c) {
   PolyBus::setPixelColor(_busPtr, _iType, pix, c, co);
 
   #else
+  #error "here"
   if (!_valid) return;
   #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
   // Directly handle RgbwwColor

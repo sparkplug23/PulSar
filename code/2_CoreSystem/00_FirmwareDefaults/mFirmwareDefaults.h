@@ -2,6 +2,10 @@
 #ifndef _FIRMWARE_DEFAULTS_H_
 #define _FIRMWARE_DEFAULTS_H_
 
+// This should maybe become its own subfolder, where one (top) includes others. This is to allow more unified way.
+// Then I can have a clean files/dev files.
+
+
 /*********************************************************************************************\
  * Function declarations
 \*********************************************************************************************/
@@ -23,36 +27,25 @@ void WiFi_Wps_StatusCallback(wps_cb_status status);
 }
 #endif
 
+// Create warning messages about the use of USBC and Serial
+#ifdef CONFIG_IDF_TARGET_ESP32C3
+#if ARDUINO_USB_CDC_ON_BOOT == 1
+#warning "ARDUINO_USB_CDC_ON_BOOT=1 permits Serial over USBC when connected to computer. CRITCIAL will stop boot when power via USBC only."
+#else
+#warning "ARDUINO_USB_CDC_ON_BOOT=0 allows normal boot over power only, but NO SERIAL IS PRESET!"
+#endif
+#endif
+
+
 #include "2_CoreSystem/mBaseConfig.h"
 
 /***** SECTION REMOVED DECEMBER 2024 */
 #include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
-#ifdef USE_USER_MICHAEL
-#include "0_ConfigUser/Whitehall/Firmware__Home__Secret.h"
-#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
-#include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
-#include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
-#include "0_ConfigUser/03_mFirmware_Secret__ActiveDevelopment.h"
-#include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2023.h"
-#include "0_ConfigUser/04_mFirmwareCustom_Secret__Christmas_2024.h"
-#include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2024.h"
-#include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2025.h"
-#include "0_ConfigUser/05_mFirmwareCustom_Secret__Christmas_2025.h"
-#include "0_ConfigUser/05_mFirmwareCustom_Secret__QTQ.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_LightingEffects.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_MotionDetectors.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_BoardBuilds.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_Cameras.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_HVAC.h"
-  #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_PZEM.h"
-#include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
-#include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_CellularDatalinks.h"
-  #include "0_ConfigUser/Meadows/FirmwareConfig_Deployed.h"
-#else
-  // #error "error"
-#endif // USE_USER_MICHAEL
 
-#include "0_ConfigUser/Templates/TemplateBase__HardwareSpecific.h"
+// #ifdef USE_USER_MICHAEL
+// #include "0_ConfigUser/Secret/ConfigUser.h"
+// #endif
+
 
 /*********************************************************************************************\
  * Default global defines
@@ -203,28 +196,11 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
 // -------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-#ifdef FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
-
-
-  #define USE_MODULE_SENSORS_SUN_TRACKING     
-  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
-    #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
-  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
-  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
-  #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
-    // #define ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
-
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
-  #define USE_MAXELEVATION_CALC_JULY2025
-
-  #define USE_MODULE_SENSORS_SUN_TRACKING
-
-#endif
-
 
 
 #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+
+  #define ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
   
   // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE // Inherit base config
 
@@ -273,6 +249,24 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
 
   #define ENABLE_DEVFEATURE_WEBSERVER__ETAGS_ENABLED_FOR_RELOADING_PALETTES_ON_FRESH_COMPILE
   #define ENABLE_DEVFEATURE_LIGHTING__SUPPRESS_WHITE_OUTPUT
+
+  
+  // SECTION: Added Jan25
+  #define ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
+
+  #define ENABLE_DEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
+  #define ENABLEDEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
+  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
+  #define ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLIST_BY_NAME_AUTOGENERATE_ID_LIST
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__PLAYLIST_PSN_TO_PS_CREATE_BACKUP_FILE
+  #define ENABLE_DEVFEATURE_LIGHT__GRADIENT_PATCH_4DEC25
+  #define ENABLE_DEVFEATURE_LIGHTS__FIX_MULTISEGMENT_DMA_FLICKER
+  #define MIN_SHOW_DELAY 25
+  //SECTION:END
+
+
+
 
 #endif
 
@@ -339,6 +333,24 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
 
 
   // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES // need to introduce a basic/lite version when only being used for palettes.
+  
+  
+  
+  #define USE_MODULE_SENSORS_SUN_TRACKING     
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+    #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+    // #define ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
+
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
+  #define USE_MAXELEVATION_CALC_JULY2025
+
+  #define USE_MODULE_SENSORS_SUN_TRACKING
+  
+  
   // this is probably the angles etc, so module needs split effeciently for full data, or just palette info very minute for performance
   #ifndef USE_MODULE_SENSORS_SUN_TRACKING
   #define USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE
@@ -437,6 +449,28 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
 
 
 
+// This stays after the lighting, since depending on basic/advanced what is included here will differ
+// long term though, as solar is complex, we need to make a high speed version
+// ie, at boot (or midnight), create a TOD vs elevation/azimuth map (this can probably be done with simple sine wave and TOD offset)
+// Lighting infact, should never use the complex version which will remain of rules based only.
+#ifdef FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+
+  #define USE_MODULE_SENSORS_SUN_TRACKING     
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+    #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+    // #define ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
+
+  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
+  #define USE_MAXELEVATION_CALC_JULY2025
+
+  #define USE_MODULE_SENSORS_SUN_TRACKING
+
+#endif
 
 
 #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__AUGUST2025
@@ -2636,7 +2670,9 @@ This enables switching to newer firmware versions, but falling back when an issu
  * 
  */
 #ifdef ENABLE_FEATURE_BUILD__10JAN25_SOFTAP_WEBUI
-// #error "ere"
+
+  #define ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+
   #ifndef ESP8266
     #define ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
   #endif

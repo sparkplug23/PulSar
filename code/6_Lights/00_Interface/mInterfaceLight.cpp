@@ -967,8 +967,6 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
 }
 
 
-#ifdef ENABLE_DEVFEATURE_LIGHTING__OCT24_COLOUR_ORDER
-
 #include <ctype.h>  // for toupper
 
 uint8_t mInterfaceLight::GetColourOrder_FromName(const char* c)
@@ -1030,60 +1028,6 @@ uint8_t mInterfaceLight::GetColourOrder_FromName(const char* c)
 
     return colour_order;
 }
-
-
-#else
-
-
-uint8_t mInterfaceLight::GetColourOrder_FromName(const char* c)
-{
-
-  uint8_t colour_order = {COLOUR_ORDER_INIT_DISABLED};
-
-  if(!c){ return colour_order; }
-  if(strlen(c)<=5){
-    ALOG_DBM( PSTR("Valid Length"));
-  }else{
-    ALOG_INF(PSTR("INVALID Length"));
-    return colour_order;
-  }
-
-  for(uint8_t index=0;index<strlen(c);index++)
-  {
-    if((c[index]=='R')||(c[index]=='r')){
-      colour_order.red = index;
-    }else
-    if((c[index]=='G')||(c[index]=='g')){
-      colour_order.green = index;
-    }else
-    if((c[index]=='B')||(c[index]=='b')){
-      colour_order.blue = index;
-    }else
-    if((c[index]=='C')||(c[index]=='c')){
-      colour_order.white_cold = index;
-    }else
-    if((c[index]=='W')||(c[index]=='w')){
-      colour_order.white_warm = index;
-    }
-  }
-
-  #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  ALOG_INF( PSTR("colour_order == R=%d, G=%d, B=%d, CW=%d, WW=%d, dec%d, %X"),
-    colour_order.red,
-    colour_order.green,
-    colour_order.blue,
-    colour_order.white_cold,
-    colour_order.white_warm,
-    colour_order.data,
-    colour_order.data
-  );
-  #endif  
-
-  return colour_order;
-
-}
-
-#endif // ENABLE_DEVFEATURE_LIGHTING__OCT24_COLOUR_ORDER
 
 
 /******************************************************************************************************************

@@ -1,5 +1,5 @@
 #ifndef _LOGGING_H
-#define _LOGGING_H 0.5
+#define _LOGGING_H
 
 #define D_UNIQUE_MODULE_CORE_LOGGING_ID   2008 // [(Folder_Number*100)+ID_File]
 
@@ -13,7 +13,6 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#include <Arduino.h>
 #include <stdint.h>
 
 #ifdef USE_SOFTWARE_SERIAL_DEBUG
