@@ -1069,7 +1069,7 @@ void mFona_Cellular::parse_JSONCommand(JsonParserObject obj)
 
 		// JBI->Start();
 
-		// pCONT->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
+		// tkr->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
 
 		// bool ready_to_send = JBI->End();
 

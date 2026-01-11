@@ -21,7 +21,7 @@ void mSettings::SettingsSaveAll(void)
   } else {
     Settings.power = 0;
   }
-  pCONT->Tasker_Interface(TASK_SETTINGS_SAVE_VALUES_FROM_MODULE);
+  tkr->Tasker_Interface(TASK_SETTINGS_SAVE_VALUES_FROM_MODULE);
   
   SettingsSave(0);
 

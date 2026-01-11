@@ -27,6 +27,10 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
   if(task == TASK_JSON_COMMAND_ID)
   { 
 
+    #ifdef ENABLE_DEBUGFEATURE_TASKER__SPLASH_JSON_BUFFER
+      Serial.printf(PSTR(D_LOG_TASKER "JSON Command Payload: %s\r\n"), data_buffer.payload.ctr);
+    #endif
+
     JsonParser parser(data_buffer.payload.ctr);
     obj = parser.getRootObject();   
     if (!obj) {
@@ -313,7 +317,7 @@ void mTaskerManager::JSONCommand_Run(char* json)
 
   #ifdef USE_LIGHTING_TEMPLATE
   
-    D_DATA_BUFFER_CLEAR();
+    data_buffer.ClearDeep();
 
     sprintf(data_buffer.payload.ctr, "%s", json);
     data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
@@ -717,6 +721,9 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER
   addTasker(new mTreadmillLogger());
   #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__SERVER_RESET_RELAYS
+  addTasker(new mServerResetRelays());
+  #endif
   #ifdef USE_MODULE_CONTROLLER_SDLOGGER_IMU_RADIATIONPATTERN
   addTasker(new mSDLoggerIMURadiationPattern());
   #endif
@@ -836,7 +843,7 @@ const char* mTaskerManager::GetTaskName_Full(uint16_t task)
     case TASK_UPTIME_10_MINUTES:                      return PM_TASK_UPTIME_10_MINUTES_CTR;
     case TASK_UPTIME_60_MINUTES:                      return PM_TASK_UPTIME_60_MINUTES_CTR;
     case TASK_JSON_APPEND:                            return PM_TASK_JSON_APPEND_CTR;
-    case TASK_SAVE_BEFORE_RESTART:                    return PM_TASK_SAVE_BEFORE_RESTART_CTR;
+    // case TASK_SAVE_BEFORE_RESTART:                    return PM_TASK_SAVE_BEFORE_RESTART_CTR;
     case TASK_SETTINGS_DEFAULT:                       return PM_TASK_SETTINGS_DEFAULT_CTR;
     case TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:    return PM_TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR;
     case TASK_SETTINGS_LOAD_VALUES_INTO_MODULE:       return PM_TASK_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR;

@@ -18,7 +18,7 @@
 #endif
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
-#include "3_Network/21_WebServer/mWebServer.h"
+#include "3_Network/21_WebServer/_WebServer.h"
 #endif
 
 #include "1_TaskerManager/mTaskerInterface.h"

@@ -191,7 +191,7 @@ void mPIR::ReadSensor()
 
           #else
           tkr_rules->New_Event(GetModuleUniqueID(), sensor_id, isActive);
-          pCONT->Tasker_Interface(TASK_EVENT_MOTION_STARTED_ID);               // This tied this submodule, directly into the interface, and will send the response immediately (with the rule populated)
+          tkr->Tasker_Interface(TASK_EVENT_MOTION_STARTED_ID);               // This tied this submodule, directly into the interface, and will send the response immediately (with the rule populated)
           #endif
         } 
         else 
@@ -218,7 +218,7 @@ void mPIR::ReadSensor()
 
           #else
           tkr_rules->New_Event(GetModuleUniqueID(), sensor_id, isActive);
-          pCONT->Tasker_Interface(TASK_EVENT_MOTION_ENDED_ID);                // This tied this submodule, directly into the interface, and will send the response immediately (with the rule populated)
+          tkr->Tasker_Interface(TASK_EVENT_MOTION_ENDED_ID);                // This tied this submodule, directly into the interface, and will send the response immediately (with the rule populated)
           #endif
         
         }

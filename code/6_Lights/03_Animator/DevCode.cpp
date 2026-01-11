@@ -41,8 +41,8 @@ int8_t mAnimatorLight::Tasker_DevCode(uint8_t function, JsonParserObject obj)
 
     }break;
     case TASK_UPTIME_1_MINUTES:
-      ALOG_INF(PSTR("mAnimatorLight::Tasker_DevCode: TASK_UPTIME_1_MINUTES   ====== WIFI_OFF"));
-      WiFi.mode(WIFI_OFF);
+      // ALOG_INF(PSTR("mAnimatorLight::Tasker_DevCode: TASK_UPTIME_1_MINUTES   ====== WIFI_OFF"));
+      // WiFi.mode(WIFI_OFF);
     break;
   } // switch(command)
 

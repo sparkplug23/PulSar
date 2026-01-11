@@ -686,7 +686,7 @@ void handleNotifications()
     if (udpIn[0] >= 'A' && udpIn[0] <= 'Z') { //HTTP API
       String apireq = "win"; apireq += '&'; // reduce flash string usage
       apireq += (char*)udpIn;
-      handleSet(nullptr, apireq);
+      handle__HTTP__GET_QueryAPI(nullptr, apireq);
     } else if (udpIn[0] == '{') { //JSON API
       DeserializationError error = deserializeJson(*pDoc, udpIn);
       JsonObject root = pDoc->as<JsonObject>();

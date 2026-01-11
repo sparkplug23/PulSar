@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="theme-color" content="#222222">
+<title>PulSar Console</title>
+
+<style>
+  /* Date Modified: 01Jan26 */
+  :root{
+    --bg:#141414;
+    --panel:#1d1d1d;
+    --border:#333;
+    --text:#e6e6e6;
+    --muted:#a8a8a8;
+    --btn:#2a2a2a;
+    --btn2:#3a3a3a;
+    --danger:#ff5c5c;
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Segoe UI,Roboto,Arial,sans-serif;}
+  .top{
+    position:fixed;left:0;right:0;top:0;
+    display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+    padding:8px 10px;background:var(--panel);border-bottom:1px solid var(--border);
+    z-index:10;
+  }
+  .top .sp{flex:1}
+  button{
+    background:var(--btn);color:var(--text);
+    border:1px solid var(--border);border-radius:6px;
+    padding:7px 10px;font-size:14px;cursor:pointer;
+  }
+  button:hover{background:var(--btn2)}
+  button:active{transform:translateY(1px)}
+  button.danger{border-color:#552222;background:#2a1717}
+  button.danger:hover{background:#3a2020}
+  .pill{
+    border:1px solid var(--border);border-radius:999px;
+    padding:6px 10px;font-size:12px;color:var(--muted);
+    background:#101010;
+    white-space:nowrap;
+  }
+  .main{
+    position:fixed;left:0;right:0;top:54px;bottom:54px;
+    padding:10px;
+  }
+  #log{
+    width:100%;height:100%;
+    box-sizing:border-box;
+    background:#0f0f0f;color:var(--text);
+    border:1px solid var(--border);border-radius:8px;
+    padding:10px;
+    font-family:Consolas,Menlo,Monaco,monospace;
+    font-size:12px;line-height:1.35;
+    white-space:pre-wrap;word-break:break-word;
+    overflow:auto;
+  }
+  .bottom{
+    position:fixed;left:0;right:0;bottom:0;
+    display:flex;gap:8px;align-items:center;
+    padding:8px 10px;background:var(--panel);border-top:1px solid var(--border);
+  }
+  #cmd{
+    flex:1;
+    background:#0f0f0f;color:var(--text);
+    border:1px solid var(--border);border-radius:8px;
+    padding:9px 10px;font-size:14px;
+    outline:none;
+  }
+  #cmd::placeholder{color:#777}
+  .hint{color:var(--muted);font-size:12px}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+  <button id="btnClear" class="danger">Clear</button>
+  <button id="btnClearHist">Clear Cmd History</button>
+
+  <span class="pill" id="stat">disconnected</span>
+  <span class="sp"></span>
+  <span class="hint" id="urlHint"></span>
+</div>
+
+<div class="main">
+  <div id="log"></div>
+</div>
+
+<div class="bottom">
+  <input id="cmd" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+         placeholder="JSON Command: Up/Down History">
+  <button id="btnSend">Send</button>
+</div>
+
+<script>
+/* Date Modified: 01Jan26 */
+
+/* -----------------------------
+   WebSocket setup
+------------------------------ */
+function wsUrl(){
+  const proto = (location.protocol === "https:") ? "wss://" : "ws://";
+  return proto + location.host + "/ws/console";
+}
+
+let ws = null;
+let wsConnected = false;
+
+/* -----------------------------
+   Elements
+------------------------------ */
+const elLog  = document.getElementById("log");
+const elCmd  = document.getElementById("cmd");
+const elStat = document.getElementById("stat");
+const elHint = document.getElementById("urlHint");
+
+/* -----------------------------
+   Command history (persisted)
+------------------------------ */
+const HISTORY_KEY = "pulsarConsole2History";
+const HISTORY_MAX = 20;
+
+const hc = [];
+let cn = 0;
+
+function historyLoad(){
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (!raw) return;
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return;
+    hc.length = 0;
+    for (const s of arr) {
+      if (typeof s === "string" && s.trim().length) hc.push(s);
+      if (hc.length >= HISTORY_MAX) break;
+    }
+  } catch(e){}
+}
+
+function historySave(){
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(hc)); } catch(e){}
+}
+
+function historyClear(){
+  hc.length = 0;
+  cn = 0;
+  try { localStorage.removeItem(HISTORY_KEY); } catch(e){}
+}
+
+function historyPush(cmd){
+  if (!cmd) return;
+  const i = hc.indexOf(cmd);
+  if (i >= 0) hc.splice(i, 1);
+  hc.unshift(cmd);
+  if (hc.length > HISTORY_MAX) hc.length = HISTORY_MAX;
+  historySave();
+}
+
+function historyApply(){
+  elCmd.value = hc[cn - 1] || "";
+  setTimeout(() => {
+    elCmd.focus();
+    elCmd.setSelectionRange(elCmd.value.length, elCmd.value.length);
+  }, 0);
+}
+
+function historyUp(){
+  if (!hc.length) return;
+  cn = Math.min(cn + 1, hc.length);
+  historyApply();
+}
+
+function historyDown(){
+  if (!hc.length) return;
+  cn = Math.max(cn - 1, 0);
+  if (cn === 0) elCmd.value = "";
+  else historyApply();
+}
+
+/* -----------------------------
+   Console helpers
+------------------------------ */
+function atBottom(){
+  return (elLog.scrollTop + elLog.clientHeight + 5) >= elLog.scrollHeight;
+}
+
+function appendLog(text){
+  if (!text) return;
+  const wasBottom = atBottom();
+  elLog.textContent += (elLog.textContent ? "\n" : "") + text.replace(/\u0001/g,"");
+  if (wasBottom) elLog.scrollTop = elLog.scrollHeight;
+}
+
+function clearLog(){
+  elLog.textContent = "";
+}
+
+/* -----------------------------
+   WebSocket handlers
+------------------------------ */
+function wsConnect(){
+  if (ws && (ws.readyState === 0 || ws.readyState === 1)) return;
+
+  ws = new WebSocket(wsUrl());
+
+  ws.onopen = () => {
+    wsConnected = true;
+    elStat.textContent = "connected";
+  };
+
+  ws.onclose = () => {
+    wsConnected = false;
+    elStat.textContent = "disconnected";
+    setTimeout(wsConnect, 500);
+  };
+
+  ws.onerror = () => {};
+
+  ws.onmessage = (ev) => {
+    appendLog(String(ev.data || "").trim());
+  };
+}
+
+function sendCommand(){
+  const cmd = elCmd.value.trim();
+  if (!cmd || !wsConnected) return;
+
+  historyPush(cmd);
+  ws.send(cmd);
+  elCmd.value = "";
+}
+
+/* -----------------------------
+   UI hooks
+------------------------------ */
+document.getElementById("btnClear").onclick = clearLog;
+document.getElementById("btnClearHist").onclick = () => {
+  historyClear();
+  elCmd.value = "";
+};
+
+document.getElementById("btnSend").onclick = sendCommand;
+
+elCmd.addEventListener("keydown", (ev) => {
+  if (ev.key === "Enter") {
+    ev.preventDefault();
+    sendCommand();
+  } else if (ev.key === "ArrowUp") {
+    ev.preventDefault();
+    historyUp();
+  } else if (ev.key === "ArrowDown") {
+    ev.preventDefault();
+    historyDown();
+  }
+});
+
+/* -----------------------------
+   Init
+------------------------------ */
+elHint.textContent = wsUrl();
+historyLoad();
+wsConnect();
+</script>
+
+</body>
+</html>

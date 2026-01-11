@@ -47,15 +47,19 @@ int16_t mPins::GetGPIOFunctionIDbyName(const char* c)
    * Drivers
   *******************************************************************************************************************/
   
-  #ifdef USE_MODULE_DRIVERS_RELAY
-  if(strcmp_P(c,PM_GPIO_FUNCTION_REL1_INV_CTR)==0){  return GPIO_REL1_INV; }
-  if(strcmp_P(c,PM_GPIO_FUNCTION_REL2_INV_CTR)==0){  return GPIO_REL2_INV; }
-  if(strcmp_P(c,PM_GPIO_FUNCTION_REL3_INV_CTR)==0){  return GPIO_REL3_INV; }
-  if(strcmp_P(c,PM_GPIO_FUNCTION_REL4_INV_CTR)==0){  return GPIO_REL4_INV; }
-  if(strcmp_P(c,PM_GPIO_FUNCTION_REL1_CTR)==0){       return GPIO_REL1; }
-  if(strcmp_P(c,PM_GPIO_FUNCTION_REL2_CTR)==0){       return GPIO_REL2; }
-  if(strcmp_P(c,PM_GPIO_FUNCTION_REL3_CTR)==0){       return GPIO_REL3; }
-  if(strcmp_P(c,PM_GPIO_FUNCTION_REL4_CTR)==0){       return GPIO_REL4; }
+  #ifdef USE_MODULE_DRIVERS_RELAY  
+  for (int i = 1; i <= 8; i++) {
+    // Check normal RELs "REL1" to "REL8"
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_REL_NUM_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_REL1 + (i - 1);  // Return the corresponding REL ID
+    }
+    // Check inverted RELs "REL1 Inv" to "REL8 Inv"
+    snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_REL_NUM_INV_CTR, i);
+    if (strcmp_P(c, buffer) == 0) {
+      return GPIO_REL1_INV + (i - 1);  // Return the corresponding inverted REL ID
+    }
+  }
   #endif
   
   
@@ -431,14 +435,8 @@ const char* mPins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, uint8_t bu
   if(GPIO_PWM5_INV == id)                        p = PM_GPIO_FUNCTION_PWM5_INV_CTR;
   #endif
   #ifdef USE_MODULE_DRIVERS_RELAY
-  if(GPIO_REL1 == id)                        p = PM_GPIO_FUNCTION_REL1_CTR;
-  if(GPIO_REL1_INV == id)                        p = PM_GPIO_FUNCTION_REL1_INV_CTR;
-  if(GPIO_REL2 == id)                        p = PM_GPIO_FUNCTION_REL2_CTR;
-  if(GPIO_REL2_INV == id)                        p = PM_GPIO_FUNCTION_REL2_INV_CTR;
-  if(GPIO_REL3 == id)                        p = PM_GPIO_FUNCTION_REL3_CTR;
-  if(GPIO_REL3_INV == id)                        p = PM_GPIO_FUNCTION_REL3_INV_CTR;
-  if(GPIO_REL4 == id)                        p = PM_GPIO_FUNCTION_REL4_CTR;
-  if(GPIO_REL4_INV == id)                        p = PM_GPIO_FUNCTION_REL4_INV_CTR;
+  if (id >= GPIO_REL1 && id <= GPIO_REL8){                 snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_REL_NUM_CTR,        id - GPIO_REL1 + 1);         return buffer; }
+  if (id >= GPIO_REL1_INV && id <= GPIO_REL8_INV){         snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_REL_NUM_INV_CTR,    id - GPIO_REL1_INV + 1);     return buffer; }
   #endif
   #ifdef USE_MODULE_DRIVERS_LEDS
   if (id >= GPIO_LED1 && id <= GPIO_LED8){                 snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_LED_NUM_CTR,        id - GPIO_LED1 + 1);         return buffer; }

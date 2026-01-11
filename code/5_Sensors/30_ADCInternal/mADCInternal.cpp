@@ -659,7 +659,7 @@ void mADCInternal::MQTTHandler_Init(){
 // //   // Check if instruction is for me
 // //   if(mSupport::mSearchCtrIndexOf(data_buffer.topic.ctr,"set/motion")>=0){
 // //       ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_TOPIC_RELAYS));
-// //       pCONT->fExitTaskerWithCompletion = true; // set true, we have found our handler
+// //       tkr->fExitTaskerWithCompletion = true; // set true, we have found our handler
 // //   }else{
 // //     return; // not meant for here
 // //   }

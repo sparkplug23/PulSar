@@ -46,7 +46,7 @@
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
   #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_HOST     MQTT_HOST
+    
     #define MQTT_PORT     1883
 
 

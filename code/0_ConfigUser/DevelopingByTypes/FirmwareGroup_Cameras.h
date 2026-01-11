@@ -35,7 +35,7 @@
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
 #define MQTT_HOST   "192.168.0.155"
-  //  #define MQTT_HOST     MQTT_HOST
+  //  
    #define MQTT_PORT     1883
   
 
@@ -429,7 +429,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
 #define MQTT_HOST   "192.168.0.155"
-  //  #define MQTT_HOST     MQTT_HOST
+  //  
    #define MQTT_PORT     1883
   
 
@@ -822,7 +822,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
 #define MQTT_HOST   "192.168.0.155"
-  //  #define MQTT_HOST     MQTT_HOST
+  //  
    #define MQTT_PORT     1883
   
 
@@ -1217,13 +1217,13 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // #endif
 // // #define DEVICENAME_ROOMHINT_CTR "testgroup"
 // // #define MQTT_HOST   "192.168.3.70"
-// //    #define MQTT_HOST     MQTT_HOST
+// //    
 // //    #define MQTT_PORT     1883
   
 
 // #define DEVICENAME_ROOMHINT_CTR "testgroup"
 // #define MQTT_HOST   "192.168.0.155"
-//   //  #define MQTT_HOST     MQTT_HOST
+//   //  
 //    #define MQTT_PORT     1883
   
   
@@ -1626,7 +1626,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // #endif
 // #define DEVICENAME_ROOMHINT_CTR "testgroup"
 // #define MQTT_HOST   "192.168.3.70"
-//    #define MQTT_HOST     MQTT_HOST
+//    
 //    #define MQTT_PORT     1883
   
 
@@ -2240,7 +2240,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
 #define MQTT_HOST   "192.168.3.70"
-   #define MQTT_HOST     MQTT_HOST
+   
    #define MQTT_PORT     1883
   
 

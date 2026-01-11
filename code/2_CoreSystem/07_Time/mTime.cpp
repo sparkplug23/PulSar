@@ -31,7 +31,12 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
       ALOG_INF(PSTR("Uptime: %s"), GetUptime().c_str());
       // Serial.println(GetUptime().c_str());
       #endif
-      WifiPollNtp();
+      
+      if(tkr_interface_network->Network_HasExternalConnectivity())
+      {
+        WifiPollNtp();
+      }
+      
       uptime_seconds_nonreset++;
     break;
     /************
@@ -746,7 +751,7 @@ void mTime::RtcSync(const char* source)
   RtcSecond();
   ALOG_INF(PSTR("RTC: Synced by %s"), source);
 
-  pCONT->Tasker_Interface(TASK_TIME_SYNCED);
+  tkr->Tasker_Interface(TASK_TIME_SYNCED);
   
 }
 
@@ -892,7 +897,7 @@ uint64_t mTime::WifiGetNtp(void)
   ALOG_INF(PSTR("ntp_server %s"), ntp_server);
   
   #ifdef USE_MODULE_NETWORK_MQTT
-  if (!tkr_wifi->WifiHostByName(ntp_server, time_server_ip)) {
+  if (!tkr_wifi->WiFi_Dns_ResolveHostname(ntp_server, time_server_ip)) {
     ntp_server_id++;
     ALOG_DBG(PSTR("NTP: Unable to resolve '%s'"), ntp_server);
     return 0;
@@ -1848,17 +1853,17 @@ datetime_t mTime::GetDifferenceInDateTimes(datetime_t* dt1, datetime_t* dt2){
   uint32_t dt2_sow = (dt2->day_of_week*SEC2DAY)+(dt2->hour*SEC2HOUR)+(dt2->minute*SEC2MIN)+(dt2->second);
   int32_t diff_sow = dt2_sow - dt1_sow;
 
-    // pCONT->mso->MessagePrint("dt1_sow");pCONT->mso->MessagePrintln(dt1_sow);
-    //   pCONT->mso->MessagePrint("dt2_sow");pCONT->mso->MessagePrintln(dt2_sow);
-    //   pCONT->mso->MessagePrint("Bdiff_sow");pCONT->mso->MessagePrintln(diff_sow);
+    // tkr->mso->MessagePrint("dt1_sow");tkr->mso->MessagePrintln(dt1_sow);
+    //   tkr->mso->MessagePrint("dt2_sow");tkr->mso->MessagePrintln(dt2_sow);
+    //   tkr->mso->MessagePrint("Bdiff_sow");tkr->mso->MessagePrintln(diff_sow);
 
   if(diff_sow<0){ //tomorrow = future < now //if negative, add day
-      //pCONT->mso->MessagePrintln("dt1_sow > dt2_sow");
+      //tkr->mso->MessagePrintln("dt1_sow > dt2_sow");
     diff_sow += SEC2DAY; //add day
   }
 
-  // pCONT->mso->MessagePrint("Adiff_sow");
-  // pCONT->mso->MessagePrintln(diff_sow);
+  // tkr->mso->MessagePrint("Adiff_sow");
+  // tkr->mso->MessagePrintln(diff_sow);
 
   // break new seconds into datetime
   AddSecondsToDateTime(&datetime_new,(uint32_t)diff_sow);
@@ -1873,12 +1878,12 @@ datetime_t mTime::GetDifferenceInDateTimes(datetime_t* dt1, datetime_t* dt2){
   // //datetime_new.week = abs(dt1->week-dt2->week);
   // datetime_new.day_of_week = abs(dt1->day_of_week-dt2->day_of_week);
 
-  // pCONT->mso->MessagePrint("dt1->day_of_week");pCONT->mso->MessagePrintln(dt1->day_of_week);
-  // pCONT->mso->MessagePrint("dt2->day_of_week");pCONT->mso->MessagePrintln(dt2->day_of_week);
-  // pCONT->mso->MessagePrint("datetime_new.day_of_week");pCONT->mso->MessagePrintln(datetime_new.day_of_week);
+  // tkr->mso->MessagePrint("dt1->day_of_week");tkr->mso->MessagePrintln(dt1->day_of_week);
+  // tkr->mso->MessagePrint("dt2->day_of_week");tkr->mso->MessagePrintln(dt2->day_of_week);
+  // tkr->mso->MessagePrint("datetime_new.day_of_week");tkr->mso->MessagePrintln(datetime_new.day_of_week);
   //
   // if(start_sow>end_sow){ //tomorrow
-  //   pCONT->mso->MessagePrintln("  if(start_sow>end_sow){ //tomorrow");
+  //   tkr->mso->MessagePrintln("  if(start_sow>end_sow){ //tomorrow");
   //   AddSecondsToDateTime(&datetime_new,SEC2DAY); //add day
   // }
 

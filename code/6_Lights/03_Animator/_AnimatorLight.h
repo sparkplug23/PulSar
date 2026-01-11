@@ -1101,8 +1101,8 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
 
 
     #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
-    void handleSettingsSet(AsyncWebServerRequest *request, byte subPage);
-    bool handleSet(AsyncWebServerRequest *request, const String& req, bool apply=true);
+    void SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage);
+    bool handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, const String& req, bool apply=true);
     #endif // ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
 
     /******************************************************************************************************************************************************************************
@@ -5079,8 +5079,6 @@ void serializePalettes(JsonObject root, int page);
 
 void serializeModeNames(JsonArray arr, bool flag_get_first_name_only = true);
 
-bool requestJSONBufferLock(uint16_t module);
-void releaseJSONBufferLock();
 
     #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
 void handleUpload(AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final);
@@ -5088,7 +5086,7 @@ bool serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient = 0);
 
 void serveJson(AsyncWebServerRequest* request);
 
-bool  captivePortal(AsyncWebServerRequest *request);
+// bool  captivePortal(AsyncWebServerRequest *request);
 // void  notFound(AsyncWebServerRequest *request);
 
 
@@ -5127,8 +5125,6 @@ bool isIp(String str);
 #define JSON_PATH_NETWORKS   7
 #define JSON_PATH_EFFECTS    8
 
-// global ArduinoJson buffer
-volatile uint16_t jsonBufferLock = 0;
 
 bool doReboot = false;
 
@@ -5265,7 +5261,6 @@ void getSettingsJS(byte subPage, Print& settingsScript);
 #define SUBPAGE_PINREQ          252
 #define SUBPAGE_CSS             253
 #define SUBPAGE_JS              254
-#define SUBPAGE_WELCOME         255
 
 // string temp buffer (now stored in stack locally)
 #ifdef ESP8266
@@ -5592,11 +5587,6 @@ bool showWelcomePage _INIT(false);
 byte presetCycCurr _INIT(0);
 byte presetCycMin _INIT(1);
 byte presetCycMax _INIT(5);
-
-#ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
-// dns server
-DNSServer dnsServer;
-#endif // ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
 
 
 //realtime override modes

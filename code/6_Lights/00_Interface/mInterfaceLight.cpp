@@ -4,7 +4,6 @@
 
 int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 {
-  DEBUG_LINE_HERE3
   int8_t function_result = 0;
 
   // As interface module, the parsing of module_init takes precedence over the Settings.light_settings.type
@@ -23,7 +22,6 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  DEBUG_LINE_HERE3
   if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
 
   switch(function){
@@ -85,7 +83,6 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 
   return function_result;
   
-  DEBUG_LINE_HERE3
 } // END function
 
 
@@ -144,7 +141,7 @@ void mInterfaceLight::Template_Load()
       template_loaded = true;
           
       ALOG_INF(PSTR("buffer_writer Template_Load ------- A >>>>>>>>>> %d"),JBI->GetBufferSize());
-      D_DATA_BUFFER_CLEAR();
+      data_buffer.ClearDeep();
 
 
       ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------F- >>>>>>>>>> %d"),JBI->GetBufferSize());
@@ -171,7 +168,7 @@ void mInterfaceLight::Template_Load()
 
       // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
-      pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+      tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
       ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
       
@@ -191,7 +188,7 @@ void mInterfaceLight::Template_Load()
   if(!template_loaded)
   {
     ALOG_INF(PSTR("buffer_writer Template_Load ------- A >>>>>>>>>> %d"),JBI->GetBufferSize());
-    D_DATA_BUFFER_CLEAR();
+    data_buffer.ClearDeep();
     ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------F- >>>>>>>>>> %d"),JBI->GetBufferSize());
     // memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
     // strncpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(data_buffer.payload.ctr));
@@ -210,7 +207,7 @@ void mInterfaceLight::Template_Load()
 
     // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
-    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+    tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
     Serial.println("we are here");
 
@@ -218,7 +215,7 @@ void mInterfaceLight::Template_Load()
 
     #ifdef USE_LIGHTING_TEMPLATE_ANOTHER
     ALOG_INF(PSTR("buffer_writer Template_Load ------- A >>>>>>>>>> %d"),JBI->GetBufferSize());
-    D_DATA_BUFFER_CLEAR();
+    data_buffer.ClearDeep();
     ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------F- >>>>>>>>>> %d"),JBI->GetBufferSize());
     // memcpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(LIGHTING_TEMPLATE));
     // strncpy_P(data_buffer.payload.ctr,LIGHTING_TEMPLATE,sizeof(data_buffer.payload.ctr));
@@ -237,7 +234,7 @@ void mInterfaceLight::Template_Load()
 
     // ALOG_HGL( PSTR("LIGHTING_TEMPLATE" " READ = \"%s\""), data_buffer.payload.ctr);
 
-    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+    tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
     ALOG_INF(PSTR("buffer_writer STTemplate_LoadART ------G- >>>>>>>>>> %d"),JBI->GetBufferSize());
     #endif // USE_LIGHTING_TEMPLATE_ANOTHER
@@ -326,13 +323,13 @@ void mInterfaceLight::Template_Load_DefaultConfig()
   }
 
   // load from progmem into local
-  D_DATA_BUFFER_CLEAR();
+  data_buffer.ClearDeep();
   memcpy_P(data_buffer.payload.ctr, LIGHTING_TEMPLATE_DEFAULT, sizeof(LIGHTING_TEMPLATE_DEFAULT));
   data_buffer.payload.len = strlen(data_buffer.payload.ctr);
 
   ALOG_DBM( PSTR("LIGHTING_TEMPLATE_DEFAULT" " READ = \"%s\""), data_buffer.payload.ctr);
 
-  pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+  tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
   JBI->ReleaseLock();
 

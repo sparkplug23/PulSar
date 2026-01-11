@@ -25,7 +25,7 @@ class mWiFi :
 
     void parse_JSONCommand(JsonParserObject obj);
    
-    void WifiConnectAP(uint8_t ap_index);
+    void WiFi_Sta_ProfileIndex_Connect(uint8_t ap_index);
     int8_t GetRSSdBm();
     uint8_t GetRSSPercentage();
 
@@ -45,7 +45,7 @@ class mWiFi :
     
     uint16_t wifi_counter_tester = 0;
     
-    bool WifiCheckIpConnected();
+    bool WiFi_Link_IsIpRoutable();
 
     #ifndef ETHERNET_RSSI_THRESHOLD
       #define ETHERNET_RSSI_THRESHOLD     10         // Difference in dB between current network and scanned network
@@ -73,10 +73,10 @@ class mWiFi :
     }connection;
 
 
-void StartMdns(void);
-void MqttDiscoverServer(void);
-void MdnsAddServiceHttp(void);
-void MdnsUpdate(void);
+void WiFi_Mdns_StartOrRestart(void);
+void WiFi_Mdns_DiscoverMqttBroker(void);
+void WiFi_Mdns_AdvertiseHttpService(void);
+void WiFi_Mdns_Tick(void);
 
 struct {
   uint8_t begun = 0;                  // mDNS active
@@ -86,28 +86,28 @@ struct {
 
 
 
-    void SplashWifiScan();
-    void WifiConnectForced();
+    void WiFi_Sta_Scan_LogSummary();
+    void WiFi_Sta_Connect_ForceRestart();
     int WifiGetRssiAsQuality(int rssi);
-    bool WifiConfigCounter(void);
+    bool WiFi_Config_ConnectWindow_Expired(void);
     #ifndef ESP32
-    void WifiWpsStatusCallback(wps_cb_status status);
+    void WiFi_Wps_StatusCallback(wps_cb_status status);
     #endif
-    bool WifiWpsConfigDone(void);
-    bool WifiWpsConfigBegin(void);
-    void WifiConfig(uint8_t type);
-    void WiFiSetSleepMode(void);
-    void ScanBestAndBeginWifi();
-    uint16_t WifiLinkCount();
+    bool WiFi_Wps_IsComplete(void);
+    bool WiFi_Wps_Start(void);
+    void WiFi_Config_Mode_Set(uint8_t type);
+    void WiFi_Radio_SleepMode_Apply(void);
+    void WiFi_Sta_Scan_SelectBest_AndBegin();
+    uint16_t WiFi_Link_ReconnectCount_Get();
     //String WifiDowntime();
-    void WifiSetState(uint8_t state);
-    void WifiBegin__OldTasMethod(uint8_t flag, uint8_t channel = 0);
-    void WifiCheckIp(void);
-    void WifiCheck(uint8_t param);
-    int WifiState(void);
-    void WifiConnect(void);
+    void WiFi_Sta_State_Set(uint8_t state);
+    void WiFi_Sta_Begin_LegacyTasmota(uint8_t flag, uint8_t channel = 0);
+    void WiFi_Link_CheckIp_AndHandleTransitions(void);
+    void WiFi_Sta_Maintain_Periodic(uint8_t param);
+    int WiFi_Sta_State_Get(void);
+    void WiFi_Sta_Connect_Start(void);
     // void WifiDisconnect(void);
-    void WifiShutdown(bool option = false);
+    void WiFi_Radio_Shutdown(bool option = false);
     void EspRestart(void);
 
     const char* GetWiFiStatusCtr(void);

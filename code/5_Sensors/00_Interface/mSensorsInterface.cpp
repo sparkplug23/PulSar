@@ -49,7 +49,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       {
         // Measurement level feedback will be "DebugMore" and show level should be "Debug". "Info" should be reserved for essential stuff not in mqtt
         ALOG_DBM(PSTR(">>> Sensor Readings <<<"));
-        pCONT->Tasker_Interface(TASK_SENSOR_SHOW_LATEST_LOGGED_ID);
+        tkr->Tasker_Interface(TASK_SENSOR_SHOW_LATEST_LOGGED_ID);
         rt.tTicker_Splash_Sensors_To_Logs = 30 ; // reset
       }
       
@@ -59,7 +59,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       #endif
 
 
-      // for(auto& pmod:pCONT->pModule)
+      // for(auto& pmod:tkr->pModule)
       // {
       //   for(int sensor_id=0;sensor_id<pmod->GetSensorCount();sensor_id++)
       //   {
@@ -76,7 +76,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
 
     }break;
     case TASK_EVERY_10_SECONDS:
-      pCONT->Tasker_Interface(TASK_SENSOR_SHOW_LATEST_LOGGED_ID);
+      tkr->Tasker_Interface(TASK_SENSOR_SHOW_LATEST_LOGGED_ID);
     break;
     /************
      * COMMANDS SECTION * 
@@ -272,7 +272,7 @@ void mSensorsInterface::Calib_AppendCurrentReadings() {
 
   char name_buf[100] = {0};
 
-  for (auto& pmod : pCONT->pModule) {
+  for (auto& pmod : tkr->pModule) {
     ++modules;
     const uint32_t mid = pmod->GetModuleUniqueID();
     const bool is_sensor = IS_MODULE_SENSOR_SUBMODULE(mid);
@@ -438,7 +438,7 @@ void mSensorsInterface::parse_JSONCommand(JsonParserObject obj)
 	{
 		JBI->Start();
 
-		pCONT->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
+		tkr->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
 
 		bool ready_to_send = JBI->End();
 
@@ -549,7 +549,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
     /**
      * @brief Check by sensor reported type
      **/
-    for(auto& pmod:pCONT->pModule)
+    for(auto& pmod:tkr->pModule)
     {
       if( IS_MODULE_SENSOR_SUBMODULE( pmod->GetModuleUniqueID() ) )
       {
@@ -743,7 +743,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 //     /**
 //      * @brief Check by sensor reported type
 //      **/
-//     for(auto& pmod:pCONT->pModule)
+//     for(auto& pmod:tkr->pModule)
 //     {
 //       //Get any sensors in module
 //       uint8_t sensors_available = pmod->GetSensorCount();
@@ -886,7 +886,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 //     /**
 //      * @brief Check by sensor reported type
 //      **/
-//     for(auto& pmod:pCONT->pModule)
+//     for(auto& pmod:tkr->pModule)
 //     {
 //       //Get any sensors in module
 //       uint8_t sensors_available = pmod->GetSensorCount();
@@ -1049,7 +1049,7 @@ uint8_t mSensorsInterface::ConstructJSON_Unified_Filtered(uint8_t json_level, bo
 
       // Get module and latest raw value
       sensors_reading_t val;
-      auto* module = pCONT->GetModule(entry.module_id);
+      auto* module = tkr->GetModule(entry.module_id);
       if (!module) continue;
 
       module->GetSensorReading(&val, entry.sensor_index);
@@ -1111,7 +1111,7 @@ void mSensorsInterface::Update_UnifiedFilteredReadings()
         }
 
         // Find module by unique ID
-        auto* module = pCONT->GetModule(entry.module_id);
+        auto* module = tkr->GetModule(entry.module_id);
         if (!module) {
             continue; // Module not found
         }
@@ -1169,7 +1169,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
     /**
      * @brief Check by sensor reported type
      **/
-    for(auto& pmod:pCONT->pModule)
+    for(auto& pmod:tkr->pModule)
     {
       //Get any sensors in module
       uint8_t sensors_available = pmod->GetSensorCount();
@@ -1315,7 +1315,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
     /**
      * @brief Check by sensor reported type
      **/
-    for(auto& pmod:pCONT->pModule)
+    for(auto& pmod:tkr->pModule)
     {
       //Get any sensors in module
       uint8_t sensors_available = pmod->GetSensorCount();

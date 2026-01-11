@@ -456,7 +456,7 @@ void mButtons::Probe(void)
  * Button handler with single press only or multi-press and hold on all buttons
  *
  * ButtonDebounce (50) - Debounce time in mSec
- * SetOption1  (0)     - If set do not execute commands WifiConfig and Reset
+ * SetOption1  (0)     - If set do not execute commands WiFi_Config_Mode_Set and Reset
  * SetOption11 (0)     - If set perform single press action on double press and reverse (on two relay devices only)
  * SetOption13 (0)     - If set act on single press only
  * SetOption32 (40)    - Button held for factor times longer
@@ -532,7 +532,7 @@ void mButtons::Handler(void) {
     tkr_events->XdrvMailbox.index = button_index;
     tkr_events->XdrvMailbox.payload = button;
     tkr_events->XdrvMailbox.command_code = (Button.last_state[button_index] & 0xFF) | ((Button.press_counter[button_index] & 0xFF) << 8);
-    if (pCONT->Tasker_Interface(TASK_BUTTON_PRESSED) == FUNCTION_RESULT_HANDLED_ID){
+    if (tkr->Tasker_Interface(TASK_BUTTON_PRESSED) == FUNCTION_RESULT_HANDLED_ID){
       // Serviced
     }
     else 
@@ -687,7 +687,7 @@ void mButtons::Handler(void) {
             
             tkr_events->XdrvMailbox.index = button_index;
             tkr_events->XdrvMailbox.payload = button;
-            if (pCONT->Tasker_Interface(TASK_BUTTON_MULTI_PRESSED) == FUNCTION_RESULT_HANDLED_ID) {
+            if (tkr->Tasker_Interface(TASK_BUTTON_MULTI_PRESSED) == FUNCTION_RESULT_HANDLED_ID) {
               // Serviced
               AddLog(LOG_LEVEL_DEBUG, PSTR("BTN: FUNC_BUTTON_MULTI_PRESSED serviced"));
             } else

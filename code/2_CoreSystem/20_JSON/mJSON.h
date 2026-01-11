@@ -3,7 +3,7 @@
 #ifndef _MMYJSON_H_
 #define _MMYJSON_H_
 
-#define D_UNIQUE_MODULE_CORE_LOGGING_ID 2020 // [(Folder_Number*100)+ID_File]
+#define D_UNIQUE_MODULE_CORE_JSON_ID 2020 // [(Folder_Number*100)+ID_File]
 
 #include <stdint.h>
 
@@ -85,6 +85,11 @@ class JsonBuilder{
     char* GetPtr();
     uint16_t GetLength();
     uint16_t GetBufferSize();
+
+// global ArduinoJson buffer
+volatile uint16_t jsonBufferLock = 0;
+bool requestJSONBufferLock(uint16_t module);
+void releaseJSONBufferLock();
 
     char* GetBuffer() // New versions, remove above
     {

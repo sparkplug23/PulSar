@@ -50,6 +50,28 @@
 #define STA_PASS2            "af4d8bc9ab"                // [Password2] Optional alternate AP Wifi password
 #endif
 
+// Dedicated SSID for home controllers
+#ifndef  STA_SSID3
+#define STA_SSID3            "fallback"                // [Ssid2] Optional alternate AP Wifi SSID
+#endif
+#ifndef  STA_PASS3
+#define STA_PASS3            "af4d8bc9ab"                // [Password2] Optional alternate AP Wifi password
+#endif
+
+// ------------------------------------------------------------------
+// SoftAP defaults (override in user config / ini later)
+//   - If SOFTAP_PASSWORD == ""  => open AP (no password)
+//   - If non-empty              => WPA2, must be >= 8 chars
+// ------------------------------------------------------------------
+#ifndef SOFTAP_SSID
+  #define SOFTAP_SSID      "PulSar-Setup"
+#endif
+
+#ifndef SOFTAP_PASSWORD
+  #define SOFTAP_PASSWORD  ""
+#endif
+
+
 #endif
 
 

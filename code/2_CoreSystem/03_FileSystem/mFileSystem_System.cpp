@@ -66,7 +66,7 @@ void mFileSystem::JsonFile_Save__Stored_Module()
   JBI->Start();
     JBI->Add(PM_UTC_TIME, tkr_time->GetDateAndTime(DT_UTC).c_str());
     JBI->Add(PSTR("millis"), millis());
-    // pCONT->Tasker_Interface(TASK_FILESYSTEM_APPEND__CONFIG_MODULES__ID);
+    // tkr->Tasker_Interface(TASK_FILESYSTEM_APPEND__CONFIG_MODULES__ID);
   JBI->End();
 
   file.print(JBI->GetBufferPtr());
@@ -91,7 +91,7 @@ void mFileSystem::JsonFile_Load__Stored_Module_Or_Default_Template()
  
   if(!JsonFile_Load__Stored_Module() || force_default_template){
     ALOG_INF(PSTR("No config_module.json file found, loading default template from progmem"));
-    pCONT->Tasker_Interface(TASK_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID);
+    tkr->Tasker_Interface(TASK_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID);
   }
 
   DEBUG_LINE_HERE;
@@ -122,7 +122,7 @@ bool mFileSystem::JsonFile_Load__Stored_Module()
   }
  
   // Read into local buffer, this should be locked from async access using buffer class method
-  D_DATA_BUFFER_CLEAR();
+  data_buffer.ClearDeep();
   uint8_t* buffer_p = (uint8_t*)data_buffer.payload.ctr;
   file.read(buffer_p, file.available());
   file.close();
@@ -131,7 +131,7 @@ bool mFileSystem::JsonFile_Load__Stored_Module()
 
   ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
 
-  pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+  tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
   JBI->ReleaseLock();
 
@@ -175,7 +175,7 @@ void mFileSystem::JsonFile_Save__Stored_Secure()
   JBI->Start();
     JBI->Add(PM_UTC_TIME, tkr_time->GetDateAndTime(DT_UTC).c_str() );
     JBI->Add(PSTR("millis"), millis());
-    pCONT->Tasker_Interface(TASK_FILESYSTEM_APPEND__Stored_Secure__ID);
+    tkr->Tasker_Interface(TASK_FILESYSTEM_APPEND__Stored_Secure__ID);
   JBI->End();
 
   file.print(JBI->GetBufferPtr());
@@ -210,7 +210,7 @@ void mFileSystem::JsonFile_Load__Stored_Secure()
   }
  
   // Read into local buffer, this should be locked from async access using buffer class method
-  D_DATA_BUFFER_CLEAR();
+  data_buffer.ClearDeep();
   uint8_t* buffer_p = (uint8_t*)data_buffer.payload.ctr;
   file.read(buffer_p, file.available());
   file.close();
@@ -219,7 +219,7 @@ void mFileSystem::JsonFile_Load__Stored_Secure()
 
   ALOG_INF( PSTR("Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
 
-  pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
+  tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
   JBI->ReleaseLock();
   

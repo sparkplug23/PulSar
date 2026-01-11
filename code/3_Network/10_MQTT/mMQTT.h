@@ -3,7 +3,7 @@
 
 #define D_UNIQUE_MODULE_NETWORK_MQTT_ID  3010 // [(Folder_Number*100)+ID_File]
 
-#include "2_CoreSystem/mFirmwareDefaults.h"
+#include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h" 
 
 #ifdef USE_MODULE_NETWORK_MQTT
 #include <stdint.h>
@@ -129,6 +129,12 @@ struct handler {
   #endif
   Handler_Flags flags = {0};
   uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level, bool json_appending); // member-function to sender with two args. Extra "json_appending" will allow calling constructjsons directly and adding them to another without closing the main json object
+
+  void Send()
+  {
+    flags.SendNow = true;
+  }
+
 };
 
 #include "PubSubClient.h"
@@ -370,6 +376,8 @@ class mMQTTManager :
     }dt;
 
     std::vector<MQTTConnection*> brokers;
+
+    WiFiClient* mqtt_client = nullptr;
 
     /************************************************************************************************
      * SECTION: Internal Functions

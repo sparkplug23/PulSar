@@ -26,7 +26,7 @@ void mHVAC::YTask_Update_Sensors()
       sensors_reading_t reading; 
       mTaskerInterface* pMod = nullptr; 
 
-      if((pMod = pCONT->GetModule(zone[zone_id].sensor.module_id)) != nullptr)
+      if((pMod = tkr->GetModule(zone[zone_id].sensor.module_id)) != nullptr)
       {
         
         pMod->GetSensorReading(&reading, zone[zone_id].sensor.index);

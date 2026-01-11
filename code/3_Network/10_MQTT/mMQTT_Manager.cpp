@@ -6,17 +6,18 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
 
   // ALOG_INF(PSTR("M0host_address===================: %s"), dt.connection[0].host_address);
 
-
   switch(function){
     /************
      * INIT SECTION * 
     *******************/
     case TASK_INIT:
       Init();
-    break;
+    break;    
   }
 
   if(!tkr_set->Settings.flag_system.mqtt_enabled){ return 0; }
+
+  if(!tkr_interface_network->Network_HasExternalConnectivity()) return 0;
 
   switch(function){
   /************
@@ -30,6 +31,46 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
     // ALOG_ERR(PSTR("MQTT_CONNECTED hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"));
       Load_New_Subscriptions_From_Function_Template();
     break;
+    
+    case TASK_WIFI_CONNECTED:{ // moved from wifi jan2026
+
+      #ifndef ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+        ALOG_HGL(PSTR("Start MQTTConnection with WiFi"));
+
+        #ifdef USE_MODULE_NETWORK_MQTT
+
+        DEBUG_LINE_HERE3
+
+          mqtt_client = new WiFiClient();
+          DEBUG_LINE_HERE3
+
+          tkr_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
+          DEBUG_LINE_HERE3
+          
+          tkr_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
+          DEBUG_LINE_HERE3
+
+          tkr_mqtt->brokers.back()->SetReConnectBackoffTime(MQTT_RETRY_SECS);
+          DEBUG_LINE_HERE3
+          
+          // char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%s"), tkr_set->Settings.system_name.device, WiFi.macAddress().c_str()); 
+          
+          uint8_t mac[6];           WiFi.macAddress(mac);
+          DEBUG_LINE_HERE3
+          char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%02X:%02X:%02X"), tkr_set->Settings.system_name.device, mac[3], mac[4], mac[5]); 
+          DEBUG_LINE_HERE3
+          tkr_mqtt->brokers.back()->SetClientName(client_name);
+          DEBUG_LINE_HERE3
+
+          tkr_mqtt->brokers.back()->SetTopicPrefix(tkr_set->Settings.system_name.device);
+          DEBUG_LINE_HERE3
+
+        #endif // USE_MODULE_NETWORK_MQTT
+      #endif // ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+    }
+    break;
+
     case TASK_NETWORK_CONNECTION_ESTABLISHED:
 
       /**
@@ -433,34 +474,42 @@ void mMQTTManager::Load_New_Subscriptions_From_Function_Template()
 
   DEBUG_LINE_HERE
 
-  #ifdef USE_FUNCTION_TEMPLATE  
-  D_DATA_BUFFER_CLEAR();
-  memcpy_P(data_buffer.payload.ctr, FUNCTION_TEMPLATE, sizeof(FUNCTION_TEMPLATE));
-  data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
-  ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK  "Load_New_Subscriptions_From_Function_Template READ = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
-  #endif //USE_FUNCTION_TEMPLATE
+  // if(data_buffer.requestLock(GetModuleUniqueID())) {
+  //   ALOG_ERR(PSTR("Load_New_Subscriptions_From_Function_Template could not get data buffer lock"));
+  //   return;
+  // }
 
-  JsonParser parser(data_buffer.payload.ctr);
-  JsonParserObject obj = parser.getRootObject();   
-  JsonParserToken jtok = 0; 
+  // #ifdef USE_FUNCTION_TEMPLATE  
+  // data_buffer.ClearDeep();
+  // memcpy_P(data_buffer.payload.ctr, FUNCTION_TEMPLATE, sizeof(FUNCTION_TEMPLATE));
+  // data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
+  // ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK  "Load_New_Subscriptions_From_Function_Template READ = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
+  // #endif //USE_FUNCTION_TEMPLATE
 
-  if(jtok = obj["MQTTSubscribe"])
-  {
-    if(jtok.isArray())
-    {
+  // JsonParser parser(data_buffer.payload.ctr);
+  // JsonParserObject obj = parser.getRootObject();   
+  // JsonParserToken jtok = 0; 
 
-      JsonParserArray arrobj = jtok;
-      for(auto v : arrobj) 
-      {
-        const char* new_topic = v.getStr();
-        ALOG_DBM(PSTR("New Subscribe = \"%s\""), new_topic);
+  // if(jtok = obj["MQTTSubscribe"])
+  // {
+  //   if(jtok.isArray())
+  //   {
+
+  //     JsonParserArray arrobj = jtok;
+  //     for(auto v : arrobj) 
+  //     {
+  //       const char* new_topic = v.getStr();
+  //       ALOG_DBM(PSTR("New Subscribe = \"%s\""), new_topic);
         
 
-      }
+  //     }
 
-    }
+  //   }
 
-  }
+  // }
+
+  // data_buffer.releaseLock();
+
 }
 
 
@@ -519,7 +568,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj["MQTT"].getObject()["StatusAll"]) //change all to be value
   {    
-    pCONT->Tasker_Interface(TASK_MQTT_STATUS_REFRESH_SEND_ALL);
+    tkr->Tasker_Interface(TASK_MQTT_STATUS_REFRESH_SEND_ALL);
   }
 
 
@@ -541,7 +590,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
       dt.configperiod_secs = jtok_sub.getInt();
       ALOG_TST(PSTR("MQTTUpdateSeconds ConfigPeriod %d"), dt.configperiod_secs);
     }
-    pCONT->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
+    tkr->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   }
 
 }//end function
@@ -563,7 +612,7 @@ void mMQTTManager::CallMQTTSenders()
   {
     if(brokers[0]->uptime_seconds && brokers[0]->downtime_counter==0)
     {
-      pCONT->Tasker_Interface(TASK_MQTT_SENDER);
+      tkr->Tasker_Interface(TASK_MQTT_SENDER);
     }
   }
 

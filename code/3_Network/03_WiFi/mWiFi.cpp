@@ -2,6 +2,8 @@
 
 #ifdef USE_MODULE_NETWORK_WIFI
 
+#ifndef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+
 #ifdef ESP8266
 extern "C" {
  #include "user_interface.h"
@@ -311,7 +313,7 @@ void mWiFi::WifiBegin__OldTasMethod(uint8_t flag, uint8_t channel)
   // delay(2000);
 
   // DEBUG_LINE_HERE_PAUSE;
-  pCONT->Tasker_Interface(TASK_WIFI_STARTING_CONNECTION);
+  tkr->Tasker_Interface(TASK_WIFI_STARTING_CONNECTION);
 
   ALOG_INF(PSTR(D_LOG_WIFI "mWiFi::WifiBegin__OldTasMethod TASK_WIFI_STARTING_CONNECTION over")); Serial.flush();
 
@@ -692,12 +694,12 @@ void mWiFi::WifiSetState(uint8_t state)
     if(state){ //new state 
     // pinMode(2,OUTPUT);
     // digitalWrite(2,LOW);
-      pCONT->Tasker_Interface(TASK_WIFI_CONNECTED);
+      tkr->Tasker_Interface(TASK_WIFI_CONNECTED);
       loglevel_with_connection_status = LOG_LEVEL_DEBUG_MORE;
     }else{
     // pinMode(2,OUTPUT);
     // digitalWrite(2,HIGH);
-      pCONT->Tasker_Interface(TASK_WIFI_DISCONNECTED);
+      tkr->Tasker_Interface(TASK_WIFI_DISCONNECTED);
       loglevel_with_connection_status = LOG_LEVEL_INFO;
     }
   }
@@ -1470,7 +1472,7 @@ void mWiFi::WifiCheck(uint8_t param)
 
       //   WifiSetState(1);
         
-      //   pCONT->Tasker_Interface(TASK_WIFI_CONNECTED);
+      //   tkr->Tasker_Interface(TASK_WIFI_CONNECTED);
 
       //   //if (tkr_set->Settings.flag_network.use_wifi_rescan) {
       //     if (!(tkr_time->UpTime() % (60 * WIFI_RESCAN_MINUTES))) {
@@ -1532,7 +1534,7 @@ void mWiFi::WifiCheck(uint8_t param)
 
       //   WifiSetState(0);
     
-      //   //pCONT->Tasker_Interface(TASK_WIFI_DISCONNECTED);
+      //   //tkr->Tasker_Interface(TASK_WIFI_DISCONNECTED);
 
       // }
     //} //if discovery
@@ -2057,6 +2059,6 @@ const char* mWiFi::GetWiFiConfigTypeCtr(void){
 
 //#endif
 
-
+#endif // ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
 
 #endif // USE_MODULE_NETWORK_WIFI

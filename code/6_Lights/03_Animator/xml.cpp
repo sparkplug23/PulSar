@@ -1,5 +1,7 @@
 #include "_AnimatorLight.h"
 
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
+
 #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS
 
 
@@ -87,12 +89,12 @@ void mAnimatorLight::appendGPIOinfo(Print& settingsScript) {
     settingsScript.printf_P(PSTR(",%d,%d"), spi_mosi, spi_sclk);
   }
   // usermod pin reservations will become unnecessary when settings pages will read cfg.json directly
-  if (requestJSONBufferLock(6)) {
+  if (JBI->requestJSONBufferLock(6)) {
     // if we can't allocate JSON buffer ignore usermod pins
     JsonObject mods = tkr_mfile->pDoc->createNestedObject("um");
     // UsermodManager::addToConfig(mods);
     if (!mods.isNull()) fillUMPins(settingsScript, mods);
-    releaseJSONBufferLock();
+    JBI->releaseJSONBufferLock();
   }
   settingsScript.print(F("];"));
 
@@ -704,3 +706,4 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
 
 
 #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS
+#endif

@@ -227,18 +227,29 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
 {
    
   IPAddress localip   = WiFi.localIP();
+  #ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+  IPAddress staticip  = IPAddress(tkr_set->Settings.network.ip_address[0]);
+  IPAddress gatewayip = IPAddress(tkr_set->Settings.network.ip_address[1]);
+  IPAddress subnetip  = IPAddress(tkr_set->Settings.network.ip_address[2]);
+  IPAddress dnsip     = IPAddress(tkr_set->Settings.network.ip_address[3]);
+  #else
   IPAddress staticip  = IPAddress(tkr_set->Settings.ip_address[0]);
   IPAddress gatewayip = IPAddress(tkr_set->Settings.ip_address[1]);
   IPAddress subnetip  = IPAddress(tkr_set->Settings.ip_address[2]);
   IPAddress dnsip     = IPAddress(tkr_set->Settings.ip_address[3]);
+  #endif
 
   JBI->Start();
     JBI->Add_FV(PM_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),localip[0],localip[1],localip[2],localip[3]);
     JBI->Add(PM_SSID, WiFi.SSID().c_str());
+    #ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+    JBI->Add(PM_SSID_NUMBERED, tkr_set->Settings.network.sta_active); // Used to debug switching in grafana
+    #else
     JBI->Add(PM_SSID_NUMBERED, tkr_set->Settings.sta_active); // Used to debug switching in grafana
+    #endif
     JBI->Add(PM_RSSI, WiFi.RSSI());
     #ifdef ESP32
-    JBI->Add("TXPower", WiFi.getTxPower()); // 0-20dBm
+    JBI->Add("TXPower_dBm", tkr_wifi->WiFiPower_To_dBm(WiFi.getTxPower()) );
     #endif
     // JBI->Add(PM_CONNECTCOUNT, wifi_reconnects_counter);
     JBI->Add(PM_HOSTNAME, tkr_set->runtime.my_hostname);
@@ -250,12 +261,21 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
     JBI->Add(PM_BSSID, WiFi.BSSIDstr().c_str());
     JBI->Add(PM_MAC, WiFi.macAddress().c_str());
     JBI->Add(PM_WEBSERVER_ENABLED, tkr_set->Settings.webserver);
-    JBI->Add(PM_WIFICONFIG_STATE, tkr_set->Settings.sta_config);
+    #ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
+    JBI->Add(PM_WIFICONFIG_STATE, tkr_set->Settings.network.sta_config);
+    #endif
 
+    #ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
     JBI->Array_Start(PM_AP_LIST);
-      JBI->Add(tkr_set->SettingsText(SET_STASSID1));
-      JBI->Add(tkr_set->SettingsText(SET_STASSID2));
+    for(int i=0;i<WIFI_MAXIMUM_CONNECTIONS;i++)
+    {
+     if(tkr_set->Settings.network.wifi[i].ssid[0] != 0)
+     {
+      JBI->Add(tkr_set->Settings.network.wifi[i].ssid); 
+     }
+    }
     JBI->Array_End();
+    #endif
 
   return JBI->End();
 
@@ -647,46 +667,212 @@ uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level, bool json_a
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level, bool json_appending){ //BuildHealth
+// uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level, bool json_appending){ //BuildHealth
 
+//   JBI->Start();
+  
+//   // #ifdef DEBUG_EXECUTION_TIME
+//   //   char buffer[50];
+//   //   JBI->Object_Start(tkr->GetModuleFriendlyName(tkr->module_settings.list[ii], buffer));
+//   //     JBI->Array_AddArray("average", tkr->module_settings.execution_time_average_ms, sizeof(tkr->module_settings.execution_time_average_ms));
+//   //     JBI->Array_AddArray("max",     tkr->module_settings.execution_time_max_ms,     sizeof(tkr->module_settings.execution_time_max_ms));
+//   //   JBI->Object_End();
+//   // #endif
+
+//   // JBI->Object_Start("ModuleSize");
+
+  
+//   // // for(uint8_t i=0;i<tkr->module_settings.count;i++){
+//   // //   JBI->Add_P(tkr->GetModuleFriendlyName(tkr->module_settings.list[i]),tkr->GetClassSizeByID(tkr->module_settings.list[i]));
+//   // //   // if(tkr->GetClassSizeByID(i)>10000){
+//   // //   //   JBI->Add("bad",i);
+//   // //   // }
+//   // // }
+
+//   // /**
+//   //  * @brief Add array of all unique id's (in a json array, this will just replace... so maybe use name+id? or rather ID_NAME so it will be easier to spot numbers the same)
+//   //  * I could also run a "append" id but check its not in it already (easier with vector?)
+//   //  * 
+//   //  */
+//   // char buffer[100] = {0};
+
+//   // JBI->Array_Start("ModuleIDs");
+//   // for(auto& mod: tkr->pModule)
+//   // {
+//   //   snprintf_P(buffer, sizeof(buffer), PSTR("%04d_%S"), mod->GetModuleUniqueID(), mod->GetModuleName()  );
+//   //   JBI->Add(buffer);
+//   // }
+//   // JBI->Array_End();
+
+//   // JBI->Object_End();
+
+
+//   return JBI->End();
+// }
+
+// uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level, bool json_appending)
+// {
+//   JBI->Start();
+
+//   // ---- Config ----
+//   constexpr uint16_t MAX_MODS = 96;   // hard cap for safety
+//   constexpr uint16_t MAX_DUPS = 32;   // max duplicate IDs reported
+
+//   // ---- Scratch storage (embedded-friendly) ----
+//   uint16_t ids[MAX_MODS];
+//   uint16_t counts[MAX_MODS];
+//   uint16_t unique_count = 0;
+
+//   // Track logger specifically
+//   uint16_t logger_count = 0;
+
+//   // ---- Modules list ----
+//   JBI->Array_Start("modules");
+
+//   uint16_t mod_i = 0;
+//   for (auto &mod : tkr->pModule)
+//   {
+//     if (!mod) continue;
+
+//     // Safety stop
+//     if (mod_i >= MAX_MODS) break;
+//     mod_i++;
+
+//     const uint16_t id = (uint16_t)mod->GetModuleUniqueID();
+
+//     // Update unique-id counts (O(N^2) but N is small; avoids std::map)
+//     bool found = false;
+//     for (uint16_t i = 0; i < unique_count; i++) {
+//       if (ids[i] == id) { counts[i]++; found = true; break; }
+//     }
+//     if (!found && unique_count < MAX_MODS) {
+//       ids[unique_count] = id;
+//       counts[unique_count] = 1;
+//       unique_count++;
+//     }
+
+//     if (id == (uint16_t)D_UNIQUE_MODULE_CORE_LOGGING_ID) {
+//       logger_count++;
+//     }
+
+//     // Emit module object
+//     // Note: pointer printed as string so JSON stays valid on all platforms.
+//     char namebuf[64] = {0};
+//     char ptrbuf[20]  = {0};
+
+//     snprintf_P(namebuf, sizeof(namebuf), PSTR("%S"), mod->GetModuleName());
+//     snprintf_P(ptrbuf,  sizeof(ptrbuf),  PSTR("0x%08lX"), (unsigned long)(uintptr_t)mod);
+
+//     JBI->Object_Start();
+//       JBI->Add("id", id);
+//       JBI->Add("name", namebuf);
+//       JBI->Add("ptr", ptrbuf);
+
+//       // Optional (only if you have these methods; comment out if not present)
+//       // JBI->Add("class_bytes", tkr->GetClassSizeByID(id));
+//       // JBI->Add("enabled", mod->IsEnabled());
+
+//     JBI->Object_End();
+//   }
+
+//   JBI->Array_End(); // modules
+
+//   // ---- Duplicate report ----
+//   JBI->Array_Start("duplicates");
+
+//   uint16_t dup_reported = 0;
+//   for (uint16_t i = 0; i < unique_count; i++)
+//   {
+//     if (counts[i] > 1)
+//     {
+//       if (dup_reported++ >= MAX_DUPS) break;
+
+//       JBI->Object_Start();
+//         JBI->Add("id", ids[i]);
+//         JBI->Add("count", counts[i]);
+
+//         // Provide an ID_NAME string for quick visual scan
+//         // (First matching module name found)
+//         const char* firstName = nullptr;
+//         for (auto &mod : tkr->pModule) {
+//           if (!mod) continue;
+//           if ((uint16_t)mod->GetModuleUniqueID() == ids[i]) {
+//             firstName = (const char*)mod->GetModuleName(); // PROGMEM string pointer
+//             break;
+//           }
+//         }
+//         if (firstName) {
+//           char idname[80] = {0};
+//           snprintf_P(idname, sizeof(idname), PSTR("%04u_%S"), (unsigned)ids[i], (const __FlashStringHelper*)firstName);
+//           JBI->Add("id_name", idname);
+//         }
+//       JBI->Object_End();
+//     }
+//   }
+
+//   JBI->Array_End(); // duplicates
+
+//   // ---- Logger report (explicit) ----
+//   JBI->Object_Start("logger");
+//     JBI->Add("id", (uint16_t)D_UNIQUE_MODULE_CORE_LOGGING_ID);
+//     JBI->Add("found", (logger_count > 0));
+//     JBI->Add("count", logger_count);
+
+//     // Add pointer list for logger instances (helps prove duplicates)
+//     JBI->Array_Start("ptrs");
+//       for (auto &mod : tkr->pModule) {
+//         if (!mod) continue;
+//         if ((uint16_t)mod->GetModuleUniqueID() == (uint16_t)D_UNIQUE_MODULE_CORE_LOGGING_ID) {
+//           char ptrbuf[20] = {0};
+//           snprintf_P(ptrbuf, sizeof(ptrbuf), PSTR("0x%08lX"), (unsigned long)(uintptr_t)mod);
+//           JBI->Add(ptrbuf);
+//         }
+//       }
+//     JBI->Array_End();
+//   JBI->Object_End();
+
+//   // ---- Summary ----
+//   JBI->Object_Start("summary");
+//     JBI->Add("modules_scanned", mod_i);
+//     JBI->Add("unique_ids", unique_count);
+//     JBI->Add("duplicate_ids", dup_reported);
+//   JBI->Object_End();
+
+//   return JBI->End();
+// }
+
+
+
+uint8_t mTelemetry::ConstructJSON_Debug_ModuleInterface(uint8_t json_level, bool json_appending)
+{
   JBI->Start();
+
+  JBI->Array_Start("unique_ids");
+  for (auto* mod : tkr->pModule) {
+    if (!mod) continue;
+    JBI->Add(mod->GetModuleUniqueID());
+  }
+  JBI->Array_End();
+
+  JBI->Object_Start("id_name_list");
+  char id_key[8];
+  for (auto* mod : tkr->pModule) {
+    if (!mod) continue;
+    snprintf_P(id_key, sizeof(id_key), PSTR("%u"), (unsigned)mod->GetModuleUniqueID());
+    JBI->Add(id_key, mod->GetModuleName());
+  }
+  JBI->Object_End();
+
+
+  JBI->Array_Start("module_ptr");
+  char ptrbuf[20]  = {0};
+  for (auto* mod : tkr->pModule) {
+    if (!mod) continue;
+    snprintf_P(ptrbuf,  sizeof(ptrbuf),  PSTR("0x%08lX"), (unsigned long)(uintptr_t)mod);
+    JBI->Add(ptrbuf);
+  }
+  JBI->Array_End();
   
-  // #ifdef DEBUG_EXECUTION_TIME
-  //   char buffer[50];
-  //   JBI->Object_Start(pCONT->GetModuleFriendlyName(pCONT->module_settings.list[ii], buffer));
-  //     JBI->Array_AddArray("average", pCONT->module_settings.execution_time_average_ms, sizeof(pCONT->module_settings.execution_time_average_ms));
-  //     JBI->Array_AddArray("max",     pCONT->module_settings.execution_time_max_ms,     sizeof(pCONT->module_settings.execution_time_max_ms));
-  //   JBI->Object_End();
-  // #endif
-
-  // JBI->Object_Start("ModuleSize");
-
-  
-  // // for(uint8_t i=0;i<pCONT->module_settings.count;i++){
-  // //   JBI->Add_P(pCONT->GetModuleFriendlyName(pCONT->module_settings.list[i]),pCONT->GetClassSizeByID(pCONT->module_settings.list[i]));
-  // //   // if(pCONT->GetClassSizeByID(i)>10000){
-  // //   //   JBI->Add("bad",i);
-  // //   // }
-  // // }
-
-  // /**
-  //  * @brief Add array of all unique id's (in a json array, this will just replace... so maybe use name+id? or rather ID_NAME so it will be easier to spot numbers the same)
-  //  * I could also run a "append" id but check its not in it already (easier with vector?)
-  //  * 
-  //  */
-  // char buffer[100] = {0};
-
-  // JBI->Array_Start("ModuleIDs");
-  // for(auto& mod: pCONT->pModule)
-  // {
-  //   snprintf_P(buffer, sizeof(buffer), PSTR("%04d_%S"), mod->GetModuleUniqueID(), mod->GetModuleName()  );
-  //   JBI->Add(buffer);
-  // }
-  // JBI->Array_End();
-
-  // JBI->Object_End();
-
-
   return JBI->End();
 }
 
@@ -782,13 +968,13 @@ uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t jso
 
   char buffer2[100];
   
-  // for(int ii=0;ii<pCONT->GetClassCount();ii++)
+  // for(int ii=0;ii<tkr->GetClassCount();ii++)
   // {
-  //   JBI->Level_Start_P(pCONT->pModule[ii]->GetModuleName());
+  //   JBI->Level_Start_P(tkr->pModule[ii]->GetModuleName());
 
-  //     JBI->Add("max_time", pCONT->debug_module_time[ii].max_time);
-  //     JBI->Add("avg_time", pCONT->debug_module_time[ii].avg_time);
-  //     JBI->Add("max_function_id", pCONT->debug_module_time[ii].max_function_id);
+  //     JBI->Add("max_time", tkr->debug_module_time[ii].max_time);
+  //     JBI->Add("avg_time", tkr->debug_module_time[ii].avg_time);
+  //     JBI->Add("max_function_id", tkr->debug_module_time[ii].max_function_id);
 
   //   JBI->Object_End();
 
@@ -803,8 +989,8 @@ uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t jso
 
 
 
-  //   JBI->Add_P(pCONT->GetModuleFriendlyName(pCONT->module_settings.list[i]),pCONT->GetClassSizeByID(pCONT->module_settings.list[i]));
-  //   // if(pCONT->GetClassSizeByID(i)>10000){
+  //   JBI->Add_P(tkr->GetModuleFriendlyName(tkr->module_settings.list[i]),tkr->GetClassSizeByID(tkr->module_settings.list[i]));
+  //   // if(tkr->GetClassSizeByID(i)>10000){
   //   //   JBI->Add("bad",i);
   //   // }
 
@@ -822,9 +1008,9 @@ uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t jso
 
 
   // JBI->Array_Start("ModuleIDs");
-  // for(int ii=0;ii<pCONT->GetClassCount();ii++)
+  // for(int ii=0;ii<tkr->GetClassCount();ii++)
   // {
-  //   snprintf_P(buffer, sizeof(buffer), PSTR("%04d_%S"), pCONT->pModule[ii]->GetModuleUniqueID(), pCONT->pModule[ii]->GetModuleFriendlyName()  );
+  //   snprintf_P(buffer, sizeof(buffer), PSTR("%04d_%S"), tkr->pModule[ii]->GetModuleUniqueID(), tkr->pModule[ii]->GetModuleFriendlyName()  );
 
   //   JBI->Add(buffer);
   // }

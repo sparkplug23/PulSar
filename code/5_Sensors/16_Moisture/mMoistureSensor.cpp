@@ -21,7 +21,7 @@ void mMoistureSensor::Tasker(uint8_t function, JsonParserObject obj){
       // LED_BLUE_SET(!PIR_DETECTED());
 
       // if(PIR_DETECTED()!=pir_detect.state){
-      //   pCONT->mqt->publish_device("status/motion/event",PIR_DETECTED_CTR,false);
+      //   tkr->mqt->publish_device("status/motion/event",PIR_DETECTED_CTR,false);
       //   pir_detect.state = PIR_DETECTED();
       //   pir_detect.tDetectTime = millis();
       //   if(pir_detect.state){ 
@@ -61,7 +61,7 @@ void mMoistureSensor::SubTasker_MQTTSender(){
 //#ifdef USE_MODULE_SENSORS_PIR // Motion Sensing -- NEEDS MOVED INTO ITS OWN FUNCTION
 void mMoistureSensor::MQTTSendMoistureSensorIfChanged(){
 
-  D_DATA_BUFFER_CLEAR();
+  data_buffer.ClearDeep();
 
   StaticJsonDocument<300> doc;
   JsonObject root = doc.to<JsonObject>();
@@ -87,7 +87,7 @@ void mMoistureSensor::MQTTSendMoistureSensorIfChanged(){
   data_buffer.payload.len = measureJson(root)+1;
   serializeJson(doc,data_buffer.payload.ctr);
 
-  pCONT->mqt->publish_device("status/moisture",data_buffer.payload.ctr,false);
+  tkr->mqt->publish_device("status/moisture",data_buffer.payload.ctr,false);
 
 }
 

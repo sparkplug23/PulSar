@@ -210,7 +210,8 @@ void setup(void)
       Serial.printf("FastBoot: Count %d\n\r", RtcFastboot.fast_reboot_count); 
       #endif
     }
-    
+    Serial.printf("FastBoot: Count %u\r\n", RtcFastboot.fast_reboot_count);
+
     RtcFastboot_Save(); // Save reboot
 
     /**
@@ -294,8 +295,33 @@ void setup(void)
  ** Init Pointers ***************************************************************************
  ********************************************************************************************/
  
+  DEBUG_LINE_HERE
+  DEBUG_LINE_HERE
+
   // Init Json builder with memory address and size
   JsonBuilderI ->Start(data_buffer.payload.ctr, data_buffer.payload.length_used, DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+  
+  DEBUG_LINE_HERE
+
+  if(data_buffer.payload.ctr){
+    DEBUG_LINE_HERE
+  }else{
+    DEBUG_LINE_HERE
+  }
+  
+  
+Serial.print(F("payload.ctr addr = 0x"));
+Serial.println((uintptr_t)data_buffer.payload.ctr, HEX);
+
+Serial.print(F("len_used addr   = 0x"));
+Serial.println((uintptr_t)&data_buffer.payload.length_used, HEX);
+
+Serial.print(F("DATA_BUFFER addr= 0x"));
+Serial.println((uintptr_t)&data_buffer, HEX);
+
+Serial.print(F("size = "));
+Serial.println((unsigned)DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+
   BufferWriterI->Start(data_buffer.payload.ctr, data_buffer.payload.length_used, DATA_BUFFER_PAYLOAD_MAX_LENGTH); //length prob doesnt need to be set either after its defined in the class
   
   /**
@@ -304,11 +330,11 @@ void setup(void)
   DEBUG_LINE_HERE
   DEBUG_LINE_HERE
   Serial.printf("time %dms\n\r", millis());
-  pCONT->Instance_Init();
+  tkr->Instance_Init();
   DEBUG_LINE_HERE
   Serial.printf("time %dms\n\r", millis());
   DEBUG_LINE_HERE
-  
+  // DEBUG_CRITICAL_STOP_CODE_PRINT
 /********************************************************************************************
  ** LOGGING: Set boot log levels *********************************************************************
  ********************************************************************************************/
@@ -487,6 +513,7 @@ DEBUG_LINE_HERE3
 
     if (tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET]) // SetOption36
     {         
+      
       // Disable functionality as possible cause of fast restart within BOOT_LOOP_TIME seconds (Exception, WDT or restarts)
       if (RtcFastboot.fast_reboot_count > tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET]) {       // Restart twice
         
@@ -550,10 +577,10 @@ DEBUG_LINE_HERE3
  ********************************************************************************************/
   
   // configure any memory address needed as part of module init or templates
-  pCONT->Tasker_Interface(TASK_POINTER_INIT);
+  tkr->Tasker_Interface(TASK_POINTER_INIT);
 
   #ifdef ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
-  pCONT->Tasker_Interface(TASK_TEMPLATES__MOVE_HARDCODED_TEMPLATES_INTO_FILESYSTEM);
+  tkr->Tasker_Interface(TASK_TEMPLATES__MOVE_HARDCODED_TEMPLATES_INTO_FILESYSTEM);
   #endif
   
   /**
@@ -562,7 +589,7 @@ DEBUG_LINE_HERE3
    **/
   #ifdef ENABLE_FEATURE_TEMPLATES__LOAD_FROM_PROGMEM_TO_OVERRIDE_STORED_SETTINGS_TO_MAINTAIN_KNOWN_WORKING_VALUES
   ALOG_DBM(PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
-  pCONT->Tasker_Interface(TASK_TEMPLATES__LOAD_MODULE); // loading module, only interface modules will have these
+  tkr->Tasker_Interface(TASK_TEMPLATES__LOAD_MODULE); // loading module, only interface modules will have these
   #else
   #warning "FORCE_TEMPLATE_LOADING is disabled, and production/release is assumed. This REQUIRES valid settings/storage or device may be unstable"
   #endif
@@ -587,20 +614,20 @@ DEBUG_LINE_HERE3
   // Init the GPIOs
   tkr_pins->GpioInit();
   // Start pins in modules
-  pCONT->Tasker_Interface(TASK_PRE_INIT);
+  tkr->Tasker_Interface(TASK_PRE_INIT);
   // Init devices
-  pCONT->Tasker_Interface(TASK_INIT);
+  tkr->Tasker_Interface(TASK_INIT);
   ALOG_INF(PSTR("TASK_INIT Complete\n\r------------------------------------------------------\n\r------------------------------------------------------"));
   // Init devices after others have been configured fully
-  pCONT->Tasker_Interface(TASK_POST_INIT);
+  tkr->Tasker_Interface(TASK_POST_INIT);
   // Run system functions 
-  pCONT->Tasker_Interface(YTASK_INIT);
+  tkr->Tasker_Interface(YTASK_INIT);
   // Load any stored user values into module
-  pCONT->Tasker_Interface(TASK_SETTINGS_LOAD_VALUES_INTO_MODULE); // to be used 2023, this will load module config from filesystem
+  tkr->Tasker_Interface(TASK_SETTINGS_LOAD_VALUES_INTO_MODULE); // to be used 2023, this will load module config from filesystem
   
   DEBUG_LINE_HERE
   // Init any dynamic memory buffers
-  pCONT->Tasker_Interface(TASK_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
+  tkr->Tasker_Interface(TASK_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
   DEBUG_LINE_HERE
 
 
@@ -618,25 +645,25 @@ DEBUG_LINE_HERE3
   #endif
   #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #ifdef ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
-  pCONT->Tasker_Interface(TASK_FILESYSTEM__LOAD__MODULE_DATA__ID);
+  tkr->Tasker_Interface(TASK_FILESYSTEM__LOAD__MODULE_DATA__ID);
   #endif // ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
 
   /**
    * This can only happen AFTER each module is running/enabled (port init checks). This will override the settings load, so should be tested if needed when settings work
    * */
-  pCONT->Tasker_Interface(TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM); //USED
+  tkr->Tasker_Interface(TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM); //USED
   // Configure sensor/drivers to values desired for modules
-  pCONT->Tasker_Interface(TASK_CONFIGURE_MODULES_FOR_DEVICE); //??
+  tkr->Tasker_Interface(TASK_CONFIGURE_MODULES_FOR_DEVICE); //??
 
   /********************************************************************************************
    ** MQTT: Configure mqtt handlers in modules   ******
   ********************************************************************************************/
 
-  pCONT->Tasker_Interface(TASK_MQTT_HANDLERS_INIT);  
+  tkr->Tasker_Interface(TASK_MQTT_HANDLERS_INIT);  
 
   // Init the refresh periods for mqtt
   #ifndef ENABLE_DEBUGFEATURE_MQTT__DISABLE_SETTING_DYNAMIC_REFRESH_RATES
-  pCONT->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
+  tkr->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   #endif
 
   /********************************************************************************************
@@ -644,7 +671,7 @@ DEBUG_LINE_HERE3
   ********************************************************************************************/
 
   #ifdef USE_MODULE_CORE_RULES
-  pCONT->Tasker_Interface(TASK_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID);
+  tkr->Tasker_Interface(TASK_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID);
   #endif 
   
 /********************************************************************************************
@@ -658,18 +685,18 @@ DEBUG_LINE_HERE3
   ********************************************************************************************/
   
   #ifdef ENABLE_FUNCTION_DEBUG
-    pCONT->Tasker_Interface(TASK_DEBUG_CONFIGURE);
+    tkr->Tasker_Interface(TASK_DEBUG_CONFIGURE);
   #endif
 
   #ifdef ENABLE_BOOT_OVERRIDE_INIT
-  pCONT->Tasker_Interface(TASK_OVERRIDE_BOOT_INIT);
+  tkr->Tasker_Interface(TASK_OVERRIDE_BOOT_INIT);
   #endif
 
   /********************************************************************************************
    ** Boot Completed **************************************************************************
   ********************************************************************************************/
 
-  pCONT->Tasker_Interface(TASK_ON_BOOT_COMPLETE);
+  tkr->Tasker_Interface(TASK_ON_BOOT_COMPLETE);
 
   // Serial.println("END OF SETUP REACHED"); Serial.flush();
 
@@ -685,7 +712,7 @@ DEBUG_LINE_HERE3
   }
   #endif
 
-  pCONT->Tasker_Interface(TASK_BOOT_MESSAGE); // Display status of system
+  tkr->Tasker_Interface(TASK_BOOT_MESSAGE); // Display status of system
   
 
 }
@@ -700,80 +727,80 @@ void LoopTasker()
   #endif
   // Serial.println("ArduinoOtaLoop passed STARTED"); Serial.flush();
    
-  pCONT->Tasker_Interface(TASK_LOOP); DEBUG_LINE;
+  tkr->Tasker_Interface(TASK_LOOP); DEBUG_LINE;
  
-  if(tkr_time->UpTime() > 30){ pCONT->Tasker_Interface(YTASK_LOOP); } // Only run after stable boot
+  if(tkr_time->UpTime() > 30){ tkr->Tasker_Interface(YTASK_LOOP); } // Only run after stable boot
  
-  if(mTime::TimeReached(&tkr_sup->tSavedLoop50mSec ,50  )){ pCONT->Tasker_Interface(TASK_EVERY_50_MSECOND);  }  DEBUG_LINE;
-  if(mTime::TimeReached(&tkr_sup->tSavedLoop100mSec,100 )){ pCONT->Tasker_Interface(TASK_EVERY_100_MSECOND); }  DEBUG_LINE;
-  if(mTime::TimeReached(&tkr_sup->tSavedLoop250mSec,250 )){ pCONT->Tasker_Interface(TASK_EVERY_250_MSECOND); }  DEBUG_LINE;
+  if(mTime::TimeReached(&tkr_sup->tSavedLoop50mSec ,50  )){ tkr->Tasker_Interface(TASK_EVERY_50_MSECOND);  }  DEBUG_LINE;
+  if(mTime::TimeReached(&tkr_sup->tSavedLoop100mSec,100 )){ tkr->Tasker_Interface(TASK_EVERY_100_MSECOND); }  DEBUG_LINE;
+  if(mTime::TimeReached(&tkr_sup->tSavedLoop250mSec,250 )){ tkr->Tasker_Interface(TASK_EVERY_250_MSECOND); }  DEBUG_LINE;
   if(mTime::TimeReached(&tkr_sup->tSavedLoop1Sec   ,1000))
   {
 
     /**Since this only gets checked every second, we can use the uptime ticking to make sure it runs just once*/
     #ifdef ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS
     if(tkr_time->UpTime()==ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS){
-      pCONT->Tasker_Interface(TASK_PRE_INIT_DELAYED);     // Configure sub modules and classes as needed, should this be renamed to "INIT_PINS"?
-      pCONT->Tasker_Interface(TASK_INIT_DELAYED);         // Actually complete init, read sensors, enable modules fully etc
-      pCONT->Tasker_Interface(TASK_MQTT_HANDLERS_INIT_DELAYED);
+      tkr->Tasker_Interface(TASK_PRE_INIT_DELAYED);     // Configure sub modules and classes as needed, should this be renamed to "INIT_PINS"?
+      tkr->Tasker_Interface(TASK_INIT_DELAYED);         // Actually complete init, read sensors, enable modules fully etc
+      tkr->Tasker_Interface(TASK_MQTT_HANDLERS_INIT_DELAYED);
     }
     #endif // ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS
 
 
-    pCONT->Tasker_Interface(TASK_EVERY_SECOND); 
+    tkr->Tasker_Interface(TASK_EVERY_SECOND); 
 
     if(
       ((tkr_time->UpTime()%5)==0)&&
       (tkr_time->UpTime()>20)
-    ){                                      pCONT->Tasker_Interface(TASK_EVERY_FIVE_SECOND); }
+    ){                                      tkr->Tasker_Interface(TASK_EVERY_FIVE_SECOND); }
     if(
       ((tkr_time->UpTime()%10)==0)&&
       (tkr_time->UpTime()>20)
-    ){                                      pCONT->Tasker_Interface(TASK_EVERY_10_SECONDS); }
+    ){                                      tkr->Tasker_Interface(TASK_EVERY_10_SECONDS); }
 
-    if((tkr_time->UpTime()%30)==0){                  pCONT->Tasker_Interface(TASK_EVERY_30_SECOND); }
+    if((tkr_time->UpTime()%30)==0){                  tkr->Tasker_Interface(TASK_EVERY_30_SECOND); }
 
-    if((tkr_time->UpTime()%60)==0){                  pCONT->Tasker_Interface(TASK_EVERY_MINUTE); }
+    if((tkr_time->UpTime()%60)==0){                  tkr->Tasker_Interface(TASK_EVERY_MINUTE); }
     
 
     if(
       ((tkr_time->UpTime()%300)==0)&&
       (tkr_time->UpTime()>60)
-    ){                                    pCONT->Tasker_Interface(TASK_EVERY_FIVE_MINUTE); }
+    ){                                    tkr->Tasker_Interface(TASK_EVERY_FIVE_MINUTE); }
 
     // Uptime triggers: Fire Once (based on uptime seconds, but due to this function being called every second, it will only fire once)
-    if(tkr_time->UpTime() == 10){   pCONT->Tasker_Interface(TASK_UPTIME_10_SECONDS); }
-    if(tkr_time->UpTime() == 30){   pCONT->Tasker_Interface(TASK_UPTIME_30_SECONDS); }
-    if(tkr_time->UpTime() == 60){   pCONT->Tasker_Interface(TASK_UPTIME_1_MINUTES); }
-    if(tkr_time->UpTime() == 600){   pCONT->Tasker_Interface(TASK_UPTIME_10_MINUTES); }
-    if(tkr_time->UpTime() == 36000){ pCONT->Tasker_Interface(TASK_UPTIME_60_MINUTES); }
+    if(tkr_time->UpTime() == 10){   tkr->Tasker_Interface(TASK_UPTIME_10_SECONDS); }
+    if(tkr_time->UpTime() == 30){   tkr->Tasker_Interface(TASK_UPTIME_30_SECONDS); }
+    if(tkr_time->UpTime() == 60){   tkr->Tasker_Interface(TASK_UPTIME_1_MINUTES); }
+    if(tkr_time->UpTime() == 600){   tkr->Tasker_Interface(TASK_UPTIME_10_MINUTES); }
+    if(tkr_time->UpTime() == 36000){ tkr->Tasker_Interface(TASK_UPTIME_60_MINUTES); }
 
     // Check for midnight
     if((tkr_time->RtcTime.hour==0)&&(tkr_time->RtcTime.minute==0)&&(tkr_time->RtcTime.second==0)&&(tkr_time->lastday_run != tkr_time->RtcTime.day_of_year)){
       tkr_time->lastday_run = tkr_time->RtcTime.day_of_year;
-      pCONT->Tasker_Interface(TASK_EVERY_MIDNIGHT); 
+      tkr->Tasker_Interface(TASK_EVERY_MIDNIGHT); 
     }
 
     if(tkr_time->UpTime()==10){
       ALOG_INF(PSTR("Boot Message>>>>>>>>>>>>>>>>>>>"));
-      pCONT->Tasker_Interface(TASK_BOOT_MESSAGE);
+      tkr->Tasker_Interface(TASK_BOOT_MESSAGE);
       ALOG_INF(PSTR("Boot Message<<<<<<<<<<<<<<<<<<<"));
     }
 
-    if(tkr_time->UpTime()==120){       pCONT->Tasker_Interface(TASK_ON_BOOT_SUCCESSFUL);}
+    if(tkr_time->UpTime()==120){       tkr->Tasker_Interface(TASK_ON_BOOT_SUCCESSFUL);}
       
-    pCONT->Tasker_Interface(TASK_INIT_DELAYED_SECONDS);
+    tkr->Tasker_Interface(TASK_INIT_DELAYED_SECONDS);
 
   } // END secondloop
 
     
   #ifdef ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
-  if(pCONT->function_event_queue.size())
+  if(tkr->function_event_queue.size())
   {
     DEBUG_LINE_HERE;
     bool execute_function = false;
     uint8_t iter_count = 0;
-    for(auto& queue:pCONT->function_event_queue)
+    for(auto& queue:tkr->function_event_queue)
     {
       if(queue.delay_millis == 0){ execute_function = true; } // no delay
       if(mTime::TimeReached(&queue.tSaved_millis,queue.delay_millis)){ execute_function = true; }
@@ -783,14 +810,14 @@ void LoopTasker()
       {
         ALOG_HGL(PSTR("Executing Event Queue Item [%d]: func_id %d"), iter_count, queue.function_id);
     DEBUG_LINE_HERE;
-        pCONT->Tasker_Interface(queue.function_id);
+        tkr->Tasker_Interface(queue.function_id);
     DEBUG_LINE_HERE;
-    // std::vector<mTaskerManager::FUNCTION_EXECUTION_EVENT>::iterator index = pCONT->function_event_queue.begin()+iter_count;
+    // std::vector<mTaskerManager::FUNCTION_EXECUTION_EVENT>::iterator index = tkr->function_event_queue.begin()+iter_count;
 
     
-        ALOG_INF(PSTR("erase %d/%d"), iter_count, pCONT->function_event_queue.size());
+        ALOG_INF(PSTR("erase %d/%d"), iter_count, tkr->function_event_queue.size());
 
-        pCONT->function_event_queue.erase(pCONT->function_event_queue.begin()+iter_count);    
+        tkr->function_event_queue.erase(tkr->function_event_queue.begin()+iter_count);    
     DEBUG_LINE_HERE;   
       }
       iter_count++;
@@ -812,7 +839,7 @@ void SmartLoopDelay()
 
   // #ifndef DISABLE_SLEEP
   // if(tkr_set->Settings.enable_sleep){
-  //   if (tkr_set->Settings.flag_network.sleep_normal) {
+  //   if (tkr_set->Settings.network.flag.sleep_normal) {
   //     tkr_sup->SleepDelay(tkr_set->runtime.sleep);
   //   } else {
   //     // Loop time < sleep length of time

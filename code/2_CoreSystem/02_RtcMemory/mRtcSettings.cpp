@@ -34,33 +34,60 @@ uint32_t RtcFastboot_CRC()
   return crc;
 }
 
-void RtcFastboot_Save(void) 
-{
+// void RtcFastboot_Save(void) 
+// {
 
+//   if (RtcFastboot_CRC() != rtc_fastboot_crc) // ie if the data has changed at all
+//   {
+//     #ifdef DEBUG_FASTBOOT
+//     Serial.println( "if (GetRtcFastbootCrc() != rtc_fastboot_crc) NEW data" );
+//     #endif
+//     RtcFastboot.valid = RTC_MEM_VALID;
+
+//     #ifdef ESP8266
+//     ESP.rtcUserMemoryWrite(100 - sizeof(RtcFastboot), (uint32_t*)&RtcFastboot, sizeof(RtcFastboot));
+//     #endif  // ESP8266
+//     #if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
+//     RtcDataFastboot = RtcFastboot;
+//     #endif  // ESP32
+
+//     rtc_fastboot_crc = RtcFastboot_CRC();
+//   }
+//   else
+//   {
+//     #ifdef DEBUG_FASTBOOT
+//     Serial.println( "ELSE if (GetRtcFastbootCrc() != rtc_fastboot_crc)" );
+//     #endif
+//   }
+
+// }
+void RtcFastboot_Save(void)
+{
   if (RtcFastboot_CRC() != rtc_fastboot_crc) // ie if the data has changed at all
   {
     #ifdef DEBUG_FASTBOOT
-    Serial.println( "if (GetRtcFastbootCrc() != rtc_fastboot_crc) NEW data" );
+    Serial.println("if (GetRtcFastbootCrc() != rtc_fastboot_crc) NEW data");
     #endif
+
     RtcFastboot.valid = RTC_MEM_VALID;
 
     #ifdef ESP8266
-    ESP.rtcUserMemoryWrite(100 - sizeof(RtcFastboot), (uint32_t*)&RtcFastboot, sizeof(RtcFastboot));
+      ESP.rtcUserMemoryWrite(100 - sizeof(RtcFastboot), (uint32_t*)&RtcFastboot, sizeof(RtcFastboot));
     #endif  // ESP8266
-    #if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
-    RtcDataFastboot = RtcFastboot;
+
+    #if defined(ESP32)
+      // Works for ESP32, ESP32-S2/S3, ESP32-C3, etc (RTC_NOINIT_ATTR storage)
+      RtcDataFastboot = RtcFastboot;
     #endif  // ESP32
-
-    rtc_fastboot_crc = RtcFastboot_CRC();
-  }
-  else
-  {
-    #ifdef DEBUG_FASTBOOT
-    Serial.println( "ELSE if (GetRtcFastbootCrc() != rtc_fastboot_crc)" );
-    #endif
   }
 
+  rtc_fastboot_crc = RtcFastboot_CRC();
+
+  #ifdef DEBUG_FASTBOOT
+  Serial.println("RtcRebootSave DONE");
+  #endif
 }
+
 
 /**
  * @brief Used to ensure the next reboot does not continue with previous fastboot count
@@ -74,9 +101,45 @@ void RtcFastboot_Reset(void)
 /**
  * @brief Load Reboot data, if not valid then reset it and save
  **/
-void RtcFastboot_Load(void) 
-{
+// void RtcFastboot_Load(void) 
+// {
    
+//   #ifdef DEBUG_FASTBOOT
+//   Serial.println("RtcRebootLoad START");
+//   #endif
+
+//   #ifdef ESP8266
+//     ESP.rtcUserMemoryRead(100 - sizeof(RtcFastboot), (uint32_t*)&RtcFastboot, sizeof(RtcFastboot));  // 0x280
+//   #endif  // ESP8266
+//   #if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
+//     RtcFastboot = RtcDataFastboot; // Set the pointer so the struct points to the data saved
+//   #endif  // ESP32
+
+//   if (RtcFastboot.valid != RTC_MEM_VALID) 
+//   {
+
+//     #ifdef DEBUG_FASTBOOT
+//     Serial.println("RtcReboot.valid != RTC_MEM_VALID");
+//     #endif
+  
+//     memset(&RtcFastboot, 0, sizeof(RtcFastboot));
+//     RtcFastboot.valid = RTC_MEM_VALID;
+    
+//     RtcFastboot_Save();
+    
+//   }
+  
+//   rtc_fastboot_crc = RtcFastboot_CRC();
+  
+//   #ifdef DEBUG_FASTBOOT
+//   Serial.println("RtcRebootLoad DONE");
+//   #endif
+  
+// }
+
+
+void RtcFastboot_Load(void)
+{
   #ifdef DEBUG_FASTBOOT
   Serial.println("RtcRebootLoad START");
   #endif
@@ -84,31 +147,31 @@ void RtcFastboot_Load(void)
   #ifdef ESP8266
     ESP.rtcUserMemoryRead(100 - sizeof(RtcFastboot), (uint32_t*)&RtcFastboot, sizeof(RtcFastboot));  // 0x280
   #endif  // ESP8266
-  #if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
-    RtcFastboot = RtcDataFastboot; // Set the pointer so the struct points to the data saved
+
+  #if defined(ESP32)
+    // Works for ESP32, ESP32-S2/S3, ESP32-C3, etc (RTC_NOINIT_ATTR storage)
+    RtcFastboot = RtcDataFastboot;
   #endif  // ESP32
 
-  if (RtcFastboot.valid != RTC_MEM_VALID) 
+  if (RtcFastboot.valid != RTC_MEM_VALID)
   {
-
     #ifdef DEBUG_FASTBOOT
     Serial.println("RtcReboot.valid != RTC_MEM_VALID");
     #endif
-  
+
     memset(&RtcFastboot, 0, sizeof(RtcFastboot));
     RtcFastboot.valid = RTC_MEM_VALID;
-    
+
     RtcFastboot_Save();
-    
   }
-  
+
   rtc_fastboot_crc = RtcFastboot_CRC();
-  
+
   #ifdef DEBUG_FASTBOOT
   Serial.println("RtcRebootLoad DONE");
   #endif
-  
 }
+
 
 /**
  * @brief Check if the fastboot data saved contains the known value of 'RTC_MEM_VALID'
@@ -169,7 +232,7 @@ void RtcSettingsSave(void)
 {
 
   // Check at least the first module has been initialised (change to function later, to check variable)  
-  if(!pCONT->pModule.size()){ return; }
+  if(!tkr->pModule.size()){ return; }
   
   RtcSettings.baudrate = tkr_set->Settings.baudrate * 300;
   if (tkr_time->GetUTCTime() > START_VALID_UTC_TIME) {  // 2016-01-01

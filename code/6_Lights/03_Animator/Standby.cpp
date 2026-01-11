@@ -449,7 +449,7 @@ bool mAnimatorLight::Standby_CaptureResumeToRAM()
  *
  * @flow
  *   - Validate input → duplicate (len+1, NUL-terminated) → log payload
- *   - Try requestDataBufferLock() → copy into shared buffer → Tasker_Interface(TASK_JSON_COMMAND_ID) → release
+ *   - Try data_buffer.requestLock() → copy into shared buffer → Tasker_Interface(TASK_JSON_COMMAND_ID) → release
  *   - Parse duplicate with ArduinoJson → deserializeState(root, callMode, 0) → notify(callMode)
  *
  * @params
@@ -470,7 +470,7 @@ bool mAnimatorLight::Standby_CaptureResumeToRAM()
  *   - Logs OOM, parse errors, missing root object, and lock failures with payload length and content.
  *
  * @threading / locking
- *   - Uses requestDataBufferLock() ONLY for the Tasker pass; releases immediately after dispatch.
+ *   - Uses data_buffer.requestLock() ONLY for the Tasker pass; releases immediately after dispatch.
  *   - ArduinoJson pass does not use the shared buffer lock.
  *
  * @performance
@@ -502,8 +502,8 @@ bool mAnimatorLight::Standby_JsonCommand_Run(const char* json, size_t len, uint8
   AddLog(level, PSTR("Standby_JsonCommand_Run: len=%u json='%s'"), (unsigned)len, buf);
 
   // -------- Pass 1: Global Tasker (platform-wide commands) --------
-  if (requestDataBufferLock(GetModuleUniqueID())) {
-    D_DATA_BUFFER_SOFT_CLEAR();
+  if (data_buffer.requestLock(GetModuleUniqueID())) {
+    data_buffer.ClearSoft();
     data_buffer.payload.length_used = len;
     memcpy(data_buffer.payload.ctr, buf, data_buffer.payload.length_used);
     data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // NUL-terminate
@@ -511,8 +511,8 @@ bool mAnimatorLight::Standby_JsonCommand_Run(const char* json, size_t len, uint8
     AddLog(level, PSTR(D_LOG_LIGHT "State Payload [len:%d] %s"),
            data_buffer.payload.length_used, data_buffer.payload.ctr);
 
-    pCONT->Tasker_Interface(TASK_JSON_COMMAND_ID);
-    releaseDataBufferLock();
+    tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
+    data_buffer.releaseLock();
   } else {
     ALOG_WRN(PSTR("Standby_JsonCommand_Run: Tasker buffer busy; skipping Tasker pass"));
   }

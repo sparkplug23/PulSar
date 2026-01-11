@@ -69,7 +69,17 @@ class mInterfaceNetwork :
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
-    
+
+    // ------------------------------------------------------------------
+    // Network policy helpers (interface-level)
+    // ------------------------------------------------------------------
+    bool Network_HasLocalConnectivity(void);
+    bool Network_HasExternalConnectivity(void);
+
+    // True when device is "local only" (no external reachability)
+    // i.e. block MQTT/NTP, but still allow local WebUI etc.
+    bool Network_IsLocalOnly(void);
+
     
     /************************************************************************************************
      * SECITON: MQTT

@@ -7,19 +7,19 @@
 
 #define DATA_BUFFER_TOPIC_MAX_LENGTH    100
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER
-  #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
+// #ifdef USE_MODULE_NETWORK_WEBSERVER
+//   #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
     #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
-  #endif
-#else
-  #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
-    #ifdef ESP32
-      #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
-    #else
-      #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 2000
-    #endif
-  #endif
-#endif //USE_MODULE_NETWORK_WEBSERVER
+//   #endif
+// #else
+//   #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
+//     #ifdef ESP32
+//       //#define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
+//     #else
+//       //#define DATA_BUFFER_PAYLOAD_MAX_LENGTH 2000
+//     #endif
+//   #endif
+// #endif //USE_MODULE_NETWORK_WEBSERVER
 
 
 typedef union {
@@ -58,82 +58,188 @@ typedef union
 } DATA_BUFFER_FLAGS;
 
 
-struct DATA_BUFFER{
-  struct TOPIC{
-    char ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
-    uint16_t length_used = 0;
-  }topic;
-  struct PAYLOAD{
-    char ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
-    uint16_t length_used = 0;
-  }payload;
-  uint16_t isserviced = 0; // Set to 0 on new mqtt
-  uint16_t moduleLock = 0;
-  DATA_BUFFER_FLAGS flags;
-};
-extern struct DATA_BUFFER data_buffer;
+#pragma once
+#include <Arduino.h>  // millis(), delay(), Serial
 
-#include <Arduino.h> // Include Arduino header for millis() and delay()
-
+// Keep your existing macros
 #define ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+// #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
 
-#ifdef ENABLE_DEVFEATURE_DATABUFFER_LOCK
+struct DATA_BUFFER {
+  struct TOPIC {
+    char     ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
+    uint16_t length_used = 0;
+  } topic;
 
-//threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
-inline bool requestDataBufferLock(uint16_t module)
-{
-  unsigned long now = millis();
+  struct PAYLOAD {
+    char     ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
+    uint16_t length_used = 0;
+  } payload;
 
-  // This assumption here is another http thread must release itself to permit this function to proceed
-  while (data_buffer.moduleLock && millis()-now < 1000) delay(1); // wait for a second for buffer lock
+  uint16_t isserviced  = 0;   // Set to 0 on new mqtt
+  uint16_t moduleLock  = 0;
+  bool     delayedJSONCommandWaiting  = false;
+  DATA_BUFFER_FLAGS flags;
 
-  if (millis()-now >= 1000) 
-  {
+  // ---------- Lock API ----------
+  inline bool requestLock(uint16_t module, uint32_t timeout_ms = 1000) {
+  #ifdef ENABLE_DEVFEATURE_DATABUFFER_LOCK
+    const unsigned long now = millis();
+
+    // This assumption here is another http thread must release itself to permit this function to proceed
+    while (moduleLock && millis()-now < 1000) delay(1); // wait for a second for buffer lock
+
+    if (millis() - now >= timeout_ms) {
+      #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+        Serial.printf(PSTR("ERROR: Locking data buffer failed! (%u)\r\n"), (unsigned)moduleLock);
+      #endif
+      return false;
+    }
+
+    moduleLock = module ? module : 255;
+
     #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
-    Serial.printf(PSTR("ERROR: Locking data buffer failed! (%d)\n\r"),data_buffer.moduleLock);
+      Serial.printf(PSTR("DATA buffer requestLock =======================================> (%u)\r\n" DEBUG_INSERT_SECTION_BREAK), (unsigned)moduleLock);
     #endif
-    return false; // waiting time-outed
+
+    return true;
+  #else
+    (void)module; (void)timeout_ms;
+    return true;
+  #endif
   }
 
-  data_buffer.moduleLock = module ? module : 255;
-
-  #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
-  Serial.printf(PSTR("DATA buffer locked (%d)\n\r"), data_buffer.moduleLock);
-  #endif
-
-  return true;
-}
-
-inline void releaseDataBufferLock()
-{
-  #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
-  Serial.printf(PSTR("DATA buffer released (%d)\n\r"), data_buffer.moduleLock);
-  #endif
-  data_buffer.moduleLock = 0;
-}
-
-#else
-
-//threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
-inline bool requestDataBufferLock(uint16_t module){ return true; };
-inline void releaseDataBufferLock(){};
-
-#endif
+  inline bool tryLock(uint16_t module)
+  {
+    if (moduleLock != 0)
+    {      
+      #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+        Serial.printf(PSTR("DATA buffer tryLock BLOCKED <<<<<<<<<<< (%u)\r\n"), (unsigned)moduleLock);
+      #endif
+      return false;
+    }
+    moduleLock = module ? module : 255;
+    #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+      Serial.printf(PSTR("DATA buffer tryLock =======================================> (%u)\r\n" DEBUG_INSERT_SECTION_BREAK), (unsigned)moduleLock);
+    #endif
+    return true;
+  }
 
 
-/**
- * @brief Complete, slow
- **/
-#define D_DATA_BUFFER_CLEAR()             \
-    memset(&data_buffer,0,sizeof(data_buffer))
-/**
- * @brief Minimal, fast
- **/
-#define D_DATA_BUFFER_SOFT_CLEAR()             \
-    data_buffer.topic.ctr[0]=0;           \
-    data_buffer.topic.length_used = 0;    \
-    data_buffer.payload.ctr[0]=0;         \
-    data_buffer.payload.length_used = 0; 
+  inline void releaseLock() {
+    #ifdef ENABLE_DEVFEATURE_DATABUFFER_LOCK
+      #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+        Serial.printf(PSTR("DATA buffer released (%u)\r\n"), (unsigned)moduleLock);
+      #endif
+      moduleLock = 0;
+      delayedJSONCommandWaiting = 0;
+    #endif
+  }
+
+  bool IsDelayedJSONCommandWaiting() {
+    return delayedJSONCommandWaiting;
+  }
+
+  void ClearDeep() {
+    // memset(this, 0, sizeof(DATA_BUFFER)); // cant do this, its destroying itself
+    memset(&topic, 0, sizeof(TOPIC));
+    memset(&payload, 0, sizeof(PAYLOAD));
+    ClearSoft();
+  }
+
+  void ClearSoft() {
+    Serial.printf("DATA buffer ClearSoft <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\r\n");
+    topic.ctr[0] = 0;
+    topic.length_used = 0;
+    payload.ctr[0] = 0;
+    payload.length_used = 0;
+    isserviced = 0;
+  }
+
+};
+
+
+// Keep your existing global instance
+extern DATA_BUFFER data_buffer;
+
+
+// struct DATA_BUFFER{
+//   struct TOPIC{
+//     char ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
+//     uint16_t length_used = 0; 
+//   }topic;
+//   struct PAYLOAD{
+//     char ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
+//     uint16_t length_used = 0;
+//   }payload;
+//   uint16_t isserviced = 0; // Set to 0 on new mqtt
+//   uint16_t moduleLock = 0;
+//   DATA_BUFFER_FLAGS flags;
+// };
+// extern struct DATA_BUFFER data_buffer;
+
+// #include <Arduino.h> // Include Arduino header for millis() and delay()
+
+// #define ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+
+// #ifdef ENABLE_DEVFEATURE_DATABUFFER_LOCK
+
+// //threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
+// inline bool requestDataBufferLock(uint16_t module)
+// {
+//   unsigned long now = millis();
+
+//   // This assumption here is another http thread must release itself to permit this function to proceed
+//   while (data_buffer.moduleLock && millis()-now < 1000) delay(1); // wait for a second for buffer lock
+
+//   if (millis()-now >= 1000) 
+//   {
+//     #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+//     Serial.printf(PSTR("ERROR: Locking data buffer failed! (%d)\n\r"),data_buffer.moduleLock);
+//     #endif
+//     return false; // waiting time-outed
+//   }
+
+//   data_buffer.moduleLock = module ? module : 255;
+
+//   #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+//   Serial.printf(PSTR("DATA buffer locked (%d)\n\r"), data_buffer.moduleLock);
+//   #endif
+
+//   return true;
+// }
+
+// inline void releaseDataBufferLock()
+// {
+//   #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
+//   Serial.printf(PSTR("DATA buffer released (%d)\n\r"), data_buffer.moduleLock);
+//   #endif
+//   data_buffer.moduleLock = 0;
+// }
+
+// #else
+
+// //threading/network callback details: https://github.com/Aircoookie/WLED/pull/2336#discussion_r762276994
+// inline bool requestDataBufferLock(uint16_t module){ return true; };
+// inline void releaseDataBufferLock(){};
+
+// #endif
+
+
+// /**
+//  * @brief Complete, slow
+//  **/
+// #define D_DATA_BUFFER_CLEAR()             \
+//     memset(&data_buffer,0,sizeof(data_buffer))
+// // data_buffer.ClearDeep()          
+// /**
+//  * @brief Minimal, fast
+//  **/
+// #define D_DATA_BUFFER_SOFT_CLEAR()             \
+//     data_buffer.topic.ctr[0]=0;           \
+//     data_buffer.topic.length_used = 0;    \
+//     data_buffer.payload.ctr[0]=0;         \
+//     data_buffer.payload.length_used = 0; 
 
 
 // Easy way to add to the counter
@@ -151,7 +257,7 @@ const uint16_t VL53LXX_MAX_SENSORS = 8;     // Max number of VL53L0X sensors
 
 #include "2_CoreSystem/05_HardwarePins/mPins.h"
 
-#include "2_CoreSystem/mFirmwareDefaults.h"
+#include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h" 
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 #include "2_CoreSystem/11_Languages/mLanguageProgmem.h"
 #include "1_TaskerManager/mTaskerManager.h"
@@ -190,8 +296,10 @@ const uint16_t VL53LXX_MAX_SENSORS = 8;     // Max number of VL53L0X sensors
  */
 enum SettingsTextIndex { 
     SET_OTAURL,
+    #ifndef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
     SET_STASSID1, SET_STASSID2,  // MAX_SSIDS
     SET_STAPWD1, SET_STAPWD2,  // MAX_SSIDS
+    #endif
     SET_HOSTNAME, SET_SYSLOG_HOST,
     SET_WEBPWD, SET_CORS,
     SET_STATE_TXT1, SET_STATE_TXT2, SET_STATE_TXT3, SET_STATE_TXT4,  // MAX_STATE_TEXT
@@ -1048,6 +1156,69 @@ struct LoggingSettings{
   uint8_t       time_isshort;  
 };
 
+// ---------------------------------------------------------------------------------------------------------------------
+// NetworkSettings (Settings-persisted config)
+// - Covers WiFi + Ethernet via a shared profile slot model.
+// - Cellular stays module-owned (filesystem JSON).
+// ---------------------------------------------------------------------------------------------------------------------
+
+struct WiFiProfile
+{
+  char    ssid[33] = {0};
+  char    pass[65] = {0};
+  uint8_t ssid_hidden = 0;
+  uint8_t has_bssid = 0;
+  uint8_t bssid[6]  = {0};
+};
+
+struct IPv4Config
+{
+  uint8_t is_static = false;               // 0 = DHCP, 1 = Static
+
+  uint8_t ip[4]   = {0,0,0,0};
+  uint8_t gw[4]   = {0,0,0,0};
+  uint8_t sn[4]   = {255,255,255,0};
+  uint8_t dns1[4] = {0,0,0,0};
+  uint8_t dns2[4] = {0,0,0,0};
+};
+
+#ifdef USE_MODULE_NETWORK_ETHERNET
+struct EthernetSettings
+{
+  IPv4Config ipv4;
+};
+#endif
+
+struct NetworkSettings
+{
+  // Preserve existing semantics if you still need these:
+  uint8_t sta_config = 0;              // e.g., config mode / portal policy
+  uint8_t sta_active = 0;              // currently selected WiFi slot (optional; can be deprecated)
+
+  SysBitfield_Network flag;
+
+  // WiFi profiles in priority order (index 0 tried first, etc.)
+  WiFiProfile wifi[WIFI_MAXIMUM_CONNECTIONS];
+
+  // Global WiFi IPv4 config (applies to active WiFi STA connection if you use static)
+  // If you do NOT support static on WiFi, omit this.
+  IPv4Config wifi_ipv4;
+
+  
+  uint32_t      ip_address[5];             // TEMPORARY for Wifi1
+  uint8_t       wifi_channel;              // TEMPORARY for Wifi1
+  uint8_t       wifi_bssid[6];             // F0A
+
+  #ifdef USE_MODULE_NETWORK_ETHERNET
+  EthernetSettings ethernet;
+  #endif
+};
+
+
+
+
+
+
 
 struct SETTINGS {
   // Header (Minimal data load required to validate settings - order must never change)
@@ -1081,12 +1252,16 @@ struct SETTINGS {
   // Core
   uint16_t      unified_interface_reporting_invalid_reading_timeout_seconds; // 0 is ignored, anything else is the seconds of age above which a sensor should not be reporting (ie is invalid)
   // Network
+  #ifndef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
   uint8_t       sta_config;                // 09F
   uint8_t       sta_active;                // 0A0
   uint32_t      ip_address[5];             // 544
   uint8_t       wifi_channel;
   uint8_t       wifi_bssid[6];             // F0A
   SysBitfield_Network  flag_network;                     // 3A0
+  #else
+  NetworkSettings network;
+  #endif
   // Webserver
   uint8_t       webserver;                 // 1AB
   uint16_t      web_refresh;               // 7CC

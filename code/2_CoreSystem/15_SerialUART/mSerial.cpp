@@ -936,7 +936,7 @@ uint16_t urxlen1 = 0;
 
 /**
  * @brief Define UART interrupt subroutine to ackowledge interrupt
- * @note As this function is static, variables used within it need to be referenced using their instances ie "pCONT"
+ * @note As this function is static, variables used within it need to be referenced using their instances ie "tkr"
  **/
 void IRAM_ATTR UART1_ISR_Static(void *arg)
 { 
@@ -1186,7 +1186,7 @@ void mSerial::init_UART2_ISR(){
 
 // /**
 //  * @brief Define UART interrupt subroutine to ackowledge interrupt
-//  * @note As this function is static, variables used within it need to be referenced using their instances ie "pCONT"
+//  * @note As this function is static, variables used within it need to be referenced using their instances ie "tkr"
 //  **/
 // void IRAM_ATTR UART2_ISR_Static_ByteRingBuffer(void *arg)
 // { 
@@ -1239,7 +1239,7 @@ void mSerial::init_UART2_ISR(){
 
 /**
  * @brief Define UART interrupt subroutine to ackowledge interrupt
- * @note As this function is static, variables used within it need to be referenced using their instances ie "pCONT"
+ * @note As this function is static, variables used within it need to be referenced using their instances ie "tkr"
  * 
  * Arriving data will be read (appended) to a global small buffer, each byte in will be checked. 
  * If special EOF chars are found, then the data in the global buffer is commited to the ringbuffer nosplit, which allows retreiving one item at a time
@@ -1399,7 +1399,7 @@ void IRAM_ATTR UART2_ISR_Static_NoSplitRingBuffer_ForMeasurements(void *arg)
 #ifdef USE_DEVFEATURE_MEASUREMENT_SYSTEM_CALIBRATION_METHOD_1
 /**
  * @brief Define UART interrupt subroutine to ackowledge interrupt
- * @note As this function is static, variables used within it need to be referenced using their instances ie "pCONT"
+ * @note As this function is static, variables used within it need to be referenced using their instances ie "tkr"
  * 
  * Arriving data will be read (appended) to a global small buffer, each byte in will be checked. 
  * If special EOF chars are found, then the data in the global buffer is commited to the ringbuffer nosplit, which allows retreiving one item at a time
@@ -1500,7 +1500,7 @@ void IRAM_ATTR UART2_ISR_Static_NoSplitRingBuffer_ForMeasurements_Calibration(vo
 
 /**
  * @brief Define UART interrupt subroutine to ackowledge interrupt
- * @note As this function is static, variables used within it need to be referenced using their instances ie "pCONT"
+ * @note As this function is static, variables used within it need to be referenced using their instances ie "tkr"
  * 
  * Arriving data will be read (appended) to a global small buffer, each byte in will be checked. 
  * If special EOF chars are found, then the data in the global buffer is commited to the ringbuffer nosplit, which allows retreiving one item at a time

@@ -106,7 +106,7 @@ int8_t DeviceNameList::RemoveDeviceName(const char* name_ctr, int16_t unique_mod
 //       ALOG_INF( PSTR("\t\t\t\t\n\r PHASEOUT direct use, PROBABLY WRONG ------------------------------------- DeviceNameList::GetDeviceNameWithEnumNumber buffer_size %d"),buffer_size);
 //   //convert enum number to unqiue#pragma region 
 
-//   module_id = pCONT->GetModuleUniqueIDbyVectorIndex(module_id);
+//   module_id = tkr->GetModuleUniqueIDbyVectorIndex(module_id);
 
 // // DEBUG_LINE_HERE;
 //   int8_t found_index = -1;
@@ -147,7 +147,7 @@ int8_t DeviceNameList::RemoveDeviceName(const char* name_ctr, int16_t unique_mod
 // // DEBUG_LINE_HERE;
 // // I will need to add an increasing index here with its module name, but important to check how many of that index exist. For now, simply "-1"
 
-//       snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleName(module_id), device_id);
+//       snprintf(buffer, buffer_size, "%S_%02d", tkr->GetModuleName(module_id), device_id);
 
 //       #ifdef ENABLE_LOG_LEVEL_INFO
 //       ALOG_DBM( PSTR("F::%s >> %s"),__FUNCTION__,buffer);
@@ -240,9 +240,9 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
     else
     {
       #ifdef ENABLE_DEVFEATURE_DEVICENAMES__USE_DEVICE_ID_WHEN_NO_NAME_MATCHED
-      snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleName(unique_module_id), device_id);
+      snprintf(buffer, buffer_size, "%S_%02d", tkr->GetModuleName(unique_module_id), device_id);
       #else
-      snprintf(buffer, buffer_size, "%S_Unknown_%03d", pCONT->GetModuleName(unique_module_id), random(1000));
+      snprintf(buffer, buffer_size, "%S_Unknown_%03d", tkr->GetModuleName(unique_module_id), random(1000));
       #endif
       ALOG_WRN(PSTR("F::GetDeviceName Undefined >> %s"), buffer);
     }
@@ -279,7 +279,7 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
 
 //   //convert enum number to unqiue#pragma region 
 
-//   // module_id = pCONT->GetModuleUniqueIDbyVectorIndex(module_id);
+//   // module_id = tkr->GetModuleUniqueIDbyVectorIndex(module_id);
 
 // // DEBUG_LINE_HERE;
 //   int8_t found_index = -1;
@@ -316,9 +316,9 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(int16_t unique_modu
 //     else
 //     {  
 //       #ifdef ENABLE_DEVFEATURE_DEVICENAMES__USE_DEVICE_ID_WHEN_NO_NAME_MATCHED
-//       snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleName(unique_module_id), device_id);
+//       snprintf(buffer, buffer_size, "%S_%02d", tkr->GetModuleName(unique_module_id), device_id);
 //       #else
-//       snprintf(buffer, buffer_size, "%S_Unknown_%03d", pCONT->GetModuleName(unique_module_id), random(1000));//device_id);
+//       snprintf(buffer, buffer_size, "%S_Unknown_%03d", tkr->GetModuleName(unique_module_id), random(1000));//device_id);
 //       #endif
 //       ALOG_WRN(PSTR("F::GetDeviceName Undefined >> %s"), buffer);
 //     }
@@ -372,7 +372,7 @@ bool DeviceNameList::GetModuleAndSensorIDs(const char* module_name, const char* 
 
     // Iterate over the buffer to find the matching module name and sensor name
     for (int i = 0; i < DLI->GetLengthIndexUsed(); i++) {
-        const char* current_module_name = pCONT->GetModuleName(number_buffer.unique_group_ids[i]);
+        const char* current_module_name = tkr->GetModuleName(number_buffer.unique_group_ids[i]);
         const char* current_sensor_name = tkr_sup->GetTextIndexed(buffer, sizeof(buffer), i, name_buffer.ptr);
 
         // ALOG_INF(PSTR("GetModuleAndSensorIDs %s %s"), current_module_name, current_sensor_name);
@@ -449,7 +449,7 @@ bool DeviceNameList::GetModuleAndSensorIDs(uint16_t module_id, const char* senso
 // {//}, char* buffer, uint16_t buffer_size, bool flag_respond_nomatch_if_not_found){
 
 //   //convert enum number to unqiue
-//   module_id = pCONT->GetModuleUniqueIDbyVectorIndex(module_id);
+//   module_id = tkr->GetModuleUniqueIDbyVectorIndex(module_id);
 
 //   int8_t found_index = -1;
 //   // Check if class & id match
@@ -484,7 +484,7 @@ bool DeviceNameList::GetModuleAndSensorIDs(uint16_t module_id, const char* senso
 
 // // I will need to add an increasing index here with its module name, but important to check how many of that index exist. For now, simply "-1"
 
-//       snprintf(buffer, buffer_size, "%S_%02d", pCONT->GetModuleFriendlyName(pCONT->GetEnumVectorIndexbyModuleUniqueID(module_id)), device_id);
+//       snprintf(buffer, buffer_size, "%S_%02d", tkr->GetModuleFriendlyName(tkr->GetEnumVectorIndexbyModuleUniqueID(module_id)), device_id);
 
 //       #ifdef ENABLE_LOG_LEVEL_INFO
 //       ALOG_DBM( PSTR("F::%s >> %s"),__FUNCTION__,buffer);

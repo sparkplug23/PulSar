@@ -27,9 +27,9 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
       Init_DebugPin();
 
       #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
-      // pCONT->monitor_task.push_back(TASK_LOOP);           // Add TASK_LOOP to the monitor list
-      // pCONT->monitor_task.push_back(TASK_EVERY_SECOND);   // Add TASK_EVERY_SECOND to the monitor list
-      pCONT->monitor_task.push_back(TASKER_FUNCTION_TYPES(0));   // Any
+      // tkr->monitor_task.push_back(TASK_LOOP);           // Add TASK_LOOP to the monitor list
+      // tkr->monitor_task.push_back(TASK_EVERY_SECOND);   // Add TASK_EVERY_SECOND to the monitor list
+      tkr->monitor_task.push_back(TASKER_FUNCTION_TYPES(0));   // Any
       #endif
 
     break;
@@ -69,15 +69,15 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_EVERY_SECOND:{
 
       #ifdef ENABLE_DEBUG_SPLASH__PSRAM_USAGE
-      
-AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d", 
-  SupportESP32::FoundPSRAM(), 
-  SupportESP32::UsePSRAM());
-  AddLog(LOG_LEVEL_INFO, "Heap free: %d, PSRAM free: %d", 
-    ESP.getFreeHeap(), 
-    ESP.getFreePsram());
-    #endif
+        AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d", 
+        SupportESP32::FoundPSRAM(), 
+        SupportESP32::UsePSRAM());
+        AddLog(LOG_LEVEL_INFO, "Heap free: %d, PSRAM free: %d", 
+        ESP.getFreeHeap(), 
+        ESP.getFreePsram());
+      #endif
 
+      // Serial.printf("moduleLock %d\r\n", (unsigned)data_buffer.moduleLock);
 
       #ifdef ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
         ALOG_INF( PSTR(PM_COMMAND_SVALUE_NVALUE), PM_LOOPSSEC, tkr_sup->activity.cycles_per_sec);
@@ -89,9 +89,9 @@ AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d",
       // ALOG_INF( PSTR("loop_load_avg %d"), tkr_set->loop_load_avg);
 
       #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
-      for (const auto& metrics : pCONT->task_metrics) {
+      for (const auto& metrics : tkr->task_metrics) {
           // Get the module name based on the unique ID
-          const char* module_name = pCONT->GetModuleName(metrics.unique_id);
+          const char* module_name = tkr->GetModuleName(metrics.unique_id);
 
           Serial.printf("Task: %d|%S, \tMax: %d us, \tMin: %d us, \tAvg: %d us\n\r", 
                         metrics.task_id, module_name, metrics.max_time, metrics.min_time, metrics.avg_time);
@@ -198,7 +198,7 @@ void mDevelopmentDebugging::parse_JSONCommand(JsonParserObject obj)
 	if(jtok = obj["Debug"].getObject()["ResetTaskMetrics"])
 	{
     // Reset all task metrics
-    for (auto& metrics : pCONT->task_metrics) {
+    for (auto& metrics : tkr->task_metrics) {
         metrics.max_time = 0;        // Reset max time to 0
         metrics.min_time = UINT32_MAX; // Set min time to the highest possible value to ensure it gets updated correctly
         metrics.total_time = 0;      // Reset total time

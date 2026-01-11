@@ -29,7 +29,7 @@ With latest version, all longer term shared debug features should be added here 
 #include "2_CoreSystem/mSystemConfig.h"
 #include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
 #ifdef USE_USER_MICHAEL
-#include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_LongTerm.h"
+#include "0_ConfigUser/Whitehall/Firmware__Home__Secret.h"
 #include "0_ConfigUser/00_mFirmwareCustom_Secret_Home_Temporary.h"
 #include "0_ConfigUser/01_mFirmwareCustom_Secret_ExampleTemplates.h"
 #include "0_ConfigUser/02_mFirmwareCustom_Secret_DevTestbeds.h"
@@ -39,6 +39,7 @@ With latest version, all longer term shared debug features should be added here 
 #include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2024.h"
 #include "0_ConfigUser/05_mFirmwareCustom_Secret__Colorado_2025.h"
 #include "0_ConfigUser/05_mFirmwareCustom_Secret__Christmas_2025.h"
+#include "0_ConfigUser/05_mFirmwareCustom_Secret__QTQ.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_LightingEffects.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_MotionDetectors.h"
   #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_BoardBuilds.h"
@@ -48,7 +49,8 @@ With latest version, all longer term shared debug features should be added here 
   #include "0_ConfigUser/BuiltUsingGroups/GroupUsing_LightingEffects.h"
 #include "0_ConfigUser/DevelopingByTypes/FirmwareGroup_CellularDatalinks.h"
   #include "0_ConfigUser/Meadows/FirmwareConfig_Deployed.h"
-#include "2_CoreSystem/mFirmwareDefaults.h" //addded feb2025
+
+#include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h" //addded feb2025
 #else
 // #error "here"
 #endif // USE_USER_MICHAEL
@@ -218,7 +220,7 @@ With latest version, all longer term shared debug features should be added here 
   // #define STA_SSID2                     ""                // [Ssid2] Optional alternate AP Wifi SSID
   // #define STA_PASS2                     ""                // [Password2] Optional alternate AP Wifi password
 
-  #define WIFI_CONFIG_TOOL              4//WIFI_RETRY        // [WifiConfig] Default tool if wifi fails to connect
+  #define WIFI_CONFIG_TOOL              4//WIFI_RETRY        // [WiFi_Config_Mode_Set] Default tool if wifi fails to connect
                                                           //   (WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL)
   #define WIFI_CONFIG_NO_SSID           WIFI_WPSCONFIG    // Default tool if wifi fails to connect and no SSID is configured
                                                           //   (WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_SERIAL)
@@ -226,7 +228,9 @@ With latest version, all longer term shared debug features should be added here 
                                                           //   *** NOTE: When WIFI_MANAGER is disabled by USE_MODULE_CORE_WEBSERVER below, WIFI_MANAGER will execute WIFI_SMARTCONFIG ***
                                                           //   *** NOTE: When WIFI_SMARTCONFIG is disabled by USE_SMARTCONFIG below, WIFI_SMARTCONFIG will execute WIFI_SERIAL ***
 
-  #define ENABLE_DEVFEATURE_NETWORK__MOVE_LIGHTING_WEBUI_INTO_SHARED_MODULE 
+   
+
+  #define WIFI_MAXIMUM_CONNECTIONS 3 // static constexpr uint8_t NETWORK_PROFILE_SLOTS = 3;
   
   // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
 

@@ -343,7 +343,7 @@ void mHVAC::YTask_Update_Sensors()
       sensors_reading_t reading; 
       mTaskerInterface* pMod = nullptr; 
 
-      if((pMod = pCONT->GetModule(rt.zone[zone_id].sensor.module_id)) != nullptr)
+      if((pMod = tkr->GetModule(rt.zone[zone_id].sensor.module_id)) != nullptr)
       {
         
         pMod->GetSensorReading(&reading, rt.zone[zone_id].sensor.index);
@@ -539,11 +539,11 @@ int8_t mHVAC::Tasker_PredictManualHeating(){
 
 //if ROC > X with programs off = on
 
-// /if(pCONT->mhs->watertemps.tank_top.ischanged){
+// /if(tkr->mhs->watertemps.tank_top.ischanged){
 //
 //   // test for rising tank temps
 //   if(watertemps.tank_top.roc1m.val>0.2){
-//     pCONT->mso->MessagePrintln("watertemps.tank_top.roc1m.val>0.2");
+//     tkr->mso->MessagePrintln("watertemps.tank_top.roc1m.val>0.2");
 //   }
 //
 // }
