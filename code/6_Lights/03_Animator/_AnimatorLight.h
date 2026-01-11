@@ -1324,6 +1324,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
     uint16_t EffectAnim__Hardware__Show_Bus();
+    uint16_t EffectAnim__Hardware__Show_Bus_Dotted();
     uint16_t EffectAnim__Hardware__Manual_Pixel_Counting();
     uint16_t EffectAnim__Hardware__View_Pixel_Range();
     uint16_t EffectAnim__Hardware__Light_Sensor_Pixel_Indexing();
@@ -1799,6 +1800,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
        **/
       #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
       EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,
+      EFFECTS_FUNCTION__HARDWARE__SHOW_BUS_DOTTED__ID,
       EFFECTS_FUNCTION__HARDWARE__MANUAL_PIXEL_COUNTING__ID,
       EFFECTS_FUNCTION__HARDWARE__VIEW_PIXEL_RANGE__ID,
       #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING__EXTERNAL_LIGHT_SENSING
