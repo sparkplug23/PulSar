@@ -1,5 +1,5 @@
 #ifndef _MWEBSERVER_H
-#define _MWEBSERVER_H 0.3
+#define _MWEBSERVER_H
 
 #define D_UNIQUE_MODULE_NETWORK_WEBSERVER_ID  3021 // [(Folder_Number*100)+ID_File]
 
@@ -258,11 +258,6 @@ AsyncWebHandler *editHandler = nullptr;
   #endif
 
 
-#ifdef ENABLE_DEVFEATURE_WEBSERVER__SETTINGS_WEBPAGES
-
-
-
-
 void serveSettingsJS(AsyncWebServerRequest* request);
 void serveJson(AsyncWebServerRequest* request);
 
@@ -295,8 +290,6 @@ void serveSettings(AsyncWebServerRequest* request, bool post = false);
 void SettingsPages_POST(AsyncWebServerRequest* request);
 void SettingsPages_GET(AsyncWebServerRequest* request);
 
-
-#endif
 
 
 

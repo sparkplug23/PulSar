@@ -370,7 +370,7 @@ protected:
 
 
 // Date Modified: 15Dec25
-static inline JsonParserToken getTokAlias(const JsonParserObject& obj,
+static inline JsonParserToken getTokenIncludingAlias(const JsonParserObject& obj,
                                          const char* keyPrimary,
                                          const char* keyAlias)
 {
@@ -380,7 +380,7 @@ static inline JsonParserToken getTokAlias(const JsonParserObject& obj,
 }
 
 // PROGMEM keys (PSTR / FPSTR)
-static inline JsonParserToken getTokAlias_P(const JsonParserObject& obj,
+static inline JsonParserToken getTokenIncludingAlias_P(const JsonParserObject& obj,
                                            PGM_P keyPrimary_P,
                                            PGM_P keyAlias_P)
 {

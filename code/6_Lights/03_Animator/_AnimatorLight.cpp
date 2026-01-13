@@ -30,9 +30,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
      * SYSTEM SECTION * 
     *******************/    
     case TASK_RESTART_SET_DO_FINAL_CLEANUP:       
-      #ifdef WLED_ENABLE_WEBSOCKETS2
       // tkr_web->websocket_lights->closeAll(1012);
-      #endif
     break;
     /************
      * PERIODIC SECTION * 
@@ -40,9 +38,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_EVERY_SECOND:{
       EverySecond_AutoOff(); 
 
-      #ifndef ENABLE_DEBUGFEATURE_LIGHTS__ESP32C3_FLICKER_TEST
       updateInterfaces(CALL_MODE_WS_SEND); //tmp fix sending here
-      #endif
 
       #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
       Serial.printf_P(PSTR("FPS: %f\n\r"), getFpsFloat());
@@ -200,9 +196,9 @@ void mAnimatorLight::Save_Module()
  
   JBI->Start();
 
-  #ifdef ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  #ifdef ENABLE_FEATURE_FILESYSTEM__ADD_TIMESTAMP_ON_SAVE_FILES
     JBI->Add(PM_UTC_TIME, tkr_time->GetDateAndTime(DT_UTC).c_str() );
-  #endif // ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  #endif // ENABLE_FEATURE_FILESYSTEM__ADD_TIMESTAMP_ON_SAVE_FILES
 
   uint8_t bus_appended = 0;
 
@@ -224,9 +220,6 @@ void mAnimatorLight::Save_Module()
         JBI->Add("Intensity", segments[seg_i].intensity );
       JBI->Object_End();
       JBI->Object_Start_F("Transition");
-        #ifndef ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
-        JBI->Add("TimeMs",  segments[seg_i].time_ms );
-        #endif // ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
         JBI->Add("RateMs",  segments[seg_i].cycle_time__rate_ms );
       JBI->Object_End();
 
@@ -257,7 +250,6 @@ void mAnimatorLight::Save_Module()
 /*
  * WebSockets server for bidirectional communication
  */
-#ifdef WLED_ENABLE_WEBSOCKETS2
 
 uint16_t wsLiveClientId = 0;
 unsigned long wsLastLiveTime = 0;
@@ -536,10 +528,6 @@ void handleWs()
   }
 }
 
-#else
-// void handleWs() {}
-// void sendDataWs(AsyncWebSocketClient * client) {}
-#endif
 
 
 void mAnimatorLight::Init_Busses()
@@ -694,9 +682,7 @@ void mAnimatorLight::EveryLoop()
     // serializeConfig(); // in WLED This saved everything to json memory
   }
     
-  #ifdef WLED_ENABLE_WEBSOCKETS2
   handleWs();
-  #endif
   
   // if (doSerializeConfig) serializeConfig();
 
@@ -835,11 +821,7 @@ void mAnimatorLight::SubTask_AnimationMode__InternalControlFromAnotherModule()
 
 void mAnimatorLight::BootMessage()
 {
-  #ifndef ENABLE_DEVFEATURE_LIGHT__HIDE_CODE_NOT_ACTIVE_TO_BE_INTEGRATED_LATER
-  // #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  // ALOG_INF(PSTR("BOOT: " "LightCount=%d"), settings.light_size_count);
-  // #endif // ENABLE_LOG_LEVEL_COMMANDS
-  #endif // ENABLE_DEVFEATURE_LIGHT__HIDE_CODE_NOT_ACTIVE_TO_BE_INTEGRATED_LATER
+  
 
 }
 
@@ -860,10 +842,6 @@ void mAnimatorLight::Pre_Init(void)
 void mAnimatorLight::Init(void)
 { 
   
-  DEBUG_LINE_HERE4
-
-  #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
-
   #ifdef USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED
   #ifdef ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
   snprintf(serverDescription, sizeof(serverDescription), "PulSar %s \"%s\" [%s]", tkr_set->Settings.system_name.friendly, DEVICENAME_DESCRIPTION_CTR, tkr_time->GetBuildDateAndTime().c_str() );
@@ -888,7 +866,7 @@ void mAnimatorLight::Init(void)
   sprintf(otaPass, "PulSar");
   sprintf(clientSSID, CLIENT_SSID);
   sprintf(clientPass, CLIENT_PASS);
-  #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
 
   WAIT_WITH_PRINT_TICK(1000);
 
@@ -903,9 +881,8 @@ void mAnimatorLight::Init(void)
 
   WAIT_WITH_PRINT_TICK(1000);
   DEBUG_LINE_HERE4
-  #ifdef WLED_ENABLE_WEBSOCKETS2
+  
   tkr_web->websocket_lights->onEvent(wsEvent);
-  #endif
   
   DEBUG_LINE_HERE4
   loadLedmap = 0; // To enable it to load once
@@ -2287,14 +2264,10 @@ void mAnimatorLight::SubTask_Effects()
 
   // IMPORTANT: make sure NeoPixelBus DMA is idle before we start writing pixels
   // adjust access as needed (this->bus_manager, tkr_iLight->bus_manager, etc.)
-  #ifdef ENABLE_DEVFEATURE_LIGHTS__FIX_MULTISEGMENT_DMA_FLICKER
   if (isUpdating()) {      // or strip.CanShow() if you wrap it there
     // ALOG_WRN(PSTR("DMA BUSY - SKIPPING EFFECTS CYCLE"));
     return;                           // try again on next scheduler tick
-  }else{
-    // ALOG_INF(PSTR("->"));
   }
-  #endif
 
   bool doShow = false;
 
@@ -4253,72 +4226,72 @@ void mAnimatorLight::Segment::colorCTtoRGB(uint16_t mired, byte* rgb) //white sp
   }
 }
 
-#ifndef WLED_DISABLE_HUESYNC
-void mAnimatorLight::Segment::colorXYtoRGB(float x, float y, byte* rgb) //coordinates to rgb (https://www.developers.meethue.com/documentation/color-conversions-rgb-xy)
-{
-  float z = 1.0f - x - y;
-  float X = (1.0f / y) * x;
-  float Z = (1.0f / y) * z;
-  float r = (int)255*(X * 1.656492f - 0.354851f - Z * 0.255038f);
-  float g = (int)255*(-X * 0.707196f + 1.655397f + Z * 0.036152f);
-  float b = (int)255*(X * 0.051713f - 0.121364f + Z * 1.011530f);
-  if (r > b && r > g && r > 1.0f) {
-    // red is too big
-    g = g / r;
-    b = b / r;
-    r = 1.0f;
-  } else if (g > b && g > r && g > 1.0f) {
-    // green is too big
-    r = r / g;
-    b = b / g;
-    g = 1.0f;
-  } else if (b > r && b > g && b > 1.0f) {
-    // blue is too big
-    r = r / b;
-    g = g / b;
-    b = 1.0f;
-  }
-  // Apply gamma correction
-  r = r <= 0.0031308f ? 12.92f * r : (1.0f + 0.055f) * powf(r, (1.0f / 2.4f)) - 0.055f;
-  g = g <= 0.0031308f ? 12.92f * g : (1.0f + 0.055f) * powf(g, (1.0f / 2.4f)) - 0.055f;
-  b = b <= 0.0031308f ? 12.92f * b : (1.0f + 0.055f) * powf(b, (1.0f / 2.4f)) - 0.055f;
+// #ifndef WLED_DISABLE_HUESYNC
+// void mAnimatorLight::Segment::colorXYtoRGB(float x, float y, byte* rgb) //coordinates to rgb (https://www.developers.meethue.com/documentation/color-conversions-rgb-xy)
+// {
+//   float z = 1.0f - x - y;
+//   float X = (1.0f / y) * x;
+//   float Z = (1.0f / y) * z;
+//   float r = (int)255*(X * 1.656492f - 0.354851f - Z * 0.255038f);
+//   float g = (int)255*(-X * 0.707196f + 1.655397f + Z * 0.036152f);
+//   float b = (int)255*(X * 0.051713f - 0.121364f + Z * 1.011530f);
+//   if (r > b && r > g && r > 1.0f) {
+//     // red is too big
+//     g = g / r;
+//     b = b / r;
+//     r = 1.0f;
+//   } else if (g > b && g > r && g > 1.0f) {
+//     // green is too big
+//     r = r / g;
+//     b = b / g;
+//     g = 1.0f;
+//   } else if (b > r && b > g && b > 1.0f) {
+//     // blue is too big
+//     r = r / b;
+//     g = g / b;
+//     b = 1.0f;
+//   }
+//   // Apply gamma correction
+//   r = r <= 0.0031308f ? 12.92f * r : (1.0f + 0.055f) * powf(r, (1.0f / 2.4f)) - 0.055f;
+//   g = g <= 0.0031308f ? 12.92f * g : (1.0f + 0.055f) * powf(g, (1.0f / 2.4f)) - 0.055f;
+//   b = b <= 0.0031308f ? 12.92f * b : (1.0f + 0.055f) * powf(b, (1.0f / 2.4f)) - 0.055f;
 
-  if (r > b && r > g) {
-    // red is biggest
-    if (r > 1.0f) {
-      g = g / r;
-      b = b / r;
-      r = 1.0f;
-    }
-  } else if (g > b && g > r) {
-    // green is biggest
-    if (g > 1.0f) {
-      r = r / g;
-      b = b / g;
-      g = 1.0f;
-    }
-  } else if (b > r && b > g) {
-    // blue is biggest
-    if (b > 1.0f) {
-      r = r / b;
-      g = g / b;
-      b = 1.0f;
-    }
-  }
-  rgb[0] = byte(255.0f*r);
-  rgb[1] = byte(255.0f*g);
-  rgb[2] = byte(255.0f*b);
-}
+//   if (r > b && r > g) {
+//     // red is biggest
+//     if (r > 1.0f) {
+//       g = g / r;
+//       b = b / r;
+//       r = 1.0f;
+//     }
+//   } else if (g > b && g > r) {
+//     // green is biggest
+//     if (g > 1.0f) {
+//       r = r / g;
+//       b = b / g;
+//       g = 1.0f;
+//     }
+//   } else if (b > r && b > g) {
+//     // blue is biggest
+//     if (b > 1.0f) {
+//       r = r / b;
+//       g = g / b;
+//       b = 1.0f;
+//     }
+//   }
+//   rgb[0] = byte(255.0f*r);
+//   rgb[1] = byte(255.0f*g);
+//   rgb[2] = byte(255.0f*b);
+// }
 
-void mAnimatorLight::Segment::colorRGBtoXY(byte* rgb, float* xy) //rgb to coordinates (https://www.developers.meethue.com/documentation/color-conversions-rgb-xy)
-{
-  float X = rgb[0] * 0.664511f + rgb[1] * 0.154324f + rgb[2] * 0.162028f;
-  float Y = rgb[0] * 0.283881f + rgb[1] * 0.668433f + rgb[2] * 0.047685f;
-  float Z = rgb[0] * 0.000088f + rgb[1] * 0.072310f + rgb[2] * 0.986039f;
-  xy[0] = X / (X + Y + Z);
-  xy[1] = Y / (X + Y + Z);
-}
-#endif // WLED_DISABLE_HUESYNC
+// void mAnimatorLight::Segment::colorRGBtoXY(byte* rgb, float* xy) //rgb to coordinates (https://www.developers.meethue.com/documentation/color-conversions-rgb-xy)
+// {
+//   float X = rgb[0] * 0.664511f + rgb[1] * 0.154324f + rgb[2] * 0.162028f;
+//   float Y = rgb[0] * 0.283881f + rgb[1] * 0.668433f + rgb[2] * 0.047685f;
+//   float Z = rgb[0] * 0.000088f + rgb[1] * 0.072310f + rgb[2] * 0.986039f;
+//   xy[0] = X / (X + Y + Z);
+//   xy[1] = Y / (X + Y + Z);
+// }
+// #endif // WLED_DISABLE_HUESYNC
 
 //RRGGBB / WWRRGGBB order for hex
 void mAnimatorLight::Segment::colorFromDecOrHexString(byte* rgb, char* in)
@@ -4461,12 +4434,7 @@ void mAnimatorLight::finalizeInit(void)
       DEBUG_PRINTF("_length = busEnd;\n\r");
     }
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
     bus->begin(); //must be called after all busses are created (so parallel buses scale to the longest bus length)
-    #else
-    #error "ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED must be defined"
-    #endif
-    // should optional force clear immediately after begin()?
 
     #ifdef ESP8266
     if ((!IS_BUSTYPE_DIGITAL(bus->getType()) || IS_BUSTYPE_2PIN(bus->getType()))) continue;
@@ -4612,15 +4580,13 @@ void mAnimatorLight::estimateCurrentAndLimitBri() {
 void mAnimatorLight::reset()
 {
   // briT = 0;
-  #ifdef WLED_ENABLE_WEBSOCKETS2
   tkr_web->websocket_lights->closeAll(1012);
-  #endif
   long dly = millis();
   while (millis() - dly < 450) {
     yield();        // enough time to send response to client
   }
   // applyBri();
-  DEBUG_PRINTLN(F("WLED RESET"));
+  DEBUG_PRINTLN(F("WLED RESET ---- delete this function"));
   ESP.restart();
 }
 
@@ -5626,11 +5592,7 @@ RgbwwColor IRAM_ATTR mAnimatorLight::GetUnloadedPaletteColour_ModeWrap(
 
 #ifndef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
 
-void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
-#ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
-,bool flag_brightness_already_applied
-#endif
-){
+void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col,bool flag_brightness_already_applied){
 
   #ifndef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   int vStrip = i>>16; // hack to allow running on virtual strips (2D segment columns/rows) REQUIRED for bouncing balls effect. Assumes this means int is 32 bit here?
@@ -5892,11 +5854,7 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col
 
 
 #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, RgbwwColor col
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
-  ,bool flag_brightness_already_applied /*temporary fix*/
-  #endif
-)//, bool flag_brightness_already_applied)
+void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, RgbwwColor col, bool flag_brightness_already_applied )//, bool flag_brightness_already_applied)
 {
 
   #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
@@ -7788,7 +7746,7 @@ void mAnimatorLight::notify(byte callMode, bool followUp)
 }
 
 
-#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
 
 
 void realtimeLock2(uint32_t timeoutMs, byte md)
@@ -8578,7 +8536,7 @@ void mAnimatorLight::colorUpdated(byte callMode) {
 
 
 
-#endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+#endif // ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
 
 
 

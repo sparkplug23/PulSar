@@ -371,9 +371,9 @@ void mInterfaceLight::Save_Module()
  
   JBI->Start();
 
-  #ifdef ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  #ifdef ENABLE_FEATURE_FILESYSTEM__ADD_TIMESTAMP_ON_SAVE_FILES
     JBI->Add(PM_UTC_TIME, tkr_time->GetDateAndTime(DT_UTC).c_str() );
-  #endif // ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  #endif // ENABLE_FEATURE_FILESYSTEM__ADD_TIMESTAMP_ON_SAVE_FILES
 
   
     JBI->Array_Start("BusConfig");
@@ -538,7 +538,7 @@ RgbColor mInterfaceLight::GetColourValueUsingMaps_FullBrightness(float value,
 
 
 
-#ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+#ifdef ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
 
 /*********************************************************************************************\
  * Change scales from 8 bits to 10 bits and vice versa
@@ -713,7 +713,7 @@ uint16_t mInterfaceLight::fadeGammaReverse(uint32_t channel, uint16_t vg) {
   }
 }
 
-#endif // ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+#endif // ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
 
 
 bool mInterfaceLight::CommandGet_LightPowerState()

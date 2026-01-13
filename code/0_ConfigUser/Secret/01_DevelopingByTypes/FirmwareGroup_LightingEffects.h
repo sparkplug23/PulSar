@@ -123,7 +123,7 @@
    * SECTION: System Configs
   ************************************/     
 
- #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+ 
 
   
 
@@ -132,10 +132,10 @@
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -144,13 +144,13 @@
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   
 
@@ -159,8 +159,8 @@
    * SECTION: Network Configs
   ************************************/    
  #ifndef ESP8266
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 #endif
   /***********************************
    * SECTION: Sensor Configs
@@ -184,14 +184,9 @@
   
   
 
-  #define ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
-
-  #define ENABLE_DEVFEATURE_LIGHT__HIDE_CODE_NOT_ACTIVE_TO_BE_INTEGRATED_LATER
-
-  #define ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS // If this works, all future WLED effects should simply use this method allowing faster CRGB performance. My effects will still work in my effects.
   
 
-
+  
 
 
 
@@ -208,14 +203,7 @@
 
   #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
     
-  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
-
   
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
     /********* Group: Testing ************************/
       // Phase out
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
@@ -235,7 +223,7 @@
   // #define ENABLE_NEOPIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
 
     
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+  
 
   #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
   #define ENABLE_DEVFEATURE_LIGHTING__PRESETS
@@ -288,7 +276,7 @@
    * SECTION: System Configs
   ************************************/     
 
- #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+ 
 
   
 
@@ -297,10 +285,10 @@
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -309,13 +297,13 @@
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   
 
@@ -324,8 +312,8 @@
    * SECTION: Network Configs
   ************************************/    
  #ifndef ESP8266
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 #endif
   /***********************************
    * SECTION: Sensor Configs
@@ -349,11 +337,8 @@
   
   
 
-  #define ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
+  
 
-  #define ENABLE_DEVFEATURE_LIGHT__HIDE_CODE_NOT_ACTIVE_TO_BE_INTEGRATED_LATER
-
-  #define ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS // If this works, all future WLED effects should simply use this method allowing faster CRGB performance. My effects will still work in my effects.
   
 
 
@@ -372,15 +357,7 @@
 
 
   #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
-    
-  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
-
-  
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
+      
     /********* Group: Testing ************************/
       // Phase out
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
@@ -400,7 +377,7 @@
   // #define ENABLE_NEOPIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
 
     
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+  
 
   #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
   #define ENABLE_DEVFEATURE_LIGHTING__PRESETS
@@ -1975,10 +1952,10 @@
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -1987,20 +1964,20 @@
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -2155,10 +2132,10 @@
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -2167,20 +2144,20 @@
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -2401,10 +2378,10 @@
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -2413,20 +2390,20 @@
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -2568,10 +2545,10 @@
   #define DEBUG_TASK_SETTINGSUPDATETEXT
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -2580,13 +2557,13 @@
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   /***********************************
    * SECTION: Core Configs
@@ -2599,8 +2576,8 @@
 
 
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -2725,10 +2702,10 @@
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -2737,20 +2714,20 @@
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -2862,7 +2839,7 @@
 //   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 //   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
 //   // #define ENABLE_DEBUG_FUNCTION_NAMES
-//   // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+//   // 
 //   // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
 //   // #define ENABLE_DEBUG_LINE_HERE
 //   // #define ENABLE_DEBUG_LINE_HERE2
@@ -2882,19 +2859,18 @@
  
 //   #define SETTINGS_HOLDER 1239
 
-//   #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-//   #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+//   
+//   
 //   #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-//   #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
-//   #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+//    // until devices can reliably be used without compiling per device
+//   
       
 //   /***********************************
 //    * SECTION: Network Configs
 //   ************************************/    
 
-//   #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-//   #define USE_MODULE_NETWORK_WEBSERVER
-//   #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+//   
+//     
 
 //   /***********************************
 //    * SECTION: Sensor Configs
@@ -2925,8 +2901,6 @@
 //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 //   // #define ENABLE_DEVFEATURE_LIGHTING__DOUBLE_BUFFER
-
-//   #define ENABLE_FEATURE_LIGHTS__GLOBAL_ANIMATOR_LIGHT_CLASS_ACCESS
 
 //   // #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
 
@@ -4034,10 +4008,10 @@
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -4046,20 +4020,20 @@
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -4196,10 +4170,10 @@
 //   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
 //   // #define USE_MODULE_CORE_FILESYSTEM
-//   //   #define WLED_ENABLE_FS_EDITOR
-//   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-//   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-//   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+//   //   
+//   //   
+//   //   
+//   //   
 
 //   // Settings saving and loading
 //   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -4208,13 +4182,13 @@
 //   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
 //   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-//   #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-//   #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+//   
+//   
 
 //   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-//   // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+//   //  // until devices can reliably be used without compiling per device
 
-//   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+//   // 
 
 //   #define USE_MODULE_SENSORS_SUN_TRACKING
 
@@ -4251,7 +4225,6 @@
     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
     
     #define ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP  
-    #define WLED_DEBUG
     #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
     // #define ENABLE_DEVFEATURE_LIGHT__MATRIX_LOAD_PALETTE_PATCH_IN_WEBUI_PALETTE_CHANGE
   #endif 
@@ -4259,21 +4232,13 @@
 //   
 
 
-//   #define ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS // If this works, all future WLED effects should simply use this method allowing faster CRGB performance. My effects will still work in my effects.
-
-
 
 //   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
 //   #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
 //   #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
 //     
-//   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
-//   #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-
-//   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
-
-//   #define USE_MODULE_NETWORK_WEBSERVER
-//   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+//   
+//   
 
 
   
@@ -4423,10 +4388,10 @@
 // //   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
 // //   // #define USE_MODULE_CORE_FILESYSTEM
-// //   //   #define WLED_ENABLE_FS_EDITOR
-// //   //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-// //   //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-// //   //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+// //   //   
+// //   //   
+// //   //   
+// //   //   
 
 // //   // Settings saving and loading
 // //   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -4435,13 +4400,13 @@
 // //   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
 // //   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-// //   #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-// //   #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+// //   
+// //   
 
 // //   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-// //   // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+// //   //  // until devices can reliably be used without compiling per device
 
-// //   // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+// //   // 
 
 // //   #define USE_MODULE_SENSORS_SUN_TRACKING
 
@@ -4478,7 +4443,6 @@
 //     #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
     
 //     #define ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP  
-//     #define WLED_DEBUG
 //     #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
 //     // #define ENABLE_DEVFEATURE_LIGHT__MATRIX_LOAD_PALETTE_PATCH_IN_WEBUI_PALETTE_CHANGE
 //   #endif 
@@ -4492,8 +4456,6 @@
 //       // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
 //       // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
 
-// // //   #define ENABLE_DEVFEATURE_LIGHT__LOAD_PULSAR_PALETTES_INTO_CRGBPALETTE_FOR_WLED_EFFECTS // If this works, all future WLED effects should simply use this method allowing faster CRGB performance. My effects will still work in my effects.
-// /*
 // {
 //   "Effects": {
 //     "Param0": 103,
@@ -4514,13 +4476,9 @@
 // //   #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
 // //   #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
 // //     
-// //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
-// //   #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
 
-// //   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__MANUAL
-
-// //   #define USE_MODULE_NETWORK_WEBSERVER
-// //   #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+// //   
+// //   
 
 
   
@@ -4684,10 +4642,10 @@
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -4696,20 +4654,20 @@
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -5046,7 +5004,7 @@ Left to right
 //   #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 //   #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
 //   #define ENABLE_DEBUG_FUNCTION_NAMES
-//   #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+//   
 //   #define SERIAL_LOG_LEVEL_DURING_BOOT 8
 //   #define ENABLE_DEBUG_LINE_HERE
 //   #define ENABLE_DEBUG_LINE_HERE2
@@ -5073,10 +5031,10 @@ Left to right
   ************************************/    
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -5085,13 +5043,13 @@ Left to right
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+   // until devices can reliably be used without compiling per device
 
-  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  
 
 
 
@@ -5101,9 +5059,8 @@ Left to right
 
   // #define ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING 
 
-  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
   
 
   // // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -5115,9 +5072,8 @@ Left to right
   // #define USE_MODULE_NETWORK_WIFI
   // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
 
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+  
+    
 
 
   /***********************************
@@ -5186,14 +5142,10 @@ Left to right
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
-  #define ENABLE_FEATURE_LIGHTS__GLOBAL_ANIMATOR_LIGHT_CLASS_ACCESS
-
   // #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
   // #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
 
 
-  #define ENABLE_DEVFEATURE_LIGHT__PWM_DITHER_V2
-  
 
   
 #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
@@ -5218,11 +5170,6 @@ typedef uint32_t ColourBaseType;
   #else
   #define RgbcctTOwwType RgbcctColor
   #endif
-
-  // 
-
-  #define ENABLE_DEVFEATURE_LIGHTING__SUPPRESS_WHITE_OUTPUT
-
 
 
         // "ColourOrder":"GRBWC",
@@ -5421,7 +5368,7 @@ typedef uint32_t ColourBaseType;
 //   #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 //   #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
 //   #define ENABLE_DEBUG_FUNCTION_NAMES
-//   #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+//   
 //   #define SERIAL_LOG_LEVEL_DURING_BOOT 8
 //   #define ENABLE_DEBUG_LINE_HERE
 //   #define ENABLE_DEBUG_LINE_HERE2
@@ -5448,10 +5395,10 @@ typedef uint32_t ColourBaseType;
   ************************************/    
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -5460,13 +5407,13 @@ typedef uint32_t ColourBaseType;
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+   // until devices can reliably be used without compiling per device
 
-  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  
 
 
 
@@ -5476,9 +5423,8 @@ typedef uint32_t ColourBaseType;
 
   // #define ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING 
 
-  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
   
 
   // // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -5490,9 +5436,8 @@ typedef uint32_t ColourBaseType;
   // #define USE_MODULE_NETWORK_WIFI
   // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
 
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+  
+    
 
 
   /***********************************
@@ -5561,14 +5506,10 @@ typedef uint32_t ColourBaseType;
   #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
-  #define ENABLE_FEATURE_LIGHTS__GLOBAL_ANIMATOR_LIGHT_CLASS_ACCESS
 
   // #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
   // #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
 
-
-  #define ENABLE_DEVFEATURE_LIGHT__PWM_DITHER_V2
-  
 
   
 #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
@@ -5577,15 +5518,6 @@ typedef RgbwwColor ColourBaseType;
 #else
 typedef uint32_t ColourBaseType;
 #endif
-
-  // #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-  // // #define ENABLE_DEVFEATURE_LIGHTING__DOUBLE_BUFFER
-  // #else
-  // // #define ENABLE_DEVFEATURE_LIGHTING__DOUBLE_BUFFER
-  // #endif
-
-
-  #define ENABLE_DEVFEATURE_LIGHTING__SUPPRESS_WHITE_OUTPUT
 
 
 
@@ -5770,10 +5702,10 @@ typedef uint32_t ColourBaseType;
   ************************************/    
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -5782,13 +5714,13 @@ typedef uint32_t ColourBaseType;
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // 
+  // 
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   #define DEBUG_FASTBOOT
 
@@ -5798,9 +5730,8 @@ typedef uint32_t ColourBaseType;
 
   // #define ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING 
 
-  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
   // 
   
 
@@ -5911,10 +5842,10 @@ typedef uint32_t ColourBaseType;
   ************************************/    
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -5923,13 +5854,13 @@ typedef uint32_t ColourBaseType;
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+   // until devices can reliably be used without compiling per device
 
-  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  
 
 
 
@@ -5939,9 +5870,8 @@ typedef uint32_t ColourBaseType;
 
   // #define ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING 
 
-  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
   
 
   // // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -6064,10 +5994,10 @@ typedef uint32_t ColourBaseType;
   ************************************/    
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -6076,13 +6006,13 @@ typedef uint32_t ColourBaseType;
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // 
+  // 
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
 
 
@@ -6092,9 +6022,8 @@ typedef uint32_t ColourBaseType;
 
   // #define ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING 
 
-  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
   // 
   
 
@@ -6222,10 +6151,10 @@ typedef uint32_t ColourBaseType;
   ************************************/    
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -6234,13 +6163,13 @@ typedef uint32_t ColourBaseType;
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // 
+  // 
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
 
 
@@ -6250,9 +6179,8 @@ typedef uint32_t ColourBaseType;
 
   // #define ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING 
 
-  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
   
 
   // // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -6465,8 +6393,6 @@ typedef uint32_t ColourBaseType;
 
 
   // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
-  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
-
 
 
   // #define ENABLE_ADVANCED_DEBUGGING
@@ -6505,15 +6431,11 @@ typedef uint32_t ColourBaseType;
   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  // #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
     
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
-    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    // 
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
     
@@ -6597,7 +6519,7 @@ typedef uint32_t ColourBaseType;
 
 
 //   #define USE_SERIAL_ALTERNATE_TX
-//   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+//   
 //   // #define USE_MODULE_DRIVERS_PWM
 
 
@@ -6615,14 +6537,8 @@ typedef uint32_t ColourBaseType;
 //   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-//   #define USE_MODULE_NETWORK_WEBSERVER
-//   #define USE_MODULE_NETWORK_WEBSERVER
-
-//   // #define ESP32
-//   // #undef ESP8266
-
-//   // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
-//   #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
+//   
+//   
 
 //   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
 //   // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -6669,15 +6585,11 @@ typedef uint32_t ColourBaseType;
 //   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-//   #define USE_BUILD_TYPE_LIGHTING
-//   #define USE_MODULE_LIGHTS_INTERFACE
-//   #define USE_MODULE_LIGHTS_ANIMATOR
-//   #define USE_MODULE_LIGHTS_ADDRESSABLE
 //     
 //     /********* Group: Needed to build ************************/
 //     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
 //     /********* Group: Ready for full integration ************************/
-//     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+//     // 
 //     /********* Group: Testing ************************/
 //     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
 //     
@@ -6737,7 +6649,7 @@ typedef uint32_t ColourBaseType;
 //     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
 
-//     #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+//     
 
 
 
@@ -6912,7 +6824,7 @@ typedef uint32_t ColourBaseType;
 
 
   #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+  
   // #define USE_MODULE_DRIVERS_PWM
 
 
@@ -7101,7 +7013,7 @@ typedef uint32_t ColourBaseType;
 
 
   #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+  
   // #define USE_MODULE_DRIVERS_PWM
 
 #define USE_SERIAL_ALTERNATE_TX
@@ -7113,9 +7025,9 @@ typedef uint32_t ColourBaseType;
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
   
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define USE_MODULE_NETWORK_WEBSERVER
-    // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
+    // 
 
   // #define ESP8266
   // #undef ESP32
@@ -7126,16 +7038,6 @@ typedef uint32_t ColourBaseType;
 
     
 
-
-
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define USE_MODULE_NETWORK_WEBSERVER
-
-  // #define ESP32
-  // #undef ESP8266
-
-  // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
-  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
 
   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
   // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -7177,15 +7079,11 @@ typedef uint32_t ColourBaseType;
 
   #define ENABLE_DEBUG_MANUAL_DELAYS
 
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
     
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
-    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    // 
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
     
@@ -7278,14 +7176,9 @@ typedef uint32_t ColourBaseType;
 //   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-//   #define USE_MODULE_NETWORK_WEBSERVER
-//   #define USE_MODULE_NETWORK_WEBSERVER
+//   
+//   
 
-//   // #define ESP32
-//   // #undef ESP8266
-
-//   // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
-//   #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
 
 //   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
 //   // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -7332,15 +7225,10 @@ typedef uint32_t ColourBaseType;
 //   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-//   #define USE_BUILD_TYPE_LIGHTING
-//   #define USE_MODULE_LIGHTS_INTERFACE
-//   #define USE_MODULE_LIGHTS_ANIMATOR
-//   #define USE_MODULE_LIGHTS_ADDRESSABLE
-//     
 //     /********* Group: Needed to build ************************/
 //     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
 //     /********* Group: Ready for full integration ************************/
-//     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+//     // 
 //     /********* Group: Testing ************************/
 //     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
 //     
@@ -7400,7 +7288,7 @@ typedef uint32_t ColourBaseType;
 //     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
 
-//     #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+//     
 
 
 
@@ -7519,7 +7407,7 @@ typedef uint32_t ColourBaseType;
 
 
   #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+  
   // #define USE_MODULE_DRIVERS_PWM
 
 #define USE_SERIAL_ALTERNATE_TX
@@ -7531,29 +7419,13 @@ typedef uint32_t ColourBaseType;
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
   
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define USE_MODULE_NETWORK_WEBSERVER
-    // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
+    // 
 
   // #define ESP8266
   // #undef ESP32
   
-
-  
-
-
-    
-
-
-
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define USE_MODULE_NETWORK_WEBSERVER
-
-  // #define ESP32
-  // #undef ESP8266
-
-  // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
-  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
 
   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
   // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -7595,15 +7467,11 @@ typedef uint32_t ColourBaseType;
 
   #define ENABLE_DEBUG_MANUAL_DELAYS
 
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
     
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
-    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    // 
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
     
@@ -7684,7 +7552,7 @@ typedef uint32_t ColourBaseType;
 
 
 //   #define USE_SERIAL_ALTERNATE_TX
-//   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+//   
 //   // #define USE_MODULE_DRIVERS_PWM
 
 
@@ -7702,14 +7570,8 @@ typedef uint32_t ColourBaseType;
 //   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-//   #define USE_MODULE_NETWORK_WEBSERVER
-//   #define USE_MODULE_NETWORK_WEBSERVER
-
-//   // #define ESP32
-//   // #undef ESP8266
-
-//   // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
-//   #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
+//   
+//   
 
 //   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
 //   // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -7756,15 +7618,10 @@ typedef uint32_t ColourBaseType;
 //   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-//   #define USE_BUILD_TYPE_LIGHTING
-//   #define USE_MODULE_LIGHTS_INTERFACE
-//   #define USE_MODULE_LIGHTS_ANIMATOR
-//   #define USE_MODULE_LIGHTS_ADDRESSABLE
-//     
 //     /********* Group: Needed to build ************************/
 //     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
 //     /********* Group: Ready for full integration ************************/
-//     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+//     // 
 //     /********* Group: Testing ************************/
 //     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
 //     
@@ -7823,7 +7680,7 @@ typedef uint32_t ColourBaseType;
 //     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
 
-//     #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+//     
 
 
 
@@ -8020,7 +7877,7 @@ typedef uint32_t ColourBaseType;
 
 
   #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+  
   // #define USE_MODULE_DRIVERS_PWM
 
 #define USE_SERIAL_ALTERNATE_TX
@@ -8032,9 +7889,9 @@ typedef uint32_t ColourBaseType;
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
   
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define USE_MODULE_NETWORK_WEBSERVER
-    // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
+    // 
 
   // #define ESP8266
   // #undef ESP32
@@ -8047,14 +7904,13 @@ typedef uint32_t ColourBaseType;
 
 
 
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define USE_MODULE_NETWORK_WEBSERVER
+  // 
+  // 
 
   // #define ESP32
   // #undef ESP8266
 
   // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
-  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
 
   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
   // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -8096,15 +7952,11 @@ typedef uint32_t ColourBaseType;
 
   #define ENABLE_DEBUG_MANUAL_DELAYS
 
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
     
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
-    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    // 
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
     
@@ -8184,7 +8036,7 @@ typedef uint32_t ColourBaseType;
 
 
 //   #define USE_SERIAL_ALTERNATE_TX
-//   #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+//   
 //   // #define USE_MODULE_DRIVERS_PWM
 
 
@@ -8202,14 +8054,13 @@ typedef uint32_t ColourBaseType;
 //   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-//   #define USE_MODULE_NETWORK_WEBSERVER
-//   #define USE_MODULE_NETWORK_WEBSERVER
+//   
+//   
 
 //   // #define ESP32
 //   // #undef ESP8266
 
 //   // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
-//   #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
 
 //   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
 //   // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -8256,15 +8107,11 @@ typedef uint32_t ColourBaseType;
 //   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-//   #define USE_BUILD_TYPE_LIGHTING
-//   #define USE_MODULE_LIGHTS_INTERFACE
-//   #define USE_MODULE_LIGHTS_ANIMATOR
-//   #define USE_MODULE_LIGHTS_ADDRESSABLE
 //     
 //     /********* Group: Needed to build ************************/
 //     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
 //     /********* Group: Ready for full integration ************************/
-//     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+//     // 
 //     /********* Group: Testing ************************/
 //     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
 //     
@@ -8323,7 +8170,7 @@ typedef uint32_t ColourBaseType;
 //     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
 
-//     #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+//     
 
 
 
@@ -8506,15 +8353,9 @@ typedef uint32_t ColourBaseType;
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define  ENABLE_WEBSERVER_LIGHTING_WEBUI
 
   #undef ESP32
   #define ESP8266
-
-  // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
-  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
 
   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
   // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -8674,16 +8515,15 @@ typedef uint32_t ColourBaseType;
   #define USE_MODULE_NETWORK_WIFI
   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define USE_MODULE_NETWORK_WEBSERVER
+  
+  
 
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
   
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
 
-  #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
   #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
   #define ENABLE_DEBUG_MANUAL_DELAYS
@@ -8812,7 +8652,7 @@ typedef uint32_t ColourBaseType;
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
+  
   
   /***********************************
    * SECTION: Lighting Configs
@@ -9009,10 +8849,10 @@ typedef uint32_t ColourBaseType;
   #define SETTINGS_HOLDER 1239
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -9025,8 +8865,8 @@ typedef uint32_t ColourBaseType;
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
   
   /***********************************
    * SECTION: Lighting Configs
@@ -9038,9 +8878,6 @@ typedef uint32_t ColourBaseType;
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
   #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
-
-  // #define ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
-
 
 
   // 13, 18, 19, 22, 23, 25, 26, 27       USED
@@ -9272,10 +9109,10 @@ typedef uint32_t ColourBaseType;
   #define SETTINGS_HOLDER 1239
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -9288,8 +9125,8 @@ typedef uint32_t ColourBaseType;
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
   
   /***********************************
    * SECTION: Lighting Configs
@@ -9302,7 +9139,6 @@ typedef uint32_t ColourBaseType;
 
   #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
 
-  #define ENABLE_DEVFEATURE_LIGHTING_PALETTE_IRAM
 
   // 13, 18, 19, 22, 23, 25, 26, 27       USED
   // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
@@ -9456,7 +9292,7 @@ typedef uint32_t ColourBaseType;
 //   // #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
 //   #define ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
 
-  #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  
 
 // #define ENABLE_DEBUG_MANUAL_DELAYS
 
@@ -9472,10 +9308,10 @@ typedef uint32_t ColourBaseType;
   ************************************/    
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -9484,13 +9320,13 @@ typedef uint32_t ColourBaseType;
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+   // until devices can reliably be used without compiling per device
 
-  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  
 
 
 
@@ -9500,9 +9336,8 @@ typedef uint32_t ColourBaseType;
 
   // #define ENABLE_FEATURE_BUILD__RELEASE_TO_OTHERS_WITHOUT_NETWORKING 
 
-  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
   
 
   // // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
@@ -9514,9 +9349,8 @@ typedef uint32_t ColourBaseType;
   // #define USE_MODULE_NETWORK_WIFI
   // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
 
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+  
+    
 
 
   /***********************************
@@ -9538,8 +9372,6 @@ typedef uint32_t ColourBaseType;
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  // #define ENABLE_DEVFEATURE_LIGHT__EFFECT_SHOW_TIME_NEW
-  #define WLED_DEBUG
 
 
 #endif

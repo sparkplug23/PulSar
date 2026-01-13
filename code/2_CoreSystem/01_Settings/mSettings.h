@@ -296,10 +296,6 @@ const uint16_t VL53LXX_MAX_SENSORS = 8;     // Max number of VL53L0X sensors
  */
 enum SettingsTextIndex { 
     SET_OTAURL,
-    #ifndef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
-    SET_STASSID1, SET_STASSID2,  // MAX_SSIDS
-    SET_STAPWD1, SET_STAPWD2,  // MAX_SSIDS
-    #endif
     SET_HOSTNAME, SET_SYSLOG_HOST,
     SET_WEBPWD, SET_CORS,
     SET_STATE_TXT1, SET_STATE_TXT2, SET_STATE_TXT3, SET_STATE_TXT4,  // MAX_STATE_TEXT
@@ -1252,16 +1248,7 @@ struct SETTINGS {
   // Core
   uint16_t      unified_interface_reporting_invalid_reading_timeout_seconds; // 0 is ignored, anything else is the seconds of age above which a sensor should not be reporting (ie is invalid)
   // Network
-  #ifndef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
-  uint8_t       sta_config;                // 09F
-  uint8_t       sta_active;                // 0A0
-  uint32_t      ip_address[5];             // 544
-  uint8_t       wifi_channel;
-  uint8_t       wifi_bssid[6];             // F0A
-  SysBitfield_Network  flag_network;                     // 3A0
-  #else
   NetworkSettings network;
-  #endif
   // Webserver
   uint8_t       webserver;                 // 1AB
   uint16_t      web_refresh;               // 7CC

@@ -946,23 +946,23 @@ bool deserializeConfig(JsonObject doc, bool fromFS) {
 #endif
 
 
-#ifndef WLED_DISABLE_HUESYNC
-  JsonObject if_hue = interfaces["hue"];
-  CJSON(huePollingEnabled, if_hue["en"]);
-  CJSON(huePollLightId, if_hue["id"]);
-  tdd = if_hue[F("iv")] | -1;
-  if (tdd >= 2) huePollIntervalMs = tdd * 100;
+// #ifndef WLED_DISABLE_HUESYNC
+//   JsonObject if_hue = interfaces["hue"];
+//   CJSON(huePollingEnabled, if_hue["en"]);
+//   CJSON(huePollLightId, if_hue["id"]);
+//   tdd = if_hue[F("iv")] | -1;
+//   if (tdd >= 2) huePollIntervalMs = tdd * 100;
 
-  JsonObject if_hue_recv = if_hue["recv"];
-  CJSON(hueApplyOnOff, if_hue_recv["on"]);
-  CJSON(hueApplyBri, if_hue_recv["bri"]);
-  CJSON(hueApplyColor, if_hue_recv["col"]);
+//   JsonObject if_hue_recv = if_hue["recv"];
+//   CJSON(hueApplyOnOff, if_hue_recv["on"]);
+//   CJSON(hueApplyBri, if_hue_recv["bri"]);
+//   CJSON(hueApplyColor, if_hue_recv["col"]);
 
-  JsonArray if_hue_ip = if_hue["ip"];
+//   JsonArray if_hue_ip = if_hue["ip"];
 
-  for (byte i = 0; i < 4; i++)
-    CJSON(hueIP[i], if_hue_ip[i]);
-#endif
+//   for (byte i = 0; i < 4; i++)
+//     CJSON(hueIP[i], if_hue_ip[i]);
+// #endif
 
   JsonObject if_ntp = interfaces[F("ntp")];
   CJSON(ntpEnabled, if_ntp["en"]);
@@ -1408,22 +1408,22 @@ void serializeConfig() {
 #endif
 
 
-#ifndef WLED_DISABLE_HUESYNC
-  JsonObject if_hue = interfaces.createNestedObject("hue");
-  if_hue["en"] = huePollingEnabled;
-  if_hue["id"] = huePollLightId;
-  if_hue[F("iv")] = huePollIntervalMs / 100;
+// #ifndef WLED_DISABLE_HUESYNC
+//   JsonObject if_hue = interfaces.createNestedObject("hue");
+//   if_hue["en"] = huePollingEnabled;
+//   if_hue["id"] = huePollLightId;
+//   if_hue[F("iv")] = huePollIntervalMs / 100;
 
-  JsonObject if_hue_recv = if_hue.createNestedObject("recv");
-  if_hue_recv["on"] = hueApplyOnOff;
-  if_hue_recv["bri"] = hueApplyBri;
-  if_hue_recv["col"] = hueApplyColor;
+//   JsonObject if_hue_recv = if_hue.createNestedObject("recv");
+//   if_hue_recv["on"] = hueApplyOnOff;
+//   if_hue_recv["bri"] = hueApplyBri;
+//   if_hue_recv["col"] = hueApplyColor;
 
-  JsonArray if_hue_ip = if_hue.createNestedArray("ip");
-  for (byte i = 0; i < 4; i++) {
-    if_hue_ip.add(hueIP[i]);
-  }
-#endif
+//   JsonArray if_hue_ip = if_hue.createNestedArray("ip");
+//   for (byte i = 0; i < 4; i++) {
+//     if_hue_ip.add(hueIP[i]);
+//   }
+// #endif
 
   JsonObject if_ntp = interfaces.createNestedObject("ntp");
   if_ntp["en"] = ntpEnabled;
@@ -1529,9 +1529,9 @@ bool deserializeConfigSec() {
   getStringFromJson(mqttPass, if_mqtt["psk"], 65);
 #endif
 
-#ifndef WLED_DISABLE_HUESYNC
-  getStringFromJson(hueApiKey, interfaces["hue"][F("key")], 47);
-#endif
+// #ifndef WLED_DISABLE_HUESYNC
+//   getStringFromJson(hueApiKey, interfaces["hue"][F("key")], 47);
+// #endif
 
   getStringFromJson(settingsPIN, doc["pin"], 5);
   correctPIN = !strlen(settingsPIN);
@@ -1566,10 +1566,10 @@ void serializeConfigSec() {
   JsonObject if_mqtt = interfaces.createNestedObject("mqtt");
   if_mqtt["psk"] = mqttPass;
 #endif
-#ifndef WLED_DISABLE_HUESYNC
-  JsonObject if_hue = interfaces.createNestedObject("hue");
-  if_hue[F("key")] = hueApiKey;
-#endif
+// #ifndef WLED_DISABLE_HUESYNC
+//   JsonObject if_hue = interfaces.createNestedObject("hue");
+//   if_hue[F("key")] = hueApiKey;
+// #endif
 
   doc["pin"] = settingsPIN;
 

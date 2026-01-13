@@ -2,8 +2,6 @@
 
 
 #ifdef USE_MODULE_NETWORK_WIFI
-#ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
-
 
 bool mWiFi::WiFi_IsAPMode(void)
 {
@@ -372,8 +370,4 @@ void mWiFi::WiFi_Mdns_Tick(void)
 #endif  // ESP8266
 
 
-
-
-
-#endif
 #endif

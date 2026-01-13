@@ -106,7 +106,7 @@
  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
  // #define ENABLE_DEBUG_FUNCTION_NAMES
- // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+ // 
  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
  // #define ENABLE_DEBUG_LINE_HERE
  // #define ENABLE_DEBUG_LINE_HERE2
@@ -131,19 +131,18 @@
 
  #define SETTINGS_HOLDER 1239
 
- #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
- #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+ 
+ 
  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
- #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
- #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // until devices can reliably be used without compiling per device
+ 
      
  /***********************************
   * SECTION: Network Configs
  ************************************/    
 
- #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
- #define USE_MODULE_NETWORK_WEBSERVER
- #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+ 
+   
 
  /***********************************
   * SECTION: Sensor Configs
@@ -471,7 +470,7 @@
   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
-  // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // 
   // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE
   // #define ENABLE_DEBUG_LINE_HERE2
@@ -505,11 +504,11 @@
 
  #define SETTINGS_HOLDER 1239
 
- #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
- #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+ 
+ 
  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
- #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
- #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // until devices can reliably be used without compiling per device
+ 
      
  /***********************************
   * SECTION: Network Configs
@@ -625,7 +624,7 @@
 // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
 // // #define ENABLE_DEBUG_FUNCTION_NAMES
-// // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+// // 
 // // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
 // // #define ENABLE_DEBUG_LINE_HERE
 // // #define ENABLE_DEBUG_LINE_HERE2
@@ -650,19 +649,18 @@
 
 // #define SETTINGS_HOLDER 1239
 
-// #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-// #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+// 
+// 
 // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-// #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
-// #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+//  // until devices can reliably be used without compiling per device
+// 
     
 // //  /***********************************
 // //   * SECTION: Network Configs
 // //  ************************************/    
 
-// //  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-// //  #define USE_MODULE_NETWORK_WEBSERVER
-// //  #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+// //  
+// //    
 
 // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 

@@ -2,9 +2,6 @@
 
 #ifdef USE_MODULE_NETWORK_WIFI
 
-#ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
-
-
 void mWiFi::WiFi_Sta_Maintain_Periodic(void)
 {
 //   ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"), __FILE__, __LINE__);
@@ -318,6 +315,8 @@ void mWiFi::WiFi2_Sta_Connected_Enter(void)
   tkr_set->Settings.network.flag.network_wifi = 1;
   tkr_set->runtime.global_state.wifi_down = false;
 
+  tkr_set->runtime.global_state.network_down = false;
+
   // Trigger existing task event flow
   tkr->Tasker_Interface(TASK_WIFI_CONNECTED);
 }
@@ -325,6 +324,9 @@ void mWiFi::WiFi2_Sta_Connected_Enter(void)
 void mWiFi::WiFi2_Sta_Disconnected_Enter(void)
 {ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   connection.fConnected = false;
+
+  
+  tkr_set->runtime.global_state.network_down = true;
 
   tkr_set->Settings.network.flag.network_wifi = 0;
   tkr_set->runtime.global_state.wifi_down = true;
@@ -402,6 +404,5 @@ ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   // ALOG_INF(PSTR(D_LOG_DEBUG "%s"),"WiFi_Sta_State_Set end");
     
 }
-#endif // ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
 
 #endif // USE_MODULE_NETWORK_WIFI

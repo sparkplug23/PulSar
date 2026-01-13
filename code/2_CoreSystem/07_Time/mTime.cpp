@@ -1305,7 +1305,6 @@ uint16_t mTime::SunMinutes(uint32_t dawn)
 
 
 
-#ifdef ENABLE_DEVFEATURE_TIME__TIME_SHORT_FUNCTIONS
 uint32_t mTime::EncodeTimeShortToU32(const time_short_t& time) 
 {
   return (time.day_of_week << 24) | (time.hour << 16) | (time.minute << 8) | time.second;
@@ -1355,9 +1354,6 @@ String mTime::GetTimeStrFromTimeShort(const time_short_t& time, bool include_day
     }
     return String(dt);  // e.g., "D3T11:08:02" or "11:08:02"
 }
-
-#endif
-
 
 
 

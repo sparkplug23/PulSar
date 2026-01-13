@@ -2,8 +2,6 @@
 
 #ifdef USE_MODULE_NETWORK_WIFI
 
-#ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
-
 #ifdef ESP8266
 extern "C" {
  #include "user_interface.h"
@@ -165,13 +163,5 @@ ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
 
   #endif
 }
-
-
-
-
-
-
-
-#endif // ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
 
 #endif // USE_MODULE_NETWORK_WIFI

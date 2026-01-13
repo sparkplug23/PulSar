@@ -656,25 +656,25 @@ void mWebServer::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte s
     retainMqttMsg = request->hasArg(F("RT"));
     #endif
 
-    #ifndef WLED_DISABLE_HUESYNC
-    for (int i=0;i<4;i++){
-      String a = "H"+String(i);
-      hueIP[i] = request->arg(a).toInt();
-    }
+    // #ifndef WLED_DISABLE_HUESYNC
+    // for (int i=0;i<4;i++){
+    //   String a = "H"+String(i);
+    //   hueIP[i] = request->arg(a).toInt();
+    // }
 
-    t = request->arg(F("HL")).toInt();
-    if (t > 0) huePollLightId = t;
+    // t = request->arg(F("HL")).toInt();
+    // if (t > 0) huePollLightId = t;
 
-    t = request->arg(F("HI")).toInt();
-    if (t > 50) huePollIntervalMs = t;
+    // t = request->arg(F("HI")).toInt();
+    // if (t > 50) huePollIntervalMs = t;
 
-    hueApplyOnOff = request->hasArg(F("HO"));
-    hueApplyBri = request->hasArg(F("HB"));
-    hueApplyColor = request->hasArg(F("HC"));
-    huePollingEnabled = request->hasArg(F("HP"));
-    hueStoreAllowed = true;
-    reconnectHue();
-    #endif
+    // hueApplyOnOff = request->hasArg(F("HO"));
+    // hueApplyBri = request->hasArg(F("HB"));
+    // hueApplyColor = request->hasArg(F("HC"));
+    // huePollingEnabled = request->hasArg(F("HP"));
+    // hueStoreAllowed = true;
+    // reconnectHue();
+    // #endif
 
     t = request->arg(F("BD")).toInt();
     if (t >= 96 && t <= 15000) serialBaud = t;

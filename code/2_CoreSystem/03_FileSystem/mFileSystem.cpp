@@ -484,7 +484,7 @@ void mFileSystem::updateFSInfo()
 }
 
 
-#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 
 //Un-comment any file types you need
@@ -552,7 +552,7 @@ static const uint8_t *getPresetCache(size_t &size) {
   size = presetsCachedSize;
   return presetsCached;
 }
-#endif
+#endif 
 
 bool mFileSystem::handleFileRead(AsyncWebServerRequest* request, String path){
   
@@ -595,7 +595,7 @@ bool mFileSystem::handleFileRead(AsyncWebServerRequest* request, String path){
 }
 
 
-#endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)

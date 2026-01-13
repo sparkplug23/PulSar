@@ -212,16 +212,12 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 
   #define WIFI_MAXIMUM_CONNECTIONS 3 // static constexpr uint8_t NETWORK_PROFILE_SLOTS = 3;
   
-  // #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-
   
-  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
 
   /***********************************
    * SECTION: Lighting Configs: Features
   ************************************/    
-
-  // #define ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS 
 
   #ifndef ANIMATION_UPDATOR_TIME_MINIMUM
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
@@ -379,9 +375,6 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 
 #define D_MQTT_COMMAND                "set"
 #define D_MQTT_SYNC                   "sync"
-
-
-#define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
 
 
 // -- MQTT - TLS ----------------------------------
@@ -819,18 +812,18 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 //   #endif
 // #endif
 
-#if !defined(CAMERA_MODEL_XIAO_ESP32S3) || !defined(DISABLE_LEDC_DEFINE_TO_PATCH_BUILD_ERROR_JUNE25)
+#ifndef DISABLE_LEDC_DEFINE_TO_PATCH_BUILD_ERROR_JUNE25
 
-#if !defined(USE_MODULE_DRIVERS__CAMERA_2025)
+  #ifndef USE_MODULE_DRIVERS__CAMERA_2025
 
-  #ifndef LEDC_CHANNEL_MAX
-    #define LEDC_CHANNEL_MAX 8 // should come from esp32-hal-ledc.h
+    #ifndef LEDC_CHANNEL_MAX
+      #define LEDC_CHANNEL_MAX 8 // should come from esp32-hal-ledc.h
+    #endif
+    #ifndef LEDC_SPEED_MODE_MAX
+      #define LEDC_SPEED_MODE_MAX 2 // should come from esp32-hal-ledc.h ledc_mode_t
+    #endif
+
   #endif
-  #ifndef LEDC_SPEED_MODE_MAX
-    #define LEDC_SPEED_MODE_MAX 2 // should come from esp32-hal-ledc.h ledc_mode_t
-  #endif
-
-#endif
 
 #endif
 

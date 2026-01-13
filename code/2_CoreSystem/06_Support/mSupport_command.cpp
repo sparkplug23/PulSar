@@ -60,10 +60,14 @@ void mSupport::CommandSet_Restart(int8_t command)
 
   switch(command) 
   {
-    // case 1:
-    // restart_flag = 2;
-    // //ResponseCmndChar(D_RESTARTING);
-    // break;
+    case 1: // Safe
+      ALOG_INF(PSTR("Safe Restart Requested"));
+      ESP_Restart_InSeconds(5);
+    break;
+    case 2: // Hard
+      ALOG_INF(PSTR("Hard Restart Requested"));
+      ESP_Restart_Immediate();
+    break;
     case -1:
       CmndCrash();    // force a crash
     break;

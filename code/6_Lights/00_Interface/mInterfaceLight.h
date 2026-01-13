@@ -43,7 +43,7 @@ enum LIGHT_POWER_STATE_IDS{
   LIGHT_POWER_STATE_LENGTH_ID
 };
 
-#ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+#ifdef ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
 // New version of Gamma correction compute
 // Instead of a table, we do a multi-linear approximation, which is close enough
 // At low levels, the slope is a bit higher than actual gamma, to make changes smoother
@@ -74,7 +74,7 @@ const gamma_table_t gamma_table_fast[] = {
   {  1023,   1023 },
   { 0xFFFF, 0xFFFF }          // fail-safe if out of range
 };
-#endif // ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+#endif // ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
 
 
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_NONE_NAME_CTR )   "None"     ;    
@@ -175,7 +175,7 @@ class mInterfaceLight :
 
     String GetColourOrderString(uint8_t colour_order);
 
-    #ifdef ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+    #ifdef ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
     uint16_t change8to10(uint8_t v);
     uint8_t change10to8(uint16_t v);
     uint16_t ledGamma_internal(uint16_t v, const struct gamma_table_t *gt_ptr);
@@ -188,7 +188,7 @@ class mInterfaceLight :
     bool isChannelGammaCorrected(uint32_t channel);
     uint16_t fadeGamma(uint32_t channel, uint16_t v);
     uint16_t fadeGammaReverse(uint32_t channel, uint16_t vg);
-    #endif //ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+    #endif //ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
 
     uint8_t  _briRGB_Global = 255;  // in place of WLED "bri" 0..255 // Used for ws28xx
     uint8_t  _briCT_Global = 255;

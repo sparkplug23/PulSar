@@ -6,8 +6,6 @@
 #define Network WiFi
 
 
-#ifdef ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-
 // ESP32-WROVER features SPI RAM (aka PSRAM) which can be allocated using ps_malloc()
 // we can create custom PSRAMDynamicJsonDocument to use such feature (replacing DynamicJsonDocument)
 // The following is a construct to enable code to compile without it.
@@ -297,10 +295,8 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   root[F("ndc")] =123;// nodeListEnabled ? (int)Nodes.size() : -1;
 
   #ifdef ARDUINO_ARCH_ESP32
-  #ifdef WLED_DEBUG
     wifi_info[F("txPower")] = (int) WiFi.getTxPower();
     wifi_info[F("sleep")] = (bool) WiFi.getSleep();
-  #endif
   #if !defined(CONFIG_IDF_TARGET_ESP32C2) && !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32S2) && !defined(CONFIG_IDF_TARGET_ESP32S3)
     root[F("arch")] = "esp32";
   #else
@@ -308,18 +304,14 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   #endif
   root[F("core")] = ESP.getSdkVersion();
   //root[F("maxalloc")] = ESP.getMaxAllocHeap();
-  #ifdef WLED_DEBUG
     root[F("resetReason0")] = (int)rtc_get_reset_reason(0);
     root[F("resetReason1")] = (int)rtc_get_reset_reason(1);
-  #endif
   root[F("lwip")] = 0; //deprecated
   #else
   root[F("arch")] = "esp8266";
   root[F("core")] = ESP.getCoreVersion();
   //root[F("maxalloc")] = ESP.getMaxFreeBlockSize();
-  #ifdef WLED_DEBUG
     root[F("resetReason")] = (int)ESP.getResetInfoPtr()->reason;
-  #endif
   root[F("lwip")] = LWIP_VERSION_MAJOR;
   #endif
 
@@ -330,13 +322,11 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   // root[F("uptime")] = millis()/1000 + rolloverMillis*4294967;
 
   uint16_t os = 0;
-  #ifdef WLED_DEBUG
   os  = 0x80;
     #ifdef WLED_DEBUG_HOST
     os |= 0x0100;
     if (!netDebugEnabled) os &= ~0x0080;
     #endif
-  #endif
   #ifndef WLED_DISABLE_ALEXA
   os += 0x40;
   #endif
@@ -349,9 +339,9 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   #ifndef WLED_DISABLE_FILESYSTEM
   os += 0x08;
   #endif
-  #ifndef WLED_DISABLE_HUESYNC
-  os += 0x04;
-  #endif
+  // #ifndef WLED_DISABLE_HUESYNC
+  // os += 0x04;
+  // #endif
   #ifdef WLED_ENABLE_ADALIGHT
   os += 0x02;
   #endif
@@ -380,7 +370,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 
   bool stateResponse = root[F("v")] | false;
 
-  #if defined(WLED_DEBUG) && defined(WLED_DEBUG_HOST)
+  #if defined(WLED_DEBUG_HOST)
   netDebugEnabled = root[F("debug")] | netDebugEnabled;
   #endif
 
@@ -689,7 +679,6 @@ size_t mAnimatorLight::printSetClassElementHTML(Print& settingsScript, const cha
 
 
 
-#endif // ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
 
 
 
@@ -1439,13 +1428,6 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   // getVal(elem["tt"], &transition_slider_time);
   // Map scale into internal rate
   
-  #ifndef ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
-  if (elem["tt"].is<int>()) {
-    seg.time_ms = elem["tt"];//map(transition_slider_time, 0,255, 0,10000);
-    ALOG_INF(PSTR("seg.time_ms = %d"), seg.time_ms);
-  }
-  #endif // ENABLE_DEVFEATURE_LIGHT__PHASE_OUT_TIMEMS
-
   // uint8_t transition_slider_rate = 0;
   // getVal(elem["tr"], &transition_slider_rate);
   // Map scale into internal rate
@@ -1592,7 +1574,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 }
           
 
-#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
 
 #ifndef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
 bool mAnimatorLight::handleFileRead(AsyncWebServerRequest* request, String path){
@@ -2662,13 +2644,11 @@ void mAnimatorLight::serializeModeNames(JsonArray arr, bool flag_get_first_name_
 
 bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient)
 {
-  #ifdef WLED_ENABLE_WEBSOCKETS2
   AsyncWebSocketClient * wsc = nullptr;
   if (!request) { //not HTTP, use Websockets
     wsc = tkr_web->websocket_lights->client(wsClient);
     if (!wsc || wsc->queueLength() > 0) return false; //only send if queue free
   }
-  #endif
 
   unsigned used = getLengthTotal();
   unsigned n = (used -1) /MAX_LIVE_LEDS +1; //only serve every n'th LED if count over MAX_LIVE_LEDS
@@ -2721,11 +2701,9 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
   if (request) {
     request->send(200, "application/json", toString(std::move(buffer)));
   }
-  #ifdef WLED_ENABLE_WEBSOCKETS2
   else {
     wsc->text(toString(std::move(buffer)));
   }
-  #endif  
   return true;
 }
 
@@ -2836,12 +2814,10 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
   else if (url.indexOf("palx")  > 0) subJson = JSON_PATH_PALETTES;
   else if (url.indexOf("fxda")  > 0) subJson = JSON_PATH_FXDATA;
   else if (url.indexOf("net")   > 0) subJson = JSON_PATH_NETWORKS;
-  #ifdef WLED_ENABLE_JSONLIVE
   else if (url.indexOf("live")  > 0) { 
     serveLiveLeds(request);
     return;
   }
-  #endif
   // else if (url.indexOf("pal") > 0) { // "/json/palettes"
 
   //   JBI->Start();
@@ -2872,7 +2848,6 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
   //   if(data) data[data_len-1] = '\0';
   //   Serial.println();
 
-  //   #ifdef ENABLE_DEVFEATURE_WEBSERVER__ETAGS_ENABLED_FOR_RELOADING_PALETTES_ON_FRESH_COMPILE    
   //   /**
   //    * @brief It actually makes perfect sense to embedded the ETag into the names of palettes, 
   //    * since its this that forces the reload of the palette colours if needed too.
@@ -2885,9 +2860,6 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
   //   AsyncWebServerResponse *response = request->beginResponse_P(200, "application/json", &data[1]);   [1] possible cause of toast#1] SyntaxError: Unexpected token '}', "}
   //   response->addHeader(F("ETag"), etag); // Add the ETag header to the response
   //   request->send(response);
-  //   #else
-  //   request->send_P(200, "application/json", &data[1]);
-  //   #endif
 
   //   return;
   // }
@@ -3371,33 +3343,6 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
     JBI->releaseJSONBufferLock();
 
-    // #ifdef ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
-
-    // if(data_buffer.requestLock(GetModuleUniqueID()))
-    //     {
-    //       data_buffer.ClearSoft();
-
-    //       char* jsonBuffer = (char*)request->_tempObject;
-
-    //       data_buffer.payload.length_used = jsonBufferLength;
-    //       memcpy(data_buffer.payload.ctr, jsonBuffer, data_buffer.payload.length_used);
-    //       data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // null terminate
-        
-    //       LoggingLevels level = LOG_LEVEL_INFO;
-    //       #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
-    //       level = LOG_LEVEL_DEV_TEST;
-    //       #endif
-    //       #ifdef ENABLE_LOG_LEVEL_INFO
-    //       AddLog(level, PSTR(D_LOG_LIGHT "State Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
-    //       #endif// ENABLE_LOG_LEVEL_INFO
-
-    //       tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
-
-    //       data_buffer.releaseLock();
-
-    //     }
-    //     #endif
-
     if (verboseResponse) {
       if (!isConfig) {
         ALOG_INF(PSTR("Serve the json back, set CALL_MODE_WS_SEND"));
@@ -3462,22 +3407,6 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   #endif
 
 
-  // -----------------------------------------------------------------------------
-// Lights UI entrypoint registration (Animator / WLED-derived module)
-// Date Modified: 30Dec25
-// -----------------------------------------------------------------------------
-//
-// Goal:
-//  - Legacy: lights owns "/" (current behaviour)
-//  - New (ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI): lights owns "/lights"
-//    and "/" is reserved for the new landing page in Network/mWebServer.
-//
-// Notes:
-//  - Do NOT register "/" in the lights module when redesign flag is enabled.
-//  - Keep the handler body identical to avoid behavioural regressions.
-//
-
-  #ifdef ENABLE_DEVFEATURE_WEBSERVER__JAN26_REDESIGNED_WEBUI
 
   tkr_web->server->on("/lights", HTTP_GET, [this](AsyncWebServerRequest *request){
     if (tkr_web->captivePortal(request)) return;
@@ -3495,27 +3424,6 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
       serveSettings(request);
     }
   });
-
-  #else
-
-  tkr_web->server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
-    if (tkr_web->captivePortal(request)) return;
-
-    if (!showWelcomePage || request->hasArg(F("sliders"))) {
-      tkr_web->handleStaticContent(
-        request,
-        F("/index.htm"),
-        200,
-        FPSTR(CONTENT_TYPE_HTML),
-        PAGE_index,
-        PAGE_index_L
-      );
-    } else {
-      serveSettings(request);
-    }
-  });
-
-  #endif
 
 
   #ifdef WLED_ENABLE_PIXART
@@ -3540,6 +3448,6 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 }
 
 
-#endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+#endif // ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
 
 #endif // USE_MODULE_LIGHTS_ANIMATOR

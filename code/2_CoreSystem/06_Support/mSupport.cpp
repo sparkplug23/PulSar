@@ -672,6 +672,39 @@ digitalWrite(26,!digitalRead(26));
       ALOG_INF(PSTR("Reset: debug_module_time"));
       #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 
+      
+    #ifdef ENABLE_DEBUGFEATURE_LIGHTS__ESP32C3_FLICKER_TEST
+    if(tkr_time->uptime_seconds_nonreset > 120)
+    {
+      // 1030 = mAnimatorLight, 1031 = mPalette, 1032 = mPlaylist, etc.
+      static constexpr uint16_t kAllowList[] = {
+        // Put light-related modules here to allow only these after warmup
+        D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID /*mAnimatorLight*/, /*1031, 1032, ...*/
+      };
+
+      static constexpr uint16_t kBlockList[] = {
+        // Or, leave ALLOW empty and put non-light modules here to skip them
+        // 2001, 2002, ...
+      };
+      WiFi.mode(WIFI_OFF); // Disable WiFi to prevent flicker
+      uint16_t id = mod->GetModuleUniqueID();
+      // If ALLOW has entries, enforce allow-list.
+      if (sizeof(kAllowList) / sizeof(kAllowList[0]) > 0) {
+        if (!in_list(id, kAllowList)) {
+          continue; // skip all non-allowed modules
+        }
+      } 
+      // else
+      // Otherwise, if BLOCK has entries, enforce block-list.
+      // if (sizeof(kBlockList) / sizeof(kBlockList[0]) > 0) {
+      //   if (in_list(id, kBlockList)) {
+      //     continue; // skip blocked modules
+      //   }
+      // }
+    }
+    #endif
+    
+
     break;
 
     case TASK_LOG__SHOW_UPTIME:      

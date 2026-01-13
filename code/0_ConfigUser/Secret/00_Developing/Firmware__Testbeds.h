@@ -1446,15 +1446,15 @@ Blue (Upstairs Link) ***********************************************************
 
   
   // #define USE_MODULE_CORE_FILESYSTEM
-  // #define WLED_ENABLE_FS_EDITOR
-  // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  // 
+  // 
 
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
+  
 
 
 
@@ -1491,16 +1491,16 @@ Blue (Upstairs Link) ***********************************************************
    * SECTION: Core Configs
   ************************************/     
   #define USE_MODULE_CORE_FILESYSTEM
-    #define WLED_ENABLE_FS_EDITOR
-    #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-    #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
+    
+    
+    
 
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
+  
 
 
 

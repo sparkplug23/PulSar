@@ -227,26 +227,15 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
 {
    
   IPAddress localip   = WiFi.localIP();
-  #ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
   IPAddress staticip  = IPAddress(tkr_set->Settings.network.ip_address[0]);
   IPAddress gatewayip = IPAddress(tkr_set->Settings.network.ip_address[1]);
   IPAddress subnetip  = IPAddress(tkr_set->Settings.network.ip_address[2]);
   IPAddress dnsip     = IPAddress(tkr_set->Settings.network.ip_address[3]);
-  #else
-  IPAddress staticip  = IPAddress(tkr_set->Settings.ip_address[0]);
-  IPAddress gatewayip = IPAddress(tkr_set->Settings.ip_address[1]);
-  IPAddress subnetip  = IPAddress(tkr_set->Settings.ip_address[2]);
-  IPAddress dnsip     = IPAddress(tkr_set->Settings.ip_address[3]);
-  #endif
 
   JBI->Start();
     JBI->Add_FV(PM_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),localip[0],localip[1],localip[2],localip[3]);
     JBI->Add(PM_SSID, WiFi.SSID().c_str());
-    #ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
     JBI->Add(PM_SSID_NUMBERED, tkr_set->Settings.network.sta_active); // Used to debug switching in grafana
-    #else
-    JBI->Add(PM_SSID_NUMBERED, tkr_set->Settings.sta_active); // Used to debug switching in grafana
-    #endif
     JBI->Add(PM_RSSI, WiFi.RSSI());
     #ifdef ESP32
     JBI->Add("TXPower_dBm", tkr_wifi->WiFiPower_To_dBm(WiFi.getTxPower()) );
@@ -261,11 +250,8 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
     JBI->Add(PM_BSSID, WiFi.BSSIDstr().c_str());
     JBI->Add(PM_MAC, WiFi.macAddress().c_str());
     JBI->Add(PM_WEBSERVER_ENABLED, tkr_set->Settings.webserver);
-    #ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
     JBI->Add(PM_WIFICONFIG_STATE, tkr_set->Settings.network.sta_config);
-    #endif
 
-    #ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
     JBI->Array_Start(PM_AP_LIST);
     for(int i=0;i<WIFI_MAXIMUM_CONNECTIONS;i++)
     {
@@ -275,7 +261,6 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
      }
     }
     JBI->Array_End();
-    #endif
 
   return JBI->End();
 

@@ -169,7 +169,7 @@ void mWebServer::createEditHandler(bool enable)
   if (editHandler != nullptr) server->removeHandler(editHandler);
   if (enable) 
   {
-    #ifdef WLED_ENABLE_FS_EDITOR
+    #ifdef USE_MODULE_CORE_FILESYSTEM
       #ifdef ARDUINO_ARCH_ESP32
       editHandler = &server->addHandler(new SPIFFSEditor(FILE_SYSTEM));
       #else

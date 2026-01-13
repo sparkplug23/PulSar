@@ -19,7 +19,7 @@
 #ifndef HEADER_MODULE_DRIVERS__CAMERA_2025_H
 #define HEADER_MODULE_DRIVERS__CAMERA_2025_H
   
-#define D_UNIQUE_MODULE_DRIVERS__CAMERA_ID 4064 // [(Folder_Number*100)+ID_File]
+#define D_UNIQUE_MODULE_DRIVERS__CAMERA_ID 4050 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -234,7 +234,7 @@ struct {
   volatile uint8_t  camPixelFormat; // 
 
   // our (separate) webserver on port 81
-  ESP8266WebServer *CamServer;
+  WebServer *CamServer;
   // pointer to the first http streaming client in a list of multiple clients, or nullptr
   wc_client *client_p;
   struct PICSTORE picstore[MAX_PICSTORE];
@@ -310,7 +310,7 @@ bool LoadDefaultConfig();
 
 
 
-ESP8266WebServer *Webserver;
+// ESP8266WebServer *Webserver;
 
 
 
@@ -350,20 +350,23 @@ ESP8266WebServer *Webserver;
     uint32_t WcGetPicstorePtr(int32_t num, struct mCamera::PICSTORE **p);
     uint32_t WcGetFrame(int32_t bnum);
 
+    
+void HandleWcJpg(AsyncWebServerRequest *request);
+
     bool WebcamAuthenticate(void);
     bool WebcamCheckPriviledgedAccess(bool autorequestauth = true);
     void HandleImage(void);    
     void HandleImageAny(struct mCamera::PICSTORE *ps);
     void HandleWebcamMjpegFn(int type);
     static void HandleWebcamMjpeg(void);
-    static void HandleWebcamMjpegDiff(void);
+    void HandleWebcamMjpegDiff(void);
     static void HandleWebcamRoot(void);
     uint32_t WcSetStreamserver(uint32_t flag);
 
     void WcInterrupt(uint32_t state);
 
     void WcLoop(void);
-    void WcPicSetup(void);
+    
     void WcShowStream(void);
     void WcInit(void);
 

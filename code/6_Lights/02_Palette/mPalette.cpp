@@ -1860,23 +1860,6 @@ IRAM_ATTR [[gnu::hot]] uint32_t mPalette::SubGet_Encoded_Palette_Colour_U32(
   if (is_basic_sequence_palette) {
     uint16_t pixel_position_adjust = _pixel_position;
 
-    // Serial.print("DP ");
-    // Serial.print(_pixel_position);
-    // Serial.flush();
-    // delay(100);
-
-    // *** CRITICAL: keep your original rescale-to-255 condition ***
-    // Original: if (palette_index__format && !is_forced_to_get_discrete && !is_not_gradient)
-    // With tri-state, “mapping happened” == PALETTE_INDEX__IS_SEGLEN_RANGE.
-    // if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE
-    //     && !is_forced_discrete
-    //     && !is_not_gradient) { // HERE! is this not a contradiction? if its in seglen range, isnt it always not not gradient?
-    //   pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
-    //     ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
-    //     : 0;
-    // }
-
-#ifdef ENABLE_DEVFEATURE_LIGHT__GRADIENT_PATCH_4DEC25
     // NEW: allow 0..SEGLEN rescaling only if the underlying palette *is* gradient.
     if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE
         && encoding.index_gradient
@@ -1886,17 +1869,6 @@ IRAM_ATTR [[gnu::hot]] uint32_t mPalette::SubGet_Encoded_Palette_Colour_U32(
         ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
         : 0;
     }
-#else
-    // OLD (broken / unreachable) logic for reference
-    if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE
-        && !is_forced_discrete
-        && !is_not_gradient)
-    {
-      pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
-        ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
-        : 0;
-    }
-#endif
 
 
 

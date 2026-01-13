@@ -13,7 +13,7 @@
 #ifndef ASYNC_JSON_H_
 #define ASYNC_JSON_H_
 
-#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 
 #include "ArduinoJson-v6.h"
@@ -170,7 +170,7 @@ public:
 
 
 
-#endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
 
 #endif // HEADER

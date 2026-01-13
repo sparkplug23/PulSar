@@ -202,15 +202,12 @@ void mAnimatorLight::setUpMatrix() {
       // delete gap array as we no longer need it
       if (gapTable) delete[] gapTable;
 
-      DEBUG_LINE_HERE;
-      #ifdef WLED_DEBUG
       DEBUG_PRINT(F("Matrix ledmap:"));
       for (unsigned i=0; i<customMappingSize; i++) {
         if (!(i%mAnimatorLight::Segment::maxWidth)) DEBUG_PRINTLN();
         DEBUG_PRINTF("%4d,", customMappingTable[i]);
       }
       DEBUG_PRINTLN();
-      #endif
 
       DEBUG_LINE_HERE;
     } 

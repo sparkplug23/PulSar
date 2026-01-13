@@ -121,7 +121,7 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
 
 
     case TASK_WEB_ADD_HANDLER:
-      WcPicSetup();
+    
       break;
     case TASK_WEB_ADD_MAIN_BUTTON:
       WcShowStream();
@@ -141,6 +141,20 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
       //   AddLog(LOG_LEVEL_INFO, "Heap free: %d, PSRAM free: %d", 
       //     ESP.getFreeHeap(), 
       //     ESP.getFreePsram());
+
+      // Bring up / tear down stream server based on network state
+if (!tkr_set->runtime.global_state.network_down) {
+  if (tkr_set->Settings.webcam_config.stream && !Wc.CamServer) {
+    ALOG_INF(PSTR(D_LOG_CAMERA "Network up, starting stream server"));
+    WcSetStreamserver(1);
+  }
+} else {
+  if (Wc.CamServer) {
+    ALOG_INF(PSTR(D_LOG_CAMERA "Network down, stopping stream server"));
+    WcSetStreamserver(0);
+  }
+}
+
           
       WcUpdateStats();
     break;
@@ -1294,14 +1308,17 @@ bool mCamera::WebcamCheckPriviledgedAccess(bool autorequestauth)
 void mCamera::HandleImage(void) {
   // if (!HttpCheckPriviledgedAccess()) { return; }
 
-  uint32_t bnum = Webserver->arg(F("p")).toInt();
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "HandleImage"));
+
+
+  uint32_t bnum = Wc.CamServer->arg(F("p")).toInt();
   if ((bnum < 0) || (bnum > MAX_PICSTORE)) { bnum= 1; }
   int format = (int)PIXFORMAT_JPEG;
 
   if (bnum){
     // no picture present at this index
     if (!Wc.picstore[bnum-1].buff){
-      Webserver->send(404,"",""); 
+      Wc.CamServer->send(404,"",""); 
       return;
     } 
     format = (int)Wc.picstore[bnum-1].format;
@@ -1325,38 +1342,38 @@ void mCamera::HandleImage(void) {
         response += itoa(Wc.snapshotStore.len, tmp, 10);
         response += "\r\n\r\n";
 
-        WiFiClient client = Webserver->client();
-        Webserver->sendContent(response);
+        WiFiClient client = Wc.CamServer->client();
+        Wc.CamServer->sendContent(response);
         client.write((char *)Wc.snapshotStore.buff, Wc.snapshotStore.len);
         client.stop();
         pic_free(&Wc.snapshotStore);
       } else {
-        Webserver->send(404,"",""); 
+        Wc.CamServer->send(404,"",""); 
         ALOG_INF(PSTR(D_LOG_CAMERA "No img #: %d"), bnum);
         return;
       }
     } else {
-      Webserver->send(404,"",""); 
+      Wc.CamServer->send(404,"",""); 
       return;
     }
   } else {
     mSupport::TasAutoMutex localmutex(&WebcamMutex, "HandleImage", 200);
     bnum--;
     if (!Wc.picstore[bnum].len) {
-      Webserver->send(404,"",""); 
+      Wc.CamServer->send(404,"",""); 
       ALOG_INF(PSTR(D_LOG_CAMERA "No img #: %d"), bnum);
       return;
     }
     response += itoa(Wc.picstore[bnum].len, tmp, 10);
     response += "\r\n\r\n";
-    WiFiClient client = Webserver->client();
-    Webserver->sendContent(response);
+    WiFiClient client = Wc.CamServer->client();
+    Wc.CamServer->sendContent(response);
     client.write((char *)Wc.picstore[bnum].buff, Wc.picstore[bnum].len);
     client.stop();
   }
 
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
-  AddLog(LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_CAMERA "Sending image #: %d"), bnum+1);
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "Sending image #: %d"), bnum+1);
 #endif
 }
 
@@ -1365,7 +1382,7 @@ void mCamera::HandleImageAny(struct mCamera::PICSTORE *ps){
 
   if (!ps || !ps->buff) {
     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_CAMERA "img pres"));
-    Webserver->send(404,"",""); 
+    Wc.CamServer->send(404,"",""); 
     return;
   }
   // convert mono to rgb8
@@ -1410,11 +1427,11 @@ void mCamera::HandleImageAny(struct mCamera::PICSTORE *ps){
   }
 
   if (_jpg_buf_len){
-    WiFiClient client = Webserver->client();
+    WiFiClient client = Wc.CamServer->client();
     String response = "HTTP/1.1 200 OK\r\n";
     response += "Content-disposition: inline; filename=cap.jpg\r\n";
     response += "Content-type: image/jpeg\r\n\r\n";
-    Webserver->sendContent(response);
+    Wc.CamServer->sendContent(response);
     client.write((char *)_jpg_buf, _jpg_buf_len);
     client.stop();
     if (conv){
@@ -1429,7 +1446,7 @@ void mCamera::HandleImageAny(struct mCamera::PICSTORE *ps){
   if (conv){
     pic_free(&psout);
   }
-  Webserver->send(500,"",""); 
+  Wc.CamServer->send(500,"",""); 
   return;
 }
 
@@ -1466,7 +1483,7 @@ void mCamera::HandleWebcamRoot(void) {
     return;
   }
   //CamServer->redirect("http://" + String(ip) + ":81/cam.mjpeg");
-  tkr_camera->Wc.CamServer->sendHeader("Location", "/cam.mjpeg");
+  tkr_camera->Wc.CamServer->sendHeader("Location", "/stream");
   tkr_camera->Wc.CamServer->send(302, "", "");
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
   ALOG_INF(PSTR(D_LOG_CAMERA "Root called"));
@@ -1489,29 +1506,31 @@ uint32_t mCamera::WcSetStreamserver(uint32_t flag) {
     if (!Wc.CamServer) {
       ALOG_INF(PSTR("=========================CAM: if (!Wc.CamServer) {"));
       
-    Webserver = new ESP8266WebServer(82);
-    // Webserver->on("/cam.jpg", HandleImage);
-    
-    tkr_web->server->on(PSTR("/wc.jpg"), HTTP_ANY, [this](AsyncWebServerRequest *request){
-      this->HandleImage();
-    });
-
-    Webserver->begin();
-      ALOG_INF(PSTR("WebServer started on port 82"));
-
-
       mSupport::TasAutoMutex localmutex(&WebcamMutex, "HandleWebcamMjpeg", 20000);
-      Wc.CamServer = new ESP8266WebServer(81);
+      Wc.CamServer = new WebServer(81);
 
-
-      Wc.CamServer->on("/", HandleWebcamRoot);
-
-
-      Wc.CamServer->on("/diff.mjpeg", HandleWebcamMjpegDiff);
-      Wc.CamServer->on("/cam.mjpeg", HandleWebcamMjpeg);
-      Wc.CamServer->on("/cam.jpg", HandleWebcamMjpeg);
-      Wc.CamServer->on("/stream", HandleWebcamMjpeg);
-
+      /***
+       * Videos
+       ***/
+      Wc.CamServer->on("/", [this](){ this->HandleWebcamRoot(); });
+      Wc.CamServer->on("/diff.mjpeg", [this](){ this->HandleWebcamMjpegDiff(); });      
+      Wc.CamServer->on("/cam.mjpeg", [this](){ this->HandleWebcamMjpeg(); }); // Same without different aliases
+      Wc.CamServer->on("/cam.jpg", [this](){ this->HandleWebcamMjpeg(); });
+      Wc.CamServer->on("/stream", [this](){ this->HandleWebcamMjpeg(); });
+      
+      /***
+       * Pictures
+       ***/
+      Wc.CamServer->on("/wc.jpg", [this](){ this->HandleImage(); });
+      Wc.CamServer->on("/wc.mjpeg", [this](){ this->HandleImage(); });
+      Wc.CamServer->on("/picture", [this](){ this->HandleImage(); });
+      #ifdef USE_WEBCAM_MOTION
+      Wc.CamServer->on(PSTR("/motiondiff.jpg"), [this](){ this->HandleImagemotiondiff });
+      Wc.CamServer->on(PSTR("/motionmask.jpg"), [this](){ this->HandleImagemotionmask });
+      Wc.CamServer->on(PSTR("/motionbuff.jpg"), [this](){ this->HandleImagemotionbuff });
+      Wc.CamServer->on(PSTR("/motionlbuff.jpg"), [this](){ this->HandleImagemotionlbuff });
+      Wc.CamServer->on(PSTR("/motionbackgroundbuff.jpg"), [this](){ this->HandleImagemotionbackgroundbuff });
+      #endif  
 
       ALOG_INF(PSTR(D_LOG_CAMERA "Strm init"));
       Wc.CamServer->begin();
@@ -1532,6 +1551,58 @@ uint32_t mCamera::WcSetStreamserver(uint32_t flag) {
     }
   }
   return 0;
+}
+
+
+void mCamera::HandleWcJpg(AsyncWebServerRequest *request)
+{
+  camera_fb_t *fb = esp_camera_fb_get();
+  if (!fb || fb->len == 0) {
+    if (fb) esp_camera_fb_return(fb);
+    request->send(503, "text/plain", "Camera capture failed");
+    return;
+  }
+
+  // Optional: ensure it's JPEG. If not, you need fmt conversion.
+  if (fb->format != PIXFORMAT_JPEG) {
+    esp_camera_fb_return(fb);
+    request->send(500, "text/plain", "Framebuffer not JPEG");
+    return;
+  }
+
+  // State holder so we can return fb after last chunk
+  struct FbState {
+    camera_fb_t *fb;
+    bool returned;
+  };
+  auto *st = new FbState{fb, false};
+
+  AsyncWebServerResponse *response =
+    request->beginResponse("image/jpeg", fb->len,
+      [st](uint8_t *buffer, size_t maxLen, size_t index) -> size_t {
+        if (!st || !st->fb) return 0;
+
+        const size_t remaining = st->fb->len - index;
+        const size_t toCopy = (remaining > maxLen) ? maxLen : remaining;
+
+        if (toCopy) memcpy(buffer, st->fb->buf + index, toCopy);
+
+        // When finished, return fb exactly once and free state
+        if ((index + toCopy) >= st->fb->len) {
+          if (!st->returned) {
+            st->returned = true;
+            esp_camera_fb_return(st->fb);
+          }
+          delete st;
+        }
+
+        return toCopy;
+      });
+
+  response->addHeader("Cache-Control", "no-store");
+  response->addHeader("Pragma", "no-cache");
+  response->addHeader("Connection", "close"); // helps browsers that keep-alive aggressively
+  request->send(response);
 }
 
 
@@ -2135,31 +2206,6 @@ void mCamera::WcEndRTSP(){ // kill all rtsp clients
   stats.activeClients.rtsp = 0;
 }
 #endif
-
-
-void mCamera::WcPicSetup(void) {
-  
-
-tkr_web->server->on("/version", HTTP_GET, [](AsyncWebServerRequest *request){
-  request->send(200, "text/plain", (String)PROJECT_VERSION);
-});
-// tkr_web->server->on(PSTR("/wc.jpg"), HTTP_ANY, [this](AsyncWebServerRequest *request){
-//   this->HandleImage();
-// });
-
-
-//   WebServer_on(PSTR("/wc.jpg"), HandleImage);
-//   WebServer_on(PSTR("/wc.mjpeg"), HandleImage);
-//   WebServer_on(PSTR("/snapshot.jpg"), HandleImage);
-// #ifdef USE_WEBCAM_MOTION
-//   WebServer_on(PSTR("/motiondiff.jpg"), HandleImagemotiondiff);
-//   WebServer_on(PSTR("/motionmask.jpg"), HandleImagemotionmask);
-//   WebServer_on(PSTR("/motionbuff.jpg"), HandleImagemotionbuff);
-//   WebServer_on(PSTR("/motionlbuff.jpg"), HandleImagemotionlbuff);
-//   WebServer_on(PSTR("/motionbackgroundbuff.jpg"), HandleImagemotionbackgroundbuff);
-// #endif  
-// #endif
-}
 
 
 const char HTTP_WEBCAM_MENUVIDEOCONTROL[] PROGMEM = "<p></p><button onclick=\"fetch('/cs?c2=64&c1=%s').then(()=>{location.reload();});\" name>%s</button>";

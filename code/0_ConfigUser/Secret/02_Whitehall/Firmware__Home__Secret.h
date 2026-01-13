@@ -1338,8 +1338,8 @@ Bathroom
 
 
   #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-    #define USE_MODULE_NETWORK_WEBSERVER
-    #define USE_MODULE_NETWORK_WEBSERVER
+    
+    
   #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
   // #define ENABLE_FREERAM_APPENDING_SERIAL
 
@@ -1363,7 +1363,7 @@ Bathroom
   
   #define ENABLE_DEVFEATURE_NEXTION_WEBUI
 
-  // #define USE_MODULE_NETWORK_WEBSERVER
+  // 
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1509,10 +1509,10 @@ Bathroom
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -1521,13 +1521,13 @@ Bathroom
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   #define USE_MODULE_SENSORS_SUN_TRACKING
 
@@ -1540,7 +1540,7 @@ Bathroom
 
   // #define ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   // #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
   // #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
@@ -1553,8 +1553,8 @@ Bathroom
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -1718,15 +1718,11 @@ Bathroom
 //   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-//   #define USE_BUILD_TYPE_LIGHTING
-//   #define USE_MODULE_LIGHTS_INTERFACE
-//   #define USE_MODULE_LIGHTS_ANIMATOR
-//   #define USE_MODULE_LIGHTS_ADDRESSABLE
 //     
 //     /********* Group: Needed to build ************************/
 //     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
 //     /********* Group: Ready for full integration ************************/
-//     // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+//     // 
 //     /********* Group: Testing ************************/
 //     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
 //     
@@ -1798,14 +1794,10 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
       
   #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+  
 
   #define DISABLE_WEBSERVER
     
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_PWM  
   
     #define ENABLE_DEVFEATURE_SOLAR_PALETTES
     #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
@@ -1970,14 +1962,10 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
       
   #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+  
 
   #define DISABLE_WEBSERVER
     
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_PWM  
   
     #define ENABLE_DEVFEATURE_SOLAR_PALETTES
     #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
@@ -2061,14 +2049,10 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
       
   #define USE_SERIAL_ALTERNATE_TX
-  #define ENABLE_PIXEL_LIGHTING_GAMMA_CORRECTION
+  
 
   #define DISABLE_WEBSERVER
     
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_PWM  
   
     #define ENABLE_DEVFEATURE_SOLAR_PALETTES
     #define ENABLE_DEVFEATURE_CHECK_SEGMENT_INIT_ERROR
@@ -2310,7 +2294,7 @@ Bathroom
   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
-  // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // 
   // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE
   // #define ENABLE_DEBUG_LINE_HERE2
@@ -2330,19 +2314,18 @@ Bathroom
  
   #define SETTINGS_HOLDER 1239
 
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
   #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
-  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+   // until devices can reliably be used without compiling per device
+  
       
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+  
+    
 
   /***********************************
    * SECTION: Sensor Configs
@@ -2754,7 +2737,7 @@ Bathroom
   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
-  // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // 
   // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE
   // #define ENABLE_DEBUG_LINE_HERE2
@@ -2774,21 +2757,19 @@ Bathroom
  
   #define SETTINGS_HOLDER 1239
 
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
   #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
-  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+   // until devices can reliably be used without compiling per device
+  
       
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+  
+    
 
-  #define WLED_DEBUG
 
   /***********************************
    * SECTION: Sensor Configs
@@ -3837,10 +3818,10 @@ Bathroom
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -3849,20 +3830,20 @@ Bathroom
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -5702,16 +5683,11 @@ Bathroom
   #define USE_MODULE_SENSORS_PIR
   #define USE_MODULE_SENSORS_BH1750
 
-  #define USE_BUILD_TYPE_LIGHTING
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define USE_MODULE_LIGHTS_ADDRESSABLE
-    #define STRIP_SIZE_MAX 60
     
     /********* Group: Needed to build ************************/
     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
     /********* Group: Ready for full integration ************************/
-    // #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    // 
     /********* Group: Testing ************************/
     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
     
@@ -6080,8 +6056,8 @@ Bathroom
 
 
   #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-    #define USE_MODULE_NETWORK_WEBSERVER
-    #define USE_MODULE_NETWORK_WEBSERVER
+    
+    
   #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
 
   DEFINE_PGM_CTR(DISPLAY_TEMPLATE)

@@ -91,11 +91,7 @@ uint16_t mAnimatorLight::EffectAnim__Solid_Colour()
 
   // Set up the animation function callback
   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment_BrightnessAlreadySet(param);
-    #else
-    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment(param);
-    #endif
   });
 
   return USE_ANIMATOR;
@@ -485,11 +481,7 @@ static const char PM_EFFECT_DESCRI__BANDS_PALETTE_SEGWIDTH[] PROGMEM =
 //     }
 
 //     SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
-//       #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
 //       SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
-//       #else
-//       SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
-//       #endif
 //     });
 
 //     return USE_ANIMATOR;
@@ -615,11 +607,7 @@ uint16_t mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
     }
 
     SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
       SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
-      #else
-      SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
-      #endif
     });
 
     return USE_ANIMATOR;
@@ -4282,11 +4270,7 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_01()
   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
-    #else
-    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
-    #endif
   });
 
   return USE_ANIMATOR;
@@ -4390,11 +4374,7 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_02(){
   //   }
   // );
   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
-    #else
-    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
-    #endif
   });
 
 
@@ -4470,11 +4450,7 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ManualNumber_01()
   //   }
   // );
   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
-    #else
-    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
-    #endif
   });
   return USE_ANIMATOR;
 
@@ -4550,11 +4526,7 @@ uint16_t mAnimatorLight::EffectAnim__7SegmentDisplay__ManualString_01()
   //   }
   // );
   SetSegment_AnimFunctionCallback(SEGIDX, [this](const AnimationParam& param) {
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
-    #else
-    SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32(param);
-    #endif
   });
   return USE_ANIMATOR;
 

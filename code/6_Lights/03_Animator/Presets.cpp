@@ -308,10 +308,10 @@ void mAnimatorLight::doSaveState()
   DEBUG_PRINTLN(F("Serialize current state"));
     
 
-#ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLIST_BY_NAME_AUTOGENERATE_ID_LIST
+  #ifdef ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_BY_NAME_AUTOGENERATE_ID_LIST
 
 
-#else
+  #else
 
 
   if (playlistSave) 
@@ -739,8 +739,6 @@ void mAnimatorLight::deletePreset(byte index)
 }
 
 
-#ifdef ENABLE_DEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
-
 void mAnimatorLight::ScanPresetsFile_GeneratePlaylistIDsFromPSN_2()
 {
   ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN2() begin"));  Serial.flush();
@@ -970,9 +968,6 @@ ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN_2() end, took %u ms"),
   ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN() end"));
   Serial.flush();
 }
-
-#endif // ENABLE_DEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
-
 
 
 #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS

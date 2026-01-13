@@ -242,18 +242,6 @@ enum EM_BUS_TYPE
 #endif
 
 
-#ifdef ENABLE_DEBUGFEATURE_LIGHTS__ESP32C3_FLICKER_TEST
-// RMT driver selection
-// #if !defined(WLED_USE_SHARED_RMT)  && !defined(__riscv)
-#include <NeoEsp32RmtHIMethod.h>
-#define NeoEsp32RmtMethod(x) NeoEsp32RmtHIN ## x ## Method
-// error
-// #else
-// #define NeoEsp32RmtMethod(x) NeoEsp32RmtN ## x ## Method
-// #endif
-#endif
-
-
 // #endif
 
 

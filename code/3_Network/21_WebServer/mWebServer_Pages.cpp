@@ -3,11 +3,7 @@
 
 #include "_WebServer.h"
 
-
-
-
-#ifdef ENABLE_DEVFEATURE_WEBSERVER__SETTINGS_WEBPAGES
-
+#ifdef USE_MODULE_NETWORK_WEBSERVER
 
 size_t mWebServer::printSetFormInput(Print& settingsScript, const char* key, const char* selector, int value) {
   return settingsScript.printf_P(PSTR("d.Sf.%s.%s=%d;"), key, selector, value);
@@ -198,7 +194,7 @@ void mWebServer::appendGPIOinfo(Print& settingsScript) {
   settingsScript.print(2); // DMX hardcoded pin
   firstPin = false;
   #endif
-  #if defined(WLED_DEBUG) && !defined(WLED_DEBUG_HOST)
+  #if !defined(WLED_DEBUG_HOST)
   if (!firstPin) settingsScript.print(',');
   int hardwareTX = -1; // WLED FIX
   settingsScript.print(hardwareTX); // debug output (TX) pin
@@ -805,12 +801,10 @@ void mWebServer::serveJson(AsyncWebServerRequest* request)
   else if (url.indexOf("palx")  > 0) subJson = JSON_PATH_WEB_PALETTES;
   else if (url.indexOf("fxda")  > 0) subJson = JSON_PATH_WEB_FXDATA;
   else if (url.indexOf("net")   > 0) subJson = JSON_PATH_WEB_NETWORKS;
-  #ifdef WLED_ENABLE_JSONLIVE
   else if (url.indexOf("live")  > 0) { 
     // tkr_anim->serveLiveLeds(request);
     return;
   }
-  #endif
   else if (url.indexOf("pal") > 0) { // "/json/palettes" - names only (flat array)
   // // Build JSON into a local String to avoid races with the global JBI buffer
   // String out;
@@ -1146,7 +1140,7 @@ void mWebServer::SettingsPages_GET(AsyncWebServerRequest* request)
 }
 
 
-#endif
+
 
 
 
@@ -3294,7 +3288,7 @@ void mWebServer::SettingsPages_GET(AsyncWebServerRequest* request)
 // // }
 
 
-
+#endif
 
 
 #endif //   #ifdef USE_MODULE_NETWORK_WEBSERVER21

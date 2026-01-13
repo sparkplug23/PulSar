@@ -435,155 +435,22 @@ void BusDigital::setStatusPixel(uint32_t c) {
  */
 void IRAM_ATTR BusDigital::setPixelColor(uint32_t pix, ColourBaseType c) {
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__SETGETPIXEL_FALLBACK_MINIMAL_2024
-
   // ALOG_INF(PSTR("p\t%d"), pix);
   if (_reversed) pix = _len - pix -1;
   else pix += _skip;
   uint8_t co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
   PolyBus::setPixelColor(_busPtr, _iType, pix, c, co);
 
-  #else
-  #error "here"
-  if (!_valid) return;
-  #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-  // Directly handle RgbwwColor
-  unsigned co = _colorOrderMap.getPixelColorOrder(pix + _start, _colorOrder);
-  #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-  Serial.printf("   BusDigital::setPixelColor[%d]   = %d,%d,%d,%d\n\r", pix, c.R, c.G, c.B, c.WW, c.CW);
-  #endif
-  // c.R = 100;
-  // c.G = 101;
-  // c.B = 102;
-  // c.WW = 103;
-  // static_assert(std::is_same<ColourBaseType, RgbwwColor>::value,
-  //             "Error: ColourBaseType must be RgbwwColor when ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE is defined.");
-
-  PolyBus::setPixelColor(_busPtr, _iType, pix, c, co);
-  #else
-  if (hasWhite()) c = autoWhiteCalc(c);
-  if (Bus::_cct >= 1900) c = colorBalanceFromKelvin(Bus::_cct, c); //color correction from CCT
-  /**
-   * @brief Internal Buffer
-   **/
-  if (_data) 
-  {
-    size_t offset = pix * getNumberOfChannels();
-    uint8_t* dataptr = _data + offset;
-    if (hasRGB()) {
-      *dataptr++ = R(c);
-      *dataptr++ = G(c);
-      *dataptr++ = B(c);
-    }
-    if (hasWhite()) *dataptr++ = W(c);
-    // unfortunately as a segment may span multiple buses or a bus may contain multiple segments and each segment may have different CCT
-    // we need to store CCT value for each pixel (if there is a color correction in play, convert K in CCT ratio)
-    if (hasCCT()) *dataptr = Bus::_cct >= 1900 ? (Bus::_cct - 1900) >> 5 : (Bus::_cct < 0 ? 127 : Bus::_cct); // TODO: if _cct == -1 we simply ignore it
-  }
-  /**
-   * @brief Direct method
-   **/
-  else 
-  {
-    if (_reversed) pix = _len - pix -1;
-    pix += _skip;
-    unsigned co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
-    if (_type == BUSTYPE_WS2812_1CH_X3) { // map to correct IC, each controls 3 LEDs
-      unsigned pOld = pix;
-      pix = IC_INDEX_WS2812_1CH_3X(pix);
-      uint32_t cOld = restoreColorLossy(PolyBus::getPixelColor(_busPtr, _iType, pix, co),_bri);
-      switch (pOld % 3) { // change only the single channel (TODO: this can cause loss because of get/set)
-        case 0: c = RGBW32(R(cOld), W(c)   , B(cOld), 0); break;
-        case 1: c = RGBW32(W(c)   , G(cOld), B(cOld), 0); break;
-        case 2: c = RGBW32(R(cOld), G(cOld), W(c)   , 0); break;
-      }
-    }
-    uint16_t wwcw = 0;
-    if (hasCCT()) {
-      uint8_t cctWW = 0, cctCW = 0;
-      Bus::calculateCCT(c, cctWW, cctCW);
-      wwcw = (cctCW<<8) | cctWW;
-    }
-
-    PolyBus::setPixelColor(_busPtr, _iType, pix, c, co, wwcw);
-  }
-  #endif
-
-  #endif // ENABLE_DEVFEATURE_LIGHTING__SETGETPIXEL_FALLBACK_MINIMAL_2024
 }
 
 // returns original color if global buffering is enabled, else returns lossly restored color from bus
 ColourBaseType IRAM_ATTR BusDigital::getPixelColor(uint32_t pix) const {
-  
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__SETGETPIXEL_FALLBACK_MINIMAL_2024
 
     if (_reversed) pix = _len - pix -1;
     else pix += _skip;
     uint8_t co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
     return PolyBus::getPixelColor(_busPtr, _iType, pix, co);
 
-  #else
-
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-
-
-
-      const unsigned co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
-
-      
-    // PolyBus::setPixelColor(_busPtr, _iType, pix, RgbwwColor(1,2,3,4,5), co);
-
-
-      RgbwwColor c = PolyBus::getPixelColor(_busPtr, _iType, pix, co);
-
-      // c.R = 123;
-      // c.WW = 130;
-
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-    ALOG_INF(PSTR("BusDigital::getPixelColor[%d]= %d %d %d %d\n\r"), pix, c.R, c.G, c.B, c.WW);
-    #endif
-    return c;
-
-    #else
-    if (!_valid) return 0;
-    /**
-     * @brief Internal Buffer
-     **/
-    if (_data) 
-    {
-      const size_t offset = pix * getNumberOfChannels();
-      uint32_t c;
-      if (!hasRGB()) {
-        c = RGBW32(_data[offset], _data[offset], _data[offset], _data[offset]); // single channel
-      } else {
-        c = RGBW32(_data[offset], _data[offset+1], _data[offset+2], hasWhite() ? _data[offset+3] : 0); // RGBW
-      }
-      return c;
-    }
-    /**
-     * @brief Direct method
-     **/
-    else 
-    {
-      if (_reversed) pix = _len - pix -1;
-      pix += _skip;
-      const unsigned co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
-      uint32_t c = restoreColorLossy(PolyBus::getPixelColor(_busPtr, _iType, (_type==BUSTYPE_WS2812_1CH_X3) ? IC_INDEX_WS2812_1CH_3X(pix) : pix, co),_bri);
-      if (_type == BUSTYPE_WS2812_1CH_X3) { // map to correct IC, each controls 3 LEDs
-        unsigned r = R(c);
-        unsigned g = _reversed ? B(c) : G(c); // should G and B be switched if _reversed?
-        unsigned b = _reversed ? G(c) : B(c);
-        switch (pix % 3) { // get only the single channel
-          case 0: c = RGBW32(g, g, g, g); break;
-          case 1: c = RGBW32(r, r, r, r); break;
-          case 2: c = RGBW32(b, b, b, b); break;
-        }
-      }
-      return c;
-    }
-    #endif
-
-  #endif
 }
 
 

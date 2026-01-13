@@ -351,11 +351,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   }
 
   
-  #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
-  if(jtok = getTokAlias(obj, PM_COLOUR_PALETTE, "Pal"))
-  #else
-  if(jtok = obj[PM_COLOUR_PALETTE])
-  #endif
+  if(jtok = getTokenIncludingAlias(obj, PM_COLOUR_PALETTE, "Pal"))
   {
     if(jtok.isStr())
     {
@@ -379,11 +375,8 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     data_buffer.isserviced++;
   }
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
-  if(jtok = getTokAlias(obj, "Palette2", "Pal2"))
-  #else
-  if(jtok = obj["Palette2"])
-  #endif
+
+  if(jtok = getTokenIncludingAlias(obj, "Palette2", "Pal2"))
   {
     if(jtok.isStr())
     {
@@ -486,11 +479,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   {    
     JsonParserObject jobj = jtok_sub.getObject();
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
-    if(jtok = getTokAlias(jobj, PM_FUNCTION, "FX"))
-    #else
-    if(jtok = jobj[PM_FUNCTION])
-    #endif
+    if(jtok = getTokenIncludingAlias(jobj, PM_FUNCTION, "FX"))
     { 
       if(jtok.isStr())
       {
@@ -517,11 +506,8 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       data_buffer.isserviced++;
     }
     
-    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
-    if(jtok = getTokAlias(jobj, PM_INTENSITY, "IX"))
-    #else
-    if(jtok = jobj[PM_INTENSITY])
-    #endif
+
+    if(jtok = getTokenIncludingAlias(jobj, PM_INTENSITY, "IX"))
     { 
       CommandSet_Effect_Intensity(jtok.getInt(), segment_index);
       ALOG_INF( PSTR(D_LOG_PIXEL D_COMMAND_2KEY_NVALUE_K(D_EFFECTS, D_INTENSITY)), jtok.getInt() );
@@ -529,11 +515,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
     
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
-    if(jtok = getTokAlias(jobj, PM_SPEED, "SX"))
-    #else
-    if(jtok = jobj[PM_SPEED])
-    #endif
+    if(jtok = getTokenIncludingAlias(jobj, PM_SPEED, "SX"))
     { 
       CommandSet_Effect_Speed(jtok.getInt(), segment_index);
       ALOG_INF( PSTR(D_LOG_PIXEL D_COMMAND_2KEY_NVALUE_K(D_EFFECTS, D_SPEED)), jtok.getInt() );
@@ -541,11 +523,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
     
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
-    if(jtok = getTokAlias(jobj, PM_REVERSE, "RV"))
-    #else
-    if(jtok = jobj[PM_REVERSE])
-    #endif
+    if(jtok = getTokenIncludingAlias(jobj, PM_REVERSE, "RV"))
     { 
       SEGMENT_I(segment_index).setOption(SEG_OPTION_REVERSED, jtok.getInt());  
       ALOG_INF( PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_REVERSE)), SEGMENT_I(segment_index).reverse);
@@ -553,11 +531,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
 
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
-    if(jtok = getTokAlias(jobj, PM_MIRROR, "MR"))
-    #else
-    if(jtok = jobj[PM_MIRROR])
-    #endif
+    if(jtok = getTokenIncludingAlias(jobj, PM_MIRROR, "MR"))
     { 
       SEGMENT_I(segment_index).setOption(SEG_OPTION_MIRROR, jtok.getInt());  
       ALOG_INF( PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_MIRROR)), SEGMENT_I(segment_index).mirror);
@@ -565,11 +539,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
 
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
-    if(jtok = getTokAlias(jobj, PM_GROUPING, "GP"))
-    #else
-    if(jtok = jobj[PM_GROUPING])
-    #endif
+    if(jtok = getTokenIncludingAlias(jobj, PM_GROUPING, "GP"))
     { 
       SEGMENT_I(segment_index).grouping = jtok.getInt();  
       ALOG_INF( PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_GROUPING)), SEGMENT_I(segment_index).grouping);
@@ -597,12 +567,8 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       data_buffer.isserviced++;
     }
 
-    
-    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
-    if(jtok = getTokAlias(jobj, PM_DECIMATE, "DC"))
-    #else
-    if(jtok = jobj[PM_DECIMATE])
-    #endif
+
+    if(jtok = getTokenIncludingAlias(jobj, PM_DECIMATE, "DC"))
     {
       SEGMENT_I(segment_index).decimate = jtok.getInt();  
       ALOG_COM(PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_DECIMATE)), SEGMENT_I(segment_index).decimate);
@@ -679,11 +645,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       ALOG_COM( PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_RATE)), SEGMENT_I(segment_index).cycle_time__rate_ms);
       data_buffer.isserviced++;
     }else
-    #ifdef ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
-    if(jtok = getTokAlias(jobj, PM_RATE_MS, "RA"))
-    #else
-    if(jtok = jobj[PM_RATE_MS])
-    #endif
+    if(jtok = getTokenIncludingAlias(jobj, PM_RATE_MS, "RA"))
     {
       CommandSet_Animation_Transition_Rate_Ms(jtok.getInt(), segment_index);
       ALOG_COM( PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_RATE_MS)), SEGMENT_I(segment_index).cycle_time__rate_ms);  
@@ -2152,8 +2114,6 @@ if (jtok_pwi && jtok_pwi.isArray())
   ************************************************* *********************************************************************************************************************************
   ***********************************************************************************************************************************************************************************/
 
-  #ifdef ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS
-
   if(jtok = obj["Debug"])
   {
 
@@ -2243,8 +2203,6 @@ if (jtok_pwi && jtok_pwi.isArray())
 
 
   } // end Debug options
-
-  #endif // ENABLE_DEBUGFEATURE_LIGHT__OPTIONAL_COMMANDS options above to be moved into debug methods
 
   #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
   

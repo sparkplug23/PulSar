@@ -57,10 +57,8 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * SYSTEM SECTION * 
     *******************/    
-    case TASK_RESTART_SET_DO_FINAL_CLEANUP:       
-      #ifdef WLED_ENABLE_WEBSOCKETS2
+    case TASK_RESTART_SET_DO_FINAL_CLEANUP:    
       websocket_lights->closeAll(1012);
-      #endif
     break;
     /************
      * PERIODIC SECTION * 
@@ -145,9 +143,8 @@ void mWebServer::Server_Start()
  
   createEditHandler(true);
 
-  #ifdef WLED_ENABLE_WEBSOCKETS2
   server->addHandler(websocket_lights);
-  #endif
+  
   #ifndef ESP8266
   #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
   server->addHandler(websocket_console);
@@ -275,9 +272,6 @@ server->on("/connecttest.txt", HTTP_GET, [this](AsyncWebServerRequest *request){
    * */
 
 
-#ifdef ENABLE_DEVFEATURE_WEBSERVER__SETTINGS_WEBPAGES
-
-
 
 server->on("/settings2", HTTP_GET, [this](AsyncWebServerRequest *request){
     this->SettingsPages_GET(request);
@@ -291,7 +285,6 @@ server->on("/settings2", HTTP_POST, [this](AsyncWebServerRequest *request){
     this->serveJson(request);
   });
 
-#endif
 
 
   

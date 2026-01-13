@@ -56,18 +56,14 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
   JsonArray presets;       // numeric preset indices (ps)
   bool useNames = false;   // true if we are using psn[]
   
-#ifdef ENABLE_DEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
   JsonArray psn = playlistObj["psn"];
 
-  #ifdef ENABLE_DEVFEATURE_LIGHT__GRADIENT_PATCH_4DEC25
   ALOG_INF(PSTR("Playlist name-based loading feature compiled in"));
-  #endif
 
   if (!psn.isNull() && psn.size() > 0) {
     useNames    = true;
     playlistLen = psn.size();
   } else
-#endif
   {
     presets     = playlistObj["ps"];
     playlistLen = presets.size();
@@ -81,7 +77,7 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
 
   byte it = 0;
 
-#ifdef ENABLEDEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
+#ifdef ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_NAME_BASED_LOADING
   if (useNames) 
   {
     ALOG_INF(PSTR("Loading playlist via preset names (psn)"));
@@ -116,7 +112,7 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
         }
       }
 
-      #ifdef ENABLEDEVFEATURE_LIGHT__PLAYLIST_NAME_BASED_LOADING_4DEC25
+      #ifdef ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_NAME_BASED_LOADING
       return -1;
       #endif
 

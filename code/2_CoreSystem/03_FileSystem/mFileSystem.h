@@ -47,10 +47,10 @@
   #include <ESPAsyncWebServer.h>
   #endif // USE_MODULE_NETWORK_WEBSERVER
 #endif
-#ifdef ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  #define ARDUINOJSON_DECODE_UNICODE 0
-  #include "3_Network/21_WebServer/ArduinoJson-v6.h"
-#endif // ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+
+#define ARDUINOJSON_DECODE_UNICODE 0
+#include "3_Network/21_WebServer/ArduinoJson-v6.h"
+
 
 // ESP32-WROVER features SPI RAM (aka PSRAM) which can be allocated using ps_malloc()
 // we can create custom PSRAMDynamicJsonDocument to use such feature (replacing DynamicJsonDocument)
@@ -267,13 +267,6 @@ JsonDocument *pDoc = &gDoc;
 
 
 
-
-    // JsonDocument* pDoc = nullptr;//&gDoc;
-
-//     #ifdef ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-//     StaticJsonDocument<JSON_BUFFER_SIZE> doc;
-//     JsonDocument *pDoc = &doc;
-//     #endif // ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
     
 //     StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
 // WLED_GLOBAL JsonDocument *pDoc _INIT(&gDoc);
@@ -301,10 +294,10 @@ void Handle_FileChanges_WebUIEdits();
     bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest);
     void updateFSInfo();
 
-    #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     String getContentType(AsyncWebServerRequest* request, String filename);
     bool handleFileRead(AsyncWebServerRequest* request, String path);
-    #endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+    #endif // USE_MODULE_NETWORK_WEBSERVER
 
 
     void listDir(fs::FS &fs, const char * dirname, uint8_t levels);

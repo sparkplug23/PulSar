@@ -50,6 +50,7 @@
 #define D_MODULE_SENSORS_MOON_TRACKING_CTR          "moon_track"
 #define D_MODULE__NETWORK_INTERFACE__CTR          "interface_network"
 #define D_MODULE_NETWORK_WIFI_CTR                 "wifi"
+#define D_MODULE_NETWORK_ETHERNET_CTR                 "ethernet"
 #define D_MODULE_NETWORK_MQTT_CTR                 "system"
 #define D_MODULE_NETWORK_MQTT_MULTIPLE_CTR        "system"
 #define D_MODULE_NETWORK_MQTT_CELLULAR_CTR        "mqtt_cellular"
@@ -1464,6 +1465,7 @@
   #define D_LOG_UPNP "UPP: "         // UPnP
   #define D_LOG_UPTIME "UPT: "         
   #define D_LOG_WIFI "WIF: "         // Wifi
+  #define D_LOG_ETHERNET "ETH: "
 
 #endif // ENABLE_FEATURE_LOG_PREFIXES
 

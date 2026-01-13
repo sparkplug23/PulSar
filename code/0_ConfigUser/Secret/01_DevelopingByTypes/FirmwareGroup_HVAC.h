@@ -219,8 +219,8 @@
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 
   /***********************************
    * SECTION: Sensor Configs

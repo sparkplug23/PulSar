@@ -5,8 +5,6 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
-
 // Included in baseconfig
 enum WifiConfigOptions {WIFI_RESTART, WIFI_SMARTCONFIG, WIFI_MANAGER, WIFI_WPSCONFIG, WIFI_RETRY, WIFI_WAIT, WIFI_SERIAL, WIFI_MANAGER_RESET_ONLY, MAX_WIFI_OPTION};
 
@@ -279,7 +277,5 @@ void WiFi_Sta_Maintain_Periodic();
 };
 
 #endif
-
-#endif // ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
 
 #endif //   #ifdef USE_MODULE_NETWORK_WIFI

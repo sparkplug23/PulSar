@@ -15,14 +15,12 @@
 
 #include "DynamicBuffer.h"
 
-#define ENABLE_DEVFEATURE_LIGHTS__GETTOKENALIAS
-
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Should nearly always be enabled as default/minimal cases
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING      // effects that enable colour mapping for counting positions and testing hardware/pins
+      // effects that enable colour mapping for counting positions and testing hardware/pins
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
 // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
@@ -520,13 +518,11 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "de
 #endif 
 
 
-#ifdef ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  #define ARDUINOJSON_DECODE_UNICODE 0
-  #include "3_Network/21_WebServer/ArduinoJson-v6.h"
-#endif // ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+#define ARDUINOJSON_DECODE_UNICODE 0
+#include "3_Network/21_WebServer/ArduinoJson-v6.h"
 
 
-#ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
   #include "3_Network/21_WebServer/AsyncJson-v6.h"
   #include "webpages_generated/html_ui.h"
   #ifdef WLED_ENABLE_SIMPLE_UI
@@ -541,7 +537,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "de
     #include "webpages_generated/html_pxmagic.h"
   #endif
   #include "webpages_generated/html_cpal.h"
-#endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
+#endif // ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
 
 //wled_math.cpp
 //float cos_t(float phi); // use float math
@@ -1012,10 +1008,8 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     void SubTask_Presets();
     inline bool applyTemporaryPreset() {return applyPreset(255);};
 
-    #ifdef ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
     void savePreset(byte index, const char* pname = nullptr, JsonObject saveobj = JsonObject());
     inline void saveTemporaryPreset() {savePreset(255);};
-    #endif // ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
 
     void deletePreset(byte index);
     #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
@@ -1983,13 +1977,6 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       #endif
       EFFECTS_FUNCTION__LENGTH__ID
     };
-
-
-
-    
-
-    // #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-
 
   
   #define WLED_GROUP_IDS_FIRST  EFFECTS_FUNCTION__PALETTE_LIT_PATTERN__ID
@@ -3482,11 +3469,7 @@ typedef struct Segment
     [[gnu::hot]] uint16_t virtualLength(void) const;
 
     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-      [[gnu::hot]] void setPixelColor(int n, RgbwwColor c
-        #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
-        ,bool brightness_already_set = false /*temporary fix*/
-        #endif
-      );                  // Main function others below call
+      [[gnu::hot]] void setPixelColor(int n, RgbwwColor c,bool brightness_already_set = false);                  // Main function others below call
       void setPixelColor(int n, byte r, byte g, byte b, byte w = 0) 
       { 
         #ifdef ENABLE_DEVFEATURE_LIGHTS__SHOW_HEADER_SETPIXEL_OVERLOADING_CALLS
@@ -3527,11 +3510,7 @@ typedef struct Segment
       void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) { setPixelColor(i, RGBW32(r,g,b,w), aa); }
       void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }    
     #else    
-      [[gnu::hot]] void setPixelColor(int n, uint32_t c
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
-      ,bool brightness_already_set = false /*temporary fix*/
-      #endif
-      );
+      [[gnu::hot]] void setPixelColor(int n, uint32_t c,bool brightness_already_set = false);
       void setPixelColor(int n, RgbwwColor c){ setPixelColor(n, RGBW32(c.R, c.G, c.B, c.WW)); } 
       void setPixelColor(unsigned n, uint32_t c){ setPixelColor((int)n, c); } // to keep compatibility with RGBWW
       void setPixelColor(uint16_t n, uint32_t c){ setPixelColor((int)n, c); } // to keep compatibility with RGBWW
@@ -4281,7 +4260,6 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_ifdef(const Animation
     
 // Serial.println("if");Serial.flush();
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_ALREADY_SET_FUNCTION_ARGUMENT
   
     float progress = param.progress;
     uint8_t blendFactor = static_cast<uint8_t>(progress * 255);
@@ -4329,46 +4307,6 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_ifdef(const Animation
             #endif
         }
     }
-  #else
-    float progress = param.progress;
-    uint8_t blendFactor = static_cast<uint8_t>(progress * 255);
-
-    for (int i = 0; i < virtualLength(); i++) {
-      // Serial.printf("buffer32 %d\n\r", i);
-        if (colour_width__used_in_effect_generate == 5) {
-            #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-            // Retrieve starting and desired colors for RGBWW
-            RgbwwColor startRgbww = Get_DynamicBuffer_StartingColour_RgbwwColor(i);
-            RgbwwColor desiredRgbww = Get_DynamicBuffer_DesiredColour_RgbwwColor(i);
-
-            // Blend RGBWW colors and write the result
-            RgbwwColor blendedRgbww = RgbwwColor::LinearBlend(startRgbww, desiredRgbww, blendFactor);
-            setPixelColor(i, blendedRgbww);
-            #endif
-        } else {
-            // Retrieve starting and desired colors for RGB/WRGB
-            uint32_t startColor = Get_DynamicBuffer_StartingColour(i);
-            uint32_t desiredColor = Get_DynamicBuffer_DesiredColour(i);
-            // SERIAL_DEBUG_COL32i("startColor", startColor, i);
-            // SERIAL_DEBUG_COL32i("desiredColor", desiredColor, i);
-
-            // Blend RGB/WRGB colors and write the result
-            uint32_t blendedColor = ColourBlend(startColor, desiredColor, blendFactor);
-            // uint32_t blendedColor = desiredColor; // When debugging without a blend
-
-            setPixelColor(i, blendedColor);
-
-            #ifdef ENABLE_DEBUGFEATURE_LIGHTING__TRACE_PIXEL_SET_GET_SHOW_FIRST_NUMBER_LOGGED_WITH_VALUE
-            if(i < ENABLE_DEBUGFEATURE_LIGHTING__TRACE_PIXEL_SET_GET_SHOW_FIRST_NUMBER_LOGGED_WITH_VALUE) {
-              SERIAL_DEBUG_COL32i(">>startColor", startColor, i);
-              SERIAL_DEBUG_COL32i(">>blendedColor", blendedColor, blendFactor);
-              SERIAL_DEBUG_COL32i(">>desiredColor", desiredColor, i);
-            }
-            #endif
-        }
-    }
-
-    #endif
     
 // Serial.println("ifEND");Serial.flush();
 }
@@ -4388,10 +4326,6 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment(const Ani
         // Handle RGBWW blending
         RgbwwColor startRgbww = Get_DynamicBuffer_StartingColour_RgbwwColor(0);
         RgbwwColor desiredRgbww = Get_DynamicBuffer_DesiredColour_RgbwwColor(0);
-
-        #ifdef ENABLE_DEVFEATURE_LIGHTING__SUPPRESS_WHITE_OUTPUT
-        desiredRgbww.WW = 0; desiredRgbww.CW = 0;
-        #endif
 
         // Blend the two colors
         // RgbwwColor blendedRgbww = desiredRgbww;//RgbwwColor::LinearBlend(startRgbww, desiredRgbww, blendFactor);
@@ -4446,10 +4380,6 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment_Brightnes
         // Handle RGBWW blending
         RgbwwColor startRgbww = Get_DynamicBuffer_StartingColour_RgbwwColor(0);
         RgbwwColor desiredRgbww = Get_DynamicBuffer_DesiredColour_RgbwwColor(0);
-
-        #ifdef ENABLE_DEVFEATURE_LIGHTING__SUPPRESS_WHITE_OUTPUT
-        desiredRgbww.WW = 0; desiredRgbww.CW = 0;
-        #endif
 
         // Blend the two colors
         // RgbwwColor blendedRgbww = desiredRgbww;//RgbwwColor::LinearBlend(startRgbww, desiredRgbww, blendFactor);
@@ -5080,17 +5010,14 @@ void serializePalettes(JsonObject root, int page);
 void serializeModeNames(JsonArray arr, bool flag_get_first_name_only = true);
 
 
-    #ifdef ENABLE_WEBSERVER_LIGHTING_WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
 void handleUpload(AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final);
 bool serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient = 0);
 
 void serveJson(AsyncWebServerRequest* request);
 
-// bool  captivePortal(AsyncWebServerRequest *request);
-// void  notFound(AsyncWebServerRequest *request);
+#endif // ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
 
-
-#endif // ENABLE_WEBSERVER_LIGHTING_WEBUI
 
 void setPaletteColors(JsonArray json, CRGBPalette16 palette);
 

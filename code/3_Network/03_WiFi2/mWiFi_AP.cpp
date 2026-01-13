@@ -2,8 +2,6 @@
 
 #ifdef USE_MODULE_NETWORK_WIFI
 
-#ifdef ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
-
 
 bool mWiFi::WiFi2_Ap_EnsureStarted(void)
 {
@@ -61,9 +59,5 @@ bool mWiFi::WiFi2_Ap_EnsureStarted(void)
 }
 
 
-
-
-
-#endif // ENABLE_DEVFEATURE_NETOWRK__WIFI_VERSION_2026V2
 
 #endif // USE_MODULE_NETWORK_WIFI

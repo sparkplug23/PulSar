@@ -114,7 +114,7 @@ void mAnimatorLight::appendGPIOinfo(Print& settingsScript) {
   settingsScript.print(2); // DMX hardcoded pin
   firstPin = false;
   #endif
-  #if defined(WLED_DEBUG) && !defined(WLED_DEBUG_HOST)
+  #if !defined(WLED_DEBUG_HOST)
   if (!firstPin) settingsScript.print(',');
   int hardwareTX = -1; // WLED FIX
   settingsScript.print(hardwareTX); // debug output (TX) pin
@@ -493,34 +493,9 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
     settingsScript.print(F("toggle('MQTT');"));    // hide MQTT settings
     #endif
 
-    #ifndef WLED_DISABLE_HUESYNC
-    printSetFormValue(settingsScript,PSTR("H0"),hueIP[0]);
-    printSetFormValue(settingsScript,PSTR("H1"),hueIP[1]);
-    printSetFormValue(settingsScript,PSTR("H2"),hueIP[2]);
-    printSetFormValue(settingsScript,PSTR("H3"),hueIP[3]);
-    printSetFormValue(settingsScript,PSTR("HL"),huePollLightId);
-    printSetFormValue(settingsScript,PSTR("HI"),huePollIntervalMs);
-    printSetFormCheckbox(settingsScript,PSTR("HP"),huePollingEnabled);
-    printSetFormCheckbox(settingsScript,PSTR("HO"),hueApplyOnOff);
-    printSetFormCheckbox(settingsScript,PSTR("HB"),hueApplyBri);
-    printSetFormCheckbox(settingsScript,PSTR("HC"),hueApplyColor);
-    char hueErrorString[25];
-    switch (hueError)
-    {
-      case HUE_ERROR_INACTIVE     : strcpy_P(hueErrorString,PSTR("Inactive"));                break;
-      case HUE_ERROR_ACTIVE       : strcpy_P(hueErrorString,PSTR("Active"));                  break;
-      case HUE_ERROR_UNAUTHORIZED : strcpy_P(hueErrorString,PSTR("Unauthorized"));            break;
-      case HUE_ERROR_LIGHTID      : strcpy_P(hueErrorString,PSTR("Invalid light ID"));        break;
-      case HUE_ERROR_PUSHLINK     : strcpy_P(hueErrorString,PSTR("Link button not pressed")); break;
-      case HUE_ERROR_JSON_PARSING : strcpy_P(hueErrorString,PSTR("JSON parsing error"));      break;
-      case HUE_ERROR_TIMEOUT      : strcpy_P(hueErrorString,PSTR("Timeout"));                 break;
-      default: sprintf_P(hueErrorString,PSTR("Bridge Error %i"),hueError);
-    }
-
-    printSetClassElementHTML(settingsScript,PSTR("sip"),0,hueErrorString);
-    #else
+    // HUESYNC Removed
     settingsScript.print(F("toggle('Hue');"));    // hide Hue Sync settings
-    #endif
+    
     printSetFormValue(settingsScript,PSTR("BD"),serialBaud);
     #ifndef WLED_ENABLE_ADALIGHT
     settingsScript.print(F("toggle('Serial');"));

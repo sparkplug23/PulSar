@@ -480,10 +480,10 @@
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -492,20 +492,20 @@
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -681,10 +681,10 @@
   #define SETTINGS_HOLDER 1239
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -693,15 +693,15 @@
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
 
-  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // 
+  // 
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
     
-  #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
@@ -795,7 +795,7 @@
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+#define 
 
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
 R"=====(
@@ -907,7 +907,7 @@ R"=====(
 // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
 // // #define ENABLE_DEBUG_FUNCTION_NAMES
-// // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+// // 
 // // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
 // // #define ENABLE_DEBUG_LINE_HERE
 // // #define ENABLE_DEBUG_LINE_HERE2
@@ -938,19 +938,18 @@ R"=====(
 
 // #define SETTINGS_HOLDER 1239
 
-// #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-// #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+// 
+// 
 // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-// #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
-// #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+//  // until devices can reliably be used without compiling per device
+// 
     
 // //  /***********************************
 // //   * SECTION: Network Configs
 // //  ************************************/    
 
-// //  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-// //  #define USE_MODULE_NETWORK_WEBSERVER
-// //  #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+// //  
+// //    
 
 // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 
@@ -1307,7 +1306,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
   // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // 
   // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE
   // #define ENABLE_DEBUG_LINE_HERE2
@@ -1718,12 +1717,9 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
 #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
 
-#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
 
-#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
 
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
 R"=====(
@@ -1928,12 +1924,8 @@ R"=====(
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
 #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
 
-#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
-
-#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
 
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
 R"=====(
@@ -2151,12 +2143,8 @@ R"=====(
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
 #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
 
-#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
-
-#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
 
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
 R"=====(
@@ -2404,14 +2392,9 @@ R"=====(
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-#define ENABLE_DEBUGFEATURE_LIGHTS__ESP32C3_FLICKER_TEST
-
-#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
 #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
 
-#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
 
-#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
 
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
 R"=====(
@@ -2608,12 +2591,8 @@ R"=====(
   // compile-time gate
   // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-  #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
   #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
 
-  #define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
-
-  #define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
 
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
   R"=====(
@@ -2733,12 +2712,8 @@ R"=====(
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS // enables the tasker development tasks across the system, but requires sub module enable too
 #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
 
-#define ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
-
-#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
 
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
 R"=====(
@@ -2987,7 +2962,7 @@ R"=====(
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-#define ENABLE_DEVFEATURE_LIGHT__ENABLE_PARSING_WITH_NORMAL_JSON_COMMANDS
+#define 
 
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
 R"=====(
@@ -3347,7 +3322,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
   // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // 
   // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE
   // #define ENABLE_DEBUG_LINE_HERE2
@@ -3396,10 +3371,10 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -3409,9 +3384,9 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
 
   /***********************************
@@ -3423,7 +3398,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   // #define ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   // #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
   // #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
@@ -3446,17 +3421,16 @@ May need to add two power connections too, so its not just the cat5e wire to let
   */
   // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
 
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+  
+  
 
 
   /***********************************
@@ -3534,7 +3508,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER 1
       #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
        
-      #define USE_MODULE_NETWORK_WEBSERVER
+      
       #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER_SERIAL1_HVAC_DESK
         #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 115200
         
@@ -4621,7 +4595,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
   // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // 
   // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE
   // #define ENABLE_DEBUG_LINE_HERE2
@@ -4671,10 +4645,10 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   #define USE_MODULE_CORE_FILESYSTEM
-  // //   #define WLED_ENABLE_FS_EDITOR
-  // //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  // //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  // //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  // //   
+  // //   
+  // //   
+  // //   
 
   // // Settings saving and loading
   // //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -4683,20 +4657,20 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   // //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // 
+  // 
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -4728,7 +4702,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define USE_LIGHTING_TEMPLATE
 
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+  
   
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
@@ -4905,10 +4879,10 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -4917,20 +4891,20 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -5153,10 +5127,10 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
  
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -5165,13 +5139,13 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  // 
 
   #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+   // until devices can reliably be used without compiling per device
 
-  #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  
 
 
   /***********************************
@@ -5197,10 +5171,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: Network Configs
   ************************************/    
 
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
 
   
 
@@ -5259,8 +5231,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_FEATURE_SENSORS_INTERFACE__SNAPSHOT_READINGS_TO_CALIBRATION_FILE
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
   // #define CALIB_FS
   // #define ENABLE_DEBUGFEATURE__CALIB_CAPTURE_VERBOSE
 
@@ -5692,10 +5664,10 @@ May need to add two power connections too, so its not just the cat5e wire to let
   
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -5704,13 +5676,13 @@ May need to add two power connections too, so its not just the cat5e wire to let
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  
+  
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   #define USE_MODULE_SENSORS_SUN_TRACKING
 
@@ -5719,8 +5691,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: Network Configs
   ************************************/    
 
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-  #define USE_MODULE_NETWORK_WEBSERVER
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -5921,7 +5892,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
   // #define ENABLE_DEBUG_FUNCTION_NAMES
-  // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // 
   // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE
   // #define ENABLE_DEBUG_LINE_HERE2
@@ -6138,7 +6109,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
  // #define ENABLE_DEBUG_FUNCTION_NAMES
- // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+ // 
  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
  // #define ENABLE_DEBUG_LINE_HERE
  // #define ENABLE_DEBUG_LINE_HERE2
@@ -6163,19 +6134,18 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 
  #define SETTINGS_HOLDER 1239
 
- #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
- #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+ 
+ 
  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
- #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
- #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // until devices can reliably be used without compiling per device
+ 
      
  /***********************************
   * SECTION: Network Configs
  ************************************/    
 
- #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
- #define USE_MODULE_NETWORK_WEBSERVER
- #define ENABLE_WEBSERVER_LIGHTING_WEBUI  
+ 
+   
 
  /***********************************
   * SECTION: Sensor Configs
@@ -6451,10 +6421,10 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // #define USE_MODULE_CORE_FILESYSTEM
-  //   #define WLED_ENABLE_FS_EDITOR
-  //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
 
   // Settings saving and loading
   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -6463,20 +6433,20 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // 
+  // 
 
   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  //  // until devices can reliably be used without compiling per device
 
-  // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // 
 
   // /***********************************
   //  * SECTION: Network Configs
   // ************************************/    
 
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
 
   // /***********************************
   //  * SECTION: Sensor Configs
@@ -6808,10 +6778,10 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   // // #define USE_MODULE_CORE_FILESYSTEM
-  // //   #define WLED_ENABLE_FS_EDITOR
-  // //   #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  // //   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  // //   #define ENABLE_FEATURE_TEMPLATES__LOAD_DEFAULT_PROGMEM_TEMPLATES_OVERRIDE_FILESYSTEM
+  // //   
+  // //   
+  // //   
+  // //   
 
   // // Settings saving and loading
   // //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
@@ -6820,20 +6790,20 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   // //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   // //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-  // #define ENABLE_DEVFEATURE_STORAGE__SYSTEM_CONFIG__LOAD_WITH_TEMPLATES_OVERRIDE
-  // #define ENABLE_DEVFEATURE_STORAGE__ANIMATION_PLAYLISTS
+  // 
+  // 
 
   // // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // // #define ENABLE_DEVFEATURE__SAVE_CRITICAL_BOOT_DATA_FOR_DEBUG_BUT_ONLY_SPLASH_ON_BOOT_FOR_NOW__EG_SSID_MQTT_SERVER_IP_ADDRESS // until devices can reliably be used without compiling per device
+  // //  // until devices can reliably be used without compiling per device
 
-  // // #define ENABLE_DEVFEATURE_ADD_TIMESTAMP_ON_SAVE_FILES
+  // // 
 
   // /***********************************
   //  * SECTION: Network Configs
   // ************************************/    
 
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_WEBSERVER_LIGHTING_WEBUI
+  // 
+  // 
 
   // /***********************************
   //  * SECTION: Sensor Configs
