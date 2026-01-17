@@ -13,6 +13,21 @@
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
+// -------------------------------------------------------------------------------------------------
+// Modem selection (compile-time)
+// Exactly one should be true in a given build configuration.
+// -------------------------------------------------------------------------------------------------
+
+#if defined(USE_MODULE_DRIVERS_MODEM_7000G)
+  #define tkr_modem tkr_sim7000g
+#elif defined(USE_MODULE_DRIVERS_MODEM_800L)
+  #define tkr_modem tkr_sim800l
+#else
+  #error "No modem selected. Define USE_MODULE_DRIVERS_MODEM_7000G or USE_MODULE_DRIVERS_MODEM_800L."
+#endif
+
+
+
 #define TINY_GSM_MODEM_SIM7000
 
 // debug inside library
@@ -80,7 +95,7 @@
 
   //https://github.com/vshymanskyy/TinyGSM/pull/260/files#diff-49f12f4a048fa1f63d160e1adb91526d97e2a16cd3ba3898525ac5d1a44ddb99
 
-#include <StreamDebugger.h>
+// #include <StreamDebugger.h>
 
 class mCellular :
   public mTaskerInterface
@@ -116,10 +131,62 @@ class mCellular :
       uint8_t leds_found = 0;
     }settings;
 
+
+
+// -------------------------------------------------------------------------------------------------
+// Cellular policy state machine (1Hz tick)
+// -------------------------------------------------------------------------------------------------
+enum class cellular_conn_state_t : uint8_t
+{
+  WAIT_MODEM_READY = 0,
+  INIT_CONFIG,
+  START_CONNECTION,
+  START_MQTT,
+  ONLINE,
+  BACKOFF
+};
+
+struct cellular_conn_sm_t
+{
+  cellular_conn_state_t state = cellular_conn_state_t::WAIT_MODEM_READY;
+
+  uint32_t t_enter_ms = 0;
+  uint32_t t_next_action_ms = 0;
+
+  uint8_t  attempts = 0;
+
+  bool     init_config_done = false;
+  bool     mqtt_started = false;
+
+  // Optional: track last known link state to detect transitions cleanly
+  bool     last_gprs_connected = false;
+};
+
+cellular_conn_sm_t conn_sm_;
+
+static inline void _conn_enter(cellular_conn_sm_t& sm, cellular_conn_state_t st, uint32_t now_ms)
+{
+  sm.state = st;
+  sm.t_enter_ms = now_ms;
+}
+
+void Cellular_ConnMgr_Reset();
+void Cellular_ConnMgr_Tick_1s(uint32_t now_ms);
+
+
+
+
+
+
     /**
      * @brief Unique features of this class
      * 
      */
+
+
+
+
+
 
     
     void parse_JSONCommand(JsonParserObject obj);

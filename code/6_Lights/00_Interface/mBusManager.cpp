@@ -285,10 +285,6 @@ void BusDigital::show() {
 
   #else
   
-  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-  ALOG_INF(PSTR("*********************************************************BusDigital::show"));
-  #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-
   _milliAmpsTotal = 0;
   if (!_valid) return;
   
@@ -753,13 +749,9 @@ ColourBaseType BusPwm::getPixelColor(uint32_t pix) const {
   #endif
 }
 
-void BusPwm::show() {
+void BusPwm::show() 
+{
   
-  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-  ALOG_INF(PSTR("*********************************************************BusPwm::show"));
-  #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-
-      DEBUG_LINE_HERE
   #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
 
 
@@ -769,11 +761,6 @@ void BusPwm::show() {
   uint16_t w1 = mapvalue(_data[3], 0, 255, 0, 1023);
   uint16_t w2 =  mapvalue(_data[4], 0, 255, 0, 1023);
   
-      DEBUG_LINE_HERE
-  // #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-  // output_colour.debug_print("output_colour");
-  // #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-
   uint16_t colour10bit[5] = {0};
   switch (_type) {
     default:
@@ -797,11 +784,6 @@ void BusPwm::show() {
       break;
   }
   
-      DEBUG_LINE_HERE
-  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-  ALOG_INF(PSTR("BusPwm::show [%d,%d,%d,%d,%d]"), colour10bit[0], colour10bit[1], colour10bit[2], colour10bit[3], colour10bit[4]);
-  #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-
   /**
    * @brief Final conversions
    * ** Upscale to 10 bit
@@ -812,18 +794,11 @@ void BusPwm::show() {
   uint16_t pwm_value;
   uint8_t numPins = numPWMPins(_type);
 
-#ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-Serial.printf("numPins %d\n", numPins);
-#endif
-
   for(uint8_t ii=0;ii<numPins;ii++)
   {
     colour10bit[ii] = colour10bit[ii] > 0 ? mapvalue(colour10bit[ii], 0, tkr_set->Settings.pwm_range, tkr_iLight->pwm_min, tkr_iLight->pwm_max) : 0; 
     pwm_value = bitRead(tkr_set->runtime.pwm_inverted, ii) ? tkr_set->Settings.pwm_range - colour10bit[ii] : colour10bit[ii];
 
-    #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-    ALOG_INF(PSTR("BusPwm[%d]::pwm_value[%d] %d"), tkr_anim->getCurrSegmentId(), ii, pwm_value);
-    #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
 
       DEBUG_LINE_HERE
     #ifdef ESP8266
@@ -1227,9 +1202,6 @@ void BusManager::show()
   _milliAmpsUsed = 0;
   for (uint8_t i = 0; i < numBusses; i++) 
   {
-    #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-    Serial.printf("busses[%d|%d]->show()------------------------------------\n\r", i,numBusses);
-    #endif // ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28  
     busses[i]->show();
     _milliAmpsUsed += busses[i]->getUsedCurrent();
   }

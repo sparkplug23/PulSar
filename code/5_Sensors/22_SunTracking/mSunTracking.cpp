@@ -854,7 +854,6 @@ double mSunTracking::julian_day(time_t utc_time_point)
     return jd;
 }
 
-#ifdef USE_MAXELEVATION_CALC_JULY2025
 
 mSunTracking::SunPosition mSunTracking::CalculateSolarAzEl(time_t utc_time, double latitude, double longitude, double altitude) {
     SunPosition AzEl;
@@ -935,122 +934,6 @@ mSunTracking::SunPosition mSunTracking::CalculateSolarAzEl(time_t utc_time, doub
 
     return AzEl;
 }
-
-
-
-
-#else
-
-mSunTracking::SunPosition mSunTracking::CalculateSolarAzEl(time_t utc_time, double latitude, double longitude, double altitude) {
-    // Step 1: Calculate the Julian day from UTC time
-    double jd = julian_day(utc_time); // Replace with your own Julian day calculation function
-    double days_since_j2000 = jd - 2451543.5;  // Days since J2000 epoch
-
-    #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS_LOOPS
-    std::cout << "Julian Day: " << jd << " Days since J2000: " << days_since_j2000 << "\n";
-    #endif
-
-    // Step 2: Keplerian elements for the Sun
-    double w = 282.9404 + 4.70935e-5 * days_since_j2000;  // Longitude of perihelion (degrees)
-    double e = 0.016709 - 1.151e-9 * days_since_j2000;    // Eccentricity of Earth's orbit
-    double M = fmod(356.0470 + 0.9856002585 * days_since_j2000, 360.0);  // Mean anomaly (degrees)
-
-    // Step 3: Sun's mean longitude
-    double L = w + M;
-
-    // Step 4: Obliquity of the ecliptic
-    double obliquity = 23.4393 - 3.563e-7 * days_since_j2000;
-
-    // Step 5: Solve Kepler's Equation (Eccentric Anomaly)
-    double E = M + (180 / M_PI) * e * sin(M * DEG_TO_RAD) * (1 + e * cos(M * DEG_TO_RAD));
-
-    // Step 6: Rectangular coordinates in the plane of the ecliptic
-    double x_eclip = cos(E * DEG_TO_RAD) - e;
-    double y_eclip = sin(E * DEG_TO_RAD) * sqrt(1 - e * e);
-
-    // Step 7: Distance and true anomaly
-    double distance = sqrt(x_eclip * x_eclip + y_eclip * y_eclip);  // Distance in AU
-    double true_anomaly = atan2(y_eclip, x_eclip) * RAD_TO_DEG;
-
-    // Step 8: Solar coordinates (Sun's longitude)
-    double solar_longitude = true_anomaly + w;
-
-    // Step 9: Convert ecliptic coordinates to equatorial coordinates
-    double x_equat = distance * cos(solar_longitude * DEG_TO_RAD);
-    double y_equat = distance * sin(solar_longitude * DEG_TO_RAD) * cos(obliquity * DEG_TO_RAD);
-    double z_equat = distance * sin(solar_longitude * DEG_TO_RAD) * sin(obliquity * DEG_TO_RAD);
-
-    // Step 10: Right Ascension and Declination
-    double r = sqrt(x_equat * x_equat + y_equat * y_equat + z_equat * z_equat);
-    double RA = atan2(y_equat, x_equat) * RAD_TO_DEG;
-    double dec = asin(z_equat / r) * RAD_TO_DEG;  // Declination
-
-    #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS_LOOPS
-    std::cout << "Right Ascension: " << RA << " Declination: " << dec << "\n";
-    #endif
-
-    // Step 11: Calculate local sidereal time
-    tm* ptm = gmtime(&utc_time);  // Get UTC time components
-    double UTH = ptm->tm_hour + ptm->tm_min / 60.0 + ptm->tm_sec / 3600.0;
-    double GMST0 = fmod(L + 180, 360.0) / 15;  // Greenwich Mean Sidereal Time at 0h UT
-    double local_sidereal_time = GMST0 + UTH + longitude / 15;
-
-    // Step 12: Hour Angle
-    double HA = local_sidereal_time * 15 - RA;
-
-    #ifdef USE_MAXELEVATION_CALC_JULY2025
-
-    // Step 13–14: Convert to horizontal coordinates
-    double sin_lat = sin(latitude * DEG_TO_RAD);
-    double cos_lat = cos(latitude * DEG_TO_RAD);
-    double sin_dec = sin(dec * DEG_TO_RAD);
-    double cos_dec = cos(dec * DEG_TO_RAD);
-    double cos_HA = cos(HA * DEG_TO_RAD);
-
-    // Elevation
-    double elevation = asin(sin_dec * sin_lat + cos_dec * cos_lat * cos_HA);
-
-    // Azimuth
-    double y = -sin(HA * DEG_TO_RAD);
-    double x = tan(dec * DEG_TO_RAD) * cos_lat - sin_lat * cos_HA;
-    double azimuth = atan2(y, x);
-
-    // Normalize azimuth to [0, 360)
-    azimuth = fmod(azimuth * RAD_TO_DEG + 360.0, 360.0);
-
-    // Store result
-    SunPosition AzEl;
-    AzEl.elevation = elevation * RAD_TO_DEG;
-    AzEl.azimuth = azimuth;
-
-
-    #else
-
-    // Step 13: Convert to rectangular coordinate system
-    double x_hor = cos(HA * DEG_TO_RAD) * cos(dec * DEG_TO_RAD);
-    double y_hor = sin(HA * DEG_TO_RAD) * cos(dec * DEG_TO_RAD);
-    double z_hor = sin(dec * DEG_TO_RAD);
-
-    // Step 14: Rotate coordinates for observer's latitude
-    double x_rotated = x_hor * cos((90 - latitude) * DEG_TO_RAD) - z_hor * sin((90 - latitude) * DEG_TO_RAD);
-    double y_rotated = y_hor;
-    double z_rotated = x_hor * sin((90 - latitude) * DEG_TO_RAD) + z_hor * cos((90 - latitude) * DEG_TO_RAD);
-
-    // Step 15: Calculate Azimuth and Elevation
-    SunPosition AzEl;
-    AzEl.azimuth = atan2(y_rotated, x_rotated) * RAD_TO_DEG + 180.0;  // Azimuth (degrees)
-    AzEl.elevation = asin(z_rotated) * RAD_TO_DEG;  // Elevation (degrees)
-
-    #endif
-
-    #ifdef ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS_LOOPS
-    std::cout << "Azimuth: " << AzEl.azimuth << " degrees, Elevation: " << AzEl.elevation << " degrees\n";
-    #endif
-
-    return AzEl;
-}
-
-#endif
 
 /*
 

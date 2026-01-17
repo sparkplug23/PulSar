@@ -62,11 +62,11 @@ int8_t mInterfaceNetwork::Tasker(uint8_t function, JsonParserObject obj){
     break;
 
     /************
-     * MQTT SECTION * 
+     * MQTT SECTION *             FOR NETWORK, IT MAY BE BETTER TO HAVE "INTERFACE" do all mqtt broadcasts.
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+      MQTTHandler_Init();              // will become "debug" only ones, for all network modules.
     break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
       tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
@@ -141,6 +141,10 @@ bool mInterfaceNetwork::Network_HasExternalConnectivity(void)
   // ---- Ethernet (future) ----
   #ifdef USE_MODULE_NETWORK_ETHERNET
   // external |= tkr_eth->Eth_HasExternalConnectivity();
+  #endif
+
+  #ifdef USE_MODULE_NETWORK_CELLULAR
+  external |= tkr_modem->Network_IsConnected();
   #endif
 
   return external;

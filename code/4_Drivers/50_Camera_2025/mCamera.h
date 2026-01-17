@@ -324,34 +324,32 @@ bool LoadDefaultConfig();
     bool pic_free_p(struct mCamera::PICSTORE **pps);
     bool wc_check_format(int format);
 
-    void WCStartOperationTask();
-    // static void WCOperationTask(void *pvParameters);
-    void WCOperationTask();
-    static void WCOperationTaskS(void* pvParameters);
+    void StartOperationTask();
+    void OperationTask();
+    static void OperationTaskS(void* pvParameters);
 
-    void WcUpdateStats(void);
+    void UpdateStats(void);
         
-    bool WcWaitZero(volatile int8_t *val, int8_t initial, int timeout_ms);
-    void WcWaitEnable();
-    bool WcPinUsed(void);
-    void WcFeature(int32_t value);
-    void WcApplySettings();
-    void WcSetDefaults(uint32_t upgrade);
-    uint32_t WcSetup(int32_t fsiz);
-    void WcRemoveDeadCients();
-    void WcEndStream();
-    void WcCamOff();
-    int32_t WcSetOptions(uint32_t sel, int32_t value);
-    void WcWaitFrame(int maxtime_ms);
-    uint32_t WcGetWidth(void);
-    uint32_t WcGetHeight(void);
+    bool WaitZero(volatile int8_t *val, int8_t initial, int timeout_ms);
+    void WaitEnable();
+    bool PinUsed(void);
+    void Feature(int32_t value);
+    void ApplySettings();
+    void SetDefaults(uint32_t upgrade);
+    uint32_t Setup(int32_t fsiz);
+    void RemoveDeadCients();
+    void EndStream();
+    void CamOff();
+    int32_t SetOptions(uint32_t sel, int32_t value);
+    void WaitFrame(int maxtime_ms);
+    uint32_t GetWidth(void);
+    uint32_t GetHeight(void);
     
-    uint32_t WcGetPicstore(int32_t num, uint8_t **buff);
-    uint32_t WcGetPicstorePtr(int32_t num, struct mCamera::PICSTORE **p);
-    uint32_t WcGetFrame(int32_t bnum);
+    uint32_t GetPicstore(int32_t num, uint8_t **buff);
+    uint32_t GetPicstorePtr(int32_t num, struct mCamera::PICSTORE **p);
+    uint32_t GetFrame(int32_t bnum);
 
-    
-void HandleWcJpg(AsyncWebServerRequest *request);
+    void HandleWcJpg(AsyncWebServerRequest *request);
 
     bool WebcamAuthenticate(void);
     bool WebcamCheckPriviledgedAccess(bool autorequestauth = true);
@@ -361,14 +359,14 @@ void HandleWcJpg(AsyncWebServerRequest *request);
     static void HandleWebcamMjpeg(void);
     void HandleWebcamMjpegDiff(void);
     static void HandleWebcamRoot(void);
-    uint32_t WcSetStreamserver(uint32_t flag);
+    uint32_t SetStreamserver(uint32_t camera_server_state);
 
-    void WcInterrupt(uint32_t state);
+    void Interrupt(uint32_t state);
 
-    void WcLoop(void);
+    void Loop(void);
     
-    void WcShowStream(void);
-    void WcInit(void);
+    void ShowStream(void);
+    void Init(void);
 
     
 #ifdef ENABLE_CAMERA__MOTION_DETECTION

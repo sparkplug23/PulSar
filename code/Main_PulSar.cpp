@@ -767,6 +767,10 @@ void LoopTasker()
       ((tkr_time->UpTime()%300)==0)&&
       (tkr_time->UpTime()>60)
     ){                                    tkr->Tasker_Interface(TASK_EVERY_FIVE_MINUTE); }
+    if(
+      ((tkr_time->UpTime()%18000)==0)&&
+      (tkr_time->UpTime()>60)
+    ){                                    tkr->Tasker_Interface(TASK_EVERY_30_MINUTES); }
 
     // Uptime triggers: Fire Once (based on uptime seconds, but due to this function being called every second, it will only fire once)
     if(tkr_time->UpTime() == 10){   tkr->Tasker_Interface(TASK_UPTIME_10_SECONDS); }

@@ -1103,9 +1103,6 @@ Blue (Upstairs Link) ***********************************************************
 
   #define USE_MODULE_CORE_RULES
 
-  #define ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
-
-  #define ENABLE_DEVFEATURE_BUTTON_MULTIPRESS
 
   #define ENABLE_DEVFEATURE_PHASEOUT_CLEARING_EVENT
 

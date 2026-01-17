@@ -15,16 +15,16 @@
 
 #include "DynamicBuffer.h"
 
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Should nearly always be enabled as default/minimal cases
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+// #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
+// #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Should nearly always be enabled as default/minimal cases
+// #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+// #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+// #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
       // effects that enable colour mapping for counting positions and testing hardware/pins
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-// #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+// #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+// #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
+// #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+// #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
 
 #ifdef ESP32
 #define PIXEL_RANGE_LIMIT 3300
@@ -39,7 +39,7 @@
 
 
 // Temporary fixing for neopixelbusLg issue
-#ifndef ANIM_BRIGHTNESS_REQUIRED
+#ifndef PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
 #define  false
 #error "dont be default yet"
 #endif
@@ -227,6 +227,14 @@
 #define RgbwwColorU32(c)  RGBW32(c.R,c.G,c.B,c.WW) 
 
 
+
+// #define FLASH_COUNT 4 
+#define LED_SKIP_AMOUNT  0
+// #define MIN_SHOW_DELAY  15
+#ifndef MIN_SHOW_DELAY
+#define MIN_SHOW_DELAY   20//(_frametime < 16 ? 8 : 15) // minimum show delay based on frametime. <10ms will cause flicker, especially on parallel methods
+#endif
+#define DEFAULT_LED_COUNT 100
 
 
 #define MIN(a,b) ((a)<(b)?(a):(b))
@@ -1107,69 +1115,69 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     *******************************************************************************************************************************************************************************
     *******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     uint16_t EffectAnim__Solid_Colour(); 
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     uint16_t EffectAnim__Static_Palette();
     uint16_t EffectAnim__Static_Palette__NoBlend();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     uint16_t EffectAnim__Firefly();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     uint16_t EffectAnim__Flicker_Base(bool use_multi = false, uint16_t flicker_palette = 0);
     uint16_t EffectAnim__Candle_Single();
     uint16_t EffectAnim__Candle_Multiple();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     uint16_t EffectAnim__Shimmering_Two_Palette();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     uint16_t EffectAnim__Shimmering_Palette_Saturation();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     uint16_t EffectAnim__Gradient_Palette_SegWidth();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     uint16_t EffectAnim__Stepping_Palette();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     uint16_t EffectAnim__TimeBased__HourProgress();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     uint16_t EffectAnim__Palette_Variation();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     uint16_t EffectAnim__Stepping_Palette_With_Background();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
     uint16_t EffectAnim__Twinkle_Out();
     uint16_t EffectAnim__Twinkle_Decay();
     uint16_t EffectAnim__Twinkle_Glow();
     uint16_t EffectAnim__Twinkle_Base(bool fade_up, bool show_decay, bool apply_decay_blanking);
     #endif 
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     uint16_t EffectAnim__Bands_Palette_SegWidth();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
     uint16_t EffectAnim__Randomise_Gradient_Palette_SegWidth();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     uint16_t EffectAnim__Rotate_Base(uint16_t movement_amount=1, bool direction=false);
     uint16_t EffectAnim__Rotating_Palette();
     uint16_t EffectAnim__Rotating_Previous_Animation();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     uint16_t Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     uint16_t EffectAnim__Blend_Two_Palettes();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
     uint16_t EffectAnim__Twinkle_Palette_Onto_Palette();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
     // Static
     uint16_t EffectAnim__Palette_Lit_Pattern();
     uint16_t EffectAnim__TriSegCol_Lit_Pattern();
@@ -1315,8 +1323,8 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__Drip();
     uint16_t EffectAnim__FlowStripe();
     uint16_t EffectAnim__WaveSins();
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
     uint16_t EffectAnim__Hardware__Show_Bus();
     uint16_t EffectAnim__Hardware__Show_Bus_Dotted();
     uint16_t EffectAnim__Hardware__Manual_Pixel_Counting();
@@ -1325,8 +1333,8 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     void LightSensorIndexing__SaveResults_To_File();
     void LightSensorIndexing__LoadResults_To_File();
     uint16_t EffectAnim__Hardware__Light_Sensor_Pixel_Indexing_Button_Triggered();
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
     uint16_t EffectAnim__SunPositions__Sunrise_Alarm_01();
     uint16_t EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_Palette_01();
     uint16_t EffectAnim__SunPositions__Sunset_Blended_Palettes_01();
@@ -1339,11 +1347,11 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__SunPositions__DrawSun_1D_Azimuth_02();
     uint16_t EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azimuth_01();
     uint16_t EffectAnim__SunPositions__White_Colour_Temperature_CCT_Based_On_Elevation_01();
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
+    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
     uint16_t EffectAnim__Manual__ControlledFromAnotherModule();
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
+    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
     uint16_t EffectAnim__Christmas_Slo_Glo__01();
     uint16_t EffectAnim__Christmas_Sequential__01();
     uint16_t EffectAnim__Christmas_InWaves__01();
@@ -1351,7 +1359,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__Christmas_TwinkleFlash__01();
     uint16_t EffectAnim__Christmas_Twinkle_Thermal();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
     uint16_t EffectAnim__Christmas_Slo_Glo__02();
     uint16_t EffectAnim__Christmas_Sequential__02();
     uint16_t EffectAnim__Christmas_InWaves__02();
@@ -1362,20 +1370,20 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     uint16_t EffectAnim__Christmas_Slo_Glo_Plus__01();
     uint16_t EffectAnim__Christmas_Sequential_Plus__01();
     #endif
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING
     void SubTask_Flasher_Animate_Function_Tester_01();
     void SubTask_Flasher_Animate_Function_Tester_02();
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
     uint16_t EffectAnim__BorderWallpaper__TwoColour_Gradient();
     uint16_t EffectAnim__BorderWallpaper__FourColour_Gradient();
     uint16_t EffectAnim__BorderWallpaper__FourColour_Solid();
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_TRACKING
+    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_TRACKING
     uint16_t EffectAnim__SolarTriggers__Sunrise_01();
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_TRACKING
+    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_TRACKING
     
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING
     uint16_t EffectAnim__Christmas_Musical__01();
     #endif 
         
@@ -1424,7 +1432,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     *** Specialised: 1D (Audio Reactive) ****************************************************************************************************************************************
     **  Requires:     ***********************************************************************************************************************************************************
     *****************************************************************************************************************************************************************************/
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
     uint16_t EffectAnim__AudioReactive__1D__FFT_Ripple_Peak();
     uint16_t EffectAnim__AudioReactive__1D__FFT_Perline_Move();
     uint16_t EffectAnim__AudioReactive__1D__FFT_Aurora();
@@ -1458,7 +1466,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     *** Specialised: 2D (Audio Reactive) ****************************************************************************************************************************************
     **  Requires:     ***********************************************************************************************************************************************************
     *****************************************************************************************************************************************************************************/
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D
     uint16_t EffectAnim__AudioReactive__2D__Swirl();
     uint16_t EffectAnim__AudioReactive__2D__Waverly();
     uint16_t EffectAnim__AudioReactive__2D__FFT_GED();
@@ -1469,18 +1477,18 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     *** Specialised: Notifcations ****************************************************************************************************************************************
     **  Requires:     ***********************************************************************************************************************************************************
     *****************************************************************************************************************************************************************************/
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
     void SubTask_Segment_Animate_Function__Notification_Static();
     void SubTask_Segment_Animate_Function__Notification_Fade();
     void SubTask_Segment_Animate_Function__Notification_Blinking();
     void SubTask_Segment_Animate_Function__Notification_Pulsing();
     void SubTask_Segment_Animate_Function__Notification_Base(bool flag_static = false, bool flag_blink = false, bool flag_pulse = false);
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
     /****************************************************************************************************************************************************************************
     *** Specialised: Notifcations ****************************************************************************************************************************************
     **  Requires:     ***********************************************************************************************************************************************************
     *****************************************************************************************************************************************************************************/
-    #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
     
     #define LED_DIGITS 4                             // 4 or 6 digits, can only be an even number as...
     // #define LED_PER_DIGITS_STRIP 47                  // ...two digits are made out of one piece of led strip with 47 leds...
@@ -1560,7 +1568,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01();
     void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
 
-    #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
       
 
     /******************************************************************************************************************************************************************************
@@ -1600,7 +1608,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     enum EFFECTS_FUNCTION__IDS
     {
       // General Level 1 Minimal Home Effects
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
       EFFECTS_FUNCTION__SOLID_COLOUR__ID,
       EFFECTS_FUNCTION__STATIC_PALETTE__ID,
       EFFECTS_FUNCTION__BANDS_PALETTE_SEGWIDTH__ID,
@@ -1613,7 +1621,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       #endif
 
       // General Level 2 Flashing Basic Effects
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
       EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,
       EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID,
       EFFECTS_FUNCTION__GRADIENT_PALETTE_SEGWIDTH__ID,
@@ -1627,7 +1635,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       #endif
 
       // General Level 3 Flashing Extended Effects
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
       EFFECTS_FUNCTION__TWINKLE_OUT__ID,
       EFFECTS_FUNCTION__TWINKLE_DECAY__ID,
       EFFECTS_FUNCTION__TWINKLE_GLOW__ID,
@@ -1637,7 +1645,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__PALETTES_INTERLEAVED__ID,
       #endif
 
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
       // General Level 4 Flashing Complete Effects
       EFFECTS_FUNCTION__SPOTS__ID,
@@ -1787,17 +1795,17 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__FLOWSTRIPE__ID, 
       EFFECTS_FUNCTION__WAVESINS__ID, 
 
-      #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+      #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
       /**
        * Hardware Installation Helpers
        **/
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
       EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,
       EFFECTS_FUNCTION__HARDWARE__SHOW_BUS_DOTTED__ID,
       EFFECTS_FUNCTION__HARDWARE__MANUAL_PIXEL_COUNTING__ID,
       EFFECTS_FUNCTION__HARDWARE__VIEW_PIXEL_RANGE__ID,
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING__EXTERNAL_LIGHT_SENSING
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING__EXTERNAL_LIGHT_SENSING
       EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING__ID,
       EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING_BTN__ID,
       #endif
@@ -1806,7 +1814,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       /**
        * Sun Position
        **/
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
       EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01__ID,
       EFFECTS_FUNCTION__SUNPOSITIONS_AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01__ID,
       EFFECTS_FUNCTION__SUNPOSITIONS_SUNSET_BLENDED_PALETTES_01__ID,
@@ -1821,7 +1829,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       /**
        * LED Segment Clock
        **/
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
       EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID,
       EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID,
       EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID,
@@ -1831,7 +1839,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       /**
        * Notifications
        **/
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
       EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID,
       EFFECTS_FUNCTION__NOTIFICATION_FADE__ID,
       EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID,
@@ -1841,7 +1849,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       /**
        * Border/Frame/Edge Wallpapers
        **/
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
       EFFECTS_FUNCTION__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT__ID,
       EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT__ID,
       EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_SOLID__ID,
@@ -1851,7 +1859,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
        * Manual Pixel: Keeping as legacy, but mode change to realtime will remove this
        * Removing this, Feb25, it should be handled by a realtime mode (ie not effects)
        **/
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
       EFFECTS_FUNCTION__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE__ID,
       #endif
 
@@ -1859,7 +1867,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
        * Christmas Multifunction Controller: Replication of vintage 8 function controllers
        * Replicate how traditional 2/4 ouput controllers and their effects look
        **/
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_01_ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_01_ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__INWAVES_01_ID,
@@ -1867,7 +1875,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__TWINKLE_FLASH_01_ID,
       EFFECTS_FUNCTION__CHRISTMAS_TWINKLE_THERMAL__ID,
       #endif
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
       // EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__COMBINATION_ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_02_ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_02_ID,
@@ -1927,7 +1935,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       /**
        * Audio Reactive 1D
        **/
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
       EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_RIPPLE_PEAK__ID,
       EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_PERLINE_MOVE__ID,
       EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_AURORA__ID,
@@ -1960,7 +1968,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       /**
        * Christmas Musical
        **/
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING
       EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,
       // pulsing lights to music as music mode, instead of off or waves, go from 30% to 100% brightness in time with music beat
       #endif
@@ -1968,7 +1976,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       /**
        * Audio Reactive 2D
        **/
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D
       EFFECTS_FUNCTION__AUDIOREACTIVE__2D__SWIRL__ID,         
       EFFECTS_FUNCTION__AUDIOREACTIVE__2D__WAVERLY__ID,   
       EFFECTS_FUNCTION__AUDIOREACTIVE__2D__FFT_GED__ID,         
@@ -1983,7 +1991,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
   #define WLED_GROUP_IDS_LAST   EFFECTS_FUNCTION__DRIP__ID
 
 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   #define DEFAULT_EFFECTS_FUNCTION    EFFECTS_FUNCTION__STATIC_PALETTE__ID
   #else
   #define DEFAULT_EFFECTS_FUNCTION    0
@@ -1995,7 +2003,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
   void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
 
   
-  #ifdef ENABLE_ANIMATION_MODE__INTERNAL_CONTROL_FROM_ANOTHER_MODULE
+  #ifdef ENABLE_FEATURE_LIGHTS__ANIMATION_MODE__INTERNAL_CONTROL_FROM_ANOTHER_MODULE
   void SubTask_AnimationMode__InternalControlFromAnotherModule();
   #endif 
   
@@ -2943,7 +2951,7 @@ typedef struct Segment
      * 
      * While it describes RGB, WRGB, RGBWW, WWA etc, in reality, it is treated as the byte width for buffers directly. 
      **/
-    #ifdef ENABLE_DEVFEATURE_LIGHT__FORCE_EFFECT_COLOUR_TYPE_AS_RGBCCT
+    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
     ColourType colour_width__used_in_effect_generate = ColourType::COLOUR_TYPE__RGBWW__ID; 
     #else
     ColourType colour_width__used_in_effect_generate = ColourType::COLOUR_TYPE__RGB__ID; 
@@ -2982,7 +2990,7 @@ typedef struct Segment
     
     uint16_t get_transition_rate_ms() // Effect that require call for every update, must be called at FRAMETIME_MS, otherwise, can manually be set
     {
-      #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
       if(effect_id >= WLED_GROUP_IDS_FIRST)
       {
         return FRAMETIME;
@@ -3089,12 +3097,12 @@ typedef struct Segment
       uint16_t vLength = (length() + groupLen - 1) / groupLen;
       if(mirror) vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
 
-      #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+      #ifdef ENABLE_FEATURE_LIGHTS__DECIMATE
       if(decimate > 1)   // only shrink when factor >= 2. 0 and 1 means no decimation
       {
         vLength = (vLength + decimate - 1) / decimate;
       }
-      #endif // ENABLE_DEVFEATURE_LIGHTS__DECIMATE
+      #endif // ENABLE_FEATURE_LIGHTS__DECIMATE
 
       return vLength;
     }
@@ -3469,7 +3477,7 @@ typedef struct Segment
     [[gnu::hot]] uint16_t virtualLength(void) const;
 
     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-      [[gnu::hot]] void setPixelColor(int n, RgbwwColor c,bool brightness_already_set = false);                  // Main function others below call
+      [[gnu::hot]] void setPixelColor(int n, RgbwwColor c, bool brightness_already_set = false);                  // Main function others below call
       void setPixelColor(int n, byte r, byte g, byte b, byte w = 0) 
       { 
         #ifdef ENABLE_DEVFEATURE_LIGHTS__SHOW_HEADER_SETPIXEL_OVERLOADING_CALLS
@@ -3505,11 +3513,16 @@ typedef struct Segment
         #endif    
         setPixelColor((int)n, RgbwwColor(R(c), G(c), B(c), W(c), W(c)));
       }  // explicit conversion
+      
+      // void setPixelColor(unsigned n, uint32_t c){ setPixelColor((int)n, c); } // to keep compatibility with RGBWW
+      // void setPixelColor(uint16_t n, uint32_t c){ setPixelColor((int)n, c); } // to keep compatibility with RGBWW
       // Anti-aliasing functions
-      void setPixelColor(float i, uint32_t c, bool aa = true);
-      void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) { setPixelColor(i, RGBW32(r,g,b,w), aa); }
-      void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }    
-    #else    
+      #ifdef ENABLE_ANTIALIAS_WITH_RGBWW // avoids ambiguous with Rgbww and u32, and int/float args
+        void setPixelColor(float i, uint32_t c, bool aa = true);
+        void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) { setPixelColor(i, RGBW32(r,g,b,w), aa); }
+        void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }    
+      #endif
+      #else    
       [[gnu::hot]] void setPixelColor(int n, uint32_t c,bool brightness_already_set = false);
       void setPixelColor(int n, RgbwwColor c){ setPixelColor(n, RGBW32(c.R, c.G, c.B, c.WW)); } 
       void setPixelColor(unsigned n, uint32_t c){ setPixelColor((int)n, c); } // to keep compatibility with RGBWW
@@ -3967,7 +3980,7 @@ inline void Set_DynamicBuffer_DesiredColour(uint16_t pixelIndex, uint32_t color)
     coldata[offset + 1] = G(color); // Green
     coldata[offset + 2] = B(color); // Blue
 
-    if (colour_width__used_in_effect_generate == 4) {
+    if (colour_width__used_in_effect_generate > 3) { // 4 or 5
         coldata[offset + 3] = W(color); // White for WRGB
     }
 }
@@ -3979,7 +3992,7 @@ inline void Set_DynamicBuffer_StartingColour(uint16_t pixelIndex, uint32_t color
     coldata[offset + 1] = G(color); // Green
     coldata[offset + 2] = B(color); // Blue
 
-    if (colour_width__used_in_effect_generate == 4) {
+    if (colour_width__used_in_effect_generate > 3) { // 4 or 5
         coldata[offset + 3] = W(color); // White for WRGB
     }
 }
@@ -4237,7 +4250,9 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(
             // uint32_t blendedColor = RGBW32(rgbw.R, rgbw.G, rgbw.B, rgbw.W); // When debugging without a blend
             // uint32_t blendedColor = desiredColor; // When debugging without a blend
 
-            setPixelColor(i, blendedColor, BRIGHTNESS_ALREADY_SET);
+            setPixelColor((int)i, blendedColor, BRIGHTNESS_ALREADY_SET);
+
+            // setPixelColor((int)i, (RgbwwColor)blendedColor, BRIGHTNESS_ALREADY_SET);
 
             #ifdef ENABLE_DEBUGFEATURE_LIGHTING__TRACE_PIXEL_SET_GET_SHOW_FIRST_NUMBER_LOGGED_WITH_VALUE
             if(i < ENABLE_DEBUGFEATURE_LIGHTING__TRACE_PIXEL_SET_GET_SHOW_FIRST_NUMBER_LOGGED_WITH_VALUE) {              
@@ -4274,7 +4289,7 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_ifdef(const Animation
 
             // Blend RGBWW colors and write the result
             RgbwwColor blendedRgbww = RgbwwColor::LinearBlend(startRgbww, desiredRgbww, blendFactor);
-            setPixelColor(i, blendedRgbww, BRIGHTNESS_ALREADY_SET);
+            setPixelColor((int)i, blendedRgbww, BRIGHTNESS_ALREADY_SET);
             #endif
         } else {
 // Serial.println("if1a");Serial.flush();
@@ -4294,7 +4309,7 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_ifdef(const Animation
 
 // Serial.println("if1");Serial.flush();
 
-            setPixelColor(i, blendedColor, BRIGHTNESS_ALREADY_SET);
+            setPixelColor((int)i, blendedColor, BRIGHTNESS_ALREADY_SET);
 
 // Serial.println("if2");Serial.flush();
 
@@ -4327,6 +4342,9 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment(const Ani
         RgbwwColor startRgbww = Get_DynamicBuffer_StartingColour_RgbwwColor(0);
         RgbwwColor desiredRgbww = Get_DynamicBuffer_DesiredColour_RgbwwColor(0);
 
+        #ifdef ENABLE_DEVFEATURE_LIGHTING__SUPPRESS_WHITE_OUTPUT
+        desiredRgbww.WW = 0; desiredRgbww.CW = 0;
+        #endif
         // Blend the two colors
         // RgbwwColor blendedRgbww = desiredRgbww;//RgbwwColor::LinearBlend(startRgbww, desiredRgbww, blendFactor);
 
@@ -4345,7 +4363,7 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment(const Ani
           #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
           Serial.printf("blendedRgbww RGBWW %d,%d,%d,%d,%d\n\r", blendedRgbww.R, blendedRgbww.G, blendedRgbww.B, blendedRgbww.WW, blendedRgbww.CW); 
           #endif
-          setPixelColor(pixel, blendedRgbww);
+          setPixelColor((int)pixel, blendedRgbww);
         }
         
         // AddLog_Array_Block(3, PSTR("Solid Colour RGBWW"), SEGMENT.Data(), SEGMENT.DataLength(), 5, false);
@@ -4360,7 +4378,7 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment(const Ani
 
         // Set the blended color across the segment
         for (uint16_t pixel = 0; pixel < virtualLength(); pixel++) {
-            setPixelColor(pixel, blendedColor);
+            setPixelColor((int)pixel, blendedColor);
         }
     }
 }
@@ -4381,6 +4399,11 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment_Brightnes
         RgbwwColor startRgbww = Get_DynamicBuffer_StartingColour_RgbwwColor(0);
         RgbwwColor desiredRgbww = Get_DynamicBuffer_DesiredColour_RgbwwColor(0);
 
+        
+        #ifdef ENABLE_DEVFEATURE_LIGHTING__SUPPRESS_WHITE_OUTPUT
+        desiredRgbww.WW = 0; desiredRgbww.CW = 0;
+        #endif
+
         // Blend the two colors
         // RgbwwColor blendedRgbww = desiredRgbww;//RgbwwColor::LinearBlend(startRgbww, desiredRgbww, blendFactor);
 
@@ -4399,7 +4422,7 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment_Brightnes
           #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
           Serial.printf("blendedRgbww RGBWW %d,%d,%d,%d,%d\n\r", blendedRgbww.R, blendedRgbww.G, blendedRgbww.B, blendedRgbww.WW, blendedRgbww.CW); 
           #endif
-          setPixelColor(pixel, blendedRgbww, BRIGHTNESS_ALREADY_SET);
+          setPixelColor((int)pixel, (RgbwwColor)blendedRgbww, BRIGHTNESS_ALREADY_SET);
         }
         
         // AddLog_Array_Block(3, PSTR("Solid Colour RGBWW"), SEGMENT.Data(), SEGMENT.DataLength(), 5, false);
@@ -4414,7 +4437,7 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment_Brightnes
 
         // Set the blended color across the segment
         for (uint16_t pixel = 0; pixel < virtualLength(); pixel++) {
-            setPixelColor(pixel, blendedColor, BRIGHTNESS_ALREADY_SET);
+            setPixelColor((int)pixel, blendedColor, BRIGHTNESS_ALREADY_SET);
         }
     }
 }
@@ -5364,14 +5387,6 @@ time_t localTime _INIT(0);
 // bool useAMPM _INIT(false);       // 12h/24h clock format
 // byte currentTimezone _INIT(0);   // Timezone ID. Refer to timezones array in wled10_ntp.ino
 // int utcOffsetSecs _INIT(0);      // Seconds to offset from UTC before timzone calculation
-
-// #define FLASH_COUNT 4 
-#define LED_SKIP_AMOUNT  0
-// #define MIN_SHOW_DELAY  15
-#ifndef MIN_SHOW_DELAY
-#define MIN_SHOW_DELAY   20//(_frametime < 16 ? 8 : 15) // minimum show delay based on frametime. <10ms will cause flicker, especially on parallel methods
-#endif
-#define DEFAULT_LED_COUNT 100
 
 
 // Segment capability byte

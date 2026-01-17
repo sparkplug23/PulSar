@@ -189,10 +189,10 @@ public mTaskerInterface{
 
 
 // server library objects
-AsyncWebServer* server = nullptr; //(80);
-#ifdef ENABLE_DEVFEATURE_LIGHTING__JSONLIVE_WEBSOCKETS
+AsyncWebServer* server = nullptr;
+
 AsyncWebSocket* websocket_lights = nullptr;
-#endif
+
 
 AsyncWebHandler *editHandler = nullptr;
 

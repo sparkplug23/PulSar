@@ -2,7 +2,7 @@
 void mAnimatorLight::LoadEffects()
 {
   // General Level 1 Minimal Home Effects
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   addEffect(EFFECTS_FUNCTION__SOLID_COLOUR__ID,
             &mAnimatorLight::EffectAnim__Solid_Colour,
             PM_EFFECT_CONFIG__SOLID_COLOUR,
@@ -44,7 +44,7 @@ void mAnimatorLight::LoadEffects()
   #endif
 
   // General Level 2 Flashing Basic Effects
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   addEffect(EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,
             &mAnimatorLight::EffectAnim__Shimmering_Two_Palette,
             PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES,
@@ -91,7 +91,7 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_CONFIG__TIMEBASED__HOUR_PROGRESS);
 
   // General Level 3 Flashing Extended Effects
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   addEffect(EFFECTS_FUNCTION__POPPING_DECAY_PALETTE_TO_BLACK__ID,
             &mAnimatorLight::EffectAnim__Popping_Decay_Palette_To_Black,
             PM_EFFECT_CONFIG__POPPING_DECAY_PALETTE_TO_BLACK,
@@ -123,7 +123,7 @@ void mAnimatorLight::LoadEffects()
   #endif
 
   // General Level 4 Flashing Complete Effects
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect(EFFECTS_FUNCTION__SPOTS__ID,
             &mAnimatorLight::EffectAnim__Spots,
             PM_EFFECT_CONFIG__SPOTS);
@@ -274,7 +274,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Chase
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect(EFFECTS_FUNCTION__CHASE_COLOR__ID,
             &mAnimatorLight::EffectAnim__Chase_Colour,
             PM_EFFECT_CONFIG__CHASE_COLOR);
@@ -315,7 +315,7 @@ void mAnimatorLight::LoadEffects()
   /**
    *  Breathe/Fade/Pulse
    **/      
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect(EFFECTS_FUNCTION__BREATH__ID,
             &mAnimatorLight::EffectAnim__Breath,
             PM_EFFECT_CONFIG__BREATH);
@@ -336,7 +336,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Sparkle/Twinkle
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect(EFFECTS_FUNCTION__SOLID_GLITTER__ID,
             &mAnimatorLight::EffectAnim__Solid_Glitter,
             PM_EFFECT_CONFIG__SOLID_GLITTER);
@@ -405,7 +405,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Fireworks
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
   addEffect(EFFECTS_FUNCTION__FIREWORKS__ID,                     
             &mAnimatorLight::EffectAnim__Fireworks,                    
             PM_EFFECT_CONFIG__FIREWORKS);
@@ -434,7 +434,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Blink/Strobe
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect(EFFECTS_FUNCTION__BLINK__ID,
             &mAnimatorLight::EffectAnim__Blink,
             PM_EFFECT_CONFIG__BLINK);
@@ -479,7 +479,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Noise
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect(EFFECTS_FUNCTION__FILLNOISE8__ID,
             &mAnimatorLight::EffectAnim__FillNoise8,
             PM_EFFECT_CONFIG__FILLNOISE8);
@@ -516,7 +516,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Scan
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
   addEffect(EFFECTS_FUNCTION__SCAN__ID,
             &mAnimatorLight::EffectAnim__Scan,
             PM_EFFECT_CONFIG__SCAN);
@@ -577,7 +577,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Hardware Installation Helpers
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
   addEffect(EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,
             &mAnimatorLight::EffectAnim__Hardware__Show_Bus,
             PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS);
@@ -598,7 +598,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Sun Position
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
   addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01__ID,
             &mAnimatorLight::EffectAnim__SunPositions__Sunrise_Alarm_01,
             PM_EFFECT_CONFIG__SUNPOSITIONS__SUNRISE_ALARM_01);
@@ -631,7 +631,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * LED Segment Clock
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
   addEffect(EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID,
             &mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_01,
             PM_EFFECT_CONFIG__7SEGMENTDISPLAY__CLOCKTIME_01);
@@ -652,7 +652,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Notifications
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
   addEffect(EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID,
             &mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Static,
             PM_EFFECT_CONFIG__NOTIFICATION_STATIC);
@@ -673,7 +673,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Border/Frame/Edge Wallpapers
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
   addEffect(EFFECTS_FUNCTION__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT__ID,
             &mAnimatorLight::EffectAnim__BorderWallpaper__TwoColour_Gradient,
             PM_EFFECT_CONFIG__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT);
@@ -690,7 +690,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Manual Pixel: Keeping as legacy, but mode change to realtime will remove this
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
   addEffect(EFFECTS_FUNCTION__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE__ID,
             &mAnimatorLight::EffectAnim__Manual__ControlledFromAnotherModule,
             PM_EFFECT_CONFIG__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE__INDEXING);
@@ -699,7 +699,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Christmas Multifunction Controller: Replication of vintage 8 function controllers
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING
   addEffect(EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,
             &mAnimatorLight::EffectAnim__Christmas_Musical__01,
             PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01);
@@ -708,7 +708,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Christmas Musical
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL0_DEVELOPING
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING
   addEffect(EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,
             &mAnimatorLight::EffectAnim__Christmas_Musical__01,
             PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01);
@@ -847,7 +847,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Audio Reactive 1D
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D_TODO
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D_TODO
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__1D__RIPPLE_PEAK__ID,
             &mAnimatorLight::EffectAnim__AudioReactive__1D__Ripple_Peak,
             PM_EFFECT_CONFIG__AUDIOREACTIVE__1D__RIPPLE_PEAK);
@@ -949,7 +949,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Audio Reactive 2D
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__2D__SWIRL__ID,   
             &mAnimatorLight::EffectAnim__AudioReactive__2D__Swirl, 
             PM_EFFECT_CONFIG__AUDIOREACTIVE__2D__SWIRL__INDEXING); 

@@ -330,7 +330,6 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 // #define MQTT_HOST       MQTT_HOST
 // #endif // MQTT_HOST
 
-  // #define ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
   // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
 
 

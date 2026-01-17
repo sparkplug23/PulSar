@@ -15,6 +15,8 @@
 // #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__ON_SIM800L__OFFICE_TESTBED // Office window testbed, SIM800L, BK-880Q GPs, onboard IMU, SIM800L
 
 
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_CELLULAR_LOCATOR_02_2026
+
 // //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -1107,6 +1109,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   // #define USE_SSIDS_NONE_DEBUGGING
   // #define DISABLE_DEVFEATURE_NETWORK_WIFI
 
+
   // #define DISABLE_NETWORK
 
   // #define DISABLE_SERIAL
@@ -1173,6 +1176,162 @@ The new smaller LTE board needs testing too, might need as window tester first.
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+    "\"" D_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"  
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_CELLULAR_LOCATOR_02_2026
+  #define DEVICENAME_CTR          "cellular_locator_02"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define MQTT_HOST   "192.168.3.70"
+
+  
+#define MQTT_HOST_CELLULAR "sparkequinox2.ddns.net"
+
+
+#define  ENABLE_FEATURE_CELLULAR__INCLUDE_MOBILE_NETWORKS
+
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_DRIVERS_MODEM_7000G
+
+  // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+  #define ENABLE_FEATURE_SIM__SMS
+
+  // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // #define USE_MODULE_NETWORK_MQTT
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // #define USE_SSIDS_NONE_DEBUGGING
+  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+
+  #define ENABLE_FEATURE_WIFI__BLOCK_CONNECTION
+
+
+  // #define DISABLE_NETWORK
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define MQTT_PORT 51883 //external mqtt broker on TOWER 
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  // #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_CELLULAR
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  #define USE_MODULE_SENSORS_GPS_MODEM
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+
+  // #define UART_CELLULAR_BAUD   115200
+#define UART_CELLULAR_BAUD   921600
+
+  #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+    #define SHOW_SPLASH
+
+    // #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__NETWORK_CELLULAR__CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__CTR "\":["
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
     "},"   
@@ -2224,7 +2383,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
   "}";
 
 #endif
-
 
 
 

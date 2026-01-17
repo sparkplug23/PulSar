@@ -776,7 +776,7 @@ void mAnimatorLight::EveryLoop()
       SubTask_Effects();
     break;
     #endif
-    #ifdef ENABLE_ANIMATION_MODE__INTERNAL_CONTROL_FROM_ANOTHER_MODULE
+    #ifdef ENABLE_FEATURE_LIGHTS__ANIMATION_MODE__INTERNAL_CONTROL_FROM_ANOTHER_MODULE
     case ANIMATION_MODE__INTERNAL_CONTROL_FROM_ANOTHER_MODULE:
       SubTask_AnimationMode__InternalControlFromAnotherModule();
     break;
@@ -788,7 +788,7 @@ void mAnimatorLight::EveryLoop()
 
 }
 
-#ifdef ENABLE_ANIMATION_MODE__INTERNAL_CONTROL_FROM_ANOTHER_MODULE
+#ifdef ENABLE_FEATURE_LIGHTS__ANIMATION_MODE__INTERNAL_CONTROL_FROM_ANOTHER_MODULE
 /**
  * @brief Function should call the Bus::Show based on the effect_period time
  * It will assume the setPixelColor has been called, and brightness has been already applied
@@ -3570,6 +3570,7 @@ uint16_t mAnimatorLight::Segment::virtualLength() const {
  *   pixel to the correct 2D coordinate.
  * - `virtualLength()` is used as the logical length of the strip dimension this 1D effect draws on.
  */
+#if !defined(ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE) || defined(ENABLE_ANTIALIAS_WITH_RGBWW)
 void mAnimatorLight::Segment::setPixelColor(float i, uint32_t col, bool aa)
 {
   // Bail if segment is inactive.
@@ -3629,6 +3630,7 @@ void mAnimatorLight::Segment::setPixelColor(float i, uint32_t col, bool aa)
     setPixelColor(idx | (vStrip << 16), col);
   }
 }
+#endif
 
 
 #if defined(ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_DEV) || defined(ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA)
@@ -5207,13 +5209,14 @@ RgbwwColor mAnimatorLight::Segment::GetPaletteColour_RGBWW(
   bool apply_brightness
 ){
 
-  uint32_t colour32 = GetPaletteColour_Legacy(
+  uint32_t colour32 = GetPaletteColour(
     pixel_position,
     flag_spanned_segment,
     flag_wrap_hard_edge,
     flag_crgb_exact_colour,
     encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-    apply_brightness
+    apply_brightness,
+    255,0
   );
 
   return RgbwwColor(
@@ -5753,7 +5756,6 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col,bool f
    *                        setPixelColorXY direct ie 2D effects and bypassing setPixelColor
    * Waiting until after 2D has been handled, with the assumption its brightness is then set by setPixelColorXY
    */
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_MANUAL_CONTROLS
   // // Apply brightness if needed
   if (flag_brightness_already_applied==false) {
     // uint8_t brightness = tkr_iLight->getBriRGB_Global();//scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
@@ -5767,7 +5769,6 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col,bool f
       (W(col) * scale) >> 8   // White
     );
   }
-  #endif
 
   unsigned len = length();
   // if color is unscaled
@@ -5809,17 +5810,7 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col,bool f
       tkr_anim->setPixelColor(indexSet, tmpCol);
 
       
-      #ifdef ENABLE_DEVFEATURE_LIGHTS__DECIMATE
-      // for (uint8_t d = 0; d < decimate; d++) 
-      // {
-      //   if (j > 1) break;  // Skip decimate when grouping is on
-
-      //   uint16_t new_indexSet = indexSet + (d * virtualLength());
-      //   if (new_indexSet >= start && new_indexSet < stop) 
-      //   {
-      //     tkr_anim->setPixelColor(new_indexSet, tmpCol);
-      //   }
-      // }
+      #ifdef ENABLE_FEATURE_LIGHTS__DECIMATE
       if (decimate > 1 && j <= 1)  // only replicate when active & not grouped
       {
         for (uint8_t d = 1; d < decimate; d++)  // start from 1, base pixel already set
@@ -5893,7 +5884,6 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, RgbwwColor col, boo
   //   );
   // }
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_MANUAL_CONTROLS
   // // Apply brightness if needed
   if (flag_brightness_already_applied==false) {
     // uint8_t brightness = tkr_iLight->getBriRGB_Global();//scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
@@ -5908,7 +5898,6 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColor(int i, RgbwwColor col, boo
     //   (W(col) * scale) >> 8   // White
     // );
   }
-  #endif
 
 
 #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS

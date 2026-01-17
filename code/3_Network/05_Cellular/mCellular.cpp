@@ -45,11 +45,13 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
 
     }
     break;
-    case TASK_EVERY_SECOND: 
+    case TASK_EVERY_SECOND:
+{
+  // 1Hz policy loop: connect GPRS, then start MQTT using modem-provided TinyGsmClient
+  Cellular_ConnMgr_Tick_1s(millis());
+}
+break;
 
-      
-
-    break;
     case TASK_EVERY_FIVE_SECOND:   
     {
       
@@ -91,15 +93,203 @@ void mCellular::Pre_Init(void){
   
 }
 
-
 void mCellular::Init(void)
 {
-
-
-
+  Cellular_ConnMgr_Reset();
 }
 
 
+
+void mCellular::Cellular_ConnMgr_Reset()
+{
+  conn_sm_.state = cellular_conn_state_t::WAIT_MODEM_READY;
+  conn_sm_.t_enter_ms = millis();
+  conn_sm_.t_next_action_ms = 0;
+
+  conn_sm_.attempts = 0;
+  conn_sm_.init_config_done = false;
+  conn_sm_.mqtt_started = false;
+
+  conn_sm_.last_gprs_connected = false;
+}
+
+void mCellular::Cellular_ConnMgr_Tick_1s(uint32_t now_ms)
+{
+  // Hard dependency: modem driver must exist
+  if (!tkr_modem) return;
+
+  #ifndef ENABLE_FEATURE_CELLULAR__INCLUDE_MOBILE_NETWORKS
+  return; //tmp block networking, to focus on sms
+  #endif
+
+  // Gate: only act when modem driver baseline is ready (AT responsive)
+  if (!tkr_modem->IsReady())
+  {
+    // If we were online previously, collapse state
+    if (conn_sm_.state != cellular_conn_state_t::WAIT_MODEM_READY) {
+      ALOG_WRN(PSTR(D_LOG_CELLULAR "CELL: Modem not ready, returning to WAIT_MODEM_READY"));
+      Cellular_ConnMgr_Reset();
+    }
+    return;
+  }
+
+  const bool gprs_connected = tkr_modem->DataNetwork_IsConnected();
+
+  ALOG_INF(PSTR("gprd_Connected %d %d"),gprs_connected,conn_sm_.state);
+
+  // Detect drop while “ONLINE”
+  if (conn_sm_.state == cellular_conn_state_t::ONLINE)
+  {
+    if (!gprs_connected)
+    {
+      ALOG_WRN(PSTR(D_LOG_CELLULAR "CELL: GPRS dropped, entering BACKOFF"));
+      conn_sm_.mqtt_started = false;     // allow re-create if needed
+      conn_sm_.attempts++;
+      _conn_enter(conn_sm_, cellular_conn_state_t::BACKOFF, now_ms);
+    }
+    return; // online and still connected => nothing to do at 1Hz
+  }
+
+  // Simple rate-limit for expensive calls (prevents hammering)
+  if (conn_sm_.t_next_action_ms && (int32_t)(now_ms - conn_sm_.t_next_action_ms) < 0) {
+    return;
+  }
+
+  switch (conn_sm_.state)
+  {
+    default:
+    case cellular_conn_state_t::WAIT_MODEM_READY:
+    {
+      // modem is ready (we passed gate), move on
+      conn_sm_.attempts = 0;
+      conn_sm_.init_config_done = false;
+      conn_sm_.mqtt_started = false;
+      _conn_enter(conn_sm_, cellular_conn_state_t::INIT_CONFIG, now_ms);
+      conn_sm_.t_next_action_ms = now_ms; // immediate
+    }
+    break;
+
+    case cellular_conn_state_t::INIT_CONFIG:
+    {
+      // Run once per boot/restart (operator preference, band, etc.)
+      // NOTE: your current DataNetwork__InitConfig() contains blocking loops.
+      // This policy SM ensures it is *not called repeatedly*.
+      ALOG_INF(PSTR(D_LOG_CELLULAR "CELL: DataNetwork__InitConfig (attempt %u)"), conn_sm_.attempts + 1);
+
+      const bool ok = tkr_modem->DataNetwork__InitConfig();
+      conn_sm_.init_config_done = ok;
+
+      if (ok) {
+        _conn_enter(conn_sm_, cellular_conn_state_t::START_CONNECTION, now_ms);
+        conn_sm_.t_next_action_ms = now_ms + 1000; // small settle
+      } else {
+        conn_sm_.attempts++;
+        _conn_enter(conn_sm_, cellular_conn_state_t::BACKOFF, now_ms);
+        conn_sm_.t_next_action_ms = now_ms + 5000;
+      }
+    }
+    break;
+
+    case cellular_conn_state_t::START_CONNECTION:
+    {
+      // If already connected, skip straight to MQTT stage
+      if (gprs_connected) {
+        _conn_enter(conn_sm_, cellular_conn_state_t::START_MQTT, now_ms);
+        conn_sm_.t_next_action_ms = now_ms;
+        break;
+      }
+
+      ALOG_INF(PSTR(D_LOG_CELLULAR "CELL: DataNetwork__StartConnection (attempt %u)"), conn_sm_.attempts + 1);
+
+      const bool ok = tkr_modem->DataNetwork__StartConnection();
+
+      if (ok && tkr_modem->DataNetwork_IsConnected()) {
+        _conn_enter(conn_sm_, cellular_conn_state_t::START_MQTT, now_ms);
+        conn_sm_.t_next_action_ms = now_ms;
+      } else {
+        conn_sm_.attempts++;
+        _conn_enter(conn_sm_, cellular_conn_state_t::BACKOFF, now_ms);
+        conn_sm_.t_next_action_ms = now_ms + 5000;
+      }
+    }
+    break;
+
+    case cellular_conn_state_t::START_MQTT:
+    {
+      // Must have data plane up
+      if (!tkr_modem->DataNetwork_IsConnected()) {
+        _conn_enter(conn_sm_, cellular_conn_state_t::BACKOFF, now_ms);
+        conn_sm_.t_next_action_ms = now_ms + 3000;
+        break;
+      }
+
+      if (!conn_sm_.mqtt_started)
+      {
+        TinyGsmClient* gsm_client = tkr_modem->DataNetwork_GetOrCreateClient(false);
+        if (!gsm_client) {
+          ALOG_ERR(PSTR(D_LOG_CELLULAR "CELL: GSM client creation failed"));
+          conn_sm_.attempts++;
+          _conn_enter(conn_sm_, cellular_conn_state_t::BACKOFF, now_ms);
+          conn_sm_.t_next_action_ms = now_ms + 5000;
+          break;
+        }
+
+        ALOG_HGL(PSTR(D_LOG_CELLULAR "CELL: Starting MQTT over cellular"));
+        tkr_mqtt->CreateConnection(
+          gsm_client,
+          MQTT_HOST_CELLULAR,
+          MQTT_PORT_CELLULAR,
+          CLIENT_TYPE_CELLULAR_ID,
+          MQTT_HOST__USERNAME,
+          MQTT_HOST__PASSWORD
+        );
+
+        
+          tkr_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
+          DEBUG_LINE_HERE3
+
+          tkr_mqtt->brokers.back()->SetReConnectBackoffTime(MQTT_RETRY_SECS);
+          DEBUG_LINE_HERE3
+          
+          // char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%s"), tkr_set->Settings.system_name.device, WiFi.macAddress().c_str()); 
+          
+          uint8_t mac[6];           WiFi.macAddress(mac);
+          DEBUG_LINE_HERE3
+          char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%02X:%02X:%02X"), tkr_set->Settings.system_name.device, mac[3], mac[4], mac[5]); 
+          DEBUG_LINE_HERE3
+          tkr_mqtt->brokers.back()->SetClientName(client_name);
+          DEBUG_LINE_HERE3
+
+          tkr_mqtt->brokers.back()->SetTopicPrefix(tkr_set->Settings.system_name.device);
+
+          tkr_mqtt->brokers.back()->SetCredentials(MQTT_HOST__USERNAME, MQTT_HOST__PASSWORD);
+
+          
+
+
+
+        conn_sm_.mqtt_started = true;
+      }
+
+      _conn_enter(conn_sm_, cellular_conn_state_t::ONLINE, now_ms);
+      conn_sm_.t_next_action_ms = 0;
+      ALOG_INF(PSTR(D_LOG_CELLULAR "CELL: ONLINE (GPRS + MQTT init issued)"));
+    }
+    break;
+
+    case cellular_conn_state_t::BACKOFF:
+    {
+      // Simple exponential-ish backoff (bounded)
+      const uint32_t backoff_ms = (uint32_t)min<uint32_t>(60000UL, 5000UL * (uint32_t)max<uint8_t>(1, conn_sm_.attempts));
+      ALOG_WRN(PSTR(D_LOG_CELLULAR "CELL: BACKOFF %lu ms (attempts=%u)"), (unsigned long)backoff_ms, conn_sm_.attempts);
+
+      // After backoff, retry from START_CONNECTION (don’t redo init config every time)
+      _conn_enter(conn_sm_, cellular_conn_state_t::START_CONNECTION, now_ms);
+      conn_sm_.t_next_action_ms = now_ms + backoff_ms;
+    }
+    break;
+  }
+}
 
 
 
@@ -149,7 +339,9 @@ uint8_t mCellular::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
   #ifdef USE_MODULE_DRIVERS_MODEM_7000G
   mSIM7000G::GPRS_STATUS gprs = tkr_sim7000g->gprs;
+  #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
   mSIM7000G::GPS_STATUS gps = tkr_sim7000g->gps;
+  #endif
   mSIM7000G::DATA modem_status = tkr_sim7000g->modem_status;
   // #endif // USE_MODULE_DRIVERS_MODEM_7000G
   // #ifdef USE_MODULE_DRIVERS_MODEM_7000G

@@ -12,7 +12,7 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 /********************************************************************************************************************************************************************************************************************
  * @function              : EffectAnim__Solid_Colour
@@ -75,7 +75,7 @@ uint16_t mAnimatorLight::EffectAnim__Solid_Colour()
   } else {
 
     // Handle RGB/WRGB cases
-    uint32_t desiredColour  = SEGMENT.GetPaletteColour(0, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+    uint32_t desiredColour  = SEGMENT.GetPaletteColour(0, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE);
     uint32_t startingColour = SEGMENT.getPixelColor(0);
 
     // SERIAL_DEBUG_COL32i("des", desiredColour, 0);
@@ -166,7 +166,7 @@ uint16_t mAnimatorLight::EffectAnim__Static_Palette()
     for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
     {
       DEBUG_LINE_HERE_TRACE
-      colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+      colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE);
       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
       #ifdef ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_COLOURS    
       Serial.printf("Static Colour --------------------------------------------------%d,%d,%d,%d\n\r", R(colour), G(colour), B(colour), W(colour));
@@ -382,7 +382,7 @@ uint16_t mAnimatorLight::EffectAnim__Bands_Palette_SegWidth()
         PALETTE_MODE__FORCE_DISCRETE,
         PALETTE_WRAP_HARDEDGE,
         NO_ENCODED_VALUE,
-        ANIM_BRIGHTNESS_REQUIRED
+        PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
       );
 
       SEGMENT.Set_DynamicBuffer_DesiredColour(adjusted_pixel, colour);
@@ -475,7 +475,7 @@ static const char PM_EFFECT_DESCRI__BANDS_PALETTE_SEGWIDTH[] PROGMEM =
 //         PALETTE_MODE__FORCE_GRADIENT,
 //         wrapoff,
 //         NO_ENCODED_VALUE,
-//         ANIM_BRIGHTNESS_REQUIRED
+//         PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
 //       );
 //       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
 //     }
@@ -601,7 +601,7 @@ uint16_t mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
         PALETTE_MODE__FORCE_GRADIENT,
         wrapoff,
         NO_ENCODED_VALUE,
-        ANIM_BRIGHTNESS_REQUIRED
+        PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
       );
       SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
     }
@@ -754,14 +754,14 @@ uint16_t mAnimatorLight::EffectAnim__Firefly()
   SEGMENT.DynamicBuffer_StartingColour_GetAllSegment();
 
   for (uint16_t i = 0; i < pixels_to_update; i++) {
-    // uint32_t colour = SEGMENT.GetPaletteColour_Legacy((SEGMENT.flags.animator_first_run) ? i : random(0, SEGMENT.palette->colours_in_palette), PALETTE_SPAN_OFF, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+    // uint32_t colour = SEGMENT.GetPaletteColour_Legacy((SEGMENT.flags.animator_first_run) ? i : random(0, SEGMENT.palette->colours_in_palette), PALETTE_SPAN_OFF, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE, PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE);
     uint32_t colour = SEGMENT.GetPaletteColour(
         (SEGMENT.flags.animator_first_run) ? i : random(0, SEGMENT.palette->colours_in_palette),
         PALETTE_INDEX__IS_EXACT_COLOUR,
         PALETTE_MODE__FORCE_DISCRETE,
         PALETTE_WRAP_HARDEDGE,
         NO_ENCODED_VALUE,
-        ANIM_BRIGHTNESS_REQUIRED
+        PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
       );
 
     SEGMENT.Set_DynamicBuffer_DesiredColour   ((SEGMENT.flags.animator_first_run) ? i : random(0, SEGMENT.virtualLength()), colour);
@@ -1096,10 +1096,10 @@ static const char PM_EFFECT_DESCRI__SHIMMERING_PALETTE_SATURATION[] PROGMEM =
 "Primary palette provides base hue; secondary is a light/white tint.";
 
 
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC /////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC /////////////////////////////////////////////////////////////////////////////////////////////
 
 
 // /*******************************************************************************************************************************************************************************************************************
@@ -1255,8 +1255,8 @@ uint16_t mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool 
   // if (move == 0) return FRAMETIME_WITH_SPEED(5, 1000);
 
   // Temp buffer for the wrapped edge in virtual space
-  std::vector<uint32_t> edge(move);
-
+  std::vector<ColorB> edge(move);
+#ifndef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
   // if (direction) {
     // ------------------------ Rotate right: pixels move toward higher virtual indices ------------------------
     // Save tail [vLen-move .. vLen-1]
@@ -1274,6 +1274,7 @@ uint16_t mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool 
     for (uint16_t j = 0; j < move; ++j) {
       tkr_iLight->bus_manager->busses[0]->setPixelColor(SEGMENT.start + j, edge[j]);
     }
+    #endif
 
 
 #else
@@ -1709,7 +1710,7 @@ uint16_t mAnimatorLight::EffectAnim__Rotating_Palette()
         PALETTE_MODE__DEFAULT,
         wrap_mode,
         NO_ENCODED_VALUE,
-        ANIM_BRIGHTNESS_REQUIRED                 // apply brightness once
+        PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE                 // apply brightness once
       );
       SEGMENT.setPixelColor(p, col, BRIGHTNESS_ALREADY_SET);
     }
@@ -1967,7 +1968,7 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette()
             PALETTE_MODE__DEFAULT,
             PALETTE_WRAP_HARDEDGE,
             NO_ENCODED_VALUE,
-            ANIM_BRIGHTNESS_REQUIRED                 // apply brightness once
+            PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE                 // apply brightness once
           );
       SEGMENT.Set_DynamicBuffer_DesiredColour(i, c);
     }
@@ -1986,7 +1987,7 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette()
             PALETTE_MODE__DEFAULT,
             PALETTE_WRAP_HARDEDGE,
             NO_ENCODED_VALUE,
-            ANIM_BRIGHTNESS_REQUIRED                 // apply brightness once
+            PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE                 // apply brightness once
           );
       SEGMENT.Set_DynamicBuffer_DesiredColour(i, c);
     }
@@ -2072,7 +2073,7 @@ uint16_t mAnimatorLight::EffectAnim__TimeBased__HourProgress()
             PALETTE_MODE__DEFAULT,
             PALETTE_WRAP_HARDEDGE,
             NO_ENCODED_VALUE,
-            ANIM_BRIGHTNESS_REQUIRED                 // apply brightness once
+            PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE                 // apply brightness once
           );
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel, colour);
   }
@@ -2153,7 +2154,7 @@ static const char PM_EFFECT_DESCRI__TIMEBASED__HOUR_PROGRESS[] PROGMEM =
  * NOTES
  *   • Background uses: GetUnloadedPaletteColour_ModeWrap(…, IS_SEGLEN_RANGE, DEFAULT/Discrete, WRAP_SMOOTH, …).
  *   • Foreground uses: GetPaletteColour(…, IS_EXACT_COLOUR, DEFAULT, WRAP_HARDEDGE, …) so we address exact entries.
- *   • Uses ANIM_BRIGHTNESS_REQUIRED only when painting desired colours; your animator applies the blend.
+ *   • Uses PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE only when painting desired colours; your animator applies the blend.
  *
  * RETURNS
  *   USE_ANIMATOR  (continue animator-driven blending)
@@ -2260,7 +2261,7 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
           PALETTE_MODE__DEFAULT,
           PALETTE_WRAP_HARDEDGE,
           NO_ENCODED_VALUE,
-          ANIM_BRIGHTNESS_REQUIRED
+          PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
         );
         SEGMENT.Set_DynamicBuffer_DesiredColour(j, c);
       }
@@ -2282,7 +2283,7 @@ uint16_t mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
           PALETTE_MODE__DEFAULT,
           PALETTE_WRAP_HARDEDGE,
           NO_ENCODED_VALUE,
-          ANIM_BRIGHTNESS_REQUIRED
+          PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
         );
       SEGMENT.Set_DynamicBuffer_DesiredColour(j, c);
     }
@@ -2436,7 +2437,7 @@ uint16_t mAnimatorLight::EffectAnim__Blend_Two_Palettes()
         PALETTE_MODE__DEFAULT,
         PALETTE_WRAP_HARDEDGE,
         NO_ENCODED_VALUE,
-        ANIM_BRIGHTNESS_REQUIRED
+        PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
       );
     } else {
       // Secondary via "unloaded" palette accessor (full visual output path)
@@ -3240,7 +3241,7 @@ static const char PM_EFFECT_DESCRI__TWINKLE_GLOW[] PROGMEM =
 
 
 
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC  SECITON END ////////////////////////////////////////////////////////
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC  SECITON END ////////////////////////////////////////////////////////
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -3254,7 +3255,7 @@ static const char PM_EFFECT_DESCRI__TWINKLE_GLOW[] PROGMEM =
  * @param time     : Blend time on first/only update
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 uint16_t mAnimatorLight::EffectAnim__SunPositions__Sunrise_Alarm_01()
 {
 
@@ -3276,7 +3277,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__Sunrise_Alarm_01()
 }
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__SUNRISE_ALARM_01[] PROGMEM = "Sun Alarm 01@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
 static const char PM_EFFECT_DESCRI__SUNPOSITIONS__SUNRISE_ALARM_01[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -3290,7 +3291,7 @@ static const char PM_EFFECT_DESCRI__SUNPOSITIONS__SUNRISE_ALARM_01[] PROGMEM = "
  * @param time     : Blend time on first/only update
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 uint16_t mAnimatorLight::EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_Palette_01()
 {
 
@@ -3312,7 +3313,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_P
 }
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01[] PROGMEM = "Sun Azimuth Palette 01@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
 static const char PM_EFFECT_DESCRI__SUNPOSITIONS__AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -3326,7 +3327,7 @@ static const char PM_EFFECT_DESCRI__SUNPOSITIONS__AZIMUTH_SELECTS_GRADIENT_OF_PA
  * @param time     : Blend time on first/only update
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 uint16_t mAnimatorLight::EffectAnim__SunPositions__Sunset_Blended_Palettes_01()
 {
 
@@ -3348,7 +3349,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__Sunset_Blended_Palettes_01()
 }
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__SUNSET_BLENDED_PALETTES_01[] PROGMEM = "SunSet Blended Palettes 01@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
 static const char PM_EFFECT_DESCRI__SUNPOSITIONS__SUNSET_BLENDED_PALETTES_01[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 
 // *********************************************************************************************
 // @function   : EffectAnim__SunPositions__NoonBurst_Base
@@ -3498,7 +3499,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__NoonBurst_Base(uint8_t speed,
  *   • To always show mirror palette by default, set o2=1 in the PM_EFFECT_CONFIG strings.
  *   • To alter burst styles by project: swap NoonBurst_Base with custom variants; interface is speed, center.
  **********************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(bool include_duskdawn)
 {
   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
@@ -3784,7 +3785,7 @@ static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_02[] PROG
 "C1/C2 present; analytic path ignores them";
 
 
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -3834,7 +3835,7 @@ static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_02[] PROG
  *   - This function is optimized for ESP32 animation loops and is called regularly for LED effects.
  ********************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_Base(bool include_duskdawn)
 {
   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
@@ -4011,7 +4012,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_02()
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_AZIMUTH_02[] PROGMEM = "Sun Azimuth DuskDawn@,Sun Width,Sky Width,Sky Fade,,Use Palette,Mirror,Markers,,;;name of palette;1;ep=1000,paln=Yellow,ix=0,c1=186,c2=50,o1=0,o3=1";
 static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_1D_AZIMUTH_02[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
 
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -4025,7 +4026,7 @@ static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_1D_AZIMUTH_02[] PROGME
  * @param time     : Blend time on first/only update
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azimuth_01()
 {
 
@@ -4047,7 +4048,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azim
 }
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01[] PROGMEM = "Sun 2D El/Az 01@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
 static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
@@ -4060,7 +4061,7 @@ static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_ELEVATION_AND_AZIMU
  * @param time     : Blend time on first/only update
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 uint16_t mAnimatorLight::EffectAnim__SunPositions__White_Colour_Temperature_CCT_Based_On_Elevation_01()
 {
 
@@ -4082,7 +4083,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__White_Colour_Temperature_CCT_
 }
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01[] PROGMEM = "Sun White Corrected El 01@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
 static const char PM_EFFECT_DESCRI__SUNPOSITIONS__WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -4097,7 +4098,7 @@ static const char PM_EFFECT_DESCRI__SUNPOSITIONS__WHITE_COLOUR_TEMPERATURE_CCT_B
  * 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 
 uint16_t mAnimatorLight::LCDDisplay_displayTime(time_t t, byte color, byte colorSpacing) {
   byte posOffset = 0;                                                                     // this offset will be used to move hours and minutes...
@@ -4152,7 +4153,7 @@ uint16_t mAnimatorLight::LCDDisplay_showSegment(byte segment, byte color_index, 
     // RgbcctColor colour = RgbcctColor();
     // colour = SEGMENT.GetPaletteColour_Legacy(color_index);      
 
-    uint32_t colour = SEGMENT.GetPaletteColour_Legacy(color_index, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+    uint32_t colour = SEGMENT.GetPaletteColour_Legacy(color_index, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE, PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE);
     SEGMENT.Set_DynamicBuffer_DesiredColour(pixel_index, colour);
 
     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel_index, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
@@ -4201,13 +4202,13 @@ uint16_t mAnimatorLight::LCDDisplay_showDots(byte dots, byte color) {
     // colour = SEGMENT.GetPaletteColour_Legacy(color);
     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), startPos, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
 
-    uint32_t colour = SEGMENT.GetPaletteColour_Legacy(color, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+    uint32_t colour = SEGMENT.GetPaletteColour_Legacy(color, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE, PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE);
     SEGMENT.Set_DynamicBuffer_DesiredColour(startPos, colour);
 
     if ( dots == 2 ) 
     {
 
-      uint32_t colour = SEGMENT.GetPaletteColour_Legacy(color, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE, ANIM_BRIGHTNESS_REQUIRED);
+      uint32_t colour = SEGMENT.GetPaletteColour_Legacy(color, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE, PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE);
       SEGMENT.Set_DynamicBuffer_DesiredColour(startPos+1, colour);
 
 
@@ -4536,7 +4537,7 @@ static const char PM_EFFECT_DESCRI__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 
 
 
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 
 
 /*
@@ -4606,7 +4607,7 @@ static const char PM_EFFECT_DESCRI__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 ****************************************************************************************************************************************************************************************
 */
 
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 /******************************************************************************************************************************************************************************************************************
    @brief: Colour_Wipe_Base
@@ -8266,7 +8267,7 @@ uint16_t mAnimatorLight::EffectAnim__Oscillate()
           PALETTE_MODE__FORCE_DISCRETE,
           PALETTE_WRAP_HARDEDGE,
           NO_ENCODED_VALUE,
-          ANIM_BRIGHTNESS_REQUIRED
+          PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
         );
 
         out = (out == BLACK) ? c : color_blend(out, c, (uint8_t)128);
@@ -13126,8 +13127,10 @@ uint16_t mAnimatorLight::EffectAnim__Bouncing_Balls()
         uint32_t color = pSEGMENT.color_wheel(i*(256/MAX(numBalls, 8)));
           
         int pos = roundf(balls[i].height * (pSEGLEN - 1));
+        #ifndef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
         if (pSEGLEN<32) pSEGMENT.setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
         else            pSEGMENT.setPixelColor(balls[i].height + (stripNr+1)*10.0f, color);
+        #endif
 
         // Serial.printf("len%d,%d\t%d\t%d\tcolor=%d,%d,%d h=%f iv=%f\n\r", pSEGMENT.virtualLength(),  pos, indexToVStrip(pos, stripNr), stripNr, R(color), G(color), B(color), balls[i].height, balls[i].impactVelocity);
       }
@@ -13706,10 +13709,10 @@ static const char PM_EFFECT_DESCRI__WAVESINS[] PROGMEM =
 "C3: Color phase variation";
 
 
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
  * @description : Notification style
@@ -13931,12 +13934,12 @@ uint16_t mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Base(boo
 
 };
 
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
 
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
- * @description : ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+ * @description : ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
  * @note : 
  * 
  * @param aux0 
@@ -13944,7 +13947,7 @@ uint16_t mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Base(boo
  * @param aux2 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
 uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__TwoColour_Gradient()
 {
 
@@ -14301,13 +14304,13 @@ uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__TwoColour_Gradient()
 }
 static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT[] PROGMEM = "Border Wallpaper TwoColour@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
 static const char PM_EFFECT_DESCRI__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
 
 
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
- * @description : ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+ * @description : ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
  * @note : 
  * 
  * @param aux0 
@@ -14315,7 +14318,7 @@ static const char PM_EFFECT_DESCRI__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT[] PROGM
  * @param aux2 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
 uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Gradient()
 {
 
@@ -14340,12 +14343,12 @@ uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Gradient()
 }
 static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT[] PROGMEM = "Border Wallpaper FourColour@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
 static const char PM_EFFECT_DESCRI__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
 
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
- * @description : ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+ * @description : ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
  * @note : 
  * 
  * @param aux0 
@@ -14353,7 +14356,7 @@ static const char PM_EFFECT_DESCRI__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT[] PROG
  * @param aux2 
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
 uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Solid()
 {
 
@@ -14377,10 +14380,10 @@ uint16_t mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Solid()
 }
 static const char PM_EFFECT_CONFIG__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM = "BW 4s@,,,,,Repeat Rate (ms);!,!,!,!,!;!";
 static const char PM_EFFECT_DESCRI__BORDER_WALLPAPER__FOURCOLOUR_SOLID[] PROGMEM = "Cycle Between Each Live Random Palette\n\rIX: Update Gradient\n\rSX: Cycle Random Palettes Rate"; //OPT DEBUG SPLASH
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
 
 
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
 
 /*******************************************************************************************************************************************************************************************************************
  * @description : Debug: Visualize Busses (Hue)
@@ -14423,7 +14426,7 @@ uint16_t mAnimatorLight::EffectAnim__Hardware__Show_Bus()
       SEGMENT.setPixelColor((int)i, col);
     }
 
-    if(SEGMENT.check1) SEGMENT.setPixelColor(start, 0xFFFFFF);
+    if(SEGMENT.check1) SEGMENT.setPixelColor((int)start, 0xFFFFFF);
   }
 
   return FRAMETIME;
@@ -14532,9 +14535,9 @@ static const char PM_EFFECT_DESCRI__HARDWARE__SHOW_BUS_DOTTED[] PROGMEM =
 
 
 
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
 
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
 /********************************************************************************************************************************************************************************************************************
  * @function      : EffectAnim__Hardware__Manual_Pixel_Counting
  * @description   :
@@ -14650,10 +14653,10 @@ static const char PM_EFFECT_DESCRI__HARDWARE__MANUAL_PIXEL_COUNTING[] PROGMEM =
 "Marks every 10th LED (bright white) and every 20th LED (colored) over a dim background."
 "\n\rBlinks: when enabled, 100th LED blinks once per second; 200th LED blinks twice per second."
 "\n\rUseful for counting/verification; no speed/intensity controls.";
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
 
 
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
 /*******************************************************************************************************************************************************************************************************************
  * @description : Debug: View Pixel Range
  *                Highlights a contiguous pixel range for inspection (e.g., a suspect span).
@@ -14730,7 +14733,7 @@ static const char PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM =
 "FG=C0, BG=C1. End index is exclusive.\n\r"
 "Indices are clamped; start/end auto-swap if reversed.";
 
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
 
 /********************************************************************************************************************************************************************************************************************
  *******************************************************************************************************************************************************************************************************************
@@ -14739,8 +14742,8 @@ static const char PM_EFFECT_DESCRI__HARDWARE__VIEW_PIXEL_RANGE[] PROGMEM =
  * Speed slider sets amount of LEDs lit, intensity sets unlit
  *******************************************************************************************************************************************************************************************************************
  ********************************************************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING__EXTERNAL_LIGHT_SENSING
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING__EXTERNAL_LIGHT_SENSING
 
 // ============================================================================
 // Hardware light sensor reading (single place to maintain)
@@ -15692,12 +15695,12 @@ static const char PM_EFFECT_DESCRI__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING_BTN[] 
 "CB3 SaveToFile: saves immediately when toggled on and after each change when left on.\n\r"
 "C1=255 load saved; C2=255 clear RAM results.";
 
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING__EXTERNAL_LIGHT_SENSING
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING__EXTERNAL_LIGHT_SENSING
 
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
 
 
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
 /*******************************************************************************************************************************************************************************************************************
  * @description : Module Controlled (no-op)
  *                Placeholder effect that renders nothing; intended for external/realtime modules to take over pixel control.
@@ -15715,10 +15718,10 @@ static const char PM_EFFECT_CONFIG__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PRO
 "Module Controlled@!;;";
 static const char PM_EFFECT_DESCRI__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE[] PROGMEM =
 "Does not render; reserved for external/realtime control.";
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
 
 
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
 
 
 // ============================================================================
@@ -17201,8 +17204,10 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Twinkle_Thermal()
 
     for (uint16_t i = 0; i < len; ++i) {
       const uint32_t c = SEGMENT.getPixelColor(i);
+      #ifndef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
       if (cool[i]) SEGMENT.setPixelColor(i, 0);           // OFF = black
       else         SEGMENT.setPixelColor(i, AdjustColourWithBrightness(c, bri_on));
+      #endif
     }
 
   } else {
@@ -17264,8 +17269,10 @@ uint16_t mAnimatorLight::EffectAnim__Christmas_Twinkle_Thermal()
       // Apply
       for (uint16_t i = base; i < base + thisBlock; ++i) {
         const uint32_t c = SEGMENT.getPixelColor(i);
+        #ifndef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
         if (cool[i]) SEGMENT.setPixelColor(i, 0); // OFF
         else         SEGMENT.setPixelColor(i, AdjustColourWithBrightness(c, bri_on));
+        #endif
       }
     }
   }
@@ -17295,9 +17302,9 @@ static const char PM_EFFECT_DESCRI__CHRISTMAS_TWINKLE_THERMAL[] PROGMEM =
 "C2 dims other blocks with a minimum dim floor (e.g. ≥30%%). Global brightness applies later.";
 
 
-#endif ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
+#endif ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
 
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
 
 
 /************************************************************************************************************************************
@@ -20092,7 +20099,7 @@ static const char PM_EFFECT_DESCRI__CHRISTMAS_SEQUENTIAL_PLUS_01[] PROGMEM =
 "EP/GP: !"
 ;
 
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
 
 
 
@@ -23590,7 +23597,7 @@ static const char PM_EFFECT_DESCRI__2D__WAVING_CELL[] PROGMEM =
 /********************     audio enhanced routines     ************************/
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
 
 
 mAnimatorLight::um_data_t* mAnimatorLight::getAudioData() {
@@ -23607,7 +23614,7 @@ mAnimatorLight::um_data_t* mAnimatorLight::getAudioData() {
 
 
 
-#ifdef   ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D     /////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef   ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D     /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -25548,11 +25555,11 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_WATERFALL[] PROGMEM =
 "C1: FFT bin to monitor\n\r"
 "C2: volume floor (min) threshold";
 
-#endif //ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D     /////////////////////////////////////////////////////////////////////////////////////////////////////////  
+#endif //ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D     /////////////////////////////////////////////////////////////////////////////////////////////////////////  
 
 
 
-#ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D ////////////////////////////////////////////////////////////////////////////////
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D ////////////////////////////////////////////////////////////////////////////////
 
 /*******************************************************************************************************************************************************************************************************************
  * @description : 2D Swirl — audio-reactive, symmetric “spirograph” trails inspired by Mark Kriegsman.
@@ -26080,13 +26087,13 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__2D__FFT_AKEMI[] PROGMEM =
 "Scales sprite from 32x32 map to your matrix size.";
 
 
-#endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D END SECTION /////////////////////////////////////////////////////////////////////////////
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D END SECTION /////////////////////////////////////////////////////////////////////////////
 
 
 void mAnimatorLight::LoadEffects()
 {
   // General Level 1 Minimal Home Effects
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
   addEffect(EFFECTS_FUNCTION__SOLID_COLOUR__ID,
             &mAnimatorLight::EffectAnim__Solid_Colour,
             PM_EFFECT_CONFIG__SOLID_COLOUR,
@@ -26159,10 +26166,10 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Release);
             
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
   // General Level 2 Flashing Basic Effects
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
   addEffect(EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,
             &mAnimatorLight::EffectAnim__Shimmering_Two_Palette,
             PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES,
@@ -26227,14 +26234,14 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Release);
 
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
 
   // General Level 3 Flashing Extended Effects
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
        
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
   // General Level 4 Flashing Complete Effects
   
@@ -27227,13 +27234,13 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Release);
   
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
 
 
   /**
    * Sun Position
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
   addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01__ID,
             &mAnimatorLight::EffectAnim__SunPositions__Sunrise_Alarm_01,
             PM_EFFECT_CONFIG__SUNPOSITIONS__SUNRISE_ALARM_01,
@@ -27310,7 +27317,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * LED Segment Clock
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
   addEffect(EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID,
             &mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_01,
             PM_EFFECT_CONFIG__7SEGMENTDISPLAY__CLOCKTIME_01,
@@ -27347,7 +27354,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Notifications
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__NOTIFICATIONS
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
   addEffect(EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID,
             &mAnimatorLight::SubTask_Segment_Animate_Function__Notification_Static,
             PM_EFFECT_CONFIG__NOTIFICATION_STATIC,
@@ -27384,7 +27391,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Border/Frame/Edge Wallpapers
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__BORDER_WALLPAPERS
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
   addEffect(EFFECTS_FUNCTION__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT__ID,
             &mAnimatorLight::EffectAnim__BorderWallpaper__TwoColour_Gradient,
             PM_EFFECT_CONFIG__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT,
@@ -27413,7 +27420,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Christmas Multifunction Controller: Replication of vintage 8 function controllers
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
   
     addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__INWAVES_01_ID,
             &mAnimatorLight::EffectAnim__Christmas_InWaves__01,
@@ -27460,7 +27467,7 @@ void mAnimatorLight::LoadEffects()
 
   #endif
 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
 
   addEffect(EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_02_ID,
             &mAnimatorLight::EffectAnim__Christmas_Sequential__02,
@@ -27862,7 +27869,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Audio Reactive 1D: UNSTABLE ASSIGNED
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_RIPPLE_PEAK__ID,
             &mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Ripple_Peak,
             PM_EFFECT_CONFIG__AUDIOREACTIVE__1D__FFT_RIPPLE_PEAK,
@@ -28075,7 +28082,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Christmas Musical
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_WITH_MUSIC
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_WITH_MUSIC
   addEffect(EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,
             &mAnimatorLight::EffectAnim__Christmas_Musical__01,
             PM_EFFECT_CONFIG__CHRISTMAS_MUSICAL_01,
@@ -28088,7 +28095,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Audio Reactive 2D
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D
   addEffect(EFFECTS_FUNCTION__AUDIOREACTIVE__2D__SWIRL__ID,   
             &mAnimatorLight::EffectAnim__AudioReactive__2D__Swirl, 
             PM_EFFECT_CONFIG__AUDIOREACTIVE__2D__SWIRL,
@@ -28133,7 +28140,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Hardware Installation Helpers
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
   addEffect(EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,
             &mAnimatorLight::EffectAnim__Hardware__Show_Bus,
             PM_EFFECT_CONFIG__HARDWARE__SHOW_BUS,
@@ -28166,7 +28173,7 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Release);
 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING__EXTERNAL_LIGHT_SENSING
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING__EXTERNAL_LIGHT_SENSING
 
   addEffect(EFFECTS_FUNCTION__HARDWARE__LIGHT_SENSOR_PIXEL_INDEXING__ID,
             &mAnimatorLight::EffectAnim__Hardware__Light_Sensor_Pixel_Indexing,
@@ -28190,7 +28197,7 @@ void mAnimatorLight::LoadEffects()
   /**
    * Manual Pixel: Keeping as legacy, but mode change to realtime will remove this
    **/
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
   addEffect(EFFECTS_FUNCTION__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE__ID,
             &mAnimatorLight::EffectAnim__Manual__ControlledFromAnotherModule,
             PM_EFFECT_CONFIG__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE,

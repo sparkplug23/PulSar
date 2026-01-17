@@ -19,9 +19,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
      
       server = new AsyncWebServer(80);
 
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__JSONLIVE_WEBSOCKETS
       websocket_lights = new AsyncWebSocket("/ws");
-      #endif
 
       #ifndef ESP8266
       #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET

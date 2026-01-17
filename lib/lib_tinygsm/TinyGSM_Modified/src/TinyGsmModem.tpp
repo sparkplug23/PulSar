@@ -186,6 +186,7 @@ class TinyGsmModem {
   // CGREG = GPRS service registration
   // CEREG = EPS registration for LTE modules
   int8_t getRegistrationStatusXREG(const char* regCommand) {
+    // Serial.println("getRegistrationStatusXREG");
     thisModem().sendAT('+', regCommand, '?');
     // check for any of the three for simplicity
     int8_t resp = thisModem().waitResponse(GF("+CREG:"), GF("+CGREG:"),

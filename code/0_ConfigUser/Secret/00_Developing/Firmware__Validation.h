@@ -25,7 +25,12 @@
 
 // #define DEVICE_VALIDATION__ESP32__CAMERA_WROOVER_E
 
-#define DEVICE_VALIDATION__ESP32__ETHERNET
+// #define DEVICE_VALIDATION__ESP32__ETHERNET
+
+
+// #define DEVICE_VALIDATION__ESP32__LIGHTING__1D_SINGLE_BUS
+
+
 
 /**
  * DEVICE_TYPE NETWORK: Any testbeds related to lighting
@@ -176,7 +181,7 @@
                   //  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
                   //  #define  ENABLE_FEATURE_BUILD__11JAN25_WIFI_AND_WEBUI
                   // #define  STRIP_DEFAULT_LENGTH  100
-                  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
+                  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 
 
   /***********************************

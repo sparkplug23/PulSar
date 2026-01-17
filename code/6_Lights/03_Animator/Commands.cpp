@@ -471,6 +471,12 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     data_buffer.isserviced++;
   }
 
+  if(jtok = obj["ColourType"])
+  {
+    ALOG_HGL(PSTR("CRITICAL ColourType should be inside EFFECT:ColourType"));
+  }
+
+
 
   /*************************************************************************
    *** {"Effects":{X:Y}}
@@ -1108,7 +1114,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   #endif // FIRMWARE_VERSION_MIN
   
 
-  #ifdef ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
   if(jtok = obj[PM_RGB_CLOCK].getObject()[PM_MANUAL_NUMBER]){
     lcd_display_show_number = jtok.getInt();
     // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
@@ -1120,7 +1126,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
     ALOG_COM(PSTR(D_LOG_PIXEL  D_COMMAND_SVALUE_K("ManualString")), lcd_display_show_string);
   }
-  #endif // ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+  #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 
 
   #ifdef ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL

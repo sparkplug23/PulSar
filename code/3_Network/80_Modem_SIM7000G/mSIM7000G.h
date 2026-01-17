@@ -1,5 +1,5 @@
 #ifndef _USE_MODULE_DRIVERS_MODEM_7000G_H
-#define _USE_MODULE_DRIVERS_MODEM_7000G_H 0.3
+#define _USE_MODULE_DRIVERS_MODEM_7000G_H
 
 #define D_UNIQUE_MODULE_DRIVERS_MODEM_7000G_ID 4080 // [(Folder_Number*100)+ID_File]
 
@@ -91,21 +91,177 @@ class mSIM7000G :
   public:
     mSIM7000G(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void Pre_Init();
+    void Init(void);
 
-    static constexpr const char* PM_MODULE__NETWORK_CELLULAR__CTR = D_MODULE__NETWORK_CELLULAR__CTR;
-    PGM_P GetModuleName(){          return PM_MODULE__NETWORK_CELLULAR__CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__NETWORK_CELLULAR__ID; }
+    static constexpr const char* PM_MODULE__DRIVERS_MODEM_7000G__CTR = D_MODULE__DRIVERS_MODEM_7000G__CTR;
+    PGM_P GetModuleName(){          return PM_MODULE__DRIVERS_MODEM_7000G__CTR; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_MODEM_7000G_ID; }
         
     struct SETTINGS{
       uint8_t fEnableSensor = false;
       uint8_t leds_found = 0;
     }settings;
 
+    // -------------------------------------------------------------------------------------------------
+    // Modem bring-up (migration API)
+    // Called by mCellular. This performs UART + baud sync + TinyGSM init/restart.
+    // Does NOT bring up data context or do network attach (those will migrate later).
+    // -------------------------------------------------------------------------------------------------
+
     
+#ifdef ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+  StreamDebugger* stream_debugger = nullptr;
+#endif
+
+
+// Progress init state machine; call from TaskSecond / TaskEvery50ms etc.
+void ModemInit_Tick(uint32_t now_ms);
+
+// True when UART+baud+AT is stable and basic probe completed
+bool ModemInit_IsReady() const;
+
+// Optional: true if init is actively in progress
+bool ModemInit_IsBusy() const;
+
+// Optional: request a hard reset and restart init
+void ModemInit_ForceRestart();
+struct modem_probe_t {
+  bool at_ok;
+  bool sim_present;
+  bool sim_ready;
+  uint32_t caps;
+  char model[24];
+  int csq;
+};
+const modem_probe_t& ModemInit_GetProbe() const;
+
+
+#ifdef ENABLE_FEATURE_SIM__SMS
+
+struct sms2_t
+{
+  // bool enabled = true;
+  bool init_done = false;
+
+  // Queue of stored SMS indices to process (CMTI/CMGL)
+  std::vector<int> pending_idx;
+
+  // CMGR state (single-reader async)
+  bool     cmgr_inflight = false;
+  int      cmgr_idx      = -1;
+  uint32_t cmgr_t0_ms    = 0;
+
+  // Delete scheduling
+  bool     delete_pending = false;
+  int      delete_idx     = -1;
+
+  // Optional periodic sweep
+  uint32_t t_last_cmgl_ms = 0;
+};
+
+sms2_t sms2;
+
+// ---- init / control ----
+void SMS2_Init_NotifyOnly();              // CMGF/CPMS/CNMI=3,1,0,0,0 (+verify)
+void SMS2_Enable();
+void SMS2_Disable();
+
+bool SMS2_Init_NotifyOnly_Blocking();
+
+// ---- parser hook (call from parse_ATCommands) ----
+void SMS2_ATParse_Line(char* buffer, uint16_t buflen, uint8_t response_loglevel);
+
+// ---- task/tick ----
+void SMS2_Task_Tick(uint32_t now_ms);
+
+// ---- operations ----
+void SMS2_Request_List_Unread();          // AT+CMGL="REC UNREAD" (optional sweep)
+void SMS2_QueueIndexUnique(int idx);
+
+#endif
+
+
+
+
+// -------------------------------------------------------------------------------------------------
+// Non-blocking modem init state machine (driver-owned)
+// -------------------------------------------------------------------------------------------------
+enum class modem_init_state_t : uint8_t {
+  IDLE = 0,
+  POWER_CYCLE_BEGIN,
+  POWER_CYCLE_WAIT,
+  UART_BEGIN_BOOT_BAUD,
+  UART_SET_MODEM_BAUD,
+  UART_REOPEN_TARGET_BAUD,
+  AT_SYNC,
+  BASIC_CFG,
+  PROBE_ID,
+  READY,
+  FAILED
+};
+
+struct modem_init_sm_t {
+  modem_init_state_t state = modem_init_state_t::IDLE;
+  uint32_t t_enter_ms = 0;
+  uint8_t  attempts = 0;
+  bool     restart_requested = false;
+  bool     busy = false;
+  bool     ready = false;
+  bool probe_done;
+
+};
+
+modem_init_sm_t modem_sm_;
+modem_probe_t   modem_probe_ = {0};
+
+
+static constexpr uint32_t MODEM_BOOT_BAUD            = 115200;
+static constexpr uint32_t POWER_OFF_MIN_MS           = 1200;
+static constexpr uint32_t MODEM_BOOT_WAIT_MS         = 1200;   // SIM7000G can be slower; 1200–2500 typical
+static constexpr uint32_t UART_SETTLE_MS             = 60;
+static constexpr uint32_t UART_REOPEN_DELAY_MS       = 60;
+
+static constexpr uint32_t AT_STREAM_TIMEOUT_MS       = 100;
+
+static constexpr uint16_t AT_SYNC_STEP_TIMEOUT_MS    = 80;     // per micro-attempt
+static constexpr uint16_t AT_SYNC_TOTAL_WINDOW_MS    = 1500;   // before retrying power cycle
+static constexpr uint8_t  AT_SYNC_ATTEMPTS_PER_TICK  = 2;
+
+static constexpr uint16_t AT_CFG_STEP_TIMEOUT_MS     = 120;
+
+static constexpr uint8_t  INIT_MAX_ATTEMPTS          = 10;
+
+void Query_Modem_Status();
+
     // StreamDebugger debugger(SerialAT, Serial);
     // TinyGsm modem(debugger);
 
-    
+    // -------------------------------------------------------------------------------------------------
+// Driver helpers for higher-level policy (mCellular)
+// -------------------------------------------------------------------------------------------------
+
+// Alias for your init SM readiness
+bool IsReady() const { return ModemInit_IsReady(); }
+
+// “data plane” = PDP/GPRS connected (not just registered to tower)
+bool DataNetwork_IsConnected() const
+{
+  return (modem != nullptr) ? modem->isGprsConnected() : false;
+}
+
+// “tower side” registration (optional, sometimes useful for diagnostics)
+bool Network_IsConnected() const
+{
+  // true;
+  return (modem != nullptr) ? ModemInit_IsReady() : false;
+  // return (modem != nullptr) ? modem->isNetworkConnected() : false;
+}
+
+// Ensure a TinyGsmClient exists for MQTT
+TinyGsmClient* DataNetwork_GetOrCreateClient(bool force_recreate = false);
+
+void SubTask_SMS__Check_Any_SMS_Saved();
 
     bool Modem__Running(uint16_t wait_millis = 1000);
     bool Modem__PowerUntilRunning(uint16_t wait_millis = 5000);
@@ -115,9 +271,15 @@ class mSIM7000G :
 
     bool DataNetwork__InitConfig();
     bool DataNetwork__StartConnection();
-    bool DataNetwork__CheckConnection();
-
     bool Modem_CheckAndRestartUnresponsiveModem();
+
+
+void SubTask_SMS__Read_Any_Waiting_Messages();
+
+bool SMS_Handle_IncomingText(const char* from_number, const char* body);
+static void SMS_NormaliseText(char* s);
+
+
 
 
     float GetSignalQualityPower();
@@ -187,9 +349,16 @@ class mSIM7000G :
     void SMS_CommandIntoJSONCommand(char* command);
 
 
+int  SendAT_WaitResponse__SMSNumberStored(uint32_t timeout_ms);
+bool SendAT_WaitResponse__SMSDeleteAll(uint32_t timeout_ms);
 
 
     void GPRS_UpdateConnectionState(bool state);
+
+    bool sms2_waiting_cmgr_body = false;
+char sms2_cmgr_header[200]  = {0};
+
+bool SMS2_ExtractNumberFromCMGRHeader(const char* header, char* out_from, size_t out_from_sz);
     
     struct GPRS_STATUS
     {
@@ -216,17 +385,104 @@ class mSIM7000G :
     struct SMS_STATUS
     {
       timereached_t tReached_Update;
-      bool enabled = 0; // 0 disabled, 1 enabled       
+      // bool enabled = 0; // 0 disabled, 1 enabled       
+      bool configured = false;
       std::vector<uint8_t> messages_incoming_index_list;     
     }sms;
     void SMS_Enable();
     void SMS_Disable();
-    void ModemUpdate_SMS();
-    void SMSReadAndEraseSavedSMS();
+
+
+
+
+
+
+    bool SMS_SendText(const char* to_number, const char* body);
+    void ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8_t buflen, uint8_t response_loglevel);
     
+
+    // to delete
+    #ifdef ENABLE_DEVFEATURE_SMS__REMOVE_OLD
+    void SMSReadAndEraseSavedSMS();
+    void SMS_PollAndDrainBacklog();
+    void ModemUpdate_SMS();
+    bool SMS_ApplyCNMI_Forwarding();
+    bool SMS_ApplyConfig();
+    void SMS_Send_TimedHeartbeat2();  // keeping this version out, a new one with asking all modules TASK_APPEND_SMS_STATUS_HEARTBEAT
+    void SMS_SendBootMessage();
+    bool SMS_Parse_CMGR(const char* cmgr_block,
+                      char* out_from, size_t out_from_sz,
+                      char* out_body, size_t out_body_sz);
+    #endif
+
+
+    // -------------------------------------------------------------------------------------------------
+// SMS2 RX state (line-based URC/response parsing)
+// -------------------------------------------------------------------------------------------------
+#ifdef ENABLE_FEATURE_SIM__SMS
+
+// Fast-path flag: set when we see a bare "OK" line.
+// Use it if you want to suppress OK spam in logs but still know OK happened.
+bool last_at_ok_seen = false;
+
+// When parsing multi-line constructs (CMGR/CMT), we need to remember the header
+// and consume the very next line as the SMS body.
+bool sms2_waiting_body = false;
+
+// What body are we waiting for?
+enum sms2_wait_kind_t : uint8_t
+{
+  SMS2_WAIT_NONE = 0,
+  SMS2_WAIT_CMGR_BODY,
+  SMS2_WAIT_CMT_BODY
+};
+sms2_wait_kind_t sms2_wait_kind = SMS2_WAIT_NONE;
+
+// Saved header line for CMGR/CMT
+char sms2_header_line[220] = {0};
+
+// For CMGR, we also keep the index we asked for so we can delete after reading.
+int16_t sms2_cmgr_pending_idx = -1;
+
+
+bool parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response_loglevel);
+bool SMS2_ExtractNumberFromHeader(const char* header_line,
+                                            char* out_number,
+                                            size_t out_number_sz) const;
+bool ATParse__OK(char* line, uint16_t buflen, uint8_t response_loglevel);
+bool ATParse__CMTI(char* line, uint16_t buflen, uint8_t response_loglevel);
+bool ATParse__CMGR_Header(char* line, uint16_t buflen, uint8_t response_loglevel);
+bool ATParse__CMT_Header(char* line, uint16_t buflen, uint8_t response_loglevel);
+bool ATParse__BodyLine(char* line, uint16_t buflen, uint8_t response_loglevel);
+bool ATParse__CMGL(char* line, uint16_t buflen, uint8_t response_loglevel);
+bool ATParse__CPMS(char* line, uint16_t buflen, uint8_t response_loglevel);
+bool ATParse__CMGD(char* line, uint16_t buflen, uint8_t response_loglevel);
+
+#endif // ENABLE_FEATURE_SIM__SMS
+
+
+
+
+
+
     bool Handler_ModemResponses(uint8_t response_loglevel, uint16_t wait_millis = 0);
 
+
+
     void Get_Modem_Hardware();
+  void ModemInit_SM_Enter(modem_init_sm_t& sm, modem_init_state_t st, uint32_t now_ms);
+  bool ModemInit_ATSyncTry();
+  void ModemInit_ProbeFillBasic();
+    #ifdef ENABLE_FEATURE_SIM__SMS
+    void     SMS_Enable_Basic();
+  void ATParse_CMT(char* buffer);
+  bool SMS_Parse_CMT(const char* block,
+                     char* out_from, size_t from_sz,
+                     char* out_body, size_t body_sz);
+#endif
+#ifdef ENABLE_FEATURE_SIM__SMS
+#endif
+
 
     struct DATA
     {
@@ -253,7 +509,7 @@ class mSIM7000G :
 
     bool flag_modem_initialized = false;
 
-    bool parse_ATCommands(char* buffer, uint16_t buflen, uint8_t log_level = 6);
+    // bool parse_ATCommands(char* buffer, uint16_t buflen, uint8_t log_level = 6);
      
     void ModemUpdate_BatteryStatus();
 
@@ -273,13 +529,9 @@ class mSIM7000G :
 
     char* ATResponse_Parse_CMT(char* incoming, char *parsed_buf, uint16_t parsed_buflen);
 
-    void ATParse_CMGD__CommandNameInTextDeleteMessage(char* buffer, uint8_t buflen, uint8_t response_loglevel);
-
 
     void EveryLoop();
 
-    void Pre_Init();
-    void Init(void);
     
     void parse_JSONCommand(JsonParserObject obj);
 

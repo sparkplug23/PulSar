@@ -43,10 +43,9 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
-#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+// For Jan2026, BETA is alway considered as complete.
+#if defined(FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA) ||  defined(FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE)
+// #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
 
   // Everything moved into complete, anything working unless in tests phase will be phased in.
 
@@ -70,6 +69,32 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   
   
 
+  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+
+  
+  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS
+  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
+  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS  
+
+  
+  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+  #define USE_MODULE_SENSORS_SUN_TRACKING
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
+  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS
+  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG
+  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS_DEBUG_LINES
+
+
+  #define ENABLE_DEVFEATURE_LIGHTING__SUPPRESS_WHITE_OUTPUT // Fix flickering of white channel
+
   /************************************************************************
    * SECTION: defines for external libaries
    ************************************************************************/
@@ -88,7 +113,7 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   // temporary fix until rgbww is added with matrix support functions
   #ifndef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE // setPixelXY needs to be added to rgbww
   #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D
+  #define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D
   #endif // ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
 
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
@@ -103,9 +128,9 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
 
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE // Inherit base config
 
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D
+  #define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
   
-  #if defined(ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__1D) || defined(ENABLE_FEATURE_ANIMATORLIGHT_EFFECT__AUDIO_REACTIVE__2D)
+  #if defined(ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D) || defined(ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D)
     #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
   #endif
 
@@ -133,17 +158,26 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
 
   #define ENABLE_FEATURE_LIGHTING__CHRISTMAS_EFFECT_PRECOMPUTE_POWF_INTO_COLOURDATA_BUFFER
 
+  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS_INCLUDE_PRIMARY_JSON_COMMANDS
+
   /************************************************************************
    * EFFECTS: 
    ************************************************************************/
 
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__HARDWARE_TESTING
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS
+  #define  ENABLE_FEATURE_LIGHTS__DECIMATE
+  
+  
+  #define ENABLE_ANIMATION_MODE__INTERNAL_CONTROL_FROM_ANOTHER_MODULE
 
   #define ENABLE_FEATURE_FILESYSTEM__ADD_TIMESTAMP_ON_SAVE_FILES
 
@@ -152,6 +186,8 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   #define ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
   #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
   #define ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
+  
+  #define PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE true // MUST be true, as we are not using NPB_LG method
 
 
   /************************************************************************
@@ -167,128 +203,18 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
   #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
 
+  #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+
   
-  
-  /************************************************************************
-   * FILESYSTEM: 
-   ************************************************************************/
-  #define USE_MODULE_CORE_FILESYSTEM
-
-
-  ///////////////////////////////////////////////////////////////////////////////////////////////
-
-
-  /************************************************************************
-   * BUS:
-   ************************************************************************/
-
-
-
-   
-
-  #ifndef DISABLE_FEATURE_LIGHTS__DECIMATE
-    #define ENABLE_DEVFEATURE_LIGHTS__DECIMATE
-  #endif
-
-
-  #define MIN_SHOW_DELAY 25
-
-
   #ifndef ESP8266
     #define ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
   #endif
 
   
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE_STORAGE_IS_LITTLEFS
-  
-  
-
-
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
-  #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
-
-  #define ENABLE_DEVFEATURE_LIGHTING__JSONLIVE_WEBSOCKETS
-
-  
-  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
-  #define ENABLE_DEBUGFEATURE_TASKER__SPLASH_JSON_BUFFER
-  #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
-
   /************************************************************************
-   * EFFECTS:
+   * FILESYSTEM: 
    ************************************************************************/
-
-  #define USE_MODULE_SENSORS_SUN_TRACKING
-  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
-  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
-  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
-  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
-  #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
-  #define USE_MAXELEVATION_CALC_JULY2025
-
-  #ifndef USE_MODULE_SENSORS_SUN_TRACKING
-  #define USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE
-  #endif
-  
-
-  #define ENABLE_ANIMATION_MODE__INTERNAL_CONTROL_FROM_ANOTHER_MODULE
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
-
-
-  
-    
-    
-
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-   // until devices can reliably be used without compiling per device
-  
-
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
-
-  #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
-
-  #define ENABLE_DEVFEATURE_LIGHTING__JSONLIVE_WEBSOCKETS
- 
-
-  /************************************************************************
-  * LIGHTING:
-  ************************************************************************/
-
-
-
-  /************************************************************************
-   * BRIGHTNESS:
-   ************************************************************************/
-  #define ANIM_BRIGHTNESS_REQUIRED true // only when manually testing it to be manual, but not part of the feb2025 method
-  // #define ANIM_BRIGHTNESS_REQUIRED false // when using LG bus
-
-  #define ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_MANUAL_CONTROLS // handle it without BusLg methods
-
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_MANUAL_CONTROLS
-    #undef ANIM_BRIGHTNESS_REQUIRED
-    #define ANIM_BRIGHTNESS_REQUIRED true // when controlling it directly
-    #endif
-
-  /************************************************************************
-   * PRESETS:
-   ************************************************************************/
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG
-
-  /************************************************************************
-   * PLAYLISTS:
-   ************************************************************************/
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS
-  #define ENABLE_DEVFEATURE_LIGHT__PLAYLISTS_2024
-  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
-  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS_DEBUG_LINES
-
+  #define USE_MODULE_CORE_FILESYSTEM
 
 #endif
 
@@ -312,7 +238,7 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   /************************************************************************
    * EFFECTS: 
    ************************************************************************/
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
   /************************************************************************
    * BUS:
@@ -351,9 +277,7 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
     // #define ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
 
-  #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS
-  // #define ENABLE_FEATURE_ANIMATORLIGHT_EFFECT_SPECIALISED__SUN_POSITIONS2
-  #define USE_MAXELEVATION_CALC_JULY2025
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 
   #define USE_MODULE_SENSORS_SUN_TRACKING
 

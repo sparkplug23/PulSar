@@ -136,7 +136,26 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
 
   ALOG_INF(PSTR("mMQTTManager::MqttReconnect START              Connect"));
 
-  if(pubsub->connect(client_name, lwt_topic, WILLQOS_CTR, WILLRETAIN_CTR, lwt_message_ondisconnect_ctr)){  //boolean connect (clientID, willTopic, willQoS, willRetain, willMessage)
+  bool connect_success = false;
+
+  if(user && password)
+  {
+    
+      char password_copy[5];
+      snprintf(password_copy, sizeof(password_copy), password);
+      Serial.printf("MQTT Secure Connection %s,%s##\n\r", user, password); // Only show start of password
+
+
+    connect_success = pubsub->connect(client_name, user, password, lwt_topic, WILLQOS_CTR, WILLRETAIN_CTR, lwt_message_ondisconnect_ctr);
+  
+  
+  
+  }else{
+    connect_success = pubsub->connect(client_name, lwt_topic, WILLQOS_CTR, WILLRETAIN_CTR, lwt_message_ondisconnect_ctr);
+  }
+
+
+  if(connect_success){  //boolean connect (clientID, willTopic, willQoS, willRetain, willMessage)
 
     ALOG_INF(PSTR("mMQTTManager::MqttReconnect Connected"));
     

@@ -318,8 +318,16 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #define tkr_eth                                 static_cast<mEthernet*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_NETWORK_ETHERNET_ID))
 #endif 
 #ifdef USE_MODULE_NETWORK_CELLULAR
-#include "3_Network/05_Cellular/mCellular.h"
-  #define tkr_cell                               static_cast<mCellular*>(tkr->pModule[EM_MODULE__NETWORK_CELLULAR__ID])
+  #include "3_Network/05_Cellular/mCellular.h"
+  #define tkr_cell                               static_cast<mCellular*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__NETWORK_CELLULAR__ID))
+#endif
+#ifdef USE_MODULE_DRIVERS_MODEM_7000G
+  #include "3_Network/80_Modem_SIM7000G/mSIM7000G.h"
+  #define tkr_sim7000g                           static_cast<mSIM7000G*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_MODEM_7000G_ID))
+#endif
+#ifdef USE_MODULE_DRIVERS_MODEM_800L
+#include "4_Drivers/81_Modem_SIM800L/mSIM800L.h"
+  #define tkr_sim800l                           static_cast<mSIM800L*>(tkr->pModule[EM_MODULE_DRIVERS__MODEM_800L__ID])
 #endif
 #ifdef USE_MODULE_NETWORK_MQTT
   #include "3_Network/10_MQTT/mMQTT.h"
@@ -411,14 +419,6 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
   #include "4_Drivers/72_MAVLink_Telemetry_Cellular/mMAVLink_Telemetry_Cellular.h"
   #define tkr_mavlink                              static_cast<mMAVLink_Telemetry_Cellular*>(tkr->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID])
-#endif
-#ifdef USE_MODULE_DRIVERS_MODEM_7000G
-#include "4_Drivers/80_Modem_SIM7000G/mSIM7000G.h"
-  #define tkr_sim7000g                           static_cast<mSIM7000G*>(tkr->pModule[EM_MODULE_DRIVERS__MODEM_7000G__ID])
-#endif
-#ifdef USE_MODULE_DRIVERS_MODEM_800L
-#include "4_Drivers/81_Modem_SIM800L/mSIM800L.h"
-  #define tkr_sim800l                           static_cast<mSIM800L*>(tkr->pModule[EM_MODULE_DRIVERS__MODEM_800L__ID])
 #endif
 /**
  * @brief Sensors
@@ -529,7 +529,8 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
   #include "5_Sensors/52_Battery_Modem/mBattery_Modem.h"
-  #define tkr_batt_modem                                 static_cast<mBattery_Modem*>(tkr->pModule[EM_MODULE__SENSORS_BATTERY_MODEM__ID])
+  #define tkr_batt_modem                                 static_cast<mBattery_Modem*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__SENSORS_BATTERY_MODEM__ID))
+  //static_cast<mBattery_Modem*>(tkr->pModule[EM_MODULE__SENSORS_BATTERY_MODEM__ID])
 #endif
 /**
  * @brief Lights

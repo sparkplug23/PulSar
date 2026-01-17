@@ -15,38 +15,6 @@
 // Void Arg Functions
 #define CALL_MEMBER_FUNCTION(object,ptrToMember)  ((object).*(ptrToMember))
 
-// Removing from per module code, this should be fully handled by iterating over the modules to get their mqtt topics, then payloads.
-// Hence, we can specify either by their name, or simply query all modules and any topics they have.
-// previous method adding url callbacks to each topic, but this can be inserted into a single callback handler. We redo process below.
-// In short, /mqtt_query/ should allow querying of any module/topic combination, and return the payload.
-#ifdef ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
-#define CODE_BLOCK__MQTTHandler_AddWebURL_PayloadRequests()  \
-  char uri_buffer[70] = {0};\
-  snprintf(uri_buffer, sizeof(uri_buffer), "/mqtt/%s/%S", D_TOPIC_STATUS, GetModuleFriendlyName());\
-  tkr_web->server->on(uri_buffer, HTTP_GET,\
-  [this](AsyncWebServerRequest *request)\
-    {\
-      char handle_url[100] = {0};       \
-      for(auto& connection:tkr_mqtt->brokers)\
-        for(auto& handle:mqtthandler_list)\
-        { \
-          connection->publish_ft(GetModuleFriendlyName(), handle->topic_type, handle->postfix_topic, handle_url, sizeof(handle_url)); \
-          ALOG_INF(PSTR("handle_url \"%s\" -> \"%s\""), request->url().c_str(), handle_url);\
-          const String& incoming_uri = request->url();\
-          if(incoming_uri.indexOf(handle_url) > 0)\
-          {        \
-            uint8_t fSendPayload = CALL_MEMBER_FUNCTION(*this, handle->ConstructJSON_function)(handle->json_level, true);\
-            ALOG_INF(PSTR("data_buffer=%s"), data_buffer.payload.ctr);\
-            request->send(200, PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT, data_buffer.payload.ctr); \
-            break;\
-          }\
-        }\
-      }\
-    }\
-  );
-#endif // ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
-
-
 enum TOPIC_TYPE_IDS
 {
   MQTT_TOPIC_TYPE_SYSTEM_ID=0, 
@@ -169,8 +137,8 @@ class MQTTConnection
     char      host_address[33];
     uint8_t   status = 0;
     uint16_t  port;
-    char      user[33];
-    char      password[33];
+    char      user[33] = {0};
+    char      password[33] = {0};
     char      prefix_topic[50]; // "<devicename>/"
     char      client_name[80]; 
     uint16_t  retry = 5; //default
@@ -224,7 +192,7 @@ class MQTTConnection
      * @param _port 
      * @param _type 
      */
-    MQTTConnection(Client* _client, char* _host_address, uint16_t _port, ConnectionClient_t _type)
+    MQTTConnection(Client* _client, char* _host_address, uint16_t _port, ConnectionClient_t _type, char* username = nullptr, char* password = nullptr)
     {
       network_client = _client;
       SetPubSubClient(_client);
@@ -232,6 +200,11 @@ class MQTTConnection
       snprintf(host_address, sizeof(host_address), _host_address);
       client_type = _type;
       Serial.printf("MQTT::CreateConnection broker_url B %s\n\r", host_address); Serial.flush();
+
+      if(username && password)
+        SetCredentials(username, password);
+
+
     };
 
 
@@ -244,6 +217,12 @@ class MQTTConnection
 
     void SetCredentials(char* _user, char* _password)
     {
+
+      char password_copy[5];
+      snprintf(password_copy, sizeof(password_copy), _password);
+
+      Serial.printf("MQTT SetCredentials %s,%s##\n\r",_user,password_copy); // Only show start of password
+
       if((strlen(_user) > sizeof(user)) || (strlen(_password) > sizeof(password))) 
       {
       Serial.println("Error");
@@ -433,7 +412,7 @@ class mMQTTManager :
      * @return true 
      * @return false 
      */
-    bool CreateConnection(Client* client_in, char* host_address, uint16_t _port, ConnectionClient_t type)
+    bool CreateConnection(Client* client_in, char* host_address, uint16_t _port, ConnectionClient_t type, char* username = nullptr, char* password = nullptr)
     {
 
       /**
@@ -461,8 +440,15 @@ class mMQTTManager :
       {
         Serial.printf("Adding new MQTTConnection \"%s\" Index:%d brokers_size:%d\n\r", host_address, search_index, brokers.size());
         Serial.flush();
-        brokers.push_back(new MQTTConnection(client_in, host_address, _port, type));
-        // brokers[0] = new MQTTConnection(client_in, url, _port, type, client_name, prefix_topic);
+
+
+        if(username && password)
+          brokers.push_back(new MQTTConnection(client_in, host_address, _port, type, username, password));
+        else
+          brokers.push_back(new MQTTConnection(client_in, host_address, _port, type));
+
+        
+          // brokers[0] = new MQTTConnection(client_in, url, _port, type, client_name, prefix_topic);
         // brokers_active = 1;
       }
 

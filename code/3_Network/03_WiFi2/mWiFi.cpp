@@ -22,7 +22,14 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj)
       connection.seconds_to_wait_for_fresh_connection_attempt = 10;
     }
     break;
+  }
 
+  #ifdef ENABLE_FEATURE_WIFI__BLOCK_CONNECTION
+  return false;
+  #endif
+
+  switch (function)
+  {
     case TASK_LOOP:
     {
       // DNS captive portal needs frequent polling
@@ -64,8 +71,10 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj)
     }
     break;
 
-    default:
-      break;
+    /************
+     * MQTT SECTION * 
+    *******************/
+    // For Networks, telemetry shows connection status
   }
 
   return FUNCTION_RESULT_SUCCESS_ID;

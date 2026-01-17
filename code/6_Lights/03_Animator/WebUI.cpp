@@ -259,11 +259,7 @@ void mAnimatorLight::serializeInfo(JsonObject root)
     root[F("lip")] = realtimeIP.toString();
   }
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__JSONLIVE_WEBSOCKETS
   root[F("ws")] = tkr_web->websocket_lights->count();
-  #else
-  root[F("ws")] = -1;
-  #endif
 
   root[F("fxcount")] = getModeCount();
   root[F("palcount")] = getPaletteCount();
@@ -2636,9 +2632,6 @@ void mAnimatorLight::serializeModeNames(JsonArray arr, bool flag_get_first_name_
 }
 
 
-// New ifdef to test out websockets
-#ifdef ENABLE_DEVFEATURE_LIGHTING__JSONLIVE_WEBSOCKETS
-
 
 #define MAX_LIVE_LEDS 256
 
@@ -2708,73 +2701,6 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
 }
 
 
-#else
-
-
-
-
-#define MAX_LIVE_LEDS 180
-
-bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient)
-{
-  #ifdef WLED_ENABLE_WEBSOCKETS
-  AsyncWebSocketClient * wsc = nullptr;
-  if (!request) { //not HTTP, use Websockets
-    wsc = ws.client(wsClient);
-    if (!wsc || wsc->queueLength() > 0) return false; //only send if queue free
-  }
-  #endif
-
-  uint16_t used = getLengthTotal();
-  uint16_t n = (used-1) /MAX_LIVE_LEDS +1; //only serve every n'th LED if count over MAX_LIVE_LEDS
-  char buffer[2000];
-  strcpy_P(buffer, PSTR("{\"leds\":["));
-  obuf = buffer;
-  olen = 9;
-
-  for (size_t i=0; i < used; i += n)
-  {
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE  
-    RgbwwColor col = getPixelColor(i);
-    col.WW = 0; //ignore white channel
-    uint32_t c = RGBW32(col.R, col.G, col.B, col.WW);
-    #else
-    uint32_t c = getPixelColor(i);
-    #endif
-
-    // if(i==0)
-      // ALOG_INF(PSTR("%d c %d,%d,%d,%d"), i, R(c), G(c), B(c), W(c));
-
-    #ifdef ENABLE_FEATURE_LIGHTS__ADD_WHITE_TO_LIVEVIEW
-    uint8_t r = qadd8(W(c), R(c)); //add white channel to RGB channels as a simple RGBW -> RGB map
-    uint8_t g = qadd8(W(c), G(c));
-    uint8_t b = qadd8(W(c), B(c));
-    #else
-    uint8_t r = R(c); //add white channel to RGB channels as a simple RGBW -> RGB map
-    uint8_t g = G(c);
-    uint8_t b = B(c);
-    #endif
-
-    olen += sprintf(obuf + olen, "\"%06X\",", RGBW32(r,g,b,0));
-    
-  }
-  olen -= 1;
-  oappend((const char*)F("],\"n\":"));
-  oappendi(n);
-  oappend("}");
-  if (request) {
-    request->send(200, "application/json", buffer);
-  }
-  #ifdef WLED_ENABLE_WEBSOCKETS
-  else {
-    wsc->text(obuf, olen);
-  }
-  #endif
-  return true;
-}
-
-
-#endif
 
 // Global buffer locking response helper class (to make sure lock is released when AsyncJsonResponse is destroyed)
 class LockedJsonResponse: public AsyncJsonResponse {
@@ -3254,7 +3180,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
     if (!JBI->requestJSONBufferLock(14)) return;
 
     
-      #ifdef ENABLE_DEVFEATURE_LIGHT__PLAYLISTS_2024
+      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS_INCLUDE_PRIMARY_JSON_COMMANDS
 
       // // Retrieve the buffer and its length
       // // char* jsonBuffer = static_cast<uint8_t*>(request->_tempObject);

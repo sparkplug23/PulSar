@@ -304,9 +304,8 @@ void mTaskerManager::JSONCommand_Run(char* json)
 void mTaskerManager::addTasker(mTaskerInterface* mod)
 {
   pModule.push_back(mod);
-  Serial.printf("AddTasker[%d]\t%S\n\r", pModule.size(), mod->GetModuleName());
+  Serial.printf("AddTasker[%d]\t%S \tuid %d\n\r", pModule.size(), mod->GetModuleName(), mod->GetModuleUniqueID());
 
-  // ✅ Check heap integrity after each module is added
   assert(heap_caps_check_integrity_all(true));  // will abort on corrupt heap
 }
 
@@ -384,7 +383,12 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   addTasker(new mWebServer());
   #endif
-  DEBUG_LINE_HERE
+  #ifdef USE_MODULE_DRIVERS_MODEM_7000G
+  addTasker(new mSIM7000G());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_MODEM_800L
+  addTasker(new mSIM800L());
+  #endif
   /**
    * @brief Drivers
    **/
@@ -462,12 +466,6 @@ uint8_t mTaskerManager::Instance_Init()
   #endif
   #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
   addTasker(new mMAVLink_Telemetry_Cellular());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_MODEM_7000G
-  addTasker(new mSIM7000G());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_MODEM_800L
-  addTasker(new mSIM800L());
   #endif
   DEBUG_LINE_HERE
   /**

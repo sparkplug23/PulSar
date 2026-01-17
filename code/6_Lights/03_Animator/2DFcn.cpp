@@ -265,7 +265,6 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t c
 
   bool flag_brightness_already_applied = false;
   // This function bypassing the 1D to 2D set function that applies brightness, so we need to apply here before calling the busmanager
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__BRIGHTNESS_MANUAL_CONTROLS
   if (flag_brightness_already_applied==false) {
     // uint8_t brightness = tkr_iLight->getBriRGB_Global();//scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
     uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
@@ -278,7 +277,6 @@ void IRAM_ATTR mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_t c
       (W(col) * scale) >> 8   // White
     );
   }
-  #endif
   
   if (reverse  ) x = virtualWidth()  - x - 1;
   if (reverse_y) y = virtualHeight() - y - 1;

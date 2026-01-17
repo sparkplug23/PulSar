@@ -57,6 +57,7 @@
 #define D_MODULE__NETWORK_CELLULAR__CTR           "cellular"
 #define D_MODULE_CORE__SERIAL__CTR                "Serial"
 #define D_MODULE_NETWORK_WEBSERVER_CTR            "webserver"
+#define D_MODULE__DRIVERS_MODEM_7000G__CTR "modem_7000g"
 #define D_MODULE_DISPLAYS_INTERFACE_CTR           "interface_displays"
 #define D_MODULE_DISPLAYS_NEXTION_CTR             "nextion"
 #define D_MODULE_DISPLAYS_OLED_SSD1306_CTR        "display_1306"
@@ -1401,6 +1402,8 @@
   #define D_LOG_BUTTONS "BTN: "
   #define D_LOG_CAMERA "CAM: "
   #define D_LOG_CEILINGFAN "CFN: "         // Ceiling Fan
+  #define D_LOG_CELLULAR "CEL: "
+  #define D_LOG_SIM7000G "S7M: "
   #define D_LOG_CHIME "CHM: "         
   #define D_LOG_CLASSLIST "CLL: "
   #define D_LOG_COMMAND "CMD: "      // Command
@@ -1989,8 +1992,7 @@
 #define D_PIXEL_HARDWARE_COLOR_ORDER_RGB_CTR "RGB"
 
 
-#define D_EFFECT_COLOUR_TYPE "ColourType" // rename later
-#define D_COLOUR_TYPE "ColourType"  //phase out
+#define D_COLOUR_TYPE "ColourType" // rename later
 
 
 #define D_HARDWARE_TYPE "HardwareType"

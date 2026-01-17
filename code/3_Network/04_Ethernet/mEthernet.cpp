@@ -4,31 +4,124 @@
 
 int8_t mEthernet::Tasker(uint8_t function, JsonParserObject obj)
 {
-  switch (function)
-  {
+
+  int8_t function_result = 0;
+
+  /************
+   * INIT SECTION * 
+  *******************/
+  switch(function){
+    case TASK_PRE_INIT:
+      Pre_Init();
+    break;
     case TASK_INIT:
-      init();
-      break;
-
-    case TASK_EVERY_SECOND:
-#ifdef ESP32
-      Ethernet_Tick_1s();
-#endif
-      break;
-
-      case TASK_UPTIME_1_MINUTES:
-      Ethernet_Begin();
-      eth.delayed_start = false;
-      break;
-
-    default:
-      break;
+      Init();
+    break;
   }
 
-  return FUNCTION_RESULT_SUCCESS_ID;
+  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+
+  switch(function){
+    /************
+     * PERIODIC SECTION * 
+    *******************/
+    case TASK_EVERY_SECOND:
+      EverySecond();
+    break;
+    case TASK_UPTIME_1_MINUTES:
+      Ethernet_Begin();
+      eth.delayed_start = false;
+    break;
+    /************
+     * STORAGE SECTION * 
+    *******************/  
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case TASK_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
+    /************
+     * RULES SECTION * 
+    *******************/
+    // #ifdef USE_MODULE_CORE_RULES
+    // case TASK_EVENT_SET_POWER_ID: 
+    //   RulesEvent_Set_Power();
+    // break;
+    // #endif// USE_MODULE_CORE_RULES
+    /************
+     * MQTT SECTION * 
+    *******************/
+    // For Networks, telemetry shows connection status
+  } // end switch
+
+  return FUNCTION_RESULT_UNKNOWN_ID;
+
+} // END function
+
+
+void mEthernet::Pre_Init()
+{
+  //   if (!Settings->flag4.network_ethernet) { return; }
+//   if (!PinUsed(GPIO_ETH_PHY_MDC) && !PinUsed(GPIO_ETH_PHY_MDIO)) {
+//     ALOG_DBG(PSTR(D_LOG_ETH "No ETH MDC and/or ETH MDIO GPIO defined"));
+//     return;
+//   }
+
+//   eth_config_change = 0;
+
+//   if (WT32_ETH01 == TasmotaGlobal.module_type) {
+//     Settings->eth_address = 1;                    // EthAddress
+//     Settings->eth_type = ETH_PHY_LAN8720;         // EthType
+//     Settings->eth_clk_mode = ETH_CLOCK_GPIO0_IN;  // EthClockMode
+//   }
+
+// //  snprintf_P(Eth.hostname, sizeof(Eth.hostname), PSTR("%s-eth"), TasmotaGlobal.hostname);
+//   strlcpy(eth_hostname, TasmotaGlobal.hostname, sizeof(eth_hostname) -5);  // Make sure there is room for "-eth"
+//   strcat(eth_hostname, "-eth");
+
+//   WiFi.onEvent(EthernetEvent);
+
+//   int eth_power = Pin(GPIO_ETH_PHY_POWER);
+//   int eth_mdc = Pin(GPIO_ETH_PHY_MDC);
+//   int eth_mdio = Pin(GPIO_ETH_PHY_MDIO);
+// //#if CONFIG_IDF_TARGET_ESP32
+//   // fix an disconnection issue after rebooting Olimex POE - this forces a clean state for all GPIO involved in RMII
+// //  gpio_reset_pin((gpio_num_t)GPIO_ETH_PHY_POWER);
+// //  gpio_reset_pin((gpio_num_t)GPIO_ETH_PHY_MDC);
+// //  gpio_reset_pin((gpio_num_t)GPIO_ETH_PHY_MDIO);
+// //  gpio_reset_pin(GPIO_NUM_19);    // EMAC_TXD0 - hardcoded
+// //  gpio_reset_pin(GPIO_NUM_21);    // EMAC_TX_EN - hardcoded
+// //  gpio_reset_pin(GPIO_NUM_22);    // EMAC_TXD1 - hardcoded
+// //  gpio_reset_pin(GPIO_NUM_25);    // EMAC_RXD0 - hardcoded
+// //  gpio_reset_pin(GPIO_NUM_26);    // EMAC_RXD1 - hardcoded
+// //  gpio_reset_pin(GPIO_NUM_27);    // EMAC_RX_CRS_DV - hardcoded
+// //  switch (Settings->eth_clk_mode) {
+// //    case 0:   // ETH_CLOCK_GPIO0_IN
+// //    case 1:   // ETH_CLOCK_GPIO0_OUT
+// //      gpio_reset_pin(GPIO_NUM_0);
+// //      break;
+// //    case 2:   // ETH_CLOCK_GPIO16_OUT
+// //      gpio_reset_pin(GPIO_NUM_16);
+// //      break;
+// //    case 3:   // ETH_CLOCK_GPIO17_OUT
+// //      gpio_reset_pin(GPIO_NUM_17);
+// //      break;
+// //  }
+// //  delay(1);
+// //#endif // CONFIG_IDF_TARGET_ESP32
+//   if (!ETH.begin(Settings->eth_address, eth_power, eth_mdc, eth_mdio, (eth_phy_type_t)Settings->eth_type, (eth_clock_mode_t)Settings->eth_clk_mode)) {
+//     ALOG_DBG(PSTR(D_LOG_ETH "Bad PHY type or init error"));
+//     return;
+//   };
+
+//   if (Settings->eth_ipv4_address[0]) {
+//     EthernetSetIp();                             // Set static IP
+//   }
 }
 
-void mEthernet::init(void)
+
+void mEthernet::Init(void)
 {
 #ifdef ESP32
   // If you want “Ethernet-only”, hard-disable WiFi early.
@@ -50,14 +143,11 @@ void mEthernet::init(void)
   strcat(eth_hostname, "-eth");
   ALOG_INF(PSTR(D_LOG_ETHERNET "Hostname %s"),eth_hostname);
 
-
+  module_state.mode = ModuleStatus::Running;
 
 }
 
-void mEthernet::parse_JSONCommand(JsonParserObject obj)
-{
-  // not needed for now
-}
+
 
 // -----------------------------------------------------------------------------
 // Status helpers
@@ -96,6 +186,16 @@ bool mEthernet::Ethernet_IsRoutable() const
 IPAddress mEthernet::EthernetLocalIP(void) {
   return ETH.localIP();
 }
+
+
+// void EthernetSetIp(void) {
+//   // Set static IP
+//   ETH.config(Settings->eth_ipv4_address[0],       // IPAddress local_ip
+//              Settings->eth_ipv4_address[1],       // IPAddress gateway
+//              Settings->eth_ipv4_address[2],       // IPAddress subnet
+//              Settings->eth_ipv4_address[3],       // IPAddress dns1
+//              Settings->eth_ipv4_address[4]);      // IPAddress dns2
+// }
 
 // Check to see if we have any routable IP address
 // IPv4 has always priority
@@ -222,13 +322,16 @@ void mEthernet::EthernetEvent(arduino_event_t* event)
       break;
 
     case ARDUINO_EVENT_ETH_DISCONNECTED:
+      ALOG_INF(PSTR(D_LOG_ETHERNET "Disconnected"));
+      tkr_set->runtime.global_state.eth_down = false;
+
       tkr_eth->eth.link_up = false;
       tkr_eth->eth.got_ip  = false;
       tkr_eth->eth.last_change = millis();
       break;
 
     case ARDUINO_EVENT_ETH_STOP:
-      ALOG_INF(PSTR(D_LOG_ETHERNET "Disconnected"));
+      ALOG_INF(PSTR(D_LOG_ETHERNET "Stopped"));
       tkr_set->runtime.global_state.eth_down = false;
 
       tkr_eth->eth.link_up = false;
@@ -241,7 +344,7 @@ void mEthernet::EthernetEvent(arduino_event_t* event)
   }
 }
 
-void mEthernet::Ethernet_Tick_1s()
+void mEthernet::EverySecond()
 {
   if(eth.delayed_start) return;
 ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
@@ -299,278 +402,42 @@ void mEthernet::OnBecameDisconnected()
   // Let MQTT reconnect logic do its thing; you can also force a disconnect if desired.
 }
 
-#endif // ESP32
-
-#endif // USE_MODULE_NETWORK_ETHERNET
 
 
 
-// #ifdef ESP32
-// #if CONFIG_IDF_TARGET_ESP32
-// #ifdef USE_ETHERNET
-// /*********************************************************************************************\
-//  * Ethernet support for ESP32
-//  *
-//  * Dedicated fixed Phy pins
-//  * GPIO17 - EMAC_CLK_OUT_180
-//  * GPIO19 - EMAC_TXD0(RMII)
-//  * GPIO21 - EMAC_TX_EN(RMII)
-//  * GPIO22 - EMAC_TXD1(RMII)
-//  * GPIO25 - EMAC_RXD0(RMII)
-//  * GPIO26 - EMAC_RXD1(RMII)
-//  * GPIO27 - EMAC_RX_CRS_DV
-//  *
-//  * {"NAME":"Olimex ESP32-PoE","GPIO":[1,1,1,1,1,1,0,0,5536,1,1,1,1,0,5600,0,0,0,0,5568,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,1],"FLAG":0,"BASE":1}
-//  * GPIO12 = ETH POWER
-//  * GPIO18 = ETH MDIO
-//  * GPIO23 = ETH MDC
-//  * #define ETH_TYPE          ETH_PHY_LAN8720
-//  * #define ETH_CLKMODE       ETH_CLOCK_GPIO17_OUT
-//  * #define ETH_ADDRESS       0
-//  *
-//  * {"NAME":"wESP32","GPIO":[0,0,1,0,1,1,0,0,1,1,1,1,5568,5600,1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,1],"FLAG":0,"BASE":1}
-//  * GPIO16 = ETH MDC
-//  * GPIO17 = ETH MDIO
-//  * #define ETH_TYPE          ETH_PHY_LAN8720
-//  * #define ETH_CLKMODE       ETH_CLOCK_GPIO0_IN
-//  * #define ETH_ADDRESS       0
-//  *
-//  * {"NAME":"WT32-ETH01","GPIO":[1,1,1,1,1,1,0,0,1,0,1,1,3840,576,5600,0,0,0,0,5568,0,0,0,0,0,0,0,0,1,1,0,1,1,0,0,1],"FLAG":0,"BASE":1}
-//  * GPIO16 = Force Hi
-//  * GPIO18 = ETH MDIO
-//  * GPIO23 = ETH MDC
-//  * #define ETH_TYPE          ETH_PHY_LAN8720
-//  * #define ETH_CLKMODE       ETH_CLOCK_GPIO0_IN
-//  * #define ETH_ADDRESS       1
-//  *
-// \*********************************************************************************************/
 
-// #define XDRV_82           82
+/*********************************************************************************************\
+ * Commands
+\*********************************************************************************************/
 
-// /*
-// // Olimex ESP32-PoE
-// #define ETH_CLKMODE       ETH_CLOCK_GPIO17_OUT
-// #define ETH_POWER_PIN     12
 
-// //********************************************************************************************
+#define D_CMND_ETHADDRESS   "Address"
+#define D_CMND_ETHTYPE      "Type"
+#define D_CMND_ETHCLOCKMODE "ClockMode"
+#define D_CMND_ETHIPADDRESS D_CMND_IPADDRESS
+#define D_CMND_ETHGATEWAY   D_GATEWAY
+#define D_CMND_ETHNETMASK   D_SUBNETMASK
+#define D_CMND_ETHDNS       D_DNSSERVER
 
-// #ifndef ETH_ADDRESS
-// #define ETH_ADDRESS       0                      // ETH.h uint8_t:          0 = PHY0 .. 31 = PHY31
-// #endif
+void mEthernet::parse_JSONCommand(JsonParserObject obj)
+{
 
-// #ifndef ETH_TYPE
-// #define ETH_TYPE          ETH_PHY_LAN8720        // ETH.h eth_phy_type_t:   0 = ETH_PHY_LAN8720, 1 = ETH_PHY_TLK110/ETH_PHY_IP101, 2 = ETH_PHY_RTL8201, 3 = ETH_PHY_DP83848, 4 = ETH_PHY_DM9051, 5 = ETH_PHY_KSZ8081
+  JsonParserToken tok;
 
-// #endif
+  JsonParserObject jobj = obj[GetModuleName()];
 
-// #ifndef ETH_CLKMODE
-// #define ETH_CLKMODE       ETH_CLOCK_GPIO0_IN     // ETH.h eth_clock_mode_t: 0 = ETH_CLOCK_GPIO0_IN, 1 = ETH_CLOCK_GPIO0_OUT, 2 = ETH_CLOCK_GPIO16_OUT, 3 = ETH_CLOCK_GPIO17_OUT
-// #endif
-// */
+  if(!jobj) return; // Only allow commands for this module
 
-// #include <ETH.h>
+  if(tok = jobj[D_CMND_ETHADDRESS])
+  {
+    
+  }
+  
 
-// char eth_hostname[sizeof(TasmotaGlobal.hostname)];
-// uint8_t eth_config_change;
+}
 
-// void EthernetEvent(arduino_event_t *event);
-// void EthernetEvent(arduino_event_t *event) {
-//   switch (event->event_id) {
-//     case ARDUINO_EVENT_ETH_START:
-//       ALOG_DBG(PSTR(D_LOG_ETH D_ATTEMPTING_CONNECTION));
-//       ETH.setHostname(eth_hostname);
-//       break;
 
-//     case ARDUINO_EVENT_ETH_CONNECTED:
-// #ifdef USE_IPV6
-//       ETH.enableIpV6();   // enable Link-Local 
-// #endif // USE_IPV6
-//       ALOG_INF(PSTR(D_LOG_ETH D_CONNECTED " at %dMbps%s, Mac %s, Hostname %s"),
-//         ETH.linkSpeed(), (ETH.fullDuplex()) ? " Full Duplex" : "",
-//         ETH.macAddress().c_str(), eth_hostname
-//         );
-        
-//       // ALOG_DBG(D_LOG_ETH "ETH.enableIpV6() -> %i", ETH.enableIpV6());
-//       break;
-      
-//     case ARDUINO_EVENT_ETH_GOT_IP:
-//       // ALOG_DBG(PSTR(D_LOG_ETH "Mac %s, IPAddress %_I, Hostname %s"),
-//       //   ETH.macAddress().c_str(), (uint32_t)ETH.localIP(), eth_hostname);
-//       Settings->eth_ipv4_address[1] = (uint32_t)ETH.gatewayIP();
-//       Settings->eth_ipv4_address[2] = (uint32_t)ETH.subnetMask();
-//       if (0 == Settings->eth_ipv4_address[0]) {  // At this point ETH.dnsIP() are NOT correct unless DHCP
-//         Settings->eth_ipv4_address[3] = (uint32_t)ETH.dnsIP();
-//         Settings->eth_ipv4_address[4] = (uint32_t)ETH.dnsIP(1);
-//       }
-//       TasmotaGlobal.rules_flag.eth_connected = 1;
-//       TasmotaGlobal.global_state.eth_down = 0;
-//       ALOG_DBG(PSTR("ETH: IPv4 %_I, mask %_I, gateway %_I"),
-//               event->event_info.got_ip.ip_info.ip.addr,
-//               event->event_info.got_ip.ip_info.netmask.addr,
-//               event->event_info.got_ip.ip_info.gw.addr);
-//       WiFi.scrubDNS();    // internal calls to reconnect can zero the DNS servers, save DNS for future use
-//       break;
 
-// #ifdef USE_IPV6
-//     case ARDUINO_EVENT_ETH_GOT_IP6:
-//     {
-//       ip_addr_t ip_addr6;
-//       ip_addr_copy_from_ip6(ip_addr6, event->event_info.got_ip6.ip6_info.ip);
-//       IPAddress addr(ip_addr6);
-//       ALOG_DBG(PSTR("%s: IPv6 %s %s"),
-//              event->event_id == ARDUINO_EVENT_ETH_GOT_IP6 ? "ETH" : "WIF",
-//              addr.isLocal() ? PSTR("Local") : PSTR("Global"), addr.toString().c_str());
-//       if (!addr.isLocal()) {    // declare network up on IPv6
-//         TasmotaGlobal.rules_flag.eth_connected = 1;
-//         TasmotaGlobal.global_state.eth_down = 0;
-//       }
-//       WiFi.scrubDNS();    // internal calls to reconnect can zero the DNS servers, save DNS for future use
-//     }
-//     break;
-// #endif // USE_IPV6
-
-//     case ARDUINO_EVENT_ETH_DISCONNECTED:
-//       ALOG_INF(PSTR(D_LOG_ETH "Disconnected"));
-//       TasmotaGlobal.rules_flag.eth_disconnected = 1;
-//       TasmotaGlobal.global_state.eth_down = 1;
-//       break;
-
-//     case ARDUINO_EVENT_ETH_STOP:
-//       ALOG_DBG(PSTR(D_LOG_ETH "Stopped"));
-//       TasmotaGlobal.global_state.eth_down = 1;
-//       break;
-
-//     default:
-//       break;
-//   }
-// }
-
-// void EthernetSetIp(void) {
-//   // Set static IP
-//   ETH.config(Settings->eth_ipv4_address[0],       // IPAddress local_ip
-//              Settings->eth_ipv4_address[1],       // IPAddress gateway
-//              Settings->eth_ipv4_address[2],       // IPAddress subnet
-//              Settings->eth_ipv4_address[3],       // IPAddress dns1
-//              Settings->eth_ipv4_address[4]);      // IPAddress dns2
-// }
-
-// void EthernetInit(void) {
-//   if (!Settings->flag4.network_ethernet) { return; }
-//   if (!PinUsed(GPIO_ETH_PHY_MDC) && !PinUsed(GPIO_ETH_PHY_MDIO)) {
-//     ALOG_DBG(PSTR(D_LOG_ETH "No ETH MDC and/or ETH MDIO GPIO defined"));
-//     return;
-//   }
-
-//   eth_config_change = 0;
-
-//   if (WT32_ETH01 == TasmotaGlobal.module_type) {
-//     Settings->eth_address = 1;                    // EthAddress
-//     Settings->eth_type = ETH_PHY_LAN8720;         // EthType
-//     Settings->eth_clk_mode = ETH_CLOCK_GPIO0_IN;  // EthClockMode
-//   }
-
-// //  snprintf_P(Eth.hostname, sizeof(Eth.hostname), PSTR("%s-eth"), TasmotaGlobal.hostname);
-//   strlcpy(eth_hostname, TasmotaGlobal.hostname, sizeof(eth_hostname) -5);  // Make sure there is room for "-eth"
-//   strcat(eth_hostname, "-eth");
-
-//   WiFi.onEvent(EthernetEvent);
-
-//   int eth_power = Pin(GPIO_ETH_PHY_POWER);
-//   int eth_mdc = Pin(GPIO_ETH_PHY_MDC);
-//   int eth_mdio = Pin(GPIO_ETH_PHY_MDIO);
-// //#if CONFIG_IDF_TARGET_ESP32
-//   // fix an disconnection issue after rebooting Olimex POE - this forces a clean state for all GPIO involved in RMII
-// //  gpio_reset_pin((gpio_num_t)GPIO_ETH_PHY_POWER);
-// //  gpio_reset_pin((gpio_num_t)GPIO_ETH_PHY_MDC);
-// //  gpio_reset_pin((gpio_num_t)GPIO_ETH_PHY_MDIO);
-// //  gpio_reset_pin(GPIO_NUM_19);    // EMAC_TXD0 - hardcoded
-// //  gpio_reset_pin(GPIO_NUM_21);    // EMAC_TX_EN - hardcoded
-// //  gpio_reset_pin(GPIO_NUM_22);    // EMAC_TXD1 - hardcoded
-// //  gpio_reset_pin(GPIO_NUM_25);    // EMAC_RXD0 - hardcoded
-// //  gpio_reset_pin(GPIO_NUM_26);    // EMAC_RXD1 - hardcoded
-// //  gpio_reset_pin(GPIO_NUM_27);    // EMAC_RX_CRS_DV - hardcoded
-// //  switch (Settings->eth_clk_mode) {
-// //    case 0:   // ETH_CLOCK_GPIO0_IN
-// //    case 1:   // ETH_CLOCK_GPIO0_OUT
-// //      gpio_reset_pin(GPIO_NUM_0);
-// //      break;
-// //    case 2:   // ETH_CLOCK_GPIO16_OUT
-// //      gpio_reset_pin(GPIO_NUM_16);
-// //      break;
-// //    case 3:   // ETH_CLOCK_GPIO17_OUT
-// //      gpio_reset_pin(GPIO_NUM_17);
-// //      break;
-// //  }
-// //  delay(1);
-// //#endif // CONFIG_IDF_TARGET_ESP32
-//   if (!ETH.begin(Settings->eth_address, eth_power, eth_mdc, eth_mdio, (eth_phy_type_t)Settings->eth_type, (eth_clock_mode_t)Settings->eth_clk_mode)) {
-//     ALOG_DBG(PSTR(D_LOG_ETH "Bad PHY type or init error"));
-//     return;
-//   };
-
-//   if (Settings->eth_ipv4_address[0]) {
-//     EthernetSetIp();                             // Set static IP
-//   }
-// }
-
-// IPAddress EthernetLocalIP(void) {
-//   return ETH.localIP();
-// }
-
-// // Check to see if we have any routable IP address
-// // IPv4 has always priority
-// // Copy the value of the IP if pointer provided (optional)
-// bool EthernetGetIP(IPAddress *ip) {
-// #ifdef USE_IPV6
-//   if ((uint32_t)ETH.localIP() != 0) {
-//     if (ip != nullptr) { *ip = ETH.localIP(); }
-//     return true;
-//   }
-//   IPAddress lip;
-//   if (EthernetGetIPv6(&lip)) {
-//     if (ip != nullptr) { *ip = lip; }
-//     return true;
-//   }
-//   if (ip != nullptr) { *ip = IPAddress(); }
-//   return false;
-// #else
-//   // IPv4 only
-//   if (ip != nullptr) { *ip = ETH.localIP(); }
-//   return (uint32_t)ETH.localIP() != 0;
-// #endif // USE_IPV6
-// }
-// bool EthernetHasIP(void) {
-//   return EthernetGetIP(nullptr);
-// }
-// String EthernetGetIPStr(void) {
-//   IPAddress ip;
-//   if (EthernetGetIP(&ip)) {
-//     return ip.toString();
-//   } else {
-//     return String();
-//   }
-// }
-
-// char* EthernetHostname(void) {
-//   return eth_hostname;
-// }
-
-// String EthernetMacAddress(void) {
-//   return ETH.macAddress();
-// }
-
-// void EthernetConfigChange(void) {
-//   if (eth_config_change) {
-//     eth_config_change--;
-//     if (!eth_config_change) {
-//       EthernetSetIp();
-//     }
-//   }
-// }
-
-// /*********************************************************************************************\
-//  * Commands
-// \*********************************************************************************************/
 
 // #define D_CMND_ETHADDRESS   "Address"
 // #define D_CMND_ETHTYPE      "Type"
@@ -651,30 +518,10 @@ void mEthernet::OnBecameDisconnected()
 //   Response_P(PSTR("{\"%s%s\":\"%_I%s\"}"), XdrvMailbox.command, cmnd_idx, Settings->eth_ipv4_address[param_id], network_address);
 // }
 
-// /*********************************************************************************************\
-//  * Interface
-// \*********************************************************************************************/
-
-// bool Xdrv82(uint32_t function) {
-//   bool result = false;
-
-//   switch (function) {
-//     case TASK_EVERY_SECOND:
-//       EthernetConfigChange();
-//       break;
-//     case TASK_COMMAND:
-//       result = DecodeCommand(kEthernetCommands, EthernetCommand);
-//       break;
-//     case TASK_INIT:
-//       EthernetInit();
-//       break;
-//   }
-//   return result;
-// }
-
-// #endif  // USE_ETHERNET
-// #endif  // CONFIG_IDF_TARGET_ESP32
-// #endif  // ESP32
 
 
-// #endif // USE_MODULE_NETWORK_ETHERNET
+#endif // ESP32
+
+#endif // USE_MODULE_NETWORK_ETHERNET
+
+

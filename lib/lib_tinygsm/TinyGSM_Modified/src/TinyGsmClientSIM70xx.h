@@ -148,6 +148,9 @@ class TinyGsmSim70xx : public TinyGsmModem<TinyGsmSim70xx<modemType>>,
    */
  public:
   RegStatus getRegistrationStatus() {
+    
+    // Serial.println("getRegistrationStatus");
+
     RegStatus epsStatus =
         (RegStatus)thisModem().getRegistrationStatusXREG("CEREG");
     // If we're connected on EPS, great!
@@ -162,6 +165,7 @@ class TinyGsmSim70xx : public TinyGsmModem<TinyGsmSim70xx<modemType>>,
 
  protected:
   bool isNetworkConnectedImpl() {
+    // Serial.println("isNetworkConnectedImpl");
     RegStatus s = getRegistrationStatus();
     return (s == REG_OK_HOME || s == REG_OK_ROAMING);
   }

@@ -220,18 +220,6 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
    * @brief When a define has been stripped from code, but not templates, this will alert user to ensure new commands
    * are properly integrated into the newer code format.    * 
    */
-  #ifdef ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE
-    #error "ENABLE_DEVFEATURE_SET_ESP32_RGB_DATAPIN_BY_TEMPLATE -- Can be removed"
-  #endif 
-  #ifdef PINSET_TEMP_METHOD_RGB_PIN_RGB
-    #error "PINSET_TEMP_METHOD_RGB_PIN_RGB -- Can be removed"
-  #endif 
-  #ifdef ENABLE_DEVFEATURE_BUTTON_HANDLER_V2
-  #error "ENABLE_DEVFEATURE_BUTTON_HANDLER_V2 - Needs to be removed"
-  #endif
-  #ifdef ENABLE_DEVFEATURE_BUTTON_MULTIPRESS
-  #error "ENABLE_DEVFEATURE_BUTTON_MULTIPRESS - Needs to be removed"
-  #endif
   #ifdef ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS
   #error "ENABLE_DEVFEATURE_ENABLE_INTENSITY_TO_REPLACE_PERCENTAGE_CHANGE_ON_RANDOMS"
   #endif
@@ -259,16 +247,7 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #ifdef ENABLE_DEVFEATURE_FORCED_REMOVE_091122
   #error "ENABLE_DEVFEATURE_FORCED_REMOVE_091122
   #endif
-  #ifdef ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-  #error "ENABLE_DEVFEATURE_SHOWHARDWARE_NEOPIXEL_CANSHOW
-  #endif
   
-  #ifdef ENABLE_DEVFEATURE_REMOVING_HSBID
-  #error "ENABLE_DEVFEATURE_REMOVING_HSBID
-  #endif
-  #ifdef ENABLE_DEVFEATURE_PALETTE__VECTORED
-  #error "ENABLE_DEVFEATURE_PALETTE__VECTORED
-  #endif
   #ifdef ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
   #error "ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
   #endif
@@ -277,9 +256,6 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #endif
   #ifdef ENABLE_DEVFEATURE__PIXEL_USE_I2S_FOR_BUS
   #error "ENABLE_DEVFEATURE__PIXEL_USE_I2S_FOR_BUS
-  #endif
-  #ifdef ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
-  #warning "ENABLE_DEBUGFEATURE_LIGHT__MULTIPIN_JUNE28
   #endif
   #ifdef ENABLE_DEBUG_MULTIPIN
   #error "ENABLE_DEBUG_MULTIPIN
@@ -300,20 +276,6 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #ifdef ENABLE_DEVFEATURE_LIGHT__WEBUI_APPEND_EFFECT_CONFIG_TO_JSON_RESPONSE
   #error "ENABLE_DEVFEATURE_LIGHT__WEBUI_APPEND_EFFECT_CONFIG_TO_JSON_RESPONSE"
   #endif
-  #ifdef ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN
-  #error "ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN"
-  #endif 
-  #ifdef ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS
-  #error "ENABLE_DEVFEATURE_MOVE_HARDWARE_COLOUR_ORDER_TO_BUS"
-  #endif 
-
-  /**
-   * @brief Remove ASAP
-   * 
-   */
-  #ifdef STRIP_SIZE_MAX
-  #error "STRIP_SIZE_MAX is no longer used since multi-pin"
-  #endif
 
   /*
   To be used sometimes
@@ -321,8 +283,4 @@ void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
   #ifdef ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
   #warning "ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS should stay, but I dont want this enabled by default until motion bug is fixed"
   #endif
-  #ifdef ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL
-  #error "ENABLE_FEATURE_WEBSERVER__MQTT_PAYLOADS_ACCESSABLE_WITH_URL"
-  #endif
-
 }

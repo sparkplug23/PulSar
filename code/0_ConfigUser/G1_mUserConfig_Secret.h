@@ -58,6 +58,12 @@
 #define STA_PASS3            "af4d8bc9ab"                // [Password2] Optional alternate AP Wifi password
 #endif
 
+
+
+#define MQTT_HOST__USERNAME "lteclient"
+#define MQTT_HOST__PASSWORD "af4d8bc9ab"
+ #define MQTT_PORT_CELLULAR 51883 
+ 
 // ------------------------------------------------------------------
 // SoftAP defaults (override in user config / ini later)
 //   - If SOFTAP_PASSWORD == ""  => open AP (no password)
