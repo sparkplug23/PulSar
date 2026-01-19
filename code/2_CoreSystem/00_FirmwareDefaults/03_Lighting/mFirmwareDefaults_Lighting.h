@@ -42,69 +42,7 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------------
-
-// For Jan2026, BETA is alway considered as complete.
-#if defined(FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA) ||  defined(FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE)
-// #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
-
-  // Everything moved into complete, anything working unless in tests phase will be phased in.
-
-  #define ENABLE_DEVFEATURE_LIGHTING__SHOW_FALLBACK_MINIMAL_2024
-
-  #define ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
-
-
-  #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS
-  #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR
-  
-  #define ENABLE_DEVFEATURE_WEBSERVER__ETAGS_ENABLED_FOR_RELOADING_PALETTES_ON_FRESH_COMPILE
-
-  
-  #define ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_NAME_BASED_LOADING
-
-  #define ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_BY_NAME_AUTOGENERATE_ID_LIST
-
-  
-  #define ENABLE_DEVFEATURE_SETTINGS__SAVE_SETTINGS_ON_SUCCESFUL_BOOT__THEN_SPLASH_ON_REBOOT_PRIOR_TO_DEFAULT_LOAD_FOR_SAVE_TESTING
-  
-  
-
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-
-  
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
-  #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS  
-
-  
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
-  #define USE_MODULE_SENSORS_SUN_TRACKING
-  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
-  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
-  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
-  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
-  #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG
-  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
-  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS_DEBUG_LINES
-
-
-  #define ENABLE_DEVFEATURE_LIGHTING__SUPPRESS_WHITE_OUTPUT // Fix flickering of white channel
-
-  /************************************************************************
-   * SECTION: defines for external libaries
-   ************************************************************************/
-  #define DEBUG_ASYNC
-
-
-#endif
-
-// -------------------------------------------------------------------------------------------------------------------------------------------------------
-#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D // auto inherit all baseline COMPLETE + 2D
 
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE // Inherit base config
 
@@ -117,6 +55,57 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   #endif // ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
 
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+#endif
+
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// For Jan2026, BETA is alway considered as complete.
+#if defined(FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA) ||  defined(FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE)
+// #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+
+  /**
+   * Permenant Development Tools
+   **/
+  #define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  
+  #define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
+
+  /**
+   * Actual beta features 2026
+   **/
+  #define ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_NAME_BASED_LOADING
+  #define ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_BY_NAME_AUTOGENERATE_ID_LIST  
+  #define ENABLE_FEATURE_LIGHTS__PRESETS_DEBUG
+
+
+
+  // Everything moved into complete, anything working unless in tests phase will be phased in.
+
+
+  
+  #define ENABLE_DEVFEATURE_SETTINGS__SAVE_SETTINGS_ON_SUCCESFUL_BOOT__THEN_SPLASH_ON_REBOOT_PRIOR_TO_DEFAULT_LOAD_FOR_SAVE_TESTING
+  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA  
+  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS
+  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
+  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS 
+  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+  #define USE_MODULE_SENSORS_SUN_TRACKING
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
+  
+  #define ENABLE_DEVFEATURE_LIGHTING__SUPPRESS_WHITE_OUTPUT // Fix flickering of white channel
+
+  /************************************************************************
+   * SECTION: defines for external libaries
+   ************************************************************************/
+  #define DEBUG_ASYNC
+
 
 #endif
 
@@ -149,6 +138,7 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   /************************************************************************
    * SECTION: New defines
    ************************************************************************/
+  #define ENABLE_FEATURE_JSON__ASYNCJSON_V6
 
   #define  ENABLE_FEATURE_FIRMWAREDEFAULT__LOAD_WITH_TEMPLATES_OVERRIDE
 
@@ -159,6 +149,9 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   #define ENABLE_FEATURE_LIGHTING__CHRISTMAS_EFFECT_PRECOMPUTE_POWF_INTO_COLOURDATA_BUFFER
 
   #define ENABLE_FEATURE_LIGHTS__PLAYLISTS_INCLUDE_PRIMARY_JSON_COMMANDS
+
+  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
 
   /************************************************************************
    * EFFECTS: 
@@ -174,7 +167,7 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
 
   #define ENABLE_FEATURE_LIGHTING__EFFECTS
-  #define  ENABLE_FEATURE_LIGHTS__DECIMATE
+  #define ENABLE_FEATURE_LIGHTS__DECIMATE
   
   
   #define ENABLE_ANIMATION_MODE__INTERNAL_CONTROL_FROM_ANOTHER_MODULE

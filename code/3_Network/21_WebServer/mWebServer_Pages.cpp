@@ -806,47 +806,8 @@ void mWebServer::serveJson(AsyncWebServerRequest* request)
     return;
   }
   else if (url.indexOf("pal") > 0) { // "/json/palettes" - names only (flat array)
-  // // Build JSON into a local String to avoid races with the global JBI buffer
-  // String out;
-  // out.reserve(64 + 24 * mPaletteI->GetPaletteListLength()); // rough reserve
-
-  // out += '[';
-
-  // char nameBuf[96];
-  // bool first = true;
-  // const bool firstNameOnly = true; // keep your current behavior
-
-  // for (uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++) {
-  //   tkr_anim->GetPaletteNameByID(i, nameBuf, sizeof(nameBuf));
-  //   if (firstNameOnly) {
-  //     if (char* p = strchr(nameBuf, PALETTE_MULTIPLE_NAME_DELIMETER)) *p = '\0';
-  //   }
-
-  //   // minimal JSON string escape (quotes + backslashes); names are simple, but be safe
-  //   String nm; nm.reserve(strlen(nameBuf) + 8);
-  //   for (const char* s = nameBuf; *s; ++s) {
-  //     char c = *s;
-  //     if (c == '\"' || c == '\\') { nm += '\\'; nm += c; }
-  //     else                         { nm += c; }
-  //   }
-
-  //   if (!first) out += ',';
-  //   first = false;
-  //   out += '\"'; out += nm; out += '\"';
-  // }
-
-  // out += ']';
-
-  // #ifdef ENABLE_DEVFEATURE_WEBSERVER__ETAGS_ENABLED_FOR_RELOADING_PALETTES_ON_FRESH_COMPILE
-  //   char etag[32];
-  //   tkr_web->generateEtag(etag, JSON_PATH_PALETTES);
-  //   AsyncWebServerResponse* resp = request->beginResponse(200, "application/json", out);
-  //   resp->addHeader(F("ETag"), etag);
-  //   request->send(resp);
-  // #else
-  //   request->send(200, "application/json", out);
-  // #endif
-
+  
+    
   return;
 }
   else if (url.indexOf("cfg") > 0 && tkr_mfile->handleFileRead(request, "/cfg.json")) {

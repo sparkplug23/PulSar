@@ -838,7 +838,7 @@ void mFileSystem::UfsInit(void)
 
   ALOG_INF(PSTR(D_LOG_FILESYSTEM "mFileSystem::UfsInit"));
   
-  // #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+  // #ifdef ENABLE_FEATURE_LIGHTS__PRESETS
   bool fsinit = false;
   DEBUG_PRINTLN(F("Mount FS"));
   #ifdef ARDUINO_ARCH_ESP32
@@ -858,7 +858,7 @@ void mFileSystem::UfsInit(void)
   }else{
     DEBUG_PRINTLN(F("FS mounted."));
   }
-  // #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+  // #endif // ENABLE_FEATURE_LIGHTS__PRESETS
 
   // #ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE
 

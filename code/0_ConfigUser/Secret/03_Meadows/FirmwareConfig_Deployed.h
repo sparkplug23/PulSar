@@ -140,10 +140,18 @@
  * 
  */
 #ifdef DEVICE_MEADOWS__KITCHEN__GLASS_BOX
-
-#ifndef DEVICENAME_ROOMHINT_CTR
-#define DEVICENAME_ROOMHINT_CTR "UNK"
-#endif
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template_name"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "Template Name"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "Template Description"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_PORT     1883
 
  /***********************************
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
@@ -159,10 +167,6 @@
    #define USE_MODULE_SENSORS_PIR
     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
  #endif
-
- #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
-
-
 
  /***********************************
   * SECTION: Module/GPIO Configs
@@ -422,108 +426,6 @@
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
   #define MQTT_HOST   "192.168.3.70"
     #define MQTT_PORT     1883
-
-
-
-  /***********************************
-   * SECTION: System Debug Options
-  ************************************/    
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-  
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-  // #define ENABLE_DEBUG_LINE_HERE
-  // #define ENABLE_DEBUG_LINE_HERE2
-
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
-
-  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
-
-  // #define ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
-
-  /***********************************
-   * SECTION: Storage Configs
-  ************************************/  
- 
-  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
-
-  /**
-   * For debugging and short term I may want to store everything as JSON, so I can view the data?
-   * Longer term, a mixture of JSON/Binary for space.
-   * Options should just be ifdef to switch between methods. 
-  */
-  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
-
-  // New way to start the save into memory periodically, and then recover if available on boot. Init phase of full system.
-  #define ENABLE_FILESYSTEM__MODULES_CORE__SAVE
-  // #define ENABLE_FILESYSTEM__MODULES_CORE__RESTORE_ON_BOOT
-  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__SAVE
-  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__RESTORE_ON_BOOT
-  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__SAVE
-  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__RESTORE_ON_BOOT
-  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__SAVE
-  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__RESTORE_ON_BOOT
-  
-
-  /***********************************
-   * SECTION: System Configs
-  ************************************/     
-
-  #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  /***********************************
-   * SECTION: Network Configs
-  ************************************/    
-
-  
-  
-
-  /***********************************
-   * SECTION: Sensor Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Display Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Driver Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/  
- 
 
  /***********************************
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
@@ -1720,7 +1622,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
 
 
 
@@ -1927,7 +1829,7 @@ R"=====(
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
 
 
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
@@ -2146,7 +2048,7 @@ R"=====(
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
 
 
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
@@ -2395,7 +2297,7 @@ R"=====(
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
 
 
 
@@ -2594,7 +2496,7 @@ R"=====(
   // compile-time gate
   // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-  #define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+  #define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
 
 
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
@@ -2715,7 +2617,7 @@ R"=====(
 // compile-time gate
 // #define LIGHTING_STANDBY_TEMPLATE_ID  5
 
-#define ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
 
 
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
@@ -4919,6 +4821,81 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
 
 
+#ifdef DEVICE_MEADOWS__LIVINGROOM__PEBBLES
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[     
+      {
+        "Name":"Bus1",
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,100],
+        "ColourPalette":0,
+        "SegColour0":{"RGBWC":[255,117,31,0,0]},
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 30
+  }
+  )=====";
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+#endif // DEVICE_END
 
 
 /**************************************************************************************************************************************************
@@ -4968,93 +4945,22 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_PORT     1883
-
-
 
   /***********************************
    * SECTION: System Debug Options
   ************************************/    
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-  
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-  // #define ENABLE_DEBUG_LINE_HERE
-  // #define ENABLE_DEBUG_LINE_HERE2
-
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
-
-  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
-
-  // #define ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
 
   /***********************************
    * SECTION: Storage Configs
   ************************************/  
- 
-  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
-
-  /**
-   * For debugging and short term I may want to store everything as JSON, so I can view the data?
-   * Longer term, a mixture of JSON/Binary for space.
-   * Options should just be ifdef to switch between methods. 
-  */
-  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
-
-  // New way to start the save into memory periodically, and then recover if available on boot. Init phase of full system.
-  #define ENABLE_FILESYSTEM__MODULES_CORE__SAVE
-  // #define ENABLE_FILESYSTEM__MODULES_CORE__RESTORE_ON_BOOT
-  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__SAVE
-  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__RESTORE_ON_BOOT
-  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__SAVE
-  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__RESTORE_ON_BOOT
-  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__SAVE
-  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__RESTORE_ON_BOOT
   
-
   /***********************************
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
   /***********************************
    * SECTION: Network Configs
   ************************************/    
-
-  
-  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -5072,89 +4978,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: Lighting Configs
   ************************************/  
  
-
- /***********************************
-  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
- ************************************/  
-  // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
-
- /***********************************
-  * SECTION: Sensor Configs
- ************************************/  
-
-  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
-   #define USE_MODULE_SENSORS_INTERFACE
-   #define USE_MODULE_SENSORS_PIR
-    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
- #endif
-
- #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
-
-
-
- /***********************************
-  * SECTION: Module/GPIO Configs
- ************************************/  
-
- #define USE_MODULE_TEMPLATE
- DEFINE_PGM_CTR(MODULE_TEMPLATE) 
- "{"
-   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
-   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-   "\"" D_GPIO_NUMBER "\":{"
-     "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
-   "},"
-   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
- "}";
-
-  
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":4,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":0,
-  //       "Length":200,
-  //       "Reversed":1
-  //     },
-  //     {
-  //       "Pin":2,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":200,
-  //       "Length":200
-  //     }
-  //   ],
-  //   "Segment0": {
-  //     "PixelRange": [
-  //       0,
-  //       400
-  //     ],
-  //     "ColourPalette":"Warm White",
-  //     "ColourType":3,
-  //     "Effects": {
-  //       "Function":"Candles",
-  //       "Speed":180,
-  //       "Intensity":85,
-  //       "Grouping":1,
-  //       "RateMs": 20
-  //     },
-  //     "BrightnessRGB": 100,
-  //     "BrightnessCCT": 0
-
-  //   },
-  //   "BrightnessRGB": 1,
-  //   "BrightnessCCT": 0
-  // }
-  // )=====";
-
-  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -5194,22 +5017,28 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "BrightnessCCT": 0
 
     },
-    "BrightnessRGB": 5,
+    "BrightnessRGB": 100,
     "BrightnessCCT": 0
   }
   )=====";
   
- #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+ /***********************************
+  * SECTION: Module/GPIO Configs
+ ************************************/  
 
- #define USE_FUNCTION_TEMPLATE
- DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ #define USE_MODULE_TEMPLATE
+ DEFINE_PGM_CTR(MODULE_TEMPLATE) 
  "{"
-   "\"" D_DEVICENAME "\":{"
-     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
-       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
-     "]"
-   "}"
+   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+   "\"" D_GPIO_NUMBER "\":{"
+     "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+   "},"
+   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
  "}";
+
 
 #endif
 

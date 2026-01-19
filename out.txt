@@ -473,7 +473,7 @@ cm_bedroom__door_frame                    IGNORED
 cm_shelly_dimmer_01                       IGNORED
 cm_livingroom__samsung_tv                 IGNORED
 cm_hallway__vase_light                    IGNORED
-cm_outside__fence_string                  IGNORED
+cm_outside__fence_lights                  IGNORED
 cm_prusa_heater                           IGNORED
 cm_treadmill_power                        IGNORED
 cm_garagelight                            IGNORED

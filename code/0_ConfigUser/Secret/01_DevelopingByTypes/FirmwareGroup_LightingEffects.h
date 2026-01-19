@@ -226,11 +226,11 @@
   
 
   #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG
-  // #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
+  #define ENABLE_FEATURE_LIGHTS__PRESETS
   
-  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS_DEBUG_LINES
+  // _LINES
+  
+  
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
 
@@ -380,12 +380,12 @@
   
 
   #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG
-  // #define ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
+  #define ENABLE_FEATURE_LIGHTS__PRESETS
   
-  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
-  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS_DEBUG_LINES
+  // _LINES
+  
+  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
 
@@ -1175,7 +1175,9 @@
 
 #ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_8W32H_TALL
 
-
+  // Adding here so intelliscense shows it
+  #define FIRMWARE_DEFAULT__MODULE_TEMPLATE__GENERIC_MINIMUM
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
   
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -2754,7 +2756,7 @@
  #define USE_DEVFEATURE_LIGHTS__CUSTOM_MAPPING_TABLE_SPLASH
 
  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS_INCLUDE_PRIMARY_JSON_COMMANDS
-  // #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+  // #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
     
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
@@ -4058,7 +4060,7 @@
  
 
  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS_INCLUDE_PRIMARY_JSON_COMMANDS
-  #define ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
 
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
@@ -10007,6 +10009,273 @@ typedef uint32_t ColourBaseType;
 #endif
 
 
+
+#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_PEBBLE_CONE_V_1D
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+  #define ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+//  /***********************************
+//   * SECTION: Sensor Configs
+//  ************************************/  
+
+//   #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+//    #define USE_MODULE_SENSORS_INTERFACE
+//    #define USE_MODULE_SENSORS_PIR
+//     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+//  #endif
+
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  // #define ENABLE_BUSCONFG__NEW_BUSCONFIG_RANGING
+  #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE
+  // #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE_ONE_SEGMENT
+
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[     
+      {
+        "Name":"Star",
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":1010
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,1010],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 100
+  }
+  )=====";
+  #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
+  #define MAX_LED_MEMORY 64000*5
+  #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+#endif // DEVICE_END
+
+/**
+ * @brief 
+ * {
+  "BrightnessRGB": 100,
+  "ColourPalette":"RGPBY",
+  "Effects":{"Grouping":1},
+   "MQTTPixel": {
+    "OnPixelsWithIndex": [
+      [0, 0, 65],
+      [1, 66, 131],
+      [4, 132, 134],
+      [0, 135, 199],
+      [1, 200, 264],
+      [4, 265, 269],
+      [0, 270, 335],
+      [1, 336, 401],
+      [4, 402, 406],
+      [0, 407, 471],
+      [1, 472, 537],
+      [4, 538, 541],
+      [0, 542, 607],
+      [1, 608, 673],
+      [4, 674, 677],
+      [0, 678, 743],
+      [1, 744, 809],
+      [4, 810, 814],
+      [0, 815, 880],
+      [1, 881, 946],
+      [4, 947, 949],
+      [0, 950, 1000]
+    ],
+    "OnPixelsFill": false
+  }
+ }
+ * 
+ */
+#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_PEBBLE_CONE_V_2D
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+  #define ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
+
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+//  /***********************************
+//   * SECTION: Sensor Configs
+//  ************************************/  
+
+//   #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+//    #define USE_MODULE_SENSORS_INTERFACE
+//    #define USE_MODULE_SENSORS_PIR
+//     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+//  #endif
+
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  // #define ENABLE_BUSCONFG__NEW_BUSCONFIG_RANGING
+  #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE
+  // #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE_ONE_SEGMENT
+
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[     
+      {
+        "Name":"Star",
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":1000
+      }
+    ],
+    "MatrixConfig":[
+      {
+        "Width":15,
+        "Height":66,
+        "BottomStart":1,
+        "RightStart":0,
+        "Vertical":1,
+        "Serpentine":1,
+        "xOffset":0,
+        "yOffset":0
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,15,0,66],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":10,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 5
+  }
+  )=====";
+  #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
+  #define MAX_LED_MEMORY 64000*5
+  #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+#endif // DEVICE_END
 
 
 

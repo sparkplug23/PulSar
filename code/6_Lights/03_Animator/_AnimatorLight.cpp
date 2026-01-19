@@ -718,11 +718,11 @@ void mAnimatorLight::EveryLoop()
        * ie grp 150 tto 1 (via jsoncommand), but effect happened before this completed since preset to load is a flag, not a hard change
        * 
        */
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
       SubTask_Playlist();
       #endif
 
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+      #ifdef ENABLE_FEATURE_LIGHTS__PRESETS
       SubTask_Presets();
       #endif
 
@@ -871,9 +871,9 @@ void mAnimatorLight::Init(void)
   WAIT_WITH_PRINT_TICK(1000);
 
   DEBUG_LINE_HERE4
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+  #ifdef ENABLE_FEATURE_LIGHTS__PRESETS
   initPresetsFile();
-  #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+  #endif // ENABLE_FEATURE_LIGHTS__PRESETS
 
   DEBUG_LINE_HERE4
   WAIT_WITH_PRINT_TICK(1000);
@@ -6850,7 +6850,7 @@ uint8_t mAnimatorLight::ConstructJSON_Playlist(uint8_t json_level, bool json_app
 
   JBI->Start();
   
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
     JBI->Add("Length", playlistLen);
 
     JBI->Array_Start("Loaded");

@@ -5,7 +5,7 @@
 #pragma once
 
 
-#ifdef ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+#ifdef ENABLE_FEATURE_JSON__ASYNCJSON_V6
 
 
 #ifdef __cplusplus
@@ -7343,4 +7343,4 @@ using namespace ArduinoJson;
 #endif
 
 
-#endif // ENABLE_DEVFEATURE_JSON__ASYNCJSON_V6
+#endif // ENABLE_FEATURE_JSON__ASYNCJSON_V6

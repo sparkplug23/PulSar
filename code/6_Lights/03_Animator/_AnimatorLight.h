@@ -20,7 +20,6 @@
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-      // effects that enable colour mapping for counting positions and testing hardware/pins
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
@@ -547,10 +546,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "de
   #include "webpages_generated/html_cpal.h"
 #endif // ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
 
-//wled_math.cpp
-//float cos_t(float phi); // use float math
-//float sin_t(float phi);
-//float tan_t(float x);
+
 int16_t sin16_t(uint16_t theta);
 int16_t cos16_t(uint16_t theta);
 uint8_t sin8_t(uint8_t theta);
@@ -596,7 +592,7 @@ class mAnimatorLight :
     void   Init(void);
     void   Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    #if defined(ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR) && defined(ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS)
+    #if defined(ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR) && defined(ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS)
     int8_t Tasker_DevCode(uint8_t function, JsonParserObject obj = 0);
     #endif
     void   parse_JSONCommand(JsonParserObject obj);
@@ -865,8 +861,6 @@ class mAnimatorLight :
     }
 
 
-
-
     /******************************************************************************************************************************************************************************
     *******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************
@@ -876,90 +870,86 @@ class mAnimatorLight :
     *****************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
 
-
-// legacy to remove
     static uint32_t ColourBlend(uint32_t color1, uint32_t color2, uint8_t blend);
-    // #define color_blend ColourBlend
-
     
-void Init_Busses();
+    void Init_Busses();
 
-// Time CONFIG
-#ifndef WLED_NTP_ENABLED
-  #define WLED_NTP_ENABLED false
-#endif
-#ifndef WLED_TIMEZONE
-  #define WLED_TIMEZONE 0
-#endif
-#ifndef WLED_UTC_OFFSET
-  #define WLED_UTC_OFFSET 0
-#endif
-bool ntpEnabled      _INIT(WLED_NTP_ENABLED); // get internet time. Only required if you use clock overlays or time-activated macros
+// // Time CONFIG
+// #ifndef WLED_NTP_ENABLED
+//   #define WLED_NTP_ENABLED false
+// #endif
+// #ifndef WLED_TIMEZONE
+//   #define WLED_TIMEZONE 0
+// #endif
+// #ifndef WLED_UTC_OFFSET
+//   #define WLED_UTC_OFFSET 0
+// #endif
+// bool ntpEnabled      _INIT(WLED_NTP_ENABLED); // get internet time. Only required if you use clock overlays or time-activated macros
 bool useAMPM         = false; //_INIT(false);            // 12h/24h clock format
-byte currentTimezone _INIT(WLED_TIMEZONE);    // Timezone ID. Refer to timezones array in wled10_ntp.ino
-int utcOffsetSecs    _INIT(WLED_UTC_OFFSET);  // Seconds to offset from UTC before timzone calculation
+// byte currentTimezone _INIT(WLED_TIMEZONE);    // Timezone ID. Refer to timezones array in wled10_ntp.ino
+// int utcOffsetSecs    _INIT(WLED_UTC_OFFSET);  // Seconds to offset from UTC before timzone calculation
 
-byte overlayCurrent _INIT(0);    // 0: no overlay 1: analog clock 2: was single-digit clock 3: was cronixie
-byte overlayMin _INIT(0), overlayMax _INIT(DEFAULT_LED_COUNT - 1);   // boundaries of overlay mode
+// byte overlayCurrent _INIT(0);    // 0: no overlay 1: analog clock 2: was single-digit clock 3: was cronixie
+// byte overlayMin _INIT(0), overlayMax _INIT(DEFAULT_LED_COUNT - 1);   // boundaries of overlay mode
 
-byte analogClock12pixel _INIT(0);               // The pixel in your strip where "midnight" would be
-bool analogClockSecondsTrail _INIT(false);      // Display seconds as trail of LEDs instead of a single pixel
-bool analogClock5MinuteMarks _INIT(false);      // Light pixels at every 5-minute position
-bool analogClockSolidBlack _INIT(false);        // Show clock overlay only if all LEDs are solid black (effect is 0 and color is black)
+// byte analogClock12pixel _INIT(0);               // The pixel in your strip where "midnight" would be
+// bool analogClockSecondsTrail _INIT(false);      // Display seconds as trail of LEDs instead of a single pixel
+// bool analogClock5MinuteMarks _INIT(false);      // Light pixels at every 5-minute position
+// bool analogClockSolidBlack _INIT(false);        // Show clock overlay only if all LEDs are solid black (effect is 0 and color is black)
 
 bool countdownMode _INIT(false);                         // Clock will count down towards date
 byte countdownYear _INIT(20), countdownMonth _INIT(1);   // Countdown target date, year is last two digits
 byte countdownDay  _INIT(1) , countdownHour  _INIT(0);
 byte countdownMin  _INIT(0) , countdownSec   _INIT(0);
 
-uint16_t serialBaud _INIT(1152); // serial baud rate, multiply by 100
-bool     serialCanRX _INIT(false);
-bool     serialCanTX _INIT(false);
-#ifndef WLED_MAX_BUTTONS
-  #ifdef ESP8266
-    #define WLED_MAX_BUTTONS 2
-  #else
-    #define WLED_MAX_BUTTONS 4
-  #endif
-#else
-  #if WLED_MAX_BUTTONS < 2
-    #undef WLED_MAX_BUTTONS
-    #define WLED_MAX_BUTTONS 2
-  #endif
-#endif
-byte macroNl   _INIT(0);        // after nightlight delay over
-byte macroCountdown _INIT(0);
-byte macroAlexaOn _INIT(0), macroAlexaOff _INIT(0);
-byte macroButton[WLED_MAX_BUTTONS]        _INIT({0});
-byte macroLongPress[WLED_MAX_BUTTONS]     _INIT({0});
-byte macroDoublePress[WLED_MAX_BUTTONS]   _INIT({0});
+// uint16_t serialBaud _INIT(1152); // serial baud rate, multiply by 100
+// bool     serialCanRX _INIT(false);
+// bool     serialCanTX _INIT(false);
+// #ifndef WLED_MAX_BUTTONS
+//   #ifdef ESP8266
+//     #define WLED_MAX_BUTTONS 2
+//   #else
+//     #define WLED_MAX_BUTTONS 4
+//   #endif
+// #else
+//   #if WLED_MAX_BUTTONS < 2
+//     #undef WLED_MAX_BUTTONS
+//     #define WLED_MAX_BUTTONS 2
+//   #endif
+// #endif
+// byte macroNl   _INIT(0);        // after nightlight delay over
+// byte macroCountdown _INIT(0);
+// byte macroAlexaOn _INIT(0), macroAlexaOff _INIT(0);
+// byte macroButton[WLED_MAX_BUTTONS]        _INIT({0});
+// byte macroLongPress[WLED_MAX_BUTTONS]     _INIT({0});
+// byte macroDoublePress[WLED_MAX_BUTTONS]   _INIT({0});
 
-// Security CONFIG
+// // Security CONFIG
 bool otaLock     _INIT(false);  // prevents OTA firmware updates without password. ALWAYS enable if system exposed to any public networks
 bool wifiLock    _INIT(false);  // prevents access to WiFi settings when OTA lock is enabled
-bool aOtaEnabled _INIT(true);   // ArduinoOTA allows easy updates directly from the IDE. Careful, it does not auto-disable when OTA lock is on
-char settingsPIN[5] _INIT("");  // PIN for settings pages
+// bool aOtaEnabled _INIT(true);   // ArduinoOTA allows easy updates directly from the IDE. Careful, it does not auto-disable when OTA lock is on
+// char settingsPIN[5] _INIT("");  // PIN for settings pages
 bool correctPIN     _INIT(true);
 unsigned long lastEditTime _INIT(0);
 
 
-uint16_t userVar0 _INIT(0), userVar1 _INIT(0); //available for use in usermod
+// uint16_t userVar0 _INIT(0), userVar1 _INIT(0); //available for use in usermod
 
-// countdown
-unsigned long countdownTime _INIT(1514764800L);
+// // countdown
+// unsigned long countdownTime _INIT(1514764800L);
 bool countdownOverTriggered _INIT(true);
 
-// timer
-byte lastTimerMinute = 0;
-byte timerHours[10]     = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-int8_t timerMinutes[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-byte timerMacro[10]     = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-// weekdays to activate on, bit pattern of arr elem: 0b11111111: sun,sat,fri,thu,wed,tue,mon,validity
-byte timerWeekday[10]   = { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
-// upper 4 bits start, lower 4 bits end month (default 28: start month 1 and end month 12)
-byte timerMonth[8]      = { 28, 28, 28, 28, 28, 28, 28, 28 };
-byte timerDay[8]        = { 1, 1, 1, 1, 1, 1, 1, 1 };
-byte timerDayEnd[8]     = { 31, 31, 31, 31, 31, 31, 31, 31 };
+// // timer
+// byte lastTimerMinute = 0;
+// byte timerHours[10]     = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+// int8_t timerMinutes[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+// byte timerMacro[10]     = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+// // weekdays to activate on, bit pattern of arr elem: 0b11111111: sun,sat,fri,thu,wed,tue,mon,validity
+// byte timerWeekday[10]   = { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
+// // upper 4 bits start, lower 4 bits end month (default 28: start month 1 and end month 12)
+// byte timerMonth[8]      = { 28, 28, 28, 28, 28, 28, 28, 28 };
+// byte timerDay[8]        = { 1, 1, 1, 1, 1, 1, 1, 1 };
+// byte timerDayEnd[8]     = { 31, 31, 31, 31, 31, 31, 31, 31 };
 bool doAdvancePlaylist  = false;
 
 
@@ -983,7 +973,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     void Init_Segments();
 
 
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+    #ifdef ENABLE_FEATURE_LIGHTS__PRESETS
     volatile byte presetToApply = 0;
     volatile byte callModeToApply = 0;
     volatile byte presetToSave = 0;
@@ -1020,12 +1010,12 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     inline void saveTemporaryPreset() {savePreset(255);};
 
     void deletePreset(byte index);
-    #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+    #endif // ENABLE_FEATURE_LIGHTS__PRESETS
 
     /******************************************************************************************************************************************************************************
     **** Playlists ***************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
 
     typedef struct PlaylistEntry 
     {
@@ -1094,7 +1084,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     #endif
 
 
-    #endif // ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+    #endif // ENABLE_FEATURE_LIGHTS__PLAYLISTS
 
     void Handle_FileSave_Edits();
 
@@ -5384,7 +5374,6 @@ uint16_t pollReplyCount _INIT(0);                     // count number of replies
 // // Time CONFIG
 time_t localTime _INIT(0);
 // bool ntpEnabled _INIT(false);    // get internet time. Only required if you use clock overlays or time-activated macros
-// bool useAMPM _INIT(false);       // 12h/24h clock format
 // byte currentTimezone _INIT(0);   // Timezone ID. Refer to timezones array in wled10_ntp.ino
 // int utcOffsetSecs _INIT(0);      // Seconds to offset from UTC before timzone calculation
 
@@ -5401,26 +5390,12 @@ time_t localTime _INIT(0);
 // // bool analogClockSecondsTrail _INIT(false);      // Display seconds as trail of LEDs instead of a single pixel
 // // bool analogClock5MinuteMarks _INIT(false);      // Light pixels at every 5-minute position
 
-// // bool countdownMode _INIT(false);                         // Clock will count down towards date
-// // byte countdownYear _INIT(20), countdownMonth _INIT(1);   // Countdown target date, year is last two digits
-// // byte countdownDay  _INIT(1) , countdownHour  _INIT(0);
-// // byte countdownMin  _INIT(0) , countdownSec   _INIT(0);
-
-
 // // byte macroNl   _INIT(0);        // after nightlight delay over
 // // byte macroCountdown _INIT(0);
 // // byte macroAlexaOn _INIT(0), macroAlexaOff _INIT(0);
 // // byte macroButton[WLED_MAX_BUTTONS]        _INIT({0});
 // // byte macroLongPress[WLED_MAX_BUTTONS]     _INIT({0});
 // // byte macroDoublePress[WLED_MAX_BUTTONS]   _INIT({0});
-
-// // // Security CONFIG
-// bool otaLock     _INIT(false);  // prevents OTA firmware updates without password. ALWAYS enable if system exposed to any public networks
-// // bool wifiLock    _INIT(false);  // prevents access to WiFi settings when OTA lock is enabled
-// // bool aOtaEnabled _INIT(true);   // ArduinoOTA allows easy updates directly from the IDE. Careful, it does not auto-disable when OTA lock is on
-// char settingsPIN[5]  = {0};//_INIT("");  // PIN for settings pages
-// bool correctPIN     _INIT(true);
-// // unsigned long lastEditTime _INIT(0);
 
 // // uint16_t userVar0 _INIT(0), userVar1 _INIT(0); //available for use in usermod
 

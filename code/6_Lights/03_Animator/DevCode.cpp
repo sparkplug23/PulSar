@@ -2,7 +2,7 @@
 
 // to add later, hence any development code for all type of drivers/sensors etc should be callable at the end of their own tasker. 
 // This will make it easier to split release/development code.
-#if defined(ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR) && defined(ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS)
+#if defined(ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR) && defined(ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS)
 
 int8_t mAnimatorLight::Tasker_DevCode(uint8_t function, JsonParserObject obj)
 {
@@ -50,7 +50,7 @@ int8_t mAnimatorLight::Tasker_DevCode(uint8_t function, JsonParserObject obj)
 
 } // END FUNCTION
 
-#endif // ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS
+#endif // ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
 
 
 

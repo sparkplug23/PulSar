@@ -480,7 +480,7 @@ void mButtons::Handler(void) {
 
     uint8_t button = Button.debounced_state[button_index];
 
-    // ALOG_INF(PSTR("button %d %d"), button_index, button);
+    ALOG_INF(PSTR("button %d %d"), button_index, button);
 
     // #ifdef ESP8266
     // if (!button_index && ((SONOFF_DUAL == TasmotaGlobal.module_type) || (CH4 == TasmotaGlobal.module_type))) {

@@ -1,7 +1,7 @@
 #include "_AnimatorLight.h"
 
 
-#ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+#ifdef ENABLE_FEATURE_LIGHTS__PRESETS
 
 /*
  * Methods to handle saving and loading presets to/from the filesystem
@@ -288,7 +288,7 @@ uint8_t mAnimatorLight::Playlist_SelectAllowedIndexByTime(JsonObject playlist, u
 void mAnimatorLight::doSaveState() 
 {
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG
+  #ifdef ENABLE_FEATURE_LIGHTS__PRESETS_DEBUG
   ALOG_INF(PSTR("doSaveState() START"));
   // CommandSet_ReadFile("/presets.json");
   #endif
@@ -317,7 +317,7 @@ void mAnimatorLight::doSaveState()
   if (playlistSave) 
   {
   
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
     serializePlaylist(sObj);
     #endif
   
@@ -336,7 +336,7 @@ void mAnimatorLight::doSaveState()
   if (quickLoad[0]) sObj[F("ql")] = quickLoad;
   if (saveLedmap >= 0) sObj[F("ledmap")] = saveLedmap;
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG_LINES
+  #ifdef ENABLE_FEATURE_LIGHTS__PRESETS_DEBUG_LINES
   DEBUG_LINE_HERE;
   DEBUG_PRINTLN(F("Serialized preset"));
   serializeJson(doc,Serial);
@@ -402,7 +402,7 @@ void mAnimatorLight::doSaveState()
   quickLoad[0] = '\0';
   playlistSave = false;
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS_DEBUG
+  #ifdef ENABLE_FEATURE_LIGHTS__PRESETS_DEBUG
   ALOG_INF(PSTR("doSaveState() END"));
   // CommandSet_ReadFile("/presets.json");
   #endif
@@ -970,4 +970,4 @@ ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN_2() end, took %u ms"),
 }
 
 
-#endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+#endif // ENABLE_FEATURE_LIGHTS__PRESETS

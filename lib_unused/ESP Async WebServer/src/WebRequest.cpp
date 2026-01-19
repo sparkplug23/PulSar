@@ -963,9 +963,7 @@ void AsyncWebServerRequest::send_code(int code){
 
 void AsyncWebServerRequest::send(int code, uint8_t contentType, char* content_ptr){
 
-  // #ifdef DEBUG_WEBSERVER_LIB
-    // Serial.printf("AsyncWebServerRequest::send2(int code, const char* contentType, const char* content)\n\r");
-  // #endif
+  
 
   // Need to add a minimum Ram size left here before trying to assemble a large response, or else, reply with not enough memory etc
 
@@ -989,9 +987,7 @@ void AsyncWebServerRequest::send(int code, uint8_t contentType, char* content_pt
 
 // void AsyncWebServerRequest::send(int code, uint8_t contentType, char* content_ptr){
 
-//   // #ifdef DEBUG_WEBSERVER_LIB
-//     // Serial.printf("AsyncWebServerRequest::send2(int code, const char* contentType, const char* content)\n\r");
-//   // #endif
+
 
 //   // Need to add a minimum Ram size left here before trying to assemble a large response, or else, reply with not enough memory etc
 

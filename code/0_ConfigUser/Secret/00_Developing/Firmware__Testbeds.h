@@ -71,8 +71,6 @@
 // #define DEVICE_testbed_rcs_ext
 // #define DEVICE_TESTBED_FASTBOOT_ESP8266
 // #define DEVICE_TESTBED_CRASHREPORT
-// #define DEVICE_TESTBED_OLED_SH1106
-
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------
 
@@ -1017,48 +1015,6 @@ Blue (Upstairs Link) ***********************************************************
 
 
 
-
-
-
-
-/**
- * Basic version of measurement system
- * GPS will be recorded at 10Hz, and logged to SD card in json format for matlab parsing
- * */
-#ifdef DEVICE_TESTBED_OLED_SH1106
-  #define DEVICENAME_CTR            "testbed_oled_sh1106"
-  #define DEVICENAME_FRIENDLY_CTR   "TestBed SH1106"
-  #define DEVICENAME_ROOMHINT_CTR   "Testbed"
-  #define MQTT_HOST   "192.168.1.70"
-
-  #define USE_MODULE_DISPLAYS_INTERFACE
-  #define USE_MODULE_DISPLAYS_OLED_SH1106
-    #define SHOW_SPLASH
-
-    #define ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
-    
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIOC "\":{"
-      /** 
-       * OLED
-       * */
-      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
-      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
-      /** 
-       * BUILTIN LED
-       * */
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-    "},"
-  "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
-  "}";
-
-#endif // DEVICE_TESTBED_OLED_SH1106
 
 
 

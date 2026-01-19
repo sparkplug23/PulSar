@@ -36,11 +36,11 @@ bool mAnimatorLight::deserializeMap(uint8_t n) {
   }
   #endif
 
-  if (!isFile || !requestJSONBufferLock(7)) return false;
+  if (!isFile || !JBI->requestJSONBufferLock(7)) return false;
 
   if (!tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_mfile->pDoc)) {
     DEBUG_PRINT(F("ERROR Invalid ledmap in ")); DEBUG_PRINTLN(fileName);
-    releaseJSONBufferLock();
+    JBI->releaseJSONBufferLock();
     return false; // if file does not load properly then exit
   }
 
@@ -66,7 +66,7 @@ bool mAnimatorLight::deserializeMap(uint8_t n) {
     DEBUG_PRINTLN(F("ERROR LED map allocation error."));
   }
 
-  releaseJSONBufferLock();
+  JBI->releaseJSONBufferLock();
   return (customMappingSize > 0);
 }
 
@@ -156,7 +156,7 @@ void mAnimatorLight::setUpMatrix() {
       size_t  gapSize = 0;
       int8_t *gapTable = nullptr;
 
-      if (isFile && requestJSONBufferLock(20)) {
+      if (isFile && JBI->requestJSONBufferLock(20)) {
         DEBUG_PRINT(F("Reading LED gap from "));
         DEBUG_PRINTLN(fileName);
         // read the array into global JSON buffer
@@ -175,7 +175,7 @@ void mAnimatorLight::setUpMatrix() {
           }
         }
         DEBUG_PRINTLN(F("Gaps loaded."));
-        releaseJSONBufferLock();
+        JBI->releaseJSONBufferLock();
       }
 
       DEBUG_LINE_HERE;

@@ -42,7 +42,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
     { 
       DEBUG_LINE_HERE_MILLIS
       mod->Tasker(task, obj);
-      #ifdef ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS
+      #ifdef ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
       mod->Tasker_DevCode(task, obj);
       #endif
     }
@@ -193,7 +193,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
        * In the future if we get stuck, remember missing return from task required with platest platform/board
        */
       DEBUG_LINE_HERE4;
-      #ifdef ENABLE_DEVFEATURE_TASKER__DEVELOPMENT_TASKS
+      #ifdef ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
       result = mod->Tasker_DevCode(task, obj);
       #endif
   #endif

@@ -137,9 +137,8 @@ size_t AsyncEventSourceMessage::ack(size_t len, uint32_t time) {
 }
 
 size_t AsyncEventSourceMessage::send(AsyncClient *client) {
-  #ifdef DEBUG_WEBSERVER_LIB
-    Serial.printf("send(AsyncClient *client)\n\r");
-  #endif
+  
+  
   const size_t len = _len - _sent;
   if(client->space() < len){
     return 0;

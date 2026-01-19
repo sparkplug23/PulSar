@@ -139,7 +139,7 @@ void mAnimatorLight::serializeState(JsonObject root, bool forPreset, bool includ
 
     root["ps"] = (currentPreset > 0) ? currentPreset : -1;    
     
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
     root[F("pl")] = currentPlaylist;
     #endif
 
@@ -484,7 +484,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
   // loadLedmap = root[F("ledmap")] | loadLedmap;
 
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+  #ifdef ENABLE_FEATURE_LIGHTS__PRESETS
   byte ps = root[F("psave")];
   if (ps > 0 && ps < 251) savePreset(ps, nullptr, root);
   ps = root[F("pdel")]; //deletion
@@ -507,7 +507,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
     if (root["win"].isNull()) presetCycCurr = currentPreset; // otherwise it was set in handle__HTTP__GET_QueryAPI() [set.cpp]
     presetToRestore = currentPreset; // stateUpdated() will clear the preset, so we need to restore it after
     
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
       unloadPlaylist();// applying a preset unloads the playlist, may be needed here too?
       #endif
       
@@ -516,7 +516,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
     if (root["win"].isNull() && getVal(root["ps"], &ps, 0, 0) && ps > 0 && ps < 251 && ps != currentPreset) {
       // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
       presetCycCurr = ps;
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
       unloadPlaylist();          // applying a preset unloads the playlist
       #endif
       applyPreset(ps, callMode); // async load from file system (only preset ID was specified)
@@ -525,7 +525,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
   }
 
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+  #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
   JsonObject playlist = root[F("playlist")];
   if (!playlist.isNull() && loadPlaylist(playlist, presetId)) {
     //do not notify here, because the first playlist entry will do
@@ -552,7 +552,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
   stateUpdated(callMode);
   if (presetToRestore) currentPreset = presetToRestore;
   
-  #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+  #endif // ENABLE_FEATURE_LIGHTS__PRESETS
 
   return stateResponse;
 }
@@ -1401,7 +1401,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
     // ALOG_INF(PSTR("elem[\"fx\"].is<const char*>() == NUMBER"));
     if (getVal(elem["fx"], &fx, 0, getModeCount())) { //load effect ('r' random, '~' inc/dec, 0-255 exact value)
       // ALOG_INF(PSTR("getVal(elem[\"fx\"], &fx, 0, getModeCount()) %d"), fx);      
-      #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
       if (!presetId && currentPlaylist>=0) unloadPlaylist(); // applying a preset unloads the playlist, may be needed here too?
       #endif
       // if (fx != seg.animation_mode_id)
@@ -2790,49 +2790,46 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
   //   return;
   // }
   else if (url.indexOf("pal") > 0) { // "/json/palettes" - names only (flat array)
-  // Build JSON into a local String to avoid races with the global JBI buffer
-  String out;
-  out.reserve(64 + 24 * mPaletteI->GetPaletteListLength()); // rough reserve
+    // Build JSON into a local String to avoid races with the global JBI buffer
+    String out;
+    out.reserve(64 + 24 * mPaletteI->GetPaletteListLength()); // rough reserve
 
-  out += '[';
+    out += '[';
 
-  char nameBuf[96];
-  bool first = true;
-  const bool firstNameOnly = true; // keep your current behavior
+    char nameBuf[96];
+    bool first = true;
+    const bool firstNameOnly = true; // keep your current behavior
 
-  for (uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++) {
-    GetPaletteNameByID(i, nameBuf, sizeof(nameBuf));
-    if (firstNameOnly) {
-      if (char* p = strchr(nameBuf, PALETTE_MULTIPLE_NAME_DELIMETER)) *p = '\0';
+    for (uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++) {
+      GetPaletteNameByID(i, nameBuf, sizeof(nameBuf));
+      if (firstNameOnly) {
+        if (char* p = strchr(nameBuf, PALETTE_MULTIPLE_NAME_DELIMETER)) *p = '\0';
+      }
+
+      // minimal JSON string escape (quotes + backslashes); names are simple, but be safe
+      String nm; nm.reserve(strlen(nameBuf) + 8);
+      for (const char* s = nameBuf; *s; ++s) {
+        char c = *s;
+        if (c == '\"' || c == '\\') { nm += '\\'; nm += c; }
+        else                         { nm += c; }
+      }
+
+      if (!first) out += ',';
+      first = false;
+      out += '\"'; out += nm; out += '\"';
     }
 
-    // minimal JSON string escape (quotes + backslashes); names are simple, but be safe
-    String nm; nm.reserve(strlen(nameBuf) + 8);
-    for (const char* s = nameBuf; *s; ++s) {
-      char c = *s;
-      if (c == '\"' || c == '\\') { nm += '\\'; nm += c; }
-      else                         { nm += c; }
-    }
+    out += ']';
 
-    if (!first) out += ',';
-    first = false;
-    out += '\"'; out += nm; out += '\"';
-  }
-
-  out += ']';
-
-  #ifdef ENABLE_DEVFEATURE_WEBSERVER__ETAGS_ENABLED_FOR_RELOADING_PALETTES_ON_FRESH_COMPILE
+    // Creating ETAGs which differ on a fresh compile, forcing palettes to be reloaded on first webpage load
     char etag[32];
     tkr_web->generateEtag(etag, JSON_PATH_PALETTES);
     AsyncWebServerResponse* resp = request->beginResponse(200, "application/json", out);
     resp->addHeader(F("ETag"), etag);
     request->send(resp);
-  #else
-    request->send(200, "application/json", out);
-  #endif
 
-  return;
-}
+    return;
+  }
   else if (url.indexOf("cfg") > 0 && tkr_mfile->handleFileRead(request, "/cfg.json")) {
     return;
   }

@@ -1,6 +1,6 @@
 #include "_AnimatorLight.h"
 
-#ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+#ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
 
 /******
  * 
@@ -371,4 +371,4 @@ void mAnimatorLight::serializePlaylist(JsonObject sObj)
 }
 
 
-#endif // ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+#endif // ENABLE_FEATURE_LIGHTS__PLAYLISTS

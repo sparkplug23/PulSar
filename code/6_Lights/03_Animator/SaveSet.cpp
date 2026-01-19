@@ -1094,10 +1094,10 @@ bool mAnimatorLight::handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, 
   }
 
   //set advanced overlay
-  pos = req.indexOf(F("OL="));
-  if (pos > 0) {
-    overlayCurrent = getNumVal(&req, pos);
-  }
+  // pos = req.indexOf(F("OL="));
+  // if (pos > 0) {
+  //   overlayCurrent = getNumVal(&req, pos);
+  // }
 
   //apply macro (deprecated, added for compatibility with pre-0.11 automations)
   pos = req.indexOf(F("&M="));
@@ -1180,10 +1180,10 @@ bool mAnimatorLight::handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, 
 
   //set countdown goal (unix timestamp)
   pos = req.indexOf(F("CT="));
-  if (pos > 0) {
-    countdownTime = getNumVal(&req, pos);
-    if (countdownTime - toki.second() > 0) countdownOverTriggered = false;
-  }
+  // if (pos > 0) {
+  //   countdownTime = getNumVal(&req, pos);
+  //   if (countdownTime - toki.second() > 0) countdownOverTriggered = false;
+  // }
 
   pos = req.indexOf(F("LO="));
   if (pos > 0) {
@@ -1198,18 +1198,18 @@ bool mAnimatorLight::handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, 
   if (pos > 0) doReboot = true;
 
   // clock mode, 0: normal, 1: countdown
-  pos = req.indexOf(F("NM="));
-  if (pos > 0) countdownMode = (req.charAt(pos+3) != '0');
+  // pos = req.indexOf(F("NM="));
+  // if (pos > 0) countdownMode = (req.charAt(pos+3) != '0');
 
-  pos = req.indexOf(F("U0=")); //user var 0
-  if (pos > 0) {
-    userVar0 = getNumVal(&req, pos);
-  }
+  // pos = req.indexOf(F("U0=")); //user var 0
+  // if (pos > 0) {
+  //   userVar0 = getNumVal(&req, pos);
+  // }
 
-  pos = req.indexOf(F("U1=")); //user var 1
-  if (pos > 0) {
-    userVar1 = getNumVal(&req, pos);
-  }
+  // pos = req.indexOf(F("U1=")); //user var 1
+  // if (pos > 0) {
+  //   userVar1 = getNumVal(&req, pos);
+  // }
   // you can add more if you need
 
   // global col[], effectCurrent, ... are updated in stateChanged()

@@ -121,10 +121,10 @@ void JsonBuilder::Add<float>(const char* key, float value) {
 //   // DEBUG_PRINT(F("LOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOCKED    JSON buffer locked. ("));
 //   // DEBUG_PRINT(jsonBufferLock);
 //   // DEBUG_PRINTLN(")");
-//   #ifdef ENABLE_DEVFEATURE_LIGHTING__PRESETS
+//   #ifdef ENABLE_FEATURE_LIGHTS__PRESETS
 //   // tkr_mfile->gDoc = &doc;  // used for applying presets (presets.cpp)
 //   tkr_mfile->pDoc->clear();
-//   #endif // ENABLE_DEVFEATURE_LIGHTING__PRESETS
+//   #endif // ENABLE_FEATURE_LIGHTS__PRESETS
 //   return true;
 // }
 

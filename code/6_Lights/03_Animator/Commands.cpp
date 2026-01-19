@@ -1981,7 +1981,7 @@ if (jtok_pwi && jtok_pwi.isArray())
   if(jtok = obj["Preset"].getObject()["Load"]){
     uint8_t ps = jtok.getInt();
     // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
-    #ifdef ENABLE_DEVFEATURE_LIGHTING__PLAYLISTS
+    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
     unloadPlaylist();          // applying a preset unloads the playlist, to stop any already running playlist
     #endif
     applyPreset(ps, CALL_MODE_DIRECT_CHANGE); // async load from file system (only preset ID was specified)

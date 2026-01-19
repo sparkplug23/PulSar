@@ -18,7 +18,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 
 /**@@@@@ Minor Changes - aim to make these quarterly
- * #132 : 24Dec25 During Christmas, Live palettes refactored. New Wifi2, webserver.
+ * #132 : 24Dec25 Live palettes refactored. New Wifi2, webserver. three html build scripts (lights,webserver,submodules). Ethernet, LTE, SMS. Lights will be either complete/beta/2d only, add new defines within these, not the user config.
  * #131 : Oct25 In Colorado
  * #130 : Aug25 Moving towards FIRMWARE_DEFAULT__LIGHTING_CONFIG__## and merging longterm working lighting options. From now on, unless testing a new feature inside FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA (where it, then inside it will be a test ifdef to keep it centralised) all lighting will be defined in the ini, and use FIRMWARE_DEFAULT__LIGHTING_CONFIG__## to define the lighting config. 
  * #129 : Jun25 Esp32, c3, s3, pin mapping templates updated
@@ -44,27 +44,12 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MINOR    132 // Update "ChangeLogManual.md" when incrementing
 
 /**@@@@@ Core Changes
- * #06 : New BME680 added, bme/p 180/280 manual without library
- * #02 : immersion controller added, more bug fixes pushes throughout more devices
- * #01 : db18 esp32 working
- * #00 : Restarting for 2023
- * #28 : Stable boot only happens after 120 seconds now, as work around for not checking for mqtt/network valid. ie, currently if mqtt connects and some bad pointer exists then the mqtt will try to send it before it works. This will catch that and cause fastboot recovery. Recovery period will be (120 seconds * recovery counter)
- * #28 : Added multiple methods to trigger crashes on mqtt command
- * #27 : Fixed WDT to work inside OTA
- *       Set WDT to 60 seconds on esp32
- * #26 : Enabled fastboot detection, OTA fallback and WDT on ESP32 devices as default
+ * #00 : 
  */
 #define FIRMWARE_VERSION_CORE     0
 
 /**@@@@@ Module changes
- * #02 : db18 esp32 working
- * #01 : Ability to fade shelly dimmer with fader
- * #00 : Restarting for 2023
- * #33 : Fixed incorrect use of virtual/segment length, grouping of up to 200 has been tested for some effects
- * #32 : Moved lighting branch back to desktop 
- * #31 : Adding a palette step that splits progmem loads to only when a palette is loaded 
- * #30 : Added ultrasonic to unified sensor
- * #29 : Flashed testbed shelly2.5 to try new modeC for outside lights that simply reports switches as motion events, with relays to be remote OH controlled
+ * #00 : 
  */
 #define FIRMWARE_VERSION_MODULE   0
 
@@ -160,15 +145,6 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 //#define ENABLE_LOG_LEVEL__DEBUG_TRACE 
 //#define ENABLE_LOG_LEVEL_ALL
 #define ENABLE_LOG_LEVEL_DYNAMIC_LEVELS
-
-#define DEBUG_WEBSERVER_LIB  //used in improving core lib
-
-// // Muted blue/green
-// #define COLOR_BUTTON_HIGHLIGHT      "#1be7f1"
-// #define COLOR_BUTTON                "#4d8d90"    // [WebColor11] Button color - Blueish
-// #define COLOR_BUTTON_HOVER          "#31595b"
-// #define D_COLOUR_PAGE_TITLE         "#4bb7e6"
-// #define D_COL_TEXT_MODULE_TITLE_CTR "#4bb7e6"
 
 #define ENABLE_USER_CONFIG_OVERRIDE
 

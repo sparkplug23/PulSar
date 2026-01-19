@@ -78,7 +78,6 @@
 // #define DEVICE_testbed_rcs_ext
 // #define DEVICE_TESTBED_FASTBOOT_ESP8266
 // #define DEVICE_TESTBED_CRASHREPORT
-// #define DEVICE_TESTBED_OLED_SH1106
 
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------

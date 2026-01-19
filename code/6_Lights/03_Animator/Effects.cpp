@@ -1255,7 +1255,7 @@ uint16_t mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool 
   // if (move == 0) return FRAMETIME_WITH_SPEED(5, 1000);
 
   // Temp buffer for the wrapped edge in virtual space
-  std::vector<ColorB> edge(move);
+  std::vector<uint32_t> edge(move);
 #ifndef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
   // if (direction) {
     // ------------------------ Rotate right: pixels move toward higher virtual indices ------------------------
