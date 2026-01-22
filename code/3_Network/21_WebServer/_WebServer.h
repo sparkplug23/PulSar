@@ -76,6 +76,7 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 #include "3_Network/21_WebServer/Webpages/Generated/html_settings2.h"
 #include "3_Network/21_WebServer/Webpages/Generated/html_other.h"
 #include "3_Network/21_WebServer/Webpages/Generated/root_basic.h"
+#include "3_Network/21_WebServer/Webpages/Generated/submodule_assets.h"
 
 
 // pages_console_select.h

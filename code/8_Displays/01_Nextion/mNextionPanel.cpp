@@ -70,7 +70,7 @@ int8_t mNextionPanel::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_EVERY_HOUR:
       // Command_SetPage(settings.page);   //temp fix
     break;
-    case TASK_RESTART_STABLE:      
+    case TASK_RESTART_SET_DO_FINAL_CLEANUP:      
       nextionSendCmd("page message");
       nextionSetAttr("message.main.txt", "\"System Rebooting...\"");
       nextionSetAttr("message.main.bco", NEXTION_16BIT_COLOUR_GREEN_STR);
@@ -294,7 +294,7 @@ void mNextionPanel::EverySecond_ActivityCheck()
   if(settings.timeout_check.timeout_period==1)
   {
     ALOG_INF(PSTR("No data"));
-    Show_ConnectionNotWorking();
+    // Show_ConnectionNotWorking();
     settings.page = -1; // unset to force update when available
   }
   else
@@ -2353,44 +2353,167 @@ void mNextionPanel::MQTTHandler_Sender()
 
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 
+
 void mNextionPanel::WebPage_AddHandlers()
 {
-    
-  tkr_web->server->on("/nextion_update", HTTP_GET, [this](AsyncWebServerRequest *request){
+  // -----------------------------
+  // Legacy (existing) routes
+  // -----------------------------
+  tkr_web->server->on("/nextion_update", HTTP_GET, [this](AsyncWebServerRequest* request){
     this->WebPage_LCD_Update_TFT(request);
   });
 
-  tkr_web->server->on("/firmware", HTTP_GET, [this](AsyncWebServerRequest *request){
+  tkr_web->server->on("/firmware", HTTP_GET, [this](AsyncWebServerRequest* request){
     this->webHandleFirmware(request);
   });
-          
-  tkr_web->server->on("/tftFileSize", HTTP_GET, [this](AsyncWebServerRequest *request){
+
+  tkr_web->server->on("/tftFileSize", HTTP_GET, [this](AsyncWebServerRequest* request){
     this->webHandleTftFileSize(request);
   });
 
   tkr_web->server->on(
-                        "/lcdupload", 
-                        HTTP_POST, 
-                        [this](AsyncWebServerRequest *request){ request->send(200); }, // On Completion
-                        [this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
-                          this->webHandleLcdUpload(request, filename, index, data, len, final);
-                        }
-                      );
+    "/lcdupload",
+    HTTP_POST,
+    [](AsyncWebServerRequest* request){ /* On Completion: handled in upload final */ },
+    [this](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final){
+      this->webHandleLcdUpload(request, filename, index, data, len, final);
+    }
+  );
 
-  #ifdef ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
-  tkr_web->server->on("/lcddownload", HTTP_GET, [this](AsyncWebServerRequest *request){
+  
+  tkr_web->server->on("/nextion/lcddownload", HTTP_GET, [this](AsyncWebServerRequest* request){
     this->webHandleLcdDownload(request);
   });
-  #endif // ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
+  
+    
+  tkr_web->server->on("/nextion/lcdOtaSuccess", HTTP_GET, [this](AsyncWebServerRequest* request){
+    this->Serve_Submodule_NextionPanel_LcdOtaSuccess_Page(request);
+  });
 
-  tkr_web->server->on("/lcdOtaSuccess", HTTP_GET, [this](AsyncWebServerRequest *request){
+  tkr_web->server->on("/nextion/lcdOtaFailure", HTTP_GET, [this](AsyncWebServerRequest* request){
+    this->Serve_Submodule_NextionPanel_LcdOtaFailure_Page(request);
+  });
+
+
+  // -----------------------------
+  // New duplicated /nextion/* routes
+  // -----------------------------
+  tkr_web->server->on("/nextion/nextion_update", HTTP_GET, [this](AsyncWebServerRequest* request){
+    this->WebPage_LCD_Update_TFT(request);
+  });
+
+  tkr_web->server->on("/nextion/firmware", HTTP_GET, [this](AsyncWebServerRequest* request){
+    this->Serve_Submodule_NextionPanel_Firmware_Page(request);
+  });
+
+  tkr_web->server->on("/nextion/tftFileSize", HTTP_GET, [this](AsyncWebServerRequest* request){
+    this->webHandleTftFileSize(request);
+  });
+
+  tkr_web->server->on(
+    "/nextion/lcdupload",
+    HTTP_POST,
+    [](AsyncWebServerRequest* request){ /* On Completion: handled in upload final */ },
+    [this](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final){
+      this->webHandleLcdUpload(request, filename, index, data, len, final);
+    }
+  );
+
+  tkr_web->server->on("/nextion/lcdOtaSuccess", HTTP_GET, [this](AsyncWebServerRequest* request){
     this->webHandleLcdUpdateSuccess(request);
   });
 
-  tkr_web->server->on("/lcdOtaFailure", HTTP_GET, [this](AsyncWebServerRequest *request){
+  tkr_web->server->on("/nextion/lcdOtaFailure", HTTP_GET, [this](AsyncWebServerRequest* request){
     this->webHandleLcdUpdateFailure(request);
   });
+}
 
+
+
+void mNextionPanel::Serve_Submodule_NextionPanel_Firmware_Page(AsyncWebServerRequest* request)
+{
+  AsyncWebServerResponse* response =
+    request->beginResponse_P(
+      200,
+      FPSTR(CONTENT_TYPE_HTML),
+      WEB_8_Displays_01_Nextion_firmware_htm,
+      WEB_8_Displays_01_Nextion_firmware_htm_length
+    );
+
+  response->addHeader(F("Content-Encoding"), F("gzip"));
+  response->addHeader(F("Cache-Control"), F("no-store"));
+  response->addHeader(F("Expires"), F("0"));
+
+  tkr_web->setStaticContentCacheHeaders(response);
+  request->send(response);
+}
+
+
+/******************************************************************************************************************
+ * SECTION: WebServer - LCD OTA Download via URL
+ *
+ * Route:  GET /lcddownload?lcdFirmware=http://host/file.tft
+ *
+ * Notes:
+ * - Mirrors the legacy oneHASP behavior: serves a simple HTML status page then starts download.
+ * - Uses AsyncWebServerRequest::authenticate() if you have configUser/configPassword defined.
+ * - Keeps the handler self-contained so it “fits into your code”.
+ *******************************************************************************************************************/
+
+void mNextionPanel::webHandleLcdDownload(AsyncWebServerRequest* request)
+{
+  if (!request) return;
+
+  // --------------------------------------------------------------------------
+  // Extract URL
+  // --------------------------------------------------------------------------
+  if (!request->hasArg(F("lcdFirmware")))
+  {
+    request->send(400, FPSTR(PM_WEB_CONTENT_TYPE_TEXT_HTML), F("Missing query arg: lcdFirmware"));
+    return;
+  }
+
+  const String lcdUrl = request->arg(F("lcdFirmware"));
+  if (lcdUrl.length() == 0)
+  {
+    request->send(400, FPSTR(PM_WEB_CONTENT_TYPE_TEXT_HTML), F("Empty lcdFirmware URL"));
+    return;
+  }
+
+  // --------------------------------------------------------------------------
+  // Serve a simple status page immediately (like oneHASP)
+  // --------------------------------------------------------------------------
+  String data;
+
+  String httpHeader = FPSTR(HTTP_HEAD_START);
+  httpHeader.replace("{v}", String(F("HASPone ")) + String(tkr_set->Settings.system_name.friendly) + String(F(" LCD firmware update")));
+
+  data += httpHeader;
+  data += FPSTR(HTTP_SCRIPT3);   // If you only have HTTP_SCRIPT, swap to that
+  data += FPSTR(HTTP_STYLE3);    // If you only have HTTP_STYLE, swap to that
+  data += FPSTR(HASP_STYLE);
+  data += FPSTR(HTTP_HEAD_END3); // If you only have HTTP_HEAD_END, swap to that
+
+  data += F("<h1>");
+  data += String(tkr_set->Settings.system_name.friendly);
+  data += F(" LCD update</h1>");
+
+  data += F("<br/>Updating LCD firmware from: ");
+  data += lcdUrl;
+
+  data += FPSTR(HTTP_END3);
+
+  request->send(200, FPSTR(CONTENT_TYPE_HTML), data);
+
+  // --------------------------------------------------------------------------
+  // Start the OTA download AFTER responding (non-blocking is ideal)
+  // --------------------------------------------------------------------------
+  ALOG_INF(PSTR(D_LOG_NEXTION "HTTP: /lcddownload lcdFirmware=%s"), lcdUrl.c_str());
+
+  // If you track state, set it here (optional)
+  // update_in_progress = true;
+
+  nextionOtaStartDownload(request, lcdUrl);
 }
 
 
@@ -2554,8 +2677,10 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
     {
       ALOG_INF(PSTR("LCDOTA: LCD upload command FAILED."));
 
-      delay(5000);
-      tkr_wifi->EspRestart();
+      tkr_sup->ESP_Restart_InSeconds(5);
+
+      // delay(5000);
+      // tkr_wifi->EspRestart();
     }
 
     lcdOtaTimer = millis();
@@ -2708,46 +2833,13 @@ void mNextionPanel::webHandleLcdUpload(AsyncWebServerRequest *request, String fi
         ALOG_INF(PSTR("LCDOTA: Failure"));
         request->redirect("/lcdOtaFailure");
       }
-      tkr_wifi->EspRestart(); // Change later to schedule a restart
+      tkr_sup->ESP_Restart_Safe(); // Change later to schedule a restart
     }
   }
 
 }
 
 
-#ifdef ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
-void mNextionPanel::webHandleLcdDownload(AsyncWebServerRequest *request)
-{ // http://plate01/lcddownload
-  
-  ALOG_INF(PSTR("HTTP: webHandleLcdDownload HTTP download: %s"), request->host());
-
-  String data = String();
-
-
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", String(tkr_set->Settings.system_name.friendly) + " LCD Firmware updates");
-
-  data += httpHeader;
-  data += FPSTR(HTTP_SCRIPT3);
-  data += FPSTR(HTTP_STYLE3);
-  data += FPSTR(HASP_STYLE);
-  data += FPSTR(HTTP_HEAD_END3);
-  
-  data += F("<h1>");
-  data += tkr_set->Settings.system_name.friendly;
-  data += F(" LCD Update</h1>");
-  
-  data += F("<br/>Updating LCD firmware using HTTP from: ");
-  data += request->arg("lcdFirmware");
-
-  nextionOtaStartDownload(request, request->arg("lcdFirmware") );
-
-  data += FPSTR(HTTP_END3);  
-  
-  request->send(200, "text/html", data);
-
-}
-#endif // ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
 
 
 void mNextionPanel::webHandleLcdUpdateSuccess(AsyncWebServerRequest *request)
@@ -2810,6 +2902,42 @@ void mNextionPanel::webHandleLcdUpdateFailure(AsyncWebServerRequest *request)
   
 }
 
+
+void mNextionPanel::Serve_Submodule_NextionPanel_LcdOtaSuccess_Page(AsyncWebServerRequest* request)
+{
+  AsyncWebServerResponse* response =
+    request->beginResponse_P(
+      200,
+      FPSTR(CONTENT_TYPE_HTML),
+      WEB_8_Displays_01_Nextion_lcd_ota_success_htm,
+      WEB_8_Displays_01_Nextion_lcd_ota_success_htm_length
+    );
+
+  response->addHeader(F("Content-Encoding"), F("gzip"));
+  response->addHeader(F("Cache-Control"), F("no-store"));
+  response->addHeader(F("Expires"), F("0"));
+  tkr_web->setStaticContentCacheHeaders(response);
+
+  request->send(response);
+}
+
+void mNextionPanel::Serve_Submodule_NextionPanel_LcdOtaFailure_Page(AsyncWebServerRequest* request)
+{
+  AsyncWebServerResponse* response =
+    request->beginResponse_P(
+      200,
+      FPSTR(CONTENT_TYPE_HTML),
+      WEB_8_Displays_01_Nextion_lcd_ota_failure_htm,
+      WEB_8_Displays_01_Nextion_lcd_ota_failure_htm_length
+    );
+
+  response->addHeader(F("Content-Encoding"), F("gzip"));
+  response->addHeader(F("Cache-Control"), F("no-store"));
+  response->addHeader(F("Expires"), F("0"));
+  tkr_web->setStaticContentCacheHeaders(response);
+
+  request->send(response);
+}
 
 void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, const String &lcdOtaUrl)
 { // Upload firmware to the Nextion LCD via HTTP download
@@ -2884,7 +3012,8 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
       else
       {
         ALOG_INF(PSTR("LCDOTA: LCD upload command FAILED.  Restarting device."));
-        tkr_wifi->EspRestart();
+        // tkr_wifi->EspRestart();
+        tkr_sup->ESP_Restart_Safe();
       }
       ALOG_INF(PSTR("LCDOTA: Starting update"));
       lcdOtaTimer = millis();
@@ -2926,8 +3055,9 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
             else
             {
               ALOG_ERR(PSTR(D_LOG_NEXTION "LCDOTA: Part %d FAILED, %d%% complete"), lcdOtaPartNum, lcdOtaPercentComplete);
-              delay(2000); // extra delay while the LCD does its thing
-              tkr_wifi->EspRestart();
+              // delay(2000); // extra delay while the LCD does its thing
+              // tkr_wifi->EspRestart();
+              tkr_sup->ESP_Restart_Safe();
             }
           }
           else
@@ -2943,7 +3073,9 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
         if ((lcdOtaTimer > 0) && ((millis() - lcdOtaTimer) > lcdOtaTimeout))
         { // Our timer expired so reset
           ALOG_INF(PSTR("LCDOTA: ERROR: LCD upload timeout. Restarting."));
-          tkr_wifi->EspRestart();
+          // tkr_wifi->EspRestart();
+          
+        tkr_sup->ESP_Restart_Safe();
         }
       }
       lcdOtaPartNum++;
@@ -2958,19 +3090,23 @@ void mNextionPanel::nextionOtaStartDownload(AsyncWebServerRequest *request, cons
           // request->handleClient();
           yield();
         }
-        tkr_wifi->EspRestart();
+        // tkr_wifi->EspRestart();
+        tkr_sup->ESP_Restart_Safe();
       }
       else
       {
         ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Failure, lcdOtaTransferred: %d lcdOtaFileSize: %d"), lcdOtaTransferred, lcdOtaFileSize);
-        tkr_wifi->EspRestart();
+        // tkr_wifi->EspRestart();
+        tkr_sup->ESP_Restart_Safe();
       }
     }
   }
   else
   {
     ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: HTTP GET failed, error code %s"), lcdOtaHttp.errorToString(lcdOtaHttpReturn));
-    tkr_wifi->EspRestart();
+    // tkr_wifi->EspRestart();
+    
+        tkr_sup->ESP_Restart_Safe();
   }
   lcdOtaHttp.end();
 }
@@ -3039,22 +3175,46 @@ void mNextionPanel::WebPage_LCD_Update_TFT(AsyncWebServerRequest *request)
 }
 
 
-void mNextionPanel::webHandleTftFileSize(AsyncWebServerRequest *request)
-{ // http://plate01/tftFileSize
+// void mNextionPanel::webHandleTftFileSize(AsyncWebServerRequest *request)
+// { // http://plate01/tftFileSize
 
-  // ALOG_INF(PSTR(D_LOG_NEXTION DEBUG_INSERT_PAGE_BREAK  "HTTP: Sending /tftFileSize page to client connected from: %s"), webServer->client().remoteIP().toString());
+//   // ALOG_INF(PSTR(D_LOG_NEXTION DEBUG_INSERT_PAGE_BREAK  "HTTP: Sending /tftFileSize page to client connected from: %s"), webServer->client().remoteIP().toString());
 
-  String httpHeader = FPSTR(HTTP_HEAD_START);
-  httpHeader.replace("{v}", String(tkr_set->Settings.system_name.friendly) + " TFT Filesize");
-  httpHeader += FPSTR(HTTP_END3);
+//   String httpHeader = FPSTR(HTTP_HEAD_START);
+//   httpHeader.replace("{v}", String(tkr_set->Settings.system_name.friendly) + " TFT Filesize");
+//   httpHeader += FPSTR(HTTP_END3);
 
-  request->send(200, "text/html", httpHeader);
+//   request->send(200, "text/html", httpHeader);
 
-  // webServer->sendContent_P(HTTP_HEAD_END);
-  tftFileSize =  request->arg(F("tftFileSize")).toInt();
+//   // webServer->sendContent_P(HTTP_HEAD_END);
+//   tftFileSize =  request->arg(F("tftFileSize")).toInt();
   
-  ALOG_INF(PSTR(D_LOG_NEXTION "Received tftFileSize: %d"), tftFileSize);
+//   ALOG_INF(PSTR(D_LOG_NEXTION "Received tftFileSize: %d"), tftFileSize);
 
+// }
+
+void mNextionPanel::webHandleTftFileSize(AsyncWebServerRequest* request)
+{
+  // GET /tftFileSize?tftFileSize=<bytes>
+
+  if (!request) return;
+
+  // Parse first, then respond (so logging reflects reality)
+  uint32_t new_size = 0;
+
+  if (request->hasArg(F("tftFileSize")))
+  {
+    // toInt() returns long; clamp to uint32_t
+    long v = request->arg(F("tftFileSize")).toInt();
+    if (v > 0) new_size = (uint32_t)v;
+  }
+
+  tftFileSize = new_size;
+
+  ALOG_INF(PSTR(D_LOG_NEXTION "Received tftFileSize: %lu"), (unsigned long)tftFileSize);
+
+  // Minimal response: No Content
+  request->send(204);
 }
 
 

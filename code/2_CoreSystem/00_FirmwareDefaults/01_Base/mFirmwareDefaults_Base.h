@@ -13,6 +13,8 @@
  */
 #ifdef ENABLE_FEATURE_BUILD__11JAN25_WIFI_AND_WEBUI
 
+#error "not to use"
+
   #ifndef ESP8266
     #define ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
   #endif

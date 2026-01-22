@@ -15,8 +15,6 @@
 
 // #define DEVICE_MEADOWS__KITCHEN__GLASS_BOX
 // #define DEVICE_MEADOWS__HALLWAY__VASE_LIGHT
-// #define DEVICE_MEADOWS__OFFICE__MONITORS_BACKLIGHT
-// #define DEVICE_OFFICE__RGBWW_VERTICAL_BAR
 // #define DEVICE_MEADOWS__ENSUITE_DOOR_FRAME
 // #define DEVICE_MEADOWS__OFFICE__HVAC_DESK
 // #define DEVICE_MEADOWS__LIVINGROOM__HYPERION_LIGHT_SAMSUNG_65INCH
@@ -31,16 +29,19 @@
 // #define DEVICE_MEADOWS__MASTER_BEDROOM__BEDLIGHT
 // #define DEVICE_MEADOWS__OFFICE__SUN_PIXELS_1D
 // #define DEVICE_MEADOWS__OFFICE__BLACK_STAND
-// #define DEVICE_OFFICE__DESK_LIGHTING
 // #define DEVICE_MEADOWS__OFFICE__GARAGE_TREE
 
-// #define DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS //1d testing
+// #define DEVICE_MEADOWS__OFFICE__MONITORS_BACKLIGHT
+// #define DEVICE_OFFICE__DESK_LIGHTING
+// #define DEVICE_OFFICE__RGBWW_VERTICAL_BAR
+// #define DEVICE_MEADOWS__OFFICE__UNDER_DESK
+
+#define DEVICE_OFFICE__NEXTION_DISPLAY__DESK_10INCH
+
 // #define DEVICE_MEADOWS__ROAMING__REDBOARD_TESTER02
-// #define DEVICE_MEADOWS__OFFICE__SANTA_HAT
-// #define DEVICE_MEADOWS__OUTSIDE__SIDE_TREE
 // #define DEVICE_MEADOWS__OFFICE__PEBBLE_ESP32C3_TESTBED
 // #define DEVICE_MEADOWS__ROAMING__ADDRESSABLE_HARDWARE_TESTER
-// #define DEVICE_MEADOWS__XMAS25__RED_TREE
+
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1580,206 +1581,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 
 
-#ifdef DEVICE_MEADOWS__OFFICE__PEBBLE_PLAYLISTS
-
-// because of all the complex timing we do, there is probably not a way, but I was just to ask if we should be sharing code between effects?
-
-// inwaves, seems to be chasing
-// twinkle/flash, is just constant twinkle back and forth
-// flashing, in chasing/flash, appears to be twinkle/flash
-
-// most recent observations with real world lights, lets make sure we are doing this 
-
-// inwaves, never turns off any lights, they just dim
-// sequential, always has two lights on. Due to real world physics, there is about a 300ms cool down of the previous light turning off
-// slo glo, I think we have it well now. 
-// chasing/flash, actually chases, then flashes in one direction, then the chasing then flash are in the opposite direction. So it flips each cycle. We will want to do this instead of random. 
-// twinkle/flash, how no reversing.
-
-
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
-  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
-
-  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
-
-  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
-  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
-
-  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
-  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
-
-
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-
-  #define ENABLE_EFFECT_DESCRIPTIONS
-
-
-// ======================= Example PROGMEM template =======================
-// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
-#define USE_STANDBY_TEMPLATE
-#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
-// compile-time gate
-// #define LIGHTING_STANDBY_TEMPLATE_ID  5
-
-#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
-
-
-
-DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
-R"=====(
-  {
-    "Segment0": {
-      "ColourPalette":"Warm White",
-      "ColourType":3,
-      "Effects": {
-        "Function":"Static",
-        "Speed":0,
-        "Intensity":85,
-        "Grouping":1,
-        "RateMs": 1000
-      },
-      "Override":{
-        "Animation":{
-          "TimeMs":60000
-        }
-      }
-    },
-    "BrightnessRGB": 10
-  }
-)=====";
-// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
-// R"=====(
-//   {
-//     "Segment0": {
-//       "ColourPalette":"Warm White",
-//       "ColourType":3,
-//       "Effects": {
-//         "Function":"Candles",
-//         "Speed":180,
-//         "Intensity":85,
-//         "Grouping":1,
-//         "RateMs": 20
-//       },
-//       "BrightnessRGB": 100
-//     },
-//     "BrightnessRGB": 100
-//   }
-// )=====";
-
-
-  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
-
-//   #define ENABLE_ADVANCED_DEBUGGING
-//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-//  #define ENABLE_DEBUG_FUNCTION_NAMES
-//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
-//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
-//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
-//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
-
-#define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
-// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
-
-  
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "BusConfig":[
-      {
-        "Pin":2,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":0,
-        "Length":2400
-      }
-    ],
-    "Segments":[
-      {
-        "Name":"Bus 1",
-        "PixelRange": [
-          0,
-          2400
-        ],
-        "ColourPalette":"RGPBY",
-        "ColourType":3,
-        "Effects": {
-          "Function":"Static",
-          "Speed":255,
-          "Intensity":127,
-          "Grouping":1,
-          "RateMs": 20
-        },
-        "BrightnessRGB": 100
-      }
-    ],
-    "BrightnessRGB": 25
-  }
-  )=====";
-  
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":2,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":0,
-  //       "Length":5
-  //     },
-  //     {
-  //       "Pin":4,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":100,
-  //       "Length":100
-  //     },
-  //     {
-  //       "Pin":18,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":200,
-  //       "Length":100
-  //     },
-  //     {
-  //       "Pin":19,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":300,
-  //       "Length":100
-  //     }
-  //   ],
-  //   "Segments":[
-  //     {
-  //       "Name":"Bus 1",
-  //       "PixelRange": [
-  //         0,
-  //         400
-  //       ],
-  //       "ColourPalette":"RGPBY",
-  //       "ColourType":3,
-  //       "Effects": {
-  //         "Function":"Solid",
-  //         "Speed":255,
-  //         "Intensity":127,
-  //         "Grouping":1,
-  //         "RateMs": 20
-  //       },
-  //       "BrightnessRGB": 100
-  //     }
-  //   ],
-  //   "BrightnessRGB": 25
-  // }
-  // )=====";
-
-#endif
-
-
-
 #ifdef DEVICE_MEADOWS__ROAMING__ADDRESSABLE_HARDWARE_TESTER
 /**
  * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
@@ -1929,253 +1730,6 @@ R"=====(
         "PixelRange": [
           0,
           800
-        ],
-        "ColourPalette":"RGPBY",
-        "ColourType":3,
-        "Effects": {
-          "Function":"Static",
-          "Speed":255,
-          "Intensity":127,
-          "Grouping":1,
-          "RateMs": 20
-        },
-        "BrightnessRGB": 100
-      }
-    ],
-    "BrightnessRGB": 25
-  }
-  )=====";
-  
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":2,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":0,
-  //       "Length":5
-  //     },
-  //     {
-  //       "Pin":4,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":100,
-  //       "Length":100
-  //     },
-  //     {
-  //       "Pin":18,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":200,
-  //       "Length":100
-  //     },
-  //     {
-  //       "Pin":19,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":300,
-  //       "Length":100
-  //     }
-  //   ],
-  //   "Segments":[
-  //     {
-  //       "Name":"Bus 1",
-  //       "PixelRange": [
-  //         0,
-  //         400
-  //       ],
-  //       "ColourPalette":"RGPBY",
-  //       "ColourType":3,
-  //       "Effects": {
-  //         "Function":"Solid",
-  //         "Speed":255,
-  //         "Intensity":127,
-  //         "Grouping":1,
-  //         "RateMs": 20
-  //       },
-  //       "BrightnessRGB": 100
-  //     }
-  //   ],
-  //   "BrightnessRGB": 25
-  // }
-  // )=====";
-
-#endif
-
-
-
-
-#ifdef DEVICE_MEADOWS__XMAS25__RED_TREE
-/**
- * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
- * Can be used to calibrate power usage of different types of lights
- * 
- * Button to be added between ground/GPIO16 to run test sequences. 
- * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
- * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
- * 
- */
-
-
-
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
-  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
-
-  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
-
-  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
-  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
-
-  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
-  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
-
-
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-
-  #define ENABLE_EFFECT_DESCRIPTIONS
-
-  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
-
-
-// ======================= Example PROGMEM template =======================
-// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
-#define USE_STANDBY_TEMPLATE
-#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
-// compile-time gate
-// #define LIGHTING_STANDBY_TEMPLATE_ID  5
-
-#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
-
-
-DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
-R"=====(
-  {
-    "Segment0": {
-      "ColourPalette":"Warm White",
-      "ColourType":3,
-      "Effects": {
-        "Function":"Static",
-        "Speed":0,
-        "Intensity":85,
-        "Grouping":1,
-        "RateMs": 1000
-      },
-      "Override":{
-        "Animation":{
-          "TimeMs":60000
-        }
-      }
-    },
-    "BrightnessRGB": 10
-  }
-)=====";
-// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
-// R"=====(
-//   {
-//     "Segment0": {
-//       "ColourPalette":"Warm White",
-//       "ColourType":3,
-//       "Effects": {
-//         "Function":"Candles",
-//         "Speed":180,
-//         "Intensity":85,
-//         "Grouping":1,
-//         "RateMs": 20
-//       },
-//       "BrightnessRGB": 100
-//     },
-//     "BrightnessRGB": 100
-//   }
-// )=====";
-
-
-  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
-
-//   #define ENABLE_ADVANCED_DEBUGGING
-//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-//  #define ENABLE_DEBUG_FUNCTION_NAMES
-//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
-//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
-//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
-//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
-
-#define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
-// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
-
-  
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "BusConfig":[      
-      {
-        "Pin":16,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":0,
-        "Length":200
-      },
-      {
-        "Pin":17,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":200,
-        "Length":200
-      },
-      {
-        "Pin":2,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":400,
-        "Length":200
-      },
-      {
-        "Pin":4,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":600,
-        "Length":200
-      },
-      {
-        "Pin":5,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":800,
-        "Length":200
-      },
-      {
-        "Pin":12,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":1000,
-        "Length":250
-      },
-      {
-        "Pin":14,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":1250,
-        "Length":250
-      },
-      {
-        "Pin":15,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":1500,
-        "Length":250
-      }
-    ],
-    "Segments":[
-      {
-        "Name":"Bus 1",
-        "PixelRange": [
-          0,
-          1750
         ],
         "ColourPalette":"RGPBY",
         "ColourType":3,
@@ -2454,363 +2008,6 @@ R"=====(
 
 
 
-#ifdef DEVICE_MEADOWS__OUTSIDE__SIDE_TREE
-
-// because of all the complex timing we do, there is probably not a way, but I was just to ask if we should be sharing code between effects?
-
-// inwaves, seems to be chasing
-// twinkle/flash, is just constant twinkle back and forth
-// flashing, in chasing/flash, appears to be twinkle/flash
-
-// most recent observations with real world lights, lets make sure we are doing this 
-
-// inwaves, never turns off any lights, they just dim
-// sequential, always has two lights on. Due to real world physics, there is about a 300ms cool down of the previous light turning off
-// slo glo, I think we have it well now. 
-// chasing/flash, actually chases, then flashes in one direction, then the chasing then flash are in the opposite direction. So it flips each cycle. We will want to do this instead of random. 
-// twinkle/flash, how no reversing.
-
-
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
-  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
-
-  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
-
-  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
-  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
-
-  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
-  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
-
-
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-
-  #define ENABLE_EFFECT_DESCRIPTIONS
-
-
-  // ======================= Example PROGMEM template =======================
-  // Put this in your config header (mirrors your DEFINE_PGM_CTR style)
-  #define USE_STANDBY_TEMPLATE
-  #define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
-  // compile-time gate
-  // #define LIGHTING_STANDBY_TEMPLATE_ID  5
-
-  #define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
-
-
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
-  R"=====(
-    {
-      "Segment0": {
-        "ColourPalette":"Warm White",
-        "ColourType":3,
-        "Effects": {
-          "Function":"Static",
-          "Speed":0,
-          "Intensity":85,
-          "Grouping":1,
-          "RateMs": 1000
-        },
-        "Override":{
-          "Animation":{
-            "TimeMs":60000
-          }
-        }
-      },
-      "BrightnessRGB": 10
-    }
-  )=====";
-
-  
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "BusConfig":[
-      {
-        "Pin":2,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":0,
-        "Length":250
-      },
-      {
-        "Pin":4,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":250,
-        "Length":250
-      }
-    ],
-    "Segments":[
-      {
-        "Name":"Bus 1",
-        "PixelRange": [
-          0,
-          500
-        ],
-        "ColourPalette":"RGPBY",
-        "ColourType":3,
-        "Effects": {
-          "Function":"Static",
-          "Speed":255,
-          "Intensity":127,
-          "Grouping":20,
-          "RateMs": 20
-        },
-        "BrightnessRGB": 100
-      }
-    ],
-    "BrightnessRGB": 25
-  }
-  )=====";
-  
-
-#endif
-
-
-
-
-
-
-
-#ifdef DEVICE_MEADOWS__OFFICE__SANTA_HAT
-
-// because of all the complex timing we do, there is probably not a way, but I was just to ask if we should be sharing code between effects?
-
-// inwaves, seems to be chasing
-// twinkle/flash, is just constant twinkle back and forth
-// flashing, in chasing/flash, appears to be twinkle/flash
-
-// most recent observations with real world lights, lets make sure we are doing this 
-
-// inwaves, never turns off any lights, they just dim
-// sequential, always has two lights on. Due to real world physics, there is about a 300ms cool down of the previous light turning off
-// slo glo, I think we have it well now. 
-// chasing/flash, actually chases, then flashes in one direction, then the chasing then flash are in the opposite direction. So it flips each cycle. We will want to do this instead of random. 
-// twinkle/flash, how no reversing.
-
-
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
-  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
-
-  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
-
-  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
-  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
-
-  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
-  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
-
-
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-
-  #define ENABLE_EFFECT_DESCRIPTIONS
-
-
-// ======================= Example PROGMEM template =======================
-// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
-#define USE_STANDBY_TEMPLATE
-#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
-// compile-time gate
-// #define LIGHTING_STANDBY_TEMPLATE_ID  5
-
-#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
-
-
-DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
-R"=====(
-  {
-    "Segment0": {
-      "ColourPalette":"Warm White",
-      "ColourType":3,
-      "Effects": {
-        "Function":"Static",
-        "Speed":0,
-        "Intensity":85,
-        "Grouping":1,
-        "RateMs": 1000
-      },
-      "Override":{
-        "Animation":{
-          "TimeMs":60000
-        }
-      }
-    },
-    "BrightnessRGB": 10
-  }
-)=====";
-// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
-// R"=====(
-//   {
-//     "Segment0": {
-//       "ColourPalette":"Warm White",
-//       "ColourType":3,
-//       "Effects": {
-//         "Function":"Candles",
-//         "Speed":180,
-//         "Intensity":85,
-//         "Grouping":1,
-//         "RateMs": 20
-//       },
-//       "BrightnessRGB": 100
-//     },
-//     "BrightnessRGB": 100
-//   }
-// )=====";
-
-
-  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
-
-//   #define ENABLE_ADVANCED_DEBUGGING
-//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-//  #define ENABLE_DEBUG_FUNCTION_NAMES
-//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
-//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
-//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
-//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
-
-  
-/*
-{
-  "BrightnessRGB": 100,
-  "SegColour0": {
-    "RGBWC": [
-      0,
-      0,
-      0,
-      0,
-      0
-    ]
-  },
-  "MQTTPixel": {
-    "OnPixels": [
-      25,65,105,143,180,223,258,291,324,354,383,412,438,463,487,510,532,554,575,594,613,630,646,661,676,691,705,719,732,744,755,765,774,783,791,797,803,
-      26,66,106,144,181,224,256,292,325,355,384,413,439,464,488,511,533,555,576,595,614,631,647,662,677,692,706,720,733,745,756,766,775,784,792,798,804,
-      3,45,85,124,162,206,241,275,308,340,370,399,426,452,476,500,522,544,565,585,605,623,639,655,670,685,699,713,726,738,749,760,770,779,787,794,800    ]
-  }
-}
-
-   * 
-   * 
-   */
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "BusConfig":[
-      {
-        "Pin":2,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":0,
-        "Length":201
-      },
-      {
-        "Pin":19,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":201,
-        "Length":201
-      },
-      {
-        "Pin":4,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":402,
-        "Length":201
-      },
-      {
-        "Pin":18,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":603,
-        "Length":201
-      }
-    ],
-    "Segment0": {
-      "PixelRange": [
-        0,
-        804
-      ],
-      "ColourPalette":"Snowy 02",
-      "Effects": {
-        "Function":"Sweep Random",
-        "Speed":127,
-        "Intensity":127,
-        "Grouping":1,
-        "RateMs": 25
-      },
-      "BrightnessRGB": 100,
-      "BrightnessCCT": 0
-    },
-    "BrightnessRGB": 10,
-    "BrightnessCCT": 0
-  }
-  )=====";
-
-  
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":2,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":0,
-  //       "Length":5
-  //     },
-  //     {
-  //       "Pin":4,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":100,
-  //       "Length":100
-  //     },
-  //     {
-  //       "Pin":18,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":200,
-  //       "Length":100
-  //     },
-  //     {
-  //       "Pin":19,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":300,
-  //       "Length":100
-  //     }
-  //   ],
-  //   "Segments":[
-  //     {
-  //       "Name":"Bus 1",
-  //       "PixelRange": [
-  //         0,
-  //         400
-  //       ],
-  //       "ColourPalette":"RGPBY",
-  //       "ColourType":3,
-  //       "Effects": {
-  //         "Function":"Solid",
-  //         "Speed":255,
-  //         "Intensity":127,
-  //         "Grouping":1,
-  //         "RateMs": 20
-  //       },
-  //       "BrightnessRGB": 100
-  //     }
-  //   ],
-  //   "BrightnessRGB": 25
-  // }
-  // )=====";
-
-#endif
 
 
 
@@ -4599,6 +3796,179 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
 
 #endif
+
+
+
+/**
+ * @brief 
+ * 
+ * For under the desk, with 12v leds (dual output)
+ * Radar and PIR towards my seat
+ * 3d print box, and screw to desk
+ * Maybe TOF?
+ * 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *                               *I ~PWM 'NC    
+ *                          _____________________
+ *                    3V3  |3V3     |USB|     VIN|
+ *                    GND  |GND               GND| 
+ *                         |15 (fL)            13|
+ *                         |2  (fL, BIL)  (fH) 12| 
+ *                         |4             (fH) 14|
+ *               RADAR TX2 |RX2/17             27| 
+ *               RADAR RX2 |TX2/16             26| TOF1EN
+ *                         |5  (fL)            25| TOF1INT
+ *                         |18                 33| TOF0EN
+ *                         |19                 32| TOF0INT
+ *                         |21  SDA     (fL) * 35| RADAR_3p18GHZ 
+ *                         |RX0         (fL) * 34| 
+ *                         |TX0              ' VN| 
+ *                         |22  SCL          ' VP| 
+ *                     NEO |23               ' EN| 
+ *                          _____________________
+ * 
+ * 
+ */
+#ifdef DEVICE_MEADOWS__OFFICE__UNDER_DESK
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "testbed_default"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_PORT     1883
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L1X
+
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+   #define USE_MODULE_SENSORS_INTERFACE
+   #define USE_MODULE_SENSORS_PIR
+    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+ #endif
+
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+    #define USE_MODULE_SENSORS__RADAR_HLK_LD2410
+    #define ENABLE_FEATURE_HLK_LD2410__USE_SERIAL_CHUNK_MODE
+  #endif
+
+ #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L1X
+  #define USE_MODULE_SENSORS__TOF_VL53L1X
+  #define ENABLE_DEVFEATURE_I2C__SET_WIRE_INSTANCE_WITH_TWOWIRE_ZERO
+  #define VL53L1X_DISTANCE_MODE Short
+ #endif
+
+ #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
+
+ /***********************************
+  * SECTION: Module/GPIO Configs
+ ************************************/  
+
+ #define USE_MODULE_TEMPLATE
+ DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+ "{"
+   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+   "\"" D_GPIO_NUMBER "\":{"
+     "\"18\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+     "\"19\":\""  D_GPIO_FUNCTION_PIR_2_CTR "\","
+     "\"23\":\""  D_GPIO_FUNCTION_PIR_3_CTR "\","
+    #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
+    "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
+    "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\""
+    #endif
+    #if defined(USE_MODULE_SENSORS__TOF_VL53L1X)
+    "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+    "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+    #endif
+     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+   "},"
+   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+ "}";
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      },
+      {
+        "Pin":12,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":100,
+        "Length":100
+      },
+      {
+        "Pin":14,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":200,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange": [
+          0,
+          300
+        ],
+        "ColourPalette":"Warm White",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Candles",
+          "Speed":180,
+          "Intensity":85,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 5
+  }
+  )=====";
+
+  
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Desk"
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "]"
+   "}"
+ "}";
+
+#endif
+
+
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -7080,6 +6450,188 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
     "BrightnessCCT":100
   }
   )=====";
+
+#endif
+
+
+
+
+
+
+
+
+#ifdef DEVICE_OFFICE__NEXTION_DISPLAY__DESK_10INCH
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "office__desk_display_10inch"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  ///////////////////////////////////////////// Enable Logs
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  ///////////////////////////////////////////// System Logs
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  
+  #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // #define ENABLE_DEBUG_LINE_HERE3
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // #define USE_DEBUG_PRINT
+
+  ///////////////////////////////////////////// Module Logs
+  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+  
+  /***********************************
+   * SECTION: System Configs
+  ************************************/   
+ 
+  #define SETTINGS_HOLDER 1239
+
+  
+  
+  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+   // until devices can reliably be used without compiling per device
+  
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
+    
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+   
+
+
+  #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+    
+    
+  #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+    // #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 115200
+    #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 921600
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_NEXTION
+
+  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY        
+        #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER 1
+        #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+         
+        
+        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER_SERIAL1_HVAC_DESK
+
+
+
+// #define USE_FEATURE_NEXTION__SERIAL_DEFAULT_BUAD_NEW_PANEL_FIRST_OTA
+
+// #define USE_FEATURE_NEXTION__FORCE_SERIAL_BAUDRATE_FROM_DEFAULT 115200
+
+  
+  #define USE_MODULE_DISPLAYS_NEXTION
+    #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  #define NEXTION_DEFAULT_PAGE_NUMBER 10//6  
+    #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+    // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
+    #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
+    #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
+
+  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  
+  #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+
+  // 
+  
+  DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
+  R"=====(
+  {
+    "ObjectNameID": {
+      "hIconUS": 2,
+      "hTimeUS": 6,
+      "hBoostUS": 11,
+      "hAutoUS": 16,
+      "hIconDS": 3,
+      "hTimeDS": 7,
+      "hBoostDS": 12,
+      "hAutoDS": 17,
+      "hIconIH": 4,
+      "hTimeIH": 8,
+      "hBoostIH": 13,
+      "hAutoIH": 18,
+      "hIconWB": 5,
+      "hTimeWB": 9,
+      "hBoostWB": 14,
+      "hAutoWB": 19,
+      "hIconDryer": 122,
+      "hTimeDryer": 123,
+      "hBoostDryer": 124,
+      "hAutoDryer": 125
+    }
+  }
+  )=====";
+
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
+    "\"MQTTSubscribe\":["
+      "\"openhab_broadcast/nextion/group/#\""
+    "],"
+  "}";
+
 
 #endif
 

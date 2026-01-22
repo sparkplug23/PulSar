@@ -10074,7 +10074,7 @@ typedef uint32_t ColourBaseType;
     "Segments":[
       {
         "PixelRange":[0,1010],
-        "ColourPalette":"RGPBY",
+        "ColourPalette":"Orange & Teal",
         "ColourType":3,
         "Effects": {
           "Function":"Static",
@@ -10086,7 +10086,7 @@ typedef uint32_t ColourBaseType;
         "BrightnessRGB": 100
       }
     ],
-    "BrightnessRGB": 100
+    "BrightnessRGB": 5
   }
   )=====";
   #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000

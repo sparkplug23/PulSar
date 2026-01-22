@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nextion Firmware Update</title>
+</head>
+
+<body>
+  <h1 id="deviceName">Device</h1>
+  <hr>
+  <h1>Nextion Firmware Update</h1>
+
+  <!--
+    OPTIONAL: If you want the page header to show the friendly name,
+    you can later populate #deviceName via JS fetching a JSON endpoint,
+    or via token replacement in your generator.
+  -->
+
+  <!-- ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL equivalent:
+       Keep this block only if you want it always visible in the static page.
+       If you need compile-time gating, generate two pages or do JS hide/show.
+  -->
+  <form method="get" action="lcddownload">
+    <br>
+    <b>Update Nextion LCD from URL</b><small><i> http only</i></small>
+    <br>
+    <input id="lcdFirmware" name="lcdFirmware" value="lcdFirmwareUrl">
+    <br><br>
+    <button type="submit">Update LCD from URL</button>
+  </form>
+
+  <br>
+
+  <!-- TFT upload -->
+  <form method="POST" action="/lcdupload" enctype="multipart/form-data">
+    <br>
+    <b>Update Nextion LCD from file</b>
+    <input type="file" id="lcdSelect" name="files[]" accept=".tft">
+    <br><br>
+    <button type="submit" id="lcdUploadSubmit" onclick="ackLcdUploadSubmit()">Update LCD from file</button>
+  </form>
+
+  <script>
+    function handleLcdFileSelect(evt) {
+      var uploadFile = evt.target.files[0];
+      if (!uploadFile) return;
+
+      document.getElementById('lcdUploadSubmit').innerHTML = 'Upload LCD firmware ' + uploadFile.name;
+
+      // Original behaviour: send the TFT file size to the firmware
+      var tftFileSize = '/tftFileSize?tftFileSize=' + uploadFile.size;
+      var xhttp = new XMLHttpRequest();
+      xhttp.open('GET', tftFileSize, true);
+      xhttp.send();
+    }
+
+    function ackLcdUploadSubmit() {
+      document.getElementById('lcdUploadSubmit').innerHTML = 'Uploading LCD firmware...';
+    }
+
+    // Legacy functions retained (harmless if no ESP upload inputs exist on page)
+    function handleEspFileSelect(evt) {
+      var uploadFile = evt.target.files[0];
+      if (!uploadFile) return;
+      var el = document.getElementById('espUploadSubmit');
+      if (el) el.innerHTML = 'Upload ESP firmware ' + uploadFile.name;
+    }
+
+    function ackEspUploadSubmit() {
+      var el = document.getElementById('espUploadSubmit');
+      if (el) el.innerHTML = 'Uploading ESP firmware...';
+    }
+
+    var lcdEl = document.getElementById('lcdSelect');
+    if (lcdEl) lcdEl.addEventListener('change', handleLcdFileSelect, false);
+  </script>
+</body>
+</html>

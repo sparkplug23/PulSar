@@ -7,7 +7,7 @@
 
 #ifdef USE_MODULE_DISPLAYS_NEXTION
 
-#define SERIAL_NEXTION_RX Serial2 //only in 32
+#define SERIAL_NEXTION_RX Serial2
 #define SERIAL_NEXTION_TX Serial2
 // #else
 // #include <SoftwareSerial.h>
@@ -79,6 +79,9 @@
 #include <WiFiClientSecure.h>
 #include <WiFiUdp.h>
 #endif
+
+
+#include "Web/Gen/generated_web.h"
 
 
 // static const char HTTP_HEAD_START[] PROGMEM = "<!DOCTYPE html><html lang=\"en\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><title>{v}</title>";
@@ -162,6 +165,9 @@ class mNextionPanel :
 
 
 
+
+    void Serve_Submodule_NextionPanel_LcdOtaSuccess_Page(AsyncWebServerRequest* request);
+    void Serve_Submodule_NextionPanel_LcdOtaFailure_Page(AsyncWebServerRequest* request);
 
 
 
@@ -640,6 +646,10 @@ class mNextionPanel :
     void webHandleLcdUpdateSuccess(AsyncWebServerRequest *request);
     void webHandleLcdUpdateFailure(AsyncWebServerRequest *request);
     #endif 
+
+void webHandleLcdDownload(AsyncWebServerRequest* request);
+    
+    void Serve_Submodule_NextionPanel_Firmware_Page(AsyncWebServerRequest* request);
 
     void CommandSet_Baud(uint32_t baud);
     bool updateCheck();

@@ -610,3 +610,22 @@ writeChunks(
   destination_path + "html_settings2.h"
 );
 
+
+
+
+writeChunks(
+  source_path,
+  [
+    {
+      file: "submodule_style.css",
+      name: "PAGE_submodule_style",
+      method: "gzip",
+      filter: "css-minify",
+      mangle: (str) =>
+        str
+          .replace(/%%/g, "%")
+    }
+  ],
+  destination_path + "submodule_assets.h"
+);
+

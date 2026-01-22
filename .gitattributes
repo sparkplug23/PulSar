@@ -15,3 +15,24 @@
 *.PDF	 diff=astextplain
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
+
+
+# Default: normalize text to LF in repo
+* text=auto eol=lf
+
+# C/C++ headers/sources
+*.h  text eol=lf
+*.hpp text eol=lf
+*.c  text eol=lf
+*.cpp text eol=lf
+
+# Scripts
+*.py text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+
+# Binary assets
+*.bin binary
+*.png binary
+*.jpg binary
+*.HMI binary

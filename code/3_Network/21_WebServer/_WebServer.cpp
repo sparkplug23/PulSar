@@ -284,6 +284,10 @@ server->on("/settings2", HTTP_POST, [this](AsyncWebServerRequest *request){
   });
 
 
+  static const char _submodule_style_css[] PROGMEM = "/submodule_style.css";
+  server->on("/submodule_style.css", HTTP_GET, [this](AsyncWebServerRequest *request){
+    handleStaticContent(request, FPSTR(_submodule_style_css), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_submodule_style, PAGE_submodule_style_length);
+  });
 
   
   #ifdef ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
