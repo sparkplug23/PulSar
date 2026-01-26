@@ -77,6 +77,9 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 #include "3_Network/21_WebServer/Webpages/Generated/html_other.h"
 #include "3_Network/21_WebServer/Webpages/Generated/root_basic.h"
 #include "3_Network/21_WebServer/Webpages/Generated/submodule_assets.h"
+#include "3_Network/21_WebServer/Webpages/Generated/submodule_unified_pages.h"
+
+
 
 
 // pages_console_select.h
@@ -281,6 +284,41 @@ size_t printToggleElementClass(Print& settingsScript,  const char* element_id,  
 
 
     void SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage);
+
+// ---- System Controls (polling containers) ----
+void HandlePage_SystemControls(AsyncWebServerRequest *request);
+void HandlePage_SystemControls_C1(AsyncWebServerRequest *request);
+void HandlePage_SystemControls_C2(AsyncWebServerRequest *request);
+void HandlePage_SystemControls_C3(AsyncWebServerRequest *request);
+
+// Active append stream context for Tasker-based append (shared within request scope)
+AsyncResponseStream* web_controls_stream = nullptr;
+uint8_t web_controls_container_id = 0;
+
+// Helpers modules may call (via tkr_web pointer) while handling TASK_WEB_APPEND_* events
+inline Print* WebControls_GetPrint() { return (Print*)web_controls_stream; }
+inline uint8_t WebControls_GetContainerId() const { return web_controls_container_id; }
+size_t WebUI_Print_SectionBegin(Print& out, const char* title);
+size_t WebUI_Print_SectionEnd(Print& out);
+
+size_t WebUI_Print_TableBegin(Print& out);
+size_t WebUI_Print_TableEnd(Print& out);
+
+size_t WebUI_Print_KV_Float(Print& out, const char* key, float value, uint8_t decimals, const char* units);
+size_t WebUI_Print_KV_U32(Print& out, const char* key, uint32_t value, const char* units);
+size_t WebUI_Print_KV_Str(Print& out, const char* key, const char* value);
+size_t WebUI_Print_TableHeaderRow_Begin(Print& out);
+size_t WebUI_Print_TableHeaderCell(Print& out, const char* text, bool is_first_blank = false);
+size_t WebUI_Print_TableHeaderRow_End(Print& out);
+
+size_t WebUI_Print_RowBegin(Print& out, const char* key);
+size_t WebUI_Print_CellText(Print& out, const char* text);
+size_t WebUI_Print_CellFloat(Print& out, float value, uint8_t decimals, const char* units);
+size_t WebUI_Print_CellDash(Print& out);
+size_t WebUI_Print_RowEnd(Print& out);
+
+
+
 
 
 

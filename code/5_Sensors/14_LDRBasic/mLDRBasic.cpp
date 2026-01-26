@@ -52,18 +52,18 @@ void mLDRBasic::Pre_Init(void)
 {
 
   if(
-    tkr_pins->PinUsed(GPIO_LDR_BASIC_DIGITAL1_ID) && 
-    tkr_pins->PinUsed(GPIO_LDR_BASIC_ANALOG1_ID)
+    tkr_pins->PinUsed(GPIO_LDR_BASIC_DIGITAL1) && 
+    tkr_pins->PinUsed(GPIO_LDR_BASIC_ANALOG1)
   ){
 
-    if(tkr_pins->PinUsed(GPIO_LDR_BASIC_DIGITAL1_ID))
+    if(tkr_pins->PinUsed(GPIO_LDR_BASIC_DIGITAL1))
     {
-      pinMode(tkr_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1_ID), INPUT);
+      pinMode(tkr_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1), INPUT);
     }
     
-    if(tkr_pins->PinUsed(GPIO_LDR_BASIC_ANALOG1_ID))
+    if(tkr_pins->PinUsed(GPIO_LDR_BASIC_ANALOG1))
     {
-      pinMode(tkr_pins->GetPin(GPIO_LDR_BASIC_ANALOG1_ID), INPUT);   // This should be changed to configure the analog module, and then just read/return from it
+      pinMode(tkr_pins->GetPin(GPIO_LDR_BASIC_ANALOG1), INPUT);   // This should be changed to configure the analog module, and then just read/return from it
     }
 
     settings.fEnableSensor = true;
@@ -90,11 +90,11 @@ void mLDRBasic::EveryLoop(void)
 void mLDRBasic::EverySecond(void)
 {
 
-  ldr[0].analog_reading  = analogRead(tkr_pins->GetPin(GPIO_LDR_BASIC_ANALOG1_ID));
-  ldr[0].digital_reading = digitalRead(tkr_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1_ID));
+  ldr[0].analog_reading  = analogRead(tkr_pins->GetPin(GPIO_LDR_BASIC_ANALOG1));
+  ldr[0].digital_reading = digitalRead(tkr_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1));
 
-  ALOG_DBM( PSTR("ldr[0].analog_reading =%d %d"), ldr[0].analog_reading, tkr_pins->GetPin(GPIO_LDR_BASIC_ANALOG1_ID));
-  ALOG_DBM( PSTR("ldr[0].digital_reading =%d %d"), ldr[0].digital_reading, tkr_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1_ID));
+  ALOG_DBM( PSTR("ldr[0].analog_reading =%d %d"), ldr[0].analog_reading, tkr_pins->GetPin(GPIO_LDR_BASIC_ANALOG1));
+  ALOG_DBM( PSTR("ldr[0].digital_reading =%d %d"), ldr[0].digital_reading, tkr_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1));
 
 }
 

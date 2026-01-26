@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nextion Command Console</title>
+  <link rel="stylesheet" href="/submodule_style.css">
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>Nextion Command Console</h1>
+    <hr>
+
+    <div class="card">
+      <p>
+        Send a raw command directly to the Nextion display.
+        The standard <code>0xFF 0xFF 0xFF</code> suffix is appended automatically.
+      </p>
+
+      <form method="get" action="/nextion/cmd">
+        <label for="cmd">Command</label>
+        <input type="text"
+               id="cmd"
+               name="cmd"
+               placeholder="e.g. page main"
+               required>
+
+        <button type="submit" class="primary">
+          Send Command
+        </button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Quick Actions</h2>
+
+      <form method="get" action="/nextion/reboot_panel">
+        <button type="submit" class="danger">
+          Reboot Nextion Panel
+        </button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

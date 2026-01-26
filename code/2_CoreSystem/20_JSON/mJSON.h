@@ -258,6 +258,58 @@ void releaseJSONBufferLock(); // duplicate of below, need to JOIN THEM!!
 
     #else
 
+      #include <stdarg.h>
+
+      // Pick a size that covers your typical payloads.
+      // If you want it configurable, make it a macro.
+      #ifndef JSON_BUILDER_VFMT_MAX
+      #define JSON_BUILDER_VFMT_MAX 128
+      #endif
+
+      // Add a formatted string value: "key":"formatted..."
+      void Addf(const char* key, const char* value_fmt, ...)
+      {
+        if (!writer.buffer) {
+          Serial.println("ERROR: JsonBuilder::Addf() buffer nullptr not valid");
+          return;
+        }
+        if (writer.buffer_size == 0) {
+          Serial.println("ERROR: JsonBuilder::Addf() buffer size zero not valid");
+          return;
+        }
+        if (!key || !value_fmt) return;
+
+        char tmp[JSON_BUILDER_VFMT_MAX];
+
+        va_list args;
+        va_start(args, value_fmt);
+        const int n = vsnprintf(tmp, sizeof(tmp), value_fmt, args);
+        va_end(args);
+
+        // Truncation or error: still emit something sane
+        if (n < 0) {
+          tmp[0] = '\0';
+        } else if ((size_t)n >= sizeof(tmp)) {
+          tmp[sizeof(tmp) - 1] = '\0';
+        }
+
+        // Reuse your existing Add() path (string type)
+        Add<const char*>(key, tmp);
+      }
+
+      void Addf_P(const char* key, PGM_P value_fmt_P, ...)
+      {
+        char tmp[JSON_BUILDER_VFMT_MAX];
+        va_list args;
+        va_start(args, value_fmt_P);
+        vsnprintf_P(tmp, sizeof(tmp), value_fmt_P, args);
+        va_end(args);
+        tmp[sizeof(tmp) - 1] = '\0';
+        Add<const char*>(key, tmp);
+      }
+
+
+
 
     template <typename T>
     void Add(T value){

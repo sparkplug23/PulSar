@@ -629,3 +629,16 @@ writeChunks(
   destination_path + "submodule_assets.h"
 );
 
+writeChunks(
+  source_path,
+  [
+    {
+      file: "system_controls.htm",
+      name: "PAGE_system_controls",
+      method: "gzip",
+      filter: "html-minify-ui",
+    }
+  ],
+  destination_path + "submodule_unified_pages.h"
+);
+

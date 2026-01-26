@@ -129,6 +129,11 @@ class mSensorsInterface :
     String PressureUnit(void);
 
 
+    void WebAppend__Sensor_Table__As_TypesRows();
+    void WebAppend__Sensor_Table__As_SensorsRows_Inverted();
+    void WebAppend__Sensor_Table__As_Ragged();
+
+
     #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
     struct filtered_sensor_entry_t 
     {

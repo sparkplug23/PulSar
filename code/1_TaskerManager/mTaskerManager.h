@@ -575,8 +575,8 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #define tkr_iDisp                               static_cast<mDisplaysInterface*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DISPLAYS_INTERFACE_ID))
 #endif
 #ifdef USE_MODULE_DISPLAYS_NEXTION
-  #include "8_Displays/01_Nextion/mNextionPanel.h"
-  #define tkr_nex                                 static_cast<mNextionPanel*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DISPLAYS_NEXTION_ID))
+  #include "8_Displays/01_Nextion/mNextion.h"
+  #define tkr_nex                                 static_cast<mNextion*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DISPLAYS_NEXTION_ID))
 #endif
 #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
   #include "8_Displays/02_OLED_SSD1606/mOLED_SSD1306.h"

@@ -79,22 +79,22 @@ void mSensorsDHT::Pre_Init(void){
   settings.fEnableSensor = false;
   settings.sensor_active_count = 0;
   
-  if (tkr_pins->PinUsed(GPIO_DHT11_1OF2_ID)) {  // not set when 255
-    pin[settings.sensor_active_count] = tkr_pins->GetPin(GPIO_DHT11_1OF2_ID);
+  if (tkr_pins->PinUsed(GPIO_DHT11_1)) {  // not set when 255
+    pin[settings.sensor_active_count] = tkr_pins->GetPin(GPIO_DHT11_1);
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT11);
     AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT11_1of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
   }
-  if (tkr_pins->PinUsed(GPIO_DHT11_2OF2_ID)) {  // not set when 255
-    pin[settings.sensor_active_count] = tkr_pins->GetPin(GPIO_DHT11_2OF2_ID);
+  if (tkr_pins->PinUsed(GPIO_DHT11_2)) {  // not set when 255
+    pin[settings.sensor_active_count] = tkr_pins->GetPin(GPIO_DHT11_2);
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT11);
     AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT11_2of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
     settings.sensor_active_count++;
   }
-  if (tkr_pins->PinUsed(GPIO_DHT22_1OF2_ID)) {  // not set when 255
-    pin[settings.sensor_active_count] = tkr_pins->GetPin(GPIO_DHT22_1OF2_ID);
+  if (tkr_pins->PinUsed(GPIO_DHT22_1)) {  // not set when 255
+    pin[settings.sensor_active_count] = tkr_pins->GetPin(GPIO_DHT22_1);
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT22);
     AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT22_1of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
@@ -104,8 +104,8 @@ void mSensorsDHT::Pre_Init(void){
     AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_DHT "DHT Sensor 1 not found"));
     // delay(2000);
   }
-  if (tkr_pins->PinUsed(GPIO_DHT22_2OF2_ID)) {  // not set when 255
-    pin[settings.sensor_active_count] = tkr_pins->GetPin(GPIO_DHT22_2OF2_ID);
+  if (tkr_pins->PinUsed(GPIO_DHT22_2)) {  // not set when 255
+    pin[settings.sensor_active_count] = tkr_pins->GetPin(GPIO_DHT22_2);
     sensor[settings.sensor_active_count].dht = new DHTesp;
     sensor[settings.sensor_active_count].dht->setup(pin[settings.sensor_active_count], DHTesp::DHT22);
     AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_DHT "DHT22_2of2 Pin[%d] %d"),settings.sensor_active_count,pin[settings.sensor_active_count]);
@@ -151,7 +151,7 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
   do{
 
     //if(!fWithinLimit){
-      unsigned long tmp = (abs(millis()-sensor[sensor_id].instant.tWithinLimit));
+      unsigned long tmp = millis()-sensor[sensor_id].instant.tWithinLimit;
       if(tmp<=1000){
         break;
       }
@@ -190,7 +190,7 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
           }
 
           if((fabsf(sensor[sensor_id].instant.temperature-newValues.temperature)>0.1)||
-            (sensor[sensor_id].instant.temperature != newValues.temperature)&&(abs(millis()-sensor[sensor_id].instant.ischangedtLast)>60000)){
+            (sensor[sensor_id].instant.temperature != newValues.temperature)&&(millis()-sensor[sensor_id].instant.ischangedtLast)>60000){
             sensor[sensor_id].instant.ischanged_over_threshold = true; // check if updated
             sensor[sensor_id].instant.ischangedtLast = millis();
           }else{
@@ -225,7 +225,7 @@ void mSensorsDHT::SplitTask_UpdateClimateSensors(uint8_t sensor_id, uint8_t requ
     //  delay(100);
     }
 
-    if(abs(millis()-timeout)>=2000){
+    if((millis()-timeout)>=2000){
       // Serial.println("if(abs(millis()-timeout)>=2000){");
       sensor[sensor_id].instant.sUpdateClimateSensors = SPLIT_TASK_TIMEOUT_ID;
       break;
@@ -313,7 +313,7 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level, bool json_appendin
         {     
           JBI->Object_Start(D_ISCHANGEDMETHOD);
             JBI->Add(D_TYPE, D_SIGNIFICANTLY);
-            JBI->Add(D_AGE, (uint16_t)round(abs(millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
+            JBI->Add(D_AGE, (uint16_t)round((millis()-sensor[sensor_id].instant.ischangedtLast)/1000));
           JBI->Object_End();   
         }
       JBI->Object_End(); 

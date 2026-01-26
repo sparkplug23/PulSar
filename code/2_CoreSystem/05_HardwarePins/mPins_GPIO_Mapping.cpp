@@ -469,10 +469,10 @@ const char* mPins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, uint8_t bu
   if (id >= GPIO_SWT1_INV_NP && id <= GPIO_SWT32_INV_NP){   snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_SWT_NUM_INV_NP_CTR,  id - GPIO_SWT1_INV_NP + 1);  return buffer; }
   #endif
   #ifdef USE_MODULE_SENSORS_DHT
-  if(GPIO_DHT11_1OF2 == id)                        p = PM_GPIO_FUNCTION_DHT11_1_CTR;
-  if(GPIO_DHT11_2OF2 == id)                        p = PM_GPIO_FUNCTION_DHT11_2_CTR;
-  if(GPIO_DHT22_1OF2 == id)                        p = PM_GPIO_FUNCTION_DHT22_1_CTR;
-  if(GPIO_DHT22_2OF2 == id)                        p = PM_GPIO_FUNCTION_DHT22_2_CTR;
+  if(GPIO_DHT11_1 == id)                        p = PM_GPIO_FUNCTION_DHT11_1_CTR;
+  if(GPIO_DHT11_2 == id)                        p = PM_GPIO_FUNCTION_DHT11_2_CTR;
+  if(GPIO_DHT22_1 == id)                        p = PM_GPIO_FUNCTION_DHT22_1_CTR;
+  if(GPIO_DHT22_2 == id)                        p = PM_GPIO_FUNCTION_DHT22_2_CTR;
   #endif
   #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
   if(GPIO_LD2410_RX == id)                        p = PM_GPIO_FUNCTION__HLK_LD2410_RX__CTR;

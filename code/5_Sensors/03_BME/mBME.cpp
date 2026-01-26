@@ -53,13 +53,84 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_SENSOR_SHOW_LATEST_LOGGED_ID:
       ShowSensor_AddLog();
     break;
+// case TASK_WEB_APPEND_SENSOR_TABLE_VALUES:
+// {
+//   Print* outp = tkr_web->WebControls_GetPrint();
+//   if (!outp) break;
+//   Print& out = *outp;
+
+//   // Section: BME
+//   out.print(F("<div class=\"section\"><div class=\"title\">BME</div>"));
+//   out.print(F("<table class=\"kv kvwide\">"));
+
+//   // Header row: blank key header + device names
+//   tkr_web->WebUI_Print_TableHeaderRow_Begin(out);
+//   tkr_web->WebUI_Print_TableHeaderCell(out, nullptr, true);
+
+//   char name_buf[50];
+//   for (uint8_t sensor_id = 0; sensor_id < bmp_count; sensor_id++){
+//     const char* name =
+//       DLI->GetDeviceName_WithModuleUniqueID(GetModuleUniqueID(), sensor_id, name_buf, sizeof(name_buf));
+//     tkr_web->WebUI_Print_TableHeaderCell(out, name);
+//   }
+//   tkr_web->WebUI_Print_TableHeaderRow_End(out);
+
+//   // Temp row
+//   tkr_web->WebUI_Print_RowBegin(out, "Temp");
+//   for (uint8_t sensor_id = 0; sensor_id < bmp_count; sensor_id++){
+//     tkr_web->WebUI_Print_CellFloat(out, bmp_sensors[sensor_id].temperature, 1, "°C");
+//   }
+//   tkr_web->WebUI_Print_RowEnd(out);
+
+//   // Humidity row
+//   tkr_web->WebUI_Print_RowBegin(out, "Humidity");
+//   for (uint8_t sensor_id = 0; sensor_id < bmp_count; sensor_id++){
+//     tkr_web->WebUI_Print_CellFloat(out, bmp_sensors[sensor_id].humidity, 1, "%");
+//   }
+//   tkr_web->WebUI_Print_RowEnd(out);
+
+//   // Pressure row (NOTE: if your value is Pa, consider /100 and units hPa)
+//   tkr_web->WebUI_Print_RowBegin(out, "Pressure");
+//   for (uint8_t sensor_id = 0; sensor_id < bmp_count; sensor_id++){
+//     tkr_web->WebUI_Print_CellFloat(out, bmp_sensors[sensor_id].pressure, 0, "Pa");
+//   }
+//   tkr_web->WebUI_Print_RowEnd(out);
+
+//   // Gas row (only BME680 has it)
+//   tkr_web->WebUI_Print_RowBegin(out, "Gas");
+//   for (uint8_t sensor_id = 0; sensor_id < bmp_count; sensor_id++){
+//     if (bmp_sensors[sensor_id].bmp_type == BME680_CHIPID)
+//       tkr_web->WebUI_Print_CellFloat(out, (float)bmp_sensors[sensor_id].bmp_gas_resistance, 0, "Ω");
+//     else
+//       tkr_web->WebUI_Print_CellDash(out);
+//   }
+//   tkr_web->WebUI_Print_RowEnd(out);
+
+//   // Age row
+//   tkr_web->WebUI_Print_RowBegin(out, "Age");
+//   for (uint8_t sensor_id = 0; sensor_id < bmp_count; sensor_id++){
+//     uint32_t age = tkr_time->UtcTime() - bmp_sensors[sensor_id].utc_measured_timestamp;
+//     // print as integer seconds
+//     out.print(F("<td class=\"val\">"));
+//     out.print(age);
+//     out.print(F(" s</td>"));
+//   }
+//   tkr_web->WebUI_Print_RowEnd(out);
+
+//   out.print(F("</table></div>"));
+// }
+// break;
+
+
+
+
     /************
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
-      break;
+    break;
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
       tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;

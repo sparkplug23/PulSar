@@ -36,7 +36,8 @@
 // #define DEVICE_OFFICE__RGBWW_VERTICAL_BAR
 // #define DEVICE_MEADOWS__OFFICE__UNDER_DESK
 
-#define DEVICE_OFFICE__NEXTION_DISPLAY__DESK_10INCH
+// #define DEVICE_OFFICE__NEXTION_DISPLAY__DESK_3P5INCH
+// #define DEVICE_OFFICE__NEXTION_DISPLAY__DESK_10INCH
 
 // #define DEVICE_MEADOWS__ROAMING__REDBOARD_TESTER02
 // #define DEVICE_MEADOWS__OFFICE__PEBBLE_ESP32C3_TESTBED
@@ -925,7 +926,7 @@ R"=====(
 #endif
 #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
   #define USE_MODULE_SENSORS_BME
-    #define ENABLE_DEVFEATURE_BME680
+    
 #endif
 #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
   #define USE_MODULE_SENSORS__RADAR_HLK_LD2410
@@ -2550,7 +2551,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #endif 
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
     #define USE_MODULE_SENSORS_BME
-      #define ENABLE_DEVFEATURE_BME680
+      
   #endif
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
     #define USE_MODULE_SENSORS_SUN_TRACKING     
@@ -4564,7 +4565,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
         #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
   #endif 
   #define USE_MODULE_SENSORS_BME
-    #define ENABLE_DEVFEATURE_BME680
+    
 
   #ifdef ENABLE_TEMPLATE_SECTION__DISPLAY_OLED
   #define USE_MODULE_DISPLAYS_INTERFACE
@@ -5264,7 +5265,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define USE_MODULE_SENSORS_PIR
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
     #define USE_MODULE_SENSORS_BME
-      #define ENABLE_DEVFEATURE_BME680
+      
   #endif
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
     #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
@@ -6634,6 +6635,189 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 
 
 #endif
+
+
+
+#ifdef DEVICE_OFFICE__NEXTION_DISPLAY__DESK_3P5INCH
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "office__desk_display_3p5inch"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_PORT     1883
+
+    #define ENABLE_NEXTION
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+  ///////////////////////////////////////////// Enable Logs
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  ///////////////////////////////////////////// System Logs
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  
+  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // #define ENABLE_DEBUG_LINE_HERE3
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // #define USE_DEBUG_PRINT
+
+  ///////////////////////////////////////////// Module Logs
+  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+  
+  /***********************************
+   * SECTION: System Configs
+  ************************************/   
+ 
+  #define SETTINGS_HOLDER 1239
+
+  
+  
+  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+   // until devices can reliably be used without compiling per device
+  
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
+    
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+#ifdef ENABLE_NEXTION
+
+  #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+   
+
+
+  #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+    
+    
+  #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+    // #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 115200
+    #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 921600
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_NEXTION
+
+  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY        
+        #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER 1
+        #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+         
+        
+        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER_SERIAL1_HVAC_DESK
+
+
+
+// #define USE_FEATURE_NEXTION__SERIAL_DEFAULT_BUAD_NEW_PANEL_FIRST_OTA
+
+// #define USE_FEATURE_NEXTION__FORCE_SERIAL_BAUDRATE_FROM_DEFAULT 115200
+
+  
+  #define USE_MODULE_DISPLAYS_NEXTION
+    #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  #define NEXTION_DEFAULT_PAGE_NUMBER 5//6  
+    #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
+    // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
+    #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
+    #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
+
+#endif
+
+  
+  #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+
+  // 
+  
+  DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
+  R"=====(
+  {
+    "ObjectNameID": {
+      "hIconUS": 2,
+      "hTimeUS": 6,
+      "hBoostUS": 11,
+      "hAutoUS": 16,
+      "hIconDS": 3,
+      "hTimeDS": 7,
+      "hBoostDS": 12,
+      "hAutoDS": 17,
+      "hIconIH": 4,
+      "hTimeIH": 8,
+      "hBoostIH": 13,
+      "hAutoIH": 18,
+      "hIconWB": 5,
+      "hTimeWB": 9,
+      "hBoostWB": 14,
+      "hAutoWB": 19,
+      "hIconDryer": 122,
+      "hTimeDryer": 123,
+      "hBoostDryer": 124,
+      "hAutoDryer": 125
+    }
+  }
+  )=====";
+
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
+    "\"MQTTSubscribe\":["
+      "\"openhab_broadcast/nextion/group/#\""
+    "],"
+  "}";
+
+
+#endif
+
 
 
 

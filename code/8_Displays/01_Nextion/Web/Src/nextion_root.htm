@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nextion Control</title>
+
+  <link rel="stylesheet" href="/submodule_style.css">
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>Nextion Panel</h1>
+    <hr>
+
+    <div class="card">
+      <h2>Firmware</h2>
+      <p>Update or reflash the connected Nextion LCD.</p>
+
+      <form method="get" action="/nextion/firmware">
+        <button type="submit" class="primary">
+          Open Firmware Update
+        </button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Commands</h2>
+      <p>Send raw commands directly to the Nextion panel.</p>
+
+      <form method="get" action="/nextion/command">
+        <button type="submit">
+          Open Command Console
+        </button>
+      </form>
+    </div>
+
+  </div>
+</body>
+</html>

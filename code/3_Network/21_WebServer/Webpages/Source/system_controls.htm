@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Date Modified: 25Jan26 -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+  <meta name="theme-color" content="#141414">
+  <title>PulSar, System Controls</title>
+
+  <link rel="stylesheet" href="/submodule_style.css">
+  <script src="/common.js"></script>
+
+  <style>
+    /* Keep page-local CSS minimal, rely on submodule_style.css */
+    .hdr{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .hdr .r{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .mono{ font-family: var(--mono); }
+
+    /* STACKED SECTIONS (rows, not columns) */
+    .sections{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .boxTitle{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .boxBody{ min-height: 40px; }
+  </style>
+
+  <script>
+    /* Date Modified: 25Jan26 */
+
+    // GetV is part of the standard page contract (WLED style).
+    // We keep it, but this page does NOT rely on it for updates.
+    function GetV(){ /* injected values here */ }
+
+    // Poll configuration (ms). Adjust later or make dynamic.
+    var CTRL_POLL_C1 = 2000;
+    var CTRL_POLL_C2 = 5000;
+    var CTRL_POLL_C3 = 10000;
+
+    var _ctrlTimers = { c1:0, c2:0, c3:0 };
+    var _ctrlPaused = false;
+
+    function _ts(){
+      try { return new Date().toLocaleTimeString(); }
+      catch(e){ return ""+Date.now(); }
+    }
+
+    function Controls_SetTopStatus(txt, ok=true){
+      var el = gId("st");
+      if (!el) return;
+      el.textContent = txt;
+      el.classList.toggle("status-ok", !!ok);
+      el.classList.toggle("status-bad", !ok);
+    }
+
+    function Controls_OnOk(which){
+      var s = gId("s_"+which);
+      if (s) s.textContent = "ok @" + _ts();
+      var last = gId("last");
+      if (last) last.textContent = "last @" + _ts();
+      Controls_SetTopStatus("ok", true);
+    }
+
+    function Controls_OnErr(which){
+      var s = gId("s_"+which);
+      if (s) s.textContent = "error @" + _ts();
+      Controls_SetTopStatus("error", false);
+    }
+
+    function Controls_LoadSection(which){
+      if (_ctrlPaused) return;
+
+      var url = getURL("/system/controls/" + which) + "?t=" + Date.now();
+      var box = gId(which);
+      if (!box) return;
+
+      var req = new XMLHttpRequest();
+      req.onreadystatechange = function(){
+        if (req.readyState !== 4) return;
+
+        if (req.status >= 200 && req.status < 300) {
+          box.innerHTML = req.responseText || "";
+          Controls_OnOk(which);
+        } else {
+          box.innerHTML = "<div class='subtle'>Failed to load</div>";
+          Controls_OnErr(which);
+        }
+      };
+      req.open("GET", url, true);
+      req.send();
+    }
+
+    function Controls_Start(){
+      getLoc();
+      Controls_SetTopStatus("ready", true);
+
+      Controls_LoadSection("c1");
+      Controls_LoadSection("c2");
+      Controls_LoadSection("c3");
+
+      _ctrlTimers.c1 = setInterval(function(){ Controls_LoadSection("c1"); }, CTRL_POLL_C1);
+      _ctrlTimers.c2 = setInterval(function(){ Controls_LoadSection("c2"); }, CTRL_POLL_C2);
+      _ctrlTimers.c3 = setInterval(function(){ Controls_LoadSection("c3"); }, CTRL_POLL_C3);
+
+      var host = gId("host");
+      if (host) host.textContent = "host:" + (location.host || "—");
+    }
+
+    function Controls_RefreshAll(){
+      Controls_LoadSection("c1");
+      Controls_LoadSection("c2");
+      Controls_LoadSection("c3");
+    }
+
+    function Controls_TogglePause(){
+      _ctrlPaused = !_ctrlPaused;
+      var b = gId("btn_pause");
+      if (b) b.textContent = _ctrlPaused ? "Resume" : "Pause";
+      Controls_SetTopStatus(_ctrlPaused ? "paused" : "ok", !_ctrlPaused);
+      if (!_ctrlPaused) Controls_RefreshAll();
+    }
+  </script>
+</head>
+
+<body onload="Controls_Start()">
+<div class="wrap">
+
+  <div class="card">
+    <div class="hdr">
+      <div>
+        <h1>System Controls</h1>
+        <!-- <div class="subtle">Three independent sections, updated via polling</div> -->
+      </div>
+      <div class="r">
+        <span class="pill mono" id="st">ready</span>
+        <span class="pill mono" id="last">—</span>
+        <span class="pill mono" id="host">host:—</span>
+        <button class="primary" type="button" onclick="Controls_RefreshAll()">Refresh</button>
+        <button type="button" id="btn_pause" onclick="Controls_TogglePause()">Pause</button>
+      </div>
+    </div>
+
+    <!-- <div class="small">
+      Endpoints:
+      <span class="hint">/system/controls/c1</span>,
+      <span class="hint">/system/controls/c2</span>,
+      <span class="hint">/system/controls/c3</span>
+    </div> -->
+  </div>
+
+  <!-- STACKED: Sensors, then Drivers, then Controllers -->
+  <div class="sections">
+
+    <div class="card">
+      <div class="boxTitle">
+        <h2>Sensors</h2>
+        <div class="small mono" id="s_c1">—</div>
+      </div>
+      <div class="boxBody" id="c1"><div class="subtle"></div></div>
+      <!-- <div class="small hint">/system/controls/c1</div> -->
+    </div>
+
+    <div class="card">
+      <div class="boxTitle">
+        <h2>Drivers</h2>
+        <div class="small mono" id="s_c2">—</div>
+      </div>
+      <div class="boxBody" id="c2"><div class="subtle"></div></div>
+      <!-- <div class="small hint">/system/controls/c2</div> -->
+    </div>
+
+    <div class="card">
+      <div class="boxTitle">
+        <h2>Controllers</h2>
+        <div class="small mono" id="s_c3">—</div>
+      </div>
+      <div class="boxBody" id="c3"><div class="subtle"></div></div>
+      <!-- <div class="small hint">/system/controls/c3</div> -->
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>

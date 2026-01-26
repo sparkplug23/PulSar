@@ -162,6 +162,82 @@ void mWebServer::Server_Start()
 }
 
 
+
+void mWebServer::HandlePage_SystemControls(AsyncWebServerRequest *request)
+{
+  // If you want captive portal redirects to hit here, you can add:
+  // if (captivePortal(request)) return;
+
+  static const char _path[] PROGMEM = "/system/controls";
+  this->handleStaticContent(
+    request,
+    FPSTR(_path),
+    200,
+    FPSTR(CONTENT_TYPE_HTML),
+    PAGE_system_controls,
+    PAGE_system_controls_length,
+    true
+  );
+}
+
+
+void mWebServer::HandlePage_SystemControls_C1(AsyncWebServerRequest *request)
+{
+  AsyncResponseStream *response = request->beginResponseStream(FPSTR(PM_WEB_CONTENT_TYPE_TEXT_HTML));
+  if (!response) { request->send(500); return; }
+  setStaticContentCacheHeaders(response, 200, 0);
+
+  // Set append context for Tasker-driven modules
+  web_controls_stream = response;
+  web_controls_container_id = 1;
+
+  // Let modules append their blocks (modules will use tkr_web->WebControls_GetPrint())
+  tkr->Tasker_Interface(TASK_WEB_APPEND_SENSOR_TABLE_VALUES);
+
+  // Clear context
+  web_controls_stream = nullptr;
+  web_controls_container_id = 0;
+
+  request->send(response);
+}
+
+
+
+void mWebServer::HandlePage_SystemControls_C2(AsyncWebServerRequest *request)
+{
+  AsyncResponseStream *response = request->beginResponseStream(FPSTR(PM_WEB_CONTENT_TYPE_TEXT_HTML));
+  setStaticContentCacheHeaders(response, 200, 0);
+
+  web_controls_stream = response;
+  web_controls_container_id = 2;
+
+  tkr->Tasker_Interface(TASK_WEB_APPEND_DRIVER_TABLE_VALUES);
+
+  web_controls_stream = nullptr;
+  web_controls_container_id = 0;
+
+  request->send(response);
+}
+
+void mWebServer::HandlePage_SystemControls_C3(AsyncWebServerRequest *request)
+{
+  AsyncResponseStream *response = request->beginResponseStream(FPSTR(PM_WEB_CONTENT_TYPE_TEXT_HTML));
+  setStaticContentCacheHeaders(response, 200, 0);
+
+  web_controls_stream = response;
+  web_controls_container_id = 3;
+
+  tkr->Tasker_Interface(TASK_WEB_APPEND_CONTROLLER_TABLE_VALUES);
+
+  web_controls_stream = nullptr;
+  web_controls_container_id = 0;
+
+  request->send(response);
+}
+
+
+
+
 /**
  * @brief Need to start making "minimal" webpages to test on esp8266
  * 
@@ -339,6 +415,22 @@ server->on("/settings2", HTTP_POST, [this](AsyncWebServerRequest *request){
     #endif
     handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404, PAGE_404_length);
   });
+
+
+server->on("/system/controls/c1", HTTP_GET, [this](AsyncWebServerRequest *request){
+  this->HandlePage_SystemControls_C1(request);
+});
+server->on("/system/controls/c2", HTTP_GET, [this](AsyncWebServerRequest *request){
+  this->HandlePage_SystemControls_C2(request);
+});
+server->on("/system/controls/c3", HTTP_GET, [this](AsyncWebServerRequest *request){
+  this->HandlePage_SystemControls_C3(request);
+});
+
+  server->on("/system/controls", HTTP_GET, [this](AsyncWebServerRequest *request){
+  this->HandlePage_SystemControls(request);
+});
+
 
 
 //   server->onNotFound([this](AsyncWebServerRequest *request){HandleNotFound(request); });

@@ -26,7 +26,6 @@
 #ifdef USE_MODULE_SENSORS_BME
 
 #include <bme68x.h>
-// #include "bme68x_defs.h"
 
 #include <Wire.h>
 

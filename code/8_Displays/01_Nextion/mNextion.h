@@ -96,14 +96,14 @@
 // String lcdFirmwareUrl = "https://raw.githubusercontent.com/HASwitchPlate/HASPone/main/Nextion_HMI/HASwitchPlate.tft";
 
 
-class mNextionPanel :
+class mNextion :
   public mTaskerInterface
 {
   public:
   /************************************************************************************************
      * SECTION: Construct Class Base
      ************************************************************************************************/
-    mNextionPanel(){};
+    mNextion(){};
     void Init(void);
     void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
@@ -155,10 +155,10 @@ class mNextionPanel :
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mNextionPanel>*> mqtthandler_list;
-    struct handler<mNextionPanel> mqtthandler_settings;
-    struct handler<mNextionPanel> mqtthandler_sensor_ifchanged;
-    struct handler<mNextionPanel> mqtthandler_sensor_teleperiod;
+    std::vector<struct handler<mNextion>*> mqtthandler_list;
+    struct handler<mNextion> mqtthandler_settings;
+    struct handler<mNextion> mqtthandler_sensor_ifchanged;
+    struct handler<mNextion> mqtthandler_sensor_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 
@@ -166,15 +166,14 @@ class mNextionPanel :
 
 
 
-    void Serve_Submodule_NextionPanel_LcdOtaSuccess_Page(AsyncWebServerRequest* request);
-    void Serve_Submodule_NextionPanel_LcdOtaFailure_Page(AsyncWebServerRequest* request);
+
+void WebHandle_Nextion_Command(AsyncWebServerRequest* request);
 
 
 
+void webHandleNextionCmd(AsyncWebServerRequest* request);
 
-
-
-
+void webHandleNextionRebootPanel(AsyncWebServerRequest* request);
 
 
 
@@ -199,12 +198,23 @@ class mNextionPanel :
 
     // https://nextion.tech/instruction-set/
 
-    enum INSTRUCTION_SET_RETURN_CODES
+    enum INSTRUCTION_SET_RETURN_CODES : uint8_t
     {
       /********************************************************************************************************************
-       * @brief Return Codes dependent on bkcmd value being greater than 0
-       * 
+       * @brief Nextion Instruction Set Return Codes (bkcmd-dependent and unsolicited events)
+       *
+       * Notes:
+       *  - When bkcmd is 2 or 3, Nextion returns a 4-byte response for most command results:
+       *      <code> 0x?? 0xFF 0xFF 0xFF </code>
+       *  - Some messages are unsolicited/event-driven and have different lengths (e.g., touch events).
+       *
        *********************************************************************************************************************/
+
+      /********************************************************************************************************************
+       * @section bkcmd-dependent return codes (bkcmd > 0)
+       * @brief Standard command result responses (typically length 4).
+       *********************************************************************************************************************/
+
       /**
        * @NO:          1
        * @BYTE:        0x00
@@ -212,280 +222,408 @@ class mNextionPanel :
        * @LENGTH:      4
        * @MEANING:     Invalid Instruction
        * @FORMAT:      0x00 0xFF 0xFF 0xFF
-       * @DESCRIPTION: Returned when instruction sent by user has failed
+       * @DESCRIPTION: Returned when instruction sent by user has failed.
        */
       INSTRUCTION_SET_RETURN_CODE__INVALID_INSTRUCTION = 0x00,
+
       /**
        * @NO:          2
        * @BYTE:        0x01
+       * @BKCMD:       2,3
        * @LENGTH:      4
        * @MEANING:     Instruction Successful
        * @FORMAT:      0x01 0xFF 0xFF 0xFF
-       * @DESCRIPTION: Returned when instruction sent by user was successful
+       * @DESCRIPTION: Returned when instruction sent by user was successful.
        */
       INSTRUCTION_SET_RETURN_CODE__INSTRUCTION_SUCCESSFUL = 0x01,
+
       /**
        * @NO:          3
        * @BYTE:        0x02
+       * @BKCMD:       2,3
        * @LENGTH:      4
        * @MEANING:     Invalid Component ID
        * @FORMAT:      0x02 0xFF 0xFF 0xFF
-       * @DESCRIPTION: Returned when invalid Component ID or name was used
+       * @DESCRIPTION: Returned when invalid Component ID or name was used.
        */
       INSTRUCTION_SET_RETURN_CODE__INVALID_COMPONENT_ID = 0x02,
+
       /**
        * @NO:          4
        * @BYTE:        0x03
+       * @BKCMD:       2,3
        * @LENGTH:      4
        * @MEANING:     Invalid Page ID
        * @FORMAT:      0x03 0xFF 0xFF 0xFF
-       * @DESCRIPTION: Returned when invalid Page ID or name was used
+       * @DESCRIPTION: Returned when invalid Page ID or name was used.
        */
       INSTRUCTION_SET_RETURN_CODE__INVALID_PAGE_ID = 0x03,
-      
-      
-
-
-      //   5	0x04
-      //     2,3	4	Invalid Picture ID	0x04 0xFF 0xFF 0xFF
-      //   Returned when invalid Picture ID was used
-
-
-      //   6	0x05
-      //     2,3	4	Invalid Font ID	0x05 0xFF 0xFF 0xFF
-      //   Returned when invalid Font ID was used
-
-
-      //   7	0x06
-      //     2,3	4	Invalid File Operation	0x06 0xFF 0xFF 0xFF
-      //   Returned when File operation fails
-
-
-      //   8	0x09
-      //     2,3	4	Invalid CRC	0x09 0xFF 0xFF 0xFF
-      //   Returned when Instructions with CRC validation fails their CRC check
-
-
-      //   9	0x11
-      //     2,3	4	Invalid Baud rate Setting	0x11 0xFF 0xFF 0xFF
-      //   Returned when invalid Baud rate was used
-
-
-      //   10	0x12
-      //     2,3	4	Invalid Waveform ID or Channel #	0x12 0xFF 0xFF 0xFF
-      //   Returned when invalid Waveform ID or Channel # was used
-
-
-      //   11	0x1A
-      //     2,3	4	Invalid Variable name or attribute	0x1A 0xFF 0xFF 0xFF
-      //   Returned when invalid Variable name or invalid attribute was used
-
-
-      //   12	0x1B
-      //     2,3	4	Invalid Variable Operation	0x1B 0xFF 0xFF 0xFF
-      //   Returned when Operation of Variable is invalid. ie: Text assignment t0.txt=abc or t0.txt=23, Numeric assignment j0.val=”50″ or j0.val=abc
-
-
-      //   13	0x1C
-      //     2,3	4	Assignment failed to assign	0x1C 0xFF 0xFF 0xFF
-      //   Returned when attribute assignment failed to assign
-
-
-      //   14	0x1D
-      //     2,3	4	EEPROM Operation failed	0x1D 0xFF 0xFF 0xFF
-      //   Returned when an EEPROM Operation has failed
-
-
-      //   15	0x1E
-      //     2,3	4	Invalid Quantity of Parameters	0x1E 0xFF 0xFF 0xFF
-      //   Returned when the number of instruction parameters is invalid
-
-
-      //   16	0x1F
-      //     2,3	4	IO Operation failed	0x1F 0xFF 0xFF 0xFF
-      //   Returned when an IO operation has failed
-
-
-      //   17	0x20
-      //     2,3	4	Escape Character Invalid	0x20 0xFF 0xFF 0xFF
-      //   Returned when an unsupported escape character is used
-
-
-      //   18	0x23
-      //     2,3	4	Variable name too long	0x23 0xFF 0xFF 0xFF
-      //   Returned when variable name is too long. Max length is 29 characters: 14 for page + “.” + 14 for component.
-
-
-        
-
-      //   /**
-      //    * @brief Return Codes not affected by bkcmd value, valid in all cases
-      //    * 
-      //    */      
-
-      //   /**
-      //    * @NO:          19
-      //    * @BYTE:        0x00
-      //    * @LENGTH:      6
-      //    * @MEANING:     Nextion Startup
-      //    * @FORMAT:      0x00 0x00 0x00 0xFF 0xFF 0xFF
-      //    * @DESCRIPTION: Returned when Nextion has started or reset. Since Nextion Editor v1.65.0, the Startup preamble is not at the firmware level but has been moved to a 
-      //    *               printh statement in Program.s allowing a user to keep, modify or remove as they choose.
-      //    */
-      //   #define INSTRUCTION_SET_RETURN_CODE__NEXTION_STARTUP 0x00
-      //   /**
-      //    * @NO:          20
-      //    * @BYTE:        0x00
-      //    * @LENGTH:      6
-      //    * @MEANING:     Nextion Startup
-      //    * @FORMAT:      0x00 0x00 0x00 0xFF 0xFF 0xFF
-      //    * @DESCRIPTION: Returned when Nextion has started or reset. Since Nextion Editor v1.65.0, the Startup preamble is not at the firmware level but has been moved to a 
-      //    *               printh statement in Program.s allowing a user to keep, modify or remove as they choose.
-      //    */
-      //   #define INSTRUCTION_SET_RETURN_CODE__NEXTION_STARTUP 0x00
-        
-        
-        
-        
-        
-      //   20	0x24
-      //     4	Serial Buffer Overflow	0x24 0xFF 0xFF 0xFF
-      //   Returned when a Serial Buffer overflow occurs
-      //   Buffer will continue to receive the current instruction, all previous instructions are lost.
-
-
-      //   21	0x65
-      //     7	Touch Event	0x65 0x00 0x01 0x01 0xFF 0xFF 0xFF
-      //   Returned when Touch occurs and component’s
-      //   corresponding Send Component ID is checked
-      //   in the users HMI design.
-      //   0x00 is page number, 0x01 is component ID,
-      //   0x01 is event (0x01 Press and 0x00 Release)
-      //   data: Page 0, Component 1, Pressed
 
       /**
-       * @NO:          21
+       * @NO:          5
+       * @BYTE:        0x04
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     Invalid Picture ID
+       * @FORMAT:      0x04 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when invalid Picture ID was used.
+       */
+      INSTRUCTION_SET_RETURN_CODE__INVALID_PICTURE_ID = 0x04,
+
+      /**
+       * @NO:          6
+       * @BYTE:        0x05
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     Invalid Font ID
+       * @FORMAT:      0x05 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when invalid Font ID was used.
+       */
+      INSTRUCTION_SET_RETURN_CODE__INVALID_FONT_ID = 0x05,
+
+      /**
+       * @NO:          7
+       * @BYTE:        0x06
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     Invalid File Operation
+       * @FORMAT:      0x06 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when File operation fails.
+       */
+      INSTRUCTION_SET_RETURN_CODE__INVALID_FILE_OPERATION = 0x06,
+
+      /**
+       * @NO:          8
+       * @BYTE:        0x09
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     Invalid CRC
+       * @FORMAT:      0x09 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when Instructions with CRC validation fails their CRC check.
+       */
+      INSTRUCTION_SET_RETURN_CODE__INVALID_CRC = 0x09,
+
+      /**
+       * @NO:          9
+       * @BYTE:        0x11
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     Invalid Baud rate Setting
+       * @FORMAT:      0x11 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when invalid Baud rate was used.
+       */
+      INSTRUCTION_SET_RETURN_CODE__INVALID_BAUD_RATE = 0x11,
+
+      /**
+       * @NO:          10
+       * @BYTE:        0x12
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     Invalid Waveform ID or Channel #
+       * @FORMAT:      0x12 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when invalid Waveform ID or Channel # was used.
+       */
+      INSTRUCTION_SET_RETURN_CODE__INVALID_WAVEFORM_ID_OR_CHANNEL = 0x12,
+
+      /**
+       * @NO:          11
+       * @BYTE:        0x1A
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     Invalid Variable name or attribute
+       * @FORMAT:      0x1A 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when invalid Variable name or invalid attribute was used.
+       */
+      INSTRUCTION_SET_RETURN_CODE__INVALID_VARIABLE_NAME_OR_ATTRIBUTE = 0x1A,
+
+      /**
+       * @NO:          12
+       * @BYTE:        0x1B
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     Invalid Variable Operation
+       * @FORMAT:      0x1B 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when Operation of Variable is invalid.
+       *               Example: Text assignment t0.txt=abc or t0.txt=23,
+       *                        Numeric assignment j0.val="50" or j0.val=abc
+       */
+      INSTRUCTION_SET_RETURN_CODE__INVALID_VARIABLE_OPERATION = 0x1B,
+
+      /**
+       * @NO:          13
+       * @BYTE:        0x1C
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     Assignment failed to assign
+       * @FORMAT:      0x1C 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when attribute assignment failed to assign.
+       */
+      INSTRUCTION_SET_RETURN_CODE__ASSIGNMENT_FAILED = 0x1C,
+
+      /**
+       * @NO:          14
+       * @BYTE:        0x1D
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     EEPROM Operation failed
+       * @FORMAT:      0x1D 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when an EEPROM Operation has failed.
+       */
+      INSTRUCTION_SET_RETURN_CODE__EEPROM_OPERATION_FAILED = 0x1D,
+
+      /**
+       * @NO:          15
+       * @BYTE:        0x1E
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     Invalid Quantity of Parameters
+       * @FORMAT:      0x1E 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when the number of instruction parameters is invalid.
+       */
+      INSTRUCTION_SET_RETURN_CODE__INVALID_PARAMETER_QUANTITY = 0x1E,
+
+      /**
+       * @NO:          16
+       * @BYTE:        0x1F
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     IO Operation failed
+       * @FORMAT:      0x1F 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when an IO operation has failed.
+       */
+      INSTRUCTION_SET_RETURN_CODE__IO_OPERATION_FAILED = 0x1F,
+
+      /**
+       * @NO:          17
+       * @BYTE:        0x20
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     Escape Character Invalid
+       * @FORMAT:      0x20 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when an unsupported escape character is used.
+       */
+      INSTRUCTION_SET_RETURN_CODE__ESCAPE_CHARACTER_INVALID = 0x20,
+
+      /**
+       * @NO:          18
+       * @BYTE:        0x23
+       * @BKCMD:       2,3
+       * @LENGTH:      4
+       * @MEANING:     Variable name too long
+       * @FORMAT:      0x23 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when variable name is too long.
+       *               Max length is 29 characters: 14 for page + "." + 14 for component.
+       */
+      INSTRUCTION_SET_RETURN_CODE__VARIABLE_NAME_TOO_LONG = 0x23,
+
+      /********************************************************************************************************************
+       * @section bkcmd-independent / event return codes (unsolicited or always valid)
+       * @brief These may be returned regardless of bkcmd settings.
+       *********************************************************************************************************************/
+
+      /**
+       * @NO:          19
+       * @BYTE:        0x24
+       * @LENGTH:      4
+       * @MEANING:     Serial Buffer Overflow
+       * @FORMAT:      0x24 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when a Serial Buffer overflow occurs.
+       *               Buffer will continue to receive the current instruction, all previous instructions are lost.
+       */
+      INSTRUCTION_SET_RETURN_CODE__SERIAL_BUFFER_OVERFLOW = 0x24,
+
+      /**
+       * @NO:          20
        * @BYTE:        0x65
        * @LENGTH:      7
        * @MEANING:     Touch Event
        * @FORMAT:      0x65 0x00 0x01 0x01 0xFF 0xFF 0xFF
-       * @DESCRIPTION: Returned when Touch occurs and component’s corresponding Send Component ID is checked in the users HMI design.
-       *               0x00 is page number, 0x01 is component ID,
-       *               0x01 is event (0x01 Press and 0x00 Release)
-       *               data: Page 0, Component 1, Pressed
+       * @DESCRIPTION: Returned when Touch occurs and component’s corresponding "Send Component ID"
+       *               is enabled in the HMI design.
+       *               Byte2: page number
+       *               Byte3: component ID
+       *               Byte4: event (0x01 Press, 0x00 Release)
+       *               Example: 0x65 0x00 0x01 0x01 ...
        */
       INSTRUCTION_SET_RETURN_CODE__TOUCH_EVENT = 0x65,
+
       /**
-       * @NO:          22
+       * @NO:          21
        * @BYTE:        0x66
-       * @LENGTH:      7
+       * @LENGTH:      5
        * @MEANING:     Current Page Number
        * @FORMAT:      0x66 0x01 0xFF 0xFF 0xFF
        * @DESCRIPTION: Returned when the sendme command is used.
-       *               0x01 is current page number
-       *               data: page 1
+       *               Byte2: current page number.
        */
-      INSTRUCTION_SET_RETURN_CODE__CURRENT_PAGE_NUMBER = 0x66
+      INSTRUCTION_SET_RETURN_CODE__CURRENT_PAGE_NUMBER = 0x66,
 
+      /**
+       * @NO:          22
+       * @BYTE:        0x67
+       * @LENGTH:      9
+       * @MEANING:     Touch Coordinate (awake)
+       * @FORMAT:      0x67 xH xL yH yL evt 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when sendxy=1 and not in sleep mode.
+       *               X and Y are big-endian 16-bit coordinates.
+       *               evt: 0x01 Press, 0x00 Release
+       */
+      INSTRUCTION_SET_RETURN_CODE__TOUCH_COORDINATE_AWAKE = 0x67,
 
+      /**
+       * @NO:          23
+       * @BYTE:        0x68
+       * @LENGTH:      9
+       * @MEANING:     Touch Coordinate (sleep)
+       * @FORMAT:      0x68 xH xL yH yL evt 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when sendxy=1 and exiting sleep mode.
+       *               X and Y are big-endian 16-bit coordinates.
+       *               evt: 0x01 Press, 0x00 Release
+       */
+      INSTRUCTION_SET_RETURN_CODE__TOUCH_COORDINATE_SLEEP = 0x68,
 
-      //   22	0x66
-      //     5	Current Page Number	0x66 0x01 0xFF 0xFF 0xFF
-      //   Returned when the sendme command is used.
-      //   0x01 is current page number
-      //   data: page 1
+      /**
+       * @NO:          24
+       * @BYTE:        0x70
+       * @LENGTH:      Varied (string + 3 terminators)
+       * @MEANING:     String Data Enclosed
+       * @FORMAT:      0x70 <chars...> 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when using get command for a string.
+       *               Each byte between 0x70 and terminators is ASCII char data.
+       */
+      INSTRUCTION_SET_RETURN_CODE__STRING_DATA_ENCLOSED = 0x70,
 
+      /**
+       * @NO:          25
+       * @BYTE:        0x71
+       * @LENGTH:      8
+       * @MEANING:     Numeric Data Enclosed
+       * @FORMAT:      0x71 b0 b1 b2 b3 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when get command returns a number.
+       *               32-bit value is little-endian (b0 is LSB).
+       */
+      INSTRUCTION_SET_RETURN_CODE__NUMERIC_DATA_ENCLOSED = 0x71,
 
-      //   23	0x67
-      //     9	Touch Coordinate (awake)	0x67 0x00 0x7A 0x00 0x1E 0x01 0xFF 0xFF 0xFF
-      //   Returned when sendxy=1 and not in sleep mode
-      //   0x00 0x7A is x coordinate in big endian order,
-      //   0x00 0x1E is y coordinate in big endian order,
-      //   0x01 is event (0x01 Press and 0x00 Release)
-      //   (0x00*256+0x71,0x00*256+0x1E)
-      //   data: (122,30) Pressed
+      /**
+       * @NO:          26
+       * @BYTE:        0x86
+       * @LENGTH:      4
+       * @MEANING:     Auto Entered Sleep Mode
+       * @FORMAT:      0x86 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when Nextion enters sleep automatically.
+       *               Using sleep=1 will not return 0x86.
+       */
+      INSTRUCTION_SET_RETURN_CODE__AUTO_ENTERED_SLEEP_MODE = 0x86,
 
+      /**
+       * @NO:          27
+       * @BYTE:        0x87
+       * @LENGTH:      4
+       * @MEANING:     Auto Wake from Sleep
+       * @FORMAT:      0x87 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when Nextion leaves sleep automatically.
+       *               Using sleep=0 will not return 0x87.
+       */
+      INSTRUCTION_SET_RETURN_CODE__AUTO_WAKE_FROM_SLEEP = 0x87,
 
-      //   24	0x68
-      //     9	Touch Coordinate (sleep)	0x68 0x00 0x7A 0x00 0x1E 0x01 0xFF 0xFF 0xFF
-      //   Returned when sendxy=1 and exiting sleep
-      //   0x00 0x7A is x coordinate in big endian order,
-      //   0x00 0x1E is y coordinate in big endian order,
-      //   0x01 is event (0x01 Press and 0x00 Release)
-      //   (0x00*256+0x71,0x00*256+0x1E)
-      //   data: (122,30) Pressed
+      /**
+       * @NO:          28
+       * @BYTE:        0x88
+       * @LENGTH:      4
+       * @MEANING:     Nextion Ready
+       * @FORMAT:      0x88 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when Nextion has powered up and initialized successfully.
+       *               Since Nextion Editor v1.65.0, this may be user-controlled via Program.s printh.
+       */
+      INSTRUCTION_SET_RETURN_CODE__NEXTION_READY = 0x88,
 
+      /**
+       * @NO:          29
+       * @BYTE:        0x89
+       * @LENGTH:      4
+       * @MEANING:     Start microSD Upgrade
+       * @FORMAT:      0x89 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when power on detects inserted microSD and begins upgrade-by-SD process.
+       */
+      INSTRUCTION_SET_RETURN_CODE__START_MICROSD_UPGRADE = 0x89,
 
-      //   25	0x70
-      //     Varied	String Data Enclosed	0x70 0x61 0x62 0x31 0x32 0x33 0xFF 0xFF 0xFF
-      //   Returned when using get command for a string.
-      //   Each byte is converted to char.
-      //   data: ab123
+      /**
+       * @NO:          30
+       * @BYTE:        0xFD
+       * @LENGTH:      4
+       * @MEANING:     Transparent Data Finished
+       * @FORMAT:      0xFD 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when all requested bytes of Transparent Data mode have been received,
+       *               and device is now leaving transparent data mode.
+       */
+      INSTRUCTION_SET_RETURN_CODE__TRANSPARENT_DATA_FINISHED = 0xFD,
 
-
-      //   26	0x71
-      //     8	Numeric Data Enclosed	0x71 0x01 0x02 0x03 0x04 0xFF 0xFF 0xFF
-      //   Returned when get command to return a number
-      //   4 byte 32-bit value in little endian order.
-      //   (0x01+0x02*256+0x03*65536+0x04*16777216)
-      //   data: 67305985
-
-
-      //   27	0x86
-      //     4	Auto Entered Sleep Mode	0x86 0xFF 0xFF 0xFF
-      //   Returned when Nextion enters sleep automatically
-      //   Using sleep=1 will not return an 0x86
-
-
-      //   28	0x87
-      //     4	Auto Wake from Sleep	0x87 0xFF 0xFF 0xFF
-      //   Returned when Nextion leaves sleep automatically
-      //   Using sleep=0 will not return an 0x87
-
-
-      //   29	0x88
-      //     4	Nextion Ready	0x88 0xFF 0xFF 0xFF
-      //   Returned when Nextion has powered up and is now initialized successfully. Since Nextion Editor v1.65.0, the Nextion Ready is not at the firmware level but has been moved to a printh statement in Program.s allowing a user to keep, modify or remove as they choose.
-      
-      
-      //   30	0x89
-      //     4	Start microSD Upgrade	0x89 0xFF 0xFF 0xFF
-      //   Returned when power on detects inserted microSD
-      //   and begins Upgrade by microSD process
-
-
-      //   31	0xFD
-      //     4	Transparent Data Finished	0xFD 0xFF 0xFF 0xFF
-      //   Returned when all requested bytes of Transparent
-      //   Data mode have been received, and is now leaving transparent data mode (see 1.16)
-
-
-      //   32	0xFE
-      //     4	Transparent Data Ready	0xFE 0xFF 0xFF 0xFF
-      //   Returned when requesting Transparent Data
-      //   mode, and device is now ready to begin receiving
-      //   the specified quantity of data (see 1.16)
-
-
-
-
-      //   INSTRUCTION_SET_RETURN_CODE__INVALID_INSTRUCTION__ID = 0x00,
-      //   INSTRUCTION_SET_RETURN_CODE__SERIAL_BUFFER_OVERFLOW__ID = 0x24,
-      //   INSTRUCTION_SET_RETURN_CODE__TOUCH_EVENT__ID = 0x65,
-      //   INSTRUCTION_SET_RETURN_CODE__CURRENT_PAGE_NUMBER__ID = 0x66,
-      //   INSTRUCTION_SET_RETURN_CODE__TOUCH_COORDINATE_AWAKE__ID = 0x67,
-      //   INSTRUCTION_SET_RETURN_CODE__TOUCH_COORDINATE_SLEEP__ID = 0x68,
-      //   INSTRUCTION_SET_RETURN_CODE__STRING_DATA_ENCLOSED__ID = 0x70,
-      //   INSTRUCTION_SET_RETURN_CODE__NUMERIC_DATA_ENCLODED__ID = 0x71,
-      //   INSTRUCTION_SET_RETURN_CODE__AUTO_ENTERED_SLEEP_MODE__ID = 0x86,
-      //   INSTRUCTION_SET_RETURN_CODE__AUTO_WAKE_FROM_SLEEP__ID = 0x87,
-      //   INSTRUCTION_SET_RETURN_CODE__NEXTION_READY__ID = 0x88,
-      //   INSTRUCTION_SET_RETURN_CODE__START_MICROSD_UPGRADE__ID = 0x89,
-      //   INSTRUCTION_SET_RETURN_CODE__TRANSPARENT_DATA_FINISHED__ID = 0xFD,
-      //   INSTRUCTION_SET_RETURN_CODE__TRANSPARENT_DATA_READY__ID = 0x00,
-      //   INSTRUCTION_SET_RETURN_CODE__INVALID_INSTRUCTIONID = 0x00,
-
+      /**
+       * @NO:          31
+       * @BYTE:        0xFE
+       * @LENGTH:      4
+       * @MEANING:     Transparent Data Ready
+       * @FORMAT:      0xFE 0xFF 0xFF 0xFF
+       * @DESCRIPTION: Returned when requesting Transparent Data mode, and device is now ready to begin
+       *               receiving the specified quantity of data.
+       */
+      INSTRUCTION_SET_RETURN_CODE__TRANSPARENT_DATA_READY = 0xFE,
     };
+/**
+ * @brief Convert a Nextion return-code byte into a stable, zero-allocation name string.
+ *
+ * Design goals (per your request):
+ *  - Standalone function (no caller-owned buffer needed)
+ *  - Returns a pointer to static storage (string literal), safe to use immediately in logs
+ *  - No heap allocation, no String usage
+ *
+ * Usage:
+ *   const uint8_t code = nextionReturnBuffer[0];
+ *   ALOG_INF(PSTR("Nextion RX: code=0x%02X (%s)"), code, GetInstructionName(code));
+ */
+static inline const char* GetInstructionName(uint8_t code)
+{
+  switch (code)
+  {
+    // ---- bkcmd-dependent result codes (length 4) ----
+    case INSTRUCTION_SET_RETURN_CODE__INVALID_INSTRUCTION:                return "INVALID_INSTRUCTION";                 // 0x00
+    case INSTRUCTION_SET_RETURN_CODE__INSTRUCTION_SUCCESSFUL:            return "INSTRUCTION_SUCCESSFUL";             // 0x01
+    case INSTRUCTION_SET_RETURN_CODE__INVALID_COMPONENT_ID:              return "INVALID_COMPONENT_ID";               // 0x02
+    case INSTRUCTION_SET_RETURN_CODE__INVALID_PAGE_ID:                   return "INVALID_PAGE_ID";                    // 0x03
+    case INSTRUCTION_SET_RETURN_CODE__INVALID_PICTURE_ID:                return "INVALID_PICTURE_ID";                 // 0x04
+    case INSTRUCTION_SET_RETURN_CODE__INVALID_FONT_ID:                   return "INVALID_FONT_ID";                    // 0x05
+    case INSTRUCTION_SET_RETURN_CODE__INVALID_FILE_OPERATION:            return "INVALID_FILE_OPERATION";             // 0x06
+    case INSTRUCTION_SET_RETURN_CODE__INVALID_CRC:                       return "INVALID_CRC";                        // 0x09
+    case INSTRUCTION_SET_RETURN_CODE__INVALID_BAUD_RATE:                 return "INVALID_BAUD_RATE";                  // 0x11
+    case INSTRUCTION_SET_RETURN_CODE__INVALID_WAVEFORM_ID_OR_CHANNEL:    return "INVALID_WAVEFORM_ID_OR_CHANNEL";     // 0x12
+    case INSTRUCTION_SET_RETURN_CODE__INVALID_VARIABLE_NAME_OR_ATTRIBUTE:return "INVALID_VARIABLE_NAME_OR_ATTRIBUTE"; // 0x1A
+    case INSTRUCTION_SET_RETURN_CODE__INVALID_VARIABLE_OPERATION:        return "INVALID_VARIABLE_OPERATION";         // 0x1B
+    case INSTRUCTION_SET_RETURN_CODE__ASSIGNMENT_FAILED:                 return "ASSIGNMENT_FAILED";                  // 0x1C
+    case INSTRUCTION_SET_RETURN_CODE__EEPROM_OPERATION_FAILED:           return "EEPROM_OPERATION_FAILED";            // 0x1D
+    case INSTRUCTION_SET_RETURN_CODE__INVALID_PARAMETER_QUANTITY:        return "INVALID_PARAMETER_QUANTITY";         // 0x1E
+    case INSTRUCTION_SET_RETURN_CODE__IO_OPERATION_FAILED:               return "IO_OPERATION_FAILED";                // 0x1F
+    case INSTRUCTION_SET_RETURN_CODE__ESCAPE_CHARACTER_INVALID:          return "ESCAPE_CHARACTER_INVALID";           // 0x20
+    case INSTRUCTION_SET_RETURN_CODE__VARIABLE_NAME_TOO_LONG:            return "VARIABLE_NAME_TOO_LONG";             // 0x23
+
+    // ---- bkcmd-independent / event codes ----
+    case INSTRUCTION_SET_RETURN_CODE__SERIAL_BUFFER_OVERFLOW:            return "SERIAL_BUFFER_OVERFLOW";             // 0x24
+    case INSTRUCTION_SET_RETURN_CODE__TOUCH_EVENT:                       return "TOUCH_EVENT";                        // 0x65
+    case INSTRUCTION_SET_RETURN_CODE__CURRENT_PAGE_NUMBER:               return "CURRENT_PAGE_NUMBER";                // 0x66
+    case INSTRUCTION_SET_RETURN_CODE__TOUCH_COORDINATE_AWAKE:            return "TOUCH_COORDINATE_AWAKE";             // 0x67
+    case INSTRUCTION_SET_RETURN_CODE__TOUCH_COORDINATE_SLEEP:            return "TOUCH_COORDINATE_SLEEP";             // 0x68
+    case INSTRUCTION_SET_RETURN_CODE__STRING_DATA_ENCLOSED:              return "STRING_DATA_ENCLOSED";               // 0x70
+    case INSTRUCTION_SET_RETURN_CODE__NUMERIC_DATA_ENCLOSED:             return "NUMERIC_DATA_ENCLOSED";              // 0x71
+    case INSTRUCTION_SET_RETURN_CODE__AUTO_ENTERED_SLEEP_MODE:           return "AUTO_ENTERED_SLEEP_MODE";            // 0x86
+    case INSTRUCTION_SET_RETURN_CODE__AUTO_WAKE_FROM_SLEEP:              return "AUTO_WAKE_FROM_SLEEP";               // 0x87
+    case INSTRUCTION_SET_RETURN_CODE__NEXTION_READY:                     return "NEXTION_READY";                      // 0x88
+    case INSTRUCTION_SET_RETURN_CODE__START_MICROSD_UPGRADE:             return "START_MICROSD_UPGRADE";              // 0x89
+    case INSTRUCTION_SET_RETURN_CODE__TRANSPARENT_DATA_FINISHED:         return "TRANSPARENT_DATA_FINISHED";          // 0xFD
+    case INSTRUCTION_SET_RETURN_CODE__TRANSPARENT_DATA_READY:            return "TRANSPARENT_DATA_READY";             // 0xFE
+
+    default:                                                             return "UNKNOWN_RETURN_CODE";
+  }
+}
+
 
     HardwareSerial* display = nullptr;
 
@@ -494,12 +632,6 @@ class mNextionPanel :
 
     void Command_SplashPage(char* pagename, uint8_t time_on_page);
     void Command_SetPage(char* pagename);
-
-    void MQTTSubscribe();
-
-    int8_t pin_tx = -1;
-    int8_t pin_rx = -1;
-    uint8_t status_enabled = false; //new module flag that all will have to signify they are working
 
     const   char*  GetObjectName_FromID(uint8_t id, char* objname, uint8_t objname_size);
     void SubParse_DisplaySet_JSON(JsonParserObject obj);
@@ -581,13 +713,6 @@ class mNextionPanel :
     void Show_ConnectionWorking();
     void Show_ConnectionNotWorking();
 
-    
-  // #ifdef USE_FEATURE_NEXTION__SERIAL_DEFAULT_BUAD_NEW_PANEL_FIRST_OTA
-
-  //   char nextionBaud[7] = "9600";
-  // #else
-  //   char nextionBaud[7] = "115200";
-  //   #endif
 
     void MQTTSend_LongPressEvent();
     uint32_t tSaved_MQTTSend_PressEvent = millis();
@@ -598,12 +723,11 @@ class mNextionPanel :
     #define NEXTION_COMMAND_INVALID_INSTRUCTION 0x1A
     #define D_NEXTION_COMMAND_INVALID_INSTRUCTION_CTR "Variable/Attribute name invalid"
 
-    void mqttConnected();
-    void mqttDisconnected();
+    
     void mqttCallback(String &strTopic, String &strPayload);
     void mqttStatusUpdate();
     void nextionHandleInput();
-    void nextionProcessInput();
+    
     void nextionSetAttr(const char* hmiAttribute, const char* hmiValue);
     void nextionSetAttr(const char* hmiAttribute, uint32_t value);
     void nextionGetAttr(String hmiAttribute);
@@ -616,7 +740,6 @@ class mNextionPanel :
     bool nextionConnect();
     void nextionSetSpeed();
     void nextionReset();
-    void espWifiSetup();
     void espWifiReconnect();
     void espSetupOta();
     void configRead();
@@ -634,22 +757,13 @@ class mNextionPanel :
 
     #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
     void webHandleTftFileSize(AsyncWebServerRequest* request);
-    void webHandleRoot(AsyncWebServerRequest* request);
-    void WebPage_LCD_Update_TFT(AsyncWebServerRequest *request);
     void webHandleLcdUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
     uint32_t transmitted_bytes = 0;
-    void webHandleFirmware(AsyncWebServerRequest *request);
-    #ifdef ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL
-    void webHandleLcdDownload(AsyncWebServerRequest *request);
-    #endif
     void nextionOtaStartDownload(AsyncWebServerRequest *request, const String &lcdOtaUrl);
-    void webHandleLcdUpdateSuccess(AsyncWebServerRequest *request);
-    void webHandleLcdUpdateFailure(AsyncWebServerRequest *request);
     #endif 
 
-void webHandleLcdDownload(AsyncWebServerRequest* request);
+    void webHandleLcdDownload(AsyncWebServerRequest* request);
     
-    void Serve_Submodule_NextionPanel_Firmware_Page(AsyncWebServerRequest* request);
 
     void CommandSet_Baud(uint32_t baud);
     bool updateCheck();
@@ -694,8 +808,38 @@ void webHandleLcdDownload(AsyncWebServerRequest* request);
  * ***********************************************************/
 
     char* ConvertBytetoASCII(byte* data, uint8_t len);
-    byte nextionReturnBuffer[128];                      // Byte array to pass around data coming from the panel
-    uint8_t nextionReturnIndex = 0;                     // Index for nextionReturnBuffer
+
+    // byte nextionReturnBuffer[128];                      // Byte array to pass around data coming from the panel
+    // uint8_t nextionReturnIndex = 0;                     // Index for nextionReturnBuffer
+
+
+    static constexpr uint16_t NEXTION_RX_MAX = 128;
+
+    struct NextionFrame {
+      uint8_t  data[NEXTION_RX_MAX];
+      uint16_t len = 0;
+      bool     complete = false;
+
+      inline void reset() {
+        len = 0;
+        complete = false;
+      }
+    };
+    NextionFrame incoming_frame;
+
+
+void ProcessInput();                         // dispatcher
+void ProcessInput__TouchEvent();             // 0x65
+void ProcessInput__CurrentPageNumber();      // 0x66
+void ProcessInput__TouchCoordinateData();    // 0x67
+void ProcessInput__TouchCoordinateData_Wake();// 0x68
+void ProcessInput__GetStringReturn();        // 0x70
+void ProcessInput__GetIntReturn();           // 0x71
+void ProcessInput__ComokResponse();           // 0x63 ... "comok"
+void ProcessInput__ErrorReturnCode();        // bucket for 0x04/0x05/... etc
+
+
+
     uint8_t nextionActivePage = 1;                      // Track active LCD page
     bool lcdConnected = false;                          // Set to true when we've heard something from the LCD
     bool shouldSaveConfig = false;                      // Flag to save json config to SPIFFS

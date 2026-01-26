@@ -55,6 +55,123 @@ size_t mWebServer::printToggleElementClass(
   );
 }
 
+// Date Modified: 25Jan26
+
+size_t mWebServer::WebUI_Print_SectionBegin(Print& out, const char* title)
+{
+  size_t n = 0;
+  n += out.print(F("<div class=\"section\"><div class=\"title\">"));
+  if (title) n += out.print(title);
+  n += out.print(F("</div>"));
+  return n;
+}
+
+size_t mWebServer::WebUI_Print_SectionEnd(Print& out)
+{
+  return out.print(F("</div>"));
+}
+
+size_t mWebServer::WebUI_Print_TableBegin(Print& out)
+{
+  return out.print(F("<table class=\"kv\">"));
+}
+
+size_t mWebServer::WebUI_Print_TableEnd(Print& out)
+{
+  return out.print(F("</table>"));
+}
+
+size_t mWebServer::WebUI_Print_KV_Float(Print& out, const char* key, float value, uint8_t decimals, const char* units)
+{
+  size_t n = 0;
+  n += out.print(F("<tr><td class=\"key\">"));
+  if (key) n += out.print(key);
+  n += out.print(F("</td><td class=\"val\">"));
+  n += out.print(value, decimals);
+  if (units) { n += out.print(' '); n += out.print(units); }
+  n += out.print(F("</td></tr>"));
+  return n;
+}
+
+size_t mWebServer::WebUI_Print_KV_U32(Print& out, const char* key, uint32_t value, const char* units)
+{
+  size_t n = 0;
+  n += out.print(F("<tr><td class=\"key\">"));
+  if (key) n += out.print(key);
+  n += out.print(F("</td><td class=\"val\">"));
+  n += out.print(value);
+  if (units) { n += out.print(' '); n += out.print(units); }
+  n += out.print(F("</td></tr>"));
+  return n;
+}
+
+size_t mWebServer::WebUI_Print_KV_Str(Print& out, const char* key, const char* value)
+{
+  size_t n = 0;
+  n += out.print(F("<tr><td class=\"key\">"));
+  if (key) n += out.print(key);
+  n += out.print(F("</td><td class=\"val\">"));
+  if (value) n += out.print(value);
+  n += out.print(F("</td></tr>"));
+  return n;
+}
+// Date Modified: 25Jan26
+
+size_t mWebServer::WebUI_Print_TableHeaderRow_Begin(Print& out){
+  return out.print(F("<tr>"));
+}
+
+size_t mWebServer::WebUI_Print_TableHeaderCell(Print& out, const char* text, bool is_first_blank){
+  size_t n = 0;
+  if (is_first_blank) {
+    n += out.print(F("<th class=\"key\"></th>"));
+    return n;
+  }
+  n += out.print(F("<th class=\"col\">"));
+  if (text) n += out.print(text);
+  n += out.print(F("</th>"));
+  return n;
+}
+
+size_t mWebServer::WebUI_Print_TableHeaderRow_End(Print& out){
+  return out.print(F("</tr>"));
+}
+
+size_t mWebServer::WebUI_Print_RowBegin(Print& out, const char* key){
+  size_t n = 0;
+  n += out.print(F("<tr><td class=\"key\">"));
+  if (key) n += out.print(key);
+  n += out.print(F("</td>"));
+  return n;
+}
+
+size_t mWebServer::WebUI_Print_CellText(Print& out, const char* text){
+  size_t n = 0;
+  n += out.print(F("<td class=\"val\">"));
+  if (text) n += out.print(text);
+  n += out.print(F("</td>"));
+  return n;
+}
+
+size_t mWebServer::WebUI_Print_CellFloat(Print& out, float value, uint8_t decimals, const char* units){
+  size_t n = 0;
+  n += out.print(F("<td class=\"val\">"));
+  n += out.print(value, decimals);
+  if (units) { n += out.print(' '); n += out.print(units); }
+  n += out.print(F("</td>"));
+  return n;
+}
+
+size_t mWebServer::WebUI_Print_CellDash(Print& out){
+  return out.print(F("<td class=\"val\">—</td>"));
+}
+
+size_t mWebServer::WebUI_Print_RowEnd(Print& out){
+  return out.print(F("</tr>"));
+}
+
+
+
 
 
 // Global buffer locking response helper class (to make sure lock is released when AsyncJsonResponse is destroyed)

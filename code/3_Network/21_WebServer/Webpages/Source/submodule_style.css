@@ -188,3 +188,12 @@ code{
 /* Optional status helpers */
 .status-ok{ color: var(--ok); }
 .status-bad{ color: var(--danger); }
+
+/* Date Modified: 25Jan26 */
+table.kv.kvwide { width:100%; border-collapse: collapse; }
+table.kv.kvwide th, table.kv.kvwide td { padding: 8px 10px; border-top: 1px solid var(--line); }
+table.kv.kvwide th.col { color: var(--muted); font-weight: 650; text-align: left; }
+table.kv.kvwide th.key { width: 120px; }
+table.kv.kvwide td.val { font-family: var(--mono); }
+.kv.kvwide td.val{ white-space:nowrap; }
+

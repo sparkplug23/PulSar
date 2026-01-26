@@ -255,12 +255,12 @@
         <span class="go">/console</span>
       </button>
 
-      <button class="railbtn" type="button" onclick="go('/nextion')">
+      <button class="railbtn" type="button" onclick="go('/nextion/main')">
         <span class="l">
           <span class="name">Nextion</span>
           <span class="desc">Display / HMI tools</span>
         </span>
-        <span class="go">/nextion</span>
+        <span class="go">/nextion/main</span>
       </button>
 
       <button class="railbtn" type="button" onclick="go('/edit')">
@@ -350,16 +350,16 @@
             <div class="u mono">/console</div>
           </div>
 
-          <div class="tile" onclick="go('/nextion')">
+          <div class="tile" onclick="go('/nextion/main')">
             <div class="t">Nextion</div>
-            <div class="d">HMI upload/config endpoints</div>
-            <div class="u mono">/nextion</div>
+            <div class="d">HMI upload</div>
+            <div class="u mono">/nextion/main</div>
           </div>
 
-          <div class="tile" onclick="go('/basic/relays')">
-            <div class="t">Relays</div>
-            <div class="d">Basic relay control (placeholder)</div>
-            <div class="u mono">/basic/relays</div>
+          <div class="tile" onclick="go('/system/controls')">
+            <div class="t">System</div>
+            <div class="d">System Controls</div>
+            <div class="u mono">/system/controls</div>
           </div>
 
           <div class="tile" onclick="go('/json')">

@@ -592,7 +592,7 @@ uint8_t mTaskerManager::Instance_Init()
   addTasker(new mDisplaysInterface());
   #endif
   #ifdef USE_MODULE_DISPLAYS_NEXTION
-  addTasker(new mNextionPanel());
+  addTasker(new mNextion());
   #endif
   #ifdef USE_MODULE_DISPLAYS_OLED_SSD1306
   addTasker(new mOLED_SSD1306());

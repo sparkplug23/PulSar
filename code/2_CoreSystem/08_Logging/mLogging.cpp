@@ -545,7 +545,7 @@ int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
       #ifdef ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING
       if(tkr_time->uptime_seconds_nonreset == 60*1)
       {
-        SetSeriallog(LOG_LEVEL_INFO)
+        SetSeriallog(LOG_LEVEL_INFO);
         Serial.printf("Reducing log level to %d to improve performance when not debugging", tkr_set->Settings.logging.serial_level);
         // ALOG_INF(PSTR(D_LOG_APPLICATION "Reducing log level to %d to improve performance when not debugging"), tkr_set->Settings.logging.serial_level);
       }

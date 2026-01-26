@@ -43,6 +43,69 @@
 // #define DEVICE_TESTBED__BOARDTEST_ESP32_WROVER_E
 // #define DEVICE_DEVBOARD__DESK__ESP32DOIT_GPIO_HARDWARE_PINS_TESTING
 
+
+
+/**
+ * DEVICE_TYPE CORE: Any testbeds related to core system
+ * */
+// #define DEVICE_TESTBED__SETTINGS_STORING
+// #define DEVICE_TESTBED__FILESYSTEM
+
+
+/**
+ * DEVICE_TYPE NETWORK: Any testbeds related to lighting
+ * */
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_01
+// #define DEVICE_MAVLINK_DECODER_LOCATOR_LTE_DOWNLINK_01
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_01
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_02
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_03
+// #define DEVICE_TESTBED_ESP32_CELLULAR_LOCATOR_MULTI_FLASH_04_MQTT_ON_WIFI
+
+// #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__ON_SIM9000G_2024
+// #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_02__ON_SIM9000G_2024
+// #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_03__ON_SIM800L_2024
+// #define DEVICE_HARDWARE_TESTBED__TINY_GPS_SERIAL
+
+/**
+ * DEVICE_TYPE LIGHTING: Any testbeds related to lighting
+ * */
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_V2
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_CELLULAR_LOCATOR_02
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM800L
+// #define DEVICE_TESTBED_ESP32_BUZZER_TONES
+// #define DEVICE_TESTBED_MAVLINK_DECODER
+// #define DEVICE_TESTBED_MAVLINK_TELEMETRY_WIFI_01
+// #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_CELLULAR_LOCATOR_01
+
+/**
+ * DEVICE_TYPE DRIVERS: Any testbeds related to lighting
+ * */
+
+
+/**
+ * DEVICE_TYPE CONTROLLERS: Any testbeds related to lighting
+ * */
+
+
+/**
+ * DEVICE_TYPE DISPLAYS: Any testbeds related to lighting
+ * */
+
+/**
+ *  SHORT TERM DEVICES IN BEDROOM -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- SHORT TERM DEVICES -- 
+**/
+// #define DEVICE_TESTBED_CAMERA_SENSOR_MODULE
+
+// #define DEVICE_TESTBED_RTC_FASTBOOT
+// #define DEVICE_TESTBED_BUTTON_MULTIPRESS
+// #define DEVICE_TESTBED_FONA_800L_BASIC
+// #define DEVICE_TESTBED_RCSWITCH_NORMAL
+// #define DEVICE_testbed_rcs_ext
+// #define DEVICE_TESTBED_FASTBOOT_ESP8266
+// #define DEVICE_TESTBED_CRASHREPORT
+
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
 ****** LOCATION: Livingroom ****************************************************************************************************************************************************
@@ -328,7 +391,7 @@ new 26GHz radar sensor
   #endif 
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
     #define USE_MODULE_SENSORS_BME
-      #define ENABLE_DEVFEATURE_BME680
+      
   #endif
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
     #define USE_MODULE_SENSORS_SUN_TRACKING     
@@ -1025,7 +1088,7 @@ new 26GHz radar sensor
   // #endif 
   // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
   //   #define USE_MODULE_SENSORS_BME
-  //     #define ENABLE_DEVFEATURE_BME680
+  //     
   // #endif
   // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
   //   #define USE_MODULE_SENSORS_SUN_TRACKING     
@@ -1632,7 +1695,7 @@ new 26GHz radar sensor
   // #endif 
   // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
   //   #define USE_MODULE_SENSORS_BME
-  //     #define ENABLE_DEVFEATURE_BME680
+  //     
   // #endif
   // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
   //   #define USE_MODULE_SENSORS_SUN_TRACKING     
@@ -2712,1209 +2775,6 @@ new 26GHz radar sensor
   
 #endif
 
-
-/**
- * @brief 
- * 
- * - This will be the test device, full of as many sensors as possible, and also use 4 LEDs to emulate relay outputs
- * - This will be used as a rapid/testbed device for improving as many sensors as possible (at minimum, the "...sensor" devices)
- * 
- * Modules to be tested
- * - DS18B20
- * - DHT22
- * - BME280
- * - BH1750
- * - Status LEDs (mqtt/wifi down)
- * - Nextion = OTA updating
- * - rgbW lights = Notification lights as a mode
- * - Motion sensor = including nicely having interface showing "event" of motion
- * - ESP32 Touch inputs
- * - DAC Output - Mono Speaker Audio
- * - ADC Input (probably with LDR)
- * - Audio Input? MCP3208
- * 
- * development branch only
- * 
- * Use one pixel to show segment1 effect paired with sun elevation, where sunrise to midday, then midday to sunset is different colours
- * another pixel to show segment2 effect paired with sun azimuth, where sunrise point to sunset point is full colour wheel
- * 
- * add solar value I can poll to get time of day (day/dusk/twilight/) and direction of sun movement (rising/falling)
- * 
- * Temporary sensor tester with dual DHT
- * 
- * 
- **/
-#ifdef DEVICE_DESKSENSOR
-  #define DEVICENAME_CTR          "desksensor"
-  #define DEVICENAME_FRIENDLY_CTR "Desk Sensor"
-  #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  #define MQTT_HOST   "192.168.1.70"
-  #define MQTT_PORT     1883
-
-  /***********************************
-   * SECTION: System Debug Options
-  ************************************/    
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE 
-  // #define DISABLE_SERIAL_LOGGING
-  
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-  // #define ENABLE_DEBUG_LINE_HERE
-  // #define ENABLE_DEBUG_LINE_HERE_MILLIS
-
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
-
-  #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
-
-  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
-    #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  /***********************************
-   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
-  ************************************/  
-
-  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
-  
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
-
-  /***********************************
-   * SECTION: Storage Configs
-  ************************************/  
-  /**
-   * For debugging and short term I may want to store everything as JSON, so I can view the data?
-   * Longer term, a mixture of JSON/Binary for space.
-   * Options should just be ifdef to switch between methods. 
-  */
-  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
-
-  /***********************************
-   * SECTION: System Configs
-  ************************************/     
-
-  
-
-  
-
-  #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  #define USE_MODULE_SENSORS_SUN_TRACKING
-
-  /***********************************
-   * SECTION: Storage Configs
-  ************************************/    
-
-  // #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
-  // #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
-
-  // #define ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
-
-  // 
-
-  // #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___RELAYS
-  // #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CONTROLLERS___HVAC
-
-  // I should add new "purely for debugging" "serialise" data struct. So this will be a new way to take important data from the module data struct that will all be saved in binary, but instead 
-  // include functions that "pretty print" them for easier comparing. Will use lots of memory, so debug only.
-
-
-  /***********************************
-   * SECTION: Network Configs
-  ************************************/    
-
-  /***********************************
-   * SECTION: Sensor Configs
-  ************************************/  
-
-  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
-    #define USE_MODULE_SENSORS_INTERFACE
-      #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
-  #endif
-  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-    #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
-      #define DS18X20_MAX_SENSORS 20
-        #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
-  #endif 
-  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
-    #define USE_MODULE_SENSORS_BME
-      #define ENABLE_DEVFEATURE_BME680
-  #endif
-  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
-    #define USE_MODULE_SENSORS_SUN_TRACKING     
-  #endif
-  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
-    #define USE_MODULE_SENSORS_BH1750
-  #endif
-
-
-  #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-    #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
-    // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNFIED_SENSOR_STRING_TYPES
-    #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
-    #define USE_MODULE_SENSORS_DHT
-    #define USE_MODULE_SENSORS_BME
-      #define ENABLE_DEVFEATURE_BME680
-    #define USE_MODULE_SENSORS_BH1750
-    #define USE_MODULE_SENSORS_SWITCHES
-    #define USE_MODULE_SENSORS_BUTTONS
-    #define USE_MODULE_SENSORS_PIR
-    #define USE_MODULE_SENSORS_LDR_BASIC
-
-  #ifdef USE_MODULE_SENSORS_LDR_BASIC
-    #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
-    #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-  #endif // USE_MODULE_SENSORS_LDR_BASIC
-  
-  
-
-
-    
-  /***********************************
-   * SECTION: Display Configs
-  ************************************/  
-
-  #define USE_MODULE_DISPLAYS_INTERFACE
-  #define USE_MODULE_DISPLAYS_OLED_SH1106
-    #define SHOW_SPLASH
-  #define USE_MODULE_DISPLAYS_NEXTION
-    #ifdef USE_MODULE_DISPLAYS_NEXTION
-      #define NEXTION_DEFAULT_PAGE_NUMBER 6  
-        #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
-        // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
-        #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
-        #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
-        // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS                    
-        #define ENABLE_DEVFEATURE_NEXTION_DISPLAY        
-        #define ENABLE_DEVFEATURE_NEXTION_WEBUI
-        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER 1
-        #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-         
-        
-        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER_SERIAL1_HVAC_DESK
-          #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 115200
-          // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS
-          // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC1  "openhab_broadcast/nextion/group/hvac_home"
-          // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS_TOPIC2  "openhab_broadcast/nextion/group/hvac_desk_power"
-      
-        DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
-        R"=====(
-        {
-          "PageNames": [
-            "boot_flash",
-            "boot",
-            "message",
-            "multiline",
-            "logger",
-            "heating",
-            "hvacdesk",
-            "main"
-          ],
-          "DefaultPageName":"hvacdesk",
-          "DefaultBaud":115200,
-          "TargetBaud":115200,
-          "ObjectNameID": {
-            "hdIconHAI": 2,
-            "hdTimeHAI": 6,
-            "hdBoostHAI": 11,
-            "hdAutoHAI": 16,
-            "powHAI": 21,
-            "hdIconFLR": 3,
-            "hdTimeFLR": 7,
-            "hdBoostFLR": 12,
-            "hdAutoFLR": 17,
-            "powFLR": 22,
-            "hdIconFAN": 4,
-            "hdTimeFAN": 8,
-            "hdBoostFAN": 13,
-            "hdAutoFAN": 18,
-            "powFAN": 23,
-            "hdIconOIL": 5,
-            "hdTimeOIL": 9,
-            "hdBoostOIL": 14,
-            "hdAutoOIL": 19,
-            "powOIL": 24
-          }
-        }
-        )=====";
-
-    #endif // USE_MODULE_DISPLAYS_NEXTION
-
-  /***********************************
-   * SECTION: Driver Configs
-  ************************************/  
-        
-  //  #define USE_MODULE_DRIVERS_INTERFACE
-  //  #define USE_MODULE_DRIVERS_RELAY
-
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/  
-
-
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-
-    #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_FEBRUARY_2023
-    #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
-    
-      
-
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
-
-    
-    
-    
-
-    
-    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
-    #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-
-    
-    
-    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
-    // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT
-    #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
-
-    // 13, 18, 19, 22, 23, 25, 26, 27       USED
-    // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
-    // 21 = on PCB (4 pixels)
-    // 32 = external
-    #define USE_LIGHTING_TEMPLATE
-    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-    R"=====(
-    {
-      "BusConfig":[
-        {
-          "Pin":4,
-          "ColourOrder":"GRB",
-          "BusType":"WS2812_RGB",
-          "Start":0,
-          "Length":16
-        }
-      ],
-      "Segment0": {
-        "PixelRange": [
-          0,
-          16
-        ],
-        "ColourPalette":"Christmas RGPBO",
-        "PaletteMappingValues":[10,15,20],
-        "SegColour0": {
-          "Hue": 0,
-          "Sat":100,
-          "BrightnessRGB":5
-        },
-        "Effects": {
-          "Function":"Static",
-          "Speed":127,
-          "Intensity":255,
-          "Decimate":0,
-          "Grouping":1
-        },
-        "Transition": {
-          "TimeMs": 200,
-          "RateMs": 1000
-        },
-        "BrightnessRGB": 100,
-        "BrightnessCCT": 100
-      },
-      "BrightnessRGB": 5,
-      "BrightnessCCT": 100
-    }
-    )=====";
-
-
-  /***********************************
-   * SECTION: Energy Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Controller Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: GPIO Template
-  ************************************/  
-
-  // #define USE_MODULE_TEMPLATE
-  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  // "{"
-  //   "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-  //   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-  //   "\"" D_GPIOC "\":{"
-  //     #ifdef USE_MODULE_DRIVERS_RELAY
-  //     "\"13\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-  //     "\"27\":\"" D_GPIO_FUNCTION_REL2_INV_CTR    "\","
-  //     "\"26\":\"" D_GPIO_FUNCTION_REL3_INV_CTR      "\","
-  //     "\"14\":\"" D_GPIO_FUNCTION_REL4_INV_CTR      "\"," //pins need sety on L
-  //     #endif
-  //     "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-  //     "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-  //     #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
-  //     "\"33\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
-  //     #endif    
-  //     #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219)
-  //     "\"23\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-  //     "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
-  //     #endif
-  //     #ifdef USE_MODULE_DISPLAYS_NEXTION
-  //     "\"18\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-  //     "\"19\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
-  //     #endif
-  //     "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
-  //     // 32 - LED Strip External
-  //     // 21 - LED Strip Onboard
-  //     // 25?
-  //     // 
-  //   "},"
-  //   "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-  //   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  // "}";
-  
-  #define ENABLE_DEBUG_POINT_MODULE_TEMPLATE_BOOT_SPLASH
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIOC "\":{"   
-      /**
-       * @brief Right side
-       **/
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023   
-      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      "\"22\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
-      #endif // USE_MODULE_SENSORS__DS18X20_ESP32_2023
-      // GPIO1 - TX0 - Debug Serial TX
-      // GPIO3 - RX0 - Debug Serial RX
-      #ifdef USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
-      "\"21\":\"" D_GPIO_FUNCTION_LDR_BASIC_DIGITAL1_CTR "\","
-      #endif
-      #ifdef USE_MODULE_SENSORS_DHT
-      "\"19\":\"" D_GPIO_FUNCTION_DHT22_1_CTR "\","
-      "\"18\":\"" D_GPIO_FUNCTION_DHT22_2_CTR "\","      
-      #endif
-      #ifdef USE_MODULE_SENSORS_PIR
-      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
-      #endif
-      #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
-      #endif
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      #endif 
-      #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      #endif
-      #ifdef USE_MODULE_DRIVERS_IR_RECEIVER
-      "\"15\":\"" D_GPIO_FUNCTION_IR_RECV_CTR "\","
-      #endif
-      // #if defined(USE_MODULE_DRIVERS_RELAY)// && !defined(USE_MODULE_DISPLAYS_NEXTION_V2) // Only debug pins
-      // "\"2\":\""  GPIO_NAME_ZONE0_UPSTAIRS_RELAY    "\"," //pin2 - blue led
-      // "\"15\":\"" GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  "\","
-      // #endif
-      // GPIO0 - ADC2 CH1
-      /**
-       * @brief Left side
-       **/
-      // EN
-      // 36 - INPUT ONLY - VP
-      // 39 - INPUT ONLY - VN
-      #ifdef USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-      "\"34\":\"" D_GPIO_FUNCTION_LDR_BASIC_ANALOG1_CTR "\"," // adc1_6 // INPUT ONLY
-      #endif
-      // 35 - INPUT ONLY - adc1_7
-      // 32 - Touch9 (Debug Header 1)
-      // 33 - Touch8 (Debug Header 2)
-      // 25 - DAC1 = LM386 Amplifier Module (Debug Header 3)
-      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      #endif
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","      
-      // 14 (Debug Header 4)
-      // 12 (Debug Header 5)
-      // 13 (Debug Header 6)
-      // Can I introduce a way that a comma at the end, does not make a broken json?
-      "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
-    "},"
-    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-
-
-  /**
-   * @brief Drivers and Sensors for HVAC zones
-   **/
-  #define D_DEVICE_HEATER_0_NAME "Dryer"
-  #define D_DEVICE_HEATER_1_NAME "FloorMat"
-  #define D_DEVICE_HEATER_2_NAME "FanHeater"
-  #define D_DEVICE_HEATER_3_NAME "OilRadiator"
-
-  #define D_DEVICE_SENSOR_DHT_0_NAME "Downstairs_DHT"
-
-// {"NumDevices":4,"DeviceNameIndex":[-1,-1,-1,-1],"AddressList":[[40,140,131,47,0,0,0,230],[40,18,77,49,0,0,0,233],[40,233,112,49,0,0,0,11],[40,165,161,47,0,0,0,189]]}
-
-  /** 
-   * MainBoard
-   * */
-  #define D_DEVICE_SENSOR_DB18S20_01_NAME        "MainBoard-1"
-  #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS     "[40,165,161,47,0,0,0,189]"
-
-  #define D_DEVICE_SENSOR_DB18S20_02_NAME        "MainBoard-2"
-  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS     "[40,233,112,49,0,0,0,11]"
-
-  #define D_DEVICE_SENSOR_DB18S20_03_NAME        "MainBoard-3"
-  #define D_DEVICE_SENSOR_DB18S20_03_ADDRESS     "[40,140,131,47,0,0,0,230]"
-
-  #define D_DEVICE_SENSOR_DB18S20_04_NAME        "MainBoard-4"
-  #define D_DEVICE_SENSOR_DB18S20_04_ADDRESS     "[40,18,77,49,0,0,0,233]" //233 4
-
-  #define D_DEVICE_SENSOR_BME_280_NAME "BME280"
-  #define D_DEVICE_SENSOR_BME_680_NAME "BME680"
-
-  #define D_DEVICE_SENSOR_BH1750_NAME "Ambient"
-
-  #define D_DEVICE_SENSOR_CURRENT "LEDStrip"
-
-  
-  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "1"
-  #define D_DEVICE_SENSOR_PZEM004T_1_ADDRESS "2"
-  #define D_DEVICE_SENSOR_PZEM004T_2_ADDRESS "3"
-  #define D_DEVICE_SENSOR_PZEM004T_3_ADDRESS "4"
-  
-  #define D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR D_DEVICE_HEATER_0_NAME
-  #define D_SENSOR_PZEM004T_1_FRIENDLY_NAME_CTR D_DEVICE_HEATER_1_NAME
-  #define D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR D_DEVICE_HEATER_2_NAME
-  #define D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR D_DEVICE_HEATER_3_NAME 
-  
-  #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_0_NAME
-  #define D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_1_NAME
-  #define D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_2_NAME
-  #define D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR   D_DEVICE_HEATER_3_NAME
-
-  #define USE_FUNCTION_TEMPLATE
-  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"" D_ENERGY "\":{"
-        "\"DeviceCount\":4"    
-    "},"
-    "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":{"
-        "\"DeviceCount\":4"    
-    "},"
-    "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
-        "\"" D_DEVICE_HEATER_0_NAME "\","
-        "\"" D_DEVICE_HEATER_1_NAME "\","
-        "\"" D_DEVICE_HEATER_2_NAME "\","
-        "\"" D_DEVICE_HEATER_3_NAME "\""
-      "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
-        "\"" D_DEVICE_HEATER_0_NAME "\","
-        "\"" D_DEVICE_HEATER_1_NAME "\","
-        "\"" D_DEVICE_HEATER_2_NAME "\","
-        "\"" D_DEVICE_HEATER_3_NAME "\""
-      "],"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
-        // Downstairs
-        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\""
-      "],"
-      "\"" D_MODULE_SENSORS_DHT_CTR "\":["
-        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
-      "],"
-      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
-        "\"" "Desk" "\""
-      "],"  
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
-        "\"" D_DEVICE_SENSOR_BME_280_NAME "\","
-        "\"" D_DEVICE_SENSOR_BME_680_NAME "\""
-      "],"
-      "\"" D_MODULE_SENSORS_INA219_CTR "\":["
-        "\"" D_DEVICE_SENSOR_CURRENT "\""
-      "],"
-      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
-        "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
-      "],"
-      "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":["
-        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "\","
-        "\"" D_DRIVER_ENERGY_3_FRIENDLY_NAME_CTR "\""
-      "],"
-      "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":["
-        "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\","
-        "\"" D_SENSOR_PZEM004T_1_FRIENDLY_NAME_CTR "\","
-        "\"" D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR "\","
-        "\"" D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR "\""
-      "],"
-      "\"" D_MODULE_CONTROLLER_HVAC_CTR "\":["
-        "\"" D_DEVICE_HEATER_0_NAME "\","
-        "\"" D_DEVICE_HEATER_1_NAME "\","
-        "\"" D_DEVICE_HEATER_2_NAME "\","
-        "\"" D_DEVICE_HEATER_3_NAME "\""
-      "]"
-    "},"
-    "\"" D_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
-        // Downstairs
-        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\":" D_DEVICE_SENSOR_DB18S20_04_ADDRESS ""
-      "}"  
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
-    "\"MQTTSubscribe\":["
-      "\"openhab_broadcast/nextion/group/hvac_home\","
-      "\"openhab_broadcast/nextion/group/hvac_desk_power\""
-    "],"
-  "}";
-
-
-
-
-  
-  // /***********************************
-  //  * SECTION: Lighting Configs
-  // ************************************/    
-
-  // #define ANIMATION_UPDATOR_TIME_MINIMUM 20
-  // #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
-  // #define ENABLE_DEBUG_MANUAL_DELAYS
-
-  // #define ENABLE_DEVFEATURE_PALETTE__CHANGE_MY_PALETTE_INDEXING_TO_255_RANGE
-
-  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_SEPTEMBER_2023
-
-  // #define USE_LIGHTING_TEMPLATE
-  // // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
-
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":4,
-  //       "ColourOrder":"GRBW",
-  //       "BusType":"SK6812_RGBW",
-  //       "Start":0,
-  //       "Length":14
-  //     }
-  //   ],
-  //   "Segment0": {
-  //     "PixelRange": [
-  //       0,
-  //       14
-  //     ],
-  //     "ColourPalette":96,
-  //     "SegColour0": {
-  //       "Hue": 0,
-  //       "Sat":100,
-  //       "BrightnessRGB":5
-  //     },
-  //     "Effects": {
-  //       "Function": 1,
-  //       "Speed":1,
-  //       "Intensity":255
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 0,
-  //       "RateMs": 2000
-  //     },
-  //     "BrightnessRGB": 100,
-  //     "BrightnessCCT": 0
-  //   },
-  //   "BrightnessRGB": 5,
-  //   "BrightnessCCT": 0
-  // }
-  // )=====";
-  
-
-  // // /***********************************
-  // //  * SECTION: Template Configs
-  // // ************************************/    
-  // // // I need to add a mqtt send limit to telemetry to prevent race conditions in OH. Add as option in configm with 0 meaning none and then MS values going up
-  // // // mqtt.h will need to check if original is from telemetry type, then only permit sending when last was greater than config amount. 
-  // // // The effect should be hourly update are stagarded by few seconds
-
-  // // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  // // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  // // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  // // // #define ENABLE_ADVANCED_DEBUGGING
-  // // // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // // // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  // // #define   ENABLE_DEBUG_LINE_HERE
-
-
-  // // #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-  // // //  
-
-
-  // // // #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-  // // //   
-  // // //   
-  // // // #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-  // // // // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // // // #define USE_MODULE_SENSORS_INTERFACE
-  // // // #define USE_MODULE_SENSORS_BME
-  // // // #define USE_MODULE_SENSORS_PIR
-
-  // // // #define USE_MODULE_DISPLAYS_INTERFACE
-  // // #define USE_MODULE_DISPLAYS_NEXTION
-
-  
-  // // #define USE_MODULE_DISPLAYS_NEXTION
-  // //   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  // // #define NEXTION_DEFAULT_PAGE_NUMBER 2  
-  // //   #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
-  // //   // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
-  // //   #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
-  // //   #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
-
-  // // #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  
-  // // #define ENABLE_DEVFEATURE_NEXTION_WEBUI
-
-  // // // 
-
-
-
-
-
-
-  // #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-  //  
-
-
-  // #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-  //   
-  //   
-  // #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-  // // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-
-  // // #define USE_MODULE_DISPLAYS_INTERFACE
-  // #define USE_MODULE_DISPLAYS_NEXTION
-
-  
-  // #define USE_MODULE_DISPLAYS_NEXTION
-  //   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  // #define NEXTION_DEFAULT_PAGE_NUMBER 2  
-  //   #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
-  //   // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
-  //   #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
-  //   #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
-
-  // #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  
-  // #define ENABLE_DEVFEATURE_NEXTION_WEBUI
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  // // #define ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
-
-  // // 
-
-  // // #define ENABLE_LOG_LEVEL__DEBUG_TRACE
-  // // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
-  // // #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-  
-  // #define ENABLE_DEVFEATURE_DEVICELIST_DEBUG_WITH_COMMANDS
-
-  // #define DISABLE_SLEEP
-
-  // #define USE_MODULE_CORE_RULES
-  //   #define D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND 5
-  //   #define ENABLE_DEVFEATURE_RULES_COMMAND_CAN_USE_TRIGGER_VALUE
-
-  // // #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-
-  // #define USE_MODULE_SENSORS_SUN_TRACKING
-
-  // // #define USE_MODULE_DRIVERS_LEDS
-
-  // // #define USE_MODULE_DRIVERS_IRREMOTE
-  // // #define USE_IR_RECEIVE
-
-  // #define USE_MODULE_SENSORS_INTERFACE
-  //   #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-  //   #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
-  //   // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNFIED_SENSOR_STRING_TYPES
-  //   #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
-  //   #define USE_MODULE_SENSORS_DHT
-  //   #define USE_MODULE_SENSORS_BME
-  //     #define ENABLE_DEVFEATURE_BME680
-  //   #define USE_MODULE_SENSORS_BH1750
-  //   #define USE_MODULE_SENSORS_SWITCHES
-  //   #define USE_MODULE_SENSORS_BUTTONS
-  //   #define USE_MODULE_SENSORS_PIR
-  //   #define USE_MODULE_SENSORS_LDR_BASIC
-
-  // #ifdef USE_MODULE_SENSORS_LDR_BASIC
-  //   #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
-  //   #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-  // #endif // USE_MODULE_SENSORS_LDR_BASIC
-  
-  
-
-
-
-
-
-
-
-
-
-  // #define USE_MODULE_DISPLAYS_INTERFACE
-  // #define USE_MODULE_DISPLAYS_OLED_SH1106
-  //   #define SHOW_SPLASH
-  // // #define USE_MODULE_DISPLAYS_NEXTION
-  // //   // Note from now on, the top few pages will also follow the exaxt same so logging/error pages will always be the same!! 
-  // //   // Any special pages will follow
-  // //   #define NEXTION_DEFAULT_PAGE_NUMBER 2   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
-  // //   #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
-  // //   #define ENABLE_DEVFEATURE_NEXTION_INCREASE_BAUDRATE
-
-  // // //  Work on ability to increase nextion baud if possible via code
-
-  // // //   #define ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
-  // // //   #define ENABLE_DEVFEATURE_CAUTION__BLOCK_ANIMATION_LOOP_FOR_DIRECT_TESTING
-
-
-  // // /**
-  // //  * @brief USe Logic analyser to find out where the delays in lighting code are
-  // //  * - around drawing new palette
-  // //  * - time to update each blend function
-  // //  * - time to output "Show"
-  // //  * Add header that breaks out multiple pins into a nice female header for easy logic analyzer connection
-  // //  * 
-  // //  */
-
-  // // #define USE_MODULE_CONTROLLER_HVAC
-  // //   #define HEATING_DEVICE_MAX 2
-  // //   
-  // //   // #define ENABLE_DEVFEATURE_CONTROLLER_HVAC_PROGRAM_TEMPERATURES
-  // // // #define USE_MODULE_CONTROLLER_HEATING_STRIP_COLOUR_UNDERSTAIRS
-  // // #define USE_MODULE_DRIVERS_INTERFACE
-  // // #define USE_MODULE_DRIVERS_RELAY
-
-  
-
-  // // // Actual
-  // // #define GPIO_NAME_ZONE0_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL1_CTR
-  // // #define GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL2_CTR
-  // // // #define GPIO_NAME_ZONE3_IMMERISON_RELAY   D_GPIO_FUNCTION_REL3_CTR
-  // // // #define GPIO_NAME_ZONE4_BOILER_RELAY      D_GPIO_FUNCTION_REL4_INV_CTR
-
-
-
-
-
-
-
-
-
-
-
-
-  // // //here
-  // // /**
-  // //  * Debug pins
-  // //  * */
-  // // // #define ENABLE_FEATURE_DEBUG_PINS
-
-  // // // #define DEBUG_PIN1_GPIO     32
-  // // // #define DEBUG_PIN1_INIT()   pinMode(DEBUG_PIN1_GPIO, OUTPUT); digitalWrite(DEBUG_PIN1_GPIO, HIGH);
-  // // // #define DEBUG_PIN1_SET(X)   digitalWrite(DEBUG_PIN1_GPIO, X);
-  // // // #define DEBUG_PIN1_TOGGLE()   digitalWrite(DEBUG_PIN1_GPIO, !digitalRead(DEBUG_PIN1_GPIO));
-
-  // // // #define DEBUG_PIN2_GPIO     33
-  // // // #define DEBUG_PIN2_INIT()   pinMode(DEBUG_PIN2_GPIO, OUTPUT); digitalWrite(DEBUG_PIN2_GPIO, HIGH);
-  // // // #define DEBUG_PIN2_SET(X)   digitalWrite(DEBUG_PIN2_GPIO, X);
-  // // // #define DEBUG_PIN2_TOGGLE()   digitalWrite(DEBUG_PIN2_GPIO, !digitalRead(DEBUG_PIN2_GPIO));
-
-  // // // #define DEBUG_PIN3_GPIO     25
-  // // // #define DEBUG_PIN3_INIT()   pinMode(DEBUG_PIN3_GPIO, OUTPUT); digitalWrite(DEBUG_PIN3_GPIO, HIGH);
-  // // // #define DEBUG_PIN3_SET(X)   digitalWrite(DEBUG_PIN3_GPIO, X);
-  // // // #define DEBUG_PIN3_TOGGLE()   digitalWrite(DEBUG_PIN3_GPIO, !digitalRead(DEBUG_PIN3_GPIO));
-
-  // // // #define DEBUG_PIN4_GPIO     14
-  // // // #define DEBUG_PIN4_INIT()   pinMode(DEBUG_PIN4_GPIO, OUTPUT); digitalWrite(DEBUG_PIN4_GPIO, HIGH);
-  // // // #define DEBUG_PIN4_SET(X)   digitalWrite(DEBUG_PIN4_GPIO, X);
-  // // // #define DEBUG_PIN4_TOGGLE()   digitalWrite(DEBUG_PIN4_GPIO, !digitalRead(DEBUG_PIN4_GPIO));
-
-  // // // #define DEBUG_PIN5_GPIO     12
-  // // // #define DEBUG_PIN5_INIT()   pinMode(DEBUG_PIN5_GPIO, OUTPUT); digitalWrite(DEBUG_PIN5_GPIO, HIGH);
-  // // // #define DEBUG_PIN5_SET(X)   digitalWrite(DEBUG_PIN5_GPIO, X);
-  // // // #define DEBUG_PIN5_TOGGLE()   digitalWrite(DEBUG_PIN5_GPIO, !digitalRead(DEBUG_PIN5_GPIO));
-
-  // // // #define DEBUG_PIN6_GPIO     13
-  // // // #define DEBUG_PIN6_INIT()   pinMode(DEBUG_PIN6_GPIO, OUTPUT); digitalWrite(DEBUG_PIN6_GPIO, HIGH);
-  // // // #define DEBUG_PIN6_SET(X)   digitalWrite(DEBUG_PIN6_GPIO, X);
-  // // // #define DEBUG_PIN6_TOGGLE()   digitalWrite(DEBUG_PIN6_GPIO, !digitalRead(DEBUG_PIN6_GPIO));
-
-  // #define ENABLE_DEBUG_POINT_MODULE_TEMPLATE_BOOT_SPLASH
-  // #define USE_MODULE_TEMPLATE
-  // DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  // "{"
-  //   "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-  //   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-  //   "\"" D_GPIOC "\":{"   
-  //     /**
-  //      * @brief Right side
-  //      **/
-  //     #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023   
-  //     "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-  //     "\"22\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
-  //     #endif // USE_MODULE_SENSORS__DS18X20_ESP32_2023
-  //     // GPIO1 - TX0 - Debug Serial TX
-  //     // GPIO3 - RX0 - Debug Serial RX
-  //     #ifdef USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
-  //     "\"21\":\"" D_GPIO_FUNCTION_LDR_BASIC_DIGITAL1_CTR "\","
-  //     #endif
-  //     #ifdef USE_MODULE_SENSORS_DHT
-  //     "\"19\":\"" D_GPIO_FUNCTION_DHT22_1_CTR "\","
-  //     "\"18\":\"" D_GPIO_FUNCTION_DHT22_2_CTR "\","      
-  //     #endif
-  //     #ifdef USE_MODULE_SENSORS_PIR
-  //     "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
-  //     #endif
-  //     #ifdef USE_MODULE_DISPLAYS_NEXTION
-  //     "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-  //     "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
-  //     #endif
-  //     #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-  //     "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-  //     #endif 
-  //     #ifdef USE_MODULE_DRIVERS_LEDS
-  //     "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-  //     #endif
-  //     #ifdef USE_MODULE_DRIVERS_IR_RECEIVER
-  //     "\"15\":\"" D_GPIO_FUNCTION_IR_RECV_CTR "\","
-  //     #endif
-  //     #if defined(USE_MODULE_DRIVERS_RELAY)// && !defined(USE_MODULE_DISPLAYS_NEXTION_V2) // Only debug pins
-  //     "\"2\":\""  GPIO_NAME_ZONE0_UPSTAIRS_RELAY    "\"," //pin2 - blue led
-  //     "\"15\":\"" GPIO_NAME_ZONE1_DOWNSTAIRS_RELAY  "\","
-  //     #endif
-  //     // GPIO0 - ADC2 CH1
-  //     /**
-  //      * @brief Left side
-  //      **/
-  //     // EN
-  //     // 36 - INPUT ONLY - VP
-  //     // 39 - INPUT ONLY - VN
-  //     #ifdef USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-  //     "\"34\":\"" D_GPIO_FUNCTION_LDR_BASIC_ANALOG1_CTR "\"," // adc1_6 // INPUT ONLY
-  //     #endif
-  //     // 35 - INPUT ONLY - adc1_7
-  //     // 32 - Touch9 (Debug Header 1)
-  //     // 33 - Touch8 (Debug Header 2)
-  //     // 25 - DAC1 = LM386 Amplifier Module (Debug Header 3)
-  //     #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-  //     "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-  //     #endif
-  //     "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","      
-  //     // 14 (Debug Header 4)
-  //     // 12 (Debug Header 5)
-  //     // 13 (Debug Header 6)
-  //     // Can I introduce a way that a comma at the end, does not make a broken json?
-  //     "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
-  //   "},"
-  //   "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-  //   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  // "}";
-
-  // /***********************************
-  //  * SECTION: Device Configs
-  // ************************************/    
-
-  // /**
-  //  * @brief HVAC zones
-  //  **/
-  // #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Upstairs"
-  // #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Downstairs"
-  // #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Immersion"
-  // #define D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "Boiler"
-
-
-  // #define D_DEVICE_DRIVER_RELAY_0_NAME "Upstairs"
-  // #define D_DEVICE_DRIVER_RELAY_1_NAME "Downstairs"
-  // #define D_DEVICE_DRIVER_RELAY_2_NAME "Immersion"
-  // #define D_DEVICE_DRIVER_RELAY_3_NAME "Boiler"
-
-  // #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "BedroomDesk"
-  // #define D_DEVICE_SENSOR_CLIMATE_BME1 "BedroomDesk-BME1"
-  // #define D_DEVICE_SENSOR_CLIMATE_BME2 "BedroomDesk-BME2"
-  // #define D_DEVICE_SENSOR_CLIMATE_DHT1 "BedroomDesk-DHT1"
-  // #define D_DEVICE_SENSOR_CLIMATE_DHT2 "BedroomDesk-DHT2" 
-  
-
-  // #define D_DEVICE_SENSOR_DB18S20_0_NAME        "DB_01"
-  // #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,255,100,29,194,124,254,111]"
-  // #define D_DEVICE_SENSOR_DB18S20_1_NAME        "DB_02"
-  // #define D_DEVICE_SENSOR_DB18S20_1_ADDRESS     "[40,255,100,29,205,206,170,25]"
-  // #define D_DEVICE_SENSOR_DB18S20_2_NAME        "DB_03"
-  // #define D_DEVICE_SENSOR_DB18S20_2_ADDRESS     "[40,255,100,29,195,134,175,63]"
-  // #define D_DEVICE_SENSOR_DB18S20_3_NAME        "DB_04"
-  // #define D_DEVICE_SENSOR_DB18S20_3_ADDRESS     "[40,255,100,29,205,202,237,231]"
-  // #define D_DEVICE_SENSOR_DB18S20_4_NAME        "DB_05"
-  // #define D_DEVICE_SENSOR_DB18S20_4_ADDRESS     "[40,237,161,47,0,0,0,105]"
-  // #define D_DEVICE_SENSOR_DB18S20_5_NAME        "DB_06"
-  // #define D_DEVICE_SENSOR_DB18S20_5_ADDRESS     "[40,255,135,47,0,0,0,56]"
-
-
-  // #define USE_FUNCTION_TEMPLATE
-  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  // "{"
-  //   "\"" D_DEVICENAME "\":{"
-  //     "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
-  //       "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
-  //       "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\","
-  //       "\"" D_DEVICE_SENSOR_DB18S20_2_NAME "\","
-  //       "\"" D_DEVICE_SENSOR_DB18S20_3_NAME "\","
-  //       "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\","
-  //       "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\""
-  //     "],"
-  //     "\"" D_MODULE_SENSORS_BME_CTR "\":["
-  //       "\"" D_DEVICE_SENSOR_CLIMATE_BME1 "\","
-  //       "\"" D_DEVICE_SENSOR_CLIMATE_BME2 "\""
-  //     "],"  
-  //     "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
-  //       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
-  //     "],"  
-  //     "\"" D_MODULE_SENSORS_DHT_CTR "\":["
-  //       "\"" D_DEVICE_SENSOR_CLIMATE_DHT1 "\","
-  //       "\"" D_DEVICE_SENSOR_CLIMATE_DHT2 "\""
-  //     "]," 
-  //     "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
-  //       "\"" "Bedroom" "\""
-  //     "],"  
-  //     "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
-  //       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
-  //     "],"  
-  //     "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
-  //       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
-  //     "],"
-  //     "\"" D_MODULE_CONTROLLER_HVAC_CTR "\":["
-  //       "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
-  //       "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
-  //       "\"" D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "\","
-  //       "\"" D_DEVICE_CONTROLLER_HVAC_ZONE3_NAME "\""
-  //     "]," 
-  //     "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
-  //       "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
-  //       "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
-  //       "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
-  //       "\"" D_DEVICE_DRIVER_RELAY_3_NAME "\""
-  //     "]"
-  //   "},"
-  //   "\"" D_SENSORADDRESS "\":{"
-  //     "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
-  //       "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\":" D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
-  //       "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\":" D_DEVICE_SENSOR_DB18S20_1_ADDRESS ","
-  //       "\"" D_DEVICE_SENSOR_DB18S20_2_NAME "\":" D_DEVICE_SENSOR_DB18S20_2_ADDRESS ","
-  //       "\"" D_DEVICE_SENSOR_DB18S20_3_NAME "\":" D_DEVICE_SENSOR_DB18S20_3_ADDRESS ","
-  //       "\"" D_DEVICE_SENSOR_DB18S20_4_NAME "\":" D_DEVICE_SENSOR_DB18S20_4_ADDRESS ","
-  //       "\"" D_DEVICE_SENSOR_DB18S20_5_NAME "\":" D_DEVICE_SENSOR_DB18S20_5_ADDRESS ""
-  //     "}"  
-  //   "}," 
-  //   "\"" "HVACZone" "\":{"
-  //     "\"" "SetSensor" "\":["
-  //       "\"" D_DEVICE_SENSOR_CLIMATE_BME1 "\","
-  //       "\"" D_DEVICE_SENSOR_CLIMATE_BME2 "\"," 
-  //       "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\","
-  //       "\"" D_DEVICE_SENSOR_DB18S20_1_NAME "\""
-  //     "],"
-  //     "\"" "SetOutput" "\":["
-  //       "{"
-  //         "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-  //         "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
-  //         "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
-  //       "},"
-  //       "{"
-  //         "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-  //         "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
-  //         "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
-  //       "},"
-  //       "{"
-  //         "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-  //         "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
-  //         "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
-  //       "},"
-  //       "{"
-  //         "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
-  //         "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_3_NAME "\","
-  //         "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
-  //       "}"
-  //     "]"
-  //   "}," 
-  //   "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
-  //   "\"MQTTSubscribe\":["
-  //       "\"desksensor_slave/status/drivers_interface/+/drivers/unified\""
-  //   "]"
-  // "}";
-
-  
-  // // #define USE_RULES_TEMPLATE
-  // // DEFINE_PGM_CTR(RULES_TEMPLATE)
-  // // R"=====(
-  // // {
-  // //   "AddRule": {
-  // //     "Default":["Switch1Change->Relay1Follow"]
-  // //   }
-  // // }
-  // // )=====";
-
-  #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)  // needs appending method 
-  "{"
-    "\"Rule0\":{"
-      "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
-        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
-        "\"DeviceName\":0,"
-        "\"State\":\"On\""
-      "},"
-      "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
-        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
-        "\"DeviceName\":0," 
-        "\"State\":\"Follow\""
-      "}"
-    "}"
-  "}";
-
-  // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
-  // // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
-
-  // // #ifdef USE_MODULE_LIGHTS_INTERFACE
-  // // #define USE_LIGHTING_TEMPLATE
-  // // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // // R"=====(
-  // // {
-  // //   "HardwareType":"SK6812",
-  // //   "ColourOrder":"grbw",
-  // //   "AnimationMode":"Effects",
-  // //   "ColourPalette":"Christmas 01",
-  // //   "Effects": {
-  // //     "Function":1,
-  // //     "Intensity":50,
-  // //     "Grouping":2
-  // //   },
-  // //   "Transition": {
-  // //     "TimeMs": 0,
-  // //     "RateMs": 1000
-  // //   },
-  // //   "BrightnessRGB": 1
-  // // }
-  // // )=====";
-  // // #endif // USE_MODULE_LIGHTS_INTERFACE
-
-
-
-  // /**
-  //  * @brief New group of commands that will run after 1 minute, ideal for testing code 
-  //  * 
-  //  */
-  // #define USE_DELAYED_COMMANDS_TEMPLATE
-  // DEFINE_PGM_CTR(FIRMWARE_CUSTOM_DELAYED_START_TEMPLATE)
-  // "{"
-  //   "\"MQTTUpdateSeconds\":{\"IfChanged\":1},"
-  //   "\"MQTTSubscribe\":["
-  //       "\"desksensor_slave/status/drivers_interface/+/drivers/unified\""
-  //   "]"
-  // "}";
-
-
-  // DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
-  // R"=====(
-  // {
-  //   "ObjectNameID": {
-  //     "hIconUS": 2,
-  //     "hTimeUS": 6,
-  //     "hBoostUS": 11,
-  //     "hAutoUS": 16,
-  //     "hIconDS": 3,
-  //     "hTimeDS": 7,
-  //     "hBoostDS": 12,
-  //     "hAutoDS": 17,
-  //     "hIconIH": 4,
-  //     "hTimeIH": 8,
-  //     "hBoostIH": 13,
-  //     "hAutoIH": 18,
-  //     "hIconWB": 5,
-  //     "hTimeWB": 9,
-  //     "hBoostWB": 14,
-  //     "hAutoWB": 19,
-  //     "hIconDryer": 124,
-  //     "hTimeDryer": 125,
-  //     "hBoostDryer": 126,
-  //     "hAutoDryer": 127
-  //   }
-  // }
-  // )=====";
-
-#endif
 
 
 
@@ -6258,7 +5118,7 @@ new 26GHz radar sensor
 #endif
 #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
   #define USE_MODULE_SENSORS_BME
-    #define ENABLE_DEVFEATURE_BME680
+    
 #endif
 #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
   #define USE_MODULE_SENSORS__RADAR_HLK_LD2410
@@ -7409,5 +6269,1412 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 
 
 #endif
+
+
+
+/* ** 
+
+3D printed base, to hold an esp32 that replicates the whole hvac heating for the house from a hardware perspective.
+
+Four single socket outputs, with pzem 100A CT monitoring them.
+
+Hardware to implement:
+- 4 PZEM 400A
+- 4 16A relays (remove V2 relays, and make sure its just one going forward)
+- 2 BME680
+- 8 DB18S20 across 2 pins for pin developing
+- 1 DHT22
+- 4 sk6812 strip to show relays active
+- another strip (and pin) with maybe 10 144/m pixels that should show the 8 DB18S20 sensors in a colour gradient
+- maybe peizo buzzer for alarm
+- Add OLED for debug
+- Nextion 2.5inch could be used for manual control and feedback
+- Add BH1750 for light level (since i2c is already in use)
+
+Software to implement:
+- Filesystem
+  -- Heating schedules should be done, so the electric floor mat automatically turns on, this needs to include power cycle tool to stop the timeout
+- Should enable integration with remote sensor to use the rooms temperature as the target temperature for oil heater
+
+
+
+
+Blue (Upstairs Link) **************************************************************************
+ * w/o           GND            GND           
+ * o/w           5V             5V            
+ * w/g           R_IH           21*           Immersion relay (5v IO)
+ * bl/w          I2D            12*           DHT22?     
+ * w/bl          I2C            13*           UNUSED   
+ * g/w           3V3            3V3           
+ * w/br                      
+ * br/w          DSX            14*           ds18b20 water, 4k7 pulled high        (comes from blue by connector)   NOT WORKING, wiring too long, Needs rerouted
+ * ** Green (Downstairs Sensors) **************************************************************************
+ * w/o           GND            GND           Black
+ * o/w           5V             5V            Red
+ * w/g           1Wire          4*            DS18B20 water pipe sensors
+ * bl/w          I2D            22*           BME in Dinning Room (Alternatively, DHT22 data pin)
+ * w/bl          I2C            23*           BME in Dinning Room
+ * g/w           3V3            3V3           White
+ * w/br                                       NC
+ * br/w          DHT22          25*           DHT22 (until BME is working)            
+ * ** Orange (Nextion Display) **************************************************************************
+ * w/o           GND            GND           
+ * o/w           5V             5V            
+ * w/g           NEO            27*             SK6812 4 pixels of rgbW
+ * bl/w                                      
+ * w/bl                                      
+ * g/w           3V3            3V3           
+ * w/br          RX2            17*              Nextion TX
+ * br/w          TX2            16*              Nextion RX   -- "SERIAL TX" of Serial will always be dominant colour (brown) as its important to know the output pin
+ * Twin          Switch
+ * Twin          Switch
+ * ** Power Screw Jacks **************************************************************************
+ * 4 (Top)       12V
+ * 3             5V
+ * 2
+ * 1 (Bottom)    GND
+ * ** ADC Input **************************************************************************
+ * 4 (Top)       LDR_US         33
+ *               LDR_DS         32 
+ *               LDR_WB         35
+ * Extra Ethernet for LDRs hot glued onto the red led of the servos?
+ * 
+ * Upstairs Connectors
+ * 3pin (DHT22)    - gnd,5v,dht_data 
+ * 3pin (relay US) - gnd,5v,relay_ih
+ * 3pin (water sensors) - gnd,3v3,ds18b20
+ * 
+ * Create seond device dad can swap in, only have basic relay control, no sensors, so it should be the most stable.
+ * 
+ **/
+#ifdef DEVICE_TESTBED__HEATING_ENERGY_SYSTEM
+  #define DEVICENAME_CTR          "heating"
+  #define DEVICENAME_FRIENDLY_CTR "HVAC House Heating 2023#2"
+  #define DEVICENAME_ROOMHINT_CTR "Hallway"
+  #define MQTT_HOST   "192.168.1.70"
+  
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define DISABLE_SLEEP // loops per second less than 1hz // I need to make an "mqtt/alert" channel that lets me know this
+  
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES_SK6812_FOR_ROOM_SENSORS
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_TEMPLATE_SK6812_FOR_ROOM_SENSORS__BOOT_STATE_OFF
+  //   #define STRIP_SIZE_MAX 10
+
+  //   #define USE_RGB_OUT_BASIC_SHOW_PALETTE
+
+
+  #define USE_MODULE_CONTROLLER_HVAC
+    #define HEATING_DEVICE_MAX 3
+    
+
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #define DS18X20_MAX_SENSORS 20
+      #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20      
+  #define USE_MODULE_SENSORS_DHT
+              
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+
+  #define USE_MODULE_SENSORS_SWITCHES
+  
+    // #define SHOW_SPLASH
+    // #define USE_MODULE_DISPLAYS_NEXTION
+    // #define NEXTION_DEFAULT_PAGE_NUMBER 3   // I should add "p[c]" where c means current page, so I need to search and replace "p[c]" as "p[0]"
+
+
+  // Actual
+  #define GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL1_INV_CTR
+  #define GPIO_NAME_ZONE1_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL2_INV_CTR
+  #define GPIO_NAME_ZONE2_BOILER_RELAY      D_GPIO_FUNCTION_REL3_INV_CTR
+/**
+ * 
+ * 
+ * Ethernet R
+ * 
+ * w/o  gnd
+ * o/w     5v
+ * w/g    left LED (upstairs)              D27
+ * bl/w   centre Relay (downstairs)        D5
+ * w/bl   centre LED (downstairs)          D33
+ * g/w    left Relay (upstairs)            D18
+ * w/br   right LED (boiler)               D26
+ * br/w   right Relay (boiler)             D19
+ * 
+ * Ethernet N
+ * 
+ * w/o  gnd
+ * o/w     5v
+ * w/g    SK6812 D4
+ * bl/w   NC
+ * w/bl   NC
+ * g/w    NC
+ * w/br   RX2 of esp32 from nextion
+ * br/w   TX2 of esp32 from nextion    
+ * 
+
+*/
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"5\":\""  GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  "\","
+      "\"18\":\"" GPIO_NAME_ZONE1_UPSTAIRS_RELAY    "\","
+      "\"19\":\"" GPIO_NAME_ZONE2_BOILER_RELAY      "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_SWITCHES
+      "\"33\":\""  D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
+      "\"27\":\""  D_GPIO_FUNCTION_SWT2_INV_CTR  "\","
+      "\"26\":\""  D_GPIO_FUNCTION_SWT3_INV_CTR  "\","
+      #endif  
+      #ifdef USE_MODULE_SENSORS_DHT
+      "\"25\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // DiningRoom 
+      #endif
+      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
+      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      #endif 
+      #ifdef USE_MODULE_DISPLAYS_NEXTION
+      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
+      #endif    
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+  /**
+   * @brief Drivers and Sensors for HVAC zones
+   **/
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "Downstairs"
+  #define D_DEVICE_DRIVER_RELAY_1_NAME "Upstairs"
+  #define D_DEVICE_DRIVER_RELAY_2_NAME "Boiler"
+
+  #define D_DEVICE_SENSOR_DHT_0_NAME "Downstairs_DHT"
+
+  /**
+   * @brief HVAC zones
+   **/
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "Downstairs"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "Upstairs"
+  #define D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "Boiler"
+
+  /** 
+   * Pin_DS
+   * */
+  #define D_DEVICE_SENSOR_DB18S20_06_NAME        "Water21-Upstairs"
+  #define D_DEVICE_SENSOR_DB18S20_06_ADDRESS     "[40,208,174,149,240,1,60,127]"
+
+  #define D_DEVICE_SENSOR_DB18S20_07_NAME        "Water22-HotCross"
+  #define D_DEVICE_SENSOR_DB18S20_07_ADDRESS     "[40,168,253,149,240,1,60,157]"
+
+  #define D_DEVICE_SENSOR_DB18S20_08_NAME        "Water23-R/C"
+  #define D_DEVICE_SENSOR_DB18S20_08_ADDRESS     "[40,12,164,2,0,0,0,72]"
+
+  #define D_DEVICE_SENSOR_DB18S20_09_NAME        "Water24-Mains"
+  #define D_DEVICE_SENSOR_DB18S20_09_ADDRESS     "[40,9,77,4,0,0,0,131]"
+
+  #define D_DEVICE_SENSOR_DB18S20_10_NAME        "Water25-HotFromBoiler"
+  #define D_DEVICE_SENSOR_DB18S20_10_ADDRESS     "[40,121,172,3,0,0,0,138]"
+
+  #define D_DEVICE_SENSOR_DB18S20_11_NAME        "Water26-Downstairs"
+  #define D_DEVICE_SENSOR_DB18S20_11_ADDRESS     "[40,205,241,149,240,1,60,148]"
+
+  #define D_DEVICE_SENSOR_DB18S20_12_NAME        "Water27-R/H"
+  #define D_DEVICE_SENSOR_DB18S20_12_ADDRESS     "[40,195,112,2,0,0,0,178]"
+
+  #define D_DEVICE_SENSOR_DB18S20_13_NAME        "Water28-HotFromFurnace"
+  #define D_DEVICE_SENSOR_DB18S20_13_ADDRESS     "[40,103,49,3,0,0,0,153]"
+
+  #define D_DEVICE_SENSOR_DB18S20_14_NAME        "Water29-WaterBoiler"
+  #define D_DEVICE_SENSOR_DB18S20_14_ADDRESS     "[40,183,162,149,240,1,60,24]"
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+        "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+        // Downstairs
+        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_07_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_08_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_09_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_10_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_11_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_12_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_13_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_14_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DHT_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
+      "],"
+      "\"" D_MODULE_CONTROLLER_HVAC_CTR "\":["
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
+        "\"" D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "\""
+      "]"
+    "},"
+    "\"" D_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+        // Downstairs
+        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\":" D_DEVICE_SENSOR_DB18S20_06_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_07_NAME "\":" D_DEVICE_SENSOR_DB18S20_07_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_08_NAME "\":" D_DEVICE_SENSOR_DB18S20_08_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_09_NAME "\":" D_DEVICE_SENSOR_DB18S20_09_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_10_NAME "\":" D_DEVICE_SENSOR_DB18S20_10_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_11_NAME "\":" D_DEVICE_SENSOR_DB18S20_11_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_12_NAME "\":" D_DEVICE_SENSOR_DB18S20_12_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_13_NAME "\":" D_DEVICE_SENSOR_DB18S20_13_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_14_NAME "\":" D_DEVICE_SENSOR_DB18S20_14_ADDRESS ""
+      "}"  
+    "},"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "}"
+      "]"
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
+  "}";
+  
+#endif
+
+
+
+/**
+ * @brief Integrating best camera code
+ * 
+ */
+#ifdef DEVICE_TESTBED_CAMERA_OV26_MODULE
+  #define DEVICENAME_CTR          "testbed_camera"
+  #define DEVICENAME_FRIENDLY_CTR "Ensuite Sensor"
+  #define DEVICENAME_ROOMHINT_CTR "Ensuite"
+  #define MQTT_HOST   "192.168.1.70"
+    
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define DISABLE_SERIAL
+  #define DISABLE_SERIAL0_CORE
+  #define DISABLE_SERIAL_LOGGING
+
+  #define USE_MODULE_CORE_RULES
+       
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_SWITCHES
+  #define USE_MODULE_SENSORS_PIR
+  #define USE_MODULE_SENSORS_BH1750
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"      
+      #ifdef USE_MODULE_SENSORS_BME
+      "\"3\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"1\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
+      #endif
+      #ifdef USE_MODULE_SENSORS_PIR
+      "\"16\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
+      #endif
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  // #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 1
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Ensuite"
+  #define D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "Ensuite"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+        "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"    
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+
+  "}";
+
+
+  #define STRIP_SIZE_MAX 58
+  #ifdef USE_MODULE_LIGHTS_INTERFACE
+  #define USE_SK6812_METHOD_DEFAULT
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "HardwareType":"SK6812",
+    "AnimationMode":"Effects",
+    "ColourOrder":"grbw",
+    "ColourPalette":"Rgbcct 01",
+    "Effects": {
+      "Function":0,
+      "Intensity":50
+    },
+    "Transition": {
+      "TimeMs": 0,
+      "RateMs": 1000
+    },
+    "SegColour": {
+      "Hue": 18,
+      "Sat": 100,
+      "SubType":3
+    },
+    "BrightnessRGB":0,
+    "BrightnessCCT":0
+  }
+  )=====";
+  #endif // USE_MODULE_LIGHTS_INTERFACE
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"// for PIR to follow
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":\"On\""
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
+        "\"DeviceName\":0," 
+        "\"State\":\"Follow\""
+      "}"
+    "}"
+  "}";
+
+#endif
+
+
+
+
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_MAVLINK_DECODE_R
+  #define DEVICENAME_CTR          "testbed_mavlink_decoder"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed MAVLink Decoder"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define MQTT_HOST   "192.168.1.70"
+
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+    #define USE_FEATURE_SEARCH_FOR_UNHANDLED_MAVLINK_MESSAGES_ON_ALLOWEDLIST
+    #define USE_DEVFEATURE_MAVLINK_DECOVER_SERIAL_NUMBER 2
+
+  #define USE_MODULE_CORE_SERIAL_UART
+    #define ENABLE_HARDWARE_UART_2
+    #define HARDWARE_UART_2_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  // #define DISABLE_NETWORK_WIFI
+  // #define USE_MODULE_NETWORK_CELLULAR
+  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  // #define USE_MODULE_SENSORS_GPS_MODEM
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+  // #define MQTT_PORT 51883 //external mqtt broker on TOWER 
+
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  //   #define SHOW_SPLASH
+
+  // #define USE_MODULE_CORE_SERIAL_UART
+
+
+  //   #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
+      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
+      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\""   
+      #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+    "\"" D_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"  
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+#endif // DEVICE_TESTBED_MAVLINK_DECODER
+
+
+
+
+/**
+ * @brief 
+ * 
+ * 
+// Add function to "settime_update" ie with GPS ticks. When it happens, reset the 
+// update millis so it does not double update, same for uptime
+ * 
+ * 
+ * If LTE connects, then set the mqtt retry counter to immediate
+ * 
+ */
+
+
+
+
+
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_MAVLINK_TELEMETRY_WIFI_01
+  #define DEVICENAME_CTR          "testbed_mavlink_telemetry_01"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define MQTT_HOST   "192.168.1.70"
+
+
+  #define ENABLE_DEBUG_FUNCTION_NAMES
+  #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+
+  
+  // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // #define USE_MODULE_NETWORK_MQTT
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // #define USE_SSIDS_NONE_DEBUGGING
+  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // #define DISABLE_NETWORK
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+  #define USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
+
+  #define USE_DEVFEATURE_DEFINED_SERIAL2
+
+  #define ENABLE_FEATURE_MAVLINK_CONVERT_MQTT_DATA_VALUES
+
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  // // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION //fails with no network
+  // // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
+
+  
+  // // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // // #define USE_MODULE_NETWORK_MQTT
+  // // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // // #define USE_SSIDS_NONE_DEBUGGING
+  // // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // // #define DISABLE_NETWORK
+
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // // #define DISABLE_SERIAL_LOGGING
+
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+
+  // #define MQTT_PORT 51883 //external mqtt broker on TOWER 
+
+  #define ENABLE_DEVFEATURE_SIM7000G_INIT_SKIP_MODEM_RESTART
+
+
+  // #define USE_DEVFEATURE_DEFINED_SERIAL2
+
+ #define MQTT_PORT 51884 // Temporary exposed primry broker : STABLE
+//  #define MQTT_PORT 51883 //external mqtt broker on TOWER  : Unstable
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  // #define DISABLE_NETWORK_WIFI
+  // #define USE_MODULE_NETWORK_CELLULAR
+  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  // #define USE_MODULE_SENSORS_GPS_MODEM
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  // #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+  // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // // #define USE_MODULE_NETWORK_MQTT
+  // // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // // #define USE_SSIDS_NONE_DEBUGGING
+  // // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+  // // #define DISABLE_NETWORK
+
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // // #define DISABLE_SERIAL_LOGGING
+
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define MQTT_PORT 51884 //external mqtt broker on TOWER 
+
+  // /**
+  //  * @brief WiFi MQTT
+  //  * 
+  //  */
+  // // #define USE_MODULE_NETWORK_WIFI
+  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  // /**
+  //  * @brief Cellular MQTT
+  //  * 
+  //  */  
+  // #define DISABLE_NETWORK_WIFI
+  // #define USE_MODULE_NETWORK_CELLULAR
+  // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  // #define USE_MODULE_SENSORS_GPS_MODEM
+  // #define USE_MODULE_SENSORS_INTERFACE
+  // #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  // #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+  // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  //   #define SHOW_SPLASH
+
+  //   // #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX
+
+  // #define USE_MODULE_CONTROLLER_CUSTOM__CELLULAR_MAVLINK_BLACK_BOX_OLED
+
+//  6P connector
+
+//  Green VIN (5v)
+// Orange 18
+// Yellow 19
+// White 25
+// Red 26
+// Black gnd
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularLocator01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+
+
+    "\"" D_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"    
+
+
+
+
+
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+
+
+/**
+ * @brief 
+ * Primary testbed for all new lighting code on nodemcu
+ */
+#ifdef DEVICE_TESTBED_ESP32_BUZZER_TONES
+  #define DEVICENAME_CTR          "testbed_buzzer_tones"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Version 2"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define MQTT_HOST   "192.168.1.70"
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE__DRIVERS_BUZZER_TONES
+
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      "\"23\":\"" D_GPIO_FUNCTION_BUZZER_CTR   "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker02"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS_GPS_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+
+
+    "\"" D_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"    
+
+    "\"BuzzerMode\":{\"FreqMode\":1},"
+
+
+
+
+
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+
+  // #define USE_FUNCTION_TEMPLATE
+  // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  // "{"
+  //   "\"MQTT\":{\"RetrySecs\":10}"
+  // "}";
+  /*
+  https://infocenter.nordicsemi.com/index.jsp?topic=%2Fref_at_commands%2FREF%2Fat_commands%2Ftext_mode%2Fcnmi_read.html
+  
+  {
+  "GPS_Enable": 0,
+  "SMS_Enable": 1,
+  "ATCommands": [
+    "AT",
+    "AT+CMGF=1",
+    "AT+CMTI?",
+    "AT+CNMI= 2,2,0,0,0"
+  ]
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  */
+
+
+
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+
+
+
+
+
+
+
+
+#ifdef DEVICE_TESTBED_RTC_FASTBOOT
+  #define DEVICENAME_CTR          "testbed_rtc_fastboot"   APPEND_ESP_TYPE_MQTT_STRING                                    // Change: The unique mqtt topic, however, mqtt client names are appended with mac address, so for basic testing (ie of templates) it is not essential this be changed
+  #define DEVICENAME_FRIENDLY_CTR "Testbed RTC Fastboot"   APPEND_ESP_TYPE_NAME_STRING                                 // Change: You may change this, but it is not important to do so (more important when webui is functioning)
+  
+  #define STRIP_SIZE_MAX 55                                                                           // Change: Set *total* length of string, segment0 will default to this length
+  #define PIN_NAME_STRING_ESP8266_DEFAULT   "RX"                                                      // Change: Set to the pin you want, esp8266 this will default to this anyway
+  #define PIN_NAME_STRING_ESP32_DEFAULT     "23"                                                      //         Set to the pin you want, any output pin should work
+
+  // #define ENABLE_DEVFEATURE_RTC_FASTBOOT_V2
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    // "\"" D_GPIOC "\":{"
+    // #ifdef ESP8266 
+    //   "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    // #else
+    //   "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    // #endif
+    // "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+    
+#endif
+
+
+#ifdef DEVICE_TESTBED_BUTTON_MULTIPRESS
+  #define DEVICENAME_CTR          "testbed_button_longpress"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Button Longpress"
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+  #define ENABLE_DEVFEATURE_BUTTONS_SEND_EVENT_MESSAGES
+
+  #define MAX_KEYS 1                 // Max number of keys or buttons
+
+  #define USE_MODULE_CORE_RULES
+
+
+  #define ENABLE_DEVFEATURE_PHASEOUT_CLEARING_EVENT
+
+  #define ENABLE_DEVFEATURE_BUTTON_SET_FLAG_BUTTON_SINGLE 0 // allow multipress = false
+
+  #define ENABLE_DEBUG_DEV_BUTTONS
+  
+  #define USE_MODULE_DRIVERS_RELAY
+  #define MAX_RELAYS 1
+  #define USE_MODULE_DRIVERS_INTERFACE
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      "\"D7\":\""  D_GPIO_FUNCTION_KEY1_CTR  "\","
+      "\"4\":\""   D_GPIO_FUNCTION_REL1_CTR  "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    // Builtin Button as toggle
+    "\"Rule0\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," //number, name, or all
+        "\"State\":2" // toggle
+      "}"
+    "},"
+    // Optional external button on RX pin
+    "\"Rule1\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":0," //number, name, or all
+        "\"State\":2" // toggle
+      "}"
+    "},"
+    // Optional external button on RX pin
+    "\"Rule2\":{" //switch example
+      "\"Trigger\":{"
+        "\"Module\":\"" D_MODULE_SENSORS_BUTTONS_FRIENDLY_CTR "\","    //sensor
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\"," //eg. InputChange (TemperatureThreshold)
+        "\"DeviceName\":1," // eg Switch0, Switch1, Button#, Motion, # (number for index)  
+        "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
+        "\"Data\":[0,2]" // [state,button_hold]
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
+        "\"DeviceName\":0,"
+        "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":3}}\""
+      "}"
+    "}"
+  "}";
+
+
+
+#endif
+
+
+/**
+ * esp32 version -- SIM800L
+ * */
+#ifdef DEVICE_TESTBED_RCSWITCH_NORMAL
+  #define DEVICENAME_CTR          "testbed_rcswitch_normal"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Fona 800L"
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+
+  #define USE_MODULE_DRIVERS_RF433_RCSWITCH
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
+      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+#endif
+
+#ifdef DEVICE_testbed_rcs_ext
+  #define DEVICENAME_CTR          "testbed_rcs_ext"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed 433MHz RCSwitch Extended"
+  #define MQTT_HOST   "192.168.1.70"
+
+  // #define USE_MODULE_DRIVERS_INTERFACE
+
+  #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+    #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+#endif
+
+
+#ifdef DEVICE_TESTBED_FASTBOOT_ESP8266
+  #define DEVICENAME_CTR          "testbed_fastboot_esp8266"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Fona 800L"
+
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // #define ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3 // FI-128
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION // FI-128
+
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_CREATE_SSID_AP
+  // #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+  // #define DEBUG_FASTBOOT
+  // #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
+
+  /**
+   * @brief wEBSERVER ISSUES
+   * 
+   */
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
+      // "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+#endif
+
+
+
+/**
+ * @brief Getting crashreports to work so I can now start tracking crashes.
+ * Start saving the mqtt json response with openhab string item, therefore I can easily go back and track issues.
+ * A rule to request item string info from persistance will allow me to recall the data (print into logs?)
+ * 
+ */
+#ifdef DEVICE_TESTBED_CRASHREPORT
+  #define DEVICENAME_CTR          "testbed_crashreport" APPEND_ESP_TYPE_MQTT_STRING
+  #define DEVICENAME_FRIENDLY_CTR "Testbed CrashReport" APPEND_ESP_TYPE_NAME_STRING
+
+  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // // #define ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3 // FI-128
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION // FI-128
+  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_CREATE_SSID_AP
+  // // #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+  // // #define DEBUG_FASTBOOT
+  // // #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
+
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      "\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+  
+#endif
+
+
+#ifdef DEVICE_TESTBED_SR04
+  #define DEVICENAME_CTR          "testbed_sr04"
+  #define DEVICENAME_FRIENDLY_CTR "Oil Tank"
+  #define DEVICENAME_ROOMHINT_CTR "Outside"
+  #define MQTT_HOST   "192.168.1.70"
+
+  // add db18 dropping from the waterproof box to know extra temp, perhaps add two for backup? (independant pin from tank sensors)
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  #define USE_MODULE_SENSORS_SR04
+    // #define USE_AMBIENT_TEMP_SENSOR_FOR_SPEEDOFSOUND
+    // #define ENABLE_DEVFEATURE_ULTRASONIC_DURATION_RAW_THRESHOLD_CHECK
+    #define ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+    #define ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+    // #define ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"      
+      #ifdef USE_MODULE_SENSORS_SR04
+      "\"21\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
+      "\"22\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+      #endif
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+
+  #define D_DEVICE_SENSOR_DB18S20_01_NAME "AmbientTank"
+  #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS "[40,226,218,149,240,1,60,142]"
+  #define D_DEVICE_SENSOR_DB18S20_02_NAME "OutsideGarage"
+  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS "[40,255,169,120,53,22,4,240]"
+
+  #define D_DEVICE_SR04_FRIENDLY_NAME_LONG "LevelSensor"
+  
+  #define D_DEVICE_BUTTON_1_CTR "FurnaceActive"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SR04_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_SR04_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"
+    "\"" D_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ""
+      "}"  
+    "}"
+  "}";
+
+#endif
+
+
+#ifdef DEVICE_BUCKET_WATER_LEVEL //get capacitive one for each chritmas!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  #define DEVICENAME_CTR          "bucketwatersensor"
+  #define DEVICENAME_FRIENDLY_CTR "RGB Notifications 01"
+  
+  #define USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
+  #define USE_MODULE_DRIVERS_RELAY
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      "\"23\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+
+      "\"32\":\"" D_GPIO_FUNCTION_ADC1_CH4_CTR   "\","
+      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR   "\""
+
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
+  "}";
+
+
+
+  #define D_DEVICE_ADC_INPUT_NAME_LONG "WaterSensor"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_FRIENDLY_CTR "\":["
+        "\"" D_DEVICE_ADC_INPUT_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+#endif
+
+
+
+
+
+#ifdef DEVICE_TESTBED__SETTINGS_STORING
+  #define DEVICENAME_CTR          "testbed_settings_storage"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed 433MHz RCSwitch Extended"
+  #define MQTT_HOST   "192.168.1.70"
+  #define DEVICENAME_ROOMHINT_CTR "Example"
+
+  /***********************************
+   * SECTION: Core Configs
+  ************************************/    
+
+  // #define ENABLE_DEVFEATURE__SETTINGS_STORAGE
+  //   #define ENABLE_DEVFEATURE__SETTINGS_STORAGE__SAVE_LOAD_STRUCT
+  //   #define ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
+  //   #define ENABLE_DEVFEATURE__SETTINGS_STORAGE_ESP_SUPPORT
+  //   #define ENABLE_DEVFEATURE__SETTINGS_NEW_STRUCT_2023
+
+  
+  // #define USE_MODULE_CORE_FILESYSTEM
+  // 
+  // 
+
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  
+
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+#endif
+
+
+
+
+#ifdef DEVICE_TESTBED__FILESYSTEM
+  #define DEVICENAME_CTR          "testbed_filesystem"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Filesystem"
+  #define MQTT_HOST   "192.168.1.70"
+  #define DEVICENAME_ROOMHINT_CTR "Example"
+
+  /***********************************
+   * SECTION: Core Configs
+  ************************************/     
+  #define USE_MODULE_CORE_FILESYSTEM
+    
+    
+    
+
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  
+
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      #endif  
+      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      #endif  
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+#endif
+
+
+
+
 
 #endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_ACTIVEDEVELOPMENT_H
