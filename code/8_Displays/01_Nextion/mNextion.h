@@ -44,6 +44,29 @@
 #include <WiFiManager.h>
 
 
+#ifdef ESP32
+  #include <WiFi.h>
+  #ifndef DISABLE_NETWORK
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #include <AsyncTCP.h>
+    #include <ESPAsyncWebServer.h>
+  #endif // USE_MODULE_NETWORK_WEBSERVER
+  #endif // DISABLE_NETWORK
+#elif defined(ESP8266)
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  #include <ESP8266WiFi.h>
+  #include <ESPAsyncTCP.h>
+  #include <ESPAsyncWebServer.h>
+  #endif // USE_MODULE_NETWORK_WEBSERVER
+#endif
+
+
+#define NEXTION_16BIT_COLOUR_RED_STR   "45056"
+#define NEXTION_16BIT_COLOUR_GREEN_STR "6116"
+
+#define CONTENT_LENGTH_UNKNOWN ((size_t) -1)
+#define CONTENT_LENGTH_NOT_SET ((size_t) -2)
+
 
 #else
 
@@ -64,6 +87,11 @@
 #endif
 
 
+    #include <AsyncTCP.h>
+    #include <ESPAsyncWebServer.h>
+    #include <SPIFFSEditor.h>
+
+    
 #define NEXTION_16BIT_COLOUR_RED_STR   "45056"
 #define NEXTION_16BIT_COLOUR_GREEN_STR "6116"
 

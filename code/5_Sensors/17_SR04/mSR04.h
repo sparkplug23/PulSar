@@ -150,8 +150,10 @@ void Reading(uint32_t i);
     void SubTask_UpdateAmbientTemperature();
     #endif // ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
 
-    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-    uint8_t GetSensorCount(void) override
+  /************************************************************************************************
+   * SECTION: Unified Reporting
+   ************************************************************************************************/
+  uint8_t GetSensorCount(void) override
     {
       return settings.fSensorCount;
     }
@@ -166,7 +168,10 @@ void Reading(uint32_t i);
       #endif
       value->sensor_id = index;
     };
-    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+   
+  /************************************************************************************************
+   * SECTION: ConstructJSON
+   ************************************************************************************************/
 
 
 

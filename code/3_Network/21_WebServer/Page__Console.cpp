@@ -37,8 +37,8 @@ void mWebServer::HandlePage_Console_WebSocket(AsyncWebServerRequest *request)
     request->beginResponse_P(
       200,
       "text/html",
-      PAGE_console_ws,
-      PAGE_console_ws_length
+      PAGE_console_ws_web,
+      PAGE_console_ws_web_length
     );
 
   response->addHeader(F("Content-Encoding"), F("gzip"));
@@ -428,7 +428,7 @@ void mWebServer::HandlePage_Console_Poll(AsyncWebServerRequest *request)
   if (handleIfNoneMatchCacheHeader(request, 200)) return;
 
   AsyncWebServerResponse *response =
-    request->beginResponse_P(200, "text/html", PAGE_console_polling, PAGE_console_polling_length);
+    request->beginResponse_P(200, "text/html", PAGE_console_polling_web, PAGE_console_polling_web_length);
 
   response->addHeader("Content-Encoding", "gzip");
   setStaticContentCacheHeaders(response);

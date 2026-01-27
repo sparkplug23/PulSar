@@ -103,9 +103,11 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
      * WEBUI SECTION * 
     *******************/   
     #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
     case TASK_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
+    #endif
     #endif
   }
 

@@ -4553,7 +4553,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define MQTT_MAX_PACKET_SIZE                3000
 
   #define USE_MODULE_SENSORS_INTERFACE
-    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #
   //   #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
   // #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
   //   #define DS18X20_MAX_SENSORS 20
@@ -5049,7 +5049,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_SWITCHES
-    #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    #
 
   /***********************************
    * SECTION: Display Configs

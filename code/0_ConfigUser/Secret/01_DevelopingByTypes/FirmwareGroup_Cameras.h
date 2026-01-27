@@ -2075,7 +2075,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 //   #define USE_MODULE_SENSORS_INTERFACE  
 //   #define USE_MODULE_SENSORS_SWITCHES
-//     #define ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+//     #
 
 //   /***********************************
 //    * SECTION: Display Configs

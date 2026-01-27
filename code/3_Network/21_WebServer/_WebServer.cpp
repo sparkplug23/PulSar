@@ -174,8 +174,8 @@ void mWebServer::HandlePage_SystemControls(AsyncWebServerRequest *request)
     FPSTR(_path),
     200,
     FPSTR(CONTENT_TYPE_HTML),
-    PAGE_system_controls,
-    PAGE_system_controls_length,
+    PAGE_system_controls_web,
+    PAGE_system_controls_web_length,
     true
   );
 }
@@ -314,7 +314,7 @@ void mWebServer::WebPage_Root_AddHandlers()
 
   server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
     if (captivePortal(request)) return;
-    this->handleStaticContent(request, F("/"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_root_basic, PAGE_root_basic_length, true);
+    this->handleStaticContent(request, F("/"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_root_basic_web, PAGE_root_basic_web_length, true);
   });
 
 
@@ -362,19 +362,19 @@ server->on("/settings2", HTTP_POST, [this](AsyncWebServerRequest *request){
 
   static const char _submodule_style_css[] PROGMEM = "/submodule_style.css";
   server->on("/submodule_style.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-    handleStaticContent(request, FPSTR(_submodule_style_css), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_submodule_style, PAGE_submodule_style_length);
+    handleStaticContent(request, FPSTR(_submodule_style_css), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_submodule_style_web, PAGE_submodule_style_web_length);
   });
 
   
-  #ifdef ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+  // #ifdef ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
   static const char _style_css[] PROGMEM = "/style.css";
   server->on("/style.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-    handleStaticContent(request, FPSTR(_style_css), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss2, PAGE_settingsCss2_length);
+    handleStaticContent(request, FPSTR(_style_css), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss2_web, PAGE_settingsCss2_web_length);
   });
 
   static const char _favicon_ico[] PROGMEM = "/favicon.ico";
   server->on(_favicon_ico, HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->handleStaticContent(request, FPSTR(_favicon_ico), 200, F("image/x-icon"), favicon2, favicon2_length, false);
+    this->handleStaticContent(request, FPSTR(_favicon_ico), 200, F("image/x-icon"), favicon2_web, favicon2_web_length, false);
   });
 
   static const char _skin_css[] PROGMEM = "/skin.css";
@@ -383,16 +383,16 @@ server->on("/settings2", HTTP_POST, [this](AsyncWebServerRequest *request){
     AsyncWebServerResponse *response = request->beginResponse(200, FPSTR(CONTENT_TYPE_CSS));
     request->send(response);
   });
-  #endif
+  // #endif
 
  static const char _common_js[] PROGMEM = "/common.js";
   server->on(_common_js, HTTP_GET, [this](AsyncWebServerRequest *request){    
-    this->handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common2, JS_common2_length);
+    this->handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common2_web, JS_common2_web_length);
   });
   
   server->on("/debug/main", HTTP_GET, [this](AsyncWebServerRequest *request){
     if (captivePortal(request)) return;
-    this->handleStaticContent(request, F("/debug/main"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_debug_main, PAGE_debug_main_length, true);
+    this->handleStaticContent(request, F("/debug/main"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_debug_main_web, PAGE_debug_main_web_length, true);
   });
 
   //called when the url is not defined here, ajax-in; get-settings
@@ -413,7 +413,7 @@ server->on("/settings2", HTTP_POST, [this](AsyncWebServerRequest *request){
     ALOG_ERR(PSTR("Not sure this needs to stay or not"));
     if(tkr_anim->handle__HTTP__GET_QueryAPI(request, request->url())) return;
     #endif
-    handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404, PAGE_404_length);
+    handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404_web, PAGE_404_web_length);
   });
 
 

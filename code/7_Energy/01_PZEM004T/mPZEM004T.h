@@ -137,7 +137,6 @@ class mEnergyPZEM004T :
      * SECTION: Unified Reporting
      ************************************************************************************************/
 
-    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
     {
       return data_v.size();
@@ -153,8 +152,8 @@ class mEnergyPZEM004T :
       value->sensor_type.push_back(SENSOR_TYPE_ENERGY_ID);        value->data_f.push_back(data_v[index].import_active);
       value->sensor_id = index;
     };
-    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
+    
     /************************************************************************************************
      * SECTION: Commands
      ************************************************************************************************/

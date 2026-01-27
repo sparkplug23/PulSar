@@ -311,7 +311,7 @@ uint8_t mDriverInterface::ConstructJson_DriverStatus(uint8_t json_method, bool j
     
 }
 
-#endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+#endif 
 
 /******************************************************************************************************************
  * mDriverInterface_MQTT.cpp

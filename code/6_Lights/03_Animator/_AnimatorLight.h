@@ -4978,7 +4978,7 @@ void sappend(char stype, const char* key, int val);
 
 
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER
+#ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
 void serveSettingsJS(AsyncWebServerRequest* request);
 void serveSettings(AsyncWebServerRequest* request, bool post = false);
 // bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request);

@@ -175,7 +175,9 @@ size_t mWebServer::WebUI_Print_RowEnd(Print& out){
 
 
 // Global buffer locking response helper class (to make sure lock is released when AsyncJsonResponse is destroyed)
-class LockedJsonResponse2: public AsyncJsonResponse {
+class LockedJsonResponse2:
+  public AsyncJsonResponse 
+{
   bool _holding_lock;
   public:
   // WARNING: constructor assumes requestJSONBufferLock() was successfully acquired externally/prior to constructing the instance
@@ -227,51 +229,51 @@ void mWebServer::XML_response(Print& dest)
   #endif
 }
 
-void mWebServer::extractPin(Print& settingsScript, JsonObject &obj, const char *key) {
-  if (obj[key].is<JsonArray>()) {
-    JsonArray pins = obj[key].as<JsonArray>();
-    for (JsonVariant pv : pins) {
-      if (pv.as<int>() > -1) { settingsScript.print(","); settingsScript.print(pv.as<int>()); }
-    }
-  } else {
-    if (obj[key].as<int>() > -1) { settingsScript.print(","); settingsScript.print(obj[key].as<int>()); }
-  }
-}
+// void mWebServer::extractPin(Print& settingsScript, JsonObject &obj, const char *key) {
+//   if (obj[key].is<JsonArray>()) {
+//     JsonArray pins = obj[key].as<JsonArray>();
+//     for (JsonVariant pv : pins) {
+//       if (pv.as<int>() > -1) { settingsScript.print(","); settingsScript.print(pv.as<int>()); }
+//     }
+//   } else {
+//     if (obj[key].as<int>() > -1) { settingsScript.print(","); settingsScript.print(obj[key].as<int>()); }
+//   }
+// }
 
-// print used pins by scanning JsonObject (1 level deep)
-void mWebServer::fillUMPins(Print& settingsScript, JsonObject &mods)
-{
-  for (JsonPair kv : mods) {
-    // kv.key() is usermod name or subobject key
-    // kv.value() is object itself
-    JsonObject obj = kv.value();
-    if (!obj.isNull()) {
-      // element is an JsonObject
-      if (!obj["pin"].isNull()) {
-        extractPin(settingsScript, obj, "pin");
-      } else {
-        // scan keys (just one level deep as is possible with usermods)
-        for (JsonPair so : obj) {
-          const char *key = so.key().c_str();
-          if (strstr(key, "pin")) {
-            // we found a key containing "pin" substring
-            if (strlen(strstr(key, "pin")) == 3) {
-              // and it is at the end, we found another pin
-              extractPin(settingsScript, obj, key);
-              continue;
-            }
-          }
-          if (!obj[so.key()].is<JsonObject>()) continue;
-          JsonObject subObj = obj[so.key()];
-          if (!subObj["pin"].isNull()) {
-            // get pins from subobject
-            extractPin(settingsScript, subObj, "pin");
-          }
-        }
-      }
-    }
-  }
-}
+// // print used pins by scanning JsonObject (1 level deep)
+// void mWebServer::fillUMPins(Print& settingsScript, JsonObject &mods)
+// {
+//   for (JsonPair kv : mods) {
+//     // kv.key() is usermod name or subobject key
+//     // kv.value() is object itself
+//     JsonObject obj = kv.value();
+//     if (!obj.isNull()) {
+//       // element is an JsonObject
+//       if (!obj["pin"].isNull()) {
+//         extractPin(settingsScript, obj, "pin");
+//       } else {
+//         // scan keys (just one level deep as is possible with usermods)
+//         for (JsonPair so : obj) {
+//           const char *key = so.key().c_str();
+//           if (strstr(key, "pin")) {
+//             // we found a key containing "pin" substring
+//             if (strlen(strstr(key, "pin")) == 3) {
+//               // and it is at the end, we found another pin
+//               extractPin(settingsScript, obj, key);
+//               continue;
+//             }
+//           }
+//           if (!obj[so.key()].is<JsonObject>()) continue;
+//           JsonObject subObj = obj[so.key()];
+//           if (!subObj["pin"].isNull()) {
+//             // get pins from subobject
+//             extractPin(settingsScript, subObj, "pin");
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
 
 void mWebServer::appendGPIOinfo(Print& settingsScript) {
   settingsScript.print(F("d.um_p=[-1")); // has to have 1 element
@@ -290,7 +292,7 @@ void mWebServer::appendGPIOinfo(Print& settingsScript) {
     // if we can't allocate JSON buffer ignore usermod pins
     JsonObject mods = tkr_mfile->pDoc->createNestedObject("um");
     // UsermodManager::addToConfig(mods);
-    if (!mods.isNull()) fillUMPins(settingsScript, mods);
+    // if (!mods.isNull()) fillUMPins(settingsScript, mods);
     JBI->releaseJSONBufferLock();
   }
   settingsScript.print(F("];"));
@@ -1019,7 +1021,7 @@ void mWebServer::serveSettingsJS(AsyncWebServerRequest* request)
 
   static const char _common_js[] PROGMEM = "/common.js";
   if (request->url().indexOf(FPSTR(_common_js)) > 0) {
-    handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common, JS_common_length);
+    handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common_web, JS_common_web_length);
     return;
   }
   
@@ -1193,25 +1195,25 @@ void mWebServer::SettingsPages_GET(AsyncWebServerRequest* request)
 
   switch (subPage)
   {
-    case SUBPAGE_WEB_WIFI:    content = PAGE_settings_wifi; len = PAGE_settings_wifi_length; break;
-    case SUBPAGE_WEB_LEDS:    content = PAGE_settings_leds;  len = PAGE_settings_leds_length;  break;
-    case SUBPAGE_WEB_UI:      content = PAGE_settings_ui;    len = PAGE_settings_ui_length;    break;
-    case SUBPAGE_WEB_SYNC:    content = PAGE_settings_sync;  len = PAGE_settings_sync_length;  break;
-    case SUBPAGE_WEB_TIME:    content = PAGE_settings_time;  len = PAGE_settings_time_length;  break;
-    case SUBPAGE_WEB_SEC:     content = PAGE_settings_sec;   len = PAGE_settings_sec_length;   break;
+    case SUBPAGE_WEB_WIFI:    content = PAGE_settings_wifi_web; len = PAGE_settings_wifi_web_length; break;
+    case SUBPAGE_WEB_LEDS:    content = PAGE_settings_leds_web;  len = PAGE_settings_leds_web_length;  break;
+    case SUBPAGE_WEB_UI:      content = PAGE_settings_ui_web;    len = PAGE_settings_ui_web_length;    break;
+    case SUBPAGE_WEB_SYNC:    content = PAGE_settings_sync_web;  len = PAGE_settings_sync_web_length;  break;
+    case SUBPAGE_WEB_TIME:    content = PAGE_settings_time_web;  len = PAGE_settings_time_web_length;  break;
+    case SUBPAGE_WEB_SEC:     content = PAGE_settings_sec_web;   len = PAGE_settings_sec_web_length;   break;
     #ifdef ENABLE_FEATURE_LIGHTING__DMX
     case SUBPAGE_WEB_DMX:     content = PAGE_settings_dmx;   len = PAGE_settings_dmx_length;   break;
     #endif
-    case SUBPAGE_WEB_UM:      content = PAGE_settings_um;    len = PAGE_settings_um_length;    break;
-    case SUBPAGE_WEB_UPDATE:  content = PAGE_update;         len = PAGE_update_length;         break;
+    case SUBPAGE_WEB_UM:      content = PAGE_settings_um_web;    len = PAGE_settings_um_web_length;    break;
+    case SUBPAGE_WEB_UPDATE:  content = PAGE_update_web;         len = PAGE_update_web_length;         break;
     #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     case SUBPAGE_WEB_2D:      content = PAGE_settings_2D;    len = PAGE_settings_2D_length;    break;
     #endif
-    case SUBPAGE_WEB_PINREQ:  content = PAGE_settings_pin;   len = PAGE_settings_pin_length;   code = 401; break;
-    case SUBPAGE_WEB_CSS:     content = PAGE_settingsCss;    len = PAGE_settingsCss_length;    contentType = FPSTR(CONTENT_TYPE_CSS); break;
+    case SUBPAGE_WEB_PINREQ:  content = PAGE_settings_pin_web;   len = PAGE_settings_pin_web_length;   code = 401; break;
+    case SUBPAGE_WEB_CSS:     content = PAGE_settingsCss_web;    len = PAGE_settingsCss_web_length;    contentType = FPSTR(CONTENT_TYPE_CSS); break;
     case SUBPAGE_WEB_JS:      serveSettingsJS(request); return;
-    case SUBPAGE_WEB_WELCOME: content = PAGE_welcome;        len = PAGE_welcome_length;        break;
-    default:              content = PAGE_settings;       len = PAGE_settings_length;       break;
+    case SUBPAGE_WEB_WELCOME: content = PAGE_welcome_web;        len = PAGE_welcome_web_length;        break;
+    default:              content = PAGE_settings_web;       len = PAGE_settings_web_length;       break;
   }
 
   handleStaticContent(request, "", code, contentType, content, len);

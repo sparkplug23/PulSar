@@ -65,7 +65,6 @@ class mBH1750 :
      * SECTION: Unified Reporting
      ************************************************************************************************/
 
-    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
     {
       return module_state.devices;
@@ -79,7 +78,6 @@ class mBH1750 :
       value->data_f.push_back(device_data[index].illuminance);
       value->sensor_id = index;
     };
-    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
         
     /************************************************************************************************
      * SECTION: Internal Functions

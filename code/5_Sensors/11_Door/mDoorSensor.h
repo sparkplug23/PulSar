@@ -84,8 +84,10 @@ class mDoorSensor :
       uint8_t fUpdateSendDoorSensor;
     //#endif
     
-    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-    uint8_t GetSensorCount(void) override
+  /************************************************************************************************
+   * SECTION: Unified Reporting
+   ************************************************************************************************/
+  uint8_t GetSensorCount(void) override
     {
       return settings.fSensorCount;
     }
@@ -100,8 +102,10 @@ class mDoorSensor :
       // #endif // DOORLOCK_SWITCH_PIN
       value->sensor_id = index;
     };
-    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-        
+  
+  /************************************************************************************************
+   * SECTION: ConstructJSON
+   ************************************************************************************************/
 
 
 void WebAppend_Root_Status_Table_Draw();

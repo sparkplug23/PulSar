@@ -158,8 +158,9 @@ char* GetStateName(uint8_t state, uint8_t count, char* buffer, uint8_t buflen);
 
 bool SendButton(uint32_t device, uint32_t state, uint16_t count = 1);
 
-
-  #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+  /************************************************************************************************
+   * SECTION: Unified Reporting
+   ************************************************************************************************/
   uint8_t GetSensorCount(void) override
   {
     uint8_t count = 0;
@@ -178,8 +179,10 @@ bool SendButton(uint32_t device, uint32_t state, uint16_t count = 1);
     value->data_f.push_back(GetState(index));
     value->sensor_id = index;
   };
-  #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
 
+  /************************************************************************************************
+   * SECTION: ConstructJSON
+   ************************************************************************************************/
 
   uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
   uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);

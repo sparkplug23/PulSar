@@ -253,7 +253,6 @@ class mEnergyINA219 :
      * SECTION: Unified Reporting
      ************************************************************************************************/
     
-    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
     {
       return module_state.devices;
@@ -266,8 +265,8 @@ class mEnergyINA219 :
       value->sensor_type.push_back(SENSOR_TYPE_ACTIVE_POWER_ID);  value->data_f.push_back(sensor[index].direct_power_mw/1000);
       value->sensor_id = index;
     };
-    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-
+    
+  
     /************************************************************************************************
      * SECTION: Commands
      ************************************************************************************************/

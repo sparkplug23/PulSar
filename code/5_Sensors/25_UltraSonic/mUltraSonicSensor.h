@@ -217,8 +217,10 @@ class mUltraSonicSensor :
 
     
     
-    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-    uint8_t GetSensorCount(void) override
+  /************************************************************************************************
+   * SECTION: Unified Reporting
+   ************************************************************************************************/
+  uint8_t GetSensorCount(void) override
     {
       return settings.fSensorCount;
     }
@@ -229,9 +231,10 @@ class mUltraSonicSensor :
       value->data.push_back(ultrasonic.duration);
       value->sensor_id = index;
     };
-    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-
-
+   
+  /************************************************************************************************
+   * SECTION: ConstructJSON
+   ************************************************************************************************/
 
 
     uint8_t ConstructJSON_Settings(uint8_t json_level);

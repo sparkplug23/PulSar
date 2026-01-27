@@ -274,8 +274,10 @@ class mBME :
     void Bme680Read(uint8_t bmp_idx);
 
 
-    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-    uint8_t GetSensorCount(void) override
+  /************************************************************************************************
+   * SECTION: Unified Reporting
+   ************************************************************************************************/
+  uint8_t GetSensorCount(void) override
     {
       return bmp_count;
     }
@@ -311,7 +313,10 @@ class mBME :
       }
       value->sensor_id = index;
     };
-    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+    
+  /************************************************************************************************
+   * SECTION: ConstructJSON
+   ************************************************************************************************/
 
     /************************************************************************************************
      * SECTION: Commands

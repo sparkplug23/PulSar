@@ -117,7 +117,6 @@ class mHLK_LD2410 :
      * SECTION: UNIFIED_SENSOR_REPORTING
      ************************************************************************************************/
 
-    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
     uint8_t GetSensorCount(void) override
     {
       return 0;
@@ -125,8 +124,8 @@ class mHLK_LD2410 :
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
     };
-    #endif
 
+    
     /************************************************************************************************
      * SECTION: Commands
      ************************************************************************************************/

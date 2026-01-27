@@ -130,6 +130,57 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
 #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
 
 
+#ifdef ENABLE_FEATURE_LIGHTING__DISABLE_WEBPAGE_TO_REDUCE_MEMORY_USAGE // lower memory footprint
+
+#warning "WEBPAGE disabled for lighting to conserve memory
+
+
+  #define ENABLE_FEATURE_JSON__ASYNCJSON_V6
+  
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+  // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+
+
+  // #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+  // #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+  // #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+
+  // #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+
+  
+  // #ifndef ESP8266
+  //   #define ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  // #endif
+
+
+
+#else // default includes full webpage
+
+
+  /************************************************************************
+   * WEBPAGE:
+   ************************************************************************/
+  
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+  #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+
+
+  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+  #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+
+  #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+
+  
+  #ifndef ESP8266
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  #endif
+
+
+#endif
+
   /************************************************************************
    * SECTION: Inherit other defaults
    ************************************************************************/
@@ -182,26 +233,6 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   
   #define PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE true // MUST be true, as we are not using NPB_LG method
 
-
-  /************************************************************************
-   * WEBPAGE:
-   ************************************************************************/
-  
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
-  #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
-
-
-  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
-  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-  #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
-
-  #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
-
-  
-  #ifndef ESP8266
-    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
-  #endif
 
   
   /************************************************************************

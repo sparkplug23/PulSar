@@ -120,7 +120,7 @@ function filter(str, type) {
 
 function writeHtmlGzipped(sourceFile, resultFile, page2) {
 
-   const page = page2 + "_lights" // fix for duplicate webserver/lights
+   const page = page2// + "_lights" // fix for duplicate webserver/lights
 
 
   console.info("Reading " + sourceFile);
@@ -218,7 +218,7 @@ function writeChunks(srcDir, specs, resultFile) {
 
   specs.forEach((s) => {
 
-    s.name = s.name + "_lights" // 
+    s.name = s.name //+ "_lights" // 
 
 
     try {

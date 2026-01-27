@@ -10,6 +10,8 @@
  *
  * > npm run dev
  *
+ * >npm run build:webserver
+ * 
  * How it works?
  *
  * It uses NodeJS packages to inline, minify and GZIP files. See writeHtmlGzipped and writeChunks invocations at the bottom of the page.
@@ -229,50 +231,19 @@ function writeChunks(srcDir, specs, resultFile) {
 }
 
 
-writeHtmlGzipped(source_path + "/index.htm", destination_path + "html_ui.h", 'index');
+writeHtmlGzipped(source_path + "/index.htm", destination_path + "html_ui.h", 'index_web');
 // writeHtmlGzipped(source_path + "/simple.htm", destination_path + "html_simple.h", 'simple'); //now create dynamically by hiding elements
-writeHtmlGzipped(source_path + "/pixart/pixart.htm", destination_path + "html_pixart.h", 'pixart');
-writeHtmlGzipped(source_path + "/cpal/cpal.htm", destination_path + "html_cpal.h", 'cpal');
-writeHtmlGzipped(source_path + "/pxmagic/pxmagic.htm", destination_path + "html_pxmagic.h", 'pxmagic');
+// writeHtmlGzipped(source_path + "/pixart/pixart.htm", destination_path + "html_pixart.h", 'pixart');
+// writeHtmlGzipped(source_path + "/cpal/cpal.htm", destination_path + "html_cpal.h", 'cpal');
+// writeHtmlGzipped(source_path + "/pxmagic/pxmagic.htm", destination_path + "html_pxmagic.h", 'pxmagic');
 
 
-
-// writeHtmlGzipped(source_path + "/console.htm", destination_path + "console.h", 'console');
-
-
-
-/*
-writeChunks(
-  "code/data23",
-  [
-    {
-      file: "simple.css",
-      name: "PAGE_simpleCss",
-      method: "gzip",
-      filter: "css-minify",
-    },
-    {
-      file: "simple.js",
-      name: "PAGE_simpleJs",
-      method: "gzip",
-      filter: "js-minify",
-    },
-    {
-      file: "simple.htm",
-      name: "PAGE_simple",
-      method: "gzip",
-      filter: "html-minify-ui",
-    }
-  ],
-  "code/html_simplex.h"
-);
-*/
 writeChunks(
   source_path,
   [
     {
       file: "style.css",
-      name: "PAGE_settingsCss",
+      name: "PAGE_settingsCss_web",
       method: "gzip",
       filter: "css-minify",
       mangle: (str) =>
@@ -281,73 +252,73 @@ writeChunks(
     },
     {
       file: "common.js",
-      name: "JS_common",
+      name: "JS_common_web",
       method: "gzip",
       filter: "js-minify",
     },
     {
       file: "settings.htm",
-      name: "PAGE_settings",
+      name: "PAGE_settings_web",
       method: "gzip",
       filter: "html-minify",
     },
     {
       file: "settings_wifi.htm",
-      name: "PAGE_settings_wifi2",
+      name: "PAGE_settings_wifi2_web",
       method: "gzip",
       filter: "html-minify",
     },
     {
       file: "settings_leds.htm",
-      name: "PAGE_settings_leds",
+      name: "PAGE_settings_leds_web",
       method: "gzip",
       filter: "html-minify",
     },
-    {
-      file: "settings_dmx.htm",
-      name: "PAGE_settings_dmx",
-      method: "gzip",
-      filter: "html-minify",
-    },
+    // {
+    //   file: "settings_dmx.htm",
+    //   name: "PAGE_settings_dmx",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
     {
       file: "settings_ui.htm",
-      name: "PAGE_settings_ui",
+      name: "PAGE_settings_ui_web",
       method: "gzip",
       filter: "html-minify",
     },
     {
       file: "settings_sync.htm",
-      name: "PAGE_settings_sync",
+      name: "PAGE_settings_sync_web",
       method: "gzip",
       filter: "html-minify",
     },
     {
       file: "settings_time.htm",
-      name: "PAGE_settings_time",
+      name: "PAGE_settings_time_web",
       method: "gzip",
       filter: "html-minify",
     },
     {
       file: "settings_sec.htm",
-      name: "PAGE_settings_sec",
+      name: "PAGE_settings_sec_web",
       method: "gzip",
       filter: "html-minify",
     },
     {
       file: "settings_um.htm",
-      name: "PAGE_settings_um",
+      name: "PAGE_settings_um_web",
       method: "gzip",
       filter: "html-minify",
     },
-    {
-      file: "settings_2D.htm",
-      name: "PAGE_settings_2D",
-      method: "gzip",
-      filter: "html-minify",
-    },
+    // {
+    //   file: "settings_2D.htm",
+    //   name: "PAGE_settings_2D",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
     {
       file: "settings_pin.htm",
-      name: "PAGE_settings_pin",
+      name: "PAGE_settings_pin_web",
       method: "gzip",
       filter: "html-minify"
     }
@@ -358,41 +329,41 @@ writeChunks(
 writeChunks(
   source_path,
   [
-    {
-      file: "usermod.htm",
-      name: "PAGE_usermod",
-      method: "gzip",
-      filter: "html-minify",
-      mangle: (str) =>
-        str.replace(/fetch\("http\:\/\/.*\/win/gms, 'fetch("/win'),
-    },
+//     {
+//       file: "usermod.htm",
+//       name: "PAGE_usermod",
+//       method: "gzip",
+//       filter: "html-minify",
+//       mangle: (str) =>
+//         str.replace(/fetch\("http\:\/\/.*\/win/gms, 'fetch("/win'),
+//     },
     {
       file: "msg.htm",
-      name: "PAGE_msg",
+      name: "PAGE_msg_web",
       prepend: "=====(",
       append: ")=====",
       method: "plaintext",
       filter: "html-minify",
       mangle: (str) => str.replace(/\<h2\>.*\<\/body\>/gms, "<h2>%MSG%</body>"),
     },
-    {
-      file: "dmxmap.htm",
-      name: "PAGE_dmxmap",
-      prepend: "=====(",
-      append: ")=====",
-      method: "plaintext",
-      filter: "html-minify",
-      mangle: (str) => `
-#ifdef ENABLE_FEATURE_LIGHTING__DMX
-${str.replace(/function FM\(\)[ ]?\{/gms, "function FM() {%DMXVARS%\n")}
-#else
-const char PAGE_dmxmap[] PROGMEM = R"=====()=====";
-#endif
-`,
-    },
+//     {
+//       file: "dmxmap.htm",
+//       name: "PAGE_dmxmap",
+//       prepend: "=====(",
+//       append: ")=====",
+//       method: "plaintext",
+//       filter: "html-minify",
+//       mangle: (str) => `
+// #ifdef ENABLE_FEATURE_LIGHTING__DMX
+// ${str.replace(/function FM\(\)[ ]?\{/gms, "function FM() {%DMXVARS%\n")}
+// #else
+// const char PAGE_dmxmap[] PROGMEM = R"=====()=====";
+// #endif
+// `,
+//     },
     {
       file: "update.htm",
-      name: "PAGE_update",
+      name: "PAGE_update_web",
       method: "gzip",
       filter: "html-minify",
       mangle: (str) =>
@@ -404,69 +375,47 @@ const char PAGE_dmxmap[] PROGMEM = R"=====()=====";
     },
     {
       file: "welcome.htm",
-      name: "PAGE_welcome",
+      name: "PAGE_welcome_web",
       method: "gzip",
       filter: "html-minify",
     },
-    {
-      file: "liveview.htm",
-      name: "PAGE_liveview",
-      method: "gzip",
-      filter: "html-minify",
-    },
-    {
-      file: "liveviewws2D.htm",
-      name: "PAGE_liveviewws2D",
-      method: "gzip",
-      filter: "html-minify",
-    },
+//     {
+//       file: "liveview.htm",
+//       name: "PAGE_liveview",
+//       method: "gzip",
+//       filter: "html-minify",
+//     },
+//     {
+//       file: "liveviewws2D.htm",
+//       name: "PAGE_liveviewws2D",
+//       method: "gzip",
+//       filter: "html-minify",
+//     },
     {
       file: "404.htm",
-      name: "PAGE_404",
+      name: "PAGE_404_web",
       method: "gzip",
       filter: "html-minify",
     },
     {
       file: "favicon_pulsar.ico",
-      name: "favicon2",
+      name: "favicon2_web",
       method: "binary",
     }
-    // ,
-    // {
-    //   file: "iro.js",
-    //   name: "iroJs",
-    //   method: "gzip"
-    // },
-    // {
-    //   file: "rangetouch.js",
-    //   name: "rangetouchJs",
-    //   method: "gzip"
-    // }
+//     // ,
+//     // {
+//     //   file: "iro.js",
+//     //   name: "iroJs",
+//     //   method: "gzip"
+//     // },
+//     // {
+//     //   file: "rangetouch.js",
+//     //   name: "rangetouchJs",
+//     //   method: "gzip"
+//     // }
   ],
   destination_path + "html_other.h"
 );
-
-
-
-
-// writeChunks(
-//   source_path,
-//   [
-//     {
-//       file: "console_ws.htm",
-//       name: "PAGE_console",
-//       method: "gzip",
-//       filter: "html-minify-ui",
-//     },
-//     {
-//       file: "console_polling.htm",
-//       name: "PAGE_console_polling",
-//       method: "gzip",
-//       filter: "html-minify-ui",
-//     }
-//   ],
-//   destination_path + "pages_2025.h"
-// );
 
 
 writeChunks(
@@ -474,28 +423,30 @@ writeChunks(
   [
     {
       file: "Consoles/console_ws.htm",
-      name: "PAGE_console_ws",
+      name: "PAGE_console_ws_web",
       method: "gzip",
       filter: "html-minify-ui",
     },
     {
       file: "Consoles/console_polling.htm",
-      name: "PAGE_console_polling",
+      name: "PAGE_console_polling_web",
       method: "gzip",
       filter: "html-minify-ui",
     }
   ],
   destination_path + "pages_console_esp32.h"
 );
+
+
 writeChunks(
   source_path,
   [
-    {
-      file: "Consoles/console_polling_esp8266.htm",
-      name: "PAGE_console_polling",
-      method: "gzip",
-      filter: "html-minify-ui",
-    }
+    // {
+    //   file: "Consoles/console_polling_esp8266.htm",
+    //   name: "PAGE_console_polling",
+    //   method: "gzip",
+    //   filter: "html-minify-ui",
+    // }
   ],
   destination_path + "pages_console_esp8266.h"
 );
@@ -506,13 +457,13 @@ writeChunks(
   [
     {
       file: "root_basic.htm",
-      name: "PAGE_root_basic",
+      name: "PAGE_root_basic_web",
       method: "gzip",
       filter: "html-minify-ui",
     },
     {
       file: "debug_main.htm",
-      name: "PAGE_debug_main",
+      name: "PAGE_debug_main_web",
       method: "gzip",
       filter: "html-minify-ui",
     }
@@ -526,7 +477,7 @@ writeChunks(
   [
     {
       file: "style.css",
-      name: "PAGE_settingsCss2",
+      name: "PAGE_settingsCss2_web",
       method: "gzip",
       filter: "css-minify",
       mangle: (str) =>
@@ -535,77 +486,77 @@ writeChunks(
     },
     {
       file: "common.js",
-      name: "JS_common2",
+      name: "JS_common2_web",
       method: "gzip",
       filter: "js-minify",
     },
-    {
-      file: "settings2.htm",
-      name: "PAGE_settings2",
-      method: "gzip",
-      filter: "html-minify",
-    },
+    // // {
+    // //   file: "settings2.htm",
+    // //   name: "PAGE_settings2",
+    // //   method: "gzip",
+    // //   filter: "html-minify",
+    // // },
     {
       file: "settings_wifi.htm",
-      name: "PAGE_settings_wifi",
+      name: "PAGE_settings_wifi_web",
       method: "gzip",
       filter: "html-minify",
     }
-    // ,
-    // {
-    //   file: "settings_leds.htm",
-    //   name: "PAGE_settings_leds",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_dmx.htm",
-    //   name: "PAGE_settings_dmx",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_ui.htm",
-    //   name: "PAGE_settings_ui",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_sync.htm",
-    //   name: "PAGE_settings_sync",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_time.htm",
-    //   name: "PAGE_settings_time",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_sec.htm",
-    //   name: "PAGE_settings_sec",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_um.htm",
-    //   name: "PAGE_settings_um",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_2D.htm",
-    //   name: "PAGE_settings_2D",
-    //   method: "gzip",
-    //   filter: "html-minify",
-    // },
-    // {
-    //   file: "settings_pin.htm",
-    //   name: "PAGE_settings_pin",
-    //   method: "gzip",
-    //   filter: "html-minify"
-    // }
+    // // ,
+    // // {
+    // //   file: "settings_leds.htm",
+    // //   name: "PAGE_settings_leds",
+    // //   method: "gzip",
+    // //   filter: "html-minify",
+    // // },
+    // // {
+    // //   file: "settings_dmx.htm",
+    // //   name: "PAGE_settings_dmx",
+    // //   method: "gzip",
+    // //   filter: "html-minify",
+    // // },
+    // // {
+    // //   file: "settings_ui.htm",
+    // //   name: "PAGE_settings_ui",
+    // //   method: "gzip",
+    // //   filter: "html-minify",
+    // // },
+    // // {
+    // //   file: "settings_sync.htm",
+    // //   name: "PAGE_settings_sync",
+    // //   method: "gzip",
+    // //   filter: "html-minify",
+    // // },
+    // // {
+    // //   file: "settings_time.htm",
+    // //   name: "PAGE_settings_time",
+    // //   method: "gzip",
+    // //   filter: "html-minify",
+    // // },
+    // // {
+    // //   file: "settings_sec.htm",
+    // //   name: "PAGE_settings_sec",
+    // //   method: "gzip",
+    // //   filter: "html-minify",
+    // // },
+    // // {
+    // //   file: "settings_um.htm",
+    // //   name: "PAGE_settings_um",
+    // //   method: "gzip",
+    // //   filter: "html-minify",
+    // // },
+    // // {
+    // //   file: "settings_2D.htm",
+    // //   name: "PAGE_settings_2D",
+    // //   method: "gzip",
+    // //   filter: "html-minify",
+    // // },
+    // // {
+    // //   file: "settings_pin.htm",
+    // //   name: "PAGE_settings_pin",
+    // //   method: "gzip",
+    // //   filter: "html-minify"
+    // // }
   ],
   destination_path + "html_settings2.h"
 );
@@ -618,7 +569,7 @@ writeChunks(
   [
     {
       file: "submodule_style.css",
-      name: "PAGE_submodule_style",
+      name: "PAGE_submodule_style_web",
       method: "gzip",
       filter: "css-minify",
       mangle: (str) =>
@@ -634,7 +585,7 @@ writeChunks(
   [
     {
       file: "system_controls.htm",
-      name: "PAGE_system_controls",
+      name: "PAGE_system_controls_web",
       method: "gzip",
       filter: "html-minify-ui",
     }

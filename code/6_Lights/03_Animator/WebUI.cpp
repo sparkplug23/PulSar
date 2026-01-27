@@ -1619,7 +1619,7 @@ void mAnimatorLight::serveIndex(AsyncWebServerRequest* request)
     response = request->beginResponse_P(200, "text/html", PAGE_simple, PAGE_simple_L);
   else
   #endif
-    response = request->beginResponse_P(200, "text/html", PAGE_index_lights, PAGE_index_lights_L);
+    response = request->beginResponse_P(200, "text/html", PAGE_index, PAGE_index_L);
 
   response->addHeader(FPSTR(s_content_enc),"gzip");
   tkr_web->setStaticContentCacheHeaders(response);
@@ -3340,8 +3340,8 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
         F("/index.htm"),
         200,
         FPSTR(CONTENT_TYPE_HTML),
-        PAGE_index_lights,
-        PAGE_index_lights_L
+        PAGE_index,
+        PAGE_index_L
       );
     } else {
       serveSettings(request);
@@ -3352,20 +3352,20 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   #ifdef WLED_ENABLE_PIXART
   static const char _pixart_htm[] PROGMEM = "/pixart.htm";
   tkr_web->server->on(_pixart_htm, HTTP_GET, [](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(request, FPSTR(_pixart_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_pixart_lights, PAGE_pixart_lights_L);
+    tkr_web->handleStaticContent(request, FPSTR(_pixart_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_pixart, PAGE_pixart_L);
   });
   #endif
 
   #ifndef WLED_DISABLE_PXMAGIC
   static const char _pxmagic_htm[] PROGMEM = "/pxmagic.htm";
   tkr_web->server->on(_pxmagic_htm, HTTP_GET, [](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(request, FPSTR(_pxmagic_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_pxmagic_lights, PAGE_pxmagic_lights_L);
+    tkr_web->handleStaticContent(request, FPSTR(_pxmagic_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_pxmagic, PAGE_pxmagic_L);
   });
   #endif
 
   static const char _cpal_htm[] PROGMEM = "/cpal.htm";
   tkr_web->server->on(_cpal_htm, HTTP_GET, [](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(request, FPSTR(_cpal_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_cpal_lights, PAGE_cpal_lights_L);
+    tkr_web->handleStaticContent(request, FPSTR(_cpal_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_cpal, PAGE_cpal_L);
   });
   
 }

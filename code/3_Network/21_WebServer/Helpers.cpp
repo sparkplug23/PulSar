@@ -205,7 +205,7 @@ void mWebServer::serveMessage(AsyncWebServerRequest* request,
   request->send_P(
     code,
     PSTR("text/html"),
-    PAGE_msg,
+    PAGE_msg_web,
     [headCopy, subCopy, optCopy](const String& var) -> String
     {
       if (var != F("MSG")) return String();

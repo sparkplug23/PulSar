@@ -130,7 +130,7 @@ class mTOF_VL53L1X :
      * SECTION: Unified Reporting
      ************************************************************************************************/
 
-    #ifdef ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
+
     uint8_t GetSensorCount(void) override
     {
         uint8_t count = 0;
@@ -152,8 +152,8 @@ class mTOF_VL53L1X :
         value->data_f.push_back(data.devices[index].distance_mm);
         value->sensor_id = index;
     };
-    #endif // ENABLE_FEATURE_SENSOR_INTERFACE_UNIFIED_SENSOR_REPORTING
-
+    
+    
     /************************************************************************************************
      * SECTION: Commands
      ************************************************************************************************/

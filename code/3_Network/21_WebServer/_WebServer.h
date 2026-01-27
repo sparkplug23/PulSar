@@ -148,9 +148,10 @@ const char HTTP_END3[] PROGMEM             = "</div></body></html>";
 #include "1_TaskerManager/mTaskerInterface.h"
 
 
-    #define ARDUINOJSON_DECODE_UNICODE 0
-    #include "3_Network/21_WebServer/AsyncJson-v6.h"
-    #include "3_Network/21_WebServer/ArduinoJson-v6.h"
+#define ARDUINOJSON_DECODE_UNICODE 0
+#include "3_Network/21_WebServer/AsyncJson-v6.h"
+#include "3_Network/21_WebServer/ArduinoJson-v6.h"
+
 
 class mWebServer : 
 // public AsyncWebHandler, 
@@ -265,9 +266,9 @@ AsyncWebHandler *editHandler = nullptr;
 void serveSettingsJS(AsyncWebServerRequest* request);
 void serveJson(AsyncWebServerRequest* request);
 
-static void extractPin(Print& settingsScript, JsonObject &obj, const char *key);
+// static void extractPin(Print& settingsScript, JsonObject &obj, const char *key);
 void XML_response(Print& dest);
-static void fillUMPins(Print& settingsScript, JsonObject &mods);
+// static void fillUMPins(Print& settingsScript, JsonObject &mods);
 void appendGPIOinfo(Print& settingsScript);
 void getSettingsJS(byte subPage, Print& settingsScript);
 
