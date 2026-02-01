@@ -192,27 +192,46 @@ class MQTTConnection
      * @param _port 
      * @param _type 
      */
-    MQTTConnection(Client* _client, char* _host_address, uint16_t _port, ConnectionClient_t _type, char* username = nullptr, char* password = nullptr)
+    MQTTConnection(Client* _client,
+               const char* _host_address,
+               uint16_t _port,
+               ConnectionClient_t _type,
+               const char* username = nullptr,
+               const char* password = nullptr)
     {
       network_client = _client;
-      SetPubSubClient(_client);
       port = _port;
-      snprintf(host_address, sizeof(host_address), _host_address);
       client_type = _type;
-      Serial.printf("MQTT::CreateConnection broker_url B %s\n\r", host_address); Serial.flush();
 
-      if(username && password)
-        SetCredentials(username, password);
+      // Safe string copy (3rd arg must be a format string)
+      if (_host_address) {
+        snprintf(host_address, sizeof(host_address), "%s", _host_address);
+      } else {
+        host_address[0] = '\0';
+      }
+
+      // Build PubSub after host/port are set (SetPubSubClient should use these)
+      SetPubSubClient(_client);
+
+      Serial.printf("MQTT::CreateConnection broker_url B %s\r\n", host_address);
+      Serial.flush();
+
+      if (username && password) {
+        SetCredentials((char*)username, (char*)password);
+      }
+    }
 
 
-    };
 
-
-    MQTTConnection(IPAddress addr, uint16_t port, Client& client)
+    MQTTConnection(IPAddress addr, uint16_t _port, Client& client)
     {
+      port = _port;
+      client_type = CLIENT_TYPE_WIFI_ID; // or pass in if you use this ctor
+      network_client = &client;
+
       Serial.println("Creating new PubSubClient");
-      pubsub = new PubSubClient(addr, port, client);
-    };
+      pubsub = new PubSubClient(addr, _port, client);
+    }
 
 
     void SetCredentials(char* _user, char* _password)
@@ -261,10 +280,8 @@ class MQTTConnection
 
     void Send_LWT_Online();
     
-    bool MqttIsConnected()
-    {
-      return pubsub->connected();
-    }
+    bool MqttIsConnected() { return pubsub && pubsub->connected(); }
+
 
     // Faster than doing socket open, try this prior to sending
     bool NetworkConnected()
@@ -412,51 +429,105 @@ class mMQTTManager :
      * @return true 
      * @return false 
      */
-    bool CreateConnection(Client* client_in, char* host_address, uint16_t _port, ConnectionClient_t type, char* username = nullptr, char* password = nullptr)
-    {
+//     bool CreateConnection(Client* client_in, char* host_address, uint16_t _port, ConnectionClient_t type, char* username = nullptr, char* password = nullptr)
+//     {
 
-      /**
-       * @brief Check if url already exists
-       **/
-      int8_t found_index = -1;
-      uint8_t search_index = 0;
-      for(auto& con:brokers)
-      // for(uint8_t i=0;i<brokers_active;i++)
-      {
-        Serial.printf("Checking \"%s\" against existing \"%s\"\n\r\r\n\r\n\r\n\r\n\r\n", host_address, con->host_address);
-        Serial.flush();
-        if(strcmp(con->host_address, host_address)==0)
-        {
-          Serial.printf("found existing connection with \"%s\" Index:%d\n\r", host_address, search_index);
-        search_index++;
-        }
-        else
-        {
-          Serial.printf("NOT found, needs to add \"%s\" Index:%d\n\r", host_address, search_index);
-        }
-      }
+//       /**
+//        * @brief Check if url already exists
+//        **/
+//       int8_t found_index = -1;
+//       uint8_t search_index = 0;
+//       for(auto& con:brokers)
+//       // for(uint8_t i=0;i<brokers_active;i++)
+//       {
+//         Serial.printf("Checking \"%s\" against existing \"%s\"\n\r\r\n\r\n\r\n\r\n\r\n", host_address, con->host_address);
+//         Serial.flush();
+//         if(strcmp(con->host_address, host_address)==0)
+//         {
+//           Serial.printf("found existing connection with \"%s\" Index:%d\n\r", host_address, search_index);
+//         search_index++;
+//         }
+//         else
+//         {
+//           Serial.printf("NOT found, needs to add \"%s\" Index:%d\n\r", host_address, search_index);
+//         }
+//       }
 
-      if(search_index==0) // None found
-      {
-        Serial.printf("Adding new MQTTConnection \"%s\" Index:%d brokers_size:%d\n\r", host_address, search_index, brokers.size());
-        Serial.flush();
+//       if(search_index==0) // None found
+//       {
+//         Serial.printf("Adding new MQTTConnection \"%s\" Index:%d brokers_size:%d\n\r", host_address, search_index, brokers.size());
+//         Serial.flush();
 
 
-        if(username && password)
-          brokers.push_back(new MQTTConnection(client_in, host_address, _port, type, username, password));
-        else
-          brokers.push_back(new MQTTConnection(client_in, host_address, _port, type));
+//         if(username && password)
+//           brokers.push_back(new MQTTConnection(client_in, host_address, _port, type, username, password));
+//         else
+//           brokers.push_back(new MQTTConnection(client_in, host_address, _port, type));
 
         
-          // brokers[0] = new MQTTConnection(client_in, url, _port, type, client_name, prefix_topic);
-        // brokers_active = 1;
+//           // brokers[0] = new MQTTConnection(client_in, url, _port, type, client_name, prefix_topic);
+//         // brokers_active = 1;
+//       }
+
+//       Serial.printf("MQTT::CreateConnection Host:\"%s\", Port:%d, Index:%d\n\r", host_address, _port, search_index);
+// Serial.flush();
+
+// return 1;
+//     }
+    int8_t CreateConnection(Client* client_in,
+                        const char* host_address,
+                        uint16_t port,
+                        ConnectionClient_t type,
+                        const char* username = nullptr,
+                        const char* password = nullptr)
+    {
+      int8_t found_index = -1;
+      uint8_t idx = 0;
+
+      for (auto* con : brokers)
+      {
+        if (con && con->host_address[0])
+        {
+          Serial.printf("Checking \"%s\" against existing \"%s\"\r\n", host_address, con->host_address);
+
+          if ((strcmp(con->host_address, host_address) == 0) &&
+              (con->port == port) &&
+              (con->client_type == type))
+          {
+            found_index = (int8_t)idx;
+            Serial.printf("found existing connection with \"%s\" Index:%d\r\n", host_address, found_index);
+            break;
+          }
+        }
+        idx++;
       }
 
-      Serial.printf("MQTT::CreateConnection Host:\"%s\", Port:%d, Index:%d\n\r", host_address, _port, search_index);
-Serial.flush();
+      if (found_index >= 0)
+      {
+        // Optional: update underlying client pointer if caller passed a new one
+        brokers[found_index]->network_client = client_in;
+        brokers[found_index]->SetPubSubClient(client_in);
 
-return 1;
+        if (username && password)
+          brokers[found_index]->SetCredentials((char*)username, (char*)password);
+
+        Serial.printf("MQTT::CreateConnection REUSE Host:\"%s\", Port:%u, Index:%d\r\n",
+                      host_address, port, found_index);
+        return found_index;
+      }
+
+      // Add
+      MQTTConnection* c = new MQTTConnection(client_in, (char*)host_address, port, type,
+                                            (char*)username, (char*)password);
+      brokers.push_back(c);
+
+      const int8_t new_index = (int8_t)(brokers.size() - 1);
+      Serial.printf("MQTT::CreateConnection ADD Host:\"%s\", Port:%u, Index:%d\r\n",
+                    host_address, port, new_index);
+      return new_index;
     }
+
+
 
     
 

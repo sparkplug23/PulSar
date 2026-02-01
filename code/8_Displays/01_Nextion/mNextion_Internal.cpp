@@ -3,17 +3,6 @@
 #ifdef USE_MODULE_DISPLAYS_NEXTION
 
 
-void mNextion::Command_SplashPage(char* pagename, uint8_t time_on_page)
-{
-  // saved current page to return to later
-  splash_page_saved_page = settings.page;
-  // Change page by name
-  Command_SetPage(pagename);
-  // start timer to return to saved page
-  splash_page_seconds = time_on_page;
-
-}
-
   
 /******************************************************************************************************************
  * SECTION: Commands
@@ -459,16 +448,25 @@ bool mNextion::nextionConnect()
   }
 
   // 5) Model query (connect response fills nextionModel)
-  if (nextionModel.length() == 0) {
+  if (nextionModel[0] == '\0')
+  {
     ALOG_INF(PSTR("HMI: Querying LCD model information"));
     nextionSendCmd("connect");
 
-    t0 = millis();
-    while ((millis() - t0) <= nextionCheckTimeout && (nextionModel.length() == 0)) {
+    const uint32_t t0 = millis();
+    while (((millis() - t0) <= nextionCheckTimeout) && (nextionModel[0] == '\0'))
+    {
       nextionHandleInput();
+      yield();
     }
-    // optional: do not hard-fail if simulator
+
+    // Optional: do not hard-fail (simulator may not answer connect)
+    if (nextionModel[0] == '\0')
+    {
+      ALOG_WRN(PSTR("HMI: LCD model query timed out (simulator or non-standard firmware?)"));
+    }
   }
+
 
   return true;
 }
@@ -727,47 +725,38 @@ String mNextion::utf8ascii(String s)
 }
 
 
-void mNextion::EverySecond_FlashScreen(){
+void mNextion::ShowMessage_On_FlashScreen(const char* msg, int8_t seconds, uint32_t bg_rgb, uint32_t fg_rgb)
+{
+  if (!msg) msg = "";
 
-  if(flash_message.cShowSeconds==0){
-    // Return screen to previous
-    AddLog(LOG_LEVEL_DEV_TEST,PSTR(D_LOG_NEXTION D_COMMAND_NVALUE),"settings.page_saved",settings.page_saved);
-    Command_SetPage(settings.page_saved);
-    flash_message.cShowSeconds = -1;
-  }else
-  if(flash_message.cShowSeconds>0){
-    flash_message.cShowSeconds--;
-    AddLog(LOG_LEVEL_DEV_TEST,PSTR(D_LOG_NEXTION D_COMMAND_NVALUE),"flash_message.cShowSeconds",flash_message.cShowSeconds);
-  }
+  flash.page_return  = settings.page;   // or settings.page_saved if you already maintain it
+  flash.seconds_left = seconds;
+  flash.running      = true;
 
-} //end F
+  Command_SetPage(flash.page_flash);
 
-
-void mNextion::EverySecond_SendScreenInfo(){
-
-  char rtc_ctr[40]; memset(rtc_ctr,'\0',sizeof(rtc_ctr));
-  sprintf(rtc_ctr, "%02d:%02d:%02d\n\r",
-  tkr_time->RtcTime.hour,tkr_time->RtcTime.minute,tkr_time->RtcTime.second);
-
-  SetAttribute_Txt(settings.page,1,rtc_ctr);
-  
-  // char health_ctr[40]; memset(health_ctr,'\0',sizeof(health_ctr));
-  // sprintf(health_ctr, "%c%c%c %d",
-  //   WiFi.status() == WL_CONNECTED ? 'N' : 'n',
-  //   tkr_mqtt->pubsub->connected() ? 'M' : 'm',
-  //   fOpenHABDataStreamActive ? 'O' : 'o',
-  //   0
-  //   // tkr_wifi->WifiGetRssiAsQuality(WiFi.RSSI())
-  // );
-
-  // Serial.println(health_ctr);
-
-  // SetAttribute_Txt(settings.page,5,health_ctr);
-
+  // Put message into known component on flash page.
+  // Replace with your actual object name.
+  nextionSetAttr("message.main.txt", msg);        // or whatever wrapper you use (must quote if Nextion expects)
+  // Optional colours:
+  // nextionSetAttr("message.main.bco", RGB888_to_RGB565_from24(bg_rgb));
+  // nextionSetAttr("message.main.pco", RGB888_to_RGB565_from24(fg_rgb));
 }
 
 
+void mNextion::EverySecond_FlashScreen()
+{
+  if (!flash.running) return;
 
+  if (flash.seconds_left <= 0) {
+    Command_SetPage(flash.page_return);
+    flash.running = false;
+    flash.seconds_left = -1;
+    return;
+  }
+
+  flash.seconds_left--;
+}
 
 
 const char*  mNextion::GetObjectName_FromID(uint8_t id, char* objname, uint8_t objname_size)

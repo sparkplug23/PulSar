@@ -410,8 +410,10 @@ server->on("/settings2", HTTP_POST, [this](AsyncWebServerRequest *request){
       return;
     }
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
     ALOG_ERR(PSTR("Not sure this needs to stay or not"));
     if(tkr_anim->handle__HTTP__GET_QueryAPI(request, request->url())) return;
+    #endif
     #endif
     handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404_web, PAGE_404_web_length);
   });

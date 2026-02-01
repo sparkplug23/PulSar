@@ -80,6 +80,10 @@ int8_t mOLED_SSD1306::Tasker(uint8_t function, JsonParserObject obj)
 void mOLED_SSD1306::parse_JSONCommand(JsonParserObject obj)
 {
 
+
+  invertDisplay
+
+  
 }
 
 

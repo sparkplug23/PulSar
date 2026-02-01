@@ -475,69 +475,77 @@ void mADC_I2S_Sampler::Append_JSONPart_ESP32ADCReadings()
 }
 
 
+#ifdef USE_MODULE_NETWORK_MQTT
 
+void mADC_I2S_Sampler::MQTTHandler_Init(){
 
+  struct handler<mADC_I2S_Sampler>* ptr;
 
-// uint8_t mADC_I2S_Sampler::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
+  ptr = &mqtthandler_settings;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mADC_I2S_Sampler::ConstructJSON_Settings;
 
-//   JBI->Start();
-//     JBI->Add(D_SENSOR_COUNT, settings.fSensorCount);
-//   return JBI->End();
+  ptr = &mqtthandler_sensor_teleperiod;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.teleperiod_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mADC_I2S_Sampler::ConstructJSON_Sensor;
 
-// }
-
-// uint8_t mADC_I2S_Sampler::ConstructJSON_Sensor(uint8_t json_level){
-
-//   JBI->Start();
-
-//   char buffer[50];
-//     // Update_Channel1_ADC_Readings();
-    
-//   JBI->Array_Start("chADC1");
-//   for(int i=0;i<2;i++){
-//     JBI->Add(readings[i].adc_level);
-//   }
-//   JBI->Array_End();
-
-//   // JBI->Array_Start("ADC1");
-//   // for(int i=0;i<8;i++){
-//   //   JBI->Add(adc1_get_raw((adc1_channel_t)i));
-//   // }
-//   // JBI->Array_End();
-
-//   JBI->Array_Start("stored_values.index");
-//   for(int i=0;i<2;i++){
-//     JBI->Add(readings[0].stored_values.index);
-//   }
-//   JBI->Array_End();
-//   JBI->Array_Start("samples_between_resets");
-//   for(int i=0;i<2;i++){
-//     JBI->Add(readings[i].samples_between_resets);
-//   }
-//   JBI->Array_End();
-
-//   uint16_t send_size = 0;
-//   send_size = 10; //STORED_VALUE_ADC_MAX
-
-//   JBI->Array_Start("adc0");
-//   for(int i=0;i<send_size;i++){
-//     JBI->Add(readings[0].stored_values.adc[i]);
-//   }
-//   JBI->Array_End();
-//   JBI->Array_Start("adc1");
-//   for(int i=0;i<send_size;i++){
-//     JBI->Add(readings[1].stored_values.adc[i]);
-//   }
-//   JBI->Array_End();
-
-
+  ptr = &mqtthandler_sensor_ifchanged;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 1;//tkr_mqtt->dt.ifchanged_secs; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mADC_I2S_Sampler::ConstructJSON_Sensor;
   
+} 
 
+/**
+ * @brief Set flag for all mqtthandlers to send
+ * */
+void mADC_I2S_Sampler::MQTTHandler_RefreshAll()
+{
+  for(auto& handle:mqtthandler_list){
+    handle->flags.SendNow = true;
+  }
+}
 
-  
-//   return JBI->End();
+/**
+ * @brief Update 'tRateSecs' with shared teleperiod
+ * */
+void mADC_I2S_Sampler::MQTTHandler_Rate()
+{
+  for(auto& handle:mqtthandler_list){
+    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
+  }
+}
 
-// }
+/**
+ * @brief Check all handlers if they require action
+ * */
+void mADC_I2S_Sampler::MQTTHandler_Sender()
+{
+  for(auto& handle:mqtthandler_list){
+    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
+  }
+}
 
+#endif // USE_MODULE_NETWORK_MQTT
 
 #endif

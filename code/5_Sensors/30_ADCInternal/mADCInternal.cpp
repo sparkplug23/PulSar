@@ -18,6 +18,9 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+// SINCE ADC IS CORE FEATURE, IT SHOULD BE MOVED INTO CORE MODULE LATER
+
 /**
  * Special method, which will use interrupt on pin change, to cause a new adc value recording
  * Test 1:
@@ -699,114 +702,6 @@ void mADCInternal::MQTTHandler_Init(){
 // // // }
 
 
-
-
-// // #ifdef USE_MODULE_NETWORK_MQTT
-
-// /*********************************************************************************************************************************************
-// ******** Data Builders (JSON + Pretty) **************************************************************************************************************************************
-// **********************************************************************************************************************************************
-// ********************************************************************************************************************************************/
-
-
-// uint8_t mSensorsAnalog::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
-
-//   JBI->Start();
-//     JBI->Add("analog", analogRead(A0));
-//   return JBI->End();
-  
-// }
-
-
-
-// // /************ CONSTRUCT JSON BUILDERS *****************************************************************************************************************************/
-
-// uint8_t mSensorsAnalog::ConstructJSON_Sensor(uint8_t json_level){
-  
-//   JBI->Start();
-//     JBI->Add("analog", analogRead(A0));
-
-//     uint8_t percentage = mapvalue(analogRead(A0), 1024,320, 0,100);
-
-//     JBI->Add("percentage", percentage);
-//     JBI->Object_Start("limits");
-//       JBI->Add("min", 1024);    
-//       JBI->Add("max", 320);
-//     JBI->Object_End();
-
-//   return JBI->End();
-
-// }
-
-
-// /*********************************************************************************************************************************************
-// ******** MQTT Stuff **************************************************************************************************************************************
-// **********************************************************************************************************************************************
-// ********************************************************************************************************************************************/
-
-// void mSensorsAnalog::MQTTHandler_Init(){
-
-//   struct handler<mSensorsAnalog>* ptr;
-
-//   ptr = &mqtthandler_settings;
-//   ptr->tSavedLastSent = 0;
-//   ptr->flags.PeriodicEnabled = true;
-//   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = SEC_IN_HOUR; 
-//   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-//   ptr->json_level = JSON_LEVEL_DETAILED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-//   ptr->ConstructJSON_function = &mSensorsAnalog::ConstructJSON_Settings;
-
-//   ptr = &mqtthandler_sensor_ifchanged;
-//   ptr->tSavedLastSent = 0;
-//   ptr->flags.PeriodicEnabled = true;
-//   ptr->flags.SendNow = true;
-//   ptr->tRateSecs = 60; 
-//   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-//   ptr->json_level = JSON_LEVEL_DETAILED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-//   ptr->ConstructJSON_function = &mSensorsAnalog::ConstructJSON_Sensor;
-  
-// } 
-
-
-// // void mSey
-
-// /**
-//  * @brief Set flag for all mqtthandlers to send
-//  * */
-// void mSensorsAnalog::MQTTHandler_RefreshAll()
-// {
-//   for(auto& handle:mqtthandler_list){
-//     handle->flags.SendNow = true;
-//   }
-// }
-
-// /**
-//  * @brief Update 'tRateSecs' with shared teleperiod
-//  * */
-// void mSensorsAnalog::MQTTHandler_Rate()
-// {
-//   for(auto& handle:mqtthandler_list){
-//     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-//       handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-//     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-//       handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-//   }
-// }
-
-// /**
-//  * @brief Check all handlers if they require action
-//  * */
-// void mSensorsAnalog::MQTTHandler_Sender()
-// {
-//   for(auto& handle:mqtthandler_list){
-//     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-//   }
-// }
-
-// #endif
 
 
 

@@ -34,21 +34,7 @@ int8_t mNextion::Tasker(uint8_t function, JsonParserObject obj)
       if(!update_in_progress)
       {
         EverySecond_ActivityCheck();
-        if(splash_page_seconds)
-        {
-          splash_page_seconds--;
-          if(splash_page_seconds==0) // The final time the if above is true, is when it is 1, then -- makes this 0 and thus true
-          {
-            Command_SetPage(splash_page_saved_page); // return to saved page
-          }
-        }
       }
-    break;
-    case TASK_EVERY_MINUTE:
-      // EverySecond_SendScreenInfo();
-    break;
-    case TASK_EVERY_HOUR:
-      // Command_SetPage(settings.page);   //temp fix
     break;
     case TASK_RESTART_SET_DO_FINAL_CLEANUP:      
       nextionSendCmd("page message");
@@ -188,9 +174,6 @@ void mNextion::Init()
   
   memset(nextionSuffix,0xFF,sizeof(nextionSuffix));
 
-  memset(flash_message.message,0,sizeof(flash_message.message));
-  sprintf(flash_message.message,"%s","Awaiting a message to show");
-
   #ifdef USE_FEATURE_NEXTION__FORCE_SERIAL_BAUDRATE_FROM_DEFAULT  
   CommandSet_Baud(USE_FEATURE_NEXTION__FORCE_SERIAL_BAUDRATE_FROM_DEFAULT);
   #endif 
@@ -214,13 +197,6 @@ void mNextion::Init()
 
 void mNextion::EverySecond_ActivityCheck()
 {
-
-  //  if(fOpenHABDataStreamActive_last_secs){ //only if positive
-  //     if(fOpenHABDataStreamActive_last_secs++>OPENHAB_DATA_STREAM_ACTIVITY_TIMEOUT_SECS){
-  //       fOpenHABDataStreamActive_last_secs = -1;
-  //       fOpenHABDataStreamActive = false;
-  //     }
-  //   }
 
   ALOG_DBG(PSTR("fOpenHABDataStreamActive_last_secs = %d"), settings.timeout_check.timeout_period );
 

@@ -143,74 +143,87 @@ void mDB18x20::Ds18x20Init(void)
 void mDB18x20::Ds18x20Search(void)
 {
   uint8_t sensor_count = 0;
-  uint8_t sensor = 0;
 
-  for (uint8_t pins = 0; pins < module_state.pins_used; pins++) 
+  // Optional: if you want a fresh scan each time
+  sensor_vector.clear();
+  sensor_vector.reserve(DS18X20_MAX_SENSORS * module_state.pins_used);
+
+  for (uint8_t pins = 0; pins < module_state.pins_used; pins++)
   {
     ds = ds18x20_gpios[pins];
     ds->reset_search();
-    for (sensor_count; sensor_count < DS18X20_MAX_SENSORS; sensor_count) 
+
+    // NOTE: This limits TOTAL sensors across all pins to DS18X20_MAX_SENSORS,
+    // matching your original behaviour. If you want per-pin, say so.
+    while (sensor_count < DS18X20_MAX_SENSORS)
     {
       uint8_t search_address[8] = {0};
 
-      if (!ds->search(search_address)) 
+      if (!ds->search(search_address))
       {
         ds->reset_search();
         break;
       }
 
-      /**
-       * @brief Create storage for new sensor found
-       **/
-      sensor_vector.push_back(sensors_t); // Add new sensor
+      // ---- Build temp sensor, then push only if valid ----
+      sensors s{}; // IMPORTANT: value-init (zero + default initializers)
+      memcpy(s.address, search_address, sizeof(search_address));
+      s.device_name_index = -1;
+      s.pins_id = (int8_t)pins;
+      s.resolution = 12;
+      s.utc_measured_timestamp = 0;
 
-      if(sensor_count > sensor_vector.size())
-      { // Sanity check
-        ALOG_ERR(PSTR(PM_MEMORY_INSUFFICIENT));
-        return; 
-      }
+      const bool crc_ok = (OneWire::crc8(s.address, 7) == s.address[7]);
+      const uint8_t id = s.address[0];
+      const bool type_ok =
+          (id == DS18S20_CHIPID) ||
+          (id == DS1822_CHIPID)  ||
+          (id == DS18B20_CHIPID) ||
+          (id == MAX31850_CHIPID);
 
-      memcpy(sensor_vector[sensor_count].address, search_address, sizeof(search_address)); // Copy address
-
-      // If CRC Ok and Type DS18S20, DS1822, DS18B20 or MAX31850
-      if ((OneWire::crc8(sensor_vector[sensor_count].address, 7) == sensor_vector[sensor_count].address[7]) &&
-        ((sensor_vector[sensor_count].address[0] == DS18S20_CHIPID) ||
-          (sensor_vector[sensor_count].address[0] == DS1822_CHIPID) ||
-          (sensor_vector[sensor_count].address[0] == DS18B20_CHIPID) ||
-          (sensor_vector[sensor_count].address[0] == MAX31850_CHIPID))
-      ){
-        sensor_vector[sensor_count].device_name_index = -1; // Reset
-        // ALOG_INF (PSTR(D_LOG_DSB "pins %d"), pins);
-        sensor_vector[sensor_count].pins_id = pins;
+      if (crc_ok && type_ok)
+      {
+        sensor_vector.push_back(s);
         sensor_count++;
       }
+      // else: ignore (do not push)
     }
   }
 
-  for (uint32_t i = 0; i < sensor_count; i++) {
-    sensor_vector[i].index = i;
+  // Assign indices (sequential)
+  for (uint32_t i = 0; i < sensor_vector.size(); i++)
+  {
+    sensor_vector[i].index = (uint8_t)i;
   }
 
-  // Place ids into accending order
-  for (uint32_t i = 0; i < sensor_count; i++) {
-    for (uint32_t j = i + 1; j < sensor_count; j++) {
-      if (uint32_t(sensor_vector[sensor_vector[i].index].address) > uint32_t(sensor_vector[sensor_vector[j].index].address)) 
+  // Sort sensors by ROM (address bytes), ascending
+  // (no std::sort dependency; simple O(N^2) is fine for small N)
+  for (uint32_t i = 0; i < sensor_vector.size(); i++)
+  {
+    for (uint32_t j = i + 1; j < sensor_vector.size(); j++)
+    {
+      if (memcmp(sensor_vector[i].address, sensor_vector[j].address, 8) > 0)
       {
-        ALOG_DBG(PSTR(D_LOG_DSB "Swap"));
-        std::swap(sensor_vector[i].index, sensor_vector[j].index);
+        std::swap(sensor_vector[i], sensor_vector[j]);
       }
     }
   }
-  module_state.devices = sensor_count;
-  ALOG_DBG(PSTR(D_LOG_DSB "sensor_count %d"),module_state.devices);
 
+  // Re-assign indices after sort
+  for (uint32_t i = 0; i < sensor_vector.size(); i++)
+  {
+    sensor_vector[i].index = (uint8_t)i;
+  }
 
-  if(module_state.devices)
+  module_state.devices = (uint8_t)sensor_vector.size();
+  ALOG_DBG(PSTR(D_LOG_DSB "sensor_count %d"), module_state.devices);
+
+  if (module_state.devices)
   {
     module_state.mode = ModuleStatus::Running;
   }
-
 }
+
 
 
 void mDB18x20::Ds18x20Convert(void) 

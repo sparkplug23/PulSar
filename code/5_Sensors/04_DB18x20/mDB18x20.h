@@ -55,21 +55,12 @@ class mDB18x20 :
      * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
      ************************************************************************************************/
 
-    struct MODULE_RUNTIME{ // these will be saved and recovered on boot
-
-    }rt;
-
-    /************************************************************************************************
-     * SECTION: Internal Functions
-     ************************************************************************************************/
-      
     // DS18S20: Fixed 9-bit resolution (1/2°C). Measures temperature in 750 mS.
     // DS18B20: Resolution of 9 to 12 bits (12-1/16°C).
     static constexpr const char* kDs18x20Types = "DS18x20|DS18S20|DS1822|DS18B20|MAX31850";
     static constexpr uint8_t ds18x20_chipids[] = { 0, DS18S20_CHIPID, DS1822_CHIPID, DS18B20_CHIPID, MAX31850_CHIPID };
 
-
-    struct SENS
+    typedef struct
     { 
       uint8_t address[8] = {0};
       uint8_t index;
@@ -82,12 +73,16 @@ class mDB18x20 :
         uint8_t ischanged = false;
       }reading;
       uint32_t utc_measured_timestamp = 0;
-    }
-    sensors_t;
-    std::vector<SENS> sensor_vector; // Using vector for dynamic memory
+    }sensors;
+    std::vector<sensors> sensor_vector; // Using vector for dynamic memory
 
     OneWire *ds = nullptr;
     OneWire *ds18x20_gpios[MAX_DSB_PINS];
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+      
     void SetDeviceNameID_WithAddress(const char* device_name, uint8_t device_name_index, uint8_t* array_val, uint8_t array_len);
     void Scan_ReportAsJsonBuilder();
     void Ds18x20Init(void);
@@ -137,20 +132,14 @@ class mDB18x20 :
 
     #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    void MQTTHandler_Sender();
-    
     std::vector<struct handler<mDB18x20>*> mqtthandler_list;
     struct handler<mDB18x20> mqtthandler_settings;
     struct handler<mDB18x20> mqtthandler_sensor_ifchanged;
     struct handler<mDB18x20> mqtthandler_sensor_teleperiod;
-
-      #ifdef ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
-      struct handler<mDB18x20> mqtthandler_debug;
-      uint8_t ConstructJSON_Debug(uint8_t json_level = 0, bool json_appending = true);
-      #endif
-    
+    #ifdef ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
+    struct handler<mDB18x20> mqtthandler_debug;
+    uint8_t ConstructJSON_Debug(uint8_t json_level = 0, bool json_appending = true);
+    #endif    
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

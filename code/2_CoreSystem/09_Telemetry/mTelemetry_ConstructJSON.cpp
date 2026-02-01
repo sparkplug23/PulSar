@@ -216,7 +216,8 @@ uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level, bool json_appending
     JBI->Add(PM_HEAPSIZE,         ESP.getFreeHeap()/1024);
     JBI->Add(PM_PROGRAMFLASHSIZE, ESP.getFlashChipSize()/1024);
     JBI->Add(PM_FLASHSIZE,        ESP.getFlashChipRealSize()/1024);
-    // JBI->Add(PM_FLASHCHIPID,      ESP.getFlashChipId());
+    uint64_t mac = ESP.getEfuseMac();
+    JBI->Add(PM_FLASHCHIPID, mac);
     #endif // ESP8266
     JBI->Add(PM_FLASHMODE,        (uint8_t)ESP.getFlashChipMode()); //FlashMode_t
   return JBI->End();
@@ -480,12 +481,21 @@ uint8_t mTelemetry::ConstructJSON_Debug_Devices(uint8_t json_level, bool json_ap
 
 uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level, bool json_appending)
 {
+
+  // I could add if reboot event (based on json_appending)
+  // Then if last was clean, dont send and return early
+
+
   JBI->Start();
+
+  // Onlu sent, when "ALL" indicates a "Event" was fired
+  if(json_level == JSON_LEVEL_ALL)
+    JBI->Add("ResetEvent", "Once");
 
   JBI->Add(PM_DEVICE,             tkr_set->Settings.system_name.device);
   JBI->Add(PM_DEVICEFRIENDLYNAME, tkr_set->Settings.system_name.friendly);
 
-  JBI->Add_FV(PM_DATETIME, PSTR("\"%02d-%02d-%02d %02d:%02d:%02d\""),
+  JBI->Add_FV("ResetDateTime", PSTR("\"%02d-%02d-%02d %02d:%02d:%02d\""),
               tkr_time->RtcTime.day_of_month, tkr_time->RtcTime.month, tkr_time->RtcTime.year,
               tkr_time->RtcTime.hour, tkr_time->RtcTime.minute, tkr_time->RtcTime.second);
 

@@ -1092,7 +1092,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     bool isAsterisksOnly(const char* str, byte maxLen);
 
 
-    #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
     void SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage);
     bool handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, const String& req, bool apply=true);
     #endif // ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
@@ -2657,8 +2657,10 @@ uint8_t perlin8(uint16_t x, uint16_t y, uint16_t z) {
   bool colorChanged();
 
   void colorUpdated(byte callMode);
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
   void stateUpdated(byte callMode);
   void updateInterfaces(uint8_t callMode);
+  #endif
 
   void handleTransitions();
 

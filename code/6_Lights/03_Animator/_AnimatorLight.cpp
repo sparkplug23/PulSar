@@ -38,7 +38,9 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_EVERY_SECOND:{
       EverySecond_AutoOff(); 
 
+      #ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
       updateInterfaces(CALL_MODE_WS_SEND); //tmp fix sending here
+      #endif 
 
       #ifdef ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
       Serial.printf_P(PSTR("FPS: %f\n\r"), getFpsFloat());

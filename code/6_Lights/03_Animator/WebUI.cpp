@@ -496,7 +496,9 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
     String apireq = "win"; apireq += '&'; // reduce flash string usage
     apireq += httpwin;
     ALOG_INF(PSTR("Did I enter here 1?"));
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
     handle__HTTP__GET_QueryAPI(nullptr, apireq, false);    // may set stateChanged
+    #endif
   }
 
   // applying preset (2 cases: a) API call includes all preset values ("pd"), b) API only specifies preset ID ("ps"))
@@ -549,7 +551,9 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 
   // ALOG_INF(PSTR("deserializeState end =>> does my normal commandjson need done here?"));
 
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
   stateUpdated(callMode);
+  #endif
   if (presetToRestore) currentPreset = presetToRestore;
   
   #endif // ENABLE_FEATURE_LIGHTS__PRESETS

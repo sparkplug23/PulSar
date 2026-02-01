@@ -194,9 +194,17 @@ void mOLED_SH1106::InitDriver(void)
     tkr_iDisp->renderer->DisplayOnff(true);
     #endif
 
+
+
     ALOG_INF(PSTR("DSP: SD1306"));
   }
 
+    tkr_set->Settings.display.invert = 0;
+    #ifdef ENABLE_DEVFEATURE_DISPLAY__INVERT
+    tkr_set->Settings.display.invert = 1;
+    #endif
+
+    tkr_iDisp->renderer->invertDisplay(tkr_set->Settings.display.invert);
 }
 
 

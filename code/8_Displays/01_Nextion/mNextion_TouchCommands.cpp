@@ -190,17 +190,17 @@ void mNextion::ProcessInput__GetStringReturn()
 
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "HMI IN: [String Return] '%s'"), getString.c_str());
 
-  if (mqttGetSubtopic == "") {
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),
-           mqttStateTopic.c_str(), getString.c_str());
-    tkr_mqtt->Publish("status/nextion/getString", getString.c_str(), 0);
-  } else {
-    String mqttReturnTopic = mqttStateTopic + mqttGetSubtopic;
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),
-           mqttReturnTopic.c_str(), getString.c_str());
-    tkr_mqtt->Publish("status/nextion/getString", getString.c_str(), 0);
-    mqttGetSubtopic = "";
-  }
+  // if (mqttGetSubtopic == "") {
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),
+  //          mqttStateTopic.c_str(), getString.c_str());
+  //   tkr_mqtt->Publish("status/nextion/getString", getString.c_str(), 0);
+  // } else {
+  //   String mqttReturnTopic = mqttStateTopic + mqttGetSubtopic;
+  //   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "MQTT OUT: '%s' : '%s']"),
+  //          mqttReturnTopic.c_str(), getString.c_str());
+  //   tkr_mqtt->Publish("status/nextion/getString", getString.c_str(), 0);
+  //   mqttGetSubtopic = "";
+  // }
 }
 
 
@@ -227,22 +227,22 @@ void mNextion::ProcessInput__GetIntReturn()
     return;
   }
 
-  if (mqttGetSubtopic == "") {
-    Serial.println(getString);
-    tkr_mqtt->Publish("status/nextion/event9", getString.c_str(), 0);
-  } else {
-    String mqttReturnTopic = mqttStateTopic + mqttGetSubtopic;
-    tkr_mqtt->Publish("status/nextion/event10", getString.c_str(), 0);
+  // if (mqttGetSubtopic == "") {
+  //   Serial.println(getString);
+  //   tkr_mqtt->Publish("status/nextion/event9", getString.c_str(), 0);
+  // } else {
+  //   String mqttReturnTopic = mqttStateTopic + mqttGetSubtopic;
+  //   tkr_mqtt->Publish("status/nextion/event10", getString.c_str(), 0);
 
-    String mqttButtonJSONEvent =
-        String(F("{\"event\":\"")) + mqttGetSubtopicJSON +
-        String(F("\", \"value\":")) + getString +
-        String(F("}"));
+  //   String mqttButtonJSONEvent =
+  //       String(F("{\"event\":\"")) + mqttGetSubtopicJSON +
+  //       String(F("\", \"value\":")) + getString +
+  //       String(F("}"));
 
-    tkr_mqtt->Publish("status/nextion/event11", mqttButtonJSONEvent.c_str(), 0);
+  //   tkr_mqtt->Publish("status/nextion/event11", mqttButtonJSONEvent.c_str(), 0);
 
-    mqttGetSubtopic = "";
-  }
+  //   mqttGetSubtopic = "";
+  // }
 }
 
 
@@ -312,9 +312,9 @@ void mNextion::ProcessInput__ErrorReturnCode()
   // Special-case behaviour you previously relied on:
   // 0x1A often occurs when querying .val on objects that don't support it.
   // Keep the old side-effect, but only for that code.
-  if (code == 0x1A) {
-    mqttGetSubtopic = "";
-  }
+  // if (code == 0x1A) {
+  //   mqttGetSubtopic = "";
+  // }
 }
 
 
@@ -337,13 +337,13 @@ void mNextion::ProcessInput__TouchCoordinateData()
 
   if (touch == 0x01) {
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "HMI IN: [Touch ON] '%s'"), xyCoord.c_str());
-    String mqttTouchTopic = mqttStateTopic + "/touchOn";
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"), mqttTouchTopic.c_str(), xyCoord.c_str());
+    // String mqttTouchTopic = mqttStateTopic + "/touchOn";
+    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"), mqttTouchTopic.c_str(), xyCoord.c_str());
     tkr_mqtt->Publish("status/nextion/xyCoord", xyCoord.c_str(), 0);
   } else if (touch == 0x00) {
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "HMI IN: [Touch OFF] '%s'"), xyCoord.c_str());
-    String mqttTouchTopic = mqttStateTopic + "/touchOff";
-    AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"), mqttTouchTopic.c_str(), xyCoord.c_str());
+    // String mqttTouchTopic = mqttStateTopic + "/touchOff";
+    // AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_NEXTION "MQTT OUT: '%s' '%s'"), mqttTouchTopic.c_str(), xyCoord.c_str());
     tkr_mqtt->Publish("status/nextion/event6", xyCoord.c_str(), 0);
   }
 }
@@ -396,7 +396,8 @@ void mNextion::ProcessInput__ComokResponse()
 
     if (b == sep) {
       if (comokFieldCount == 2) {
-        nextionModel = comokField;
+        strncpy(nextionModel, comokField.c_str(), sizeof(nextionModel) - 1);
+        nextionModel[sizeof(nextionModel) - 1] = '\0'; // Ensure null termination
       }
       comokFieldCount++;
       comokField = "";

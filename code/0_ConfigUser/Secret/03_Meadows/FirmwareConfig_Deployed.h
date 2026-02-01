@@ -542,165 +542,7 @@
   #endif
     #define MQTT_PORT     1883
 
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
-  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
-
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-
-  #define ENABLE_EFFECT_DESCRIPTIONS
-
-  /***********************************
-   * SECTION: System Debug Options
-  ************************************/   
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-  
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-  // #define ENABLE_DEBUG_LINE_HERE
-
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
-
-  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
-
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  /***********************************
-   * SECTION: Enable Functions
-  ************************************/  
-  
-
-  /***********************************
-   * SECTION: System Configs
-  ************************************/    
- 
-  #define SETTINGS_HOLDER 1239
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-
-  // 
-  // 
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-    
-  
-
-  #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-
-  /***********************************
-   * SECTION: Network Configs
-  ************************************/    
-
-  /***********************************
-   * SECTION: Sensor Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Display Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Driver Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/  
-
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":2,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":0,
-  //       "Length":250
-  //     }
-  //   ],
-  //   "Segment0": {
-  //     "PixelRange": [
-  //       0,
-  //       175
-  //     ],
-  //     "ColourPalette":"Snowy 02",
-  //     "Effects": {
-  //       "Function":"Static",
-  //       "Speed":127,
-  //       "Intensity":127,
-  //       "Decimate":0,
-  //       "Grouping":1,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 0,
-  //     "BrightnessCCT": 0
-  //   },
-  //   "Segment1": {
-  //     "PixelRange": [
-  //       175,
-  //       250
-  //     ],
-  //     "ColourPalette":"Warm White",
-  //     "Effects": {
-  //       "Function":"Static",
-  //       "Speed":127,
-  //       "Intensity":127,
-  //       "Decimate":0,
-  //       "Grouping":1,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 100,
-  //     "BrightnessCCT": 0
-  //   },
-  //   "BrightnessRGB": 100,
-  //   "BrightnessCCT": 0
-  // }
-  // )=====";
-
-
-  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
-  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
-
-
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-
-  #define ENABLE_EFFECT_DESCRIPTIONS
-
-
-// ======================= Example PROGMEM template =======================
-// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
-#define USE_STANDBY_TEMPLATE
-#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
-// compile-time gate
-// #define LIGHTING_STANDBY_TEMPLATE_ID  5
-
-#define 
 
 DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
 R"=====(
@@ -2601,11 +2443,11 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #ifdef ENABLE_TEMPLATE_SECTION__DISPLAY_NEXTION
     #define USE_MODULE_DISPLAYS_NEXTION
     #define NEXTION_DEFAULT_PAGE_NUMBER 6  
-      #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
-      // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
+      
+      //  // change to be code option later
       #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
       #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
-      // #define ENABLE_DEVFEATURE_NEXTION__FORCE_SUBSCRIBE_TO_OPENHAB_BROADCASTS                    
+      //                     
       #define ENABLE_DEVFEATURE_NEXTION_DISPLAY        
       #define ENABLE_DEVFEATURE_NEXTION_WEBUI
       #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER 1
@@ -5699,212 +5541,6 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
  * 
  */
 #ifdef DEVICE_MEADOWS__OFFICE__SUN_PIXELS_1D
-  // #ifndef DEVICENAME_CTR
-  // #define DEVICENAME_CTR          "testbed_default"
-  // #endif
-  // #ifndef DEVICENAME_FRIENDLY_CTR
-  // #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
-  // #endif
-  // #ifndef DEVICENAME_DESCRIPTION_CTR
-  // #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
-  // #endif
-  // #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  // #define MQTT_HOST   "192.168.3.70"
-  //   
-  //   #define MQTT_PORT     1883
-
-
-
-  /***********************************
-   * SECTION: System Debug Options
-  ************************************/    
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-  
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-  // #define ENABLE_DEBUG_LINE_HERE
-  // #define ENABLE_DEBUG_LINE_HERE2
-
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
-
-  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE // comment out to enable fastboot recovery
-
-  // #define ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
-
-  /***********************************
-   * SECTION: Storage Configs
-  ************************************/  
- 
-  // #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
-
-  /**
-   * For debugging and short term I may want to store everything as JSON, so I can view the data?
-   * Longer term, a mixture of JSON/Binary for space.
-   * Options should just be ifdef to switch between methods. 
-  */
-  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
-
-  // New way to start the save into memory periodically, and then recover if available on boot. Init phase of full system.
-  // #define ENABLE_FILESYSTEM__MODULES_CORE__SAVE
-  // #define ENABLE_FILESYSTEM__MODULES_CORE__RESTORE_ON_BOOT
-  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__SAVE
-  // #define ENABLE_FILESYSTEM__MODULES_DRIVERS__RESTORE_ON_BOOT
-  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__SAVE
-  // #define ENABLE_FILESYSTEM__MODULES_SENSORS__RESTORE_ON_BOOT
-  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__SAVE
-  // #define ENABLE_FILESYSTEM__MODULES_LIGHTING__RESTORE_ON_BOOT
-  
-
-  /***********************************
-   * SECTION: System Configs
-  ************************************/     
-
-  // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  // 
-  // 
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  // /***********************************
-  //  * SECTION: Network Configs
-  // ************************************/    
-
-  // 
-  // 
-
-  // /***********************************
-  //  * SECTION: Sensor Configs
-  // ************************************/  
-
-  
-  // #define USE_MODULE_SENSORS_SUN_TRACKING     
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
-  //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
-  //   // #define ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
-
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
-  // // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS2
-
-  // #define ENABLE_DEVFEATURE_SUNTRACKING__SUN_TIME_CALCULATE_SUN_PATHS_ACROSS_DAY
-
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__DETAILED_MQTT_INFO_UNIX
-
-  /***********************************
-   * SECTION: Display Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Driver Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/  
-
-  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__JUNE2025__NO_MODULE_GPIO
-
-  // #define USE_LIGHTING_TEMPLATE__AS_SEGMENT_ARRAY
- 
-
-  // #ifdef USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
-
-  // 
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":2,
-  //       "ColourOrder":"GRB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":0,
-  //       "Length":450
-  //     }
-  //   ],
-  //   "Segment0": {
-  //     "PixelRange": [
-  //       0,
-  //       35
-  //     ],
-  //     "ColourPalette":"Red",
-  //     "ColourType":3,
-  //     "Effects": {
-  //       "Function":"Static",
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 0
-  //   },
-  //   "Segment1": {
-  //     "PixelRange": [
-  //       35,
-  //       137
-  //     ],
-  //     "ColourPalette":"Rainbow",
-  //     "ColourType":3,
-  //     "Effects": {
-  //       "Function":"Candles",
-  //       "Speed":180,
-  //       "Intensity":85,
-  //       "Grouping":1,
-  //       "RateMs": 20
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "Segment2": {
-  //     "PixelRange": [
-  //       137,
-  //       450
-  //     ],
-  //     "ColourPalette":"Vintage",
-  //     "ColourType":3,
-  //     "Effects": {
-  //       "Function":"Candles",
-  //       "Speed":180,
-  //       "Intensity":85,
-  //       "Grouping":1,
-  //       "RateMs": 20
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "BrightnessRGB": 100
-  // }
-  // )=====";
-
-  // #endif // USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
-
-
-  // #ifdef USE_LIGHTING_TEMPLATE__AS_SEGMENT_ARRAY
- 
    
    #define USE_LIGHTING_TEMPLATE
    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -5966,57 +5602,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
       "BrightnessRGB": 100
    }
    )=====";
-  //  #endif // USE_LIGHTING_TEMPLATE__AS_SEGMENTNUMBERED
-
- /***********************************
-  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
- ************************************/  
-  // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
-
- /***********************************
-  * SECTION: Sensor Configs
- ************************************/  
-
-//   #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
-//    #define USE_MODULE_SENSORS_INTERFACE
-//    #define USE_MODULE_SENSORS_PIR
-//     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
-//  #endif
-
-//  #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
-
-
-
-//  /***********************************
-//   * SECTION: Module/GPIO Configs
-//  ************************************/  
-
-//  #define USE_MODULE_TEMPLATE
-//  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-//  "{"
-//    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
-//    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-//    "\"" D_GPIO_NUMBER "\":{"
-//      "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-//      "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
-//    "},"
-//    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-//    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-//  "}";
-
-  
-//  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
-
-//  #define USE_FUNCTION_TEMPLATE
-//  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-//  "{"
-//    "\"" D_DEVICENAME "\":{"
-//      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
-//        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
-//      "]"
-//    "}"
-//  "}";
-
+   
 #endif
 
 
@@ -6565,8 +6151,8 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   #define USE_MODULE_DISPLAYS_NEXTION
     #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
   #define NEXTION_DEFAULT_PAGE_NUMBER 10//6  
-    #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
-    // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
+    
+    //  // change to be code option later
     #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
     #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
 
@@ -6746,8 +6332,8 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   #define USE_MODULE_DISPLAYS_NEXTION
     #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
   #define NEXTION_DEFAULT_PAGE_NUMBER 5//6  
-    #define ENABLE_DEVFEATURE_NEXTION_OTA_UPLOAD_TFT
-    // #define ENABLE_DEBUG_FEATURE_REVERT_TO_ERROR_PAGE_WITH_NO_UPDATE // change to be code option later
+    
+    //  // change to be code option later
     #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
     #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
 

@@ -12,7 +12,7 @@
 
 void mNextion::Show_ConnectionWorking()
 {
-  Command_SplashPage("message", 2);
+  // Command_SplashPage("message", 2);
   
   nextionSetAttr("message.main.txt", "\"Computer connected!\"");
   uint16_t colour565 = RGB888_to_RGB565(0,255,255);
@@ -29,17 +29,11 @@ void mNextion::Show_ConnectionNotWorking()
 }
 
 
-
 void mNextion::nextionUpdateProgress(const unsigned int &progress, const unsigned int &total)
 {
   uint8_t progressPercent = (float(progress) / float(total)) * 100;
   nextionSetAttr("p[0].b[4].val", String(progressPercent).c_str());
 }
-
-
-
-
-
 
 
 #endif  // USE_MODULE_DISPLAYS_NEXTION
