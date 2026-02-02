@@ -92,26 +92,41 @@
       }
     #else
       #include "esp_system.h"
-      hw_timer_t *timerwdt = NULL;
-      const uint64_t wdtTimeout = D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS;
+      // hw_timer_t *timerwdt = NULL;
+      // const uint64_t wdtTimeout = D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS;
 
-      void IRAM_ATTR resetModule() {
-        ets_printf("reboot resetModule\n");
-        Serial.println("WDT REBOOTING!!"); Serial.flush();
-        esp_restart();
-      }
+      // void IRAM_ATTR resetModule() {
+      //   ets_printf("reboot resetModule\n");
+      //   Serial.println("WDT REBOOTING!!"); Serial.flush();
+      //   esp_restart();
+      // }
+
+      // void WDT_Init() {
+      //   timerwdt = timerBegin(0, 80, true);
+      //   timerAttachInterrupt(timerwdt, &resetModule, true);
+      //   timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);
+      //   timerAlarmEnable(timerwdt);
+      // }
+
+      // void WDT_Reset() {
+      //   if (timerwdt == nullptr) WDT_Init();
+      //   timerWrite(timerwdt, 0);
+      // }
 
       void WDT_Init() {
-        timerwdt = timerBegin(0, 80, true);
-        timerAttachInterrupt(timerwdt, &resetModule, true);
-        timerAlarmWrite(timerwdt, wdtTimeout * 1000, false);
-        timerAlarmEnable(timerwdt);
+        // timeout in seconds
+        const int timeout_s = (D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS + 999) / 1000;
+
+        // (Older cores differ slightly; this matches the common Arduino-ESP32 v2.x style)
+        esp_task_wdt_init(timeout_s, true);   // panic = true
+        esp_task_wdt_add(NULL);              // current task
       }
 
       void WDT_Reset() {
-        if (timerwdt == nullptr) WDT_Init();
-        timerWrite(timerwdt, 0);
+        esp_task_wdt_reset();
       }
+
+      
     #endif
   #endif
 #else

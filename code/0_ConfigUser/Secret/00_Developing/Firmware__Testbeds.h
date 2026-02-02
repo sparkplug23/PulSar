@@ -99,14 +99,14 @@
    * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
   ************************************/  
   
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__DHT
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-  // #define ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
-  #define ENABLE_TEMPLATE_SECTION__DISPLAYS__NEXTION
-  #define ENABLE_TEMPLATE_SECTION__LIGHTS // maybe dont want them here, too much memory. or, need lightweight version (few effects, no webui? ie basic notification tester!>)
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__DHT
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
+  // // #define ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+  // #define ENABLE_TEMPLATE_SECTION__DISPLAYS__NEXTION
+  // #define ENABLE_TEMPLATE_SECTION__LIGHTS // maybe dont want them here, too much memory. or, need lightweight version (few effects, no webui? ie basic notification tester!>)
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR
 
   /***********************************
    * SECTION: Storage Configs
@@ -121,6 +121,8 @@
   /***********************************
    * SECTION: System Configs
   ************************************/     
+
+  #define USE_MODULE_CORE__CRASH_RECORDER
 
   /***********************************
    * SECTION: Storage Configs
@@ -377,7 +379,8 @@
   #define D_DEVICE_HEATER_2_NAME "FanHeater"
   #define D_DEVICE_HEATER_3_NAME "OilRadiator"
 
-  #define D_DEVICE_SENSOR_DHT_0_NAME "Downstairs_DHT"
+  #define D_DEVICE_SENSOR_DHT_0_NAME "DHT1"
+  #define D_DEVICE_SENSOR_DHT_1_NAME "DHT2"
 
 // {"NumDevices":4,"DeviceNameIndex":[-1,-1,-1,-1],"AddressList":[[40,140,131,47,0,0,0,230],[40,18,77,49,0,0,0,233],[40,233,112,49,0,0,0,11],[40,165,161,47,0,0,0,189]]}
 
@@ -453,7 +456,8 @@
         "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_DHT_CTR "\":["
-        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
+        "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
+        "\"" D_DEVICE_SENSOR_DHT_1_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
         "\"" "Desk" "\""

@@ -215,7 +215,7 @@ bool mBH1750::Get_SensorReading(uint8_t sensor_index)
   device_data[sensor_index].illuminance = illuminance;
 
   // ALOG_INF( PSTR(D_LOG_BH1750 "level=%d, lum=%d (%d.%d)"), level, (int)illuminance, FLOAT_N(illuminance), FLOAT_D(illuminance) );
-  ALOG_INF( PSTR(D_LOG_BH1750 "level=%d, lum=%d.%d"), level, FLOAT_N(illuminance), FLOAT_D(illuminance) );
+  ALOG_DBM( PSTR(D_LOG_BH1750 "level=%d, lum=%d.%d"), level, FLOAT_N(illuminance), FLOAT_D(illuminance) );
 
   device_data[sensor_index].valid = SENSOR_MAX_MISS;
 

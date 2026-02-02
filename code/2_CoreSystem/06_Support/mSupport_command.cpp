@@ -69,10 +69,10 @@ void mSupport::CommandSet_Restart(int8_t command)
       ESP_Restart_Immediate();
     break;
     case -1:
-      CmndCrash();    // force a crash
+      tkr_crash_recorder->CmndCrash();    // force a crash
     break;
     case -2:
-      CmndWDT();
+      tkr_crash_recorder->CmndWDT();
     break;
     // case -3:
     // // OSWATCH_RESET_TIME

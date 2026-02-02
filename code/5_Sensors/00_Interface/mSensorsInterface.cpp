@@ -76,7 +76,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
 
     }break;
     case TASK_EVERY_10_SECONDS:
-      tkr->Tasker_Interface(TASK_SENSOR_SHOW_LATEST_LOGGED_ID);
+      // tkr->Tasker_Interface(TASK_SENSOR_SHOW_LATEST_LOGGED_ID);
     break;
     case TASK_WEB_APPEND_SENSOR_TABLE_VALUES:
       WebAppend__Sensor_Table__As_Ragged();

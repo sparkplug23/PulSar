@@ -266,6 +266,10 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "2_CoreSystem/09_Telemetry/mTelemetry.h"
   #define   tkr_tel                               static_cast<mTelemetry*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_TELEMETRY_ID))
 #endif 
+#ifdef USE_MODULE_CORE__CRASH_RECORDER
+  #include "2_CoreSystem/10_CrashRecorder/CrashRecorder.h"
+  #define   tkr_crash_recorder                               static_cast<CrashRecorder*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE__CRASH_RECORDER__ID))
+#endif 
 // #ifdef USE_MODULE_CORE_EVENTS
   #include "2_CoreSystem/12_Events/mEvents.h"
   #define   tkr_events                           static_cast<mEvent*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_EVENTS_ID))

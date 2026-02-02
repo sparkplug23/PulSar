@@ -41,6 +41,7 @@
 #define D_MODULE_CORE_SUPPORT_CTR                 "support"
 #define D_MODULE_CORE_LOGGING_CTR                 "logging"
 #define D_MODULE_CORE_TELEMETRY_CTR               "telemetry"
+#define D_MODULE_CORE__CRASH_RECORDER__CTR       "crashrecorder"
 #define D_MODULE_CORE_TIME_CTR                    "time"
 #define D_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR   "debug_development"
 #define D_MODULE_CORE_EVENTS_CTR                  "events"

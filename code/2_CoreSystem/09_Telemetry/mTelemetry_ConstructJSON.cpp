@@ -525,7 +525,7 @@ uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level, bool json_appending
 
   JBI->Object_Start(PM_CRASHDUMP);
     tkr_sup->WriteBuffer_P(PSTR(","));
-    tkr_sup->CrashDump_AddJson();
+    tkr_crash_recorder->CrashDump_AddJson();
   JBI->Object_End();
 
   return JBI->End();

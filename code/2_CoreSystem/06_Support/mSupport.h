@@ -376,8 +376,6 @@ std::string toBinaryString(T value, size_t bitCount = sizeof(T) * 8) {
     return result;
 }
 
-extern "C" void custom_crash_callback(struct rst_info * rst_info, uint32_t stack, uint32_t stack_end);
-
 extern uint32_t ResetReason_g(void);
 
 extern void SafeMode_StartAndAwaitOTA(uint8_t seconds_to_wait = 0 /*default of zero, is indefinitely */);
@@ -390,11 +388,6 @@ extern void SafeMode_StartAndAwaitOTA(uint8_t seconds_to_wait = 0 /*default of z
 #include <TinyGsmClient.h>
 extern void SafeMode_CellularConnectionAndSendLocation();
 #endif // ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
-
-
-const uint32_t crash_magic = 0x53415400;   // Stack trace magic number (TASx)
-const uint32_t crash_rtc_offset = 32;      // Offset in RTC memory skipping OTA used block
-const uint32_t crash_dump_max_len = 31;    // Dump only 31 call addresses to satisfy max JSON length of about 600 characters
 
 #include <Ticker.h>
 
@@ -595,13 +588,6 @@ public:
 
     void CommandSet_Restart(int8_t command);
 
-    void CrashDump_AddJson();
-    void CmndCrash(void);
-    void CmndWDT(void);
-    void CmndBlockedLoop(void);
-    void CrashDumpClear(void);
-    bool CrashFlag(void);
-    void CrashDump(void);
     
     int Response_P(const char* format, ...);
     int ResponseAppend_P(const char* format, ...);
