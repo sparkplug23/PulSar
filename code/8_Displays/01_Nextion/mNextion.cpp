@@ -45,11 +45,11 @@ int8_t mNextion::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * Network SECTION * 
     *******************/
-    case TASK_WIFI_STARTING_CONNECTION:      
-      nextionSendCmd("page message");
-      nextionSetAttr("message.main.txt", "\"WiFi Connecting...\"");
-      nextionSetAttr("message.main.bco", NEXTION_16BIT_COLOUR_RED_STR);
-    break;
+    // case TASK_WIFI_STARTING_CONNECTION:      
+    //   nextionSendCmd("page message");
+    //   nextionSetAttr("message.main.txt", "\"WiFi Connecting...\"");
+    //   nextionSetAttr("message.main.bco", NEXTION_16BIT_COLOUR_RED_STR);
+    // break;
     case TASK_WEB_ADD_HANDLER:
       WebPage_AddHandlers();
     break;

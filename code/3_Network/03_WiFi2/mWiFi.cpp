@@ -63,7 +63,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj)
     }
     break;
 
-    case TASK_WIFI_CONNECTED:
+    case TASK_NETWORK_CONNECTED__WIFI:
     {
       #ifdef USE_NETWORK_MDNS
         WiFi_Mdns_StartOrRestart();

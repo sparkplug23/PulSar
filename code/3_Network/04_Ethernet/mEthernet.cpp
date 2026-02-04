@@ -394,7 +394,7 @@ ALOG_INF(PSTR("ethernet connected? %d.%d.%d.%d"),ip[0],ip[1],ip[2],ip[3]);
   // }
 
   // If you want to reuse your Tasker event pattern:
-  // Tasker(TASK_ETHERNET_CONNECTED);  // only if your Tasker manager expects it
+  // Tasker(TASK_NETWORK_CONNECTED__ETHERNET);  // only if your Tasker manager expects it
 }
 
 void mEthernet::OnBecameDisconnected()

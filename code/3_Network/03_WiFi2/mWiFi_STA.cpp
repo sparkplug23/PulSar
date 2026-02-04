@@ -318,7 +318,7 @@ void mWiFi::WiFi2_Sta_Connected_Enter(void)
   tkr_set->runtime.global_state.network_down = false;
 
   // Trigger existing task event flow
-  tkr->Tasker_Interface(TASK_WIFI_CONNECTED);
+  tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__WIFI); tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__ANY);
 }
 
 void mWiFi::WiFi2_Sta_Disconnected_Enter(void)
@@ -330,6 +330,10 @@ void mWiFi::WiFi2_Sta_Disconnected_Enter(void)
 
   tkr_set->Settings.network.flag.network_wifi = 0;
   tkr_set->runtime.global_state.wifi_down = true;
+
+  
+  // Trigger existing task event flow
+  tkr->Tasker_Interface(TASK_NETWORK_LOST__WIFI); tkr->Tasker_Interface(TASK_NETWORK_LOST__WIFI);
 }
 
 void mWiFi::WiFi2_Sta_EnsureConnecting(void)
@@ -352,57 +356,145 @@ void mWiFi::WiFi2_Sta_EnsureConnecting(void)
 }
 
 
+// void mWiFi::WiFi_Sta_State_Set(uint8_t state)
+// {
+// ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+//   //check for change in state
+//   if(connection.fConnected != state)
+//   {
+//     DEBUG_LINE_HERE;
+
+//     if(state){ //new state 
+//     // pinMode(2,OUTPUT);
+//     // digitalWrite(2,LOW);
+//       tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__WIFI);
+//       loglevel_with_connection_status = LOG_LEVEL_DEBUG_MORE;
+//     }else{
+//     // pinMode(2,OUTPUT);
+//     // digitalWrite(2,HIGH);
+//       tkr->Tasker_Interface(TASK_NETWORK_LOST__WIFI);
+//       loglevel_with_connection_status = LOG_LEVEL_INFO;
+//     }
+//   }
+
+//   connection.fConnected = state;
+
+  
+//   if(state == 0){
+//     ALOG_INF(PSTR(D_LOG_DEBUG "%s=%d"),"WiFi_Sta_State_Set",state);
+//   }
+
+//   if (state == tkr_set->runtime.global_state.wifi_down) {
+//     DEBUG_LINE_HERE;
+//     if (state) {
+//       // tkr_set->rules_flag.wifi_connected = 1;
+//       connection.link_count++;
+//       connection.downtime += tkr_time->UpTime() - connection.last_event;
+//     } else {
+//       // tkr_set->rules_flag.wifi_disconnected = 1;
+//       connection.last_event = tkr_time->UpTime();
+//     }DEBUG_LINE_HERE
+
+//   }
+//   // if(tkr_time==NULL){
+//   //    ALOG_DBM( "tkr_time==NULL");
+//   // }
+//   tkr_set->runtime.global_state.wifi_down = state ^1;
+//   if (!tkr_set->runtime.global_state.wifi_down) {
+//     // DEBUG_LINE_HERE;
+//     tkr_set->runtime.global_state.network_down = 0;
+//   }
+
+//   // ALOG_INF(PSTR(D_LOG_DEBUG "%s"),"WiFi_Sta_State_Set end");
+    
+// }
+
 void mWiFi::WiFi_Sta_State_Set(uint8_t state)
 {
-ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
-  //check for change in state
-  if(connection.fConnected != state)
+  ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"), __FILE__, __LINE__);
+
+  // Normalise: treat any non-zero as "connected"
+  state = (state != 0) ? 1 : 0;
+
+  const bool prev_connected = (connection.fConnected != 0);
+  const bool new_connected  = (state != 0);
+
+  // Edge-trigger only
+  if (prev_connected != new_connected)
   {
     DEBUG_LINE_HERE;
 
-    if(state){ //new state 
-    // pinMode(2,OUTPUT);
-    // digitalWrite(2,LOW);
-      tkr->Tasker_Interface(TASK_WIFI_CONNECTED);
+    // NOTE: this function historically triggers task events directly
+    if (new_connected)
+    {
+      tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__WIFI); tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__ANY);
       loglevel_with_connection_status = LOG_LEVEL_DEBUG_MORE;
-    }else{
-    // pinMode(2,OUTPUT);
-    // digitalWrite(2,HIGH);
-      tkr->Tasker_Interface(TASK_WIFI_DISCONNECTED);
-      loglevel_with_connection_status = LOG_LEVEL_INFO;
+
+      // Transition into connected:
+      // - Count link ups
+      // - Reset downtime tracking and last_event for next outage window
+      connection.link_count++;
+      connection.downtime  = 0;
+      connection.last_event = tkr_time ? tkr_time->UpTime() : 0;
     }
+    else
+    {
+      tkr->Tasker_Interface(TASK_NETWORK_LOST__WIFI); tkr->Tasker_Interface(TASK_NETWORK_LOST__WIFI);
+      loglevel_with_connection_status = LOG_LEVEL_INFO;
+
+      // Transition into disconnected:
+      // - Start outage timer
+      connection.last_event = tkr_time ? tkr_time->UpTime() : 0;
+    }
+
+    DEBUG_LINE_HERE;
   }
 
+  // Persist state
   connection.fConnected = state;
 
-  
-  if(state == 0){
-    ALOG_INF(PSTR(D_LOG_DEBUG "%s=%d"),"WiFi_Sta_State_Set",state);
+  if (state == 0)
+  {
+    ALOG_INF(PSTR(D_LOG_DEBUG "%s=%d"), "WiFi_Sta_State_Set", state);
   }
 
-  if (state == tkr_set->runtime.global_state.wifi_down) {
-    DEBUG_LINE_HERE;
-    if (state) {
-      // tkr_set->rules_flag.wifi_connected = 1;
-      connection.link_count++;
-      connection.downtime += tkr_time->UpTime() - connection.last_event;
-    } else {
-      // tkr_set->rules_flag.wifi_disconnected = 1;
-      connection.last_event = tkr_time->UpTime();
-    }DEBUG_LINE_HERE
+  // -------------------------------------------------------------------------
+  // Global flags must be consistent:
+  // wifi_down == !connected
+  // network_down cleared only when wifi comes up
+  // -------------------------------------------------------------------------
+  tkr_set->runtime.global_state.wifi_down = new_connected ? 0 : 1;
 
-  }
-  // if(tkr_time==NULL){
-  //    ALOG_DBM( "tkr_time==NULL");
-  // }
-  tkr_set->runtime.global_state.wifi_down = state ^1;
-  if (!tkr_set->runtime.global_state.wifi_down) {
-    // DEBUG_LINE_HERE;
+  if (new_connected)
+  {
     tkr_set->runtime.global_state.network_down = 0;
   }
 
-  // ALOG_INF(PSTR(D_LOG_DEBUG "%s"),"WiFi_Sta_State_Set end");
-    
+  // -------------------------------------------------------------------------
+  // Optional: if you want to keep the legacy "accumulate downtime" behaviour,
+  // do it ONLY when we have an edge and ONLY when time is valid.
+  // (Most of your newer code tracks downtime elsewhere; this keeps it safe.)
+  // -------------------------------------------------------------------------
+  // if ((!new_connected) && prev_connected)
+  // {
+  //   // Just went down: start timer already set above
+  // }
+  // else if (new_connected && (!prev_connected))
+  // {
+  //   // Just came up: add outage duration if we have a valid timer
+  //   if (tkr_time)
+  //   {
+  //     // last_event was set on disconnect; but in case older states existed, guard it
+  //     // (If last_event is 0, this adds nothing meaningful.)
+  //     // NOTE: If you want pure edge accounting, keep this;
+  //     // if you want continuous accounting, do it in your periodic maintain code instead.
+  //     // Here: edge accounting only.
+  //     // connection.downtime += (tkr_time->UpTime() - connection.last_event);
+  //   }
+  // }
 }
+
+
+
 
 #endif // USE_MODULE_NETWORK_WIFI

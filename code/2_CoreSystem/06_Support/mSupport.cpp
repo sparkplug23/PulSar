@@ -626,6 +626,7 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
     }break;
     case TASK_EVERY_SECOND:{
 
+
       /***
        * Scheduled reboot ticker
        */
@@ -670,15 +671,29 @@ digitalWrite(26,onoff);
 
       PerformEverySecond();
     }break;
+    case TASK_EVERY_50_MSECOND:
+      #ifdef USE_ARDUINO_OTA
+        if(!tkr_set->runtime.global_state.network_down)
+          ArduinoOtaLoop();
+      #endif
+    break;
+    case TASK_EVERY_FIVE_MINUTE:
+      // Run OTA without network check, in case we are in unknown state to allow recovery
+      #ifdef USE_ARDUINO_OTA
+        ArduinoOtaLoop();
+      #endif
+    break;
+
+
     case TASK_EVERY_MINUTE:
 
-#ifdef ENABLE_DEBUGFEATURE_RELAY__TEMP_FORCE_ON_FOR_5_MINS
-// bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 1 : 0;
-//bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 0 : 1;
-//pinMode(26,OUTPUT);
-digitalWrite(26,!digitalRead(26));
+      #ifdef ENABLE_DEBUGFEATURE_RELAY__TEMP_FORCE_ON_FOR_5_MINS
+      // bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 1 : 0;
+      //bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 0 : 1;
+      //pinMode(26,OUTPUT);
+      digitalWrite(26,!digitalRead(26));
 
-#endif
+      #endif
     break;
     case TASK_ON_BOOT_SUCCESSFUL:
 
@@ -733,8 +748,8 @@ digitalWrite(26,!digitalRead(26));
       parse_JSONCommand(obj);
     break;
 
-    case TASK_NETWORK_CONNECTED:
-    case TASK_WIFI_CONNECTED:
+    case TASK_NETWORK_CONNECTED__ANY:
+    case TASK_NETWORK_CONNECTED__WIFI:
       ArduinoOTAInit();
     break;
   }
@@ -757,19 +772,72 @@ uint8_t getIdentifierID(char* x){ return IDENTIFIER_STRING_ID; }
 uint8_t getIdentifierID(const char* x){ return IDENTIFIER_STRING_ID; }
     
 
-void mSupport::AppendDList(char* buffer, const char* to_add){
-  sprintf(buffer+strlen(buffer), "%s|", to_add);
+// void mSupport::AppendDList(char* buffer, const char* to_add){
+//   sprintf(buffer+strlen(buffer), "%s|", to_add);
+// }
+// void mSupport::AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...)
+// {
+//   uint16_t length = strlen(buffer);
+//   if(length >= buflen){ return; }
+//   va_list arg;
+//   Serial.println(buffer);
+//   va_start(arg, formatP);  
+//   length += vsnprintf(buffer+length, buflen, formatP, arg);
+//   va_end(arg);  
+//   length += snprintf(buffer+length, buflen, "|");
+// }
+
+// tmp name to force into this, instead of being ambiguous, cant be sure making it the same name as below wont cause unknown errors
+void mSupport::AppendDList_Single(char* buffer, uint16_t buflen, const char* to_add)
+{
+  if (!buffer || buflen == 0) return;
+
+  size_t len = strnlen(buffer, buflen);
+  if (len >= buflen) { buffer[buflen - 1] = '\0'; len = buflen - 1; }
+
+  if (!to_add) to_add = "";
+
+  size_t rem = buflen - len;
+  if (rem <= 1) return;
+
+  int n = snprintf(buffer + len, rem, "%s", to_add);
+  if (n < 0) return;
+
+  // Clamp to actual written chars
+  size_t written = (static_cast<size_t>(n) >= rem) ? (rem - 1) : static_cast<size_t>(n);
+  len += written;
+
+  // Append delimiter if room for '|' + '\0'
+  if (len + 1 < buflen) {
+    buffer[len++] = '|';
+    buffer[len] = '\0';
+  }
 }
+
 void mSupport::AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...)
 {
-  uint16_t length = strlen(buffer);
-  if(length >= buflen){ return; }
+  if (!buffer || buflen == 0 || !formatP) return;
+
+  size_t len = strnlen(buffer, buflen);
+  if (len >= buflen) { buffer[buflen - 1] = '\0'; len = buflen - 1; }
+
+  size_t rem = buflen - len;
+  if (rem <= 1) return;
+
   va_list arg;
-  Serial.println(buffer);
-  va_start(arg, formatP);  
-  length += vsnprintf(buffer+length, buflen, formatP, arg);
-  va_end(arg);  
-  length += snprintf(buffer+length, buflen, "|");
+  va_start(arg, formatP);
+  int n = vsnprintf(buffer + len, rem, formatP, arg);
+  va_end(arg);
+
+  if (n < 0) return;
+
+  size_t written = (static_cast<size_t>(n) >= rem) ? (rem - 1) : static_cast<size_t>(n);
+  len += written;
+
+  if (len + 1 < buflen) {
+    buffer[len++] = '|';
+    buffer[len] = '\0';
+  }
 }
 
 
@@ -1000,7 +1068,10 @@ void mSupport::ArduinoOtaLoop(void)
   ArduinoOTA.handle();
   // Once OTA is triggered, only handle that and dont do other stuff. (otherwise it fails)
   // Note async stuff can still occur, so I need to disable them
-  while (arduino_ota_triggered){ ArduinoOTA.handle(); }
+  while (arduino_ota_triggered){ 
+    ArduinoOTA.handle(); 
+    delay(0); // yield() is ESP8266 specific, delay(0) works for both ESP32 and ESP8266
+  }
 }
 
 #endif  // USE_ARDUINO_OTA

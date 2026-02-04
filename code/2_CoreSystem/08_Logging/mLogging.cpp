@@ -588,7 +588,7 @@ int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
     break;
 
 
-    case TASK_WIFI_CONNECTED:
+    case TASK_NETWORK_CONNECTED__WIFI:
       StartTelnetServer();
     break;
   }

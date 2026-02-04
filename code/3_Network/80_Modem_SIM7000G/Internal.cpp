@@ -2543,18 +2543,18 @@ void mSIM7000G::GPRS_UpdateConnectionState(bool state)
     if(state)
     {
   DEBUG_LINE_HERE;
-      tkr->function_event_queue.push_back(tkr->FunctionEvent(TASK_CELLULAR_CONNECTION_ESTABLISHED));
+      tkr->function_event_queue.push_back(tkr->FunctionEvent(TASK_NETWORK_CONNECTED__CELLULAR));
   DEBUG_LINE_HERE;
-      tkr->function_event_queue.push_back(tkr->FunctionEvent(TASK_NETWORK_CONNECTION_ESTABLISHED));
+      tkr->function_event_queue.push_back(tkr->FunctionEvent(TASK_NETWORK_CONNECTED__ANY));
   DEBUG_LINE_HERE;
       gprs.reconnect_init_counts++;
     }
     else
     {
   DEBUG_LINE_HERE;
-      tkr->function_event_queue.push_back(tkr->FunctionEvent(TASK_CELLULAR_CONNECTION_LOST));
+      tkr->function_event_queue.push_back(tkr->FunctionEvent(TASK_NETWORK_LOST__CELLULAR));
   DEBUG_LINE_HERE;
-      tkr->function_event_queue.push_back(tkr->FunctionEvent(TASK_NETWORK_CONNECTION_LOST));
+      tkr->function_event_queue.push_back(tkr->FunctionEvent(TASK_NETWORK_LOST__ANY));
   DEBUG_LINE_HERE;
     }
     #endif //ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE

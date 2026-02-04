@@ -159,7 +159,7 @@ if (!tkr_set->runtime.global_state.network_down) {
       WcUpdateStats();
     break;
     case TASK_UPTIME_30_SECONDS:
-    // case TASK_WIFI_CONNECTED:
+    // case TASK_NETWORK_CONNECTED__WIFI:
       ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "TASK_UPTIME_30_SECONDS"));
 
       tkr_set->Settings.webcam_config.stream=1;

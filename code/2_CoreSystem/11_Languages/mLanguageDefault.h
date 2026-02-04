@@ -228,8 +228,8 @@
 #define D_TASK_COMMAND_DRIVER_CTR                           "COMMAND_DRIVER"
 #define D_TASK_JSON_COMMAND_CTR                             "JSON_COMMAND"
 #define D_TASK_JSON_COMMAND_OBJECT_CTR                      "JSON_COMMAND_OBJECT"
-#define D_TASK_WIFI_CONNECTED_CTR                           "WIFI_CONNECTED"
-#define D_TASK_WIFI_DISCONNECTED_CTR                        "WIFI_DISCONNECTED"
+#define D_TASK_NETWORK_CONNECTED__WIFI_CTR                           "WIFI_CONNECTED"
+#define D_TASK_NETWORK_LOST__WIFI_CTR                        "WIFI_DISCONNECTED"
 #define D_TASK_MQTT_SUBSCRIBE_CTR                           "MQTT_SUBSCRIBE"
 #define D_TASK_MQTT_INIT_CTR                                "MQTT_INIT"
 #define D_TASK_MQTT_CONNECTED_CTR                           "MQTT_CONNECTED"
@@ -2155,6 +2155,13 @@
 #define D_POWERRETAIN "PowerRetain"
 #define D_SENSORRETAIN "SensorRetain"
 #define D_PUBLISH "Publish"
+
+#define D_HEAP_FREE_8BIT "HeapFree8Bit"
+#define D_HEAP_MIN_8BIT "HeapMin8Bit"
+#define D_HEAP_LARGEST_8BIT "HeapLargest8Bit"
+#define D_PSRAM_FREE "PSRAMFree"
+#define D_PSRAM_SIZE "PSRAMSize"
+
 
 #define D_DOOR_POSITION "DoorPosition"
 #define D_DOOR_LOCKED "DoorLocked"

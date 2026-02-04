@@ -40,8 +40,6 @@ class CrashRecorder :
      * SECTION: Construct Class Base
      ************************************************************************************************/
 	  CrashRecorder(){};
-    void Pre_Init(void);
-    void Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage();
     
@@ -66,7 +64,6 @@ class CrashRecorder :
      ************************************************************************************************/
       #ifdef ESP32
       
-        bool CrashRTC_HasRecord(void) const;
         void CrashRTC_Clear(void);
         void CrashRTC_Print(void);
         void CrashRTC_PrintAndClear(void);
@@ -109,13 +106,11 @@ bool Create_CrashDumpJSON(char* out, uint16_t out_len) const;
           void CrashRTC_PrintAndClear();
       #endif
 
-
-    void CrashDump_AddJson();
     void CmndCrash(void);
     void CmndWDT(void);
     void CmndBlockedLoop(void);
     void CrashDumpClear(void);
-    bool CrashFlag(void);
+    
     void CrashDump(void);
     
   /************************************************************************************************

@@ -32,49 +32,53 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
       Load_New_Subscriptions_From_Function_Template();
     break;
     
-    case TASK_WIFI_CONNECTED:{ // moved from wifi jan2026
+    // case TASK_NETWORK_CONNECTED__WIFI:{ // moved from wifi jan2026
 
-      #ifndef ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+    //   #ifndef ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
 
-        ALOG_HGL(PSTR("Start MQTTConnection with WiFi"));
+    //     ALOG_HGL(PSTR("Start MQTTConnection with WiFi"));
 
-        #ifdef USE_MODULE_NETWORK_MQTT
+    //     #ifdef USE_MODULE_NETWORK_MQTT
 
-        DEBUG_LINE_HERE3
+    //     DEBUG_LINE_HERE3
 
-          mqtt_client = new WiFiClient();
-          DEBUG_LINE_HERE3
+    //       mqtt_client = new WiFiClient();
+    //       DEBUG_LINE_HERE3
 
-          tkr_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
-          DEBUG_LINE_HERE3
+    //       tkr_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
+    //       DEBUG_LINE_HERE3
           
-          tkr_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
-          DEBUG_LINE_HERE3
+    //       tkr_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
+    //       DEBUG_LINE_HERE3
 
-          tkr_mqtt->brokers.back()->SetReConnectBackoffTime(MQTT_RETRY_SECS);
-          DEBUG_LINE_HERE3
+    //       tkr_mqtt->brokers.back()->SetReConnectBackoffTime(MQTT_RETRY_SECS);
+    //       DEBUG_LINE_HERE3
           
-          // char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%s"), tkr_set->Settings.system_name.device, WiFi.macAddress().c_str()); 
+    //       // char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%s"), tkr_set->Settings.system_name.device, WiFi.macAddress().c_str()); 
           
-          uint8_t mac[6];           WiFi.macAddress(mac);
-          DEBUG_LINE_HERE3
-          char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%02X:%02X:%02X"), tkr_set->Settings.system_name.device, mac[3], mac[4], mac[5]); 
-          DEBUG_LINE_HERE3
-          tkr_mqtt->brokers.back()->SetClientName(client_name);
-          DEBUG_LINE_HERE3
+    //       uint8_t mac[6];           WiFi.macAddress(mac);
+    //       DEBUG_LINE_HERE3
+    //       char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%02X:%02X:%02X"), tkr_set->Settings.system_name.device, mac[3], mac[4], mac[5]); 
+    //       DEBUG_LINE_HERE3
+    //       tkr_mqtt->brokers.back()->SetClientName(client_name);
+    //       DEBUG_LINE_HERE3
 
-          tkr_mqtt->brokers.back()->SetTopicPrefix(tkr_set->Settings.system_name.device);
-          DEBUG_LINE_HERE3
+    //       tkr_mqtt->brokers.back()->SetTopicPrefix(tkr_set->Settings.system_name.device);
+    //       DEBUG_LINE_HERE3
 
-        #endif // USE_MODULE_NETWORK_MQTT
-      #endif // ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-    }
-    break;
+    //     #endif // USE_MODULE_NETWORK_MQTT
+    //   #endif // ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+    // }
+    // break;
 
-    case TASK_NETWORK_CONNECTION_ESTABLISHED:
-
+    case TASK_NETWORK_CONNECTED__WIFI:
+    case TASK_NETWORK_CONNECTED__ETHERNET:
+    // case TASK_NETWORK_CONNECTED__CELLULAR: Handled via the Celullar module directly
+      Start_Connection();
+      
       /**
        * @brief If status is down, and awaiting connection, immediate try reconnect
+       * Not sure this is needed here, might be a LTE remenant
        * */
       if(brokers.size()) 
       // if(brokers_active)   
@@ -83,6 +87,7 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
           ALOG_HGL(PSTR(D_LOG_PUBSUB "retry_counter IMMEDIATE = %d"),brokers[0]->retry_counter);
 
     break;
+    
     case TASK_EVERY_50_MSECOND:
 DEBUG_LINE_HERE_MILLIS
 
@@ -174,6 +179,32 @@ DEBUG_LINE_HERE_MILLIS
   return FUNCTION_RESULT_UNKNOWN_ID;
 
 } // END function
+
+void mMQTTManager::Start_Connection()
+{
+  ALOG_HGL(PSTR("Start MQTTConnection with WiFi NEW WAY"));
+
+  mqtt_client = new WiFiClient();
+
+  const int8_t idx = tkr_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
+  if (idx < 0) { ALOG_ERR(PSTR("MQTT CreateConnection failed")); return; }
+
+  MQTTConnection* c = tkr_mqtt->brokers[(size_t)idx];
+  if (!c) { ALOG_ERR(PSTR("MQTT broker null")); return; }
+
+  c->SetCredentials(MQTT_USER, MQTT_PASS);
+  c->SetReConnectBackoffTime(MQTT_RETRY_SECS);
+
+  uint8_t mac[6]; WiFi.macAddress(mac);
+  char client_name[100];
+  snprintf_P(client_name, sizeof(client_name), PSTR("%s-%02X:%02X:%02X"),
+            tkr_set->Settings.system_name.device, mac[3], mac[4], mac[5]);
+
+  c->SetClientName(client_name);
+  c->SetTopicPrefix(tkr_set->Settings.system_name.device);
+
+  return;
+}
 
 /**
  * @brief Should be called from Init now, its the new way of setting up as a new device with default settings

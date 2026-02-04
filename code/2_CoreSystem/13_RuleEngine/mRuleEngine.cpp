@@ -704,47 +704,71 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
     
     }//end trigger
 
-    if(jtok = jobj["JsonCommands"]){
+    // if(jtok = jobj["JsonCommands"]){
 
-    // #ifdef ENABLE_LOG_LEVEL_INFO
-      ALOG_INF(PSTR("JTOK FOUND Trigger Module JsonCommands = %s"), jtok.getStr());
-    // #endif //  ENABLE_LOG_LEVEL_INFO
-
-
-      // if(jsonbuffer.data != nullptr){
-        if(strlen(jsonbuffer.data) < sizeof(jsonbuffer.data)){
-
-          // uint16_t available_space = 255 - strlen(event->p_json_commands);
-
-          // event->p_json_commands = &jsonbuffer.data[0];
-
-          tkr_sup->AppendDList(jsonbuffer.data,jtok.getStr());
+    // // #ifdef ENABLE_LOG_LEVEL_INFO
+    //   ALOG_INF(PSTR("JTOK FOUND Trigger Module JsonCommands = %s"), jtok.getStr());
+    // // #endif //  ENABLE_LOG_LEVEL_INFO
 
 
-          event->json_commands_dlist_id = jsonbuffer.delims_used;
+    //   // if(jsonbuffer.data != nullptr){
+    //     if(strlen(jsonbuffer.data) < sizeof(jsonbuffer.data)){
 
-          jsonbuffer.delims_used++;
+    //       // uint16_t available_space = 255 - strlen(event->p_json_commands);
 
-          // sprintf(event->p_json_commands,"%s|", jtok.getStr());
-          jsonbuffer.bytes_used += strlen(jtok.getStr());
+    //       // event->p_json_commands = &jsonbuffer.data[0];
 
-          // char dlist[200]; memset(dlist,0,sizeof(dlist));
-          // tkr_sup->AppendDList(dlist, D_TRANSITION "," D_PIXELS_UPDATE_PERCENTAGE);
+    //       tkr_sup->AppendDList_Single(jsonbuffer.data,sizeof(jsonbuffer.data),jtok.getStr());
+
+
+    //       event->json_commands_dlist_id = jsonbuffer.delims_used;
+
+    //       jsonbuffer.delims_used++;
+
+    //       // sprintf(event->p_json_commands,"%s|", jtok.getStr());
+    //       jsonbuffer.bytes_used += strlen(jtok.getStr());
   
-          // I need to create the ability to move to add/edit buffer (like tas)
-          // Rules can therefore only be created once at starttime for now          
+    //       // I need to create the ability to move to add/edit buffer (like tas)
+    //       // Rules can therefore only be created once at starttime for now          
 
-          #ifdef ENABLE_LOG_LEVEL_INFO
-          ALOG_INF(PSTR("JTOK FOUND jsonbuffer.data = %s"), jsonbuffer.data);
-          ALOG_INF(PSTR("JTOK FOUND jsonbuffer.bytes_used = %d"), jsonbuffer.bytes_used);
-          #endif // ENABLE_LOG_LEVEL_INFO
+    //       #ifdef ENABLE_LOG_LEVEL_INFO
+    //       ALOG_INF(PSTR("JTOK FOUND jsonbuffer.data = %s"), jsonbuffer.data);
+    //       ALOG_INF(PSTR("JTOK FOUND jsonbuffer.bytes_used = %d"), jsonbuffer.bytes_used);
+    //       #endif // ENABLE_LOG_LEVEL_INFO
 
-          // snprintf(event->p_json_commands+strlen(event->p_json_commands),available_space,)
-        }
-      // }
+    //       // snprintf(event->p_json_commands+strlen(event->p_json_commands),available_space,)
+    //     }
+    //   // }
 
     
-    }//end trigger
+    // }//end trigger
+
+
+    if (jtok = jobj["JsonCommands"]) {
+
+      const char* s = jtok.getStr();
+      if (!s) s = "";
+
+      ALOG_INF(PSTR("JTOK FOUND Trigger Module JsonCommands = %s"), s);
+
+      const size_t buflen = sizeof(jsonbuffer.data);
+      const size_t len    = strnlen(jsonbuffer.data, buflen);
+
+      if (len < buflen - 2) { // need space for '|' + '\0' at least
+        tkr_sup->AppendDList_Single(jsonbuffer.data, buflen, s);
+
+        event->json_commands_dlist_id = jsonbuffer.delims_used++;
+        jsonbuffer.bytes_used += strlen(s); // OK if you accept "requested" not "actually appended"
+
+        #ifdef ENABLE_LOG_LEVEL_INFO
+        ALOG_INF(PSTR("JTOK FOUND jsonbuffer.data = %s"), jsonbuffer.data);
+        ALOG_INF(PSTR("JTOK FOUND jsonbuffer.bytes_used = %u"), (unsigned)jsonbuffer.bytes_used);
+        #endif
+      }
+    }
+
+
+
 
 //Execute test
 
@@ -1056,67 +1080,6 @@ void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)
 
   // if(strcmp(name, "Switch1ON->Relay1On2Hrs?Switch1OFF->Relay1Off")==0)
   // {
-  
-  //   ALOG_INF(PSTR(D_LOG_RULES "AddRule Relay1Follow NEW Switch1Change->Relay1Follow"));
-
-  //   EventPackage* p_event = nullptr;
-
-  //   if(tkr_rules->rules_active_index>D_MAX_RULES){ return; } //block new rules
-
-  //   #if defined(USE_MODULE_SENSORS_SWITCHES) && defined(USE_MODULE_DRIVERS_RELAY)
-    
-  //   // Trigger0
-  //   tkr_rules->rules[tkr_rules->rules_active_index].flag_enabled = true;   
-  //   tkr_rules->rules[tkr_rules->rules_active_index].flag_configured = true;   
-  //   p_event = &tkr_rules->rules[tkr_rules->rules_active_index].trigger;   
-  //   p_event->module_id = D_UNIQUE_MODULE_SENSORS_SWITCHES_ID;
-  //   p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
-  //   p_event->device_id = 0;
-  //   p_event->value.length = 0;
-  //   p_event->value.data[p_event->value.length++] = STATE_NUMBER_ON_ID;  // Toggled 
-  //   // Command0
-  //   p_event = &tkr_rules->rules[tkr_rules->rules_active_index].command;   
-  //   p_event->module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
-  //   p_event->function_id = TASK_EVENT_SET_POWER_ID;
-  //   p_event->device_id = 0;
-  //   p_event->value.length = 0;
-  //   p_event->value.data[p_event->value.length++] = STATE_NUMBER_ON_ID;  // Toggle
-
-  //   tkr_rules->rules_active_index++;
-
-
-  //   // Trigger1
-  //   tkr_rules->rules[tkr_rules->rules_active_index].flag_enabled = true;   
-  //   tkr_rules->rules[tkr_rules->rules_active_index].flag_configured = true;   
-  //   p_event = &tkr_rules->rules[tkr_rules->rules_active_index].trigger;   
-  //   p_event->module_id = D_UNIQUE_MODULE_SENSORS_SWITCHES_ID;
-  //   p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
-  //   p_event->device_id = 0;
-  //   p_event->value.length = 0;
-  //   p_event->value.data[p_event->value.length++] = STATE_NUMBER_OFF_ID;  // Toggled 
-  //   // Command1
-  //   p_event = &tkr_rules->rules[tkr_rules->rules_active_index].command;   
-  //   p_event->module_id = D_UNIQUE_MODULE_DRIVERS_RELAY_ID;
-  //   p_event->function_id = TASK_EVENT_SET_POWER_ID;
-  //   p_event->device_id = 0;
-  //   p_event->value.length = 0;
-  //   p_event->value.data[p_event->value.length++] = STATE_NUMBER_OFF_ID;  // Toggle
-
-    
-  //   tkr_sup->AppendDList(jsonbuffer.data,jtok.getStr());
-  //   event->json_commands_dlist_id = jsonbuffer.delims_used;
-  //   jsonbuffer.delims_used++;
-  //   jsonbuffer.bytes_used += strlen(jtok.getStr());
-
-
-
-
-  //   tkr_rules->rules_active_index++;
-
-  //   #endif // defined(USE_MODULE_SENSORS_SWITCHES) && defined(USE_MODULE_DRIVERS_RELAY)
-
-  // }
-
 
 
 

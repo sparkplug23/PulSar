@@ -56,9 +56,9 @@ int8_t mInterfaceNetwork::Tasker(uint8_t function, JsonParserObject obj){
     break;
 
 // network hooks for others
-    case TASK_WIFI_CONNECTED:
-    case TASK_ETHERNET_CONNECTED:
-      tkr->Tasker_Interface(TASK_NETWORK_CONNECTED);
+    case TASK_NETWORK_CONNECTED__WIFI:
+    case TASK_NETWORK_CONNECTED__ETHERNET:
+      tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__ANY);
     break;
 
     /************

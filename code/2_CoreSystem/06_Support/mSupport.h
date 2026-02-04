@@ -499,7 +499,8 @@ public:
 
     void parse_JSONCommand(JsonParserObject obj);
 
-    void AppendDList(char* buffer, const char* to_add);
+    // void AppendDList(char* buffer, const char* to_add);
+    void AppendDList_Single(char* buffer, uint16_t buflen, const char* to_add);
     void AppendDList(char* buffer, uint16_t buflen, const char* formatP, ...);
 
     float CharToFloat(const char *str);

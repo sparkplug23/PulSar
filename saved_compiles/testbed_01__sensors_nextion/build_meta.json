@@ -1,7 +1,7 @@
 {
   "env_name": "testbed_01__sensors_nextion",
-  "created_utc": "2026-02-02T19:02:27Z",
-  "created_epoch": 1770058947,
+  "created_utc": "2026-02-02T23:44:07Z",
+  "created_epoch": 1770075847,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\testbed_01__sensors_nextion",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "b730899a10cae0ede63f3d35ff572b78df41a01e",
-    "describe": "b730899a-dirty",
-    "status_short": "M code/0_ConfigUser/Secret/00_Developing/Firmware__Testbeds.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/1_TaskerManager/mTaskerManager.cpp\n M code/1_TaskerManager/mTaskerManager.h\n M code/2_CoreSystem/06_Support/mSupport.cpp\n M code/2_CoreSystem/06_Support/mSupport.h\n D code/2_CoreSystem/06_Support/mSupport_CrashRecorder.cpp\n M code/2_CoreSystem/06_Support/mSupport_command.cpp\n M code/2_CoreSystem/09_Telemetry/mTelemetry_ConstructJSON.cpp\n M code/2_CoreSystem/11_Languages/mLanguageDefault.h\n M code/2_CoreSystem/11_Languages/mLanguageProgmem.h\n M code/5_Sensors/00_Interface/mSensorsInterface.cpp\n M code/5_Sensors/06_BH1750Light/mBH1750.cpp\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M platformio_override.ini\n M platformio_testbeds.ini\n?? code/2_CoreSystem/10_CrashRecorder/\n?? saved_compiles/\n?? tools/post_copy_artifacts.py"
+    "commit": "a0abf5e8eec679610a8ecb63c5f3b38e0268e2b2",
+    "describe": "a0abf5e8-dirty",
+    "status_short": "M code/2_CoreSystem/09_Telemetry/mTelemetry_ConstructJSON.cpp\n M code/2_CoreSystem/10_CrashRecorder/CrashRecorder.cpp\n M code/2_CoreSystem/10_CrashRecorder/CrashRecorder.h\n M code/2_CoreSystem/mBaseConfig.h\n M code/2_CoreSystem/mSystemConfig.h\n M platformio_32.ini\n M platformio_lgt.ini\n M platformio_meadows.ini\n M platformio_override.ini\n M platformio_testbeds.ini\n M saved_compiles/decode_crash_json.py\n M saved_compiles/testbed_01__sensors_nextion/build_meta.json\n M saved_compiles/testbed_01__sensors_nextion/firmware.elf\n?? saved_compiles/cm_kitchen__glass_box/\n?? saved_compiles/cm_lgt__esp32_coneV_1D/\n?? saved_compiles/cm_office__rgbww_vertical/\n?? saved_compiles/cm_office__under_desk/\n?? saved_compiles/tg_lgt__esp32_7segclock/\n?? saved_compiles/tg_lgt__esp32_matrix_16x16/\n?? saved_compiles/tg_lgt__esp32_matrix_16x16_16fx/\n?? saved_compiles/tg_lgt__esp32_matrix_32w8h/\n?? saved_compiles/tg_lgt__esp32_matrix_32w8h_weight/\n?? saved_compiles/tg_lgt__esp32_matrix_8w32h/\n?? tools/CommandLineShortcuts/MosquittoTopics/MosquittoTopic_CrashRecorder.lnk"
   }
 }

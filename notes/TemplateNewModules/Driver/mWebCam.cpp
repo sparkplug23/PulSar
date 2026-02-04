@@ -32,10 +32,10 @@ int8_t mWebCamera::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * WIFI SECTION * 
     *******************/
-    case TASK_WIFI_CONNECTED:
+    case TASK_NETWORK_CONNECTED__WIFI:
     
     break;
-    case TASK_WIFI_DISCONNECTED:
+    case TASK_NETWORK_LOST__WIFI:
     
     break;
     /************

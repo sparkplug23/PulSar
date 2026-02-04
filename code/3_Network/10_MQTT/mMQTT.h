@@ -385,6 +385,7 @@ class mMQTTManager :
     uint16_t GetTelePeriod_SubModule();
     uint16_t GetIfChangedPeriod(); // main
     uint16_t GetIfChangedPeriod_SubModule();
+    void Start_Connection();
 
     #ifdef ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
 

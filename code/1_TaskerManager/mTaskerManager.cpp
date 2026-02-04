@@ -27,9 +27,16 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
   if(task == TASK_JSON_COMMAND_ID)
   { 
 
-    #ifdef ENABLE_DEBUGFEATURE_TASKER__SPLASH_JSON_BUFFER
+    // #ifdef ENABLE_DEBUGFEATURE_TASKER__SPLASH_JSON_BUFFER
       Serial.printf(PSTR(D_LOG_TASKER "JSON Command Payload: %s\r\n"), data_buffer.payload.ctr);
-    #endif
+    // #endif
+
+    // Added protection against buffer overflows
+    data_buffer.payload.ctr[sizeof(data_buffer.payload.ctr) - 1] = '\0';
+    if (memchr(data_buffer.payload.ctr, '\0', sizeof(data_buffer.payload.ctr)) == nullptr) {
+      ALOG_ERR(PSTR("JSON payload not NUL-terminated (truncated?)"));
+      return FUNCTION_RESULT_ERROR_ID;
+    }
 
     JsonParser parser(data_buffer.payload.ctr);
     obj = parser.getRootObject();   
@@ -39,8 +46,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
     }
 
     for(auto& mod:pModule)
-    { 
-      DEBUG_LINE_HERE_MILLIS
+    {
       mod->Tasker(task, obj);
       #ifdef ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
       mod->Tasker_DevCode(task, obj);
@@ -825,8 +831,8 @@ const char* mTaskerManager::GetTaskName_Full(uint16_t task)
     // case TASK_COMMAND_DRIVER:                         return PM_TASK_COMMAND_DRIVER_CTR;
     // case TASK_JSON_COMMAND:                           return PM_TASK_JSON_COMMAND_CTR;
     // case TASK_JSON_COMMAND_OBJECT:                    return PM_TASK_JSON_COMMAND_OBJECT_CTR;
-    case TASK_WIFI_CONNECTED:                         return PM_TASK_WIFI_CONNECTED_CTR;
-    case TASK_WIFI_DISCONNECTED:                      return PM_TASK_WIFI_DISCONNECTED_CTR;
+    case TASK_NETWORK_CONNECTED__WIFI:                         return PM_TASK_NETWORK_CONNECTED__WIFI_CTR;
+    case TASK_NETWORK_LOST__WIFI:                      return PM_TASK_NETWORK_LOST__WIFI_CTR;
     case TASK_MQTT_SUBSCRIBE:                         return PM_TASK_MQTT_SUBSCRIBE_CTR;
     // case TASK_MQTT_INIT:                              return PM_TASK_MQTT_INIT_CTR;
     case TASK_MQTT_CONNECTED:                         return PM_TASK_MQTT_CONNECTED_CTR;

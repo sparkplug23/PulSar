@@ -41,12 +41,12 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * #111 : Working on lighting as its own branch. Removing any WLED palette usage until my palatte works!
  * #110 : Before colorado
  */
-#define FIRMWARE_VERSION_MINOR    132 // Update "ChangeLogManual.md" when incrementing
+#define FIRMWARE_VERSION_MINOR    133 // Update "ChangeLogManual.md" when incrementing
 
 /**@@@@@ Core Changes
  * #00 : 
  */
-#define FIRMWARE_VERSION_CORE     2
+#define FIRMWARE_VERSION_CORE     4
 
 /**@@@@@ Module changes
  * #00 : 

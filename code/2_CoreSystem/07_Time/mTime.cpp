@@ -872,153 +872,474 @@ void mTime::WifiPollNtp()
 }
 
 
-uint64_t mTime::WifiGetNtp(void) 
+// uint64_t mTime::WifiGetNtp(void) 
+// {
+//   static uint8_t ntp_server_id = 0;
+
+//  ALOG_INF(PSTR("NTP: Start NTP Sync %d ..."), ntp_server_id);
+
+//   IPAddress time_server_ip;
+
+//   char fallback_ntp_server[2][32];
+//   ext_snprintf_P(fallback_ntp_server[0], sizeof(fallback_ntp_server[0]), PSTR("%_I"), tkr_set->Settings.ipv4_address[1]);  // #17984
+//   ext_snprintf_P(fallback_ntp_server[1], sizeof(fallback_ntp_server[1]), PSTR("%d.pool.ntp.org"), random(0,3));
+
+//   char* ntp_server;
+//   for (uint32_t i = 0; i < MAX_NTP_SERVERS +2; i++) {
+//     if (ntp_server_id >= MAX_NTP_SERVERS +2) { ntp_server_id = 0; }
+//     ntp_server = (ntp_server_id < MAX_NTP_SERVERS) ? tkr_set->SettingsText(SET_NTPSERVER1 + ntp_server_id) : fallback_ntp_server[ntp_server_id - MAX_NTP_SERVERS];
+//     if (strlen(ntp_server)) {
+//       break;
+//     }
+//     ntp_server_id++;
+//   }
+
+//   ALOG_INF(PSTR("ntp_server %s"), ntp_server);
+  
+//   #ifdef USE_MODULE_NETWORK_MQTT
+//   if (!tkr_wifi->WiFi_Dns_ResolveHostname(ntp_server, time_server_ip)) {
+//     ntp_server_id++;
+//     ALOG_DBG(PSTR("NTP: Unable to resolve '%s'"), ntp_server);
+//     return 0;
+//   }
+//   #else
+//   return 0; //tmp solution to no networking
+//   #endif
+  
+//   WiFiUDP udp;
+
+//   // uint32_t attempts = 3;
+//   // while (attempts > 0) {
+//   //   uint32_t port = random(1025, 65535);   // Create a random port for the UDP connection.
+
+//   //   #ifdef USE_IPV6
+//   //   if (udp.begin(IPAddress(IPv6), port) != 0)
+//   //   #else
+//   //   if (udp.begin(port) != 0) 
+//   //   #endif
+//   //   {
+//   //     break;
+//   //   }
+//   //   attempts--;
+//   // }
+//   // if (0 == attempts) { return 0; }
+
+//   // while (udp.parsePacket() > 0) {          // Discard any previously received packets
+//   //   yield();
+//   // }
+
+//   // const uint32_t NTP_PACKET_SIZE = 48;     // NTP time is in the first 48 bytes of message
+//   // uint8_t packet_buffer[NTP_PACKET_SIZE];  // Buffer to hold incoming & outgoing packets
+//   // memset(packet_buffer, 0, NTP_PACKET_SIZE);
+//   // packet_buffer[0]  = 0b11100011;          // LI, Version, Mode
+//   // packet_buffer[1]  = 0;                   // Stratum, or type of clock
+//   // packet_buffer[2]  = 6;                   // Polling Interval
+//   // packet_buffer[3]  = 0xEC;                // Peer Clock Precision
+//   // packet_buffer[12] = 49;
+//   // packet_buffer[13] = 0x4E;
+//   // packet_buffer[14] = 49;
+//   // packet_buffer[15] = 52;
+
+//   // if (udp.beginPacket(time_server_ip, 123) == 0) {  // NTP requests are to port 123
+//   //   ntp_server_id++;                                // Next server next time
+//   //   udp.stop();
+//   //   return 0;
+//   // }
+//   // udp.write(packet_buffer, NTP_PACKET_SIZE);
+//   // udp.endPacket();
+
+
+
+
+
+//     // ---- Bind UDP socket (ephemeral local port) ----
+//     // Random port is unnecessary; ephemeral allocation is fine.
+//     // If your core requires a port, pick a stable high port.
+//     const uint16_t local_port = 0; // 0 = ephemeral (works on ESP32 Arduino core)
+//     bool begun = false;
+
+//     #ifdef USE_IPV6
+//       // If you actually use IPv6 here, keep your existing path.
+//       // (Leaving as-is; most builds won't hit this.)
+//       begun = (udp.begin(IPAddress(IPv6), local_port) != 0);
+//     #else
+//       begun = (udp.begin(local_port) != 0);
+//     #endif
+
+//     if (!begun)
+//     {
+//       // Fallback if port=0 isn't supported in your environment/core:
+//       // try a few fixed ephemeral-ish ports.
+//       const uint16_t fallback_ports[] = { 49152, 49153, 49154 };
+//       for (uint8_t k = 0; k < (sizeof(fallback_ports)/sizeof(fallback_ports[0])); k++)
+//       {
+//         #ifdef USE_IPV6
+//           if (udp.begin(IPAddress(IPv6), fallback_ports[k]) != 0) { begun = true; break; }
+//         #else
+//           if (udp.begin(fallback_ports[k]) != 0) { begun = true; break; }
+//         #endif
+//       }
+//     }
+
+//     if (!begun) { return 0; }
+
+//     // ---- Flush any stale packets (bounded) ----
+//     // Keep this, but bound it: prevents a pathological busy loop if packets keep arriving.
+//     const uint32_t flush_start = millis();
+//     uint8_t flushed = 0;
+//     while ((udp.parsePacket() > 0) && (flushed < 8) && ((millis() - flush_start) < 50))
+//     {
+//       // drain packet payload (discard)
+//       while (udp.available()) { (void)udp.read(); }
+//       flushed++;
+//       yield();
+//     }
+
+//     // ---- Build and send NTP request ----
+//     const uint32_t NTP_PACKET_SIZE = 48;
+//     uint8_t packet_buffer[NTP_PACKET_SIZE] = {0};
+
+//     packet_buffer[0]  = 0b11100011;  // LI, Version, Mode
+//     packet_buffer[1]  = 0;           // Stratum
+//     packet_buffer[2]  = 6;           // Polling Interval
+//     packet_buffer[3]  = 0xEC;        // Precision
+//     packet_buffer[12] = 49;
+//     packet_buffer[13] = 0x4E;
+//     packet_buffer[14] = 49;
+//     packet_buffer[15] = 52;
+
+//     if (udp.beginPacket(time_server_ip, 123) == 0)
+//     {
+//       ntp_server_id++;
+//       udp.stop();
+//       return 0;
+//     }
+
+//     udp.write(packet_buffer, NTP_PACKET_SIZE);
+//     udp.endPacket();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//   uint32_t begin_wait = millis();
+//   while (!TimeReached(begin_wait + 1000)) {         // Wait up to one second
+//     uint32_t size        = udp.parsePacket();
+//     uint32_t remote_port = udp.remotePort();
+
+//     if ((size >= NTP_PACKET_SIZE) && (remote_port == 123)) {
+//       udp.read(packet_buffer, NTP_PACKET_SIZE);     // Read packet into the buffer
+//       udp.stop();
+
+//       if ((packet_buffer[0] & 0b11000000) == 0b11000000) {
+//         // Leap-Indicator: unknown (clock unsynchronized)
+//         // See: https://github.com/letscontrolit/ESPEasy/issues/2886#issuecomment-586656384
+//         ALOG_INF(PSTR("NTP: IP %_I unsynced"), (uint32_t)time_server_ip);
+//         ntp_server_id++;                            // Next server next time
+//         return 0;
+//       }
+//   Serial.println("packet_buffer");
+//   for(int i=0;i<48;i++){ Serial.print(packet_buffer[i], HEX); Serial.print(' ');}
+//   Serial.println("packet_buffer");
+
+//       // Convert four bytes starting at location 40 to a long integer (seconds since 1900)
+// uint32_t secs_since_1900 = ((uint32_t)packet_buffer[40] << 24) |
+//                            ((uint32_t)packet_buffer[41] << 16) |
+//                            ((uint32_t)packet_buffer[42] << 8) |
+//                             (uint32_t)packet_buffer[43];
+
+// Serial.print("Seconds since 1900: "); Serial.println(secs_since_1900);
+
+// if (secs_since_1900 == 0) {
+//     // No time stamp received
+//     ntp_server_id++;
+//     return 0;
+// }
+
+// // Convert the next four bytes into the fractional part of the timestamp
+// uint32_t tmp_fraction = ((uint32_t)packet_buffer[44] << 24) |
+//                         ((uint32_t)packet_buffer[45] << 16) |
+//                         ((uint32_t)packet_buffer[46] << 8) |
+//                          (uint32_t)packet_buffer[47];
+
+// Serial.print("Fractional part (raw): "); Serial.println(tmp_fraction);
+
+// // Convert fractional part from 32-bit fixed point (2^-32) to nanoseconds (1e-9)
+// uint64_t fraction = (((uint64_t)tmp_fraction) * 1000000000ULL) >> 32;
+
+
+// // Subtract the NTP epoch (1900-01-01) to Unix epoch (1970-01-01)
+// uint64_t unix_seconds = ((uint64_t)secs_since_1900) - 2208988800ULL;
+
+
+// // Combine the seconds and fractional parts to get the final result in nanoseconds
+// uint64_t result = (unix_seconds * 1000000000ULL) + fraction;
+
+// #ifdef ESP32
+// Serial.print("Fractional part (nanoseconds): "); Serial.println(fraction);
+// Serial.print("Unix seconds: "); Serial.println(unix_seconds);
+// Serial.print("Final NTP result (nanoseconds): "); Serial.println(result);
+// #endif
+
+
+//       return result;
+//     }
+//     delay(10);
+//   }
+//   // Timeout.
+//   ALOG_INF(PSTR("NTP: No reply from %_I"), (uint32_t)time_server_ip);
+//   udp.stop();
+//   ntp_server_id++;                                  // Next server next time
+//   return 0;
+// }
+
+uint64_t mTime::WifiGetNtp(void)
 {
   static uint8_t ntp_server_id = 0;
 
- ALOG_INF(PSTR("NTP: Start NTP Sync %d ..."), ntp_server_id);
+  ALOG_INF(PSTR("NTP: Start NTP Sync %d ..."), ntp_server_id);
 
+  // --------------------------------------------------------------------------
+  // Pick server (configured list, then fallbacks)
+  // --------------------------------------------------------------------------
   IPAddress time_server_ip;
 
   char fallback_ntp_server[2][32];
-  ext_snprintf_P(fallback_ntp_server[0], sizeof(fallback_ntp_server[0]), PSTR("%_I"), tkr_set->Settings.ipv4_address[1]);  // #17984
-  ext_snprintf_P(fallback_ntp_server[1], sizeof(fallback_ntp_server[1]), PSTR("%d.pool.ntp.org"), random(0,3));
+  ext_snprintf_P(fallback_ntp_server[0], sizeof(fallback_ntp_server[0]), PSTR("%_I"), tkr_set->Settings.ipv4_address[1]);  // local gateway/DNS-ish
+  ext_snprintf_P(fallback_ntp_server[1], sizeof(fallback_ntp_server[1]), PSTR("%d.pool.ntp.org"), (int)random(0, 3));
 
-  char* ntp_server;
-  for (uint32_t i = 0; i < MAX_NTP_SERVERS +2; i++) {
-    if (ntp_server_id >= MAX_NTP_SERVERS +2) { ntp_server_id = 0; }
-    ntp_server = (ntp_server_id < MAX_NTP_SERVERS) ? tkr_set->SettingsText(SET_NTPSERVER1 + ntp_server_id) : fallback_ntp_server[ntp_server_id - MAX_NTP_SERVERS];
-    if (strlen(ntp_server)) {
-      break;
-    }
+  const uint32_t server_count = MAX_NTP_SERVERS + 2;
+
+  // Find first non-empty server string, starting at ntp_server_id (wraps)
+  const char* ntp_server = nullptr;
+  for (uint32_t tries = 0; tries < server_count; tries++) {
+    if (ntp_server_id >= server_count) { ntp_server_id = 0; }
+
+    const char* s =
+      (ntp_server_id < MAX_NTP_SERVERS)
+        ? tkr_set->SettingsText(SET_NTPSERVER1 + ntp_server_id)
+        : fallback_ntp_server[ntp_server_id - MAX_NTP_SERVERS];
+
+    if (s && s[0] != '\0') { ntp_server = s; break; }
     ntp_server_id++;
   }
 
-  ALOG_INF(PSTR("ntp_server %s"), ntp_server);
-  
+  if (!ntp_server || ntp_server[0] == '\0') {
+    ALOG_DBG(PSTR("NTP: No server configured"));
+    ntp_server_id++;
+    return 0;
+  }
+
+  ALOG_INF(PSTR("NTP: server '%s'"), ntp_server);
+
+  // --------------------------------------------------------------------------
+  // Resolve hostname -> IP
+  // --------------------------------------------------------------------------
   #ifdef USE_MODULE_NETWORK_MQTT
   if (!tkr_wifi->WiFi_Dns_ResolveHostname(ntp_server, time_server_ip)) {
-    ntp_server_id++;
     ALOG_DBG(PSTR("NTP: Unable to resolve '%s'"), ntp_server);
+    ntp_server_id++;
     return 0;
   }
   #else
-  return 0; //tmp solution to no networking
+  // No DNS support in this build
+  ntp_server_id++;
+  return 0;
   #endif
-  
+
+  // --------------------------------------------------------------------------
+  // Open UDP + flush stale RX (bounded)
+  // --------------------------------------------------------------------------
   WiFiUDP udp;
 
-  uint32_t attempts = 3;
-  while (attempts > 0) {
-    uint32_t port = random(1025, 65535);   // Create a random port for the UDP connection.
+  bool begun = false;
+  #ifdef USE_IPV6
+    // If you truly need IPv6, keep your existing IPv6 binding logic.
+    // NOTE: many cores don't support IPv6 binding this way; leaving it guarded.
+    begun = (udp.begin(IPAddress(IPv6), 0) != 0);
+  #else
+    // Prefer ephemeral port if supported.
+    begun = (udp.begin((uint16_t)0) != 0);
+  #endif
 
-    #ifdef USE_IPV6
-    if (udp.begin(IPAddress(IPv6), port) != 0)
-    #else
-    if (udp.begin(port) != 0) 
-    #endif
-    {
-      break;
+  if (!begun) {
+    // Fallback: a few known-high ports
+    const uint16_t fallback_ports[] = { 49152, 49153, 49154 };
+    for (uint8_t k = 0; k < (sizeof(fallback_ports)/sizeof(fallback_ports[0])); k++) {
+      #ifdef USE_IPV6
+        if (udp.begin(IPAddress(IPv6), fallback_ports[k]) != 0) { begun = true; break; }
+      #else
+        if (udp.begin(fallback_ports[k]) != 0) { begun = true; break; }
+      #endif
+      yield();
     }
-    attempts--;
-  }
-  if (0 == attempts) { return 0; }
-
-  while (udp.parsePacket() > 0) {          // Discard any previously received packets
-    yield();
   }
 
-  const uint32_t NTP_PACKET_SIZE = 48;     // NTP time is in the first 48 bytes of message
-  uint8_t packet_buffer[NTP_PACKET_SIZE];  // Buffer to hold incoming & outgoing packets
-  memset(packet_buffer, 0, NTP_PACKET_SIZE);
-  packet_buffer[0]  = 0b11100011;          // LI, Version, Mode
-  packet_buffer[1]  = 0;                   // Stratum, or type of clock
-  packet_buffer[2]  = 6;                   // Polling Interval
-  packet_buffer[3]  = 0xEC;                // Peer Clock Precision
+  if (!begun) {
+    ALOG_DBG(PSTR("NTP: udp.begin failed"));
+    ntp_server_id++;
+    return 0;
+  }
+
+  // Bounded flush to avoid busy-loop if network is noisy.
+  {
+    const uint32_t flush_start = millis();
+    uint8_t flushed = 0;
+    while ((udp.parsePacket() > 0) && (flushed < 8) && ((millis() - flush_start) < 50)) {
+      while (udp.available()) { (void)udp.read(); }
+      flushed++;
+      yield();
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // Build NTP request
+  // --------------------------------------------------------------------------
+  const uint32_t NTP_PACKET_SIZE = 48;
+  uint8_t packet_buffer[NTP_PACKET_SIZE] = {0};
+
+  packet_buffer[0]  = 0b11100011;  // LI, Version, Mode (client)
+  packet_buffer[1]  = 0;           // Stratum
+  packet_buffer[2]  = 6;           // Polling interval
+  packet_buffer[3]  = 0xEC;        // Precision
   packet_buffer[12] = 49;
   packet_buffer[13] = 0x4E;
   packet_buffer[14] = 49;
   packet_buffer[15] = 52;
 
-  if (udp.beginPacket(time_server_ip, 123) == 0) {  // NTP requests are to port 123
-    ntp_server_id++;                                // Next server next time
+  // --------------------------------------------------------------------------
+  // Send request
+  // --------------------------------------------------------------------------
+  if (udp.beginPacket(time_server_ip, 123) == 0) {
+    ALOG_DBG(PSTR("NTP: beginPacket failed (%_I)"), (uint32_t)time_server_ip);
     udp.stop();
+    ntp_server_id++;
     return 0;
   }
+
   udp.write(packet_buffer, NTP_PACKET_SIZE);
   udp.endPacket();
 
+  // --------------------------------------------------------------------------
+  // Wait for reply (bounded, safe validation)
+  // --------------------------------------------------------------------------
+  const uint32_t wait_start = millis();
+  const uint32_t wait_ms    = 1000;
 
-  uint32_t begin_wait = millis();
-  while (!TimeReached(begin_wait + 1000)) {         // Wait up to one second
-    uint32_t size        = udp.parsePacket();
-    uint32_t remote_port = udp.remotePort();
+  while (!TimeReached(wait_start + wait_ms)) {
 
-    if ((size >= NTP_PACKET_SIZE) && (remote_port == 123)) {
-      udp.read(packet_buffer, NTP_PACKET_SIZE);     // Read packet into the buffer
-      udp.stop();
-
-      if ((packet_buffer[0] & 0b11000000) == 0b11000000) {
-        // Leap-Indicator: unknown (clock unsynchronized)
-        // See: https://github.com/letscontrolit/ESPEasy/issues/2886#issuecomment-586656384
-        ALOG_INF(PSTR("NTP: IP %_I unsynced"), (uint32_t)time_server_ip);
-        ntp_server_id++;                            // Next server next time
-        return 0;
-      }
-  Serial.println("packet_buffer");
-  for(int i=0;i<48;i++){ Serial.print(packet_buffer[i], HEX); Serial.print(' ');}
-  Serial.println("packet_buffer");
-
-      // Convert four bytes starting at location 40 to a long integer (seconds since 1900)
-uint32_t secs_since_1900 = ((uint32_t)packet_buffer[40] << 24) |
-                           ((uint32_t)packet_buffer[41] << 16) |
-                           ((uint32_t)packet_buffer[42] << 8) |
-                            (uint32_t)packet_buffer[43];
-
-Serial.print("Seconds since 1900: "); Serial.println(secs_since_1900);
-
-if (secs_since_1900 == 0) {
-    // No time stamp received
-    ntp_server_id++;
-    return 0;
-}
-
-// Convert the next four bytes into the fractional part of the timestamp
-uint32_t tmp_fraction = ((uint32_t)packet_buffer[44] << 24) |
-                        ((uint32_t)packet_buffer[45] << 16) |
-                        ((uint32_t)packet_buffer[46] << 8) |
-                         (uint32_t)packet_buffer[47];
-
-Serial.print("Fractional part (raw): "); Serial.println(tmp_fraction);
-
-// Convert fractional part from 32-bit fixed point (2^-32) to nanoseconds (1e-9)
-uint64_t fraction = (((uint64_t)tmp_fraction) * 1000000000ULL) >> 32;
-
-
-// Subtract the NTP epoch (1900-01-01) to Unix epoch (1970-01-01)
-uint64_t unix_seconds = ((uint64_t)secs_since_1900) - 2208988800ULL;
-
-
-// Combine the seconds and fractional parts to get the final result in nanoseconds
-uint64_t result = (unix_seconds * 1000000000ULL) + fraction;
-
-#ifdef ESP32
-Serial.print("Fractional part (nanoseconds): "); Serial.println(fraction);
-Serial.print("Unix seconds: "); Serial.println(unix_seconds);
-Serial.print("Final NTP result (nanoseconds): "); Serial.println(result);
-#endif
-
-
-      return result;
+    const int size = udp.parsePacket();
+    if (size <= 0) {
+      delay(10);
+      yield();
+      continue;
     }
-    delay(10);
+
+    // Drain packets that are too small
+    if (size < (int)NTP_PACKET_SIZE) {
+      while (udp.available()) { (void)udp.read(); }
+      continue;
+    }
+
+    // Validate origin (optional: don’t require remotePort==123, NAT can vary)
+    // Keep IP check; allow port flexibility.
+    const IPAddress rip = udp.remoteIP();
+    if (rip != time_server_ip) {
+      // Not from the server we queried; discard.
+      while (udp.available()) { (void)udp.read(); }
+      continue;
+    }
+
+    // Read exactly 48 bytes (discard remainder if any)
+    const int rd = udp.read(packet_buffer, NTP_PACKET_SIZE);
+    while (udp.available()) { (void)udp.read(); } // discard any extra
+
+    udp.stop();
+
+    if (rd != (int)NTP_PACKET_SIZE) {
+      ALOG_DBG(PSTR("NTP: short read %d"), rd);
+      ntp_server_id++;
+      return 0;
+    }
+
+    // Basic NTP sanity:
+    // - LI must not be 3 (unsynchronized)
+    // - Mode in low bits should be server (4) or broadcast (5), but some stacks vary; keep light-touch
+    const uint8_t li = (packet_buffer[0] >> 6) & 0x03;
+    if (li == 3) {
+      ALOG_INF(PSTR("NTP: IP %_I unsynced (LI=3)"), (uint32_t)time_server_ip);
+      ntp_server_id++;
+      return 0;
+    }
+
+    // Extract transmit timestamp (seconds + fraction) at bytes 40..47
+    const uint32_t secs_since_1900 =
+      ((uint32_t)packet_buffer[40] << 24) |
+      ((uint32_t)packet_buffer[41] << 16) |
+      ((uint32_t)packet_buffer[42] << 8)  |
+       (uint32_t)packet_buffer[43];
+
+    if (secs_since_1900 == 0) {
+      ALOG_DBG(PSTR("NTP: zero timestamp"));
+      ntp_server_id++;
+      return 0;
+    }
+
+    const uint32_t frac_raw =
+      ((uint32_t)packet_buffer[44] << 24) |
+      ((uint32_t)packet_buffer[45] << 16) |
+      ((uint32_t)packet_buffer[46] << 8)  |
+       (uint32_t)packet_buffer[47];
+
+    // Convert NTP epoch to Unix epoch
+    // NTP(1900-01-01) -> Unix(1970-01-01) offset = 2208988800 seconds
+    if (secs_since_1900 < 2208988800UL) {
+      ALOG_DBG(PSTR("NTP: timestamp before Unix epoch"));
+      ntp_server_id++;
+      return 0;
+    }
+
+    const uint64_t unix_seconds = (uint64_t)(secs_since_1900 - 2208988800UL);
+
+    // fraction: 32-bit fixed point of a second => nanoseconds
+    const uint64_t fraction_ns = (((uint64_t)frac_raw) * 1000000000ULL) >> 32;
+
+    const uint64_t result_ns = (unix_seconds * 1000000000ULL) + fraction_ns;
+
+    // Optional debug (guarded)
+    #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
+    ALOG_DBG(PSTR("NTP: %_I unix=%lu frac_ns=%lu -> %llu ns"),
+      (uint32_t)time_server_ip,
+      (uint32_t)unix_seconds,
+      (uint32_t)fraction_ns,
+      (unsigned long long)result_ns
+    );
+    #endif
+
+    // Success: do NOT advance ntp_server_id here (stick to working server)
+    return result_ns;
   }
-  // Timeout.
+
+  // Timeout
   ALOG_INF(PSTR("NTP: No reply from %_I"), (uint32_t)time_server_ip);
   udp.stop();
-  ntp_server_id++;                                  // Next server next time
+  ntp_server_id++; // rotate server next time after failure
   return 0;
 }
+
+
+
+
+
 
 
 /**

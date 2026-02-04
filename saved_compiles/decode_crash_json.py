@@ -191,7 +191,27 @@ def _parse_unified(report: Dict[str, Any]) -> Tuple[int, Optional[str], str, str
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--env", default="testbed_01__sensors_nextion", help="PlatformIO env name")
+
+    
+    # ap.add_argument("--env", default="testbed_01__sensors_nextion", help="PlatformIO env name")
+    # ap.add_argument("--env", default="tg_lgt__esp32_matrix_32w8h", help="PlatformIO env name")
+    ap.add_argument("--env", default="cm_office__ws2815panel12v", help="PlatformIO env name")
+    # ap.add_argument("--env", default="cm_lgt__esp32_coneV_1D", help="PlatformIO env name")
+    # ap.add_argument("--env", default="cm_office__rgbww_vertical", help="PlatformIO env name")
+    # ap.add_argument("--env", default="cm_kitchen__glass_box", help="PlatformIO env name")
+    # ap.add_argument("--env", default="tg_lgt__esp32_matrix_32w8h_weight", help="PlatformIO env name")
+
+
+
+
+
+
+
+
+
+
+
+
     ap.add_argument("--project-root", default=None, help="PulSar project root (folder containing saved_compiles)")
     ap.add_argument("--report", default=None, help="crash_report.json path (overrides env default)")
     ap.add_argument("--elf", default=None, help="firmware.elf path (overrides env default)")

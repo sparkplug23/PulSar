@@ -722,9 +722,8 @@ void LoopTasker()
 {
   // Serial.println("LOOP STARTED"); Serial.flush();
 
-  #ifdef USE_ARDUINO_OTA
-    tkr_sup->ArduinoOtaLoop();
-  #endif
+  // log_v("wifi heap=%u", ESP.getFreeHeap());
+
   // Serial.println("ArduinoOtaLoop passed STARTED"); Serial.flush();
    
   tkr->Tasker_Interface(TASK_LOOP); DEBUG_LINE;

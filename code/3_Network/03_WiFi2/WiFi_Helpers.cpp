@@ -163,22 +163,21 @@ uint8_t mWiFi::GetRSSPercentage(){
 
 
 
-
-const char* mWiFi::GetWiFiStatusCtr(void){                          // UNSTABLE CODE, RETURNING NULL!!
-
-//NULL
-
-  switch(WiFi.status()){
-    case WL_IDLE_STATUS      : return PSTR("WL_IDLE_STATUS");
-    case WL_NO_SSID_AVAIL    : return PSTR("WL_NO_SSID_AVAIL");
-    case WL_SCAN_COMPLETED   : return PSTR("WL_SCAN_COMPLETED");
-    case WL_CONNECTED        : return PSTR("WL_CONNECTED");
-    case WL_CONNECT_FAILED   : return PSTR("WL_CONNECT_FAILED");
-    case WL_CONNECTION_LOST  : return PSTR("WL_CONNECTION_LOST");
-    case WL_DISCONNECTED     : return PSTR("WL_DISCONNECTED");
-    default: PSTR("Unknown");
+const char* mWiFi::GetWiFiStatusCtr(void)
+{
+  switch (WiFi.status())
+  {
+    case WL_IDLE_STATUS     : return PSTR("WL_IDLE_STATUS");
+    case WL_NO_SSID_AVAIL   : return PSTR("WL_NO_SSID_AVAIL");
+    case WL_SCAN_COMPLETED  : return PSTR("WL_SCAN_COMPLETED");
+    case WL_CONNECTED       : return PSTR("WL_CONNECTED");
+    case WL_CONNECT_FAILED  : return PSTR("WL_CONNECT_FAILED");
+    case WL_CONNECTION_LOST : return PSTR("WL_CONNECTION_LOST");
+    case WL_DISCONNECTED    : return PSTR("WL_DISCONNECTED");
+    default                 : return PSTR("Unknown");
   }
 }
+
 
 const char* mWiFi::GetWiFiConfigTypeCtr(void){
 

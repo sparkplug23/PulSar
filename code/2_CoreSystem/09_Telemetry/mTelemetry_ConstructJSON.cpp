@@ -202,26 +202,45 @@ uint8_t mTelemetry::ConstructJSON_Log(uint8_t json_level, bool json_appending){
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level, bool json_appending){ // Debug info
+uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level, bool json_appending)
+{
   JBI->Start();
-    JBI->Add(PM_PROGRAMSIZE,      ESP.getSketchSize()/1024);
-    #ifdef ESP8266
-    JBI->Add(PM_FREEMEMORY,       ESP.getFreeSketchSpace()/1024); // this takes seconds on esp32, what about here?... should I get and store on boot
-    JBI->Add(PM_HEAPSIZE,         ESP.getFreeHeap()/1024);
-    JBI->Add(PM_PROGRAMFLASHSIZE, ESP.getFlashChipSize()/1024);
-    JBI->Add(PM_FLASHSIZE,        ESP.getFlashChipRealSize()/1024);
-    JBI->Add(PM_FLASHCHIPID,      ESP.getFlashChipId());
-    #else
-    JBI->Add(PM_FREEMEMORY,       ESP.getFreeSketchSpace()/1024); // this takes seconds on esp32, what about here?... should I get and store on boot
-    JBI->Add(PM_HEAPSIZE,         ESP.getFreeHeap()/1024);
-    JBI->Add(PM_PROGRAMFLASHSIZE, ESP.getFlashChipSize()/1024);
-    JBI->Add(PM_FLASHSIZE,        ESP.getFlashChipRealSize()/1024);
-    uint64_t mac = ESP.getEfuseMac();
-    JBI->Add(PM_FLASHCHIPID, mac);
-    #endif // ESP8266
-    JBI->Add(PM_FLASHMODE,        (uint8_t)ESP.getFlashChipMode()); //FlashMode_t
+
+  // ---- Mostly-static (can be cached at boot if you want) ----
+  JBI->Add(PM_PROGRAMSIZE, ESP.getSketchSize() / 1024);
+
+#ifdef ESP8266
+  JBI->Add(PM_FREEMEMORY,       ESP.getFreeSketchSpace() / 1024);
+  JBI->Add(PM_HEAPSIZE,         ESP.getFreeHeap() / 1024);
+  JBI->Add(PM_PROGRAMFLASHSIZE, ESP.getFlashChipSize() / 1024);
+  JBI->Add(PM_FLASHSIZE,        ESP.getFlashChipRealSize() / 1024);
+  JBI->Add(PM_FLASHCHIPID,      ESP.getFlashChipId());
+#else
+  // ESP32
+  JBI->Add(PM_FREEMEMORY,       ESP.getFreeSketchSpace() / 1024);
+  JBI->Add(PM_HEAPSIZE,         ESP.getFreeHeap() / 1024);
+
+  // ESP32: "chip flash size" is OK; no "real size" concept here in Arduino layer
+  JBI->Add(PM_PROGRAMFLASHSIZE, ESP.getFlashChipSize() / 1024);
+
+  // This isn't "flash chip id". It's the silicon MAC / eFuse ID.
+  const uint64_t efuse_mac = ESP.getEfuseMac();
+  JBI->Add(PM_FLASHCHIPID, efuse_mac);
+
+  // ---- Heap health (ESP32) ----
+  JBI->Add(PM_HEAP_FREE_8BIT,    heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
+  JBI->Add(PM_HEAP_LARGEST_8BIT, heap_caps_get_largest_free_block(MALLOC_CAP_8BIT) / 1024);
+  JBI->Add(PM_HEAP_MIN_8BIT,     heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT) / 1024);
+
+  // ---- Optional: PSRAM ----
+  JBI->Add(PM_PSRAM_FREE, ESP.getFreePsram() / 1024);
+  JBI->Add(PM_PSRAM_SIZE, ESP.getPsramSize() / 1024);
+#endif
+
+  JBI->Add(PM_FLASHMODE, (uint8_t)ESP.getFlashChipMode());
   return JBI->End();
 }
+
 
 
 uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appending)
@@ -525,7 +544,7 @@ uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level, bool json_appending
 
   JBI->Object_Start(PM_CRASHDUMP);
     tkr_sup->WriteBuffer_P(PSTR(","));
-    tkr_crash_recorder->CrashDump_AddJson();
+    // tkr_crash_recorder->CrashDump_AddJson();
   JBI->Object_End();
 
   return JBI->End();
