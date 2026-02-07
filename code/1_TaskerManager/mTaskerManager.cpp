@@ -60,7 +60,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
    * Threaded Processing Loop
    *****************************************************************************************************************/ 
 
-  #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES) || defined(ENABLE_DEBUGFEATURE_TASKER__DEBUG_MEMORY_PER_MODULE)
   uint16_t debug_idx = 0;
   #endif
   #ifdef ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE
@@ -186,22 +186,36 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
       // If metrics are disabled, just run the task
     DEBUG_LINE_HERE;
 
+    /***DEBUGGING::  Uncomment to block a TASK */
     // if (task == TASK_SETTINGS_DEFAULT || task == TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT) {
     //   ALOG_ERR(PSTR("TASK_SETTINGS_DEFAULT or TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT called"));
     //   return 0;
     // }
+    /***DEBUGGING::  Uncomment to block a MODULE */
+    // if (
+    //   (mod->GetModuleUniqueID() == D_UNIQUE_MODULE_LIGHTS_INTERFACE_ID) || 
+    //   (mod->GetModuleUniqueID() == D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID) || 
+    //   // (mod->GetModuleUniqueID() == D_UNIQUE_MODULE_NETWORK_MQTT_ID) || 
+    //   (mod->GetModuleUniqueID() == D_UNIQUE_MODULE_NETWORK_WIFI_ID)
+    // ){
+    //   ALOG_DBM(PSTR("mod->GetModuleUniqueID() %d BLOCKED"), mod->GetModuleUniqueID());
+    //   #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES) || defined(ENABLE_DEBUGFEATURE_TASKER__DEBUG_MEMORY_PER_MODULE)
+    //   debug_idx++;
+    //   #endif
+    //   continue;
+    // }
 
 
+    result = mod->Tasker(task, obj);
 
+
+    /***
+     * In the future if we get stuck, remember missing return from task required with platest platform/board
+     */
     DEBUG_LINE_HERE4;
-      result = mod->Tasker(task, obj);
-      /***
-       * In the future if we get stuck, remember missing return from task required with platest platform/board
-       */
-      DEBUG_LINE_HERE4;
-      #ifdef ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
-      result = mod->Tasker_DevCode(task, obj);
-      #endif
+    #ifdef ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
+    result = mod->Tasker_DevCode(task, obj);
+    #endif
   #endif
 
     
@@ -236,7 +250,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
     if(long_end_millis > ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS)
     {
       #ifdef ENABLE_DEBUG_FUNCTION_NAMES
-      ALOG_WRN(PSTR(D_LOG_CLASSLIST "LONG: %S %d-%S %d"), mod->GetModuleName(), task,GetTaskName(task), long_end_millis);
+      ALOG_WRN(PSTR(D_LOG_CLASSLIST "LONG: %d-%S %d-%S %d"), debug_idx, mod->GetModuleName(), task,GetTaskName(task), long_end_millis);
       #else // without task name ENABLE_DEBUG_FUNCTION_NAMES
       ALOG_WRN(PSTR(D_LOG_CLASSLIST "LONG: %S %d %d"),    mod->GetModuleName(), task,                   long_end_millis);
       #endif
@@ -244,6 +258,11 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
     #endif
 
     DEBUG_LINE_HERE;
+
+      
+    #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES) || defined(ENABLE_DEBUGFEATURE_TASKER__DEBUG_MEMORY_PER_MODULE)
+    debug_idx++;
+    #endif
  
   } // end for
 

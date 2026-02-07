@@ -3364,6 +3364,7 @@ static const char PM_EFFECT_DESCRI__SUNPOSITIONS__SUNSET_BLENDED_PALETTES_01[] P
 // @returns    : FRAMETIME
 // @Date Modified : 16Sep2025
 // *********************************************************************************************
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 uint16_t mAnimatorLight::EffectAnim__SunPositions__NoonBurst_Base(uint8_t speed, uint16_t center)
 {
   // Clamp/basic
@@ -3436,6 +3437,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__NoonBurst_Base(uint8_t speed,
 
   return FRAMETIME;
 }
+#endif
 
 
 

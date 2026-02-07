@@ -259,7 +259,9 @@ void mAnimatorLight::serializeInfo(JsonObject root)
     root[F("lip")] = realtimeIP.toString();
   }
 
-  root[F("ws")] = tkr_web->websocket_lights->count();
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+  root[F("ws")] = websocket_lights->count();
+  #endif
 
   root[F("fxcount")] = getModeCount();
   root[F("palcount")] = getPaletteCount();
@@ -496,7 +498,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
     String apireq = "win"; apireq += '&'; // reduce flash string usage
     apireq += httpwin;
     ALOG_INF(PSTR("Did I enter here 1?"));
-    #ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
     handle__HTTP__GET_QueryAPI(nullptr, apireq, false);    // may set stateChanged
     #endif
   }
@@ -551,7 +553,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 
   // ALOG_INF(PSTR("deserializeState end =>> does my normal commandjson need done here?"));
 
-  #ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
   stateUpdated(callMode);
   #endif
   if (presetToRestore) currentPreset = presetToRestore;
@@ -1157,6 +1159,8 @@ void mAnimatorLight::sappend(char stype, const char* key, int val)
 }
 
 
+
+
 bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 {
 
@@ -1574,7 +1578,305 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 }
           
 
-#ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+
+
+
+
+
+/*
+ * WebSockets server for bidirectional communication
+ */
+
+uint16_t wsLiveClientId = 0;
+unsigned long wsLastLiveTime = 0;
+//uint8_t* wsFrameBuffer = nullptr;
+
+#define WS_LIVE_INTERVAL 40
+
+void sendDataWs(AsyncWebSocketClient * client = nullptr);
+
+void sendDataWs(AsyncWebSocketClient * client)
+{
+  if (!tkr_anim->websocket_lights->count())
+  {
+    ALOG_ERR(PSTR("No WS clients connected"));
+    return;
+  }
+
+  if (!JBI->requestJSONBufferLock(12)) {
+    const char* error = PSTR("{\"error\":3}");
+    if (client) {
+      client->text(FPSTR(error)); // ERR_NOBUF
+    } else {
+      tkr_anim->websocket_lights->textAll(FPSTR(error)); // ERR_NOBUF
+    }
+    return;
+  }
+
+  JsonObject state = tkr_mfile->pDoc->createNestedObject("state");
+  tkr_anim->serializeState(state);
+  JsonObject info  = tkr_mfile->pDoc->createNestedObject("info");
+  tkr_anim->serializeInfo(info);
+
+  size_t len = measureJson(*tkr_mfile->pDoc);
+  // DEBUG_PRINTF_P(PSTR("JSON buffer size: %u for WS request (%u).\n"), tkr_anim->pDoc->memoryUsage(), len);
+
+  // the following may no longer be necessary as heap management has been fixed by @willmmiles in AWS
+  size_t heap1 = ESP.getFreeHeap();
+  // DEBUG_PRINTF_P(PSTR("heap %u\n"), ESP.getFreeHeap());
+  #ifdef ESP8266
+  if (len>heap1) {
+    DEBUG_PRINTLN(F("Out of memory (WS)!"));
+    return;
+  }
+  #endif
+  AsyncWebSocketBuffer buffer(len);
+  #ifdef ESP8266
+  size_t heap2 = ESP.getFreeHeap();
+  DEBUG_PRINTF_P(PSTR("heap %u\n"), ESP.getFreeHeap());
+  #else
+  size_t heap2 = 0; // ESP32 variants do not have the same issue and will work without checking heap allocation
+  #endif
+  if (!buffer || heap1-heap2<len) {
+    JBI->releaseJSONBufferLock();
+    DEBUG_PRINTLN(F("WS buffer allocation failed."));
+    tkr_anim->websocket_lights->closeAll(1013); //code 1013 = temporary overload, try again later
+    tkr_anim->websocket_lights->cleanupClients(0); //disconnect all clients to release memory
+    return; //out of memory
+  }
+  serializeJson(*tkr_mfile->pDoc, (char *)buffer.data(), len);
+
+  DEBUG_PRINT(F("Sending WS data "));
+  if (client) {
+    DEBUG_PRINTLN(F("to a single client."));
+    client->text(std::move(buffer));
+  } else {
+    DEBUG_PRINTLN(F("to multiple clients."));
+    tkr_anim->websocket_lights->textAll(std::move(buffer));
+  }
+
+  JBI->releaseJSONBufferLock();
+}
+
+
+void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len)
+{
+  uint8_t log = LOG_LEVEL_INFO;
+
+  Serial.println("wsEvent called");
+
+  if (type == WS_EVT_CONNECT) {
+    DEBUG_PRINTLN(F("WS client connected."));
+    sendDataWs(client);
+    return;
+  }
+
+  if (type == WS_EVT_DISCONNECT) {
+    if (client->id() == wsLiveClientId) wsLiveClientId = 0;
+    DEBUG_PRINTLN(F("WS client disconnected."));
+    return;
+  }
+
+  if (type == WS_EVT_DATA) {
+    ALOG_INF(PSTR("wsEvent::WS_EVT_DATA"));
+    AwsFrameInfo * info = (AwsFrameInfo*)arg;
+
+    // Single-frame, full payload
+    if (info->final && info->index == 0 && info->len == len) {
+      if (info->opcode == WS_TEXT) {
+        // Lightweight heartbeat
+        if (len > 0 && len < 10 && data[0] == 'p') {
+          client->text(F("pong"));
+          return;
+        }
+
+        // -------- Pass 1: ALWAYS run Tasker on raw WS payload (pre-parse, no JSON lock) --------
+        if (len < DATA_BUFFER_PAYLOAD_MAX_LENGTH) {
+          ALOG_INF(PSTR("wsEvent:: len < DATA_BUFFER_PAYLOAD_MAX_LENGTH"));
+          if (data_buffer.requestLock(tkr_anim->GetModuleUniqueID())) {
+            data_buffer.ClearSoft();
+            data_buffer.payload.length_used = (uint16_t)len;
+            memcpy(data_buffer.payload.ctr, data, len);
+            data_buffer.payload.ctr[len] = '\0'; // NUL terminate for logging/consumers
+
+            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "WS State Payload [len:%d] %s"),
+                   data_buffer.payload.length_used, data_buffer.payload.ctr);
+
+            tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
+            data_buffer.releaseLock();
+          } else {
+            ALOG_WRN(PSTR("WS Tasker: buffer lock busy; skipping Tasker pass"));
+          }
+        } else {
+          ALOG_ERR(PSTR("WS Tasker: payload too large (%u)"), (unsigned)len);
+        }
+        // ----------------------------------------------------------------------------------------
+
+        // -------- Pass 2: ArduinoJson parse + lighting state (with JSON buffer lock) -----------
+        bool verboseResponse = false;
+
+        if (!JBI->requestJSONBufferLock(11)) {
+          client->text(F("{\"error\":3}")); // ERR_NOBUF
+          return;
+        }
+
+        DeserializationError error = deserializeJson(*tkr_mfile->pDoc, data, len);
+        JsonObject root = tkr_mfile->pDoc->as<JsonObject>();
+        if (error || root.isNull()) {
+          JBI->releaseJSONBufferLock();
+          ALOG(log, PSTR("{\"error\":2}")); // ERR_JSON
+          return;
+        }
+
+        if (root["v"] && root.size() == 1) {
+          // client asked only for a verbose state reply
+          verboseResponse = true;
+        } else if (root.containsKey("lv")) {
+          wsLiveClientId = root["lv"] ? client->id() : 0;
+        } else {
+          verboseResponse = tkr_anim->deserializeState(root);
+        }
+
+        JBI->releaseJSONBufferLock();
+
+        // Per-client response if no broadcast queued
+        if (!tkr_anim->interfaceUpdateCallMode) {
+          if (verboseResponse) {
+            ALOG(log, PSTR("{\"success\":true} verboseResponse"));
+            sendDataWs(client);
+          } else {
+            ALOG(log, PSTR("{\"success\":true}"));
+            client->text(F("{\"success\":true}"));
+          }
+        }
+        // ----------------------------------------------------------------------------------------
+      }
+      return;
+    }
+
+    // Multi-frame / split packets not handled yet
+    if ((info->index + len) == info->len) {
+      if (info->final && info->message_opcode == WS_TEXT) {
+        client->text(F("{\"error\":9}")); // ERR_JSON (we do not handle split packets right now)
+      }
+    }
+    DEBUG_PRINTLN(F("WS multipart message."));
+    return;
+  }
+
+  if (type == WS_EVT_ERROR) {
+    DEBUG_PRINTLN(F("WS error."));
+    return;
+  }
+
+  if (type == WS_EVT_PONG) {
+    DEBUG_PRINTLN(F("WS pong."));
+    return;
+  }
+
+  DEBUG_PRINTLN(F("WS unknown event."));
+}
+
+
+bool sendLiveLedsWs(uint32_t wsClient)
+{
+  AsyncWebSocketClient * wsc = tkr_anim->websocket_lights->client(wsClient);
+  if (!wsc || wsc->queueLength() > 0) return false; //only send if queue free
+
+  size_t used = tkr_anim->getLengthTotal();
+#ifdef ESP8266
+  const size_t MAX_LIVE_LEDS_WS = 256U;
+#else
+  const size_t MAX_LIVE_LEDS_WS = 1024U;
+#endif
+  size_t n = ((used -1)/MAX_LIVE_LEDS_WS) +1; //only serve every n'th LED if count over MAX_LIVE_LEDS_WS
+  size_t pos = 2;  // start of data
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  if (tkr_anim->isMatrix) {
+    // ignore anything behid matrix (i.e. extra strip)
+    used = mAnimatorLight::Segment::maxWidth*mAnimatorLight::Segment::maxHeight; // always the size of matrix (more or less than strip.getLengthTotal())
+    n = 1;
+    if (used > MAX_LIVE_LEDS_WS) n = 2;
+    if (used > MAX_LIVE_LEDS_WS*4) n = 4;
+    pos = 4;
+  }
+#endif
+  size_t bufSize = pos + (used/n)*3;
+
+  AsyncWebSocketBuffer wsBuf(bufSize);
+  if (!wsBuf) return false; //out of memory
+  uint8_t* buffer = reinterpret_cast<uint8_t*>(wsBuf.data());
+  if (!buffer) return false; //out of memory
+  buffer[0] = 'L';
+  buffer[1] = 1; //version
+
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  if (tkr_anim->isMatrix) {
+    buffer[1] = 2; //version
+    buffer[2] = mAnimatorLight::Segment::maxWidth/n;
+    buffer[3] = mAnimatorLight::Segment::maxHeight/n;
+  }
+#endif
+
+  // Serial.println("Sending live data to WS client");
+  for (size_t i = 0; pos < bufSize -2; i += n)
+  {
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    if (tkr_anim->isMatrix && n>1 && (i/mAnimatorLight::Segment::maxWidth)%n) i += mAnimatorLight::Segment::maxWidth * (n-1);
+#endif
+
+
+    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
+    RgbwwColor col = tkr_anim->getPixelColor(i);
+    uint32_t c = RGBW32(col.R, col.G, col.B, col.WW);
+    #else
+    uint32_t c = tkr_anim->getPixelColor(i);
+    #endif
+    
+    uint8_t r = R(c);
+    uint8_t g = G(c);
+    uint8_t b = B(c);
+    uint8_t w = W(c);
+    buffer[pos++] = r;//tkr_iLight->_briRGB_Global ? qadd8(w, r) : 0; //R, add white channel to RGB channels as a simple RGBW -> RGB map
+    buffer[pos++] = g;//tkr_iLight->_briRGB_Global ? qadd8(w, g) : 0; //G
+    buffer[pos++] = b;//tkr_iLight->_briRGB_Global ? qadd8(w, b) : 0; //B
+    // Serial.println(r);
+  }
+
+
+  wsc->binary(std::move(wsBuf));
+  return true;
+}
+
+void mAnimatorLight::handleWs()
+{
+  if (millis() - wsLastLiveTime > WS_LIVE_INTERVAL)
+  {
+    #ifdef ESP8266
+    websocket_lights->cleanupClients(3);
+    #else
+    websocket_lights->cleanupClients();
+    #endif
+    bool success = true;
+    if (wsLiveClientId) success = sendLiveLedsWs(wsLiveClientId);
+    wsLastLiveTime = millis();
+    if (!success) wsLastLiveTime -= 20; //try again in 20ms if failed due to non-empty WS queue
+  }
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
 
 #ifndef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
 bool mAnimatorLight::handleFileRead(AsyncWebServerRequest* request, String path){
@@ -2643,7 +2945,7 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
 {
   AsyncWebSocketClient * wsc = nullptr;
   if (!request) { //not HTTP, use Websockets
-    wsc = tkr_web->websocket_lights->client(wsClient);
+    wsc = websocket_lights->client(wsClient);
     if (!wsc || wsc->queueLength() > 0) return false; //only send if queue free
   }
 
@@ -3109,6 +3411,8 @@ bool mAnimatorLight::isIp(String str) {
 void mAnimatorLight::WebPage_Root_AddHandlers()
 {
 
+  tkr_web->server->addHandler(websocket_lights);
+
   JBI->releaseJSONBufferLock();
 
   #ifdef ENABLE_FEATURE_LIGHTING__WEBSOCKETS
@@ -3375,6 +3679,105 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 }
 
 
-#endif // ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+#endif // ENABLE_FEATURE_LIGHTING__WEBUI
+
+
+void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
+{ 
+  
+  #ifdef USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED
+  #ifdef ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  snprintf(serverDescription, sizeof(serverDescription), "PulSar %s \"%s\" [%s]", tkr_set->Settings.system_name.friendly, DEVICENAME_DESCRIPTION_CTR, tkr_time->GetBuildDateAndTime().c_str() );
+  #else
+  snprintf(serverDescription, sizeof(serverDescription), tkr_set->Settings.system_name.friendly);
+  #endif
+  #else
+  #ifdef ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  #ifdef DEVICENAME_DESCRIPTION_CTR
+  snprintf(serverDescription, sizeof(serverDescription), "PulSar \"%s\" [%s] %s", tkr_set->Settings.system_name.friendly, tkr_time->GetBuildDateAndTime().c_str() , tkr_set->runtime.firmware_version.current.name_ctr);
+  #else
+  snprintf(serverDescription, sizeof(serverDescription), "PulSar %s [%s]", tkr_set->Settings.system_name.friendly, tkr_time->GetBuildDateAndTime().c_str());
+  #endif
+  #else
+  snprintf(serverDescription, sizeof(serverDescription), tkr_set->Settings.system_name.friendly);
+  #endif
+  #endif
+  DEBUG_LINE_HERE4
+
+  sprintf(ntpServerName, NTP_SERVER1);  
+  sprintf(apPass, CLIENT_SSID);
+  sprintf(otaPass, "PulSar");
+  sprintf(clientSSID, CLIENT_SSID);
+  sprintf(clientPass, CLIENT_PASS);
+  
+
+  WAIT_WITH_PRINT_TICK(1000);
+
+  DEBUG_LINE_HERE4
+  #ifdef ENABLE_FEATURE_LIGHTS__PRESETS
+  initPresetsFile();
+  #endif // ENABLE_FEATURE_LIGHTS__PRESETS
+
+  DEBUG_LINE_HERE4
+  WAIT_WITH_PRINT_TICK(1000);
+  Reset_CustomPalette_NamesDefault();  
+
+  WAIT_WITH_PRINT_TICK(1000);
+  DEBUG_LINE_HERE4
+  
+  
+  websocket_lights = new AsyncWebSocket("/ws");
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+  websocket_lights->onEvent(wsEvent);
+  #endif
+  
+  DEBUG_LINE_HERE4
+  loadLedmap = 0; // To enable it to load once
+  paletteFade=0;
+  paletteBlend = 0;
+  milliampsPerLed = 5;
+  cctBlending = 0;
+  ablMilliampsMax = 0;
+  currentMilliamps = 0;
+  effect_start_time = millis();
+  timebase = 0;
+  isMatrix = false;
+  _virtualSegmentLength = 0;
+  _length = DEFAULT_LED_COUNT;
+  _brightness = DEFAULT_BRIGHTNESS;
+  _targetFps = 40;
+  _frametime = FRAMETIME;
+  _cumulativeFps = 2;
+  _isServicing = false;
+  _isOffRefreshRequired = false;
+  _hasWhiteChannel = false;
+  _force_update = false;
+  effects.count = getEffectsAmount();
+  _callback = nullptr;
+  customMappingTable = nullptr;
+  customMappingSize = 0;
+  _lastShow = 0;
+  segment_current_index = 0;
+  _mainSegment = 0;
+
+  DEBUG_LINE_HERE4
+  effects.function.reserve(effects.count);     // allocate memory to prevent initial fragmentation (does not increase size())
+  effects.config.reserve(effects.count); // allocate memory to prevent initial fragmentation (does not increase size())
+    
+  DEBUG_LINE_HERE4
+  LoadEffects();
+
+  DEBUG_LINE_HERE4
+  Init_Segments();
+    
+  #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  Standby_Init();
+  #endif
+
+  DEBUG_LINE_HERE4
+  module_state.mode = ModuleStatus::Running;
+
+  DEBUG_LINE_HERE4
+} // END "Init"
 
 #endif // USE_MODULE_LIGHTS_ANIMATOR

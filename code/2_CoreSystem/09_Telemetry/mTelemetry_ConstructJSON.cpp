@@ -207,7 +207,7 @@ uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level, bool json_appending
   JBI->Start();
 
   // ---- Mostly-static (can be cached at boot if you want) ----
-  JBI->Add(PM_PROGRAMSIZE, ESP.getSketchSize() / 1024);
+  // JBI->Add(PM_PROGRAMSIZE, ESP.getSketchSize() / 1024);
 
 #ifdef ESP8266
   JBI->Add(PM_FREEMEMORY,       ESP.getFreeSketchSpace() / 1024);
@@ -217,15 +217,15 @@ uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level, bool json_appending
   JBI->Add(PM_FLASHCHIPID,      ESP.getFlashChipId());
 #else
   // ESP32
-  JBI->Add(PM_FREEMEMORY,       ESP.getFreeSketchSpace() / 1024);
+  // JBI->Add(PM_FREEMEMORY,       ESP.getFreeSketchSpace() / 1024);
   JBI->Add(PM_HEAPSIZE,         ESP.getFreeHeap() / 1024);
 
-  // ESP32: "chip flash size" is OK; no "real size" concept here in Arduino layer
-  JBI->Add(PM_PROGRAMFLASHSIZE, ESP.getFlashChipSize() / 1024);
+  // // ESP32: "chip flash size" is OK; no "real size" concept here in Arduino layer
+  // JBI->Add(PM_PROGRAMFLASHSIZE, ESP.getFlashChipSize() / 1024);
 
-  // This isn't "flash chip id". It's the silicon MAC / eFuse ID.
-  const uint64_t efuse_mac = ESP.getEfuseMac();
-  JBI->Add(PM_FLASHCHIPID, efuse_mac);
+  // // This isn't "flash chip id". It's the silicon MAC / eFuse ID.
+  // const uint64_t efuse_mac = ESP.getEfuseMac();
+  // JBI->Add(PM_FLASHCHIPID, efuse_mac);
 
   // ---- Heap health (ESP32) ----
   JBI->Add(PM_HEAP_FREE_8BIT,    heap_caps_get_free_size(MALLOC_CAP_8BIT) / 1024);
@@ -233,11 +233,11 @@ uint8_t mTelemetry::ConstructJSON_Memory(uint8_t json_level, bool json_appending
   JBI->Add(PM_HEAP_MIN_8BIT,     heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT) / 1024);
 
   // ---- Optional: PSRAM ----
-  JBI->Add(PM_PSRAM_FREE, ESP.getFreePsram() / 1024);
-  JBI->Add(PM_PSRAM_SIZE, ESP.getPsramSize() / 1024);
+  // JBI->Add(PM_PSRAM_FREE, ESP.getFreePsram() / 1024);
+  // JBI->Add(PM_PSRAM_SIZE, ESP.getPsramSize() / 1024);
 #endif
 
-  JBI->Add(PM_FLASHMODE, (uint8_t)ESP.getFlashChipMode());
+  // JBI->Add(PM_FLASHMODE, (uint8_t)ESP.getFlashChipMode());
   return JBI->End();
 }
 
@@ -962,80 +962,125 @@ uint8_t mTelemetry::ConstructJSON_Debug_System_Stored_Settings(uint8_t json_leve
 }
 
 
-#ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+// #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+// uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t json_level, bool json_appending)
+// {
+  
+//     // //test devices
+//     // JBI->Object_Start("Test");
+//     //   JBI->Add("activity.loop_counter", tkr_sup->activity.loop_counter);
+//     // //   JBI->Add("sleep", tkr_set->sleep);
+//     // //   JBI->Add("loop_runtime_millis", tkr_sup->loop_runtime_millis);
+//     // //   JBI->Add("loops_per_second", tkr_sup->loops_per_second);
+//     // //   JBI->Add("this_cycle_ratio", tkr_sup->this_cycle_ratio);
+//     // //   JBI->Add("loop_load_avg", tkr_set->loop_load_avg);
+//     // //   JBI->Add("enable_sleep", tkr_set->Settings.enable_sleep);
+//     // JBI->Object_End();
+//     // // test end
+
+//   JBI->Start();
+
+//   char buffer2[100];
+  
+//   // for(int ii=0;ii<tkr->GetClassCount();ii++)
+//   // {
+//   //   JBI->Level_Start_P(tkr->pModule[ii]->GetModuleName());
+
+//   //     JBI->Add("max_time", tkr->debug_module_time[ii].max_time);
+//   //     JBI->Add("avg_time", tkr->debug_module_time[ii].avg_time);
+//   //     JBI->Add("max_function_id", tkr->debug_module_time[ii].max_function_id);
+
+//   //   JBI->Object_End();
+
+
+
+
+//   // }
+
+
+
+
+
+
+
+//   //   JBI->Add_P(tkr->GetModuleFriendlyName(tkr->module_settings.list[i]),tkr->GetClassSizeByID(tkr->module_settings.list[i]));
+//   //   // if(tkr->GetClassSizeByID(i)>10000){
+//   //   //   JBI->Add("bad",i);
+//   //   // }
+
+
+
+//   // }
+
+//   // /**
+//   //  * @brief Add array of all unique id's (in a json array, this will just replace... so maybe use name+id? or rather ID_NAME so it will be easier to spot numbers the same)
+//   //  * I could also run a "append" id but check its not in it already (easier with vector?)
+//   //  * 
+//   //  */
+//   // char buffer[100];
+
+
+
+//   // JBI->Array_Start("ModuleIDs");
+//   // for(int ii=0;ii<tkr->GetClassCount();ii++)
+//   // {
+//   //   snprintf_P(buffer, sizeof(buffer), PSTR("%04d_%S"), tkr->pModule[ii]->GetModuleUniqueID(), tkr->pModule[ii]->GetModuleFriendlyName()  );
+
+//   //   JBI->Add(buffer);
+//   // }
+//   // JBI->Array_End();
+
+//   // JBI->Object_End();
+
+
+//   return JBI->End();
+// }
+// #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+
+
 uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t json_level, bool json_appending)
 {
-  
-    // //test devices
-    // JBI->Object_Start("Test");
-    //   JBI->Add("activity.loop_counter", tkr_sup->activity.loop_counter);
-    // //   JBI->Add("sleep", tkr_set->sleep);
-    // //   JBI->Add("loop_runtime_millis", tkr_sup->loop_runtime_millis);
-    // //   JBI->Add("loops_per_second", tkr_sup->loops_per_second);
-    // //   JBI->Add("this_cycle_ratio", tkr_sup->this_cycle_ratio);
-    // //   JBI->Add("loop_load_avg", tkr_set->loop_load_avg);
-    // //   JBI->Add("enable_sleep", tkr_set->Settings.enable_sleep);
-    // JBI->Object_End();
-    // // test end
-
   JBI->Start();
 
-  char buffer2[100];
-  
-  // for(int ii=0;ii<tkr->GetClassCount();ii++)
-  // {
-  //   JBI->Level_Start_P(tkr->pModule[ii]->GetModuleName());
+  #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // Existing perf block (if you want)
+  JBI->Object_Start("TaskerPerf");
+  for (uint8_t ii = 0; ii < tkr->GetClassCount(); ii++) {
+    JBI->Object_Start_P(tkr->pModule[ii]->GetModuleName());
+      JBI->Add("max_ms", tkr->debug_module_time[ii].max_time);
+      JBI->Add("avg_ms", tkr->debug_module_time[ii].avg_time);
+      JBI->Add("max_task", tkr->debug_module_time[ii].max_function_id);
+    JBI->Object_End();
+  }
+  JBI->Object_End();
+#endif
 
-  //     JBI->Add("max_time", tkr->debug_module_time[ii].max_time);
-  //     JBI->Add("avg_time", tkr->debug_module_time[ii].avg_time);
-  //     JBI->Add("max_function_id", tkr->debug_module_time[ii].max_function_id);
+  // New: per-module heap deltas
+  #ifdef ENABLE_DEBUGFEATURE_TASKER__DEBUG_MEMORY_PER_MODULE
+  JBI->Object_Start("TaskerMemDelta8");
+  for (uint8_t ii = 0; ii < tkr->GetClassCount(); ii++) {
+    const auto &s = tkr->memstats[ii];
 
-  //   JBI->Object_End();
+    // Optional: suppress zeros to reduce payload
+    if (s.samples == 0) continue;
+    if ((s.free8_sum == 0) && (s.largest8_sum == 0) && (s.free8_min_delta == 0) && (s.largest8_min_delta == 0)) continue;
 
-
-
-
-  // }
-
-
-
-
-
-
-
-  //   JBI->Add_P(tkr->GetModuleFriendlyName(tkr->module_settings.list[i]),tkr->GetClassSizeByID(tkr->module_settings.list[i]));
-  //   // if(tkr->GetClassSizeByID(i)>10000){
-  //   //   JBI->Add("bad",i);
-  //   // }
-
-
-
-  // }
-
-  // /**
-  //  * @brief Add array of all unique id's (in a json array, this will just replace... so maybe use name+id? or rather ID_NAME so it will be easier to spot numbers the same)
-  //  * I could also run a "append" id but check its not in it already (easier with vector?)
-  //  * 
-  //  */
-  // char buffer[100];
-
-
-
-  // JBI->Array_Start("ModuleIDs");
-  // for(int ii=0;ii<tkr->GetClassCount();ii++)
-  // {
-  //   snprintf_P(buffer, sizeof(buffer), PSTR("%04d_%S"), tkr->pModule[ii]->GetModuleUniqueID(), tkr->pModule[ii]->GetModuleFriendlyName()  );
-
-  //   JBI->Add(buffer);
-  // }
-  // JBI->Array_End();
-
-  // JBI->Object_End();
-
+    JBI->Object_Start_P(tkr->pModule[ii]->GetModuleName());
+      // JBI->Add("n",        s.samples);
+      JBI->Add("free_sum", s.free8_sum);
+      JBI->Add("lb_sum",   s.largest8_sum);
+      // JBI->Add("free_min", (int32_t)s.free8_min_delta);
+      // JBI->Add("lb_min",   (int32_t)s.largest8_min_delta);
+    JBI->Object_End();
+  }
+  JBI->Object_End();
+  #endif
+  ALOG_INF(PSTR("per %s"), JBI->GetBuffer());
 
   return JBI->End();
 }
-#endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+
+
 
 
 /**

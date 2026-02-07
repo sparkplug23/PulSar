@@ -3,7 +3,7 @@
 #define MUSERCONFIG_SECRET_HEADER
 
 #include "stdint.h"
-#include "2_CoreSystem/mSystemConfig.h"
+#include "2_CoreSystem/Version.h"
 #include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
 
 /*********************************************************************************************\

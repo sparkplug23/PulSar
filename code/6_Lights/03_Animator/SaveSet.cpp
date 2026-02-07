@@ -87,7 +87,7 @@ Summary
  * Receives client input
  */
 
-  #ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
 //called upon POST settings form submit
 void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage)
 {

@@ -1,5 +1,5 @@
 // #defines for my credentials and passwards to NOT sync to github.
-// This file will override those found in "mSystemConfig"
+// This file will override those found in "Version"
 #ifndef mUserConfigSecret_Example_H
 #define mUserConfigSecret_Example_H
 

@@ -11,6 +11,10 @@ extern "C" {
 
 int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj)
 {
+
+  // return 0;
+
+
   switch (function)
   {
     case TASK_INIT:

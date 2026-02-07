@@ -29,7 +29,7 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 #define MUSERCONFIG_DEFAULTS_H
 
 #include "stdint.h"
-#include "2_CoreSystem/mSystemConfig.h"
+#include "2_CoreSystem/Version.h"
 #include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
 
 // #ifdef USE_USER_MICHAEL
@@ -185,6 +185,8 @@ SHOULD NOT rely on other files for pre-defines, other than INI
   #define USE_MODULE_CORE_SPI
   #define USE_MODULE_CORE_I2C
 
+  #define USE_MODULE_CORE_FILESYSTEM
+  #define ENABLE_FEATURE_JSON__ASYNCJSON_V6
 
   /***********************************
    * SECTION: Networking
@@ -597,6 +599,8 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 
 // -- OTA -----------------------------------------
 #define USE_ARDUINO_OTA                          // Add optional support for Arduino OTA (+13k code)
+
+
 
 // ----- WDT timer
 // #define ENABLE_FEATURE_WATCHDOG_TIMER

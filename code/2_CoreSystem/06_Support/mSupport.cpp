@@ -91,7 +91,7 @@
         esp_task_wdt_reset();
       }
     #else
-      #include "esp_system.h"
+      // #include "esp_system.h"
       // hw_timer_t *timerwdt = NULL;
       // const uint64_t wdtTimeout = D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS;
 

@@ -12,6 +12,8 @@
 //--------------------------------[Enable Device]-------------------------------------
 
 // #define DEVICE_TESTBED_01__SENSORS_NEXTION
+// #define DEVICE_TESTBED_02__MOTION_AUDIO
+// #define DEVICE_TESTBED_05__SWITCHES_BUTTONS
 
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------
@@ -88,12 +90,12 @@
 
   // #define ENABLE_FREERAM_APPENDING_SERIAL
 
-  #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
+  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
 
-  #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 
-  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
-    #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+  //   #define ENABLE_DEBUG_FUNCTION_NAMES
 
   /***********************************
    * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
@@ -248,7 +250,7 @@
   #ifdef ENABLE_TEMPLATE_SECTION__LIGHTS
 
     #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
-    #define ENABLE_FEATURE_LIGHTING__DISABLE_WEBPAGE_TO_REDUCE_MEMORY_USAGE // save memory by removing web page
+    // #define ENABLE_FEATURE_LIGHTING__DISABLE_WEBPAGE_TO_REDUCE_MEMORY_USAGE // save memory by removing web page
 
     // 13, 18, 19, 22, 23, 25, 26, 27       USED
     // 33, 32, 21, 17, 16, 15*, 14*, 5*, 4, NOTUSED
@@ -529,6 +531,642 @@
   "}";
 
 #endif
+
+
+
+
+/**
+ * @brief 
+ * 
+ * Testbed for motion/distance sensors
+ * 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *                               *I ~PWM 'NC    
+ *                          _____________________
+ *                    3V3  |3V3     |USB|     VIN|
+ *                    GND  |GND               GND| 
+ *                 =BUZZER |15 (fL)            13| RADAR_OUT_MOT4
+ *              =SONIC TX1 |2  (fL, BIL)  (fH) 12| 
+ *              =SONIC RX1 |4             (fH) 14|
+ *              =RADAR TX2 |RX2/17             27| 
+ *              =RADAR RX2 |TX2/16             26| TOF1EN
+ *         PIR_SMALL_MOT2  |5  (fL)            25| TOF1INT
+ *                    aud  |18                 33| TOF0EN
+ *              LM386 SPKR |19                 32| TOF0INT
+ *        OLED,TOF I2C_SDA |21  SDA     (fL) * 35| RADAR_3p18GHZ_MOT3
+ *                         |RX0         (fL) * 34| PIR_LARGE_MOT1
+ *                         |TX0              ' VN| 
+ *        OLED,TOF I2C_SCL |22  SCL          ' VP| 
+ *                     NEO |23               ' EN| 
+ *                          _____________________
+ * 
+ * 
+ */
+
+ #ifdef DEVICE_TESTBED_02__MOTION_AUDIO
+ #ifndef DEVICENAME_CTR
+ #define DEVICENAME_CTR          "consumerunit"
+ #endif
+ #ifndef DEVICENAME_FRIENDLY_CTR
+ #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+ #endif
+ #ifndef DEVICENAME_DESCRIPTION_CTR
+ #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+ #endif
+ #define DEVICENAME_ROOMHINT_CTR "testgroup"
+ #define MQTT_HOST   "192.168.3.70"
+    
+    #define MQTT_PORT     1883
+   
+
+   
+ /***********************************
+  * SECTION: System Debug Options
+ ************************************/    
+ ///////////////////////////////////////////// Enable Logs
+ // #define DISABLE_SERIAL
+ // #define DISABLE_SERIAL0_CORE
+ // #define DISABLE_SERIAL_LOGGING
+ // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+ 
+ ///////////////////////////////////////////// System Logs
+ // #define ENABLE_ADVANCED_DEBUGGING
+ // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+ // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+ // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+ // #define ENABLE_DEBUG_FUNCTION_NAMES
+ // 
+ // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+ // #define ENABLE_DEBUG_LINE_HERE
+ // #define ENABLE_DEBUG_LINE_HERE2
+ // #define ENABLE_DEBUG_LINE_HERE3
+ // #define ENABLE_DEBUG_LINE_HERE_TRACE
+ // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+ // #define USE_DEBUG_PRINT
+ // #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
+
+//new feature to only show logs for a specific module when developing code
+  // #define ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE 5028
+  // #define ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE_ARRAY [1, 2]
+
+
+ ///////////////////////////////////////////// Module Logs
+ // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+ // #define ENABLE_FREERAM_APPENDING_SERIAL
+ 
+ /***********************************
+  * SECTION: System Configs
+ ************************************/    
+
+ #define SETTINGS_HOLDER 1239
+
+ 
+ 
+ #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // until devices can reliably be used without compiling per device
+ 
+     
+ /***********************************
+  * SECTION: Network Configs
+ ************************************/    
+
+ 
+   
+
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+ // #define USE_MODULE_SENSORS_INTERFACE  
+ // #define USE_MODULE_SENSORS_BUTTONS
+ //   
+   /**
+    * @brief 
+    * Button 1: Single button installs, means {"short":"iter over nice palettes", "long": "iter over 4 brightness levels"}
+    * Button 2: (Short) Two button installs, this button is iter common effects || (Long) starts a demo and debug mode
+    **/
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L0X
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L1X
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__ULTRASONIC
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE        // PIR1
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL        // PIR2
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ    // PIR3
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ      // PIR4
+
+
+// #define ENABLE_TEMPLATE_SECTION__DRIVERS__AUDIO_SPEAKER
+// #define ENABLE_TEMPLATE_SECTION__DRIVERS__AUDIO_BUZZER
+
+// #define ENABLE_TEMPLATE_SECTION__LIGHTS__NEOPIXEL
+
+#define ENABLE_TEMPLATE_SECTION__DISPLAYS__OLED
+
+//  // #define ENABLE_TEMPLATE_SECTION__LIGHTING
+//  #define ENABLE_TEMPLATE_SECTION__ENERGY
+//  #define ENABLE_TEMPLATE_SECTION__ENERGY__PZEM
+
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+ #define USE_MODULE_SENSORS_INTERFACE
+ #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+   #define USE_MODULE_SENSORS_INTERFACE
+   #define USE_MODULE_SENSORS_PIR
+    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+ #endif
+ #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
+  #define USE_MODULE_SENSORS_BUTTONS
+    #define ENABLE_DEVFATURE_BUTTON__REMOVE_MQTT_BUTTONS
+    #define SOC_TOUCH_VERSION_1
+  #endif
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__ULTRASONIC
+    #define USE_MODULE_SENSORS_SR04
+    #define ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+    #define ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+  #endif
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+    #define USE_MODULE_SENSORS__RADAR_HLK_LD2410
+  #endif
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L0X
+    #define USE_MODULE_SENSORS__TOF_VL53L0X
+    #define ENABLE_DEVFEATURE_I2C__SET_WIRE_INSTANCE_WITH_TWOWIRE_ZERO
+    #define VL53L0X_LONG_RANGE
+  #endif
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L1X
+    #define USE_MODULE_SENSORS__TOF_VL53L1X
+    #define ENABLE_DEVFEATURE_I2C__SET_WIRE_INSTANCE_WITH_TWOWIRE_ZERO
+    // #define USE_SENSORS_TOFVL_AVERAGING_DATA
+  #endif
+
+//  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
+
+//  #define ENABLE_DEVFEATURE_SENSORS__TOF_BOTH_VL53_ACTIVE_ON_SHARED_ADD29
+
+ /***********************************
+  * SECTION: Lighting Configs
+ ************************************/  
+
+  #ifdef ENABLE_TEMPLATE_SECTION__LIGHTS__NEOPIXEL
+
+    #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025_NO_GPIO
+
+    
+
+
+    #define USE_LIGHTING_TEMPLATE
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Pin":23,
+          "ColourOrder":"GRBW",
+          "BusType":"SK6812_RGBW",
+          "Start":0,
+          "Length":9
+        }
+      ],
+      "Segment0": {
+        "Name":"Door Edge",
+        "PixelRange": [
+          0,
+          9
+        ],
+        "ColourPalette":"Rainbow 16",
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":0,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 100
+      }
+      "BrightnessRGB": 5
+    }
+    )=====";
+
+ #endif
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+  #ifdef ENABLE_TEMPLATE_SECTION__DISPLAYS__OLED
+    #define USE_MODULE_DISPLAYS_INTERFACE
+    #define USE_MODULE_DISPLAYS_OLED_SH1106
+      #define SHOW_SPLASH
+  #endif
+
+ /***********************************
+  * SECTION: Energy Configs
+ ************************************/  
+
+ /***********************************
+  * SECTION: Controller Configs
+ ************************************/  
+
+ // #define USE_MODULE_CONTROLLER_CUSTOM__LIGHTNEO_MOTION_ALERTS
+
+ /***********************************
+  * SECTION: Module/GPIO Configs
+ ************************************/  
+
+ #define USE_MODULE_TEMPLATE
+ DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+ "{"
+   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+   "\"" D_GPIO_NUMBER "\":{"          
+     #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
+     "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+     "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
+    // "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," // Flipped
+    // "\"21\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\"," // Flipped      
+     #endif
+     #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
+     "\"33\":\""  D_GPIO_FUNCTION__TOF_VL53L0X_XSHUT1__CTR "\","
+    //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+    //  "\"26\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+     #endif
+     #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
+      // "\"26\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
+    //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+     #endif
+     #ifdef USE_MODULE_SENSORS_SR04
+     "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
+     "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+     #endif 
+     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE //c
+     "\"34\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+     #endif
+     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
+     "\"5\":\""  D_GPIO_FUNCTION_PIR_2_CTR "\"," //COR
+     #endif
+     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
+     "\"35\":\""  D_GPIO_FUNCTION_PIR_3_CTR "\","
+     #endif
+     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+     "\"13\":\""  D_GPIO_FUNCTION_PIR_4_CTR "\","
+     #endif
+     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
+     "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
+     "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
+     #endif
+     #ifdef USE_MODULE_SENSORS_BUTTONS
+     "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\""
+     #endif
+   "},"
+   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+ "}";
+
+ #define ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
+ #define ENABLE_FEATURE_BUTTON__FACTORY_RESET_WITH_LONG_HOLD
+
+ 
+ /***********************************
+  * SECTION: TEMPLATE: Names
+ ************************************/    
+
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "PIRLarge"
+ #define D_DEVICE_SENSOR_MOTION1_FRIENDLY_NAME_LONG "RADAR 3p18GHz"
+ #define D_DEVICE_SENSOR_MOTION2_FRIENDLY_NAME_LONG "PIRSmall"
+
+
+ #define D_DEVICE_SENSOR_CLIMATE "PIRLarge"
+
+ 
+
+
+ #define D_DEVICE_SENSOR_BME_280_NAME "BME280"
+ #define D_DEVICE_SENSOR_BME_680_NAME "BME680"
+
+ #define D_DEVICE_SENSOR_BH1750_NAME "Ambient"
+
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\","
+       "\"" D_DEVICE_SENSOR_MOTION1_FRIENDLY_NAME_LONG "\","
+       "\"" D_DEVICE_SENSOR_MOTION2_FRIENDLY_NAME_LONG "\""
+     "],"
+     "\"" D_MODULE_SENSORS__TOF_VL53L0X__CTR "\":["
+       "\"" "TOF_VL53L0X" "\""
+     "],"
+     "\"" D_MODULE_SENSORS__TOF_VL53L1X__CTR "\":["
+       "\"" "TOF_VL53L1X" "\""
+     "],"
+     "\"" D_MODULE_SENSORS_SR04_CTR "\":["
+       "\"" "SRO4" "\""
+     "],"
+     "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "],"
+     "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+       "\"" "WallRed" "\","
+       "\"" "WallBlue" "\","
+       "\"" "DoorAlert" "\""
+     "],"
+     "\"" D_MODULE_DRIVERS_LEDS_CTR "\":["
+       "\"" "WallRed" "\","
+       "\"" "WallBlue" "\","
+       "\"" "StatusLED" "\""
+     "],"
+     "\"" D_MODULE_SENSORS_BME_CTR "\":["
+       "\"" D_DEVICE_SENSOR_CLIMATE "\""
+     "]"
+   "},"
+   "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+   "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+ "}";
+
+
+#endif
+
+
+
+
+
+/**
+ * @brief Device will be made that contains different GPIO testing for the esp32
+ * * leave 22,21 for possible OLED later
+ * * 4 Buttons  (Pull down when active) [12, 14, 18, 19]
+ * * 2 Touch Buttons [32,33]                                 (Solder wires to a pad, then tape or something over it so I can test touch through it (and other materials)) 
+ * * 2 Switches (Pull down when active) [25, 26, 27, 13]
+ * * 4 LEDs
+ * * * 2 as Relays
+ * * * 2 as LED module for status 
+ * 
+ */
+#ifdef DEVICE_TESTBED_05__SWITCHES_BUTTONS
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+    #define MQTT_HOST     "192.168.3.70"
+    #define MQTT_PORT     1883
+    
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/  
+ 
+  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define USE_MODULE_CORE_FILESYSTEM  
+  #define ENABLE_FEATURE_JSON__ASYNCJSON_V6
+  #define USE_MODULE_NETWORK_WEBSERVER  
+  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS
+  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
+  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
+  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING  
+  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+  #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+
+
+
+//  #define ENABLE_ADVANCED_DEBUGGING
+// #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+// #define ENABLE_DEBUG_FUNCTION_NAMES
+// 
+// #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+// #define ENABLE_DEBUG_LINE_HERE
+// #define ENABLE_DEBUG_LINE_HERE2
+// #define ENABLE_DEBUG_LINE_HERE3
+// #define ENABLE_DEBUG_LINE_HERE4
+// #define ENABLE_DEBUG_LINE_HERE_TRACE
+// #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+// #define USE_DEBUG_PRINT
+// #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
+
+// #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+ 
+  #define ENABLE_FEATURE_SYSTEM__BOOT_SPLASH__DISPLAY_BLOCK_TO_SHOW_END_OF_INIT
+  #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
+
+  /***********************************
+   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+  ************************************/  
+
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+
+  // #define ENABLE_TEMPLATE_SECTION__ENERGY
+  // #define ENABLE_TEMPLATE_SECTION__ENERGY__PZEM
+
+ 
+  /***********************************
+   * SECTION: Storage Configs
+  ************************************/  
+
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+  #define USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
+
+  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  // 
+  // 
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_BUTTONS    
+    #define SOC_TOUCH_VERSION_1
+
+  #define USE_MODULE_SENSORS_SWITCHES
+    
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+ 
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+ 
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+//   // #define USE_MODULE_DRIVERS_LEDS
+ 
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+        
+  /***********************************
+   * SECTION: Energy Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Controller Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: MQTT Template Test Loading
+  ************************************/  
+
+//  #define ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
+// //  #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//  #define ENABLE_RULES_ENGINE__TEST_BUTTON0_RELAY0
+//  #define ENABLE_DEVFEATURE_RESET_RELAY_DECOUNTER_WHEN_TURNED_OFF
+
+  /***********************************
+   * SECTION: GPIO Template
+  ************************************/  
+
+//  #define ENABLE_DEBUG_POINT_MODULE_TEMPLATE_BOOT_SPLASH
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_LEDS
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","  // BUILTIN LED as new Status LED, to reflect Network and Relay0 status
+      #else
+      "\"2\":\""  D_GPIO_FUNCTION_LED3_CTR  "\"," //builtin BLUE
+      #endif  
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"5\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"4\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"26\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+      "\"15\":\"" D_GPIO_FUNCTION_KEY4_INV_CTR  "\","
+      #ifdef SOC_TOUCH_VERSION_1
+      "\"32\":\"" D_GPIO_FUNCTION_KEY5_TOUCH_CTR  "\","
+      "\"33\":\"" D_GPIO_FUNCTION_KEY6_TOUCH_CTR  "\","
+      "\"0\":\"" D_GPIO_FUNCTION_KEY7_INV_CTR  "\","
+      #endif
+      #endif
+      #ifdef USE_MODULE_SENSORS_SWITCHES
+      "\"18\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
+      "\"19\":\"" D_GPIO_FUNCTION_SWT2_INV_CTR  "\","
+      #endif  
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"27\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
+      "\"14\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
+      "\"12\":\"" D_GPIO_FUNCTION_REL3_CTR  "\","
+      "\"13\":\"" D_GPIO_FUNCTION_REL4_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+
+  /***********************************
+   * SECTION: TEMPLATE: Names
+  ************************************/    
+
+  #define D_DEVICE_UNIQUE_NAME "OilRadiator01"
+  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "16"
+  #define D_DEVICE_SENSOR_ZONE_0_NAME "OilRadiator01-BME0"
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "OilRadiator01-DriverZone0"
+  
+  #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Radiator"
+  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,143,81,7,51,20,1,189]"
+
+  #define D_DEVICE_HEATER_0_NAME "Dryer"
+  #define D_DEVICE_HEATER_1_NAME "FloorMat"
+  #define D_DEVICE_HEATER_2_NAME "FanHeater"
+  #define D_DEVICE_HEATER_3_NAME "OilRadiator"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+        "\"" "SwitchEdge" "\","
+        "\"" "SwitchClose" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+        "\"" "WallRed" "\","
+        "\"" "WallBlue" "\","
+        "\"" "DoorAlert" "\""
+        // "\"" "BUT1" "\","
+        // "\"" "BUT2" "\","
+        // "\"" "BUT3" "\","
+        "\"" "BUT4" "\","
+        "\"" "BUT5" "\","
+        "\"" "BUT6" "\","
+        "\"" "ResetGPIO0" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\""
+      "],"      
+      "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "],"
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+        "\"" D_DEVICE_HEATER_0_NAME "\","
+        "\"" D_DEVICE_HEATER_1_NAME "\","
+        "\"" D_DEVICE_HEATER_2_NAME "\","
+        "\"" D_DEVICE_HEATER_3_NAME "\""
+      "],"
+      "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "]"
+    "},"
+    "\"" D_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\":" D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
+      "},"  
+      "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":[" 
+        D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
+      "]"  
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+  "}";
+
+
+#endif
+
+
+
+
 
 
 

@@ -34,7 +34,7 @@
  * SECTION: Minimal/Inital States
  */
 #include "2_CoreSystem/mBaseConfig.h"           //DEFAULTS
-#include "2_CoreSystem/mSystemConfig.h"
+#include "2_CoreSystem/Version.h"
 
 /**
  * SECTION: User defined options/build patterns 
@@ -102,7 +102,6 @@
     #include "esp_wifi.h"
     #include <ESPmDNS.h>
     #include <AsyncTCP.h>
-    #include "esp_task_wdt.h"
 
     #ifndef WLED_DISABLE_ESPNOW
       #include <esp_now.h>
@@ -111,6 +110,7 @@
 
 #endif // USE_MODULE_NETWORK_WEBSERVER
 
+    #include "esp_task_wdt.h"
 
 #ifdef USE_MODULE_CORE_FILESYSTEM
   #define LOROL_LITTLEFS   
@@ -158,7 +158,6 @@ enum ModuleStatus{
   Running,
   DevicesPresent // Running means searching is enabled, but this is only set when devices are found
 };
-
 
 
 
@@ -864,6 +863,43 @@ class mTaskerManager{
   
       return 0;
   }
+
+    #ifdef ENABLE_DEBUGFEATURE_TASKER__DEBUG_MEMORY_PER_MODULE
+    struct MemDeltaLast {
+        int32_t last_free_used;     // bytes used in last call  (before - after)
+        int32_t last_lb_used;       // bytes lost in largest block (before - after)
+        int32_t max_free_used;      // max bytes used in any single call
+        int32_t max_lb_used;        // max lb loss in any single call
+      };
+
+      MemDeltaLast memdelta_last[64];  // set >= max modules
+    struct MemDeltaStats {
+      int32_t  free8_sum;        // bytes
+      int32_t  largest8_sum;     // bytes
+      int16_t  free8_min_delta;  // bytes (most negative single-call delta, clamp)
+      int16_t  largest8_min_delta;
+      uint32_t samples;
+    };
+    
+int32_t sum_free_used[64] = {0};
+int32_t sum_lb_used[64]   = {0};
+uint32_t last_second_ms = 0;
+
+const int32_t ALERT_FREE_PER_CALL = 256;
+const int32_t ALERT_LB_PER_CALL   = 512;
+
+const int32_t ALERT_FREE_PER_SEC  = 1024;
+const int32_t ALERT_LB_PER_SEC    = 2048;
+
+    MemDeltaStats memstats[64];   // set to your max modules
+    static inline uint32_t HeapFree8() {
+      return heap_caps_get_free_size(MALLOC_CAP_8BIT);
+    }
+    static inline uint32_t HeapLargest8() {
+      return heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
+    }
+    #endif
+
     
 
     uint8_t Instance_Init();

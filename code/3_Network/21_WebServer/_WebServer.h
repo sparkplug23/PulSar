@@ -196,8 +196,6 @@ public mTaskerInterface{
 // server library objects
 AsyncWebServer* server = nullptr;
 
-AsyncWebSocket* websocket_lights = nullptr;
-
 
 AsyncWebHandler *editHandler = nullptr;
 

@@ -823,52 +823,131 @@ bool mTime::TimeReached(uint32_t timer)
 }
 
 
-void mTime::WifiPollNtp() 
+// void mTime::WifiPollNtp() 
+// {
+//   static uint8_t ntp_sync_minute = 0;
+//   static uint32_t ntp_run_time = 0;
+
+//   if (tkr_set->runtime.global_state.wifi_down || Rtc.user_time_entry) { return; }
+
+//   uint8_t uptime_minute = (uptime_seconds_nonreset / 60) % 60;  // 0 .. 59
+//   if ((ntp_sync_minute > 59) && (uptime_minute > 2)) {
+//     ntp_sync_minute = 1;                 // If sync prepare for a new cycle
+//   }
+//   // First try ASAP to sync. If fails try once every 60 seconds based on chip id
+//   uint8_t offset = (uptime_seconds_nonreset < 30) ? RtcTime.second + ntp_run_time : (((mSupportHardware::ESP_getChipId() & 0xF) * 3) + 3) ;
+
+//   if ( (((offset == RtcTime.second) && ( (RtcTime.year < 2016) ||                  // Never synced
+//                                          (ntp_sync_minute == uptime_minute))) ||   // Re-sync every hour
+//        ntp_force_sync ) ) {                                          // Forced sync
+
+//     ntp_force_sync = false;
+
+//     ALOG_INF(PSTR("NTP: Sync time..."));
+
+//     ntp_run_time = millis();
+//     uint64_t ntp_nanos = WifiGetNtp();
+//     uint32_t ntp_time = ntp_nanos / 1000000000;
+//     ntp_run_time = (millis() - ntp_run_time) / 1000;
+
+//     ALOG_INF(PSTR("NTP: Runtime %d"), ntp_run_time);
+
+//     if (ntp_run_time < 5) { ntp_run_time = 0; }  // DNS timeout is around 10s
+    
+//     ALOG_HGL(PSTR("NTP: ntp_time %d"), ntp_time);
+
+//     if (ntp_time > START_VALID_TIME) 
+//     {
+//       Rtc.utc_time = ntp_time;
+//       Rtc.nanos = ntp_nanos % 1000000000;
+//       ntp_sync_minute = 60;             // Sync so block further requests
+//       RtcSync("NTP");
+//     } 
+//     else 
+//     {
+//       ntp_sync_minute++;                // Try again in next minute
+//     }
+    
+//   }
+// }
+// SUMMARY
+//   Poll NTP over WiFi with deterministic scheduling and backoff.
+//   - First sync: shortly after WiFi comes up (with stagger per-chip).
+//   - Retry on failure: exponential backoff (capped).
+//   - Re-sync on success: once per hour (staggered per-chip).
+//
+// ARGUMENTS
+//   (none)
+//
+// EXAMPLES
+//   // Call from your periodic loop (e.g., EverySecond / Tasker)
+//   tkr_time->WifiPollNtp();
+//
+// RETURNS
+//   (none)
+//
+// CHANGED
+//   04Feb26  Replace minute/second gating with millis-based scheduler, add backoff and reentrancy guard.
+void mTime::WifiPollNtp()
 {
-  static uint8_t ntp_sync_minute = 0;
-  static uint32_t ntp_run_time = 0;
+  // ---- Static state ----
+  static bool     ntp_busy = false;
+  static uint32_t next_try_ms = 0;
+  static uint32_t backoff_s = 5;            // start retry at 5s
+  static bool     ever_synced = false;
 
   if (tkr_set->runtime.global_state.wifi_down || Rtc.user_time_entry) { return; }
+  if (ntp_busy) { return; }
 
-  uint8_t uptime_minute = (uptime_seconds_nonreset / 60) % 60;  // 0 .. 59
-  if ((ntp_sync_minute > 59) && (uptime_minute > 2)) {
-    ntp_sync_minute = 1;                 // If sync prepare for a new cycle
+  const uint32_t now_ms = millis();
+
+  // ---- Chip-stagger (0..45s) to avoid fleet thundering herd ----
+  const uint32_t chip_stagger_s = ((mSupportHardware::ESP_getChipId() & 0xF) * 3) + 3;
+
+  // ---- Forced sync overrides schedule ----
+  if (!ntp_force_sync) {
+    if (next_try_ms != 0 && (int32_t)(now_ms - next_try_ms) < 0) { return; }
   }
-  // First try ASAP to sync. If fails try once every 60 seconds based on chip id
-  uint8_t offset = (uptime_seconds_nonreset < 30) ? RtcTime.second + ntp_run_time : (((mSupportHardware::ESP_getChipId() & 0xF) * 3) + 3) ;
 
-  if ( (((offset == RtcTime.second) && ( (RtcTime.year < 2016) ||                  // Never synced
-                                         (ntp_sync_minute == uptime_minute))) ||   // Re-sync every hour
-       ntp_force_sync ) ) {                                          // Forced sync
+  ntp_force_sync = false;
+  ntp_busy = true;
 
-    ntp_force_sync = false;
+  ALOG_INF(PSTR("NTP: Sync time..."));
 
-    ALOG_INF(PSTR("NTP: Sync time..."));
+  const uint32_t t0 = now_ms;
+  const uint64_t ntp_nanos = WifiGetNtp();
+  const uint32_t dt_s = (millis() - t0) / 1000;
 
-    ntp_run_time = millis();
-    uint64_t ntp_nanos = WifiGetNtp();
-    uint32_t ntp_time = ntp_nanos / 1000000000;
-    ntp_run_time = (millis() - ntp_run_time) / 1000;
+  ALOG_INF(PSTR("NTP: Runtime %u"), (unsigned)dt_s);
 
-    ALOG_INF(PSTR("NTP: Runtime %d"), ntp_run_time);
+  const uint32_t ntp_time = (uint32_t)(ntp_nanos / 1000000000ULL);
+  ALOG_HGL(PSTR("NTP: ntp_time %u"), (unsigned)ntp_time);
 
-    if (ntp_run_time < 5) { ntp_run_time = 0; }  // DNS timeout is around 10s
-    
-    ALOG_HGL(PSTR("NTP: ntp_time %d"), ntp_time);
+  if (ntp_time > START_VALID_TIME) {
+    // ---- Success ----
+    Rtc.utc_time = ntp_time;
+    Rtc.nanos    = (uint32_t)(ntp_nanos % 1000000000ULL);
+    RtcSync("NTP");
 
-    if (ntp_time > START_VALID_TIME) 
-    {
-      Rtc.utc_time = ntp_time;
-      Rtc.nanos = ntp_nanos % 1000000000;
-      ntp_sync_minute = 60;             // Sync so block further requests
-      RtcSync("NTP");
-    } 
-    else 
-    {
-      ntp_sync_minute++;                // Try again in next minute
+    ever_synced = true;
+    backoff_s   = 5;
+
+    // Re-sync hourly, staggered
+    next_try_ms = millis() + (3600UL + chip_stagger_s) * 1000UL;
+  } else {
+    // ---- Failure ----
+    // Backoff: 5,10,20,40,80,160,320,600 (cap at 10 min)
+    if (backoff_s < 600) {
+      backoff_s = (backoff_s < 300) ? (backoff_s * 2) : 600;
     }
-    
+
+    // First-sync failures: retry sooner, but still staggered
+    const uint32_t retry_s = (ever_synced ? backoff_s : (backoff_s + chip_stagger_s));
+
+    next_try_ms = millis() + retry_s * 1000UL;
   }
+
+  ntp_busy = false;
 }
 
 

@@ -154,7 +154,7 @@ void mUpdates::WebPage_Root_AddHandlers()
     //   serveMessage(request, 500, "Access Denied", FPSTR(s_unlock_ota), 254);
     // } else
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
-#ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI
       tkr_anim->serveSettings(request); // checks for "upd" in URL and handles PIN
 #endif // USE_MODULE_LIGHTS_ANIMATOR
 #endif

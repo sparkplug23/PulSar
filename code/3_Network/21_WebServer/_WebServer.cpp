@@ -19,8 +19,6 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
      
       server = new AsyncWebServer(80);
 
-      websocket_lights = new AsyncWebSocket("/ws");
-
       #ifndef ESP8266
       #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
       websocket_console = new AsyncWebSocket("/ws/console");
@@ -55,9 +53,6 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * SYSTEM SECTION * 
     *******************/    
-    case TASK_RESTART_SET_DO_FINAL_CLEANUP:    
-      websocket_lights->closeAll(1012);
-    break;
     /************
      * PERIODIC SECTION * 
     *******************/
@@ -141,7 +136,6 @@ void mWebServer::Server_Start()
  
   createEditHandler(true);
 
-  server->addHandler(websocket_lights);
   
   #ifndef ESP8266
   #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
@@ -410,7 +404,7 @@ server->on("/settings2", HTTP_POST, [this](AsyncWebServerRequest *request){
       return;
     }
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    #ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
     ALOG_ERR(PSTR("Not sure this needs to stay or not"));
     if(tkr_anim->handle__HTTP__GET_QueryAPI(request, request->url())) return;
     #endif

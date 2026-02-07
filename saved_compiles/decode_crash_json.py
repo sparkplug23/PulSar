@@ -193,9 +193,12 @@ def main() -> int:
     ap = argparse.ArgumentParser()
 
     
-    # ap.add_argument("--env", default="testbed_01__sensors_nextion", help="PlatformIO env name")
+    ap.add_argument("--env", default="testbed_01__sensors_nextion", help="PlatformIO env name")
     # ap.add_argument("--env", default="tg_lgt__esp32_matrix_32w8h", help="PlatformIO env name")
-    ap.add_argument("--env", default="cm_office__ws2815panel12v", help="PlatformIO env name")
+    # ap.add_argument("--env", default="tg_lgt__esp32_matrix_16x16", help="PlatformIO env name")
+    # ap.add_argument("--env", default="tg_lgt__esp32_matrix_16x16_16fx", help="PlatformIO env name")
+    # ap.add_argument("--env", default="cm_office__ws2815panel12v", help="PlatformIO env name")
+    # ap.add_argument("--env", default="cm_kitchen__glass_box", help="PlatformIO env name")
     # ap.add_argument("--env", default="cm_lgt__esp32_coneV_1D", help="PlatformIO env name")
     # ap.add_argument("--env", default="cm_office__rgbww_vertical", help="PlatformIO env name")
     # ap.add_argument("--env", default="cm_kitchen__glass_box", help="PlatformIO env name")

@@ -16,6 +16,13 @@ uint32_t mSunTracking::LocalTime(){ // Only function in cpp to access mTime
  */
 
 #ifdef USE_MODULE_SENSORS_SUN_TRACKING
+
+
+
+
+
+
+
 time_t ConvertToUTCTime(int year, int month, int day, int hour, int min, int sec) {
     struct tm timeinfo = { 0 };
     timeinfo.tm_year = year - 1900;  // tm_year is years since 1900
@@ -33,6 +40,7 @@ time_t ConvertToUTCTime(int year, int month, int day, int hour, int min, int sec
 
 int8_t mSunTracking::Tasker(uint8_t function, JsonParserObject obj)
 {
+
 
   int8_t function_result = 0;
   
@@ -288,7 +296,7 @@ void mSunTracking::Update_Solar_Tracking_Data()
 }
 
 
-#if defined(USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY) || defined(USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL)    
+#if defined(USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL)    
 // Returns the next occurring dawn based on the current UTC time
 time_t mSunTracking::GetNext_Dawn(time_t utc_time, const SolarDayTimes& today, const SolarDayTimes& tomorrow) {
     return (utc_time < today.dawn) ? today.dawn : tomorrow.dawn;

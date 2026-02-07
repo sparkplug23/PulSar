@@ -37,7 +37,6 @@
   #ifdef USE_MODULE_NETWORK_WEBSERVER
     #include <AsyncTCP.h>
     #include <ESPAsyncWebServer.h>
-    #include <SPIFFSEditor.h>
   #endif // USE_MODULE_NETWORK_WEBSERVER
   #endif // DISABLE_NETWORK
 #elif defined(ESP8266)
@@ -47,6 +46,8 @@
   #include <ESPAsyncWebServer.h>
   #endif // USE_MODULE_NETWORK_WEBSERVER
 #endif
+
+#include <SPIFFSEditor.h>
 
 #define ARDUINOJSON_DECODE_UNICODE 0
 #include "3_Network/21_WebServer/AsyncJson-v6.h"

@@ -529,7 +529,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "de
 #include "3_Network/21_WebServer/ArduinoJson-v6.h"
 
 
-#ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI
   #include "3_Network/21_WebServer/AsyncJson-v6.h"
   #include "webpages_generated/html_ui.h"
   #ifdef WLED_ENABLE_SIMPLE_UI
@@ -544,7 +544,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "de
     #include "webpages_generated/html_pxmagic.h"
   #endif
   #include "webpages_generated/html_cpal.h"
-#endif // ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+#endif // ENABLE_FEATURE_LIGHTING__WEBUI
 
 
 int16_t sin16_t(uint16_t theta);
@@ -1092,7 +1092,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     bool isAsterisksOnly(const char* str, byte maxLen);
 
 
-    #ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
     void SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage);
     bool handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, const String& req, bool apply=true);
     #endif // ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
@@ -2657,7 +2657,7 @@ uint8_t perlin8(uint16_t x, uint16_t y, uint16_t z) {
   bool colorChanged();
 
   void colorUpdated(byte callMode);
-  #ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
   void stateUpdated(byte callMode);
   void updateInterfaces(uint8_t callMode);
   #endif
@@ -4980,7 +4980,7 @@ void sappend(char stype, const char* key, int val);
 
 
 
-#ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI
 void serveSettingsJS(AsyncWebServerRequest* request);
 void serveSettings(AsyncWebServerRequest* request, bool post = false);
 // bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request);
@@ -5025,13 +5025,22 @@ void serializePalettes(JsonObject root, int page);
 void serializeModeNames(JsonArray arr, bool flag_get_first_name_only = true);
 
 
-#ifdef ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI
 void handleUpload(AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final);
 bool serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient = 0);
 
 void serveJson(AsyncWebServerRequest* request);
 
-#endif // ENABLE_FEATURE_LIGHTING__WEBSERVER_WEBUI
+void handleWs();
+
+AsyncWebSocket* websocket_lights = nullptr;
+#endif
+
+
+
+
+
+
 
 
 void setPaletteColors(JsonArray json, CRGBPalette16 palette);

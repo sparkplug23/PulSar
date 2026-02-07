@@ -1,1 +1,15 @@
-{"ESP32":{"Exception":28,"Reason":"LoadProhibited","EPC":"0x401a8c14","EXCVADDR":"0x00000000","CallChain":["0x401a8c11","0x400dd5ea","0x400dd7b2","0x400d4953","0x400e1520","0x400e154a","0x400e1319","0x400e260a","0x400d498e","0x400e969e","0x400e99f2","0x4010012d"]}}
+{
+  "ESP32": {
+    "Exception": 28,
+    "Reason": "LoadProhibited",
+    "EPC": "0x4010e3b8",
+    "EXCVADDR": "0x00000060",
+    "CallChain": [
+      "0x4010e3b5",
+      "0x4011d7ba",
+      "0x400d449f",
+      "0x40121ea3",
+      "0x4013a152"
+    ]
+  }
+}

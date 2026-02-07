@@ -86,7 +86,7 @@ class mTelemetry :
         handler<mTelemetry> mqtthandler_debug_moduleinterface;
         handler<mTelemetry> mqtthandler_debug_minimal;
         handler<mTelemetry> mqtthandler_debug_system_saved_settings;
-        #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+        #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES) || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_PERFORMANCE)
         handler<mTelemetry> mqtthandler_debug_tasker_interface_performance;
         #endif
         #ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
