@@ -13,21 +13,43 @@
 
 //--------------------------------[Enable Device]-------------------------------------
 
+/// KITCHEN //////////////////////////////////////////////////////////////////////////////////
 // #define DEVICE_MEADOWS__KITCHEN__GLASS_BOX
+/// LANDING //////////////////////////////////////////////////////////////////////////////////
+
+/// HALLWAY //////////////////////////////////////////////////////////////////////////////////
 // #define DEVICE_MEADOWS__HALLWAY__VASE_LIGHT
+/// MASTER BEDROOM ///////////////////////////////////////////////////////////////////////////
+// #define DEVICE_MEADOWS__MASTER_BEDROOM__AMBIENT_SENSOR
+// #define DEVICE_MEADOWS__MASTER_BEDROOM__BEDLIGHT
+// #define DEVICE_MEADOWS__BED_ALARM_LIGHT
 // #define DEVICE_MEADOWS__ENSUITE_DOOR_FRAME
+/// OFFICE ///////////////////////////////////////////////////////////////////////////////////
+
+/// LIVINGROOM ///////////////////////////////////////////////////////////////////////////////
+
+/// HALLWAY //////////////////////////////////////////////////////////////////////////////////
+
+/// GARAGE ///////////////////////////////////////////////////////////////////////////////////
+
+/// BATHROOM /////////////////////////////////////////////////////////////////////////////////
+
+/// OUTSIDE //////////////////////////////////////////////////////////////////////////////////
+// #define DEVICE_MEADOWS__OUTSIDE__FENCE_LIGHTS
+
+
+
+
 // #define DEVICE_MEADOWS__OFFICE__HVAC_DESK
 // #define DEVICE_MEADOWS__LIVINGROOM__HYPERION_LIGHT_SAMSUNG_65INCH
-// #define DEVICE_MEADOWS__OUTSIDE__FENCE_LIGHTS
 // #define DEVICE_MEADOWS__PRUSA_CLIMATE_CONTROL
 // #define DEVICE_MEADOWS__LANDING__GLASS_BOX
 // #define DEVICE_MEADOWS__TREADMILL_POWER_MONITOR
 // #define DEVICE_MEADOWS__OUTSIDE__OILTANK
 // #define DEVICE_MEADOWS__OFFICE__433MHZ_NODE
-// #define DEVICE_MEADOWS__MASTER_BEDROOM__AMBIENT_SENSOR
 // #define DEVICE_MEADOWS__BATHROOM__IMMERSION
-// #define DEVICE_MEADOWS__MASTER_BEDROOM__BEDLIGHT
-#define DEVICE_MEADOWS__OFFICE__SUN_PIXELS_1D
+
+// #define DEVICE_MEADOWS__OFFICE__SUN_PIXELS_1D
 // #define DEVICE_MEADOWS__OFFICE__BLACK_STAND
 // #define DEVICE_MEADOWS__OFFICE__GARAGE_TREE
 
@@ -950,8 +972,8 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 // #define D_DEVICE_SENSOR_BME_280_NAME "BME280"
 // #define D_DEVICE_SENSOR_BME_680_NAME "BME680"
 
-#define D_DEVICE_SENSOR_BH1750_NAME "Ambient"
-#define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "PIRSmall"
+#define D_DEVICE_SENSOR_BH1750_NAME "MasterBedroom"
+#define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "MasterBedroom"
 
 
 #define USE_FUNCTION_TEMPLATE
@@ -1249,6 +1271,87 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 
 #endif
+
+
+#ifdef DEVICE_MEADOWS__BED_ALARM_LIGHT
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+
+  /***********************************
+  * SECTION: Enable Grouped
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        100
+      ],
+      "ColourPalette":"Cold White",
+      "Effects": {
+        "Function":"Solid",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "BrightnessRGB": 100
+    },
+    "BrightnessRGB": 0
+  }
+  )=====";
+ 
+      
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      "\"12\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"26\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"32\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"14\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"27\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"25\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"33\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";  
+
+#endif // END DEVICE
+
 
 
 /**************************************************************************************************************************************************
@@ -4110,6 +4213,78 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
 #endif // DEVICE_END
 
+
+
+
+
+
+#ifdef DEVICE_MEADOWS__LIVINGROOM__TV
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[     
+      {
+        "Name":"Bus1",
+        "Pin":2,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":269
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,269],
+        "ColourPalette":0,
+        "SegColour0":{"RGBWC":[255,117,31,0,0]},
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 5
+  }
+  )=====";
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+#endif // DEVICE_END
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************

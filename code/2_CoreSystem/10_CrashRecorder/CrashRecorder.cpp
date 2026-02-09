@@ -137,6 +137,49 @@ static inline const char* CrashRecorder__ExcReasonStr(uint32_t exccause)
 // ------------------------------------------------------------------
 // Core capture (Xtensa)
 // ------------------------------------------------------------------
+// extern "C" void IRAM_ATTR CrashRTC_CaptureFromFrame(XtExcFrame* exc_frame)
+// {
+//   g_crashrec_rtc.magic    = CRASHREC_MAGIC;
+//   g_crashrec_rtc.pc       = exc_frame ? exc_frame->pc       : 0;
+//   g_crashrec_rtc.exccause = exc_frame ? exc_frame->exccause : 0;
+//   g_crashrec_rtc.excvaddr = exc_frame ? exc_frame->excvaddr : 0;
+
+//   for (uint32_t i = 0; i < CRASHREC_MAX_FRAMES; ++i) {
+//     g_crashrec_rtc.stack[i] = 0;
+//   }
+
+//   if (!exc_frame) return;
+
+//   uint32_t idx = 0;
+
+//   esp_backtrace_frame_t stk_frame;
+//   stk_frame.pc      = exc_frame->pc;
+//   stk_frame.sp      = exc_frame->a1;
+//   stk_frame.next_pc = exc_frame->a0;
+
+//   const uint32_t pc0 = esp_cpu_process_stack_pc(stk_frame.pc);
+//   g_crashrec_rtc.stack[idx++] = pc0;
+
+//   bool corrupted = !(esp_stack_ptr_is_sane(stk_frame.sp) &&
+//                      esp_ptr_executable((void*)pc0));
+
+//   uint32_t i = (CRASHREC_DEPTH > 0) ? (CRASHREC_DEPTH - 1) : 0;
+//   while (i-- > 0 && stk_frame.next_pc != 0 && !corrupted) {
+
+//     if (!esp_backtrace_get_next_frame(&stk_frame)) {
+//       corrupted = true;
+//       break;
+//     }
+
+//     if (idx >= CRASHREC_MAX_FRAMES) break;
+
+//     const uint32_t pc = esp_cpu_process_stack_pc(stk_frame.pc);
+//     g_crashrec_rtc.stack[idx++] = pc;
+//   }
+// }
+
+#if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_IDF_TARGET_ARCH_XTENSA)
+
 extern "C" void IRAM_ATTR CrashRTC_CaptureFromFrame(XtExcFrame* exc_frame)
 {
   g_crashrec_rtc.magic    = CRASHREC_MAGIC;
@@ -144,10 +187,7 @@ extern "C" void IRAM_ATTR CrashRTC_CaptureFromFrame(XtExcFrame* exc_frame)
   g_crashrec_rtc.exccause = exc_frame ? exc_frame->exccause : 0;
   g_crashrec_rtc.excvaddr = exc_frame ? exc_frame->excvaddr : 0;
 
-  for (uint32_t i = 0; i < CRASHREC_MAX_FRAMES; ++i) {
-    g_crashrec_rtc.stack[i] = 0;
-  }
-
+  for (uint32_t i = 0; i < CRASHREC_MAX_FRAMES; ++i) g_crashrec_rtc.stack[i] = 0;
   if (!exc_frame) return;
 
   uint32_t idx = 0;
@@ -160,23 +200,20 @@ extern "C" void IRAM_ATTR CrashRTC_CaptureFromFrame(XtExcFrame* exc_frame)
   const uint32_t pc0 = esp_cpu_process_stack_pc(stk_frame.pc);
   g_crashrec_rtc.stack[idx++] = pc0;
 
-  bool corrupted = !(esp_stack_ptr_is_sane(stk_frame.sp) &&
-                     esp_ptr_executable((void*)pc0));
+  bool corrupted = !(esp_stack_ptr_is_sane(stk_frame.sp) && esp_ptr_executable((void*)pc0));
 
   uint32_t i = (CRASHREC_DEPTH > 0) ? (CRASHREC_DEPTH - 1) : 0;
   while (i-- > 0 && stk_frame.next_pc != 0 && !corrupted) {
-
-    if (!esp_backtrace_get_next_frame(&stk_frame)) {
-      corrupted = true;
-      break;
-    }
-
+    if (!esp_backtrace_get_next_frame(&stk_frame)) { corrupted = true; break; }
     if (idx >= CRASHREC_MAX_FRAMES) break;
-
     const uint32_t pc = esp_cpu_process_stack_pc(stk_frame.pc);
     g_crashrec_rtc.stack[idx++] = pc;
   }
 }
+
+#endif
+
+
 
 // ------------------------------------------------------------------
 // Linker-wrap hooks (Xtensa) — match Tasmota
@@ -240,42 +277,89 @@ static inline const char* CrashRecorder__ExcReasonStr(uint32_t exccause)
   return (exccause < CRASHREC_NUM_RV_REASONS) ? CRASHREC_RV_REASONS[exccause] : "Unknown";
 }
 
-// ------------------------------------------------------------------
-// Core capture (RISC-V)
-// NOTE: there is no esp_backtrace_get_next_frame() path like Xtensa;
-// we do a lightweight stack scan like Tasmota.
-// ------------------------------------------------------------------
+// // ------------------------------------------------------------------
+// // Core capture (RISC-V)
+// // NOTE: there is no esp_backtrace_get_next_frame() path like Xtensa;
+// // we do a lightweight stack scan like Tasmota.
+// // ------------------------------------------------------------------
+// extern "C" void IRAM_ATTR CrashRTC_CaptureFromFrame(void* exc_frame)
+// {
+//   const RvExcFrame* regs = (const RvExcFrame*)exc_frame;
+
+//   g_crashrec_rtc.magic    = CRASHREC_MAGIC;
+//   g_crashrec_rtc.pc       = regs ? (uint32_t)regs->mepc   : 0;
+//   g_crashrec_rtc.exccause = regs ? (uint32_t)regs->mcause : 0;
+//   g_crashrec_rtc.excvaddr = regs ? (uint32_t)regs->mtval  : 0;
+
+//   for (uint32_t i = 0; i < CRASHREC_MAX_FRAMES; ++i) {
+//     g_crashrec_rtc.stack[i] = 0;
+//   }
+
+//   if (!regs) return;
+
+//   uint32_t idx = 0;
+
+//   // First frame: return address (RA) is the most useful seed.
+//   g_crashrec_rtc.stack[idx++] = (uint32_t)regs->ra;
+
+//   // Lightweight scan of stack memory for code addresses.
+//   // Code region filter used by Tasmota for C3:
+//   //   0x40000000 .. 0x42800000 (keeps only executable-ish addresses)
+//   const uint32_t* sp = (const uint32_t*)regs->sp;
+//   for (uint32_t n = 0; n < 320 && idx < CRASHREC_MAX_FRAMES; ++n, ++sp) {
+//     const uint32_t v = *sp;
+//     if ((v >= 0x40000000U) && (v < 0x42800000U)) {
+//       g_crashrec_rtc.stack[idx++] = v;
+//     }
+//   }
+// }
+
+#if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_IDF_TARGET_ARCH_RISCV)
+
+static inline bool IRAM_ATTR CrashRec_IsPlausiblePC(uint32_t v)
+{
+  // Conservative “code-ish” ranges for ESP32-C3/C6 flash/iram mappings.
+  // Keeps noise down and avoids storing random stack values.
+  return (v >= 0x40000000U && v < 0x44000000U);
+}
+
 extern "C" void IRAM_ATTR CrashRTC_CaptureFromFrame(void* exc_frame)
 {
-  const RvExcFrame* regs = (const RvExcFrame*)exc_frame;
-
   g_crashrec_rtc.magic    = CRASHREC_MAGIC;
-  g_crashrec_rtc.pc       = regs ? (uint32_t)regs->mepc   : 0;
-  g_crashrec_rtc.exccause = regs ? (uint32_t)regs->mcause : 0;
-  g_crashrec_rtc.excvaddr = regs ? (uint32_t)regs->mtval  : 0;
+  g_crashrec_rtc.pc       = 0;
+  g_crashrec_rtc.exccause = 0;
+  g_crashrec_rtc.excvaddr = 0;
+  for (uint32_t i = 0; i < CRASHREC_MAX_FRAMES; ++i) g_crashrec_rtc.stack[i] = 0;
 
-  for (uint32_t i = 0; i < CRASHREC_MAX_FRAMES; ++i) {
-    g_crashrec_rtc.stack[i] = 0;
-  }
+  if (!exc_frame) return;
 
-  if (!regs) return;
+  // If RvExcFrame is available, use it; otherwise we can’t safely decode regs.
+  #if defined(RISCV_RVRUNTIME_FRAMES_H) || defined(_RVRUNTIME_FRAMES_H_) || defined(RISCV_RVRUNTIME_FRAMES)
+    const RvExcFrame* regs = (const RvExcFrame*)exc_frame;
+    g_crashrec_rtc.pc       = (uint32_t)regs->mepc;
+    g_crashrec_rtc.exccause = (uint32_t)regs->mcause;
+    g_crashrec_rtc.excvaddr = (uint32_t)regs->mtval;
 
-  uint32_t idx = 0;
+    uint32_t idx = 0;
 
-  // First frame: return address (RA) is the most useful seed.
-  g_crashrec_rtc.stack[idx++] = (uint32_t)regs->ra;
+    // Seed with mepc and ra if plausible.
+    if (CrashRec_IsPlausiblePC((uint32_t)regs->mepc) && idx < CRASHREC_MAX_FRAMES) g_crashrec_rtc.stack[idx++] = (uint32_t)regs->mepc;
+    if (CrashRec_IsPlausiblePC((uint32_t)regs->ra)   && idx < CRASHREC_MAX_FRAMES) g_crashrec_rtc.stack[idx++] = (uint32_t)regs->ra;
 
-  // Lightweight scan of stack memory for code addresses.
-  // Code region filter used by Tasmota for C3:
-  //   0x40000000 .. 0x42800000 (keeps only executable-ish addresses)
-  const uint32_t* sp = (const uint32_t*)regs->sp;
-  for (uint32_t n = 0; n < 320 && idx < CRASHREC_MAX_FRAMES; ++n, ++sp) {
-    const uint32_t v = *sp;
-    if ((v >= 0x40000000U) && (v < 0x42800000U)) {
-      g_crashrec_rtc.stack[idx++] = v;
+    // Bounded scan of stack for plausible return addresses.
+    const uint32_t* sp = (const uint32_t*)regs->sp;
+    for (uint32_t n = 0; n < 256 && idx < CRASHREC_MAX_FRAMES; ++n) {
+      uint32_t v = sp[n];
+      if (CrashRec_IsPlausiblePC(v)) g_crashrec_rtc.stack[idx++] = v;
     }
-  }
+  #else
+    // No known frame layout; record “something happened” only.
+    g_crashrec_rtc.pc = 0;
+  #endif
 }
+
+#endif
+
 
 // ------------------------------------------------------------------
 // Linker-wrap hooks (RISC-V)
@@ -283,24 +367,40 @@ extern "C" void IRAM_ATTR CrashRTC_CaptureFromFrame(void* exc_frame)
 //   -Wl,--wrap=panicHandler -Wl,--wrap=xt_unhandled_exception
 // Signatures are void* on these targets.
 // ------------------------------------------------------------------
+// extern "C" {
+//   void __real_panicHandler(void *frame);
+//   void __real_xt_unhandled_exception(void *frame);
+
+//   void IRAM_ATTR __wrap_panicHandler(void *frame)
+//   {
+//     ets_printf("wrap_panicHandler\n");
+//     CrashRTC_CaptureFromFrame(frame);
+//     __real_panicHandler(frame);
+//   }
+
+//   void IRAM_ATTR __wrap_xt_unhandled_exception(void *frame)
+//   {
+//     ets_printf("wrap_xt_unhandled_exception\n");
+//     CrashRTC_CaptureFromFrame(frame);
+//     __real_xt_unhandled_exception(frame);
+//   }
+// } // extern "C"
+
+// #if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_IDF_TARGET_ARCH_RISCV)
+
 extern "C" {
   void __real_panicHandler(void *frame);
-  void __real_xt_unhandled_exception(void *frame);
 
   void IRAM_ATTR __wrap_panicHandler(void *frame)
   {
-    ets_printf("wrap_panicHandler\n");
     CrashRTC_CaptureFromFrame(frame);
     __real_panicHandler(frame);
   }
+}
 
-  void IRAM_ATTR __wrap_xt_unhandled_exception(void *frame)
-  {
-    ets_printf("wrap_xt_unhandled_exception\n");
-    CrashRTC_CaptureFromFrame(frame);
-    __real_xt_unhandled_exception(frame);
-  }
-} // extern "C"
+// #endif
+
+
 
 #else
   // Unknown ESP32 target

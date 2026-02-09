@@ -24,11 +24,43 @@ extern "C" void CrashRecorder__PanicHook(void);   // registered with IDF
 #endif
 
 
-#ifdef ESP32
+// #ifdef ESP32
+//   #include "esp_system.h"
+//   #include "esp_debug_helpers.h"
+//   #include "xtensa/xtensa_context.h"   // XtExcFrame
+// #endif
+#if defined(ARDUINO_ARCH_ESP32)
   #include "esp_system.h"
   #include "esp_debug_helpers.h"
-  #include "xtensa/xtensa_context.h"   // XtExcFrame
+  #include "esp_heap_caps.h"     // if you later add heap snapshot
+
+  // Xtensa-only context frame:
+  #if defined(CONFIG_IDF_TARGET_ARCH_XTENSA)
+    #include "xtensa/xtensa_context.h"   // XtExcFrame
+    #if defined(__has_include)
+      #if __has_include("xtensa_api.h")
+        #include "xtensa_api.h"
+      #else
+        #include "freertos/xtensa_api.h"
+      #endif
+    #else
+      #include "freertos/xtensa_api.h"
+    #endif
+  #endif
+
+  // RISC-V exception frame header name varies slightly by core/IDF.
+  #if defined(CONFIG_IDF_TARGET_ARCH_RISCV)
+    #if defined(__has_include)
+      #if __has_include(<riscv/rvruntime-frames.h>)
+        #include <riscv/rvruntime-frames.h>   // RvExcFrame
+      #elif __has_include("riscv/rvruntime-frames.h")
+        #include "riscv/rvruntime-frames.h"
+      #endif
+    #endif
+  #endif
 #endif
+
+
 
 
 class CrashRecorder :
@@ -77,7 +109,7 @@ class CrashRecorder :
         // Called by panic wrappers (IRAM_ATTR safe)
         void IRAM_ATTR CaptureFromFrame(void* frame);
         
-void CrashRTC_CaptureFromFrame(XtExcFrame* exc_frame);
+// void CrashRTC_CaptureFromFrame(XtExcFrame* exc_frame);
 bool Create_CrashDumpJSON(char* out, uint16_t out_len) const;
 
   //         void CrashHook_Install();              // call once in Init()

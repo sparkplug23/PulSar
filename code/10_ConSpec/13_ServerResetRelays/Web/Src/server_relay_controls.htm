@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Server Reset Relays</title>
+
+  <script src="/common.js"></script>
+  <style>@import url("/style.css");</style>
+
+  <script>
+    // Date Modified: 07Jan26
+
+    const RELAY_COUNT  = 8;
+    const POLL_SECONDS = 1;
+
+    var poll_timer = 0;
+
+    function S() {
+      getLoc();
+
+      // POST target
+      if (loc) d.Sf.action = getURL("/m/serverrelays");
+
+      BuildRelayRows();
+
+      // Start polling
+      PollNow();
+    }
+
+    function BuildRelayRows() {
+      var html = "";
+      for (var i = 0; i < RELAY_COUNT; i++) {
+        var n = i + 1;
+
+        html += '<div id="row' + i + '" style="padding:10px 8px;margin:8px 0;border-left:6px solid #666;">';
+        html += '  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">';
+
+        html += '    <div style="min-width:190px;">';
+        html += '      <b>Relay ' + n + ':</b><br>';
+        html += '      <input type="text" name="R' + i + '" maxlength="32" style="width:180px;">';
+        html += '    </div>';
+
+        html += '    <div style="display:flex;gap:8px;flex-wrap:wrap;">';
+        html += '      <button id="b' + i + '_0" type="button" onclick="SendCmd(' + i + ',0)">Off</button>';
+        html += '      <button id="b' + i + '_1" type="button" onclick="SendCmd(' + i + ',1)">On</button>';
+        html += '      <button id="b' + i + '_2" type="button" onclick="SendCmd(' + i + ',2)">Toggle 7s</button>';
+        html += '    </div>';
+
+        html += '    <div style="flex:1;min-width:220px;">';
+        html += '      <b>Status:</b><br>';
+        html += '      <input id="T' + i + '" name="T' + i + '" type="text" readonly value="" style="width:100%;">';
+        html += '    </div>';
+
+        html += '  </div>';
+        html += '</div>';
+      }
+
+      gId("rows").innerHTML = html;
+    }
+
+    function SendCmd(relayIndex, cmdIndex) {
+      gId("C").value = "RB" + relayIndex + "_" + cmdIndex;
+      gId("A").value = "cmd";
+      d.Sf.submit();
+    }
+
+    function PollNow() {
+      loadJS(getURL("/m/serverrelays/s.js?p=1&ts=" + Date.now()), false);
+      if (typeof GetV === "function") GetV();
+      PollSchedule();
+    }
+
+    function PollSchedule() {
+      if (poll_timer) clearTimeout(poll_timer);
+      poll_timer = setTimeout(PollNow, POLL_SECONDS * 1000);
+    }
+  </script>
+</head>
+
+<body onload="S()">
+<form id="form_s" name="Sf" method="post">
+
+  <div class="toprow">
+    <button type="button" onclick="B()">Back</button>
+    <button type="submit" onclick="gId('A').value='save'">Save</button>
+
+    <span style="float:right">
+      <input type="text" name="UT" readonly value="" style="width:220px;text-align:right;">
+    </span>
+
+    <hr>
+  </div>
+
+  <h2>Server Reset Relays</h2>
+
+  <!-- Hidden selectors -->
+  <input type="hidden" id="A" name="A" value="save">
+  <input type="hidden" id="C" name="C" value="">
+
+  <hr>
+
+  <!-- rows injected here -->
+  <div id="rows"></div>
+
+  <hr>
+</form>
+</body>
+</html>

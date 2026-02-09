@@ -55,14 +55,14 @@ int8_t mServerResetRelays::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
-    break; 
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    break;
+    case TASK_MQTT_SENDER:
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif  
     /************
@@ -133,7 +133,7 @@ void mServerResetRelays::SubTask_UpdateOLED()
    * 1     : "I:4.3.2.1 " IPAddress
    * 2     : "U:12:34:56" Uptime
    * 3     : "R:01000000"  Relay states as binary 00000010 ie relays 7 is on
-   * 4     : 
+   * 4     : "DATA FLASHED" Although not practical, since we are going softAP I cant debug, so good to know when the software was added.
    * 
    */
 
@@ -143,8 +143,10 @@ void mServerResetRelays::SubTask_UpdateOLED()
   tkr_iDisp->LogBuffer_AddRow(buffer, 0);
 
   memset(buffer,0,sizeof(buffer));
-  sprintf(buffer, "I:");
+  // sprintf(buffer, "");
   IPAddress localip   = WiFi.localIP();
+  if(localip[0]==192) localip[0]=2;  // Lets force short hand when its expected 192.168
+  if(localip[1]==168) localip[1]=8;
   sprintf(&buffer[2], "%d.%d.%d.%d", localip[0],localip[1],localip[2],localip[3] );
   tkr_iDisp->LogBuffer_AddRow(buffer, 1);
 
@@ -154,6 +156,31 @@ void mServerResetRelays::SubTask_UpdateOLED()
     sprintf(&buffer[i+2], "%d", tkr_relay->CommandGet_Relay_Power(i));
   }
   tkr_iDisp->LogBuffer_AddRow(buffer, 2);
+
+  
+  memset(buffer, 0, sizeof(buffer));
+  const char *s = tkr_time->GetBuildDateAndTime().c_str();
+  /*
+    s = "YYYY-MM-DDThh:mm:ss"
+          0123456789ABCDEF
+  */
+  if (s && strlen(s) >= 16) {
+      buffer[0]  = s[2];   // Y
+      buffer[1]  = s[3];   // Y
+      buffer[2]  = s[5];   // M
+      buffer[3]  = s[6];   // M
+      buffer[4]  = s[8];   // D
+      buffer[5]  = s[9];   // D
+      buffer[6]  = s[11];  // h
+      buffer[7]  = s[12];  // h
+      buffer[8]  = s[14];  // m
+      buffer[9]  = s[15];  // m
+      buffer[10] = '\0';
+  } else {
+      memcpy(buffer, "0000000000", 11);
+  }
+  tkr_iDisp->LogBuffer_AddRow(buffer, 3);
+
 
 }
 
@@ -520,38 +547,6 @@ void mServerResetRelays::MQTTHandler_Init()
 } 
 
 
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mServerResetRelays::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mServerResetRelays::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mServerResetRelays::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
 
 #endif // USE_MODULE_NETWORK_MQTT
 

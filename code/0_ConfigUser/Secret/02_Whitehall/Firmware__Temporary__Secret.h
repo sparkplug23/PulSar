@@ -8,7 +8,6 @@
 \*********************************************************************************************/
 
 // #define USE_MODULE_NETWORK_MQTT
-// #define DEVICE_FORCED_TO_BE_TESTER
 // #define ENABLE_TESTUSER
 // #define DISABLE_WEBSERVER
 //#define FORCE_TEMPLATE_LOADING

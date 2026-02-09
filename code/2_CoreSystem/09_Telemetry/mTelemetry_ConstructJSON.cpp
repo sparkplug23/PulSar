@@ -123,32 +123,15 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_appendi
     JBI->Add(PM_BUILDDATETIME,   tkr_time->GetBuildDateAndTime().c_str());
     JBI->Add(PM_BUILDTIME,       __TIME__);
     JBI->Add(PM_VERSION_NUMBER,   (uint32_t)PROJECT_VERSION);
-    JBI->Add(PM_VERSION_NUMBER_MINIMUM,   (uint32_t)PROJECT_VERSION_MINIMAL);
     JBI->Add(PM_VERSION_NUMBER_NOTYPE,   (uint32_t)PROJECT_VERSION & 0x3FFFFFFF); //suppres 2 MSBs
 
-    JBI->Object_Start(PM_VERSION_PARTS);
-      JBI->Object_Start(PM_CURRENT);
-        JBI->Add(PM_TYPE,   (uint8_t)FIRMWARE_VERSION_TYPE);
-        JBI->Add(PM_MAJOR,   (uint8_t)FIRMWARE_VERSION_MAJOR);
-        JBI->Add(PM_MINOR,   (uint8_t)FIRMWARE_VERSION_MINOR);
-        JBI->Add(PM_CORE,   (uint8_t)FIRMWARE_VERSION_CORE);
-        JBI->Add(PM_MODULE,   (uint8_t)FIRMWARE_VERSION_MODULE);
-      JBI->Object_End();
-      JBI->Object_Start(PM_MINIMAL);
-        JBI->Add(PM_TYPE,   (uint8_t)FIRMWARE_VERSION_TYPE_MINIMAL);
-        JBI->Add(PM_MAJOR,   (uint8_t)FIRMWARE_VERSION_MAJOR_MINIMAL);
-        JBI->Add(PM_MINOR,   (uint8_t)FIRMWARE_VERSION_MINOR_MINIMAL);
-        JBI->Add(PM_CORE,   (uint8_t)FIRMWARE_VERSION_CORE_MINIMAL);
-        JBI->Add(PM_MODULE,   (uint8_t)FIRMWARE_VERSION_MODULE_MINIMAL);
-      JBI->Object_End();
-    JBI->Object_End();
-
-    #ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__BASE_DEFAULT
-    JBI->Add("LightingBase", FIRMWARE_DEFAULT_DESCRIPTION);
-    #else
-    JBI->Add("LightingBase", "Disabled");
-    #endif
-
+    JBI->Array_Start(PM_VERSION_PARTS);
+      JBI->Add( (uint8_t)FIRMWARE_VERSION_TYPE);
+      JBI->Add( (uint8_t)FIRMWARE_VERSION_MAJOR);
+      JBI->Add( (uint8_t)FIRMWARE_VERSION_MINOR);
+      JBI->Add( (uint8_t)FIRMWARE_VERSION_CORE);
+      JBI->Add( (uint8_t)FIRMWARE_VERSION_MODULE);
+    JBI->Array_End();
 
     #ifdef ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
     JBI->Add(PM_ARDUINO_CORE,     ARDUINO_ESP8266_RELEASE); 

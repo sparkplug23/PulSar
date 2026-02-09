@@ -101,10 +101,6 @@ class mServerResetRelays :
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();    
-    void MQTTHandler_Sender();
-
     std::vector<struct handler<mServerResetRelays>*> mqtthandler_list;
     struct handler<mServerResetRelays> mqtthandler_settings;    struct handler<mServerResetRelays> mqtthandler_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT

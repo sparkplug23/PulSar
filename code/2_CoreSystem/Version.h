@@ -1,11 +1,8 @@
-#ifndef Version2_H
-#define Version2_H
-
-// File contains settings for the project that should not be edited by user
+#ifndef VERSION_H
+#define VERSION_H
 
 #include "stdint.h"
-// DEVICE named defines that set modules to use below
-#include "0_ConfigUser/G0_mFirmwareCustom_Secret.h"
+
 
 enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
   FIRMWARE_VERSION_TYPE_RELEASE_ID = 0,  
@@ -14,7 +11,15 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
   FIRMWARE_VERSION_TYPE_DEVELOPING_ID
 };
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Firmware Version //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #define FIRMWARE_VERSION_TYPE     FIRMWARE_VERSION_TYPE_DEVELOPING_ID
+
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 
 /**@@@@@ Minor Changes - aim to make these quarterly
@@ -41,7 +46,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * #111 : Working on lighting as its own branch. Removing any WLED palette usage until my palatte works!
  * #110 : Before colorado
  */
-#define FIRMWARE_VERSION_MINOR    133 // Update "ChangeLogManual.md" when incrementing
+#define FIRMWARE_VERSION_MINOR    134 // Update "ChangeLogManual.md" when incrementing
 
 /**@@@@@ Core Changes
  * #00 : 
@@ -51,116 +56,11 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 /**@@@@@ Module changes
  * #00 : 
  */
-#define FIRMWARE_VERSION_MODULE   0
+#define FIRMWARE_VERSION_MODULE   1
+
 
 #define FIRMWARE_BRANCH_NAME_STRING "development"
 
-// #define ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
-
-/**
- * @brief Version names used to set limits on when code can be included
- * 
- * 0V124 ie MAJORvMINOR
- */
-#define FIRMWARE_VERSION_MIN(major, minor) \
-  ((FIRMWARE_VERSION_MAJOR > (major)) || \
-   (FIRMWARE_VERSION_MAJOR == (major) && FIRMWARE_VERSION_MINOR >= (minor)))
-
-// #define FIRMWARE_VERSION_MAX(major, minor) \
-//   ((FIRMWARE_VERSION_MAJOR < (major)) || \
-//    (FIRMWARE_VERSION_MAJOR == (major) && FIRMWARE_VERSION_MINOR <= (minor)))
-#define FIRMWARE_VERSION_MAX(major, minor) true
-  // ((FIRMWARE_VERSION_MAJOR < (major)) || \
-  //  (FIRMWARE_VERSION_MAJOR == (major) && FIRMWARE_VERSION_MINOR <= (minor)))
-
-
-
-#ifndef SETTINGS_HOLDER
-#define SETTINGS_HOLDER           1//                (random(1,1000))
-#endif
-
-/**
- * @brief Depreciation code
- **/
-#define DEPRECIATION_FIRMWARE_ERROR_MESSAGE "Depreciated Error: Must remove before compile should proceed"
-// https://en.cppreference.com/w/cpp/language/attributes/deprecated
-
-// #define DEPRECIATION_WARN(warning_firmware_version_minor, error_firmware_version_minor) \                          
-//                     if(FIRMWARE_VERSION_MINOR > 114)   \
-//                       #error "DEPRECIATION_ERROR"        \
-//                     if(FIRMWARE_VERSION_MINOR > 114)   \
-//                       #error "DEPRECIATION_ERROR"        \
-
-
-// #define ENABLE_BUG_TRACING
-
-// BUG TRACING
-#ifdef ENABLE_BUG_TRACING
-  #define ENABLE_SERIAL_FLUSH
-  #define ENABLE_ADVANCED_DEBUGGING // new feature that only includes lowest level debugging when needed
-  #define DEBUG_SERIAL_TESTING // Sets debug level of serial, else info for performance improvements
-  #define DEBUG_MQTT_HANDLER
-  #define DEBUG_FOR_FAULT
-  #define USE_DEBUG_LINE  
-  #define USE_DEBUG_LINE_LED
-  #define ENABLE_DELAYED_BOOT
-  #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  #define ENABLE_LOG_LEVEL_NONE 
-  #define ENABLE_LOG_LEVEL_ERROR 
-  #define ENABLE_LOG_LEVEL_WARNING 
-  #define ENABLE_LOG_LEVEL_TEST
-  #define ENABLE_LOG_LEVEL_INFO 
-  #define ENABLE_LOG_LEVEL_COMMANDS
-  #define ENABLE_LOG_LEVEL_DEBUG 
-  #define ENABLE_LOG_LEVEL_DEBUG_MORE 
-  #define ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL 
-  #define ENABLE_LOG_LEVEL_ALL
-
-  #define ENABLE_LOG
-
-  // Enable debugging on only this module parts
-  #define ENABLE_DEBUG_MODULE_LIGHTS_ADDRESSABLE
-
-#endif
-
-// Enable special d ebugs that trigger only regions
-// #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-
-#define ENABLE_LOG
-
-
-// To reduce ram usage
-#define ENABLE_LOG_LEVEL_NONE 
-#define ENABLE_LOG_LEVEL_ERROR 
-#define ENABLE_LOG_LEVEL_WARNING
-#define ENABLE_LOG_LEVEL_TEST
-#define ENABLE_LOG_LEVEL_IMPORTANT 
-#define ENABLE_LOG_LEVEL_INFO 
-#define ENABLE_LOG_LEVEL_COMMANDS
-#define ENABLE_LOG_LEVEL_HIGHLIGHT
-//#define ENABLE_LOG_LEVEL_DEBUG 
-//#define ENABLE_LOG_LEVEL_DEBUG_MORE 
-//#define ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL
-//#define ENABLE_LOG_LEVEL__DEBUG_TRACE 
-//#define ENABLE_LOG_LEVEL_ALL
-#define ENABLE_LOG_LEVEL_DYNAMIC_LEVELS
-
-#define ENABLE_USER_CONFIG_OVERRIDE
-
-//  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-
-
-/**
- *  Extra Debugging methods
- **/
-//#define ENABLE_FREERAM_APPENDING_SERIAL
-// #define ADD_DEBUG_PERIODS_FOR_SERIAL_MONITORING
-// #ifdef ENABLE_ADVANCED_DEBUGGING
-//   #define DEBUG_FOR_FAULT
-// #endif
-
-//--------------------------------[Defines needed here]-------------------------------------
 
 // Project version is bit-packed as follows
 // bits 31-30  (2)  (Range 0-4)     Type/Branch (e.g. Stable, Developing)
@@ -169,24 +69,49 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 // bits 15-8   (8)  (Range 0-255)   System version (e.g. Wifi, Support)
 // bits 7-0    (8)  (Range 0-255)   Module version (e.g. Sensors, Drivers)
 
-#define FIRMWARE_VERSION_TYPE_MINIMAL     FIRMWARE_VERSION_TYPE_DEVELOPING_ID
-#define FIRMWARE_VERSION_MAJOR_MINIMAL    0
-#define FIRMWARE_VERSION_MINOR_MINIMAL    105
-#define FIRMWARE_VERSION_CORE_MINIMAL     0
-#define FIRMWARE_VERSION_MODULE_MINIMAL   1
-
 // Generate Version AFTER Hardware defaults have been called, this allows undef VERSION_TYPE for overriding
 const uint32_t PROJECT_VERSION = ((FIRMWARE_VERSION_TYPE & 0x03) << 30) | ((FIRMWARE_VERSION_MAJOR & 0x3F) << 24) | (FIRMWARE_VERSION_MINOR << 16) | (FIRMWARE_VERSION_CORE << 8) | (FIRMWARE_VERSION_MODULE);
-const uint32_t PROJECT_VERSION_MINIMAL = ((FIRMWARE_VERSION_TYPE_MINIMAL & 0x03) << 30) | ((FIRMWARE_VERSION_MAJOR_MINIMAL & 0x3F) << 24) | (FIRMWARE_VERSION_MINOR_MINIMAL << 16) | (FIRMWARE_VERSION_CORE_MINIMAL << 8) | (FIRMWARE_VERSION_MODULE_MINIMAL);
 
-//--------------------------------[AUTOSET - DEFINE HARDWARE needed to run tasks requested]-------------------------------------
 
-#define PROJECT_NAME_CTR "Home Automation Control System (TBD)"
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// OPTIONAL DEPRECIATION /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef DEVICE_FORCED_TO_BE_TESTER
-  #warning "DEVICE_FORCED_TO_BE_TESTER is set!"
+// #define ENABLE_FEATURE_FIRMWARE_VERSION__INCLUDE_MIN_MAX_VERSIONING
+
+/*********** EXAMPLE
+ *
+#if FIRMWARE_VERSION_MAX(0, 140)
+  // deprecated code still allowed
+#else
+  #error "Deprecated code expired — must be removed"
+#endif
+*
+*/
+
+// Pack MAJOR.MINOR into a single comparable integer (preprocessor-safe)
+#define FW_VER_PACK(major, minor) \
+  (((major) << 16) | ((minor) & 0xFFFF))
+
+#define FW_VER_CURRENT \
+  FW_VER_PACK(FIRMWARE_VERSION_MAJOR, FIRMWARE_VERSION_MINOR)
+
+#ifdef ENABLE_FEATURE_FIRMWARE_VERSION__INCLUDE_MIN_MAX_VERSIONING
+  #define FIRMWARE_VERSION_MIN(major, minor) \
+    (FW_VER_CURRENT >= FW_VER_PACK((major),(minor)))
+  #define FIRMWARE_VERSION_MAX(major, minor) \
+    (FW_VER_CURRENT <= FW_VER_PACK((major),(minor)))
+#else
+  // Version gating disabled → always include
+  #define FIRMWARE_VERSION_MIN(major, minor)  (1)
+  #define FIRMWARE_VERSION_MAX(major, minor)  (1)
 #endif
 
+#define FIRMWARE_VERSION_IN_RANGE(minMaj,minMin,maxMaj,maxMin) \
+  (FIRMWARE_VERSION_MIN((minMaj),(minMin)) && \
+   FIRMWARE_VERSION_MAX((maxMaj),(maxMin)))
 
 
 #endif

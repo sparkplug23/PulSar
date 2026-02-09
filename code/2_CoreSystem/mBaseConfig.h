@@ -84,6 +84,76 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 
 #define USE_CONFIG_OVERRIDE                      // Uncomment to use mUserConfig_Override.h file. See README.md
 
+
+// #define ENABLE_BUG_TRACING
+
+// BUG TRACING
+#ifdef ENABLE_BUG_TRACING
+  #define ENABLE_SERIAL_FLUSH
+  #define ENABLE_ADVANCED_DEBUGGING // new feature that only includes lowest level debugging when needed
+  #define DEBUG_SERIAL_TESTING // Sets debug level of serial, else info for performance improvements
+  #define DEBUG_MQTT_HANDLER
+  #define DEBUG_FOR_FAULT
+  #define USE_DEBUG_LINE  
+  #define USE_DEBUG_LINE_LED
+  #define ENABLE_DELAYED_BOOT
+  #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  #define ENABLE_LOG_LEVEL_NONE 
+  #define ENABLE_LOG_LEVEL_ERROR 
+  #define ENABLE_LOG_LEVEL_WARNING 
+  #define ENABLE_LOG_LEVEL_TEST
+  #define ENABLE_LOG_LEVEL_INFO 
+  #define ENABLE_LOG_LEVEL_COMMANDS
+  #define ENABLE_LOG_LEVEL_DEBUG 
+  #define ENABLE_LOG_LEVEL_DEBUG_MORE 
+  #define ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL 
+  #define ENABLE_LOG_LEVEL_ALL
+
+  #define ENABLE_LOG
+
+  // Enable debugging on only this module parts
+  #define ENABLE_DEBUG_MODULE_LIGHTS_ADDRESSABLE
+
+#endif
+
+// Enable special d ebugs that trigger only regions
+// #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+
+#define ENABLE_LOG
+
+
+// To reduce ram usage
+#define ENABLE_LOG_LEVEL_NONE 
+#define ENABLE_LOG_LEVEL_ERROR 
+#define ENABLE_LOG_LEVEL_WARNING
+#define ENABLE_LOG_LEVEL_TEST
+#define ENABLE_LOG_LEVEL_IMPORTANT 
+#define ENABLE_LOG_LEVEL_INFO 
+#define ENABLE_LOG_LEVEL_COMMANDS
+#define ENABLE_LOG_LEVEL_HIGHLIGHT
+//#define ENABLE_LOG_LEVEL_DEBUG 
+//#define ENABLE_LOG_LEVEL_DEBUG_MORE 
+//#define ENABLE_LOG_LEVEL_DEBUG_LOWLEVEL
+//#define ENABLE_LOG_LEVEL__DEBUG_TRACE 
+//#define ENABLE_LOG_LEVEL_ALL
+#define ENABLE_LOG_LEVEL_DYNAMIC_LEVELS
+
+#define ENABLE_USER_CONFIG_OVERRIDE
+
+//  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+
+
+/**
+ *  Extra Debugging methods
+ **/
+//#define ENABLE_FREERAM_APPENDING_SERIAL
+// #define ADD_DEBUG_PERIODS_FOR_SERIAL_MONITORING
+// #ifdef ENABLE_ADVANCED_DEBUGGING
+//   #define DEBUG_FOR_FAULT
+// #endif
+
+
 /*********************************************************************************************\
  * This MUST BE CHANGED for ANY parameters in this file to overwrite those saved in settings
 \*********************************************************************************************/
@@ -178,7 +248,10 @@ SHOULD NOT rely on other files for pre-defines, other than INI
   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
+  // #ifndef CONFIG_IDF_TARGET_ESP32C3
   #define USE_MODULE_CORE__CRASH_RECORDER
+  // #endif
+
 
   #define USE_MODULE_CORE__JSON_TEMPLATE
   #define USE_MODULE_CORE_TIME

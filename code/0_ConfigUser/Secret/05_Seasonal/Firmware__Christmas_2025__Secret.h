@@ -43,7 +43,6 @@
 
 // #define DEVICE_XMAS25__MEADOWS__DESK_PLAYLIST
 
-// #define DEVICE_MEADOWS__BED_ALARM_LIGHT
 
 // #define DEVICE_CHRISTMAS25__FINAL__16X_SNOW_TREE
 
@@ -3810,117 +3809,7 @@
 
 
 
-#ifdef DEVICE_MEADOWS__BED_ALARM_LIGHT
-  #ifndef DEVICENAME_CTR
-  #define DEVICENAME_CTR          "coxmas24__redboard_01"
-  #endif
-  #ifndef DEVICENAME_FRIENDLY_CTR
-  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
-  #endif
-  #ifndef DEVICENAME_DESCRIPTION_CTR
-  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
-  #endif
-  #define DEVICENAME_ROOMHINT_CTR "testgroup"
 
 
-  /***********************************
-  * SECTION: Enable Grouped
-  ************************************/  
 
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/   
-
-
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
-
-  // #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
-  // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
-
-  #define ENABLE_BUSCONFG__OUTPUTS_1X_100
-  // #define ENABLE_BUSCONFG__OUTPUTS_1X_2000 // Just for testing larger compute times
-
-  #define ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
-
-
-  #define ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_BY_NAME_AUTOGENERATE_ID_LIST
-  // #define ENABLE_DEBUGFEATURE_LIGHTING__PLAYLIST_PSN_TO_PS_CREATE_BACKUP_FILE
-
-  #
-  #define MIN_SHOW_DELAY 25
-  #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
-
-  #define ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_GROUPING_OVERRIDE_RESCALE_TO_STRIP // Testing playlists on smaller strips
-  // #define ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_BRIGHTNESS_BLOCKED // Testing playlists on smaller strips
-
-
-  #ifdef ENABLE_BUSCONFG__OUTPUTS_1X_100
-
-  /**
-   * @brief tree physical wiring connections
-   * 16 outputs
-   */
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "BusConfig":[
-      {
-        "Pin":2,
-        "ColourOrder":"GRB",
-        "BusType":"WS2812_RGB",
-        "Start":0,
-        "Length":100
-      }
-    ],
-    "Segment0": {
-      "PixelRange": [
-        0,
-        100
-      ],
-      "ColourPalette":"Cold White",
-      "Effects": {
-        "Function":"Solid",
-        "Speed":127,
-        "Intensity":127,
-        "Grouping":1,
-        "RateMs": 25
-      },
-      "BrightnessRGB": 100
-    },
-    "BrightnessRGB": 100
-  }
-  )=====";
- 
-      
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIO_NUMBER "\":{"    
-      // "\"28\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
-      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"12\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"26\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"32\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"14\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"25\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"33\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
-      #endif
-    "},"
-    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-  #endif
-  
-
-#endif // END DEVICE
-
-#endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_CHRISTMAS23_H
+#endif

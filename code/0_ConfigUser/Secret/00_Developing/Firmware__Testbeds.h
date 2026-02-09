@@ -15,6 +15,9 @@
 // #define DEVICE_TESTBED_02__MOTION_AUDIO
 // #define DEVICE_TESTBED_05__SWITCHES_BUTTONS
 
+// room_sensor   : BME680, Light, PIR, RADAR
+// camera_sensor : Cam gives too much heat to make BME reliable, instead, this will focus on LIGHT_SENS,LIGHT_RGB(for night vision),PIR,RADAR so ability to sense motion and capture via FS and transmit later to networked storage?
+
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------
 
@@ -101,13 +104,13 @@
    * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
   ************************************/  
   
-  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
-  // #define ENABLE_TEMPLATE_SECTION__SENSORS__DHT
-  // #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__DHT
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
   // // #define ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
   // #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
   // #define ENABLE_TEMPLATE_SECTION__DISPLAYS__NEXTION
-  // #define ENABLE_TEMPLATE_SECTION__LIGHTS // maybe dont want them here, too much memory. or, need lightweight version (few effects, no webui? ie basic notification tester!>)
+  #define ENABLE_TEMPLATE_SECTION__LIGHTS // maybe dont want them here, too much memory. or, need lightweight version (few effects, no webui? ie basic notification tester!>)
   // #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR
 
   /***********************************
@@ -406,7 +409,7 @@
   #define D_DEVICE_SENSOR_DB18S20_04_ADDRESS     "[40,18,77,49,0,0,0,233]" //233 4
 
   #define D_DEVICE_SENSOR_BME_280_NAME "BME280"
-  #define D_DEVICE_SENSOR_BME_680_NAME "BME680"
+  #define D_DEVICE_SENSOR_BME_680_NAME "Office"
 
   #define D_DEVICE_SENSOR_BH1750_NAME "Ambient"
 

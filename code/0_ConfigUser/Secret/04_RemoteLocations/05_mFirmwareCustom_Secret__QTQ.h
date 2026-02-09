@@ -138,7 +138,7 @@
 
   #define DEBUG_FASTBOOT
 
-  // #define ENABLE_DEVFEATURE_WIFI__FORCE_SOFTAP_MODE_BY_BLOCKING_SSIDS
+                                                  // #define ENABLE_DEVFEATURE_WIFI__FORCE_SOFTAP_MODE_BY_BLOCKING_SSIDS
 
 
   #define   D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/m/serverrelays"
@@ -370,26 +370,10 @@
     
   /***********************************
    * SECTION: System Debug Options
-  ************************************/  
-//  #define ENABLE_ADVANCED_DEBUGGING
-// #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-// #define ENABLE_DEBUG_FUNCTION_NAMES
-// 
-// #define SERIAL_LOG_LEVEL_DURING_BOOT 8
-// #define ENABLE_DEBUG_LINE_HERE
-// #define ENABLE_DEBUG_LINE_HERE2
-// #define ENABLE_DEBUG_LINE_HERE3
-// #define ENABLE_DEBUG_LINE_HERE4
-// #define ENABLE_DEBUG_LINE_HERE_TRACE
-// #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
-// #define USE_DEBUG_PRINT
-// #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
-
-// #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+  ************************************/ 
  
   #define ENABLE_FEATURE_SYSTEM__BOOT_SPLASH__DISPLAY_BLOCK_TO_SHOW_END_OF_INIT
   #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
-
   #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
   
   /***********************************
@@ -435,28 +419,29 @@
    * WEBPAGE:
    ************************************************************************/
   
+  #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
     
   
 
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
+                                #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS
+                                #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
+                                #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
 
-  #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
-
-
-// lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
+                                #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
 
 
+                              // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
-  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
-  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
-  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-  #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
 
-  #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
 
-  #define DEBUG_FASTBOOT
+                                #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+                                #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+                                #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+                                #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+
+                                #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+
+                                #define DEBUG_FASTBOOT
 
   // #define ENABLE_DEVFEATURE_WIFI__FORCE_SOFTAP_MODE_BY_BLOCKING_SSIDS
 
@@ -491,72 +476,8 @@
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
   #define USE_MODULE_DRIVERS_LEDS
-#define MAX_RELAYS 8
+  #define MAX_RELAYS 8
  
-  /***********************************
-   * SECTION: Lighting Configs
-  ************************************/  
-        
-  #ifdef ENABLE_TEMPLATE_SECTIONS__LIGHTS
-  
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
-
-  // #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
-  // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
-
-  // #define ENABLE_BUSCONFG__NEW_BUSCONFIG_RANGING
-  #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE
-  // #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE_ONE_SEGMENT
-
-#define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
-   #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
-
-
-   // r8=13?
-  
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  R"=====(
-  {
-    "BusConfig":[     
-      {
-        "Name":"Star",
-        "Pin":19,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":0,
-        "Length":100
-      }
-    ],
-    "Segments":[
-      {
-        "PixelRange":[0,100],
-        "ColourPalette":"RGPBY",
-        "ColourType":3,
-        "Effects": {
-          "Function":"Static",
-          "Speed":255,
-          "Intensity":127,
-          "Grouping":1,
-          "RateMs": 20
-        },
-        "BrightnessRGB": 100
-      }
-    ],
-    "BrightnessRGB": 100
-  }
-  )=====";
-  #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
-  #define MAX_LED_MEMORY 64000*5
-  #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
-
-  #endif
-
-  /***********************************
-   * SECTION: Energy Configs
-  ************************************/  
-
   /***********************************
    * SECTION: Controller Configs
   ************************************/  
