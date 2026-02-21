@@ -150,6 +150,219 @@ void mI2C::Pre_Init()
 }
 
 
+/*********************************************************************************************\
+ * I2C Non-Stop / Repeated-Start Compatibility Fix (ESP32-C3 / Arduino core 3.x)
+ *
+ * Usage:
+ *   - Define ENABLE_DEVFEATURE_I2C__ESP32C3_TRANSMISSION_NONSTOP_FIX to enable safe STOP-based
+ *     register reads (and to fix invalid double-endTransmission patterns).
+ *
+ * NOTE:
+ *   - The "else" blocks below are your original code copied verbatim (no edits).
+ *   - The "if" blocks are full replacements.
+\*********************************************************************************************/
+
+#ifdef ENABLE_DEVFEATURE_I2C__ESP32C3_TRANSMISSION_NONSTOP_FIX
+
+bool mI2C::I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size)
+{
+  uint8_t x = I2C_RETRY_COUNTER;
+  i2c_buffer = 0;
+
+  do {
+    // Write register pointer (STOP-based for robustness)
+    wire->beginTransmission(addr);
+    wire->write(reg);
+    uint8_t err = wire->endTransmission(true);   // STOP
+
+    if (err == 0) {
+      // Read bytes
+      uint8_t got = (uint8_t)wire->requestFrom((int)addr, (int)size);
+      if (got == size) {
+        uint32_t v = 0;
+        for (uint8_t i = 0; i < size; i++) {
+          v = (v << 8) | (uint8_t)wire->read();
+        }
+        i2c_buffer = v;
+        return true;
+      } else {
+        // Drain any partial data
+        while (wire->available()) { (void)wire->read(); }
+      }
+    }
+
+    x--;
+    // Small backoff helps after NACK/bus errors on ESP32-C3
+    delayMicroseconds(200);
+
+  } while (x != 0);
+
+  return false;
+}
+
+int8_t mI2C::I2cReadBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len)
+{
+  if (!wire) { return 1; }
+
+  // Write register pointer (STOP-based)
+  wire->beginTransmission((uint8_t)addr);
+  wire->write((uint8_t)reg);
+  uint8_t err = wire->endTransmission(true);  // STOP
+  if (err != 0) { return 1; }
+
+  // Read bytes
+  uint16_t got = (uint16_t)wire->requestFrom((uint8_t)addr, (uint8_t)len);
+  if (got != len) {
+    while (wire->available()) { (void)wire->read(); }
+    return 1;
+  }
+
+  while (len--) {
+    *reg_data++ = (uint8_t)wire->read();
+  }
+  return 0;
+}
+
+bool mI2C::I2cDevice(uint8_t addr) // This checks ALL, not just the desired address so is slow
+{
+  if(!wire){ return false; } // Not started
+
+  ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=search"),addr);
+
+  for (uint8_t address = 1; address <= 127; address++) {
+    ALOG_TST(PSTR("I2cDevice(%x|%x)=for"),address,addr);
+
+    wire->beginTransmission(address);
+    uint8_t err = wire->endTransmission(true); // STOP
+
+    if (err == 0 && (address == addr))
+    {
+      ALOG_INF( PSTR("I2cDevice(0x%02X)=true found"),addr);
+      return true;
+    }else
+    if (err == 0 && (address != addr))
+    {
+      ALOG_INF( PSTR("I2cDevice(%x) also found %x"),address,addr);
+    }
+  }
+
+  ALOG_ERR(PSTR("I2cDevice(%x)=FALSE no response"),addr);
+
+  return false;
+}
+
+bool mI2C::I2cDevice_IsConnected(uint8_t addr) // This checks ALL, not just the desired address so is slow
+{
+  ALOG_DBM( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
+
+  uint8_t address = addr;
+  ALOG_DBM( PSTR("I2cDevice(%x)=for"),addr);
+
+  wire->beginTransmission(address);
+  uint8_t err = wire->endTransmission(true); // STOP
+
+  if (err == 0 && (address == addr))
+  {
+    ALOG_DBM( PSTR("I2cDevice(%x)=true"),addr);
+    return true;
+  }else
+  if (err == 0 && (address != addr))
+  {
+    ALOG_DBM(PSTR("I2cDevice(%x) also found %x"),address,addr);
+  }
+  ALOG_ERR( PSTR("I2cDevice(%x)=FALSE"),addr);
+
+  return false;
+}
+
+#else  // ENABLE_DEVFEATURE_I2C__ESP32C3_TRANSMISSION_NONSTOP_FIX not enabled
+
+bool mI2C::I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size)
+{
+  uint8_t x = I2C_RETRY_COUNTER;
+
+  i2c_buffer = 0;
+  do {
+    wire->beginTransmission(addr);                       // start transmission to device
+    wire->write(reg);                                    // sends register address to read from
+    if (0 == wire->endTransmission(false)) {             // Try to become I2C Master, send data and collect bytes, keep master status for next request...
+      wire->requestFrom((int)addr, (int)size);           // send data n-bytes read
+      if (wire->available() == size) {
+        for (uint8_t i = 0; i < size; i++) {
+          i2c_buffer = i2c_buffer << 8 | wire->read();   // receive DATA
+        }
+      }
+    }
+    x--;
+  } while (wire->endTransmission(true) != 0 && x != 0);  // end transmission
+  return (x);
+}
+
+int8_t mI2C::I2cReadBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len)
+{
+  wire->beginTransmission((uint8_t)addr);
+  wire->write((uint8_t)reg);
+  wire->endTransmission();
+  if (len != wire->requestFrom((uint8_t)addr, (uint8_t)len)) {
+    return 1;
+  }
+  while (len--) {
+    *reg_data = (uint8_t)wire->read();
+    reg_data++;
+  }
+  return 0;
+}
+
+//old function that seems to be changed
+bool mI2C::I2cDevice(uint8_t addr) // This checks ALL, not just the desired address so is slow
+{
+
+  if(!wire){ return false; } // Not started
+  
+  ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=search"),addr);
+
+  for (uint8_t address = 1; address <= 127; address++) {
+      ALOG_TST(PSTR("I2cDevice(%x|%x)=for"),address,addr);
+    wire->beginTransmission(address);
+    if (!wire->endTransmission() && (address == addr)) 
+    {
+      ALOG_INF( PSTR("I2cDevice(0x%02X)=true found"),addr);
+      return true;
+    }else
+    if (!wire->endTransmission() && (address != addr))
+    {
+      ALOG_INF( PSTR("I2cDevice(%x) also found %x"),address,addr);
+    }
+  }
+  
+  ALOG_ERR(PSTR("I2cDevice(%x)=FALSE no response"),addr);
+  
+  return false;
+}
+
+bool mI2C::I2cDevice_IsConnected(uint8_t addr) // This checks ALL, not just the desired address so is slow
+{
+
+  ALOG_DBM( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
+
+  uint8_t address = addr;
+  ALOG_DBM( PSTR("I2cDevice(%x)=for"),addr);
+  wire->beginTransmission(address);
+  if (!wire->endTransmission() && (address == addr)) 
+  {
+    ALOG_DBM( PSTR("I2cDevice(%x)=true"),addr);
+    return true;
+  }else
+  if (!wire->endTransmission() && (address != addr))
+  {
+    ALOG_DBM(PSTR("I2cDevice(%x) also found %x"),address,addr);
+  }
+  ALOG_ERR( PSTR("I2cDevice(%x)=FALSE"),addr);
+  
+  return false;
+}
+
+#endif // ENABLE_DEVFEATURE_I2C__ESP32C3_TRANSMISSION_NONSTOP_FIX
 
 
 void mI2C::Debug_I2CScan_To_Serial()
@@ -179,26 +392,26 @@ void mI2C::Debug_I2CScan_To_Serial()
 
 }
 
-bool mI2C::I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size)
-{
-  uint8_t x = I2C_RETRY_COUNTER;
+// bool mI2C::I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size)
+// {
+//   uint8_t x = I2C_RETRY_COUNTER;
 
-  i2c_buffer = 0;
-  do {
-    wire->beginTransmission(addr);                       // start transmission to device
-    wire->write(reg);                                    // sends register address to read from
-    if (0 == wire->endTransmission(false)) {             // Try to become I2C Master, send data and collect bytes, keep master status for next request...
-      wire->requestFrom((int)addr, (int)size);           // send data n-bytes read
-      if (wire->available() == size) {
-        for (uint8_t i = 0; i < size; i++) {
-          i2c_buffer = i2c_buffer << 8 | wire->read();   // receive DATA
-        }
-      }
-    }
-    x--;
-  } while (wire->endTransmission(true) != 0 && x != 0);  // end transmission
-  return (x);
-}
+//   i2c_buffer = 0;
+//   do {
+//     wire->beginTransmission(addr);                       // start transmission to device
+//     wire->write(reg);                                    // sends register address to read from
+//     if (0 == wire->endTransmission(false)) {             // Try to become I2C Master, send data and collect bytes, keep master status for next request...
+//       wire->requestFrom((int)addr, (int)size);           // send data n-bytes read
+//       if (wire->available() == size) {
+//         for (uint8_t i = 0; i < size; i++) {
+//           i2c_buffer = i2c_buffer << 8 | wire->read();   // receive DATA
+//         }
+//       }
+//     }
+//     x--;
+//   } while (wire->endTransmission(true) != 0 && x != 0);  // end transmission
+//   return (x);
+// }
 
 bool mI2C::I2cValidRead8(uint8_t *data, uint8_t addr, uint8_t reg)
 {
@@ -308,20 +521,20 @@ bool mI2C::I2cWrite16(uint8_t addr, uint8_t reg, uint16_t val)
    return I2cWrite(addr, reg, val, 2);
 }
 
-int8_t mI2C::I2cReadBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len)
-{
-  wire->beginTransmission((uint8_t)addr);
-  wire->write((uint8_t)reg);
-  wire->endTransmission();
-  if (len != wire->requestFrom((uint8_t)addr, (uint8_t)len)) {
-    return 1;
-  }
-  while (len--) {
-    *reg_data = (uint8_t)wire->read();
-    reg_data++;
-  }
-  return 0;
-}
+// int8_t mI2C::I2cReadBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len)
+// {
+//   wire->beginTransmission((uint8_t)addr);
+//   wire->write((uint8_t)reg);
+//   wire->endTransmission();
+//   if (len != wire->requestFrom((uint8_t)addr, (uint8_t)len)) {
+//     return 1;
+//   }
+//   while (len--) {
+//     *reg_data = (uint8_t)wire->read();
+//     reg_data++;
+//   }
+//   return 0;
+// }
 
 int8_t mI2C::I2cWriteBuffer(uint8_t addr, uint8_t reg, uint8_t *reg_data, uint16_t len)
 {
@@ -385,54 +598,54 @@ void mI2C::I2cScan(char *devs, unsigned int devs_len)
 
 }
 
-//old function that seems to be changed
-bool mI2C::I2cDevice(uint8_t addr) // This checks ALL, not just the desired address so is slow
-{
+// //old function that seems to be changed
+// bool mI2C::I2cDevice(uint8_t addr) // This checks ALL, not just the desired address so is slow
+// {
 
-  if(!wire){ return false; } // Not started
+//   if(!wire){ return false; } // Not started
   
-  ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=search"),addr);
+//   ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=search"),addr);
 
-  for (uint8_t address = 1; address <= 127; address++) {
-      ALOG_TST(PSTR("I2cDevice(%x|%x)=for"),address,addr);
-    wire->beginTransmission(address);
-    if (!wire->endTransmission() && (address == addr)) 
-    {
-      ALOG_INF( PSTR("I2cDevice(0x%02X)=true found"),addr);
-      return true;
-    }else
-    if (!wire->endTransmission() && (address != addr))
-    {
-      ALOG_INF( PSTR("I2cDevice(%x) also found %x"),address,addr);
-    }
-  }
+//   for (uint8_t address = 1; address <= 127; address++) {
+//       ALOG_TST(PSTR("I2cDevice(%x|%x)=for"),address,addr);
+//     wire->beginTransmission(address);
+//     if (!wire->endTransmission() && (address == addr)) 
+//     {
+//       ALOG_INF( PSTR("I2cDevice(0x%02X)=true found"),addr);
+//       return true;
+//     }else
+//     if (!wire->endTransmission() && (address != addr))
+//     {
+//       ALOG_INF( PSTR("I2cDevice(%x) also found %x"),address,addr);
+//     }
+//   }
   
-  ALOG_ERR(PSTR("I2cDevice(%x)=FALSE no response"),addr);
+//   ALOG_ERR(PSTR("I2cDevice(%x)=FALSE no response"),addr);
   
-  return false;
-}
+//   return false;
+// }
 
-bool mI2C::I2cDevice_IsConnected(uint8_t addr) // This checks ALL, not just the desired address so is slow
-{
+// bool mI2C::I2cDevice_IsConnected(uint8_t addr) // This checks ALL, not just the desired address so is slow
+// {
 
-  ALOG_DBM( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
+//   ALOG_DBM( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
 
-  uint8_t address = addr;
-  ALOG_DBM( PSTR("I2cDevice(%x)=for"),addr);
-  wire->beginTransmission(address);
-  if (!wire->endTransmission() && (address == addr)) 
-  {
-    ALOG_DBM( PSTR("I2cDevice(%x)=true"),addr);
-    return true;
-  }else
-  if (!wire->endTransmission() && (address != addr))
-  {
-    ALOG_DBM(PSTR("I2cDevice(%x) also found %x"),address,addr);
-  }
-  ALOG_ERR( PSTR("I2cDevice(%x)=FALSE"),addr);
+//   uint8_t address = addr;
+//   ALOG_DBM( PSTR("I2cDevice(%x)=for"),addr);
+//   wire->beginTransmission(address);
+//   if (!wire->endTransmission() && (address == addr)) 
+//   {
+//     ALOG_DBM( PSTR("I2cDevice(%x)=true"),addr);
+//     return true;
+//   }else
+//   if (!wire->endTransmission() && (address != addr))
+//   {
+//     ALOG_DBM(PSTR("I2cDevice(%x) also found %x"),address,addr);
+//   }
+//   ALOG_ERR( PSTR("I2cDevice(%x)=FALSE"),addr);
   
-  return false;
-}
+//   return false;
+// }
 
 
 void mI2C::I2cResetActive(uint32_t addr, uint32_t count)

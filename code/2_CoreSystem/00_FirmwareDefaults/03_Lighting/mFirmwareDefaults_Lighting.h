@@ -250,7 +250,9 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   /************************************************************************
    * BUS:
    ************************************************************************/
+  #ifndef ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
   #define ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+  #endif
 
   /************************************************************************
    * BRIGHTNESS:

@@ -104,11 +104,23 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
         tkr_time->BreakTime(tkr_time->UpTime(), ut);
         snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d"), ut.minute, ut.second);
       }else{
-        snprintf_P(mxtime, sizeof(mxtime), PSTR("%s"), tkr_time->GetUptime().c_str());
+        tkr_time->GetUptime(mxtime, sizeof(mxtime));
       }
     #endif    
   }else{
-    snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d %s"),tkr_time->RtcTime.hour, tkr_time->RtcTime.minute, tkr_time->RtcTime.second, tkr_time->GetUptime().c_str());
+    // snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d %s"),tkr_time->RtcTime.hour, tkr_time->RtcTime.minute, tkr_time->RtcTime.second, tkr_time->GetUptime(buffer,sizeof(buffer)));
+  
+    char up[16];
+    tkr_time->GetUptime(up, sizeof(up));  // your no-String version
+
+    snprintf_P(mxtime, sizeof(mxtime), PSTR("%02u:%02u:%02u %s"),
+              (unsigned)tkr_time->RtcTime.hour,
+              (unsigned)tkr_time->RtcTime.minute,
+              (unsigned)tkr_time->RtcTime.second,
+              up);
+
+  
+  
   }
 
   // SERIAL_DEBUG.printf("%s %d\r\n","serail",millis());
@@ -129,7 +141,7 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
     #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
 
     #ifdef ENABLE_FREERAM_APPENDING_SERIAL
-      SERIAL_DEBUG.printf(PSTR("R%05d%c %s %S %s\r\n"),ESP.getFreeHeap(),isconnected ? 'Y' : 'N',tkr_time->GetUptime().c_str(),tkr_log->GetLogLevelNamebyID(loglevel),tkr_log->log_data);      
+      SERIAL_DEBUG.printf(PSTR("R%05d%c %s %S %s\r\n"),ESP.getFreeHeap(),isconnected ? 'Y' : 'N',tkr_time->GetUptime(buffer,sizeof(buffer)),tkr_log->GetLogLevelNamebyID(loglevel),tkr_log->log_data);      
     #else
       SERIAL_DEBUG.printf(PSTR("%s %S %s\r\n"), mxtime, tkr_log->GetLogLevelNamebyID(loglevel), tkr_log->log_data);
     #endif

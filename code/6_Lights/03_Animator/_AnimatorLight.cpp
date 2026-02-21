@@ -1253,7 +1253,7 @@ if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE
   // ------------------------------------------------------------------
   if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAYTIME_01__ID)
   {
-    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
       const float elevation = tkr_solar->Get_Elevation();
       const float el_min = 0.0f;
       const float el_max = (ELEVATION_DAY_THRESHOLD != 0) ? ELEVATION_DAY_THRESHOLD : tkr_solar->Get_Elevation_Max();
@@ -1289,7 +1289,7 @@ if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE
   // ------------------------------------------------------------------
   if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAWNDUSKTIME_01__ID)
   {
-    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
       const float elevation = tkr_solar->Get_Elevation();
       const float el_min = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : tkr_solar->Get_Elevation_Min();
       const float el_max = (ELEVATION_DAY_THRESHOLD   != 0) ? ELEVATION_DAY_THRESHOLD   : tkr_solar->Get_Elevation_Max();
@@ -1329,7 +1329,7 @@ if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE
 // ------------------------------------------------------------------
 if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID)
 {
-  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
     const float elevation = tkr_solar->Get_Elevation();
     const float el_min = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : tkr_solar->Get_Elevation_Min();
     const float el_max = (ELEVATION_DAY_THRESHOLD   != 0) ? ELEVATION_DAY_THRESHOLD   : tkr_solar->Get_Elevation_Max();
@@ -1410,7 +1410,7 @@ if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERAT
   // ------------------------------------------------------------------
   if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_NIGHTTIME_01__ID)
   {
-    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
       const float elevation = tkr_solar->Get_Elevation();
       const float el_max = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : -10.0f;
       const float el_min = tkr_solar->Get_Elevation_Min();
@@ -1446,7 +1446,7 @@ if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERAT
   // ------------------------------------------------------------------
   if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SOLID_COLOUR_OF_SKY__ID)
   {
-    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
       const float elevation = tkr_solar->Get_Elevation();
       const float el_min = tkr_solar->Get_Elevation_Min();
       const float el_max = tkr_solar->Get_Elevation_Max();
@@ -1519,7 +1519,7 @@ if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SK
   }
 
   // --- compute el_min/el_max/elevation as you already do ---
-  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
     const float elevation = tkr_solar->Get_Elevation();
     const float el_min = tkr_solar->Get_Elevation_Min();
     const float el_max = tkr_solar->Get_Elevation_Max();
@@ -2082,9 +2082,9 @@ void mAnimatorLight::SubTask_Effects()
       // ALOG_INF(PSTR("Loop1cB7"));Serial.flush();
   if(doShow)
   {
-    yield();
     show();
     _lastShow = nowUp;
+    // yield();
   }   
   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PERFORMANCE_METRICS_SAFE_IN_RELEASE_MODE
   if ((_targetFps != FPS_UNLIMITED) && (millis() - nowUp > _frametime))
@@ -4231,6 +4231,69 @@ void mAnimatorLight::reset()
 }
 
 
+#define ENABLE_DEVFEATURE_LIGHTS__UPDATED_SHOW_RMT_FIX
+
+#ifdef ENABLE_DEVFEATURE_LIGHTS__UPDATED_SHOW_RMT_FIX
+
+void mAnimatorLight::show(void)
+{
+  // Dual-core safe re-entrancy guard
+  static portMUX_TYPE g_show_mux = portMUX_INITIALIZER_UNLOCKED;
+  static bool g_show_inflight = false;
+
+  // Acquire guard
+  portENTER_CRITICAL(&g_show_mux);
+  if (g_show_inflight) {
+    portEXIT_CRITICAL(&g_show_mux);
+    return;
+  }
+  g_show_inflight = true;
+  portEXIT_CRITICAL(&g_show_mux);
+
+  // Optional: gate here too (keeps show() self-contained safe)
+  // If you don't want this here because caller already checked, you can remove it.
+  if (!tkr_iLight->bus_manager->canAllShow()) {
+    portENTER_CRITICAL(&g_show_mux);
+    g_show_inflight = false;
+    portEXIT_CRITICAL(&g_show_mux);
+    return;
+  }
+
+  // Avoid race condition: capture _callback value (but execute while guarded)
+  show_callback callback = _callback;
+  if (callback) {
+    callback();
+  }
+
+  const unsigned long showNow = millis();
+
+  // Do the actual output
+  BusManager::show();
+
+  // Release guard ASAP after output
+  portENTER_CRITICAL(&g_show_mux);
+  g_show_inflight = false;
+  portEXIT_CRITICAL(&g_show_mux);
+
+  // FPS / timing (preserve your behaviour)
+  const unsigned long diff = showNow - _lastShow;
+  if (diff > 0) {
+    const size_t fpsCurr = (1000 << FPS_CALC_SHIFT) / diff; // fixed point math
+    _cumulativeFps = (FPS_CALC_AVG * _cumulativeFps + fpsCurr + FPS_CALC_AVG / 2) / (FPS_CALC_AVG + 1);
+    _lastShow = showNow;
+  }
+
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+  const uint32_t elapsed = millis() - tSaved_LoopTime;
+  if (elapsed > 10) Serial.printf("LoopElapsed %d(fps%d)\n\r", elapsed, 1000 / elapsed);
+  tSaved_LoopTime = millis();
+  #endif
+}
+
+#else
+
+static volatile bool g_show_inflight = false;
+
 void mAnimatorLight::show(void) 
 {  
 
@@ -4240,7 +4303,12 @@ void mAnimatorLight::show(void)
 
   unsigned long showNow = millis();
 
+  if (g_show_inflight) return;
+  g_show_inflight = true;
+
   BusManager::show();
+  
+  g_show_inflight = false;
 
   unsigned long diff = showNow - _lastShow;
   if (diff > 0) { // skip calculation if no time has passed
@@ -4261,6 +4329,7 @@ void mAnimatorLight::show(void)
   tSaved_LoopTime = millis();
   #endif
 }
+#endif
 
 /**
  * Returns a true value if any of the strips are still being updated.

@@ -3506,7 +3506,7 @@ uint16_t mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Elevation_Base(boo
 {
   if (!tkr_solar->Valid()) return DEFAULT_EFFECTS_FUNCTION;
   SEGMENT.fill(BLACK);
-
+ 
   bool use_palette   = SEGMENT.check1;
   bool is_mirrored   = SEGMENT.check2;
   bool draw_markers  = SEGMENT.check3;

@@ -98,6 +98,16 @@ typedef enum
   SENSOR_TYPE_DISTANCE_ID, // The default should be metres, so all conversions must report the unified method in metres. This means CM/MM can be calculated from this value.
   
   /**
+   * @brief Radar
+   * 
+   */ 
+  SENSOR_TYPE_DISTANCE_MOVING_ID,
+  SENSOR_TYPE_DISTANCE_STATIC_ID,
+  SENSOR_TYPE_STRENGTH_MOVING_ID,
+  SENSOR_TYPE_STRENGTH_STATIC_ID,
+  SENSOR_TYPE_DISTANCE_DETECT_ID, 
+
+  /**
    * @brief Global Position
    **/
   SENSOR_TYPE_LATITUDE_ID,
@@ -310,6 +320,12 @@ static const char* GetUnifiedSensor_NameByTypeID(uint8_t id)
     case SENSOR_TYPE_LATITUDE_ID:               return PSTR("Latitude");  
     case SENSOR_TYPE_LONGITUDE_ID:              return PSTR("Longitude");  
     case SENSOR_TYPE_ALTITUDE_ID:               return PSTR("Altitude");  
+
+    case SENSOR_TYPE_DISTANCE_MOVING_ID:               return PSTR("DistanceMoving");  
+    case SENSOR_TYPE_DISTANCE_STATIC_ID:               return PSTR("DistanceStatic");  
+    case SENSOR_TYPE_STRENGTH_MOVING_ID:               return PSTR("StrengthMoving");  
+    case SENSOR_TYPE_STRENGTH_STATIC_ID:               return PSTR("StrengthStatic");  
+    case SENSOR_TYPE_DISTANCE_DETECT_ID:               return PSTR("DistanceDetect");  
 
     case SENSOR_TYPE_VOLTAGE_ID:                return PSTR("Voltage");
     case SENSOR_TYPE_CURRENT_ID:                return PSTR("Current");

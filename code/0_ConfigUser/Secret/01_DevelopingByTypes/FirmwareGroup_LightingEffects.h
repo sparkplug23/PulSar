@@ -81,6 +81,8 @@
 
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H_MAPS
 
+#define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_PEBBLE_CONE_H_1D
+
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__BASE
@@ -9348,6 +9350,120 @@ typedef uint32_t ColourBaseType;
       "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
       "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
       #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+#endif // DEVICE_END
+
+
+
+#ifdef DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_PEBBLE_CONE_H_1D
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+  #define ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+//  /***********************************
+//   * SECTION: Sensor Configs
+//  ************************************/  
+
+//   #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+//    #define USE_MODULE_SENSORS_INTERFACE
+//    #define USE_MODULE_SENSORS_PIR
+//     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+//  #endif
+
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+  #define ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
+  #define ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+
+ 
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":2000,
+  //       "Length":1000
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":3000,
+  //       "Length":1000
+  //     }
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[     
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":1000
+      },
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1000,
+        "Length":1000
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,2000],
+        "ColourPalette":0,
+        "ColourType":3,
+        "Effects": {
+          "Function":"Solid",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 5
+      }
+    ],
+    "BrightnessRGB": 5
+  }
+  )=====";
+  #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
+  #define MAX_LED_MEMORY 64000*5
+  #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

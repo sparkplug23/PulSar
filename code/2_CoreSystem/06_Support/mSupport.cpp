@@ -633,13 +633,12 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
       if(restart_delayed_seconds_ticks > 1) restart_delayed_seconds_ticks--;
       if(restart_delayed_seconds_ticks == 0) ESP_Restart_Safe();
 
-#ifdef ENABLE_DEBUGFEATURE_RELAY__TEMP_FORCE_ON_FOR_5_MINS
-// bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 1 : 0;
-bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 0 : 1;
-pinMode(26,OUTPUT);
-digitalWrite(26,onoff);
-
-#endif
+      #ifdef ENABLE_DEBUGFEATURE_RELAY__TEMP_FORCE_ON_FOR_5_MINS
+      // bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 1 : 0;
+      bool onoff = tkr_time->uptime_seconds_nonreset < 120 ? 0 : 1;
+      pinMode(26,OUTPUT);
+      digitalWrite(26,onoff);
+      #endif
 
       #ifdef ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
         Serial.println("IP address: ");
@@ -647,10 +646,10 @@ digitalWrite(26,onoff);
       #endif // ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
 
       #ifdef ENABLE_DEBUGFEATURE_SENSORS__SPLASH_I2C_SCAN
-      if(tkr_pins->PinUsed(GPIO_I2C_SCL_ID)&&tkr_pins->PinUsed(GPIO_I2C_SDA_ID))
+      if(tkr_pins->PinUsed(GPIO_I2C_SCL)&&tkr_pins->PinUsed(GPIO_I2C_SDA))
       {
         char mqtt_data[300];
-        tkr_sup->I2cScan(mqtt_data, sizeof(mqtt_data));
+        tkr_i2c->I2cScan(mqtt_data, sizeof(mqtt_data));
         ALOG_INF(PSTR("I2C_Scan=%s"), mqtt_data);
       }
       #endif // ENABLE_DEBUGFEATURE_SENSORS__SPLASH_I2C_SCAN
@@ -738,7 +737,8 @@ digitalWrite(26,onoff);
     break;
 
     case TASK_LOG__SHOW_UPTIME:      
-      ALOG_INF(PSTR("TASK_LOG__SHOW_UPTIME Uptime %s"), tkr_time->GetUptime().c_str());
+      char buffer[40];
+      ALOG_INF(PSTR("TASK_LOG__SHOW_UPTIME Uptime %s"), tkr_time->GetUptime(buffer,sizeof(buffer)));
     break;
 
     /************

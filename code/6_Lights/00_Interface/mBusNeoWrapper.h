@@ -6,8 +6,16 @@
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 
-// #define ENABLE_FEATURE_LIGHTING__USE_NEOPIXELBUS_LIGHT_GAMMA_LG
+#ifdef ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
+
+#undef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+
+#else
+
 #define DISABLE_RMT_METHODS
+
+#endif
+
 
 
 /**
@@ -27,22 +35,13 @@
 #endif
 
 
-// #if (defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3))
-// #undef DISABLE_RMT_METHODS
-// #endif
-// #if !defined(NEOPIXEL_DISABLE_I2S1_PIXELBUS) && (defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S2))
-// #undef DISABLE_RMT_METHODS
-// #endif
-
-
-
 //Hardware SPI Pins
-#define P_8266_HS_MOSI 13
-#define P_8266_HS_CLK  14
-#define P_32_HS_MOSI   13
-#define P_32_HS_CLK    14
-#define P_32_VS_MOSI   23
-#define P_32_VS_CLK    18
+// #define P_8266_HS_MOSI 13
+// #define P_8266_HS_CLK  14
+// #define P_32_HS_MOSI   13
+// #define P_32_HS_CLK    14
+// #define P_32_VS_MOSI   23
+// #define P_32_VS_CLK    18
 
 
 // Define masks for the RGB and white channel bits
@@ -107,70 +106,6 @@ enum EM_BUS_TYPE
 #define ENABLE_PIXELBUS_8266_U1_TYPES
 #define ENABLE_PIXELBUS_8266_DM_TYPES
 
-#ifdef ENABLE_FEATURE_LIGHTING__USE_NEOPIXELBUS_LIGHT_GAMMA_LG
-#include "NeoPixelBusLg.h"
-
-/*** ESP8266 Neopixel methods ***/
-#ifdef ESP8266
-//RGB
-#ifdef ENABLE_PIXELBUS_8266_U0_TYPES
-#define PIXELBUS_8266_U0_3 NeoPixelBusLg<NeoRgbFeature, NeoEsp8266Uart0Ws2813Method, NeoGammaNullMethod> //3 chan, esp8266, gpio1
-#endif
-#ifdef ENABLE_PIXELBUS_8266_U1_TYPES
-#define PIXELBUS_8266_U1_3 NeoPixelBusLg<NeoRgbFeature, NeoEsp8266Uart1Ws2813Method, NeoGammaNullMethod> //3 chan, esp8266, gpio2
-#endif 
-#ifdef ENABLE_PIXELBUS_8266_DM_TYPES
-#define PIXELBUS_8266_DM_3 NeoPixelBusLg<NeoRgbFeature, NeoEsp8266Dma800KbpsMethod, NeoGammaNullMethod>  //3 chan, esp8266, gpio3
-#endif
-// #define PIXELBUS_8266_BB_3 NeoPixelBusLg<NeoRgbFeature, NeoEsp8266BitBang800KbpsMethod, NeoGammaNullMethod> //3 chan, esp8266, bb (any pin but 16)
-//RGBW
-#ifdef ENABLE_PIXELBUS_8266_U0_TYPES
-#define PIXELBUS_8266_U0_4 NeoPixelBusLg<NeoRgbwFeature, NeoEsp8266Uart0Ws2813Method, NeoGammaNullMethod>   //4 chan, esp8266, gpio1
-#endif 
-#ifdef ENABLE_PIXELBUS_8266_U1_TYPES
-#define PIXELBUS_8266_U1_4 NeoPixelBusLg<NeoRgbwFeature, NeoEsp8266Uart1Ws2813Method, NeoGammaNullMethod>   //4 chan, esp8266, gpio2
-#endif
-#ifdef ENABLE_PIXELBUS_8266_DM_TYPES
-#define PIXELBUS_8266_DM_4 NeoPixelBusLg<NeoRgbwFeature, NeoEsp8266Dma800KbpsMethod, NeoGammaNullMethod>    //4 chan, esp8266, gpio3
-#endif
-#endif
-
-
-/*** ESP32 Neopixel methods ***/
-#ifdef ARDUINO_ARCH_ESP32
-  //RGB
-  #ifdef DISABLE_RMT_METHODS
-  #define PIXELBUS_32_RN_3 NeoPixelBusLg<NeoRgbFeature, NeoEsp32I2s0Sk6812Method, NeoGammaNullMethod>
-  #else
-  #define PIXELBUS_32_RN_3 NeoPixelBusLg<NeoRgbFeature, NeoEsp32RmtNWs2812xMethod, NeoGammaNullMethod>
-  #endif
-  #define PIXELBUS_32_I0_3 NeoPixelBusLg<NeoRgbFeature, NeoEsp32I2s0Sk6812Method, NeoGammaNullMethod>//NeoEsp32I2s0800KbpsMethod>NeoEsp32I2s0800KbpsMethod>
-  #define PIXELBUS_32_I1_3 NeoPixelBusLg<NeoRgbFeature, NeoEsp32I2s1Sk6812Method, NeoGammaNullMethod>
-  #define PIXELBUS_32_I1_3P NeoPixelBusLg<NeoRgbFeature, NeoEsp32I2s1X8Ws2812xMethod, NeoGammaNullMethod>
-  #define PIXELBUS_32_I0_3P NeoPixelBusLg<NeoRgbFeature, NeoEsp32I2s0X16Ws2812xMethod, NeoGammaNullMethod>
-  //RGBW
-  #ifdef DISABLE_RMT_METHODS
-  #define PIXELBUS_32_RN_4 NeoPixelBusLg<NeoRgbwFeature, NeoEsp32I2s0Sk6812Method, NeoGammaNullMethod>
-  #else
-  #define PIXELBUS_32_RN_4 NeoPixelBusLg<NeoRgbwFeature, NeoEsp32RmtNSk6812Method, NeoGammaNullMethod>
-  #endif
-  #define PIXELBUS_32_I0_4 NeoPixelBusLg<NeoRgbwFeature, NeoEsp32I2s0Sk6812Method, NeoGammaNullMethod>
-  #define PIXELBUS_32_I1_4 NeoPixelBusLg<NeoRgbwFeature, NeoEsp32I2s1Sk6812Method, NeoGammaNullMethod>
-  #define PIXELBUS_32_I1_4P NeoPixelBusLg<NeoRgbwFeature, NeoEsp32I2s1X8Sk6812Method, NeoGammaNullMethod>
-  #define PIXELBUS_32_I0_4P NeoPixelBusLg<NeoRgbwFeature, NeoEsp32I2s0X16Sk6812Method, NeoGammaNullMethod>
-  //RGBWW (WS2805)
-  #define PIXELBUS_32_RN_5 NeoPixelBusLg<NeoRgbwwFeature, NeoEsp32I2s0Ws2805Method, NeoGammaNullMethod> // No RMT method
-  #define PIXELBUS_32_I0_5 NeoPixelBusLg<NeoRgbwwFeature, NeoEsp32I2s0Ws2805Method, NeoGammaNullMethod>
-  #define PIXELBUS_32_I1_5 NeoPixelBusLg<NeoRgbwwFeature, NeoEsp32I2s1Ws2805Method, NeoGammaNullMethod>
-  #define PIXELBUS_32_I1_5P NeoPixelBusLg<NeoRgbwwFeature, NeoEsp32I2s1X8Ws2805Method, NeoGammaNullMethod>
-  #define PIXELBUS_32_I0_5P NeoPixelBusLg<NeoRgbwwFeature, NeoEsp32I2s0X16Ws2805Method, NeoGammaNullMethod>
-  //400Kbps
-  #define PIXELBUS_32_RN_400_3 NeoPixelBusLg<NeoRgbFeature, NeoEsp32RmtN400KbpsMethod, NeoGammaNullMethod>
-  #define PIXELBUS_32_I0_400_3 NeoPixelBusLg<NeoRgbFeature, NeoEsp32I2s0400KbpsMethod, NeoGammaNullMethod>
-  #define PIXELBUS_32_I1_400_3 NeoPixelBusLg<NeoRgbFeature, NeoEsp32I2s1400KbpsMethod, NeoGammaNullMethod>
-#endif
-
-#else
 #include "NeoPixelBus.h"
 
 
@@ -242,8 +177,6 @@ enum EM_BUS_TYPE
 #endif
 
 
-// #endif
-
 
 // /*** ESP32 Neopixel methods ***/
 // #ifdef ESP32
@@ -297,6 +230,7 @@ enum EM_BUS_TYPE
     //RGB
     #ifdef DISABLE_RMT_METHODS
     #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1800KbpsMethod>
+    #error "stop this"
     #else
     #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoEsp32RmtNWs2812xMethod>
     #endif
@@ -332,7 +266,6 @@ enum EM_BUS_TYPE
 
 #endif // ESP32
 
-#endif
 
 // 48bit & 64bit to 24bit & 32bit RGB(W) conversion
 #define toRGBW32(c) (RGBW32((c>>40)&0xFF, (c>>24)&0xFF, (c>>8)&0xFF, (c>>56)&0xFF))
@@ -390,7 +323,7 @@ class PolyBus
 
   static void begin(void* busPtr, uint8_t busType, uint8_t* pins) 
   {
-    
+    Serial.printf("========================BEGIN: busType=%u pin=%u\n", busType, pins ? pins[0] : 255);
     #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
     DEBUG_PRINTF("PolyBus::begin busPtr UNSET, busType %d, pin[0] %d\n\r", busType, pins[0]);
     #endif
@@ -436,9 +369,9 @@ class PolyBus
 
   static void* create(uint8_t busType, uint8_t* pins, uint16_t len, uint8_t channel) 
   {
-    #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
+    // #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
     DEBUG_PRINTF("PolyBus::create busType %d, pin[0] %d, len %d, channel %d\n\r", busType, pins[0], len, channel);
-    #endif
+    // #endif
         
     #ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
       total_virtual_length = len;  // whatever variable holds total LED count
@@ -459,7 +392,10 @@ class PolyBus
       #ifdef DISABLE_RMT_METHODS
       case BUSTYPE__32_RN_3__ID: busPtr = new PIXELBUS_32_I0_3(len, pins[0]); break;
       #else
-      case BUSTYPE__32_RN_3__ID: busPtr = new PIXELBUS_32_RN_3(len, pins[0], (NeoBusChannel)channel); break;
+      case BUSTYPE__32_RN_3__ID: 
+        Serial.printf("CREATE RN: busType=%u pin=%u len=%u channel(arg)=%u\n", busType, pins[0], len, channel);
+        busPtr = new PIXELBUS_32_RN_3(len, pins[0], (NeoBusChannel)channel); 
+      break;
       #endif
       #ifdef DISABLE_RMT_METHODS
       case BUSTYPE__32_RN_4__ID: busPtr = new PIXELBUS_32_RN_4(len, pins[0]); break;
@@ -492,9 +428,9 @@ class PolyBus
     }
       
 
-    #ifndef ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
-    begin(busPtr, busType, pins);
-    #endif
+    // #ifndef ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+    // begin(busPtr, busType, pins);
+    // #endif
     
     return busPtr;
   };
@@ -517,7 +453,7 @@ class PolyBus
       case BUSTYPE__8266_DM_4__ID: (static_cast<PIXELBUS_8266_DM_4*>(busPtr))->Show(consistent); break;
     #endif
     #ifdef ARDUINO_ARCH_ESP32
-      case BUSTYPE__32_RN_3__ID: (static_cast<PIXELBUS_32_RN_3*>(busPtr))->Show(consistent);   
+      case BUSTYPE__32_RN_3__ID: (static_cast<PIXELBUS_32_RN_3*>(busPtr))->Show(consistent);   break;
       case BUSTYPE__32_RN_4__ID: (static_cast<PIXELBUS_32_RN_4*>(busPtr))->Show(consistent); break;  
       case BUSTYPE__32_RN_5__ID: (static_cast<PIXELBUS_32_RN_5*>(busPtr))->Show(consistent); break;
       #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
@@ -1286,6 +1222,7 @@ static uint32_t getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uint8
                             offset_method_inside_group = num - 7;
                         }
                         #warning "RMT methods cause flickering on ESP32, use I2S methods instead -- needs debugging"
+                        Serial.printf("Bus getI RMT: num%d, offset%d\n\r",num,offset_method_inside_group);
                     #else
                     #error "2024: No method defined"
                     #endif

@@ -49,6 +49,7 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case TASK_EVERY_SECOND:
       BmpRead();
+      ShowSensor_AddLog();
     break;
     case TASK_SENSOR_SHOW_LATEST_LOGGED_ID:
       ShowSensor_AddLog();

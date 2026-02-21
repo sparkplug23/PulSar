@@ -27,10 +27,12 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
      * PERIODIC SECTION * 
     *******************/
     case TASK_EVERY_SECOND:    
+      
       #ifdef ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
-      ALOG_INF(PSTR("Uptime: %s"), GetUptime().c_str());
-      // Serial.println(GetUptime().c_str());
+      char up[16];
+      ALOG_INF(PSTR("Uptime: %s"), tkr_time->GetUptime(up, sizeof(up)));
       #endif
+
       
       if(tkr_interface_network->Network_HasExternalConnectivity())
       {
@@ -228,15 +230,28 @@ String mTime::GetTimeZone(void)
 }
 
 
-String mTime::GetDuration(uint32_t time) 
+// String mTime::GetDuration(uint32_t time) 
+// {
+//   char dt[16];
+//   datetime_t ut;
+//   BreakTime(time, ut);
+//   // "P128DT14H35M44S" - ISO8601:2004 - https://en.wikipedia.org/wiki/ISO_8601 Durations
+//   snprintf_P(dt, sizeof(dt), PSTR("%dT%02d:%02d:%02d"), ut.days, ut.hour, ut.minute, ut.second);
+//   return String(dt);  // 128T14:35:44
+// }
+bool mTime::GetDuration(char* out, size_t out_len, uint32_t seconds)
 {
-  char dt[16];
+  // "128T14:35:44" worst case fits easily in <16, you used 16 already
+  if (!out || out_len < 16) { if(out && out_len) out[0]=0; return false; }
+
   datetime_t ut;
-  BreakTime(time, ut);
-  // "P128DT14H35M44S" - ISO8601:2004 - https://en.wikipedia.org/wiki/ISO_8601 Durations
-  snprintf_P(dt, sizeof(dt), PSTR("%dT%02d:%02d:%02d"), ut.days, ut.hour, ut.minute, ut.second);
-  return String(dt);  // 128T14:35:44
+  BreakTime(seconds, ut);
+  int n = snprintf(out, out_len, "%uT%02u:%02u:%02u",
+                   (unsigned)ut.days, (unsigned)ut.hour, (unsigned)ut.minute, (unsigned)ut.second);
+  if (n < 0 || (size_t)n >= out_len) { out[0]=0; return false; }
+  return true;
 }
+
 
 
 String mTime::GetDT(uint32_t time) 
@@ -293,16 +308,107 @@ String mTime::GetTimeStr(uint32_t time, bool include_day_of_week)
 
 }
 
-// might be same as above, possible phase out
-String mTime::formatTimeUntil(double time_until_seconds) {
-    int hours = static_cast<int>(time_until_seconds) / 3600;
-    int minutes = (static_cast<int>(time_until_seconds) % 3600) / 60;
-    int seconds = static_cast<int>(time_until_seconds) % 60;
 
-    char buffer[9]; // HH:MM:SS is 8 characters + null terminator
-    snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", hours, minutes, seconds);
-    return String(buffer);
+
+
+
+// -----------------------------------------------------------------------------
+// FormatTime (no-heap)
+// - Writes UTC timestamp into caller buffer.
+// - Output: "YYYY-MM-DD HH:MM:SS" (19 chars + null)
+// - Returns true on success, false if buffer too small or gmtime fails.
+// -----------------------------------------------------------------------------
+bool mTime::FormatTime(char* out, size_t out_len, time_t t)
+{
+  if (!out || out_len < 20) { // 19 + '\0'
+    if (out && out_len) out[0] = '\0';
+    return false;
+  }
+
+  // gmtime_r is thread-safe / re-entrant. On ESP32/newlib it exists.
+  struct tm tm_utc;
+  if (!gmtime_r(&t, &tm_utc)) {
+    out[0] = '\0';
+    return false;
+  }
+
+  // YYYY-MM-DD HH:MM:SS
+  int n = snprintf(out, out_len, "%04d-%02d-%02d %02d:%02d:%02d",
+                   tm_utc.tm_year + 1900,
+                   tm_utc.tm_mon + 1,
+                   tm_utc.tm_mday,
+                   tm_utc.tm_hour,
+                   tm_utc.tm_min,
+                   tm_utc.tm_sec);
+
+  if (n < 0 || (size_t)n >= out_len) {
+    out[0] = '\0';
+    return false;
+  }
+
+  return true;
 }
+
+
+// -----------------------------------------------------------------------------
+// mTime::formatTimeCTime (no-heap)
+// - Formats like ctime(): "Wed Jun 30 21:49:08 1993" (no trailing '\n')
+// -----------------------------------------------------------------------------
+bool mTime::formatTimeCTime(char* out, size_t out_len, time_t t)
+{
+  if (!out || out_len < 2) {
+    if (out && out_len) out[0] = '\0';
+    return false;
+  }
+
+  const char* s = ctime(&t);     // static internal buffer
+  if (!s) {
+    out[0] = '\0';
+    return false;
+  }
+
+  // Copy, stripping trailing newline if present
+  size_t i = 0;
+  for (; i + 1 < out_len && s[i] && s[i] != '\n' && s[i] != '\r'; ++i) {
+    out[i] = s[i];
+  }
+  out[i] = '\0';
+  return true;
+}
+
+
+// -----------------------------------------------------------------------------
+// mTime::formatTimeUntil (no-heap)
+// - Writes "HH:MM:SS" into caller buffer.
+// - Returns true on success.
+// -----------------------------------------------------------------------------
+bool mTime::formatTimeUntil(char* out, size_t out_len, uint32_t time_until_seconds)
+{
+  if (!out || out_len < 9) { // "HH:MM:SS" + '\0'
+    if (out && out_len) out[0] = '\0';
+    return false;
+  }
+
+  uint32_t hours   = time_until_seconds / 3600UL;
+  uint32_t minutes = (time_until_seconds % 3600UL) / 60UL;
+  uint32_t seconds = time_until_seconds % 60UL;
+
+  // If you want to clamp hours to 2 digits (00-99), uncomment:
+  // if (hours > 99) hours = 99;
+
+  int n = snprintf(out, out_len, "%02lu:%02lu:%02lu",
+                   (unsigned long)hours,
+                   (unsigned long)minutes,
+                   (unsigned long)seconds);
+
+  if (n < 0 || (size_t)n >= out_len) {
+    out[0] = '\0';
+    return false;
+  }
+
+  return true;
+}
+
 
 
 
@@ -380,10 +486,16 @@ uint32_t mTime::MinutesUptime(void)
 }
 
 
-String mTime::GetUptime(void) 
+// String mTime::GetUptime(void) 
+// {
+//   return GetDuration(UpTime());
+// }
+const char* mTime::GetUptime(char* out, size_t out_len)
 {
-  return GetDuration(UpTime());
+  GetDuration(out, out_len, UpTime());
+  return out;
 }
+
 
 
 uint32_t mTime::MinutesPastMidnight(void) 

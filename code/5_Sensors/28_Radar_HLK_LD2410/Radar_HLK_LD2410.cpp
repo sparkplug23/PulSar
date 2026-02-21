@@ -248,7 +248,6 @@ void mHLK_LD2410::Ld1410HandleTargetData(void) {
       ALOG_DBM(PSTR(D_LOG_LD2410 "No target"));
     }
 
-
     rt.web_engin_mode = rt.buffer[6]==1?1:0;
     if (0x01 == rt.buffer[6]) { /* Engineering mode*/
       if (rt.buffer[17] < 9) {

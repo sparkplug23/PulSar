@@ -119,11 +119,28 @@ class mHLK_LD2410 :
 
     uint8_t GetSensorCount(void) override
     {
-      return 0;
-    }
+      return module_state.devices;
+    }    
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
+        if(index >= module_state.devices) {value->sensor_type.push_back(0); return ;}
+        value->timestamp = millis();
+
+        value->sensor_type.push_back(SENSOR_TYPE_DISTANCE_MOVING_ID);
+        value->data_f.push_back(rt.moving_distance);
+        value->sensor_type.push_back(SENSOR_TYPE_DISTANCE_STATIC_ID);
+        value->data_f.push_back(rt.static_distance);
+        value->sensor_type.push_back(SENSOR_TYPE_STRENGTH_MOVING_ID);
+        value->data_f.push_back(rt.moving_energy);
+        value->sensor_type.push_back(SENSOR_TYPE_STRENGTH_STATIC_ID);
+        value->data_f.push_back(rt.static_energy);
+        value->sensor_type.push_back(SENSOR_TYPE_DISTANCE_DETECT_ID);
+        value->data_f.push_back(rt.detect_distance);
+
+        value->sensor_id = index;
     };
+
+
 
     
     /************************************************************************************************

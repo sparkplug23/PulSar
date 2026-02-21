@@ -224,6 +224,11 @@ void mWiFi::WiFi_Sta_ProfileIndex_Connect(uint8_t profile_i)
   // Ensure STA mode
   WiFi.mode(WIFI_STA);
 
+  #ifdef ENABLE_DEBUGFEATURE_WIFI__SUPERMINI_REDUCE_WIFI_BAD_ANTENNA_HARDWARE
+  esp_wifi_set_max_tx_power(40); 
+  #endif
+
+
   #ifdef ESP8266
     // ESP8266 hostname must be set after WiFi.mode(WIFI_STA)
     WiFi.hostname(tkr_set->runtime.my_hostname);

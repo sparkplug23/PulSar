@@ -502,6 +502,10 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "5_Sensors/22_SunTracking/mSunTracking.h"
   #define   tkr_solar                             static_cast<mSunTracking*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID))
 #endif
+#if defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+  #include "5_Sensors/22b_SunTracking/mSunTracking.h"
+  #define   tkr_solar                             static_cast<mSunTracking*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID))
+#endif
 #ifdef USE_MODULE_SENSORS_ULTRASONICS
   #include "5_Sensors/UltraSonic/mUltraSonicSensor.h"
   #define tkr_ult                             static_cast<mUltraSonicSensor*>(tkr->pModule[EM_MODULE_SENSORS_ULTRASONIC_ID])

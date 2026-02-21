@@ -186,14 +186,14 @@ class mTime :
     String GetSyslogDate(char* mxtime);
     String GetDate(void);
     String GetMinuteTime(uint32_t minutes);
-    String GetTimeZone(void);
-    String GetDuration(uint32_t time);
+    String GetTimeZone(void);    
+    bool GetDuration(char* out, size_t out_len, uint32_t seconds);
     String GetDT(uint32_t time);
     String GetDateAndTime(uint8_t time_type);
     String GetTime(uint8_t time_type = DT_LOCAL);
     uint32_t UpTime(void);
     uint32_t MinutesUptime(void);
-    String GetUptime(void);
+    const char* GetUptime(char* out, size_t out_len);
     uint32_t MinutesPastMidnight(void);
     uint32_t SecondsPastMidnight_SecondsOfCurrentDay(void);
     uint32_t RtcMillis(void);
@@ -222,7 +222,11 @@ class mTime :
     static uint32_t MillisElapsed(uint32_t tSaved);
 
     String GetTimeStr(uint32_t time, bool include_day_of_week = false);
-    String formatTimeUntil(double time_until_seconds);
+    
+    bool FormatTime(char* out, size_t out_len, time_t t);
+    bool formatTimeUntil(char* out, size_t out_len, uint32_t time_until_seconds);
+    bool formatTimeCTime(char* out, size_t out_len, time_t t);
+
     
     time_t GetStartOfDayUTC(time_t utc_time);
 

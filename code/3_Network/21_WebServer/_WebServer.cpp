@@ -177,6 +177,10 @@ void mWebServer::HandlePage_SystemControls(AsyncWebServerRequest *request)
 
 void mWebServer::HandlePage_SystemControls_C1(AsyncWebServerRequest *request)
 {
+
+  // DELETED METHOD??
+
+
   AsyncResponseStream *response = request->beginResponseStream(FPSTR(PM_WEB_CONTENT_TYPE_TEXT_HTML));
   if (!response) { request->send(500); return; }
   setStaticContentCacheHeaders(response, 200, 0);

@@ -10,7 +10,8 @@ void MQTTConnection::MqttConnected(void)
   cConnectionAttempts = 0; // reset
 
   char lwt_message_ondisconnect_ctr[200];
-  sprintf_P(lwt_message_ondisconnect_ctr, PM_MQTT_LWT_PAYLOAD_FORMATED, tkr_sup->GetResetReason().c_str(), tkr_time->GetUptime().c_str() );
+  char buffer[40];
+  sprintf_P(lwt_message_ondisconnect_ctr, PM_MQTT_LWT_PAYLOAD_FORMATED, tkr_sup->GetResetReason().c_str(), tkr_time->GetUptime(buffer,sizeof(buffer)) );
   
   #ifdef ENABLE_MQTT_SEND_DISCONNECT_ON_RECONNECT // Show disconnect occured if we have reconnected inside timeout
     char lwt_topic[50];
@@ -119,7 +120,8 @@ void MQTTConnection::MqttReconnect(void){ DEBUG_PRINT_FUNCTION_NAME;
   
   // Generate will message
   char lwt_message_ondisconnect_ctr[200];
-  sprintf_P(lwt_message_ondisconnect_ctr, PM_MQTT_LWT_PAYLOAD_FORMATED, tkr_sup->GetResetReason().c_str(), tkr_time->GetUptime().c_str());
+  char buffer[40];
+  sprintf_P(lwt_message_ondisconnect_ctr, PM_MQTT_LWT_PAYLOAD_FORMATED, tkr_sup->GetResetReason().c_str(), tkr_time->GetUptime(buffer,sizeof(buffer)));
 
   char lwt_topic[50];
   snprintf_P(lwt_topic, sizeof(lwt_topic), PM_MQTT_LWT_TOPIC_FORMATED, tkr_set->Settings.system_name.device);

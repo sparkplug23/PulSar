@@ -139,7 +139,7 @@ void mServerResetRelays::SubTask_UpdateOLED()
 
   memset(buffer,0,sizeof(buffer));
   // sprintf(buffer, "U:");
-  sprintf(&buffer[0], "%s", tkr_time->GetUptime().c_str());
+  sprintf(&buffer[0], "%s", tkr_time->GetUptime(buffer,sizeof(buffer)));
   tkr_iDisp->LogBuffer_AddRow(buffer, 0);
 
   memset(buffer,0,sizeof(buffer));

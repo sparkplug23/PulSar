@@ -35,10 +35,11 @@ uint8_t mTelemetry::ConstructJSON_LWT_Online(uint8_t json_level, bool json_appen
 
 uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending)
 {
+  char buffer[30];
 
   JBI->Start();
     JBI->Add(PM_TIME,           tkr_time->GetTime().c_str());
-    JBI->Add(PM_UPTIME,         tkr_time->GetUptime().c_str());
+    JBI->Add(PM_UPTIME,         tkr_time->GetUptime(buffer, sizeof(buffer)));
     JBI->Add(PM_UPSECONDS,      tkr_time->UpTime());
     JBI->Add(PM_SLEEPMODE,      tkr_set->runtime.sleep ? "Dynamic" : "Unknown");
     JBI->Add(PM_SLEEP,          tkr_set->runtime.sleep); // typ. 20
@@ -550,10 +551,12 @@ uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level, bool json_appending
 uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level, bool json_appending)
 {
 
+  char buffer[30];
+
   IPAddress localip = WiFi.localIP();
   
   JBI->Start();
-    JBI->Add(PM_UPTIME,         tkr_time->GetUptime().c_str());// PSTR("\"%02dT%02d:%02d:%02d\""), tkr_time->uptime.day_of_year,tkr_time->uptime.hour,tkr_time->uptime.minute,tkr_time->uptime.second);
+    JBI->Add(PM_UPTIME,         tkr_time->GetUptime(buffer, sizeof(buffer)));// PSTR("\"%02dT%02d:%02d:%02d\""), tkr_time->uptime.day_of_year,tkr_time->uptime.hour,tkr_time->uptime.minute,tkr_time->uptime.second);
     JBI->Add(PM_UPSECONDS,      tkr_time->UpTime());//uptime_seconds_nonreset);
     JBI->Add(PM_SLEEP,          tkr_sup->loop_delay_temp);
     JBI->Add(PM_LOOPSSEC,       tkr_sup->activity.cycles_per_sec);
@@ -1089,7 +1092,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t jso
   //     JBI->Add("user_time_entry",tkr_time->Rtc.user_time_entry);
   //     JBI->Add("ntp_last_active_secs", (millis()-tkr_time->Rtc.ntp_last_active)/1000);
   //     JBI->Add("last_sync_secs", (tkr_time->Rtc.utc_time-tkr_time->Rtc.last_sync)/1000);
-  //     JBI->Add("GetUptime",tkr_time->GetUptime().c_str());
+  //     JBI->Add("GetUptime",tkr_time->GetUptime(buffer,sizeof(buffer)));
   //     JBI->Object_Start("DST");
   //       JBI->Add("IsDst", tkr_time->IsDst());
   //       int32_t dstoffset = tkr_set->Settings.toffset[1] * tkr_time->SECS_PER_MIN;
