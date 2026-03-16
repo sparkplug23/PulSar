@@ -15,7 +15,7 @@
 
 //    ;;;;;;;;;;;; ESP32 ;;;;;;;;;;;;;;;;
 // #define DEVICE_TESTGROUP__HVAC__OIL_RADIATOR_01                               // original, no parallel
-
+// #define DEVICE_MEADOWS__OFFICE__HVAC1X_DESK
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -57,7 +57,7 @@
   #define USE_MODULE_SENSORS_INTERFACE  
     #
   #define USE_MODULE_SENSORS_BME
-  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  #define USE_MODULE_SENSORS_DS18X20
   #define USE_MODULE_SENSORS_REMOTE_DEVICE
 
   #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
@@ -87,7 +87,7 @@
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      #ifdef USE_MODULE_SENSORS_DS18X20
       "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR     "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
@@ -232,7 +232,7 @@
     #define USE_MODULE_SENSORS_BME
   #endif
 
-  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  #define USE_MODULE_SENSORS_DS18X20
 
   /***********************************
    * SECTION: Display Configs
@@ -293,7 +293,7 @@
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      #ifdef USE_MODULE_SENSORS_DS18X20
       "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR     "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
@@ -380,6 +380,76 @@
 #endif
 
 
+/**
+ * @brief 
+ * New aliexpress bought 30A relay esp32 boards. To be used for electric heaters.
+ * Button on top will toggle power, hold = 30 minutes.
+ */
+#ifdef DEVICE_MEADOWS__OFFICE__HVAC1X_DESK
+#ifndef DEVICENAME_CTR
+#define DEVICENAME_CTR          "template"
+#endif
+#ifndef DEVICENAME_FRIENDLY_CTR
+#define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+#endif
+#ifndef DEVICENAME_DESCRIPTION_CTR
+#define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+#endif
+#define DEVICENAME_ROOMHINT_CTR "testgroup"
+#define MQTT_HOST   "192.168.3.70"
+   
+ /***********************************
+  * SECTION: Features
+ ************************************/  
+
+ #define ENABLE_TEMPLATE_SECTION__DRIVERS__RELAYS
+//  #define ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
+
+ /***********************************
+  * SECTION: Features
+ ************************************/  
+
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+        
+  #ifdef ENABLE_TEMPLATE_SECTION__DRIVERS__RELAYS
+   #define USE_MODULE_DRIVERS_INTERFACE
+   #define USE_MODULE_DRIVERS_RELAY
+  #endif
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS   
+  #endif 
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      #endif  
+      "\"4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\"" 
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif
 
 
 

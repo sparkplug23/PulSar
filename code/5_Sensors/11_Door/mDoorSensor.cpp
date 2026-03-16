@@ -22,7 +22,7 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -39,8 +39,11 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
       // }
 
     break;
-    case TASK_SENSOR_SHOW_LATEST_LOGGED_ID:
-      ShowSensor_AddLog();
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case TASK_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
@@ -49,74 +52,55 @@ int8_t mDoorSensor::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT    
-    /************
-     * WEBPAGE SECTION * 
-    *******************/
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case TASK_WEB_ADD_ROOT_TABLE_ROWS:
-      WebAppend_Root_Status_Table_Draw();
-      break;
-    case TASK_WEB_APPEND_ROOT_STATUS_TABLE_IFCHANGED:
-      WebAppend_Root_Status_Table_Data();
-      break;
-    #endif //USE_MODULE_NETWORK_WEBSERVER
+    #endif //USE_MODULE_NETWORK_MQTT
   }
 
 } // END function
 
 
-
-void mDoorSensor::Pre_Init(void){
+void mDoorSensor::Pre_Init(void)
+{
+  module_state.mode = ModuleStatus::Initialising;
+  module_state.devices = 0;
   
-  settings.fEnableSensor = false;
+}
 
-  if(tkr_pins->PinUsed(GPIO_DOOR_OPEN_ID)) {  // not set when 255
-    // pin_open = tkr_pins->GetPin(GPIO_DOOR_OPEN_ID);
-    pinMode(tkr_pins->GetPin(GPIO_DOOR_OPEN_ID), INPUT_PULLUP);
-    settings.fEnableSensor = true;
-    settings.fSensorCount = 1;
-  }else{
-    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),tkr_pins->GetPin(GPIO_DOOR_OPEN_ID));
-    //disable pir code
-  }
-
-
-  if(tkr_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
+void mDoorSensor::Init(void)
+{
+  
+  if (tkr_pins->PinUsed(GPIO_DOOR_OPEN))
   {
-    pinMode(tkr_pins->GetPin(GPIO_DOOR_LOCK_ID), INPUT_PULLUP);
-    settings.fEnableSensor = true;
-    settings.fSensorCount = 1;
-  }else{
-    AddLog(LOG_LEVEL_ERROR,PSTR(D_LOG_PIR "Pin Invalid %d"),tkr_pins->GetPin(GPIO_DOOR_LOCK_ID));
-    //disable pir code
+    pinMode(tkr_pins->GetPin(GPIO_DOOR_OPEN), INPUT_PULLUP);
+    module_state.devices++;
+  }
+  else
+  {
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PIR "Pin Invalid %d"), tkr_pins->GetPin(GPIO_DOOR_OPEN));
   }
 
-}
+  if (tkr_pins->PinUsed(GPIO_DOOR_LOCK))
+  {
+    pinMode(tkr_pins->GetPin(GPIO_DOOR_LOCK), INPUT_PULLUP);
+    module_state.devices++;
+  }
+  else
+  {
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PIR "Pin Invalid %d"), tkr_pins->GetPin(GPIO_DOOR_LOCK));
+  }
 
-/**
- * @brief "LOW" is closed, HIGH is open
- * 
- * @return uint8_t 
- */
-uint8_t mDoorSensor::IsDoorOpen(){
-  return (digitalRead(tkr_pins->GetPin(GPIO_DOOR_OPEN_ID))==HIGH);
-}
-uint8_t mDoorSensor::IsLock_Locked(){
-  return (digitalRead(tkr_pins->GetPin(GPIO_DOOR_LOCK_ID))==LOW);
-}
-
-
-void mDoorSensor::init(void){
+  if(module_state.devices)
+  {
+    module_state.mode = ModuleStatus::Running;
+  }
 
   door_detect.state = IsDoorOpen();
   lock_detect.state = IsLock_Locked();
@@ -125,60 +109,97 @@ void mDoorSensor::init(void){
 
 
 
-void mDoorSensor::EveryLoop(){
 
+/**
+ * @brief "LOW" is closed, HIGH is open
+ * 
+ * @return uint8_t 
+ */
+uint8_t mDoorSensor::IsDoorOpen(){
+  return (digitalRead(tkr_pins->GetPin(GPIO_DOOR_OPEN))==HIGH);
+}
+uint8_t mDoorSensor::IsLock_Locked(){
+  return (digitalRead(tkr_pins->GetPin(GPIO_DOOR_LOCK))==LOW);
+}
+
+
+
+void mDoorSensor::EveryLoop()
+{
   /**
    * @brief Reed Switch Door Position
    **/
-  if((IsDoorOpen()!=door_detect.state)&&mTime::TimeReachedNonReset(&door_detect.tDetectTimeforDebounce,100)){
-
+  if ((IsDoorOpen() != door_detect.state) && mTime::TimeReachedNonReset(&door_detect.tDetectTimeforDebounce, 100))
+  {
     ALOG_TST(PSTR("IsDoorOpen()"));
 
     door_detect.state = IsDoorOpen();
     door_detect.tDetectTimeforDebounce = millis();
-    if(door_detect.state){ 
-      door_detect.isactive = true;
-      door_detect.detected_time = tkr_time->GetTimeShortNow();
-      tkr_rules->NewEventRun( GetModuleUniqueID(), TASK_EVENT_MOTION_STARTED_ID, 0, door_detect.isactive);
-    }else{ 
-      door_detect.isactive = false;
-      tkr_rules->NewEventRun( GetModuleUniqueID(), TASK_EVENT_MOTION_ENDED_ID, 0, door_detect.isactive);
-    }
     door_detect.ischanged = true;
-    mqtthandler_sensor_ifchanged.flags.SendNow = true;
-    mqtthandler_sensor_teleperiod.flags.SendNow = true;
 
+    if (door_detect.state)
+    {
+      door_detect.isactive = true;
+      door_detect.tDetectTime = millis();
+      door_detect.detected_time = tkr_time->LocalTime();
+
+      tkr_rules->NewEventRun(GetModuleUniqueID(), TASK_EVENT_MOTION_STARTED_ID, 0, door_detect.isactive);
+    }
+    else
+    {
+      door_detect.isactive = false;
+      door_detect.tEndedTime = millis();
+      door_detect.detected_time = tkr_time->LocalTime();
+
+      tkr_rules->NewEventRun(GetModuleUniqueID(), TASK_EVENT_MOTION_ENDED_ID, 0, door_detect.isactive);
+    }
+
+    mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  }
+  else
+  {
+    door_detect.ischanged = false;
   }
 
   /**
-   * @brief Door lock  
+   * @brief Door lock
    **/
-  if((IsLock_Locked()!=lock_detect.state)&&mTime::TimeReachedNonReset(&lock_detect.tDetectTimeforDebounce,100)){
-
+  if (tkr_pins->PinUsed(GPIO_DOOR_LOCK) &&
+      (IsLock_Locked() != lock_detect.state) &&
+      mTime::TimeReachedNonReset(&lock_detect.tDetectTimeforDebounce, 100))
+  {
     ALOG_TST(PSTR("IsLock_Locked()"));
 
     lock_detect.state = IsLock_Locked();
     lock_detect.tDetectTimeforDebounce = millis();
-    if(lock_detect.state){ 
-      lock_detect.isactive = true;
-      lock_detect.detected_time = tkr_time->GetTimeShortNow();
-      tkr_rules->NewEventRun( GetModuleUniqueID(), TASK_EVENT_MOTION_STARTED_ID, 1, lock_detect.isactive);
-    }else{ 
-      lock_detect.isactive = false;
-      tkr_rules->NewEventRun( GetModuleUniqueID(), TASK_EVENT_MOTION_ENDED_ID, 1, lock_detect.isactive);
-    }
     lock_detect.ischanged = true;
+
+    if (lock_detect.state)
+    {
+      lock_detect.isactive = true;
+      lock_detect.detected_time = tkr_time->LocalTime();
+
+      tkr_rules->NewEventRun(GetModuleUniqueID(), TASK_EVENT_MOTION_STARTED_ID, 1, lock_detect.isactive);
+    }
+    else
+    {
+      lock_detect.isactive = false;
+      lock_detect.detected_time = tkr_time->LocalTime();
+
+      tkr_rules->NewEventRun(GetModuleUniqueID(), TASK_EVENT_MOTION_ENDED_ID, 1, lock_detect.isactive);
+    }
+
     mqtthandler_sensor_ifchanged.flags.SendNow = true;
-    mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
   }
-
-
-
+  else
+  {
+    lock_detect.ischanged = false;
+  }
 }
 
 
-const char* mDoorSensor::IsDoorOpen_Ctr(char* buffer, uint8_t buflen){
+const char* mDoorSensor::IsDoorOpen_Ctr(char* buffer, uint8_t buflen)
+{
   if(door_detect.isactive){
     snprintf_P(buffer, buflen, PM_EVENT_DOOR_OPENED_CTR, sizeof(PM_EVENT_DOOR_OPENED_CTR));
   }else{
@@ -186,17 +207,6 @@ const char* mDoorSensor::IsDoorOpen_Ctr(char* buffer, uint8_t buflen){
   }
   return buffer;
 }
-
-
-void mDoorSensor::ShowSensor_AddLog()
-{
-  
-  ConstructJSON_Sensor(JSON_LEVEL_SHORT);
-  ALOG_INF(PSTR(D_LOG_BME "\"%s\""),JBI->GetBufferPtr());
-
-}
-
-
 
   
 /******************************************************************************************************************
@@ -212,39 +222,44 @@ void mDoorSensor::ShowSensor_AddLog()
 uint8_t mDoorSensor::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    //JBI->Add_P(PM_SENSORCOUNT, settings.);
+    JBI->Add(D_DEVICES, module_state.devices);
   return JBI->End();
 
 }
 
 
-uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
-  
-  char buffer[50];
+uint8_t mDoorSensor::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
+{
+  char buffer[80];
 
   JBI->Start();
-  JBI->Add(D_LOCATION, DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),0,buffer,sizeof(buffer)));
-  JBI->Add("Position", IsDoorOpen_Ctr(buffer, sizeof(buffer))); // give telemetry update of position
-  
-  if(json_level >= JSON_LEVEL_IFCHANGED){
-    JBI->Add(D_TIME, mTime::ConvertShortTimetoCtr(&door_detect.detected_time, buffer, sizeof(buffer)));
+
+  JBI->Add(D_LOCATION, DLI->GetDeviceName_WithModuleUniqueID(GetModuleUniqueID(), 0, buffer, sizeof(buffer)));
+  JBI->Add("Position", IsDoorOpen_Ctr(buffer, sizeof(buffer)));
+
+  if (json_level >= JSON_LEVEL_IFCHANGED)
+  {
+    JBI->Add(D_TIME, tkr_time->GetTimeStr(door_detect.detected_time).c_str());
+    JBI->Add(D_UTC_TIME, door_detect.detected_time);
     JBI->Add(D_EVENT, IsDoorOpen_Ctr(buffer, sizeof(buffer)));
   }
 
-  JBI->Add("DoorOpenPin", digitalRead(tkr_pins->GetPin(GPIO_DOOR_OPEN_ID)));
-
-    
+  JBI->Add("DoorOpenPin", digitalRead(tkr_pins->GetPin(GPIO_DOOR_OPEN)));
   JBI->Add("IsDoorOpen", IsDoorOpen());
 
-
-  if(tkr_pins->PinUsed(GPIO_DOOR_LOCK_ID)) // phase out in favour of basic switch? if so, doorsensor can become similar to motion that is non-resetting
+  if (tkr_pins->PinUsed(GPIO_DOOR_LOCK))
   {
-    JBI->Add("DoorLockPin", digitalRead(tkr_pins->GetPin(GPIO_DOOR_LOCK_ID)));
+    JBI->Add("DoorLockPin", digitalRead(tkr_pins->GetPin(GPIO_DOOR_LOCK)));
     JBI->Add("IsLock_Locked", IsLock_Locked());
+
+    if (json_level >= JSON_LEVEL_IFCHANGED)
+    {
+      JBI->Add("LockTime", tkr_time->GetTimeStr(lock_detect.detected_time).c_str());
+      JBI->Add("LockTimeUtc", lock_detect.detected_time);
+    }
   }
 
   return JBI->End();
-
 }
 
   
@@ -267,16 +282,7 @@ void mDoorSensor::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mDoorSensor::ConstructJSON_Settings;
-
-  ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = false;
-  ptr->flags.SendNow = false;
-  ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mDoorSensor::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
@@ -287,113 +293,12 @@ void mDoorSensor::MQTTHandler_Init(){
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mDoorSensor::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
   
 } 
 
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mDoorSensor::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mDoorSensor::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mDoorSensor::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
-
 #endif // USE_MODULE_NETWORK_MQTT
 
-/******************************************************************************************************************
- * WebServer
-*******************************************************************************************************************/
-
-
-#ifdef USE_MODULE_NETWORK_WEBSERVER
-void mDoorSensor::WebAppend_Root_Status_Table_Draw(){
-
-  char buffer[10];
-    
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_START_0V);
-    BufferWriterI->Append_P(PSTR("<td>Door Position</td>"));
-    BufferWriterI->Append_P(PSTR("<td>{dc}%s'>%s</div></td>"),"tab_door", IsDoorOpen_Ctr(buffer, sizeof(buffer)));   
-  BufferWriterI->Append_P(PM_WEBAPPEND_TABLE_ROW_END_0V);
-  
-}
-
-
-//append to internal buffer if any root messages table
-void mDoorSensor::WebAppend_Root_Status_Table_Data(){
-  
-  uint8_t sensor_counter = 0;
-  char value_ctr[8];
-  char colour_ctr[10];
-  char inner_html[100];
-  char door_pos_ctr[20];
-  char time_ctr[20];
-
-  JBI->Array_Start("tab_door");// Class name
-  
-  for(int sensor_id=0;sensor_id<1;sensor_id++){
-    
-    JBI->Object_Start();
-      JBI->Add("id",sensor_id);
-
-      char colour_ctr[8];
-      uint32_t millis_elapsed = mTime::MillisElapsed(&door_detect.tEndedTime);
-      // Motion in progress
-      if(door_detect.isactive){
-        sprintf_P(colour_ctr,PSTR("#00ff00"));
-      }else
-      // If movement event has just finished
-      if(millis_elapsed<(1000*60)){
-        // Show colour as fading back to white over X seconds SINCE EVENT OVER
-        uint8_t colour_G = constrain(
-                              map(millis_elapsed,0,(1000*60),0,255)
-                              ,0,255 //increases with time
-                            );
-        tkr_web->WebColorCtr(255,colour_G,colour_G, colour_ctr, sizeof(colour_ctr));
-      }
-      // no event show, just white
-      else{
-        sprintf(colour_ctr,"#ffffff");
-      }
-
-      // sprintf(inner_html,"%s %s",IsDoorOpen_Ctr(door_pos_ctr,sizeof(door_pos_ctr)),
-      //   mTime::ConvertShortTime_HHMMSS(&door_detect.detected_time, time_ctr, sizeof(time_ctr)));
-    
-      JBI->Add("ih",inner_html);
-      JBI->Add("fc",colour_ctr);
-    
-    JBI->Object_End();
-  }
-
-  JBI->Array_End();
-
-}
-
-#endif // USE_MODULE_NETWORK_WEBSERVER
 
 #endif
 

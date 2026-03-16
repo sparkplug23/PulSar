@@ -27,22 +27,22 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
   if(task == TASK_JSON_COMMAND_ID)
   { 
 
-    // #ifdef ENABLE_DEBUGFEATURE_TASKER__SPLASH_JSON_BUFFER
+    #ifdef ENABLE_DEBUGFEATURE_TASKER__SPLASH_JSON_BUFFER
       Serial.printf(PSTR(D_LOG_TASKER "JSON Command Payload: %s\r\n"), data_buffer.payload.ctr);
-    // #endif
+    #endif
 
     // Added protection against buffer overflows
     data_buffer.payload.ctr[sizeof(data_buffer.payload.ctr) - 1] = '\0';
     if (memchr(data_buffer.payload.ctr, '\0', sizeof(data_buffer.payload.ctr)) == nullptr) {
       ALOG_ERR(PSTR("JSON payload not NUL-terminated (truncated?)"));
-      return FUNCTION_RESULT_ERROR_ID;
+      return TASKER_RESULT__ERROR_ID;
     }
 
     JsonParser parser(data_buffer.payload.ctr);
     obj = parser.getRootObject();   
     if (!obj) {
       ALOG_ERR(PM_DESERIALIZATION_ERROR);
-      return FUNCTION_RESULT_ERROR_ID;
+      return TASKER_RESULT__ERROR_ID;
     }
 
     for(auto& mod:pModule)
@@ -53,7 +53,7 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
       #endif
     }
     
-    return FUNCTION_RESULT_SUCCESS_ID;
+    return TASKER_RESULT__SUCCESS_ID;
   } 
 
   /****************************************************************************************************************
@@ -335,7 +335,7 @@ void mTaskerManager::addTasker(mTaskerInterface* mod)
 }
 
 
-uint8_t mTaskerManager::Instance_Init()
+void mTaskerManager::Instance_Init()
 {
     
   /**
@@ -386,6 +386,9 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CORE_SPI
   addTasker(new mSPI());
   #endif
+  #ifdef USE_MODULE_CORE_PWM
+  addTasker(new mPWM());
+  #endif
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   addTasker(new mDevelopmentDebugging());
   #endif 
@@ -429,20 +432,14 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_DRIVERS_RELAY
   addTasker(new mRelays());
   #endif
-  #ifdef USE_MODULE_DRIVERS_PWM
-  addTasker(new mPWM());
-  #endif
   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
   addTasker(new mIRtransceiver());
   #endif
   #ifdef USE_MODULE_DRIVERS_IRREMOTE
   addTasker(new mIRRemote());
   #endif
-  #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
-  addTasker(new mRCSwitch());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
-  addTasker(new mRCSwitch());
+  #ifdef USE_MODULE_DRIVERS_RF433_CODES
+  addTasker(new mRF433Codes());
   #endif
   #ifdef USE_MODULE_DRIVERS_HBRIDGE
   addTasker(new mHBridge());
@@ -459,31 +456,7 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE__DRIVERS_BUZZER_TONES
   addTasker(new mBuzzer());
   #endif
-  #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640
-  addTasker(new mCameraOV2640());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_CAMERA_OV2640_2
-  addTasker(new mCameraOV2640());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM
-  addTasker(new mWebCam());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
-  addTasker(new mWebCamera());
-  #endif
-  #ifdef USE_MODULE_DRIVERS__CAMERA_ARDUINO
-  addTasker(new mWebCamera());
-  #endif
-  #ifdef USE_MODULE_DRIVERS__CAMERA_TASMOTA
-  addTasker(new mWebCamera());
-  #endif
-  #ifdef USE_MODULE_DRIVERS__CAMERA_MULTICLIENT
-  addTasker(new mWebCamera());
-  #endif
-  #ifdef USE_MODULE_DRIVERS__CAMERA_TAS25
-  addTasker(new mCamera());
-  #endif
-  #ifdef USE_MODULE_DRIVERS__CAMERA_2025
+  #ifdef USE_MODULE_DRIVERS__CAMERA
   addTasker(new mCamera());
   #endif
   #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
@@ -550,12 +523,9 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_SENSORS_ROTARY_ENCODER
   addTasker(new mRotaryEncoder());
   #endif
-  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
   addTasker(new mSunTracking());
   #endif
-  #ifdef USE_MODULE_SENSORS_ULTRASONICS
-  addTasker(new mUltraSonicSensor());
-  #endif  
   #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
   addTasker(new mTOF_VL53L0X());
   #endif
@@ -574,7 +544,7 @@ uint8_t mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
   addTasker(new mDB18x20());
   #endif
-  #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  #ifdef USE_MODULE_SENSORS_DS18X20
   addTasker(new mDB18x20());
   #endif
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
@@ -754,47 +724,10 @@ uint8_t mTaskerManager::Instance_Init()
   #endif
   DEBUG_LINE_HERE
 
-  Serial.printf("time %dms\n\r", millis());
-
   assert(heap_caps_check_integrity_all(true));  // optional final check
-
-  Serial.printf("time %dms\n\r", millis());
-  DEBUG_LINE_HERE
-  return 0;
-  Serial.printf("time %dms\n\r", millis());
 
 };
 
-
-
-// uint8_t mTaskerManager::Instance_Init()
-// {
-
-//   // return 0;
-    
-  
-//   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
-//   addTasker(new mDevelopmentDebugging());
-//   #endif 
-
-//   Serial.printf("time %dms\n\r", millis());
-
-//   assert(heap_caps_check_integrity_all(true));  // optional final check
-
-//   Serial.printf("time %dms\n\r", millis());
-//   DEBUG_LINE_HERE
-//   Serial.printf("time %dms\n\r", millis());
-
-//   if (!heap_caps_check_integrity_all(true)) {
-//     Serial.println("HEAP CORRUPTION DETECTED!");
-//     delay(2000);
-// }
-
-// return 0;
-
-
-
-// };
 
 const char* mTaskerManager::GetTaskName(uint16_t task)
 {

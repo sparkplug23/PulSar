@@ -81,7 +81,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj)
     // For Networks, telemetry shows connection status
   }
 
-  return FUNCTION_RESULT_SUCCESS_ID;
+  return TASKER_RESULT__SUCCESS_ID;
 }
 
 

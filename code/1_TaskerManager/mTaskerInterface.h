@@ -18,16 +18,11 @@ class mTaskerInterface
   public:
 
     mTaskerInterface(){};
-    virtual int8_t Tasker(uint8_t function, JsonParserObject obj);
+    virtual int8_t Tasker(uint8_t function, JsonParserObject obj) { return 0; }
     virtual int8_t Tasker_DevCode(uint8_t function, JsonParserObject obj) { return 0; } // optional per module place to test development code. It will be in its own file "DevCode.cpp"
-    virtual PGM_P GetModuleName();
-    virtual uint16_t GetModuleUniqueID();
-    
-   //  virtual ~mTaskerInterface() {
-   //    Serial.printf("Destructor called on base\n");
-   //  }
-
-   virtual ~mTaskerInterface();
+    virtual PGM_P GetModuleName() { return PSTR("BaseTasker"); }
+    virtual uint16_t GetModuleUniqueID() { return 0; }
+    virtual ~mTaskerInterface(){};
     
     /**
      * Get device count for each module that should be in module.settings

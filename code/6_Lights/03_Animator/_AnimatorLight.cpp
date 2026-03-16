@@ -9,7 +9,7 @@ mAnimatorLight* tkr_extern_lAni = nullptr; // Define the global instance
 int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
 {
 
-  int8_t function_result = FUNCTION_RESULT_SUCCESS_ID;
+  int8_t function_result = TASKER_RESULT__SUCCESS_ID;
 
   /************
    * INIT SECTION * 
@@ -23,7 +23,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
   
-  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
   
   switch(function){
     /************
@@ -1253,7 +1253,7 @@ if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE
   // ------------------------------------------------------------------
   if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAYTIME_01__ID)
   {
-    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
       const float elevation = tkr_solar->Get_Elevation();
       const float el_min = 0.0f;
       const float el_max = (ELEVATION_DAY_THRESHOLD != 0) ? ELEVATION_DAY_THRESHOLD : tkr_solar->Get_Elevation_Max();
@@ -1289,7 +1289,7 @@ if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE
   // ------------------------------------------------------------------
   if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAWNDUSKTIME_01__ID)
   {
-    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
       const float elevation = tkr_solar->Get_Elevation();
       const float el_min = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : tkr_solar->Get_Elevation_Min();
       const float el_max = (ELEVATION_DAY_THRESHOLD   != 0) ? ELEVATION_DAY_THRESHOLD   : tkr_solar->Get_Elevation_Max();
@@ -1329,7 +1329,7 @@ if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE
 // ------------------------------------------------------------------
 if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID)
 {
-  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
     const float elevation = tkr_solar->Get_Elevation();
     const float el_min = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : tkr_solar->Get_Elevation_Min();
     const float el_max = (ELEVATION_DAY_THRESHOLD   != 0) ? ELEVATION_DAY_THRESHOLD   : tkr_solar->Get_Elevation_Max();
@@ -1410,7 +1410,7 @@ if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERAT
   // ------------------------------------------------------------------
   if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_NIGHTTIME_01__ID)
   {
-    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
       const float elevation = tkr_solar->Get_Elevation();
       const float el_max = (ELEVATION_NIGHT_THRESHOLD != 0) ? ELEVATION_NIGHT_THRESHOLD : -10.0f;
       const float el_min = tkr_solar->Get_Elevation_Min();
@@ -1446,7 +1446,7 @@ if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERAT
   // ------------------------------------------------------------------
   if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SOLID_COLOUR_OF_SKY__ID)
   {
-    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+    #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
       const float elevation = tkr_solar->Get_Elevation();
       const float el_min = tkr_solar->Get_Elevation_Min();
       const float el_max = tkr_solar->Get_Elevation_Max();
@@ -1519,7 +1519,7 @@ if (pid == mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SK
   }
 
   // --- compute el_min/el_max/elevation as you already do ---
-  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
     const float elevation = tkr_solar->Get_Elevation();
     const float el_min = tkr_solar->Get_Elevation_Min();
     const float el_max = tkr_solar->Get_Elevation_Max();

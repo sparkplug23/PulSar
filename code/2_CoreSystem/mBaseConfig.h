@@ -830,67 +830,10 @@ SHOULD NOT rely on other files for pre-defines, other than INI
   #endif
 #endif
 
-// #ifndef WLED_MAX_BUSSES
-//   #ifdef ESP8266
-//     #define WLED_MAX_BUSSES 10
-//   #else // esp32
-//     #if defined(CONFIG_IDF_TARGET_ESP32C3)    // 2 RMT, 6 LEDC, only has 1 I2S but NPB does not support it ATM
-//       #define WLED_MAX_BUSSES 3               // will allow 2 digital & 1 analog (or the other way around)
-//     #elif defined(CONFIG_IDF_TARGET_ESP32S2)  // 4 RMT, 8 LEDC, only has 1 I2S bus, supported in NPB
-//       #if defined(USERMOD_AUDIOREACTIVE)      // requested by @softhack007 https://github.com/blazoncek/WLED/issues/33
-//         #define WLED_MAX_BUSSES 6             // will allow 4 digital & 2 analog
-//       #else
-//         #define WLED_MAX_BUSSES 7             // will allow 5 digital & 2 analog
-//       #endif
-//     #elif defined(CONFIG_IDF_TARGET_ESP32S3)  // 4 RMT, 8 LEDC, has 2 I2S but NPB does not support them ATM
-//       #define WLED_MAX_BUSSES 6               // will allow 4 digital & 2 analog
-//     #else
-//       #if defined(USERMOD_AUDIOREACTIVE)      // requested by @softhack007 https://github.com/blazoncek/WLED/issues/33
-//         #define WLED_MAX_BUSSES 8
-//       #else
-//         #define WLED_MAX_BUSSES 10
-//       #endif
-//     #endif
-//   #endif
-// #endif
-
-
-// #ifndef WLED_MAX_BUSSES
-//   #ifdef ESP8266
-//     #define WLED_MAX_BUSSES 1
-//     #define WLED_MIN_VIRTUAL_BUSSES 2
-//   #else
-//     #if defined(CONFIG_IDF_TARGET_ESP32C3)    // 2 RMT, 6 LEDC, only has 1 I2S but NPB does not support it ATM
-//       #define WLED_MAX_BUSSES 3               // will allow 2 digital & 1 analog (or the other way around)
-//       #define WLED_MIN_VIRTUAL_BUSSES 3
-//     #elif defined(CONFIG_IDF_TARGET_ESP32S2)  // 4 RMT, 8 LEDC, only has 1 I2S bus, supported in NPB
-//       #define WLED_MAX_BUSSES 7             // will allow 5 digital & 2 analog
-//       #define WLED_MIN_VIRTUAL_BUSSES 3
-//     #elif defined(CONFIG_IDF_TARGET_ESP32S3)  // 4 RMT, 8 LEDC, has 2 I2S but NPB does not support them ATM
-//       #define WLED_MAX_BUSSES 6               // will allow 4 digital & 2 analog
-//       #define WLED_MIN_VIRTUAL_BUSSES 4
-//     #else
-//       #define WLED_MAX_BUSSES 16
-//       #define WLED_MIN_VIRTUAL_BUSSES 0
-//     #endif
-//   #endif
-// #else
-//   #ifdef ESP8266
-//     #if WLED_MAX_BUSES > 10
-//       #error Maximum number of buses is 5.
-//     #endif
-//     #define WLED_MIN_VIRTUAL_BUSSES (10-WLED_MAX_BUSSES)
-//   #else
-//     #if WLED_MAX_BUSES > 10
-//       #error Maximum number of buses is 10.
-//     #endif
-//     #define WLED_MIN_VIRTUAL_BUSSES (10-WLED_MAX_BUSSES)
-//   #endif
-// #endif
 
 #ifndef DISABLE_LEDC_DEFINE_TO_PATCH_BUILD_ERROR_JUNE25
 
-  #ifndef USE_MODULE_DRIVERS__CAMERA_2025
+  #ifndef USE_MODULE_DRIVERS__CAMERA
 
     #ifndef LEDC_CHANNEL_MAX
       #define LEDC_CHANNEL_MAX 8 // should come from esp32-hal-ledc.h
@@ -903,74 +846,6 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 
 #endif
 
-
-#ifndef WLED_MAX_BUSSES
-  #ifdef ESP8266
-    #define WLED_MAX_DIGITAL_CHANNELS 3
-    #define WLED_MAX_ANALOG_CHANNELS 5
-    #define WLED_MAX_BUSSES 4                 // will allow 3 digital & 1 analog RGB
-    #define WLED_MIN_VIRTUAL_BUSSES 2
-  #else
-    #define WLED_MAX_ANALOG_CHANNELS (LEDC_CHANNEL_MAX*LEDC_SPEED_MODE_MAX)
-    #if defined(CONFIG_IDF_TARGET_ESP32C3)    // 2 RMT, 6 LEDC, only has 1 I2S but NPB does not support it ATM
-      #define WLED_MAX_BUSSES 6               // will allow 2 digital & 2 analog RGB or 6 PWM white
-      #define WLED_MAX_DIGITAL_CHANNELS 2
-      //#define WLED_MAX_ANALOG_CHANNELS 6
-      #define WLED_MIN_VIRTUAL_BUSSES 3
-    #elif defined(CONFIG_IDF_TARGET_ESP32S2)  // 4 RMT, 8 LEDC, only has 1 I2S bus, supported in NPB
-      // the 5th bus (I2S) will prevent Audioreactive usermod from functioning (it is last used though)
-      #define WLED_MAX_BUSSES 7               // will allow 5 digital & 2 analog RGB
-      #define WLED_MAX_DIGITAL_CHANNELS 5
-      //#define WLED_MAX_ANALOG_CHANNELS 8
-      #define WLED_MIN_VIRTUAL_BUSSES 3
-    #elif defined(CONFIG_IDF_TARGET_ESP32S3)  // 4 RMT, 8 LEDC, has 2 I2S but NPB does not support them ATM
-      #define WLED_MAX_BUSSES 6               // will allow 4 digital & 2 analog RGB
-      #define WLED_MAX_DIGITAL_CHANNELS 4
-      //#define WLED_MAX_ANALOG_CHANNELS 8
-      #define WLED_MIN_VIRTUAL_BUSSES 4
-    #else
-      // the last digital bus (I2S0) will prevent Audioreactive usermod from functioning
-      #define WLED_MAX_BUSSES 20              // will allow 17 digital & 3 analog RGB
-      #define WLED_MAX_DIGITAL_CHANNELS 17
-      //#define WLED_MAX_ANALOG_CHANNELS 16
-      #define WLED_MIN_VIRTUAL_BUSSES 4
-    #endif
-  #endif
-#else
-  #ifdef ESP8266
-    #if WLED_MAX_BUSSES > 5
-      #error Maximum number of buses is 5.
-    #endif
-    #ifndef WLED_MAX_ANALOG_CHANNELS
-      #error You must also define WLED_MAX_ANALOG_CHANNELS.
-    #endif
-    #ifndef WLED_MAX_DIGITAL_CHANNELS
-      #error You must also define WLED_MAX_DIGITAL_CHANNELS.
-    #endif
-    #define WLED_MIN_VIRTUAL_BUSSES (5-WLED_MAX_BUSSES)
-  #else
-    #if WLED_MAX_BUSSES > 20
-      #error Maximum number of buses is 20.
-    #endif
-    #ifndef WLED_MAX_ANALOG_CHANNELS
-      #error You must also define WLED_MAX_ANALOG_CHANNELS.
-    #endif
-    #ifndef WLED_MAX_DIGITAL_CHANNELS
-      #error You must also define WLED_MAX_DIGITAL_CHANNELS.
-    #endif
-    #define WLED_MIN_VIRTUAL_BUSSES (20-WLED_MAX_BUSSES)
-  #endif
-#endif
-
-// Maximum number of pins per output. 5 for RGBCCT analog LEDs.
-#define OUTPUT_MAX_PINS_WLED 5
-
-
-#ifdef ESP8266
-#define WLED_MAX_COLOR_ORDER_MAPPINGS 5
-#else
-#define WLED_MAX_COLOR_ORDER_MAPPINGS 10
-#endif
 
 
 // Anything added by this file must "undef" then "ifdef" to replace it

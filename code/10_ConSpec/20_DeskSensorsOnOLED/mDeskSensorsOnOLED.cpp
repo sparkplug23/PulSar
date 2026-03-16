@@ -36,7 +36,7 @@ int8_t mDeskSensorsOnOLED::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function)
   {    
@@ -71,7 +71,7 @@ int8_t mDeskSensorsOnOLED::Tasker(uint8_t function, JsonParserObject obj){
     #endif  
   }
 
-  return FUNCTION_RESULT_UNKNOWN_ID;
+  return TASKER_RESULT__UNKNOWN_ID;
 
 }//end
 
@@ -279,7 +279,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page2()
 
     line = -1;
     sensors_reading_t val;
-    #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #ifdef USE_MODULE_SENSORS_DS18X20
     tkr->GetModule_P(D_MODULE_SENSORS_DB18S20_CTR)->GetSensorReading(&val, sensor_id);   
     if(val.Valid())
     {
@@ -302,7 +302,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page2()
       }
 
     }
-    #endif // USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #endif // USE_MODULE_SENSORS_DS18X20
 
   }
 

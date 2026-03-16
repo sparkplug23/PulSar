@@ -43,7 +43,7 @@ int8_t mADC_I2S_Sampler::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  // if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  // if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -86,7 +86,7 @@ int8_t mADC_I2S_Sampler::Tasker(uint8_t function, JsonParserObject obj)
     #endif //USE_MODULE_NETWORK_MQTT
   }
 
-  return FUNCTION_RESULT_SUCCESS_ID;
+  return TASKER_RESULT__SUCCESS_ID;
 
 }
 

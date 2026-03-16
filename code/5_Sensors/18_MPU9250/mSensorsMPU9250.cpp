@@ -31,7 +31,7 @@ int8_t mSensorsMPU9250::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -50,14 +50,14 @@ int8_t mSensorsMPU9250::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_EVERY_SECOND:
 
     
-  // Serial.println(averaging->Mean());
+      // Serial.println(averaging->Mean());
 
-  break;
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
     case TASK_JSON_COMMAND_ID:
-    //  parse_JSONCommand(obj);
+      parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
@@ -65,25 +65,28 @@ int8_t mSensorsMPU9250::Tasker(uint8_t function, JsonParserObject obj){
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
-      break;
+    break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
-      break;
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
-      break;
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
 
-  return FUNCTION_RESULT_SUCCESS_ID;
+  return TASKER_RESULT__SUCCESS_ID;
 
 }
 
 
 void mSensorsMPU9250::Pre_Init(){
 
-  settings.fEnableSensor = false;
-  settings.fSensorCount = 0;
+  module_state.mode = ModuleStatus::Initialising;
+  module_state.devices = 0;
 
   // char mqtt_data[300];
 
@@ -100,7 +103,7 @@ void mSensorsMPU9250::Pre_Init(){
   // in futre use array to store bme type found (BME_280_ID, BME_180_ID) etc
   // if(tkr_pins->PinUsed(GPIO_I2C_SCL_ID) && tkr_pins->PinUsed(GPIO_I2C_SDA_ID)){
 
-  if(tkr_sup->I2cDevice(I2C_ADDRESS_MPU9250)){
+  if(tkr_i2c->I2cDevice(I2C_ADDRESS_MPU9250)){
 
     // Wire = new TwoWire();//tkr_pins->GetPin(GPIO_I2C_SCL_ID),tkr_pins->GetPin(GPIO_I2C_SDA_ID));
 
@@ -135,9 +138,9 @@ void mSensorsMPU9250::Pre_Init(){
 
   #define MAGNETOMETER_SAMPLES_SIZE 10
 
-  mag.average.x = new AVERAGING_DATA<float>(MAGNETOMETER_SAMPLES_SIZE);
-  mag.average.y = new AVERAGING_DATA<float>(MAGNETOMETER_SAMPLES_SIZE);
-  mag.average.z = new AVERAGING_DATA<float>(MAGNETOMETER_SAMPLES_SIZE);
+  mag.average.x = new Averaging_Data<float>(MAGNETOMETER_SAMPLES_SIZE);
+  mag.average.y = new Averaging_Data<float>(MAGNETOMETER_SAMPLES_SIZE);
+  mag.average.z = new Averaging_Data<float>(MAGNETOMETER_SAMPLES_SIZE);
 
 
   // measured.averaging->SetBoundaryLimits(0,11);
@@ -156,15 +159,15 @@ void mSensorsMPU9250::Pre_Init(){
   //   compass = new LSM303();
   // compass->init();
   // compass->enableDefault();
-settings.fSensorCount++;
+  module_state.devices++;
 
 
   }
 
   
-  if(settings.fSensorCount){
-    settings.fEnableSensor = true;
-    AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_DHT "BME Sensor Enabled"));
+  if(module_state.devices)
+  {
+    module_state.mode = ModuleStatus::Running;
   }
 
 }
@@ -262,87 +265,29 @@ uint32_t tSaved = millis();
 }
 
 
-// void mSensorsMPU9250::SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_completion){
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
 
-//   unsigned long timeout = millis();
-//   do{
+void mSensorsMPU9250::parse_JSONCommand(JsonParserObject obj)
+{
 
-//     switch(sensor[sensor_id].sReadSensor){
-//       case SPLIT_TASK_SUCCESS_ID: // allow it to run into task1
-//       case SPLIT_TASK_TIMEOUT_ID:
-//       case SPLIT_TASK_SEC1_ID:
-
-//         sensor[sensor_id].bme->takeForcedMeasurement(); // has no effect in normal mode
-//         sensor[sensor_id].isvalid = true;
-
-//         if(
-//           (sensor[sensor_id].temperature != sensor[sensor_id].bme->readTemperature())||
-//           (sensor[sensor_id].humidity != sensor[sensor_id].bme->readHumidity())         
-//           ){
-//           sensor[sensor_id].ischanged = true; // check if updated
-//         }else{
-//           sensor[sensor_id].ischanged = false;
-//         }
-        
-//         if(
-//           (fabsf(sensor[sensor_id].temperature-sensor[sensor_id].bme->readTemperature())>0.1)||
-//           (sensor[sensor_id].temperature != sensor[sensor_id].bme->readTemperature())&&(abs(millis()-sensor[sensor_id].ischangedtLast)>60000)  
-//         ){
-//           sensor[sensor_id].ischanged_over_threshold = true;
-//           mqtthandler_sensor_ifchanged.flags.SendNow = true;
-//           sensor[sensor_id].ischangedtLast = millis();
-//         }else{
-//           sensor[sensor_id].ischanged_over_threshold = false;
-//         }
-
-//         sensor[sensor_id].temperature = sensor[sensor_id].bme->readTemperature();
-//         sensor[sensor_id].humidity =    sensor[sensor_id].bme->readHumidity();
-//         sensor[sensor_id].pressure =    sensor[sensor_id].bme->readPressure() / 100.0f;
-//         sensor[sensor_id].altitude =    sensor[sensor_id].bme->readAltitude(tkr_iSensors->settings.sealevel_pressure);
-
-//         ALOG_DBG(     PSTR(D_LOG_BME D_MEASURE D_COMMAND_NVALUE), D_TEMPERATURE,  (int)sensor[sensor_id].temperature);
-//         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_COMMAND_NVALUE), D_HUMIDITY,    (int)sensor[sensor_id].humidity);
-//         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_COMMAND_NVALUE), D_PRESSURE,    (int)sensor[sensor_id].pressure);
-//         ALOG_DBM( PSTR(D_LOG_BME D_MEASURE D_COMMAND_NVALUE), D_ALTITUDE,    (int)sensor[sensor_id].altitude);
-
-//         sensor[sensor_id].sReadSensor = SPLIT_TASK_DONE_ID;
-
-//       break;
-//       case SPLIT_TASK_DONE_ID: //exiting
-//         fWithinLimit = 1;
-//       break;
-//       default:
-//       break;
-//     } // end switch
-
-//     if(require_completion){ //delay required if we are going to do multiple calls
-//     //  delay(100);
-//     }
-
-//     if(abs(millis()-timeout)>=2000){
-//       sensor[sensor_id].sReadSensor = SPLIT_TASK_TIMEOUT_ID;
-//       break;
-//     }
-
-//   }while(require_completion); // loops once even if false
-
-// }//end function
+}
 
 
-/*********************************************************************************************************************************************
-******** Data Builders (JSON + Pretty) **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
 
 uint8_t mSensorsMPU9250::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_SENSOR_COUNT, settings.fSensorCount);
+    JBI->Add(D_SENSOR_COUNT, GetSensorCount());
   return JBI->End();
 
 }
 
-uint8_t mSensorsMPU9250::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mSensorsMPU9250::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
@@ -393,11 +338,9 @@ JBI->Add("reset", mag.average.x->tResetPeriod);
 
 }
 
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
@@ -408,99 +351,27 @@ void mSensorsMPU9250::MQTTHandler_Init(){
   ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = tkr_mqtt->GetConfigPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mSensorsMPU9250::ConstructJSON_Settings;
-
-  ptr = &mqtthandler_sensor_teleperiod;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//tkr_mqtt->dt.teleperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
-  ptr->ConstructJSON_function = &mSensorsMPU9250::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = 1;//FLAG_ENABLE_DEFAULT_PERIODIC_SENSOR_MQTT_MESSAGES;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//tkr_mqtt->dt.ifchanged_secs; 
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = tkr_mqtt->GetIfChangedPeriod(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mSensorsMPU9250::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
   
 } 
-
-
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mSensorsMPU9250::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mSensorsMPU9250::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief Check all handlers if they require action
- * */
-void mSensorsMPU9250::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
 
 #endif // USE_MODULE_NETWORK_MQTT
 
 #endif
-
-
-
-// #include <Wire.h>
-// #include <LSM303.h>
-
-// LSM303 compass;
-
-// char report[80];
-
-// void setup()
-// {
-//   Serial.begin(9600);
-//   Wire.begin();
-//   compass.init();
-//   compass.enableDefault();
-// }
-
-// void loop()
-// {
-//   compass.read();
-
-//   snprintf(report, sizeof(report), "A: %6d %6d %6d    M: %6d %6d %6d",
-//     compass.a.x, compass.a.y, compass.a.z,
-//     compass.m.x, compass.m.y, compass.m.z);
-//   Serial.println(report);
-
-//   delay(100);
-// }

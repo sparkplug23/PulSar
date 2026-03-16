@@ -20,7 +20,7 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -62,9 +62,26 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
     #endif // ENABLE_DEBUGFEATURE_TIME__MQTT_DIRECT_PUBLISH_WITHOUT_TELEMETRY
   } // end switch
 
-  return FUNCTION_RESULT_UNKNOWN_ID;
+  return TASKER_RESULT__UNKNOWN_ID;
   
 } // END function
+
+
+
+time_t mTime::ConvertToUTCTime(int year, int month, int day, int hour, int min, int sec) {
+    struct tm timeinfo = { 0 };
+    timeinfo.tm_year = year - 1900;  // tm_year is years since 1900
+    timeinfo.tm_mon  = month - 1;    // tm_mon is 0-based
+    timeinfo.tm_mday = day;
+    timeinfo.tm_hour = hour;
+    timeinfo.tm_min  = min;
+    timeinfo.tm_sec  = sec;
+  
+    // Use mktime assuming system is set to UTC (or ignore timezone entirely)
+    time_t t = mktime(&timeinfo);
+    return t;
+  }
+
 
 
 void mTime::Pre_Init(void)
@@ -122,41 +139,49 @@ bool mTime::IsDst(void)
 // }
 #include <ctime>
 
-time_t my_timegm(struct tm* time_info) {
-    // Save the current timezone settings
-    time_t local_time;
+// time_t my_timegm(struct tm* time_info) {
+//     // Save the current timezone settings
+//     time_t local_time;
 
-    // Save the current timezone settings
-    char* tz = getenv("TZ");
-    setenv("TZ", "UTC", 1);
-    tzset();
+//     // Save the current timezone settings
+//     char* tz = getenv("TZ");
+//     setenv("TZ", "UTC", 1);
+//     tzset();
 
-    // Convert the tm structure to time_t (UTC)
-    local_time = mktime(time_info);
+//     // Convert the tm structure to time_t (UTC)
+//     local_time = mktime(time_info);
 
-    // Restore the original timezone settings
-    if (tz) {
-        setenv("TZ", tz, 1);
-    } else {
-        unsetenv("TZ");
-    }
-    tzset();
+//     // Restore the original timezone settings
+//     if (tz) {
+//         setenv("TZ", tz, 1);
+//     } else {
+//         unsetenv("TZ");
+//     }
+//     tzset();
 
-    return local_time;
-}
+//     return local_time;
+// }
 
 
-time_t mTime::GetStartOfDayUTC(time_t utc_time) {
-    // Convert to a tm structure in UTC
-    struct tm* time_info = gmtime(&utc_time);
+// time_t mTime::GetStartOfDayUTC(time_t utc_time) {
+//     // Convert to a tm structure in UTC
+//     struct tm* time_info = gmtime(&utc_time);
 
-    // Reset the hour, minute, and second to zero (midnight UTC)
-    time_info->tm_hour = 0;
-    time_info->tm_min = 0;
-    time_info->tm_sec = 0;
+//     // Reset the hour, minute, and second to zero (midnight UTC)
+//     time_info->tm_hour = 0;
+//     time_info->tm_min = 0;
+//     time_info->tm_sec = 0;
 
-    // Use timegm() to convert back to UTC time_t
-    return my_timegm(time_info);  // Use timegm() instead of mktime()
+//     // Use timegm() to convert back to UTC time_t
+//     return my_timegm(time_info);  // Use timegm() instead of mktime()
+// }
+time_t mTime::GetStartOfDayUTC(time_t utc_time)
+{
+  // utc_time is seconds since epoch (UTC). Midnight UTC is just day truncation.
+  const time_t day = (time_t)86400;
+  if (utc_time >= 0) return (utc_time / day) * day; // basically get remainder of "current" day
+  // handle negative epochs safely
+  return -(((-utc_time + day - 1) / day) * day);
 }
 
 
@@ -186,9 +211,9 @@ String mTime::GetBuildDateAndTime(void)
       year = atoi(str);
     }
   }
-  char MonthNamesEnglish[sizeof(kMonthNamesEnglish)];
-  strcpy_P(MonthNamesEnglish, kMonthNamesEnglish);
-  int month = (strstr(MonthNamesEnglish, smonth) -MonthNamesEnglish) /3 +1;
+  char MonthNames[sizeof(kMonthNames)];
+  strcpy_P(MonthNames, kMonthNames);
+  int month = (strstr(MonthNames, smonth) -MonthNames) /3 +1;
   snprintf_P(bdt, sizeof(bdt), PSTR("%d" D_YEAR_MONTH_SEPARATOR "%02d" D_MONTH_DAY_SEPARATOR "%02d" D_DATE_TIME_SEPARATOR "%s"), year, month, day, PSTR(__TIME__));
   return String(bdt);  // 2017-03-07T11:08:02
 }
@@ -200,7 +225,7 @@ String mTime::GetSyslogDate(char* mxtime) {
   // Assuming the day hasn't changed yet ;-)
   uint32_t month_idx = (RtcTime.month -1) * 3;
   char month[4] = { 0 };
-  strncpy_P(month, kMonthNamesEnglish + month_idx, 3);
+  strncpy_P(month, kMonthNames + month_idx, 3);
   char dt[16];
   snprintf_P(dt, sizeof(dt), PSTR("%s %2d %s"), month, RtcTime.day_of_month, mxtime);
   return String(dt);
@@ -230,15 +255,6 @@ String mTime::GetTimeZone(void)
 }
 
 
-// String mTime::GetDuration(uint32_t time) 
-// {
-//   char dt[16];
-//   datetime_t ut;
-//   BreakTime(time, ut);
-//   // "P128DT14H35M44S" - ISO8601:2004 - https://en.wikipedia.org/wiki/ISO_8601 Durations
-//   snprintf_P(dt, sizeof(dt), PSTR("%dT%02d:%02d:%02d"), ut.days, ut.hour, ut.minute, ut.second);
-//   return String(dt);  // 128T14:35:44
-// }
 bool mTime::GetDuration(char* out, size_t out_len, uint32_t seconds)
 {
   // "128T14:35:44" worst case fits easily in <16, you used 16 already
@@ -251,7 +267,6 @@ bool mTime::GetDuration(char* out, size_t out_len, uint32_t seconds)
   if (n < 0 || (size_t)n >= out_len) { out[0]=0; return false; }
   return true;
 }
-
 
 
 String mTime::GetDT(uint32_t time) 
@@ -935,53 +950,6 @@ bool mTime::TimeReached(uint32_t timer)
 }
 
 
-// void mTime::WifiPollNtp() 
-// {
-//   static uint8_t ntp_sync_minute = 0;
-//   static uint32_t ntp_run_time = 0;
-
-//   if (tkr_set->runtime.global_state.wifi_down || Rtc.user_time_entry) { return; }
-
-//   uint8_t uptime_minute = (uptime_seconds_nonreset / 60) % 60;  // 0 .. 59
-//   if ((ntp_sync_minute > 59) && (uptime_minute > 2)) {
-//     ntp_sync_minute = 1;                 // If sync prepare for a new cycle
-//   }
-//   // First try ASAP to sync. If fails try once every 60 seconds based on chip id
-//   uint8_t offset = (uptime_seconds_nonreset < 30) ? RtcTime.second + ntp_run_time : (((mSupportHardware::ESP_getChipId() & 0xF) * 3) + 3) ;
-
-//   if ( (((offset == RtcTime.second) && ( (RtcTime.year < 2016) ||                  // Never synced
-//                                          (ntp_sync_minute == uptime_minute))) ||   // Re-sync every hour
-//        ntp_force_sync ) ) {                                          // Forced sync
-
-//     ntp_force_sync = false;
-
-//     ALOG_INF(PSTR("NTP: Sync time..."));
-
-//     ntp_run_time = millis();
-//     uint64_t ntp_nanos = WifiGetNtp();
-//     uint32_t ntp_time = ntp_nanos / 1000000000;
-//     ntp_run_time = (millis() - ntp_run_time) / 1000;
-
-//     ALOG_INF(PSTR("NTP: Runtime %d"), ntp_run_time);
-
-//     if (ntp_run_time < 5) { ntp_run_time = 0; }  // DNS timeout is around 10s
-    
-//     ALOG_HGL(PSTR("NTP: ntp_time %d"), ntp_time);
-
-//     if (ntp_time > START_VALID_TIME) 
-//     {
-//       Rtc.utc_time = ntp_time;
-//       Rtc.nanos = ntp_nanos % 1000000000;
-//       ntp_sync_minute = 60;             // Sync so block further requests
-//       RtcSync("NTP");
-//     } 
-//     else 
-//     {
-//       ntp_sync_minute++;                // Try again in next minute
-//     }
-    
-//   }
-// }
 // SUMMARY
 //   Poll NTP over WiFi with deterministic scheduling and backoff.
 //   - First sync: shortly after WiFi comes up (with stagger per-chip).
@@ -1062,236 +1030,6 @@ void mTime::WifiPollNtp()
   ntp_busy = false;
 }
 
-
-// uint64_t mTime::WifiGetNtp(void) 
-// {
-//   static uint8_t ntp_server_id = 0;
-
-//  ALOG_INF(PSTR("NTP: Start NTP Sync %d ..."), ntp_server_id);
-
-//   IPAddress time_server_ip;
-
-//   char fallback_ntp_server[2][32];
-//   ext_snprintf_P(fallback_ntp_server[0], sizeof(fallback_ntp_server[0]), PSTR("%_I"), tkr_set->Settings.ipv4_address[1]);  // #17984
-//   ext_snprintf_P(fallback_ntp_server[1], sizeof(fallback_ntp_server[1]), PSTR("%d.pool.ntp.org"), random(0,3));
-
-//   char* ntp_server;
-//   for (uint32_t i = 0; i < MAX_NTP_SERVERS +2; i++) {
-//     if (ntp_server_id >= MAX_NTP_SERVERS +2) { ntp_server_id = 0; }
-//     ntp_server = (ntp_server_id < MAX_NTP_SERVERS) ? tkr_set->SettingsText(SET_NTPSERVER1 + ntp_server_id) : fallback_ntp_server[ntp_server_id - MAX_NTP_SERVERS];
-//     if (strlen(ntp_server)) {
-//       break;
-//     }
-//     ntp_server_id++;
-//   }
-
-//   ALOG_INF(PSTR("ntp_server %s"), ntp_server);
-  
-//   #ifdef USE_MODULE_NETWORK_MQTT
-//   if (!tkr_wifi->WiFi_Dns_ResolveHostname(ntp_server, time_server_ip)) {
-//     ntp_server_id++;
-//     ALOG_DBG(PSTR("NTP: Unable to resolve '%s'"), ntp_server);
-//     return 0;
-//   }
-//   #else
-//   return 0; //tmp solution to no networking
-//   #endif
-  
-//   WiFiUDP udp;
-
-//   // uint32_t attempts = 3;
-//   // while (attempts > 0) {
-//   //   uint32_t port = random(1025, 65535);   // Create a random port for the UDP connection.
-
-//   //   #ifdef USE_IPV6
-//   //   if (udp.begin(IPAddress(IPv6), port) != 0)
-//   //   #else
-//   //   if (udp.begin(port) != 0) 
-//   //   #endif
-//   //   {
-//   //     break;
-//   //   }
-//   //   attempts--;
-//   // }
-//   // if (0 == attempts) { return 0; }
-
-//   // while (udp.parsePacket() > 0) {          // Discard any previously received packets
-//   //   yield();
-//   // }
-
-//   // const uint32_t NTP_PACKET_SIZE = 48;     // NTP time is in the first 48 bytes of message
-//   // uint8_t packet_buffer[NTP_PACKET_SIZE];  // Buffer to hold incoming & outgoing packets
-//   // memset(packet_buffer, 0, NTP_PACKET_SIZE);
-//   // packet_buffer[0]  = 0b11100011;          // LI, Version, Mode
-//   // packet_buffer[1]  = 0;                   // Stratum, or type of clock
-//   // packet_buffer[2]  = 6;                   // Polling Interval
-//   // packet_buffer[3]  = 0xEC;                // Peer Clock Precision
-//   // packet_buffer[12] = 49;
-//   // packet_buffer[13] = 0x4E;
-//   // packet_buffer[14] = 49;
-//   // packet_buffer[15] = 52;
-
-//   // if (udp.beginPacket(time_server_ip, 123) == 0) {  // NTP requests are to port 123
-//   //   ntp_server_id++;                                // Next server next time
-//   //   udp.stop();
-//   //   return 0;
-//   // }
-//   // udp.write(packet_buffer, NTP_PACKET_SIZE);
-//   // udp.endPacket();
-
-
-
-
-
-//     // ---- Bind UDP socket (ephemeral local port) ----
-//     // Random port is unnecessary; ephemeral allocation is fine.
-//     // If your core requires a port, pick a stable high port.
-//     const uint16_t local_port = 0; // 0 = ephemeral (works on ESP32 Arduino core)
-//     bool begun = false;
-
-//     #ifdef USE_IPV6
-//       // If you actually use IPv6 here, keep your existing path.
-//       // (Leaving as-is; most builds won't hit this.)
-//       begun = (udp.begin(IPAddress(IPv6), local_port) != 0);
-//     #else
-//       begun = (udp.begin(local_port) != 0);
-//     #endif
-
-//     if (!begun)
-//     {
-//       // Fallback if port=0 isn't supported in your environment/core:
-//       // try a few fixed ephemeral-ish ports.
-//       const uint16_t fallback_ports[] = { 49152, 49153, 49154 };
-//       for (uint8_t k = 0; k < (sizeof(fallback_ports)/sizeof(fallback_ports[0])); k++)
-//       {
-//         #ifdef USE_IPV6
-//           if (udp.begin(IPAddress(IPv6), fallback_ports[k]) != 0) { begun = true; break; }
-//         #else
-//           if (udp.begin(fallback_ports[k]) != 0) { begun = true; break; }
-//         #endif
-//       }
-//     }
-
-//     if (!begun) { return 0; }
-
-//     // ---- Flush any stale packets (bounded) ----
-//     // Keep this, but bound it: prevents a pathological busy loop if packets keep arriving.
-//     const uint32_t flush_start = millis();
-//     uint8_t flushed = 0;
-//     while ((udp.parsePacket() > 0) && (flushed < 8) && ((millis() - flush_start) < 50))
-//     {
-//       // drain packet payload (discard)
-//       while (udp.available()) { (void)udp.read(); }
-//       flushed++;
-//       yield();
-//     }
-
-//     // ---- Build and send NTP request ----
-//     const uint32_t NTP_PACKET_SIZE = 48;
-//     uint8_t packet_buffer[NTP_PACKET_SIZE] = {0};
-
-//     packet_buffer[0]  = 0b11100011;  // LI, Version, Mode
-//     packet_buffer[1]  = 0;           // Stratum
-//     packet_buffer[2]  = 6;           // Polling Interval
-//     packet_buffer[3]  = 0xEC;        // Precision
-//     packet_buffer[12] = 49;
-//     packet_buffer[13] = 0x4E;
-//     packet_buffer[14] = 49;
-//     packet_buffer[15] = 52;
-
-//     if (udp.beginPacket(time_server_ip, 123) == 0)
-//     {
-//       ntp_server_id++;
-//       udp.stop();
-//       return 0;
-//     }
-
-//     udp.write(packet_buffer, NTP_PACKET_SIZE);
-//     udp.endPacket();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//   uint32_t begin_wait = millis();
-//   while (!TimeReached(begin_wait + 1000)) {         // Wait up to one second
-//     uint32_t size        = udp.parsePacket();
-//     uint32_t remote_port = udp.remotePort();
-
-//     if ((size >= NTP_PACKET_SIZE) && (remote_port == 123)) {
-//       udp.read(packet_buffer, NTP_PACKET_SIZE);     // Read packet into the buffer
-//       udp.stop();
-
-//       if ((packet_buffer[0] & 0b11000000) == 0b11000000) {
-//         // Leap-Indicator: unknown (clock unsynchronized)
-//         // See: https://github.com/letscontrolit/ESPEasy/issues/2886#issuecomment-586656384
-//         ALOG_INF(PSTR("NTP: IP %_I unsynced"), (uint32_t)time_server_ip);
-//         ntp_server_id++;                            // Next server next time
-//         return 0;
-//       }
-//   Serial.println("packet_buffer");
-//   for(int i=0;i<48;i++){ Serial.print(packet_buffer[i], HEX); Serial.print(' ');}
-//   Serial.println("packet_buffer");
-
-//       // Convert four bytes starting at location 40 to a long integer (seconds since 1900)
-// uint32_t secs_since_1900 = ((uint32_t)packet_buffer[40] << 24) |
-//                            ((uint32_t)packet_buffer[41] << 16) |
-//                            ((uint32_t)packet_buffer[42] << 8) |
-//                             (uint32_t)packet_buffer[43];
-
-// Serial.print("Seconds since 1900: "); Serial.println(secs_since_1900);
-
-// if (secs_since_1900 == 0) {
-//     // No time stamp received
-//     ntp_server_id++;
-//     return 0;
-// }
-
-// // Convert the next four bytes into the fractional part of the timestamp
-// uint32_t tmp_fraction = ((uint32_t)packet_buffer[44] << 24) |
-//                         ((uint32_t)packet_buffer[45] << 16) |
-//                         ((uint32_t)packet_buffer[46] << 8) |
-//                          (uint32_t)packet_buffer[47];
-
-// Serial.print("Fractional part (raw): "); Serial.println(tmp_fraction);
-
-// // Convert fractional part from 32-bit fixed point (2^-32) to nanoseconds (1e-9)
-// uint64_t fraction = (((uint64_t)tmp_fraction) * 1000000000ULL) >> 32;
-
-
-// // Subtract the NTP epoch (1900-01-01) to Unix epoch (1970-01-01)
-// uint64_t unix_seconds = ((uint64_t)secs_since_1900) - 2208988800ULL;
-
-
-// // Combine the seconds and fractional parts to get the final result in nanoseconds
-// uint64_t result = (unix_seconds * 1000000000ULL) + fraction;
-
-// #ifdef ESP32
-// Serial.print("Fractional part (nanoseconds): "); Serial.println(fraction);
-// Serial.print("Unix seconds: "); Serial.println(unix_seconds);
-// Serial.print("Final NTP result (nanoseconds): "); Serial.println(result);
-// #endif
-
-
-//       return result;
-//     }
-//     delay(10);
-//   }
-//   // Timeout.
-//   ALOG_INF(PSTR("NTP: No reply from %_I"), (uint32_t)time_server_ip);
-//   udp.stop();
-//   ntp_server_id++;                                  // Next server next time
-//   return 0;
-// }
 
 uint64_t mTime::WifiGetNtp(void)
 {
@@ -1526,11 +1264,6 @@ uint64_t mTime::WifiGetNtp(void)
   ntp_server_id++; // rotate server next time after failure
   return 0;
 }
-
-
-
-
-
 
 
 /**

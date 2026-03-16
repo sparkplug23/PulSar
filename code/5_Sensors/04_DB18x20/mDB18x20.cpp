@@ -22,7 +22,7 @@
  **/
 #include "mDB18x20.h"
 
-#ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+#ifdef USE_MODULE_SENSORS_DS18X20
 
 constexpr uint8_t mDB18x20::ds18x20_chipids[]; // Definition outside the class is required for c++14 or older. c++17 can remove this with "inline"
 
@@ -44,7 +44,7 @@ int8_t mDB18x20::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************

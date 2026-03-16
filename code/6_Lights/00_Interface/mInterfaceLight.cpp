@@ -22,7 +22,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -1081,7 +1081,7 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   if(jtok = obj[PM_BRIGHTNESS_RGB]){ // Range 0-100
     float value = mSupport::mapfloat(jtok.getFloat(), 0,100, 0,255); // Using float so sub 1% transition is possible
     CommandSet_Global_BrtRGB_255( (uint8_t)value );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), getBriRGB_Global());
+    ALOG_INF(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), getBriRGB_Global());
     data_buffer.isserviced++;
   }else
   if(jtok = obj[PM_BRIGHTNESS_RGB_255]){ // Range 0-255

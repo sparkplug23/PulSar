@@ -26,7 +26,7 @@
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
 
 #ifdef ESP32
-#define PIXEL_RANGE_LIMIT 3300
+#define PIXEL_RANGE_LIMIT 4000
 #else
 #define PIXEL_RANGE_LIMIT 1000
 #endif 
@@ -3130,12 +3130,13 @@ typedef struct Segment
     uint8_t  cct_slider;                 //0==1900K, 255==10091K
 
 
-    uint8_t  custom1, custom2;    // custom FX parameters/sliders
+    uint8_t custom1; //3c1=Custom1
+    uint8_t custom2; //4c2=Custom2   // custom FX parameters/sliders  
     struct {
-      uint8_t custom3 : 5;        // reduced range slider (0-31)
-      bool    check1  : 1;        // checkmark 1 PaletteIcon
-      bool    check2  : 1;        // checkmark 2 ?
-      bool    check3  : 1;        // checkmark 3 OverlayIcon
+      uint8_t custom3 : 5;        //5c3=Custom3    // reduced range slider (0-31)
+      bool    check1  : 1;        //6cbPal=Check1  // checkmark 1 PaletteIcon
+      bool    check2  : 1;        //7cbLay=Check2  // checkmark 2 ?
+      bool    check3  : 1;        //8cbFav=Check3  // checkmark 3 OverlayIcon
     };
     
     uint8_t startY;  // start Y coodrinate 2D (top); there should be no more than 255 rows

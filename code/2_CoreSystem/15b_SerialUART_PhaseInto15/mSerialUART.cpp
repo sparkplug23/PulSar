@@ -75,7 +75,7 @@
 //   }
 
 //   // Only continue in to tasker if module was configured properly
-//   if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+//   if(!settings.fEnableModule){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
 
 // // static const char *TX_TASK_TAG = "TX_TASK";
@@ -1588,9 +1588,9 @@
 // //     #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 // //     tkr->fExitTaskerWithCompletion = true; // set true, we have found our handler
 // //     parse_JSONCommand();
-// //     return FUNCTION_RESULT_HANDLED_ID;
+// //     return TASKER_RESULT__HANDLED_ID;
 // //   }else{
-// //     return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+// //     return TASKER_RESULT__UNKNOWN_ID; // not meant for here
 // //   }
 
 // // }

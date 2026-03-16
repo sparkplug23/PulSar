@@ -150,7 +150,7 @@ void setup(void)
     }
     #endif  // CONFIG_IDF_TARGET_ESP32
     
-    #ifdef USE_MODULE_DRIVERS__CAMERA_2025
+    #ifdef USE_MODULE_DRIVERS__CAMERA
     psramInit();               // initialize PSRAM        
     Serial.printf("psramFound: %d\n\r", psramFound());
     Serial.printf("esp_spiram_is_initialized: %d\n\r", esp_spiram_is_initialized());

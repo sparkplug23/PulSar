@@ -63,7 +63,7 @@ int8_t mImmersionPanel::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function)
   {    
@@ -101,7 +101,7 @@ int8_t mImmersionPanel::Tasker(uint8_t function, JsonParserObject obj){
     #endif  
   }
 
-  return FUNCTION_RESULT_UNKNOWN_ID;
+  return TASKER_RESULT__UNKNOWN_ID;
 
 }//end
 
@@ -229,7 +229,7 @@ void mImmersionPanel::SubTask_UpdateOLED()
   #endif // USE_MODULE_CONTROLLER_HVAC
 
 
-  #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  #ifdef USE_MODULE_SENSORS_DS18X20
   snprintf(buffer, sizeof(buffer), "SH: %d",
     0
   );
@@ -238,7 +238,7 @@ void mImmersionPanel::SubTask_UpdateOLED()
     0
   );
   tkr_iDisp->LogBuffer_AddRow(buffer, 2);
-  #endif //USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  #endif //USE_MODULE_SENSORS_DS18X20
   
   
   /**
@@ -412,4 +412,4 @@ void mImmersionPanel::MQTTHandler_Sender()
 
 #endif // USE_MODULE_NETWORK_MQTT
 
-#endif // USE_MODULE_DRIVERS_RF433_RCSWITCH
+#endif // USE_MODULE_DRIVERS_RF433_CODES

@@ -24,8 +24,7 @@
 
 #include "JsonParser.h"
 
-#include "1_TaskerManager/mTaskerInterface.h"  // MUST BE INCLUDED FIRST TET ADDED MAY2025
-
+#include "1_TaskerManager/mTaskerInterface.h"
 
 #include "2_CoreSystem/esp32_compat.h"
 #include "2_CoreSystem/mGlobalMacros.h"
@@ -98,19 +97,14 @@
   #else // ESP32
     #include <HardwareSerial.h>  // ensure we have the correct "Serial" on new MCUs (depends on ARDUINO_USB_MODE and ARDUINO_USB_CDC_ON_BOOT)
     #include <WiFi.h>
-    #include <ETH.h>
     #include "esp_wifi.h"
     #include <ESPmDNS.h>
     #include <AsyncTCP.h>
-
-    #ifndef WLED_DISABLE_ESPNOW
-      #include <esp_now.h>
-    #endif
   #endif
 
 #endif // USE_MODULE_NETWORK_WEBSERVER
 
-    #include "esp_task_wdt.h"
+#include "esp_task_wdt.h"
 
 #ifdef USE_MODULE_CORE_FILESYSTEM
   #define LOROL_LITTLEFS   
@@ -136,19 +130,18 @@
 
 
 // Returns via tasker that report special status
-// Can also be interpeted as basic numbers
-enum FUNCTION_RESULT_IDS{
+enum TASKER_RESULT__IDS{
   // Errors
-  FUNCTION_RESULT_ERROR_POINTER_INVALID_ID = -2,
-  FUNCTION_RESULT_MODULE_DISABLED_ID = -1,
+  TASKER_RESULT__ERROR_POINTER_INVALID_ID = -2,
+  TASKER_RESULT__MODULE_DISABLED_ID = -1,
   // Unknown
-  FUNCTION_RESULT_UNKNOWN_ID = 0,
+  TASKER_RESULT__UNKNOWN_ID = 0,
   // Good results
-  FUNCTION_RESULT_SUCCESS_ID,
-  FUNCTION_RESULT_HANDLED_ID, // e.g. button press handled by another module, so it can be ignored by hardcoded rules
-  FUNCTION_RESULT_ERROR_ID,
+  TASKER_RESULT__SUCCESS_ID,
+  TASKER_RESULT__HANDLED_ID, // e.g. button press handled by another module, so it can be ignored by hardcoded rules
+  TASKER_RESULT__ERROR_ID,
   // Length
-  FUNCTION_RESULT_LENGTH_ID
+  TASKER_RESULT__LENGTH_ID
 };
 
 enum ModuleStatus{
@@ -158,11 +151,6 @@ enum ModuleStatus{
   Running,
   DevicesPresent // Running means searching is enabled, but this is only set when devices are found
 };
-
-
-
-// Libraries
-// #include <StreamString.h>                   // Webserver, Updater
 
 #ifdef USE_ARDUINO_OTA
   #include <ArduinoOTA.h>                   // Arduino OTA
@@ -201,16 +189,13 @@ enum ModuleStatus{
 
 #include "2_CoreSystem/20_JSON/mJSON.h"
 #include "2_CoreSystem/06_Support/mSupport.h"
-
 #include "2_CoreSystem/02_RtcMemory/mRtcSettings.h"
-
-
-    
-  template <size_t N>
-  static inline bool in_list(uint16_t id, const uint16_t (&lst)[N]) {
-    for (size_t i = 0; i < N; ++i) if (lst[i] == id) return true;
-    return false;
-  }
+  
+template <size_t N>
+static inline bool in_list(uint16_t id, const uint16_t (&lst)[N]) {
+  for (size_t i = 0; i < N; ++i) if (lst[i] == id) return true;
+  return false;
+}
 
 enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   MODULE_SUBTYPE_CORE_ID,
@@ -297,6 +282,10 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "2_CoreSystem/32_SPI/mSPI.h"
   #define tkr_spi                       static_cast<mSPI*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE__SPI__ID))
 #endif
+#ifdef USE_MODULE_CORE_PWM
+  #include "2_CoreSystem/34_PWM/mPWM.h"
+  #define tkr_pwm                                 static_cast<mPWM*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE__PWM__ID))
+#endif
 #ifdef USE_MODULE_CORE_SUPPORT
   #include "2_CoreSystem/06_Support/mSupport.h"
   #define   tkr_sup                               static_cast<mSupport*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_SUPPORT_ID))
@@ -355,25 +344,21 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "4_Drivers/04_Relays/mRelays.h"
   #define tkr_relay                                 static_cast<mRelays*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_RELAY_ID))
 #endif
-#ifdef USE_MODULE_DRIVERS_PWM
-  #include "4_Drivers/PWM/mPWM.h"
-  #define tkr_pwm                                 static_cast<mPWM*>(tkr->pModule[EM_MODULE_DRIVERS_PWM_ID])
-#endif
 #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
-  #include "4_Drivers/IRDevices/mIRtransceiver.h"
-  #define tkr_mdirt                               static_cast<mIRtransceiver*>(tkr->pModule[EM_MODULE_DRIVERS_IRTRANSCEIVER_ID])
+  #include "4_Drivers/07_IRDevices/mIRtransceiver.h"
+  #define tkr_mdirt                               static_cast<mIRtransceiver*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_IRTRANSCEIVER_ID))
 #endif
 #ifdef USE_MODULE_DRIVERS_IRREMOTE
-#include "4_Drivers/IRRemote/mIRRemote.h"
-  #define tkr_ir_remote                           static_cast<mIRRemote*>(tkr->pModule[EM_MODULE_DRIVERS_IRREMOTE_ID])
+  #include "4_Drivers/08_IRRemote/mIRRemote.h"
+  #define tkr_ir_remote                           static_cast<mIRRemote*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_IRREMOTE_ID))
 #endif
-#ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
-  #include "4_Drivers/09_RCSwitch/mRCSwitch.h"
-  #define tkr_rcswitch                            static_cast<mBuzzer*>(tkr->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_ID])
+#ifdef USE_MODULE_DRIVERS_SERVOS
+  #include "4_Drivers/09_Servos/mServos.h"
+  #define tkr_servos                          static_cast<mServos*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__DRIVERS__SERVOS_ID))
 #endif
-#ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
-  #include "4_Drivers/10_RCSwitch_Extended/mRCSwitch_Extended.h"
-  #define tkr_rcswitch                            static_cast<mRCSwitch*>(tkr->pModule[EM_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED_ID])
+#ifdef USE_MODULE_DRIVERS_RF433_CODES
+  #include "4_Drivers/10_RF433Codes/mRF433Codes.h"
+  #define tkr_rf433codes                          static_cast<mRF433Codes*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__DRIVERS__RF433_CODES_ID))
 #endif
 #ifdef USE_MODULE_DRIVERS_HBRIDGE
   #include "4_Drivers/Motors/HBridgeL9110/mHBridge.h"
@@ -395,21 +380,9 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "4_Drivers/21_Buzzer_Tones/mBuzzer.h"
   #define tkr_buzzer                              static_cast<mBuzzer*>(tkr->pModule[EM_MODULE__DRIVERS_BUZZER_TONES__ID])
 #endif
-#ifdef USE_MODULE_DRIVERS__CAMERA_2025
+#ifdef USE_MODULE_DRIVERS__CAMERA
   #include "4_Drivers/50_Camera_2025/mCamera.h"
   #define tkr_camera                              static_cast<mCamera*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS__CAMERA_ID))
-#endif
-#ifdef USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
-  #include "4_Drivers/52_WebCamera/mWebCamera.h"
-  #define tkr_camera                              static_cast<mWebCamera*>(tkr->pModule[EM_MODULE_DRIVERS_CAMERA_WEBCAM_V4_ID])
-#endif
-#ifdef USE_MODULE_DRIVERS__CAMERA_ARDUINO
-  #include "4_Drivers/60_WebCam_Arduino/mWebCam.h"
-  #define tkr_camera                              static_cast<mWebCamera*>(tkr->pModule[EM_MODULE_DRIVERS__CAMERA_ARDUINO__ID])
-#endif
-#ifdef USE_MODULE_DRIVERS__CAMERA_TAS25
-  #include "4_Drivers/63_WebCam_Tas25/mCamera.h"
-  #define tkr_camera                              static_cast<mCamera*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS__CAMERA_TAS25_ID))
 #endif
 #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   #include "4_Drivers/70_MAVLink_Decoder/mMAVLink_Decoder.h"
@@ -442,9 +415,9 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "5_Sensors/03_BME/mBME.h"
   #define tkr_bme                             static_cast<mBME*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_BME_ID))
 #endif
-#ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+#ifdef USE_MODULE_SENSORS_DS18X20
   #include "5_Sensors/04_DB18x20/mDB18x20.h"
-  #define tkr_db18                      static_cast<mDB18x20*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID))
+  #define tkr_db18                      static_cast<mDB18x20*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DS18X20__ID))
 #endif
 #ifdef USE_MODULE_SENSORS_DHT
   #include "5_Sensors/05_DHT/mSensorsDHT.h"
@@ -460,31 +433,31 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_SENSORS_DOOR
   #include "5_Sensors/11_Door/mDoorSensor.h"
-  #define tkr_sdoor                           static_cast<mDoorSensor*>(tkr->pModule[EM_MODULE_SENSORS_DOOR_ID])
+  #define tkr_sdoor                           static_cast<mDoorSensor*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_DOOR_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_L3G
-  #include "5_Sensors/L3GD20_3Axis_Gryo/mSensorsL3G.h"
-  #define tkr_L3G                      static_cast<mSensorsL3G*>(tkr->pModule[EM_MODULE_SENSORS_L3G_ID])
+  #include "5_Sensors/13_L3GD20_3Axis_Gryo/mSensorsL3G.h"
+  #define tkr_L3G                      static_cast<mSensorsL3G*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_L3G_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_LDR_BASIC
   #include "5_Sensors/14_LDRBasic/mLDRBasic.h"
-  #define tkr_ldr_basic                      static_cast<mLDRBasic*>(tkr->pModule[EM_MODULE_SENSORS_LDR_BASIC_ID])
+  #define tkr_ldr_basic                      static_cast<mLDRBasic*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_LDR_BASIC_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_LSM303D
-  #include "5_Sensors/LSM303D_3Axis_AccMag/mSensorsLSM303D.h"
-  #define tkr_LSM303D                      static_cast<mSensorsLSM303D*>(tkr->pModule[EM_MODULE_SENSORS_LSM303D_ID])
+  #include "5_Sensors/15_LSM303D_3Axis_AccMag/mSensorsLSM303D.h"
+  #define tkr_LSM303D                      static_cast<mSensorsLSM303D*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_LSM303D_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_MOISTURE
-  #include "5_Sensors/Moisture/mMoistureSensor.h"
-  #define tkr_srmoisture                      static_cast<mMoistureSensor*>(tkr->pModule[EM_MODULE_SENSORS_RESISTIVE_MOISTURE_ID])
+  #include "5_Sensors/16_Moisture/mMoistureSensor.h"
+  #define tkr_moisture_adc                          static_cast<mMoistureSensor*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_MOTION_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_SR04
   #include "5_Sensors/17_SR04/mSR04.h"
-  #define tkr_sr04                              static_cast<mSR04*>(tkr->pModule[EM_MODULE_SENSORS_SR04_ID])
+  #define tkr_sr04                              static_cast<mSR04*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_SR04_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_MPU9250
-  #include "5_Sensors/MPU9250/mSensorsMPU9250.h"
-  #define tkr_MPU9250                      static_cast<mSensorsMPU9250*>(tkr->pModule[EM_MODULE_SENSORS_MPU9250_ID])
+  #include "5_Sensors/18_MPU9250/mSensorsMPU9250.h"
+  #define tkr_MPU9250                      static_cast<mSensorsMPU9250*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_MPU9250_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_PULSE_COUNTER
   #include "5_Sensors/PulseCounter/mPulseCounter.h"
@@ -501,14 +474,6 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
   #include "5_Sensors/22_SunTracking/mSunTracking.h"
   #define   tkr_solar                             static_cast<mSunTracking*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID))
-#endif
-#if defined(USE_MODULE_SENSORS_SUN_TRACKING2) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
-  #include "5_Sensors/22b_SunTracking/mSunTracking.h"
-  #define   tkr_solar                             static_cast<mSunTracking*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID))
-#endif
-#ifdef USE_MODULE_SENSORS_ULTRASONICS
-  #include "5_Sensors/UltraSonic/mUltraSonicSensor.h"
-  #define tkr_ult                             static_cast<mUltraSonicSensor*>(tkr->pModule[EM_MODULE_SENSORS_ULTRASONIC_ID])
 #endif
 #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
   #include "5_Sensors/26_TOF_VL53L0X/mTOF_VL53L0X.h"
@@ -765,10 +730,7 @@ class mTaskerManager{
     mTaskerManager(){};
     /* Here will be the instance stored. */
     static mTaskerManager* instance;
-
-    ~mTaskerManager(){ Serial.println("Destructor, should never reach this"); Serial.flush(); }; // Destructor
-    
-    
+        
   public:
     // External function to get instance
     static mTaskerManager* GetInstance(){
@@ -791,7 +753,6 @@ class mTaskerManager{
     }
 
     // Find a module by name
-    // Flash only
     mTaskerInterface* GetModule_F(const char* name) const {
         char buffer[64];  // Adjust size as needed
         auto it = std::find_if(pModule.begin(), pModule.end(),
@@ -828,21 +789,7 @@ class mTaskerManager{
         return nullptr; // Return nullptr if the module is not found
     }
     
-    // Function to find a module unique ID by class name
-    // From now on, no module is allowed to be called number 0 as unique ID so it can be reserved for no match
-    // uint16_t GetModuleID(const char* name) const {
-    //   auto it = std::find_if(pModule.begin(), pModule.end(),
-    //       [name](mTaskerInterface* module) {
-    //           // Use strcmp_P if name is stored in PROGMEM
-    //           return strcmp_P(name, module->GetModuleName()) == 0;
-    //       });
-
-    //       if (it != pModule.end()) {
-    //           return (*it)->GetModuleUniqueID();
-    //     }
-
-    //     return 0; // Return 0 or another appropriate invalid ID if the module is not found
-    // }
+    
     uint16_t GetModuleID(const char* name, bool caseInsensitive = false) const {
       auto it = std::find_if(pModule.begin(), pModule.end(),
           [name, caseInsensitive](mTaskerInterface* module) {
@@ -885,15 +832,15 @@ class mTaskerManager{
       uint32_t samples;
     };
     
-int32_t sum_free_used[64] = {0};
-int32_t sum_lb_used[64]   = {0};
-uint32_t last_second_ms = 0;
+    int32_t sum_free_used[64] = {0};
+    int32_t sum_lb_used[64]   = {0};
+    uint32_t last_second_ms = 0;
 
-const int32_t ALERT_FREE_PER_CALL = 256;
-const int32_t ALERT_LB_PER_CALL   = 512;
+    const int32_t ALERT_FREE_PER_CALL = 256;
+    const int32_t ALERT_LB_PER_CALL   = 512;
 
-const int32_t ALERT_FREE_PER_SEC  = 1024;
-const int32_t ALERT_LB_PER_SEC    = 2048;
+    const int32_t ALERT_FREE_PER_SEC  = 1024;
+    const int32_t ALERT_LB_PER_SEC    = 2048;
 
     MemDeltaStats memstats[64];   // set to your max modules
     static inline uint32_t HeapFree8() {
@@ -904,9 +851,8 @@ const int32_t ALERT_LB_PER_SEC    = 2048;
     }
     #endif
 
-    
 
-    uint8_t Instance_Init();
+    void Instance_Init();
     
     int8_t Tasker_Interface(uint16_t function);    
         
@@ -917,11 +863,9 @@ const int32_t ALERT_LB_PER_SEC    = 2048;
 
     const char* GetTaskName(uint16_t task);
     const char* GetTaskName_Full(uint16_t task);
-    
-    
+        
     void JSONCommand_Run(char* json);
     
-
     uint16_t last_function = 255; // 0 will be first
 
     #ifdef ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
@@ -942,7 +886,6 @@ const int32_t ALERT_LB_PER_SEC    = 2048;
     }
     std::vector<FUNCTION_EXECUTION_EVENT> function_event_queue;
     #endif // ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
-
 
 
     #if defined(ENABLE_ADVANCED_DEBUGGING) || defined(ENABLE_DEVFEATURE_SERIAL_PRINT_LONG_LOOP_TASKERS)
@@ -978,10 +921,6 @@ const int32_t ALERT_LB_PER_SEC    = 2048;
     std::vector<TASKER_FUNCTION_TYPES> monitor_task; // Vector to hold the tasks to monitor
     std::vector<TaskMetrics> task_metrics;
     #endif
-
-
-
-    
 
 };
 

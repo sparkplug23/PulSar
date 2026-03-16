@@ -32,7 +32,7 @@ int8_t mServerResetRelays::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function)
   {    
@@ -75,7 +75,7 @@ int8_t mServerResetRelays::Tasker(uint8_t function, JsonParserObject obj){
     #endif
   }
 
-  return FUNCTION_RESULT_UNKNOWN_ID;
+  return TASKER_RESULT__UNKNOWN_ID;
 
 }//end
 

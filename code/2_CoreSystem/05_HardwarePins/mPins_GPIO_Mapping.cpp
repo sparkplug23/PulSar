@@ -27,6 +27,17 @@ int16_t mPins::GetGPIOFunctionIDbyName(const char* c)
   if(strcmp_P(c,PM_GPIO_FUNCTION_I2C_SDA_CTR)==0){  return GPIO_I2C_SDA; }
   #endif
 
+  
+
+  #ifdef USE_MODULE_CORE_PWM
+  if(strcmp_P(c,PM_GPIO_FUNCTION_PWM1_CTR)==0){  return GPIO_PWM1; }
+  if(strcmp_P(c,PM_GPIO_FUNCTION_PWM2_CTR)==0){  return GPIO_PWM2; }
+  if(strcmp_P(c,PM_GPIO_FUNCTION_PWM3_CTR)==0){  return GPIO_PWM3; }
+  if(strcmp_P(c,PM_GPIO_FUNCTION_PWM4_CTR)==0){  return GPIO_PWM4; }
+  if(strcmp_P(c,PM_GPIO_FUNCTION_PWM5_CTR)==0){  return GPIO_PWM5; }
+  #endif
+
+
   if(strcmp_P(c,PM_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR)==0){   return GPIO_UNUSED_FORCED_HIGH; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR)==0){  return GPIO_UNUSED_FORCED_LOW; }
   
@@ -72,7 +83,7 @@ int16_t mPins::GetGPIOFunctionIDbyName(const char* c)
   if(strcmp_P(c,PM_GPIO_FUNCTION_DHT22_2_CTR)==0){  return GPIO_DHT22_2; }
   #endif
 
-  #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  #ifdef USE_MODULE_SENSORS_DS18X20
   if(strcmp_P(c,PM_GPIO_FUNCTION_DS18X20_1_CTR)==0){  return GPIO_DSB_1; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_DS18X20_2_CTR)==0){  return GPIO_DSB_2; }
   #endif
@@ -156,15 +167,6 @@ int16_t mPins::GetGPIOFunctionIDbyName(const char* c)
   #endif
 
 
-
-  #ifdef USE_MODULE_DRIVERS_PWM
-  if(strcmp_P(c,PM_GPIO_FUNCTION_PWM1_CTR)==0){  return GPIO_PWM1; }
-  if(strcmp_P(c,PM_GPIO_FUNCTION_PWM2_CTR)==0){  return GPIO_PWM2; }
-  if(strcmp_P(c,PM_GPIO_FUNCTION_PWM3_CTR)==0){  return GPIO_PWM3; }
-  if(strcmp_P(c,PM_GPIO_FUNCTION_PWM4_CTR)==0){  return GPIO_PWM4; }
-  if(strcmp_P(c,PM_GPIO_FUNCTION_PWM5_CTR)==0){  return GPIO_PWM5; }
-  #endif
-
   #ifdef ESP32
   if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR)==0){  return GPIO_HWSERIAL1_RING_BUFFER_RX; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR)==0){  return GPIO_HWSERIAL1_RING_BUFFER_TX; }
@@ -224,7 +226,8 @@ int16_t mPins::GetGPIOFunctionIDbyName(const char* c)
   if(strcmp_P(c,PM_GPIO_FUNCTION__HLK_LD2410_RX__CTR)==0){  return GPIO_LD2410_RX; }
   if(strcmp_P(c,PM_GPIO_FUNCTION__HLK_LD2410_TX__CTR)==0){  return GPIO_LD2410_TX; }
   #endif
-  // #ifdef USE_MODULE_SENSORS_ULTRASONICS
+
+  // #ifdef USE_MODULE_SENSORS_
   // if(strcmp_P(c,PM_GPIO_FUNCTION__ROTARY_ENCODER_A__CTR)==0){  return GPIO__ROTARY_ENCODER_A_; }
   // if(strcmp_P(c,PM_GPIO_FUNCTION__ROTARY_ENCODER_B__CTR)==0){  return GPIO__ROTARY_ENCODER_B_; }
   // #endif
@@ -265,10 +268,15 @@ int16_t mPins::GetGPIOFunctionIDbyName(const char* c)
   }
   #endif
 
+  
+  if(strcmp_P(c,PM_GPIO_FUNCTION_MOISTURE_ANALOG_CTR)==0){  return GPIO_MOISTURE_ANALOG; }
+
+
+
   // if(strcmp_P(c,PM_GPIO_FUNCTION_KEY1_PULLDOWN_CTR)==0){  return GPIO_KEY1_PULLDOWN; }
 
 
-  #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+  #ifdef USE_MODULE_DRIVERS_RF433_CODES
   if(strcmp_P(c,PM_GPIO_FUNCTION__RF_433MHZ_RX__CTR)==0){  return GPIO_RF_433MHZ_RX; }
   if(strcmp_P(c,PM_GPIO_FUNCTION__RF_433MHZ_TX__CTR)==0){  return GPIO_RF_433MHZ_TX; }
   #endif
@@ -415,14 +423,7 @@ const char* mPins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, uint8_t bu
   if(GPIO_UNUSED_FORCED_LOW == id)              p = PM_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR;
 
 
-  /******************************************************************************************************************
-   * Network
-  *******************************************************************************************************************/
-
-  /******************************************************************************************************************
-   * Drivers
-  *******************************************************************************************************************/
-  #ifdef USE_MODULE_DRIVERS_PWM
+  #ifdef USE_MODULE_CORE_PWM
   if(GPIO_PWM1 == id)                        p = PM_GPIO_FUNCTION_PWM1_CTR;
   if(GPIO_PWM1_INV == id)                        p = PM_GPIO_FUNCTION_PWM1_INV_CTR;
   if(GPIO_PWM2 == id)                        p = PM_GPIO_FUNCTION_PWM2_CTR;
@@ -434,6 +435,14 @@ const char* mPins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, uint8_t bu
   if(GPIO_PWM5 == id)                        p = PM_GPIO_FUNCTION_PWM5_CTR;
   if(GPIO_PWM5_INV == id)                        p = PM_GPIO_FUNCTION_PWM5_INV_CTR;
   #endif
+
+  /******************************************************************************************************************
+   * Network
+  *******************************************************************************************************************/
+
+  /******************************************************************************************************************
+   * Drivers
+  *******************************************************************************************************************/
   #ifdef USE_MODULE_DRIVERS_RELAY
   if (id >= GPIO_REL1 && id <= GPIO_REL8){                 snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_REL_NUM_CTR,        id - GPIO_REL1 + 1);         return buffer; }
   if (id >= GPIO_REL1_INV && id <= GPIO_REL8_INV){         snprintf_P(buffer, buflen, PM_GPIO_FUNCTION_REL_NUM_INV_CTR,    id - GPIO_REL1_INV + 1);     return buffer; }
@@ -495,7 +504,7 @@ const char* mPins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, uint8_t bu
   if(GPIO_PIR_3_INV == id)                        p = PM_GPIO_FUNCTION_PIR_3_INV_CTR;
   if(GPIO_PIR_4_INV == id)                        p = PM_GPIO_FUNCTION_PIR_4_INV_CTR;
   #endif
-  #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  #ifdef USE_MODULE_SENSORS_DS18X20
   if(GPIO_DSB_1 == id)                        p = PM_GPIO_FUNCTION_DS18X20_1_CTR;
   if(GPIO_DSB_2 == id)                        p = PM_GPIO_FUNCTION_DS18X20_2_CTR;
   #endif
@@ -505,6 +514,9 @@ const char* mPins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, uint8_t bu
   if(GPIO_LDR_BASIC_DIGITAL2 == id)                        p = PM_GPIO_FUNCTION_LDR_BASIC_DIGITAL2_CTR;
   if(GPIO_LDR_BASIC_ANALOG2 == id)                        p = PM_GPIO_FUNCTION_LDR_BASIC_ANALOG2_CTR;
   #endif // USE_MODULE_SENSORS_LDR_BASIC
+
+  
+  if(GPIO_MOISTURE_ANALOG == id)                        p = PM_GPIO_FUNCTION_MOISTURE_ANALOG_CTR;
 
   /******************************************************************************************************************
    * Lights

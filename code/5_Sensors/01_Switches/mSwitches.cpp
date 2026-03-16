@@ -44,7 +44,7 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj)
     #endif //USE_MODULE_NETWORK_MQTT
   }
 
-  return FUNCTION_RESULT_SUCCESS_ID;
+  return TASKER_RESULT__SUCCESS_ID;
 
 }
 
@@ -606,19 +606,19 @@ bool mSwitches::SendSwitch(uint32_t index, uint32_t state)
   event.id      = index;
   event.type    = state;
   event.waiting = true; // new event recorded
-
+  
   #ifdef USE_MODULE_CORE_RULES
   tkr_rules->NewEventRun_NumArg(
     D_UNIQUE_MODULE_SENSORS_SWITCHES_ID, // Unique module ID
-    TASK_EVENT_INPUT_STATE_CHANGED_ID,   // FUNC ID
+    TASK_EVENT_INPUT_STATE_CHANGED_ID,   // FUNC I
     index, // SWitch index
     1, // Embedded data length
     state); // Event has occured, save and check it      
   #endif
-      
+
   mqtthandler_sensor_ifchanged.flags.SendNow = true;
   Tasker(TASK_MQTT_SENDER);
-
+  
   event.waiting = false;
 
   return true; // Event was sent
@@ -697,7 +697,7 @@ char* mSwitches::GetStateName(uint8_t state, char* buffer, uint8_t buflen)
 {
   if (state <= 3) { // First 4 options are stored in SettingsText
     char *name = tkr_set->SettingsText(SET_STATE_TXT1 + state);
-    Serial.println(name);
+    // Serial.println(name);
     snprintf(buffer, buflen, name);
   } else {
     tkr_sup->GetTextIndexed(buffer, buflen, state, kSwitchPressStates);

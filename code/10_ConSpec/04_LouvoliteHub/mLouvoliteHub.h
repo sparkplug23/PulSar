@@ -171,6 +171,6 @@ class mLouvoliteHub :
 
 };
 
-#endif // USE_MODULE_DRIVERS_RF433_RCSWITCH
+#endif // USE_MODULE_DRIVERS_RF433_CODES
 
 #endif

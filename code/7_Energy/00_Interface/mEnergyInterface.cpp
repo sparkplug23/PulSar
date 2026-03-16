@@ -347,7 +347,7 @@ void mEnergyInterface::MQTTHandler_Sender()
 //     break; 
 //   }
 
-//   if(!tkr_set->runtime_var.energy_driver){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+//   if(!tkr_set->runtime_var.energy_driver){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
 //   switch(function){
 //     /************

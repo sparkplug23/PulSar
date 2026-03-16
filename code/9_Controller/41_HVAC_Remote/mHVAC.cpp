@@ -50,7 +50,7 @@ int8_t mHVAC::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!settings.fEnableModule){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************

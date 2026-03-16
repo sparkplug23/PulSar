@@ -889,7 +889,7 @@ int8_t mPins::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  return FUNCTION_RESULT_UNKNOWN_ID;
+  return TASKER_RESULT__UNKNOWN_ID;
 
 }
 

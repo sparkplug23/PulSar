@@ -2,12 +2,31 @@
 
 #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
 
+int8_t mIRtransceiver::Tasker(uint8_t func, JsonParserObject obj){
+
+  switch(func){
+    case TASK_PRE_INIT:
+      Pre_Init();
+    break;
+    case TASK_INIT:
+      //init();
+    break;
+  }
+  
+  return 0;
+
+}//end function
+
+
+
+
+
 void mIRtransceiver::Pre_Init(void){
 
   // AddLog(LOG_LEVEL_INFO,PSTR("Pre_Init tkr_pins->GetPin(GPIO_IRSEND]=%d\n\r\n\n\n\n\n\n"),tkr_pins->GetPin(GPIO_IRSEND]);
 
-  if (tkr_pins->GetPin(GPIO_IRSEND_ID] < 99) {  // not set when 255
-    pin = tkr_pins->GetPin(GPIO_IRSEND_ID];
+  if (tkr_pins->PinUsed(GPIO_IRSEND)) {  // not set when 255
+    pin = tkr_pins->GetPin(GPIO_IRSEND);
     AddLog(LOG_LEVEL_INFO,PSTR("pin[GPIO_IRSEND] %d"),pin);
   }
   #ifdef CLIMATE_DHT1_PIN
@@ -58,25 +77,82 @@ void mIRtransceiver::TransmitCode(uint32_t code, uint8_t code_bits, uint8_t repe
 }
 
 
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
 
+void mIRtransceiver::parse_JSONCommand(JsonParserObject obj)
+{
 
-int8_t mIRtransceiver::Tasker(uint8_t func){
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+    
+}
 
-  switch(func){
-    case TASK_PRE_INIT:
-      Pre_Init();
-    break;
-    case TASK_INIT:
-      //init();
-    break;
-  }
   
-  return 0;
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
 
-}//end function
+  
+uint8_t mIRtransceiver::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
+
+  JBI->Start();
+  
+  return JBI->End();
+
+}
 
 
-void mIRtransceiver::parse_JSONCommand(char* topic, char* payload,unsigned int length){}
+uint8_t mIRtransceiver::ConstructJSON_State(uint8_t json_level, bool json_appending){
+
+  char buffer[40];
+
+  JBI->Start();
+
+    JBI->Object_Start(D_RFRECEIVED);
+    
+    JBI->Object_End();
+  
+  return JBI->End();
+
+}
+
+
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
+
+#ifdef USE_MODULE_NETWORK_MQTT
+
+void mIRtransceiver::MQTTHandler_Init()
+{
+
+  struct handler<mIRtransceiver>* ptr;
+
+  ptr = &mqtthandler_settings;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true; // DEBUG CHANGE
+  ptr->tRateSecs = 120; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mIRtransceiver::ConstructJSON_Settings;
+
+  ptr = &mqtthandler_state_ifchanged;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_IFCHANGED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->ConstructJSON_function = &mIRtransceiver::ConstructJSON_State;
+
+} 
+
+#endif // USE_MODULE_NETWORK_MQTT
 
 
 #endif

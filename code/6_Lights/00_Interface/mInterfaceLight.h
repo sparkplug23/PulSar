@@ -149,6 +149,8 @@ class mInterfaceLight :
     uint16_t pwm_min = 0;                  // minimum value for PWM, from DimmerRange, 0..1023
     uint16_t pwm_max = 1023;               // maxumum value for PWM, from DimmerRange, 0..1023
 
+
+    
     BusManager* bus_manager = nullptr;
     BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
     

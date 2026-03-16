@@ -6,8 +6,8 @@
 #include <Wire.h>
 
 
-// Tmp method from another lib
-struct xyzFloat {
+// // Tmp method from another lib
+struct xyzFloat3 {
     float x;
     float y;
     float z;
@@ -22,7 +22,7 @@ class LSM303
       T x, y, z;
     };
 
-    xyzFloat getAngles(void);
+    xyzFloat3 getAngles(void);
 
 
     enum deviceType { device_DLH, device_DLM, device_DLHC, device_D, device_auto };

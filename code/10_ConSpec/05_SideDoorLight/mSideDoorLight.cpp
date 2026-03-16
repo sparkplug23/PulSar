@@ -37,7 +37,7 @@ int8_t mSideDoorLight::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function)
   {    
@@ -72,7 +72,7 @@ int8_t mSideDoorLight::Tasker(uint8_t function, JsonParserObject obj){
     #endif  
   }
 
-  return FUNCTION_RESULT_UNKNOWN_ID;
+  return TASKER_RESULT__UNKNOWN_ID;
 
 }//end
 
@@ -204,4 +204,4 @@ void mSideDoorLight::MQTTHandler_Sender()
 
 #endif // USE_MODULE_NETWORK_MQTT
 
-#endif // USE_MODULE_DRIVERS_RF433_RCSWITCH
+#endif // USE_MODULE_DRIVERS_RF433_CODES

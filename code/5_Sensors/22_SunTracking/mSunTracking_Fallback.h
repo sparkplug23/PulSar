@@ -1,5 +1,5 @@
-#ifndef MODULE_SENSORS_SUN_TRACKING_SIMULATED_H
-#define MODULE_SENSORS_SUN_TRACKING_SIMULATED_H
+#ifndef MODULE_SENSORS_SUN_TRACKING_SIMULATED_H2
+#define MODULE_SENSORS_SUN_TRACKING_SIMULATED_H2
 
 /**
  * High performance minimal particular for the palettes in lighting. 
@@ -8,7 +8,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE
+#ifdef USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE2
 #include "3_Network/10_MQTT/mMQTT.h"
 
 #include "1_TaskerManager/mTaskerInterface.h"

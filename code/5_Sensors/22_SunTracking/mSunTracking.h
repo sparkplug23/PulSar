@@ -1,5 +1,5 @@
-#ifndef MODULE_SENSORS_SUN_TRACKING_H
-#define MODULE_SENSORS_SUN_TRACKING_H
+#ifndef MODULE_SENSORS_SUN_TRACKING_H2
+#define MODULE_SENSORS_SUN_TRACKING_H2
 
 #define D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID 5022 // [(Folder_Number*100)+ID_File]
 
@@ -15,7 +15,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE
+#ifdef USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE2
 #include "mSunTracking_Fallback.h" // minimal version of below in self contained header
 #endif
 
@@ -119,6 +119,7 @@ class mSunTracking :
       uint32_t tUpdated_millis = 0;
       bool isvalid = false;
     }calc;
+   
 
     /************************************************************************************************
      * SECTION: Internal Functions
@@ -149,48 +150,68 @@ class mSunTracking :
       return CalculateSolarAzEl(calc.today.sunset, latitude, longitude, altitude).azimuth;
     }
 
-        
-    // Converts a time_t value to a trimmed String
-    String TimeToString(time_t t) {
-        String timeStr = String(ctime(&t));  // Convert to a String
-        timeStr.trim();  // Remove any trailing newline or spaces
-        return timeStr;
+    // -----------------------------------------------------------------------------
+    // No-String time formatting helpers (ctime-like, trimmed)
+    // -----------------------------------------------------------------------------
+
+    // Copy ctime(t) into out, stripping trailing '\n' / '\r'.
+    // Returns true on success.
+    static bool CopyCTimeTrimmed(char* out, size_t out_len, time_t t)
+    {
+      if (!out || out_len < 2) {
+        if (out && out_len) out[0] = '\0';
+        return false;
+      }
+
+      const char* s = ctime(&t); // static internal buffer
+      if (!s) {
+        out[0] = '\0';
+        return false;
+      }
+
+      size_t i = 0;
+      for (; (i + 1) < out_len && s[i] && s[i] != '\n' && s[i] != '\r'; ++i) {
+        out[i] = s[i];
+      }
+      out[i] = '\0';
+      return true;
     }
 
-    String Get_DawnTime() const {
-        time_t t = calc.today.dawn;
-        String timeStr = String(ctime(&t));
-        timeStr.trim();  // Remove any trailing newline or spaces
-        return timeStr;
+    // If you want this as a class method, make it mTime::TimeToString(...) or similar.
+    bool TimeToString(char* out, size_t out_len, time_t t)
+    {
+      return CopyCTimeTrimmed(out, out_len, t);
     }
 
-    String Get_SunriseTime() const {
-        time_t t = calc.today.sunrise;
-        String timeStr = String(ctime(&t));
-        timeStr.trim();  // Remove any trailing newline or spaces
-        return timeStr;
+    // -----------------------------------------------------------------------------
+    // Sun tracking getters (no heap). Caller supplies buffer.
+    // -----------------------------------------------------------------------------
+
+    bool Get_DawnTime(char* out, size_t out_len) const
+    {
+      return CopyCTimeTrimmed(out, out_len, (time_t)calc.today.dawn);
     }
 
-    String Get_SolarNoonTime() const {
-        time_t t = calc.today.solar_noon;
-        String timeStr = String(ctime(&t));
-        timeStr.trim();  // Remove any trailing newline or spaces
-        return timeStr;
+    bool Get_SunriseTime(char* out, size_t out_len) const
+    {
+      return CopyCTimeTrimmed(out, out_len, (time_t)calc.today.sunrise);
     }
 
-    String Get_SunsetTime() const {
-        time_t t = calc.today.sunset;
-        String timeStr = String(ctime(&t));
-        timeStr.trim();  // Remove any trailing newline or spaces
-        return timeStr;
+    bool Get_SolarNoonTime(char* out, size_t out_len) const
+    {
+      return CopyCTimeTrimmed(out, out_len, (time_t)calc.today.solar_noon);
     }
 
-    String Get_DuskTime() const {
-        time_t t = calc.today.dusk;
-        String timeStr = String(ctime(&t));
-        timeStr.trim();  // Remove any trailing newline or spaces
-        return timeStr;
+    bool Get_SunsetTime(char* out, size_t out_len) const
+    {
+      return CopyCTimeTrimmed(out, out_len, (time_t)calc.today.sunset);
     }
+
+    bool Get_DuskTime(char* out, size_t out_len) const
+    {
+      return CopyCTimeTrimmed(out, out_len, (time_t)calc.today.dusk);
+    }
+
 
     uint32_t Get_DaylightDuration() const {
         return calc.today.daylight_duration; // in seconds
@@ -201,6 +222,7 @@ class mSunTracking :
 
     #endif // USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
 
+    void SubTask_Testing_Calculations();
     
     #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
     double CalculateSolarZenith();
@@ -239,11 +261,29 @@ class mSunTracking :
     void PrintSunPositions(const char* label, SunPosition* sun_positions, int count);
     #endif
 
-    String CTimeFormat(time_t t) const {
-        String timeStr = String(ctime(&t));
-        timeStr.trim();  // Remove any trailing newline or spaces
-        return timeStr;
+    // In your class (const-safe, no heap). Returns true on success.
+    bool CTimeFormat(char* out, size_t out_len, time_t t) const
+    {
+      if (!out || out_len < 2) {
+        if (out && out_len) out[0] = '\0';
+        return false;
+      }
+
+      const char* s = ctime(&t); // static internal buffer (not re-entrant)
+      if (!s) {
+        out[0] = '\0';
+        return false;
+      }
+
+      // Copy, stripping trailing newline/CR like String.trim() would.
+      size_t i = 0;
+      for (; (i + 1) < out_len && s[i] && s[i] != '\n' && s[i] != '\r'; ++i) {
+        out[i] = s[i];
+      }
+      out[i] = '\0';
+      return true;
     }
+
 
     #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
     struct DEBUG
@@ -337,12 +377,13 @@ class mSunTracking :
     }    
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      value->timestamp = 0; // Constantly updated, so timestamp is not required. Assume "0" from now on means reading can be skipped as timeout
-      value->sensor_type.push_back(SENSOR_TYPE_SUN_AZIMUTH_ID);
-      value->data_f.push_back((float)Get_Azimuth());
-      value->sensor_type.push_back(SENSOR_TYPE_SUN_ELEVATION_ID);
-      value->data_f.push_back((float)Get_Elevation());
-      value->sensor_id = index;
+      return;
+      // value->timestamp = 0; // Constantly updated, so timestamp is not required. Assume "0" from now on means reading can be skipped as timeout
+      // value->sensor_type.push_back(SENSOR_TYPE_SUN_AZIMUTH_ID);
+      // value->data_f.push_back((float)Get_Azimuth());
+      // value->sensor_type.push_back(SENSOR_TYPE_SUN_ELEVATION_ID);
+      // value->data_f.push_back((float)Get_Elevation());
+      // value->sensor_id = index;
     };
     
 

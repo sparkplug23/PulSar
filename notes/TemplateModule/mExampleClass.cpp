@@ -19,7 +19,7 @@ int8_t mExampleClass::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************

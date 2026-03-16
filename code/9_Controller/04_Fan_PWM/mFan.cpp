@@ -105,7 +105,7 @@ int8_t mFan::Tasker(uint8_t function, JsonParserObject obj){
   }
 
   // Only continue in to tasker if module was configured properly
-  // if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  // if(!settings.fEnableModule){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************

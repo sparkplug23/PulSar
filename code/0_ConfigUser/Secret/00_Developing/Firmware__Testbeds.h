@@ -152,7 +152,7 @@
     #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
   #endif
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-    #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #define USE_MODULE_SENSORS_DS18X20
     #define DS18X20_MAX_SENSORS 20
     #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
   #endif 
@@ -316,10 +316,10 @@
       /**
        * @brief Right side
        **/
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023   
+      #ifdef USE_MODULE_SENSORS_DS18X20   
       "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       "\"22\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
-      #endif // USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      #endif // USE_MODULE_SENSORS_DS18X20
       // GPIO1 - TX0 - Debug Serial TX
       // GPIO3 - RX0 - Debug Serial RX
       #ifdef USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
@@ -915,6 +915,17 @@
  * * * 2 as Relays
  * * * 2 as LED module for status 
  * 
+ * 9 inputs (2 touch, 4 push, 2 switch, esp32 button)
+ * 5 leds (4 leds, esp32 led)
+ * 
+ * ONBOARD_LED should be used now for connection status by default from now on, unless another GPIO takes it over
+ * 
+ * Two types of boards I cna test here
+ * LEDS_ARE_RELAYS: sonoff pro 4, single push toggle, hold button is relay on timer.
+ * 
+ * Use this to develop auto rule adds via name parsing, SWT1>REL3?FOLLOW etc
+ * 
+ * 
  */
 #ifdef DEVICE_TESTBED_05__SWITCHES_BUTTONS
   #ifndef DEVICENAME_CTR
@@ -934,42 +945,6 @@
    * SECTION: System Debug Options
   ************************************/  
  
-  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  #define USE_MODULE_CORE_FILESYSTEM  
-  #define ENABLE_FEATURE_JSON__ASYNCJSON_V6
-  #define USE_MODULE_NETWORK_WEBSERVER  
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
-  #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
-  #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
-  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
-  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING  
-  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-  #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
-  #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
-
-
-
-//  #define ENABLE_ADVANCED_DEBUGGING
-// #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-// #define ENABLE_DEBUG_FUNCTION_NAMES
-// 
-// #define SERIAL_LOG_LEVEL_DURING_BOOT 8
-// #define ENABLE_DEBUG_LINE_HERE
-// #define ENABLE_DEBUG_LINE_HERE2
-// #define ENABLE_DEBUG_LINE_HERE3
-// #define ENABLE_DEBUG_LINE_HERE4
-// #define ENABLE_DEBUG_LINE_HERE_TRACE
-// #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
-// #define USE_DEBUG_PRINT
-// #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
-
-// #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
- 
-  #define ENABLE_FEATURE_SYSTEM__BOOT_SPLASH__DISPLAY_BLOCK_TO_SHOW_END_OF_INIT
-  #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
-
   /***********************************
    * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
   ************************************/  
@@ -1166,8 +1141,6 @@
 
 
 #endif
-
-
 
 
 

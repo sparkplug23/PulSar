@@ -20,7 +20,7 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -48,7 +48,7 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
     #endif //USE_MODULE_NETWORK_MQTT
   }
 
-  return FUNCTION_RESULT_SUCCESS_ID;
+  return TASKER_RESULT__SUCCESS_ID;
 
 }
 
@@ -117,9 +117,6 @@ void mButtons::Pre_Init(void)
       TouchFlag(i);
     }
     #endif // SOC_TOUCH_VERSION_1
-    else{
-      ALOG_DBG(PSTR(D_LOG_BUTTONS "%d None"), i);
-    }
 
     if(pin != -1)
     {
@@ -480,7 +477,7 @@ void mButtons::Handler(void) {
 
     uint8_t button = Button.debounced_state[button_index];
 
-    ALOG_INF(PSTR("button %d %d"), button_index, button);
+    ALOG_DBM(PSTR("button %d %d"), button_index, button);
 
     // #ifdef ESP8266
     // if (!button_index && ((SONOFF_DUAL == TasmotaGlobal.module_type) || (CH4 == TasmotaGlobal.module_type))) {
@@ -532,7 +529,7 @@ void mButtons::Handler(void) {
     tkr_events->XdrvMailbox.index = button_index;
     tkr_events->XdrvMailbox.payload = button;
     tkr_events->XdrvMailbox.command_code = (Button.last_state[button_index] & 0xFF) | ((Button.press_counter[button_index] & 0xFF) << 8);
-    if (tkr->Tasker_Interface(TASK_BUTTON_PRESSED) == FUNCTION_RESULT_HANDLED_ID){
+    if (tkr->Tasker_Interface(TASK_BUTTON_PRESSED) == TASKER_RESULT__HANDLED_ID){
       // Serviced
     }
     else 
@@ -687,7 +684,7 @@ void mButtons::Handler(void) {
             
             tkr_events->XdrvMailbox.index = button_index;
             tkr_events->XdrvMailbox.payload = button;
-            if (tkr->Tasker_Interface(TASK_BUTTON_MULTI_PRESSED) == FUNCTION_RESULT_HANDLED_ID) {
+            if (tkr->Tasker_Interface(TASK_BUTTON_MULTI_PRESSED) == TASKER_RESULT__HANDLED_ID) {
               // Serviced
               AddLog(LOG_LEVEL_DEBUG, PSTR("BTN: FUNC_BUTTON_MULTI_PRESSED serviced"));
             } else

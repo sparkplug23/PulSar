@@ -89,9 +89,8 @@
 
 // #define P_CHECK(x) if(x!-nullptr)
 
-#define FLOAT_N(x) ((int)(x))
-#define FLOAT_D(x) ((int)((((x) - (int)(x)) * 100.0f)))  // 2 decimal places
-
+#define FLOAT_N(x) ((int)(x))  // integer part (keeps sign)
+#define FLOAT_D(x) ((int)(fabsf(((float)(x) - (float)((int)(x))) ) * 100.0f))  // 2dp, magnitude only
 
 #ifdef ESP8266
   #define APPEND_ESP_TYPE_MQTT_STRING "_esp8266"

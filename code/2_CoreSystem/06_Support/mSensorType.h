@@ -108,6 +108,11 @@ typedef enum
   SENSOR_TYPE_DISTANCE_DETECT_ID, 
 
   /**
+   * @brief Moisture
+   **/
+  SENSOR_TYPE_MOISTURE_ID,
+
+  /**
    * @brief Global Position
    **/
   SENSOR_TYPE_LATITUDE_ID,
@@ -326,6 +331,8 @@ static const char* GetUnifiedSensor_NameByTypeID(uint8_t id)
     case SENSOR_TYPE_STRENGTH_MOVING_ID:               return PSTR("StrengthMoving");  
     case SENSOR_TYPE_STRENGTH_STATIC_ID:               return PSTR("StrengthStatic");  
     case SENSOR_TYPE_DISTANCE_DETECT_ID:               return PSTR("DistanceDetect");  
+
+    case SENSOR_TYPE_MOISTURE_ID: return PSTR("Moisture");
 
     case SENSOR_TYPE_VOLTAGE_ID:                return PSTR("Voltage");
     case SENSOR_TYPE_CURRENT_ID:                return PSTR("Current");

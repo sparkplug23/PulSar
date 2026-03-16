@@ -10,9 +10,6 @@
 
 #undef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
 
-#else
-
-#define DISABLE_RMT_METHODS
 
 #endif
 
@@ -134,138 +131,464 @@ enum EM_BUS_TYPE
 #endif
 #endif
 
-/*** ESP32 Neopixel methods ***/
-#ifdef ARDUINO_ARCH_ESP32
-// C3: I2S0 and I2S1 methods not supported (has one I2S bus)
-// S2: I2S0 methods supported (single & parallel), I2S1 methods not supported (has one I2S bus)
-// S3: I2S0 methods not supported, I2S1 supports LCD parallel methods (has two I2S buses)
-// https://github.com/Makuna/NeoPixelBus/blob/b32f719e95ef3c35c46da5c99538017ef925c026/src/internal/Esp32_i2s.h#L4
-// https://github.com/Makuna/NeoPixelBus/blob/b32f719e95ef3c35c46da5c99538017ef925c026/src/internal/NeoEsp32RmtMethod.h#L857
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
-  // S3 will always use LCD parallel output
-  typedef X8Ws2812xMethod X1Ws2812xMethod;
-  typedef X8Sk6812Method X1Sk6812Method;
-  typedef X8400KbpsMethod X1400KbpsMethod;
-  typedef X8800KbpsMethod X1800KbpsMethod;
-  typedef X8Tm1814Method X1Tm1814Method;
-  typedef X8Tm1829Method X1Tm1829Method;
-  typedef X8Apa106Method X1Apa106Method;
-  typedef X8Ws2805Method X1Ws2805Method;
-  typedef X8Tm1914Method X1Tm1914Method;
-#elif defined(CONFIG_IDF_TARGET_ESP32S2)
-  // S2 will use I2S0
-  typedef NeoEsp32I2s0Ws2812xMethod X1Ws2812xMethod;
-  typedef NeoEsp32I2s0Sk6812Method X1Sk6812Method;
-  typedef NeoEsp32I2s0400KbpsMethod X1400KbpsMethod;
-  typedef NeoEsp32I2s0800KbpsMethod X1800KbpsMethod;
-  typedef NeoEsp32I2s0Tm1814Method X1Tm1814Method;
-  typedef NeoEsp32I2s0Tm1829Method X1Tm1829Method;
-  typedef NeoEsp32I2s0Apa106Method X1Apa106Method;
-  typedef NeoEsp32I2s0Ws2805Method X1Ws2805Method;
-  typedef NeoEsp32I2s0Tm1914Method X1Tm1914Method;
-#elif !defined(CONFIG_IDF_TARGET_ESP32C3)
-  // regular ESP32 will use I2S1
-  typedef NeoEsp32I2s1Ws2812xMethod X1Ws2812xMethod;
-  typedef NeoEsp32I2s1Sk6812Method X1Sk6812Method;
-  typedef NeoEsp32I2s1400KbpsMethod X1400KbpsMethod;
-  typedef NeoEsp32I2s1800KbpsMethod X1800KbpsMethod;
-  typedef NeoEsp32I2s1Tm1814Method X1Tm1814Method;
-  typedef NeoEsp32I2s1Tm1829Method X1Tm1829Method;
-  typedef NeoEsp32I2s1Apa106Method X1Apa106Method;
-  typedef NeoEsp32I2s1Ws2805Method X1Ws2805Method;
-  typedef NeoEsp32I2s1Tm1914Method X1Tm1914Method;
-#endif
-
-
-
 // /*** ESP32 Neopixel methods ***/
-// #ifdef ESP32
+// #ifdef ARDUINO_ARCH_ESP32
 
-  #ifdef CONFIG_IDF_TARGET_ESP32C3
-    // No I2S, only RMT methods available
-    #define NEOPIXEL_DISABLE_400_PIXELBUS
+//   /**********************************************************************
+//    * I2S typedef selection (keep this exactly aligned with NeoPixelBus)
+//    **********************************************************************/
+//   #if defined(CONFIG_IDF_TARGET_ESP32S3)
+//     // S3 uses LCD-style parallel types
+//     typedef X8Ws2812xMethod   X1Ws2812xMethod;
+//     typedef X8Sk6812Method    X1Sk6812Method;
+//     typedef X8400KbpsMethod   X1400KbpsMethod;
+//     typedef X8800KbpsMethod   X1800KbpsMethod;
+//     typedef X8Tm1814Method    X1Tm1814Method;
+//     typedef X8Tm1829Method    X1Tm1829Method;
+//     typedef X8Apa106Method    X1Apa106Method;
+//     typedef X8Ws2805Method    X1Ws2805Method;
+//     typedef X8Tm1914Method    X1Tm1914Method;
 
-    //RGB
-    // 
-    #ifdef ENABLE_DEBUGFEATURE_LIGHTS__ESP32C3_FLICKER_TEST
-    // #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoEsp32Rmt0Ws2812xMethod>//NeoEsp32RmtMethod(Ws2812x)> // ESP32, S2, S3, C3
-    // #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoEsp32RmtHINWs2812xMethod>//NeoEsp32RmtMethod(Ws2812x)> // ESP32, S2, S3, C3
-    
-    // using StripMethod = NeoEsp32Rmt0Ws2812xHiMethod;  // WS2812/WS2812B (prefer HI)
-    //// using StripMethod = NeoEsp32Rmt0Ws2812xMethod;   // classic
-    //// using StripMethod = NeoEsp32Rmt0Sk6812Method;    // SK6812 (RGBW)
-    // #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoEsp32Rmt0Ws2812xHiMethod>//NeoEsp32RmtMethod(Ws2812x)> // ESP32, S2, S3, C3
-    
-    // static_assert(RMT_CHANNEL_MAX >= 4, "Unexpected RMT channel count on this target");
-    // static_assert(0 < RMT_CHANNEL_MAX,  "Chosen RMT channel out of range");
-    #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
+//   #elif defined(CONFIG_IDF_TARGET_ESP32S2)
+//     // S2 uses I2S0
+//     typedef NeoEsp32I2s0Ws2812xMethod X1Ws2812xMethod;
+//     typedef NeoEsp32I2s0Sk6812Method  X1Sk6812Method;
+//     typedef NeoEsp32I2s0400KbpsMethod X1400KbpsMethod;
+//     typedef NeoEsp32I2s0800KbpsMethod X1800KbpsMethod;
+//     typedef NeoEsp32I2s0Tm1814Method  X1Tm1814Method;
+//     typedef NeoEsp32I2s0Tm1829Method  X1Tm1829Method;
+//     typedef NeoEsp32I2s0Apa106Method  X1Apa106Method;
+//     typedef NeoEsp32I2s0Ws2805Method  X1Ws2805Method;
+//     typedef NeoEsp32I2s0Tm1914Method  X1Tm1914Method;
+
+//   #elif !defined(CONFIG_IDF_TARGET_ESP32C3)
+//     // Classic ESP32 uses I2S1
+//     typedef NeoEsp32I2s1Ws2812xMethod X1Ws2812xMethod;
+//     typedef NeoEsp32I2s1Sk6812Method  X1Sk6812Method;
+//     typedef NeoEsp32I2s1400KbpsMethod X1400KbpsMethod;
+//     typedef NeoEsp32I2s1800KbpsMethod X1800KbpsMethod;
+//     typedef NeoEsp32I2s1Tm1814Method  X1Tm1814Method;
+//     typedef NeoEsp32I2s1Tm1829Method  X1Tm1829Method;
+//     typedef NeoEsp32I2s1Apa106Method  X1Apa106Method;
+//     typedef NeoEsp32I2s1Ws2805Method  X1Ws2805Method;
+//     typedef NeoEsp32I2s1Tm1914Method  X1Tm1914Method;
+//   #endif
+
+
+//   /**********************************************************************
+//    * RMT method selection (WLED-style)
+//    *
+//    * You are adding NeoEsp32RmtHI locally.
+//    * - Xtensa (ESP32/S2/S3): prefer HI unless WLED_USE_SHARED_RMT is defined
+//    * - RISC-V (C3): use N methods (HI generally not used there)
+//    **********************************************************************/
+//   #if !defined(__riscv) && !defined(WLED_USE_SHARED_RMT)
+//     #include <NeoEsp32RmtHIMethod.h>
+//     #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtHIN ## x ## Method
+//   #else
+//     // fallback to the standard NeoPixelBus "N" channel-capable RMT methods
+//     #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtN ## x ## Method
+//   #endif
+
+
+//   /**********************************************************************
+//    * BUS DEFINITIONS
+//    *
+//    * IMPORTANT:
+//    * - RN_3 / RN_4 / RN_400_3 are RMT-capable and accept (len,pin,NeoBusChannel)
+//    * - RN_5 (WS2805 RGBWW) is NOT RMT; keep it I2S-only and DO NOT pass channel
+//    * - For targets where you disable I2S, we alias I0/I1/*P to RN so code compiles.
+//    **********************************************************************/
+
+//   // ---------- Common RGB / RGBW ----------
+//   #define PIXELBUS_32_RN_3       NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
+//   #define PIXELBUS_32_RN_4       NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
+
+//   // 400K (if enabled)
+//   #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+//     #define PIXELBUS_32_RN_400_3 NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(400Kbps)>
+//   #endif
+
+//   // ---------- RGBWW (WS2805) ----------
+//   // No RMT method. Keep it as I2S based on target’s X1Ws2805Method typedef.
+//   #define PIXELBUS_32_RN_5       NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+
+
+//   // ---------- Target mapping ----------
+//   #if defined(CONFIG_IDF_TARGET_ESP32C3)
+//     // C3: your policy = RMT only (no I2S WS2812 paths)
+//     #define NEOPIXEL_DISABLE_400_PIXELBUS
+
+//     // map "I*" names so the rest of your wrapper compiles
+//     #define PIXELBUS_32_I0_3   PIXELBUS_32_RN_3
+//     #define PIXELBUS_32_I1_3   PIXELBUS_32_RN_3
+//     #define PIXELBUS_32_I0_3P  PIXELBUS_32_RN_3
+//     #define PIXELBUS_32_I1_3P  PIXELBUS_32_RN_3
+
+//     #define PIXELBUS_32_I0_4   PIXELBUS_32_RN_4
+//     #define PIXELBUS_32_I1_4   PIXELBUS_32_RN_4
+//     #define PIXELBUS_32_I0_4P  PIXELBUS_32_RN_4
+//     #define PIXELBUS_32_I1_4P  PIXELBUS_32_RN_4
+
+//     // RGBWW aliases (still compiles, but is I2S-type; if you truly don't support it on C3, leave it unused)
+//     #define PIXELBUS_32_I0_5   PIXELBUS_32_RN_5
+//     #define PIXELBUS_32_I1_5   PIXELBUS_32_RN_5
+//     #define PIXELBUS_32_I0_5P  PIXELBUS_32_RN_5
+//     #define PIXELBUS_32_I1_5P  PIXELBUS_32_RN_5
+
+//     // 400K aliases are disabled above
+
+//   #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+//     // S3: keep I2S disabled if you already do that globally; otherwise map I* to X1/X8
+//     #define PIXELBUS_32_I0_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
+//     #define PIXELBUS_32_I1_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
+//     #define PIXELBUS_32_I0_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
+//     #define PIXELBUS_32_I1_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
+
+//     #define PIXELBUS_32_I0_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+//     #define PIXELBUS_32_I1_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+//     #define PIXELBUS_32_I0_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+//     #define PIXELBUS_32_I1_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+
+//     #define PIXELBUS_32_I0_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+//     #define PIXELBUS_32_I1_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+//     #define PIXELBUS_32_I0_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+//     #define PIXELBUS_32_I1_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+
+//     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+//       #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
+//       #define PIXELBUS_32_I1_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
+//     #endif
+
+//   #elif defined(CONFIG_IDF_TARGET_ESP32S2)
+//     // S2: I2S0 only, map I1->I0 for compatibility
+//     #define PIXELBUS_32_I0_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
+//     #define PIXELBUS_32_I1_3   PIXELBUS_32_I0_3
+//     #define PIXELBUS_32_I0_3P  PIXELBUS_32_I0_3
+//     #define PIXELBUS_32_I1_3P  PIXELBUS_32_I0_3
+
+//     #define PIXELBUS_32_I0_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+//     #define PIXELBUS_32_I1_4   PIXELBUS_32_I0_4
+//     #define PIXELBUS_32_I0_4P  PIXELBUS_32_I0_4
+//     #define PIXELBUS_32_I1_4P  PIXELBUS_32_I0_4
+
+//     #define PIXELBUS_32_I0_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+//     #define PIXELBUS_32_I1_5   PIXELBUS_32_I0_5
+//     #define PIXELBUS_32_I0_5P  PIXELBUS_32_I0_5
+//     #define PIXELBUS_32_I1_5P  PIXELBUS_32_I0_5
+
+//     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+//       #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
+//       #define PIXELBUS_32_I1_400_3 PIXELBUS_32_I0_400_3
+//     #endif
+
+//   #else
+//     // Classic ESP32: keep your old scheme (I0/I1 + parallel)
+//     #define PIXELBUS_32_I0_3   NeoPixelBus<NeoRgbFeature,  NeoEsp32I2s0Sk6812Method>
+//     #define PIXELBUS_32_I1_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
+//     #define PIXELBUS_32_I0_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
+//     #define PIXELBUS_32_I1_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
+
+//     #define PIXELBUS_32_I0_4   NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0Sk6812Method>
+//     #define PIXELBUS_32_I1_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+//     #define PIXELBUS_32_I0_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+//     #define PIXELBUS_32_I1_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+
+//     #define PIXELBUS_32_I0_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+//     #define PIXELBUS_32_I1_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+//     #define PIXELBUS_32_I0_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+//     #define PIXELBUS_32_I1_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+
+//     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+//       #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0400KbpsMethod>
+//       #define PIXELBUS_32_I1_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1400KbpsMethod>
+//     #endif
+
+//   #endif // target select
+
+// #endif // ARDUINO_ARCH_ESP32
+
+// #ifdef ARDUINO_ARCH_ESP32
+//   #pragma message "ARDUINO_ARCH_ESP32 is defined"
+// #endif
+
+// #ifdef CONFIG_IDF_TARGET_ESP32C3
+//   #pragma message "CONFIG_IDF_TARGET_ESP32C3 is defined"
+// #endif
+// #ifdef CONFIG_IDF_TARGET_ESP32
+//   #pragma message "CONFIG_IDF_TARGET_ESP32 is defined"
+// #endif
+// #ifdef CONFIG_IDF_TARGET_ESP32S3
+//   #pragma message "CONFIG_IDF_TARGET_ESP32S3 is defined"
+// #endif
+// #ifdef CONFIG_IDF_TARGET_ESP32S2
+//   #pragma message "CONFIG_IDF_TARGET_ESP32S2 is defined"
+// #endif
+
+// #ifdef ARDUINO_ESP32C3_DEV
+//   #pragma message "ARDUINO_ESP32C3_DEV is defined"
+// #endif
+// #ifdef ESP32C3
+//   #pragma message "ESP32C3 is defined"
+// #endif
+
+
+/* =================================================================================================
+ * ESP32 family quick-reference (NeoPixelBus / NeoPixelBus-RMT-HI planning)
+ *
+ * Source for I2S + RMT peripheral counts: ESP-IDF Chip Series Comparison (v5.0). :contentReference[oaicite:0]{index=0}
+ *
+ * Notes:
+ * - “I2S count” is the number of I2S peripherals on the SoC (not “works for NeoPixelBus I2S method”).
+ * - “RMT” is the SoC peripheral count; some targets split TX/RX (C3/S3/S2) per Espressif table.
+ * - “HI Method” here means your NeoEsp32RmtHI add-on (interrupt/ISR-driven) *availability by arch*.
+ *   In WLED, HI is *disabled* on __riscv (C3), so C3 defaults to “N” methods.
+ * - “Mini form factor” = commonly available tiny modules/boards in the ecosystem (subjective, not SoC).
+ * =================================================================================================
+ *
+ * | Chip Series     | Arch / Core            | I2S peripherals | RMT peripheral (total / TX / RX)         | HI Method usable? | Mini modules common? |
+ * |----------------|-------------------------|-----------------|------------------------------------------|-------------------|----------------------|
+ * | ESP32 (classic) | Xtensa LX6 (dual/single)| 2               | 8 channels (TX/RX flexible)              | YES (Xtensa)      | YES                  |
+ * | ESP32-S2        | Xtensa LX7 (single)     | 1               | 4 channels (TX/RX configurable)          | YES (Xtensa)      | SOME                 |
+ * | ESP32-C3        | RISC-V (single)         | 1               | 4 channels (2 TX, 2 RX)                  | NO* (WLED disables)| YES (SuperMini etc.) |
+ * | ESP32-S3        | Xtensa LX7 (dual)       | 2               | 8 channels (4 TX, 4 RX)                  | YES (Xtensa)      | YES (many “mini”)    |
+ *
+ * *C3 note: your flicker problem is on RMT “N” paths; WLED chooses N on __riscv, not HI.
+ * ================================================================================================= */
+
+#ifdef ARDUINO_ARCH_ESP32
+
+  #include <sdkconfig.h>
+
+  /**********************************************************************
+   * I2S typedef selection (keep aligned with NeoPixelBus internals)
+   **********************************************************************/
+  #if defined(CONFIG_IDF_TARGET_ESP32S3)
+    // S3 uses LCD-style parallel types
+    typedef X8Ws2812xMethod   X1Ws2812xMethod;
+    typedef X8Sk6812Method    X1Sk6812Method;
+    typedef X8400KbpsMethod   X1400KbpsMethod;
+    typedef X8800KbpsMethod   X1800KbpsMethod;
+    typedef X8Tm1814Method    X1Tm1814Method;
+    typedef X8Tm1829Method    X1Tm1829Method;
+    typedef X8Apa106Method    X1Apa106Method;
+    typedef X8Ws2805Method    X1Ws2805Method;
+    typedef X8Tm1914Method    X1Tm1914Method;
+
+  #elif defined(CONFIG_IDF_TARGET_ESP32S2)
+    // S2 uses I2S0
+    typedef NeoEsp32I2s0Ws2812xMethod X1Ws2812xMethod;
+    typedef NeoEsp32I2s0Sk6812Method  X1Sk6812Method;
+    typedef NeoEsp32I2s0400KbpsMethod X1400KbpsMethod;
+    typedef NeoEsp32I2s0800KbpsMethod X1800KbpsMethod;
+    typedef NeoEsp32I2s0Tm1814Method  X1Tm1814Method;
+    typedef NeoEsp32I2s0Tm1829Method  X1Tm1829Method;
+    typedef NeoEsp32I2s0Apa106Method  X1Apa106Method;
+    typedef NeoEsp32I2s0Ws2805Method  X1Ws2805Method;
+    typedef NeoEsp32I2s0Tm1914Method  X1Tm1914Method;
+
+  #elif defined(CONFIG_IDF_TARGET_ESP32C3)
+    // C3: no NeoPixelBus I2S typedefs used here (RMT-only in your policy)
 
   #else
-    #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
+    // Classic ESP32 uses I2S1
+    typedef NeoEsp32I2s1Ws2812xMethod X1Ws2812xMethod;
+    typedef NeoEsp32I2s1Sk6812Method  X1Sk6812Method;
+    typedef NeoEsp32I2s1400KbpsMethod X1400KbpsMethod;
+    typedef NeoEsp32I2s1800KbpsMethod X1800KbpsMethod;
+    typedef NeoEsp32I2s1Tm1814Method  X1Tm1814Method;
+    typedef NeoEsp32I2s1Tm1829Method  X1Tm1829Method;
+    typedef NeoEsp32I2s1Apa106Method  X1Apa106Method;
+    typedef NeoEsp32I2s1Ws2805Method  X1Ws2805Method;
+    typedef NeoEsp32I2s1Tm1914Method  X1Tm1914Method;
+  #endif
+
+
+  /**********************************************************************
+   * RMT method selection + BUS DEFINITIONS (explicit per target)
+   **********************************************************************/
+
+  // ====================================================================
+  // ESP32-C3 (RISC-V) - NO I2S, RMT Only
+  // ====================================================================
+  #if defined(CONFIG_IDF_TARGET_ESP32C3)
+
+    // Your policy: RMT-only on C3
+    #define NEOPIXEL_DISABLE_400_PIXELBUS
+
+    // C3: use upstream "N" RMT methods
+    #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtN ## x ## Method
+
+    // ---------- RGB / RGBW ----------
+    #define PIXELBUS_32_RN_3  NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
+    #define PIXELBUS_32_RN_4  NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
+
+    // ---------- 400K ----------
+    // disabled above
+
+    // ---------- RGBWW (WS2805) ----------
+    #define PIXELBUS_32_RN_5  NeoPixelBus<NeoRgbwwFeature, NeoWs2812xMethod>  // TEMP: RGBWW placeholder on C3 (not true WS2805 timing). You will change later.
+
+    // Map I2S names to RMT so the rest of the wrapper compiles
+    #define PIXELBUS_32_I0_3   PIXELBUS_32_RN_3
+    #define PIXELBUS_32_I1_3   PIXELBUS_32_RN_3
+    #define PIXELBUS_32_I0_3P  PIXELBUS_32_RN_3
+    #define PIXELBUS_32_I1_3P  PIXELBUS_32_RN_3
+
+    #define PIXELBUS_32_I0_4   PIXELBUS_32_RN_4
+    #define PIXELBUS_32_I1_4   PIXELBUS_32_RN_4
+    #define PIXELBUS_32_I0_4P  PIXELBUS_32_RN_4
+    #define PIXELBUS_32_I1_4P  PIXELBUS_32_RN_4
+
+    #define PIXELBUS_32_I0_5   PIXELBUS_32_RN_5
+    #define PIXELBUS_32_I1_5   PIXELBUS_32_RN_5
+    #define PIXELBUS_32_I0_5P  PIXELBUS_32_RN_5
+    #define PIXELBUS_32_I1_5P  PIXELBUS_32_RN_5
+
+
+  // ====================================================================
+  // ESP32-S3 (Xtensa)
+  // ====================================================================
+  #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+
+    // Keep EXACT HI-selection logic (as requested)
+    #if !defined(__riscv) && !defined(WLED_USE_SHARED_RMT)
+      #include <NeoEsp32RmtHIMethod.h>
+      #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtHIN ## x ## Method
+    #else
+      #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtN ## x ## Method
     #endif
-    #define PIXELBUS_32_I0_3 NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
-    #define PIXELBUS_32_I1_3 NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
-    #define PIXELBUS_32_I1_3P NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
-    #define PIXELBUS_32_I0_3P NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
-    //RGBW
-    #define PIXELBUS_32_RN_4 NeoPixelBus<NeoRgbwFeature, NeoWs2812xMethod>
-    #define PIXELBUS_32_I0_4 NeoPixelBus<NeoRgbwFeature, NeoWs2812xMethod>
-    #define PIXELBUS_32_I1_4 NeoPixelBus<NeoRgbwFeature, NeoWs2812xMethod>
-    #define PIXELBUS_32_I1_4P NeoPixelBus<NeoRgbwFeature, NeoWs2812xMethod>
-    #define PIXELBUS_32_I0_4P NeoPixelBus<NeoRgbwFeature, NeoWs2812xMethod>
-    //RGBWW (WS2805)
-    #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, NeoWs2812xMethod> // No RMT method
-    #define PIXELBUS_32_I0_5 NeoPixelBus<NeoRgbwwFeature, NeoWs2812xMethod>
-    #define PIXELBUS_32_I1_5 NeoPixelBus<NeoRgbwwFeature, NeoWs2812xMethod>
-    #define PIXELBUS_32_I1_5P NeoPixelBus<NeoRgbwwFeature, NeoWs2812xMethod>
-    #define PIXELBUS_32_I0_5P NeoPixelBus<NeoRgbwwFeature, NeoWs2812xMethod>
-    //400Kbps
+
+    // ---------- RGB / RGBW ----------
+    #define PIXELBUS_32_RN_3  NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
+    #define PIXELBUS_32_RN_4  NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
+
+    // ---------- 400K ----------
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
-    #define PIXELBUS_32_RN_400_3 NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
-    #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
-    #define PIXELBUS_32_I1_400_3 NeoPixelBus<NeoRgbFeature, NeoWs2812xMethod>
+      #define PIXELBUS_32_RN_400_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(400Kbps)>
     #endif
 
-  #else  // not CONFIG_IDF_TARGET_ESP32C2/C3/C6 nor CONFIG_IDF_TARGET_ESP32S2 - ESP32
-    //RGB
-    #ifdef DISABLE_RMT_METHODS
-    #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1800KbpsMethod>
-    #error "stop this"
-    #else
-    #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NeoEsp32RmtNWs2812xMethod>
-    #endif
-    #define PIXELBUS_32_I0_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0Sk6812Method>//NeoEsp32I2s0800KbpsMethod>
-    #define PIXELBUS_32_I1_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1800KbpsMethod>
-    #define PIXELBUS_32_I1_3P NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1X8Ws2812xMethod>
-    #define PIXELBUS_32_I0_3P NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0X16Ws2812xMethod>
-    //RGBW
-    #ifdef DISABLE_RMT_METHODS
-    #define PIXELBUS_32_RN_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0Sk6812Method>
-    #else
-    #define PIXELBUS_32_RN_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32RmtNSk6812Method>
-    #endif
-    #define PIXELBUS_32_I0_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0Sk6812Method>
-    #define PIXELBUS_32_I1_4 NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s1Sk6812Method>
-    #define PIXELBUS_32_I1_4P NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s1X8Sk6812Method>
-    #define PIXELBUS_32_I0_4P NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0X16Sk6812Method>
-    //RGBWW (WS2805)
-    #ifdef DISABLE_RMT_METHODS
-    #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0Ws2805Method> // No RMT method
-    #else
-    #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, NeoWs2812Method> // No RMT method
-    #endif
-    #define PIXELBUS_32_I0_5 NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0Ws2805Method>
-    #define PIXELBUS_32_I1_5 NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s1Ws2805Method>
-    #define PIXELBUS_32_I1_5P NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s1X8Ws2805Method>
-    #define PIXELBUS_32_I0_5P NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0X16Ws2805Method>
-    //400Kbps
-    #define PIXELBUS_32_RN_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32RmtN400KbpsMethod>
-    #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0400KbpsMethod>
-    #define PIXELBUS_32_I1_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1400KbpsMethod>
-  #endif  // not CONFIG_IDF_TARGET_ESP32C2/C3/C6 nor CONFIG_IDF_TARGET_ESP32S2 - ESP32
+    // ---------- RGBWW (WS2805) ----------
+    #define PIXELBUS_32_RN_5  NeoPixelBus<NeoRgbwwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2805)>
 
-#endif // ESP32
+    // I2S mappings (single + parallel)
+    #define PIXELBUS_32_I0_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
+    #define PIXELBUS_32_I1_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
+    #define PIXELBUS_32_I0_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
+    #define PIXELBUS_32_I1_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
 
+    #define PIXELBUS_32_I0_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+    #define PIXELBUS_32_I1_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+    #define PIXELBUS_32_I0_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+    #define PIXELBUS_32_I1_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+
+    #define PIXELBUS_32_I0_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+    #define PIXELBUS_32_I1_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+    #define PIXELBUS_32_I0_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+    #define PIXELBUS_32_I1_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+
+    #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+      #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
+      #define PIXELBUS_32_I1_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
+    #endif
+
+
+  // ====================================================================
+  // ESP32-S2 (Xtensa)
+  // ====================================================================
+  #elif defined(CONFIG_IDF_TARGET_ESP32S2)
+
+    // Keep EXACT HI-selection logic (as requested)
+    #if !defined(__riscv) && !defined(WLED_USE_SHARED_RMT)
+      #include <NeoEsp32RmtHIMethod.h>
+      #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtHIN ## x ## Method
+    #else
+      #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtN ## x ## Method
+    #endif
+
+    // ---------- RGB / RGBW ----------
+    #define PIXELBUS_32_RN_3  NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
+    #define PIXELBUS_32_RN_4  NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
+
+    // ---------- 400K ----------
+    #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+      #define PIXELBUS_32_RN_400_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(400Kbps)>
+    #endif
+
+    // ---------- RGBWW (WS2805) ----------
+    #define PIXELBUS_32_RN_5  NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>  // WS2805 uses I2S0, not RMT
+
+    // I2S0 only; map I1 -> I0
+    #define PIXELBUS_32_I0_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
+    #define PIXELBUS_32_I1_3   PIXELBUS_32_I0_3
+    #define PIXELBUS_32_I0_3P  PIXELBUS_32_I0_3
+    #define PIXELBUS_32_I1_3P  PIXELBUS_32_I0_3
+
+    #define PIXELBUS_32_I0_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+    #define PIXELBUS_32_I1_4   PIXELBUS_32_I0_4
+    #define PIXELBUS_32_I0_4P  PIXELBUS_32_I0_4
+    #define PIXELBUS_32_I1_4P  PIXELBUS_32_I0_4
+
+    #define PIXELBUS_32_I0_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+    #define PIXELBUS_32_I1_5   PIXELBUS_32_I0_5
+    #define PIXELBUS_32_I0_5P  PIXELBUS_32_I0_5
+    #define PIXELBUS_32_I1_5P  PIXELBUS_32_I0_5
+
+    #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+      #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
+      #define PIXELBUS_32_I1_400_3 PIXELBUS_32_I0_400_3
+    #endif
+
+
+  // ====================================================================
+  // Classic ESP32 (Xtensa)
+  // ====================================================================
+  #else
+
+    // Keep EXACT HI-selection logic (as requested)
+    #if !defined(__riscv) && !defined(WLED_USE_SHARED_RMT)
+      #include <NeoEsp32RmtHIMethod.h>
+      #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtHIN ## x ## Method
+    #else
+      #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtN ## x ## Method
+    #endif
+
+    // ---------- RGB / RGBW ----------
+    #define PIXELBUS_32_RN_3  NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
+    #define PIXELBUS_32_RN_4  NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
+
+    // ---------- 400K ----------
+    #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+      #define PIXELBUS_32_RN_400_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(400Kbps)>
+    #endif
+
+    // ---------- RGBWW (WS2805) ----------
+    #define PIXELBUS_32_RN_5  NeoPixelBus<NeoRgbwwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2805)>  // WS2805 via RMT (channel-selectable). If HI is available it will pick HI, else N.
+
+    // I2S + parallel (your historical naming)
+    #define PIXELBUS_32_I0_3   NeoPixelBus<NeoRgbFeature,  NeoEsp32I2s0Sk6812Method>
+    #define PIXELBUS_32_I1_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
+    #define PIXELBUS_32_I0_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
+    #define PIXELBUS_32_I1_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
+
+    #define PIXELBUS_32_I0_4   NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0Sk6812Method>
+    #define PIXELBUS_32_I1_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+    #define PIXELBUS_32_I0_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+    #define PIXELBUS_32_I1_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+
+    #define PIXELBUS_32_I0_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+    #define PIXELBUS_32_I1_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+    #define PIXELBUS_32_I0_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+    #define PIXELBUS_32_I1_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+
+    #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+      #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0400KbpsMethod>
+      #define PIXELBUS_32_I1_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1400KbpsMethod>
+    #endif
+
+  #endif // target
+
+#endif // ARDUINO_ARCH_ESP32
 
 // 48bit & 64bit to 24bit & 32bit RGB(W) conversion
 #define toRGBW32(c) (RGBW32((c>>40)&0xFF, (c>>24)&0xFF, (c>>8)&0xFF, (c>>56)&0xFF))
@@ -366,74 +689,156 @@ class PolyBus
     }
   };
 
+static void* create(uint8_t busType, uint8_t* pins, uint16_t len, uint8_t channel)
+{
+  DEBUG_PRINTF("PolyBus::create busType %d, pin[0] %d, len %d, channel %d\n\r", busType, pins[0], len, channel);
 
-  static void* create(uint8_t busType, uint8_t* pins, uint16_t len, uint8_t channel) 
-  {
-    // #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
-    DEBUG_PRINTF("PolyBus::create busType %d, pin[0] %d, len %d, channel %d\n\r", busType, pins[0], len, channel);
-    // #endif
-        
-    #ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
-      total_virtual_length = len;  // whatever variable holds total LED count
-    #endif
-    
-    void* busPtr = nullptr;
-    switch (busType) {
-      case BUSTYPE__NONE__ID: break;
-    #ifdef ESP8266
-      case BUSTYPE__8266_U0_3__ID: busPtr = new PIXELBUS_8266_U0_3(len, pins[0]); break;
-      case BUSTYPE__8266_U1_3__ID: busPtr = new PIXELBUS_8266_U1_3(len, pins[0]); break;
-      case BUSTYPE__8266_DM_3__ID: busPtr = new PIXELBUS_8266_DM_3(len, pins[0]); break;
-      case BUSTYPE__8266_U0_4__ID: busPtr = new PIXELBUS_8266_U0_4(len, pins[0]); break;
-      case BUSTYPE__8266_U1_4__ID: busPtr = new PIXELBUS_8266_U1_4(len, pins[0]); break;
-      case BUSTYPE__8266_DM_4__ID: busPtr = new PIXELBUS_8266_DM_4(len, pins[0]); break;
-    #endif
-    #ifdef ARDUINO_ARCH_ESP32
-      #ifdef DISABLE_RMT_METHODS
-      case BUSTYPE__32_RN_3__ID: busPtr = new PIXELBUS_32_I0_3(len, pins[0]); break;
-      #else
-      case BUSTYPE__32_RN_3__ID: 
-        Serial.printf("CREATE RN: busType=%u pin=%u len=%u channel(arg)=%u\n", busType, pins[0], len, channel);
-        busPtr = new PIXELBUS_32_RN_3(len, pins[0], (NeoBusChannel)channel); 
+  #ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+    total_virtual_length = len;
+  #endif
+
+  void* busPtr = nullptr;
+
+  switch (busType) {
+    case BUSTYPE__NONE__ID:
       break;
-      #endif
-      #ifdef DISABLE_RMT_METHODS
-      case BUSTYPE__32_RN_4__ID: busPtr = new PIXELBUS_32_RN_4(len, pins[0]); break;
-      #else
-      case BUSTYPE__32_RN_4__ID: busPtr = new PIXELBUS_32_RN_4(len, pins[0], (NeoBusChannel)channel); break;
-      #endif
-      case BUSTYPE__32_RN_5__ID:  busPtr = new PIXELBUS_32_RN_5(len, pins[0]); break;
-      #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
-      case BUSTYPE__32_RN_400_3__ID: busPtr = new PIXELBUS_32_RN_400_3(len, pins[0], (NeoBusChannel)channel); break;     
-      #endif
-      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
-      case BUSTYPE__32_I0_3__ID: busPtr = new PIXELBUS_32_I0_3(len, pins[0]); break;
-      case BUSTYPE__32_I0_4__ID: busPtr = new PIXELBUS_32_I0_4(len, pins[0]); break;
-      case BUSTYPE__32_I0_5__ID: busPtr = new PIXELBUS_32_I0_5(len, pins[0]); break;
-      case BUSTYPE__32_I0_400_3__ID: busPtr = new PIXELBUS_32_I0_400_3(len, pins[0]); break;
-      case BUSTYPE__32_I0_3P__ID: busPtr = new PIXELBUS_32_I0_3P(len, pins[0]); break;
-      case BUSTYPE__32_I0_4P__ID: busPtr = new PIXELBUS_32_I0_4P(len, pins[0]); break;
-      case BUSTYPE__32_I0_5P__ID: busPtr = new PIXELBUS_32_I0_5P(len, pins[0]); break;
-      #endif      
-      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
-      case BUSTYPE__32_I1_3__ID: busPtr = new PIXELBUS_32_I1_3(len, pins[0]); break;
-      case BUSTYPE__32_I1_4__ID: busPtr = new PIXELBUS_32_I1_4(len, pins[0]); break;
-      case BUSTYPE__32_I1_5__ID: busPtr = new PIXELBUS_32_I1_5(len, pins[0]); break;
-      case BUSTYPE__32_I1_400_3__ID: busPtr = new PIXELBUS_32_I1_400_3(len, pins[0]); break;
-      case BUSTYPE__32_I1_3P__ID: busPtr = new PIXELBUS_32_I1_3P(len, pins[0]); break;
-      case BUSTYPE__32_I1_4P__ID: busPtr = new PIXELBUS_32_I1_4P(len, pins[0]); break;
-      case BUSTYPE__32_I1_5P__ID: busPtr = new PIXELBUS_32_I1_5P(len, pins[0]); break;
-      #endif
+
+  #ifdef ESP8266
+    case BUSTYPE__8266_U0_3__ID: busPtr = new PIXELBUS_8266_U0_3(len, pins[0]); break;
+    case BUSTYPE__8266_U1_3__ID: busPtr = new PIXELBUS_8266_U1_3(len, pins[0]); break;
+    case BUSTYPE__8266_DM_3__ID: busPtr = new PIXELBUS_8266_DM_3(len, pins[0]); break;
+
+    case BUSTYPE__8266_U0_4__ID: busPtr = new PIXELBUS_8266_U0_4(len, pins[0]); break;
+    case BUSTYPE__8266_U1_4__ID: busPtr = new PIXELBUS_8266_U1_4(len, pins[0]); break;
+    case BUSTYPE__8266_DM_4__ID: busPtr = new PIXELBUS_8266_DM_4(len, pins[0]); break;
+  #endif
+
+  #ifdef ARDUINO_ARCH_ESP32
+    // ------------------------
+    // RMT-capable (needs channel)
+    // ------------------------
+    case BUSTYPE__32_RN_3__ID:
+      busPtr = new PIXELBUS_32_RN_3(len, pins[0], (NeoBusChannel)channel);
+      break;
+
+    case BUSTYPE__32_RN_4__ID:
+      busPtr = new PIXELBUS_32_RN_4(len, pins[0], (NeoBusChannel)channel);
+      break;
+
+    #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+    case BUSTYPE__32_RN_400_3__ID:
+      busPtr = new PIXELBUS_32_RN_400_3(len, pins[0], (NeoBusChannel)channel);
+      break;
     #endif
-    }
+
+    // ------------------------
+    // RGBWW
+    // ------------------------
+    case BUSTYPE__32_RN_5__ID:
+      busPtr = new PIXELBUS_32_RN_5(len, pins[0], (NeoBusChannel)channel);
+      break;
+
+    // ------------------------
+    // I2S families (no channel)
+    // ------------------------
+    #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+    case BUSTYPE__32_I0_3__ID:     busPtr = new PIXELBUS_32_I0_3(len, pins[0]); break;
+    case BUSTYPE__32_I0_4__ID:     busPtr = new PIXELBUS_32_I0_4(len, pins[0]); break;
+    case BUSTYPE__32_I0_5__ID:     busPtr = new PIXELBUS_32_I0_5(len, pins[0]); break;
+    case BUSTYPE__32_I0_3P__ID:    busPtr = new PIXELBUS_32_I0_3P(len, pins[0]); break;
+    case BUSTYPE__32_I0_4P__ID:    busPtr = new PIXELBUS_32_I0_4P(len, pins[0]); break;
+    case BUSTYPE__32_I0_5P__ID:    busPtr = new PIXELBUS_32_I0_5P(len, pins[0]); break;
+    #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+    case BUSTYPE__32_I0_400_3__ID: busPtr = new PIXELBUS_32_I0_400_3(len, pins[0]); break;
+    #endif
+    #endif
+
+    #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+    case BUSTYPE__32_I1_3__ID:     busPtr = new PIXELBUS_32_I1_3(len, pins[0]); break;
+    case BUSTYPE__32_I1_4__ID:     busPtr = new PIXELBUS_32_I1_4(len, pins[0]); break;
+    case BUSTYPE__32_I1_5__ID:     busPtr = new PIXELBUS_32_I1_5(len, pins[0]); break;
+    case BUSTYPE__32_I1_3P__ID:    busPtr = new PIXELBUS_32_I1_3P(len, pins[0]); break;
+    case BUSTYPE__32_I1_4P__ID:    busPtr = new PIXELBUS_32_I1_4P(len, pins[0]); break;
+    case BUSTYPE__32_I1_5P__ID:    busPtr = new PIXELBUS_32_I1_5P(len, pins[0]); break;
+    #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+    case BUSTYPE__32_I1_400_3__ID: busPtr = new PIXELBUS_32_I1_400_3(len, pins[0]); break;
+    #endif
+    #endif
+  #endif
+  }
+
+  return busPtr;
+}
+//   static void* create(uint8_t busType, uint8_t* pins, uint16_t len, uint8_t channel) 
+//   {
+//     // #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
+//     DEBUG_PRINTF("PolyBus::create busType %d, pin[0] %d, len %d, channel %d\n\r", busType, pins[0], len, channel);
+//     // #endif
+        
+//     #ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+//       total_virtual_length = len;  // whatever variable holds total LED count
+//     #endif
+    
+//     void* busPtr = nullptr;
+//     switch (busType) {
+//       case BUSTYPE__NONE__ID: break;
+//     #ifdef ESP8266
+//       case BUSTYPE__8266_U0_3__ID: busPtr = new PIXELBUS_8266_U0_3(len, pins[0]); break;
+//       case BUSTYPE__8266_U1_3__ID: busPtr = new PIXELBUS_8266_U1_3(len, pins[0]); break;
+//       case BUSTYPE__8266_DM_3__ID: busPtr = new PIXELBUS_8266_DM_3(len, pins[0]); break;
+//       case BUSTYPE__8266_U0_4__ID: busPtr = new PIXELBUS_8266_U0_4(len, pins[0]); break;
+//       case BUSTYPE__8266_U1_4__ID: busPtr = new PIXELBUS_8266_U1_4(len, pins[0]); break;
+//       case BUSTYPE__8266_DM_4__ID: busPtr = new PIXELBUS_8266_DM_4(len, pins[0]); break;
+//     #endif
+//     #ifdef ARDUINO_ARCH_ESP32
+//       case BUSTYPE__32_RN_3__ID:
+//         busPtr = new PIXELBUS_32_RN_3(len, pins[0], (NeoBusChannel)channel);
+//         break;
+
+//       case BUSTYPE__32_RN_4__ID:
+//         busPtr = new PIXELBUS_32_RN_4(len, pins[0], (NeoBusChannel)channel);
+//         break;
+
+//       case BUSTYPE__32_RN_5__ID:
+//         // RGBWW has no RMT "N" method; do NOT pass NeoBusChannel.
+//         busPtr = new PIXELBUS_32_RN_5(len, pins[0]);
+//         break;
+
+//       #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+//       case BUSTYPE__32_RN_400_3__ID:
+//         busPtr = new PIXELBUS_32_RN_400_3(len, pins[0], (NeoBusChannel)channel);
+//         break;
+//       #endif
+
+//       #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+//       case BUSTYPE__32_I0_3__ID:     busPtr = new PIXELBUS_32_I0_3(len, pins[0]); break;
+//       case BUSTYPE__32_I0_4__ID:     busPtr = new PIXELBUS_32_I0_4(len, pins[0]); break;
+//       case BUSTYPE__32_I0_5__ID:     busPtr = new PIXELBUS_32_I0_5(len, pins[0]); break;
+//       case BUSTYPE__32_I0_400_3__ID: busPtr = new PIXELBUS_32_I0_400_3(len, pins[0]); break;
+//       case BUSTYPE__32_I0_3P__ID:    busPtr = new PIXELBUS_32_I0_3P(len, pins[0]); break;
+//       case BUSTYPE__32_I0_4P__ID:    busPtr = new PIXELBUS_32_I0_4P(len, pins[0]); break;
+//       case BUSTYPE__32_I0_5P__ID:    busPtr = new PIXELBUS_32_I0_5P(len, pins[0]); break;
+//       #endif
+
+//       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+//       case BUSTYPE__32_I1_3__ID:     busPtr = new PIXELBUS_32_I1_3(len, pins[0]); break;
+//       case BUSTYPE__32_I1_4__ID:     busPtr = new PIXELBUS_32_I1_4(len, pins[0]); break;
+//       case BUSTYPE__32_I1_5__ID:     busPtr = new PIXELBUS_32_I1_5(len, pins[0]); break;
+//       case BUSTYPE__32_I1_400_3__ID: busPtr = new PIXELBUS_32_I1_400_3(len, pins[0]); break;
+//       case BUSTYPE__32_I1_3P__ID:    busPtr = new PIXELBUS_32_I1_3P(len, pins[0]); break;
+//       case BUSTYPE__32_I1_4P__ID:    busPtr = new PIXELBUS_32_I1_4P(len, pins[0]); break;
+//       case BUSTYPE__32_I1_5P__ID:    busPtr = new PIXELBUS_32_I1_5P(len, pins[0]); break;
+//       #endif
+// #endif
+//     }
       
 
-    // #ifndef ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
-    // begin(busPtr, busType, pins);
-    // #endif
+//     // #ifndef ENABLE_DEVFEATURE_LIGHTING__BEGIN_MUST_HAPPEN_AFTER_ALL_BUSSES_ARE_CREATED
+//     // begin(busPtr, busType, pins);
+//     // #endif
     
-    return busPtr;
-  };
+//     return busPtr;
+//   };
 
   static void show(void* busPtr, uint8_t busType, bool consistent = true) 
   {
@@ -1085,168 +1490,348 @@ static uint32_t getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uint8
     }
   }
 
+
   //gives back the internal type index (I_XX_XXX_X above) for the input 
-  static    
-  #ifdef USE_DEVFEATURE_IRAM__PIXEL_BUS_INTERFACING
-  IRAM_ATTR
-  #endif 
-  uint8_t getI(uint8_t busType, uint8_t* pins, uint8_t num = 0) 
-  {
-    // DEBUG_PRINTF("PolyBus::getI busType %d\n\r", busType);
+static    
+#ifdef USE_DEVFEATURE_IRAM__PIXEL_BUS_INTERFACING
+IRAM_ATTR
+#endif 
+uint8_t getI(uint8_t busType, uint8_t* pins, uint8_t num = 0) 
+{
+  // DEBUG_PRINTF("PolyBus::getI busType %d\n\r", busType);
 
-    if (!IS_BUSTYPE_DIGITAL(busType)) return BUSTYPE__NONE__ID;
+  if (!IS_BUSTYPE_DIGITAL(busType)) return BUSTYPE__NONE__ID;
 
-    if (IS_BUSTYPE_2PIN(busType)) { //SPI LED chips
-        bool isHSPI = false;
+  if (IS_BUSTYPE_2PIN(busType)) { //SPI LED chips
+      bool isHSPI = false;
 
-        #ifdef ESP8266
-            if (pins[0] == P_8266_HS_MOSI && pins[1] == P_8266_HS_CLK) isHSPI = true;
-        #else
-            // temporary hack to limit use of hardware SPI to a single SPI peripheral (HSPI): 
-            // only allow ESP32 hardware serial on segment 0
-            // SPI global variable is normally linked to VSPI on ESP32 (or FSPI C3, S3)
-            if (!num) isHSPI = true;
-        #endif
+      #ifdef ESP8266
+          if (pins[0] == P_8266_HS_MOSI && pins[1] == P_8266_HS_CLK) isHSPI = true;
+      #else
+          // temporary hack to limit use of hardware SPI to a single SPI peripheral (HSPI): 
+          // only allow ESP32 hardware serial on segment 0
+          // SPI global variable is normally linked to VSPI on ESP32 (or FSPI C3, S3)
+          if (!num) isHSPI = true;
+      #endif
 
-        uint8_t t = BUSTYPE__NONE__ID;
-        switch (busType) {
-            case BUSTYPE_APA102:  t = BUSTYPE__SS_DOT_3__ID; break;
-            case BUSTYPE_LPD8806: t = BUSTYPE__SS_LPD_3__ID; break;
-            case BUSTYPE_LPD6803: t = BUSTYPE__SS_LPO_3__ID; break;
-            case BUSTYPE_WS2801:  t = BUSTYPE__SS_WS1_3__ID; break;
-            case BUSTYPE_P9813:   t = BUSTYPE__SS_P98_3__ID; break;
-            default: t = BUSTYPE__NONE__ID;
-        }
-        if (t > BUSTYPE__NONE__ID && isHSPI) t--; //hardware SPI has one smaller ID than software
-        return t;
-    } else {
-        #ifdef ESP8266
-            uint8_t offset_method_inside_group = pins[0] - 1; // for driver: 0 = uart0, 1 = uart1, 2 = dma, 3 = bitbang
-            if (offset_method_inside_group > 3) offset_method_inside_group = 3;
+      uint8_t t = BUSTYPE__NONE__ID;
+      switch (busType) {
+          case BUSTYPE_APA102:  t = BUSTYPE__SS_DOT_3__ID; break;
+          case BUSTYPE_LPD8806: t = BUSTYPE__SS_LPD_3__ID; break;
+          case BUSTYPE_LPD6803: t = BUSTYPE__SS_LPO_3__ID; break;
+          case BUSTYPE_WS2801:  t = BUSTYPE__SS_WS1_3__ID; break;
+          case BUSTYPE_P9813:   t = BUSTYPE__SS_P98_3__ID; break;
+          default: t = BUSTYPE__NONE__ID;
+      }
+      if (t > BUSTYPE__NONE__ID && isHSPI) t--; //hardware SPI has one smaller ID than software
+      return t;
+  } else {
+      #ifdef ESP8266
+          uint8_t offset_method_inside_group = pins[0] - 1; // for driver: 0 = uart0, 1 = uart1, 2 = dma, 3 = bitbang
+          if (offset_method_inside_group > 3) offset_method_inside_group = 3;
 
-            switch (busType) {
-                case BUSTYPE_WS2812_RGB:
-                case BUSTYPE_WS2812_WWA:
-                    return BUSTYPE__8266_U0_3__ID + offset_method_inside_group;
-                case BUSTYPE_SK6812_RGBW:
-                    return BUSTYPE__8266_U0_4__ID + offset_method_inside_group;
-            }
-        #else //ESP32
-            uint8_t offset_method_inside_group = 0;
+          switch (busType) {
+              case BUSTYPE_WS2812_RGB:
+              case BUSTYPE_WS2812_WWA:
+                  return BUSTYPE__8266_U0_3__ID + offset_method_inside_group;
+              case BUSTYPE_SK6812_RGBW:
+                  return BUSTYPE__8266_U0_4__ID + offset_method_inside_group;
+          }
+      #else //ESP32
+          uint8_t offset_method_inside_group = 0;
 
-            #if defined(CONFIG_IDF_TARGET_ESP32S2)
-                // ESP32-S2 only has 4 RMT channels
-                if (num > 4) return BUSTYPE__NONE__ID;
-                if (num > 3) offset_method_inside_group = 1;  // only one I2S
+          #if defined(CONFIG_IDF_TARGET_ESP32S2)
+              // ESP32-S2 only has 4 RMT channels
+              if (num > 4) return BUSTYPE__NONE__ID;
+              if (num > 3) offset_method_inside_group = 1;  // only one I2S
 
-            #elif defined(CONFIG_IDF_TARGET_ESP32C3)
-                // On ESP32-C3 only the first 2 RMT channels are usable for transmitting
-                if (num > 1) return BUSTYPE__NONE__ID;
+          #elif defined(CONFIG_IDF_TARGET_ESP32C3)
+              // On ESP32-C3 only the first 2 RMT channels are usable for transmitting
+              if (num > 1) return BUSTYPE__NONE__ID;
 
-                // need to force RMT on C3, as I2S is not supported for WS2812
-                offset_method_inside_group = 0; // force RMT method
+              // need to force RMT on C3, as I2S is not supported for WS2812
+              offset_method_inside_group = 0; // force RMT method
 
-                //if (num > 1) offset_method_inside_group = 1; // I2S not supported yet (only 1 I2S)
+              //if (num > 1) offset_method_inside_group = 1; // I2S not supported yet (only 1 I2S)
 
-            #elif defined(CONFIG_IDF_TARGET_ESP32S3)
-                // On ESP32-S3 only the first 4 RMT channels are usable for transmitting
-                if (num > 3) return BUSTYPE__NONE__ID;
-                //if (num > 3) offset_method_inside_group = num -4; // I2S not supported yet
+          #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+              // On ESP32-S3 only the first 4 RMT channels are usable for transmitting
+              if (num > 3) return BUSTYPE__NONE__ID;
+              //if (num > 3) offset_method_inside_group = num -4; // I2S not supported yet
 
-            #else
+          #else
 
-                #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+              #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
 
-                  if(useParallelI2S)
+                if(useParallelI2S)
+                {
+                  Serial.println("BUS DETECT: useParallelI2S");
+                  Serial.printf("required_channels %d %d\n\r", required_channels, num);
+                  if(required_channels <= 8 && num < 8)
+                  { 
+                    offset_method_inside_group = 3;  // Handled inside library automatically for I2S1 types
+                  }else
+                  if(required_channels <= 16 && num < 16)
                   {
-                    Serial.println("BUS DETECT: useParallelI2S");
-                    Serial.printf("required_channels %d %d\n\r", required_channels, num);
-                    if(required_channels <= 8 && num < 8)
-                    { 
-                      offset_method_inside_group = 3;  // Handled inside library automatically for I2S1 types
-                    }else
-                    if(required_channels <= 16 && num < 16)
-                    {
-                      offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
-                    }
-                    else {
-                      return BUSTYPE__NONE__ID;
-                    }
-                    Serial.printf("offset_method_inside_group %d\n\r", offset_method_inside_group);
-                    
+                    offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
                   }
-                  else // I0, I1, RMT0 to RMT7
-                  {
-                    if(num == 0){
-                      offset_method_inside_group = 1; // I2S0 preffered( RMT0, I2S0, I2S1)
-                      Serial.println("BUS DETECT: I2S0 preffered");
-                    }else 
-                    if (num < 2) { // Channel 0 and 1, will be I2S0 and I2S1
-                      offset_method_inside_group = num + 1; // +1 to skip RMT method
-                      Serial.printf("BUS DETECT: RMT num%d, busType%d\n\r", num, offset_method_inside_group);
-                    } else if (num < 9) {
-                      offset_method_inside_group = num; // Use RMT0 to 7
-                      Serial.printf("BUS DETECT: I2S num%d, busType%d\n\r", num, offset_method_inside_group);
-                    } else {
-                      return BUSTYPE__NONE__ID;
-                    }
-                    Serial.printf("BUS DETECT: No Parallel num%d, busType%d\n\r^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\r", num, offset_method_inside_group);
+                  else {
+                    return BUSTYPE__NONE__ID;
                   }
+                  Serial.printf("offset_method_inside_group %d\n\r", offset_method_inside_group);
+                  
+                }
+                else // I0, I1, RMT0 to RMT7
+                {
+                  if(num == 0){
+                    offset_method_inside_group = 1; // I2S0 preffered( RMT0, I2S0, I2S1)
+                    Serial.println("BUS DETECT: I2S0 preffered");
+                  }else 
+                  if (num < 2) { // Channel 0 and 1, will be I2S0 and I2S1
+                    offset_method_inside_group = num + 1; // +1 to skip RMT method
+                    Serial.printf("BUS DETECT: RMT num%d, busType%d\n\r", num, offset_method_inside_group);
+                  } else if (num < 9) {
+                    offset_method_inside_group = num; // Use RMT0 to 7
+                    Serial.printf("BUS DETECT: I2S num%d, busType%d\n\r", num, offset_method_inside_group);
+                  } else {
+                    return BUSTYPE__NONE__ID;
+                  }
+                  Serial.printf("BUS DETECT: No Parallel num%d, busType%d\n\r^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\r", num, offset_method_inside_group);
+                }
 
-                #else
-                    #if defined(ENABLE_PIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS)
-                        if (num < 2) {
-                            offset_method_inside_group = num + 1;  // To skip that RMT was entered first in enum
-                        } else if (num < 9) {
-                            offset_method_inside_group = num - 7;
-                        } else {
-                            return BUSTYPE__NONE__ID;
-                        }
-                    #elif defined(ENABLE_PIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE)
-                        if (num < 8) {
-                            offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
-                        } else {
-                            return BUSTYPE__NONE__ID;
-                        }
-                    #elif defined(ENABLE_PIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE)
-                        if (num < 16) {
-                            offset_method_inside_group = 5;  // Handled inside library automatically for I2S1 types
-                        } else {
-                            return BUSTYPE__NONE__ID;
-                        }
-                    #elif defined(ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS)
-                        if (num > 9) {
-                            return BUSTYPE__NONE__ID;
-                        }
-                        if (num > 7) {
-                            offset_method_inside_group = num - 7;
-                        }
-                        #warning "RMT methods cause flickering on ESP32, use I2S methods instead -- needs debugging"
-                        Serial.printf("Bus getI RMT: num%d, offset%d\n\r",num,offset_method_inside_group);
-                    #else
-                    #error "2024: No method defined"
-                    #endif
-                #endif // ENABLE_PIXELBUS_BUSMETHODS__I2S_AUTO_CHANNEL_SWITCHING
+              #else
+                  #if defined(ENABLE_PIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS)
+                      if (num < 2) {
+                          offset_method_inside_group = num + 1;  // To skip that RMT was entered first in enum
+                      } else if (num < 9) {
+                          offset_method_inside_group = num - 7;
+                      } else {
+                          return BUSTYPE__NONE__ID;
+                      }
+                  #elif defined(ENABLE_PIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE)
+                      if (num < 8) {
+                          offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
+                      } else {
+                          return BUSTYPE__NONE__ID;
+                      }
+                  #elif defined(ENABLE_PIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE)
+                      if (num < 16) {
+                          offset_method_inside_group = 5;  // Handled inside library automatically for I2S1 types
+                      } else {
+                          return BUSTYPE__NONE__ID;
+                      }
+                  #elif defined(ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS)
+                      if (num > 9) {
+                          return BUSTYPE__NONE__ID;
+                      }
+                      if (num > 7) {
+                          offset_method_inside_group = num - 7;
+                      }
+                      #warning "RMT methods cause flickering on ESP32, use I2S methods instead -- needs debugging"
+                  #else
+                  #error "2024: No method defined"
+                  #endif
+              #endif // ENABLE_PIXELBUS_BUSMETHODS__I2S_AUTO_CHANNEL_SWITCHING
 
-            #endif
+          #endif
 
-            switch (busType) {
-                case BUSTYPE_WS2812_RGB:
-                case BUSTYPE_WS2812_WWA:
-                    return BUSTYPE__32_RN_3__ID + offset_method_inside_group;
-                case BUSTYPE_SK6812_RGBW:
-                    return BUSTYPE__32_RN_4__ID + offset_method_inside_group;
-                case BUSTYPE_WS2805_RGBWW:
-                    return BUSTYPE__32_RN_5__ID + offset_method_inside_group;
-                case BUSTYPE_WS2811_400KHZ:
-                    return BUSTYPE__32_RN_400_3__ID + offset_method_inside_group;
-            }
+          switch (busType) {
+              case BUSTYPE_WS2812_RGB:
+              case BUSTYPE_WS2812_WWA:
+                  return BUSTYPE__32_RN_3__ID + offset_method_inside_group;
+              case BUSTYPE_SK6812_RGBW:
+                  return BUSTYPE__32_RN_4__ID + offset_method_inside_group;
+              case BUSTYPE_WS2805_RGBWW:
+                  return BUSTYPE__32_RN_5__ID + offset_method_inside_group;
+              case BUSTYPE_WS2811_400KHZ:
+                  return BUSTYPE__32_RN_400_3__ID + offset_method_inside_group;
+          }
 
-        #endif
-    }
+      #endif
+  }
 
-    return BUSTYPE__NONE__ID;
+  return BUSTYPE__NONE__ID;
 }
+
+
+
+//   static
+// #ifdef USE_DEVFEATURE_IRAM__PIXEL_BUS_INTERFACING
+// IRAM_ATTR
+// #endif
+// uint8_t getI(uint8_t busType, uint8_t* pins, uint8_t num = 0)
+// {
+//   if (!IS_BUSTYPE_DIGITAL(busType)) return BUSTYPE__NONE__ID;
+
+//   // ---------------------------------------------------------------------------
+//   // 2-pin SPI LED chips (kept as-is: you had HSPI/SSPI mapping here)
+//   // ---------------------------------------------------------------------------
+//   if (IS_BUSTYPE_2PIN(busType)) {
+//     bool isHSPI = false;
+
+//     #ifdef ESP8266
+//       if (pins[0] == P_8266_HS_MOSI && pins[1] == P_8266_HS_CLK) isHSPI = true;
+//     #else
+//       if (!num) isHSPI = true;
+//     #endif
+
+//     uint8_t t = BUSTYPE__NONE__ID;
+//     switch (busType) {
+//       case BUSTYPE_APA102:  t = BUSTYPE__SS_DOT_3__ID; break;
+//       case BUSTYPE_LPD8806: t = BUSTYPE__SS_LPD_3__ID; break;
+//       case BUSTYPE_LPD6803: t = BUSTYPE__SS_LPO_3__ID; break;
+//       case BUSTYPE_WS2801:  t = BUSTYPE__SS_WS1_3__ID; break;
+//       case BUSTYPE_P9813:   t = BUSTYPE__SS_P98_3__ID; break;
+//       default:              t = BUSTYPE__NONE__ID;     break;
+//     }
+//     if (t > BUSTYPE__NONE__ID && isHSPI) t--; // HW SPI has one smaller ID than SW
+//     return t;
+//   }
+
+//   // ---------------------------------------------------------------------------
+//   // ESP8266 digital (unchanged behaviour: U0/U1/DM based on pin)
+//   // ---------------------------------------------------------------------------
+//   #ifdef ESP8266
+//     uint8_t offset = pins[0] - 1;
+//     if (offset > 3) offset = 3;
+
+//     switch (busType) {
+//       case BUSTYPE_WS2812_RGB:
+//       case BUSTYPE_WS2812_WWA:
+//         return BUSTYPE__8266_U0_3__ID + offset;
+
+//       case BUSTYPE_SK6812_RGBW:
+//         return BUSTYPE__8266_U0_4__ID + offset;
+
+//       default:
+//         return BUSTYPE__NONE__ID;
+//     }
+//   #else
+//   // ---------------------------------------------------------------------------
+//   // ESP32 digital: IMPORTANT
+//   // - Your enum encodes METHOD FAMILY, not RMT channel.
+//   // - RMT channel is selected by "num" passed into PolyBus::create(..., channel).
+//   // - Therefore: return RN/I0/I1/I*P ONLY. No offset games.
+//   // ---------------------------------------------------------------------------
+
+//     // Target-specific hard limits (optional; keeps you honest)
+//     #if defined(CONFIG_IDF_TARGET_ESP32C3)
+//       // You said: only first 2 RMT channels usable for TX on your C3 setup
+//       if (num > 1) return BUSTYPE__NONE__ID;
+
+//       // Force RMT family on C3 (your policy)
+//       switch (busType) {
+//         case BUSTYPE_WS2812_RGB:
+//         case BUSTYPE_WS2812_WWA:
+//           return BUSTYPE__32_RN_3__ID;
+//         case BUSTYPE_SK6812_RGBW:
+//           return BUSTYPE__32_RN_4__ID;
+//         case BUSTYPE_WS2805_RGBWW:
+//           return BUSTYPE__32_RN_5__ID;
+//         case BUSTYPE_WS2811_400KHZ:
+//           return BUSTYPE__32_RN_400_3__ID;
+//         default:
+//           return BUSTYPE__NONE__ID;
+//       }
+
+//     #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+//       // If you want to restrict RMT TX channels on S3 (you previously said 4), do it here:
+//       // if (num > 3) return BUSTYPE__NONE__ID;
+
+//       // If you want RMT primary, return RN; otherwise pick I2S family below.
+//       #ifdef ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
+//         switch (busType) {
+//           case BUSTYPE_WS2812_RGB:
+//           case BUSTYPE_WS2812_WWA:   return BUSTYPE__32_RN_3__ID;
+//           case BUSTYPE_SK6812_RGBW:  return BUSTYPE__32_RN_4__ID;
+//           case BUSTYPE_WS2805_RGBWW: return BUSTYPE__32_RN_5__ID;
+//           case BUSTYPE_WS2811_400KHZ:return BUSTYPE__32_RN_400_3__ID;
+//           default:                   return BUSTYPE__NONE__ID;
+//         }
+//       #else
+//         // Default: single-output I2S family (your X1 typedefs handle S3 internally)
+//         switch (busType) {
+//           case BUSTYPE_WS2812_RGB:
+//           case BUSTYPE_WS2812_WWA:   return BUSTYPE__32_I1_3__ID;
+//           case BUSTYPE_SK6812_RGBW:  return BUSTYPE__32_I1_4__ID;
+//           case BUSTYPE_WS2805_RGBWW: return BUSTYPE__32_I1_5__ID;
+//           case BUSTYPE_WS2811_400KHZ:return BUSTYPE__32_I1_400_3__ID;
+//           default:                   return BUSTYPE__NONE__ID;
+//         }
+//       #endif
+
+//     #elif defined(CONFIG_IDF_TARGET_ESP32S2)
+//       // S2: if you want to restrict RMT channels, do it here (optional)
+//       // if (num > 3) return BUSTYPE__NONE__ID;
+
+//       #ifdef ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
+//         switch (busType) {
+//           case BUSTYPE_WS2812_RGB:
+//           case BUSTYPE_WS2812_WWA:   return BUSTYPE__32_RN_3__ID;
+//           case BUSTYPE_SK6812_RGBW:  return BUSTYPE__32_RN_4__ID;
+//           case BUSTYPE_WS2805_RGBWW: return BUSTYPE__32_RN_5__ID;
+//           case BUSTYPE_WS2811_400KHZ:return BUSTYPE__32_RN_400_3__ID;
+//           default:                   return BUSTYPE__NONE__ID;
+//         }
+//       #else
+//         // S2 uses I2S0 family
+//         switch (busType) {
+//           case BUSTYPE_WS2812_RGB:
+//           case BUSTYPE_WS2812_WWA:   return BUSTYPE__32_I0_3__ID;
+//           case BUSTYPE_SK6812_RGBW:  return BUSTYPE__32_I0_4__ID;
+//           case BUSTYPE_WS2805_RGBWW: return BUSTYPE__32_I0_5__ID;
+//           case BUSTYPE_WS2811_400KHZ:return BUSTYPE__32_I0_400_3__ID;
+//           default:                   return BUSTYPE__NONE__ID;
+//         }
+//       #endif
+
+//     #else
+//       // Classic ESP32
+//       // If RMT is primary, always return RN family. Channel comes from "num".
+//       #ifdef ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
+//         switch (busType) {
+//           case BUSTYPE_WS2812_RGB:
+//           case BUSTYPE_WS2812_WWA:   return BUSTYPE__32_RN_3__ID;
+//           case BUSTYPE_SK6812_RGBW:  return BUSTYPE__32_RN_4__ID;
+//           case BUSTYPE_WS2805_RGBWW: return BUSTYPE__32_RN_5__ID;
+//           case BUSTYPE_WS2811_400KHZ:return BUSTYPE__32_RN_400_3__ID;
+//           default:                   return BUSTYPE__NONE__ID;
+//         }
+//       #else
+//         // Otherwise, use your existing auto-detect / parallel policy.
+//         // Here’s a sane, minimal policy: I0 for bus 0, I1 for bus 1, then RN thereafter.
+//         // If you want parallel I2S selection, put it here, but do NOT encode RMT channel in type.
+//         switch (busType) {
+//           case BUSTYPE_WS2812_RGB:
+//           case BUSTYPE_WS2812_WWA:
+//             if (num == 0) return BUSTYPE__32_I0_3__ID;
+//             if (num == 1) return BUSTYPE__32_I1_3__ID;
+//             return BUSTYPE__32_RN_3__ID;
+
+//           case BUSTYPE_SK6812_RGBW:
+//             if (num == 0) return BUSTYPE__32_I0_4__ID;
+//             if (num == 1) return BUSTYPE__32_I1_4__ID;
+//             return BUSTYPE__32_RN_4__ID;
+
+//           case BUSTYPE_WS2805_RGBWW:
+//             if (num == 0) return BUSTYPE__32_I0_5__ID;
+//             if (num == 1) return BUSTYPE__32_I1_5__ID;
+//             return BUSTYPE__32_RN_5__ID;
+
+//           case BUSTYPE_WS2811_400KHZ:
+//             if (num == 0) return BUSTYPE__32_I0_400_3__ID;
+//             if (num == 1) return BUSTYPE__32_I1_400_3__ID;
+//             return BUSTYPE__32_RN_400_3__ID;
+
+//           default:
+//             return BUSTYPE__NONE__ID;
+//         }
+//       #endif
+
+//     #endif // target select
+
+//   #endif // ESP32/!ESP8266
+// }
 
 };
 

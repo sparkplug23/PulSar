@@ -2,101 +2,150 @@
 
 #ifdef USE_MODULE_SENSORS_MOISTURE
 
-void mMoistureSensor::init(void){
-  //PIR_DETECT_INIT();
 
-  pinMode(MOISTURE_DIGITAL_PIN,INPUT);
-  // pinMode(MOISTURE_DIGITAL_PIN,INPUT); //MOISTURE_ANALOG_PIN
-
-}
-
-void mMoistureSensor::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mMoistureSensor::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function){
+    /************
+     * INIT SECTION * 
+    *******************/
+    case TASK_PRE_INIT:
+      Pre_Init();
+    break;
     case TASK_INIT:
-      init();
-    break;
-    case TASK_LOOP:
-
-      // LED_BLUE_SET(!PIR_DETECTED());
-
-      // if(PIR_DETECTED()!=pir_detect.state){
-      //   tkr->mqt->publish_device("status/motion/event",PIR_DETECTED_CTR,false);
-      //   pir_detect.state = PIR_DETECTED();
-      //   pir_detect.tDetectTime = millis();
-      //   if(pir_detect.state){ 
-      //     pir_detect.isactive = true;
-      //   }else{
-      //     pir_detect.isactive = false;
-      //   }
-      //   //ALOG_DBG(PSTR(D_LOG_PIR "pir_detect \"%s\""),ONOFF_CTR(pir_detect));
-
-      //   pir_detect.ischanged = true;
-      // }
-
-      // Use short timer to automatically clear event
-      //if > 1 sec
-      //clear struct
-
-    break;
-    case TASK_MQTT_SENDER:
-      SubTasker_MQTTSender();
+      Init();
     break;
   }
+
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
+
+  switch(function){
+    /************
+     * PERIODIC SECTION * 
+    *******************/
+    case TASK_EVERY_SECOND:
+
+      adc_raw = analogRead(tkr_pins->Pin(GPIO_MOISTURE_ANALOG));
+      ALOG_INF(PSTR("val %d"), adc_raw);
+
+    break;
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    case TASK_MQTT_HANDLERS_INIT:
+      MQTTHandler_Init();
+    break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    break;
+    case TASK_MQTT_SENDER:
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    break;
+    #endif
+  }
+
+  return TASKER_RESULT__SUCCESS_ID;
 
 } // END function
 
-#ifdef USE_MODULE_NETWORK_MQTT
+void mMoistureSensor::Init(void)
+{ 
 
-// NEW METHOD -- first senders then on internals
-void mMoistureSensor::SubTasker_MQTTSender(){
+  int8_t pin = tkr_pins->Pin(GPIO_MOISTURE_ANALOG);
 
-  if(mTime::TimeReached(&tSavedMeasure,rateMeasure*1000)){
-    MQTTSendMoistureSensorIfChanged();
+  if(pin >= 0)
+  {
+    pinMode(pin,INPUT);
+    ALOG_INF(PSTR("pin %d val%d"), pin, analogRead(pin));
+    module_state.devices++;
   }
 
+  module_state.mode = ModuleStatus::Running;
 
 }
 
-//#ifdef USE_MODULE_SENSORS_PIR // Motion Sensing -- NEEDS MOVED INTO ITS OWN FUNCTION
-void mMoistureSensor::MQTTSendMoistureSensorIfChanged(){
+void mMoistureSensor::Pre_Init(void)
+{
+  if (tkr_pins->PinUsed(GPIO_MOISTURE_ANALOG))
+  {
+    module_state.mode = ModuleStatus::Initialising;
+  }
+}
 
-  data_buffer.ClearDeep();
+  
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
 
-  StaticJsonDocument<300> doc;
-  JsonObject root = doc.to<JsonObject>();
 
-  // root["location"] = "MOTIONALERT_PAYLOAD_CTR";
-  // root["time"] = tkr_time->RtcTime.hhmmss_ctr;
+uint8_t mMoistureSensor::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
-  root["digital"] = digitalRead(MOISTURE_DIGITAL_PIN);
-  root["analog"] = analogRead(MOISTURE_ANALOG_PIN);
-
-  root["min"] = MIN_ADC_BOUNDARY;
-  root["max"] = MAX_ADC_BOUNDARY;
-
-  uint16_t adc_level = analogRead(MOISTURE_ANALOG_PIN);
-  uint16_t adc_level_flipped = MAX_ADC_BOUNDARY-adc_level;
-  float adc_mapped = mSupport::mapfloat(adc_level,MIN_ADC_BOUNDARY,MAX_ADC_BOUNDARY,100,0);
-  float adc_mapped_constrained = constrain(adc_mapped,0,100);
-
-  root["adc_level_flipped"] = adc_level_flipped;
-  root["adc_mapped"] = adc_mapped;
-  root["percentage"] = adc_mapped_constrained;
-
-  data_buffer.payload.len = measureJson(root)+1;
-  serializeJson(doc,data_buffer.payload.ctr);
-
-  tkr->mqt->publish_device("status/moisture",data_buffer.payload.ctr,false);
+  JBI->Start();
+    JBI->Add_P(PM_SENSOR_COUNT, GetSensorCount());
+  return JBI->End();
 
 }
 
-void mMoistureSensor::AddToJsonObject_AddHardware(JsonObject root){
-  JsonObject obj = root.createNestedObject("moisture");
-    obj["type"] = "PIR_DETECTOR_NAME_CTR";
-    obj["pin"] = PIR_DETECT_PIN;
+uint8_t mMoistureSensor::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
+
+  char buffer[40];
+
+  JBI->Start();
+    JBI->Add("ADC", adc_raw);
+  return JBI->End();
+
 }
 
-#endif
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
+
+#ifdef USE_MODULE_NETWORK_MQTT
+
+void mMoistureSensor::MQTTHandler_Init(){
+
+  struct handler<mMoistureSensor>* ptr;
+
+  ptr = &mqtthandler_settings;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = tkr_mqtt->GetConfigPeriod_SubModule(); 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mMoistureSensor::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
+
+  ptr = &mqtthandler_state_teleperiod;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mMoistureSensor::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
+
+  ptr = &mqtthandler_state_ifchanged;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = tkr_mqtt->GetIfChangedPeriod_SubModule();
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mMoistureSensor::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
+  
+}
+#endif // USE_MODULE_NETWORK_MQTT
+
+
 
 #endif

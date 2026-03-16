@@ -7,7 +7,7 @@
 int8_t mAnimatorLight::Tasker_DevCode(uint8_t function, JsonParserObject obj)
 {
 
-  int8_t function_result = FUNCTION_RESULT_SUCCESS_ID;
+  int8_t function_result = TASKER_RESULT__SUCCESS_ID;
 
   switch(function){
     /************

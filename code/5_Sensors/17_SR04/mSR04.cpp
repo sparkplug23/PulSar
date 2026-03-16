@@ -12,14 +12,14 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
      * INIT SECTION * 
     *******************/
     case TASK_PRE_INIT:
-      Pre_Init();  // should "pre_init" ne chanegd to pin/gpio/hardware pin ??
+      Pre_Init();
     break;
     case TASK_INIT:
       Init();
     break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -36,8 +36,6 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
           if (SR04[i].type) 
           {
             Reading(i);
-
-            
             ALOG_INF(PSTR(D_LOG_ULTRASONIC "Distance: %d mm"),(int)SR04[0].distance*10);
           }
         }
@@ -48,7 +46,9 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
       EveryMinute();
     break;
     case TASK_UPTIME_1_MINUTES:
+      #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
       readings.average_EMA.alpha = 2.0f / (200.0f-1.0f); // 60 samples, slower
+      #endif
       Config_Filters();
     break;
     /************
@@ -64,11 +64,14 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
@@ -81,10 +84,13 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
 
 void mSR04::Pre_Init(void)
 {
+  module_state.mode = ModuleStatus::Initialising;
+  module_state.devices = 0;
+
   if (tkr_pins->PinUsed(GPIO_SR04_TRIG) && tkr_pins->PinUsed(GPIO_SR04_ECHO))
   {
-    settings.fEnableSensor = true;
-    settings.fSensorCount++;
+    module_state.mode = ModuleStatus::Running;
+    module_state.devices++;
   }
 }
 
@@ -210,62 +216,6 @@ void mSR04::ModeDetect(void) {
 }
 
 
-
-// uint8_t mSR04::ModeDetect(void)
-// {
-//   sr04_type = 1; // default
-//   if (!tkr_pins->PinUsed(GPIO_SR04_ECHO_ID))
-//   {
-//     ALOG_TST(PSTR("Sr04: TModeDetect::Error"));
-//     return sr04_type; 
-//   }
-
-//   int sr04_echo_pin = tkr_pins->GetPin(GPIO_SR04_ECHO_ID);
-//   int sr04_trig_pin = (tkr_pins->PinUsed(GPIO_SR04_TRIG_ID)) ? tkr_pins->GetPin(GPIO_SR04_TRIG_ID) : tkr_pins->GetPin(GPIO_SR04_ECHO_ID);   // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_ECHO only
-//   sonar_serial = new TasmotaSerial(sr04_echo_pin, sr04_trig_pin, 1);
-
-
-//   if (sonar_serial->begin(SONAR_SERIAL_BAUD,1))
-//   {
-//     AddLog(LOG_LEVEL_DEV_TEST,PSTR("SR04: Detect mode pins TX%d, RX%d"), sr04_trig_pin, sr04_echo_pin);
-//     if (sr04_trig_pin != -1) 
-//     {      
-//       if (tkr_pins->PinUsed(GPIO_SR04_TRIG_ID, i)) {
-//         SR04[i].type = (MiddleValue(Mode3Distance(i), Mode3Distance(i), Mode3Distance(i)) != 0) ? SR04_MODE_SER_TRANSCEIVER : SR04_MODE_TRIGGER_ECHO;
-//       } else {
-//         SR04[i].type = (MiddleValue(Mode2Distance(i), Mode2Distance(i), Mode2Distance(i)) != 0) ? SR04_MODE_SER_RECEIVER : SR04_MODE_TRIGGER_ECHO;
-//       }
-//     } else {
-//       sr04_type = 2;
-//     }
-//   } else {
-//     sr04_type = 1;
-//   }
-
-//   if (sr04_type < 2) {
-//     delete sonar_serial;
-//     sonar_serial = nullptr;
-//     ALOG_TST(PSTR(D_LOG_SR04 "Release TasmotaSerial"));
-//     if (-1 == sr04_trig_pin) {
-//       sr04_trig_pin = tkr_pins->GetPin(GPIO_SR04_ECHO_ID);  // if GPIO_SR04_TRIG is not configured use single PIN mode with GPIO_SR04_ECHO only
-//     }
-//     sonar = new NewPing(sr04_trig_pin, sr04_echo_pin, 100);
-    
-//     AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_SR04 "NewPing %d %d"), sr04_trig_pin, sr04_echo_pin);
-
-//   } else {
-//     if (sonar_serial->hardwareSerial()) {
-//       // ClaimSerial();
-//       AddLog(LOG_LEVEL_INFO,PSTR("ClaimSerial NotEnabled %d %d"), sr04_trig_pin, sr04_echo_pin);
-//     }
-//   }
-
-//   AddLog(LOG_LEVEL_INFO,PSTR("SR04: Mode %d"), sr04_type);
-//   return sr04_type;
-
-// }
-
-
 uint16_t mSR04::MiddleValue(uint16_t first, uint16_t second, uint16_t third)
 {
   uint16_t ret = first;
@@ -283,45 +233,6 @@ uint16_t mSR04::MiddleValue(uint16_t first, uint16_t second, uint16_t third)
   }
 }
 
-
-// uint16_t mSR04::Mode3Distance() 
-// {
-//   sonar_serial->write(0x55);
-//   sonar_serial->flush();
-//   return Mode2Distance();
-// }
-
-
-// uint16_t mSR04::Mode2Distance(void)
-// {
-//   sonar_serial->setTimeout(300);
-//   const char startByte = 0xff;
-
-//   if (!sonar_serial->find(startByte)) {
-//     AddLog(LOG_LEVEL_DEV_TEST,PSTR("SR04: No start byte"));
-//     return NO_ECHO;
-//   }
-
-//   delay(5);
-
-//   uint8_t crc = sonar_serial->read();
-//   //read high byte
-//   uint16_t distance = ((uint16_t)crc) << 8;
-
-//   //read low byte
-//   distance += sonar_serial->read();
-//   crc += distance & 0x00ff;
-//   crc += 0x00FF;
-
-//   //check crc sum
-//   if (crc != sonar_serial->read()) {
-//     AddLog(LOG_LEVEL_ERROR,PSTR("SR04: Reading CRC error."));
-//     return NO_ECHO;
-//   }
-//   AddLog(LOG_LEVEL_DEV_TEST,PSTR("SR04: Distance: %d"), distance);
-  
-//   return distance;
-// }
 
 uint16_t mSR04::Mode2Distance(uint32_t i) {
   uint8_t buffer[4];                  // Accommodate either 2 or 4 bytes of data
@@ -455,37 +366,6 @@ float mSR04::GetDistanceFromPing(uint32_t ping_value)
 {
   if(ping_value==0){ return 0; }
   float distance_cm = 0;
-
-  // if(settings.flag_distance_conversion_method == EM_DISTANCE_PING_CONVERSION_METHOD__SPEED_OF_SOUND_DEFAULT__ID)
-  // {
-  //   readings.conversion_settings.speed_of_sound = 343.0f;
-  //   float speed_of_sound_cm_per_us = readings.conversion_settings.speed_of_sound/10000.0f;
-  //   distance_cm = (float)(ping_value)*(speed_of_sound_cm_per_us/2.0f);
-  //   return 
-  // }
-
-
-  // switch(readings.conversion_settings.flag_distance_conversion_method)
-  // {
-  //   default:
-  //   case EM_DISTANCE_PING_CONVERSION_METHOD__BASIC__ID:
-  //     distance_cm = (float)(ping_value)/ US_ROUNDTRIP_CM;
-  //   break;
-  //   case EM_DISTANCE_PING_CONVERSION_METHOD__SPEED_OF_SOUND_DEFAULT__ID:
-  //   {
-  //     readings.conversion_settings.speed_of_sound = 343.0f;
-  //     float speed_of_sound_cm_per_us = readings.conversion_settings.speed_of_sound/10000.0f;
-  //     distance_cm = (float)(ping_value)*(speed_of_sound_cm_per_us/2.0f);
-
-
-
-
-// // this should be last to always return it
-//   if(settings.flag_distance_conversion_method == EM_DISTANCE_PING_CONVERSION_METHOD__BASIC__ID)
-//   {
-//     return distance_cm = (float)(ping_value)/ US_ROUNDTRIP_CM;
-//   }
-//   if
   
   switch(readings.conversion_settings.flag_distance_conversion_method)
   {
@@ -549,6 +429,62 @@ void mSR04::SubTask_UpdateAmbientTemperature()
 
 
 
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+void mSR04::parse_JSONCommand(JsonParserObject obj)
+{
+
+
+  #ifdef ENABLE_LOG_LEVEL_COMMANDS
+  ALOG_TST(PSTR(D_LOG_LIGHT D_TOPIC "mSR04::parse_JSONCommand %d"),obj.isNull());
+  #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
+
+  char buffer[50];
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+  
+  /***
+   * As order of importance, others that rely on previous commands must come after
+   * */
+  int val = 0;
+
+  float a1 = 0;
+  float a2 = 0;
+
+  if(jtok = obj["SetAlpha1"])
+  {
+    a1= jtok.getFloat();
+  }
+
+  if(jtok = obj["SetAlpha2"])
+  {
+    a2= jtok.getFloat();
+    #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+    readings.average_EMA.filter->SetAlpha(a1);
+    #endif
+    #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+    readings.average_DEMA.filter->SetAlpha(a1,a2);
+    #endif
+    mqtthandler_settings.flags.SendNow = true;
+  }
+
+  if(jtok = obj["SR04"].getObject()["ConversionMethod"])
+  {
+    readings.conversion_settings.flag_distance_conversion_method = jtok.getInt();
+    ALOG_TST(PSTR("ConversionMethod %d"),readings.conversion_settings.flag_distance_conversion_method);
+    
+    mqtthandler_settings.flags.SendNow = true;
+  }
+
+}
+
+
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
+
 
 uint8_t mSR04::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 {
@@ -602,5 +538,41 @@ uint8_t mSR04::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
   return JBI->End();    
 }
 
+  
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
+
+#ifdef USE_MODULE_NETWORK_MQTT
+
+void mSR04::MQTTHandler_Init(){
+
+  struct handler<mSR04>* ptr;
+
+  ptr = &mqtthandler_settings;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = tkr_mqtt->GetConfigPeriod(); 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mSR04::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
+
+  ptr = &mqtthandler_sensor_ifchanged;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = tkr_mqtt->GetIfChangedPeriod(); 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->ConstructJSON_function = &mSR04::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
+  
+} 
+
+#endif // USE_MODULE_NETWORK_MQTT
 
 #endif

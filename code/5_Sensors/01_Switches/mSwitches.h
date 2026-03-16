@@ -9,18 +9,6 @@
 
 #include <Ticker.h>
 
-#include "2_CoreSystem/mBaseConfig.h"
-
-#include "2_CoreSystem/07_Time/mTime.h"
-#include "2_CoreSystem/08_Logging/mLogging.h"
-#include "3_Network/10_MQTT/mMQTT.h"
-#include "2_CoreSystem/07_Time/mTime.h"
-
-#include <Ticker.h>
-
-enum SwitchStates { SWITCH_PRESSED_ID, SWITCH_NOT_PRESSED_ID };
-
-
 enum SwitchModeOptions_IDS {
   SWITCHMODE_TOGGLE_ID, 
   SWITCHMODE_FOLLOW_ID, 
@@ -33,28 +21,9 @@ enum SwitchModeOptions_IDS {
   SWITCHMODE_MAX_SWITCH_OPTION_ID
 };
 
-#define D_SWITCHMODE_TOGGLE_CTR               "Toggle"
-#define D_SWITCHMODE_FOLLOW_CTR               "Follow"
-#define D_SWITCHMODE_FOLLOW_INV_CTR           "Follow Inv"
-#define D_SWITCHMODE_PUSHBUTTON_CTR           "PushButton"
-#define D_SWITCHMODE_PUSHBUTTON_INV_CTR       "PushButton Inv"
-#define D_SWITCHMODE_PUSHBUTTONHOLD_CTR       "PushButton Hold"
-#define D_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR   "PushButton Hold Inv"
-#define D_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR    "PushButton Toggle"
-
-DEFINE_PGM_CTR(PM_SWITCHMODE_TOGGLE_CTR) D_SWITCHMODE_TOGGLE_CTR;
-DEFINE_PGM_CTR(PM_SWITCHMODE_FOLLOW_CTR) D_SWITCHMODE_FOLLOW_CTR;
-DEFINE_PGM_CTR(PM_SWITCHMODE_FOLLOW_INV_CTR) D_SWITCHMODE_FOLLOW_INV_CTR;
-DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTON_CTR) D_SWITCHMODE_PUSHBUTTON_CTR;
-DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTON_INV_CTR) D_SWITCHMODE_PUSHBUTTON_INV_CTR;
-DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTONHOLD_CTR) D_SWITCHMODE_PUSHBUTTONHOLD_CTR;
-DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR) D_SWITCHMODE_PUSHBUTTONHOLD_INV_CTR;
-DEFINE_PGM_CTR(PM_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR) D_SWITCHMODE_PUSHBUTTON_TOGGLE_CTR;
-
 // Lowest 4 "|" are the standard power events, and are stored in the SettingsText 
 // Keep the SettingsTxt for switches there, as they are common OFF/ON/HOLD/??
 static const char kSwitchPressStates[] PROGMEM = "||||POWER_INCREMENT|POWER_INV|POWER_CLEAR|POWER_RELEASE|POWER_100||POWER_DELAYED";
-
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
@@ -97,11 +66,10 @@ class mSwitches :
                             PUSH_IGNORE, PUSH_IGNORE_INV,        // 15, 16 - Send only MQTT message on switch change
                             MAX_SWITCH_OPTION};
 
-    enum ButtonStates { PRESSED, NOT_PRESSED };
+    enum SwitchStates { PRESSED, NOT_PRESSED };
     enum SendKeyPowerOptions { POWER_HOLD = 3, POWER_INCREMENT = 4, POWER_INV = 5, POWER_CLEAR = 6, POWER_RELEASE = 7,
                               POWER_100 = 8, CLEAR_RETAIN = 9, POWER_DELAYED = 10 };
-
-                              
+       
     /*********************************************************************************************\
      * Switch support with input filter
      *
@@ -118,9 +86,6 @@ class mSwitches :
     #define SM_FIRST_PRESS        0x40
     #define SM_SECOND_PRESS       0x80
     #define POWER_NONE            99
-
-    
-    #include <Ticker.h>
 
     Ticker* TickerSwitch;
 
@@ -172,11 +137,10 @@ class mSwitches :
 
     char*  GetStateName(uint8_t state, char* buffer, uint8_t buflen);
 
-
-
     /************************************************************************************************
      * SECTION: Unified Reporting
      ************************************************************************************************/
+
     uint8_t GetSensorCount(void) override
     {
       uint8_t count = 0;
@@ -195,10 +159,10 @@ class mSwitches :
       value->data_f.push_back(GetState(index));
       value->sensor_id = index;
     };
+
     /************************************************************************************************
      * SECTION: ConstructJSON
      ************************************************************************************************/
-
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
@@ -210,12 +174,8 @@ class mSwitches :
     struct handler<mSwitches> mqtthandler_sensor_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT 
 
-
 };
-
-
 
 #endif
 
-#endif  // _SONOFF_H_
-//#endif
+#endif

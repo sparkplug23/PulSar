@@ -16,7 +16,7 @@
 //                                  0 1 2 3 4 5 6 7 8 91011121314151617181920
 const char PINS_WEMOS[] PROGMEM = "AOAOAOAOAOIOIOIOIOIOIOFLFLFLFLFLFLFLIORXTX";
 
-#elif CONFIG_IDF_TARGET_ESP32C3
+#elif defined(CONFIG_IDF_TARGET_ESP32C3)
 
 
 // ✅ Key Bootstrapping Pins on ESP32-C3

@@ -20,7 +20,7 @@ int8_t mMAVLink_Decoder::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -687,7 +687,7 @@ void mMAVLink_Decoder::Maintain_Connection()
      */
     PacketData* packet_ahrs = findPacketData(MAVLINK_MSG_ID_AHRS2);
     if (packet_ahrs != nullptr && packet_ahrs->data != nullptr) {
-        if (abs(millis() - packet_ahrs->tUpdate) > 30000) {
+        if ((millis() - packet_ahrs->tUpdate) > 30000) {
             Send_MAVLink_Stream_Pack__Enable_All();
         }
     }

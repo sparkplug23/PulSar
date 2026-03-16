@@ -102,13 +102,35 @@ class mIRRemote :
 
   private:
   public:
-    mIRRemote(){};
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
+	  mIRRemote(){};
+    void Pre_Init(void);
+    void Init(void);
+    void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-
+    
     static constexpr const char* PM_MODULE_DRIVERS_IRREMOTE_CTR = D_MODULE_DRIVERS_IRREMOTE_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_IRREMOTE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_IRREMOTE_ID; }
-        
+   
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+
+
     
     struct SETTINGS{
       uint8_t fEnableSensor = false;
@@ -190,6 +212,10 @@ uint8_t ledlnk_inverted = 0;                // Link LED inverted flag (1 = (0 = 
   bool GetState(uint8_t index);
   void SetState(uint8_t index);
 
+  #ifndef MAX_LEDS
+  #define MAX_LEDS 8
+  #endif
+
 
     struct LEDS
     {    
@@ -202,12 +228,7 @@ uint8_t ledlnk_inverted = 0;                // Link LED inverted flag (1 = (0 = 
 
 
     void EveryLoop();
-
-    void Pre_Init();
-    void Init(void);
     
-    void parse_JSONCommand(JsonParserObject obj);
-
     void UpdateStatusBlink();
     
     void UpdateLedPowerAll();
@@ -217,25 +238,29 @@ uint8_t ledlnk_inverted = 0;                // Link LED inverted flag (1 = (0 = 
     void SetLedLink(uint32_t state);
 
 
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+    
+    void parse_JSONCommand(JsonParserObject obj);
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+    
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
-  
-    void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    void MQTTHandler_Sender();
+
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
     
+    #ifdef USE_MODULE_NETWORK_MQTT 
+    void MQTTHandler_Init();
+    std::vector<struct handler<mIRRemote>*> mqtthandler_list;
     struct handler<mIRRemote> mqtthandler_settings;
     struct handler<mIRRemote> mqtthandler_state_ifchanged;
-
-    // No specialised payload therefore use system default instead of enum
-      
-
-    struct handler<mIRRemote>* mqtthandler_list[2] = {
-      &mqtthandler_settings,
-      &mqtthandler_state_ifchanged
-    };
-
+    #endif // USE_MODULE_NETWORK_MQTT
     
 };
 

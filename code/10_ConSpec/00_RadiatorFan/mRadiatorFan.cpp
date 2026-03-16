@@ -15,7 +15,7 @@ int8_t mRadiatorFan::Tasker(uint8_t function, JsonParserObject obj)
       break;
   }
 
-  if(!settings.enabled_module){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!settings.enabled_module){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     case TASK_EVERY_MINUTE: 
@@ -46,7 +46,7 @@ int8_t mRadiatorFan::Tasker(uint8_t function, JsonParserObject obj)
     #endif //USE_MODULE_NETWORK_MQTT
   }
 
-  return FUNCTION_RESULT_UNKNOWN_ID;
+  return TASKER_RESULT__UNKNOWN_ID;
   
 }
 

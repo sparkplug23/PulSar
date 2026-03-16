@@ -23,7 +23,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_DRIVERS__CAMERA_2025
+#ifdef USE_MODULE_DRIVERS__CAMERA
 
 #include <Arduino.h>
 #include <vector>
@@ -61,6 +61,37 @@
 
 #define WEBCAM_CORE 0
 
+
+
+
+
+
+class mCamera :
+  public mTaskerInterface
+{
+
+  private:
+  public:
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
+    mCamera(){};
+    void Pre_Init(void);
+    void Init(void);
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    void BootMessage();
+    
+    static constexpr const char* PM_MODULE_DRIVERS__CAMERA_CTR = D_MODULE_DRIVERS__CAMERA_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_DRIVERS__CAMERA_CTR; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS__CAMERA_ID; }
+
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+
 enum LedEffect {
   LED_OFF,
   LED_ON,
@@ -93,37 +124,6 @@ struct LedState {
   uint32_t startTime;       // To track when the blinking/pulsing started
   LedMode_BitField mode;
 };
-
-
-
-
-
-
-
-class mCamera :
-  public mTaskerInterface
-{
-
-  private:
-  public:
-    /************************************************************************************************
-     * SECTION: Construct Class Base
-     ************************************************************************************************/
-    mCamera(){};
-    void Pre_Init(void);
-    void Init(void);
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void BootMessage();
-    
-    static constexpr const char* PM_MODULE_DRIVERS__CAMERA_CTR = D_MODULE_DRIVERS__CAMERA_CTR;
-    PGM_P GetModuleName(){          return PM_MODULE_DRIVERS__CAMERA_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS__CAMERA_ID; }
-
-    struct ClassState
-    {
-      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
-      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
-    }module_state;
 
 
     #ifdef ENABLE_RTSPSERVER
@@ -729,6 +729,6 @@ void CmndWebcamGetMotionPixels(void);
     
 };
 
-#endif // USE_MODULE_DRIVERS__CAMERA_2025
+#endif // USE_MODULE_DRIVERS__CAMERA
 
 #endif

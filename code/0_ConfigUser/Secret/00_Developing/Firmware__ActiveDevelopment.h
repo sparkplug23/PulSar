@@ -49,7 +49,6 @@
  * DEVICE_TYPE CORE: Any testbeds related to core system
  * */
 // #define DEVICE_TESTBED__SETTINGS_STORING
-// #define DEVICE_TESTBED__FILESYSTEM
 
 
 /**
@@ -106,6 +105,10 @@
 // #define DEVICE_TESTBED_FASTBOOT_ESP8266
 // #define DEVICE_TESTBED_CRASHREPORT
 
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32C3_TESTER
+
+// #define DEVICE_DEVELOPMENT__MOISTURE_SENSOR
+
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
 ****** LOCATION: Livingroom ****************************************************************************************************************************************************
@@ -134,7 +137,7 @@
   //   #define USE_MODULE_SENSORS_INTERFACE
   //   #
   // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  // #define USE_MODULE_SENSORS_DS18X20
   #define USE_MODULE_SENSORS_SR04
     #define ENABLE_DEVFEATURE_SR04_FILTERING_EMA
     #define ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
@@ -154,7 +157,7 @@
       "\"19\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
       "\"18\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
       #endif 
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      #ifdef USE_MODULE_SENSORS_DS18X20
       "\"5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," 
       #endif
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
@@ -383,7 +386,7 @@ new 26GHz radar sensor
       #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
   #endif
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-    #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #define USE_MODULE_SENSORS_DS18X20
       #define DS18X20_MAX_SENSORS 20
         #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
   #endif 
@@ -733,7 +736,7 @@ new 26GHz radar sensor
       #endif
       "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
       "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      #ifdef USE_MODULE_SENSORS_DS18X20
       "\"33\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
       #endif    
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219)
@@ -1080,7 +1083,7 @@ new 26GHz radar sensor
   //     #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
   // #endif
   // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-  //   #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  //   #define USE_MODULE_SENSORS_DS18X20
   //     #define DS18X20_MAX_SENSORS 20
   //       #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
   // #endif 
@@ -1343,7 +1346,7 @@ new 26GHz radar sensor
       #endif
       // "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
       // "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      #ifdef USE_MODULE_SENSORS_DS18X20
       "\"33\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
       #endif    
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219)
@@ -1684,7 +1687,7 @@ new 26GHz radar sensor
   //     #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
   // #endif
   // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-  //   #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  //   #define USE_MODULE_SENSORS_DS18X20
   //     #define DS18X20_MAX_SENSORS 20
   //       #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
   // #endif 
@@ -2569,7 +2572,7 @@ new 26GHz radar sensor
       #endif
       // "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
       // "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      #ifdef USE_MODULE_SENSORS_DS18X20
       "\"33\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
       #endif    
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219)
@@ -3002,10 +3005,10 @@ new 26GHz radar sensor
       "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
       "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","
       #endif
-      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      #ifdef USE_MODULE_DRIVERS_RF433_CODES
       "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
       #endif  
-      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      #ifdef USE_MODULE_DRIVERS_RF433_CODES
       "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
       #endif  
       "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
@@ -3452,7 +3455,7 @@ new 26GHz radar sensor
 //       #endif
 //       "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
 //       "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
-//       #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+//       #ifdef USE_MODULE_SENSORS_DS18X20
 //       "\"33\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
 //       #endif    
 //       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
@@ -5808,7 +5811,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 // //  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING__HVACDESK_HARDCODED_ADD
 // #define ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING__HVACDESK_OILTANK_ADD
 // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-//  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+//  #define USE_MODULE_SENSORS_DS18X20
 //    #define DS18X20_MAX_SENSORS 5
 //      #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
 //       #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
@@ -5845,7 +5848,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
  "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
  "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
  "\"" D_GPIO_NUMBER "\":{"  
-   #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+   #ifdef USE_MODULE_SENSORS_DS18X20
    "\"15\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
    #endif            
    #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
@@ -6009,8 +6012,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // #define USE_MODULE_DRIVERS_LEDS  
 
   // #define USE_MODULE_DRIVERS_CAMERA_OV2640
-  // #define USE_MODULE_DRIVERS_CAMERA_WEBCAM_V4
-  // #define USE_MODULE_DRIVERS__CAMERA_TAS25
     // #define CAMERA_MODEL_XIAO_ESP32S3
   // #define USE_MODULE_DRIVERS__CAMERA_TASMOTA
     // #define ENABLE_DEVFEATURE_CAMERA_TASMOTA_INCLUDE_WEBSERVER
@@ -6365,7 +6366,7 @@ Blue (Upstairs Link) ***********************************************************
   #define USE_MODULE_SENSORS_INTERFACE
     #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
     #
-  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  #define USE_MODULE_SENSORS_DS18X20
     #define DS18X20_MAX_SENSORS 20
       #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20      
   #define USE_MODULE_SENSORS_DHT
@@ -6438,7 +6439,7 @@ Blue (Upstairs Link) ***********************************************************
       "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
       "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
       #endif
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      #ifdef USE_MODULE_SENSORS_DS18X20
       "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
       #endif    
       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
@@ -7334,7 +7335,7 @@ Blue (Upstairs Link) ***********************************************************
 
   #define USE_MODULE_DRIVERS_INTERFACE
 
-  #define USE_MODULE_DRIVERS_RF433_RCSWITCH
+  #define USE_MODULE_DRIVERS_RF433_CODES
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -7342,7 +7343,7 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH
+      #ifdef USE_MODULE_DRIVERS_RF433_CODES
       "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
       #endif  
       "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
@@ -7359,7 +7360,7 @@ Blue (Upstairs Link) ***********************************************************
 
   // #define USE_MODULE_DRIVERS_INTERFACE
 
-  #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+  #define USE_MODULE_DRIVERS_RF433_CODES
     #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
 
   #define USE_MODULE_TEMPLATE
@@ -7368,7 +7369,7 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      #ifdef USE_MODULE_DRIVERS_RF433_CODES
       "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
       #endif  
       "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
@@ -7604,10 +7605,10 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      #ifdef USE_MODULE_DRIVERS_RF433_CODES
       "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
       #endif  
-      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      #ifdef USE_MODULE_DRIVERS_RF433_CODES
       "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
       #endif  
       "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
@@ -7621,19 +7622,79 @@ Blue (Upstairs Link) ***********************************************************
 
 
 
-#ifdef DEVICE_TESTBED__FILESYSTEM
-  #define DEVICENAME_CTR          "testbed_filesystem"
-  #define DEVICENAME_FRIENDLY_CTR "Testbed Filesystem"
-  #define MQTT_HOST   "192.168.1.70"
-  #define DEVICENAME_ROOMHINT_CTR "Example"
+
+
+
+#ifdef DEVICE_DEVELOPMENT__MOISTURE_SENSOR
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template_name"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "Template Name"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "Template Description"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_PORT     1883
+
+  // #define DEVICENAME_CTR          "treadmill_power_monitor"
+  // #define DEVICENAME_FRIENDLY_CTR "HVAC Desk DevPlatform"
+  // #define DEVICENAME_ROOMHINT_CTR "Bedroom"
+  // #define MQTT_HOST   "192.168.1.70" // primary
+  //   #define MQTT_PORT     1883
+    
+  #define SETTINGS_HOLDER 1239
+
 
   /***********************************
-   * SECTION: Core Configs
+   * SECTION: System Debug Options
+  ************************************/    
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  // #define DISABLE_SERIAL_LOGGING
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+
+  /***********************************
+   * SECTION: System Configs
   ************************************/     
-  #define USE_MODULE_CORE_FILESYSTEM
+
+  
+
+  
+
+  // #define USE_MODULE_CORE_FILESYSTEM
+  //   
+  //   
+  //   
+  //   
+
+  // Settings saving and loading
+  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
+  //   
+  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
+  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
-    
-    
+  
+  
+
+  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  //  // until devices can reliably be used without compiling per device
+
+  // 
+
+  // #define USE_MODULE_SENSORS_SUN_TRACKING
 
 
   /***********************************
@@ -7642,7 +7703,55 @@ Blue (Upstairs Link) ***********************************************************
 
   
 
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
 
+  #define MOISTURE_DIGITAL_PIN 23
+
+  #define USE_MODULE_SENSORS_MOISTURE
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_SWITCHES
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  //   #define SHOW_SPLASH
+
+  // Add this, 4 rows so show the power, current, voltage and energy
+
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Energy Configs
+  ************************************/  
+
+  // #define USE_MODULE_ENERGY_INTERFACE
+  // #define USE_MODULE_ENERGY_PZEM004T_V3
+  //   #define ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY // If energy_interface is primary reporting, reduce pzem to slower (debug only)
+  // #define MAX_ENERGY_SENSORS 1
+  // #define MAX_PZEM004T_DEVICES 1
+
+  /***********************************
+   * SECTION: Controller Configs
+  ************************************/  
+
+//  #define USE_MODULE_CONTROLLER__ENERGY_OLED
+//  #define USE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER
+
+  /***********************************
+   * SECTION: GPIO Template
+  ************************************/  
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -7650,22 +7759,49 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
-      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
-      #endif  
-      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
-      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
-      #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"32\":\""  D_GPIO_FUNCTION_MOISTURE_ANALOG_CTR "\"" 
     "},"
-    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
+
+  
+  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "1"
+
+  #define D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "MainFeed"
+  
+  
+  #define D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR   D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_ENERGY "\":{"
+        "\"DeviceCount\":1"    
+    "},"
+    "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":{"
+        "\"DeviceCount\":1"    
+    "},"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":["
+        "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\""
+      "],"
+      "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":["
+        "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\""
+      "]"
+    "},"
+    "\"" D_SENSORADDRESS "\":{"
+      "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":[" 
+        D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
+      "]"  
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
+  "}";
+
+
+
   
 #endif
-
-
-
 
 
 #endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_ACTIVEDEVELOPMENT_H

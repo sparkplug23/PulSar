@@ -1,5 +1,5 @@
 #ifndef _MMOISTURESENSOR_H
-#define _MMOISTURESENSOR_H 0.1
+#define _MMOISTURESENSOR_H
 
 #define D_UNIQUE_MODULE_SENSORS_MOTION_ID 5016 // [(Folder_Number*100)+ID_File]
 
@@ -9,56 +9,77 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-
-#include "ArduinoJson.h"
-
 #include "1_TaskerManager/mTaskerInterface.h"
 
 class mMoistureSensor :
   public mTaskerInterface
 {
   public:
-    // Constructor
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
     mMoistureSensor(){};
-    // Init the class
-    void init(void);
-    // Tasker that is called on each loop
+    void Init(void);
+    void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    // All SubTasks called by Tasker 
+
+    static constexpr const char* PM_MODULE_SENSORS_MOISTURE_ADC_CTR = D_MODULE_SENSORS_MOISTURE_ADC_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MOISTURE_ADC_CTR; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MOTION_ID; } 
+      
+
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+
+    uint16_t adc_raw = 0;
+
+    /************************************************************************************************
+     * SECTION: Unified Reporting
+     ************************************************************************************************/
+    uint8_t GetSensorCount(void) override
+    {
+      return module_state.devices;
+    }    
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      if(index > module_state.devices) {value->sensor_type.push_back(0); return ;}
+      value->sensor_type.push_back(SENSOR_TYPE_MOISTURE_ID);
+      value->data_f.push_back((float)adc_raw);      
+      value->sensor_id = index;
+    };
+
+
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
     
-    static constexpr const char* PM_MODULE_SENSORS_MOTION_CTR = D_MODULE_SENSORS_PIR_CTR;
-    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MOTION_CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MOTION_ID; }
+    void   parse_JSONCommand(JsonParserObject obj);
 
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
     
-    #define MOISTURE_DETECT_INIT() pinMode(MOISTURE_DIGITAL_PIN,INPUT_PULLUP)
-    #ifdef MOISTURE_ISACTIVELOW
-      #define MOISTURE_DETECTED()  !digitalRead(MOISTURE_DIGITAL_PIN) //motion when LOW
-    #else
-      #define MOISTURE_DETECTED()  digitalRead(MOISTURE_DIGITAL_PIN)
-    #endif
-    #define MOISTURE_DETECTED_CTR  MOISTURE_DETECTED() ? "MOISTURE" : "NO_MOISTURE"
-    //#define ONOFF_CTR(X)      X ? "ON" : "OFF"
+    uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
 
-    #define MAX_ADC_BOUNDARY 1024
-    #define MIN_ADC_BOUNDARY 340
-
-
-    struct MOISTURE_DETECT{
-      uint8_t isactive = false;
-      uint8_t state = false;
-      uint8_t ischanged = false;
-      uint32_t tDetectTime;
-    }moisture_detect;
-
-    uint32_t tSavedMeasure = 0;
-    uint8_t rateMeasure = 10;
-
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-      void MQTTSendMoistureSensorIfChanged();
-      void SubTasker_MQTTSender();
-      void AddToJsonObject_AddHardware(JsonObject root);
-    #endif
+    void MQTTHandler_Init();
+    std::vector<struct handler<mMoistureSensor>*> mqtthandler_list;
+    struct handler<mMoistureSensor> mqtthandler_settings;
+    struct handler<mMoistureSensor> mqtthandler_state_ifchanged;
+    struct handler<mMoistureSensor> mqtthandler_state_teleperiod;
+    #endif // USE_MODULE_NETWORK_MQTT
 
 };
 #endif

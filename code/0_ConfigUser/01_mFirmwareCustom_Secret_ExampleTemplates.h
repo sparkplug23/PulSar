@@ -613,7 +613,7 @@
 
   // #define USE_MODULE_CONTROLLER_SONOFF_4CHPRO
 
-  #define USE_MODULE_DRIVERS_RF433_RCSWITCH
+  #define USE_MODULE_DRIVERS_RF433_CODES
 
   // default key# = relay#
   // RF Key433 using rules to match patterns then need limit to how often RF matches 
@@ -1065,7 +1065,7 @@
   #define USE_MODULE_SENSORS_INTERFACE  
     #
   #define USE_MODULE_SENSORS_BME
-  #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  #define USE_MODULE_SENSORS_DS18X20
   #define USE_MODULE_SENSORS_REMOTE_DEVICE
 
   #define REMOTE_SENSOR_1_MQTT_TOPIC "bedroomsensor/status/bme/+/sensors"
@@ -1095,7 +1095,7 @@
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      #ifdef USE_MODULE_SENSORS_DS18X20
       "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR     "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
@@ -1247,7 +1247,7 @@
 
   // #define USE_MODULE_DRIVERS_INTERFACE
 
-  #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+  #define USE_MODULE_DRIVERS_RF433_CODES
     #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
   
   #define USE_MODULE_TEMPLATE
@@ -1256,10 +1256,10 @@
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      #ifdef USE_MODULE_DRIVERS_RF433_CODES
       "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
       #endif  
-      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      #ifdef USE_MODULE_DRIVERS_RF433_CODES
       "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
       #endif  
       "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""

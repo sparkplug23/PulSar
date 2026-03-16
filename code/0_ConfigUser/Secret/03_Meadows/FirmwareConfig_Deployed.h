@@ -15,6 +15,7 @@
 
 /// KITCHEN //////////////////////////////////////////////////////////////////////////////////
 // #define DEVICE_MEADOWS__KITCHEN__GLASS_BOX
+// #define DEVICE_MEADOWS__KITCHEN__GREEN_PLANT
 /// LANDING //////////////////////////////////////////////////////////////////////////////////
 
 /// HALLWAY //////////////////////////////////////////////////////////////////////////////////
@@ -26,6 +27,7 @@
 // #define DEVICE_MEADOWS__ENSUITE_DOOR_FRAME
 /// OFFICE ///////////////////////////////////////////////////////////////////////////////////
 
+// #define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
 /// LIVINGROOM ///////////////////////////////////////////////////////////////////////////////
 
 /// HALLWAY //////////////////////////////////////////////////////////////////////////////////
@@ -36,7 +38,6 @@
 
 /// OUTSIDE //////////////////////////////////////////////////////////////////////////////////
 // #define DEVICE_MEADOWS__OUTSIDE__FENCE_LIGHTS
-
 
 
 
@@ -676,6 +677,135 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 
 
+/**
+ * @brief 
+ * Using bad antenna supermini
+ * 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *                               *I ~PWM 'NC    
+ *                          _____________________
+ *                         |5V     |USB|     5|
+ *                         |GND              6| 
+ *                         |3V3              7|
+ *                         |4  (fL, BIL)     8| I2C SDA   - Blue LED
+ *                         |3                9| I2C SCL
+ *                         |2 fL            10| 
+ *                    U1RX |1               20| U0TX
+ *                    U1TX |0               21| U0RX
+ *                         ____________________
+ * 
+        Pin	Function	ESP Pin	Input/Output	Description
+        1	5V	5V	POWER INPUT	5V power input for the board
+        2	GND	GND	POWER GROUNT	Ground connection
+        3	3V3	3.3V	POWER OUTPUT	3.3V power output
+        4	IO0	A0	BIDIRECTIONAL	GPIO, ADC pin, PWM
+        5	IO1	A1	BIDIRECTIONAL	GPIO, ADC pin, PWM
+        6	IO2	A2	BIDIRECTIONAL	GPIO, ADC pin, PWM
+        7	IO3	A3	BIDIRECTIONAL	GPIO, ADC pin, PWM
+        8	IO4	A4	BIDIRECTIONAL	GPIO, ADC pin, SCK, PWM
+        9	IO5	A5	BIDIRECTIONAL	GPIO, ADC pin, SPI Master In Slave Out, PWM
+        10	IO6	MISO	BIDIRECTIONAL	GPIO, SPI Master Out Slave In, PWM
+        11	IO7	SS	BIDIRECTIONAL	GPIO, SPI Slave Select, PWM
+        12	IO8	SDA	BIDIRECTIONAL	GPIO, I2C Data line, PWM
+        13	IO9	SCL	BIDIRECTIONAL	GPIO, I2C Clock line, PWM
+        14	IO10	RX	BIDIRECTIONAL	GPIO, PWM
+        15	IO21	TX	BIDIRECTIONAL	GPIO, UART Transmit
+        16	IO20	RX	BIDIRECTIONAL	GPIO, UART Receive (secondary)
+
+        Hardware serial port, there are two hardware serial ports on the board:
+          USB serial port
+          ART serial port
+
+        GPIO Matrix pins with one of the following important functions, as described in Section 2.3.3
+          Restrictions for GPIOs:–GPIO2,
+          GPIO8, GPIO9 : Strapping pins.–GPIO18,
+          GPIO19 : USB_C Serial/JTAG interface.–GPIO4,
+          GPIO5, GPIO6, GPIO7 : JTAG interface.–GPIO2
+          0, GPIO21 : UART0 interface.–GPIO11: The VDD_SPI pin. The power supply pin for flash by default, and can only be reconfigured
+          as a GPIO pin if the flash is powered by an external power supply. */
+#ifdef DEVICE_MEADOWS__KITCHEN__GREEN_PLANT
+#ifndef DEVICENAME_CTR
+#define DEVICENAME_CTR          "template"
+#endif
+#ifndef DEVICENAME_FRIENDLY_CTR
+#define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+#endif
+#ifndef DEVICENAME_DESCRIPTION_CTR
+#define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+#endif
+#define DEVICENAME_ROOMHINT_CTR "testgroup"
+#define MQTT_HOST   "192.168.3.70"
+   
+   #define MQTT_PORT     1883
+    
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+
+  // #define ENABLE_DEBUGFEATURE_SENSORS__SPLASH_I2C_SCAN
+
+ /***********************************
+  * SECTION: Network Configs
+ ************************************/    
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+  #define USE_MODULE_SENSORS_INTERFACE
+
+  #define USE_MODULE_SENSORS_MOISTURE
+
+/***********************************
+ * SECTION: Lighting Configs
+************************************/  
+
+
+/***********************************                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+ * SECTION: Module/GPIO Configs
+************************************/  
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      "\"4\":\""  D_GPIO_FUNCTION_MOISTURE_ANALOG_CTR "\"" 
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+/***********************************
+ * SECTION: TEMPLATE: Names
+************************************/    
+
+#define D_DEVICE_SENSOR_MOISTURE_ADC_NAME "KitchenTree"
+
+#define USE_FUNCTION_TEMPLATE
+DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+"{"
+  "\"" D_DEVICENAME "\":{"
+    "\"" D_MODULE_SENSORS_MOISTURE_ADC_CTR "\":["
+      "\"" D_DEVICE_SENSOR_MOISTURE_ADC_NAME "\""
+    "]"
+  "}"
+"}";
+
+
+#endif
+
+
+
+
+
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
 ****** ROOM: Utility ****************************************************************************************************************************************************
@@ -827,6 +957,142 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 
 #endif
+
+
+/**
+ * @brief 
+ * 
+ * Testbed for motion/distance sensors
+ * 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *                               *I ~PWM 'NC    
+ *                          _____________________
+ *                    3V3  |3V3     |USB|     VIN|
+ *                    GND  |GND               GND| 
+ *                 =BUZZER |15 (fL)            13|
+ *              =SONIC TX1 |2  (fL, BIL)  (fH) 12| 
+ *              =SONIC RX1 |4             (fH) 14|
+ *              =RADAR TX2 |RX2/17             27| 
+ *              =RADAR RX2 |TX2/16             26| TOF1EN
+ *                         |5  (fL)            25| TOF1INT
+ *                         |18                 33| TOF0EN
+ *              LM386 SPKR |19                 32| TOF0INT
+ *        OLED,TOF I2C_SDA |21  SDA     (fL) * 35| RADAR_3p18GHZ 
+ *                         |RX0         (fL) * 34| PIR_LARGE
+ *                         |TX0              ' VN| 
+ *        OLED,TOF I2C_SCL |22  SCL          ' VP| 
+ *                     NEO |23               ' EN| 
+ *                          _____________________
+ * 
+ * 
+ */
+#ifdef DEVICE_MEADOWS__UTILITY__CLEARVASE_LIGHT
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "testbed_default"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_PORT     1883
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+   #define USE_MODULE_SENSORS_INTERFACE
+   #define USE_MODULE_SENSORS_PIR
+    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+ #endif
+
+ #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
+
+
+
+ /***********************************
+  * SECTION: Module/GPIO Configs
+ ************************************/  
+
+ #define USE_MODULE_TEMPLATE
+ DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+ "{"
+   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+   "\"" D_GPIO_NUMBER "\":{"
+     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+   "},"
+   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+ "}";
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"Warm White",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Candles",
+          "Speed":180,
+          "Intensity":85,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 100
+  }
+  )=====";
+
+  
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Utility"
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "]"
+   "}"
+ "}";
+
+#endif
+
+
+
+
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -1193,8 +1459,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 /**
  * @brief 
- * Using bad antenna supermini
- * 
  *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
  *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
  *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
@@ -1210,36 +1474,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
  *                    U1RX |1               20| U0TX
  *                    U1TX |0               21| U0RX
  *                         ____________________
- * 
-        Pin	Function	ESP Pin	Input/Output	Description
-        1	5V	5V	POWER INPUT	5V power input for the board
-        2	GND	GND	POWER GROUNT	Ground connection
-        3	3V3	3.3V	POWER OUTPUT	3.3V power output
-        4	IO0	A0	BIDIRECTIONAL	GPIO, ADC pin, PWM
-        5	IO1	A1	BIDIRECTIONAL	GPIO, ADC pin, PWM
-        6	IO2	A2	BIDIRECTIONAL	GPIO, ADC pin, PWM
-        7	IO3	A3	BIDIRECTIONAL	GPIO, ADC pin, PWM
-        8	IO4	A4	BIDIRECTIONAL	GPIO, ADC pin, SCK, PWM
-        9	IO5	A5	BIDIRECTIONAL	GPIO, ADC pin, SPI Master In Slave Out, PWM
-        10	IO6	MISO	BIDIRECTIONAL	GPIO, SPI Master Out Slave In, PWM
-        11	IO7	SS	BIDIRECTIONAL	GPIO, SPI Slave Select, PWM
-        12	IO8	SDA	BIDIRECTIONAL	GPIO, I2C Data line, PWM
-        13	IO9	SCL	BIDIRECTIONAL	GPIO, I2C Clock line, PWM
-        14	IO10	RX	BIDIRECTIONAL	GPIO, PWM
-        15	IO21	TX	BIDIRECTIONAL	GPIO, UART Transmit
-        16	IO20	RX	BIDIRECTIONAL	GPIO, UART Receive (secondary)
-
-        Hardware serial port, there are two hardware serial ports on the board:
-          USB serial port
-          ART serial port
-
-        GPIO Matrix pins with one of the following important functions, as described in Section 2.3.3
-          Restrictions for GPIOs:–GPIO2,
-          GPIO8, GPIO9 : Strapping pins.–GPIO18,
-          GPIO19 : USB_C Serial/JTAG interface.–GPIO4,
-          GPIO5, GPIO6, GPIO7 : JTAG interface.–GPIO2
-          0, GPIO21 : UART0 interface.–GPIO11: The VDD_SPI pin. The power supply pin for flash by default, and can only be reconfigured
-          as a GPIO pin if the flash is powered by an external power supply. */
+ *  */
 #ifdef DEVICE_MEADOWS__HALLWAY__ROOM_SENSOR
 #ifndef DEVICENAME_CTR
 #define DEVICENAME_CTR          "template"
@@ -1269,7 +1504,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
  ************************************/  
 
-// #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+#define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
 #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
 
  /***********************************
@@ -2030,70 +2265,12 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   /***********************************
    * SECTION: System Debug Options
   ************************************/    
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE 
-  // #define DISABLE_SERIAL_LOGGING
-  
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-  // #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
-  // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
-  // #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-  // #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
-  // #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
-
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-  // #define ENABLE_DEBUG_LINE_HERE
-  // #define ENABLE_DEBUG_LINE_HERE2
-  // #define ENABLE_DEBUG_LINE_HERE_MILLIS
-  
-  // #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
-  // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
-
-  // #define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-
-  // #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 200
-
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-  //   #define ENABLE_DEBUG_LINE_HERE4
-  //   #define ENABLE_WAIT_WITH_PRINT_TICK
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // 
-  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
-  // #define ENABLE_DEBUG_LINE_HERE
-  // #define ENABLE_DEBUG_LINE_HERE2
-  // #define ENABLE_DEBUG_LINE_HERE3
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
-  // #define USE_DEBUG_PRINT
-  // #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
-
-
-  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
-
-  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
-
-  #define ENABLE_FEATURE_SYSTEM__BOOT_SPLASH__DISPLAY_BLOCK_TO_SHOW_END_OF_INIT
-
-  #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
-
-
-  // #define ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
-  // #define ENABLE_DEVFEATURE_PINS__GPIO_UI_VIEWER
 
   /***********************************
    * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
   ************************************/  
- #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
- #define ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
   
   /***********************************
    * SECTION: System Configs
@@ -2128,11 +2305,40 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
    * SECTION: Lighting Configs
   ************************************/    
 
-         #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
-  //       #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-  
-
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
   #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"GRB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       100
+  //     ],
+  //     "ColourPalette":"Cold White",
+  //     "Effects": {
+  //       "Function":"Solid",
+  //       "Speed":127,
+  //       "Intensity":127,
+  //       "Grouping":1,
+  //       "RateMs": 25
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 0
+  // }
+  // )=====";
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -2181,7 +2387,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
         "RateMs": 1000,
         "Speed":127
       },
-      "BrightnessRGB":5,
+      "BrightnessRGB":100,
       "BrightnessCCT":100
     },
     "Segment1":{
@@ -3481,7 +3687,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
   #endif
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-    #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #define USE_MODULE_SENSORS_DS18X20
       #define DS18X20_MAX_SENSORS 20
         #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
   #endif 
@@ -4225,7 +4431,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
       "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
       #endif
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      #ifdef USE_MODULE_SENSORS_DS18X20
       "\"33\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
       #endif    
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219)
@@ -4886,7 +5092,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
         "BrightnessRGB": 100
       }
     ],
-    "BrightnessRGB": 5
+    "BrightnessRGB": 100
   }
   )=====";
 
@@ -5436,6 +5642,125 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
 
 /**
+ * @brief 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *                               *I ~PWM 'NC    
+ *                          _____________________
+ *                         |5V     |USB|     5|
+ *                         |GND              6| 
+ *                         |3V3              7|
+ *                         |4  (fL, BIL)     8| I2C SDA   - Blue LED
+ *                         |3                9| I2C SCL
+ *                         |2 fL            10| 
+ *                    U1RX |1               20| U0TX
+ *                    U1TX |0               21| U0RX
+ *                         ____________________
+ *  */
+#ifdef DEVICE_MEADOWS__GARAGE__ROOM_SENSOR
+#ifndef DEVICENAME_CTR
+#define DEVICENAME_CTR          "template"
+#endif
+#ifndef DEVICENAME_FRIENDLY_CTR
+#define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+#endif
+#ifndef DEVICENAME_DESCRIPTION_CTR
+#define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+#endif
+#define DEVICENAME_ROOMHINT_CTR "testgroup"
+#define MQTT_HOST   "192.168.3.70"
+   
+   #define MQTT_PORT     1883
+    
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+
+  // #define ENABLE_DEBUGFEATURE_SENSORS__SPLASH_I2C_SCAN
+
+ /***********************************
+  * SECTION: Network Configs
+ ************************************/    
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+
+#define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+#define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+//  #define ENABLE_DEBUGFEATURE_WIFI__SUPERMINI_REDUCE_WIFI_BAD_ANTENNA_HARDWARE
+
+#define USE_MODULE_SENSORS_INTERFACE
+#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+  #define USE_MODULE_SENSORS_BH1750
+#endif
+#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
+  #define USE_MODULE_SENSORS_BME    
+#endif
+#define USE_MODULE_SENSORS_PIR
+
+/***********************************
+ * SECTION: Lighting Configs
+************************************/  
+
+
+/***********************************                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+ * SECTION: Module/GPIO Configs
+************************************/  
+
+#define USE_MODULE_TEMPLATE
+DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+"{"
+  "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+  "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+  "\"" D_GPIO_NUMBER "\":{"          
+    #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
+    "\"10\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+    "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
+    #endif
+    #ifdef USE_MODULE_SENSORS_PIR
+    "\"4\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\""
+    #endif
+  "},"
+  "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+  "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+"}";
+
+/***********************************
+ * SECTION: TEMPLATE: Names
+************************************/    
+
+#define D_DEVICE_SENSOR_BH1750_NAME "Garage"
+#define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Garage"
+
+#define USE_FUNCTION_TEMPLATE
+DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+"{"
+  "\"" D_DEVICENAME "\":{"
+    "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+      "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+    "],"
+    "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
+    "],"
+    "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
+    "]"
+  "}"
+"}";
+
+
+#endif
+
+
+/**
  * @description: 
  * 
  * Landing Panel
@@ -5564,12 +5889,12 @@ May need to add two power connections too, so its not just the cat5e wire to let
   #define USE_MODULE_SENSORS_INTERFACE
     #
   //   #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
-  // #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  // #define USE_MODULE_SENSORS_DS18X20
   //   #define DS18X20_MAX_SENSORS 20
   //   #define ENABLE_DEVFEATURE_DS18B20_SEARCHING_SENSOR_LOCATION_WITH_ADDRESS_TEMP_SPLASH
   
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-    #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #define USE_MODULE_SENSORS_DS18X20
       #define DS18X20_MAX_SENSORS 20
         #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
   #endif 
@@ -5641,7 +5966,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      #ifdef USE_MODULE_SENSORS_DS18X20
       "\"4\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," // Group 1 = Basic Set, use just these until device is stable
       // "\"19\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR  "\"," // Group 2 = Detailed, use these only after stress testing with 3 pins for sensors with rewrite. Read datasheet.
       #endif
@@ -6277,7 +6602,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       
   #endif
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-    #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #define USE_MODULE_SENSORS_DS18X20
       #define DS18X20_MAX_SENSORS 5
         #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
   #endif 
@@ -6322,7 +6647,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
       #endif
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+      #ifdef USE_MODULE_SENSORS_DS18X20
       "\"15\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
       #endif    
       #ifdef USE_MODULE_DRIVERS_RELAY
@@ -6532,7 +6857,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 //  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING__HVACDESK_HARDCODED_ADD
  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING__HVACDESK_OILTANK_ADD
  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-   #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+   #define USE_MODULE_SENSORS_DS18X20
      #define DS18X20_MAX_SENSORS 5
        #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
         #define ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
@@ -6564,7 +6889,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
    "\"" D_GPIO_NUMBER "\":{"  
-     #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+     #ifdef USE_MODULE_SENSORS_DS18X20
      "\"15\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
      #endif            
      #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
@@ -6654,7 +6979,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   
   // #define USE_MODULE_DRIVERS_INTERFACE
 
-  #define USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+  #define USE_MODULE_DRIVERS_RF433_CODES
     // #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
   
   #define USE_MODULE_TEMPLATE
@@ -6663,7 +6988,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      #ifdef USE_MODULE_DRIVERS_RF433_RCSWITCH_EXTENDED
+      #ifdef USE_MODULE_DRIVERS_RF433_CODES
       "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
       #endif  
       "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
@@ -6712,8 +7037,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 
 
-  // #define USE_MODULE_SENSORS_SUN_TRACKING     
-  #define USE_MODULE_SENSORS_SUN_TRACKING2     
+  #define USE_MODULE_SENSORS_SUN_TRACKING 
   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
   #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
   //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
@@ -7583,6 +7907,121 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 
 
 #endif
+
+
+
+#ifdef DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+
+  /***********************************
+  * SECTION: Enable Grouped
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+
+
+  #define USE_MODULE_SENSORS_SUN_TRACKING      
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+  //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+
+  
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI
+  // // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+  // #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+  // // #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  // // #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+
+  
+
+
+  /**
+   * @brief tree physical wiring connections
+   * 16 outputs
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":256
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        256
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Static",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "BrightnessRGB": 100,
+      "Preset":{"Load":1}
+    },
+    "BrightnessRGB": 100
+  }
+  )=====";
+ 
+      
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      // "\"28\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"12\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"26\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"32\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"14\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"27\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"25\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"33\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif // END DEVICE
+
+
 
 
 

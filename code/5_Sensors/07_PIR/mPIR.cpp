@@ -38,7 +38,7 @@ int8_t mPIR::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
   
-  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     case TASK_EVERY_50_MSECOND:

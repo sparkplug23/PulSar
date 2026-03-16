@@ -18,7 +18,7 @@
 */
 #include "mSensorsLSM303D.h"
 
-#ifdef USE_MODULE_SENSORS_LSM303D
+#ifdef USE_MODULE_SENSORS_LSM303D // accelerometer and magnetic compass
 
 int8_t mSensorsLSM303D::Tasker(uint8_t function, JsonParserObject obj)
 {
@@ -32,7 +32,7 @@ int8_t mSensorsLSM303D::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -45,7 +45,7 @@ int8_t mSensorsLSM303D::Tasker(uint8_t function, JsonParserObject obj)
      * COMMANDS SECTION * 
     *******************/
     case TASK_JSON_COMMAND_ID:
-    //  parse_JSONCommand(obj);
+      parse_JSONCommand(obj);
     break;
     /************
      * MQTT SECTION * 
@@ -53,200 +53,105 @@ int8_t mSensorsLSM303D::Tasker(uint8_t function, JsonParserObject obj)
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
-      break;
+    break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
-      break;
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
-      break;
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
 
-  return FUNCTION_RESULT_SUCCESS_ID;
+  return TASKER_RESULT__SUCCESS_ID;
 
 }
 
 
 /**
  * tmp method which assumes both, force the sensors
+ * Needs redone, as this is coded for the SOLO3DR leg/arm
  * */
 void mSensorsLSM303D::Pre_Init()
 {
 
-  settings.fEnableSensor = false;
-  settings.fSensorCount = 0;
+  module_state.mode = ModuleStatus::Initialising;
+  module_state.devices = 0;
 
-  /**
-   * Arm sensor (with gyro): Keep +-2 range on mag
-   * */
-  sensor[0].lsm303d = new LSM303(tkr_i2c->wire, I2C_ADDRESS_LSM303D_ARM);
-  sensor[0].lsm303d->init(LSM303::device_D, LSM303::sa0_high); //pulled high is defualt address
-  ALOG_INF(PSTR("LSM303D %02x sensor detected %d"), I2C_ADDRESS_LSM303D_ARM, 0);
-  sensor[0].lsm303d->enableDefault();
-  // 0x20 = 0b00100000
-  // MFS = 01 (+/- 4 gauss full scale)
-  sensor[0].lsm303d->writeReg(LSM303::CTRL6, 0x20);                ///////////// change here   -- forced +-4 range (default)
-  sensor[0].address_id = 0;
-  sensor[0].address = I2C_ADDRESS_LSM303D_ARM;
-  settings.fSensorCount++;
-
-  /**
-   * Leg sensor (withOUT gyro): Extended range of +-4
-   * */
-  sensor[1].lsm303d = new LSM303(tkr_i2c->wire, I2C_ADDRESS_LSM303D_LEG);
-  sensor[1].lsm303d->init(LSM303::device_D, LSM303::sa0_low); //pulled high is defualt address
-  ALOG_INF(PSTR("LSM303D %02x sensor detected %d"), I2C_ADDRESS_LSM303D_LEG, 0);
-  sensor[1].lsm303d->enableDefault();
-  // 0x20 = 0b00100000
-  // MFS = 01 (+/- 4 gauss full scale)
-  sensor[1].lsm303d->writeReg(LSM303::CTRL6, 0x00);                ///////////// change here   -- forced +-2 range (not default)
-  sensor[1].address_id = 1;
-  sensor[1].address = I2C_ADDRESS_LSM303D_LEG;
-  settings.fSensorCount++;
-
- 
-  if(settings.fSensorCount)
+  for (uint8_t i = 0; i < MAX_LM303D_SENSORS; i++)
   {
-    settings.fEnableSensor = true;
-    AddLog(LOG_LEVEL_INFO,PSTR("LSM303D Sensor Enabled %d"),settings.fSensorCount);
-    AddLog(LOG_LEVEL_INFO,PSTR("LSM303D Sensor Enabled settings.fSensorCount %d %d"),sensor[0].address, I2C_ADDRESS_LSM303D_ARM);
-    AddLog(LOG_LEVEL_INFO,PSTR("LSM303D Sensor Enabled settings.fSensorCount %d %d"),sensor[1].address, I2C_ADDRESS_LSM303D_LEG);
+    sensor[i].lsm303d = new LSM303(tkr_i2c->wire, addresses[i]);
+
+    if (sensor[i].lsm303d->init(LSM303::device_D, LSM303::sa0_high))
+    {
+      ALOG_INF(PSTR("LSM303D %02x sensor detected %d"), addresses[i], i);
+      sensor[i].lsm303d->enableDefault();
+      sensor[i].address_id = i;
+      sensor[i].address = addresses[i];
+      module_state.devices++;
+    }
+    else
+    {
+      delete sensor[i].lsm303d;
+      sensor[i].lsm303d = nullptr;
+    }
+  }
+ 
+  if(module_state.devices)
+  {
+    module_state.mode = ModuleStatus::Running;
   }
 
 }
 
+// For LSM303D magnetometer full-scale, CTRL6 bits MFS[6:5] are:
+// 0x00 = ±2 gauss
+// 0x20 = ±4 gauss
+// 0x40 = ±8 gauss
+// 0x60 = ±12 gauss
+void mSensorsLSM303D::Init(void)
+{
+  #ifdef ENABLE_SENSOR_LSM303D_READING_AVERAGING
+  for (uint8_t sensor_id = 0; sensor_id < module_state.devices; sensor_id++)
+  {
+    sensor[sensor_id].mag.average.x = new AVERAGING_DATA<float>(MAGNETOMETER_SAMPLES_SIZE);
+    sensor[sensor_id].mag.average.y = new AVERAGING_DATA<float>(MAGNETOMETER_SAMPLES_SIZE);
+    sensor[sensor_id].mag.average.z = new AVERAGING_DATA<float>(MAGNETOMETER_SAMPLES_SIZE);
+  }
+  #endif // ENABLE_SENSOR_LSM303D_READING_AVERAGING
 
-// void mSensorsLSM303D::Pre_Init()
-// {
+  settings.measure_rate_ms = 60000; // 1000/MAGNETOMETER_SAMPLES_SIZE;
 
-//   settings.fEnableSensor = false;
-//   settings.fSensorCount = 0;
+  for (uint8_t sensor_id = 0; sensor_id < module_state.devices; sensor_id++)
+  {
+    if (sensor[sensor_id].lsm303d == nullptr) {
+      continue;
+    }
 
-//   uint8_t addresses[] = {I2C_ADDRESS_LSM303D_1, I2C_ADDRESS_LSM303D_2};
-
-//   if(tkr_pins->PinUsed(GPIO_I2C_SCL_ID) && tkr_pins->PinUsed(GPIO_I2C_SDA_ID))
-//   {
-
-//     for(int i=0;i<sizeof(addresses);i++)
-//     {
-    
-//       if(tkr_sup->I2cDevice(addresses[i]))
-//       {
-//         sensor[settings.fSensorCount].lsm303d = new LSM303(tkr_i2c->wire, addresses[i]);
-//         // if(sensor[settings.fSensorCount].lsm303d->init_addressed(addresses[i]))  // should not be needed if the address is correctly within wire
-//         // if(sensor[settings.fSensorCount].lsm303d->init())  // should not be needed if the address is correctly within wire
-//         if(sensor[settings.fSensorCount].lsm303d->init(LSM303::device_D, i?LSM303::sa0_low:LSM303::sa0_high))  // should not be needed if the address is correctly within wire
-//         {
-//           ALOG_INF(PSTR("LSM303D %02x sensor detected %d"), addresses[i], i);
-//           sensor[settings.fSensorCount].lsm303d->enableDefault();
-
-
-//           /**
-//            * Arm sensor (with gyro): Keep +-2 range on mag
-//            * */
-//           if(addresses[i] == I2C_ADDRESS_LSM303D_ARM)
-//           {
-//             // Accelerometer
-
-//             // 0x57 = 0b 0101 0111
-//             // AFS = 0 (+/- 2 g full scale)
-//             // sensor[settings.fSensorCount].lsm303d->writeReg(LSM303::CTRL2, 0x00);
-
-//             // 0x57 = 0b01010111
-//             // AODR = 0101 (50 Hz ODR); AZEN = AYEN = AXEN = 1 (all axes enabled)
-//             // writeReg(CTRL1, 0x57);
-
-//             // Magnetometer
-
-//             // 0x64 = 0b01100100
-//             // M_RES = 11 (high resolution mode); M_ODR = 001 (6.25 Hz ODR)
-//             // writeReg(CTRL5, 0x64);
-
-//             // 0x20 = 0b00100000
-//             // MFS = 01 (+/- 4 gauss full scale)
-//             sensor[settings.fSensorCount].lsm303d->writeReg(LSM303::CTRL6, 0x00);                ///////////// change here
-
-//             // 0x00 = 0b00000000
-//             // MLP = 0 (low power mode off); MD = 00 (continuous-conversion mode)
-//             // writeReg(CTRL7, 0x00);
-//           }
-
-
-//           /**
-//            * Leg sensor (withOUT gyro): Extended range of +-4
-//            * */
-//           if(addresses[i] == I2C_ADDRESS_LSM303D_LEG)
-//           {
-//             // Accelerometer
-
-//             // 0x57 = 0b 0101 0111
-//             // AFS = 0 (+/- 2 g full scale)
-//             // sensor[settings.fSensorCount].lsm303d->writeReg(CTRL2, 0x00);
-
-//             // 0x57 = 0b01010111
-//             // AODR = 0101 (50 Hz ODR); AZEN = AYEN = AXEN = 1 (all axes enabled)
-//             // sensor[settings.fSensorCount].lsm303d->writeReg(CTRL1, 0x57);
-
-//             // Magnetometer
-
-//             // 0x64 = 0b01100100
-//             // M_RES = 11 (high resolution mode); M_ODR = 001 (6.25 Hz ODR)
-//             // sensor[settings.fSensorCount].lsm303d->writeReg(CTRL5, 0x64);
-
-//             // 0x20 = 0b00100000
-//             // MFS = 01 (+/- 4 gauss full scale)
-//             sensor[settings.fSensorCount].lsm303d->writeReg(LSM303::CTRL6, 0x20);                ///////////// change here
-
-//             // 0x00 = 0b00000000
-//             // MLP = 0 (low power mode off); MD = 00 (continuous-conversion mode)
-//             // sensor[settings.fSensorCount].lsm303d->writeReg(CTRL7, 0x00);
-//           }
-
-
-
-
-
-
-
-
-
-//           sensor[settings.fEnableSensor].address_id = settings.fEnableSensor;
-//           sensor[settings.fEnableSensor].address = addresses[i];
-//           settings.fSensorCount++;
-//         }
-//       }
-
-//     }
-
-//   }
-
-  
-//   if(settings.fSensorCount)
-//   {
-//     settings.fEnableSensor = true;
-//     AddLog(LOG_LEVEL_INFO,PSTR("LSM303D Sensor Enabled %d"),settings.fSensorCount);
-//   }
-
-// }
-
-
-void mSensorsLSM303D::Init(void){
-
-    int sensor_id=0;
-        #ifdef ENABLE_SENSOR_LSM303D_READING_AVERAGING
-    sensor.mag.average.x = new AVERAGING_DATA<float>(MAGNETOMETER_SAMPLES_SIZE);
-    sensor.mag.average.y = new AVERAGING_DATA<float>(MAGNETOMETER_SAMPLES_SIZE);
-    sensor.mag.average.z = new AVERAGING_DATA<float>(MAGNETOMETER_SAMPLES_SIZE);
-        #endif //  ENABLE_SENSOR_LSM303D_READING_AVERAGING
-    settings.measure_rate_ms = 60000;//1000/MAGNETOMETER_SAMPLES_SIZE; // Gives samples per 1 second
-  
+    /**
+     * Temporary per-sensor precision/range reminder.
+     * Proper version should become a later command/setter.
+     */
+    if (sensor_id == 0)
+    {
+      sensor[sensor_id].lsm303d->writeReg(LSM303::CTRL6, 0x20);  // ±4 gauss
+      ALOG_INF(PSTR("LSM303D[%d] mag scale set to +/-4 gauss"), sensor_id);
+    }
+    else if (sensor_id == 1)
+    {
+      sensor[sensor_id].lsm303d->writeReg(LSM303::CTRL6, 0x00);  // ±2 gauss
+      ALOG_INF(PSTR("LSM303D[%d] mag scale set to +/-2 gauss"), sensor_id);
+    }
+  }
 }
 
 
 void mSensorsLSM303D::EveryLoop(){
     
-  for(int sensor_id=0; sensor_id<settings.fSensorCount; sensor_id++)
+  for(int sensor_id=0; sensor_id<module_state.devices; sensor_id++)
   {
     if(mTime::TimeReachedNonReset(&sensor[sensor_id].tSavedMeasure,settings.measure_rate_ms))
     {  
@@ -279,17 +184,6 @@ void mSensorsLSM303D::EveryLoop(){
 
     }
   }
-
-
-  
-// char report[80];
-//   snprintf(report, sizeof(report), "A: %6d %6d %6d    M: %6d %6d %6d",
-//     compass->a.x, compass->a.y, compass->a.z,
-//     compass->m.x, compass->m.y, compass->m.z);
-//   Serial.println(report);
-
-  // Serial.println();
-
 
 }
 
@@ -605,20 +499,20 @@ void mSensorsLSM303D::CalculateOrientation(
 uint8_t mSensorsLSM303D::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_SENSOR_COUNT, settings.fSensorCount);
+    JBI->Add(D_SENSOR_COUNT, module_state.devices);
   return JBI->End();
 
 }
 
 
 
-uint8_t mSensorsLSM303D::ConstructJSON_Sensor(uint8_t json_level){
+uint8_t mSensorsLSM303D::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   JBI->Start();
 
   char buffer[40];
 
-  for(int sensor_id=0;sensor_id<settings.fSensorCount;sensor_id++)
+  for(int sensor_id=0;sensor_id<module_state.devices;sensor_id++)
   { //db18_sensors_active
    
   //  JBI->Object_Start(DLI->GetDeviceNameWithEnumNumber(E M_MODULE_SENSORS_LSM303D_ID,sensor[sensor_id].address_id,buffer,sizeof(buffer)));         
@@ -713,41 +607,6 @@ void mSensorsLSM303D::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mSensorsLSM303D::ConstructJSON_Sensor;
   
-} 
-
-
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mSensorsLSM303D::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mSensorsLSM303D::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-    // if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-    //   handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief Check all handlers if they require action
- * */
-void mSensorsLSM303D::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
 }
 
 #endif // USE_MODULE_NETWORK_MQTT

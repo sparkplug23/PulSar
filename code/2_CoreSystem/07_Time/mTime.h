@@ -79,21 +79,6 @@ typedef struct TIMEREACHED_HANDLER{
 #define SEC_IN_MIN   60
 
 
-enum TIME_UNITS_IDS{
-  TIME_UNIT_SECONDS_ID = 0,
-  TIME_UNIT_MILLISECONDS_ID
-};
-
-
-template <typename TIME, typename UNIT>
-uint32_t ConvertTimeToMilliSecondsWithUnit(TIME time_secs, UNIT unit){
-  if(unit == TIME_UNIT_SECONDS_ID){
-    time_secs *= 1000;
-  }
-  return time_secs;
-}
-
-
 #include "1_TaskerManager/mTaskerManager.h"
 
 #include "2_CoreSystem/01_Settings/mSettings.h"
@@ -102,8 +87,8 @@ uint32_t ConvertTimeToMilliSecondsWithUnit(TIME time_secs, UNIT unit){
 
 #include "3_Network/10_MQTT/mMQTT.h"
 
-static const uint8_t kDaysInMonth[]    PROGMEM = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // API starts months from 1, this array starts from 0
-static const char kMonthNamesEnglish[] PROGMEM = "JanFebMarAprMayJunJulAugSepOctNovDec";
+static const uint8_t kDaysInMonth[] PROGMEM = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 }; // API starts months from 1, this array starts from 0
+static const char    kMonthNames[]  PROGMEM = "JanFebMarAprMayJunJulAugSepOctNovDec";
 
 class mTime :
   public mTaskerInterface
@@ -227,6 +212,7 @@ class mTime :
     bool formatTimeUntil(char* out, size_t out_len, uint32_t time_until_seconds);
     bool formatTimeCTime(char* out, size_t out_len, time_t t);
 
+    time_t ConvertToUTCTime(int year, int month, int day, int hour, int min, int sec);
     
     time_t GetStartOfDayUTC(time_t utc_time);
 
@@ -247,12 +233,12 @@ class mTime :
         return buffer;
       }
 
-      // Calculate the starting index in the kMonthNamesEnglish array
+      // Calculate the starting index in the kMonthNames array
       uint8_t startIndex = (month - 1) * dt_SHORT_STR_LEN;
 
       // Copy the month name from PROGMEM to the buffer
       for (uint8_t i = 0; i < dt_SHORT_STR_LEN; i++) {
-        buffer[i] = pgm_read_byte(&(kMonthNamesEnglish[startIndex + i]));
+        buffer[i] = pgm_read_byte(&(kMonthNames[startIndex + i]));
       }
       buffer[dt_SHORT_STR_LEN] = '\0'; // Null-terminate the string
       return buffer;
@@ -280,7 +266,7 @@ class mTime :
         for (int i = 0; i < 12; i++) {
             char monthBuf[4];
             // Copy 3 characters from PROGMEM into a RAM buffer.
-            memcpy_P(monthBuf, kMonthNamesEnglish + i * 3, 3);
+            memcpy_P(monthBuf, kMonthNames + i * 3, 3);
             monthBuf[3] = '\0';
             if (strcmp(monthBuf, monthStr) == 0) {
                 buildMonth = i + 1;

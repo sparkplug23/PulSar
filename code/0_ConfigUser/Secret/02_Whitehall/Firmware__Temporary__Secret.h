@@ -62,7 +62,7 @@
 
   #define USE_MODULE_SENSORS_INTERFACE
     #
-    #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+    #define USE_MODULE_SENSORS_DS18X20
 
   #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_OLED_SSD1306
@@ -82,7 +82,7 @@
        * */
       "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
       "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
-      #ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023   
+      #ifdef USE_MODULE_SENSORS_DS18X20   
       "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
       #endif
     "},"
@@ -154,7 +154,7 @@
 
   #define USE_SERIAL_ALTERNATE_TX
   
-  // #define USE_MODULE_DRIVERS_PWM
+  // #define USE_MODULE_CORE_PWM
 
 #define USE_SERIAL_ALTERNATE_TX
   
@@ -307,7 +307,7 @@
 
 //   #define USE_SERIAL_ALTERNATE_TX
 //   
-//   // #define USE_MODULE_DRIVERS_PWM
+//   // #define USE_MODULE_CORE_PWM
 
 
   

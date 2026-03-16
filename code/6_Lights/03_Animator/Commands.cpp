@@ -1956,7 +1956,7 @@ if (jtok_pwi && jtok_pwi.isArray())
     brightness = brightness > 10 ? 10 : brightness;
     #endif
     SEGMENT_I(segment_index).setBrightnessRGB( brightness );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
+    ALOG_INF(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
     data_buffer.isserviced++;
   }else
   if(jtok = obj[PM_BRIGHTNESS_RGB_255]){

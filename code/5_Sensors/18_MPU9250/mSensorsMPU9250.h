@@ -29,50 +29,56 @@
 
 #ifdef USE_MODULE_SENSORS_MPU9250
 
-// #include <Wire.h>
-
 #include <ICM20948_WE.h>
 
 #include <Wire.h>
-#include "5_Sensors/MPU9250/mSensorsMPU9250.h"
-
-
-// class Adafruit_BME280;
-
-// #include "1_TaskerManager/mTaskerManager.h"
-
-// #include "1_TaskerManager/mTaskerInterface.h"
+#include "AveragingDataLib.h"
 
 class mSensorsMPU9250 :
   public mTaskerInterface
 {
   
   public:
-    mSensorsMPU9250(){};
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
+	  mSensorsMPU9250(){};
     void Pre_Init(void);
     void Init(void);
+    void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
     static constexpr const char* PM_MODULE_SENSORS_MPU9250_CTR = D_MODULE_SENSORS_MPU9250_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MPU9250_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MPU9250_ID; }
+    
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+    
 
 
-/* There are several ways to create your ICM20948 object:
- * ICM20948_WE myIMU = ICM20948_WE()              -> uses Wire / I2C Address = 0x68
- * ICM20948_WE myIMU = ICM20948_WE(ICM20948_ADDR) -> uses Wire / ICM20948_ADDR
- * ICM20948_WE myIMU = ICM20948_WE(&wire2)        -> uses the TwoWire object wire2 / ICM20948_ADDR
- * ICM20948_WE myIMU = ICM20948_WE(&wire2, ICM20948_ADDR) -> all together
- * Successfully tested with two I2C busses on an ESP32
- */
-ICM20948_WE* myIMU;// = ICM20948_WE(ICM20948_ADDR);
+    /* There are several ways to create your ICM20948 object:
+    * ICM20948_WE myIMU = ICM20948_WE()              -> uses Wire / I2C Address = 0x68
+    * ICM20948_WE myIMU = ICM20948_WE(ICM20948_ADDR) -> uses Wire / ICM20948_ADDR
+    * ICM20948_WE myIMU = ICM20948_WE(&wire2)        -> uses the TwoWire object wire2 / ICM20948_ADDR
+    * ICM20948_WE myIMU = ICM20948_WE(&wire2, ICM20948_ADDR) -> all together
+    * Successfully tested with two I2C busses on an ESP32
+    */
+    ICM20948_WE* myIMU;// = ICM20948_WE(ICM20948_ADDR);
 
     struct MAGNET_READINGS{
 
       struct AVERAGED{
-        AVERAGING_DATA<float>* x;
-        AVERAGING_DATA<float>* y;
-        AVERAGING_DATA<float>* z;
+        Averaging_Data<float>* x;
+        Averaging_Data<float>* y;
+        Averaging_Data<float>* z;
       }average;
 
 
@@ -80,8 +86,8 @@ ICM20948_WE* myIMU;// = ICM20948_WE(ICM20948_ADDR);
 
 
     struct SETTINGS{
-      uint8_t fEnableSensor= false;
-      uint8_t fSensorCount= 0; 
+      // uint8_t fEnableSensor= false;
+      // uint8_t fSensorCount= 0; 
       uint8_t sModuleStatus =0;
       uint16_t measure_rate_ms = 1000;
     }settings;
@@ -123,49 +129,55 @@ ICM20948_WE* myIMU;// = ICM20948_WE(ICM20948_ADDR);
 //     }sensor[MAX_SENSORS];
 
     
-//     uint8_t GetSensorCount(void) override
-//     {
-//       return settings.fSensorCount;
-//     }
-    
-//     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
-//     {
-//       // Serial.printf("OVERRIDE ACCESSED DHT %d\n\r",index);Serial.println(sensor[index].instant.temperature);
-//       if(index > MAX_SENSORS-1) {value->type.push_back(0); return ;}
-//       value->type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
-//       value->type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
-//       value->data.push_back(sensor[index].temperature);
-//       value->data.push_back(sensor[index].humidity);
-//       value->sensor_id = index;
-//     };
+    /************************************************************************************************
+     * SECTION: Unified Reporting
+     ************************************************************************************************/
 
-
-
+    uint8_t GetSensorCount(void) override
+    {
+      return module_state.devices;
+    }    
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {      
+      if(index > GetSensorCount()) {value->sensor_type.push_back(0); return ;}
+      value->sensor_type.push_back(SENSOR_TYPE_MAGNETIC_FIELD_UNCALIBRATED_ID);
+      value->data_f.push_back(mag.average.x->Mean());
+      value->data_f.push_back(mag.average.y->Mean());
+      value->data_f.push_back(mag.average.z->Mean());
+      value->sensor_id = index;
+    };
         
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+
+
+
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+    
+    void parse_JSONCommand(JsonParserObject obj);
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+    
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
-  
-    #ifdef USE_MODULE_NETWORK_MQTT
-
-    void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    void MQTTHandler_Sender();
+      
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
     
+    #ifdef USE_MODULE_NETWORK_MQTT 
+    void MQTTHandler_Init();
+    std::vector<struct handler<mSensorsMPU9250>*> mqtthandler_list;
     struct handler<mSensorsMPU9250> mqtthandler_settings;
     struct handler<mSensorsMPU9250> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsMPU9250> mqtthandler_sensor_teleperiod;
- 
-    struct handler<mSensorsMPU9250>* mqtthandler_list[3] = {
-      &mqtthandler_settings,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
-    };
-
-    // No specialised payload therefore use system default instead of enum
-    
-    
     #endif // USE_MODULE_NETWORK_MQTT
+
 
 };
 #endif

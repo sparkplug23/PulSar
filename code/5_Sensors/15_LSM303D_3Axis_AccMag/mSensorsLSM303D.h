@@ -47,7 +47,6 @@ at this FS setting, so the value of -1009 corresponds to -1009 * 1 =
 1009 mg = 1.009 g.
 */
 
-
 #define D_UNIQUE_MODULE_SENSORS_LSM303D_ID 5015 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
@@ -55,50 +54,53 @@ at this FS setting, so the value of -1009 corresponds to -1009 * 1 =
 #ifdef USE_MODULE_SENSORS_LSM303D
 
 #include <Wire.h>
-#include "5_Sensors/LSM303D_3Axis_AccMag/internal/LSM303.h"
 
+#include "5_Sensors/15_LSM303D_3Axis_AccMag/internal/LSM303.h"
+
+#include "AveragingDataLib.h"
+
+#define MAX_LM303D_SENSORS 2
 
 class mSensorsLSM303D :
   public mTaskerInterface
-{
-  
+{  
   public:
-    mSensorsLSM303D(){};
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
+	  mSensorsLSM303D(){};
     void Pre_Init(void);
     void Init(void);
+    void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
     static constexpr const char* PM_MODULE_SENSORS_LSM303D_CTR = D_MODULE_SENSORS_LSM303D_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_LSM303D_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_LSM303D_ID; }
+    
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
 
-
-    struct xyzFloat {
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+  
+    struct xyzFloat2 {
         float x;
         float y;
         float z;
     };
     
-xyzFloat getAngles();
+    xyzFloat2 getAngles();
+    xyzFloat2 getGValues();
 
-xyzFloat getGValues();
-
-
-/**
- * Possible but not yet proven address options are:
- * 0x6b, 0x1d and 0x1E
- * */
-
-// #ifndef I2C_ADDRESS_LSM303D
-//     #define I2C_ADDRESS_LSM303D  0x6B
-//   #endif
-
-// confirmed
     #define I2C_ADDRESS_LSM303D_1  0x1D
     #define I2C_ADDRESS_LSM303D_2  0x1E
 
-    #define I2C_ADDRESS_LSM303D_ARM  0x1D
-    #define I2C_ADDRESS_LSM303D_LEG  0x1E //leg as addr was cut, so alternate address
+    uint8_t addresses[2] = {I2C_ADDRESS_LSM303D_1, I2C_ADDRESS_LSM303D_2};
 
     #define MAGNETOMETER_SAMPLES_SIZE 10
     
@@ -110,16 +112,8 @@ xyzFloat getGValues();
       uint16_t measure_rate_ms = 1000;
     }settings;
     
-//     void SplitTask_ReadSensor(uint8_t sensor_id, uint8_t require_completion);
-    
-//     #define REQUIRE_COMPLETE true
-//     #define DONTREQUIRE_COMPLETE false
-
-    #define MAX_SENSORS 2
     void EveryLoop();
-    
     void ReadSensor();
-    // void ReadSensor_Instant();
 
     struct SENSORDATA
     {
@@ -131,9 +125,9 @@ xyzFloat getGValues();
       struct MAGNET_READINGS{
         #ifdef ENABLE_SENSOR_LSM303D_READING_AVERAGING
         struct AVERAGED{
-          AVERAGING_DATA<float>* x;
-          AVERAGING_DATA<float>* y;
-          AVERAGING_DATA<float>* z;
+          Averaging_Data<float>* x;
+          Averaging_Data<float>* y;
+          Averaging_Data<float>* z;
         }average;
         #endif // ENABLE_SENSOR_LSM303D_READING_AVERAGING
         struct INSTANT{
@@ -149,80 +143,60 @@ xyzFloat getGValues();
           float z;
         }instant;
       }acc;
-    }sensor[MAX_SENSORS];
+    }sensor[MAX_LM303D_SENSORS];
       
-  // struct OR2 
-  // {/* Orientation sensors */
-  //       // struct {
-  //           float roll;    /**< Rotation around the longitudinal axis (the plane body, 'X axis'). Roll is positive and increasing when moving downward. -90�<=roll<=90� */
-  //           float pitch;   /**< Rotation around the lateral axis (the wing span, 'Y axis'). Pitch is positive and increasing when moving upwards. -180�<=pitch<=180�) */
-  //           float heading; /**< Angle between the longitudinal axis (the plane body) and magnetic north, measured clockwise when viewing from the top of the device. 0-359� */
-  //       // };
-  // }orientation2;
-  // OR or;
+    /************************************************************************************************
+     * SECTION: Unified Reporting
+     ************************************************************************************************/
+
+    uint8_t GetSensorCount(void) override
+    {
+      return module_state.devices;
+    }    
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      if(index > GetSensorCount()) {value->sensor_type.push_back(0); return ;}
+      value->sensor_type.push_back(SENSOR_TYPE_ORIENTATION_ID);
+      value->data_f.push_back(sensor[index].mag.instant.x);
+      value->data_f.push_back(sensor[index].mag.instant.y);
+      value->data_f.push_back(sensor[index].mag.instant.z);
+      value->sensor_type.push_back(SENSOR_TYPE_ROTATION_VECTOR_ID);
+      value->data_f.push_back(sensor[index].acc.instant.x);
+      value->data_f.push_back(sensor[index].acc.instant.y);
+      value->data_f.push_back(sensor[index].acc.instant.z);
+      value->sensor_id = index;
+    };
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+
+    void CalculateOrientation(int16_t a_x, int16_t a_y, int16_t a_z, int16_t m_x, int16_t m_y, int16_t m_z, float* heading, float* roll, float* pitch);
 
 
-//       uint8_t isvalid=false;
-//       uint8_t ischanged=false;
-//       uint8_t ischanged_over_threshold=false;
-//       uint32_t ischangedtLast = millis();
-//       float heatIndex;
-//       float dewPoint;
-//       float cr;
-//       uint8_t fWithinLimit;
-//       unsigned long tWithinLimit;
-//       uint8_t sReadSensor;
-//       Adafruit_BME280* bme = NULL;
-    // }sensor[MAX_SENSORS];
-
-
-// bool getOrientation();
-// bool CalculateOrientation(LSM303::vector<int16_t> *acceleration, LSM303::vector<int16_t> *magnetic);
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
     
-void CalculateOrientation(int16_t a_x, int16_t a_y, int16_t a_z, int16_t m_x, int16_t m_y, int16_t m_z, float* heading, float* roll, float* pitch);
+    void parse_JSONCommand(JsonParserObject obj){};
 
-//     uint8_t GetSensorCount(void) override
-//     {
-//       return settings.fSensorCount;
-//     }
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
     
-//     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
-//     {
-//       // Serial.printf("OVERRIDE ACCESSED DHT %d\n\r",index);Serial.println(sensor[index].instant.temperature);
-//       if(index > MAX_SENSORS-1) {value->type.push_back(0); return ;}
-//       value->type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
-//       value->type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);
-//       value->data.push_back(sensor[index].temperature);
-//       value->data.push_back(sensor[index].humidity);
-//       value->sensor_id = index;
-//     };
-
-
-
-        
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
-  
-    #ifdef USE_MODULE_NETWORK_MQTT
-
-    void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    void MQTTHandler_Sender();
+      
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
     
+    #ifdef USE_MODULE_NETWORK_MQTT 
+    void MQTTHandler_Init();
+    std::vector<struct handler<mSensorsLSM303D>*> mqtthandler_list;
     struct handler<mSensorsLSM303D> mqtthandler_settings;
     struct handler<mSensorsLSM303D> mqtthandler_sensor_ifchanged;
     struct handler<mSensorsLSM303D> mqtthandler_sensor_teleperiod;
- 
-    struct handler<mSensorsLSM303D>* mqtthandler_list[3] = {
-      &mqtthandler_settings,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
-    };
-
-    // No specialised payload therefore use system default instead of enum
-    
-    
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

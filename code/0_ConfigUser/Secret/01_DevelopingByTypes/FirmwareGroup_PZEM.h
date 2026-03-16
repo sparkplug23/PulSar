@@ -93,7 +93,7 @@
   #define USE_MODULE_SENSORS_BUTTONS
     
 
-  // #define USE_MODULE_SENSORS__DS18X20_ESP32_2023
+  // #define USE_MODULE_SENSORS_DS18X20
 
   /***********************************
    * SECTION: Display Configs

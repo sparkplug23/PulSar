@@ -35,7 +35,7 @@ int8_t mIRRemote::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -53,24 +53,23 @@ int8_t mIRRemote::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    // /************
-    //  * MQTT SECTION * 
-    // *******************/
-    // #ifdef USE_MODULE_NETWORK_MQTT
-    // case TASK_MQTT_HANDLERS_INIT:
-    // case TASK_MQTT_HANDLERS_RESET:
-    //   MQTTHandler_Init();
-    // break;
-    // case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-    //   MQTTHandler_Rate();
-    // break;
-    // case TASK_MQTT_SENDER:
-    //   MQTTHandler_Sender();
-    // break;
-    // case TASK_MQTT_CONNECTED:
-    //   MQTTHandler_RefreshAll();
-    // break;
-    // #endif //USE_MODULE_NETWORK_MQTT    
+    /************
+     * MQTT SECTION * 
+    *******************/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    case TASK_MQTT_HANDLERS_INIT:
+      MQTTHandler_Init();
+    break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    break;
+    case TASK_MQTT_SENDER:
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    break;
+    #endif // USE_MODULE_NETWORK_MQTT 
   }
 
 
@@ -99,7 +98,7 @@ int8_t mIRRemote::Tasker(uint8_t function, JsonParserObject obj){
 //   }
 //   return result;
 
-  return FUNCTION_RESULT_UNKNOWN_ID;
+  return TASKER_RESULT__UNKNOWN_ID;
 
 } // END function
 
@@ -112,7 +111,7 @@ void mIRRemote::Pre_Init(void)
   //   IrSendInit();
   // }
   #ifdef USE_IR_RECEIVE
-  if (tkr_pins->PinUsed(GPIO_IRRECV_ID)) {
+  if (tkr_pins->PinUsed(GPIO_IRRECV)) {
     IrReceiveInit();
   }
   #endif  // USE_IR_RECEIVE
@@ -142,43 +141,43 @@ void mIRRemote::EveryLoop()
 // void (* const IrRemoteCommand[])(void) PROGMEM = {
 //   &CmndIrSend };
 
-char* ulltoa(unsigned long long value, char *str, int radix)
-{
-  char digits[64];
-  char *dst = str;
-  int i = 0;
+// char* ulltoa(unsigned long long value, char *str, int radix)
+// {
+//   char digits[64];
+//   char *dst = str;
+//   int i = 0;
 
-//  if (radix < 2 || radix > 36) { radix = 10; }
+// //  if (radix < 2 || radix > 36) { radix = 10; }
 
-  do {
-    int n = value % radix;
-    digits[i++] = (n < 10) ? (char)n+'0' : (char)n-10+'A';
-    value /= radix;
-  } while (value != 0);
+//   do {
+//     int n = value % radix;
+//     digits[i++] = (n < 10) ? (char)n+'0' : (char)n-10+'A';
+//     value /= radix;
+//   } while (value != 0);
 
-  while (i > 0) { *dst++ = digits[--i]; }
+//   while (i > 0) { *dst++ = digits[--i]; }
 
-  *dst = 0;
-  return str;
-}
+//   *dst = 0;
+//   return str;
+// }
 
-char* Uint64toHex(uint64_t value, char *str, uint16_t bits)
-{
-  ulltoa(value, str, 16);  // Get 64bit value
+// char* Uint64toHex(uint64_t value, char *str, uint16_t bits)
+// {
+//   ulltoa(value, str, 16);  // Get 64bit value
 
-  int fill = 8;
-  if ((bits > 3) && (bits < 65)) {
-    fill = bits / 4;  // Max 16
-    if (bits % 4) { fill++; }
-  }
-  int len = strlen(str);
-  fill -= len;
-  if (fill > 0) {
-    memmove(str + fill, str, len +1);
-    memset(str, '0', fill);
-  }
-  return str;
-}
+//   int fill = 8;
+//   if ((bits > 3) && (bits < 65)) {
+//     fill = bits / 4;  // Max 16
+//     if (bits % 4) { fill++; }
+//   }
+//   int len = strlen(str);
+//   fill -= len;
+//   if (fill > 0) {
+//     memmove(str + fill, str, len +1);
+//     memset(str, '0', fill);
+//   }
+//   return str;
+// }
 
 
 // Based on IRremoteESP8266.h enum decode_type_t
@@ -1452,7 +1451,7 @@ uint8_t mIRRemote::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
     JBI->Object_Start(D_RFRECEIVED);
   
-      JBI->Add("Pin1", tkr_pins->GetPin(GPIO_LED1_ID));
+      // JBI->Add("Pin1", tkr_pins->GetPin(GPIO_LED1_ID));
       // JBI->Add(D_RF_BITS, rx_pkt.bit_length);
       // JBI->Add(D_RF_PROTOCOL, rx_pkt.protocol);
       // JBI->Add(D_RF_PULSE, rx_pkt.delay);   
@@ -1469,6 +1468,7 @@ uint8_t mIRRemote::ConstructJSON_State(uint8_t json_level, bool json_appending){
 }
 
   
+
 /******************************************************************************************************************
  * MQTT
 *******************************************************************************************************************/
@@ -1502,45 +1502,7 @@ void mIRRemote::MQTTHandler_Init()
 
 } 
 
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mIRRemote::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mIRRemote::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mIRRemote::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
-
 #endif // USE_MODULE_NETWORK_MQTT
-
-/******************************************************************************************************************
- * WebServer
-*******************************************************************************************************************/
 
 
 

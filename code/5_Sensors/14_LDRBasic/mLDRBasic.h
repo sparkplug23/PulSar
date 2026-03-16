@@ -7,18 +7,7 @@
 
 #ifdef USE_MODULE_SENSORS_LDR_BASIC
 
-#include <Ticker.h>
-
-#include "2_CoreSystem/mBaseConfig.h"
-
-#include "2_CoreSystem/07_Time/mTime.h"
-#include "2_CoreSystem/08_Logging/mLogging.h"
-#include "2_CoreSystem/07_Time/mTime.h"
-
-
 #define MAX_LDR_BASIC 2             // Max number of switches
-
-#include <Ticker.h>
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
@@ -26,17 +15,29 @@ class mLDRBasic :
   public mTaskerInterface
 {
   public:
-    mLDRBasic(){};
-    
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
+	  mLDRBasic(){};
     void Pre_Init(void);
     void Init(void);
-
+    void BootMessage();
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    
     static constexpr const char* PM_MODULE_SENSORS_LDR_BASIC_CTR = D_MODULE_SENSORS_LDR_BASIC_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_LDR_BASIC_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_LDR_BASIC_ID; }
+    
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
 
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+         
     void EveryLoop();
     void EverySecond();
 
@@ -51,36 +52,60 @@ class mLDRBasic :
 
     }ldr[MAX_LDR_BASIC];
 
+
+    /************************************************************************************************
+     * SECTION: Unified Reporting
+     ************************************************************************************************/
+
+    uint8_t GetSensorCount(void) override
+    {
+      return module_state.devices;
+    }    
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      if(index > GetSensorCount()) {value->sensor_type.push_back(0); return ;}
+      value->sensor_type.push_back(SENSOR_TYPE_LIGHT_LEVEL_ID);
+      value->data_f.push_back(ldr[index].analog_reading);
+      // value->sensor_type.push_back(SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID);
+      // value->data_f.push_back(device_data[index].illuminance);
+      value->sensor_id = index;
+    };
+        
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+
+    
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+    
+    void parse_JSONCommand(JsonParserObject obj);
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+    
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
-  
+    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
+      
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    void MQTTHandler_Sender();
-    
+    std::vector<struct handler<mLDRBasic>*> mqtthandler_list;
     struct handler<mLDRBasic> mqtthandler_settings;
     struct handler<mLDRBasic> mqtthandler_sensor_ifchanged;
     struct handler<mLDRBasic> mqtthandler_sensor_teleperiod;
+    #endif // USE_MODULE_NETWORK_MQTT
 
-    // No specialised payload therefore use system default instead of enum
-    
 
-    struct handler<mLDRBasic>* mqtthandler_list[3] = {
-      &mqtthandler_settings,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
-    };
-
-    #endif // USE_MODULE_NETWORK_MQTT 
 
 
 };
 
-
-
 #endif
 
-#endif  // _SONOFF_H_
-//#endif
+#endif

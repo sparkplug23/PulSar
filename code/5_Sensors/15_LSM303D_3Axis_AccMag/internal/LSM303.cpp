@@ -590,9 +590,10 @@ template <typename T> float LSM303::heading(vector<T> from)
     return heading;
 }
 
-xyzFloat LSM303::getAngles(void)
+
+xyzFloat3 LSM303::getAngles(void)
 {
-    // xyzFloat angleVal;
+    xyzFloat3 angleVal;
     // xyzFloat gVal;// = getGValues();
     // gVal.x = 
 
@@ -620,7 +621,7 @@ xyzFloat LSM303::getAngles(void)
     // }
     // angleVal.z = (asin(gVal.z)) * 57.296;
     
-    // return angleVal;
+    return angleVal;
 }
 
 template <typename Ta, typename Tb, typename To> void LSM303::vector_cross(const vector<Ta> *a,const vector<Tb> *b, vector<To> *out)

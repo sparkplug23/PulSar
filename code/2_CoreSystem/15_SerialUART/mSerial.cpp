@@ -227,7 +227,7 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
 //     break;
 
 
-  if(module_state.mode != ModuleStatus::Running){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
 
   switch(function){
@@ -359,7 +359,7 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
 
 
   // // Only continue in to tasker if module was configured properly
-  // //if(!settings.fEnableModule){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  // //if(!settings.fEnableModule){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   // switch(function){
   //   /************
@@ -393,7 +393,7 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
   //   #endif // USE_MODULE_NETWORK_MQTT
   // }
 
-  return FUNCTION_RESULT_UNKNOWN_ID;
+  return TASKER_RESULT__UNKNOWN_ID;
   
 
 } // END Tasker

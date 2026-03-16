@@ -1,11 +1,11 @@
 #ifndef _mDB18x20_ESP32_H
 #define _mDB18x20_ESP32_H
 
-#define D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID 5004 // [(Folder_Number*100)+ID_File]
+#define D_UNIQUE_MODULE_DS18X20__ID 5004 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_SENSORS__DS18X20_ESP32_2023
+#ifdef USE_MODULE_SENSORS_DS18X20
 
 #include <OneWire.h>
 
@@ -39,9 +39,9 @@ class mDB18x20 :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage();
     
-    static constexpr const char* PM_MODULE_SENSORS__DS18X20_ESP32_2023__CTR = D_MODULE_SENSORS_DB18S20_CTR;
-    PGM_P GetModuleName(){          return PM_MODULE_SENSORS__DS18X20_ESP32_2023__CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__DS18X20_ESP32_2023__ID; }
+    static constexpr const char* PM_MODULE_SENSORS_DS18X20__CTR = D_MODULE_SENSORS_DB18S20_CTR;
+    PGM_P GetModuleName(){          return PM_MODULE_SENSORS_DS18X20__CTR; }
+    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DS18X20__ID; }
     
 
     struct ClassState
@@ -91,10 +91,10 @@ class mDB18x20 :
     bool Ds18x20Read(uint8_t sensor, float &t);
     void EverySecond(void);
 
-  /************************************************************************************************
-   * SECTION: Unified Reporting
-   ************************************************************************************************/
-  uint8_t GetSensorCount(void) override
+    /************************************************************************************************
+     * SECTION: Unified Reporting
+     ************************************************************************************************/
+    uint8_t GetSensorCount(void) override
     {
       return module_state.devices;
     }
@@ -109,9 +109,9 @@ class mDB18x20 :
       value->sensor_id = sensor_vector[index].device_name_index;
       value->resolution = sensor_vector[index].resolution;
     };
-  /************************************************************************************************
-   * SECTION: ConstructJSON
-   ************************************************************************************************/
+    /************************************************************************************************
+     * SECTION: ConstructJSON
+     ************************************************************************************************/
 
     /************************************************************************************************
      * SECTION: Commands

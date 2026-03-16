@@ -31,7 +31,7 @@ int8_t mSensorsDHT::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(!module_state.mode){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!module_state.mode){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     case TASK_LOOP:
@@ -59,7 +59,7 @@ int8_t mSensorsDHT::Tasker(uint8_t function, JsonParserObject obj){
     #endif //USE_MODULE_NETWORK_MQTT
   } // END switch
 
-  return FUNCTION_RESULT_SUCCESS_ID;
+  return TASKER_RESULT__SUCCESS_ID;
   
 }// END Tasker
 
@@ -244,8 +244,6 @@ void mSensorsDHT::ShowSensor_AddLog()
 
 }
 
-
-  
 /******************************************************************************************************************
  * Commands
 *******************************************************************************************************************/

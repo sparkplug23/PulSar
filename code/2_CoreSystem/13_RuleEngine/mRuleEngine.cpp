@@ -56,7 +56,7 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
   }
 
   // Only continue to remaining functions if sensor has been detected and enabled
-//   if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+//   if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     // /************

@@ -65,9 +65,9 @@ int8_t mBlinds::CheckAndExecute_JSONCommands(JsonObjectConst obj){
       ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED D_TOPIC_COMMAND D_MODULE_CONTROLLER_BLINDS_FRIENDLY_CTR));
       tkr->fExitTaskerWithCompletion = true; // set true, we have found our handler
       parsesub_TopicCheck_JSONCommand(obj);
-      return FUNCTION_RESULT_HANDLED_ID;
+      return TASKER_RESULT__HANDLED_ID;
   }else{
-    return FUNCTION_RESULT_UNKNOWN_ID; // not meant for here
+    return TASKER_RESULT__UNKNOWN_ID; // not meant for here
   }
 
 }

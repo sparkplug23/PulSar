@@ -35,15 +35,12 @@ int8_t mRemoteDevice::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
+  if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     case TASK_LOOP:
       EveryLoop();
     break;
-
-
-
     case TASK_MQTT_CONNECTED:
 
       #ifdef REMOTE_SENSOR_1_MQTT_TOPIC

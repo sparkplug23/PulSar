@@ -40,8 +40,8 @@ int8_t mOLED_SH1106::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  if(!settings.fEnableSensor){ return FUNCTION_RESULT_MODULE_DISABLED_ID; }
-  if(!tkr_iDisp->renderer) { return FUNCTION_RESULT_ERROR_POINTER_INVALID_ID; }
+  if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
+  if(!tkr_iDisp->renderer) { return TASKER_RESULT__ERROR_POINTER_INVALID_ID; }
 
   switch(function){
     /************
