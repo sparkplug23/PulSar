@@ -2,6 +2,7 @@
 #define _MODULE_ENERGY_ADE7953_H
 
 #define D_UNIQUE_MODULE_ENERGY_ADE7953_ID    7002 // [(Folder_Number*100)+ID_File]
+#define D_GROUP_MODULE_ENERGY_ADE7953_ID 2
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -19,19 +20,33 @@ class mEnergyADE7953 :
   public mTaskerInterface
 {
   public:
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
 	  mEnergyADE7953(){};
     void Pre_Init(void);
     void Init(void);
+    void BootMessage();
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
     static constexpr const char* PM_MODULE_ENERGY_ADE7953_CTR = D_MODULE_ENERGY_ADE7953_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_ENERGY_ADE7953_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_ADE7953_ID; }
 
-    struct SETTINGS{
-      uint8_t fEnableSensor = false;
-    }settings;
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
 
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
     
     #define XI2C_07                 7  // See I2CDEVICES.md
 
@@ -69,23 +84,32 @@ class mEnergyADE7953 :
     void GetData(void);
     bool Command(void);
 
+
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+    
+    void parse_JSONCommand(JsonParserObject obj);
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+    
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
-  
+    uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
+
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    
-    void MQTTHandler_Sender();
+    std::vector<struct handler<mEnergyADE7953>*> mqtthandler_list;
     struct handler<mEnergyADE7953> mqtthandler_settings;
-    void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
-    struct handler<mEnergyADE7953> mqtthandler_sensor_ifchanged;
-    struct handler<mEnergyADE7953> mqtthandler_sensor_teleperiod;
-    void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
-
-    
+    struct handler<mEnergyADE7953> mqtthandler_state_teleperiod;
+    struct handler<mEnergyADE7953> mqtthandler_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
+    
 
 };
 

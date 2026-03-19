@@ -300,9 +300,13 @@ void mTOF_VL53L1X::Init(void)
 
           // **Set Sensor Parameters**
           settings.devices[i].sensor.setTimeout(500);
-          settings.devices[i].sensor.setDistanceMode(VL53L1X::VL53L1X_DISTANCE_MODE);
-          settings.devices[i].sensor.setMeasurementTimingBudget(140000);
-          settings.devices[i].sensor.startContinuous(50);
+          // settings.devices[i].sensor.setDistanceMode(VL53L1X::VL53L1X_DISTANCE_MODE);
+          // settings.devices[i].sensor.setMeasurementTimingBudget(140000);
+          // settings.devices[i].sensor.startContinuous(50);
+
+          settings.devices[i].sensor.setDistanceMode(VL53L1X::Long);
+          settings.devices[i].sensor.setMeasurementTimingBudget(200000);
+          settings.devices[i].sensor.startContinuous(200);
             
           #ifdef USE_SENSORS_TOFVL_AVERAGING_DATA
           data.devices[i].distance_mm_average = new Averaging_Data<uint16_t>(100); // @ 50ms reads, 20 per second, 100 is 5 seconds
@@ -324,12 +328,14 @@ void mTOF_VL53L1X::Init(void)
   // SetSensorROI(0, 199, 4, 4); // Forced narrow FOV for all sensors
 
   // Assuming sensor index 0 for now — extendable with optional parameter later
-  if (!SetSensorROI(0, 199, 4, 4)) {
+  #ifndef BYPASS_OILTANK_ADDED
+  if (!SetSensorROI(0, 199, 4, 4)) { // 4x4 is as narrow as possible
     ALOG_ERR(PSTR("Failed to set ROI"));
     roi_set = 2;
   }else{
     roi_set = 1;
   }
+  #endif
 
 
   ALOG_HGL(PSTR("END OF INIT"));

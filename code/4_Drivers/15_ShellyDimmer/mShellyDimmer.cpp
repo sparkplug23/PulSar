@@ -178,9 +178,9 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj)
   /************
    * WEBPAGE SECTION * 
   *******************/
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-  return Tasker_Web(function);
-  #endif // USE_MODULE_NETWORK_WEBSERVER
+  // #ifdef USE_MODULE_NETWORK_WEBSERVER
+  // return Tasker_Web(function);
+  // #endif // USE_MODULE_NETWORK_WEBSERVER
 
   return TASKER_RESULT__UNKNOWN_ID;
 
@@ -322,7 +322,7 @@ bool mShellyDimmer::SerialSend(const uint8_t data[], uint16_t len)
 
     // wait for any response
     uint32_t snd_time = millis();
-    while(abs(millis()-snd_time)<SHD_ACK_TIMEOUT)
+    while((millis()-snd_time)<SHD_ACK_TIMEOUT)
     // while (TimePassedSince(snd_time) < SHD_ACK_TIMEOUT)
     {
       if (SerialInput())

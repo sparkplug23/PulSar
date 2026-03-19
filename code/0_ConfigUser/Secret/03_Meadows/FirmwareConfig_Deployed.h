@@ -1373,50 +1373,107 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 
 
+
+
+/**
+ * @brief Seeed Studio XIAO ESP32S3 (and ESP32S3 Sense) pin map (quick reference)
+ *
+ * Notes:
+ *  - BOOT (GPIO0): hold LOW at reset to enter ROM bootloader (download mode).
+ *  - USER_LED: GPIO21 (on-board user LED).
+ *  - D4/D5 are I2C SDA/SCL (GPIO5/GPIO6).
+ *  - D6/D7 are UART TX/RX (GPIO43/GPIO44).
+ *  - SPI: SCK=GPIO7 (D8), MISO=GPIO8 (D9), MOSI=GPIO10 (D10).
+ *  - For the Sense variant, the digital mic uses GPIO42 (CLK) and GPIO41 (DATA).
+ *
+ * ┌───────────────────────────────────────────────────────────────┐
+ * │  XIAO Pin   | Function(s)        | ESP32-S3 GPIO | Notes       │
+ * ├───────────────────────────────────────────────────────────────┤
+ * │  5V         | VBUS               | —             | USB 5V rail  │
+ * │  GND        | GND                | —             | Ground       │
+ * │  3V3        | 3V3_OUT            | —             | Regulated 3V │
+ * │  D0 (A0)    | ADC, TOUCH1        | GPIO1         | GPIO/ADC     │
+ * │  D1 (A1)    | ADC, TOUCH2        | GPIO2         | GPIO/ADC     │
+ * │  D2 (A2)    | ADC, TOUCH3        | GPIO3         | GPIO/ADC     │
+ * │  D3 (A3)    | ADC, TOUCH4        | GPIO4         | GPIO/ADC     │
+ * │  D4 (A4)    | ADC, SDA, TOUCH5   | GPIO5         | I2C SDA      │
+ * │  D5 (A5)    | ADC, SCL, TOUCH6   | GPIO6         | I2C SCL      │
+ * │  D6         | TX                 | GPIO43        | UART TX      │
+ * │  D7         | RX                 | GPIO44        | UART RX      │
+ * │  D8 (A8)    | ADC, SCK, TOUCH7   | GPIO7         | SPI SCK      │
+ * │  D9 (A9)    | ADC, MISO, TOUCH8  | GPIO8         | SPI MISO     │
+ * │  D10 (A10)  | ADC, MOSI, TOUCH9  | GPIO10        | SPI MOSI     │
+ * │  D11 (A11)  | ADC, TOUCH12       | GPIO42        | GPIO/ADC     │
+ * │  D12 (A12)  | ADC, TOUCH13       | GPIO41        | GPIO/ADC     │
+ * │  RESET      | EN                 | EN            | Chip enable  │
+ * │  BOOT       | Boot strap         | GPIO0         | Bootloader   │
+ * │  USER_LED   | User LED           | GPIO21        | On-board LED │
+ * │  CHARGE_LED | Charge indicator   | —             | Board LED    │
+ * │  U.FL       | Antenna (LNA_IN)   | LNA_IN         | UFL antenna  │
+ * └───────────────────────────────────────────────────────────────┘
+ *
+ * Source: Seeed XIAO ESP32S3 “Pin Map” table (D0..D12, BOOT, USER_LED, etc.).
+ */
 #ifdef DEVICE_MEADOWS__HALLWAY__BLUE_VASE_LIGHT
-  #ifndef DEVICENAME_CTR
-  #define DEVICENAME_CTR          "testbed_default"
-  #endif
-  #ifndef DEVICENAME_FRIENDLY_CTR
-  #define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
-  #endif
-  #ifndef DEVICENAME_DESCRIPTION_CTR
-  #define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
-  #endif
-  #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_PORT     1883
+#ifndef DEVICENAME_CTR
+#define DEVICENAME_CTR          "template"
+#endif
+#ifndef DEVICENAME_FRIENDLY_CTR
+#define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+#endif
+#ifndef DEVICENAME_DESCRIPTION_CTR
+#define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+#endif
+#define DEVICENAME_ROOMHINT_CTR "testgroup"
+#define MQTT_HOST   "192.168.3.70"
+   
+  #define ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
 
  /***********************************
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
  ************************************/  
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
 
- /***********************************
-  * SECTION: Sensor Configs
- ************************************/  
+//  /***********************************
+//   * SECTION: Sensor Configs
+//  ************************************/  
 
- /***********************************
-  * SECTION: Module/GPIO Configs
- ************************************/  
+//   #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+//    #define USE_MODULE_SENSORS_INTERFACE
+//    #define USE_MODULE_SENSORS_PIR
+//     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+//  #endif
 
- #define USE_MODULE_TEMPLATE
- DEFINE_PGM_CTR(MODULE_TEMPLATE) 
- "{"
-   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
-   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-   "\"" D_GPIO_NUMBER "\":{"
-     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
-   "},"
-   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
- "}";
 
-  // 13,12,14,27
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+  #define ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
+  #define ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+
+  // #define CONFIG_IDF_TARGET_ESP32C3
+
+ 
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":2000,
+  //       "Length":1000
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":3000,
+  //       "Length":1000
+  //     }
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
-    "BusConfig":[
+    "BusConfig":[     
       {
         "Pin":13,
         "ColourOrder":"GRB",
@@ -1434,16 +1491,13 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     ],
     "Segments":[
       {
-        "PixelRange": [
-          0,
-          200
-        ],
-        "ColourPalette":"Cyan",
+        "PixelRange":[0,200],
+        "ColourPalette":"Rainbow",
         "ColourType":3,
         "Effects": {
-          "Function":"Static",
-          "Speed":180,
-          "Intensity":85,
+          "Function":"Gradient",
+          "Speed":255,
+          "Intensity":127,
           "Grouping":1,
           "RateMs": 20
         },
@@ -1453,6 +1507,27 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "BrightnessRGB": 100
   }
   )=====";
+  #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
+  #define MAX_LED_MEMORY 64000*5
+  #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+    "\"48\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
 
 #endif
 
@@ -2685,8 +2760,13 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
           0,
           132
         ],
-        "ColourPalette":"Warm White",
-        "ColourType":3,
+        "ColourPalette":0,
+        "SegColour0": {
+          "Hue": 15,
+          "Sat":100,
+          "BrightnessRGB":100
+        },
+        "ColourType":4,
         "Effects": {
           "Function":"Static",
           "Speed":255,
@@ -2694,7 +2774,8 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
           "Grouping":20,
           "RateMs": 20
         },
-        "BrightnessRGB": 20
+        "BrightnessRGB": 100,
+        "BrightnessCCT":0
       },
       {
         "Name":"27 Inch Vertical",
@@ -6828,7 +6909,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   * SECTION: Network Configs
  ************************************/    
 
- 
+ #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
    
 
  /***********************************
@@ -6851,7 +6932,8 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__TOF_VL53L1X
   #define USE_MODULE_SENSORS__TOF_VL53L1X
   #define ENABLE_DEVFEATURE_I2C__SET_WIRE_INSTANCE_WITH_TWOWIRE_ZERO
-  #define VL53L1X_DISTANCE_MODE Short
+  #define VL53L1X_DISTANCE_MODE Long
+  // #define BYPASS_OILTANK_ADDED
  #endif
  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
 //  #define ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING__HVACDESK_HARDCODED_ADD

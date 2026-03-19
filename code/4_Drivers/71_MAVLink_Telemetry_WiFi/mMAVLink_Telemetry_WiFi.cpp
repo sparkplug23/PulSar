@@ -24,7 +24,7 @@ int8_t mMAVLink_Telemetry_WiFi::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -52,16 +52,16 @@ int8_t mMAVLink_Telemetry_WiFi::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT    
+    #endif // USE_MODULE_NETWORK_MQTT
   }
 
 } // END function
@@ -69,9 +69,7 @@ int8_t mMAVLink_Telemetry_WiFi::Tasker(uint8_t function, JsonParserObject obj){
 
 void mMAVLink_Telemetry_WiFi::Pre_Init(void){
   
-  settings.fEnableSensor = false;
-
-    settings.fEnableSensor = true; 
+  module_state.mode = ModuleStatus::Initialising;
 
 }
 
@@ -79,6 +77,7 @@ void mMAVLink_Telemetry_WiFi::Pre_Init(void){
 void mMAVLink_Telemetry_WiFi::Init(void)
 {
   // Configured already
+  module_state.mode = ModuleStatus::Running;
 }
 
 
@@ -87,11 +86,6 @@ void mMAVLink_Telemetry_WiFi::EveryLoop()
 
 
 }
-
-
-/******************************************************************************************************************
- * 
-*******************************************************************************************************************/
 
   
 /******************************************************************************************************************
@@ -103,21 +97,23 @@ void mMAVLink_Telemetry_WiFi::parse_JSONCommand(JsonParserObject obj)
 
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
-
     
 }
+
   
 /******************************************************************************************************************
  * ConstructJson
 *******************************************************************************************************************/
 
+  
 uint8_t mMAVLink_Telemetry_WiFi::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    // JBI->Add("RfMask", mySwitch->GetReceiveProtolMask());
+  
   return JBI->End();
 
 }
+
 
 uint8_t mMAVLink_Telemetry_WiFi::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
@@ -125,13 +121,15 @@ uint8_t mMAVLink_Telemetry_WiFi::ConstructJSON_State(uint8_t json_level, bool js
 
   JBI->Start();
 
-
+    JBI->Object_Start(D_RFRECEIVED);
+    
+    JBI->Object_End();
+  
   return JBI->End();
 
 }
 
 
-  
 /******************************************************************************************************************
  * MQTT
 *******************************************************************************************************************/
@@ -152,6 +150,7 @@ void mMAVLink_Telemetry_WiFi::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mMAVLink_Telemetry_WiFi::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_state_ifchanged;
   ptr->tSavedLastSent = 0;
@@ -162,46 +161,11 @@ void mMAVLink_Telemetry_WiFi::MQTTHandler_Init()
   ptr->json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mMAVLink_Telemetry_WiFi::ConstructJSON_State;
+  mqtthandler_list.push_back(ptr);
 
 } 
 
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mMAVLink_Telemetry_WiFi::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mMAVLink_Telemetry_WiFi::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mMAVLink_Telemetry_WiFi::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
-
 #endif // USE_MODULE_NETWORK_MQTT
-
-
 
 
 #endif

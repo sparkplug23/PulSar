@@ -81,7 +81,7 @@
 #define D_MODULE_CORE__I2C__CTR                   "i2c"
 #define D_MODULE_CORE__SPI__CTR                   "spi"
 #define D_MODULE_DRIVERS_BUZZER_CTR               "buzzer"
-#define D_MODULE__DRIVERS_BUZZER_TONES__CTR       "buzzer""
+#define D_MODULE__DRIVERS_BUZZER_TONES__CTR       "buzzer"
 #define D_MODULE_DRIVERS__RF433_CODES_CTR       "rf433"
 #define D_MODULE_DRIVERS_LEDS_CTR                 "leds"
 #define D_MODULE_DRIVERS_IRREMOTE_CTR             "irremote"

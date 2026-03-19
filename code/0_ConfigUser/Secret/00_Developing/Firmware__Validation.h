@@ -29,7 +29,8 @@
 // #define DEVICE_VALIDATION__ESP32__LIGHTING__1D_SINGLE_BUS
 
 // #define DEVICE_VALIDATION__ESP32__SENSORS_ALL
-#define DEVICE_VALIDATION__ESP32__DRIVERS_ALL
+// #define DEVICE_VALIDATION__ESP32__DRIVERS_ALL
+// #define DEVICE_VALIDATION__ESP32__MODULES_ALL
 
 /**
  * DEVICE_TYPE NETWORK: Any testbeds related to lighting
@@ -1351,18 +1352,123 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   #define USE_MODULE_DRIVERS_IRREMOTE
   #define USE_MODULE_DRIVERS_SERVOS
   #define USE_MODULE_DRIVERS_RF433_CODES
-  // #define USE_MODULE_DRIVERS_HBRIDGE
-  // #define USE_MODULE_DRIVERS_SDCARD
-  // #define USE_MODULE_DRIVERS_SHELLY_DIMMER
-  // #define USE_MODULE__DRIVERS_BUZZER_BASIC
-  // #define USE_MODULE__DRIVERS_BUZZER_TONES
+  #define USE_MODULE_DRIVERS_HBRIDGE
+  #define USE_MODULE_DRIVERS_SDCARD
+  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
+  #define USE_MODULE__DRIVERS_BUZZER_BASIC
+  #define USE_MODULE__DRIVERS_BUZZER_TONES
   #define USE_MODULE_DRIVERS__CAMERA
   #define USE_MODULE__DRIVERS_MAVLINK_DECODER
-  // #define USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
+  #define USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
   // #define USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
 
 
 
+      
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif 
+
+
+
+
+#ifdef DEVICE_VALIDATION__ESP32__MODULES_ALL
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "validation"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "validation"
+
+  /***********************************
+  * SECTION: Enable Grouped
+  ************************************/  
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/   
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_LEDS
+  #define USE_MODULE_DRIVERS_RELAY
+  #define USE_MODULE_CORE_PWM
+  #define USE_MODULE_DRIVERS_IRTRANSCEIVER
+  #define USE_MODULE_DRIVERS_IRREMOTE
+  #define USE_MODULE_DRIVERS_SERVOS
+  #define USE_MODULE_DRIVERS_RF433_CODES
+  #define USE_MODULE_DRIVERS_HBRIDGE
+  #define USE_MODULE_DRIVERS_SDCARD
+  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
+  #define USE_MODULE__DRIVERS_BUZZER_BASIC
+  #define USE_MODULE__DRIVERS_BUZZER_TONES
+  #define USE_MODULE_DRIVERS__CAMERA
+  #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+  #define USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
+  // #define USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/   
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_LEDS
+  #define USE_MODULE_DRIVERS_RELAY
+  #define USE_MODULE_CORE_PWM
+  #define USE_MODULE_DRIVERS_IRTRANSCEIVER
+  #define USE_MODULE_DRIVERS_IRREMOTE
+  #define USE_MODULE_DRIVERS_SERVOS
+  #define USE_MODULE_DRIVERS_RF433_CODES
+  #define USE_MODULE_DRIVERS_HBRIDGE
+  #define USE_MODULE_DRIVERS_SDCARD
+  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
+  #define USE_MODULE__DRIVERS_BUZZER_BASIC
+  #define USE_MODULE__DRIVERS_BUZZER_TONES
+  #define USE_MODULE_DRIVERS__CAMERA
+  #define USE_MODULE__DRIVERS_MAVLINK_DECODER
+  #define USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
+  // #define USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+
+  /***********************************
+   * SECTION: Energy Configs
+  ************************************/  
+ 
+  #define USE_MODULE_ENERGY_INTERFACE
+  #define USE_MODULE_ENERGY_PZEM004T_V3
+  // #define USE_MODULE_ENERGY_ADE7953
+  #define USE_MODULE_ENERGY_INA219
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_NEXTION
+  #define USE_MODULE_DISPLAYS_OLED_SSD1306
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+
+  /***********************************
+   * SECTION: Module Configs
+  ************************************/   
       
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 

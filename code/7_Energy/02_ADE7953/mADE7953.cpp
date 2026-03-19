@@ -4,26 +4,29 @@
 
 void mEnergyADE7953::Pre_Init(void)
 {
-  if (!tkr_sup->I2cEnabled(XI2C_07)) { 
+
+  if (!tkr_i2c->I2cEnabled(XI2C_07)) { 
     return; 
   }
 
-  if (tkr_pins->PinUsed(GPIO_ADE7953_IRQ_ID)) {                // Irq on GPIO16 is not supported...
-    pinMode(tkr_pins->GetPin(GPIO_ADE7953_IRQ_ID), INPUT);     // Related to resetPins() - Must be set to input
+  module_state.mode = ModuleStatus::Initialising;
+
+  if (tkr_pins->PinUsed(GPIO_ADE7953_IRQ)) {                // Irq on GPIO16 is not supported...
+    pinMode(tkr_pins->GetPin(GPIO_ADE7953_IRQ), INPUT);     // Related to resetPins() - Must be set to input
     delay(100);                                                  // Need 100mS to init ADE7953
-    if (tkr_sup->I2cSetDevice(ADE7953_ADDR)) {
+    if (tkr_i2c->I2cSetDevice(ADE7953_ADDR)) {
       if (HLW_PREF_PULSE == tkr_set->Settings.energy_usage.energy_power_calibration) {
         tkr_set->Settings.energy_usage.energy_power_calibration = ADE7953_PREF;
         tkr_set->Settings.energy_usage.energy_voltage_calibration = ADE7953_UREF;
         tkr_set->Settings.energy_usage.energy_current_calibration = ADE7953_IREF;
       }
-      tkr_sup->I2cSetActiveFound(ADE7953_ADDR, "ADE7953");
-      settings.fEnableSensor = true;
+      tkr_i2c->I2cSetActiveFound(ADE7953_ADDR, "ADE7953");
+      module_state.mode = ModuleStatus::Running;
       measured.init_step = 2;
       tkr_iEnergy->Energy.phase_count = 2;                     // Handle two channels as two phases
       tkr_iEnergy->Energy.voltage_common = true;               // Use common voltage
       // tkr_iEnergy->Energy.frequency_common = true;             // Use common frequency
-      tkr_set->runtime_var.energy_driver = D_GROUP_MODULE_ENERGY_ADE7953_ID;
+      // tkr_set->runtime.energy_driver = D_GROUP_MODULE_ENERGY_ADE7953_ID;
     }
   }
 }
@@ -43,7 +46,7 @@ int8_t mEnergyADE7953::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
-  if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -60,13 +63,16 @@ int8_t mEnergyADE7953::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
   }
   
   return 0;
@@ -80,6 +86,9 @@ void mEnergyADE7953::Init(void)
   Write(0x102, 0x0004);    // Locking the communication interface (Clear bit COMM_LOCK), Enable HPF
   Write(0x0FE, 0x00AD);    // Unlock register 0x120
   Write(0x120, 0x0030);    // Configure optimum setting
+
+  
+  module_state.mode = ModuleStatus::Running;
 
 }
 
@@ -294,12 +303,11 @@ uint8_t mEnergyADE7953::ConstructJSON_Sensor(uint8_t json_level, bool json_appen
 }
 
 
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
 
-
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
+#ifdef USE_MODULE_NETWORK_MQTT
 
 void mEnergyADE7953::MQTTHandler_Init(){
 
@@ -308,71 +316,39 @@ void mEnergyADE7953::MQTTHandler_Init(){
   ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = SEC2HOUR; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = tkr_mqtt->GetConfigPeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mEnergyADE7953::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_teleperiod;
+  ptr = &mqtthandler_state_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = SEC2HOUR; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mEnergyADE7953::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_ifchanged;
+  ptr = &mqtthandler_state_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 60; 
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = tkr_mqtt->GetIfChangedPeriod_SubModule();
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mEnergyADE7953::ConstructJSON_Sensor;
+  mqtthandler_list.push_back(ptr);
   
-} 
-
-
-void mEnergyADE7953::MQTTHandler_RefreshAll(){
-
-  mqtthandler_settings.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
-
-} 
-
-
-void mEnergyADE7953::MQTTHandler_Rate(){
-
-  mqtthandler_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-
-} //end "MQTTHandler_Rate"
-
-
-void mEnergyADE7953::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  uint8_t list_ids[] = {
-    MQTT_HANDLER_SETTINGS_ID, 
-    MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
-    MQTT_HANDLER_SENSOR_TELEPERIOD_ID
-  };
-  
-  struct handler<mEnergyADE7953>* list_ptr[] = {
-    &mqtthandler_settings,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
-  };
-
-  tkr_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_ENERGY_ADE7953_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id);
-
 }
+#endif // USE_MODULE_NETWORK_MQTT
 
-////////////////////// END OF MQTT /////////////////////////
+
 
 #endif

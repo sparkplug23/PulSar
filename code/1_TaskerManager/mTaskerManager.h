@@ -361,24 +361,24 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #define tkr_rf433codes                          static_cast<mRF433Codes*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__DRIVERS__RF433_CODES_ID))
 #endif
 #ifdef USE_MODULE_DRIVERS_HBRIDGE
-  #include "4_Drivers/Motors/HBridgeL9110/mHBridge.h"
-  #define tkr_mdhbridge                           static_cast<mHBridge*>(tkr->pModule[EM_MODULE_DRIVERS_HBRIDGE_ID])
+  #include "4_Drivers/11_HBridgeL9110/mHBridge.h"
+  #define tkr_mdhbridge                           static_cast<mHBridge*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__DRIVERS__HBRIDGE_ID))
 #endif
 #ifdef USE_MODULE_DRIVERS_SDCARD
-  #include "4_Drivers/SD/mSDCard.h"
-  #define tkr_sdcard                              static_cast<mSDCard*>(tkr->pModule[EM_MODULE_DRIVERS_SDCARD_ID])
+  #include "4_Drivers/12_SD/mSDCard.h"
+  #define tkr_sdcard                              static_cast<mSDCard*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_SDCARD_ID))  
 #endif
 #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
   #include "4_Drivers/15_ShellyDimmer/mShellyDimmer.h"
-  #define tkr_shelly                              static_cast<mShellyDimmer*>(tkr->pModule[EM_MODULE_DRIVERS_SHELLY_DIMMER_ID])
+  #define tkr_shelly                              static_cast<mShellyDimmer*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_SHELLY_DIMMER_ID))
 #endif
 #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
-  #include "4_Drivers/20_Buzzer_Basic/mBuzzer.h"
-  #define tkr_buzzer                              static_cast<mBuzzer*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_BUZZER_BASIC_ID))
+  #include "4_Drivers/20_Buzzer_Basic/mBuzzerBasic.h"
+  #define tkr_buzzer                              static_cast<mBuzzerBasic*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_BUZZER_BASIC_ID))
 #endif
 #ifdef USE_MODULE__DRIVERS_BUZZER_TONES
-  #include "4_Drivers/21_Buzzer_Tones/mBuzzer.h"
-  #define tkr_buzzer                              static_cast<mBuzzer*>(tkr->pModule[EM_MODULE__DRIVERS_BUZZER_TONES__ID])
+  #include "4_Drivers/21_Buzzer_Tones/mBuzzerTones.h"
+  #define tkr_buzzer                              static_cast<mBuzzerTones*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__DRIVERS_BUZZER_TONES__ID))
 #endif
 #ifdef USE_MODULE_DRIVERS__CAMERA
   #include "4_Drivers/50_Camera_2025/mCamera.h"

@@ -40,7 +40,7 @@ int8_t mOLED_SH1106::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
   if(!tkr_iDisp->renderer) { return TASKER_RESULT__ERROR_POINTER_INVALID_ID; }
 
   switch(function){
@@ -66,13 +66,16 @@ int8_t mOLED_SH1106::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif // USE_MODULE_NETWORK_MQTT
   }
   
   return function_result;
@@ -84,7 +87,7 @@ void mOLED_SH1106::Pre_Init(void)
 {
   if (tkr_i2c->I2cEnabled(XI2C_04))
   { 
-    settings.fEnableSensor = true;
+    module_state.mode = ModuleStatus::Running;
   }
 }
 
@@ -300,7 +303,9 @@ void mOLED_SH1106::ShowUTCTime(void)
   tkr_iDisp->renderer->setCursor(0, 0);
   // snprintf_P(line, sizeof(line), PSTR(" %02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"), tkr_time->RtcTime.hour,  tkr_time->RtcTime.minute,  tkr_time->RtcTime.second);  // [ 12:34:56 ]
   tkr_iDisp->renderer->println( tkr_time->GetTime().c_str() );
-  tkr_iDisp->renderer->println(tkr_time->GetUptime());
+  char buffer[40];
+  tkr_time->GetUptime(buffer,sizeof(buffer));
+  tkr_iDisp->renderer->println(buffer);
   // snprintf_P(line, sizeof(line), PSTR("%02d" D_MONTH_DAY_SEPARATOR "%02d" D_YEAR_MONTH_SEPARATOR "%04d"),  tkr_time->RtcTime.Mday,  tkr_time->RtcTime.month,  tkr_time->RtcTime.year);   // [01-02-2018]
   // tkr_iDisp->renderer->println(line);
   tkr_iDisp->renderer->Updateframe();
@@ -309,6 +314,94 @@ void mOLED_SH1106::ShowUTCTime(void)
 
 
 #endif  // USE_DISPLAY_MODES1TO5
+
+
+
+
+
+
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+void mOLED_SH1106::parse_JSONCommand(JsonParserObject obj)
+{
+
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+    
+}
+
+  
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
+
+  
+uint8_t mOLED_SH1106::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
+
+  JBI->Start();
+  
+  return JBI->End();
+
+}
+
+
+uint8_t mOLED_SH1106::ConstructJSON_State(uint8_t json_level, bool json_appending){
+
+  char buffer[40];
+
+  JBI->Start();
+
+    JBI->Object_Start(D_RFRECEIVED);
+    
+    JBI->Object_End();
+  
+  return JBI->End();
+
+}
+
+
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
+
+#ifdef USE_MODULE_NETWORK_MQTT
+
+void mOLED_SH1106::MQTTHandler_Init()
+{
+
+  struct handler<mOLED_SH1106>* ptr;
+
+  ptr = &mqtthandler_settings;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true; // DEBUG CHANGE
+  ptr->tRateSecs = 120; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mOLED_SH1106::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
+
+  ptr = &mqtthandler_state_ifchanged;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_IFCHANGED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->ConstructJSON_function = &mOLED_SH1106::ConstructJSON_State;
+  mqtthandler_list.push_back(ptr);
+
+} 
+
+#endif // USE_MODULE_NETWORK_MQTT
+
+
+
+
 
 
 #endif // USE_MODULE_DISPLAYS_OLED_SH1106

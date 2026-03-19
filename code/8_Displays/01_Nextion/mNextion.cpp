@@ -81,11 +81,16 @@ int8_t mNextion::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); 
-      MQTTHandler_Rate();
+      MQTTHandler_Init();
+    break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     case TASK_MQTT_CONNECTED:
       Show_ConnectionWorking();
@@ -93,7 +98,7 @@ int8_t mNextion::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_MQTT_DISCONNECTED:
       Show_ConnectionNotWorking();
     break;
-    #endif
+    #endif // USE_MODULE_NETWORK_MQTT
   }
 
   return TASKER_RESULT__SUCCESS_ID;
@@ -326,10 +331,14 @@ uint8_t mNextion::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 }
 
 
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mNextion::MQTTHandler_Init(){
+void mNextion::MQTTHandler_Init()
+{
 
   struct handler<mNextion>* ptr;
 
@@ -365,42 +374,10 @@ void mNextion::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mNextion::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
-  
-}
 
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mNextion::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
+} 
 
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mNextion::MQTTHandler_Rate()
-{
-  // for(auto& handle:mqtthandler_list){
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-  //     handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-  //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-  //     handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-  // }
-}
-
-/**
- * @brief Check all handlers if they require action
- * */
-void mNextion::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
-#endif// USE_MODULE_NETWORK_MQTT
+#endif // USE_MODULE_NETWORK_MQTT
 
 
 #endif

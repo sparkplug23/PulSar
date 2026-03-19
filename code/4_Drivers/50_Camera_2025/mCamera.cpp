@@ -99,7 +99,7 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
   switch(function)
   {
     case TASK_LOOP:
-      WcLoop();
+      Loop();
     break;
     /************
      * STORAGE SECTION * 
@@ -124,7 +124,7 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
     
       break;
     case TASK_WEB_ADD_MAIN_BUTTON:
-      WcShowStream();
+      ShowStream();
     break;
     case TASK_EVERY_SECOND:
 
@@ -146,17 +146,17 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
 if (!tkr_set->runtime.global_state.network_down) {
   if (tkr_set->Settings.webcam_config.stream && !Wc.CamServer) {
     ALOG_INF(PSTR(D_LOG_CAMERA "Network up, starting stream server"));
-    WcSetStreamserver(1);
+    SetStreamserver(1);
   }
 } else {
   if (Wc.CamServer) {
     ALOG_INF(PSTR(D_LOG_CAMERA "Network down, stopping stream server"));
-    WcSetStreamserver(0);
+    SetStreamserver(0);
   }
 }
 
           
-      WcUpdateStats();
+      UpdateStats();
     break;
     case TASK_UPTIME_30_SECONDS:
     // case TASK_NETWORK_CONNECTED__WIFI:
@@ -164,7 +164,7 @@ if (!tkr_set->runtime.global_state.network_down) {
 
       tkr_set->Settings.webcam_config.stream=1;
       ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "\n\r\t\t\tCAM: WcSetStreamserver STARTED"));
-      WcSetStreamserver(tkr_set->Settings.webcam_config.stream);
+      SetStreamserver(tkr_set->Settings.webcam_config.stream);
 
     break;
     case TASK_UPDATE_OTA_BEFORE_ON_START:
@@ -610,7 +610,7 @@ bool mCamera::pic_free_p(struct mCamera::PICSTORE **pps){
 }
 
 
-bool mCamera::_check_format(int format){
+bool mCamera::check_format(int format){
   switch(format){
     case PIXFORMAT_JPEG:      return true;
     case PIXFORMAT_GRAYSCALE: return true;
@@ -661,7 +661,7 @@ void mCamera::Interrupt(uint32_t state) {
 void mCamera::SuspendAndShutdownCameraForOTA() {
   // if (Wc.taskHandle) {
   //   vTaskSuspend(Wc.taskHandle);
-    WcCamOff();
+    CamOff();
   //   Wc.up = false;
   //   vTaskDelete(Wc.taskHandle);
   //   Wc.taskHandle = nullptr;
@@ -809,7 +809,7 @@ void mCamera::ApplySettings() {
   wc_s->set_dcw(wc_s, tkr_set->Settings.webcam_config.dcw);
   wc_s->set_bpc(wc_s, tkr_set->Settings.webcam_config.bpc);
 
-  WcFeature(tkr_set->Settings.webcam_config.feature);
+  Feature(tkr_set->Settings.webcam_config.feature);
 
   ALOG_INF(PSTR(D_LOG_CAMERA "Settings updated"));
 }
@@ -855,13 +855,13 @@ void mCamera::SetDefaults(uint32_t upgrade) {
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
   ALOG_INF(PSTR(D_LOG_CAMERA "Defaults set"));
 #endif
-  if (Wc.up) { WcApplySettings(); }
+  if (Wc.up) { ApplySettings(); }
 }
 
 
 uint32_t mCamera::Setup(int32_t fsiz) {
   // we must stall until re-enabled
-  WcWaitEnable();
+  WaitEnable();
 
   mSupport::TasAutoMutex localmutex(&WebcamMutex, "WcSetup", 200);
 
@@ -896,10 +896,10 @@ uint32_t mCamera::Setup(int32_t fsiz) {
 
   memset(&config, 0, sizeof(config));
 
-    ALOG_INF(PSTR("WcPinUsed() = %d"), WcPinUsed());
+    ALOG_INF(PSTR("WcPinUsed() = %d"), PinUsed());
 
 
-  if (WcPinUsed()) {
+  if (PinUsed()) {
     config.pin_d0       = tkr_pins->Pin(GPIO_WEBCAM_DATA1);        // Y2_GPIO_NUM;
     config.pin_d1       = tkr_pins->Pin(GPIO_WEBCAM_DATA1, 1);     // Y3_GPIO_NUM;
     config.pin_d2       = tkr_pins->Pin(GPIO_WEBCAM_DATA1, 2);     // Y4_GPIO_NUM;
@@ -1084,7 +1084,7 @@ uint32_t mCamera::Setup(int32_t fsiz) {
   Wc.height = wc_fb->height;
   esp_camera_fb_return(wc_fb);
 
-  WcApplySettings();
+  ApplySettings();
 
   camera_sensor_info_t *info = esp_camera_sensor_get_info(&wc_s->id);
 
@@ -1104,8 +1104,8 @@ uint32_t mCamera::Setup(int32_t fsiz) {
 void mCamera::RemoveDeadCients()
 {
   // iterate over clients removing dead ones
-  mCamera::_client *client = Wc.client_p;
-  mCamera::_client **prev = &Wc.client_p;
+  mCamera::wc_client *client = Wc.client_p;
+  mCamera::wc_client **prev = &Wc.client_p;
   while(client)
   {
     if (!client->active)
@@ -1114,7 +1114,7 @@ void mCamera::RemoveDeadCients()
       mSupport::TasAutoMutex localmutex(&WebcamMutex, "WcLoop", 200);
       *prev = client->p_next;
       client->client.stop();
-      mCamera::_client *next = client->p_next;
+      mCamera::wc_client *next = client->p_next;
       delete client;
       client = next;
     } else {
@@ -1130,7 +1130,7 @@ void mCamera::EndStream(){
   // we should use a mutext here, in case we are currently sending
   mSupport::TasAutoMutex localmutex(&WebcamMutex, "WcLoop2", 20000);
   // if http streaming is active
-  mCamera::_client *client = Wc.client_p;
+  mCamera::wc_client *client = Wc.client_p;
   // iterate over clients
   while(client){
     client->active = 0;
@@ -1139,19 +1139,19 @@ void mCamera::EndStream(){
     }
     client = client->p_next;
   }
-  WcRemoveDeadCients();
+  RemoveDeadCients();
 }
 
 // deinit and power down camera
 void mCamera::CamOff() {
   mSupport::TasAutoMutex localmutex(&WebcamMutex, "WcCamOff", 30000);
   // deinit camera
-  WcSetup(-1);
+  Setup(-1);
   // kill any existing clients
-  WcEndStream();
+  EndStream();
 #ifdef ENABLE_RTSPSERVER
   // kill any existing rtsp clients
-  WcEndRTSP();
+  EndRTSP();
 #endif
   int pin_pwdn = -1;
   if (tkr_pins->PinUsed(GPIO_WEBCAM_PWDN)){
@@ -1190,7 +1190,7 @@ int32_t mCamera::SetOptions(uint32_t sel, int32_t value) {
       // pixelformat - native formats + 1, 0->jpeg
       if (value >= 0) { Wc.camPixelFormat = value; }
       if (Wc.up){
-        WcSetup(tkr_set->Settings.webcam_config.resolution);
+        Setup(tkr_set->Settings.webcam_config.resolution);
       }
       return value;
       break;
@@ -1204,13 +1204,13 @@ int32_t mCamera::SetOptions(uint32_t sel, int32_t value) {
 void mCamera::WaitFrame(int maxtime_ms) {
   if (!Wc.taskRunning) return;
   // force a wait for a read
-  WcWaitZero(&Wc.taskTakePic, -1, maxtime_ms);
+  WaitZero(&Wc.taskTakePic, -1, maxtime_ms);
 }
 
 uint32_t mCamera::GetWidth(void) {
   if (Wc.taskRunning){
     if (!Wc.width){
-      WcWaitFrame(1000);
+      WaitFrame(1000);
     }
   }
   return Wc.width;
@@ -1219,7 +1219,7 @@ uint32_t mCamera::GetWidth(void) {
 uint32_t mCamera::GetHeight(void) {
   if (Wc.taskRunning){
     if (!Wc.width){
-      WcWaitFrame(1000);
+      WaitFrame(1000);
     }
   }
   return Wc.width;
@@ -1270,7 +1270,7 @@ uint32_t mCamera::GetFrame(int32_t bnum) {
   }
 
   if (Wc.taskRunning){
-    WcWaitZero(&Wc.taskGetFrame, bnum, 1000);
+    WaitZero(&Wc.taskGetFrame, bnum, 1000);
     return Wc.picstore[bnum - 1].len;
   }
   return 0;
@@ -1336,7 +1336,7 @@ void mCamera::HandleImage(void) {
 
   if (!bnum) {
     if (Wc.taskRunning == 1){
-      WcWaitZero(&Wc.taskTakePic, 1, 1000);
+      WaitZero(&Wc.taskTakePic, 1, 1000);
       mSupport::TasAutoMutex localmutex(&WebcamMutex, "HandleImage", 200);
       if (Wc.snapshotStore.len) {
         response += itoa(Wc.snapshotStore.len, tmp, 10);
@@ -1458,7 +1458,7 @@ void mCamera::HandleWebcamMjpegFn(int type) {
     return;
   }
   mSupport::TasAutoMutex localmutex(&WebcamMutex, "HandleWebcamMjpeg", 200);
-  mCamera::_client *client = new mCamera::_client;
+  mCamera::wc_client *client = new mCamera::wc_client;
   client->active = 1;
   client->type = type;
   client->p_next = Wc.client_p;
@@ -1492,11 +1492,11 @@ void mCamera::HandleWebcamRoot(void) {
 
 /*********************************************************************************************/
 
-uint32_t mCamera::SetStreamserver(uint32_t camera_server_state) {
+uint32_t mCamera::SetStreamserver(uint32_t flag) {
   ALOG_INF(PSTR("=========================CAM: WcSetStreamserver %d"), flag);
   if (tkr_set->runtime.global_state.network_down) { 
     ALOG_INF(PSTR("=========================CAM: Network down, cannot set stream server"));
-    WcEndStream();
+    EndStream();
     return 0; 
   }
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
@@ -1543,7 +1543,7 @@ uint32_t mCamera::SetStreamserver(uint32_t camera_server_state) {
     if (Wc.CamServer) {
       ALOG_INF(PSTR("=========================CAM: } else {if (Wc.CamServer) {"));
       mSupport::TasAutoMutex localmutex(&WebcamMutex, "HandleWebcamMjpeg", 20000);
-      WcEndStream();
+      EndStream();
       Wc.CamServer->stop();
       delete Wc.CamServer;
       Wc.CamServer = NULL;
@@ -1615,7 +1615,7 @@ void mCamera::StartOperationTask()
     ALOG_INF(PSTR(D_LOG_CAMERA "Start operations"));
 
     xTaskCreatePinnedToCore(
-      WCOperationTaskS,    /* Function to implement the task */
+      OperationTaskS,    /* Function to implement the task */
       "WCOperationTask",  /* Name of the task */
 
       /**************
@@ -1655,7 +1655,7 @@ void mCamera::StartOperationTask()
 
 void mCamera::OperationTaskS(void* pvParameters) {
   // Avoids relying on tkr_camera and is more reusable if there are multiple camera instances.
-  static_cast<mCamera*>(pvParameters)->WCOperationTask();  // Call actual task logic
+  static_cast<mCamera*>(pvParameters)->OperationTask();  // Call actual task logic
 }
 
 // this IS as task.
@@ -1687,7 +1687,7 @@ void mCamera::OperationTask(){
     // storage and settings disable cam.
     // we must stall until re-enabled
     // it asserts the mutex whilst stopping the cam, so it can't stop it mid-processing
-    WcWaitEnable();
+    WaitEnable();
     // if camera is configured and working
     { // closure for auto mutex
       // note that this mutex can block the loop for a long time - 
@@ -1885,7 +1885,7 @@ void mCamera::OperationTask(){
                 #endif
 
                 // if http streaming is active, we will have one or more clients
-                mCamera::_client *client = Wc.client_p;
+                mCamera::wc_client *client = Wc.client_p;
                 // iterate over clients
                 uint8_t webclientcount = 0;
 
@@ -2114,7 +2114,7 @@ void mCamera::Loop(void)
     // pretty sure this would be safe
     //TasAutoMutex localmutex(&WebcamMutex, "WcLoop", 200);
     Wc.CamServer->handleClient();
-    WcRemoveDeadCients();
+    RemoveDeadCients();
   }
 
 #ifdef ENABLE_RTSPSERVER
@@ -2215,7 +2215,7 @@ void mCamera::ShowStream(void) {
   if (tkr_set->Settings.webcam_config.stream) {
 //    if (!Wc.CamServer || !Wc.up) {
     if (!Wc.CamServer) {
-      WcSetStreamserver(tkr_set->Settings.webcam_config.stream);
+      SetStreamserver(tkr_set->Settings.webcam_config.stream);
     }
   }
 
@@ -2241,20 +2241,20 @@ void mCamera::ShowStream(void) {
   // }
 }
 
-void mCamera::Init(void) {
+void mCamera::WcInit(void) {
   // .data is in union with the rest of the settings, so
   // this means 'i have no config'
   if (!tkr_set->Settings.webcam_config.data) {
     // set defaults...
     tkr_set->Settings.webcam_config.stream = 1;
     tkr_set->Settings.webcam_config.resolution = FRAMESIZE_QVGA;
-    WcSetDefaults(0);
+    SetDefaults(0);
   }
   // previous webcam driver had only a small subset of possible config vars
   // in this case we have to only set the new variables to default values
   if(!tkr_set->Settings.webcam_config2.upgraded) {
     ALOG_INF(PSTR(D_LOG_CAMERA "Upg settings"));
-    WcSetDefaults(1);
+    SetDefaults(1);
     tkr_set->Settings.webcam_config2.upgraded = 1;
   }
 
@@ -2290,11 +2290,11 @@ void mCamera::Pre_Init(void)
 void mCamera::Init(void)
 {
   ALOG_INF(PSTR("\n\r\t\t\tCAM: WcSetup STARTED"));
-  WcSetup(tkr_set->Settings.webcam_config.resolution);
+  Setup(tkr_set->Settings.webcam_config.resolution);
   ALOG_INF(PSTR("\n\r\t\t\tCAM: WcSetStreamserver STARTED"));
-  WcSetStreamserver(tkr_set->Settings.webcam_config.stream);
+  SetStreamserver(tkr_set->Settings.webcam_config.stream);
   ALOG_INF(PSTR("\n\r\t\t\tCAM: WCStartOperationTask STARTED"));
-  WCStartOperationTask();
+  StartOperationTask();
   ALOG_INF(PSTR("\n\r\t\t\tCAM: WCStartOperationTask DONE"));
 
   tkr_set->Settings.webcam_config.rtsp = 1;
@@ -2542,7 +2542,7 @@ void mCamera::parse_JSONCommand(JsonParserObject obj)
   
 
 void mCamera::CmndWebcamPowerOff(void){
-  WcCamOff();
+  CamOff();
   // ResponseCmndDone();
 }
 
@@ -2551,12 +2551,12 @@ void mCamera::CmndWebcamTaskEnable(bool enable) {
   if(enable)
   {
     if (Wc.taskRunning == 0){
-      WCStartOperationTask();
+      StartOperationTask();
     }
   }else
     {
       // stop the task
-      WcStopTask();
+      StopTask();
     }
   // ResponseCmndDone();
 }
@@ -2564,7 +2564,7 @@ void mCamera::CmndWebcamTaskEnable(bool enable) {
 void mCamera::StopTask(void){
   if (Wc.taskRunning == 1){
     // set to 2, and wait until cleared
-    WcWaitZero(&Wc.taskRunning, 2, 20000);
+    WaitZero(&Wc.taskRunning, 2, 20000);
     if (Wc.taskHandle){
       // why does this cause a problem?
       //vTaskDelete(Wc.taskHandle);
@@ -2585,9 +2585,9 @@ void mCamera::CmndWebcamGetFrame(int bnum) {
   //   bnum = tkr_events->XdrvMailbox.payload;
   // }
   if (bnum == 0) bnum = 1;
-  uint32_t res = WcGetFrame(bnum);
+  uint32_t res = GetFrame(bnum);
   struct PICSTORE *p = nullptr;
-  res = WcGetPicstorePtr(bnum-1, &p);
+  res = GetPicstorePtr(bnum-1, &p);
   char resp[100] = "0";
   if (p) {
     snprintf_P(resp, sizeof(resp), PSTR("{\"buff\":%d,\"addr\":%d,\"len\":%d,\"w\":%d,\"h\":%d,\"format\":%d}"), 
@@ -2620,11 +2620,11 @@ void mCamera::CmndWebcamGetPicStore(int bnum) {
   // if given 0, then get frame 1 first, and use frame 1 (the first frame, index 0).
   if (bnum == 0){
     bnum = 1;
-    uint32_t res = WcGetFrame(bnum);
+    uint32_t res = GetFrame(bnum);
   }
   //uint32_t res = WcGetPicstore(bnum-1, &t);
   struct PICSTORE *p = nullptr;
-  uint32_t res = WcGetPicstorePtr(bnum-1, &p);
+  uint32_t res = GetPicstorePtr(bnum-1, &p);
 #ifdef DEBUG_DRIVERS__CAMERA_2025  
   ALOG_DBG(PSTR(D_LOG_CAMERA "PicStore %d at 0x%x"), bnum, p);
 #endif
@@ -2749,7 +2749,7 @@ void mCamera::CmndWebcamResolution(uint8_t resolution)
     
     tkr_set->Settings.webcam_config.resolution = resolution;
     if (reinit) {
-      WcSetup(tkr_set->Settings.webcam_config.resolution);
+      Setup(tkr_set->Settings.webcam_config.resolution);
     } else {
       // WcSetOptions(0, tkr_set->Settings.webcam_config.resolution);
       
@@ -2764,7 +2764,7 @@ void mCamera::CmndWebcamResolution(uint8_t resolution)
       stats.maxfps = (uint32_t)((float)1000000.0/(float)Wc.frameIntervalsus);
 
       // WcFeature is lost on resolution change
-      WcApplySettings();
+      ApplySettings();
     }    
     
 }
@@ -3002,7 +3002,7 @@ void mCamera::CmndWebcamFeature(uint8_t val)
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 2){
       tkr_set->Settings.webcam_config2.agc_gain = val;
-      WcFeature(val);
+      Feature(val);
     }
   }
 }
@@ -3023,7 +3023,7 @@ void mCamera::CmndWebcamClock(uint16_t val)
     if(val >= 10 && val <= 200){
       tkr_set->Settings.webcam_clk = val;
       if (Wc.up){
-        WcSetup(tkr_set->Settings.webcam_config.resolution);
+        Setup(tkr_set->Settings.webcam_config.resolution);
       }
     }
   }
@@ -3032,19 +3032,19 @@ void mCamera::CmndWebcamClock(uint16_t val)
 
 void mCamera::CmndWebcamCamStartStop(bool val) {
   if(val >= 0 && val <= 1){
-    WcInterrupt(val);
+    Interrupt(val);
   }
 }
 
 
 void mCamera::CmndWebcamInit() {
-  WcSetup(tkr_set->Settings.webcam_config.resolution);
-  WcSetStreamserver(tkr_set->Settings.webcam_config.stream);
+  Setup(tkr_set->Settings.webcam_config.resolution);
+  SetStreamserver(tkr_set->Settings.webcam_config.stream);
 }
 
 
 void mCamera::CmndWebcamSetDefaults() {
-  WcSetDefaults(0);
+  SetDefaults(0);
 }
   
 #ifdef ENABLE_RTSPSERVER

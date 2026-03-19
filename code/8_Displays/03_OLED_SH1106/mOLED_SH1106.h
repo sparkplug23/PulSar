@@ -33,16 +33,34 @@ class mOLED_SH1106 :
   public mTaskerInterface
 {
   public:
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
 	  mOLED_SH1106(){};
     void Pre_Init(void);
     void Init(void);
+    void BootMessage();
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
     static constexpr const char* PM_MODULE_DISPLAYS_OLED_SH1106_CTR = D_MODULE_DISPLAYS_OLED_SH1106_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DISPLAYS_OLED_SH1106_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DISPLAYS_OLED_SH1106_ID; }
+   
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
 
-    void parse_JSONCommand(JsonParserObject obj);
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
 
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+    
     Adafruit_SH1106 *oled1106;
 
     void InitDriver(void);
@@ -52,34 +70,32 @@ class mOLED_SH1106 :
     void EverySecond(void);
     void RefreshDisplay();
 
-    struct SETTINGS{
-      uint8_t fEnableSensor = false;
-    }settings;
 
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
     
+    void parse_JSONCommand(JsonParserObject obj);
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
     
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
-  
-    #ifdef USE_MODULE_NETWORK_MQTT
+    uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
 
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    
+    #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    void MQTTHandler_Sender();
-    
+    std::vector<struct handler<mOLED_SH1106>*> mqtthandler_list;
     struct handler<mOLED_SH1106> mqtthandler_settings;
- 
-    struct handler<mOLED_SH1106>* mqtthandler_list[1] = {
-      &mqtthandler_settings
-    };
-
-    // No specialised payload therefore use system default instead of enum
-    
-    
+    struct handler<mOLED_SH1106> mqtthandler_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
-
+    
 };
 
 #endif

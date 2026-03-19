@@ -59,7 +59,6 @@ class mDisplaysInterface :
     void Init(void);
     void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void   parse_JSONCommand(JsonParserObject obj);
 
     static constexpr const char* PM_MODULE_DISPLAYS_INTERFACE_CTR = D_MODULE_DISPLAYS_INTERFACE_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DISPLAYS_INTERFACE_CTR; }
@@ -285,30 +284,29 @@ class mDisplaysInterface :
     void SetTextSize(uint8_t font_size);
     void SetDisplayMode(uint8_t mode);
 
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+    
+    void parse_JSONCommand(JsonParserObject obj);
 
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+    
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
+    uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
 
-  
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    
-    void MQTTHandler_Sender();
+    std::vector<struct handler<mDisplaysInterface>*> mqtthandler_list;
     struct handler<mDisplaysInterface> mqtthandler_settings;
-    void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
-    struct handler<mDisplaysInterface> mqtthandler_sensor_ifchanged;
-    struct handler<mDisplaysInterface> mqtthandler_sensor_teleperiod;
-    void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
-
-    
-    struct handler<mDisplaysInterface>* mqtthandler_list[3] = {
-      &mqtthandler_settings,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
-    };
-
+    struct handler<mDisplaysInterface> mqtthandler_state_teleperiod;
+    struct handler<mDisplaysInterface> mqtthandler_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

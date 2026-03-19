@@ -57,19 +57,30 @@ class mMAVLink_Telemetry_WiFi :
 
   private:
   public:
-    mMAVLink_Telemetry_WiFi(){};
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
+	  mMAVLink_Telemetry_WiFi(){};
+    void Pre_Init(void);
+    void Init(void);
+    void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-
+    
     static constexpr const char* PM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR = D_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID; }
-    
-    void CommandSet_LED_Power(uint8_t state, uint8_t index = 0);
+   
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
 
-    struct SETTINGS{
-      uint8_t fEnableSensor = false;
-      uint8_t leds_found = 0;
-    }settings;
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+
 
 // const uint8_t MAX_LEDS = 8;                 // Max number of leds
 
@@ -126,11 +137,6 @@ uint8_t ledlnk_inverted = 0;                // Link LED inverted flag (1 = (0 = 
 
     void EveryLoop();
 
-    void Pre_Init();
-    void Init(void);
-    
-    void parse_JSONCommand(JsonParserObject obj);
-
     void UpdateStatusBlink();
     
     void UpdateLedPowerAll();
@@ -140,24 +146,30 @@ uint8_t ledlnk_inverted = 0;                // Link LED inverted flag (1 = (0 = 
     void SetLedLink(uint32_t state);
 
 
+
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+    
+    void parse_JSONCommand(JsonParserObject obj);
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+    
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
-  
-    void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    void MQTTHandler_Sender();
+
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
     
+    #ifdef USE_MODULE_NETWORK_MQTT 
+    void MQTTHandler_Init();
+    std::vector<struct handler<mMAVLink_Telemetry_WiFi>*> mqtthandler_list;
     struct handler<mMAVLink_Telemetry_WiFi> mqtthandler_settings;
     struct handler<mMAVLink_Telemetry_WiFi> mqtthandler_state_ifchanged;
-
-    // No specialised payload therefore use system default instead of enum
-      
-
-    struct handler<mMAVLink_Telemetry_WiFi>* mqtthandler_list[2] = {
-      &mqtthandler_settings,
-      &mqtthandler_state_ifchanged
-    };
+    #endif // USE_MODULE_NETWORK_MQTT
 
     
 };

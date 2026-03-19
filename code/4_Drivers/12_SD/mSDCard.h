@@ -1,5 +1,6 @@
-#ifndef _USE_MODULE_DRIVERS_SDCARD_H
-#define _USE_MODULE_DRIVERS_SDCARD_H 0.3
+
+#ifndef HEADER_DRIVERS__SDCARD_H
+#define HEADER_DRIVERS__SDCARD_H
 
 #define D_UNIQUE_MODULE_DRIVERS_SDCARD_ID 4012 // [(Folder_Number*100)+ID_File]
 
@@ -86,16 +87,34 @@ class mSDCard :
 
   private:
   public:
-    mSDCard(){};
-
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
+	  mSDCard(){};
+    void Pre_Init(void);
+    void Init(void);
+    void BootMessage();
+    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
+    
     static constexpr const char* PM_MODULE_DRIVERS_SDCARD_CTR = D_MODULE_DRIVERS_SDCARD_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_SDCARD_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_SDCARD_ID; }
+   
+    struct ClassState
+    {
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
 
 
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    // int8_t Tasker(uint8_t function, JsonObjectConst obj);   
-
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+    
     int8_t Tasker_Web(uint8_t function);
 
     enum TEST_MODE_IDS{
@@ -177,18 +196,10 @@ class mSDCard :
 void init_SDCARD_is_Serial_Debug_Only();
 #endif
 
-void parse_JSONCommand(JsonParserObject obj);
 
 uint16_t test_val = 0;
 uint8_t dir = 0;
 
-void init();
-void Pre_Init();
-int8_t pin = -1;
-struct SETTINGS{
-  uint8_t fEnableModule = false;
-  uint8_t fShowManualSlider = false;
-}settings;
 
 
 struct DEBUG_WRITE_TIMES{
@@ -257,7 +268,6 @@ char stream_out_buffer[2048];
 
 
 int8_t CheckAndExecute_JSONCommands();
-void parse_JSONCommand(void);
 
 uint8_t ConstructJSON_Scene(uint8_t json_level, bool json_appending);
 
@@ -267,35 +277,31 @@ void WebCommand_Parse(void);
 void WebAppend_Root_Draw_PageTable();
 void WebAppend_Root_Status_Table();
 
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+    
+    void parse_JSONCommand(JsonParserObject obj);
 
-
-
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
+    
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_FileWriter(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Debug_WriteTimes(uint8_t json_level = 0, bool json_appending = true);
 
-  
-  #ifdef USE_MODULE_NETWORK_MQTT
-
-    void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
     
-    void MQTTHandler_Sender();
-
+    #ifdef USE_MODULE_NETWORK_MQTT 
+    void MQTTHandler_Init();
+    std::vector<struct handler<mSDCard>*> mqtthandler_list;
     struct handler<mSDCard> mqtthandler_settings;
     struct handler<mSDCard> mqtthandler_file_writer;
     struct handler<mSDCard> mqtthandler_debug_write_times;
-    
-    const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
-
-    struct handler<mSDCard>* mqtthandler_list[3] = {
-      &mqtthandler_settings,
-      &mqtthandler_file_writer,
-      &mqtthandler_debug_write_times
-    };
-  #endif // USE_MODULE_NETWORK_MQTT
-
+    #endif // USE_MODULE_NETWORK_MQTT
 
 };
 

@@ -19,6 +19,8 @@ int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj){
     break;
   }
 
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
+
   switch(function){
     /************
      * PERIODIC SECTION * 
@@ -47,13 +49,16 @@ int8_t mEnergyInterface::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
   }
   
   return function_result;
@@ -71,8 +76,8 @@ void mEnergyInterface::Pre_Init(void)
 
 void mEnergyInterface::Init(void)
 {
-  settings.sealevel_pressure = SENSORS_PRESSURE_SEALEVELHPA;
-  settings.fEnableSensor = true;
+  // settings.sealevel_pressure = SENSORS_PRESSURE_SEALEVELHPA;
+  module_state.mode = ModuleStatus::Running;
 }
 
 
@@ -227,7 +232,7 @@ uint8_t mEnergyInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_app
   } // END sensor_type
 
 
-  JBI->Add("Rate", mqtthandler_sensor_ifchanged.tRateSecs);
+  JBI->Add("Rate", mqtthandler_state_ifchanged.tRateSecs);
 
 
   return JBI->End();
@@ -257,7 +262,7 @@ void mEnergyInterface::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Settings;
   mqtthandler_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_teleperiod;
+  ptr = &mqtthandler_state_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
@@ -268,7 +273,7 @@ void mEnergyInterface::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_ifchanged;
+  ptr = &mqtthandler_state_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
@@ -279,41 +284,6 @@ void mEnergyInterface::MQTTHandler_Init(){
   ptr->ConstructJSON_function = &mEnergyInterface::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
 
-} 
-
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mEnergyInterface::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mEnergyInterface::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = tkr_mqtt->GetTelePeriod();
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = tkr_mqtt->GetIfChangedPeriod();
-  }
-}
-
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mEnergyInterface::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
 }
 
 #endif // USE_MODULE_NETWORK_MQTT

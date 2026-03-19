@@ -40,7 +40,7 @@ int8_t mOLED_SSD1306::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
   if(!tkr_iDisp->renderer) { return TASKER_RESULT__ERROR_POINTER_INVALID_ID; }
 
   switch(function){
@@ -63,13 +63,16 @@ int8_t mOLED_SSD1306::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif // USE_MODULE_NETWORK_MQTT
   }
   
   return function_result;
@@ -77,21 +80,13 @@ int8_t mOLED_SSD1306::Tasker(uint8_t function, JsonParserObject obj)
 } // END function
 
 
-void mOLED_SSD1306::parse_JSONCommand(JsonParserObject obj)
-{
-
-
-  invertDisplay
-
-  
-}
 
 
 void mOLED_SSD1306::Pre_Init(void)
 {
-  if (tkr_sup->I2cEnabled(XI2C_04))
+  if (tkr_i2c->I2cEnabled(XI2C_04))
   { 
-    settings.fEnableSensor = true;
+    module_state.mode = ModuleStatus::Running;
   }
 }
 
@@ -129,19 +124,19 @@ void mOLED_SSD1306::EverySecond(void)
 
 void mOLED_SSD1306::InitDriver(void)
 {
-  if (!tkr_set->i2c_enabled) 
+  if (!tkr_set->runtime.i2c_enabled) 
   {
     return; 
   }
 
   if (!tkr_set->Settings.display.model)
   {
-    if (tkr_sup->I2cSetDevice(OLED_ADDRESS1))
+    if (tkr_i2c->I2cSetDevice(OLED_ADDRESS1))
     {
       tkr_set->Settings.display.address[0] = OLED_ADDRESS1;
       tkr_set->Settings.display.model = D_GROUP_MODULE_DISPLAYS_OLED_SSD1306_ID;
     }
-    else if (tkr_sup->I2cSetDevice(OLED_ADDRESS2))
+    else if (tkr_i2c->I2cSetDevice(OLED_ADDRESS2))
     {
       tkr_set->Settings.display.address[0] = OLED_ADDRESS2;
       tkr_set->Settings.display.model = D_GROUP_MODULE_DISPLAYS_OLED_SSD1306_ID;
@@ -152,7 +147,7 @@ void mOLED_SSD1306::InitDriver(void)
   
   if(tkr_set->Settings.display.model == D_GROUP_MODULE_DISPLAYS_OLED_SSD1306_ID)
   {
-    tkr_sup->I2cSetActiveFound(tkr_set->Settings.display.address[0], "SSD1306");
+    tkr_i2c->I2cSetActiveFound(tkr_set->Settings.display.address[0], "SSD1306");
 
     if((tkr_set->Settings.display.width != 64) && (tkr_set->Settings.display.width != 96) && (tkr_set->Settings.display.width != 128))
     {
@@ -163,8 +158,8 @@ void mOLED_SSD1306::InitDriver(void)
       tkr_set->Settings.display.height = 64;
     }
 
-    oled1306 = new Adafruit_SSD1306(tkr_set->Settings.display.width, tkr_set->Settings.display.height, tkr_i2c->wire, tkr_pins->Pin(GPIO_OLED_RESET_ID));
-    oled1306->begin(SSD1306_SWITCHCAPVCC, tkr_set->Settings.display.address[0], tkr_pins->Pin(GPIO_OLED_RESET_ID) >= 0);
+    oled1306 = new Adafruit_SSD1306(tkr_set->Settings.display.width, tkr_set->Settings.display.height, tkr_i2c->wire, tkr_pins->Pin(GPIO_OLED_RESET));
+    oled1306->begin(SSD1306_SWITCHCAPVCC, tkr_set->Settings.display.address[0], tkr_pins->Pin(GPIO_OLED_RESET) >= 0);
     tkr_iDisp->renderer = oled1306;
     tkr_iDisp->renderer->DisplayInit(tkr_iDisp->DISPLAY_INIT_MODE, tkr_set->Settings.display.size, tkr_set->Settings.display.rotate, tkr_set->Settings.display.font);
     tkr_iDisp->renderer->setTextColor(1,0);
@@ -268,69 +263,95 @@ void mOLED_SSD1306::ShowUTCTime(void)
   snprintf_P(line, sizeof(line), PSTR(" %02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"), tkr_time->RtcTime.hour,  tkr_time->RtcTime.minute,  tkr_time->RtcTime.second);  // [ 12:34:56 ]
   tkr_iDisp->renderer->println(line);
   tkr_iDisp->renderer->println();
-  snprintf_P(line, sizeof(line), PSTR("%02d" D_MONTH_DAY_SEPARATOR "%02d" D_YEAR_MONTH_SEPARATOR "%04d"),  tkr_time->RtcTime.Mday,  tkr_time->RtcTime.month,  tkr_time->RtcTime.year);   // [01-02-2018]
+  snprintf_P(line, sizeof(line), PSTR("%02d" D_MONTH_DAY_SEPARATOR "%02d" D_YEAR_MONTH_SEPARATOR "%04d"),  tkr_time->RtcTime.day_of_month,  tkr_time->RtcTime.month,  tkr_time->RtcTime.year);   // [01-02-2018]
   tkr_iDisp->renderer->println(line);
   tkr_iDisp->renderer->Updateframe();
 
 }
 
 
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
 
+void mOLED_SSD1306::parse_JSONCommand(JsonParserObject obj)
+{
+
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+    
+}
+
+  
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
+
+  
 uint8_t mOLED_SSD1306::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add(D_CHANNELCOUNT, 0);
+  
   return JBI->End();
 
 }
 
 
-/*********************************************************************************************************************************************
-******** MQTT Stuff **************************************************************************************************************************
-**********************************************************************************************************************************************
-********************************************************************************************************************************************/
+uint8_t mOLED_SSD1306::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
-  #ifdef USE_MODULE_NETWORK_MQTT
-void mOLED_SSD1306::MQTTHandler_Init(){
+  char buffer[40];
+
+  JBI->Start();
+
+    JBI->Object_Start(D_RFRECEIVED);
+    
+    JBI->Object_End();
+  
+  return JBI->End();
+
+}
+
+
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
+
+#ifdef USE_MODULE_NETWORK_MQTT
+
+void mOLED_SSD1306::MQTTHandler_Init()
+{
 
   struct handler<mOLED_SSD1306>* ptr;
 
   ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->flags.SendNow = true; // DEBUG CHANGE
+  ptr->tRateSecs = 120; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mOLED_SSD1306::ConstructJSON_Settings;
-  
+  mqtthandler_list.push_back(ptr);
+
+  ptr = &mqtthandler_state_ifchanged;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_IFCHANGED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->ConstructJSON_function = &mOLED_SSD1306::ConstructJSON_State;
+  mqtthandler_list.push_back(ptr);
+
 } 
-
-
-// Can these be replaced by mqtt shared function that gets the mqtt from the module
-void mOLED_SSD1306::MQTTHandler_RefreshAll(){
-
-  mqtthandler_settings.flags.SendNow = true;
-
-} 
-
-
-void mOLED_SSD1306::MQTTHandler_Rate(){
-
-  mqtthandler_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-
-} //end "MQTTHandler_Rate"
-
-
-void mOLED_SSD1306::MQTTHandler_Sender(uint8_t mqtt_handler_id){
-
-  tkr_mqtt->MQTTHandler_Command_Array_Group(*this, 
-    EM_MODULE_DISPLAYS_OLED_SSD1306_ID, list_ptr, list_ids, sizeof(list_ptr)/sizeof(list_ptr[0]), mqtt_handler_id
-  );
-
-}
 
 #endif // USE_MODULE_NETWORK_MQTT
+
+
+
+
+
 
 #endif

@@ -451,10 +451,10 @@ void mTaskerManager::Instance_Init()
   addTasker(new mShellyDimmer());
   #endif
   #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
-  addTasker(new mBuzzer());
+  addTasker(new mBuzzerBasic());
   #endif
   #ifdef USE_MODULE__DRIVERS_BUZZER_TONES
-  addTasker(new mBuzzer());
+  addTasker(new mBuzzerTones());
   #endif
   #ifdef USE_MODULE_DRIVERS__CAMERA
   addTasker(new mCamera());

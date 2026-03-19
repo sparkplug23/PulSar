@@ -253,7 +253,7 @@ class mShellyDimmer :
      * SECTION: Commands
      ************************************************************************************************/
     
-    int8_t Tasker_Web(uint8_t function);
+    // int8_t Tasker_Web(uint8_t function);
 
     int8_t CheckAndExecute_JSONCommands();
     void parse_JSONCommand(JsonParserObject obj);

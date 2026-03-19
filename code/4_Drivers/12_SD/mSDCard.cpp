@@ -37,6 +37,7 @@ char global_stream_out_buffer[BYTE_SIZE_GLOABL_STEAM_OUT_BUFFER];
 
 
 
+#ifdef USE_SDCARD_RINGBUFFER_STREAM_OUT
 /**
  * Part1: Take from circle buffer into ringbuffer when not writting
  * Part2: Write into sdcard from ringbuffer_sd 
@@ -183,6 +184,8 @@ void sdcardWriterTask(void *param)
   }//while
 
 }
+
+#endif // USE_SDCARD_RINGBUFFER_STREAM_OUT
 
 
 
@@ -336,7 +339,7 @@ void mSDCard::SubTask_Append_To_Open_File(char* buffer, uint16_t buflen)
 
 			sprintf(writer_settings.file_name, "/%s_%s_%02d%02d%02d_%03d.txt", // Unique name each time it is opened
 				"APPEND", 
-				DEVICENAME_FOR_SDCARD_FRIENDLY_CTR, 
+				"name", //DEVICENAME_FOR_SDCARD_FRIENDLY_CTR, 
 				tkr_time->RtcTime.hour, tkr_time->RtcTime.minute, tkr_time->RtcTime.second, 
 				random(1,1000)
 			);
@@ -384,6 +387,10 @@ void mSDCard::SubTask_Append_To_Open_File(char* buffer, uint16_t buflen)
 
 }
 
+
+#ifdef USE_SDCARD_RINGBUFFER_STREAM_OUT
+
+
 /***
  * New ringbuffer for stream out to sdcard, every 10ms if there is new sdcard data to write, it will be taken from ringbuffer
  * 
@@ -398,7 +405,7 @@ void mSDCard::Stream_AddToBuffer(char* buffer, uint16_t buflen)
 
 }
 
-
+#endif
 
 
 
@@ -509,8 +516,7 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
     }
   }
 
-  // Only continue in to tasker if module was configured properly
-  if(!settings.fEnableModule){ return TASKER_RESULT__MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -559,16 +565,16 @@ int8_t mSDCard::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif // USE_MODULE_NETWORK_MQTT
   }
 
   return TASKER_RESULT__UNKNOWN_ID;
@@ -616,8 +622,9 @@ void mSDCard::EveryLoop_Handle_Appending_File_Method()
 }
 
 
-void mSDCard::init(void)
+void mSDCard::Init(void)
 {
+  module_state.mode = ModuleStatus::Initialising;
 
   Serial.println("Initializing SD card...");
 
@@ -626,10 +633,10 @@ void mSDCard::init(void)
   int8_t mosi = -1;
   int8_t miso = -1;
 
-  chip_select = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CSO_ID);
-  clock = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CLK_ID);
-  mosi = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MOSI_ID);
-  miso = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MISO_ID);
+  chip_select = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CSO);
+  clock = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CLK);
+  mosi = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MOSI);
+  miso = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MISO);
   
   uint8_t sd_hardware_type = 0;
 
@@ -689,7 +696,7 @@ void mSDCard::init(void)
 
   // Success, no failure
   sdcard_status.init_error_on_boot = false;
-  settings.fEnableModule = true;
+  module_state.mode = ModuleStatus::Running;
 
 }
 
@@ -699,7 +706,7 @@ void mSDCard::init_SDCARD_is_Serial_Debug_Only()
 
   // Success, no failure
   sdcard_status.init_error_on_boot = false;
-  settings.fEnableModule = true;
+  module_state.mode = ModuleStatus::Running;
 
 }
 #endif  //   USE_SYSTEM_SIMULATE_SDCARD_OUTPUT_TO_RSS_SERIAL0_ESP32_OUTPUT
@@ -819,231 +826,12 @@ uint16_t mSDCard::AppendRingBuffer(char* buffer, uint16_t buflen)
 #endif // USE_SDCARD_RINGBUFFER_STREAM_OUT
 
 
-uint8_t mSDCard::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
-{
-
-  char buffer[30];
-  
-  JBI->Start();  
-
-    JBI->Object_Start("Debug");
-      JBI->Array_Start("message1");
-          for(int i=0;i<debug.write_time.opened.size();i++)
-              JBI->Add(debug.write_time.closed[i]-debug.write_time.opened[i]);
-      JBI->Array_End();
-    JBI->Object_End();
-  
-    JBI->Add_P(PM_TIME, 1000);
-  return JBI->End();
-
-}
-
-
-uint8_t mSDCard::ConstructJSON_FileWriter(uint8_t json_level, bool json_appending)
-{
-
-  char buffer[30];
-  
-  JBI->Start();  
-
-    JBI->Add("file_name", writer_settings.file_name);
-    JBI->Add("status", writer_settings.status);
-
-  return JBI->End();
-
-}
-
-/**
- * @brief Created for write time tests of sector sizes
- * */
-uint8_t mSDCard::ConstructJSON_Debug_WriteTimes(uint8_t json_level, bool json_appending)
-{
-
-  char buffer[30];
-  
-  JBI->Start();  
-
-    JBI->Object_Start("512B");
-      JBI->Add("CompleteWriteTime", debug_write_times.complete_write_duration);
-      JBI->Add("BytesWritten", debug_write_times.write_byte_count);
-    JBI->Object_End();
-
-
-  return JBI->End();
-
-}
-
-
-  #ifdef USE_MODULE_NETWORK_MQTT
-void mSDCard::MQTTHandler_Init(){
-
-  struct handler<mSDCard>* ptr;
-
-  ptr = &mqtthandler_settings;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  ptr->ConstructJSON_function = &mSDCard::ConstructJSON_Settings;
-
-  ptr = &mqtthandler_file_writer;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FILE_WRITER_CTR;
-  ptr->ConstructJSON_function = &mSDCard::ConstructJSON_FileWriter;
-
-  ptr = &mqtthandler_debug_write_times;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_WRITE_TIMES_CTR;
-  ptr->ConstructJSON_function = &mSDCard::ConstructJSON_Debug_WriteTimes;
-
-}
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mSDCard::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mSDCard::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-  }
-}
-
-void mSDCard::MQTTHandler_Sender(){
-    
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-
-}
-
-
-  #endif// USE_MODULE_NETWORK_MQTT
-
-
-
-
-/******************************************************************************************************************
- * 
-*******************************************************************************************************************/
 
   
 /******************************************************************************************************************
  * Commands
 *******************************************************************************************************************/
 
-void mSDCard::parse_JSONCommand(JsonParserObject obj){
-
-  JsonParserToken jtok = 0; 
-
-
-  if(jtok = obj["ListDir"]){
-
-    CommandSet_SerialPrint_FileNames(jtok.getStr());
-    
-  }
-  
-
-  if(jtok = obj["WriteFile"]){
-
-    // Also check for datafile
-    JsonParserToken jtok_data = obj["DataFile"];
-    if(!jtok_data.isNull()){
-      CommandSet_WriteFile(jtok.getStr(), jtok_data.getStr());
-    }
-    else{
-      CommandSet_WriteFile(jtok.getStr());
-    }
-
-
-  //   if(jtok.isStr()){
-  //     if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
-  //       CommandSet_PaletteID(tmp_id);
-  //       data_buffer.isserviced++;
-  //     }
-  //   }else
-    // if(jtok.isNum()){
-    //   CommandSet_FanSpeed_Manual(map(jtok.getInt(),0,3,1,1023)); //fix
-    //   set_fan_pwm = map(jtok.getInt(),0,3,1,1023);
-    //   set_fan_speed = jtok.getInt();
-    //   data_buffer.isserviced++;
-    // }
-  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
-  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
-  //   #endif // ENABLE_LOG_LEVEL_DEBUG
-  }
-  
-  if(jtok = obj["ReadFile"]){
-
-    CommandSet_ReadFile(jtok.getStr());
-    
-  }
-
-
-  /**
-   * Set flag, write 100 single bytes, 1 per second
-   * */
-  if(jtok = obj["Debug"].getObject()["WriteTest"]){
-
-    // CommandSet_ReadFile(jtok.getStr());
-    debug.bytes_to_write = jtok.getInt();
-    debug.test_mode = WRITE_BYTES_ID;
-
-  }
-
-  if(jtok = obj["Debug"].getObject()["OpenFile"]){
-
-    // CommandSet_ReadFile(jtok.getStr());
-    // debug.bytes_to_write = jtok.getInt();
-    // debug.test_mode = WRITE_BYTES_ID;
-    char buffer[5] = {0,1,2,3,4};
-    uint8_t close_decounter = 10;
-    writer_settings.status = FILE_STATUS_OPENING_ID;
-    SubTask_Append_To_Open_File(buffer, 5);
-
-  }
-
-  
-
-  // /**
-  //  * Set flag, write 512 bytes, same time
-  //  * */
-  // if(jtok = obj["Debug"].getObject()["LargeWriteTest"]){
-
-  //   // CommandSet_ReadFile(jtok.getStr());
-
-  // }
-  
-  #ifdef USE_MODULE_NETWORK_MQTT
-  MQTTHandler_RefreshAll();
-  #endif// USE_MODULE_NETWORK_MQTT
-
-}
 
 
 
@@ -1244,18 +1032,204 @@ void mSDCard::SDCardBulkSpeedTest(uint8_t test_number, uint32_t bytes_to_write)
 }
 
   
+
+  
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+void mSDCard::parse_JSONCommand(JsonParserObject obj){
+
+  JsonParserToken jtok = 0; 
+
+
+  if(jtok = obj["ListDir"]){
+
+    CommandSet_SerialPrint_FileNames(jtok.getStr());
+    
+  }
+  
+
+  if(jtok = obj["WriteFile"]){
+
+    // Also check for datafile
+    JsonParserToken jtok_data = obj["DataFile"];
+    if(!jtok_data.isNull()){
+      CommandSet_WriteFile(jtok.getStr(), jtok_data.getStr());
+    }
+    else{
+      CommandSet_WriteFile(jtok.getStr());
+    }
+
+
+  //   if(jtok.isStr()){
+  //     if((tmp_id=mPaletteI->GetPaletteIDbyName(jtok.getStr()))>=0){
+  //       CommandSet_PaletteID(tmp_id);
+  //       data_buffer.isserviced++;
+  //     }
+  //   }else
+    // if(jtok.isNum()){
+    //   CommandSet_FanSpeed_Manual(map(jtok.getInt(),0,3,1,1023)); //fix
+    //   set_fan_pwm = map(jtok.getInt(),0,3,1,1023);
+    //   set_fan_speed = jtok.getInt();
+    //   data_buffer.isserviced++;
+    // }
+  //   #ifdef ENABLE_LOG_LEVEL_DEBUG
+  //   ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+  //   #endif // ENABLE_LOG_LEVEL_DEBUG
+  }
+  
+  if(jtok = obj["ReadFile"]){
+
+    CommandSet_ReadFile(jtok.getStr());
+    
+  }
+
+
+  /**
+   * Set flag, write 100 single bytes, 1 per second
+   * */
+  if(jtok = obj["Debug"].getObject()["WriteTest"]){
+
+    // CommandSet_ReadFile(jtok.getStr());
+    debug.bytes_to_write = jtok.getInt();
+    debug.test_mode = WRITE_BYTES_ID;
+
+  }
+
+  if(jtok = obj["Debug"].getObject()["OpenFile"]){
+
+    // CommandSet_ReadFile(jtok.getStr());
+    // debug.bytes_to_write = jtok.getInt();
+    // debug.test_mode = WRITE_BYTES_ID;
+    char buffer[5] = {0,1,2,3,4};
+    uint8_t close_decounter = 10;
+    writer_settings.status = FILE_STATUS_OPENING_ID;
+    SubTask_Append_To_Open_File(buffer, 5);
+
+  }
+
+  
+
+  // /**
+  //  * Set flag, write 512 bytes, same time
+  //  * */
+  // if(jtok = obj["Debug"].getObject()["LargeWriteTest"]){
+
+  //   // CommandSet_ReadFile(jtok.getStr());
+
+  // }
+  
+  tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+
+}
+
 /******************************************************************************************************************
  * ConstructJson
 *******************************************************************************************************************/
 
   
+uint8_t mSDCard::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
+{
+
+  char buffer[30];
+  
+  JBI->Start();  
+
+    JBI->Object_Start("Debug");
+      JBI->Array_Start("message1");
+          for(int i=0;i<debug.write_time.opened.size();i++)
+              JBI->Add(debug.write_time.closed[i]-debug.write_time.opened[i]);
+      JBI->Array_End();
+    JBI->Object_End();
+  
+    JBI->Add_P(PM_TIME, 1000);
+  return JBI->End();
+
+}
+
+
+uint8_t mSDCard::ConstructJSON_FileWriter(uint8_t json_level, bool json_appending)
+{
+
+  char buffer[30];
+  
+  JBI->Start();  
+
+    JBI->Add("file_name", writer_settings.file_name);
+    JBI->Add("status", writer_settings.status);
+
+  return JBI->End();
+
+}
+
+/**
+ * @brief Created for write time tests of sector sizes
+ * */
+uint8_t mSDCard::ConstructJSON_Debug_WriteTimes(uint8_t json_level, bool json_appending)
+{
+
+  char buffer[30];
+  
+  JBI->Start();  
+
+    JBI->Object_Start("512B");
+      JBI->Add("CompleteWriteTime", debug_write_times.complete_write_duration);
+      JBI->Add("BytesWritten", debug_write_times.write_byte_count);
+    JBI->Object_End();
+
+
+  return JBI->End();
+
+}
+
+
 /******************************************************************************************************************
  * MQTT
 *******************************************************************************************************************/
 
-/******************************************************************************************************************
- * WebServer
-*******************************************************************************************************************/
+#ifdef USE_MODULE_NETWORK_MQTT
 
+void mSDCard::MQTTHandler_Init()
+{
+
+  struct handler<mSDCard>* ptr;
+
+  ptr = &mqtthandler_settings;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true; // DEBUG CHANGE
+  ptr->tRateSecs = 120; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mSDCard::ConstructJSON_Settings;
+  mqtthandler_list.push_back(ptr);
+
+  ptr = &mqtthandler_file_writer;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_IFCHANGED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FILE_WRITER_CTR;
+  ptr->ConstructJSON_function = &mSDCard::ConstructJSON_FileWriter;
+  mqtthandler_list.push_back(ptr);
+
+  ptr = &mqtthandler_debug_write_times;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_IFCHANGED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_WRITE_TIMES_CTR;
+  ptr->ConstructJSON_function = &mSDCard::ConstructJSON_Debug_WriteTimes;
+  mqtthandler_list.push_back(ptr);
+
+} 
+
+#endif // USE_MODULE_NETWORK_MQTT
 
 #endif

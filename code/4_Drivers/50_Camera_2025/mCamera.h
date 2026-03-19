@@ -322,7 +322,7 @@ bool LoadDefaultConfig();
     bool pic_free(struct mCamera::PICSTORE *ps);
     bool pic_alloc_p(struct mCamera::PICSTORE **pps, int width, int height, int jpegsize, int format, int allocstyle);
     bool pic_free_p(struct mCamera::PICSTORE **pps);
-    bool wc_check_format(int format);
+    bool check_format(int format);
 
     void StartOperationTask();
     void OperationTask();
@@ -365,8 +365,8 @@ bool LoadDefaultConfig();
 
     void Loop(void);
     
+    void WcInit();
     void ShowStream(void);
-    void Init(void);
 
     
 #ifdef ENABLE_CAMERA__MOTION_DETECTION
@@ -700,10 +700,11 @@ void CmndWebcamGetMotionPixels(void);
     void CmndWebcamPowerOff(void);
     void CmndWebcamTaskEnable(bool val);
 
+
     void CmndWebcamInit();
     void CmndWebRtsp(bool val);
 
-    void WcStopTask();
+    void StopTask();
 
     void SuspendAndShutdownCameraForOTA();
 

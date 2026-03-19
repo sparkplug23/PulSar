@@ -16,54 +16,66 @@ class mEnergyInterface :
   public mTaskerInterface
 {
   public:
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
 	  mEnergyInterface(){};
     void Pre_Init(void);
     void Init(void);
+    void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void EveryLoop();
-
     
     static constexpr const char* PM_MODULE_ENERGY_INTERFACE_CTR = D_MODULE_ENERGY_INTERFACE_CTR;
     PGM_P GetModuleName(){          return PM_MODULE_ENERGY_INTERFACE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_INTERFACE_ID; }
-    
-    void parse_JSONCommand(JsonParserObject obj);
-
-    struct SETTINGS
+   
+    struct ClassState
     {
-      uint8_t fEnableSensor = false;
-      uint8_t tTicker_Splash_Sensors_To_Logs = 30;
-      float sealevel_pressure; 
-    }
-    settings;
+      uint8_t devices = 0; // sensors/drivers etc, if class operates on multiple items how many are present.
+      uint8_t mode = ModuleStatus::Initialising; // Disabled,Initialise,Running
+    }module_state;
 
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+
+    /************************************************************************************************
+     * SECTION: Internal Functions
+     ************************************************************************************************/
+    
+    void EveryLoop();
     #ifdef USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
     uint32_t GetColourValueUsingMaps_FullBrightness(float value, uint8_t map_style_id = 0, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
     uint32_t GetColourValueUsingMaps_AdjustedBrightness(float value, uint8_t map_style_id, float value_min=0, float value_max=0,  bool map_is_palette_id = false);
     void HsbToRgb(float h, float s, float v, uint8_t* r8, uint8_t* g8, uint8_t* b8);
     #endif // USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
-      
+
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
+    
+    void parse_JSONCommand(JsonParserObject obj);
+
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
     
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_SensorTemperatureColours(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Motion_Event(uint8_t json_level = 0, bool json_appending = true);
 
-  
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    
     std::vector<struct handler<mEnergyInterface>*> mqtthandler_list;
-
-    void MQTTHandler_Sender();
     struct handler<mEnergyInterface> mqtthandler_settings;
-    void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
-    struct handler<mEnergyInterface> mqtthandler_sensor_ifchanged;
-    struct handler<mEnergyInterface> mqtthandler_sensor_teleperiod;
-    void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
-    
+    struct handler<mEnergyInterface> mqtthandler_state_ifchanged;
+    struct handler<mEnergyInterface> mqtthandler_state_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };
