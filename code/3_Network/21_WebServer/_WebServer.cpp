@@ -33,6 +33,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
           this->wsEventConsole(server, client, type, arg, data, len);
         }
       );
+      AddURLtoList("/ws/console", HTTP_GET);
       #endif
       #endif
 
@@ -106,18 +107,23 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 
     }
     break; 
-    case TASK_NETWORK_CONNECTED__ANY: //tmp icnclude as fallthrough
-    case TASK_WEBSERVER_START:
-      Server_Start();
+    case TASK_EVERY_SECOND:
+
+      #ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+      // for(int i=0;i<gWebUrlTracker.urls.size();i++){
+      //   ALOG_INF(PSTR("url %d, %s"), i, gWebUrlTracker.urls[i]);
+      // }
+      #endif
     break;
-    
+    case TASK_NETWORK_CONNECTED__WIFI:
+    case TASK_NETWORK_CONNECTED__ETHERNET:
+    case TASK_NETWORK_CONNECTED__CELLULAR:
+      Server_Start();
+    break;    
     case TASK_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
-
- 
   }
-
 
   return TASKER_RESULT__UNKNOWN_ID;
 
@@ -135,7 +141,6 @@ void mWebServer::Server_Start()
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), "*");
  
   createEditHandler(true);
-
   
   #ifndef ESP8266
   #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
@@ -234,30 +239,24 @@ void mWebServer::HandlePage_SystemControls_C3(AsyncWebServerRequest *request)
 }
 
 
-
-
-/**
- * @brief Need to start making "minimal" webpages to test on esp8266
- * 
- * ESP8266 Minimal pages
- * ** basic probe values (version/uptime)
- * ** directed controls (/reboot or /reset?force=1 )
- * ** console for debugging
- * ** update/recovery
- * 
- */
 void mWebServer::WebPage_Root_AddHandlers()
 {
-
-  server->on("/version", HTTP_GET, [](AsyncWebServerRequest *request){
+  ALOG_HGL(PSTR("mWebServer::WebPage_Root_AddHandlers()"));
+  
+  SPGM_CTR(PM_URL_VERSION) "/version";
+  server->on(PM_URL_VERSION, HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/plain", (String)PROJECT_VERSION);
   });
+  AddURLtoList(PM_URL_VERSION, HTTP_GET);
 
-  server->on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request){
+  SPGM_CTR(PM_URL_UPTIME) "/uptime";
+  server->on(PM_URL_UPTIME, HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, "text/plain", (String)millis());
   });
+  AddURLtoList(PM_URL_UPTIME, HTTP_GET);
 
-  server->on("/reboot", HTTP_GET, [this](AsyncWebServerRequest *request){
+  SPGM_CTR(PM_URL_REBOOT) "/reboot";
+  server->on(PM_URL_REBOOT, HTTP_GET, [this](AsyncWebServerRequest *request){
     serveMessage(request, 200,
                 F("Rebooting now..."),
                 F("Please wait ~10 seconds..."),
@@ -266,8 +265,10 @@ void mWebServer::WebPage_Root_AddHandlers()
     // Grace period for sockets + subsystems
     tkr_sup->ESP_Restart_InSeconds(2);
   });
+  AddURLtoList(PM_URL_REBOOT, HTTP_GET);
 
-  server->on("/reset", HTTP_GET, [this](AsyncWebServerRequest *request){
+  SPGM_CTR(PM_URL_RESET) "/reset";
+  server->on(PM_URL_RESET, HTTP_GET, [this](AsyncWebServerRequest *request){
     if (!request->hasArg("force")) {
       request->send(403, "text/plain", F("Forbidden: ?force=1 required"));
       return;
@@ -275,6 +276,7 @@ void mWebServer::WebPage_Root_AddHandlers()
     request->send(204);
     ESP.restart();
   });
+  AddURLtoList(PM_URL_RESET, HTTP_GET);
 
   // --------------------------------------------------------------------------
   // Console
@@ -285,160 +287,275 @@ void mWebServer::WebPage_Root_AddHandlers()
   #ifdef ESP8266
 
     // ESP8266: only /console, polling
-    server->on("/console", HTTP_GET, [this](AsyncWebServerRequest *request){
+    SPGM_CTR(PM_URL_CONSOLE) "/console";
+    server->on(PM_URL_CONSOLE, HTTP_GET, [this](AsyncWebServerRequest *request){
       this->HandlePage_Console_Poll(request);
     });
+    AddURLtoList(PM_URL_CONSOLE, HTTP_GET);
 
   #else // ESP32 (and others)
 
     // ESP32: /console is websocket
-    server->on("/console", HTTP_GET, [this](AsyncWebServerRequest *request){
+    SPGM_CTR(PM_URL_CONSOLE) "/console";
+    server->on(PM_URL_CONSOLE, HTTP_GET, [this](AsyncWebServerRequest *request){
       this->HandlePage_Console_WebSocket(request);
     });
+    AddURLtoList(PM_URL_CONSOLE, HTTP_GET);
 
     // ESP32: polling exists only for testing, and only when not minimal
     #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
-    server->on("/console_poll", HTTP_GET, [this](AsyncWebServerRequest *request){
+    SPGM_CTR(PM_URL_CONSOLE_POLL) "/console_poll";
+    server->on(PM_URL_CONSOLE_POLL, HTTP_GET, [this](AsyncWebServerRequest *request){
       this->HandlePage_Console_Poll(request);
     });
+    AddURLtoList(PM_URL_CONSOLE_POLL, HTTP_GET);
     #endif
 
-  #endif
-
-
-
+  #endif // ESP32
 
   #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
 
-  server->on("/", HTTP_GET, [this](AsyncWebServerRequest *request){
-    if (captivePortal(request)) return;
-    this->handleStaticContent(request, F("/"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_root_basic_web, PAGE_root_basic_web_length, true);
-  });
+    SPGM_CTR(PM_URL_ROOT) "/";
+    server->on(PM_URL_ROOT, HTTP_GET, [this](AsyncWebServerRequest *request){
+      if (captivePortal(request)) return;
+      this->handleStaticContent(request, F("/"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_root_basic_web, PAGE_root_basic_web_length, true);
+    });
+    AddURLtoList(PM_URL_ROOT, HTTP_GET);
 
 
+    #ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
 
-#ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
-server->on("/generate_204", HTTP_GET, [this](AsyncWebServerRequest *request){
-  if (this->captivePortal(request)) return;
-  request->redirect("/");
-});
-
-server->on("/hotspot-detect.html", HTTP_GET, [this](AsyncWebServerRequest *request){
-  if (this->captivePortal(request)) return;
-  request->redirect("/");
-});
-
-server->on("/ncsi.txt", HTTP_GET, [this](AsyncWebServerRequest *request){
-  if (this->captivePortal(request)) return;
-  request->send(200, "text/plain", "Microsoft NCSI");
-});
-
-server->on("/connecttest.txt", HTTP_GET, [this](AsyncWebServerRequest *request){
-  if (this->captivePortal(request)) return;
-  request->send(200, "text/plain", "Microsoft Connect Test");
-});
-#endif
-
-  /**
-   * Console Page
-   * */
+      SPGM_CTR(PM_URL_GENERATE_204) "/generate_204";
+      server->on(PM_URL_GENERATE_204, HTTP_GET, [this](AsyncWebServerRequest *request){
+        if (this->captivePortal(request)) return;
+        request->redirect("/");
+      });
+      AddURLtoList(PM_URL_GENERATE_204, HTTP_GET);
 
 
-
-server->on("/settings2", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->SettingsPages_GET(request);
-  });
-
-server->on("/settings2", HTTP_POST, [this](AsyncWebServerRequest *request){
-    this->SettingsPages_POST(request);
-  });
-
-  server->on("/json2", HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->serveJson(request);
-  });
+      SPGM_CTR(PM_URL_HOTSPOT_DETECT) "/hotspot-detect.html";
+      server->on(PM_URL_HOTSPOT_DETECT, HTTP_GET, [this](AsyncWebServerRequest *request){
+        if (this->captivePortal(request)) return;
+        request->redirect("/");
+      });
+      AddURLtoList(PM_URL_HOTSPOT_DETECT, HTTP_GET);
 
 
-  static const char _submodule_style_css[] PROGMEM = "/submodule_style.css";
-  server->on("/submodule_style.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-    handleStaticContent(request, FPSTR(_submodule_style_css), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_submodule_style_web, PAGE_submodule_style_web_length);
-  });
+      SPGM_CTR(PM_URL_NCSI) "/ncsi.txt";
+      server->on(PM_URL_NCSI, HTTP_GET, [this](AsyncWebServerRequest *request){
+        if (this->captivePortal(request)) return;
+        request->send(200, "text/plain", "Microsoft NCSI");
+      });
+      AddURLtoList(PM_URL_NCSI, HTTP_GET);
 
-  
-  // #ifdef ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
-  static const char _style_css[] PROGMEM = "/style.css";
-  server->on("/style.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-    handleStaticContent(request, FPSTR(_style_css), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss2_web, PAGE_settingsCss2_web_length);
-  });
 
-  static const char _favicon_ico[] PROGMEM = "/favicon.ico";
-  server->on(_favicon_ico, HTTP_GET, [this](AsyncWebServerRequest *request){
-    this->handleStaticContent(request, FPSTR(_favicon_ico), 200, F("image/x-icon"), favicon2_web, favicon2_web_length, false);
-  });
+      SPGM_CTR(PM_URL_CONNECTTEST) "/connecttest.txt";
+      server->on(PM_URL_CONNECTTEST, HTTP_GET, [this](AsyncWebServerRequest *request){
+        if (this->captivePortal(request)) return;
+        request->send(200, "text/plain", "Microsoft Connect Test");
+      });
+      AddURLtoList(PM_URL_CONNECTTEST, HTTP_GET);
 
-  static const char _skin_css[] PROGMEM = "/skin.css";
-  server->on(_skin_css, HTTP_GET, [](AsyncWebServerRequest *request){
-    if (tkr_mfile->handleFileRead(request, FPSTR(_skin_css))) return;
-    AsyncWebServerResponse *response = request->beginResponse(200, FPSTR(CONTENT_TYPE_CSS));
-    request->send(response);
-  });
-  // #endif
+    #endif // ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
 
- static const char _common_js[] PROGMEM = "/common.js";
-  server->on(_common_js, HTTP_GET, [this](AsyncWebServerRequest *request){    
-    this->handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common2_web, JS_common2_web_length);
-  });
-  
-  server->on("/debug/main", HTTP_GET, [this](AsyncWebServerRequest *request){
-    if (captivePortal(request)) return;
-    this->handleStaticContent(request, F("/debug/main"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_debug_main_web, PAGE_debug_main_web_length, true);
-  });
 
-  //called when the url is not defined here, ajax-in; get-settings
-  server->onNotFound([this](AsyncWebServerRequest *request)
-  {
-    ALOG_ERR(PSTR("HTTP URI Not-Found: %s"), request->url().c_str());    
-    if (captivePortal(request)) return;
+    SPGM_CTR(PM_URL_SETTINGS2) "/settings2";
+    server->on(PM_URL_SETTINGS2, HTTP_GET, [this](AsyncWebServerRequest *request){
+      this->SettingsPages_GET(request);
+    });
+    AddURLtoList(PM_URL_SETTINGS2, HTTP_GET);
 
-    //make API CORS compatible
-    if (request->method() == HTTP_OPTIONS)
-    {
-      AsyncWebServerResponse *response = request->beginResponse(200);
-      response->addHeader(F("Access-Control-Max-Age"), F("7200"));
+
+    server->on(PM_URL_SETTINGS2, HTTP_POST, [this](AsyncWebServerRequest *request){
+      this->SettingsPages_POST(request);
+    });
+    AddURLtoList(PM_URL_SETTINGS2, HTTP_POST);
+
+
+    SPGM_CTR(PM_URL_JSON2) "/json2";
+    server->on(PM_URL_JSON2, HTTP_GET, [this](AsyncWebServerRequest *request){
+      this->serveJson(request);
+    });
+    AddURLtoList(PM_URL_JSON2, HTTP_GET);
+
+
+    SPGM_CTR(PM_URL_SUBMODULE_STYLE_CSS) "/submodule_style.css";
+    server->on(PM_URL_SUBMODULE_STYLE_CSS, HTTP_GET, [this](AsyncWebServerRequest *request){
+      handleStaticContent(request, FPSTR(PM_URL_SUBMODULE_STYLE_CSS), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_submodule_style_web, PAGE_submodule_style_web_length);
+    });
+    AddURLtoList(PM_URL_SUBMODULE_STYLE_CSS, HTTP_GET);
+
+    
+    SPGM_CTR(PM_URL_STYLE_CSS) "/style.css";
+    server->on(PM_URL_STYLE_CSS, HTTP_GET, [this](AsyncWebServerRequest *request){
+      handleStaticContent(request, FPSTR(PM_URL_STYLE_CSS), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss2_web, PAGE_settingsCss2_web_length);
+    });
+    AddURLtoList(PM_URL_STYLE_CSS, HTTP_GET);
+
+
+    SPGM_CTR(PM_URL_FAVICON_ICO) "/favicon.ico";
+    server->on(PM_URL_FAVICON_ICO, HTTP_GET, [this](AsyncWebServerRequest *request){
+      this->handleStaticContent(request, FPSTR(PM_URL_FAVICON_ICO), 200, F("image/x-icon"), favicon2_web, favicon2_web_length, false);
+    });
+    AddURLtoList(PM_URL_FAVICON_ICO, HTTP_GET);
+
+
+    SPGM_CTR(PM_URL_SKIN_CSS) "/skin.css";
+    server->on(PM_URL_SKIN_CSS, HTTP_GET, [](AsyncWebServerRequest *request){
+      if (tkr_mfile->handleFileRead(request, FPSTR(PM_URL_SKIN_CSS))) return;
+      AsyncWebServerResponse *response = request->beginResponse(200, FPSTR(CONTENT_TYPE_CSS));
       request->send(response);
-      return;
-    }
-    #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
-    ALOG_ERR(PSTR("Not sure this needs to stay or not"));
-    if(tkr_anim->handle__HTTP__GET_QueryAPI(request, request->url())) return;
+    });
+    AddURLtoList(PM_URL_SKIN_CSS, HTTP_GET);
+
+
+    SPGM_CTR(PM_URL_COMMON_JS) "/common.js";
+    server->on(PM_URL_COMMON_JS, HTTP_GET, [this](AsyncWebServerRequest *request){    
+      this->handleStaticContent(request, FPSTR(PM_URL_COMMON_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common2_web, JS_common2_web_length);
+    });
+    AddURLtoList(PM_URL_COMMON_JS, HTTP_GET);
+
+
+    SPGM_CTR(PM_URL_DEBUG_MAIN) "/debug/main";
+    server->on(PM_URL_DEBUG_MAIN, HTTP_GET, [this](AsyncWebServerRequest *request){
+      if (captivePortal(request)) return;
+      this->handleStaticContent(request, F("/debug/main"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_debug_main_web, PAGE_debug_main_web_length, true);
+    });
+    AddURLtoList(PM_URL_DEBUG_MAIN, HTTP_GET);
+
+
+    //called when the url is not defined here, ajax-in; get-settings
+    server->onNotFound([this](AsyncWebServerRequest *request)
+    {
+      ALOG_ERR(PSTR("HTTP URI Not-Found: %s"), request->url().c_str());    
+      if (captivePortal(request)) return;
+
+      //make API CORS compatible
+      if (request->method() == HTTP_OPTIONS)
+      {
+        AsyncWebServerResponse *response = request->beginResponse(200);
+        response->addHeader(F("Access-Control-Max-Age"), F("7200"));
+        request->send(response);
+        return;
+      }
+      #ifdef USE_MODULE_LIGHTS_ANIMATOR
+      #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+      ALOG_ERR(PSTR("Not sure this needs to stay or not"));
+      if(tkr_anim->handle__HTTP__GET_QueryAPI(request, request->url())) return;
+      #endif
+      #endif
+      handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404_web, PAGE_404_web_length);
+    });
+
+
+    SPGM_CTR(PM_URL_SYSTEM_CONTROLS_C1) "/system/controls/c1";
+    server->on(PM_URL_SYSTEM_CONTROLS_C1, HTTP_GET, [this](AsyncWebServerRequest *request){
+      this->HandlePage_SystemControls_C1(request);
+    });
+    AddURLtoList(PM_URL_SYSTEM_CONTROLS_C1, HTTP_GET);
+
+
+    SPGM_CTR(PM_URL_SYSTEM_CONTROLS_C2) "/system/controls/c2";
+    server->on(PM_URL_SYSTEM_CONTROLS_C2, HTTP_GET, [this](AsyncWebServerRequest *request){
+      this->HandlePage_SystemControls_C2(request);
+    });
+    AddURLtoList(PM_URL_SYSTEM_CONTROLS_C2, HTTP_GET);
+
+
+    SPGM_CTR(PM_URL_SYSTEM_CONTROLS_C3) "/system/controls/c3";
+    server->on(PM_URL_SYSTEM_CONTROLS_C3, HTTP_GET, [this](AsyncWebServerRequest *request){
+      this->HandlePage_SystemControls_C3(request);
+    });
+    AddURLtoList(PM_URL_SYSTEM_CONTROLS_C3, HTTP_GET);
+
+
+    SPGM_CTR(PM_URL_SYSTEM_CONTROLS) "/system/controls";
+    server->on(PM_URL_SYSTEM_CONTROLS, HTTP_GET, [this](AsyncWebServerRequest *request){
+      this->HandlePage_SystemControls(request);
+    });
+    AddURLtoList(PM_URL_SYSTEM_CONTROLS, HTTP_GET);
+
+    #ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+      SPGM_CTR(PM_URL_URL_LIST) "/url_list";
+      server->on(PM_URL_URL_LIST, HTTP_GET, [this](AsyncWebServerRequest *request){
+        this->HandlePage_UrlList(request);
+      });
+      AddURLtoList(PM_URL_URL_LIST, HTTP_GET);
+
+      SPGM_CTR(PM_URL_URL_LIST_JSON) "/url_list.json";
+      server->on(PM_URL_URL_LIST_JSON, HTTP_GET, [this](AsyncWebServerRequest *request){
+        this->HandlePage_UrlList_JSON(request);
+      });
+      AddURLtoList(PM_URL_URL_LIST_JSON, HTTP_GET);
     #endif
-    #endif
-    handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404_web, PAGE_404_web_length);
-  });
 
-
-server->on("/system/controls/c1", HTTP_GET, [this](AsyncWebServerRequest *request){
-  this->HandlePage_SystemControls_C1(request);
-});
-server->on("/system/controls/c2", HTTP_GET, [this](AsyncWebServerRequest *request){
-  this->HandlePage_SystemControls_C2(request);
-});
-server->on("/system/controls/c3", HTTP_GET, [this](AsyncWebServerRequest *request){
-  this->HandlePage_SystemControls_C3(request);
-});
-
-  server->on("/system/controls", HTTP_GET, [this](AsyncWebServerRequest *request){
-  this->HandlePage_SystemControls(request);
-});
-
-
-
-//   server->onNotFound([this](AsyncWebServerRequest *request){HandleNotFound(request); });
-
-  #endif
+  #endif // ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
   
 }
 
 
+#ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+void mWebServer::HandlePage_UrlList(AsyncWebServerRequest *request)
+{
+  if (captivePortal(request)) return;
+
+  handleStaticContent(
+    request,
+    F("/url_list.htm"),
+    200,
+    FPSTR(CONTENT_TYPE_HTML),
+    PAGE_url_list,
+    PAGE_url_list_length,
+    true
+  );
+}
+
+
+void mWebServer::HandlePage_UrlList_JSON(AsyncWebServerRequest *request)
+{
+  AsyncResponseStream *response = request->beginResponseStream(FPSTR(PM_WEB_CONTENT_TYPE_APPLICATION_JSON_JAVASCRIPT));
+  if (!response) {
+    request->send(500, FPSTR(CONTENT_TYPE_PLAIN), F("Failed to allocate JSON response"));
+    return;
+  }
+
+  response->print(F("{\"items\":["));
+
+  for (size_t i = 0; i < gWebUrlTracker.urls.size(); i++)
+  {
+    const auto &entry = gWebUrlTracker.urls[i];
+
+    if (i) {
+      response->print(',');
+    }
+
+    response->print(F("{\"url\":\""));
+
+    // minimal JSON escaping for url
+    for (size_t j = 0; j < entry.url.length(); j++)
+    {
+      char c = entry.url[j];
+      switch (c)
+      {
+        case '\"': response->print(F("\\\"")); break;
+        case '\\': response->print(F("\\\\")); break;
+        case '\n': response->print(F("\\n"));  break;
+        case '\r': response->print(F("\\r"));  break;
+        case '\t': response->print(F("\\t"));  break;
+        default:   response->write(c);         break;
+      }
+    }
+
+    response->print(F("\",\"method\":"));
+    response->print(entry.method);
+    response->print(F(",\"port\":"));
+    response->print(entry.port);
+    response->print('}');
+  }
+
+  response->print(F("]}"));
+  request->send(response);
+}
+#endif
 
 #endif

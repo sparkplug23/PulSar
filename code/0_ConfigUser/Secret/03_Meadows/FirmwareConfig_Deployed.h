@@ -27,7 +27,7 @@
 // #define DEVICE_MEADOWS__ENSUITE_DOOR_FRAME
 /// OFFICE ///////////////////////////////////////////////////////////////////////////////////
 
-// #define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
+#define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
 /// LIVINGROOM ///////////////////////////////////////////////////////////////////////////////
 
 /// HALLWAY //////////////////////////////////////////////////////////////////////////////////
@@ -8008,6 +8008,12 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   /***********************************
   * SECTION: Enable Grouped
   ************************************/  
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/  
+
+  #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
 
   /***********************************
    * SECTION: Lighting Configs

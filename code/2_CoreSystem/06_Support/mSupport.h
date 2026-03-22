@@ -441,7 +441,6 @@ public:
   void take();
   static void init(SemaphoreHandle_t* ptr);
 };
-
 #endif // ENABLE_DEVFEATURE_ESP32__AUTO_MUTEX
 
 

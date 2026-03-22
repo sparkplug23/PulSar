@@ -114,12 +114,6 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
     break;
     #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__DRIVERS___CAMERA
     #endif // USE_MODULE_CORE_FILESYSTEM
-    
-
-
-
-
-
     case TASK_WEB_ADD_HANDLER:
     
       break;
@@ -135,6 +129,7 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
         AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d", SupportESP32::FoundPSRAM(), SupportESP32::UsePSRAM());
         AddLog(LOG_LEVEL_INFO, "Heap free: %d, PSRAM free: %d", ESP.getFreeHeap(), ESP.getFreePsram());
       }
+
       // AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d CanUsePSRAM=%d", 
       //   SupportESP32::FoundPSRAM(), 
       //   SupportESP32::UsePSRAM(), SupportESP32::CanUsePSRAM());
@@ -143,19 +138,19 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
       //     ESP.getFreePsram());
 
       // Bring up / tear down stream server based on network state
-if (!tkr_set->runtime.global_state.network_down) {
-  if (tkr_set->Settings.webcam_config.stream && !Wc.CamServer) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Network up, starting stream server"));
-    SetStreamserver(1);
-  }
-} else {
-  if (Wc.CamServer) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Network down, stopping stream server"));
-    SetStreamserver(0);
-  }
-}
+      if (!tkr_set->runtime.global_state.network_down) {
+        if (tkr_set->Settings.webcam_config.stream && !rt.CamServer) {
+          ALOG_INF(PSTR(D_LOG_CAMERA "Network up, starting stream server"));
+          SetStreamserver(1);
+        }
+      } else {
+        if (rt.CamServer) {
+          ALOG_INF(PSTR(D_LOG_CAMERA "Network down, stopping stream server"));
+          SetStreamserver(0);
+        }
+      }
 
-          
+                
       UpdateStats();
     break;
     case TASK_UPTIME_30_SECONDS:
@@ -170,12 +165,12 @@ if (!tkr_set->runtime.global_state.network_down) {
     case TASK_UPDATE_OTA_BEFORE_ON_START:
 
       ALOG_INF(PSTR(D_LOG_CAMERA "Suspending webcam task before OTA update"));
-      // vTaskSuspend(Wc.taskHandle);
+      // vTaskSuspend(rt.taskHandle);
       // esp_camera_deinit(); // gracefully release memory from the driver
-      // Wc.up = false;
+      // rt.up = false;
 
-      // vTaskDelete(Wc.taskHandle);
-      // Wc.taskHandle = nullptr;
+      // vTaskDelete(rt.taskHandle);
+      // rt.taskHandle = nullptr;
       SuspendAndShutdownCameraForOTA();
       ALOG_INF(PSTR(D_LOG_CAMERA "Suspended webcam task before OTA update"));
 
@@ -260,8 +255,8 @@ const int nativeIntervals20ms[14] = {
  * {"NAME":"AITHINKER CAM","GPIO":[4992,1,672,1,416,5088,1,1,1,6720,736,704,1,1,5089,5090,0,5091,5184,5152,0,5120,5024,5056,0,0,0,0,4928,1,5094,5095,5092,0,0,5093],"FLAG":0,"BASE":2}
  *
  * Supported commands:
- * WcInterrupt     = Control streaming, 0 = stop, 1 = start
- * WcResolution = Set resolution (max framerates at wcclock=20)
+ * Interrupt     = Control streaming, 0 = stop, 1 = start
+ * Resolution = Set resolution (max framerates at wcclock=20)
  * FPS quoted is (max, withonewebclient) at wcclock=20 on AIThinker esp32cam equivalent
  * FPS is mostly limited by sending data to webclients & rtsp, not by the camera.
  0 = FRAMESIZE_96X96,    // 96x96 (50fps, ~48fps) - at wcclock=30 (75, ~53)
@@ -280,8 +275,7 @@ const int nativeIntervals20ms[14] = {
  13 = FRAMESIZE_UXGA,     // 1600x1200 (12.5fps, ~5fps)
  // 3MP Sensors above this no yet supported with this driver
  14 = FRAMESIZE_FHD,      // 1920x1080
- 15 = CAMERA DISABLED (from wcresolution -1)
-
+ 15 = CAMERA DISABLED (from resolution -1)
  // not accessible
  15 = FRAMESIZE_P_HD,     //  720x1280
  // our resolution variable is 4 bit, so we can;t use these.
@@ -298,62 +292,62 @@ Framerate: I found that achievable streamed framerate is VERY dependent on wifi.
 e.g. latest BT router, but with android screensharing with TV, and framerate for resolution 0 was scatty between 20 and 40fps!!!!
 As soon as the screenshare ended, back to 53fps at 30mhz clock.
 
- * WcMirror     = Mirror picture, 0 = no, 1 = yes
- * WcFlip       = Flip picture, 0 = no, 1 = yes
- * WcSaturation = Set picture Saturation -2 ... +2
- * WcBrightness = Set picture Brightness -2 ... +2
- * WcContrast   = Set picture Contrast -2 ... +2
- * WcSpecialEffekt = Set Special Picture Effect: 0 = off, 1 = , 2 = , 3 = , 4 = , 5 = , 6 =
- * WcAWB          = Auto White Balance, 0 = no, 1 = yes
- * WcWBMode       = White Balance Mode, 0 = auto, 1 =
- * WcAWBGain      = Auto White Balance Gain, 0 = no, 1 = yes
- * WcAEC          = Auto exposure control (Sensor), 0 = no, 1 = yes
- * WcAECDSP       = Auto exposure control (DSP), 0 = no, 1 = yes
- * WcAECValue     = Auto exposure control value, 0 ... 1024
- * WcAECLevel     = Auto exposure control level, -2 ... +2
- * WcAGC          = Auto gain control, 0 = no, 1 = yes
- * WcAGCGain      = Auto gain control gain, 0 .. 30
- * WcGainCeiling  = Gain ceiling, 0 .. 6 (0 = x2, 1 = x4, 2 = x8, 3 = x16, 4 = x32, 5 = x64, 6 = x128)
- * WcGammaCorrect = Auto Gamma Correct, 0 = no, 1 = yes
- * WcLensCorrect  = Auto Lens Correct, 0 = no, 1 = yes
- * WcWPC          = White Pixel Correct, 0 = no, 1 = yes
- * WcDCW          = Downscale, 0 = no, 1 = yes
- * WcBPC          = Black Pixel Correct, 0 = no, 1 = yes
- * WcColorbar     = Show Colorbar, 0 = no, 1 = yes
- * WcFeature      = Set extended Feature, 0 = off, 1 = reduce FPS, 2 = Nightmode
+ * Mirror     = Mirror picture, 0 = no, 1 = yes
+ * Flip       = Flip picture, 0 = no, 1 = yes
+ * Saturation = Set picture Saturation -2 ... +2
+ * Brightness = Set picture Brightness -2 ... +2
+ * Contrast   = Set picture Contrast -2 ... +2
+ * SpecialEffekt = Set Special Picture Effect: 0 = off, 1 = , 2 = , 3 = , 4 = , 5 = , 6 =
+ * AWB          = Auto White Balance, 0 = no, 1 = yes
+ * WBMode       = White Balance Mode, 0 = auto, 1 =
+ * AWBGain      = Auto White Balance Gain, 0 = no, 1 = yes
+ * AEC          = Auto exposure control (Sensor), 0 = no, 1 = yes
+ * AECDSP       = Auto exposure control (DSP), 0 = no, 1 = yes
+ * AECValue     = Auto exposure control value, 0 ... 1024
+ * AECLevel     = Auto exposure control level, -2 ... +2
+ * AGC          = Auto gain control, 0 = no, 1 = yes
+ * AGCGain      = Auto gain control gain, 0 .. 30
+ * GainCeiling  = Gain ceiling, 0 .. 6 (0 = x2, 1 = x4, 2 = x8, 3 = x16, 4 = x32, 5 = x64, 6 = x128)
+ * GammaCorrect = Auto Gamma Correct, 0 = no, 1 = yes
+ * LensCorrect  = Auto Lens Correct, 0 = no, 1 = yes
+ * WPC          = White Pixel Correct, 0 = no, 1 = yes
+ * DCW          = Downscale, 0 = no, 1 = yes
+ * BPC          = Black Pixel Correct, 0 = no, 1 = yes
+ * Colorbar     = Show Colorbar, 0 = no, 1 = yes
+ * Feature      = Set extended Feature, 0 = off, 1 = reduce FPS, 2 = Nightmode
  * stats        = Show Statistics
- * WcInit         = Init Camera Interface
- * WcRtsp         = Control RTSP Server, 0=disable, 1=enable (forces restart) (if defined ENABLE_RTSPSERVER)
+ * Init         = Init Camera Interface
+ * Rtsp         = Control RTSP Server, 0=disable, 1=enable (forces restart) (if defined ENABLE_RTSPSERVER)
 
- * WcGetframeN    = read a picture from camera and store in slot N - return {"addr":123456,"len":12345,"w":160,"h":120, "format":5}
- * WcSavepicN     = save a picture 1-4 after WcGetframe or WcSavepic0 to get frame 1 and save. argument is filename
- * WcAppendpicN   = append a picture 1-4 to a file after WcGetframe or WcSavepic0 to get frame 1 and save. argument is filename
- * WcGetpistoreN  = read buff, addr, len of a stored image, returns json (e.g. for berry) {"addr":123456,"len":12345,"w":160,"h":120, "format":5}
+ * GetframeN    = read a picture from camera and store in slot N - return {"addr":123456,"len":12345,"w":160,"h":120, "format":5}
+ * SavepicN     = save a picture 1-4 after Getframe or Savepic0 to get frame 1 and save. argument is filename
+ * AppendpicN   = append a picture 1-4 to a file after Getframe or Savepic0 to get frame 1 and save. argument is filename
+ * GetpistoreN  = read buff, addr, len of a stored image, returns json (e.g. for berry) {"addr":123456,"len":12345,"w":160,"h":120, "format":5}
  *    if N==0 take a picture to 1 first.
- * WcGetmotionpixelsN = (N=1..4) read addr, len, w, h as JSON {"addr":123456,"len":12345,"w":160,"h":120, "format":4} 
+ * GetmotionpixelsN = (N=1..4) read addr, len, w, h as JSON {"addr":123456,"len":12345,"w":160,"h":120, "format":4} 
  *    motion(1)
  *    difference(2) buffer - e.g for berry
  *    mask(3)
  *    background(4)
  *     e.g. could be used to read pixels, or change pixels from berry.
 
- * WcMenuvideodisable 0 = turn on video in main menu
- * WcMenuvideodisable 1 = turn off video in main menu
+ * Menuvideodisable 0 = turn on video in main menu
+ * Menuvideodisable 1 = turn off video in main menu
 
- * WcSetOptionsNN  = call WcSetOptions function with (index, payload).
+ * SetOptionsNN  = call SetOptions function with (index, payload).
  *   - can oprate many of the functions above, plus:
- *     WcSetoptions24 <frames to skip at input> - e.g. WcSetoptions24 2 will give you only every 3rd frame
- *     WcSetoptions25 <camPixelFormat> - espcam format + 1.  0->default->JPEG.   1:2BPP/RGB565, 2:2BPP/YUV422, 3:1.5BPP/YUV420, 4:1BPP/GRAYSCALE 5:JPEG/COMPRESSED 6:3BPP/RGB888 7:RAW 8:3BP2P/RGB444 9:3BP2P/RGB555
+ *     Setoptions24 <frames to skip at input> - e.g. Setoptions24 2 will give you only every 3rd frame
+ *     Setoptions25 <camPixelFormat> - espcam format + 1.  0->default->JPEG.   1:2BPP/RGB565, 2:2BPP/YUV422, 3:1.5BPP/YUV420, 4:1BPP/GRAYSCALE 5:JPEG/COMPRESSED 6:3BPP/RGB888 7:RAW 8:3BP2P/RGB444 9:3BP2P/RGB555
  *        Maybe useful for tensorflow or similar?
  *        ***** I COULD NOT GET THIS TO WORK ON MY AiThinker style cam ******
 
- * WcConvertFrameN <format> <scale> - convert a wcgetframe in picstore from jpeg to <format> (0=2BPP/RGB565, 3=1BPP/GRAYSCALE, 5=3BPP/RGB888), <scale> (0-3)
+ * ConvertFrameN <format> <scale> - convert a wcgetframe in picstore from jpeg to <format> (0=2BPP/RGB565, 3=1BPP/GRAYSCALE, 5=3BPP/RGB888), <scale> (0-3)
  *     converts in place, replacing the stored frame with the new format.  Data can be retrieved using wcgetpicstoreN (e.g. for use in berry)
  *     will fail if it can't convert or allocate.
  * 
- * WcPowerOff - power down camera.  WcInit will bring it back up.
- * WcSetPicture - SetPictureN (N=1-MAX_PICTORE) expects 'addr len format [width height]
- *   use to populate a frame in Wc.picstore from Berry.  e.g. to put a JPEG mask there
+ * PowerOff - power down camera.  Init will bring it back up.
+ * SetPicture - SetPictureN (N=1-MAX_PICTORE) expects 'addr len format [width height]
+ *   use to populate a frame in .picstore from Berry.  e.g. to put a JPEG mask there
  *   so you can then decode it, get it's address, get the address of the current mask, and 
  *   copy data across.
  *   if sending JPEG (format=0|5), width and height are calculated on decode.
@@ -427,7 +421,7 @@ Wifi use has a big effect on framerate.
 
 
  *
- * WcFeature Explanation
+ * Feature Explanation
  * See https://hobbylad.files.wordpress.com/2020/02/ov2640-camera-module-software-application-notes.pdf
  * for more Information
  * 0: Normal Operation
@@ -489,11 +483,11 @@ and/or
 "frame"
 
 New commands:
-WcGetFrame <n> or WcGetFrame<n> - reads the next frame into slot n (1-4)
-WcSavePic<n> fname
-WcAppendPic<n> fname
+GetFrame <n> or GetFrame<n> - reads the next frame into slot n (1-4)
+SavePic<n> fname
+AppendPic<n> fname
 (n is 0-4) - 0 will trigger a read of a picture now,
-These will save or append a picture to a file.  The picture must have been first read with WcGetFrame <n> if n > 0
+These will save or append a picture to a file.  The picture must have been first read with GetFrame <n> if n > 0
 
 
 */
@@ -508,9 +502,7 @@ bool mCamera::pic_alloc(struct mCamera::PICSTORE *ps, int width, int height, int
 
   if (!ps)
   {
-    #ifdef DEBUG_DRIVERS__CAMERA_2025  
     ALOG_ERR(PSTR(D_LOG_CAMERA "pic_alloc ps null"));
-    #endif
     return false;
   }
 
@@ -524,9 +516,7 @@ bool mCamera::pic_alloc(struct mCamera::PICSTORE *ps, int width, int height, int
 
   if (!len)
   {
-    #ifdef DEBUG_DRIVERS__CAMERA_2025
     ALOG_ERR(PSTR(D_LOG_CAMERA "pic_alloc invalid format or len 0"));
-    #endif    
     return false;
   }
 
@@ -551,7 +541,7 @@ bool mCamera::pic_alloc(struct mCamera::PICSTORE *ps, int width, int height, int
   }
   if (!ps->buff){
     if (len){
-      if ((allocstyle & WC_USE_FAST_MEM) || !Wc.psram){
+      if ((allocstyle & WC_USE_FAST_MEM) || !rt.psram){
         ps->buff = (uint8_t *)malloc(len);
       } else {
         ps->buff = (uint8_t *)heap_caps_aligned_alloc(4, len, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
@@ -635,37 +625,33 @@ bool mCamera::check_format(int format){
 void mCamera::Interrupt(uint32_t state) {
   mSupport::TasAutoMutex localmutex(&WebcamMutex, "WcInterrupt", 20000);
   // Stop camera ISR if active to fix TG1WDT_SYS_RESET
-  if (!Wc.up) { return; }
+  if (!rt.up) { return; }
 
   // why stop/start the server itself here?
   // stopping the cam interrupt should be enough?
-  //WcSetStreamserver(state);
+  // SetStreamserver(state);
   if (state) {
     // Re-enable interrupts
     cam_start();
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
     ALOG_INF(PSTR(D_LOG_CAMERA "cam_start()"));
-#endif    
-    Wc.disable_cam = 0;
+    rt.disable_cam = 0;
   } else {
     // Stop interrupts
-    Wc.disable_cam = 1;
+    rt.disable_cam = 1;
     cam_stop();
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
     ALOG_INF(PSTR(D_LOG_CAMERA "cam_stop()"));
-#endif
   }
 }
 
 
 void mCamera::SuspendAndShutdownCameraForOTA() {
-  // if (Wc.taskHandle) {
-  //   vTaskSuspend(Wc.taskHandle);
+  // if (rt.taskHandle) {
+  //   vTaskSuspend(rt.taskHandle);
     CamOff();
-  //   Wc.up = false;
-  //   vTaskDelete(Wc.taskHandle);
-  //   Wc.taskHandle = nullptr;
-  //   Wc.taskRunning = 0;
+  //   rt.up = false;
+  //   vTaskDelete(rt.taskHandle);
+  //   rt.taskHandle = nullptr;
+  //   rt.taskRunning = 0;
   // }
 }
 
@@ -690,7 +676,7 @@ void mCamera::WaitEnable(){
   int timeout_ms = 1000;
   int loops = timeout_ms/WC_WAIT_INTERVAL_MS;
   if (!loops) loops = 1;
-  while(Wc.disable_cam && loops--){
+  while(rt.disable_cam && loops--){
     vTaskDelay(WC_WAIT_INTERVAL_MS / portTICK_PERIOD_MS);
   }
 }
@@ -721,9 +707,7 @@ bool mCamera::PinUsed(void)
 //    }
   }
 
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
   ALOG_INF(PSTR(D_LOG_CAMERA "i2c_enabled: %d"), tkr_set->runtime.i2c_enabled/*[1]*/);
-#endif
 
   if (
     !tkr_pins->PinUsed(GPIO_WEBCAM_XCLK) || 
@@ -771,9 +755,7 @@ void mCamera::Feature(int32_t value) {
       wc_s->set_reg(wc_s, 0x103, 0xff, 0xcf);   // COM1: Allow 7 dummy frames
       break;
   }
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
   ALOG_INF(PSTR(D_LOG_CAMERA "Feature: %d"), value);
-#endif  
 }
 
 void mCamera::ApplySettings() {
@@ -852,10 +834,9 @@ void mCamera::SetDefaults(uint32_t upgrade) {
     WcSetMotionDefaults();
   #endif
 
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
   ALOG_INF(PSTR(D_LOG_CAMERA "Defaults set"));
-#endif
-  if (Wc.up) { ApplySettings(); }
+  
+  if (rt.up) { ApplySettings(); }
 }
 
 
@@ -865,30 +846,29 @@ uint32_t mCamera::Setup(int32_t fsiz) {
 
   mSupport::TasAutoMutex localmutex(&WebcamMutex, "WcSetup", 200);
 
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
-  ALOG_INF(PSTR(D_LOG_CAMERA "WcSetup"));
-#endif  
+  ALOG_INF(PSTR(D_LOG_CAMERA "Setup"));
+  
   // if 15, make it -1, so disableing
   if (fsiz >= FRAMESIZE_FHD) { fsiz = -1; }
 
   if (fsiz < 0) {
-    if (Wc.up){    
+    if (rt.up){    
       esp_camera_deinit();
       ALOG_INF(PSTR(D_LOG_CAMERA "Deinit fsiz %d"), fsiz);
-      Wc.up = 0;
+      rt.up = 0;
     }
-    Wc.lastCamError = 0x1;
+    rt.lastCamError = 0x1;
     return 0;
   }
 
-  if (Wc.up) {
+  if (rt.up) {
     esp_camera_deinit();
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
+    
     ALOG_INF(PSTR(D_LOG_CAMERA "Deinit"));
-#endif    
-    //return Wc.up;
+    
+    //return rt.up;
   }
-  Wc.up = 0;
+  rt.up = 0;
 
 //esp_log_level_set("*", ESP_LOG_VERBOSE);
 
@@ -917,16 +897,16 @@ uint32_t mCamera::Setup(int32_t fsiz) {
     if(tkr_set->runtime.i2c_enabled/*[1]*/){              // configure SIOD and SIOC as SDA,2 and SCL,2
       config.sccb_i2c_port = 1;                   // reuse initialized bus 2, can be shared now
       if(config.pin_sccb_sda < 0){                // GPIO_WEBCAM_SIOD must not be set to really make it happen
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
+        
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "Use I2C bus2"));
-#endif        
+        
       }
     }
     config.pin_pwdn = tkr_pins->Pin(GPIO_WEBCAM_PWDN);       // PWDN_GPIO_NUM;
     config.pin_reset = tkr_pins->Pin(GPIO_WEBCAM_RESET);    // RESET_GPIO_NUM;
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
+    
     ALOG_INF(PSTR(D_LOG_CAMERA "Template pin config"));
-#endif    
+    
   } else if (Y2_GPIO_NUM != -1) {
     // Modell is set in camera_pins.h
     config.pin_d0 = Y2_GPIO_NUM;
@@ -945,9 +925,9 @@ uint32_t mCamera::Setup(int32_t fsiz) {
     config.pin_sscb_scl = SIOC_GPIO_NUM;
     config.pin_pwdn = PWDN_GPIO_NUM;
     config.pin_reset = RESET_GPIO_NUM;
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
+    
     ALOG_INF(PSTR(D_LOG_CAMERA "Compile flag pin config"));
-#endif    
+    
   } else {
     // no valid config found -> abort
     ALOG_INF(PSTR(D_LOG_CAMERA "No pin config"));
@@ -982,20 +962,16 @@ uint32_t mCamera::Setup(int32_t fsiz) {
     }
   }
 
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
   ALOG_INF("CAM: get ledc channel");
-#endif
-
+  
   int32_t ledc_channel = analogAttach(config.pin_xclk);/*added by me*/
   if (ledc_channel < 0) {
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
     AddLog(LOG_LEVEL_ERROR, "CAM: cannot allocated ledc channel, remove a PWM GPIO");
-#endif    
   }
   config.ledc_channel = (ledc_channel_t) ledc_channel;
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
+  
   AddLog(LOG_LEVEL_DEBUG_MORE, "CAM: XCLK on GPIO %i using ledc channel %i", config.pin_xclk, config.ledc_channel);
-#endif  
+  
   config.ledc_timer = LEDC_TIMER_0;
 //  config.xclk_freq_hz = 20000000;
   if (!tkr_set->Settings.webcam_clk) tkr_set->Settings.webcam_clk = 20;
@@ -1006,7 +982,7 @@ uint32_t mCamera::Setup(int32_t fsiz) {
   even if it's set to another value at power on.  
   Maybe it will work with a different camera, or a board with a CAM_RESET line.
 */
-  if (Wc.camPixelFormat) pixFormat = (Wc.camPixelFormat-1);
+  if (rt.camPixelFormat) pixFormat = (rt.camPixelFormat-1);
   
   config.pixel_format = (pixformat_t)pixFormat;
   if (config.pixel_format != PIXFORMAT_JPEG)
@@ -1024,8 +1000,8 @@ uint32_t mCamera::Setup(int32_t fsiz) {
   AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d", SupportESP32::FoundPSRAM(), SupportESP32::UsePSRAM());
   AddLog(LOG_LEVEL_INFO, "Heap free: %d, PSRAM free: %d", ESP.getFreeHeap(), ESP.getFreePsram());
 
-  Wc.psram = SupportESP32::UsePSRAM();
-  if (Wc.psram) {
+  rt.psram = SupportESP32::UsePSRAM();
+  if (rt.psram) {
     config.frame_size = FRAMESIZE_UXGA;
     config.jpeg_quality = 10;
     config.fb_count = 2;
@@ -1062,7 +1038,7 @@ uint32_t mCamera::Setup(int32_t fsiz) {
 
   if (err != ESP_OK) {
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "InitErr 0x%x"), err);
-    Wc.lastCamError = err;
+    rt.lastCamError = err;
     return 0;
   }
 
@@ -1077,11 +1053,11 @@ uint32_t mCamera::Setup(int32_t fsiz) {
   camera_fb_t *wc_fb = esp_camera_fb_get();
   if (!wc_fb) {
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "Init failed !frame on time"));
-    Wc.lastCamError = 2;
+    rt.lastCamError = 2;
     return 0;
   }
-  Wc.width = wc_fb->width;
-  Wc.height = wc_fb->height;
+  rt.width = wc_fb->width;
+  rt.height = wc_fb->height;
   esp_camera_fb_return(wc_fb);
 
   ApplySettings();
@@ -1090,22 +1066,22 @@ uint32_t mCamera::Setup(int32_t fsiz) {
 
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "%s Initialized"), info->name);
   tkr_set->runtime.camera_initialized = true;
-  Wc.up = 1;
-  if (Wc.psram) { Wc.up = 2; }
+  rt.up = 1;
+  if (rt.psram) { rt.up = 2; }
 
-  Wc.frameIntervalsus = (uint32_t)(((float)nativeIntervals20ms[fsiz]/((float)tkr_set->Settings.webcam_clk/20.0))*1000.0);
-  stats.maxfps = (uint32_t)((float)1000000.0/(float)Wc.frameIntervalsus);
+  rt.frameIntervalsus = (uint32_t)(((float)nativeIntervals20ms[fsiz]/((float)tkr_set->Settings.webcam_clk/20.0))*1000.0);
+  stats.maxfps = (uint32_t)((float)1000000.0/(float)rt.frameIntervalsus);
 
-  Wc.lastCamError = ESP_OK;
-  return Wc.up;
+  rt.lastCamError = ESP_OK;
+  return rt.up;
 }
 
 
 void mCamera::RemoveDeadCients()
 {
   // iterate over clients removing dead ones
-  mCamera::wc_client *client = Wc.client_p;
-  mCamera::wc_client **prev = &Wc.client_p;
+  mCamera::wc_client *client = rt.client_p;
+  mCamera::wc_client **prev = &rt.client_p;
   while(client)
   {
     if (!client->active)
@@ -1130,7 +1106,7 @@ void mCamera::EndStream(){
   // we should use a mutext here, in case we are currently sending
   mSupport::TasAutoMutex localmutex(&WebcamMutex, "WcLoop2", 20000);
   // if http streaming is active
-  mCamera::wc_client *client = Wc.client_p;
+  mCamera::wc_client *client = rt.client_p;
   // iterate over clients
   while(client){
     client->active = 0;
@@ -1170,7 +1146,7 @@ void mCamera::CamOff() {
     gpio_set_level((gpio_num_t)pin_pwdn, 1);
     vTaskDelay(10 / portTICK_PERIOD_MS);
   }
-  Wc.lastCamError = 0x3;
+  rt.lastCamError = 0x3;
 }
 
 /*********************************************************************************************/
@@ -1183,13 +1159,13 @@ int32_t mCamera::SetOptions(uint32_t sel, int32_t value) {
   switch (sel) {
     case 24:
       // frames to ignore between reads
-      if (value >= 0) { Wc.skipFrames = value; }
+      if (value >= 0) { rt.skipFrames = value; }
       return value;
       break;
     case 25:
       // pixelformat - native formats + 1, 0->jpeg
-      if (value >= 0) { Wc.camPixelFormat = value; }
-      if (Wc.up){
+      if (value >= 0) { rt.camPixelFormat = value; }
+      if (rt.up){
         Setup(tkr_set->Settings.webcam_config.resolution);
       }
       return value;
@@ -1202,27 +1178,27 @@ int32_t mCamera::SetOptions(uint32_t sel, int32_t value) {
 
 // wait for a frame to be read, if thread is running
 void mCamera::WaitFrame(int maxtime_ms) {
-  if (!Wc.taskRunning) return;
+  if (!rt.taskRunning) return;
   // force a wait for a read
-  WaitZero(&Wc.taskTakePic, -1, maxtime_ms);
+  WaitZero(&rt.taskTakePic, -1, maxtime_ms);
 }
 
 uint32_t mCamera::GetWidth(void) {
-  if (Wc.taskRunning){
-    if (!Wc.width){
+  if (rt.taskRunning){
+    if (!rt.width){
       WaitFrame(1000);
     }
   }
-  return Wc.width;
+  return rt.width;
 }
 
 uint32_t mCamera::GetHeight(void) {
-  if (Wc.taskRunning){
-    if (!Wc.width){
+  if (rt.taskRunning){
+    if (!rt.width){
       WaitFrame(1000);
     }
   }
-  return Wc.width;
+  return rt.width;
 }
 
 /*********************************************************************************************/
@@ -1230,8 +1206,8 @@ uint32_t mCamera::GetHeight(void) {
 
 uint32_t mCamera::GetPicstore(int32_t num, uint8_t **buff) {
   if (num<0) { return MAX_PICSTORE; }
-  *buff = Wc.picstore[num].buff;
-  return Wc.picstore[num].len;
+  *buff = rt.picstore[num].buff;
+  return rt.picstore[num].len;
 }
 uint32_t mCamera::GetPicstorePtr(int32_t num, struct mCamera::PICSTORE **p) {
   if (num < 0) { 
@@ -1242,8 +1218,8 @@ uint32_t mCamera::GetPicstorePtr(int32_t num, struct mCamera::PICSTORE **p) {
     *p = nullptr;
     return MAX_PICSTORE; 
   } 
-  *p = &Wc.picstore[num];
-  return Wc.picstore[num].len;
+  *p = &rt.picstore[num];
+  return rt.picstore[num].len;
 }
 
 
@@ -1252,14 +1228,14 @@ uint32_t mCamera::GetFrame(int32_t bnum) {
     if (bnum < -MAX_PICSTORE) { bnum=-1; }
     bnum = -bnum;
     // check before decrement
-    if (bnum == Wc.lastBnum){
-      Wc.lastBnum = 0;
+    if (bnum == rt.lastBnum){
+      rt.lastBnum = 0;
     }
     bnum--;
     mSupport::TasAutoMutex localmutex(&WebcamMutex, "WcGetFrame", 200);
-    if (Wc.picstore[bnum].buff) { free(Wc.picstore[bnum].buff); }
-    memset(&Wc.picstore[bnum], 0, sizeof(Wc.picstore[bnum]));
-    Wc.picstore[bnum].len = 0;
+    if (rt.picstore[bnum].buff) { free(rt.picstore[bnum].buff); }
+    memset(&rt.picstore[bnum], 0, sizeof(rt.picstore[bnum]));
+    rt.picstore[bnum].len = 0;
     return 0;
   }
 
@@ -1269,9 +1245,9 @@ uint32_t mCamera::GetFrame(int32_t bnum) {
     return 0;
   }
 
-  if (Wc.taskRunning){
-    WaitZero(&Wc.taskGetFrame, bnum, 1000);
-    return Wc.picstore[bnum - 1].len;
+  if (rt.taskRunning){
+    WaitZero(&rt.taskGetFrame, bnum, 1000);
+    return rt.picstore[bnum - 1].len;
   }
   return 0;
 }
@@ -1285,7 +1261,7 @@ uint32_t mCamera::GetFrame(int32_t bnum) {
 bool mCamera::WebcamAuthenticate(void)
 {
   // if (strlen(SettingsText(SET_WEBPWD)) && (HTTP_MANAGER_RESET_ONLY != Web.state)) {
-  //   return Wc.CamServer->authenticate(WEB_USERNAME, SettingsText(SET_WEBPWD));
+  //   return rt.CamServer->authenticate(WEB_USERNAME, SettingsText(SET_WEBPWD));
   // } else {
     return true;
   // }
@@ -1297,7 +1273,7 @@ bool mCamera::WebcamCheckPriviledgedAccess(bool autorequestauth)
   //   return true;
   // }
   // if (autorequestauth && !WebcamAuthenticate()) {
-  //   Wc.CamServer->requestAuthentication();
+  //   rt.CamServer->requestAuthentication();
   //   return false;
   // }
   return true;
@@ -1305,23 +1281,23 @@ bool mCamera::WebcamCheckPriviledgedAccess(bool autorequestauth)
 
 ///////////////////////////////////////////////////
 
-void mCamera::HandleImage(void) {
-  // if (!HttpCheckPriviledgedAccess()) { return; }
+void mCamera::HandleImage(void) 
+{
 
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "HandleImage"));
 
 
-  uint32_t bnum = Wc.CamServer->arg(F("p")).toInt();
+  uint32_t bnum = rt.CamServer->arg(F("p")).toInt();
   if ((bnum < 0) || (bnum > MAX_PICSTORE)) { bnum= 1; }
   int format = (int)PIXFORMAT_JPEG;
 
   if (bnum){
     // no picture present at this index
-    if (!Wc.picstore[bnum-1].buff){
-      Wc.CamServer->send(404,"",""); 
+    if (!rt.picstore[bnum-1].buff){
+      rt.CamServer->send(404,"",""); 
       return;
     } 
-    format = (int)Wc.picstore[bnum-1].format;
+    format = (int)rt.picstore[bnum-1].format;
   }
 
   String response = "HTTP/1.1 200 OK\r\n";
@@ -1335,54 +1311,52 @@ void mCamera::HandleImage(void) {
   char tmp[12];
 
   if (!bnum) {
-    if (Wc.taskRunning == 1){
-      WaitZero(&Wc.taskTakePic, 1, 1000);
+    if (rt.taskRunning == 1){
+      WaitZero(&rt.taskTakePic, 1, 1000);
       mSupport::TasAutoMutex localmutex(&WebcamMutex, "HandleImage", 200);
-      if (Wc.snapshotStore.len) {
-        response += itoa(Wc.snapshotStore.len, tmp, 10);
+      if (rt.snapshotStore.len) {
+        response += itoa(rt.snapshotStore.len, tmp, 10);
         response += "\r\n\r\n";
 
-        WiFiClient client = Wc.CamServer->client();
-        Wc.CamServer->sendContent(response);
-        client.write((char *)Wc.snapshotStore.buff, Wc.snapshotStore.len);
+        WiFiClient client = rt.CamServer->client();
+        rt.CamServer->sendContent(response);
+        client.write((char *)rt.snapshotStore.buff, rt.snapshotStore.len);
         client.stop();
-        pic_free(&Wc.snapshotStore);
+        pic_free(&rt.snapshotStore);
       } else {
-        Wc.CamServer->send(404,"",""); 
+        rt.CamServer->send(404,"",""); 
         ALOG_INF(PSTR(D_LOG_CAMERA "No img #: %d"), bnum);
         return;
       }
     } else {
-      Wc.CamServer->send(404,"",""); 
+      rt.CamServer->send(404,"",""); 
       return;
     }
   } else {
     mSupport::TasAutoMutex localmutex(&WebcamMutex, "HandleImage", 200);
     bnum--;
-    if (!Wc.picstore[bnum].len) {
-      Wc.CamServer->send(404,"",""); 
+    if (!rt.picstore[bnum].len) {
+      rt.CamServer->send(404,"",""); 
       ALOG_INF(PSTR(D_LOG_CAMERA "No img #: %d"), bnum);
       return;
     }
-    response += itoa(Wc.picstore[bnum].len, tmp, 10);
+    response += itoa(rt.picstore[bnum].len, tmp, 10);
     response += "\r\n\r\n";
-    WiFiClient client = Wc.CamServer->client();
-    Wc.CamServer->sendContent(response);
-    client.write((char *)Wc.picstore[bnum].buff, Wc.picstore[bnum].len);
+    WiFiClient client = rt.CamServer->client();
+    rt.CamServer->sendContent(response);
+    client.write((char *)rt.picstore[bnum].buff, rt.picstore[bnum].len);
     client.stop();
   }
 
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "Sending image #: %d"), bnum+1);
-#endif
 }
 
-void mCamera::HandleImageAny(struct mCamera::PICSTORE *ps){
-  // if (!HttpCheckPriviledgedAccess()) { return; }
+void mCamera::HandleImageAny(struct mCamera::PICSTORE *ps)
+{
 
   if (!ps || !ps->buff) {
     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_CAMERA "img pres"));
-    Wc.CamServer->send(404,"",""); 
+    rt.CamServer->send(404,"",""); 
     return;
   }
   // convert mono to rgb8
@@ -1418,20 +1392,19 @@ void mCamera::HandleImageAny(struct mCamera::PICSTORE *ps){
   } else {
     _jpg_buf_len = ps->len;
     _jpg_buf = ps->buff;
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
+    
     ALOG_INF(PSTR(D_LOG_CAMERA "already jpeg %X %d (%dx%d) (%d)"),
       ps->buff, ps->len, ps->width, ps->height,
       ps->allocatedLen
     );
-#endif      
   }
 
   if (_jpg_buf_len){
-    WiFiClient client = Wc.CamServer->client();
+    WiFiClient client = rt.CamServer->client();
     String response = "HTTP/1.1 200 OK\r\n";
     response += "Content-disposition: inline; filename=cap.jpg\r\n";
     response += "Content-type: image/jpeg\r\n\r\n";
-    Wc.CamServer->sendContent(response);
+    rt.CamServer->sendContent(response);
     client.write((char *)_jpg_buf, _jpg_buf_len);
     client.stop();
     if (conv){
@@ -1440,13 +1413,11 @@ void mCamera::HandleImageAny(struct mCamera::PICSTORE *ps){
     return; // don't send 500
   }
 
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
   ALOG_INF(PSTR(D_LOG_CAMERA "image could not be encoded"));
-#endif
   if (conv){
     pic_free(&psout);
   }
-  Wc.CamServer->send(500,"",""); 
+  rt.CamServer->send(500,"",""); 
   return;
 }
 
@@ -1454,19 +1425,19 @@ void mCamera::HandleImageAny(struct mCamera::PICSTORE *ps){
 
 void mCamera::HandleWebcamMjpegFn(int type) {
   if(!WebcamCheckPriviledgedAccess()){
-    Wc.CamServer->send(403,"","");
+    rt.CamServer->send(403,"","");
     return;
   }
   mSupport::TasAutoMutex localmutex(&WebcamMutex, "HandleWebcamMjpeg", 200);
   mCamera::wc_client *client = new mCamera::wc_client;
   client->active = 1;
   client->type = type;
-  client->p_next = Wc.client_p;
-  client->client = Wc.CamServer->client();
-  Wc.client_p = client;
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
+  client->p_next = rt.client_p;
+  client->client = rt.CamServer->client();
+  rt.client_p = client;
+  
   ALOG_INF(PSTR(D_LOG_CAMERA "Create client"));
-#endif
+  
 }
 
 void mCamera::HandleWebcamMjpeg(void) {
@@ -1479,74 +1450,95 @@ void mCamera::HandleWebcamMjpegDiff(void) {
 
 void mCamera::HandleWebcamRoot(void) {
   if(!tkr_camera->WebcamCheckPriviledgedAccess()){
-    tkr_camera->Wc.CamServer->send(403,"","");
+    tkr_camera->rt.CamServer->send(403,"","");
     return;
   }
   //CamServer->redirect("http://" + String(ip) + ":81/cam.mjpeg");
-  tkr_camera->Wc.CamServer->sendHeader("Location", "/stream");
-  tkr_camera->Wc.CamServer->send(302, "", "");
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
+  tkr_camera->rt.CamServer->sendHeader("Location", "/stream");
+  tkr_camera->rt.CamServer->send(302, "", "");
   ALOG_INF(PSTR(D_LOG_CAMERA "Root called"));
-#endif
 }
 
 /*********************************************************************************************/
 
-uint32_t mCamera::SetStreamserver(uint32_t flag) {
-  ALOG_INF(PSTR("=========================CAM: WcSetStreamserver %d"), flag);
-  if (tkr_set->runtime.global_state.network_down) { 
+uint32_t mCamera::SetStreamserver(uint32_t flag) 
+{
+  ALOG_INF(PSTR("=========================CAM: SetStreamserver %d"), flag);
+  if (tkr_set->runtime.global_state.network_down) 
+  {
     ALOG_INF(PSTR("=========================CAM: Network down, cannot set stream server"));
     EndStream();
     return 0; 
   }
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
-  AddLog(LOG_LEVEL_INFO, PSTR("WcSetStreamserver %d"), flag);
-#endif
+  AddLog(LOG_LEVEL_INFO, PSTR("SetStreamserver %d"), flag);
   if (flag) {
-    if (!Wc.CamServer) {
-      ALOG_INF(PSTR("=========================CAM: if (!Wc.CamServer) {"));
-      
+    if (!rt.CamServer) {
+      ALOG_INF(PSTR("=========================CAM: if (!rt.CamServer) {"));
+            
       mSupport::TasAutoMutex localmutex(&WebcamMutex, "HandleWebcamMjpeg", 20000);
-      Wc.CamServer = new WebServer(81);
+      rt.CamServer = new WebServer(81);
 
       /***
        * Videos
        ***/
-      Wc.CamServer->on("/", [this](){ this->HandleWebcamRoot(); });
-      Wc.CamServer->on("/diff.mjpeg", [this](){ this->HandleWebcamMjpegDiff(); });      
-      Wc.CamServer->on("/cam.mjpeg", [this](){ this->HandleWebcamMjpeg(); }); // Same without different aliases
-      Wc.CamServer->on("/cam.jpg", [this](){ this->HandleWebcamMjpeg(); });
-      Wc.CamServer->on("/stream", [this](){ this->HandleWebcamMjpeg(); });
-      
+      SPGM_CTR(PM_URL_CAM_ROOT) "/";
+      rt.CamServer->on(PM_URL_CAM_ROOT, [this](){ this->HandleWebcamRoot(); });    
+      AddURLtoListwPort(PM_URL_CAM_ROOT, HTTP_GET, 81);
+
+      SPGM_CTR(PM_URL_CAM_DIFF_MJPEG) "/diff.mjpeg";
+      rt.CamServer->on(PM_URL_CAM_DIFF_MJPEG, [this](){ this->HandleWebcamMjpegDiff(); });
+      AddURLtoListwPort(PM_URL_CAM_DIFF_MJPEG, HTTP_GET, 81);
+
+      SPGM_CTR(PM_URL_CAM_STREAM) "/stream";
+      rt.CamServer->on(PM_URL_CAM_STREAM, [this](){ this->HandleWebcamMjpeg(); });
+      AddURLtoListwPort(PM_URL_CAM_STREAM, HTTP_GET, 81);
+
       /***
-       * Pictures
+       * Picture
        ***/
-      Wc.CamServer->on("/wc.jpg", [this](){ this->HandleImage(); });
-      Wc.CamServer->on("/wc.mjpeg", [this](){ this->HandleImage(); });
-      Wc.CamServer->on("/picture", [this](){ this->HandleImage(); });
+      SPGM_CTR(PM_URL_CAM_PICTURE) "/picture";
+      rt.CamServer->on(PM_URL_CAM_PICTURE, [this](){ this->HandleImage(); });
+      AddURLtoListwPort(PM_URL_CAM_PICTURE, HTTP_GET, 81);
+
       #ifdef USE_WEBCAM_MOTION
-      Wc.CamServer->on(PSTR("/motiondiff.jpg"), [this](){ this->HandleImagemotiondiff });
-      Wc.CamServer->on(PSTR("/motionmask.jpg"), [this](){ this->HandleImagemotionmask });
-      Wc.CamServer->on(PSTR("/motionbuff.jpg"), [this](){ this->HandleImagemotionbuff });
-      Wc.CamServer->on(PSTR("/motionlbuff.jpg"), [this](){ this->HandleImagemotionlbuff });
-      Wc.CamServer->on(PSTR("/motionbackgroundbuff.jpg"), [this](){ this->HandleImagemotionbackgroundbuff });
+
+      SPGM_CTR(PM_URL_CAM_MOTIONDIFF_JPG) "/motiondiff.jpg";
+      rt.CamServer->on(PM_URL_CAM_MOTIONDIFF_JPG, [this](){ this->HandleImagemotiondiff(); });
+      AddURLtoListwPort(PM_URL_CAM_MOTIONDIFF_JPG, HTTP_GET, 81);
+
+      SPGM_CTR(PM_URL_CAM_MOTIONMASK_JPG) "/motionmask.jpg";
+      rt.CamServer->on(PM_URL_CAM_MOTIONMASK_JPG, [this](){ this->HandleImagemotionmask(); });
+      AddURLtoListwPort(PM_URL_CAM_MOTIONMASK_JPG, HTTP_GET, 81);
+
+      SPGM_CTR(PM_URL_CAM_MOTIONBUFF_JPG) "/motionbuff.jpg";
+      rt.CamServer->on(PM_URL_CAM_MOTIONBUFF_JPG, [this](){ this->HandleImagemotionbuff(); });
+      AddURLtoListwPort(PM_URL_CAM_MOTIONBUFF_JPG, HTTP_GET, 81);
+
+      SPGM_CTR(PM_URL_CAM_MOTIONLBUFF_JPG) "/motionlbuff.jpg";
+      rt.CamServer->on(PM_URL_CAM_MOTIONLBUFF_JPG, [this](){ this->HandleImagemotionlbuff(); });
+      AddURLtoListwPort(PM_URL_CAM_MOTIONLBUFF_JPG, HTTP_GET, 81);
+
+      SPGM_CTR(PM_URL_CAM_MOTIONBACKGROUNDBUFF_JPG) "/motionbackgroundbuff.jpg";
+      rt.CamServer->on(PM_URL_CAM_MOTIONBACKGROUNDBUFF_JPG, [this](){ this->HandleImagemotionbackgroundbuff(); });
+      AddURLtoListwPort(PM_URL_CAM_MOTIONBACKGROUNDBUFF_JPG, HTTP_GET, 81);
+
       #endif  
 
       ALOG_INF(PSTR(D_LOG_CAMERA "Strm init"));
-      Wc.CamServer->begin();
+      rt.CamServer->begin();
     }else{
       
-      ALOG_INF(PSTR("=========================CAM: else (!Wc.CamServer) {"));
+      ALOG_INF(PSTR("=========================CAM: else (!rt.CamServer) {"));
     }
   } else {
     ALOG_INF(PSTR("=========================CAM: } else {"));
-    if (Wc.CamServer) {
-      ALOG_INF(PSTR("=========================CAM: } else {if (Wc.CamServer) {"));
+    if (rt.CamServer) {
+      ALOG_INF(PSTR("=========================CAM: } else {if (rt.CamServer) {"));
       mSupport::TasAutoMutex localmutex(&WebcamMutex, "HandleWebcamMjpeg", 20000);
       EndStream();
-      Wc.CamServer->stop();
-      delete Wc.CamServer;
-      Wc.CamServer = NULL;
+      rt.CamServer->stop();
+      delete rt.CamServer;
+      rt.CamServer = NULL;
       ALOG_INF(PSTR(D_LOG_CAMERA "Strm exit"));
     }
   }
@@ -1609,7 +1601,7 @@ void mCamera::HandleWcJpg(AsyncWebServerRequest *request)
 void mCamera::StartOperationTask()
 {
 
-  if (Wc.taskRunning == 0)
+  if (rt.taskRunning == 0)
   {
 
     ALOG_INF(PSTR(D_LOG_CAMERA "Start operations"));
@@ -1636,7 +1628,7 @@ void mCamera::StartOperationTask()
 
       this,               // <--- Pass the instance
       0,                  /* Priority of the task */
-      &Wc.taskHandle,     /* Task handle. */
+      &rt.taskHandle,     /* Task handle. */
       #ifdef CONFIG_FREERTOS_UNICORE
         0                 /* Core where the task should run */
       #else
@@ -1646,7 +1638,7 @@ void mCamera::StartOperationTask()
 
     // wait for task to start
     int loops = 10;
-    while(!Wc.taskRunning && loops--){
+    while(!rt.taskRunning && loops--){
       vTaskDelay(10 / portTICK_PERIOD_MS);
     }
   }
@@ -1663,23 +1655,22 @@ void mCamera::OperationTaskS(void* pvParameters) {
 void mCamera::OperationTask(){
   unsigned long loopcount = 0;
 
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
   ALOG_INF(PSTR(D_LOG_CAMERA "WCOperationTask: Start task"));
-#endif
+  
   int framecount = 0;
   unsigned long laststatmillis = millis();
   bool jpeg_converted = false;
   uint32_t processing_total = 0;
   uint64_t last_camtime = 0;
-  Wc.taskRunning = 1;
+  rt.taskRunning = 1;
   stats.framesTotal = 0;
   stats.framesLost = 0;
 
-  int32_t skipsWanted = Wc.skipFrames;
+  int32_t skipsWanted = rt.skipFrames;
 
 
-  // we set to Wc.taskRunning 2 to stop the task
-  while (Wc.taskRunning == 1){
+  // we set to rt.taskRunning 2 to stop the task
+  while (rt.taskRunning == 1){
     loopcount++;
     uint32_t thismillis = millis();
     uint32_t statdur = thismillis - laststatmillis;
@@ -1695,7 +1686,7 @@ void mCamera::OperationTask(){
       mSupport::TasAutoMutex localmutex(&WebcamMutex, "WebcamMjpeg", 30000);
 
       // only do anything if cam us up, and cam has not remained stopped
-      if (Wc.up && !Wc.disable_cam) {
+      if (rt.up && !rt.disable_cam) {
         size_t _jpg_buf_len = 0;
         uint8_t * _jpg_buf = NULL;
 
@@ -1719,13 +1710,13 @@ void mCamera::OperationTask(){
           camtime = camtime * 1000000;
           camtime += wc_fb->timestamp.tv_usec;
 
-          if (!skipsWanted) skipsWanted = Wc.skipFrames;
+          if (!skipsWanted) skipsWanted = rt.skipFrames;
 
           if (last_camtime){
             uint32_t camdiff = camtime - last_camtime;
             // this is an accurate indication of framerate, but also frame skip
-            Wc.camtimediff = camdiff;
-            int framesPassed = round(((float)camdiff)/(float)(Wc.frameIntervalsus));
+            rt.camtimediff = camdiff;
+            int framesPassed = round(((float)camdiff)/(float)(rt.frameIntervalsus));
             if (framesPassed){
               stats.framesTotal += framesPassed;
               stats.framesLost += (framesPassed - 1);
@@ -1734,9 +1725,7 @@ void mCamera::OperationTask(){
               }
               if (skipsWanted > 0) skipsWanted --;
             } else {
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
-              ALOG_INF(PSTR(D_LOG_CAMERA "Duplicate time in frame? diff %d intv %d"), camdiff, Wc.frameIntervalsus);
-#endif              
+              ALOG_INF(PSTR(D_LOG_CAMERA "Duplicate time in frame? diff %d intv %d"), camdiff, rt.frameIntervalsus);
             }
           }
           last_camtime = camtime;
@@ -1748,7 +1737,7 @@ void mCamera::OperationTask(){
               framespersec, 
               jpeg_converted?"raw":"jpg", 
               wc_fb->len, 
-              Wc.lenDiff,
+              rt.lenDiff,
               stats.framesTotal,
               stats.framesLost
               );
@@ -1761,12 +1750,12 @@ void mCamera::OperationTask(){
           }
 
           // we got a frame
-          Wc.width = wc_fb->width;
-          Wc.height = wc_fb->height;
+          rt.width = wc_fb->width;
+          rt.height = wc_fb->height;
           stats.camcnt++;
 
           // if we want to process this frame.
-          // skipsWanted is the counter used for Wc.skipFrames use
+          // skipsWanted is the counter used for rt.skipFrames use
           if (skipsWanted <= 0) skipsWanted = 0;
           if (!skipsWanted){
 #ifdef USE_WEBCAM_MOTION
@@ -1781,12 +1770,12 @@ void mCamera::OperationTask(){
 #endif
             // if we need a frame for web stream or rtsp
             if(
-              Wc.client_p // pointer to first 
+              rt.client_p // pointer to first 
               #ifdef ENABLE_RTSPSERVER
-              || Wc.rtsp_client // pointer to first
+              || rt.rtsp_client // pointer to first
               #endif
-              || Wc.taskGetFrame // get one frame - from scripts
-              || Wc.taskTakePic // get one frame - from scripts
+              || rt.taskGetFrame // get one frame - from scripts
+              || rt.taskTakePic // get one frame - from scripts
               #ifdef USE_WEBCAM_MOTION
               || detectMotion 
               #endif                
@@ -1824,57 +1813,53 @@ void mCamera::OperationTask(){
 
               if (_jpg_buf)
               {
-                int jpeg_len_diff = abs((int)Wc.last_frame_len - (int)_jpg_buf_len);
+                int jpeg_len_diff = abs((int)rt.last_frame_len - (int)_jpg_buf_len);
                 int jpeg_len_diff_percent = 100*jpeg_len_diff/_jpg_buf_len;
-                Wc.lenDiff = jpeg_len_diff_percent;
-                if (Wc.lenDiffLimit && (Wc.lenDiffLimit < jpeg_len_diff_percent))
+                rt.lenDiff = jpeg_len_diff_percent;
+                if (rt.lenDiffLimit && (rt.lenDiffLimit < jpeg_len_diff_percent))
                 {
-                  Wc.lenDiffTrigger = 1;
-                  Wc.lenDiffTriggered = jpeg_len_diff_percent;
+                  rt.lenDiffTrigger = 1;
+                  rt.lenDiffTriggered = jpeg_len_diff_percent;
                 }
 
-                Wc.last_frame_len = _jpg_buf_len;
-                // we use -1 to just detect that Wc.width/height should have been set
-                if (Wc.taskTakePic)
+                rt.last_frame_len = _jpg_buf_len;
+                // we use -1 to just detect that rt.width/height should have been set
+                if (rt.taskTakePic)
                 {
-                  if (Wc.taskTakePic > 0)
+                  if (rt.taskTakePic > 0)
                   {
-                    if (pic_alloc(&Wc.snapshotStore, 0, 0, _jpg_buf_len, PIXFORMAT_JPEG, 1))
+                    if (pic_alloc(&rt.snapshotStore, 0, 0, _jpg_buf_len, PIXFORMAT_JPEG, 1))
                     {
-                      memcpy(Wc.snapshotStore.buff, _jpg_buf, _jpg_buf_len);
+                      memcpy(rt.snapshotStore.buff, _jpg_buf, _jpg_buf_len);
                     }
                   }
-                  Wc.taskTakePic = 0;
+                  rt.taskTakePic = 0;
                 }
 
                 // request to store the frame into picstore
-                if (Wc.taskGetFrame)
+                if (rt.taskGetFrame)
                 {
-                  int bnum = Wc.taskGetFrame;
+                  int bnum = rt.taskGetFrame;
                   if ((bnum < 1) || (bnum > MAX_PICSTORE)) { bnum = 1; }
                   bnum--;
-                  if (Wc.picstore[bnum].buff) { free(Wc.picstore[bnum].buff); }
-                  memset(&Wc.picstore[bnum], 0, sizeof(Wc.picstore[bnum]));
-                  Wc.picstore[bnum].buff = (uint8_t *)heap_caps_aligned_alloc(4, _jpg_buf_len+4, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
-                  if (Wc.picstore[bnum].buff) {
-                    memcpy(Wc.picstore[bnum].buff, _jpg_buf, _jpg_buf_len);
-                    Wc.picstore[bnum].len = _jpg_buf_len;
-                    Wc.lastBnum = bnum + 1;
-                    Wc.picstore[bnum].format = (int8_t)PIXFORMAT_JPEG;
-                    Wc.picstore[bnum].width = Wc.width;
-                    Wc.picstore[bnum].height = Wc.height;
+                  if (rt.picstore[bnum].buff) { free(rt.picstore[bnum].buff); }
+                  memset(&rt.picstore[bnum], 0, sizeof(rt.picstore[bnum]));
+                  rt.picstore[bnum].buff = (uint8_t *)heap_caps_aligned_alloc(4, _jpg_buf_len+4, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+                  if (rt.picstore[bnum].buff) {
+                    memcpy(rt.picstore[bnum].buff, _jpg_buf, _jpg_buf_len);
+                    rt.picstore[bnum].len = _jpg_buf_len;
+                    rt.lastBnum = bnum + 1;
+                    rt.picstore[bnum].format = (int8_t)PIXFORMAT_JPEG;
+                    rt.picstore[bnum].width = rt.width;
+                    rt.picstore[bnum].height = rt.height;
 
-                    #ifdef DEBUG_DRIVERS__CAMERA_2025  
-                    ALOG_INF(PSTR(D_LOG_CAMERA "Got frame %d"), Wc.lastBnum);
-                    #endif                    
+                    ALOG_INF(PSTR(D_LOG_CAMERA "Got frame %d"), rt.lastBnum);
                   } 
                   else 
                   {
-                    #ifdef DEBUG_DRIVERS__CAMERA_2025  
                     ALOG_INF(PSTR(D_LOG_CAMERA "Can't allocate picstore"));
-                    #endif                    
                   }
-                  Wc.taskGetFrame = 0;
+                  rt.taskGetFrame = 0;
                 }
 
                 #ifdef USE_WEBCAM_MOTION
@@ -1885,7 +1870,7 @@ void mCamera::OperationTask(){
                 #endif
 
                 // if http streaming is active, we will have one or more clients
-                mCamera::wc_client *client = Wc.client_p;
+                mCamera::wc_client *client = rt.client_p;
                 // iterate over clients
                 uint8_t webclientcount = 0;
 
@@ -1902,9 +1887,7 @@ void mCamera::OperationTask(){
 
                     if (!client->client.connected())
                     {
-                      #ifdef DEBUG_DRIVERS__CAMERA_2025  
                       ALOG_INF(PSTR(D_LOG_CAMERA "Client fail"));
-                      #endif                      
                       client->active = 0;
                       stats.clientfail++;
                     }
@@ -1912,9 +1895,7 @@ void mCamera::OperationTask(){
                       client->client.flush();
                       client->client.setTimeout(3);
 
-                      #ifdef DEBUG_DRIVERS__CAMERA_2025  
                       ALOG_INF(PSTR(D_LOG_CAMERA "Start stream"));
-                      #endif       
 
                       client->client.print("HTTP/1.1 200 OK\r\n"
                         "Content-Type: multipart/x-mixed-replace;boundary=" BOUNDARY "\r\n"
@@ -1999,7 +1980,7 @@ void mCamera::OperationTask(){
 
                 #ifdef ENABLE_RTSPSERVER
                 // if rtsp is active, we will have one or more clients
-                volatile wc_rtspclient *rtsp_client = Wc.rtsp_client;
+                volatile wc_rtspclient *rtsp_client = rt.rtsp_client;
                 uint8_t rtspclientcount = 0;
                 while (rtsp_client) {
                   if (rtsp_client->camStreamer && rtsp_client->rtsp_session){
@@ -2017,13 +1998,13 @@ void mCamera::OperationTask(){
                 if (free_jpeg) { free(_jpg_buf); }
 
                 // could trigger info to berry every fraem, if configured
-                Wc.frame_processed = 1;
+                rt.frame_processed = 1;
 
                 uint32_t processingend = millis();
                 uint32_t processingdur = processingend - now;
                 processing_total += processingdur;
               } else {
-                Wc.last_frame_len = 0;            
+                rt.last_frame_len = 0;            
               }
             }
           }
@@ -2032,14 +2013,14 @@ void mCamera::OperationTask(){
           esp_camera_fb_return(wc_fb);
         }
       } else {
-        if (Wc.up){
+        if (rt.up){
           // if camera up, but just can't get a frame right now because
           // else we may conflict with files or settings store, delay just a shorter time
           vTaskDelay(10/ portTICK_PERIOD_MS);
         } else {
           // be sure to clear this if camera is not running, else we could wait forever
           // when asking for a frame
-          Wc.taskGetFrame = 0;
+          rt.taskGetFrame = 0;
           // come around every 1/10s if not serving pictures
           vTaskDelay(100/ portTICK_PERIOD_MS);
         }
@@ -2050,7 +2031,7 @@ void mCamera::OperationTask(){
   // this log sometimes causes guru mediation error. Maybe because 
   // temp storage is removed before it is serviced?
   ALOG_INF(PSTR(D_LOG_CAMERA "Left task"));
-  Wc.taskRunning = 0;
+  rt.taskRunning = 0;
 
   // wait 1/2 second for log to be done?
   vTaskDelay(500/ portTICK_PERIOD_MS);
@@ -2061,7 +2042,7 @@ void mCamera::OperationTask(){
 
 void mCamera::Loop(void) 
 {
-  Wc.loopcounter++;
+  rt.loopcounter++;
   { // closure for automutex
     // we don't need one here
     //TasAutoMutex localmutex(&WebcamMutex, "WcLoop", 200);
@@ -2076,44 +2057,40 @@ void mCamera::Loop(void)
       snprintf(t, (size_t)39, "{\"val\":%d,\"bri\":%d,\"pix\":%d}", wc_motion.motion_trigger, wc_motion.motion_brightness, wc_motion.changedPixelPertenthousand);
       callBerryEventDispatcher("webcam", "motion", 0, t, strlen(t));
 #endif
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
       ALOG_INF(PSTR(D_LOG_CAMERA "Motion Triggered"));
-#endif      
       WcMotionLog();
       wc_motion.motion_triggered = 0;
     }
 #endif    
-    if (Wc.lenDiffTrigger){
+    if (rt.lenDiffTrigger){
 #ifdef USE_BERRY
       char t[40];
-      snprintf(t, (size_t)39, "{\"diff\":%d}", Wc.lenDiffTriggered);
+      snprintf(t, (size_t)39, "{\"diff\":%d}", rt.lenDiffTriggered);
       callBerryEventDispatcher("webcam", "framesizechange", 0, t, strlen(t));
 #endif
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
-      ALOG_INF(PSTR(D_LOG_CAMERA "Framesize Change > %d = %d"), Wc.lenDiffLimit, Wc.lenDiffTriggered);
-#endif      
-      Wc.lenDiffTrigger = 0;
+      ALOG_INF(PSTR(D_LOG_CAMERA "Framesize Change > %d = %d"), rt.lenDiffLimit, rt.lenDiffTriggered);
+      rt.lenDiffTrigger = 0;
 #ifdef USE_WEBCAM_MOTION
       WcMotionLog();
 #endif      
     }
 
-    if (Wc.frame_processed){
+    if (rt.frame_processed){
 #ifdef USE_BERRY
-      if (Wc.berryFrames){
+      if (rt.berryFrames){
         char t[80];
-        snprintf(t, (size_t)39, "{\"len\":%d}", Wc.last_frame_len);
+        snprintf(t, (size_t)39, "{\"len\":%d}", rt.last_frame_len);
         callBerryEventDispatcher("webcam", "frame", 0, t, strlen(t));
       }
 #endif
-      Wc.frame_processed = 0;
+      rt.frame_processed = 0;
     }
   } // end closure for automutex
 
-  if (Wc.CamServer) {
+  if (rt.CamServer) {
     // pretty sure this would be safe
     //TasAutoMutex localmutex(&WebcamMutex, "WcLoop", 200);
-    Wc.CamServer->handleClient();
+    rt.CamServer->handleClient();
     RemoveDeadCients();
   }
 
@@ -2123,14 +2100,14 @@ void mCamera::Loop(void)
     if (!tkr_set->runtime.global_state.wifi_down) {
       // pretty sure we don;t need the mutex here
       mSupport::TasAutoMutex localmutex(&WebcamMutex, "WcLoop2", 30000);
-      if (!Wc.rtspp) {
-        Wc.rtspp = new WiFiServer(8554);
-        Wc.rtspp->begin();
+      if (!rt.rtspp) {
+        rt.rtspp = new WiFiServer(8554);
+        rt.rtspp->begin();
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "RTSP init"));
       }
 
-      wc_rtspclient * volatile rtsp_client = Wc.rtsp_client;
-      wc_rtspclient * volatile *  prev = &Wc.rtsp_client;
+      wc_rtspclient * volatile rtsp_client = rt.rtsp_client;
+      wc_rtspclient * volatile *  prev = &rt.rtsp_client;
       uint8_t clients = 0;
       while (rtsp_client) {
         bool removed = false;
@@ -2160,25 +2137,25 @@ void mCamera::Loop(void)
       stats.activeClients.rtsp = clients;
 
       // accept new rtsp clients
-      WiFiClient rtsp_client2 = Wc.rtspp->accept();
+      WiFiClient rtsp_client2 = rt.rtspp->accept();
       if (rtsp_client2) {
         wc_rtspclient *client = new wc_rtspclient;
-        client->p_next = Wc.rtsp_client;
+        client->p_next = rt.rtsp_client;
         client->rtsp_client = rtsp_client2;
-        client->camStreamer = new localOV2640Streamer(&client->rtsp_client, Wc.width, Wc.height);
+        client->camStreamer = new localOV2640Streamer(&client->rtsp_client, rt.width, rt.height);
         client->rtsp_session = new CRtspSession(&client->rtsp_client, client->camStreamer); // our threads RTSP session and state
         AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "RTSP str"));
-        Wc.rtsp_client = client;
+        rt.rtsp_client = client;
         stats.activeClients.rtsp++;
       }
     } else {
       // rtsp not enabled
-      if (Wc.rtspp){
+      if (rt.rtspp){
         // if running, stop cleanly.
         // stop all clients
-        WcEndRTSP();
-        delete Wc.rtspp;
-        Wc.rtspp = nullptr;
+        EndRTSP();
+        delete rt.rtspp;
+        rt.rtspp = nullptr;
       }
     }
   }
@@ -2189,9 +2166,9 @@ void mCamera::Loop(void)
 #ifdef ENABLE_RTSPSERVER
 void mCamera::EndRTSP(){ // kill all rtsp clients
   // we should use a mutext here, in case we are currently sending
-  mSupport::TasAutoMutex localmutex(&WebcamMutex, "WcEndRTSP", 2000);
-  wc_rtspclient * volatile rtsp_client = Wc.rtsp_client;
-  wc_rtspclient * volatile * prev = &Wc.rtsp_client;
+  mSupport::TasAutoMutex localmutex(&WebcamMutex, "EndRTSP", 2000);
+  wc_rtspclient * volatile rtsp_client = rt.rtsp_client;
+  wc_rtspclient * volatile * prev = &rt.rtsp_client;
   while (rtsp_client) {
     delete rtsp_client->rtsp_session;
     rtsp_client->rtsp_session = nullptr;
@@ -2202,7 +2179,7 @@ void mCamera::EndRTSP(){ // kill all rtsp clients
     rtsp_client = next;
     AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "RTSP stop"));
   }
-  Wc.rtsp_client = nullptr;
+  rt.rtsp_client = nullptr;
   stats.activeClients.rtsp = 0;
 }
 #endif
@@ -2213,18 +2190,18 @@ const char HTTP_WEBCAM_MENUVIDEOCONTROL[] PROGMEM = "<p></p><button onclick=\"fe
 void mCamera::ShowStream(void) {
   // if streaming is enabled (1 or 2), start stream server
   if (tkr_set->Settings.webcam_config.stream) {
-//    if (!Wc.CamServer || !Wc.up) {
-    if (!Wc.CamServer) {
+//    if (!rt.CamServer || !rt.up) {
+    if (!rt.CamServer) {
       SetStreamserver(tkr_set->Settings.webcam_config.stream);
     }
   }
 
-  // if (!Wc.CamServer){
+  // if (!rt.CamServer){
   //   WSContentSend_P(PSTR("<p></p><center>Cam Server Not Running'</center><p></p>"));
   //   WSContentSend_P(HTTP_WEBCAM_MENUVIDEOCONTROL, "wcstream2", "Turn On Streaming");
   // } else {
-  //   if (!Wc.up){
-  //     WSContentSend_P(PSTR("<p></p><center>Cam Not Running Err 0x%x</center><p></p>"), Wc.lastCamError);
+  //   if (!rt.up){
+  //     WSContentSend_P(PSTR("<p></p><center>Cam Not Running Err 0x%x</center><p></p>"), rt.lastCamError);
   //     WSContentSend_P(HTTP_WEBCAM_MENUVIDEOCONTROL, "wcinit", "Try WCINIT");
   //   } else {
   //     if (tkr_set->Settings.webcam_config.spare15) {
@@ -2234,7 +2211,7 @@ void mCamera::ShowStream(void) {
   // }
 
   // // spare15 is 'hide cam on menu'
-  // if (!tkr_set->Settings.webcam_config.spare15 && tkr_set->Settings.webcam_config.stream && Wc.CamServer && Wc.up!=0) {
+  // if (!tkr_set->Settings.webcam_config.spare15 && tkr_set->Settings.webcam_config.stream && rt.CamServer && rt.up!=0) {
   //   // Give the webcam webserver some time to prepare the stream - catch error in JS
   //   WSContentSend_P(PSTR("<p></p><center><img onerror='setTimeout(()=>{this.src=this.src;},1000)' src='http://%_I:81/stream' alt='Webcam stream' style='width:99%%;'></center><p></p>"),(uint32_t)WiFi.localIP());
   //   WSContentSend_P(HTTP_WEBCAM_MENUVIDEOCONTROL, "wcmenuvideodisable%201", "Turn Off Video");
@@ -2264,8 +2241,8 @@ void mCamera::WcInit(void) {
 void mCamera::UpdateStats(void) {
   stats.camfps = stats.camcnt;
   stats.camcnt = 0;
-  Wc.loopspersec = Wc.loopcounter;
-  Wc.loopcounter = 0;
+  rt.loopspersec = rt.loopcounter;
+  rt.loopcounter = 0;
 }
 
 
@@ -2274,7 +2251,8 @@ void mCamera::Pre_Init(void)
   
   ALOG_HGL( PSTR("mCamera::Pre_Init") );
 
-  memset(&Wc, 0, sizeof(Wc));
+  memset(&rt, 0, sizeof(rt));
+
   #ifdef USE_WEBCAM_MOTION
   memset(&wc_motion, 0, sizeof(wc_motion));
   WcSetMotionDefaults();
@@ -2289,19 +2267,15 @@ void mCamera::Pre_Init(void)
 
 void mCamera::Init(void)
 {
-  ALOG_INF(PSTR("\n\r\t\t\tCAM: WcSetup STARTED"));
+  
   Setup(tkr_set->Settings.webcam_config.resolution);
-  ALOG_INF(PSTR("\n\r\t\t\tCAM: WcSetStreamserver STARTED"));
   SetStreamserver(tkr_set->Settings.webcam_config.stream);
-  ALOG_INF(PSTR("\n\r\t\t\tCAM: WCStartOperationTask STARTED"));
   StartOperationTask();
-  ALOG_INF(PSTR("\n\r\t\t\tCAM: WCStartOperationTask DONE"));
-
+  
   tkr_set->Settings.webcam_config.rtsp = 1;
 
   // Configured already
   module_state.mode = ModuleStatus::Running;
-
 
 }
 
@@ -2550,7 +2524,7 @@ void mCamera::CmndWebcamPowerOff(void){
 void mCamera::CmndWebcamTaskEnable(bool enable) {
   if(enable)
   {
-    if (Wc.taskRunning == 0){
+    if (rt.taskRunning == 0){
       StartOperationTask();
     }
   }else
@@ -2562,13 +2536,13 @@ void mCamera::CmndWebcamTaskEnable(bool enable) {
 }
 
 void mCamera::StopTask(void){
-  if (Wc.taskRunning == 1){
+  if (rt.taskRunning == 1){
     // set to 2, and wait until cleared
-    WaitZero(&Wc.taskRunning, 2, 20000);
-    if (Wc.taskHandle){
+    WaitZero(&rt.taskRunning, 2, 20000);
+    if (rt.taskHandle){
       // why does this cause a problem?
-      //vTaskDelete(Wc.taskHandle);
-      Wc.taskHandle = nullptr;
+      //vTaskDelete(rt.taskHandle);
+      rt.taskHandle = nullptr;
     }
   }
 }
@@ -2598,9 +2572,7 @@ void mCamera::CmndWebcamGetFrame(int bnum) {
   }
   // Response_P(S_JSON_COMMAND_XVALUE, tkr_events->XdrvMailbox.command, resp);
 
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
   ALOG_DBG(PSTR(D_LOG_CAMERA "Getframe %d -> %d"), bnum, res);
-#endif
   // ResponseCmndNumber((int)res);
 }
 
@@ -2625,9 +2597,7 @@ void mCamera::CmndWebcamGetPicStore(int bnum) {
   //uint32_t res = WcGetPicstore(bnum-1, &t);
   struct PICSTORE *p = nullptr;
   uint32_t res = GetPicstorePtr(bnum-1, &p);
-#ifdef DEBUG_DRIVERS__CAMERA_2025  
   ALOG_DBG(PSTR(D_LOG_CAMERA "PicStore %d at 0x%x"), bnum, p);
-#endif
   char resp[100] = "0";
   if (p) {
     snprintf_P(resp, sizeof(resp), PSTR("{\"buff\":%d,\"addr\":%d,\"len\":%d,\"w\":%d,\"h\":%d,\"format\":%d}"), 
@@ -2646,9 +2616,7 @@ void mCamera::CmndWebcamGetPicStore(int bnum) {
 //   int len = 0;
 //   int bnum = tkr_events->XdrvMailbox.index;
 //   if (bnum < 0){
-// #ifdef DEBUG_DRIVERS__CAMERA_2025  
 //     ALOG_DBG(PSTR(D_LOG_CAMERA "savePic bnum %d"), bnum);
-// #endif
 //     return 0;
 //   }
 
@@ -2660,24 +2628,20 @@ void mCamera::CmndWebcamGetPicStore(int bnum) {
 //   if (bnum == 0){
 //     // if bnum 0, get a picture now....
 //     // use the snapshot frame buffer
-//     Wc.taskTakePic = 1;
+//     rt.taskTakePic = 1;
 //     int loops = 100;
-//     while (Wc.taskTakePic && (loops--)){
+//     while (rt.taskTakePic && (loops--)){
 //       vTaskDelay(10/ portTICK_PERIOD_MS);
 //     }
 //   }
 //   mSupport::TasAutoMutex localmutex(&WebcamMutex, "SavePic", 2000);
 //   if (bnum == 0){
-//     buf = Wc.snapshotStore.buff;
-//     len = Wc.snapshotStore.len;
-// #ifdef DEBUG_DRIVERS__CAMERA_2025  
+//     buf = rt.snapshotStore.buff;
+//     len = rt.snapshotStore.len;
 //     ALOG_DBG(PSTR(D_LOG_CAMERA "savePic snapshotstore %d"), len);
-// #endif    
 //   } else {
 //     len = WcGetPicstore(bnum - 1, &buf);
-// #ifdef DEBUG_DRIVERS__CAMERA_2025  
 //     ALOG_DBG(PSTR(D_LOG_CAMERA "savePic PicStore %d -> %d"), bnum, len);
-// #endif
 //   }
 //   if (len){
 // #ifdef USE_UFILESYS
@@ -2687,11 +2651,9 @@ void mCamera::CmndWebcamGetPicStore(int bnum) {
 //       if (f){
 //         f.write(buf, len);
 //         f.close();
-// #ifdef DEBUG_DRIVERS__CAMERA_2025  
 //         ALOG_DBG(PSTR(D_LOG_CAMERA "Save Pic %s"), tkr_events->XdrvMailbox.data);
-// #endif        
 //         if (bnum == 0){
-//           pic_free(&Wc.snapshotStore);
+//           pic_free(&rt.snapshotStore);
 //         }
 //         return 1;
 //       }
@@ -2701,7 +2663,7 @@ void mCamera::CmndWebcamGetPicStore(int bnum) {
 //     ALOG_DBG(PSTR(D_LOG_CAMERA "Failed Save Pic %s - no USE_UFILESYS"), tkr_events->XdrvMailbox.data);
 // #endif
 //     if (bnum == 0){
-//       pic_free(&Wc.snapshotStore);
+//       pic_free(&rt.snapshotStore);
 //     }
 //     return 0;
 //   } 
@@ -2757,11 +2719,11 @@ void mCamera::CmndWebcamResolution(uint8_t resolution)
       int32_t res = 0;
       if (resolution >= 0) { s->set_framesize(s, (framesize_t)resolution); }
       res = s->status.framesize;
-      Wc.width = 0;
-      Wc.height = 0;
-      Wc.last_frame_len = 0;
-      Wc.frameIntervalsus = (uint32_t)(((float)nativeIntervals20ms[resolution]/((float)tkr_set->Settings.webcam_clk/20.0))*1000.0);
-      stats.maxfps = (uint32_t)((float)1000000.0/(float)Wc.frameIntervalsus);
+      rt.width = 0;
+      rt.height = 0;
+      rt.last_frame_len = 0;
+      rt.frameIntervalsus = (uint32_t)(((float)nativeIntervals20ms[resolution]/((float)tkr_set->Settings.webcam_clk/20.0))*1000.0);
+      stats.maxfps = (uint32_t)((float)1000000.0/(float)rt.frameIntervalsus);
 
       // WcFeature is lost on resolution change
       ApplySettings();
@@ -3022,7 +2984,7 @@ void mCamera::CmndWebcamClock(uint16_t val)
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >= 10 && val <= 200){
       tkr_set->Settings.webcam_clk = val;
-      if (Wc.up){
+      if (rt.up){
         Setup(tkr_set->Settings.webcam_config.resolution);
       }
     }
@@ -3094,7 +3056,7 @@ uint8_t mCamera::ConstructJSON_State(uint8_t json_level, bool json_appending){
     // JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV,0));
     // JBI->Add("LED2_INV", tkr_pins->GetPin(GPIO_LED2_INV,0));
 
-    size_t free_stack = uxTaskGetStackHighWaterMark(Wc.taskHandle); // returns "word/U32" being used, so multiply by 4 to get bytes
+    size_t free_stack = uxTaskGetStackHighWaterMark(rt.taskHandle); // returns "word/U32" being used, so multiply by 4 to get bytes
 // Serial.printf("Free stack: %d bytes\n", free_stack * 4);
   JBI->Add("FreeStack", (uint32_t)(free_stack * 4)); // If the number is small (<100 words), you’re about to overflow.
 
@@ -3135,9 +3097,9 @@ uint8_t mCamera::ConstructJSON_State(uint8_t json_level, bool json_appending){
   JBI->Add(("rtsp"),           tkr_set->Settings.webcam_config.rtsp);
 
   // Optional runtime-only (not config) if applicable
-  JBI->Add(("up"),             Wc.up);
-  JBI->Add(("width"),          Wc.width);
-  JBI->Add(("height"),         Wc.height);
+  JBI->Add(("up"),             rt.up);
+  JBI->Add(("width"),          rt.width);
+  JBI->Add(("height"),         rt.height);
 
 
 
@@ -3200,7 +3162,7 @@ void mCamera::MQTTHandler_Init()
  *     will fail if it can't convert or allocate.
  * 
  * WcSetPicture - SetPictureN (N=1-MAX_PICTORE) expects 'addr len format [width height]
- *   use to populate a frame in Wc.picstore from Berry.  e.g. to put a JPEG mask there
+ *   use to populate a frame in rt.picstore from Berry.  e.g. to put a JPEG mask there
  *   so you can then decode it, get it's address, get the address of the current mask, and 
  *   copy data across.
  *   if sending JPEG (format=0|5), width and height are calculated on decode.
@@ -3437,7 +3399,7 @@ uint32_t mCamera::SetMotionDetect(int32_t value) {
 bool mCamera::ConvertFrame(int32_t bnum_i, int format, int scale) {
   if ((bnum_i < 0) || bnum_i >= MAX_PICSTORE) return false;
   if ((scale < 0) || scale > 3) return false;
-  struct PICSTORE *ps = &Wc.picstore[bnum_i];
+  struct PICSTORE *ps = &rt.picstore[bnum_i];
   if (!ps->buff) return false;
   // if jpeg decode
   bool res = false;
@@ -3477,8 +3439,8 @@ bool mCamera::ConvertFrame(int32_t bnum_i, int format, int scale) {
 
 void mCamera::MotionLog(){
   AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("CAM: motion: w:%d h:%d scale:1/%d:1/%d ms:%u val:%d br: %d triggerpoint:%d, px10000:%d"), 
-    (Wc.width/(1<<wc_motion.scale))/(1<<wc_motion.swscale), 
-    (Wc.height/(1<<wc_motion.scale))/(1<<wc_motion.swscale), 
+    (rt.width/(1<<wc_motion.scale))/(1<<wc_motion.swscale), 
+    (rt.height/(1<<wc_motion.scale))/(1<<wc_motion.swscale), 
     (1<<wc_motion.scale), 
     (1<<wc_motion.swscale), 
     wc_motion.last_duration,
@@ -3747,8 +3709,8 @@ void mCamera::AutoMask(){
   //uint32_t auto_mask; // number of mootion detects to run automask over
   //uint8_t auto_mask_pixel_threshold; // pixel change threshold to add pixel to mask
   //uint8_t auto_mask_pixel_expansion; // number of pixels atound the detected pixel to set in mask (square)
-  int width = Wc.width/(1<<wc_motion.scale);
-  int height = Wc.height/(1<<wc_motion.scale);
+  int width = rt.width/(1<<wc_motion.scale);
+  int height = rt.height/(1<<wc_motion.scale);
   int swscalex = (1<<wc_motion.swscale);
   int scaledwidth = width/swscalex;
   int swscaley = (1<<wc_motion.swscale);
@@ -3785,12 +3747,12 @@ void mCamera::AutoMask(){
 
 /*********************************************************************************************/
 // motion detect routine.
-// Wc.width and Wc.height must be set
+// rt.width and rt.height must be set
 // buffer is passed in
 // if it fails to allocate, it will TURN OFF detection
 void mCamera::DetectMotionFn(uint8_t *_jpg_buf, int _jpg_buf_len){
-  int width = Wc.width/(1<<wc_motion.scale);
-  int height = Wc.height/(1<<wc_motion.scale);
+  int width = rt.width/(1<<wc_motion.scale);
+  int height = rt.height/(1<<wc_motion.scale);
   int pixelcount = width*height;
   int swscalex = (1<<wc_motion.swscale);
   int scaledwidth = width/swscalex;
@@ -4123,7 +4085,7 @@ void mCamera::CmndWebcamConvertFrame(void){
     AddLog(LOG_LEVEL_ERROR, PSTR("CAM: Invalid format %d"), format+1);
     return;  // Command Error
   }
-  struct PICSTORE *ps = &Wc.picstore[bnum-1];
+  struct PICSTORE *ps = &rt.picstore[bnum-1];
   if (!ps->buff){
     AddLog(LOG_LEVEL_ERROR, PSTR("CAM: No pic at %d"), bnum);
     return;  // Command Error
@@ -4148,7 +4110,7 @@ void mCamera::CmndWebcamSetPicture(void){
   if (!tkr_events->XdrvMailbox.data_len || bnum < 1 || bnum > MAX_PICSTORE) {
     return;  // Command Error
   }
-  struct PICSTORE *p = &Wc.picstore[bnum-1];
+  struct PICSTORE *p = &rt.picstore[bnum-1];
 
   char tmp[100];
   strncpy(tmp, tkr_events->XdrvMailbox.data, 99);
@@ -4211,7 +4173,7 @@ void mCamera::CmndWebcamSetMotionDetect(void) {
       res = WcSetMotionDetect(tkr_events->XdrvMailbox.payload);
       break;
     case 2:
-      res = Wc.lenDiffLimit = tkr_events->XdrvMailbox.payload;
+      res = rt.lenDiffLimit = tkr_events->XdrvMailbox.payload;
       break;
     case 3:
       if (tkr_events->XdrvMailbox.payload >= 0 && tkr_events->XdrvMailbox.payload <= 255){
@@ -4326,8 +4288,8 @@ void mCamera::CmndWebcamSetMotionDetect(void) {
 void mCamera::CmndWebcamGetMotionPixels(void) {
   // NOTE: the buffers returned here are static unless the frame size or scale changes.
   // use with care
-  int width = Wc.width/(1<<wc_motion.scale);
-  int height = Wc.height/(1<<wc_motion.scale);
+  int width = rt.width/(1<<wc_motion.scale);
+  int height = rt.height/(1<<wc_motion.scale);
   int swscalex = (1<<wc_motion.swscale);
   int scaledwidth = width/swscalex;
   int swscaley = (1<<wc_motion.swscale);
@@ -4365,10 +4327,10 @@ void mCamera::CmndWebcamGetMotionPixels(void) {
   }
 
   if (bnum > 1){
-    bool res = pic_alloc(&Wc.picstore[bnum-1], p->width, p->height, 0, p->format, WC_ALLOC_ALWAYS);
+    bool res = pic_alloc(&rt.picstore[bnum-1], p->width, p->height, 0, p->format, WC_ALLOC_ALWAYS);
     if (res){
-      memcpy(Wc.picstore[bnum-1].buff, p->buff, p->len);
-      p = &Wc.picstore[bnum-1];
+      memcpy(rt.picstore[bnum-1].buff, p->buff, p->len);
+      p = &rt.picstore[bnum-1];
     } else {
       return;  // Command Error
     }

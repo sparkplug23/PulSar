@@ -53,7 +53,7 @@ bool mWiFi::WiFi2_Ap_EnsureStarted(void)
   #endif
 
   // TEMPORARY bridge: start webserver/pages
-  tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__ANY);
+  tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__WIFI);
 
   return true;
 }

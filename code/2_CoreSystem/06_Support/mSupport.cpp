@@ -748,8 +748,9 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
       parse_JSONCommand(obj);
     break;
 
-    case TASK_NETWORK_CONNECTED__ANY:
     case TASK_NETWORK_CONNECTED__WIFI:
+    case TASK_NETWORK_CONNECTED__ETHERNET:
+    case TASK_NETWORK_CONNECTED__CELLULAR:
       ArduinoOTAInit();
     break;
   }

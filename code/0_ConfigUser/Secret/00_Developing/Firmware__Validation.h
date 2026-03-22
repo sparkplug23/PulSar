@@ -630,7 +630,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   // #define USE_MODULE_DRIVERS_CAMERA_OV2640
   #define USE_MODULE_DRIVERS__CAMERA
   // #define CAMERA_MODEL_WROVER_KIT
-  #define WEBCAM_DEV_DEBUG
+  
 
   #define ESP32
   #define CONFIG_IDF_TARGET_ESP32S3 1
@@ -648,7 +648,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 
 // #define ENABLE_RTSPSERVER
 
-#define DEBUG_DRIVERS__CAMERA_2025
+
 // //  /***********************************
 // //   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
 // //  ************************************/  
@@ -963,17 +963,17 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   // #define USE_MODULE_DRIVERS_CAMERA_OV2640
   #define USE_MODULE_DRIVERS__CAMERA
   #define CAMERA_MODEL_WROVER_KIT
-  #define WEBCAM_DEV_DEBUG
+  
 
   
 
 #define USE_MODULE_CORE_FILESYSTEM
 
 
-#define DEBUG_DRIVERS__CAMERA_2025
+
 #define ENABLE_RTSPSERVER
 
-#define DEBUG_DRIVERS__CAMERA_2025
+
 // //  /***********************************
 // //   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
 // //  ************************************/  

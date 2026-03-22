@@ -54,13 +54,6 @@ int8_t mInterfaceNetwork::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-
-// network hooks for others
-    case TASK_NETWORK_CONNECTED__WIFI:
-    case TASK_NETWORK_CONNECTED__ETHERNET:
-      tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__ANY);
-    break;
-
     /************
      * MQTT SECTION *             FOR NETWORK, IT MAY BE BETTER TO HAVE "INTERFACE" do all mqtt broadcasts.
     *******************/

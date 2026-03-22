@@ -1076,6 +1076,13 @@
 
 #define D_GPIO_FUNCTION_BUILTIN_LED1_CTR              "Builtin LED 1" // only enabled if available and not being used by another pin
 
+#define D_GPIO_FUNCTION_STATUS_LED_CTR              "StatusLed"     // Will still be added into LED module, its just an additional "virtual" LEDx
+#define D_GPIO_FUNCTION_STATUS_LED_INV_CTR          "StatusLedInv"
+
+
+
+
+
 #define D_GPIO_FUNCTION_LED1_CTR              "Led1"
 #define D_GPIO_FUNCTION_LED2_CTR              "Led2"
 #define D_GPIO_FUNCTION_LED3_CTR              "Led3"

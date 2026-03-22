@@ -50,20 +50,8 @@
   #endif // RTSP_FRAME_TIME
 #endif
 
-// #include "cam_hal.h"
-// #include "esp_camera.h"
-// #include "sensor.h"
-// #include "fb_gfx.h"
-// #include "camera_pins.h"
-// #include "esp_jpg_decode.h"
-//#include "img_converters.h"
-
 
 #define WEBCAM_CORE 0
-
-
-
-
 
 
 class mCamera :
@@ -92,38 +80,38 @@ class mCamera :
     }module_state;
 
 
-enum LedEffect {
-  LED_OFF,
-  LED_ON,
-  LED_BLINK,
-  LED_PULSE
-};
+    enum LedEffect {
+      LED_OFF,
+      LED_ON,
+      LED_BLINK,
+      LED_PULSE
+    };
 
-typedef union {
-  uint8_t data;
-  struct {
-    uint8_t network_down : 1;  // No wifi/ethernet connect
-    uint8_t mqtt_down : 1;     // No mqtt connect
-    uint8_t wifi_ap_active : 1;       // In AP mode, waiting config
-    uint8_t show_power : 1;
-    uint8_t spare04 : 1;
-    uint8_t spare05 : 1;
-    uint8_t slave : 1;     // Controlled by another task
-    uint8_t manual : 1;    // Direct control
-  };
-} LedMode_BitField;
+    typedef union {
+      uint8_t data;
+      struct {
+        uint8_t network_down : 1;  // No wifi/ethernet connect
+        uint8_t mqtt_down : 1;     // No mqtt connect
+        uint8_t wifi_ap_active : 1;       // In AP mode, waiting config
+        uint8_t show_power : 1;
+        uint8_t spare04 : 1;
+        uint8_t spare05 : 1;
+        uint8_t slave : 1;     // Controlled by another task
+        uint8_t manual : 1;    // Direct control
+      };
+    } LedMode_BitField;
 
-struct LedState {
-  LedEffect effect;
-  uint8_t state;            // Current state (HIGH or LOW)
-  uint8_t count;            // Number of blinks/pulses
-  uint16_t period;          // Period for both blinking and pulsing in milliseconds
-  uint16_t groupPause;      // Pause time between blink/pulse groups in milliseconds
-  uint8_t duration_secs;    // Duration in seconds for how long the LED should blink/pulse
-  uint32_t lastUpdateTime;  // Time tracking for blinking/pulsing
-  uint32_t startTime;       // To track when the blinking/pulsing started
-  LedMode_BitField mode;
-};
+    struct LedState {
+      LedEffect effect;
+      uint8_t state;            // Current state (HIGH or LOW)
+      uint8_t count;            // Number of blinks/pulses
+      uint16_t period;          // Period for both blinking and pulsing in milliseconds
+      uint16_t groupPause;      // Pause time between blink/pulse groups in milliseconds
+      uint8_t duration_secs;    // Duration in seconds for how long the LED should blink/pulse
+      uint32_t lastUpdateTime;  // Time tracking for blinking/pulsing
+      uint32_t startTime;       // To track when the blinking/pulsing started
+      LedMode_BitField mode;
+    };
 
 
     #ifdef ENABLE_RTSPSERVER
@@ -160,7 +148,7 @@ struct LedState {
 #endif
 
 #ifdef ENABLE_RTSPSERVER
-void WcEndRTSP();
+void EndRTSP();
 
 typedef struct tag_wc_rtspclient {
   localOV2640Streamer * volatile camStreamer;
@@ -248,7 +236,7 @@ struct {
   wc_rtspclient * volatile rtsp_client;
   uint8_t rtsp_start;
   #endif // ENABLE_RTSPSERVER
-} Wc;
+} rt;
 
 struct {
   uint32_t camcnt = 0;

@@ -3410,70 +3410,84 @@ bool mAnimatorLight::isIp(String str) {
 
 void mAnimatorLight::WebPage_Root_AddHandlers()
 {
-
   tkr_web->server->addHandler(websocket_lights);
+  // AddURLtoList(PM_URL_WS_LIGHTS, HTTP_GET); // add manually here if websocket_lights path is known
 
   JBI->releaseJSONBufferLock();
 
   #ifdef ENABLE_FEATURE_LIGHTING__WEBSOCKETS
   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-  tkr_web->server->on("/liveview2D", HTTP_GET, [](AsyncWebServerRequest *request){
+  SPGM_CTR(PM_URL_LIVEVIEW2D) "/liveview2D";
+  tkr_web->server->on(PM_URL_LIVEVIEW2D, HTTP_GET, [](AsyncWebServerRequest *request){
     tkr_web->handleStaticContent(request, "", 200, FPSTR(CONTENT_TYPE_HTML), PAGE_liveviewws2D, PAGE_liveviewws2D_length);
   });
+  AddURLtoList(PM_URL_LIVEVIEW2D, HTTP_GET);
   #endif
   #endif
 
-  tkr_web->server->on("/liveview", HTTP_GET, [](AsyncWebServerRequest *request){
+  SPGM_CTR(PM_URL_LIVEVIEW) "/liveview";
+  tkr_web->server->on(PM_URL_LIVEVIEW, HTTP_GET, [](AsyncWebServerRequest *request){
     tkr_web->handleStaticContent(request, "", 200, FPSTR(CONTENT_TYPE_HTML), PAGE_liveview, PAGE_liveview_length);
   });
+  AddURLtoList(PM_URL_LIVEVIEW, HTTP_GET);
 
-  //settings page for LEDs, UI, sync, time, security, usermods, update
-  tkr_web->server->on("/lights/settings", HTTP_GET, [this](AsyncWebServerRequest *request){
+  // settings page for LEDs, UI, sync, time, security, usermods, update
+  SPGM_CTR(PM_URL_LIGHTS_SETTINGS) "/lights/settings";
+  tkr_web->server->on(PM_URL_LIGHTS_SETTINGS, HTTP_GET, [this](AsyncWebServerRequest *request){
     this->serveSettings(request);
   });
-
+  AddURLtoList(PM_URL_LIGHTS_SETTINGS, HTTP_GET);
 
   // "/settings/settings.js&p=x" request also handled by serveSettings()
-  
- static const char _common_js[] PROGMEM = "/lights/common.js";
-  tkr_web->server->on(_common_js, HTTP_GET, [this](AsyncWebServerRequest *request){    
-    tkr_web->handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common, JS_common_length);
+
+  SPGM_CTR(PM_URL_LIGHTS_COMMON_JS) "/lights/common.js";
+  tkr_web->server->on(PM_URL_LIGHTS_COMMON_JS, HTTP_GET, [this](AsyncWebServerRequest *request){
+    tkr_web->handleStaticContent(request, FPSTR(PM_URL_LIGHTS_COMMON_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common, JS_common_length);
   });
-  
-  
+  AddURLtoList(PM_URL_LIGHTS_COMMON_JS, HTTP_GET);
+
   #ifndef ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
-  static const char _style_css[] PROGMEM = "/style.css";
-  tkr_web->server->on("/style.css", HTTP_GET, [this](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(request, FPSTR(_style_css), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss, PAGE_settingsCss_length);
-  });
 
-  static const char _favicon_ico[] PROGMEM = "/favicon.ico";
-  tkr_web->server->on(_favicon_ico, HTTP_GET, [](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(request, FPSTR(_favicon_ico), 200, F("image/x-icon"), favicon, favicon_length, false);
+  SPGM_CTR(PM_URL_STYLE_CSS) "/style.css";
+  tkr_web->server->on(PM_URL_STYLE_CSS, HTTP_GET, [this](AsyncWebServerRequest *request){
+    tkr_web->handleStaticContent(request, FPSTR(PM_URL_STYLE_CSS), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss, PAGE_settingsCss_length);
   });
+  AddURLtoList(PM_URL_STYLE_CSS, HTTP_GET);
 
-  static const char _skin_css[] PROGMEM = "/skin.css";
-  tkr_web->server->on(_skin_css, HTTP_GET, [](AsyncWebServerRequest *request){
-    if (tkr_mfile->handleFileRead(request, FPSTR(_skin_css))) return;
+  SPGM_CTR(PM_URL_FAVICON_ICO) "/favicon.ico";
+  tkr_web->server->on(PM_URL_FAVICON_ICO, HTTP_GET, [](AsyncWebServerRequest *request){
+    tkr_web->handleStaticContent(request, FPSTR(PM_URL_FAVICON_ICO), 200, F("image/x-icon"), favicon, favicon_length, false);
+  });
+  AddURLtoList(PM_URL_FAVICON_ICO, HTTP_GET);
+
+  SPGM_CTR(PM_URL_SKIN_CSS) "/skin.css";
+  tkr_web->server->on(PM_URL_SKIN_CSS, HTTP_GET, [](AsyncWebServerRequest *request){
+    if (tkr_mfile->handleFileRead(request, FPSTR(PM_URL_SKIN_CSS))) return;
     AsyncWebServerResponse *response = request->beginResponse(200, FPSTR(CONTENT_TYPE_CSS));
     request->send(response);
   });
+  AddURLtoList(PM_URL_SKIN_CSS, HTTP_GET);
+
   #endif
 
-  tkr_web->server->on("/welcome", HTTP_GET, [this](AsyncWebServerRequest *request){
+  SPGM_CTR(PM_URL_WELCOME) "/welcome";
+  tkr_web->server->on(PM_URL_WELCOME, HTTP_GET, [this](AsyncWebServerRequest *request){
     this->serveSettings(request);
   });
+  AddURLtoList(PM_URL_WELCOME, HTTP_GET);
 
-
-  tkr_web->server->on("/lights/settings", HTTP_POST, [this](AsyncWebServerRequest *request){
+  tkr_web->server->on(PM_URL_LIGHTS_SETTINGS, HTTP_POST, [this](AsyncWebServerRequest *request){
     this->serveSettings(request, true);
   });
+  AddURLtoList(PM_URL_LIGHTS_SETTINGS, HTTP_POST);
 
-  tkr_web->server->on("/json", HTTP_GET, [this](AsyncWebServerRequest *request){
+  SPGM_CTR(PM_URL_JSON) "/json";
+  tkr_web->server->on(PM_URL_JSON, HTTP_GET, [this](AsyncWebServerRequest *request){
     this->serveJson(request);
   });
+  AddURLtoList(PM_URL_JSON, HTTP_GET);
 
-  AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler("/json", [this](AsyncWebServerRequest *request) 
+  AsyncCallbackJsonWebHandler* handler = new AsyncCallbackJsonWebHandler(PM_URL_JSON, [this](AsyncWebServerRequest *request)
   {
     bool verboseResponse = false;
     bool isConfig = false;
@@ -3484,34 +3498,16 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
     if (!JBI->requestJSONBufferLock(14)) return;
 
-    
-      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS_INCLUDE_PRIMARY_JSON_COMMANDS
-
-      // // Retrieve the buffer and its length
-      // // char* jsonBuffer = static_cast<uint8_t*>(request->_tempObject);
-      // // size_t jsonBufferLength = request->contentLength();
-      // char* jsonBuffer = (char*)request->_tempObject;
-      // ALOG_INF(PSTR("request->contentLength %d"),request->contentLength());
-      // for(int i=0;i<request->contentLength();i++){
-      //   Serial.printf("[%03d] ",i);
-      //   Serial.println((char)jsonBuffer[i]);
-      // }
-
-      /***
-       * Enable parsing through normal JSON commands
-       * This must happen first, as it is later consumed by the arduinojson deserializer which tokenizes the buffer
-       * and then it is no longer possible to parse the buffer again.
-       * It works here because we copy the buffer out before it is deserialized into the global large buffer with thread lock.
-       */
+    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS_INCLUDE_PRIMARY_JSON_COMMANDS
 
       uint16_t jsonBufferLength = request->contentLength();
       if(jsonBufferLength < DATA_BUFFER_PAYLOAD_MAX_LENGTH)
       {
-        ALOG_INF(PSTR("AsyncCallbackJsonWebHandler jsonBufferLength %d"),jsonBufferLength);
+        ALOG_INF(PSTR("AsyncCallbackJsonWebHandler jsonBufferLength %d"), jsonBufferLength);
 
         /**
          * @brief LOAD TO PARSE
-         * 
+         *
          */
         if(data_buffer.requestLock(GetModuleUniqueID()))
         {
@@ -3522,25 +3518,22 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
           data_buffer.payload.length_used = jsonBufferLength;
           memcpy(data_buffer.payload.ctr, jsonBuffer, data_buffer.payload.length_used);
           data_buffer.payload.ctr[data_buffer.payload.length_used] = '\0'; // null terminate
-        
+
           LoggingLevels level = LOG_LEVEL_INFO;
           #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
           level = LOG_LEVEL_DEV_TEST;
           #endif
           #ifdef ENABLE_LOG_LEVEL_INFO
-          AddLog(level, PSTR(D_LOG_LIGHT "State Payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
-          #endif// ENABLE_LOG_LEVEL_INFO
+          AddLog(level, PSTR(D_LOG_LIGHT "State Payload [len:%d] %s"), data_buffer.payload.length_used, data_buffer.payload.ctr);
+          #endif
 
           tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
           data_buffer.releaseLock();
-
         }
-
-
       }
 
-      #endif
+    #endif
 
     DeserializationError error = deserializeJson(*tkr_mfile->pDoc, (uint8_t*)(request->_tempObject));
     JsonObject root = tkr_mfile->pDoc->as<JsonObject>();
@@ -3549,28 +3542,19 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
       request->send(400, "application/json", F("{\"error\":9}")); // ERR_JSON
       return;
     }
-    // if (root.containsKey("pin")) checkSettingsPIN(root["pin"].as<const char*>());
 
     const String& url = request->url();
-    isConfig = url.indexOf("cfg") > -1; 
+    isConfig = url.indexOf("cfg") > -1;
     if (!isConfig) {
       ALOG_INF(PSTR("deserializeState"));
-      serializeJson(root,Serial);
-      // DEBUG_PRINTLN();
-      // ALOG_DBG(PSTR("deserializeState"));
-        
-      verboseResponse = this->deserializeState(root);
-      
-    } else {
-      // if (!correctPIN && strlen(settingsPIN)>0) {
-      //   request->send(403, "application/json", F("{\"error\":1}")); // ERR_DENIED
-      //   this->releaseJSONBufferLock();
-      //   return;
-      // }
-      ALOG_INF(PSTR("deserializeConfig"));
-      verboseResponse = this->deserializeConfig(root); //use verboseResponse to determine whether cfg change should be saved immediately
-    }
+      serializeJson(root, Serial);
 
+      verboseResponse = this->deserializeState(root);
+
+    } else {
+      ALOG_INF(PSTR("deserializeConfig"));
+      verboseResponse = this->deserializeConfig(root); // use verboseResponse to determine whether cfg change should be saved immediately
+    }
 
     JBI->releaseJSONBufferLock();
 
@@ -3579,69 +3563,64 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
         ALOG_INF(PSTR("Serve the json back, set CALL_MODE_WS_SEND"));
         lastInterfaceUpdate = millis(); // prevent WS update until cooldown
         interfaceUpdateCallMode = CALL_MODE_WS_SEND; // schedule WS update
-        this->serveJson(request); return; //if JSON contains "v"
+        this->serveJson(request); return; // if JSON contains "v"
       } else {
-        doSerializeConfig = true; //serializeConfig(); //Save new settings to FS
+        doSerializeConfig = true; // serializeConfig(); // Save new settings to FS
       }
     }
     request->send(200, CONTENT_TYPE_JSON, F("{\"success\":true}"));
   }, JSON_BUFFER_SIZE);
   tkr_web->server->addHandler(handler);
+  AddURLtoList(PM_URL_JSON, HTTP_POST);
 
-
-
-  tkr_web->server->on("/version", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, FPSTR(CONTENT_TYPE_PLAIN), (String)PROJECT_VERSION);
-  });
-
-  tkr_web->server->on("/uptime", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, FPSTR(CONTENT_TYPE_PLAIN), (String)millis());
-  });
-
-  tkr_web->server->on("/freeheap", HTTP_GET, [](AsyncWebServerRequest *request){
+  SPGM_CTR(PM_URL_FREEHEAP) "/freeheap";
+  tkr_web->server->on(PM_URL_FREEHEAP, HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(200, FPSTR(CONTENT_TYPE_PLAIN), (String)ESP.getFreeHeap());
   });
+  AddURLtoList(PM_URL_FREEHEAP, HTTP_GET);
 
-#ifdef WLED_ENABLE_USERMOD_PAGE
-  tkr_web->server->on("/u", HTTP_GET, [](AsyncWebServerRequest *request){
+  #ifdef WLED_ENABLE_USERMOD_PAGE
+  SPGM_CTR(PM_URL_USERMOD) "/u";
+  tkr_web->server->on(PM_URL_USERMOD, HTTP_GET, [](AsyncWebServerRequest *request){
     if (handleIfNoneMatchCacheHeader(request)) return;
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", PAGE_usermod, PAGE_usermod_length);
-    response->addHeader(FPSTR(s_content_enc),"gzip");
+    response->addHeader(FPSTR(s_content_enc), "gzip");
     setStaticContentCacheHeaders(response);
     request->send(response);
   });
-#endif
+  AddURLtoList(PM_URL_USERMOD, HTTP_GET);
+  #endif
 
-  tkr_web->server->on("/teapot", HTTP_GET, [this](AsyncWebServerRequest *request){
-    tkr_web->serveMessage(request, 418, F("418. I'm a teapot."), F("(Tangible Embedded Advanced Project Of Twinkling)"), 254);
-  });
-
-  tkr_web->server->on("/upload", HTTP_POST, [this](AsyncWebServerRequest *request) {},
+  SPGM_CTR(PM_URL_UPLOAD) "/upload";
+  tkr_web->server->on(PM_URL_UPLOAD, HTTP_POST, [this](AsyncWebServerRequest *request) {},
         [this](AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data,
-                      size_t len, bool final) {this->handleUpload(request, filename, index, data, len, final);}
+                      size_t len, bool final) { this->handleUpload(request, filename, index, data, len, final); }
   );
+  AddURLtoList(PM_URL_UPLOAD, HTTP_POST);
 
   /**
-   * @brief 
+   * @brief
    * /iro.js and /rangetouch.js are inlined via the compress,minify code during npm compile
    * It adds them into the index.htm file to reduce repeated loads
    **/
 
   #ifdef ENABLE_FEATURE_LIGHTING__DMX
-  tkr_web->server->on("/dmxmap", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", PAGE_dmxmap     , dmxProcessor);
+  SPGM_CTR(PM_URL_DMXMAP) "/dmxmap";
+  tkr_web->server->on(PM_URL_DMXMAP, HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/html", PAGE_dmxmap, dmxProcessor);
   });
+  AddURLtoList(PM_URL_DMXMAP, HTTP_GET);
   #else
-  tkr_web->server->on("/dmxmap", HTTP_GET, [this](AsyncWebServerRequest *request){
+  SPGM_CTR(PM_URL_DMXMAP) "/dmxmap";
+  tkr_web->server->on(PM_URL_DMXMAP, HTTP_GET, [this](AsyncWebServerRequest *request){
     tkr_web->serveMessage(request, 501, "Not implemented", F("DMX support is not enabled in this build."), 254);
   });
+  AddURLtoList(PM_URL_DMXMAP, HTTP_GET);
   #endif
 
-
-
-  tkr_web->server->on("/lights", HTTP_GET, [this](AsyncWebServerRequest *request){
+  SPGM_CTR(PM_URL_LIGHTS) "/lights";
+  tkr_web->server->on(PM_URL_LIGHTS, HTTP_GET, [this](AsyncWebServerRequest *request){
     if (tkr_web->captivePortal(request)) return;
-
     if (!showWelcomePage || request->hasArg(F("sliders"))) {
       tkr_web->handleStaticContent(
         request,
@@ -3655,27 +3634,29 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
       serveSettings(request);
     }
   });
-
+  AddURLtoList(PM_URL_LIGHTS, HTTP_GET);
 
   #ifdef WLED_ENABLE_PIXART
-  static const char _pixart_htm[] PROGMEM = "/pixart.htm";
-  tkr_web->server->on(_pixart_htm, HTTP_GET, [](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(request, FPSTR(_pixart_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_pixart, PAGE_pixart_L);
+  SPGM_CTR(PM_URL_PIXART_HTM) "/pixart.htm";
+  tkr_web->server->on(PM_URL_PIXART_HTM, HTTP_GET, [](AsyncWebServerRequest *request){
+    tkr_web->handleStaticContent(request, FPSTR(PM_URL_PIXART_HTM), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_pixart, PAGE_pixart_L);
   });
+  AddURLtoList(PM_URL_PIXART_HTM, HTTP_GET);
   #endif
 
   #ifndef WLED_DISABLE_PXMAGIC
-  static const char _pxmagic_htm[] PROGMEM = "/pxmagic.htm";
-  tkr_web->server->on(_pxmagic_htm, HTTP_GET, [](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(request, FPSTR(_pxmagic_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_pxmagic, PAGE_pxmagic_L);
+  SPGM_CTR(PM_URL_PXMAGIC_HTM) "/pxmagic.htm";
+  tkr_web->server->on(PM_URL_PXMAGIC_HTM, HTTP_GET, [](AsyncWebServerRequest *request){
+    tkr_web->handleStaticContent(request, FPSTR(PM_URL_PXMAGIC_HTM), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_pxmagic, PAGE_pxmagic_L);
   });
+  AddURLtoList(PM_URL_PXMAGIC_HTM, HTTP_GET);
   #endif
 
-  static const char _cpal_htm[] PROGMEM = "/cpal.htm";
-  tkr_web->server->on(_cpal_htm, HTTP_GET, [](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(request, FPSTR(_cpal_htm), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_cpal, PAGE_cpal_L);
+  SPGM_CTR(PM_URL_CPAL_HTM) "/cpal.htm";
+  tkr_web->server->on(PM_URL_CPAL_HTM, HTTP_GET, [](AsyncWebServerRequest *request){
+    tkr_web->handleStaticContent(request, FPSTR(PM_URL_CPAL_HTM), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_cpal, PAGE_cpal_L);
   });
-  
+  AddURLtoList(PM_URL_CPAL_HTM, HTTP_GET);
 }
 
 

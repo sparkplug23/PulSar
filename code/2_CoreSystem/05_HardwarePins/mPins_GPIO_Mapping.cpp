@@ -208,13 +208,14 @@ int16_t mPins::GetGPIOFunctionIDbyName(const char* c)
     if (strcmp_P(c, buffer) == 0) {
       return GPIO_LED1 + (i - 1);  // Return the corresponding LED ID
     }
-
     // Check inverted LEDs "LED1 Inv" to "LED8 Inv"
     snprintf_P(buffer, sizeof(buffer), PM_GPIO_FUNCTION_LED_NUM_INV_CTR, i);
     if (strcmp_P(c, buffer) == 0) {
       return GPIO_LED1_INV + (i - 1);  // Return the corresponding inverted LED ID
     }
   }
+  if(strcmp_P(c,PM_GPIO_FUNCTION_STATUS_LED_CTR)==0){      return GPIO_STATUS_LED; }
+  if(strcmp_P(c,PM_GPIO_FUNCTION_STATUS_LED_INV_CTR)==0){  return GPIO_STATUS_LED_INV; }
   #endif
   
 

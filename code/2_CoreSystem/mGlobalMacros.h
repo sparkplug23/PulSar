@@ -19,6 +19,19 @@
 #define DEFINE_PROGMEM_CTR2(X,Y) \
   const char X[] PROGMEM = Y;
 
+// Cleaned version of the above.
+
+#define PGM_CTR(X) \
+  const char X[] PROGMEM =
+
+#define SPGM_CTR(X) \
+  static const char X[] PROGMEM =
+
+#define PROGMEM_CTR2(X,Y) \
+  const char X[] PROGMEM = Y;
+
+
+
 // fixing "abs" on esp32 later platform API
 
 // #define ABS_FUNCTION(x) static_cast<long long int>abs(x)

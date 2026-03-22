@@ -47,6 +47,7 @@
 
 #include <stdint.h>
 
+#include "mWebUrlTracker.h" // Must be included so #else blanks are inserted
 
 const char PM_WEB_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html";
 const char PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT[] PROGMEM = "text/javascript";
@@ -78,7 +79,9 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 #include "3_Network/21_WebServer/Webpages/Generated/root_basic.h"
 #include "3_Network/21_WebServer/Webpages/Generated/submodule_assets.h"
 #include "3_Network/21_WebServer/Webpages/Generated/submodule_unified_pages.h"
-
+#ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#include "3_Network/21_WebServer/Webpages/Generated/pages_url_debugs.h"
+#endif
 
 
 
@@ -316,8 +319,10 @@ size_t WebUI_Print_CellFloat(Print& out, float value, uint8_t decimals, const ch
 size_t WebUI_Print_CellDash(Print& out);
 size_t WebUI_Print_RowEnd(Print& out);
 
-
-
+#ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+void HandlePage_UrlList(AsyncWebServerRequest *request);
+void HandlePage_UrlList_JSON(AsyncWebServerRequest *request);
+#endif
 
 
 

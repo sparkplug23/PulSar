@@ -323,7 +323,7 @@ void mWiFi::WiFi2_Sta_Connected_Enter(void)
   tkr_set->runtime.global_state.network_down = false;
 
   // Trigger existing task event flow
-  tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__WIFI); tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__ANY);
+  tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__WIFI);
 }
 
 void mWiFi::WiFi2_Sta_Disconnected_Enter(void)
@@ -338,7 +338,7 @@ void mWiFi::WiFi2_Sta_Disconnected_Enter(void)
 
   
   // Trigger existing task event flow
-  tkr->Tasker_Interface(TASK_NETWORK_LOST__WIFI); tkr->Tasker_Interface(TASK_NETWORK_LOST__WIFI);
+  tkr->Tasker_Interface(TASK_NETWORK_LOST__WIFI);
 }
 
 void mWiFi::WiFi2_Sta_EnsureConnecting(void)
@@ -361,59 +361,6 @@ void mWiFi::WiFi2_Sta_EnsureConnecting(void)
 }
 
 
-// void mWiFi::WiFi_Sta_State_Set(uint8_t state)
-// {
-// ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
-//   //check for change in state
-//   if(connection.fConnected != state)
-//   {
-//     DEBUG_LINE_HERE;
-
-//     if(state){ //new state 
-//     // pinMode(2,OUTPUT);
-//     // digitalWrite(2,LOW);
-//       tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__WIFI);
-//       loglevel_with_connection_status = LOG_LEVEL_DEBUG_MORE;
-//     }else{
-//     // pinMode(2,OUTPUT);
-//     // digitalWrite(2,HIGH);
-//       tkr->Tasker_Interface(TASK_NETWORK_LOST__WIFI);
-//       loglevel_with_connection_status = LOG_LEVEL_INFO;
-//     }
-//   }
-
-//   connection.fConnected = state;
-
-  
-//   if(state == 0){
-//     ALOG_INF(PSTR(D_LOG_DEBUG "%s=%d"),"WiFi_Sta_State_Set",state);
-//   }
-
-//   if (state == tkr_set->runtime.global_state.wifi_down) {
-//     DEBUG_LINE_HERE;
-//     if (state) {
-//       // tkr_set->rules_flag.wifi_connected = 1;
-//       connection.link_count++;
-//       connection.downtime += tkr_time->UpTime() - connection.last_event;
-//     } else {
-//       // tkr_set->rules_flag.wifi_disconnected = 1;
-//       connection.last_event = tkr_time->UpTime();
-//     }DEBUG_LINE_HERE
-
-//   }
-//   // if(tkr_time==NULL){
-//   //    ALOG_DBM( "tkr_time==NULL");
-//   // }
-//   tkr_set->runtime.global_state.wifi_down = state ^1;
-//   if (!tkr_set->runtime.global_state.wifi_down) {
-//     // DEBUG_LINE_HERE;
-//     tkr_set->runtime.global_state.network_down = 0;
-//   }
-
-//   // ALOG_INF(PSTR(D_LOG_DEBUG "%s"),"WiFi_Sta_State_Set end");
-    
-// }
-
 void mWiFi::WiFi_Sta_State_Set(uint8_t state)
 {
   ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"), __FILE__, __LINE__);
@@ -432,7 +379,7 @@ void mWiFi::WiFi_Sta_State_Set(uint8_t state)
     // NOTE: this function historically triggers task events directly
     if (new_connected)
     {
-      tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__WIFI); tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__ANY);
+      tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__WIFI);
       loglevel_with_connection_status = LOG_LEVEL_DEBUG_MORE;
 
       // Transition into connected:
@@ -444,7 +391,7 @@ void mWiFi::WiFi_Sta_State_Set(uint8_t state)
     }
     else
     {
-      tkr->Tasker_Interface(TASK_NETWORK_LOST__WIFI); tkr->Tasker_Interface(TASK_NETWORK_LOST__WIFI);
+      tkr->Tasker_Interface(TASK_NETWORK_LOST__WIFI);
       loglevel_with_connection_status = LOG_LEVEL_INFO;
 
       // Transition into disconnected:

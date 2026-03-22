@@ -208,9 +208,11 @@ void mServerResetRelays::parse_JSONCommand(JsonParserObject obj)
 
 void mServerResetRelays::WebPage_Root_AddHandlers()
 {
-  tkr_web->server->on("/m/serverrelays", HTTP_ANY, [this](AsyncWebServerRequest *request){
+  SPGM_CTR(PM_SERVER_RELAYS) "/m/serverrelays";
+  tkr_web->server->on(PM_SERVER_RELAYS, HTTP_ANY, [this](AsyncWebServerRequest *request){
     this->Serve_Submodule_ServerResetRelays(request);
   });
+  AddURLtoList(PM_SERVER_RELAYS, HTTP_ANY);
 
 }
 

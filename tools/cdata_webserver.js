@@ -451,6 +451,19 @@ writeChunks(
   destination_path + "pages_console_esp8266.h"
 );
 
+writeChunks(
+  source_path,
+  [
+    {
+      file: "url_list.htm",
+      name: "PAGE_url_list",
+      method: "gzip",
+      filter: "html-minify-ui",
+    }
+  ],
+  destination_path + "pages_url_debugs.h"
+);
+
 
 writeChunks(
   source_path,
