@@ -17,7 +17,7 @@
 *******************************************************************************************************************************************/
 
 // #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__TESTBOARD
-// #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__INSTALLED_BOARD
+#define DEVICE_QTQ__SERVER_RESET_CONTROLLER__INSTALLED_BOARD
 
 
 
