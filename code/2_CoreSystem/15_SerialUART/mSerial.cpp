@@ -22,6 +22,8 @@ bool flag_simple_uart2_receive_frame_for_calibration_updated = false;
 
 void mSerial::Init(void)
 {
+  ALOG_INF(PSTR("====================== >>>>>>>>>>>> Init"));
+
 
   // #ifdef ENABLE_HARDWARE_UART_1
   // if(settings.uart1.receive_interrupts_enable)
@@ -77,6 +79,8 @@ void mSerial::Init(void)
 }
 void mSerial::Pre_Init()
 {
+
+  ALOG_INF(PSTR("====================== >>>>>>>>>>>> Pre_Init"));
 
   module_state.mode = ModuleStatus::Initialising;
 
@@ -138,13 +142,13 @@ void mSerial::Pre_Init()
 
   
   #ifdef ENABLE_HARDWARE_UART_2
-  if(tkr_pins->PinUsed(GPIO_HWSERIAL2_TX_ID)&&tkr_pins->PinUsed(GPIO_HWSERIAL2_RX_ID)) 
+  if(tkr_pins->PinUsed(GPIO_HWSERIAL2_TX)&&tkr_pins->PinUsed(GPIO_HWSERIAL2_RX)) 
   {
 
 
     settings.uart2.baud = HARDWARE_UART_2_BAUD_RATE_SPEED;
-    settings.uart2.gpio.tx = tkr_pins->GetPin(GPIO_HWSERIAL2_TX_ID);
-    settings.uart2.gpio.rx = tkr_pins->GetPin(GPIO_HWSERIAL2_RX_ID);
+    settings.uart2.gpio.tx = tkr_pins->GetPin(GPIO_HWSERIAL2_TX);
+    settings.uart2.gpio.rx = tkr_pins->GetPin(GPIO_HWSERIAL2_RX);
 
     HWSerial2 = new HardwareSerial(2);
 
@@ -229,6 +233,8 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
 
   if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
+
+// return 0;
 
   switch(function){
     /************
@@ -337,16 +343,16 @@ int8_t mSerial::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      // tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
   }
   
   /************
@@ -511,7 +517,7 @@ uint16_t mSerial::GetRingBufferDataAndClear(uint8_t uart_num, char* buffer, uint
 
 
   RingbufHandle_t handle_tmp;
-  ringbuf_type_t ringbuffer_format_type_tmp;
+  RingbufferType_t ringbuffer_format_type_tmp;
   switch(uart_num)
   {
     default:
@@ -733,7 +739,7 @@ uint16_t mSerial::GetSingleItemFromNoSplitRingBuffer(uint8_t uart_num, char* buf
 {
 
   RingbufHandle_t handle_tmp;
-  ringbuf_type_t ringbuffer_format_type_tmp;
+  RingbufferType_t ringbuffer_format_type_tmp;
   switch(uart_num)
   {
     default:
@@ -1369,23 +1375,31 @@ void IRAM_ATTR UART2_ISR_Static_NoSplitRingBuffer_ForMeasurements(void *arg)
   }
   
   // after reading bytes from buffer clear UART interrupt status
-  uart_clear_intr_status(UART_NUM_2, 
+  // uart_clear_intr_status(UART_NUM_2, 
+  //   UART_RXFIFO_TOUT_INT_CLR |
+  //   //clearing more, maybe its the cause of crashes?
+  //   UART_BRK_DET_INT_CLR |
+  //   //clearing more, maybe its the cause of crashes?
+  //   UART_CTS_CHG_INT_CLR |
+  //   //clearing more, maybe its the cause of crashes?
+  //   UART_DSR_CHG_INT_CLR |
+  //   //clearing more, maybe its the cause of crashes?
+  //   UART_RXFIFO_OVF_INT_CLR |
+  //   UART_FRM_ERR_INT_CLR | // UART Frame Error
+  //   //clearing more, maybe its the cause of crashes?
+  //   UART_PARITY_ERR_INT_CLR |
+  //   UART_TXFIFO_EMPTY_INT_CLR | // Needed to enable transmitting on serial
+  //   UART_RXFIFO_FULL_INT_CLR 
+  // );
+ uart_clear_intr_status(
+    UART_NUM_2,
     UART_RXFIFO_TOUT_INT_CLR |
-    //clearing more, maybe its the cause of crashes?
-    UART_BRK_DET_INT_CLR |
-    //clearing more, maybe its the cause of crashes?
-    UART_CTS_CHG_INT_CLR |
-    //clearing more, maybe its the cause of crashes?
-    UART_DSR_CHG_INT_CLR |
-    //clearing more, maybe its the cause of crashes?
-    UART_RXFIFO_OVF_INT_CLR |
-    UART_FRM_ERR_INT_CLR | // UART Frame Error
-    //clearing more, maybe its the cause of crashes?
-    UART_PARITY_ERR_INT_CLR |
-    UART_TXFIFO_EMPTY_INT_CLR | // Needed to enable transmitting on serial
-    UART_RXFIFO_FULL_INT_CLR 
-  );
-
+    UART_BRK_DET_INT_CLR     |
+    UART_RXFIFO_OVF_INT_CLR  |
+    UART_FRM_ERR_INT_CLR     |
+    UART_PARITY_ERR_INT_CLR  |
+    UART_RXFIFO_FULL_INT_CLR
+);
 
   #ifdef ENABLE_FEATURE_BLINK_ON_ISR_ACTIVITY
   gpio_set_level(BLINK_GPIO, !gpio_get_level(BLINK_GPIO));
@@ -1610,12 +1624,20 @@ void IRAM_ATTR UART2_ISR_Static_NoSplitRingBuffer(void *arg)
 #endif // ENABLE_HARDWARE_UART_2
 
 
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
 
 void mSerial::parse_JSONCommand(JsonParserObject obj)
 {
 
 
 }
+
+/******************************************************************************************************************
+ * ConstructJson
+*******************************************************************************************************************/
 
 
 uint8_t mSerial::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
@@ -1680,6 +1702,9 @@ uint8_t mSerial::ConstructJSON_UARTInfo(uint8_t json_level, bool json_appending)
 }
 
 
+/******************************************************************************************************************
+ * MQTT
+*******************************************************************************************************************/
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
@@ -1691,62 +1716,29 @@ void mSerial::MQTTHandler_Init(){
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//tkr_mqtt->dt.configperiod_secs; 
+  ptr->tRateSecs = SEC_IN_MIN; 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mSerial::ConstructJSON_Settings;
   mqtthandler_list.push_back(ptr);
 
-
   ptr = &mqtthandler_uartinfo_teleperiod;
   ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//tkr_mqtt->dt.configperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 10; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_UARTINFO_CTR;
   ptr->ConstructJSON_function = &mSerial::ConstructJSON_UARTInfo;
   mqtthandler_list.push_back(ptr);
-
   
 } 
 
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mSerial::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mSerial::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mSerial::MQTTHandler_Sender()
-{    
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
+#endif// USE_MODULE_NETWORK_MQTT
 
 
-#endif // USE_MODULE_NETWORK_MQTT
+
 
 #endif // USE_MODULE_CORE__SERIAL

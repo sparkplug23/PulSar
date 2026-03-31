@@ -14,6 +14,7 @@
 // #define DEVICE_TESTBED_01__SENSORS_NEXTION
 // #define DEVICE_TESTBED_02__MOTION_AUDIO
 // #define DEVICE_TESTBED_05__SWITCHES_BUTTONS
+// #define DEVICE_TESTBED_06__GPS_DECODER_WITH_SERIAL_SNIFFERS
 
 // room_sensor   : BME680, Light, PIR, RADAR
 // camera_sensor : Cam gives too much heat to make BME reliable, instead, this will focus on LIGHT_SENS,LIGHT_RGB(for night vision),PIR,RADAR so ability to sense motion and capture via FS and transmit later to networked storage?
@@ -1142,6 +1143,342 @@
 
 #endif
 
+
+
+/**
+ * @brief 
+ * 
+ * Testbed for GPS receivers, with TTYL on each serial pin (rx and tx), and across it (for ublox u-center)
+ * 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *                               *I ~PWM 'NC    
+ *                          _____________________
+ *                    3V3  |3V3     |USB|     VIN|
+ *                    GND  |GND               GND| 
+ *                 =BUZZER |15 (fL)            13| RADAR_OUT_MOT4
+ *              =SONIC TX1 |2  (fL, BIL)  (fH) 12| 
+ *              =SONIC RX1 |4             (fH) 14|
+ *              =RADAR TX2 |RX2/17             27| 
+ *              =RADAR RX2 |TX2/16             26| TOF1EN
+ *         PIR_SMALL_MOT2  |5  (fL)            25| TOF1INT
+ *                    aud  |18                 33| TOF0EN
+ *              LM386 SPKR |19                 32| TOF0INT
+ *        OLED,TOF I2C_SDA |21  SDA     (fL) * 35| RADAR_3p18GHZ_MOT3
+ *                         |RX0         (fL) * 34| PIR_LARGE_MOT1
+ *                         |TX0              ' VN| 
+ *        OLED,TOF I2C_SCL |22  SCL          ' VP| 
+ *                     NEO |23               ' EN| 
+ *                          _____________________
+ * 
+ * 
+ */
+
+ #ifdef DEVICE_TESTBED_06__GPS_DECODER_WITH_SERIAL_SNIFFERS
+ #ifndef DEVICENAME_CTR
+ #define DEVICENAME_CTR          "consumerunit"
+ #endif
+ #ifndef DEVICENAME_FRIENDLY_CTR
+ #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+ #endif
+ #ifndef DEVICENAME_DESCRIPTION_CTR
+ #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+ #endif
+ #define DEVICENAME_ROOMHINT_CTR "testgroup"
+ #define MQTT_HOST   "192.168.3.70"
+    
+    #define MQTT_PORT     1883
+   
+
+   
+ /***********************************
+  * SECTION: System Debug Options
+ ************************************/    
+ ///////////////////////////////////////////// Enable Logs
+ // #define DISABLE_SERIAL
+ // #define DISABLE_SERIAL0_CORE
+ // #define DISABLE_SERIAL_LOGGING
+ // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+ 
+ ///////////////////////////////////////////// System Logs
+ // #define ENABLE_ADVANCED_DEBUGGING
+ // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+ // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+ // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+ // #define ENABLE_DEBUG_FUNCTION_NAMES
+ // 
+ // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+ // #define ENABLE_DEBUG_LINE_HERE
+ // #define ENABLE_DEBUG_LINE_HERE2
+ // #define ENABLE_DEBUG_LINE_HERE3
+ // #define ENABLE_DEBUG_LINE_HERE_TRACE
+ // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+ // #define USE_DEBUG_PRINT
+ // #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
+
+//new feature to only show logs for a specific module when developing code
+  // #define ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE 5028
+  // #define ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE_ARRAY [1, 2]
+
+
+ ///////////////////////////////////////////// Module Logs
+ // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+ // #define ENABLE_FREERAM_APPENDING_SERIAL
+ 
+ /***********************************
+  * SECTION: System Configs
+ ************************************/    
+
+ #define SETTINGS_HOLDER 1239
+
+ 
+ 
+ #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // until devices can reliably be used without compiling per device
+ 
+     
+ /***********************************
+  * SECTION: Network Configs
+ ************************************/    
+
+ 
+   
+
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+ // #define USE_MODULE_SENSORS_INTERFACE  
+ // #define USE_MODULE_SENSORS_BUTTONS
+ //   
+   /**
+    * @brief 
+    * Button 1: Single button installs, means {"short":"iter over nice palettes", "long": "iter over 4 brightness levels"}
+    * Button 2: (Short) Two button installs, this button is iter common effects || (Long) starts a demo and debug mode
+    **/
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+  // #define ENABLE_GROUPFEATURE__GPS__WITH_SERIAL_POLLING
+  // #define ENABLE_GROUPFEATURE__GPS__WITH_SERIAL_INTERRUPTS_BUFFER
+
+ /***********************************
+  * SECTION: Driver Configs
+ ************************************/  
+
+
+  // /**
+  //  *  GPS
+  //  * */
+  // // #ifdef ENABLE_GROUPFEATURE__GPS_SERIAL
+    #define USE_MODULE_SENSORS_GPS_SERIAL
+  //   #define ENABLE_GPS_PARSER_NMEA
+    #define ENABLE_GPS_PARSER_UBX
+  //   #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
+  //   #define NMEAGPS_DERIVED_TYPES
+  //   // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+  //   #define NMEAGPS_PARSE_SAVE_MILLIS
+    #define gpsPort Serial2
+  //   // #define D_GPS_BAUD_RATE_FAST    921600
+    #define D_GPS_BAUD_RATE_DEFAULT 921600
+
+    #define ENABLE_DEVFEATURE__START_STATIC_LOOP
+
+  //   // #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+  //   // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+    
+  //   #define NMEAGPS_PARSE_SAVE_MILLIS
+  //   #define gpsPort Serial2
+  //   #define D_GPS_BAUD_RATE_DEFAULT 9600
+  //   // #define D_GPS_BAUD_RATE_DEFAULT 115200
+  //   // #define D_GPS_BAUD_RATE_DEFAULT 230400
+  //   // #define D_GPS_BAUD_RATE_DEFAULT 460800
+
+  //   // #define D_GPS_BAUD_RATE_DEFAULT 115200
+  //   // #define D_GPS_TX_PIN_DEFAULT 19
+  //   // #define D_GPS_RX_PIN_DEFAULT 18
+
+  //   #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+  //   #define USE_MODULE_CORE__SERIAL
+
+  //   // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+  //   #define ENABLE_DEVFEATURE_USE_HARDWARE_SERIAL2_FOR_GPS
+
+  //   #define USE_DEVFEATURE_UBLOX_GLOBAL
+    
+  //   // #define ENABLE_DEVFEATURE__ENABLE_UBX_PARSER_IN_CLASS
+
+  //   #define USE_DEVFEATURE__UBLOX_TEST_CLASS
+
+  //   #define ENABLE_DEBUGFEATURE__GPS_COMMANDS_FOR_TESTING
+
+
+
+
+
+  //   // #define USE_MODULE_DRIVERS_INTERFACE
+  //   // #define USE_MODULE_DRIVERS_SERIAL_UART
+  //   #define ENABLE_HARDWARE_UART_1
+  //   #define HARDWARE_UART_1_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+  // // #endif // ENABLE_GROUPFEATURE__GPS_SERIAL
+
+  // /**
+  //  *  GPS
+  //  * */
+  // #define USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+  // #ifdef USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+  //   #define USE_MODULE_SENSORS_GPS_SERIAL //remove?
+  //   #define USE_MODULE_SENSORS_GPS_SERIAL
+  //   #define ENABLE_GPS_PARSER_NMEA
+  //   #define ENABLE_GPS_PARSER_UBX
+  //   #define USE_DEVFEATURE_GPS_RINGBUFFER_CONFIGURATION_UBX
+  //   #define NMEAGPS_DERIVED_TYPES
+  //   // #define ENABLE_DEVFEATURE_GPS_FROM_RINGBUFFERS
+  //   #define NMEAGPS_PARSE_SAVE_MILLIS
+  //   #define gpsPort Serial2
+  //   #define D_GPS_BAUD_RATE_FAST    921600
+  //   #define D_GPS_BAUD_RATE_DEFAULT 9600
+
+  //   #define USE_DEVFEATURE_GPS_POLLING_INPUT
+
+  //   // #define USE_MODULE_CORE__SERIAL
+
+  //   // #define ENABLE_DEVFEATURE_GPS_SERIAL__NEW_CODE
+
+  //   #define ENABLE_DEVFEATURE_USE_HARDWARE_SERIAL2_FOR_GPS
+
+  //   #define USE_DEVFEATURE_UBLOX_GLOBAL
+    
+  //   // #define ENABLE_DEVFEATURE__ENABLE_UBX_PARSER_IN_CLASS
+
+  //   #define USE_DEVFEATURE__UBLOX_TEST_CLASS
+
+  //   // #define ENABLE_DEVFEATURE_NEOGPS__CLASS_AS_INSTANCE
+
+
+  //   // #define USE_MODULE_DRIVERS_INTERFACE
+  //   // #define USE_MODULE_DRIVERS_SERIAL_UART
+  //   #define ENABLE_HARDWARE_UART_2
+  //   #define HARDWARE_UART_2_BAUD_RATE_SPEED  9600  //D_GPS_BAUD_RATE_FAST
+  // #endif // USE_SYSTEM_GPS_INPUT_USING_RINGBUFFER_INTERRUPTS
+
+//  #define USE_MODULE_CORE__SERIAL
+      #define ENABLE_HARDWARE_UART_2
+      #define HARDWARE_UART_2_BAUD_RATE_SPEED  921600  //D_GPS_BAUD_RATE_FAST
+
+      #define ENABLE_DEBUG_FEATURE__MAVLINK_FLYING_LEDS__FORCED_TESTBED_MODE 3
+
+ /***********************************
+  * SECTION: Lighting Configs
+ ************************************/  
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+ 
+
+ /***********************************
+  * SECTION: Energy Configs
+ ************************************/  
+
+ /***********************************
+  * SECTION: Controller Configs
+ ************************************/  
+
+ // #define USE_MODULE_CONTROLLER_CUSTOM__LIGHTNEO_MOTION_ALERTS
+
+ /***********************************
+  * SECTION: Module/GPIO Configs
+ ************************************/  
+
+ #define USE_MODULE_TEMPLATE
+ DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+ "{"
+   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+   "\"" D_GPIO_NUMBER "\":{" 
+      // #ifdef USE_MODULE_CORE__SERIAL
+      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
+      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","
+      // #endif
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+   "},"
+   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+ "}";
+
+ #define ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
+ #define ENABLE_FEATURE_BUTTON__FACTORY_RESET_WITH_LONG_HOLD
+
+ 
+ /***********************************
+  * SECTION: TEMPLATE: Names
+ ************************************/    
+
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "PIRLarge"
+ #define D_DEVICE_SENSOR_MOTION1_FRIENDLY_NAME_LONG "RADAR 3p18GHz"
+ #define D_DEVICE_SENSOR_MOTION2_FRIENDLY_NAME_LONG "PIRSmall"
+
+
+ #define D_DEVICE_SENSOR_CLIMATE "PIRLarge"
+
+ 
+
+
+ #define D_DEVICE_SENSOR_BME_280_NAME "BME280"
+ #define D_DEVICE_SENSOR_BME_680_NAME "BME680"
+
+ #define D_DEVICE_SENSOR_BH1750_NAME "Ambient"
+
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\","
+       "\"" D_DEVICE_SENSOR_MOTION1_FRIENDLY_NAME_LONG "\","
+       "\"" D_DEVICE_SENSOR_MOTION2_FRIENDLY_NAME_LONG "\""
+     "],"
+     "\"" D_MODULE_SENSORS__TOF_VL53L0X__CTR "\":["
+       "\"" "TOF_VL53L0X" "\""
+     "],"
+     "\"" D_MODULE_SENSORS__TOF_VL53L1X__CTR "\":["
+       "\"" "TOF_VL53L1X" "\""
+     "],"
+     "\"" D_MODULE_SENSORS_SR04_CTR "\":["
+       "\"" "SRO4" "\""
+     "],"
+     "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "],"
+     "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+       "\"" "WallRed" "\","
+       "\"" "WallBlue" "\","
+       "\"" "DoorAlert" "\""
+     "],"
+     "\"" D_MODULE_DRIVERS_LEDS_CTR "\":["
+       "\"" "WallRed" "\","
+       "\"" "WallBlue" "\","
+       "\"" "StatusLED" "\""
+     "],"
+     "\"" D_MODULE_SENSORS_BME_CTR "\":["
+       "\"" D_DEVICE_SENSOR_CLIMATE "\""
+     "]"
+   "},"
+   "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+   "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+ "}";
+
+
+#endif
 
 
 

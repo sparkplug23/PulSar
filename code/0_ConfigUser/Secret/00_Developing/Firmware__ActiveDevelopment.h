@@ -36,7 +36,7 @@
 // #define DEVICE_DOLPHIN__FLIGHT__LED_CONTROL_MAVLINK
 // #define DEVICE_TESTBED__ULTRASONIC
 // #define DEVICE_LIGHTING__LIGHTING_EFFECTS__MATRIX_SEGMENT_TESTER
-// #define DEVICE_TESTBED__GPS_SERIAL
+// #define DEVICE_TESTBED__GPS_SERIAL_WITH_COMPASS
 // #define DEVICE_ACTIVE_DEVELOPMENT__SWITCHES_AND_BUTTONS
 // #define DEVICE_TESTBED__ROOM_SENSOR_ESP32C3_SUPERMINI
 // #define DEVICE_TESTBED__BOARDTEST_ESP32S3__XIAO_ESP32_S3_SEEDSTUDIO
@@ -2777,7 +2777,7 @@ new 26GHz radar sensor
  * For testing lnog range devices, without a battery that uses the aircrafts power source. Last known will be used as tracking instead of constant updates.
  * 800L as smaller and lighter than 7000G
  */
-#ifdef DEVICE_TESTBED__GPS_SERIAL
+#ifdef DEVICE_TESTBED__GPS_SERIAL_WITH_COMPASS
   #define DEVICENAME_CTR          "testbed_gps_serial"
   #define DEVICENAME_FRIENDLY_CTR "Plane2024 - 1Hz position updater"
   #define DEVICENAME_ROOMHINT_CTR "roaming"
@@ -3221,7 +3221,7 @@ new 26GHz radar sensor
 
 
 
-#endif // DEVICE_TESTBED__GPS_SERIAL
+#endif // DEVICE_TESTBED__GPS_SERIAL_WITH_COMPASS
 
               
 

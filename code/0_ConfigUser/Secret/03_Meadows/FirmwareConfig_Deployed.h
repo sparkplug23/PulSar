@@ -26,8 +26,7 @@
 // #define DEVICE_MEADOWS__BED_ALARM_LIGHT
 // #define DEVICE_MEADOWS__ENSUITE_DOOR_FRAME
 /// OFFICE ///////////////////////////////////////////////////////////////////////////////////
-
-#define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
+// #define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
 /// LIVINGROOM ///////////////////////////////////////////////////////////////////////////////
 
 /// HALLWAY //////////////////////////////////////////////////////////////////////////////////
@@ -5149,8 +5148,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
       },
       {
         "Pin":14,
-        "ColourOrder":"GRB",
-        "BusType":"WS2812_RGB",
+        "ColourOrder":"GRBWC",
+        "BusType":"WS2805_RGBWW",
         "Start":200,
         "Length":100
       }
@@ -5164,7 +5163,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
         "ColourPalette":"Warm White",
         "ColourType":3,
         "Effects": {
-          "Function":"Candles",
+          "Function":"Solid",
           "Speed":180,
           "Intensity":85,
           "Grouping":1,
@@ -5644,6 +5643,50 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: Lighting Configs
   ************************************/  
  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":250,
+  //       "Reversed":1
+  //     },
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":250,
+  //       "Length":250
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       500
+  //     ],
+  //     "ColourPalette":"Warm White",
+  //     "ColourType":3,
+  //     "Effects": {
+  //       "Function":"Candles",
+  //       "Speed":180,
+  //       "Intensity":85,
+  //       "Grouping":10,
+  //       "RateMs": 20
+  //     },
+  //     "BrightnessRGB": 100,
+  //     "BrightnessCCT": 0
+
+  //   },
+  //   "BrightnessRGB": 100,
+  //   "BrightnessCCT": 0
+  // }
+  // )=====";
+  
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -5654,31 +5697,31 @@ May need to add two power connections too, so its not just the cat5e wire to let
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
-        "Length":250,
+        "Length":246,
         "Reversed":1
-      },
-      {
-        "Pin":2,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":250,
-        "Length":250
       }
     ],
     "Segment0": {
       "PixelRange": [
         0,
-        500
+        246
       ],
-      "ColourPalette":"Warm White",
+      "ColourPalette":"Gradient Five",
       "ColourType":3,
       "Effects": {
         "Function":"Candles",
         "Speed":180,
         "Intensity":85,
-        "Grouping":10,
+        "Grouping":1,
         "RateMs": 20
       },
+      
+      "SegColour0":{"Hue":120,"Sat":100},
+      "SegColour1":{"Hue":180,"Sat":100},
+      "SegColour2":{"Hue":240,"Sat":100},
+      "SegColour3":{"Hue":180,"Sat":100},
+      "SegColour4":{"Hue":120,"Sat":100},
+
       "BrightnessRGB": 100,
       "BrightnessCCT": 0
 

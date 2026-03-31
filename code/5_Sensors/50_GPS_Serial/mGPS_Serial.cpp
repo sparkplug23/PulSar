@@ -273,7 +273,8 @@ static void static_disableUBX()
 }
 
 
-int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj)
+{
 
   /************
    * INIT SECTION * 
@@ -293,6 +294,7 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
       break;
   }
 
+  
   if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
@@ -319,6 +321,8 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
       // }
 
       // ubx_parser.PrintDevice("func loop");
+
+      GPS_Incoming_Stream(Serial2);
 
 
       if(rt.valid_timeout_seconds)
@@ -388,8 +392,8 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
 
 
       #ifdef      ENABLE_DEVFEATURE__START_STATIC_LOOP
-        if (static_gps.available( gpsPort ))
-          trace_all( DEBUG_PORT, static_gps, static_gps.read() );
+        // if (static_gps.available( gpsPort ))
+        //   trace_all( DEBUG_PORT, static_gps, static_gps.read() );
 
         // If the user types something, reset the message configuration
         //   back to a normal set of NMEA messages.  This makes it
@@ -406,7 +410,7 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
       if(rt.valid_timeout_seconds==0)
       {
         ALOG_INF(PSTR("GPS Fix Timeout"));
-        RecheckConnection();
+        // RecheckConnection();
       }else{
         rt.valid_timeout_seconds--;
         ALOG_INF(PSTR("GPS Fix Valid: %d"), rt.valid_timeout_seconds);
@@ -441,6 +445,8 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj){
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
+
+  return 1;
   
 } // END Tasker
 
@@ -611,29 +617,134 @@ void mGPS_Serial::ReadGPSStream()
 }
 
 
-void mGPS_Serial::Splash_Latest_Fix(Stream* out)
+void mGPS_Serial::GPS_Incoming_Stream(Stream& stream)
 {
+  if (stream.available() > 0)
+  {
+    uint8_t c = (uint8_t)stream.read();
+    Serial.print(c,HEX);
+    stats.bytes_received++;
+    GPS_ProcessByte(c);
+  }
+}
+bool mGPS_Serial::GPS_ProcessByte(uint8_t c)
+{
+  gps_ublox.handle(c);
 
-  out->print( state);
-  out->print( ',' );
-  out->print( fix_valid.dateTime.seconds);
-  out->print( ',' );
-  out->print( fix_valid.latitude(), 6 );
-  out->print( ',' );
-  out->print( fix_valid.longitude(), 6 );
-  out->print( ',' );
-  out->print( fix_valid.altitude_cm(), 6 );  
-  out->print( "cm, " );
-  out->print( fix_valid.speed_mph(), 6 );  
-  out->print( "mph" );
-  out->print( F(", Alt: ") );
-  if (fix_valid.valid.altitude)
-    out->print( fix_valid.altitude() );
-  out->println();
+  if (!gps_ublox.available()) {
+    return false;
+  }
 
+  fix_parsing = gps_ublox.read();
+
+  stats.packets_received++;
+  stats.last_message_received_time = millis();
+
+  return GPS_CommitFixIfAccepted(fix_parsing);
+}
+bool mGPS_Serial::GPS_CommitFixIfAccepted(const gps_fix& candidate)
+{
+  if (candidate.status <= gps_fix::STATUS_NONE) {
+    return false;
+  }
+
+  fix_valid |= candidate;
+  stats.last_valid_message_received_time = millis();
+  return true;
 }
 
+// void mGPS_Serial::Splash_Latest_Fix(Stream* out)
+// {
 
+//   out->print( state);
+//   out->print( ',' );
+//   out->print( fix_valid.dateTime.seconds);
+//   out->print( ',' );
+//   out->print( fix_valid.latitude(), 6 );
+//   out->print( ',' );
+//   out->print( fix_valid.longitude(), 6 );
+//   out->print( ',' );
+//   out->print( fix_valid.altitude_cm(), 6 );  
+//   out->print( "cm, " );
+//   out->print( fix_valid.speed_mph(), 6 );  
+//   out->print( "mph" );
+//   out->print( F(", Alt: ") );
+//   if (fix_valid.valid.altitude)
+//     out->print( fix_valid.altitude() );
+//   out->println();
+
+// }
+
+void mGPS_Serial::Splash_Latest_Fix(Stream* out)
+{
+  const bool has_recent_valid_fix =
+    (stats.last_valid_message_received_time != 0) &&
+    ((millis() - stats.last_valid_message_received_time) <= rt.valid_fix_timeout_ms);
+
+  out->print(F("GPS "));
+  out->print(has_recent_valid_fix ? F("VALID") : F("STALE"));
+
+  out->print(F(" | pkt="));
+  out->print(stats.packets_received);
+
+  out->print(F(" | last_valid_ms="));
+  if (stats.last_valid_message_received_time == 0) {
+    out->print(F("never"));
+  } else {
+    out->print(millis() - stats.last_valid_message_received_time);
+  }
+
+  out->print(F(" | time="));
+  if (fix_valid.valid.time) {
+    if (fix_valid.dateTime.hours < 10) out->print('0');
+    out->print(fix_valid.dateTime.hours);
+    out->print(':');
+    if (fix_valid.dateTime.minutes < 10) out->print('0');
+    out->print(fix_valid.dateTime.minutes);
+    out->print(':');
+    if (fix_valid.dateTime.seconds < 10) out->print('0');
+    out->print(fix_valid.dateTime.seconds);
+  } else {
+    out->print(F("--:--:--"));
+  }
+
+  out->print(F(" | lat="));
+  if (fix_valid.valid.location) {
+    out->print(fix_valid.latitude(), 6);
+  } else {
+    out->print(F("NA"));
+  }
+
+  out->print(F(" | lon="));
+  if (fix_valid.valid.location) {
+    out->print(fix_valid.longitude(), 6);
+  } else {
+    out->print(F("NA"));
+  }
+
+  out->print(F(" | alt_m="));
+  if (fix_valid.valid.altitude) {
+    out->print(fix_valid.altitude(), 2);
+  } else {
+    out->print(F("NA"));
+  }
+
+  out->print(F(" | spd_kph="));
+  if (fix_valid.valid.speed) {
+    out->print(fix_valid.speed_kph(), 2);
+  } else {
+    out->print(F("NA"));
+  }
+
+  out->print(F(" | sats="));
+  if (fix_valid.valid.satellites) {
+    out->print(fix_valid.satellites);
+  } else {
+    out->print(F("NA"));
+  }
+
+  out->println();
+}
 
 
 
@@ -913,6 +1024,20 @@ void mGPS_Serial::Pre_Init(){
   state = NOT_STARTED;
 
 
+
+  memset(&fix_parsing, 0, sizeof(fix_parsing));
+  memset(&fix_valid,   0, sizeof(fix_valid));
+
+  stats.last_message_received_time = 0;
+  stats.last_valid_message_received_time = 0;
+  stats.packets_received = 0;
+  stats.bytes_received = 0;
+
+  rt.tSavedSplash = millis();
+  rt.valid_fix_timeout_ms = 3000;
+
+  module_state.mode = ModuleStatus::Initialising;
+
 }
 
 
@@ -947,6 +1072,10 @@ void mGPS_Serial::Init(void)
   // gpsPort.end(); delay(100);
   // DEBUG_LINE_HERE;
 
+  // Serial2.begin(115200, SERIAL_8N1, 16, 17);
+  Serial2.begin(115200, SERIAL_8N1, 17, 16);
+  Serial2.updateBaudRate(921600)
+
 
   // gpsPort.begin(9600);//, SERIAL_8N1, 22, 23);
   // DEBUG_LINE_HERE;
@@ -958,7 +1087,7 @@ void mGPS_Serial::Init(void)
   // DEBUG_LINE_HERE;
 
   // delay(3000);
-  gpsPort.begin(D_GPS_BAUD_RATE_DEFAULT, SERIAL_8N1, 16,17);
+  // gpsPort.begin(D_GPS_BAUD_RATE_DEFAULT, SERIAL_8N1, 16,17);
 
   // while(1)
   // {
@@ -1018,6 +1147,8 @@ void mGPS_Serial::Init(void)
   // }
   module_state.mode = ModuleStatus::Running;
 
+  // Serial2 is assumed already configured externally.
+  module_state.mode = ModuleStatus::Running;
 
   // gpsPort.begin( 9600, SERIAL_8N1, tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_RX_ID), tkr_pins->GetPin(GPIO_HWSERIAL1_RING_BUFFER_TX_ID) );
 

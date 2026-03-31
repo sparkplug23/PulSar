@@ -200,6 +200,8 @@ class mGPS_Serial :
     struct MODULE_RUNTIME{ // these will be saved and recovered on boot
       uint32_t last_message = 0;
       uint8_t valid_timeout_seconds = 0;
+      uint32_t tSavedSplash = 0;
+      uint32_t valid_fix_timeout_ms = 3000;
     }rt;
 
 
@@ -266,10 +268,20 @@ class mGPS_Serial :
 
     void sendUBX( const unsigned char *progmemBytes, size_t len );
 
+
+    
+
+void GPS_Incoming_Stream(Stream& stream);
+bool GPS_ProcessByte(uint8_t c);
+bool GPS_CommitFixIfAccepted(const gps_fix& candidate);
+
+
+
     struct STATS{
       uint32_t last_message_received_time = 0;
       uint32_t last_valid_message_received_time = 0;
       uint32_t packets_received = 0;
+      uint32_t bytes_received = 0;
     }stats;
         
 
@@ -317,7 +329,7 @@ class mGPS_Serial :
     // #endif // ENABLE_GPS_PARSER_NMEA
     // #ifdef ENABLE_GPS_PARSER_UBX
     // #ifndef USE_DEVFEATURE_UBLOX_GLOBAL
-    // ubloxGPS*  ubx_parser = nullptr; // This parses the GPS characters
+    ubloxGPS*  ubx_parser = nullptr; // This parses the GPS characters
     // #endif // USE_DEVFEATURE_UBLOX_GLOBAL
     // #endif
     // ubloxGPS*  gps_ublox = nullptr; // This parses the GPS characters

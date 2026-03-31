@@ -381,7 +381,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #define tkr_buzzer                              static_cast<mBuzzerTones*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__DRIVERS_BUZZER_TONES__ID))
 #endif
 #ifdef USE_MODULE_DRIVERS__CAMERA
-  #include "4_Drivers/50_Camera_2025/mCamera.h"
+  #include "4_Drivers/50_Camera/mCamera.h"
   #define tkr_camera                              static_cast<mCamera*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS__CAMERA_ID))
 #endif
 #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER

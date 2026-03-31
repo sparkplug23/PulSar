@@ -14,6 +14,8 @@
 #define ENABLE_UART2_ISR_BUFFERS
 
 
+
+
 // #define ENABLE_HARDWARE_UART_0
 // #define ENABLE_HARDWARE_UART_1
 // #define ENABLE_HARDWARE_UART_2
@@ -34,6 +36,11 @@
 #include "driver/gpio.h"
 #include "sdkconfig.h"
 #include "esp_intr_alloc.h"
+
+#include "driver/uart.h"
+#include "soc/uart_struct.h"
+#include "soc/uart_reg.h"
+
 
 static const char *TAG = "uart_events";
 
@@ -226,7 +233,7 @@ class mSerial :
       uint8_t initialised = false;
       uint32_t baud = 115200; //must be int
       RingbufHandle_t ringbuffer_handle;
-      ringbuf_type_t ringbuffer_format_type = RINGBUF_TYPE_BYTEBUF;
+      RingbufferType_t ringbuffer_format_type = RINGBUF_TYPE_BYTEBUF;
       QueueHandle_t event_queue_handle;
       int ring_buffer_size_tx = (RINGBUFFER_HANDLE_2_LENGTH);// * 2); //1024*2
       int ring_buffer_size_rx = (RINGBUFFER_HANDLE_2_LENGTH);// * 2); //1024*2
