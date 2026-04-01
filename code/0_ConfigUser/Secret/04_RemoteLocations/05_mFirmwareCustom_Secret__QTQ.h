@@ -469,6 +469,80 @@
  #endif
 
  
+  #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+   
+
+
+  #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+    
+    
+  #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+    // #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 115200
+    #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 921600
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_NEXTION
+
+  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY        
+        #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER 1
+        #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
+         
+        
+        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER_SERIAL1_HVAC_DESK
+
+
+
+// #define USE_FEATURE_NEXTION__SERIAL_DEFAULT_BUAD_NEW_PANEL_FIRST_OTA
+
+// #define USE_FEATURE_NEXTION__FORCE_SERIAL_BAUDRATE_FROM_DEFAULT 115200
+
+  
+  #define USE_MODULE_DISPLAYS_NEXTION
+    #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  #define NEXTION_DEFAULT_PAGE_NUMBER 10//6  
+    
+    //  // change to be code option later
+    #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
+    #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
+
+  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
+  
+  #define ENABLE_DEVFEATURE_NEXTION_WEBUI
+
+  // 
+  
+  DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
+  R"=====(
+  {
+    "ObjectNameID": {
+      "hIconUS": 2,
+      "hTimeUS": 6,
+      "hBoostUS": 11,
+      "hAutoUS": 16,
+      "hIconDS": 3,
+      "hTimeDS": 7,
+      "hBoostDS": 12,
+      "hAutoDS": 17,
+      "hIconIH": 4,
+      "hTimeIH": 8,
+      "hBoostIH": 13,
+      "hAutoIH": 18,
+      "hIconWB": 5,
+      "hTimeWB": 9,
+      "hBoostWB": 14,
+      "hAutoWB": 19,
+      "hIconDryer": 122,
+      "hTimeDryer": 123,
+      "hBoostDryer": 124,
+      "hAutoDryer": 125
+    }
+  }
+  )=====";
+
+    
   /***********************************
    * SECTION: Driver Configs
   ************************************/  
