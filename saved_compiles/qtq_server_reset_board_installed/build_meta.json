@@ -1,9 +1,9 @@
 {
   "env_name": "qtq_server_reset_board_installed",
-  "created_utc": "2026-03-31T11:46:19Z",
-  "created_epoch": 1774957579,
-  "project_dir": "U:\\GitHub\\PulSar",
-  "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\qtq_server_reset_board_installed",
+  "created_utc": "2026-03-31T13:14:59Z",
+  "created_epoch": 1774962899,
+  "project_dir": "C:\\Users\\User\\Documents\\GitHub\\PulSar",
+  "build_dir": "C:\\Users\\User\\Documents\\GitHub\\PulSar\\.pio\\build\\qtq_server_reset_board_installed",
   "platform": "espressif32",
   "board": "esp32dev",
   "framework": [
@@ -17,9 +17,9 @@
     "bootloader.bin"
   ],
   "git": {
-    "branch": "development",
-    "commit": "bf7f08e926b4fa9f83753103803779dd582172d1",
-    "describe": "bf7f08e9-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/00_Developing/Firmware__ActiveDevelopment.h\n M code/0_ConfigUser/Secret/00_Developing/Firmware__Testbeds.h\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/1_TaskerManager/mTaskerManager.h\n M code/2_CoreSystem/15_SerialUART/mSerial.cpp\n M code/2_CoreSystem/15_SerialUART/mSerial.h\n D code/4_Drivers/50_Camera_2025/camera_pins.h\n D code/4_Drivers/50_Camera_2025/mCamera.cpp\n D code/4_Drivers/50_Camera_2025/mCamera.h\n M code/5_Sensors/50_GPS_Serial/mGPS_Serial.cpp\n M code/5_Sensors/50_GPS_Serial/mGPS_Serial.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n M platformio_testbeds.ini\n M saved_compiles/cm_office__under_desk/build_meta.json\n M saved_compiles/cm_office__under_desk/firmware.elf\n M saved_compiles/cm_outside__fence_lights/build_meta.json\n M saved_compiles/cm_outside__fence_lights/firmware.elf\n M saved_compiles/qtq_server_reset_board_installed/build_meta.json\n M saved_compiles/qtq_server_reset_board_installed/firmware.elf\n?? code/4_Drivers/50_Camera/\n?? saved_compiles/testbed_06__gps_decoder/"
+    "branch": "",
+    "commit": "",
+    "describe": "",
+    "status_short": ""
   }
 }
