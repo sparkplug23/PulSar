@@ -425,7 +425,7 @@ void mSettings::parse_JSONCommand(JsonParserObject obj)
   if(jtok = obj["BootCount"])
   {
     Settings.bootcount = jtok.getInt();
-    AddLog(LOG_LEVEL_HIGHLIGHT, PSTR("BootCount %d"),Settings.bootcount);
+    ALOG_HGL(PSTR("BootCount %d"),Settings.bootcount);
   }
 
 }

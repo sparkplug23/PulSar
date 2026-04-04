@@ -157,7 +157,7 @@ void mSettings::SettingsLoad(void)
 
     if(settings_reset_by_defaults || forced_default_load)
     {
-      AddLog(LOG_LEVEL_HIGHLIGHT, PSTR(D_LOG_CONFIG "Settings reseting to DEFAULT"));
+      ALOG_HGL(PSTR(D_LOG_CONFIG "Settings reseting to DEFAULT"));
       SettingsDefault();
       DEBUG_LINE_HERE
       runtime.settings_holder_hardcorded_stored_changed = true;
@@ -400,13 +400,13 @@ void mSettings::SettingsErase(uint8_t type)
       #ifdef ENABLE_DEVFEATURE_SETTINGS__TFS
       r3 = tkr_mfile->TfsDeleteFile(TASM_FILE_SETTINGS);
       #endif
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_ERASE " Tasmota data (%d,%d,%d)"), r1, r2, r3);
+      ALOG_DBG(PSTR(D_LOG_APPLICATION D_ERASE " Tasmota data (%d,%d,%d)"), r1, r2, r3);
       break;
     case 1:               // Reset 3 = SDK parameter area
     case 4:               // WIFI_FORCE_RF_CAL_ERASE = SDK parameter area
       r1 = esp_phy_erase_cal_data_in_nvs();
       //      r1 = NvmErase("cal_data");
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_ERASE " PHY data (%d)"), r1);
+      ALOG_DBG(PSTR(D_LOG_APPLICATION D_ERASE " PHY data (%d)"), r1);
       break;
     case 3:               // QPC Reached = QPC, Tasmota and SDK parameter area (0x0F3xxx - 0x0FFFFF)
       #ifdef ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
@@ -420,7 +420,7 @@ void mSettings::SettingsErase(uint8_t type)
       #ifdef ENABLE_DEVFEATURE_SETTINGS__TFS
       r3 = tkr_mfile->TfsDeleteFile(TASM_FILE_SETTINGS);
       #endif
-      AddLog(LOG_LEVEL_DEBUG, PSTR(D_LOG_APPLICATION D_ERASE " Tasmota data (%d,%d,%d)"), r1, r2, r3);
+      ALOG_DBG(PSTR(D_LOG_APPLICATION D_ERASE " Tasmota data (%d,%d,%d)"), r1, r2, r3);
       break;
   }
 

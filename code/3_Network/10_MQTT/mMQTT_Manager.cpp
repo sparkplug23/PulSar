@@ -558,17 +558,14 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj["MQTTSend"])
   {
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEV_TEST,PSTR("mMQTTManager::parse_JSONCommand MQTTSend"));
-    #endif //
+    ALOG_DBG(PSTR("mMQTTManager::parse_JSONCommand MQTTSend"));
+    
     JsonParserToken jtok_topic = jtok.getObject()["Topic"];
     JsonParserToken jtok_payload = jtok.getObject()["Payload"];
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEV_TEST,PSTR("mMQTTManager::parse_JSONCommand MQTTSend %d"),jtok_topic.size());
-    AddLog(LOG_LEVEL_DEV_TEST,PSTR("mMQTTManager::parse_JSONCommand MQTTSend %d"),jtok_payload.size());
-    #endif // 
-
+    ALOG_DBG(PSTR("mMQTTManager::parse_JSONCommand MQTTSend %d"),jtok_topic.size());
+    ALOG_DBG(PSTR("mMQTTManager::parse_JSONCommand MQTTSend %d"),jtok_payload.size());
+   
     char topic_ctr[100] = {0};
     char payload_ctr[300] = {0};
 
@@ -585,12 +582,10 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
       }
     }
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
-    AddLog(LOG_LEVEL_DEV_TEST,PSTR("Topic=%s"),topic_ctr);
-    AddLog(LOG_LEVEL_DEV_TEST,PSTR("Payload=%s"),payload_ctr);
-    AddLog(LOG_LEVEL_DEV_TEST,PSTR("buffer_escaped=%s"),buffer_escaped);
-    #endif // ENABLE_LOG_LEVEL_INFO
-
+    ALOG_DBG(PSTR("Topic=%s"),topic_ctr);
+    ALOG_DBG(PSTR("Payload=%s"),payload_ctr);
+    ALOG_DBG(PSTR("buffer_escaped=%s"),buffer_escaped);
+    
     // publish_device(jtok_topic.getStr(),jtok_payload.getStr(),false);
     brokers[0]->pubsub->publish(topic_ctr,buffer_escaped,false);
 

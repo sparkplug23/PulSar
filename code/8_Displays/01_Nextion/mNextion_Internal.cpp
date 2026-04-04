@@ -97,6 +97,55 @@ void mNextion::parse_JSONCommand(JsonParserObject obj)
 
   }
 
+  
+  if(jtok = obj["Nextion"].getObject()["AddLogEnable"])
+  {
+    settings.transmit_addlog_message = jtok.getBool();
+    ALOG_INF(PSTR("AddLogEnable %d"), settings.transmit_addlog_message);
+  }
+  if(jtok = obj["Nextion"].getObject()["AddLogStart"])
+  {
+    Command_SetPage("ser");
+  }
+  if(jtok = obj["Nextion"].getObject()["AddLogStop"])
+  {
+    nextionSendCmd("[[exit log]]");
+  }
+  if(jtok = obj["Nextion"].getObject()["SerialRecovery"])
+  {
+    nextionSendCmd("DRAKJHSUYDGBNCJHGJKSHBDN");
+  }
+
+
+  // JsonParserObject jobj2 = 0;
+  // if(!(jobj2 = obj[D_MODULE_DISPLAYS_NEXTION_CTR].getObject()))
+  // {
+  //   ALOG_ERR(PSTR(D_LOG_CAMERA "No Nextion object found"));
+  //   return;
+  // }
+
+  // JsonParserObject obj2 = 0;
+  // if(obj2 = jobj2["AddLogEnable"])
+  // {
+  //   settings.transmit_addlog_message = obj2.getBool();
+  //   ALOG_INF(PSTR("AddLogEnable %d"), settings.transmit_addlog_message);
+  // }
+  // if(obj2 = jobj2["AddLogStart"])
+  // {
+  //   Command_SetPage("ser");
+  // }
+  // if(obj2 = jobj2["AddLogStop"])
+  // {
+  //   nextionSendCmd("[[exit log]]");
+  // }
+  // if(obj2 = jobj2["SerialRecovery"])
+  // {
+  //   nextionSendCmd("DRAKJHSUYDGBNCJHGJKSHBDN");
+  // }
+
+
+
+
 }
 
 
@@ -636,9 +685,12 @@ void mNextion::Command_SetPage(uint8_t page){
   sprintf(ctr,"page %d",page);
   nextionSendCmd(ctr);
 }
+// note this wrapper does not contain "page " insert, it should do. Adding it.
 void mNextion::Command_SetPage(char* pagename)
 {
-  nextionSendCmd(pagename);
+  char ctr[30];
+  sprintf(ctr,"page %s",pagename);
+  nextionSendCmd(ctr);
 }
 
 void mNextion::Command_SetPageIfChanged(uint8_t page){

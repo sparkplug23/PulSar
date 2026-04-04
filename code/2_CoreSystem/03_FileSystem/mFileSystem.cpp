@@ -992,7 +992,7 @@ bool mFileSystem::TfsFileExists(const char *fname)
 
   bool yes = ffsp->exists(fname);
   if (!yes) {
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("TFS: File '%s' not found"), fname +1);  // Skip leading slash
+    ALOG_DBM(PSTR("TFS: File '%s' not found"), fname +1);  // Skip leading slash
   }
   return yes;
 }
@@ -1023,7 +1023,7 @@ bool mFileSystem::TfsSaveFile(const char *fname, const uint8_t *buf, uint32_t le
   File file = ffsp->open(fname, "w");
   
   if (!file) {
-    AddLog(LOG_LEVEL_INFO, PSTR("TFS: Save failed"));
+    ALOG_INF( PSTR("TFS: Save failed"));
   } else {
     // This will timeout on ESP32-webcam
     // But now solved with WcInterrupt(0) in support_esp.ino
@@ -1062,7 +1062,7 @@ bool mFileSystem::TfsInitFile(const char *fname, uint32_t len, uint8_t init_valu
 
   File file = ffsp->open(fname, "w");
   if (!file) {
-    AddLog(LOG_LEVEL_INFO, PSTR("TFS: Erase failed"));
+    ALOG_INF( PSTR("TFS: Erase failed"));
     return false;
   }
 
@@ -1078,7 +1078,7 @@ bool mFileSystem::TfsLoadFile(const char *fname, uint8_t *buf, uint32_t len) {
 
   File file = ffsp->open(fname, "r");
   if (!file) {
-    AddLog(LOG_LEVEL_DEBUG_MORE, PSTR("TFS: File '%s' not found"), fname +1);  // Skip leading slash
+    ALOG_DBM(PSTR("TFS: File '%s' not found"), fname +1);  // Skip leading slash
     return false;
   }
 
@@ -1100,7 +1100,7 @@ bool mFileSystem::TfsDeleteFile(const char *fname) {
   if (!ffs_type) { return false; }
 
   if (!ffsp->remove(fname)) {
-    AddLog(LOG_LEVEL_INFO, PSTR("TFS: Delete failed"));
+    ALOG_INF(PSTR("TFS: Delete failed"));
     return false;
   }
   return true;
@@ -1110,7 +1110,7 @@ bool mFileSystem::TfsRenameFile(const char *fname1, const char *fname2) {
   if (!ffs_type) { return false; }
 
   if (!ffsp->rename(fname1, fname2)) {
-    AddLog(LOG_LEVEL_INFO, PSTR("TFS: Rename failed"));
+    ALOG_INF(PSTR("TFS: Rename failed"));
     return false;
   }
   return true;

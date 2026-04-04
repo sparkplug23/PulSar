@@ -1700,7 +1700,7 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
             memcpy(data_buffer.payload.ctr, data, len);
             data_buffer.payload.ctr[len] = '\0'; // NUL terminate for logging/consumers
 
-            AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_LIGHT "WS State Payload [len:%d] %s"),
+            ALOG_INF(PSTR(D_LOG_LIGHT "WS State Payload [len:%d] %s"),
                    data_buffer.payload.length_used, data_buffer.payload.ctr);
 
             tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);

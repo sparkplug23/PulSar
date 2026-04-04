@@ -73,7 +73,7 @@ class mNextion :
       struct TimeoutCheck{
         uint8_t timeout_period = 120;
       }timeout_check;
-
+      bool transmit_addlog_message = 0;
     }settings;
 
 

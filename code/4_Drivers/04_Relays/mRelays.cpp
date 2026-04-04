@@ -204,7 +204,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
         }
         state = 1;                                // Set pulse
       }
-      if (update && (i < MAX_RELAYS)) {        
+      if (update && (i < MAX_RELAYS_SET)) {        
         uint16_t gpio_pin = 0;
         if(bitRead(rt.bitpacked.rel_inverted, i))
         { //add the gpio mpin shift back in
@@ -624,14 +624,14 @@ void mRelays::Pre_Init(void){
   module_state.devices = 0;
 
   // Lets check each type on their own, normal, inverted etc
-  for(uint8_t driver_index=0; driver_index<MAX_RELAYS; driver_index++)
+  for(uint8_t driver_index=0; driver_index<MAX_RELAYS_SET; driver_index++)
   {
     if(tkr_pins->PinUsed(GPIO_REL1, driver_index))
     {
       uint8_t pin_number = tkr_pins->Pin(GPIO_REL1, driver_index);
       pinMode(pin_number, OUTPUT);
       rt.devices_present++;
-      if(module_state.devices++ >= MAX_RELAYS){ break; }
+      if(module_state.devices++ >= MAX_RELAYS_SET){ break; }
     }else
     if(tkr_pins->PinUsed(GPIO_REL1_INV, driver_index))
     {
@@ -639,7 +639,7 @@ void mRelays::Pre_Init(void){
       pinMode(pin_number, OUTPUT);
       bitSet(rt.bitpacked.rel_inverted, driver_index); //temp fix
       rt.devices_present++;
-      if(module_state.devices++ >= MAX_RELAYS){ break; }
+      if(module_state.devices++ >= MAX_RELAYS_SET){ break; }
     }
   }
 
@@ -658,7 +658,7 @@ void mRelays::Init(void)
   memset(&rt.relay_status, 0, sizeof(rt.relay_status));
 
   // Set defaults
-  for(int relay_id=0;relay_id<MAX_RELAYS;relay_id++){
+  for(int relay_id=0;relay_id<MAX_RELAYS_SET;relay_id++){
     rt.relay_status[relay_id].timer_decounter.seconds = 0;
     rt.relay_status[relay_id].timer_decounter.active = false;
   }

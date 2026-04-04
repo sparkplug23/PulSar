@@ -949,6 +949,226 @@ void mPins::parse_JSONCommand(JsonParserObject obj)
     #endif
 
   }
+
+  /*
+  {"Debug":{"GpioSet":{"pin":3,"digital":1}}}
+  {"Debug":{"GpioSet":{"pin":3,"digital":0}}}
+  {"Debug":{"GpioSet":{"pin":3,"analog":123}}}
+
+  {"Debug":{"GpioRead":{"pin":3,"digital":1}}}
+  {"Debug":{"GpioRead":{"pin":3,"analog":1}}}
+
+  Notes:
+
+  GpioSet makes pin OUTPUT.
+  GpioRead makes pin INPUT.
+  For read, digital and analog are just flags to choose which read to perform.
+  On ESP32, analogWrite() only works if your build already provides that wrapper. If not, this needs to be swapped for your existing LEDC helper.
+  */
+  if(tok = obj["Debug"].getObject()["GpioSet"])
+  {
+    ALOG_WRN(PSTR("GpioSet"));
+
+    JsonParserObject gpio_obj = tok.getObject();
+
+    int pin = -1;
+    if(auto tpin = gpio_obj["pin"]) {
+      pin = tpin.getInt();
+    }
+
+    if(pin >= 0)
+    {
+      pinMode(pin, OUTPUT);
+
+      if(auto tdigital = gpio_obj["digital"])
+      {
+        int value = tdigital.getInt() ? HIGH : LOW;
+        digitalWrite(pin, value);
+        ALOG_INF(PSTR("GPIO Set, pin=%d, digital=%d"), pin, value ? 1 : 0);
+      }
+
+      if(auto tanalog = gpio_obj["analog"])
+      {
+        int value = tanalog.getInt();
+
+        #ifdef ESP32
+        value = constrain(value, 0, 255);  // LEDC/PWM style range expected here
+        analogWrite(pin, value);
+        #else
+        value = constrain(value, 0, 255);
+        analogWrite(pin, value);
+        #endif
+
+        ALOG_INF(PSTR("GPIO Set, pin=%d, analog=%d"), pin, value);
+      }
+    }
+    else
+    {
+      ALOG_INF(PSTR("GPIO Set failed, invalid pin"));
+    }
+  }
+
+  if(tok = obj["Debug"].getObject()["GpioRead"])
+  {
+    ALOG_WRN(PSTR("GpioRead"));
+
+    JsonParserObject gpio_obj = tok.getObject();
+
+    int pin = -1;
+    if(auto tpin = gpio_obj["pin"]) {
+      pin = tpin.getInt();
+    }
+
+    if(pin >= 0)
+    {
+      pinMode(pin, INPUT);
+
+      if(gpio_obj["digital"])
+      {
+        int value = digitalRead(pin);
+        ALOG_INF(PSTR("GPIO Read, pin=%d, digital=%d"), pin, value);
+      }
+
+      if(gpio_obj["analog"])
+      {
+        int value = analogRead(pin);
+        ALOG_INF(PSTR("GPIO Read, pin=%d, analog=%d"), pin, value);
+      }
+    }
+    else
+    {
+      ALOG_INF(PSTR("GPIO Read failed, invalid pin"));
+    }
+  }
+    if(tok = obj["Debug"].getObject()["GpioSeqTest"])
+  {
+    ALOG_WRN(PSTR("GpioSeqTest"));
+
+    int pins[16];
+    uint8_t pin_count = 0;
+    uint32_t cycles = 1; // effectively long soak test
+
+    // Support:
+    // {"Debug":{"GpioSeqTest":[32,33,...]}}
+    // {"Debug":{"GpioSeqTest":{"pins":[32,33,...],"cycles":100}}}
+
+    JsonParserArray pin_array;
+
+    if(tok.isArray())
+    {
+      pin_array = tok.getArray();
+    }
+    else if(tok.isObject())
+    {
+      JsonParserObject seq_obj = tok.getObject();
+      if(auto tcycles = seq_obj["cycles"]) {
+        cycles = tcycles.getInt();
+      }
+      pin_array = seq_obj["pins"].getArray();
+    }
+
+    for(auto item : pin_array)
+    {
+      if(pin_count < 16)
+      {
+        pins[pin_count++] = item.getInt();
+      }
+    }
+
+    if(pin_count == 0)
+    {
+      ALOG_INF(PSTR("GpioSeqTest failed, no pins"));
+      return;
+    }
+
+    // Configure all as outputs and force off first
+    for(uint8_t i = 0; i < pin_count; i++)
+    {
+      pinMode(pins[i], OUTPUT);
+      digitalWrite(pins[i], LOW);
+    }
+
+    auto all_off = [&]() {
+      for(uint8_t i = 0; i < pin_count; i++)
+      {
+        digitalWrite(pins[i], LOW);
+      }
+    };
+
+    auto delay_with_wdt = [&](uint32_t ms) {
+      uint32_t t_start = millis();
+      while((millis() - t_start) < ms)
+      {
+        // Replace with your actual watchdog feed if different
+        WDT_Reset();
+        delay(10);
+      }
+    };
+
+    ALOG_DBG(PSTR("GpioSeqTest starting, pins=%d, cycles=%lu"), pin_count, cycles);
+
+    for(uint32_t cycle_i = 0; cycle_i < cycles; cycle_i++)
+    {
+      /**********************************************************************
+       * 1) ONE IN SEQUENCE ON
+       * One relay on at a time, 1 second each
+       *********************************************************************/
+      for(uint8_t i = 0; i < pin_count; i++)
+      {
+        all_off();
+        digitalWrite(pins[i], HIGH);
+        ALOG_DBG(PSTR("GpioSeqTest seq1, step=%d, pin=%d ON"), i, pins[i]);
+        delay_with_wdt(1000);
+      }
+
+      /**********************************************************************
+       * 2) 4 ON, 4 OFF
+       * First half ON, second half OFF, then invert
+       *********************************************************************/
+      all_off();
+      for(uint8_t i = 0; i < pin_count; i++)
+      {
+        digitalWrite(pins[i], (i < 4) ? HIGH : LOW);
+      }
+      ALOG_INF(PSTR("GpioSeqTest seq2, first4 ON"));
+      delay_with_wdt(1000);
+
+      all_off();
+      for(uint8_t i = 0; i < pin_count; i++)
+      {
+        digitalWrite(pins[i], (i < 4) ? LOW : HIGH);
+      }
+      ALOG_INF(PSTR("GpioSeqTest seq2, last4 ON"));
+      delay_with_wdt(1000);
+
+      /**********************************************************************
+       * 3) 4 EVENS, 4 ODDS
+       * Based on array index: 0,2,4,6 then 1,3,5,7
+       *********************************************************************/
+      all_off();
+      for(uint8_t i = 0; i < pin_count; i++)
+      {
+        digitalWrite(pins[i], ((i % 2) == 0) ? HIGH : LOW);
+      }
+      ALOG_INF(PSTR("GpioSeqTest seq3, even index ON"));
+      delay_with_wdt(1000);
+
+      all_off();
+      for(uint8_t i = 0; i < pin_count; i++)
+      {
+        digitalWrite(pins[i], ((i % 2) == 1) ? HIGH : LOW);
+      }
+      ALOG_INF(PSTR("GpioSeqTest seq3, odd index ON"));
+      delay_with_wdt(1000);
+
+      all_off();
+      ALOG_INF(PSTR("GpioSeqTest cycle=%lu complete"), cycle_i + 1);
+      delay_with_wdt(1000);
+    }
+
+    all_off();
+    ALOG_INF(PSTR("GpioSeqTest finished"));
+  }
   
 
   #endif

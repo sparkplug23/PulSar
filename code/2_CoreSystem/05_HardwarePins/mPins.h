@@ -16,6 +16,7 @@
 
 #include "mPin_GPIO.h"
 
+#include "2_CoreSystem/11_Languages/mLanguageDefault.h" // patch 3apr26
 
 
 #define USE_MODULE_TEMPLATE_SONOFF_BASIC

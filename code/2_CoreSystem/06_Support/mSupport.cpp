@@ -2172,11 +2172,9 @@ int8_t mSupport::GetStateNumber(const char *state_text)
   { // c_str to number
     state_number = (!strlen(state_text)) ? 0 : atoi(state_text);
   }
-
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_DEBUG,PSTR("%d=GetStateNumber(%s)"),state_number, state_text);
-  #endif// ENABLE_LOG_LEVEL_INFO
-
+  
+  ALOG_DBG(PSTR("%d=GetStateNumber(%s)"),state_number, state_text);
+  
   return state_number;
 
 }
@@ -2253,7 +2251,6 @@ void mSupport::ClaimSerial(void)
 {
   // serial_local = true;
   ALOG_INF(PSTR("SNS: Hardware Serial"));
-  // SetSeriallog(LOG_LEVEL_NONE);
   // baudrate = Serial.baudRate();
   // Settings.baudrate = baudrate / 1200;
 }

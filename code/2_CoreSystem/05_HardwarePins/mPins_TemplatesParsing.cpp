@@ -174,9 +174,7 @@ void mPins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
         }
         else
         {
-          #ifdef ENABLE_LOG_LEVEL_ERROR
-          AddLog(LOG_LEVEL_ERROR, PSTR("DECODE ERROR \"%s\" %d"),value, gpio_function_id);
-          #endif // ENABLE_LOG_LEVEL_COMMANDS
+          ALOG_ERR(PSTR("DECODE ERROR \"%s\" %d"),value, gpio_function_id);
         }
 
       }// end

@@ -361,7 +361,7 @@ Serial.println((unsigned)DATA_BUFFER_PAYLOAD_MAX_LENGTH);
   //   delay(1000);
   //   if ((WiFi.status() == WL_CONNECTED) && WiFi.localIP()){
   //     tkr_log->StartTelnetServer();
-  //     if(tkr_log->telnet_started){      tkr_log->handleTelnet();    }
+  //     if(tkr_log->telnet.running){      tkr_log->handleTelnet();    }
   //     delay(2000);
   //     ALOG_INF(PSTR("Attempt %d: Successful"), i); 
   //     break;
@@ -404,16 +404,14 @@ Serial.println((unsigned)DATA_BUFFER_PAYLOAD_MAX_LENGTH);
   #endif // ESP32
   DEBUG_LINE_HERE3
   #ifdef ESP32
-  DEBUG_LINE_HERE3
-  AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s %s"), SupportESP32::GetDeviceHardwareRevision().c_str(),
-  SupportESP32::FoundPSRAM() ? (SupportESP32::CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
+  ALOG_INF(PSTR("HDW: %s %s"), SupportESP32::GetDeviceHardwareRevision().c_str(),SupportESP32::FoundPSRAM() ? (SupportESP32::CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
   DEBUG_LINE_HERE3
   // AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), FoundPSRAM(), CanUsePSRAM());
 #if !defined(HAS_PSRAM_FIX)
 DEBUG_LINE_HERE3
   if (SupportESP32::FoundPSRAM() && !SupportESP32::CanUsePSRAM()) {
     DEBUG_LINE_HERE3
-    AddLog(LOG_LEVEL_INFO, PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
+    ALOG_INF(PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
   }
   DEBUG_LINE_HERE3
   // DELAY_DEBUG(5000); // Allow time to read the log

@@ -423,31 +423,6 @@ void mWebServer::WebPage_Root_AddHandlers()
     });
     AddURLtoList(PM_URL_DEBUG_MAIN, HTTP_GET);
 
-
-    //called when the url is not defined here, ajax-in; get-settings
-    server->onNotFound([this](AsyncWebServerRequest *request)
-    {
-      ALOG_ERR(PSTR("HTTP URI Not-Found: %s"), request->url().c_str());    
-      if (captivePortal(request)) return;
-
-      //make API CORS compatible
-      if (request->method() == HTTP_OPTIONS)
-      {
-        AsyncWebServerResponse *response = request->beginResponse(200);
-        response->addHeader(F("Access-Control-Max-Age"), F("7200"));
-        request->send(response);
-        return;
-      }
-      #ifdef USE_MODULE_LIGHTS_ANIMATOR
-      #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
-      ALOG_ERR(PSTR("Not sure this needs to stay or not"));
-      if(tkr_anim->handle__HTTP__GET_QueryAPI(request, request->url())) return;
-      #endif
-      #endif
-      handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404_web, PAGE_404_web_length);
-    });
-
-
     SPGM_CTR(PM_URL_SYSTEM_CONTROLS_C1) "/system/controls/c1";
     server->on(PM_URL_SYSTEM_CONTROLS_C1, HTTP_GET, [this](AsyncWebServerRequest *request){
       this->HandlePage_SystemControls_C1(request);
@@ -490,6 +465,30 @@ void mWebServer::WebPage_Root_AddHandlers()
     #endif
 
   #endif // ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  
+  //called when the url is not defined here, ajax-in; get-settings
+  server->onNotFound([this](AsyncWebServerRequest *request)
+  {
+    ALOG_ERR(PSTR("HTTP URI Not-Found: %s"), request->url().c_str());    
+    if (captivePortal(request)) return;
+
+    //make API CORS compatible
+    if (request->method() == HTTP_OPTIONS)
+    {
+      AsyncWebServerResponse *response = request->beginResponse(200);
+      response->addHeader(F("Access-Control-Max-Age"), F("7200"));
+      request->send(response);
+      return;
+    }
+    #ifdef USE_MODULE_LIGHTS_ANIMATOR
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+    ALOG_ERR(PSTR("Not sure this needs to stay or not"));
+    if(tkr_anim->handle__HTTP__GET_QueryAPI(request, request->url())) return;
+    #endif
+    #endif
+    handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404_web, PAGE_404_web_length);
+  });
+
   
 }
 

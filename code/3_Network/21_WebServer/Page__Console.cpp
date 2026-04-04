@@ -54,12 +54,12 @@ void mWebServer::HandlePage_Console_WebSocket(AsyncWebServerRequest *request)
 // Date Modified: 02Jan26
 //
 // PURPOSE
-//   Streams Tasmota-style "web_log" content to the Console2 WebUI over WebSocket.
+//   Streams Tasmota-style "weblog.buffer" content to the Console2 WebUI over WebSocket.
 //
 // IMPORTANT DETAILS (matches your logging ring format)
-//   - tkr_log->web_log is a delimited char buffer storing many log entries.
+//   - tkr_log->weblog.buffer is a delimited char buffer storing many log entries.
 //   - Each entry is stored as: [index byte][text ...]['\1']
-//   - tkr_log->web_log_index is the NEXT index to be used (i.e., current "head").
+//   - tkr_log->weblog.index is the NEXT index to be used (i.e., current "head").
 //   - Index 0 is reserved/invalid (used as terminator rules), so we skip 0.
 //
 // CURSOR RULES
@@ -78,7 +78,7 @@ void mWebServer::HandlePage_Console_WebSocket(AsyncWebServerRequest *request)
 //   - If GetLog() returns empty while idx is advancing, it usually means
 //     the ring buffer has already dropped those indices due to overflow/eviction,
 //     or the producer gate flags (fConsole_active / fConsole_history) prevented
-//     those log lines from being captured into web_log in the first place.
+//     those log lines from being captured into weblog.buffer in the first place.
 // -----------------------------------------------------------------------------
 void mWebServer::sendConsoleWs(AsyncWebSocketClient *client /*= nullptr*/)
 {
@@ -95,7 +95,7 @@ void mWebServer::sendConsoleWs(AsyncWebSocketClient *client /*= nullptr*/)
 
   // Current "head" index of the web log ring.
   // This is the next value the logger will write.
-  const uint8_t head_idx = tkr_log->web_log_index;
+  const uint8_t head_idx = tkr_log->weblog.index;
 
   // ---------------------------------------------------------------------------
   // First sync behaviour:
@@ -167,8 +167,8 @@ void mWebServer::sendConsoleWs(AsyncWebSocketClient *client /*= nullptr*/)
   // If we walked indices but appended nothing, GetLog() did not find any entries.
   // Typical reasons:
   //   - ring buffer evicted those indices due to size pressure
-  //   - logging gate flags prevented capture into web_log
-  //   - idx bookkeeping mismatch vs how web_log_index is inserted
+  //   - logging gate flags prevented capture into weblog.buffer
+  //   - idx bookkeeping mismatch vs how weblog.index is inserted
   if (pos == 0) {
     // Serial.printf("console2ws: walked %u slots, got 0 lines; head=%u\n\r",
     //               (unsigned)tried, (unsigned)head_idx);
@@ -363,12 +363,12 @@ void mWebServer::wsEventConsole(AsyncWebSocket *server,
 //   It does two jobs:
 //
 //   1) Gates web-ring logging capture:
-//        Your logger only appends to web_log when tkr_fConsole_active==true.
+//        Your logger only appends to weblog.buffer when tkr_fConsole_active==true.
 //        With Console2 using WebSocket (not HTTP polling), nothing else will
 //        automatically toggle that flag, so we enable it here whenever a WS
 //        client is connected.
 //
-//      Without this, web_idx will still increment for Serial, but web_log will
+//      Without this, web_idx will still increment for Serial, but weblog.buffer will
 //      not capture the lines, so GetLog() returns empty.
 //
 //   2) Pushes new log deltas over WS at a controlled interval.
@@ -491,7 +491,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
   // Stream reply (no shared JSON buffer)
   AsyncResponseStream *response = request->beginResponseStream("text/plain");
 
-  const uint8_t web_idx = tkr_log->web_log_index;
+  const uint8_t web_idx = tkr_log->weblog.index;
 
   // Header: "<idx>}1<reset_flag>}1"
   response->printf("%u}1%u}1", (unsigned)web_idx, (unsigned)reset_web_log_flag);
@@ -627,7 +627,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
   // Stream reply (no shared JSON buffer)
   AsyncResponseStream *response = request->beginResponseStream("text/plain");
 
-  const uint8_t web_idx = tkr_log->web_log_index;
+  const uint8_t web_idx = tkr_log->weblog.index;
 
   // Header: "<idx>}1<reset_flag>}1"
   response->printf("%u}1%u}1", (unsigned)web_idx, (unsigned)reset_web_log_flag);

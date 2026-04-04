@@ -15,6 +15,25 @@
 
 #include <stdint.h>
 
+/*
+| Type             | Purpose                                | Path / Scope                    | Transport / Storage             | Port / Notes                      |
+|------------------|----------------------------------------|----------------------------------|----------------------------------|-----------------------------------|
+| SerialLog        | Live developer log over USB/UART       | Local, transient                 | Serial                           | No network; best for boot/crash   |
+| WebLog           | Recent retained log for Web UI/console | Local on device, short history   | Internal RAM ring buffer         | No port by itself; shown via Web  |
+| TelnetLog        | Live remote terminal-style debug       | Remote, transient                | TCP                              | Usually port 23                   |
+| Syslog           | Centralised multi-device logging       | External collector/server        | UDP by default, TCP/TLS possible | Common: 514/UDP, 601/TCP, 6514/TLS|
+| Console          | Interactive text console               | Local/remote operator interface  | Web UI / serial terminal         | Command entry + textual feedback  |
+| MQTT Result      | Command return / state response        | External automation systems      | MQTT broker                      | cmnd in, stat/tele out            |
+| ResponseAppend   | Internal response builder              | Internal only                    | RAM buffer then flushed outward  | Use for command/API replies       |
+| ResponseCmnd     | Final command reply helper             | Console/Web/MQTT-facing output   | Depends on caller/output path    | Not debug log; command result     |
+| Event / Alert    | Async status, fault, or rule message   | External/local subscribers       | Usually MQTT, optionally log too | Separate from developer logging   |
+| FileLog          | Persistent on-device diagnostics       | Local, retained                  | Filesystem                       | Useful for post-mortem/debug      |
+| NextionMirror    | Optional human-facing mirrored log     | Local attached display           | UART/display text                | Presentation sink, not primary    |
+*/
+
+
+
+
 #ifdef USE_SOFTWARE_SERIAL_DEBUG
   #include <SoftwareSerial.h>
   #define SERIAL_DEBUG Serial
@@ -540,9 +559,6 @@ enum LoggingLevels {
 #endif
 
 
-
-
-
 #define ALOG_DEBUG_LINE_HERE ALOG_DBG(PSTR("DP:%s|%d"),__FILE__,__LINE__);
 
 
@@ -596,179 +612,18 @@ DEFINE_PGM_CTR(PM_LOG_LEVEL_DEBUG_LOWLEVEL_CTR)  D_LOG_LEVEL_DEBUG_LOWLEVEL_CTR;
 DEFINE_PGM_CTR(PM_LOG_LEVEL_ALL_CTR)             D_LOG_LEVEL_ALL_CTR;
 
 
-//https://eli.thegreenplace.net/2014/variadic-templates-in-c/
-
-// template<typename T, typename U>
-// void AddLog_Array3(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len);
-
-
-// /**
-//  * @brief Form into message then pass into normal AddLog
-//  * 
-//  * @tparam T 
-//  * @tparam U 
-//  * @param loglevel 
-//  * @param name_ctr 
-//  * @param arr 
-//  * @param arr_len 
-//  */
-// template<typename T, typename U>
-// void AddLog_Array3(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
-// {
-
-//   // form into string then send to normal addlog
-
-//   // char buffer[100] = {0}; // short buffer
-//   // uint16_t buflen = 0;
-
-//   // buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array3 %s = ", name_ctr);
-
-//   // AddLog(loglevel, "%s", buffer);
-
-
-//   // #ifndef DISABLE_SERIAL_LOGGING
-//   // SERIAL_DEBUG.printf("%s = ",name_ctr);
-//   // for(T index=0;index<arr_len;index++){
-//   //   SERIAL_DEBUG.printf("%d,", arr[index]);
-//   // }
-//   // SERIAL_DEBUG.printf("\n\r");
-//   // #endif
-
-// };
-
-
-
-
+/**
+ *  
+ * Defining for global access, in the cpp
+ * Called mostly via define ALOG_X
+ */
 void AddLog(uint8_t loglevel, PGM_P formatP, ...);
-
-
 void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...);
 
 
-
-
-// void AddLog(PGM_P formatP, ...);
-// void AddSerialLog_mP2(uint8_t loglevel, PGM_P formatP, ...);
 int Response_mP(const char* format, ...);
 int ResponseAppend_mP(const char* format, ...);
-void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...);
 
-
-// template<typename T, typename U>
-// void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
-// {
-
-//   // if(
-//   //   (loglevel>tkr_set->Settings.logging.serial_level)&&
-//   //   (loglevel>tkr_set->Settings.logging.web_level)
-//   //   ){
-//   //   return;
-//   // }  
-
-//   // if(loglevel>tkr_set->Settings.logging.serial_level){
-//   //   return;
-//   // }
-  
-//   #ifndef DISABLE_SERIAL_LOGGING
-//   SERIAL_DEBUG.printf("%s = ",name_ctr);
-//   for(T index=0;index<arr_len;index++){
-//     SERIAL_DEBUG.printf("%d,", arr[index]);
-//   }
-//   SERIAL_DEBUG.printf("\n\r");
-//   #endif
-
-// }
-
-// template<typename T, typename U>
-// void AddLog_Array(const char* name_ctr, T* arr, U arr_len)
-// {
-  
-//   #ifndef DISABLE_SERIAL_LOGGING
-//   SERIAL_DEBUG.printf("%s = ",name_ctr);
-//   for(T index=0;index<arr_len;index++){
-//     SERIAL_DEBUG.printf("%d,", arr[index]);
-//   }
-//   SERIAL_DEBUG.printf("\n\r");
-//   #endif
-
-// }
-
-
-// /**
-//  * @brief Form into message then pass into normal AddLog
-//  * 
-//  * @tparam T 
-//  * @tparam U 
-//  * @param loglevel 
-//  * @param name_ctr 
-//  * @param arr 
-//  * @param arr_len 
-//  */
-// template<typename T, typename U>
-// void AddLog_Array2(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
-// {
-
-//   // form into string then send to normal addlog
-
-//   char buffer[100] = {0}; // short buffer
-//   uint16_t buflen = 0;
-
-//   buflen += snprintf(buffer+buflen, sizeof(buffer), "AddLog_Array2 %s = ", name_ctr);
-
-//   AddLog(loglevel, buffer);
-
-
-//   // #ifndef DISABLE_SERIAL_LOGGING
-//   // SERIAL_DEBUG.printf("%s = ",name_ctr);
-//   // for(T index=0;index<arr_len;index++){
-//   //   SERIAL_DEBUG.printf("%d,", arr[index]);
-//   // }
-//   // SERIAL_DEBUG.printf("\n\r");
-//   // #endif
-
-// }
-
-
-enum ERROR_MESSAGE_TYPES
-{
-  ERROR_MESSAGE_TYPE_INVALID_FORMAT=0
-};
-
-void ErrorMessage_P(uint8_t error_type, const char* message);
-void ErrorMessage(uint8_t error_type, const char* message);
-
-// template<typename T, typename U>
-// void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len, bool use_hex = false)
-// {
-//     // Create a buffer to store the log message
-//     char logBuffer[512];  // Adjust the size if needed
-//     char* logPointer = logBuffer;
-
-//     // Add the array name to the log message
-//     size_t written = snprintf(logPointer, sizeof(logBuffer), "%s = ", name_ctr);
-//     logPointer += written;
-
-//     // Add array elements to the log message
-//     for (U index = 0; index < arr_len && (logPointer - logBuffer) < sizeof(logBuffer) - 10; ++index) {
-//         // Append the current element
-//         written = snprintf(logPointer, sizeof(logBuffer) - (logPointer - logBuffer), "%d", arr[index]);
-//         logPointer += written;
-
-//         // Append a comma only if there is another element after the current one
-//         if (index < arr_len - 1) {
-//             written = snprintf(logPointer, sizeof(logBuffer) - (logPointer - logBuffer), ",");
-//             logPointer += written;
-//         }
-//     }
-
-//     // Null-terminate the string
-//     if ((logPointer - logBuffer) < sizeof(logBuffer)) {
-//         *logPointer = '\0';
-//     }
-
-//     // Pass the formatted string to AddLog
-//     AddLog(loglevel, PSTR("%s"), logBuffer);
-// }
 
 template<typename T, typename U>
 void AddLog_Array(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len, bool use_hex = false)
@@ -837,35 +692,6 @@ void AddLog_Array_Block(uint8_t loglevel, const char* name_ctr, T* arr, U arr_le
 }
 
 
-// template<typename T, typename U>
-// void AddLog_Array_P(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
-// {
-//   T ch;
-//   #ifndef DISABLE_SERIAL_LOGGING
-//   SERIAL_DEBUG.printf("%S = ",name_ctr);
-//   for(T index=0;index<arr_len;index++){
-//     ch = pgm_read_byte(arr + index);
-//     SERIAL_DEBUG.printf("%d,", ch);
-//   }
-//   SERIAL_DEBUG.printf("\n\r");
-//   #endif
-// }
-
-
-// template<typename T, typename U>
-// void AddLog_Array_P(const char* name_ctr, T* arr, U arr_len)
-// {
-//   T ch;
-//   #ifndef DISABLE_SERIAL_LOGGING
-//   SERIAL_DEBUG.printf("%S = ",name_ctr);
-//   for(T index=0;index<arr_len;index++){
-//     ch = pgm_read_byte(arr + index);
-//     SERIAL_DEBUG.printf("%d,", ch);
-//   }
-//   SERIAL_DEBUG.printf("\n\r");
-//   #endif
-// }
-
 template<typename T, typename U>
 void AddLog_Array_P(uint8_t loglevel, const char* name_ctr, T* arr, U arr_len)
 {
@@ -907,9 +733,6 @@ public:
     PGM_P GetModuleName(){          return PM_MODULE_CORE_LOGGING_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_LOGGING_ID; }
 
-    void handleTelnet();
-
-    static void AddLog_Static(uint8_t loglevel, PGM_P formatP, ...);
 
     void parse_JSONCommand(JsonParserObject obj);
 
@@ -917,14 +740,15 @@ public:
     enum DEBUG_OUTPUT_IDS{
       DEBUG_OUTPUT_HARDWARE_ID=0,
       DEBUG_OUTPUT_SOFTWARE_ID
-    };
-
-     
+    };     
     #ifdef USE_SOFTWARE_SERIAL_DEBUG
       uint8_t fDebugOutputMode = DEBUG_OUTPUT_SOFTWARE_ID;
     #else
       uint8_t fDebugOutputMode = DEBUG_OUTPUT_HARDWARE_ID;
     #endif
+
+    const char* GetLogLevelNamebyID(uint8_t id);
+    uint8_t GetLogLevelIDbyName(const char* name);
 
      
     #ifdef DISABLE_SERIAL_LOGGING
@@ -935,48 +759,30 @@ public:
     //mode to include
     // OFF, ON, TIMED_10_MINUTES_FROM_BOOT, TIMED_MINUTES_FROM_USER_REQUEST
 
- 
-    void GetLog(uint8_t idx, char** entry_pp, size_t* len_p);
-    void SetSeriallog(uint8_t loglevel);
+    
     void Syslog(void);
-    void AddLogAddLog(uint8_t loglevel);
-    void AddLog(uint8_t loglevel, const char *formatP);
-    void AddLog(uint8_t loglevel, const char *formatP, const char *formatP2);
-    void AddLog_P2(uint8_t loglevel, PGM_P formatP, ...);
-    void AddLogBuffer(uint8_t loglevel, uint8_t *buffer, int count);
-    void AddLogSerial(uint8_t loglevel);
-    void AddLogMissed(char *sensor, uint8_t misses);
-
-    /****
-     * Internal buffers, should I move these elsewhere? They are not settings, logs??
-    */
+    
 
     #ifndef WEB_LOG_SIZE
     #define WEB_LOG_SIZE 200       // Max number of characters in weblog
-    #endif // WEB_LOG_SIZE
-    #ifndef LOG_BUFFER_SIZE
-    #ifdef ESP8266
-    #define LOG_BUFFER_SIZE 400 //if debug is enabled, push this to 1000, if not, keep at much smaller 300
-    #else //esp32
-    #define LOG_BUFFER_SIZE 1000
     #endif
-    #endif // LOG_BUFFER_SIZE
-    char log_data[LOG_BUFFER_SIZE];                       // Logging
-    char web_log[WEB_LOG_SIZE] = {'\0'};        // Web log buffer - REMEMBERS EVERYTHING for new load
-    uint8_t web_log_index = 1;                  // Index in Web log buffer (should never be 0)
+    struct WEBLOG{
+      char buffer[WEB_LOG_SIZE] = {'\0'}; // Web log buffer - REMEMBERS EVERYTHING for new load
+      uint8_t index = 1;                  // Index in Web log buffer (should never be 0)
+    }weblog;
+    void GetLog(uint8_t idx, char** entry_pp, size_t* len_p);
 
-    const char* GetLogLevelNamebyID(uint8_t id);
-    uint8_t GetLogLevelIDbyName(const char* name);
 
+    struct TELNET{
+      WiFiServer* server;
+      WiFiClient client;
+      bool running = false;
+    }telnet;
     void StartTelnetServer();
-
+    void handleTelnet();
     #define TELNET_PORT 23
 
-    WiFiServer* TelnetServer;
-    WiFiClient Telnet;
 
-    bool telnet_started = false;
-    
 };
 
 

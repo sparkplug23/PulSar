@@ -1,5 +1,5 @@
-#ifndef mInterfaceController_H2
-#define mInterfaceController_H2 1.1
+#ifndef TASKERMANAGER_H
+#define TASKERMANAGER_H
 
 #define USE_USER_MICHAEL
 
@@ -11,10 +11,9 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <ext_printf.h>
-
-#define SET_FLAG   true
-#define RESET_FLAG false
+// From tasmota, to allow float/u64 built into printf
+#include <ext_printf.h> 
+#include <SBuffer.hpp>
 
 #ifdef CONFIG_IDF_TARGET_ESP32
 #include "soc/efuse_reg.h"
@@ -51,6 +50,45 @@
  */
 #include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
 
+#include "2_CoreSystem/mSystemConstants.h"
+
+// Returns via tasker that report special status
+enum TASKER_RESULT__IDS{
+  // Errors
+  TASKER_RESULT__ERROR_POINTER_INVALID_ID = -2,
+  TASKER_RESULT__MODULE_DISABLED_ID = -1,
+  // Unknown
+  TASKER_RESULT__UNKNOWN_ID = 0,
+  // Good results
+  TASKER_RESULT__SUCCESS_ID,
+  TASKER_RESULT__HANDLED_ID, // e.g. button press handled by another module, so it can be ignored by hardcoded rules
+  TASKER_RESULT__ERROR_ID,
+  // Length
+  TASKER_RESULT__LENGTH_ID
+};
+
+enum ModuleStatus{
+  Disabled,
+  NoGPIOConfigured,
+  Initialising,
+  Running,
+  DevicesPresent // Running means searching is enabled, but this is only set when devices are found
+};
+
+#include "2_CoreSystem/06_Support/mSupport.h"
+#include "2_CoreSystem/08_Logging/mLogging.h"
+
+#include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h" 
+#include "2_CoreSystem/11_Languages/mLanguageDefault.h"
+#include "2_CoreSystem/11_Languages/mLanguageProgmem.h"
+
+#include "2_CoreSystem/05_HardwarePins/mPins_Templates.h"
+#include "2_CoreSystem/05_HardwarePins/mPins_Esp32.h"
+#include "2_CoreSystem/05_HardwarePins/mPins_Esp82xx.h"
+#include "2_CoreSystem/05_HardwarePins/mPins.h"
+
+#include "2_CoreSystem/07_Time/mTime.h"
+
 // INCLUDE ORDER TO HERE OKAY
 
 
@@ -78,10 +116,8 @@
   #define mSupportHardware SupportESP32
 #endif
 
-#ifdef USE_MODULE_NETWORK_WEBSERVER
-    
+#ifdef USE_MODULE_NETWORK_WEBSERVER    
   #define LOROL_LITTLEFS 
-
   #ifdef ESP8266
     #include <ESP8266WiFi.h>
     #include <ESP8266mDNS.h>
@@ -101,7 +137,6 @@
     #include <ESPmDNS.h>
     #include <AsyncTCP.h>
   #endif
-
 #endif // USE_MODULE_NETWORK_WEBSERVER
 
 #include "esp_task_wdt.h"
@@ -127,34 +162,6 @@
     #endif
   #endif
 #endif // USE_MODULE_CORE_FILESYSTEM
-
-
-// Returns via tasker that report special status
-enum TASKER_RESULT__IDS{
-  // Errors
-  TASKER_RESULT__ERROR_POINTER_INVALID_ID = -2,
-  TASKER_RESULT__MODULE_DISABLED_ID = -1,
-  // Unknown
-  TASKER_RESULT__UNKNOWN_ID = 0,
-  // Good results
-  TASKER_RESULT__SUCCESS_ID,
-  TASKER_RESULT__HANDLED_ID, // e.g. button press handled by another module, so it can be ignored by hardcoded rules
-  TASKER_RESULT__ERROR_ID,
-  // Length
-  TASKER_RESULT__LENGTH_ID
-};
-
-enum ModuleStatus{
-  Disabled,
-  NoGPIOConfigured,
-  Initialising,
-  Running,
-  DevicesPresent // Running means searching is enabled, but this is only set when devices are found
-};
-
-#ifdef USE_ARDUINO_OTA
-  #include <ArduinoOTA.h>                   // Arduino OTA
-#endif  // USE_ARDUINO_OTA
 
 #ifdef USE_MODULE_CORE_I2C
   #include <Wire.h>                         // I2C support library
@@ -190,6 +197,8 @@ enum ModuleStatus{
 #include "2_CoreSystem/20_JSON/mJSON.h"
 #include "2_CoreSystem/06_Support/mSupport.h"
 #include "2_CoreSystem/02_RtcMemory/mRtcSettings.h"
+
+#include "3_Network/10_MQTT/mMQTT.h"
   
 template <size_t N>
 static inline bool in_list(uint16_t id, const uint16_t (&lst)[N]) {
@@ -215,9 +224,6 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #define IS_MODULE_LIGHTING_SUBMODULE(x) (x >= 6001 && x <= 6999) // skipping the interface
 #define IS_MODULE_ENERGY_SUBMODULE(x)   (x >= 7001 && x <= 7999) // skipping the interface
 #define IS_MODULE_DISPLAY_SUBMODULE(x)  (x >= 8001 && x <= 8999) // skipping the interface
-
-// Added to maybe fix header include issue
-#include "3_Network/10_MQTT/mMQTT.h"
 
 /**
  * @brief Core Modules
@@ -717,10 +723,6 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 class mTaskerManager{
 
   friend class mTaskerInterface;
-
-  public:
-
-    std::vector<mTaskerInterface*> pModule;
     
   private:
     /* Prevent others from being created */
@@ -739,6 +741,8 @@ class mTaskerManager{
       }
       return instance;
     };
+
+    std::vector<mTaskerInterface*> pModule;
 
     // Register a new module
     void addTasker(mTaskerInterface* module);

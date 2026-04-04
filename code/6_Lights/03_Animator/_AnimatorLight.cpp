@@ -2008,7 +2008,7 @@ void mAnimatorLight::SubTask_Effects()
       // ALOG_INF(PSTR("Loop1cB4"));Serial.flush();
       if(!seg.animation_has_anim_callback)  // Direct method, which the effect has ran above once so can be reset here
       {
-        SEGMENT.flags.animator_first_run = RESET_FLAG; // if not
+        SEGMENT.flags.animator_first_run = false; // if not
       }
       
       seg.call++; // Used as progress counter for animations eg rainbow across all hues
@@ -2032,7 +2032,7 @@ void mAnimatorLight::SubTask_Effects()
       seg.animator->UpdateAnimations();
       //  ALOG_INF(PSTR("Loop1cB5d"));Serial.flush();
       doShow = true;
-      SEGMENT.flags.animator_first_run = RESET_FLAG;
+      SEGMENT.flags.animator_first_run = false;
 
       // If UpdateAnimations() finished the animation, restore the original cycle time.
       if (!seg.animator->IsAnimating())
@@ -2354,7 +2354,7 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segmen
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   char buffer[30];
-  AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_NEO D_COMMAND_SVALUE_SVALUE_K(D_EFFECTS, D_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
+  ALOG_COM(PSTR(D_LOG_NEO D_COMMAND_SVALUE_SVALUE_K(D_EFFECTS, D_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }

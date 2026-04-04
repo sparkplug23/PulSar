@@ -3,6 +3,9 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
+#include "2_CoreSystem/11_Languages/mLanguageDefault.h" // patch 3apr26
+
+
 // Friendly names of gpio functions (add ifdefs later)
 
 DEFINE_PGM_CTR(PM_GPIO_FUNCTION_NONE_CTR)              D_GPIO_FUNCTION_NONE_CTR;

@@ -17,7 +17,7 @@
 *******************************************************************************************************************************************/
 
 // #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__TESTBOARD
-#define DEVICE_QTQ__SERVER_RESET_CONTROLLER__INSTALLED_BOARD
+// #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__INSTALLED_BOARD
 
 
 
@@ -404,7 +404,7 @@
    * SECTION: Network Configs
   ************************************/    
 
-  
+  #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST  
   
   /************************************************************************
    * FILESYSTEM: 
@@ -452,9 +452,9 @@
    * SECTION: Sensor Configs
   ************************************/  
 
-  // #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_BUTTONS    
-  //   #define SOC_TOUCH_VERSION_1
+    #define SOC_TOUCH_VERSION_1
 
   // #define USE_MODULE_SENSORS_SWITCHES
     
@@ -469,51 +469,30 @@
  #endif
 
  
-  #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-   
-
-
-  #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-    
-    
-  #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
   // #define ENABLE_FREERAM_APPENDING_SERIAL
-
     // #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 115200
     #define ENABLE_DEVFEATURE_NEXTION__BAUDRETE_DEFAULT 921600
-
   // #define USE_MODULE_DISPLAYS_INTERFACE
   #define USE_MODULE_DISPLAYS_NEXTION
-
   #define ENABLE_DEVFEATURE_NEXTION_DISPLAY        
         #define ENABLE_DEVFEATURE_NEXTION_WEBUI
-        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER 1
-        #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-         
-        
-        #define ENABLE_DEVFEATURE_NEXTION__TEMPORARY_FIX_SERIAL_PORT_NUMBER_SERIAL1_HVAC_DESK
-
-
-
+        #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER    
 // #define USE_FEATURE_NEXTION__SERIAL_DEFAULT_BUAD_NEW_PANEL_FIRST_OTA
-
-// #define USE_FEATURE_NEXTION__FORCE_SERIAL_BAUDRATE_FROM_DEFAULT 115200
-
-  
+// #define USE_FEATURE_NEXTION__FORCE_SERIAL_BAUDRATE_FROM_DEFAULT 115200  
   #define USE_MODULE_DISPLAYS_NEXTION
     #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  #define NEXTION_DEFAULT_PAGE_NUMBER 10//6  
-    
+  #define NEXTION_DEFAULT_PAGE_NUMBER 10//6      
     //  // change to be code option later
     #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
     #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
-
-  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  
+  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY  
   #define ENABLE_DEVFEATURE_NEXTION_WEBUI
 
-  // 
-  
+  #define ENABLE_FEATURE_NEXTION__ADDLOG_ON_LOG_PAGE
+
+
+
+
   DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
   R"=====(
   {
@@ -549,8 +528,7 @@
  
   #define USE_MODULE_DRIVERS_INTERFACE
   #define USE_MODULE_DRIVERS_RELAY
-  #define USE_MODULE_DRIVERS_LEDS
-  #define MAX_RELAYS 8
+  // #define USE_MODULE_DRIVERS_LEDS
  
   /***********************************
    * SECTION: Controller Configs
@@ -589,6 +567,10 @@
       #ifdef USE_MODULE_DRIVERS_LEDS
       "\"23\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
       #endif  
+      #ifdef USE_MODULE_DISPLAYS_NEXTION
+      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"32\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
       "\"33\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
@@ -634,6 +616,40 @@
 // - platform: gpio
 // pin: GPIO12
 // name: "Relay7"
+// - platform: gpio
+// pin: GPIO13
+// name: "Relay8"
+
+
+// switch:
+// - platform: gpio
+// pin: GPIO32
+// name: "Relay1"
+
+// - platform: gpio
+// pin: GPIO33
+// name: "Relay2"
+
+// - platform: gpio
+// pin: GPIO25
+// name: "Relay3"
+
+// - platform: gpio
+// pin: GPIO26
+// name: "Relay4"
+
+// - platform: gpio
+// pin: GPIO27
+// name: "Relay5"
+
+// - platform: gpio
+// pin: GPIO14
+// name: "Relay6"
+
+// - platform: gpio
+// pin: GPIO12
+// name: "Relay7"
+
 // - platform: gpio
 // pin: GPIO13
 // name: "Relay8"

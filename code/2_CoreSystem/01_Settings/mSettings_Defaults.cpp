@@ -41,13 +41,8 @@ DEBUG_LINE_HERE2
   
   tkr->Tasker_Interface(TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT);
       
-  DEBUG_LINE_HERE;
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
-  #endif// ENABLE_LOG_LEVEL_INFO
-
-
-  DEBUG_LINE_HERE;
+  ALOG_INF(PSTR(D_LOG_MEMORY D_LOAD " %s %d %d"), "SettingsDefault",Settings.cfg_holder,SETTINGS_HOLDER);
+  
   // After defaults are loaded everything should immediately be saved
   SettingsSaveAll();
    

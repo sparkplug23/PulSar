@@ -1,209 +1,165 @@
 #include "2_CoreSystem/08_Logging/mLogging.h"
 
-void AddLog(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...){
-  if(ABS_FUNCTION(millis()-*tSaved)>=limit_ms){ *tSaved=millis();
-    va_list arg;
-    //AddLog(loglevel,formatP,arg);
-  }
-}
 
-
-void ErrorMessage_P(uint8_t error_type, const char* message)
+void AddLogOutput2(uint8_t loglevel, const char* log_data)
 {
-  AddLog(LOG_LEVEL_ERROR, PSTR("Invalid Format: %S"), message);
-}
-
-
-void ErrorMessage(uint8_t error_type, const char* message)
-{
-  AddLog(LOG_LEVEL_ERROR, PSTR("Invalid Format: %s"), message);
-}
-
-
-void AddLog(uint8_t loglevel, PGM_P formatP, ...)
-{
-  #ifdef ESP32
-    if (xPortInIsrContext()) {
-      // When called from an ISR, you should not send out logs.
-      // Allocating memory from within an ISR is a big no-no.
-      // Also long-time blocking like sending logs (especially to a syslog server) 
-      // is also really not a good idea from an ISR call.
-      return;
-    }
-  #endif
-
-  // DEBUG_LINE_HERE3
-  #ifdef ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE
-  uint16_t unique_module_ids[] = { ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE }; // Single number or "1, 2, 3"  
-  // Corrected end pointer calculation
-  uint16_t* end_ptr = unique_module_ids + (sizeof(unique_module_ids) / sizeof(unique_module_ids[0]));
-  // Fixed `std::find` condition
-  if (std::find(unique_module_ids, end_ptr, tkr->module_id_being_serviced) == end_ptr) // if none found, "find" returns the end_ptr.
-  {
-    return;  // Module ID not found, exit function
-  }
-  #endif
-  
-  #ifdef DEBUG_FOR_FAULT
-    tkr_set->Settings.logging.serial_level = LOG_LEVEL_ALL;
-  #endif
-  // SERIAL_DEBUG.printf("%s %d\r\n","START",millis()); 
-
-  // Speed/stability improvements, check log level and return early if it doesnt apply to any log events
-  if(
-    (loglevel>tkr_set->Settings.logging.serial_level)&&
-    (loglevel>tkr_set->Settings.logging.web_level)
-    ){
+  if (log_data == nullptr) {
     return;
   }
-  
-  // Filtering
-  if(tkr_set->runtime.enable_serial_logging_filtering){ // if true, only permit exact log level and not all above
-    if(loglevel == tkr_set->Settings.logging.serial_level){
-      //permit messages
-    }else{
-      return;
-    }
-  }
-  if(tkr_set->runtime.enable_web_logging_filtering){ // if true, only permit exact log level and not all above
-    if(loglevel == tkr_set->Settings.logging.web_level){
-      //permit messages
-    }else{
-      return;
-    }
-  }
-  
 
-  // SERIAL_DEBUG.printf("%s %d\r\n","before vsn",millis());
+  char mxtime[25];  // "13:45:21 "
+  memset(mxtime, 0, sizeof(mxtime));
 
-  va_list arg;
-  va_start(arg, formatP);
-  vsnprintf_P(tkr_log->log_data, sizeof(tkr_log->log_data), formatP, arg);
-  va_end(arg);
-
-  char mxtime[25];  // "13:45:21 " //9
-
-  /**
-   * Change to different log layouts, using a switch case. Each method (serial/web etc) can use different formats
-   * */
-
-  memset(mxtime,0,sizeof(mxtime));
-  // if time is short, ie debugging, them only show uptime (not RTCTime)
-  if(tkr_set->Settings.logging.time_isshort){
-    #ifdef ENABLE_FEATURE_LOGGING__INCLUDE_RTC_IN_LOGS
-      // Only show hour
-      if(tkr_time->uptime.hour<1){
-        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d "), tkr_time->RtcTime.hour,tkr_time->RtcTime.minute,tkr_time->RtcTime.second, tkr_time->uptime.minute,tkr_time->uptime.second);
-      }else{
-        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d-%02d:%02d:%02d "), tkr_time->RtcTime.hour,tkr_time->RtcTime.minute,tkr_time->RtcTime.second, tkr_time->uptime.hour,tkr_time->uptime.minute,tkr_time->uptime.second);
-      }
-    #else
-      if(tkr_time->UpTime()<3600){
-        char dt[16]; 
-        datetime_t ut;
-        tkr_time->BreakTime(tkr_time->UpTime(), ut);
-        snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d"), ut.minute, ut.second);
-      }else{
-        tkr_time->GetUptime(mxtime, sizeof(mxtime));
-      }
-    #endif    
-  }else{
-    // snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d:%02d:%02d %s"),tkr_time->RtcTime.hour, tkr_time->RtcTime.minute, tkr_time->RtcTime.second, tkr_time->GetUptime(buffer,sizeof(buffer)));
-  
+  if (tkr_set->Settings.logging.time_isshort) {
+    tkr_time->GetUptime(mxtime, sizeof(mxtime));
+  } else {
     char up[16];
-    tkr_time->GetUptime(up, sizeof(up));  // your no-String version
-
-    snprintf_P(mxtime, sizeof(mxtime), PSTR("%02u:%02u:%02u %s"),
-              (unsigned)tkr_time->RtcTime.hour,
-              (unsigned)tkr_time->RtcTime.minute,
-              (unsigned)tkr_time->RtcTime.second,
-              up);
-
-  
-  
+    tkr_time->GetUptime(up, sizeof(up));
+    snprintf_P(
+      mxtime,
+      sizeof(mxtime),
+      PSTR("%02u:%02u:%02u %s"),
+      (unsigned)tkr_time->RtcTime.hour,
+      (unsigned)tkr_time->RtcTime.minute,
+      (unsigned)tkr_time->RtcTime.second,
+      up
+    );
   }
-
-  // SERIAL_DEBUG.printf("%s %d\r\n","serail",millis());
 
   bool isconnected = false;
   #ifdef USE_MODULE_NETWORK_WIFI
   isconnected = tkr_wifi->connection.fConnected;
   #endif
-  
+
   #ifndef DISABLE_SERIAL_LOGGING
   // LOG : SERIAL
-  if (loglevel <= tkr_set->Settings.logging.serial_level) 
+  if (loglevel <= tkr_set->Settings.logging.serial_level)
   {
+    if ((loglevel == LOG_LEVEL_HIGHLIGHT) || (loglevel == LOG_LEVEL_HIGHLIGHT_TOP)) {
+      SERIAL_DEBUG.printf("HIGHLIGHT START >>>>>>>>>>>>>>>>>\n\r");
+    }
 
-    if((loglevel == LOG_LEVEL_HIGHLIGHT)||(loglevel == LOG_LEVEL_HIGHLIGHT_TOP)){ SERIAL_DEBUG.printf("HIGHLIGHT START >>>>>>>>>>>>>>>>>\n\r"); }
     #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
-    if(loglevel == LOG_LEVEL_ERROR){ SERIAL_DEBUG.printf("\n\rERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r"); }
-    #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
-
-    #ifdef ENABLE_FREERAM_APPENDING_SERIAL
-      SERIAL_DEBUG.printf(PSTR("R%05d%c %s %S %s\r\n"),ESP.getFreeHeap(),isconnected ? 'Y' : 'N',tkr_time->GetUptime(buffer,sizeof(buffer)),tkr_log->GetLogLevelNamebyID(loglevel),tkr_log->log_data);      
-    #else
-      SERIAL_DEBUG.printf(PSTR("%s %S %s\r\n"), mxtime, tkr_log->GetLogLevelNamebyID(loglevel), tkr_log->log_data);
+    if (loglevel == LOG_LEVEL_ERROR) {
+      SERIAL_DEBUG.printf("\n\rERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r");
+    }
     #endif
 
-    if((loglevel == LOG_LEVEL_HIGHLIGHT)||(loglevel == LOG_LEVEL_HIGHLIGHT_BOT)){ SERIAL_DEBUG.printf("HIGHLIGHT END   <<<<<<<<<<<<<<<<<\n\r"); }
+    #ifdef ENABLE_FREERAM_APPENDING_SERIAL
+      SERIAL_DEBUG.printf(
+        PSTR("R%05d%c %s %S %s\r\n"),
+        ESP.getFreeHeap(),
+        isconnected ? 'Y' : 'N',
+        tkr_time->GetUptime(buffer, sizeof(buffer)),
+        tkr_log->GetLogLevelNamebyID(loglevel),
+        log_data
+      );
+    #else
+      SERIAL_DEBUG.printf(
+        PSTR("%s %S %s\r\n"),
+        mxtime,
+        tkr_log->GetLogLevelNamebyID(loglevel),
+        log_data
+      );
+    #endif
+
+    if ((loglevel == LOG_LEVEL_HIGHLIGHT) || (loglevel == LOG_LEVEL_HIGHLIGHT_BOT)) {
+      SERIAL_DEBUG.printf("HIGHLIGHT END   <<<<<<<<<<<<<<<<<\n\r");
+    }
+
     #ifdef ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
-    if(loglevel == LOG_LEVEL_ERROR){ SERIAL_DEBUG.printf("\n\rERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r"); }
-    #endif // ENABLE_DEVFEATURE_LOGLEVEL_ERROR_TERMINAL_EMPHASIS
-    
-    //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
-    // IMPORTANT!!! The code will pause here if flush is set, only for ms until the serial print has been sent
-    // Normally, serial is passed to hardware internal the the chip, and serial is printed in the background. However, if a problem/bug with forced reseting exists,
-    // you want to print all serial BEFORE tripping the reset, so only enable when fault tracing
+    if (loglevel == LOG_LEVEL_ERROR) {
+      SERIAL_DEBUG.printf("\n\rERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\r");
+    }
+    #endif
+
     #ifdef ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
     SERIAL_DEBUG.flush(); // To ensure all serial is sent before a reset
     #endif
 
-    if((tkr_set->Settings.logging.serial_level == LOG_LEVEL_DEBUG)||(tkr_set->Settings.logging.serial_level == LOG_LEVEL_DEBUG_LOWLEVEL)||(tkr_set->Settings.logging.serial_level == LOG_LEVEL_ALL)){ SERIAL_DEBUG.flush(); } 
-  } 
-  #endif //DISABLE_SERIAL_LOGGING
+    if ((tkr_set->Settings.logging.serial_level == LOG_LEVEL_DEBUG) ||
+        (tkr_set->Settings.logging.serial_level == LOG_LEVEL_DEBUG_LOWLEVEL) ||
+        (tkr_set->Settings.logging.serial_level == LOG_LEVEL_ALL)
+        #ifdef ENABLE_SERIAL_FLUSH
+        ||(true)
+        #endif
+    ) {
+      SERIAL_DEBUG.flush();
+    }
+    
+  }
+  #endif // DISABLE_SERIAL_LOGGING
 
-  #ifdef ENABLE_SERIAL_FLUSH
-    SERIAL_DEBUG.flush(); 
-  #endif 
-  
+
   // LOG : TELNET
-  if (loglevel <= tkr_set->Settings.logging.telnet_level) 
-  {    
-    if(tkr_log->Telnet)
-    {
-      tkr_log->Telnet.printf( "%s%S %s\r\n", mxtime, tkr_log->GetLogLevelNamebyID(loglevel), tkr_log->log_data);
+  if (loglevel <= tkr_set->Settings.logging.telnet_level)
+  {
+    if (tkr_log->telnet.client) {
+      tkr_log->telnet.client.printf(
+        "%s%S %s\r\n",
+        mxtime,
+        tkr_log->GetLogLevelNamebyID(loglevel),
+        log_data
+      );
     }
   }
-  
+
   // LOG : WEBSERVER
   #ifdef USE_MODULE_NETWORK_WEBSERVER
-  if(tkr_web->fConsole_active){ //only append values when active, however, this stops history
-    if (tkr_set->Settings.webserver && (loglevel <= tkr_set->Settings.logging.web_level)) {
+  if (loglevel <= tkr_set->Settings.logging.web_level) {
+    if (tkr_set->Settings.webserver && tkr_web->fConsole_active) { // only append values when active, however, this stops history
       // Delimited, zero-terminated buffer of log lines.
       // Each entry has this format: [index][log data]['\1']
-      if (!tkr_log->web_log_index) tkr_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
-      
-      while (tkr_log->web_log_index == tkr_log->web_log[0] ||  // If log already holds the next index, remove it
-            strlen(tkr_log->web_log) + strlen(tkr_log->log_data) + 13 > WEB_LOG_SIZE)  // 13 = web_log_index + mxtime + '\1' + '\0'
-      {
-        char* it = tkr_log->web_log;
-        it++;                                  // Skip web_log_index
-        it += tkr_sup->strchrspn(it, '\1'); // Skip log line
-        it++;                                  // Skip delimiting "\1"
-        // circle uffer
-        memmove(tkr_log->web_log, it, WEB_LOG_SIZE -(it-tkr_log->web_log));  // Move buffer forward to remove oldest log line
+      if (!tkr_log->weblog.index) {
+        tkr_log->weblog.index++;   // Index 0 is not allowed as it is the end of char string
       }
+
+      while (
+        (tkr_log->weblog.index == tkr_log->weblog.buffer[0]) ||
+        (strlen(tkr_log->weblog.buffer) + strlen(log_data) + 13 > WEB_LOG_SIZE)
+      ) {
+        char* it = tkr_log->weblog.buffer;
+        it++;                                  // Skip weblog.index
+        it += tkr_sup->strchrspn(it, '\1');    // Skip log line
+        it++;                                  // Skip delimiting "\1"
+        memmove(tkr_log->weblog.buffer, it, WEB_LOG_SIZE - (it - tkr_log->weblog.buffer));  // Move buffer forward to remove oldest log line
+      }
+
       // creates line formatted with \1 meaning EOL
-      snprintf_P(tkr_log->web_log, sizeof(tkr_log->web_log), PSTR("%s%c%s %S %s\1"), tkr_log->web_log, tkr_log->web_log_index++, mxtime, tkr_log->GetLogLevelNamebyID(loglevel), tkr_log->log_data);
-      if (!tkr_log->web_log_index) tkr_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
-    
+      snprintf_P(
+        tkr_log->weblog.buffer,
+        sizeof(tkr_log->weblog.buffer),
+        PSTR("%s%c%s %S %s\1"),
+        tkr_log->weblog.buffer,
+        tkr_log->weblog.index++,
+        mxtime,
+        tkr_log->GetLogLevelNamebyID(loglevel),
+        log_data
+      );
+
+      if (!tkr_log->weblog.index) {
+        tkr_log->weblog.index++;   // Index 0 is not allowed as it is the end of char string
+      }
     }
-    // Serial.printf("WebLog Added=%d\n\r",tkr_log->web_log_index);
   }
   #endif  // USE_MODULE_NETWORK_WEBSERVER
 
-  
+  #ifdef USE_MODULE_DISPLAYS_NEXTION
+    #ifdef ENABLE_FEATURE_NEXTION__ADDLOG_ON_LOG_PAGE
+    if (loglevel <= tkr_set->Settings.logging.serial_level)
+    {
+      if (tkr_nex->settings.transmit_addlog_message) {
+        tkr_nex->display->printf(
+          PSTR("%S%s %s\r\n"),
+          tkr_log->GetLogLevelNamebyID(loglevel),
+          log_data,
+          mxtime
+        );
+      }
+    }
+    #endif
+  #endif
+
   // LOG : MQTT Broadcast Alerts
   /**
    * @brief New method that assuming enabled, will broadcast the error message so a central location can view any ongoing system messages
@@ -213,174 +169,130 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
    * device_name/logging/alert/LOG_LEVEL    alerts are reserved for special messages, and depending on the openhab may be broadcast as notifications on my phone
    **/
   #ifdef ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
-  if (loglevel <= tkr_set->Settings.logging.mqtt_level) 
+  if (loglevel <= tkr_set->Settings.logging.mqtt_level)
   {
     char topic[100] = {0};
     snprintf_P(topic, sizeof(topic), "logging/message/%S", tkr_log->GetLogLevelNamebyID(loglevel));
-    if(tkr_time->uptime_seconds_nonreset>60)
-      tkr_mqtt->Publish(topic, tkr_log->log_data);
+    if (tkr_time->uptime_seconds_nonreset > 60) {
+      tkr_mqtt->Publish(topic, log_data);
+    }
     DEBUG_LINE_HERE3
   }
   #endif // ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
-  
+
+}
+
+uint8_t HighestLogLevel()
+{
+  uint8_t highest_loglevel = tkr_set->Settings.logging.serial_level;
+
+  if (tkr_set->Settings.logging.web_level > highest_loglevel) { highest_loglevel = tkr_set->Settings.logging.web_level; }
+  if (tkr_set->Settings.logging.telnet_level > highest_loglevel) { highest_loglevel = tkr_set->Settings.logging.telnet_level; }
+  if (tkr_set->Settings.logging.mqtt_level > highest_loglevel) { highest_loglevel = tkr_set->Settings.logging.mqtt_level; }
+  if (tkr_set->Settings.logging.sys_level > highest_loglevel) { highest_loglevel = tkr_set->Settings.logging.sys_level; }
+  #ifdef USE_MODULE_DISPLAYS_NEXTION
+  if (tkr_set->Settings.logging.display_serial_level > highest_loglevel) { highest_loglevel = tkr_set->Settings.logging.display_serial_level; }
+  #endif
+  #ifdef ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING
+  if (tkr_time->uptime_seconds_nonreset < 3) { highest_loglevel = LOG_LEVEL_DEBUG_MORE; }
+  #endif
+
+  return highest_loglevel;
+}
+
+static char* AddLog_MallocV(PGM_P formatP, va_list arg)
+{
+  va_list arg_copy;
+  va_copy(arg_copy, arg);
+  int len = vsnprintf_P(nullptr, 0, formatP, arg_copy);
+  va_end(arg_copy);
+
+  if (len < 0) {
+    return nullptr;
+  }
+
+  char* log_data = (char*)malloc((size_t)len + 1);
+  if (log_data == nullptr) {
+    return nullptr;
+  }
+
+  va_list arg_copy2;
+  va_copy(arg_copy2, arg);
+  vsnprintf_P(log_data, (size_t)len + 1, formatP, arg_copy2);
+  va_end(arg_copy2);
+
+  return log_data;
+}
+
+static void AddLogV(uint8_t loglevel, PGM_P formatP, va_list arg)
+{
+  #ifdef ESP32
+  if (xPortInIsrContext()) {
+    return;
+  }
+  #endif
+
+  if (loglevel > HighestLogLevel()) {
+    return;
+  }
+
+  char* log_data = AddLog_MallocV(formatP, arg);
+  if (log_data == nullptr) {
+    return;
+  }
+
+  AddLogOutput2(loglevel, log_data);
+  free(log_data);
+}
+
+void AddLog(uint8_t loglevel, PGM_P formatP, ...)
+{
+  va_list arg;
+  va_start(arg, formatP);
+  AddLogV(loglevel, formatP, arg);
+  va_end(arg);
+}
+
+void AddLog_TimeGated(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...)
+{
+  if (tSaved == nullptr) {
+    return;
+  }
+
+  uint32_t now = millis();
+  if ((uint32_t)(now - *tSaved) < limit_ms) {
+    return;
+  }
+
+  *tSaved = now;
+
+  va_list arg;
+  va_start(arg, formatP);
+  AddLogV(loglevel, formatP, arg);
+  va_end(arg);
 }
 
 
 void mLogging::handleTelnet(){
-  if(!TelnetServer) return; //not configured yet
-  if (TelnetServer->hasClient()){
+  if(!telnet.server) return; //not configured yet
+  if (telnet.server->hasClient()){
   	// client is connected
-    if (!Telnet || !Telnet.connected()){
-      if(Telnet) Telnet.stop();          // client disconnected
-      Telnet = TelnetServer->available(); // ready for new client
+    if (!telnet.client || !telnet.client.connected()){
+      if(telnet.client) telnet.client.stop();          // client disconnected
+      telnet.client = telnet.server->available(); // ready for new client
     } else {
-      TelnetServer->available().stop();  // have client, block new conections
+      telnet.server->available().stop();  // have client, block new conections
     }
   }
 
-  if (Telnet && Telnet.connected() && Telnet.available()){
+  if (telnet.client && telnet.client.connected() && telnet.client.available()){
     // client input processing
-    while(Telnet.available())
-      char c = Telnet.read();//dump values
-      // Serial.write(Telnet.read()); // pass through
+    while(telnet.client.available())
+      char c = telnet.client.read();//dump values
+      // Serial.write(telnet.client.read()); // pass through
       // do other stuff with client input here
   } 
 }
-
-
-void AddLog_NoTime(uint8_t loglevel, PGM_P formatP, ...)
-{
-
-  // Speed/stability improvements, check log level and return early if it doesnt apply to any log events
-  if(
-    (loglevel>tkr_set->Settings.logging.serial_level)&&
-    (loglevel>tkr_set->Settings.logging.web_level)
-    ){
-    return;
-  }
-
-  va_list arg;
-  va_start(arg, formatP);
-  vsnprintf_P(tkr_log->log_data, sizeof(tkr_log->log_data), formatP, arg);
-  va_end(arg);
-
-  //AddLogAddLog(loglevel);
-
-  char mxtime[25];  // "13:45:21 " //9
-  memset(mxtime,0,sizeof(mxtime));
-
-  char level_buffer[10];
-
-  // uint8_t hour = 0;
-  // uint8_t minute = 0;
-  // uint8_t second = 0;
-  // uint8_t uday = 0;
-  // uint8_t uhour = 0;
-  // uint8_t uminute = 0;
-  // uint8_t usecond = 0;
-  // if(tkr_time!=NULL){ 
-  //   hour = tkr_time->RtcTime.hour; 
-  //   minute = tkr_time->RtcTime.minute; 
-  //   second = tkr_time->RtcTime.second; 
-  //   uday = tkr_time->uptime.Mday; 
-  //   usecond = tkr_time->uptime.second; 
-  //   uminute = tkr_time->uptime.minute; 
-  //   uhour = tkr_time->uptime.hour;   
-  // }
-
-  // memset(mxtime,0,sizeof(mxtime));
-  // snprintf_P(mxtime, sizeof(mxtime), PSTR("%02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d %02dT%02d:%02d:%02d "),hour,minute,second,uday,uhour,uminute,usecond);
-
-  // Overrides
-  //uint8_t seriallog_level = LOG_LEVEL_DEBUG_MORE;
-  //tkr_log->seriallog_level = LOG_LEVEL_DEBUG_MORE;
-  //tkr_set->Settings.logging.serial_level = LOG_LEVEL_DEBUG;
-  //tkr_set->Settings.logging.web_level = LOG_LEVEL_INFO;
-
-  // LOG : SERIAL
-  if (loglevel <= tkr_set->Settings.logging.serial_level) {
-    SERIAL_DEBUG.printf("%s%S %s\r\n", 
-    mxtime,
-    tkr_log->GetLogLevelNamebyID(loglevel),  
-    tkr_log->log_data);
-    //To stop asynchronous serial prints, flush it, but remove this under normal operation so code runs better (sends serial after the fact)
-    // SERIAL_DEBUG.flush();
-  }
-
-  // LOG : TELNET
-  // if (loglevel <= tkr_set->Settings.telnetlog_level) {
-  //   if((tkr_log!=NULL)&&(tkr_log->server!=NULL)){
-  //     if(!tkr_log->client.connected()) {
-  //       tkr_log->client = tkr_log->server->available();
-  //     }
-  //     if(tkr_log->client.connected()) {
-  //       tkr_log->client.printf("%s%s %s\r\n", mxtime,tkr_log->GetLogLevelNamebyID(loglevel, level_buffer), log_data);
-  //     }
-  //   }
-  // }
-  if(tkr_log->Telnet){
-    //   if(!tkr_log->client.connected()) {
-      
-    //     tkr_log->client = tkr_log->server->available();
-    //   }
-    
-  tkr_log->Telnet.println("uptime: ");
-    //   if(tkr_log->client.connected()) {
-    //     tkr_log->client.printf("%s%s %s\r\n", mxtime, tkr_log->GetLogLevelNamebyID(loglevel, level_buffer), log_data);
-    //   }
-    // }
-    }
-
-  // LOG : WEBSERVER
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-  if (tkr_set->Settings.webserver && (loglevel <= tkr_set->Settings.logging.web_level)) {
-    // Delimited, zero-terminated buffer of log lines.
-    // Each entry has this format: [index][log data]['\1']
-    if (!tkr_log->web_log_index) tkr_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
-    
-    while (tkr_log->web_log_index == tkr_log->web_log[0] ||  // If log already holds the next index, remove it
-           strlen(tkr_log->web_log) + strlen(tkr_log->log_data) + 13 > WEB_LOG_SIZE)  // 13 = web_log_index + mxtime + '\1' + '\0'
-    {
-      char* it = tkr_log->web_log;
-      it++;                                  // Skip web_log_index
-      it += tkr_sup->strchrspn(it, '\1'); // Skip log line
-      it++;                                  // Skip delimiting "\1"
-      memmove(tkr_log->web_log, it, WEB_LOG_SIZE -(it-tkr_log->web_log));  // Move buffer forward to remove oldest log line
-    }
-
-    // creates line formatted with \1 meaning EOL
-    snprintf_P(tkr_log->web_log, sizeof(tkr_log->web_log), PSTR("%s%c%s%S %s\1"), tkr_log->web_log, 
-    tkr_log->web_log_index++, mxtime, tkr_log->GetLogLevelNamebyID(loglevel), tkr_log->log_data);
-    if (!tkr_log->web_log_index) tkr_log->web_log_index++;   // Index 0 is not allowed as it is the end of char string
-  
-  // SERIAL_DEBUG.printf("WEBLOG");
-  // SERIAL_DEBUG.printf(web_log_index);
-  // // for(int i=web_log_index;i<500;i++){
-  // //   SERIAL_DEBUG.printf(web_log[i]);
-  // // }
-  // SERIAL_DEBUG.printf("END WEBLOG");
-
-  }
-  #endif  // USE_MODULE_NETWORK_WEBSERVER
-
-}
-
-
-/*********************************************************************************************\
- * Syslog
- *
- * Example:
- *   AddLog_P2(LOG_LEVEL_DEBUG, PSTR(D_LOG_LOG "Any value %d"), value);
- *
-\*********************************************************************************************/
-
-void mLogging::SetSeriallog(uint8_t loglevel)
-{
-  tkr_set->Settings.logging.serial_level = loglevel;
-  // seriallog_level = loglevel;
-  // seriallog_timer = 0;
-}
-
 
 void mLogging::GetLog(uint8_t idx, char** entry_pp, size_t* len_p)
 {
@@ -388,7 +300,7 @@ void mLogging::GetLog(uint8_t idx, char** entry_pp, size_t* len_p)
   size_t len = 0;
 
   if (idx) {
-    char* it = web_log;
+    char* it = weblog.buffer;
     // get line
     do {
       uint8_t cur_idx = *it;
@@ -401,98 +313,21 @@ void mLogging::GetLog(uint8_t idx, char** entry_pp, size_t* len_p)
         break;
       }
       it += tmp;
-    } while (it < web_log + WEB_LOG_SIZE && *it != '\0');
+    } while (it < weblog.buffer + WEB_LOG_SIZE && *it != '\0');
   }
   *entry_pp = entry_p;
   *len_p = len;
-}
-//#endif  // USE_MODULE_NETWORK_WEBSERVER
-
-void mLogging::Syslog(void)
-{
-  // // Destroys log_data
-  // char syslog_preamble[64];  // Hostname + Id
-
-  // uint32_t current_hash = GetHash(Settings.syslog_host, strlen(Settings.syslog_host));
-  // if (syslog_host_hash != current_hash) {
-  //   syslog_host_hash = current_hash;
-  //   WiFi.hostByName(Settings.syslog_host, syslog_host_addr);  // If sleep enabled this might result in exception so try to do it once using hash
-  // }
-  // if (PortUdp.beginPacket(syslog_host_addr, Settings.syslog_port)) {
-  //   snprintf_P(syslog_preamble, sizeof(syslog_preamble), PSTR("%s ESP-"), my_hostname);
-  //   memmove(log_data + strlen(syslog_preamble), log_data, sizeof(log_data) - strlen(syslog_preamble));
-  //   log_data[sizeof(log_data) -1] = '\0';
-  //   memcpy(log_data, syslog_preamble, strlen(syslog_preamble));
-  //   PortUdp.write(log_data);
-  //   PortUdp.endPacket();
-  //   delay(1);  // Add time for UDP handling (#5512)
-  // } else {
-  //   syslog_level = 0;
-  //   syslog_timer = SYSLOG_TIMER;
-  //   AddLog_P2(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION D_SYSLOG_HOST_NOT_FOUND ". " D_RETRY_IN " %d " D_UNIT_SECOND), SYSLOG_TIMER);
-  // }
-}
-
-
-// Static wrapper
-void mLogging::AddLog_Static(uint8_t loglevel, PGM_P formatP, ...) {
-  va_list args;
-  va_start(args, formatP);
-
-  // Use the global AddLog function, assuming it has a `va_list` version
-  ::AddLog(loglevel, formatP, args);
-
-  va_end(args);
-}
-
-
-/*********************************************************************************************\
- * Response data handling -- "AddLog" that are pushed to mqtt channel "status/response"
-\*********************************************************************************************/
-
-// return if response was sent, else use leds?
-int Response_mP(const char* format, ...)     // Content send snprintf_P char data
-{
-  
-  memset(&tkr_set->response_msg,0,sizeof(tkr_set->response_msg));
-
-  // This uses char strings. Be aware of sending %% if % is needed
-  va_list args;
-  va_start(args, format);
-  int len = vsnprintf_P(tkr_set->response_msg, RESPONSE_MESSAGE_BUFFER_SIZE, format, args);
-  va_end(args);
-
-//   //Share on serial/telnet
-  ALOG_DBG(PSTR(D_LOG_RESPONSE "%s"), tkr_set->response_msg);
-//   //Send via mqtt
-//   #ifdef USE_MODULE_NETWORK_MQTT
-//   tkr_mqtt->publish_device("status/result",tkr_set->response_msg,false);
-//   #endif
-  
-  return 0;// len;
-}
-
-int ResponseAppend_mP(const char* format, ...)  // Content send snprintf_P char data
-{
-  // This uses char strings. Be aware of sending %% if % is needed
-  // va_list args;
-  // va_start(args, format);
-  // int mlen = strlen(tkr_set->response_msg);
-  // int len = vsnprintf_P(tkr_set->response_msg + mlen, sizeof(tkr_set->response_msg) - mlen, format, args);
-  // va_end(args);
-  // AddLog(LOG_LEVEL_DEBUG,PSTR(D_LOG_RESPONSE "Response_P %s"),tkr_set->response_msg);
-  return 0;// len + mlen;
 }
 
 
 void mLogging::StartTelnetServer()
 {  
   // if(tkr_set->global_state.network_down) return;
-  TelnetServer = new WiFiServer(TELNET_PORT);  // set port here
-  TelnetServer->begin();
-  telnet_started = true;
+  telnet.server = new WiFiServer(TELNET_PORT);  // set port here
+  telnet.server->begin();
+  telnet.running = true;
   // if(seriallog)
-  // ALOG_INF(PSTR("Telnet server started on port %d"),(uint8_t)TELNET_PORT);
+  // ALOG_INF(PSTR("telnet.client server started on port %d"),(uint8_t)TELNET_PORT);
 }
 
 
@@ -540,24 +375,16 @@ uint8_t mLogging::GetLogLevelIDbyName(const char* name) {
 int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
 { // KEEP TASKER ON TOP
 
-
   switch(function){
-    case TASK_INIT:
-      // init();
-      // StartTelnetServer();
-    break;
     case TASK_LOOP: 
-    // Serial.println("mLogging::Tasker");
-      // if(!Telnet) StartTelnetServer();
-      if(telnet_started){      handleTelnet();    }
+      if(telnet.running){      handleTelnet();    }
     break;
     case TASK_EVERY_SECOND:
-      // Serial.println("mLogging::Tasker");
-      
+    
       #ifdef ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING
       if(tkr_time->uptime_seconds_nonreset == 60*1)
       {
-        SetSeriallog(LOG_LEVEL_INFO);
+        tkr_set->Settings.logging.serial_level = LOG_LEVEL_INFO;
         Serial.printf("Reducing log level to %d to improve performance when not debugging", tkr_set->Settings.logging.serial_level);
         // ALOG_INF(PSTR(D_LOG_APPLICATION "Reducing log level to %d to improve performance when not debugging"), tkr_set->Settings.logging.serial_level);
       }

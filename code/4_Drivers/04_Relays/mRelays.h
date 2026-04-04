@@ -11,6 +11,8 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SCHEDULED_CTR) "scheduled";
 
 #define D_SCHEDULED_ENABLED_TIME_PERIODS_AMOUNT 1 // not yet working >1 for commands, needs a better jsoncommand method
 
+#include "1_TaskerManager/mTaskerInterface.h"
+
 class mRelays :
   public mTaskerInterface
 {
@@ -44,11 +46,6 @@ class mRelays :
     #endif // USE_MODULE_CORE_FILESYSTEM
 
     typedef unsigned long power_t;              // Power (Relay) type
-
-    #ifndef MAX_RELAYS
-      #define MAX_RELAYS 4 // Phase out, should be detected with pin set
-      #warning "MAX_RELAYS Phase out, should be detected with pin set"
-    #endif
 
     /**
      * @brief Needs to be renamed, "runtime" should not be
@@ -125,7 +122,7 @@ class mRelays :
           uint8_t enabled = false;
         }enabled_ranges[D_SCHEDULED_ENABLED_TIME_PERIODS_AMOUNT];
 
-      }relay_status[MAX_RELAYS]; // Anything saved must have fixed size. If not, all data is lost and set to default.
+      }relay_status[MAX_RELAYS_SET]; // Anything saved must have fixed size. If not, all data is lost and set to default.
 
     }rt;
 
