@@ -102,7 +102,7 @@ Notes:
   #define MQTT_HOST   "192.168.3.70"
 
 
-  
+
 
   
 #define MQTT_HOST_CELLULAR "sparkequinox2.ddns.net"
@@ -210,6 +210,113 @@ Notes:
     "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
+
+
+  
+  #define USE_NETWORK_CONFIG_TEMPLATE
+  DEFINE_PGM_CTR(NETWORK_CONFIG_TEMPLATE)
+  R"=====(
+  {
+    "Version": 1,
+    "Interface": {
+      "Policy": {
+        "PreferOrder": ["eth0", "wifi0", "lte0"],
+        "AllowMultipleActive": true,
+        "BlockRemoteMqttWhenLocalAvailable": true
+      },
+
+      "Transports": [
+        {
+          "Id": "wifi0",
+          "Type": "wifi",
+          "Enabled": true,
+          "Priority": 20,
+          "Backoff": {
+            "InitialSecs": 5,
+            "Step1Secs": 30,
+            "Step2Secs": 60,
+            "MaxSecs": 600
+          }
+        },
+        {
+          "Id": "eth0",
+          "Type": "ethernet",
+          "Enabled": true,
+          "Priority": 10,
+          "Backoff": {
+            "InitialSecs": 5,
+            "MaxSecs": 60
+          }
+        },
+        {
+          "Id": "lte0",
+          "Type": "cellular",
+          "Enabled": true,
+          "Priority": 30,
+          "Backoff": {
+            "InitialSecs": 10,
+            "Step1Secs": 30,
+            "Step2Secs": 60,
+            "MaxSecs": 600
+          }
+        }
+      ]
+    },
+
+    "MQTTUpdateSeconds": {
+      "IfChanged": 1,
+      "TelePeriod": 60,
+      "ConfigPeriod": 60
+    },
+
+    "MQTT": {
+      "DefaultRetrySecs": 10,
+      "DefaultRoute": "primary",
+
+      "Brokers": [
+        {
+          "Id": "home",
+          "Enabled": true,
+          "Priority": 10,
+          "Host": "192.168.3.70",
+          "Port": 1883,
+          "User": "",
+          "Password": "",
+          "TopicPrefix": "%device%",
+          "ClientName": "%device%-%transport%",
+          "RetrySecs": 10,
+          "KeepAliveSecs": 60,
+          "AllowedTransports": ["eth0", "wifi0"],
+          "PreferredTransports": ["eth0", "wifi0"],
+          "OutgoingLevel": 3,
+          "OutgoingLimiterMs": 0
+        },
+        {
+          "Id": "remote",
+          "Enabled": true,
+          "Priority": 20,
+          "Host": "mqtt.example.com",
+          "Port": 51883,
+          "User": "lteclient",
+          "Password": "af4d8bc9ab",
+          "TopicPrefix": "%device%",
+          "ClientName": "%device%-%transport%",
+          "RetrySecs": 30,
+          "KeepAliveSecs": 60,
+          "AllowedTransports": ["lte0", "wifi0"],
+          "PreferredTransports": ["lte0"],
+          "OutgoingLevel": 2,
+          "OutgoingLimiterMs": 10
+        }
+      ]
+
+    }
+  }
+  )=====";
+
+
+
+
 
 #endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
 
