@@ -143,6 +143,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
 \*********************************************************************************************/
 void mSensorsInterface::WebAppend__Sensor_Table__As_TypesRows()
 {
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   Print* out = tkr_web->WebControls_GetPrint();
   if (!out) return;
 
@@ -283,6 +284,7 @@ void mSensorsInterface::WebAppend__Sensor_Table__As_TypesRows()
   }
 
   out->print(F("</table>"));
+  #endif // USE_MODULE_NETWORK_WEBSERVER
 }
 
 
@@ -305,7 +307,7 @@ void mSensorsInterface::WebAppend__Sensor_Table__As_TypesRows()
 \*********************************************************************************************/
 void mSensorsInterface::WebAppend__Sensor_Table__As_SensorsRows_Inverted()
 {
-
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   Print* out = tkr_web->WebControls_GetPrint();
   if (!out) return;
 
@@ -480,6 +482,7 @@ void mSensorsInterface::WebAppend__Sensor_Table__As_SensorsRows_Inverted()
   }
 
   tbl_end();
+  #endif // USE_MODULE_NETWORK_WEBSERVER
 }
 
 
@@ -502,6 +505,7 @@ void mSensorsInterface::WebAppend__Sensor_Table__As_SensorsRows_Inverted()
 \*********************************************************************************************/
 void mSensorsInterface::WebAppend__Sensor_Table__As_Ragged()
 {
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   Print* out = tkr_web->WebControls_GetPrint();
   if (!out) return;
 
@@ -632,6 +636,7 @@ void mSensorsInterface::WebAppend__Sensor_Table__As_Ragged()
   }
 
   out->print(F("</table>"));
+  #endif // USE_MODULE_NETWORK_WEBSERVER
 }
 
 

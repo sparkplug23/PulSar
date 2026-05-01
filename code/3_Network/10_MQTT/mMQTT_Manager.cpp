@@ -32,45 +32,6 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
       Load_New_Subscriptions_From_Function_Template();
     break;
     
-    // case TASK_NETWORK_CONNECTED__WIFI:{ // moved from wifi jan2026
-
-    //   #ifndef ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-
-    //     ALOG_HGL(PSTR("Start MQTTConnection with WiFi"));
-
-    //     #ifdef USE_MODULE_NETWORK_MQTT
-
-    //     DEBUG_LINE_HERE3
-
-    //       mqtt_client = new WiFiClient();
-    //       DEBUG_LINE_HERE3
-
-    //       tkr_mqtt->CreateConnection(mqtt_client, MQTT_HOST, MQTT_PORT, CLIENT_TYPE_WIFI_ID);
-    //       DEBUG_LINE_HERE3
-          
-    //       tkr_mqtt->brokers.back()->SetCredentials(MQTT_USER, MQTT_PASS);
-    //       DEBUG_LINE_HERE3
-
-    //       tkr_mqtt->brokers.back()->SetReConnectBackoffTime(MQTT_RETRY_SECS);
-    //       DEBUG_LINE_HERE3
-          
-    //       // char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%s"), tkr_set->Settings.system_name.device, WiFi.macAddress().c_str()); 
-          
-    //       uint8_t mac[6];           WiFi.macAddress(mac);
-    //       DEBUG_LINE_HERE3
-    //       char client_name[100]; snprintf_P(client_name, sizeof(client_name), PSTR("%s-%02X:%02X:%02X"), tkr_set->Settings.system_name.device, mac[3], mac[4], mac[5]); 
-    //       DEBUG_LINE_HERE3
-    //       tkr_mqtt->brokers.back()->SetClientName(client_name);
-    //       DEBUG_LINE_HERE3
-
-    //       tkr_mqtt->brokers.back()->SetTopicPrefix(tkr_set->Settings.system_name.device);
-    //       DEBUG_LINE_HERE3
-
-    //     #endif // USE_MODULE_NETWORK_MQTT
-    //   #endif // ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-    // }
-    // break;
-
     case TASK_NETWORK_CONNECTED__WIFI:
     case TASK_NETWORK_CONNECTED__ETHERNET:
     // case TASK_NETWORK_CONNECTED__CELLULAR: Handled via the Celullar module directly
@@ -89,11 +50,11 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
     break;
     
     case TASK_EVERY_50_MSECOND:
-DEBUG_LINE_HERE_MILLIS
+      DEBUG_LINE_HERE_MILLIS
 
-DEBUG_LINE_HERE_MILLIS
+      DEBUG_LINE_HERE_MILLIS
       MM_Every50mSecond();
-DEBUG_LINE_HERE_MILLIS
+      DEBUG_LINE_HERE_MILLIS
 
       // if(brokers.size())   
       //   if(brokers[0]->retry_counter)
@@ -265,6 +226,10 @@ void mMQTTManager::Default_Module()
   // ALOG_INF(PSTR("prefixtopic: %s"), dt.connection[idx].prefixtopic);
   // ALOG_INF(PSTR("status: %d"), dt.connection[idx].status);
 
+  #ifdef ENABLE_FEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
+  rate_limit_send_delay = ENABLE_FEATURE__MQTT_ENABLE_SENDING_LIMIT_MS;
+  #endif
+
 }
 
 
@@ -303,8 +268,6 @@ void mMQTTManager::Default_Module__Connection_WiFi()
 }
 
 
-
-
 #ifdef USE_MODULE_CORE_FILESYSTEM
 #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
 
@@ -322,8 +285,6 @@ void mMQTTManager::Load_Module(bool erase)
 
 #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
 #endif // USE_MODULE_CORE_FILESYSTEM
-
-
 
 
 void mMQTTManager::MQTTSubscribe()

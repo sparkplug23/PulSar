@@ -504,7 +504,7 @@ class TinyGsmSim7000 : public TinyGsmSim70xx<TinyGsmSim7000>,
     if (!index) {
       data.trim();
       if (data.length()) { 
-        DBG("waitResponse ### Unhandled:", data); 
+        // DBG("waitResponse ### Unhandled:", data); 
         
         waitresponse_error_counter++;  
       }

@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>GPS Config Device</title>
+
+  <script src="/common.js"></script>
+  <style>@import url("/style.css");</style>
+
+  <script>
+    // Date Modified: 12Apr26
+
+    const GPS_UBX_ROWS = [
+      { idx: 0,  name: "NAV-POSECEF",   id: 0x01 },
+      { idx: 1,  name: "NAV-POSLLH",    id: 0x02 },
+      { idx: 2,  name: "NAV-STATUS",    id: 0x03 },
+      { idx: 3,  name: "NAV-DOP",       id: 0x04 },
+      { idx: 4,  name: "NAV-PVT",       id: 0x07 },
+      { idx: 5,  name: "NAV-ODO",       id: 0x09 },
+      { idx: 6,  name: "NAV-RESETODO",  id: 0x10 },
+      { idx: 7,  name: "NAV-VELECEF",   id: 0x11 },
+      { idx: 8,  name: "NAV-VELNED",    id: 0x12 },
+      { idx: 9,  name: "NAV-TIMEGPS",   id: 0x20 },
+      { idx: 10, name: "NAV-TIMEUTC",   id: 0x21 },
+      { idx: 11, name: "NAV-CLOCK",     id: 0x22 },
+      { idx: 12, name: "NAV-TIMEGLO",   id: 0x23 },
+      { idx: 13, name: "NAV-TIMEBDS",   id: 0x24 },
+      { idx: 14, name: "NAV-TIMEGAL",   id: 0x25 },
+      { idx: 15, name: "NAV-TIMEQZSS",  id: 0x27 },
+      { idx: 16, name: "NAV-SVINFO",    id: 0x30 },
+      { idx: 17, name: "NAV-SBAS",      id: 0x32 },
+      { idx: 18, name: "NAV-ORB",       id: 0x34 },
+      { idx: 19, name: "NAV-SAT",       id: 0x35 },
+      { idx: 20, name: "NAV-COV",       id: 0x36 },
+      { idx: 21, name: "NAV-GEOFENCE",  id: 0x39 },
+      { idx: 22, name: "NAV-SLAS",      id: 0x42 },
+      { idx: 23, name: "NAV-SIG",       id: 0x43 },
+      { idx: 24, name: "NAV-AOPSTATUS", id: 0x60 },
+      { idx: 25, name: "NAV-EOE",       id: 0x61 }
+    ];
+
+    const GPS_NMEA_ROWS = [
+      { idx: 0, name: "GGA" },
+      { idx: 1, name: "GLL" },
+      { idx: 2, name: "GSA" },
+      { idx: 3, name: "GST" },
+      { idx: 4, name: "GSV" },
+      { idx: 5, name: "RMC" },
+      { idx: 6, name: "VTG" },
+      { idx: 7, name: "ZDA" }
+    ];
+
+    const POLL_SECONDS = 1;
+    var poll_timer = 0;
+
+    function S() {
+      getLoc();
+
+      if (loc) d.Sf.action = getURL("/m/gpsconfig");
+
+      BuildUBXRows();
+      BuildNMEARows();
+      PollNow();
+    }
+
+    function BuildUBXRows() {
+      var html = "";
+      html += '<table style="width:100%;">';
+      html += '<tr><th>Enable</th><th>Name</th><th>ID</th><th>Seen</th><th>Count</th><th>Age ms</th></tr>';
+
+      for (var i = 0; i < GPS_UBX_ROWS.length; i++) {
+        var r = GPS_UBX_ROWS[i];
+        html += '<tr>';
+        html += '  <td><input type="checkbox" id="UE' + r.idx + '" name="UE' + r.idx + '"></td>';
+        html += '  <td>' + r.name + '</td>';
+        html += '  <td>0x' + Hex2(r.id) + '</td>';
+        html += '  <td><input id="US' + r.idx + '" type="text" readonly value="" style="width:100px;"></td>';
+        html += '  <td><input id="UC' + r.idx + '" type="text" readonly value="" style="width:100px;"></td>';
+        html += '  <td><input id="UA' + r.idx + '" type="text" readonly value="" style="width:100px;"></td>';
+        html += '</tr>';
+      }
+
+      html += '</table>';
+      gId("ubx_rows").innerHTML = html;
+    }
+
+    function BuildNMEARows() {
+      var html = "";
+      html += '<table style="width:100%;">';
+      html += '<tr><th>Enable</th><th>Name</th><th>Seen</th><th>Count</th><th>Age ms</th></tr>';
+
+      for (var i = 0; i < GPS_NMEA_ROWS.length; i++) {
+        var r = GPS_NMEA_ROWS[i];
+        html += '<tr>';
+        html += '  <td><input type="checkbox" id="NE' + r.idx + '" name="NE' + r.idx + '"></td>';
+        html += '  <td>' + r.name + '</td>';
+        html += '  <td><input id="NS' + r.idx + '" type="text" readonly value="" style="width:100px;"></td>';
+        html += '  <td><input id="NC' + r.idx + '" type="text" readonly value="" style="width:100px;"></td>';
+        html += '  <td><input id="NA' + r.idx + '" type="text" readonly value="" style="width:100px;"></td>';
+        html += '</tr>';
+      }
+
+      html += '</table>';
+      gId("nmea_rows").innerHTML = html;
+    }
+
+    function Hex2(v) {
+      var s = Number(v).toString(16).toUpperCase();
+      if (s.length < 2) s = "0" + s;
+      return s;
+    }
+
+    function PollNow() {
+      loadJS(getURL("/m/gpsconfig/s.js?p=1&ts=" + Date.now()), false);
+      if (typeof GetV === "function") GetV();
+      PollSchedule();
+    }
+
+    function PollSchedule() {
+      if (poll_timer) clearTimeout(poll_timer);
+      poll_timer = setTimeout(PollNow, POLL_SECONDS * 1000);
+    }
+
+    function Cmd(action) {
+      gId("A").value = action;
+      d.Sf.submit();
+    }
+  </script>
+</head>
+
+<body onload="S()">
+<form id="form_s" name="Sf" method="post">
+
+  <div class="toprow">
+    <button type="button" onclick="B()">Back</button>
+    <button type="submit" onclick="gId('A').value='save'">Send</button>
+
+    <span style="float:right">
+      <input type="text" name="UT" readonly value="" style="width:220px;text-align:right;">
+    </span>
+
+    <hr>
+  </div>
+
+  <h2>GPS Config Device</h2>
+
+  <input type="hidden" id="A" name="A" value="save">
+
+  <div style="padding:10px 0;">
+    <table style="width:100%;">
+      <tr>
+        <td>Parser</td>
+        <td><input id="GPS_PARSER" type="text" readonly style="width:180px;"></td>
+
+        <td>Fix Status</td>
+        <td><input id="GPS_FIX_STATUS" type="text" readonly style="width:180px;"></td>
+      </tr>
+
+      <tr>
+        <td>Current Baud</td>
+        <td>
+          <input id="GPS_BAUD_CURRENT" type="text" readonly style="width:120px;">
+          <button type="button" onclick="Cmd('detect_baud')">Detect Baud</button>
+        </td>
+
+        <td>Satellites</td>
+        <td><input id="GPS_SATS" type="text" readonly style="width:180px;"></td>
+      </tr>
+
+      <tr>
+        <td>Target Baud</td>
+        <td>
+          <select id="BaudTarget" name="BaudTarget" style="width:140px;">
+            <option value="115200">115200</option>
+            <option value="230400">230400</option>
+            <option value="460800">460800</option>
+            <option value="921600">921600</option>
+            <option value="57600">57600</option>
+            <option value="38400">38400</option>
+            <option value="19200">19200</option>
+            <option value="9600">9600</option>
+          </select>
+          <button type="button" onclick="Cmd('apply_baud')">Apply Baud</button>
+        </td>
+
+        <td>Last Packet Age</td>
+        <td><input id="GPS_LAST_AGE" type="text" readonly style="width:180px;"></td>
+      </tr>
+
+      <tr>
+        <td>Rate</td>
+        <td><input id="Rate" name="Rate" type="number" min="0" max="10" value="1" style="width:80px;"></td>
+
+        <td></td>
+        <td></td>
+      </tr>
+    </table>
+  </div>
+
+  <hr>
+
+  <div>
+    <b>UBX Messages</b>
+    <div id="ubx_rows"></div>
+  </div>
+
+  <hr>
+
+  <div>
+    <b>NMEA Messages</b>
+    <div id="nmea_rows"></div>
+  </div>
+
+  <hr>
+</form>
+</body>
+</html>

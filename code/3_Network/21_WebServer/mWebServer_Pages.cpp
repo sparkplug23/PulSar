@@ -54,6 +54,47 @@ size_t mWebServer::printToggleElementClass(
     class_name
   );
 }
+size_t mWebServer::printSetElementHTML(
+  Print& settingsScript,
+  const char* element_id,
+  const char* val
+) {
+  return settingsScript.printf_P(
+    PSTR("var e=d.getElementById(\"%s\");if(e)e.innerHTML=\"%s\";"),
+    element_id, val
+  );
+}size_t mWebServer::printTableSetCell(Print& s, const char* table_id, uint16_t row, uint8_t col, const char* val) {
+  return s.printf_P(
+    PSTR("TSet('%s',%u,%u,\"%s\");"),
+    table_id, row, col, val
+  );
+}
+
+size_t mWebServer::printTableAddRow(Print& s, const char* table_id, uint16_t row, const char* c0, const char* c1, const char* c2) {
+  return s.printf_P(
+    PSTR("TRow('%s',%u,\"%s\",\"%s\",\"%s\");"),
+    table_id, row, c0, c1, c2
+  );
+}
+
+size_t mWebServer::printTableClear(Print& s, const char* table_id) {
+  return s.printf_P(PSTR("TClear('%s');"), table_id);
+}
+
+size_t mWebServer::printTableSetValue(Print& s, const char* table_id, uint16_t row, const char* val) {
+  return s.printf_P(
+    PSTR("TSetValue('%s',%u,\"%s\");"),
+    table_id, row, val
+  );
+}
+
+size_t mWebServer::printTableSetNotes(Print& s, const char* table_id, uint16_t row, const char* val) {
+  return s.printf_P(
+    PSTR("TSetNotes('%s',%u,\"%s\");"),
+    table_id, row, val
+  );
+}
+
 
 // Date Modified: 25Jan26
 

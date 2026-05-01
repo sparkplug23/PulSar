@@ -498,7 +498,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #define tkr_adc_internal                          static_cast<mADCInternal*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_ADC_INTERNAL_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_GPS_SERIAL
-  #include "5_Sensors/50_GPS_Serial/mGPS_Serial.h"
+  #include "5_Sensors/50_GPS_Serial/_mGPS_Serial.h"
   #define tkr_gps                                static_cast<mGPS_Serial*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS__GPS_SERIAL_ID))
 #endif
 #ifdef USE_MODULE_SENSORS_GPS_MODEM

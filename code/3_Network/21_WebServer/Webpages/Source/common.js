@@ -147,3 +147,64 @@ function KVTable(rowsHtml){
 function Section(title, innerHtml){
   return "<div class='section'><div class='title'>" + title + "</div>" + innerHtml + "</div>";
 }
+
+
+
+
+// -----------------------------------------------------------------------------
+// Generic 3-column table helpers added April2026
+//   - table id convention:
+//       table body id = "<tableId>_body"
+//       cell ids      = "<tableId>_r<row>c<col>"
+//   - intended columns:
+//       c0 = name
+//       c1 = value
+//       c2 = notes
+// -----------------------------------------------------------------------------
+
+function TID(tableId, row, col){
+  return tableId + "_r" + row + "c" + col;
+}
+
+function TClear(tableId){
+  SHTML(tableId + "_body", "");
+}
+
+function TRow(tableId, row, c0 = "", c1 = "", c2 = ""){
+  var body = gId(tableId + "_body");
+  if (!body) return;
+
+  var tr  = cE("tr");
+  var td0 = cE("td");
+  var td1 = cE("td");
+  var td2 = cE("td");
+
+  td0.id = TID(tableId, row, 0);
+  td1.id = TID(tableId, row, 1);
+  td2.id = TID(tableId, row, 2);
+
+  td0.innerHTML = c0;
+  td1.innerHTML = c1;
+  td2.innerHTML = c2;
+
+  tr.appendChild(td0);
+  tr.appendChild(td1);
+  tr.appendChild(td2);
+  body.appendChild(tr);
+}
+
+function TSet(tableId, row, col, html){
+  SHTML(TID(tableId, row, col), html);
+}
+
+function TSetName(tableId, row, html){
+  TSet(tableId, row, 0, html);
+}
+
+function TSetValue(tableId, row, html){
+  TSet(tableId, row, 1, html);
+}
+
+function TSetNotes(tableId, row, html){
+  TSet(tableId, row, 2, html);
+}

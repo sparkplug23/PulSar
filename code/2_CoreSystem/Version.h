@@ -22,8 +22,11 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 
-/**@@@@@ Minor Changes - aim to make these quarterly
- * #132 : 24Dec25 Live palettes refactored. New Wifi2, webserver. three html build scripts (lights,webserver,submodules). Ethernet, LTE, SMS. Lights will be either complete/beta/2d only, add new defines within these, not the user config. RMT added back in (eg coneH). Most esp32 versions (s3,c3, working). crash_report and add2line parsing.
+/**@@@@@ Minor Changes - Aim for Quartely Milestones : Try describe development in this stage, when increased, assumed previous was done.
+ * #135 : [26Q2] Created 4April26. Worked on: Addlog,   
+ * #134 : Created Feb26. Fixed RTC leak causing crashing on solar, new panic_handler added for postcrash decoding
+ * #133 : New testbeds created for permenant structured developed.
+ * #132 : [26Q1] 24Dec25 Live palettes refactored. New Wifi2, webserver. three html build scripts (lights,webserver,submodules). Ethernet, LTE, SMS. Lights will be either complete/beta/2d only, add new defines within these, not the user config. RMT added back in (eg coneH). Most esp32 versions (s3,c3, working). crash_report and add2line parsing.
  * #131 : Oct25 In Colorado
  * #130 : Aug25 Moving towards FIRMWARE_DEFAULT__LIGHTING_CONFIG__## and merging longterm working lighting options. From now on, unless testing a new feature inside FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA (where it, then inside it will be a test ifdef to keep it centralised) all lighting will be defined in the ini, and use FIRMWARE_DEFAULT__LIGHTING_CONFIG__## to define the lighting config. 
  * #129 : Jun25 Esp32, c3, s3, pin mapping templates updated
@@ -46,18 +49,18 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * #111 : Working on lighting as its own branch. Removing any WLED palette usage until my palatte works!
  * #110 : Before colorado
  */
-#define FIRMWARE_VERSION_MINOR    134 // Update "ChangeLogManual.md" when incrementing
+#define FIRMWARE_VERSION_MINOR    135 // Update "ChangeLogManual.md" when incrementing
 
 /**@@@@@ Core Changes
  * #00 : 
  */
-#define FIRMWARE_VERSION_CORE     6
+#define FIRMWARE_VERSION_CORE     0
 
 /**@@@@@ Module changes
  * #00 : 
  * In the future, if core remains 0, this can be used to iter one level up.
  */
-#define FIRMWARE_VERSION_MODULE   3
+#define FIRMWARE_VERSION_MODULE   0
 
 
 #define FIRMWARE_BRANCH_NAME_STRING "development"

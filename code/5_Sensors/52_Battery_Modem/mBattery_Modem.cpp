@@ -43,7 +43,7 @@ int8_t mBattery_Modem::Tasker(uint8_t function, JsonParserObject obj)
     break;
   }
 
-  if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -65,11 +65,14 @@ int8_t mBattery_Modem::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
@@ -88,8 +91,8 @@ void mBattery_Modem::Pre_Init(void)
 void mBattery_Modem::Init(void)
 {
   
-  settings.fEnableSensor = true;
-  settings.sensor_count++;
+  module_state.mode = ModuleStatus::Running;
+  module_state.devices++;
 
 }
 
@@ -180,47 +183,7 @@ void mBattery_Modem::MQTTHandler_Init()
   
 } 
 
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mBattery_Modem::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mBattery_Modem::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mBattery_Modem::MQTTHandler_Sender()
-{    
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
-  
 #endif // USE_MODULE_NETWORK_MQTT
-/******************************************************************************************************************
- * WebServer
-*******************************************************************************************************************/
-
-
-
-
 
 
 #endif

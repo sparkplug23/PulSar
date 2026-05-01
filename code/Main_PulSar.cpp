@@ -111,7 +111,75 @@ void EmergencySerial_SettingsReset(void) {
 // #include "esp_private/esp_gpio_reserve.h"
 #endif  // ESP32
 extern bool psramInit();   // forward declare if needed
+/**
+ * @brief Print basic PulSar firmware/device splash to Serial.
+ * 
+ * Put this after Serial.begin(...) and after any early delay needed for USB serial.
+ */
+void Serial_PrintFirmwareSplash()
+{
+  Serial.println();
+  Serial.println(F("=================================================="));
+  Serial.println(F(" PulSar Firmware Boot"));
+  Serial.println(F("=================================================="));
 
+  #ifdef DEVICENAME_CTR
+    Serial.printf("Device:          %s\r\n", DEVICENAME_CTR);
+  #else
+    Serial.println(F("Device:          <DEVICENAME_CTR not defined>"));
+  #endif
+
+  #ifdef DEVICENAME_FRIENDLY_CTR
+    Serial.printf("Friendly Name:   %s\r\n", DEVICENAME_FRIENDLY_CTR);
+  #else
+    Serial.println(F("Friendly Name:   <DEVICENAME_FRIENDLY_CTR not defined>"));
+  #endif
+
+  #ifdef FIRMWARE_NAME_CTR
+    Serial.printf("Firmware:        %s\r\n", FIRMWARE_NAME_CTR);
+  #else
+    Serial.println(F("Firmware:        PulSar"));
+  #endif
+
+  #ifdef FIRMWARE_VERSION_CTR
+    Serial.printf("Version:         %s\r\n", FIRMWARE_VERSION_CTR);
+  #else
+    Serial.println(F("Version:         <FIRMWARE_VERSION_CTR not defined>"));
+  #endif
+
+  Serial.printf("Build Date:      %s\r\n", __DATE__);
+  Serial.printf("Build Time:      %s\r\n", __TIME__);
+
+  #if defined(ARDUINO_ARCH_ESP32)
+    Serial.println(F("Platform:        ESP32"));
+    Serial.printf("ESP-IDF:         %s\r\n", ESP.getSdkVersion());
+    Serial.printf("Chip Model:      %s\r\n", ESP.getChipModel());
+    Serial.printf("Chip Revision:   %d\r\n", ESP.getChipRevision());
+    Serial.printf("CPU Freq:        %u MHz\r\n", ESP.getCpuFreqMHz());
+    Serial.printf("Flash Size:      %u bytes\r\n", ESP.getFlashChipSize());
+    Serial.printf("Sketch Size:     %u bytes\r\n", ESP.getSketchSize());
+    Serial.printf("Free Sketch:     %u bytes\r\n", ESP.getFreeSketchSpace());
+    Serial.printf("Heap Free:       %u bytes\r\n", ESP.getFreeHeap());
+  #elif defined(ARDUINO_ARCH_ESP8266)
+    Serial.println(F("Platform:        ESP8266"));
+    Serial.printf("SDK:             %s\r\n", ESP.getSdkVersion());
+    Serial.printf("Core Version:    %s\r\n", ESP.getCoreVersion().c_str());
+    Serial.printf("CPU Freq:        %u MHz\r\n", ESP.getCpuFreqMHz());
+    Serial.printf("Flash Size:      %u bytes\r\n", ESP.getFlashChipRealSize());
+    Serial.printf("Sketch Size:     %u bytes\r\n", ESP.getSketchSize());
+    Serial.printf("Free Sketch:     %u bytes\r\n", ESP.getFreeSketchSpace());
+    Serial.printf("Heap Free:       %u bytes\r\n", ESP.getFreeHeap());
+  #else
+    Serial.println(F("Platform:        <unknown>"));
+  #endif
+
+  #ifdef PIOENV
+    Serial.printf("PIO Env:         %s\r\n", PIOENV);
+  #endif
+
+  Serial.println(F("=================================================="));
+  Serial.println();
+}
 /********************************************************************************************/
 /*********************SETUP******************************************************************/
 /********************************************************************************************/
@@ -275,6 +343,8 @@ void setup(void)
   Serial.println(F("DELAYED BOOT for 5 seconds...")); Serial.flush(); delay(5000);
   #endif
   #endif
+  
+  Serial_PrintFirmwareSplash();
 
   Serial.printf("baudrate_tmp = %d\n\r", baudrate_tmp);
 

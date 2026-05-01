@@ -17,7 +17,7 @@ class mGPS_Modem :
     void Pre_Init(void);
     void Init(void);
     
-    static constexpr const char* PM_MODULE__SENSORS_GPS_MODEM__CTR = D_MODULE__SENSORS_GPS_MODEM__CTR;
+    static constexpr const char* PM_MODULE__SENSORS_GPS_MODEM__CTR = D_MODULE_SENSORS__GPS_MODEM__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__SENSORS_GPS_MODEM__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__SENSORS_GPS_MODEM__ID; }
     

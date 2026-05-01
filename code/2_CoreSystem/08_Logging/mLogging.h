@@ -337,6 +337,40 @@ enum LoggingLevels {
 
 
 
+#define ENABLE_SERIAL_TERMINAL_POSITION_RESET__PUTTY
+
+
+#if defined(ENABLE_SERIAL_TERMINAL_POSITION_RESET__PUTTY)
+
+  // ANSI / VT100 style reset
+  // Clear screen + move cursor home
+  #define SERIAL_TERMINAL_POSITION_RESET() \
+    do { \
+      SERIAL_DEBUG.print("\033[2J\033[H"); \
+      SERIAL_DEBUG.flush(); \
+    } while(0)
+
+#elif defined(ENABLE_SERIAL_TERMINAL_POSITION_RESET__REALTERM)
+
+  // RealTerm is not a proper ANSI terminal in the same way.
+  // Best effort only: push a large visual break so the next table
+  // appears in a predictable fresh area.
+  //
+  // You can tune the number of blank lines if needed.
+  #define SERIAL_TERMINAL_POSITION_RESET() \
+    do { \
+      SERIAL_DEBUG.print("\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r"); \
+      SERIAL_DEBUG.print("------------------------------------------------------------\n\r"); \
+      SERIAL_DEBUG.flush(); \
+    } while(0)
+
+#else
+
+  #define SERIAL_TERMINAL_POSITION_RESET() \
+    do { \
+    } while(0)
+
+#endif
 
 
 

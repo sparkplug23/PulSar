@@ -1,7 +1,7 @@
 {
   "env_name": "cm_office__ws2815panel12v",
-  "created_utc": "2026-04-03T23:27:15Z",
-  "created_epoch": 1775258835,
+  "created_utc": "2026-04-04T11:38:53Z",
+  "created_epoch": 1775302733,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "6f34b5fcfc0623066d5d1d1b55ddbe4d8fdbed8d",
-    "describe": "6f34b5fc-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M Nextion/PulSar_2p5Inch_2023/pulsar_2p5_april2024.HMI\n M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__QTQ.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/1_TaskerManager/mTaskerManager.h\n M code/2_CoreSystem/01_Settings/mSettings.cpp\n M code/2_CoreSystem/01_Settings/mSettings.h\n M code/2_CoreSystem/01_Settings/mSettings_Defaults.cpp\n M code/2_CoreSystem/01_Settings/mSettings_Saving.cpp\n M code/2_CoreSystem/03_FileSystem/mFileSystem.cpp\n M code/2_CoreSystem/05_HardwarePins/mPin_GPIO.h\n M code/2_CoreSystem/05_HardwarePins/mPins.cpp\n M code/2_CoreSystem/05_HardwarePins/mPins.h\n M code/2_CoreSystem/05_HardwarePins/mPins_TemplatesParsing.cpp\n M code/2_CoreSystem/06_Support/mSupport.cpp\n M code/2_CoreSystem/08_Logging/mLogging.cpp\n M code/2_CoreSystem/08_Logging/mLogging.h\n M code/3_Network/03_WiFi2/WiFi_Helpers.cpp\n M code/3_Network/10_MQTT/mMQTT_Manager.cpp\n M code/3_Network/21_WebServer/Page__Console.cpp\n M code/3_Network/21_WebServer/Webpages/Generated/root_basic.h\n M code/3_Network/21_WebServer/Webpages/Source/root_basic.htm\n M code/3_Network/21_WebServer/_WebServer.cpp\n M code/4_Drivers/04_Relays/mRelays.cpp\n M code/4_Drivers/04_Relays/mRelays.h\n M code/6_Lights/03_Animator/WebUI.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.cpp\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/mNextion.cpp\n M code/8_Displays/01_Nextion/mNextion.h\n M code/8_Displays/01_Nextion/mNextion_Internal.cpp\n M code/Main_PulSar.cpp\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_lgt.ini\n M platformio_meadows.ini\n M platformio_override.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M saved_compiles/qtq_server_reset_board_installed/build_meta.json\n M saved_compiles/qtq_server_reset_board_installed/firmware.elf\n?? Nextion/3p5Inch/pulsar_2p5_april2024.tft\n?? Nextion/3p5Inch/pulsar_2p5_april2026.tft\n?? Nextion/3p5Inch/pulsar_2p5_april2026_withkey.tft\n?? Nextion/NX-SerialMonitor-main.zip\n?? Nextion/NX-SerialMonitor-main/\n?? Nextion/PulSar_2p5Inch_2023/pulsar_2p5_april2026.HMI\n?? Nextion/PulSar_2p5Inch_2023/pulsar_2p5_april2026_withkey.HMI\n?? Nextion/PulSar_2p5Inch_2023/serial_keyboard.page\n?? Nextion/PulSar_2p5Inch_2023/serial_main.page\n?? Nextion/PulSar_2p5Inch_2023/serial_options.page\n?? code/2_CoreSystem/08_Logging/ToSort.cpp\n?? code/2_CoreSystem/mSystemConstants.h"
+    "commit": "785c1ef293a4b4da6c9f91060dd17278dd4f311c",
+    "describe": "785c1ef2-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/08_Logging/mLogging.cpp\n M code/2_CoreSystem/Version.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M saved_compiles/qtq_server_reset_board_installed/build_meta.json\n M saved_compiles/qtq_server_reset_board_installed/firmware.elf"
   }
 }

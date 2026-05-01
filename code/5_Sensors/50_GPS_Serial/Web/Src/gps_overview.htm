@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Overview</title>
+
+  <script src="/common.js"></script>
+  <style>@import url("/style.css");</style>
+
+  <script>
+    // Date Modified: 12Apr26
+
+    const POLL_SECONDS = 1;
+    var poll_timer = 0;
+
+    function S() {
+      getLoc();
+
+      if (loc) d.Sf.action = getURL("/m/gpsoverview");
+
+      PollNow();
+    }
+
+    function PollNow() {
+      loadJS(getURL("/m/gpsoverview/s.js?p=1&ts=" + Date.now()), false);
+      if (typeof GetV === "function") GetV();
+      PollSchedule();
+    }
+
+    function PollSchedule() {
+      if (poll_timer) clearTimeout(poll_timer);
+      poll_timer = setTimeout(PollNow, POLL_SECONDS * 1000);
+    }
+  </script>
+</head>
+
+<body onload="S()">
+<form id="form_s" name="Sf" method="post">
+
+  <div class="toprow">
+    <button type="button" onclick="B()">Back</button>
+
+    <span style="float:right">
+      <input type="text" name="UT" readonly value="" style="width:220px;text-align:right;">
+    </span>
+
+    <hr>
+  </div>
+
+  <h2 id="page_title">Overview</h2>
+
+  <table style="width:100%;">
+    <tr>
+      <th style="width:26%;">Name</th>
+      <th style="width:32%;">Value</th>
+      <th>Notes</th>
+    </tr>
+    <tbody id="gps_body"></tbody>
+  </table>
+
+  <hr>
+</form>
+</body>
+</html>

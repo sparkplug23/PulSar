@@ -284,6 +284,19 @@ size_t printSetElementStyle(Print& settingsScript, const char* element_id, const
 size_t printToggleElementClass(Print& settingsScript,  const char* element_id,  const char* class_name,  bool enable);
 
 
+size_t printTableSetCell(Print& s, const char* table_id, uint16_t row, uint8_t col, const char* val);
+size_t printTableAddRow(Print& s, const char* table_id, uint16_t row, const char* c0, const char* c1, const char* c2);
+size_t printTableClear(Print& s, const char* table_id);
+
+size_t printTableSetValue(Print& s, const char* table_id, uint16_t row, const char* val);
+size_t printTableSetNotes(Print& s, const char* table_id, uint16_t row, const char* val);
+
+size_t printSetElementHTML(
+  Print& settingsScript,
+  const char* element_id,
+  const char* val
+) ;
+
 
     void SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage);
 

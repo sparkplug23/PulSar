@@ -10,14 +10,229 @@
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 
+
+/******
+Board List - LilyGO ESP32 Modem Boards
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index   |  Qty  |  Board                         |  Modem      |  Network Class              |  GPS/GNSS  |  LTE/Data                 |  SMS  |  Phone Calls  |  Notes
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+[01]    |   1   |  LilyGO TTGO T-Call V1.4/V1.5 |  SIM800L    |  2G GSM/GPRS                |     No     |  GPRS only, slow 2G data  |  Yes  |     Yes       |  Good for SMS alerts, GSM call triggers, basic telemetry. No LTE.
+[02]    |   1   |  LilyGO T-SIM7000G            |  SIM7000G   |  LTE Cat-M1 / NB-IoT / 2G   |    Yes     |  LTE-M / NB-IoT / GPRS    |  Yes  |     No*       |  Good for GPS tracking, remote telemetry, low-power IoT data logging.
+[03]    |   1   |  LilyGO T-SIM7000G            |  SIM7000G   |  LTE Cat-M1 / NB-IoT / 2G   |    Yes     |  LTE-M / NB-IoT / GPRS    |  Yes  |     No*       |  Same as [02].
+[04]    |   1   |  LilyGO T-SIM7000G            |  SIM7000G   |  LTE Cat-M1 / NB-IoT / 2G   |    Yes     |  LTE-M / NB-IoT / GPRS    |  Yes  |     No*       |  Same as [02].
+[05]    |   1   |  LilyGO TTGO T-Call V1.4/V1.5 |  SIM800L    |  2G GSM/GPRS                |     No     |  GPRS only, slow 2G data  |  Yes  |     Yes       |  Good for SMS alerts, GSM call triggers, basic telemetry. No LTE.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Totals  |   5   |  2x T-Call, 3x T-SIM7000G      |  2 modem types
+        |       |                                |  2x SIM800L |  2G GSM/GPRS only           |  No GPS    |  GPRS data only           |  Yes  |     Yes       |
+        |       |                                |  3x SIM7000G|  LTE Cat-M1 / NB-IoT        |  GPS/GNSS  |  LTE IoT data             |  Yes  |     No*       |
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Modem Capability Summary
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Modem      |  Main Purpose                         |  Data Capability              |  GPS/GNSS  |  SMS  |  Voice / Calls  |  Practical Use
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+SIM800L    |  Legacy GSM modem                     |  2G GPRS only                 |     No     |  Yes  |      Yes        |  SMS alarms, call-triggered actions, simple TCP/MQTT telemetry where 2G still exists.
+SIM7000G   |  LTE IoT modem with GNSS              |  LTE Cat-M1, NB-IoT, GPRS     |    Yes     |  Yes  |      No*        |  GPS tracker, LTE telemetry, low-power remote sensor nodes, MQTT/HTTP data uplink.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Notes:
+  - SIM800L is useful for SMS and voice-call based control, but it depends on 2G network availability.
+  - SIM7000G is the better modem for modern IoT telemetry and GPS tracking.
+  - SIM7000G supports SMS and packet data, but is not normally used for standard mobile phone-style voice calls.
+  - The T-SIM7000G boards are the better choice for GPS + LTE data logging.
+  - The T-Call boards are the better choice if you specifically want SMS plus GSM phone-call behaviour.
+
+* No normal phone-call support expected in typical SIM7000G use. Treat it as an LTE IoT/data/GNSS modem, not a handset modem.
+******/
+
+
+
+/*****
+ * 
+ * Board List
+ * #1 Lilygo t-call 
+ * 
+ * 
+ * 
+ * Build Types (and its uses)
+ * ** Device for planes tracking, self contained few hour tracking
+ * ** 
+ * 
+ * 
+ * 
+ * 
+ */
+
 //--------------------------------[Enable Device]-------------------------------------
+
+#define DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
+
 
 // #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__ON_SIM800L__OFFICE_TESTBED // Office window testbed, SIM800L, BK-880Q GPs, onboard IMU, SIM800L
 
 
 // #define DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_CELLULAR_LOCATOR_02_2026
 
+
 // //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * @file Device_LTE_Locator.ino
+ * @brief SIM7000G LTE Tracker Foundation
+ * * CORE FEATURES:
+ * - Connectivity: LTE-M / NB-IoT via SIM7000G
+ * - Telemetry: Periodic GPS/Status logs via MQTT (to InfluxDB/Grafana)
+ * - Remote Management: SMS command interface (Status, Config, Emergency)
+ * - Web Integration: Webhook-enabled location polling with Leaflet map UI
+ * - Power Profiles: 
+ * - High Fidelity (Short interval, active connectivity)
+ * - Long-Life (Power Saving Mode/eDRX, extended battery duration)
+ * 
+ * - Need to make it so wifi/mqtt can also perform a secondary connection.
+ *  -- But have a ifdef so wifi can stay disabled where I never want wifi broadcasting
+ * 
+ * * DEVELOPMENT NOTES:
+ * - Focus: Establish foundational LTE and MQTT handshake stability.
+ * - Future: Integrate WebUI map view and webhook dispatch.
+ */
+#ifdef DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
+  #define DEVICENAME_CTR          "cellular_locator_02"
+  #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
+  #define DEVICENAME_ROOMHINT_CTR "testbed"
+  #define MQTT_HOST   "192.168.3.70"
+
+
+  
+
+  
+#define MQTT_HOST_CELLULAR "sparkequinox2.ddns.net"
+
+
+#define  ENABLE_FEATURE_CELLULAR__INCLUDE_MOBILE_NETWORKS
+
+  // #define ENABLE_FEATURE_WATCHDOG_TIMER
+  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+
+  #define USE_MODULE_DRIVERS_MODEM_7000G
+
+  // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
+  #define ENABLE_FEATURE_SIM__SMS
+
+  // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+
+  // #define USE_MODULE_NETWORK_MQTT
+  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
+
+  // #define USE_SSIDS_NONE_DEBUGGING
+  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+
+
+  #define ENABLE_FEATURE_WIFI__BLOCK_CONNECTION
+
+  #define MQTT_USER "lteclient"
+  #define MQTT_PASS "af4d8bc9ab"
+  
+  #define MQTT_PORT 51883 //external mqtt broker on TOWER 
+
+  /**
+   * @brief WiFi MQTT
+   * 
+   */
+  // #define USE_MODULE_NETWORK_WIFI
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+
+  /**
+   * @brief Cellular MQTT
+   * 
+   */  
+  #define DISABLE_NETWORK_WIFI
+  #define USE_MODULE_NETWORK_CELLULAR
+  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+  #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+  #define USE_MODULE_SENSORS_GPS_MODEM
+                #define USE_MODULE_SENSORS_INTERFACE
+  #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+  #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+
+  // #define UART_CELLULAR_BAUD   115200
+#define UART_CELLULAR_BAUD   921600
+
+  #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+  #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
+      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker01"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__NETWORK_CELLULAR__CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+
+      "\"" D_MODULE_SENSORS__GPS_MODEM__CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "],"
+
+      
+
+
+      "\"" D_MODULE__SENSORS_BATTERY_MODEM__CTR "\":["
+        "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "},"   
+    "\"" D_DISPLAY "\":{"
+      "\"" "DisplayRows" "\":8,"
+      "\"" "DisplayCols" "\":[21,2],"
+      "\"" "DisplaySize" "\":1"
+    "},"  
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    "\"MQTT\":{\"RetrySecs\":10}"
+  "}";
+
+#endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
+
+
+
+
+
+/**
+ * @brief T-SIM7000G FPV Recovery Tracker
+ * * CORE FEATURES:
+ * - Hybrid Logic: Passive (Timer-based) vs. Active (MavLink-aware) monitoring
+ * - Emergency Beacon: Auto-broadcasts GPS coords via WiFi SSID and SMS
+ * - Remote Control: SMS-interface for Status, WiFi Toggle, and Location Polling
+ * - Power Management: Integrated LiPo charger with Diode-isolated 5V rail (Flight Battery charging)
+ * - Hardware Interface: Universal 4-pin UART (5V/GND/TX/RX) for modular fleet use
+ * * OPERATIONAL STATES:
+ * 1. FLIGHT: WiFi OFF, Listening for MavLink (or just waiting)
+ * 2. CRASH: Triggered by Timer or Heartbeat Timeout. 
+ * Action: Report SMS -> Cycle WiFi AP (SSID = Lat/Long) -> Sleep
+ */
+
+
+
 
 
 /**

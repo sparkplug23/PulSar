@@ -30,6 +30,9 @@
 #define PROGMEM_CTR2(X,Y) \
   const char X[] PROGMEM = Y;
 
+#define CTRP(X) \
+  const char* X =
+
 
 
 // fixing "abs" on esp32 later platform API

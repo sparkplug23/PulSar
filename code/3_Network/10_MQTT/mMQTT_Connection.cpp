@@ -74,8 +74,8 @@ void MQTTConnection::EverySecond()
     {
       ALOG_INF(PSTR("retry_counter==1"));
       MqttReconnect();
-    } 
-    else 
+    }
+    else
     {
       retry_counter--;
       ALOG_INF( PSTR("retry_counter=%d"), retry_counter );

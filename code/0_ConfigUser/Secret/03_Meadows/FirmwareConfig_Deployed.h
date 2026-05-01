@@ -1146,7 +1146,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
  /***********************************
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
  ************************************/  
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
 
  /***********************************
   * SECTION: Sensor Configs
@@ -1207,11 +1207,9 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
         "Grouping":1,
         "RateMs": 20
       },
-      "BrightnessRGB": 100,
-      "BrightnessCCT": 0
+      "BrightnessRGB": 100
     },
-    "BrightnessRGB": 100,
-    "BrightnessCCT": 0
+    "BrightnessRGB": 100
   }
   )=====";
 
@@ -5156,11 +5154,29 @@ May need to add two power connections too, so its not just the cat5e wire to let
     ],
     "Segments":[
       {
+        "Name":"Under Desk",
         "PixelRange": [
           0,
-          300
+          200
         ],
         "ColourPalette":"Warm White",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Solid",
+          "Speed":180,
+          "Intensity":85,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      },
+      {
+        "Name":"Metal Pole",
+        "PixelRange": [
+          200,
+          300
+        ],
+        "ColourPalette":"Cold White",
         "ColourType":3,
         "Effects": {
           "Function":"Solid",
@@ -5726,7 +5742,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
       "BrightnessCCT": 0
 
     },
-    "BrightnessRGB": 100,
+    "BrightnessRGB": 0,
     "BrightnessCCT": 0
   }
   )=====";
@@ -5754,134 +5770,14 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
 
 
-
-
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
-****** ROOM: Garage ****************************************************************************************************************************************************
+****** ROOM: Guest Room ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
 
 
-
-/**
- * @brief 
- *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
- *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
- *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
- *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
- *                               *I ~PWM 'NC    
- *                          _____________________
- *                         |5V     |USB|     5|
- *                         |GND              6| 
- *                         |3V3              7|
- *                         |4  (fL, BIL)     8| I2C SDA   - Blue LED
- *                         |3                9| I2C SCL
- *                         |2 fL            10| 
- *                    U1RX |1               20| U0TX
- *                    U1TX |0               21| U0RX
- *                         ____________________
- *  */
-#ifdef DEVICE_MEADOWS__GARAGE__ROOM_SENSOR
-#ifndef DEVICENAME_CTR
-#define DEVICENAME_CTR          "template"
-#endif
-#ifndef DEVICENAME_FRIENDLY_CTR
-#define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
-#endif
-#ifndef DEVICENAME_DESCRIPTION_CTR
-#define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
-#endif
-#define DEVICENAME_ROOMHINT_CTR "testgroup"
-#define MQTT_HOST   "192.168.3.70"
-   
-   #define MQTT_PORT     1883
-    
-  /***********************************
-   * SECTION: System Configs
-  ************************************/    
-
-  // #define ENABLE_DEBUGFEATURE_SENSORS__SPLASH_I2C_SCAN
-
- /***********************************
-  * SECTION: Network Configs
- ************************************/    
-
- /***********************************
-  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
- ************************************/  
-
-#define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
-#define ENABLE_TEMPLATE_SECTION__SENSORS__BME
-
- /***********************************
-  * SECTION: Sensor Configs
- ************************************/  
-
-//  #define ENABLE_DEBUGFEATURE_WIFI__SUPERMINI_REDUCE_WIFI_BAD_ANTENNA_HARDWARE
-
-#define USE_MODULE_SENSORS_INTERFACE
-#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
-  #define USE_MODULE_SENSORS_BH1750
-#endif
-#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
-  #define USE_MODULE_SENSORS_BME    
-#endif
-#define USE_MODULE_SENSORS_PIR
-
-/***********************************
- * SECTION: Lighting Configs
-************************************/  
-
-
-/***********************************                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
- * SECTION: Module/GPIO Configs
-************************************/  
-
-#define USE_MODULE_TEMPLATE
-DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-"{"
-  "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
-  "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-  "\"" D_GPIO_NUMBER "\":{"          
-    #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-    "\"10\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
-    #endif
-    #ifdef USE_MODULE_SENSORS_PIR
-    "\"4\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\""
-    #endif
-  "},"
-  "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-  "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-"}";
-
-/***********************************
- * SECTION: TEMPLATE: Names
-************************************/    
-
-#define D_DEVICE_SENSOR_BH1750_NAME "Garage"
-#define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Garage"
-
-#define USE_FUNCTION_TEMPLATE
-DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-"{"
-  "\"" D_DEVICENAME "\":{"
-    "\"" D_MODULE_SENSORS_PIR_CTR "\":["
-      "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
-    "],"
-    "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
-      "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
-    "],"
-    "\"" D_MODULE_SENSORS_BME_CTR "\":["
-      "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
-    "]"
-  "}"
-"}";
-
-
-#endif
 
 
 /**
@@ -6423,6 +6319,237 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 
 
+/**************************************************************************************************************************************************
+***************************************************************************************************************************************************
+****** ROOM: Garage ****************************************************************************************************************************************************
+****************************************************************************************************************************************************
+*******************************************************************************************************************************************/
+
+
+
+
+/**
+ * @brief 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *                               *I ~PWM 'NC    
+ *                          _____________________
+ *                         |5V     |USB|     5|
+ *                         |GND              6| 
+ *                         |3V3              7|
+ *                         |4  (fL, BIL)     8| I2C SDA   - Blue LED
+ *                         |3                9| I2C SCL
+ *                         |2 fL            10| 
+ *                    U1RX |1               20| U0TX
+ *                    U1TX |0               21| U0RX
+ *                         ____________________
+ *  */
+#ifdef DEVICE_MEADOWS__GARAGE__ROOM_SENSOR
+#ifndef DEVICENAME_CTR
+#define DEVICENAME_CTR          "template"
+#endif
+#ifndef DEVICENAME_FRIENDLY_CTR
+#define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+#endif
+#ifndef DEVICENAME_DESCRIPTION_CTR
+#define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+#endif
+#define DEVICENAME_ROOMHINT_CTR "testgroup"
+#define MQTT_HOST   "192.168.3.70"
+   
+   #define MQTT_PORT     1883
+    
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+
+  // #define ENABLE_DEBUGFEATURE_SENSORS__SPLASH_I2C_SCAN
+
+ /***********************************
+  * SECTION: Network Configs
+ ************************************/    
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+
+#define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+#define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+//  #define ENABLE_DEBUGFEATURE_WIFI__SUPERMINI_REDUCE_WIFI_BAD_ANTENNA_HARDWARE
+
+#define USE_MODULE_SENSORS_INTERFACE
+#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+  #define USE_MODULE_SENSORS_BH1750
+#endif
+#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
+  #define USE_MODULE_SENSORS_BME    
+#endif
+#define USE_MODULE_SENSORS_PIR
+
+/***********************************
+ * SECTION: Lighting Configs
+************************************/  
+
+
+/***********************************                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+ * SECTION: Module/GPIO Configs
+************************************/  
+
+#define USE_MODULE_TEMPLATE
+DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+"{"
+  "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+  "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+  "\"" D_GPIO_NUMBER "\":{"          
+    #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
+    "\"10\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+    "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
+    #endif
+    #ifdef USE_MODULE_SENSORS_PIR
+    "\"4\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\""
+    #endif
+  "},"
+  "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+  "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+"}";
+
+/***********************************
+ * SECTION: TEMPLATE: Names
+************************************/    
+
+#define D_DEVICE_SENSOR_BH1750_NAME "Garage"
+#define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "Garage"
+
+#define USE_FUNCTION_TEMPLATE
+DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+"{"
+  "\"" D_DEVICENAME "\":{"
+    "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+      "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+    "],"
+    "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
+    "],"
+    "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
+    "]"
+  "}"
+"}";
+
+
+#endif
+
+
+/**
+ * @description: 
+ *  
+ * **********************************************************************************************************************************************************************************/
+#ifdef DEVICE_MEADOWS__GARAGE__FURNACE
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template_name"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "Template Name"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "Template Description"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+  /***********************************
+   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+  ************************************/  
+  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
+    #define USE_MODULE_SENSORS_DS18X20
+      #define DS18X20_MAX_SENSORS 20
+        #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
+  #endif 
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      #ifdef USE_MODULE_SENSORS_DS18X20
+      "\"15\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\","
+      #endif
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  /***********************************
+   * SECTION: Device Configs
+  ************************************/    
+  
+  #define D_DEVICE_SENSOR_DB18S20_01_NAME        "FurnaceInFlow"
+  #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS     "[40,217,230,84,0,0,0,220]"
+  #define D_DEVICE_SENSOR_DB18S20_02_NAME        "FurnaceOutFlow"
+  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS     "[40,131,176,82,0,0,0,61]"
+  #define D_DEVICE_SENSOR_DB18S20_03_NAME        "FurnaceExhaust"
+  #define D_DEVICE_SENSOR_DB18S20_03_ADDRESS     "[40,10,43,85,0,0,0,0]"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\""    
+      "]"
+    "},"
+    "\"" D_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+        // Group 1
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ""
+      "}"  
+    "}"
+    "}";
+
+#endif
+
+
+
+
 #ifdef DEVICE_MEADOWS__TREADMILL_POWER_MONITOR
   #ifndef DEVICENAME_CTR
   #define DEVICENAME_CTR          "template_name"
@@ -6844,6 +6971,117 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "}"; 
  
 #endif
+
+
+
+/**
+ * @description: 
+ *  
+ * **********************************************************************************************************************************************************************************/
+#ifdef DEVICE_MEADOWS__BATHROOM__RADIATOR
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template_name"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "Template Name"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "Template Description"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
+  #define MQTT_HOST   "192.168.3.70"
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+  /***********************************
+   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+  ************************************/  
+  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
+    #define USE_MODULE_SENSORS_DS18X20
+      #define DS18X20_MAX_SENSORS 20
+        #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
+  #endif 
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      #ifdef USE_MODULE_SENSORS_DS18X20
+      "\"15\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\","
+      #endif
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  /***********************************
+   * SECTION: Device Configs
+  ************************************/    
+  
+  #define D_DEVICE_SENSOR_DB18S20_01_NAME        "BathroomRadiator100" // Long
+  #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS     "[40,68,213,84,0,0,0,237]"
+  #define D_DEVICE_SENSOR_DB18S20_02_NAME        "BathroomRadiator90" // Long
+  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS     "[40,137,228,84,0,0,0,113]"
+  #define D_DEVICE_SENSOR_DB18S20_03_NAME        "BathroomRadiator40" // short, with label E7
+  #define D_DEVICE_SENSOR_DB18S20_03_ADDRESS     "[40,170,67,3,30,19,2,25]" //hot
+  #define D_DEVICE_SENSOR_DB18S20_04_NAME        "BathroomRadiator00" // short, with label
+  #define D_DEVICE_SENSOR_DB18S20_04_ADDRESS     "[40,255,152,171,193,23,4,231]" //231=E7
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\""    
+      "]"
+    "},"
+    "\"" D_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+        // Group 1
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\":" D_DEVICE_SENSOR_DB18S20_04_ADDRESS ""
+      "}"  
+    "}"
+    "}";
+
+#endif
+
+
+
+
  
 
 /**************************************************************************************************************************************************

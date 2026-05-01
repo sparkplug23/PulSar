@@ -1,7 +1,7 @@
 #include "2_CoreSystem/08_Logging/mLogging.h"
 
 
-void AddLogOutput2(uint8_t loglevel, const char* log_data)
+void AddLogOutput(uint8_t loglevel, const char* log_data)
 {
   if (log_data == nullptr) {
     return;
@@ -232,19 +232,28 @@ static void AddLogV(uint8_t loglevel, PGM_P formatP, va_list arg)
   }
   #endif
 
+  // Check if at least one log meets threshold
   if (loglevel > HighestLogLevel()) {
     return;
   }
 
+  // Create log buffer
   char* log_data = AddLog_MallocV(formatP, arg);
   if (log_data == nullptr) {
     return;
   }
 
-  AddLogOutput2(loglevel, log_data);
+  // Send to output function for dispatch on any log methods
+  AddLogOutput(loglevel, log_data);
+
+  // Clear the log buffer
   free(log_data);
+
 }
 
+/**
+ * Normal log starting point
+ */
 void AddLog(uint8_t loglevel, PGM_P formatP, ...)
 {
   va_list arg;
@@ -253,6 +262,9 @@ void AddLog(uint8_t loglevel, PGM_P formatP, ...)
   va_end(arg);
 }
 
+/**
+ * Optional time limited logging: eg always report errors but restrict flooding the log window
+ */
 void AddLog_TimeGated(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM_P formatP, ...)
 {
   if (tSaved == nullptr) {
@@ -272,27 +284,6 @@ void AddLog_TimeGated(uint8_t loglevel, uint32_t* tSaved, uint16_t limit_ms, PGM
   va_end(arg);
 }
 
-
-void mLogging::handleTelnet(){
-  if(!telnet.server) return; //not configured yet
-  if (telnet.server->hasClient()){
-  	// client is connected
-    if (!telnet.client || !telnet.client.connected()){
-      if(telnet.client) telnet.client.stop();          // client disconnected
-      telnet.client = telnet.server->available(); // ready for new client
-    } else {
-      telnet.server->available().stop();  // have client, block new conections
-    }
-  }
-
-  if (telnet.client && telnet.client.connected() && telnet.client.available()){
-    // client input processing
-    while(telnet.client.available())
-      char c = telnet.client.read();//dump values
-      // Serial.write(telnet.client.read()); // pass through
-      // do other stuff with client input here
-  } 
-}
 
 void mLogging::GetLog(uint8_t idx, char** entry_pp, size_t* len_p)
 {
@@ -330,6 +321,27 @@ void mLogging::StartTelnetServer()
   // ALOG_INF(PSTR("telnet.client server started on port %d"),(uint8_t)TELNET_PORT);
 }
 
+
+void mLogging::handleTelnet(){
+  if(!telnet.server) return; //not configured yet
+  if (telnet.server->hasClient()){
+  	// client is connected
+    if (!telnet.client || !telnet.client.connected()){
+      if(telnet.client) telnet.client.stop();          // client disconnected
+      telnet.client = telnet.server->available(); // ready for new client
+    } else {
+      telnet.server->available().stop();  // have client, block new conections
+    }
+  }
+
+  if (telnet.client && telnet.client.connected() && telnet.client.available()){
+    // client input processing
+    while(telnet.client.available())
+      char c = telnet.client.read();//dump values
+      // Serial.write(telnet.client.read()); // pass through
+      // do other stuff with client input here
+  } 
+}
 
 const char* mLogging::GetLogLevelNamebyID(uint8_t id) {
   switch(id) {
