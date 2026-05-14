@@ -1321,9 +1321,21 @@ int16_t IRAM_ATTR mPins::Pin(uint32_t gpio, uint32_t index)
   }
   #else
   uint16_t real_gpio = gpio + index;
+
+  // if(real_gpio == 320)
+  // {
+
+  // AddLog_Array(LOG_LEVEL_INFO, "pin_attached_gpio_functions", pin_attached_gpio_functions, ARRAY_SIZE(pin_attached_gpio_functions));
+  // AddLog_Array(LOG_LEVEL_INFO, "gpio_pin_by_index", gpio_pin_by_index, ARRAY_SIZE(gpio_pin_by_index));
+  // }
+
+
   for (uint32_t index_pin = 0; index_pin < nitems(pin_attached_gpio_functions); index_pin++) {
     if (pin_attached_gpio_functions[index_pin] == real_gpio) {
+
+      // if(real_gpio == 320)
       // ALOG_INF(PSTR("Pin(%d,%d) pin_attached[%d] == real_gpio|%d==%d"), gpio,index, index_pin, pin_attached_gpio_functions[index_pin],real_gpio);
+      
       return gpio_pin_by_index[index_pin];              // Pin number configured for gpio
     }
   }
@@ -1411,7 +1423,9 @@ int8_t mPins::ConvertIndexPinToRealPin(uint8_t index_pin){
 
 void mPins::DigitalWrite(uint32_t gpio_pin, uint32_t state)
 {
-  ALOG_ERR(PSTR("SHould never be here!!"));
+
+  ALOG_INF(PSTR("DigitalWrite(uint32_t %d, uint32_t %d"), gpio_pin, state);
+
   DigitalWrite(gpio_pin, 0, state);
   // if (tkr_set->pin[gpio_pin] < 99) {
         // AddLog(LOG_LEVEL_DEV_TEST,PSTR(D_LOG_RELAYS "DigitalWrite(%d[%d],%d)"),tkr_set->pin[gpio_pin],gpio_pin,state);

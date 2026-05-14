@@ -99,6 +99,11 @@ SHOULD NOT rely on other files for pre-defines, other than INI
   #define ENABLE_DELAYED_BOOT
   #define ENABLE_DEBUG_FUNCTION_NAMES
 
+  #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+  #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+  #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+
+
   #define ENABLE_LOG_LEVEL_NONE 
   #define ENABLE_LOG_LEVEL_ERROR 
   #define ENABLE_LOG_LEVEL_WARNING 
@@ -153,6 +158,10 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 //   #define DEBUG_FOR_FAULT
 // #endif
 
+
+#define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
+#define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
+#define ENABLE_DEVFEATURE_SETTINGS__TFS
 
 /*********************************************************************************************\
  * This MUST BE CHANGED for ANY parameters in this file to overwrite those saved in settings
@@ -241,6 +250,20 @@ SHOULD NOT rely on other files for pre-defines, other than INI
   /***********************************
    * SECTION: System Configs
   ************************************/    
+
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR            "template"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR    DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #ifndef DEVICENAME_ROOMHINT_CTR
+  #define DEVICENAME_ROOMHINT_CTR   "template"
+  #endif
+
 
 
   // #define ENABLE_FEATURE_WATCHDOG_TIMER
@@ -634,6 +657,8 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 #define TASM_FILE_ZIGBEE_DATA       "/zbdata"          // Zigbee last known values of devices
 #define TASM_FILE_AUTOEXEC          "/autoexec.bat"    // Commands executed after restart
 #define TASM_FILE_CONFIG            "/config.sys"      // Settings executed after restart
+
+
 
 
 

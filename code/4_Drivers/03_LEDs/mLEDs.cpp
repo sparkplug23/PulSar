@@ -60,6 +60,17 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
       Refresh_AllLEDs();  // This will update all the LEDs according to their modes
     break;
 
+    case TASK_UPTIME_1_MINUTES:
+    
+    // Test inject patterns
+    SET_SYSTEM_LED__AP_MODE(true);
+
+    break;
+
+    case TASK_EVERY_50_MSECOND:
+      Handle_SystemLEDs();
+    break;
+
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -92,73 +103,97 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
 
 void mLEDs::Pre_Init(void)
 {
-  
-  ALOG_HGL( PSTR("D_LOG_STARTUP" "LED Init") );
+  ALOG_HGL(PSTR("D_LOG_STARTUP" "LED Init"));
 
-  inverted_bitmask = 0; // Reset all bits
+  used_bitmask = 0;
+  inverted_bitmask = 0;
 
-  // Lets check each type on their own, normal, inverted etc
-  for(uint32_t ii=0; ii<MODULE_LEDS_MAX; ii++)
+  leds.clear();
+  leds.resize(MODULE_LEDS_MAX);
+
+  for(uint8_t led_index = 0; led_index < MODULE_LEDS_MAX; led_index++)
   {
+    int16_t pin = -1;
+    bool inverted = false;
 
-    int8_t pin = -1;
-
-    if(tkr_pins->PinUsed(GPIO_LED1, ii))
+    if(tkr_pins->PinUsed(GPIO_LED1, led_index))
     {
-      SetUsed(ii);
-      pin = tkr_pins->GetPin(GPIO_LED1, ii);
-      pinMode(pin, OUTPUT);
-      digitalWrite(pin, LOW); // Default: OFF
-    }else
-    if(tkr_pins->PinUsed(GPIO_LED1_INV, ii))
+      pin = tkr_pins->GetPin(GPIO_LED1, led_index);
+      inverted = false;
+    }
+    else if(tkr_pins->PinUsed(GPIO_LED1_INV, led_index))
     {
-      SetUsed(ii);
-      pin = tkr_pins->GetPin(GPIO_LED1_INV, ii);
-      ALOG_INF(PSTR("%d %d %d"), GPIO_LED1_INV, ii, pin);
-      pinMode(pin, OUTPUT);
-      digitalWrite(pin, HIGH); // Default: OFF
-      SetInvertFlag(ii);
-    }else{
-      ALOG_DBG(PSTR(D_LOG_LED "%d None"), ii);
+      pin = tkr_pins->GetPin(GPIO_LED1_INV, led_index);
+      inverted = true;
+    }
+    else
+    {
+      ALOG_DBG(PSTR(D_LOG_LED "%u None"), led_index);
+      continue;
     }
 
-    if(pin != -1)
+    if(!LED_PinIsValid(pin))
     {
-      ALOG_INF(PSTR(D_LOG_LED "%d pin=%d %s"), ii, pin, toBinaryString(used_bitmask, MODULE_LEDS_MAX).c_str() );
+      ALOG_ERR(PSTR(D_LOG_LED "LED%u invalid GPIO pin=%d"), led_index, pin);
+      continue;
     }
 
+    SetUsed(led_index);
+
+    if(inverted)
+    {
+      SetInvertFlag(led_index);
+    }
+
+    LedState& led = leds[led_index];
+
+    led.configured = true;
+    led.inverted = inverted;
+    led.pin = pin;
+    led.effect = LED_OFF;
+    led.state = inverted ? HIGH : LOW;
+    led.lastUpdateTime = millis();
+    led.startTime = millis();
+
+    pinMode(pin, OUTPUT);
+    LED_Write(led_index, false);
+
+    ALOG_INF(
+      PSTR(D_LOG_LED "LED%u pin=%d inverted=%u used=%s"),
+      led_index,
+      pin,
+      inverted,
+      toBinaryString(used_bitmask, MODULE_LEDS_MAX).c_str()
+    );
   }
 
-  if(used_bitmask){ module_state.mode = ModuleStatus::Initialising; }
-
+  if(used_bitmask)
+  {
+    module_state.mode = ModuleStatus::Initialising;
+  }
 }
-
 
 void mLEDs::Init(void)
 {
-  // Configured already
   module_state.mode = ModuleStatus::Running;
 
-  leds.resize( UsedCount() );  // Allocate space for MAX_LEDS
+  for(uint8_t led_index = 0; led_index < MODULE_LEDS_MAX; led_index++)
+  {
+    if(!IsUsed(led_index)) { continue; }
+    if(led_index >= leds.size()) { continue; }
+    if(!leds[led_index].configured) { continue; }
 
-  for (uint8_t i = 0; i < UsedCount(); i++) {
-    uint8_t pin = tkr_pins->GetPin(GPIO_LED1, i);  // Get the pin for each LED
-    pinMode(pin, OUTPUT);  // Set the pin as output
+    pinMode(leds[led_index].pin, OUTPUT);
+    LED_Write(led_index, false);
 
-    // if (i == 0) {  // LED 1 - Blink 3 times, each blink 300ms apart, cycle every 5 seconds
-      StartEffect_Blink(i, 40, 100, 1000, 60);  
-    // } else if (i == 1) {  // LED 2 - Solid ON
-    //   StartEffect_Blink(i, 40, 250, 1000, 60);  
-    //   // StartEffect_On(i);
-    // } 
-    // else if (i == 2) {  // LED 3 - Solid OFF
-    //   StartEffect_Blink(i, 10, 100, 5000, 30);  
-    //   // StartEffect_Off(i);
-    // } else if (i == 3) {  // LED 4 - Pulsing with 1-second period
-    //   StartEffect_Blink(i, 20, 100, 5000, 30);  
-    //   // StartEffect_Pulse(i, 1000);
-    // }
+    StartEffect_Blink(led_index, 40, 100, 1000, 60);
   }
+
+  // Default system LED role assignment.
+  // LED1 is user-facing naming, but internally this maps to leds[0].
+  // Later this can be overridden by JSON/template configuration.
+  system_led.status_index = 0;
+  // system_led.power_index = 0;   // LED1 / leds[0] used as aggregate power LED when no status event is active
 
 }
 
@@ -185,154 +220,231 @@ void mLEDs::BootMessage()
   #endif // ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
 }
 
+bool mLEDs::LED_PinIsValid(int16_t pin)
+{
+  if(pin < 0) { return false; }
 
-void mLEDs::Refresh_AllLEDs() {
-  for (uint8_t i = 0; i < UsedCount(); i++) 
+  // Catches bad encoded/invalid values such as 226.
+  // ESP32 variants normally stay well below this.
+  if(pin > 48) { return false; }
+
+  return true;
+}
+
+
+void mLEDs::LED_Write(uint8_t index, bool on)
+{
+  if(index >= leds.size()) { return; }
+
+  LedState& led = leds[index];
+
+  if(!led.configured) { return; }
+  if(!LED_PinIsValid(led.pin)) { return; }
+
+  const uint8_t level = led.inverted ? (on ? LOW : HIGH) : (on ? HIGH : LOW);
+
+  digitalWrite(led.pin, level);
+  led.state = level;
+}
+
+
+void mLEDs::LED_PWMWrite(uint8_t index, uint8_t duty)
+{
+  if(index >= leds.size()) { return; }
+
+  LedState& led = leds[index];
+
+  if(!led.configured) { return; }
+  if(!LED_PinIsValid(led.pin)) { return; }
+
+  const uint8_t pwm = led.inverted ? (255 - duty) : duty;
+
+  analogWrite(led.pin, pwm);
+  led.state = pwm ? HIGH : LOW;
+}
+
+
+void mLEDs::Refresh_AllLEDs()
+{
+  for(uint8_t led_index = 0; led_index < MODULE_LEDS_MAX; led_index++)
   {
-    Refresh_LED(i);  // Update the state of each LED
+    if(!IsUsed(led_index)) { continue; }
+
+    Refresh_LED(led_index);
   }
 }
 
 
 void mLEDs::Refresh_LED(uint8_t led_index)
 {
+  if(led_index >= leds.size()) { return; }
+  if(!IsUsed(led_index)) { return; }
 
-  LedState led = leds[led_index];
-  uint8_t pin = tkr_pins->GetPin(GPIO_LED1, led_index);  // Get the corresponding pin for each LED
+  LedState& led = leds[led_index];
 
-  uint32_t currentTime = millis();
+  if(!led.configured) { return; }
+
+  if(!LED_PinIsValid(led.pin))
+  {
+    ALOG_ERR(PSTR(D_LOG_LED "Refresh_LED invalid pin led=%u pin=%d"), led_index, led.pin);
+    return;
+  }
+
+  const uint32_t currentTime = millis();
   uint32_t tElapsed = currentTime - led.lastUpdateTime;
 
-  // Check if duration has exceeded, and only reset once
-  if (led.duration_secs > 0 && (currentTime - led.startTime) >= (led.duration_secs * 1000)) {
-      if (led.effect != LED_OFF) { // This check ensures that reset happens only once
-          digitalWrite(pin, LOW);  // Turn off the LED after duration is exceeded
-          led.effect = LED_OFF;      // Set the mode to OFF
-          ALOG_DBM(PSTR("LED%d Reset OFF after duration"), pin);
-      }
-      return;  // Stop further processing as the LED is now off
+  if(led.duration_secs > 0 && (currentTime - led.startTime) >= ((uint32_t)led.duration_secs * 1000UL))
+  {
+    if(led.effect != LED_OFF)
+    {
+      LED_Write(led_index, false);
+      led.effect = LED_OFF;
+      ALOG_DBM(PSTR("LED%u pin=%d Reset OFF after duration"), led_index, led.pin);
+    }
+
+    return;
   }
 
-  switch (led.effect) {
-      case LED_ON:
-          digitalWrite(pin, HIGH);
-          break;
+  switch(led.effect)
+  {
+    case LED_ON:
+    {
+      LED_Write(led_index, true);
+    }
+    break;
 
-      case LED_OFF:
-          digitalWrite(pin, LOW);
-          break;
+    case LED_OFF:
+    {
+      LED_Write(led_index, false);
+    }
+    break;
 
-      case LED_BLINK:
+    case LED_BLINK:
+    {
+      if(led.period == 0 || led.count == 0)
       {
-          uint32_t totalCycle = (led.period * led.count) + led.groupPause;  // Total cycle time (blinks + pause)
-
-          if (tElapsed >= totalCycle) {
-              // Reset the cycle and start again
-              led.lastUpdateTime = currentTime;
-              tElapsed = 0;
-          }
-
-          // If we are within the blink phase
-          if (tElapsed < (led.period * led.count)) {
-              uint32_t phase = tElapsed / led.period;  // Which blink are we in?
-
-              // Toggle the LED on/off in each interval
-              if ((tElapsed % led.period) < (led.period / 2)) {
-                  digitalWrite(pin, HIGH);  // Turn LED on
-              } else {
-                  digitalWrite(pin, LOW);   // Turn LED off
-              }
-          } else {
-              // After the blinks, keep LED off during the pause
-              digitalWrite(pin, LOW);
-          }
+        LED_Write(led_index, false);
+        return;
       }
-      break;
 
-      case LED_PULSE:
+      const uint32_t totalCycle = ((uint32_t)led.period * led.count) + led.groupPause;
+
+      if(tElapsed >= totalCycle)
       {
-          // Calculate the total time for pulse up and down (one complete pulse cycle)
-          uint32_t totalCycle = (led.period * led.count) + led.groupPause;
-
-          // Check if we are at the end of the pulse cycle (including pause)
-          if (tElapsed >= totalCycle) {
-              // ALOG_INF(PSTR("tElapsed >= totalCycle %d %d"),tElapsed,totalCycle);
-              // Reset the cycle and start again
-              led.lastUpdateTime = currentTime;
-              tElapsed = 0;  // Reset tElapsed for the new cycle
-          }
-
-              // ALOG_INF(PSTR("tElapsed < (led.period * led.count) %d %d %d"), tElapsed,led.period,led.count);
-          // If we are within the pulse phase
-          if (tElapsed < (led.period * led.count)) {
-              uint32_t currentPhaseTime = tElapsed % led.period;  // Get the current time within the period
-
-              // Calculate the duty cycle as a sine wave based on the current phase
-              float phase = (float)currentPhaseTime / (float)led.period;
-              float dutyCycle = (sin(2 * PI * phase) + 1) / 2;  // Sine wave for smooth pulsing
-
-              // Set PWM brightness based on the duty cycle (for smooth pulsing)
-              analogWrite(pin, (int)(dutyCycle * 255));  // Set brightness based on the duty cycle
-
-              // Debugging: Print the current duty cycle
-              // char floats[20] = {0}; 
-              // mSupport::float2CString(dutyCycle, 2, floats);
-              // ALOG_INF(PSTR("float %s"), floats);
-          } else {
-              // After the pulse, keep LED off during the pause period
-              analogWrite(pin, 0);  // Turn LED off (0 brightness)
-              ALOG_INF(PSTR("off"));
-          }
+        led.lastUpdateTime = currentTime;
+        tElapsed = 0;
       }
-      break;
 
+      if(tElapsed < ((uint32_t)led.period * led.count))
+      {
+        if((tElapsed % led.period) < (led.period / 2))
+        {
+          LED_Write(led_index, true);
+        }
+        else
+        {
+          LED_Write(led_index, false);
+        }
+      }
+      else
+      {
+        LED_Write(led_index, false);
+      }
+    }
+    break;
+
+    case LED_PULSE:
+    {
+      if(led.period == 0 || led.count == 0)
+      {
+        LED_PWMWrite(led_index, 0);
+        return;
+      }
+
+      const uint32_t totalCycle = ((uint32_t)led.period * led.count) + led.groupPause;
+
+      if(tElapsed >= totalCycle)
+      {
+        led.lastUpdateTime = currentTime;
+        tElapsed = 0;
+      }
+
+      if(tElapsed < ((uint32_t)led.period * led.count))
+      {
+        const uint32_t currentPhaseTime = tElapsed % led.period;
+        const float phase = (float)currentPhaseTime / (float)led.period;
+        const float dutyCycle = (sin(2 * PI * phase) + 1.0f) / 2.0f;
+
+        LED_PWMWrite(led_index, (uint8_t)(dutyCycle * 255.0f));
+      }
+      else
+      {
+        LED_PWMWrite(led_index, 0);
+      }
+    }
+    break;
   }
-
 }
 
 
-void mLEDs::StartEffect_On(uint8_t index) {
+void mLEDs::StartEffect_On(uint8_t index)
+{
+  if(index >= leds.size()) { return; }
+  if(!IsUsed(index)) { return; }
+
   leds[index].effect = LED_ON;
   leds[index].lastUpdateTime = millis();
 }
 
 
-void mLEDs::StartEffect_Off(uint8_t index) {
+void mLEDs::StartEffect_Off(uint8_t index)
+{
+  if(index >= leds.size()) { return; }
+  if(!IsUsed(index)) { return; }
+
   leds[index].effect = LED_OFF;
   leds[index].lastUpdateTime = millis();
 }
 
 
-void mLEDs::StartEffect_Blink(uint8_t index, uint8_t blinkCount, uint16_t blinkInterval, uint16_t blinkGroupPause, uint8_t duration_secs) 
+void mLEDs::StartEffect_Blink(uint8_t index, uint8_t blinkCount, uint16_t blinkInterval, uint16_t blinkGroupPause, uint8_t duration_secs)
 {
+  if(index >= leds.size()) { return; }
+  if(!IsUsed(index)) { return; }
+
   leds[index].effect = LED_BLINK;
   leds[index].count = blinkCount;
   leds[index].period = blinkInterval;
-  leds[index].groupPause = blinkGroupPause;  // Pause time between blink groups
+  leds[index].groupPause = blinkGroupPause;
   leds[index].lastUpdateTime = millis();
-  leds[index].state = LOW;  // Start with the LED off
-  leds[index].duration_secs = duration_secs;  // Duration in seconds
-  leds[index].startTime = millis();  // Record the start time
+  leds[index].state = LOW;
+  leds[index].duration_secs = duration_secs;
+  leds[index].startTime = millis();
 }
 
 
-void mLEDs::StartEffect_Pulse(uint8_t index, uint8_t pulseCount, uint16_t period, uint16_t groupPause, uint8_t duration_secs) 
+void mLEDs::StartEffect_Pulse(uint8_t index, uint8_t pulseCount, uint16_t period, uint16_t groupPause, uint8_t duration_secs)
 {
-  leds[index].effect = LED_PULSE;
-  leds[index].period = period;
-  leds[index].groupPause = groupPause;  // Pause time between pulse cycles
-  leds[index].count = pulseCount;       // Number of pulses in each cycle
-  leds[index].lastUpdateTime = millis();
-  leds[index].duration_secs = duration_secs;  // Duration in seconds
-  leds[index].startTime = millis();  // Record the start time
+  if(index >= leds.size()) { return; }
+  if(!IsUsed(index)) { return; }
 
-  // Attach the PWM channel to the pin for the pulse mode
-  uint8_t pin = tkr_pins->GetPin(GPIO_LED1, index);
-  #ifdef ESP32 // tmp fix for 4chPro
-  analogAttach(pin, index);  // The PWM channel corresponds to the index of the LED
+  LedState& led = leds[index];
+
+  if(!led.configured) { return; }
+  if(!LED_PinIsValid(led.pin)) { return; }
+
+  led.effect = LED_PULSE;
+  led.period = period;
+  led.groupPause = groupPause;
+  led.count = pulseCount;
+  led.lastUpdateTime = millis();
+  led.duration_secs = duration_secs;
+  led.startTime = millis();
+
+  #ifdef ESP32
+  analogAttach(led.pin, index);
   #endif
 }
-
 
 void mLEDs::SetInvertFlag(uint8_t b) {
   bitSet(inverted_bitmask, b);
@@ -350,53 +462,6 @@ uint8_t mLEDs::UsedCount() {
   return __builtin_popcount(used_bitmask);
 }
 
-
-/*
- If LEDs are in this mode, update them (eg to blink/pulse etc)
-index if set with index, will set the power type (so if 4 power leds, then they are 0,1,2,3 which may not actually be started from the first ones)
-If index==255, then all are set regardless by index
-*/
-void mLEDs::Set_PowerLED(bool state, uint8_t index) 
-{
-  // This will cycle through and set all LEDs configured as power type
-
-
-}
-
-/*
- If LEDs are in this mode, update them (eg to blink/pulse etc)
- This function lets me set the status to show certain types, with timing, and effect (pulse/blink/on/off)
-*/
-void mLEDs::Set_StatusLED(uint8_t count, uint16_t interval, uint16_t event_pause, uint8_t duration_secs, LedEffect effect)
-{
-  // This will cycle through and set all LEDs configured as status type
-
-}
-
-
-
-/**
- * @brief Status LED 
- * 
- * For each LED configured as status type, this function will read all status flags across the systems and make sure the LEDs are configured to show.
- * This is a interface of sorts.
- * 
- */
-void mLEDs::Config_StatusEffect()
-{
-  
-  DEBUG_LINE;
-  uint8_t blinkinterval = 1;
-  
-  if (tkr_set->runtime.global_state.data) {                              // Any problem
-    if (tkr_set->runtime.global_state.mqtt_down) { blinkinterval = 7; }  // MQTT problem so blink every 2 seconds (slowest)
-    if (tkr_set->runtime.global_state.wifi_down) { blinkinterval = 3; }  // Wifi problem so blink every second (slow)
-    tkr_set->runtime.blinks = 201;                                       // Allow only a single blink in case the problem is solved
-  }
-  
-
-
-}
 
 
 /******************************************************************************************************************
@@ -475,7 +540,27 @@ uint16_t state_value = 0;
   }
 
 
-
+  // -------------------------------------------------------------------------
+  // LED Blink command
+  // -------------------------------------------------------------------------
+  // JSON:
+  //   {"LED":{"Blink":[led_index, blink_count, blink_period_ms, group_pause_ms, duration_secs]}}
+  //
+  // Example:
+  //   {"LED":{"Blink":[0,10,200,200,10]}}
+  //
+  // Meaning:
+  //   led_index        = 0     LED index to control
+  //   blink_count      = 10    Number of blink periods per group
+  //   blink_period_ms  = 200   Full ON+OFF blink period in milliseconds
+  //   group_pause_ms   = 200   Pause after each blink group
+  //   duration_secs    = 10    Total effect duration in seconds
+  //
+  // Notes:
+  //   - If LED name lookup was used, led_index is overridden by led_index.
+  //   - blink_period_ms is split internally into ON for half period,
+  //     then OFF for half period.
+  // -------------------------------------------------------------------------
   if(jtok_sub = jobj["Blink"])
   {
     std::vector<uint32_t> data;
@@ -493,6 +578,29 @@ uint16_t state_value = 0;
 
     StartEffect_Blink(data[0], data[1], data[2], data[3], data[4]);
   }
+
+
+  // -------------------------------------------------------------------------
+  // LED Pulse command
+  // -------------------------------------------------------------------------
+  // JSON:
+  //   {"LED":{"Pulse":[led_index, pulse_count, pulse_period_ms, group_pause_ms, duration_secs]}}
+  //
+  // Example:
+  //   {"LED":{"Pulse":[0,5,1000,500,20]}}
+  //
+  // Meaning:
+  //   led_index        = 0      LED index to control
+  //   pulse_count      = 5      Number of pulse periods per group
+  //   pulse_period_ms  = 1000   Full brightness wave period in milliseconds
+  //   group_pause_ms   = 500    Pause after each pulse group
+  //   duration_secs    = 20     Total effect duration in seconds
+  //
+  // Notes:
+  //   - If LED name lookup was used, led_index is overridden by led_index.
+  //   - Pulse uses PWM/sine brightness modulation.
+  //   - Inverted LEDs are handled in LED_PWMWrite().
+  // -------------------------------------------------------------------------
   if(jtok_sub = jobj["Pulse"])
   {
     std::vector<uint32_t> data;

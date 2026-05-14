@@ -194,12 +194,6 @@ extern DATA_BUFFER data_buffer;
   #endif
 #endif
 
-#ifdef ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
-// Handle 20k of NVM
-#include <nvs_flash.h>
-#include <nvs.h>
-#endif // ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
-
 
 // #define ENABLE_DEVFEATURE_REMOVE__UNDESIRED_SETTINGS_TEXT_OF_SUBMODULES
 
@@ -323,27 +317,8 @@ class mSettings :
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SETTINGS_ID; }
     ~mSettings() {          }
 
-  #ifdef ESP8266
-    #if AUTOFLASHSIZE
-      #include "flash_hal.h"
-      // From libraries/EEPROM/EEPROM.cpp EEPROMClass
-      const uint32_t SPIFFS_END = (FS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
-    #else
-      // extern "C" uint32_t _FS_end;
-      // From libraries/EEPROM/EEPROM.cpp EEPROMClass
-      const uint32_t SPIFFS_END = ((uint32_t)&_FS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
-    #endif  // AUTOFLASHSIZE
-    // Version 4.2 config = eeprom area
-    const uint32_t SETTINGS_LOCATION = SPIFFS_END;  // No need for SPIFFS as it uses EEPROM area
-
-    // Version 5.2 allow for more flash space
-    const uint8_t CFG_ROTATES = 1;//8;          // Number of flash sectors used (handles uploads)
-
-    uint32_t settings_location = SETTINGS_LOCATION;
-    // uint32_t settings_crc = 0;
-    uint32_t settings_crc32 = 0;
-    uint8_t *settings_buffer = nullptr;
-  #endif // ESP8266
+  // Settings persistence is filesystem-only on ESP32 and ESP8266.
+  // RTC memory remains used separately for fastboot/quick boot state.
 
   void JsonAppend_Settings();    
   void init(void);
@@ -359,21 +334,18 @@ class mSettings :
   uint32_t SettingsRead(void *data, size_t size);
   void SettingsSaveAll(void);
   uint32_t GetSettingsAddress(void);
-  void SettingsSave(uint8_t rotate);
+  void SettingsSave(uint8_t rotate);  // rotate is now legacy naming: 0 = save-if-changed, non-zero = force save
+  void SettingsUpdateFileWriteTimeAscii(void);
   void SettingsLoad(void);
   void SettingsDelta();
   void SettingsErase(uint8_t type);
   bool SettingsEraseConfig(void) ;
   void SettingsSdkErase(void);
   void SettingsDefault(void);
-  void SystemSettings_DefaultHeader(void);
-  void SystemSettings_DefaultBody(void);
 
   uint32_t GetCfgCrc32(uint8_t *bytes, uint32_t size);
   uint32_t GetSettingsCrc32(void);
 
-  void SettingsResetStd(void);
-  void SettingsResetDst(void);
 
   typedef union {
     uint8_t data;
@@ -862,62 +834,10 @@ struct LoggingSettings{
   uint8_t       time_isshort;   // should become short/long/only some types/none
 };
 
-// ---------------------------------------------------------------------------------------------------------------------
-// NetworkSettings (Settings-persisted config)
-// - Covers WiFi + Ethernet via a shared profile slot model.
-// - Cellular stays module-owned (filesystem JSON).
-// ---------------------------------------------------------------------------------------------------------------------
-
-struct WiFiProfile
-{
-  char    ssid[33] = {0};
-  char    pass[65] = {0};
-  uint8_t ssid_hidden = 0;
-  uint8_t has_bssid = 0;
-  uint8_t bssid[6]  = {0};
-};
-
-struct IPv4Config
-{
-  uint8_t is_static = false;               // 0 = DHCP, 1 = Static
-
-  uint8_t ip[4]   = {0,0,0,0};
-  uint8_t gw[4]   = {0,0,0,0};
-  uint8_t sn[4]   = {255,255,255,0};
-  uint8_t dns1[4] = {0,0,0,0};
-  uint8_t dns2[4] = {0,0,0,0};
-};
-
-#ifdef USE_MODULE_NETWORK_ETHERNET
-struct EthernetSettings
-{
-  IPv4Config ipv4;
-};
-#endif
 
 struct NetworkSettings
 {
-  // Preserve existing semantics if you still need these:
-  uint8_t sta_config = 0;              // e.g., config mode / portal policy
-  uint8_t sta_active = 0;              // currently selected WiFi slot (optional; can be deprecated)
-
   SysBitfield_Network flag;
-
-  // WiFi profiles in priority order (index 0 tried first, etc.)
-  WiFiProfile wifi[WIFI_MAXIMUM_CONNECTIONS];
-
-  // Global WiFi IPv4 config (applies to active WiFi STA connection if you use static)
-  // If you do NOT support static on WiFi, omit this.
-  IPv4Config wifi_ipv4;
-
-  
-  uint32_t      ip_address[5];             // TEMPORARY for Wifi1
-  uint8_t       wifi_channel;              // TEMPORARY for Wifi1
-  uint8_t       wifi_bssid[6];             // F0A
-
-  #ifdef USE_MODULE_NETWORK_ETHERNET
-  EthernetSettings ethernet;
-  #endif
 };
 
 
@@ -932,7 +852,12 @@ struct SETTINGS {
   uint16_t      cfg_size;                  // 002
   uint32_t      save_flag;                 // 004
   uint32_t      version;                   // 008
-  uint16_t      bootcount;              // 00C
+  uint16_t      bootcount;                  // 00C
+
+  // Visible binary debug marker. Updated immediately before /settings.txt is written.
+  // Format: "utcHHMMSS:DDMMYY", example "utc142305:130526".
+  char          settings_file_update_utc_ascii[18];
+
   // Body (All other settings)
   // Modules
   uint16_t      bootcount_errors_only;     // E01
@@ -969,7 +894,6 @@ struct SETTINGS {
   uint8_t       timezone_minutes2;          // 66D
   SysBitfield_Drivers    flag_drivers;  
   int16_t       toffset[2];                // 30E
-
   // Previously other char arrays followed this memory space that was reserved as "overflow" fom text pool to be read in another format
   // From now on, the text pool must be the hardcoded full length
   char          text_pool[settings_text_size];            // 017  Size is settings_text_size
@@ -1000,8 +924,7 @@ struct SETTINGS {
   // Power
   unsigned long power;                     // 2E8
   uint8_t       poweronstate;              // 398
-  power_t       interlock[MAX_INTERLOCKS_SET];  // 4D0 MAX_INTERLOCKS = MAX_RELAYS / 2
-  
+  power_t       interlock[MAX_INTERLOCKS_SET];  // 4D0 MAX_INTERLOCKS = MAX_RELAYS / 2  
   // Energy
   EnergyUsageNew   energy_usage;           // 77C 
   SysBitfield_Power  flag_power;           // 5BC
@@ -1026,9 +949,6 @@ struct SETTINGS {
   uint32_t      ipv4_rgx_address;          // 558
   uint32_t      ipv4_rgx_subnetmask;       // 55C
   uint16_t      dns_timeout;               // 4C8
-  #ifdef ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
-  char local_time_ascii_debug[20];
-  #endif
   // E00 - FFF (4095 ie eeprom size) free locations
   uint32_t      cfg_timestamp;
   uint32_t      cfg_crc32;                 // 32 bit CRC, must remain at last 4 bytes
@@ -1059,6 +979,19 @@ struct SETTINGS {
   #ifdef ESP8266
   SerialConfig serial_config = SERIAL_8N1;    // Serial interface configuration 8 data bits, No parity, 1 stop bit
   #endif
+  
+  struct FASTBOOT_RUNTIME_FLAGS
+  {
+    bool disable_rules              = false;
+    bool disable_sensors            = false;
+    bool disable_drivers            = false;
+    bool disable_module_config_load = false;
+    bool disable_templates          = false;
+
+    bool force_safe_compiled_config = false;
+    bool factory_ap_recovery        = false;
+    bool blocking_safe_mode         = false;
+  };
 
   // These are used only at runtime, and not saved eg TasmotaGlobals
   struct RUNTIME_GLOBALS{
@@ -1093,7 +1026,7 @@ struct SETTINGS {
     uint8_t my_module_type;                     // Current copy of Settings.module or user template type
     uint8_t last_source = 0;                    // Last command source
     uint8_t mdns_delayed_start = 0;             // mDNS delayed start
-    bool stop_flash_rotate = false;             // Allow flash configuration rotation
+    bool stop_flash_rotate = false;             // Legacy runtime flag; filesystem settings do not rotate raw flash slots
     bool blinkstate = false;                    // LED state
     bool pwm_present = false;                   // Any PWM channel configured with SetOption15 0
     bool i2c_enabled = false;                       // I2C configured
@@ -1119,6 +1052,7 @@ struct SETTINGS {
     uint8_t enable_web_logging_filtering = false;
     uint8_t enable_serial_logging_filtering = false;    
     bool settings_holder_hardcorded_stored_changed = false; // if true, other files may want to reset too
+    FASTBOOT_RUNTIME_FLAGS fastboot;
   }runtime;
 
   #define RESET_BOOT_STATUS() memset(&tkr_set->runtime.boot_status,0,sizeof(tkr_set->runtime.boot_status))
@@ -1135,12 +1069,6 @@ struct SETTINGS {
 
   
 
-  #ifdef ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
-  bool NvmExists(const char *sNvsName);
-  bool NvmLoad(const char *sNvsName, const char *sName, void *pSettings, unsigned nSettingsLen);
-  void NvmSave(const char *sNvsName, const char *sName, const void *pSettings, unsigned nSettingsLen);
-  int32_t NvmErase(const char *sNvsName);
-  #endif // ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
 
 
 

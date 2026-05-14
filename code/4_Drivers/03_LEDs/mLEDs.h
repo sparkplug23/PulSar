@@ -36,6 +36,59 @@
 //   LED_SHOW_STATUS, // Network, plus others
 // };
 
+/*********************************************************************************************\
+ * System LED Event Macros
+ *
+ * DESCRIPTION:
+ *   These macros provide simple cross-module hooks for setting or clearing system LED events.
+ *
+ *   Modules such as WiFi, Network, MQTT, OTA, and WebServer should not directly call
+ *   StartEffect_Blink(), StartEffect_Pulse(), etc. Instead, they should only set/clear logical
+ *   system events.
+ *
+ *   The LED module then resolves the highest-priority active event inside Handle_SystemLEDs()
+ *   and applies the correct pattern to the configured system status LED.
+ *
+ *   If USE_MODULE_DRIVERS_LEDS is not enabled, these macros compile to nothing.
+ *
+ * EXAMPLE:
+ *   SET_SYSTEM_LED__NO_NETWORK(true);   // WiFi/network not connected yet
+ *   SET_SYSTEM_LED__NO_NETWORK(false);  // WiFi/network connected
+ *
+\*********************************************************************************************/
+#ifdef USE_MODULE_DRIVERS_LEDS
+
+  #define SET_SYSTEM_LED__NO_NETWORK(state) \
+    tkr_led->SystemLED_SetEvent(SYSTEM_LED_EVENT_NO_NETWORK, state)
+
+  #define SET_SYSTEM_LED__NO_MQTT(state) \
+    tkr_led->SystemLED_SetEvent(SYSTEM_LED_EVENT_NO_MQTT, state)
+
+  #define SET_SYSTEM_LED__AP_MODE(state) \
+    tkr_led->SystemLED_SetEvent(SYSTEM_LED_EVENT_AP_MODE, state)
+
+  #define SET_SYSTEM_LED__OTA_ACTIVE(state) \
+    tkr_led->SystemLED_SetEvent(SYSTEM_LED_EVENT_OTA_ACTIVE, state)
+
+  #define SET_SYSTEM_LED__ERROR(state) \
+    tkr_led->SystemLED_SetEvent(SYSTEM_LED_EVENT_ERROR, state)
+
+#else
+
+  #define SET_SYSTEM_LED__NO_NETWORK(state)
+  #define SET_SYSTEM_LED__NO_MQTT(state)
+  #define SET_SYSTEM_LED__AP_MODE(state)
+  #define SET_SYSTEM_LED__OTA_ACTIVE(state)
+  #define SET_SYSTEM_LED__ERROR(state)
+
+#endif
+
+
+
+
+
+
+
 enum LedEffect {
   LED_OFF,
   LED_ON,
@@ -58,15 +111,38 @@ typedef union {
 } LedMode_BitField;
 
 struct LedState {
-  LedEffect effect;
-  uint8_t state;            // Current state (HIGH or LOW)
-  uint8_t count;            // Number of blinks/pulses
-  uint16_t period;          // Period for both blinking and pulsing in milliseconds
-  uint16_t groupPause;      // Pause time between blink/pulse groups in milliseconds
-  uint8_t duration_secs;    // Duration in seconds for how long the LED should blink/pulse
-  uint32_t lastUpdateTime;  // Time tracking for blinking/pulsing
-  uint32_t startTime;       // To track when the blinking/pulsing started
-  LedMode_BitField mode;
+  bool configured = false;
+  bool inverted = false;
+  int16_t pin = -1;
+
+  LedEffect effect = LED_OFF;
+  uint8_t state = LOW;
+  uint8_t count = 0;
+  uint16_t period = 0;
+  uint16_t groupPause = 0;
+  uint8_t duration_secs = 0;
+  uint32_t lastUpdateTime = 0;
+  uint32_t startTime = 0;
+  LedMode_BitField mode = {0};
+};
+
+#define LED_INDEX_NONE 255
+
+enum SystemLedEventId : uint8_t
+{
+  SYSTEM_LED_EVENT_NONE = 0,
+
+  SYSTEM_LED_EVENT_OTA_ACTIVE,
+  SYSTEM_LED_EVENT_AP_MODE,
+  SYSTEM_LED_EVENT_NO_NETWORK,
+  SYSTEM_LED_EVENT_NO_MQTT,
+  SYSTEM_LED_EVENT_ERROR,
+
+  SYSTEM_LED_EVENT_MAX
+};
+struct LedRoleConfig {
+  uint8_t power_index  = LED_INDEX_NONE;
+  uint8_t status_index = LED_INDEX_NONE;
 };
 
 
@@ -117,7 +193,11 @@ class mLEDs :
 
     uint8_t UsedCount();
 
-    void Set_PowerLED(bool state, uint8_t index = 255);
+    bool LED_PinIsValid(int16_t pin);
+    void LED_Write(uint8_t index, bool on);
+    void LED_PWMWrite(uint8_t index, uint8_t duty);
+
+    void Set_PowerLED(bool state);
     void Set_StatusLED(uint8_t count, uint16_t interval, uint16_t event_pause, uint8_t duration_secs, LedEffect effect);
 
     void Config_StatusEffect();
@@ -135,6 +215,46 @@ class mLEDs :
     uint8_t led_power = 0;                      // LED power state
     uint8_t ledlnk_inverted = 0;                // Link LED inverted flag (1 = (0 = On, 1 = Off))
     uint8_t used_bitmask = 0; 
+
+    struct SYSTEM_LED_t
+    {
+      // Optional aggregate power LED.
+      // Used for devices with one general system LED, e.g. Sonoff Basic.
+      // Leave as LED_INDEX_NONE when relay-specific LEDs are used instead.
+      uint8_t power_index = LED_INDEX_NONE;
+
+      // Optional system/status LED.
+      // Used for WiFi/MQTT/AP/OTA/error indication.
+      // When active, this LED suppresses normal relay/power writes to the same LED.
+      uint8_t status_index = LED_INDEX_NONE;
+
+      // Bitmask of active system LED events.
+      // Each bit corresponds to one SystemLedEventId.
+      uint32_t event_mask = 0;
+
+      // Currently displayed highest-priority system event.
+      // Used to avoid restarting the same effect every 50 ms.
+      SystemLedEventId current_event = SYSTEM_LED_EVENT_NONE;
+
+      // True when the status LED is actively showing a system event.
+      // Normal LED writes to the same LED should return while this is true.
+      bool status_active = false;
+
+      // Time when the current system LED event was last changed.
+      // Useful for future debounce, minimum display time, or timeout logic.
+      uint32_t last_change_millis = 0;
+    };
+
+    SYSTEM_LED_t system_led;
+    void SystemLED_SetEvent(SystemLedEventId event_id, bool enabled);
+    bool SystemLED_IsStatusBusy(uint8_t index);
+    bool SystemLED_IsEventActive(SystemLedEventId event_id);
+    SystemLedEventId SystemLED_GetHighestPriorityEvent(void);
+    void SystemLED_ApplyEventPattern(SystemLedEventId event_id);
+    void SystemLED_ReleaseStatusLED(void);
+    void SystemLED_HandlePowerLED(void);
+    void Handle_SystemLEDs(void);
+
 
     /************************************************************************************************
      * SECTION: Internal Functions

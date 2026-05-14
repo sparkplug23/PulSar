@@ -180,6 +180,185 @@ void Serial_PrintFirmwareSplash()
   Serial.println(F("=================================================="));
   Serial.println();
 }
+
+/********************************************************************************************/
+/********************* ENABLE_DEVFEATURE_FASTBOOT_DETECTION ******************************************************************/
+/********************************************************************************************/
+
+
+#ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+void Fastboot_RecoveryCheck(void)
+{
+  ALOG_DBM(PSTR("ARESET TWICE! \t\t\t%d"), RtcFastboot.fast_reboot_count);
+
+  const uint8_t boot_loop_offset = tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET]; // SetOption36
+
+  if (!boot_loop_offset) {
+    return;
+  }
+
+  // Not yet considered a boot loop
+  if (RtcFastboot.fast_reboot_count <= boot_loop_offset) {
+    return;
+  }
+
+  const uint8_t fastboot_stage = RtcFastboot.fast_reboot_count - boot_loop_offset;
+
+  ALOG_WRN(
+    PSTR("Fastboot: Recovery stage %d, fast_reboot_count=%d, offset=%d"),
+    fastboot_stage,
+    RtcFastboot.fast_reboot_count,
+    boot_loop_offset
+  );
+
+  // --------------------------------------------------------------------------
+  // Stage 1:
+  // First detected fast reboot beyond offset.
+  // Log only / reserve for very light test-disable behaviour.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 1) {
+    ALOG_INF(PSTR("Fastboot: Stage 1 - detected boot loop, no destructive action"));
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 2:
+  // Disable newest experimental/test code.
+  // Modules may listen for this event and disable risky dev features.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 2) {
+    ALOG_INF(PSTR("Fastboot: Stage 2 - FASTBOOT_EVENT_1"));
+    tkr->Tasker_Interface(TASK_FASTBOOT_EVENT_1);
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 3:
+  // Disable broader experimental code.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 3) {
+    ALOG_INF(PSTR("Fastboot: Stage 3 - FASTBOOT_EVENT_2"));
+    tkr->Tasker_Interface(TASK_FASTBOOT_EVENT_2);
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 4:
+  // Disable rules first. Rules cross-link modules and are high-risk during boot.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 4) {
+    ALOG_INF(PSTR("Fastboot: Stage 4 - Disable rules"));
+
+    // Runtime flag preferred, if available:
+    tkr_set->runtime.fastboot.disable_rules = true;
+
+    // Later, also guard rule startup:
+    // if (!tkr_set->runtime.fastboot.disable_rules) {
+    //   tkr->Tasker_Interface(TASK_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID);
+    // }
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 5:
+  // Disable sensors. Sensors touch I2C/SPI/UART/external devices and can block.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 5) {
+    ALOG_INF(PSTR("Fastboot: Stage 5 - Disable sensors"));
+
+    tkr_set->runtime.fastboot.disable_sensors = true;
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 6:
+  // Disable drivers / actuators.
+  // Keep network, OTA, WebUI, filesystem, logging alive.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 6) {
+    ALOG_INF(PSTR("Fastboot: Stage 6 - Disable drivers"));
+
+    tkr_set->runtime.fastboot.disable_drivers = true;
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 7:
+  // Skip stored module JSON/config loads.
+  // This recovers from bad module config files, not bad core settings.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 7) {
+    ALOG_INF(PSTR("Fastboot: Stage 7 - Disable module filesystem config load"));
+
+    tkr_set->runtime.fastboot.disable_module_config_load = true;
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 8:
+  // Skip templates and use compiled-safe module configuration.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 8) {
+    ALOG_INF(PSTR("Fastboot: Stage 8 - Disable templates, force safe compiled config"));
+
+    tkr_set->runtime.fastboot.disable_templates = true;
+    tkr_set->runtime.fastboot.force_safe_compiled_config = true;
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 9:
+  // Reset settings to defaults, but force known STA WiFi for OTA recovery.
+  // First destructive recovery stage.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage == 9) {
+    ALOG_WRN(PSTR("Fastboot: Stage 9 - Reset settings to defaults with STA recovery"));
+
+    tkr_set->runtime.fastboot.disable_rules = true;
+    tkr_set->runtime.fastboot.disable_sensors = true;
+    tkr_set->runtime.fastboot.disable_drivers = true;
+    tkr_set->runtime.fastboot.disable_module_config_load = true;
+    tkr_set->runtime.fastboot.disable_templates = true;
+
+    // Later implement these as plain/global-safe helpers or thin settings calls.
+    // SettingsSave_Prev();
+    // SettingsDefault();
+    // ApplyHardcodedStaWifiRecoverySettings();
+    // SettingsSaveAll();
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 10:
+  // Factory recovery. Clear settings and boot AP recovery mode with OTA/WebUI.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage == 10) {
+    ALOG_ERR(PSTR("Fastboot: Stage 10 - Factory AP recovery"));
+
+    tkr_set->runtime.fastboot.disable_rules = true;
+    tkr_set->runtime.fastboot.disable_sensors = true;
+    tkr_set->runtime.fastboot.disable_drivers = true;
+    tkr_set->runtime.fastboot.disable_module_config_load = true;
+    tkr_set->runtime.fastboot.disable_templates = true;
+    tkr_set->runtime.fastboot.factory_ap_recovery = true;
+
+    // Later:
+    // SettingsSave_Prev();
+    // SettingsErase(3);
+    // SettingsDefault();
+    // ApplyFactoryApRecoverySettings();
+    // SettingsSaveAll();
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 11+:
+  // Do not continue normal boot. Recovery only.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 11) {
+    ALOG_ERR(PSTR("Fastboot: Stage 11+ - Blocking safe recovery mode"));
+
+    tkr_set->runtime.fastboot.blocking_safe_mode = true;
+
+    // Later:
+    // SafeMode_StartAndAwaitOTA();
+  }
+
+  ALOG_INF(PSTR("FRC: " D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcFastboot.fast_reboot_count);
+}
+#endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+
+
 /********************************************************************************************/
 /*********************SETUP******************************************************************/
 /********************************************************************************************/
@@ -576,45 +755,7 @@ DEBUG_LINE_HERE3
    *     - This code must run before drivers/sensors are initiated, so they may be disabled if recovery is required
   ********************************************************************************************/
   #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  
-    ALOG_DBM( PSTR("ARESET TWICE! \t\t\t%d"), RtcFastboot.fast_reboot_count);
-
-    if (tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET]) // SetOption36
-    {         
-      
-      // Disable functionality as possible cause of fast restart within BOOT_LOOP_TIME seconds (Exception, WDT or restarts)
-      if (RtcFastboot.fast_reboot_count > tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET]) {       // Restart twice
-        
-        // Settings->flag3.user_esp8285_enable = 0;       // SetOption51 - Enable ESP8285 user GPIO's - Disable ESP8285 Generic GPIOs interfering with flash SPI
-        if (RtcFastboot.fast_reboot_count > tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +1) {  // Restart 3 times
-          // for (
-            uint32_t i = 0; //i < MAX_RULE_SETS; i++) {
-          //   if (bitRead(Settings->rule_stop, i)) {
-          //     bitWrite(Settings->rule_enabled, i, 0);  // Disable rules causing boot loop
-          ALOG_INF( PSTR("Fastboot: Disable Rule %d"), i );
-          //   }
-          // }
-        }
-        if (RtcFastboot.fast_reboot_count > tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +2) {  // Restarted 4 times
-          // Settings->rule_enabled = 0;                  // Disable all rules
-          // TasmotaGlobal.no_autoexec = true;
-          ALOG_INF( PSTR("Fastboot: Disable All Rules") );
-        }
-        if (RtcFastboot.fast_reboot_count > tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +3) {  // Restarted 5 times
-          // for (uint32_t i = 0; i < nitems(Settings->my_gp.io); i++) {
-          //   Settings->my_gp.io[i] = GPIO_NONE;         // Reset user defined GPIO disabling sensors
-          // }
-          ALOG_INF( PSTR("Fastboot: Disable GPIO Functions") );
-        }
-        if (RtcFastboot.fast_reboot_count > tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +4) {  // Restarted 6 times
-          // Settings->module = Settings->fallback_module;  // Reset module to fallback module
-          // Settings->last_module = Settings->fallback_module;
-          ALOG_INF( PSTR("Fastboot: Reset Module") );
-        }
-        ALOG_INF( PSTR("FRC: " D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcFastboot.fast_reboot_count);
-      }
-    }
-
+  Fastboot_RecoveryCheck();
   #endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 
 /********************************************************************************************
@@ -681,17 +822,23 @@ DEBUG_LINE_HERE3
 
   // Init the GPIOs
   tkr_pins->GpioInit();
+
   // Start pins in modules
   tkr->Tasker_Interface(TASK_PRE_INIT);
-  // Init devices
+
+  // Init devices with safe compiled/fallback defaults
   tkr->Tasker_Interface(TASK_INIT);
+
   ALOG_INF(PSTR("TASK_INIT Complete\n\r------------------------------------------------------\n\r------------------------------------------------------"));
-  // Init devices after others have been configured fully
+
+  // Init devices after basic module init
   tkr->Tasker_Interface(TASK_POST_INIT);
-  // Run system functions 
+
+  // Run system functions
   tkr->Tasker_Interface(YTASK_INIT);
-  // Load any stored user values into module
-  tkr->Tasker_Interface(TASK_SETTINGS_LOAD_VALUES_INTO_MODULE); // to be used 2023, this will load module config from filesystem
+
+  // Load module-owned filesystem config.
+  tkr->Tasker_Interface(TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM);
   
   DEBUG_LINE_HERE
   // Init any dynamic memory buffers

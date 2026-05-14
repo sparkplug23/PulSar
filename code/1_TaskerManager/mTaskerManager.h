@@ -50,6 +50,8 @@
  */
 #include "2_CoreSystem/00_FirmwareDefaults/mFirmwareDefaults.h"                    // Configuration overrides for all previous includes
 
+#include "2_CoreSystem/00_FirmwareDefaults/Progmem_Template_Defaults.h"            // Default template stored in PROGMEM, which can be overridden by OTA updates and edited via web UI
+
 #include "2_CoreSystem/mSystemConstants.h"
 
 // Returns via tasker that report special status
@@ -317,15 +319,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif 
 #ifdef USE_MODULE_NETWORK_CELLULAR
   #include "3_Network/05_Cellular/mCellular.h"
-  #define tkr_cell                               static_cast<mCellular*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__NETWORK_CELLULAR__ID))
-#endif
-#ifdef USE_MODULE_DRIVERS_MODEM_7000G
-  #include "3_Network/80_Modem_SIM7000G/mSIM7000G.h"
-  #define tkr_sim7000g                           static_cast<mSIM7000G*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_MODEM_7000G_ID))
-#endif
-#ifdef USE_MODULE_DRIVERS_MODEM_800L
-#include "4_Drivers/81_Modem_SIM800L/mSIM800L.h"
-  #define tkr_sim800l                           static_cast<mSIM800L*>(tkr->pModule[EM_MODULE_DRIVERS__MODEM_800L__ID])
+  #define tkr_cellular                               static_cast<mCellular*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__NETWORK_CELLULAR__ID))
 #endif
 #ifdef USE_MODULE_NETWORK_MQTT
   #include "3_Network/10_MQTT/mMQTT.h"
@@ -344,7 +338,7 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #endif
 #ifdef USE_MODULE_DRIVERS_LEDS
 #include "4_Drivers/03_LEDs/mLEDs.h"
-  #define tkr_led                                static_cast<mLEDs*>(tkr->pModule[EM_MODULE_DRIVERS_LEDS_ID])
+  #define tkr_led                                static_cast<mLEDs*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_LEDS_ID))
 #endif
 #ifdef USE_MODULE_DRIVERS_RELAY
   #include "4_Drivers/04_Relays/mRelays.h"
@@ -390,17 +384,25 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
   #include "4_Drivers/50_Camera/mCamera.h"
   #define tkr_camera                              static_cast<mCamera*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS__CAMERA_ID))
 #endif
+#ifdef USE_MODULE_DRIVERS_MODEM_7000G
+  #include "4_Drivers/40_Modem_SIM7000G/_mSIM7000G.h"
+  #define tkr_modem_sim7000g                           static_cast<mSIM7000G*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_MODEM_7000G_ID))
+#endif
+#ifdef USE_MODULE_DRIVERS_MODEM_800L
+#include "4_Drivers/41_Modem_SIM800L/mSIM800L.h"
+  #define tkr_modem_sim800l                           static_cast<mSIM800L*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DRIVERS_MODEM_800L_ID))
+#endif
 #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   #include "4_Drivers/70_MAVLink_Decoder/mMAVLink_Decoder.h"
-  #define tkr_mavlink                              static_cast<mMAVLink_Decoder*>(tkr->pModule[EM_MODULE__DRIVERS_MAVLINK_DECODER__ID])
+  #define tkr_mavlink                              static_cast<mMAVLink_Decoder*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__DRIVERS_MAVLINK_DECODER__ID))
 #endif
 #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI
   #include "4_Drivers/71_MAVLink_Telemetry_WiFi/mMAVLink_Telemetry_WiFi.h"
-  #define tkr_mavlink                              static_cast<mMAVLink_Telemetry_WiFi*>(tkr->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID])
+  #define tkr_mavlink                              static_cast<mMAVLink_Telemetry_WiFi*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__ID])
 #endif
 #ifdef USE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR
   #include "4_Drivers/72_MAVLink_Telemetry_Cellular/mMAVLink_Telemetry_Cellular.h"
-  #define tkr_mavlink                              static_cast<mMAVLink_Telemetry_Cellular*>(tkr->pModule[EM_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID])
+  #define tkr_mavlink                              static_cast<mMAVLink_Telemetry_Cellular*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__DRIVERS_MAVLINK_TELEMETRY_CELLULAR__ID])
 #endif
 /**
  * @brief Sensors
@@ -500,15 +502,6 @@ enum MODULE_SUBTYPE_IDS{ //ignores the "interface"
 #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   #include "5_Sensors/50_GPS_Serial/_mGPS_Serial.h"
   #define tkr_gps                                static_cast<mGPS_Serial*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS__GPS_SERIAL_ID))
-#endif
-#ifdef USE_MODULE_SENSORS_GPS_MODEM
-  #include "5_Sensors/51_GPS_Modem/mGPS_Modem.h"
-  #define tkr_gps                                 static_cast<mGPS_Modem*>(tkr->pModule[EM_MODULE__SENSORS_GPS_MODEM__ID])
-#endif
-#ifdef USE_MODULE_SENSORS_BATTERY_MODEM
-  #include "5_Sensors/52_Battery_Modem/mBattery_Modem.h"
-  #define tkr_batt_modem                                 static_cast<mBattery_Modem*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__SENSORS_BATTERY_MODEM__ID))
-  //static_cast<mBattery_Modem*>(tkr->pModule[EM_MODULE__SENSORS_BATTERY_MODEM__ID])
 #endif
 /**
  * @brief Lights

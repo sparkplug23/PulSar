@@ -11,11 +11,6 @@ bool mWiFi::WiFi2_Ap_EnsureStarted(void)
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(IPAddress(4,3,2,1), IPAddress(4,3,2,1), IPAddress(255,255,255,0));
 
-  // const bool ok = WiFi.softAP("PulSar-Setup", nullptr);
-  // if (!ok)
-  // {
-  //   return false;
-  // }
   const char* ap_ssid = SOFTAP_SSID;
   const char* ap_pass = SOFTAP_PASSWORD;
 
@@ -41,11 +36,9 @@ bool mWiFi::WiFi2_Ap_EnsureStarted(void)
     }
   }
 
-  if (!ok)
-  {
+  if (!ok){
     return false;
   }
-
 
   // Captive portal support (DNS hijack) is OPTIONAL
   #ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
@@ -54,6 +47,8 @@ bool mWiFi::WiFi2_Ap_EnsureStarted(void)
 
   // TEMPORARY bridge: start webserver/pages
   tkr->Tasker_Interface(TASK_NETWORK_CONNECTED__WIFI);
+
+  SET_SYSTEM_LED__AP_MODE(true);
 
   return true;
 }

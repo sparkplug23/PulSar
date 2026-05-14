@@ -12,9 +12,6 @@ extern "C" {
 int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj)
 {
 
-  // return 0;
-
-
   switch (function)
   {
     case TASK_INIT:
@@ -24,6 +21,9 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj)
       // Simple delayed start for both STA/AP.
       // (Later you will replace 10 with chip-id derived jitter.)
       connection.seconds_to_wait_for_fresh_connection_attempt = 10;
+
+      
+      SET_SYSTEM_LED__NO_NETWORK(true);
     }
     break;
   }
@@ -139,42 +139,140 @@ void mWiFi::Task_EverySecond()
 
 void mWiFi::Init_Preload_Wifi2_Settings()
 {
-ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
-  memset(tkr_set->Settings.network.wifi[0].ssid, 0, sizeof(tkr_set->Settings.network.wifi[0].ssid));
-  memset(tkr_set->Settings.network.wifi[0].pass, 0, sizeof(tkr_set->Settings.network.wifi[0].pass));
-  memset(tkr_set->Settings.network.wifi[1].ssid, 0, sizeof(tkr_set->Settings.network.wifi[1].ssid));
-  memset(tkr_set->Settings.network.wifi[1].pass, 0, sizeof(tkr_set->Settings.network.wifi[1].pass));
-  memset(tkr_set->Settings.network.wifi[2].ssid, 0, sizeof(tkr_set->Settings.network.wifi[2].ssid));
-  memset(tkr_set->Settings.network.wifi[2].pass, 0, sizeof(tkr_set->Settings.network.wifi[2].pass));
+  ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"), __FILE__, __LINE__);
 
-  #ifndef ENABLE_DEVFEATURE_WIFI__FORCE_SOFTAP_MODE_BY_BLOCKING_SSIDS
-  // Slot 0
-  snprintf(tkr_set->Settings.network.wifi[0].ssid,
-           sizeof(tkr_set->Settings.network.wifi[0].ssid),
-           "%s", STA_SSID1);
+  WiFi_Config_Clear();
+  WiFi_Config_LoadLegacyDefaults();
+}
 
-  snprintf(tkr_set->Settings.network.wifi[0].pass,
-           sizeof(tkr_set->Settings.network.wifi[0].pass),
-           "%s", STA_PASS1);
 
-  // Slot 1
-  snprintf(tkr_set->Settings.network.wifi[1].ssid,
-           sizeof(tkr_set->Settings.network.wifi[1].ssid),
-           "%s", STA_SSID2);
+void mWiFi::WiFi_Config_Clear(void)
+{
+  memset(&config, 0, sizeof(config));
 
-  snprintf(tkr_set->Settings.network.wifi[1].pass,
-           sizeof(tkr_set->Settings.network.wifi[1].pass),
-           "%s", STA_PASS2);
-  // Slot 2
-  snprintf(tkr_set->Settings.network.wifi[2].ssid,
-           sizeof(tkr_set->Settings.network.wifi[2].ssid),
-           "%s", STA_SSID3);
+  config.station.enabled = 1;
+  config.station.profile_count = 0;
+  config.station.active_profile = 0;
 
-  snprintf(tkr_set->Settings.network.wifi[2].pass,
-           sizeof(tkr_set->Settings.network.wifi[2].pass),
-           "%s", STA_PASS3);
+  config.station.ipv4.is_static = 0;
+  config.station.ipv4.ip[0]   = 0;
+  config.station.ipv4.ip[1]   = 0;
+  config.station.ipv4.ip[2]   = 0;
+  config.station.ipv4.ip[3]   = 0;
+  config.station.ipv4.gw[0]   = 0;
+  config.station.ipv4.gw[1]   = 0;
+  config.station.ipv4.gw[2]   = 0;
+  config.station.ipv4.gw[3]   = 0;
+  config.station.ipv4.sn[0]   = 255;
+  config.station.ipv4.sn[1]   = 255;
+  config.station.ipv4.sn[2]   = 255;
+  config.station.ipv4.sn[3]   = 0;
+  config.station.ipv4.dns1[0] = 0;
+  config.station.ipv4.dns1[1] = 0;
+  config.station.ipv4.dns1[2] = 0;
+  config.station.ipv4.dns1[3] = 0;
+  config.station.ipv4.dns2[0] = 0;
+  config.station.ipv4.dns2[1] = 0;
+  config.station.ipv4.dns2[2] = 0;
+  config.station.ipv4.dns2[3] = 0;
 
-  #endif
+  config.softap.enabled = 1;
+  config.softap.channel = 1;
+  config.softap.hidden = 0;
+}
+
+
+void mWiFi::WiFi_Config_LoadLegacyDefaults(void)
+{
+#ifndef ENABLE_DEVFEATURE_WIFI__FORCE_SOFTAP_MODE_BY_BLOCKING_SSIDS
+
+  snprintf(config.station.profiles[0].id,
+           sizeof(config.station.profiles[0].id),
+           "%s",
+           "home");
+
+  snprintf(config.station.profiles[0].ssid,
+           sizeof(config.station.profiles[0].ssid),
+           "%s",
+           STA_SSID1);
+
+  snprintf(config.station.profiles[0].pass,
+           sizeof(config.station.profiles[0].pass),
+           "%s",
+           STA_PASS1);
+
+  config.station.profiles[0].priority = 10;
+
+
+  snprintf(config.station.profiles[1].id,
+           sizeof(config.station.profiles[1].id),
+           "%s",
+           "backup");
+
+  snprintf(config.station.profiles[1].ssid,
+           sizeof(config.station.profiles[1].ssid),
+           "%s",
+           STA_SSID2);
+
+  snprintf(config.station.profiles[1].pass,
+           sizeof(config.station.profiles[1].pass),
+           "%s",
+           STA_PASS2);
+
+  config.station.profiles[1].priority = 20;
+
+
+  snprintf(config.station.profiles[2].id,
+           sizeof(config.station.profiles[2].id),
+           "%s",
+           "mobile");
+
+  snprintf(config.station.profiles[2].ssid,
+           sizeof(config.station.profiles[2].ssid),
+           "%s",
+           STA_SSID3);
+
+  snprintf(config.station.profiles[2].pass,
+           sizeof(config.station.profiles[2].pass),
+           "%s",
+           STA_PASS3);
+
+  config.station.profiles[2].priority = 30;
+
+
+  config.station.profile_count = 0;
+
+  for (uint8_t profile_i = 0; profile_i < WIFI_MAXIMUM_CONNECTIONS; profile_i++)
+  {
+    if (config.station.profiles[profile_i].ssid[0] != '\0')
+    {
+      config.station.profile_count++;
+    }
+  }
+
+#endif
+
+
+#ifdef SOFTAP_SSID
+  snprintf(config.softap.ssid,
+           sizeof(config.softap.ssid),
+           "%s",
+           SOFTAP_SSID);
+#else
+  snprintf(config.softap.ssid,
+           sizeof(config.softap.ssid),
+           "%s",
+           "PulSar-Setup");
+#endif
+
+#ifdef SOFTAP_PASSWORD
+  snprintf(config.softap.pass,
+           sizeof(config.softap.pass),
+           "%s",
+           SOFTAP_PASSWORD);
+#else
+  config.softap.pass[0] = '\0';
+#endif
 }
 
 #endif // USE_MODULE_NETWORK_WIFI

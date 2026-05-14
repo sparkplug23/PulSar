@@ -325,6 +325,47 @@ String mTime::GetTimeStr(uint32_t time, bool include_day_of_week)
 
 
 
+int32_t mTime::DateTime_DaysFromCivil(int32_t year, uint8_t month, uint8_t day)
+{
+  year -= month <= 2;
+
+  const int32_t era = (year >= 0 ? year : year - 399) / 400;
+  const uint32_t yoe = (uint32_t)(year - era * 400);
+  const uint32_t doy = (153 * (month + (month > 2 ? -3 : 9)) + 2) / 5 + day - 1;
+  const uint32_t doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+
+  return era * 146097 + (int32_t)doe - 719468;
+}
+
+
+uint32_t mTime::DateTime_UTC_ToEpochSeconds(
+  uint16_t year,
+  uint8_t month,
+  uint8_t day,
+  uint8_t hour,
+  uint8_t minute,
+  uint8_t second
+)
+{
+  if (year < 1970 || month < 1 || month > 12 || day < 1 || day > 31)
+  {
+    return 0;
+  }
+
+  const int32_t days = DateTime_DaysFromCivil(year, month, day);
+
+  if (days < 0)
+  {
+    return 0;
+  }
+
+  return
+    ((uint32_t)days * 86400UL) +
+    ((uint32_t)hour * 3600UL) +
+    ((uint32_t)minute * 60UL) +
+    (uint32_t)second;
+}
+
 
 
 // -----------------------------------------------------------------------------

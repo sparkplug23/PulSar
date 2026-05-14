@@ -305,6 +305,17 @@ class mTime :
 
 
 
+    int32_t DateTime_DaysFromCivil(int32_t year, uint8_t month, uint8_t day);
+
+    uint32_t DateTime_UTC_ToEpochSeconds(
+      uint16_t year,
+      uint8_t month,
+      uint8_t day,
+      uint8_t hour,
+      uint8_t minute,
+      uint8_t second
+    );
+
     uint8_t day(uint32_t time);
     uint8_t month(uint32_t time);
     uint16_t year(uint32_t time);

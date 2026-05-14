@@ -45,7 +45,7 @@ enum TASKER_FUNCTION_TYPES
   TASK_INIT,         // Actually complete init, read sensors, enable modules fully etc
 
   TASK_INIT_DELAYED_SECONDS, // To enable modules to either intentional begin with a delayed start, or, to changed at an interval if it is possible to start again (e.g. new sensor connected)
-
+  
   /**
    * Flags that are used in debugging, that will override any stored or default init states. This will be optionally called at the end of setup.
    * */
@@ -64,13 +64,16 @@ enum TASKER_FUNCTION_TYPES
   
 
   YTASK_INIT,
-  TASK_SETTINGS_LOAD_VALUES_INTO_MODULE, // Load values from settings struct and overwrite module values
   TASK_CONFIGURE_MODULES_FOR_DEVICE, // Configure any sensors that are needed for controllers, to the required settings
   TASK_MQTT_HANDLERS_INIT,
   // TASK_MQTT_INIT,
   
+  TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM,
+
   TASK_TEMPLATE_DEVICE_EXECUTE_LOAD, // This is called from the above function, used to parse the object json
   
+  TASK_FASTBOOT_EVENT_1,
+  TASK_FASTBOOT_EVENT_2,
   
   /**
    * Called when we reach the end of "setup()" before loop starts
@@ -362,7 +365,7 @@ DEFINE_PGM_CTR(PM_TASK_JSON_APPEND_CTR)                             D_TASK_JSON_
 // DEFINE_PGM_CTR(PM_TASK_SAVE_BEFORE_RESTART_CTR)                     D_TASK_SAVE_BEFORE_RESTART_CTR;
 DEFINE_PGM_CTR(PM_TASK_SETTINGS_DEFAULT_CTR)                        D_TASK_SETTINGS_DEFAULT_CTR;
 DEFINE_PGM_CTR(PM_TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR)     D_TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR;
-DEFINE_PGM_CTR(PM_TASK_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR)        D_TASK_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR;
+DEFINE_PGM_CTR(PM_TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM_CTR)        D_TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM_CTR;
 DEFINE_PGM_CTR(PM_TASK_SETTINGS_SAVE_VALUES_FROM_MODULE_CTR)        D_TASK_SETTINGS_SAVE_VALUES_FROM_MODULE_CTR;
 DEFINE_PGM_CTR(PM_YTASK_INIT_CTR)                    D_YTASK_INIT_CTR;
 DEFINE_PGM_CTR(PM_YTASK_LOOP_CTR)                    D_YTASK_LOOP_CTR;

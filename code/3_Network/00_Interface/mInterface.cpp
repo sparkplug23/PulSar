@@ -29,9 +29,12 @@ int8_t mInterfaceNetwork::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_INIT:
       Init();
     break;
+    case TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM:
+      Load_Config();
+    break;
   }
 
-  if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   switch(function){
     /************
@@ -81,23 +84,10 @@ int8_t mInterfaceNetwork::Tasker(uint8_t function, JsonParserObject obj){
 void mInterfaceNetwork::Pre_Init(void)
 {
   
-  settings.fEnableSensor = true;
+  module_state.mode = ModuleStatus::Initialising;
 
 }
 
-
-void mInterfaceNetwork::Init(void)
-{
-
-
-}
-
-
-void mInterfaceNetwork::EveryLoop()
-{
-
-
-}
 
 bool mInterfaceNetwork::Network_HasLocalConnectivity(void)
 {
@@ -119,14 +109,14 @@ bool mInterfaceNetwork::Network_HasLocalConnectivity(void)
   return local;
 }
 
+
 bool mInterfaceNetwork::Network_HasExternalConnectivity(void)
 {
   bool external = false;
 
   // ---- WiFi ----
   #ifdef USE_MODULE_NETWORK_WIFI
-  if (tkr_wifi)
-  {
+  if (tkr_wifi){
     external |= tkr_wifi->WiFi_HasExternalConnectivity();
   }
   #endif
@@ -163,15 +153,11 @@ bool mInterfaceNetwork::Network_IsLocalOnly(void)
 bool mInterfaceNetwork::Connected(uint8_t type)
 {
   
-#ifndef ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-
   // ALOG_ERR(PSTR("mInterfaceNetwork::Connected"));
 
   #ifdef USE_MODULE_NETWORK_WIFI
-  if(
-    (type == NETWORK_TYPE_WIFI) ||
-    (type == NETWORK_TYPE_ANY)
-  ){
+  if( (type == NETWORK_TYPE_WIFI) || (type == NETWORK_TYPE_ANY) )
+  {
     if(tkr_wifi->WiFi_Link_IsIpRoutable())
     {
       return true;
@@ -179,24 +165,14 @@ bool mInterfaceNetwork::Connected(uint8_t type)
   }
   #endif // USE_MODULE_NETWORK_WIFI
 
-/**
- * @brief WiFi needs to be first to fix extra AT commands when WiFi and Cellular are being used, but mqtt is via Wifi and not cellular
- * 
- */
+  
   #ifdef USE_MODULE_NETWORK_CELLULAR
-  if(
-    (type == NETWORK_TYPE_CELLULAR) ||
-    (type == NETWORK_TYPE_ANY)
-  ){
-
-    /**
-     * @brief Perfect example of how this needs to become a superclass
-     * 
-     */
+  if( (type == NETWORK_TYPE_CELLULAR) || (type == NETWORK_TYPE_ANY) )
+  {
     #ifdef USE_MODULE_DRIVERS_MODEM_7000G
-    if(tkr_sim7000g->modem != nullptr)
+    if(tkr_modem_sim7000g->modem != nullptr)
     {
-      if(tkr_sim7000g->modem->isGprsConnected())
+      if(tkr_modem_sim7000g->modem->isGprsConnected())
       {
         return true;
       }
@@ -214,9 +190,6 @@ bool mInterfaceNetwork::Connected(uint8_t type)
 
   }
   #endif // USE_MODULE_NETWORK_CELLULAR
-
-
-#endif //  ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
 
   return false;
 }
@@ -238,6 +211,9 @@ void mInterfaceNetwork::parse_JSONCommand(JsonParserObject obj)
     {
       // GPS_Enable();
     }
+  } 
+  if(jtok = obj["Version"]){
+      ALOG_INF( PSTR("Version: %d"), jtok.getInt());
   } 
     
 }

@@ -118,6 +118,8 @@ typedef enum
   SENSOR_TYPE_LATITUDE_ID,
   SENSOR_TYPE_LONGITUDE_ID,
   SENSOR_TYPE_ALTITUDE_ID,
+  SENSOR_TYPE_LOCATION_ACCURACY_ID,
+  SENSOR_TYPE_LOCATION_SATELLITES_USED_ID,
   /**
    * @brief Speed
    **/
@@ -325,6 +327,8 @@ static const char* GetUnifiedSensor_NameByTypeID(uint8_t id)
     case SENSOR_TYPE_LATITUDE_ID:               return PSTR("Latitude");  
     case SENSOR_TYPE_LONGITUDE_ID:              return PSTR("Longitude");  
     case SENSOR_TYPE_ALTITUDE_ID:               return PSTR("Altitude");  
+    case SENSOR_TYPE_LOCATION_ACCURACY_ID:               return PSTR("LocationAccuracy");  
+    case SENSOR_TYPE_LOCATION_SATELLITES_USED_ID:               return PSTR("LocationSatellitesUsed");  
 
     case SENSOR_TYPE_DISTANCE_MOVING_ID:               return PSTR("DistanceMoving");  
     case SENSOR_TYPE_DISTANCE_STATIC_ID:               return PSTR("DistanceStatic");  

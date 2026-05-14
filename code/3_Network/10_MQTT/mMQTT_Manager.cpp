@@ -4,8 +4,6 @@
 
 int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT_FUNCTION_NAME;
 
-  // ALOG_INF(PSTR("M0host_address===================: %s"), dt.connection[0].host_address);
-
   switch(function){
     /************
      * INIT SECTION * 
@@ -13,11 +11,15 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
     case TASK_INIT:
       Init();
     break;    
+    case TASK_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+      return 1;
+    break;
   }
 
-  if(!tkr_set->Settings.flag_system.mqtt_enabled){ return 0; }
+  if(!tkr_set->Settings.flag_system.mqtt_enabled){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
-  if(!tkr_interface_network->Network_HasExternalConnectivity()) return 0;
+  if(!tkr_interface_network->Network_HasExternalConnectivity()) return TASKER_RESULT__MODULE_DISABLED_ID;
 
   switch(function){
   /************
@@ -28,81 +30,21 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
       CallMQTTSenders();
     break;
     case TASK_MQTT_CONNECTED:
-    // ALOG_ERR(PSTR("MQTT_CONNECTED hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"));
       Load_New_Subscriptions_From_Function_Template();
-    break;
-    
+    break;    
     case TASK_NETWORK_CONNECTED__WIFI:
     case TASK_NETWORK_CONNECTED__ETHERNET:
-    // case TASK_NETWORK_CONNECTED__CELLULAR: Handled via the Celullar module directly
-      Start_Connection();
-      
-      /**
-       * @brief If status is down, and awaiting connection, immediate try reconnect
-       * Not sure this is needed here, might be a LTE remenant
-       * */
-      if(brokers.size()) 
-      // if(brokers_active)   
-        if(brokers[0]->retry_counter)
-          brokers[0]->retry_counter = 1; //retry immediate
-          ALOG_HGL(PSTR(D_LOG_PUBSUB "retry_counter IMMEDIATE = %d"),brokers[0]->retry_counter);
-
-    break;
-    
+      Handle__ServiceBrokerConnects_With_Transports();
+    break;    
     case TASK_EVERY_50_MSECOND:
-      DEBUG_LINE_HERE_MILLIS
-
-      DEBUG_LINE_HERE_MILLIS
       MM_Every50mSecond();
-      DEBUG_LINE_HERE_MILLIS
-
-      // if(brokers.size())   
-      //   if(brokers[0]->retry_counter)
-      //     Serial.printf(D_LOG_PUBSUB "retry_counter = %d\n\r", brokers[0]->retry_counter);
-
     break;
-    case TASK_EVERY_SECOND:      {
-      
-      // if(brokers.size())
-      //   ALOG_INF(PSTR("M4host_address: %s"), brokers[0]->host_address);
-
-  
-      strlcpy(test, "tesT MESSAGE FROM INIT", sizeof(test));
-
+    case TASK_EVERY_SECOND:  
+      Handle__ServiceBrokerConnects_With_Transports();
       MM_EverySecond();  
-
-//   ALOG_INF(PSTR("M5host_address: %s"), dt.connection[0].host_address);
-
-//       for(int i=0;i<50;i++)
-//       {
-//         Serial.write(dt.connection[0].prefixtopic[i]);
-//       }
-//       Serial.println();
-
-//   ALOG_INF(PSTR("M6host_address: %s"), dt.connection[0].host_address);
-
-// uint8_t idx=0;
-//   ALOG_INF(PSTR("Fhost_address: %s"), dt.connection[idx].host_address);
-//   ALOG_INF(PSTR("port: %d"), dt.connection[idx].port);
-//   ALOG_INF(PSTR("user: %s"), dt.connection[idx].user);
-//   ALOG_INF(PSTR("pwd: %s"), dt.connection[idx].pwd);
-//   ALOG_INF(PSTR("retry: %d"), dt.connection[idx].retry);
-//   ALOG_INF(PSTR("client: %s"), dt.connection[idx].client);
-//   ALOG_INF(PSTR("prefixtopic: %s"), dt.connection[idx].prefixtopic);
-//   ALOG_INF(PSTR("status: %d"), dt.connection[idx].status);
-
-//   tkr_tel->mqtthandler_mqtt.flags.SendNow = true;
-
-
-
-    }
     break;
     case TASK_EVERY_HOUR:
-      if(brokers.size())
-      // if(brokers_active)   
-      {
-        brokers[0]->Send_LWT_Online(); // this does work, but how about wrapping the LWT into the normal status messages? Just the LWT offline would be its own.
-      }
+      Send_LWT_To_Any_Connected_Brokers();
     break;
     case TASK_UPTIME_10_MINUTES:
       flag_uptime_reached_reduce_frequency = true;
@@ -137,9 +79,19 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
     break;
   } // END switch
 
-  return TASKER_RESULT__UNKNOWN_ID;
+  return TASKER_RESULT__SUCCESS_ID;
 
 } // END function
+
+
+void mMQTTManager::Send_LWT_To_Any_Connected_Brokers()
+{
+  uint8_t br = brokers.size();
+  for(uint8_t i = 0; i < br; i++)
+  {
+    brokers[i]->Send_LWT_Online(); // this does work, but how about wrapping the LWT into the normal status messages? Just the LWT offline would be its own.
+  }
+}
 
 void mMQTTManager::Start_Connection()
 {
@@ -167,6 +119,394 @@ void mMQTTManager::Start_Connection()
   return;
 }
 
+void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
+{
+  ALOG_DBG(PSTR(D_LOG_MQTT "Handle__ServiceBrokerConnects_With_Transports brokers=%u"), brokers.size());
+
+  if(!brokers.size())
+  {
+    ALOG_INF(PSTR(D_LOG_MQTT "Handle__ServiceBrokerConnects_With_Transports skipped: no brokers"));
+    return;
+  }
+
+  for(uint8_t broker_i = 0; broker_i < brokers.size(); broker_i++)
+  {
+    MQTTConnection* broker = brokers[broker_i];
+
+    ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] service begin ptr=%p"), broker_i, broker);
+
+    if(!broker)
+    {
+      ALOG_ERR(PSTR(D_LOG_MQTT "Broker[%u] skipped: null broker pointer"), broker_i);
+      continue;
+    }
+
+    ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] state id=%s en=%u allowed=%u host=%s port=%u net=%p pubsub=%p"),
+      broker_i,
+      broker->id,
+      broker->en,
+      broker->allowed,
+      broker->host_address,
+      broker->port,
+      broker->network_client,
+      broker->pubsub
+    );
+
+    if(!broker->en)
+    {
+      ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] skipped: EN false"), broker_i);
+      continue;
+    }
+
+    if(!broker->allowed)
+    {
+      ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] skipped: allowed false"), broker_i);
+      continue;
+    }
+
+    if(!broker->host_address[0])
+    {
+      ALOG_ERR(PSTR(D_LOG_MQTT "Broker[%u] skipped: empty host"), broker_i);
+      continue;
+    }
+
+    if(broker->network_client && broker->pubsub)
+    {
+      ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] skipped: already has transport client_type=%u net=%p pubsub=%p"),
+        broker_i,
+        broker->client_type,
+        broker->network_client,
+        broker->pubsub
+      );
+      continue;
+    }
+
+    if(broker->network_client && !broker->pubsub)
+    {
+      ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] partial bind: network_client set but pubsub null"), broker_i);
+    }
+
+    if(!broker->network_client && broker->pubsub)
+    {
+      ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] partial bind: pubsub set but network_client null"), broker_i);
+    }
+
+    ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] bind required id=%s host=%s"),
+      broker_i,
+      broker->id,
+      broker->host_address
+    );
+
+    const bool use_pref_transport = broker->pref_transport_count > 0;
+    const uint8_t transport_count = use_pref_transport ? broker->pref_transport_count : broker->transport_count;
+
+    ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] transport source=%s pref_count=%u transport_count=%u selected_count=%u"),
+      broker_i,
+      use_pref_transport ? "PrefTransport" : "Transport",
+      broker->pref_transport_count,
+      broker->transport_count,
+      transport_count
+    );
+
+    if(transport_count == 0)
+    {
+      ALOG_ERR(PSTR(D_LOG_MQTT "Broker[%u] skipped: no configured transports"), broker_i);
+      continue;
+    }
+
+    bool transport_attached = false;
+
+    for(uint8_t transport_i = 0; transport_i < transport_count; transport_i++)
+    {
+      ConnectionClient_t transport_type = use_pref_transport ? broker->pref_transport[transport_i] : broker->transport[transport_i];
+
+      ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] checking transport[%u]=%u"),
+        broker_i,
+        transport_i,
+        transport_type
+      );
+
+      Client* client_ptr = nullptr;
+      bool client_owned_by_mqtt = false;
+
+      switch(transport_type)
+      {
+        case CLIENT_TYPE_WIFI_ID:
+        {
+          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] transport[%u] type=WiFi"), broker_i, transport_i);
+
+          #ifdef USE_MODULE_NETWORK_WIFI
+
+          if(!tkr_wifi)
+          {
+            ALOG_ERR(PSTR(D_LOG_MQTT "Broker[%u] WiFi skipped: tkr_wifi null"), broker_i);
+            break;
+          }
+
+          if(!tkr_wifi->WiFi_HasExternalConnectivity())
+          {
+            ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] WiFi skipped: no external connectivity"), broker_i);
+            break;
+          }
+
+          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] WiFi healthy: allocating WiFiClient"), broker_i);
+
+          client_ptr = new WiFiClient();
+
+          if(!client_ptr)
+          {
+            ALOG_ERR(PSTR(D_LOG_MQTT "Broker[%u] WiFiClient allocation failed"), broker_i);
+            break;
+          }
+
+          broker->client_type = CLIENT_TYPE_WIFI_ID;
+          client_owned_by_mqtt = true;
+
+          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] WiFiClient allocated ptr=%p"), broker_i, client_ptr);
+
+          #else
+
+          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] WiFi skipped: USE_MODULE_NETWORK_WIFI not compiled"), broker_i);
+
+          #endif
+        }
+        break;
+
+        case CLIENT_TYPE_ETHERNET_ID:
+        {
+          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] transport[%u] type=Ethernet"), broker_i, transport_i);
+
+          #ifdef USE_MODULE_NETWORK_ETHERNET
+
+          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Ethernet compiled but bind path not implemented"), broker_i);
+
+          // Later:
+          // if(tkr_eth && tkr_eth->Ethernet_HasExternalConnectivity())
+          // {
+          //   client_ptr = new EthernetClient();
+          //   broker->client_type = CLIENT_TYPE_ETHERNET_ID;
+          // }
+
+          #else
+
+          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Ethernet skipped: NETWORK_ETHERNET not compiled"), broker_i);
+
+          #endif
+        }
+        break;
+
+        case CLIENT_TYPE_CELLULAR_ID:
+        {
+          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] transport[%u] type=Cellular"), broker_i, transport_i);
+
+          #ifdef USE_MODULE_NETWORK_CELLULAR
+
+          if(!tkr_cellular)
+          {
+            ALOG_ERR(PSTR(D_LOG_MQTT "Broker[%u] Cellular skipped: tkr_cellular null"), broker_i);
+            break;
+          }
+
+          if(!tkr_cellular->Cellular_HasExternalConnectivity())
+          {
+            ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Cellular skipped: no external connectivity"), broker_i);
+            break;
+          }
+
+          client_ptr = tkr_cellular->Cellular_GetNetworkClient();
+
+          if(!client_ptr)
+          {
+            ALOG_ERR(PSTR(D_LOG_MQTT "Broker[%u] Cellular skipped: no network client"), broker_i);
+            break;
+          }
+
+          broker->client_type = CLIENT_TYPE_CELLULAR_ID;
+          client_owned_by_mqtt = false; // modem/cellular owns TinyGsmClient
+
+          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Cellular client ready ptr=%p"), broker_i, client_ptr);
+
+          #else
+
+          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Cellular skipped: USE_MODULE_NETWORK_CELLULAR not compiled"), broker_i);
+
+          #endif
+        }
+        break;
+
+        default:
+        {
+          ALOG_WRN(PSTR(D_LOG_MQTT "Broker[%u] transport[%u] skipped: unknown transport type %u"),
+            broker_i,
+            transport_i,
+            transport_type
+          );
+        }
+        break;
+      }
+
+      if(!client_ptr)
+      {
+        ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] transport[%u]=%u produced no client"),
+          broker_i,
+          transport_i,
+          transport_type
+        );
+        continue;
+      }
+
+      ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] attaching transport type=%u client=%p"),
+        broker_i,
+        transport_type,
+        client_ptr
+      );
+
+      broker->network_client = client_ptr;
+      broker->SetPubSubClient(client_ptr);
+
+      if(!broker->pubsub)
+      {
+        ALOG_ERR(PSTR(D_LOG_MQTT "Broker[%u] SetPubSubClient failed: pubsub null"), broker_i);
+
+        if(client_owned_by_mqtt)
+        {
+          delete client_ptr;
+        }
+
+        broker->network_client = nullptr;
+        broker->client_type = CLIENT_TYPE_WIFI_ID;
+
+        continue;
+      }
+
+      broker->retry = broker->backoff_fast_secs;
+      broker->retry_counter_start_value = broker->backoff_fast_secs;
+      broker->retry_counter = 1;
+      broker->flag_start_reconnect = true;
+
+      transport_attached = true;
+
+      ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] transport attached type=%u retry immediate net=%p pubsub=%p"),
+        broker_i,
+        broker->client_type,
+        broker->network_client,
+        broker->pubsub
+      );
+
+      #ifdef ENABLE_DEBUG_MQTT__INCLUDE_NEW_CONNECTION_SPLASH
+      broker->Debug_PrintConnectionInfo();
+      #endif
+
+      break;
+    }
+
+    if(!transport_attached)
+    {
+      ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] no transport attached id=%s"), broker_i, broker->id);
+
+      broker->retry_counter = 0;
+      broker->flag_start_reconnect = false;
+    }
+  }
+}
+
+void mMQTTManager::EnsureDefaultBroker_FromDefines(void)
+{
+  if(brokers.size() > 0)
+  {
+    ALOG_INF(PSTR(D_LOG_MQTT "Define broker skipped: brokers already configured=%u"), brokers.size());
+    return;
+  }
+
+  #ifndef MQTT_HOST
+  ALOG_WRN(PSTR(D_LOG_MQTT "Define broker skipped: MQTT_HOST not defined"));
+  return;
+  #endif
+
+  ALOG_WRN(PSTR(D_LOG_MQTT "No MQTT brokers configured, creating broker from defines"));
+
+  MQTTConnection* broker = new MQTTConnection();
+
+  if(!broker)
+  {
+    ALOG_ERR(PSTR(D_LOG_MQTT "Define broker allocation failed"));
+    return;
+  }
+
+  snprintf(broker->id, sizeof(broker->id), "home");
+  snprintf(broker->host_address, sizeof(broker->host_address), "%s", MQTT_HOST);
+
+  #ifdef MQTT_PORT
+  broker->port = MQTT_PORT;
+  #else
+  broker->port = 1883;
+  #endif
+
+  broker->en = true;
+  broker->allowed = true;
+
+  #ifdef MQTT_USER
+  snprintf(broker->user, sizeof(broker->user), "%s", MQTT_USER);
+  #else
+  broker->user[0] = '\0';
+  #endif
+
+  #ifdef MQTT_PASS
+  snprintf(broker->password, sizeof(broker->password), "%s", MQTT_PASS);
+  #else
+  broker->password[0] = '\0';
+  #endif
+
+  #ifdef DEVICENAME_CTR
+  broker->SetTopicPrefix(DEVICENAME_CTR);
+  broker->SetClientName(DEVICENAME_CTR);
+  #else
+  broker->SetTopicPrefix(tkr_set->Settings.system_name.device);
+  broker->SetClientName(tkr_set->Settings.system_name.device);
+  #endif
+
+  broker->transport_count = 0;
+  broker->pref_transport_count = 0;
+
+  #ifdef USE_MODULE_NETWORK_WIFI
+  broker->transport[broker->transport_count++] = CLIENT_TYPE_WIFI_ID;
+  broker->pref_transport[broker->pref_transport_count++] = CLIENT_TYPE_WIFI_ID;
+  #endif
+
+  #ifdef USE_MODULE_NETWORK_ETHERNET
+  broker->transport[broker->transport_count++] = CLIENT_TYPE_ETHERNET_ID;
+  broker->pref_transport[broker->pref_transport_count++] = CLIENT_TYPE_ETHERNET_ID;
+  #endif
+
+  #if !defined(USE_MODULE_NETWORK_WIFI) && !defined(USE_MODULE_NETWORK_ETHERNET) && defined(USE_MODULE_NETWORK_CELLULAR)
+  broker->transport[broker->transport_count++] = CLIENT_TYPE_CELLULAR_ID;
+  broker->pref_transport[broker->pref_transport_count++] = CLIENT_TYPE_CELLULAR_ID;
+  #endif
+
+  if(broker->transport_count == 0)
+  {
+    ALOG_ERR(PSTR(D_LOG_MQTT "Define broker failed: no compiled transport"));
+    delete broker;
+    return;
+  }
+
+  broker->retry = broker->backoff_fast_secs;
+  broker->retry_counter_start_value = broker->backoff_fast_secs;
+  broker->retry_counter = 0;
+  broker->flag_start_reconnect = false;
+
+  brokers.push_back(broker);
+
+  ALOG_INF(
+    PSTR(D_LOG_MQTT "Define broker added id=%s host=%s port=%u transports=%u"),
+    broker->id,
+    broker->host_address,
+    broker->port,
+    broker->transport_count
+  );
+}
+
+
 /**
  * @brief Should be called from Init now, its the new way of setting up as a new device with default settings
  * 
@@ -176,9 +516,6 @@ void mMQTTManager::Default_Module()
   ALOG_INF(PSTR(D_LOG_MQTT "Default_Module"));
   
   // memset((uint8_t*)&dt, 0, sizeof(dt));
-
-  // MODULE_STORAGE::CONNECTION* con = &dt.connection[0];
-
   
   dt.ifchanged_secs = SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS; // ifchanged etc timing should be moved into mqtt substruct
   dt.ifchanged_json_level = JSON_LEVEL_IFCHANGED; //default
@@ -196,7 +533,6 @@ void mMQTTManager::Default_Module()
   dt.options.unified_module_interface_reporting__suppress_submodule_teleperiod = 0;
   dt.options.unified_module_interface_reporting__suppress_submodule_ifchangedperiod = 0;
   #endif
-
 
   strlcpy(test, "TEST MESSAGE FROM INIT", sizeof(test));
 
@@ -373,7 +709,8 @@ uint16_t mMQTTManager::GetIfChangedPeriod_SubModule()
     return dt.ifchanged_secs;  
 }
 
-    #ifdef ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
+
+#ifdef ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
 void mMQTTManager::MqttPublishPayloadPrefixTopic_P(uint32_t prefix, const char* subtopic, const char* payload, uint32_t binary_length, bool retained) {
 
 ALOG_INF(PSTR("MqttPublishPayloadPrefixTopic_P"));
@@ -510,6 +847,78 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 
+  ALOG_INF(PSTR(D_LOG_MQTT "mMQTTManager::parse_JSONCommand"));
+
+  
+  JsonParserObject jobj = 0; 
+
+  if(!(jobj = obj[D_MODULE_NETWORK_MQTT_CTR].getObject()))
+  {
+    ALOG_ERR(PSTR(D_LOG_MQTT "No MQTT object found"));
+    return;
+  }
+  
+  if(jtok = jobj["Brokers"])
+  {
+
+    ALOG_INF(PSTR(D_LOG_MQTT "Parsing Brokers from JSONCommand"));
+
+    uint8_t broker_i = 0;
+
+    for(auto broker_jtok : jtok.getArray())
+    {
+      if(broker_i >= MQTT_MAX_BROKERS)
+      {
+        ALOG_WRN(PSTR(D_LOG_MQTT "Brokers ignored, max reached %u"), MQTT_MAX_BROKERS);
+        break;
+      }
+
+      while(brokers.size() <= broker_i)
+      {
+        brokers.push_back(new MQTTConnection());
+      }
+
+      subparse_JSONCommand__Broker(broker_jtok.getObject(), broker_i);
+
+      broker_i++;
+    }
+
+    // Remove stale broker objects if this JSON has fewer brokers than before.
+    while(brokers.size() > broker_i)
+    {
+      MQTTConnection* broker = brokers.back();
+
+      if(broker)
+      {
+        if(broker->pubsub)
+        {
+          delete broker->pubsub;
+          broker->pubsub = nullptr;
+        }
+
+        if(broker->network_client)
+        {
+          delete broker->network_client;
+          broker->network_client = nullptr;
+        }
+
+        delete broker;
+      }
+
+      brokers.pop_back();
+    }
+
+    ALOG_INF(PSTR(D_LOG_MQTT "Brokers loaded %u"), brokers.size());
+  }
+  else
+  {
+    // ALOG_INF(PSTR(D_LOG_MQTT "No Brokers found in JSONCommand"));
+    // return;
+  }
+  
+
+  ALOG_INF(PSTR(D_LOG_MQTT "mMQTTManager::parse_JSONCommand2"));
+
   uint8_t connection_idx = 0; // should be like Segments, assumes 0 when only 1
 
   if(jtok = obj["MQTT"].getObject()["RetrySecs"])
@@ -580,8 +989,226 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
     tkr->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   }
 
+
+
 }//end function
 
+
+void mMQTTManager::subparse_JSONCommand__Broker(JsonParserObject obj, uint8_t broker_i)
+{
+
+  ALOG_INF(PSTR(D_LOG_MQTT "subparse_JSONCommand__Broker %u"), broker_i);
+
+  if(!obj){ return; }
+  if(broker_i >= MQTT_MAX_BROKERS){ return; }
+  if(broker_i >= brokers.size()){ return; }
+
+  MQTTConnection* broker = brokers[broker_i];
+
+  if(!broker){ return; }
+
+  JsonParserToken jtok = 0;
+
+  // Reset config fields, but do not delete runtime object.
+  broker->en = true;
+  broker->allowed = false;
+
+  broker->host_address[0] = '\0';
+  broker->user[0] = '\0';
+  broker->password[0] = '\0';
+  broker->prefix_topic[0] = '\0';
+  broker->client_name[0] = '\0';
+
+  broker->port = 1883;
+
+  broker->backoff_fast_secs = 5;
+  broker->backoff_periodic_secs = 10;
+  broker->backoff_max_secs = 60;
+
+  broker->transport_count = 0;
+  broker->pref_transport_count = 0;
+
+  broker->outgoing_level = 3;
+  broker->outgoing_limiter_ms = 0;
+  broker->keepalive_secs = 60;
+
+  ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] reset to defaults"), broker_i);
+
+  if(jtok = obj["Id"])
+  {
+    snprintf(broker->id, sizeof(broker->id), "%s", jtok.getStr());
+    ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Id=%s"), broker_i, broker->id);
+  }
+
+  if(jtok = obj["EN"])
+  {
+    broker->en = jtok.getBool();
+    ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] EN=%u"), broker_i, broker->en);
+  }
+
+  if(jtok = obj["Host"])
+  {
+    snprintf(broker->host_address, sizeof(broker->host_address), "%s", jtok.getStr());
+    ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Host=%s"), broker_i, broker->host_address);
+  }
+
+  if(jtok = obj["Port"])
+  {
+    broker->port = jtok.getInt();
+  }
+
+  if(jtok = obj["User"])
+  {
+    snprintf(broker->user, sizeof(broker->user), "%s", jtok.getStr());
+  }
+
+  if(jtok = obj["Password"])
+  {
+    snprintf(broker->password, sizeof(broker->password), "%s", jtok.getStr());
+  }
+
+  if(jtok = obj["TopicPrefix"])
+  {
+    snprintf(broker->prefix_topic, sizeof(broker->prefix_topic), "%s", jtok.getStr());
+  }
+
+  if(jtok = obj["ClientName"])
+  {
+    snprintf(broker->client_name, sizeof(broker->client_name), "%s", jtok.getStr());
+  }
+
+  if(jtok = obj["Backoff"])
+  {
+    uint8_t backoff_i = 0;
+
+    for(auto val : jtok.getArray())
+    {
+      if(backoff_i == 0)
+      {
+        broker->backoff_fast_secs = val.getInt();
+      }
+      else if(backoff_i == 1)
+      {
+        broker->backoff_periodic_secs = val.getInt();
+      }
+      else if(backoff_i == 2)
+      {
+        broker->backoff_max_secs = val.getInt();
+        break;
+      }
+
+      backoff_i++;
+    }
+  }
+
+  if(jtok = obj["Transport"])
+  {
+    broker->transport_count = 0;
+
+    for(auto val : jtok.getArray())
+    {
+      if(broker->transport_count >= MQTT_TRANSPORT_LIST_MAX){ break; }
+
+      const char* transport_ctr = val.getStr();
+
+      if(!transport_ctr){ continue; }
+
+      if(strcasecmp(transport_ctr, "Ethernet") == 0)
+      {
+        broker->transport[broker->transport_count++] = CLIENT_TYPE_ETHERNET_ID;
+      }
+      else if(strcasecmp(transport_ctr, "WiFi") == 0)
+      {
+        broker->transport[broker->transport_count++] = CLIENT_TYPE_WIFI_ID;
+      }
+      else if(strcasecmp(transport_ctr, "Cellular") == 0)
+      {
+        broker->transport[broker->transport_count++] = CLIENT_TYPE_CELLULAR_ID;
+      }
+      else
+      {
+        ALOG_WRN(PSTR(D_LOG_MQTT "Broker[%u] unknown transport %s"), broker_i, transport_ctr);
+      }
+    }
+  }
+
+  if(jtok = obj["PrefTransport"])
+  {
+    broker->pref_transport_count = 0;
+
+    for(auto val : jtok.getArray())
+    {
+      if(broker->pref_transport_count >= MQTT_TRANSPORT_LIST_MAX){ break; }
+
+      const char* transport_ctr = val.getStr();
+
+      if(!transport_ctr){ continue; }
+
+      if(strcasecmp(transport_ctr, "Ethernet") == 0)
+      {
+        broker->pref_transport[broker->pref_transport_count++] = CLIENT_TYPE_ETHERNET_ID;
+      }
+      else if(strcasecmp(transport_ctr, "WiFi") == 0)
+      {
+        broker->pref_transport[broker->pref_transport_count++] = CLIENT_TYPE_WIFI_ID;
+      }
+      else if(strcasecmp(transport_ctr, "Cellular") == 0)
+      {
+        broker->pref_transport[broker->pref_transport_count++] = CLIENT_TYPE_CELLULAR_ID;
+      }
+      else
+      {
+        ALOG_WRN(PSTR(D_LOG_MQTT "Broker[%u] unknown pref transport %s"), broker_i, transport_ctr);
+      }
+    }
+  }
+
+  if(jtok = obj["OutgoingLevel"])
+  {
+    broker->outgoing_level = jtok.getInt();
+  }
+
+  if(jtok = obj["OutgoingLimiterMs"])
+  {
+    broker->outgoing_limiter_ms = jtok.getInt();
+  }
+
+  if(broker->pref_transport_count == 0)
+  {
+    broker->pref_transport_count = broker->transport_count;
+
+    for(uint8_t i=0; i<broker->transport_count; i++)
+    {
+      broker->pref_transport[i] = broker->transport[i];
+    }
+  }
+
+  if(broker->backoff_periodic_secs < broker->backoff_fast_secs)
+  {
+    broker->backoff_periodic_secs = broker->backoff_fast_secs;
+  }
+
+  if(broker->backoff_max_secs < broker->backoff_periodic_secs)
+  {
+    broker->backoff_max_secs = broker->backoff_periodic_secs;
+  }
+
+  broker->retry = broker->backoff_fast_secs;
+  broker->retry_counter_start_value = broker->backoff_fast_secs;
+
+  broker->allowed = broker->en && broker->host_address[0];
+
+  ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] id=%s en=%u host=%s port=%u allowed=%u"),
+    broker_i,
+    broker->id,
+    broker->en,
+    broker->host_address,
+    broker->port,
+    broker->allowed
+  );
+
+  broker->Debug_PrintConnectionInfo();
+}
 
 void mMQTTManager::Init(void)
 {
@@ -590,20 +1217,39 @@ void mMQTTManager::Init(void)
 }
 
 
+bool mMQTTManager::AnyBrokerConnected(void)
+{
+  if(!brokers.size())
+  {
+    return false;
+  }
+
+  for(uint8_t broker_i = 0; broker_i < brokers.size(); broker_i++)
+  {
+    MQTTConnection* broker = brokers[broker_i];
+
+    if(!broker) { continue; }
+    if(!broker->en) { continue; }
+    if(!broker->allowed) { continue; }
+    if(!broker->uptime_seconds) { continue; }
+    if(broker->downtime_counter != 0) { continue; }
+    if(!broker->MqttIsConnected()) { continue; }
+
+    return true;
+  }
+
+  return false;
+}
+
 
 void mMQTTManager::CallMQTTSenders()
 {
-
-  if(brokers.size())  
-      // if(brokers_active)   
+  if(AnyBrokerConnected())
   {
-    if(brokers[0]->uptime_seconds && brokers[0]->downtime_counter==0)
-    {
-      tkr->Tasker_Interface(TASK_MQTT_SENDER);
-    }
+    tkr->Tasker_Interface(TASK_MQTT_SENDER);
   }
-
 }
+
 
 /**
  * @brief Transmit on any connected brokers with connection checking
@@ -655,43 +1301,17 @@ boolean mMQTTManager::Publish(const char* topic, const char* payload, boolean re
 boolean mMQTTManager::Subscribe(const char* topic, uint8_t qos)
 {
   
-  if(brokers.size())
-      // if(brokers_active)   
+  if(brokers.size()) 
   {
-    // if(brokers[0]->uptime_seconds && brokers[0]->downtime_counter==0)
-    // {
-      for (auto& broker : brokers)
+    for (auto& broker : brokers)
+    {
+      if(broker->pubsub->connected())
       {
-        if(broker->pubsub->connected())
-        {
-          return broker->pubsub->subscribe(topic);
-        }
+        return broker->pubsub->subscribe(topic);
       }
     }
-  // }
+  }
 
 }
-
-
-// /**
-//  * @brief This is not thread safe
-//  * 
-//  * @return const char* 
-//  */
-// const char* mMQTTManager::GetState_PCtr(int8_t state)
-// {
-//   switch(state){
-//     case MQTT_CONNECTION_TIMEOUT:       return PSTR("Connection Timeout");
-//     case MQTT_CONNECTION_LOST:          return PSTR("Connecttion Lost");
-//     case MQTT_CONNECT_FAILED:           return PSTR("Connect Failed");
-//     case MQTT_DISCONNECTED:             return PSTR("Disconnected");
-//     case MQTT_CONNECTED:                return PSTR("Connected");
-//     case MQTT_CONNECT_BAD_PROTOCOL:     return PSTR("Bad Protocol");
-//     case MQTT_CONNECT_BAD_CLIENT_ID:    return PSTR("Bad Client ID");
-//     case MQTT_CONNECT_UNAVAILABLE:      return PSTR("Unavailable");
-//     case MQTT_CONNECT_BAD_CREDENTIALS:  return PSTR("Bad Credentials");
-//     case MQTT_CONNECT_UNAUTHORIZED:     return PSTR("Unauthorized");
-//   }
-// }
 
 #endif // USE_MODULE_NETWORK_MQTT

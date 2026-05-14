@@ -11,8 +11,9 @@
 
 //--------------------------------[Enable Device]-------------------------------------
 
-// #define DEVICE_TESTBED_01__SENSORS_NEXTION
+#define DEVICE_TESTBED_01__SENSORS_NEXTION
 // #define DEVICE_TESTBED_02__MOTION_AUDIO
+// #define DEVICE_TESTBED_04__HVAC_X1
 // #define DEVICE_TESTBED_05__SWITCHES_BUTTONS
 // #define DEVICE_TESTBED_06__GPS_DECODER_WITH_SERIAL_SNIFFERS
 
@@ -54,7 +55,6 @@
  * 
  * 
  **/
-// #ifdef DEVICE_DESKSENSOR
 #ifdef DEVICE_TESTBED_01__SENSORS_NEXTION
   #ifndef DEVICENAME_CTR
   #define DEVICENAME_CTR          "testbed_01__sensors_nextion"
@@ -67,14 +67,6 @@
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testbeds"
   
-
-
-  // #define DEVICENAME_CTR          "desksensor"
-  // #define DEVICENAME_FRIENDLY_CTR "Desk Sensor"
-  // #define DEVICENAME_ROOMHINT_CTR "Temporary_Bedroom"
-  // #define MQTT_HOST   "192.168.1.70"
-  // #define MQTT_PORT     1883
-
   /***********************************
    * SECTION: System Debug Options
   ************************************/    
@@ -106,13 +98,12 @@
   ************************************/  
   
   #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__DHT
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__DHT
   #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-  // // #define ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
-  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
-  // #define ENABLE_TEMPLATE_SECTION__DISPLAYS__NEXTION
-  #define ENABLE_TEMPLATE_SECTION__LIGHTS // maybe dont want them here, too much memory. or, need lightweight version (few effects, no webui? ie basic notification tester!>)
-  // #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+  #define ENABLE_TEMPLATE_SECTION__DISPLAYS__NEXTION
+  #define ENABLE_TEMPLATE_SECTION__LIGHTS 
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR
 
   /***********************************
    * SECTION: Storage Configs
@@ -136,7 +127,6 @@
 
   // I should add new "purely for debugging" "serialise" data struct. So this will be a new way to take important data from the module data struct that will all be saved in binary, but instead 
   // include functions that "pretty print" them for easier comparing. Will use lots of memory, so debug only.
-
 
   /***********************************
    * SECTION: Network Configs
@@ -176,6 +166,8 @@
     #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
     #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
   #endif
+
+  #define USE_MODULE_DRIVERS_LEDS
   
   /***********************************
    * SECTION: Display Configs
@@ -236,7 +228,6 @@
       }
     }
     )=====";
-
 
   #endif // ENABLE_TEMPLATE_SECTION__DISPLAYS__NEXTION
 
@@ -341,7 +332,7 @@
       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
       #endif 
       #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
+      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_IR_RECEIVER
       "\"15\":\"" D_GPIO_FUNCTION_IR_RECV_CTR "\","
@@ -362,8 +353,8 @@
       // 25 - DAC1 = LM386 Amplifier Module (Debug Header 3)
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
       "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      #endif
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","      
+      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","  
+      #endif    
       // 14 (Debug Header 4)
       // 12 (Debug Header 5)
       // 13 (Debug Header 6) + RX
@@ -904,6 +895,95 @@
 
 
 
+
+
+/**
+ * @brief 
+ * 
+ * HVAC X1
+ * 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *                               *I ~PWM 'NC    
+ *                          _____________________
+ *                    3V3  |3V3     |USB|     VIN|
+ *                    GND  |GND               GND| 
+ *                 =BUZZER |15 (fL)            13| RADAR_OUT_MOT4
+ *              =SONIC TX1 |2  (fL, BIL)  (fH) 12| 
+ *              =SONIC RX1 |4             (fH) 14|
+ *              =RADAR TX2 |RX2/17             27| 
+ *              =RADAR RX2 |TX2/16             26| TOF1EN
+ *         PIR_SMALL_MOT2  |5  (fL)            25| TOF1INT
+ *                    aud  |18                 33| TOF0EN
+ *              LM386 SPKR |19                 32| TOF0INT
+ *        OLED,TOF I2C_SDA |21  SDA     (fL) * 35| RADAR_3p18GHZ_MOT3
+ *                         |RX0         (fL) * 34| PIR_LARGE_MOT1
+ *                         |TX0              ' VN| 
+ *        OLED,TOF I2C_SCL |22  SCL          ' VP| 
+ *                     NEO |23               ' EN| 
+ *                          _____________________
+ * 
+ * 
+ */
+#ifdef DEVICE_TESTBED_04__HVAC_X1
+ #ifndef DEVICENAME_CTR
+ #define DEVICENAME_CTR          "consumerunit"
+ #endif
+ #ifndef DEVICENAME_FRIENDLY_CTR
+ #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+ #endif
+ #ifndef DEVICENAME_DESCRIPTION_CTR
+ #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+ #endif
+ #define DEVICENAME_ROOMHINT_CTR "testgroup"
+ #define MQTT_HOST   "192.168.3.70"
+               
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY  
+  #define USE_MODULE_DRIVERS_LEDS
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SWITCHES
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"2\":\""  D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_SWITCHES
+      "\"0\":\""  D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
+      #endif
+      "\"4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_INTERFACE_CTR"\":["
+        "\"" "System" "\""
+      "],"
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+        "\"" "Relay" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+        "\"" "Button" "\""
+      "]"
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
+  "}";
+  
+#endif
 
 
 /**

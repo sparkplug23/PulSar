@@ -59,17 +59,18 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
 }
 
 
-
 uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured(void) const
-{ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+{
+  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   for (uint8_t i = 0; i < WIFI_MAXIMUM_CONNECTIONS; i++)
   {
-    if (tkr_set->Settings.network.wifi[i].ssid[0] != '\0') return i;
+    if (config.station.profiles[i].ssid[0] != '\0') return i;
   }
   return 0;
 }
 bool mWiFi::WiFi_Sta_ShouldScanNow_OnBootOrOutage(void)
-{ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+{
+  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   // Boot scan exactly once
   if (!s_wifi2_scanned_on_boot)
   {
@@ -122,7 +123,7 @@ uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_WithScanPreference(bool force_scan)
 
     for (uint8_t p = 0; p < WIFI_MAXIMUM_CONNECTIONS; p++)
     {
-      const char* cfg = tkr_set->Settings.network.wifi[p].ssid;
+      const char* cfg = config.station.profiles[p].ssid;
       if (cfg[0] == '\0') continue;
 
       if (ssid.equals(cfg))
@@ -190,7 +191,8 @@ uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_WithScanPreference(bool force_scan)
 }
 
 void mWiFi::WiFi_Sta_Connect_Start(void)
-{ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+{
+  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   // Policy: SoftAP only if ALL SSIDs are empty
   if (!WiFi2_HasAnyStaProfileConfigured())
   {
@@ -204,19 +206,17 @@ void mWiFi::WiFi_Sta_Connect_Start(void)
   WiFi_Sta_ProfileIndex_Connect(profile_i);
 }
 
-
-
-
 void mWiFi::WiFi_Sta_ProfileIndex_Connect(uint8_t profile_i)
-{ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+{
+  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   // Bounds + configured check
   if (profile_i >= WIFI_MAXIMUM_CONNECTIONS) { return; }
 
-  const auto& p = tkr_set->Settings.network.wifi[profile_i];
+  const auto& p = config.station.profiles[profile_i];
   if (p.ssid[0] == '\0') { return; }
 
   // Preserve existing semantics: record which slot we are attempting
-  tkr_set->Settings.network.sta_active = profile_i;
+  config.station.active_profile = profile_i;
 
   // Optional: keep your existing behaviour stable
   WiFi.persistent(false);
@@ -235,7 +235,7 @@ void mWiFi::WiFi_Sta_ProfileIndex_Connect(uint8_t profile_i)
   #endif
 
   // Apply static/DHCP config from your new settings struct
-  const auto& ipcfg = tkr_set->Settings.network.wifi_ipv4;
+  const auto& ipcfg = config.station.ipv4;
   if (ipcfg.is_static)
   {
     IPAddress ip   = IPv4ArrayToIP(ipcfg.ip);
@@ -268,44 +268,52 @@ void mWiFi::WiFi_Sta_ProfileIndex_Connect(uint8_t profile_i)
     WiFi.setTxPower(WIFI_POWER_8_5dBm);
   #endif
 
-  #ifdef ENABLE_DEVFEATURE_NETWORK__WIFI_DUPLICATED_WRITEBACK
-    WiFi2_LegacyWriteback_FromNetworkSettings();
-  #endif
-
   // Update connection bookkeeping (preserve your existing fields)
   connection.fReconnect = true;
   connection.last_event = millis();
+
+  SET_SYSTEM_LED__NO_NETWORK(true);
 }
 
 
 static inline bool _ssid_is_configured(const char* s) { return (s && s[0] != '\0'); }
 
 IPAddress mWiFi::IPv4ArrayToIP(const uint8_t a[4])
-{ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+{
+  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   return IPAddress(a[0], a[1], a[2], a[3]);
 }
 
 bool mWiFi::WiFi2_HasAnyStaProfileConfigured(void) const
-{ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
-  for (uint8_t i = 0; i < WIFI_MAXIMUM_CONNECTIONS; i++)
+{
+  if (!config.station.enabled)
   {
-    const auto& p = tkr_set->Settings.network.wifi[i];
-    if (_ssid_is_configured(p.ssid)) { return true; }
+    return false;
   }
+
+  for (uint8_t profile_i = 0; profile_i < WIFI_MAXIMUM_CONNECTIONS; profile_i++)
+  {
+    if (config.station.profiles[profile_i].ssid[0] != '\0')
+    {
+      return true;
+    }
+  }
+
   return false;
 }
 
 uint8_t mWiFi::WiFi2_GetFirstConfiguredProfileIndex(void) const
-{ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
-  for (uint8_t i = 0; i < WIFI_MAXIMUM_CONNECTIONS; i++)
+{
+  for (uint8_t profile_i = 0; profile_i < WIFI_MAXIMUM_CONNECTIONS; profile_i++)
   {
-    const auto& p = tkr_set->Settings.network.wifi[i];
-    if (_ssid_is_configured(p.ssid)) { return i; }
+    if (config.station.profiles[profile_i].ssid[0] != '\0')
+    {
+      return profile_i;
+    }
   }
+
   return 0;
 }
-
-
 
 
 void mWiFi::WiFi2_Sta_Connected_Enter(void)
@@ -327,32 +335,32 @@ void mWiFi::WiFi2_Sta_Connected_Enter(void)
 }
 
 void mWiFi::WiFi2_Sta_Disconnected_Enter(void)
-{ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+{
+  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   connection.fConnected = false;
-
   
   tkr_set->runtime.global_state.network_down = true;
 
   tkr_set->Settings.network.flag.network_wifi = 0;
   tkr_set->runtime.global_state.wifi_down = true;
-
   
   // Trigger existing task event flow
   tkr->Tasker_Interface(TASK_NETWORK_LOST__WIFI);
 }
 
 void mWiFi::WiFi2_Sta_EnsureConnecting(void)
-{ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+{
+  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   if (WL_CONNECTED == WiFi.status()) { return; }
   if (!WiFi2_HasAnyStaProfileConfigured()) { return; }
 
   // Try in configured order starting from current active
-  uint8_t start_i = tkr_set->Settings.network.sta_active;
+  uint8_t start_i = config.station.active_profile;
 
   for (uint8_t off = 0; off < WIFI_MAXIMUM_CONNECTIONS; off++)
   {
     uint8_t i = (start_i + off) % WIFI_MAXIMUM_CONNECTIONS;
-    const auto& p = tkr_set->Settings.network.wifi[i];
+    const auto& p = config.station.profiles[i];
     if (p.ssid[0] == '\0') { continue; }
 
     WiFi_Sta_ProfileIndex_Connect(i);
@@ -363,7 +371,7 @@ void mWiFi::WiFi2_Sta_EnsureConnecting(void)
 
 void mWiFi::WiFi_Sta_State_Set(uint8_t state)
 {
-  ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"), __FILE__, __LINE__);
+  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"), __FILE__, __LINE__);
 
   // Normalise: treat any non-zero as "connected"
   state = (state != 0) ? 1 : 0;
@@ -374,7 +382,6 @@ void mWiFi::WiFi_Sta_State_Set(uint8_t state)
   // Edge-trigger only
   if (prev_connected != new_connected)
   {
-    DEBUG_LINE_HERE;
 
     // NOTE: this function historically triggers task events directly
     if (new_connected)
@@ -399,7 +406,6 @@ void mWiFi::WiFi_Sta_State_Set(uint8_t state)
       connection.last_event = tkr_time ? tkr_time->UpTime() : 0;
     }
 
-    DEBUG_LINE_HERE;
   }
 
   // Persist state
@@ -421,29 +427,7 @@ void mWiFi::WiFi_Sta_State_Set(uint8_t state)
   {
     tkr_set->runtime.global_state.network_down = 0;
   }
-
-  // -------------------------------------------------------------------------
-  // Optional: if you want to keep the legacy "accumulate downtime" behaviour,
-  // do it ONLY when we have an edge and ONLY when time is valid.
-  // (Most of your newer code tracks downtime elsewhere; this keeps it safe.)
-  // -------------------------------------------------------------------------
-  // if ((!new_connected) && prev_connected)
-  // {
-  //   // Just went down: start timer already set above
-  // }
-  // else if (new_connected && (!prev_connected))
-  // {
-  //   // Just came up: add outage duration if we have a valid timer
-  //   if (tkr_time)
-  //   {
-  //     // last_event was set on disconnect; but in case older states existed, guard it
-  //     // (If last_event is 0, this adds nothing meaningful.)
-  //     // NOTE: If you want pure edge accounting, keep this;
-  //     // if you want continuous accounting, do it in your periodic maintain code instead.
-  //     // Here: edge accounting only.
-  //     // connection.downtime += (tkr_time->UpTime() - connection.last_event);
-  //   }
-  // }
+  
 }
 
 

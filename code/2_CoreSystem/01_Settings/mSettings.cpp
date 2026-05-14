@@ -1,6 +1,59 @@
 
 #include "2_CoreSystem/01_Settings/mSettings.h"
 
+/*********************************************************************************************\
+ * PulSar Settings System Overview
+ *
+ * Storage policy
+ * --------------
+ * PulSar stores the complete SETTINGS struct as a compact binary file on the filesystem/TFS.
+ * This is now the only persistent backend for the full user configuration on both ESP32 and
+ * ESP8266.
+ *
+ * Main files:
+ *   /settings.txt       active binary SETTINGS struct
+ *   /settings_prev.txt  previous binary SETTINGS struct saved before replacement/reset
+ *   /settings_lkg.txt   last-known-good binary SETTINGS struct saved after stable uptime
+ *
+ * Explicitly removed from the full SETTINGS path:
+ *   - ESP8266 raw flash-sector rotation
+ *   - ESP32 NVS/NVM SETTINGS blob storage
+ *
+ * RTC memory remains separate and is still used for fastboot/quick boot state. RTC state is
+ * short-lived boot/recovery state, not the authoritative user configuration.
+ *
+ * Boot model
+ * ----------
+ * The intended boot sequence is:
+ *   1. SettingsInit()
+ *   2. SettingsDefault()       - build compiled defaults in RAM only, no save
+ *   3. SettingsLoad()          - replace RAM defaults with /settings.txt if valid
+ *   4. SettingsDelta()         - future migration hook for compatible saved settings
+ *   5. Fastboot_RecoveryCheck()- plain function in Main_PulSar.cpp, after settings load
+ *
+ * SETTINGS_HOLDER policy
+ * ----------------------
+ * Keep SETTINGS_HOLDER unchanged for normal firmware updates. User config survives.
+ * Change SETTINGS_HOLDER when the binary layout/default meaning is intentionally incompatible.
+ * On holder mismatch, /settings.txt is copied to /settings_prev.txt, defaults are rebuilt, and
+ * the new defaults are saved as the active /settings.txt.
+ *
+ * Deployment model
+ * ----------------
+ * - Compile-time defaults provision a safe first boot.
+ * - A device can then be configured through WebUI/MQTT/serial JSON/templates.
+ * - The resulting /settings.txt can be downloaded and copied to another device with the same
+ *   firmware/settings holder.
+ * - JSON restore/import remains a higher-level command/config path, not the core storage format.
+ *
+ * Fastboot model
+ * --------------
+ * Fastboot stays outside this class as a plain function. It runs after SettingsLoad(), then
+ * progressively disables risky features, rules first, then sensors, drivers, module config,
+ * templates, and finally settings/factory recovery if needed.
+\*********************************************************************************************/
+
+
 struct DATA_BUFFER data_buffer;
 
 int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
@@ -17,50 +70,57 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
     }break;
 
     case TASK_EVERY_MINUTE:
-      
+    {
       #ifdef USE_MODULE_CORE_FILESYSTEM
       #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
-        // Copy Settings as Last Known Good if no changes have been saved since 30 minutes
-        if (!runtime.settings_lkg && (tkr_time->UtcTime() > START_VALID_UTC_TIME) && (Settings.cfg_timestamp < tkr_time->UtcTime() - (3 * 60))) 
-        {
-          tkr_mfile->TfsSaveFile(TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD, (const uint8_t*)&Settings, sizeof(SETTINGS));
-          runtime.settings_lkg = true;
-        }
-        else
-        {
-          ALOG_INF(PSTR("UtcTime()%d > START_VALID_UTC_TIME%d) && (Settings.cfg_timestamp%d < UtcTime() - (30 * 60)) %d"), 
-            tkr_time->UtcTime(),
-            START_VALID_UTC_TIME,
-            Settings.cfg_timestamp,
-            tkr_time->UtcTime() - (3 * 60)
-         );
-        }
+      #ifndef ENABLE_DEVFEATURE_SETTINGS__BLOCK_USER_CONFIG_SAVE
+
+      // Save last-known-good once after a stable period. Do not save this early,
+      // otherwise a boot-looping configuration could be blessed as good.
+      if (
+        !runtime.settings_lkg &&
+        (millis() > 3600000UL) &&
+        (tkr_time->UtcTime() > START_VALID_UTC_TIME)
+      )
+      {
+        tkr_mfile->TfsSaveFile(
+          TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD,
+          (const uint8_t*)&Settings,
+          sizeof(SETTINGS)
+        );
+
+        runtime.settings_lkg = true;
+
+        ALOG_INF(PSTR(D_LOG_SETTINGS "Saved last-known-good settings"));
+      }
+
+      #endif // ENABLE_DEVFEATURE_SETTINGS__BLOCK_USER_CONFIG_SAVE
       #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
       #endif // USE_MODULE_CORE_FILESYSTEM
-      
+    }
     break;
     case TASK_EVERY_HOUR:
-
+    {
       #ifdef ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
         #ifdef ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-        tkr_set->SettingsSaveAll();
+          tkr_set->SettingsSaveAll();
         #endif
-      #else 
-      #ifdef ENABLE_LOG_LEVEL_INFO
-      DEBUG_PRINTLN("SettingsSave dis");
-      #endif // ifdef ENABLE_LOG_LEVEL_INFO
-      #endif // ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-
-    break;   
+      #endif
+    }
+    break;
     case TASK_ON_BOOT_SUCCESSFUL:
       Settings.bootcount++;              // Moved to here to stop flash writes during start-up
 
       ALOG_INF( PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d after %d seconds"), Settings.bootcount, 120);
 
       RtcSettings.boot_was_completed_ota_event = false; // Reset the flag for next boot
+
+      // Save before fastboot reset. If the save path causes a crash/WDT, the
+      // fastboot counter must remain active so recovery can continue.
+      SettingsSaveAll();
   
       #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-      RtcFastboot_Reset(); // ie reset the value so bootloops wont be detected after this point (eg 10 seconds)
+      RtcFastboot_Reset(); // Reset once boot is considered successful
       #endif
 
       #ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3

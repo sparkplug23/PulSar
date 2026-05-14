@@ -414,12 +414,6 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   addTasker(new mWebServer());
   #endif
-  #ifdef USE_MODULE_DRIVERS_MODEM_7000G
-  addTasker(new mSIM7000G());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_MODEM_800L
-  addTasker(new mSIM800L());
-  #endif
   /**
    * @brief Drivers
    **/
@@ -458,6 +452,12 @@ void mTaskerManager::Instance_Init()
   #endif
   #ifdef USE_MODULE_DRIVERS__CAMERA
   addTasker(new mCamera());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_MODEM_7000G
+  addTasker(new mSIM7000G());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_MODEM_800L
+  addTasker(new mSIM800L());
   #endif
   #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   addTasker(new mMAVLink_Decoder());
@@ -550,12 +550,12 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   addTasker(new mGPS_Serial());
   #endif
-  #ifdef USE_MODULE_SENSORS_GPS_MODEM
-  addTasker(new mGPS_Modem());
-  #endif
-  #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
-  addTasker(new mBattery_Modem());
-  #endif
+  // #ifdef USE_MODULE_SENSORS_GPS_MODEM
+  // addTasker(new mGPS_Modem());
+  // #endif
+  // #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
+  // addTasker(new mBattery_Modem());
+  // #endif
   DEBUG_LINE_HERE
   /**
    * @brief Lights
@@ -774,7 +774,7 @@ const char* mTaskerManager::GetTaskName_Full(uint16_t task)
     // case TASK_SAVE_BEFORE_RESTART:                    return PM_TASK_SAVE_BEFORE_RESTART_CTR;
     case TASK_SETTINGS_DEFAULT:                       return PM_TASK_SETTINGS_DEFAULT_CTR;
     case TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:    return PM_TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR;
-    case TASK_SETTINGS_LOAD_VALUES_INTO_MODULE:       return PM_TASK_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR;
+    case TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM:       return PM_TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM_CTR;
     case TASK_SETTINGS_SAVE_VALUES_FROM_MODULE:       return PM_TASK_SETTINGS_SAVE_VALUES_FROM_MODULE_CTR;
     case YTASK_INIT:                   return PM_YTASK_INIT_CTR;
     case YTASK_LOOP:                   return PM_YTASK_LOOP_CTR;

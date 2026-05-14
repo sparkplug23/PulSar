@@ -178,32 +178,12 @@ const char* mWiFi::GetWiFiStatusCtr(void)
   }
 }
 
-
-const char* mWiFi::GetWiFiConfigTypeCtr(void){
-
-  //NULL 
-
-  switch(connection.config_type){
-    case WIFI_RESTART      : return PSTR("WIFI_RESTART");
-    case WIFI_SMARTCONFIG    : return PSTR("WIFI_SMARTCONFIG");
-    case WIFI_MANAGER   : return PSTR("WIFI_MANAGER");
-    case WIFI_WPSCONFIG        : return PSTR("WIFI_WPSCONFIG");
-    case WIFI_RETRY   : return PSTR("WIFI_RETRY");
-    case WIFI_WAIT  : return PSTR("WIFI_WAIT");
-    case WIFI_SERIAL     : return PSTR("WIFI_SERIAL");
-    case WIFI_MANAGER_RESET_ONLY  : return PSTR("WIFI_MANAGER_RESET_ONLY");
-    case MAX_WIFI_OPTION     : return PSTR("MAX_WIFI_OPTION");
-    default: PSTR("Unknown");
-  }
-}
-
-
 void mWiFi::parse_JSONCommand(JsonParserObject obj){};
    
 
 
 
-void mWiFi::init(void){
+void mWiFi::Init(void){
   
 //  AddLog(LOG_LEVEL_DEBUG_LOWLEVEL, PSTR(D_LOG_RELAYS D_DEBUG_FUNCTION "\"%s\""),"mRelays::init");
 

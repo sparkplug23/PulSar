@@ -329,7 +329,7 @@ void mEnergyInterface::MQTTHandler_Init(){
 //     /************
 //      * SETTINGS SECTION * 
 //     *******************/
-//     // case TASK_SETTINGS_LOAD_VALUES_INTO_MODULE: 
+//     // case TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM: 
 //     //   Settings_Load();
 //     // break;
 //     // case TASK_SETTINGS_SAVE_VALUES_FROM_MODULE: 

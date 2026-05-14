@@ -230,6 +230,7 @@ Bathroom
 // #define DEVICE_DEFAULT_SONOFF_BASIC__06
 // #define DEVICE_DEFAULT_SONOFF_BASIC__BLACK_SHORT // Desk floor mat
 // #define DEVICE_DEFAULT_SONOFF_R4_BASIC__24
+// #define DEVICE_SOCKET_NUMBERED_SONOFF_BASIC_R4
 
 
 /**************************************************************************************************************************************************
@@ -558,16 +559,19 @@ Bathroom
 
 
 #ifdef DEVICE_SOCKET_NUMBERED_SONOFF_BASIC_R4
+  #ifndef DEVICENAME_CTR
   #define DEVICENAME_CTR          "socket_number_" STR2(DEVICENAME_SOCKET_NUMBER_CTR)
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
   #define DEVICENAME_FRIENDLY_CTR "Socket Number " STR2(DEVICENAME_SOCKET_NUMBER_CTR)
-  
+  #endif
+
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   // #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_RELAY_KEYS_DEFINES_TO_SETTINGS_HEADER
-  
 
   // #define ENABLE_DEBUGFEATURE__RELOAD_TEMPLATE__RULES_EVER_MINUTE
 
@@ -586,7 +590,7 @@ Bathroom
   "{"
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR  "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR  "\"," // ESP32 easier to do without custom base
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 

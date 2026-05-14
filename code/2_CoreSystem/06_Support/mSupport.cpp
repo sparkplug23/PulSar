@@ -990,8 +990,8 @@ void mSupport::ArduinoOTAInit(void)
     if (tkr_set->runtime.seriallog_level >= LOG_LEVEL_DEBUG) { // for when hardware serial is in use for modules
       uint8_t progress_now = (progress/(total/100));
       if(arduino_ota_progress_dot_count != progress_now){
-        Serial.println(progress_now);
         arduino_ota_progress_dot_count = progress_now;
+        Serial.printf("Progress: %u%%\r", progress_now); // using return, not newline, to overwrite the line instead of spamming new lines
       }
     }
 

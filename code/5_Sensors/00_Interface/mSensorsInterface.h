@@ -7,49 +7,17 @@
 
 #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
 
-#include "stdint.h"
-
-typedef struct event_motion_s{
-  uint8_t  state     = false;
-  uint8_t  isactive  = false;
-  uint8_t  ischanged = false;
-  bool isActiveLow = true;
-  uint32_t tDetectTime;
-  uint32_t tEndedTime;
-  uint32_t detected_time;
-  struct devove_name_t{
-    uint16_t unique_module_id = 0;  // unique, not "em_##_id"
-    uint8_t device_id = 0;
-  }device_name;
-}event_motion_t;
-
-typedef struct sensorset_location_s
-{   
-  bool isvalid = false;
-  float latitude = 54.5;// Latitude
-  float longitude = -6.0;// Longitude
-  float speed = 0;// Speed Over Ground. Unit is knots.
-  float altitude = 0;// MSL Altitude. Unit is meters
-  int vsat = 0;// GNSS Satellites in View
-  int usat = 0;// GNSS Satellites Used
-  float accuracy = 0;// Horizontal Dilution Of Precision
-  int year = 0; // Four digit year
-  int month = 0;// Two digit month
-  int day = 0;// Two digit day
-  int hour = 0;// Two digit hour
-  int minute = 0;// Two digit minute
-  int second = 0;// 6 digit second with subseconds
-}sensorset_location_t;
+#include "custom_types.h"
 
 #include "1_TaskerManager/mTaskerManager.h"
+
+#ifdef USE_MODULE_SENSORS_INTERFACE
 
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR)     "unified/heatmap";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED_FILTERED__CTR)        "unified/filtered";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR)                 "unified";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_SYSTEM_LOCATION__CTR)         "system_location";
   
-
-#ifdef USE_MODULE_SENSORS_INTERFACE
-
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_MOTION__CTR) "event_motion";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_USER_INPUT__CTR) "event_userinput";
 
@@ -127,6 +95,8 @@ class mSensorsInterface :
     char TempUnit(void);
     float ConvertPressure(float p);
     String PressureUnit(void);
+
+    sensorset_location_t system_location;
 
 
     void WebAppend__Sensor_Table__As_TypesRows();
@@ -209,8 +179,8 @@ class mSensorsInterface :
       // Optional filter (capture only this device name)
       char* capture_name = nullptr;     // malloc'ed (or set via template)
       uint8_t capture_name_len = 0;
-  bool use_name_list = false;
-  std::vector<String> capture_names; // exact-include list
+      bool use_name_list = false;
+      std::vector<String> capture_names; // exact-include list
 
       // Optional “truth” channel injection later (leave placeholder)
       // char* truth_key = nullptr; float truth_value = NAN;
@@ -236,6 +206,39 @@ class mSensorsInterface :
 
     void parse_JSONCommand(JsonParserObject obj);
 
+
+    /************************************************************************************************
+     * SECTION: Unified Reporting : System level not reported via submodules
+     ************************************************************************************************/
+    
+    uint8_t GetSensorCount(void) override
+    {
+      return 1;
+    }    
+    void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
+    {
+      if(index >= GetSensorCount()) {value->sensor_type.push_back(0); Serial.println("returning invalid"); return ;}
+      if(system_location.isvalid)
+      {
+        value->sensor_type.push_back(SENSOR_TYPE_LATITUDE_ID);
+        value->data_f.push_back(system_location.latitude);
+        value->sensor_type.push_back(SENSOR_TYPE_LONGITUDE_ID);
+        value->data_f.push_back(system_location.longitude);
+        value->sensor_type.push_back(SENSOR_TYPE_SPEED_ID);
+        value->data_f.push_back(system_location.speed);
+        value->sensor_type.push_back(SENSOR_TYPE_ALTITUDE_ID);
+        value->data_f.push_back(system_location.altitude);
+        value->sensor_type.push_back(SENSOR_TYPE_LOCATION_ACCURACY_ID);
+        value->data_f.push_back(system_location.accuracy_position);
+        value->sensor_type.push_back(SENSOR_TYPE_LOCATION_SATELLITES_USED_ID);
+        value->data_f.push_back(system_location.satellites_used);
+        value->sensor_id = index;
+        return;
+      }
+      // Return nothing if we reach here
+      value->sensor_type.push_back(0); return ;//Serial.println("returning invalid2"); 
+    };
+   
     
     /************************************************************************************************
      * SECTION: Construct Messages
@@ -262,6 +265,7 @@ class mSensorsInterface :
     #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
     uint8_t ConstructJSON_Unified_Filtered(uint8_t json_level = 0, bool json_appending = true);
     #endif
+    uint8_t ConstructJSON_System_Location(uint8_t json_level = 0, bool json_appending = true);
     
     /************************************************************************************************
      * SECITON: MQTT
@@ -269,10 +273,6 @@ class mSensorsInterface :
       
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();    
-    void MQTTHandler_Sender();
-
     std::vector<struct handler<mSensorsInterface>*> mqtthandler_list;
     struct handler<mSensorsInterface> mqtthandler_settings;
     struct handler<mSensorsInterface> mqtthandler_sensor_ifchanged; // polling non-user interactive sensing
@@ -283,6 +283,7 @@ class mSensorsInterface :
     #endif
     struct handler<mSensorsInterface> mqtthandler_motion_event_ifchanged;
     struct handler<mSensorsInterface> mqtthandler_event_input; // events triggered by user input
+    struct handler<mSensorsInterface> mqtthandler_system_location; 
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

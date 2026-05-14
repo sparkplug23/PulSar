@@ -109,6 +109,7 @@ void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
 
   for (uint32_t i = 0; i < rt.devices_present; i++) {
     uint32_t port = (i << 1) + ((latching_power >> i) &1);
+          ALOG_INF(PSTR("DigitalWrite Pre %d"), 3);
     tkr_pins->DigitalWrite(GPIO_REL1 + port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
   }
 }
@@ -212,7 +213,8 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
         }else{
           gpio_pin = GPIO_REL1;
         }
-        ALOG_INF(PSTR("Am I here?? %d"), i);
+        
+        ALOG_INF(PSTR("DigitalWrite Pre %d"), 2);
         tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
         // tkr_pins->DigitalWrite(GPIO_REL1, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
       }
@@ -242,6 +244,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
             gpio_pin = GPIO_REL1;
           }
           power_t state = rpower &1;
+          ALOG_INF(PSTR("DigitalWrite Pre %d"), 1);
           tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
           // tkr_pins->DigitalWrite(GPIO_REL1, i, bitRead(rt.bitpacked.rel_inverted, i) ? 1 : 0);
           ALOG_INF(PSTR("Relay DigitalWrite %d, %d"), gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);

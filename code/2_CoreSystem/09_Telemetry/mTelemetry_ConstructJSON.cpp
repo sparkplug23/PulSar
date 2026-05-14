@@ -231,15 +231,15 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
 {
    
   IPAddress localip   = WiFi.localIP();
-  IPAddress staticip  = IPAddress(tkr_set->Settings.network.ip_address[0]);
-  IPAddress gatewayip = IPAddress(tkr_set->Settings.network.ip_address[1]);
-  IPAddress subnetip  = IPAddress(tkr_set->Settings.network.ip_address[2]);
-  IPAddress dnsip     = IPAddress(tkr_set->Settings.network.ip_address[3]);
+  IPAddress staticip  = IPAddress(tkr_wifi->config.station.ipv4.ip[0]);
+  IPAddress gatewayip = IPAddress(tkr_wifi->config.station.ipv4.gw[0]);
+  IPAddress subnetip  = IPAddress(tkr_wifi->config.station.ipv4.sn[0]);
+  IPAddress dnsip     = IPAddress(tkr_wifi->config.station.ipv4.dns1[0]);
 
   JBI->Start();
     JBI->Add_FV(PM_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),localip[0],localip[1],localip[2],localip[3]);
     JBI->Add(PM_SSID, WiFi.SSID().c_str());
-    JBI->Add(PM_SSID_NUMBERED, tkr_set->Settings.network.sta_active); // Used to debug switching in grafana
+    JBI->Add(PM_SSID_NUMBERED, tkr_wifi->config.station.active_profile); // Used to debug switching in grafana
     JBI->Add(PM_RSSI, WiFi.RSSI());
     #ifdef ESP32
     JBI->Add("TXPower_dBm", tkr_wifi->WiFiPower_To_dBm(WiFi.getTxPower()) );
@@ -254,14 +254,14 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
     JBI->Add(PM_BSSID, WiFi.BSSIDstr().c_str());
     JBI->Add(PM_MAC, WiFi.macAddress().c_str());
     JBI->Add(PM_WEBSERVER_ENABLED, tkr_set->Settings.webserver);
-    JBI->Add(PM_WIFICONFIG_STATE, tkr_set->Settings.network.sta_config);
+    JBI->Add(PM_WIFICONFIG_STATE, tkr_wifi->config.station.enabled);
 
     JBI->Array_Start(PM_AP_LIST);
     for(int i=0;i<WIFI_MAXIMUM_CONNECTIONS;i++)
     {
-     if(tkr_set->Settings.network.wifi[i].ssid[0] != 0)
+     if(tkr_wifi->config.station.profiles[i].ssid[0] != 0)
      {
-      JBI->Add(tkr_set->Settings.network.wifi[i].ssid); 
+      JBI->Add(tkr_wifi->config.station.profiles[i].ssid); 
      }
     }
     JBI->Array_End();
@@ -592,28 +592,26 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appen
 
 
     JBI->Object_Start(PM_GPIO);
-    for(uint16_t i=0;i<ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions);i++)
+    for (uint16_t index_pin = 0; index_pin < ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions); index_pin++)
     {
-      if(tkr_pins->PinUsed(tkr_pins->pin_attached_gpio_functions[i]))
-      {
-        sprintf_P(buffer, PSTR("%s"), tkr_pins->GetGPIOFunctionNamebyID(tkr_pins->pin_attached_gpio_functions[i], buffer, sizeof(buffer)));
-        JBI->Add(buffer, tkr_pins->GetPin(tkr_pins->pin_attached_gpio_functions[i],0));
+      const uint16_t gpio_function = tkr_pins->pin_attached_gpio_functions[index_pin];
+
+      // GPIO_NONE means no function attached to this physical/index pin
+      if (gpio_function == GPIO_NONE) {
+        continue;
       }
-    }    
+
+      const int8_t real_pin = tkr_pins->ConvertIndexPinToRealPin(index_pin);
+
+      sprintf_P(buffer,PSTR("%s"),tkr_pins->GetGPIOFunctionNamebyID(gpio_function, buffer, sizeof(buffer)));
+
+      JBI->Add(buffer, real_pin);
+
+      // ALOG_INF(PSTR("Pin index=%d real_pin=%d attached to function=%d %s"),index_pin,real_pin,gpio_function,buffer);
+    }
     JBI->Object_End();
 
-
-    // JBI->Object_Start(D_GPIO "_map");
-    // for(uint16_t i=0;i<MAX_USER_PINS;i++){ 
-    //   sprintf_P(buffer, PSTR("%d"),
-      
-    //   gpio_pin_by_index[i]
-    //   //  i
-    //    );
-    //   JBI->Add(buffer, tkr_pins->GetPin(i));
-    // }
-    // JBI->Object_End();
-
+    
     // Debug by printing all arrays out
     JBI->Array_Start("pin_attached_gpio_functions");
     for(int i=0; i<ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions);i++)

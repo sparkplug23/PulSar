@@ -54,7 +54,7 @@
 #define D_MODULE__NETWORK_INTERFACE__CTR          "interface_network"
 #define D_MODULE_NETWORK_WIFI_CTR                 "wifi"
 #define D_MODULE_NETWORK_ETHERNET_CTR                 "ethernet"
-#define D_MODULE_NETWORK_MQTT_CTR                 "mqtt"
+#define D_MODULE_NETWORK_MQTT_CTR                 "MQTT"
 #define D_MODULE_NETWORK_MQTT_MULTIPLE_CTR        "mqtt_multi"
 #define D_MODULE_NETWORK_MQTT_CELLULAR_CTR        "mqtt_cellular"
 #define D_MODULE__NETWORK_CELLULAR__CTR           "cellular"
@@ -219,7 +219,7 @@
 // #define D_TASK_SAVE_BEFORE_RESTART_CTR                      "SAVE_BEFORE_RESTART"
 #define D_TASK_SETTINGS_DEFAULT_CTR                         "SETTINGS_DEFAULT"
 #define D_TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR      "SETTINGS_OVERWRITE_SAVED_TO_DEFAULT"
-#define D_TASK_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR         "SETTINGS_LOAD_VALUES_INTO_MODULE"
+#define D_TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM_CTR         "SETTINGS_LOAD_VALUES_INTO_MODULE"
 #define D_TASK_SETTINGS_SAVE_VALUES_FROM_MODULE_CTR         "SETTINGS_SAVE_VALUES_FROM_MODULE"
 #define D_YTASK_INIT_CTR                     "FUNCTION_LAMBDA_INIT"
 #define D_YTASK_LOOP_CTR                     "FUNCTION_LAMBDA_LOOP"
@@ -1442,6 +1442,7 @@
   #define D_LOG_MODULE "MOD: "       // Module
   #define D_LOG_MQTT "MQT: "         // MQTT
   #define D_LOG_NEO "NEO: "         // Neopixels
+  #define D_LOG_NETWORK "NET: "       // Network
   #define D_LOG_NEXTION "NEX: "
   #define D_LOG_OTHER "OTH: "        // Other
   #define D_LOG_OTA "OTA: "
