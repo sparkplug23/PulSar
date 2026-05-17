@@ -324,7 +324,7 @@ int16_t mPins::GetGPIOFunctionIDbyName(const char* c)
   if(strcmp_P(c,PM_GPIO_FUNCTION_WEBCAM_PWDN_CTR)==0){   return GPIO_WEBCAM_PWDN; }
   #endif // ESP32
 
-  #ifdef USE_MODULE_DRIVERS_SDCARD
+  #ifdef USE_MODULE_FILESYSTEM_SDCARD
   if(strcmp_P(c,PM_GPIO_FUNCTION_SDCARD_VSPI_CSO_CTR)==0){    return GPIO_FUNCTION_SDCARD_VSPI_CSO; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_SDCARD_VSPI_CLK_CTR)==0){    return GPIO_FUNCTION_SDCARD_VSPI_CLK; }
   if(strcmp_P(c,PM_GPIO_FUNCTION_SDCARD_VSPI_MOSI_CTR)==0){   return GPIO_FUNCTION_SDCARD_VSPI_MOSI; }
@@ -558,7 +558,7 @@ const char* mPins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, uint8_t bu
   if(GPIO_WEBCAM_SIOC == id)                        p = PM_GPIO_FUNCTION_WEBCAM_SIOC_CTR;
   if(GPIO_WEBCAM_PWDN == id)                        p = PM_GPIO_FUNCTION_WEBCAM_PWDN_CTR;
   #endif
-  #ifdef USE_MODULE_DRIVERS_SDCARD
+  #ifdef USE_MODULE_FILESYSTEM_SDCARD
   if(GPIO_FUNCTION_SDCARD_VSPI_CSO == id)                        p = PM_GPIO_FUNCTION_SDCARD_VSPI_CSO_CTR;
   if(GPIO_FUNCTION_SDCARD_VSPI_CLK == id)                        p = PM_GPIO_FUNCTION_SDCARD_VSPI_CLK_CTR;
   if(GPIO_FUNCTION_SDCARD_VSPI_MOSI == id)                        p = PM_GPIO_FUNCTION_SDCARD_VSPI_MOSI_CTR;

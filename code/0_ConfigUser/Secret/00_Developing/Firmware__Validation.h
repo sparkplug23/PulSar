@@ -553,7 +553,6 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -886,7 +885,6 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs

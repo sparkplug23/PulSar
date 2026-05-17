@@ -50,7 +50,7 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -64,32 +64,7 @@
    * SECTION: System Configs
   ************************************/     
 
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  // 
-  // 
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-
-
-
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -171,7 +146,7 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -185,26 +160,6 @@
    * SECTION: System Configs
   ************************************/     
 
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-   // until devices can reliably be used without compiling per device
-
-  
 
 
   /***********************************
@@ -384,7 +339,7 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -397,27 +352,6 @@
   /***********************************
    * SECTION: System Configs
   ************************************/     
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-   // until devices can reliably be used without compiling per device
-
-  
 
 
   /***********************************
@@ -636,7 +570,7 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -649,28 +583,6 @@
   /***********************************
    * SECTION: System Configs
   ************************************/     
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-   // until devices can reliably be used without compiling per device
-
-  
-
 
   /***********************************
    * SECTION: Network Configs
@@ -836,7 +748,7 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -852,20 +764,6 @@
  
   #define SETTINGS_HOLDER 1239
 
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-
-  
   
 
   #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
@@ -1161,7 +1059,7 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -1174,28 +1072,6 @@
   /***********************************
    * SECTION: System Configs
   ************************************/     
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-   // until devices can reliably be used without compiling per device
-
-  
-
 
   /***********************************
    * SECTION: Network Configs
@@ -1543,7 +1419,7 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -1555,7 +1431,7 @@
   
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
 
   /***********************************
    * SECTION: System Configs
@@ -1731,7 +1607,7 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -1743,7 +1619,7 @@
   
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -1992,7 +1868,7 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -2004,7 +1880,7 @@
   
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
 
   /***********************************
    * SECTION: System Configs
@@ -2184,7 +2060,7 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -2196,7 +2072,7 @@
   
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
 
   /***********************************
    * SECTION: System Configs
@@ -2368,7 +2244,7 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -2380,7 +2256,7 @@
   
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
 
   /***********************************
    * SECTION: System Configs
@@ -2605,7 +2481,7 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -2617,7 +2493,7 @@
   
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
 
   #define ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT
 

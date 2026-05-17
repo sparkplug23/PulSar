@@ -286,7 +286,7 @@
 //   uint8_t blinkinterval = 1;
 //   // tkr_set->global_state.network_down = (tkr_set->global_state.wifi_down && tkr_set->global_state.eth_down);
 
-//   if (!tkr_set->Settings.flag_system.global_state) {                      // Problem blinkyblinky enabled
+//   if (!tkr_set->Settings.sysopt_system.bit.global_state) {                      // Problem blinkyblinky enabled
 //     if (tkr_set->global_state.data) {                              // Any problem
 //       if (tkr_set->global_state.mqtt_down) { blinkinterval = 7; }  // MQTT problem so blink every 2 seconds (slowest)
 //       if (tkr_set->global_state.wifi_down) { blinkinterval = 3; }  // Wifi problem so blink every second (slow)

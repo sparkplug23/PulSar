@@ -130,7 +130,6 @@
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
   
@@ -241,8 +240,6 @@ new 26GHz radar sensor
     
   #define SETTINGS_HOLDER 1241
   #define ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
-  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  #define ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #define USE_MODULE_CORE_FILESYSTEM
   #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
 
@@ -253,7 +250,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE 
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -312,26 +308,6 @@ new 26GHz radar sensor
    * SECTION: System Configs
   ************************************/     
 
-  // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
 
   /***********************************
    * SECTION: Storage Configs
@@ -352,9 +328,6 @@ new 26GHz radar sensor
 
   #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
 
-  // #define ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
-
-  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   // #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_MINUTE
 
@@ -976,7 +949,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE 
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -1026,29 +998,6 @@ new 26GHz radar sensor
   
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  // #define USE_MODULE_SENSORS_SUN_TRACKING
 
   /***********************************
    * SECTION: Storage Configs
@@ -1576,7 +1525,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE 
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -1623,32 +1571,8 @@ new 26GHz radar sensor
    * SECTION: System Configs
   ************************************/     
 
-  
-
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  // #define USE_MODULE_SENSORS_SUN_TRACKING
 
   /***********************************
    * SECTION: Storage Configs
@@ -1830,38 +1754,9 @@ new 26GHz radar sensor
 
   /***********************************
    * SECTION: System Configs
-  ************************************/     
-
- 
-
-  
-
-  
+  ************************************/       
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  
 
 
   /***********************************
@@ -2791,7 +2686,6 @@ new 26GHz radar sensor
  
 //   // #define DISABLE_SERIAL
 //   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
   
 //   // #define ENABLE_ADVANCED_DEBUGGING
 //   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -2835,9 +2729,6 @@ new 26GHz radar sensor
 //   #define ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
 
 
-//   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 //   // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
 //   //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
@@ -3270,7 +3161,6 @@ new 26GHz radar sensor
 //   ************************************/    
 //   // #define DISABLE_SERIAL
 //   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
   
 //   // #define ENABLE_ADVANCED_DEBUGGING
 //   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -3296,23 +3186,6 @@ new 26GHz radar sensor
   
 
 //   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-//   // #define USE_MODULE_CORE_FILESYSTEM
-//   //   
-//   //   
-//   //   
-//   //   
-
-//   // Settings saving and loading
-//   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-//   //   
-//   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-//   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-//   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-//   
-//   
-
 //   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
 //   //  // until devices can reliably be used without compiling per device
 
@@ -3680,7 +3553,6 @@ new 26GHz radar sensor
 //   ************************************/    
 //   // #define DISABLE_SERIAL
 //   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
   
 //   // #define ENABLE_ADVANCED_DEBUGGING
 //   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -3693,27 +3565,6 @@ new 26GHz radar sensor
 //   /***********************************
 //    * SECTION: System Configs
 //   ************************************/     
-
-//   // #define USE_MODULE_CORE_FILESYSTEM
-//   //   
-//   //   
-//   //   
-//   //   
-
-//   // Settings saving and loading
-//   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-//   //   
-//   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-//   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-//   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-//   
-//   
-
-//   #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-//    // until devices can reliably be used without compiling per device
-
-//   
 
 
 //   /***********************************
@@ -3835,7 +3686,6 @@ new 26GHz radar sensor
   ///////////////////////////////////////////// Enable Logs
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
   
   ///////////////////////////////////////////// System Logs
@@ -4004,7 +3854,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4020,7 +3869,6 @@ new 26GHz radar sensor
 
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -4131,7 +3979,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4147,9 +3994,6 @@ new 26GHz radar sensor
    * SECTION: System Configs
   ************************************/     
 
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -4285,8 +4129,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-  
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
@@ -4299,9 +4141,6 @@ new 26GHz radar sensor
    * SECTION: System Configs
   ************************************/     
 
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -4405,7 +4244,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4420,8 +4258,6 @@ new 26GHz radar sensor
   ************************************/     
 
 
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -4533,7 +4369,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4560,26 +4395,6 @@ new 26GHz radar sensor
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
 
   /***********************************
    * SECTION: Network Configs
@@ -4989,7 +4804,6 @@ new 26GHz radar sensor
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -5341,7 +5155,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -5734,7 +5547,6 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 ///////////////////////////////////////////// Enable Logs
 // #define DISABLE_SERIAL
 // #define DISABLE_SERIAL0_CORE
-// #define DISABLE_SERIAL_LOGGING
 // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 ///////////////////////////////////////////// System Logs
@@ -5917,7 +5729,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -6346,7 +6157,6 @@ Blue (Upstairs Link) ***********************************************************
   #define MQTT_HOST   "192.168.1.70"
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -6587,18 +6397,15 @@ Blue (Upstairs Link) ***********************************************************
   #define MQTT_HOST   "192.168.1.70"
     
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #define DISABLE_SERIAL
   #define DISABLE_SERIAL0_CORE
-  #define DISABLE_SERIAL_LOGGING
 
   #define USE_MODULE_CORE_RULES
        
   #define USE_MODULE_SENSORS_INTERFACE
-    #
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_PIR
@@ -6714,8 +6521,6 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define MQTT_HOST   "192.168.1.70"
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -6867,7 +6672,6 @@ Blue (Upstairs Link) ***********************************************************
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -6889,8 +6693,6 @@ Blue (Upstairs Link) ***********************************************************
   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
 
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  // // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION //fails with no network
   // // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   // // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -6911,7 +6713,6 @@ Blue (Upstairs Link) ***********************************************************
 
   // // #define DISABLE_SERIAL
   // // #define DISABLE_SERIAL0_CORE
-  // // #define DISABLE_SERIAL_LOGGING
 
   // // #define ENABLE_ADVANCED_DEBUGGING
   // // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -6962,7 +6763,6 @@ Blue (Upstairs Link) ***********************************************************
 
   // // #define DISABLE_SERIAL
   // // #define DISABLE_SERIAL0_CORE
-  // // #define DISABLE_SERIAL_LOGGING
 
   // // #define ENABLE_ADVANCED_DEBUGGING
   // // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -7109,7 +6909,6 @@ Blue (Upstairs Link) ***********************************************************
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -7385,10 +7184,6 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_FRIENDLY_CTR "Testbed Fona 800L"
 
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // #define ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3 // FI-128
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION // FI-128
-
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_CREATE_SSID_AP
   // #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
@@ -7431,9 +7226,6 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_FRIENDLY_CTR "Testbed CrashReport" APPEND_ESP_TYPE_NAME_STRING
 
   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // // #define ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3 // FI-128
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION // FI-128
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
   // // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_CREATE_SSID_AP
   // // #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
@@ -7465,7 +7257,6 @@ Blue (Upstairs Link) ***********************************************************
   // add db18 dropping from the waterproof box to know extra temp, perhaps add two for backup? (independant pin from tank sensors)
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -7583,7 +7374,6 @@ Blue (Upstairs Link) ***********************************************************
   //   #define ENABLE_DEVFEATURE__SETTINGS_STORAGE__SAVE_LOAD_STRUCT
   //   #define ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
   //   #define ENABLE_DEVFEATURE__SETTINGS_STORAGE_ESP_SUPPORT
-  //   #define ENABLE_DEVFEATURE__SETTINGS_NEW_STRUCT_2023
 
   
   // #define USE_MODULE_CORE_FILESYSTEM
@@ -7653,7 +7443,6 @@ Blue (Upstairs Link) ***********************************************************
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -7669,32 +7458,6 @@ Blue (Upstairs Link) ***********************************************************
    * SECTION: System Configs
   ************************************/     
 
-  
-
-  
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  // #define USE_MODULE_SENSORS_SUN_TRACKING
 
 
   /***********************************

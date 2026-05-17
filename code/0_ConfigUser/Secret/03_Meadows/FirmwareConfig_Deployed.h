@@ -345,7 +345,6 @@
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -1679,7 +1678,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -1694,33 +1693,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   /***********************************
    * SECTION: System Configs
   ************************************/     
-
-  
-
-  
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  // #define USE_MODULE_SENSORS_SUN_TRACKING
 
 
   /***********************************
@@ -1965,7 +1937,7 @@ R"=====(
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
+// 
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -3599,8 +3571,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
     
   #define SETTINGS_HOLDER 1241
   #define ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
-  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  #define ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #define USE_MODULE_CORE_FILESYSTEM
   #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
 
@@ -3611,7 +3581,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE 
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -3691,27 +3661,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: System Configs
   ************************************/     
 
-  // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-
   /***********************************
    * SECTION: Storage Configs
   ************************************/    
@@ -3731,9 +3680,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
 
   #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
 
-  // #define ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
-
-  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   // #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_MINUTE
 
@@ -5237,7 +5183,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -5306,16 +5252,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   #define USE_MODULE_CORE_FILESYSTEM
-  // //   
-  // //   
-  // //   
-  // //   
-
-  // // Settings saving and loading
-  // //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  // //   
-  // //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  // //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   // //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
   // 
@@ -5815,7 +5751,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -5829,22 +5765,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: System Configs
   ************************************/     
 
- 
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  // 
 
   #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
@@ -5885,7 +5805,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: Lighting Configs
   ************************************/    
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -6578,7 +6497,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -6594,30 +6513,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
    * SECTION: System Configs
   ************************************/     
 
-  
-
-  
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
 
   #define USE_MODULE_SENSORS_SUN_TRACKING
 
@@ -6818,7 +6713,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   ///////////////////////////////////////////// Enable Logs
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
   ///////////////////////////////////////////// System Logs
@@ -7146,7 +7041,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
  ///////////////////////////////////////////// Enable Logs
  // #define DISABLE_SERIAL
  // #define DISABLE_SERIAL0_CORE
- // #define DISABLE_SERIAL_LOGGING
+ 
  // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
  
  ///////////////////////////////////////////// System Logs
@@ -7529,7 +7424,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -7579,26 +7474,6 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 
   // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // // #define USE_MODULE_CORE_FILESYSTEM
-  // //   
-  // //   
-  // //   
-  // //   
-
-  // // Settings saving and loading
-  // //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  // //   
-  // //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  // //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  // //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  // 
-  // 
-
-  // // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // //  // until devices can reliably be used without compiling per device
-
-  // // 
 
   // /***********************************
   //  * SECTION: Network Configs
@@ -7934,7 +7809,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   ///////////////////////////////////////////// Enable Logs
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
   
   ///////////////////////////////////////////// System Logs
@@ -8113,7 +7988,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   ///////////////////////////////////////////// Enable Logs
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
   
   ///////////////////////////////////////////// System Logs

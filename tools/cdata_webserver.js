@@ -465,6 +465,37 @@ writeChunks(
 );
 
 
+
+writeChunks(
+  source_path,
+  [
+    {
+      file: "sd_editor.htm",
+      name: "PAGE_sd_editor",
+      method: "gzip",
+      filter: "html-minify-ui",
+    }
+  ],
+  destination_path + "html_sdcard_editor.h"
+);
+
+/*** Generate only once when change is needed. Then copy and insert into library */
+writeChunks(
+  source_path,
+  [
+    {
+      file: "edit_fs_darkmode.htm",
+      name: "PAGE_sedit_fs_darkmode",
+      method: "gzip",
+      filter: "html-minify-ui",
+    }
+  ],
+  destination_path + "html_edit_fs_darkmode.h"
+);
+
+
+
+
 writeChunks(
   source_path,
   [

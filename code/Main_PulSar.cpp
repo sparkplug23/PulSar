@@ -182,16 +182,16 @@ void Serial_PrintFirmwareSplash()
 }
 
 /********************************************************************************************/
-/********************* ENABLE_DEVFEATURE_FASTBOOT_DETECTION ******************************************************************/
+/********************* ENABLE_FEATURE_FASTBOOT__DETECTION ******************************************************************/
 /********************************************************************************************/
 
 
-#ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+#ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
 void Fastboot_RecoveryCheck(void)
 {
   ALOG_DBM(PSTR("ARESET TWICE! \t\t\t%d"), RtcFastboot.fast_reboot_count);
 
-  const uint8_t boot_loop_offset = tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET]; // SetOption36
+  const uint8_t boot_loop_offset = tkr_set->Settings.sysopt_system.param.boot_loop_offset;
 
   if (!boot_loop_offset) {
     return;
@@ -356,7 +356,7 @@ void Fastboot_RecoveryCheck(void)
 
   ALOG_INF(PSTR("FRC: " D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcFastboot.fast_reboot_count);
 }
-#endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+#endif // ENABLE_FEATURE_FASTBOOT__DETECTION
 
 
 /********************************************************************************************/
@@ -431,7 +431,7 @@ void setup(void)
   Serial.println(F("\n\rSerial Enabled Early for FastBoot Debug" DEBUG_INSERT_PAGE_BREAK));
   #endif
 
-  #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
 
     RtcFastboot_Load();
 
@@ -482,8 +482,8 @@ void setup(void)
     }
     #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
-  #endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-
+  #endif // ENABLE_FEATURE_FASTBOOT__DETECTION
+  
   #ifdef ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
   Serial.flush();
   delay(1000);
@@ -676,27 +676,8 @@ DEBUG_LINE_HERE3
  ********************************************************************************************/
 
   #ifdef USE_MODULE_CORE_FILESYSTEM
-    tkr_mfile->UfsInit();  // xdrv_50_filesystem.ino
+    tkr_mfile->Init(); // Need immediate filesystem for settings load, fastboot, templates, OTA, etc
   #endif
-
-  #ifdef ENABLE_DEVFEATURE__SETTINGS_NEW_STRUCT_2023
-  if (tkr_set->Settings2 == nullptr) {
-    tkr_set->Settings2 = (mSettings::TSettings2*)malloc(sizeof(mSettings::TSettings2));
-  }
-  #endif
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
 
 /********************************************************************************************
  ** Settings ********************************************************************************
@@ -754,9 +735,9 @@ DEBUG_LINE_HERE3
    *     - Loaded settings to determine how fastboot is configured
    *     - This code must run before drivers/sensors are initiated, so they may be disabled if recovery is required
   ********************************************************************************************/
-  #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
   Fastboot_RecoveryCheck();
-  #endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #endif
 
 /********************************************************************************************
  ** SERIAL: Change baud to module default if module has changed ****************************************
@@ -854,11 +835,9 @@ DEBUG_LINE_HERE3
    ** File System : Load after settings for now, so this method overrides any defaults   ******
   ********************************************************************************************/
 
-  #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #ifdef ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
     tkr_mfile->JsonFile_Load__Stored_Module_Or_Default_Template();
   #endif
-  #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #ifdef ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
   tkr->Tasker_Interface(TASK_FILESYSTEM__LOAD__MODULE_DATA__ID);
   #endif // ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
@@ -1057,7 +1036,7 @@ void SmartLoopDelay()
 
   // #ifndef DISABLE_SLEEP
   // if(tkr_set->Settings.enable_sleep){
-  //   if (tkr_set->Settings.network.flag.sleep_normal) {
+  //   if (tkr_set->Settings.sysopt_network.bit.flag.sleep_normal) {
   //     tkr_sup->SleepDelay(tkr_set->runtime.sleep);
   //   } else {
   //     // Loop time < sleep length of time

@@ -36,46 +36,51 @@ class mJsonTemplate :
      * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
      ************************************************************************************************/
 
-
     /************************************************************************************************
      * SECTION: Internal Functions
      ************************************************************************************************/
+    
+    
+    /************************************************************************************************
+     * SECTION: Compile-time module template loading
+     *
+     * Purpose:
+     * - MODULE_TEMPLATE is an early boot template.
+     * - It configures module identity/GPIO map before GpioInit(), TASK_PRE_INIT, and TASK_INIT.
+     * - It must use the direct module-template parser, not TASK_JSON_COMMAND_ID.
+     *
+     * Policy:
+     * - Normal/default pass is called only by Settings when saved settings are missing/invalid.
+     * - Override pass is called by Settings when USE_MODULE_TEMPLATE__OVERRIDE is defined.
+     *
+     * Date Modified: 17May26
+     ************************************************************************************************/
 
-    void Template_Load();
-    bool ReadModuleTemplateFromProgmem();
-    #ifdef ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
-    void Templates__SaveHardcodedTemplateToFilesystem();
-    #endif
-        
+    void Template_Load(); // compatibility wrapper for old tasker/manual debug path
+
+    bool ModuleDeviceTemplate_CompileTime_Load_ModuleOnly(bool override_reloading_pass);
+
+    bool ModuleDeviceTemplate_CompileTime_ApplyModuleTemplate_P(
+      const char* template_name,
+      const char* payload_p,
+      size_t payload_size
+    );
+
+    bool ReadModuleTemplateFromProgmem(); // compatibility wrapper
+
 
     /************************************************************************************************
      * SECTION: Commands
      ************************************************************************************************/
 
-    // void parse_JSONCommand(JsonParserObject obj);
-
     /************************************************************************************************
      * SECTION: Construct Messages
      ************************************************************************************************/
     
-    // uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
-    // uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
-
      /************************************************************************************************
      * SECITON: MQTT
      ************************************************************************************************/
     
-    // #ifdef USE_MODULE_NETWORK_MQTT
-    // void MQTTHandler_Init();
-    // void MQTTHandler_RefreshAll();
-    // void MQTTHandler_Rate();    
-    // void MQTTHandler_Sender();
-
-    // std::vector<struct handler<mJsonTemplate>*> mqtthandler_list;    
-    // struct handler<mJsonTemplate> mqtthandler_settings;    
-    // struct handler<mJsonTemplate> mqtthandler_sensor_ifchanged;
-    // struct handler<mJsonTemplate> mqtthandler_sensor_teleperiod;    
-    // #endif // USE_MODULE_NETWORK_MQTT
 
 };
 

@@ -12,7 +12,7 @@
  **/
 #include "mRtcSettings.h"
 
-#ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+#ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
 TRtcFastboot RtcFastboot;
 // #ifdef ESP32
 // RTC_NOINIT_ATTR TRtcFastboot RtcDataFastboot;
@@ -34,33 +34,6 @@ uint32_t RtcFastboot_CRC()
   return crc;
 }
 
-// void RtcFastboot_Save(void) 
-// {
-
-//   if (RtcFastboot_CRC() != rtc_fastboot_crc) // ie if the data has changed at all
-//   {
-//     #ifdef DEBUG_FASTBOOT
-//     Serial.println( "if (GetRtcFastbootCrc() != rtc_fastboot_crc) NEW data" );
-//     #endif
-//     RtcFastboot.valid = RTC_MEM_VALID;
-
-//     #ifdef ESP8266
-//     ESP.rtcUserMemoryWrite(100 - sizeof(RtcFastboot), (uint32_t*)&RtcFastboot, sizeof(RtcFastboot));
-//     #endif  // ESP8266
-//     #if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
-//     RtcDataFastboot = RtcFastboot;
-//     #endif  // ESP32
-
-//     rtc_fastboot_crc = RtcFastboot_CRC();
-//   }
-//   else
-//   {
-//     #ifdef DEBUG_FASTBOOT
-//     Serial.println( "ELSE if (GetRtcFastbootCrc() != rtc_fastboot_crc)" );
-//     #endif
-//   }
-
-// }
 void RtcFastboot_Save(void)
 {
   if (RtcFastboot_CRC() != rtc_fastboot_crc) // ie if the data has changed at all
@@ -97,45 +70,6 @@ void RtcFastboot_Reset(void)
   RtcFastboot.fast_reboot_count = 0;
   RtcFastboot_Save();
 }
-
-/**
- * @brief Load Reboot data, if not valid then reset it and save
- **/
-// void RtcFastboot_Load(void) 
-// {
-   
-//   #ifdef DEBUG_FASTBOOT
-//   Serial.println("RtcRebootLoad START");
-//   #endif
-
-//   #ifdef ESP8266
-//     ESP.rtcUserMemoryRead(100 - sizeof(RtcFastboot), (uint32_t*)&RtcFastboot, sizeof(RtcFastboot));  // 0x280
-//   #endif  // ESP8266
-//   #if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3)
-//     RtcFastboot = RtcDataFastboot; // Set the pointer so the struct points to the data saved
-//   #endif  // ESP32
-
-//   if (RtcFastboot.valid != RTC_MEM_VALID) 
-//   {
-
-//     #ifdef DEBUG_FASTBOOT
-//     Serial.println("RtcReboot.valid != RTC_MEM_VALID");
-//     #endif
-  
-//     memset(&RtcFastboot, 0, sizeof(RtcFastboot));
-//     RtcFastboot.valid = RTC_MEM_VALID;
-    
-//     RtcFastboot_Save();
-    
-//   }
-  
-//   rtc_fastboot_crc = RtcFastboot_CRC();
-  
-//   #ifdef DEBUG_FASTBOOT
-//   Serial.println("RtcRebootLoad DONE");
-//   #endif
-  
-// }
 
 
 void RtcFastboot_Load(void)
@@ -192,7 +126,7 @@ bool RtcFastboot_Valid(void)
 const uint16_t RTC_MEM_VALID = 0xA55A; // Value does not matter
 
 
-#endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+#endif // ENABLE_FEATURE_FASTBOOT__DETECTION
 
 
 /***********************************************************************************************************************************************************

@@ -22,12 +22,12 @@ void mInterfaceNetwork::Load_Config(void)
   #ifdef USE_MODULE_CORE_FILESYSTEM
   if(tkr_mfile)
   {
-    if(tkr_mfile->TfsFileExists(NETWORK_CONFIG_FILE_PATH))
+    if(tkr_mfile->FileExists(NETWORK_CONFIG_FILE_PATH))
     {
       ALOG_INF(
         PSTR(D_LOG_NETWORK "Network config file found: %s len=%u"),
         NETWORK_CONFIG_FILE_PATH,
-        tkr_mfile->TfsFileSize(NETWORK_CONFIG_FILE_PATH)
+        tkr_mfile->FileSize(NETWORK_CONFIG_FILE_PATH)
       );
 
       config_loaded = NetworkConfig_LoadFileAndParse();
@@ -101,12 +101,12 @@ bool mInterfaceNetwork::NetworkConfig_LoadFileAndParse(void)
     return false;
   }
 
-  if(!tkr_mfile->TfsFileExists(NETWORK_CONFIG_FILE_PATH))
+  if(!tkr_mfile->FileExists(NETWORK_CONFIG_FILE_PATH))
   {
     return false;
   }
 
-  const size_t file_size = tkr_mfile->TfsFileSize(NETWORK_CONFIG_FILE_PATH);
+  const size_t file_size = tkr_mfile->FileSize(NETWORK_CONFIG_FILE_PATH);
 
   if(file_size == 0)
   {
@@ -135,7 +135,7 @@ bool mInterfaceNetwork::NetworkConfig_LoadFileAndParse(void)
 
   memset(file_buffer, 0, file_size + 1);
 
-  const bool loaded = tkr_mfile->TfsLoadFile(
+  const bool loaded = tkr_mfile->LoadFile(
     NETWORK_CONFIG_FILE_PATH,
     reinterpret_cast<uint8_t*>(file_buffer),
     file_size

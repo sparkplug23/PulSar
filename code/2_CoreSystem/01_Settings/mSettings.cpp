@@ -1,14 +1,28 @@
 
 #include "2_CoreSystem/01_Settings/mSettings.h"
 
+// 1. Try to load saved settings.
+// 2. If saved settings are valid:
+//      use them, ignore compile-time templates unless override is enabled.
+// 3. If saved settings are missing/invalid/holder mismatch:
+//      build defaults,
+//      apply MODULE_TEMPLATE,
+//      save the resulting settings,
+//      continue boot.
+// 4. If override is enabled:
+//      apply MODULE_TEMPLATE after saved/default settings load,
+//      save if desired,
+//      continue boot.
+
+
+
 /*********************************************************************************************\
  * PulSar Settings System Overview
  *
  * Storage policy
  * --------------
  * PulSar stores the complete SETTINGS struct as a compact binary file on the filesystem/TFS.
- * This is now the only persistent backend for the full user configuration on both ESP32 and
- * ESP8266.
+ * This is now the only persistent backend for the full user configuration on both ESP32 and ESP8266.
  *
  * Main files:
  *   /settings.txt       active binary SETTINGS struct
@@ -28,8 +42,8 @@
  *   1. SettingsInit()
  *   2. SettingsDefault()       - build compiled defaults in RAM only, no save
  *   3. SettingsLoad()          - replace RAM defaults with /settings.txt if valid
- *   4. SettingsDelta()         - future migration hook for compatible saved settings
- *   5. Fastboot_RecoveryCheck()- plain function in Main_PulSar.cpp, after settings load
+ *   4. SettingsDelta()         - future migration hook for compatible saved settings with newer firmware revisions
+ *   5. Fastboot_RecoveryCheck()- function in Main_PulSar.cpp, after settings load
  *
  * SETTINGS_HOLDER policy
  * ----------------------
@@ -42,17 +56,15 @@
  * ----------------
  * - Compile-time defaults provision a safe first boot.
  * - A device can then be configured through WebUI/MQTT/serial JSON/templates.
- * - The resulting /settings.txt can be downloaded and copied to another device with the same
- *   firmware/settings holder.
+ * - The resulting /settings.txt can be downloaded and copied to another device with the same firmware/settings holder.
  * - JSON restore/import remains a higher-level command/config path, not the core storage format.
  *
  * Fastboot model
  * --------------
- * Fastboot stays outside this class as a plain function. It runs after SettingsLoad(), then
- * progressively disables risky features, rules first, then sensors, drivers, module config,
+ * Fastboot stays outside this class as a plain function. It runs after SettingsLoad(). 
+ * If instabiltiy is detected, then progressively disables risky features, rules first, then sensors, drivers, module config,
  * templates, and finally settings/factory recovery if needed.
-\*********************************************************************************************/
-
+*********************************************************************************************/
 
 struct DATA_BUFFER data_buffer;
 
@@ -61,51 +73,14 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
   
   switch(function)
   {
-    
-    case TASK_EVERY_SECOND:
-
-    break;
-    case TASK_EVERY_FIVE_SECOND:{
-
-    }break;
-
     case TASK_EVERY_MINUTE:
     {
-      #ifdef USE_MODULE_CORE_FILESYSTEM
-      #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
-      #ifndef ENABLE_DEVFEATURE_SETTINGS__BLOCK_USER_CONFIG_SAVE
-
-      // Save last-known-good once after a stable period. Do not save this early,
-      // otherwise a boot-looping configuration could be blessed as good.
-      if (
-        !runtime.settings_lkg &&
-        (millis() > 3600000UL) &&
-        (tkr_time->UtcTime() > START_VALID_UTC_TIME)
-      )
-      {
-        tkr_mfile->TfsSaveFile(
-          TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD,
-          (const uint8_t*)&Settings,
-          sizeof(SETTINGS)
-        );
-
-        runtime.settings_lkg = true;
-
-        ALOG_INF(PSTR(D_LOG_SETTINGS "Saved last-known-good settings"));
-      }
-
-      #endif // ENABLE_DEVFEATURE_SETTINGS__BLOCK_USER_CONFIG_SAVE
-      #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
-      #endif // USE_MODULE_CORE_FILESYSTEM
+      SaveSettings__LastKnownGood();
     }
     break;
     case TASK_EVERY_HOUR:
     {
-      #ifdef ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-        #ifdef ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-          tkr_set->SettingsSaveAll();
-        #endif
-      #endif
+      SettingsSaveAll();
     }
     break;
     case TASK_ON_BOOT_SUCCESSFUL:
@@ -119,23 +94,17 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
       // fastboot counter must remain active so recovery can continue.
       SettingsSaveAll();
   
-      #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+      #ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
       RtcFastboot_Reset(); // Reset once boot is considered successful
       #endif
 
-      #ifdef ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
-      flag_rtc_reboot_reset_on_success = true;
-      ALOG_HGL(PSTR("flag_rtc_reboot_reset_on_success"));
-      #endif // ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3
-
       #ifdef USE_DEEPSLEEP
-          if (!(DeepSleepEnabled() && !Settings->flag3.bootcount_update)) {  
-            // SetOption76  - (Deepsleep) Enable incrementing bootcount (1) when deepsleep is enabled
+        if (!(DeepSleepEnabled() && !Settings->flag3.bootcount_update)) {  
       #endif
-            // Settings->bootcount++;              // Moved to here to stop flash writes during start-up
-            // ALOG_DBG(PSTR(D_LOG_APPLICATION D_BOOT_COUNT " %d"), Settings->bootcount);
+          // Settings->bootcount++;              // Moved to here to stop flash writes during start-up
+          // ALOG_DBG(PSTR(D_LOG_APPLICATION D_BOOT_COUNT " %d"), Settings->bootcount);
       #ifdef USE_DEEPSLEEP
-          }
+        }
       #endif
 
     break;
@@ -161,14 +130,8 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
 } 
 
 
-
-
-// load in driver and sensor template settings
-void mSettings::Function_Template_Load(){
-
-  #ifndef DISABLE_SERIAL_LOGGING
-  //DEBUG_PRINTF("mSettings::Function_Template_Load"); Serial.flush();
-  #endif
+void mSettings::Function_Template_Load()
+{
 
   #ifdef USE_FUNCTION_TEMPLATE  
   // Read into local
@@ -203,7 +166,7 @@ void mSettings::JsonAppend_Settings()
 
   // JBI->Object_Start_F(GetModuleFriendlyName());  //json file parser will pass them to the modules, but should strip out the level_object from commands
     JBI->Add("BootCount", Settings.bootcount);
-    #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+    #ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
     JBI->Add("FastBootCount", RtcFastboot.fast_reboot_count);
     #endif
   // JBI->Object_End();
@@ -211,33 +174,24 @@ void mSettings::JsonAppend_Settings()
 }
 
 
-uint16_t mSettings::CountCharInCtr(const char* tosearch, char tofind){
-  uint16_t count = 0;
-  for(uint16_t i=0;i<strlen(tosearch);i++){
-    if(tosearch[i]==tofind){ count++; }
-  }
-  return count;
-}
-
-
 const char* mSettings::Get_Json_Level_Name(uint8_t id) 
 {
-    switch(id){
-        case JSON_LEVEL_NONE:      
-            return PM_LEVEL_NONE_CTR;
-        case JSON_LEVEL_IFCHANGED: 
-            return PM_LEVEL_IFCHANGED_CTR;
-        case JSON_LEVEL_SHORT:     
-            return PM_LEVEL_SHORT_CTR;
-        case JSON_LEVEL_DETAILED:  
-            return PM_LEVEL_DETAILED_CTR;
-        case JSON_LEVEL_ALL:       
-            return PM_LEVEL_ALL_CTR;
-        case JSON_LEVEL_DEBUG:     
-            return PM_LEVEL_DEBUG_CTR;
-        default:
-            return PM_LEVEL_NONE_CTR; // Default to "None" if an unknown id is passed
-    }
+  switch(id){
+    case JSON_LEVEL_NONE:      
+      return PM_LEVEL_NONE_CTR;
+    case JSON_LEVEL_IFCHANGED: 
+      return PM_LEVEL_IFCHANGED_CTR;
+    case JSON_LEVEL_SHORT:     
+      return PM_LEVEL_SHORT_CTR;
+    case JSON_LEVEL_DETAILED:  
+      return PM_LEVEL_DETAILED_CTR;
+    case JSON_LEVEL_ALL:       
+      return PM_LEVEL_ALL_CTR;
+    case JSON_LEVEL_DEBUG:     
+      return PM_LEVEL_DEBUG_CTR;
+    default:
+      return PM_LEVEL_NONE_CTR; // Default to "None" if an unknown id is passed
+  }
 }
 
 
@@ -249,7 +203,7 @@ void mSettings::SetFlashModeDout(void)
   uint8_t *_buffer;
   uint32_t address;
 
-    #ifdef ESP8266
+  #ifdef ESP8266
   eboot_command ebcmd;
   eboot_command_read(&ebcmd);
   address = ebcmd.args[0];
@@ -262,12 +216,9 @@ void mSettings::SetFlashModeDout(void)
     }
   }
   delete[] _buffer;
-  
-    #endif // ESP8266
+  #endif // ESP8266
+
 }
-
-
-#ifdef ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
 
 
 /*********************************************************************************************\
@@ -306,8 +257,6 @@ bool mSettings::SettingsUpdateText(uint32_t index, const char* replace_me)
   if (index >= SET_MAX) {
     return false;  // Setting not supported - internal error
   }
-
-  
 
   // Make a copy first in case we use source from Settings->text
   uint32_t replace_len = strlen_P(replace_me);
@@ -401,10 +350,6 @@ char* mSettings::SettingsText(uint32_t index) {
   }
   return position;
 }
-
-
-#endif // ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
-
 
 
 /******************************************************************************************************************
@@ -513,7 +458,6 @@ void mSettings::CommandSet_SystemRestartID(uint8_t value){
    * 
    * */
   
-  #ifdef USE_MODULE_NETWORK_WIFI   
   if(value == 1)
   {
     tkr_sup->EspRestart();
@@ -525,22 +469,21 @@ void mSettings::CommandSet_SystemRestartID(uint8_t value){
     ALOG_DBM(PSTR("REBOOT TEST" DEBUG_INSERT_PAGE_BREAK));
     ALOG_DBM(PSTR("Current bootcount is %d"), Settings.bootcount);
 
-    tkr_set->TestSettings_ShowLocal_Header();
-    tkr_set->TestSettingsLoad();
+    TestSettings_ShowLocal_Header();
+    TestSettingsLoad();
 
     ALOG_DBM(PSTR("Modying bootcount to %d"), Settings.bootcount++);
     
-    tkr_set->SettingsSaveAll();
+    SettingsSaveAll();
 
     ALOG_DBM(PSTR("Settings should be saved now to %d"), Settings.bootcount);
 
-    tkr_set->TestSettings_ShowLocal_Header();
-    tkr_set->TestSettingsLoad();
+    TestSettings_ShowLocal_Header();
+    TestSettingsLoad();
 
     tkr_sup->EspRestart();
 
-  }  
-  #endif // ifdef USE_MODULE_NETWORK_WIFI
+  }
   
 }
 

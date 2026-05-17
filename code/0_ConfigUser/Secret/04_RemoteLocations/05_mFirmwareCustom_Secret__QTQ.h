@@ -130,7 +130,7 @@
 
   
   
-  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+  #define ENABLE_FEATURE__DATABUFFER_LOCK
   
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
@@ -434,7 +434,7 @@
 
 
 
-                                #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+                                #define ENABLE_FEATURE__DATABUFFER_LOCK
                                 #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
                                 #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
                                 #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL

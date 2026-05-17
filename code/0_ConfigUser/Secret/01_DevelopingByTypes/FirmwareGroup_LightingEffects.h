@@ -100,7 +100,6 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -121,37 +120,8 @@
    * SECTION: System Configs
   ************************************/     
 
- 
-
-  
-
-  
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  
-
 
   /***********************************
    * SECTION: Network Configs
@@ -253,7 +223,6 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -281,30 +250,6 @@
   
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  
-
 
   /***********************************
    * SECTION: Network Configs
@@ -2021,7 +1966,6 @@
 #ifdef DEVICE_TESTGROUP__LIGHTING_MULTIPIN
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -2051,17 +1995,11 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-
-  // #undef ESP32
-  // #define ESP8266
-
   
 
   #define ENABLE_DEBUG_MANUAL_DELAYS
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -2148,158 +2086,6 @@
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
   #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
-
-
-//   #define USE_SERIAL_ALTERNATE_TX
-//   
-//   // #define USE_MODULE_CORE_PWM
-
-
-  
-
-//     
-
-
-// // Step A: Replicate WLED to function as it was designed on the webui part. Only when this works for effect/colour controls etc, slowly change it to add more of my original stuff. 
-// // Gain complete understanding/implemenation as is, only then start changes. 
-// // WebUI of WLED style should become its own webserver option (not just the debug version).
-
-//   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-//   
-//   
-
-//   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
-//   // 
-
-//   // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_TESTER
-//   // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
-
-//   
-
-
-//   // #define ENABLE_ADVANCED_DEBUGGING
-//   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-//   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-//   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-//   // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-
-//   //mqtt debug
-//   #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
-//   // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
-
-//   // #define DISABLE_NETWORK
-//   // #define DISABLE_NETWORK_WIFI
-//   #define USE_MODULE_NETWORK_WIFI
-//   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-
-//   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
-
-//   #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
-
-//   // #define DISABLE_SERIAL
-//   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
-
-//   // #undef ESP32
-//   // #define ESP8266
-
-//   
-
-//   #define ENABLE_DEBUG_MANUAL_DELAYS
-
-//   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-//     
-//     /********* Group: Needed to build ************************/
-//     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-//     /********* Group: Ready for full integration ************************/
-//     // 
-//     /********* Group: Testing ************************/
-//     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-//     
-//     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-//     
-//     
-//     #define DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
-//     #define ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
-//     
-//     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-//     #define ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
-//     // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-//     // 
-//     /********* Group: Debug options only ************************/
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_ARRAY
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_OBJECT_INDEXED_LIST
-//     #define ENABLE_DEVFEATURE_PALETTE_GET_NAMES_FROM_PALETTE_WHEN_STATIC
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
-//     #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-//     #define ENABLE_DEBUG_SERIAL
-
-//     #define ENABLE_DEVFEATURE_LIGHT__WEBUI_APPEND_EFFECT_CONFIG_TO_JSON_RESPONSE
-
-//     // Needs significant change to merge WLED and HACS
-//     
-//     // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
-
-//     #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
-
-//     #define ENABLE_DEVFEATURE_LIGHT__BRIGHTNESS_GET_IN_SEGMENTS_INCLUDES_BOTH_SEGMENT_AND_GLOBAL
-
-//     #define ENABLE_DEVFEATURE_LIGHT__WLED_WEBUI_SEND_MY_PALETTE_COLOUR_BARS
-
-//     // #define ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-
-//     // #define ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
-//     // #define ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
-    
-//     #define ENABLE_DEBUG_LINE_HERE
-//     #define ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
-
-//     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
-//     // #
-
-//     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
-
-
-//     
-
-
-
-//     // #define ENABLE_DEVFEATURE_LIGHT__PERMIT_PIXEL_INDEXING_GREATER_THAN_FIRST_ON_PWM_CHANNELS_FOR_MULTIPLE_SEGMENTS
-
-
-
-//     // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-//     // #define ENABLE_LOG_LEVEL_DEBUG
-//     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-//     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-//     
-    
-
-//     // #define ENABLE_DEVFEATURE_LIGHT__PRELOAD_BUSCONFIG_FROM_TEMPLATE_AS_TEMPORARY_MEASURE
-//     
-
 
 
   #define USE_MODULE_TEMPLATE
@@ -2700,7 +2486,6 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #undef ESP32
   // #define ESP8266
@@ -2800,7 +2585,6 @@
 // // WebUI of WLED style should become its own webserver option (not just the debug version).
 
 //   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 //   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -2839,7 +2623,6 @@
 
 //   // #define DISABLE_SERIAL
 //   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
 
 //   // #undef ESP32
 //   // #define ESP8266
@@ -2849,7 +2632,6 @@
 //   #define ENABLE_DEBUG_MANUAL_DELAYS
 
 //   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 //   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -3084,7 +2866,6 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #undef ESP32
   // #define ESP8266
@@ -3190,7 +2971,6 @@
 // // WebUI of WLED style should become its own webserver option (not just the debug version).
 
 //   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 //   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -3228,7 +3008,6 @@
 
 //   // #define DISABLE_SERIAL
 //   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
 
 //   // #undef ESP32
 //   // #define ESP8266
@@ -3238,7 +3017,6 @@
 //   #define ENABLE_DEBUG_MANUAL_DELAYS
 
 //   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 //   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 //   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -3565,7 +3343,6 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #undef ESP32
   // #define ESP8266
@@ -3637,180 +3414,6 @@
 
     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
-
-    // #define ENABLE_DEVFEATURE_LIGHT__PERMIT_PIXEL_INDEXING_GREATER_THAN_FIRST_ON_PWM_CHANNELS_FOR_MULTIPLE_SEGMENTS
-
-
-
-
-    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-    // #define ENABLE_LOG_LEVEL_DEBUG
-    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-    
-    
-
-    // #define ENABLE_DEVFEATURE_LIGHT__PRELOAD_BUSCONFIG_FROM_TEMPLATE_AS_TEMPORARY_MEASURE
-    
-
-
-
-//   #define USE_SERIAL_ALTERNATE_TX
-//   
-//   // #define USE_MODULE_CORE_PWM
-
-
-  
-
-//     
-
-
-// // Step A: Replicate WLED to function as it was designed on the webui part. Only when this works for effect/colour controls etc, slowly change it to add more of my original stuff. 
-// // Gain complete understanding/implemenation as is, only then start changes. 
-// // WebUI of WLED style should become its own webserver option (not just the debug version).
-
-//   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-//   
-//   
-
-//   // #define ESP32
-//   // #undef ESP8266
-
-//   // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
-
-//   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
-//   // 
-
-//   // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_TESTER
-//   // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
-
-//   
-
-
-//   // #define ENABLE_ADVANCED_DEBUGGING
-//   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-//   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-//   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-//   // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-
-//   //mqtt debug
-//   #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
-//   // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
-
-//   // #define DISABLE_NETWORK
-//   // #define DISABLE_NETWORK_WIFI
-//   #define USE_MODULE_NETWORK_WIFI
-//   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-
-//   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
-
-//   #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
-
-//   // #define DISABLE_SERIAL
-//   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
-
-//   // #undef ESP32
-//   // #define ESP8266
-
-//   
-
-//   #define ENABLE_DEBUG_MANUAL_DELAYS
-
-//   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-//     
-//     /********* Group: Needed to build ************************/
-//     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-//     /********* Group: Ready for full integration ************************/
-//     // 
-//     /********* Group: Testing ************************/
-//     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-//     
-//     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-//     
-//     
-//     #define DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
-//     #define ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
-//     
-//     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-//     #define ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
-//     // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-//     // 
-//     /********* Group: Debug options only ************************/
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_ARRAY
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_OBJECT_INDEXED_LIST
-//     #define ENABLE_DEVFEATURE_PALETTE_GET_NAMES_FROM_PALETTE_WHEN_STATIC
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
-//     #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-//     #define ENABLE_DEBUG_SERIAL
-
-//     #define ENABLE_DEVFEATURE_LIGHT__WEBUI_APPEND_EFFECT_CONFIG_TO_JSON_RESPONSE
-
-//     // Needs significant change to merge WLED and HACS
-//     
-//     // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
-
-//     #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
-
-//     #define ENABLE_DEVFEATURE_LIGHT__BRIGHTNESS_GET_IN_SEGMENTS_INCLUDES_BOTH_SEGMENT_AND_GLOBAL
-
-//     #define ENABLE_DEVFEATURE_LIGHT__WLED_WEBUI_SEND_MY_PALETTE_COLOUR_BARS
-
-//     // #define ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-
-//     // #define ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
-//     // #define ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
-    
-//     #define ENABLE_DEBUG_LINE_HERE
-//     #define ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
-
-//     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
-
-//     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
-
-
-//     
-
-
-
-
-//     // #define ENABLE_DEVFEATURE_LIGHT__PERMIT_PIXEL_INDEXING_GREATER_THAN_FIRST_ON_PWM_CHANNELS_FOR_MULTIPLE_SEGMENTS
-
-
-
-
-//     // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-//     // #define ENABLE_LOG_LEVEL_DEBUG
-//     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-//     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-//     
-    
-
-//     // #define ENABLE_DEVFEATURE_LIGHT__PRELOAD_BUSCONFIG_FROM_TEMPLATE_AS_TEMPORARY_MEASURE
-//     
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
 
@@ -3966,10 +3569,6 @@
 
   #define ENABLE_FREERAM_APPENDING_SERIAL
 
-  
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -4006,7 +3605,6 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #undef ESP32
   // #define ESP8266
@@ -4105,13 +3703,11 @@
    * SECTION: System Configs
   ************************************/    
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4256,7 +3852,6 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4452,7 +4047,6 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4467,19 +4061,6 @@
   ************************************/    
  
   #define SETTINGS_HOLDER 1239
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
   /***********************************
    * SECTION: Network Configs
@@ -4712,7 +4293,6 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4728,18 +4308,6 @@
  
   #define SETTINGS_HOLDER 1239
 
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
   /***********************************
    * SECTION: Network Configs

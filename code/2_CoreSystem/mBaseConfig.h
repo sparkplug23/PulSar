@@ -47,8 +47,8 @@ SHOULD NOT rely on other files for pre-defines, other than INI
  * 
  * 
  * *****************************************************************************************************/
-// Store original defines into intermediate macros if USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED is defined
-// #ifdef USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED
+// Store original defines into intermediate macros if USE_DEBUGFEATURE_DEVICE__CLONE_TESTBED is defined
+// #ifdef USE_DEBUGFEATURE_DEVICE__CLONE_TESTBED
 // // Directly redefine the macros with the prefix
 // #undef DEVICENAME_CTR
 // #undef DEVICENAME_FRIENDLY_CTR
@@ -158,10 +158,9 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 //   #define DEBUG_FOR_FAULT
 // #endif
 
+#define USE_MODULE_FILESYSTEM_SDCARD
 
-#define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-#define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-#define ENABLE_DEVFEATURE_SETTINGS__TFS
+#define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
 
 /*********************************************************************************************\
  * This MUST BE CHANGED for ANY parameters in this file to overwrite those saved in settings
@@ -169,6 +168,9 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 #ifndef SETTINGS_HOLDER
 #define SETTINGS_HOLDER             1              // [Reset 1] Change this value (max 32000) to load SECTION1 configuration parameters to flash
 #endif
+
+// #define ENABLE_FEATURE_SETTINGS__IGNORE_USER_DEFINED_FILES // [optional] Disable user defined settings to always use hardcoded compile time values
+
 
 #define SERIALD Serial //serial debug
 #ifndef SERIAL_DEBUG_BAUD_DEFAULT
@@ -202,8 +204,8 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 #ifndef ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 #define ENABLE_FEATURE_WATCHDOG_TIMER
 #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
-#define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-// #error "ENABLE_DEVFEATURE_FASTBOOT_DETECTION is not supported on ESP32C3"
+#define ENABLE_FEATURE_FASTBOOT__DETECTION
+// #error "ENABLE_FEATURE_FASTBOOT__DETECTION is not supported on ESP32C3"
 #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 #endif
@@ -212,7 +214,7 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 #ifndef ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 #define ENABLE_FEATURE_WATCHDOG_TIMER
 #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
-#define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+#define ENABLE_FEATURE_FASTBOOT__DETECTION
 #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
 #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 #endif
@@ -265,9 +267,6 @@ SHOULD NOT rely on other files for pre-defines, other than INI
   #endif
 
 
-
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -527,7 +526,6 @@ SHOULD NOT rely on other files for pre-defines, other than INI
 
 
 #define ENABLE_DEVFEATURE_RTC_SETTINGS
-#define ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
 
 // -- Time - Up to three NTP servers in your region
 #define NTP_SERVER2            "pool.ntp.org"       // [NtpServer1] automatically redirects your request to a geographically close server, ensuring low latency and accurate time. 

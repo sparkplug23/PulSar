@@ -325,7 +325,7 @@ void mWiFi::WiFi2_Sta_Connected_Enter(void)
   connection.link_count++;
 
   // Preserve existing system flags pattern
-  tkr_set->Settings.network.flag.network_wifi = 1;
+  tkr_set->Settings.sysopt_network.bit.network_wifi = 1;
   tkr_set->runtime.global_state.wifi_down = false;
 
   tkr_set->runtime.global_state.network_down = false;
@@ -341,7 +341,7 @@ void mWiFi::WiFi2_Sta_Disconnected_Enter(void)
   
   tkr_set->runtime.global_state.network_down = true;
 
-  tkr_set->Settings.network.flag.network_wifi = 0;
+  tkr_set->Settings.sysopt_network.bit.network_wifi = 0;
   tkr_set->runtime.global_state.wifi_down = true;
   
   // Trigger existing task event flow

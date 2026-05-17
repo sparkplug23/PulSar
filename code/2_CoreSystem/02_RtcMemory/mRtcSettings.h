@@ -10,7 +10,7 @@
 /**
  * @brief RTC Reboot/Fastboot data is made with global functions, so it is safe from TaskManager pointers and be processed immediately in setup()
  **/
-#ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+#ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
 typedef struct {
   uint16_t      valid;                     // 280  (RTC memory offset 100 - sizeof(RTCRBT))
   uint8_t       fast_reboot_count;         // 282
@@ -31,7 +31,7 @@ extern void     RtcFastboot_Save(void);
 extern void     RtcFastboot_Reset(void);
 extern void     RtcFastboot_Load(void);
 extern bool     RtcFastboot_Valid(void);
-#endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+#endif // ENABLE_FEATURE_FASTBOOT__DETECTION
 
 /**
  * @brief 

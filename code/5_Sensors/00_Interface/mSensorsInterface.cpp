@@ -1907,7 +1907,7 @@ void mSensorsInterface::HsbToRgb(float h, float s, float v, uint8_t* r8, uint8_t
 float mSensorsInterface::ConvertTemp(float c)
 {
   float result = c;
-  // if (!isnan(c) && Settings.flag_system.temperature_conversion) {
+  // if (!isnan(c) && Settings.sysopt_system.bit.temperature_conversion) {
   //   result = c * 1.8 + 32;  // Fahrenheit
   // }
   return result;
@@ -1916,7 +1916,7 @@ float mSensorsInterface::ConvertTemp(float c)
 
 char mSensorsInterface::TempUnit(void)
 {
-  return (tkr_set->Settings.flag_system.temperature_conversion) ? 'F' : 'C';
+  return (tkr_set->Settings.sysopt_sensors.bit.temperature_conversion) ? 'F' : 'C';
 }
 
 
@@ -1924,7 +1924,7 @@ float mSensorsInterface::ConvertPressure(float p)
 {
   // float result = p;
 
-  // if (!isnan(p) && Settings.flag_system.pressure_conversion) {
+  // if (!isnan(p) && Settings.sysopt_system.bit.pressure_conversion) {
   //   result = p * 0.75006375541921;  // mmHg
   // }
   // return result;
@@ -1932,7 +1932,7 @@ float mSensorsInterface::ConvertPressure(float p)
 
 String mSensorsInterface::PressureUnit(void)
 {
-  // return (Settings.flag_system.pressure_conversion) ? String(D_UNIT_MILLIMETER_MERCURY) : String(D_UNIT_PRESSURE);
+  // return (Settings.sysopt_system.bit.pressure_conversion) ? String(D_UNIT_MILLIMETER_MERCURY) : String(D_UNIT_PRESSURE);
 }
 
 

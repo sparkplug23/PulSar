@@ -5,161 +5,7 @@
 
 #include "2_CoreSystem/mBaseConfig.h"
 
-#define DATA_BUFFER_TOPIC_MAX_LENGTH    100
-
-// #ifdef USE_MODULE_NETWORK_WEBSERVER
-//   #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
-    #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
-//   #endif
-// #else
-//   #ifndef DATA_BUFFER_PAYLOAD_MAX_LENGTH
-//     #ifdef ESP32
-//       //#define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000
-//     #else
-//       //#define DATA_BUFFER_PAYLOAD_MAX_LENGTH 2000
-//     #endif
-//   #endif
-// #endif //USE_MODULE_NETWORK_WEBSERVER
-
-
-typedef union {
-  uint16_t data;
-  struct {
-    uint16_t hemis : 1;                    // bit 0        = 0=Northern, 1=Southern Hemisphere (=Opposite DST/STD)
-    uint16_t week : 3;                     // bits 1 - 3   = 0=Last week of the month, 1=First, 2=Second, 3=Third, 4=Fourth
-    uint16_t month : 4;                    // bits 4 - 7   = 1=Jan, 2=Feb, ... 12=Dec
-    uint16_t dow : 3;                      // bits 8 - 10  = day of week, 1=Sun, 2=Mon, ... 7=Sat
-    uint16_t hour : 5;                     // bits 11 - 15 = 0-23
-  };
-} TimeRule;
-
-
-enum DATA_BUFFER_FLAG_SOURCE_IDS
-{
-  DATA_BUFFER_FLAG_SOURCE_MQTT=0,
-  DATA_BUFFER_FLAG_SOURCE_WEBUI
-};
-
-
-typedef union 
-{
-  uint16_t data;
-  struct { 
-    // 3 bits (9 values)
-    // (0) DATA_BUFFER_FLAG_SOURCE_MQTT  // Defaulted to 0
-    // (1) DATA_BUFFER_FLAG_SOURCE_WEBUI
-    uint16_t source_id : 4;
-    // Waiting
-    uint16_t waiting : 1;
-    // Encoding format
-    uint16_t encoded_type_id : 1; // json,raw
-    uint16_t reserved : 10;
-  };
-} DATA_BUFFER_FLAGS;
-
-
-#pragma once
-#include <Arduino.h>  // millis(), delay(), Serial
-
-// Keep your existing macros
-#define ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
-// #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
-
-struct DATA_BUFFER {
-  struct TOPIC {
-    char     ctr[DATA_BUFFER_TOPIC_MAX_LENGTH];
-    uint16_t length_used = 0;
-  } topic;
-
-  struct PAYLOAD {
-    char     ctr[DATA_BUFFER_PAYLOAD_MAX_LENGTH];
-    uint16_t length_used = 0;
-  } payload;
-
-  uint16_t isserviced  = 0;   // Set to 0 on new mqtt
-  uint16_t moduleLock  = 0;
-  bool     delayedJSONCommandWaiting  = false;
-  DATA_BUFFER_FLAGS flags;
-
-  // ---------- Lock API ----------
-  inline bool requestLock(uint16_t module, uint32_t timeout_ms = 1000) {
-  #ifdef ENABLE_DEVFEATURE_DATABUFFER_LOCK
-    const unsigned long now = millis();
-
-    // This assumption here is another http thread must release itself to permit this function to proceed
-    while (moduleLock && millis()-now < 1000) delay(1); // wait for a second for buffer lock
-
-    if (millis() - now >= timeout_ms) {
-      #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
-        Serial.printf(PSTR("ERROR: Locking data buffer failed! (%u)\r\n"), (unsigned)moduleLock);
-      #endif
-      return false;
-    }
-
-    moduleLock = module ? module : 255;
-
-    #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
-      Serial.printf(PSTR("DATA buffer requestLock =======================================> (%u)\r\n" DEBUG_INSERT_SECTION_BREAK), (unsigned)moduleLock);
-    #endif
-
-    return true;
-  #else
-    (void)module; (void)timeout_ms;
-    return true;
-  #endif
-  }
-
-  inline bool tryLock(uint16_t module)
-  {
-    if (moduleLock != 0)
-    {      
-      #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
-        Serial.printf(PSTR("DATA buffer tryLock BLOCKED <<<<<<<<<<< (%u)\r\n"), (unsigned)moduleLock);
-      #endif
-      return false;
-    }
-    moduleLock = module ? module : 255;
-    #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
-      Serial.printf(PSTR("DATA buffer tryLock =======================================> (%u)\r\n" DEBUG_INSERT_SECTION_BREAK), (unsigned)moduleLock);
-    #endif
-    return true;
-  }
-
-
-  inline void releaseLock() {
-    #ifdef ENABLE_DEVFEATURE_DATABUFFER_LOCK
-      #ifdef ENABLE_FEATURE_DATABUFFER__LOCK_LOGGING
-        Serial.printf(PSTR("DATA buffer released (%u)\r\n"), (unsigned)moduleLock);
-      #endif
-      moduleLock = 0;
-      delayedJSONCommandWaiting = 0;
-    #endif
-  }
-
-  bool IsDelayedJSONCommandWaiting() {
-    return delayedJSONCommandWaiting;
-  }
-
-  void ClearDeep() {
-    // memset(this, 0, sizeof(DATA_BUFFER)); // cant do this, its destroying itself
-    memset(&topic, 0, sizeof(TOPIC));
-    memset(&payload, 0, sizeof(PAYLOAD));
-    ClearSoft();
-  }
-
-  void ClearSoft() {
-    Serial.printf("DATA buffer ClearSoft <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\r\n");
-    topic.ctr[0] = 0;
-    topic.length_used = 0;
-    payload.ctr[0] = 0;
-    payload.length_used = 0;
-    isserviced = 0;
-  }
-
-};
-// Keep your existing global instance
-extern DATA_BUFFER data_buffer;
-
+#include "DataBuffer.h"
 
 // Easy way to add to the counter
 #define D_MQTT_COMMAND_HANDLED_COUNT_INC data_buffer.isserviced++
@@ -195,12 +41,6 @@ extern DATA_BUFFER data_buffer;
 #endif
 
 
-// #define ENABLE_DEVFEATURE_REMOVE__UNDESIRED_SETTINGS_TEXT_OF_SUBMODULES
-
-
-
-#ifdef ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
-// Unlike tasmota,
 /***
  * I likely want to remove any sensor/driver name here, and limit SettingsTxt to be for system related values
  * ie remove SET_SWITCH_TXT1
@@ -249,7 +89,6 @@ enum SettingsTextIndex {
     #endif // ENABLE_DEVFEATURE_REMOVE__UNDESIRED_SETTINGS_TEXT_OF_SUBMODULES
     SET_FINAL_MAX
    };
-#endif // ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
 
 
 enum CommandSource { SRC_IGNORE, SRC_MQTT, SRC_RESTART, SRC_BUTTON, SRC_SWITCH, SRC_BACKLOG, SRC_SERIAL, SRC_WEBGUI, SRC_WEBCOMMAND, SRC_WEBCONSOLE, SRC_PULSETIMER,
@@ -317,12 +156,29 @@ class mSettings :
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SETTINGS_ID; }
     ~mSettings() {          }
 
-  // Settings persistence is filesystem-only on ESP32 and ESP8266.
-  // RTC memory remains used separately for fastboot/quick boot state.
+  #ifdef ESP8266
+    #if AUTOFLASHSIZE
+      #include "flash_hal.h"
+      // From libraries/EEPROM/EEPROM.cpp EEPROMClass
+      const uint32_t SPIFFS_END = (FS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
+    #else
+      // extern "C" uint32_t _FS_end;
+      // From libraries/EEPROM/EEPROM.cpp EEPROMClass
+      const uint32_t SPIFFS_END = ((uint32_t)&_FS_end - 0x40200000) / SPI_FLASH_SEC_SIZE;
+    #endif  // AUTOFLASHSIZE
+    // Version 4.2 config = eeprom area
+    const uint32_t SETTINGS_LOCATION = SPIFFS_END;  // No need for SPIFFS as it uses EEPROM area
+
+    // Version 5.2 allow for more flash space
+    const uint8_t CFG_ROTATES = 1;//8;          // Number of flash sectors used (handles uploads)
+
+    uint32_t settings_location = SETTINGS_LOCATION;
+    // uint32_t settings_crc = 0;
+    uint32_t settings_crc32 = 0;
+    uint8_t *settings_buffer = nullptr;
+  #endif // ESP8266
 
   void JsonAppend_Settings();    
-  void init(void);
-  uint16_t CountCharInCtr(const char* tosearch, char tofind);
   int16_t GetIndexOfNthCharPosition(const char* tosearch, char tofind, uint8_t occurance_count);
   void Function_Template_Load();
   void SettingsWrite(const void *pSettings, unsigned nSettingsLen);
@@ -334,18 +190,24 @@ class mSettings :
   uint32_t SettingsRead(void *data, size_t size);
   void SettingsSaveAll(void);
   uint32_t GetSettingsAddress(void);
-  void SettingsSave(uint8_t rotate);  // rotate is now legacy naming: 0 = save-if-changed, non-zero = force save
-  void SettingsUpdateFileWriteTimeAscii(void);
+  void SettingsSave(uint8_t rotate);
   void SettingsLoad(void);
   void SettingsDelta();
   void SettingsErase(uint8_t type);
   bool SettingsEraseConfig(void) ;
   void SettingsSdkErase(void);
   void SettingsDefault(void);
+  void SystemSettings_DefaultHeader(void);
+  void SystemSettings_DefaultBody(void);
+
+  bool SaveSettings__LastKnownGood(void);
+  bool LoadSettings__RestoreFrom_LastKnownGood(void);
 
   uint32_t GetCfgCrc32(uint8_t *bytes, uint32_t size);
   uint32_t GetSettingsCrc32(void);
 
+  void SettingsResetStd(void);
+  void SettingsResetDst(void);
 
   typedef union {
     uint8_t data;
@@ -430,121 +292,495 @@ struct SystemName{
 
 
 #define PARAM8_SIZE 18            // Number of param bytes (SetOption)
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
-  uint32_t data;                           // Allow bit manipulation using SetOption
-  struct {                                 // SetOption0 .. SetOption31
-    uint32_t save_state : 1;               // bit 0              - SetOption0  - Save power state and use after restart
-    uint32_t button_restrict : 1;          // bit 1              - SetOption1  - Control button multipress
-    uint32_t value_units : 1;              // bit 2              - SetOption2  - Add units to JSON status messages
-    uint32_t mqtt_enabled : 1;             // bit 3              - SetOption3  - Control MQTT
-    uint32_t mqtt_response : 1;            // bit 4              - SetOption4  - Switch between MQTT RESULT or COMMAND
-    uint32_t mqtt_power_retain : 1;        // bit 5              - CMND_POWERRETAIN
-    uint32_t mqtt_button_retain : 1;       // bit 6              - CMND_BUTTONRETAIN
-    uint32_t mqtt_switch_retain : 1;       // bit 7              - CMND_SWITCHRETAIN
-    uint32_t temperature_conversion : 1;   // bit 8              - SetOption8  - Switch between Celsius or Fahrenheit
-    uint32_t mqtt_sensor_retain : 1;       // bit 9              - CMND_SENSORRETAIN
-    uint32_t mqtt_offline : 1;             // bit 10             - SetOption10 - Control MQTT LWT message format
-    uint32_t button_swap : 1;              // bit 11 (v5.1.6)    - SetOption11 - Swap button single and double press functionality
-    uint32_t stop_flash_rotate : 1;        // bit 12 (v5.2.0)    - SetOption12 - Switch between dynamic or fixed slot flash save location
-    uint32_t button_single_press_only : 1;            // bit 13 (v5.4.0)    - SetOption13 - Support only single press to speed up button press recognition
-    uint32_t interlock : 1;                // bit 14 (v5.6.0)    - CMND_INTERLOCK
-    uint32_t pwm_control : 1;              // bit 15 (v5.8.1)    - SetOption15 - Switch between commands PWM or COLOR/DIMMER/CT/CHANNEL
-    uint32_t ws_clock_reverse : 1;         // bit 16 (v5.8.1)    - SetOption16 - Switch between clockwise or counter-clockwise
-    uint32_t decimal_text : 1;             // bit 17 (v5.8.1)    - SetOption17 - Switch between decimal or hexadecimal output
-    uint32_t light_signal : 1;             // bit 18 (v5.10.0c)  - SetOption18 - Pair light signal with CO2 sensor
-    uint32_t hass_discovery : 1;           // bit 19 (v5.11.1a)  - SetOption19 - Control Home Assistantautomatic discovery (See SetOption59)
-    uint32_t not_power_linked : 1;         // bit 20 (v5.11.1f)  - SetOption20 - Control power in relation to Dimmer/Color/Ct changes
-    uint32_t no_power_on_check : 1;        // bit 21 (v5.11.1i)  - SetOption21 - Show voltage even if powered off
-    uint32_t mqtt_serial : 1;              // bit 22 (v5.12.0f)  - CMND_SERIALSEND and CMND_SERIALLOG
-    uint32_t mqtt_serial_raw : 1;          // bit 23 (v6.1.1c)   - CMND_SERIALSEND3
-    uint32_t pressure_conversion : 1;      // bit 24 (v6.3.0.2)  - SetOption24 - Switch between hPa or mmHg pressure unit
-    uint32_t knx_enabled : 1;              // bit 25 (v5.12.0l)  - CMND_KNX_ENABLED
-    uint32_t device_index_enable : 1;      // bit 26 (v5.13.1a)  - SetOption26 - Switch between POWER or POWER1
-    uint32_t knx_enable_enhancement : 1;   // bit 27 (v5.14.0a)  - CMND_KNX_ENHANCED
-    uint32_t rf_receive_decimal : 1;       // bit 28 (v6.0.0a)   - SetOption28 - RF receive data format
-    uint32_t ir_receive_decimal : 1;       // bit 29 (v6.0.0a)   - SetOption29 - IR receive data format
-    uint32_t mqtt_switches : 1;               // bit 30 (v6.0.0b)   - SetOption30 - Enforce HAss autodiscovery as light
-    uint32_t global_state : 1;             // bit 31 (v6.1.0)    - SetOption31 - Control link led blinking
-  };
-} SysBitfield_System;
 
 
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
-  uint32_t data;                           // Allow bit manipulation using SetOption
-  struct {                                 // SetOption50 .. SetOption81
-    uint32_t timers_enable : 1;            // bit 0 (v6.1.1b)    - CMND_TIMERS
-    uint32_t user_esp8285_enable : 1;      // bit 1 (v6.1.1.14)  - SetOption51 - Enable ESP8285 user GPIO's
-    uint32_t time_append_timezone : 1;     // bit 2 (v6.2.1.2)   - SetOption52 - Append timezone to JSON time
-    uint32_t gui_hostname_ip : 1;          // bit 3 (v6.2.1.20)  - SetOption53 - Show hostanme and IP address in GUI main menu
-    uint32_t tuya_apply_o20 : 1;           // bit 4 (v6.3.0.4)   - SetOption54 - Apply SetOption20 settings to Tuya device
-    uint32_t mdns_enabled : 1;             // bit 5 (v6.4.1.4)   - SetOption55 - Control mDNS service
-    uint32_t use_wifi_scan : 1;            // bit 6 (v6.3.0.10)  - SetOption56 - Scan wifi network at restart for configured AP's
-    uint32_t use_wifi_rescan : 1;          // bit 7 (v6.3.0.10)  - SetOption57 - Scan wifi network every 44 minutes for configured AP's
-    uint32_t receive_raw : 1;              // bit 8 (v6.3.0.11)  - SetOption58 - Add IR Raw data to JSON message
-    uint32_t hass_tele_on_power : 1;       // bit 9 (v6.3.0.13)  - SetOption59 - Send tele/%topic%/STATE in addition to stat/%topic%/RESULT
-    uint32_t sleep_normal : 1;             // bit 10 (v6.3.0.15) - SetOption60 - Enable normal sleep instead of dynamic sleep
-    uint32_t button_switch_force_local : 1;// bit 11 (v6.3.0.16) - SetOption61 - Force local operation when button/switch topic is set
-    uint32_t no_hold_retain : 1;           // bit 12 (v6.4.1.19) - SetOption62 - Don't use retain flag on HOLD messages
-    uint32_t no_power_feedback : 1;        // bit 13 (v6.5.0.9)  - SetOption63 - Don't scan relay power state at restart
-    uint32_t use_underscore : 1;           // bit 14 (v6.5.0.12) - SetOption64 - Enable "_" instead of "-" as sensor index separator
-    uint32_t fast_power_cycle_disable : 1; // bit 15 (v6.6.0.20) - SetOption65 - Disable fast power cycle detection for device reset
-    uint32_t tuya_serial_mqtt_publish : 1; // bit 16 (v6.6.0.21) - SetOption66 - Enable TuyaMcuReceived messages over Mqtt
-    uint32_t buzzer_enable : 1;            // bit 17 (v6.6.0.1)  - SetOption67 - Enable buzzer when available
-    uint32_t pwm_multi_channels : 1;       // bit 18 (v6.6.0.3)  - SetOption68 - Enable multi-channels PWM instead of Color PWM
-    uint32_t ex_tuya_dimmer_min_limit : 1; // bit 19 (v6.6.0.5)  - SetOption69 - Limits Tuya dimmers to minimum of 10% (25) when enabled.
-    uint32_t energy_weekend : 1;           // bit 20 (v6.6.0.8)  - CMND_TARIFF
-    uint32_t dds2382_model : 1;            // bit 21 (v6.6.0.14) - SetOption71 - Select different Modbus registers for Active Energy (#6531)
-    uint32_t hardware_energy_total : 1;    // bit 22 (v6.6.0.15) - SetOption72 - Enable hardware energy total counter as reference (#6561)
-    uint32_t ex_cors_enabled : 1;          // bit 23 (v7.0.0.1)  - SetOption73 - Enable HTTP CORS
-    uint32_t ds18x20_internal_pullup : 1;  // bit 24 (v7.0.0.1)  - SetOption74 - Enable internal pullup for single DS18x20 sensor
-    uint32_t grouptopic_mode : 1;          // bit 25 (v7.0.0.1)  - SetOption75 - GroupTopic replaces %topic% (0) or fixed topic cmnd/grouptopic (1)
-    uint32_t bootcount_update : 1;         // bit 26 (v7.0.0.4)  - SetOption76 - Enable incrementing bootcount when deepsleep is enabled
-    uint32_t slider_dimmer_stay_on : 1;    // bit 27 (v7.0.0.6)  - SetOption77 - Do not power off if slider moved to far left
-    uint32_t compatibility_check : 1;      // bit 28 (v7.1.2.6)  - SetOption78 - Disable OTA compatibility check
-    uint32_t counter_reset_on_tele : 1;    // bit 29 (v8.1.0.1)  - SetOption79 - Enable resetting of counters after telemetry was sent
-    uint32_t shutter_mode : 1;             // bit 30 (v6.6.0.14) - SetOption80 - Enable shutter support
-    uint32_t pcf8574_ports_inverted : 1;   // bit 31 (v6.6.0.14) - SetOption81 - Invert all ports on PCF8574 devices
-    uint32_t network_wifi : 1;             // bit 13 (v8.3.1.3)  - CMND_WIFI
-    uint32_t network_ethernet : 1;         // bit 14 (v8.3.1.3)  - CMND_ETHERNET
-  };
-} SysBitfield_Network;
 
 
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
-  uint8_t data;                           // Allow bit manipulation using SetOption
-  struct {                                 // SetOption0 .. SetOption31
-    uint8_t buzzer_freq_mode : 1;               // bit 0              - SetOption0  - Save power state and use after restart
-    uint8_t buzzer_enable : 1;
-    uint8_t reserved : 6;          // bit 1              - SetOption1  - Control button multipress
-   
-  };
-} SysBitfield_Drivers;
 
+
+
+/*******************************************************************************************************************************************************************
+********************************************************************************************************************************************************************
+** SECITON: BitFields **********************************************************************************************************************************************
+********************************************************************************************************************************************************************
+*******************************************************************************************************************************************************************/
+
+/*******************************************************************************************************************************************************************
+********************************************************************************************************************************************************************
+** SECTION: System Options
+**
+** PulSar option model
+** -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+** Each option group contains:
+**
+**   bit     = compact boolean flags, stored in a bitfield
+**   params  = named numeric parameters, stored as explicit typed fields
+**
+** SetOption IDs are now only an API/command namespace.
+** They do not define how the value is stored.
+**
+** Suggested ranges:
+**   100..199 = System
+**   200..299 = Network
+**   300..399 = Drivers
+**   400..499 = Sensors
+**   500..599 = Lights
+**   600..699 = Power / energy
+**   700..799 = Rules / event layer
+**
+** Examples:
+**   SetOption100 -> sysopt_system.bit.save_state
+**   SetOption101 -> sysopt_system.params.boot_loop_offset
+**   SetOption200 -> sysopt_network.bit.mdns_enabled
+**   SetOption201 -> sysopt_network.params.mdns_delayed_start_s
+**
+********************************************************************************************************************************************************************
+*******************************************************************************************************************************************************************/
+
+
+// ============================================================================
+// System options
+// ============================================================================
 
 typedef union {
-  uint16_t data;
+  uint32_t data;
+
   struct {
-    uint16_t spare0 : 1;
-    uint16_t reserved : 15;     
+    uint32_t save_state               : 1;  // SetOption100 - Save power/runtime state and restore after restart
+    uint32_t mqtt_enabled             : 1;  // SetOption101 - Enable MQTT
+    uint32_t mqtt_power_retain        : 1;  // SetOption102 - Use MQTT retain for power messages
+    uint32_t mqtt_button_retain       : 1;  // SetOption103 - Use MQTT retain for button messages
+    uint32_t mqtt_switch_retain       : 1;  // SetOption104 - Use MQTT retain for switch messages
+    uint32_t button_single_press_only : 1;  // SetOption105 - Support only single press for faster button response
+    uint32_t interlock                : 1;  // SetOption106 - Enable relay/power interlock
+    uint32_t decimal_text             : 1;  // SetOption107 - Use decimal instead of hexadecimal text output
+    uint32_t ex_cors_enabled          : 1;  // SetOption108 - Enable HTTP CORS
+    uint32_t compatibility_check      : 1;  // SetOption109 - Enable/disable OTA compatibility check
+    uint32_t gui_no_state_text        : 1;  // SetOption110 - Disable GUI state text display
+
+    uint32_t timers_enable            : 1;  // bit 11
+    uint32_t sleep_normal             : 1;  // bit 12
+    uint32_t reserved13               : 1;
+    uint32_t reserved14               : 1;
+    uint32_t reserved15               : 1;
+    uint32_t reserved16               : 1;
+    uint32_t reserved17               : 1;
+    uint32_t reserved18               : 1;
+    uint32_t reserved19               : 1;
+    uint32_t reserved20               : 1;
+    uint32_t reserved21               : 1;
+    uint32_t reserved22               : 1;
+    uint32_t reserved23               : 1;
+    uint32_t reserved24               : 1;
+    uint32_t reserved25               : 1;
+    uint32_t reserved26               : 1;
+    uint32_t reserved27               : 1;
+    uint32_t reserved28               : 1;
+    uint32_t reserved29               : 1;
+    uint32_t reserved30               : 1;
+    uint32_t reserved31               : 1;
   };
-} SysBitfield_Lighting;
+} SystemBitField__System;
 
 
-// struct LightSettings{
-//   uint8_t light_brightness_as_percentage;
-//   uint8_t light_fade;          // 4A1
-//   uint8_t light_speed;         // 4A2
-//   uint8_t light_scheme;        // 4A3
-//   uint8_t light_width;         // 4A4
-//   uint16_t light_rotation;     // 39E
-//   uint16_t light_pixels;       // 496
-//   uint8_t light_correction;    // 49D
-//   uint8_t light_dimmer;        // 49E
-//   uint16_t light_wakeup;       // 4A6
-//   uint8_t type; //phase out now with multipin?
-//   uint16_t size;
-// };
+struct SystemParams__System
+{
+  uint8_t  boot_loop_offset;       // SetOption150 - Fastboot restart count offset before recovery stages begin
+  uint16_t key_hold_time_ms;       // SetOption151 - Button/switch hold detection threshold
+  uint16_t backlog_delay_ms;       // SetOption152 - Minimum delay between backlog commands
+};
 
+
+struct SystemOptions__System
+{
+  SystemBitField__System bit;
+  SystemParams__System   param;
+};
+
+
+// ============================================================================
+// Network options
+// ============================================================================
+
+typedef union {
+  uint32_t data;
+
+  struct {
+    uint32_t mdns_enabled             : 1;  // SetOption200 - Enable mDNS service
+    uint32_t use_wifi_scan            : 1;  // SetOption201 - Scan WiFi networks at restart
+    uint32_t use_wifi_rescan          : 1;  // SetOption202 - Periodically rescan WiFi networks
+    uint32_t sleep_normal             : 1;  // SetOption203 - Use normal sleep instead of dynamic sleep
+    uint32_t fast_power_cycle_disable : 1;  // SetOption204 - Disable fast power-cycle reset detection
+    uint32_t network_wifi             : 1;  // SetOption205 - Enable WiFi networking
+    uint32_t network_ethernet         : 1;  // SetOption206 - Enable Ethernet networking
+    uint32_t dns_ipv6_priority        : 1;  // SetOption207 - Prefer IPv6 DNS when available
+
+    uint32_t reserved08               : 1;
+    uint32_t reserved09               : 1;
+    uint32_t reserved10               : 1;
+    uint32_t reserved11               : 1;
+    uint32_t reserved12               : 1;
+    uint32_t reserved13               : 1;
+    uint32_t reserved14               : 1;
+    uint32_t reserved15               : 1;
+    uint32_t reserved16               : 1;
+    uint32_t reserved17               : 1;
+    uint32_t reserved18               : 1;
+    uint32_t reserved19               : 1;
+    uint32_t reserved20               : 1;
+    uint32_t reserved21               : 1;
+    uint32_t reserved22               : 1;
+    uint32_t reserved23               : 1;
+    uint32_t reserved24               : 1;
+    uint32_t reserved25               : 1;
+    uint32_t reserved26               : 1;
+    uint32_t reserved27               : 1;
+    uint32_t reserved28               : 1;
+    uint32_t reserved29               : 1;
+    uint32_t reserved30               : 1;
+    uint32_t reserved31               : 1;
+  };
+} SystemBitField__Network;
+
+
+struct SystemParams__Network
+{
+  uint16_t mdns_delayed_start_s;      // SetOption250 - Delay before mDNS starts
+  uint16_t gratuitous_arp_s;          // SetOption251 - Interval between gratuitous ARP requests
+  uint16_t wifi_rescan_interval_min;  // SetOption252 - WiFi rescan interval
+};
+
+
+struct SystemOptions__Network
+{
+  SystemBitField__Network bit;
+  SystemParams__Network   param;
+};
+
+
+// ============================================================================
+// Driver / actuator options
+// ============================================================================
+
+typedef union {
+  uint32_t data;
+
+  struct {
+    uint32_t buzzer_freq_mode         : 1;  // SetOption300 - Enable alternate buzzer frequency mode
+    uint32_t buzzer_enable            : 1;  // SetOption301 - Enable buzzer when available
+    uint32_t use_esp32_temperature    : 1;  // SetOption302 - Enable ESP32 internal temperature reporting
+    uint32_t ws_clock_reverse         : 1;  // SetOption303 - Reverse WS2812/clocked LED direction where supported
+    uint32_t receive_raw              : 1;  // SetOption304 - Add raw received data to JSON messages
+    uint32_t rf_receive_decimal       : 1;  // SetOption305 - Use decimal RF receive data format
+    uint32_t ir_receive_decimal       : 1;  // SetOption306 - Use decimal IR receive data format
+    uint32_t artnet_autorun           : 1;  // SetOption307 - Start DMX ArtNet at boot
+    uint32_t neopool_outputsensitive  : 1;  // SetOption308 - Output NeoPool sensitive data
+    uint32_t counter_both_edges       : 1;  // SetOption309 - Count both rising and falling counter edges
+
+    uint32_t reserved10               : 1;
+    uint32_t reserved11               : 1;
+    uint32_t reserved12               : 1;
+    uint32_t reserved13               : 1;
+    uint32_t reserved14               : 1;
+    uint32_t reserved15               : 1;
+    uint32_t reserved16               : 1;
+    uint32_t reserved17               : 1;
+    uint32_t reserved18               : 1;
+    uint32_t reserved19               : 1;
+    uint32_t reserved20               : 1;
+    uint32_t reserved21               : 1;
+    uint32_t reserved22               : 1;
+    uint32_t reserved23               : 1;
+    uint32_t reserved24               : 1;
+    uint32_t reserved25               : 1;
+    uint32_t reserved26               : 1;
+    uint32_t reserved27               : 1;
+    uint32_t reserved28               : 1;
+    uint32_t reserved29               : 1;
+    uint32_t reserved30               : 1;
+    uint32_t reserved31               : 1;
+  };
+} SystemBitField__Drivers;
+
+
+struct SystemParams__Drivers
+{
+  uint8_t  ir_unknown_threshold;      // SetOption350 - Minimum packet size treated as meaningful UNKNOWN IR
+  uint8_t  ir_tolerance_percent;      // SetOption351 - IR matching tolerance percentage
+  uint16_t bistable_pulse_ms;         // SetOption352 - Pulse time for bistable/latching relays
+  uint8_t  rotary_max_step;           // SetOption353 - Rotary encoder step boundary
+  uint8_t  hold_ignore_s;             // SetOption354 - Ignore button/shutter changes for this many seconds
+};
+
+
+struct SystemOptions__Drivers
+{
+  SystemBitField__Drivers bit;
+  SystemParams__Drivers   param;
+};
+
+
+// ============================================================================
+// Sensor options
+// ============================================================================
+
+typedef union {
+  uint32_t data;
+
+  struct {
+    uint32_t button_restrict           : 1;  // SetOption400 - Control button multipress behaviour
+    uint32_t temperature_conversion    : 1;  // SetOption401 - Temperature unit conversion
+    uint32_t pressure_conversion       : 1;  // SetOption402 - Pressure unit conversion
+    uint32_t ds18x20_internal_pullup   : 1;  // SetOption403 - Enable internal pull-up for single DS18x20
+    uint32_t hx711_json_weight_change  : 1;  // SetOption404 - Publish JSON message on HX711 weight change
+    uint32_t mhz19b_abc_disable        : 1;  // SetOption405 - Disable MH-Z19(B) automatic baseline correction
+
+    uint32_t reserved06                : 1;
+    uint32_t reserved07                : 1;
+    uint32_t reserved08                : 1;
+    uint32_t reserved09                : 1;
+    uint32_t reserved10                : 1;
+    uint32_t reserved11                : 1;
+    uint32_t reserved12                : 1;
+    uint32_t reserved13                : 1;
+    uint32_t reserved14                : 1;
+    uint32_t reserved15                : 1;
+    uint32_t reserved16                : 1;
+    uint32_t reserved17                : 1;
+    uint32_t reserved18                : 1;
+    uint32_t reserved19                : 1;
+    uint32_t reserved20                : 1;
+    uint32_t reserved21                : 1;
+    uint32_t reserved22                : 1;
+    uint32_t reserved23                : 1;
+    uint32_t reserved24                : 1;
+    uint32_t reserved25                : 1;
+    uint32_t reserved26                : 1;
+    uint32_t reserved27                : 1;
+    uint32_t reserved28                : 1;
+    uint32_t reserved29                : 1;
+    uint32_t reserved30                : 1;
+    uint32_t reserved31                : 1;
+  };
+} SystemBitField__Sensors;
+
+
+struct SystemParams__Sensors
+{
+  uint8_t decimal_precision;          // SetOption450 - Sensor decimal precision, 0..3
+};
+
+
+struct SystemOptions__Sensors
+{
+  SystemBitField__Sensors bit;
+  SystemParams__Sensors   param;
+};
+
+
+// ============================================================================
+// Lighting options
+// ============================================================================
+
+typedef union {
+  uint32_t data;
+
+  struct {
+    uint32_t pwm_multi_channels        : 1;  // SetOption500 - Enable multi-channel PWM instead of colour PWM
+
+    uint32_t reserved01                : 1;
+    uint32_t reserved02                : 1;
+    uint32_t reserved03                : 1;
+    uint32_t reserved04                : 1;
+    uint32_t reserved05                : 1;
+    uint32_t reserved06                : 1;
+    uint32_t reserved07                : 1;
+    uint32_t reserved08                : 1;
+    uint32_t reserved09                : 1;
+    uint32_t reserved10                : 1;
+    uint32_t reserved11                : 1;
+    uint32_t reserved12                : 1;
+    uint32_t reserved13                : 1;
+    uint32_t reserved14                : 1;
+    uint32_t reserved15                : 1;
+    uint32_t reserved16                : 1;
+    uint32_t reserved17                : 1;
+    uint32_t reserved18                : 1;
+    uint32_t reserved19                : 1;
+    uint32_t reserved20                : 1;
+    uint32_t reserved21                : 1;
+    uint32_t reserved22                : 1;
+    uint32_t reserved23                : 1;
+    uint32_t reserved24                : 1;
+    uint32_t reserved25                : 1;
+    uint32_t reserved26                : 1;
+    uint32_t reserved27                : 1;
+    uint32_t reserved28                : 1;
+    uint32_t reserved29                : 1;
+    uint32_t reserved30                : 1;
+    uint32_t reserved31                : 1;
+  };
+} SystemBitField__Lights;
+
+
+struct SystemParams__Lights
+{
+  uint8_t reserved;
+};
+
+
+struct SystemOptions__Lights
+{
+  SystemBitField__Lights bit;
+  SystemParams__Lights   param;
+};
+
+
+// ============================================================================
+// Power / energy options
+// ============================================================================
+
+typedef union {
+  uint32_t data;
+
+  struct {
+    uint32_t energy_weekend            : 1;  // SetOption600 - Enable weekend energy tariff behaviour
+    uint32_t hardware_energy_total     : 1;  // SetOption601 - Use hardware energy total counter as reference
+    uint32_t no_export_energy_today    : 1;  // SetOption602 - Do not add export energy to today's energy total
+
+    uint32_t reserved03                : 1;
+    uint32_t reserved04                : 1;
+    uint32_t reserved05                : 1;
+    uint32_t reserved06                : 1;
+    uint32_t reserved07                : 1;
+    uint32_t reserved08                : 1;
+    uint32_t reserved09                : 1;
+    uint32_t reserved10                : 1;
+    uint32_t reserved11                : 1;
+    uint32_t reserved12                : 1;
+    uint32_t reserved13                : 1;
+    uint32_t reserved14                : 1;
+    uint32_t reserved15                : 1;
+    uint32_t reserved16                : 1;
+    uint32_t reserved17                : 1;
+    uint32_t reserved18                : 1;
+    uint32_t reserved19                : 1;
+    uint32_t reserved20                : 1;
+    uint32_t reserved21                : 1;
+    uint32_t reserved22                : 1;
+    uint32_t reserved23                : 1;
+    uint32_t reserved24                : 1;
+    uint32_t reserved25                : 1;
+    uint32_t reserved26                : 1;
+    uint32_t reserved27                : 1;
+    uint32_t reserved28                : 1;
+    uint32_t reserved29                : 1;
+    uint32_t reserved30                : 1;
+    uint32_t reserved31                : 1;
+  };
+} SystemBitField__Power;
+
+
+struct SystemParams__Power
+{
+  uint8_t  max_power_retry;             // SetOption650 - Max retries before deciding power-limit overflow
+  int16_t  over_temperature_c;          // SetOption651 - Turn all power off at or above this temperature
+
+  uint8_t  calc_resolution;             // SetOption652 - Calculation display/reporting resolution
+  uint8_t  weight_resolution;           // SetOption653 - Weight display/reporting resolution
+  uint8_t  frequency_resolution;        // SetOption654 - Frequency display/reporting resolution
+  uint8_t  axis_resolution;             // SetOption655 - Axis display/reporting resolution
+  uint8_t  current_resolution;          // SetOption656 - Current display/reporting resolution
+  uint8_t  voltage_resolution;          // SetOption657 - Voltage display/reporting resolution
+  uint8_t  wattage_resolution;          // SetOption658 - Wattage display/reporting resolution
+  uint8_t  emulation;                   // SetOption659 - Energy/power emulation mode
+  uint8_t  energy_resolution;           // SetOption660 - Energy display/reporting resolution
+  uint8_t  pressure_resolution;         // SetOption661 - Pressure display/reporting resolution
+  uint8_t  humidity_resolution;         // SetOption662 - Humidity display/reporting resolution
+  uint8_t  temperature_resolution;      // SetOption663 - Temperature display/reporting resolution
+
+  uint16_t power_on_delay_ms;           // SetOption664 - Delay at power-on, milliseconds
+  uint16_t power_on_delay_s;            // SetOption665 - Delay before activating relays, seconds
+};
+
+
+struct SystemOptions__Power
+{
+  SystemBitField__Power bit;
+  SystemParams__Power   param;
+};
+
+
+// ============================================================================
+// Rules/event options
+// ============================================================================
+
+typedef union {
+  uint32_t data;
+
+  struct {
+    uint32_t system_init        : 1;  // SetOption700 - Event: system initialised
+    uint32_t system_boot        : 1;  // SetOption701 - Event: system boot completed
+    uint32_t time_init          : 1;  // SetOption702 - Event: time subsystem initialised
+    uint32_t time_set           : 1;  // SetOption703 - Event: valid time acquired/set
+
+    uint32_t mqtt_connected     : 1;  // SetOption704 - Event: MQTT connected
+    uint32_t mqtt_disconnected  : 1;  // SetOption705 - Event: MQTT disconnected
+
+    uint32_t wifi_connected     : 1;  // SetOption706 - Event: WiFi connected
+    uint32_t wifi_disconnected  : 1;  // SetOption707 - Event: WiFi disconnected
+
+    uint32_t eth_connected      : 1;  // SetOption708 - Event: Ethernet connected
+    uint32_t eth_disconnected   : 1;  // SetOption709 - Event: Ethernet disconnected
+
+    uint32_t http_init          : 1;  // SetOption710 - Event: HTTP/WebUI initialised
+
+    uint32_t shutter_moved      : 1;  // SetOption711 - Event: shutter moved
+    uint32_t shutter_moving     : 1;  // SetOption712 - Event: shutter moving
+
+    uint32_t reserved13         : 1;
+    uint32_t reserved14         : 1;
+    uint32_t reserved15         : 1;
+    uint32_t reserved16         : 1;
+    uint32_t reserved17         : 1;
+    uint32_t reserved18         : 1;
+    uint32_t reserved19         : 1;
+    uint32_t reserved20         : 1;
+    uint32_t reserved21         : 1;
+    uint32_t reserved22         : 1;
+    uint32_t reserved23         : 1;
+    uint32_t reserved24         : 1;
+    uint32_t reserved25         : 1;
+    uint32_t reserved26         : 1;
+    uint32_t reserved27         : 1;
+    uint32_t reserved28         : 1;
+    uint32_t reserved29         : 1;
+    uint32_t reserved30         : 1;
+    uint32_t reserved31         : 1;
+  };
+} SystemBitField__Rules;
+
+
+struct SystemParams__Rules
+{
+  uint8_t reserved;
+};
+
+
+struct SystemOptions__Rules
+{
+  SystemBitField__Rules bit;
+  SystemParams__Rules   param;
+};
+
+
+
+
+/*******************************************************************************************************************************************************************
+********************************************************************************************************************************************************************
+** SECITON: Next ***************************************************************************************************************************************************
+********************************************************************************************************************************************************************
+*******************************************************************************************************************************************************************/
 
 // Buffer that stores names of sensors as delimeter list
 #ifndef DEVICENAMEBUFFER_NAME_INDEX_LENGTH // Memory reduction
@@ -566,263 +802,6 @@ struct DeviceNameBuffer{ // size(230)
 };
 
 
-typedef union {
-  uint8_t data;
-  struct {
-    uint8_t spare0 : 1;
-    uint8_t spare1 : 1;
-    // uint8_t bh1750_1_resolution : 2;       // Sensor10 1,2,3
-    // uint8_t bh1750_2_resolution : 2;
-    uint8_t hx711_json_weight_change : 1;  // Sensor34 8,x - Enable JSON message on weight change
-    uint8_t mhz19b_abc_disable : 1;        // Disable ABC (Automatic Baseline Correction for MHZ19(B) (0 = Enabled (default), 1 = Disabled with Sensor15 command)
-  };
-} SensorCfg1;
-
-// Bitfield to be used for any SetOption50 .. SetOption81 persistent single bit
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
-  uint32_t data;                           // Allow bit manipulation using SetOption
-  struct {                                 // SetOption50 .. SetOption81
-    uint32_t timers_enable : 1;            // bit 0 (v6.1.1b)    - CMND_TIMERS
-    uint32_t user_esp8285_enable : 1;      // bit 1 (v6.1.1.14)  - SetOption51  - (GPIO) Enable ESP8285 user GPIO's (1)
-    uint32_t time_append_timezone : 1;     // bit 2 (v6.2.1.2)   - SetOption52  - (Time) Append timezone to JSON time (1)
-    uint32_t gui_hostname_ip : 1;          // bit 3 (v6.2.1.20)  - SetOption53  - (GUI) Show hostname and IP address in GUI main menu (1)
-    uint32_t tuya_apply_o20 : 1;           // bit 4 (v6.3.0.4)   - SetOption54  - (Tuya) Apply SetOption20 settings to Tuya device (1)
-    uint32_t mdns_enabled : 1;             // bit 5 (v6.4.1.4)   - SetOption55  - (mDNS) Service on (1) or off (0)
-    uint32_t use_wifi_scan : 1;            // bit 6 (v6.3.0.10)  - SetOption56  - (Wifi) Scan network at restart for configured AP's (1) or used stored AP (0)
-    uint32_t use_wifi_rescan : 1;          // bit 7 (v6.3.0.10)  - SetOption57  - (Wifi) Scan network every 44 minutes for configured AP's (1)
-    uint32_t receive_raw : 1;              // bit 8 (v6.3.0.11)  - SetOption58  - (IR) Add IR Raw data to JSON message (1)
-    uint32_t hass_tele_on_power : 1;       // bit 9 (v6.3.0.13)  - SetOption59  - (MQTT) Send tele/%topic%/STATE in addition to stat/%topic%/RESULT (1)
-    uint32_t sleep_normal : 1;             // bit 10 (v6.3.0.15) - SetOption60  - (Sleep) Enable normal sleep (1) instead of dynamic sleep (0)
-    uint32_t button_switch_force_local : 1;// bit 11 (v6.3.0.16) - SetOption61  - (Button, Switch) Force local operation (1) when button/switch topic is set
-    uint32_t no_hold_retain : 1;           // bit 12 (v6.4.1.19) - SetOption62  - (MQTT) Don't use retain flag on HOLD messages (1)
-    uint32_t no_power_feedback : 1;        // bit 13 (v6.5.0.9)  - SetOption63  - (Power) Don't scan relay power state at restart (1)
-    uint32_t use_underscore : 1;           // bit 14 (v6.5.0.12) - SetOption64  - (JSON) Enable "_" (1) instead of "-" (0) as sensor index separator
-    uint32_t fast_power_cycle_disable : 1; // bit 15 (v6.6.0.20) - SetOption65  - (QPC) Disable (1) fast power cycle detection for device reset
-    uint32_t tuya_serial_mqtt_publish : 1; // bit 16 (v6.6.0.21) - SetOption66  - (Tuya) Enable (1) TuyaMcuReceived messages over Mqtt
-    uint32_t buzzer_enable : 1;            // bit 17 (v6.6.0.1)  - SetOption67  - (Buzzer) Enable (1) buzzer when available
-    uint32_t pwm_multi_channels : 1;       // bit 18 (v6.6.0.3)  - SetOption68  - (Light) Enable multi-channels PWM (1) instead of Color PWM (0)
-    uint32_t ex_tuya_dimmer_min_limit : 1; // bit 19 (v6.6.0.5)  - SetOption69  - (not used) Limits Tuya dimmers to minimum of 10% (25) when enabled
-    uint32_t energy_weekend : 1;           // bit 20 (v6.6.0.8)  - CMND_TARIFF
-    uint32_t dds2382_model : 1;            // bit 21 (v6.6.0.14) - SetOption71  - (DDS2382) Select different Modbus registers (1) for Active Energy (#6531)
-    uint32_t hardware_energy_total : 1;    // bit 22 (v6.6.0.15) - SetOption72  - (Energy) Enable (1) hardware energy total counter as reference (#6561)
-    uint32_t mqtt_buttons : 1;             // bit 23 (v8.2.0.3)  - SetOption73  - (Button) Detach buttons from relays (1) and enable MQTT action state for multipress
-    uint32_t ds18x20_internal_pullup : 1;  // bit 24 (v7.0.0.1)  - SetOption74  - (DS18x20) Enable internal pullup (1) for single DS18x20 sensor
-    uint32_t grouptopic_mode : 1;          // bit 25 (v7.0.0.1)  - SetOption75  - (MQTT) GroupTopic replaces %topic% (0) or fixed topic cmnd/grouptopic (1)
-    uint32_t bootcount_update : 1;         // bit 26 (v7.0.0.4)  - SetOption76  - (Deepsleep) Enable incrementing bootcount (1) when deepsleep is enabled
-    uint32_t slider_dimmer_stay_on : 1;    // bit 27 (v7.0.0.6)  - SetOption77  - (Light) Do not power off (1) if slider moved to far left
-    uint32_t ex_compatibility_check : 1;   // bit 28 (v7.1.2.6)  - SetOption78  - (not used) Disable OTA compatibility check
-    uint32_t counter_reset_on_tele : 1;    // bit 29 (v8.1.0.1)  - SetOption79  - (Counter) Enable resetting of counters (1) after telemetry was sent
-    uint32_t shutter_mode : 1;             // bit 30 (v6.6.0.14) - SetOption80  - (Shutter) Enable shutter support (1)
-    uint32_t pcf8574_ports_inverted : 1;   // bit 31 (v6.6.0.14) - SetOption81  - (PCF8574) Invert all ports on PCF8574 devices (1)
-  };
-} SOBitfield3;
-
-
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
-  uint32_t data;                           // Allow bit manipulation using SetOption
-  struct {                                 // SetOption146 .. SetOption177
-    uint32_t use_esp32_temperature : 1;    // bit 0  (v12.1.1.1) - SetOption146 - (ESP32) Show ESP32 internal temperature sensor
-    uint32_t mqtt_disable_publish : 1;     // bit 1  (v12.1.1.2) - SetOption147 - MQTT_DISABLE_SSERIALRECEIVED - (MQTT) Disable publish SSerialReceived/IRReceived MQTT messages, you must use event trigger rules instead.
-    uint32_t artnet_autorun : 1;           // bit 2  (v12.2.0.4) - SetOption148 - (Light) start DMX ArtNet at boot, listen to UDP port as soon as network is up
-    uint32_t dns_ipv6_priority : 1;        // bit 3  (v12.2.0.6) - SetOption149 - (Wifi) prefer IPv6 DNS resolution to IPv4 address when available. Requires `#define USE_IPV6`
-    uint32_t no_voltage_common : 1;        // bit 4  (v12.3.1.5) - SetOption150 - (Energy) Force no voltage/frequency common
-    uint32_t matter_enabled : 1;           // bit 5  (v12.3.1.5) - SetOption151 - MATTER_ENABLED - (Matter) Enable Matter protocol over Wifi
-    uint32_t bistable_single_pin : 1;      // bit 6  (v12.5.0.1) - SetOption152 - (Power) Switch between two (0) or one (1) pin bistable relay control
-    uint32_t berry_no_autoexec : 1;        // bit 7  (v12.5.0.3) - SetOption153 - (Berry) Disable autoexec.be on restart (1)
-    uint32_t berry_light_scheme : 1;       // bit 8  (v12.5.0.3) - SetOption154 - (Berry) Handle berry led using RMT0 as additional WS2812 scheme
-    uint32_t zcfallingedge : 1;            // bit 9  (v13.0.0.1) - SetOption155 - (ZCDimmer) Enable rare falling Edge dimmer instead of leading edge
-    uint32_t sen5x_passive_mode : 1;       // bit 10 (v13.1.0.1) - SetOption156 - (Sen5x) Run in passive mode when there is another I2C master (e.g. Ikea Vindstyrka), i.e. do not set up Sen5x sensor, higher polling interval
-    uint32_t neopool_outputsensitive : 1;  // bit 11 (v13.2.0.1) - SetOption157 - (NeoPool) Output sensitive data (1)
-    uint32_t mqtt_disable_modbus : 1;      // bit 12 (v13.3.0.5) - SetOption158 - MQTT_DISABLE_MODBUSRECEIVED - (MQTT) Disable publish ModbusReceived MQTT messages (1), you must use event trigger rules instead
-    uint32_t counter_both_edges : 1;       // bit 13 (v13.3.0.5) - SetOption159 - (Counter) Enable counting on both rising and falling edge (1)
-    uint32_t ld2410_use_pin : 1;           // bit 14 (v14.3.0.2) - SetOption160 - (LD2410) Disable generate moving event by sensor report - use LD2410 out pin for events (1)
-    uint32_t gui_no_state_text : 1;        // bit 15 (v14.3.0.7) - SetOption161 - GUI_NOSHOW_STATETEXT - (GUI) Disable display of state text (1)
-    uint32_t no_export_energy_today : 1;   // bit 16 (v14.3.0.7) - SetOption162 - (Energy) Do not add export energy to energy today (1)
-    uint32_t gui_device_name : 1;          // bit 17 (v14.4.1.1) - SetOption163 - GUI_NOSHOW_DEVICENAME - (GUI) Disable display of GUI device name (1)
-    uint32_t spare18 : 1;                  // bit 18
-    uint32_t spare19 : 1;                  // bit 19
-    uint32_t spare20 : 1;                  // bit 20
-    uint32_t spare21 : 1;                  // bit 21
-    uint32_t spare22 : 1;                  // bit 22
-    uint32_t spare23 : 1;                  // bit 23
-    uint32_t spare24 : 1;                  // bit 24
-    uint32_t spare25 : 1;                  // bit 25
-    uint32_t spare26 : 1;                  // bit 26
-    uint32_t spare27 : 1;                  // bit 27
-    uint32_t spare28 : 1;                  // bit 28
-    uint32_t spare29 : 1;                  // bit 29
-    uint32_t spare30 : 1;                  // bit 30
-    uint32_t spare31 : 1;                  // bit 31
-  };
-} SOBitfield6;
-
-
-
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
-  uint8_t data;                           // Allow bit manipulation using SetOption
-  struct {                                 // SetOption0 .. SetOption31
-    uint8_t button_restrict : 1;          // bit 1              - SetOption1  - Control button multipress
-    uint8_t decimal_precision : 2;        // bit 2,3   4 levels [0,1,2,3]
-
-  };
-} SysBitfield_Sensors;
-
-
-
-struct SensorSettings{
-  /**
-   * Stored as ints for data savings, flat change to int
-   * */
-  int16_t       altitude;            
-  float           latitude;      //54.5 shall be 54500000
-  float           longitude;               
-  SysBitfield_Sensors flags;
-};
-
-
-struct EnergyUsageNew{
-  uint32_t usage1_kWhtotal;
-  uint32_t usage2_kWhtotal;
-  uint32_t return1_kWhtotal;
-  uint32_t return2_kWhtotal;
-  uint32_t last_return_kWhtotal;
-  uint32_t last_usage_kWhtotal;  
-  uint8_t       energy_power_delta;        // 33F
-  unsigned long energy_power_calibration;  // 364
-  unsigned long energy_voltage_calibration;  // 368
-  unsigned long energy_current_calibration;  // 36C
-  unsigned long energy_kWhtoday;           // 370
-  unsigned long energy_kWhyesterday;       // 374
-  uint16_t      energy_kWhdoy;             // 378
-  uint16_t      energy_min_power;          // 37A
-  uint16_t      energy_max_power;          // 37C
-  uint16_t      energy_min_voltage;        // 37E
-  uint16_t      energy_max_voltage;        // 380
-  uint16_t      energy_min_current;        // 382
-  uint16_t      energy_max_current;        // 384
-  uint16_t      energy_max_power_limit;    // 386 MaxPowerLimit
-  uint16_t      energy_max_power_limit_hold;         // 388 MaxPowerLimitHold
-  uint16_t      energy_max_power_limit_window;       // 38A MaxPowerLimitWindow
-  uint16_t      energy_max_power_safe_limit;         // 38C MaxSafePowerLimit
-  uint16_t      energy_max_power_safe_limit_hold;    // 38E MaxSafePowerLimitHold
-  uint16_t      energy_max_power_safe_limit_window;  // 390 MaxSafePowerLimitWindow
-  uint16_t      energy_max_energy;         // 392 MaxEnergy
-  uint16_t      energy_max_energy_start;   // 394 MaxEnergyStart
-  uint32_t      energy_kWhtotal_time;      // 7B4
-  unsigned long energy_frequency_calibration;  // 7C8
-  unsigned long energy_kWhtotal;           // 554
-  uint16_t      tariff[4][2];              // E30
-};// EnergyUsage;
-
-
-// Sensors
-typedef union {
-  uint32_t data;                           // Allow bit manipulation
-  struct {
-    uint32_t spare00 : 1;
-    uint32_t spare01 : 1;
-    uint32_t spare02 : 1;
-    uint32_t spare03 : 1;
-    uint32_t spare04 : 1;
-    uint32_t spare05 : 1;
-    uint32_t calc_resolution : 3;
-    uint32_t weight_resolution : 2;
-    uint32_t frequency_resolution : 2;
-    uint32_t axis_resolution : 2;
-    uint32_t current_resolution : 2;
-    uint32_t voltage_resolution : 2;
-    uint32_t wattage_resolution : 2;
-    uint32_t emulation : 2;
-    uint32_t energy_resolution : 3;
-    uint32_t pressure_resolution : 2;
-    uint32_t humidity_resolution : 2;
-    uint32_t temperature_resolution : 2;
-  };
-} SysBitfield_Power;
-
-struct DisplaySettings{
-  uint8_t       model; 
-  uint8_t       mode;
-  uint8_t       refresh;
-  uint8_t       rows;
-  uint8_t       cols[2];
-  uint8_t       address[8];
-  uint8_t       dimmer;
-  uint8_t       size;
-  uint8_t       font;
-  uint8_t       rotate;
-  uint16_t      width;
-  uint16_t      height;
-  bool          invert;
-};
-
-
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
-  uint32_t data;
-  struct {
-    uint32_t stream : 1;
-    uint32_t mirror : 1;
-    uint32_t flip : 1;
-    uint32_t rtsp : 1;
-    uint32_t awb : 1;
-    uint32_t awb_gain : 1;
-    uint32_t aec : 1;
-    uint32_t aec2 : 1;
-    uint32_t agc : 1;
-    uint32_t raw_gma : 1;
-    uint32_t lenc : 1;
-    uint32_t colorbar : 1;
-    uint32_t wpc : 1;
-    uint32_t dcw : 1;
-    uint32_t bpc : 1;
-    uint32_t spare15 : 1;
-    uint32_t spare16 : 1;
-    uint32_t feature : 2;
-    uint32_t contrast : 3;
-    uint32_t brightness : 3;
-    uint32_t saturation : 3;
-    uint32_t resolution : 4;
-  };
-} WebCamCfg;
-
-typedef union {
-  uint32_t data;
-  struct {
-    uint32_t wb_mode : 3;
-    uint32_t ae_level : 3;
-    uint32_t aec_value : 11;
-    uint32_t gainceiling : 3;
-    uint32_t agc_gain: 5;
-    uint32_t special_effect : 3;
-    uint32_t auth : 1;
-    uint32_t spare29 : 1;
-    uint32_t spare30 : 1;
-    uint32_t upgraded : 1;
-  };
-} WebCamCfg2;
-
-typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
-  uint16_t data;                           // Allow bit manipulation
-  struct {
-    uint16_t system_init : 1;              // Changing layout here needs adjustments in xdrv_10_rules.ino too
-    uint16_t system_boot : 1;
-    uint16_t time_init : 1;
-    uint16_t time_set : 1;
-    uint16_t mqtt_connected : 1;
-    uint16_t mqtt_disconnected : 1;
-    uint16_t wifi_connected : 1;
-    uint16_t wifi_disconnected : 1;
-    uint16_t eth_connected : 1;
-    uint16_t eth_disconnected : 1;
-    uint16_t http_init : 1;
-    uint16_t shutter_moved : 1;
-    uint16_t shutter_moving : 1;
-    uint16_t spare13 : 1;
-    uint16_t spare14 : 1;
-    uint16_t spare15 : 1;
-  };
-} RulesBitfield;
-
 struct LoggingSettings{
   uint8_t       serial_level;           // 09E
   uint16_t      sys_port;               // 1A8
@@ -835,16 +814,6 @@ struct LoggingSettings{
 };
 
 
-struct NetworkSettings
-{
-  SysBitfield_Network flag;
-};
-
-
-
-
-
-
 
 struct SETTINGS {
   // Header (Minimal data load required to validate settings - order must never change)
@@ -852,13 +821,14 @@ struct SETTINGS {
   uint16_t      cfg_size;                  // 002
   uint32_t      save_flag;                 // 004
   uint32_t      version;                   // 008
-  uint16_t      bootcount;                  // 00C
-
+  uint16_t      bootcount;              // 00C
+  // Body (All other settings)
+  
   // Visible binary debug marker. Updated immediately before /settings.txt is written.
   // Format: "utcHHMMSS:DDMMYY", example "utc142305:130526".
   char          settings_file_update_utc_ascii[18];
-
-  // Body (All other settings)
+  char          settings_holder_ctr[5]; 
+  
   // Modules
   uint16_t      bootcount_errors_only;     // E01
   uint8_t       module;                    // 474
@@ -867,8 +837,24 @@ struct SETTINGS {
   Template_Config user_template; 
   SystemName      system_name;                             // Move into SettingsText
   char room_hint[50];                                      // Move into SettingsText
-  SysBitfield_System   flag_system;     // flag ie flag0                  // 010
-  RulesBitfield rules_flag;                 // Rule state flags (16 bits)
+  
+  // --------------------------------------------------------------------------
+  // System option groups
+  // --------------------------------------------------------------------------
+  // Each group contains:
+  //   bit   = compact boolean flags
+  //   param = named numeric parameters
+  // --------------------------------------------------------------------------
+  SystemOptions__System  sysopt_system;
+  SystemOptions__Network sysopt_network;
+  SystemOptions__Drivers sysopt_drivers;
+  SystemOptions__Sensors sysopt_sensors;
+  SystemOptions__Lights  sysopt_lights;
+  SystemOptions__Power   sysopt_power;
+  SystemOptions__Rules   sysopt_rules;
+
+
+
   int16_t       save_data;                 // 014
   myio          module_pins;                     // 484     
   uint8_t       baudrate;                  // 09D  // saved as (/300) value. ie 9600/300 => 32, 115200=>384?? I want to change this to full uint32_t for higher speed bauds
@@ -882,8 +868,7 @@ struct SETTINGS {
   uint8_t       setoption_255[PARAM8_SIZE]; // https://tasmota.github.io/docs/Commands/#setoptions "aka param"
   // Core
   uint16_t      unified_interface_reporting_invalid_reading_timeout_seconds; // 0 is ignored, anything else is the seconds of age above which a sensor should not be reporting (ie is invalid)
-  // Network
-  NetworkSettings network;
+
   // Webserver
   uint8_t       webserver;                 // 1AB
   uint16_t      web_refresh;               // 7CC
@@ -892,23 +877,22 @@ struct SETTINGS {
   uint8_t       timezone_minutes;          // 66D 
   int8_t        timezone2;                  // 016
   uint8_t       timezone_minutes2;          // 66D
-  SysBitfield_Drivers    flag_drivers;  
+  
   int16_t       toffset[2];                // 30E
+
   // Previously other char arrays followed this memory space that was reserved as "overflow" fom text pool to be read in another format
   // From now on, the text pool must be the hardcoded full length
   char          text_pool[settings_text_size];            // 017  Size is settings_text_size
-  // Lighting
-  SysBitfield_Lighting    flag_lighting;
+  
   // Pulse Counter
   uint16_t      pulse_timer[MAX_PULSETIMERS];  // 57C
   uint16_t      pulse_counter_type;        // 5D0
   uint16_t      pulse_counter_debounce;    // 5D2
   // Sensors
-  SensorCfg1    SensorBits1;               // 717  On/Off settings used by Sensor Commands  
   uint16_t      button_debounce;           // 542
   uint16_t      switch_debounce;           // 66E
   uint8_t       switchmode[8];
-  SensorSettings sensors;
+  
   // Drivers
   uint16_t      ledmask;                   // 7BC
   uint8_t       ledstate;                  // 2FB
@@ -924,31 +908,22 @@ struct SETTINGS {
   // Power
   unsigned long power;                     // 2E8
   uint8_t       poweronstate;              // 398
-  power_t       interlock[MAX_INTERLOCKS_SET];  // 4D0 MAX_INTERLOCKS = MAX_RELAYS / 2  
+  power_t       interlock[MAX_INTERLOCKS_SET];  // 4D0 MAX_INTERLOCKS = MAX_RELAYS / 2
+  
   // Energy
-  EnergyUsageNew   energy_usage;           // 77C 
-  SysBitfield_Power  flag_power;           // 5BC
+  
   // Displays
-  DisplaySettings   display;  
   uint32_t      i2c_drivers[3];            // FEC
   uint64_t      rf_protocol_mask;          // FA8
-  #ifdef ESP32
-  WebCamCfg     webcam_config;             // 44C
-  uint8_t       webcam_clk;                // 72F
-  WebCamCfg2    webcam_config2;            // 460
-  #endif
-  #ifdef ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  char settings_holder_ctr[10];
-  #endif
   uint32_t      power_lock;                // F9C
   uint32_t      bootcount_reset_time;      // FD4
-  TimeRule      tflag[2];                  // 2E2
-  SOBitfield3   flag3;                     // 3A0
-  SOBitfield6   flag6;                     // 3A0
   uint32_t      ipv4_address[5];           // 544
   uint32_t      ipv4_rgx_address;          // 558
   uint32_t      ipv4_rgx_subnetmask;       // 55C
   uint16_t      dns_timeout;               // 4C8
+  #ifdef ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
+  char local_time_ascii_debug[20];
+  #endif
   // E00 - FFF (4095 ie eeprom size) free locations
   uint32_t      cfg_timestamp;
   uint32_t      cfg_crc32;                 // 32 bit CRC, must remain at last 4 bytes
@@ -979,7 +954,7 @@ struct SETTINGS {
   #ifdef ESP8266
   SerialConfig serial_config = SERIAL_8N1;    // Serial interface configuration 8 data bits, No parity, 1 stop bit
   #endif
-  
+
   struct FASTBOOT_RUNTIME_FLAGS
   {
     bool disable_rules              = false;
@@ -1026,7 +1001,7 @@ struct SETTINGS {
     uint8_t my_module_type;                     // Current copy of Settings.module or user template type
     uint8_t last_source = 0;                    // Last command source
     uint8_t mdns_delayed_start = 0;             // mDNS delayed start
-    bool stop_flash_rotate = false;             // Legacy runtime flag; filesystem settings do not rotate raw flash slots
+    
     bool blinkstate = false;                    // LED state
     bool pwm_present = false;                   // Any PWM channel configured with SetOption15 0
     bool i2c_enabled = false;                       // I2C configured
@@ -1052,6 +1027,7 @@ struct SETTINGS {
     uint8_t enable_web_logging_filtering = false;
     uint8_t enable_serial_logging_filtering = false;    
     bool settings_holder_hardcorded_stored_changed = false; // if true, other files may want to reset too
+
     FASTBOOT_RUNTIME_FLAGS fastboot;
   }runtime;
 
@@ -1067,19 +1043,12 @@ struct SETTINGS {
 
   const char* Get_Json_Level_Name(uint8_t id);
 
-  
+  void SettingsUpdateFileWriteTimeAscii(void);
 
-
-
-
-
-
-  #ifdef ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
   uint32_t GetSettingsTextLen(void);
   bool SettingsUpdateFinished(void);
   bool SettingsUpdateText(uint32_t index, const char* replace_me);
   char* SettingsText(uint32_t index);
-  #endif // ENABLE_DEVFEATURE_SETTINGS__TEXT_BUFFER
 
 };
 

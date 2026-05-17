@@ -96,8 +96,8 @@ void mDisplaysInterface::Pre_Init(void)
 
   if (renderer) {
     
-    renderer->setTextFont(tkr_set->Settings.display.font);
-    renderer->setTextSize(tkr_set->Settings.display.size);
+    renderer->setTextFont(display.font);
+    renderer->setTextSize(display.size);
     
     // force opaque mode
     renderer->setDrawMode(0);
@@ -119,14 +119,14 @@ void mDisplaysInterface::Pre_Init(void)
     for (uint8_t count = 0; count < NUM_GRAPHS; count++) { graph[count] = 0; }
   #endif
 
-  ALOG_DBG(PSTR(D_LOG_DEBUG "Display model %d"), tkr_set->Settings.display.model);
+  ALOG_DBG(PSTR(D_LOG_DEBUG "Display model %d"), display.model);
 
-  tkr_set->Settings.display.mode = EM_DISPLAY_MODE_UTC_TIME_ID;
+  display.mode = EM_DISPLAY_MODE_UTC_TIME_ID;
 
-  if (tkr_set->Settings.display.model) {
+  if (display.model) {
     // tkr_set->runtime.devices_present++;
     // if (!tkr_pins->PinUsed(GPIO_BACKLIGHT_ID)) {
-    //   if (tkr_set->runtime.light_type && (4 == tkr_set->Settings.display.model)) {
+    //   if (tkr_set->runtime.light_type && (4 == display.model)) {
     //     tkr_set->runtime.devices_present--;  // Assume PWM channel is used for backlight
     //   }
     // }
@@ -145,18 +145,34 @@ void mDisplaysInterface::Pre_Init(void)
     module_state.mode = ModuleStatus::Running;
   }
 
-  // tkr_set->Settings.display.mode = EM_DISPLAY_MODE_BASIC_BUFFER_TEXT_DRAW;
+  // display.mode = EM_DISPLAY_MODE_BASIC_BUFFER_TEXT_DRAW;
 }
 
 void mDisplaysInterface::Init(void)
 {
+
+  
+  // --------------------------------------------------------------------------
+  // 15. Display defaults
+  // --------------------------------------------------------------------------
+  display.model   = 0;
+  display.mode    = 0;
+  display.refresh = 2;
+  display.rows    = 4;
+  display.cols[0] = 16;
+  display.cols[1] = 8;
+  display.dimmer  = 7;
+  display.size    = 2;
+  display.font    = 1;
+  display.rotate  = 0;
+
 
 }
 
 void mDisplaysInterface::Init(uint8_t mode) // this is not my normal init, move to new name
 {
   if (renderer)  {
-    renderer->DisplayInit(mode, tkr_set->Settings.display.size, tkr_set->Settings.display.rotate, tkr_set->Settings.display.font);
+    renderer->DisplayInit(mode, display.size, display.rotate, display.font);
   }
   else {
     dsp_init = mode;
@@ -336,7 +352,7 @@ void mDisplaysInterface::SetPower(void)
 
   //ALOG_DBG(PSTR("DSP: Power %d"), disp_power);
 
-  if (tkr_set->Settings.display.model) {
+  if (display.model) {
     if (!renderer) {
       tkr->Tasker_Interface(TASK_DISPLAY_POWER);
     } else {
@@ -384,7 +400,7 @@ void mDisplaysInterface::SetTextSize(uint8_t font_size)
 void mDisplaysInterface::SetDisplayMode(uint8_t mode)
 {
   ALOG_TST(PSTR("SetDisplayMode(%d)"),mode);
-  tkr_set->Settings.display.mode = mode;
+  display.mode = mode;
 }
 
 
@@ -432,11 +448,11 @@ void mDisplaysInterface::ScreenBuffer_Free(void)
 void mDisplaysInterface::ScreenBuffer_Alloc(void)
 {
   if (!screen_buffer.cols) {
-    screen_buffer.rows = tkr_set->Settings.display.rows;
+    screen_buffer.rows = display.rows;
     screen_buffer.ptr = (char**)malloc(sizeof(*screen_buffer.ptr) * screen_buffer.rows);
     if (screen_buffer.ptr != nullptr) {
       for (uint32_t i = 0; i < screen_buffer.rows; i++) {
-        screen_buffer.ptr[i] = (char*)malloc(sizeof(*screen_buffer.ptr[i]) * (tkr_set->Settings.display.cols[0] +1));
+        screen_buffer.ptr[i] = (char*)malloc(sizeof(*screen_buffer.ptr[i]) * (display.cols[0] +1));
         if (screen_buffer.ptr[i] == nullptr) {
           ScreenBuffer_Free();
           break;
@@ -444,7 +460,7 @@ void mDisplaysInterface::ScreenBuffer_Alloc(void)
       }
     }
     if (screen_buffer.ptr != nullptr) {
-      screen_buffer.cols = tkr_set->Settings.display.cols[0] +1;
+      screen_buffer.cols = display.cols[0] +1;
       ScreenBuffer_Clear();
     }
   }
@@ -465,7 +481,7 @@ void mDisplaysInterface::LogBuffer_Init(void)
     
   log_buffer.index = 0;
   log_buffer.ptr_index = 0;
-  disp_refresh = tkr_set->Settings.display.refresh;
+  disp_refresh = display.refresh;
 
   LogBuffer_ReAlloc();
  
@@ -507,7 +523,7 @@ void mDisplaysInterface::LogBuffer_Alloc(void)
       
       // Allocate each row pointer, to have enough space for the row + termination
       for (uint32_t i = 0; i < DISPLAY_LOG_ROWS; i++) {
-        log_buffer.ptr[i] = (char*)malloc(sizeof(*log_buffer.ptr[i]) * (tkr_set->Settings.display.cols[0] +1));
+        log_buffer.ptr[i] = (char*)malloc(sizeof(*log_buffer.ptr[i]) * (display.cols[0] +1));
         // If not succesful, reset buffer
         if (log_buffer.ptr[i] == nullptr) {
           // Clear buffer again
@@ -518,7 +534,7 @@ void mDisplaysInterface::LogBuffer_Alloc(void)
     }
     // If all of the above worked, then get the number of coloumn available
     if (log_buffer.ptr != nullptr) {
-      log_buffer.cols = tkr_set->Settings.display.cols[0] +1;
+      log_buffer.cols = display.cols[0] +1;
       // Init the data as empty
       LogBuffer_Clear();
     }
@@ -615,45 +631,45 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
 
     if(jtok = obj_sub[PM_MODEL])
     {
-      tkr_set->Settings.display.model = jtok.getInt();
-      ALOG_COM( PM_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_DISPLAY, PM_MODEL, tkr_set->Settings.display.model );
+      display.model = jtok.getInt();
+      ALOG_COM( PM_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_DISPLAY, PM_MODEL, display.model );
     }
 
     if(jtok = obj_sub[PM_MODE])
     {
-      tkr_set->Settings.display.mode = jtok.getInt();
-      ALOG_COM( PM_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_DISPLAY, PM_MODE, tkr_set->Settings.display.mode );
+      display.mode = jtok.getInt();
+      ALOG_COM( PM_COMMAND_PM_SVALUE_SVALUE_NVALUE, PM_DISPLAY, PM_MODE, display.mode );
     }
 
     // if(jtok = obj["DisplayRefresh"]){
-    //   tkr_set->Settings.display.refresh = jtok.getInt();
+    //   display.refresh = jtok.getInt();
     // }
     if(jtok = obj_sub["DisplayRows"]){
-      tkr_set->Settings.display.rows = jtok.getInt();
-      ALOG_INF(PSTR("DisplayRows=%d"), tkr_set->Settings.display.rows);
-      // ALOG_COM( PM_COMMAND_PM_SVALUE_NVALUE, PM_DISPLAY, PM_MODEL, tkr_set->Settings.display.model );
+      display.rows = jtok.getInt();
+      ALOG_INF(PSTR("DisplayRows=%d"), display.rows);
+      // ALOG_COM( PM_COMMAND_PM_SVALUE_NVALUE, PM_DISPLAY, PM_MODEL, display.model );
     }
     if(jtok = obj_sub["DisplayCols"])
     {
       JsonParserArray arr_pos = jtok;
       if(arr_pos.size() == 2)
       {
-        tkr_set->Settings.display.cols[0] = arr_pos[0].getInt();
-        tkr_set->Settings.display.cols[1] = arr_pos[1].getInt();
+        display.cols[0] = arr_pos[0].getInt();
+        display.cols[1] = arr_pos[1].getInt();
       }
       flag_drivers_needs_reinitialised = true;
     }
     // if(jtok = obj["DisplayDimmer"]){
-    //   tkr_set->Settings.display.dimmer = jtok.getInt();
+    //   display.dimmer = jtok.getInt();
     // }
     if(jtok = obj_sub["DisplaySize"]){
-      tkr_set->Settings.display.size = jtok.getInt();
+      display.size = jtok.getInt();
     }
     // if(jtok = obj["DisplayFont"]){
-    //   tkr_set->Settings.display.font = jtok.getInt();
+    //   display.font = jtok.getInt();
     // }
     // if(jtok = obj["DisplayRotate"]){
-    //   tkr_set->Settings.display.rotate = jtok.getInt();
+    //   display.rotate = jtok.getInt();
     // }
 
 
@@ -734,7 +750,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     //   CommandSet_DisplayAddLog(jtok.getStr());
     // }
 
-    tkr_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
+    display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
     LogBuffer_Add((char*)jtok.getStr());
 
     #ifdef ENABLE_LOG_LEVEL_DEBUG
@@ -750,7 +766,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
   if(jtok = obj["DisplayStaticLog"].getObject()["Row"]){
     uint8_t row_number = jtok.getInt();
     if(jtok = obj["DisplayStaticLog"].getObject()["Text"]){
-      tkr_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
+      display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
       LogBuffer_AddRow((char*)jtok.getStr(), row_number);
     }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
@@ -765,7 +781,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
   {
     if(jtok.isArray())
     {
-      tkr_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
+      display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
       JsonParserArray array = jtok;
       uint8_t index = 0;
       LogBuffer_Clear();
@@ -1610,50 +1626,50 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 //   Response_P(PSTR("{\"" D_PRFX_DISPLAY "\":{\"" D_CMND_DISP_MODEL "\":%d,\"" D_CMND_DISP_TYPE "\":%d,\"" D_CMND_DISP_WIDTH "\":%d,\"" D_CMND_DISP_HEIGHT "\":%d,\""
 //     D_CMND_DISP_MODE "\":%d,\"" D_CMND_DISP_DIMMER "\":%d,\"" D_CMND_DISP_SIZE "\":%d,\"" D_CMND_DISP_FONT "\":%d,\""
 //     D_CMND_DISP_ROTATE "\":%d,\"" D_CMND_DISP_INVERT "\":%d,\"" D_CMND_DISP_REFRESH "\":%d,\"" D_CMND_DISP_COLS "\":[%d,%d],\"" D_CMND_DISP_ROWS "\":%d}}"),
-//     tkr_set->Settings.display.model, tkr_set->Settings.display.options.type, tkr_set->Settings.display.width, tkr_set->Settings.display.height,
-//     tkr_set->Settings.display.mode, changeUIntScale(tkr_set->Settings.display.dimmer, 0, 15, 0, 100), tkr_set->Settings.display.size, tkr_set->Settings.display.font,
-//     tkr_set->Settings.display.rotate, tkr_set->Settings.display.options.invert, tkr_set->Settings.display.refresh, tkr_set->Settings.display.cols[0], tkr_set->Settings.display.cols[1], tkr_set->Settings.display.rows);
+//     display.model, display.options.type, display.width, display.height,
+//     display.mode, changeUIntScale(display.dimmer, 0, 15, 0, 100), display.size, display.font,
+//     display.rotate, display.options.invert, display.refresh, display.cols[0], display.cols[1], display.rows);
 // }
 
 // void CmndDisplayModel(void) {
 //   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < DISPLAY_MAX_DRIVERS)) {
-//     uint32_t last_display_model = tkr_set->Settings.display.model;
-//     tkr_set->Settings.display.model = XdrvMailbox.payload;
+//     uint32_t last_display_model = display.model;
+//     display.model = XdrvMailbox.payload;
 //     if (tkr->Tasker_Interface(TASK_DISPLAY_MODEL)) {
 //       tkr_set->runtime_var.restart_flag = 2;  // Restart to re-init interface and add/Remove MQTT subscribe
 //     } else {
-//       tkr_set->Settings.display.model = last_display_model;
+//       display.model = last_display_model;
 //     }
 //   }
-//   ResponseCmndNumber(tkr_set->Settings.display.model);
+//   ResponseCmndNumber(display.model);
 // }
 
 // void CmndDisplayType(void) {
 //   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 7)) {
-//     tkr_set->Settings.display.options.type = XdrvMailbox.payload;
+//     display.options.type = XdrvMailbox.payload;
 //     tkr_set->runtime_var.restart_flag = 2;
 //   }
-//   ResponseCmndNumber(tkr_set->Settings.display.options.type);
+//   ResponseCmndNumber(display.options.type);
 // }
 
 // void CmndDisplayWidth(void) {
 //   if (XdrvMailbox.payload > 0) {
-//     if (XdrvMailbox.payload != tkr_set->Settings.display.width) {
-//       tkr_set->Settings.display.width = XdrvMailbox.payload;
+//     if (XdrvMailbox.payload != display.width) {
+//       display.width = XdrvMailbox.payload;
 //       tkr_set->runtime_var.restart_flag = 2;  // Restart to re-init width
 //     }
 //   }
-//   ResponseCmndNumber(tkr_set->Settings.display.width);
+//   ResponseCmndNumber(display.width);
 // }
 
 // void CmndDisplayHeight(void) {
 //   if (XdrvMailbox.payload > 0) {
-//     if (XdrvMailbox.payload != tkr_set->Settings.display.height) {
-//       tkr_set->Settings.display.height = XdrvMailbox.payload;
+//     if (XdrvMailbox.payload != display.height) {
+//       display.height = XdrvMailbox.payload;
 //       tkr_set->runtime_var.restart_flag = 2;  // Restart to re-init height
 //     }
 //   }
-//   ResponseCmndNumber(tkr_set->Settings.display.height);
+//   ResponseCmndNumber(display.height);
 // }
 
 // void CmndDisplayMode(void) {
@@ -1666,13 +1682,13 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 //  * 5 = Mqtt up and time     Mqtt (incl local) sensors and time   Mqtt (incl local) sensors and time
 // */
 //   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 5)) {
-//     uint32_t last_display_mode = tkr_set->Settings.display.mode;
-//     tkr_set->Settings.display.mode = XdrvMailbox.payload;
+//     uint32_t last_display_mode = display.mode;
+//     display.mode = XdrvMailbox.payload;
 
-//     if (disp_subscribed != (tkr_set->Settings.display.mode &0x04)) {
+//     if (disp_subscribed != (display.mode &0x04)) {
 //       tkr_set->runtime_var.restart_flag = 2;  // Restart to Add/Remove MQTT subscribe
 //     } else {
-//       if (last_display_mode && !tkr_set->Settings.display.mode) {  // Switch to mode 0
+//       if (last_display_mode && !display.mode) {  // Switch to mode 0
 //         DisplayInit(DISPLAY_INIT_MODE);
 //         if (renderer) renderer->fillScreen(bg_color);
 //         else DisplayClear();
@@ -1683,88 +1699,88 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 //     }
 //   }
 // #endif  // USE_DISPLAY_MODES1TO5
-//   ResponseCmndNumber(tkr_set->Settings.display.mode);
+//   ResponseCmndNumber(display.mode);
 // }
 
 // void CmndDisplayDimmer(void) {
 //   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 100)) {
-//     tkr_set->Settings.display.dimmer = changeUIntScale(XdrvMailbox.payload, 0, 100, 0, 15);  // Correction for Domoticz (0 - 15)
-//     if (tkr_set->Settings.display.dimmer && !(disp_power)) {
+//     display.dimmer = changeUIntScale(XdrvMailbox.payload, 0, 100, 0, 15);  // Correction for Domoticz (0 - 15)
+//     if (display.dimmer && !(disp_power)) {
 //       ExecuteCommandPower(disp_device, POWER_ON, SRC_DISPLAY);
 //     }
-//     else if (!tkr_set->Settings.display.dimmer && disp_power) {
+//     else if (!display.dimmer && disp_power) {
 //       ExecuteCommandPower(disp_device, POWER_OFF, SRC_DISPLAY);
 //     }
 //     if (renderer) {
-//       renderer->dim(tkr_set->Settings.display.dimmer);
+//       renderer->dim(display.dimmer);
 //     } else {
 //       tkr->Tasker_Interface(TASK_DISPLAY_DIM);
 //     }
 //   }
-//   ResponseCmndNumber(changeUIntScale(tkr_set->Settings.display.dimmer, 0, 15, 0, 100));
+//   ResponseCmndNumber(changeUIntScale(display.dimmer, 0, 15, 0, 100));
 // }
 
 // void CmndDisplaySize(void) {
 //   if ((XdrvMailbox.payload > 0) && (XdrvMailbox.payload <= 4)) {
-//     tkr_set->Settings.display.size = XdrvMailbox.payload;
-//     if (renderer) renderer->setTextSize(tkr_set->Settings.display.size);
-//     //else DisplaySetSize(tkr_set->Settings.display.size);
+//     display.size = XdrvMailbox.payload;
+//     if (renderer) renderer->setTextSize(display.size);
+//     //else DisplaySetSize(display.size);
 //   }
-//   ResponseCmndNumber(tkr_set->Settings.display.size);
+//   ResponseCmndNumber(display.size);
 // }
 
 // void CmndDisplayFont(void) {
 //   if ((XdrvMailbox.payload >=0) && (XdrvMailbox.payload <= 4)) {
-//     tkr_set->Settings.display.font = XdrvMailbox.payload;
-//     if (renderer) renderer->setTextFont(tkr_set->Settings.display.font);
-//     //else DisplaySetFont(tkr_set->Settings.display.font);
+//     display.font = XdrvMailbox.payload;
+//     if (renderer) renderer->setTextFont(display.font);
+//     //else DisplaySetFont(display.font);
 //   }
-//   ResponseCmndNumber(tkr_set->Settings.display.font);
+//   ResponseCmndNumber(display.font);
 // }
 
 // void CmndDisplayRotate(void) {
 //   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload < 4)) {
-//     if ((tkr_set->Settings.display.rotate) != XdrvMailbox.payload) {
+//     if ((display.rotate) != XdrvMailbox.payload) {
 // /*
 //       // Needs font info regarding height and width
-//       if ((tkr_set->Settings.display.rotate &1) != (XdrvMailbox.payload &1)) {
-//         uint8_t temp_rows = tkr_set->Settings.display.rows;
-//         tkr_set->Settings.display.rows = tkr_set->Settings.display.cols[0];
-//         tkr_set->Settings.display.cols[0] = temp_rows;
+//       if ((display.rotate &1) != (XdrvMailbox.payload &1)) {
+//         uint8_t temp_rows = display.rows;
+//         display.rows = display.cols[0];
+//         display.cols[0] = temp_rows;
 // #ifdef USE_DISPLAY_MODES1TO5
 //         ScreenBuffer_ReAlloc();
 // #endif  // USE_DISPLAY_MODES1TO5
 //       }
 // */
-//       tkr_set->Settings.display.rotate = XdrvMailbox.payload;
+//       display.rotate = XdrvMailbox.payload;
 //       DisplayInit(DISPLAY_INIT_MODE);
 // #ifdef USE_DISPLAY_MODES1TO5
 //       LogBuffer_Init();
 // #endif  // USE_DISPLAY_MODES1TO5
 //     }
 //   }
-//   ResponseCmndNumber(tkr_set->Settings.display.rotate);
+//   ResponseCmndNumber(display.rotate);
 // }
 
 // void CmndDisplayInvert(void) {
 //   if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 1)) {
-//     tkr_set->Settings.display.options.invert = XdrvMailbox.payload;
-//     if (renderer) renderer->invertDisplay(tkr_set->Settings.display.options.invert);
+//     display.options.invert = XdrvMailbox.payload;
+//     if (renderer) renderer->invertDisplay(display.options.invert);
 //   }
-//   ResponseCmndNumber(tkr_set->Settings.display.options.invert);
+//   ResponseCmndNumber(display.options.invert);
 // }
 
 // void CmndDisplayRefresh(void) {
 //   if ((XdrvMailbox.payload >= 1) && (XdrvMailbox.payload <= 7)) {
-//     tkr_set->Settings.display.refresh = XdrvMailbox.payload;
+//     display.refresh = XdrvMailbox.payload;
 //   }
-//   ResponseCmndNumber(tkr_set->Settings.display.refresh);
+//   ResponseCmndNumber(display.refresh);
 // }
 
 // void CmndDisplayColumns(void) {
 //   if ((XdrvMailbox.index > 0) && (XdrvMailbox.index <= 2)) {
 //     if ((XdrvMailbox.payload > 0) && (XdrvMailbox.payload <= DISPLAY_MAX_COLS)) {
-//       tkr_set->Settings.display.cols[XdrvMailbox.index -1] = XdrvMailbox.payload;
+//       display.cols[XdrvMailbox.index -1] = XdrvMailbox.payload;
 // #ifdef USE_DISPLAY_MODES1TO5
 //       if (1 == XdrvMailbox.index) {
 //         LogBuffer_Init();
@@ -1772,27 +1788,27 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 //       }
 // #endif  // USE_DISPLAY_MODES1TO5
 //     }
-//     ResponseCmndIdxNumber(tkr_set->Settings.display.cols[XdrvMailbox.index -1]);
+//     ResponseCmndIdxNumber(display.cols[XdrvMailbox.index -1]);
 //   }
 // }
 
 // void CmndDisplayRows(void) {
 //   if ((XdrvMailbox.payload > 0) && (XdrvMailbox.payload <= DISPLAY_MAX_ROWS)) {
-//     tkr_set->Settings.display.rows = XdrvMailbox.payload;
+//     display.rows = XdrvMailbox.payload;
 // #ifdef USE_DISPLAY_MODES1TO5
 //     LogBuffer_Init();
 //     ScreenBuffer_ReAlloc();
 // #endif  // USE_DISPLAY_MODES1TO5
 //   }
-//   ResponseCmndNumber(tkr_set->Settings.display.rows);
+//   ResponseCmndNumber(display.rows);
 // }
 
 // void CmndDisplayAddress(void) {
 //   if ((XdrvMailbox.index > 0) && (XdrvMailbox.index <= 8)) {
 //     if ((XdrvMailbox.payload >= 0) && (XdrvMailbox.payload <= 255)) {
-//       tkr_set->Settings.display.address[XdrvMailbox.index -1] = XdrvMailbox.payload;
+//       display.address[XdrvMailbox.index -1] = XdrvMailbox.payload;
 //     }
-//     ResponseCmndIdxNumber(tkr_set->Settings.display.address[XdrvMailbox.index -1]);
+//     ResponseCmndIdxNumber(display.address[XdrvMailbox.index -1]);
 //   }
 // }
 
@@ -1808,7 +1824,7 @@ void mDisplaysInterface::CommandSet_DisplayClearLog(bool d)
 // #ifdef USE_UFILESYS
 // void CmndDisplayBatch(void) {
 //   if (XdrvMailbox.data_len > 0) {
-//     if (!tkr_set->Settings.display.mode) {
+//     if (!display.mode) {
 //       Display_Text_From_File(XdrvMailbox.data);
 //     }
 //     ResponseCmndChar(XdrvMailbox.data);
@@ -1822,9 +1838,9 @@ void mDisplaysInterface::CmndDisplayText(const char* buffer) {
 // #ifndef USE_DISPLAY_MODES1TO5
 //     DisplayText();
 // #else
-//     if(tkr_set->Settings.display.model == 15) {
+//     if(display.model == 15) {
 //       tkr->Tasker_Interface(TASK_DISPLAY_SEVENSEG_TEXT);
-//     } else if (!tkr_set->Settings.display.mode) {
+//     } else if (!display.mode) {
 #ifdef ENABLE_DISPLAY_MODE_USER_TEXT_SERIALISED
       DisplayText(buffer);
 #endif // ENABLE_DISPLAY_MODE_USER_TEXT_SERIALISED
@@ -2032,20 +2048,20 @@ uint8_t mDisplaysInterface::ConstructJSON_Settings(uint8_t json_level, bool json
 
   JBI->Start();
 
-    JBI->Add("model", tkr_set->Settings.display.model);
-    JBI->Add("mode", tkr_set->Settings.display.mode);
-    JBI->Add("refresh", tkr_set->Settings.display.refresh);
-    JBI->Add("rows", tkr_set->Settings.display.rows);
-    JBI->Add("cols0", tkr_set->Settings.display.cols[0]);
-    JBI->Add("cols1", tkr_set->Settings.display.cols[1]);
-    JBI->Add("address0", tkr_set->Settings.display.address[0]);
-    JBI->Add("dimmer", tkr_set->Settings.display.dimmer);
-    JBI->Add("size", tkr_set->Settings.display.size);
-    JBI->Add("font", tkr_set->Settings.display.font);
-    JBI->Add("rotate", tkr_set->Settings.display.rotate);
+    JBI->Add("model", display.model);
+    JBI->Add("mode", display.mode);
+    JBI->Add("refresh", display.refresh);
+    JBI->Add("rows", display.rows);
+    JBI->Add("cols0", display.cols[0]);
+    JBI->Add("cols1", display.cols[1]);
+    JBI->Add("address0", display.address[0]);
+    JBI->Add("dimmer", display.dimmer);
+    JBI->Add("size", display.size);
+    JBI->Add("font", display.font);
+    JBI->Add("rotate", display.rotate);
 
-    JBI->Add("width", tkr_set->Settings.display.width);
-    JBI->Add("height", tkr_set->Settings.display.height);
+    JBI->Add("width", display.width);
+    JBI->Add("height", display.height);
 
   return JBI->End();
 

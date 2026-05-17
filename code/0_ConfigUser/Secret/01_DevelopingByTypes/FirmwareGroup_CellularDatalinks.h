@@ -127,8 +127,6 @@ Notes:
 
     #define  ENABLE_FEATURE_CELLULAR__INCLUDE_MOBILE_NETWORKS
 
-    // #define ENABLE_FEATURE_WATCHDOG_TIMER
-    #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
     #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
     #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -565,7 +563,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -647,7 +644,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
   //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
@@ -1009,7 +1005,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
 //   #define ENABLE_FEATURE_WATCHDOG_TIMER
 //     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 //   // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
 //   //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
@@ -1167,8 +1162,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define MQTT_HOST   "192.168.1.70"
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -1182,7 +1175,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -1313,7 +1305,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -1327,7 +1318,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -1459,7 +1449,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION //fails with no network
   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -1473,7 +1462,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -1607,8 +1595,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define MQTT_HOST   "192.168.1.70"
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -1626,8 +1612,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
@@ -1751,8 +1735,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
 #define  ENABLE_FEATURE_CELLULAR__INCLUDE_MOBILE_NETWORKS
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -1777,7 +1759,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -2192,7 +2173,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
   //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
@@ -2427,7 +2407,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -2465,7 +2444,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
   //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
@@ -2705,8 +2683,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define MQTT_HOST   "192.168.1.70"
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
@@ -2723,7 +2699,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES

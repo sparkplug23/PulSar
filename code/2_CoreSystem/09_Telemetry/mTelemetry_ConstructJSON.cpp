@@ -99,10 +99,10 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level, bool json_appendi
     JBI->Add(PM_SAVESTATE,      0); 
     JBI->Add(PM_SWITCHMODE,     0);
     JBI->Add(PM_BAUDRATE,       (uint16_t)115200);
-    JBI->Add(PM_BUTTONRETAIN,   tkr_set->Settings.flag_system.mqtt_button_retain); 
-    JBI->Add(PM_SWITCHRETAIN,   tkr_set->Settings.flag_system.mqtt_switch_retain); 
-    JBI->Add(PM_SENSORRETAIN,   tkr_set->Settings.flag_system.mqtt_sensor_retain); 
-    JBI->Add(PM_POWERRETAIN,    tkr_set->Settings.flag_system.mqtt_power_retain);
+    JBI->Add(PM_BUTTONRETAIN,   tkr_set->Settings.sysopt_system.bit.mqtt_button_retain); 
+    JBI->Add(PM_SWITCHRETAIN,   tkr_set->Settings.sysopt_system.bit.mqtt_switch_retain); 
+    JBI->Add(PM_SENSORRETAIN,   tkr_set->Settings.sysopt_system.bit.mqtt_sensor_retain); 
+    JBI->Add(PM_POWERRETAIN,    tkr_set->Settings.sysopt_system.bit.mqtt_power_retain);
     JBI->Add(PM_OTAURL,         D_OTA_URL);
     JBI->Add(PM_STARTUPUTC,     "2019-12-10T21:35:44");
     #endif // ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES

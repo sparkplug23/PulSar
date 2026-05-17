@@ -73,6 +73,7 @@ enum ModuleStatus{
   Disabled,
   NoGPIOConfigured,
   Initialising,
+  Error,
   Running,
   DevicesPresent // Running means searching is enabled, but this is only set when devices are found
 };

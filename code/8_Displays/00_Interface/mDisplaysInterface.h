@@ -97,6 +97,27 @@ class mDisplaysInterface :
     VButton *buttons[MAX_TOUCH_BUTTONS];
     #endif
 
+    
+struct DisplaySettings{
+  uint8_t       model; 
+  uint8_t       mode;
+  uint8_t       refresh;
+  uint8_t       rows;
+  uint8_t       cols[2];
+  uint8_t       address[8];
+  uint8_t       dimmer;
+  uint8_t       size;
+  uint8_t       font;
+  uint8_t       rotate;
+  uint16_t      width;
+  uint16_t      height;
+  bool          invert;
+};
+  DisplaySettings   display;  
+
+
+
+
     // drawing color is WHITE
     // on epaper the whole display buffer is transfered inverted this results in white paper
     uint16_t fg_color = 1;

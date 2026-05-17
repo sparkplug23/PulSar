@@ -40,6 +40,42 @@ class mEnergyInterface :
      ************************************************************************************************/
 
 
+struct EnergyUsageNew{
+  uint32_t usage1_kWhtotal;
+  uint32_t usage2_kWhtotal;
+  uint32_t return1_kWhtotal;
+  uint32_t return2_kWhtotal;
+  uint32_t last_return_kWhtotal;
+  uint32_t last_usage_kWhtotal;  
+  uint8_t       energy_power_delta;        // 33F
+  unsigned long energy_power_calibration;  // 364
+  unsigned long energy_voltage_calibration;  // 368
+  unsigned long energy_current_calibration;  // 36C
+  unsigned long energy_kWhtoday;           // 370
+  unsigned long energy_kWhyesterday;       // 374
+  uint16_t      energy_kWhdoy;             // 378
+  uint16_t      energy_min_power;          // 37A
+  uint16_t      energy_max_power;          // 37C
+  uint16_t      energy_min_voltage;        // 37E
+  uint16_t      energy_max_voltage;        // 380
+  uint16_t      energy_min_current;        // 382
+  uint16_t      energy_max_current;        // 384
+  uint16_t      energy_max_power_limit;    // 386 MaxPowerLimit
+  uint16_t      energy_max_power_limit_hold;         // 388 MaxPowerLimitHold
+  uint16_t      energy_max_power_limit_window;       // 38A MaxPowerLimitWindow
+  uint16_t      energy_max_power_safe_limit;         // 38C MaxSafePowerLimit
+  uint16_t      energy_max_power_safe_limit_hold;    // 38E MaxSafePowerLimitHold
+  uint16_t      energy_max_power_safe_limit_window;  // 390 MaxSafePowerLimitWindow
+  uint16_t      energy_max_energy;         // 392 MaxEnergy
+  uint16_t      energy_max_energy_start;   // 394 MaxEnergyStart
+  uint32_t      energy_kWhtotal_time;      // 7B4
+  unsigned long energy_frequency_calibration;  // 7C8
+  unsigned long energy_kWhtotal;           // 554
+  uint16_t      tariff[4][2];              // E30
+};// EnergyUsage;
+
+
+  EnergyUsageNew   energy_usage;           // 77C 
     /************************************************************************************************
      * SECTION: Internal Functions
      ************************************************************************************************/

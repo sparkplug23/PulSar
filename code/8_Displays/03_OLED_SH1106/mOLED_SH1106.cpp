@@ -118,7 +118,7 @@ void mOLED_SH1106::EverySecond(void)
 void mOLED_SH1106::RefreshDisplay()
 {
 
-  switch (tkr_set->Settings.display.mode) {
+  switch (tkr_iDisp->display.mode) {
     default:
     case EM_DISPLAY_MODE_LOG_SCROLLING_ID:
       ShowScrollingLog();
@@ -146,46 +146,46 @@ void mOLED_SH1106::InitDriver(void)
     return; 
   }
 
-  if (!tkr_set->Settings.display.model)
+  if (!tkr_iDisp->display.model)
   {
     if (tkr_i2c->I2cSetDevice(OLED_ADDRESS1))
     {
-      tkr_set->Settings.display.address[0] = OLED_ADDRESS1;
-      tkr_set->Settings.display.model = D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID;
+      tkr_iDisp->display.address[0] = OLED_ADDRESS1;
+      tkr_iDisp->display.model = D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID;
     }
     else if (tkr_i2c->I2cSetDevice(OLED_ADDRESS2))
     {
-      tkr_set->Settings.display.address[0] = OLED_ADDRESS2;
-      tkr_set->Settings.display.model = D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID;
+      tkr_iDisp->display.address[0] = OLED_ADDRESS2;
+      tkr_iDisp->display.model = D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID;
     }
   }
 
-  ALOG_INF(PSTR("DSP: SD1306 address[0] %d"),tkr_set->Settings.display.address[0]);
+  ALOG_INF(PSTR("DSP: SD1306 address[0] %d"),tkr_iDisp->display.address[0]);
   
-  if(tkr_set->Settings.display.model == D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID)
+  if(tkr_iDisp->display.model == D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID)
   {
-    tkr_i2c->I2cSetActiveFound(tkr_set->Settings.display.address[0], "SH1106");
+    tkr_i2c->I2cSetActiveFound(tkr_iDisp->display.address[0], "SH1106");
 
     if(
-      (tkr_set->Settings.display.width != 64) && 
-      (tkr_set->Settings.display.width != 96) && 
-      (tkr_set->Settings.display.width != 128))
+      (tkr_iDisp->display.width != 64) && 
+      (tkr_iDisp->display.width != 96) && 
+      (tkr_iDisp->display.width != 128))
     {
-      tkr_set->Settings.display.width = 128;
+      tkr_iDisp->display.width = 128;
     }
     if(
-      (tkr_set->Settings.display.height != 16) && 
-      (tkr_set->Settings.display.height != 32) && 
-      (tkr_set->Settings.display.height != 48) && 
-      (tkr_set->Settings.display.height != 64)
+      (tkr_iDisp->display.height != 16) && 
+      (tkr_iDisp->display.height != 32) && 
+      (tkr_iDisp->display.height != 48) && 
+      (tkr_iDisp->display.height != 64)
     ){
-      tkr_set->Settings.display.height = 64;
+      tkr_iDisp->display.height = 64;
     }
 
-    oled1106 = new Adafruit_SH1106(tkr_set->Settings.display.width, tkr_set->Settings.display.height, tkr_i2c->wire);
-    oled1106->begin(SH1106_SWITCHCAPVCC, tkr_set->Settings.display.address[0], tkr_pins->Pin(GPIO_OLED_RESET) >= 0);
+    oled1106 = new Adafruit_SH1106(tkr_iDisp->display.width, tkr_iDisp->display.height, tkr_i2c->wire);
+    oled1106->begin(SH1106_SWITCHCAPVCC, tkr_iDisp->display.address[0], tkr_pins->Pin(GPIO_OLED_RESET) >= 0);
     tkr_iDisp->renderer = oled1106;
-    tkr_iDisp->renderer->DisplayInit(tkr_iDisp->DISPLAY_INIT_MODE, tkr_set->Settings.display.size, tkr_set->Settings.display.rotate, tkr_set->Settings.display.font);
+    tkr_iDisp->renderer->DisplayInit(tkr_iDisp->DISPLAY_INIT_MODE, tkr_iDisp->display.size, tkr_iDisp->display.rotate, tkr_iDisp->display.font);
     tkr_iDisp->renderer->setTextColor(1,0);
 
     #ifdef SHOW_SPLASH
@@ -202,12 +202,12 @@ void mOLED_SH1106::InitDriver(void)
     ALOG_INF(PSTR("DSP: SD1306"));
   }
 
-    tkr_set->Settings.display.invert = 0;
+    tkr_iDisp->display.invert = 0;
     #ifdef ENABLE_DEVFEATURE_DISPLAY__INVERT
-    tkr_set->Settings.display.invert = 1;
+    tkr_iDisp->display.invert = 1;
     #endif
 
-    tkr_iDisp->renderer->invertDisplay(tkr_set->Settings.display.invert);
+    // tkr_iDisp->renderer->invertDisplay(tkr_iDisp->display.invert);
 }
 
 
@@ -222,7 +222,7 @@ void mOLED_SH1106::ShowScrollingLog(void)
   
   tkr_iDisp->disp_refresh--;
   if (!tkr_iDisp->disp_refresh) {
-    tkr_iDisp->disp_refresh = tkr_set->Settings.display.refresh;
+    tkr_iDisp->disp_refresh = tkr_iDisp->display.refresh;
 
     // If no columns have been init, then first allocate memory
     if (!tkr_iDisp->screen_buffer.cols) { tkr_iDisp->ScreenBuffer_Alloc(); }
@@ -231,11 +231,11 @@ void mOLED_SH1106::ShowScrollingLog(void)
     char* txt = tkr_iDisp->LogBuffer_GetRowPointer('\370');
     if (txt != NULL) {
       // Last row is row_size - 1 for indexing
-      uint8_t last_row = tkr_set->Settings.display.rows -1;
+      uint8_t last_row = tkr_iDisp->display.rows -1;
 
       // Start by clearing the display
       tkr_iDisp->renderer->clearDisplay();
-      tkr_iDisp->renderer->setTextSize(tkr_set->Settings.display.size);
+      tkr_iDisp->renderer->setTextSize(tkr_iDisp->display.size);
       tkr_iDisp->renderer->setCursor(0,0);
 
       // Shift the logs by moving the rows from next into current and display this
@@ -271,11 +271,11 @@ void mOLED_SH1106::ShowStaticLog(void)
 
   // Start by clearing the display
   tkr_iDisp->renderer->clearDisplay();
-  tkr_iDisp->renderer->setTextSize(tkr_set->Settings.display.size);
+  tkr_iDisp->renderer->setTextSize(tkr_iDisp->display.size);
   tkr_iDisp->renderer->setCursor(0,0);
 
   // Copy log_buffer contents into screen_buffer
-  for(int row_index=0; row_index<tkr_set->Settings.display.rows; row_index++)
+  for(int row_index=0; row_index<tkr_iDisp->display.rows; row_index++)
   {
     // Get log_buffer by row
     char* row_ptr = tkr_iDisp->LogBuffer_GetRowPointerByRowIndex(row_index);
@@ -298,8 +298,8 @@ void mOLED_SH1106::ShowUTCTime(void)
 
   char line[12];
   tkr_iDisp->renderer->clearDisplay();
-  tkr_iDisp->renderer->setTextSize(tkr_set->Settings.display.size);
-  tkr_iDisp->renderer->setTextFont(tkr_set->Settings.display.font);
+  tkr_iDisp->renderer->setTextSize(tkr_iDisp->display.size);
+  tkr_iDisp->renderer->setTextFont(tkr_iDisp->display.font);
   tkr_iDisp->renderer->setCursor(0, 0);
   // snprintf_P(line, sizeof(line), PSTR(" %02d" D_HOUR_MINUTE_SEPARATOR "%02d" D_MINUTE_SECOND_SEPARATOR "%02d"), tkr_time->RtcTime.hour,  tkr_time->RtcTime.minute,  tkr_time->RtcTime.second);  // [ 12:34:56 ]
   tkr_iDisp->renderer->println( tkr_time->GetTime().c_str() );

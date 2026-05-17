@@ -50,7 +50,7 @@
 // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
-  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+  #define ENABLE_FEATURE__DATABUFFER_LOCK
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
   
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
@@ -104,7 +104,7 @@
 // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
-  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+  #define ENABLE_FEATURE__DATABUFFER_LOCK
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
   
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
@@ -157,7 +157,7 @@
 // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
-  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+  #define ENABLE_FEATURE__DATABUFFER_LOCK
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
   
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
@@ -214,7 +214,7 @@
 // // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
-//   #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+//   #define ENABLE_FEATURE__DATABUFFER_LOCK
 //   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
   
 //   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET

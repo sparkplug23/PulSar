@@ -131,7 +131,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
     rpower = tkr_set->runtime.power;
   }
 
-  if (tkr_set->Settings.flag_system.interlock) {          // Allow only one or no relay set - CMND_INTERLOCK - Enable/disable interlock
+  if (tkr_set->Settings.sysopt_system.bit.interlock) {          // Allow only one or no relay set - CMND_INTERLOCK - Enable/disable interlock
     for (uint32_t i = 0; i < MAX_INTERLOCKS; i++) {
       power_t mask = 1;
       uint32_t count = 0;
@@ -338,13 +338,13 @@ void mRelays::SetPowerOnState(void)
         break;
       case POWER_ALL_SAVED_TOGGLE:
         tkr_set->runtime.power = (tkr_set->Settings.power & devices_mask) ^ POWER_MASK;
-        if (tkr_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
+        if (tkr_set->Settings.sysopt_system.bit.save_state) {  // SetOption0 - Save power state and use after restart
           SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
         }
         break;
       case POWER_ALL_SAVED:
         tkr_set->runtime.power = tkr_set->Settings.power & devices_mask;
-        if (tkr_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
+        if (tkr_set->Settings.sysopt_system.bit.save_state) {  // SetOption0 - Save power state and use after restart
           SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
         }
         break;
@@ -352,7 +352,7 @@ void mRelays::SetPowerOnState(void)
 
     } else {
       tkr_set->runtime.power = tkr_set->Settings.power & devices_mask;
-      if (tkr_set->Settings.flag_system.save_state) {    // SetOption0 - Save power state and use after restart
+      if (tkr_set->Settings.sysopt_system.bit.save_state) {    // SetOption0 - Save power state and use after restart
         SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
       }
     }
@@ -459,7 +459,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
       #endif
     }
 
-    if (tkr_set->Settings.flag_system.interlock &&      // CMND_INTERLOCK - Enable/disable interlock
+    if (tkr_set->Settings.sysopt_system.bit.interlock &&      // CMND_INTERLOCK - Enable/disable interlock
         !interlock_mutex &&
         ((POWER_ON == state) || ((POWER_TOGGLE == state) && !(tkr_set->runtime.power & mask)))
        ) {

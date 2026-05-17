@@ -3666,7 +3666,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
 { 
   
-  #ifdef USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED
+  #ifdef USE_DEBUGFEATURE_DEVICE__CLONE_TESTBED
   #ifdef ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
   snprintf(serverDescription, sizeof(serverDescription), "PulSar %s \"%s\" [%s]", tkr_set->Settings.system_name.friendly, DEVICENAME_DESCRIPTION_CTR, tkr_time->GetBuildDateAndTime().c_str() );
   #else

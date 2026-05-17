@@ -76,6 +76,38 @@ void mEnergyInterface::Pre_Init(void)
 
 void mEnergyInterface::Init(void)
 {
+
+  
+  energy_usage.energy_power_delta = DEFAULT_POWER_DELTA;
+
+  energy_usage.energy_power_calibration   = HLW_PREF_PULSE;
+  energy_usage.energy_voltage_calibration = HLW_UREF_PULSE;
+  energy_usage.energy_current_calibration = HLW_IREF_PULSE;
+
+  energy_usage.energy_kWhtoday     = 0;
+  energy_usage.energy_kWhyesterday = 0;
+  energy_usage.energy_kWhdoy       = 0;
+  energy_usage.energy_kWhtotal     = 0;
+
+  energy_usage.energy_min_power   = 0;
+  energy_usage.energy_max_power   = 0;
+  energy_usage.energy_min_voltage = 0;
+  energy_usage.energy_max_voltage = 0;
+  energy_usage.energy_min_current = 0;
+  energy_usage.energy_max_current = 0;
+
+  energy_usage.energy_max_power_limit        = 0;
+  energy_usage.energy_max_power_limit_hold   = MAX_POWER_HOLD;
+  energy_usage.energy_max_power_limit_window = MAX_POWER_WINDOW;
+
+  energy_usage.energy_max_power_safe_limit        = 0;
+  energy_usage.energy_max_power_safe_limit_hold   = SAFE_POWER_HOLD;
+  energy_usage.energy_max_power_safe_limit_window = SAFE_POWER_WINDOW;
+
+  energy_usage.energy_max_energy       = 0;
+  energy_usage.energy_max_energy_start = 0;
+
+
   // settings.sealevel_pressure = SENSORS_PRESSURE_SEALEVELHPA;
   module_state.mode = ModuleStatus::Running;
 }
@@ -668,7 +700,7 @@ void mEnergyInterface::MQTTHandler_Init(){
 // void mEnergyInterface::Energy200ms(void)
 // {
   
-//   // Energy.power_on = (tkr_set->power != 0) | tkr_set->Settings.flag_system.no_power_on_check;  // SetOption21 - Show voltage even if powered off
+//   // Energy.power_on = (tkr_set->power != 0) | tkr_set->Settings.sysopt_system.bit.no_power_on_check;  // SetOption21 - Show voltage even if powered off
 
 //   // Energy.fifth_second++;
 //   // if (5 == Energy.fifth_second) {
@@ -1355,24 +1387,24 @@ void mEnergyInterface::MQTTHandler_Init(){
 // // //   Energy.total = (float)(tkr_set->RtcSettings.energy_kWhtotal + Energy.kWhtoday_offset + Energy.kWhtoday) / 100000;
 
 // //   char energy_total_chr[FLOATSZ];
-// //   tkr_sup->dtostrfd(Energy.total, tkr_set->Settings.flag_power.energy_resolution, energy_total_chr);
+// //   tkr_sup->dtostrfd(Energy.total, tkr_set->Settings.sysopt_power.bit.energy_resolution, energy_total_chr);
 // //   char energy_daily_chr[FLOATSZ];
-// //   tkr_sup->dtostrfd(Energy.daily, tkr_set->Settings.flag_power.energy_resolution, energy_daily_chr);
+// //   tkr_sup->dtostrfd(Energy.daily, tkr_set->Settings.sysopt_power.bit.energy_resolution, energy_daily_chr);
 // //   char energy_yesterday_chr[FLOATSZ];
 
 
 
 
-// // //   tkr_sup->dtostrfd((float)Settings.energy_kWhyesterday / 100000, tkr_set->Settings.flag_power.energy_resolution, energy_yesterday_chr);
+// // //   tkr_sup->dtostrfd((float)Settings.energy_kWhyesterday / 100000, tkr_set->Settings.sysopt_power.bit.energy_resolution, energy_yesterday_chr);
 
 // // //   char energy_usage1_chr[FLOATSZ];
-// // //   tkr_sup->dtostrfd((float)Settings.energy_usage.usage1_kWhtotal / 100000, tkr_set->Settings.flag_power.energy_resolution, energy_usage1_chr);
+// // //   tkr_sup->dtostrfd((float)Settings.energy_usage.usage1_kWhtotal / 100000, tkr_set->Settings.sysopt_power.bit.energy_resolution, energy_usage1_chr);
 // // //   char energy_usage2_chr[FLOATSZ];
-// // //   tkr_sup->dtostrfd((float)Settings.energy_usage.usage2_kWhtotal / 100000, tkr_set->Settings.flag_power.energy_resolution, energy_usage2_chr);
+// // //   tkr_sup->dtostrfd((float)Settings.energy_usage.usage2_kWhtotal / 100000, tkr_set->Settings.sysopt_power.bit.energy_resolution, energy_usage2_chr);
 // // //   char energy_return1_chr[FLOATSZ];
-// // //   tkr_sup->dtostrfd((float)Settings.energy_usage.return1_kWhtotal / 100000, tkr_set->Settings.flag_power.energy_resolution, energy_return1_chr);
+// // //   tkr_sup->dtostrfd((float)Settings.energy_usage.return1_kWhtotal / 100000, tkr_set->Settings.sysopt_power.bit.energy_resolution, energy_return1_chr);
 // // //   char energy_return2_chr[FLOATSZ];
-// // //   tkr_sup->dtostrfd((float)Settings.energy_usage.return2_kWhtotal / 100000, tkr_set->Settings.flag_power.energy_resolution, energy_return2_chr);
+// // //   tkr_sup->dtostrfd((float)Settings.energy_usage.return2_kWhtotal / 100000, tkr_set->Settings.sysopt_power.bit.energy_resolution, energy_return2_chr);
 
 // // //   Response_P(PSTR("{\"%s\":{\"" D_TOTAL "\":%s,\"" D_YESTERDAY "\":%s,\"" D_TODAY "\":%s,\"" D_USAGE "\":[%s,%s],\"" D_EXPORT "\":[%s,%s]}}"),
 // // //     XdrvMailbox.command, energy_total_chr, energy_yesterday_chr, energy_daily_chr, energy_usage1_chr, energy_usage2_chr, energy_return1_chr, energy_return2_chr);
@@ -1873,7 +1905,7 @@ void mEnergyInterface::MQTTHandler_Init(){
 //     //   }
 //     //   Energy.period = tkr_set->RtcSettings.energy_kWhtoday;
 //     //   char energy_period_chr[FLOATSZ];
-//     //   tkr_sup->dtostrfd(energy, tkr_set->Settings.flag_power.wattage_resolution, energy_period_chr);
+//     //   tkr_sup->dtostrfd(energy, tkr_set->Settings.sysopt_power.bit.wattage_resolution, energy_period_chr);
 //     //   tkr_sup->ResponseAppend_P(PSTR(",\"" D_PERIOD "\":%s"), energy_period_chr);
 //     // }
 //     // tkr_sup->ResponseAppend_P(PSTR(",\"" D_POWERUSAGE "\":%s"),

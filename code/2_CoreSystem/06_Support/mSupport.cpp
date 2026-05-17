@@ -963,7 +963,7 @@ void mSupport::ArduinoOTAInit(void)
         if (tkr_set->Settings.webserver) { tkr_web->StopWebserver(); }
       #endif  // USE_MODULE_NETWORK_WEBSERVER
       AllowInterrupts(0);
-      if (tkr_set->Settings.flag_system.mqtt_enabled) {
+      if (tkr_set->Settings.sysopt_system.bit.mqtt_enabled) {
         MqttDisconnect();      // SetOption3  - Enable MQTT
       }
     #endif
@@ -2739,7 +2739,7 @@ void mSupport::EspRestart(void)
   //   ESP_Restart();
   // }
   // delay(100);                 // Allow time for message xfer - disabled v6.1.0b
-  // //if (Settings.flag_system.mqtt_enabled) MqttDisconnect();
+  // //if (Settings.sysopt_system.bit.mqtt_enabled) MqttDisconnect();
   // WifiDisconnect();
   // //tkr_sup->CrashDumpClear();
   // ESP.restart();            // This results in exception 3 on restarts on core 2.3.0

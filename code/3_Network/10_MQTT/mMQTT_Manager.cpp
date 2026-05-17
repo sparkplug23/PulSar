@@ -17,7 +17,7 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
     break;
   }
 
-  if(!tkr_set->Settings.flag_system.mqtt_enabled){ return TASKER_RESULT__MODULE_DISABLED_ID; }
+  if(!tkr_set->Settings.sysopt_system.bit.mqtt_enabled){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
   if(!tkr_interface_network->Network_HasExternalConnectivity()) return TASKER_RESULT__MODULE_DISABLED_ID;
 
@@ -789,7 +789,7 @@ void mMQTTManager::MqttPublishPowerBlinkState(uint32_t device) {
   // }
   #ifdef USE_MODULE_DRIVERS_RELAY
   tkr_sup->Response_P(PSTR("{\"%s\":\"" D_BLINK " %s\"}"), 
-    tkr_sup->GetPowerDevice(scommand, device, sizeof(scommand), tkr_set->Settings.flag_system.device_index_enable), tkr_sup->GetStateText(bitRead(tkr_relay->rt.bitpacked.blink_mask, device -1)));  // SetOption26 - Switch between POWER or POWER1
+    tkr_sup->GetPowerDevice(scommand, device, sizeof(scommand), tkr_set->Settings.sysopt_system.bit.device_index_enable), tkr_sup->GetStateText(bitRead(tkr_relay->rt.bitpacked.blink_mask, device -1)));  // SetOption26 - Switch between POWER or POWER1
   #endif 
   
   MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_STAT, S_RSLT_POWER);

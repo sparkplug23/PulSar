@@ -546,7 +546,7 @@ void mButtons::Handler(void) {
         /***
          * SINGLE-PRESS: React to single press and trigger rule
          */
-        if (tkr_set->Settings.flag_system.button_single_press_only) { // SetOption13 (0) - Allow only single button press for immediate action
+        if (tkr_set->Settings.sysopt_system.bit.button_single_press_only) { // SetOption13 (0) - Allow only single button press for immediate action
 
           AddLog(LOG_LEVEL_INFO,PSTR(D_LOG_BUTTONS "#%d Immediate: %d | %s " D_IMMEDIATE), button_index, button, button==PRESSED?"ACTIVE":"Not Active" );          
                       
@@ -599,12 +599,12 @@ void mButtons::Handler(void) {
          * If single-press only was enabled, then holding the button for X time will enable multipress mode. The reason for this code is single-press mode enables immediate action, while multipress adds a timeout delay to await multiple press so may not always be the best option.
          * The following code enables a runtime way of switching from single only, to, multipress enabled.
          */
-        if (tkr_set->Settings.flag_system.button_single_press_only) {                  // SetOption13 (0) - Allow only single button press for immediate action
+        if (tkr_set->Settings.sysopt_system.bit.button_single_press_only) {                  // SetOption13 (0) - Allow only single button press for immediate action
           uint16_t hold_timer_limit = loops_per_second * hold_time_extent * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10;
           if (Button.hold_timer[button_index] == hold_timer_limit) {  // SetOption32 (40) - Button held for factor times longer
             Button.press_counter[button_index] = 0;
             ALOG_INF(PSTR("Disable single press only SO13"));
-            tkr_set->Settings.flag_system.button_single_press_only = false;        // SetOption13 (0) - "SetOption" "13 0" // Disable single press only
+            tkr_set->Settings.sysopt_system.bit.button_single_press_only = false;        // SetOption13 (0) - "SetOption" "13 0" // Disable single press only
           }
         }
         /**
@@ -623,7 +623,7 @@ void mButtons::Handler(void) {
              * SECTION: Button hold is used to system factory reset
              */
             #ifdef ENABLE_FEATURE_BUTTON__FACTORY_RESET_WITH_LONG_HOLD
-            if (tkr_set->Settings.flag_system.button_restrict) {            // SetOption1 (0) - Control button multipress
+            if (tkr_set->Settings.sysopt_system.bit.button_restrict) {            // SetOption1 (0) - Control button multipress
               if (tkr_set->Settings.setoption_255[P_HOLD_IGNORE] > 0) {      // SetOption40 (0) - Do not ignore button hold
                 if (Button.hold_timer[button_index] > loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_IGNORE] / 10) {
                   Button.hold_timer[button_index] = 0;       // Reset button hold counter to stay below hold trigger
@@ -650,7 +650,7 @@ void mButtons::Handler(void) {
         }
       }
 
-      if (!tkr_set->Settings.flag_system.button_single_press_only)  // SetOption13 (0) - Allow multi-press
+      if (!tkr_set->Settings.sysopt_system.bit.button_single_press_only)  // SetOption13 (0) - Allow multi-press
       {                   
         if (Button.window_timer[button_index]) 
         {
@@ -673,9 +673,9 @@ void mButtons::Handler(void) {
               // } else
               // #endif  // ESP8266
               {
-                single_press = (tkr_set->Settings.flag_system.button_swap +1 == Button.press_counter[button_index]);  // SetOption11 (0)
+                single_press = (tkr_set->Settings.sysopt_system.bit.button_swap +1 == Button.press_counter[button_index]);  // SetOption11 (0)
                 if ((1 == Button.used_bitmap) && 0/* (2 == TasmotaGlobal.devices_present)*/) {  // Single Button with two devices only
-                  if (tkr_set->Settings.flag_system.button_swap) {          // SetOption11 (0)
+                  if (tkr_set->Settings.sysopt_system.bit.button_swap) {          // SetOption11 (0)
                     Button.press_counter[button_index] = (single_press) ? 1 : 2;
                   }
                 }
