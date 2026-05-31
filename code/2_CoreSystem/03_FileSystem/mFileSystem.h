@@ -18,24 +18,58 @@
 #include <string.h>
 #include <strings.h>
 
+// #ifndef PULSAR_HAS_FILESYSTEM
+//   #define PULSAR_HAS_FILESYSTEM 1
+// #endif
+
+// #if defined(DISABLE_FILESYSTEM)
+//   #undef  PULSAR_HAS_FILESYSTEM
+//   #define PULSAR_HAS_FILESYSTEM 0
+// #endif
 
 #ifdef ESP8266
-  #include <SPIFFSEditor.h>
-  #include <FS.h>
+  // #include <SPIFFSEditor.h>
+  // // #include <LittleFS.h>
+  // #include <FS.h>
+  // #include <LittleFS.h>
+  // #include <SPI.h>
+  // #ifdef USE_MODULE_FILESYSTEM_SDCARD
+  //   #include <SD.h>
+  //   #include <SDFAT.h>
+  // #endif
+
+  
+  #ifdef ESP8266
   #include <LittleFS.h>
   #include <SPI.h>
   #ifdef USE_MODULE_FILESYSTEM_SDCARD
-    #include <SD.h>
-    #include <SDFAT.h>
-  #endif
+  #include <SD.h>
+  #include <SdFat.h>
+  #endif  // USE_MODULE_FILESYSTEM_SDCARD
+  #endif  // ESP8266
+
+  #include <SPIFFSEditor.h>
+
 #endif  // ESP8266
 #ifdef ESP32
   #include <LittleFS.h>
+
+
   #ifdef USE_MODULE_FILESYSTEM_SDCARD
     #include <SD.h>
   #endif
+
+
   #include "FFat.h"
   #include "FS.h"
+  #include "SD.h"
+  #include "SPI.h"
+
+  #ifdef ESP32
+    #include "SD_MMC.h"
+  #endif
+
+  #include <SPIFFSEditor.h>
 #endif  // ESP32
 
 #ifdef ESP32
@@ -54,7 +88,6 @@
   #endif // USE_MODULE_NETWORK_WEBSERVER
 #endif
 
-#include <SPIFFSEditor.h>
 
 #define ARDUINOJSON_DECODE_UNICODE 0
 #include "3_Network/21_WebServer/AsyncJson-v6.h"
@@ -100,6 +133,15 @@ using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
 // #define FILE_EXTENSION_BIN ".bin" //release version
 
 
+#ifdef ESP32
+  #include <AsyncTCP.h>
+  #include <ESPAsyncWebServer.h>
+#endif
+#ifdef ESP8266
+  #include <ESPAsyncTCP.h>
+  #include <ESPAsyncWebServer.h>
+#endif
+
 #include "1_TaskerManager/mTaskerInterface.h"
 
 class mFileSystem :
@@ -129,74 +171,145 @@ class mFileSystem :
      * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
      ************************************************************************************************/
 
-    
-    /*********************************************************************************************\
-    This driver adds universal file system support for
-    - ESP8266 (sd card or littlefs on  > 1 M devices with special linker file e.g. eagle.flash.4m2m.ld)
-      (makes no sense on 1M devices without sd card)
-    - ESP32 (sd card or littlefs or sfatfile system).
+    /************************************************************************************************
+ * SECTION: PFS - PulSar File System / Minimal Persistent Storage
+ *
+ * SUMMARY:
+ * - PFS owns internal persistent storage only.
+ * - If an internal filesystem is mounted, blobs are stored as files.
+ * - If filesystem is disabled on ESP8266, blobs can fall back to fixed raw-flash slots.
+ * - SD card is not part of PFS. SD card is owned by mSDCard.
+ *
+ * CHANGED:
+ * - 31May26: Added PFS backend abstraction and ESP8266 raw flash fallback interface.
+ ************************************************************************************************/
 
-    The sd card chip select is the standard SDCARD_CS or when not found SDCARD_CS_PIN and initializes
-    the FS System Pointer ufsp which can be used by all standard file system calls.
+#define PFS_TNONE         0
+#define PFS_TFAT          1
+#define PFS_TLFS          2
 
-    The only specific call is UfsInfo() which gets the total size (0) and free size (1).
+enum PFSStorageTarget : uint8_t
+{
+  PFS_STORAGE_INTERNAL = 0,
+  PFS_STORAGE_ACTIVE   = 1,
+  PFS_STORAGE_FLASH    = PFS_STORAGE_INTERNAL
+};
 
-    A button is created in the setup section to show up the file directory to download and upload files
-    subdirectories are supported.
+enum PFSBackendType : uint8_t
+{
+  PFS_BACKEND_NONE = 0,
+  PFS_BACKEND_FILESYSTEM,
+  PFS_BACKEND_RAW_FLASH
+};
 
-    Supported commands:
-    ufs       fs info
-    ufstype   get filesytem type 0=none 1=SD  2=Flashfile
-    ufssize   total size in kB
-    ufsfree   free size in kB
-    \*********************************************************************************************/
+enum PFSBlobId : uint8_t
+{
+  PFS_BLOB_SETTINGS_MAIN = 0,
+  PFS_BLOB_SETTINGS_NETWORK,
+  PFS_BLOB_SETTINGS_MODULE,
+  PFS_BLOB_SETTINGS_FUNCTION,
+  PFS_BLOB_COUNT
+};
 
-    #define UFS_TNONE         0
-    #define UFS_TSDC          1
-    #define UFS_TFAT          2
-    #define UFS_TLFS          3
+struct PFSBlobSlot
+{
+  PFSBlobId id;
+  const char* name;
+  const char* file_path;
+  uint32_t raw_offset;
+  uint32_t raw_size;
+};
 
-    // Global file system pointer
-    FS *ufsp = nullptr;
-    // Flash file system pointer
-    FS *ffsp = nullptr;
-    // Local pointer for file managment
-    FS *dfsp = nullptr;
+struct PFSRawFlashHeader
+{
+  uint32_t magic;
+  uint16_t version;
+  uint16_t header_size;
+  uint32_t blob_id;
+  uint32_t payload_len;
+  uint32_t payload_crc;
+  uint32_t sequence;
+  uint32_t reserved;
+};
 
-    char ufs_path[48];
-    File ufs_upload_file;
-    uint8_t ufs_dir;    
-    uint8_t ufs_type; // 0 = None, 1 = SD, 2 = ffat, 3 = littlefs
-    uint8_t ffs_type;
+PFSBackendType pfs_backend = PFS_BACKEND_NONE;
 
-    struct {
-      char run_file[48];
-      int run_file_pos = -1;
-      bool run_file_mutex = 0;
-      bool download_busy;
-    } UfsData;
+uint32_t GetFreeStorageSpace(PFSStorageTarget target = PFS_STORAGE_INTERNAL);
+uint32_t SubCall__GetFreeStorageSpace__Active(void);
+uint32_t SubCall__GetFreeStorageSpace__LittleFS(void);
+uint32_t SubCall__GetFreeStorageSpace__FFat(void);
+
+bool PFSBackend_Init();
+bool PFSBackend_IsAvailable() const;
+PFSBackendType PFSBackend_GetType() const;
+const char* PFSBackend_GetTypeName() const;
+
+const PFSBlobSlot* PFS_GetBlobSlot(PFSBlobId id) const;
+const char* PFS_GetBlobName(PFSBlobId id) const;
+
+bool PFS_SaveBlob(PFSBlobId id, const uint8_t* data, uint32_t len);
+bool PFS_LoadBlob(PFSBlobId id, uint8_t* data, uint32_t max_len, uint32_t* loaded_len = nullptr);
+bool PFS_DeleteBlob(PFSBlobId id);
+bool PFS_BlobExists(PFSBlobId id);
+uint32_t PFS_BlobSize(PFSBlobId id);
+
+bool PFS_SaveSettingsBlob(const uint8_t* data, uint32_t len);
+bool PFS_LoadSettingsBlob(uint8_t* data, uint32_t max_len, uint32_t* loaded_len = nullptr);
+bool PFS_SettingsBlobExists();
+
+bool PFS_FileBackend_SaveBlob(const PFSBlobSlot* slot, const uint8_t* data, uint32_t len);
+bool PFS_FileBackend_LoadBlob(const PFSBlobSlot* slot, uint8_t* data, uint32_t max_len, uint32_t* loaded_len);
+bool PFS_FileBackend_DeleteBlob(const PFSBlobSlot* slot);
+bool PFS_FileBackend_BlobExists(const PFSBlobSlot* slot);
+uint32_t PFS_FileBackend_BlobSize(const PFSBlobSlot* slot);
+
+bool PFS_RawFlash_Init();
+bool PFS_RawFlash_SaveBlob(const PFSBlobSlot* slot, const uint8_t* data, uint32_t len);
+bool PFS_RawFlash_LoadBlob(const PFSBlobSlot* slot, uint8_t* data, uint32_t max_len, uint32_t* loaded_len);
+bool PFS_RawFlash_DeleteBlob(const PFSBlobSlot* slot);
+bool PFS_RawFlash_BlobExists(const PFSBlobSlot* slot);
+uint32_t PFS_RawFlash_BlobSize(const PFSBlobSlot* slot);
+uint32_t PFS_RawFlash_CRC32(const uint8_t* data, uint32_t len) const;
 
 
-    enum FileStorageTarget : uint8_t
-    {
-      FILE_STORAGE_INTERNAL = 0,   // Internal LittleFS, system/module config
-      FILE_STORAGE_ACTIVE   = 1,   // Currently selected filesystem
-      FILE_STORAGE_SD       = 2,   // SD card, future high-volume/user files
-      FILE_STORAGE_FLASH    = FILE_STORAGE_INTERNAL
-    };
-    uint32_t GetFreeStorageSpace(FileStorageTarget target = FILE_STORAGE_INTERNAL);
-    uint32_t SubCall__GetFreeStorageSpace__Active(void);
-    uint32_t SubCall__GetFreeStorageSpace__LittleFS(void);
-    uint32_t SubCall__GetFreeStorageSpace__FFat(void);
-    uint32_t SubCall__GetFreeStorageSpace__SD(void);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     void SystemTask__Execute_Module_Data_Save();
 
-    void JsonFile_Save__Stored_Module();
-    bool JsonFile_Load__Stored_Module();
-    void JsonFile_Load__Stored_Module_Or_Default_Template();
-    void JsonFile_Save__Stored_Secure();
-    void JsonFile_Load__Stored_Secure();    
+    // void JsonFile_Save__Stored_Module();
+    // bool JsonFile_Load__Stored_Module();
+    // void JsonFile_Load__Stored_Module_Or_Default_Template();
+    // void JsonFile_Save__Stored_Secure();
+    // void JsonFile_Load__Stored_Secure();    
     
     void ByteFile_Save(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
     uint32_t ByteFile_Load(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
@@ -219,6 +332,8 @@ class mFileSystem :
     StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
     JsonDocument *pDoc = &gDoc;
     #endif
+    
+    bool IsMounted(void) const;
        
     void Handle_FileChanges_WebUIEdits();
 
@@ -246,256 +361,7 @@ class mFileSystem :
 
     void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
     void readFile(fs::FS &fs, const char * path);
-
-
-    /************************************************************************************************
-     * SECTION: SD CARD FILESYSTEM BACKEND
-     *
-     * Purpose:
-     * - SD card is owned by mFileSystem, not by a separate driver.
-     * - Provides optional /sd/... filesystem backend.
-     * - Handles pin discovery, SPI init, mount, card info, and direct SD file access.
-     *
-     * Virtual path convention:
-     * - /system/...  -> existing internal filesystem, e.g. LittleFS
-     * - /sd/...      -> SD card filesystem
-     *
-     * Date Modified: 16May26
-     ************************************************************************************************/
-
-    #ifdef USE_MODULE_FILESYSTEM_SDCARD
-
-      #include "FS.h"
-      #include "SD.h"
-      #include "SPI.h"
-
-      #ifndef FILESYSTEM_SDCARD_HEALTH_CHECK_PERIOD_MS
-        #define FILESYSTEM_SDCARD_HEALTH_CHECK_PERIOD_MS 5000UL
-      #endif
-
-      #ifndef FILESYSTEM_SDCARD_HEALTH_CHECK_FAIL_LIMIT
-        #define FILESYSTEM_SDCARD_HEALTH_CHECK_FAIL_LIMIT 2
-      #endif
-
-      struct SDCardState
-      {
-        bool enabled = false;
-        bool mounted = false;
-        bool mount_failed = false;
-
-        int8_t pin_cs   = -1;
-        int8_t pin_sck  = -1;
-        int8_t pin_mosi = -1;
-        int8_t pin_miso = -1;
-
-        uint8_t card_type = CARD_NONE;
-
-        uint64_t card_size_bytes  = 0;
-        uint64_t total_bytes      = 0;
-        uint64_t used_bytes       = 0;
-
-        uint32_t mount_attempts   = 0;
-        uint32_t mount_failures   = 0;
-        uint32_t last_mount_ms    = 0;
-
-        uint32_t last_health_check_ms = 0;
-        uint32_t health_check_failures = 0;
-        bool card_removed = false;
-
-      } sdcard;
-
-      // Keep SD SPI ownership inside filesystem.
-      // No separate SD driver module.
-      SPIClass spiSD = SPIClass(HSPI);
-
-      bool SDCard_Init();
-      bool SDCard_Mount();
-      bool SDCard_Unmount();
-      bool SDCard_IsMounted() const;
-      bool SDCard_RefreshInfo();  
-      void SDCard_ServiceMountRetry();
-      const char* SDCard_CardTypeName(uint8_t card_type) const;
-      bool SDCard_HealthCheck();
-      void SDCard_MarkUnmounted();
-      void SDCard_Service();
-
-      #ifndef FILESYSTEM_SDCARD_MOUNT_RETRY_PERIOD_MS
-        #define FILESYSTEM_SDCARD_MOUNT_RETRY_PERIOD_MS 10000UL
-      #endif
-
-      #ifndef FILESYSTEM_SDCARD_MOUNT_RETRY_MAX
-        #define FILESYSTEM_SDCARD_MOUNT_RETRY_MAX 0
-      #endif
-      // 0 = retry forever, useful while debugging SD bring-up
-      
-      AsyncWebHandler *editSDHandler = nullptr;
-
-      bool SDCard_ResolveLocalPath(
-        const char* virtual_path,
-        const char** local_path
-      ) const;
-
-      File SDCard_Open(const char* virtual_path, const char* mode);
-      bool SDCard_Exists(const char* virtual_path);
-      bool SDCard_Remove(const char* virtual_path);
-      bool SDCard_Rename(const char* from_virtual_path, const char* to_virtual_path);
-      bool SDCard_Mkdir(const char* virtual_path);
-      bool SDCard_Rmdir(const char* virtual_path);
-
-      void SDCard_ListDir(const char* virtual_path = "/sd/", uint8_t levels = 0);
-      bool SDCard_ReadToSerial(const char* virtual_path);
-      bool SDCard_WriteAll(const char* virtual_path, const uint8_t* data, size_t len, const char* mode = FILE_WRITE);
-      bool SDCard_WriteText(const char* virtual_path, const char* text, const char* mode = FILE_WRITE);
-      bool SDCard_AppendText(const char* virtual_path, const char* text);
-      void SDCard_TestFileIO(const char* virtual_path);
-
-    #endif // USE_MODULE_FILESYSTEM_SDCARD
-
-
-    /************************************************************************************************
-     * SECTION: SD CARD EDITOR WEB ACCESS
-     *
-     * Purpose:
-     * - Registers SD-backed editor route using a project-local SDCardEditor handler.
-     * - Uses generated gzip page PAGE_sd_editor from html_sdcard_editor.h.
-     * - Drops the previous manual /sd browser/API method.
-     *
-     * Route:
-     * - /sdedit
-     *
-     * Date Modified: 17May26
-     ************************************************************************************************/
-    #if defined(USE_MODULE_FILESYSTEM_SDCARD) && defined(USE_MODULE_NETWORK_WEBSERVER)
-
-      void WebPage_Root_AddHandlers();
-
-      void Web_SDCardEditor_GET(AsyncWebServerRequest* request);
-      void Web_SDCardEditor_PUT(AsyncWebServerRequest* request);
-      void Web_SDCardEditor_DELETE(AsyncWebServerRequest* request);
-      void Web_SDCardEditor_POST_Final(AsyncWebServerRequest* request);
-
-      void Web_SDCardEditor_POST_Upload(
-        AsyncWebServerRequest* request,
-        const String& filename,
-        size_t index,
-        uint8_t* data,
-        size_t len,
-        bool final
-      );
-
-      String Web_SDCardEditor_ContentTypeFromPath(const String& path);
-      String Web_SDCardEditor_JSONEscape(const String& in);
-      bool Web_SDCardEditor_NormalisePath(String& path);
-
-      void AppendJSON_SDCard_Files(const char* virtual_dir, uint8_t max_files);
-
-    #endif
-
-    /************************************************************************************************
-     * SECTION: SD CARD BUFFERED WRITE SUBSYSTEM
-     *
-     * Purpose:
-     * - Filesystem-owned high-rate SD logging path.
-     * - Producers such as GPS/UART/sensors only push bytes/lines into this subsystem.
-     * - This owns the open File handle, ringbuffer, writer task, flush/close policy, and counters.
-     *
-     * Important:
-     * - This is still part of mFileSystem, not a GPS/UART/controller module.
-     * - Producers decide what bytes mean.
-     * - Filesystem decides how bytes are safely written to SD.
-     *
-     * Date Modified: 16May26
-     ************************************************************************************************/
-
-    #if defined(USE_MODULE_FILESYSTEM_SDCARD) && defined(USE_FILESYSTEM_SDCARD_BUFFERS)
-
-      #ifndef FILESYSTEM_SDLOG_RINGBUFFER_SIZE
-        #define FILESYSTEM_SDLOG_RINGBUFFER_SIZE 65536
-      #endif
-
-      #ifndef FILESYSTEM_SDLOG_WRITER_STACK_SIZE
-        #define FILESYSTEM_SDLOG_WRITER_STACK_SIZE 4096
-      #endif
-
-      #ifndef FILESYSTEM_SDLOG_WRITER_PRIORITY
-        #define FILESYSTEM_SDLOG_WRITER_PRIORITY 1
-      #endif
-
-      #ifndef FILESYSTEM_SDLOG_WRITER_CORE
-        #define FILESYSTEM_SDLOG_WRITER_CORE 0
-      #endif
-
-      #ifndef FILESYSTEM_SDLOG_CHUNK_SIZE
-        #define FILESYSTEM_SDLOG_CHUNK_SIZE 4096
-      #endif
-
-      #ifndef FILESYSTEM_SDLOG_CLOSE_TIMEOUT_MS
-        #define FILESYSTEM_SDLOG_CLOSE_TIMEOUT_MS 3000
-      #endif
-
-      enum SDLogStatus : uint8_t
-      {
-        SDLOG_STATUS_DISABLED = 0,
-        SDLOG_STATUS_IDLE,
-        SDLOG_STATUS_OPEN,
-        SDLOG_STATUS_CLOSE_REQUESTED,
-        SDLOG_STATUS_CLOSED,
-        SDLOG_STATUS_ERROR
-      };
-
-      struct SDLogState
-      {
-        bool initialised = false;
-        bool task_started = false;
-
-        volatile SDLogStatus status = SDLOG_STATUS_DISABLED;
-
-        RingbufHandle_t ringbuffer_handle = nullptr;
-        TaskHandle_t writer_task_handle = nullptr;
-        SemaphoreHandle_t file_mutex = nullptr;
-
-        File file;
-
-        char active_path[128] = {0};
-
-        uint32_t bytes_written = 0;
-        uint32_t bytes_queued = 0;
-        uint32_t bytes_dropped = 0;
-        uint32_t write_failures = 0;
-
-        uint32_t open_count = 0;
-        uint32_t close_count = 0;
-
-        uint32_t last_write_ms = 0;
-        uint32_t last_flush_ms = 0;
-      } sdlog;
-
-      bool SDLog_Init();
-      bool SDLog_Open(const char* virtual_path, bool append = true);
-      bool SDLog_IsOpen() const;
-      bool SDLog_Write(const uint8_t* data, size_t len, uint32_t timeout_ms = 0);
-      bool SDLog_Write(const char* data, uint32_t timeout_ms = 0);
-      bool SDLog_WriteLine(const char* line, uint32_t timeout_ms = 0);
-      bool SDLog_Flush();
-      bool SDLog_Close();
-
-      static void SDLog_WriterTask_Trampoline(void* param);
-      void SDLog_WriterTask();
-
-      uint32_t SDLog_GetBytesWritten() const;
-      uint32_t SDLog_GetBytesQueued() const;
-      uint32_t SDLog_GetBytesDropped() const;
-      uint32_t SDLog_GetWriteFailures() const;
-      SDLogStatus SDLog_GetStatus() const;
-      const char* SDLog_GetActivePath() const;
-
-      #ifdef ENABLE_DEVFEATURE_FILESYSTEM__SDCARD_LOGGING_PERFORMANCE_TEST
-      void Loop__DevTest__FastSDLogging();
-      #endif
-
-    #endif // USE_MODULE_FILESYSTEM_SDCARD && USE_FILESYSTEM_SDCARD_BUFFERS
-
-
+        
     /************************************************************************************************
      * SECTION: Internal Functions
      ************************************************************************************************/

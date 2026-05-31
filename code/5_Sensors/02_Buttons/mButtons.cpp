@@ -600,7 +600,7 @@ void mButtons::Handler(void) {
          * The following code enables a runtime way of switching from single only, to, multipress enabled.
          */
         if (tkr_set->Settings.sysopt_system.bit.button_single_press_only) {                  // SetOption13 (0) - Allow only single button press for immediate action
-          uint16_t hold_timer_limit = loops_per_second * hold_time_extent * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10;
+          uint16_t hold_timer_limit = loops_per_second * hold_time_extent * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 10;
           if (Button.hold_timer[button_index] == hold_timer_limit) {  // SetOption32 (40) - Button held for factor times longer
             Button.press_counter[button_index] = 0;
             ALOG_INF(PSTR("Disable single press only SO13"));
@@ -612,7 +612,7 @@ void mButtons::Handler(void) {
          */
         else 
         {
-          if (Button.hold_timer[button_index] == loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10) {  // SetOption32 (40) - Button hold
+          if (Button.hold_timer[button_index] == loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 10) {  // SetOption32 (40) - Button hold
             Button.press_counter[button_index] = 0;
 
             SendButton(button_index, INPUT_TYPE_SINGLE_HOLD_ID);
@@ -632,14 +632,14 @@ void mButtons::Handler(void) {
               }
             } else {
 
-              if (Button.hold_timer[button_index] == (loops_per_second * hold_time_extent * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10) ) {  // SetOption32 (40) - Button held for factor times longer
+              if (Button.hold_timer[button_index] == (loops_per_second * hold_time_extent * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 10) ) {  // SetOption32 (40) - Button held for factor times longer
                 ALOG_WRN(PSTR(D_LOG_BUTTONS "FACTORY RESET")); 
                 Button.press_counter[button_index] = 0;
                 
                 SendButton(button_index, INPUT_TYPE_SINGLE_HOLD_RESET_TIME_ID);
 
               }else
-              if (Button.hold_timer[button_index] == (loops_per_second * hold_time_extent * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 20) ) { // Warning at half way point this will cause a reset
+              if (Button.hold_timer[button_index] == (loops_per_second * hold_time_extent * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 20) ) { // Warning at half way point this will cause a reset
                 ALOG_WRN(PSTR(D_LOG_BUTTONS "FACTORY RESET will occur if hold is continued"));                
               }
               
@@ -673,9 +673,9 @@ void mButtons::Handler(void) {
               // } else
               // #endif  // ESP8266
               {
-                single_press = (tkr_set->Settings.sysopt_system.bit.button_swap +1 == Button.press_counter[button_index]);  // SetOption11 (0)
+                single_press = (tkr_set->Settings.sysopt_sensors.bit.button_swap_on_single_device +1 == Button.press_counter[button_index]);  // SetOption11 (0)
                 if ((1 == Button.used_bitmap) && 0/* (2 == TasmotaGlobal.devices_present)*/) {  // Single Button with two devices only
-                  if (tkr_set->Settings.sysopt_system.bit.button_swap) {          // SetOption11 (0)
+                  if (tkr_set->Settings.sysopt_sensors.bit.button_swap_on_single_device) {          // SetOption11 (0)
                     Button.press_counter[button_index] = (single_press) ? 1 : 2;
                   }
                 }

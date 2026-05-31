@@ -374,11 +374,20 @@ writeChunks(
           )
     },
     {
+      file: "update_web.htm",
+      name: "PAGE_welcome_web2",
+      method: "gzip",
+      filter: "html-minify",
+    },
+
+
+    {
       file: "welcome.htm",
       name: "PAGE_welcome_web",
       method: "gzip",
       filter: "html-minify",
     },
+    
 //     {
 //       file: "liveview.htm",
 //       name: "PAGE_liveview",
@@ -441,12 +450,12 @@ writeChunks(
 writeChunks(
   source_path,
   [
-    // {
-    //   file: "Consoles/console_polling_esp8266.htm",
-    //   name: "PAGE_console_polling",
-    //   method: "gzip",
-    //   filter: "html-minify-ui",
-    // }
+    {
+      file: "Consoles/console_polling_esp8266.htm",
+      name: "PAGE_console_polling",
+      method: "gzip",
+      filter: "html-minify-ui",
+    }
   ],
   destination_path + "pages_console_esp8266.h"
 );

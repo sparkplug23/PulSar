@@ -312,6 +312,37 @@ enum LoggingLevels {
 #endif
 
 
+// #define DEBUG_CRITICAL_STOP_CODE_PRINT uint32_t stoptick=0; while(1){ ESP.wdtFeed(); delay(1000);  Serial.printf("STOPPED: while(%d)\n\r", stoptick); stoptick++; }
+// #define DEBUG_CRITICAL_STOP_CODE_PRINT                                      \
+//   do {                                                                      \
+//     uint32_t stoptick = 0;                                                   \
+//     while(1) {                                                               \
+//       ESP.wdtFeed();                                                         \
+//       delay(1000);                                                           \
+//       Serial.printf("STOPPED: tick=%lu millis=%lu\n\r",                     \
+//                     (unsigned long)stoptick,                                 \
+//                     (unsigned long)millis());                                \
+//       stoptick++;                                                            \
+//     }                                                                        \
+//   } while(0);
+
+#define DEBUG_CRITICAL_STOP_CODE_PRINT()                                     \
+do {                                                                         \
+  Serial.printf("line %d\n\r", __LINE__);                                    \
+  uint32_t stoptick = 0;                                                     \
+  while(1) {                                                                 \
+    const uint32_t t_start = millis();                                       \
+    while((uint32_t)(millis() - t_start) < 1000) {                           \
+      ESP.wdtFeed();                                                         \
+      delayMicroseconds(1000);                                               \
+    }                                                                        \
+    Serial.printf("STOPPED: tick=%lu millis=%lu\n\r",                        \
+                  (unsigned long)stoptick,                                   \
+                  (unsigned long)millis());                                  \
+    stoptick++;                                                              \
+  }                                                                          \
+} while(0);
+
 
 // Added indexing, as nested debug points need different saved start points. 
 #ifdef ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING

@@ -16,7 +16,7 @@
 // #define DEVICE_TESTBED_04__HVAC_X1
 // #define DEVICE_TESTBED_05__SWITCHES_BUTTONS
 // #define DEVICE_TESTBED_06__GPS_DECODER_WITH_SERIAL_SNIFFERS
-#define DEVICE_TESTBED_11__FILESYSTEM
+// #define DEVICE_TESTBED_11__FILESYSTEM
 
 // room_sensor   : BME680, Light, PIR, RADAR
 // camera_sensor : Cam gives too much heat to make BME reliable, instead, this will focus on LIGHT_SENS,LIGHT_RGB(for night vision),PIR,RADAR so ability to sense motion and capture via FS and transmit later to networked storage?
@@ -391,14 +391,17 @@
   #define D_DEVICE_SENSOR_DB18S20_01_NAME        "MainBoard-1"
   #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS     "[40,255,100,29,194,124,254,111]"
 
-  #define D_DEVICE_SENSOR_DB18S20_02_NAME        "MainBoard-2"
-  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS     "[40,255,100,29,205,206,170,25]"
+  #define D_DEVICE_SENSOR_DB18S20_05_NAME        "MainBoard-2"
+  #define D_DEVICE_SENSOR_DB18S20_05_ADDRESS     "[40,255,100,29,205,206,170,25]"
 
   #define D_DEVICE_SENSOR_DB18S20_03_NAME        "MainBoard-3"
   #define D_DEVICE_SENSOR_DB18S20_03_ADDRESS     "[40,255,100,29,195,134,175,63]"
 
   #define D_DEVICE_SENSOR_DB18S20_04_NAME        "MainBoard-4"
   #define D_DEVICE_SENSOR_DB18S20_04_ADDRESS     "[40,18,77,49,0,0,0,233]" //233 4
+
+  #define D_DEVICE_SENSOR_DB18S20_02_NAME        "MainBoard-5"
+  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS     "[40,255,100,29,205,202,237,231]"
 
   #define D_DEVICE_SENSOR_BME_280_NAME "BME280"
   #define D_DEVICE_SENSOR_BME_680_NAME "Office"
@@ -433,6 +436,9 @@
         "\"DeviceCount\":4"    
     "},"
     "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_INTERFACE_CTR "\":["
+        "\"" "Internal" "\""
+      "],"  
       "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
         "\"" D_DEVICE_HEATER_0_NAME "\","
         "\"" D_DEVICE_HEATER_1_NAME "\","
@@ -450,7 +456,8 @@
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\","
-        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\""
+        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_05_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_DHT_CTR "\":["
         "\"" D_DEVICE_SENSOR_DHT_0_NAME "\","
@@ -494,14 +501,15 @@
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
-        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\":" D_DEVICE_SENSOR_DB18S20_04_ADDRESS ""
+        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\":" D_DEVICE_SENSOR_DB18S20_04_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_05_NAME "\":" D_DEVICE_SENSOR_DB18S20_05_ADDRESS ""
       "}"  
     "},"
     "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
     "\"MQTTSubscribe\":["
       "\"openhab_broadcast/nextion/group/hvac_home\","
       "\"openhab_broadcast/nextion/group/hvac_desk_power\""
-    "],"
+    "]"
   "}";
 
   #define D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "motion"

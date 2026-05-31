@@ -176,6 +176,7 @@ class mTime :
   
     bool time_append_timezone = true;
 
+
     uint32_t UtcTime(void);
     uint32_t LocalTime(void);
     uint32_t Midnight(void);
@@ -219,6 +220,8 @@ class mTime :
     static bool TimeReachedNonReset(TIMEREACHED_HANDLER* tSaved, uint32_t ElapsedTime);
     static uint32_t MillisElapsed(uint32_t* tSaved);
     static uint32_t MillisElapsed(uint32_t tSaved);
+
+    bool UptimeValid(){ return UpTime() > 1; }
 
     String GetTimeStr(uint32_t time, bool include_day_of_week = false);
     

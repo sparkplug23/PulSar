@@ -42,13 +42,16 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
   /************
    * INIT SECTION * 
   *******************/
-  switch(function){
+  switch(function)
+  {
+      #ifdef USE_MODULE_FILESYSTEM_SDCARD
     case TASK_PRE_INIT:
-      Pre_Init();
+      Pre_Init__ExternalStorage();
     break;
     case TASK_INIT:
-      Init();
+      Init__ExternalStorage();
     break;
+    #endif
   }
 
   if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
@@ -81,8 +84,8 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
       // #endif     
     break;  
     case TASK_EVERY_FIVE_MINUTE:
-      JsonFile_Save__Stored_Module();
-      JsonFile_Save__Stored_Secure();       
+      // JsonFile_Save__Stored_Module();
+      // JsonFile_Save__Stored_Secure();       
     break;
     /************
      * COMMANDS SECTION * 
@@ -109,8 +112,8 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
     #endif //USE_MODULE_NETWORK_MQTT
     /************
      * WEBUI SECTION * 
-    *******************/    
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    *******************/        
+   #if defined(USE_MODULE_FILESYSTEM_SDCARD) && defined(USE_MODULE_NETWORK_WEBSERVER)
     case TASK_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
@@ -122,18 +125,17 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
 
 } // END Tasker
 
-
 void mFileSystem::Pre_Init()
 {
+  
+  static bool done = false;
+  if(done) { return; }
+  done = true;
+
   /************************************************************************************************
    * SECTION: JSON BUFFER / PSRAM INITIALISATION
    *
    * SD card mounting is intentionally NOT done here.
-   *
-   * Reason:
-   * - Pre_Init should only prepare filesystem module memory/state.
-   * - SD mount requires the pin manager to be ready.
-   * - SD is mounted from Init() after flash filesystem state is prepared.
    ************************************************************************************************/
 
 #if defined(ARDUINO_ARCH_ESP32)
@@ -142,27 +144,105 @@ void mFileSystem::Pre_Init()
   if (!psramSafe) DEBUG_PRINTLN(F("Not using PSRAM."));
   #endif
 
-  pDoc = new PSRAMDynamicJsonDocument((psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE);
+  if(!pDoc)
+  {
+    pDoc = new PSRAMDynamicJsonDocument((psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE);
 
-  DEBUG_PRINTF_P(
-    PSTR("JSON buffer allocated: %u\n"),
-    (psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE
-  );
-
-  if (psramFound()) {
     DEBUG_PRINTF_P(
-      PSTR("PSRAM: %dkB/%dkB\n"),
-      ESP.getFreePsram() / 1024,
-      ESP.getPsramSize() / 1024
+      PSTR("JSON buffer allocated: %u\n"),
+      (psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE
     );
+
+    if (psramFound()) {
+      DEBUG_PRINTF_P(
+        PSTR("PSRAM: %dkB/%dkB\n"),
+        ESP.getFreePsram() / 1024,
+        ESP.getPsramSize() / 1024
+      );
+    }
   }
 #endif
 }
 
+#ifdef USE_MODULE_FILESYSTEM_SDCARD
+void mFileSystem::Pre_Init__ExternalStorage()
+{
+
+  /************************************************************************************************
+   * External storage pre-init must be safe to call repeatedly.
+   *
+   * It must not mount yet. It only keeps the SD service eligible so that pins configured later
+   * by template override/runtime GPIO changes can be detected by Init__ExternalStorage() or retry.
+   ************************************************************************************************/
+
+  sdcard.enabled = true;
+
+  if(!sdcard.mounted)
+  {
+    sdcard.fs = nullptr;
+    sdcard.pin_config_valid = false;
+    sdcard.mount_failed = false;
+    sdcard.card_removed = false;
+  }
+
+}
+#endif
+
+
+// void mFileSystem::Pre_Init()
+// {
+//   /************************************************************************************************
+//    * SECTION: JSON BUFFER / PSRAM INITIALISATION
+//    *
+//    * SD card mounting is intentionally NOT done here.
+//    *
+//    * Reason:
+//    * - Pre_Init should only prepare filesystem module memory/state.
+//    * - SD mount requires the pin manager to be ready.
+//    * - SD is mounted from Init() after flash filesystem state is prepared.
+//    ************************************************************************************************/
+
+// #if defined(ARDUINO_ARCH_ESP32)
+//   #if !defined(BOARD_HAS_PSRAM) && !(defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3))
+//   if (psramFound() && ESP.getChipRevision() < 3) psramSafe = false;
+//   if (!psramSafe) DEBUG_PRINTLN(F("Not using PSRAM."));
+//   #endif
+
+//   pDoc = new PSRAMDynamicJsonDocument((psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE);
+
+//   DEBUG_PRINTF_P(
+//     PSTR("JSON buffer allocated: %u\n"),
+//     (psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE
+//   );
+
+//   if (psramFound()) {
+//     DEBUG_PRINTF_P(
+//       PSTR("PSRAM: %dkB/%dkB\n"),
+//       ESP.getFreePsram() / 1024,
+//       ESP.getPsramSize() / 1024
+//     );
+//   }
+// #endif
+// }
+
+#if defined(ESP8266)
+extern "C" {
+  extern uint32_t _FS_start;
+  extern uint32_t _FS_end;
+  extern uint32_t _FS_page;
+  extern uint32_t _FS_block;
+}
+
+#endif
 
 void mFileSystem::Init(void)
 {
-  ALOG_INF(PSTR(D_LOG_FILESYSTEM "mFileSystem::Init"));
+
+  static bool done = false;
+  if(done) { return; }
+  done = true;
+
+  ALOG_INF(PSTR(D_LOG_FILESYSTEM "Init__InternalStorage"));
 
   bool fsinit = false;
 
@@ -177,24 +257,52 @@ void mFileSystem::Init(void)
   dfsp     = nullptr;
   ufs_dir  = 0;
 
-  DEBUG_PRINTLN(F("Mount FS"));
+#if defined(PULSAR_HAS_FILESYSTEM) && (PULSAR_HAS_FILESYSTEM == 0)
+
+  ALOG_WRN(PSTR(D_LOG_FILESYSTEM "Disabled: no filesystem partition in this build"));
+
+  module_state.mode = ModuleStatus::Disabled;
+  return;
+
+#endif
+
 
 #ifdef ESP8266
 
   ffsp = &LittleFS;
 
+#if defined(ESP8266)
+ALOG_INF(PSTR(D_LOG_FILESYSTEM "FS symbols start=0x%08X end=0x%08X size=%u page=%u block=%u"),
+         (uint32_t)&_FS_start,
+         (uint32_t)&_FS_end,
+         (uint32_t)((uint32_t)&_FS_end - (uint32_t)&_FS_start),
+         (uint32_t)&_FS_page,
+         (uint32_t)&_FS_block);
+#endif
   fsinit = LittleFS.begin();
 
   if (!fsinit) {
-    ALOG_ERR(PSTR(D_LOG_FILESYSTEM "LittleFS mount failed"));
+    ALOG_WRN(PSTR(D_LOG_FILESYSTEM "LittleFS mount failed"));
 
-    // Optional recovery, leave disabled unless explicitly wanted.
-    // LittleFS.format();
-    // fsinit = LittleFS.begin();
+    #if defined(ENABLE_DEBUGFEATURE_FILESYSTEM__FORMAT_ON_MOUNT_FAIL)
+      ALOG_WRN(PSTR(D_LOG_FILESYSTEM "Formatting LittleFS after mount failure"));
+      LittleFS.format();
+      fsinit = LittleFS.begin();
+    #endif
 
-    ffsp = nullptr;
-    module_state.mode = ModuleStatus::Error;
-    return;
+    if (!fsinit) {
+      ALOG_WRN(PSTR(D_LOG_FILESYSTEM "Flash filesystem unavailable"));
+
+      ffsp     = nullptr;
+      ufsp     = nullptr;
+      dfsp     = nullptr;
+      ffs_type = 0;
+      ufs_type = 0;
+      ufs_dir  = 0;
+
+      module_state.mode = ModuleStatus::Disabled;
+      return;
+    }
   }
 
   ALOG_INF(PSTR(D_LOG_FILESYSTEM "LittleFS mounted"));
@@ -276,45 +384,41 @@ void mFileSystem::Init(void)
     GetFreeStorageSpace()
   );
 
-    /************************************************************************************************
-   * SECTION: Optional SD card backend mount
-   *
-   * SD is now owned by mFileSystem.
-   *
-   * Important:
-   * - SD mount failure must NOT disable the filesystem module.
-   * - Flash filesystem remains the system/default backend.
-   * - SD is an optional /sd/... backend.
-   ************************************************************************************************/
-
-/************************************************************************************************
- * SECTION: Optional SD card filesystem backend
- *
- * SD is compiled as part of mFileSystem but only enabled when all SD pins are configured.
- * Missing pins are not an error.
- ************************************************************************************************/
-
-#ifdef USE_MODULE_FILESYSTEM_SDCARD
-  SDCard_Init();
-
-  if (SDCard_IsMounted())
-  {
-    ALOG_INF(PSTR(D_LOG_FILESYSTEM "SD backend mounted and available at /sd/"));
-  }
-  else
-  if (sdcard.enabled)
-  {
-    ALOG_WRN(PSTR(D_LOG_FILESYSTEM "SD backend enabled but not mounted, retry service active"));
-  }
-  else
-  {
-    ALOG_INF(PSTR(D_LOG_FILESYSTEM "SD backend disabled"));
-  }
-#endif
+  
 
 }
 
+#ifdef USE_MODULE_FILESYSTEM_SDCARD
+void mFileSystem::Init__ExternalStorage(void)
+{
 
+  ALOG_INF(PSTR(D_LOG_FILESYSTEM "Init__ExternalStorage"));
+
+  sdcard.enabled = true;
+
+  if(SDCard_IsMounted())
+  {
+    ALOG_INF(PSTR(D_LOG_FILESYSTEM "Init__ExternalStorage: SD already mounted"));
+    return;
+  }
+
+  SDCard_Init();
+
+  if(SDCard_IsMounted())
+  {
+    ALOG_INF(PSTR(D_LOG_FILESYSTEM "SD backend mounted and available at /sd/"));
+  }
+  else if(sdcard.pin_config_valid)
+  {
+    ALOG_WRN(PSTR(D_LOG_FILESYSTEM "SD backend configured but not mounted, retry service active"));
+  }
+  else
+  {
+    ALOG_INF(PSTR(D_LOG_FILESYSTEM "SD backend waiting for valid pin configuration"));
+  }
+
+}
+#endif
 
 #ifndef ERR_FS_QUOTA
 #define ERR_FS_QUOTA    11  // The FS is full or the maximum file size is reached
@@ -331,6 +435,17 @@ void mFileSystem::Init(void)
 #endif
 
 // #define WLED_DEBUG_FS2
+
+bool mFileSystem::IsMounted(void) const
+{
+#if defined(PULSAR_HAS_FILESYSTEM) && (PULSAR_HAS_FILESYSTEM == 0)
+  return false;
+#else
+  return (module_state.mode == ModuleStatus::Running) &&
+         (ufsp != nullptr) &&
+         (ufs_type != 0);
+#endif
+}
 
 #define FS_BUFSIZE 256
 
@@ -905,6 +1020,10 @@ void mFileSystem::SystemTask__Execute_Module_Data_Save()
 \*********************************************************************************************/
 uint32_t mFileSystem::GetFreeStorageSpace(FileStorageTarget target)
 {
+  #if defined(PULSAR_HAS_FILESYSTEM) && (PULSAR_HAS_FILESYSTEM == 0)
+    return 0;
+  #endif
+
   switch (target)
   {
     case FILE_STORAGE_INTERNAL:
@@ -951,7 +1070,7 @@ uint32_t mFileSystem::SubCall__GetFreeStorageSpace__LittleFS(void)
   uint64_t free_bytes = 0;
 
 #ifdef ESP8266
-  if (!ffsp) {
+  if (!ffsp || !ffs_type) {
     return 0;
   }
 
@@ -1037,131 +1156,128 @@ uint32_t mFileSystem::SubCall__GetFreeStorageSpace__SD(void)
 
 bool mFileSystem::FileExists(const char *fname)
 {
-  if (!ffs_type) { return false; }
+  if (!ffsp || !ffs_type || !fname) { return false; }
 
   bool yes = ffsp->exists(fname);
   if (!yes) {
-    ALOG_DBM(PSTR("TFS: File '%s' not found"), fname +1);  // Skip leading slash
+    ALOG_DBM(PSTR("TFS: File '%s' not found"), fname + 1);
   }
   return yes;
 }
 
-
 size_t mFileSystem::FileSize(const char *fname)
 {
-  if (!ffs_type) { return 0; }
+  if (!ffsp || !ffs_type || !fname) { return 0; }
 
   File file = ffsp->open(fname, "r");
   if (!file) { return 0; }
+
   size_t flen = file.size();
   file.close();
   return flen;
 }
 
 
-bool mFileSystem::SaveFile(const char *fname, const uint8_t *buf, uint32_t len) 
+bool mFileSystem::SaveFile(const char *fname, const uint8_t *buf, uint32_t len)
 {
-  
-  if (!ffs_type) { return false; }
-  
+  if (!ffsp || !ffs_type || !fname || !buf) { return false; }
+
 #ifdef USE_WEBCAM
-  WcInterrupt(0);  // Stop stream if active to fix TG1WDT_SYS_RESET
+  WcInterrupt(0);
 #endif
+
   bool result = false;
-  
   File file = ffsp->open(fname, "w");
-  
+
   if (!file) {
-    ALOG_INF( PSTR("TFS: Save failed"));
+    ALOG_INF(PSTR("TFS: Save failed"));
   } else {
-    // This will timeout on ESP32-webcam
-    // But now solved with WcInterrupt(0) in support_esp.ino
-  DEBUG_LINE_HERE
     file.write(buf, len);
-  DEBUG_LINE_HERE
-  /*
-    // This will still timeout on ESP32-webcam when wcresolution 10
-    uint32_t count = len / 512;
-    uint32_t chunk = len / count;
-    for (uint32_t i = 0; i < count; i++) {
-      file.write(buf + (i * chunk), chunk);
-      // do actually wait a little to allow ESP32 tasks to tick
-      // fixes task timeout in ESP32Solo1 style unicore code and webcam.
-      delay(10);
-      OsWatchLoop();
-    }
-    uint32_t left = len % count;
-    if (left) {
-      file.write(buf + (count * chunk), left);
-    }
-  */
     file.close();
-  DEBUG_LINE_HERE
     result = true;
   }
+
 #ifdef USE_WEBCAM
   WcInterrupt(1);
 #endif
-  DEBUG_LINE_HERE
+
   return result;
 }
 
-bool mFileSystem::InitFile(const char *fname, uint32_t len, uint8_t init_value) {
-  if (!ffs_type) { return false; }
+bool mFileSystem::InitFile(const char *fname, uint32_t len, uint8_t init_value)
+{
+  if (!ffsp || !ffs_type || !fname) { return false; }
 
   File file = ffsp->open(fname, "w");
   if (!file) {
-    ALOG_INF( PSTR("TFS: Erase failed"));
+    ALOG_INF(PSTR("TFS: Erase failed"));
     return false;
   }
 
   for (uint32_t i = 0; i < len; i++) {
     file.write(&init_value, 1);
   }
+
   file.close();
   return true;
 }
 
-bool mFileSystem::LoadFile(const char *fname, uint8_t *buf, uint32_t len) {
-  if (!ffs_type) { return false; }
+bool mFileSystem::LoadFile(const char *fname, uint8_t *buf, uint32_t len)
+{
+  if (!ffsp || !ffs_type || !fname || !buf) { return false; }
 
   File file = ffsp->open(fname, "r");
   if (!file) {
-    ALOG_DBM(PSTR("TFS: File '%s' not found"), fname +1);  // Skip leading slash
+    ALOG_DBM(PSTR("TFS: File '%s' not found"), fname + 1);
     return false;
   }
 
   size_t flen = file.size();
-  if (len > flen) { len = flen; }           // Adjust requested length to smaller file length
+  if (len > flen) { len = flen; }
+
   file.read(buf, len);
   file.close();
   return true;
 }
 
-String mFileSystem::LoadString(const char *fname) {
-  // Use a reasonable amount of stack space considering 4k/8k available on ESP8266/ESP32 and manageable string length
-  char buf[2048] = { 0 };                   // Prepare empty string of max 2047 characters on stack
-  LoadFile(fname, (uint8_t*)buf, 2047);  // Leave last position as end of string ('\0')
-  return String(buf);                       // Received string or empty on error
+// String mFileSystem::LoadString(const char *fname) {
+//   // Use a reasonable amount of stack space considering 4k/8k available on ESP8266/ESP32 and manageable string length
+//   char buf[2048] = { 0 };                   // Prepare empty string of max 2047 characters on stack
+//   LoadFile(fname, (uint8_t*)buf, 2047);  // Leave last position as end of string ('\0')
+//   return String(buf);                       // Received string or empty on error
+// }
+String mFileSystem::LoadString(const char *fname)
+{
+  if (!ffsp || !ffs_type || !fname) { return String(); }
+
+  char buf[2048] = { 0 };
+  LoadFile(fname, (uint8_t*)buf, sizeof(buf) - 1);
+  return String(buf);
 }
 
-bool mFileSystem::DeleteFile(const char *fname) {
-  if (!ffs_type) { return false; }
+
+
+bool mFileSystem::DeleteFile(const char *fname)
+{
+  if (!ffsp || !ffs_type || !fname) { return false; }
 
   if (!ffsp->remove(fname)) {
     ALOG_INF(PSTR("TFS: Delete failed"));
     return false;
   }
+
   return true;
 }
 
-bool mFileSystem::RenameFile(const char *fname1, const char *fname2) {
-  if (!ffs_type) { return false; }
+bool mFileSystem::RenameFile(const char *fname1, const char *fname2)
+{
+  if (!ffsp || !ffs_type || !fname1 || !fname2) { return false; }
 
   if (!ffsp->rename(fname1, fname2)) {
     ALOG_INF(PSTR("TFS: Rename failed"));
     return false;
   }
+
   return true;
 }
 
@@ -1251,17 +1367,17 @@ void mFileSystem::parse_JSONCommand(JsonParserObject obj)
   {
     JsonParserObject debug = jtok.getObject();
 
-    if (debug["TriggerJSONSave"])
-    {
-      JsonFile_Save__Stored_Module();
-      return;
-    }
+    // if (debug["TriggerJSONSave"])
+    // {
+    //   JsonFile_Save__Stored_Module();
+    //   return;
+    // }
 
-    if (debug["TriggerJSONLoad"])
-    {
-      JsonFile_Load__Stored_Module();
-      return;
-    }
+    // if (debug["TriggerJSONLoad"])
+    // {
+    //   JsonFile_Load__Stored_Module();
+    //   return;
+    // }
   }
 
 
@@ -1370,104 +1486,104 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void mFileSystem::JsonFile_Save__Stored_Module()
-{
+// void mFileSystem::JsonFile_Save__Stored_Module()
+// {
   
-  ALOG_INF( PSTR("JsonFile_Save__Stored_Module") );
+//   ALOG_INF( PSTR("JsonFile_Save__Stored_Module") );
 
-  const char* file_path = "/config_module.json";
-  char buffer[100] = {0};
+//   const char* file_path = "/config_module.json";
+//   char buffer[100] = {0};
 
-  File file;  
-  // Open file for writing, if it does not exist, create it
-  // Seek is placed at the start of the file, contents will be overwriten
-  file = FILE_SYSTEM.open(file_path, "w+");
+//   File file;  
+//   // Open file for writing, if it does not exist, create it
+//   // Seek is placed at the start of the file, contents will be overwriten
+//   file = FILE_SYSTEM.open(file_path, "w+");
   
-  if(!file) 
-  {
-    ALOG_ERR(PSTR("Failed to open \"%s\""), file_path);
-    return;
-  }
+//   if(!file) 
+//   {
+//     ALOG_ERR(PSTR("Failed to open \"%s\""), file_path);
+//     return;
+//   }
 
-  if(!JBI->RequestLock(GetModuleUniqueID())){
-    return;
-  }
+//   if(!JBI->RequestLock(GetModuleUniqueID())){
+//     return;
+//   }
  
-  JBI->Start();
-    JBI->Add(PM_UTC_TIME, tkr_time->GetDateAndTime(DT_UTC).c_str());
-    JBI->Add(PSTR("millis"), millis());
-    // tkr->Tasker_Interface(TASK_FILESYSTEM_APPEND__CONFIG_MODULES__ID);
-  JBI->End();
+//   JBI->Start();
+//     JBI->Add(PM_UTC_TIME, tkr_time->GetDateAndTime(DT_UTC).c_str());
+//     JBI->Add(PSTR("millis"), millis());
+//     // tkr->Tasker_Interface(TASK_FILESYSTEM_APPEND__CONFIG_MODULES__ID);
+//   JBI->End();
 
-  file.print(JBI->GetBufferPtr());
-  file.close();
+//   file.print(JBI->GetBufferPtr());
+//   file.close();
     
-  ALOG_INF(PSTR("Writing file \"%s\""), JBI->GetBufferPtr());
+//   ALOG_INF(PSTR("Writing file \"%s\""), JBI->GetBufferPtr());
 
-  JBI->ReleaseLock();
+//   JBI->ReleaseLock();
 
-}
+// }
 
-/**
- * @brief Test if file exists, if not, load default template from progmem if it exists
- * 
- */
-void mFileSystem::JsonFile_Load__Stored_Module_Or_Default_Template()
-{
+// /**
+//  * @brief Test if file exists, if not, load default template from progmem if it exists
+//  * 
+//  */
+// void mFileSystem::JsonFile_Load__Stored_Module_Or_Default_Template()
+// {
 
-  DEBUG_LINE_HERE;
+//   DEBUG_LINE_HERE;
 
-  bool force_default_template = false; // ie on reset
+//   bool force_default_template = false; // ie on reset
  
-  if(!JsonFile_Load__Stored_Module() || force_default_template){
-    ALOG_INF(PSTR("No config_module.json file found, loading default template from progmem"));
-    tkr->Tasker_Interface(TASK_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID);
-  }
+//   if(!JsonFile_Load__Stored_Module() || force_default_template){
+//     ALOG_INF(PSTR("No config_module.json file found, loading default template from progmem"));
+//     tkr->Tasker_Interface(TASK_CONFIG_LOAD_POST_INIT_DEFAULTS_FROM_PROGMEM);
+//   }
 
-  DEBUG_LINE_HERE;
+//   DEBUG_LINE_HERE;
 
-}
+// }
 
 
-bool mFileSystem::JsonFile_Load__Stored_Module()
-{
+// bool mFileSystem::JsonFile_Load__Stored_Module()
+// {
   
-  ALOG_INF( PSTR("JsonFile_Load__Stored_Module") );
+//   ALOG_INF( PSTR("JsonFile_Load__Stored_Module") );
 
-  File file;  
-  const char* file_path = "/config_module.json";
+//   File file;  
+//   const char* file_path = "/config_module.json";
   
-  // Open file for read only
-  file = FILE_SYSTEM.open(file_path, "r");
+//   // Open file for read only
+//   file = FILE_SYSTEM.open(file_path, "r");
   
-  if (!file) {
-    ALOG_ERR(PSTR("Failed to open \"%s\""), file_path);
-    return false;
-  }
+//   if (!file) {
+//     ALOG_ERR(PSTR("Failed to open \"%s\""), file_path);
+//     return false;
+//   }
 
-  Serial.printf("Read from file [%d] \n\r", file.available());
+//   Serial.printf("Read from file [%d] \n\r", file.available());
 
-  if(!JBI->RequestLock(GetModuleUniqueID())){
-    return false;
-  }
+//   if(!JBI->RequestLock(GetModuleUniqueID())){
+//     return false;
+//   }
  
-  // Read into local buffer, this should be locked from async access using buffer class method
-  data_buffer.ClearDeep();
-  uint8_t* buffer_p = (uint8_t*)data_buffer.payload.ctr;
-  file.read(buffer_p, file.available());
-  file.close();
+//   // Read into local buffer, this should be locked from async access using buffer class method
+//   data_buffer.ClearDeep();
+//   uint8_t* buffer_p = (uint8_t*)data_buffer.payload.ctr;
+//   file.read(buffer_p, file.available());
+//   file.close();
   
-  data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
+//   data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
-  ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
+//   ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
 
-  tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
+//   tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
-  JBI->ReleaseLock();
+//   JBI->ReleaseLock();
 
-  return true;
+//   return true;
   
-}
+// }
 
 
 
@@ -1479,81 +1595,81 @@ bool mFileSystem::JsonFile_Load__Stored_Module()
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void mFileSystem::JsonFile_Save__Stored_Secure()
-{
+// void mFileSystem::JsonFile_Save__Stored_Secure()
+// {
   
-  ALOG_INF( PSTR("JsonFile_Save__Stored_Secure") );
+//   ALOG_INF( PSTR("JsonFile_Save__Stored_Secure") );
 
-  const char* file_path = "/config_secure.json";
-  char buffer[100] = {0};
+//   const char* file_path = "/config_secure.json";
+//   char buffer[100] = {0};
 
-  File file;  
-  // Open file for writing, if it does not exist, create it
-  // Seek is placed at the start of the file, contents will be overwriten
-  file = FILE_SYSTEM.open(file_path, "w+");
+//   File file;  
+//   // Open file for writing, if it does not exist, create it
+//   // Seek is placed at the start of the file, contents will be overwriten
+//   file = FILE_SYSTEM.open(file_path, "w+");
   
-  if(!file) 
-  {
-    ALOG_ERR(PSTR("Failed to open \"%s\""), file_path);
-    return;
-  }
+//   if(!file) 
+//   {
+//     ALOG_ERR(PSTR("Failed to open \"%s\""), file_path);
+//     return;
+//   }
 
-  if(!JBI->RequestLock(GetModuleUniqueID())){
-    return;
-  }
+//   if(!JBI->RequestLock(GetModuleUniqueID())){
+//     return;
+//   }
  
-  JBI->Start();
-    JBI->Add(PM_UTC_TIME, tkr_time->GetDateAndTime(DT_UTC).c_str() );
-    JBI->Add(PSTR("millis"), millis());
-    tkr->Tasker_Interface(TASK_FILESYSTEM_APPEND__Stored_Secure__ID);
-  JBI->End();
+//   JBI->Start();
+//     JBI->Add(PM_UTC_TIME, tkr_time->GetDateAndTime(DT_UTC).c_str() );
+//     JBI->Add(PSTR("millis"), millis());
+//     tkr->Tasker_Interface(TASK_FILESYSTEM_APPEND__Stored_Secure__ID);
+//   JBI->End();
 
-  file.print(JBI->GetBufferPtr());
-  file.close();
+//   file.print(JBI->GetBufferPtr());
+//   file.close();
     
-  ALOG_INF(PSTR("Writing file \"%s\""), JBI->GetBufferPtr());
+//   ALOG_INF(PSTR("Writing file \"%s\""), JBI->GetBufferPtr());
 
-  JBI->ReleaseLock();
+//   JBI->ReleaseLock();
 
-}
+// }
 
-void mFileSystem::JsonFile_Load__Stored_Secure()
-{
+// void mFileSystem::JsonFile_Load__Stored_Secure()
+// {
   
-  ALOG_INF( PSTR("JsonFile_Load__Stored_Secure") );
+//   ALOG_INF( PSTR("JsonFile_Load__Stored_Secure") );
 
-  File file;  
-  const char* file_path = "/config_secure.json";
+//   File file;  
+//   const char* file_path = "/config_secure.json";
   
-  // Open file for read only
-  file = FILE_SYSTEM.open(file_path, "r");
+//   // Open file for read only
+//   file = FILE_SYSTEM.open(file_path, "r");
   
-  if (!file) {
-    ALOG_ERR(PSTR("Failed to open \"%s\""), file_path);
-    return;
-  }
+//   if (!file) {
+//     ALOG_ERR(PSTR("Failed to open \"%s\""), file_path);
+//     return;
+//   }
 
-  Serial.printf("Read from file [%d]: \n\r", file.available());
+//   Serial.printf("Read from file [%d]: \n\r", file.available());
 
-  if(!JBI->RequestLock(GetModuleUniqueID())){
-    return;
-  }
+//   if(!JBI->RequestLock(GetModuleUniqueID())){
+//     return;
+//   }
  
-  // Read into local buffer, this should be locked from async access using buffer class method
-  data_buffer.ClearDeep();
-  uint8_t* buffer_p = (uint8_t*)data_buffer.payload.ctr;
-  file.read(buffer_p, file.available());
-  file.close();
+//   // Read into local buffer, this should be locked from async access using buffer class method
+//   data_buffer.ClearDeep();
+//   uint8_t* buffer_p = (uint8_t*)data_buffer.payload.ctr;
+//   file.read(buffer_p, file.available());
+//   file.close();
   
-  data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
+//   data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
-  ALOG_INF( PSTR("Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
+//   ALOG_INF( PSTR("Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
 
-  tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
+//   tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
-  JBI->ReleaseLock();
+//   JBI->ReleaseLock();
   
-}
+// }
 
 
 

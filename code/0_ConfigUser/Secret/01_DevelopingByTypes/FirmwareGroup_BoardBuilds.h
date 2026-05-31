@@ -25,6 +25,7 @@
 
 // ======================== ESP8266 ========================
 // #define DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU
+// #define DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU_WITH_FILESYSTEM_1M
 // ======================== ESP8285 ========================
 // #define DEVICE_TESTGROUP__BOARDBUILDS__ESP8285__IFAN03
 // ======================== ESP32 ===========================
@@ -62,7 +63,7 @@
  *                      |D0  G16      ADC0  A0| 
  *                       _____________________
  **/
-#ifdef DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU
+#ifdef DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU_NO_FILESYSTEM_1M
   #ifndef DEVICENAME_CTR
   #define DEVICENAME_CTR          "tg_boardbuild__esp8266_nodemcu"
   #endif
@@ -87,13 +88,20 @@
   ///////////////////////////////////////////// System Logs
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
 
+  // #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
+  #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+
+  // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
+  #define ENABLE_DEBUG_LINE_HERE3
+
   /***********************************
   * SECTION: System Configs
   ************************************/    
 
   #define SETTINGS_HOLDER 1239
 
-  #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
+  // #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
 
 
   // #define ENABLE_ADVANCED_DEBUGGING
@@ -103,7 +111,7 @@
   // #define ENABLE_DEBUG_FUNCTION_NAMES
   // #define ENABLE_DEBUG_LINE_HERE
 
-  #define ENABLE_FEATURE_BUILD__11JAN25_WIFI_AND_WEBUI
+  // #define ENABLE_FEATURE_BUILD__11JAN25_WIFI_AND_WEBUI
 
 
   // #define DEBUG_FASTBOOT
@@ -128,7 +136,319 @@
   /***********************************
   * SECTION: Drivers Configs
   ************************************/  
-  #define USE_MODULE_DRIVERS_LEDS // 3 blink - no network, 2 blink = network, no mqtt
+  // #define USE_MODULE_DRIVERS_LEDS // 3 blink - no network, 2 blink = network, no mqtt
+    // #define ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN 2
+
+  /***********************************
+  * SECTION: Sensor Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Lighting Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Energy Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Controller Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Module/GPIO Configs
+  ************************************/  
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      "\"D3\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"D4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
+  * SECTION: TEMPLATE: Names
+  ************************************/    
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+  "}";
+
+#endif
+
+
+
+/**
+ * @brief 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *          BIB (Built-in Button) → On some boards, pin is used for onboard button
+ *                               *I ~PWM 'NC    
+ *                       _____________________
+ *                      |3V3     |USB|     VIN|
+ *                      |GND               GND| 
+ *                      |TX  G1, fL        RST| 
+ *                      |RX  G3             EN| 
+ *                      |D8  G15,fL        3V3|
+ *                      |D7  G13           GND| 
+ *                      |D6  G12           CLK| 
+ *                      |D5  G14           SDO| 
+ *                      |GND               CMD| 
+ *                      |3V3               SD1| 
+ *                      |D4  G2,fL,BIL     SD2| 
+ *                      |D3  G0,fL,BIB     SD3| 
+ *                      |D2  G4            RSV| 
+ *                      |D1  G5            RSV| 
+ *                      |D0  G16      ADC0  A0| 
+ *                       _____________________
+ **/
+#ifdef DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU_WITH_FILESYSTEM_1M
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "tg_boardbuild__esp8266_nodemcu"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #ifndef DEVICENAME_ROOMHINT_CTR
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #endif
+
+
+  // #define PULSAR_HAS_FILESYSTEM 1
+  // #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  /***********************************
+  * SECTION: System Debug Options
+  ************************************/    
+  ///////////////////////////////////////////// Enable Logs
+  // #define DISABLE_SERIAL
+
+  #define ESP8266
+
+  ///////////////////////////////////////////// System Logs
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+
+  // #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
+  #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+
+  // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
+  #define ENABLE_DEBUG_LINE_HERE3
+
+  /***********************************
+  * SECTION: System Configs
+  ************************************/    
+
+  #define SETTINGS_HOLDER 1239
+
+  // #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
+
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_LINE_HERE
+
+  // #define ENABLE_FEATURE_BUILD__11JAN25_WIFI_AND_WEBUI
+
+
+  // #define DEBUG_FASTBOOT
+
+  // #define ENABLE_DEVFEATURE_WIFI__FORCE_SOFTAP_MODE_BY_BLOCKING_SSIDS
+
+
+  #define   D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/m/serverrelays"
+      
+  /***********************************
+  * SECTION: Enable Sections
+  ************************************/  
+
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
+  // #define ENABLE_TEMPLATE_SECTION__DRIVERS__LEDS // Status LED
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/    
+
+
+  /***********************************
+  * SECTION: Drivers Configs
+  ************************************/  
+  // #define USE_MODULE_DRIVERS_LEDS // 3 blink - no network, 2 blink = network, no mqtt
+    // #define ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN 2
+
+  /***********************************
+  * SECTION: Sensor Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Lighting Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Energy Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Controller Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Module/GPIO Configs
+  ************************************/  
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      "\"D3\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"D4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
+  * SECTION: TEMPLATE: Names
+  ************************************/    
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+  "}";
+
+#endif
+
+
+
+
+/**
+ * @brief 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *          BIB (Built-in Button) → On some boards, pin is used for onboard button
+ *                               *I ~PWM 'NC    
+ *                       _____________________
+ *                      |3V3     |USB|     VIN|
+ *                      |GND               GND| 
+ *                      |TX  G1, fL        RST| 
+ *                      |RX  G3             EN| 
+ *                      |D8  G15,fL        3V3|
+ *                      |D7  G13           GND| 
+ *                      |D6  G12           CLK| 
+ *                      |D5  G14           SDO| 
+ *                      |GND               CMD| 
+ *                      |3V3               SD1| 
+ *                      |D4  G2,fL,BIL     SD2| 
+ *                      |D3  G0,fL,BIB     SD3| 
+ *                      |D2  G4            RSV| 
+ *                      |D1  G5            RSV| 
+ *                      |D0  G16      ADC0  A0| 
+ *                       _____________________
+ **/
+#ifdef DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU_WITH_FILESYSTEM_4M
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "tg_boardbuild__esp8266_nodemcu"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #ifndef DEVICENAME_ROOMHINT_CTR
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #endif
+   
+  /***********************************
+  * SECTION: System Debug Options
+  ************************************/    
+  ///////////////////////////////////////////// Enable Logs
+  // #define DISABLE_SERIAL
+
+  #define ESP8266
+
+  ///////////////////////////////////////////// System Logs
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+
+  // #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
+  #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+
+  // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
+  #define ENABLE_DEBUG_LINE_HERE3
+
+  /***********************************
+  * SECTION: System Configs
+  ************************************/    
+
+  #define SETTINGS_HOLDER 1239
+
+  // #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
+
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_LINE_HERE
+
+  // #define ENABLE_FEATURE_BUILD__11JAN25_WIFI_AND_WEBUI
+
+
+  // #define DEBUG_FASTBOOT
+
+  // #define ENABLE_DEVFEATURE_WIFI__FORCE_SOFTAP_MODE_BY_BLOCKING_SSIDS
+
+
+  #define   D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/m/serverrelays"
+      
+  /***********************************
+  * SECTION: Enable Sections
+  ************************************/  
+
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
+  // #define ENABLE_TEMPLATE_SECTION__DRIVERS__LEDS // Status LED
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/    
+
+
+  /***********************************
+  * SECTION: Drivers Configs
+  ************************************/  
+  // #define USE_MODULE_DRIVERS_LEDS // 3 blink - no network, 2 blink = network, no mqtt
     // #define ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN 2
 
   /***********************************

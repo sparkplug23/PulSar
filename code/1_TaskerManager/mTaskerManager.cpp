@@ -1,15 +1,3 @@
-/**
- * @file mTaskerManager.cpp
- * @author your name (you@domain.com)
- * @brief 
- * @version 0.1
- * @date 2025-02-14
- * 
- * @copyright Copyright (c) 2025
- * 
- * cooperative multitasking scheduler or a cyclic executive.
- * 
- */
 #include "1_TaskerManager/mTaskerManager.h"
 
 mTaskerManager* mTaskerManager::instance = nullptr;
@@ -186,6 +174,10 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
       // If metrics are disabled, just run the task
     DEBUG_LINE_HERE;
 
+    /***DEBUGGING::  Uncomment to HIGHLIGHT a TASK */
+    // if (task == TASK_PRE_INIT || task == TASK_PRE_INIT) {
+    //   ALOG_ERR(PSTR("TASK_PRE_INIT or TASK_PRE_INIT called %S %s"), GetTaskName(task), mod->GetModuleName());
+    // }
     /***DEBUGGING::  Uncomment to block a TASK */
     // if (task == TASK_SETTINGS_DEFAULT || task == TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT) {
     //   ALOG_ERR(PSTR("TASK_SETTINGS_DEFAULT or TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT called"));
@@ -206,8 +198,9 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
     // }
 
 
-    result = mod->Tasker(task, obj);
+    
 
+    result = mod->Tasker(task, obj);
 
     /***
      * In the future if we get stuck, remember missing return from task required with platest platform/board
@@ -218,7 +211,6 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
     #endif
   #endif
 
-    
 
     /****************************************************************************************************************
      * Debug: Stats
@@ -426,6 +418,9 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_DRIVERS_RELAY
   addTasker(new mRelays());
   #endif
+  #ifdef USE_MODULE_DRIVERS_SDCARD
+  addTasker(new mSDCard());
+  #endif
   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
   addTasker(new mIRtransceiver());
   #endif
@@ -437,9 +432,6 @@ void mTaskerManager::Instance_Init()
   #endif
   #ifdef USE_MODULE_DRIVERS_HBRIDGE
   addTasker(new mHBridge());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_SDCARD
-  addTasker(new mSDCard());
   #endif
   #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
   addTasker(new mShellyDimmer());
@@ -550,12 +542,6 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   addTasker(new mGPS_Serial());
   #endif
-  // #ifdef USE_MODULE_SENSORS_GPS_MODEM
-  // addTasker(new mGPS_Modem());
-  // #endif
-  // #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
-  // addTasker(new mBattery_Modem());
-  // #endif
   DEBUG_LINE_HERE
   /**
    * @brief Lights
@@ -720,7 +706,6 @@ void mTaskerManager::Instance_Init()
   #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   // Causing hang up and crash on ESP32 May2025
   debug_module_time.resize(pModule.size());
-  make error
   #endif
   DEBUG_LINE_HERE
 
@@ -755,7 +740,7 @@ const char* mTaskerManager::GetTaskName_Full(uint16_t task)
     case TASK_TEMPLATES__LOAD_MODULE:                 return PM_TASK_TEMPLATE_LOAD_CTR;
     case TASK_PRE_INIT:                               return PM_TASK_PRE_INIT_CTR;
     case TASK_INIT:                                   return PM_TASK_INIT_CTR;
-    case TASK_CONFIGURE_MODULES_FOR_DEVICE:           return PM_TASK_CONFIGURE_MODULES_FOR_DEVICE_CTR;
+    // case TASK_CONFIGURE_MODULES_FOR_DEVICE:           return PM_TASK_CONFIGURE_MODULES_FOR_DEVICE_CTR;
     case TASK_LOOP:                                   return PM_TASK_LOOP_CTR;
     case TASK_EVERY_50_MSECOND:                       return PM_TASK_EVERY_50_MSECOND_CTR;
     case TASK_EVERY_100_MSECOND:                      return PM_TASK_EVERY_100_MSECOND_CTR;

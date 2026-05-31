@@ -113,6 +113,7 @@ void mI2C::Pre_Init()
  */
 
   tkr_set->runtime.i2c_enabled = ( tkr_pins->PinUsed(GPIO_I2C_SCL) && tkr_pins->PinUsed(GPIO_I2C_SDA));
+  ALOG_INF(PSTR("I2C Enabled: %s"), tkr_set->runtime.i2c_enabled ? "Yes" : "No");
   if (tkr_set->runtime.i2c_enabled)
   { 
     if(wire == nullptr)
@@ -392,26 +393,6 @@ void mI2C::Debug_I2CScan_To_Serial()
 
 }
 
-// bool mI2C::I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size)
-// {
-//   uint8_t x = I2C_RETRY_COUNTER;
-
-//   i2c_buffer = 0;
-//   do {
-//     wire->beginTransmission(addr);                       // start transmission to device
-//     wire->write(reg);                                    // sends register address to read from
-//     if (0 == wire->endTransmission(false)) {             // Try to become I2C Master, send data and collect bytes, keep master status for next request...
-//       wire->requestFrom((int)addr, (int)size);           // send data n-bytes read
-//       if (wire->available() == size) {
-//         for (uint8_t i = 0; i < size; i++) {
-//           i2c_buffer = i2c_buffer << 8 | wire->read();   // receive DATA
-//         }
-//       }
-//     }
-//     x--;
-//   } while (wire->endTransmission(true) != 0 && x != 0);  // end transmission
-//   return (x);
-// }
 
 bool mI2C::I2cValidRead8(uint8_t *data, uint8_t addr, uint8_t reg)
 {
@@ -597,55 +578,6 @@ void mI2C::I2cScan(char *devs, unsigned int devs_len)
 // #endif
 
 }
-
-// //old function that seems to be changed
-// bool mI2C::I2cDevice(uint8_t addr) // This checks ALL, not just the desired address so is slow
-// {
-
-//   if(!wire){ return false; } // Not started
-  
-//   ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=search"),addr);
-
-//   for (uint8_t address = 1; address <= 127; address++) {
-//       ALOG_TST(PSTR("I2cDevice(%x|%x)=for"),address,addr);
-//     wire->beginTransmission(address);
-//     if (!wire->endTransmission() && (address == addr)) 
-//     {
-//       ALOG_INF( PSTR("I2cDevice(0x%02X)=true found"),addr);
-//       return true;
-//     }else
-//     if (!wire->endTransmission() && (address != addr))
-//     {
-//       ALOG_INF( PSTR("I2cDevice(%x) also found %x"),address,addr);
-//     }
-//   }
-  
-//   ALOG_ERR(PSTR("I2cDevice(%x)=FALSE no response"),addr);
-  
-//   return false;
-// }
-
-// bool mI2C::I2cDevice_IsConnected(uint8_t addr) // This checks ALL, not just the desired address so is slow
-// {
-
-//   ALOG_DBM( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
-
-//   uint8_t address = addr;
-//   ALOG_DBM( PSTR("I2cDevice(%x)=for"),addr);
-//   wire->beginTransmission(address);
-//   if (!wire->endTransmission() && (address == addr)) 
-//   {
-//     ALOG_DBM( PSTR("I2cDevice(%x)=true"),addr);
-//     return true;
-//   }else
-//   if (!wire->endTransmission() && (address != addr))
-//   {
-//     ALOG_DBM(PSTR("I2cDevice(%x) also found %x"),address,addr);
-//   }
-//   ALOG_ERR( PSTR("I2cDevice(%x)=FALSE"),addr);
-  
-//   return false;
-// }
 
 
 void mI2C::I2cResetActive(uint32_t addr, uint32_t count)

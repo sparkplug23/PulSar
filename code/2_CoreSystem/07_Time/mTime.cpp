@@ -27,18 +27,27 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
      * PERIODIC SECTION * 
     *******************/
     case TASK_EVERY_SECOND:    
+
+    DEBUG_LINE_HERE;
       
       #ifdef ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
       char up[16];
+    DEBUG_LINE_HERE;
       ALOG_INF(PSTR("Uptime: %s"), tkr_time->GetUptime(up, sizeof(up)));
       #endif
+      
+    DEBUG_LINE_HERE;
 
       
       if(tkr_interface_network->Network_HasExternalConnectivity())
       {
+    DEBUG_LINE_HERE;
         WifiPollNtp();
+        
+    DEBUG_LINE_HERE;
       }
       
+    DEBUG_LINE_HERE;
       uptime_seconds_nonreset++;
     break;
     /************
@@ -944,19 +953,25 @@ void mTime::Init(void)
 
   Rtc.utc_time = 0;
   BreakTime(Rtc.utc_time, RtcTime);
+
+  DEBUG_LINE_HERE
   
   #ifdef ESP32
     TickerRtc->attach_ms(1000, +[](mTime* instance){ instance->RtcSecond(); }, this);
   #else
     TickerRtc->attach   (1,            [this](void){ this->RtcSecond(); });
   #endif
+  
+  DEBUG_LINE_HERE
 
   if (tkr_set->Settings.cfg_timestamp > START_VALID_TIME) {
     // Fix file timestamp while utctime is not synced
     uint32_t utc_time = tkr_set->Settings.cfg_timestamp;
-    if (RtcSettings.utc_time > utc_time) {
-      utc_time = RtcSettings.utc_time;
+    #ifdef ENABLE_FEATURE_RTC__SETTINGS
+    if (RtcMemory__RuntimeState.utc_time > utc_time) {
+      utc_time = RtcMemory__RuntimeState.utc_time;
     }
+    #endif
     utc_time++;
     RtcGetDaylightSavingTimes(utc_time);
     uint32_t local_time = utc_time + RtcTimeZoneOffset(utc_time);

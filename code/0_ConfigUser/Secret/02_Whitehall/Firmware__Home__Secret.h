@@ -1475,7 +1475,7 @@ Bathroom
   /***********************************
    * SECTION: Storage Configs
   ************************************/  
-  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+  #define ENABLE_DEBUGFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
 
   /**
    * For debugging and short term I may want to store everything as JSON, so I can view the data?

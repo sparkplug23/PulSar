@@ -401,7 +401,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   }
 
 #ifndef ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
-  if(jtok = obj[PM_PIXELRANGE])
+  if(jtok = getTokenIncludingAlias(obj, PM_PIXELRANGE, "PR"))//obj[PM_PIXELRANGE])
   { 
     if(jtok.isArray())
     {
@@ -426,7 +426,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
   }
   #else
-    if (jtok = obj[PM_PIXELRANGE])
+    if (jtok = getTokenIncludingAlias(obj, PM_PIXELRANGE, "PR"))//obj[PM_PIXELRANGE])
   {
     if (jtok.isArray())
     {
@@ -481,7 +481,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   /*************************************************************************
    *** {"Effects":{X:Y}}
    *************************************************************************/
-  if(jtok_sub = obj[PM_EFFECTS])
+  if(jtok_sub = getTokenIncludingAlias(obj, PM_EFFECTS, "EF"))//obj[PM_EFFECTS])
   {    
     JsonParserObject jobj = jtok_sub.getObject();
 

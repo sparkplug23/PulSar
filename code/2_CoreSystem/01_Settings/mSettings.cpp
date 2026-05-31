@@ -68,9 +68,42 @@
 
 struct DATA_BUFFER data_buffer;
 
+
+/************************************************************************************************
+ * FUNCTION: Function_Template_Load
+ *
+ * SUMMARY:
+ * - Compatibility wrapper for the old TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM path.
+ * - Delegates to the JSON template module.
+ *
+ * POLICY:
+ * - This task is now treated as the late override pass.
+ * - Normal late default templates are loaded by:
+ *     TASK_CONFIG_LOAD_POST_INIT_DEFAULTS_FROM_PROGMEM
+ ************************************************************************************************/
+void mSettings::Function_Template_Load()
+{
+  #if defined(USE_MODULE_CORE__JSON_TEMPLATE) || defined(USE_MODULE_CORE_JSON_TEMPLATE)
+  if (tkr_json_template)
+  {
+    tkr_json_template->ModuleDeviceTemplate_CompileTime_Load_Late(true);
+  }
+  #endif
+}
+
+
+/************************************************************************************************
+ * FUNCTION: Tasker
+ *
+ * SUMMARY:
+ * - Handles settings periodic tasks, settings JSON commands, and compatibility template task.
+ *
+ * CHANGED:
+ * - 17May26: TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM now delegates to Function_Template_Load(),
+ *            which calls mJsonTemplate late-template loader.
+ ************************************************************************************************/
 int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
 {
-  
   switch(function)
   {
     case TASK_EVERY_MINUTE:
@@ -78,76 +111,139 @@ int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
       SaveSettings__LastKnownGood();
     }
     break;
+
     case TASK_EVERY_HOUR:
     {
       SettingsSaveAll();
     }
     break;
+
     case TASK_ON_BOOT_SUCCESSFUL:
-      Settings.bootcount++;              // Moved to here to stop flash writes during start-up
+    {
+      Settings.bootcount++;
 
-      ALOG_INF( PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d after %d seconds"), Settings.bootcount, 120);
+      ALOG_INF(
+        PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d after %d seconds"),
+        Settings.bootcount,
+        120
+      );
 
-      RtcSettings.boot_was_completed_ota_event = false; // Reset the flag for next boot
+      #ifdef ENABLE_FEATURE_RTC__SETTINGS
+      RtcMemory__RuntimeState.boot_was_completed_ota_event = false;
+      #endif
 
-      // Save before fastboot reset. If the save path causes a crash/WDT, the
-      // fastboot counter must remain active so recovery can continue.
       SettingsSaveAll();
-  
+
       #ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
-      RtcFastboot_Reset(); // Reset once boot is considered successful
+      RtcMemory__BootState_Reset();
       #endif
-
-      #ifdef USE_DEEPSLEEP
-        if (!(DeepSleepEnabled() && !Settings->flag3.bootcount_update)) {  
-      #endif
-          // Settings->bootcount++;              // Moved to here to stop flash writes during start-up
-          // ALOG_DBG(PSTR(D_LOG_APPLICATION D_BOOT_COUNT " %d"), Settings->bootcount);
-      #ifdef USE_DEEPSLEEP
-        }
-      #endif
-
+    }
     break;
-    /************
-     * COMMANDS SECTION * 
-    *******************/
+
     case TASK_JSON_COMMAND_ID:
+    {
       parse_JSONCommand(obj);
+    }
     break;
+
     case TASK_FILESYSTEM_APPEND__CONFIG_SETTINGS__ID:
+    {
       JsonAppend_Settings();
+    }
     break;
-    /************
-     * xx SECTION * 
-    *******************/
+
     case TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
+    {
       Function_Template_Load();
+    }
     break;
   }
 
   return TASKER_RESULT__UNKNOWN_ID;
-
-} 
-
-
-void mSettings::Function_Template_Load()
-{
-
-  #ifdef USE_FUNCTION_TEMPLATE  
-  // Read into local
-  data_buffer.ClearDeep();
-  memcpy_P(data_buffer.payload.ctr,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
-  data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
-
-  ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
-  
-  tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
-
-  runtime.template_loading.status.function = TemplateSource::HEADER_TEMPLATE;
-
-  #endif //USE_FUNCTION_TEMPLATE
-  
 }
+
+
+
+// int8_t mSettings::Tasker(uint8_t function, JsonParserObject obj)
+// {
+  
+//   switch(function)
+//   {
+//     case TASK_EVERY_MINUTE:
+//     {
+//       SaveSettings__LastKnownGood();
+//     }
+//     break;
+//     case TASK_EVERY_HOUR:
+//     {
+//       SettingsSaveAll();
+//     }
+//     break;
+//     case TASK_ON_BOOT_SUCCESSFUL:
+//       Settings.bootcount++;              // Moved to here to stop flash writes during start-up
+
+//       ALOG_INF( PSTR(D_LOG_APPLICATION D_BOOT_COUNT "SUCCESSFUL BOOT %d after %d seconds"), Settings.bootcount, 120);
+
+//       RtcMemory__RuntimeState.boot_was_completed_ota_event = false; // Reset the flag for next boot
+
+//       // Save before fastboot reset. If the save path causes a crash/WDT, the
+//       // fastboot counter must remain active so recovery can continue.
+//       SettingsSaveAll();
+  
+//       #ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
+//       RtcMemory__BootState_Reset(); // Reset once boot is considered successful
+//       #endif
+
+//       #ifdef USE_DEEPSLEEP
+//         if (!(DeepSleepEnabled() && !Settings->flag3.bootcount_update)) {  
+//       #endif
+//           // Settings->bootcount++;              // Moved to here to stop flash writes during start-up
+//           // ALOG_DBG(PSTR(D_LOG_APPLICATION D_BOOT_COUNT " %d"), Settings->bootcount);
+//       #ifdef USE_DEEPSLEEP
+//         }
+//       #endif
+
+//     break;
+//     /************
+//      * COMMANDS SECTION * 
+//     *******************/
+//     case TASK_JSON_COMMAND_ID:
+//       parse_JSONCommand(obj);
+//     break;
+//     case TASK_FILESYSTEM_APPEND__CONFIG_SETTINGS__ID:
+//       JsonAppend_Settings();
+//     break;
+//     /************
+//      * xx SECTION * 
+//     *******************/
+//     case TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
+//       Function_Template_Load();
+//     break;
+//   }
+
+//   return TASKER_RESULT__UNKNOWN_ID;
+
+// } 
+
+
+// void mSettings::Function_Template_Load()
+// {
+
+//   #ifdef USE_FUNCTION_TEMPLATE  
+//   // Read into local
+//   data_buffer.ClearDeep();
+//   memcpy_P(data_buffer.payload.ctr,FUNCTION_TEMPLATE,sizeof(FUNCTION_TEMPLATE));
+//   data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
+
+//   ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK  "FUNCTION_TEMPLATE READ = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
+  
+//   tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
+
+//   runtime.template_loading.status.function = TemplateSource::HEADER_TEMPLATE;
+
+//   #endif //USE_FUNCTION_TEMPLATE
+  
+// }
 
 int16_t mSettings::GetFunctionIDbyName(const char* c)
 {
@@ -167,7 +263,7 @@ void mSettings::JsonAppend_Settings()
   // JBI->Object_Start_F(GetModuleFriendlyName());  //json file parser will pass them to the modules, but should strip out the level_object from commands
     JBI->Add("BootCount", Settings.bootcount);
     #ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
-    JBI->Add("FastBootCount", RtcFastboot.fast_reboot_count);
+    JBI->Add("FastBootCount", RtcMemory__BootState.fast_reboot_count);
     #endif
   // JBI->Object_End();
 

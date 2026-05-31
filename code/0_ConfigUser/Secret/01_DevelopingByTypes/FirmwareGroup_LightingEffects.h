@@ -1549,6 +1549,10 @@
     
   #define MAX_NUM_SEGMENTS 16
 
+  // #define LIGHTING_TEMOPLATES_SPLIT
+
+  #ifdef LIGHTING_TEMOPLATES_SPLIT
+
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -1752,6 +1756,210 @@
     }
   }
   )=====";
+
+  #else
+
+  #define ENABLE_DEVFEATURE_LIGHTING__LIGHTING_TEMPLATE_NO_LONGER_FROM_SUBMODULE
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":256
+      }
+    ],
+    "Segment0": {
+      "PR": [0,16],
+      "Pal":"Rainbow 16",
+      "EF": {
+        "FX":"Static",
+        "RateMs": 1000
+      }
+    },
+    "Segment1": {
+      "PR": [16,32],
+      "Pal":"Snowy 02",
+      "EF": {
+        "FX":"Static",
+        "FX":1,
+        "RateMs": 1000
+      }
+    },
+    "Segment2": {
+      "PR": [32,48],
+      "Pal":"Snowy 02",
+      "EF": {
+        "FX":"Sweep Random",
+        "SX":229,
+        "RateMs": 25
+      }
+    },
+    "Segment3": {
+      "PR": [48,64],
+      "Pal":"RGPBO",
+      "EF": {
+        "FX":"Fireworks 1D",
+        "SX":229,
+        "IX":127,
+        "FX":1,
+        "RateMs": 25
+      }
+    },
+    "Segment4": {
+      "PR": [64,80],
+      "Pal":"RGPBO",
+      "SegColour1": {
+          "Hue": 0,
+          "Sat":0,
+          "BrightnessRGB":5
+        },
+      "EF": {
+        "FX":"Theater",
+        "SX":229,
+        "IX":127,
+        "RateMs": 25
+      }
+    },
+    "Segment5": {
+      "PR": [80,96],
+      "Pal":"RGPBO",
+      "EF": {
+        "FX":"Dissolve Random",
+        "SX":229,
+        "IX":127,
+        "FX":1,
+        "RateMs": 25
+      }
+    },
+    "Segment6": {
+      "PR": [96,112],
+      "Pal":"RGPBO",
+      "EF": {
+        "FX":"Static",
+        "SX":229,
+        "IX":127,
+        "RateMs": 100
+      }
+    },
+    "Segment7": {
+      "PR": [112,128],
+      "Pal":"Blue and White",
+      "EF": {
+        "FX":"Static",
+        "SX":229,
+        "IX":127,
+        "FX":1,
+        "RateMs": 100
+      }
+    },
+    "Segment8": {
+      "PR": [128,144],
+      "Pal":"Hot 16",
+      "EF": {
+        "FX":"Sine",
+        "SX":229,
+        "IX":127,
+        "RateMs": 100
+      },
+      "SegColour1": {
+        "Hue": 0,
+        "Sat":0,
+        "BrightnessRGB":0
+      }
+    },
+    "Segment9": {
+      "PR": [144,160],
+      "Pal":"Rainbow 16",
+      "EF": {
+        "FX":"Meteor Smooth",
+        "SX":229,
+        "IX":127,
+        "FX":1,
+        "RateMs": 100
+      }
+    },
+    "Segment10": {
+      "PR": [160,176],
+      "Pal":"Turbo 16",
+      "EF": {
+        "FX":"Bouncing Balls",
+        "SX":127,
+        "IX":127,
+        "RateMs": 100
+      }
+    },
+    "Segment11": {
+      "PR": [176,192],
+      "Pal":"Sunset",
+      "EF": {
+        "FX":"Hour Progress",
+        "SX":229,
+        "IX":127,
+        "FX":1,
+        "RateMs": 1000
+      }
+    },
+    "Segment12": {
+      "PR": [192,208],
+      "Pal":"Snowy 02",
+      "EF": {
+        "FX":"Twinkle Palette Two on One",
+        "SX":255,
+        "IX":30,
+        "RateMs": 25,
+        "Param0":0
+      },
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":0,
+        "BrightnessRGB":3
+      }
+    },
+    "Segment13": {
+      "PR": [208,224],
+      "Pal":"Snowy 02",
+      "EF": {
+        "FX":"Stepping Palette",
+        "SX":229,
+        "IX":127,
+        "FX":1,
+        "RateMs": 1000
+      }
+    },
+    "Segment14": {
+      "PR": [224,240],
+      "Pal":"Snowy 02",
+      "EF": {
+        "FX":"Wipe Random",
+        "SX":229,
+        "IX":127,
+        "RateMs": 100
+      }
+    },
+    "Segment15": {
+      "PR": [240,256],
+      "Pal":"Random 01",
+      "EF": {
+        "FX":"Randomise Gradient",
+        "SX":229,
+        "IX":20,
+        "FX":1,
+        "RateMs": 1000
+      }
+    },
+    "BrightnessRGB": 8,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+  #endif
 
 #endif
 
@@ -1987,7 +2195,7 @@
   // #define DISABLE_NETWORK
   // #define DISABLE_NETWORK_WIFI
   #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -2478,7 +2686,7 @@
   // #define DISABLE_NETWORK
   // #define DISABLE_NETWORK_WIFI
   #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -2615,7 +2823,7 @@
 //   // #define DISABLE_NETWORK
 //   // #define DISABLE_NETWORK_WIFI
 //   #define USE_MODULE_NETWORK_WIFI
-//   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+//   
 
 //   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -2858,7 +3066,7 @@
   // #define DISABLE_NETWORK
   // #define DISABLE_NETWORK_WIFI
   #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -3000,7 +3208,7 @@
 //   // #define DISABLE_NETWORK
 //   // #define DISABLE_NETWORK_WIFI
 //   #define USE_MODULE_NETWORK_WIFI
-//   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+//   
 
 //   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -3335,7 +3543,7 @@
   // #define DISABLE_NETWORK
   // #define DISABLE_NETWORK_WIFI
   #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -3597,7 +3805,7 @@
   // #define DISABLE_NETWORK
   // #define DISABLE_NETWORK_WIFI
   #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -3729,7 +3937,7 @@
   // #define DISABLE_NETWORK
   // #define DISABLE_NETWORK_WIFI
   #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   
   

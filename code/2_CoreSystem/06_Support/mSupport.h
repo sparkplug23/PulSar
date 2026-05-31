@@ -70,11 +70,6 @@ enum STATE_NUMBER_IDS{
 
 #define P_PHASE_OUT() Serial.println(F("PHASE OUT"));
 
-// Methods for disable (returning from loop early) until an uptime, network established, or network uptime > x amount
-#define DEBUG_OTA_FLASH_BLOCKER_UNTIL_STABLE_RETURN_ZERO()   if(tkr_time->RtcTime.seconds_nonreset < 120){ return 0; }
-#define DEBUG_OTA_FLASH_BLOCKER_UNTIL_UPTIME_X_RETURN_ZERO(X)   if(tkr_time->RtcTime.seconds_nonreset < X){ return 0; }
-// #define DEBUG_OTA_FLASH_BLOCKER_UNTIL_NETWORK_UPTIME_X_RETURN_ZERO(X)   if(tkr_time->RtcTime.seconds_nonreset < X){ return 0; }
-
 
 #define CALL_VOID_FUNCTION(object,ptrToMember)  ((object).*(ptrToMember))
 
@@ -378,8 +373,6 @@ std::string toBinaryString(T value, size_t bitCount = sizeof(T) * 8) {
 
 extern uint32_t ResetReason_g(void);
 
-extern void SafeMode_StartAndAwaitOTA(uint8_t seconds_to_wait = 0 /*default of zero, is indefinitely */);
-
 #ifdef ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
 #define TINY_GSM_MODEM_SIM7000
 #define TINY_GSM_DEBUG Serial
@@ -447,22 +440,6 @@ public:
 
 
     void CheckResetConditions();
-
-    #ifdef USE_ARDUINO_OTA
-      /*********************************************************************************************\
-       * Allow updating via the Arduino OTA-protocol.
-       *
-       * - Once started disables current wifi clients and udp
-       * - Perform restart when done to re-init wifi clients
-      \*********************************************************************************************/
-
-      bool arduino_ota_triggered = false;
-      uint16_t arduino_ota_progress_dot_count = 0;
-      bool ota_init_success = false;
-
-      void ArduinoOTAInit(void);
-      void ArduinoOtaLoop(void);
-    #endif // USE_ARDUINO_OTA
 
 
     /****

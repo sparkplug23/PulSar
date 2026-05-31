@@ -1,34 +1,7 @@
 #include "mRuleEngine.h"
 
-/**
- * @brief 
- * 
- * 
- * Create new method that uses filesystem to load rules from a file
- * Append rules to existing ones, or clear existing ones
- * 
- * Hence, I can change them, without needing to reflash firmware
- * 
- * 
- * 
- * 
- */
-
 
 #ifdef USE_MODULE_CORE_RULES
-
-
-// /* Null, because instance will be initialized on demand. */
-// RuleEngine* RuleEngine::instance = nullptr;
-
-// RuleEngine* RuleEngine::GetInstance(){
-//   if (instance == nullptr){
-//     instance = new RuleEngine();
-//     // PRINT_FLUSHED("instance = new RuleEngine()");
-//   }
-//   return instance;
-// }
-
 
 int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
 

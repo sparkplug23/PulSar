@@ -1,0 +1,149 @@
+Processing tg_cam__wroover_01 (board: esp32dev; platform: espressif32@6.4.0; framework: arduino; platform_packages: platformio/framework-arduinoespressif32@3.20011.230801; upload_port: 192.168.2.78; board_build.flash_mode: dio; board_build.boot: qio; board_build.f_cpu: 240000000L; board_build.f_flash: 80000000L; board_build.mcu: esp32; board_build.psram: enabled; board_build.partitions: partitions/esp32_default.csv; board_build.ldscript: ; lib_ignore: esp32-camera; lib_ldf_mode: chain+; lib_extra_dirs: lib/lib_basic, lib/lib_network, lib/lib_display, lib/lib_onewire2023, lib/lib_sensor, lib/lib_custom, lib/lib_basic, lib/lib_wled32, lib/lib_custom, lib/lib_neo_original25, lib/lib_i2c, lib/lib_energy, lib/lib_network_web, lib/libesp32, lib/lib_custom, lib/lib_default, lib/lib_basic, lib/libesp32/network, lib/lib_network, lib/lib_onewire2023, lib/lib_sensor, lib/lib_custom, lib/libesp32, lib/lib_basic, lib/lib_basic, lib/lib_network, lib/lib_display, lib/lib_onewire2023, lib/lib_sensor, lib/lib_custom, lib/lib_custom, lib/lib_neopixel_june24_ws2805, lib/lib_i2c, lib/lib_energy, lib/lib_nextion_esp32_web, lib/lib_default; build_flags: -w, -D DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_01, -D ENABLE_DEVFEATURE_ANALOG_WRITE_EMULATION_VERSION2, -D USE_USER_MICHAEL, -D I2C_BUS_SPEED=400000, -DBOARD_HAS_PSRAM, '-DDEVICENAME_CTR="tg_cam__wroover_01"', '-DDEVICENAME_FRIENDLY_CTR="TestGroup Camera WROVER-E 01#Testbed"', '-DDEVICENAME_DESCRIPTION_CTR="ESP32;WROVER-E;Testbed"', '-DMQTT_HOST="192.168.3.70"', -D SETTINGS_LOCATION=0x300000, -D SETTINGS_SIZE=0x10000, -D CORE_DEBUG_LEVEL=5, -D ARDUINO_USB_CDC_ON_BOOT=1, -D ARDUINO_USB_MODE=1, -D Serial=Serial0, -D FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC, -D ENABLE_DEBUG_LINE_HERE3, -D ENABLE_DEBUG_MANUAL_DELAYS, -D ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT, -D DISABLE_LEDC_DEFINE_TO_PATCH_BUILD_ERROR_JUNE25, -D ENABLE_IMMEDIATE_BOOT_SERIAL_PRINT_WHILE, -D ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES, -Ilib/lib_esp32_camera2/driver/private_include, -Ilib/lib_esp32_camera2/driver/include, -Ilib/lib_esp32_camera2/conversions, -I"C:/Users/micha/.platformio/packages/framework-arduinoespressif32/tools/esp32-arduino-libs/esp32/include/esp_hw_support/include"; build_unflags: -Wall, -Wdeprecated-declarations; monitor_speed: 115200; upload_resetmethod: nodemcu; upload_speed: 921600; extra_scripts: pio/strip-floats.py, pio/name-firmware.py, pio/gzip-firmware.py, gzip_fw.py, pio/override_copy.py, pre:pio/build_webpages.py, post:tools/post_copy_artifacts.py, pio/strip-floats.py, pio/name-firmware.py, gzip_fw.py, pio/override_copy.py)
+--------------------------------------------------------------------------------
+[WEB] Changing to project directory: U:\GitHub\PulSar
+[WEB] node_modules present, skipping npm install
+[WEB] npm run build:webpages
+
+> wled@0.14.0-b3 build:webpages
+> npm run build:webserver && npm run build:submodules && npm run build:lights
+
+
+> wled@0.14.0-b3 build:webserver
+> node tools/cdata_webserver.js
+
+Reading code/3_Network/21_WebServer/Webpages/Source/index.htm
+Reading code/3_Network/21_WebServer/Webpages/Source/style.css as PAGE_settingsCss_web
+Reading code/3_Network/21_WebServer/Webpages/Source/common.js as JS_common_web
+Reading code/3_Network/21_WebServer/Webpages/Source/settings.htm as PAGE_settings_web
+Reading code/3_Network/21_WebServer/Webpages/Source/settings_wifi.htm as PAGE_settings_wifi2_web
+Reading code/3_Network/21_WebServer/Webpages/Source/settings_leds.htm as PAGE_settings_leds_web
+Reading code/3_Network/21_WebServer/Webpages/Source/settings_ui.htm as PAGE_settings_ui_web
+Reading code/3_Network/21_WebServer/Webpages/Source/settings_sync.htm as PAGE_settings_sync_web
+Reading code/3_Network/21_WebServer/Webpages/Source/settings_time.htm as PAGE_settings_time_web
+Reading code/3_Network/21_WebServer/Webpages/Source/settings_sec.htm as PAGE_settings_sec_web
+Reading code/3_Network/21_WebServer/Webpages/Source/settings_um.htm as PAGE_settings_um_web
+Reading code/3_Network/21_WebServer/Webpages/Source/settings_pin.htm as PAGE_settings_pin_web
+Writing 181136 characters into code/3_Network/21_WebServer/Webpages/Generated/html_settings.h
+Reading code/3_Network/21_WebServer/Webpages/Source/msg.htm as PAGE_msg_web
+Reading code/3_Network/21_WebServer/Webpages/Source/update.htm as PAGE_update_web
+Reading code/3_Network/21_WebServer/Webpages/Source/update_web.htm as PAGE_welcome_web2
+Reading code/3_Network/21_WebServer/Webpages/Source/welcome.htm as PAGE_welcome_web
+Reading code/3_Network/21_WebServer/Webpages/Source/404.htm as PAGE_404_web
+Reading code/3_Network/21_WebServer/Webpages/Source/favicon_pulsar.ico as favicon2_web
+Writing 30201 characters into code/3_Network/21_WebServer/Webpages/Generated/html_other.h
+Reading code/3_Network/21_WebServer/Webpages/Source/Consoles/console_ws.htm as PAGE_console_ws_web
+Reading code/3_Network/21_WebServer/Webpages/Source/Consoles/console_polling.htm as PAGE_console_polling_web
+Writing 28130 characters into code/3_Network/21_WebServer/Webpages/Generated/pages_console_esp32.h
+Reading code/3_Network/21_WebServer/Webpages/Source/Consoles/console_polling_esp8266.htm as PAGE_console_polling
+Writing 9719 characters into code/3_Network/21_WebServer/Webpages/Generated/pages_console_esp8266.h
+Reading code/3_Network/21_WebServer/Webpages/Source/url_list.htm as PAGE_url_list
+Writing 8529 characters into code/3_Network/21_WebServer/Webpages/Generated/pages_url_debugs.h
+Reading code/3_Network/21_WebServer/Webpages/Source/sd_editor.htm as PAGE_sd_editor
+Writing 25100 characters into code/3_Network/21_WebServer/Webpages/Generated/html_sdcard_editor.h
+Reading code/3_Network/21_WebServer/Webpages/Source/edit_fs_darkmode.htm as PAGE_sedit_fs_darkmode
+Writing 26213 characters into code/3_Network/21_WebServer/Webpages/Generated/html_edit_fs_darkmode.h
+Reading code/3_Network/21_WebServer/Webpages/Source/root_basic.htm as PAGE_root_basic_web
+Reading code/3_Network/21_WebServer/Webpages/Source/debug_main.htm as PAGE_debug_main_web
+Writing 27155 characters into code/3_Network/21_WebServer/Webpages/Generated/root_basic.h
+Reading code/3_Network/21_WebServer/Webpages/Source/style.css as PAGE_settingsCss2_web
+Reading code/3_Network/21_WebServer/Webpages/Source/common.js as JS_common2_web
+Reading code/3_Network/21_WebServer/Webpages/Source/settings_wifi.htm as PAGE_settings_wifi_web
+Writing 31333 characters into code/3_Network/21_WebServer/Webpages/Generated/html_settings2.h
+Reading code/3_Network/21_WebServer/Webpages/Source/submodule_style.css as PAGE_submodule_style_web
+Writing 7052 characters into code/3_Network/21_WebServer/Webpages/Generated/submodule_assets.h
+Reading code/3_Network/21_WebServer/Webpages/Source/system_controls.htm as PAGE_system_controls_web
+Writing 8688 characters into code/3_Network/21_WebServer/Webpages/Generated/submodule_unified_pages.h
+Inlined 226836 characters
+Minified to 159123 characters
+Compressed 50043 bytes
+Writing code/3_Network/21_WebServer/Webpages/Generated/html_ui.h
+
+> wled@0.14.0-b3 build:submodules
+> node tools/cdata_submodules.js
+
+PulSar cdata_submodules.js
+Repo: U:/GitHub/PulSar
+Code: U:/GitHub/PulSar/code
+Found 3 submodule Web/Src directory(ies).
+------------------------------------------------------------
+Module: code/5_Sensors/50_GPS_Serial
+Src:    code/5_Sensors/50_GPS_Serial/Web/Src
+Gen:    code/5_Sensors/50_GPS_Serial/Web/Gen
+Wrote: code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h
+------------------------------------------------------------
+Module: code/8_Displays/01_Nextion
+Src:    code/8_Displays/01_Nextion/Web/Src
+Gen:    code/8_Displays/01_Nextion/Web/Gen
+Wrote: code/8_Displays/01_Nextion/Web/Gen/generated_web.h
+------------------------------------------------------------
+Module: code/10_ConSpec/13_ServerResetRelays
+Src:    code/10_ConSpec/13_ServerResetRelays/Web/Src
+Gen:    code/10_ConSpec/13_ServerResetRelays/Web/Gen
+Wrote: code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h
+Done.
+
+> wled@0.14.0-b3 build:lights
+> node tools/cdata_lights.js
+
+Reading code/6_Lights/03_Animator/source/index.htm
+Reading code/6_Lights/03_Animator/source/pixart/pixart.htm
+Reading code/6_Lights/03_Animator/source/cpal/cpal.htm
+Reading code/6_Lights/03_Animator/source/pxmagic/pxmagic.htm
+Reading code/6_Lights/03_Animator/source/style.css as PAGE_settingsCss
+Reading code/6_Lights/03_Animator/source/common.js as JS_common
+Reading code/6_Lights/03_Animator/source/settings.htm as PAGE_settings
+Reading code/6_Lights/03_Animator/source/settings_wifi.htm as PAGE_settings_wifi
+Reading code/6_Lights/03_Animator/source/settings_leds.htm as PAGE_settings_leds
+Reading code/6_Lights/03_Animator/source/settings_dmx.htm as PAGE_settings_dmx
+Reading code/6_Lights/03_Animator/source/settings_ui.htm as PAGE_settings_ui
+Reading code/6_Lights/03_Animator/source/settings_sync.htm as PAGE_settings_sync
+Reading code/6_Lights/03_Animator/source/settings_time.htm as PAGE_settings_time
+Reading code/6_Lights/03_Animator/source/settings_sec.htm as PAGE_settings_sec
+Reading code/6_Lights/03_Animator/source/settings_um.htm as PAGE_settings_um
+Reading code/6_Lights/03_Animator/source/settings_2D.htm as PAGE_settings_2D
+Reading code/6_Lights/03_Animator/source/settings_pin.htm as PAGE_settings_pin
+Writing 206369 characters into code/6_Lights/03_Animator/webpages_generated/html_settings.h
+Reading code/6_Lights/03_Animator/source/usermod.htm as PAGE_usermod
+Reading code/6_Lights/03_Animator/source/msg.htm as PAGE_msg
+Reading code/6_Lights/03_Animator/source/dmxmap.htm as PAGE_dmxmap
+Reading code/6_Lights/03_Animator/source/update.htm as PAGE_update
+Reading code/6_Lights/03_Animator/source/liveview.htm as PAGE_liveview
+Reading code/6_Lights/03_Animator/source/liveviewws2D.htm as PAGE_liveviewws2D
+Reading code/6_Lights/03_Animator/source/404.htm as PAGE_404
+Reading code/6_Lights/03_Animator/source/favicon_pulsar.ico as favicon
+Writing 25738 characters into code/6_Lights/03_Animator/webpages_generated/html_other.h
+Inlined 25059 characters
+Minified to 14543 characters
+Inlined 45071 characters
+Minified to 27939 characters
+Compressed 5194 bytes
+Writing code/6_Lights/03_Animator/webpages_generated/html_cpal.h
+Inlined 226843 characters
+Minified to 159133 characters
+Compressed 8831 bytes
+Writing code/6_Lights/03_Animator/webpages_generated/html_pxmagic.h
+Inlined 39054 characters
+Minified to 24239 characters
+Compressed 8442 bytes
+Writing code/6_Lights/03_Animator/webpages_generated/html_pixart.h
+Compressed 50053 bytes
+Writing code/6_Lights/03_Animator/webpages_generated/html_ui.h
+
+[WEB] Webpage generation complete.
+[WEB] Returning to previous directory: U:\GitHub\PulSar
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32dev.html
+PLATFORM: Espressif 32 (6.4.0) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20011.230801 (2.0.11) 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - toolchain-xtensa-esp32 @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain+, Compatibility ~ soft
+Ignored library U:\GitHub\PulSar\lib\lib_esp32_camera2
+More details about "Library Compatibility Mode": https://docs.platformio.org/page/librarymanager/ldf.html#ldf-compat-mode
+Found 202 compatible libraries
+Scanning dependencies...
+Build interrupted.
+AbortedByUser: Aborted by user

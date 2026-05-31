@@ -53,12 +53,21 @@ static void SettingsSavePrevFile_FromBuffer(const mSettings::SETTINGS *settings_
 static void SettingsUpdateRuntimeHostname(void)
 {
   memset(tkr_set->runtime.my_hostname, 0, sizeof(tkr_set->runtime.my_hostname));
+  // snprintf(
+  //   tkr_set->runtime.my_hostname,
+  //   sizeof(tkr_set->runtime.my_hostname),
+  //   PSTR("%s"),
+  //   tkr_set->Settings.system_name.device
+  // );
+
   snprintf(
     tkr_set->runtime.my_hostname,
     sizeof(tkr_set->runtime.my_hostname),
-    PSTR("%s"),
+    "%s",
     tkr_set->Settings.system_name.device
   );
+
+
 }
 
 
@@ -105,7 +114,7 @@ static void SettingsEpochToUtcDateTime(
 void mSettings::SettingsUpdateFileWriteTimeAscii(void)
 {
   // Default visible value when UTC is not valid yet.
-  snprintf(Settings.settings_file_update_utc_ascii,sizeof(Settings.settings_file_update_utc_ascii),PSTR("utc------:------"));
+  snprintf(Settings.settings_file_update_utc_ascii,sizeof(Settings.settings_file_update_utc_ascii),"utc------:------");
 
   const uint32_t utc = tkr_time->UtcTime();
 
@@ -135,7 +144,7 @@ void mSettings::SettingsUpdateFileWriteTimeAscii(void)
   snprintf(
     Settings.settings_file_update_utc_ascii,
     sizeof(Settings.settings_file_update_utc_ascii),
-    PSTR("utc%02u%02u%02u:%02u%02u%02u"),
+    "utc%02u%02u%02u:%02u%02u%02u",
     hour,
     minute,
     second,
@@ -161,7 +170,7 @@ void mSettings::SettingsSaveAll(void)
   }
 
   // Modules must only copy persistent values here, not high-churn telemetry.
-  tkr->Tasker_Interface(TASK_SETTINGS_SAVE_VALUES_FROM_MODULE);
+  // tkr->Tasker_Interface(TASK_SETTINGS_SAVE_VALUES_FROM_MODULE);
 
   SettingsSave(0);
 }
@@ -270,6 +279,16 @@ void mSettings::SettingsLoad(void)
   SETTINGS loaded_settings;
   memset(&loaded_settings, 0x00, sizeof(SETTINGS));
 
+  const bool filesystem_available =
+  #ifdef USE_MODULE_CORE_FILESYSTEM
+    (tkr_mfile && tkr_mfile->IsMounted());
+  #else
+    false;
+  #endif
+
+  ALOG_INF(PSTR("Filesystem available: %u"), (unsigned)filesystem_available);
+
+
   const uint32_t source = SettingsRead(&loaded_settings, sizeof(SETTINGS));
 
   if (!source)
@@ -282,7 +301,10 @@ void mSettings::SettingsLoad(void)
 
     ALOG_WRN(PSTR(D_LOG_SETTINGS "No saved settings found, using compiled defaults"));
 
+    DEBUG_LINE_HERE3;
     SettingsDefault();
+    DEBUG_LINE_HERE3;
+
     runtime.settings_holder_hardcorded_stored_changed = true;
     settings_generated_from_defaults = true;
 
@@ -294,10 +316,17 @@ void mSettings::SettingsLoad(void)
     }
     #endif
 
+    DEBUG_LINE_HERE3;
     settings_should_save = true;
   }
-  else
+
+  ALOG_INF(PSTR(D_LOG_SETTINGS "SettingsLoad source=%d"), source);
+  
+  if (source)
   {
+    
+
+    DEBUG_LINE_HERE3;
     settings_location = source;
 
     const uint32_t loaded_crc = GetCfgCrc32((uint8_t*)&loaded_settings, sizeof(SETTINGS) - 4);
@@ -325,6 +354,7 @@ void mSettings::SettingsLoad(void)
       sizeof(SETTINGS),
       crc_valid
     );
+        DEBUG_LINE_HERE3;
 
     /************************************************************************************************
      * SECTION: Valid saved settings
@@ -332,12 +362,13 @@ void mSettings::SettingsLoad(void)
 
     if (size_valid && holder_valid && crc_valid)
     {
+
+      ALOG_INF(PSTR(D_LOG_SETTINGS "Valid saved settings found, loading"));
+
+      DEBUG_LINE_HERE3;
       memcpy(&Settings, &loaded_settings, sizeof(SETTINGS));
 
-      ALOG_INF(
-        PSTR(D_LOG_CONFIG "Loaded from file, " D_COUNT " %lu"),
-        Settings.save_flag
-      );
+      ALOG_INF( PSTR(D_LOG_CONFIG "Loaded from file, " D_COUNT " %lu"), Settings.save_flag );
 
       settings_loaded_from_valid_file = true;
     }
@@ -347,12 +378,20 @@ void mSettings::SettingsLoad(void)
        * SECTION: Invalid saved settings
        *
        * Save the invalid binary before replacing it.
+       * * * Holder mismatch
+       * * * Size mismatch
+       * * * CRC invalid
+       * * * Defensive fallback
        ************************************************************************************************/
+      
+      ALOG_INF(PSTR(D_LOG_SETTINGS "INVALID saved settings found, repairing"));
 
-      #ifdef USE_MODULE_CORE_FILESYSTEM
-      SettingsSavePrevFile_FromBuffer(&loaded_settings);
-      #endif
+        DEBUG_LINE_HERE3;
 
+        #ifdef USE_MODULE_CORE_FILESYSTEM
+        if(filesystem_available){  SettingsSavePrevFile_FromBuffer(&loaded_settings); }
+        else{  ALOG_WRN(PSTR(D_LOG_SETTINGS "Skipping invalid-settings backup, filesystem not mounted")); }
+        #endif
 
       /************************************************************************************************
        * SECTION: Holder mismatch
@@ -360,8 +399,9 @@ void mSettings::SettingsLoad(void)
 
       if (!holder_valid)
       {
+        DEBUG_LINE_HERE3;
         ALOG_WRN(
-          PSTR(D_LOG_SETTINGS "Settings holder mismatch, using compiled defaults (%d != %d)"),
+          PSTR(D_LOG_SETTINGS ">>>>>>>>>>>>>>>>>>>>>>>Settings holder mismatch, using compiled defaults (%d != %d)"),
           loaded_settings.cfg_holder,
           (uint16_t)SETTINGS_HOLDER
         );
@@ -369,6 +409,8 @@ void mSettings::SettingsLoad(void)
         SettingsDefault();
         runtime.settings_holder_hardcorded_stored_changed = true;
         settings_generated_from_defaults = true;
+
+        DEBUG_LINE_HERE3;
 
         #ifdef USE_MODULE_CORE_JSON_TEMPLATE
         if (tkr_json_template) {
@@ -387,8 +429,9 @@ void mSettings::SettingsLoad(void)
          * SECTION: Size mismatch
          ************************************************************************************************/
 
+        DEBUG_LINE_HERE3;
         ALOG_WRN(
-          PSTR(D_LOG_SETTINGS "Settings size mismatch, using compiled defaults (%d != %d)"),
+          PSTR(D_LOG_SETTINGS ">>>>>>>>>>>>>>>>>>>>>>>Settings size mismatch, using compiled defaults (%d != %d)"),
           loaded_settings.cfg_size,
           sizeof(SETTINGS)
         );
@@ -405,6 +448,7 @@ void mSettings::SettingsLoad(void)
         }
         #endif
 
+        DEBUG_LINE_HERE3;
         settings_should_save = true;
       }
       else
@@ -414,13 +458,14 @@ void mSettings::SettingsLoad(void)
          * SECTION: CRC invalid, try last-known-good before rebuilding defaults
          ************************************************************************************************/
 
-        ALOG_WRN(PSTR(D_LOG_SETTINGS "Settings CRC invalid"));
+        ALOG_WRN(PSTR(D_LOG_SETTINGS ">>>>>>>>>>>>>>>>>>>>>>>Settings CRC invalid"));
 
+        DEBUG_LINE_HERE3;
         #ifdef USE_MODULE_CORE_FILESYSTEM
         SETTINGS lkg_settings;
         memset(&lkg_settings, 0x00, sizeof(SETTINGS));
 
-        if (tkr_mfile->LoadFile(TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD, (uint8_t*)&lkg_settings, sizeof(SETTINGS)))
+        if (tkr_mfile->LoadFile(FILENAME__SETTINGS__LKG_LAST_KNOWN_GOOD, (uint8_t*)&lkg_settings, sizeof(SETTINGS)))
         {
           const uint32_t lkg_crc = GetCfgCrc32((uint8_t*)&lkg_settings, sizeof(SETTINGS) - 4);
 
@@ -435,20 +480,22 @@ void mSettings::SettingsLoad(void)
           {
             memcpy(&Settings, &lkg_settings, sizeof(SETTINGS));
 
-            ALOG_WRN(PSTR(D_LOG_SETTINGS "Recovered settings from last-known-good file"));
+            ALOG_WRN(PSTR(D_LOG_SETTINGS ">>>>>>>>>>>>>>>>>>>>>>>Recovered settings from last-known-good file"));
 
             settings_recovered_from_lkg = true;
             settings_should_save = true;
           }
           else
           {
-            ALOG_WRN(PSTR(D_LOG_SETTINGS "Last-known-good settings invalid"));
+            ALOG_WRN(PSTR(D_LOG_SETTINGS ">>>>>>>>>>>>>>>>>>>>>>>Last-known-good settings invalid"));
           }
         }
         #endif
 
+        DEBUG_LINE_HERE3;
         if (!settings_recovered_from_lkg)
         {
+        DEBUG_LINE_HERE3;
           SettingsDefault();
           runtime.settings_holder_hardcorded_stored_changed = true;
           settings_generated_from_defaults = true;
@@ -461,6 +508,7 @@ void mSettings::SettingsLoad(void)
           }
           #endif
 
+        DEBUG_LINE_HERE3;
           settings_should_save = true;
         }
       }
@@ -470,7 +518,8 @@ void mSettings::SettingsLoad(void)
          * SECTION: Defensive fallback
          ************************************************************************************************/
 
-        ALOG_ERR(PSTR(D_LOG_SETTINGS "Unhandled invalid SettingsLoad state, using compiled defaults"));
+        DEBUG_LINE_HERE3;
+        ALOG_ERR(PSTR(D_LOG_SETTINGS ">>>>>>>>>>>>>>>>>>>>>>>Unhandled invalid SettingsLoad state, using compiled defaults"));
 
         SettingsDefault();
         runtime.settings_holder_hardcorded_stored_changed = true;
@@ -484,9 +533,12 @@ void mSettings::SettingsLoad(void)
         }
         #endif
 
+        DEBUG_LINE_HERE3;
         settings_should_save = true;
       }
     }
+  }else{
+    ALOG_INF(PSTR(">>>>>>>>>>>>>>>>>>>>>>>SettingsLoad source=%d, no file read"), source);
   }
 
   #endif // ENABLE_FEATURE_SETTINGS__LOAD_PRECODED_SETTINGS_ON_BOOT_NO_SAVED_STATES
@@ -513,6 +565,7 @@ void mSettings::SettingsLoad(void)
   #endif
 
 
+                                                                  DEBUG_LINE_HERE3;
   /************************************************************************************************
    * SECTION: Save generated/modified settings
    *
@@ -522,32 +575,48 @@ void mSettings::SettingsLoad(void)
    * - module template default/override changed the RAM settings
    ************************************************************************************************/
 
-  if (settings_should_save)
+  if(settings_should_save)
   {
-    SettingsSaveAll();
+  #ifdef USE_MODULE_CORE_FILESYSTEM
+    if(filesystem_available)
+    {
+      ALOG_INF(PSTR(D_LOG_SETTINGS "Saving settings after load due to generated/modified state"));
+      SettingsSaveAll();
+    }
+    else
+    {
+      ALOG_WRN(PSTR(D_LOG_SETTINGS "Skipping SettingsSaveAll, filesystem not mounted"));
+    }
+  #else
+    ALOG_WRN(PSTR(D_LOG_SETTINGS "Skipping SettingsSaveAll, filesystem disabled"));
+  #endif
   }
 
-
+                                                            DEBUG_LINE_HERE3;
   /************************************************************************************************
    * SECTION: Finalise runtime metadata
    ************************************************************************************************/
 
+                                                        DEBUG_LINE_HERE3;
   settings_crc32 = GetSettingsCrc32();
 
-  #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
-  RtcSettingsLoad(1);
+                                                      DEBUG_LINE_HERE3;
+  #ifdef ENABLE_FEATURE_RTC__SETTINGS
+  RtcMemory__RuntimeState_Load(1);
   #endif
 
+                                                      DEBUG_LINE_HERE3;
   SettingsUpdateRuntimeHostname();
 
   ALOG_INF(
-    PSTR(D_LOG_SETTINGS "SettingsLoad complete valid_file=%u defaults=%u lkg=%u saved=%u crc=0x%08X"),
+    PSTR(D_LOG_SETTINGS "SettingsLoad ====================================complete valid_file=%u defaults=%u lkg=%u saved=%u crc=0x%08X"),
     (unsigned)settings_loaded_from_valid_file,
     (unsigned)settings_generated_from_defaults,
     (unsigned)settings_recovered_from_lkg,
     (unsigned)settings_should_save,
     settings_crc32
   );
+                                                      DEBUG_LINE_HERE3;
 }
 
 
@@ -559,10 +628,12 @@ uint32_t mSettings::SettingsRead(void *data, size_t size)
   #endif
 
   #ifdef USE_MODULE_CORE_FILESYSTEM
-  if (tkr_mfile->LoadFile(TASM_FILE_SETTINGS, (uint8_t*)data, size)) {
+  if (tkr_mfile->LoadFile(FILENAME__SETTINGS__SYSTEM_BLOCK, (uint8_t*)data, size)) {
     return 1;
   }
   #endif
+
+  ALOG_INF(PSTR("SettingsRead: no file read"));
 
   return 0;
 }
@@ -576,7 +647,7 @@ void mSettings::SettingsWrite(const void *pSettings, unsigned nSettingsLen)
   #endif
 
   #ifdef USE_MODULE_CORE_FILESYSTEM
-  tkr_mfile->SaveFile(TASM_FILE_SETTINGS, (const uint8_t*)pSettings, nSettingsLen);
+  tkr_mfile->SaveFile(FILENAME__SETTINGS__SYSTEM_BLOCK, (const uint8_t*)pSettings, nSettingsLen);
   #else
   ALOG_WRN(PSTR(D_LOG_SETTINGS "SettingsWrite skipped, TFS disabled"));
   #endif
@@ -637,8 +708,8 @@ void mSettings::SettingsSave(uint8_t rotate)
     settings_crc32 = Settings.cfg_crc32;
   }
 
-  #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
-  RtcSettingsSave();
+  #ifdef ENABLE_FEATURE_RTC__SETTINGS
+  RtcMemory__RuntimeState_Save();
   #endif
 }
 
@@ -736,7 +807,7 @@ void mSettings::SettingsErase(uint8_t type)
       int32_t result = 0;
 
       #ifdef USE_MODULE_CORE_FILESYSTEM
-      result = tkr_mfile->DeleteFile(TASM_FILE_SETTINGS);
+      result = tkr_mfile->DeleteFile(FILENAME__SETTINGS__SYSTEM_BLOCK);
       #endif
 
       ALOG_DBG(PSTR(D_LOG_APPLICATION D_ERASE " settings file (%d)"), result);
@@ -815,13 +886,15 @@ bool mSettings::SaveSettings__LastKnownGood(void)
 
   Settings.cfg_crc32 = GetSettingsCrc32();
 
+  #ifdef USE_MODULE_CORE_FILESYSTEM
   tkr_mfile->SaveFile(
-    TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD,
+    FILENAME__SETTINGS__LKG_LAST_KNOWN_GOOD,
     (const uint8_t*)&Settings,
     sizeof(SETTINGS)
   );
 
   runtime.settings_lkg = true;
+  #endif
 
   ALOG_INF(PSTR(D_LOG_SETTINGS "Saved last-known-good settings"));
 
@@ -846,8 +919,9 @@ bool mSettings::LoadSettings__RestoreFrom_LastKnownGood(void)
   SETTINGS settings_lkg;
   memset(&settings_lkg, 0x00, sizeof(SETTINGS));
 
+  #ifdef USE_MODULE_CORE_FILESYSTEM
   if (!tkr_mfile->LoadFile(
-        TASM_FILE_SETTINGS_LKG_LAST_KNOWN_GOOD,
+        FILENAME__SETTINGS__LKG_LAST_KNOWN_GOOD,
         (uint8_t*)&settings_lkg,
         sizeof(SETTINGS)
       ))
@@ -855,6 +929,7 @@ bool mSettings::LoadSettings__RestoreFrom_LastKnownGood(void)
     ALOG_WRN(PSTR(D_LOG_SETTINGS "No last-known-good settings file"));
     return false;
   }
+  #endif
 
   const uint32_t lkg_crc = GetCfgCrc32(
     (uint8_t*)&settings_lkg,

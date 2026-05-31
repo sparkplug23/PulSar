@@ -20,9 +20,12 @@ enum TASKER_FUNCTION_TYPES
    * or, I need to call this twice, so some functions required before init and after init are handled (yes, do this)
    * */
   TASK_TEMPLATES__LOAD_MODULE,  // Read progmem configs if needed, read settings configuration
+
+
+
   TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM,  // Read progmem configs if needed, read settings configuration
 
-  TASK_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID, // progmem is only loaded when file system is reset
+  TASK_CONFIG_LOAD_POST_INIT_DEFAULTS_FROM_PROGMEM, // progmem is only loaded when file system is reset
 
 
   TASK_SETTINGS_DEFAULT,   // Use defaults in code
@@ -44,8 +47,6 @@ enum TASKER_FUNCTION_TYPES
   
   TASK_INIT,         // Actually complete init, read sensors, enable modules fully etc
 
-  TASK_INIT_DELAYED_SECONDS, // To enable modules to either intentional begin with a delayed start, or, to changed at an interval if it is possible to start again (e.g. new sensor connected)
-  
   /**
    * Flags that are used in debugging, that will override any stored or default init states. This will be optionally called at the end of setup.
    * */
@@ -64,7 +65,10 @@ enum TASKER_FUNCTION_TYPES
   
 
   YTASK_INIT,
-  TASK_CONFIGURE_MODULES_FOR_DEVICE, // Configure any sensors that are needed for controllers, to the required settings
+
+
+  // TASK_CONFIGURE_MODULES_FOR_DEVICE, // Configure any sensors that are needed for controllers, to the required settings
+
   TASK_MQTT_HANDLERS_INIT,
   // TASK_MQTT_INIT,
   
@@ -344,7 +348,7 @@ DEFINE_PGM_CTR(PM_TASK_TEMPLATE_LOAD_CTR)                           D_TASK_TEMPL
 // DEFINE_PGM_CTR(PM_TASK_MODULE_INIT_CTR)                             D_TASK_MODULE_INIT_CTR;
 DEFINE_PGM_CTR(PM_TASK_PRE_INIT_CTR)                                D_TASK_PRE_INIT_CTR;
 DEFINE_PGM_CTR(PM_TASK_INIT_CTR)                                    D_TASK_INIT_CTR;
-DEFINE_PGM_CTR(PM_TASK_CONFIGURE_MODULES_FOR_DEVICE_CTR)            D_TASK_CONFIGURE_MODULES_FOR_DEVICE_CTR;
+// DEFINE_PGM_CTR(PM_TASK_CONFIGURE_MODULES_FOR_DEVICE_CTR)            D_TASK_CONFIGURE_MODULES_FOR_DEVICE_CTR;
 DEFINE_PGM_CTR(PM_TASK_LOOP_CTR)                                    D_TASK_LOOP_CTR;
 DEFINE_PGM_CTR(PM_TASK_EVERY_50_MSECOND_CTR)                        D_TASK_EVERY_50_MSECOND_CTR;
 DEFINE_PGM_CTR(PM_TASK_EVERY_100_MSECOND_CTR)                       D_TASK_EVERY_100_MSECOND_CTR;

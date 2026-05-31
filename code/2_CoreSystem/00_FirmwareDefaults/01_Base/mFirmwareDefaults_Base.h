@@ -26,7 +26,9 @@
    // until devices can reliably be used without compiling per device
   
 
+  #ifdef ESP32
   #define USE_MODULE_CORE_FILESYSTEM
+  #endif
     
     
     
@@ -81,7 +83,9 @@
    // until devices can reliably be used without compiling per device
   
 
+  #ifdef ESP32
   #define USE_MODULE_CORE_FILESYSTEM
+  #endif
     
     
 
@@ -133,8 +137,9 @@
    // until devices can reliably be used without compiling per device
   
 
+  #ifdef ESP32
   #define USE_MODULE_CORE_FILESYSTEM
-    
+  #endif
     
     
     
@@ -190,7 +195,9 @@
    // until devices can reliably be used without compiling per device
   
 
+  #ifdef ESP32
   #define USE_MODULE_CORE_FILESYSTEM
+  #endif
     
     
     

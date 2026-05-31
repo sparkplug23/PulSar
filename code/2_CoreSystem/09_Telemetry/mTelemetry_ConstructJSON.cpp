@@ -1,13 +1,3 @@
-/**
- * @file mTelemetry_ConstructJSON.cpp
- * @author your name (you@domain.com)
- * @brief 
- * @version 0.1
- * @date 2022-08-17
- * 
- * @copyright Copyright (c) 2022
- * 
- */
 #include "mTelemetry.h"
 
 
@@ -18,7 +8,7 @@ uint8_t mTelemetry::ConstructJSON_LWT_Online(uint8_t json_level, bool json_appen
     JBI->Add("LWT", "Online");
     JBI->Add("ResetReason", "TBA");
     #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
-    if(RtcSettings.boot_was_completed_ota_event == 1)
+    if(RtcMemory__RuntimeState.boot_was_completed_ota_event == 1)
     {
       JBI->Add("OTABootReason", "OTAYes");
     }else{
@@ -513,7 +503,7 @@ uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level, bool json_appending
 
   // OTA boot flag (same behaviour as your LWT)
   #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
-  JBI->Add("OTABootReason", (RtcSettings.boot_was_completed_ota_event == 1) ? "OTAYes" : "OTANo");
+  JBI->Add("OTABootReason", (RtcMemory__RuntimeState.boot_was_completed_ota_event == 1) ? "OTAYes" : "OTANo");
   #else
   JBI->Add("OTABootReason", "Unknown");
   #endif

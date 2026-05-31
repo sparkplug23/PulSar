@@ -162,7 +162,7 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
     GPIO_USER,           // GPIO01 Serial RXD and Optional sensor
     GPIO_LED1_INV,       // GPIO02 Blue onboard LED - Link and Power status
     GPIO_USER,           // GPIO03 Serial TXD and Optional sensor
-    GPIO_ARIRFRCV,       // GPIO04 IR or RF receiver (optional) (Arilux LC10)
+    GPIO_USER, //GPIO_ARIRFRCV,       // GPIO04 IR or RF receiver (optional) (Arilux LC10)
     GPIO_PWM2,           // GPIO05 RGB LED Green
                       // GPIO06 (SD_CLK   Flash)
                       // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
@@ -1100,7 +1100,9 @@ void mPins::parse_JSONCommand(JsonParserObject obj)
       while((millis() - t_start) < ms)
       {
         // Replace with your actual watchdog feed if different
+        #ifdef ESP32
         WDT_Reset();
+        #endif
         delay(10);
       }
     };
@@ -1497,7 +1499,7 @@ bool mPins::ValidUserGPIOFunction(uint8_t* pin_array, uint8_t index)
 
 bool mPins::ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index)
 {
-  ALOG_ERR(PSTR("not in tas25 %d[%d]"), pin_array[index], index);
+  // ALOG_ERR(PSTR("not in tas25 %d[%d]"), pin_array[index], index);
   // Outside valid gpio function range
   // if((pin_array[index] >= GPIO_SENSOR_END) && (pin_array[index] < GPIO_USER)){
   //     return false;

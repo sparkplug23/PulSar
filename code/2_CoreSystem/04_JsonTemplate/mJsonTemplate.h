@@ -40,34 +40,56 @@ class mJsonTemplate :
      * SECTION: Internal Functions
      ************************************************************************************************/
     
-    
     /************************************************************************************************
-     * SECTION: Compile-time module template loading
+     * FILE: mJsonTemplate.h
+     *
+     * Replace the existing Internal Functions section with this block.
+     ************************************************************************************************/
+
+      void Template_Load();                    // Compatibility wrapper for old/manual task path.
+      bool ReadModuleTemplateFromProgmem();    // Compatibility wrapper for older call sites.
+
+      bool ModuleDeviceTemplate_CompileTime_Load_ModuleOnly(bool override_reloading_pass);
+      bool ModuleDeviceTemplate_CompileTime_Load_Late(bool override_reloading_pass);
+
+      bool ModuleDeviceTemplate_CompileTime_ApplyModuleTemplate_P(
+        const char* template_name,
+        const char* payload_p,
+        size_t payload_size
+      );
+
+      bool ModuleDeviceTemplate_CompileTime_ApplyJsonCommand_P(
+        const char* template_name,
+        const char* payload_p,
+        size_t payload_size
+      );
+
+      void ModuleDeviceTemplate_CompileTime_DevelopmentOverridePass();
+
+      void ModuleDeviceTemplate__LoadDefault();
+
+      #ifdef ENABLE_DEBUGFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+
+    /************************************************************************************************
+     * SECTION: Compile-time template export
      *
      * Purpose:
-     * - MODULE_TEMPLATE is an early boot template.
-     * - It configures module identity/GPIO map before GpioInit(), TASK_PRE_INIT, and TASK_INIT.
-     * - It must use the direct module-template parser, not TASK_JSON_COMMAND_ID.
-     *
-     * Policy:
-     * - Normal/default pass is called only by Settings when saved settings are missing/invalid.
-     * - Override pass is called by Settings when USE_MODULE_TEMPLATE__OVERRIDE is defined.
+     * - Saves compile-time PROGMEM templates into the internal filesystem.
+     * - Files are flat root-level JSON files so they can be viewed through /edit.
      *
      * Date Modified: 17May26
      ************************************************************************************************/
 
-    void Template_Load(); // compatibility wrapper for old tasker/manual debug path
+      void Templates__SaveHardcodedTemplateToFilesystem();
 
-    bool ModuleDeviceTemplate_CompileTime_Load_ModuleOnly(bool override_reloading_pass);
+      bool Templates__SaveProgmemTemplateToFilesystem_P(
+        const char* file_path,
+        const char* template_name,
+        const char* payload_p,
+        size_t payload_size
+      );
 
-    bool ModuleDeviceTemplate_CompileTime_ApplyModuleTemplate_P(
-      const char* template_name,
-      const char* payload_p,
-      size_t payload_size
-    );
-
-    bool ReadModuleTemplateFromProgmem(); // compatibility wrapper
-
+      #endif
 
     /************************************************************************************************
      * SECTION: Commands

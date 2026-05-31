@@ -81,6 +81,11 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
 void mBME::Pre_Init()
 {
 
+  if(tkr_i2c->wire == nullptr){ 
+    ALOG_ERR(PSTR(D_LOG_BME "I2C not enabled, cannot use BME module"));
+    return;
+  }
+
   module_state.mode = ModuleStatus::Initialising;
   bmp_count = 0;
   

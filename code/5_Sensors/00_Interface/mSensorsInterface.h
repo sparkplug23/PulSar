@@ -238,7 +238,7 @@ class mSensorsInterface :
         return;
       }
       // Return nothing if we reach here
-      value->sensor_type.push_back(0); return ;//Serial.println("returning invalid2"); 
+      value->sensor_type.push_back(0); value->sensor_id = 0; return ;//Serial.println("returning invalid2"); 
     };
    
     

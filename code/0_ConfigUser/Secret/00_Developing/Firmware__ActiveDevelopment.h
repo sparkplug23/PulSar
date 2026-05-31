@@ -326,7 +326,7 @@ new 26GHz radar sensor
   // I should add new "purely for debugging" "serialise" data struct. So this will be a new way to take important data from the module data struct that will all be saved in binary, but instead 
   // include functions that "pretty print" them for easier comparing. Will use lots of memory, so debug only.
 
-  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+  #define ENABLE_DEBUGFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
 
   // #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_MINUTE
@@ -2802,7 +2802,7 @@ new 26GHz radar sensor
 //   // #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
 //   //   #define USE_MODULE_NETWORK_WIFI
 //   //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-//   //   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+//   //   
 //   //   #define MQTT_HOST       MQTT_HOST
 //   //   #define MQTT_PORT     1883
 //   // #endif
@@ -6555,7 +6555,7 @@ Blue (Upstairs Link) ***********************************************************
    */
   #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   /**
    * @brief Cellular MQTT
@@ -6690,7 +6690,7 @@ Blue (Upstairs Link) ***********************************************************
    */
   #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
 
   // // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
@@ -6735,7 +6735,7 @@ Blue (Upstairs Link) ***********************************************************
    */
   #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   /**
    * @brief Cellular MQTT
@@ -6775,7 +6775,7 @@ Blue (Upstairs Link) ***********************************************************
   //  */
   // // #define USE_MODULE_NETWORK_WIFI
   // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  // // 
 
   // /**
   //  * @brief Cellular MQTT
@@ -7565,6 +7565,138 @@ Blue (Upstairs Link) ***********************************************************
 
   
 #endif
+
+
+#ifdef DEVICE_INTERMEDIATE_FLASH__ESP8266_MINIMAL_OTA
+
+  #ifndef ESP8266
+  #define ESP8266
+  #endif
+
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR "intermediate_flash__esp8266_minimal_OTA"
+  #endif
+
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+
+  #ifndef DEVICENAME_ROOMHINT_CTR
+  #define DEVICENAME_ROOMHINT_CTR "recovery"
+  #endif
+
+  /***********************************
+   * SECTION: Purpose
+   ************************************
+   *
+   * Minimal ESP8266 OTA bridge firmware.
+   *
+   * Intended use:
+   *   1. OTA this small image onto an ESP8266 device that no longer has enough
+   *      free sketch space to accept the full firmware.
+   *   2. Device reboots into minimal AP+STA recovery updater.
+   *   3. OTA or HTTP-upload the full firmware.
+   *
+   * This build should remain intentionally small.
+   ************************************/
+
+  /***********************************
+   * SECTION: Settings
+   ************************************/
+
+  #define SETTINGS_HOLDER 1239
+
+  /***********************************
+   * SECTION: Recovery / OTA
+   ************************************/
+
+  #define ENABLE_FEATURE_SYSTEM__SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+  #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+
+  /*
+   * Keep only the basic HTTP update path.
+   * Do not enable full WebUI.
+   */
+  // #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
+
+  /***********************************
+   * SECTION: Logging
+   ************************************/
+
+  /*
+   * Keep serial logging available for recovery diagnostics.
+   * Avoid heavy debug features.
+   */
+  #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
+
+  /***********************************
+   * SECTION: Drivers
+   ************************************/
+
+  /*
+   * Optional status LED only.
+   * Remove this too if you need the absolute smallest binary.
+   */
+  #define USE_MODULE_DRIVERS_LEDS
+
+  /***********************************
+   * SECTION: Explicitly avoid heavy subsystems
+   ************************************/
+
+  /*
+   * Do not enable:
+   * - filesystem,
+   * - MQTT,
+   * - rules,
+   * - sensors,
+   * - lighting,
+   * - displays,
+   * - crash recorder,
+   * - full WebUI,
+   * - template export.
+   */
+
+  /***********************************
+   * SECTION: Module/GPIO template
+   ************************************/
+
+  #define USE_MODULE_TEMPLATE
+
+  DEFINE_PGM_CTR(MODULE_TEMPLATE)
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      "\"D3\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR "\","
+      "\"D4\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
+   * SECTION: Function template
+   ************************************/
+
+  /*
+   * Keep this empty/minimal.
+   * MQTT is not needed in the bridge image.
+   */
+  #define USE_FUNCTION_TEMPLATE
+
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+  "}";
+
+#endif // DEVICE_INTERMEDIATE_FLASH__ESP8266_MINIMAL_OTA
+
+
+
 
 
 #endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_ACTIVEDEVELOPMENT_H

@@ -46,9 +46,10 @@ void AddLogOutput(uint8_t loglevel, const char* log_data)
     #endif
 
     #ifdef ENABLE_FREERAM_APPENDING_SERIAL
+      char buffer[20];
       SERIAL_DEBUG.printf(
-        PSTR("R%05d%c %s %S %s\r\n"),
-        ESP.getFreeHeap(),
+        EPSTR("R%05u%c %s %s %s\r\n"),
+        (unsigned)ESP.getFreeHeap(),
         isconnected ? 'Y' : 'N',
         tkr_time->GetUptime(buffer, sizeof(buffer)),
         tkr_log->GetLogLevelNamebyID(loglevel),

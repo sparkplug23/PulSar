@@ -786,7 +786,8 @@ void ServicePeriodicTrigger(handler<T>* handler_ptr)
   #endif
 }
 
-bool CanSendOnBroker(const decltype(brokers[0])& con) const
+bool CanSendOnBroker(const MQTTConnection* con) const
+// bool CanSendOnBroker(const decltype(brokers[0])& con) const
 {
   if (!con->uptime_seconds) {
     return false;

@@ -157,7 +157,7 @@ Notes:
      */
     // #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    // 
 
     /**
      * @brief Cellular MQTT
@@ -717,7 +717,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   // #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
   //   #define USE_MODULE_NETWORK_WIFI
   //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  //   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  //   
   //   #define MQTT_HOST       MQTT_HOST
   //   #define MQTT_PORT     1883
   // #endif
@@ -1081,7 +1081,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
 //   #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
 //     #define USE_MODULE_NETWORK_WIFI
 //     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-//     #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+//     
 //     #define MQTT_HOST       MQTT_HOST
 //     #define MQTT_PORT     1883
 //   #endif
@@ -1187,7 +1187,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
    */
   // #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  // 
 
   /**
    * @brief Cellular MQTT
@@ -1328,7 +1328,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
    */
   // #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  // 
 
   /**
    * @brief Cellular MQTT
@@ -1474,7 +1474,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
    */
   // #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  // 
 
   /**
    * @brief Cellular MQTT
@@ -1623,7 +1623,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
    */
   // #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  // 
 
   /**
    * @brief Cellular MQTT
@@ -1771,7 +1771,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
    */
   // #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  // 
 
   /**
    * @brief Cellular MQTT
@@ -1969,7 +1969,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    
     #define MQTT_HOST       MQTT_HOST
     #define MQTT_PORT     1883
   #endif // USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
@@ -1977,14 +1977,14 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #if !defined(USE_GROUPFEATURE__MQTT_AS_CELLULAR) && !defined(USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS)
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    
   #endif
 
   #ifdef USE_GROUPFEATURE__MQTT_ON_WIFI_AND_CELLULAR
 
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    
     #define MQTT_HOST       MQTT_HOST
     #define MQTT_PORT     1883
 
@@ -2249,7 +2249,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    
     #define MQTT_HOST       MQTT_HOST
     #define MQTT_PORT     1883
   #endif
@@ -2517,7 +2517,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   // #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
   //   #define USE_MODULE_NETWORK_WIFI
   //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  //   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  //   
   //   #define MQTT_HOST       MQTT_HOST
   //   #define MQTT_PORT     1883
   // #endif
@@ -2709,7 +2709,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
    */
   #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   /**
    * @brief Cellular MQTT

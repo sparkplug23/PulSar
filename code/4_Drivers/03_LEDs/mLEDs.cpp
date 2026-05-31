@@ -21,6 +21,9 @@
 
 int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
 
+  Serial.printf("mLEDs::Tasker function=%u\n\r", function); Serial.flush();
+  return 0;
+
   /************
    * INIT SECTION * 
   *******************/
@@ -103,7 +106,7 @@ int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
 
 void mLEDs::Pre_Init(void)
 {
-  ALOG_HGL(PSTR("D_LOG_STARTUP" "LED Init"));
+  ALOG_INF(PSTR("D_LOG_STARTUP: " "LED Init"));
 
   used_bitmask = 0;
   inverted_bitmask = 0;

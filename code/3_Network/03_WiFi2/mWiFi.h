@@ -162,7 +162,11 @@ class mWiFi :
     
     struct {
       uint8_t begun = 0;                  // mDNS active
-    } Mdns;
+    } Mdns;    
+
+    #if defined(USE_NETWORK_MDNS) && defined(ESP8266) //Not needed with esp32 mdns
+    void WiFi_Mdns_Tick(void);
+    #endif
 
     bool WiFi2_HasAnyStaProfileConfigured(void) const;
     uint8_t WiFi2_GetFirstConfiguredProfileIndex(void) const;

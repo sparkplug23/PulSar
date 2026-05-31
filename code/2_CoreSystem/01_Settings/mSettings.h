@@ -386,7 +386,6 @@ typedef union {
 struct SystemParams__System
 {
   uint8_t  boot_loop_offset;       // SetOption150 - Fastboot restart count offset before recovery stages begin
-  uint16_t key_hold_time_ms;       // SetOption151 - Button/switch hold detection threshold
   uint16_t backlog_delay_ms;       // SetOption152 - Minimum delay between backlog commands
 };
 
@@ -476,8 +475,8 @@ typedef union {
     uint32_t artnet_autorun           : 1;  // SetOption307 - Start DMX ArtNet at boot
     uint32_t neopool_outputsensitive  : 1;  // SetOption308 - Output NeoPool sensitive data
     uint32_t counter_both_edges       : 1;  // SetOption309 - Count both rising and falling counter edges
+    uint32_t no_power_feedback        : 1;  // SetOption310 - Disable power feedback for relays without power measurement
 
-    uint32_t reserved10               : 1;
     uint32_t reserved11               : 1;
     uint32_t reserved12               : 1;
     uint32_t reserved13               : 1;
@@ -534,8 +533,8 @@ typedef union {
     uint32_t ds18x20_internal_pullup   : 1;  // SetOption403 - Enable internal pull-up for single DS18x20
     uint32_t hx711_json_weight_change  : 1;  // SetOption404 - Publish JSON message on HX711 weight change
     uint32_t mhz19b_abc_disable        : 1;  // SetOption405 - Disable MH-Z19(B) automatic baseline correction
+    uint32_t button_swap_on_single_device : 1;  // SetOption406 - Swap button behaviour on single device
 
-    uint32_t reserved06                : 1;
     uint32_t reserved07                : 1;
     uint32_t reserved08                : 1;
     uint32_t reserved09                : 1;
@@ -568,6 +567,7 @@ typedef union {
 struct SystemParams__Sensors
 {
   uint8_t decimal_precision;          // SetOption450 - Sensor decimal precision, 0..3
+  uint16_t key_hold_time_ms;       // SetOption151 - Button/switch hold detection threshold P_HOLD_TIME
 };
 
 
@@ -647,8 +647,8 @@ typedef union {
     uint32_t energy_weekend            : 1;  // SetOption600 - Enable weekend energy tariff behaviour
     uint32_t hardware_energy_total     : 1;  // SetOption601 - Use hardware energy total counter as reference
     uint32_t no_export_energy_today    : 1;  // SetOption602 - Do not add export energy to today's energy total
+    uint32_t bistable_single_pin       : 1;  // SetOption603 - Bistable relay uses one pin instead of two pins
 
-    uint32_t reserved03                : 1;
     uint32_t reserved04                : 1;
     uint32_t reserved05                : 1;
     uint32_t reserved06                : 1;
@@ -701,6 +701,7 @@ struct SystemParams__Power
 
   uint16_t power_on_delay_ms;           // SetOption664 - Delay at power-on, milliseconds
   uint16_t power_on_delay_s;            // SetOption665 - Delay before activating relays, seconds
+  uint16_t bistable_pulse_ms;           // SetOption666 - Bistable relay pulse time, milliseconds
 };
 
 

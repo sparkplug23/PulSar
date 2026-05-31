@@ -139,7 +139,7 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
 
       // Bring up / tear down stream server based on network state
       if (!tkr_set->runtime.global_state.network_down) {
-        if (tkr_set->Settings.webcam_config.stream && !rt.CamServer) {
+        if (tkr_iDrivers->webcam_config.stream && !rt.CamServer) {
           ALOG_INF(PSTR(D_LOG_CAMERA "Network up, starting stream server"));
           SetStreamserver(1);
         }
@@ -157,9 +157,9 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
     // case TASK_NETWORK_CONNECTED__WIFI:
       ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "TASK_UPTIME_30_SECONDS"));
 
-      tkr_set->Settings.webcam_config.stream=1;
+      tkr_iDrivers->webcam_config.stream=1;
       ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "\n\r\t\t\tCAM: WcSetStreamserver STARTED"));
-      SetStreamserver(tkr_set->Settings.webcam_config.stream);
+      SetStreamserver(tkr_iDrivers->webcam_config.stream);
 
     break;
     case TASK_UPDATE_OTA_BEFORE_ON_START:
@@ -589,6 +589,7 @@ bool mCamera::pic_alloc_p(struct mCamera::PICSTORE **pps, int width, int height,
   }
   return false;
 }
+
 bool mCamera::pic_free_p(struct mCamera::PICSTORE **pps){
   bool res = false;
   if (*pps){
@@ -763,72 +764,72 @@ void mCamera::ApplySettings() {
   sensor_t * wc_s = esp_camera_sensor_get();
   if (!wc_s) { return; }
 
-  wc_s->set_vflip(wc_s, tkr_set->Settings.webcam_config.flip);
-  wc_s->set_hmirror(wc_s, tkr_set->Settings.webcam_config.mirror);
+  wc_s->set_vflip(wc_s, tkr_iDrivers->webcam_config.flip);
+  wc_s->set_hmirror(wc_s, tkr_iDrivers->webcam_config.mirror);
 
-  wc_s->set_brightness(wc_s, tkr_set->Settings.webcam_config.brightness - 2);
-  wc_s->set_saturation(wc_s, tkr_set->Settings.webcam_config.saturation - 2);
-  wc_s->set_contrast(wc_s, tkr_set->Settings.webcam_config.contrast - 2);
+  wc_s->set_brightness(wc_s, tkr_iDrivers->webcam_config.brightness - 2);
+  wc_s->set_saturation(wc_s, tkr_iDrivers->webcam_config.saturation - 2);
+  wc_s->set_contrast(wc_s, tkr_iDrivers->webcam_config.contrast - 2);
 
-  wc_s->set_special_effect(wc_s, tkr_set->Settings.webcam_config2.special_effect);
+  wc_s->set_special_effect(wc_s, tkr_iDrivers->webcam_config2.special_effect);
 
-  wc_s->set_whitebal(wc_s, tkr_set->Settings.webcam_config.awb);
-  wc_s->set_wb_mode(wc_s, tkr_set->Settings.webcam_config2.wb_mode);
-  wc_s->set_awb_gain(wc_s, tkr_set->Settings.webcam_config.awb_gain);
+  wc_s->set_whitebal(wc_s, tkr_iDrivers->webcam_config.awb);
+  wc_s->set_wb_mode(wc_s, tkr_iDrivers->webcam_config2.wb_mode);
+  wc_s->set_awb_gain(wc_s, tkr_iDrivers->webcam_config.awb_gain);
 
-  wc_s->set_exposure_ctrl(wc_s, tkr_set->Settings.webcam_config.aec);
-  wc_s->set_aec_value(wc_s, tkr_set->Settings.webcam_config2.aec_value - 2);
-  wc_s->set_ae_level(wc_s, tkr_set->Settings.webcam_config2.ae_level);
-  wc_s->set_aec2(wc_s, tkr_set->Settings.webcam_config.aec2);
+  wc_s->set_exposure_ctrl(wc_s, tkr_iDrivers->webcam_config.aec);
+  wc_s->set_aec_value(wc_s, tkr_iDrivers->webcam_config2.aec_value - 2);
+  wc_s->set_ae_level(wc_s, tkr_iDrivers->webcam_config2.ae_level);
+  wc_s->set_aec2(wc_s, tkr_iDrivers->webcam_config.aec2);
 
-  wc_s->set_gain_ctrl(wc_s, tkr_set->Settings.webcam_config.agc);
-  wc_s->set_agc_gain(wc_s, tkr_set->Settings.webcam_config2.agc_gain);
-  wc_s->set_gainceiling(wc_s, (gainceiling_t)tkr_set->Settings.webcam_config2.gainceiling);
+  wc_s->set_gain_ctrl(wc_s, tkr_iDrivers->webcam_config.agc);
+  wc_s->set_agc_gain(wc_s, tkr_iDrivers->webcam_config2.agc_gain);
+  wc_s->set_gainceiling(wc_s, (gainceiling_t)tkr_iDrivers->webcam_config2.gainceiling);
 
-  wc_s->set_raw_gma(wc_s, tkr_set->Settings.webcam_config.raw_gma);
-  wc_s->set_lenc(wc_s, tkr_set->Settings.webcam_config.lenc);
-  wc_s->set_wpc(wc_s, tkr_set->Settings.webcam_config.wpc);
-  wc_s->set_dcw(wc_s, tkr_set->Settings.webcam_config.dcw);
-  wc_s->set_bpc(wc_s, tkr_set->Settings.webcam_config.bpc);
+  wc_s->set_raw_gma(wc_s, tkr_iDrivers->webcam_config.raw_gma);
+  wc_s->set_lenc(wc_s, tkr_iDrivers->webcam_config.lenc);
+  wc_s->set_wpc(wc_s, tkr_iDrivers->webcam_config.wpc);
+  wc_s->set_dcw(wc_s, tkr_iDrivers->webcam_config.dcw);
+  wc_s->set_bpc(wc_s, tkr_iDrivers->webcam_config.bpc);
 
-  Feature(tkr_set->Settings.webcam_config.feature);
+  Feature(tkr_iDrivers->webcam_config.feature);
 
   ALOG_INF(PSTR(D_LOG_CAMERA "Settings updated"));
 }
 
 void mCamera::SetDefaults(uint32_t upgrade) {
   if (!upgrade) {
-    tkr_set->Settings.webcam_config.flip = 0;
-    tkr_set->Settings.webcam_config.mirror = 0;
+    tkr_iDrivers->webcam_config.flip = 0;
+    tkr_iDrivers->webcam_config.mirror = 0;
 
-    tkr_set->Settings.webcam_config.saturation = 2; // = 0
-    tkr_set->Settings.webcam_config.brightness = 2; // = 0
-    tkr_set->Settings.webcam_config.contrast = 2;   // = 0
+    tkr_iDrivers->webcam_config.saturation = 2; // = 0
+    tkr_iDrivers->webcam_config.brightness = 2; // = 0
+    tkr_iDrivers->webcam_config.contrast = 2;   // = 0
   }
 
-  tkr_set->Settings.webcam_config2.special_effect = 0;
-  tkr_set->Settings.webcam_config.colorbar = 0;
+  tkr_iDrivers->webcam_config2.special_effect = 0;
+  tkr_iDrivers->webcam_config.colorbar = 0;
 
-  tkr_set->Settings.webcam_config.awb = 1;        // white balance
-  tkr_set->Settings.webcam_config2.wb_mode = 0;   // white balance mode
-  tkr_set->Settings.webcam_config.awb_gain = 1;   // white blance gain
+  tkr_iDrivers->webcam_config.awb = 1;        // white balance
+  tkr_iDrivers->webcam_config2.wb_mode = 0;   // white balance mode
+  tkr_iDrivers->webcam_config.awb_gain = 1;   // white blance gain
 
-  tkr_set->Settings.webcam_config.aec = 1;          // autoexposure (sensor)
-  tkr_set->Settings.webcam_config.aec2 = 1;         // autoexposure (dsp)
-  tkr_set->Settings.webcam_config2.ae_level = 2;    // autoexposure level (-2 - +2, default 0)
-  tkr_set->Settings.webcam_config2.aec_value = 204; // manual exposure value
+  tkr_iDrivers->webcam_config.aec = 1;          // autoexposure (sensor)
+  tkr_iDrivers->webcam_config.aec2 = 1;         // autoexposure (dsp)
+  tkr_iDrivers->webcam_config2.ae_level = 2;    // autoexposure level (-2 - +2, default 0)
+  tkr_iDrivers->webcam_config2.aec_value = 204; // manual exposure value
 
-  tkr_set->Settings.webcam_config.agc = 1;          // auto gain control
-  tkr_set->Settings.webcam_config2.agc_gain = 5;    // manual gain control
-  tkr_set->Settings.webcam_config2.gainceiling = 0; // auto gain ceiling
+  tkr_iDrivers->webcam_config.agc = 1;          // auto gain control
+  tkr_iDrivers->webcam_config2.agc_gain = 5;    // manual gain control
+  tkr_iDrivers->webcam_config2.gainceiling = 0; // auto gain ceiling
 
-  tkr_set->Settings.webcam_config.raw_gma = 1;      // gamma correct
-  tkr_set->Settings.webcam_config.lenc = 1;         // lens correction
-  tkr_set->Settings.webcam_config.wpc = 1;          // white pixel correct
-  tkr_set->Settings.webcam_config.dcw = 1;          // downsize en
-  tkr_set->Settings.webcam_config.bpc = 0;          // black pixel correct?
+  tkr_iDrivers->webcam_config.raw_gma = 1;      // gamma correct
+  tkr_iDrivers->webcam_config.lenc = 1;         // lens correction
+  tkr_iDrivers->webcam_config.wpc = 1;          // white pixel correct
+  tkr_iDrivers->webcam_config.dcw = 1;          // downsize en
+  tkr_iDrivers->webcam_config.bpc = 0;          // black pixel correct?
 
-  tkr_set->Settings.webcam_config.feature = 0;
+  tkr_iDrivers->webcam_config.feature = 0;
   
   #ifdef USE_WEBCAM_MOTION
     WcSetMotionDefaults();
@@ -974,8 +975,8 @@ uint32_t mCamera::Setup(int32_t fsiz) {
   
   config.ledc_timer = LEDC_TIMER_0;
 //  config.xclk_freq_hz = 20000000;
-  if (!tkr_set->Settings.webcam_clk) tkr_set->Settings.webcam_clk = 20;
-  config.xclk_freq_hz = tkr_set->Settings.webcam_clk * 1000000;
+  if (!tkr_iDrivers->webcam_clk) tkr_iDrivers->webcam_clk = 20;
+  config.xclk_freq_hz = tkr_iDrivers->webcam_clk * 1000000;
   int pixFormat = PIXFORMAT_JPEG;
 /* 2023-05-28 - AiThinker type cam module marked DM.
   tried everything here, and it seems you cannot get anything other than JPEG.
@@ -1069,7 +1070,7 @@ uint32_t mCamera::Setup(int32_t fsiz) {
   rt.up = 1;
   if (rt.psram) { rt.up = 2; }
 
-  rt.frameIntervalsus = (uint32_t)(((float)nativeIntervals20ms[fsiz]/((float)tkr_set->Settings.webcam_clk/20.0))*1000.0);
+  rt.frameIntervalsus = (uint32_t)(((float)nativeIntervals20ms[fsiz]/((float)tkr_iDrivers->webcam_clk/20.0))*1000.0);
   stats.maxfps = (uint32_t)((float)1000000.0/(float)rt.frameIntervalsus);
 
   rt.lastCamError = ESP_OK;
@@ -1166,7 +1167,7 @@ int32_t mCamera::SetOptions(uint32_t sel, int32_t value) {
       // pixelformat - native formats + 1, 0->jpeg
       if (value >= 0) { rt.camPixelFormat = value; }
       if (rt.up){
-        Setup(tkr_set->Settings.webcam_config.resolution);
+        Setup(tkr_iDrivers->webcam_config.resolution);
       }
       return value;
       break;
@@ -1269,7 +1270,7 @@ bool mCamera::WebcamAuthenticate(void)
 
 bool mCamera::WebcamCheckPriviledgedAccess(bool autorequestauth)
 {
-  // if(tkr_set->Settings.webcam_config2.auth == 0){
+  // if(tkr_iDrivers->webcam_config2.auth == 0){
   //   return true;
   // }
   // if (autorequestauth && !WebcamAuthenticate()) {
@@ -2096,7 +2097,7 @@ void mCamera::Loop(void)
 
 #ifdef ENABLE_RTSPSERVER
 // rtsp://192.168.2.39:8554/mjpeg/1
-  if (tkr_set->Settings.webcam_config.rtsp){
+  if (tkr_iDrivers->webcam_config.rtsp){
     if (!tkr_set->runtime.global_state.wifi_down) {
       // pretty sure we don;t need the mutex here
       mSupport::TasAutoMutex localmutex(&WebcamMutex, "WcLoop2", 30000);
@@ -2189,10 +2190,10 @@ const char HTTP_WEBCAM_MENUVIDEOCONTROL[] PROGMEM = "<p></p><button onclick=\"fe
 
 void mCamera::ShowStream(void) {
   // if streaming is enabled (1 or 2), start stream server
-  if (tkr_set->Settings.webcam_config.stream) {
+  if (tkr_iDrivers->webcam_config.stream) {
 //    if (!rt.CamServer || !rt.up) {
     if (!rt.CamServer) {
-      SetStreamserver(tkr_set->Settings.webcam_config.stream);
+      SetStreamserver(tkr_iDrivers->webcam_config.stream);
     }
   }
 
@@ -2204,14 +2205,14 @@ void mCamera::ShowStream(void) {
   //     WSContentSend_P(PSTR("<p></p><center>Cam Not Running Err 0x%x</center><p></p>"), rt.lastCamError);
   //     WSContentSend_P(HTTP_WEBCAM_MENUVIDEOCONTROL, "wcinit", "Try WCINIT");
   //   } else {
-  //     if (tkr_set->Settings.webcam_config.spare15) {
+  //     if (tkr_iDrivers->webcam_config.spare15) {
   //       WSContentSend_P(HTTP_WEBCAM_MENUVIDEOCONTROL, "wcmenuvideodisable%200", "Turn On Video");
   //     }
   //   }
   // }
 
   // // spare15 is 'hide cam on menu'
-  // if (!tkr_set->Settings.webcam_config.spare15 && tkr_set->Settings.webcam_config.stream && rt.CamServer && rt.up!=0) {
+  // if (!tkr_iDrivers->webcam_config.spare15 && tkr_iDrivers->webcam_config.stream && rt.CamServer && rt.up!=0) {
   //   // Give the webcam webserver some time to prepare the stream - catch error in JS
   //   WSContentSend_P(PSTR("<p></p><center><img onerror='setTimeout(()=>{this.src=this.src;},1000)' src='http://%_I:81/stream' alt='Webcam stream' style='width:99%%;'></center><p></p>"),(uint32_t)WiFi.localIP());
   //   WSContentSend_P(HTTP_WEBCAM_MENUVIDEOCONTROL, "wcmenuvideodisable%201", "Turn Off Video");
@@ -2221,18 +2222,18 @@ void mCamera::ShowStream(void) {
 void mCamera::WcInit(void) {
   // .data is in union with the rest of the settings, so
   // this means 'i have no config'
-  if (!tkr_set->Settings.webcam_config.data) {
+  if (!tkr_iDrivers->webcam_config.data) {
     // set defaults...
-    tkr_set->Settings.webcam_config.stream = 1;
-    tkr_set->Settings.webcam_config.resolution = FRAMESIZE_QVGA;
+    tkr_iDrivers->webcam_config.stream = 1;
+    tkr_iDrivers->webcam_config.resolution = FRAMESIZE_QVGA;
     SetDefaults(0);
   }
   // previous webcam driver had only a small subset of possible config vars
   // in this case we have to only set the new variables to default values
-  if(!tkr_set->Settings.webcam_config2.upgraded) {
+  if(!tkr_iDrivers->webcam_config2.upgraded) {
     ALOG_INF(PSTR(D_LOG_CAMERA "Upg settings"));
     SetDefaults(1);
-    tkr_set->Settings.webcam_config2.upgraded = 1;
+    tkr_iDrivers->webcam_config2.upgraded = 1;
   }
 
 }
@@ -2268,11 +2269,11 @@ void mCamera::Pre_Init(void)
 void mCamera::Init(void)
 {
   
-  Setup(tkr_set->Settings.webcam_config.resolution);
-  SetStreamserver(tkr_set->Settings.webcam_config.stream);
+  Setup(tkr_iDrivers->webcam_config.resolution);
+  SetStreamserver(tkr_iDrivers->webcam_config.stream);
   StartOperationTask();
   
-  tkr_set->Settings.webcam_config.rtsp = 1;
+  tkr_iDrivers->webcam_config.rtsp = 1;
 
   // Configured already
   module_state.mode = ModuleStatus::Running;
@@ -2685,23 +2686,23 @@ void mCamera::CmndWebcamGetPicStore(int bnum) {
 
 // void CmndWebcamMenuVideoDisable(void) {
 //   if ((tkr_events->XdrvMailbox.payload >= 0) && (tkr_events->XdrvMailbox.payload <= 1)) {
-//     tkr_set->Settings.webcam_config.spare15 = tkr_events->XdrvMailbox.payload;
+//     tkr_iDrivers->webcam_config.spare15 = tkr_events->XdrvMailbox.payload;
 //   }
-//   ResponseCmndStateText(tkr_set->Settings.webcam_config.spare15);
+//   ResponseCmndStateText(tkr_iDrivers->webcam_config.spare15);
 // }
 
 // void CmndWebcamStream(void) {
 //   if ((tkr_events->XdrvMailbox.payload >= 0) && (tkr_events->XdrvMailbox.payload <= 1)) {
-//     tkr_set->Settings.webcam_config.stream = tkr_events->XdrvMailbox.payload;
-//     WcSetStreamserver(tkr_set->Settings.webcam_config.stream);
+//     tkr_iDrivers->webcam_config.stream = tkr_events->XdrvMailbox.payload;
+//     WcSetStreamserver(tkr_iDrivers->webcam_config.stream);
 //   } else {
 //     // we use this from a menu
 //     if (tkr_events->XdrvMailbox.index == 2){
-//       tkr_set->Settings.webcam_config.stream = 1;
-//       WcSetStreamserver(tkr_set->Settings.webcam_config.stream);
+//       tkr_iDrivers->webcam_config.stream = 1;
+//       WcSetStreamserver(tkr_iDrivers->webcam_config.stream);
 //     }
 //   }
-//   ResponseCmndStateText(tkr_set->Settings.webcam_config.stream);
+//   ResponseCmndStateText(tkr_iDrivers->webcam_config.stream);
 // }
 
 
@@ -2709,11 +2710,11 @@ void mCamera::CmndWebcamResolution(uint8_t resolution)
 {
     int8_t reinit = 0;
     
-    tkr_set->Settings.webcam_config.resolution = resolution;
+    tkr_iDrivers->webcam_config.resolution = resolution;
     if (reinit) {
-      Setup(tkr_set->Settings.webcam_config.resolution);
+      Setup(tkr_iDrivers->webcam_config.resolution);
     } else {
-      // WcSetOptions(0, tkr_set->Settings.webcam_config.resolution);
+      // WcSetOptions(0, tkr_iDrivers->webcam_config.resolution);
       
       sensor_t* s = esp_camera_sensor_get();
       int32_t res = 0;
@@ -2722,7 +2723,7 @@ void mCamera::CmndWebcamResolution(uint8_t resolution)
       rt.width = 0;
       rt.height = 0;
       rt.last_frame_len = 0;
-      rt.frameIntervalsus = (uint32_t)(((float)nativeIntervals20ms[resolution]/((float)tkr_set->Settings.webcam_clk/20.0))*1000.0);
+      rt.frameIntervalsus = (uint32_t)(((float)nativeIntervals20ms[resolution]/((float)tkr_iDrivers->webcam_clk/20.0))*1000.0);
       stats.maxfps = (uint32_t)((float)1000000.0/(float)rt.frameIntervalsus);
 
       // WcFeature is lost on resolution change
@@ -2735,7 +2736,7 @@ void mCamera::CmndWebcamResolution(uint8_t resolution)
 void mCamera::CmndWebcamMirror(bool val){
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-      tkr_set->Settings.webcam_config.mirror = val;
+      tkr_iDrivers->webcam_config.mirror = val;
       s->set_hmirror(s, val);
     }
   }
@@ -2746,7 +2747,7 @@ void mCamera::CmndWebcamFlip(bool val)
 {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-      tkr_set->Settings.webcam_config.flip = val;
+      tkr_iDrivers->webcam_config.flip = val;
       s->set_vflip(s, val);
     }
   }
@@ -2757,7 +2758,7 @@ void mCamera::CmndWebcamSaturation(int8_t val)
 {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=-2 && val <= 2){
-      tkr_set->Settings.webcam_config.saturation = val + 2;
+      tkr_iDrivers->webcam_config.saturation = val + 2;
       s->set_saturation(s, val);
     }
   }
@@ -2768,7 +2769,7 @@ void mCamera::CmndWebcamBrightness(int8_t val)
 {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=-2 && val <= 2){
-      tkr_set->Settings.webcam_config.brightness = val + 2;
+      tkr_iDrivers->webcam_config.brightness = val + 2;
       s->set_brightness(s, val);
     }
   }
@@ -2779,7 +2780,7 @@ void mCamera::CmndWebcamContrast(int8_t val)
 {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=-2 && val <= 2){
-      tkr_set->Settings.webcam_config.contrast = val + 2;
+      tkr_iDrivers->webcam_config.contrast = val + 2;
       s->set_contrast(s, val);
     }
   }
@@ -2789,7 +2790,7 @@ void mCamera::CmndWebcamContrast(int8_t val)
 void mCamera::CmndWebcamSpecialEffect(uint8_t val) {  
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 6){
-			tkr_set->Settings.webcam_config2.special_effect = val;
+			tkr_iDrivers->webcam_config2.special_effect = val;
       s->set_special_effect(s, val);
     }
   }
@@ -2799,7 +2800,7 @@ void mCamera::CmndWebcamSpecialEffect(uint8_t val) {
 void mCamera::CmndWebcamAWB(bool val) {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-			tkr_set->Settings.webcam_config.awb = val;
+			tkr_iDrivers->webcam_config.awb = val;
       s->set_whitebal(s, val);
     }
   }
@@ -2809,7 +2810,7 @@ void mCamera::CmndWebcamAWB(bool val) {
 void mCamera::CmndWebcamWBMode(uint8_t val) {  
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 4){
-			tkr_set->Settings.webcam_config2.wb_mode = val;
+			tkr_iDrivers->webcam_config2.wb_mode = val;
       s->set_wb_mode(s, val);
     }
   }
@@ -2819,7 +2820,7 @@ void mCamera::CmndWebcamWBMode(uint8_t val) {
 void mCamera::CmndWebcamAWBGain(bool val) {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-			tkr_set->Settings.webcam_config.awb_gain = val;
+			tkr_iDrivers->webcam_config.awb_gain = val;
       s->set_awb_gain(s, val);
     }
   }
@@ -2829,7 +2830,7 @@ void mCamera::CmndWebcamAWBGain(bool val) {
 void mCamera::CmndWebcamAEC(bool val) {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-			tkr_set->Settings.webcam_config.aec = val;
+			tkr_iDrivers->webcam_config.aec = val;
       s->set_exposure_ctrl(s, val);
     }
   }
@@ -2839,7 +2840,7 @@ void mCamera::CmndWebcamAEC(bool val) {
 void mCamera::CmndWebcamAECValue(uint16_t val) {  
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1200){
-			tkr_set->Settings.webcam_config2.aec_value = val;
+			tkr_iDrivers->webcam_config2.aec_value = val;
       s->set_aec_value(s, val);
     }
   }
@@ -2850,7 +2851,7 @@ void mCamera::CmndWebcamAELevel(int8_t val)
 {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=-2 && val <= 2){
-      tkr_set->Settings.webcam_config2.ae_level = val + 2;
+      tkr_iDrivers->webcam_config2.ae_level = val + 2;
       s->set_ae_level(s, val);
     }
   }
@@ -2860,7 +2861,7 @@ void mCamera::CmndWebcamAELevel(int8_t val)
 void mCamera::CmndWebcamAEC2(bool val) {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-			tkr_set->Settings.webcam_config.aec2 = val;
+			tkr_iDrivers->webcam_config.aec2 = val;
       s->set_aec2(s, val);
     }
   }
@@ -2870,7 +2871,7 @@ void mCamera::CmndWebcamAEC2(bool val) {
 void mCamera::CmndWebcamAGC(bool val) {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-			tkr_set->Settings.webcam_config.agc = val;
+			tkr_iDrivers->webcam_config.agc = val;
       s->set_gain_ctrl(s, val);
     }
   }
@@ -2882,7 +2883,7 @@ void mCamera::CmndWebcamAGCGain(uint8_t val)
 {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 30){
-      tkr_set->Settings.webcam_config2.agc_gain = val;
+      tkr_iDrivers->webcam_config2.agc_gain = val;
       s->set_agc_gain(s, val);
     }
   }
@@ -2892,7 +2893,7 @@ void mCamera::CmndWebcamGainCeiling(uint8_t val)
 {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 30){
-      tkr_set->Settings.webcam_config2.gainceiling = val;
+      tkr_iDrivers->webcam_config2.gainceiling = val;
       s->set_gainceiling(s, (gainceiling_t)val);
     }
   }
@@ -2902,7 +2903,7 @@ void mCamera::CmndWebcamGainCeiling(uint8_t val)
 void mCamera::CmndWebcamGammaCorrect(bool val) {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-      tkr_set->Settings.webcam_config.raw_gma = val;
+      tkr_iDrivers->webcam_config.raw_gma = val;
       s->set_raw_gma(s, val);
     }
   }
@@ -2912,7 +2913,7 @@ void mCamera::CmndWebcamGammaCorrect(bool val) {
 void mCamera::CmndWebcamLensCorrect(bool val) {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-      tkr_set->Settings.webcam_config.lenc = val;
+      tkr_iDrivers->webcam_config.lenc = val;
       s->set_lenc(s, val);
     }
   }
@@ -2922,7 +2923,7 @@ void mCamera::CmndWebcamLensCorrect(bool val) {
 void mCamera::CmndWebcamWPC(bool val) {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-      tkr_set->Settings.webcam_config.wpc = val;
+      tkr_iDrivers->webcam_config.wpc = val;
       s->set_wpc(s, val);
     }
   }
@@ -2932,7 +2933,7 @@ void mCamera::CmndWebcamWPC(bool val) {
 void mCamera::CmndWebcamDCW(bool val) {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-      tkr_set->Settings.webcam_config.dcw = val;
+      tkr_iDrivers->webcam_config.dcw = val;
       s->set_dcw(s, val);
     }
   }
@@ -2942,7 +2943,7 @@ void mCamera::CmndWebcamDCW(bool val) {
 void mCamera::CmndWebcamBPC(bool val) {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-      tkr_set->Settings.webcam_config.bpc = val;
+      tkr_iDrivers->webcam_config.bpc = val;
       s->set_bpc(s, val); // blackpixelcontrol
     }
   }
@@ -2952,7 +2953,7 @@ void mCamera::CmndWebcamBPC(bool val) {
 void mCamera::CmndWebcamColorbar(bool val) {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-      tkr_set->Settings.webcam_config.colorbar = val;
+      tkr_iDrivers->webcam_config.colorbar = val;
       s->set_colorbar(s, val);
     }
   }
@@ -2963,7 +2964,7 @@ void mCamera::CmndWebcamFeature(uint8_t val)
 {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 2){
-      tkr_set->Settings.webcam_config2.agc_gain = val;
+      tkr_iDrivers->webcam_config2.agc_gain = val;
       Feature(val);
     }
   }
@@ -2973,7 +2974,7 @@ void mCamera::CmndWebcamFeature(uint8_t val)
 void mCamera::CmndWebcamAuth(bool val) {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >=0 && val <= 1){
-      tkr_set->Settings.webcam_config2.auth = val;
+      tkr_iDrivers->webcam_config2.auth = val;
     }
   }
 }
@@ -2983,9 +2984,9 @@ void mCamera::CmndWebcamClock(uint16_t val)
 {
   if (sensor_t* s = esp_camera_sensor_get()){
     if(val >= 10 && val <= 200){
-      tkr_set->Settings.webcam_clk = val;
+      tkr_iDrivers->webcam_clk = val;
       if (rt.up){
-        Setup(tkr_set->Settings.webcam_config.resolution);
+        Setup(tkr_iDrivers->webcam_config.resolution);
       }
     }
   }
@@ -3000,8 +3001,8 @@ void mCamera::CmndWebcamCamStartStop(bool val) {
 
 
 void mCamera::CmndWebcamInit() {
-  Setup(tkr_set->Settings.webcam_config.resolution);
-  SetStreamserver(tkr_set->Settings.webcam_config.stream);
+  Setup(tkr_iDrivers->webcam_config.resolution);
+  SetStreamserver(tkr_iDrivers->webcam_config.stream);
 }
 
 
@@ -3012,7 +3013,7 @@ void mCamera::CmndWebcamSetDefaults() {
 #ifdef ENABLE_RTSPSERVER
 void mCamera::CmndWebRtsp(bool val) {
   if(val >= 0 && val <= 1){
-    tkr_set->Settings.webcam_config.rtsp = val;
+    tkr_iDrivers->webcam_config.rtsp = val;
   }
 }
 #endif
@@ -3064,37 +3065,37 @@ uint8_t mCamera::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
 
       // Webcam basic config
-  JBI->Add(("stream"),        tkr_set->Settings.webcam_config.stream);
-  JBI->Add(("mirror"),        tkr_set->Settings.webcam_config.mirror);
-  JBI->Add(("flip"),          tkr_set->Settings.webcam_config.flip);
-  JBI->Add(("awb"),           tkr_set->Settings.webcam_config.awb);
-  JBI->Add(("awb_gain"),      tkr_set->Settings.webcam_config.awb_gain);
-  JBI->Add(("aec"),           tkr_set->Settings.webcam_config.aec);
-  JBI->Add(("aec2"),          tkr_set->Settings.webcam_config.aec2);
-  JBI->Add(("agc"),           tkr_set->Settings.webcam_config.agc);
-  JBI->Add(("raw_gma"),       tkr_set->Settings.webcam_config.raw_gma);
-  JBI->Add(("lenc"),          tkr_set->Settings.webcam_config.lenc);
-  JBI->Add(("colorbar"),      tkr_set->Settings.webcam_config.colorbar);
-  JBI->Add(("wpc"),           tkr_set->Settings.webcam_config.wpc);
-  JBI->Add(("dcw"),           tkr_set->Settings.webcam_config.dcw);
-  JBI->Add(("bpc"),           tkr_set->Settings.webcam_config.bpc);
-  JBI->Add(("feature"),       tkr_set->Settings.webcam_config.feature);
-  JBI->Add(("contrast"),      (int32_t)tkr_set->Settings.webcam_config.contrast - 2);
-  JBI->Add(("brightness"),    (int32_t)tkr_set->Settings.webcam_config.brightness - 2);
-  JBI->Add(("saturation"),    (int32_t)tkr_set->Settings.webcam_config.saturation - 2);
-  JBI->Add(("resolution"),    tkr_set->Settings.webcam_config.resolution);
+  JBI->Add(("stream"),        tkr_iDrivers->webcam_config.stream);
+  JBI->Add(("mirror"),        tkr_iDrivers->webcam_config.mirror);
+  JBI->Add(("flip"),          tkr_iDrivers->webcam_config.flip);
+  JBI->Add(("awb"),           tkr_iDrivers->webcam_config.awb);
+  JBI->Add(("awb_gain"),      tkr_iDrivers->webcam_config.awb_gain);
+  JBI->Add(("aec"),           tkr_iDrivers->webcam_config.aec);
+  JBI->Add(("aec2"),          tkr_iDrivers->webcam_config.aec2);
+  JBI->Add(("agc"),           tkr_iDrivers->webcam_config.agc);
+  JBI->Add(("raw_gma"),       tkr_iDrivers->webcam_config.raw_gma);
+  JBI->Add(("lenc"),          tkr_iDrivers->webcam_config.lenc);
+  JBI->Add(("colorbar"),      tkr_iDrivers->webcam_config.colorbar);
+  JBI->Add(("wpc"),           tkr_iDrivers->webcam_config.wpc);
+  JBI->Add(("dcw"),           tkr_iDrivers->webcam_config.dcw);
+  JBI->Add(("bpc"),           tkr_iDrivers->webcam_config.bpc);
+  JBI->Add(("feature"),       tkr_iDrivers->webcam_config.feature);
+  JBI->Add(("contrast"),      (int32_t)tkr_iDrivers->webcam_config.contrast - 2);
+  JBI->Add(("brightness"),    (int32_t)tkr_iDrivers->webcam_config.brightness - 2);
+  JBI->Add(("saturation"),    (int32_t)tkr_iDrivers->webcam_config.saturation - 2);
+  JBI->Add(("resolution"),    tkr_iDrivers->webcam_config.resolution);
 
   // Webcam advanced config
-  JBI->Add(("special_effect"), tkr_set->Settings.webcam_config2.special_effect);
-  JBI->Add(("wb_mode"),        tkr_set->Settings.webcam_config2.wb_mode);
-  JBI->Add(("aec_value"),      tkr_set->Settings.webcam_config2.aec_value);
-  JBI->Add(("agc_gain"),       tkr_set->Settings.webcam_config2.agc_gain);
-  JBI->Add(("gainceiling"),    tkr_set->Settings.webcam_config2.gainceiling);
-  JBI->Add(("auth"),           tkr_set->Settings.webcam_config2.auth);
+  JBI->Add(("special_effect"), tkr_iDrivers->webcam_config2.special_effect);
+  JBI->Add(("wb_mode"),        tkr_iDrivers->webcam_config2.wb_mode);
+  JBI->Add(("aec_value"),      tkr_iDrivers->webcam_config2.aec_value);
+  JBI->Add(("agc_gain"),       tkr_iDrivers->webcam_config2.agc_gain);
+  JBI->Add(("gainceiling"),    tkr_iDrivers->webcam_config2.gainceiling);
+  JBI->Add(("auth"),           tkr_iDrivers->webcam_config2.auth);
 
   // Additional
-  JBI->Add(("clk"),            tkr_set->Settings.webcam_clk);
-  JBI->Add(("rtsp"),           tkr_set->Settings.webcam_config.rtsp);
+  JBI->Add(("clk"),            tkr_iDrivers->webcam_clk);
+  JBI->Add(("rtsp"),           tkr_iDrivers->webcam_config.rtsp);
 
   // Optional runtime-only (not config) if applicable
   JBI->Add(("up"),             rt.up);

@@ -126,5 +126,18 @@ struct DATA_BUFFER {
   }
 
 };
+
+
+// Maximum template payload that can be copied into data_buffer.payload.ctr.
+// DATA_BUFFER_PAYLOAD_MAX_LENGTH includes space for the null terminator.
+#define JSON_TEMPLATE_MAX_PAYLOAD_BYTES   (DATA_BUFFER_PAYLOAD_MAX_LENGTH - 1)
+
+#define STATIC_ASSERT_JSON_TEMPLATE_FITS(template_name)                                      \
+  static_assert(                                                                             \
+    (sizeof(template_name) - 1) <= JSON_TEMPLATE_MAX_PAYLOAD_BYTES,                           \
+    #template_name " exceeds DATA_BUFFER_PAYLOAD_MAX_LENGTH payload limit"                    \
+  )
+
+  
 // Keep your existing global instance
 extern DATA_BUFFER data_buffer;

@@ -148,7 +148,7 @@ void mWebServer::Server_Start()
   #endif
   #endif
 
-  // Let modules add their own URLs
+  // // Let modules add their own URLs
   tkr->Tasker_Interface(TASK_WEB_ADD_HANDLER);
 
   server->begin();
@@ -254,6 +254,7 @@ void mWebServer::WebPage_Root_AddHandlers()
     request->send(200, "text/plain", (String)millis());
   });
   AddURLtoList(PM_URL_UPTIME, HTTP_GET);
+  
 
   SPGM_CTR(PM_URL_REBOOT) "/reboot";
   server->on(PM_URL_REBOOT, HTTP_GET, [this](AsyncWebServerRequest *request){
@@ -267,6 +268,7 @@ void mWebServer::WebPage_Root_AddHandlers()
   });
   AddURLtoList(PM_URL_REBOOT, HTTP_GET);
 
+
   SPGM_CTR(PM_URL_RESET) "/reset";
   server->on(PM_URL_RESET, HTTP_GET, [this](AsyncWebServerRequest *request){
     if (!request->hasArg("force")) {
@@ -277,6 +279,28 @@ void mWebServer::WebPage_Root_AddHandlers()
     ESP.restart();
   });
   AddURLtoList(PM_URL_RESET, HTTP_GET);
+
+  
+    SPGM_CTR(PM_URL_STYLE_CSS) "/style.css";
+    server->on(PM_URL_STYLE_CSS, HTTP_GET, [this](AsyncWebServerRequest *request){
+      handleStaticContent(request, FPSTR(PM_URL_STYLE_CSS), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss2_web, PAGE_settingsCss2_web_length);
+    });
+    AddURLtoList(PM_URL_STYLE_CSS, HTTP_GET);
+
+    SPGM_CTR(PM_URL_SKIN_CSS) "/skin.css";
+    server->on(PM_URL_SKIN_CSS, HTTP_GET, [](AsyncWebServerRequest *request){
+      if (tkr_mfile->handleFileRead(request, FPSTR(PM_URL_SKIN_CSS))) return;
+      AsyncWebServerResponse *response = request->beginResponse(200, FPSTR(CONTENT_TYPE_CSS));
+      request->send(response);
+    });
+    AddURLtoList(PM_URL_SKIN_CSS, HTTP_GET);
+
+
+    SPGM_CTR(PM_URL_COMMON_JS) "/common.js";
+    server->on(PM_URL_COMMON_JS, HTTP_GET, [this](AsyncWebServerRequest *request){    
+      this->handleStaticContent(request, FPSTR(PM_URL_COMMON_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common2_web, JS_common2_web_length);
+    });
+    AddURLtoList(PM_URL_COMMON_JS, HTTP_GET);
 
   // --------------------------------------------------------------------------
   // Console
@@ -386,12 +410,6 @@ void mWebServer::WebPage_Root_AddHandlers()
     AddURLtoList(PM_URL_SUBMODULE_STYLE_CSS, HTTP_GET);
 
     
-    SPGM_CTR(PM_URL_STYLE_CSS) "/style.css";
-    server->on(PM_URL_STYLE_CSS, HTTP_GET, [this](AsyncWebServerRequest *request){
-      handleStaticContent(request, FPSTR(PM_URL_STYLE_CSS), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss2_web, PAGE_settingsCss2_web_length);
-    });
-    AddURLtoList(PM_URL_STYLE_CSS, HTTP_GET);
-
 
     SPGM_CTR(PM_URL_FAVICON_ICO) "/favicon.ico";
     server->on(PM_URL_FAVICON_ICO, HTTP_GET, [this](AsyncWebServerRequest *request){
@@ -400,20 +418,6 @@ void mWebServer::WebPage_Root_AddHandlers()
     AddURLtoList(PM_URL_FAVICON_ICO, HTTP_GET);
 
 
-    SPGM_CTR(PM_URL_SKIN_CSS) "/skin.css";
-    server->on(PM_URL_SKIN_CSS, HTTP_GET, [](AsyncWebServerRequest *request){
-      if (tkr_mfile->handleFileRead(request, FPSTR(PM_URL_SKIN_CSS))) return;
-      AsyncWebServerResponse *response = request->beginResponse(200, FPSTR(CONTENT_TYPE_CSS));
-      request->send(response);
-    });
-    AddURLtoList(PM_URL_SKIN_CSS, HTTP_GET);
-
-
-    SPGM_CTR(PM_URL_COMMON_JS) "/common.js";
-    server->on(PM_URL_COMMON_JS, HTTP_GET, [this](AsyncWebServerRequest *request){    
-      this->handleStaticContent(request, FPSTR(PM_URL_COMMON_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common2_web, JS_common2_web_length);
-    });
-    AddURLtoList(PM_URL_COMMON_JS, HTTP_GET);
 
 
     SPGM_CTR(PM_URL_DEBUG_MAIN) "/debug/main";
@@ -450,22 +454,23 @@ void mWebServer::WebPage_Root_AddHandlers()
     });
     AddURLtoList(PM_URL_SYSTEM_CONTROLS, HTTP_GET);
 
-    #ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
-      SPGM_CTR(PM_URL_URL_LIST) "/url_list";
-      server->on(PM_URL_URL_LIST, HTTP_GET, [this](AsyncWebServerRequest *request){
-        this->HandlePage_UrlList(request);
-      });
-      AddURLtoList(PM_URL_URL_LIST, HTTP_GET);
-
-      SPGM_CTR(PM_URL_URL_LIST_JSON) "/url_list.json";
-      server->on(PM_URL_URL_LIST_JSON, HTTP_GET, [this](AsyncWebServerRequest *request){
-        this->HandlePage_UrlList_JSON(request);
-      });
-      AddURLtoList(PM_URL_URL_LIST_JSON, HTTP_GET);
-    #endif
 
   #endif // ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
   
+  #ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+    SPGM_CTR(PM_URL_URL_LIST) "/url_list";
+    server->on(PM_URL_URL_LIST, HTTP_GET, [this](AsyncWebServerRequest *request){
+      this->HandlePage_UrlList(request);
+    });
+    AddURLtoList(PM_URL_URL_LIST, HTTP_GET);
+
+    SPGM_CTR(PM_URL_URL_LIST_JSON) "/url_list.json";
+    server->on(PM_URL_URL_LIST_JSON, HTTP_GET, [this](AsyncWebServerRequest *request){
+      this->HandlePage_UrlList_JSON(request);
+    });
+    AddURLtoList(PM_URL_URL_LIST_JSON, HTTP_GET);
+  #endif
+
   //called when the url is not defined here, ajax-in; get-settings
   server->onNotFound([this](AsyncWebServerRequest *request)
   {

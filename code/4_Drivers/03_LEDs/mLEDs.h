@@ -23,19 +23,6 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_DRIVERS_LEDS
-
-#include <Arduino.h>
-#include <vector>
-
-#include "1_TaskerManager/mTaskerInterface.h"
-
-// enum LedMode{
-//   LED_MANUAL=0,
-//   LED_SHOW_POWER,
-//   LED_SHOW_STATUS, // Network, plus others
-// };
-
 /*********************************************************************************************\
  * System LED Event Macros
  *
@@ -56,32 +43,21 @@
  *   SET_SYSTEM_LED__NO_NETWORK(false);  // WiFi/network connected
  *
 \*********************************************************************************************/
+
+
 #ifdef USE_MODULE_DRIVERS_LEDS
 
-  #define SET_SYSTEM_LED__NO_NETWORK(state) \
-    tkr_led->SystemLED_SetEvent(SYSTEM_LED_EVENT_NO_NETWORK, state)
+#include <Arduino.h>
+#include <vector>
 
-  #define SET_SYSTEM_LED__NO_MQTT(state) \
-    tkr_led->SystemLED_SetEvent(SYSTEM_LED_EVENT_NO_MQTT, state)
+#include "1_TaskerManager/mTaskerInterface.h"
 
-  #define SET_SYSTEM_LED__AP_MODE(state) \
-    tkr_led->SystemLED_SetEvent(SYSTEM_LED_EVENT_AP_MODE, state)
+// enum LedMode{
+//   LED_MANUAL=0,
+//   LED_SHOW_POWER,
+//   LED_SHOW_STATUS, // Network, plus others
+// };
 
-  #define SET_SYSTEM_LED__OTA_ACTIVE(state) \
-    tkr_led->SystemLED_SetEvent(SYSTEM_LED_EVENT_OTA_ACTIVE, state)
-
-  #define SET_SYSTEM_LED__ERROR(state) \
-    tkr_led->SystemLED_SetEvent(SYSTEM_LED_EVENT_ERROR, state)
-
-#else
-
-  #define SET_SYSTEM_LED__NO_NETWORK(state)
-  #define SET_SYSTEM_LED__NO_MQTT(state)
-  #define SET_SYSTEM_LED__AP_MODE(state)
-  #define SET_SYSTEM_LED__OTA_ACTIVE(state)
-  #define SET_SYSTEM_LED__ERROR(state)
-
-#endif
 
 
 

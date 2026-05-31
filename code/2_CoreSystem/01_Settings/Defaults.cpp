@@ -34,11 +34,13 @@ void mSettings::SettingsDefault(void)
   ALOG_INF(PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
   #endif
 
+        DEBUG_LINE_HERE3;
   // --------------------------------------------------------------------------
   // 0. Clear all settings
   // --------------------------------------------------------------------------
   memset(&Settings, 0x00, sizeof(SETTINGS));
 
+        DEBUG_LINE_HERE3;
   // --------------------------------------------------------------------------
   // 1. Required settings header
   // --------------------------------------------------------------------------
@@ -49,11 +51,20 @@ void mSettings::SettingsDefault(void)
   Settings.bootcount  = 0;
   Settings.cfg_crc32  = 0;
 
+        DEBUG_LINE_HERE3;
   /****
    * Debug parts of the save data as ascii readable in the binary file for easier visual debugging of the file contents.
    */
-  snprintf(Settings.settings_file_update_utc_ascii,sizeof(Settings.settings_file_update_utc_ascii),PSTR("utc------:------"));
-  snprintf(Settings.settings_holder_ctr, sizeof(Settings.settings_holder_ctr), "%d\0", Settings.cfg_holder);
+  // snprintf(Settings.settings_file_update_utc_ascii,sizeof(Settings.settings_file_update_utc_ascii),PSTR("utc------:------"));
+  // snprintf(Settings.settings_holder_ctr, sizeof(Settings.settings_holder_ctr), "%d\0", Settings.cfg_holder);
+  snprintf(Settings.settings_file_update_utc_ascii,
+         sizeof(Settings.settings_file_update_utc_ascii),
+         "utc------:------"); // PSTR unsafe for esp8266
+
+  snprintf(Settings.settings_holder_ctr,
+         sizeof(Settings.settings_holder_ctr),
+         "%u",
+         (unsigned)Settings.cfg_holder);
 
   // --------------------------------------------------------------------------
   // 2. Core system defaults
@@ -154,6 +165,7 @@ void mSettings::SettingsDefault(void)
   memset(runtime.my_hostname, 0, sizeof(runtime.my_hostname));
   snprintf(runtime.my_hostname, sizeof(runtime.my_hostname), "%s", Settings.system_name.device);
 
+        DEBUG_LINE_HERE3;
   // --------------------------------------------------------------------------
   // 7. Web server defaults
   // --------------------------------------------------------------------------
@@ -174,8 +186,10 @@ void mSettings::SettingsDefault(void)
   // 9. Param / SetOption defaults
   // --------------------------------------------------------------------------
   Settings.sysopt_system.param.boot_loop_offset = BOOT_LOOP_OFFSET;
-  Settings.sysopt_system.param.key_hold_time_ms = KEY_HOLD_TIME;
   Settings.sysopt_power.param.max_power_retry   = MAX_POWER_RETRY;
+  
+  Settings.sysopt_power.bit.bistable_single_pin = 0;
+  Settings.sysopt_power.param.bistable_pulse_ms = 40;
 
   #ifdef USE_NETWORK_MDNS
   Settings.sysopt_network.param.mdns_delayed_start_s = 0;
@@ -206,6 +220,7 @@ void mSettings::SettingsDefault(void)
       tkr_sup->ReplaceCommaWithDot(SettingsText(SET_NTPSERVER1 + i))
     );
   }
+        DEBUG_LINE_HERE3;
 
   // --------------------------------------------------------------------------
   // 11. Human interface defaults
@@ -219,16 +234,21 @@ void mSettings::SettingsDefault(void)
   }
   #endif
 
+        DEBUG_LINE_HERE3;
   SettingsUpdateText(SET_STATE_TXT1, PSTR(D_OFF));
   SettingsUpdateText(SET_STATE_TXT2, PSTR(D_ON));
   SettingsUpdateText(SET_STATE_TXT3, PSTR(D_TOGGLE));
   SettingsUpdateText(SET_STATE_TXT4, PSTR(D_HOLD));
 
+        DEBUG_LINE_HERE3;
   // --------------------------------------------------------------------------
   // 12. Sensor defaults
   // --------------------------------------------------------------------------
   
+  Settings.sysopt_sensors.bit.button_swap_on_single_device = 0;
+
   Settings.sysopt_sensors.param.decimal_precision = 3;
+  Settings.sysopt_sensors.param.key_hold_time_ms = KEY_HOLD_TIME;
 
   // --------------------------------------------------------------------------
   // 13. Driver / actuator defaults
@@ -240,6 +260,8 @@ void mSettings::SettingsDefault(void)
   #endif
 
   Settings.power_lock = 0;
+
+  Settings.sysopt_drivers.bit.no_power_feedback = 0;  // SetOption63 - Don't scan relay power state at restart - #5594 and #5663
 
   Settings.ledmask    = APP_LEDMASK;
   Settings.ledstate   = APP_LEDSTATE;
@@ -266,12 +288,14 @@ void mSettings::SettingsDefault(void)
   Settings.sysopt_power.param.calc_resolution    = CALC_RESOLUTION;
 
 
+        DEBUG_LINE_HERE3;
   // --------------------------------------------------------------------------
   // 16. Module defaults hook
   // --------------------------------------------------------------------------
   // This must only populate RAM defaults. It must not write saved settings.
   tkr->Tasker_Interface(TASK_SETTINGS_DEFAULT);
 
+        DEBUG_LINE_HERE3;
   ALOG_INF(
     PSTR(D_LOG_MEMORY D_LOAD " %s holder=%d expected=%d size=%d"),
     "SettingsDefault",
@@ -279,6 +303,7 @@ void mSettings::SettingsDefault(void)
     SETTINGS_HOLDER,
     Settings.cfg_size
   );
+        DEBUG_LINE_HERE3;
 }
 
 

@@ -53,7 +53,7 @@ int8_t mNextion::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case TASK_JSON_COMMAND_ID:
     
-      if(!update_in_progress && !tkr_sup->arduino_ota_triggered)
+      if(!update_in_progress && !tkr_updates->arduino_ota_triggered)
         parse_JSONCommand(obj);
 
     break;

@@ -465,8 +465,8 @@ void mEnergyInterface::MQTTHandler_Init(){
 
 
 //   if (tkr_set->runtime.energy_driver) {
-//     // // if (RtcSettingsValid()) {
-//     //   Energy.kWhtoday_offset = tkr_set->RtcSettings.energy_kWhtoday;
+//     // // if (RtcMemory__RuntimeState_Valid()) {
+//     //   Energy.kWhtoday_offset = tkr_set->RtcMemory__RuntimeState.energy_kWhtoday;
 //     // // }
 //     // else if (RtcTime.day_of_year == Settings.energy_kWhdoy) {
 //     //   Energy.kWhtoday_offset = Settings.energy_kWhtoday;
@@ -641,27 +641,27 @@ void mEnergyInterface::MQTTHandler_Init(){
 //   //   Energy.kWhtoday += delta;
 //   // }
 
-//   // tkr_set->RtcSettings.energy_kWhtoday = Energy.kWhtoday_offset + Energy.kWhtoday;
-//   // Energy.daily = (float)(tkr_set->RtcSettings.energy_kWhtoday) / 100000;
-//   // Energy.total = (float)(tkr_set->RtcSettings.energy_kWhtotal + tkr_set->RtcSettings.energy_kWhtoday) / 100000;
+//   // tkr_set->RtcMemory__RuntimeState.energy_kWhtoday = Energy.kWhtoday_offset + Energy.kWhtoday;
+//   // Energy.daily = (float)(tkr_set->RtcMemory__RuntimeState.energy_kWhtoday) / 100000;
+//   // Energy.total = (float)(tkr_set->RtcMemory__RuntimeState.energy_kWhtotal + tkr_set->RtcMemory__RuntimeState.energy_kWhtoday) / 100000;
 
 //   // //if (tkr_set->RtcTime.valid){ // We calc the difference only if we have a valid RTC time.
 
-//   //   uint32_t energy_diff = (uint32_t)(Energy.total * 100000) - tkr_set->RtcSettings.energy_usage.last_usage_kWhtotal;
-//   //   tkr_set->RtcSettings.energy_usage.last_usage_kWhtotal = (uint32_t)(Energy.total * 100000);
+//   //   uint32_t energy_diff = (uint32_t)(Energy.total * 100000) - tkr_set->RtcMemory__RuntimeState.energy_usage.last_usage_kWhtotal;
+//   //   tkr_set->RtcMemory__RuntimeState.energy_usage.last_usage_kWhtotal = (uint32_t)(Energy.total * 100000);
 
 //   //   uint32_t return_diff = 0;
 //   //   if (!isnan(Energy.export_active)) {
-//   //     return_diff = (uint32_t)(Energy.export_active * 100000) - tkr_set->RtcSettings.energy_usage.last_return_kWhtotal;
-//   //     tkr_set->RtcSettings.energy_usage.last_return_kWhtotal = (uint32_t)(Energy.export_active * 100000);
+//   //     return_diff = (uint32_t)(Energy.export_active * 100000) - tkr_set->RtcMemory__RuntimeState.energy_usage.last_return_kWhtotal;
+//   //     tkr_set->RtcMemory__RuntimeState.energy_usage.last_return_kWhtotal = (uint32_t)(Energy.export_active * 100000);
 //   //   }
 
 //   //   if (EnergyTariff1Active()) {  // Tarrif1 = Off-Peak
-//   //     tkr_set->RtcSettings.energy_usage.usage1_kWhtotal += energy_diff;
-//   //     tkr_set->RtcSettings.energy_usage.return1_kWhtotal += return_diff;
+//   //     tkr_set->RtcMemory__RuntimeState.energy_usage.usage1_kWhtotal += energy_diff;
+//   //     tkr_set->RtcMemory__RuntimeState.energy_usage.return1_kWhtotal += return_diff;
 //   //   } else {
-//   //     tkr_set->RtcSettings.energy_usage.usage2_kWhtotal += energy_diff;
-//   //     tkr_set->RtcSettings.energy_usage.return2_kWhtotal += return_diff;
+//   //     tkr_set->RtcMemory__RuntimeState.energy_usage.usage2_kWhtotal += energy_diff;
+//   //     tkr_set->RtcMemory__RuntimeState.energy_usage.return2_kWhtotal += return_diff;
 //   //   }
 //   // //}
   
@@ -685,9 +685,9 @@ void mEnergyInterface::MQTTHandler_Init(){
 
 //   // if((Energy.total < (value - 0.01)) &&       // We subtract a little offset to avoid continuous updates
 //   //     tkr_set->Settings.flag_network.hardware_energy_total) {  // SetOption72 - Enable hardware energy total counter as reference (#6561)
-//   //   tkr_set->RtcSettings.energy_kWhtotal = (unsigned long)((value * multiplier) - Energy.kWhtoday_offset - Energy.kWhtoday);
-//   //   tkr_set->Settings.energy_usage.energy_kWhtotal = tkr_set->RtcSettings.energy_kWhtotal;
-//   //   Energy.total = (float)(tkr_set->RtcSettings.energy_kWhtotal + Energy.kWhtoday_offset + Energy.kWhtoday) / 100000;
+//   //   tkr_set->RtcMemory__RuntimeState.energy_kWhtotal = (unsigned long)((value * multiplier) - Energy.kWhtoday_offset - Energy.kWhtoday);
+//   //   tkr_set->Settings.energy_usage.energy_kWhtotal = tkr_set->RtcMemory__RuntimeState.energy_kWhtotal;
+//   //   Energy.total = (float)(tkr_set->RtcMemory__RuntimeState.energy_kWhtotal + Energy.kWhtoday_offset + Energy.kWhtoday) / 100000;
 //   //   tkr_set->Settings.energy_usage.energy_kWhtotal_time = (!Energy.kWhtoday_offset) ? tkr_time->LocalTime() : tkr_time->Midnight();
 //   //   ALOG_DBG(PSTR("NRG: Energy Total updated with hardware value"));
 //   // }
@@ -710,13 +710,13 @@ void mEnergyInterface::MQTTHandler_Init(){
 
 //   //   if (tkr_set->RtcTime.valid) {
 //   //     if (tkr_time->LocalTime() == tkr_time->Midnight()) {
-//   //       tkr_set->Settings.energy_usage.energy_kWhyesterday = tkr_set->RtcSettings.energy_kWhtoday;
+//   //       tkr_set->Settings.energy_usage.energy_kWhyesterday = tkr_set->RtcMemory__RuntimeState.energy_kWhtoday;
 
-//   //       tkr_set->RtcSettings.energy_kWhtotal += tkr_set->RtcSettings.energy_kWhtoday;
-//   //       tkr_set->Settings.energy_usage.energy_kWhtotal = tkr_set->RtcSettings.energy_kWhtotal;
+//   //       tkr_set->RtcMemory__RuntimeState.energy_kWhtotal += tkr_set->RtcMemory__RuntimeState.energy_kWhtoday;
+//   //       tkr_set->Settings.energy_usage.energy_kWhtotal = tkr_set->RtcMemory__RuntimeState.energy_kWhtotal;
 //   //       Energy.kWhtoday = 0;
 //   //       Energy.kWhtoday_offset = 0;
-//   //       tkr_set->RtcSettings.energy_kWhtoday = 0;
+//   //       tkr_set->RtcMemory__RuntimeState.energy_kWhtoday = 0;
 //   //       Energy.start_energy = 0;
 
 //   //       Energy.kWhtoday_delta = 0;
@@ -741,10 +741,10 @@ void mEnergyInterface::MQTTHandler_Init(){
 // {
 //   // Settings.energy_kWhdoy = (RtcTime.valid) ? RtcTime.day_of_year : 0;
 
-//   // Settings.energy_kWhtoday = tkr_set->RtcSettings.energy_kWhtoday;
-//   // Settings.energy_kWhtotal = tkr_set->RtcSettings.energy_kWhtotal;
+//   // Settings.energy_kWhtoday = tkr_set->RtcMemory__RuntimeState.energy_kWhtoday;
+//   // Settings.energy_kWhtotal = tkr_set->RtcMemory__RuntimeState.energy_kWhtotal;
 
-//   // Settings.energy_usage = tkr_set->RtcSettings.energy_usage;
+//   // Settings.energy_usage = tkr_set->RtcMemory__RuntimeState.energy_usage;
 // }
 
 // // #ifdef USE_ENERGY_MARGIN_DETECTION
@@ -1323,9 +1323,9 @@ void mEnergyInterface::MQTTHandler_Init(){
 // // //         Energy.start_energy = 0;
 // // //         Energy.period = Energy.kWhtoday_offset;
 // // //         Settings.energy_kWhtoday = Energy.kWhtoday_offset;
-// // //         tkr_set->RtcSettings.energy_kWhtoday = Energy.kWhtoday_offset;
+// // //         tkr_set->RtcMemory__RuntimeState.energy_kWhtoday = Energy.kWhtoday_offset;
 // // //         Energy.daily = (float)Energy.kWhtoday_offset / 100000;
-// // //         if (!tkr_set->RtcSettings.energy_kWhtotal && !Energy.kWhtoday_offset) {
+// // //         if (!tkr_set->RtcMemory__RuntimeState.energy_kWhtotal && !Energy.kWhtoday_offset) {
 // // //           Settings.energy_kWhtotal_time = LocalTime();
 // // //         }
 // // //         break;
@@ -1335,11 +1335,11 @@ void mEnergyInterface::MQTTHandler_Init(){
 // // //         break;
 // // //       case 3:
 // // //         // Reset Energy Total
-// // //         tkr_set->RtcSettings.energy_kWhtotal = lnum *100;
-// // //         Settings.energy_kWhtotal = tkr_set->RtcSettings.energy_kWhtotal;
-// // // //        Energy.total = (float)(tkr_set->RtcSettings.energy_kWhtotal + Energy.kWhtoday_offset + Energy.kWhtoday) / 100000;
+// // //         tkr_set->RtcMemory__RuntimeState.energy_kWhtotal = lnum *100;
+// // //         Settings.energy_kWhtotal = tkr_set->RtcMemory__RuntimeState.energy_kWhtotal;
+// // // //        Energy.total = (float)(tkr_set->RtcMemory__RuntimeState.energy_kWhtotal + Energy.kWhtoday_offset + Energy.kWhtoday) / 100000;
 // // //         Settings.energy_kWhtotal_time = (!Energy.kWhtoday_offset) ? LocalTime() : Midnight();
-// // //         tkr_set->RtcSettings.energy_usage.last_usage_kWhtotal = (uint32_t)(Energy.total * 1000);
+// // //         tkr_set->RtcMemory__RuntimeState.energy_usage.last_usage_kWhtotal = (uint32_t)(Energy.total * 1000);
 // // //         break;
 // // //       }
 // // //     }
@@ -1362,29 +1362,29 @@ void mEnergyInterface::MQTTHandler_Init(){
 // // //       case 4:
 // // //         // Reset energy_usage.usage totals
 // // //         if (position > -1) {
-// // //           tkr_set->RtcSettings.energy_usage.usage1_kWhtotal = values[0];
+// // //           tkr_set->RtcMemory__RuntimeState.energy_usage.usage1_kWhtotal = values[0];
 // // //         }
 // // //         if (position > 0) {
-// // //           tkr_set->RtcSettings.energy_usage.usage2_kWhtotal = values[1];
+// // //           tkr_set->RtcMemory__RuntimeState.energy_usage.usage2_kWhtotal = values[1];
 // // //         }
-// // //         Settings.energy_usage.usage1_kWhtotal = tkr_set->RtcSettings.energy_usage.usage1_kWhtotal;
-// // //         Settings.energy_usage.usage2_kWhtotal = tkr_set->RtcSettings.energy_usage.usage2_kWhtotal;
+// // //         Settings.energy_usage.usage1_kWhtotal = tkr_set->RtcMemory__RuntimeState.energy_usage.usage1_kWhtotal;
+// // //         Settings.energy_usage.usage2_kWhtotal = tkr_set->RtcMemory__RuntimeState.energy_usage.usage2_kWhtotal;
 // // //         break;
 // // //       case 5:
 // // //         // Reset energy_usage.return totals
 // // //         if (position > -1) {
-// // //           tkr_set->RtcSettings.energy_usage.return1_kWhtotal = values[0];
+// // //           tkr_set->RtcMemory__RuntimeState.energy_usage.return1_kWhtotal = values[0];
 // // //         }
 // // //         if (position > 0) {
-// // //           tkr_set->RtcSettings.energy_usage.return2_kWhtotal = values[1];
+// // //           tkr_set->RtcMemory__RuntimeState.energy_usage.return2_kWhtotal = values[1];
 // // //         }
-// // //         Settings.energy_usage.return1_kWhtotal = tkr_set->RtcSettings.energy_usage.return1_kWhtotal;
-// // //         Settings.energy_usage.return2_kWhtotal = tkr_set->RtcSettings.energy_usage.return2_kWhtotal;
+// // //         Settings.energy_usage.return1_kWhtotal = tkr_set->RtcMemory__RuntimeState.energy_usage.return1_kWhtotal;
+// // //         Settings.energy_usage.return2_kWhtotal = tkr_set->RtcMemory__RuntimeState.energy_usage.return2_kWhtotal;
 // // //         break;
 // // //       }
 // // //   }
 
-// // //   Energy.total = (float)(tkr_set->RtcSettings.energy_kWhtotal + Energy.kWhtoday_offset + Energy.kWhtoday) / 100000;
+// // //   Energy.total = (float)(tkr_set->RtcMemory__RuntimeState.energy_kWhtotal + Energy.kWhtoday_offset + Energy.kWhtoday) / 100000;
 
 // //   char energy_total_chr[FLOATSZ];
 // //   tkr_sup->dtostrfd(Energy.total, tkr_set->Settings.sysopt_power.bit.energy_resolution, energy_total_chr);
@@ -1901,9 +1901,9 @@ void mEnergyInterface::MQTTHandler_Init(){
 //     // if (show_energy_period) {
 //     //   float energy = 0;
 //     //   if (Energy.period) {
-//     //     energy = (float)(tkr_set->RtcSettings.energy_kWhtoday - Energy.period) / 100;
+//     //     energy = (float)(tkr_set->RtcMemory__RuntimeState.energy_kWhtoday - Energy.period) / 100;
 //     //   }
-//     //   Energy.period = tkr_set->RtcSettings.energy_kWhtoday;
+//     //   Energy.period = tkr_set->RtcMemory__RuntimeState.energy_kWhtoday;
 //     //   char energy_period_chr[FLOATSZ];
 //     //   tkr_sup->dtostrfd(energy, tkr_set->Settings.sysopt_power.bit.wattage_resolution, energy_period_chr);
 //     //   tkr_sup->ResponseAppend_P(PSTR(",\"" D_PERIOD "\":%s"), energy_period_chr);
@@ -1941,10 +1941,10 @@ void mEnergyInterface::MQTTHandler_Init(){
 // //       tkr_sup->dtostrfd(Energy.total * 1000, 1, energy_total_chr[0]);
 // //       DomoticzSensorPowerEnergy((int)Energy.active_power[0], energy_total_chr[0]);  // PowerUsage, EnergyToday
 
-// //       tkr_sup->dtostrfd((float)tkr_set->RtcSettings.energy_usage.usage1_kWhtotal / 100, 1, energy_total_chr[1]);  // Tariff1
-// //       tkr_sup->dtostrfd((float)tkr_set->RtcSettings.energy_usage.usage2_kWhtotal / 100, 1, energy_total_chr[2]);  // Tariff2
-// //       tkr_sup->dtostrfd((float)tkr_set->RtcSettings.energy_usage.return1_kWhtotal / 100, 1, export_active_chr[1]);
-// //       tkr_sup->dtostrfd((float)tkr_set->RtcSettings.energy_usage.return2_kWhtotal / 100, 1, export_active_chr[2]);
+// //       tkr_sup->dtostrfd((float)tkr_set->RtcMemory__RuntimeState.energy_usage.usage1_kWhtotal / 100, 1, energy_total_chr[1]);  // Tariff1
+// //       tkr_sup->dtostrfd((float)tkr_set->RtcMemory__RuntimeState.energy_usage.usage2_kWhtotal / 100, 1, energy_total_chr[2]);  // Tariff2
+// //       tkr_sup->dtostrfd((float)tkr_set->RtcMemory__RuntimeState.energy_usage.return1_kWhtotal / 100, 1, export_active_chr[1]);
+// //       tkr_sup->dtostrfd((float)tkr_set->RtcMemory__RuntimeState.energy_usage.return2_kWhtotal / 100, 1, export_active_chr[2]);
 // //       DomoticzSensorP1SmartMeter(energy_total_chr[1], energy_total_chr[2], export_active_chr[1], export_active_chr[2], (int)Energy.active_power[0]);
 
 // //       if (Energy.voltage_available) {

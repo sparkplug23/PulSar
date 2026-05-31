@@ -4817,8 +4817,8 @@ uint32_t mAnimatorLight::Segment::GetPaletteColour_Legacy(
     LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
   }
 
-  if(pixel_position==0)
-    Serial.println("PO: GetPaletteColour_Legacy");
+  // if(pixel_position==0)
+  //   Serial.println("PO: GetPaletteColour_Legacy");
 
 
   // uint32_t color = SEGCOLOR(mcol < NUMBER_SEGMENT_COLOURS ? mcol : 0);
