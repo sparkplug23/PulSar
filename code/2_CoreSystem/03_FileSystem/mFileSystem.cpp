@@ -38,92 +38,74 @@
 
 int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
 {
-
   /************
-   * INIT SECTION * 
-  *******************/
+   * INIT SECTION
+   *******************/
   switch(function)
   {
-      #ifdef USE_MODULE_FILESYSTEM_SDCARD
     case TASK_PRE_INIT:
-      Pre_Init__ExternalStorage();
+      Pre_Init();
     break;
     case TASK_INIT:
-      Init__ExternalStorage();
+      Init();
     break;
-    #endif
   }
 
   if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }
 
-  switch(function){
+  switch(function)
+  {
     /************
-     * PERIODIC SECTION * 
-    *******************/
-    case TASK_EVERY_SECOND:  
-      #ifdef USE_MODULE_FILESYSTEM_SDCARD
-        SDCard_Service();
-      #endif
-    break;
-     case TASK_LOOP:    
-      #ifdef ENABLE_DEVFEATURE_FILESYSTEM__SDCARD_LOGGING_PERFORMANCE_TEST
-      Loop__DevTest__FastSDLogging();
-      #endif
-    break;
-    case TASK_EVERY_FIVE_SECOND:    
+     * PERIODIC SECTION
+     *******************/
+    case TASK_EVERY_FIVE_SECOND:
       #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
       SystemTask__Execute_Module_Data_Save();
-      #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
+      #endif
       Handle_FileChanges_WebUIEdits();
     break;
+
     case TASK_EVERY_MINUTE:
-      // #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA // This will in the future only occur once an hour, or before planned boot
       #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
       SystemTask__Execute_Module_Data_Save();
-      #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
-      // #endif     
-    break;  
-    case TASK_EVERY_FIVE_MINUTE:
-      // JsonFile_Save__Stored_Module();
-      // JsonFile_Save__Stored_Secure();       
+      #endif
     break;
+
+    case TASK_EVERY_FIVE_MINUTE:
+    break;
+
     /************
-     * COMMANDS SECTION * 
-    *******************/
+     * COMMANDS SECTION
+     *******************/
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
+
     /************
-     * MQTT SECTION * 
-    *******************/
+     * MQTT SECTION
+     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
+
     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
       tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
+
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
       tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
+
     case TASK_MQTT_SENDER:
       tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
-    #endif //USE_MODULE_NETWORK_MQTT
-    /************
-     * WEBUI SECTION * 
-    *******************/        
-   #if defined(USE_MODULE_FILESYSTEM_SDCARD) && defined(USE_MODULE_NETWORK_WEBSERVER)
-    case TASK_WEB_ADD_HANDLER:
-      WebPage_Root_AddHandlers();
-    break;
-    #endif // USE_MODULE_NETWORK_WEBSERVER
+    #endif
+  }
 
-  }  
-
-  return TASKER_RESULT__UNKNOWN_ID;  
-
+  return TASKER_RESULT__UNKNOWN_ID;
 } // END Tasker
+
 
 void mFileSystem::Pre_Init()
 {
@@ -164,29 +146,6 @@ void mFileSystem::Pre_Init()
 #endif
 }
 
-#ifdef USE_MODULE_FILESYSTEM_SDCARD
-void mFileSystem::Pre_Init__ExternalStorage()
-{
-
-  /************************************************************************************************
-   * External storage pre-init must be safe to call repeatedly.
-   *
-   * It must not mount yet. It only keeps the SD service eligible so that pins configured later
-   * by template override/runtime GPIO changes can be detected by Init__ExternalStorage() or retry.
-   ************************************************************************************************/
-
-  sdcard.enabled = true;
-
-  if(!sdcard.mounted)
-  {
-    sdcard.fs = nullptr;
-    sdcard.pin_config_valid = false;
-    sdcard.mount_failed = false;
-    sdcard.card_removed = false;
-  }
-
-}
-#endif
 
 
 // void mFileSystem::Pre_Init()
@@ -237,7 +196,6 @@ extern "C" {
 
 void mFileSystem::Init(void)
 {
-
   static bool done = false;
   if(done) { return; }
   done = true;
@@ -250,8 +208,8 @@ void mFileSystem::Init(void)
 
   UfsData.run_file_pos = -1;
 
-  ufs_type = 0;
-  ffs_type = 0;
+  ufs_type = PFS_TNONE;
+  ffs_type = PFS_TNONE;
   ufsp     = nullptr;
   ffsp     = nullptr;
   dfsp     = nullptr;
@@ -259,29 +217,30 @@ void mFileSystem::Init(void)
 
 #if defined(PULSAR_HAS_FILESYSTEM) && (PULSAR_HAS_FILESYSTEM == 0)
 
-  ALOG_WRN(PSTR(D_LOG_FILESYSTEM "Disabled: no filesystem partition in this build"));
-
-  module_state.mode = ModuleStatus::Disabled;
+  ALOG_WRN(PSTR(D_LOG_FILESYSTEM "Internal filesystem disabled by build"));
+  module_state.mode = ModuleStatus::Running;
+  PFS_Init();
   return;
 
 #endif
-
 
 #ifdef ESP8266
 
   ffsp = &LittleFS;
 
-#if defined(ESP8266)
-ALOG_INF(PSTR(D_LOG_FILESYSTEM "FS symbols start=0x%08X end=0x%08X size=%u page=%u block=%u"),
-         (uint32_t)&_FS_start,
-         (uint32_t)&_FS_end,
-         (uint32_t)((uint32_t)&_FS_end - (uint32_t)&_FS_start),
-         (uint32_t)&_FS_page,
-         (uint32_t)&_FS_block);
-#endif
+  #if defined(ENABLE_DEBUGFEATURE_FILESYSTEM__SHOW_FS_SYMBOLS)
+  ALOG_INF(PSTR(D_LOG_FILESYSTEM "FS symbols start=0x%08X end=0x%08X size=%u page=%u block=%u"),
+           (uint32_t)&_FS_start,
+           (uint32_t)&_FS_end,
+           (uint32_t)((uint32_t)&_FS_end - (uint32_t)&_FS_start),
+           (uint32_t)&_FS_page,
+           (uint32_t)&_FS_block);
+  #endif
+
   fsinit = LittleFS.begin();
 
-  if (!fsinit) {
+  if (!fsinit)
+  {
     ALOG_WRN(PSTR(D_LOG_FILESYSTEM "LittleFS mount failed"));
 
     #if defined(ENABLE_DEBUGFEATURE_FILESYSTEM__FORMAT_ON_MOUNT_FAIL)
@@ -289,66 +248,54 @@ ALOG_INF(PSTR(D_LOG_FILESYSTEM "FS symbols start=0x%08X end=0x%08X size=%u page=
       LittleFS.format();
       fsinit = LittleFS.begin();
     #endif
+  }
 
-    if (!fsinit) {
-      ALOG_WRN(PSTR(D_LOG_FILESYSTEM "Flash filesystem unavailable"));
+  if (!fsinit)
+  {
+    ALOG_WRN(PSTR(D_LOG_FILESYSTEM "Flash filesystem unavailable"));
 
-      ffsp     = nullptr;
-      ufsp     = nullptr;
-      dfsp     = nullptr;
-      ffs_type = 0;
-      ufs_type = 0;
-      ufs_dir  = 0;
+    ffsp     = nullptr;
+    ufsp     = nullptr;
+    dfsp     = nullptr;
+    ffs_type = PFS_TNONE;
+    ufs_type = PFS_TNONE;
+    ufs_dir  = 0;
 
-      module_state.mode = ModuleStatus::Disabled;
-      return;
-    }
+    module_state.mode = ModuleStatus::Running;
+    PFS_Init();
+    return;
   }
 
   ALOG_INF(PSTR(D_LOG_FILESYSTEM "LittleFS mounted"));
 
 #endif // ESP8266
 
-
 #ifdef ESP32
 
   ffsp = &FILE_SYSTEM;
 
-  /*
-   * FILE_SYSTEM is expected to be the selected flash filesystem backend,
-   * normally LittleFS in PulSar builds.
-   *
-   * begin(true, ""):
-   *   - auto-format if mount fails
-   *   - use empty mount point so this FS can act as the fallback/default FS
-   *
-   * The second begin() attempt with "fs_1" is retained from the previous code
-   * path for compatibility with existing partition/label behaviour.
-   */
   fsinit =
     FILE_SYSTEM.begin(true, "") ||
     FILE_SYSTEM.begin(true, "", 5, "fs_1");
 
-  if (!fsinit) {
+  if (!fsinit)
+  {
     ALOG_WRN(PSTR(D_LOG_FILESYSTEM "Primary filesystem mount failed"));
 
-    /*
-     * FFat fallback retained from previous implementation.
-     * If PulSar is now LittleFS-only, this block can later be deleted.
-     */
     ffsp = &FFat;
-
     fsinit = FFat.begin(true, "");
 
-    if (!fsinit) {
+    if (!fsinit)
+    {
       ALOG_ERR(PSTR(D_LOG_FILESYSTEM "FFat fallback mount failed"));
 
       ffsp = nullptr;
-      module_state.mode = ModuleStatus::Error;
+      module_state.mode = ModuleStatus::Running;
+      PFS_Init();
       return;
     }
 
-    ffs_type = UFS_TFAT;
+    ffs_type = PFS_TFAT;
     ufs_type = ffs_type;
     ufsp     = ffsp;
     dfsp     = ffsp;
@@ -360,6 +307,7 @@ ALOG_INF(PSTR(D_LOG_FILESYSTEM "FS symbols start=0x%08X end=0x%08X size=%u page=
       GetFreeStorageSpace()
     );
 
+    PFS_Init();
     return;
   }
 
@@ -367,12 +315,7 @@ ALOG_INF(PSTR(D_LOG_FILESYSTEM "FS symbols start=0x%08X end=0x%08X size=%u page=
 
 #endif // ESP32
 
-
-  /*
-   * If we reached here, the flash filesystem mounted successfully.
-   * Current normal backend is LittleFS.
-   */
-  ffs_type = UFS_TLFS;
+  ffs_type = PFS_TLFS;
   ufs_type = ffs_type;
   ufsp     = ffsp;
   dfsp     = ffsp;
@@ -384,41 +327,8 @@ ALOG_INF(PSTR(D_LOG_FILESYSTEM "FS symbols start=0x%08X end=0x%08X size=%u page=
     GetFreeStorageSpace()
   );
 
-  
-
+  PFS_Init();
 }
-
-#ifdef USE_MODULE_FILESYSTEM_SDCARD
-void mFileSystem::Init__ExternalStorage(void)
-{
-
-  ALOG_INF(PSTR(D_LOG_FILESYSTEM "Init__ExternalStorage"));
-
-  sdcard.enabled = true;
-
-  if(SDCard_IsMounted())
-  {
-    ALOG_INF(PSTR(D_LOG_FILESYSTEM "Init__ExternalStorage: SD already mounted"));
-    return;
-  }
-
-  SDCard_Init();
-
-  if(SDCard_IsMounted())
-  {
-    ALOG_INF(PSTR(D_LOG_FILESYSTEM "SD backend mounted and available at /sd/"));
-  }
-  else if(sdcard.pin_config_valid)
-  {
-    ALOG_WRN(PSTR(D_LOG_FILESYSTEM "SD backend configured but not mounted, retry service active"));
-  }
-  else
-  {
-    ALOG_INF(PSTR(D_LOG_FILESYSTEM "SD backend waiting for valid pin configuration"));
-  }
-
-}
-#endif
 
 #ifndef ERR_FS_QUOTA
 #define ERR_FS_QUOTA    11  // The FS is full or the maximum file size is reached
@@ -1018,22 +928,15 @@ void mFileSystem::SystemTask__Execute_Module_Data_Save()
  *   - Future backends, such as SD card, should be handled by backend-specific
  *     SubCall__GetFreeStorageSpace__TYPE() functions.
 \*********************************************************************************************/
-uint32_t mFileSystem::GetFreeStorageSpace(FileStorageTarget target)
+uint32_t mFileSystem::GetFreeStorageSpace(PFSStorageTarget target)
 {
-  #if defined(PULSAR_HAS_FILESYSTEM) && (PULSAR_HAS_FILESYSTEM == 0)
-    return 0;
-  #endif
-
   switch (target)
   {
-    case FILE_STORAGE_INTERNAL:
+    case PFS_STORAGE_INTERNAL:
       return SubCall__GetFreeStorageSpace__LittleFS();
 
-    case FILE_STORAGE_ACTIVE:
+    case PFS_STORAGE_ACTIVE:
       return SubCall__GetFreeStorageSpace__Active();
-
-    case FILE_STORAGE_SD:
-      return SubCall__GetFreeStorageSpace__SD();
 
     default:
       return 0;
@@ -1044,17 +947,14 @@ uint32_t mFileSystem::SubCall__GetFreeStorageSpace__Active(void)
 {
   switch (ufs_type)
   {
-    case UFS_TLFS:
+    case PFS_TLFS:
       return SubCall__GetFreeStorageSpace__LittleFS();
 
-    case UFS_TFAT:
+    case PFS_TFAT:
       return SubCall__GetFreeStorageSpace__FFat();
 
-    case UFS_TSDC:
-      return SubCall__GetFreeStorageSpace__SD();
-
     default:
-      ALOG_WRN(PSTR(D_LOG_FILESYSTEM "No active filesystem"));
+      ALOG_WRN(PSTR(D_LOG_FILESYSTEM "No active internal filesystem"));
       return 0;
   }
 }
@@ -1085,6 +985,10 @@ uint32_t mFileSystem::SubCall__GetFreeStorageSpace__LittleFS(void)
 #endif
 
 #ifdef ESP32
+  if(!ffsp || !ffs_type) {
+    return 0;
+  }
+
   free_bytes = LITTLEFS.totalBytes() - LITTLEFS.usedBytes();
 #endif
 
@@ -1096,10 +1000,6 @@ uint32_t mFileSystem::SubCall__GetFreeStorageSpace__LittleFS(void)
  * SubCall__GetFreeStorageSpace__FFat
  *
  * Returns free space on the FFat filesystem in kB.
- *
- * Notes:
- *   - ESP32 only.
- *   - Retained only if FFat fallback remains supported.
 \*********************************************************************************************/
 uint32_t mFileSystem::SubCall__GetFreeStorageSpace__FFat(void)
 {
@@ -1109,46 +1009,6 @@ uint32_t mFileSystem::SubCall__GetFreeStorageSpace__FFat(void)
   return 0;
 #endif
 }
-
-/*********************************************************************************************\
- * SubCall__GetFreeStorageSpace__SD
- *
- * Returns free space on the SD card filesystem in kB.
- *
- * Notes:
- *   - Only active when USE_SDCARD is enabled.
- *   - This should eventually move to a dedicated SD/storage class if SD card
- *     support grows beyond basic file access.
-\*********************************************************************************************/
-uint32_t mFileSystem::SubCall__GetFreeStorageSpace__SD(void)
-{
-#ifndef USE_SDCARD
-  return 0;
-#else
-
-#ifdef ESP8266
-  // Only valid if ufsp currently points to SD, or later if you add sdsp.
-  if (!ufsp || (ufs_type != UFS_TSDC)) {
-    return 0;
-  }
-
-  FSInfo64 fsinfo;
-
-  if (!ufsp->info64(fsinfo)) {
-    ALOG_WRN(PSTR(D_LOG_FILESYSTEM "SD info64 failed"));
-    return 0;
-  }
-
-  return (fsinfo.totalBytes - fsinfo.usedBytes) / 1024;
-#endif
-
-#ifdef ESP32
-  return (SD.totalBytes() - SD.usedBytes()) / 1024;
-#endif
-
-#endif
-}
-
 
 /*********************************************************************************************\
  * low level functions
@@ -1287,12 +1147,9 @@ uint8_t mFileSystem::ConstructJSON_Settings(uint8_t json_level, bool json_append
 {
   JBI->Start();
 
-  JBI->Add_P("InternalFreeKB", GetFreeStorageSpace(FILE_STORAGE_INTERNAL));
-  JBI->Add_P("ActiveFreeKB",   GetFreeStorageSpace(FILE_STORAGE_ACTIVE));
-
-#ifdef USE_SDCARD
-  JBI->Add_P("SdFreeKB",       GetFreeStorageSpace(FILE_STORAGE_SD));
-#endif
+  JBI->Add_P("InternalFreeKB", GetFreeStorageSpace(PFS_STORAGE_INTERNAL));
+  JBI->Add_P("ActiveFreeKB",   GetFreeStorageSpace(PFS_STORAGE_ACTIVE));
+  JBI->Add_P("PFSBackend",     PFS_GetBackendName());
 
   return JBI->End();
 }
@@ -1314,21 +1171,6 @@ void mFileSystem::MQTTHandler_Init(){
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mFileSystem::ConstructJSON_Settings;
   mqtthandler_list.push_back(ptr);
-
-  #ifdef USE_MODULE_FILESYSTEM_SDCARD
-  ptr = &mqtthandler_sdcard;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PSTR("SDCard");
-  ptr->ConstructJSON_function = &mFileSystem::ConstructJSON_SDCard;
-  mqtthandler_list.push_back(ptr);
-#endif
-
-  
 } 
 
 #endif // USE_MODULE_NETWORK_MQTT
@@ -1347,18 +1189,6 @@ void mFileSystem::MQTTHandler_Init(){
 void mFileSystem::parse_JSONCommand(JsonParserObject obj)
 {
   JsonParserToken jtok = 0;
-
-  /************************************************************************************************
-   * SECTION: SD CARD COMMANDS
-   *
-   * Keep SD-specific parsing grouped with SD code.
-   ************************************************************************************************/
-
-  #ifdef USE_MODULE_FILESYSTEM_SDCARD
-  subparse_JSONCommand__SDCards(obj);
-  #endif
-
-
   /************************************************************************************************
    * SECTION: DEBUG COMMANDS
    ************************************************************************************************/
@@ -1461,7 +1291,7 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
 
   readFile(FILE_SYSTEM, filename);
 
-  ALOG_COM(PSTR(D_LOG_SDCARD D_COMMAND_SVALUE_K("ReadFile")), filename);
+  ALOG_COM(PSTR(D_LOG_FILESYSTEM D_COMMAND_SVALUE_K("ReadFile")), filename);
 
 } 
 

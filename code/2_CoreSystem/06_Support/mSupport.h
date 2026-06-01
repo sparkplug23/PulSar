@@ -505,6 +505,10 @@ public:
     char* ReplaceChar(char* p, char find, char replace);
     char* ReplaceCommaWithDot(char* p);    
     char* Unescape(char* buffer, uint32_t* size);
+    void SetSerialBaudrate(int baudrate);
+    void SerialSendRaw(char *codes);
+    uint32_t GetHash(const char *buffer, size_t size);
+    uint8_t GetNormalDistributionRandom(uint8_t mean, uint8_t standard_deviation, uint8_t constrained_min = 0, uint8_t constrained_max = 0);
     #endif
 
     char* LowerCase(char* dest, const char* source);
@@ -514,10 +518,6 @@ public:
 
     bool ValidIpAddress(const char* str);
     bool ParseIPv4(uint32_t* addr, const char* str);
-    
-    #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
-    bool NewerVersion(char* version_str);
-    #endif
     
     void EspRestart(void);
 
@@ -545,12 +545,6 @@ public:
 
     int GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack);
     
-    #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
-    void SetSerialBaudrate(int baudrate);
-    void SerialSendRaw(char *codes);
-    uint32_t GetHash(const char *buffer, size_t size);
-    #endif
-
     void ClaimSerial(void);
     void ShowSource(int source);
         
@@ -601,10 +595,6 @@ public:
     uint32_t loop_delay_temp = millis();
     uint32_t loops_per_second = millis();
     uint32_t this_cycle_ratio = millis();
-
-    #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
-    uint8_t GetNormalDistributionRandom(uint8_t mean, uint8_t standard_deviation, uint8_t constrained_min = 0, uint8_t constrained_max = 0);
-    #endif
 
     static int32_t safeDivideInt(int32_t num, int32_t den);
 

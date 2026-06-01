@@ -351,7 +351,7 @@ const char* mLogging::GetLogLevelNamebyID(uint8_t id) {
     case LOG_LEVEL_DEBUG_TRACE:    return PM_LOG_LEVEL_DEBUG_TRACE_CTR;
     case LOG_LEVEL_ERROR:          return PM_LOG_LEVEL_ERROR_CTR;
     case LOG_LEVEL_WARNING:        return PM_LOG_LEVEL_WARN_CTR;
-    case LOG_LEVEL_DEV_TEST:           return PM_LOG_LEVEL_TEST_CTR;
+    case LOG_LEVEL_DEV_TEST:       return PM_LOG_LEVEL_TEST_CTR;
     case LOG_LEVEL_HIGHLIGHT:      return PM_LOG_LEVEL_HIGHLIGHT_CTR;
     case LOG_LEVEL_IMPORTANT:      return PM_LOG_LEVEL_IMPORTANT_CTR;
     case LOG_LEVEL_INFO:           return PM_LOG_LEVEL_INFO_CTR;
