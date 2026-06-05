@@ -1,6 +1,9 @@
 /**
  * Writes compressed C arrays of data files (web interface)
  * How to use it?
+ * 
+ * https://nodejs.org/en/download
+ * 
  *
  * 1) Install Node 11+ and npm
  * 2) npm install
