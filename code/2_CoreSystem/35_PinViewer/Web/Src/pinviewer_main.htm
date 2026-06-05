@@ -1,0 +1,384 @@
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PulSar PinViewer</title>
+<style>
+:root{
+  --bg:#101216;
+  --panel:#181b21;
+  --panel2:#20242c;
+  --line:#303744;
+  --text:#d8dde7;
+  --muted:#8992a3;
+  --bad:#ff5252;
+  --warn:#ffb74d;
+  --ok:#69f0ae;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}
+header{
+  padding:14px 18px;
+  background:#0b0d11;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+h1{font-size:18px;margin:0}
+.small{font-size:12px;color:var(--muted)}
+.layout{
+  display:grid;
+  grid-template-columns:minmax(280px,1.3fr) minmax(340px,0.9fr);
+  gap:14px;
+  padding:14px;
+}
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:8px;
+  overflow:hidden;
+}
+.card h2{
+  font-size:14px;
+  margin:0;
+  padding:10px 12px;
+  background:var(--panel2);
+  border-bottom:1px solid var(--line);
+}
+.card-body{padding:12px}
+.pin-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(58px,1fr));
+  gap:8px;
+}
+.pin{
+  border:1px solid var(--line);
+  background:#12151b;
+  border-radius:8px;
+  min-height:62px;
+  padding:6px;
+  position:relative;
+}
+.pin.invalid{opacity:0.18}
+.pin.reserved{border-color:#555;background:#171717}
+.pin.conflict{outline:2px solid var(--bad)}
+.pin.locked{box-shadow:0 0 0 2px var(--warn) inset}
+.pin-num{font-weight:bold;font-size:13px}
+.pin-fn{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+.dot{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  position:absolute;
+  top:6px;
+  right:6px;
+  border:1px solid rgba(255,255,255,0.35);
+}
+.level{
+  position:absolute;
+  bottom:6px;
+  right:6px;
+  font-size:10px;
+  color:#000;
+  background:#777;
+  border-radius:10px;
+  padding:1px 5px;
+}
+.level.high{background:var(--ok)}
+.level.low{background:#78909c}
+.bad{color:var(--bad)}
+.warn{color:var(--warn)}
+.ok{color:var(--ok)}
+table{
+  border-collapse:collapse;
+  width:100%;
+  font-size:12px;
+}
+th,td{
+  border-bottom:1px solid var(--line);
+  padding:7px;
+  text-align:left;
+  vertical-align:top;
+}
+th{color:#b7c0d1;background:#171a20}
+tr:hover{background:#20242c}
+.swatch{
+  display:inline-block;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  margin-right:6px;
+  vertical-align:-1px;
+  border:1px solid rgba(255,255,255,0.35);
+}
+.toolbar{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-bottom:10px;
+}
+button{
+  background:#263143;
+  color:var(--text);
+  border:1px solid #3a465a;
+  padding:6px 10px;
+  border-radius:5px;
+  cursor:pointer;
+}
+button:hover{background:#30405a}
+pre{
+  white-space:pre-wrap;
+  word-break:break-word;
+  color:#b8c1d4;
+  font-size:11px;
+}
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>PulSar PinViewer</h1>
+    <div class="small">Live GPIO state + temporary allocation metadata</div>
+  </div>
+  <div class="small" id="status">connecting</div>
+</header>
+
+<div class="layout">
+  <div class="card">
+    <h2>Physical Pins</h2>
+    <div class="card-body">
+      <div class="toolbar">
+        <button onclick="reloadAll()">Reload metadata</button>
+        <button onclick="forceRefresh()">Force refresh</button>
+        <span class="small" id="heap"></span>
+      </div>
+      <div class="pin-grid" id="pins"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card" style="margin-bottom:14px">
+      <h2>Assigned Groups / Modules</h2>
+      <div class="card-body">
+        <table>
+          <thead>
+            <tr>
+              <th>Group</th>
+              <th>Addresses / Users</th>
+            </tr>
+          </thead>
+          <tbody id="groups"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Pin Allocation Table</h2>
+      <div class="card-body">
+        <table>
+          <thead>
+            <tr>
+              <th>Pin</th>
+              <th>Function</th>
+              <th>Owner</th>
+              <th>Flags</th>
+            </tr>
+          </thead>
+          <tbody id="pinTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let pins = {};
+let groups = {};
+
+function esc(v){
+  return String(v ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#039;'
+  }[c]));
+}
+
+function stateText(v){
+  if(v === 1) return 'HIGH';
+  if(v === 0) return 'LOW';
+  if(v === -1) return 'INV';
+  return '?';
+}
+
+function pinClass(p){
+  let c = 'pin';
+  if(!p.valid) c += ' invalid';
+  if(p.reserved) c += ' reserved';
+  if(p.locked) c += ' locked';
+  if(p.conflict) c += ' conflict';
+  return c;
+}
+
+function renderPins(){
+  const el = document.getElementById('pins');
+  const keys = Object.keys(pins).map(Number).sort((a,b)=>a-b);
+  let html = '';
+
+  for(const k of keys){
+    const p = pins[k];
+    const colour = p.colour || '#666';
+    const level = stateText(p.state);
+    const levelClass = p.state === 1 ? 'high' : 'low';
+
+    html += `
+      <div class="${pinClass(p)}" title="${esc(p.owner)} / ${esc(p.group)}">
+        <div class="dot" style="background:${esc(colour)}"></div>
+        <div class="pin-num">GPIO ${p.pin}</div>
+        <div class="pin-fn">${esc(p.function || 'None')}</div>
+        <div class="pin-fn">${esc(p.owner || '')}</div>
+        <div class="level ${levelClass}">${level}</div>
+      </div>
+    `;
+  }
+
+  el.innerHTML = html;
+}
+
+function renderPinTable(){
+  const el = document.getElementById('pinTable');
+  const keys = Object.keys(pins).map(Number).sort((a,b)=>a-b);
+  let html = '';
+
+  for(const k of keys){
+    const p = pins[k];
+    if(!p.used && !p.conflict && !p.locked && !p.reserved) continue;
+
+    let flags = [];
+    if(p.reserved) flags.push('<span class="warn">reserved</span>');
+    if(p.locked) flags.push('<span class="warn">locked</span>');
+    if(p.conflict) flags.push('<span class="bad">conflict</span>');
+    if(p.used) flags.push('<span class="ok">used</span>');
+
+    html += `
+      <tr>
+        <td>GPIO ${p.pin}<br><span class="small">${esc(p.direction)} / ${esc(p.share)}</span></td>
+        <td><span class="swatch" style="background:${esc(p.colour || '#666')}"></span>${esc(p.function)}</td>
+        <td>${esc(p.owner)}<br><span class="small">${esc(p.group)}</span></td>
+        <td>${flags.join('<br>')}</td>
+      </tr>
+    `;
+  }
+
+  el.innerHTML = html || '<tr><td colspan="4" class="small">No assigned pins yet</td></tr>';
+}
+
+function renderGroups(){
+  const el = document.getElementById('groups');
+  const keys = Object.keys(groups).map(Number).sort((a,b)=>a-b);
+  let html = '';
+
+  for(const k of keys){
+    const g = groups[k];
+    let addresses = '';
+
+    if(g.addresses && g.addresses.length){
+      addresses = g.addresses.map(a => `${esc(a.address)} - ${esc(a.module)}`).join('<br>');
+    }else{
+      addresses = '<span class="small">No address list</span>';
+    }
+
+    html += `
+      <tr>
+        <td><span class="swatch" style="background:${esc(g.colour || '#666')}"></span>${esc(g.name)}</td>
+        <td>${addresses}</td>
+      </tr>
+    `;
+  }
+
+  el.innerHTML = html || '<tr><td colspan="2" class="small">No groups</td></tr>';
+}
+
+function updatePins(list){
+  for(const p of list){
+    pins[p.pin] = Object.assign(pins[p.pin] || {}, p);
+  }
+
+  renderPins();
+  renderPinTable();
+}
+
+async function fetchJson(url){
+  const response = await fetch(url);
+  const text = await response.text();
+
+  try{
+    return JSON.parse(text);
+  }catch(e){
+    console.error(url + ' returned non-JSON:', text);
+    document.getElementById('status').textContent = url + ' returned non-JSON';
+    throw e;
+  }
+}
+
+async function reloadAll(){
+  const pinJson = await fetchJson('/pinviewer_pinallocations');
+
+  pins = {};
+  updatePins(pinJson.pins || []);
+
+  const groupJson = await fetchJson('/pinviewer_groups');
+
+  groups = {};
+  for(const g of (groupJson.groups || [])){
+    groups[g.group_id] = g;
+  }
+  renderGroups();
+
+  const espJson = await fetchJson('/pinviewer_espinfo');
+  document.getElementById('heap').textContent = `heap=${espJson.free_heap}`;
+}
+
+async function forceRefresh(){
+  await fetch('/pinviewer_sampling?ms=250');
+  await reloadAll();
+}
+
+reloadAll();
+
+const es = new EventSource('/pinviewer_events');
+
+es.addEventListener('open', () => {
+  document.getElementById('status').textContent = 'connected';
+});
+
+es.addEventListener('status', e => {
+  document.getElementById('status').textContent = e.data;
+});
+
+es.addEventListener('gpio-state', e => {
+  const msg = JSON.parse(e.data);
+  updatePins(msg.pins || []);
+  document.getElementById('status').textContent = `live ms=${msg.ms}`;
+});
+
+es.addEventListener('free_heap', e => {
+  document.getElementById('heap').textContent = `heap=${e.data}`;
+});
+
+es.onerror = () => {
+  document.getElementById('status').textContent = 'disconnected';
+};
+</script>
+</body>
+</html>

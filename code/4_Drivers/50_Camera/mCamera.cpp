@@ -842,6 +842,9 @@ void mCamera::SetDefaults(uint32_t upgrade) {
 
 
 uint32_t mCamera::Setup(int32_t fsiz) {
+
+  rt.camera_init = false;
+
   // we must stall until re-enabled
   WaitEnable();
 
@@ -1057,6 +1060,14 @@ uint32_t mCamera::Setup(int32_t fsiz) {
     rt.lastCamError = 2;
     return 0;
   }
+
+  if(wc_fb)
+  {
+    rt.camera_init = true;
+    ALOG_INF(PSTR(D_LOG_CAMERA "Camera init success, frame size %d, fb size %d"), wc_fb->width, wc_fb->len);
+  }
+
+
   rt.width = wc_fb->width;
   rt.height = wc_fb->height;
   esp_camera_fb_return(wc_fb);
@@ -2329,6 +2340,9 @@ void mCamera::parse_JSONCommand(JsonParserObject obj)
     ALOG_INF(PSTR("Free PSRAM: %u\n"), ESP.getFreePsram());
   }
 
+  // Only allow commands if camera is initialised, else we could have mutex problems if we try to change settings mid-initialisation
+  if(!rt.camera_init) return;
+
   JsonParserObject jobj = 0; 
   
   if(!(jobj = obj[D_MODULE_DRIVERS__CAMERA_CTR].getObject()))
@@ -2708,6 +2722,7 @@ void mCamera::CmndWebcamGetPicStore(int bnum) {
 
 void mCamera::CmndWebcamResolution(uint8_t resolution) 
 {
+      DEBUG_LINE_HERE3
     int8_t reinit = 0;
     
     tkr_iDrivers->webcam_config.resolution = resolution;
@@ -2715,20 +2730,33 @@ void mCamera::CmndWebcamResolution(uint8_t resolution)
       Setup(tkr_iDrivers->webcam_config.resolution);
     } else {
       // WcSetOptions(0, tkr_iDrivers->webcam_config.resolution);
+
+      DEBUG_LINE_HERE3
       
       sensor_t* s = esp_camera_sensor_get();
       int32_t res = 0;
-      if (resolution >= 0) { s->set_framesize(s, (framesize_t)resolution); }
+      DEBUG_LINE_HERE3
+      if (resolution >= 0) { 
+      DEBUG_LINE_HERE3
+        s->set_framesize(s, (framesize_t)resolution);  // crash here
+      DEBUG_LINE_HERE3
+      }
+      DEBUG_LINE_HERE3
       res = s->status.framesize;
       rt.width = 0;
       rt.height = 0;
       rt.last_frame_len = 0;
+      DEBUG_LINE_HERE3
       rt.frameIntervalsus = (uint32_t)(((float)nativeIntervals20ms[resolution]/((float)tkr_iDrivers->webcam_clk/20.0))*1000.0);
       stats.maxfps = (uint32_t)((float)1000000.0/(float)rt.frameIntervalsus);
 
+      DEBUG_LINE_HERE3
       // WcFeature is lost on resolution change
+      DEBUG_LINE_HERE3
       ApplySettings();
+      DEBUG_LINE_HERE3
     }    
+      DEBUG_LINE_HERE3
     
 }
 

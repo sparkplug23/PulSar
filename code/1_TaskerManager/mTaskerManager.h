@@ -346,6 +346,10 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
   #include "2_CoreSystem/06_Support/mSupport.h"
   #define   tkr_sup                               static_cast<mSupport*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_SUPPORT_ID))
 #endif 
+#ifdef USE_MODULE_CORE_PINVIEWER
+  #include "2_CoreSystem/35_PinViewer/mPinViewer.h"
+  #define   tkr_pinviewer                              static_cast<mPinViewer*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_PINVIEWER_ID))
+#endif 
 #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   #include "2_CoreSystem/99_DevelopmentDebugging/mDevelopmentDebugging.h"
   #define   tkr_debug                             static_cast<mDevelopmentDebugging*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID))

@@ -36,6 +36,7 @@
 #endif
 
 #define D_MODULE_CORE_HARDWAREPINS_CTR            "hardwarepins"
+#define D_MODULE_CORE_PINVIEWER_CTR               "pinviewer"
 #define D_MODULE_CORE_SERIAL_UART_CTR             "serialuart"
 #define D_MODULE_CORE_SETTINGS_CTR                "settings"
 #define D_MODULE_CORE_SUPPORT_CTR                 "support"

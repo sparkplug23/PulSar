@@ -1,7 +1,7 @@
 {
   "env_name": "tg_cam__wroover_01",
-  "created_utc": "2026-05-31T21:58:01Z",
-  "created_epoch": 1780264681,
+  "created_utc": "2026-06-04T23:21:53Z",
+  "created_epoch": 1780615313,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\tg_cam__wroover_01",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "dev_mqtt_transport",
-    "commit": "952f2f54aa516a195113f87a9249b2f899a28dd6",
-    "describe": "952f2f54-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_Cameras.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/01_Settings/mSettings.cpp\n D code/2_CoreSystem/03_FileSystem/Module_SaveLoad.cpp\n D code/2_CoreSystem/03_FileSystem/PFS_FlashStorage.cpp\n D code/2_CoreSystem/03_FileSystem/PFS_MinimalStorage.cpp\n D code/2_CoreSystem/03_FileSystem/SDCard_Base.cpp\n D code/2_CoreSystem/03_FileSystem/SDCard_Buffers.cpp\n D code/2_CoreSystem/03_FileSystem/SDCard_Web.cpp\n M code/2_CoreSystem/03_FileSystem/mFileSystem.cpp\n M code/2_CoreSystem/03_FileSystem/mFileSystem.h\n M code/3_Network/21_WebServer/Webpages/Generated/html_other.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_npb_feb26/NeoPixelBus\n M saved_compiles/tg_cam__wroover_01/build_meta.json\n M saved_compiles/tg_cam__wroover_01/firmware.elf\n?? code/2_CoreSystem/03_FileSystem/Storage_Modules.cpp\n?? code/2_CoreSystem/03_FileSystem/Storage_System.cpp"
+    "commit": "9e6e742225c4377902f41703a01c03a9cce4be56",
+    "describe": "9e6e7422-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_Cameras.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/1_TaskerManager/mTaskerManager.cpp\n M code/1_TaskerManager/mTaskerManager.h\n M code/2_CoreSystem/05_HardwarePins/mPins.cpp\n M code/2_CoreSystem/05_HardwarePins/mPins.h\n M code/2_CoreSystem/08_Logging/mLogging.cpp\n M code/2_CoreSystem/11_Languages/mLanguageDefault.h\n M code/4_Drivers/50_Camera/mCamera.cpp\n M code/4_Drivers/50_Camera/mCamera.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_npb_feb26/NeoPixelBus\n M saved_compiles/decode_serial_crashdump_esp32.py\n M saved_compiles/tg_cam__wroover_01/build_meta.json\n M saved_compiles/tg_cam__wroover_01/firmware.elf\n M tools/cdata_submodules.js\n?? code/2_CoreSystem/35_PinViewer/"
   }
 }

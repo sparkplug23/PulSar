@@ -236,6 +236,10 @@ struct {
   wc_rtspclient * volatile rtsp_client;
   uint8_t rtsp_start;
   #endif // ENABLE_RTSPSERVER
+
+
+  bool camera_init = false;
+
 } rt;
 
 struct {

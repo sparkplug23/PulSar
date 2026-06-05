@@ -60,6 +60,11 @@
 #define ENABLE_DEVFEATURE_ESP32__AUTO_MUTEX
 #define ENABLE_RTSPSERVER
 
+
+// #define ENABLE_DEBUGFEATURE_SPLASH__PIN_ALLOCATIONS
+
+// #define USE_MODULE_CORE_PINVIEWER
+
 /***********************************
  * SECTION: Module/GPIO Configs
 ************************************/  

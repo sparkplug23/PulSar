@@ -127,17 +127,17 @@ void AddLogOutput(uint8_t loglevel, const char* log_data)
       }
 
       // creates line formatted with \1 meaning EOL
-      snprintf_P(
-        tkr_log->weblog.buffer,
+      snprintf_P(tkr_log->weblog.buffer,
         sizeof(tkr_log->weblog.buffer),
         PSTR("%s%c%s %S %s\1"),
         tkr_log->weblog.buffer,
-        tkr_log->weblog.index++,
+        tkr_log->weblog.index,
         mxtime,
         tkr_log->GetLogLevelNamebyID(loglevel),
         log_data
       );
-
+      
+      tkr_log->weblog.index++;
       if (!tkr_log->weblog.index) {
         tkr_log->weblog.index++;   // Index 0 is not allowed as it is the end of char string
       }
@@ -386,7 +386,7 @@ uint8_t mLogging::GetLogLevelIDbyName(const char* name) {
 
 
 int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
-{ // KEEP TASKER ON TOP
+{
 
   switch(function){
     case TASK_LOOP: 
@@ -438,7 +438,6 @@ int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-
 
     case TASK_NETWORK_CONNECTED__WIFI:
       StartTelnetServer();
