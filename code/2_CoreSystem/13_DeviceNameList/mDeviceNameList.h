@@ -83,7 +83,7 @@ class DeviceNameList
 
     char* GetTextIndexed(char* destination, size_t destination_size, uint16_t index, const char* haystack);
 
-    int8_t AddDeviceName(const char* name_ctr, int16_t class_id, int8_t device_id);
+    int8_t AddDeviceName(const char* name_ctr, int16_t class_id, int8_t device_id = 0);
     int8_t RemoveDeviceName(const char* name_ctr, int16_t class_id, int8_t device_id);
 
     bool GetModuleAndSensorIDs(const char* module_name, const char* sensor_name, uint16_t* out_module_id, uint8_t* out_sensor_id);

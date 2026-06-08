@@ -672,6 +672,9 @@ void mSensorsInterface::Init(void)
   AddFilteredSensor(tkr_bme->GetModuleUniqueID(), 0, 10, 60, SENSOR_TYPE_TEMPERATURE_ID, "BME10Sec");
   #endif
 
+  
+  DLI->AddDeviceName("SensorInterface",GetModuleUniqueID());
+
 
 
 }

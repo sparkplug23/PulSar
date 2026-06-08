@@ -222,23 +222,16 @@ class mSensorsInterface :
       if(index >= GetSensorCount()) {value->sensor_type.push_back(0); Serial.println("returning invalid"); return ;}
       if(system_location.isvalid)
       {
-        value->sensor_type.push_back(SENSOR_TYPE_LATITUDE_ID);
-        value->data_f.push_back(system_location.latitude);
-        value->sensor_type.push_back(SENSOR_TYPE_LONGITUDE_ID);
-        value->data_f.push_back(system_location.longitude);
-        value->sensor_type.push_back(SENSOR_TYPE_SPEED_ID);
-        value->data_f.push_back(system_location.speed);
-        value->sensor_type.push_back(SENSOR_TYPE_ALTITUDE_ID);
-        value->data_f.push_back(system_location.altitude);
-        value->sensor_type.push_back(SENSOR_TYPE_LOCATION_ACCURACY_ID);
-        value->data_f.push_back(system_location.accuracy_position);
-        value->sensor_type.push_back(SENSOR_TYPE_LOCATION_SATELLITES_USED_ID);
-        value->data_f.push_back(system_location.satellites_used);
+        value->sensor_type.push_back(SENSOR_TYPE_LATITUDE_ID);                 value->data_f.push_back(system_location.latitude);
+        value->sensor_type.push_back(SENSOR_TYPE_LONGITUDE_ID);                value->data_f.push_back(system_location.longitude);
+        value->sensor_type.push_back(SENSOR_TYPE_SPEED_ID);                    value->data_f.push_back(system_location.speed);
+        value->sensor_type.push_back(SENSOR_TYPE_ALTITUDE_ID);                 value->data_f.push_back(system_location.altitude);
+        value->sensor_type.push_back(SENSOR_TYPE_LOCATION_ACCURACY_ID);        value->data_f.push_back(system_location.accuracy_position);
+        value->sensor_type.push_back(SENSOR_TYPE_LOCATION_SATELLITES_USED_ID); value->data_f.push_back(system_location.satellites_used);
         value->sensor_id = index;
         return;
       }
-      // Return nothing if we reach here
-      value->sensor_type.push_back(0); value->sensor_id = 0; return ;//Serial.println("returning invalid2"); 
+      value->sensor_type.push_back(0); value->sensor_id = 0; return; // Return nothing if we reach here
     };
    
     

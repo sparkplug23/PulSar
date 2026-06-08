@@ -136,6 +136,7 @@
 // #define D_MODULE_SENSORS__TOF_VL53L1X__CTR "tof_vl53l1x"
 // #define D_MODULE_SENSORS__RADAR_HLK_LD2410__CTR "radar_hlk_ld2410"
 // #define D_MODULE_SENSORS__GPS_MODEM__CTR          "gps_modem"
+#define D_MODULE_SENSORS_ESP32_TEMPERATURE_CTR "esp32_temperature"
 // #define D_MODULE_CONTROLLER_BLINDS_CTR            "blinds"
 #define D_MODULE_CONTROLLER_HVAC_CTR              "hvac"
 // #define D_MODULE_CONTROLLER_RADIATORFAN_CTR       "radiatorfan"

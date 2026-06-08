@@ -606,7 +606,7 @@ struct PinAllocationFlags
       uint16_t active_high       : 1;  // Logical active-high output/input
       uint16_t inverted          : 1;  // Logical inverted behaviour
 
-      uint16_t reserved12        : 1;
+      uint16_t sensitive_to_probe : 1; // Do not digitalRead/probe this pin as it can conflict with normal operation (eg camera with pinned FreeRTOS tasks)
       uint16_t reserved13        : 1;
       uint16_t reserved14        : 1;
       uint16_t disabled          : 1;  // Intentionally disabled/unavailable

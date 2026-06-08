@@ -66,6 +66,16 @@
 // #define USE_MODULE_CORE_PINVIEWER
 
 /***********************************
+* SECTION: Sensors Configs
+************************************/  
+
+#define USE_MODULE_SENSORS_INTERFACE
+
+#define USE_MODULE_SENSORS_ESP32_TEMPERATURE
+#define ENABLE_FEATURE_INTERNAL_CHIP_TEMPERATURE__ALLOW_CLASSIC_ESP32
+
+
+/***********************************
  * SECTION: Module/GPIO Configs
 ************************************/  
 
@@ -124,12 +134,36 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 * SECTION: Driver Configs
 ************************************/  
 
+#define ESP32
+
 #define USE_MODULE_CORE_FILESYSTEM
+
+#define USE_MODULE_DRIVERS_INTERFACE
+
+#define USE_MODULE_DRIVERS_SDCARD
+
+// #define USE_MODULE_FILESYSTEM_SDCARD
+#define ENABLE_FEATURE_FILESYSTEM__SDCARD_MMC
 
 #define USE_MODULE_DRIVERS__CAMERA
 #define CAMERA_MODEL_WROVER_KIT
 #define ENABLE_DEVFEATURE_ESP32__AUTO_MUTEX
 #define ENABLE_RTSPSERVER
+
+
+// #define ENABLE_DEBUGFEATURE_SPLASH__PIN_ALLOCATIONS
+
+// #define USE_MODULE_CORE_PINVIEWER
+
+/***********************************
+* SECTION: Sensors Configs
+************************************/  
+
+#define USE_MODULE_SENSORS_INTERFACE
+
+#define USE_MODULE_SENSORS_ESP32_TEMPERATURE
+#define ENABLE_FEATURE_INTERNAL_CHIP_TEMPERATURE__ALLOW_CLASSIC_ESP32
+
 
 /***********************************
  * SECTION: Module/GPIO Configs
@@ -141,7 +175,11 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"
-    "\"2\":\"" D_GPIO_FUNCTION_STATUS_LED_CTR  "\""
+    #ifdef USE_MODULE_DRIVERS_SDCARD
+    "\"15\":\"" D_GPIO_FUNCTION_SDCARD_MMC_CMD_CTR  "\","
+    "\"14\":\"" D_GPIO_FUNCTION_SDCARD_MMC_CLK_CTR   "\","   
+    "\"2\":\"" D_GPIO_FUNCTION_SDCARD_MMC_D0_CTR   "\""
+    #endif // USE_MODULE_FILESYSTEM_SDCARD  
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -155,8 +193,8 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 "{"
   "\"" D_MODULE_DRIVERS__CAMERA_CTR "\":{"
-    "\"Mirror\":1,"
-      "\"Flip\":1,"
+    "\"Mirror\":0,"
+      "\"Flip\":0,"
       "\"AWB\":0,"
       "\"Resolution\":12" //12 max
     "}"

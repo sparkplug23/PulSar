@@ -538,6 +538,7 @@ void mSupport::AppendDList(char* buffer, uint16_t buflen, const char* formatP, .
 #ifdef ESP32
 
 #ifdef ENABLE_DEVFEATURE_ESP32__AUTO_MUTEX
+
 /*********************************************************************************************\
  * ESP32 AutoMutex
 \*********************************************************************************************/
@@ -548,7 +549,7 @@ void mSupport::AppendDList(char* buffer, uint16_t buflen, const char* formatP, .
 // void *mutex = nullptr;
 //
 // then protect any function with
-// TasAutoMutex m(&mutex, "somename");
+// AutoMutex m(&mutex, "somename");
 // - mutex is automatically initialised if not already intialised.
 // - it will be automagically released when the function is over.
 // - the same thread can take multiple times (recursive).
@@ -556,72 +557,112 @@ void mSupport::AppendDList(char* buffer, uint16_t buflen, const char* formatP, .
 // - if take=false at creat, it will not be initially taken.
 // - name is used in serial log of mutex deadlock.
 // - maxWait in ticks is how long it will wait before failing in a deadlock scenario (and then emitting on serial)
-// class TasAutoMutex {
+// class AutoMutex {
 //   SemaphoreHandle_t mutex;
 //   bool taken;
 //   int maxWait;
 //   const char *name;
 //   public:
-//     TasAutoMutex(SemaphoreHandle_t* mutex, const char *name = "", int maxWait = 40, bool take=true);
-//     ~TasAutoMutex();
+//     AutoMutex(SemaphoreHandle_t* mutex, const char *name = "", int maxWait = 40, bool take=true);
+//     ~AutoMutex();
 //     void give();
 //     void take();
 //     static void init(SemaphoreHandle_t* ptr);
 // };
 //////////////////////////////////////////
+mSupport::AutoMutex::AutoMutex(
+  SemaphoreHandle_t* mutex_a,
+  const char* name_a,
+  int maxWait_a,
+  bool take_a
+)
+{
+  mutex = (SemaphoreHandle_t)nullptr;
+  taken = false;
+  maxWait = maxWait_a;
+  name = name_a ? name_a : "";
 
-mSupport::TasAutoMutex::TasAutoMutex(SemaphoreHandle_t*mutex, const char *name, int maxWait, bool take) {
-  if (mutex) {
-    if (!(*mutex)){
-      TasAutoMutex::init(mutex);
-    }
-    this->mutex = *mutex;
-    this->maxWait = maxWait;
-    this->name = name;
-    if (take) {
-      this->taken = xSemaphoreTakeRecursive(this->mutex, this->maxWait);
-//      if (!this->taken){
-//        Serial.printf("\r\nMutexfail %s\r\n", this->name);
-//      }
-    }
-  } else {
-    this->mutex = (SemaphoreHandle_t)nullptr;
+  if (!mutex_a) {
+    return;
   }
-}
 
-mSupport::TasAutoMutex::~TasAutoMutex() {
-  if (this->mutex) {
-    if (this->taken) {
-      xSemaphoreGiveRecursive(this->mutex);
-      this->taken = false;
-    }
+  if (!(*mutex_a)) {
+    AutoMutex::init(mutex_a);
   }
-}
 
-void mSupport::TasAutoMutex::init(SemaphoreHandle_t* ptr) {
-  SemaphoreHandle_t mutex = xSemaphoreCreateRecursiveMutex();
-  (*ptr) = mutex;
-  // needed, else for ESP8266 as we will initialis more than once in logging
-//  (*ptr) = (void *) 1;
-}
+  mutex = *mutex_a;
 
-void mSupport::TasAutoMutex::give() {
-  if (this->mutex) {
-    if (this->taken) {
-      xSemaphoreGiveRecursive(this->mutex);
-      this->taken= false;
+  if (!mutex) {
+    Serial.printf("\r\nMutexcreatefail %s\r\n", name);
+    return;
+  }
+
+  if (take_a) {
+    taken = xSemaphoreTakeRecursive(mutex, maxWait);
+
+    if (!taken) {
+      Serial.printf("\r\nMutexfail %s\r\n", name);
     }
   }
 }
 
-void mSupport::TasAutoMutex::take() {
-  if (this->mutex) {
-    if (!this->taken) {
-      this->taken = xSemaphoreTakeRecursive(this->mutex, this->maxWait);
-//      if (!this->taken){
-//        Serial.printf("\r\nMutexfail %s\r\n", this->name);
-//      }
-    }
+
+mSupport::AutoMutex::~AutoMutex()
+{
+  give();
+}
+
+
+void mSupport::AutoMutex::init(SemaphoreHandle_t* ptr)
+{
+  if (!ptr) {
+    return;
+  }
+
+  if (*ptr) {
+    return;  // Already initialised
+  }
+
+  SemaphoreHandle_t new_mutex = xSemaphoreCreateRecursiveMutex();
+
+  if (!new_mutex) {
+    Serial.printf("\r\nAutoMutex create failed\r\n");
+    return;
+  }
+
+  *ptr = new_mutex;
+}
+
+
+void mSupport::AutoMutex::give()
+{
+  if (!mutex) {
+    return;
+  }
+
+  if (!taken) {
+    return;
+  }
+
+  xSemaphoreGiveRecursive(mutex);
+  taken = false;
+}
+
+
+void mSupport::AutoMutex::take()
+{
+  if (!mutex) {
+    return;
+  }
+
+  if (taken) {
+    return;
+  }
+
+  taken = xSemaphoreTakeRecursive(mutex, maxWait);
+
+  if (!taken) {
+    Serial.printf("\r\nMutexfail %s\r\n", name);
   }
 }
 

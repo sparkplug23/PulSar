@@ -551,6 +551,10 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
   #include "5_Sensors/30_ADCInternal/mADCInternal.h"
   #define tkr_adc_internal                       static_cast<mADCInternal*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_ADC_INTERNAL_ID))
 #endif
+#ifdef USE_MODULE_SENSORS_ESP32_TEMPERATURE
+  #include "5_Sensors/32_InternalChip__TempEsp32/mESP32Temperature.h"
+  #define tkr_esp32_temp                         static_cast<mESP32Temperature*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_ESP32_TEMPERATURE_ID))
+#endif
 #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   #include "5_Sensors/50_GPS_Serial/_mGPS_Serial.h"
   #define tkr_gps                                static_cast<mGPS_Serial*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS__GPS_SERIAL_ID))

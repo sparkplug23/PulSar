@@ -413,7 +413,7 @@ class mSupport :
 // void *mutex = nullptr;
 //
 // then protect any function with
-// TasAutoMutex m(&mutex, "somename");
+// AutoMutex m(&mutex, "somename");
 // - mutex is automatically initialised if not already intialised.
 // - it will be automagically released when the function is over.
 // - the same thread can take multiple times (recursive).
@@ -422,14 +422,14 @@ class mSupport :
 // - name is used in serial log of mutex deadlock.
 // - maxWait in ticks is how long it will wait before failing in a deadlock scenario (and then emitting on serial)
 // Nested class
-class TasAutoMutex {
+class AutoMutex {
   SemaphoreHandle_t mutex;
   bool taken;
   int maxWait;
   const char *name;
 public:
-  TasAutoMutex(SemaphoreHandle_t* mutex, const char *name = "", int maxWait = 40, bool take=true);
-  ~TasAutoMutex();
+  AutoMutex(SemaphoreHandle_t* mutex, const char *name = "", int maxWait = 40, bool take=true);
+  ~AutoMutex();
   void give();
   void take();
   static void init(SemaphoreHandle_t* ptr);

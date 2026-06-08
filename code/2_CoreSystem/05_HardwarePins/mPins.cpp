@@ -2832,6 +2832,7 @@ void mPins::Splash__PinAllocations(void)
       if(allocation->flags.required && pos < sizeof(flags)-1) { flags[pos++] = 'Q'; }
       if(allocation->flags.from_dummy && pos < sizeof(flags)-1) { flags[pos++] = 'D'; }
       if(allocation->flags.disabled && pos < sizeof(flags)-1) { flags[pos++] = 'X'; }
+      if(allocation->flags.sensitive_to_probe && pos < sizeof(flags)-1) { flags[pos++] = 'P'; }
 
       flags[pos] = 0;
     }

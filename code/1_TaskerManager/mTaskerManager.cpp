@@ -545,6 +545,9 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   addTasker(new mGPS_Serial());
   #endif
+  #ifdef USE_MODULE_SENSORS_ESP32_TEMPERATURE
+  addTasker(new mESP32Temperature());
+  #endif
   DEBUG_LINE_HERE
   /**
    * @brief Lights

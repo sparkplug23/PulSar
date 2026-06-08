@@ -18,16 +18,16 @@ DeviceNameList::DeviceNameList()
 
 DeviceNameList* DeviceNameList::GetInstance()
 {
-  ALOG_INF(PSTR("DLI GetInstance enter"));
+  // ALOG_INF(PSTR("DLI GetInstance enter"));
 
   if(instance == nullptr)
   {
-    ALOG_INF(PSTR("DLI instance null, before new"));
+    // ALOG_INF(PSTR("DLI instance null, before new"));
     instance = new DeviceNameList();
-    ALOG_INF(PSTR("DLI instance after new = %p"), instance);
+    // ALOG_INF(PSTR("DLI instance after new = %p"), instance);
   }
 
-  ALOG_INF(PSTR("DLI GetInstance return = %p"), instance);
+  // ALOG_INF(PSTR("DLI GetInstance return = %p"), instance);
   return instance;
 }
 
