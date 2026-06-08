@@ -816,7 +816,7 @@
   // //#define DATA_BUFFER_PAYLOAD_MAX_LENGTH      3000 //needed for db sensosrs, but currently causes crash in lighting
   // // #define MQTT_MAX_PACKET_SIZE                3000
 
-  // #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_INTERFACE
   //   #
   // //   #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
   // // #define USE_MODULE_SENSORS_DS18X20
@@ -824,11 +824,11 @@
   // //   #define ENABLE_DEVFEATURE_DS18B20_SEARCHING_SENSOR_LOCATION_WITH_ADDRESS_TEMP_SPLASH
   
   // #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
-  //   #define USE_MODULE_SENSORS_DS18X20
-  //     #define DS18X20_MAX_SENSORS 20
-  //       #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
+    #define USE_MODULE_SENSORS_DS18X20
+      #define DS18X20_MAX_SENSORS 20
+        #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
   // #endif 
-  // #define USE_MODULE_SENSORS_BME
+  #define USE_MODULE_SENSORS_BME
     
 
   // #ifdef ENABLE_TEMPLATE_SECTION__DISPLAY_OLED
@@ -883,59 +883,29 @@
    * SECTION: Template Configs
   ************************************/    
 
+  /***
+   * 23 = dallas
+   * 21/22 i2c
+   * 4 = PIR
+   */
+
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"26\":\""  D_GPIO_FUNCTION_REL1_CTR    "\","   // Immersion = Also add additonal LED with relay pin
-      #endif
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
+      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"4\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," // Group 1 = Basic Set, use just these until device is stable
-      // "\"19\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR  "\"," // Group 2 = Detailed, use these only after stress testing with 3 pins for sensors with rewrite. Read datasheet.
+      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\","
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"32\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","       // Stairs
-      "\"4\":\""  D_GPIO_FUNCTION_SWT2_CTR "\","       // Landing
-      "\"25\":\"" D_GPIO_FUNCTION_SWT3_CTR "\","       // Hotpress (negating need of button? or use non-momentary switch to enable/disable it)
+      "\"4\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","       // Room
       #endif 
-      #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-        // "\"26\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Orange - Immersional Relay
-        // "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
-        // "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
-        // "\"13\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Brown - Immersion Relay (Label wrong, )
-        #ifdef USE_RGB_OUT_LANDING_PANEL
-        "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
-        #endif
-        #ifdef USE_RGB_OUT_TANK
-        "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
-        #endif      
-        #ifdef ENABLE_DEVFEATURE_MULTIPLE_PIXEL_PINS
-        "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA2_CTR  "\","
-        "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA3_CTR  "\","
-        #endif
-      #endif
-      #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
-      #endif
-      #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"33\":\"" D_GPIO_FUNCTION_KEY1_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_CTR  "\","
-      #endif
-      #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"12\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\"," 
-      "\"21\":\""  D_GPIO_FUNCTION_LED3_INV_CTR "\"," 
-      #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""  // Also optional physical LED to be made external to box (buy one of those drill through ones!)
-      // 5  // i2c oled needs to be another bus because of BME? or, what if it shared!!
-      // 15
+      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
