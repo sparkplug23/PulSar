@@ -172,6 +172,7 @@
 // #define D_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__CTR "sensor_colourbar"
 // #define D_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR "relay_state_ledstrip"
 // #define D_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS_CTR "mavlink_flying_leds"
+#define D_MODULE_CONTROLLER_CUSTOM__OLED_NITC_AMBIENT_CTR "custom_oled_nitc_ambient"
 // #define D_MODULE__CONTROLLER_CUSTOM__LIGHTNEO_MOTION_ALERTS__CTR "light_motion_alerts"
 // #define D_MODULE__CONTROLLER_CUSTOM__LIGHTNEO_RADAR_DISTANCE__CTR "light_radar_distance"
 
@@ -976,7 +977,7 @@
 
 // #define D_GPIO_FUNCTION_ANALOG_INPUT0_CTR "Analog Input0"
 
-// #define D_GPIO_FUNCTION_OLED_RESET_CTR "OLED Reset"
+#define D_GPIO_FUNCTION_OLED_RESET_CTR "OLED Reset"
 
 #define D_GPIO_FUNCTION_PIR_1_CTR         "PIR 1"
 #define D_GPIO_FUNCTION_PIR_2_CTR         "PIR 2"

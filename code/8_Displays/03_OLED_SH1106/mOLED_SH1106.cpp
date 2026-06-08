@@ -353,7 +353,7 @@ uint8_t mOLED_SH1106::ConstructJSON_State(uint8_t json_level, bool json_appendin
 
   JBI->Start();
 
-    JBI->Object_Start(D_RFRECEIVED);
+    // JBI->Object_Start(D_RFRECEIVED);
     
     JBI->Object_End();
   

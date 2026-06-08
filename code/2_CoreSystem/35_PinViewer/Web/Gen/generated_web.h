@@ -1,11 +1,7 @@
 /*
  * AUTO-GENERATED FILE
  *   Generator: tools/cdata_submodules.js
-<<<<<<< HEAD
- *   Time:      2026-06-08T12:53:58.756Z
-=======
- *   Time:      2026-06-08T12:51:59.693Z
->>>>>>> 20aa2b9b3fa6b8943dbc0066dfd82645ce36672d
+ *   Time:      2026-06-08T19:07:40.748Z
  *
  * Source:
  *   code/2_CoreSystem/35_PinViewer/Web/Src

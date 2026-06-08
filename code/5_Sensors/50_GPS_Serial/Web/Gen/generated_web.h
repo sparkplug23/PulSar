@@ -1,11 +1,7 @@
 /*
  * AUTO-GENERATED FILE
  *   Generator: tools/cdata_submodules.js
-<<<<<<< HEAD
- *   Time:      2026-06-08T12:53:58.873Z
-=======
- *   Time:      2026-06-08T12:51:59.726Z
->>>>>>> 20aa2b9b3fa6b8943dbc0066dfd82645ce36672d
+ *   Time:      2026-06-08T19:07:40.806Z
  *
  * Source:
  *   code/5_Sensors/50_GPS_Serial/Web/Src

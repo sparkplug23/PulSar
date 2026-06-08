@@ -1,11 +1,7 @@
 /*
  * AUTO-GENERATED FILE
  *   Generator: tools/cdata_submodules.js
-<<<<<<< HEAD
- *   Time:      2026-06-08T12:53:58.951Z
-=======
- *   Time:      2026-06-08T12:51:59.749Z
->>>>>>> 20aa2b9b3fa6b8943dbc0066dfd82645ce36672d
+ *   Time:      2026-06-08T19:07:40.850Z
  *
  * Source:
  *   code/10_ConSpec/13_ServerResetRelays/Web/Src

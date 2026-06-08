@@ -761,6 +761,11 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
   #include "10_ConSpec/22_LightNeo_RadarDistance/mLightNeo_RadarDistance.h"
   #define tkrCC_radar_distance                   static_cast<mLightNeo_RadarDistance*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__CONTROLLER_CUSTOM__LIGHTNEO_RADAR_DISTANCE__ID))
 #endif
+#ifdef USE_MODULE_CONTROLLER_CUSTOM__OLED_NITC_AMBIENT
+  #include "10_ConSpec/30_OLED_NITCAmbient/Custom.h"
+  #define tkr_custom__oled_nitc_ambient                      static_cast<mCustom*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLER_CUSTOM__OLED_NITC_AMBIENT__ID))
+#endif
+// Other users below
 #ifdef USE_MODULE_CONTROLLER_USERMOD_01
   #include "9_Controller/UserMod_01/mUserMod_01.h"
   #define tkr_usermod_01                         static_cast<mUserMod_01*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLER_USERMOD_01_ID))

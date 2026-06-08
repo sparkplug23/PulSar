@@ -699,11 +699,14 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__LIGHTNEO_RADAR_DISTANCE
   addTasker(new mLightNeo_RadarDistance());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_USERMOD_01
-  addTasker(new mUserMod_01());
-  #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS
   addTasker(new mMavlinkFlyingLEDS());
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__OLED_NITC_AMBIENT
+  addTasker(new mCustom());
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_USERMOD_01
+  addTasker(new mUserMod_01());
   #endif
   DEBUG_LINE_HERE
 

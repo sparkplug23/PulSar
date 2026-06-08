@@ -1,16 +1,9 @@
 {
   "env_name": "nitc_server__room_sensor",
-<<<<<<< HEAD
-  "created_utc": "2026-06-05T23:15:52Z",
-  "created_epoch": 1780701352,
+  "created_utc": "2026-06-08T19:10:42Z",
+  "created_epoch": 1780945842,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\nitc_server__room_sensor",
-=======
-  "created_utc": "2026-06-08T12:49:26Z",
-  "created_epoch": 1780922966,
-  "project_dir": "C:\\pool_local\\Github\\Personal\\PulSar",
-  "build_dir": "C:\\pool_local\\Github\\Personal\\PulSar\\.pio\\build\\nitc_server__room_sensor",
->>>>>>> 20aa2b9b3fa6b8943dbc0066dfd82645ce36672d
   "platform": "espressif32",
   "board": "esp32dev",
   "framework": [
@@ -25,12 +18,8 @@
   ],
   "git": {
     "branch": "dev_mqtt_transport",
-    "commit": "4cb88be6af40e027a66a5c680c0e113af604fc0e",
-    "describe": "4cb88be6-dirty",
-<<<<<<< HEAD
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_Cameras.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/1_TaskerManager/mTaskerManager.cpp\n M code/1_TaskerManager/mTaskerManager.h\n M code/2_CoreSystem/05_HardwarePins/mPins.cpp\n M code/2_CoreSystem/05_HardwarePins/mPins.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/3_Network/21_WebServer/Webpages/Generated/html_ui.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/6_Lights/03_Animator/webpages_generated/html_pixart.h\n M code/6_Lights/03_Animator/webpages_generated/html_pxmagic.h\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M saved_compiles/nitc_server__room_sensor/build_meta.json\n M saved_compiles/nitc_server__room_sensor/firmware.elf\n?? code/5_Sensors/32_InternalChip__TempEsp32/"
-=======
-    "status_short": "M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_remote.ini\n M saved_compiles/nitc_server__room_sensor/build_meta.json\n M saved_compiles/nitc_server__room_sensor/firmware.elf"
->>>>>>> 20aa2b9b3fa6b8943dbc0066dfd82645ce36672d
+    "commit": "95a71eb339a78de961854371cbb6d40298122ba1",
+    "describe": "95a71eb3-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/1_TaskerManager/mTaskerManager.cpp\n M code/1_TaskerManager/mTaskerManager.h\n M code/2_CoreSystem/11_Languages/mLanguageDefault.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M code/8_Displays/03_OLED_SH1106/mOLED_SH1106.cpp\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n M platformio_remote.ini\n M saved_compiles/nitc_server__room_sensor/build_meta.json\n M saved_compiles/nitc_server__room_sensor/firmware.elf\n?? code/10_ConSpec/30_OLED_NITCAmbient/"
   }
 }
