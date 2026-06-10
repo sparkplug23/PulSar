@@ -56,8 +56,8 @@
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_SENSORS_INTERFACE
     #
@@ -314,8 +314,8 @@
 // // WebUI of WLED style should become its own webserver option (not just the debug version).
 
 //   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+//   
+//   
 
 
 //   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
@@ -357,8 +357,8 @@
 
 //   #define ENABLE_DEBUG_MANUAL_DELAYS
 
-//   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+//   // 
+//   // 
 
 //     /********* Group: Needed to build ************************/
 //     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins

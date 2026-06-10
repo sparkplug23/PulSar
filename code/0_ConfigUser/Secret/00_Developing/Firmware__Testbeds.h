@@ -1761,12 +1761,12 @@
       #endif
       // GPIO0 - ADC2 CH1
       
-      #ifdef USE_MODULE_FILESYSTEM_SDCARD
+      #ifdef USE_MODULE_DRIVERS_SDCARD
       "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
       "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
       "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
       "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
-      #endif // USE_MODULE_FILESYSTEM_SDCARD  
+      #endif
 
 
 

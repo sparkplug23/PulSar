@@ -292,13 +292,13 @@ int16_t mPins::GetGPIOFunctionIDbyName(const char* c)
    * Drivers / Cellular Modem
    *******************************************************************************************************************/
 
-  #ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
-  if(strcmp_P(c, PM_GPIO_FUNCTION__MODEM_TX__CTR)==0){ return GPIO_FUNCTION__MODEM_TX; }
-  if(strcmp_P(c, PM_GPIO_FUNCTION__MODEM_RX__CTR)==0){ return GPIO_FUNCTION__MODEM_RX; }
-  if(strcmp_P(c, PM_GPIO_FUNCTION__MODEM_POWER__CTR)==0){ return GPIO_FUNCTION__MODEM_POWER; }
-  if(strcmp_P(c, PM_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR)==0){ return GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR; }
-  #endif
-
+  if(strcmp_P(c, PM_GPIO_FUNCTION__MODEM_RX0__CTR)==0){ return GPIO_FUNCTION__MODEM_RX0; }
+  if(strcmp_P(c, PM_GPIO_FUNCTION__MODEM_TX0__CTR)==0){ return GPIO_FUNCTION__MODEM_TX0; }
+  if(strcmp_P(c, PM_GPIO_FUNCTION__MODEM_RX1__CTR)==0){ return GPIO_FUNCTION__MODEM_RX1; }
+  if(strcmp_P(c, PM_GPIO_FUNCTION__MODEM_TX1__CTR)==0){ return GPIO_FUNCTION__MODEM_TX1; }
+  if(strcmp_P(c, PM_GPIO_FUNCTION__MODEM_RX2__CTR)==0){ return GPIO_FUNCTION__MODEM_RX2; }
+  if(strcmp_P(c, PM_GPIO_FUNCTION__MODEM_TX2__CTR)==0){ return GPIO_FUNCTION__MODEM_TX2; }
+  if(strcmp_P(c, PM_GPIO_FUNCTION__MODEM_POWER_KEY__CTR)==0){ return GPIO_FUNCTION__MODEM_POWER_KEY; }
 
   /******************************************************************************************************************
    * Drivers / Cellular Modem placeholders
@@ -983,14 +983,15 @@ const char* mPins::GetGPIOFunctionNamebyID(uint16_t id, char* buffer, uint8_t bu
    * Drivers / Cellular Modem
    *******************************************************************************************************************/
 
-  #ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
-  if(GPIO_FUNCTION__MODEM_TX == id){ p = PM_GPIO_FUNCTION__MODEM_TX__CTR; }
-  if(GPIO_FUNCTION__MODEM_RX == id){ p = PM_GPIO_FUNCTION__MODEM_RX__CTR; }
-  if(GPIO_FUNCTION__MODEM_POWER == id){ p = PM_GPIO_FUNCTION__MODEM_POWER__CTR; }
-  if(GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR == id){ p = PM_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR; }
-  #endif
-
-
+   
+  if(GPIO_FUNCTION__MODEM_RX0 == id){ p = PM_GPIO_FUNCTION__MODEM_RX0__CTR; }
+  if(GPIO_FUNCTION__MODEM_TX0 == id){ p = PM_GPIO_FUNCTION__MODEM_TX0__CTR; }
+  if(GPIO_FUNCTION__MODEM_RX1 == id){ p = PM_GPIO_FUNCTION__MODEM_RX1__CTR; }
+  if(GPIO_FUNCTION__MODEM_TX1 == id){ p = PM_GPIO_FUNCTION__MODEM_TX1__CTR; }
+  if(GPIO_FUNCTION__MODEM_RX2 == id){ p = PM_GPIO_FUNCTION__MODEM_RX2__CTR; }
+  if(GPIO_FUNCTION__MODEM_TX2 == id){ p = PM_GPIO_FUNCTION__MODEM_TX2__CTR; }
+  if(GPIO_FUNCTION__MODEM_POWER_KEY == id){ p = PM_GPIO_FUNCTION__MODEM_POWER_KEY__CTR; }
+  
   /******************************************************************************************************************
    * Drivers / Cellular Modem placeholders
    *******************************************************************************************************************/

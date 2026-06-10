@@ -110,10 +110,6 @@ bool mCellular::Cellular_HasExternalConnectivity(void)
   if (module_state.mode != ModuleStatus::Running) { return false; }
   if (!tkr_modem) { return false; }
 
-  #ifndef ENABLE_FEATURE_CELLULAR__INCLUDE_MOBILE_NETWORKS
-  return false;
-  #endif
-
   if (conn_sm_.state != cellular_conn_state_t::ONLINE) { return false; }
 
   if (!tkr_modem->IsReady()) { return false; }
@@ -147,10 +143,6 @@ void mCellular::Cellular_ConnMgr_Reset()
 void mCellular::Cellular_ConnMgr_Tick_1s(uint32_t now_ms)
 {
   if (!tkr_modem) { return; }
-
-  #ifndef ENABLE_FEATURE_CELLULAR__INCLUDE_MOBILE_NETWORKS
-  return; // tmp block networking, to focus on sms
-  #endif
 
   if (!tkr_modem->IsReady())
   {

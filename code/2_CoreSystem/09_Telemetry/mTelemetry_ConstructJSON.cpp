@@ -139,6 +139,10 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_appendi
     JBI->Add(PM_SDKVERSION,      ESP.getSdkVersion());    
     JBI->Add(PM_FREESKETCHSPACE,      ESP.getFreeSketchSpace());
 
+    #ifdef DEVICENAME_BUILD_ENVIRONMENT
+    JBI->Add("BuildEnvironment", DEVICENAME_BUILD_ENVIRONMENT);
+    #endif
+
     
     JBI->Array_Start(PM_FASTBOOT_RECOVERY);
     #ifdef ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID

@@ -7,6 +7,93 @@
 
 #include "gpio_progmem.h"
 
+/*********************************************************************************************\
+ * GPIO Function Group Packing
+ *
+ * PulSar GPIO functions are normally stored as enum values, for example:
+ *
+ *   GPIO_FUNCTION__MODEM_RX
+ *   GPIO_FUNCTION__MODEM_TX
+ *   GPIO_FUNCTION__I2C_SCL
+ *   GPIO_FUNCTION__I2C_SDA
+ *
+ * Some GPIO functions are repeatable. Examples:
+ *
+ *   MODEM_RX  -> MODEM_RX, MODEM_RX2, MODEM_RX3
+ *   MODEM_TX  -> MODEM_TX, MODEM_TX2, MODEM_TX3
+ *   I2C_SCL   -> I2C_SCL,  I2C_SCL2
+ *   I2C_SDA   -> I2C_SDA,  I2C_SDA2
+ *
+ * For repeatable groups, the enum values must be arranged contiguously:
+ *
+ *   GPIO_FUNCTION__MODEM_RX,     // index 0
+ *   GPIO_FUNCTION__MODEM_RX2,    // index 1
+ *   GPIO_FUNCTION__MODEM_RX3,    // index 2
+ *
+ *   GPIO_FUNCTION__MODEM_TX,     // index 0
+ *   GPIO_FUNCTION__MODEM_TX2,    // index 1
+ *   GPIO_FUNCTION__MODEM_TX3,    // index 2
+ *
+ * This allows code to resolve a specific instance using:
+ *
+ *   real_gpio = GPIO_FUNCTION__MODEM_RX + index;
+ *
+ * The packing macros below are used for GPIO function list / WebUI / naming expansion,
+ * where one base enum entry can describe several indexed variants.
+ *
+ * Packed list format:
+ *
+ *   [ upper bits: GPIO base enum ][ lower 5 bits: max count - 1 ]
+ *
+ * Example:
+ *
+ *   PGPIO(GPIO_FUNCTION__MODEM_RX) + MGPIO(3)
+ *
+ * means:
+ *
+ *   base function : GPIO_FUNCTION__MODEM_RX
+ *   variants      : 3
+ *   expands to    : GPIO_FUNCTION__MODEM_RX + 0
+ *                   GPIO_FUNCTION__MODEM_RX + 1
+ *                   GPIO_FUNCTION__MODEM_RX + 2
+ *
+ * The lower 5 bits are metadata for the number of available indexed variants.
+ * They are not the selected instance index. The selected instance is still derived
+ * from base + index during lookup.
+ *
+ * Current staged migration model:
+ *
+ *   - PGPIO/MGPIO are used for grouped GPIO list entries.
+ *   - Stored pin assignments may still use raw enum values.
+ *   - Full packed storage can be migrated later once enough groups have been converted.
+ *
+ * Limits:
+ *
+ *   GPIO_INDEX_BITS = 5 gives 0..31 metadata values.
+ *   Since MGPIO stores count - 1, this supports 1..32 variants per group.
+\*********************************************************************************************/
+
+#define GPIO_INDEX_BITS  5
+#define GPIO_INDEX_MASK  0x001F
+#define GPIO_BASE_MASK   0xFFE0
+
+#define PGPIO(x)         ((uint16_t)((x) << GPIO_INDEX_BITS))          // Pack GPIO base/function
+#define UGPIO(x)         ((uint16_t)((x) >> GPIO_INDEX_BITS))          // Unpack GPIO base/function
+#define MGPIO(x)         ((uint16_t)((x) ? ((x) - 1) : 0))             // Encode max/count metadata as count-1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #define GPIO_ANY           32   // Any GPIO
@@ -217,9 +304,14 @@ enum GPIO_COMPLETE_STATIC_LIST_IDS {
       ****************************************
       ****************************************/
      
-        GPIO_FUNCTION__MODEM_TX,
-        GPIO_FUNCTION__MODEM_RX,
-        GPIO_FUNCTION__MODEM_POWER,
+        GPIO_FUNCTION__MODEM_RX0, GPIO_FUNCTION__MODEM_TX0, 
+        GPIO_FUNCTION__MODEM_RX1, GPIO_FUNCTION__MODEM_TX1, 
+        GPIO_FUNCTION__MODEM_RX2, GPIO_FUNCTION__MODEM_TX2,
+        
+
+
+
+        GPIO_FUNCTION__MODEM_POWER_KEY,
         GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR,
         GPIO_FUNCTION__MODEM_RING_INDICATOR,
         GPIO_FUNCTION__MODEM_POWER_STATUS,

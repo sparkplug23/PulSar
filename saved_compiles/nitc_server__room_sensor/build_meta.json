@@ -1,7 +1,7 @@
 {
   "env_name": "nitc_server__room_sensor",
-  "created_utc": "2026-06-08T19:10:43Z",
-  "created_epoch": 1780945843,
+  "created_utc": "2026-06-08T19:51:03Z",
+  "created_epoch": 1780948263,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\nitc_server__room_sensor",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "dev_mqtt_transport",
-    "commit": "95a71eb339a78de961854371cbb6d40298122ba1",
-    "describe": "95a71eb3-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/1_TaskerManager/mTaskerManager.cpp\n M code/1_TaskerManager/mTaskerManager.h\n M code/2_CoreSystem/11_Languages/mLanguageDefault.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M code/8_Displays/03_OLED_SH1106/mOLED_SH1106.cpp\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n M platformio_remote.ini\n M saved_compiles/nitc_server__room_sensor/build_meta.json\n M saved_compiles/nitc_server__room_sensor/firmware.elf\n?? code/10_ConSpec/30_OLED_NITCAmbient/"
+    "commit": "b7735976e5ed962ea4965fe7ff481d113c81fb5a",
+    "describe": "b7735976-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M saved_compiles/nitc_server__room_sensor/build_meta.json\n M saved_compiles/nitc_server__room_sensor/firmware.elf"
   }
 }

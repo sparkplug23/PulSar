@@ -6,21 +6,24 @@
 
 bool mSIM7000G::Modem_OpenUart(uint32_t baud)
 {
+
+  if(modem_serial==nullptr) return false;
+
   WDT_Reset();
 
-  SerialAT.end();
+  modem_serial->end();
   delay(UART_REOPEN_DELAY_MS);
 
-  SerialAT.begin(baud, SERIAL_8N1, PIN_RX, PIN_TX);
-  SerialAT.setTimeout(AT_STREAM_TIMEOUT_MS);
+  modem_serial->begin(baud, SERIAL_8N1, pins.rx_pin, pins.tx_pin);
+  modem_serial->setTimeout(AT_STREAM_TIMEOUT_MS);
 
   delay(UART_SETTLE_MS);
 
   ALOG_INF(
     PSTR(D_LOG_CELLULAR "UART open baud=%lu rx=%u tx=%u"),
     (unsigned long)baud,
-    PIN_RX,
-    PIN_TX
+    pins.rx_pin,
+    pins.tx_pin
   );
 
   return true;
@@ -35,9 +38,9 @@ void mSIM7000G::Modem_FlushUartRx(uint32_t drain_ms)
   {
     WDT_Reset();
 
-    while (SerialAT.available())
+    while (modem_serial->available())
     {
-      (void)SerialAT.read();
+      (void)modem_serial->read();
     }
 
     delay(1);
@@ -53,12 +56,12 @@ void mSIM7000G::Modem_PulsePowerKey(uint32_t hold_ms)
     (unsigned long)hold_ms
   );
 
-  pinMode(PWR_PIN, OUTPUT);
+  pinMode(pins.pwrkey_pin, OUTPUT);
 
-  digitalWrite(PWR_PIN, LOW);
+  digitalWrite(pins.pwrkey_pin, LOW);
   delay(hold_ms);
 
-  digitalWrite(PWR_PIN, HIGH);
+  digitalWrite(pins.pwrkey_pin, HIGH);
   delay(MODEM_PWRKEY_SETTLE_MS);
 }
 
@@ -253,6 +256,9 @@ bool mSIM7000G::Modem_LockBaud(uint32_t current_baud, uint32_t target_baud)
 
 bool mSIM7000G::Modem_EnsurePowerOnAndBaud(uint32_t target_baud)
 {
+  
+  if(modem_serial==nullptr) return false;
+  
   uint32_t found_baud = 0;
 
   ALOG_WRN(
@@ -298,7 +304,7 @@ bool mSIM7000G::Modem_EnsurePowerOnAndBaud(uint32_t target_baud)
   // --------------------------------------------------------------------------
   ALOG_WRN(PSTR(D_LOG_CELLULAR "Ensure pass 2: PWRKEY pulse then boot wait"));
 
-  SerialAT.end();
+  modem_serial->end();
   delay(250);
 
   Modem_PulsePowerKey(MODEM_PWRKEY_HOLD_MS);
@@ -330,7 +336,7 @@ bool mSIM7000G::Modem_EnsurePowerOnAndBaud(uint32_t target_baud)
   // --------------------------------------------------------------------------
   ALOG_WRN(PSTR(D_LOG_CELLULAR "Ensure pass 3: second PWRKEY pulse then boot wait"));
 
-  SerialAT.end();
+  modem_serial->end();
   delay(250);
 
   Modem_PulsePowerKey(MODEM_PWRKEY_HOLD_MS);

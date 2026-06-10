@@ -65,7 +65,7 @@ Notes:
 
 //--------------------------------[Enable Device]-------------------------------------
 
-// #define DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
+#define DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
 
 
 // #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__ON_SIM800L__OFFICE_TESTBED // Office window testbed, SIM800L, BK-880Q GPs, onboard IMU, SIM800L
@@ -96,91 +96,44 @@ Notes:
  * - Future: Integrate WebUI map view and webhook dispatch.
  */
 #ifdef DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
-  #define DEVICENAME_CTR          "cellular_locator_02"
-  #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
-  #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define MQTT_HOST   "192.168.3.70"
 
-  // #define ENABLE_BUG_TRACING
-  // #define DEBUG_MQTT_RECONNECTS
-  // #define USE_DEBUG_PRINT_FUNCTION_NAME
-  // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+  /***********************************
+  * SECTION: Feature Sets
+  ************************************/  
 
   #define ENABLE_GROUP_FEATURE__CELLULAR
   #define ENABLE_GROUP_FEATURE__WIFI
-
   #define ENABLE_GROUP_FEATURE__MQTT_CELLULAR_AND_WIFI
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/  
 
   #ifdef ENABLE_GROUP_FEATURE__WIFI
     #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
-              #define USE_MODULE_SENSORS_INTERFACE
-
-
+    #define USE_MODULE_SENSORS_INTERFACE
   #endif
 
 
-
-  #ifdef ENABLE_GROUP_FEATURE__CELLULAR
-  
+  #ifdef ENABLE_GROUP_FEATURE__CELLULAR  
     #define MQTT_HOST_CELLULAR "sparkequinox2.ddns.net"
-
-
-    #define  ENABLE_FEATURE_CELLULAR__INCLUDE_MOBILE_NETWORKS
-
-    #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-    #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
+    
     #define USE_MODULE_DRIVERS_MODEM_7000G
 
-    // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
-    // #define ENABLE_FEATURE_SIM__SMS
-
-    // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
-
-    // #define USE_MODULE_NETWORK_MQTT
-    // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
-
-    // #define USE_SSIDS_NONE_DEBUGGING
-    // #define DISABLE_DEVFEATURE_NETWORK_WIFI
-
-
-    // #define ENABLE_FEATURE_WIFI__BLOCK_CONNECTION
-
-    // #define MQTT_USER "lteclient"
-    // #define MQTT_PASS "af4d8bc9ab"
-
-    // #define MQTT_PORT 51883 //external mqtt broker on TOWER 
-
-    /**
-     * @brief WiFi MQTT
-     * 
-     */
-    // #define USE_MODULE_NETWORK_WIFI
-    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    // 
-
-    /**
-     * @brief Cellular MQTT
-     * 
-     */  
-    // #define DISABLE_NETWORK_WIFI
     #define USE_MODULE_NETWORK_CELLULAR
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
     #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
     #define USE_MODULE_SENSORS_GPS_MODEM
-              #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_MODULE_SENSORS_INTERFACE
     #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
 
     #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
 
-  #define MODEM_UART_RX_PIN  26  // ESP32 RX pin used by SerialAT
-  #define MODEM_UART_TX_PIN  27  // ESP32 TX pin used by SerialAT
-  #define MODEM_PWRKEY_PIN   4
-
-    // #define UART_CELLULAR_BAUD   115200
+    #define MODEM_UART_RX_PIN  26  // ESP32 RX pin used by SerialAT
+    #define MODEM_UART_TX_PIN  27  // ESP32 TX pin used by SerialAT
+    #define MODEM_PWRKEY_PIN   4
 
     #define UART_CELLULAR_BAUD   230400
-    // #define UART_CELLULAR_BAUD   921600
 
     // #define USE_MODULE_SENSORS_BATTERY_MODEM
 
@@ -188,8 +141,29 @@ Notes:
 
     #define USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
 
-  #endif
+    #define USE_MODULE_CORE__SERIAL
 
+
+
+  #endif
+        
+
+
+  /***********************************
+  * SECTION: Driver Configs
+  ************************************/  
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_SDCARD
+
+  /***********************************
+  * SECTION: Sensors Configs
+  ************************************/  
+    
+
+  /***********************************
+   * SECTION: Module/GPIO Configs
+  ************************************/ 
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -197,14 +171,25 @@ Notes:
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
-      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
-      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      
+      "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX1__CTR   "\","
+      "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX1__CTR   "\"," 
+      "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER_KEY__CTR   "\"," 
+
+      #ifdef USE_MODULE_DRIVERS_SDCARD
+      "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
+      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
+      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+      #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
+
+  /***********************************
+   * SECTION: Templates
+  ************************************/    
 
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker01"
 
@@ -224,203 +209,72 @@ Notes:
       "\"" D_MODULE__SENSORS_BATTERY_MODEM__CTR "\":["
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
-    "},"   
-    "\"" D_DISPLAY "\":{"
-      "\"" "DisplayRows" "\":8,"
-      "\"" "DisplayCols" "\":[21,2],"
-      "\"" "DisplaySize" "\":1"
-    "},"  
+    "},"
     "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 
 
-
-
   #ifdef ENABLE_GROUP_FEATURE__MQTT_CELLULAR_AND_WIFI
-#define USE_NETWORK_CONFIG_TEMPLATE
-DEFINE_PGM_CTR(NETWORK_CONFIG_TEMPLATE)
-"{"
-  "\"Version\":1,"
+  #define USE_NETWORK_CONFIG_TEMPLATE
+  DEFINE_PGM_CTR(NETWORK_CONFIG_TEMPLATE)
+  "{"
+    "\"Version\":1,"
 
-  "\"Interface\":{"
-    "\"Policy\":{"
-      "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
-      "\"AllowMultipleActive\":true,"
-      "\"BlockRemoteMqttWhenLocalAvailable\":true"
-    "}"
-  "},"
-
-  "\"WiFi\":{"
-    "\"EN\":true,"
-    "\"Backoff\":[5,60,600],"
-
-    "\"Mode\":{"
-      "\"STA\":true,"
-      "\"AP\":true,"
-      "\"STA_AP\":true,"
-      "\"APBootMins\":10,"
-      "\"APOnSTAFail\":true,"
-      "\"APFailDelayMins\":0,"
-      "\"APAlwaysOn\":false"
-    "},"
-
-    "\"Station\":{"
-      "\"Profiles\":["
-        "{"
-          "\"SSID\":\"" STA_SSID1 "\","
-          "\"Password\":\"" STA_PASS1 "\""
-        "},"
-        "{"
-          "\"SSID\":\"" STA_SSID3 "\","
-          "\"Password\":\"" STA_PASS3 "\""
-        "}"
-      "],"
-
-      "\"IPv4\":{"
-        "\"Static\":false,"
-        "\"IP\":\"0.0.0.0\","
-        "\"Gateway\":\"0.0.0.0\","
-        "\"Subnet\":\"0.0.0.0\","
-        "\"DNS1\":\"0.0.0.0\","
-        "\"DNS2\":\"0.0.0.0\""
+    "\"Interface\":{"
+      "\"Policy\":{"
+        "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+        "\"AllowMultipleActive\":true,"
+        "\"BlockRemoteMqttWhenLocalAvailable\":true"
       "}"
     "},"
 
-    "\"SoftAP\":{"
-      "\"SSID\":\"" SOFTAP_SSID "\","
-      "\"Password\":\"" SOFTAP_PASSWORD "\","
-      "\"Channel\":1"
-    "}"
-  "},"
-
-  "\"Ethernet\":{"
-    "\"EN\":true,"
-    "\"Backoff\":[5,30,60],"
-
-    "\"IPv4\":{"
-      "\"Static\":false,"
-      "\"IP\":\"0.0.0.0\","
-      "\"Gateway\":\"0.0.0.0\","
-      "\"Subnet\":\"0.0.0.0\","
-      "\"DNS1\":\"0.0.0.0\","
-      "\"DNS2\":\"0.0.0.0\""
-    "}"
-  "},"
-
-  "\"Cellular\":{"
-    "\"EN\":true,"
-    "\"Backoff\":[10,60,600],"
-
-    "\"Modem\":{"
+    "\"WiFi\":{"
       "\"EN\":true,"
-      "\"APN\":\"" CELLULAR_APN "\","
-      "\"User\":\"\","
-      "\"Password\":\"\""
-    "},"
+      "\"Backoff\":[5,60,600],"
 
-    "\"GNSS\":{"
-      "\"EN\":true"
-    "},"
-
-    "\"SMS\":{"
-      "\"EN\":true,"
-      "\"PrivilegedOnly\":true"
-    "}"
-  "},"
-
-  "\"MQTT\":{"
-    "\"EN\":true,"
-
-    "\"UpdateSeconds\":{"
-      "\"IfChanged\":1,"
-      "\"TelePeriod\":60,"
-      "\"ConfigPeriod\":60"
-    "},"
-
-    "\"Brokers\":["
-      "{"
-        "\"Id\":\"home\","
-        "\"EN\":true,"
-        "\"Host\":\"" MQTT_HOST "\","
-        "\"Port\":" STR(MQTT_PORT) ","
-        "\"User\":\"\","
-        "\"Password\":\"\","
-        "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
-        "\"ClientName\":\"" DEVICENAME_CTR "\","
-        "\"Backoff\":[5,10,60],"
-        "\"Transport\":[\"Ethernet\",\"WiFi\"],"
-        "\"PrefTransport\":[\"Ethernet\",\"WiFi\"],"
-        "\"OutgoingLevel\":3,"
-        "\"OutgoingLimiterMs\":0"
+      "\"Mode\":{"
+        "\"STA\":true,"
+        "\"AP\":true,"
+        "\"STA_AP\":true,"
+        "\"APBootMins\":10,"
+        "\"APOnSTAFail\":true,"
+        "\"APFailDelayMins\":0,"
+        "\"APAlwaysOn\":false"
       "},"
-      "{"
-        "\"Id\":\"remote\","
-        "\"EN\":true,"
-        "\"Host\":\"" MQTT_HOST_CELLULAR "\","
-        "\"Port\":" STR(MQTT_PORT_CELLULAR) ","
-        "\"User\":\"" MQTT_HOST__USERNAME "\","
-        "\"Password\":\"" MQTT_HOST__PASSWORD "\","
-        "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
-        "\"ClientName\":\"" DEVICENAME_CTR "\","
-        "\"Backoff\":[5,10,60],"
-        "\"Transport\":[\"Cellular\",\"WiFi\"],"
-        "\"PrefTransport\":[\"Cellular\"],"
-        "\"OutgoingLevel\":2,"
-        "\"OutgoingLimiterMs\":10"
+
+      "\"Station\":{"
+        "\"Profiles\":["
+          "{"
+            "\"SSID\":\"" STA_SSID1 "\","
+            "\"Password\":\"" STA_PASS1 "\""
+          "},"
+          "{"
+            "\"SSID\":\"" STA_SSID3 "\","
+            "\"Password\":\"" STA_PASS3 "\""
+          "}"
+        "],"
+
+        "\"IPv4\":{"
+          "\"Static\":false,"
+          "\"IP\":\"0.0.0.0\","
+          "\"Gateway\":\"0.0.0.0\","
+          "\"Subnet\":\"0.0.0.0\","
+          "\"DNS1\":\"0.0.0.0\","
+          "\"DNS2\":\"0.0.0.0\""
+        "}"
+      "},"
+
+      "\"SoftAP\":{"
+        "\"SSID\":\"" SOFTAP_SSID "\","
+        "\"Password\":\"" SOFTAP_PASSWORD "\","
+        "\"Channel\":1"
       "}"
-    "]"
-  "}"
-"}";
-#endif
-
-
-
-#ifdef ENABLE_GROUP_FEATURE__MQTT_CELLULAR
-
-
-#define USE_NETWORK_CONFIG_TEMPLATE
-DEFINE_PGM_CTR(NETWORK_CONFIG_TEMPLATE)
-"{"
-  "\"Version\":1,"
-
-  "\"Interface\":{"
-    "\"Policy\":{"
-      "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
-      "\"AllowMultipleActive\":true,"
-      "\"BlockRemoteMqttWhenLocalAvailable\":true"
-    "}"
-  "},"
-
-  "\"WiFi\":{"
-    "\"EN\":true,"
-    "\"Backoff\":[5,60,600],"
-
-    "\"Mode\":{"
-      "\"STA\":true,"
-      "\"AP\":true,"
-      "\"STA_AP\":true,"
-      "\"APBootMins\":10,"
-      "\"APOnSTAFail\":true,"
-      "\"APFailDelayMins\":0,"
-      "\"APAlwaysOn\":false"
     "},"
 
-    "\"Station\":{"
-      "\"Profiles\":["
-        "{"
-          "\"SSID\":\"" STA_SSID1 "\","
-          "\"Password\":\"" STA_PASS1 "\""
-        "},"
-        "{"
-          "\"SSID\":\"" STA_SSID2 "\","
-          "\"Password\":\"" STA_PASS2 "\""
-        "},"
-        "{"
-          "\"SSID\":\"" STA_SSID3 "\","
-          "\"Password\":\"" STA_PASS3 "\""
-        "}"
-      "],"
+    "\"Ethernet\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,30,60],"
 
       "\"IPv4\":{"
         "\"Static\":false,"
@@ -432,78 +286,199 @@ DEFINE_PGM_CTR(NETWORK_CONFIG_TEMPLATE)
       "}"
     "},"
 
-    "\"SoftAP\":{"
-      "\"SSID\":\"" SOFTAP_SSID "\","
-      "\"Password\":\"" SOFTAP_PASSWORD "\","
-      "\"Channel\":1"
-    "}"
-  "},"
-
-  "\"Ethernet\":{"
-    "\"EN\":true,"
-    "\"Backoff\":[5,30,60],"
-
-    "\"IPv4\":{"
-      "\"Static\":false,"
-      "\"IP\":\"0.0.0.0\","
-      "\"Gateway\":\"0.0.0.0\","
-      "\"Subnet\":\"0.0.0.0\","
-      "\"DNS1\":\"0.0.0.0\","
-      "\"DNS2\":\"0.0.0.0\""
-    "}"
-  "},"
-
-  "\"Cellular\":{"
-    "\"EN\":true,"
-    "\"Backoff\":[10,60,600],"
-
-    "\"Modem\":{"
+    "\"Cellular\":{"
       "\"EN\":true,"
-      "\"APN\":\"" CELLULAR_APN "\","
-      "\"User\":\"\","
-      "\"Password\":\"\""
-    "},"
+      "\"Backoff\":[10,60,600],"
 
-    "\"GNSS\":{"
-      "\"EN\":true"
-    "},"
-
-    "\"SMS\":{"
-      "\"EN\":true,"
-      "\"PrivilegedOnly\":true"
-    "}"
-  "},"
-
-  "\"MQTT\":{"
-    "\"EN\":true,"
-
-    "\"UpdateSeconds\":{"
-      "\"IfChanged\":1,"
-      "\"TelePeriod\":60,"
-      "\"ConfigPeriod\":60"
-    "},"
-
-    "\"Brokers\":["
-      "{"
-        "\"Id\":\"home\","
+      "\"Modem\":{"
         "\"EN\":true,"
-        "\"Host\":\"" MQTT_HOST "\","
-        "\"Port\":" STR(MQTT_PORT) ","
+        "\"APN\":\"" CELLULAR_APN "\","
         "\"User\":\"\","
-        "\"Password\":\"\","
-        "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
-        "\"ClientName\":\"" DEVICENAME_CTR "\","
-        "\"Backoff\":[5,10,60],"
-        "\"Transport\":[\"WiFi\"],"
-        "\"PrefTransport\":[\"WiFi\"],"
-        "\"OutgoingLevel\":3,"
-        "\"OutgoingLimiterMs\":0"
-      "}"
-    "]"
-  "}"
-"}";
+        "\"Password\":\"\""
+      "},"
 
-#endif
+      "\"GNSS\":{"
+        "\"EN\":true"
+      "},"
+
+      "\"SMS\":{"
+        "\"EN\":true,"
+        "\"PrivilegedOnly\":true"
+      "}"
+    "},"
+
+    "\"MQTT\":{"
+      "\"EN\":true,"
+
+      "\"UpdateSeconds\":{"
+        "\"IfChanged\":1,"
+        "\"TelePeriod\":60,"
+        "\"ConfigPeriod\":60"
+      "},"
+
+      "\"Brokers\":["
+        "{"
+          "\"Id\":\"home\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST "\","
+          "\"Port\":" STR(MQTT_PORT) ","
+          "\"User\":\"\","
+          "\"Password\":\"\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"Ethernet\",\"WiFi\"],"
+          "\"PrefTransport\":[\"Ethernet\",\"WiFi\"],"
+          "\"OutgoingLevel\":3,"
+          "\"OutgoingLimiterMs\":0"
+        "},"
+        "{"
+          "\"Id\":\"remote\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST_CELLULAR "\","
+          "\"Port\":" STR(MQTT_PORT_CELLULAR) ","
+          "\"User\":\"" MQTT_HOST__USERNAME "\","
+          "\"Password\":\"" MQTT_HOST__PASSWORD "\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"Cellular\",\"WiFi\"],"
+          "\"PrefTransport\":[\"Cellular\"],"
+          "\"OutgoingLevel\":2,"
+          "\"OutgoingLimiterMs\":10"
+        "}"
+      "]"
+    "}"
+  "}";
+  #endif
+
+
+  #ifdef ENABLE_GROUP_FEATURE__MQTT_CELLULAR
+  #define USE_NETWORK_CONFIG_TEMPLATE
+  DEFINE_PGM_CTR(NETWORK_CONFIG_TEMPLATE)
+  "{"
+    "\"Version\":1,"
+
+    "\"Interface\":{"
+      "\"Policy\":{"
+        "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+        "\"AllowMultipleActive\":true,"
+        "\"BlockRemoteMqttWhenLocalAvailable\":true"
+      "}"
+    "},"
+
+    "\"WiFi\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,60,600],"
+
+      "\"Mode\":{"
+        "\"STA\":true,"
+        "\"AP\":true,"
+        "\"STA_AP\":true,"
+        "\"APBootMins\":10,"
+        "\"APOnSTAFail\":true,"
+        "\"APFailDelayMins\":0,"
+        "\"APAlwaysOn\":false"
+      "},"
+
+      "\"Station\":{"
+        "\"Profiles\":["
+          "{"
+            "\"SSID\":\"" STA_SSID1 "\","
+            "\"Password\":\"" STA_PASS1 "\""
+          "},"
+          "{"
+            "\"SSID\":\"" STA_SSID2 "\","
+            "\"Password\":\"" STA_PASS2 "\""
+          "},"
+          "{"
+            "\"SSID\":\"" STA_SSID3 "\","
+            "\"Password\":\"" STA_PASS3 "\""
+          "}"
+        "],"
+
+        "\"IPv4\":{"
+          "\"Static\":false,"
+          "\"IP\":\"0.0.0.0\","
+          "\"Gateway\":\"0.0.0.0\","
+          "\"Subnet\":\"0.0.0.0\","
+          "\"DNS1\":\"0.0.0.0\","
+          "\"DNS2\":\"0.0.0.0\""
+        "}"
+      "},"
+
+      "\"SoftAP\":{"
+        "\"SSID\":\"" SOFTAP_SSID "\","
+        "\"Password\":\"" SOFTAP_PASSWORD "\","
+        "\"Channel\":1"
+      "}"
+    "},"
+
+    "\"Ethernet\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,30,60],"
+
+      "\"IPv4\":{"
+        "\"Static\":false,"
+        "\"IP\":\"0.0.0.0\","
+        "\"Gateway\":\"0.0.0.0\","
+        "\"Subnet\":\"0.0.0.0\","
+        "\"DNS1\":\"0.0.0.0\","
+        "\"DNS2\":\"0.0.0.0\""
+      "}"
+    "},"
+
+    "\"Cellular\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[10,60,600],"
+
+      "\"Modem\":{"
+        "\"EN\":true,"
+        "\"APN\":\"" CELLULAR_APN "\","
+        "\"User\":\"\","
+        "\"Password\":\"\""
+      "},"
+
+      "\"GNSS\":{"
+        "\"EN\":true"
+      "},"
+
+      "\"SMS\":{"
+        "\"EN\":true,"
+        "\"PrivilegedOnly\":true"
+      "}"
+    "},"
+
+    "\"MQTT\":{"
+      "\"EN\":true,"
+
+      "\"UpdateSeconds\":{"
+        "\"IfChanged\":1,"
+        "\"TelePeriod\":60,"
+        "\"ConfigPeriod\":60"
+      "},"
+
+      "\"Brokers\":["
+        "{"
+          "\"Id\":\"home\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST "\","
+          "\"Port\":" STR(MQTT_PORT) ","
+          "\"User\":\"\","
+          "\"Password\":\"\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"WiFi\"],"
+          "\"PrefTransport\":[\"WiFi\"],"
+          "\"OutgoingLevel\":3,"
+          "\"OutgoingLimiterMs\":0"
+        "}"
+      "]"
+    "}"
+  "}";
+
+  #endif
 
 
 #endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
@@ -1162,8 +1137,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define MQTT_HOST   "192.168.1.70"
 
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   // #define USE_MODULE_NETWORK_MQTT
   // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
@@ -1305,8 +1280,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   // #define USE_MODULE_NETWORK_MQTT
   // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
@@ -1449,8 +1424,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // 
+  // 
 
   // #define USE_MODULE_NETWORK_MQTT
   // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
@@ -1595,8 +1570,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define MQTT_HOST   "192.168.1.70"
 
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   
   // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
@@ -1733,10 +1708,9 @@ The new smaller LTE board needs testing too, might need as window tester first.
 #define MQTT_HOST_CELLULAR "sparkequinox2.ddns.net"
 
 
-#define  ENABLE_FEATURE_CELLULAR__INCLUDE_MOBILE_NETWORKS
 
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_DRIVERS_MODEM_7000G
 
@@ -2683,8 +2657,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define MQTT_HOST   "192.168.1.70"
 
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_SUN_TRACKING

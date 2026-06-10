@@ -18,7 +18,7 @@
 
 // #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__TESTBOARD
 // #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__INSTALLED_BOARD
-#define DEVICE_NITC__SERVER_ROOM__AMBIENT_SENSOR
+// #define DEVICE_NITC__SERVER_ROOM__AMBIENT_SENSOR
 
 
 
@@ -794,7 +794,7 @@
   /***********************************
    * SECTION: Controllers Configs
   ************************************/
- 
+
   #define USE_MODULE_CONTROLLER_CUSTOM__OLED_NITC_AMBIENT
 
  
@@ -844,12 +844,22 @@
   #define D_DEVICE_SENSOR_BME_LONG_WIRE_NAME  "Room"
   #define D_DEVICE_SENSOR_BME_SHORT_WIRE_NAME "None"
 
+  #define D_DEVICE_SENSOR_BH1750_NAME "Room"
+
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "NITC Server Room"
+
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
         "\"" "PRINTER" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+        "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
       "],"
       "\"" D_MODULE_SENSORS_BME_CTR "\":["
         "\"" D_DEVICE_SENSOR_BME_LONG_WIRE_NAME "\","   // 0x76

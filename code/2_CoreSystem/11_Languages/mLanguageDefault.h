@@ -121,7 +121,7 @@
 // #define D_MODULE_SENSORS_L3G_CTR                  "l3g"
 // #define D_MODULE_SENSORS_MOISTURE_ADC_CTR                  "moisure_adc" 
 // #define D_MODULE_SENSORS_MPU9250_CTR              "mpu9250"
-// #define D_MODULE__SENSORS_BATTERY_MODEM__CTR      "battery_modem"
+#define D_MODULE__SENSORS_BATTERY_MODEM__CTR      "battery_modem"
 // #define D_MODULE_SENSORS_RESISTIVE_MOISTURE_CTR   "moisture"
 // #define D_MODULE_SENSORS_ADC_INTERNAL_CTR         "adc_internal"
 // #define D_MODULE_SENSORS_ADC_I2S_INTERNAL_CTR     "adc_i2s"
@@ -135,7 +135,7 @@
 // #define D_MODULE_SENSORS__TOF_VL53L0X__CTR "tof_vl53l0x"
 // #define D_MODULE_SENSORS__TOF_VL53L1X__CTR "tof_vl53l1x"
 // #define D_MODULE_SENSORS__RADAR_HLK_LD2410__CTR "radar_hlk_ld2410"
-// #define D_MODULE_SENSORS__GPS_MODEM__CTR          "gps_modem"
+#define D_MODULE_SENSORS__GPS_MODEM__CTR          "gps_modem"
 #define D_MODULE_SENSORS_ESP32_TEMPERATURE_CTR "esp32_temperature"
 // #define D_MODULE_CONTROLLER_BLINDS_CTR            "blinds"
 #define D_MODULE_CONTROLLER_HVAC_CTR              "hvac"
@@ -1260,6 +1260,15 @@
 #define D_GPIO_FUNCTION_SDCARD_MMC_D1_CTR   "SDCard MMC D1"
 #define D_GPIO_FUNCTION_SDCARD_MMC_D2_CTR   "SDCard MMC D2"
 #define D_GPIO_FUNCTION_SDCARD_MMC_D3_CTR   "SDCard MMC D3"
+
+
+#define D_GPIO_FUNCTION__MODEM_RX0__CTR "Modem RX0"
+#define D_GPIO_FUNCTION__MODEM_TX0__CTR "Modem TX0"
+#define D_GPIO_FUNCTION__MODEM_RX1__CTR "Modem RX1"
+#define D_GPIO_FUNCTION__MODEM_TX1__CTR "Modem TX1"
+#define D_GPIO_FUNCTION__MODEM_RX2__CTR "Modem RX2"
+#define D_GPIO_FUNCTION__MODEM_TX2__CTR "Modem TX2"
+#define D_GPIO_FUNCTION__MODEM_POWER_KEY__CTR "Modem Power Key"
 
 
 

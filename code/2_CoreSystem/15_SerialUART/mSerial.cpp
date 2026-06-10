@@ -16,7 +16,7 @@
 
 #ifdef USE_MODULE_CORE__SERIAL
 
-#error "temp make sure not used"
+// #error "temp make sure not used"
 
 uint8_t simple_uart2_receive_frame_for_calibration[4] = {0};
 bool flag_simple_uart2_receive_frame_for_calibration_updated = false;
@@ -553,6 +553,7 @@ uint16_t mSerial::GetRingBufferDataAndClear(uint8_t uart_num, char* buffer, uint
       ringbuffer_format_type_tmp = settings.uart2.ringbuffer_format_type;
     break;
   #endif // ENABLE_HARDWARE_UART_2
+    break;
   }
 
   //delayed start check
@@ -775,6 +776,7 @@ uint16_t mSerial::GetSingleItemFromNoSplitRingBuffer(uint8_t uart_num, char* buf
       ringbuffer_format_type_tmp = settings.uart2.ringbuffer_format_type;
     break;
   #endif // ENABLE_HARDWARE_UART_2
+    break;
   }
 
   //delayed start check

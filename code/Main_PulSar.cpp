@@ -118,6 +118,12 @@ void Serial_PrintFirmwareSplash()
     Serial.println(F("Friendly Name:   <DEVICENAME_FRIENDLY_CTR not defined>"));
   #endif
 
+  #ifdef DEVICENAME_BUILD_ENVIRONMENT
+    Serial.printf("Build Environment: %s\r\n", DEVICENAME_BUILD_ENVIRONMENT);
+  #else
+    Serial.println(F("Build Environment:"));
+  #endif
+
   #ifdef FIRMWARE_NAME_CTR
     Serial.printf("Firmware:        %s\r\n", FIRMWARE_NAME_CTR);
   #else

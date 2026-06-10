@@ -34,7 +34,7 @@
 #define TINY_GSM_DEBUG Serial
 
 #define TINY_GSM_RX_BUFFER 1024 // Set RX buffer to 1Kb
-#define SerialAT Serial1
+// #define SerialAT Serial1
 
 // See all AT commands, if wanted
 #define DUMP_AT_COMMANDS
@@ -64,16 +64,16 @@
 #define TIME_TO_SLEEP  60          // Time ESP32 will go to sleep (in seconds)
 
 // #define UART_CELLULAR_BAUD   921600
-#define PIN_DTR     25
-#define PIN_TX      27
-#define PIN_RX      26
-#define PWR_PIN     4
+// #define PIN_DTR     25
+// #define PIN_TX      27
+// #define PIN_RX      26
+// #define PWR_PIN     4
 
-#define SD_MISO     2
-#define SD_MOSI     15
-#define SD_SCLK     14
-#define SD_CS       13
-#define LED_PIN     12
+// #define SD_MISO     2
+// #define SD_MOSI     15
+// #define SD_SCLK     14
+// #define SD_CS       13
+// #define LED_PIN     12
 
 #define DEFAULT_AT_COMMAND_RESPONSE_WAIT 3000
 

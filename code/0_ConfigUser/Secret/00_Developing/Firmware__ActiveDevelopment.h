@@ -130,8 +130,8 @@
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
   
   //   #define USE_MODULE_SENSORS_INTERFACE
   //   #
@@ -3869,8 +3869,8 @@ new 26GHz radar sensor
 
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
 
   #define   ENABLE_DEBUG_LINE_HERE
@@ -3994,8 +3994,8 @@ new 26GHz radar sensor
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
 
 
@@ -4141,8 +4141,8 @@ new 26GHz radar sensor
    * SECTION: System Configs
   ************************************/     
 
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
 
   #define   ENABLE_DEBUG_LINE_HERE
@@ -4258,8 +4258,8 @@ new 26GHz radar sensor
   ************************************/     
 
 
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
 
   #define   ENABLE_DEBUG_LINE_HERE
@@ -6157,8 +6157,8 @@ Blue (Upstairs Link) ***********************************************************
   #define MQTT_HOST   "192.168.1.70"
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define DISABLE_SLEEP // loops per second less than 1hz // I need to make an "mqtt/alert" channel that lets me know this
   
@@ -6397,8 +6397,8 @@ Blue (Upstairs Link) ***********************************************************
   #define MQTT_HOST   "192.168.1.70"
     
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define DISABLE_SERIAL
   #define DISABLE_SERIAL0_CORE
@@ -6521,8 +6521,8 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define MQTT_HOST   "192.168.1.70"
 
-  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // 
+  // 
 
   // #define ENABLE_DEBUG_FUNCTION_NAMES
   // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
@@ -6693,8 +6693,8 @@ Blue (Upstairs Link) ***********************************************************
   
 
 
-  // // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // // 
+  // // 
 
 
   // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -6909,8 +6909,8 @@ Blue (Upstairs Link) ***********************************************************
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE__DRIVERS_BUZZER_TONES
 
@@ -7183,8 +7183,8 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_CTR          "testbed_fastboot_esp8266"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Fona 800L"
 
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_CREATE_SSID_AP
   // #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
   // #define DEBUG_FASTBOOT
@@ -7225,8 +7225,8 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_CTR          "testbed_crashreport" APPEND_ESP_TYPE_MQTT_STRING
   #define DEVICENAME_FRIENDLY_CTR "Testbed CrashReport" APPEND_ESP_TYPE_NAME_STRING
 
-  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // 
+  // 
   // // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_CREATE_SSID_AP
   // // #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
   // // #define DEBUG_FASTBOOT
@@ -7257,8 +7257,8 @@ Blue (Upstairs Link) ***********************************************************
   // add db18 dropping from the waterproof box to know extra temp, perhaps add two for backup? (independant pin from tank sensors)
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_SENSORS_INTERFACE
     #
