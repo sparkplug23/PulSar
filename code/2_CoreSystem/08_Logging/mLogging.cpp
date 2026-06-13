@@ -57,7 +57,7 @@ void AddLogOutput(uint8_t loglevel, const char* log_data)
       );
     #else
       SERIAL_DEBUG.printf(
-        PSTR("%s %S %s\r\n"),
+        PSTR("%s %s %s\r\n"),
         mxtime,
         tkr_log->GetLogLevelNamebyID(loglevel),
         log_data

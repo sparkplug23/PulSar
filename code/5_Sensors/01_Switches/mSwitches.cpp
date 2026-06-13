@@ -65,33 +65,33 @@ void mSwitches::Pre_Init(void)
      * Note: This loop checks each number, for each type within each loop (only one else may match)
      * All types of SWT1 (INV, NP etc)
      **/
-    if(tkr_pins->PinUsed(GPIO_SWT1, i))
+    if(tkr_pins->PinUsed(GPIO_SWT, i))
     { 
-      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1"), i);
+      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT"), i);
       SetSwitchUsed(i);
-      pin = tkr_pins->GetPin(GPIO_SWT1, i);
+      pin = tkr_pins->GetPin(GPIO_SWT, i);
       pinMode(pin, INPUT_PULLUP);
     }else    
-    if(tkr_pins->PinUsed(GPIO_SWT1_INV, i)) // Inverted pin, active low, with pulls
+    if(tkr_pins->PinUsed(GPIO_SWT_INV, i)) // Inverted pin, active low, with pulls
     {    
-      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_INV"), i);
+      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT_INV"), i);
       SetSwitchUsed(i);
-      pin = tkr_pins->GetPin(GPIO_SWT1_INV, i);
+      pin = tkr_pins->GetPin(GPIO_SWT_INV, i);
       pinMode(pin, INPUT_PULLUP);
     }else    
-    if(tkr_pins->PinUsed(GPIO_SWT1_NP, i)) // Standard pin, active high, NO pulls
+    if(tkr_pins->PinUsed(GPIO_SWT_NP, i)) // Standard pin, active high, NO pulls
     {
-      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_NP"), i);
+      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT_NP"), i);
       SetSwitchUsed(i);
-      pin = tkr_pins->GetPin(GPIO_SWT1_NP, i);
+      pin = tkr_pins->GetPin(GPIO_SWT_NP, i);
       pinMode(pin, INPUT);
       PullupFlag(i);
     }else    
-    if(tkr_pins->PinUsed(GPIO_SWT1_INV_NP, i))
+    if(tkr_pins->PinUsed(GPIO_SWT_INV_NP, i))
     {    
-      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT1_INV_NP"), i);
+      ALOG_INF(PSTR(D_LOG_SWITCHES "%d GPIO_SWT_INV_NP"), i);
       SetSwitchUsed(i);
-      pin = tkr_pins->GetPin(GPIO_SWT1_INV_NP, i);
+      pin = tkr_pins->GetPin(GPIO_SWT_INV_NP, i);
       pinMode(pin, INPUT);
       PulldownFlag(i);
     }else{
@@ -253,7 +253,7 @@ void mSwitches::Probe(void)
   // uint8_t current_second = (millis() / 1000) % 60;  
   // if (current_second != last_second) {
   //   last_second = current_second;
-  //   ALOG_INF(PSTR("state_filter %d u%d"), state_filter, tkr_pins->PinUsed(GPIO_SWT1_INV_NP, 0)); 
+  //   ALOG_INF(PSTR("state_filter %d u%d"), state_filter, tkr_pins->PinUsed(GPIO_SWT_INV_NP, 0)); 
   // } 
 
 
@@ -261,25 +261,25 @@ void mSwitches::Probe(void)
   for (uint32_t i = 0; i < MAX_SWITCHES_SET; i++) {
     if (!bitRead(Switch.used_bitmap, i)) { continue; }
 
-    if(tkr_pins->PinUsed(GPIO_SWT1, i))
+    if(tkr_pins->PinUsed(GPIO_SWT, i))
     { 
-      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1, i));
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT, i));
     }else    
-    if(tkr_pins->PinUsed(GPIO_SWT1_INV, i)) // Inverted pin, active low, with pulls
+    if(tkr_pins->PinUsed(GPIO_SWT_INV, i)) // Inverted pin, active low, with pulls
     {    
-      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_INV, i));
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT_INV, i));
     }else  
-    if(tkr_pins->PinUsed(GPIO_SWT1_NP, i)) // Active high, No pullup
+    if(tkr_pins->PinUsed(GPIO_SWT_NP, i)) // Active high, No pullup
     {    
-      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_NP, i));      
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT_NP, i));      
     }else    
-    if(tkr_pins->PinUsed(GPIO_SWT1, i)) // Standard pin, active high, NO pulls
+    if(tkr_pins->PinUsed(GPIO_SWT, i)) // Standard pin, active high, NO pulls
     {
-      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1, i));
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT, i));
     }else    
-    if(tkr_pins->PinUsed(GPIO_SWT1_INV_NP, i))
+    if(tkr_pins->PinUsed(GPIO_SWT_INV_NP, i))
     {    
-      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT1_INV_NP, i));
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_SWT_INV_NP, i));
     } else {
       not_activated = bitRead(Switch.virtual_pin_bitmap, i);
     }
@@ -394,7 +394,7 @@ void mSwitches::Handler(void) {
      **/
     if (Switch.hold_timer[i] & (((switchmode == PUSHHOLDMULTI) | (switchmode == PUSHHOLDMULTI_INV)) ? SM_TIMER_MASK: SM_NO_TIMER_MASK)) {
       Switch.hold_timer[i]--;
-      if ((Switch.hold_timer[i] & SM_TIMER_MASK) == loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 25) {
+      if ((Switch.hold_timer[i] & SM_TIMER_MASK) == loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 25) {
         if ((switchmode == PUSHHOLDMULTI) | (switchmode == PUSHHOLDMULTI_INV)){
           if (((switchmode == PUSHHOLDMULTI) & (NOT_PRESSED == Switch.last_state[i])) | ((switchmode == PUSHHOLDMULTI_INV) & (PRESSED == Switch.last_state[i]))) {
             SendSwitch(i, POWER_INCREMENT);
@@ -418,7 +418,7 @@ void mSwitches::Handler(void) {
             break;
           case PUSHHOLDMULTI:
             if (NOT_PRESSED == button) {
-              Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 25;
+              Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 25;
               SendSwitch(i, POWER_INCREMENT);
             } else {
               Switch.hold_timer[i]= 0;
@@ -427,7 +427,7 @@ void mSwitches::Handler(void) {
             break;
           case PUSHHOLDMULTI_INV:
             if (PRESSED == button) {
-              Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 25;
+              Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 25;
               SendSwitch(i, POWER_INCREMENT); // Execute command via MQTT
             } else {
               Switch.hold_timer[i]= 0;
@@ -468,7 +468,7 @@ void mSwitches::Handler(void) {
         break;
       case PUSHBUTTONHOLD:                 // SwitchMode 5
         if (PRESSED == button) {
-          Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10;  // Start timer on button press
+          Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 10;  // Start timer on button press
         }
         if ((NOT_PRESSED == button) && (Switch.hold_timer[i])) {
           Switch.hold_timer[i] = 0;        // Button released and hold timer not expired : stop timer...
@@ -477,7 +477,7 @@ void mSwitches::Handler(void) {
         break;
       case PUSHBUTTONHOLD_INV:             // SwitchMode 6
         if (NOT_PRESSED == button) {
-          Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10;  // Start timer on button press...
+          Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 10;  // Start timer on button press...
         }
         if ((PRESSED == button) && (Switch.hold_timer[i])) {
           Switch.hold_timer[i] = 0;        // Button released and hold timer not expired : stop timer.
@@ -501,7 +501,7 @@ void mSwitches::Handler(void) {
             SendSwitch(i, POWER_INV);             // Execute command via MQTT
           }
         } else {
-          if ((Switch.hold_timer[i] & SM_TIMER_MASK) > loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 25) {
+          if ((Switch.hold_timer[i] & SM_TIMER_MASK) > loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 25) {
             if ((Switch.hold_timer[i] & ~SM_TIMER_MASK) != SM_SECOND_PRESS) {
               Switch.hold_timer[i]= SM_FIRST_PRESS;
               switchflag = POWER_TOGGLE;                      // Toggle with pushbutton
@@ -515,7 +515,7 @@ void mSwitches::Handler(void) {
             SendSwitch(i, POWER_RELEASE);         // Execute command via MQTT
           }
         }
-        Switch.hold_timer[i] = (Switch.hold_timer[i] & ~SM_TIMER_MASK) | loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10;
+        Switch.hold_timer[i] = (Switch.hold_timer[i] & ~SM_TIMER_MASK) | loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 10;
         break;
       case PUSHHOLDMULTI_INV:              // SwitchMode 12
         if (PRESSED == button) {
@@ -524,7 +524,7 @@ void mSwitches::Handler(void) {
             SendSwitch(i, POWER_INV);             // Execute command via MQTT
           }
         } else {
-          if ((Switch.hold_timer[i] & SM_TIMER_MASK)> loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 25) {
+          if ((Switch.hold_timer[i] & SM_TIMER_MASK)> loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 25) {
             if ((Switch.hold_timer[i] & ~SM_TIMER_MASK) != SM_SECOND_PRESS) {
               Switch.hold_timer[i]= SM_FIRST_PRESS;
               switchflag = POWER_TOGGLE;                      // Toggle with pushbutton
@@ -538,7 +538,7 @@ void mSwitches::Handler(void) {
             SendSwitch(i, POWER_RELEASE);         // Execute command via MQTT
           }
         }
-        Switch.hold_timer[i] = (Switch.hold_timer[i] & ~SM_TIMER_MASK) | loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10;
+        Switch.hold_timer[i] = (Switch.hold_timer[i] & ~SM_TIMER_MASK) | loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 10;
         break;
       case PUSHON:                         // SwitchMode 13
         if (PRESSED == button) {

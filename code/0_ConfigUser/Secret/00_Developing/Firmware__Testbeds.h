@@ -309,33 +309,33 @@
        * @brief Right side
        **/
       #ifdef USE_MODULE_SENSORS_DS18X20   
-      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      "\"22\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
+      "\"23\":\"" D_GPIO_DS18X20_1_CTR "\","
+      "\"22\":\"" D_GPIO_DS18X20_2_CTR "\","
       #endif // USE_MODULE_SENSORS_DS18X20
       // GPIO1 - TX0 - Debug Serial TX
       // GPIO3 - RX0 - Debug Serial RX
       #ifdef USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
-      "\"21\":\"" D_GPIO_FUNCTION_LDR_BASIC_DIGITAL1_CTR "\","
+      "\"21\":\"" D_GPIO_LDR_BASIC_DIGITAL1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DHT
-      "\"19\":\"" D_GPIO_FUNCTION_DHT22_1_CTR "\","
-      "\"18\":\"" D_GPIO_FUNCTION_DHT22_2_CTR "\","      
+      "\"19\":\"" D_GPIO_DHT22_1_CTR "\","
+      "\"18\":\"" D_GPIO_DHT22_2_CTR "\","      
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
+      "\"5\":\""  D_GPIO_SWT1_CTR "\","
       #endif
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"4\":\"" D_GPIO_RGB_DATA_CTR  "\","
       #endif 
       #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR "\","
+      "\"2\":\"" D_GPIO_LED1_CTR "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_IR_RECEIVER
-      "\"15\":\"" D_GPIO_FUNCTION_IR_RECV_CTR "\","
+      "\"15\":\"" D_GPIO_IR_RECV_CTR "\","
       #endif
       // GPIO0 - ADC2 CH1
       /**
@@ -345,22 +345,22 @@
       // 36 - INPUT ONLY - VP
       // 39 - INPUT ONLY - VN
       #ifdef USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-      "\"34\":\"" D_GPIO_FUNCTION_LDR_BASIC_ANALOG1_CTR "\"," // adc1_6 // INPUT ONLY
+      "\"34\":\"" D_GPIO_LDR_BASIC_ANALOG1_CTR "\"," // adc1_6 // INPUT ONLY
       #endif
       // 35 - INPUT ONLY - adc1_7
       // 32 - Touch9 (Debug Header 1)
       // 33 - Touch8 (Debug Header 2)
       // 25 - DAC1 = LM386 Amplifier Module (Debug Header 3)
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","  
+      "\"26\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_I2C_SDA_CTR   "\","  
       #endif    
       // 14 (Debug Header 4)
       // 12 (Debug Header 5)
       // 13 (Debug Header 6) + RX
       //rx receivers?
       // Can I introduce a way that a comma at the end, does not make a broken json?
-      "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR   "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -792,42 +792,42 @@
    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
    "\"" D_GPIO_NUMBER "\":{"          
      #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-     "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-     "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
-    // "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," // Flipped
-    // "\"21\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\"," // Flipped      
+     "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
+     "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","    
+    // "\"22\":\"" D_GPIO_I2C_SDA_CTR   "\"," // Flipped
+    // "\"21\":\"" D_GPIO_I2C_SCL_CTR   "\"," // Flipped      
      #endif
      #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-     "\"33\":\""  D_GPIO_FUNCTION__TOF_VL53L0X_XSHUT1__CTR "\","
-    //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
-    //  "\"26\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+     "\"33\":\""  D_GPIO__TOF_VL53L0X_XSHUT1__CTR "\","
+    //  "\"33\":\""  D_GPIO_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+    //  "\"26\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
      #endif
      #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
-      // "\"26\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
-    //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+      // "\"26\":\""  D_GPIO__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
+    //  "\"33\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
      #endif
      #ifdef USE_MODULE_SENSORS_SR04
-     "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-     "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+     "\"4\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+     "\"2\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
      #endif 
      #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE //c
-     "\"34\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+     "\"34\":\""  D_GPIO_PIR_1_CTR "\","
      #endif
      #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-     "\"5\":\""  D_GPIO_FUNCTION_PIR_2_CTR "\"," //COR
+     "\"5\":\""  D_GPIO_PIR_2_CTR "\"," //COR
      #endif
      #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-     "\"35\":\""  D_GPIO_FUNCTION_PIR_3_CTR "\","
+     "\"35\":\""  D_GPIO_PIR_3_CTR "\","
      #endif
      #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
-     "\"13\":\""  D_GPIO_FUNCTION_PIR_4_CTR "\","
+     "\"13\":\""  D_GPIO_PIR_4_CTR "\","
      #endif
      #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-     "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-     "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
+     "\"17\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+     "\"16\":\""  D_GPIO__HLK_LD2410_RX__CTR "\","
      #endif
      #ifdef USE_MODULE_SENSORS_BUTTONS
-     "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\""
+     "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
      #endif
    "},"
    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -961,12 +961,12 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"2\":\""  D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"2\":\""  D_GPIO_REL1_INV_CTR  "\","
       #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"0\":\""  D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
+      "\"0\":\""  D_GPIO_SWT1_INV_CTR  "\","
       #endif
-      "\"4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      "\"4\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1121,30 +1121,30 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","  // BUILTIN LED as new Status LED, to reflect Network and Relay0 status
+      "\"2\":\"" D_GPIO_LED1_CTR  "\","  // BUILTIN LED as new Status LED, to reflect Network and Relay0 status
       #else
-      "\"2\":\""  D_GPIO_FUNCTION_LED3_CTR  "\"," //builtin BLUE
+      "\"2\":\""  D_GPIO_LED_CTR "3"  "\"," //builtin BLUE
       #endif  
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"5\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"4\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"26\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
-      "\"15\":\"" D_GPIO_FUNCTION_KEY4_INV_CTR  "\","
+      "\"5\":\"" D_GPIO_KEY_INV_CTR "1"  "\","
+      "\"4\":\"" D_GPIO_KEY_INV_CTR "2"  "\","
+      "\"26\":\"" D_GPIO_KEY_INV_CTR "3" "\","
+      "\"15\":\"" D_GPIO_KEY_INV_CTR "4" "\","
       #ifdef SOC_TOUCH_VERSION_1
-      "\"32\":\"" D_GPIO_FUNCTION_KEY5_TOUCH_CTR  "\","
-      "\"33\":\"" D_GPIO_FUNCTION_KEY6_TOUCH_CTR  "\","
-      "\"0\":\"" D_GPIO_FUNCTION_KEY7_INV_CTR  "\","
+      "\"32\":\"" D_GPIO_KEY_TOUCH_CTR "5" "\","
+      "\"33\":\"" D_GPIO_KEY_TOUCH_CTR "6" "\","
+      "\"0\":\"" D_GPIO_KEY_INV_CTR "7"  "\","
       #endif
       #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"18\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
-      "\"19\":\"" D_GPIO_FUNCTION_SWT2_INV_CTR  "\","
+      "\"18\":\"" D_GPIO_SWT_INV_CTR "1"  "\","
+      "\"19\":\"" D_GPIO_SWT_INV_CTR "2" "\","
       #endif  
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"27\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
-      "\"14\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
-      "\"12\":\"" D_GPIO_FUNCTION_REL3_CTR  "\","
-      "\"13\":\"" D_GPIO_FUNCTION_REL4_CTR  "\""
+      "\"27\":\"" D_GPIO_REL_CTR "1" "\","
+      "\"14\":\"" D_GPIO_REL_CTR "2" "\","
+      "\"12\":\"" D_GPIO_REL_CTR "3" "\","
+      "\"13\":\"" D_GPIO_REL_CTR "4" "\","
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1521,10 +1521,10 @@
    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
    "\"" D_GPIO_NUMBER "\":{" 
       // #ifdef USE_MODULE_CORE__SERIAL
-      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","
+      "\"17\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+      "\"16\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","
       // #endif
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"2\":\"" D_GPIO_LED1_CTR  "\""
    "},"
    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1731,41 +1731,41 @@
        * @brief Right side
        **/
       #ifdef USE_MODULE_SENSORS_DS18X20   
-      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      "\"22\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR "\","
+      "\"23\":\"" D_GPIO_DS18X20_1_CTR "\","
+      "\"22\":\"" D_GPIO_DS18X20_2_CTR "\","
       #endif // USE_MODULE_SENSORS_DS18X20
       // GPIO1 - TX0 - Debug Serial TX
       // GPIO3 - RX0 - Debug Serial RX
       #ifdef USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
-      "\"21\":\"" D_GPIO_FUNCTION_LDR_BASIC_DIGITAL1_CTR "\","
+      "\"21\":\"" D_GPIO_LDR_BASIC_DIGITAL1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DHT
-      "\"19\":\"" D_GPIO_FUNCTION_DHT22_1_CTR "\","
-      "\"18\":\"" D_GPIO_FUNCTION_DHT22_2_CTR "\","      
+      "\"19\":\"" D_GPIO_DHT22_1_CTR "\","
+      "\"18\":\"" D_GPIO_DHT22_2_CTR "\","      
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
+      "\"5\":\""  D_GPIO_SWT1_CTR "\","
       #endif
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"4\":\"" D_GPIO_RGB_DATA_CTR  "\","
       #endif 
       #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_CTR "\","
+      "\"12\":\"" D_GPIO_LED1_CTR "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_IR_RECEIVER
-      "\"15\":\"" D_GPIO_FUNCTION_IR_RECV_CTR "\","
+      "\"15\":\"" D_GPIO_IR_RECV_CTR "\","
       #endif
       // GPIO0 - ADC2 CH1
       
       #ifdef USE_MODULE_DRIVERS_SDCARD
-      "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
-      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
-      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
-      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+      "\"2\":\"" D_GPIO_SDCARD_HSPI_MISO_CTR   "\","
+      "\"15\":\"" D_GPIO_SDCARD_HSPI_MOSI_CTR   "\","   
+      "\"14\":\"" D_GPIO_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_SDCARD_HSPI_CSO_CTR   "\","  
       #endif
 
 
@@ -1777,22 +1777,22 @@
       // 36 - INPUT ONLY - VP
       // 39 - INPUT ONLY - VN
       #ifdef USE_MODULE_SENSORS_LDR_BASIC_ANALOG
-      "\"34\":\"" D_GPIO_FUNCTION_LDR_BASIC_ANALOG1_CTR "\"," // adc1_6 // INPUT ONLY
+      "\"34\":\"" D_GPIO_LDR_BASIC_ANALOG1_CTR "\"," // adc1_6 // INPUT ONLY
       #endif
       // 35 - INPUT ONLY - adc1_7
       // 32 - Touch9 (Debug Header 1)
       // 33 - Touch8 (Debug Header 2)
       // 25 - DAC1 = LM386 Amplifier Module (Debug Header 3)
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","  
+      "\"26\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_I2C_SDA_CTR   "\","  
       #endif    
       // 14 (Debug Header 4)
       // 12 (Debug Header 5)
       // 13 (Debug Header 6) + RX
       //rx receivers?
       // Can I introduce a way that a comma at the end, does not make a broken json?
-      "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR   "\""
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR   "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

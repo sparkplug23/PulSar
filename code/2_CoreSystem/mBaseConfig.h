@@ -115,6 +115,7 @@
   #define USE_MODULE_CORE_TIME
   #define USE_MODULE_CORE_SPI
   #define USE_MODULE_CORE_I2C
+  #define USE_MODULE_CORE_PWM
 
   // #ifdef ESP32
   #ifndef DISABLE_FILESYSTEM

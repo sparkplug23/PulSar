@@ -57,7 +57,15 @@ void mPins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
     }
   }
 
+  // AddLog_Array_Block((uint8_t)LOG_LEVEL_HIGHLIGHT, "hardware.gp.io", tkr_set->Settings.user_template.hardware.gp.io, ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
+
   ALOG_INF(PSTR(D_LOG_PINS "PM_GPIOC: Starting"));
+
+  for(int ii=0;ii<ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io);ii++){
+    ALOG_INF(PSTR("io %d=%d"),ii,tkr_set->Settings.user_template.hardware.gp.io[ii]);
+  }
+
+
 
   if(jtok = rootObj[PM_GPIOC])
   {
@@ -366,281 +374,356 @@ void mPins::GetInternalTemplate(void* ptr, uint32_t module, uint32_t option)
 #endif  // ESP8266
 
 
-/**
- * Takes GPIO/pins configured to internal module and configures pins output
- * */
+
+
+
 void mPins::GpioInit(void)
 {
-
   ALOG_INF(PSTR(D_LOG_MODULE "GpioInit: Start ================================================"));
-  
-  uint16_t mgpio;
 
-  /**
+
+  uint16_t mgpio = GPIO_NONE;
+
+  /*******************************************************************************************\
    * Part A: Checking module or setting to default based on chipset
-   * */
+  \*******************************************************************************************/
+
   ALOG_INF(PSTR(D_LOG_MODULE "Validate module or set default"));
-  if (!ValidModule(tkr_set->Settings.module)) 
+
+  if (!ValidModule(tkr_set->Settings.module))
   {
     ALOG_INF(PSTR(D_LOG_MODULE "!ValidModule"));
+
     uint8_t module = MODULE;
+
     if (!ValidModule(MODULE))
-    { 
+    {
       module = MODULE_DEFAULT;
     }
-    tkr_set->Settings.module = module;
+
+    tkr_set->Settings.module      = module;
     tkr_set->Settings.last_module = module;
-  }else{
-    ALOG_INF(PSTR(D_LOG_MODULE "ValidModule %d"),tkr_set->Settings.module);
+  }
+  else
+  {
+    ALOG_INF(PSTR(D_LOG_MODULE "ValidModule %d"), tkr_set->Settings.module);
   }
 
   SetModuleType();
 
 
-  /**
-   * Part C: Correcting for invalid gpio functions
-   * */
+  /*******************************************************************************************\
+   * Part C: Correcting for invalid gpio functions from user template
+   *
+   * GPIO_NONE = normal unassigned state
+   * GPIO_USER = normal legacy/user-free state
+   *
+   * Anything else must be a valid packed selectable GPIO function.
+  \*******************************************************************************************/
+
   ALOG_INF(PSTR(D_LOG_MODULE "Correcting for invalid gpio functions from user template"));
-  for (uint8_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io); i++) {
-    if(!ValidUserGPIOFunction(tkr_set->Settings.user_template.hardware.gp.io,i))
+
+  for (uint8_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io); i++)
+  {
+    const uint16_t gpio = tkr_set->Settings.user_template.hardware.gp.io[i];
+
+    if ((gpio == GPIO_NONE) || (gpio == GPIO_USER))
     {
-      ALOG_INF(PSTR(D_LOG_CONFIG "InValidUserGPIOFunction %d %d"), i, tkr_set->Settings.user_template.hardware.gp.io[i]);
-      tkr_set->Settings.user_template.hardware.gp.io[i] = GPIO_USER;  // Fix not supported sensor ids in template
+      ALOG_INF(
+        PSTR(D_LOG_CONFIG "user_template.gp.io[%u]=%u, normal unassigned/user state"),
+        i,
+        gpio
+      );
+      continue;
+    }
+
+    if (!ValidUserGPIOFunction(tkr_set->Settings.user_template.hardware.gp.io, i))
+    {
+      ALOG_INF(
+        PSTR(D_LOG_CONFIG "Invalid user_template.gp.io[%u]=%u, resetting to GPIO_USER"),
+        i,
+        gpio
+      );
+
+      tkr_set->Settings.user_template.hardware.gp.io[i] = GPIO_USER;
     }
   }
-  
 
-  /**
-   * @brief Part D: Read any template GPIO values. Function name needs changed!
-   * 
-   */
+  /*******************************************************************************************\
+   * Part D: Read template GPIO values
+  \*******************************************************************************************/
+
   ALOG_INF(PSTR(D_LOG_MODULE "Load TemplateGPIOs"));
+
   myio def_gp;
-  TemplateGPIOs(&def_gp); // Get template values
+  TemplateGPIOs(&def_gp);
 
   #ifdef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
   AddLog_Array(LOG_LEVEL_INFO, PSTR("module_pins.io"), tkr_set->Settings.module_pins.io, ARRAY_SIZE(tkr_set->Settings.module_pins.io));
-  AddLog_Array(LOG_LEVEL_INFO, PSTR("def_gp.io"), def_gp.io, ARRAY_SIZE(def_gp.io));
-  #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-  
-  /**
-   * @brief For all possible GPIO physical pins, populate gpio function if desired from TEMPLATE
-   **/
-  ALOG_INF(PSTR(D_LOG_MODULE "Sanitise GPIOs"));
-  for (uint8_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.module_pins.io); i++) 
-  { //all pins
-    
-    ALOG_DBM(PSTR(D_LOG_CONFIG "%d=module_pins.io[%d]"),tkr_set->Settings.module_pins.io[i],i);
-
-    uint16_t gpio = tkr_set->Settings.module_pins.io[i];
-
-    ALOG_DBM(PSTR(D_LOG_CONFIG "module_pins.io[%d]=%d"),i,tkr_set->Settings.module_pins.io[i]);
-    
-    // If out of range, reset to none
-    if(!ValidUserGPIOFunction(tkr_set->Settings.module_pins.io,i)){
-      tkr_set->Settings.module_pins.io[i] = GPIO_NONE;             // Fix not supported sensor ids in module
-      ALOG_DBM(PSTR(D_LOG_CONFIG "Unsupported module_pins.io %d being reset to GPIO_NONE"),i);
-    }
-    // Set any user pins 
-    else if (tkr_set->Settings.module_pins.io[i] > GPIO_NONE) {
-      tkr_set->runtime.my_module.io[i] = tkr_set->Settings.module_pins.io[i];
-      ALOG_DBM(PSTR(D_LOG_CONFIG "my_module.io[i] = %d"),i,tkr_set->Settings.module_pins.io[i]);
-    }
-
-    // Set any pins set in template
-    if ((def_gp.io[i] >= GPIO_NONE) && (def_gp.io[i] < GPIO_USER)) { //ADDED >= to also copy NONE 
-      tkr_set->runtime.my_module.io[i] = def_gp.io[i];
-      #ifndef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-      if(tkr_set->runtime.my_module.io[i] > GPIO_NONE){
-        #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-        #ifdef ENABLE_LOG_LEVEL_INFO
-          char buffer[50];
-          ALOG_DBM(PSTR(D_LOG_CONFIG "mio[i]=gio[i] %d %d index/real %d/%d \"%s\""), tkr_set->runtime.my_module.io[i], def_gp.io[i], i,ConvertIndexPinToRealPin(i), GetGPIOFunctionNamebyID(tkr_set->runtime.my_module.io[i], buffer, sizeof(buffer))
-        );
-        #endif // ENABLE_LOG_LEVEL_INFO
-        #ifndef ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-      }
-      #endif // ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-    }
-    else{
-      ALOG_INF(PSTR(D_LOG_CONFIG "Invalid IO in def_gp.io[%d]=%d"),i,def_gp.io[i]);
-    }
-
-  }
-
-  
-  /** 
-   * PArt E: Checking for bitSet/Inverted etc, but I am expecting this to move into submodules
-   *  Take module io and configure pins
-   * Unlike Tas, each pin function has its unique name maintained (ie SWT_INV for switch inverted maintained its ID, and it not saved simply as INV then shifted back to standard SWT. Internal classes must handle this)
-   * */
-  ALOG_INF(PSTR(D_LOG_MODULE "SetPin modes"));
-  for (uint8_t index = 0; index < ARRAY_SIZE(tkr_set->runtime.my_module.io); index++) 
-  {
-    uint8_t real_pin = ConvertIndexPinToRealPin(index);
-    uint16_t gpio = tkr_set->runtime.my_module.io[index];
-    mgpio = ValidPin_AdjustGPIO(index, gpio);
-    ALOG_INF( PSTR("DBG: %d real_pin=%d moduleIO=%d  mgpio=%d"), index, real_pin, tkr_set->Settings.module_pins.io[index], mgpio);
-
-    if(mgpio){ SetPin(real_pin, mgpio); }                  // Anything above GPIO_NONE and below GPIO_SENSOR_END 
-    
-  }//end for
-
-  #ifdef ESP8266
-  ALOG_INF(PSTR(D_LOG_MODULE "Switch default serial TX pin (H801)"));
-  /**
-   * @brief The check for H801 should be phased out here, as its hardware specific, really the template should force this to happen anyway as TX==2
-   * 2023: Just check if the HWSerial is set to 2 then do it here
-   * 
-   */
-    if ((2 == GetPin(GPIO_HWSERIAL0_TX)) || (MODULE_H801 == tkr_set->runtime.my_module_type)) { 
-      DEBUG_LINE_HERE;
-      Serial.set_tx(2); 
-      flag_serial_set_tx_set = true;
-      
-      }
+  AddLog_Array(LOG_LEVEL_INFO, PSTR("def_gp.io"),        def_gp.io,                         ARRAY_SIZE(def_gp.io));
   #endif
 
-  ALOG_INF(PSTR(D_LOG_MODULE "Set PWM defaults"));
-  analogWriteRange(tkr_set->Settings.pwm_range);      // Default is 1023 (Arduino.h)
-  analogWriteFreq(tkr_set->Settings.pwm_frequency);   // Default is 1000 (core_esp8266_wiring_pwm.c)
-  
-  // Set any non-used GPIO to INPUT - Related to resetPins() in support_legacy_cores.ino
-  // Doing it here solves relay toggles at restart.
-  ALOG_INF(PSTR(D_LOG_MODULE "Set unused pins as input"));
-  for (uint32_t i = 0; 
-                i < ARRAY_SIZE(tkr_set->runtime.my_module.io);
-                i++
-  ){
-    
-    uint32_t mgpio = ValidPin_AdjustGPIO(i, tkr_set->runtime.my_module.io[i]);
-    
-    ALOG_DBM( PSTR("INI: gpio pin %d, mgpio %d"), i, mgpio);
-    
-    if (((i < 6) || (i > 11)) && (0 == mgpio))
-    {  // Skip SPI flash interface
 
-      if (!((1 == i) || (3 == i))) {             // Skip serial
-        #ifdef ESP8266
-        if((MODULE_H801 == tkr_set->runtime.my_module_type) && (i !=2 ))
-        {
-          pinMode(i, INPUT);
-        }
-        #endif
-      }
+  /*******************************************************************************************\
+   * Part E: Sanitise GPIOs and populate runtime.my_module.io
+   *
+   * For each physical/index pin:
+   *
+   *   1. Start runtime slot as GPIO_NONE.
+   *   2. Apply user/module override if valid.
+   *   3. Apply template value if valid.
+   *
+   * Template GPIO_USER means "free/user-controlled", so it must not overwrite a user setting.
+   * Template GPIO_NONE means explicitly unassigned.
+  \*******************************************************************************************/
+
+  ALOG_INF(PSTR(D_LOG_MODULE "Sanitise GPIOs"));
+
+  for (uint8_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.module_pins.io); i++)
+  {
+    const uint16_t module_gpio   = tkr_set->Settings.module_pins.io[i];
+    const uint16_t template_gpio = def_gp.io[i];
+
+    tkr_set->runtime.my_module.io[i] = GPIO_NONE;
+
+    ALOG_INF(
+      PSTR(D_LOG_CONFIG "GPIO[%u]: module_pins.io=%u def_gp.io=%u"),
+      i,
+      module_gpio,
+      template_gpio
+    );
+
+
+    /**************************************************************************
+     * 1. Apply user/module pin override
+    **************************************************************************/
+
+    if (module_gpio == GPIO_NONE)
+    {
+      ALOG_INF(
+        PSTR(D_LOG_CONFIG "module_pins.io[%u]=GPIO_NONE, normal unassigned state"),
+        i
+      );
+    }
+    else if (module_gpio == GPIO_USER)
+    {
+      ALOG_INF(
+        PSTR(D_LOG_CONFIG "module_pins.io[%u]=GPIO_USER, normal free/user state"),
+        i
+      );
+    }
+    else if (!ValidUserGPIOFunction(tkr_set->Settings.module_pins.io, i))
+    {
+      ALOG_INF(
+        PSTR(D_LOG_CONFIG "Unsupported module_pins.io[%u]=%u being reset to GPIO_NONE"),
+        i,
+        module_gpio
+      );
+
+      tkr_set->Settings.module_pins.io[i] = GPIO_NONE;
+    }
+    else
+    {
+      tkr_set->runtime.my_module.io[i] = module_gpio;
+
+      #ifdef ENABLE_LOG_LEVEL_INFO
+      char buffer[50];
+      ALOG_INF(
+        PSTR(D_LOG_CONFIG "module override: mio[%u]=%u index/real %u/%d \"%s\""),
+        i,
+        tkr_set->runtime.my_module.io[i],
+        i,
+        ConvertIndexPinToRealPin(i),
+        GetGPIOFunctionNamebyID(tkr_set->runtime.my_module.io[i], buffer, sizeof(buffer))
+      );
+      #endif
+    }
+
+    ALOG_INF(PSTR("Stable boot when here included"));
+
+
+
+    /**************************************************************************
+     * 2. Apply template pin value
+     *
+     * GPIO_USER = leave free/user-controlled, do not overwrite runtime slot.
+     * GPIO_NONE = explicitly no function.
+     * valid packed function = assign.
+    **************************************************************************/
+
+    if (template_gpio == GPIO_USER)
+    {
+      ALOG_INF(
+        PSTR(D_LOG_CONFIG "def_gp.io[%u]=GPIO_USER, leaving runtime pin user-controlled"),
+        i
+      );
+    }
+    else if (template_gpio == GPIO_NONE)
+    {
+      tkr_set->runtime.my_module.io[i] = GPIO_NONE;
+
+      ALOG_INF(
+        PSTR(D_LOG_CONFIG "def_gp.io[%u]=GPIO_NONE, runtime.my_module.io[%u]=GPIO_NONE"),
+        i,
+        i
+      );
+    }
+    else if (!ValidUserGPIOFunction(def_gp.io, i))
+    {
+      ALOG_INF(
+        PSTR(D_LOG_CONFIG "Invalid IO in def_gp.io[%u]=%u"),
+        i,
+        template_gpio
+      );
+    }
+    else
+    {
+      tkr_set->runtime.my_module.io[i] = template_gpio;
+
+      #ifdef ENABLE_LOG_LEVEL_INFO
+      char buffer[50];
+      ALOG_INF(
+        PSTR(D_LOG_CONFIG "mio[i]=gio[i] %u %u index/real %u/%d \"%s\""),
+        tkr_set->runtime.my_module.io[i],
+        def_gp.io[i],
+        i,
+        ConvertIndexPinToRealPin(i),
+        GetGPIOFunctionNamebyID(tkr_set->runtime.my_module.io[i], buffer, sizeof(buffer))
+      );
+      #endif
     }
   }
 
 
-  /**
-   * @brief New to help with inactive IC data lines, set esp32 outputs to either high or low for enable pins of ICs
-   **/
-  ALOG_INF(PSTR(D_LOG_MODULE "Set any latched pins"));
-  for (uint32_t i = 0; 
-                i < ARRAY_SIZE(tkr_set->runtime.my_module.io);
-                i++
-  ){
-    
-    uint32_t mgpio_function = ValidPin_AdjustGPIO(i, tkr_set->runtime.my_module.io[i]);    
+  /*******************************************************************************************\
+   * Part F: Set pin modes
+  \*******************************************************************************************/
 
-    ALOG_DBM( PSTR("INI: gpio pin %d, mgpio %d"), i, mgpio_function);
+  ALOG_INF(PSTR(D_LOG_MODULE "SetPin_GPIOFunction with GPIO Function"));
 
-    if(mgpio_function == GPIO_UNUSED_FORCED_LOW)
+  // Scan over all possible pins up to the max
+  for (uint8_t real_pin = 0; real_pin < ARRAY_SIZE(tkr_set->runtime.my_module.io); real_pin++)
+  {
+    uint16_t gpio  = tkr_set->runtime.my_module.io[real_pin];
+    uint16_t mgpio = ValidPin_AdjustGPIO(real_pin, gpio);
+
+    ALOG_INF(PSTR("DBG: real_pin=%u moduleIO=%u runtimeIO=%u mgpio=%u"),real_pin,tkr_set->Settings.module_pins.io[real_pin],gpio,mgpio);
+
+    SetPin_GPIOFunction(real_pin, mgpio);
+
+  }
+
+
+  /*******************************************************************************************\
+   * ESP8266: switch default serial TX pin, H801 compatibility
+  \*******************************************************************************************/
+
+  #ifdef ESP8266
+  /*
+   * Performed here for earlier possible logging
+   */
+  if ((2 == GetPin(GPIO_HWSERIAL_TX,0)) || (MODULE_H801 == tkr_set->runtime.my_module_type))
+  {
+    Serial.set_tx(2);
+    flag_serial_set_tx_set = true;
+    ALOG_INF(PSTR(D_LOG_MODULE "Switch default serial TX pin (H801)"));
+  }
+  #endif
+
+  /*******************************************************************************************\
+   * Set unused pins as input
+   *
+   * Related to resetPins()
+   * Doing it here reduces relay toggles at restart.
+   * CRITICAL: Do not perform this on esp32, as it will cause wifi to crash (unable to scan rssi)
+  \*******************************************************************************************/
+
+  #ifdef ESP8266
+
+  for (uint32_t index_pin = 0;
+      index_pin < ARRAY_SIZE(tkr_set->runtime.my_module.io);
+      index_pin++)
+  {
+    int8_t real_pin = ConvertIndexPinToRealPin(index_pin);
+
+    if (real_pin < 0)
     {
+      ALOG_INF(PSTR("PIN: skip invalid index_pin=%u"), index_pin);
+      continue;
+    }
 
-      if (((i < 6) || (i > 11)) && (0 == mgpio))
-      {  // Skip SPI flash interface
-        if (!((1 == i) || (3 == i))) {             // Skip serial
-          #ifdef ESP8266
-          if((MODULE_H801 == tkr_set->runtime.my_module_type) && (i !=2 ))
-          {
-            pinMode(i, OUTPUT);
-            digitalWrite(i, LOW);
-          }
-          #endif
+    uint32_t mgpio = ValidPin_AdjustGPIO(
+      (uint8_t)real_pin,
+      tkr_set->runtime.my_module.io[index_pin]
+    );
+
+    ALOG_DBM(
+      PSTR("INI: index_pin=%u real_pin=%d mgpio=%u"),
+      index_pin,
+      real_pin,
+      mgpio
+    );
+
+    if (0 == mgpio)
+    {
+      if (!((1 == real_pin) || (3 == real_pin)))   // skip serial
+      {
+        if ((MODULE_H801 == tkr_set->runtime.my_module_type) && (real_pin != 2))
+        {
+          pinMode(real_pin, INPUT);
         }
       }
+    }
+  }
+
+  #endif
+
+
+  /*******************************************************************************************\
+   * Set any latched / forced unused pins
+   *
+   * GPIO_UNUSED_FORCED_LOW  -> output low
+   * GPIO_UNUSED_FORCED_HIGH -> output high
+  \*******************************************************************************************/
+
+  ALOG_INF(PSTR(D_LOG_MODULE "Set any latched pins"));
+
+  for (uint32_t i = 0; i < ARRAY_SIZE(tkr_set->runtime.my_module.io); i++)
+  {
+    uint32_t mgpio_function = ValidPin_AdjustGPIO(i, tkr_set->runtime.my_module.io[i]);
+
+    ALOG_INF(PSTR("INI: gpio pin %u, mgpio_function %u"), i, mgpio_function);
+
+    if (mgpio_function == GPIO_UNUSED_FORCED_LOW)
+    {
 
       uint8_t real_pin = ConvertIndexPinToRealPin(i);
+
+      ALOG_INF(
+        PSTR(D_LOG_MODULE "Forced LOW index=%u real_pin=%u"),
+        i,
+        real_pin
+      );
+
       pinMode(real_pin, OUTPUT);
       digitalWrite(real_pin, LOW);
-
-    }else
-    if(mgpio_function == GPIO_UNUSED_FORCED_HIGH)
+    }
+    else if (mgpio_function == GPIO_UNUSED_FORCED_HIGH)
     {
-      if (((i < 6) || (i > 11)) && (0 == mgpio))
-      {  // Skip SPI flash interface
-        if (!((1 == i) || (3 == i))) {             // Skip serial
-          #ifdef ESP8266
-          if((MODULE_H801 == tkr_set->runtime.my_module_type) && (i !=2 ))
-          {
-            pinMode(i, OUTPUT);
-            digitalWrite(i, HIGH);
-          }
-          #endif
-        }
-      }
-      
+
       uint8_t real_pin = ConvertIndexPinToRealPin(i);
+
+      ALOG_INF(
+        PSTR(D_LOG_MODULE "Forced HIGH index=%u real_pin=%u"),
+        i,
+        real_pin
+      );
+
       pinMode(real_pin, OUTPUT);
       digitalWrite(real_pin, HIGH);
-
     }
-    
   }
 
-  GpioInitPwm();
-  
+
   ALOG_INF(PSTR(D_LOG_MODULE "GpioInit: Complete ================================================"));
-
-}
-
-
-void mPins::GpioInitPwm(void) {
-  // for (uint32_t pin = 0; pin < MAX_GPIO_PIN; pin++) {
-  //   analog_write_state[pin] = -1;  // No PWM pin (could be GPIO_PWM or GPIO_LED)
-  // }
-  // for (uint32_t i = 0; i < MAX_PWMS; i++) {     // Basic PWM control only
-  //   if (PinUsed(GPIO_PWM1, i)) {
-  //     pinMode(Pin(GPIO_PWM1, i), OUTPUT);
-  //     if (i < TasmotaGlobal.light_type) {
-  //       // force PWM GPIOs to low or high mode if belongs to the light (always <5), see #7165
-  //       AnalogWrite(Pin(GPIO_PWM1, i), bitRead(TasmotaGlobal.pwm_inverted, i) ? Settings->pwm_range : 0);
-  //     } else {
-  //       TasmotaGlobal.pwm_present = true;
-  //       if (i < MAX_PWMS_LEGACY) {
-  //         AnalogWrite(Pin(GPIO_PWM1, i), bitRead(TasmotaGlobal.pwm_inverted, i) ? Settings->pwm_range - Settings->pwm_value[i] : Settings->pwm_value[i]);
-  //       } else {
-  //         AnalogWrite(Pin(GPIO_PWM1, i), bitRead(TasmotaGlobal.pwm_inverted, i) ? Settings->pwm_range - Settings->pwm_value_ext[i] : Settings->pwm_value_ext[i]);
-  //       }
-  //     }
-  //   }
-  // }
-
-#ifdef USE_PWM
-  for (uint32_t i = 0; i < MAX_PWMS; i++) {     // Basic PWM control only
-    if (PinUsed(GPIO_PWM1, i)) {
-      pinMode(Pin(GPIO_PWM1, i), OUTPUT);
-
-      #ifdef ESP32
-      analogAttach(Pin(GPIO_PWM1, i),i);
-      // analogWriteFreqRange(i,tkr_set->Settings.pwm_frequency,tkr_set->Settings.pwm_range);
-        analogWrite(Pin(GPIO_PWM1, i), bitRead(tkr_set->runtime.pwm_inverted, i) ? tkr_set->Settings.pwm_range : 0);
-      tkr_set->runtime.pwm_present = true;
-      #endif
-
-      #ifdef ESP8266
-      // if (tkr_set->Settings.light_settings.type) {      // force PWM GPIOs to low or high mode, see #7165
-        analogWrite(Pin(GPIO_PWM1, i), bitRead(tkr_set->runtime.pwm_inverted, i) ? tkr_set->Settings.pwm_range : 0);
-      // } else {
-      //   tkr_set->pwm_present = true;
-      //   analogWrite(Pin(GPIO_PWM1_ID, i), bitRead(tkr_set->pwm_inverted, i) ? tkr_set->Settings.pwm_range - tkr_set->Settings.pwm_value[i] : tkr_set->Settings.pwm_value[i]);
-      // }
-      #endif // ESP8266
-    
-    }
-    
-  }
-  #endif // USE_PWM
-
 }

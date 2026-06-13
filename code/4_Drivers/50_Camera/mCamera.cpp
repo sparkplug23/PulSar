@@ -4,6 +4,7 @@
 
 int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
 {
+  // return 0;
 
   /************
    * INIT SECTION * 

@@ -110,7 +110,7 @@ void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
   for (uint32_t i = 0; i < rt.devices_present; i++) {
     uint32_t port = (i << 1) + ((latching_power >> i) &1);
           ALOG_INF(PSTR("DigitalWrite Pre %d"), 3);
-    tkr_pins->DigitalWrite(GPIO_REL1 + port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
+    tkr_pins->DigitalWrite(GPIO_REL + port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
   }
 }
 
@@ -209,14 +209,14 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
         uint16_t gpio_pin = 0;
         if(bitRead(rt.bitpacked.rel_inverted, i))
         { //add the gpio mpin shift back in
-          gpio_pin = GPIO_REL1_INV;          
+          gpio_pin = GPIO_REL_INV;          
         }else{
-          gpio_pin = GPIO_REL1;
+          gpio_pin = GPIO_REL;
         }
         
         ALOG_INF(PSTR("DigitalWrite Pre %d"), 2);
         tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
-        // tkr_pins->DigitalWrite(GPIO_REL1, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
+        // tkr_pins->DigitalWrite(GPIO_REL, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
       }
       port += port_next;                          // Select next relay
       rpower >>= 1;                               // Select next power
@@ -239,14 +239,14 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
           uint16_t gpio_pin = 0;
           if(bitRead(rt.bitpacked.rel_inverted, i))
           { //add the gpio mpin shift back in
-            gpio_pin = GPIO_REL1_INV;          
+            gpio_pin = GPIO_REL_INV;          
           }else{
-            gpio_pin = GPIO_REL1;
+            gpio_pin = GPIO_REL;
           }
           power_t state = rpower &1;
           ALOG_INF(PSTR("DigitalWrite Pre %d"), 1);
           tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
-          // tkr_pins->DigitalWrite(GPIO_REL1, i, bitRead(rt.bitpacked.rel_inverted, i) ? 1 : 0);
+          // tkr_pins->DigitalWrite(GPIO_REL, i, bitRead(rt.bitpacked.rel_inverted, i) ? 1 : 0);
           ALOG_INF(PSTR("Relay DigitalWrite %d, %d"), gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
         }
       }
@@ -369,11 +369,11 @@ void mRelays::SetPowerOnState(void)
           && !tkr_set->Settings.flag3.shutter_mode       // SetOption80 - Enable shutter support
           #endif // USE_SHUTTER
         ) {
-        if ((port < MAX_RELAYS_SET) && tkr_pins->PinUsed(GPIO_REL1, port)) {
+        if ((port < MAX_RELAYS_SET) && tkr_pins->PinUsed(GPIO_REL, port)) {
           if (bitRead(rt.bitpacked.rel_bistable, port)) {
             port++;                              // Skip both bistable relays as always 0
           } else {
-            bitWrite(tkr_set->runtime.power, i, digitalRead(tkr_pins->Pin(GPIO_REL1, port)) ^ bitRead(rt.bitpacked.rel_inverted, port));
+            bitWrite(tkr_set->runtime.power, i, digitalRead(tkr_pins->Pin(GPIO_REL, port)) ^ bitRead(rt.bitpacked.rel_inverted, port));
           }
         }
         port++;
@@ -629,16 +629,16 @@ void mRelays::Load_Module(bool erase)
 //   // Lets check each type on their own, normal, inverted etc
 //   for(uint8_t driver_index=0; driver_index<MAX_RELAYS_SET; driver_index++)
 //   {
-//     if(tkr_pins->PinUsed(GPIO_REL1, driver_index))
+//     if(tkr_pins->PinUsed(GPIO_REL, driver_index))
 //     {
-//       uint8_t pin_number = tkr_pins->Pin(GPIO_REL1, driver_index);
+//       uint8_t pin_number = tkr_pins->Pin(GPIO_REL, driver_index);
 //       pinMode(pin_number, OUTPUT);
 //       rt.devices_present++;
 //       if(module_state.devices++ >= MAX_RELAYS_SET){ break; }
 //     }else
-//     if(tkr_pins->PinUsed(GPIO_REL1_INV, driver_index))
+//     if(tkr_pins->PinUsed(GPIO_REL_INV, driver_index))
 //     {
-//       uint8_t pin_number = tkr_pins->Pin(GPIO_REL1_INV, driver_index);
+//       uint8_t pin_number = tkr_pins->Pin(GPIO_REL_INV, driver_index);
 //       pinMode(pin_number, OUTPUT);
 //       bitSet(rt.bitpacked.rel_inverted, driver_index); //temp fix
 //       rt.devices_present++;
@@ -662,9 +662,9 @@ void mRelays::Pre_Init(void)
 
   for(uint8_t relay_index = 0; relay_index < MAX_RELAYS_SET; relay_index++)
   {
-    if(tkr_pins->PinUsed(GPIO_REL1_INV, relay_index))
+    if(tkr_pins->PinUsed(GPIO_REL_INV, relay_index))
     {
-      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1_INV, relay_index);
+      uint8_t pin_number = tkr_pins->Pin(GPIO_REL_INV, relay_index);
       pinMode(pin_number, OUTPUT);
 
       bitSet(rt.bitpacked.rel_inverted, relay_index);
@@ -674,9 +674,9 @@ void mRelays::Pre_Init(void)
       continue;
     }
 
-    if(tkr_pins->PinUsed(GPIO_REL1, relay_index))
+    if(tkr_pins->PinUsed(GPIO_REL, relay_index))
     {
-      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1, relay_index);
+      uint8_t pin_number = tkr_pins->Pin(GPIO_REL, relay_index);
       pinMode(pin_number, OUTPUT);
 
       rt.devices_present++;

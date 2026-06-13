@@ -139,6 +139,9 @@ typedef struct MYTMPLT {
   gpio_flag    flag;
 } mytmplt;
 
+
+ #define GPIO_ANY 32
+ 
 #endif // ESP8266
 
 

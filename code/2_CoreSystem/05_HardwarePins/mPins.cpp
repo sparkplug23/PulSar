@@ -91,9 +91,9 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
   
   #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC
   {                           // MODULE_SONOFF_BASIC_ID    // Sonoff Basic (ESP8266)
-    GPIO_KEY1,                // GPIO00 Button
+    GPIO_KEY,                // GPIO00 Button
     GPIO_USER,                // GPIO01 Serial RXD and Optional sensor
-    GPIO_LED2_INV,            // GPIO02 Only available on newer Sonoff Basic R2 V1
+    PIGPIO_N(GPIO_LED_INV,2),            // GPIO02 Only available on newer Sonoff Basic R2 V1
     GPIO_USER,                // GPIO03 Serial TXD and Optional sensor
     GPIO_USER,                // GPIO04 Optional sensor
     0,                        // GPIO05
@@ -103,8 +103,8 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
                               // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
                               // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
                               // GPIO11 (SD_CMD   Flash)
-    GPIO_REL1,                // GPIO12 Red Led and Relay (0 = Off,    1 = On)
-    GPIO_LED1_INV,            // GPIO13 Green Led (0 = On, 1 = Off) - Link and Power status
+    PIGPIO_N(GPIO_REL,1),                // GPIO12 Red Led and Relay (0 = Off,    1 = On)
+    PIGPIO_N(GPIO_LED_INV,1),            // GPIO13 Green Led (0 = On, 1 = Off) - Link and Power status
     GPIO_USER,                // GPIO14 Optional sensor
     0,                        // GPIO15
     0,                        // GPIO16
@@ -113,10 +113,10 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
   #endif
   #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC_EXTERNAL
   {                   // MODULE_SONOFF_BASIC_EXTERNAL_ID    // Sonoff Basic (ESP8266)
-    GPIO_KEY1,        // GPIO00 Button
+    PIGPIO_N(GPIO_KEY,1),        // GPIO00 Button
     GPIO_USER,        // GPIO01 Serial RXD and Optional sensor
-    GPIO_LED2_INV,    // GPIO02 Only available on newer Sonoff Basic R2 V1
-    GPIO_KEY2,        // GPIO03 Serial TXD and Optional sensor
+    PIGPIO_N(GPIO_LED_INV,2),    // GPIO02 Only available on newer Sonoff Basic R2 V1
+    PIGPIO_N(GPIO_KEY,2),        // GPIO03 Serial TXD and Optional sensor
     GPIO_USER,        // GPIO04 Optional sensor
     0,                // GPIO05
                       // GPIO06 (SD_CLK   Flash)
@@ -125,8 +125,8 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
                       // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
                       // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
                       // GPIO11 (SD_CMD   Flash)
-    GPIO_REL1,        // GPIO12 Red Led and Relay (0 = Off,    1 = On)
-    GPIO_LED1_INV,    // GPIO13 Green Led (0 = On, 1 = Off) - Link and Power status
+    PIGPIO_N(GPIO_REL,1),        // GPIO12 Red Led and Relay (0 = Off,    1 = On)
+    PIGPIO_N(GPIO_LED_INV,1),    // GPIO13 Green Led (0 = On, 1 = Off) - Link and Power status
     GPIO_USER,        // GPIO14 Optional sensor
     0,                // GPIO15
     0,                // GPIO16
@@ -135,22 +135,22 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
   #endif
   #ifdef USE_MODULE_TEMPLATE_H801
   {                      // MODULE_H801,               // Lixada H801 Wifi (ESP8266)
-    GPIO_KEY1,           // GPIO00 E-FW Button   // TEMPORARILY FORCING AS A KEY1 HERE, REMOVE WHEN GPIOC IS PROPERLY ADDED INTO CODE
-    GPIO_LED1,           // GPIO01 Green LED - Link and Power status
+    PIGPIO_N(GPIO_KEY,1),           // GPIO00 E-FW Button   // TEMPORARILY FORCING AS A KEY1 HERE, REMOVE WHEN GPIOC IS PROPERLY ADDED INTO CODE
+    PIGPIO_N(GPIO_LED,1),           // GPIO01 Green LED - Link and Power status
     GPIO_USER,           // GPIO02 TX and Optional sensor - Pin next to TX on the PCB
     GPIO_USER,           // GPIO03 RX and Optional sensor - Pin next to GND on the PCB
-    GPIO_PWM5,           // GPIO04 W2 - PWM5
-    GPIO_LED2_INV,       // GPIO05 Red LED
+    PIGPIO_N(GPIO_PWM,5),           // GPIO04 W2 - PWM5
+    PIGPIO_N(GPIO_LED_INV,2),       // GPIO05 Red LED
                       // GPIO06 (SD_CLK   Flash)
                       // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                       // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
                       // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
                       // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
                       // GPIO11 (SD_CMD   Flash)
-    GPIO_PWM3,           // GPIO12 Blue
-    GPIO_PWM2,           // GPIO13 Green
-    GPIO_PWM4,           // GPIO14 W1 - PWM4
-    GPIO_PWM1,           // GPIO15 Red
+    PIGPIO_N(GPIO_PWM,3),           // GPIO12 Blue
+    PIGPIO_N(GPIO_PWM,2),           // GPIO13 Green
+    PIGPIO_N(GPIO_PWM,4),           // GPIO14 W1 - PWM4
+    PIGPIO_N(GPIO_PWM,1),           // GPIO15 Red
     0, // GPIO16
     0 // A0
   },
@@ -160,20 +160,20 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
                       // https://www.aliexpress.com/item/Magic-Home-Mini-RGB-RGBW-Wifi-Controller-For-Led-Strip-Panel-light-Timing-Function-16million-colors/32686853650.html
     0,
     GPIO_USER,           // GPIO01 Serial RXD and Optional sensor
-    GPIO_LED1_INV,       // GPIO02 Blue onboard LED - Link and Power status
+    PIGPIO_N(GPIO_LED_INV,1),       // GPIO02 Blue onboard LED - Link and Power status
     GPIO_USER,           // GPIO03 Serial TXD and Optional sensor
     GPIO_USER, //GPIO_ARIRFRCV,       // GPIO04 IR or RF receiver (optional) (Arilux LC10)
-    GPIO_PWM2,           // GPIO05 RGB LED Green
+    PIGPIO_N(GPIO_PWM,2),           // GPIO05 RGB LED Green
                       // GPIO06 (SD_CLK   Flash)
                       // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                       // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
                       // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
                       // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
                       // GPIO11 (SD_CMD   Flash)
-    GPIO_PWM3,           // GPIO12 RGB LED Blue
+    PIGPIO_N(GPIO_PWM,3),           // GPIO12 RGB LED Blue
     GPIO_USER,           // GPIO13 RGBW LED White (optional - set to PWM4 for Cold White or Warm White as used on Arilux LC10)
-    GPIO_PWM1,           // GPIO14 RGB LED Red
-    GPIO_LED4_INV,       // GPIO15 RF receiver control (Arilux LC10)
+    PIGPIO_N(GPIO_PWM,1),           // GPIO14 RGB LED Red
+    PIGPIO_N(GPIO_LED_INV,4),       // GPIO15 RF receiver control (Arilux LC10)
     0, 0
   },
   #endif
@@ -183,8 +183,8 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
      0,                // GPIO01 Serial RXD - Can be changed to GPIO_USER, only if Shelly is powered with 12V DC
      0,
      0,                // GPIO03 Serial TXD - Can be changed to GPIO_USER, only if Shelly is powered with 12V DC
-     GPIO_REL1,           // GPIO04 Relay (0 = Off, 1 = On)
-     GPIO_SWT1_NP,        // GPIO05 SW pin
+     PIGPIO_N(GPIO_REL,1),           // GPIO04 Relay (0 = Off, 1 = On)
+     PIGPIO_N(GPIO_SWT_NP,1),        // GPIO05 SW pin
                        // GPIO06 (SD_CLK   Flash)
                        // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                        // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
@@ -196,12 +196,12 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
   #endif
   #ifdef USE_MODULE_TEMPLATE_SHELLY_2P5  
   {//MODULE_SHELLY2P5     // Shelly2 (ESP8266 - 2MB) - https://shelly.cloud/shelly2/
-    GPIO_LED1_INV,        // GPIO00 LED1i
+    PIGPIO_N(GPIO_LED_INV,1),        // GPIO00 LED1i
     0,                    // GPIO01 None
-    GPIO_KEY1,            // GPIO02 Button1
+    PIGPIO_N(GPIO_KEY,1),            // GPIO02 Button1
     0,                    // GPIO03 None
-    GPIO_REL1,            // GPIO04 Relay1
-    GPIO_SWT2_NP,         // GPIO05 Switch2n
+    PIGPIO_N(GPIO_REL,1),            // GPIO04 Relay1
+    PIGPIO_N(GPIO_SWT_NP,2),         // GPIO05 Switch2n
                           // GPIO06 (SD_CLK   Flash)
                           // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                           // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
@@ -209,9 +209,9 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
                           // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
                           // GPIO11 (SD_CMD   Flash)
     GPIO_I2C_SDA,         // GPIO12 I2C_SDA
-    GPIO_SWT1_NP,         // GPIO13 Switch1n
+    PIGPIO_N(GPIO_SWT_NP,1),         // GPIO13 Switch1n
     GPIO_I2C_SCL,         // GPIO14 I2C_SCL
-    GPIO_REL2,            // GPIO15 Relay2
+    PIGPIO_N(GPIO_REL,2),            // GPIO15 Relay2
     GPIO_ADE7953_IRQ,     // GPIO16 ADE7953_IRQ
     GPIO_FLAG_ADC0_TEMP   // GPIOA0 Tempurature
   },
@@ -219,9 +219,9 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
   #ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
   {//MODULE_SHELLY_DIMMER2     // SHELLY_DIMMER2 - Shelly Dimmer 2 (ESP8285)
     0,                         // GPIO00 None
-    GPIO_HWSERIAL0_TX,         // GPIO01 ESP_TXD Serial RXD connection to Dimmer MCU
+    GPIO_HWSERIAL_TX,         // GPIO01 ESP_TXD Serial RXD connection to Dimmer MCU
     0,                         // GPIO02 None 
-    GPIO_HWSERIAL0_RX,         // GPIO03 ESP_RXD Serial TXD connection to Dimmer MCU
+    GPIO_HWSERIAL_RX,         // GPIO03 ESP_RXD Serial TXD connection to Dimmer MCU
     GPIO_SHELLY2_SHD_BOOT0,    // GPIO04 SHD Boot 0 
     GPIO_SHELLY2_SHD_RESET_INV,    // GPIO05 SHD Reset
                                // GPIO06 (SD_CLK   Flash)
@@ -230,11 +230,11 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
                                // GPIO09 None 
                                // GPIO10 None 
                                // GPIO11 (SD_CMD   Flash)
-    GPIO_SWT2_NP,              // GPIO12 Switch2n 
+    PIGPIO_N(GPIO_SWT_NP,2),              // GPIO12 Switch2n 
     0,                         // GPIO13 None 
-    GPIO_SWT1_NP,              // GPIO14 Switch1n 
+    PIGPIO_N(GPIO_SWT_NP,1),              // GPIO14 Switch1n 
     0,                         // GPIO15 None
-    GPIO_LED1_INV,             // GPIO16 Led1i 
+    PIGPIO_N(GPIO_LED_INV,1),             // GPIO16 Led1i 
     GPIO_FLAG_ADC0_TEMP        // ADC Temperature
   },
   #endif
@@ -267,44 +267,44 @@ const mytmplt8285 mPins::module_template__gpio_map_ESP8285[3] PROGMEM = {
   },
   #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
   {          //MODULE_SONOFF_IFAN03_ID                  // SONOFF_IFAN03 - Sonoff iFan03 (ESP8285)
-    GPIO_KEY1,                 // GPIO00 WIFI_KEY0 Button 1
-    GPIO_HWSERIAL0_TX,         // GPIO01 ESP_TXD Serial RXD connection to P0.5 of RF microcontroller
+    PIGPIO_N(GPIO_KEY,1),                 // GPIO00 WIFI_KEY0 Button 1
+    GPIO_HWSERIAL_TX,         // GPIO01 ESP_TXD Serial RXD connection to P0.5 of RF microcontroller
     0,                         // GPIO02 ESP_LOG
-    GPIO_HWSERIAL0_RX,         // GPIO03 ESP_RXD Serial TXD connection to P0.4 of RF microcontroller
+    GPIO_HWSERIAL_RX,         // GPIO03 ESP_RXD Serial TXD connection to P0.4 of RF microcontroller
     0,                         // GPIO04 DEBUG_RX
     0,                         // GPIO05 DEBUG_TX
                                // GPIO06 (SD_CLK   Flash)
                                // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                                // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
-    GPIO_REL1_INV,             // GPIO09 WIFI_O0 Relay 1 (0 = Off, 1 = On) controlling the light
+    PIGPIO_N(GPIO_REL_INV,1),             // GPIO09 WIFI_O0 Relay 1 (0 = Off, 1 = On) controlling the light
     GPIO_BUZZER_INV,           // GPIO10 WIFI_O4 Buzzer (0 = Off, 1 = On)
                                // GPIO11 (SD_CMD   Flash)
-    GPIO_REL3,                 // GPIO12 WIFI_O2 Relay 3 (0 = Off, 1 = On) controlling the fan
-    GPIO_LED1_INV,             // GPIO13 WIFI_CHK Blue Led on PCA (0 = On, 1 = Off) - Link and Power status
-    GPIO_REL2,                 // GPIO14 WIFI_O1 Relay 2 (0 = Off, 1 = On) controlling the fan
-    GPIO_REL4,                 // GPIO15 WIFI_O3 Relay 4 (0 = Off, 1 = On) controlling the fan
+    PIGPIO_N(GPIO_REL,3),                 // GPIO12 WIFI_O2 Relay 3 (0 = Off, 1 = On) controlling the fan
+    PIGPIO_N(GPIO_LED_INV,1),             // GPIO13 WIFI_CHK Blue Led on PCA (0 = On, 1 = Off) - Link and Power status
+    PIGPIO_N(GPIO_REL,2),                 // GPIO14 WIFI_O1 Relay 2 (0 = Off, 1 = On) controlling the fan
+    PIGPIO_N(GPIO_REL,4),                 // GPIO15 WIFI_O3 Relay 4 (0 = Off, 1 = On) controlling the fan
     0,                         // GPIO16 None 
     0                          // A0
   },
   #endif
   #ifdef USE_MODULE_TEMPLATE_SONOFF_4CHPRO  
   {                           // SONOFF_4CH - Sonoff 4CH (ESP8285)
-    GPIO_KEY1,             // GPIO00 Button 1
+    PIGPIO_N(GPIO_KEY,1),             // GPIO00 Button 1
     GPIO_USER,             // GPIO01 Serial RXD and Optional sensor
     GPIO_RF_433MHZ_RX,             // GPIO02 Optional sensor
     GPIO_USER,             // GPIO03 Serial TXD and Optional sensor
-    GPIO_REL3,             // GPIO04 Sonoff 4CH Red Led and Relay 3 (0 = Off, 1 = On)
-    GPIO_REL2,             // GPIO05 Sonoff 4CH Red Led and Relay 2 (0 = Off, 1 = On)
+    PIGPIO_N(GPIO_REL,3),             // GPIO04 Sonoff 4CH Red Led and Relay 3 (0 = Off, 1 = On)
+    PIGPIO_N(GPIO_REL,2),             // GPIO05 Sonoff 4CH Red Led and Relay 2 (0 = Off, 1 = On)
                         // GPIO06 (SD_CLK   Flash)
                         // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                         // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
-    GPIO_KEY2,             // GPIO09 Button 2
-    GPIO_KEY3,             // GPIO10 Button 3
+    PIGPIO_N(GPIO_KEY,2),             // GPIO09 Button 2
+    PIGPIO_N(GPIO_KEY,3),             // GPIO10 Button 3
                         // GPIO11 (SD_CMD   Flash)
-    GPIO_REL1,             // GPIO12 Red Led and Relay 1 (0 = Off, 1 = On) - Link and Power status
-    GPIO_LED1_INV,         // GPIO13 Blue Led (0 = On, 1 = Off)
-    GPIO_KEY4,             // GPIO14 Button 4
-    GPIO_REL4,             // GPIO15 Red Led and Relay 4 (0 = Off, 1 = On)
+    PIGPIO_N(GPIO_REL,1),             // GPIO12 Red Led and Relay 1 (0 = Off, 1 = On) - Link and Power status
+    PIGPIO_N(GPIO_LED_INV,1),         // GPIO13 Blue Led (0 = On, 1 = Off)
+    PIGPIO_N(GPIO_KEY,4),             // GPIO14 Button 4
+    PIGPIO_N(GPIO_REL,4),             // GPIO15 Red Led and Relay 4 (0 = Off, 1 = On)
     0, 0
   },
   #endif //  USE_MODULE_TEMPLATE_SONOFF_4CHPRO
@@ -1278,7 +1278,7 @@ int8_t mPins::GetRealPinNumberFromName(const char* c){
   // }
 
     #ifdef ENABLE_LOG_LEVEL_INFO
-    ALOG_INF( PSTR("GetRealPinNumberFromName = %d"), pin);
+    ALOG_INF( PSTR("GetRealPinNumberFromName = \t\t%d"), pin);
     #endif // ENABLE_LOG_LEVEL_INFO
   // #endif // ESP32
 
@@ -1304,122 +1304,119 @@ int8_t mPins::ConvertRealPinToIndexPin(uint8_t real_pin){
 }
 
 
-#ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
-int IRAM_ATTR mPins::Pin(uint32_t gpio, uint32_t index, bool enable_debug)
-#else
+/*********************************************************************************************\
+ * Pin lookup / assignment, packed GPIO function model
+ *
+ * Previous reference implementation kept here while the packed-ID rewrite settles:
+ *
+ *   #ifdef ENABLE_FEATURE_HARDWAREPINS__FUNCTION_AND_INDEX_PACKED_GPIO
+ *     uint16_t real_gpio = gpio << 5;
+ *     uint16_t mask = 0xFFE0;
+ *     if (index < GPIO_ANY) {
+ *       real_gpio += index;
+ *       mask = 0xFFFF;
+ *     }
+ *     for (...) {
+ *       if ((pin_attached_gpio_functions[i] & mask) == real_gpio) { ... }
+ *     }
+ *   #else
+ *     uint16_t real_gpio = gpio + index;
+ *     for (...) {
+ *       if (pin_attached_gpio_functions[i] == real_gpio) { ... }
+ *     }
+ *   #endif
+ *
+ * New model:
+ *   - pin_attached_gpio_functions[] always stores packed selected IDs.
+ *   - stored_id = PGPIO(base_id) + instance_index.
+ *   - public callers pass base + index: Pin(GPIO_MODEM_RX, 1).
+ *   - no GPIO__X + index arithmetic is used outside this layer.
+\*********************************************************************************************/
+
 int16_t IRAM_ATTR mPins::Pin(uint32_t gpio, uint32_t index)
-#endif
 {
-  #ifdef ENABLE_FEATURE_HARDWAREPINS__FUNCTION_AND_INDEX_PACKED_GPIO
-  uint16_t real_gpio = gpio << 5;
-  uint16_t mask = 0xFFE0;
-  if (index < GPIO_ANY) {
-    real_gpio += index;
+  uint16_t packed_gpio = PGPIO(gpio);
+  uint16_t mask        = GPIO_BASE_MASK;
+
+  if (index < GPIO_ANY)
+  {
+    packed_gpio += (index & GPIO_INDEX_MASK);
     mask = 0xFFFF;
   }
-  for (uint32_t i = 0; i < nitems(pin_attached_gpio_functions); i++) {
-    if ((pin_attached_gpio_functions[i] & mask) == real_gpio) {
-      return i;              // Pin number configured for gpio
+
+  for (uint32_t index_pin = 0; index_pin < nitems(pin_attached_gpio_functions); index_pin++)
+  {
+    if ((pin_attached_gpio_functions[index_pin] & mask) == packed_gpio)
+    {
+      return gpio_pin_by_index[index_pin];   // physical GPIO number configured for this function
     }
   }
-  #else
-  uint16_t real_gpio = gpio + index;
 
-  // if(real_gpio == 320)
-  // {
-
-  // AddLog_Array(LOG_LEVEL_INFO, "pin_attached_gpio_functions", pin_attached_gpio_functions, ARRAY_SIZE(pin_attached_gpio_functions));
-  // AddLog_Array(LOG_LEVEL_INFO, "gpio_pin_by_index", gpio_pin_by_index, ARRAY_SIZE(gpio_pin_by_index));
-  // }
-
-
-  for (uint32_t index_pin = 0; index_pin < nitems(pin_attached_gpio_functions); index_pin++) {
-    if (pin_attached_gpio_functions[index_pin] == real_gpio) {
-
-      // if(real_gpio == 320)
-      // ALOG_INF(PSTR("Pin(%d,%d) pin_attached[%d] == real_gpio|%d==%d"), gpio,index, index_pin, pin_attached_gpio_functions[index_pin],real_gpio);
-      
-      return gpio_pin_by_index[index_pin];              // Pin number configured for gpio
-    }
-  }
-  #endif
-  return -1;                 // No pin used for gpio
+  return -1;
 }
 
 
-#ifdef ENABLE_DEBUFEATURE_HARDWAREPINS__ENABLE_DEBUG_ON_PINUSED
-boolean mPins::PinUsed(uint32_t gpio, uint32_t index, bool enable_debug)
-{
-  return (Pin(gpio, index, enable_debug) >= 0);
-}
-#else
 boolean mPins::PinUsed(uint32_t gpio, uint32_t index)
 {
   return (Pin(gpio, index) >= 0);
 }
-#endif
 
 
 /**
- * @brief Assigns a pin with a GPIO
- * @note 
- * @param lpin The real_pin number GPIO#
- * @param gpio The actual hardware attached to the pin (eg led, relay, sensor data)
- * @return none
+ * @brief Assign a packed selected GPIO function to a physical GPIO pin.
+ *
+ * @param real_pin Physical GPIO number.
+ * @param packed_gpio Packed selected GPIO ID, i.e. PGPIO(base_id) + index.
  */
-void mPins::SetPin(uint32_t real_pin, uint32_t gpio) 
+void mPins::SetPin_GPIOFunction(uint32_t real_pin, uint16_t gpio_function)
 {
-  // if(lpin < ARRAY_SIZE(pin_attached_gpio_functions)){
+  const int8_t internal_pin_index = ConvertRealPinToIndexPin(real_pin);
 
-
-  //   pin_attached_gpio_functions[internal_pin_index] = gpio;
-
-  // }else{
-
-  // }
-
-  // ALOG_INF( PSTR("SetPin real_pin=%d  internal_index=%d gpio=%d"), real_pin, gpio); Serial.flush();
-
-  // Adjust real_pin to internal indexpin
-  int8_t internal_pin_index = ConvertRealPinToIndexPin(real_pin);
-
-  ALOG_INF( PSTR("SetPinAreal_pin=%d  internal_index=%d gpio=%d"),real_pin,internal_pin_index,gpio);
-
-  // delay(1000);
-  // Serial.printf("this = %p\n", this);
-
-
-  // Serial.println(internal_pin_index);
-  // delay(1000);
-
-  
-
-  // Serial.println(pin_attached_gpio_functions[0]);
-  // Serial.println(pin_attached_gpio_functions[1]);
-  // delay(1000);
-
-  // Serial.println(pin_attached_gpio_functions[(uint8_t)internal_pin_index]);
-  // delay(1000);
-  // uint8_t pin_count = ARRAY_SIZE(gpio_pin_by_index);
-
-  // AddLog_Array(LOG_LEVEL_INFO, "gpio_pin_by_index", gpio_pin_by_index, ARRAY_SIZE(gpio_pin_by_index));
-  // AddLog_Array(LOG_LEVEL_INFO, "pin_attached_gpio_functions", pin_attached_gpio_functions, ARRAY_SIZE(pin_attached_gpio_functions));
-
-  if(internal_pin_index != -1) // -1 means unset pin
+  if (internal_pin_index < 0)
   {
-    pin_attached_gpio_functions[internal_pin_index] = gpio;
-    // ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "SetPin real_pin=%d  internal_index=%d gpio=%d\t\n\r=====%d%d"),real_pin,internal_pin_index,gpio,pin_attached_gpio_functions[internal_pin_index],internal_pin_index);
+    ALOG_ERR(
+      PSTR("SetPin_GPIOFunction failed: real_pin=%u gpio_function=0x%04X internal_index=%d"),
+      real_pin,
+      gpio_function,
+      internal_pin_index
+    );
+    return;
+  }
+
+  pin_attached_gpio_functions[internal_pin_index] = gpio_function;
+
+  if ((gpio_function == GPIO_NONE) || (gpio_function == GPIO_USER))
+  {
+    ALOG_INF(
+      PSTR("SetPin_GPIOFunction real_pin=%u internal_index=%d special_gpio=%u"),
+      real_pin,
+      internal_pin_index,
+      gpio_function
+    );
   }
   else
   {
-    ALOG_ERR( PSTR("Error SetPin %d %d<%d"), gpio, internal_pin_index, MAX_USER_PINS);
+    ALOG_INF(
+      PSTR("SetPin_GPIOFunction real_pin=%u internal_index=%d gpio_function=0x%04X base=%u index=%u"),
+      real_pin,
+      internal_pin_index,
+      gpio_function,
+      UGPIO(gpio_function),
+      gpio_function & GPIO_INDEX_MASK
+    );
   }
-  // ALOG_INF( PSTR("SetPin DONE real_pin=%d  internal_index=%d gpio=%d"), real_pin, gpio); Serial.flush();
-
 }
 
 
-int8_t mPins::ConvertIndexPinToRealPin(uint8_t index_pin){
+int8_t mPins::ConvertIndexPinToRealPin(uint8_t index_pin)
+{
+  
+  if (index_pin >= MAX_USER_PINS)
+  {
+    ALOG_INF(PSTR("PIN: ConvertIndexPinToRealPin OOR, index_pin=%u >= MAX_USER_PINS=%u"),index_pin,MAX_USER_PINS);
+    return -1;
+  }
+
   return gpio_pin_by_index[index_pin];
 }
 
@@ -1488,26 +1485,117 @@ bool mPins::ValidModule(uint8_t index)
   return ValidTemplateModule(index);
 }
 
-bool mPins::ValidUserGPIOFunction(uint8_t* pin_array, uint8_t index)
-{
-  // Outside valid gpio function range
-  if((pin_array[index] >= GPIO_SENSOR_END) && (pin_array[index] < GPIO_USER)){
-      return false;
-    }else{
-      return true;
-    }
-}
+/*********************************************************************************************\
+ * GPIO function validation, packed GPIO function model
+ *
+ * Previous behaviour only range-checked legacy raw enum IDs. The packed model validates by
+ * checking that the packed base ID exists in SelectablePins_BitPacked[] and that the stored
+ * index is within the group's MGPIO(count) limit.
+\*********************************************************************************************/
 
+
+// bool mPins::ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index)
+// {
+//   if (!pin_array) { return false; }
+
+//   const uint16_t packed_gpio = pin_array[index];
+
+//   for (uint32_t list_i = 0; list_i < SelectablePins_BitPacked_Count; list_i++)
+//   {
+//     const uint16_t entry = pgm_read_word(&SelectablePins_BitPacked[list_i]);
+//     const uint16_t base  = UGPIO(entry);
+//     const uint8_t count  = (entry & GPIO_INDEX_MASK) + 1;
+
+//     if ((UGPIO(packed_gpio) == base) && ((packed_gpio & GPIO_INDEX_MASK) < count))
+//     {
+//       return true;
+//     }
+//   }
+
+//   return false;
+// }
 bool mPins::ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index)
 {
-  // ALOG_ERR(PSTR("not in tas25 %d[%d]"), pin_array[index], index);
-  // Outside valid gpio function range
-  // if((pin_array[index] >= GPIO_SENSOR_END) && (pin_array[index] < GPIO_USER)){
-  //     return false;
-  //   }else{
-      return true;
-    // }
+  if (!pin_array)
+  {
+    ALOG_ERR(PSTR("ValidUserGPIOFunction: pin_array=null index=%u"), index);
+    return false;
+  }
+
+  const uint16_t packed_gpio = pin_array[index];
+
+  if (packed_gpio == GPIO_NONE)
+  {
+    ALOG_INF(PSTR("ValidUserGPIOFunction: VALID_NONE index=%u packed=%u"), index, packed_gpio);
+    return true;
+  }
+
+  if (packed_gpio == GPIO_USER)
+  {
+    ALOG_INF(PSTR("ValidUserGPIOFunction: VALID_USER index=%u packed=%u"), index, packed_gpio);
+    return true;
+  }
+
+  const uint16_t packed_base = UGPIO(packed_gpio);
+  const uint8_t  packed_idx  = packed_gpio & GPIO_INDEX_MASK;
+
+  char gpio_name[64];
+  GetGPIOFunctionNamebyID(packed_gpio, gpio_name, sizeof(gpio_name));
+
+  ALOG_INF(
+    PSTR("ValidUserGPIOFunction: index=%u packed=0x%04X dec=%u base=%u idx=%u name=\"%s\""),
+    index,
+    packed_gpio,
+    packed_gpio,
+    packed_base,
+    packed_idx,
+    gpio_name
+  );
+
+  for (uint32_t list_i = 0; list_i < SelectablePins_BitPacked_Count; list_i++)
+  {
+    const uint16_t entry      = pgm_read_word(&SelectablePins_BitPacked[list_i]);
+    const uint16_t entry_base = UGPIO(entry);
+    const uint8_t  entry_max  = (entry & GPIO_INDEX_MASK) + 1;
+
+    if (packed_base == entry_base)
+    {
+      if (packed_idx < entry_max)
+      {
+        ALOG_INF(
+          PSTR("ValidUserGPIOFunction: VALID index=%u packed=0x%04X base=%u idx=%u max=%u"),
+          index,
+          packed_gpio,
+          packed_base,
+          packed_idx,
+          entry_max
+        );
+        return true;
+      }
+
+      ALOG_ERR(
+        PSTR("ValidUserGPIOFunction: INVALID_INDEX index=%u packed=0x%04X base=%u idx=%u max=%u"),
+        index,
+        packed_gpio,
+        packed_base,
+        packed_idx,
+        entry_max
+      );
+      return false;
+    }
+  }
+
+  ALOG_ERR(
+    PSTR("ValidUserGPIOFunction: INVALID_BASE index=%u packed=0x%04X base=%u idx=%u"),
+    index,
+    packed_gpio,
+    packed_base,
+    packed_idx
+  );
+
+  return false;
 }
+
 
 const char* mPins::ModuleName()
 {
@@ -1626,43 +1714,22 @@ bool mPins::CheckPhysicalPinIsFlashPin(uint32_t pin)
  * @param gpio 
  * @return uint16_t 
  */
-uint16_t mPins::ValidPin_AdjustGPIO(uint8_t pin, uint16_t gpio)
+uint16_t mPins::ValidPin_AdjustGPIO(uint8_t physical_pin, uint16_t gpio)
 {
   uint16_t result = gpio;
 
-  // // #ifdef ESP8266
+  if (CheckPhysicalPinIsFlashPin(physical_pin)) { 
+    return GPIO_NONE;    // Disable flash pins GPIO6, GPIO7, GPIO8 and GPIO11
+  }
 
-  // // DEBUG_LINE;
-  // // if (((pin > 5) && (pin < 9)) || (11 == pin)) {
-  // //   result = GPIO_NONE_ID;  // Disable flash pins GPIO6, GPIO7, GPIO8 and GPIO11
-  // // }
-  // // DEBUG_LINE;
-  // // // need to add my other boards here
-  // // if ((MODULE_WEMOS_ID == tkr_set->Settings.module) && (!tkr_set->Settings.flag_network.user_esp8285_enable)) {
-  // //   if ((pin == 9) || (pin == 10)) { result = GPIO_NONE_ID; }  // Disable possible flash GPIO9 and GPIO10
-  // // }
-  // // DEBUG_LINE;
+  #ifdef ESP8266
+  if ((MODULE_GENERIC == tkr_set->Settings.module)){// && (!tkr_set->Settings.flag_network.user_esp8285_enable)) {
+    if ((physical_pin == 9) || (physical_pin == 10)) { return GPIO_NONE; }  // Disable possible flash GPIO9 and GPIO10
+  }
+  #endif
 
-  // // #endif
+  return result;
 
-  // return result;
-
-//   if (CheckPhysicalPinIsFlashPin(pin)) { // WRONG, BECAUSE IT IS NOT A GPIO PIN. This expects the physical pin number, not the GPIO function
-//     return GPIO_NONE_ID;    // Disable flash pins GPIO6, GPIO7, GPIO8 and GPIO11
-//   }
-
-// #ifdef ESP8266
-//   // if (((WEMOS == Settings->module) || isTuya) && !Settings->flag3.user_esp8285_enable) {  // SetOption51 - Enable ESP8285 user GPIO's
-//   //   if ((9 == pin) || (10 == pin)) {
-//   //     return GPIO_NONE_ID;  // Disable possible flash GPIO9 and GPIO10
-//   //   }
-//   // }
-//    if ((MODULE_WEMOS_ID == tkr_set->Settings.module) && (!tkr_set->Settings.flag_network.user_esp8285_enable)) {
-//     if ((pin == 9) || (pin == 10)) { gpio = GPIO_NONE_ID; }  // Disable possible flash GPIO9 and GPIO10
-//   }
-// #endif
-
-  return gpio;
 }
 
 
