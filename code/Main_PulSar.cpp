@@ -982,6 +982,7 @@ DEBUG_LINE_HERE3
 DEBUG_LINE_HERE3
   
   tkr->Tasker_Interface(TASK_PRE_INIT);
+DEBUG_LINE_HERE3
   tkr->Tasker_Interface(TASK_INIT);
 
   ALOG_INF(PSTR("TASK_INIT Complete\n\r------------------------------------------------------\n\r------------------------------------------------------"));

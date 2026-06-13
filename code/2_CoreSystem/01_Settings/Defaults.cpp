@@ -83,6 +83,7 @@ void mSettings::SettingsDefault(void)
 
   Settings.sysopt_system.bit.timers_enable = 0;
   Settings.sysopt_system.bit.sleep_normal = true;
+  Settings.sysopt_system.bit.user_esp8285_enable = false;
 
   // --------------------------------------------------------------------------
   // 3. Module / template / GPIO defaults

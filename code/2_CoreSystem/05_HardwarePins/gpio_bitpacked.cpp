@@ -53,6 +53,9 @@ const uint16_t SelectablePins_BitPacked[] PROGMEM =
   PGPIO(GPIO_SBR_TX),
   PGPIO(GPIO_SBR_RX),
 
+  // Buzzer
+  PGPIO(GPIO_BUZZER),
+  PGPIO(GPIO_BUZZER_INV),
 
   /****************************************
    * SECTION: I2C

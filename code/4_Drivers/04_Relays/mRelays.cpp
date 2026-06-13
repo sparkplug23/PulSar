@@ -110,7 +110,7 @@ void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
   for (uint32_t i = 0; i < rt.devices_present; i++) {
     uint32_t port = (i << 1) + ((latching_power >> i) &1);
           ALOG_INF(PSTR("DigitalWrite Pre %d"), 3);
-    tkr_pins->DigitalWrite(GPIO_REL + port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
+    tkr_pins->DigitalWrite(GPIO_REL, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
   }
 }
 
@@ -215,7 +215,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
         }
         
         ALOG_INF(PSTR("DigitalWrite Pre %d"), 2);
-        tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+        tkr_pins->DigitalWrite(gpio_pin,i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
         // tkr_pins->DigitalWrite(GPIO_REL, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
       }
       port += port_next;                          // Select next relay
@@ -245,7 +245,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
           }
           power_t state = rpower &1;
           ALOG_INF(PSTR("DigitalWrite Pre %d"), 1);
-          tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+          tkr_pins->DigitalWrite(gpio_pin, i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
           // tkr_pins->DigitalWrite(GPIO_REL, i, bitRead(rt.bitpacked.rel_inverted, i) ? 1 : 0);
           ALOG_INF(PSTR("Relay DigitalWrite %d, %d"), gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
         }
@@ -508,7 +508,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
       SendDeviceGroupMessage(device, DGR_MSGTYP_UPDATE, DGR_ITEM_POWER, dgr_power);
     }
 #endif  // USE_DEVICE_GROUPS
-ALOG_INF(PSTR("before SetDeivePower %d,%d,%d %d"),device,state,source,tkr_set->runtime.power);
+ALOG_INF(PSTR("before SetDevicePower %d,%d,%d %d"),device,state,source,tkr_set->runtime.power);
     SetDevicePower(tkr_set->runtime.power, source);
 #ifdef USE_DOMOTICZ
     DomoticzUpdatePowerState(device);
@@ -655,6 +655,9 @@ void mRelays::Load_Module(bool erase)
 
 void mRelays::Pre_Init(void)
 {
+
+  DEBUG_LINE_HERE3
+
   module_state.mode = ModuleStatus::Initialising;
   module_state.devices = 0;
   rt.devices_present = 0;
@@ -662,41 +665,55 @@ void mRelays::Pre_Init(void)
 
   for(uint8_t relay_index = 0; relay_index < MAX_RELAYS_SET; relay_index++)
   {
+  DEBUG_LINE_HERE3
     if(tkr_pins->PinUsed(GPIO_REL_INV, relay_index))
     {
+  DEBUG_LINE_HERE3
       uint8_t pin_number = tkr_pins->Pin(GPIO_REL_INV, relay_index);
+      Serial.println(pin_number);Serial.flush();
+  DEBUG_LINE_HERE3
       pinMode(pin_number, OUTPUT);
 
+  DEBUG_LINE_HERE3
       bitSet(rt.bitpacked.rel_inverted, relay_index);
 
+  DEBUG_LINE_HERE3
       rt.devices_present++;
       module_state.devices++;
       continue;
     }
 
+  DEBUG_LINE_HERE3
     if(tkr_pins->PinUsed(GPIO_REL, relay_index))
     {
+  DEBUG_LINE_HERE3
       uint8_t pin_number = tkr_pins->Pin(GPIO_REL, relay_index);
+  DEBUG_LINE_HERE3
       pinMode(pin_number, OUTPUT);
 
+  DEBUG_LINE_HERE3
       rt.devices_present++;
       module_state.devices++;
       continue;
     }
+  DEBUG_LINE_HERE3
 
     break; // critical: stop at first missing relay slot
   }
+  DEBUG_LINE_HERE3
 
   if(module_state.devices)
   {
     module_state.mode = ModuleStatus::Running;
   }
 
+  DEBUG_LINE_HERE3
   ALOG_INF(
     PSTR("REL: Pre_Init devices=%d inverted_mask=0x%08X"),
     rt.devices_present,
     rt.bitpacked.rel_inverted
   );
+  DEBUG_LINE_HERE3
 }
 
 

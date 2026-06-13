@@ -17,8 +17,9 @@ void mPins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
   }
   if(jtok = rootObj[PM_NAME])
   {
+  
     const char* name_ctr = jtok.getStr();
-    #ifdef USE_DEBUGFEATURE_DEVICE__CLONE_TESTBED
+    #ifdef USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED
       char tb_name_ctr[64]; // Temporary buffer for modified name
       snprintf(tb_name_ctr, sizeof(tb_name_ctr), "tb_%s", name_ctr);
       name_ctr = tb_name_ctr; // Update name_ctr to point to modified name
@@ -32,7 +33,7 @@ void mPins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
   if(jtok = rootObj[PM_FRIENDLYNAME])
   {
     const char* name_ctr = jtok.getStr();
-    #ifdef USE_DEBUGFEATURE_DEVICE__CLONE_TESTBED
+    #ifdef USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED
       char tb_friendly_ctr[64]; // Temporary buffer for modified friendly name
       snprintf(tb_friendly_ctr, sizeof(tb_friendly_ctr), "tb_%s", name_ctr);
       name_ctr = tb_friendly_ctr; // Update name_ctr to point to modified friendly name
@@ -231,58 +232,148 @@ const uint8_t Esp32TemplateToPhy[MAX_USER_PINS] = { ESP32_TEMPLATE_TO_PHY };
 #endif // CONFIG_IDF_TARGET_ESP32
 
 
+// /**
+//  * @brief Reads any template GPIOs then reads any user set GPIOs
+//  * */
+// void mPins::TemplateGPIOs(myio *gp)
+// {
+
+//   // Create an empty template to write gpio functions in to
+//   uint16_t *dest = (uint16_t *)gp;
+//     memset(dest, GPIO_NONE, sizeof(myio));
+
+//   uint16_t src[ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io)];
+//   ALOG_INF(PSTR(D_LOG_PINS "src size %d"), ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
+  
+//   // Check if active module is simply a user_module, requiring no template reads
+//   if (tkr_set->Settings.module == USER_MODULE) 
+//   {
+//     ALOG_INF(PSTR(D_LOG_PINS "Loading USER provided template"));    
+//     memcpy(&src, &tkr_set->Settings.user_template.hardware.gp, sizeof(mycfgio)); // Simply read the user_configured gpio, skipping any progmem templates
+//   } 
+//   // Read templates from progmem, these will differ by esp8266, esp8285 and esp32
+//   else {
+//     ALOG_INF(PSTR(D_LOG_PINS "Loading predefined template %d"), tkr_set->Settings.module);
+//     #ifdef ESP8266
+//       GetInternalTemplate(&src, tkr_set->Settings.module, 1);
+//     #endif
+//     #ifdef ESP32
+//       uint32_t module = ModuleTemplate(tkr_set->Settings.module);
+//       ALOG_INF(PSTR(D_LOG_PINS "Loading ESP32 template %d"), module);
+//       if(ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io) != sizeof(mycfgio))
+//       {
+//         ALOG_ERR(PSTR("TemplateGPIOs: Size mismatch %d != %d"), ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io), sizeof(mycfgio));
+//       }
+//       memcpy_P(&src, &module_template__gpio_map[module].gp, sizeof(mycfgio));
+//     #endif
+//   }
+
+//   /******
+//    * Dissimilar to tasmota which does dynamic copying and stores gpio, here
+//    * The src moves into the destination
+//    ******/
+//   uint32_t j = 0;
+//   for (uint8_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io); i++) 
+//   {    
+//     dest[j] = src[i];    
+//     ALOG_DBM(PSTR("Copying dest=%d[%d]\t index/real = %d/%d"), dest[j],j, i,ConvertIndexPinToRealPin(i));
+//     j++;
+//   }
+
+//   AddLog_Array(LOG_LEVEL_INFO, PSTR("TemplateGPIO  src"), src, ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
+//   AddLog_Array(LOG_LEVEL_INFO, PSTR("TemplateGPIO dest"), dest, ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
+
+// }
+
 /**
  * @brief Reads any template GPIOs then reads any user set GPIOs
- * */
+ */
 void mPins::TemplateGPIOs(myio *gp)
 {
+  if (!gp)
+  {
+    ALOG_ERR(PSTR(D_LOG_PINS "TemplateGPIOs: gp is null"));
+    return;
+  }
 
-  // Create an empty template to write gpio functions in to
-  uint16_t *dest = (uint16_t *)gp;
-    memset(dest, GPIO_NONE, sizeof(myio));
+  uint16_t *dest = gp->io;
+
+  for (uint16_t i = 0; i < ARRAY_SIZE(gp->io); i++)
+  {
+    dest[i] = GPIO_NONE;
+  }
 
   uint16_t src[ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io)];
-  ALOG_INF(PSTR(D_LOG_PINS "src size %d"), ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
-  
-  // Check if active module is simply a user_module, requiring no template reads
-  if (tkr_set->Settings.module == USER_MODULE) 
+
+  for (uint16_t i = 0; i < ARRAY_SIZE(src); i++)
   {
-    ALOG_INF(PSTR(D_LOG_PINS "Loading USER provided template"));    
-    memcpy(&src, &tkr_set->Settings.user_template.hardware.gp, sizeof(mycfgio)); // Simply read the user_configured gpio, skipping any progmem templates
-  } 
-  // Read templates from progmem, these will differ by esp8266, esp8285 and esp32
-  else {
-    ALOG_INF(PSTR(D_LOG_PINS "Loading predefined template %d"), tkr_set->Settings.module);
-    #ifdef ESP8266
-      GetInternalTemplate(&src, tkr_set->Settings.module, 1);
-    #endif
-    #ifdef ESP32
-      uint32_t module = ModuleTemplate(tkr_set->Settings.module);
-      ALOG_INF(PSTR(D_LOG_PINS "Loading ESP32 template %d"), module);
-      if(ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io) != sizeof(mycfgio))
-      {
-        ALOG_ERR(PSTR("TemplateGPIOs: Size mismatch %d != %d"), ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io), sizeof(mycfgio));
-      }
-      memcpy_P(&src, &module_template__gpio_map[module].gp, sizeof(mycfgio));
-    #endif
+    src[i] = GPIO_NONE;
   }
 
-  /******
-   * Dissimilar to tasmota which does dynamic copying and stores gpio, here
-   * The src moves into the destination
-   ******/
-  uint32_t j = 0;
-  for (uint8_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io); i++) 
-  {    
-    dest[j] = src[i];    
-    ALOG_DBM(PSTR("Copying dest=%d[%d]\t index/real = %d/%d"), dest[j],j, i,ConvertIndexPinToRealPin(i));
-    j++;
+  ALOG_INF(PSTR(D_LOG_PINS "TemplateGPIOs: src_count=%u dest_count=%u"), ARRAY_SIZE(src), ARRAY_SIZE(gp->io));
+
+  if (tkr_set->Settings.module == USER_MODULE)
+  {
+    ALOG_INF(PSTR(D_LOG_PINS "Loading USER provided template"));
+    memcpy(&src, &tkr_set->Settings.user_template.hardware.gp, sizeof(mycfgio));
+  }
+  else
+  {
+    ALOG_INF(PSTR(D_LOG_PINS "Loading predefined template %u"), tkr_set->Settings.module);
+
+#ifdef ESP8266
+    GetInternalTemplate(&src, tkr_set->Settings.module, 1);
+#endif
+
+#ifdef ESP32
+    uint32_t module = ModuleTemplate(tkr_set->Settings.module);
+    ALOG_INF(PSTR(D_LOG_PINS "Loading ESP32 template %u"), module);
+
+    if (sizeof(src) != sizeof(mycfgio))
+    {
+      ALOG_ERR(PSTR("TemplateGPIOs: src size mismatch sizeof(src)=%u sizeof(mycfgio)=%u"), sizeof(src), sizeof(mycfgio));
+    }
+
+    memcpy_P(&src, &module_template__gpio_map[module].gp, sizeof(mycfgio));
+#endif
   }
 
-  AddLog_Array(LOG_LEVEL_INFO, PSTR("TemplateGPIO  src"), src, ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
-  AddLog_Array(LOG_LEVEL_INFO, PSTR("TemplateGPIO dest"), dest, ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io));
+  /*
+   * src[] is compact template-indexed.
+   * dest[] is expanded to physical GPIO indexed.
+   *
+   * Example ESP8266:
+   *   src[6] -> real GPIO9/12/etc depending on ESP8266 map
+   *
+   * Runtime after this point should use:
+   *   gp->io[real_gpio]
+   */
+  for (uint8_t index_pin = 0; index_pin < ARRAY_SIZE(src); index_pin++)
+  {
+    int8_t real_pin = ConvertIndexPinToRealPin(index_pin);
 
+    if (real_pin < 0)
+    {
+      ALOG_INF(PSTR(D_LOG_PINS "TemplateGPIOs: skip invalid index_pin=%u gpio=%u"), index_pin, src[index_pin]);
+      continue;
+    }
+
+    if ((uint8_t)real_pin >= ARRAY_SIZE(gp->io))
+    {
+      ALOG_ERR(PSTR(D_LOG_PINS "TemplateGPIOs: real_pin OOR index_pin=%u real_pin=%d gpio=%u dest_count=%u"), index_pin, real_pin, src[index_pin], ARRAY_SIZE(gp->io));
+      continue;
+    }
+
+    dest[(uint8_t)real_pin] = src[index_pin];
+
+    ALOG_DBM(PSTR(D_LOG_PINS "TemplateGPIOs: copy index_pin=%u real_pin=%d gpio=%u"), index_pin, real_pin, src[index_pin]);
+  }
+
+  AddLog_Array(LOG_LEVEL_INFO, PSTR("TemplateGPIO  src"), src, ARRAY_SIZE(src));
+  AddLog_Array(LOG_LEVEL_INFO, PSTR("TemplateGPIO dest"), dest, ARRAY_SIZE(gp->io));
 }
+
+
 
 #ifdef ESP8266
 void mPins::GetInternalTemplate(void* ptr, uint32_t module, uint32_t option) 
@@ -539,10 +630,6 @@ void mPins::GpioInit(void)
       #endif
     }
 
-    ALOG_INF(PSTR("Stable boot when here included"));
-
-
-
     /**************************************************************************
      * 2. Apply template pin value
      *
@@ -604,13 +691,12 @@ void mPins::GpioInit(void)
   // Scan over all possible pins up to the max
   for (uint8_t real_pin = 0; real_pin < ARRAY_SIZE(tkr_set->runtime.my_module.io); real_pin++)
   {
-    uint16_t gpio  = tkr_set->runtime.my_module.io[real_pin];
-    uint16_t mgpio = ValidPin_AdjustGPIO(real_pin, gpio);
+    uint16_t gpio_function = tkr_set->runtime.my_module.io[real_pin];
+    uint16_t mgpio = ValidPin_AdjustGPIO(real_pin, gpio_function);
 
-    ALOG_INF(PSTR("DBG: real_pin=%u moduleIO=%u runtimeIO=%u mgpio=%u"),real_pin,tkr_set->Settings.module_pins.io[real_pin],gpio,mgpio);
+    ALOG_INF(PSTR("DBG: real_pin=%u moduleIO=%u runtimeIO=%u mgpio=%u"), real_pin, tkr_set->Settings.module_pins.io[real_pin], gpio_function, mgpio);
 
     SetPin_GPIOFunction(real_pin, mgpio);
-
   }
 
 
@@ -640,41 +726,41 @@ void mPins::GpioInit(void)
 
   #ifdef ESP8266
 
-  for (uint32_t index_pin = 0;
-      index_pin < ARRAY_SIZE(tkr_set->runtime.my_module.io);
-      index_pin++)
-  {
-    int8_t real_pin = ConvertIndexPinToRealPin(index_pin);
+  // for (uint32_t index_pin = 0;
+  //     index_pin < ARRAY_SIZE(tkr_set->runtime.my_module.io);
+  //     index_pin++)
+  // {
+  //   int8_t real_pin = ConvertIndexPinToRealPin(index_pin);
 
-    if (real_pin < 0)
-    {
-      ALOG_INF(PSTR("PIN: skip invalid index_pin=%u"), index_pin);
-      continue;
-    }
+  //   if (real_pin < 0)
+  //   {
+  //     ALOG_INF(PSTR("PIN: skip invalid index_pin=%u"), index_pin);
+  //     continue;
+  //   }
 
-    uint32_t mgpio = ValidPin_AdjustGPIO(
-      (uint8_t)real_pin,
-      tkr_set->runtime.my_module.io[index_pin]
-    );
+  //   uint32_t mgpio = ValidPin_AdjustGPIO(
+  //     (uint8_t)real_pin,
+  //     tkr_set->runtime.my_module.io[index_pin]
+  //   );
 
-    ALOG_DBM(
-      PSTR("INI: index_pin=%u real_pin=%d mgpio=%u"),
-      index_pin,
-      real_pin,
-      mgpio
-    );
+  //   ALOG_DBM(
+  //     PSTR("INI: index_pin=%u real_pin=%d mgpio=%u"),
+  //     index_pin,
+  //     real_pin,
+  //     mgpio
+  //   );
 
-    if (0 == mgpio)
-    {
-      if (!((1 == real_pin) || (3 == real_pin)))   // skip serial
-      {
-        if ((MODULE_H801 == tkr_set->runtime.my_module_type) && (real_pin != 2))
-        {
-          pinMode(real_pin, INPUT);
-        }
-      }
-    }
-  }
+  //   if (0 == mgpio)
+  //   {
+  //     if (!((1 == real_pin) || (3 == real_pin)))   // skip serial
+  //     {
+  //       if ((MODULE_H801 == tkr_set->runtime.my_module_type) && (real_pin != 2))
+  //       {
+  //         pinMode(real_pin, INPUT);
+  //       }
+  //     }
+  //   }
+  // }
 
   #endif
 

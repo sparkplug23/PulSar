@@ -9,6 +9,8 @@
 int8_t mPWM::Tasker(uint8_t function, JsonParserObject obj)
 {
 
+  // return 0;
+
   switch(function){
     /************
      * INIT SECTION * 
@@ -115,8 +117,13 @@ void mPWM::Pre_Init(void)
 
   ALOG_INF(PSTR(D_LOG_MODULE "Set PWM defaults"));
 
+  DEBUG_LINE_HERE3
+
   analogWriteRange(tkr_set->Settings.pwm_range);
   analogWriteFreq(tkr_set->Settings.pwm_frequency);
+
+  DEBUG_LINE_HERE3
+  // DEBUG_WAIT_POINT_MS(2000);
 
 
   // if(

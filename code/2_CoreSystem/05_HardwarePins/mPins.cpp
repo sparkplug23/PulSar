@@ -267,24 +267,24 @@ const mytmplt8285 mPins::module_template__gpio_map_ESP8285[3] PROGMEM = {
   },
   #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
   {          //MODULE_SONOFF_IFAN03_ID                  // SONOFF_IFAN03 - Sonoff iFan03 (ESP8285)
-    PIGPIO_N(GPIO_KEY,1),                 // GPIO00 WIFI_KEY0 Button 1
-    GPIO_HWSERIAL_TX,         // GPIO01 ESP_TXD Serial RXD connection to P0.5 of RF microcontroller
-    0,                         // GPIO02 ESP_LOG
-    GPIO_HWSERIAL_RX,         // GPIO03 ESP_RXD Serial TXD connection to P0.4 of RF microcontroller
-    0,                         // GPIO04 DEBUG_RX
-    0,                         // GPIO05 DEBUG_TX
-                               // GPIO06 (SD_CLK   Flash)
-                               // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
-                               // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
-    PIGPIO_N(GPIO_REL_INV,1),             // GPIO09 WIFI_O0 Relay 1 (0 = Off, 1 = On) controlling the light
-    GPIO_BUZZER_INV,           // GPIO10 WIFI_O4 Buzzer (0 = Off, 1 = On)
-                               // GPIO11 (SD_CMD   Flash)
-    PIGPIO_N(GPIO_REL,3),                 // GPIO12 WIFI_O2 Relay 3 (0 = Off, 1 = On) controlling the fan
-    PIGPIO_N(GPIO_LED_INV,1),             // GPIO13 WIFI_CHK Blue Led on PCA (0 = On, 1 = Off) - Link and Power status
-    PIGPIO_N(GPIO_REL,2),                 // GPIO14 WIFI_O1 Relay 2 (0 = Off, 1 = On) controlling the fan
-    PIGPIO_N(GPIO_REL,4),                 // GPIO15 WIFI_O3 Relay 4 (0 = Off, 1 = On) controlling the fan
-    0,                         // GPIO16 None 
-    0                          // A0
+    PIGPIO_N(GPIO_KEY,1),           // GPIO00 WIFI_KEY0 Button 1
+    PIGPIO_N(GPIO_HWSERIAL_TX,1),   // GPIO01 ESP_TXD Serial RXD connection to P0.5 of RF microcontroller
+    0,                              // GPIO02 ESP_LOG
+    PIGPIO_N(GPIO_HWSERIAL_RX,1),   // GPIO03 ESP_RXD Serial TXD connection to P0.4 of RF microcontroller
+    0,                              // GPIO04 DEBUG_RX
+    0,                              // GPIO05 DEBUG_TX
+                                    // GPIO06 (SD_CLK   Flash)
+                                    // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
+                                    // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
+    PIGPIO_N(GPIO_REL_INV,1),       // GPIO09 WIFI_O0 Relay 1 (0 = Off, 1 = On) controlling the light
+    PIGPIO_N(GPIO_BUZZER_INV,1),    // GPIO10 WIFI_O4 Buzzer (0 = Off, 1 = On)
+                                    // GPIO11 (SD_CMD   Flash)
+    PIGPIO_N(GPIO_REL,3),           // GPIO12 WIFI_O2 Relay 3 (0 = Off, 1 = On) controlling the fan
+    PIGPIO_N(GPIO_LED_INV,1),       // GPIO13 WIFI_CHK Blue Led on PCA (0 = On, 1 = Off) - Link and Power status
+    PIGPIO_N(GPIO_REL,2),           // GPIO14 WIFI_O1 Relay 2 (0 = Off, 1 = On) controlling the fan
+    PIGPIO_N(GPIO_REL,4),           // GPIO15 WIFI_O3 Relay 4 (0 = Off, 1 = On) controlling the fan
+    0,                              // GPIO16 None 
+    0                               // A0
   },
   #endif
   #ifdef USE_MODULE_TEMPLATE_SONOFF_4CHPRO  
@@ -1424,6 +1424,8 @@ int8_t mPins::ConvertIndexPinToRealPin(uint8_t index_pin)
 void mPins::DigitalWrite(uint32_t gpio_pin, uint32_t state)
 {
 
+  ALOG_ERR(PSTR("May be invalid if gpio is not unpacked. Use 3 arg version."));
+
   ALOG_INF(PSTR("DigitalWrite(uint32_t %d, uint32_t %d"), gpio_pin, state);
 
   DigitalWrite(gpio_pin, 0, state);
@@ -1723,7 +1725,7 @@ uint16_t mPins::ValidPin_AdjustGPIO(uint8_t physical_pin, uint16_t gpio)
   }
 
   #ifdef ESP8266
-  if ((MODULE_GENERIC == tkr_set->Settings.module)){// && (!tkr_set->Settings.flag_network.user_esp8285_enable)) {
+  if ((MODULE_GENERIC == tkr_set->Settings.module) && (!tkr_set->Settings.sysopt_system.bit.user_esp8285_enable)) {
     if ((physical_pin == 9) || (physical_pin == 10)) { return GPIO_NONE; }  // Disable possible flash GPIO9 and GPIO10
   }
   #endif

@@ -238,8 +238,8 @@
  * 
  * 
  * *****************************************************************************************************/
-// Store original defines into intermediate macros if USE_DEBUGFEATURE_DEVICE__CLONE_TESTBED is defined
-// #ifdef USE_DEBUGFEATURE_DEVICE__CLONE_TESTBED
+// Store original defines into intermediate macros if USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED is defined
+// #ifdef USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED
 // // Directly redefine the macros with the prefix
 // #undef DEVICENAME_CTR
 // #undef DEVICENAME_FRIENDLY_CTR
@@ -553,7 +553,7 @@
 
 
 #ifndef D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND
-#define D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND 60
+#define D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND 20
 #endif
 
 

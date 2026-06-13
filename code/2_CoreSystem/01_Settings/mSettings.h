@@ -360,7 +360,7 @@ typedef union {
 
     uint32_t timers_enable            : 1;  // bit 11
     uint32_t sleep_normal             : 1;  // bit 12
-    uint32_t reserved13               : 1;
+    uint32_t user_esp8285_enable      : 1;  // bit 13
     uint32_t reserved14               : 1;
     uint32_t reserved15               : 1;
     uint32_t reserved16               : 1;
