@@ -209,12 +209,12 @@ bool mSDCard::SDCard_Mount()
    ************************************************************************************************/
 #if defined(ESP32) && defined(ENABLE_FEATURE_SDCARD__MMC)
 
-  sdcard.pin_mmc_clk = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_MMC_CLK);
-  sdcard.pin_mmc_cmd = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_MMC_CMD);
-  sdcard.pin_mmc_d0  = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_MMC_D0);
-  sdcard.pin_mmc_d1  = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_MMC_D1);
-  sdcard.pin_mmc_d2  = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_MMC_D2);
-  sdcard.pin_mmc_d3  = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_MMC_D3);
+  sdcard.pin_mmc_clk = tkr_pins->GetPin(GPIO_SDCARD_MMC_CLK);
+  sdcard.pin_mmc_cmd = tkr_pins->GetPin(GPIO_SDCARD_MMC_CMD);
+  sdcard.pin_mmc_d0  = tkr_pins->GetPin(GPIO_SDCARD_MMC_D, 0);
+  sdcard.pin_mmc_d1  = tkr_pins->GetPin(GPIO_SDCARD_MMC_D, 1);
+  sdcard.pin_mmc_d2  = tkr_pins->GetPin(GPIO_SDCARD_MMC_D, 2);
+  sdcard.pin_mmc_d3  = tkr_pins->GetPin(GPIO_SDCARD_MMC_D, 3);
 
   if((sdcard.pin_mmc_clk >= 0) &&
      (sdcard.pin_mmc_cmd >= 0) &&
@@ -231,10 +231,10 @@ bool mSDCard::SDCard_Mount()
    ************************************************************************************************/
 #ifdef ESP32
 
-  sdcard.pin_cs   = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CSO);
-  sdcard.pin_sck  = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CLK);
-  sdcard.pin_mosi = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MOSI);
-  sdcard.pin_miso = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MISO);
+  sdcard.pin_cs   = tkr_pins->GetPin(GPIO_SDCARD_VSPI_CSO);
+  sdcard.pin_sck  = tkr_pins->GetPin(GPIO_SDCARD_VSPI_CLK);
+  sdcard.pin_mosi = tkr_pins->GetPin(GPIO_SDCARD_VSPI_MOSI);
+  sdcard.pin_miso = tkr_pins->GetPin(GPIO_SDCARD_VSPI_MISO);
 
   if((sdcard.pin_cs   >= 0) &&
      (sdcard.pin_sck  >= 0) &&
@@ -251,10 +251,10 @@ bool mSDCard::SDCard_Mount()
    * HSPI SD mode.
    ************************************************************************************************/
 
-  sdcard.pin_cs   = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_HSPI_CSO);
-  sdcard.pin_sck  = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_HSPI_CLK);
-  sdcard.pin_mosi = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_HSPI_MOSI);
-  sdcard.pin_miso = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_HSPI_MISO);
+  sdcard.pin_cs   = tkr_pins->GetPin(GPIO_SDCARD_HSPI_CSO);
+  sdcard.pin_sck  = tkr_pins->GetPin(GPIO_SDCARD_HSPI_CLK);
+  sdcard.pin_mosi = tkr_pins->GetPin(GPIO_SDCARD_HSPI_MOSI);
+  sdcard.pin_miso = tkr_pins->GetPin(GPIO_SDCARD_HSPI_MISO);
 
   if((sdcard.pin_cs   >= 0) &&
      (sdcard.pin_sck  >= 0) &&

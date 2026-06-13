@@ -65,7 +65,7 @@ Notes:
 
 //--------------------------------[Enable Device]-------------------------------------
 
-#define DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
+// #define DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
 
 
 // #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__ON_SIM800L__OFFICE_TESTBED // Office window testbed, SIM800L, BK-880Q GPs, onboard IMU, SIM800L
@@ -101,9 +101,8 @@ Notes:
   * SECTION: Feature Sets
   ************************************/  
 
-  #define ENABLE_GROUP_FEATURE__CELLULAR
+  // #define ENABLE_GROUP_FEATURE__CELLULAR
   #define ENABLE_GROUP_FEATURE__WIFI
-  #define ENABLE_GROUP_FEATURE__MQTT_CELLULAR_AND_WIFI
 
   /***********************************
   * SECTION: Network Configs
@@ -112,11 +111,17 @@ Notes:
   #ifdef ENABLE_GROUP_FEATURE__WIFI
     #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
     #define USE_MODULE_SENSORS_INTERFACE
+
+    #ifndef ENABLE_GROUP_FEATURE__CELLULAR
+    #define ENABLE_GROUP_FEATURE__MQTT_WIFI
+    #endif
   #endif
 
 
   #ifdef ENABLE_GROUP_FEATURE__CELLULAR  
     #define MQTT_HOST_CELLULAR "sparkequinox2.ddns.net"
+    
+    #define ENABLE_GROUP_FEATURE__MQTT_CELLULAR_AND_WIFI
     
     #define USE_MODULE_DRIVERS_MODEM_7000G
 
@@ -172,15 +177,15 @@ Notes:
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       
-      "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX1__CTR   "\","
-      "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX1__CTR   "\"," 
-      "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER_KEY__CTR   "\"," 
+      "\"27\":\"" D_GPIO_MODEM_TX_CTR  "1" "\","
+      "\"26\":\"" D_GPIO_MODEM_RX_CTR  "1" "\"," 
+      "\"4\":\""  D_GPIO_MODEM_POWER_KEY_CTR   "\"," 
 
       #ifdef USE_MODULE_DRIVERS_SDCARD
-      "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
-      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
-      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
-      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+      "\"2\":\"" D_GPIO_SDCARD_HSPI_MISO_CTR   "\","
+      "\"15\":\"" D_GPIO_SDCARD_HSPI_MOSI_CTR   "\","   
+      "\"14\":\"" D_GPIO_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_SDCARD_HSPI_CSO_CTR   "\","  
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -479,6 +484,130 @@ Notes:
   "}";
 
   #endif
+
+  
+  #ifdef ENABLE_GROUP_FEATURE__MQTT_WIFI
+  #define USE_NETWORK_CONFIG_TEMPLATE
+  DEFINE_PGM_CTR(NETWORK_CONFIG_TEMPLATE)
+  "{"
+    "\"Version\":1,"
+
+    "\"Interface\":{"
+      "\"Policy\":{"
+        "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+        "\"AllowMultipleActive\":true,"
+        "\"BlockRemoteMqttWhenLocalAvailable\":true"
+      "}"
+    "},"
+
+    "\"WiFi\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,60,600],"
+
+      "\"Mode\":{"
+        "\"STA\":true,"
+        "\"AP\":true,"
+        "\"STA_AP\":true,"
+        "\"APBootMins\":10,"
+        "\"APOnSTAFail\":true,"
+        "\"APFailDelayMins\":0,"
+        "\"APAlwaysOn\":false"
+      "},"
+
+      "\"Station\":{"
+        "\"Profiles\":["
+          "{"
+            "\"SSID\":\"" STA_SSID1 "\","
+            "\"Password\":\"" STA_PASS1 "\""
+          "},"
+          "{"
+            "\"SSID\":\"" STA_SSID3 "\","
+            "\"Password\":\"" STA_PASS3 "\""
+          "}"
+        "],"
+
+        "\"IPv4\":{"
+          "\"Static\":false,"
+          "\"IP\":\"0.0.0.0\","
+          "\"Gateway\":\"0.0.0.0\","
+          "\"Subnet\":\"0.0.0.0\","
+          "\"DNS1\":\"0.0.0.0\","
+          "\"DNS2\":\"0.0.0.0\""
+        "}"
+      "},"
+
+      "\"SoftAP\":{"
+        "\"SSID\":\"" SOFTAP_SSID "\","
+        "\"Password\":\"" SOFTAP_PASSWORD "\","
+        "\"Channel\":1"
+      "}"
+    "},"
+
+    "\"Ethernet\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,30,60],"
+
+      "\"IPv4\":{"
+        "\"Static\":false,"
+        "\"IP\":\"0.0.0.0\","
+        "\"Gateway\":\"0.0.0.0\","
+        "\"Subnet\":\"0.0.0.0\","
+        "\"DNS1\":\"0.0.0.0\","
+        "\"DNS2\":\"0.0.0.0\""
+      "}"
+    "},"
+
+    "\"Cellular\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[10,60,600],"
+
+      "\"Modem\":{"
+        "\"EN\":true,"
+        "\"APN\":\"" CELLULAR_APN "\","
+        "\"User\":\"\","
+        "\"Password\":\"\""
+      "},"
+
+      "\"GNSS\":{"
+        "\"EN\":true"
+      "},"
+
+      "\"SMS\":{"
+        "\"EN\":true,"
+        "\"PrivilegedOnly\":true"
+      "}"
+    "},"
+
+    "\"MQTT\":{"
+      "\"EN\":true,"
+
+      "\"UpdateSeconds\":{"
+        "\"IfChanged\":1,"
+        "\"TelePeriod\":60,"
+        "\"ConfigPeriod\":60"
+      "},"
+
+      "\"Brokers\":["
+        "{"
+          "\"Id\":\"home\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST "\","
+          "\"Port\":" STR(MQTT_PORT) ","
+          "\"User\":\"\","
+          "\"Password\":\"\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"Ethernet\",\"WiFi\"],"
+          "\"PrefTransport\":[\"Ethernet\",\"WiFi\"],"
+          "\"OutgoingLevel\":3,"
+          "\"OutgoingLimiterMs\":0"
+        "}"
+      "]"
+    "}"
+  "}";
+  #endif
+
 
 
 #endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
@@ -783,14 +912,14 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
       #ifdef USE_MODULE_NETWORK_CELLULAR
-      "\"25\":\"" D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX__CTR   "\","   
-      "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
-      "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
+      "\"25\":\"" D_GPIO__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
+      "\"27\":\"" D_GPIO__MODEM_TX__CTR   "\","   
+      "\"26\":\"" D_GPIO__MODEM_RX__CTR   "\","   
+      "\"4\":\""  D_GPIO__MODEM_POWER__CTR   "\","   
       #endif // USE_MODULE_NETWORK_CELLULAR   
 
       // modem is on 26/27 per datasheet
@@ -803,23 +932,23 @@ The new smaller LTE board needs testing too, might need as window tester first.
        * Red         VCC, 3V3
        * Black       GND
        * */
-      // "\"32\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
-      // "\"33\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+      // "\"32\":\"" D_GPIO_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+      // "\"33\":\"" D_GPIO_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
 
 
 
       #ifdef USE_MODULE_DRIVERS_SDCARD
-      "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
-      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
-      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
-      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+      "\"2\":\"" D_GPIO_SDCARD_HSPI_MISO_CTR   "\","
+      "\"15\":\"" D_GPIO_SDCARD_HSPI_MOSI_CTR   "\","   
+      "\"14\":\"" D_GPIO_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_SDCARD_HSPI_CSO_CTR   "\","  
       #endif // USE_MODULE_DRIVERS_SDCARD   
       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      "\"19\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+      "\"18\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","   
       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+      "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1080,27 +1209,27 @@ The new smaller LTE board needs testing too, might need as window tester first.
 //     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 //     "\"" D_GPIO_NUMBER "\":{"
 //       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-//       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-//       "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+//       "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+//       "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
 //       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
 //       #ifdef USE_MODULE_NETWORK_CELLULAR
-//       "\"25\":\"" D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
-//       "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX__CTR   "\","   
-//       "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
-//       "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
+//       "\"25\":\"" D_GPIO__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
+//       "\"27\":\"" D_GPIO__MODEM_TX__CTR   "\","   
+//       "\"26\":\"" D_GPIO__MODEM_RX__CTR   "\","   
+//       "\"4\":\""  D_GPIO__MODEM_POWER__CTR   "\","   
 //       #endif // USE_MODULE_NETWORK_CELLULAR   
 //       #ifdef USE_MODULE_DRIVERS_SDCARD
-//       "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
-//       "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
-//       "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
-//       "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+//       "\"2\":\"" D_GPIO_SDCARD_HSPI_MISO_CTR   "\","
+//       "\"15\":\"" D_GPIO_SDCARD_HSPI_MOSI_CTR   "\","   
+//       "\"14\":\"" D_GPIO_SDCARD_HSPI_CLK_CTR   "\","
+//       "\"13\":\"" D_GPIO_SDCARD_HSPI_CSO_CTR   "\","  
 //       #endif // USE_MODULE_DRIVERS_SDCARD   
 //       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-//       "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-//       "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+//       "\"19\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+//       "\"18\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","   
 //       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-//       "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-//       "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+//       "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+//       "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
 //     "},"
 //     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
 //     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1193,8 +1322,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1334,11 +1463,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+      "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1481,11 +1610,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+      "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1629,8 +1758,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1781,8 +1910,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1991,15 +2120,15 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      "\"19\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+      "\"18\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","   
       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+      "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2247,27 +2376,27 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
       #ifdef USE_MODULE_NETWORK_CELLULAR
-      "\"25\":\"" D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX__CTR   "\","   
-      "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
-      "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
+      "\"25\":\"" D_GPIO__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
+      "\"27\":\"" D_GPIO__MODEM_TX__CTR   "\","   
+      "\"26\":\"" D_GPIO__MODEM_RX__CTR   "\","   
+      "\"4\":\""  D_GPIO__MODEM_POWER__CTR   "\","   
       #endif // USE_MODULE_NETWORK_CELLULAR   
       #ifdef USE_MODULE_DRIVERS_SDCARD
-      "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
-      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
-      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
-      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+      "\"2\":\"" D_GPIO_SDCARD_HSPI_MISO_CTR   "\","
+      "\"15\":\"" D_GPIO_SDCARD_HSPI_MOSI_CTR   "\","   
+      "\"14\":\"" D_GPIO_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_SDCARD_HSPI_CSO_CTR   "\","  
       #endif // USE_MODULE_DRIVERS_SDCARD   
       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      "\"19\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+      "\"18\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","   
       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+      "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2582,14 +2711,14 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
       #ifdef USE_MODULE_NETWORK_CELLULAR
-      "\"25\":\"" D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX__CTR   "\","   
-      "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
-      "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
+      "\"25\":\"" D_GPIO__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
+      "\"27\":\"" D_GPIO__MODEM_TX__CTR   "\","   
+      "\"26\":\"" D_GPIO__MODEM_RX__CTR   "\","   
+      "\"4\":\""  D_GPIO__MODEM_POWER__CTR   "\","   
       #endif // USE_MODULE_NETWORK_CELLULAR   
 
 
@@ -2600,23 +2729,23 @@ The new smaller LTE board needs testing too, might need as window tester first.
        * Red         VCC, 3V3
        * Black       GND
        * */
-      // "\"32\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
-      // "\"33\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+      // "\"32\":\"" D_GPIO_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+      // "\"33\":\"" D_GPIO_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
 
 
 
       #ifdef USE_MODULE_DRIVERS_SDCARD
-      "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
-      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
-      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
-      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+      "\"2\":\"" D_GPIO_SDCARD_HSPI_MISO_CTR   "\","
+      "\"15\":\"" D_GPIO_SDCARD_HSPI_MOSI_CTR   "\","   
+      "\"14\":\"" D_GPIO_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_SDCARD_HSPI_CSO_CTR   "\","  
       #endif // USE_MODULE_DRIVERS_SDCARD   
       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      "\"19\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+      "\"18\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","   
       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+      "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2714,8 +2843,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -2807,15 +2936,15 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
-      "\"23\":\"" D_GPIO_FUNCTION__FONA_POWER_KEY__CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION__FONA_POWER_STATUS__CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION__FONA_NETWORK_STATUS__CTR   "\","
-      "\"4\":\"" D_GPIO_FUNCTION__FONA_RESET__CTR   "\","
-      "\"17\":\"" D_GPIO_FUNCTION__FONA_UART_TX__CTR   "\","
-      "\"16\":\"" D_GPIO_FUNCTION__FONA_UART_RX__CTR   "\","
-      "\"19\":\"" D_GPIO_FUNCTION__FONA_RING_INDICATOR__CTR   "\","
+      "\"23\":\"" D_GPIO__FONA_POWER_KEY__CTR   "\","
+      "\"22\":\"" D_GPIO__FONA_POWER_STATUS__CTR   "\","
+      "\"21\":\"" D_GPIO__FONA_NETWORK_STATUS__CTR   "\","
+      "\"4\":\"" D_GPIO__FONA_RESET__CTR   "\","
+      "\"17\":\"" D_GPIO__FONA_UART_TX__CTR   "\","
+      "\"16\":\"" D_GPIO__FONA_UART_RX__CTR   "\","
+      "\"19\":\"" D_GPIO__FONA_RING_INDICATOR__CTR   "\","
       #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"2\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";

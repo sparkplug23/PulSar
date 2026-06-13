@@ -460,6 +460,12 @@ void mMQTTManager::EnsureDefaultBroker_FromDefines(void)
   #ifdef DEVICENAME_CTR
   broker->SetTopicPrefix(DEVICENAME_CTR);
   broker->SetClientName(DEVICENAME_CTR);
+  #ifdef USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED
+  char tb_name_ctr[64]; // Temporary buffer for modified name
+  snprintf(tb_name_ctr, sizeof(tb_name_ctr), "tb_%s", DEVICENAME_CTR);
+  broker->SetTopicPrefix(tb_name_ctr);
+  broker->SetClientName(tb_name_ctr);
+  #endif
   #else
   broker->SetTopicPrefix(tkr_set->Settings.system_name.device);
   broker->SetClientName(tkr_set->Settings.system_name.device);

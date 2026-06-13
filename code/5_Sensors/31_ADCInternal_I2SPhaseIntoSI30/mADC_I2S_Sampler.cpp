@@ -210,8 +210,8 @@ void mADC_I2S_Sampler::Init(void){
   
   Serial2.begin(2048000);
 
-  // #ifdef PIN_GPIO_FUNCTION_RXON_SAMPLING_ENABLED_NUM
-  //   pinMode(PIN_GPIO_FUNCTION_RXON_SAMPLING_ENABLED_NUM, INPUT);
+  // #ifdef PIN_GPIO_RXON_SAMPLING_ENABLED_NUM
+  //   pinMode(PIN_GPIO_RXON_SAMPLING_ENABLED_NUM, INPUT);
   // #endif
 
   // input from analog microphones such as the MAX9814 or MAX4466
@@ -237,8 +237,8 @@ void mADC_I2S_Sampler::Init(void){
   btStop();
 
   #ifdef ENABLE_INTERRUPT_ON_CHANGE_PIN35_FOR_RXON_SAMPLING_TIMESLOT
-    pinMode(PIN_GPIO_FUNCTION_RXON_SAMPLING_ENABLED_NUM, INPUT_PULLUP );
-    attachInterrupt(PIN_GPIO_FUNCTION_RXON_SAMPLING_ENABLED_NUM, ISR_External_Pin_RXON_Sampling_Timeslot_Event_Trigger, CHANGE);
+    pinMode(PIN_GPIO_RXON_SAMPLING_ENABLED_NUM, INPUT_PULLUP );
+    attachInterrupt(PIN_GPIO_RXON_SAMPLING_ENABLED_NUM, ISR_External_Pin_RXON_Sampling_Timeslot_Event_Trigger, CHANGE);
   #endif // ENABLE_INTERRUPT_ON_CHANGE_PIN35_FOR_RXON_SAMPLING_TIMESLOT
   
   

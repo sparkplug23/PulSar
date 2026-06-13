@@ -567,69 +567,262 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level, bool json_ap
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appending)
-{
+// uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appending)
+// {
 
-  // return 0;
+//   // return 0;
 
-  char buffer[30];
-  JBI->Start();
-  JBI->Add("flag_serial_set_tx_set",tkr_pins-> flag_serial_set_tx_set);
-    // JBI->Object_Start(PM_GPIO);
-    // for(uint16_t i=0;i<sizeof(tkr_set->pin);i++){ 
-    //   if(tkr_pins->PinUsed(i)){ // skip pins not configured
-    //     sprintf_P(buffer, PSTR("TASK_%d"), i);
-    //     JBI->Add(buffer, tkr_pins->GetPin(i));
-    //   }
-    // }
-    // JBI->Object_End();
+//   char buffer[30];
+//   JBI->Start();
+//   JBI->Add("flag_serial_set_tx_set",tkr_pins-> flag_serial_set_tx_set);
+//     // JBI->Object_Start(PM_GPIO);
+//     // for(uint16_t i=0;i<sizeof(tkr_set->pin);i++){ 
+//     //   if(tkr_pins->PinUsed(i)){ // skip pins not configured
+//     //     sprintf_P(buffer, PSTR("TASK_%d"), i);
+//     //     JBI->Add(buffer, tkr_pins->GetPin(i));
+//     //   }
+//     // }
+//     // JBI->Object_End();
 
 
-    JBI->Object_Start(PM_GPIO);
-    for (uint16_t index_pin = 0; index_pin < ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions); index_pin++)
-    {
-      const uint16_t gpio_function = tkr_pins->pin_attached_gpio_functions[index_pin];
+//     JBI->Object_Start(PM_GPIO);
+//     for (uint16_t index_pin = 0; index_pin < ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions); index_pin++)
+//     {
+//       const uint16_t gpio_function = tkr_pins->pin_attached_gpio_functions[index_pin];
 
-      // GPIO_NONE means no function attached to this physical/index pin
-      if (gpio_function == GPIO_NONE) {
-        continue;
-      }
+//       // GPIO_NONE means no function attached to this physical/index pin
+//       if (gpio_function == GPIO_NONE) {
+//         continue;
+//       }
 
-      const int8_t real_pin = tkr_pins->ConvertIndexPinToRealPin(index_pin);
+//       const int8_t real_pin = tkr_pins->ConvertIndexPinToRealPin(index_pin);
 
-      sprintf_P(buffer,PSTR("%s"),tkr_pins->GetGPIOFunctionNamebyID(gpio_function, buffer, sizeof(buffer)));
+//       sprintf_P(buffer,PSTR("%s"),tkr_pins->GetGPIOFunctionNamebyID(gpio_function, buffer, sizeof(buffer)));
 
-      JBI->Add(buffer, real_pin);
+//       JBI->Add(buffer, real_pin);
 
-      // ALOG_INF(PSTR("Pin index=%d real_pin=%d attached to function=%d %s"),index_pin,real_pin,gpio_function,buffer);
-    }
-    JBI->Object_End();
+//       // ALOG_INF(PSTR("Pin index=%d real_pin=%d attached to function=%d %s"),index_pin,real_pin,gpio_function,buffer);
+//     }
+//     JBI->Object_End();
 
     
-    // Debug by printing all arrays out
-    JBI->Array_Start("pin_attached_gpio_functions");
-    for(int i=0; i<ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions);i++)
-      JBI->Add(tkr_pins->pin_attached_gpio_functions[i]);
-    JBI->Array_End();
+//     // Debug by printing all arrays out
+//     JBI->Array_Start("pin_attached_gpio_functions");
+//     for(int i=0; i<ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions);i++)
+//       JBI->Add(tkr_pins->pin_attached_gpio_functions[i]);
+//     JBI->Array_End();
 
-    JBI->Array_Start("user_template_io");
-    for(int i=0; i<ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io);i++)
-      JBI->Add(tkr_set->Settings.user_template.hardware.gp.io[i]);
-    JBI->Array_End();
+//     JBI->Array_Start("user_template_io");
+//     for(int i=0; i<ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io);i++)
+//       JBI->Add(tkr_set->Settings.user_template.hardware.gp.io[i]);
+//     JBI->Array_End();
 
-    JBI->Array_Start("getpin");
-    for(int i=0; i<ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions);i++)
+//     JBI->Array_Start("getpin");
+//     for(int i=0; i<ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions);i++)
+//     {
+//       JBI->Add(tkr_pins->GetPin(tkr_pins->pin_attached_gpio_functions[i]));
+//     }
+//     JBI->Array_End();
+
+
+
+
+
+//   return JBI->End();
+
+// }
+
+uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appending)
+{
+  char key_buffer[64];
+  char name_buffer[64];
+
+  JBI->Start();
+
+  // JBI->Add("flag_serial_set_tx_set", tkr_pins->flag_serial_set_tx_set);
+
+
+  /*******************************************************************************************\
+   * GPIO object
+   *
+   * Key   = decoded GPIO function name, e.g. "Modem TX1"
+   * Value = real physical pin number
+  \*******************************************************************************************/
+
+  JBI->Object_Start(PM_GPIO);
+
+  for (uint16_t index_pin = 0; index_pin < ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions); index_pin++)
+  {
+    const uint16_t packed_gpio = tkr_pins->pin_attached_gpio_functions[index_pin];
+
+    if ((packed_gpio == GPIO_NONE) || (packed_gpio == GPIO_USER))
     {
-      JBI->Add(tkr_pins->GetPin(tkr_pins->pin_attached_gpio_functions[i]));
+      continue;
     }
-    JBI->Array_End();
+
+    const int8_t real_pin = tkr_pins->ConvertIndexPinToRealPin(index_pin);
+
+    tkr_pins->GetGPIOFunctionNamebyID(packed_gpio, name_buffer, sizeof(name_buffer));
+
+    JBI->Add(name_buffer, real_pin);
+
+    // ALOG_INF(
+    //   PSTR("DBG_PIN: index_pin=%u real_pin=%d packed=0x%04X dec=%u base=%u idx=%u name=\"%s\""),
+    //   index_pin,
+    //   real_pin,
+    //   packed_gpio,
+    //   packed_gpio,
+    //   UGPIO(packed_gpio),
+    //   packed_gpio & GPIO_INDEX_MASK,
+    //   name_buffer
+    // );
+  }
+
+  JBI->Object_End();
+
+
+  /*******************************************************************************************\
+   * Detailed attached pin table
+  \*******************************************************************************************/
+
+  JBI->Array_Start("pin_attached_gpio_functions");
+
+  for (uint16_t index_pin = 0; index_pin < ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions); index_pin++)
+  {
+    const uint16_t packed_gpio = tkr_pins->pin_attached_gpio_functions[index_pin];
 
 
 
+    if ((packed_gpio == GPIO_NONE) || (packed_gpio == GPIO_USER))
+    {
+      // JBI->Add("state", (packed_gpio == GPIO_NONE) ? "GPIO_NONE" : "GPIO_USER");
+      // JBI->Add("base",  0);
+      // JBI->Add("idx",   0);
+      // JBI->Add("name",  "");
+    }
+    else
+    {
+      const uint16_t base_id = UGPIO(packed_gpio);
+      const uint8_t  func_i  = packed_gpio & GPIO_INDEX_MASK;
 
+      tkr_pins->GetGPIOFunctionNamebyID(packed_gpio, name_buffer, sizeof(name_buffer));
+
+      JBI->Object_Start();
+        JBI->Add("index", index_pin);
+        JBI->Add("real",  tkr_pins->ConvertIndexPinToRealPin(index_pin));
+        JBI->Add("raw",   packed_gpio);
+        // JBI->Add("hex",   packed_gpio);  // numeric only unless your JSON builder has hex-string support
+
+        // JBI->Add("state", "GPIO_FUNCTION");
+        JBI->Add("base",  base_id);
+        JBI->Add("idx",   func_i);
+        JBI->Add("name",  name_buffer);
+      JBI->Object_End();
+    }
+
+  }
+
+  JBI->Array_End();
+
+
+  // /*******************************************************************************************\
+  //  * User template raw GPIO array
+  // \*******************************************************************************************/
+
+  // JBI->Array_Start("user_template_io");
+
+  // for (uint16_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io); i++)
+  // {
+  //   const uint16_t packed_gpio = tkr_set->Settings.user_template.hardware.gp.io[i];
+
+  //   JBI->Object_Start();
+
+  //   JBI->Add("index", i);
+  //   JBI->Add("raw",   packed_gpio);
+
+  //   if ((packed_gpio == GPIO_NONE) || (packed_gpio == GPIO_USER))
+  //   {
+  //     JBI->Add("state", (packed_gpio == GPIO_NONE) ? "GPIO_NONE" : "GPIO_USER");
+  //     JBI->Add("base",  0);
+  //     JBI->Add("idx",   0);
+  //     JBI->Add("name",  "");
+  //   }
+  //   else
+  //   {
+  //     const uint16_t base_id = UGPIO(packed_gpio);
+  //     const uint8_t  func_i  = packed_gpio & GPIO_INDEX_MASK;
+
+  //     tkr_pins->GetGPIOFunctionNamebyID(packed_gpio, name_buffer, sizeof(name_buffer));
+
+  //     JBI->Add("state", "GPIO_FUNCTION");
+  //     JBI->Add("base",  base_id);
+  //     JBI->Add("idx",   func_i);
+  //     JBI->Add("name",  name_buffer);
+  //   }
+
+  //   JBI->Object_End();
+  // }
+
+  // JBI->Array_End();
+
+
+  // /*******************************************************************************************\
+  //  * Pin lookup check
+  //  *
+  //  * For each attached packed GPIO function:
+  //  *
+  //  *   packed -> base/index -> Pin(base,index)
+  //  *
+  //  * This verifies that the packed lookup path returns the same real pin.
+  // \*******************************************************************************************/
+
+  // JBI->Array_Start("pin_lookup_check");
+
+  // for (uint16_t index_pin = 0; index_pin < ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions); index_pin++)
+  // {
+  //   const uint16_t packed_gpio = tkr_pins->pin_attached_gpio_functions[index_pin];
+
+  //   if ((packed_gpio == GPIO_NONE) || (packed_gpio == GPIO_USER))
+  //   {
+  //     continue;
+  //   }
+
+  //   const uint16_t base_id = UGPIO(packed_gpio);
+  //   const uint8_t  func_i  = packed_gpio & GPIO_INDEX_MASK;
+
+  //   const int16_t lookup_pin = tkr_pins->Pin(base_id, func_i);
+  //   const int8_t  real_pin   = tkr_pins->ConvertIndexPinToRealPin(index_pin);
+
+  //   tkr_pins->GetGPIOFunctionNamebyID(packed_gpio, name_buffer, sizeof(name_buffer));
+
+  //   JBI->Object_Start();
+
+  //   JBI->Add("index",      index_pin);
+  //   JBI->Add("real",       real_pin);
+  //   JBI->Add("lookup",     lookup_pin);
+  //   JBI->Add("match",      lookup_pin == real_pin);
+  //   JBI->Add("raw",        packed_gpio);
+  //   JBI->Add("base",       base_id);
+  //   JBI->Add("idx",        func_i);
+  //   JBI->Add("name",       name_buffer);
+
+  //   JBI->Object_End();
+
+  //   ALOG_INF(
+  //     PSTR("DBG_PIN_LOOKUP: name=\"%s\" packed=0x%04X base=%u idx=%u real=%d lookup=%d match=%u"),
+  //     name_buffer,
+  //     packed_gpio,
+  //     base_id,
+  //     func_i,
+  //     real_pin,
+  //     lookup_pin,
+  //     lookup_pin == real_pin
+  //   );
+  // }
+
+  // JBI->Array_End();
 
   return JBI->End();
-
 }
 
 

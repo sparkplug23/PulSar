@@ -256,34 +256,34 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","  // BUILTIN LED as new Status LED, to reflect Network and Relay0 status
+      "\"2\":\"" D_GPIO_LED1_CTR  "\","  // BUILTIN LED as new Status LED, to reflect Network and Relay0 status
       #else
-      // "\"2\":\""  D_GPIO_FUNCTION_LED3_CTR  "\"," //builtin BLUE
+      // "\"2\":\""  D_GPIO_LED3_CTR  "\"," //builtin BLUE
       #endif  
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"5\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"4\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"26\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
-      "\"15\":\"" D_GPIO_FUNCTION_KEY4_INV_CTR  "\","
+      "\"5\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"4\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"26\":\"" D_GPIO_KEY3_INV_CTR  "\","
+      "\"15\":\"" D_GPIO_KEY4_INV_CTR  "\","
       #ifdef SOC_TOUCH_VERSION_1
-      "\"32\":\"" D_GPIO_FUNCTION_KEY5_TOUCH_CTR  "\","
-      "\"33\":\"" D_GPIO_FUNCTION_KEY6_TOUCH_CTR  "\","
-      "\"0\":\"" D_GPIO_FUNCTION_KEY7_INV_CTR  "\","
+      "\"32\":\"" D_GPIO_KEY5_TOUCH_CTR  "\","
+      "\"33\":\"" D_GPIO_KEY6_TOUCH_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY7_INV_CTR  "\","
       #endif
       #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"18\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
-      "\"19\":\"" D_GPIO_FUNCTION_SWT2_INV_CTR  "\","
+      "\"18\":\"" D_GPIO_SWT1_INV_CTR  "\","
+      "\"19\":\"" D_GPIO_SWT2_INV_CTR  "\","
       #endif  
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      "\"4\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
-      "\"12\":\"" D_GPIO_FUNCTION_REL3_CTR  "\","
-      "\"5\":\"" D_GPIO_FUNCTION_REL4_CTR  "\","
-      "\"26\":\"" D_GPIO_FUNCTION_REL5_CTR  "\","
-      "\"15\":\"" D_GPIO_FUNCTION_REL6_CTR  "\","
-      "\"22\":\"" D_GPIO_FUNCTION_REL7_CTR  "\","
-      "\"23\":\"" D_GPIO_FUNCTION_REL8_CTR  "\""
+      "\"2\":\"" D_GPIO_REL1_INV_CTR  "\","
+      "\"4\":\"" D_GPIO_REL_CTR "2" "\","
+      "\"12\":\"" D_GPIO_REL_CTR "3" "\","
+      "\"5\":\"" D_GPIO_REL_CTR "4" "\","
+      "\"26\":\"" D_GPIO_REL5_CTR  "\","
+      "\"15\":\"" D_GPIO_REL6_CTR  "\","
+      "\"22\":\"" D_GPIO_REL7_CTR  "\","
+      "\"23\":\"" D_GPIO_REL8_CTR  "\""
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -559,28 +559,28 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\","
       #endif
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
       #endif   
       #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"23\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
+      "\"23\":\"" D_GPIO_LED1_CTR  "\","
       #endif  
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"32\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
-      "\"33\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
-      "\"25\":\"" D_GPIO_FUNCTION_REL3_CTR  "\","
-      "\"26\":\"" D_GPIO_FUNCTION_REL4_CTR  "\","
-      "\"27\":\"" D_GPIO_FUNCTION_REL5_CTR  "\","
-      "\"14\":\"" D_GPIO_FUNCTION_REL6_CTR  "\","
-      "\"12\":\"" D_GPIO_FUNCTION_REL7_CTR  "\","
-      "\"13\":\"" D_GPIO_FUNCTION_REL8_CTR  "\""
+      "\"32\":\"" D_GPIO_REL_CTR "1" "\","
+      "\"33\":\"" D_GPIO_REL_CTR "2" "\","
+      "\"25\":\"" D_GPIO_REL_CTR "3" "\","
+      "\"26\":\"" D_GPIO_REL_CTR "4" "\","
+      "\"27\":\"" D_GPIO_REL5_CTR  "\","
+      "\"14\":\"" D_GPIO_REL6_CTR  "\","
+      "\"12\":\"" D_GPIO_REL7_CTR  "\","
+      "\"13\":\"" D_GPIO_REL8_CTR  "\""
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -809,16 +809,16 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\","
+      "\"23\":\"" D_GPIO_DS18X20_1_CTR  "\","
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"4\":\"" D_GPIO_FUNCTION_PIR_1_CTR "\","       // Room
+      "\"4\":\"" D_GPIO_PIR_1_CTR "\","       // Room
       #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

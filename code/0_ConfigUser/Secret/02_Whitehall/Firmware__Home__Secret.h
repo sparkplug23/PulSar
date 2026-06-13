@@ -500,7 +500,7 @@ Bathroom
      * DONT MAKE THIS DEFAULT until I can set this gpio for button here, and hence combine this "DEVICE_...GPIO_BUTTON" with above using ifdef around GPIOC
      * */
     // "\"" D_GPIOC "\":{"
-    //   "\"14\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
+    //   "\"14\":\"" D_GPIO_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
     // "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR "\""
   "}";
@@ -667,7 +667,7 @@ Bathroom
      * Temporary fix creating a new template, as adding gpio on top of existing default templates is not working
      * */
     // "\"" D_GPIOC "\":{"
-    //   "\"14\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
+    //   "\"14\":\"" D_GPIO_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
     // "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -909,19 +909,19 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"13\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
-      "\"5\":\""  D_GPIO_FUNCTION_SWT2_NP_CTR  "\","
+      "\"13\":\"" D_GPIO_SWT1_NP_CTR  "\","
+      "\"5\":\""  D_GPIO_SWT2_NP_CTR  "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"4\":\""  D_GPIO_FUNCTION_REL1_CTR  "\","
-      "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
+      "\"4\":\""  D_GPIO_REL1_CTR  "\","
+      "\"15\":\"" D_GPIO_REL_CTR "2" "\","
       #endif 
       #ifdef USE_MODULE_ENERGY_ADE7953
-      "\"16\":\""  D_GPIO_FUNCTION_ADE7953_IRQ_CTR  "\","
-      "\"14\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"12\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"16\":\""  D_GPIO_ADE7953_IRQ_CTR  "\","
+      "\"14\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"12\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif 
-      "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+      "\"0\":\"" D_GPIO_LED1_CTR "\""
       // Button1 GPIO2
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1136,12 +1136,12 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"5\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
+      "\"5\":\"" D_GPIO_SWT1_NP_CTR  "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"4\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","  // Just so it gets turned off as a known state
+      "\"4\":\"" D_GPIO_REL1_INV_CTR  "\","  // Just so it gets turned off as a known state
       #endif 
-      "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+      "\"0\":\"" D_GPIO_LED1_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1366,8 +1366,8 @@ Bathroom
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1617,9 +1617,9 @@ Bathroom
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"18\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Installed unused NPB output
-      "\"4\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Installed unused NPB output
-      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR   "\""
+      "\"18\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Installed unused NPB output
+      "\"4\":\""  D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Installed unused NPB output
+      "\"5\":\""  D_GPIO_SWT1_CTR   "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1696,8 +1696,8 @@ Bathroom
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+      "\"1\":\""  D_GPIO_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_LED2_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1777,11 +1777,11 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"25\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
+      "\"26\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"25\":\"" D_GPIO_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"5\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
+      "\"5\":\"" D_GPIO_SWT1_CTR   "\""
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1862,8 +1862,8 @@ Bathroom
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+      "\"1\":\""  D_GPIO_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_LED2_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1909,10 +1909,10 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_LSM303D)
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
       #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\""
+      "\"2\":\"" D_GPIO_DS18X20_1_CTR  "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -1949,8 +1949,8 @@ Bathroom
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+      "\"1\":\""  D_GPIO_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_LED2_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2027,17 +2027,17 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
+      "\"26\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_I2C_SDA_CTR   "\""
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
+      "\"5\":\""  D_GPIO_SWT1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
-      "\"18\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
+      "\"18\":\"" D_GPIO_DOOR_OPEN_CTR     "\","
       #endif
-      "\"19\":\"" D_GPIO_FUNCTION_LED2_INV_CTR "\","
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"19\":\"" D_GPIO_LED2_INV_CTR "\","
+      "\"2\":\"" D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2379,23 +2379,23 @@ Bathroom
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"          
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219)
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"21\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"23\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+      "\"23\":\""  D_GPIO_PIR_1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"18\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"19\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"33\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+      "\"18\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"19\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"33\":\"" D_GPIO_KEY3_INV_CTR  "\","
       #endif
-      "\"4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
-      "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\","
-      "\"2\":\"" D_GPIO_FUNCTION_LED3_CTR  "\""
+      "\"4\":\"" D_GPIO_LED1_CTR  "\","
+      "\"5\":\"" D_GPIO_LED2_CTR  "\","
+      "\"2\":\"" D_GPIO_LED3_CTR  "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2763,13 +2763,13 @@ Bathroom
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"    
-      // "\"12\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\""       // 3 pin out not being used
-      // "\"14\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\""         // unused top door
-      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      // "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\""       // 3 pin out not being used
+      // "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\""         // unused top door
+      // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -2822,17 +2822,17 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_SR04
-      "\"19\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+      "\"19\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+      "\"18\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
       #endif 
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," 
+      "\"5\":\"" D_GPIO_DS18X20_1_CTR  "\"," 
       #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2918,13 +2918,13 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"D1\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_CTR      "\","
+      "\"D6\":\"" D_GPIO_SWT1_CTR      "\","
       #endif
-      "\"D4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"D4\":\""  D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -3062,23 +3062,23 @@ Bathroom
     "\"" D_GPIOC "\":{"   
       // 3P - Top Right
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"23\":\""  D_GPIO_FUNCTION_SWT1_CTR     "\","
+      "\"23\":\""  D_GPIO_SWT1_CTR     "\","
       #endif
       // RJ45 Connector   
       #ifdef USE_MODULE_SENSORS_BME
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"26\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DHT
-      "\"18\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      "\"18\":\"" D_GPIO_DHT22_1_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\","
+      "\"5\":\"" D_GPIO_DS18X20_1_CTR  "\","
       #endif   
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"4\":\"" D_GPIO_FUNCTION_REL1_INV_CTR   "\","
+      "\"4\":\"" D_GPIO_REL1_INV_CTR   "\","
       #endif
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\"" D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -3282,9 +3282,9 @@ Bathroom
 
 
   // Actual
-  #define GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL1_INV_CTR
-  #define GPIO_NAME_ZONE1_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL2_INV_CTR
-  #define GPIO_NAME_ZONE2_BOILER_RELAY      D_GPIO_FUNCTION_REL3_INV_CTR
+  #define GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  D_GPIO_REL1_INV_CTR
+  #define GPIO_NAME_ZONE1_UPSTAIRS_RELAY    D_GPIO_REL2_INV_CTR
+  #define GPIO_NAME_ZONE2_BOILER_RELAY      D_GPIO_REL3_INV_CTR
 /**
  * 
  * 
@@ -3325,24 +3325,24 @@ Bathroom
       "\"19\":\"" GPIO_NAME_ZONE2_BOILER_RELAY      "\","
       #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"33\":\""  D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
-      "\"27\":\""  D_GPIO_FUNCTION_SWT2_INV_CTR  "\","
-      "\"26\":\""  D_GPIO_FUNCTION_SWT3_INV_CTR  "\","
+      "\"33\":\""  D_GPIO_SWT1_INV_CTR  "\","
+      "\"27\":\""  D_GPIO_SWT2_INV_CTR  "\","
+      "\"26\":\""  D_GPIO_SWT3_INV_CTR  "\","
       #endif  
       #ifdef USE_MODULE_SENSORS_DHT
-      "\"25\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // DiningRoom 
+      "\"25\":\"" D_GPIO_DHT22_1_CTR   "\"," // DiningRoom 
       #endif
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"4\":\"" D_GPIO_RGB_DATA_CTR  "\","
       #endif 
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
+      "\"23\":\"" D_GPIO_DS18X20_1_CTR "\"," // DS_DB - 3 pin
       #endif    
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -4051,11 +4051,11 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-      "\"2\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"15\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR  "\","
+      "\"2\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"15\":\"" D_GPIO_I2C_SDA_CTR  "\","
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"4\":\""  D_GPIO_FUNCTION_SWT1_CTR "\""
+      "\"4\":\""  D_GPIO_SWT1_CTR "\""
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -4228,12 +4228,12 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      "\"22\":\"" D_GPIO__RF_433MHZ_TX__CTR   "\","
       #endif  
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"23\":\"" D_GPIO__RF_433MHZ_RX__CTR   "\","
       #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"2\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -4275,11 +4275,11 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_SR04
-      "\"19\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+      "\"19\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+      "\"18\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
       #endif 
-      "\"27\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"27\":\"" D_GPIO_DS18X20_1_CTR "\","
+      "\"2\":\"" D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -4357,23 +4357,23 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
+      "\"26\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_I2C_SDA_CTR   "\""
       #endif
       // #ifdef USE_MODULE_SENSORS_PIR
-      // "\"5\":\""  D_GPIO_FUNCTION_SWT3_CTR "\","
+      // "\"5\":\""  D_GPIO_SWT3_CTR "\","
       // #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"18\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
-      "\"4\":\""  D_GPIO_FUNCTION_SWT2_CTR  "\","
+      "\"18\":\"" D_GPIO_SWT1_CTR  "\","
+      "\"4\":\""  D_GPIO_SWT2_CTR  "\","
       #endif  
       #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
-      "\"35\":\"" D_GPIO_FUNCTION_ANALOG_INPUT0_CTR "\","
+      "\"35\":\"" D_GPIO_ANALOG_INPUT0_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      "\"19\":\"" D_GPIO_DS18X20_1_CTR "\","
       #endif
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\"" D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -5083,18 +5083,18 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
       #endif
       #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
-      "\"27\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      "\"27\":\"" D_GPIO__RF_433MHZ_TX__CTR   "\","
       #endif  
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"14\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"14\":\"" D_GPIO__RF_433MHZ_RX__CTR   "\","
       #endif  
-      "\"18\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"18\":\"" D_GPIO_RGB_DATA_CTR  "\","
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"33\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
+      "\"33\":\"" D_GPIO_SWT1_CTR   "\""
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -5557,14 +5557,14 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif
-      "\"19\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"19\":\"" D_GPIO_RGB_DATA_CTR  "\","
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"5\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\","
+      "\"5\":\"" D_GPIO_SWT1_CTR   "\","
       #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""  
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""  
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -5956,50 +5956,50 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"26\":\""  D_GPIO_FUNCTION_REL1_CTR    "\","   // Immersion = Also add additonal LED with relay pin
+      "\"26\":\""  D_GPIO_REL1_CTR    "\","   // Immersion = Also add additonal LED with relay pin
       #endif
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"18\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," // Group 1 = Basic Set, use just these until device is stable
-      "\"19\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR  "\"," // Group 2 = Detailed, use these only after stress testing with 3 pins for sensors with rewrite. Read datasheet.
+      "\"18\":\"" D_GPIO_DS18X20_1_CTR  "\"," // Group 1 = Basic Set, use just these until device is stable
+      "\"19\":\"" D_GPIO_DS18X20_2_CTR  "\"," // Group 2 = Detailed, use these only after stress testing with 3 pins for sensors with rewrite. Read datasheet.
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"32\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","       // Stairs
-      "\"4\":\""  D_GPIO_FUNCTION_SWT2_CTR "\","       // Landing
-      "\"25\":\"" D_GPIO_FUNCTION_SWT3_CTR "\","       // Hotpress (negating need of button? or use non-momentary switch to enable/disable it)
+      "\"32\":\"" D_GPIO_SWT1_CTR "\","       // Stairs
+      "\"4\":\""  D_GPIO_SWT2_CTR "\","       // Landing
+      "\"25\":\"" D_GPIO_SWT3_CTR "\","       // Hotpress (negating need of button? or use non-momentary switch to enable/disable it)
       #endif 
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-        // "\"26\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Orange - Immersional Relay
-        // "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
-        // "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
-        // "\"13\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Brown - Immersion Relay (Label wrong, )
+        // "\"26\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Orange - Immersional Relay
+        // "\"27\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
+        // "\"14\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
+        // "\"13\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Brown - Immersion Relay (Label wrong, )
         #ifdef USE_RGB_OUT_LANDING_PANEL
-        "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
+        "\"14\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
         #endif
         #ifdef USE_RGB_OUT_TANK
-        "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
+        "\"27\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
         #endif      
         #ifdef ENABLE_DEVFEATURE_MULTIPLE_PIXEL_PINS
-        "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA2_CTR  "\","
-        "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA3_CTR  "\","
+        "\"14\":\"" D_GPIO_RGB_DATA2_CTR  "\","
+        "\"27\":\"" D_GPIO_RGB_DATA3_CTR  "\","
         #endif
       #endif
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"33\":\"" D_GPIO_FUNCTION_KEY1_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_CTR  "\","
+      "\"33\":\"" D_GPIO_KEY1_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_CTR  "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"12\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\"," 
-      "\"23\":\""  D_GPIO_FUNCTION_LED3_INV_CTR "\"," 
+      "\"12\":\""  D_GPIO_LED2_INV_CTR "\"," 
+      "\"23\":\""  D_GPIO_LED3_INV_CTR "\"," 
       #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""  // Also optional physical LED to be made external to box (buy one of those drill through ones!)
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""  // Also optional physical LED to be made external to box (buy one of those drill through ones!)
       // 5  // i2c oled needs to be another bus because of BME? or, what if it shared!!
       // 15
     "},"
@@ -6413,24 +6413,24 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
+      "\"26\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_I2C_SDA_CTR   "\""
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
+      "\"5\":\""  D_GPIO_SWT1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
-      "\"18\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
-      "\"19\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
+      "\"18\":\"" D_GPIO_DOOR_OPEN_CTR     "\","
+      "\"19\":\"" D_GPIO_DOOR_LOCK_CTR     "\","
       #else
-      "\"18\":\""  D_GPIO_FUNCTION_SWT2_INV_CTR "\","
-      "\"19\":\""  D_GPIO_FUNCTION_SWT3_INV_CTR "\","
+      "\"18\":\""  D_GPIO_SWT2_INV_CTR "\","
+      "\"19\":\""  D_GPIO_SWT3_INV_CTR "\","
       #endif
       #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
-      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      "\"22\":\"" D_GPIO__RF_433MHZ_TX__CTR   "\","
       #endif  
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"4\":\"" D_GPIO_RGB_DATA_CTR  "\","
+      "\"2\":\"" D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

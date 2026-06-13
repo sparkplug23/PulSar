@@ -201,28 +201,17 @@ void mSIM7000G::Pre_Init(void)
 
   ALOG_INF(PSTR(D_LOG_SIM7000G "Pre_Init"));
 
-  if(tkr_pins->PinUsed(GPIO_FUNCTION__MODEM_RX0)&&tkr_pins->PinUsed(GPIO_FUNCTION__MODEM_TX0))
-  {    
-    pins.tx_pin = tkr_pins->GetPin(GPIO_FUNCTION__MODEM_TX0);
-    pins.rx_pin = tkr_pins->GetPin(GPIO_FUNCTION__MODEM_RX0);
-    pins.uart_port = 0;
-  }
-  else 
-  if(tkr_pins->PinUsed(GPIO_FUNCTION__MODEM_RX1)&&tkr_pins->PinUsed(GPIO_FUNCTION__MODEM_TX1))
+  for (int i=0;i<3;i++)
   {
-    pins.tx_pin = tkr_pins->GetPin(GPIO_FUNCTION__MODEM_TX1);
-    pins.rx_pin = tkr_pins->GetPin(GPIO_FUNCTION__MODEM_RX1);
-    pins.uart_port = 1;
-  }
-  else 
-  if(tkr_pins->PinUsed(GPIO_FUNCTION__MODEM_RX2)&&tkr_pins->PinUsed(GPIO_FUNCTION__MODEM_TX2))
-  {
-    pins.tx_pin = tkr_pins->GetPin(GPIO_FUNCTION__MODEM_TX2);
-    pins.rx_pin = tkr_pins->GetPin(GPIO_FUNCTION__MODEM_RX2);
-    pins.uart_port = 2;
+    if(tkr_pins->PinUsed(GPIO_MODEM_RX, i)&&tkr_pins->PinUsed(GPIO_MODEM_TX, i))
+    {    
+      pins.tx_pin = tkr_pins->GetPin(GPIO_MODEM_TX, i); // this specific pattern, together with GetSerial can be used later to more easily latch the serial to a module
+      pins.rx_pin = tkr_pins->GetPin(GPIO_MODEM_RX, i);
+      pins.uart_port = 1;
+    }
   }
 
-  pins.pwrkey_pin = tkr_pins->GetPin(GPIO_FUNCTION__MODEM_POWER_KEY);
+  pins.pwrkey_pin = tkr_pins->GetPin(GPIO_MODEM_POWER_KEY);
 
 
   if ((pins.tx_pin == -1) || (pins.rx_pin == -1))

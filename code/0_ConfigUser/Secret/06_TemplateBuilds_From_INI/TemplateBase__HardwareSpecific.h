@@ -16,7 +16,7 @@
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-// #define DEVICE_TEMPLATE_SONOFF_IFAN03
+#define DEVICE_TEMPLATE_SONOFF_IFAN03
 // #define DEVICE_TEMPLATE_SONOFF_BASIC_R2
 // #define DEVICE_TEMPLATE_SHELLY_DIMMER_V2
 // #define DEVICE_TEMPLATE_SONOFF_4CHPRO_V3
@@ -400,12 +400,12 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"2\":\""  D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"2\":\""  D_GPIO_REL1_INV_CTR  "\","
       #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"0\":\""  D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
+      "\"0\":\""  D_GPIO_SWT1_INV_CTR  "\","
       #endif
-      "\"4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      "\"4\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

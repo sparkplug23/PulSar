@@ -635,10 +635,10 @@
 //   int8_t mosi = -1;
 //   int8_t miso = -1;
 
-//   chip_select = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CSO);
-//   clock = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_CLK);
-//   mosi = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MOSI);
-//   miso = tkr_pins->GetPin(GPIO_FUNCTION_SDCARD_VSPI_MISO);
+//   chip_select = tkr_pins->GetPin(GPIO_SDCARD_VSPI_CSO);
+//   clock = tkr_pins->GetPin(GPIO_SDCARD_VSPI_CLK);
+//   mosi = tkr_pins->GetPin(GPIO_SDCARD_VSPI_MOSI);
+//   miso = tkr_pins->GetPin(GPIO_SDCARD_VSPI_MISO);
   
 //   uint8_t sd_hardware_type = 0;
 

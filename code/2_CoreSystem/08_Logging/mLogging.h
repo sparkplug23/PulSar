@@ -226,6 +226,11 @@ enum LoggingLevels {
 #endif
 
 
+
+// Used when we need to wait at a point considered safe, but need to allow other threads to potentially cause a crash, proving the code after this test point is not the cause.
+#define DEBUG_WAIT_POINT_MS(ms) SERIAL_DEBUG.printf("[WAIT DEBUG] %s:%d - wait %lu ms START\n", __FILE__, __LINE__, (unsigned long)(ms)); delay(ms); SERIAL_DEBUG.printf("[WAIT DEBUG] %s:%d - %lu ms Continue\n", __FILE__, __LINE__, (unsigned long)(ms));
+
+
 #if defined(ENABLE_WAIT_WITH_PRINT_TICK)
   #define WAIT_WITH_PRINT_TICK(ms) do { \
       SERIAL_DEBUG.printf("[WAIT DEBUG] %s:%d - wait %lu ms START\n", __FILE__, __LINE__, (unsigned long)(ms)); \

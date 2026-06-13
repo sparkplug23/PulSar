@@ -14,7 +14,8 @@
   
 #include "jsmn.h"
 
-#include "gpio_list_ids.h"
+#include "gpio_enums.h"
+#include "gpio_bitpacked.h"
 
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h" // patch 3apr26
 
@@ -465,24 +466,24 @@ class mPins :
   uint32_t ModuleTemplate(uint32_t module);
 
   int8_t GetRealPinNumberFromName(const char* c);
-  int16_t GetGPIOFunctionIDbyName(const char* c);
+  int32_t GetGPIOFunctionIDbyName(const char* c);
 
   void ModuleSettings_ShowActiveTemplate();
   
   int16_t     GetModuleIDbyName(const char* c);
   const char* GetModuleNameByID(uint8_t id);
-
-  void GpioInitPwm(void);
   
-  const char* GetGPIOFunctionNamebyID(uint16_t id, char* buffer, uint8_t buflen);
+  const char* GetGPIOFunctionNamebyID(uint16_t id, char* B, uint8_t L);
 
-  bool ValidUserGPIOFunction(uint8_t* pin_array, uint8_t index);
+  
   bool ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index);
 
   int16_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0);
   int16_t IRAM_ATTR GetPin(uint32_t gpio, uint32_t index = 0){ return Pin(gpio, index); }
   bool PinUsed(uint32_t gpio, uint32_t index = 0);
-  void SetPin(uint32_t lpin, uint32_t gpio);
+
+  // Stores a packed selected GPIO function ID, i.e. PGPIO(base_id) + index.
+  void SetPin_GPIOFunction(uint32_t real_pin, uint16_t packed_gpio);
   bool CheckPhysicalPinIsFlashPin(uint32_t pin);
   int8_t ConvertIndexPinToRealPin(uint8_t real_pin);
 

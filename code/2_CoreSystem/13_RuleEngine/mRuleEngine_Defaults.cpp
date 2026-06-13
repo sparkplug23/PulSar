@@ -207,7 +207,7 @@ void mRuleEngine::DefaultRule_Sonoff_Basic_R2()
 void mRuleEngine::DefaultRule_Sonoff_iFan03()
 {
 
-    ALOG_DBM( PSTR("DefaultRule_Sonoff_iFan03"));
+    ALOG_INF( PSTR("DefaultRule_Sonoff_iFan03"));
     
     EventPackage* p_event = nullptr;
 
