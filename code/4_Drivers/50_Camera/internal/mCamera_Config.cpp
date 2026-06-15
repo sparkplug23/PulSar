@@ -31,7 +31,7 @@ const int nativeIntervals20ms[14] = {
 
 void mCamera::LoadDefaultConfig()
 {
-  ALOG_INF(PSTR(D_LOG_CAMERA "Loading default config"));
+  ALOG_DBG(PSTR(D_LOG_CAMERA "Loading default config"));
 
   // Actually, cam is enabled at boot, just stream blocked. 
   // so this may not be required.
@@ -50,13 +50,13 @@ void mCamera::Driver_SetInterruptState(uint32_t state) {
   if (state) {
     // Re-enable interrupts
     cam_start();
-    ALOG_INF(PSTR(D_LOG_CAMERA "cam_start()"));
+    ALOG_DBG(PSTR(D_LOG_CAMERA "cam_start()"));
     rt.disable_cam = 0;
   } else {
     // Stop interrupts
     rt.disable_cam = 1;
     cam_stop();
-    ALOG_INF(PSTR(D_LOG_CAMERA "cam_stop()"));
+    ALOG_DBG(PSTR(D_LOG_CAMERA "cam_stop()"));
   }
 }
 
@@ -107,7 +107,7 @@ bool mCamera::Pins_AreConfigured(void)
 //    }
   }
 
-  ALOG_INF(PSTR(D_LOG_CAMERA "i2c_enabled: %d"), tkr_set->runtime.i2c_enabled/*[1]*/);
+  ALOG_DBG(PSTR(D_LOG_CAMERA "i2c_enabled: %d"), tkr_set->runtime.i2c_enabled/*[1]*/);
 
   if (
     !tkr_pins->PinUsed(GPIO_WEBCAM_XCLK) || 
@@ -155,7 +155,7 @@ void mCamera::Sensor_ApplyFeatureMode(int32_t value) {
       wc_s->set_reg(wc_s, 0x103, 0xff, 0xcf);   // COM1: Allow 7 dummy frames
       break;
   }
-  ALOG_INF(PSTR(D_LOG_CAMERA "Feature: %d"), value);
+  ALOG_DBG(PSTR(D_LOG_CAMERA "Feature: %d"), value);
 }
 
 void mCamera::Sensor_ApplyStoredSettings() {
@@ -176,6 +176,8 @@ void mCamera::Sensor_ApplyStoredSettings() {
   wc_s->set_vflip(wc_s, tkr_iDrivers->webcam_config.flip);
   wc_s->set_hmirror(wc_s, tkr_iDrivers->webcam_config.mirror);
 
+  wc_s->set_framesize(wc_s, (framesize_t)tkr_iDrivers->webcam_config.resolution);
+  
   wc_s->set_brightness(wc_s, tkr_iDrivers->webcam_config.brightness - 2);
   wc_s->set_saturation(wc_s, tkr_iDrivers->webcam_config.saturation - 2);
   wc_s->set_contrast(wc_s, tkr_iDrivers->webcam_config.contrast - 2);
@@ -203,7 +205,7 @@ void mCamera::Sensor_ApplyStoredSettings() {
 
   Sensor_ApplyFeatureMode(tkr_iDrivers->webcam_config.feature);
 
-  ALOG_INF(PSTR(D_LOG_CAMERA "Settings updated"));
+  ALOG_DBG(PSTR(D_LOG_CAMERA "Settings updated"));
 }
 
 void mCamera::Defaults_Apply(uint32_t upgrade) {
@@ -215,6 +217,9 @@ void mCamera::Defaults_Apply(uint32_t upgrade) {
     tkr_iDrivers->webcam_config.brightness = 2; // = 0
     tkr_iDrivers->webcam_config.contrast = 2;   // = 0
   }
+
+  
+  tkr_iDrivers->webcam_config.resolution = 12;
 
   tkr_iDrivers->webcam_config2.special_effect = 0;
   tkr_iDrivers->webcam_config.colorbar = 0;
@@ -244,7 +249,7 @@ void mCamera::Defaults_Apply(uint32_t upgrade) {
     Motion_SetDefaults();
   #endif
 
-  ALOG_INF(PSTR(D_LOG_CAMERA "Defaults set"));
+  ALOG_DBG(PSTR(D_LOG_CAMERA "Defaults set"));
   
   if (rt.up) { Sensor_ApplyStoredSettings(); }
 }
@@ -258,7 +263,7 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
 
   mSupport::AutoMutex localmutex(&WebcamMutex, "WcSetup", 200);
 
-  ALOG_INF(PSTR(D_LOG_CAMERA "Setup"));
+  ALOG_DBG(PSTR(D_LOG_CAMERA "Setup"));
   
   // if 15, make it -1, so disableing
   if (frame_size >= FRAMESIZE_FHD) { frame_size = -1; }
@@ -266,7 +271,7 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
   if (frame_size < 0) {
     if (rt.up){    
       esp_camera_deinit();
-      ALOG_INF(PSTR(D_LOG_CAMERA "Deinit frame_size %d"), frame_size);
+      ALOG_DBG(PSTR(D_LOG_CAMERA "Deinit frame_size %d"), frame_size);
       rt.up = 0;
     }
     rt.lastCamError = 0x1;
@@ -276,7 +281,7 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
   if (rt.up) {
     esp_camera_deinit();
     
-    ALOG_INF(PSTR(D_LOG_CAMERA "Deinit"));
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Deinit"));
     
     //return rt.up;
   }
@@ -288,7 +293,7 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
 
   memset(&config, 0, sizeof(config));
 
-  ALOG_INF(PSTR("Pins_AreConfigured() = %d"), Pins_AreConfigured());
+  ALOG_DBG(PSTR("Pins_AreConfigured() = %d"), Pins_AreConfigured());
 
 
   if (Pins_AreConfigured()) {
@@ -317,7 +322,7 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
     config.pin_pwdn = tkr_pins->Pin(GPIO_WEBCAM_PWDN);       // PWDN_GPIO_NUM;
     config.pin_reset = tkr_pins->Pin(GPIO_WEBCAM_RESET);    // RESET_GPIO_NUM;
     
-    ALOG_INF(PSTR(D_LOG_CAMERA "Template pin config"));
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Template pin config"));
     
   } else if (Y2_GPIO_NUM != -1) {
     // Modell is set in camera_pins.h
@@ -338,18 +343,18 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
     config.pin_pwdn = PWDN_GPIO_NUM;
     config.pin_reset = RESET_GPIO_NUM;
     
-    ALOG_INF(PSTR(D_LOG_CAMERA "Compile flag pin config"));
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Compile flag pin config"));
     
   } else {
     // no valid config found -> abort
-    ALOG_INF(PSTR(D_LOG_CAMERA "No pin config"));
+    ALOG_DBG(PSTR(D_LOG_CAMERA "No pin config"));
     return 0;
   }
 
   // always power cycle the camera
   // this adds 400ms to start delay, but is worth it to solve random 0x105
   if (config.pin_pwdn >= 0){
-    ALOG_INF(PSTR(D_LOG_CAMERA "pwdn pin %d"), config.pin_pwdn);
+    ALOG_DBG(PSTR(D_LOG_CAMERA "pwdn pin %d"), config.pin_pwdn);
     // this is only done in driver first init
     // so first run, we should configure as they do.
     gpio_config_t conf = { 0 };
@@ -374,7 +379,7 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
     }
   }
 
-  ALOG_INF("CAM: get ledc channel");
+  ALOG_DBG("CAM: get ledc channel");
   
 
   #ifdef ENABLE_DEVFEATURE_ANALOG_WRITE_EMULATION_VERSION2
@@ -413,7 +418,7 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   //                      for larger pre-allocated frame buffer.
 
-  ALOG_INF("CAM: get psram");
+  ALOG_DBG("CAM: get psram");
 
   AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d", SupportESP32::FoundPSRAM(), SupportESP32::UsePSRAM());
   AddLog(LOG_LEVEL_INFO, "Heap free: %d, PSRAM free: %d", ESP.getFreeHeap(), ESP.getFreePsram());
@@ -423,18 +428,18 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
     config.frame_size = FRAMESIZE_UXGA;
     config.jpeg_quality = 10;
     config.fb_count = 2;
-    ALOG_INF(PSTR(D_LOG_CAMERA "PSRAM found"));
+    ALOG_DBG(PSTR(D_LOG_CAMERA "PSRAM found"));
   } else {
     config.frame_size = FRAMESIZE_VGA;
     config.jpeg_quality = 12;
     config.fb_count = 1;
     config.fb_location = CAMERA_FB_IN_DRAM;
-    ALOG_INF(PSTR(D_LOG_CAMERA "PSRAM not found"));
+    ALOG_DBG(PSTR(D_LOG_CAMERA "PSRAM not found"));
   }
 
-  // ALOG_INF(PSTR(D_LOG_CAMERA "Waiting for stable test %d"), millis());
+  // ALOG_DBG(PSTR(D_LOG_CAMERA "Waiting for stable test %d"), millis());
   // delay(4000);
-  // ALOG_INF(PSTR(D_LOG_CAMERA "Waiting for stable test... continue %d"), millis());
+  // ALOG_DBG(PSTR(D_LOG_CAMERA "Waiting for stable test... continue %d"), millis());
 
   DEBUG_LINE_HERE3;
 
@@ -486,10 +491,10 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
   if(wc_fb)
   {
     rt.camera_init = true;
-    ALOG_INF(PSTR(D_LOG_CAMERA "Camera init success, frame size %d, fb size %d"), wc_fb->width, wc_fb->len);
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Camera init success, frame size %d, fb size %d"), wc_fb->width, wc_fb->len);
   }else
   {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Camera init FAILED"));//, frame size %d, fb size %d"), wc_fb->width, wc_fb->len);
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Camera init FAILED"));//, frame size %d, fb size %d"), wc_fb->width, wc_fb->len);
 
     return 0;
 
@@ -593,17 +598,17 @@ int32_t mCamera::Options_Set(uint32_t sel, int32_t value) {
 
 uint32_t mCamera::Stream_SetEnabled(uint32_t flag) 
 {
-  ALOG_INF(PSTR("=========================CAM: SetStreamserver %d"), flag);
+  ALOG_DBG(PSTR("=========================CAM: SetStreamserver %d"), flag);
   if (tkr_set->runtime.global_state.network_down) 
   {
-    ALOG_INF(PSTR("=========================CAM: Network down, cannot set stream server"));
+    ALOG_DBG(PSTR("=========================CAM: Network down, cannot set stream server"));
     Stream_End();
     return 0; 
   }
   AddLog(LOG_LEVEL_INFO, PSTR("SetStreamserver %d"), flag);
   if (flag) {
     if (!rt.CamServer) {
-      ALOG_INF(PSTR("=========================CAM: if (!rt.CamServer) {"));
+      ALOG_DBG(PSTR("=========================CAM: if (!rt.CamServer) {"));
             
       mSupport::AutoMutex localmutex(&WebcamMutex, "HandleWebcamMjpeg", 20000);
       rt.CamServer = new WebServer(81);
@@ -654,22 +659,22 @@ uint32_t mCamera::Stream_SetEnabled(uint32_t flag)
 
       #endif  
 
-      ALOG_INF(PSTR(D_LOG_CAMERA "Strm init"));
+      ALOG_DBG(PSTR(D_LOG_CAMERA "Strm init"));
       rt.CamServer->begin();
     }else{
       
-      ALOG_INF(PSTR("=========================CAM: else (!rt.CamServer) {"));
+      ALOG_DBG(PSTR("=========================CAM: else (!rt.CamServer) {"));
     }
   } else {
-    ALOG_INF(PSTR("=========================CAM: } else {"));
+    ALOG_DBG(PSTR("=========================CAM: } else {"));
     if (rt.CamServer) {
-      ALOG_INF(PSTR("=========================CAM: } else {if (rt.CamServer) {"));
+      ALOG_DBG(PSTR("=========================CAM: } else {if (rt.CamServer) {"));
       mSupport::AutoMutex localmutex(&WebcamMutex, "HandleWebcamMjpeg", 20000);
       Stream_End();
       rt.CamServer->stop();
       delete rt.CamServer;
       rt.CamServer = NULL;
-      ALOG_INF(PSTR(D_LOG_CAMERA "Strm exit"));
+      ALOG_DBG(PSTR(D_LOG_CAMERA "Strm exit"));
     }
   }
   return 0;
@@ -687,7 +692,7 @@ void mCamera::Defaults_LoadOrCreate(void) {
   // previous webcam driver had only a small subset of possible config vars
   // in this case we have to only set the new variables to default values
   if(!tkr_iDrivers->webcam_config2.upgraded) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Upg settings"));
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Upg settings"));
     Defaults_Apply(1);
     tkr_iDrivers->webcam_config2.upgraded = 1;
   }
@@ -697,7 +702,7 @@ void mCamera::Defaults_LoadOrCreate(void) {
 void mCamera::Pre_Init(void)
 {
   
-  ALOG_HGL( PSTR("mCamera::Pre_Init") );
+  ALOG_DBG( PSTR("mCamera::Pre_Init") );
 
   memset(&rt, 0, sizeof(rt));
 
@@ -706,7 +711,7 @@ void mCamera::Pre_Init(void)
   Motion_SetDefaults();
   #endif
   Defaults_LoadOrCreate();
-  ALOG_INF(PSTR("\n\r\t\t\tCAM: Init webcam done"));
+  ALOG_DBG(PSTR("\n\r\t\t\tCAM: Init webcam done"));
 
   module_state.mode = ModuleStatus::Initialising;
 
@@ -1088,9 +1093,9 @@ void mCamera::parse_JSONCommand(JsonParserObject obj)
   {
     psramInit();               // initialize PSRAM
         
-    ALOG_INF(PSTR("psramFound: %d\n"), psramFound());
-    ALOG_INF(PSTR("esp_spiram_is_initialized: %d\n"), esp_spiram_is_initialized());
-    ALOG_INF(PSTR("Free PSRAM: %u\n"), ESP.getFreePsram());
+    ALOG_DBG(PSTR("psramFound: %d\n"), psramFound());
+    ALOG_DBG(PSTR("esp_spiram_is_initialized: %d\n"), esp_spiram_is_initialized());
+    ALOG_DBG(PSTR("Free PSRAM: %u\n"), ESP.getFreePsram());
   }
 
   // Only allow commands if camera is initialised, else we could have mutex problems if we try to change settings mid-initialisation
@@ -1108,175 +1113,175 @@ void mCamera::parse_JSONCommand(JsonParserObject obj)
 
   if(jtok = jobj["Resolution"])
   {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Resolution %d"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Resolution %d"), jtok.getInt());
     CommandSet_Resolution(jtok.getInt());
   }
 
   if(jtok = jobj["Mirror"])
   {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Mirror %d"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Mirror %d"), jtok.getInt());
     CommandSet_Mirror(jtok.getInt());
   }
 
   if(jtok = jobj["Flip"])
   {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Flip %d"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Flip %d"), jtok.getInt());
     CommandSet_Flip(jtok.getBool());
   }
 
   if(jtok = jobj["Saturation"])
   {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Saturation %d [±2]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Saturation %d [±2]"), jtok.getInt());
     CommandSet_Saturation(jtok.getInt());
   }
 
   if (jtok = jobj["Brightness"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Brightness %d [±2]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Brightness %d [±2]"), jtok.getInt());
     CommandSet_Brightness(jtok.getInt());
   }
 
   if (jtok = jobj["Contrast"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Contrast %d [±2]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Contrast %d [±2]"), jtok.getInt());
     CommandSet_Contrast(jtok.getInt());
   }
 
   if (jtok = jobj["SpecialEffect"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "SpecialEffect %d [0-6]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "SpecialEffect %d [0-6]"), jtok.getInt());
     CommandSet_SpecialEffect(jtok.getInt());
   }
 
   if (jtok = jobj["AWB"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "AWB %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "AWB %d [0/1]"), jtok.getInt());
     CommandSet_AWB(jtok.getBool());
   }
 
   if (jtok = jobj["WBMode"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "WBMode %d [0-4]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "WBMode %d [0-4]"), jtok.getInt());
     CommandSet_WBMode(jtok.getInt());
   }
 
   if (jtok = jobj["AWBGain"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "AWBGain %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "AWBGain %d [0/1]"), jtok.getInt());
     CommandSet_AWBGain(jtok.getBool());
   }
 
   if (jtok = jobj["AEC"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "AEC %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "AEC %d [0/1]"), jtok.getInt());
     CommandSet_AEC(jtok.getBool());
   }
 
   if (jtok = jobj["AECValue"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "AECValue %d [0-1200]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "AECValue %d [0-1200]"), jtok.getInt());
     CommandSet_AECValue(jtok.getInt());
   }
 
   if (jtok = jobj["AELevel"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "AELevel %d [±2]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "AELevel %d [±2]"), jtok.getInt());
     CommandSet_AELevel(jtok.getInt());
   }
 
   if (jtok = jobj["AEC2"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "AEC2 %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "AEC2 %d [0/1]"), jtok.getInt());
     CommandSet_AEC2(jtok.getBool());
   }
 
   if (jtok = jobj["AGC"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "AGC %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "AGC %d [0/1]"), jtok.getInt());
     CommandSet_AGC(jtok.getBool());
   }
 
   if (jtok = jobj["AGCGain"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "AGCGain %d [0-30]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "AGCGain %d [0-30]"), jtok.getInt());
     CommandSet_AGCGain(jtok.getInt());
   }
 
   if (jtok = jobj["GainCeiling"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "GainCeiling %d [0-6]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "GainCeiling %d [0-6]"), jtok.getInt());
     CommandSet_GainCeiling(jtok.getInt());
   }
 
   if (jtok = jobj["GammaCorrect"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "GammaCorrect %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "GammaCorrect %d [0/1]"), jtok.getInt());
     CommandSet_GammaCorrect(jtok.getBool());
   }
 
   if (jtok = jobj["LensCorrect"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "LensCorrect %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "LensCorrect %d [0/1]"), jtok.getInt());
     CommandSet_LensCorrect(jtok.getBool());
   }
 
   if (jtok = jobj["WPC"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "WPC %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "WPC %d [0/1]"), jtok.getInt());
     CommandSet_WPC(jtok.getBool());
   }
 
   if (jtok = jobj["DCW"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "DCW %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "DCW %d [0/1]"), jtok.getInt());
     CommandSet_DCW(jtok.getBool());
   }
 
   if (jtok = jobj["BPC"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "BPC %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "BPC %d [0/1]"), jtok.getInt());
     CommandSet_BPC(jtok.getBool());
   }
 
   if (jtok = jobj["Colorbar"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Colorbar %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Colorbar %d [0/1]"), jtok.getInt());
     CommandSet_Colorbar(jtok.getBool());
   }
 
   if (jtok = jobj["Feature"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Feature %d [0–2]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Feature %d [0–2]"), jtok.getInt());
     CommandSet_Feature(jtok.getInt());
   }
 
   if (jtok = jobj["Auth"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Auth %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Auth %d [0/1]"), jtok.getInt());
     CommandSet_Auth(jtok.getBool());
   }
 
   if (jtok = jobj["Clock"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Clock %d [10–200]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Clock %d [10–200]"), jtok.getInt());
     CommandSet_Clock(jtok.getInt());
   }
 
   if (jtok = jobj["CamStartStop"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "CamStartStop %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "CamStartStop %d [0/1]"), jtok.getInt());
     CommandSet_CamStartStop(jtok.getBool());
   }
   
   if (jtok = jobj[D_CMND_WC_GETFRAME]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Frame_RequestCaptureToStore %d [1-4]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Frame_RequestCaptureToStore %d [1-4]"), jtok.getInt());
     CommandSet_GetFrame(jtok.getInt());
   }
 
   if (jtok = jobj[D_CMND_WC_GETPICSTORE]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "GetPicStore %d [1-4]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "GetPicStore %d [1-4]"), jtok.getInt());
     CommandSet_GetPicStore(jtok.getInt());
   }
 
   if (jtok = jobj[D_CMND_WC_POWEROFF]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA D_CMND_WC_POWEROFF " %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA D_CMND_WC_POWEROFF " %d [0/1]"), jtok.getInt());
     CommandSet_PowerOff();
   }
 
   if (jtok = jobj["StartTask"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "StartTask" " %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "StartTask" " %d [0/1]"), jtok.getInt());
     CommandSet_TaskEnable(true);
   }
 
   if (jtok = jobj["StopTask"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "StopTask" " %d [0/1]"), jtok.getInt());
+    ALOG_DBG(PSTR(D_LOG_CAMERA "StopTask" " %d [0/1]"), jtok.getInt());
     CommandSet_TaskEnable(false);
   }
 
   if (jtok = jobj["Init"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "Init"));
+    ALOG_DBG(PSTR(D_LOG_CAMERA "Init"));
     CommandSet_Init();
   }
 
   if (jtok = jobj["SetDefaults"]) {
-    ALOG_INF(PSTR(D_LOG_CAMERA "SetDefaults"));
+    ALOG_DBG(PSTR(D_LOG_CAMERA "SetDefaults"));
     CommandSet_SetDefaults();
   }
 

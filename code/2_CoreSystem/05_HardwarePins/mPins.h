@@ -118,18 +118,7 @@ class mPins :
      ************************************************************************************************/
             
 
-    #ifndef ENABLE_DEVFEATURE_GPIO_PIN_METHOD_MAY_2025
-    int8_t GetPinByIndex(uint8_t index);
-    int8_t GetPinIndexedLocation(uint8_t pin_number);
-    bool SetPinFunction(int8_t gpio_pin_number, int8_t pin_function);
-    #endif
-
     bool flag_serial_set_tx_set = false;
-
-    /**
-     * Module that is attached to the pin, indexed by ascending order of pins available on chip
-     */
-    uint16_t pin_attached_gpio_functions[MAX_USER_PINS] = {0};  
     // uint16_t pin_attached_gpio_functions[MAX_USER_PINS];// = {0};  
     
     #define GPIO_FLAG_USED         2  // Currently two flags used
@@ -460,41 +449,37 @@ class mPins :
     #endif // standard esp32
   #endif //end esp32 all
 
-  int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
-
-
   uint32_t ModuleTemplate(uint32_t module);
 
-  int8_t GetRealPinNumberFromName(const char* c);
+  int8_t  GetRealPinNumberFromName(const char* c);
   int32_t GetGPIOFunctionIDbyName(const char* c);
 
   void ModuleSettings_ShowActiveTemplate();
-  
+
   int16_t     GetModuleIDbyName(const char* c);
   const char* GetModuleNameByID(uint8_t id);
-  
+
   const char* GetGPIOFunctionNamebyID(uint16_t id, char* B, uint8_t L);
 
-  
   bool ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index);
 
   int16_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0);
-  int16_t IRAM_ATTR GetPin(uint32_t gpio, uint32_t index = 0){ return Pin(gpio, index); }
+  int16_t IRAM_ATTR GetPin(uint32_t gpio, uint32_t index = 0) { return Pin(gpio, index); }
   bool PinUsed(uint32_t gpio, uint32_t index = 0);
 
   // Stores a packed selected GPIO function ID, i.e. PGPIO(base_id) + index.
   void SetPin_GPIOFunction(uint32_t real_pin, uint16_t packed_gpio);
+
   bool CheckPhysicalPinIsFlashPin(uint32_t pin);
-  int8_t ConvertIndexPinToRealPin(uint8_t real_pin);
 
   void DigitalWrite(uint32_t gpio_pin, uint32_t state);
   void DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t state);
   bool DigitalRead(uint32_t gpio_pin, uint32_t index = 0);
-  
+
   uint8_t ModuleNr();
   bool ValidTemplateModule(uint8_t index);
   bool ValidModule(uint8_t index);
-  
+
   const char* AnyModuleName(uint8_t index);
   const char* ModuleName();
 
@@ -503,14 +488,72 @@ class mPins :
   gpio_flag ModuleFlag();
   void ModuleDefault(uint8_t module);
   void SetModuleType();
-  uint16_t ValidPin_AdjustGPIO(uint8_t pin, uint16_t gpio);
-  bool ValidGPIO(uint8_t pin, uint16_t gpio);
+
+  uint16_t ValidPin_AdjustGPIO(uint8_t real_pin, uint16_t gpio);
+  bool ValidGPIO(uint8_t real_pin, uint16_t gpio);
   bool JsonTemplate(const char* dataBuf);
 
   void ModuleTemplate__ParseCJSONBuffer(char* buffer);
+  
+  int8_t TemplateIndexToRealPin(uint8_t template_index);
+
+
+  // int8_t ConvertRealPinToIndexPin(uint8_t real_pin);
+
+
+  // uint32_t ModuleTemplate(uint32_t module);
+
+  // int8_t GetRealPinNumberFromName(const char* c);
+  // int32_t GetGPIOFunctionIDbyName(const char* c);
+
+  // void ModuleSettings_ShowActiveTemplate();
+  
+  // int16_t     GetModuleIDbyName(const char* c);
+  // const char* GetModuleNameByID(uint8_t id);
+  
+  // const char* GetGPIOFunctionNamebyID(uint16_t id, char* B, uint8_t L);
+
+  
+  // bool ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index);
+
+  // int16_t IRAM_ATTR Pin(uint32_t gpio, uint32_t index = 0);
+  // int16_t IRAM_ATTR GetPin(uint32_t gpio, uint32_t index = 0){ return Pin(gpio, index); }
+  // bool PinUsed(uint32_t gpio, uint32_t index = 0);
+
+  // // Stores a packed selected GPIO function ID, i.e. PGPIO(base_id) + index.
+  // void SetPin_GPIOFunction(uint32_t real_pin, uint16_t packed_gpio);
+  // bool CheckPhysicalPinIsFlashPin(uint32_t pin);
+  // int8_t ConvertIndexPinToRealPin(uint8_t real_pin);
+
+  // void DigitalWrite(uint32_t gpio_pin, uint32_t state);
+  // void DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t state);
+  // bool DigitalRead(uint32_t gpio_pin, uint32_t index = 0);
+  
+  // uint8_t ModuleNr();
+  // bool ValidTemplateModule(uint8_t index);
+  // bool ValidModule(uint8_t index);
+  
+  // const char* AnyModuleName(uint8_t index);
+  // const char* ModuleName();
+
+  // void GpioInit(void);
+  // void TemplateGPIOs(myio *gp);
+  // gpio_flag ModuleFlag();
+  // void ModuleDefault(uint8_t module);
+  // void SetModuleType();
+  // uint16_t ValidPin_AdjustGPIO(uint8_t pin, uint16_t gpio);
+  // bool ValidGPIO(uint8_t pin, uint16_t gpio);
+  // bool JsonTemplate(const char* dataBuf);
+
+  // void ModuleTemplate__ParseCJSONBuffer(char* buffer);
 
 
 
+
+    /**
+     * Module that is attached to the pin, indexed by ascending order of pins available on chip
+     */
+    uint16_t pin_attached_gpio_functions[MAX_USER_PINS] = {0};  
 
 /************************************************************************************************
  * SECTION: Pin Allocation / Physical Pin Model
@@ -551,7 +594,6 @@ class mPins :
 #define PIN_FUNCTION_NONE_ID            0
 #endif
 
-
 struct PinPhysicalFlags
 {
   union
@@ -560,29 +602,30 @@ struct PinPhysicalFlags
 
     struct
     {
-      uint16_t valid             : 1;  // GPIO number exists for this MCU target
-      uint16_t user_configurable : 1;  // Present in gpio_pin_by_index[MAX_USER_PINS]
-      uint16_t input_capable     : 1;  // GPIO can be used as input
-      uint16_t output_capable    : 1;  // GPIO can be used as output
+
+      uint16_t input_only        : 1;  // Hardware input-only, e.g. ESP32 GPIO34-39
+      uint16_t output_only       : 1;  // Hardware output-only/unsafe-to-read, rare
+      uint16_t input_capable     : 1;  // Can be used as digital input
+      uint16_t output_capable    : 1;  // Can be used as digital output
 
       uint16_t pullup_capable    : 1;  // Internal pull-up supported/allowed
       uint16_t pulldown_capable  : 1;  // Internal pull-down supported/allowed
+
       uint16_t analog_capable    : 1;  // ADC/analog capable
-      uint16_t pwm_capable       : 1;  // PWM/LEDC/RMT style output possible
-
+      uint16_t pwm_capable       : 1;  // PWM/LEDC/RMT/software PWM capable
       uint16_t touch_capable     : 1;  // Touch capable where applicable
-      uint16_t boot_sensitive    : 1;  // Boot strap / boot-mode sensitive
-      uint16_t flash_reserved    : 1;  // Flash/PSRAM reserved pin
-      uint16_t usb_reserved      : 1;  // USB/JTAG/serial-board reserved pin
 
-      uint16_t board_reserved    : 1;  // Reserved by selected module/board
-      uint16_t input_only        : 1;  // Input only
-      uint16_t output_only       : 1;  // Output only
-      uint16_t hidden            : 1;  // Hide unless debug/all mode
+      uint16_t user_configurable : 1;  // Exposed to template/user GPIO configuration
+      uint16_t boot_sensitive    : 1;  // Strap/boot-mode sensitive pin
+      uint16_t flash_reserved    : 1;  // Flash/PSRAM/SPI flash related pin
+      uint16_t usb_reserved      : 1;  // USB/JTAG/native debug related pin
+
+      uint16_t reserved13        : 1;
+      uint16_t reserved14        : 1;
+      uint16_t reserved15        : 1;
     };
   };
 };
-
 
 struct PinAllocationFlags
 {
@@ -592,121 +635,104 @@ struct PinAllocationFlags
 
     struct
     {
-      uint16_t allocated         : 1;  // Pin is currently allocated
-      uint16_t locked            : 1;  // Allocation cannot be changed without override
-      uint16_t reserved_by_board : 1;  // Board/template reserved this pin
-      uint16_t conflict          : 1;  // Incompatible users requested this pin
+      uint16_t allocated          : 1;  // Pin currently has assigned function/owner
+      uint16_t locked             : 1;  // Cannot be changed without override
+      uint16_t unavailable        : 1;  // Intentionally unavailable for allocation/use
 
-      uint16_t grouped           : 1;  // Part of a multi-pin function, I2C/SPI/UART/RGB/etc
-      uint16_t shared            : 1;  // Multiple users allowed, usually bus-style
-      uint16_t required          : 1;  // Required for owning module to work
-      uint16_t runtime_assigned  : 1;  // Came from runtime config rather than template/default
+      uint16_t grouped            : 1;  // Part of grouped function, I2C/SPI/UART/camera/RGB
+      uint16_t shared             : 1;  // Bus-style shared ownership
 
-      uint16_t from_template     : 1;  // Came from module/template config
-      uint16_t from_dummy        : 1;  // Temporary/debug allocation
-      uint16_t active_high       : 1;  // Logical active-high output/input
-      uint16_t inverted          : 1;  // Logical inverted behaviour
+      uint16_t inverted           : 1;  // Logical inverted behaviour
+      uint16_t sensitive_to_probe : 1;  // Do not digitalRead/probe
 
-      uint16_t sensitive_to_probe : 1; // Do not digitalRead/probe this pin as it can conflict with normal operation (eg camera with pinned FreeRTOS tasks)
-      uint16_t reserved13        : 1;
-      uint16_t reserved14        : 1;
-      uint16_t disabled          : 1;  // Intentionally disabled/unavailable
+      uint16_t reserved7          : 1;
+      uint16_t reserved8          : 1;
+      uint16_t reserved9          : 1;
+      uint16_t reserved10         : 1;
+      uint16_t reserved11         : 1;
+      uint16_t reserved12         : 1;
+      uint16_t reserved13         : 1;
+      uint16_t reserved14         : 1;
+      uint16_t reserved15         : 1;
     };
   };
 };
 
 
-struct PinPhysicalInfo
-{
-  uint8_t physical_pin = 255;
-  PinPhysicalFlags flags;
-};
-
-
-struct PinAllocation
-{
-  int8_t physical_pin = -1;
-
-  uint16_t function_id = PIN_FUNCTION_NONE_ID;
-  uint16_t owner_id = PIN_OWNER_NONE_ID;
-
-  uint8_t direction = PIN_DIRECTION_UNKNOWN_ID;
-  uint8_t share_mode = PIN_SHARE_UNKNOWN_ID;
-  uint8_t user_count = 0;
-
-  PinAllocationFlags flags;
-};
-
 /************************************************************************************************
- * SECTION: Pin Allocation Runtime Data
+ * SECTION: Pin Runtime Data
  ************************************************************************************************/
 
-PinPhysicalInfo pininfo[MAX_GPIO_PIN];
-PinAllocation   pinalloc[MAX_USER_PINS];
-int8_t          pin_index_by_physical[MAX_GPIO_PIN];
-
+struct PinTable
+{
+  PinPhysicalFlags physical;    // Hardware/MCU/board capability
+  PinAllocationFlags allocation; // Runtime/template/module allocation state
+  uint16_t gpio_function = GPIO_NONE;   // Packed GPIO function, or GPIO_NONE/GPIO_USER
+  uint16_t unique_module_owner_id    = PIN_OWNER_NONE_ID; // Primary owner, e.g. template, relay, camera, I2C0
+};
+PinTable pin[MAX_GPIO_PIN];
 
 /************************************************************************************************
  * SECTION: Pin Allocation Init / Debug
  ************************************************************************************************/
 
-void PinAlloc_Init(void);
-void PinAlloc_InitPhysicalInfo(void);
-void PinAlloc_InitAllocationTable(void);
-void Init_InsertDummyPinAllocations(void);
+// void PinAlloc_Init(void);
+// void PinAlloc_InitPhysicalInfo(void);
+// void PinAlloc_InitAllocationTable(void);
+// void Init_InsertDummyPinAllocations(void);
 
-#ifdef ENABLE_DEBUGFEATURE_SPLASH__PIN_ALLOCATIONS
-void Splash__PinAllocations(void);
-#endif
-
-
-/************************************************************************************************
- * SECTION: Pin Allocation Accessors
- ************************************************************************************************/
-
-PinPhysicalInfo* PinInfo_GetByPhysicalPin(uint8_t physical_pin);
-PinAllocation*   PinAlloc_GetByIndex(uint8_t index);
-PinAllocation*   PinAlloc_GetByPhysicalPin(uint8_t physical_pin);
-
-const PinPhysicalInfo* PinInfo_GetByPhysicalPin_Const(uint8_t physical_pin) const;
-const PinAllocation*   PinAlloc_GetByIndex_Const(uint8_t index) const;
-const PinAllocation*   PinAlloc_GetByPhysicalPin_Const(uint8_t physical_pin) const;
-
-bool PinAlloc_IsPhysicalPinKnown(uint8_t physical_pin) const;
-bool PinAlloc_IsPhysicalPinUserConfigurable(uint8_t physical_pin) const;
+// #ifdef ENABLE_DEBUGFEATURE_SPLASH__PIN_ALLOCATIONS
+// void Splash__PinAllocations(void);
+// #endif
 
 
-/************************************************************************************************
- * SECTION: Pin Allocation Temporary Helpers
- *
- * These are deliberately simple and replaceable.
- * Later these become the real RequestPin()/ReleasePin()/LockPin() implementation.
- ************************************************************************************************/
+// /************************************************************************************************
+//  * SECTION: Pin Allocation Accessors
+//  ************************************************************************************************/
 
-bool PinAlloc_AssignDummy(
-  uint8_t physical_pin,
-  uint16_t function_id,
-  uint16_t owner_id,
-  uint8_t direction,
-  uint8_t share_mode,
-  bool grouped,
-  bool shared,
-  bool locked,
-  bool required
-);
+// PinPhysicalInfo* PinInfo_GetByPhysicalPin(uint8_t physical_pin);
+// PinAllocation*   PinAlloc_GetByIndex(uint8_t index);
+// PinAllocation*   PinAlloc_GetByPhysicalPin(uint8_t physical_pin);
 
-void PinAlloc_ClearAllocation(PinAllocation* allocation);
-void PinAlloc_ClearAllAllocations(void);
+// const PinPhysicalInfo* PinInfo_GetByPhysicalPin_Const(uint8_t physical_pin) const;
+// const PinAllocation*   PinAlloc_GetByIndex_Const(uint8_t index) const;
+// const PinAllocation*   PinAlloc_GetByPhysicalPin_Const(uint8_t physical_pin) const;
+
+// bool PinAlloc_IsPhysicalPinKnown(uint8_t physical_pin) const;
+// bool PinAlloc_IsPhysicalPinUserConfigurable(uint8_t physical_pin) const;
 
 
-/************************************************************************************************
- * SECTION: Pin Allocation Names
- ************************************************************************************************/
+// /************************************************************************************************
+//  * SECTION: Pin Allocation Temporary Helpers
+//  *
+//  * These are deliberately simple and replaceable.
+//  * Later these become the real RequestPin()/ReleasePin()/LockPin() implementation.
+//  ************************************************************************************************/
 
-const char* PinAlloc_GetDirectionName(uint8_t direction, char* buffer, uint8_t buflen) const;
-const char* PinAlloc_GetShareModeName(uint8_t share_mode, char* buffer, uint8_t buflen) const;
-const char* PinAlloc_GetFunctionName(uint16_t function_id, char* buffer, uint8_t buflen) const;
-const char* PinAlloc_GetOwnerName(uint16_t owner_id, char* buffer, uint8_t buflen) const;
+// bool PinAlloc_AssignDummy(
+//   uint8_t physical_pin,
+//   uint16_t function_id,
+//   uint16_t owner_id,
+//   uint8_t direction,
+//   uint8_t share_mode,
+//   bool grouped,
+//   bool shared,
+//   bool locked,
+//   bool required
+// );
+
+// void PinAlloc_ClearAllocation(PinAllocation* allocation);
+// void PinAlloc_ClearAllAllocations(void);
+
+
+// /************************************************************************************************
+//  * SECTION: Pin Allocation Names
+//  ************************************************************************************************/
+
+// const char* PinAlloc_GetDirectionName(uint8_t direction, char* buffer, uint8_t buflen) const;
+// const char* PinAlloc_GetShareModeName(uint8_t share_mode, char* buffer, uint8_t buflen) const;
+// const char* PinAlloc_GetFunctionName(uint16_t function_id, char* buffer, uint8_t buflen) const;
+// const char* PinAlloc_GetOwnerName(uint16_t owner_id, char* buffer, uint8_t buflen) const;
 
 
 

@@ -200,7 +200,7 @@ void mFileSystem::Init(void)
   if(done) { return; }
   done = true;
 
-  ALOG_INF(PSTR(D_LOG_FILESYSTEM "Init__InternalStorage"));
+  ALOG_DBG(PSTR(D_LOG_FILESYSTEM "Init__InternalStorage"));
 
   bool fsinit = false;
 
@@ -229,7 +229,7 @@ void mFileSystem::Init(void)
   ffsp = &LittleFS;
 
   #if defined(ENABLE_DEBUGFEATURE_FILESYSTEM__SHOW_FS_SYMBOLS)
-  ALOG_INF(PSTR(D_LOG_FILESYSTEM "FS symbols start=0x%08X end=0x%08X size=%u page=%u block=%u"),
+  ALOG_DBG(PSTR(D_LOG_FILESYSTEM "FS symbols start=0x%08X end=0x%08X size=%u page=%u block=%u"),
            (uint32_t)&_FS_start,
            (uint32_t)&_FS_end,
            (uint32_t)((uint32_t)&_FS_end - (uint32_t)&_FS_start),
@@ -266,7 +266,7 @@ void mFileSystem::Init(void)
     return;
   }
 
-  ALOG_INF(PSTR(D_LOG_FILESYSTEM "LittleFS mounted"));
+  ALOG_DBG(PSTR(D_LOG_FILESYSTEM "LittleFS mounted"));
 
 #endif // ESP8266
 
@@ -302,7 +302,7 @@ void mFileSystem::Init(void)
 
     module_state.mode = ModuleStatus::Running;
 
-    ALOG_INF(
+    ALOG_DBG(
       PSTR(D_LOG_FILESYSTEM "FFat mounted with %d kB free"),
       GetFreeStorageSpace()
     );
@@ -311,7 +311,7 @@ void mFileSystem::Init(void)
     return;
   }
 
-  ALOG_INF(PSTR(D_LOG_FILESYSTEM "Primary filesystem mounted"));
+  ALOG_DBG(PSTR(D_LOG_FILESYSTEM "Primary filesystem mounted"));
 
 #endif // ESP32
 
@@ -322,7 +322,7 @@ void mFileSystem::Init(void)
 
   module_state.mode = ModuleStatus::Running;
 
-  ALOG_INF(
+  ALOG_DBG(
     PSTR(D_LOG_FILESYSTEM "FlashFS mounted with %d kB free"),
     GetFreeStorageSpace()
   );
@@ -864,7 +864,7 @@ bool mFileSystem::handleFileRead(AsyncWebServerRequest* request, String path){
   // if(path.indexOf("sec") > -1) return false;
   // String contentType = getContentType(request, path);
   // if(FILE_SYSTEM.exists(path)) {
-  //   ALOG_INF(PSTR("Sending file %s from FILE_SYSTEM"), path.c_str());
+  //   ALOG_DBG(PSTR("Sending file %s from FILE_SYSTEM"), path.c_str());
   //   request->send(FILE_SYSTEM, path, contentType);
   //   return true;
   // }
@@ -906,7 +906,7 @@ void mFileSystem::Handle_FileChanges_WebUIEdits()
 void mFileSystem::SystemTask__Execute_Module_Data_Save()
 {
 
-  ALOG_INF(PSTR("SystemTask__Execute_Module_Data_Save"));
+  ALOG_DBG(PSTR("SystemTask__Execute_Module_Data_Save"));
 
   tkr->Tasker_Interface(TASK_FILESYSTEM__SAVE__MODULE_DATA__ID);
 
@@ -1050,7 +1050,7 @@ bool mFileSystem::SaveFile(const char *fname, const uint8_t *buf, uint32_t len)
   File file = ffsp->open(fname, "w");
 
   if (!file) {
-    ALOG_INF(PSTR("TFS: Save failed"));
+    ALOG_DBG(PSTR("TFS: Save failed"));
   } else {
     file.write(buf, len);
     file.close();
@@ -1070,7 +1070,7 @@ bool mFileSystem::InitFile(const char *fname, uint32_t len, uint8_t init_value)
 
   File file = ffsp->open(fname, "w");
   if (!file) {
-    ALOG_INF(PSTR("TFS: Erase failed"));
+    ALOG_DBG(PSTR("TFS: Erase failed"));
     return false;
   }
 
@@ -1122,7 +1122,7 @@ bool mFileSystem::DeleteFile(const char *fname)
   if (!ffsp || !ffs_type || !fname) { return false; }
 
   if (!ffsp->remove(fname)) {
-    ALOG_INF(PSTR("TFS: Delete failed"));
+    ALOG_DBG(PSTR("TFS: Delete failed"));
     return false;
   }
 
@@ -1134,7 +1134,7 @@ bool mFileSystem::RenameFile(const char *fname1, const char *fname2)
   if (!ffsp || !ffs_type || !fname1 || !fname2) { return false; }
 
   if (!ffsp->rename(fname1, fname2)) {
-    ALOG_INF(PSTR("TFS: Rename failed"));
+    ALOG_DBG(PSTR("TFS: Rename failed"));
     return false;
   }
 
@@ -1319,7 +1319,7 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
 // void mFileSystem::JsonFile_Save__Stored_Module()
 // {
   
-//   ALOG_INF( PSTR("JsonFile_Save__Stored_Module") );
+//   ALOG_DBG( PSTR("JsonFile_Save__Stored_Module") );
 
 //   const char* file_path = "/config_module.json";
 //   char buffer[100] = {0};
@@ -1348,7 +1348,7 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
 //   file.print(JBI->GetBufferPtr());
 //   file.close();
     
-//   ALOG_INF(PSTR("Writing file \"%s\""), JBI->GetBufferPtr());
+//   ALOG_DBG(PSTR("Writing file \"%s\""), JBI->GetBufferPtr());
 
 //   JBI->ReleaseLock();
 
@@ -1366,7 +1366,7 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
 //   bool force_default_template = false; // ie on reset
  
 //   if(!JsonFile_Load__Stored_Module() || force_default_template){
-//     ALOG_INF(PSTR("No config_module.json file found, loading default template from progmem"));
+//     ALOG_DBG(PSTR("No config_module.json file found, loading default template from progmem"));
 //     tkr->Tasker_Interface(TASK_CONFIG_LOAD_POST_INIT_DEFAULTS_FROM_PROGMEM);
 //   }
 
@@ -1378,7 +1378,7 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
 // bool mFileSystem::JsonFile_Load__Stored_Module()
 // {
   
-//   ALOG_INF( PSTR("JsonFile_Load__Stored_Module") );
+//   ALOG_DBG( PSTR("JsonFile_Load__Stored_Module") );
 
 //   File file;  
 //   const char* file_path = "/config_module.json";
@@ -1405,7 +1405,7 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
   
 //   data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
-//   ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
+//   ALOG_DBG( PSTR(DEBUG_INSERT_PAGE_BREAK "Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
 
 //   tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
@@ -1428,7 +1428,7 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
 // void mFileSystem::JsonFile_Save__Stored_Secure()
 // {
   
-//   ALOG_INF( PSTR("JsonFile_Save__Stored_Secure") );
+//   ALOG_DBG( PSTR("JsonFile_Save__Stored_Secure") );
 
 //   const char* file_path = "/config_secure.json";
 //   char buffer[100] = {0};
@@ -1457,7 +1457,7 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
 //   file.print(JBI->GetBufferPtr());
 //   file.close();
     
-//   ALOG_INF(PSTR("Writing file \"%s\""), JBI->GetBufferPtr());
+//   ALOG_DBG(PSTR("Writing file \"%s\""), JBI->GetBufferPtr());
 
 //   JBI->ReleaseLock();
 
@@ -1466,7 +1466,7 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
 // void mFileSystem::JsonFile_Load__Stored_Secure()
 // {
   
-//   ALOG_INF( PSTR("JsonFile_Load__Stored_Secure") );
+//   ALOG_DBG( PSTR("JsonFile_Load__Stored_Secure") );
 
 //   File file;  
 //   const char* file_path = "/config_secure.json";
@@ -1493,7 +1493,7 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
   
 //   data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
-//   ALOG_INF( PSTR("Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
+//   ALOG_DBG( PSTR("Loaded file = \"%d|%s\""),data_buffer.payload.length_used, data_buffer.payload.ctr);
 
 //   tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 
@@ -1516,7 +1516,7 @@ void mFileSystem::CommandSet_ReadFile(const char* filename){
 void mFileSystem::ByteFile_Save(char* filename_With_extension, uint8_t* buffer, uint16_t buflen) // where to write the data from
 {
   
-  ALOG_INF( PSTR("ByteFile_Save") );
+  ALOG_DBG( PSTR("ByteFile_Save") );
 
   File file;  
   // Open file for writing, if it does not exist, create it
@@ -1532,14 +1532,14 @@ void mFileSystem::ByteFile_Save(char* filename_With_extension, uint8_t* buffer, 
   file.write((const uint8_t*)buffer, buflen);
   file.close();
     
-  ALOG_INF(PSTR("Writing file (%s) \"%s\""), filename_With_extension, buffer);
+  ALOG_DBG(PSTR("Writing file (%s) \"%s\""), filename_With_extension, buffer);
 
 }
 
 uint32_t mFileSystem::ByteFile_Load(char* filename_With_extension, uint8_t* buffer, uint16_t buflen) // where to write the data into
 {
   
-  ALOG_INF( PSTR("ByteFile_Load") );
+  ALOG_DBG( PSTR("ByteFile_Load") );
 
   File file;  
   // Open file for writing, if it does not exist, create it
@@ -1555,7 +1555,7 @@ uint32_t mFileSystem::ByteFile_Load(char* filename_With_extension, uint8_t* buff
 
   uint32_t filesize = file.size();
 
-  ALOG_INF(PSTR("Reading file \"%s\" %d bytes (expected %d bytes)"), filename_With_extension, filesize, buflen);
+  ALOG_DBG(PSTR("Reading file \"%s\" %d bytes (expected %d bytes)"), filename_With_extension, filesize, buflen);
 
   if(filesize != buflen){
     ALOG_ERR(PSTR("File size mismatch, expected %d bytes, got %d bytes"), buflen, filesize);
@@ -1577,7 +1577,7 @@ uint32_t mFileSystem::ByteFile_Load(char* filename_With_extension, uint8_t* buff
 void mFileSystem::JSONFile_Save(char* filename_With_extension, char* buffer, uint16_t buflen) // where to write the data from
 {
   
-  ALOG_INF( PSTR("JSONFile_Save") );
+  ALOG_DBG( PSTR("JSONFile_Save") );
 
   File file;  
   // Open file for writing, if it does not exist, create it
@@ -1593,7 +1593,7 @@ void mFileSystem::JSONFile_Save(char* filename_With_extension, char* buffer, uin
   file.write((const uint8_t*)buffer, buflen);
   file.close();
     
-  ALOG_INF(PSTR("Writing file (%s) \"%s\""), filename_With_extension, buffer);
+  ALOG_DBG(PSTR("Writing file (%s) \"%s\""), filename_With_extension, buffer);
 
 }
 
@@ -1601,7 +1601,7 @@ void mFileSystem::JSONFile_Save(char* filename_With_extension, char* buffer, uin
 void mFileSystem::JSONFile_Load(char* filename_With_extension, char* buffer, uint16_t buflen) // where to write the data into
 {
 
-  ALOG_INF( PSTR("JSONFile_Load") );
+  ALOG_DBG( PSTR("JSONFile_Load") );
 
 }
 

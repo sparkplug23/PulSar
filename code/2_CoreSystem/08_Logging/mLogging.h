@@ -104,6 +104,8 @@ enum LoggingLevels {
   LOG_LEVEL_ALL
 };
 
+#define BOOT_LOG_LEVEL tkr_set->runtime.seriallog_level_during_boot
+
 
 // Can only be used when hardware serial is enabled
 #if defined(USE_DEBUG_LINE) && !defined(USE_SOFTWARE_SERIAL_DEBUG)

@@ -5,7 +5,7 @@
 
 bool mWiFi::WiFi2_Ap_EnsureStarted(void)
 {
-  ALOG_INF(PSTR(D_LOG_WIFI "WiFi2_Ap_EnsureStarted"));
+  ALOG_DBG(PSTR(D_LOG_WIFI "WiFi2_Ap_EnsureStarted"));
 
   // Start minimal SoftAP (no dependency on initAP)
   WiFi.mode(WIFI_AP);

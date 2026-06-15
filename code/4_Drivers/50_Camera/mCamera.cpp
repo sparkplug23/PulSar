@@ -71,12 +71,12 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
       // Bring up / tear down stream server based on network state
       if (!tkr_set->runtime.global_state.network_down) {
         if (tkr_iDrivers->webcam_config.stream && !rt.CamServer) {
-          ALOG_INF(PSTR(D_LOG_CAMERA "Network up, starting stream server"));
+          ALOG_DBG(PSTR(D_LOG_CAMERA "Network up, starting stream server"));
           Stream_SetEnabled(1);
         }
       } else {
         if (rt.CamServer) {
-          ALOG_INF(PSTR(D_LOG_CAMERA "Network down, stopping stream server"));
+          ALOG_DBG(PSTR(D_LOG_CAMERA "Network down, stopping stream server"));
           Stream_SetEnabled(0);
         }
       }
@@ -86,16 +86,16 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
     break;
     case TASK_UPTIME_30_SECONDS:
     // case TASK_NETWORK_CONNECTED__WIFI:
-      ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "TASK_UPTIME_30_SECONDS"));
+      ALOG_DBG(PSTR(DEBUG_INSERT_PAGE_BREAK "TASK_UPTIME_30_SECONDS"));
 
       tkr_iDrivers->webcam_config.stream=1;
-      ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "\n\r\t\t\tCAM: Stream_SetEnabled STARTED"));
+      ALOG_DBG(PSTR(DEBUG_INSERT_PAGE_BREAK "\n\r\t\t\tCAM: Stream_SetEnabled STARTED"));
       Stream_SetEnabled(tkr_iDrivers->webcam_config.stream);
 
     break;
     case TASK_UPDATE_OTA_BEFORE_ON_START:
 
-      ALOG_INF(PSTR(D_LOG_CAMERA "Suspending webcam task before OTA update"));
+      ALOG_DBG(PSTR(D_LOG_CAMERA "Suspending webcam task before OTA update"));
       // vTaskSuspend(rt.taskHandle);
       // esp_camera_deinit(); // gracefully release memory from the driver
       // rt.up = false;
@@ -103,7 +103,7 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
       // vTaskDelete(rt.taskHandle);
       // rt.taskHandle = nullptr;
       Driver_SuspendForOTA();
-      ALOG_INF(PSTR(D_LOG_CAMERA "Suspended webcam task before OTA update"));
+      ALOG_DBG(PSTR(D_LOG_CAMERA "Suspended webcam task before OTA update"));
 
     break;
     /************
@@ -141,13 +141,13 @@ int8_t mCamera::Tasker(uint8_t function, JsonParserObject obj)
 
 void mRelays::Save_Module()
 {
-  ALOG_INF(PSTR(D_LOG_RELAYS "Save_Module"));
+  ALOG_DBG(PSTR(D_LOG_RELAYS "Save_Module"));
   tkr_mfile->ByteFile_Save("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
 }
 
 void mRelays::Load_Module(bool erase)
 {
-  ALOG_INF(PSTR(D_LOG_RELAYS "Load_Module"));
+  ALOG_DBG(PSTR(D_LOG_RELAYS "Load_Module"));
   tkr_mfile->ByteFile_Load("/relays" FILE_EXTENSION_BIN, (uint8_t*)&rt, sizeof(rt));
 }
 

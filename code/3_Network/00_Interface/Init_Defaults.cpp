@@ -12,7 +12,7 @@ void mInterfaceNetwork::Init(void)
 
 void mInterfaceNetwork::Load_Config(void)
 {
-  ALOG_INF(PSTR(D_LOG_NETWORK "Load_Config"));
+  ALOG_DBG(PSTR(D_LOG_NETWORK "Load_Config"));
 
   bool config_loaded = false;
 
@@ -24,7 +24,7 @@ void mInterfaceNetwork::Load_Config(void)
   {
     if(tkr_mfile->FileExists(NETWORK_CONFIG_FILE_PATH))
     {
-      ALOG_INF(
+      ALOG_DBG(
         PSTR(D_LOG_NETWORK "Network config file found: %s len=%u"),
         NETWORK_CONFIG_FILE_PATH,
         tkr_mfile->FileSize(NETWORK_CONFIG_FILE_PATH)
@@ -47,7 +47,7 @@ void mInterfaceNetwork::Load_Config(void)
     ALOG_WRN(PSTR(D_LOG_NETWORK "Filesystem module pointer null"));
   }
   #else
-  ALOG_INF(PSTR(D_LOG_NETWORK "Filesystem module not compiled"));
+  ALOG_DBG(PSTR(D_LOG_NETWORK "Filesystem module not compiled"));
   #endif
 
   // ------------------------------------------------------------------
@@ -66,7 +66,7 @@ void mInterfaceNetwork::Load_Config(void)
   #else
   if(!config_loaded)
   {
-    ALOG_INF(PSTR(D_LOG_NETWORK "No compiled network template, using define defaults"));
+    ALOG_DBG(PSTR(D_LOG_NETWORK "No compiled network template, using define defaults"));
   }
   #endif
 
@@ -200,8 +200,8 @@ bool mInterfaceNetwork::NetworkConfig_ParseJSONString(const String& json_string)
   data_buffer.payload.ctr[copy_len] = '\0';
   data_buffer.payload.length_used = copy_len;
 
-  ALOG_INF(
-    PSTR(DEBUG_INSERT_PAGE_BREAK D_LOG_NETWORK "NETWORK_CONFIG READ = \"%u|%s\""),
+  ALOG_DBG(
+    PSTR(D_LOG_NETWORK "NETWORK_CONFIG READ = \"%u|%s\""),
     data_buffer.payload.length_used,
     data_buffer.payload.ctr
   );
@@ -243,7 +243,7 @@ bool mInterfaceNetwork::NetworkConfig_CreateFileFromTemplateAndParse(void)
         template_json.length()
       ))
     {
-      ALOG_INF(
+      ALOG_DBG(
         PSTR(D_LOG_NETWORK "Created network config file from template: %s len=%u"),
         NETWORK_CONFIG_FILE_PATH,
         template_json.length()
@@ -290,7 +290,7 @@ void mInterfaceNetwork::NetworkConfig_DebugPrint(const char* title, const String
 {
   if (!title) { title = "NetworkConfig"; }
 
-  ALOG_INF(PSTR(D_LOG_NETWORK "---- %s START len=%u ----"), title, data.length());
+  ALOG_DBG(PSTR(D_LOG_NETWORK "---- %s START len=%u ----"), title, data.length());
 
   const uint16_t chunk_size = 192;
 
@@ -309,7 +309,7 @@ void mInterfaceNetwork::NetworkConfig_DebugPrint(const char* title, const String
 
   Serial.println();
 
-  ALOG_INF(PSTR(D_LOG_NETWORK "---- %s END ----"), title);
+  ALOG_DBG(PSTR(D_LOG_NETWORK "---- %s END ----"), title);
 }
 
 

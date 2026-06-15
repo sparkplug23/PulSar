@@ -208,7 +208,7 @@ void mSettings::SettingsSaveAll(void)
  ************************************************************************************************/
 void mSettings::SettingsLoad(void)
 {
-  ALOG_INF(PSTR(D_LOG_MEMORY D_LOAD));
+  ALOG_DBG(PSTR(D_LOG_MEMORY D_LOAD));
 
   settings_location = 0;
 
@@ -286,7 +286,7 @@ void mSettings::SettingsLoad(void)
     false;
   #endif
 
-  ALOG_INF(PSTR("Filesystem available: %u"), (unsigned)filesystem_available);
+  ALOG_DBG(PSTR("Filesystem available: %u"), (unsigned)filesystem_available);
 
 
   const uint32_t source = SettingsRead(&loaded_settings, sizeof(SETTINGS));
@@ -320,7 +320,7 @@ void mSettings::SettingsLoad(void)
     settings_should_save = true;
   }
 
-  ALOG_INF(PSTR(D_LOG_SETTINGS "SettingsLoad source=%d"), source);
+  ALOG_DBG(PSTR(D_LOG_SETTINGS "SettingsLoad source=%d"), source);
   
   if (source)
   {
@@ -345,7 +345,7 @@ void mSettings::SettingsLoad(void)
       crc_nonblank &&
       (loaded_settings.cfg_crc32 == loaded_crc);
 
-    ALOG_INF(
+    ALOG_DBG(
       PSTR(D_LOG_SETTINGS "LoadCheck src=%d holder=%d expected=%d size=%d expected_size=%d crc_valid=%d"),
       source,
       loaded_settings.cfg_holder,
@@ -363,12 +363,12 @@ void mSettings::SettingsLoad(void)
     if (size_valid && holder_valid && crc_valid)
     {
 
-      ALOG_INF(PSTR(D_LOG_SETTINGS "Valid saved settings found, loading"));
+      ALOG_DBG(PSTR(D_LOG_SETTINGS "Valid saved settings found, loading"));
 
       DEBUG_LINE_HERE3;
       memcpy(&Settings, &loaded_settings, sizeof(SETTINGS));
 
-      ALOG_INF( PSTR(D_LOG_CONFIG "Loaded from file, " D_COUNT " %lu"), Settings.save_flag );
+      ALOG_DBG( PSTR(D_LOG_CONFIG "Loaded from file, " D_COUNT " %lu"), Settings.save_flag );
 
       settings_loaded_from_valid_file = true;
     }
@@ -384,7 +384,7 @@ void mSettings::SettingsLoad(void)
        * * * Defensive fallback
        ************************************************************************************************/
       
-      ALOG_INF(PSTR(D_LOG_SETTINGS "INVALID saved settings found, repairing"));
+      ALOG_DBG(PSTR(D_LOG_SETTINGS "INVALID saved settings found, repairing"));
 
         DEBUG_LINE_HERE3;
 
@@ -538,7 +538,7 @@ void mSettings::SettingsLoad(void)
       }
     }
   }else{
-    ALOG_INF(PSTR(">>>>>>>>>>>>>>>>>>>>>>>SettingsLoad source=%d, no file read"), source);
+    ALOG_DBG(PSTR(">>>>>>>>>>>>>>>>>>>>>>>SettingsLoad source=%d, no file read"), source);
   }
 
   #endif // ENABLE_FEATURE_SETTINGS__LOAD_PRECODED_SETTINGS_ON_BOOT_NO_SAVED_STATES
@@ -580,7 +580,7 @@ void mSettings::SettingsLoad(void)
   #ifdef USE_MODULE_CORE_FILESYSTEM
     if(filesystem_available)
     {
-      ALOG_INF(PSTR(D_LOG_SETTINGS "Saving settings after load due to generated/modified state"));
+      ALOG_DBG(PSTR(D_LOG_SETTINGS "Saving settings after load due to generated/modified state"));
       SettingsSaveAll();
     }
     else
@@ -608,7 +608,7 @@ void mSettings::SettingsLoad(void)
                                                       DEBUG_LINE_HERE3;
   SettingsUpdateRuntimeHostname();
 
-  ALOG_INF(
+  ALOG_DBG(
     PSTR(D_LOG_SETTINGS "SettingsLoad ====================================complete valid_file=%u defaults=%u lkg=%u saved=%u crc=0x%08X"),
     (unsigned)settings_loaded_from_valid_file,
     (unsigned)settings_generated_from_defaults,
@@ -633,7 +633,7 @@ uint32_t mSettings::SettingsRead(void *data, size_t size)
   }
   #endif
 
-  ALOG_INF(PSTR("SettingsRead: no file read"));
+  ALOG_DBG(PSTR("SettingsRead: no file read"));
 
   return 0;
 }
@@ -896,7 +896,7 @@ bool mSettings::SaveSettings__LastKnownGood(void)
   runtime.settings_lkg = true;
   #endif
 
-  ALOG_INF(PSTR(D_LOG_SETTINGS "Saved last-known-good settings"));
+  ALOG_DBG(PSTR(D_LOG_SETTINGS "Saved last-known-good settings"));
 
   return true;
 }

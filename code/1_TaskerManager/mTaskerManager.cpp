@@ -175,9 +175,9 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
     DEBUG_LINE_HERE;
 
     /***DEBUGGING::  Uncomment to HIGHLIGHT a TASK */
-    if (task == TASK_PRE_INIT || task == TASK_INIT) {
-      ALOG_ERR(PSTR("TASK_PRE_INIT or TASK_INIT called %S %s"), GetTaskName(task), mod->GetModuleName());
-    }
+    // if (task == TASK_PRE_INIT || task == TASK_INIT) {
+    //   ALOG_ERR(PSTR("TASK_PRE_INIT or TASK_INIT called %S %s"), GetTaskName(task), mod->GetModuleName());
+    // }
     /***DEBUGGING::  Uncomment to block a TASK */
     // if (task == TASK_SETTINGS_DEFAULT || task == TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT) {
     //   ALOG_ERR(PSTR("TASK_SETTINGS_DEFAULT or TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT called"));
@@ -321,7 +321,7 @@ void mTaskerManager::JSONCommand_Run(char* json)
 void mTaskerManager::addTasker(mTaskerInterface* mod)
 {
   pModule.push_back(mod);
-  Serial.printf("AddTasker[%d]\t%S \tuid %d\n\r", pModule.size(), mod->GetModuleName(), mod->GetModuleUniqueID());
+  // Serial.printf("AddTasker[%d]\t%S \tuid %d\n\r", pModule.size(), mod->GetModuleName(), mod->GetModuleUniqueID());
 
   assert(heap_caps_check_integrity_all(true));  // will abort on corrupt heap
 }

@@ -42,7 +42,7 @@ bool mFileSystem::PFS_Init()
   {
     pfs_backend = PFS_BACKEND_FILESYSTEM;
     ok = true;
-    ALOG_INF(PSTR(D_LOG_FILESYSTEM "PFS backend: filesystem"));
+    ALOG_DBG(PSTR(D_LOG_FILESYSTEM "PFS backend: filesystem"));
   }
   else
   {
@@ -257,7 +257,7 @@ bool mFileSystem::PFS_MinimalSector_Init()
 
   if (ok)
   {
-    ALOG_INF(
+    ALOG_DBG(
       PSTR(D_LOG_FILESYSTEM "PFS minimal sector base=0x%08X size=%u"),
       (unsigned)PFS_MINIMAL_SECTOR_BASE_ADDRESS,
       (unsigned)PFS_MINIMAL_SECTOR_TOTAL_SIZE
@@ -361,7 +361,7 @@ bool mFileSystem::PFS_MinimalSector_Save(uint32_t sector_offset, const uint8_t* 
 
   if (ok)
   {
-    ALOG_INF(
+    ALOG_DBG(
       PSTR(D_LOG_FILESYSTEM "PFS minimal save offset=0x%04X len=%u"),
       (unsigned)sector_offset,
       (unsigned)len
@@ -458,7 +458,7 @@ bool mFileSystem::PFS_MinimalSector_Load(uint32_t sector_offset, uint8_t* data, 
       *loaded_len = header.data_size;
     }
 
-    ALOG_INF(
+    ALOG_DBG(
       PSTR(D_LOG_FILESYSTEM "PFS minimal load offset=0x%04X len=%u"),
       (unsigned)sector_offset,
       (unsigned)header.data_size

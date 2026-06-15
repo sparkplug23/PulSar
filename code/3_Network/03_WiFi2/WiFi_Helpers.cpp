@@ -103,7 +103,7 @@ void mWiFi::WiFi2_Ap_Dns_Start(void)
   dnsServer.start(53, "*", WiFi.softAPIP());
 
   dnsServerRunning = true;
-  ALOG_INF(PSTR(D_LOG_WIFI "DNS captive portal started @ %s"), WiFi.softAPIP().toString().c_str());
+  ALOG_DBG(PSTR(D_LOG_WIFI "DNS captive portal started @ %s"), WiFi.softAPIP().toString().c_str());
 }
 
 void mWiFi::WiFi2_Ap_Dns_Stop(void)
@@ -112,7 +112,7 @@ void mWiFi::WiFi2_Ap_Dns_Stop(void)
 
   dnsServer.stop();
   dnsServerRunning = false;
-  ALOG_INF(PSTR(D_LOG_WIFI "DNS captive portal stopped"));
+  ALOG_DBG(PSTR(D_LOG_WIFI "DNS captive portal stopped"));
 }
 
 void mWiFi::WiFi2_Ap_Dns_Tick(void)
@@ -122,7 +122,7 @@ void mWiFi::WiFi2_Ap_Dns_Tick(void)
 }
 
 
-bool mWiFi::WiFi_Dns_ResolveHostname(const char* aHostname, IPAddress& aResult) {ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+bool mWiFi::WiFi_Dns_ResolveHostname(const char* aHostname, IPAddress& aResult) {ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
 #ifdef USE_IPV6
 #if ESP_IDF_VERSION_MAJOR >= 5
   // try converting directly to IP
@@ -249,49 +249,61 @@ void mWiFi::WiFi_Mdns_StartOrRestart(void)
 
   const char* originalName = tkr_set->Settings.system_name.device;
 
-  // Define a temporary buffer (max 64 bytes: 63 + null terminator)
   char hostname[64];
-  strncpy(hostname, originalName, 63);
-  hostname[63] = '\0';
+  strncpy(hostname, originalName, sizeof(hostname) - 1);
+  hostname[sizeof(hostname) - 1] = '\0';
 
-  // Replace invalid underscores with dashes
   for (char* p = hostname; *p; ++p)
   {
     if (*p == '_') *p = '-';
   }
 
-  // Platform-specific hostname setter
-  #if defined(ESP8266)
-    WiFi.hostname(hostname);
-  #elif defined(ESP32)
-    WiFi.setHostname(hostname);
-  #endif
+#if defined(ESP8266)
+  WiFi.hostname(hostname);
+#elif defined(ESP32)
+  WiFi.setHostname(hostname);
+#endif
 
-  // OTA hostname
   ArduinoOTA.setHostname(hostname);
 
-  // Close existing session to prevent failure
   MDNS.end();
 
-  // Begin with sanitized hostname
   Mdns.begun = (uint8_t)MDNS.begin(hostname);
 
-  ALOG_INF(PSTR(D_LOG_MDNS "%s with %s"),
-           (Mdns.begun) ? PSTR(D_INITIALIZED) : PSTR(D_FAILED),
-           hostname);
+  ALOG_DBG(PSTR(D_LOG_MDNS "%s with %s"), Mdns.begun ? PSTR(D_INITIALIZED) : PSTR(D_FAILED), hostname);
 
-  #if defined(ESP32)
-    // Register service
-    MDNS.addService("_http", "_tcp", 80);
+  if (!Mdns.begun) return;
 
-    String escapedMac = WiFi.macAddress();
-    escapedMac.replace(":", "");
-    escapedMac.toLowerCase();
+  /***
+   * Requires Bonjour Print Services to be installed on windows to resolve commands
+   * Powershell Commands below
+     dns-sd -B _pulsar._tcp local
+     dns-sd -B _http._tcp local
+     dns-sd -L <shown-instance-name> _pulsar._tcp local
+     dns-sd -L tg-cam--wroover-01 _pulsar._tcp local            
+      ->  11:46:39.454  tg-cam--wroover-01._pulsar._tcp.local. can be reached at tg-cam--wroover-01.local.:80 (interface 20)
+          module=wifi name=tg-cam--wroover-01 mac=cc7b5c979c94
 
-    MDNS.addService("http", "tcp", 80);
-    MDNS.addService("pulsar", "tcp", 80);
+
+     
+   */
+#if defined(ESP32)
+  String escapedMac = WiFi.macAddress();
+  escapedMac.replace(":", "");
+  escapedMac.toLowerCase();
+
+  bool http_ok   = MDNS.addService("http", "tcp", 80);
+  bool pulsar_ok = MDNS.addService("pulsar", "tcp", 80);
+
+  if (pulsar_ok)
+  {
     MDNS.addServiceTxt("pulsar", "tcp", "mac", escapedMac.c_str());
-  #endif
+    MDNS.addServiceTxt("pulsar", "tcp", "name", (const char*)hostname);
+    MDNS.addServiceTxt("pulsar", "tcp", "module", GetModuleName());
+  }
+
+  ALOG_DBG(PSTR(D_LOG_MDNS "services http=%u pulsar=%u mac=%s"), http_ok, pulsar_ok, escapedMac.c_str());
+#endif
 }
 
 
@@ -306,7 +318,7 @@ void mWiFi::WiFi_Mdns_DiscoverMqttBroker(void)
 
   int n = MDNS.queryService("mqtt", "tcp");  // Search for mqtt service
 
-  ALOG_INF( PSTR(D_LOG_MDNS D_QUERY_DONE " %d"), n);
+  ALOG_DBG( PSTR(D_LOG_MDNS D_QUERY_DONE " %d"), n);
 
   if (n > 0) {
     uint32_t i = 0;            // If the hostname isn't set, use the first record found.
@@ -319,7 +331,7 @@ void mWiFi::WiFi_Mdns_DiscoverMqttBroker(void)
     #endif  // MDNS_HOSTNAME
     // SettingsUpdateText(SET_MQTT_HOST, MDNS.hostname(i).c_str());
     // Settings.mqtt_port = MDNS.port(i);
-    // ALOG_INF(PSTR(D_LOG_MDNS D_MQTT_SERVICE_FOUND " %s," D_PORT " %d"), SettingsText(SET_MQTT_HOST), Settings.mqtt_port);
+    // ALOG_DBG(PSTR(D_LOG_MDNS D_MQTT_SERVICE_FOUND " %s," D_PORT " %d"), SettingsText(SET_MQTT_HOST), Settings.mqtt_port);
   }
 }
 #endif  // MQTT_HOST_DISCOVERY

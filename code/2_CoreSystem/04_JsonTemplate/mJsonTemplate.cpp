@@ -942,7 +942,7 @@ bool mJsonTemplate::Templates__SaveProgmemTemplateToFilesystem_P(
  ************************************************************************************************/
 void mJsonTemplate::Templates__SaveHardcodedTemplateToFilesystem()
 {
-  ALOG_HGL(PSTR(D_LOG_FILESYSTEM "Templates__SaveHardcodedTemplateToFilesystem"));
+  ALOG_DBG(PSTR(D_LOG_FILESYSTEM "Templates__SaveHardcodedTemplateToFilesystem"));
 
   uint8_t exported_count = 0;
 

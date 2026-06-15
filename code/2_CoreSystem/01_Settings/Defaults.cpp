@@ -31,7 +31,7 @@ void mSettings::SettingsInit(void)
 void mSettings::SettingsDefault(void)
 {
   #ifdef ENABLE_LOG_LEVEL_INFO
-  ALOG_INF(PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
+  ALOG_DBG(PSTR(D_LOG_CONFIG D_USE_DEFAULTS));
   #endif
 
         DEBUG_LINE_HERE3;
@@ -297,7 +297,7 @@ void mSettings::SettingsDefault(void)
   tkr->Tasker_Interface(TASK_SETTINGS_DEFAULT);
 
         DEBUG_LINE_HERE3;
-  ALOG_INF(
+  ALOG_DBG(
     PSTR(D_LOG_MEMORY D_LOAD " %s holder=%d expected=%d size=%d"),
     "SettingsDefault",
     Settings.cfg_holder,

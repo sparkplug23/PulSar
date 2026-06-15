@@ -83,7 +83,7 @@ bool mSIM7000G::Handler_ModemResponses(uint8_t response_loglevel, uint16_t wait_
 void mSIM7000G::ModemInit_ForceRestart()
 {
   modem_sm_.restart_requested = true;
-  ALOG_INF(PSTR(D_LOG_CELLULAR "ModemInit_ForceRestart requested"));
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "ModemInit_ForceRestart requested"));
 }
 
 bool mSIM7000G::ModemInit_IsReady() const
@@ -139,7 +139,7 @@ void mSIM7000G::ModemInit_Tick(uint32_t now_ms)
 
   flag_modem_initialized = true;
 
-  ALOG_INF(PSTR(D_LOG_CELLULAR "Modem restart complete"));
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "Modem restart complete"));
 }
 
 TinyGsmClient* mSIM7000G::DataNetwork_GetOrCreateClient(bool force_recreate)
@@ -220,7 +220,7 @@ void mSIM7000G::Query_Modem_Status()
   // Guards
   // --------------------------------------------------------------------------
   if (!modem) {
-    ALOG_INF(PSTR(D_LOG_CELLULAR "Query_Modem_Status: modem=null"));
+    ALOG_DBG(PSTR(D_LOG_CELLULAR "Query_Modem_Status: modem=null"));
     return;
   }
 
@@ -251,7 +251,7 @@ void mSIM7000G::Query_Modem_Status()
     static uint8_t fail_count = 0;
     fail_count++;
     if (fail_count >= 5) {
-      ALOG_INF(PSTR(D_LOG_CELLULAR "AT failed %u times -> ModemInit_ForceRestart()"), fail_count);
+      ALOG_DBG(PSTR(D_LOG_CELLULAR "AT failed %u times -> ModemInit_ForceRestart()"), fail_count);
       fail_count = 0;
       ModemInit_ForceRestart();
     }
@@ -343,22 +343,22 @@ void mSIM7000G::Query_Modem_Status()
   // t_last_status_log_ms = now_ms;
 
   // if (!sim_present) {
-  //   ALOG_INF(PSTR(D_LOG_CELLULAR "AT OK, SIM: no response (CPIN?) , CSQ=%d (%.1f dBm), REG=%d"),
+  //   ALOG_DBG(PSTR(D_LOG_CELLULAR "AT OK, SIM: no response (CPIN?) , CSQ=%d (%.1f dBm), REG=%d"),
   //            (int)csq, (double)rssi_dbm, (int)reg);
   // } else if (!sim_ready) {
-  //   ALOG_INF(PSTR(D_LOG_CELLULAR "AT OK, SIM: present NOT READY, CSQ=%d (%.1f dBm), REG=%d"),
+  //   ALOG_DBG(PSTR(D_LOG_CELLULAR "AT OK, SIM: present NOT READY, CSQ=%d (%.1f dBm), REG=%d"),
   //            (int)csq, (double)rssi_dbm, (int)reg);
   // } else {
   //   if (ccid[0] != '\0') {
-  //     ALOG_INF(PSTR(D_LOG_CELLULAR "SIM READY, CCID=%s, CSQ=%d (%.1f dBm), REG=%d"),
+  //     ALOG_DBG(PSTR(D_LOG_CELLULAR "SIM READY, CCID=%s, CSQ=%d (%.1f dBm), REG=%d"),
   //              ccid, (int)csq, (double)rssi_dbm, (int)reg);
   //   } else {
-  //     ALOG_INF(PSTR(D_LOG_CELLULAR "AT OK, SIM READY, CSQ=%d (%.1f dBm), REG=%d"),
+  //     ALOG_DBG(PSTR(D_LOG_CELLULAR "AT OK, SIM READY, CSQ=%d (%.1f dBm), REG=%d"),
   //              (int)csq, (double)rssi_dbm, (int)reg);
   //   }
   // }
 
-  ALOG_INF(PSTR(D_LOG_CELLULAR "SIM=%s CSQ=%d RSSI=%.1f dBm REG=%d NET=%u GPRS=%u"),
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "SIM=%s CSQ=%d RSSI=%.1f dBm REG=%d NET=%u GPRS=%u"),
     sim_ready ? "READY" : (sim_present ? "NOT_READY" : "NO_RESPONSE"),
     (int)csq,
     (double)rssi_dbm,
@@ -393,13 +393,13 @@ void mSIM7000G::SendATCommand_FunctionalityMode_Minimum()
 {
   modem->sendAT("+CFUN=0"); 
   bool result = modem->waitResponse(AT_COMMAND_RESPONSE_TIMEOUT__CFUN);
-  ALOG_INF(PSTR(D_LOG_CELLULAR "FunctionalityMode_Minimum %d"), result);
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "FunctionalityMode_Minimum %d"), result);
 }
 void mSIM7000G::SendATCommand_FunctionalityMode_Full()
 {
   modem->sendAT("+CFUN=1");
   bool result = modem->waitResponse(AT_COMMAND_RESPONSE_TIMEOUT__CFUN); 
-  ALOG_INF(PSTR(D_LOG_CELLULAR "FunctionalityMode_Full %d"), result);
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "FunctionalityMode_Full %d"), result);
 }
 
 
@@ -442,10 +442,10 @@ bool mSIM7000G::Modem_CheckAndRestartUnresponsiveModem()
 
   if(modem->testAT(timeout_wait_for_AT_response))
   {
-    ALOG_INF(PSTR(D_LOG_CELLULAR "Modem Running"));
+    ALOG_DBG(PSTR(D_LOG_CELLULAR "Modem Running"));
     return true;
   }else{
-    ALOG_INF(PSTR(D_LOG_CELLULAR "Modem Not responding, restarting (TBC: causes 7.5 second pause)"));
+    ALOG_DBG(PSTR(D_LOG_CELLULAR "Modem Not responding, restarting (TBC: causes 7.5 second pause)"));
     modemRestart(); // If no response, cause reboot and do something else
     return false;
   }
@@ -490,10 +490,10 @@ void mSIM7000G::Get_Modem_Hardware()
 {
 
   String name = modem->getModemName();
-  ALOG_INF(PSTR(D_LOG_CELLULAR "Modem Name: %s"),name.c_str());
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "Modem Name: %s"),name.c_str());
 
   String modemInfo = modem->getModemInfo();
-  ALOG_INF(PSTR(D_LOG_CELLULAR "Modem Info: %s"),modemInfo.c_str());
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "Modem Info: %s"),modemInfo.c_str());
 
 }
 
@@ -521,7 +521,7 @@ bool mSIM7000G::SendAT(const char* buffer, uint16_t wait_millis)
   }
   uint32_t tSaved_Elapsed = millis()-tSaved_millis;
 
-  ALOG_INF(PSTR(D_LOG_CELLULAR ">>>%s %s (%dms)"), buffer, result?"Success":"FAILED", tSaved_Elapsed);
+  ALOG_DBG(PSTR(D_LOG_CELLULAR ">>>%s %s (%dms)"), buffer, result?"Success":"FAILED", tSaved_Elapsed);
 
   return result;
   
@@ -602,8 +602,8 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
   
   if(jtok = obj["OpenHAB"].getObject()["SystemTime"]){
-    ALOG_INF( PSTR(D_LOG_CELLULAR "OpenHAB:SystemTime"));
-    ALOG_INF(PSTR(D_LOG_CELLULAR "OH Time %s"),jtok.getStr());
+    ALOG_DBG( PSTR(D_LOG_CELLULAR "OpenHAB:SystemTime"));
+    ALOG_DBG(PSTR(D_LOG_CELLULAR "OH Time %s"),jtok.getStr());
     //toggle led
     DIGITAL_INVERT_PIN(12); //esp32 blue led
   }
@@ -614,7 +614,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
   {
     const bool enable = (jtok.getInt() == 1);
 
-    ALOG_INF(PSTR(D_LOG_CELLULAR "GPS_Enable desired=%d"), enable);
+    ALOG_DBG(PSTR(D_LOG_CELLULAR "GPS_Enable desired=%d"), enable);
 
     gps.enabled = enable;
 
@@ -631,7 +631,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
 
   if(jtok = obj["SMSAuto_GPS"]){
-    ALOG_INF( PSTR(D_LOG_CELLULAR "SMSAuto_GPS smsauto_gps_messages.rate_seconds %d"), jtok.getInt());
+    ALOG_DBG( PSTR(D_LOG_CELLULAR "SMSAuto_GPS smsauto_gps_messages.rate_seconds %d"), jtok.getInt());
     #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS 
     smsauto_gps_messages.rate_seconds = jtok.getInt();
     #endif
@@ -639,7 +639,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
 
   if(jtok = obj["GPRS_Enable"]){
-    ALOG_INF( PSTR(D_LOG_CELLULAR "GPRS_Enable"));
+    ALOG_DBG( PSTR(D_LOG_CELLULAR "GPRS_Enable"));
     if(jtok.getInt() == 1)
     {
       DataNetwork__InitConfig();
@@ -649,7 +649,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
   #ifdef ENABLE_FEATURE_SIM__SMS
   if(jtok = obj["SMS_Enable"]){
-    ALOG_INF( PSTR(D_LOG_CELLULAR "SMS_Enable"));
+    ALOG_DBG( PSTR(D_LOG_CELLULAR "SMS_Enable"));
     if(jtok.getInt() == 1)
     {
       SMS_Enable();
@@ -660,7 +660,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
   #ifdef USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
   if(jtok = obj["SMS_GPSLocation"]){
-    ALOG_INF( PSTR(D_LOG_CELLULAR "SMS_GPSLocation"));
+    ALOG_DBG( PSTR(D_LOG_CELLULAR "SMS_GPSLocation"));
     if(jtok.getInt() == 1)
     {
       SMS_GPSLocation();
@@ -671,7 +671,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
   #ifdef ENABLE_FEATURE_SIM__SMS
   if(jtok = obj["SMSForward"]){
-    ALOG_INF( PSTR(D_LOG_CELLULAR "SMSForward"));
+    ALOG_DBG( PSTR(D_LOG_CELLULAR "SMSForward"));
     if(jtok.getInt() == 1)
     {
       SendATCommand_SMSImmediateForwardOverSerial();
@@ -681,26 +681,26 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
   
   if(jtok = obj["BattVolt"]){
-    ALOG_INF( PSTR(D_LOG_CELLULAR "BattVolt"));
+    ALOG_DBG( PSTR(D_LOG_CELLULAR "BattVolt"));
     if(jtok.getInt() == 1)
     {    
       // read the battery voltage and percentage
       uint16_t vbat = modem->getBattVoltage();        
-      ALOG_INF(PSTR(D_LOG_CELLULAR "%d mV"), vbat);
+      ALOG_DBG(PSTR(D_LOG_CELLULAR "%d mV"), vbat);
     }
   }
 
   if(jtok = obj["ModemInit"]){
-    ALOG_INF( PSTR(D_LOG_CELLULAR "ModemInit"));
+    ALOG_DBG( PSTR(D_LOG_CELLULAR "ModemInit"));
     flag_modem_initialized = jtok.getInt();
   }
 
   if(jtok = obj["ADCVoltage"]){
-    ALOG_INF( PSTR(D_LOG_CELLULAR "ADCVoltage"));
+    ALOG_DBG( PSTR(D_LOG_CELLULAR "ADCVoltage"));
     if(jtok.getInt() == 1)
     {      
       ModemUpdate_BatteryStatus();
-      ALOG_INF(PSTR(D_LOG_CELLULAR "{\"volts_mv\":%d,\"percent\":%d,\"milliVolts\":%d}"),
+      ALOG_DBG(PSTR(D_LOG_CELLULAR "{\"volts_mv\":%d,\"percent\":%d,\"milliVolts\":%d}"),
         modem_status.battery.volts_mv,modem_status.battery.percentage,modem_status.battery.charge_state);
     }
   }
@@ -708,7 +708,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
   if(jtok = obj["ReadSMS"]){
 
-    ALOG_INF( PSTR(D_LOG_CELLULAR "ReadSMS"));
+    ALOG_DBG( PSTR(D_LOG_CELLULAR "ReadSMS"));
 
     // flag_modem_initialized = jtok.getInt();
   
@@ -719,7 +719,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
       //parser right here
 
       bool result = modem->waitResponse(DEFAULT_AT_COMMAND_RESPONSE_WAIT);
-      ALOG_INF(PSTR(D_LOG_CELLULAR "ReadSMS %d"), result);
+      ALOG_DBG(PSTR(D_LOG_CELLULAR "ReadSMS %d"), result);
       
 
     // "AT+CMGD=,4",// DELETE ALL MESSAGES (Read or not)
@@ -735,7 +735,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
     if(jtok2 = jtok.getObject()["SMSReadOnly"])
     {
-      ALOG_INF( PSTR(D_LOG_CELLULAR "SMSReadOnly"));
+      ALOG_DBG( PSTR(D_LOG_CELLULAR "SMSReadOnly"));
 
       if(jtok2.isStr()) //Assumed worded group type
       {        
@@ -749,7 +749,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
     if(jtok2 = jtok.getObject()["SMSReadAndClear"])
     {
-      ALOG_INF( PSTR(D_LOG_CELLULAR "SMSReadAndClear"));
+      ALOG_DBG( PSTR(D_LOG_CELLULAR "SMSReadAndClear"));
 
       if(jtok2.isNum()) // Assumed index (From 0-max)
       {        
@@ -764,7 +764,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
     if(jtok2 = jtok.getObject()["SMSReadAndClearAll"])
     {
-      ALOG_INF( PSTR(D_LOG_CELLULAR "SMSReadAndClearAll"));
+      ALOG_DBG( PSTR(D_LOG_CELLULAR "SMSReadAndClearAll"));
       
       if(SendAT_ATParseResponse_F(100, LOG_LEVEL_COMMANDS, PSTR("+CMGD=?")))
       {
@@ -783,7 +783,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
     if(jtok2 = jtok.getObject()["SMSCheckWaitingIndexs"])
     {
-      ALOG_INF( PSTR(D_LOG_CELLULAR "SMSCheckWaitingIndexs"));
+      ALOG_DBG( PSTR(D_LOG_CELLULAR "SMSCheckWaitingIndexs"));
       
       if(SendAT_ATParseResponse_F(100, LOG_LEVEL_COMMANDS, PSTR("+CMGD=?")))
       {
@@ -796,7 +796,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
     if(jtok2 = jtok.getObject()["SMSClearAll"])
     {
-      ALOG_INF( PSTR(D_LOG_CELLULAR "SMSClearAll"));
+      ALOG_DBG( PSTR(D_LOG_CELLULAR "SMSClearAll"));
       uint8_t flag = 4; // delete all
       SendAT_F(100, PSTR("+CMGR=%d[,%d]"), jtok2.getInt(), flag);
     }
@@ -805,7 +805,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
   if(jtok = obj["ReadDeleteSMS"]){
 
-    ALOG_INF( PSTR(D_LOG_CELLULAR "ReadDeleteSMS"));
+    ALOG_DBG( PSTR(D_LOG_CELLULAR "ReadDeleteSMS"));
 
     // flag_modem_initialized = jtok.getInt();
   
@@ -825,7 +825,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
       modem->sendAT("+CMGD=0");
       
       result = modem->waitResponse(DEFAULT_AT_COMMAND_RESPONSE_WAIT);
-      ALOG_INF(PSTR(D_LOG_CELLULAR "ReadDeleteSMS %d"), result);
+      ALOG_DBG(PSTR(D_LOG_CELLULAR "ReadDeleteSMS %d"), result);
     // "AT+CMGD=,4",// DELETE ALL MESSAGES (Read or not)
     // "AT+CMGR=1",
     // "AT+CMGL=\"REC UNREAD\""
@@ -835,25 +835,25 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
 
 
   if(jtok = obj["ATCommands"]){
-    ALOG_INF( PSTR(D_LOG_CELLULAR "ATCommands"));
+    ALOG_DBG( PSTR(D_LOG_CELLULAR "ATCommands"));
     JsonParserArray array = jtok;
     for(auto val : array) {
-      ALOG_INF(PSTR(D_LOG_CELLULAR "F::%s %s"),__FUNCTION__,val.getStr());
+      ALOG_DBG(PSTR(D_LOG_CELLULAR "F::%s %s"),__FUNCTION__,val.getStr());
       modem_serial->println(val.getStr());  
       delay(500);
       if (modem_serial->available()) {
         String r = modem_serial->readString();
-        ALOG_INF(PSTR(D_LOG_CELLULAR "ATResponse = \"%s\""), r.c_str());
+        ALOG_DBG(PSTR(D_LOG_CELLULAR "ATResponse = \"%s\""), r.c_str());
       }
     }
 
   }
 
   if(jtok = obj["ATCommandsParsing"]){
-    ALOG_INF( PSTR(D_LOG_CELLULAR "ATCommandsParsing"));
+    ALOG_DBG( PSTR(D_LOG_CELLULAR "ATCommandsParsing"));
     JsonParserArray array = jtok;
     for(auto val : array) {
-      ALOG_INF(PSTR(D_LOG_CELLULAR "F::%s %s"),__FUNCTION__,val.getStr());
+      ALOG_DBG(PSTR(D_LOG_CELLULAR "F::%s %s"),__FUNCTION__,val.getStr());
       modem_serial->println(val.getStr());  
       delay(500);
 
@@ -887,7 +887,7 @@ bool mSIM7000G::parse_ATCommands(char* buffer, uint16_t buflen, uint8_t response
   // ---- OPTIONAL: suppress OK spam but keep a flag ----
   if (ATParse__OK(buffer, buflen, response_loglevel))
   { // handled "OK"
-    // ALOG_INF(PSTR("Suppress OK response"));
+    // ALOG_DBG(PSTR("Suppress OK response"));
     return true;
   }
 
@@ -1009,7 +1009,7 @@ bool mSIM7000G::ATParse__CMT_Header(char* line, uint16_t buflen, uint8_t respons
   char* p = strstr(line, "+CMT:");
   if (!p) return false;
 
-  ALOG_INF(PSTR(D_LOG_CELLULAR "SMS2: CMT header: %s"), p);
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "SMS2: CMT header: %s"), p);
 
   snprintf(sms2_header_line, sizeof(sms2_header_line), "%s", p);
   sms2_wait_kind    = SMS2_WAIT_CMT_BODY;
@@ -1036,7 +1036,7 @@ bool mSIM7000G::ATParse__BodyLine(char* line, uint16_t buflen, uint8_t response_
   }
 
   // Dispatch SMS content into your command handler
-  ALOG_INF(PSTR(D_LOG_CELLULAR "SMS2: RX from=%s body=\"%s\""), from, body);
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "SMS2: RX from=%s body=\"%s\""), from, body);
   SMS_Handle_IncomingText(from, body);
 
   // If this was a CMGR read, delete using the pending index (if set by your read logic)
@@ -1046,7 +1046,7 @@ bool mSIM7000G::ATParse__BodyLine(char* line, uint16_t buflen, uint8_t response_
     {
       // Deleting is a “setup/process” action; blocking 1-2s is fine.
       SendAT_F(2000, PSTR("+CMGD=%d"), (int)sms2_cmgr_pending_idx);
-      ALOG_INF(PSTR(D_LOG_CELLULAR "SMS2: deleted idx=%d"), (int)sms2_cmgr_pending_idx);
+      ALOG_DBG(PSTR(D_LOG_CELLULAR "SMS2: deleted idx=%d"), (int)sms2_cmgr_pending_idx);
       sms2_cmgr_pending_idx = -1;
     }
   }
@@ -1069,7 +1069,7 @@ bool mSIM7000G::ATParse__CMTI(char* line, uint16_t buflen, uint8_t response_logl
   char* p = strstr(line, "+CMTI:");
   if (!p) return false;
 
-  ALOG_INF(PSTR(D_LOG_CELLULAR "SMS2: URC CMTI (stored SMS): \"%s\""), p);
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "SMS2: URC CMTI (stored SMS): \"%s\""), p);
 
   // Find comma and parse index
   const char* comma = strchr(p, ',');
@@ -1087,7 +1087,7 @@ bool mSIM7000G::ATParse__CMTI(char* line, uint16_t buflen, uint8_t response_logl
   }
 
   sms.messages_incoming_index_list.push_back(idx);
-  ALOG_INF(PSTR(D_LOG_CELLULAR "SMS2: CMTI queued idx=%d"), idx);
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "SMS2: CMTI queued idx=%d"), idx);
 
   // Forward-looking: you can optionally trigger a read here (fire-and-forget),
   // but you asked to keep this generic, so we only queue.
@@ -1131,7 +1131,7 @@ bool mSIM7000G::ATParse__CMGL(char* line, uint16_t buflen, uint8_t response_logl
   if (sscanf(p, "+CMGL: %d", &idx) == 1 && idx >= 0)
   {
     sms.messages_incoming_index_list.push_back(idx);
-    ALOG_INF(PSTR(D_LOG_CELLULAR "SMS: CMGL queued idx=%d"), idx);
+    ALOG_DBG(PSTR(D_LOG_CELLULAR "SMS: CMGL queued idx=%d"), idx);
   }
   else
   {
@@ -1149,7 +1149,7 @@ bool mSIM7000G::ATParse__CPMS(char* line, uint16_t buflen, uint8_t response_logl
   char* p = strstr(line, "+CPMS:");
   if (!p) return false;
 
-  ALOG_INF(PSTR(D_LOG_CELLULAR "SMS2: CPMS: %s"), p);
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "SMS2: CPMS: %s"), p);
   // If you want structured numbers, parse here (but you asked to keep generic right now).
   return true;
 }
@@ -1220,22 +1220,22 @@ void mSIM7000G::ModemUpdate_GPRS()
 
             
         // String ccid = modem->getSimCCID();
-        // ALOG_INF(PSTR(D_LOG_CELLULAR "CCID: %s"), ccid.c_str());
+        // ALOG_DBG(PSTR(D_LOG_CELLULAR "CCID: %s"), ccid.c_str());
 
         // String imei = modem->getIMEI();
-        // ALOG_INF(PSTR(D_LOG_CELLULAR "IMEI: %s"), imei.c_str());
+        // ALOG_DBG(PSTR(D_LOG_CELLULAR "IMEI: %s"), imei.c_str());
 
         // String cop = modem->getOperator();
-        // ALOG_INF(PSTR(D_LOG_CELLULAR "Operator: %s"), cop.c_str());
+        // ALOG_DBG(PSTR(D_LOG_CELLULAR "Operator: %s"), cop.c_str());
 
         // IPAddress local = modem->localIP();
-        // ALOG_INF(PSTR(D_LOG_CELLULAR "Local IP: %s"), String(local).c_str());
+        // ALOG_DBG(PSTR(D_LOG_CELLULAR "Local IP: %s"), String(local).c_str());
 
       } 
       else 
       {
         GPRS_UpdateConnectionState(false);
-        ALOG_INF(PSTR(D_LOG_CELLULAR "GPRS status: NOT connected Downtime: %d secs"), gprs.downtime_secs);
+        ALOG_DBG(PSTR(D_LOG_CELLULAR "GPRS status: NOT connected Downtime: %d secs"), gprs.downtime_secs);
         DataNetwork__StartConnection();
       }
 
@@ -1349,10 +1349,10 @@ bool mSIM7000G::Modem__PowerUntilRunning(uint16_t wait_millis)
 bool mSIM7000G::Modem__Running(uint16_t wait_millis)
 {
 
-  ALOG_INF(PSTR("mSIM7000G::Modem__Running"));
+  ALOG_DBG(PSTR("mSIM7000G::Modem__Running"));
   bool modem_responded = false;
   modem_responded = modem->testAT(wait_millis);
-  ALOG_INF(PSTR("modem_responded = %d"), modem_responded);
+  ALOG_DBG(PSTR("modem_responded = %d"), modem_responded);
   return modem_responded;
 
 }
@@ -1420,7 +1420,7 @@ bool mSIM7000G::DataNetwork__InitConfig()
 
     uint32_t  timeout = millis();
     // Check network signal and registration information
-    // ALOG_INF(PSTR(D_LOG_CELLULAR "> SIM7000/SIM7070 uses automatic mode to access the network. The access speed may be slow. Please wait patiently"));
+    // ALOG_DBG(PSTR(D_LOG_CELLULAR "> SIM7000/SIM7070 uses automatic mode to access the network. The access speed may be slow. Please wait patiently"));
     RegStatus status;
     timeout = millis();
     do {
@@ -1429,15 +1429,15 @@ bool mSIM7000G::DataNetwork__InitConfig()
       status = modem->getRegistrationStatus();
 
       if (status == REG_DENIED) {
-        ALOG_INF(PSTR(D_LOG_CELLULAR "The SIM card you use has been rejected by the network operator"));
+        ALOG_DBG(PSTR(D_LOG_CELLULAR "The SIM card you use has been rejected by the network operator"));
         return false;
       } else {
-        ALOG_INF(PSTR(D_LOG_CELLULAR "Signal %d dBm, %d, pause %d"), (int)GetSignalQualityPower(sq), status, 10000-(timeout-millis()) );
+        ALOG_DBG(PSTR(D_LOG_CELLULAR "Signal %d dBm, %d, pause %d"), (int)GetSignalQualityPower(sq), status, 10000-(timeout-millis()) );
       }
 
       if (millis() - timeout > 10000 ) { //!! THIS IS BLOCKING CODE, NEEDS RESOLVED TO RETRY AGAIN
         if (sq == 99) {
-          ALOG_INF(PSTR(D_LOG_CELLULAR "It seems that there is no signal."));
+          ALOG_DBG(PSTR(D_LOG_CELLULAR "It seems that there is no signal."));
           return false;
         }
         timeout = millis();
@@ -1450,7 +1450,7 @@ bool mSIM7000G::DataNetwork__InitConfig()
 
     String res;
 
-    ALOG_INF(PSTR(D_LOG_CELLULAR "Obtain the APN issued by the network"));
+    ALOG_DBG(PSTR(D_LOG_CELLULAR "Obtain the APN issued by the network"));
     modem->sendAT("+CGNAPN");
     if (modem->waitResponse(3000, res) == 1) 
     {
@@ -1459,7 +1459,7 @@ bool mSIM7000G::DataNetwork__InitConfig()
       res.replace("\r", "");
       res.replace("\n", "");
       res.replace("OK", "");
-      ALOG_INF(PSTR(D_LOG_CELLULAR "The APN issued by the network is: %s"), res.c_str());
+      ALOG_DBG(PSTR(D_LOG_CELLULAR "The APN issued by the network is: %s"), res.c_str());
     }
 
     modem->sendAT("+CNACT=1");
@@ -1476,7 +1476,7 @@ bool mSIM7000G::DataNetwork__InitConfig()
       res.replace("\r", "");
       res.replace("\n", "");
       modem->waitResponse();
-      ALOG_INF(PSTR(D_LOG_CELLULAR "The current network IP address is: %s"), res.c_str());
+      ALOG_DBG(PSTR(D_LOG_CELLULAR "The current network IP address is: %s"), res.c_str());
     }
 
     
@@ -1500,39 +1500,39 @@ bool mSIM7000G::DataNetwork__StartConnection()
     return false;
   }
 
-  ALOG_INF(PSTR(D_LOG_CELLULAR "RECONNECTING GPRS_Connect Waiting for CELL TOWER network..."));
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "RECONNECTING GPRS_Connect Waiting for CELL TOWER network..."));
 
   if(!modem->waitForNetwork())  // SIM to cell tower connection, not GPRS
   {
-    ALOG_INF(PSTR(D_LOG_CELLULAR "RECONNECTING GPRS_Connect Timeout waiting for network"));
+    ALOG_DBG(PSTR(D_LOG_CELLULAR "RECONNECTING GPRS_Connect Timeout waiting for network"));
     return false;
   }
 
   if(modem->isNetworkConnected())
   {
-    ALOG_INF(PSTR(D_LOG_CELLULAR "Network connected"));
+    ALOG_DBG(PSTR(D_LOG_CELLULAR "Network connected"));
   }
 
   modem->gprsDisconnect();
   delay(50);
 
-  ALOG_INF(PSTR(D_LOG_CELLULAR "Connecting to: %s"), CELLULAR_APN);
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "Connecting to: %s"), CELLULAR_APN);
 
   const bool gprs_connection_successful =
     modem->gprsConnect(CELLULAR_APN, CELLULAR_GPRS_USERNAME, CELLULAR_GPRS_PASSWORD);
 
   if(gprs_connection_successful)
   {
-    ALOG_INF(PSTR(D_LOG_CELLULAR "modem->gprsConnect success"));
+    ALOG_DBG(PSTR(D_LOG_CELLULAR "modem->gprsConnect success"));
     gprs.apn_connect_called++;
   }
   else
   {
-    ALOG_INF(PSTR(D_LOG_CELLULAR "modem->gprsConnect failed"));
+    ALOG_DBG(PSTR(D_LOG_CELLULAR "modem->gprsConnect failed"));
     return false;
   }
 
-  ALOG_INF(PSTR(D_LOG_CELLULAR "GPRS Checking..."));
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "GPRS Checking..."));
 
   if(!modem->isGprsConnected())
   {
@@ -1541,7 +1541,7 @@ bool mSIM7000G::DataNetwork__StartConnection()
     return false;
   }
 
-  ALOG_INF(PSTR(D_LOG_CELLULAR "GPRS Connected"));
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "GPRS Connected"));
   GPRS_UpdateConnectionState(true);
 
   String res;
@@ -1554,7 +1554,7 @@ bool mSIM7000G::DataNetwork__StartConnection()
     res.replace("\n", "");
     modem->waitResponse();
 
-    ALOG_INF(PSTR(D_LOG_CELLULAR "The current network parameter is: %s"), res.c_str());
+    ALOG_DBG(PSTR(D_LOG_CELLULAR "The current network parameter is: %s"), res.c_str());
   }
 
   return true;

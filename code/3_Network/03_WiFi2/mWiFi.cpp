@@ -53,7 +53,7 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj)
 
     case TASK_EVERY_MINUTE:
     {
-      // ALOG_INF(PSTR("WL_CONNECTED=%d IP=%s"),
+      // ALOG_DBG(PSTR("WL_CONNECTED=%d IP=%s"),
       //          (WiFi.status() == WL_CONNECTED),
       //          WiFi.localIP().toString().c_str());
     }
@@ -139,7 +139,7 @@ void mWiFi::Task_EverySecond()
 
 void mWiFi::Init_Preload_Wifi2_Settings()
 {
-  ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"), __FILE__, __LINE__);
+  ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"), __FILE__, __LINE__);
 
   WiFi_Config_Clear();
   WiFi_Config_LoadLegacyDefaults();

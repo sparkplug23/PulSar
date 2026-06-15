@@ -573,7 +573,7 @@ int32_t analogAttach(uint32_t pin, bool output_invert)
   chan = findEmptyChannel();
 
   
-  Serial.printf("PWM: analogAttach chan %u", chan);
+  // Serial.printf("PWM: analogAttach chan %u", chan);
 
   if (chan < 0 || chan >= MAX_PWMS)
   {
