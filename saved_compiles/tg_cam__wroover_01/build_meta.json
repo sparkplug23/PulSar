@@ -1,7 +1,7 @@
 {
   "env_name": "tg_cam__wroover_01",
-  "created_utc": "2026-06-15T10:26:53Z",
-  "created_epoch": 1781519213,
+  "created_utc": "2026-06-17T22:07:52Z",
+  "created_epoch": 1781734072,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\tg_cam__wroover_01",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "dev_mqtt_transport",
-    "commit": "5a50454b9a063a23a2e07878f213ee109fde7a86",
-    "describe": "5a50454b-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_Cameras.h\n M code/0_ConfigUser/Secret/06_TemplateBuilds_From_INI/TemplateBase__HardwareSpecific.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/1_TaskerManager/mTaskerManager.cpp\n M code/2_CoreSystem/01_Settings/Defaults.cpp\n M code/2_CoreSystem/01_Settings/SavingLoading.cpp\n M code/2_CoreSystem/03_FileSystem/Storage_System.cpp\n M code/2_CoreSystem/03_FileSystem/mFileSystem.cpp\n M code/2_CoreSystem/04_JsonTemplate/mJsonTemplate.cpp\n M code/2_CoreSystem/05_HardwarePins/mPins.cpp\n M code/2_CoreSystem/05_HardwarePins/mPins_TemplatesParsing.cpp\n M code/2_CoreSystem/07_Time/mTime.cpp\n M code/2_CoreSystem/08_Logging/mLogging.h\n M code/2_CoreSystem/20_JSON/mJSON.cpp\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/2_CoreSystem/Version.h\n M code/2_CoreSystem/mBaseConfig.h\n M code/3_Network/00_Interface/Init_Defaults.cpp\n M code/3_Network/03_WiFi2/WiFi_Helpers.cpp\n M code/3_Network/03_WiFi2/mWiFi.cpp\n M code/3_Network/03_WiFi2/mWiFi_AP.cpp\n M code/3_Network/03_WiFi2/mWiFi_STA.cpp\n M code/3_Network/10_MQTT/mMQTT_Connection.cpp\n M code/3_Network/10_MQTT/mMQTT_Manager.cpp\n M code/3_Network/21_WebServer/_WebServer.cpp\n M code/4_Drivers/40_Modem_SIM7000G/Internal.cpp\n M code/4_Drivers/50_Camera/internal/mCamera_Config.cpp\n M code/4_Drivers/50_Camera/mCamera.cpp\n D code/4_Drivers/50_CameraOLD/camera_pins.h\n D code/4_Drivers/50_CameraOLD/mCamera.cpp\n D code/4_Drivers/50_CameraOLD/mCamera.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M code/Main_PulSar.cpp\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M lib/libesp32/ESP32-to-ESP8266-compat/src/esp8266toEsp32.cpp\n M notes/ChangeLogManual.md\n M platformio_override.ini\n M platformio_tg_cameras.ini\n M saved_compiles/tg_cam__wroover_01/build_meta.json\n M saved_compiles/tg_cam__wroover_01/firmware.elf"
+    "commit": "588b95a838027ff825ba98308a5df7b4d59dc3e5",
+    "describe": "588b95a8-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_Cameras.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/05_HardwarePins/gpio_bitpacked.cpp\n M code/2_CoreSystem/05_HardwarePins/mPins.cpp\n M code/2_CoreSystem/05_HardwarePins/mPins.h\n M code/2_CoreSystem/05_HardwarePins/mPins_TemplatesParsing.cpp\n M code/2_CoreSystem/09_Telemetry/mTelemetry.cpp\n M code/2_CoreSystem/09_Telemetry/mTelemetry.h\n M code/2_CoreSystem/09_Telemetry/mTelemetry_ConstructJSON.cpp\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/2_CoreSystem/35_PinViewer/Web/Src/pinviewer_main.htm\n M code/2_CoreSystem/35_PinViewer/mPinViewer.cpp\n M code/2_CoreSystem/35_PinViewer/mPinViewer.h\n M code/3_Network/10_MQTT/mMQTT.h\n M code/4_Drivers/50_Camera/internal/mCamera_Config.cpp\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M code/Main_PulSar.cpp\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M saved_compiles/tg_cam__wroover_01/build_meta.json\n M saved_compiles/tg_cam__wroover_01/firmware.elf"
   }
 }

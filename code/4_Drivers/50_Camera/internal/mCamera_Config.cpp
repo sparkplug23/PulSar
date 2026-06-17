@@ -326,23 +326,84 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
     
   } else if (Y2_GPIO_NUM != -1) {
     // Modell is set in camera_pins.h
-    config.pin_d0 = Y2_GPIO_NUM;
-    config.pin_d1 = Y3_GPIO_NUM;
-    config.pin_d2 = Y4_GPIO_NUM;
-    config.pin_d3 = Y5_GPIO_NUM;
-    config.pin_d4 = Y6_GPIO_NUM;
-    config.pin_d5 = Y7_GPIO_NUM;
-    config.pin_d6 = Y8_GPIO_NUM;
-    config.pin_d7 = Y9_GPIO_NUM;
-    config.pin_xclk = XCLK_GPIO_NUM;
-    config.pin_pclk = PCLK_GPIO_NUM;
-    config.pin_vsync = VSYNC_GPIO_NUM;
-    config.pin_href = HREF_GPIO_NUM;
-    config.pin_sscb_sda = SIOD_GPIO_NUM;
-    config.pin_sscb_scl = SIOC_GPIO_NUM;
-    config.pin_pwdn = PWDN_GPIO_NUM;
-    config.pin_reset = RESET_GPIO_NUM;
+    // config.pin_d0 = Y2_GPIO_NUM;
+    // config.pin_d1 = Y3_GPIO_NUM;
+    // config.pin_d2 = Y4_GPIO_NUM;
+    // config.pin_d3 = Y5_GPIO_NUM;
+    // config.pin_d4 = Y6_GPIO_NUM;
+    // config.pin_d5 = Y7_GPIO_NUM;
+    // config.pin_d6 = Y8_GPIO_NUM;
+    // config.pin_d7 = Y9_GPIO_NUM;
+    // config.pin_xclk = XCLK_GPIO_NUM;
+    // config.pin_pclk = PCLK_GPIO_NUM;
+    // config.pin_vsync = VSYNC_GPIO_NUM;
+    // config.pin_href = HREF_GPIO_NUM;
+    // config.pin_sscb_sda = SIOD_GPIO_NUM;
+    // config.pin_sscb_scl = SIOC_GPIO_NUM;
+    // config.pin_pwdn = PWDN_GPIO_NUM;
+    // config.pin_reset = RESET_GPIO_NUM;
     
+    // ALOG_DBG(PSTR(D_LOG_CAMERA "Compile flag pin config"));
+
+    /*******************************************************************************************\
+     * Compile flag camera pin config
+     *
+     * The camera pins are provided by camera_pins.h.
+     * Register them back into the pin table using the generic GPIO_WEBCAM_* functions so they
+     * appear in pin telemetry and allocation state.
+    \*******************************************************************************************/
+
+    mPins::PinAllocationFlags camera_flags;
+    camera_flags.data = 0;
+    camera_flags.grouped = 1;
+    camera_flags.locked = 1;
+    camera_flags.sensitive_to_probe = 1;
+
+    const uint16_t owner_id = GetModuleUniqueID();
+
+    config.pin_d0    = Y2_GPIO_NUM;
+    config.pin_d1    = Y3_GPIO_NUM;
+    config.pin_d2    = Y4_GPIO_NUM;
+    config.pin_d3    = Y5_GPIO_NUM;
+    config.pin_d4    = Y6_GPIO_NUM;
+    config.pin_d5    = Y7_GPIO_NUM;
+    config.pin_d6    = Y8_GPIO_NUM;
+    config.pin_d7    = Y9_GPIO_NUM;
+    config.pin_xclk  = XCLK_GPIO_NUM;
+    config.pin_pclk  = PCLK_GPIO_NUM;
+    config.pin_vsync = VSYNC_GPIO_NUM;
+    config.pin_href  = HREF_GPIO_NUM;
+
+    config.pin_sccb_sda = SIOD_GPIO_NUM;
+    config.pin_sccb_scl = SIOC_GPIO_NUM;
+
+    config.pin_pwdn  = PWDN_GPIO_NUM;
+    config.pin_reset = RESET_GPIO_NUM;
+
+    tkr_pins->PinTable_SerialPrint("before camera AllocatePin");
+
+    if(config.pin_d0    >= 0) { tkr_pins->AllocatePin(config.pin_d0,    PIGPIO(GPIO_WEBCAM_DATA, 0),  owner_id, camera_flags); }
+    if(config.pin_d1    >= 0) { tkr_pins->AllocatePin(config.pin_d1,    PIGPIO(GPIO_WEBCAM_DATA, 1),  owner_id, camera_flags); }
+    if(config.pin_d2    >= 0) { tkr_pins->AllocatePin(config.pin_d2,    PIGPIO(GPIO_WEBCAM_DATA, 2),  owner_id, camera_flags); }
+    if(config.pin_d3    >= 0) { tkr_pins->AllocatePin(config.pin_d3,    PIGPIO(GPIO_WEBCAM_DATA, 3),  owner_id, camera_flags); }
+    if(config.pin_d4    >= 0) { tkr_pins->AllocatePin(config.pin_d4,    PIGPIO(GPIO_WEBCAM_DATA, 4),  owner_id, camera_flags); }
+    if(config.pin_d5    >= 0) { tkr_pins->AllocatePin(config.pin_d5,    PIGPIO(GPIO_WEBCAM_DATA, 5),  owner_id, camera_flags); }
+    if(config.pin_d6    >= 0) { tkr_pins->AllocatePin(config.pin_d6,    PIGPIO(GPIO_WEBCAM_DATA, 6),  owner_id, camera_flags); }
+    if(config.pin_d7    >= 0) { tkr_pins->AllocatePin(config.pin_d7,    PIGPIO(GPIO_WEBCAM_DATA, 7),  owner_id, camera_flags); }
+
+    if(config.pin_xclk  >= 0) { tkr_pins->AllocatePin(config.pin_xclk,  PGPIO(GPIO_WEBCAM_XCLK),      owner_id, camera_flags); }
+    if(config.pin_pclk  >= 0) { tkr_pins->AllocatePin(config.pin_pclk,  PGPIO(GPIO_WEBCAM_PCLK),      owner_id, camera_flags); }
+    if(config.pin_vsync >= 0) { tkr_pins->AllocatePin(config.pin_vsync, PGPIO(GPIO_WEBCAM_VSYNC),     owner_id, camera_flags); }
+    if(config.pin_href  >= 0) { tkr_pins->AllocatePin(config.pin_href,  PGPIO(GPIO_WEBCAM_HREF),      owner_id, camera_flags); }
+
+    if(config.pin_sccb_sda >= 0) { tkr_pins->AllocatePin(config.pin_sccb_sda, PGPIO(GPIO_WEBCAM_SIOD), owner_id, camera_flags); }
+    if(config.pin_sccb_scl >= 0) { tkr_pins->AllocatePin(config.pin_sccb_scl, PGPIO(GPIO_WEBCAM_SIOC), owner_id, camera_flags); }
+
+    if(config.pin_pwdn  >= 0) { tkr_pins->AllocatePin(config.pin_pwdn,  PGPIO(GPIO_WEBCAM_PWDN),      owner_id, camera_flags); }
+    if(config.pin_reset >= 0) { tkr_pins->AllocatePin(config.pin_reset, PGPIO(GPIO_WEBCAM_RESET),     owner_id, camera_flags); }
+
+    tkr_pins->PinTable_SerialPrint("after camera AllocatePin");
+
     ALOG_DBG(PSTR(D_LOG_CAMERA "Compile flag pin config"));
     
   } else {

@@ -2,15 +2,13 @@
 
 #ifdef USE_MODULE_CORE_PINVIEWER
 
+
 /******************************************************************************************************************
  * Tasker
 *******************************************************************************************************************/
 
 int8_t mPinViewer::Tasker(uint8_t function, JsonParserObject obj)
 {
-  /************
-   * INIT SECTION
-   *******************/
   switch(function)
   {
     case TASK_PRE_INIT:
@@ -29,9 +27,6 @@ int8_t mPinViewer::Tasker(uint8_t function, JsonParserObject obj)
 
   switch(function)
   {
-    /************
-     * PERIODIC SECTION
-     *******************/
     case TASK_LOOP:
       UpdateIfDue();
     break;
@@ -48,23 +43,14 @@ int8_t mPinViewer::Tasker(uint8_t function, JsonParserObject obj)
       PublishKeepAlive(false);
     break;
 
-    /************
-     * WEB SECTION
-     *******************/
     case TASK_WEB_ADD_HANDLER:
       Web_AddHandlers();
     break;
 
-    /************
-     * COMMANDS SECTION
-     *******************/
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
 
-    /************
-     * MQTT SECTION
-     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
@@ -232,24 +218,24 @@ bool mPinViewer::BuildGPIOStateJSON(String& json, bool force_all)
   bool first = true;
   bool has_update = false;
 
-  for(uint8_t pin = 0; pin < PINVIEWER_MAX_GPIO_PINS; pin++)
+  for(uint8_t real_pin = 0; real_pin < PINVIEWER_MAX_GPIO_PINS; real_pin++)
   {
-    PinViewerPinMeta meta = GetPinMeta(pin);
+    PinViewerPinMeta meta = GetPinMeta(real_pin);
 
     if(!meta.valid) { continue; }
 
     const bool changed =
-      (meta.state != runtime.last_pin_state[pin]) ||
-      (meta.locked != runtime.last_pin_locked[pin]) ||
-      (meta.conflict != runtime.last_pin_conflict[pin]);
+      (meta.state != runtime.last_pin_state[real_pin]) ||
+      (meta.locked != runtime.last_pin_locked[real_pin]) ||
+      (meta.conflict != runtime.last_pin_conflict[real_pin]);
 
     if(force_all || changed)
     {
-      AppendPinJSON(json, pin, true, first);
+      AppendPinJSON(json, real_pin, true, first);
 
-      runtime.last_pin_state[pin] = meta.state;
-      runtime.last_pin_locked[pin] = meta.locked;
-      runtime.last_pin_conflict[pin] = meta.conflict;
+      runtime.last_pin_state[real_pin] = meta.state;
+      runtime.last_pin_locked[real_pin] = meta.locked;
+      runtime.last_pin_conflict[real_pin] = meta.conflict;
 
       has_update = true;
     }
@@ -269,13 +255,13 @@ bool mPinViewer::BuildPinListJSON(String& json)
 
   bool first = true;
 
-  for(uint8_t pin = 0; pin < PINVIEWER_MAX_GPIO_PINS; pin++)
+  for(uint8_t real_pin = 0; real_pin < PINVIEWER_MAX_GPIO_PINS; real_pin++)
   {
-    PinViewerPinMeta meta = GetPinMeta(pin);
+    PinViewerPinMeta meta = GetPinMeta(real_pin);
 
     if(!meta.valid) { continue; }
 
-    AppendPinJSON(json, pin, true, first);
+    AppendPinJSON(json, real_pin, true, first);
   }
 
   json += F("]}");
@@ -292,11 +278,11 @@ bool mPinViewer::BuildGroupListJSON(String& json)
 
   bool first = true;
 
-  const uint8_t group_count = tkr_pins->PinViewer__Group__GetCount();
+  const uint8_t group_count = Group_GetCount();
 
   for(uint8_t group_index = 0; group_index < group_count; group_index++)
   {
-    const uint8_t group_id = tkr_pins->PinViewer__Group__GetID_ByIndex(group_index);
+    const uint8_t group_id = Group_GetID_ByIndex(group_index);
 
     if(group_id == 0) { continue; }
 
@@ -384,22 +370,22 @@ bool mPinViewer::BuildSettingsJSON(String& json)
 }
 
 
-void mPinViewer::AppendPinJSON(String& json, uint8_t pin, bool include_state, bool& first)
+void mPinViewer::AppendPinJSON(String& json, uint8_t real_pin, bool include_state, bool& first)
 {
   if(!first) { json += ','; }
   first = false;
 
-  PinViewerPinMeta meta = GetPinMeta(pin);
+  PinViewerPinMeta meta = GetPinMeta(real_pin);
 
   char function_name[32];
   char owner_name[32];
   char group_name[32];
   char group_colour[12];
 
-  tkr_pins->PinViewer__PhysicalPin__GetFunctionName(pin, function_name, sizeof(function_name));
-  tkr_pins->PinViewer__PhysicalPin__GetOwnerName(pin, owner_name, sizeof(owner_name));
-  tkr_pins->PinViewer__PhysicalPin__GetGroupName(pin, group_name, sizeof(group_name));
-  tkr_pins->PinViewer__PhysicalPin__GetGroupColour(pin, group_colour, sizeof(group_colour));
+  tkr_pins->mPins::PinTable_GetFunctionName(real_pin, function_name, sizeof(function_name));
+  tkr_pins->mPins::PinTable_GetOwnerName(real_pin, owner_name, sizeof(owner_name));
+  tkr_pins->mPins::PinTable_GetGroupName(real_pin, group_name, sizeof(group_name));
+  Group_GetColour_ByID(meta.group_id, group_colour, sizeof(group_colour));
 
   json += F("{\"pin\":");
   json += meta.pin;
@@ -470,6 +456,9 @@ void mPinViewer::AppendPinJSON(String& json, uint8_t pin, bool include_state, bo
   json += F(",\"conflict\":");
   json += meta.conflict ? F("true") : F("false");
 
+  json += F(",\"allocated\":");
+  json += meta.used ? F("true") : F("false");
+
   json += F("}");
 }
 
@@ -482,8 +471,8 @@ void mPinViewer::AppendGroupJSON(String& json, uint8_t group_id, bool& first)
   char group_name[32];
   char group_colour[12];
 
-  tkr_pins->PinViewer__Group__GetName_ByID(group_id, group_name, sizeof(group_name));
-  tkr_pins->PinViewer__Group__GetColour_ByID(group_id, group_colour, sizeof(group_colour));
+  Group_GetName_ByID(group_id, group_name, sizeof(group_name));
+  Group_GetColour_ByID(group_id, group_colour, sizeof(group_colour));
 
   json += F("{\"group_id\":");
   json += group_id;
@@ -500,14 +489,14 @@ void mPinViewer::AppendGroupJSON(String& json, uint8_t group_id, bool& first)
 
   bool first_address = true;
 
-  const uint8_t address_count = tkr_pins->PinViewer__Group__GetAddressCount(group_id);
+  const uint8_t address_count = Group_GetAddressCount(group_id);
 
   for(uint8_t address_index = 0; address_index < address_count; address_index++)
   {
     uint8_t address = 0;
     char module_name[32];
 
-    if(!tkr_pins->PinViewer__Group__GetAddress_ByIndex(group_id, address_index, &address, module_name, sizeof(module_name)))
+    if(!Group_GetAddress_ByIndex(group_id, address_index, &address, module_name, sizeof(module_name)))
     {
       continue;
     }
@@ -554,34 +543,270 @@ void mPinViewer::AppendJSONString(String& json, const char* value)
  * Pin metadata
 *******************************************************************************************************************/
 
-mPinViewer::PinViewerPinMeta mPinViewer::GetPinMeta(uint8_t pin)
+mPinViewer::PinViewerPinMeta mPinViewer::GetPinMeta(uint8_t real_pin)
 {
   PinViewerPinMeta meta;
 
-  meta.pin = pin;
-  meta.valid = tkr_pins->PinViewer__PhysicalPin__IsValid(pin);
-  meta.usable = tkr_pins->PinViewer__PhysicalPin__IsUsable(pin);
-  meta.used = tkr_pins->PinViewer__PhysicalPin__IsUsed(pin);
-  meta.locked = tkr_pins->PinViewer__PhysicalPin__IsLocked(pin);
-  meta.reserved = tkr_pins->PinViewer__PhysicalPin__IsReserved(pin);
-  meta.conflict = tkr_pins->PinViewer__PhysicalPin__HasConflict(pin);
-  meta.function_id = tkr_pins->PinViewer__PhysicalPin__GetFunctionID(pin);
-  meta.owner_id = tkr_pins->PinViewer__PhysicalPin__GetOwnerID(pin);
-  meta.direction_id = tkr_pins->PinViewer__PhysicalPin__GetDirectionID(pin);
-  meta.share_mode_id = tkr_pins->PinViewer__PhysicalPin__GetShareModeID(pin);
-  meta.user_count = tkr_pins->PinViewer__PhysicalPin__GetUserCount(pin);
-  meta.group_id = tkr_pins->PinViewer__PhysicalPin__GetGroupID(pin);
-  meta.state = ReadPinState(pin);
+  meta.pin = real_pin;
+  meta.valid = IsValidPin(real_pin);
+
+  if(!meta.valid)
+  {
+    meta.state = PINVIEWER_STATE_INVALID;
+    return meta;
+  }
+
+  const mPins::PinTable& p = tkr_pins->pin[real_pin];
+
+  meta.usable = IsUsablePin(real_pin);
+  meta.used = p.IsAllocated();
+  meta.locked = p.IsLocked();
+  meta.reserved = IsReservedPin(real_pin);
+  meta.conflict = p.HasConflict();
+
+  meta.function_id = p.FunctionID();
+  meta.owner_id = p.OwnerID();
+  meta.direction_id = GetDirectionID(real_pin);
+  meta.share_mode_id = GetShareModeID(real_pin);
+  meta.user_count = GetUserCount(real_pin);
+  meta.group_id = p.GroupID();
+
+  meta.state = ReadPinState(real_pin);
 
   return meta;
 }
 
 
-int8_t mPinViewer::ReadPinState(uint8_t pin)
+int8_t mPinViewer::ReadPinState(uint8_t real_pin)
 {
-  if(!tkr_pins->PinViewer__PhysicalPin__IsValid(pin)) { return PINVIEWER_STATE_INVALID; }
+  if(!IsValidPin(real_pin)) { return PINVIEWER_STATE_INVALID; }
 
-  return digitalRead(pin) ? PINVIEWER_STATE_HIGH : PINVIEWER_STATE_LOW;
+  const mPins::PinTable& p = tkr_pins->pin[real_pin];
+
+  if(p.allocation.sensitive_to_probe) { return PINVIEWER_STATE_UNKNOWN; }
+  if(p.physical.flash_reserved) { return PINVIEWER_STATE_UNKNOWN; }
+  if(p.physical.usb_reserved) { return PINVIEWER_STATE_UNKNOWN; }
+  if(p.allocation.unavailable) { return PINVIEWER_STATE_UNKNOWN; }
+
+  return digitalRead(real_pin) ? PINVIEWER_STATE_HIGH : PINVIEWER_STATE_LOW;
+}
+
+
+bool mPinViewer::IsValidPin(uint8_t real_pin)
+{
+  return real_pin < MAX_GPIO_PIN;
+}
+
+
+bool mPinViewer::IsUsablePin(uint8_t real_pin)
+{
+  if(!IsValidPin(real_pin)) return false;
+
+  const mPins::PinTable& p = tkr_pins->pin[real_pin];
+
+  return p.IsUsable();
+}
+
+
+bool mPinViewer::IsReservedPin(uint8_t real_pin)
+{
+  if(!IsValidPin(real_pin)) return false;
+
+  const mPins::PinTable& p = tkr_pins->pin[real_pin];
+
+  return p.IsReserved();
+}
+
+
+uint8_t mPinViewer::GetDirectionID(uint8_t real_pin)
+{
+  if(!IsValidPin(real_pin)) return PINVIEWER_DIRECTION_UNKNOWN;
+
+  const mPins::PinTable& p = tkr_pins->pin[real_pin];
+
+  if(p.physical.input_only)  return PINVIEWER_DIRECTION_INPUT;
+  if(p.physical.output_only) return PINVIEWER_DIRECTION_OUTPUT;
+
+  return PINVIEWER_DIRECTION_UNKNOWN;
+}
+
+
+uint8_t mPinViewer::GetShareModeID(uint8_t real_pin)
+{
+  if(!IsValidPin(real_pin)) return PINVIEWER_SHARE_UNKNOWN;
+
+  const mPins::PinTable& p = tkr_pins->pin[real_pin];
+
+  if(p.allocation.shared) return PINVIEWER_SHARE_SHARED;
+  if(p.allocation.allocated) return PINVIEWER_SHARE_EXCLUSIVE;
+  if(p.allocation.unavailable) return PINVIEWER_SHARE_RESERVED;
+
+  return PINVIEWER_SHARE_UNKNOWN;
+}
+
+
+uint8_t mPinViewer::GetUserCount(uint8_t real_pin)
+{
+  if(!IsValidPin(real_pin)) return 0;
+
+  const mPins::PinTable& p = tkr_pins->pin[real_pin];
+
+  return p.allocation.allocated ? 1 : 0;
+}
+
+
+uint8_t mPinViewer::Group_GetCount(void)
+{
+  uint8_t count = 0;
+  uint8_t groups[MAX_GPIO_PIN];
+
+  for(uint8_t i = 0; i < ARRAY_SIZE(groups); i++)
+  {
+    groups[i] = 0;
+  }
+
+  for(uint8_t real_pin = 0; real_pin < MAX_GPIO_PIN; real_pin++)
+  {
+    const uint8_t group_id = tkr_pins->pin[real_pin].GroupID();
+
+    if(group_id == 0)
+    {
+      continue;
+    }
+
+    bool found = false;
+
+    for(uint8_t i = 0; i < count; i++)
+    {
+      if(groups[i] == group_id)
+      {
+        found = true;
+        break;
+      }
+    }
+
+    if(!found)
+    {
+      groups[count++] = group_id;
+    }
+  }
+
+  return count;
+}
+
+
+uint8_t mPinViewer::Group_GetID_ByIndex(uint8_t group_index)
+{
+  uint8_t count = 0;
+  uint8_t groups[MAX_GPIO_PIN];
+
+  for(uint8_t i = 0; i < ARRAY_SIZE(groups); i++)
+  {
+    groups[i] = 0;
+  }
+
+  for(uint8_t real_pin = 0; real_pin < MAX_GPIO_PIN; real_pin++)
+  {
+    const uint8_t group_id = tkr_pins->pin[real_pin].GroupID();
+
+    if(group_id == 0)
+    {
+      continue;
+    }
+
+    bool found = false;
+
+    for(uint8_t i = 0; i < count; i++)
+    {
+      if(groups[i] == group_id)
+      {
+        found = true;
+        break;
+      }
+    }
+
+    if(!found)
+    {
+      if(count == group_index)
+      {
+        return group_id;
+      }
+
+      groups[count++] = group_id;
+    }
+  }
+
+  return 0;
+}
+
+
+const char* mPinViewer::Group_GetName_ByID(uint8_t group_id, char* buffer, uint8_t buflen)
+{
+  if((!buffer) || (buflen == 0)) return "";
+
+  buffer[0] = '\0';
+
+  if(group_id == 0)
+  {
+    snprintf(buffer, buflen, "None");
+    return buffer;
+  }
+
+  return tkr_pins->GetGPIOFunctionNamebyID(PGPIO(group_id), buffer, buflen);
+}
+
+
+const char* mPinViewer::Group_GetColour_ByID(uint8_t group_id, char* buffer, uint8_t buflen)
+{
+  if((!buffer) || (buflen == 0)) return "";
+
+  buffer[0] = '\0';
+
+  if(group_id == 0)
+  {
+    snprintf(buffer, buflen, "#808080");
+    return buffer;
+  }
+
+  switch(group_id % 8)
+  {
+    case 0:  snprintf(buffer, buflen, "#4E79A7"); break;
+    case 1:  snprintf(buffer, buflen, "#F28E2B"); break;
+    case 2:  snprintf(buffer, buflen, "#E15759"); break;
+    case 3:  snprintf(buffer, buflen, "#76B7B2"); break;
+    case 4:  snprintf(buffer, buflen, "#59A14F"); break;
+    case 5:  snprintf(buffer, buflen, "#EDC948"); break;
+    case 6:  snprintf(buffer, buflen, "#B07AA1"); break;
+    default: snprintf(buffer, buflen, "#FF9DA7"); break;
+  }
+
+  return buffer;
+}
+
+
+uint8_t mPinViewer::Group_GetAddressCount(uint8_t group_id)
+{
+  (void)group_id;
+  return 0;
+}
+
+
+bool mPinViewer::Group_GetAddress_ByIndex(uint8_t group_id, uint8_t address_index, uint8_t* address, char* module_name, uint8_t module_name_len)
+{
+  (void)group_id;
+  (void)address_index;
+
+  if(address)
+  {
+    *address = 0;
+  }
+
+  if((module_name) && (module_name_len > 0))
+  {
+    module_name[0] = '\0';
+  }
+
+  return false;
 }
 
 
@@ -589,11 +814,11 @@ const char* mPinViewer::GetDirectionName(uint8_t direction_id)
 {
   switch(direction_id)
   {
-    case 1: return "input";
-    case 2: return "output";
-    case 3: return "bidirectional";
-    case 4: return "alternate";
-    default: return "unknown";
+    case PINVIEWER_DIRECTION_INPUT:         return "input";
+    case PINVIEWER_DIRECTION_OUTPUT:        return "output";
+    case PINVIEWER_DIRECTION_BIDIRECTIONAL: return "bidirectional";
+    case PINVIEWER_DIRECTION_ALTERNATE:     return "alternate";
+    default:                                return "unknown";
   }
 }
 
@@ -602,11 +827,11 @@ const char* mPinViewer::GetShareModeName(uint8_t share_mode_id)
 {
   switch(share_mode_id)
   {
-    case 1: return "exclusive";
-    case 2: return "shared";
-    case 3: return "reserved";
-    case 4: return "internal";
-    default: return "unknown";
+    case PINVIEWER_SHARE_EXCLUSIVE: return "exclusive";
+    case PINVIEWER_SHARE_SHARED:    return "shared";
+    case PINVIEWER_SHARE_RESERVED:  return "reserved";
+    case PINVIEWER_SHARE_INTERNAL:  return "internal";
+    default:                        return "unknown";
   }
 }
 
@@ -621,58 +846,70 @@ void mPinViewer::Web_AddHandlers(void)
 
   ALOG_INF(PSTR("PinViewer Web_AddHandlers"));
 
-  /*
-   * Root-level only.
-   * Do not use /pinviewer/xxx because this has previously collided with deep-route handling.
-   */
 
-  tkr_web->server->on("/pinviewer", HTTP_GET, [this](AsyncWebServerRequest* request)
-  {
-    ALOG_INF(PSTR("PinViewer route: /pinviewer"));
-    Web_SendRoot(request);
-  });
-
-  tkr_web->server->on("/pinviewer_release", HTTP_GET, [this](AsyncWebServerRequest* request)
-  {
-    ALOG_INF(PSTR("PinViewer route: /pinviewer_release"));
+  SPGM_CTR(PM_URL_PINVIEWER_RELEASE) "/pinv/release";
+  tkr_web->server->on(PM_URL_PINVIEWER_RELEASE, HTTP_GET, [this](AsyncWebServerRequest* request){
+    ALOG_INF(PSTR("PinViewer route: /pinv/release"));
     Web_SendRelease(request);
   });
+  AddURLtoList(PM_URL_PINVIEWER_RELEASE, HTTP_GET);
 
-  tkr_web->server->on("/pinviewer_sampling", HTTP_GET, [this](AsyncWebServerRequest* request)
-  {
-    ALOG_INF(PSTR("PinViewer route: /pinviewer_sampling"));
+
+  SPGM_CTR(PM_URL_PINVIEWER_SAMPLING) "/pinv/smp";
+  tkr_web->server->on(PM_URL_PINVIEWER_SAMPLING, HTTP_GET, [this](AsyncWebServerRequest* request){
+    ALOG_INF(PSTR("PinViewer route: /pinv/smp"));
     Web_SendSampling(request);
   });
+  AddURLtoList(PM_URL_PINVIEWER_SAMPLING, HTTP_GET);
 
-  tkr_web->server->on("/pinviewer_espinfo", HTTP_GET, [this](AsyncWebServerRequest* request)
-  {
-    ALOG_INF(PSTR("PinViewer route: /pinviewer_espinfo"));
+
+  SPGM_CTR(PM_URL_PINVIEWER_SYSTEM) "/pinv/sys";
+  tkr_web->server->on(PM_URL_PINVIEWER_SYSTEM, HTTP_GET, [this](AsyncWebServerRequest* request){
+    ALOG_INF(PSTR("PinViewer route: /pinv/sys"));
     Web_SendEspInfo(request);
   });
+  AddURLtoList(PM_URL_PINVIEWER_SYSTEM, HTTP_GET);
 
-  tkr_web->server->on("/pinviewer_pinmodes", HTTP_GET, [this](AsyncWebServerRequest* request)
-  {
-    ALOG_INF(PSTR("PinViewer route: /pinviewer_pinmodes"));
+
+  SPGM_CTR(PM_URL_PINVIEWER_MODES) "/pinv/mode";
+  tkr_web->server->on(PM_URL_PINVIEWER_MODES, HTTP_GET, [this](AsyncWebServerRequest* request){
+    ALOG_INF(PSTR("PinViewer route: /pinv/mode"));
     Web_SendPinModes(request);
   });
+  AddURLtoList(PM_URL_PINVIEWER_MODES, HTTP_GET);
 
-  tkr_web->server->on("/pinviewer_pinfunctions", HTTP_GET, [this](AsyncWebServerRequest* request)
-  {
-    ALOG_INF(PSTR("PinViewer route: /pinviewer_pinfunctions"));
+
+  SPGM_CTR(PM_URL_PINVIEWER_FUNCTIONS) "/pinv/func";
+  tkr_web->server->on(PM_URL_PINVIEWER_FUNCTIONS, HTTP_GET, [this](AsyncWebServerRequest* request){
+    ALOG_INF(PSTR("PinViewer route: /pinv/func"));
     Web_SendPinFunctions(request);
   });
+  AddURLtoList(PM_URL_PINVIEWER_FUNCTIONS, HTTP_GET);
 
-  tkr_web->server->on("/pinviewer_pinallocations", HTTP_GET, [this](AsyncWebServerRequest* request)
-  {
-    ALOG_INF(PSTR("PinViewer route: /pinviewer_pinallocations"));
+
+  SPGM_CTR(PM_URL_PINVIEWER_ALLOCATIONS) "/pinv/alloc";
+  tkr_web->server->on(PM_URL_PINVIEWER_ALLOCATIONS, HTTP_GET, [this](AsyncWebServerRequest* request){
+    ALOG_INF(PSTR("PinViewer route: /pinv/alloc"));
     Web_SendPinAllocations(request);
   });
+  AddURLtoList(PM_URL_PINVIEWER_ALLOCATIONS, HTTP_GET);
 
-  tkr_web->server->on("/pinviewer_groups", HTTP_GET, [this](AsyncWebServerRequest* request)
-  {
-    ALOG_INF(PSTR("PinViewer route: /pinviewer_groups"));
+
+  SPGM_CTR(PM_URL_PINVIEWER_GROUPS) "/pinv/groups";
+  tkr_web->server->on(PM_URL_PINVIEWER_GROUPS, HTTP_GET, [this](AsyncWebServerRequest* request){
+    ALOG_INF(PSTR("PinViewer route: /pinv/groups"));
     Web_SendGroups(request);
   });
+  AddURLtoList(PM_URL_PINVIEWER_GROUPS, HTTP_GET);
+
+
+  SPGM_CTR(PM_URL_PINVIEWER) "/pinv";
+  tkr_web->server->on(PM_URL_PINVIEWER, HTTP_GET, [this](AsyncWebServerRequest* request){
+    ALOG_INF(PSTR("PinViewer route: /pinv"));
+    Web_SendRoot(request);
+  });
+  AddURLtoList(PM_URL_PINVIEWER, HTTP_GET);
+
 
   SSE_Init();
 
@@ -684,19 +921,22 @@ void mPinViewer::SSE_Init(void)
 {
   if(runtime.sse_attached) { return; }
 
-  ALOG_INF(PSTR("PinViewer SSE_Init route: /pinviewer_events"));
+  SPGM_CTR(PM_URL_PINVIEWER_EVENTS) "/pinv/events";
 
-  events = new AsyncEventSource("/pinviewer_events");
+  ALOG_INF(PSTR("PinViewer SSE_Init route: /pinv/events"));
 
-  events->onConnect([this](AsyncEventSourceClient* client)
-  {
+  events = new AsyncEventSource(PM_URL_PINVIEWER_EVENTS);
+
+  events->onConnect([this](AsyncEventSourceClient* client){
     SSE_OnConnect(client);
   });
 
   tkr_web->server->addHandler(events);
+  AddURLtoList(PM_URL_PINVIEWER_EVENTS, HTTP_GET);
 
   runtime.sse_attached = true;
 }
+
 
 void mPinViewer::Web_SendRoot(AsyncWebServerRequest* request)
 {
@@ -718,7 +958,7 @@ void mPinViewer::Web_SendRoot(AsyncWebServerRequest* request)
 
 void mPinViewer::Web_SendRelease(AsyncWebServerRequest* request)
 {
-  request->send(200, "application/json", "{\"name\":\"PulSar PinViewer\",\"version\":\"0.3-root-level\"}");
+  request->send(200, "application/json", "{\"name\":\"PulSar PinViewer\",\"version\":\"0.4-mPins::PinTable\"}");
 }
 
 
@@ -856,10 +1096,6 @@ void mPinViewer::parse_JSONCommand(JsonParserObject obj)
       runtime.force_publish_all = true;
     }
   }
-
-  // #ifdef USE_MODULE_NETWORK_MQTT
-  // tkr_mqtt->MQTTHandler_Set_RefreshAll(mqtthandler_list);
-  // #endif
 }
 
 
@@ -896,15 +1132,17 @@ uint8_t mPinViewer::ConstructJSON_Sensor(uint8_t json_level, bool json_appending
   uint16_t conflict_count = 0;
   uint16_t locked_count = 0;
 
-  for(uint8_t pin = 0; pin < PINVIEWER_MAX_GPIO_PINS; pin++)
+  for(uint8_t real_pin = 0; real_pin < PINVIEWER_MAX_GPIO_PINS; real_pin++)
   {
-    if(!tkr_pins->PinViewer__PhysicalPin__IsValid(pin)) { continue; }
+    if(!IsValidPin(real_pin)) { continue; }
 
     valid_count++;
 
-    if(tkr_pins->PinViewer__PhysicalPin__IsUsed(pin)) { used_count++; }
-    if(tkr_pins->PinViewer__PhysicalPin__HasConflict(pin)) { conflict_count++; }
-    if(tkr_pins->PinViewer__PhysicalPin__IsLocked(pin)) { locked_count++; }
+    const mPins::PinTable& p = tkr_pins->pin[real_pin];
+
+    if(p.IsAllocated()) { used_count++; }
+    if(p.HasConflict()) { conflict_count++; }
+    if(p.IsLocked())    { locked_count++; }
   }
 
   JBI->Start();

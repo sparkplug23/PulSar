@@ -12,7 +12,9 @@
 #include <ESPAsyncWebServer.h>
 
 #ifndef PINVIEWER_MAX_GPIO_PINS
-  #ifdef ESP8266
+  #ifdef MAX_GPIO_PIN
+    #define PINVIEWER_MAX_GPIO_PINS MAX_GPIO_PIN
+  #elif defined(ESP8266)
     #define PINVIEWER_MAX_GPIO_PINS 17
   #else
     #define PINVIEWER_MAX_GPIO_PINS 48
@@ -44,6 +46,7 @@ class mPinViewer :
     /************************************************************************************************
      * SECTION: Construct Class Base
      ************************************************************************************************/
+
     mPinViewer(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void Pre_Init(void);
@@ -58,6 +61,7 @@ class mPinViewer :
       uint8_t devices = 0;
       uint8_t mode = ModuleStatus::Initialising;
     }module_state;
+
 
     /************************************************************************************************
      * SECTION: DATA_RUNTIME
@@ -97,6 +101,24 @@ class mPinViewer :
       PINVIEWER_STATE_HIGH    = 1
     };
 
+    enum PinViewerDirection : uint8_t
+    {
+      PINVIEWER_DIRECTION_UNKNOWN       = 0,
+      PINVIEWER_DIRECTION_INPUT         = 1,
+      PINVIEWER_DIRECTION_OUTPUT        = 2,
+      PINVIEWER_DIRECTION_BIDIRECTIONAL = 3,
+      PINVIEWER_DIRECTION_ALTERNATE     = 4
+    };
+
+    enum PinViewerShareMode : uint8_t
+    {
+      PINVIEWER_SHARE_UNKNOWN   = 0,
+      PINVIEWER_SHARE_EXCLUSIVE = 1,
+      PINVIEWER_SHARE_SHARED    = 2,
+      PINVIEWER_SHARE_RESERVED  = 3,
+      PINVIEWER_SHARE_INTERNAL  = 4
+    };
+
     struct PinViewerPinMeta
     {
       uint8_t pin = 0;
@@ -108,12 +130,13 @@ class mPinViewer :
       bool conflict = false;
       uint16_t function_id = 0;
       uint16_t owner_id = 0;
-      uint8_t direction_id = 0;
-      uint8_t share_mode_id = 0;
+      uint8_t direction_id = PINVIEWER_DIRECTION_UNKNOWN;
+      uint8_t share_mode_id = PINVIEWER_SHARE_UNKNOWN;
       uint8_t user_count = 0;
       uint8_t group_id = 0;
       int8_t state = PINVIEWER_STATE_UNKNOWN;
     };
+
 
     /************************************************************************************************
      * SECTION: Internal Functions
@@ -141,8 +164,24 @@ class mPinViewer :
     PinViewerPinMeta GetPinMeta(uint8_t pin);
     int8_t ReadPinState(uint8_t pin);
 
+    bool IsValidPin(uint8_t real_pin);
+    bool IsUsablePin(uint8_t real_pin);
+    bool IsReservedPin(uint8_t real_pin);
+
+    uint8_t GetDirectionID(uint8_t real_pin);
+    uint8_t GetShareModeID(uint8_t real_pin);
+    uint8_t GetUserCount(uint8_t real_pin);
+
+    uint8_t Group_GetCount(void);
+    uint8_t Group_GetID_ByIndex(uint8_t group_index);
+    const char* Group_GetName_ByID(uint8_t group_id, char* buffer, uint8_t buflen);
+    const char* Group_GetColour_ByID(uint8_t group_id, char* buffer, uint8_t buflen);
+    uint8_t Group_GetAddressCount(uint8_t group_id);
+    bool Group_GetAddress_ByIndex(uint8_t group_id, uint8_t address_index, uint8_t* address, char* module_name, uint8_t module_name_len);
+
     const char* GetDirectionName(uint8_t direction_id);
     const char* GetShareModeName(uint8_t share_mode_id);
+
 
     /************************************************************************************************
      * SECTION: Web Handlers
@@ -161,11 +200,13 @@ class mPinViewer :
 
     AsyncEventSource* events = nullptr;
 
+
     /************************************************************************************************
      * SECTION: Commands
      ************************************************************************************************/
 
     void parse_JSONCommand(JsonParserObject obj);
+
 
     /************************************************************************************************
      * SECTION: Construct Messages
@@ -173,6 +214,7 @@ class mPinViewer :
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
+
 
     /************************************************************************************************
      * SECTION: MQTT

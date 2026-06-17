@@ -83,7 +83,7 @@ void mPins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
       real_pin = GetRealPinNumberFromName(key);
       // ALOG_DBG(PSTR("KEY%d %s %d"), pair_index, key, real_pin);
 
-      int8_t index_pin = ConvertRealPinToIndexPin(real_pin);
+      int8_t index_pin = real_pin;
       ALOG_DBG( PSTR("KEY%d %s real_pin%d->index_pin%d"), pair_index, key, real_pin, index_pin);
       
       if(index_pin>=0){
@@ -163,7 +163,7 @@ void mPins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
         real_pin = GetRealPinNumberFromName(value);
         ALOG_DBG(PSTR("Value%d>> \"%s\" %d #%d"), pair_index, value, real_pin, jtok.getInt());
 
-        int8_t index_pin = ConvertRealPinToIndexPin(real_pin);
+        int8_t index_pin = real_pin;
         ALOG_DBG( PSTR("\t\t\treal_pin%d->index_pin%d"), real_pin, index_pin);
 
         if(index_pin != -1){
@@ -288,38 +288,46 @@ const uint8_t Esp32TemplateToPhy[MAX_USER_PINS] = { ESP32_TEMPLATE_TO_PHY };
 /**
  * @brief Reads any template GPIOs then reads any user set GPIOs
  */
+/**
+ * @brief Reads compact template GPIOs and expands them to physical GPIO-indexed runtime storage.
+ */
 void mPins::TemplateGPIOs(myio *gp)
 {
-  if (!gp)
+  if(!gp)
   {
     ALOG_ERR(PSTR(D_LOG_PINS "TemplateGPIOs: gp is null"));
     return;
   }
 
-  uint16_t *dest = gp->io;
-
-  for (uint16_t i = 0; i < ARRAY_SIZE(gp->io); i++)
+  for(uint8_t real_pin = 0; real_pin < ARRAY_SIZE(gp->io); real_pin++)
   {
-    dest[i] = GPIO_NONE;
+    gp->io[real_pin] = GPIO_NONE;
   }
 
-  uint16_t src[ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io)];
-
-  for (uint16_t i = 0; i < ARRAY_SIZE(src); i++)
+  for(uint8_t real_pin = 0; real_pin < MAX_GPIO_PIN; real_pin++)
   {
-    src[i] = GPIO_NONE;
+    pin[real_pin].gpio_function = GPIO_NONE;
+    pin[real_pin].unique_module_owner_id = 0;
+    pin[real_pin].allocation.allocated = 0;
   }
 
-  ALOG_DBG(PSTR(D_LOG_PINS "TemplateGPIOs: src_count=%u dest_count=%u"), ARRAY_SIZE(src), ARRAY_SIZE(gp->io));
+  uint16_t src[MAX_USER_PINS];
 
-  if (tkr_set->Settings.module == USER_MODULE)
+  for(uint8_t template_index = 0; template_index < ARRAY_SIZE(src); template_index++)
   {
-    ALOG_DBG(PSTR(D_LOG_PINS "Loading USER provided template"));
+    src[template_index] = GPIO_NONE;
+  }
+
+  ALOG_INF(PSTR(D_LOG_PINS "TemplateGPIOs src_count=%u dest_count=%u"), ARRAY_SIZE(src), ARRAY_SIZE(gp->io));
+
+  if(tkr_set->Settings.module == USER_MODULE)
+  {
+    ALOG_INF(PSTR(D_LOG_PINS "Loading USER provided template"));
     memcpy(&src, &tkr_set->Settings.user_template.hardware.gp, sizeof(mycfgio));
   }
   else
   {
-    ALOG_DBG(PSTR(D_LOG_PINS "Loading predefined template %u"), tkr_set->Settings.module);
+    ALOG_INF(PSTR(D_LOG_PINS "Loading predefined template %u"), tkr_set->Settings.module);
 
 #ifdef ESP8266
     GetInternalTemplate(&src, tkr_set->Settings.module, 1);
@@ -327,52 +335,71 @@ void mPins::TemplateGPIOs(myio *gp)
 
 #ifdef ESP32
     uint32_t module = ModuleTemplate(tkr_set->Settings.module);
-    ALOG_DBG(PSTR(D_LOG_PINS "Loading ESP32 template %u"), module);
-
-    if (sizeof(src) != sizeof(mycfgio))
-    {
-      ALOG_ERR(PSTR("TemplateGPIOs: src size mismatch sizeof(src)=%u sizeof(mycfgio)=%u"), sizeof(src), sizeof(mycfgio));
-    }
-
+    ALOG_INF(PSTR(D_LOG_PINS "Loading ESP32 template %u"), module);
     memcpy_P(&src, &module_template__gpio_map[module].gp, sizeof(mycfgio));
 #endif
   }
 
-  /*
-   * src[] is compact template-indexed.
-   * dest[] is expanded to physical GPIO indexed.
-   *
-   * Example ESP8266:
-   *   src[6] -> real GPIO9/12/etc depending on ESP8266 map
-   *
-   * Runtime after this point should use:
-   *   gp->io[real_gpio]
-   */
-  for (uint8_t index_pin = 0; index_pin < ARRAY_SIZE(src); index_pin++)
+  for(uint8_t template_index = 0; template_index < ARRAY_SIZE(src); template_index++)
   {
-    int8_t real_pin = ConvertIndexPinToRealPin(index_pin);
+    int8_t real_pin = TemplateIndexToRealPin(template_index);
 
-    if (real_pin < 0)
+    if(real_pin < 0)
     {
-      ALOG_DBG(PSTR(D_LOG_PINS "TemplateGPIOs: skip invalid index_pin=%u gpio=%u"), index_pin, src[index_pin]);
+      ALOG_ERR(PSTR(D_LOG_PINS "TemplateGPIOs skip bad template_index=%u gpio=%u"), template_index, src[template_index]);
       continue;
     }
 
-    if ((uint8_t)real_pin >= ARRAY_SIZE(gp->io))
+    if((uint8_t)real_pin >= ARRAY_SIZE(gp->io))
     {
-      ALOG_ERR(PSTR(D_LOG_PINS "TemplateGPIOs: real_pin OOR index_pin=%u real_pin=%d gpio=%u dest_count=%u"), index_pin, real_pin, src[index_pin], ARRAY_SIZE(gp->io));
+      ALOG_ERR(PSTR(D_LOG_PINS "TemplateGPIOs real_pin OOR index=%u real_pin=%d gpio=%u"), template_index, real_pin, src[template_index]);
       continue;
     }
 
-    dest[(uint8_t)real_pin] = src[index_pin];
+    gp->io[(uint8_t)real_pin] = src[template_index];
 
-    ALOG_DBM(PSTR(D_LOG_PINS "TemplateGPIOs: copy index_pin=%u real_pin=%d gpio=%u"), index_pin, real_pin, src[index_pin]);
+    if((uint8_t)real_pin < MAX_GPIO_PIN)
+    {
+      pin[(uint8_t)real_pin].gpio_function = src[template_index];
+
+      if((src[template_index] != GPIO_NONE) && (src[template_index] != GPIO_USER))
+      {
+        pin[(uint8_t)real_pin].allocation.allocated = 1;
+        pin[(uint8_t)real_pin].allocation.unavailable = 0;
+        SetPinOwnerIfAllowed((uint8_t)real_pin, GetModuleUniqueID());
+      }
+    }
+
+    ALOG_DBM(PSTR(D_LOG_PINS "TemplateGPIOs index=%u real_pin=%d gpio=%u"), template_index, real_pin, src[template_index]);
   }
 
-  AddLog_Array(LOG_LEVEL_DEBUG, PSTR("TemplateGPIO  src"), src, ARRAY_SIZE(src));
-  AddLog_Array(LOG_LEVEL_DEBUG, PSTR("TemplateGPIO dest"), dest, ARRAY_SIZE(gp->io));
+  AddLog_Array(LOG_LEVEL_INFO, PSTR("TemplateGPIO src"), src, ARRAY_SIZE(src));
+  AddLog_Array(LOG_LEVEL_INFO, PSTR("TemplateGPIO dst"), gp->io, ARRAY_SIZE(gp->io));
 }
 
+
+bool mPins::SetPinOwnerIfAllowed(uint8_t real_pin, uint16_t new_owner_id)
+{
+  if(real_pin >= MAX_GPIO_PIN) return false;
+
+  uint16_t current_owner_id = pin[real_pin].unique_module_owner_id;
+
+  if(current_owner_id == 0)
+  {
+    pin[real_pin].unique_module_owner_id = new_owner_id;
+    return true;
+  }
+
+  if((current_owner_id < 3000) && (new_owner_id >= 3000))
+  {
+    ALOG_WRN(PSTR(D_LOG_PINS "Owner protected real_pin=%u current=%u new=%u"),
+      real_pin, current_owner_id, new_owner_id);
+    return false;
+  }
+
+  pin[real_pin].unique_module_owner_id = new_owner_id;
+  return true;
+}
 
 
 #ifdef ESP8266
@@ -467,27 +494,30 @@ void mPins::GetInternalTemplate(void* ptr, uint32_t module, uint32_t option)
 
 
 
-
 void mPins::GpioInit(void)
 {
   ALOG_DBG(PSTR(D_LOG_MODULE "GpioInit: Start ================================================"));
 
+  /*******************************************************************************************\
+   * Part A: Initialise runtime pin table to safe defaults
+  \*******************************************************************************************/
 
-  uint16_t mgpio = GPIO_NONE;
+  PinTable_InitSafeDefaults();
+
 
   /*******************************************************************************************\
-   * Part A: Checking module or setting to default based on chipset
+   * Part B: Validate selected module or fall back to default
   \*******************************************************************************************/
 
   ALOG_DBG(PSTR(D_LOG_MODULE "Validate module or set default"));
 
-  if (!ValidModule(tkr_set->Settings.module))
+  if(!ValidModule(tkr_set->Settings.module))
   {
     ALOG_DBG(PSTR(D_LOG_MODULE "!ValidModule"));
 
     uint8_t module = MODULE;
 
-    if (!ValidModule(MODULE))
+    if(!ValidModule(MODULE))
     {
       module = MODULE_DEFAULT;
     }
@@ -504,44 +534,31 @@ void mPins::GpioInit(void)
 
 
   /*******************************************************************************************\
-   * Part C: Correcting for invalid gpio functions from user template
-   *
-   * GPIO_NONE = normal unassigned state
-   * GPIO_USER = normal legacy/user-free state
-   *
-   * Anything else must be a valid packed selectable GPIO function.
+   * Part C: Correct invalid GPIO functions in stored user compact template
   \*******************************************************************************************/
 
-  ALOG_DBG(PSTR(D_LOG_MODULE "Correcting for invalid gpio functions from user template"));
+  ALOG_DBG(PSTR(D_LOG_MODULE "Correct invalid GPIO functions from user compact template"));
 
-  for (uint8_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io); i++)
+  for(uint8_t template_index = 0; template_index < ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io); template_index++)
   {
-    const uint16_t gpio = tkr_set->Settings.user_template.hardware.gp.io[i];
+    const uint16_t gpio_function = tkr_set->Settings.user_template.hardware.gp.io[template_index];
 
-    if ((gpio == GPIO_NONE) || (gpio == GPIO_USER))
+    if((gpio_function == GPIO_NONE) || (gpio_function == GPIO_USER))
     {
-      ALOG_DBG(
-        PSTR(D_LOG_CONFIG "user_template.gp.io[%u]=%u, normal unassigned/user state"),
-        i,
-        gpio
-      );
+      ALOG_DBG(PSTR(D_LOG_CONFIG "user_template.gp.io[%u]=%u, normal unassigned/user state"), template_index, gpio_function);
       continue;
     }
 
-    if (!ValidUserGPIOFunction(tkr_set->Settings.user_template.hardware.gp.io, i))
+    if(!ValidUserGPIOFunction(tkr_set->Settings.user_template.hardware.gp.io, template_index))
     {
-      ALOG_DBG(
-        PSTR(D_LOG_CONFIG "Invalid user_template.gp.io[%u]=%u, resetting to GPIO_USER"),
-        i,
-        gpio
-      );
-
-      tkr_set->Settings.user_template.hardware.gp.io[i] = GPIO_USER;
+      ALOG_DBG(PSTR(D_LOG_CONFIG "Invalid user_template.gp.io[%u]=%u, resetting to GPIO_USER"), template_index, gpio_function);
+      tkr_set->Settings.user_template.hardware.gp.io[template_index] = GPIO_USER;
     }
   }
 
+
   /*******************************************************************************************\
-   * Part D: Read template GPIO values
+   * Part D: Load and decode template GPIOs
   \*******************************************************************************************/
 
   ALOG_DBG(PSTR(D_LOG_MODULE "Load TemplateGPIOs"));
@@ -556,126 +573,80 @@ void mPins::GpioInit(void)
 
 
   /*******************************************************************************************\
-   * Part E: Sanitise GPIOs and populate runtime.my_module.io
-   *
-   * For each physical/index pin:
-   *
-   *   1. Start runtime slot as GPIO_NONE.
-   *   2. Apply user/module override if valid.
-   *   3. Apply template value if valid.
-   *
-   * Template GPIO_USER means "free/user-controlled", so it must not overwrite a user setting.
-   * Template GPIO_NONE means explicitly unassigned.
+   * Part E: Build runtime.my_module.io as physical GPIO-indexed table
   \*******************************************************************************************/
 
-  ALOG_DBG(PSTR(D_LOG_MODULE "Sanitise GPIOs"));
+  ALOG_DBG(PSTR(D_LOG_MODULE "Build physical-indexed runtime.my_module.io"));
 
-  for (uint8_t i = 0; i < ARRAY_SIZE(tkr_set->Settings.module_pins.io); i++)
+  for(uint8_t real_pin = 0; real_pin < ARRAY_SIZE(tkr_set->runtime.my_module.io); real_pin++)
   {
-    const uint16_t module_gpio   = tkr_set->Settings.module_pins.io[i];
-    const uint16_t template_gpio = def_gp.io[i];
+    const uint16_t module_gpio   = tkr_set->Settings.module_pins.io[real_pin];
+    const uint16_t template_gpio = def_gp.io[real_pin];
 
-    tkr_set->runtime.my_module.io[i] = GPIO_NONE;
+    tkr_set->runtime.my_module.io[real_pin] = GPIO_NONE;
 
-    ALOG_DBG(
-      PSTR(D_LOG_CONFIG "GPIO[%u]: module_pins.io=%u def_gp.io=%u"),
-      i,
-      module_gpio,
-      template_gpio
-    );
+    ALOG_DBG(PSTR(D_LOG_CONFIG "GPIO%u: module_pins=%u template=%u"), real_pin, module_gpio, template_gpio);
 
 
     /**************************************************************************
-     * 1. Apply user/module pin override
+     * 1. Apply physical-indexed module/user override
     **************************************************************************/
 
-    if (module_gpio == GPIO_NONE)
+    if(module_gpio == GPIO_NONE)
     {
-      ALOG_DBG( 
-        PSTR(D_LOG_CONFIG "module_pins.io[%u]=GPIO_NONE, normal unassigned state"),
-        i
-      );
+      ALOG_DBG(PSTR(D_LOG_CONFIG "module_pins.io[%u]=GPIO_NONE"), real_pin);
     }
-    else if (module_gpio == GPIO_USER)
+    else if(module_gpio == GPIO_USER)
     {
-      ALOG_DBG( 
-        PSTR(D_LOG_CONFIG "module_pins.io[%u]=GPIO_USER, normal free/user state"),
-        i
-      );
+      ALOG_DBG(PSTR(D_LOG_CONFIG "module_pins.io[%u]=GPIO_USER"), real_pin);
     }
-    else if (!ValidUserGPIOFunction(tkr_set->Settings.module_pins.io, i))
+    else if(!ValidGPIO(real_pin, module_gpio))
     {
-      ALOG_DBG( 
-        PSTR(D_LOG_CONFIG "Unsupported module_pins.io[%u]=%u being reset to GPIO_NONE"),
-        i,
-        module_gpio
-      );
-
-      tkr_set->Settings.module_pins.io[i] = GPIO_NONE;
+      ALOG_DBG(PSTR(D_LOG_CONFIG "Invalid module_pins.io[%u]=%u, resetting to GPIO_NONE"), real_pin, module_gpio);
+      tkr_set->Settings.module_pins.io[real_pin] = GPIO_NONE;
     }
     else
     {
-      tkr_set->runtime.my_module.io[i] = module_gpio;
+      tkr_set->runtime.my_module.io[real_pin] = module_gpio;
 
-      #ifdef ENABLE_LOG_LEVEL_INFO
+      #ifdef ENABLE_LOG_LEVEL_DEBUG
       char buffer[50];
-      ALOG_DBG( 
-        PSTR(D_LOG_CONFIG "module override: mio[%u]=%u index/real %u/%d \"%s\""),
-        i,
-        tkr_set->runtime.my_module.io[i],
-        i,
-        ConvertIndexPinToRealPin(i),
-        GetGPIOFunctionNamebyID(tkr_set->runtime.my_module.io[i], buffer, sizeof(buffer))
+      ALOG_DBG(PSTR(D_LOG_CONFIG "module override GPIO%u=%u \"%s\""),
+        real_pin,
+        module_gpio,
+        GetGPIOFunctionNamebyID(module_gpio, buffer, sizeof(buffer))
       );
       #endif
     }
 
+
     /**************************************************************************
-     * 2. Apply template pin value
-     *
-     * GPIO_USER = leave free/user-controlled, do not overwrite runtime slot.
-     * GPIO_NONE = explicitly no function.
-     * valid packed function = assign.
+     * 2. Apply decoded template value
     **************************************************************************/
 
-    if (template_gpio == GPIO_USER)
+    if(template_gpio == GPIO_USER)
     {
-      ALOG_DBG( 
-        PSTR(D_LOG_CONFIG "def_gp.io[%u]=GPIO_USER, leaving runtime pin user-controlled"),
-        i
-      );
+      ALOG_DBG(PSTR(D_LOG_CONFIG "template GPIO%u=GPIO_USER, keeping user/module value"), real_pin);
     }
-    else if (template_gpio == GPIO_NONE)
+    else if(template_gpio == GPIO_NONE)
     {
-      tkr_set->runtime.my_module.io[i] = GPIO_NONE;
-
-      ALOG_DBG( 
-        PSTR(D_LOG_CONFIG "def_gp.io[%u]=GPIO_NONE, runtime.my_module.io[%u]=GPIO_NONE"),
-        i,
-        i
-      );
+      tkr_set->runtime.my_module.io[real_pin] = GPIO_NONE;
+      ALOG_DBG(PSTR(D_LOG_CONFIG "template GPIO%u=GPIO_NONE"), real_pin);
     }
-    else if (!ValidUserGPIOFunction(def_gp.io, i))
+    else if(!ValidGPIO(real_pin, template_gpio))
     {
-      ALOG_DBG( 
-        PSTR(D_LOG_CONFIG "Invalid IO in def_gp.io[%u]=%u"),
-        i,
-        template_gpio
-      );
+      ALOG_DBG(PSTR(D_LOG_CONFIG "Invalid template GPIO%u=%u, ignored"), real_pin, template_gpio);
     }
     else
     {
-      tkr_set->runtime.my_module.io[i] = template_gpio;
+      tkr_set->runtime.my_module.io[real_pin] = template_gpio;
 
-      #ifdef ENABLE_LOG_LEVEL_INFO
+      #ifdef ENABLE_LOG_LEVEL_DEBUG
       char buffer[50];
-      ALOG_DBG( 
-        PSTR(D_LOG_CONFIG "mio[i]=gio[i] %u %u index/real %u/%d \"%s\""),
-        tkr_set->runtime.my_module.io[i],
-        def_gp.io[i],
-        i,
-        ConvertIndexPinToRealPin(i),
-        GetGPIOFunctionNamebyID(tkr_set->runtime.my_module.io[i], buffer, sizeof(buffer))
+      ALOG_DBG(PSTR(D_LOG_CONFIG "template GPIO%u=%u \"%s\""),
+        real_pin,
+        template_gpio,
+        GetGPIOFunctionNamebyID(template_gpio, buffer, sizeof(buffer))
       );
       #endif
     }
@@ -683,20 +654,19 @@ void mPins::GpioInit(void)
 
 
   /*******************************************************************************************\
-   * Part F: Set pin modes
+   * Part F: Commit selected GPIO functions into pin[real_pin]
   \*******************************************************************************************/
 
-  ALOG_DBG( PSTR(D_LOG_MODULE "SetPin_GPIOFunction with GPIO Function"));
+  ALOG_DBG(PSTR(D_LOG_MODULE "Commit GPIO functions to pin table"));
 
-  // Scan over all possible pins up to the max
-  for (uint8_t real_pin = 0; real_pin < ARRAY_SIZE(tkr_set->runtime.my_module.io); real_pin++)
+  for(uint8_t real_pin = 0; real_pin < ARRAY_SIZE(tkr_set->runtime.my_module.io); real_pin++)
   {
-    uint16_t gpio_function = tkr_set->runtime.my_module.io[real_pin];
-    uint16_t mgpio = ValidPin_AdjustGPIO(real_pin, gpio_function);
+    const uint16_t gpio_function = tkr_set->runtime.my_module.io[real_pin];
+    const uint16_t adjusted_gpio = ValidPin_AdjustGPIO(real_pin, gpio_function);
 
-    ALOG_DBG(PSTR("DBG: real_pin=%u moduleIO=%u runtimeIO=%u mgpio=%u"), real_pin, tkr_set->Settings.module_pins.io[real_pin], gpio_function, mgpio);
+    ALOG_DBG(PSTR(D_LOG_CONFIG "GPIO%u: runtime=%u adjusted=%u"), real_pin, gpio_function, adjusted_gpio);
 
-    SetPin_GPIOFunction(real_pin, mgpio);
+    SetPin_GPIOFunction(real_pin, adjusted_gpio);
   }
 
 
@@ -708,13 +678,14 @@ void mPins::GpioInit(void)
   /*
    * Performed here for earlier possible logging
    */
-  if ((2 == GetPin(GPIO_HWSERIAL_TX,0)) || (MODULE_H801 == tkr_set->runtime.my_module_type))
+  if((2 == GetPin(GPIO_HWSERIAL_TX, 0)) || (MODULE_H801 == tkr_set->runtime.my_module_type))
   {
     Serial.set_tx(2);
     flag_serial_set_tx_set = true;
     ALOG_DBG(PSTR(D_LOG_MODULE "Switch default serial TX pin (H801)"));
   }
   #endif
+
 
   /*******************************************************************************************\
    * Set unused pins as input
@@ -726,35 +697,24 @@ void mPins::GpioInit(void)
 
   #ifdef ESP8266
 
-  // for (uint32_t index_pin = 0;
-  //     index_pin < ARRAY_SIZE(tkr_set->runtime.my_module.io);
-  //     index_pin++)
+  // for(uint32_t real_pin = 0; real_pin < ARRAY_SIZE(tkr_set->runtime.my_module.io); real_pin++)
   // {
-  //   int8_t real_pin = ConvertIndexPinToRealPin(index_pin);
-
-  //   if (real_pin < 0)
-  //   {
-  //     ALOG_DBG(PSTR("PIN: skip invalid index_pin=%u"), index_pin);
-  //     continue;
-  //   }
-
   //   uint32_t mgpio = ValidPin_AdjustGPIO(
   //     (uint8_t)real_pin,
-  //     tkr_set->runtime.my_module.io[index_pin]
+  //     tkr_set->runtime.my_module.io[real_pin]
   //   );
 
   //   ALOG_DBM(
-  //     PSTR("INI: index_pin=%u real_pin=%d mgpio=%u"),
-  //     index_pin,
+  //     PSTR("INI: real_pin=%u mgpio=%u"),
   //     real_pin,
   //     mgpio
   //   );
 
-  //   if (0 == mgpio)
+  //   if(0 == mgpio)
   //   {
-  //     if (!((1 == real_pin) || (3 == real_pin)))   // skip serial
+  //     if(!((1 == real_pin) || (3 == real_pin)))   // skip serial
   //     {
-  //       if ((MODULE_H801 == tkr_set->runtime.my_module_type) && (real_pin != 2))
+  //       if((MODULE_H801 == tkr_set->runtime.my_module_type) && (real_pin != 2))
   //       {
   //         pinMode(real_pin, INPUT);
   //       }
@@ -770,40 +730,30 @@ void mPins::GpioInit(void)
    *
    * GPIO_UNUSED_FORCED_LOW  -> output low
    * GPIO_UNUSED_FORCED_HIGH -> output high
+   *
+   * This only applies the electrical latch state.
+   * It does not allocate ownership. Allocation is handled later by AllocatePin().
   \*******************************************************************************************/
 
   ALOG_DBG(PSTR(D_LOG_MODULE "Set any latched pins"));
 
-  for (uint32_t i = 0; i < ARRAY_SIZE(tkr_set->runtime.my_module.io); i++)
+  for(uint32_t real_pin = 0; real_pin < ARRAY_SIZE(tkr_set->runtime.my_module.io); real_pin++)
   {
-    uint32_t mgpio_function = ValidPin_AdjustGPIO(i, tkr_set->runtime.my_module.io[i]);
+    const uint16_t mgpio_function = ValidPin_AdjustGPIO(real_pin, tkr_set->runtime.my_module.io[real_pin]);
+    const uint16_t mgpio_base     = UGPIO(mgpio_function);
 
-    ALOG_DBG(PSTR("INI: gpio pin %u, mgpio_function %u"), i, mgpio_function);
+    ALOG_DBG(PSTR("INI: real_pin %u, mgpio_function %u"), real_pin, mgpio_function);
 
-    if (mgpio_function == GPIO_UNUSED_FORCED_LOW)
+    if((mgpio_function == GPIO_UNUSED_FORCED_LOW) || (mgpio_base == GPIO_UNUSED_FORCED_LOW))
     {
-
-      uint8_t real_pin = ConvertIndexPinToRealPin(i);
-
-      ALOG_DBG(
-        PSTR(D_LOG_MODULE "Forced LOW index=%u real_pin=%u"),
-        i,
-        real_pin
-      );
+      ALOG_DBG(PSTR(D_LOG_MODULE "Forced LOW real_pin=%u"), real_pin);
 
       pinMode(real_pin, OUTPUT);
       digitalWrite(real_pin, LOW);
     }
-    else if (mgpio_function == GPIO_UNUSED_FORCED_HIGH)
+    else if((mgpio_function == GPIO_UNUSED_FORCED_HIGH) || (mgpio_base == GPIO_UNUSED_FORCED_HIGH))
     {
-
-      uint8_t real_pin = ConvertIndexPinToRealPin(i);
-
-      ALOG_DBG(
-        PSTR(D_LOG_MODULE "Forced HIGH index=%u real_pin=%u"),
-        i,
-        real_pin
-      );
+      ALOG_DBG(PSTR(D_LOG_MODULE "Forced HIGH real_pin=%u"), real_pin);
 
       pinMode(real_pin, OUTPUT);
       digitalWrite(real_pin, HIGH);
@@ -811,5 +761,5 @@ void mPins::GpioInit(void)
   }
 
 
-  ALOG_DBG(PSTR(D_LOG_MODULE "GpioInit: Complete ================================================"));
+  ALOG_DBG(PSTR(D_LOG_MODULE "GpioInit: End =================================================="));
 }

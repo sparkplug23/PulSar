@@ -243,7 +243,7 @@ void mTelemetry::MQTTHandler_Init()
     ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Devices;
     mqtthandler_list.push_back(ptr);
 
-    ptr = &mqtthandler_debug_pins;
+    ptr = &mqtthandler_debug_pins_gpio;
     ptr->tSavedLastSent = 0;
     ptr->flags.PeriodicEnabled = true;
     ptr->flags.SendNow = true;
@@ -252,8 +252,21 @@ void mTelemetry::MQTTHandler_Init()
     ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
     ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
     ptr->json_level = JSON_LEVEL_DETAILED;
-    ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_PINS_CTR;
-    ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Pins;
+    ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_PINS_GPIO_CTR;
+    ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Pins_GPIO;
+    mqtthandler_list.push_back(ptr);
+
+    ptr = &mqtthandler_debug_pins_table;
+    ptr->tSavedLastSent = 0;
+    ptr->flags.PeriodicEnabled = true;
+    ptr->flags.SendNow = true;
+    ptr->flags.retain = true;
+    ptr->tRateSecs = SEC_IN_HOUR; 
+    ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+    ptr->topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+    ptr->json_level = JSON_LEVEL_DETAILED;
+    ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_PINS_TABLE_CTR;
+    ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Pins_Table;
     mqtthandler_list.push_back(ptr);
 
     ptr = &mqtthandler_debug_template;

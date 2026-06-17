@@ -969,6 +969,8 @@ tkr_json_template->ModuleDeviceTemplate__LoadDefault();
   #endif
 
   tkr_pins->GpioInit();
+
+  tkr_pins->PinTable_SerialPrint("after GpioInit");
   
   tkr->Tasker_Interface(TASK_PRE_INIT);
   
