@@ -44,8 +44,8 @@
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   //Add special debug method here that will count loglevel by type so "error" messages can be counted and shared every X seconds on terminal
   #
@@ -79,19 +79,19 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_BME
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"23\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR     "\","
+      "\"19\":\"" D_GPIO_DS18X20_1_CTR     "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"21\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      "\"2\":\""  D_GPIO_FUNCTION_REL2_INV_CTR  "\""  // Using Builtin LED
+      "\"21\":\"" D_GPIO_REL1_INV_CTR  "\","
+      "\"2\":\""  D_GPIO_REL2_INV_CTR  "\""  // Using Builtin LED
       #endif  
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -285,18 +285,18 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{" 
       #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_BME
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"23\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR     "\","
+      "\"19\":\"" D_GPIO_DS18X20_1_CTR     "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"21\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\""
+      "\"21\":\"" D_GPIO_REL1_INV_CTR  "\""
       #endif  
 
     "},"
@@ -437,12 +437,12 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"    
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"2\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"2\":\"" D_GPIO_REL1_INV_CTR  "\","
       #endif
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\","
       #endif  
-      "\"4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\"" 
+      "\"4\":\""  D_GPIO_LED1_INV_CTR "\"" 
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

@@ -200,7 +200,7 @@ const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {ESP32_TEMPLATE_TO_PHY};
 
 // ESP32?
 typedef struct MYIO {
-   uint16_t      io[MAX_GPIO_PIN];
+   uint16_t      io[MAX_GPIO_PIN];  // CRITICAL: Distinction that here up to the max pin number, eg 40 on esp32, is stored in full. This includes skipped flash pins, but used for template mapping.
  } myio;                         // 18 * 2 = 36 bytes / 40 * 2 = 80 bytes
  
  typedef struct MYCFGIO {
@@ -228,6 +228,8 @@ typedef struct MYIO {
    gpio_flag    flag;
  } mytmplt;
 
+
+ #define GPIO_ANY 32
  
 #endif  // ESP32
 

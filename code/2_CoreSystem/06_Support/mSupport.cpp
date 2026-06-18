@@ -577,33 +577,42 @@ mSupport::AutoMutex::AutoMutex(
   bool take_a
 )
 {
+  // DEBUG_LINE_HERE3
   mutex = (SemaphoreHandle_t)nullptr;
   taken = false;
   maxWait = maxWait_a;
   name = name_a ? name_a : "";
 
+  // DEBUG_LINE_HERE3
   if (!mutex_a) {
     return;
   }
 
+  // DEBUG_LINE_HERE3
   if (!(*mutex_a)) {
     AutoMutex::init(mutex_a);
   }
 
+  // DEBUG_LINE_HERE3
   mutex = *mutex_a;
 
+  // DEBUG_LINE_HERE3
   if (!mutex) {
     Serial.printf("\r\nMutexcreatefail %s\r\n", name);
     return;
   }
 
+  // DEBUG_LINE_HERE3
   if (take_a) {
+  // DEBUG_LINE_HERE3
     taken = xSemaphoreTakeRecursive(mutex, maxWait);
 
+  // DEBUG_LINE_HERE3
     if (!taken) {
       Serial.printf("\r\nMutexfail %s\r\n", name);
     }
   }
+  // DEBUG_LINE_HERE3
 }
 
 
@@ -623,19 +632,23 @@ void mSupport::AutoMutex::init(SemaphoreHandle_t* ptr)
     return;  // Already initialised
   }
 
+  // DEBUG_LINE_HERE3
   SemaphoreHandle_t new_mutex = xSemaphoreCreateRecursiveMutex();
 
+  // DEBUG_LINE_HERE3
   if (!new_mutex) {
     Serial.printf("\r\nAutoMutex create failed\r\n");
     return;
   }
 
   *ptr = new_mutex;
+  // DEBUG_LINE_HERE3
 }
 
 
 void mSupport::AutoMutex::give()
 {
+  // DEBUG_LINE_HERE3
   if (!mutex) {
     return;
   }
@@ -646,11 +659,13 @@ void mSupport::AutoMutex::give()
 
   xSemaphoreGiveRecursive(mutex);
   taken = false;
+  // DEBUG_LINE_HERE3
 }
 
 
 void mSupport::AutoMutex::take()
 {
+  // DEBUG_LINE_HERE3
   if (!mutex) {
     return;
   }
@@ -664,6 +679,7 @@ void mSupport::AutoMutex::take()
   if (!taken) {
     Serial.printf("\r\nMutexfail %s\r\n", name);
   }
+  // DEBUG_LINE_HERE3
 }
 
 #endif  // ESP32

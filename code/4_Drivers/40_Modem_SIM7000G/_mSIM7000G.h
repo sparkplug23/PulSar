@@ -20,7 +20,7 @@
 #define TINY_GSM_DEBUG Serial
 
 #define TINY_GSM_RX_BUFFER 1024 // Set RX buffer to 1Kb
-#define SerialAT Serial1
+// #define SerialAT Serial1
 
 // See all AT commands, if wanted
 #define DUMP_AT_COMMANDS
@@ -50,20 +50,17 @@
 #define TIME_TO_SLEEP  60          // Time ESP32 will go to sleep (in seconds)
 
 // #define UART_CELLULAR_BAUD   921600
-#define PIN_DTR     25
-#define PIN_TX      27
-#define PIN_RX      26
-#define PWR_PIN     4
+// #define PIN_DTR     25
+// #define PIN_TX      27
+// #define PIN_RX      26
+// #define PWR_PIN     4
 
-#define SD_MISO     2
-#define SD_MOSI     15
-#define SD_SCLK     14
-#define SD_CS       13
-#define LED_PIN     12
+// #define SD_MISO     2
+// #define SD_MOSI     15
+// #define SD_SCLK     14
+// #define SD_CS       13
+// #define LED_PIN     12
 
-#ifndef UART_CELLULAR_BAUD
-#define UART_CELLULAR_BAUD 115200
-#endif
 #ifndef UART_CELLULAR_BAUD
 #define UART_CELLULAR_BAUD 115200
 #endif
@@ -123,16 +120,28 @@ class mSIM7000G :
     PGM_P GetModuleName(){          return PM_MODULE__DRIVERS_MODEM_7000G__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_MODEM_7000G_ID; }
         
-    struct SETTINGS{
-      uint8_t fEnableSensor = false;
-      uint8_t leds_found = 0;
-    }settings;
-
+    struct ClassState
+    {
+      uint8_t devices = 0;
+      uint8_t mode = ModuleStatus::Initialising;
+    } module_state;
+    
     // -------------------------------------------------------------------------------------------------
     // Modem bring-up (migration API)
     // Called by mCellular. This performs UART + baud sync + TinyGSM init/restart.
     // Does NOT bring up data context or do network attach (those will migrate later).
     // -------------------------------------------------------------------------------------------------
+
+    struct MODEM_UART_RUNTIME
+    {
+      int8_t rx_pin = -1;
+      int8_t tx_pin = -1;
+      int8_t pwrkey_pin = -1;
+      int8_t uart_port = -1;
+    } pins;
+    HardwareSerial* modem_serial = nullptr;
+
+
 
     
 #ifdef ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT

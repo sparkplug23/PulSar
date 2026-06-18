@@ -24,16 +24,16 @@ bool mSIM7000G::Handler_ModemResponses(uint8_t response_loglevel, uint16_t wait_
   const uint32_t t0 = millis();
 
   // Drain for up to wait_millis (0 means "just what's available right now")
-  while (SerialAT.available() || ((wait_millis > 0) && ((millis() - t0) < wait_millis)))
+  while (modem_serial->available() || ((wait_millis > 0) && ((millis() - t0) < wait_millis)))
   {
-    if (!SerialAT.available())
+    if (!modem_serial->available())
     {
       // nothing right now, don’t burn CPU
       delay(1);
       continue;
     }
 
-    const int c = SerialAT.read();
+    const int c = modem_serial->read();
     if (c < 0) continue;
 
     // Drop CR (we’ll use LF as end-of-line)
@@ -267,7 +267,7 @@ void mSIM7000G::Query_Modem_Status()
   // --------------------------------------------------------------------------
   // 2) Flush any stray unsolicited text so subsequent queries are clean
   // --------------------------------------------------------------------------
-  while (SerialAT.available()) { (void)SerialAT.read(); }
+  while (modem_serial->available()) { (void)modem_serial->read(); }
 
   // --------------------------------------------------------------------------
   // 3) SIM presence / readiness via AT+CPIN? (most reliable quick check)
@@ -839,10 +839,10 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
     JsonParserArray array = jtok;
     for(auto val : array) {
       ALOG_INF(PSTR(D_LOG_CELLULAR "F::%s %s"),__FUNCTION__,val.getStr());
-      SerialAT.println(val.getStr());  
+      modem_serial->println(val.getStr());  
       delay(500);
-      if (SerialAT.available()) {
-        String r = SerialAT.readString();
+      if (modem_serial->available()) {
+        String r = modem_serial->readString();
         ALOG_INF(PSTR(D_LOG_CELLULAR "ATResponse = \"%s\""), r.c_str());
       }
     }
@@ -854,7 +854,7 @@ void mSIM7000G::parse_JSONCommand(JsonParserObject obj)
     JsonParserArray array = jtok;
     for(auto val : array) {
       ALOG_INF(PSTR(D_LOG_CELLULAR "F::%s %s"),__FUNCTION__,val.getStr());
-      SerialAT.println(val.getStr());  
+      modem_serial->println(val.getStr());  
       delay(500);
 
       uint32_t wait_millis = 1000;

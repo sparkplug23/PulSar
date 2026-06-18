@@ -68,7 +68,7 @@
 //     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
 //     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 //     "\"" D_GPIOC "\":{"
-//       "\"RX\":\""  D_GPIO_FUNCTION_RGB_DATA_CTR "\""
+//       "\"RX\":\""  D_GPIO_RGB_DATA_CTR "\""
 //     "},"
 //   "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
 //   "}";
@@ -168,8 +168,8 @@
 //     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
 //     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 //     "\"" D_GPIOC "\":{"
-//       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-//       //"\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+//       "\"RX\":\"" D_GPIO_RGB_DATA_CTR  "\""
+//       //"\"LBI\":\"" D_GPIO_LED1_CTR "\""
 //     "},"
 //     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
 //   "}";
@@ -351,7 +351,7 @@
 // //     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
 // //     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 // //     "\"" D_GPIOC "\":{"
-// //       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+// //       "\"RX\":\"" D_GPIO_RGB_DATA_CTR  "\""
 // //     "},"
 // //     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
 // //   "}";
@@ -417,8 +417,8 @@
 //     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
 //     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 //     "\"" D_GPIOC "\":{"
-//       "\"RX\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
-//       //"\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+//       "\"RX\":\"" D_GPIO_RGB_DATA_CTR  "\""
+//       //"\"LBI\":\"" D_GPIO_LED1_CTR "\""
 //     "},"
 //     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
 //   "}";

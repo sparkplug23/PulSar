@@ -79,6 +79,7 @@
 // #define DEVICE_TESTBED_FASTBOOT_ESP8266
 // #define DEVICE_TESTBED_CRASHREPORT
 
+// #define DEVICE_VALIDATION__ESP32__MINIMAL_DEVKIT
 
 //-----------------[User Defined Devices == USE_BUILD_TYPE_ENERGY == Any Energy Monitoring Firmware]-------------------------------------
 
@@ -226,17 +227,17 @@
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"   
-      "\"12\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"26\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"32\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"14\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"25\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"33\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -315,29 +316,29 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
     #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-    "\"10\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //instead of 9
-    "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
+    "\"10\":\"" D_GPIO_I2C_SDA_CTR   "\"," //instead of 9
+    "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\","    
     #endif
     #ifdef USE_MODULE_SENSORS_PIR
-    "\"4\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-    "\"7\":\""  D_GPIO_FUNCTION_PIR_2_CTR "\","
+    "\"4\":\""  D_GPIO_PIR_1_CTR "\","
+    "\"7\":\""  D_GPIO_PIR_2_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS_SR04
-    "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-    "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+    "\"4\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+    "\"2\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
     #endif 
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-    "\"35\":\""  D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
+    "\"35\":\""  D_GPIO_PIR_2_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-    "\"5\":\""  D_GPIO_FUNCTION_PIR_3_INV_CTR "\","
+    "\"5\":\""  D_GPIO_PIR_3_INV_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-    "\"6\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-    "\"5\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\""
+    "\"6\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+    "\"5\":\""  D_GPIO__HLK_LD2410_RX__CTR "\""
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-    "\"34\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\""
+    "\"34\":\""  D_GPIO_PIR_1_INV_CTR "\""
     #endif
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -473,8 +474,8 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"D3\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"D4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"D3\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"D4\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -802,53 +803,53 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
-   //  "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-   //  "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+   //  "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+   //  "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
     // #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-    // "\"8\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    // "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\""    
+    // "\"8\":\"" D_GPIO_I2C_SDA_CTR   "\","
+    // "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\""    
     // #endif
     #ifdef USE_MODULE_SENSORS_PIR
-   //  "\"23\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+   //  "\"23\":\""  D_GPIO_PIR_1_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-    "\"33\":\""  D_GPIO_FUNCTION__TOF_VL53L0X_XSHUT1__CTR "\","
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
-   //  "\"26\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+    "\"33\":\""  D_GPIO__TOF_VL53L0X_XSHUT1__CTR "\","
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+   //  "\"26\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
-     // "\"26\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+     // "\"26\":\""  D_GPIO__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS_SR04
-    "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-    "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+    "\"4\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+    "\"2\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
     #endif 
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-    "\"35\":\""  D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
+    "\"35\":\""  D_GPIO_PIR_2_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-    "\"34\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+    "\"34\":\""  D_GPIO_PIR_1_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-    "\"5\":\""  D_GPIO_FUNCTION_PIR_3_INV_CTR "\","
+    "\"5\":\""  D_GPIO_PIR_3_INV_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-    "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-    "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
+    "\"17\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+    "\"16\":\""  D_GPIO__HLK_LD2410_RX__CTR "\","
     #endif
    //  #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-   //  "\"27\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT__CTR "\","
+   //  "\"27\":\""  D_GPIO__TOF_VL53L1X_XSHUT__CTR "\","
    //  #endif
     #ifdef USE_MODULE_SENSORS_BUTTONS
-   //  "\"18\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-   //  "\"19\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-   //  "\"33\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+   //  "\"18\":\"" D_GPIO_KEY1_INV_CTR  "\","
+   //  "\"19\":\"" D_GPIO_KEY2_INV_CTR  "\","
+   //  "\"33\":\"" D_GPIO_KEY3_INV_CTR  "\","
     #endif
     
-   //  "\"4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
-   //  "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\","
-    // "\"8\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+   //  "\"4\":\"" D_GPIO_LED1_CTR  "\","
+   //  "\"5\":\"" D_GPIO_LED2_CTR  "\","
+    // "\"8\":\"" D_GPIO_LED1_CTR  "\""
   "},"
   // "\"" D_BASE     "\":\"" D__MODULE_TEMPLATE__CAMERA_FREENOVE_WROOVER__CTR "\","
   "\"" D_BASE     "\":\"" D__MODULE_TEMPLATE__CAMERA_XIAO_ESP32S3_SENSE__CTR "\","
@@ -1126,53 +1127,53 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
-   //  "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-   //  "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+   //  "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+   //  "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
     // #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-    // "\"8\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    // "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\""    
+    // "\"8\":\"" D_GPIO_I2C_SDA_CTR   "\","
+    // "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\""    
     // #endif
     #ifdef USE_MODULE_SENSORS_PIR
-   //  "\"23\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+   //  "\"23\":\""  D_GPIO_PIR_1_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-    "\"33\":\""  D_GPIO_FUNCTION__TOF_VL53L0X_XSHUT1__CTR "\","
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
-   //  "\"26\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+    "\"33\":\""  D_GPIO__TOF_VL53L0X_XSHUT1__CTR "\","
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+   //  "\"26\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
-     // "\"26\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+     // "\"26\":\""  D_GPIO__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS_SR04
-    "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-    "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+    "\"4\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+    "\"2\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
     #endif 
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-    "\"35\":\""  D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
+    "\"35\":\""  D_GPIO_PIR_2_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-    "\"34\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+    "\"34\":\""  D_GPIO_PIR_1_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-    "\"5\":\""  D_GPIO_FUNCTION_PIR_3_INV_CTR "\","
+    "\"5\":\""  D_GPIO_PIR_3_INV_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-    "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-    "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
+    "\"17\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+    "\"16\":\""  D_GPIO__HLK_LD2410_RX__CTR "\","
     #endif
    //  #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-   //  "\"27\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT__CTR "\","
+   //  "\"27\":\""  D_GPIO__TOF_VL53L1X_XSHUT__CTR "\","
    //  #endif
     #ifdef USE_MODULE_SENSORS_BUTTONS
-   //  "\"18\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-   //  "\"19\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-   //  "\"33\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+   //  "\"18\":\"" D_GPIO_KEY1_INV_CTR  "\","
+   //  "\"19\":\"" D_GPIO_KEY2_INV_CTR  "\","
+   //  "\"33\":\"" D_GPIO_KEY3_INV_CTR  "\","
     #endif
     
-   //  "\"4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
-   //  "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\","
-    // "\"8\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+   //  "\"4\":\"" D_GPIO_LED1_CTR  "\","
+   //  "\"5\":\"" D_GPIO_LED2_CTR  "\","
+    // "\"8\":\"" D_GPIO_LED1_CTR  "\""
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

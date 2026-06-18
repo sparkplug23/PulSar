@@ -118,6 +118,12 @@ void Serial_PrintFirmwareSplash()
     Serial.println(F("Friendly Name:   <DEVICENAME_FRIENDLY_CTR not defined>"));
   #endif
 
+  #ifdef DEVICENAME_BUILD_ENVIRONMENT
+    Serial.printf("Build Environment: %s\r\n", DEVICENAME_BUILD_ENVIRONMENT);
+  #else
+    Serial.println(F("Build Environment:"));
+  #endif
+
   #ifdef FIRMWARE_NAME_CTR
     Serial.printf("Firmware:        %s\r\n", FIRMWARE_NAME_CTR);
   #else
@@ -902,7 +908,7 @@ tkr_set->SettingsDelta();
  * and migration/delta handling, so the firmware template wins.
  */
 #ifdef USE_MODULE_TEMPLATE__OVERRIDE
-ALOG_WRN(PSTR("SET: USE_MODULE_TEMPLATE__OVERRIDE active, forcing compiled module template"));
+ALOG_WRN(PSTR(DEBUG_INSERT_PAGE_BREAK "SET: USE_MODULE_TEMPLATE__OVERRIDE active, forcing compiled module template"));
 tkr_json_template->ModuleDeviceTemplate__LoadDefault();
 #endif
 
@@ -941,6 +947,17 @@ tkr_json_template->ModuleDeviceTemplate__LoadDefault();
 
   tkr_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   tkr_set->Settings.logging.serial_level = tkr_set->runtime.seriallog_level_during_boot;  
+
+  // normal boot = info only
+  // issue is most boot is info, when it should be debug or lower.
+//   if (fast_reboot_count == 0 || fast_reboot_count == 1)
+// {
+//   boot_log_level = LOG_LEVEL_WARNING;   // or INFO-but-minimal
+// }
+// else
+// {
+//   boot_log_level = LOG_LEVEL_DEBUG_MORE;
+// }
     
 /********************************************************************************************
  ** Initialise System and Modules ***********************************************************
@@ -958,16 +975,25 @@ tkr_json_template->ModuleDeviceTemplate__LoadDefault();
   gpio_viewer.begin();
   #endif
 
+DEBUG_LINE_HERE3
+  
   tkr_pins->GpioInit();
 
+DEBUG_LINE_HERE3
+  
   tkr->Tasker_Interface(TASK_PRE_INIT);
+DEBUG_LINE_HERE3
   tkr->Tasker_Interface(TASK_INIT);
 
   ALOG_INF(PSTR("TASK_INIT Complete\n\r------------------------------------------------------\n\r------------------------------------------------------"));
 
+DEBUG_LINE_HERE3
+  
   tkr->Tasker_Interface(TASK_POST_INIT);
   tkr->Tasker_Interface(YTASK_INIT);
 
+DEBUG_LINE_HERE3
+  
   /********************************************************************************************
    ** Normal post-init PROGMEM default config **************************************************
   *
@@ -983,6 +1009,8 @@ tkr_json_template->ModuleDeviceTemplate__LoadDefault();
   * This is not used for GPIO mapping or device identity.
   ********************************************************************************************/
 
+DEBUG_LINE_HERE3
+  
   tkr->Tasker_Interface(TASK_CONFIG_LOAD_POST_INIT_DEFAULTS_FROM_PROGMEM);
 
 
@@ -999,14 +1027,20 @@ tkr_json_template->ModuleDeviceTemplate__LoadDefault();
   * These should override normal compile-time defaults.
   ********************************************************************************************/
 
+DEBUG_LINE_HERE3
+  
   #ifndef ENABLE_FEATURE_FASTBOOT__DISABLE_MODULE_FILESYSTEM_CONFIG
   tkr->Tasker_Interface(TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM);
 
+DEBUG_LINE_HERE3
+  
   #ifdef ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
   tkr->Tasker_Interface(TASK_FILESYSTEM__LOAD__MODULE_DATA__ID);
   #endif
   #endif
 
+DEBUG_LINE_HERE3
+  
 
  /************************************************************************************************
    * SECTION: Development compile-time template enforcement
@@ -1027,12 +1061,16 @@ tkr_json_template->ModuleDeviceTemplate__LoadDefault();
    * - This prevents mSettings and mJsonTemplate from both executing the same override pass.
    ************************************************************************************************/
 
+DEBUG_LINE_HERE3
+  
   #if defined(USE_MODULE_CORE__JSON_TEMPLATE) || defined(USE_MODULE_CORE_JSON_TEMPLATE)
   if (tkr_json_template)
   {
     tkr_json_template->ModuleDeviceTemplate_CompileTime_DevelopmentOverridePass();
   }
   #endif
+DEBUG_LINE_HERE3
+  
 
   /********************************************************************************************
    ** Dynamic memory buffers ******************************************************************
@@ -1040,8 +1078,12 @@ tkr_json_template->ModuleDeviceTemplate__LoadDefault();
    * Runs after normal defaults, filesystem config/data, and late override templates.
   ********************************************************************************************/
 
+DEBUG_LINE_HERE3
+  
   tkr->Tasker_Interface(TASK_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
 
+DEBUG_LINE_HERE3
+  
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
   #endif

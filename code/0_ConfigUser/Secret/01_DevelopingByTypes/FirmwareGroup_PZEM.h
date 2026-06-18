@@ -152,19 +152,19 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{" 
       #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
       #endif
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"27\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"27\":\"" D_GPIO_KEY1_INV_CTR  "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"26\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
-      "\"2\":\"" D_GPIO_FUNCTION_REL2_CTR  "\"" // use LED as temporary relay tester
+      "\"26\":\"" D_GPIO_REL_CTR "1" "\","
+      "\"2\":\"" D_GPIO_REL_CTR "2" "\","" // use LED as temporary relay tester
       #endif  
 
     "},"

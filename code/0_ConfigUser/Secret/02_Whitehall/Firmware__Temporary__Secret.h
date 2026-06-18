@@ -56,8 +56,8 @@
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_SENSORS_INTERFACE
     #
@@ -79,10 +79,10 @@
       /** Built in - OLED
        * 
        * */
-      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"4\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"5\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #ifdef USE_MODULE_SENSORS_DS18X20   
-      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\""
+      "\"23\":\"" D_GPIO_DS18X20_1_CTR "\""
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -314,8 +314,8 @@
 // // WebUI of WLED style should become its own webserver option (not just the debug version).
 
 //   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+//   
+//   
 
 
 //   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
@@ -357,8 +357,8 @@
 
 //   #define ENABLE_DEBUG_MANUAL_DELAYS
 
-//   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+//   // 
+//   // 
 
 //     /********* Group: Needed to build ************************/
 //     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
@@ -450,11 +450,11 @@
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_FUNCTION "\":{" 
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_E_CTR "\":4"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_E_CTR "\":4"  // PWM RGBCCT
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -618,8 +618,8 @@
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+      "\"1\":\""  D_GPIO_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_LED2_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -672,9 +672,9 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"4\":\"" D_GPIO_RGB_DATA_CTR  "\","
       #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

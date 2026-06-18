@@ -9,6 +9,8 @@
 int8_t mPWM::Tasker(uint8_t function, JsonParserObject obj)
 {
 
+  // return 0;
+
   switch(function){
     /************
      * INIT SECTION * 
@@ -108,6 +110,22 @@ int8_t mPWM::Tasker(uint8_t function, JsonParserObject obj)
 void mPWM::Pre_Init(void)
 {
 
+  
+  /*******************************************************************************************\
+   * PWM defaults
+  \*******************************************************************************************/
+
+  ALOG_INF(PSTR(D_LOG_MODULE "Set PWM defaults"));
+
+  DEBUG_LINE_HERE3
+
+  analogWriteRange(tkr_set->Settings.pwm_range);
+  analogWriteFreq(tkr_set->Settings.pwm_frequency);
+
+  DEBUG_LINE_HERE3
+  // DEBUG_WAIT_POINT_MS(2000);
+
+
   // if(
   //   tkr_pins->PinUsed(GPIO_LDR_BASIC_DIGITAL1_ID) && 
   //   tkr_pins->PinUsed(GPIO_LDR_BASIC_ANALOG1_ID)
@@ -118,16 +136,6 @@ void mPWM::Pre_Init(void)
   //     pinMode(tkr_pins->GetPin(GPIO_LDR_BASIC_DIGITAL1_ID), INPUT);
   //   }
     
-  for(uint8_t i=0;i<MAX_PWM_PINS;i++)
-  {
-    if(tkr_pins->PinUsed(GPIO_PWM1,i))
-    {
-      pinMode(tkr_pins->GetPin(GPIO_PWM1,i), OUTPUT);   // This should be changed to configure the analog module, and then just read/return from it
-      pwm[i].pin = tkr_pins->GetPin(GPIO_PWM1,i);
-
-    }
-  }
-
 
 
     settings.fEnableSensor = true;
@@ -139,13 +147,36 @@ void mPWM::Pre_Init(void)
 void mPWM::Init(void)
 {
 
+  
+  for (uint32_t i = 0; i < MAX_PWMS; i++)
+  {
+    if (tkr_pins->PinUsed(GPIO_PWM, i)) 
+    {
+      pinMode(tkr_pins->Pin(GPIO_PWM, i), OUTPUT);
+
+      #ifdef ESP32
+        analogAttach(tkr_pins->Pin(GPIO_PWM, i),i);
+        analogWrite(tkr_pins->Pin(GPIO_PWM, i), bitRead(tkr_set->runtime.pwm_inverted, i) ? tkr_set->Settings.pwm_range : 0);
+      #endif
+
+      #ifdef ESP8266
+        analogWrite(tkr_pins->Pin(GPIO_PWM, i), bitRead(tkr_set->runtime.pwm_inverted, i) ? tkr_set->Settings.pwm_range : 0);
+      #endif
+      
+      tkr_set->runtime.pwm_present = true;
+    
+    }
+    
+  }
+
+
   /**
    * @brief Note I could also add flag to change the scale here to much longer than 1 minute
    * 
    */
-  for(uint8_t i=0;i<MAX_PWM_PINS;i++)
+  for(uint8_t i=0;i<MAX_PWMS;i++)
   {
-    if(tkr_pins->PinUsed(GPIO_PWM1,i))
+    if(tkr_pins->PinUsed(GPIO_PWM,i))
     {
       pwm[i].blended_value = new LinearBlendVariable<uint16_t>(1, BLEND_DATA_MILLISECONDS);
     }
@@ -165,7 +196,7 @@ void mPWM::EveryLoop(void)
   // var_blend_u8->UpdateBlend();
 
   
-  for(uint8_t i=0;i<MAX_PWM_PINS;i++)
+  for(uint8_t i=0;i<MAX_PWMS;i++)
   {
     if(pwm[i].blended_value != nullptr)
     {
@@ -177,11 +208,11 @@ void mPWM::EveryLoop(void)
    * @brief Update PWM outputs
    * 
    */
-  for(uint8_t i=0;i<MAX_PWM_PINS;i++)
+  for(uint8_t i=0;i<MAX_PWMS;i++)
   {
-    if(tkr_pins->PinUsed(GPIO_PWM1,i))
+    if(tkr_pins->PinUsed(GPIO_PWM,i))
     {
-      analogWrite(pwm[i].pin, pwm[i].blended_value->GetValue());
+      analogWrite(tkr_pins->Pin(GPIO_PWM, i), pwm[i].blended_value->GetValue());
     }
   }
 
@@ -227,7 +258,7 @@ void mPWM::parse_JSONCommand(JsonParserObject obj)
  
   char buffer[20];
 
-  for(uint8_t i=0;i<MAX_PWM_PINS;i++)
+  for(uint8_t i=0;i<MAX_PWMS;i++)
   {
 
     snprintf(buffer, sizeof(buffer), "PWM%d\0", i);
@@ -382,7 +413,7 @@ uint8_t mPWM::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
     JBI->Array_Start("pins");
     for(uint8_t i=0;i<5;i++){ 
-      JBI->Add(pwm[i].pin);
+      JBI->Add(tkr_pins->Pin(GPIO_PWM, i));
     }
     JBI->Array_End();
 

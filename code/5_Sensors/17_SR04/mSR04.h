@@ -29,7 +29,7 @@
  * - https://www.dfrobot.com/wiki/index.php/Weather-proof_Ultrasonic_Sensor_SKU_:_SEN0207
 \*********************************************************************************************/
 
-const uint8_t MAX_SR04 = 1; // Max number of SR04 ultrasonic sensors MUST be one, unless GPIO are increased (D_GPIO_FUNCTION_SR04_ECHO2_CTR)
+const uint8_t MAX_SR04 = 1; // Max number of SR04 ultrasonic sensors MUST be one, unless GPIO are increased (D_GPIO_SR04_ECHO2_CTR)
 
 class mSR04 :
   public mTaskerInterface

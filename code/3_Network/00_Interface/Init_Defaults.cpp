@@ -237,7 +237,7 @@ bool mInterfaceNetwork::NetworkConfig_CreateFileFromTemplateAndParse(void)
   #ifdef USE_MODULE_CORE_FILESYSTEM
   if(tkr_mfile)
   {
-    if(tkr_mfile->TfsSaveFile(
+    if(tkr_mfile->SaveFile(
         NETWORK_CONFIG_FILE_PATH,
         reinterpret_cast<const uint8_t*>(template_json.c_str()),
         template_json.length()

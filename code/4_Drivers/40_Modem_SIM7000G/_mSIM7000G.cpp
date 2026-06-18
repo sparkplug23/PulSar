@@ -41,7 +41,10 @@ int8_t mSIM7000G::Tasker(uint8_t function, JsonParserObject obj)
     break;  
   }
 
-  if(!settings.fEnableSensor){ return TASKER_RESULT__MODULE_DISABLED_ID; }
+  if(module_state.mode != ModuleStatus::Running)
+  {
+    return TASKER_RESULT__MODULE_DISABLED_ID;
+  }
 
   switch(function){
     /************
@@ -192,19 +195,38 @@ int8_t mSIM7000G::Tasker(uint8_t function, JsonParserObject obj)
 
 
 
-void mSIM7000G::Pre_Init(void){
-  
-  pinMode(12, OUTPUT);
-
-  #ifdef ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
-  if (!stream_debugger) {
-    stream_debugger = new StreamDebugger(SerialAT, Serial);
-  }
-  #endif
+void mSIM7000G::Pre_Init(void)
+{
+  module_state.mode = ModuleStatus::Initialising;
 
   ALOG_INF(PSTR(D_LOG_SIM7000G "Pre_Init"));
-  
+
+  for (int i=0;i<3;i++)
+  {
+    if(tkr_pins->PinUsed(GPIO_MODEM_RX, i)&&tkr_pins->PinUsed(GPIO_MODEM_TX, i))
+    {    
+      pins.tx_pin = tkr_pins->GetPin(GPIO_MODEM_TX, i); // this specific pattern, together with GetSerial can be used later to more easily latch the serial to a module
+      pins.rx_pin = tkr_pins->GetPin(GPIO_MODEM_RX, i);
+      pins.uart_port = 1;
+    }
+  }
+
+  pins.pwrkey_pin = tkr_pins->GetPin(GPIO_MODEM_POWER_KEY);
+
+
+  if ((pins.tx_pin == -1) || (pins.rx_pin == -1))
+  {
+    ALOG_ERR(PSTR(D_LOG_SIM7000G "Pre_Init failed: modem UART pins not found"));
+    return;
+  }
+
+  ALOG_INF(PSTR(D_LOG_SIM7000G "Pre_Init: UART%d TX=%d RX=%d PWRKEY=%d"), pins.uart_port, pins.tx_pin, pins.rx_pin, pins.pwrkey_pin);
+
+  modem_serial = new HardwareSerial(pins.uart_port);
+
 }
+
+
 void mSIM7000G::Init(void)
 {
   ALOG_INF(PSTR(D_LOG_SIM7000G "Init"));
@@ -214,7 +236,12 @@ void mSIM7000G::Init(void)
     #ifdef ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
       modem = new TinyGsm(*stream_debugger);
     #else
-      modem = new TinyGsm(SerialAT);
+      if (modem_serial == nullptr)
+      {
+        ALOG_ERR(PSTR(D_LOG_SIM7000G "Init failed: modem_serial not set up"));
+        return;
+      }
+      modem = new TinyGsm(*modem_serial);
     #endif
   }
 
@@ -230,9 +257,10 @@ void mSIM7000G::Init(void)
 
   flag_modem_initialized = false;
 
-  settings.fEnableSensor = true;
+  module_state.mode = ModuleStatus::Running;
 
-  const bool ok = Modem_EnsurePowerOnAndBaud(MODEM_TARGET_BAUD);
+  // Start and search for valid uart data
+  const bool ok = Modem_EnsurePowerOnAndBaud(MODEM_TARGET_BAUD); 
 
   if (!ok)
   {

@@ -65,7 +65,7 @@ d0 0x40146166:0x3ffb2820
 def _SerialCrashDumpBlock() -> str:
     return r"""
                                   
-                      
+                                     
 Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandle
 d.
                                                                             
@@ -73,43 +73,50 @@ d.
                                                                           
 Core  1 register dump:
                                                         
-PC      : 0x400f0619  PS      : 0x00060630  A0      : 0x800f14e4  A1      : 0x3f
-fcfe00  
+PC      : 0x40090660  PS      : 0x00060930  A0      : 0x80109a14  A1      : 0x3f
+fce8d0  
                                                                       
-A2      : 0x3ffd12dc  A3      : 0x0000000c  A4      : 0x3ffcfdd0  A5      : 0x00
-000001  
+A2      : 0xffffffff  A3      : 0xffffffff  A4      : 0xffffffff  A5      : 0x00
+060923  
                                                                       
-A6      : 0x00000fa0  A7      : 0x00000000  A8      : 0x800f0619  A9      : 0x3f
-fcfde0  
+A6      : 0x00060923  A7      : 0x00000001  A8      : 0x00000001  A9      : 0x00
+000004  
                                                                       
-A10     : 0x00000000  A11     : 0x0fffffff  A12     : 0x3ffcfe00  A13     : 0x3f
-fcfdd0  
+A10     : 0x00060923  A11     : 0x003fffff  A12     : 0x8008460b  A13     : 0x3f
+fd36f0  
                                                                       
-A14     : 0x00000008  A15     : 0x3ffcfc50  SAR     : 0x0000001c  EXCCAUSE: 0x00
+A14     : 0x007bf5f8  A15     : 0x003fffff  SAR     : 0x0000000a  EXCCAUSE: 0x00
 00001c  
                                                                       
-EXCVADDR: 0x00000040  LBEG    : 0x4008d325  LEND    : 0x4008d335  LCOUNT  : 0xff
-fffffb  
+EXCVADDR: 0x0000003f  LBEG    : 0x40085f0d  LEND    : 0x40085f15  LCOUNT  : 0x00
+000027  
                                                                       
           
                                                                     
             
                                                                   
-Backtrace: 0x400f0616:0x3ffcfe00 0x400f14e1:0x3ffcfe20 0x400f1e2e:0x3ffcfe70 0x4
-00d4c8f:0x3ffcfe90 0x400d71a7:0x3ffcfed0 0x400d72ef:0x3ffcff00 0x400d7564:0x3ffc
-ff20 0x400d4cc1:0x3ffcff40 0x400f3953:0x3ffcff80 0x401177c6:0x3ffcffd0
-        
-                                                                        
-      
-                                                                          
-    
-                                                                            
-  
-                                                                              
+Backtrace: 0x4009065d:0x3ffce8d0 0x40109a11:0x3ffce910 0x4010a30d:0x3ffce960 0x4
+0104c19:0x3ffce990 0x4010197d:0x3ffce9b0 0x4010204b:0x3ffce9d0 0x400e29cd:0x3ffc
+ea70 0x400e2c1e:0x3ffcead0 0x400e234d:0x3ffceaf0 0x400e24be:0x3ffceb10 0x400d4aa
+5:0x3ffceb30 0x400eb3c7:0x3ffceb70 0x400eb636:0x3ffceb90 0x401051d1:0x3ffcebb0
 
-ELF file SHA256: 49c988d33a5ab49d
-                                             
+                                                                               
+
+                                                                               
+
+                                                                               
+
+                                                                               
+
+ELF file SHA256: 0d1859bc66a7d2a3
+   
+                       
                                    
+                        
+
+
+      
+ 
       
 
                                                  

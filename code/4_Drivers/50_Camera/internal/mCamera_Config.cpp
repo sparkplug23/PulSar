@@ -94,20 +94,10 @@ void mCamera::Access_WaitUntilEnabled(){
 bool mCamera::Pins_AreConfigured(void) 
 {
 
-  // for (uint32_t i = 0; i < GPIO_WEBCAM_DATA8-GPIO_WEBCAM_DATA1; i++)
-  // {
-  //   ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_DATA%d: %d"), i, tkr_pins->PinUsed(GPIO_WEBCAM_DATA1, i));
-  // }
-  // ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_XCLK: %d"),tkr_pins->PinUsed(GPIO_WEBCAM_XCLK));
-  // ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_PCLK: %d"),tkr_pins->PinUsed(GPIO_WEBCAM_PCLK));
-  // ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_VSYNC: %d"),tkr_pins->PinUsed(GPIO_WEBCAM_VSYNC));
-  // ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_HREF: %d"),tkr_pins->PinUsed(GPIO_WEBCAM_HREF));
-  // ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_SIOD: %d"),tkr_pins->PinUsed(GPIO_WEBCAM_SIOD));
-  // ALOG_INF(PSTR(D_LOG_CAMERA "GPIO_WEBCAM_SIOC: %d"),tkr_pins->PinUsed(GPIO_WEBCAM_SIOC));
 
   bool pin_used = true;
-  for (uint32_t i = 0; i < (GPIO_WEBCAM_DATA8-GPIO_WEBCAM_DATA1); i++) {
-    if (!tkr_pins->PinUsed(GPIO_WEBCAM_DATA1, i)) {
+  for (uint32_t i = 0; i < 8; i++) {
+    if (!tkr_pins->PinUsed(GPIO_WEBCAM_DATA, i)) {
       pin_used = false;
     }
 //    if (i < MAX_WEBCAM_HSD) {
@@ -169,9 +159,19 @@ void mCamera::Sensor_ApplyFeatureMode(int32_t value) {
 }
 
 void mCamera::Sensor_ApplyStoredSettings() {
+  DEBUG_LINE_HERE3
   mSupport::AutoMutex localmutex(&WebcamMutex, "WcApplySettings", 200);
+  DEBUG_LINE_HERE3
+
+
   sensor_t * wc_s = esp_camera_sensor_get();
-  if (!wc_s) { return; }
+  DEBUG_LINE_HERE3
+
+
+  if (!wc_s) { 
+  DEBUG_LINE_HERE3
+  return; }
+  DEBUG_LINE_HERE3
 
   wc_s->set_vflip(wc_s, tkr_iDrivers->webcam_config.flip);
   wc_s->set_hmirror(wc_s, tkr_iDrivers->webcam_config.mirror);
@@ -288,18 +288,18 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
 
   memset(&config, 0, sizeof(config));
 
-    ALOG_INF(PSTR("Pins_AreConfigured() = %d"), Pins_AreConfigured());
+  ALOG_INF(PSTR("Pins_AreConfigured() = %d"), Pins_AreConfigured());
 
 
   if (Pins_AreConfigured()) {
-    config.pin_d0       = tkr_pins->Pin(GPIO_WEBCAM_DATA1);        // Y2_GPIO_NUM;
-    config.pin_d1       = tkr_pins->Pin(GPIO_WEBCAM_DATA1, 1);     // Y3_GPIO_NUM;
-    config.pin_d2       = tkr_pins->Pin(GPIO_WEBCAM_DATA1, 2);     // Y4_GPIO_NUM;
-    config.pin_d3       = tkr_pins->Pin(GPIO_WEBCAM_DATA1, 3);     // Y5_GPIO_NUM;
-    config.pin_d4       = tkr_pins->Pin(GPIO_WEBCAM_DATA1, 4);     // Y6_GPIO_NUM;
-    config.pin_d5       = tkr_pins->Pin(GPIO_WEBCAM_DATA1, 5);     // Y7_GPIO_NUM;
-    config.pin_d6       = tkr_pins->Pin(GPIO_WEBCAM_DATA1, 6);     // Y8_GPIO_NUM;
-    config.pin_d7       = tkr_pins->Pin(GPIO_WEBCAM_DATA1, 7);     // Y9_GPIO_NUM;
+    config.pin_d0       = tkr_pins->Pin(GPIO_WEBCAM_DATA, 0);        // Y2_GPIO_NUM;
+    config.pin_d1       = tkr_pins->Pin(GPIO_WEBCAM_DATA, 1);     // Y3_GPIO_NUM;
+    config.pin_d2       = tkr_pins->Pin(GPIO_WEBCAM_DATA, 2);     // Y4_GPIO_NUM;
+    config.pin_d3       = tkr_pins->Pin(GPIO_WEBCAM_DATA, 3);     // Y5_GPIO_NUM;
+    config.pin_d4       = tkr_pins->Pin(GPIO_WEBCAM_DATA, 4);     // Y6_GPIO_NUM;
+    config.pin_d5       = tkr_pins->Pin(GPIO_WEBCAM_DATA, 5);     // Y7_GPIO_NUM;
+    config.pin_d6       = tkr_pins->Pin(GPIO_WEBCAM_DATA, 6);     // Y8_GPIO_NUM;
+    config.pin_d7       = tkr_pins->Pin(GPIO_WEBCAM_DATA, 7);     // Y9_GPIO_NUM;
     config.pin_xclk     = tkr_pins->Pin(GPIO_WEBCAM_XCLK);      // XCLK_GPIO_NUM;
     config.pin_pclk     = tkr_pins->Pin(GPIO_WEBCAM_PCLK);      // PCLK_GPIO_NUM;
     config.pin_vsync    = tkr_pins->Pin(GPIO_WEBCAM_VSYNC);    // VSYNC_GPIO_NUM;
@@ -376,13 +376,19 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
 
   ALOG_INF("CAM: get ledc channel");
   
+
+  #ifdef ENABLE_DEVFEATURE_ANALOG_WRITE_EMULATION_VERSION2
   int32_t ledc_channel = analogAttach(config.pin_xclk);/*added by me*/
+  #else
+  int32_t ledc_channel = 0;
+  analogAttach(config.pin_xclk,ledc_channel);/*added by me*/
+  #endif
   if (ledc_channel < 0) {
     AddLog(LOG_LEVEL_ERROR, "CAM: cannot allocated ledc channel, remove a PWM GPIO");
   }
   config.ledc_channel = (ledc_channel_t) ledc_channel;
   
-  AddLog(LOG_LEVEL_DEBUG_MORE, "CAM: XCLK on GPIO %i using ledc channel %i", config.pin_xclk, config.ledc_channel);
+  AddLog(LOG_LEVEL_INFO, "CAM: XCLK on GPIO %i using ledc channel %i", config.pin_xclk, config.ledc_channel);
   
   config.ledc_timer = LEDC_TIMER_0;
 //  config.xclk_freq_hz = 20000000;
@@ -426,6 +432,11 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
     ALOG_INF(PSTR(D_LOG_CAMERA "PSRAM not found"));
   }
 
+  // ALOG_INF(PSTR(D_LOG_CAMERA "Waiting for stable test %d"), millis());
+  // delay(4000);
+  // ALOG_INF(PSTR(D_LOG_CAMERA "Waiting for stable test... continue %d"), millis());
+
+  DEBUG_LINE_HERE3;
 
   esp_err_t err;
   // cannot hurt to retry...
@@ -456,6 +467,9 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
 
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "heap check 2: %d"),ESP.getFreeHeap());
 
+  DEBUG_WAIT_POINT_MS(2000);
+
+
   // drop down frame size for higher initial frame rate
   sensor_t * wc_s = esp_camera_sensor_get();
   // seems config.frame_size has no effect?
@@ -473,6 +487,12 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
   {
     rt.camera_init = true;
     ALOG_INF(PSTR(D_LOG_CAMERA "Camera init success, frame size %d, fb size %d"), wc_fb->width, wc_fb->len);
+  }else
+  {
+    ALOG_INF(PSTR(D_LOG_CAMERA "Camera init FAILED"));//, frame size %d, fb size %d"), wc_fb->width, wc_fb->len);
+
+    return 0;
+
   }
 
 
@@ -480,10 +500,14 @@ uint32_t mCamera::Driver_InitFromResolution(int32_t frame_size) {
   rt.height = wc_fb->height;
   esp_camera_fb_return(wc_fb);
 
+  DEBUG_LINE_HERE3
+
   Sensor_ApplyStoredSettings();
 
+  DEBUG_LINE_HERE3
   camera_sensor_info_t *info = esp_camera_sensor_get_info(&wc_s->id);
 
+  DEBUG_LINE_HERE3
   AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_CAMERA "%s Initialized"), info->name);
   tkr_set->runtime.camera_initialized = true;
   rt.up = 1;

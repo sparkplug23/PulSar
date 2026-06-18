@@ -219,6 +219,8 @@ uint32_t mCamera::Frame_RequestCaptureToStore(int32_t bnum) {
 void mCamera::FrameTask_Start()
 {
 
+// return;
+
   if (rt.taskRunning == 0)
   {
 
@@ -290,6 +292,38 @@ void mCamera::FrameTask_Loop(){
     loopcount++;
     uint32_t thismillis = millis();
     uint32_t statdur = thismillis - laststatmillis;
+
+    /****
+     * Block Loop if no connection exists
+     */
+    if (tkr_iDrivers->webcam_config.stream &&
+        tkr_set->runtime.global_state.network_down &&
+        !rt.CamServer)
+    {
+      if (!(loopcount % 100))
+      {
+        ALOG_INF(PSTR(D_LOG_CAMERA "WCOperationTask: network down, waiting for stream server"));
+      }
+
+      vTaskDelay(100 / portTICK_PERIOD_MS);
+      continue;
+    }
+
+    if (tkr_iDrivers->webcam_config.stream &&
+        !tkr_set->runtime.global_state.network_down &&
+        !rt.CamServer)
+    {
+      ALOG_INF(PSTR(D_LOG_CAMERA "WCOperationTask: network up, retry stream server"));
+      Stream_SetEnabled(1);
+
+      vTaskDelay(100 / portTICK_PERIOD_MS);
+      continue;
+    }
+
+    /****
+     * Connection must exist, continue to process
+     */
+
 
     // storage and settings disable cam.
     // we must stall until re-enabled

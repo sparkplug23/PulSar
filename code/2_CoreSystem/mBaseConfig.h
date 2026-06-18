@@ -100,7 +100,7 @@
   #define DEVICENAME_ROOMHINT_CTR   "template"
   #endif
 
-  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+  // 
   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 
   #ifdef ESP32
@@ -115,6 +115,7 @@
   #define USE_MODULE_CORE_TIME
   #define USE_MODULE_CORE_SPI
   #define USE_MODULE_CORE_I2C
+  #define USE_MODULE_CORE_PWM
 
   // #ifdef ESP32
   #ifndef DISABLE_FILESYSTEM
@@ -155,7 +156,7 @@
 #define ENABLE_FEATURE_WATCHDOG_TIMER
 #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
 #define ENABLE_FEATURE_FASTBOOT__DETECTION
-#define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+
 #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 #endif
 #endif
@@ -164,10 +165,11 @@
 #define ENABLE_FEATURE_WATCHDOG_TIMER
 #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 60000
 #define ENABLE_FEATURE_FASTBOOT__DETECTION
-#define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
+
 #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 #endif
 #endif
+
 
 
 #define ENABLE_FEATURE_DRIVERS_INTERFACE_UNIFIED_DRIVER_REPORTING
@@ -184,7 +186,9 @@
  *********************************************************************************************/
 
 #ifdef ESP32
-// #define USE_MODULE_FILESYSTEM_SDCARD
+// #define USE_MODULE_DRIVERS_SDCARD
+
+  #define ENABLE_FEATURE_FILESYSTEM__SDCARD_MMC // keep pn, planned also on
 #endif
 
 
@@ -234,8 +238,8 @@
  * 
  * 
  * *****************************************************************************************************/
-// Store original defines into intermediate macros if USE_DEBUGFEATURE_DEVICE__CLONE_TESTBED is defined
-// #ifdef USE_DEBUGFEATURE_DEVICE__CLONE_TESTBED
+// Store original defines into intermediate macros if USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED is defined
+// #ifdef USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED
 // // Directly redefine the macros with the prefix
 // #undef DEVICENAME_CTR
 // #undef DEVICENAME_FRIENDLY_CTR
@@ -549,7 +553,7 @@
 
 
 #ifndef D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND
-#define D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND 60
+#define D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND 20
 #endif
 
 

@@ -33,6 +33,10 @@
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
    #define MQTT_PORT     1883
 
+   #define ENABLE_DEBUG_LINE_HERE3
+
+  //  #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
+
 /***********************************
 * SECTION: Network Configs
 ************************************/  
@@ -50,10 +54,10 @@
 
 #define USE_MODULE_DRIVERS_INTERFACE
 
-#define USE_MODULE_DRIVERS_SDCARD
+// #define USE_MODULE_DRIVERS_SDCARD
 
-// #define USE_MODULE_FILESYSTEM_SDCARD
-#define ENABLE_FEATURE_FILESYSTEM__SDCARD_MMC
+// #define USE_MODULE_DRIVERS_SDCARD
+// #define ENABLE_FEATURE_FILESYSTEM__SDCARD_MMC
 
 #define USE_MODULE_DRIVERS__CAMERA
 #define CAMERA_MODEL_WROVER_KIT
@@ -69,10 +73,10 @@
 * SECTION: Sensors Configs
 ************************************/  
 
-#define USE_MODULE_SENSORS_INTERFACE
+// #define USE_MODULE_SENSORS_INTERFACE
 
-#define USE_MODULE_SENSORS_ESP32_TEMPERATURE
-#define ENABLE_FEATURE_INTERNAL_CHIP_TEMPERATURE__ALLOW_CLASSIC_ESP32
+// #define USE_MODULE_SENSORS_ESP32_TEMPERATURE
+// #define ENABLE_FEATURE_INTERNAL_CHIP_TEMPERATURE__ALLOW_CLASSIC_ESP32
 
 
 /***********************************
@@ -86,10 +90,10 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"
     #ifdef USE_MODULE_DRIVERS_SDCARD
-    "\"15\":\"" D_GPIO_FUNCTION_SDCARD_MMC_CMD_CTR  "\","
-    "\"14\":\"" D_GPIO_FUNCTION_SDCARD_MMC_CLK_CTR   "\","   
-    "\"2\":\"" D_GPIO_FUNCTION_SDCARD_MMC_D0_CTR   "\""
-    #endif // USE_MODULE_FILESYSTEM_SDCARD  
+    "\"15\":\"" D_GPIO_SDCARD_MMC_CMD_CTR  "\","
+    "\"14\":\"" D_GPIO_SDCARD_MMC_CLK_CTR   "\","   
+    "\"2\":\"" D_GPIO_SDCARD_MMC_D0_CTR   "\""
+    #endif
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -99,17 +103,135 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
  * SECTION: Templates
 ************************************/    
 
-#define USE_FUNCTION_TEMPLATE
-DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-"{"
-  "\"" D_MODULE_DRIVERS__CAMERA_CTR "\":{"
-    "\"Mirror\":1,"
-      "\"Flip\":1,"
-      "\"AWB\":0,"
-      "\"Resolution\":12" //12 max
-    "}"
-"}";
+// #define USE_FUNCTION_TEMPLATE
+// DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+// "{"
+//   "\"" D_MODULE_DRIVERS__CAMERA_CTR "\":{"
+//     "\"Mirror\":1,"
+//       "\"Flip\":1,"
+//       "\"AWB\":0,"
+//       "\"Resolution\":12" //12 max
+//     "}"
+// "}";
+#define USE_NETWORK_CONFIG_TEMPLATE
+  DEFINE_PGM_CTR(NETWORK_CONFIG_TEMPLATE)
+  "{"
+    "\"Version\":1,"
 
+    "\"Interface\":{"
+      "\"Policy\":{"
+        "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+        "\"AllowMultipleActive\":true,"
+        "\"BlockRemoteMqttWhenLocalAvailable\":true"
+      "}"
+    "},"
+
+    "\"WiFi\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,60,600],"
+
+      "\"Mode\":{"
+        "\"STA\":true,"
+        "\"AP\":true,"
+        "\"STA_AP\":true,"
+        "\"APBootMins\":10,"
+        "\"APOnSTAFail\":true,"
+        "\"APFailDelayMins\":0,"
+        "\"APAlwaysOn\":false"
+      "},"
+
+      "\"Station\":{"
+        "\"Profiles\":["
+          "{"
+            "\"SSID\":\"" STA_SSID1 "\","
+            "\"Password\":\"" STA_PASS1 "\""
+          "},"
+          "{"
+            "\"SSID\":\"" STA_SSID3 "\","
+            "\"Password\":\"" STA_PASS3 "\""
+          "}"
+        "],"
+
+        "\"IPv4\":{"
+          "\"Static\":false,"
+          "\"IP\":\"0.0.0.0\","
+          "\"Gateway\":\"0.0.0.0\","
+          "\"Subnet\":\"0.0.0.0\","
+          "\"DNS1\":\"0.0.0.0\","
+          "\"DNS2\":\"0.0.0.0\""
+        "}"
+      "},"
+
+      "\"SoftAP\":{"
+        "\"SSID\":\"" SOFTAP_SSID "\","
+        "\"Password\":\"" SOFTAP_PASSWORD "\","
+        "\"Channel\":1"
+      "}"
+    "},"
+
+    "\"Ethernet\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,30,60],"
+
+      "\"IPv4\":{"
+        "\"Static\":false,"
+        "\"IP\":\"0.0.0.0\","
+        "\"Gateway\":\"0.0.0.0\","
+        "\"Subnet\":\"0.0.0.0\","
+        "\"DNS1\":\"0.0.0.0\","
+        "\"DNS2\":\"0.0.0.0\""
+      "}"
+    "},"
+
+    "\"Cellular\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[10,60,600],"
+
+      "\"Modem\":{"
+        "\"EN\":true,"
+        "\"APN\":\"" CELLULAR_APN "\","
+        "\"User\":\"\","
+        "\"Password\":\"\""
+      "},"
+
+      "\"GNSS\":{"
+        "\"EN\":true"
+      "},"
+
+      "\"SMS\":{"
+        "\"EN\":true,"
+        "\"PrivilegedOnly\":true"
+      "}"
+    "},"
+
+    "\"MQTT\":{"
+      "\"EN\":true,"
+
+      "\"UpdateSeconds\":{"
+        "\"IfChanged\":1,"
+        "\"TelePeriod\":60,"
+        "\"ConfigPeriod\":60"
+      "},"
+
+      "\"Brokers\":["
+        "{"
+          "\"Id\":\"home\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST "\","
+          "\"Port\":" STR(MQTT_PORT) ","
+          "\"User\":\"\","
+          "\"Password\":\"\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"Ethernet\",\"WiFi\"],"
+          "\"PrefTransport\":[\"Ethernet\",\"WiFi\"],"
+          "\"OutgoingLevel\":3,"
+          "\"OutgoingLimiterMs\":0"
+        "}"
+      "]"
+    "}"
+  "}";
 #endif
 
 
@@ -142,7 +264,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 #define USE_MODULE_DRIVERS_SDCARD
 
-// #define USE_MODULE_FILESYSTEM_SDCARD
+// #define USE_MODULE_DRIVERS_SDCARD
 #define ENABLE_FEATURE_FILESYSTEM__SDCARD_MMC
 
 #define USE_MODULE_DRIVERS__CAMERA
@@ -176,10 +298,10 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"
     #ifdef USE_MODULE_DRIVERS_SDCARD
-    "\"15\":\"" D_GPIO_FUNCTION_SDCARD_MMC_CMD_CTR  "\","
-    "\"14\":\"" D_GPIO_FUNCTION_SDCARD_MMC_CLK_CTR   "\","   
-    "\"2\":\"" D_GPIO_FUNCTION_SDCARD_MMC_D0_CTR   "\""
-    #endif // USE_MODULE_FILESYSTEM_SDCARD  
+    "\"15\":\"" D_GPIO_SDCARD_MMC_CMD_CTR  "\","
+    "\"14\":\"" D_GPIO_SDCARD_MMC_CLK_CTR   "\","   
+    "\"2\":\"" D_GPIO_SDCARD_MMC_D0_CTR   "\""
+    #endif 
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -241,7 +363,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"
-    "\"2\":\"" D_GPIO_FUNCTION_STATUS_LED_CTR  "\""
+    "\"2\":\"" D_GPIO_STATUS_LED_CTR  "\""
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -360,15 +482,15 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"23\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
+      "\"23\":\"" D_GPIO_SWT1_CTR  "\","
       #endif
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
       // 32 - LED Strip External
       // 21 - LED Strip Onboard
       // 25?
@@ -706,53 +828,53 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
-   //  "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-   //  "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+   //  "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+   //  "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
     #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-    "\"8\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\""    
+    "\"8\":\"" D_GPIO_I2C_SDA_CTR   "\","
+    "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\""    
     #endif
     #ifdef USE_MODULE_SENSORS_PIR
-   //  "\"23\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+   //  "\"23\":\""  D_GPIO_PIR_1_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-    "\"33\":\""  D_GPIO_FUNCTION__TOF_VL53L0X_XSHUT1__CTR "\","
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
-   //  "\"26\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+    "\"33\":\""  D_GPIO__TOF_VL53L0X_XSHUT1__CTR "\","
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+   //  "\"26\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
-     // "\"26\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+     // "\"26\":\""  D_GPIO__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS_SR04
-    "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-    "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+    "\"4\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+    "\"2\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
     #endif 
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-    "\"35\":\""  D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
+    "\"35\":\""  D_GPIO_PIR_2_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-    "\"34\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+    "\"34\":\""  D_GPIO_PIR_1_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-    "\"5\":\""  D_GPIO_FUNCTION_PIR_3_INV_CTR "\","
+    "\"5\":\""  D_GPIO_PIR_3_INV_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-    "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-    "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
+    "\"17\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+    "\"16\":\""  D_GPIO__HLK_LD2410_RX__CTR "\","
     #endif
    //  #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-   //  "\"27\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT__CTR "\","
+   //  "\"27\":\""  D_GPIO__TOF_VL53L1X_XSHUT__CTR "\","
    //  #endif
     #ifdef USE_MODULE_SENSORS_BUTTONS
-   //  "\"18\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-   //  "\"19\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-   //  "\"33\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+   //  "\"18\":\"" D_GPIO_KEY1_INV_CTR  "\","
+   //  "\"19\":\"" D_GPIO_KEY2_INV_CTR  "\","
+   //  "\"33\":\"" D_GPIO_KEY3_INV_CTR  "\","
     #endif
     
-   //  "\"4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
-   //  "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\","
-    // "\"8\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+   //  "\"4\":\"" D_GPIO_LED1_CTR  "\","
+   //  "\"5\":\"" D_GPIO_LED2_CTR  "\","
+    // "\"8\":\"" D_GPIO_LED1_CTR  "\""
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -983,11 +1105,11 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"    
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR
-    "\"16\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\""
+    "\"16\":\""  D_GPIO_PIR_1_INV_CTR "\""
     #endif
     #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-    "\"8\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\""    
+    "\"8\":\"" D_GPIO_I2C_SDA_CTR   "\","
+    "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\""    
     #endif
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","

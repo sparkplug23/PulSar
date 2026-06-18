@@ -61,11 +61,17 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
 
 uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured(void) const
 {
+  DEBUG_LINE_HERE3
   // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   for (uint8_t i = 0; i < WIFI_MAXIMUM_CONNECTIONS; i++)
   {
-    if (config.station.profiles[i].ssid[0] != '\0') return i;
+    if (config.station.profiles[i].ssid[0] != '\0')
+    {
+      ALOG_INF(PSTR("config.station.profiles[i].ssid[0] %s %d"),config.station.profiles[i].ssid,i);
+      return i;
+    } 
   }
+  DEBUG_LINE_HERE3
   return 0;
 }
 bool mWiFi::WiFi_Sta_ShouldScanNow_OnBootOrOutage(void)
@@ -97,21 +103,27 @@ void mWiFi::WiFi_Sta_OnConnected_ResetOutageScanFlags(void)
 }
 
 uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_WithScanPreference(bool force_scan)
-{ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+{
+  DEBUG_LINE_HERE3
+  ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+  DEBUG_LINE_HERE3
   const uint8_t ordered_first = WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured();
+  DEBUG_LINE_HERE3
 
   if (!force_scan)
   {
     return ordered_first;
   }
 
-  int n = WiFi.scanNetworks();
+  DEBUG_LINE_HERE3
+  int n = 0;//WiFi.scanNetworks();
   if (n <= 0)
   {
     WiFi.scanDelete();
     return ordered_first;
   }
 
+  DEBUG_LINE_HERE3
   // best RSSI per profile (only for configured SSIDs)
   int16_t best_rssi_by_profile[WIFI_MAXIMUM_CONNECTIONS];
   for (uint8_t p = 0; p < WIFI_MAXIMUM_CONNECTIONS; p++) best_rssi_by_profile[p] = (int16_t)-32768;
@@ -133,6 +145,7 @@ uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_WithScanPreference(bool force_scan)
     }
   }
 
+  DEBUG_LINE_HERE3
   WiFi.scanDelete();
 
   // find best + second best among configured profiles seen
@@ -187,6 +200,7 @@ uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_WithScanPreference(bool force_scan)
     }
   }
 
+  DEBUG_LINE_HERE3
   return override_order ? (uint8_t)scan_best : ordered_first;
 }
 

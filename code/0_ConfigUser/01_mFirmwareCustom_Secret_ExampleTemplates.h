@@ -227,8 +227,8 @@
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   /*
     Method should only activate if boot loop happens 10 times
@@ -799,13 +799,13 @@
        * OLED
        * */
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"4\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"5\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"4\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"5\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
       /** 
        * BUILTIN LED
        * */
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""
     "},"
   "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -838,8 +838,8 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"D1\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
+      "\"D1\":\"" D_GPIO_REL1_CTR   "\","
+      "\"D2\":\"" D_GPIO_REL1_CTR   "\","
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -886,8 +886,8 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"D1\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
+      "\"D1\":\"" D_GPIO_REL1_CTR   "\","
+      "\"D2\":\"" D_GPIO_REL1_CTR   "\","
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -935,8 +935,8 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"D1\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
+      "\"D1\":\"" D_GPIO_REL1_CTR   "\","
+      "\"D2\":\"" D_GPIO_REL1_CTR   "\","
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -980,8 +980,8 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"D1\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_REL1_CTR   "\","
+      "\"D1\":\"" D_GPIO_REL1_CTR   "\","
+      "\"D2\":\"" D_GPIO_REL1_CTR   "\","
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -1050,8 +1050,8 @@
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   //Add special debug method here that will count loglevel by type so "error" messages can be counted and shared every X seconds on terminal
   #
@@ -1085,19 +1085,19 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_BME
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"23\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR     "\","
+      "\"19\":\"" D_GPIO_DS18X20_1_CTR     "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"21\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      "\"2\":\""  D_GPIO_FUNCTION_REL2_INV_CTR  "\""  // Using Builtin LED
+      "\"21\":\"" D_GPIO_REL1_INV_CTR  "\","
+      "\"2\":\""  D_GPIO_REL2_INV_CTR  "\""  // Using Builtin LED
       #endif  
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -1207,8 +1207,8 @@
     #define MQTT_PORT     1883
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   // #define DISABLE_NETWORK
   // #define DISABLE_NETWORK_WIFI
@@ -1222,10 +1222,10 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_FUNCTION "\":{" 
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
+      "\"" D_GPIO_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
+      "\"" D_GPIO_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
+      "\"" D_GPIO_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
+      "\"" D_GPIO_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1253,12 +1253,12 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      "\"22\":\"" D_GPIO__RF_433MHZ_TX__CTR   "\","
       #endif  
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"23\":\"" D_GPIO__RF_433MHZ_RX__CTR   "\","
       #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"2\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
