@@ -18,7 +18,7 @@
 
 // #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__TESTBOARD
 // #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__INSTALLED_BOARD
-// #define DEVICE_NITC__SERVER_ROOM__AMBIENT_SENSOR
+#define DEVICE_NITC__SERVER_ROOM__AMBIENT_SENSOR
 
 
 
@@ -722,8 +722,6 @@
   #define DEVICENAME_DESCRIPTION_CTR "Template Description"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_PORT     1883
   
   #define SETTINGS_HOLDER 1239
 
@@ -816,9 +814,9 @@
       "\"23\":\"" D_GPIO_DS18X20_1_CTR  "\","
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"4\":\"" D_GPIO_PIR_1_CTR "\","       // Room
+      "\"4\":\"" D_GPIO_PIR_CTR "1" "\","       // Room
       #endif 
-      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""
+      "\"2\":\""  D_GPIO_LED_INV_CTR "1" "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -891,6 +889,106 @@
    * DH %d.%d, 
    * 
    */
+
+   
+// [AP] SSID: ServerLink_AP
+// [AP] Password: 
+// [AP] IP: 192.168.50.1
+// [AP] MAC: 5C:01:3B:95:96:25
+
+#define STA_SSID4 "ServerLink32"
+#define STA_PASS4 "af4d8bc9ab"
+#define MQTT_HOST   "192.168.50.2" //ecit01818 wifi via esp32
+#define MQTT_PORT     1883
+
+
+#define USE_NETWORK_CONFIG_TEMPLATE
+  DEFINE_PGM_CTR(NETWORK_CONFIG_TEMPLATE)
+  "{"
+    "\"Version\":1,"
+
+    "\"Interface\":{"
+      "\"Policy\":{"
+        "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+        "\"AllowMultipleActive\":true,"
+        "\"BlockRemoteMqttWhenLocalAvailable\":true"
+      "}"
+    "},"
+
+    "\"WiFi\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,60,600],"
+
+      "\"Mode\":{"
+        "\"STA\":true,"
+        "\"AP\":true,"
+        "\"STA_AP\":true,"
+        "\"APBootMins\":10,"
+        "\"APOnSTAFail\":true,"
+        "\"APFailDelayMins\":0,"
+        "\"APAlwaysOn\":false"
+      "},"
+
+      "\"Station\":{"
+        "\"Profiles\":["
+          "{"
+            "\"SSID\":\"" STA_SSID1 "\","
+            "\"Password\":\"" STA_PASS1 "\""
+          "},"
+          "{"
+            "\"SSID\":\"" STA_SSID4 "\","
+            "\"Password\":\"" STA_PASS4 "\""
+          "}"
+        "],"
+
+        "\"IPv4\":{"
+          "\"Static\":false,"
+          "\"IP\":\"0.0.0.0\","
+          "\"Gateway\":\"0.0.0.0\","
+          "\"Subnet\":\"0.0.0.0\","
+          "\"DNS1\":\"0.0.0.0\","
+          "\"DNS2\":\"0.0.0.0\""
+        "}"
+      "},"
+
+      "\"SoftAP\":{"
+        "\"SSID\":\"" SOFTAP_SSID "\","
+        "\"Password\":\"" SOFTAP_PASSWORD "\","
+        "\"Channel\":1"
+      "}"
+    "},"
+
+    "\"MQTT\":{"
+      "\"EN\":true,"
+
+      "\"UpdateSeconds\":{"
+        "\"IfChanged\":1,"
+        "\"TelePeriod\":60,"
+        "\"ConfigPeriod\":60"
+      "},"
+
+      "\"Brokers\":["
+        "{"
+          "\"Id\":\"home\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST "\","
+          "\"Port\":" STR(MQTT_PORT) ","
+          "\"User\":\"\","
+          "\"Password\":\"\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"Ethernet\",\"WiFi\"],"
+          "\"PrefTransport\":[\"Ethernet\",\"WiFi\"],"
+          "\"OutgoingLevel\":3,"
+          "\"OutgoingLimiterMs\":0"
+        "}"
+      "]"
+    "}"
+  "}";
+
+
+
 
 #endif
 

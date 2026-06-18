@@ -1,9 +1,9 @@
 {
   "env_name": "nitc_server__room_sensor",
-  "created_utc": "2026-06-08T19:51:03Z",
-  "created_epoch": 1780948263,
-  "project_dir": "U:\\GitHub\\PulSar",
-  "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\nitc_server__room_sensor",
+  "created_utc": "2026-06-18T12:51:16Z",
+  "created_epoch": 1781787076,
+  "project_dir": "C:\\pool_local\\Github\\Personal\\PulSar",
+  "build_dir": "C:\\pool_local\\Github\\Personal\\PulSar\\.pio\\build\\nitc_server__room_sensor",
   "platform": "espressif32",
   "board": "esp32dev",
   "framework": [
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "dev_mqtt_transport",
-    "commit": "b7735976e5ed962ea4965fe7ff481d113c81fb5a",
-    "describe": "b7735976-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M saved_compiles/nitc_server__room_sensor/build_meta.json\n M saved_compiles/nitc_server__room_sensor/firmware.elf"
+    "commit": "59a8e143992dab37b79129227d6411d5c0994071",
+    "describe": "59a8e143-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/0_ConfigUser/Secret/06_TemplateBuilds_From_INI/TemplateBase__HardwareSpecific.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/5_Sensors/04_DB18x20/mDB18x20.cpp\n M code/5_Sensors/07_PIR/mPIR.cpp\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n M platformio_remote.ini\n M saved_compiles/nitc_server__room_sensor/build_meta.json\n M saved_compiles/nitc_server__room_sensor/firmware.elf\n?? arduino_scripts/"
   }
 }
