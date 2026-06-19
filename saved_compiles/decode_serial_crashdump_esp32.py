@@ -25,47 +25,13 @@ from typing import Dict, List, Optional, Tuple
 
 
 # ============================================================
-# >>> EXAMPLE YOUR FULL SERIAL CRASH DUMP HERE <<<
-# ============================================================
-
-def _SerialCrashDumpBlock_Example() -> str:
-    return r"""
-Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandle
-d.
-
-Core  1 register dump:
-
-PC      : 0x40127e06  PS      : 0x00060430  A0      : 0x801282a6  A1      : 0x3f
-fb26c0
-
-A2      : 0x00000000  A3      : 0x00001f40  A4      : 0x000000a5  A5      : 0x00
-00000e
-
-A6      : 0x00000028  A7      : 0x00000009  A8      : 0x80127e04  A9      : 0x3f
-fb26a0
-
-A10     : 0x3ffb462c  A11     : 0x00001f40  A12     : 0x3ffb2670  A13     : 0x00
-000004
-
-A14     : 0x3ffc82ac  A15     : 0x3ffb260c  SAR     : 0x00000011  EXCCAUSE: 0x00
-00001c
-
-EXCVADDR: 0x00000000  LBEG    : 0x4008d1a5  LEND    : 0x4008d1b5  LCOUNT  : 0xff
-fffff9
-
-Backtrace:0x40127e03:0x3ffb26c00x401282a3:0x3ffb26f0 0x400d423b:0x3ffb2710 0x401
-229f6:0x3ffb2750 0x4012331e:0x3ffb2770 0x400d423b:0x3ffb2790 0x401293af:0x3ffb27
-d0 0x40146166:0x3ffb2820
-""".strip()
-
-# ============================================================
 # >>> PASTE YOUR FULL SERIAL CRASH DUMP HERE <<<
 # ============================================================
 
 def _SerialCrashDumpBlock() -> str:
     return r"""
                                   
-                                     
+                                                                                     
 Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandle
 d.
                                                                             
@@ -73,25 +39,34 @@ d.
                                                                           
 Core  1 register dump:
                                                         
-PC      : 0x40090660  PS      : 0x00060930  A0      : 0x80109a14  A1      : 0x3f
-fce8d0  
+PC      : 0x4009193d  PS      : 0x00060033  A0      : 0x80090525  A1      : 0x3f
+fce5e0  
                                                                       
-A2      : 0xffffffff  A3      : 0xffffffff  A4      : 0xffffffff  A5      : 0x00
-060923  
-                                                                      
-A6      : 0x00060923  A7      : 0x00000001  A8      : 0x00000001  A9      : 0x00
+A2      : 0x3ffbd69c  A3      : 0x3ffbd69c  A4      : 0x00000014  A5      : 0x00
 000004  
                                                                       
-A10     : 0x00060923  A11     : 0x003fffff  A12     : 0x8008460b  A13     : 0x3f
-fd36f0  
+A6      : 0x3ffbd694  A7      : 0x80000001  A8      : 0x00006f60  A9      : 0x3f
+fc6f68  
                                                                       
-A14     : 0x007bf5f8  A15     : 0x003fffff  SAR     : 0x0000000a  EXCCAUSE: 0x00
+A10     : 0x3ffc6f68  A11     : 0x003fffff  A12     : 0x80085226  A13     : 0x3f
+fbf56c  
+                                                                      
+A14     : 0x007bf618  A15     : 0x003fffff  SAR     : 0x0000001c  EXCCAUSE: 0x00
 00001c  
                                                                       
-EXCVADDR: 0x0000003f  LBEG    : 0x40085f0d  LEND    : 0x40085f15  LCOUNT  : 0x00
-000027  
+EXCVADDR: 0x00006f64  LBEG    : 0x4008bd6d  LEND    : 0x4008bd7d  LCOUNT  : 0xff
+ffffef  
                                                                       
           
+                                                                    
+            
+                                                                  
+Backtrace: 0x4009193a:0x3ffce5e0 0x40090522:0x3ffce600 0x4008e838:0x3ffce630 0x4
+008e7e8:0x4000bff0 |<-CORRUPTED
+                                               
+                                 
+          
+
                                                                     
             
                                                                   
@@ -130,7 +105,7 @@ ELF file SHA256: 0d1859bc66a7d2a3
 # CONFIGURATION
 # ============================================================
 
-ENV_NAME = "tg_cam__wroover_01"   # <<< change if needed
+ENV_NAME = "nitc_server__room_sensor"   # <<< change if needed
 PROJECT_ROOT = None                   # None = auto-detect folder containing saved_compiles
 
 DEDUPE_CONSECUTIVE_ONLY = True
@@ -621,3 +596,40 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+
+    
+# ============================================================
+# >>> EXAMPLE YOUR FULL SERIAL CRASH DUMP HERE <<<
+# ============================================================
+
+def _SerialCrashDumpBlock_Example() -> str:
+    return r"""
+Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandle
+d.
+
+Core  1 register dump:
+
+PC      : 0x40127e06  PS      : 0x00060430  A0      : 0x801282a6  A1      : 0x3f
+fb26c0
+
+A2      : 0x00000000  A3      : 0x00001f40  A4      : 0x000000a5  A5      : 0x00
+00000e
+
+A6      : 0x00000028  A7      : 0x00000009  A8      : 0x80127e04  A9      : 0x3f
+fb26a0
+
+A10     : 0x3ffb462c  A11     : 0x00001f40  A12     : 0x3ffb2670  A13     : 0x00
+000004
+
+A14     : 0x3ffc82ac  A15     : 0x3ffb260c  SAR     : 0x00000011  EXCCAUSE: 0x00
+00001c
+
+EXCVADDR: 0x00000000  LBEG    : 0x4008d1a5  LEND    : 0x4008d1b5  LCOUNT  : 0xff
+fffff9
+
+Backtrace:0x40127e03:0x3ffb26c00x401282a3:0x3ffb26f0 0x400d423b:0x3ffb2710 0x401
+229f6:0x3ffb2750 0x4012331e:0x3ffb2770 0x400d423b:0x3ffb2790 0x401293af:0x3ffb27
+d0 0x40146166:0x3ffb2820
+""".strip()

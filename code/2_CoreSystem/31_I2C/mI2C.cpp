@@ -112,7 +112,7 @@ void mI2C::Pre_Init()
  * 
  */
 
-  tkr_set->runtime.i2c_enabled = ( tkr_pins->PinUsed(GPIO_I2C_SCL) && tkr_pins->PinUsed(GPIO_I2C_SDA));
+  tkr_set->runtime.i2c_enabled = ( tkr_pins->PinUsed(GPIO_I2C_SCL,1) && tkr_pins->PinUsed(GPIO_I2C_SDA,1));
   ALOG_INF(PSTR("I2C Enabled: %s"), tkr_set->runtime.i2c_enabled ? "Yes" : "No");
   if (tkr_set->runtime.i2c_enabled)
   { 
@@ -120,18 +120,18 @@ void mI2C::Pre_Init()
     {
       #ifdef ESP8266
       wire = new TwoWire();
-      wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA), tkr_pins->GetPin(GPIO_I2C_SCL)); // no return to check status
+      wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA,1), tkr_pins->GetPin(GPIO_I2C_SCL,1)); // no return to check status
       #else
       wire = new TwoWire(0);
       ALOG_DBM( PSTR("Trying to start i2c 2-wire"));
       #ifdef ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
-      if(wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA_ID), tkr_pins->GetPin(GPIO_I2C_SCL_ID)))//, 100000))
+      if(wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA_ID,1), tkr_pins->GetPin(GPIO_I2C_SCL_ID,1)))//, 100000))
       #else
 
-      if(wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA,0), tkr_pins->GetPin(GPIO_I2C_SCL,0), I2C_BUS_SPEED))
+      if(wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA,1), tkr_pins->GetPin(GPIO_I2C_SCL,1), I2C_BUS_SPEED))
       #endif // ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
       {
-        ALOG_HGL( PSTR("STARTED to start i2c 2-wire sda%d scl%d"),tkr_pins->GetPin(GPIO_I2C_SDA,0),tkr_pins->GetPin(GPIO_I2C_SCL,0));
+        ALOG_HGL( PSTR("STARTED to start i2c 2-wire sda%d scl%d"),tkr_pins->GetPin(GPIO_I2C_SDA,1),tkr_pins->GetPin(GPIO_I2C_SCL,1));
       }
       else
       {

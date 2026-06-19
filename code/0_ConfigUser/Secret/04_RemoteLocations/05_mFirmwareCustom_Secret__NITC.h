@@ -807,11 +807,11 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR "1"  "\"," // if no index, assume its 1, only set as 0 when defined (eg serial0). perhaps easier to just understand serial as offset?
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR "1"  "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"23\":\"" D_GPIO_DS18X20_1_CTR  "\","
+      "\"23\":\"" D_GPIO_DS18X20_1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
       "\"4\":\"" D_GPIO_PIR_CTR "1" "\","       // Room
@@ -932,12 +932,12 @@
       "\"Station\":{"
         "\"Profiles\":["
           "{"
-            "\"SSID\":\"" STA_SSID1 "\","
-            "\"Password\":\"" STA_PASS1 "\""
-          "},"
-          "{"
             "\"SSID\":\"" STA_SSID4 "\","
             "\"Password\":\"" STA_PASS4 "\""
+          "},"
+          "{"
+            "\"SSID\":\"" STA_SSID1 "\","
+            "\"Password\":\"" STA_PASS1 "\""
           "}"
         "],"
 
@@ -952,11 +952,12 @@
       "},"
 
       "\"SoftAP\":{"
-        "\"SSID\":\"" SOFTAP_SSID "\","
+        "\"SSID\":\"" SOFTAP_SSID "AmSen" "\","
         "\"Password\":\"" SOFTAP_PASSWORD "\","
         "\"Channel\":1"
       "}"
     "},"
+
 
     "\"MQTT\":{"
       "\"EN\":true,"
@@ -987,6 +988,8 @@
     "}"
   "}";
 
+
+// 1840 has the only esp32, which is the AP for now
 
 
 
