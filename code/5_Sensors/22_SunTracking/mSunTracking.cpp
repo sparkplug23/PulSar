@@ -1123,10 +1123,10 @@ uint8_t mSunTracking::ConstructJSON_Sensor(uint8_t json_method, bool json_append
 
     #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
     JBI->Object_Start(PM__ANGLES);
-      JBI->Add(PM__AZIMUTH,        (float)calc.position.azimuth);
-      JBI->Add(PM__ELEVATION,      (float)calc.position.elevation);
-      JBI->Add(PM__ELEVATION_MAX,  calc.max_elevation);
-      JBI->Add(PM__ELEVATION_MIN,  calc.min_elevation);
+      JBI->Add(PM_SUN_AZIMUTH,        (float)calc.position.azimuth);
+      JBI->Add(PM_SUN_ELEVATION,      (float)calc.position.elevation);
+      JBI->Add(PM_SUN_ELEVATION_MAX,  calc.max_elevation);
+      JBI->Add(PM_SUN_ELEVATION_MIN,  calc.min_elevation);
       JBI->Add("SunriseAzimuth",   calc.sunrise_azimuth);
       JBI->Add("SunsetAzimuth",    calc.sunset_azimuth);
       JBI->Add("DawnAzimuth",      calc.dawn_azimuth);
