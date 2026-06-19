@@ -338,6 +338,14 @@ void mWiFi::WiFi2_Sta_Connected_Enter(void)
   connection.fReconnect = false;
   connection.link_count++;
 
+  // ALOG_INF(
+  //   PSTR(D_LOG_WIFI "STA connected | SSID=%s | IP=%s | GW=%s | RSSI=%d dBm"),
+  //   WiFi.SSID().c_str(),
+  //   WiFi.localIP().toString().c_str(),
+  //   WiFi.gatewayIP().toString().c_str(),
+  //   WiFi.RSSI()
+  // );
+
   // Preserve existing system flags pattern
   tkr_set->Settings.sysopt_network.bit.network_wifi = 1;
   tkr_set->runtime.global_state.wifi_down = false;

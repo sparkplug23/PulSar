@@ -94,10 +94,10 @@ void mDB18x20::Pre_Init(void)
   module_state.pins_used = 0;
   for (uint8_t pins = 0; pins < MAX_DSB_PINS; pins++) 
   {
-    ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), tkr_pins->PinUsed(GPIO_DSB_1, pins), tkr_pins->GetPin(GPIO_DSB_1, pins));
-    if (tkr_pins->PinUsed(GPIO_DSB_1, pins)) 
+    ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), tkr_pins->PinUsed(GPIO_DSB, pins), tkr_pins->GetPin(GPIO_DSB, pins));
+    if (tkr_pins->PinUsed(GPIO_DSB, pins)) 
     {
-      ds18x20_gpios[pins] = new OneWire(tkr_pins->GetPin(GPIO_DSB_1, pins));
+      ds18x20_gpios[pins] = new OneWire(tkr_pins->GetPin(GPIO_DSB, pins));
       ALOG_INF(PSTR(D_LOG_DSB "pins_used %d"), module_state.pins_used);
       module_state.pins_used++;
     }

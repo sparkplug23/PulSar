@@ -91,16 +91,16 @@ void mPIR::Init(void)
               ii++
   )
   {
-    if(tkr_pins->PinUsed(GPIO_PIR_1, ii))
+    if(tkr_pins->PinUsed(GPIO_PIR, ii))
     {
-      pinMode(tkr_pins->GetPin(GPIO_PIR_1, ii), INPUT);
+      pinMode(tkr_pins->GetPin(GPIO_PIR, ii), INPUT);
       pir_detect.push_back(event_motion_t());
       pir_detect[module_state.devices].isActiveLow = false;
       module_state.devices++;
     }
-    if(tkr_pins->PinUsed(GPIO_PIR_1_INV, ii))
+    if(tkr_pins->PinUsed(GPIO_PIR_INV, ii))
     {
-      pinMode(tkr_pins->GetPin(GPIO_PIR_1_INV, ii), INPUT_PULLUP);
+      pinMode(tkr_pins->GetPin(GPIO_PIR_INV, ii), INPUT_PULLUP);
       pir_detect.push_back(event_motion_t());
       pir_detect[module_state.devices].isActiveLow = true;
       module_state.devices++;
@@ -141,9 +141,9 @@ void mPIR::ReadSensor()
 {
   for (uint8_t sensor_id = 0; sensor_id < module_state.devices; sensor_id++) 
   {
-    int8_t pin = tkr_pins->GetPin(GPIO_PIR_1, sensor_id);
+    int8_t pin = tkr_pins->GetPin(GPIO_PIR, sensor_id);
     if (pin == -1) {
-      pin = tkr_pins->GetPin(GPIO_PIR_1_INV, sensor_id);  // Check the inverted pin
+      pin = tkr_pins->GetPin(GPIO_PIR_INV, sensor_id);  // Check the inverted pin
     }
 
     if (pin != -1) {

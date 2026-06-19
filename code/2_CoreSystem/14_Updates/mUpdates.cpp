@@ -378,6 +378,8 @@ void SafeMode_StartAndAwaitOTA(uint8_t seconds_to_wait)
 
   ArduinoOTA.onEnd([]()
   {
+    RtcMemory__BootState.fast_reboot_count = 0; 
+    RtcMemory__BootState_Save();
     Serial.println(F("ArduinoOTA end"));
     // RtcMemory__BootState_Reset();
   });
