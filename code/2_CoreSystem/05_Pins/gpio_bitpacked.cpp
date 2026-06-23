@@ -17,11 +17,11 @@
  *
  * Example:
  *
- *   PGPIO(GPIO_REL) + MGPIO(MAX_RELAYS_SET)
+ *   PGPIO(GPIO_REL1) + MGPIO(MAX_RELAYS_SET)
  *
  * expands to:
  *
- *   Relay
+ *   Relay1
  *   Relay2
  *   Relay3
  *   ...
@@ -29,6 +29,7 @@
 
 const uint16_t SelectablePins_BitPacked[] PROGMEM =
 {
+  
   /****************************************
    * SECTION: UART
    ****************************************/
@@ -87,25 +88,25 @@ const uint16_t SelectablePins_BitPacked[] PROGMEM =
    ****************************************/
 
   // Relays
-  PGPIO(GPIO_REL) + MGPIO(MAX_RELAYS_SET),
-  PGPIO(GPIO_REL_INV) + MGPIO(MAX_RELAYS_SET),
+  PGPIO(GPIO_REL1) + MGPIO(MAX_RELAYS_SET),
+  PGPIO(GPIO_REL1_INV) + MGPIO(MAX_RELAYS_SET),
 
   // LEDs
-  PGPIO(GPIO_LED) + MGPIO(MAX_DIGITAL_LEDS),
-  PGPIO(GPIO_LED_INV) + MGPIO(MAX_DIGITAL_LEDS),
+  PGPIO(GPIO_LED1) + MGPIO(MAX_DIGITAL_LEDS),
+  PGPIO(GPIO_LED1_INV) + MGPIO(MAX_DIGITAL_LEDS),
 
   // Switches
-  PGPIO(GPIO_SWT) + MGPIO(MAX_SWITCHES_SET),
-  PGPIO(GPIO_SWT_INV) + MGPIO(MAX_SWITCHES_SET),
-  PGPIO(GPIO_SWT_NP) + MGPIO(MAX_SWITCHES_SET),
-  PGPIO(GPIO_SWT_INV_NP) + MGPIO(MAX_SWITCHES_SET),
+  PGPIO(GPIO_SWT1) + MGPIO(MAX_SWITCHES_SET),
+  PGPIO(GPIO_SWT1_INV) + MGPIO(MAX_SWITCHES_SET),
+  PGPIO(GPIO_SWT1_NP) + MGPIO(MAX_SWITCHES_SET),
+  PGPIO(GPIO_SWT1_INV_NP) + MGPIO(MAX_SWITCHES_SET),
 
   // Buttons / keys
-  PGPIO(GPIO_KEY) + MGPIO(MAX_KEYS_SET),
-  PGPIO(GPIO_KEY_INV) + MGPIO(MAX_KEYS_SET),
-  PGPIO(GPIO_KEY_NP) + MGPIO(MAX_KEYS_SET),
-  PGPIO(GPIO_KEY_INV_NP) + MGPIO(MAX_KEYS_SET),
-  PGPIO(GPIO_KEY_TOUCH) + MGPIO(MAX_KEYS_SET),
+  PGPIO(GPIO_KEY1) + MGPIO(MAX_KEYS_SET),
+  PGPIO(GPIO_KEY1_INV) + MGPIO(MAX_KEYS_SET),
+  PGPIO(GPIO_KEY1_NP) + MGPIO(MAX_KEYS_SET),
+  PGPIO(GPIO_KEY1_INV_NP) + MGPIO(MAX_KEYS_SET),
+  PGPIO(GPIO_KEY1_TOUCH) + MGPIO(MAX_KEYS_SET),
 
 
   /****************************************
@@ -113,12 +114,12 @@ const uint16_t SelectablePins_BitPacked[] PROGMEM =
    ****************************************/
 
   // PWM
-  PGPIO(GPIO_PWM) + MGPIO(MAX_PWMS),
-  PGPIO(GPIO_PWM_INV) + MGPIO(MAX_PWMS),
+  PGPIO(GPIO_PWM1) + MGPIO(MAX_PWMS),
+  PGPIO(GPIO_PWM1_INV) + MGPIO(MAX_PWMS),
 
   // Counters
-  PGPIO(GPIO_PULSE_COUNTER) + MGPIO(MAX_COUNTERS),
-  PGPIO(GPIO_PULSE_COUNTER_NP) + MGPIO(MAX_COUNTERS),
+  PGPIO(GPIO_PULSE_COUNTER1) + MGPIO(MAX_COUNTERS),
+  PGPIO(GPIO_PULSE_COUNTER1_NP) + MGPIO(MAX_COUNTERS),
 
   // ADC
   PGPIO(GPIO_ADC_INPUT) + MGPIO(MAX_ADCS),
@@ -175,6 +176,42 @@ const uint16_t SelectablePins_BitPacked[] PROGMEM =
   // Camera power/reset pins
   PGPIO(GPIO_WEBCAM_PWDN),
   PGPIO(GPIO_WEBCAM_RESET),
+
+  
+  /****************************************
+   * SECTION: Sensors
+   ****************************************/
+
+    /****************************************
+     * SECTION: DS18X20
+     ****************************************/
+    
+    PGPIO(GPIO_DS18B20) + MGPIO(2),
+
+    /****************************************
+     * SECTION: DHT
+     ****************************************/
+    
+    PGPIO(GPIO_DHT11) + MGPIO(2),
+    PGPIO(GPIO_DHT22) + MGPIO(2),
+
+
+  /****************************************
+   * SECTION: Displays
+   ****************************************/
+  
+  PGPIO(GPIO_NEXTION_TX) + MGPIO(3),
+  PGPIO(GPIO_NEXTION_RX) + MGPIO(3),
+
+
+  PGPIO(GPIO_LIGHTING_DIGITAL) + MGPIO(16),
+  PGPIO(GPIO_LIGHTING_CLOCK)   + MGPIO(4),
+  PGPIO(GPIO_LIGHTING_PWM)     + MGPIO(10),
+  PGPIO(GPIO_LIGHTING_ONOFF)   + MGPIO(5),
+
+  // Generic hardware serial
+  PGPIO(GPIO_UNUSED_FORCED_HIGH) + MGPIO(16),
+  PGPIO(GPIO_UNUSED_FORCED_LOW) + MGPIO(16),
 
 
 

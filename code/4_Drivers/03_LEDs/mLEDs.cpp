@@ -21,8 +21,8 @@
 
 int8_t mLEDs::Tasker(uint8_t function, JsonParserObject obj){
 
-  Serial.printf("mLEDs::Tasker function=%u\n\r", function); Serial.flush();
-  return 0;
+  // Serial.printf("mLEDs::Tasker function=%u\n\r", function); Serial.flush();
+  // return 0;
 
   /************
    * INIT SECTION * 
@@ -219,7 +219,7 @@ void mLEDs::BootMessage()
     mSupport::appendToBuffer(buffer, sizeof(buffer), "None");  
   }
   mSupport::removeTrailingComma(buffer);
-  ALOG_IMP(PSTR(D_LOG_LOG "%s"), buffer);
+  ALOG_IMP(PSTR(D_LOG_LED "%s"), buffer);
   #endif // ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
 }
 
@@ -649,7 +649,7 @@ uint8_t mLEDs::ConstructJSON_State(uint8_t json_level, bool json_appending){
   JBI->Start();
 
     JBI->Add("LED1_INV", tkr_pins->GetPin(GPIO_LED1_INV,0));
-    JBI->Add("LED2_INV", tkr_pins->GetPin(GPIO_LED2_INV,0));
+    JBI->Add("LED2_INV", tkr_pins->GetPin(GPIO_LED1_INV,1));
 
   return JBI->End();
 

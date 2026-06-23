@@ -299,6 +299,10 @@ void mPins::TemplateGPIOs(myio *gp)
     return;
   }
 
+  /*******************************************************************************************\
+   * Clear destination/runtime pin-function storage
+  \*******************************************************************************************/
+
   for(uint8_t real_pin = 0; real_pin < ARRAY_SIZE(gp->io); real_pin++)
   {
     gp->io[real_pin] = GPIO_NONE;
@@ -311,6 +315,17 @@ void mPins::TemplateGPIOs(myio *gp)
     pin[real_pin].allocation.allocated = 0;
   }
 
+  /*******************************************************************************************\
+   * Load source template
+   *
+   * USER_MODULE:
+   *   tkr_set->Settings.user_template.hardware.gp.io[] is already physical GPIO indexed.
+   *   src[26] means GPIO26, src[27] means GPIO27, etc.
+   *
+   * Predefined/internal templates:
+   *   Kept on the compact template-indexed path and expanded using TemplateIndexToRealPin().
+  \*******************************************************************************************/
+
   uint16_t src[MAX_USER_PINS];
 
   for(uint8_t template_index = 0; template_index < ARRAY_SIZE(src); template_index++)
@@ -318,63 +333,153 @@ void mPins::TemplateGPIOs(myio *gp)
     src[template_index] = GPIO_NONE;
   }
 
-  ALOG_INF(PSTR(D_LOG_PINS "TemplateGPIOs src_count=%u dest_count=%u"), ARRAY_SIZE(src), ARRAY_SIZE(gp->io));
+  ALOG_DBG(
+    PSTR(D_LOG_PINS "TemplateGPIOs src_count=%u dest_count=%u"),
+    ARRAY_SIZE(src),
+    ARRAY_SIZE(gp->io)
+  );
 
-  if(tkr_set->Settings.module == USER_MODULE)
+  const bool user_template_is_physical_indexed = (tkr_set->Settings.module == USER_MODULE);
+
+  if(user_template_is_physical_indexed)
   {
     ALOG_INF(PSTR(D_LOG_PINS "Loading USER provided template"));
+
     memcpy(&src, &tkr_set->Settings.user_template.hardware.gp, sizeof(mycfgio));
   }
   else
   {
-    ALOG_INF(PSTR(D_LOG_PINS "Loading predefined template %u"), tkr_set->Settings.module);
+    ALOG_DBG(PSTR(D_LOG_PINS "Loading predefined template %u"), tkr_set->Settings.module);
 
-#ifdef ESP8266
+    #ifdef ESP8266
     GetInternalTemplate(&src, tkr_set->Settings.module, 1);
-#endif
+    #endif
 
-#ifdef ESP32
+    #ifdef ESP32
     uint32_t module = ModuleTemplate(tkr_set->Settings.module);
     ALOG_INF(PSTR(D_LOG_PINS "Loading ESP32 template %u"), module);
     memcpy_P(&src, &module_template__gpio_map[module].gp, sizeof(mycfgio));
-#endif
+    #endif
   }
 
-  for(uint8_t template_index = 0; template_index < ARRAY_SIZE(src); template_index++)
+  /*******************************************************************************************\
+   * Expand/copy source into physical GPIO-indexed destination
+  \*******************************************************************************************/
+
+  if(user_template_is_physical_indexed)
   {
-    int8_t real_pin = TemplateIndexToRealPin(template_index);
+    /***************************************************************************\
+     * User templates are already physical GPIO indexed.
+     *
+     * Do not run TemplateIndexToRealPin() here.
+     *
+     * Required example:
+     *   src[26] -> gp->io[26]
+     *   src[27] -> gp->io[27]
+    \***************************************************************************/
 
-    if(real_pin < 0)
+    for(uint8_t real_pin = 0; real_pin < ARRAY_SIZE(gp->io); real_pin++)
     {
-      ALOG_ERR(PSTR(D_LOG_PINS "TemplateGPIOs skip bad template_index=%u gpio=%u"), template_index, src[template_index]);
-      continue;
-    }
+      uint16_t gpio_function = GPIO_NONE;
 
-    if((uint8_t)real_pin >= ARRAY_SIZE(gp->io))
-    {
-      ALOG_ERR(PSTR(D_LOG_PINS "TemplateGPIOs real_pin OOR index=%u real_pin=%d gpio=%u"), template_index, real_pin, src[template_index]);
-      continue;
-    }
-
-    gp->io[(uint8_t)real_pin] = src[template_index];
-
-    if((uint8_t)real_pin < MAX_GPIO_PIN)
-    {
-      pin[(uint8_t)real_pin].gpio_function = src[template_index];
-
-      if((src[template_index] != GPIO_NONE) && (src[template_index] != GPIO_USER))
+      if(real_pin < ARRAY_SIZE(src))
       {
-        pin[(uint8_t)real_pin].allocation.allocated = 1;
-        pin[(uint8_t)real_pin].allocation.unavailable = 0;
-        SetPinOwnerIfAllowed((uint8_t)real_pin, GetModuleUniqueID());
+        gpio_function = src[real_pin];
       }
-    }
 
-    ALOG_DBM(PSTR(D_LOG_PINS "TemplateGPIOs index=%u real_pin=%d gpio=%u"), template_index, real_pin, src[template_index]);
+      gp->io[real_pin] = gpio_function;
+
+      if(real_pin < MAX_GPIO_PIN)
+      {
+        pin[real_pin].gpio_function = gpio_function;
+
+        if((gpio_function != GPIO_NONE) && (gpio_function != GPIO_USER))
+        {
+          pin[real_pin].allocation.allocated = 1;
+          pin[real_pin].allocation.unavailable = 0;
+          SetPinOwnerIfAllowed(real_pin, GetModuleUniqueID());
+        }
+      }
+
+      ALOG_DBM(
+        PSTR(D_LOG_PINS "TemplateGPIOs USER real_pin=%u gpio=%u"),
+        real_pin,
+        gpio_function
+      );
+    }
   }
+  else
+  {
+    /***************************************************************************\
+     * Internal/predefined templates use compact template indices.
+     *
+     * These require conversion to physical GPIO numbers.
+    \***************************************************************************/
+
+    for(uint8_t template_index = 0; template_index < ARRAY_SIZE(src); template_index++)
+    {
+      int8_t real_pin = TemplateIndexToRealPin(template_index);
+
+      if(real_pin < 0)
+      {
+        ALOG_ERR(
+          PSTR(D_LOG_PINS "TemplateGPIOs skip bad template_index=%u gpio=%u"),
+          template_index,
+          src[template_index]
+        );
+        continue;
+      }
+
+      if((uint8_t)real_pin >= ARRAY_SIZE(gp->io))
+      {
+        ALOG_ERR(
+          PSTR(D_LOG_PINS "TemplateGPIOs real_pin OOR index=%u real_pin=%d gpio=%u"),
+          template_index,
+          real_pin,
+          src[template_index]
+        );
+        continue;
+      }
+
+      gp->io[(uint8_t)real_pin] = src[template_index];
+
+      if((uint8_t)real_pin < MAX_GPIO_PIN)
+      {
+        pin[(uint8_t)real_pin].gpio_function = src[template_index];
+
+        if((src[template_index] != GPIO_NONE) && (src[template_index] != GPIO_USER))
+        {
+          pin[(uint8_t)real_pin].allocation.allocated = 1;
+          pin[(uint8_t)real_pin].allocation.unavailable = 0;
+          SetPinOwnerIfAllowed((uint8_t)real_pin, GetModuleUniqueID());
+        }
+      }
+
+      ALOG_DBM(
+        PSTR(D_LOG_PINS "TemplateGPIOs PRESET index=%u real_pin=%d gpio=%u"),
+        template_index,
+        real_pin,
+        src[template_index]
+      );
+    }
+  }
+
+  /*******************************************************************************************\
+   * Debug output
+  \*******************************************************************************************/
 
   AddLog_Array(LOG_LEVEL_INFO, PSTR("TemplateGPIO src"), src, ARRAY_SIZE(src));
   AddLog_Array(LOG_LEVEL_INFO, PSTR("TemplateGPIO dst"), gp->io, ARRAY_SIZE(gp->io));
+
+  ALOG_DBG(
+    PSTR(D_LOG_PINS "TemplateGPIO CHECK dst[16]=%u dst[17]=%u dst[26]=%u dst[27]=%u dst[30]=%u dst[31]=%u"),
+    gp->io[16],
+    gp->io[17],
+    gp->io[26],
+    gp->io[27],
+    gp->io[30],
+    gp->io[31]
+  );
 }
 
 

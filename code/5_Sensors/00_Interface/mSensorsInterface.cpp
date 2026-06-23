@@ -45,7 +45,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
         // Measurement level feedback will be "DebugMore" and show level should be "Debug". "Info" should be reserved for essential stuff not in mqtt
         ALOG_DBM(PSTR(">>> Sensor Readings <<<"));
         tkr->Tasker_Interface(TASK_SENSOR_SHOW_LATEST_LOGGED_ID);
-        rt.tTicker_Splash_Sensors_To_Logs = 30 ; // reset
+        rt.tTicker_Splash_Sensors_To_Logs = 120 ; // reset
       }
       
   
@@ -70,9 +70,6 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       //   pModule[switch_index]->Tasker(function, obj);
 
     }break;
-    case TASK_EVERY_10_SECONDS:
-      // tkr->Tasker_Interface(TASK_SENSOR_SHOW_LATEST_LOGGED_ID);
-    break;
     case TASK_WEB_APPEND_SENSOR_TABLE_VALUES:
       WebAppend__Sensor_Table__As_Ragged();
       // WebAppend__Sensor_Table__As_SensorsRows_Inverted();

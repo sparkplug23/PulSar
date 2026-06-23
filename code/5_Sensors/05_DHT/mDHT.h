@@ -12,10 +12,8 @@ class DHTesp;
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
-static const float    DHT_CHANGE_THRESH_C  = 0.1f;
-static const float    DHT_CHANGE_THRESH_RH = 0.5f;
-
 #define MAX_DHT_SENSORS 4
+#define MAX_DHT_SENSORS_PER_MODEL 2
 
 class mSensorsDHT :
   public mTaskerInterface
@@ -51,6 +49,9 @@ class mSensorsDHT :
     struct DHT_Sensor {
       // hardware / driver
       DHTesp* dht = nullptr;
+      uint16_t gpio_base = 0;
+      uint8_t gpio_index = 0;
+      int16_t pin = -1;
 
       // latest values
       float temperature = NAN;
@@ -62,7 +63,6 @@ class mSensorsDHT :
       // flags
       uint8_t isvalid = 0;
       uint8_t ischanged = 0;
-      uint8_t ischanged_over_threshold = 0;
 
       // scheduling / health
       uint32_t next_poll_ms   = 0;
@@ -76,12 +76,11 @@ class mSensorsDHT :
 
     uint32_t next_rescan_ms = 0;
     
-    void ShowSensor_AddLog();
     void EveryLoop();
 
 
     void ClearSensors(void);
-    bool AddSensor(uint8_t gpio_function, DHTesp::DHT_MODEL_t model, const char* tag);
+    bool AddSensor(uint16_t gpio_base, uint8_t index, DHTesp::DHT_MODEL_t model, const char* tag);
     bool PollOne(uint8_t sensor_id);
 
     /************************************************************************************************
@@ -93,8 +92,7 @@ class mSensorsDHT :
     }    
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      // Serial.printf("OVERRIDE ACCESSED DHT %d\n\r",index);Serial.println(sensor[index].instant.temperature);
-      if(index > module_state.devices) {value->sensor_type.push_back(0); return ;}
+      if(index >= module_state.devices) {value->sensor_type.push_back(0); return ;}
       value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
       value->data_f.push_back(s[index].temperature);
       value->sensor_type.push_back(SENSOR_TYPE_RELATIVE_HUMIDITY_ID);

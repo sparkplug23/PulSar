@@ -919,16 +919,16 @@ void mPins::parse_JSONCommand(JsonParserObject obj)
     for (int module_i = 0; module_i < MODULE_MAXMODULE_8266; module_i++) {
       memcpy_P(gpio_buffer, &mPins::module_template__gpio_map_ESP8266[module_i], sizeof(gpio_buffer));
   
-      ALOG_INF(PSTR("Module %d:"), module_i);
+      ALOG_DBG(PSTR("Module %d:"), module_i);
   
       for (int gpio_i = 0; gpio_i < MAX_USER_PINS; gpio_i++) {
         uint16_t gpio_fn = gpio_buffer[gpio_i];
   
         if (gpio_fn != 0) {
           const char* fn_name = GetGPIOFunctionNamebyID(gpio_fn, buffer, sizeof(buffer));
-          ALOG_INF(PSTR("  GPIO%02d = %d (%s)"), gpio_i, gpio_fn, buffer);
+          ALOG_DBG(PSTR("  GPIO%02d = %d (%s)"), gpio_i, gpio_fn, buffer);
         } else {
-          ALOG_INF(PSTR("  GPIO%02d = None"), gpio_i);
+          ALOG_DBG(PSTR("  GPIO%02d = None"), gpio_i);
         }
       }
     }
@@ -937,16 +937,16 @@ void mPins::parse_JSONCommand(JsonParserObject obj)
     for (int module_i = 0; module_i < MAXMODULE; module_i++) {
       memcpy_P(gpio_buffer, &mPins::module_template__gpio_map[module_i], sizeof(gpio_buffer));
   
-      ALOG_INF(PSTR("Module %d:"), module_i);
+      ALOG_DBG(PSTR("Module %d:"), module_i);
   
       for (int gpio_i = 0; gpio_i < MAX_USER_PINS; gpio_i++) {
         uint16_t gpio_fn = gpio_buffer[gpio_i];
   
         if (gpio_fn != 0) {
           const char* fn_name = GetGPIOFunctionNamebyID(gpio_fn, buffer, sizeof(buffer));
-          ALOG_INF(PSTR("  GPIO%02d = %d (%s)"), gpio_i, gpio_fn, buffer);
+          ALOG_DBG(PSTR("  GPIO%02d = %d (%s)"), gpio_i, gpio_fn, buffer);
         } else {
-          ALOG_INF(PSTR("  GPIO%02d = None"), gpio_i);
+          ALOG_DBG(PSTR("  GPIO%02d = None"), gpio_i);
         }
       }
     }
@@ -988,7 +988,7 @@ void mPins::parse_JSONCommand(JsonParserObject obj)
       {
         int value = tdigital.getInt() ? HIGH : LOW;
         digitalWrite(pin, value);
-        ALOG_INF(PSTR("GPIO Set, pin=%d, digital=%d"), pin, value ? 1 : 0);
+        ALOG_DBG(PSTR("GPIO Set, pin=%d, digital=%d"), pin, value ? 1 : 0);
       }
 
       if(auto tanalog = gpio_obj["analog"])
@@ -1003,12 +1003,12 @@ void mPins::parse_JSONCommand(JsonParserObject obj)
         analogWrite(pin, value);
         #endif
 
-        ALOG_INF(PSTR("GPIO Set, pin=%d, analog=%d"), pin, value);
+        ALOG_DBG(PSTR("GPIO Set, pin=%d, analog=%d"), pin, value);
       }
     }
     else
     {
-      ALOG_INF(PSTR("GPIO Set failed, invalid pin"));
+      ALOG_DBG(PSTR("GPIO Set failed, invalid pin"));
     }
   }
 
@@ -1672,13 +1672,13 @@ bool mPins::ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index)
 
   if (packed_gpio == GPIO_NONE)
   {
-    ALOG_INF(PSTR("ValidUserGPIOFunction: VALID_NONE index=%u packed=%u"), index, packed_gpio);
+    ALOG_DBG(PSTR("ValidUserGPIOFunction: VALID_NONE index=%u packed=%u"), index, packed_gpio);
     return true;
   }
 
   if (packed_gpio == GPIO_USER)
   {
-    ALOG_INF(PSTR("ValidUserGPIOFunction: VALID_USER index=%u packed=%u"), index, packed_gpio);
+    ALOG_DBG(PSTR("ValidUserGPIOFunction: VALID_USER index=%u packed=%u"), index, packed_gpio);
     return true;
   }
 
@@ -1688,7 +1688,7 @@ bool mPins::ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index)
   char gpio_name[64];
   GetGPIOFunctionNamebyID(packed_gpio, gpio_name, sizeof(gpio_name));
 
-  ALOG_INF(
+  ALOG_DBG(
     PSTR("ValidUserGPIOFunction: index=%u packed=0x%04X dec=%u base=%u idx=%u name=\"%s\""),
     index,
     packed_gpio,
@@ -1708,7 +1708,7 @@ bool mPins::ValidUserGPIOFunction(uint16_t* pin_array, uint8_t index)
     {
       if (packed_idx < entry_max)
       {
-        ALOG_INF(
+        ALOG_DBG(
           PSTR("ValidUserGPIOFunction: VALID index=%u packed=0x%04X base=%u idx=%u max=%u"),
           index,
           packed_gpio,
@@ -1819,7 +1819,7 @@ void mPins::ModuleDefault(uint8_t module)
   #endif  // ESP8266
   #ifdef ESP32
   
-    ALOG_INF( PSTR("ModuleDefault =================================================================================================================================================================================================module=%d %d %d"), module, sizeof(tkr_set->Settings.user_template), sizeof(mytmplt));
+    ALOG_DBG( PSTR("ModuleDefault =================================================================================================================================================================================================module=%d %d %d"), module, sizeof(tkr_set->Settings.user_template), sizeof(mytmplt));
 
     memcpy_P(&tkr_set->Settings.user_template, &module_template__gpio_map[module], sizeof(mytmplt));
   #endif  // ESP32
@@ -1879,9 +1879,70 @@ uint16_t mPins::ValidPin_AdjustGPIO(uint8_t physical_pin, uint16_t gpio)
 }
 
 
+// bool mPins::ValidGPIO(uint8_t pin, uint16_t gpio)
+// {
+//   return (GPIO_USER == ValidPin_AdjustGPIO(pin, gpio));  // Only allow GPIO_USER pins
+// }
 bool mPins::ValidGPIO(uint8_t pin, uint16_t gpio)
 {
-  return (GPIO_USER == ValidPin_AdjustGPIO(pin, gpio));  // Only allow GPIO_USER pins
+  /*******************************************************************************************\
+   * GPIO_NONE is always a valid empty assignment.
+  \*******************************************************************************************/
+
+  if(gpio == GPIO_NONE)
+  {
+    return true;
+  }
+
+  /*******************************************************************************************\
+   * Reject assignments to invalid/reserved physical pins.
+   *
+   * ValidPin_AdjustGPIO() returns GPIO_NONE for flash/reserved pins.
+   * If a non-empty assignment becomes GPIO_NONE, it is not valid.
+  \*******************************************************************************************/
+
+  const uint16_t adjusted_gpio = ValidPin_AdjustGPIO(pin, gpio);
+
+  if(adjusted_gpio == GPIO_NONE)
+  {
+    return false;
+  }
+
+  /*******************************************************************************************\
+   * GPIO_USER is valid only when the physical pin is allowed.
+  \*******************************************************************************************/
+
+  if(gpio == GPIO_USER)
+  {
+    return (adjusted_gpio == GPIO_USER);
+  }
+
+  /*******************************************************************************************\
+   * Validate packed selectable GPIO functions.
+   *
+   * Stored GPIO function IDs use:
+   *   packed_id = PGPIO(base_id) + index
+   *
+   * SelectablePins_BitPacked[] stores:
+   *   PGPIO(base_id) + MGPIO(count)
+  \*******************************************************************************************/
+
+  const uint16_t packed_base = UGPIO(gpio);
+  const uint8_t  packed_idx  = gpio & GPIO_INDEX_MASK;
+
+  for(uint32_t list_i = 0; list_i < SelectablePins_BitPacked_Count; list_i++)
+  {
+    const uint16_t entry      = pgm_read_word(&SelectablePins_BitPacked[list_i]);
+    const uint16_t entry_base = UGPIO(entry);
+    const uint8_t  entry_max  = (entry & GPIO_INDEX_MASK) + 1;
+
+    if(packed_base == entry_base)
+    {
+      return (packed_idx < entry_max);
+    }
+  }
+
+  return false;
 }
 
 
@@ -2077,8 +2138,8 @@ void mPins::PinTable_SerialPrint(const char* label)
 
   Serial.println();
   Serial.println(F("===================================================================================================="));
-  Serial.println(F("Pin  Raw    Base Idx  Function                 Owner  Alloc Phys  A L U G S I C  Flash USB Boot"));
-  Serial.println(F("---  -----  ---- ---  -----------------------  -----  ----- ----- - - - - - - -  ----- --- ----"));
+  Serial.println(F("Pin  Raw    Base Idx  Function                 Owner  Alloc  Phys   A L U G S I C  Flash USB Boot"));
+  Serial.println(F("---  -----  ---- ---  -----------------------  -----  ------ ------ - - - - - - -  ----- --- ----"));
 
   for(uint8_t real_pin = 0; real_pin < MAX_GPIO_PIN; real_pin++)
   {

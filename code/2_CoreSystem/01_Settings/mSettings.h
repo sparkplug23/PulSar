@@ -11,10 +11,10 @@
 #define D_MQTT_COMMAND_HANDLED_COUNT_INC data_buffer.isserviced++
 
 
-#include "2_CoreSystem/05_HardwarePins/mPins_Templates.h"
-#include "2_CoreSystem/05_HardwarePins/mPins_Esp32.h"
-#include "2_CoreSystem/05_HardwarePins/mPins_Esp82xx.h"
-#include "2_CoreSystem/05_HardwarePins/mPins.h"
+#include "2_CoreSystem/05_Pins/mPins_Templates.h"
+#include "2_CoreSystem/05_Pins/mPins_Esp32.h"
+#include "2_CoreSystem/05_Pins/mPins_Esp82xx.h"
+#include "2_CoreSystem/05_Pins/mPins.h"
 
 #include "1_TaskerManager/mTaskerManager.h"
 

@@ -8314,6 +8314,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 
 
+  #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_SUN_TRACKING      
   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
   #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
@@ -8379,13 +8380,13 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
     "\"" D_GPIO_NUMBER "\":{"    
       // "\"28\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
       // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","
+      "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "2" "\","
+      "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "3" "\","
+      "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "4" "\","
+      "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "5" "\","
+      "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "6" "\","
+      "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "7" "\","
       #ifdef USE_MODULE_SENSORS_BUTTONS
       "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
       "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
@@ -8394,6 +8395,17 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+        "\"" "Desk" "\""
+      "]"
+    "}"
   "}";
 
 #endif // END DEVICE

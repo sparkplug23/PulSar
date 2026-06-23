@@ -49,10 +49,10 @@ int8_t mBME::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case TASK_EVERY_SECOND:
       BmpRead();
-      ShowSensor_AddLog();
     break;
     case TASK_SENSOR_SHOW_LATEST_LOGGED_ID:
-      ShowSensor_AddLog();
+      ConstructJSON_Sensor(JSON_LEVEL_SHORT);
+      ALOG_INF(PSTR(D_LOG_BME "\"%s\""),JBI->GetBufferPtr());
     break;
     /************
      * MQTT SECTION * 
@@ -205,16 +205,6 @@ void mBME::BmpRead(void)
     bmp_sensors[bmp_idx].utc_measured_timestamp = tkr_time->UtcTime();
   }
 }
-
-
-void mBME::ShowSensor_AddLog()
-{
-  
-  ConstructJSON_Sensor(JSON_LEVEL_SHORT);
-  ALOG_DBM(PSTR(D_LOG_BME "\"%s\""),JBI->GetBufferPtr());
-
-}
-
 
 
 /******************************************************************************************************************
@@ -580,7 +570,9 @@ uint8_t mBME::ConstructJSON_Sensor(uint8_t json_level, bool json_appending){
 
   char buffer[50];
 
-  for(uint8_t sensor_id = 0; sensor_id<bmp_count; sensor_id++){
+  JBI->Add("SensorCount", GetSensorCount());
+
+  for(uint8_t sensor_id = 0; sensor_id<GetSensorCount(); sensor_id++){
     if(
       bmp_sensors[sensor_id].ischanged_over_threshold || 
       (json_level >  JSON_LEVEL_IFCHANGED) || 

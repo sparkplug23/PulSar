@@ -795,22 +795,22 @@ void mCamera::Init(void)
 void mCamera::BootMessage()
 {
   #ifdef ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
-  char buffer[100];
-  if(used_bitmask)
-  {
-    mSupport::appendToBuffer(buffer, sizeof(buffer), "#%d ", UsedCount());  
-    char buffer2[50];
-    for(uint8_t sensor_id = 0; sensor_id<MODULE_LEDS_MAX; sensor_id++)
-    {      
-      //if bit0 is used as LEDSTATUS, then show this here too
-      mSupport::appendToBuffer(buffer, sizeof(buffer), "%d, ", sensor_id);    
-    }
-  }
-  else{
-    mSupport::appendToBuffer(buffer, sizeof(buffer), "None");  
-  }
-  mSupport::removeTrailingComma(buffer);
-  ALOG_IMP(PSTR(D_LOG_LOG "%s"), buffer);
+  // char buffer[100];
+  // if(used_bitmask)
+  // {
+  //   mSupport::appendToBuffer(buffer, sizeof(buffer), "#%d ", UsedCount());  
+  //   char buffer2[50];
+  //   for(uint8_t sensor_id = 0; sensor_id<MODULE_LEDS_MAX; sensor_id++)
+  //   {      
+  //     //if bit0 is used as LEDSTATUS, then show this here too
+  //     mSupport::appendToBuffer(buffer, sizeof(buffer), "%d, ", sensor_id);    
+  //   }
+  // }
+  // else{
+  //   mSupport::appendToBuffer(buffer, sizeof(buffer), "None");  
+  // }
+  // mSupport::removeTrailingComma(buffer);
+  // ALOG_IMP(PSTR(D_LOG_CAMERA "%s"), buffer);
   #endif // ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
 }
 

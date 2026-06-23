@@ -443,6 +443,8 @@ class mPins :
     // Stores a packed selected GPIO function ID, i.e. PGPIO(base_id) + index.
     void SetPin_GPIOFunction(uint32_t real_pin, uint16_t packed_gpio);
 
+    bool GPIOBase_UsesZeroBasedSuffix(uint16_t base_id);
+
     bool CheckPhysicalPinIsFlashPin(uint32_t pin);
 
     void DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t state);
@@ -679,6 +681,8 @@ class mPins :
     const char* PinTable_GetFunctionName(uint8_t real_pin, char* buffer, uint8_t buflen);
     const char* PinTable_GetOwnerName(uint8_t real_pin, char* buffer, uint8_t buflen);
     const char* PinTable_GetGroupName(uint8_t real_pin, char* buffer, uint8_t buflen);
+
+    uint16_t GPIOPacked_Make(uint16_t base_id, uint8_t index);
 
     void PinTable_SerialPrint(const char* label = nullptr);
 };

@@ -112,38 +112,66 @@ void mI2C::Pre_Init()
  * 
  */
 
-  tkr_set->runtime.i2c_enabled = ( tkr_pins->PinUsed(GPIO_I2C_SCL,1) && tkr_pins->PinUsed(GPIO_I2C_SDA,1));
+  const uint8_t i2c_bus_i = 0;  // I2C bus 1 in human/template naming, zero-based internally
+
+  tkr_set->runtime.i2c_enabled = ( tkr_pins->PinUsed(GPIO_I2C_SCL, i2c_bus_i) && tkr_pins->PinUsed(GPIO_I2C_SDA, i2c_bus_i) );
+
   ALOG_INF(PSTR("I2C Enabled: %s"), tkr_set->runtime.i2c_enabled ? "Yes" : "No");
+
   if (tkr_set->runtime.i2c_enabled)
-  { 
-    if(wire == nullptr)
+  {
+    if (wire == nullptr)
     {
+      const int8_t pin_sda = tkr_pins->GetPin(GPIO_I2C_SDA, i2c_bus_i);
+      const int8_t pin_scl = tkr_pins->GetPin(GPIO_I2C_SCL, i2c_bus_i);
+
       #ifdef ESP8266
+
       wire = new TwoWire();
-      wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA,1), tkr_pins->GetPin(GPIO_I2C_SCL,1)); // no return to check status
-      #else
-      wire = new TwoWire(0);
-      ALOG_DBM( PSTR("Trying to start i2c 2-wire"));
-      #ifdef ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
-      if(wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA_ID,1), tkr_pins->GetPin(GPIO_I2C_SCL_ID,1)))//, 100000))
+      wire->begin(pin_sda, pin_scl); // ESP8266 begin has no status return
+
+      ALOG_HGL(
+        PSTR("STARTED i2c 2-wire bus%d SDA%d SCL%d"),
+        i2c_bus_i + 1,
+        pin_sda,
+        pin_scl
+      );
+
       #else
 
-      if(wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA,1), tkr_pins->GetPin(GPIO_I2C_SCL,1), I2C_BUS_SPEED))
+      wire = new TwoWire(i2c_bus_i);
+
+      ALOG_DBM(PSTR("Trying to start i2c 2-wire bus%d"), i2c_bus_i + 1);
+
+      #ifdef ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
+      if (wire->begin(pin_sda, pin_scl))
+      #else
+      if (wire->begin(pin_sda, pin_scl, I2C_BUS_SPEED))
       #endif // ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
       {
-        ALOG_HGL( PSTR("STARTED to start i2c 2-wire sda%d scl%d"),tkr_pins->GetPin(GPIO_I2C_SDA,1),tkr_pins->GetPin(GPIO_I2C_SCL,1));
+        ALOG_INF(
+          PSTR("STARTED i2c 2-wire bus%d SDA%d SCL%d"),
+          i2c_bus_i + 1,
+          pin_sda,
+          pin_scl
+        );
       }
       else
       {
-        ALOG_DBM( PSTR("NOT STARTED to start i2c 2-wire"));
+        ALOG_ERR(
+          PSTR("NOT STARTED i2c 2-wire bus%d SDA%d SCL%d"),
+          i2c_bus_i + 1,
+          pin_sda,
+          pin_scl
+        );
       }
-      #endif
-    }   
-    
+
+      #endif // ESP8266
+    }
+
     #ifdef ENABLE_DEVFEATURE_I2C__SET_WIRE_INSTANCE_WITH_TWOWIRE_ZERO
-    Wire = *tkr_i2c->wire; // Forces Compatibility. This copies the instance from tkr_i2c->wire into Wire, ensuring all libraries expecting Wire can still function.
+    Wire = *tkr_i2c->wire; // Compatibility for libraries expecting global Wire
     #endif
-    
   } // i2c_enabled
 
   Debug_I2CScan_To_Serial();

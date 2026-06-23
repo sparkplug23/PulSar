@@ -1,7 +1,7 @@
 /*
  * AUTO-GENERATED FILE
  *   Generator: tools/cdata_submodules.js
- *   Time:      2026-06-18T16:29:33.288Z
+ *   Time:      2026-06-23T08:03:03.467Z
  *
  * Source:
  *   code/8_Displays/01_Nextion/Web/Src

@@ -87,6 +87,7 @@
   #define USE_MODULE_CORE_FILESYSTEM
   #endif
     
+#define USE_MODULE_CORE_PINVIEWER
     
 
   //webserver?

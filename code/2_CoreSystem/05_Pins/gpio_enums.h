@@ -10,8 +10,10 @@
  *
  * Rules:
  *   1. This enum is always complete. Do not wrap enum IDs in feature #ifdef blocks.
- *   2. This enum contains base IDs only. Do not add numbered instance variants such as
- *      GPIO_REL1, GPIO_REL2, GPIO_MODEM_RX0, GPIO_MODEM_RX1, etc.
+ *   2. This enum contains base IDs only. Do not add repeated numbered instance variants such as
+ *      GPIO_REL2, GPIO_REL3, GPIO_MODEM_RX1, GPIO_MODEM_RX2, etc.
+ *      A base ID may keep the human-facing first-instance suffix when that is the
+ *      established function name, for example GPIO_REL1, GPIO_LED1, GPIO_KEY1.
  *   3. Runtime/module code calls the pin layer using base ID + index:
  *
  *        tkr_pins->Pin(GPIO_MODEM_RX, 0);   // Modem RX
@@ -22,14 +24,10 @@
  *   5. Numeric strings that are part of a real device/protocol/signal name may remain, for
  *      example DHT11, DHT22, LD2410, L9110, ADC1_CH4. Numbered instance suffixes are removed.
  *   6. Semantic suffixes are preserved as separate base IDs, for example:
- *        GPIO_REL      and GPIO_REL_INV
- *        GPIO_KEY      and GPIO_KEY_INV_NP
- *        GPIO_SWT      and GPIO_SWT_NP
+ *        GPIO_REL1     and GPIO_REL1_INV
+ *        GPIO_KEY1     and GPIO_KEY1_INV_NP
+ *        GPIO_SWT1     and GPIO_SWT1_NP
  *
- * Next file in the rewrite:
- *   gpio_bitpacked.h will define the build-specific selectable list using compact entries,
- *   for example PGPIO(GPIO_REL) + MGPIO(MAX_RELAYS). That list replaces the old repeated
- *   explicit entries and drives WebUI/naming expansion.
 \*********************************************************************************************/
 
 enum SelectablePins_Base : uint16_t
@@ -119,9 +117,9 @@ enum SelectablePins_Base : uint16_t
        ****************************************/
 
       // PWM output
-      GPIO_PWM,
+      GPIO_PWM1,
       // PWM output, inverted
-      GPIO_PWM_INV,
+      GPIO_PWM1_INV,
 
 
   /****************************************
@@ -133,18 +131,18 @@ enum SelectablePins_Base : uint16_t
        ****************************************/
 
       // LED output
-      GPIO_LED,
+      GPIO_LED1,
       // LED output, inverted
-      GPIO_LED_INV,
+      GPIO_LED1_INV,
 
       /****************************************
        * SECTION: Relay
        ****************************************/
 
       // Relay output
-      GPIO_REL,
+      GPIO_REL1,
       // Relay output, inverted
-      GPIO_REL_INV,
+      GPIO_REL1_INV,
 
       /****************************************
        * SECTION: IR
@@ -251,28 +249,28 @@ enum SelectablePins_Base : uint16_t
        ****************************************/
 
       // Switch input
-      GPIO_SWT,
+      GPIO_SWT1,
       // Switch input, inverted
-      GPIO_SWT_INV,
+      GPIO_SWT1_INV,
       // Switch input, no pull
-      GPIO_SWT_NP,
+      GPIO_SWT1_NP,
       // Switch input, inverted no pull
-      GPIO_SWT_INV_NP,
+      GPIO_SWT1_INV_NP,
 
       /****************************************
        * SECTION: Buttons
        ****************************************/
 
       // Button input
-      GPIO_KEY,
+      GPIO_KEY1,
       // Button input, inverted
-      GPIO_KEY_INV,
+      GPIO_KEY1_INV,
       // Button input, no pull
-      GPIO_KEY_NP,
+      GPIO_KEY1_NP,
       // Button input, inverted no pull
-      GPIO_KEY_INV_NP,
+      GPIO_KEY1_INV_NP,
       // Touch button input
-      GPIO_KEY_TOUCH,
+      GPIO_KEY1_TOUCH,
 
       /****************************************
        * SECTION: BME
@@ -285,7 +283,7 @@ enum SelectablePins_Base : uint16_t
        ****************************************/
 
       // DS18x20 one-wire data pin
-      GPIO_DSB,
+      GPIO_DS18B20,
 
       /****************************************
        * SECTION: DHT11/DHT22
@@ -364,9 +362,9 @@ enum SelectablePins_Base : uint16_t
        ****************************************/
 
       // Pulse counter input
-      GPIO_PULSE_COUNTER,
+      GPIO_PULSE_COUNTER1,
       // Pulse counter input, no pull
-      GPIO_PULSE_COUNTER_NP,
+      GPIO_PULSE_COUNTER1_NP,
 
 
       /****************************************
@@ -514,7 +512,18 @@ enum SelectablePins_Base : uint16_t
       GPIO_RXON_SAMPLING_ENABLED,
       // CC1110 sync pulse signal
       GPIO_CC1110_SYNC_PULSE_SIGNAL,
+      
+/*********************************************************************************************\
+ * Lighting GPIO functions
+ *
+ * Generic lighting allocation roles.
+ * These do not describe the LED protocol, only the pin role owned by lighting.
+\*********************************************************************************************/
 
+GPIO_LIGHTING_DIGITAL,       // Digital lighting data pin, up to 16 outputs
+GPIO_LIGHTING_CLOCK,         // Optional clock pin for 2-pin digital protocols, up to 4 outputs
+GPIO_LIGHTING_PWM,           // PWM lighting channel pin, up to 10 channels
+GPIO_LIGHTING_ONOFF,         // Simple binary lighting/output pin, up to 5 outputs
 
   /****************************************
    * SECTION: End Markers

@@ -16,7 +16,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "mSensorsDHT.h"
+#include "mDHT.h"
 
 #ifdef USE_MODULE_SENSORS_DHT
 
@@ -38,7 +38,8 @@ int8_t mSensorsDHT::Tasker(uint8_t function, JsonParserObject obj){
       EveryLoop();
     break;
     case TASK_SENSOR_SHOW_LATEST_LOGGED_ID:
-      ShowSensor_AddLog();
+      ConstructJSON_Sensor(JSON_LEVEL_SHORT);
+      ALOG_INF(PSTR(D_LOG_DHT "\"%s\""),JBI->GetBufferPtr());
     break;
     /************
      * MQTT SECTION * 
@@ -79,7 +80,6 @@ void mSensorsDHT::ClearSensors(void)
 
     s[i].isvalid = 0;
     s[i].ischanged = 0;
-    s[i].ischanged_over_threshold = 0;
 
     s[i].next_poll_ms   = 0;
     s[i].backoff_ms     = DHT_BACKOFF_MIN_MS;
@@ -91,38 +91,50 @@ void mSensorsDHT::ClearSensors(void)
   next_rescan_ms = millis() + DHT_RESCAN_PERIOD_MS;
 }
 
-bool mSensorsDHT::AddSensor(uint8_t gpio_function, DHTesp::DHT_MODEL_t model, const char* tag)
+bool mSensorsDHT::AddSensor(uint16_t gpio_base, uint8_t index, DHTesp::DHT_MODEL_t model, const char* tag)
 {
-  if (!tkr_pins->PinUsed(gpio_function)) return false;
+  if (!tkr_pins->PinUsed(gpio_base, index)) return false;
 
-  const uint8_t idx = module_state.devices;
-  if (idx >= MAX_DHT_SENSORS) {
-    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DHT "MAX_DHT_SENSORS reached, skipping %s"), tag);
+  const uint8_t sensor_i = module_state.devices;
+  if (sensor_i >= MAX_DHT_SENSORS) {
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DHT "MAX_DHT_SENSORS reached, skipping %s[%u]"), tag, index);
     return false;
   }
 
-  int16_t pin = tkr_pins->GetPin(gpio_function);
+  const int16_t pin = tkr_pins->GetPin(gpio_base, index);
+  if (pin < 0) {
+    AddLog(LOG_LEVEL_WARNING, PSTR(D_LOG_DHT "%s[%u] configured but pin invalid"), tag, index);
+    return false;
+  }
 
-  s[idx].dht = new DHTesp;
-  s[idx].dht->setup(pin, model);
+  s[sensor_i].dht = new DHTesp;
+  if (!s[sensor_i].dht) {
+    AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_DHT "%s[%u] DHTesp allocation failed"), tag, index);
+    return false;
+  }
+
+  s[sensor_i].gpio_base  = gpio_base;
+  s[sensor_i].gpio_index = index;
+  s[sensor_i].pin        = pin;
+
+  s[sensor_i].dht->setup(pin, model);
 
   const uint32_t now = millis();
-  s[idx].next_poll_ms = now + 250;
-  s[idx].backoff_ms   = DHT_BACKOFF_MIN_MS;
+  s[sensor_i].next_poll_ms = now + 250;
+  s[sensor_i].backoff_ms   = DHT_BACKOFF_MIN_MS;
 
   // ensure flags/data are reset for this slot
-  s[idx].isvalid = 0;
-  s[idx].ischanged = 0;
-  s[idx].ischanged_over_threshold = 0;
-  s[idx].temperature = NAN;
-  s[idx].humidity    = NAN;
-  s[idx].heatIndex   = NAN;
-  s[idx].dewPoint    = NAN;
-  s[idx].cr          = NAN;
-  s[idx].last_ok_ms = 0;
-  s[idx].last_change_ms = 0;
+  s[sensor_i].isvalid = 0;
+  s[sensor_i].ischanged = 0;
+  s[sensor_i].temperature = NAN;
+  s[sensor_i].humidity    = NAN;
+  s[sensor_i].heatIndex   = NAN;
+  s[sensor_i].dewPoint    = NAN;
+  s[sensor_i].cr          = NAN;
+  s[sensor_i].last_ok_ms = 0;
+  s[sensor_i].last_change_ms = 0;
 
-  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DHT "%s idx=%u pin=%u"), tag, idx, pin);
+  AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_DHT "%s[%u] sensor_i=%u pin=%d"), tag, index, sensor_i, pin);
 
   module_state.devices++;
   return true;
@@ -132,10 +144,13 @@ void mSensorsDHT::Pre_Init(void)
 {
   ClearSensors();
 
-  AddSensor(GPIO_DHT11_1, DHTesp::DHT11, "DHT11_1of2");
-  AddSensor(GPIO_DHT11_2, DHTesp::DHT11, "DHT11_2of2");
-  AddSensor(GPIO_DHT22_1, DHTesp::DHT22, "DHT22_1of2");
-  AddSensor(GPIO_DHT22_2, DHTesp::DHT22, "DHT22_2of2");
+  for (uint8_t dht_i = 0; dht_i < MAX_DHT_SENSORS_PER_MODEL; dht_i++) {
+    AddSensor(GPIO_DHT11, dht_i, DHTesp::DHT11, "DHT11");
+  }
+
+  for (uint8_t dht_i = 0; dht_i < MAX_DHT_SENSORS_PER_MODEL; dht_i++) {
+    AddSensor(GPIO_DHT22, dht_i, DHTesp::DHT22, "DHT22");
+  }
 
   if (module_state.devices) {
     module_state.mode = ModuleStatus::Running;
@@ -177,14 +192,12 @@ bool mSensorsDHT::PollOne(uint8_t i)
     const float dt = fabsf(s[i].temperature - v.temperature);
     const float dh = fabsf(s[i].humidity    - v.humidity);
     changed     = (dt > 0.0f) || (dh > 0.0f);
-    changed_thr = (dt >= DHT_CHANGE_THRESH_C) || (dh >= DHT_CHANGE_THRESH_RH);
   }
 
   const uint32_t now = millis();
 
   s[i].isvalid = 1;
   s[i].ischanged = changed ? 1 : 0;
-  s[i].ischanged_over_threshold = changed_thr ? 1 : 0;
   s[i].last_ok_ms = now;
   if (changed_thr) s[i].last_change_ms = now;
 
@@ -235,15 +248,6 @@ void mSensorsDHT::EveryLoop(void)
 }
 
 
-
-void mSensorsDHT::ShowSensor_AddLog()
-{
-  
-  ConstructJSON_Sensor(JSON_LEVEL_SHORT);
-  ALOG_INF(PSTR(D_LOG_DHT "\"%s\""),JBI->GetBufferPtr());
-
-}
-
 /******************************************************************************************************************
  * Commands
 *******************************************************************************************************************/
@@ -256,10 +260,11 @@ void mSensorsDHT::ShowSensor_AddLog()
 uint8_t mSensorsDHT::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   JBI->Start();
-    JBI->Add("SensorCount", module_state.devices);
+    JBI->Add("SensorCount", GetSensorCount());
     JBI->Array_Start("Pin");
-      // JBI->Add(s[0].pin);
-      // JBI->Add(pin[1]);
+      for (uint8_t sensor_i = 0; sensor_i < GetSensorCount(); sensor_i++) {
+        JBI->Add(s[sensor_i].pin);
+      }
     JBI->Array_End();
   return JBI->End();
 
@@ -270,8 +275,8 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level, bool json_appendin
   char buffer[50];
 
   JBI->Start();
-  JBI->Add("SensorCount", module_state.devices);
-  for(uint8_t sensor_id=0;sensor_id<module_state.devices;sensor_id++){
+  JBI->Add("SensorCount", GetSensorCount());
+  for(uint8_t sensor_id=0;sensor_id<GetSensorCount();sensor_id++){
     if(
       s[sensor_id].ischanged || 
       (json_level >  JSON_LEVEL_IFCHANGED) || 
@@ -281,13 +286,6 @@ uint8_t mSensorsDHT::ConstructJSON_Sensor(uint8_t json_level, bool json_appendin
       JBI->Level_Start_P(DLI->GetDeviceName_WithModuleUniqueID( GetModuleUniqueID(),sensor_id,buffer,sizeof(buffer)));   
         JBI->Add(D_TEMPERATURE, s[sensor_id].temperature);
         JBI->Add(D_HUMIDITY,    s[sensor_id].humidity);
-        if(json_level >=  JSON_LEVEL_DETAILED)
-        {     
-          JBI->Object_Start(D_ISCHANGEDMETHOD);
-            JBI->Add(D_TYPE, D_SIGNIFICANTLY);
-            JBI->Add(D_AGE, (uint16_t)round((millis()-s[sensor_id].last_ok_ms)/1000));
-          JBI->Object_End();   
-        }
       JBI->Object_End(); 
     }else{
       ALOG_INF(PSTR(D_LOG_DHT "Skipping sensor_id=%u no change"), sensor_id);

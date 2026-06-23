@@ -112,10 +112,10 @@ enum ModuleStatus{
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 #include "2_CoreSystem/11_Languages/mLanguageProgmem.h"
 
-#include "2_CoreSystem/05_HardwarePins/mPins_Templates.h"
-#include "2_CoreSystem/05_HardwarePins/mPins_Esp32.h"
-#include "2_CoreSystem/05_HardwarePins/mPins_Esp82xx.h"
-#include "2_CoreSystem/05_HardwarePins/mPins.h"
+#include "2_CoreSystem/05_Pins/mPins_Templates.h"
+#include "2_CoreSystem/05_Pins/mPins_Esp32.h"
+#include "2_CoreSystem/05_Pins/mPins_Esp82xx.h"
+#include "2_CoreSystem/05_Pins/mPins.h"
 
 #include "2_CoreSystem/07_Time/mTime.h"
 
@@ -128,7 +128,7 @@ enum ModuleStatus{
 #include "2_CoreSystem/06_Support/mSensorType.h"
 #include <DeCounter.h>
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"                           // Language support configured by .h
-#include "2_CoreSystem/05_HardwarePins/mPins_Templates.h"                // Hardware configuration
+#include "2_CoreSystem/05_Pins/mPins_Templates.h"                // Hardware configuration
 #include "2_CoreSystem/06_Support/BufferWriter.h"
 
 #include "1_TaskerManager/mTasks.h"
@@ -295,7 +295,7 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
   #define tkr_json_template                       static_cast<mJsonTemplate*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_JSON_TEMPLATE_ID))
 #endif
 #ifdef USE_MODULE_CORE_HARDWAREPINS
-  #include "2_CoreSystem/05_HardwarePins/mPins.h"
+  #include "2_CoreSystem/05_Pins/mPins.h"
   #define   tkr_pins                              static_cast<mPins*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_HARDWAREPINS_ID))
 #endif 
 #ifdef USE_MODULE_CORE_TIME
@@ -480,7 +480,7 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
   #define tkr_db18                               static_cast<mDB18x20*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_DS18X20__ID))
 #endif
 #ifdef USE_MODULE_SENSORS_DHT
-  #include "5_Sensors/05_DHT/mSensorsDHT.h"
+  #include "5_Sensors/05_DHT/mDHT.h"
   #define tkr_dht                                static_cast<mSensorsDHT*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_DHT_ID
 #endif
 #ifdef USE_MODULE_SENSORS_BH1750

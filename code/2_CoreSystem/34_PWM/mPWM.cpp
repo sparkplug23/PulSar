@@ -150,13 +150,13 @@ void mPWM::Init(void)
   
   for (uint32_t i = 0; i < MAX_PWMS; i++)
   {
-    if (tkr_pins->PinUsed(GPIO_PWM, i)) 
+    if (tkr_pins->PinUsed(GPIO_PWM1, i)) 
     {
-      pinMode(tkr_pins->Pin(GPIO_PWM, i), OUTPUT);
+      pinMode(tkr_pins->Pin(GPIO_PWM1, i), OUTPUT);
 
       #ifdef ESP32
-        analogAttach(tkr_pins->Pin(GPIO_PWM, i),i);
-        analogWrite(tkr_pins->Pin(GPIO_PWM, i), bitRead(tkr_set->runtime.pwm_inverted, i) ? tkr_set->Settings.pwm_range : 0);
+        analogAttach(tkr_pins->Pin(GPIO_PWM1, i),i);
+        analogWrite(tkr_pins->Pin(GPIO_PWM1, i), bitRead(tkr_set->runtime.pwm_inverted, i) ? tkr_set->Settings.pwm_range : 0);
       #endif
 
       #ifdef ESP8266
@@ -176,7 +176,7 @@ void mPWM::Init(void)
    */
   for(uint8_t i=0;i<MAX_PWMS;i++)
   {
-    if(tkr_pins->PinUsed(GPIO_PWM,i))
+    if(tkr_pins->PinUsed(GPIO_PWM1,i))
     {
       pwm[i].blended_value = new LinearBlendVariable<uint16_t>(1, BLEND_DATA_MILLISECONDS);
     }
@@ -210,9 +210,9 @@ void mPWM::EveryLoop(void)
    */
   for(uint8_t i=0;i<MAX_PWMS;i++)
   {
-    if(tkr_pins->PinUsed(GPIO_PWM,i))
+    if(tkr_pins->PinUsed(GPIO_PWM1,i))
     {
-      analogWrite(tkr_pins->Pin(GPIO_PWM, i), pwm[i].blended_value->GetValue());
+      analogWrite(tkr_pins->Pin(GPIO_PWM1, i), pwm[i].blended_value->GetValue());
     }
   }
 
@@ -413,7 +413,7 @@ uint8_t mPWM::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
     JBI->Array_Start("pins");
     for(uint8_t i=0;i<5;i++){ 
-      JBI->Add(tkr_pins->Pin(GPIO_PWM, i));
+      JBI->Add(tkr_pins->Pin(GPIO_PWM1, i));
     }
     JBI->Array_End();
 

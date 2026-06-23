@@ -37,7 +37,7 @@ int8_t mDB18x20::Tasker(uint8_t function, JsonParserObject obj)
       Pre_Init();
     break;
     case TASK_INIT:
-      Ds18x20Init();
+      Init();
     break;
     case TASK_BOOT_MESSAGE:
       BootMessage();
@@ -52,6 +52,10 @@ int8_t mDB18x20::Tasker(uint8_t function, JsonParserObject obj)
     *******************/
     case TASK_EVERY_SECOND:
       EverySecond();
+    break;
+    case TASK_SENSOR_SHOW_LATEST_LOGGED_ID:      
+      ConstructJSON_Sensor(JSON_LEVEL_SHORT);
+      ALOG_INF(PSTR(D_LOG_DB18 "\"%s\""),JBI->GetBufferPtr());
     break;
     /************
      * COMMANDS SECTION * 
@@ -94,12 +98,12 @@ void mDB18x20::Pre_Init(void)
   module_state.pins_used = 0;
   for (uint8_t pins = 0; pins < MAX_DSB_PINS; pins++) 
   {
-    ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), tkr_pins->PinUsed(GPIO_DSB, pins), tkr_pins->GetPin(GPIO_DSB, pins));
-    if (tkr_pins->PinUsed(GPIO_DSB, pins)) 
+    ALOG_INF (PSTR(D_LOG_DSB "PinUsed %d %d"), tkr_pins->PinUsed(GPIO_DS18B20, pins), tkr_pins->GetPin(GPIO_DS18B20, pins));
+    if (tkr_pins->PinUsed(GPIO_DS18B20, pins)) 
     {
-      ds18x20_gpios[pins] = new OneWire(tkr_pins->GetPin(GPIO_DSB, pins));
-      ALOG_INF(PSTR(D_LOG_DSB "pins_used %d"), module_state.pins_used);
+      ds18x20_gpios[pins] = new OneWire(tkr_pins->GetPin(GPIO_DS18B20, pins));
       module_state.pins_used++;
+      ALOG_INF(PSTR(D_LOG_DSB "pins_used %d"), module_state.pins_used);
     }
   }
 
@@ -133,14 +137,14 @@ void mDB18x20::BootMessage()
 }
 
 
-void mDB18x20::Ds18x20Init(void) 
+void mDB18x20::Init(void) 
 {
-  Ds18x20Search();
+  Search();
   ALOG_INF(PSTR(D_LOG_DSB D_SENSORS_FOUND " %d"), module_state.devices);
 }
 
 
-void mDB18x20::Ds18x20Search(void)
+void mDB18x20::Search(void)
 {
   uint8_t sensor_count = 0;
 
@@ -150,6 +154,7 @@ void mDB18x20::Ds18x20Search(void)
 
   for (uint8_t pins = 0; pins < module_state.pins_used; pins++)
   {
+    ALOG_DBG(PSTR(D_LOG_DB18 "search id %d"), pins);
     ds = ds18x20_gpios[pins];
     ds->reset_search();
 
@@ -216,7 +221,7 @@ void mDB18x20::Ds18x20Search(void)
   }
 
   module_state.devices = (uint8_t)sensor_vector.size();
-  ALOG_DBG(PSTR(D_LOG_DSB "sensor_count %d"), module_state.devices);
+  ALOG_INF(PSTR(D_LOG_DSB "sensor_count %d"), GetSensorCount());
 
   if (module_state.devices)
   {
@@ -226,7 +231,7 @@ void mDB18x20::Ds18x20Search(void)
 
 
 
-void mDB18x20::Ds18x20Convert(void) 
+void mDB18x20::Convert(void) 
 {
   for (uint32_t i = 0; i < module_state.pins_used; i++) {
     ds = ds18x20_gpios[i];
@@ -243,7 +248,7 @@ void mDB18x20::Ds18x20Convert(void)
   }
 }
 
-bool mDB18x20::Ds18x20Read(uint8_t sensor, float &t) 
+bool mDB18x20::Read(uint8_t sensor, float &t) 
 {
   uint8_t data[12];
   int8_t sign = 1;
@@ -304,7 +309,7 @@ bool mDB18x20::Ds18x20Read(uint8_t sensor, float &t)
       }
     }
   }
-  ALOG_DBG( PSTR(D_LOG_DSB D_SENSOR_CRC_ERROR " %d a%d"), index, sensor_vector[index].address[7]);
+  ALOG_DBG( PSTR(D_LOG_DSB "D_SENSOR_CRC_ERROR" " %d a%d"), index, sensor_vector[index].address[7]);
   return false;
 }
 
@@ -315,18 +320,18 @@ void mDB18x20::EverySecond(void)
   // Check for sensors if none was found
   if (module_state.devices==0) 
   {     
-    Ds18x20Search();      // Check for changes in sensors number
+    Search();      // Check for changes in sensors number
     return; 
   }
 
   if (tkr_time->uptime_seconds_nonreset & 1) 
   {
-    Ds18x20Convert();     // Start Conversion, takes up to one second
+    Convert();     // Start Conversion, takes up to one second
   } else {
     float t;
     for (uint32_t i = 0; i < module_state.devices; i++) {
       // 12mS per device
-      if (Ds18x20Read(i, t)) {   // Read temperature
+      if (Read(i, t)) {   // Read temperature
         sensor_vector[i].reading.ischanged = (t != sensor_vector[i].reading.val)?true:false;
         sensor_vector[i].reading.isvalid   = D_SENSOR_VALID_TIMEOUT_SECS;
         sensor_vector[i].reading.val = t;
@@ -367,8 +372,6 @@ void mDB18x20::SetDeviceNameID_WithAddress(const char* device_name, uint8_t devi
 void mDB18x20::Scan_ReportAsJsonBuilder()
 {
   
-  // Pre_Init();
-  // Ds18x20Init();  
   bool flag_found_any = false;
   bool flag_started_object = false;
 
@@ -412,6 +415,9 @@ uint8_t mDB18x20::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
   bool flag_send_data = true;
 
   JBI->Start();
+
+  
+  JBI->Add("SensorCount", GetSensorCount());
 
   for (uint8_t sensor_id = 0; sensor_id < module_state.devices; sensor_id++) 
   {
@@ -568,7 +574,7 @@ void mDB18x20::MQTTHandler_Init(){
   ptr = &mqtthandler_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
+  ptr->flags.SendNow = false; 
   ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->json_level = JSON_LEVEL_DETAILED;
@@ -579,7 +585,7 @@ void mDB18x20::MQTTHandler_Init(){
   ptr = &mqtthandler_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
+  ptr->flags.SendNow = false; 
   ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->json_level = JSON_LEVEL_IFCHANGED;
@@ -591,7 +597,7 @@ void mDB18x20::MQTTHandler_Init(){
   ptr = &mqtthandler_debug; // Each sensor should have its own debug channel for extra output only when needed
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
-  ptr->flags.SendNow = false; // Handled by MQTTHandler_Rate
+  ptr->flags.SendNow = false; 
   ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
   ptr->topic_type = MQTT_TOPIC_TYPE__DEBUG__ID;
   ptr->json_level = JSON_LEVEL_ALL;

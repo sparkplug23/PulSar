@@ -118,11 +118,11 @@ void mNextion::Pre_Init(void)
     rx_pin = tkr_pins->GetPin(GPIO_NEXTION_RX);
     tx_pin = tkr_pins->GetPin(GPIO_NEXTION_TX);
   }
-  else if(tkr_pins->PinUsed(GPIO_NEXTION_RX2) && tkr_pins->PinUsed(GPIO_NEXTION_TX2))
+  else if(tkr_pins->PinUsed(GPIO_NEXTION_RX,2) && tkr_pins->PinUsed(GPIO_NEXTION_TX,2))
   {
     serial_port = 2;
-    rx_pin = tkr_pins->GetPin(GPIO_NEXTION_RX2);
-    tx_pin = tkr_pins->GetPin(GPIO_NEXTION_TX2);
+    rx_pin = tkr_pins->GetPin(GPIO_NEXTION_RX,2);
+    tx_pin = tkr_pins->GetPin(GPIO_NEXTION_TX,2);
   }else{
     module_state.mode = ModuleStatus::NoGPIOConfigured;
     return;

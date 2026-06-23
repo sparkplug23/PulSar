@@ -663,7 +663,7 @@ void mMQTTManager::MQTTSubscribe()
     for(auto val : jtok.getArray()) 
     {
       const char* val_string = val.getStr();
-      ALOG_HGL(PSTR("val = %s"), val_string);
+      ALOG_DBG(PSTR("val = %s"), val_string);
   
       Subscribe(val_string, 0);
 
@@ -861,7 +861,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
 
   if(!(jobj = obj[D_MODULE_NETWORK_MQTT_CTR].getObject()))
   {
-    ALOG_ERR(PSTR(D_LOG_MQTT "No MQTT object found"));
+    // ALOG_ERR(PSTR(D_LOG_MQTT "No MQTT object found"));
     return;
   }
   
@@ -1308,6 +1308,8 @@ boolean mMQTTManager::Publish(const char* topic, const char* payload, boolean re
  */
 boolean mMQTTManager::Subscribe(const char* topic, uint8_t qos)
 {
+
+  ALOG_INF(PSTR(D_LOG_MQTT "Subscribe %s"), topic);
   
   if(brokers.size()) 
   {

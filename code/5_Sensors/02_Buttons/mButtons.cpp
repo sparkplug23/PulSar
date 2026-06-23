@@ -80,40 +80,40 @@ void mButtons::Pre_Init(void)
   
     int8_t pin = -1;
   
-    if(tkr_pins->PinUsed(GPIO_KEY, i))
+    if(tkr_pins->PinUsed(GPIO_KEY1, i))
     {
       SetButtonUsed(i);
-      pin = tkr_pins->GetPin(GPIO_KEY, i);
+      pin = tkr_pins->GetPin(GPIO_KEY1, i);
       pinMode(pin, GetHardwareSpecificPullMethod(pin)); // Note: GPIO16/D0 inversion is pulldown, not up
     }else    
-    if(tkr_pins->PinUsed(GPIO_KEY_INV, i))
+    if(tkr_pins->PinUsed(GPIO_KEY1_INV, i))
     {
       SetButtonUsed(i);
-      pin = tkr_pins->GetPin(GPIO_KEY_INV, i);
+      pin = tkr_pins->GetPin(GPIO_KEY1_INV, i);
       pinMode(pin, GetHardwareSpecificPullMethod(pin));
       InvertFlag(i);
     }else    
-    if(tkr_pins->PinUsed(GPIO_KEY_NP, i))
+    if(tkr_pins->PinUsed(GPIO_KEY1_NP, i))
     {
       SetButtonUsed(i);
-      pin = tkr_pins->GetPin(GPIO_KEY_NP, i);
+      pin = tkr_pins->GetPin(GPIO_KEY1_NP, i);
       pinMode(pin, INPUT);
       PullupFlag(i); 
     }else    
-    if(tkr_pins->PinUsed(GPIO_KEY_INV_NP, i))
+    if(tkr_pins->PinUsed(GPIO_KEY1_INV_NP, i))
     {
       SetButtonUsed(i);
-      pin = tkr_pins->GetPin(GPIO_KEY_INV_NP, i);
+      pin = tkr_pins->GetPin(GPIO_KEY1_INV_NP, i);
       pinMode(pin, INPUT);
       PullupFlag(i); 
       InvertFlag(i); 
     }
     #ifdef SOC_TOUCH_VERSION_1
     else
-    if(tkr_pins->PinUsed(GPIO_KEY_TOUCH, i))
+    if(tkr_pins->PinUsed(GPIO_KEY1_TOUCH, i))
     {
       SetButtonUsed(i);
-      pin = tkr_pins->GetPin(GPIO_KEY_TOUCH, i);      
+      pin = tkr_pins->GetPin(GPIO_KEY1_TOUCH, i);      
       TouchFlag(i);
     }
     #endif // SOC_TOUCH_VERSION_1
@@ -152,16 +152,16 @@ void mButtons::Init(void)
 //       bitSet(Button.used_bitmap, i);            // This pin is used
 //     } else
 // #endif  // ESP8266
-//     if (tkr_pins->PinUsed(GPIO_KEY_ID, i)) {
+//     if (tkr_pins->PinUsed(GPIO_KEY1_ID, i)) {
 //       bitSet(Button.used_bitmap, i);            // This pin is used
 // #ifdef ESP8266
-//       pinMode(tkr_pins->Pin(GPIO_KEY, i), bitRead(Button.no_pullup_bitmap, i) ? INPUT : ((16 == tkr_pins->Pin(GPIO_KEY, i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
+//       pinMode(tkr_pins->Pin(GPIO_KEY1, i), bitRead(Button.no_pullup_bitmap, i) ? INPUT : ((16 == tkr_pins->Pin(GPIO_KEY1, i)) ? INPUT_PULLDOWN_16 : INPUT_PULLUP));
 // #endif  // ESP8266
 // #ifdef ESP32
-//       pinMode(tkr_pins->Pin(GPIO_KEY_ID, i), bitRead(Button.pulldown_bitmap, i) ? INPUT_PULLDOWN : bitRead(Button.no_pullup_bitmap, i) ? INPUT : INPUT_PULLUP);
+//       pinMode(tkr_pins->Pin(GPIO_KEY1_ID, i), bitRead(Button.pulldown_bitmap, i) ? INPUT_PULLDOWN : bitRead(Button.no_pullup_bitmap, i) ? INPUT : INPUT_PULLUP);
 // #endif  // ESP32
 //       // Set global now so doesn't change the saved power state on first button check
-//       Button.last_state[i] = (digitalRead(tkr_pins->Pin(GPIO_KEY_ID, i)) != bitRead(Button.inverted_bitmap, i));
+//       Button.last_state[i] = (digitalRead(tkr_pins->Pin(GPIO_KEY1_ID, i)) != bitRead(Button.inverted_bitmap, i));
 //       if (ac_detect) {
 //         Button.state[i] = 0x80 + 2 * BUTTON_AC_PERIOD;
 //         Button.last_state[i] = 0;				 // Will set later in the debouncing code
@@ -304,7 +304,7 @@ uint8_t mButtons::LastState(uint32_t index) {
 /*------------------------------------------------------------------------------------------*/
 
 bool mButtons::Used(uint32_t index) {
-  return (tkr_pins->PinUsed(GPIO_KEY, index) || bitRead(Button.used_bitmap, index));
+  return (tkr_pins->PinUsed(GPIO_KEY1, index) || bitRead(Button.used_bitmap, index));
 }
 
 void mButtons::SetButtonUsed(uint32_t index) {
@@ -343,21 +343,21 @@ void mButtons::Probe(void)
   for (uint32_t i = 0; i < MAX_KEYS_SET; i++) {
     if (!bitRead(Button.used_bitmap, i)) { continue; }
 
-    if (tkr_pins->PinUsed(GPIO_KEY, i)) {
-      not_activated = (digitalRead(tkr_pins->GetPin(GPIO_KEY, i)) != bitRead(Button.inverted_bitmap, i));
-    } else if (tkr_pins->PinUsed(GPIO_KEY_INV, i)) { // Inverted pin, active low
-      not_activated = digitalRead(tkr_pins->GetPin(GPIO_KEY_INV, i));
-    } else if (tkr_pins->PinUsed(GPIO_KEY_NP, i)) { // No pull, active high
-      not_activated = digitalRead(tkr_pins->GetPin(GPIO_KEY_NP, i));
-    } else if (tkr_pins->PinUsed(GPIO_KEY_INV_NP, i)) { // Inverted pin, no pull, active low
-      not_activated = digitalRead(tkr_pins->GetPin(GPIO_KEY_INV_NP, i));
+    if (tkr_pins->PinUsed(GPIO_KEY1, i)) {
+      not_activated = (digitalRead(tkr_pins->GetPin(GPIO_KEY1, i)) != bitRead(Button.inverted_bitmap, i));
+    } else if (tkr_pins->PinUsed(GPIO_KEY1_INV, i)) { // Inverted pin, active low
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_KEY1_INV, i));
+    } else if (tkr_pins->PinUsed(GPIO_KEY1_NP, i)) { // No pull, active high
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_KEY1_NP, i));
+    } else if (tkr_pins->PinUsed(GPIO_KEY1_INV_NP, i)) { // Inverted pin, no pull, active low
+      not_activated = digitalRead(tkr_pins->GetPin(GPIO_KEY1_INV_NP, i));
     } 
     #if defined(SOC_TOUCH_VERSION_1) || defined(SOC_TOUCH_VERSION_2)
     else
-    if (tkr_pins->PinUsed(GPIO_KEY_TOUCH, i)) {
+    if (tkr_pins->PinUsed(GPIO_KEY1_TOUCH, i)) {
       if (bitRead(TouchButton.touch_bitmap, i)) {
         if (ac_detect || bitRead(TouchButton.calibration, i +1)) { continue; }  // Touch is slow. Takes 21mS to read
-        uint32_t value = touchRead( tkr_pins->Pin(GPIO_KEY_TOUCH, i));
+        uint32_t value = touchRead( tkr_pins->Pin(GPIO_KEY1_TOUCH, i));
         #ifdef SOC_TOUCH_VERSION_2
         not_activated = (value < touch_threshold);  // ESPS3 No touch = 24200, Touch > 40000
         #else
@@ -499,7 +499,7 @@ void mButtons::Handler(void) {
 
       #if defined(SOC_TOUCH_VERSION_1) || defined(SOC_TOUCH_VERSION_2)
       if (bitRead(TouchButton.touch_bitmap, button_index) && bitRead(TouchButton.calibration, button_index +1)) {  // Touch
-        uint32_t _value = touchRead( tkr_pins->Pin(GPIO_KEY_TOUCH, button_index) );
+        uint32_t _value = touchRead( tkr_pins->Pin(GPIO_KEY1_TOUCH, button_index) );
         #ifdef SOC_TOUCH_VERSION_2
         if (_value > tkr_set->Settings.touch_threshold) {  // ESPS3 No touch = 24200, Touch = 100000
         #else

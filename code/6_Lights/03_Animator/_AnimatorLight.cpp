@@ -254,10 +254,336 @@ void mAnimatorLight::Save_Module()
 
 
 
+// void mAnimatorLight::Init_Busses()
+// {
+
+//   uint32_t mem = 0;
+
+//     /*****************************************************************************
+//      * Detect type of NPB methods
+//     ******************************************************************************/
+//    #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+//    // determine if it is sensible to use parallel I2S outputs on ESP32 (i.e. more than 5 outputs = 1 I2S + 4 RMT)
+//    bool useParallel = false;
+//    #if defined(ARDUINO_ARCH_ESP32) && !defined(ARDUINO_ARCH_ESP32S2) && !defined(ARDUINO_ARCH_ESP32S3) && !defined(ARDUINO_ARCH_ESP32C3)
+//    unsigned digitalCount = 0;
+//    unsigned maxLedsOnBus = 0;
+//    unsigned maxChannels = 0;
+//    for (unsigned i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) {
+//      if (tkr_iLight->busConfigs[i] == nullptr) break;
+//      if (!Bus::isDigital(tkr_iLight->busConfigs[i]->type)) continue;
+//      if (!Bus::is2Pin(tkr_iLight->busConfigs[i]->type)) {
+//        digitalCount++;
+//        unsigned channels = Bus::getNumberOfChannels(tkr_iLight->busConfigs[i]->type);
+//        if (tkr_iLight->busConfigs[i]->length > maxLedsOnBus) maxLedsOnBus = tkr_iLight->busConfigs[i]->length;
+//        if (channels > maxChannels) maxChannels  = channels;
+//      }
+//    }
+//    DEBUG_PRINTF_P(PSTR("Maximum LEDs on a bus: %u\n\rDigital buses: %u\n\r"), maxLedsOnBus, digitalCount);
+//    /**
+//     * Assign to use parallel only when pixels per bus are low, and channels are more than 2
+//     * Will use combined I2Sx2 + RMTx8 when pixels per bus are more than 300
+//     * Default is 300 per output, but override is allowed in special cases (eg limited pins but want 1 higher output)
+//     * 
+//     */
+//    if (maxLedsOnBus <= BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S && digitalCount > 2) 
+//    {  // I will want >2, as I0 and I1 are for 2 pins only, then immediately switch to parallel
+//      DEBUG_PRINTF_P(PSTR("Switching to parallel I2S\n\r"));
+//      useParallel = true;
+//      tkr_iLight->bus_manager->useParallelOutput(true);
+//      tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
+//      mem = BusManager::memUsage(maxChannels, maxLedsOnBus, 8); // use alternate memory calculation (hse to be used *after* useParallelOutput())
+//    }else
+//    if (maxLedsOnBus > BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S && digitalCount > 2) 
+//    {
+//      ALOG_ERR(PSTR("Parallel is required to avoid RMT, but per bus count exceeded. Using anyway for now (%d,%d)"), maxLedsOnBus, digitalCount);
+//      tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
+//      tkr_iLight->bus_manager->useParallelOutput(true);
+//    }
+//    else{
+//      ALOG_INF(PSTR("Parallel is not required for %d channels"), digitalCount);
+//      tkr_iLight->bus_manager->setRequiredChannels(digitalCount);
+//      tkr_iLight->bus_manager->useParallelOutput(false);
+//    }
+//    #endif
+//  #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+
+//  DELAY_DEBUG(1000);
+
+//  /*****************************************************************************
+//   * Create NPB methods
+//  ******************************************************************************/
+//  for (uint8_t i = 0; i < WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES; i++) 
+//  {
+//    if (tkr_iLight->busConfigs[i] == nullptr) break;
+//    // mem += BusManager::memUsage(*tkr_iLight->busConfigs[i]);
+
+//    #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+//    if (useParallel && i < 16) {
+//      // if for some unexplained reason the above pre-calculation was wrong, update
+//      unsigned memT = BusManager::memUsage(*tkr_iLight->busConfigs[i]); // includes x8 memory allocation for parallel I2S
+//      if (memT > mem) mem = memT; // if we have unequal LED count use the largest
+//    } 
+//    else
+//    #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+//    {
+//      mem += BusManager::memUsage(*tkr_iLight->busConfigs[i]); // includes global buffer
+//    }
+
+//    if (mem <= MAX_LED_MEMORY) 
+//    {        
+//      tkr_iLight->bus_manager->add(*tkr_iLight->busConfigs[i]);        
+//    }
+//    else
+//    {        
+//      ALOG_ERR(PSTR("MEMORY ISSUE"));        
+//    }
+//    delete tkr_iLight->busConfigs[i]; 
+//    tkr_iLight->busConfigs[i] = nullptr;
+//  }
+//  ALOG_INF(PSTR("Memory used: %d"), mem);
+
+  
+// }
+
+
+bool mAnimatorLight::LightingBusConfig_CheckPinsAvailable(
+  const BusConfig& bus_config,
+  uint8_t bus_i,
+  uint8_t lighting_digital_index,
+  uint8_t lighting_clock_index,
+  uint8_t lighting_pwm_index,
+  uint8_t lighting_onoff_index,
+  bool override_existing
+)
+{
+  uint8_t pin_count = Bus::getNumberOfPins(bus_config.type);
+
+  if (pin_count == 0)
+  {
+    return true;
+  }
+
+  uint8_t digital_offset = 0;
+  uint8_t clock_offset   = 0;
+  uint8_t pwm_offset     = 0;
+  uint8_t onoff_offset   = 0;
+
+  for (uint8_t pin_i = 0; pin_i < pin_count; pin_i++)
+  {
+    const int16_t pin = bus_config.pins[pin_i];
+
+    if (pin < 0)
+    {
+      ALOG_ERR(PSTR("LGT: CheckPins invalid pin bus=%u pin_i=%u pin=%d"), bus_i, pin_i, pin);
+      return false;
+    }
+
+    if (pin >= MAX_GPIO_PIN)
+    {
+      ALOG_ERR(PSTR("LGT: CheckPins pin OOR bus=%u pin_i=%u pin=%d"), bus_i, pin_i, pin);
+      return false;
+    }
+
+    const uint8_t real_pin = (uint8_t)pin;
+
+    uint16_t gpio_base = GPIO_NONE;
+    uint8_t gpio_index = 0;
+
+    if (Bus::isDigital(bus_config.type))
+    {
+      if (Bus::is2Pin(bus_config.type) && (pin_i == 1))
+      {
+        gpio_base = GPIO_LIGHTING_CLOCK;
+        gpio_index = lighting_clock_index + clock_offset;
+        clock_offset++;
+      }
+      else
+      {
+        gpio_base = GPIO_LIGHTING_DIGITAL;
+        gpio_index = lighting_digital_index + digital_offset;
+        digital_offset++;
+      }
+    }
+    else
+    {
+      gpio_base = GPIO_LIGHTING_PWM;
+      gpio_index = lighting_pwm_index + pwm_offset;
+      pwm_offset++;
+    }
+
+    const uint16_t packed_id = tkr_pins->GPIOPacked_Make(gpio_base, gpio_index);
+
+    if (!override_existing && tkr_pins->pin[real_pin].IsAllocated())
+    {
+      ALOG_ERR(PSTR("LGT: CheckPins pin already allocated bus=%u pin_i=%u pin=%u current=0x%04X owner=%u new_base=%u new_index=%u new=0x%04X"), bus_i, pin_i, real_pin, tkr_pins->pin[real_pin].gpio_function, tkr_pins->pin[real_pin].unique_module_owner_id, gpio_base, gpio_index, packed_id);
+      return false;
+    }
+
+    if (override_existing && tkr_pins->pin[real_pin].IsAllocated())
+    {
+      ALOG_WRN(PSTR("LGT: CheckPins override allowed bus=%u pin_i=%u pin=%u current=0x%04X owner=%u new_base=%u new_index=%u new=0x%04X"), bus_i, pin_i, real_pin, tkr_pins->pin[real_pin].gpio_function, tkr_pins->pin[real_pin].unique_module_owner_id, gpio_base, gpio_index, packed_id);
+    }
+
+    ALOG_DBM(PSTR("LGT: CheckPins OK bus=%u pin_i=%u pin=%u gpio_base=%u gpio_index=%u packed=0x%04X override=%u"), bus_i, pin_i, real_pin, gpio_base, gpio_index, packed_id, override_existing);
+  }
+
+  return true;
+}
+
+
+bool mAnimatorLight::Lighting_AllocatePin_WithOverride(
+  uint8_t real_pin,
+  uint16_t packed_id,
+  uint16_t owner_id,
+  bool override_existing
+)
+{
+  mPins::PinAllocationFlags flags;
+  flags.data = 0;
+  flags.grouped = 1;
+  flags.shared = 0;
+  flags.sensitive_to_probe = 1;
+
+  if (!override_existing)
+  {
+    return tkr_pins->AllocatePin(real_pin, packed_id, owner_id, flags);
+  }
+
+  if (tkr_pins->pin[real_pin].IsAllocated())
+  {
+    ALOG_WRN(PSTR("LGT: AllocatePin override clearing pin=%u current=0x%04X owner=%u"), real_pin, tkr_pins->pin[real_pin].gpio_function, tkr_pins->pin[real_pin].unique_module_owner_id);
+
+    tkr_pins->pin[real_pin].allocation.data = 0;
+    tkr_pins->pin[real_pin].gpio_function = GPIO_NONE;
+    tkr_pins->pin[real_pin].unique_module_owner_id = 0;
+  }
+
+  return tkr_pins->AllocatePin(real_pin, packed_id, owner_id, flags);
+}
+
+
+void mAnimatorLight::LightingBusConfig_AllocatePins(
+  const BusConfig& bus_config,
+  uint8_t bus_i,
+  uint8_t& lighting_digital_index,
+  uint8_t& lighting_clock_index,
+  uint8_t& lighting_pwm_index,
+  uint8_t& lighting_onoff_index,
+  bool override_existing
+)
+{
+  uint8_t pin_count = Bus::getNumberOfPins(bus_config.type);
+
+  if (pin_count == 0)
+  {
+    return;
+  }
+
+  for (uint8_t pin_i = 0; pin_i < pin_count; pin_i++)
+  {
+    const int16_t pin = bus_config.pins[pin_i];
+
+    if (pin < 0)
+    {
+      ALOG_ERR(PSTR("LGT: AllocatePins invalid pin bus=%u pin_i=%u pin=%d"), bus_i, pin_i, pin);
+      continue;
+    }
+
+    if (pin >= MAX_GPIO_PIN)
+    {
+      ALOG_ERR(PSTR("LGT: AllocatePins pin OOR bus=%u pin_i=%u pin=%d"), bus_i, pin_i, pin);
+      continue;
+    }
+
+    const uint8_t real_pin = (uint8_t)pin;
+
+    uint16_t gpio_base = GPIO_NONE;
+    uint8_t* gpio_index_ptr = nullptr;
+
+    if (Bus::isDigital(bus_config.type))
+    {
+      if (Bus::is2Pin(bus_config.type) && (pin_i == 1))
+      {
+        gpio_base = GPIO_LIGHTING_CLOCK;
+        gpio_index_ptr = &lighting_clock_index;
+      }
+      else
+      {
+        gpio_base = GPIO_LIGHTING_DIGITAL;
+        gpio_index_ptr = &lighting_digital_index;
+      }
+    }
+    else
+    {
+      gpio_base = GPIO_LIGHTING_PWM;
+      gpio_index_ptr = &lighting_pwm_index;
+    }
+
+    if (!gpio_index_ptr)
+    {
+      ALOG_ERR(PSTR("LGT: AllocatePins no gpio_index_ptr bus=%u pin_i=%u pin=%u"), bus_i, pin_i, real_pin);
+      continue;
+    }
+
+    const uint8_t gpio_index = *gpio_index_ptr;
+    const uint16_t packed_id = tkr_pins->GPIOPacked_Make(gpio_base, gpio_index);
+
+    bool allocated = Lighting_AllocatePin_WithOverride(
+      real_pin,
+      packed_id,
+      GetModuleUniqueID(),
+      override_existing
+    );
+
+    if (!allocated)
+    {
+      ALOG_ERR(PSTR("LGT: AllocatePin failed bus=%u pin_i=%u pin=%u gpio_base=%u gpio_index=%u packed=0x%04X override=%u"), bus_i, pin_i, real_pin, gpio_base, gpio_index, packed_id, override_existing);
+      continue;
+    }
+
+    ALOG_INF(PSTR("LGT: AllocatePin bus=%u pin_i=%u pin=%u gpio_base=%u gpio_index=%u packed=0x%04X owner=%u override=%u"), bus_i, pin_i, real_pin, gpio_base, gpio_index, packed_id, GetModuleUniqueID(), override_existing);
+
+    (*gpio_index_ptr)++;
+  }
+}
+
+
 void mAnimatorLight::Init_Busses()
 {
 
   uint32_t mem = 0;
+
+  /*
+   * Debug / migration override.
+   *
+   * false:
+   *   Pin allocation check can block bus creation if a physical pin is already owned.
+   *
+   * true:
+   *   Bus creation is allowed to continue and AllocatePin is allowed to force ownership.
+   */
+  bool enable_allocatepin_override = false;
+
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTING_ALLOCATEPIN_OVERRIDE
+  enable_allocatepin_override = true;
+  #endif
+
+  /*
+   * Running logical lighting allocation indexes.
+   *
+   * These map the created light buses onto the new generic GPIO roles:
+   *   GPIO_LIGHTING_DIGITAL  1..16
+   *   GPIO_LIGHTING_CLOCK    1..4
+   *   GPIO_LIGHTING_PWM      1..10
+   *   GPIO_LIGHTING_ONOFF    1..5
+   *
+   * Note: indexes here are internal zero-based indexes.
+   */
+  uint8_t lighting_digital_index = 0;
+  uint8_t lighting_clock_index   = 0;
+  uint8_t lighting_pwm_index     = 0;
+  uint8_t lighting_onoff_index   = 0;
 
     /*****************************************************************************
      * Detect type of NPB methods
@@ -308,8 +634,6 @@ void mAnimatorLight::Init_Busses()
    #endif
  #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
 
- DELAY_DEBUG(1000);
-
  /*****************************************************************************
   * Create NPB methods
  ******************************************************************************/
@@ -331,8 +655,35 @@ void mAnimatorLight::Init_Busses()
    }
 
    if (mem <= MAX_LED_MEMORY) 
-   {        
-     tkr_iLight->bus_manager->add(*tkr_iLight->busConfigs[i]);        
+   {
+     bool pins_available = LightingBusConfig_CheckPinsAvailable(
+       *tkr_iLight->busConfigs[i],
+       i,
+       lighting_digital_index,
+       lighting_clock_index,
+       lighting_pwm_index,
+       lighting_onoff_index,
+       enable_allocatepin_override
+     );
+
+     if (pins_available)
+     {
+       tkr_iLight->bus_manager->add(*tkr_iLight->busConfigs[i]);
+
+       LightingBusConfig_AllocatePins(
+         *tkr_iLight->busConfigs[i],
+         i,
+         lighting_digital_index,
+         lighting_clock_index,
+         lighting_pwm_index,
+         lighting_onoff_index,
+         enable_allocatepin_override
+       );
+     }
+     else
+     {
+       ALOG_ERR(PSTR("LGT: Bus add skipped, pin allocation check failed bus=%u override=%u"), i, enable_allocatepin_override);
+     }
    }
    else
    {        
@@ -343,8 +694,12 @@ void mAnimatorLight::Init_Busses()
  }
  ALOG_INF(PSTR("Memory used: %d"), mem);
 
+
+ tkr_pins->PinTable_SerialPrint("after bus set");
+
   
 }
+
 
 
 void mAnimatorLight::EveryLoop()
@@ -2354,7 +2709,7 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segmen
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   char buffer[30];
-  ALOG_COM(PSTR(D_LOG_NEO D_COMMAND_SVALUE_SVALUE_K(D_EFFECTS, D_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
+  ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_SVALUE_SVALUE_K(D_EFFECTS, D_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
   #endif // ENABLE_LOG_LEVEL_COMMANDS
 
 }

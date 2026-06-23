@@ -244,7 +244,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
   // When no direct segment is set, assumed they are single segment (or control of first segment)
   if(segments_found == 0)
   {
-    ALOG_INF(PSTR(D_LOG_NEO "Assumed main segment"));
+    ALOG_INF(PSTR(D_LOG_PIXEL "Assumed main segment"));
     subparse_JSONCommand(obj, 0); // Legacy commands
   }
 
@@ -317,7 +317,7 @@ void mAnimatorLight::subparse_MatrixConfig(JsonParserObject obj)
  */
 void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index)
 {
-  ALOG_HGLT(PSTR("subparse_JSONCommand for segment %d"), segment_index);
+  ALOG_DBG(PSTR("subparse_JSONCommand for segment %d"), segment_index);
 
   JsonParserToken jtok = 0; 
   JsonParserToken jtok_sub = 0; 
@@ -2366,7 +2366,7 @@ if (jtok_pwi && jtok_pwi.isArray())
     // segment_animation_override.time_ms = 100;
   }
 
-  ALOG_HGLB(PSTR("REACHED END OF SEGMENT PARSING %d"), data_buffer.isserviced);
+  // ALOG_HGLB(PSTR("REACHED END OF SEGMENT PARSING %d"), data_buffer.isserviced);
   
 } // END PARSE COMMANDS
 

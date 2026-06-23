@@ -98,7 +98,8 @@ class mSensorsInterface :
     float ConvertPressure(float p);
     String PressureUnit(void);
 
-    sensorset_location_t system_location;
+    sensorset_location_t system_location; // actually, although sensor related, to compile outside of anything, should be system
+    // but, sun position is here, so perhaps needs to anyway.
 
 
     void WebAppend__Sensor_Table__As_TypesRows();

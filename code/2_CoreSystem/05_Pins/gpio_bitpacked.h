@@ -11,7 +11,21 @@
  * GPIO selectable-function bit packing
  *
  * gpio_enums.h
- *   Static base GPIO IDs only, for example GPIO_REL, GPIO_REL_INV, GPIO_MODEM_RX.
+ *   Static base GPIO IDs only.
+ *
+ *   Logical/user-facing groups keep the "1" in the base enum name when the first visible
+ *   instance is normally called #1, for example:
+ *
+ *     GPIO_REL1, GPIO_REL1_INV
+ *     GPIO_LED1, GPIO_LED1_INV
+ *     GPIO_SWT1, GPIO_KEY1
+ *     GPIO_PWM1, GPIO_PULSE_COUNTER1
+ *
+ *   Hardware/bus/peripheral-style groups normally remain unnumbered, for example:
+ *
+ *     GPIO_I2C_SCL, GPIO_I2C_SDA
+ *     GPIO_HWSERIAL_TX, GPIO_HWSERIAL_RX
+ *     GPIO_MODEM_RX, GPIO_MODEM_TX
  *
  * gpio_bitpacked.cpp
  *   Build-specific selectable GPIO groups.
@@ -20,7 +34,15 @@
  *
  *   packed_id = PGPIO(base_id) + index
  *
- * Examples:
+ * The lower GPIO_INDEX_BITS bits always store a zero-based instance offset.
+ *
+ * Examples, logical/user-facing group:
+ *
+ *   PGPIO(GPIO_REL1) + 0  -> Relay1
+ *   PGPIO(GPIO_REL1) + 1  -> Relay2
+ *   PGPIO(GPIO_REL1) + 2  -> Relay3
+ *
+ * Examples, hardware/bus/peripheral-style group:
  *
  *   PGPIO(GPIO_MODEM_RX) + 0  -> Modem RX
  *   PGPIO(GPIO_MODEM_RX) + 1  -> Modem RX2
@@ -28,15 +50,19 @@
  *
  * Module-facing code must not manually pack IDs. Use:
  *
- *   tkr_pins->Pin(GPIO_MODEM_RX, 0);
- *   tkr_pins->Pin(GPIO_MODEM_RX, 1);
+ *   tkr_pins->Pin(GPIO_REL1, 0);       // Relay1
+ *   tkr_pins->Pin(GPIO_REL1, 1);       // Relay2
+ *
+ *   tkr_pins->Pin(GPIO_MODEM_RX, 0);   // Modem RX
+ *   tkr_pins->Pin(GPIO_MODEM_RX, 1);   // Modem RX2
  *
  * SelectablePins_BitPacked[] stores selectable groups:
  *
- *   PGPIO(GPIO_MODEM_RX) + MGPIO(count)
+ *   PGPIO(GPIO_REL1) + MGPIO(MAX_RELAYS)
+ *   PGPIO(GPIO_MODEM_RX) + MGPIO(MAX_MODEM_UARTS)
  *
  * In group entries, the lower 5 bits store count-1.
- * In stored selected IDs, the lower 5 bits store the selected index.
+ * In stored selected IDs, the lower 5 bits store the selected zero-based index.
  *
  * The count values must come from mSystemConstants.h where they are configurable/capacity
  * limits. Fixed hardware/bus widths may be written directly in gpio_bitpacked.cpp.

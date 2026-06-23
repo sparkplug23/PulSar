@@ -645,7 +645,7 @@ uint8_t mTelemetry::ConstructJSON_Debug_Pins_Table(uint8_t json_level, bool json
     
     const uint16_t base_id2 = UGPIO(packed_gpio);
     const uint8_t  func_i2  = packed_gpio & GPIO_INDEX_MASK;
-    ALOG_INF(PSTR("gpio %d %d"), real_pin, base_id2, func_i2);
+    ALOG_DBM(PSTR("gpio %d %d"), real_pin, base_id2, func_i2);
 
 
     if((packed_gpio == GPIO_NONE) || (packed_gpio == GPIO_USER))

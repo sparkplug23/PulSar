@@ -30,63 +30,51 @@ from typing import Dict, List, Optional, Tuple
 
 def _SerialCrashDumpBlock() -> str:
     return r"""
-                                  
-                                                                                     
-Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandle
-d.
-                                                                            
     
-                                                                          
+
+                                                                               
+ Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandl
+ed.
+                                                                           
+     
+                                                                         
 Core  1 register dump:
                                                         
-PC      : 0x4009193d  PS      : 0x00060033  A0      : 0x80090525  A1      : 0x3f
-fce5e0  
+PC      : 0x4012ffdb  PS      : 0x00060e30  A0      : 0x80130147  A1      : 0x3f
+fb2710  
                                                                       
-A2      : 0x3ffbd69c  A3      : 0x3ffbd69c  A4      : 0x00000014  A5      : 0x00
+A2      : 0x00000000  A3      : 0x00000023  A4      : 0x3ffb398c  A5      : 0x00
 000004  
                                                                       
-A6      : 0x3ffbd694  A7      : 0x80000001  A8      : 0x00006f60  A9      : 0x3f
-fc6f68  
+A6      : 0x3ffb26b0  A7      : 0x00000008  A8      : 0x800d4228  A9      : 0x3f
+fb26e0  
                                                                       
-A10     : 0x3ffc6f68  A11     : 0x003fffff  A12     : 0x80085226  A13     : 0x3f
-fbf56c  
+A10     : 0x00000001  A11     : 0x3ffb94f8  A12     : 0xffffffff  A13     : 0xff
+ffffff  
                                                                       
-A14     : 0x007bf618  A15     : 0x003fffff  SAR     : 0x0000001c  EXCCAUSE: 0x00
+A14     : 0x3ffc82e4  A15     : 0x00000009  SAR     : 0x0000001d  EXCCAUSE: 0x00
 00001c  
                                                                       
-EXCVADDR: 0x00006f64  LBEG    : 0x4008bd6d  LEND    : 0x4008bd7d  LCOUNT  : 0xff
-ffffef  
+EXCVADDR: 0x00000040  LBEG    : 0x4008d1d1  LEND    : 0x4008d1e1  LCOUNT  : 0xff
+fffffd  
                                                                       
           
                                                                     
             
                                                                   
-Backtrace: 0x4009193a:0x3ffce5e0 0x40090522:0x3ffce600 0x4008e838:0x3ffce630 0x4
-008e7e8:0x4000bff0 |<-CORRUPTED
+Backtrace:0x4012ffd8:0x3ffb27100x40130144:0x3ffb2730 0x400f1525:0x3ffb2750 0x400
+f1688:0x3ffb2770 0x400f18bb:0x3ffb2790 0x400d4376:0x3ffb27b0 0x40128b2c:0x3ffb27
+f0 0x4014500e:0x3ffb2820 
+                                                     
+                           
+                                                   
+                             
+                                                 
+                               
                                                
                                  
-          
+                          
 
-                                                                    
-            
-                                                                  
-Backtrace: 0x4009065d:0x3ffce8d0 0x40109a11:0x3ffce910 0x4010a30d:0x3ffce960 0x4
-0104c19:0x3ffce990 0x4010197d:0x3ffce9b0 0x4010204b:0x3ffce9d0 0x400e29cd:0x3ffc
-ea70 0x400e2c1e:0x3ffcead0 0x400e234d:0x3ffceaf0 0x400e24be:0x3ffceb10 0x400d4aa
-5:0x3ffceb30 0x400eb3c7:0x3ffceb70 0x400eb636:0x3ffceb90 0x401051d1:0x3ffcebb0
-
-                                                                               
-
-                                                                               
-
-                                                                               
-
-                                                                               
-
-ELF file SHA256: 0d1859bc66a7d2a3
-   
-                       
-                                   
                         
 
 
@@ -105,7 +93,7 @@ ELF file SHA256: 0d1859bc66a7d2a3
 # CONFIGURATION
 # ============================================================
 
-ENV_NAME = "nitc_server__room_sensor"   # <<< change if needed
+ENV_NAME = "testbed_01__sensors_nextion"   # <<< change if needed
 PROJECT_ROOT = None                   # None = auto-detect folder containing saved_compiles
 
 DEDUPE_CONSECUTIVE_ONLY = True

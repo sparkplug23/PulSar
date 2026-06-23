@@ -7,9 +7,9 @@
  * - Selectable packed groups are defined in gpio_bitpacked.cpp.
  * - Stored/selected IDs are packed as PGPIO(base_id) + index.
  * - Base strings come only from D_GPIO_*_CTR language defines.
- * - Indexed strings are generated dynamically, e.g. Relay, Relay2, Relay3.
+ * - Indexed strings are generated dynamically, e.g. Relay1, Relay2, Relay3.
  *
- * Do not add indexed language strings here. Add only base D_GPIO_*_CTR defines
+ * Do not add per-index language strings here. Add only base D_GPIO_*_CTR defines
  * in mLanguageDefault.h and let this file append the numeric suffix.
  **/
 
@@ -31,7 +31,7 @@
  * Local helpers
 \*********************************************************************************************/
 
-static uint16_t GPIOPacked_Make(uint16_t base_id, uint8_t index)
+uint16_t mPins::GPIOPacked_Make(uint16_t base_id, uint8_t index)
 {
   return PGPIO(base_id) + (index & GPIO_INDEX_MASK);
 }
@@ -60,6 +60,61 @@ static bool StringEqualsNoCase(const char* a, const char* b)
 {
   if (!a || !b) { return false; }
   return strcasecmp(a, b) == 0;
+}
+static bool StringStartsWithNoCase(const char* text, const char* prefix)
+{
+  if (!text || !prefix)
+  {
+    return false;
+  }
+
+  const size_t prefix_len = strlen(prefix);
+
+  if (prefix_len == 0)
+  {
+    return false;
+  }
+
+  if (strlen(text) < prefix_len)
+  {
+    return false;
+  }
+
+  return strncasecmp(text, prefix, prefix_len) == 0;
+
+}
+
+static bool GPIOBaseName_UsesOneBasedIndex(uint16_t base_id)
+{
+  switch (base_id)
+  {
+    case GPIO_PWM1:
+    case GPIO_PWM1_INV:
+
+    case GPIO_LED1:
+    case GPIO_LED1_INV:
+
+    case GPIO_REL1:
+    case GPIO_REL1_INV:
+
+    case GPIO_SWT1:
+    case GPIO_SWT1_INV:
+    case GPIO_SWT1_NP:
+    case GPIO_SWT1_INV_NP:
+
+    case GPIO_KEY1:
+    case GPIO_KEY1_INV:
+    case GPIO_KEY1_NP:
+    case GPIO_KEY1_INV_NP:
+    case GPIO_KEY1_TOUCH:
+
+    case GPIO_PULSE_COUNTER1:
+    case GPIO_PULSE_COUNTER1_NP:
+      return true;
+
+    default:
+      return false;
+  }
 }
 
 /*********************************************************************************************\
@@ -177,9 +232,9 @@ static const char* GPIOBaseName_ByID(uint16_t base_id, char* B, uint8_t L)
        ****************************************/
 
       // PWM output
-    case GPIO_PWM:                               snprintf_P(B, L, PSTR(D_GPIO_PWM_CTR)); return B;
+    case GPIO_PWM1:                               snprintf_P(B, L, PSTR(D_GPIO_PWM1_CTR)); return B;
       // PWM output, inverted
-    case GPIO_PWM_INV:                           snprintf_P(B, L, PSTR(D_GPIO_PWM_INV_CTR)); return B;
+    case GPIO_PWM1_INV:                           snprintf_P(B, L, PSTR(D_GPIO_PWM1_INV_CTR)); return B;
 
 
   /****************************************
@@ -191,18 +246,18 @@ static const char* GPIOBaseName_ByID(uint16_t base_id, char* B, uint8_t L)
        ****************************************/
 
       // LED output
-    case GPIO_LED:                               snprintf_P(B, L, PSTR(D_GPIO_LED_CTR)); return B;
+    case GPIO_LED1:                               snprintf_P(B, L, PSTR(D_GPIO_LED1_CTR)); return B;
       // LED output, inverted
-    case GPIO_LED_INV:                           snprintf_P(B, L, PSTR(D_GPIO_LED_INV_CTR)); return B;
+    case GPIO_LED1_INV:                           snprintf_P(B, L, PSTR(D_GPIO_LED1_INV_CTR)); return B;
 
       /****************************************
        * SECTION: Relay
        ****************************************/
 
       // Relay output
-    case GPIO_REL:                               snprintf_P(B, L, PSTR(D_GPIO_REL_CTR)); return B;
+    case GPIO_REL1:                               snprintf_P(B, L, PSTR(D_GPIO_REL1_CTR)); return B;
       // Relay output, inverted
-    case GPIO_REL_INV:                           snprintf_P(B, L, PSTR(D_GPIO_REL_INV_CTR)); return B;
+    case GPIO_REL1_INV:                           snprintf_P(B, L, PSTR(D_GPIO_REL1_INV_CTR)); return B;
 
       /****************************************
        * SECTION: IR
@@ -308,28 +363,28 @@ static const char* GPIOBaseName_ByID(uint16_t base_id, char* B, uint8_t L)
        ****************************************/
 
       // Switch input
-    case GPIO_SWT:                               snprintf_P(B, L, PSTR(D_GPIO_SWT_CTR)); return B;
+    case GPIO_SWT1:                               snprintf_P(B, L, PSTR(D_GPIO_SWT1_CTR)); return B;
       // Switch input, inverted
-    case GPIO_SWT_INV:                           snprintf_P(B, L, PSTR(D_GPIO_SWT_INV_CTR)); return B;
+    case GPIO_SWT1_INV:                           snprintf_P(B, L, PSTR(D_GPIO_SWT1_INV_CTR)); return B;
       // Switch input, no pull
-    case GPIO_SWT_NP:                            snprintf_P(B, L, PSTR(D_GPIO_SWT_NP_CTR)); return B;
+    case GPIO_SWT1_NP:                            snprintf_P(B, L, PSTR(D_GPIO_SWT1_NP_CTR)); return B;
       // Switch input, inverted no pull
-    case GPIO_SWT_INV_NP:                        snprintf_P(B, L, PSTR(D_GPIO_SWT_INV_NP_CTR)); return B;
+    case GPIO_SWT1_INV_NP:                        snprintf_P(B, L, PSTR(D_GPIO_SWT1_INV_NP_CTR)); return B;
 
       /****************************************
        * SECTION: Buttons
        ****************************************/
 
       // Button input
-    case GPIO_KEY:                               snprintf_P(B, L, PSTR(D_GPIO_KEY_CTR)); return B;
+    case GPIO_KEY1:                               snprintf_P(B, L, PSTR(D_GPIO_KEY1_CTR)); return B;
       // Button input, inverted
-    case GPIO_KEY_INV:                           snprintf_P(B, L, PSTR(D_GPIO_KEY_INV_CTR)); return B;
+    case GPIO_KEY1_INV:                           snprintf_P(B, L, PSTR(D_GPIO_KEY1_INV_CTR)); return B;
       // Button input, no pull
-    case GPIO_KEY_NP:                            snprintf_P(B, L, PSTR(D_GPIO_KEY_NP_CTR)); return B;
+    case GPIO_KEY1_NP:                            snprintf_P(B, L, PSTR(D_GPIO_KEY1_NP_CTR)); return B;
       // Button input, inverted no pull
-    case GPIO_KEY_INV_NP:                        snprintf_P(B, L, PSTR(D_GPIO_KEY_INV_NP_CTR)); return B;
+    case GPIO_KEY1_INV_NP:                        snprintf_P(B, L, PSTR(D_GPIO_KEY1_INV_NP_CTR)); return B;
       // Touch button input
-    case GPIO_KEY_TOUCH:                         snprintf_P(B, L, PSTR(D_GPIO_KEY_TOUCH_CTR)); return B;
+    case GPIO_KEY1_TOUCH:                         snprintf_P(B, L, PSTR(D_GPIO_KEY1_TOUCH_CTR)); return B;
 
       /****************************************
        * SECTION: BME
@@ -342,7 +397,7 @@ static const char* GPIOBaseName_ByID(uint16_t base_id, char* B, uint8_t L)
        ****************************************/
 
       // DS18x20 one-wire data pin
-    case GPIO_DSB:                               snprintf_P(B, L, PSTR(D_GPIO_DS18B20_CTR)); return B;
+    case GPIO_DS18B20:                               snprintf_P(B, L, PSTR(D_GPIO_DS18B20_CTR)); return B;
 
       /****************************************
        * SECTION: DHT11/DHT22
@@ -423,9 +478,9 @@ static const char* GPIOBaseName_ByID(uint16_t base_id, char* B, uint8_t L)
        ****************************************/
 
       // Pulse counter input
-    case GPIO_PULSE_COUNTER:                     snprintf_P(B, L, PSTR(D_GPIO_PULSE_COUNTER_CTR)); return B;
+    case GPIO_PULSE_COUNTER1:                     snprintf_P(B, L, PSTR(D_GPIO_PULSE_COUNTER1_CTR)); return B;
       // Pulse counter input, no pull
-    case GPIO_PULSE_COUNTER_NP:                  snprintf_P(B, L, PSTR(D_GPIO_PULSE_COUNTER_NP_CTR)); return B;
+    case GPIO_PULSE_COUNTER1_NP:                  snprintf_P(B, L, PSTR(D_GPIO_PULSE_COUNTER1_NP_CTR)); return B;
 
       /****************************************
        * SECTION: Remote Device
@@ -586,6 +641,12 @@ static const char* GPIOBaseName_ByID(uint16_t base_id, char* B, uint8_t L)
       // CC1110 sync pulse signal
     case GPIO_CC1110_SYNC_PULSE_SIGNAL:          snprintf_P(B, L, PSTR(D_GPIO_CC1110_SYNC_PULSE_SIGNAL_CTR)); return B;
 
+    #ifdef USE_MODULE_LIGHTS_ANIMATOR
+    case GPIO_LIGHTING_DIGITAL:                  snprintf_P(B, L, PSTR(D_GPIO_LIGHTING_DIGITAL_CTR)); return B;
+    case GPIO_LIGHTING_CLOCK:                    snprintf_P(B, L, PSTR(D_GPIO_LIGHTING_CLOCK_CTR)); return B;
+    case GPIO_LIGHTING_PWM:                      snprintf_P(B, L, PSTR(D_GPIO_LIGHTING_PWM_CTR)); return B;
+    case GPIO_LIGHTING_ONOFF:                    snprintf_P(B, L, PSTR(D_GPIO_LIGHTING_ONOFF_CTR)); return B;
+    #endif
 
   /****************************************
    * SECTION: End Markers
@@ -624,7 +685,8 @@ static const char* GPIOName_Build(uint16_t base_id, uint8_t index, uint8_t count
 
   if (count > 1)
   {
-    snprintf_P(B, L, PSTR("%s%u"), base_name, index);
+    const uint8_t display_index = GPIOBaseName_UsesOneBasedIndex(base_id) ? (index + 1u) : index;
+    snprintf_P(B, L, PSTR("%s%u"), base_name, display_index);
   }
   else
   {
@@ -672,11 +734,37 @@ const char* mPins::GetGPIOFunctionNamebyID(uint16_t id, char* B, uint8_t L)
   snprintf_P(B, L, PSTR("GPIOUnknown0x%04X"), id);
   return B;
 }
+/*********************************************************************************************\
+ * Helper: base IDs where numeric suffix is part of a zero-based signal name
+ *
+ * Normal repeated GPIO functions use 1-based external suffixes:
+ *   Relay1 -> index 0
+ *   Relay2 -> index 1
+ *   DHT221 -> index 0
+ *   DHT222 -> index 1
+ *
+ * Some protocol/signal names are inherently zero-based:
+ *   SDCard MMC D0 -> index 0
+ *   SDCard MMC D1 -> index 1
+ *   SDCard MMC D2 -> index 2
+ *   SDCard MMC D3 -> index 3
+\*********************************************************************************************/
+bool mPins::GPIOBase_UsesZeroBasedSuffix(uint16_t base_id)
+{
+  switch (base_id)
+  {
+    case GPIO_SDCARD_MMC_D:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
 
 /*********************************************************************************************\
  * Public API: name -> packed ID
 \*********************************************************************************************/
-
 int32_t mPins::GetGPIOFunctionIDbyName(const char* c)
 {
   if (!c || !c[0])
@@ -685,7 +773,13 @@ int32_t mPins::GetGPIOFunctionIDbyName(const char* c)
     return -1;
   }
 
-  ALOG_INF(PSTR("GPIONameSearch: search=\"%s\" count=%u"), c, SelectablePins_BitPacked_Count);
+  ALOG_DBG(PSTR("GPIONameSearch: search=\"%s\" count=%u"), c, SelectablePins_BitPacked_Count);
+
+  uint16_t best_base_id = 0;
+  uint8_t  best_count = 0;
+  uint8_t  best_index = 0;
+  size_t   best_base_len = 0;
+  bool     best_found = false;
 
   for (uint16_t entry_i = 0; entry_i < SelectablePins_BitPacked_Count; entry_i++)
   {
@@ -693,17 +787,10 @@ int32_t mPins::GetGPIOFunctionIDbyName(const char* c)
     const uint16_t base_id = GPIOEntry_Base(entry);
     const uint8_t  count   = GPIOEntry_Count(entry);
 
-    char base_name[64];
+    char base_name[64] = {0};
     GPIOBaseName_ByID(base_id, base_name, sizeof(base_name));
 
-    ALOG_INF(
-      PSTR("GPIONameSearch: entry[%u] entry=0x%04X base=%u count=%u base_name=\"%s\""),
-      entry_i,
-      entry,
-      base_id,
-      count,
-      base_name
-    );
+    ALOG_DBM(PSTR("GPIONameSearch: entry[%u] entry=0x%04X base=%u count=%u base_name=\"%s\""), entry_i, entry, base_id, count, base_name);
 
     if (base_name[0] == '\0')
     {
@@ -711,61 +798,125 @@ int32_t mPins::GetGPIOFunctionIDbyName(const char* c)
       continue;
     }
 
+    const size_t base_len = strlen(base_name);
+
     /*
-     * Alias rule:
-     *   "Modem TX"  -> index 0
-     *   "Modem TX0" -> index 0
+     * Decode rule:
+     *   input = base_name + optional numeric suffix
+     *
+     * Most repeated functions use 1-based suffixes:
+     *   DHT22    -> base DHT22, index 0
+     *   DHT221   -> base DHT22, index 0
+     *   DHT222   -> base DHT22, index 1
+     *   DSB1     -> base DSB,   index 0
+     *   DSB2     -> base DSB,   index 1
+     *
+     * Some signal-lane functions use zero-based suffixes:
+     *   SDCard MMC D0 -> base SDCard MMC D, index 0
+     *   SDCard MMC D1 -> base SDCard MMC D, index 1
+     *   SDCard MMC D2 -> base SDCard MMC D, index 2
+     *   SDCard MMC D3 -> base SDCard MMC D, index 3
      */
-    if (StringEqualsNoCase(c, base_name))
+    if (!StringStartsWithNoCase(c, base_name))
     {
-      const uint16_t packed_id = GPIOPacked_Make(base_id, 0);
-
-    //   ALOG_INF(
-    //     PSTR("GPIONameSearch: MATCH_ALIAS0 search=\"%s\" base_name=\"%s\" base=%u index=0 packed=0x%04X return=%d"),
-    //     c,
-    //     base_name,
-    //     base_id,
-    //     packed_id,
-    //     (int32_t)packed_id
-    //   );
-
-      return packed_id;
+      continue;
     }
 
-    for (uint8_t index = 0; index < count; index++)
+    /*
+     * Longest base-name wins.
+     *
+     * Required for base names that already contain or end in digits:
+     *   DHT222    -> DHT22   + 2
+     *   DS18B202  -> DS18B20 + 2
+     *   BME2802   -> BME280  + 2
+     */
+    if (base_len < best_base_len)
     {
-      char generated_name[64];
-      GPIOName_Build(base_id, index, count, generated_name, sizeof(generated_name));
+      continue;
+    }
 
-      const uint16_t packed_id = GPIOPacked_Make(base_id, index);
+    const char* suffix = &c[base_len];
 
-      #ifdef ENABLE_DEBUGFEATURE_GPIO_NAME_SEARCH_VERBOSE
-      ALOG_INF(
-        PSTR("GPIONameSearch:   try base=%u index=%u count=%u packed=0x%04X name=\"%s\""),
-        base_id,
-        index,
-        count,
-        packed_id,
-        generated_name
-      );
-      #endif
+    uint8_t decoded_index = 0;
 
-      if (StringEqualsNoCase(c, generated_name))
+    if (suffix[0] == '\0')
+    {
+      decoded_index = 0;
+    }
+    else
+    {
+      uint16_t suffix_value = 0;
+      bool suffix_valid = true;
+
+      for (uint8_t i = 0; suffix[i]; i++)
       {
-        ALOG_INF(
-          PSTR("GPIONameSearch: MATCH search=\"%s\" name=\"%s\" base=%u index=%u count=%u packed=0x%04X return=%d"),
-          c,
-          generated_name,
-          base_id,
-          index,
-          count,
-          packed_id,
-          (int32_t)packed_id
-        );
+        if ((suffix[i] < '0') || (suffix[i] > '9'))
+        {
+          suffix_valid = false;
+          break;
+        }
 
-        return packed_id;
+        suffix_value = (suffix_value * 10) + (suffix[i] - '0');
+
+        if (suffix_value > 255)
+        {
+          suffix_valid = false;
+          break;
+        }
+      }
+
+      if (!suffix_valid)
+      {
+        continue;
+      }
+
+      if (GPIOBase_UsesZeroBasedSuffix(base_id))
+      {
+        /*
+         * Zero-based suffix:
+         *   suffix 0 -> internal index 0
+         *   suffix 1 -> internal index 1
+         *   suffix 2 -> internal index 2
+         */
+        decoded_index = (uint8_t)suffix_value;
+      }
+      else
+      {
+        /*
+         * Normal 1-based suffix:
+         *   suffix 1 -> internal index 0
+         *   suffix 2 -> internal index 1
+         *
+         * Suffix 0 is rejected here to avoid two names for the same indexed GPIO.
+         */
+        if (suffix_value == 0)
+        {
+          continue;
+        }
+
+        decoded_index = (uint8_t)(suffix_value - 1);
       }
     }
+
+    if (decoded_index >= count)
+    {
+      continue;
+    }
+
+    best_base_id = base_id;
+    best_count = count;
+    best_index = decoded_index;
+    best_base_len = base_len;
+    best_found = true;
+
+    ALOG_DBM(PSTR("GPIONameSearch: candidate search=\"%s\" base_name=\"%s\" base=%u index=%u count=%u base_len=%u zero_based=%u"), c, base_name, base_id, decoded_index, count, (uint16_t)base_len, GPIOBase_UsesZeroBasedSuffix(base_id));
+  }
+
+  if (best_found)
+  {
+    const uint16_t packed_id = GPIOPacked_Make(best_base_id, best_index);
+    ALOG_INF(PSTR("GPIONameSearch: MATCH search=\"%s\" base=%u index=%u count=%u packed=0x%04X return=%d"), c, best_base_id, best_index, best_count, packed_id, (int32_t)packed_id);
+    return packed_id;
   }
 
   ALOG_ERR(PSTR("GPIONameSearch: NO MATCH search=\"%s\""), c);

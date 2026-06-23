@@ -55,6 +55,10 @@ int8_t mBH1750::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_EVERY_SECOND:
       ReadSensor();
     break;
+    case TASK_SENSOR_SHOW_LATEST_LOGGED_ID:      
+      ConstructJSON_Sensor(JSON_LEVEL_SHORT);
+      ALOG_INF(PSTR(D_LOG_BH1750 "\"%s\""),JBI->GetBufferPtr());
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/

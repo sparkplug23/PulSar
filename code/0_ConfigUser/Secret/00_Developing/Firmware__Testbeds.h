@@ -11,8 +11,8 @@
 
 //--------------------------------[Enable Device]-------------------------------------
 
-#define DEVICE_TESTBED_01__SENSORS_NEXTION
-// #define DEVICE_TESTBED_02__MOTION_AUDIO
+// #define DEVICE_TESTBED_01__SENSORS_NEXTION
+#define DEVICE_TESTBED_02__MOTION_AUDIO
 // #define DEVICE_TESTBED_04__HVAC_X1
 // #define DEVICE_TESTBED_05__SWITCHES_BUTTONS
 // #define DEVICE_TESTBED_06__GPS_DECODER_WITH_SERIAL_SNIFFERS
@@ -73,6 +73,10 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE 
+
+  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
+
+  #define ENABLE_LOG_LEVEL_DEBUG
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -98,7 +102,7 @@
   ************************************/  
   
   #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
-  // #define ENABLE_TEMPLATE_SECTION__SENSORS__DHT
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__DHT
   #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
   #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
   #define ENABLE_TEMPLATE_SECTION__DISPLAYS__NEXTION
@@ -174,7 +178,7 @@
   ************************************/  
 
   #define USE_MODULE_DISPLAYS_INTERFACE
-  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
     #define ENABLE_DEVFEATURE_DISPLAY__INVERT
     #define SHOW_SPLASH
 
@@ -318,8 +322,8 @@
       "\"21\":\"" D_GPIO_LDR_BASIC_DIGITAL1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DHT
-      "\"19\":\"" D_GPIO_DHT22_1_CTR "\","
-      "\"18\":\"" D_GPIO_DHT22_2_CTR "\","      
+      "\"18\":\"" D_GPIO_DHT22_CTR "1" "\","
+      "\"19\":\"" D_GPIO_DHT22_CTR "2" "\","      
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
       "\"5\":\""  D_GPIO_SWT_CTR "1" "\","
@@ -329,7 +333,7 @@
       "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_RGB_DATA_CTR  "\","
+      // "\"4\":\"" D_GPIO_RGB_DATA_CTR  "\","
       #endif 
       #ifdef USE_MODULE_DRIVERS_LEDS
       "\"2\":\"" D_GPIO_LED_CTR "1" "\","
@@ -811,20 +815,20 @@
      "\"2\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
      #endif 
      #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE //c
-     "\"34\":\""  D_GPIO_PIR_1_CTR "\","
+     "\"34\":\""  D_GPIO_PIR_CTR "1" "\","
      #endif
      #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-     "\"5\":\""  D_GPIO_PIR_2_CTR "\"," //COR
+     "\"5\":\""  D_GPIO_PIR_CTR "2" "\"," //COR
      #endif
      #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-     "\"35\":\""  D_GPIO_PIR_3_CTR "\","
+     "\"35\":\""  D_GPIO_PIR_CTR "3" "\","
      #endif
      #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
-     "\"13\":\""  D_GPIO_PIR_4_CTR "\","
+     "\"13\":\""  D_GPIO_PIR_CTR "4" "\","
      #endif
      #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-     "\"17\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
-     "\"16\":\""  D_GPIO__HLK_LD2410_RX__CTR "\","
+     "\"17\":\""  D_GPIO_LD2410_TX_CTR "\","
+     "\"16\":\""  D_GPIO_LD2410_RX_CTR "\","
      #endif
      #ifdef USE_MODULE_SENSORS_BUTTONS
      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""

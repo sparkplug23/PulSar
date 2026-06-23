@@ -108,9 +108,9 @@ void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
   }
 
   for (uint32_t i = 0; i < rt.devices_present; i++) {
-    uint32_t port = (i << 1) + ((latching_power >> i) &1);
+    uint32_t index = (i << 1) + ((latching_power >> i) &1);
           ALOG_INF(PSTR("DigitalWrite Pre %d"), 3);
-    tkr_pins->DigitalWrite(GPIO_REL, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
+    tkr_pins->DigitalWrite(GPIO_REL1, index, bitRead(rt.bitpacked.rel_inverted, index) ? !state : state);
   }
 }
 
@@ -209,9 +209,9 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
         uint16_t gpio_pin = 0;
         if(bitRead(rt.bitpacked.rel_inverted, i))
         { //add the gpio mpin shift back in
-          gpio_pin = GPIO_REL_INV;          
+          gpio_pin = GPIO_REL1_INV;          
         }else{
-          gpio_pin = GPIO_REL;
+          gpio_pin = GPIO_REL1;
         }
         
         ALOG_INF(PSTR("DigitalWrite Pre %d"), 2);
@@ -239,9 +239,9 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
           uint16_t gpio_pin = 0;
           if(bitRead(rt.bitpacked.rel_inverted, i))
           { //add the gpio mpin shift back in
-            gpio_pin = GPIO_REL_INV;          
+            gpio_pin = GPIO_REL1_INV;          
           }else{
-            gpio_pin = GPIO_REL;
+            gpio_pin = GPIO_REL1;
           }
           power_t state = rpower &1;
           ALOG_INF(PSTR("DigitalWrite Pre %d"), 1);
@@ -666,10 +666,10 @@ void mRelays::Pre_Init(void)
   for(uint8_t relay_index = 0; relay_index < MAX_RELAYS_SET; relay_index++)
   {
   DEBUG_LINE_HERE3
-    if(tkr_pins->PinUsed(GPIO_REL_INV, relay_index))
+    if(tkr_pins->PinUsed(GPIO_REL1_INV, relay_index))
     {
   DEBUG_LINE_HERE3
-      uint8_t pin_number = tkr_pins->Pin(GPIO_REL_INV, relay_index);
+      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1_INV, relay_index);
       Serial.println(pin_number);Serial.flush();
   DEBUG_LINE_HERE3
       pinMode(pin_number, OUTPUT);
@@ -684,10 +684,10 @@ void mRelays::Pre_Init(void)
     }
 
   DEBUG_LINE_HERE3
-    if(tkr_pins->PinUsed(GPIO_REL, relay_index))
+    if(tkr_pins->PinUsed(GPIO_REL1, relay_index))
     {
   DEBUG_LINE_HERE3
-      uint8_t pin_number = tkr_pins->Pin(GPIO_REL, relay_index);
+      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1, relay_index);
   DEBUG_LINE_HERE3
       pinMode(pin_number, OUTPUT);
 
@@ -884,7 +884,7 @@ void mRelays::SubTask_Relay_TimeOn(){
     // Auto time off decounters
     if(rt.relay_status[relay_id].timer_decounter.seconds == 1){ //if =1 then turn off and clear to 0
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      ALOG_INF(PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds==1 and disable"), relay_id);
+      ALOG_INF(PSTR(D_LOG_PIXEL "relay_status[%d].timer_decounter.seconds==1 and disable"), relay_id);
       #endif       
 
       CommandSet_Relay_Power(0, relay_id);
@@ -898,7 +898,7 @@ void mRelays::SubTask_Relay_TimeOn(){
       CommandSet_Relay_Power(1, relay_id);
       
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      ALOG_INF(PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds=%d dec"),relay_id, rt.relay_status[relay_id].timer_decounter.seconds);
+      ALOG_INF(PSTR(D_LOG_PIXEL "relay_status[%d].timer_decounter.seconds=%d dec"),relay_id, rt.relay_status[relay_id].timer_decounter.seconds);
       #endif
 
       mqtthandler_state_ifchanged.flags.SendNow = true; // If active, send every second
@@ -926,7 +926,7 @@ void mRelays::SubTask_Relay_PulseOff(){
     // Auto time off decounters
     if(rt.relay_status[relay_id].timer_off_then_on_decounter.seconds == 1){ //if =1 then turn off and clear to 0
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      ALOG_INF(PSTR(D_LOG_NEO "relay_status[%d].timer_off_then_on_decounter.seconds==1 and disable"), relay_id);
+      ALOG_INF(PSTR(D_LOG_PIXEL "relay_status[%d].timer_off_then_on_decounter.seconds==1 and disable"), relay_id);
       #endif       
 
       CommandSet_Relay_Power(1, relay_id); // TURN ON
@@ -940,7 +940,7 @@ void mRelays::SubTask_Relay_PulseOff(){
       CommandSet_Relay_Power(0, relay_id); // TURN OFF
       
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      ALOG_INF(PSTR(D_LOG_NEO "relay_status[%d].timer_off_then_on_decounter.seconds=%d dec"),relay_id, rt.relay_status[relay_id].timer_off_then_on_decounter.seconds);
+      ALOG_INF(PSTR(D_LOG_PIXEL "relay_status[%d].timer_off_then_on_decounter.seconds=%d dec"),relay_id, rt.relay_status[relay_id].timer_off_then_on_decounter.seconds);
       #endif
 
       mqtthandler_state_ifchanged.flags.SendNow = true;

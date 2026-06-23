@@ -15,11 +15,11 @@
 //--------------------------------[Enable Device]-------------------------------------
 
 //    ;;;;;;;;;;;; ESP32 ;;;;;;;;;;;;;;;;
-// #define DEVICE_TESTBED__BOARDTEST_ESP32S3__XIAO_ESP32_S3_SEEDSTUDIO
 // #define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_01
 // #define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_02
 // #define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_03
 // #define DEVICE_GROUP__CAMERAS__ESP32_CAM_EYE_SENSOR_01
+// #define DEVICE_TESTBED__BOARDTEST_ESP32S3__XIAO_ESP32_S3_SEEDSTUDIO
 
 //--------------------------------[Enable Device]-------------------------------------
 

@@ -951,6 +951,7 @@ tkr_json_template->ModuleDeviceTemplate__LoadDefault();
   #endif
 
   tkr_set->Settings.logging.serial_level = tkr_set->runtime.seriallog_level_during_boot;  
+  // tkr_set->Settings.logging.serial_level = LOG_LEVEL_DEBUG_LOWLEVEL;//tkr_set->runtime.seriallog_level_during_boot;  
 
   /********************************************************************************************
    ** Initialise System and Modules ***********************************************************
