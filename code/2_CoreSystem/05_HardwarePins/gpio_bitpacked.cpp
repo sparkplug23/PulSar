@@ -157,6 +157,27 @@ const uint16_t SelectablePins_BitPacked[] PROGMEM =
   PGPIO(GPIO_SDCARD_MMC_CLK),
   PGPIO(GPIO_SDCARD_MMC_D) + MGPIO(4),
 
+  /****************************************
+   * SECTION: Cameras
+   ****************************************/
+
+  // Camera external clock
+  PGPIO(GPIO_WEBCAM_XCLK),
+  // Camera parallel data bus
+  PGPIO(GPIO_WEBCAM_DATA) + MGPIO(8),
+  // Camera timing/control pins
+  PGPIO(GPIO_WEBCAM_PCLK),
+  PGPIO(GPIO_WEBCAM_HREF),
+  PGPIO(GPIO_WEBCAM_VSYNC),
+  // Camera SCCB/I2C pins
+  PGPIO(GPIO_WEBCAM_SIOD),
+  PGPIO(GPIO_WEBCAM_SIOC),
+  // Camera power/reset pins
+  PGPIO(GPIO_WEBCAM_PWDN),
+  PGPIO(GPIO_WEBCAM_RESET),
+
+
+
 };
 
 const uint16_t SelectablePins_BitPacked_Count =

@@ -4,7 +4,7 @@
 
 void mWiFi::WiFi_Sta_Maintain_Periodic(void)
 {
-//   ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"), __FILE__, __LINE__);
+//   ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"), __FILE__, __LINE__);
 
   const bool connected = (WiFi.status() == WL_CONNECTED);
 
@@ -42,7 +42,7 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
   // Backoff window using your existing counter
   if (connection.counter > 0)
   {
-    ALOG_INF(PSTR(D_LOG_WIFI "Reconnecting in %d seconds"),connection.counter);
+    ALOG_DBG(PSTR(D_LOG_WIFI "Reconnecting in %d seconds"),connection.counter);
     connection.counter--;
     return;
   }
@@ -62,12 +62,12 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
 uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured(void) const
 {
   DEBUG_LINE_HERE3
-  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+  // ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   for (uint8_t i = 0; i < WIFI_MAXIMUM_CONNECTIONS; i++)
   {
     if (config.station.profiles[i].ssid[0] != '\0')
     {
-      ALOG_INF(PSTR("config.station.profiles[i].ssid[0] %s %d"),config.station.profiles[i].ssid,i);
+      // ALOG_DBG(PSTR("config.station.profiles[i].ssid[0] %s %d"),config.station.profiles[i].ssid,i);
       return i;
     } 
   }
@@ -76,7 +76,7 @@ uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured(void) const
 }
 bool mWiFi::WiFi_Sta_ShouldScanNow_OnBootOrOutage(void)
 {
-  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+  // ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   // Boot scan exactly once
   if (!s_wifi2_scanned_on_boot)
   {
@@ -96,7 +96,7 @@ bool mWiFi::WiFi_Sta_ShouldScanNow_OnBootOrOutage(void)
 
 void mWiFi::WiFi_Sta_OnConnected_ResetOutageScanFlags(void)
 {
-//   ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+//   ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   // When link is back, allow a future outage to trigger a scan again
   s_wifi2_scanned_on_this_outage = false;
   connection.downtime = 0;
@@ -105,7 +105,7 @@ void mWiFi::WiFi_Sta_OnConnected_ResetOutageScanFlags(void)
 uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_WithScanPreference(bool force_scan)
 {
   DEBUG_LINE_HERE3
-  ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+  ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   DEBUG_LINE_HERE3
   const uint8_t ordered_first = WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured();
   DEBUG_LINE_HERE3
@@ -206,7 +206,7 @@ uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_WithScanPreference(bool force_scan)
 
 void mWiFi::WiFi_Sta_Connect_Start(void)
 {
-  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+  // ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   // Policy: SoftAP only if ALL SSIDs are empty
   if (!WiFi2_HasAnyStaProfileConfigured())
   {
@@ -222,7 +222,7 @@ void mWiFi::WiFi_Sta_Connect_Start(void)
 
 void mWiFi::WiFi_Sta_ProfileIndex_Connect(uint8_t profile_i)
 {
-  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+  // ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   // Bounds + configured check
   if (profile_i >= WIFI_MAXIMUM_CONNECTIONS) { return; }
 
@@ -294,7 +294,7 @@ static inline bool _ssid_is_configured(const char* s) { return (s && s[0] != '\0
 
 IPAddress mWiFi::IPv4ArrayToIP(const uint8_t a[4])
 {
-  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+  // ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   return IPAddress(a[0], a[1], a[2], a[3]);
 }
 
@@ -332,7 +332,7 @@ uint8_t mWiFi::WiFi2_GetFirstConfiguredProfileIndex(void) const
 
 void mWiFi::WiFi2_Sta_Connected_Enter(void)
 {
-  ALOG_INF(PSTR(D_LOG_WIFI "%s"),"WiFi2_Sta_Connected_Enter");
+  ALOG_DBG(PSTR(D_LOG_WIFI "%s"),"WiFi2_Sta_Connected_Enter");
   
   connection.fConnected = true;
   connection.fReconnect = false;
@@ -358,7 +358,7 @@ void mWiFi::WiFi2_Sta_Connected_Enter(void)
 
 void mWiFi::WiFi2_Sta_Disconnected_Enter(void)
 {
-  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+  // ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   connection.fConnected = false;
   
   tkr_set->runtime.global_state.network_down = true;
@@ -372,7 +372,7 @@ void mWiFi::WiFi2_Sta_Disconnected_Enter(void)
 
 void mWiFi::WiFi2_Sta_EnsureConnecting(void)
 {
-  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
+  // ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
   if (WL_CONNECTED == WiFi.status()) { return; }
   if (!WiFi2_HasAnyStaProfileConfigured()) { return; }
 
@@ -393,7 +393,7 @@ void mWiFi::WiFi2_Sta_EnsureConnecting(void)
 
 void mWiFi::WiFi_Sta_State_Set(uint8_t state)
 {
-  // ALOG_INF(PSTR(D_LOG_WIFI "%s|%d"), __FILE__, __LINE__);
+  // ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"), __FILE__, __LINE__);
 
   // Normalise: treat any non-zero as "connected"
   state = (state != 0) ? 1 : 0;
@@ -435,7 +435,7 @@ void mWiFi::WiFi_Sta_State_Set(uint8_t state)
 
   if (state == 0)
   {
-    ALOG_INF(PSTR(D_LOG_DEBUG "%s=%d"), "WiFi_Sta_State_Set", state);
+    ALOG_DBG(PSTR(D_LOG_DEBUG "%s=%d"), "WiFi_Sta_State_Set", state);
   }
 
   // -------------------------------------------------------------------------

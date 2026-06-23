@@ -125,7 +125,7 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
 
   if(!brokers.size())
   {
-    ALOG_INF(PSTR(D_LOG_MQTT "Handle__ServiceBrokerConnects_With_Transports skipped: no brokers"));
+    ALOG_DBG(PSTR(D_LOG_MQTT "Handle__ServiceBrokerConnects_With_Transports skipped: no brokers"));
     return;
   }
 
@@ -154,13 +154,13 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
 
     if(!broker->en)
     {
-      ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] skipped: EN false"), broker_i);
+      ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] skipped: EN false"), broker_i);
       continue;
     }
 
     if(!broker->allowed)
     {
-      ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] skipped: allowed false"), broker_i);
+      ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] skipped: allowed false"), broker_i);
       continue;
     }
 
@@ -191,7 +191,7 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
       ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] partial bind: pubsub set but network_client null"), broker_i);
     }
 
-    ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] bind required id=%s host=%s"),
+    ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] bind required id=%s host=%s"),
       broker_i,
       broker->id,
       broker->host_address
@@ -220,7 +220,7 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
     {
       ConnectionClient_t transport_type = use_pref_transport ? broker->pref_transport[transport_i] : broker->transport[transport_i];
 
-      ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] checking transport[%u]=%u"),
+      ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] checking transport[%u]=%u"),
         broker_i,
         transport_i,
         transport_type
@@ -233,7 +233,7 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
       {
         case CLIENT_TYPE_WIFI_ID:
         {
-          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] transport[%u] type=WiFi"), broker_i, transport_i);
+          ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] transport[%u] type=WiFi"), broker_i, transport_i);
 
           #ifdef USE_MODULE_NETWORK_WIFI
 
@@ -245,11 +245,11 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
 
           if(!tkr_wifi->WiFi_HasExternalConnectivity())
           {
-            ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] WiFi skipped: no external connectivity"), broker_i);
+            ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] WiFi skipped: no external connectivity"), broker_i);
             break;
           }
 
-          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] WiFi healthy: allocating WiFiClient"), broker_i);
+          ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] WiFi healthy: allocating WiFiClient"), broker_i);
 
           client_ptr = new WiFiClient();
 
@@ -262,11 +262,11 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
           broker->client_type = CLIENT_TYPE_WIFI_ID;
           client_owned_by_mqtt = true;
 
-          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] WiFiClient allocated ptr=%p"), broker_i, client_ptr);
+          ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] WiFiClient allocated ptr=%p"), broker_i, client_ptr);
 
           #else
 
-          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] WiFi skipped: USE_MODULE_NETWORK_WIFI not compiled"), broker_i);
+          ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] WiFi skipped: USE_MODULE_NETWORK_WIFI not compiled"), broker_i);
 
           #endif
         }
@@ -274,11 +274,11 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
 
         case CLIENT_TYPE_ETHERNET_ID:
         {
-          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] transport[%u] type=Ethernet"), broker_i, transport_i);
+          ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] transport[%u] type=Ethernet"), broker_i, transport_i);
 
           #ifdef USE_MODULE_NETWORK_ETHERNET
 
-          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Ethernet compiled but bind path not implemented"), broker_i);
+          ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] Ethernet compiled but bind path not implemented"), broker_i);
 
           // Later:
           // if(tkr_eth && tkr_eth->Ethernet_HasExternalConnectivity())
@@ -289,7 +289,7 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
 
           #else
 
-          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Ethernet skipped: NETWORK_ETHERNET not compiled"), broker_i);
+          ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] Ethernet skipped: NETWORK_ETHERNET not compiled"), broker_i);
 
           #endif
         }
@@ -297,7 +297,7 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
 
         case CLIENT_TYPE_CELLULAR_ID:
         {
-          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] transport[%u] type=Cellular"), broker_i, transport_i);
+          ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] transport[%u] type=Cellular"), broker_i, transport_i);
 
           #ifdef USE_MODULE_NETWORK_CELLULAR
 
@@ -309,7 +309,7 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
 
           if(!tkr_cellular->Cellular_HasExternalConnectivity())
           {
-            ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Cellular skipped: no external connectivity"), broker_i);
+            ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] Cellular skipped: no external connectivity"), broker_i);
             break;
           }
 
@@ -324,11 +324,11 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
           broker->client_type = CLIENT_TYPE_CELLULAR_ID;
           client_owned_by_mqtt = false; // modem/cellular owns TinyGsmClient
 
-          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Cellular client ready ptr=%p"), broker_i, client_ptr);
+          ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] Cellular client ready ptr=%p"), broker_i, client_ptr);
 
           #else
 
-          ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Cellular skipped: USE_MODULE_NETWORK_CELLULAR not compiled"), broker_i);
+          ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] Cellular skipped: USE_MODULE_NETWORK_CELLULAR not compiled"), broker_i);
 
           #endif
         }
@@ -355,7 +355,7 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
         continue;
       }
 
-      ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] attaching transport type=%u client=%p"),
+      ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] attaching transport type=%u client=%p"),
         broker_i,
         transport_type,
         client_ptr
@@ -386,7 +386,7 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
 
       transport_attached = true;
 
-      ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] transport attached type=%u retry immediate net=%p pubsub=%p"),
+      ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] transport attached type=%u retry immediate net=%p pubsub=%p"),
         broker_i,
         broker->client_type,
         broker->network_client,
@@ -394,7 +394,8 @@ void mMQTTManager::Handle__ServiceBrokerConnects_With_Transports(void)
       );
 
       #ifdef ENABLE_DEBUG_MQTT__INCLUDE_NEW_CONNECTION_SPLASH
-      broker->Debug_PrintConnectionInfo();
+      if (tkr_set->Settings.logging.serial_level > LOG_LEVEL_DEBUG)
+        broker->Debug_PrintConnectionInfo();
       #endif
 
       break;
@@ -414,7 +415,7 @@ void mMQTTManager::EnsureDefaultBroker_FromDefines(void)
 {
   if(brokers.size() > 0)
   {
-    ALOG_INF(PSTR(D_LOG_MQTT "Define broker skipped: brokers already configured=%u"), brokers.size());
+    ALOG_DBG(PSTR(D_LOG_MQTT "Define broker skipped: brokers already configured=%u"), brokers.size());
     return;
   }
 
@@ -503,7 +504,7 @@ void mMQTTManager::EnsureDefaultBroker_FromDefines(void)
 
   brokers.push_back(broker);
 
-  ALOG_INF(
+  ALOG_DBG(
     PSTR(D_LOG_MQTT "Define broker added id=%s host=%s port=%u transports=%u"),
     broker->id,
     broker->host_address,
@@ -519,7 +520,7 @@ void mMQTTManager::EnsureDefaultBroker_FromDefines(void)
  */
 void mMQTTManager::Default_Module()
 {
-  ALOG_INF(PSTR(D_LOG_MQTT "Default_Module"));
+  ALOG_DBG(PSTR(D_LOG_MQTT "Default_Module"));
   
   // memset((uint8_t*)&dt, 0, sizeof(dt));
   
@@ -559,14 +560,14 @@ void mMQTTManager::Default_Module()
   // strlcpy(dt.connection[idx].prefixtopic, tkr_set->Settings.system_name.device, sizeof(dt.connection[idx].prefixtopic));
   // dt.connection[idx].status = 1;
     
-  // ALOG_INF(PSTR("Ghost_address: %s"), dt.connection[idx].host_address);
-  // ALOG_INF(PSTR("port: %d"), dt.connection[idx].port);
-  // ALOG_INF(PSTR("user: %s"), dt.connection[idx].user);
-  // ALOG_INF(PSTR("pwd: %s"), dt.connection[idx].pwd);
-  // ALOG_INF(PSTR("retry: %d"), dt.connection[idx].retry);
-  // ALOG_INF(PSTR("client: %s"), dt.connection[idx].client);
-  // ALOG_INF(PSTR("prefixtopic: %s"), dt.connection[idx].prefixtopic);
-  // ALOG_INF(PSTR("status: %d"), dt.connection[idx].status);
+  // ALOG_DBG(PSTR("Ghost_address: %s"), dt.connection[idx].host_address);
+  // ALOG_DBG(PSTR("port: %d"), dt.connection[idx].port);
+  // ALOG_DBG(PSTR("user: %s"), dt.connection[idx].user);
+  // ALOG_DBG(PSTR("pwd: %s"), dt.connection[idx].pwd);
+  // ALOG_DBG(PSTR("retry: %d"), dt.connection[idx].retry);
+  // ALOG_DBG(PSTR("client: %s"), dt.connection[idx].client);
+  // ALOG_DBG(PSTR("prefixtopic: %s"), dt.connection[idx].prefixtopic);
+  // ALOG_DBG(PSTR("status: %d"), dt.connection[idx].status);
 
   #ifdef ENABLE_FEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
   rate_limit_send_delay = ENABLE_FEATURE__MQTT_ENABLE_SENDING_LIMIT_MS;
@@ -596,14 +597,14 @@ void mMQTTManager::Default_Module__Connection_WiFi()
   // strlcpy(con->prefix_topic, tkr_set->Settings.system_name.device, sizeof(con->prefix_topic));
   // con->status = 1;
     
-  // ALOG_INF(PSTR("Ghost_address: %s"), con->host_address);
-  // ALOG_INF(PSTR("port: %d"), con->port);
-  // ALOG_INF(PSTR("user: %s"), con->user);
-  // ALOG_INF(PSTR("pwd: %s"), con->pwd);
-  // ALOG_INF(PSTR("retry: %d"), con->retry);
-  // ALOG_INF(PSTR("client: %s"), con->client_name);
-  // ALOG_INF(PSTR("prefixtopic: %s"), con->prefix_topic);
-  // ALOG_INF(PSTR("status: %d"), con->status);
+  // ALOG_DBG(PSTR("Ghost_address: %s"), con->host_address);
+  // ALOG_DBG(PSTR("port: %d"), con->port);
+  // ALOG_DBG(PSTR("user: %s"), con->user);
+  // ALOG_DBG(PSTR("pwd: %s"), con->pwd);
+  // ALOG_DBG(PSTR("retry: %d"), con->retry);
+  // ALOG_DBG(PSTR("client: %s"), con->client_name);
+  // ALOG_DBG(PSTR("prefixtopic: %s"), con->prefix_topic);
+  // ALOG_DBG(PSTR("status: %d"), con->status);
 
 
 
@@ -615,13 +616,13 @@ void mMQTTManager::Default_Module__Connection_WiFi()
 
 void mMQTTManager::Save_Module()
 {
-  ALOG_INF(PSTR(D_LOG_MQTT "Save_Module"));
+  ALOG_DBG(PSTR(D_LOG_MQTT "Save_Module"));
   tkr_mfile->ByteFile_Save("/mqtt" FILE_EXTENSION_BIN, (uint8_t*)&dt, sizeof(dt));
 }
 
 void mMQTTManager::Load_Module(bool erase)
 {
-  ALOG_INF(PSTR(D_LOG_MQTT "Load_Module"));
+  ALOG_DBG(PSTR(D_LOG_MQTT "Load_Module"));
   // tkr_mfile->ByteFile_Load("/mqtt" FILE_EXTENSION_BIN, (uint8_t*)&dt, sizeof(dt));
 }
 
@@ -654,7 +655,7 @@ void mMQTTManager::MQTTSubscribe()
   JsonParserObject obj1 = 0;
   char item_name[100] = {0};
 
-  // ALOG_INF(PSTR("ObjectNameID size %d"), rootObj["ObjectNameID"].size());
+  // ALOG_DBG(PSTR("ObjectNameID size %d"), rootObj["ObjectNameID"].size());
 
   if(jtok = rootObj["MQTTSubscribe"])
   {
@@ -719,7 +720,7 @@ uint16_t mMQTTManager::GetIfChangedPeriod_SubModule()
 #ifdef ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS
 void mMQTTManager::MqttPublishPayloadPrefixTopic_P(uint32_t prefix, const char* subtopic, const char* payload, uint32_t binary_length, bool retained) {
 
-ALOG_INF(PSTR("MqttPublishPayloadPrefixTopic_P"));
+ALOG_DBG(PSTR("MqttPublishPayloadPrefixTopic_P"));
 
 /*
   Publish <prefix>/<device>/<RESULT or <subtopic>> payload string or binary when binary_length set with optional retained
@@ -763,7 +764,7 @@ ALOG_INF(PSTR("MqttPublishPayloadPrefixTopic_P"));
 }
 
 void mMQTTManager::MqttPublishPrefixTopic_P(uint32_t prefix, const char* subtopic, bool retained) {
-ALOG_INF(PSTR("MqttPublishPrefixTopic_P"));
+ALOG_DBG(PSTR("MqttPublishPrefixTopic_P"));
   // Publish <prefix>/<device>/<RESULT or <subtopic>> default ResponseData string with optional retained
   SHOW_FREE_MEM(PSTR("MqttPublishPrefixTopic_P"));
 
@@ -771,7 +772,7 @@ ALOG_INF(PSTR("MqttPublishPrefixTopic_P"));
 }
 
 void mMQTTManager::MqttPublishPrefixTopicRulesProcess_P(uint32_t prefix, const char* subtopic, bool retained) {
-ALOG_INF(PSTR("MqttPublishPrefixTopicRulesProcess_P"));
+ALOG_DBG(PSTR("MqttPublishPrefixTopicRulesProcess_P"));
   // Publish <prefix>/<device>/<RESULT or <subtopic>> default ResponseData string with optional retained
   //   then process rules
   SHOW_FREE_MEM(PSTR("MqttPublishPrefixTopicRulesProcess_P"));
@@ -818,7 +819,7 @@ void mMQTTManager::Load_New_Subscriptions_From_Function_Template()
   // data_buffer.ClearDeep();
   // memcpy_P(data_buffer.payload.ctr, FUNCTION_TEMPLATE, sizeof(FUNCTION_TEMPLATE));
   // data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
-  // ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK  "Load_New_Subscriptions_From_Function_Template READ = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
+  // ALOG_DBG(PSTR(DEBUG_INSERT_PAGE_BREAK  "Load_New_Subscriptions_From_Function_Template READ = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
   // #endif //USE_FUNCTION_TEMPLATE
 
   // JsonParser parser(data_buffer.payload.ctr);
@@ -853,7 +854,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 
-  ALOG_INF(PSTR(D_LOG_MQTT "mMQTTManager::parse_JSONCommand"));
+  ALOG_DBG(PSTR(D_LOG_MQTT "mMQTTManager::parse_JSONCommand"));
 
   
   JsonParserObject jobj = 0; 
@@ -867,7 +868,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
   if(jtok = jobj["Brokers"])
   {
 
-    ALOG_INF(PSTR(D_LOG_MQTT "Parsing Brokers from JSONCommand"));
+    ALOG_DBG(PSTR(D_LOG_MQTT "Parsing Brokers from JSONCommand"));
 
     uint8_t broker_i = 0;
 
@@ -914,16 +915,16 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
       brokers.pop_back();
     }
 
-    ALOG_INF(PSTR(D_LOG_MQTT "Brokers loaded %u"), brokers.size());
+    ALOG_DBG(PSTR(D_LOG_MQTT "Brokers loaded %u"), brokers.size());
   }
   else
   {
-    // ALOG_INF(PSTR(D_LOG_MQTT "No Brokers found in JSONCommand"));
+    // ALOG_DBG(PSTR(D_LOG_MQTT "No Brokers found in JSONCommand"));
     // return;
   }
   
 
-  ALOG_INF(PSTR(D_LOG_MQTT "mMQTTManager::parse_JSONCommand2"));
+  ALOG_DBG(PSTR(D_LOG_MQTT "mMQTTManager::parse_JSONCommand2"));
 
   uint8_t connection_idx = 0; // should be like Segments, assumes 0 when only 1
 
@@ -1003,7 +1004,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
 void mMQTTManager::subparse_JSONCommand__Broker(JsonParserObject obj, uint8_t broker_i)
 {
 
-  ALOG_INF(PSTR(D_LOG_MQTT "subparse_JSONCommand__Broker %u"), broker_i);
+  ALOG_DBG(PSTR(D_LOG_MQTT "subparse_JSONCommand__Broker %u"), broker_i);
 
   if(!obj){ return; }
   if(broker_i >= MQTT_MAX_BROKERS){ return; }
@@ -1038,24 +1039,24 @@ void mMQTTManager::subparse_JSONCommand__Broker(JsonParserObject obj, uint8_t br
   broker->outgoing_limiter_ms = 0;
   broker->keepalive_secs = 60;
 
-  ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] reset to defaults"), broker_i);
+  ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] reset to defaults"), broker_i);
 
   if(jtok = obj["Id"])
   {
     snprintf(broker->id, sizeof(broker->id), "%s", jtok.getStr());
-    ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Id=%s"), broker_i, broker->id);
+    ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] Id=%s"), broker_i, broker->id);
   }
 
   if(jtok = obj["EN"])
   {
     broker->en = jtok.getBool();
-    ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] EN=%u"), broker_i, broker->en);
+    ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] EN=%u"), broker_i, broker->en);
   }
 
   if(jtok = obj["Host"])
   {
     snprintf(broker->host_address, sizeof(broker->host_address), "%s", jtok.getStr());
-    ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] Host=%s"), broker_i, broker->host_address);
+    ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] Host=%s"), broker_i, broker->host_address);
   }
 
   if(jtok = obj["Port"])
@@ -1204,7 +1205,7 @@ void mMQTTManager::subparse_JSONCommand__Broker(JsonParserObject obj, uint8_t br
 
   broker->allowed = broker->en && broker->host_address[0];
 
-  ALOG_INF(PSTR(D_LOG_MQTT "Broker[%u] id=%s en=%u host=%s port=%u allowed=%u"),
+  ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] id=%s en=%u host=%s port=%u allowed=%u"),
     broker_i,
     broker->id,
     broker->en,
@@ -1213,7 +1214,8 @@ void mMQTTManager::subparse_JSONCommand__Broker(JsonParserObject obj, uint8_t br
     broker->allowed
   );
 
-  broker->Debug_PrintConnectionInfo();
+  if (tkr_set->Settings.logging.serial_level > LOG_LEVEL_DEBUG)
+    broker->Debug_PrintConnectionInfo();
 }
 
 void mMQTTManager::Init(void)

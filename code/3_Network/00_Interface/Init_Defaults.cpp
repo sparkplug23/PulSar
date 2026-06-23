@@ -14,7 +14,7 @@ void mInterfaceNetwork::Init(void)
 
 void mInterfaceNetwork::Load_Config(void)
 {
-  ALOG_INF(PSTR(D_LOG_NETWORK "Load_Config"));
+  ALOG_DBG(PSTR(D_LOG_NETWORK "Load_Config"));
 
   // This module no longer owns JSON template/file loading.
   //

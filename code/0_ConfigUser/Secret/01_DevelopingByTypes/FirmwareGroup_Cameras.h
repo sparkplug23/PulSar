@@ -33,9 +33,10 @@
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
    #define MQTT_PORT     1883
 
-   #define ENABLE_DEBUG_LINE_HERE3
+  //  #define ENABLE_DEBUG_LINE_HERE3
 
   //  #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
+
 
 /***********************************
 * SECTION: Network Configs
@@ -54,10 +55,8 @@
 
 #define USE_MODULE_DRIVERS_INTERFACE
 
-// #define USE_MODULE_DRIVERS_SDCARD
-
-// #define USE_MODULE_DRIVERS_SDCARD
-// #define ENABLE_FEATURE_FILESYSTEM__SDCARD_MMC
+#define USE_MODULE_DRIVERS_SDCARD
+#define ENABLE_FEATURE_FILESYSTEM__SDCARD_MMC
 
 #define USE_MODULE_DRIVERS__CAMERA
 #define CAMERA_MODEL_WROVER_KIT
@@ -65,9 +64,7 @@
 #define ENABLE_RTSPSERVER
 
 
-// #define ENABLE_DEBUGFEATURE_SPLASH__PIN_ALLOCATIONS
-
-// #define USE_MODULE_CORE_PINVIEWER
+#define USE_MODULE_CORE_PINVIEWER
 
 /***********************************
 * SECTION: Sensors Configs
@@ -107,11 +104,11 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // "{"
 //   "\"" D_MODULE_DRIVERS__CAMERA_CTR "\":{"
-//     "\"Mirror\":1,"
-//       "\"Flip\":1,"
-//       "\"AWB\":0,"
-//       "\"Resolution\":12" //12 max
-//     "}"
+//     "\"Mirror\":0,"
+//     "\"Flip\":0,"
+//     "\"AWB\":0,"
+//     "\"Resolution\":12" //12 max
+//   "}"
 // "}";
 #define USE_NETWORK_TEMPLATE
   DEFINE_PGM_CTR(NETWORK_TEMPLATE)
@@ -272,8 +269,6 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 #define ENABLE_DEVFEATURE_ESP32__AUTO_MUTEX
 #define ENABLE_RTSPSERVER
 
-
-// #define ENABLE_DEBUGFEATURE_SPLASH__PIN_ALLOCATIONS
 
 // #define USE_MODULE_CORE_PINVIEWER
 

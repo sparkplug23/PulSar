@@ -133,7 +133,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 
 void mWebServer::Server_Start()
 {
-  ALOG_HGLT(PSTR(D_LOG_HTTP "Starting web server")); 
+  ALOG_INF(PSTR(D_LOG_HTTP "Starting web server")); 
     
   // CORS compatiblity
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), "*");
@@ -157,7 +157,7 @@ void mWebServer::Server_Start()
   ALOG_INF(PSTR(D_LOG_HTTP "Webserver started on http://%s.local or http://%s or http://%d.%d.%d.%d"), 
   cmDNS, tkr_set->runtime.my_hostname, localip[0],localip[1],localip[2],localip[3] );
 
-  ALOG_HGLB(PSTR(D_LOG_HTTP "Started web server"));
+  // ALOG_HGLB(PSTR(D_LOG_HTTP "Started web server"));
 }
 
 
@@ -241,7 +241,7 @@ void mWebServer::HandlePage_SystemControls_C3(AsyncWebServerRequest *request)
 
 void mWebServer::WebPage_Root_AddHandlers()
 {
-  ALOG_HGL(PSTR("mWebServer::WebPage_Root_AddHandlers()"));
+  ALOG_DBG(PSTR("mWebServer::WebPage_Root_AddHandlers()"));
   
   SPGM_CTR(PM_URL_VERSION) "/version";
   server->on(PM_URL_VERSION, HTTP_GET, [](AsyncWebServerRequest *request){

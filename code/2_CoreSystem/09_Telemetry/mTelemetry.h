@@ -52,7 +52,8 @@ class mTelemetry :
     uint8_t ConstructJSON_Reboot(uint8_t json_method = 0, bool json_appending = true);
     #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
     uint8_t ConstructJSON_Debug_Devices(uint8_t json_method = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Debug_Pins(uint8_t json_method = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Debug_Pins_GPIO(uint8_t json_method = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Debug_Pins_Table(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Debug_Template(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Debug_ModuleInterface(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Debug_Minimal(uint8_t json_method = 0, bool json_appending = true);
@@ -81,7 +82,8 @@ class mTelemetry :
       handler<mTelemetry> mqtthandler_reboot_event;
       #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
         handler<mTelemetry> mqtthandler_devices;
-        handler<mTelemetry> mqtthandler_debug_pins;
+        handler<mTelemetry> mqtthandler_debug_pins_gpio;
+        handler<mTelemetry> mqtthandler_debug_pins_table;
         handler<mTelemetry> mqtthandler_debug_template;
         handler<mTelemetry> mqtthandler_debug_moduleinterface;
         handler<mTelemetry> mqtthandler_debug_minimal;

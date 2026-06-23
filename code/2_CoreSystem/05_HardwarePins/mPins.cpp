@@ -871,7 +871,7 @@ int8_t mPins::Tasker(uint8_t function, JsonParserObject obj)
   switch(function){
     case TASK_PRE_INIT:
       Pre_Init();
-      PinAlloc_Init();
+      // PinAlloc_Init();
     break;
     case TASK_EVERY_MINUTE:
       //ModuleSettings_ShowTemplateLog();
@@ -893,6 +893,9 @@ int8_t mPins::Tasker(uint8_t function, JsonParserObject obj)
   return TASKER_RESULT__UNKNOWN_ID;
 
 }
+
+
+
 
 void mPins::parse_JSONCommand(JsonParserObject obj)
 {
@@ -1180,6 +1183,54 @@ void mPins::parse_JSONCommand(JsonParserObject obj)
 }
 
 
+
+
+
+void mPins::PinTable_InitSafeDefaults(void)
+{
+  for(uint8_t real_pin = 0; real_pin < MAX_GPIO_PIN; real_pin++)
+  {
+    pin[real_pin].physical.data = 0;
+    pin[real_pin].allocation.data = 0;
+    pin[real_pin].gpio_function = GPIO_NONE;
+    pin[real_pin].unique_module_owner_id = 0;
+
+    pin[real_pin].allocation.unavailable = 1;
+  }
+
+  ALOG_INF(PSTR(D_LOG_PINS "PinTable_InitSafeDefaults complete, MAX_GPIO_PIN=%u"), MAX_GPIO_PIN);
+}
+
+int8_t mPins::TemplateIndexToRealPin(uint8_t template_index)
+{
+  if(template_index >= MAX_USER_PINS)
+  {
+    ALOG_ERR(PSTR(D_LOG_PINS "TemplateIndexToRealPin OOR index=%u max=%u"), template_index, MAX_USER_PINS);
+    return -1;
+  }
+
+  return (int8_t)template_index_to_real_pin[template_index];
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void mPins::Pre_Init()
 {
 
@@ -1245,17 +1296,17 @@ int8_t mPins::GetRealPinNumberFromName(const char* c){
   
   // Check for pin_array matching
   char buffer[10];
-  for(uint8_t i=0; i<ARRAY_SIZE(gpio_pin_by_index); i++)
+  for(uint8_t i=0; i<MAX_GPIO_PIN; i++)//ARRAY_SIZE(gpio_pin_by_index); i++)
   // for(uint8_t i=0; i<35; i++)
   {
-    sprintf(buffer,"%d\0",gpio_pin_by_index[i]);
+    sprintf(buffer,"%d\0",i);
     // sprintf(buffer,"%d\0",i);
     
       // ALOG_INF(PSTR("NOOOOOOOOOmatched pin %d %d %s %s"),pin,i,c,buffer);
 
     if(strcmp(c,buffer)==0)
     {
-      pin = gpio_pin_by_index[i];
+      pin = i;
       ALOG_DBM( PSTR("matched pin %d %d"),pin,i);
       break;
     }else{
@@ -1286,51 +1337,14 @@ int8_t mPins::GetRealPinNumberFromName(const char* c){
 
 }
 
-/**
- * @brief Convert the real_pin number to its indexed position within pin_array
- * @note 
- * @param real_pin physical external pin number
- * @return index position of pin in array
- */
-int8_t mPins::ConvertRealPinToIndexPin(uint8_t real_pin){
-  for(int index_pin=0;index_pin<MAX_GPIO_PIN;index_pin++)
-  {
-    if(real_pin == gpio_pin_by_index[index_pin])
-    {
-      return index_pin;
-    }
-  }
-  return -1;
-}
-
 
 /*********************************************************************************************\
- * Pin lookup / assignment, packed GPIO function model
+ * Pin lookup / assignment
  *
- * Previous reference implementation kept here while the packed-ID rewrite settles:
- *
- *   #ifdef ENABLE_FEATURE_HARDWAREPINS__FUNCTION_AND_INDEX_PACKED_GPIO
- *     uint16_t real_gpio = gpio << 5;
- *     uint16_t mask = 0xFFE0;
- *     if (index < GPIO_ANY) {
- *       real_gpio += index;
- *       mask = 0xFFFF;
- *     }
- *     for (...) {
- *       if ((pin_attached_gpio_functions[i] & mask) == real_gpio) { ... }
- *     }
- *   #else
- *     uint16_t real_gpio = gpio + index;
- *     for (...) {
- *       if (pin_attached_gpio_functions[i] == real_gpio) { ... }
- *     }
- *   #endif
- *
- * New model:
- *   - pin_attached_gpio_functions[] always stores packed selected IDs.
- *   - stored_id = PGPIO(base_id) + instance_index.
- *   - public callers pass base + index: Pin(GPIO_MODEM_RX, 1).
- *   - no GPIO__X + index arithmetic is used outside this layer.
+ * Runtime model:
+ *   - pin[real_pin] is the source of truth.
+ *   - compact template indices are only decoded inside TemplateGPIOs()/template parsing.
+ *   - no runtime lookup uses template-index mapping.
 \*********************************************************************************************/
 
 int16_t IRAM_ATTR mPins::Pin(uint32_t gpio, uint32_t index)
@@ -1338,17 +1352,24 @@ int16_t IRAM_ATTR mPins::Pin(uint32_t gpio, uint32_t index)
   uint16_t packed_gpio = PGPIO(gpio);
   uint16_t mask        = GPIO_BASE_MASK;
 
-  if (index < GPIO_ANY)
+  if(index < GPIO_ANY)
   {
     packed_gpio += (index & GPIO_INDEX_MASK);
     mask = 0xFFFF;
   }
 
-  for (uint32_t index_pin = 0; index_pin < nitems(pin_attached_gpio_functions); index_pin++)
+  for(uint8_t real_pin = 0; real_pin < MAX_GPIO_PIN; real_pin++)
   {
-    if ((pin_attached_gpio_functions[index_pin] & mask) == packed_gpio)
+    if((pin[real_pin].gpio_function & mask) == packed_gpio)
     {
-      return gpio_pin_by_index[index_pin];   // physical GPIO number configured for this function
+      if(pin[real_pin].allocation.unavailable)
+      {
+        ALOG_WRN(PSTR(D_LOG_PINS "Pin match unavailable gpio=%u index=%u real_pin=%u func=0x%04X"),
+          gpio, index, real_pin, pin[real_pin].gpio_function);
+        return -1;
+      }
+
+      return real_pin;
     }
   }
 
@@ -1366,90 +1387,213 @@ boolean mPins::PinUsed(uint32_t gpio, uint32_t index)
  * @brief Assign a packed selected GPIO function to a physical GPIO pin.
  *
  * @param real_pin Physical GPIO number.
- * @param packed_gpio Packed selected GPIO ID, i.e. PGPIO(base_id) + index.
+ * @param gpio_function Packed selected GPIO ID, i.e. PGPIO(base_id) + instance_index,
+ *                      or GPIO_NONE/GPIO_USER.
  */
 void mPins::SetPin_GPIOFunction(uint32_t real_pin, uint16_t gpio_function)
 {
-  const int8_t internal_pin_index = ConvertRealPinToIndexPin(real_pin);
-
-  if (internal_pin_index < 0)
+  if(real_pin >= MAX_GPIO_PIN)
   {
-    ALOG_ERR(
-      PSTR("SetPin_GPIOFunction failed: real_pin=%u gpio_function=0x%04X internal_index=%d"),
-      real_pin,
-      gpio_function,
-      internal_pin_index
-    );
+    ALOG_ERR(PSTR(D_LOG_PINS "SetPin_GPIOFunction OOR real_pin=%u gpio_function=0x%04X"),
+      real_pin, gpio_function);
     return;
   }
 
-  pin_attached_gpio_functions[internal_pin_index] = gpio_function;
+  pin[real_pin].gpio_function = gpio_function;
 
-  if ((gpio_function == GPIO_NONE) || (gpio_function == GPIO_USER))
+  if((gpio_function == GPIO_NONE) || (gpio_function == GPIO_USER))
   {
-    ALOG_INF(
-      PSTR("SetPin_GPIOFunction real_pin=%u internal_index=%d special_gpio=%u"),
-      real_pin,
-      internal_pin_index,
-      gpio_function
-    );
-  }
-  else
-  {
-    ALOG_INF(
-      PSTR("SetPin_GPIOFunction real_pin=%u internal_index=%d gpio_function=0x%04X base=%u index=%u"),
-      real_pin,
-      internal_pin_index,
-      gpio_function,
-      UGPIO(gpio_function),
-      gpio_function & GPIO_INDEX_MASK
-    );
-  }
-}
+    pin[real_pin].allocation.allocated = 0;
 
-
-int8_t mPins::ConvertIndexPinToRealPin(uint8_t index_pin)
-{
-  
-  if (index_pin >= MAX_USER_PINS)
-  {
-    ALOG_INF(PSTR("PIN: ConvertIndexPinToRealPin OOR, index_pin=%u >= MAX_USER_PINS=%u"),index_pin,MAX_USER_PINS);
-    return -1;
+    ALOG_DBG(PSTR(D_LOG_PINS "SetPin_GPIOFunction real_pin=%u special_gpio=%u"),
+      real_pin, gpio_function);
+    return;
   }
 
-  return gpio_pin_by_index[index_pin];
-}
+  pin[real_pin].allocation.allocated = 1;
+  pin[real_pin].allocation.unavailable = 0;
 
+  SetPinOwnerIfAllowed((uint8_t)real_pin, GetModuleUniqueID());
 
-void mPins::DigitalWrite(uint32_t gpio_pin, uint32_t state)
-{
-
-  ALOG_ERR(PSTR("May be invalid if gpio is not unpacked. Use 3 arg version."));
-
-  ALOG_INF(PSTR("DigitalWrite(uint32_t %d, uint32_t %d"), gpio_pin, state);
-
-  DigitalWrite(gpio_pin, 0, state);
-  // if (tkr_set->pin[gpio_pin] < 99) {
-        // AddLog(LOG_LEVEL_DEV_TEST,PSTR(D_LOG_RELAYS "DigitalWrite(%d[%d],%d)"),tkr_set->pin[gpio_pin],gpio_pin,state);
-    // digitalWrite(tkr_set->pin[gpio_pin], state &1);
-  // }
+  ALOG_DBG(PSTR(D_LOG_PINS "SetPin_GPIOFunction real_pin=%u gpio_function=0x%04X base=%u index=%u owner=%u"),
+    real_pin,
+    gpio_function,
+    UGPIO(gpio_function),
+    gpio_function & GPIO_INDEX_MASK,
+    pin[real_pin].unique_module_owner_id);
 }
 
 
 void mPins::DigitalWrite(uint32_t gpio_pin, uint32_t index, uint32_t state)
 {
-  uint8_t real_pin = Pin(gpio_pin, index);
-  ALOG_INF(PSTR("DigitalWrite gpio_pin=%d,real_pin=%d,index=%d,state=%d"),gpio_pin,real_pin, index, state &1);
-  digitalWrite(real_pin, state &1);
+  int16_t real_pin = Pin(gpio_pin, index);
+
+  if(real_pin < 0)
+  {
+    ALOG_WRN(PSTR(D_LOG_PINS "DigitalWrite failed gpio=%u index=%u state=%u"),
+      gpio_pin, index, state & 1);
+    return;
+  }
+
+  if(pin[real_pin].allocation.unavailable)
+  {
+    ALOG_WRN(PSTR(D_LOG_PINS "DigitalWrite blocked unavailable real_pin=%d gpio=%u index=%u"),
+      real_pin, gpio_pin, index);
+    return;
+  }
+
+  if(pin[real_pin].physical.input_only)
+  {
+    ALOG_WRN(PSTR(D_LOG_PINS "DigitalWrite blocked input-only real_pin=%d gpio=%u index=%u"),
+      real_pin, gpio_pin, index);
+    return;
+  }
+
+  ALOG_DBG(PSTR(D_LOG_PINS "DigitalWrite gpio=%u index=%u real_pin=%d state=%u"),
+    gpio_pin, index, real_pin, state & 1);
+
+  digitalWrite((uint8_t)real_pin, state & 1);
 }
 
 
 bool mPins::DigitalRead(uint32_t gpio_pin, uint32_t index)
 {
-  uint8_t real_pin = Pin(gpio_pin, index);
-  return digitalRead(real_pin);
+  int16_t real_pin = Pin(gpio_pin, index);
+
+  if(real_pin < 0)
+  {
+    ALOG_WRN(PSTR(D_LOG_PINS "DigitalRead failed gpio=%u index=%u"), gpio_pin, index);
+    return false;
+  }
+
+  if(pin[real_pin].allocation.unavailable)
+  {
+    ALOG_WRN(PSTR(D_LOG_PINS "DigitalRead blocked unavailable real_pin=%d gpio=%u index=%u"),
+      real_pin, gpio_pin, index);
+    return false;
+  }
+
+  if(pin[real_pin].allocation.sensitive_to_probe)
+  {
+    ALOG_WRN(PSTR(D_LOG_PINS "DigitalRead blocked sensitive real_pin=%d gpio=%u index=%u"),
+      real_pin, gpio_pin, index);
+    return false;
+  }
+
+  return digitalRead((uint8_t)real_pin);
 }
 
+bool mPins::AllocatePin(uint8_t real_pin, uint16_t gpio_function, uint16_t owner_id, PinAllocationFlags flags)
+{
+  if(real_pin >= MAX_GPIO_PIN)
+  {
+    ALOG_ERR(PSTR(D_LOG_PINS "AllocatePin OOR real_pin=%u function=0x%04X owner=%u"),
+      real_pin, gpio_function, owner_id);
+    return false;
+  }
+
+  if((gpio_function == GPIO_NONE) || (gpio_function == GPIO_USER))
+  {
+    ALOG_WRN(PSTR(D_LOG_PINS "AllocatePin ignored real_pin=%u special_function=%u owner=%u"),
+      real_pin, gpio_function, owner_id);
+    return false;
+  }
+
+  if(flags.unavailable)
+  {
+    pin[real_pin].allocation.unavailable = 1;
+    ALOG_WRN(PSTR(D_LOG_PINS "AllocatePin denied unavailable-request real_pin=%u function=0x%04X owner=%u"),
+      real_pin, gpio_function, owner_id);
+    return false;
+  }
+
+  const uint16_t current_function = pin[real_pin].gpio_function;
+  const uint16_t current_owner    = pin[real_pin].unique_module_owner_id;
+
+  /*******************************************************************************************\
+   * Function conflict check
+   *
+   * GPIO_NONE/GPIO_USER means no resolved runtime function exists yet.
+   * This allows compile-time camera pins to register themselves into the pin table.
+  \*******************************************************************************************/
+
+  if((current_function != GPIO_NONE) &&
+     (current_function != GPIO_USER) &&
+     (current_function != gpio_function))
+  {
+    pin[real_pin].allocation.conflict = 1;
+
+    ALOG_WRN(PSTR(D_LOG_PINS "AllocatePin denied function conflict real_pin=%u current=0x%04X new=0x%04X owner=%u"),
+      real_pin, current_function, gpio_function, owner_id);
+
+    return false;
+  }
+
+  /*******************************************************************************************\
+   * Existing allocation check
+  \*******************************************************************************************/
+
+  if(pin[real_pin].allocation.allocated)
+  {
+    const bool current_shared = pin[real_pin].allocation.shared;
+    const bool new_shared     = flags.shared;
+
+    if((current_owner != owner_id) && !(current_shared && new_shared))
+    {
+      pin[real_pin].allocation.conflict = 1;
+
+      ALOG_WRN(PSTR(D_LOG_PINS "AllocatePin denied owner conflict real_pin=%u current_owner=%u new_owner=%u function=0x%04X"),
+        real_pin, current_owner, owner_id, gpio_function);
+
+      return false;
+    }
+  }
+
+  /*******************************************************************************************\
+   * Existing owner priority
+   *
+   * Owners in the 2000 range are protected/core owners.
+   * Later higher-level module owners must not overwrite them unless both allocations are shared.
+  \*******************************************************************************************/
+
+  if((current_owner >= 2000) && (current_owner < 3000))
+  {
+    const bool current_shared = pin[real_pin].allocation.shared;
+    const bool new_shared     = flags.shared;
+
+    if(!(current_shared && new_shared))
+    {
+      pin[real_pin].allocation.conflict = 1;
+
+      ALOG_WRN(PSTR(D_LOG_PINS "AllocatePin denied priority owner real_pin=%u current_owner=%u new_owner=%u function=0x%04X"),
+        real_pin, current_owner, owner_id, gpio_function);
+
+      return false;
+    }
+  }
+
+  /*******************************************************************************************\
+   * Allocation accepted
+  \*******************************************************************************************/
+
+  pin[real_pin].gpio_function = gpio_function;
+  pin[real_pin].unique_module_owner_id = owner_id;
+
+  pin[real_pin].allocation = flags;
+  pin[real_pin].allocation.allocated = 1;
+  pin[real_pin].allocation.unavailable = 0;
+  pin[real_pin].allocation.conflict = 0;
+
+  ALOG_INF(PSTR(D_LOG_PINS "AllocatePin OK real_pin=%u function=0x%04X base=%u index=%u owner=%u flags=0x%04X"),
+    real_pin,
+    gpio_function,
+    UGPIO(gpio_function),
+    gpio_function & GPIO_INDEX_MASK,
+    owner_id,
+    pin[real_pin].allocation.data);
+
+  return true;
+}
 
 uint8_t mPins::ModuleNr()
 {
@@ -1833,1121 +1977,163 @@ const char* mPins::GetModuleNameByID(uint8_t id){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/******************************************************************************************************************
- * PinViewer Compatibility / Diagnostic Wrapper API
-*******************************************************************************************************************/
-
-bool mPins::PinViewer__PhysicalPin__IsValid(uint8_t physical_pin)
+const char* mPins::PinTable_GetFunctionName(uint8_t real_pin, char* buffer, uint8_t buflen)
 {
-  #ifdef ESP8266
-    if(physical_pin > 16) { return false; }
-    if((physical_pin >= 6) && (physical_pin <= 11)) { return false; } // flash pins
-    return true;
-  #else
-    if(physical_pin >= 48) { return false; }
-    return true;
-  #endif
-}
+  if((!buffer) || (buflen == 0)) return "";
 
+  buffer[0] = '\0';
 
-bool mPins::PinViewer__PhysicalPin__IsUsable(uint8_t physical_pin)
-{
-  if(!PinViewer__PhysicalPin__IsValid(physical_pin)) { return false; }
-  if(PinViewer__PhysicalPin__IsReserved(physical_pin)) { return false; }
-
-  return true;
-}
-
-
-bool mPins::PinViewer__PhysicalPin__IsReserved(uint8_t physical_pin)
-{
-  #ifdef ESP8266
-    if((physical_pin >= 6) && (physical_pin <= 11)) { return true; }
-  #endif
-
-  #ifdef ESP32
-    // Demo reservation examples, replace with real board/flash/PSRAM/strapping rules later.
-    if(physical_pin == 6)  { return true; }
-    if(physical_pin == 7)  { return true; }
-    if(physical_pin == 8)  { return true; }
-    if(physical_pin == 9)  { return true; }
-    if(physical_pin == 10) { return true; }
-    if(physical_pin == 11) { return true; }
-  #endif
-
-  return false;
-}
-
-
-bool mPins::PinViewer__PhysicalPin__IsUsed(uint8_t physical_pin)
-{
-  if(!PinViewer__PhysicalPin__IsUsable(physical_pin)) { return false; }
-
-  const uint8_t group_id = PinViewer__PhysicalPin__GetGroupID(physical_pin);
-  if(group_id != 0) { return true; }
-
-  // Existing current map, where possible.
-  const int8_t index = ConvertRealPinToIndexPin(physical_pin);
-  if(index >= 0 && index < MAX_USER_PINS)
+  if(real_pin >= MAX_GPIO_PIN)
   {
-    if(pin_attached_gpio_functions[index] != 0) { return true; }
+    snprintf(buffer, buflen, "Invalid");
+    return buffer;
   }
 
-  return false;
-}
+  const uint16_t gpio_function = pin[real_pin].gpio_function;
 
-
-bool mPins::PinViewer__PhysicalPin__IsLocked(uint8_t physical_pin)
-{
-  if(!PinViewer__PhysicalPin__IsUsed(physical_pin)) { return false; }
-
-  // Temporary animated demo.
-  // Gives visible changing lock states on the page.
-  return (((millis() / 1000) + physical_pin) % 13) == 0;
-}
-
-
-bool mPins::PinViewer__PhysicalPin__HasConflict(uint8_t physical_pin)
-{
-  if(!PinViewer__PhysicalPin__IsUsable(physical_pin)) { return false; }
-
-  // Temporary animated demo.
-  // Gives visible changing conflict states on the page.
-  return (((millis() / 1500) + (physical_pin * 3)) % 19) == 0;
-}
-
-
-uint16_t mPins::PinViewer__PhysicalPin__GetFunctionID(uint8_t physical_pin)
-{
-  if(!PinViewer__PhysicalPin__IsUsable(physical_pin)) { return 0; }
-
-  switch(physical_pin)
-  {
-    case 21: return 3001; // I2C SDA demo
-    case 22: return 3002; // I2C SCL demo
-
-    case 18: return 3101; // SPI SCK demo
-    case 19: return 3102; // SPI MISO demo
-    case 23: return 3103; // SPI MOSI demo
-
-    case 4:  return 4001; // Relay demo
-    case 5:  return 4002; // Button demo
-    case 2:  return 4003; // Status LED demo
-  }
-
-  const int8_t index = ConvertRealPinToIndexPin(physical_pin);
-  if(index >= 0 && index < MAX_USER_PINS)
-  {
-    return pin_attached_gpio_functions[index];
-  }
-
-  return 0;
-}
-
-
-uint16_t mPins::PinViewer__PhysicalPin__GetOwnerID(uint8_t physical_pin)
-{
-  switch(PinViewer__PhysicalPin__GetGroupID(physical_pin))
-  {
-    case 1: return 3001000; // I2C bus owner demo
-    case 2: return 3101000; // SPI bus owner demo
-    case 3: return 4001000; // relay module demo
-    case 4: return 4002000; // button module demo
-    case 5: return 4003000; // led module demo
-  }
-
-  return 0;
-}
-
-
-uint8_t mPins::PinViewer__PhysicalPin__GetDirectionID(uint8_t physical_pin)
-{
-  switch(physical_pin)
-  {
-    case 5:
-    case 19:
-      return 1; // input
-
-    case 2:
-    case 4:
-    case 18:
-    case 21:
-    case 22:
-    case 23:
-      return 2; // output / peripheral output-ish demo
-
-    default:
-      return 0; // unknown
-  }
-}
-
-
-uint8_t mPins::PinViewer__PhysicalPin__GetShareModeID(uint8_t physical_pin)
-{
-  switch(PinViewer__PhysicalPin__GetGroupID(physical_pin))
-  {
-    case 1: return 2; // shared bus
-    case 2: return 2; // shared bus
-    case 3: return 1; // exclusive
-    case 4: return 1; // exclusive
-    case 5: return 1; // exclusive
-  }
-
-  return 0;
-}
-
-
-uint8_t mPins::PinViewer__PhysicalPin__GetUserCount(uint8_t physical_pin)
-{
-  switch(PinViewer__PhysicalPin__GetGroupID(physical_pin))
-  {
-    case 1: return 2; // BME280 + OLED demo
-    case 2: return 1; // SPI display demo
-    case 3: return 1;
-    case 4: return 1;
-    case 5: return 1;
-  }
-
-  return 0;
-}
-
-
-uint8_t mPins::PinViewer__PhysicalPin__GetGroupID(uint8_t physical_pin)
-{
-  switch(physical_pin)
-  {
-    case 21:
-    case 22:
-      return 1; // I2C group
-
-    case 18:
-    case 19:
-    case 23:
-      return 2; // SPI group
-
-    case 4:
-      return 3; // Relay group
-
-    case 5:
-      return 4; // Button group
-
-    case 2:
-      return 5; // Status LED group
-  }
-
-  return 0;
-}
-
-
-const char* mPins::PinViewer__PhysicalPin__GetFunctionName(uint8_t physical_pin, char* buffer, uint8_t buflen)
-{
-  if(!buffer || buflen == 0) { return ""; }
-
-  switch(physical_pin)
-  {
-    case 21: snprintf(buffer, buflen, "I2C_SDA"); return buffer;
-    case 22: snprintf(buffer, buflen, "I2C_SCL"); return buffer;
-
-    case 18: snprintf(buffer, buflen, "SPI_SCK");  return buffer;
-    case 19: snprintf(buffer, buflen, "SPI_MISO"); return buffer;
-    case 23: snprintf(buffer, buflen, "SPI_MOSI"); return buffer;
-
-    case 4:  snprintf(buffer, buflen, "Relay_1");     return buffer;
-    case 5:  snprintf(buffer, buflen, "Button_1");    return buffer;
-    case 2:  snprintf(buffer, buflen, "Status_LED");  return buffer;
-  }
-
-  const uint16_t function_id = PinViewer__PhysicalPin__GetFunctionID(physical_pin);
-  if(function_id == 0)
+  if(gpio_function == GPIO_NONE)
   {
     snprintf(buffer, buflen, "None");
     return buffer;
   }
 
-  snprintf(buffer, buflen, "GPIO_%u", function_id);
+  if(gpio_function == GPIO_USER)
+  {
+    snprintf(buffer, buflen, "User");
+    return buffer;
+  }
+
+  return GetGPIOFunctionNamebyID(gpio_function, buffer, buflen);
+}
+
+
+const char* mPins::PinTable_GetOwnerName(uint8_t real_pin, char* buffer, uint8_t buflen)
+{
+  if((!buffer) || (buflen == 0)) return "";
+
+  buffer[0] = '\0';
+
+  if(real_pin >= MAX_GPIO_PIN)
+  {
+    snprintf(buffer, buflen, "Invalid");
+    return buffer;
+  }
+
+  const uint16_t owner_id = pin[real_pin].unique_module_owner_id;
+
+  if(owner_id == 0)
+  {
+    snprintf(buffer, buflen, "None");
+    return buffer;
+  }
+
+  /*
+   * Keep this numeric for now.
+   * Later this can be expanded into module/class decoding once owner-id naming is final.
+   */
+  snprintf(buffer, buflen, "%u", owner_id);
   return buffer;
 }
 
 
-const char* mPins::PinViewer__PhysicalPin__GetOwnerName(uint8_t physical_pin, char* buffer, uint8_t buflen)
+const char* mPins::PinTable_GetGroupName(uint8_t real_pin, char* buffer, uint8_t buflen)
 {
-  if(!buffer || buflen == 0) { return ""; }
+  if((!buffer) || (buflen == 0)) return "";
 
-  switch(PinViewer__PhysicalPin__GetGroupID(physical_pin))
+  buffer[0] = '\0';
+
+  if(real_pin >= MAX_GPIO_PIN)
   {
-    case 1: snprintf(buffer, buflen, "mI2C"); return buffer;
-    case 2: snprintf(buffer, buflen, "mSPI"); return buffer;
-    case 3: snprintf(buffer, buflen, "mRelays[0]"); return buffer;
-    case 4: snprintf(buffer, buflen, "mButtons[0]"); return buffer;
-    case 5: snprintf(buffer, buflen, "mLEDs[0]"); return buffer;
+    snprintf(buffer, buflen, "Invalid");
+    return buffer;
   }
 
-  snprintf(buffer, buflen, "None");
-  return buffer;
-}
+  const uint8_t group_id = pin[real_pin].GroupID();
 
-
-const char* mPins::PinViewer__PhysicalPin__GetGroupName(uint8_t physical_pin, char* buffer, uint8_t buflen)
-{
-  return PinViewer__Group__GetName_ByID(PinViewer__PhysicalPin__GetGroupID(physical_pin), buffer, buflen);
-}
-
-
-const char* mPins::PinViewer__PhysicalPin__GetGroupColour(uint8_t physical_pin, char* buffer, uint8_t buflen)
-{
-  return PinViewer__Group__GetColour_ByID(PinViewer__PhysicalPin__GetGroupID(physical_pin), buffer, buflen);
-}
-
-
-uint8_t mPins::PinViewer__Group__GetCount(void)
-{
-  return 5;
-}
-
-
-uint8_t mPins::PinViewer__Group__GetID_ByIndex(uint8_t group_index)
-{
-  switch(group_index)
+  if(group_id == 0)
   {
-    case 0: return 1;
-    case 1: return 2;
-    case 2: return 3;
-    case 3: return 4;
-    case 4: return 5;
-  }
-
-  return 0;
-}
-
-
-const char* mPins::PinViewer__Group__GetName_ByID(uint8_t group_id, char* buffer, uint8_t buflen)
-{
-  if(!buffer || buflen == 0) { return ""; }
-
-  switch(group_id)
-  {
-    case 1: snprintf(buffer, buflen, "I2C Bus 0"); return buffer;
-    case 2: snprintf(buffer, buflen, "SPI Bus 0"); return buffer;
-    case 3: snprintf(buffer, buflen, "Relay Module"); return buffer;
-    case 4: snprintf(buffer, buflen, "Button Module"); return buffer;
-    case 5: snprintf(buffer, buflen, "System LED"); return buffer;
-  }
-
-  snprintf(buffer, buflen, "Unassigned");
-  return buffer;
-}
-
-
-const char* mPins::PinViewer__Group__GetColour_ByID(uint8_t group_id, char* buffer, uint8_t buflen)
-{
-  if(!buffer || buflen == 0) { return ""; }
-
-  switch(group_id)
-  {
-    case 1: snprintf(buffer, buflen, "#ff9800"); return buffer; // orange
-    case 2: snprintf(buffer, buflen, "#42a5f5"); return buffer; // blue
-    case 3: snprintf(buffer, buflen, "#66bb6a"); return buffer; // green
-    case 4: snprintf(buffer, buflen, "#ab47bc"); return buffer; // purple
-    case 5: snprintf(buffer, buflen, "#ef5350"); return buffer; // red
-  }
-
-  snprintf(buffer, buflen, "#666666");
-  return buffer;
-}
-
-
-uint8_t mPins::PinViewer__Group__GetAddressCount(uint8_t group_id)
-{
-  switch(group_id)
-  {
-    case 1: return 2; // I2C demo: BME280 + OLED
-    case 2: return 1; // SPI demo: display pseudo CS address
-  }
-
-  return 0;
-}
-
-
-bool mPins::PinViewer__Group__GetAddress_ByIndex(
-  uint8_t group_id,
-  uint8_t address_index,
-  uint8_t* address,
-  char* module_name,
-  uint8_t module_name_len
-){
-  if(!address || !module_name || module_name_len == 0) { return false; }
-
-  switch(group_id)
-  {
-    case 1:
-      switch(address_index)
-      {
-        case 0:
-          *address = 0x76;
-          snprintf(module_name, module_name_len, "BME280");
-          return true;
-
-        case 1:
-          *address = 0x3C;
-          snprintf(module_name, module_name_len, "OLED");
-          return true;
-      }
-    break;
-
-    case 2:
-      switch(address_index)
-      {
-        case 0:
-          *address = 0x00;
-          snprintf(module_name, module_name_len, "SPI_Display_CS0");
-          return true;
-      }
-    break;
-  }
-
-  return false;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/******************************************************************************************************************
- * Pin Allocation / Physical Pin Model
- * Date Modified: 04Jun26
-*******************************************************************************************************************/
-
-#ifndef PINALLOC_DUMMY_FUNCTION_RELAY_ID
-#define PINALLOC_DUMMY_FUNCTION_RELAY_ID        4001
-#define PINALLOC_DUMMY_FUNCTION_BUTTON_ID       4002
-#define PINALLOC_DUMMY_FUNCTION_SWITCH_ID       4003
-#define PINALLOC_DUMMY_FUNCTION_STATUS_LED_ID   4004
-#define PINALLOC_DUMMY_FUNCTION_I2C_SDA_ID      4101
-#define PINALLOC_DUMMY_FUNCTION_I2C_SCL_ID      4102
-#define PINALLOC_DUMMY_FUNCTION_SERIAL_TX_ID    4201
-#define PINALLOC_DUMMY_FUNCTION_SERIAL_RX_ID    4202
-#define PINALLOC_DUMMY_FUNCTION_SPI_SCK_ID      4301
-#define PINALLOC_DUMMY_FUNCTION_SPI_MISO_ID     4302
-#define PINALLOC_DUMMY_FUNCTION_SPI_MOSI_ID     4303
-#endif
-
-#ifndef PINALLOC_DUMMY_OWNER_RELAY_ID
-#define PINALLOC_DUMMY_OWNER_RELAY_ID           4001000
-#define PINALLOC_DUMMY_OWNER_BUTTON_ID          4002000
-#define PINALLOC_DUMMY_OWNER_SWITCH_ID          4003000
-#define PINALLOC_DUMMY_OWNER_LED_ID             4004000
-#define PINALLOC_DUMMY_OWNER_I2C_ID             4100000
-#define PINALLOC_DUMMY_OWNER_SERIAL_ID          4200000
-#define PINALLOC_DUMMY_OWNER_SPI_ID             4300000
-#endif
-
-
-void mPins::PinAlloc_Init(void)
-{
-  PinAlloc_InitPhysicalInfo();
-  PinAlloc_InitAllocationTable();
-
-  /*
-   * Temporary layer while the real RequestPin()/ReleasePin() flow is developed.
-   * This makes the PinViewer useful immediately.
-   */
-  Init_InsertDummyPinAllocations();
-
-  #ifdef ENABLE_DEBUGFEATURE_SPLASH__PIN_ALLOCATIONS
-  Splash__PinAllocations();
-  #endif
-}
-
-
-void mPins::PinAlloc_InitPhysicalInfo(void)
-{
-  for(uint8_t physical_pin = 0; physical_pin < MAX_GPIO_PIN; physical_pin++)
-  {
-    pininfo[physical_pin].physical_pin = physical_pin;
-    pininfo[physical_pin].flags.data = 0;
-
-    /*
-     * First-pass assumption:
-     *   GPIO numbers inside MAX_GPIO_PIN exist unless marked otherwise.
-     *   Target-specific refinements are added below.
-     */
-    pininfo[physical_pin].flags.valid = 1;
-    pininfo[physical_pin].flags.input_capable = 1;
-    pininfo[physical_pin].flags.output_capable = 1;
-    pininfo[physical_pin].flags.pullup_capable = 1;
-    pininfo[physical_pin].flags.pulldown_capable = 1;
-    pininfo[physical_pin].flags.pwm_capable = 1;
-  }
-
-  #ifdef ESP8266
-  /*
-   * ESP8266 flash pins.
-   */
-  for(uint8_t physical_pin = 6; physical_pin <= 11 && physical_pin < MAX_GPIO_PIN; physical_pin++)
-  {
-    pininfo[physical_pin].flags.flash_reserved = 1;
-    pininfo[physical_pin].flags.board_reserved = 1;
-    pininfo[physical_pin].flags.hidden = 1;
-    pininfo[physical_pin].flags.input_capable = 0;
-    pininfo[physical_pin].flags.output_capable = 0;
-    pininfo[physical_pin].flags.pullup_capable = 0;
-    pininfo[physical_pin].flags.pulldown_capable = 0;
-    pininfo[physical_pin].flags.pwm_capable = 0;
+    snprintf(buffer, buflen, "None");
+    return buffer;
   }
 
   /*
-   * GPIO16 is special on ESP8266.
+   * Group ID is currently the GPIO function base ID for grouped allocations.
+   * Use packed index 0 so the normal GPIO naming path can decode it.
    */
-  if(16 < MAX_GPIO_PIN)
-  {
-    pininfo[16].flags.pulldown_capable = 0;
-  }
-  #endif
-
-
-  #ifdef ESP32
-  /*
-   * Common ESP32 flash pins. This is intentionally conservative for now.
-   */
-  for(uint8_t physical_pin = 6; physical_pin <= 11 && physical_pin < MAX_GPIO_PIN; physical_pin++)
-  {
-    pininfo[physical_pin].flags.flash_reserved = 1;
-    pininfo[physical_pin].flags.board_reserved = 1;
-    pininfo[physical_pin].flags.hidden = 1;
-    pininfo[physical_pin].flags.input_capable = 0;
-    pininfo[physical_pin].flags.output_capable = 0;
-    pininfo[physical_pin].flags.pullup_capable = 0;
-    pininfo[physical_pin].flags.pulldown_capable = 0;
-    pininfo[physical_pin].flags.pwm_capable = 0;
-  }
-
-  /*
-   * Classic ESP32 input-only pins.
-   * Guarded so this also compiles for variants with lower MAX_GPIO_PIN.
-   */
-  for(uint8_t physical_pin = 34; physical_pin <= 39 && physical_pin < MAX_GPIO_PIN; physical_pin++)
-  {
-    pininfo[physical_pin].flags.output_capable = 0;
-    pininfo[physical_pin].flags.pwm_capable = 0;
-    pininfo[physical_pin].flags.input_only = 1;
-  }
-
-  /*
-   * Boot-sensitive examples. Refine per target/board later.
-   */
-  if(0 < MAX_GPIO_PIN)  { pininfo[0].flags.boot_sensitive = 1; }
-  if(2 < MAX_GPIO_PIN)  { pininfo[2].flags.boot_sensitive = 1; }
-  if(12 < MAX_GPIO_PIN) { pininfo[12].flags.boot_sensitive = 1; }
-  if(15 < MAX_GPIO_PIN) { pininfo[15].flags.boot_sensitive = 1; }
-  #endif
-
-
-  /*
-   * Mark user-configurable pins from the current compiled template mapping.
-   */
-  for(uint8_t index = 0; index < MAX_USER_PINS; index++)
-  {
-    const uint8_t physical_pin = gpio_pin_by_index[index];
-
-    if(physical_pin >= MAX_GPIO_PIN)
-    {
-      continue;
-    }
-
-    pininfo[physical_pin].flags.user_configurable = 1;
-  }
+  return GetGPIOFunctionNamebyID(PGPIO(group_id), buffer, buflen);
 }
 
-
-void mPins::PinAlloc_InitAllocationTable(void)
-{
-  for(uint8_t physical_pin = 0; physical_pin < MAX_GPIO_PIN; physical_pin++)
-  {
-    pin_index_by_physical[physical_pin] = -1;
-  }
-
-  for(uint8_t index = 0; index < MAX_USER_PINS; index++)
-  {
-    PinAlloc_ClearAllocation(&pinalloc[index]);
-
-    const uint8_t physical_pin = gpio_pin_by_index[index];
-
-    pinalloc[index].physical_pin = physical_pin;
-
-    if(physical_pin < MAX_GPIO_PIN)
-    {
-      pin_index_by_physical[physical_pin] = index;
-
-      /*
-       * Mirror physical restrictions into allocation flags.
-       */
-      pinalloc[index].flags.reserved_by_board = pininfo[physical_pin].flags.board_reserved;
-      pinalloc[index].flags.disabled = !pininfo[physical_pin].flags.user_configurable;
-    }
-  }
-}
-
-
-void mPins::Init_InsertDummyPinAllocations(void)
-{
-  /*
-   * These are deliberately demo allocations.
-   * They should be replaced by real RequestPin() calls later.
-   */
-
-  #ifdef ESP8266
-  PinAlloc_AssignDummy(0, PINALLOC_DUMMY_FUNCTION_BUTTON_ID,     PINALLOC_DUMMY_OWNER_BUTTON_ID, PIN_DIRECTION_INPUT_ID,        PIN_SHARE_EXCLUSIVE_ID,  false, false, false, false);
-  PinAlloc_AssignDummy(2, PINALLOC_DUMMY_FUNCTION_STATUS_LED_ID, PINALLOC_DUMMY_OWNER_LED_ID,    PIN_DIRECTION_OUTPUT_ID,       PIN_SHARE_EXCLUSIVE_ID,  false, false, true,  true);
-  PinAlloc_AssignDummy(4, PINALLOC_DUMMY_FUNCTION_I2C_SDA_ID,    PINALLOC_DUMMY_OWNER_I2C_ID,    PIN_DIRECTION_INPUT_OUTPUT_ID, PIN_SHARE_SHARED_BUS_ID, true,  true,  true,  true);
-  PinAlloc_AssignDummy(5, PINALLOC_DUMMY_FUNCTION_I2C_SCL_ID,    PINALLOC_DUMMY_OWNER_I2C_ID,    PIN_DIRECTION_INPUT_OUTPUT_ID, PIN_SHARE_SHARED_BUS_ID, true,  true,  true,  true);
-  PinAlloc_AssignDummy(12, PINALLOC_DUMMY_FUNCTION_RELAY_ID,     PINALLOC_DUMMY_OWNER_RELAY_ID,  PIN_DIRECTION_OUTPUT_ID,       PIN_SHARE_EXCLUSIVE_ID,  false, false, false, true);
-  PinAlloc_AssignDummy(13, PINALLOC_DUMMY_FUNCTION_SWITCH_ID,    PINALLOC_DUMMY_OWNER_SWITCH_ID, PIN_DIRECTION_INPUT_ID,        PIN_SHARE_EXCLUSIVE_ID,  false, false, false, false);
-  #endif
-
-
-  #ifdef ESP32
-  /*
-   * Generic ESP32/C3/S3 style demo.
-   * These calls are safe: if a pin is not user-configurable for the current board,
-   * PinAlloc_AssignDummy() will ignore it.
-   */
-
-  PinAlloc_AssignDummy(2,  PINALLOC_DUMMY_FUNCTION_STATUS_LED_ID, PINALLOC_DUMMY_OWNER_LED_ID,    PIN_DIRECTION_OUTPUT_ID,       PIN_SHARE_EXCLUSIVE_ID,  false, false, true,  true);
-
-  PinAlloc_AssignDummy(4,  PINALLOC_DUMMY_FUNCTION_RELAY_ID,      PINALLOC_DUMMY_OWNER_RELAY_ID,  PIN_DIRECTION_OUTPUT_ID,       PIN_SHARE_EXCLUSIVE_ID,  false, false, false, true);
-  PinAlloc_AssignDummy(5,  PINALLOC_DUMMY_FUNCTION_BUTTON_ID,     PINALLOC_DUMMY_OWNER_BUTTON_ID, PIN_DIRECTION_INPUT_ID,        PIN_SHARE_EXCLUSIVE_ID,  false, false, false, false);
-
-  PinAlloc_AssignDummy(21, PINALLOC_DUMMY_FUNCTION_I2C_SDA_ID,    PINALLOC_DUMMY_OWNER_I2C_ID,    PIN_DIRECTION_INPUT_OUTPUT_ID, PIN_SHARE_SHARED_BUS_ID, true,  true,  true,  true);
-  PinAlloc_AssignDummy(22, PINALLOC_DUMMY_FUNCTION_I2C_SCL_ID,    PINALLOC_DUMMY_OWNER_I2C_ID,    PIN_DIRECTION_INPUT_OUTPUT_ID, PIN_SHARE_SHARED_BUS_ID, true,  true,  true,  true);
-
-  PinAlloc_AssignDummy(1,  PINALLOC_DUMMY_FUNCTION_SERIAL_TX_ID,  PINALLOC_DUMMY_OWNER_SERIAL_ID, PIN_DIRECTION_ALT_FUNCTION_ID,  PIN_SHARE_EXCLUSIVE_ID,  true,  false, false, false);
-  PinAlloc_AssignDummy(3,  PINALLOC_DUMMY_FUNCTION_SERIAL_RX_ID,  PINALLOC_DUMMY_OWNER_SERIAL_ID, PIN_DIRECTION_ALT_FUNCTION_ID,  PIN_SHARE_EXCLUSIVE_ID,  true,  false, false, false);
-
-  PinAlloc_AssignDummy(18, PINALLOC_DUMMY_FUNCTION_SPI_SCK_ID,    PINALLOC_DUMMY_OWNER_SPI_ID,    PIN_DIRECTION_ALT_FUNCTION_ID,  PIN_SHARE_SHARED_BUS_ID, true,  true,  false, false);
-  PinAlloc_AssignDummy(19, PINALLOC_DUMMY_FUNCTION_SPI_MISO_ID,   PINALLOC_DUMMY_OWNER_SPI_ID,    PIN_DIRECTION_ALT_FUNCTION_ID,  PIN_SHARE_SHARED_BUS_ID, true,  true,  false, false);
-  PinAlloc_AssignDummy(23, PINALLOC_DUMMY_FUNCTION_SPI_MOSI_ID,   PINALLOC_DUMMY_OWNER_SPI_ID,    PIN_DIRECTION_ALT_FUNCTION_ID,  PIN_SHARE_SHARED_BUS_ID, true,  true,  false, false);
-  #endif
-}
-
-
-bool mPins::PinAlloc_AssignDummy(
-  uint8_t physical_pin,
-  uint16_t function_id,
-  uint16_t owner_id,
-  uint8_t direction,
-  uint8_t share_mode,
-  bool grouped,
-  bool shared,
-  bool locked,
-  bool required
-){
-  PinAllocation* allocation = PinAlloc_GetByPhysicalPin(physical_pin);
-
-  if(!allocation)
-  {
-    return false;
-  }
-
-  PinPhysicalInfo* info = PinInfo_GetByPhysicalPin(physical_pin);
-
-  if(!info)
-  {
-    return false;
-  }
-
-  if(!info->flags.user_configurable)
-  {
-    return false;
-  }
-
-  allocation->function_id = function_id;
-  allocation->owner_id = owner_id;
-  allocation->direction = direction;
-  allocation->share_mode = share_mode;
-  allocation->user_count = shared ? 2 : 1;
-
-  allocation->flags.allocated = 1;
-  allocation->flags.grouped = grouped ? 1 : 0;
-  allocation->flags.shared = shared ? 1 : 0;
-  allocation->flags.locked = locked ? 1 : 0;
-  allocation->flags.required = required ? 1 : 0;
-  allocation->flags.from_dummy = 1;
-  allocation->flags.reserved_by_board = info->flags.board_reserved;
-
-  /*
-   * Soft conflict checks for early visualisation.
-   */
-  if((direction == PIN_DIRECTION_OUTPUT_ID) && !info->flags.output_capable)
-  {
-    allocation->flags.conflict = 1;
-  }
-
-  if((direction == PIN_DIRECTION_INPUT_ID) && !info->flags.input_capable)
-  {
-    allocation->flags.conflict = 1;
-  }
-
-  if(info->flags.board_reserved || info->flags.flash_reserved)
-  {
-    allocation->flags.conflict = 1;
-  }
-
-  return true;
-}
-
-
-void mPins::PinAlloc_ClearAllocation(PinAllocation* allocation)
-{
-  if(!allocation)
-  {
-    return;
-  }
-
-  allocation->physical_pin = -1;
-  allocation->function_id = PIN_FUNCTION_NONE_ID;
-  allocation->owner_id = PIN_OWNER_NONE_ID;
-  allocation->direction = PIN_DIRECTION_UNKNOWN_ID;
-  allocation->share_mode = PIN_SHARE_UNKNOWN_ID;
-  allocation->user_count = 0;
-  allocation->flags.data = 0;
-}
-
-
-void mPins::PinAlloc_ClearAllAllocations(void)
-{
-  for(uint8_t index = 0; index < MAX_USER_PINS; index++)
-  {
-    const int8_t physical_pin = pinalloc[index].physical_pin;
-
-    PinAlloc_ClearAllocation(&pinalloc[index]);
-
-    pinalloc[index].physical_pin = physical_pin;
-  }
-}
-
-
-/******************************************************************************************************************
- * Pin Allocation Accessors
-*******************************************************************************************************************/
-
-mPins::PinPhysicalInfo* mPins::PinInfo_GetByPhysicalPin(uint8_t physical_pin)
-{
-  if(physical_pin >= MAX_GPIO_PIN)
-  {
-    return nullptr;
-  }
-
-  return &pininfo[physical_pin];
-}
-
-
-mPins::PinAllocation* mPins::PinAlloc_GetByIndex(uint8_t index)
-{
-  if(index >= MAX_USER_PINS)
-  {
-    return nullptr;
-  }
-
-  return &pinalloc[index];
-}
-
-
-mPins::PinAllocation* mPins::PinAlloc_GetByPhysicalPin(uint8_t physical_pin)
-{
-  if(physical_pin >= MAX_GPIO_PIN)
-  {
-    return nullptr;
-  }
-
-  const int8_t index = pin_index_by_physical[physical_pin];
-
-  if(index < 0)
-  {
-    return nullptr;
-  }
-
-  if(index >= MAX_USER_PINS)
-  {
-    return nullptr;
-  }
-
-  return &pinalloc[index];
-}
-
-
-const mPins::PinPhysicalInfo* mPins::PinInfo_GetByPhysicalPin_Const(uint8_t physical_pin) const
-{
-  if(physical_pin >= MAX_GPIO_PIN)
-  {
-    return nullptr;
-  }
-
-  return &pininfo[physical_pin];
-}
-
-
-const mPins::PinAllocation* mPins::PinAlloc_GetByIndex_Const(uint8_t index) const
-{
-  if(index >= MAX_USER_PINS)
-  {
-    return nullptr;
-  }
-
-  return &pinalloc[index];
-}
-
-
-const mPins::PinAllocation* mPins::PinAlloc_GetByPhysicalPin_Const(uint8_t physical_pin) const
-{
-  if(physical_pin >= MAX_GPIO_PIN)
-  {
-    return nullptr;
-  }
-
-  const int8_t index = pin_index_by_physical[physical_pin];
-
-  if(index < 0)
-  {
-    return nullptr;
-  }
-
-  if(index >= MAX_USER_PINS)
-  {
-    return nullptr;
-  }
-
-  return &pinalloc[index];
-}
-
-
-bool mPins::PinAlloc_IsPhysicalPinKnown(uint8_t physical_pin) const
-{
-  if(physical_pin >= MAX_GPIO_PIN)
-  {
-    return false;
-  }
-
-  return pininfo[physical_pin].flags.valid;
-}
-
-
-bool mPins::PinAlloc_IsPhysicalPinUserConfigurable(uint8_t physical_pin) const
-{
-  if(physical_pin >= MAX_GPIO_PIN)
-  {
-    return false;
-  }
-
-  return pininfo[physical_pin].flags.user_configurable;
-}
-
-
-/******************************************************************************************************************
- * Pin Allocation Names
-*******************************************************************************************************************/
-
-const char* mPins::PinAlloc_GetDirectionName(uint8_t direction, char* buffer, uint8_t buflen) const
-{
-  if(!buffer || buflen == 0)
-  {
-    return "";
-  }
-
-  switch(direction)
-  {
-    case PIN_DIRECTION_INPUT_ID:
-      snprintf(buffer, buflen, "IN");
-      break;
-
-    case PIN_DIRECTION_OUTPUT_ID:
-      snprintf(buffer, buflen, "OUT");
-      break;
-
-    case PIN_DIRECTION_INPUT_OUTPUT_ID:
-      snprintf(buffer, buflen, "I/O");
-      break;
-
-    case PIN_DIRECTION_ALT_FUNCTION_ID:
-      snprintf(buffer, buflen, "ALT");
-      break;
-
-    case PIN_DIRECTION_ANALOG_ID:
-      snprintf(buffer, buflen, "ANA");
-      break;
-
-    default:
-      snprintf(buffer, buflen, "-");
-      break;
-  }
-
-  return buffer;
-}
-
-
-const char* mPins::PinAlloc_GetShareModeName(uint8_t share_mode, char* buffer, uint8_t buflen) const
-{
-  if(!buffer || buflen == 0)
-  {
-    return "";
-  }
-
-  switch(share_mode)
-  {
-    case PIN_SHARE_EXCLUSIVE_ID:
-      snprintf(buffer, buflen, "EXCL");
-      break;
-
-    case PIN_SHARE_SHARED_BUS_ID:
-      snprintf(buffer, buflen, "BUS");
-      break;
-
-    case PIN_SHARE_SHARED_READ_ID:
-      snprintf(buffer, buflen, "READ");
-      break;
-
-    case PIN_SHARE_INTERNAL_ID:
-      snprintf(buffer, buflen, "INT");
-      break;
-
-    default:
-      snprintf(buffer, buflen, "-");
-      break;
-  }
-
-  return buffer;
-}
-
-
-const char* mPins::PinAlloc_GetFunctionName(uint16_t function_id, char* buffer, uint8_t buflen) const
-{
-  if(!buffer || buflen == 0)
-  {
-    return "";
-  }
-
-  switch(function_id)
-  {
-    case PIN_FUNCTION_NONE_ID:                    snprintf(buffer, buflen, "None");       break;
-    case PINALLOC_DUMMY_FUNCTION_RELAY_ID:        snprintf(buffer, buflen, "Relay");      break;
-    case PINALLOC_DUMMY_FUNCTION_BUTTON_ID:       snprintf(buffer, buflen, "Button");     break;
-    case PINALLOC_DUMMY_FUNCTION_SWITCH_ID:       snprintf(buffer, buflen, "Switch");     break;
-    case PINALLOC_DUMMY_FUNCTION_STATUS_LED_ID:   snprintf(buffer, buflen, "StatusLED");  break;
-    case PINALLOC_DUMMY_FUNCTION_I2C_SDA_ID:      snprintf(buffer, buflen, "I2C_SDA");    break;
-    case PINALLOC_DUMMY_FUNCTION_I2C_SCL_ID:      snprintf(buffer, buflen, "I2C_SCL");    break;
-    case PINALLOC_DUMMY_FUNCTION_SERIAL_TX_ID:    snprintf(buffer, buflen, "UART_TX");    break;
-    case PINALLOC_DUMMY_FUNCTION_SERIAL_RX_ID:    snprintf(buffer, buflen, "UART_RX");    break;
-    case PINALLOC_DUMMY_FUNCTION_SPI_SCK_ID:      snprintf(buffer, buflen, "SPI_SCK");    break;
-    case PINALLOC_DUMMY_FUNCTION_SPI_MISO_ID:     snprintf(buffer, buflen, "SPI_MISO");   break;
-    case PINALLOC_DUMMY_FUNCTION_SPI_MOSI_ID:     snprintf(buffer, buflen, "SPI_MOSI");   break;
-
-    default:
-      snprintf(buffer, buflen, "F%u", function_id);
-      break;
-  }
-
-  return buffer;
-}
-
-
-const char* mPins::PinAlloc_GetOwnerName(uint16_t owner_id, char* buffer, uint8_t buflen) const
-{
-  if(!buffer || buflen == 0)
-  {
-    return "";
-  }
-
-  switch(owner_id)
-  {
-    case PIN_OWNER_NONE_ID:              snprintf(buffer, buflen, "None");     break;
-    case PINALLOC_DUMMY_OWNER_RELAY_ID:  snprintf(buffer, buflen, "mRelays");  break;
-    case PINALLOC_DUMMY_OWNER_BUTTON_ID: snprintf(buffer, buflen, "mButtons"); break;
-    case PINALLOC_DUMMY_OWNER_SWITCH_ID: snprintf(buffer, buflen, "mSwitch");  break;
-    case PINALLOC_DUMMY_OWNER_LED_ID:    snprintf(buffer, buflen, "mLEDs");    break;
-    case PINALLOC_DUMMY_OWNER_I2C_ID:    snprintf(buffer, buflen, "mI2C");     break;
-    case PINALLOC_DUMMY_OWNER_SERIAL_ID: snprintf(buffer, buflen, "mSerial");  break;
-    case PINALLOC_DUMMY_OWNER_SPI_ID:    snprintf(buffer, buflen, "mSPI");     break;
-
-    default:
-      snprintf(buffer, buflen, "O%u", owner_id);
-      break;
-  }
-
-  return buffer;
-}
-
-/******************************************************************************************************************
- * Pin Allocation Debug Splash
-*******************************************************************************************************************/
-
-#ifdef ENABLE_DEBUGFEATURE_SPLASH__PIN_ALLOCATIONS
-
-void mPins::Splash__PinAllocations(void)
+void mPins::PinTable_SerialPrint(const char* label)
 {
   Serial.println();
-  Serial.println(F("==============================================================="));
-  Serial.println(F("PIN ALLOCATIONS"));
-  Serial.println(F("==============================================================="));
-  Serial.println(F("Pin Usr Phy  Fn        Own       Dir  Shr  U  Flags"));
-  Serial.println(F("--- --- ---- --------- --------- ---- ---- -- ---------------"));
+  Serial.println(F("===================================================================================================="));
+  Serial.print(F("PIN TABLE"));
 
-  for(uint8_t physical_pin = 0; physical_pin < MAX_GPIO_PIN; physical_pin++)
+  if(label)
   {
-    const PinPhysicalInfo* info = PinInfo_GetByPhysicalPin_Const(physical_pin);
-    const PinAllocation* allocation = PinAlloc_GetByPhysicalPin_Const(physical_pin);
+    Serial.print(F(" - "));
+    Serial.print(label);
+  }
 
-    if(!info)
+  Serial.println();
+  Serial.println(F("===================================================================================================="));
+  Serial.println(F("Pin  Raw    Base Idx  Function                 Owner  Alloc Phys  A L U G S I C  Flash USB Boot"));
+  Serial.println(F("---  -----  ---- ---  -----------------------  -----  ----- ----- - - - - - - -  ----- --- ----"));
+
+  for(uint8_t real_pin = 0; real_pin < MAX_GPIO_PIN; real_pin++)
+  {
+    const PinTable& p = pin[real_pin];
+
+    const uint16_t gpio_function = p.gpio_function;
+    const bool has_function =
+      (gpio_function != GPIO_NONE) &&
+      (gpio_function != GPIO_USER);
+
+    const bool has_any_data =
+      has_function ||
+      (p.unique_module_owner_id != 0) ||
+      (p.allocation.data != 0) ||
+      (p.physical.data != 0);
+
+    if(!has_any_data)
     {
       continue;
     }
 
-    char function_name[10];
-    char owner_name[10];
-    char direction_name[5];
-    char share_name[5];
-    char flags[16];
+    char function_name[28];
 
-    function_name[0] = 0;
-    owner_name[0] = 0;
-    direction_name[0] = 0;
-    share_name[0] = 0;
-    flags[0] = 0;
+    PinTable_GetFunctionName(real_pin, function_name, sizeof(function_name));
 
-    if(allocation)
-    {
-      PinAlloc_GetFunctionName(allocation->function_id, function_name, sizeof(function_name));
-      PinAlloc_GetOwnerName(allocation->owner_id, owner_name, sizeof(owner_name));
-      PinAlloc_GetDirectionName(allocation->direction, direction_name, sizeof(direction_name));
-      PinAlloc_GetShareModeName(allocation->share_mode, share_name, sizeof(share_name));
-
-      uint8_t pos = 0;
-
-      if(allocation->flags.allocated && pos < sizeof(flags)-1) { flags[pos++] = 'A'; }
-      if(allocation->flags.locked && pos < sizeof(flags)-1) { flags[pos++] = 'L'; }
-      if(allocation->flags.reserved_by_board && pos < sizeof(flags)-1) { flags[pos++] = 'R'; }
-      if(allocation->flags.conflict && pos < sizeof(flags)-1) { flags[pos++] = 'C'; }
-      if(allocation->flags.grouped && pos < sizeof(flags)-1) { flags[pos++] = 'G'; }
-      if(allocation->flags.shared && pos < sizeof(flags)-1) { flags[pos++] = 'S'; }
-      if(allocation->flags.required && pos < sizeof(flags)-1) { flags[pos++] = 'Q'; }
-      if(allocation->flags.from_dummy && pos < sizeof(flags)-1) { flags[pos++] = 'D'; }
-      if(allocation->flags.disabled && pos < sizeof(flags)-1) { flags[pos++] = 'X'; }
-      if(allocation->flags.sensitive_to_probe && pos < sizeof(flags)-1) { flags[pos++] = 'P'; }
-
-      flags[pos] = 0;
-    }
-    else
-    {
-      snprintf(function_name, sizeof(function_name), "-");
-      snprintf(owner_name, sizeof(owner_name), "-");
-      snprintf(direction_name, sizeof(direction_name), "-");
-      snprintf(share_name, sizeof(share_name), "-");
-
-      uint8_t pos = 0;
-
-      if(info->flags.valid && pos < sizeof(flags)-1) { flags[pos++] = 'V'; }
-      if(info->flags.user_configurable && pos < sizeof(flags)-1) { flags[pos++] = 'U'; }
-      if(info->flags.input_capable && pos < sizeof(flags)-1) { flags[pos++] = 'I'; }
-      if(info->flags.output_capable && pos < sizeof(flags)-1) { flags[pos++] = 'O'; }
-      if(info->flags.flash_reserved && pos < sizeof(flags)-1) { flags[pos++] = 'F'; }
-      if(info->flags.board_reserved && pos < sizeof(flags)-1) { flags[pos++] = 'B'; }
-      if(info->flags.boot_sensitive && pos < sizeof(flags)-1) { flags[pos++] = 'T'; }
-      if(info->flags.hidden && pos < sizeof(flags)-1) { flags[pos++] = 'H'; }
-
-      flags[pos] = 0;
-    }
-
-    const int8_t index = (physical_pin < MAX_GPIO_PIN) ? pin_index_by_physical[physical_pin] : -1;
+    const uint16_t base_id = has_function ? UGPIO(gpio_function) : 0;
+    const uint8_t  func_i  = has_function ? (gpio_function & GPIO_INDEX_MASK) : 0;
 
     Serial.printf(
-      PSTR("%3u %3d %04X %-9s %-9s %-4s %-4s %2u %-15s\n\r"),
-      physical_pin,
-      index,
-      info->flags.data,
+      "%3u  0x%04X %4u %3u  %-23s  %5u  0x%04X 0x%04X %u %u %u %u %u %u %u  %5u %3u %4u\r\n",
+      real_pin,
+      gpio_function,
+      base_id,
+      func_i,
       function_name,
-      owner_name,
-      direction_name,
-      share_name,
-      allocation ? allocation->user_count : 0,
-      flags
+      p.unique_module_owner_id,
+      p.allocation.data,
+      p.physical.data,
+
+      p.allocation.allocated,
+      p.allocation.locked,
+      p.allocation.unavailable,
+      p.allocation.grouped,
+      p.allocation.shared,
+      p.allocation.sensitive_to_probe,
+      p.allocation.conflict,
+
+      p.physical.flash_reserved,
+      p.physical.usb_reserved,
+      p.physical.boot_sensitive
     );
   }
 
-  Serial.println(F("--- --- ---- --------- --------- ---- ---- -- ---------------"));
-  Serial.println(F("Flags: A=Alloc L=Lock R=Rsv C=Confl G=Group S=Shared"));
-  Serial.println(F("       Q=Req D=Dummy X=Dis V=Valid U=User I=In O=Out"));
-  Serial.println(F("       F=Flash B=Board T=Boot H=Hidden"));
-  Serial.println(F("==============================================================="));
+  Serial.println(F("----------------------------------------------------------------------------------------------------"));
+  Serial.println(F("Legend: A=allocated, L=locked, U=unavailable, G=grouped, S=shared, I=sensitive_to_probe, C=conflict"));
+  Serial.println(F("===================================================================================================="));
   Serial.println();
 }
-
-#endif // ENABLE_DEBUGFEATURE_SPLASH__PIN_ALLOCATIONS

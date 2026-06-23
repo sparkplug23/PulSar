@@ -1048,16 +1048,16 @@ void mTime::WifiPollNtp()
   ntp_force_sync = false;
   ntp_busy = true;
 
-  ALOG_INF(PSTR("NTP: Sync time..."));
+  ALOG_DBG(PSTR("NTP: Sync time..."));
 
   const uint32_t t0 = now_ms;
   const uint64_t ntp_nanos = WifiGetNtp();
   const uint32_t dt_s = (millis() - t0) / 1000;
 
-  ALOG_INF(PSTR("NTP: Runtime %u"), (unsigned)dt_s);
+  ALOG_DBG(PSTR("NTP: Runtime %u"), (unsigned)dt_s);
 
   const uint32_t ntp_time = (uint32_t)(ntp_nanos / 1000000000ULL);
-  ALOG_HGL(PSTR("NTP: ntp_time %u"), (unsigned)ntp_time);
+  ALOG_DBG(PSTR("NTP: ntp_time %u"), (unsigned)ntp_time);
 
   if (ntp_time > START_VALID_TIME) {
     // ---- Success ----

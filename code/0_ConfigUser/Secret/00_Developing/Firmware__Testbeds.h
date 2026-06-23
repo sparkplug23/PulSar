@@ -11,7 +11,7 @@
 
 //--------------------------------[Enable Device]-------------------------------------
 
-// #define DEVICE_TESTBED_01__SENSORS_NEXTION
+#define DEVICE_TESTBED_01__SENSORS_NEXTION
 // #define DEVICE_TESTBED_02__MOTION_AUDIO
 // #define DEVICE_TESTBED_04__HVAC_X1
 // #define DEVICE_TESTBED_05__SWITCHES_BUTTONS
@@ -309,8 +309,8 @@
        * @brief Right side
        **/
       #ifdef USE_MODULE_SENSORS_DS18X20   
-      "\"23\":\"" D_GPIO_DS18X20_1_CTR "\","
-      "\"22\":\"" D_GPIO_DS18X20_2_CTR "\","
+      "\"23\":\"" D_GPIO_DS18B20_CTR "1" "\","
+      "\"22\":\"" D_GPIO_DS18B20_CTR "2" "\","
       #endif // USE_MODULE_SENSORS_DS18X20
       // GPIO1 - TX0 - Debug Serial TX
       // GPIO3 - RX0 - Debug Serial RX
@@ -322,7 +322,7 @@
       "\"18\":\"" D_GPIO_DHT22_2_CTR "\","      
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"5\":\""  D_GPIO_SWT1_CTR "\","
+      "\"5\":\""  D_GPIO_SWT_CTR "1" "\","
       #endif
       #ifdef USE_MODULE_DISPLAYS_NEXTION
       "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
@@ -332,7 +332,7 @@
       "\"4\":\"" D_GPIO_RGB_DATA_CTR  "\","
       #endif 
       #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"2\":\"" D_GPIO_LED1_CTR "\","
+      "\"2\":\"" D_GPIO_LED_CTR "1" "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_IR_RECEIVER
       "\"15\":\"" D_GPIO_IR_RECV_CTR "\","
@@ -360,7 +360,7 @@
       // 13 (Debug Header 6) + RX
       //rx receivers?
       // Can I introduce a way that a comma at the end, does not make a broken json?
-      "\"0\":\"" D_GPIO_KEY1_INV_CTR   "\""
+      "\"0\":\"" D_GPIO_KEY_INV_CTR "1"   "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

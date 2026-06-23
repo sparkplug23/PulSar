@@ -63,7 +63,7 @@ void MQTTConnection::EverySecond()
   {
 
     #ifdef ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
-    ALOG_INF(PSTR("MqttIsConnected == FALSE"));
+    ALOG_DBG(PSTR("MqttIsConnected == FALSE"));
     #endif
 
     tkr_set->runtime.global_state.mqtt_down = 1;
@@ -77,20 +77,20 @@ void MQTTConnection::EverySecond()
     else
     if (retry_counter==1) 
     {
-      ALOG_INF(PSTR("retry_counter==1"));
+      ALOG_DBG(PSTR(D_LOG_MQTT "retry_counter==1"));
       MqttReconnect();
     }
     else
     {
       retry_counter--;
-      ALOG_INF( PSTR("retry_counter=%d"), retry_counter );
+      ALOG_DBG( PSTR(D_LOG_MQTT "retry_counter=%d"), retry_counter );
     }
 
   } 
   else 
   {
     #ifdef ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
-    ALOG_INF(PSTR("MqttIsConnected == TRUE"));
+    ALOG_DBG(PSTR("MqttIsConnected == TRUE"));
     #endif 
     tkr_set->runtime.global_state.mqtt_down = 0;
     downtime_counter = 0;
@@ -99,56 +99,45 @@ void MQTTConnection::EverySecond()
 
 }
 
+
 void MQTTConnection::MqttReconnect(void)
 {
   DEBUG_PRINT_FUNCTION_NAME;
-  
+
   uint32_t before_millis = millis();
 
-  const bool valid_config =
-    en &&
-    allowed &&
-    host_address[0] &&
-    port &&
-    client_name[0] &&
-    network_client &&
-    pubsub;
+  const bool valid_config = en && allowed && host_address[0] && port && client_name[0] && network_client && pubsub;
 
   if(!valid_config)
   {
-    ALOG_ERR(PSTR(D_LOG_MQTT "MqttReconnect blocked: invalid config id=%s host=%s port=%u"),
-      id,
-      host_address,
-      port
-    );
+    ALOG_ERR(PSTR(D_LOG_MQTT "Reconnect blocked id=%s en=%u allowed=%u host=%s port=%u client=%s net=%p pubsub=%p"),
+      id, en, allowed, host_address, port, client_name, network_client, pubsub);
 
     #ifdef DEBUG_MQTT_RECONNECTS
-    ALOG_ERR(PSTR(D_LOG_MQTT "  en=%u"), en);
-    ALOG_ERR(PSTR(D_LOG_MQTT "  allowed=%u"), allowed);
-    ALOG_ERR(PSTR(D_LOG_MQTT "  host_valid=%u host=%s"), host_address[0] ? 1 : 0, host_address);
-    ALOG_ERR(PSTR(D_LOG_MQTT "  port_valid=%u port=%u"), port ? 1 : 0, port);
-    ALOG_ERR(PSTR(D_LOG_MQTT "  client_name_valid=%u client_name=%s"), client_name[0] ? 1 : 0, client_name);
-    ALOG_ERR(PSTR(D_LOG_MQTT "  network_client=%p"), network_client);
-    ALOG_ERR(PSTR(D_LOG_MQTT "  pubsub=%p"), pubsub);
-    ALOG_ERR(PSTR(D_LOG_MQTT "  retry=%u retry_counter=%u retry_start=%u"), retry, retry_counter, retry_counter_start_value);
-    ALOG_ERR(PSTR(D_LOG_MQTT "  client_type=%u connected=%u flag_start_reconnect=%u"), client_type, connected, flag_start_reconnect);
+    ALOG_ERR(PSTR(D_LOG_MQTT "Reconnect debug retry=%u retry_counter=%u retry_start=%u client_type=%u connected=%u flag=%u"),
+      retry, retry_counter, retry_counter_start_value, client_type, connected, flag_start_reconnect);
     #endif
 
     connected = false;
     flag_start_reconnect = false;
     retry_counter = 0;
-
     return;
   }
 
-  ALOG_INF(PSTR(D_LOG_MQTT D_ATTEMPTING_CONNECTION " to \"%s:%d\""), host_address, port);
-  
+  const bool has_user = user[0] != '\0';
+  const bool has_password = password[0] != '\0';
+  const bool is_secure_connection = has_user && has_password;
+
+  ALOG_INF(PSTR(D_LOG_MQTT "Attempting %ssecure connection to %s:%u client=%s"),
+    is_secure_connection ? "" : "un", host_address, port, client_name);
+
   connected = false;
   retry_counter = retry_counter_start_value;
   tkr_set->runtime.global_state.mqtt_down = 1;
 
   if(pubsub->connected())
   {
+    ALOG_INF(PSTR(D_LOG_MQTT "Disconnecting previous MQTT session"));
     pubsub->disconnect();
   }
 
@@ -159,95 +148,42 @@ void MQTTConnection::MqttReconnect(void)
   );
 
   pubsub->setServer(host_address, port);
-  
-  // Generate will message
+
   char lwt_message_ondisconnect_ctr[200] = {0};
   char buffer[40] = {0};
-
-  sprintf_P(
-    lwt_message_ondisconnect_ctr,
-    PM_MQTT_LWT_PAYLOAD_FORMATED,
-    tkr_sup->GetResetReason().c_str(),
-    tkr_time->GetUptime(buffer, sizeof(buffer))
-  );
+  sprintf_P(lwt_message_ondisconnect_ctr, PM_MQTT_LWT_PAYLOAD_FORMATED,tkr_sup->GetResetReason().c_str(), tkr_time->GetUptime(buffer, sizeof(buffer)));
 
   char lwt_topic[50] = {0};
+  snprintf_P(lwt_topic, sizeof(lwt_topic), PM_MQTT_LWT_TOPIC_FORMATED,tkr_set->Settings.system_name.device);
 
-  snprintf_P(
-    lwt_topic,
-    sizeof(lwt_topic),
-    PM_MQTT_LWT_TOPIC_FORMATED,
-    tkr_set->Settings.system_name.device
-  );
-
-  uint8_t loglevel = LOG_LEVEL_INFO;
-
-  #ifdef ENABLE_DEVFEATURE_DEBUG_MQTT_RECONNECT
-  loglevel = LOG_LEVEL_DEV_TEST;
-  #endif
-
-  #ifdef ENABLE_LOG_LEVEL_INFO
-  AddLog(loglevel, PSTR("cliente = %s"), client_name);
-  AddLog(loglevel, PSTR("lwt_tpc = %s"), lwt_topic);
-  AddLog(loglevel, PSTR("lwt_msg = %s"), lwt_message_ondisconnect_ctr);
-  #endif
-
-  ALOG_INF(PSTR("mMQTTManager::MqttReconnect START              Connect"));
-
-  bool connect_success = false;
-
-  const bool has_user = user[0] != '\0';
-  const bool has_password = password[0] != '\0';
-
-  if(has_user && has_password)
+  if(is_secure_connection)
   {
-    char password_copy[5] = {0};
-    snprintf(password_copy, sizeof(password_copy), "%s", password);
-
-    Serial.printf("MQTT Secure Connection %s,%s##\n\r", user, password_copy);
-
-    connect_success = pubsub->connect(
-      client_name,
-      user,
-      password,
-      lwt_topic,
-      WILLQOS_CTR,
-      WILLRETAIN_CTR,
-      lwt_message_ondisconnect_ctr
-    );
+    ALOG_INF(PSTR(D_LOG_MQTT "Credentials user=%s pw=%.3s*** lwt=%s"), user, password, lwt_topic);
+    connected = pubsub->connect(client_name, user, password, lwt_topic, WILLQOS_CTR, WILLRETAIN_CTR, lwt_message_ondisconnect_ctr);
   }
   else
   {
-    connect_success = pubsub->connect(
-      client_name,
-      lwt_topic,
-      WILLQOS_CTR,
-      WILLRETAIN_CTR,
-      lwt_message_ondisconnect_ctr
-    );
+    ALOG_INF(PSTR(D_LOG_MQTT "Credentials none lwt=%s"), lwt_topic);
+    connected = pubsub->connect(client_name, lwt_topic, WILLQOS_CTR, WILLRETAIN_CTR, lwt_message_ondisconnect_ctr);
   }
 
-  if(connect_success)
+  const int mqtt_state = pubsub->state();
+  const uint32_t elapsed_millis = millis() - before_millis;
+
+  if(connected)
   {
-    ALOG_INF(PSTR("mMQTTManager::MqttReconnect Connected"));
-    
+    ALOG_INF(PSTR(D_LOG_MQTT "Reconnect success state=%d elapsed=%ums"), mqtt_state, elapsed_millis);
     MqttConnected();
-    
     flag_start_reconnect = false;
     retry_counter = 0;
     downtime_counter = 0;
   }
   else
-  { 
-    ALOG_INF(PSTR("mMQTTManager::MqttReconnect Failed %d"), pubsub->state());
-    MqttDisconnected(pubsub->state());
+  {
+    ALOG_ERR(PSTR(D_LOG_MQTT "Reconnect failed state=%d elapsed=%ums"), mqtt_state, elapsed_millis);
+    MqttDisconnected(mqtt_state);
   }
-  
-  uint32_t elapsed_millis = millis() - before_millis;
-
-  ALOG_INF(PSTR("MqttReconnect ElapsedTime = %d"), elapsed_millis);
-
-} // END function
+}
 
 
 void MQTTConnection::MqttDisconnected(int state)
@@ -269,7 +205,7 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
   
   if (data_len >= DATA_BUFFER_PAYLOAD_MAX_LENGTH) 
   {  
-    ALOG_INF(PSTR("MqttDataHandler"));
+    ALOG_ERR(PSTR("MqttDataHandler"));
     return;
   }
   
@@ -335,7 +271,7 @@ void MQTTConnection::MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsig
 boolean MQTTConnection::subscribe(const char* topic) {  
   char ttopic[70] = {0};
   strncpy_P(ttopic, topic, strlen(topic));
-  ALOG_INF( PSTR("Subscribing to \"%s\""), ttopic );
+  ALOG_INF(PSTR(D_LOG_MQTT "Subscribing to \"%s\""), ttopic );
   if(pubsub)
     return pubsub->subscribe(ttopic, 0); // Expects topic in RAM (not PSTR)
 }
@@ -343,7 +279,7 @@ boolean MQTTConnection::subscribe(const char* topic) {
 boolean MQTTConnection::subscribe_device(const char* topic) {
   char ttopic[70] = {0};
   sprintf(ttopic, PSTR("%s/%s"), prefix_topic, topic);
-  ALOG_INF( PSTR("Subscribing to \"%s\""), ttopic );
+  ALOG_INF(PSTR(D_LOG_MQTT "Subscribing to \"%s\""), ttopic );
   return pubsub->subscribe(ttopic, 0);
 }
 
@@ -435,10 +371,10 @@ bool MQTTConnection::publish_ft(const char* module_name, uint8_t topic_type_id, 
   }
 
   #ifdef ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-  ALOG_INF( PSTR(D_LOG_MQTT "topic=\"%s\""), topic );
+  ALOG_DBG( PSTR(D_LOG_MQTT "topic=\"%s\""), topic );
   #endif
   #ifdef ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
-  ALOG_INF( PSTR(D_LOG_MQTT "payload=\"%s\""), payload_ctr );
+  ALOG_DBG( PSTR(D_LOG_MQTT "payload=\"%s\""), payload_ctr );
   #endif
   
   return publish_device(topic, payload_ctr, retain_flag);
@@ -494,8 +430,8 @@ boolean MQTTConnection::publish_device(const char* topic, const char* payload, b
   snprintf(convctr, sizeof(convctr), PSTR("%s/%S"), prefix_topic, topic);
   
   #ifdef ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-  ALOG_INF( PSTR(D_LOG_PUBSUB "-->" D_TOPIC   "%d [%s]"), strlen(convctr), convctr);
-  ALOG_INF( PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD "%d [%s]"), strlen(payload), payload);
+  ALOG_DBG( PSTR(D_LOG_PUBSUB "-->" D_TOPIC   "%d [%s]"), strlen(convctr), convctr);
+  ALOG_DBG( PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD "%d [%s]"), strlen(payload), payload);
   #endif
 
   return pubsub->publish(convctr, (const uint8_t*)payload, strlen(payload), retained);

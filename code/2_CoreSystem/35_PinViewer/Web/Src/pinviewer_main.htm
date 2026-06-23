@@ -332,12 +332,12 @@ async function fetchJson(url){
 }
 
 async function reloadAll(){
-  const pinJson = await fetchJson('/pinviewer_pinallocations');
+  const pinJson = await fetchJson('/pinv/alloc');
 
   pins = {};
   updatePins(pinJson.pins || []);
 
-  const groupJson = await fetchJson('/pinviewer_groups');
+  const groupJson = await fetchJson('/pinv/groups');
 
   groups = {};
   for(const g of (groupJson.groups || [])){
@@ -345,18 +345,18 @@ async function reloadAll(){
   }
   renderGroups();
 
-  const espJson = await fetchJson('/pinviewer_espinfo');
+  const espJson = await fetchJson('/pinv/sys');
   document.getElementById('heap').textContent = `heap=${espJson.free_heap}`;
 }
 
 async function forceRefresh(){
-  await fetch('/pinviewer_sampling?ms=250');
+  await fetch('/pinv/smp?ms=250');
   await reloadAll();
 }
 
 reloadAll();
 
-const es = new EventSource('/pinviewer_events');
+const es = new EventSource('/pinv/events');
 
 es.addEventListener('open', () => {
   document.getElementById('status').textContent = 'connected';
