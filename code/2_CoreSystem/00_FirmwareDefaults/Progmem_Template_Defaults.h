@@ -10,11 +10,11 @@
 
 #include "2_CoreSystem/mBaseConfig.h"
 
-#ifndef USE_NETWORK_CONFIG_TEMPLATE
+#ifndef USE_NETWORK_TEMPLATE
 
-#warning "USE_NETWORK_CONFIG_TEMPLATE" has not been defined -- using hardcoded defaults for network config template, which may not be ideal for all devices. Consider defining USE_NETWORK_CONFIG_TEMPLATE to use the default template stored in PROGMEM, which can be overridden by OTA updates and edited via web UI, or define your own NETWORK_CONFIG_TEMPLATE.
+#warning "USE_NETWORK_TEMPLATE" has not been defined -- using hardcoded defaults for network config template, which may not be ideal for all devices. Consider defining USE_NETWORK_TEMPLATE to use the default template stored in PROGMEM, which can be overridden by OTA updates and edited via web UI, or define your own NETWORK_TEMPLATE.
 
-DEFINE_PGM_CTR(NETWORK_CONFIG_TEMPLATE)
+DEFINE_PGM_CTR(NETWORK_TEMPLATE)
 "{"
   "\"Version\":1,"
 

@@ -110,9 +110,8 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 //     "\"Resolution\":12" //12 max
 //   "}"
 // "}";
-
-#define USE_NETWORK_CONFIG_TEMPLATE
-  DEFINE_PGM_CTR(NETWORK_CONFIG_TEMPLATE)
+#define USE_NETWORK_TEMPLATE
+  DEFINE_PGM_CTR(NETWORK_TEMPLATE)
   "{"
     "\"Version\":1,"
 

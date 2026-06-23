@@ -7,7 +7,7 @@
 #   using G1_mUserConfig_Secret.h and PlatformIO build flags, then emit the
 #   final legacy-compatible PROGMEM const symbols:
 #
-#     DEF_TEMPLATE__NETWORK_CONFIG -> NETWORK_CONFIG_TEMPLATE
+#     DEF_TEMPLATE__NETWORK_CONFIG -> NETWORK_TEMPLATE
 #     DEF_TEMPLATE__MODULE         -> MODULE_TEMPLATE
 #     DEF_TEMPLATE__FUNCTION       -> FUNCTION_TEMPLATE
 #     DEF_TEMPLATE__RULES          -> RULES_TEMPLATE
@@ -431,7 +431,7 @@ def template_to_output_symbol(macro_name):
     suffix = macro_name.replace("DEF_TEMPLATE__", "", 1)
 
     mapping = {
-        "NETWORK_CONFIG": "NETWORK_CONFIG_TEMPLATE",
+        "NETWORK_CONFIG": "NETWORK_TEMPLATE",
         "MODULE": "MODULE_TEMPLATE",
         "FUNCTION": "FUNCTION_TEMPLATE",
         "RULES": "RULES_TEMPLATE",
