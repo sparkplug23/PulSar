@@ -902,10 +902,11 @@
 #define MQTT_PORT     1883
 
 
-#define USE_NETWORK_CONFIG_TEMPLATE
-  DEFINE_PGM_CTR(NETWORK_CONFIG_TEMPLATE)
+#define USE_NETWORK_TEMPLATE__OVERRIDE
+#define USE_NETWORK_TEMPLATE
+  DEFINE_PGM_CTR(NETWORK_TEMPLATE)
   "{"
-    "\"Version\":1,"
+    "\"Version\":2,"
 
     "\"Interface\":{"
       "\"Policy\":{"
@@ -942,10 +943,10 @@
         "],"
 
         "\"IPv4\":{"
-          "\"Static\":false,"
-          "\"IP\":\"0.0.0.0\","
+          "\"Static\":true,"
+          "\"IP\":\"192.168.50.50\","
+          "\"Subnet\":\"255.255.255.0\","
           "\"Gateway\":\"0.0.0.0\","
-          "\"Subnet\":\"0.0.0.0\","
           "\"DNS1\":\"0.0.0.0\","
           "\"DNS2\":\"0.0.0.0\""
         "}"

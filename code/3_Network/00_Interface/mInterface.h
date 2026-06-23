@@ -46,7 +46,7 @@ class mInterfaceNetwork :
     bool NetworkConfig_LoadFileAndParse(void);
     bool NetworkConfig_ParseJSONString(const String& json_string);
 
-    #ifdef USE_NETWORK_CONFIG_TEMPLATE
+    #ifdef USE_NETWORK_TEMPLATE
     String NetworkConfig_LoadTemplate(void);
     bool   NetworkConfig_CreateFileFromTemplateAndParse(void);
     #endif

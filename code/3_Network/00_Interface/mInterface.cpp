@@ -205,16 +205,7 @@ void mInterfaceNetwork::parse_JSONCommand(JsonParserObject obj)
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 
-  if(jtok = obj["GPS_Enable"]){
-    ALOG_INF( PSTR("GPS_Enable"));
-    if(jtok.getInt() == 1)
-    {
-      // GPS_Enable();
-    }
-  } 
-  if(jtok = obj["Version"]){
-      ALOG_INF( PSTR("Version: %d"), jtok.getInt());
-  } 
+  
     
 }
   

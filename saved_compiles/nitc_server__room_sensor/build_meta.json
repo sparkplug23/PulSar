@@ -1,7 +1,7 @@
 {
   "env_name": "nitc_server__room_sensor",
-  "created_utc": "2026-06-18T16:30:49Z",
-  "created_epoch": 1781800249,
+  "created_utc": "2026-06-23T12:01:32Z",
+  "created_epoch": 1782216092,
   "project_dir": "C:\\pool_local\\Github\\Personal\\PulSar",
   "build_dir": "C:\\pool_local\\Github\\Personal\\PulSar\\.pio\\build\\nitc_server__room_sensor",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "dev_mqtt_transport",
-    "commit": "f761cc9e8508b6878584f157c42bf9fb6dfbb600",
-    "describe": "f761cc9e-dirty",
-    "status_short": "M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/14_Updates/mUpdates.cpp\n M code/2_CoreSystem/31_I2C/mI2C.cpp\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/3_Network/03_WiFi2/mWiFi_STA.cpp\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_remote.ini\n M saved_compiles/nitc_server__room_sensor/build_meta.json\n M saved_compiles/nitc_server__room_sensor/firmware.elf"
+    "commit": "c9b6a59030a9f47d2759b26a0e6fc36a17f3aebb",
+    "describe": "c9b6a590-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_Cameras.h\n M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_CellularDatalinks.h\n M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/00_FirmwareDefaults/Progmem_Template_Defaults.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/3_Network/00_Interface/Init_Defaults.cpp\n M code/3_Network/00_Interface/mInterface.cpp\n M code/3_Network/00_Interface/mInterface.h\n M code/3_Network/03_WiFi2/WiFi_Helpers.cpp\n M code/3_Network/03_WiFi2/mWiFi.cpp\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_remote.ini\n M saved_compiles/nitc_server__room_sensor/build_meta.json\n M saved_compiles/nitc_server__room_sensor/firmware.elf\n M tools/pre_populate_dynamic_templates.py"
   }
 }

@@ -66,6 +66,12 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj)
       #endif
     }
     break;
+    /************
+     * COMMANDS SECTION * 
+    *******************/
+    case TASK_JSON_COMMAND_ID:
+      parse_JSONCommand(obj);
+    break;
 
     case TASK_NETWORK_CONNECTED__WIFI:
     {
@@ -83,6 +89,143 @@ int8_t mWiFi::Tasker(uint8_t function, JsonParserObject obj)
 
   return TASKER_RESULT__SUCCESS_ID;
 }
+
+
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+// -----------------------------------------------------------------------------
+// WiFi IPv4 JSON parsing helpers
+// Date Modified: 23Jun26
+// -----------------------------------------------------------------------------
+
+static bool ParseIPv4StringToArray(const char* str, uint8_t out[4])
+{
+  if (!str) { return false; }
+
+  int a = -1;
+  int b = -1;
+  int c = -1;
+  int d = -1;
+
+  if (sscanf(str, "%d.%d.%d.%d", &a, &b, &c, &d) != 4)
+  {
+    return false;
+  }
+
+  if ((a < 0) || (a > 255) ||
+      (b < 0) || (b > 255) ||
+      (c < 0) || (c > 255) ||
+      (d < 0) || (d > 255))
+  {
+    return false;
+  }
+
+  out[0] = (uint8_t)a;
+  out[1] = (uint8_t)b;
+  out[2] = (uint8_t)c;
+  out[3] = (uint8_t)d;
+
+  return true;
+}
+
+
+static bool IPv4ArrayIsZero(const uint8_t ip[4])
+{
+  return (ip[0] == 0) &&
+         (ip[1] == 0) &&
+         (ip[2] == 0) &&
+         (ip[3] == 0);
+}
+
+
+static void ParseIPv4Config(JsonParserObject obj_ipv4, mWiFi::IPv4Config& ipv4)
+{
+  JsonParserToken jtok = 0;
+
+  if (jtok = obj_ipv4["Static"])
+  {
+    ipv4.is_static = jtok.getBool() ? 1 : 0;
+  }
+
+  if (jtok = obj_ipv4["IP"])
+  {
+    ParseIPv4StringToArray(jtok.getStr(), ipv4.ip);
+  }
+
+  if (jtok = obj_ipv4["Gateway"])
+  {
+    ParseIPv4StringToArray(jtok.getStr(), ipv4.gw);
+  }
+
+  if (jtok = obj_ipv4["Subnet"])
+  {
+    ParseIPv4StringToArray(jtok.getStr(), ipv4.sn);
+  }
+
+  if (jtok = obj_ipv4["DNS1"])
+  {
+    ParseIPv4StringToArray(jtok.getStr(), ipv4.dns1);
+  }
+
+  if (jtok = obj_ipv4["DNS2"])
+  {
+    ParseIPv4StringToArray(jtok.getStr(), ipv4.dns2);
+  }
+
+  // Debug/default behaviour:
+  // If IP, gateway, DNS1, and DNS2 are all zero, treat as DHCP even if Static was
+  // accidentally left true. Subnet is ignored here because the struct default is
+  // normally 255.255.255.0.
+  if (IPv4ArrayIsZero(ipv4.ip)   &&
+      IPv4ArrayIsZero(ipv4.gw)   &&
+      IPv4ArrayIsZero(ipv4.dns1) &&
+      IPv4ArrayIsZero(ipv4.dns2))
+  {
+    ipv4.is_static = 0;
+  }
+
+  ALOG_INF(
+    PSTR("WiFi IPv4: static=%d ip=%d.%d.%d.%d gw=%d.%d.%d.%d sn=%d.%d.%d.%d dns1=%d.%d.%d.%d dns2=%d.%d.%d.%d"),
+    ipv4.is_static,
+    ipv4.ip[0],   ipv4.ip[1],   ipv4.ip[2],   ipv4.ip[3],
+    ipv4.gw[0],   ipv4.gw[1],   ipv4.gw[2],   ipv4.gw[3],
+    ipv4.sn[0],   ipv4.sn[1],   ipv4.sn[2],   ipv4.sn[3],
+    ipv4.dns1[0], ipv4.dns1[1], ipv4.dns1[2], ipv4.dns1[3],
+    ipv4.dns2[0], ipv4.dns2[1], ipv4.dns2[2], ipv4.dns2[3]
+  );
+}
+
+
+void mWiFi::parse_JSONCommand(JsonParserObject obj)
+{
+
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+
+  JsonParserObject obj_wifi = obj["WiFi"];
+  if (obj_wifi)
+  {
+
+ALOG_INF(PSTR("HERE" "wifi found"));
+
+    JsonParserObject obj_station = obj_wifi["Station"];
+    if (obj_station)
+    {
+ALOG_INF(PSTR("HERE" "station found"));
+      JsonParserObject obj_ipv4 = obj_station["IPv4"];
+      if (obj_ipv4)
+      {
+ALOG_INF(PSTR("HERE" "ipv4 found"));
+        ParseIPv4Config(obj_ipv4, config.station.ipv4);
+      }
+    }
+  }
+
+
+}
+  
 
 
 void mWiFi::Task_EverySecond()

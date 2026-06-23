@@ -177,8 +177,6 @@ const char* mWiFi::GetWiFiStatusCtr(void)
     default                 : return PSTR("Unknown");
   }
 }
-
-void mWiFi::parse_JSONCommand(JsonParserObject obj){};
    
 
 
