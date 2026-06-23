@@ -150,7 +150,7 @@ void mCustom::SubTask_UpdateOLED()
         sprintf(buffer_n, "%s", "AMB");
       }
       snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
-      tkr_iDisp->LogBuffer_AddRow(buffer, sensor_id);
+      tkr_iDisp->LogBuffer_AddRow(buffer, 0);
     
     }
 
@@ -172,15 +172,17 @@ void mCustom::SubTask_UpdateOLED()
         {
           memset(buffer_n, 0, sizeof(buffer_n));
           sprintf(buffer_n, "%s", " 2m");
+          snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
+          tkr_iDisp->LogBuffer_AddRow(buffer, 1);
         }else 
         if(strcmp(buffer_n, D_DEVICE_SENSOR_DB18S20_02_NAME)==0)
         {
           memset(buffer_n, 0, sizeof(buffer_n));
           sprintf(buffer_n, "%s", " 3m");
+          snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
+          tkr_iDisp->LogBuffer_AddRow(buffer, 2);
         }
 
-        snprintf(buffer, sizeof(buffer), "%s: %s", buffer_n, mSupport::float2CString(sensor_data,2,buffer_f));
-        tkr_iDisp->LogBuffer_AddRow(buffer, sensor_id+1);
       
       }
 

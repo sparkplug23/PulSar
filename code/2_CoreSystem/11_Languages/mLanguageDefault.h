@@ -824,8 +824,8 @@
 // #define D_GPIO_DS18X20_CTR       "DS18x20"
 
 #define D_GPIO_DS18B20_CTR       "DSB"
-#define D_GPIO_DS18X20_1_CTR       "DSB 1"
-#define D_GPIO_DS18X20_2_CTR       "DSB 2"
+#define D_GPIO_DS18X20_1_CTR       "DSB1"
+#define D_GPIO_DS18X20_2_CTR       "DSB2"
 
 #define D_GPIO_UNUSED_FORCED_LOW_CTR "ForcedLow"
 #define D_GPIO_UNUSED_FORCED_HIGH_CTR "ForcedHigh"
