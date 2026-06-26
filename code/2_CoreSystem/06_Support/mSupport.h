@@ -545,7 +545,7 @@ public:
 
     int GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack);
     
-    void ClaimSerial(void);
+    void ClaimSerial(void); // should be within serial module, not support!
     void ShowSource(int source);
         
     char* GetPowerDevice(char* dest, uint32_t idx, size_t size, uint32_t option);

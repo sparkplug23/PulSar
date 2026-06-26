@@ -71,6 +71,10 @@ class JsonBuilder{
       char*     buffer      = nullptr;
       uint16_t  buffer_size = 0;
       uint16_t  length      = 0;
+      uint16_t  remaining()
+      {
+        return buffer_size - length;
+      }
     }writer;
 
     uint16_t locked_by_module_unique_id = 0;
@@ -448,13 +452,19 @@ void releaseJSONBufferLock(); // duplicate of below, need to JOIN THEM!!
       else
       if (is_float_type<T>::value){ 
         float f = 0;     memcpy(&f,&value,sizeof(f));
+
+        // if (!isfinite(f))
+        // {
+          writer.length += snprintf(&writer.buffer[writer.length], writer.remaining(), "\"%s\":null", key);
+        // }
+
         char fvalue[20]; dtostrfd2(f,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,fvalue);
-        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.remaining(),"\"%s\":%s",key,fvalue);
       }else
       if (is_double_type<T>::value){ 
         double f = 0;     memcpy(&f,&value,sizeof(double));
         char fvalue[20]; dtostrfd2(f,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,fvalue);
-        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%s",key,fvalue);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.remaining(),"\"%s\":%s",key,fvalue);
       }
       #endif
     }

@@ -400,9 +400,9 @@ enum SelectablePins_Base : uint16_t
        ****************************************/
 
       // VL53L0X XSHUT pin
-      GPIO_VL53L0X_XSHUT,
+      GPIO_VL53L0X_XSHUT1,
       // VL53L1X XSHUT pin
-      GPIO_VL53L1X_XSHUT,
+      GPIO_VL53L1X_XSHUT1,
 
       /****************************************
        * SECTION: Radar HLK LD2410
@@ -512,7 +512,7 @@ enum SelectablePins_Base : uint16_t
       GPIO_RXON_SAMPLING_ENABLED,
       // CC1110 sync pulse signal
       GPIO_CC1110_SYNC_PULSE_SIGNAL,
-      
+
 /*********************************************************************************************\
  * Lighting GPIO functions
  *

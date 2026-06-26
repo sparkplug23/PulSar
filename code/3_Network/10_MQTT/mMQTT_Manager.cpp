@@ -799,7 +799,7 @@ void mMQTTManager::MqttPublishPowerBlinkState(uint32_t device) {
     tkr_sup->GetPowerDevice(scommand, device, sizeof(scommand), tkr_set->Settings.sysopt_system.bit.device_index_enable), tkr_sup->GetStateText(bitRead(tkr_relay->rt.bitpacked.blink_mask, device -1)));  // SetOption26 - Switch between POWER or POWER1
   #endif 
   
-  MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_STAT, S_RSLT_POWER);
+  MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_STAT, "Power");//S_RSLT_POWER);
 }
 
 #endif // ENABLE_DEVFEATURE_MQTT__PUBLUSH_TASMOTA_METHODS

@@ -16,6 +16,7 @@
 // #define DEVICE_TESTBED_04__HVAC_X1
 // #define DEVICE_TESTBED_05__SWITCHES_BUTTONS
 // #define DEVICE_TESTBED_06__GPS_DECODER_WITH_SERIAL_SNIFFERS
+#define DEVICE_TESTBED_09__SONOFF_BASIC_CLONE_NODEMCU
 // #define DEVICE_TESTBED_11__FILESYSTEM
 
 // room_sensor   : BME680, Light, PIR, RADAR
@@ -1962,3 +1963,72 @@
   "}";
 
 #endif
+
+
+
+/****
+ * Replicating sonoff basic with a nodemcu, to allow easy serial debugging and testing
+ * Due to the pinout on the esp8266 (vs esp8285), a duplicated template is used with nodemcu friendly pins (using both LEDs)
+ */
+#ifdef DEVICE_TESTBED_09__SONOFF_BASIC_CLONE_NODEMCU
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template_name"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "Template Name"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "Template Description"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
+  #define MQTT_HOST   "192.168.3.70"
+    
+    #define MQTT_PORT     1883
+
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  
+  #define ESP8266
+  
+
+  
+  #define USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
+
+  #define USE_MODULE_CORE_RULES
+  
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_BUTTONS
+  
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+    #define MAX_RELAYS 1
+    
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_NODEMCU_CTR  "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "Socket"
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+        "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+        "\"Button\""
+      "]"
+    "}"
+  "}";
+   
+  // Default Rule Defined (DefaultRule_Sonoff_Basic_R2)
+
+#endif
+
+

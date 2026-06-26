@@ -72,13 +72,26 @@
 // // #define WEMOS_MODULE       17   // Wemos module
 
 
-const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {
-    0, 1, 2, 3, 4, 5, 
-    // 6, 7, 8, 
-    9, 10, 
-    // 11, 
-    12, 13, 14, 15, 16
-};
+// const uint8_t gpio_pin_by_index[MAX_USER_PINS] = {
+//     0, 1, 2, 3, 4, 5, 
+//     // 6, 7, 8, 
+//     9, 10, 
+//     // 11, 
+//     12, 13, 14, 15, 16
+// };
+
+
+#define ESP2866_TEMPLATE_TO_PHY         \
+   0,  1,  2,  3,  4,  5,             \
+   /* 6-8 Flash */                    \
+   9, 10,                             \
+   /* 11 Flash */                     \
+  12, 13, 14, 15, 16
+
+
+const uint8_t template_index_to_real_pin[MAX_USER_PINS] = {ESP2866_TEMPLATE_TO_PHY};
+
+
 
 
     #define MAX_GPIO_PIN       17   // Number of supported GPIO
