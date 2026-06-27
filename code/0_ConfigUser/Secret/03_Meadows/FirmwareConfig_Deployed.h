@@ -14,6 +14,7 @@
 //--------------------------------[Enable Device]-------------------------------------
 
 /// KITCHEN //////////////////////////////////////////////////////////////////////////////////
+#define DEVICE_MEADOWS__KITCHEN__ROOM_SENSOR
 // #define DEVICE_MEADOWS__KITCHEN__GLASS_BOX
 // #define DEVICE_MEADOWS__KITCHEN__GREEN_PLANT
 /// LANDING //////////////////////////////////////////////////////////////////////////////////
@@ -577,8 +578,8 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
     "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\","    
     #endif
     #ifdef USE_MODULE_SENSORS_PIR
-    "\"4\":\""  D_GPIO_PIR_1_CTR "\","
-    "\"7\":\""  D_GPIO_PIR_2_CTR "\","
+    "\"4\":\""  D_GPIO_PIR_CTR "1" "\","
+    "\"7\":\""  D_GPIO_PIR_CTR "2" "\","
     #endif
     #ifdef USE_MODULE_SENSORS_SR04
     "\"4\":\"" D_GPIO_SR04_ECHO_CTR   "\","
@@ -591,8 +592,8 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
     "\"5\":\""  D_GPIO_PIR_3_INV_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-    "\"6\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
-    "\"5\":\""  D_GPIO__HLK_LD2410_RX__CTR "\""
+    "\"6\":\""  D_GPIO_LD2410_TX_CTR "\","
+    "\"5\":\""  D_GPIO_LD2410_RX_CTR "\""
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
     "\"34\":\""  D_GPIO_PIR_1_INV_CTR "\""

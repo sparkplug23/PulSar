@@ -4771,13 +4771,13 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"    
       // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-     "\"15\":\""  D_GPIO_PIR_1_CTR "\","
-     "\"2\":\"" D_GPIO_LED1_CTR  "\""
-      #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
-      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
-      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
-      #endif
+    //  "\"15\":\""  D_GPIO_PIR_1_CTR "\","
+    //  "\"2\":\"" D_GPIO_LED1_CTR  "\""
+    //   #ifdef USE_MODULE_SENSORS_BUTTONS
+    //   "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+    //   "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+    //   "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+    //   #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

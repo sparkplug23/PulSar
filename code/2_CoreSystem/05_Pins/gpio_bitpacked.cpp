@@ -234,6 +234,13 @@ const uint16_t SelectablePins_BitPacked[] PROGMEM =
     PGPIO(GPIO_SR04_ECHO) + MGPIO(3),
     PGPIO(GPIO_SR04_TRIG) + MGPIO(3),
 
+    /****************************************
+     * SECTION: LD2410
+     ****************************************/
+  
+    PGPIO(GPIO_LD2410_TX) + MGPIO(3),
+    PGPIO(GPIO_LD2410_RX) + MGPIO(3),
+
     
 
 };

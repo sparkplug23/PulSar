@@ -1115,13 +1115,13 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   
 
   #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-  if(jtok = obj[PM_RGB_CLOCK].getObject()[PM_MANUAL_NUMBER]){
+  if(jtok = obj[D_RGB_CLOCK].getObject()[D_MANUAL_NUMBER]){
     lcd_display_show_number = jtok.getInt();
     // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
     ALOG_COM(PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_MANUAL_NUMBER)), lcd_display_show_number);
   }
   
-  if(jtok = obj[PM_RGB_CLOCK].getObject()["ManualString"]){
+  if(jtok = obj[D_RGB_CLOCK].getObject()["ManualString"]){
     strcpy(lcd_display_show_string, jtok.getStr());
     // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
     ALOG_COM(PSTR(D_LOG_PIXEL  D_COMMAND_SVALUE_K("ManualString")), lcd_display_show_string);
