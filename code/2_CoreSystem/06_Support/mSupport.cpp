@@ -296,296 +296,6 @@ uint32_t ResetReason_g(void)
 
 
 
-#ifdef ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-#ifdef ESP32
-#include <WiFi.h>
-#include <ESPmDNS.h>
-#include <WiFiUdp.h>
-#include <ArduinoOTA.h>
-#endif
-#ifdef ESP8266
-// #include <ESP8266HTTPClient.h>
-// #include <ESP8266httpUpdate.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
-#include <WiFiUdp.h>
-#include <ArduinoOTA.h>                   // Arduino OTA
-#endif
-
-#endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-#if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
-
-const char* host = "recovery";
-const char* ssid = STA_SSID1;
-const char* password = STA_PASS1;
-
-#endif //  defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || (ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
-
-
-#ifdef ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
-
-#ifdef ESP32
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <WebServer.h>
-#include <ESPmDNS.h>
-#include <Update.h>
-#endif
-#ifdef ESP8266
-
-  #include <ESP8266HTTPClient.h>
-  #include <ESP8266httpUpdate.h> 
-  #include <ESP8266WiFi.h> 
-
-  #error "Need to figure out webserver replacement for esp8266"
-
-#endif
-
-/**
- * @brief Using pointer to reduce memory footprint
- **/
-WebServer* http_safemode_server = nullptr;// server(80);
-
-/*
- * Server Index Page
- */
-
-const char* serverIndex =
-"<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>"
-"<form method='POST' action='#' enctype='multipart/form-data' id='upload_form'>"
-   "<input type='file' name='update'>"
-        "<input type='submit' value='Update'>"
-    "</form>"
- "<div id='prg'>progress: 0%</div>"
- "<script>"
-  "$('form').submit(function(e){"
-  "e.preventDefault();"
-  "var form = $('#upload_form')[0];"
-  "var data = new FormData(form);"
-  " $.ajax({"
-  "url: '/update',"
-  "type: 'POST',"
-  "data: data,"
-  "contentType: false,"
-  "processData:false,"
-  "xhr: function() {"
-  "var xhr = new window.XMLHttpRequest();"
-  "xhr.upload.addEventListener('progress', function(evt) {"
-  "if (evt.lengthComputable) {"
-  "var per = evt.loaded / evt.total;"
-  "$('#prg').html('progress: ' + Math.round(per*100) + '%');"
-  "}"
-  "}, false);"
-  "return xhr;"
-  "},"
-  "success:function(d, s) {"
-  "console.log('success!')"
- "},"
- "error: function (a, b, c) {"
- "}"
- "});"
- "});"
- "</script>";
-#endif // ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
-
-
-#if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
-
-/**
- * @brief Single function that a fastboot'ing device will call to await for new code to be uploaded
- * "0" means to wait indefinitely, ie fastboot is recovering
- **/
-void SafeMode_StartAndAwaitOTA(uint8_t seconds_to_wait)
-{
-  Serial.begin(115200);
-
-  Serial.println("SafeMode_StartAndAwaitOTA");
-  
-  uint32_t tSaved_heartbeat = millis();
-  #ifdef ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
-  bool http_triggered = false;
-  #endif
-
-  // Connect to WiFi network
-  WiFi.begin(ssid, password);
-
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  /*use mdns for host name resolution*/
-  if (!MDNS.begin(host)) { //http://esp32.local           
-    Serial.println("Error setting up MDNS responder!");
-    while (1) {
-      delay(1000);
-    }
-  }
-  
-  Serial.println("mDNS responder started");
-
-  #ifdef ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
-  http_safemode_server = new WebServer(80);
-
-  /*return index page which is stored in serverIndex */
-  http_safemode_server->on("/", HTTP_GET, []() {
-    http_safemode_server->sendHeader("Connection", "close");
-    http_safemode_server->send(200, "text/html", serverIndex);
-  });
-  /*handling uploading firmware file */
-  http_safemode_server->on("/update", HTTP_POST, []() {
-    http_safemode_server->sendHeader("Connection", "close");
-    http_safemode_server->send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
-    ESP.restart();
-  }, []() {
-    
-      #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-      WDT_Reset();
-      #endif
-
-    HTTPUpload& upload = http_safemode_server->upload();
-    if (upload.status == UPLOAD_FILE_START) {
-      Serial.printf("Update: %s\n", upload.filename.c_str());
-      if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
-        Update.printError(Serial);
-      }
-      // http_triggered = true;
-    } else if (upload.status == UPLOAD_FILE_WRITE) {
-      /* flashing firmware to ESP*/
-      if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
-        Update.printError(Serial);
-      }
-    } else if (upload.status == UPLOAD_FILE_END) {
-      if (Update.end(true)) { //true to set the size to the current progress
-        Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
-
-        /**
-         * @brief Reset RTC so device can reboot out of safemode
-         **/
-        RtcFastboot_Reset();
-      } else {
-        Update.printError(Serial);
-      }
-    }
-  });
-  http_safemode_server->begin();
-  #endif // ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
-
-  #ifdef ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-  // bool ota_triggered = false;
-  ArduinoOTA.onStart([]() {
-      String type;
-      if (ArduinoOTA.getCommand() == U_FLASH)
-        type = "sketch";
-      else // U_SPIFFS
-        type = "filesystem";
-
-      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-      // ota_triggered = true;
-      Serial.println("Start updating " + type);
-    });
-    ArduinoOTA.onEnd([]() {
-      Serial.println("\nEnd");
-      
-      RtcFastboot_Reset();
-    });
-    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-      
-      #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-      WDT_Reset();
-      #endif
-
-    });
-    ArduinoOTA.onError([](ota_error_t error) {
-      Serial.printf("Error[%u]: ", error);
-      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-      else if (error == OTA_END_ERROR) Serial.println("End Failed");
-    });
-
-  ArduinoOTA.begin();
-  #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-
-  Serial.printf("SafeMode: Awaiting OTA/HTTP recovery for %d seconds\n", seconds_to_wait);
-
-  bool bExit = false;
-  uint32_t tStart = millis();
-  while(!bExit)
-  {
-    #ifdef ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
-    http_safemode_server->handleClient();
-    #endif
-    #ifdef ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-    ArduinoOTA.handle();
-    #endif
-
-    if(seconds_to_wait>0)
-    {
-      if(millis()-tStart>seconds_to_wait*1000)
-      {
-        bExit = true;
-      }
-    }
-
-    if(llabs(millis()-tSaved_heartbeat)>1000)
-    {
-      tSaved_heartbeat = millis();
-      Serial.println("Waiting for Recovery");
-      Serial.print("Connected to ");
-      Serial.println(ssid);
-      Serial.print("IP address: ");
-      Serial.println(WiFi.localIP());
-
-      #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-      WDT_Reset();
-      #endif
-
-    }
-  }
-  // while(1){ 
-  //   // Serial.println("SafeMode: Just waiting for OTA"); delay(1000);
-    
-  //   #ifdef ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-  //   ArduinoOTA.handle(); 
-  //   #endif 
-  //   #ifdef ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
-  //   http_safemode_server->handleClient(); 
-  //   #endif
-  //   delay(1);
-
-  //   if(llabs(millis()-tSaved_heartbeat)>1000)
-  //   {
-  //     tSaved_heartbeat = millis();
-  //     Serial.println("Waiting for Recovery");
-  //     Serial.print("Connected to ");
-  //     Serial.println(ssid);
-  //     Serial.print("IP address: ");
-  //     Serial.println(WiFi.localIP());
-
-  //     #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-  //     WDT_Reset();
-  //     #endif
-
-  //   }
-
-  // }
-
-}
-#endif // if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || (ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
-
-
 int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
 {
 
@@ -670,19 +380,6 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
 
       PerformEverySecond();
     }break;
-    case TASK_EVERY_50_MSECOND:
-      #ifdef USE_ARDUINO_OTA
-        if(!tkr_set->runtime.global_state.network_down)
-          ArduinoOtaLoop();
-      #endif
-    break;
-    case TASK_EVERY_FIVE_MINUTE:
-      // Run OTA without network check, in case we are in unknown state to allow recovery
-      #ifdef USE_ARDUINO_OTA
-        ArduinoOtaLoop();
-      #endif
-    break;
-
 
     case TASK_EVERY_MINUTE:
 
@@ -748,11 +445,6 @@ int8_t mSupport::Tasker(uint8_t function, JsonParserObject obj)
       parse_JSONCommand(obj);
     break;
 
-    case TASK_NETWORK_CONNECTED__WIFI:
-    case TASK_NETWORK_CONNECTED__ETHERNET:
-    case TASK_NETWORK_CONNECTED__CELLULAR:
-      ArduinoOTAInit();
-    break;
   }
 
   return TASKER_RESULT__UNKNOWN_ID;
@@ -846,6 +538,7 @@ void mSupport::AppendDList(char* buffer, uint16_t buflen, const char* formatP, .
 #ifdef ESP32
 
 #ifdef ENABLE_DEVFEATURE_ESP32__AUTO_MUTEX
+
 /*********************************************************************************************\
  * ESP32 AutoMutex
 \*********************************************************************************************/
@@ -856,7 +549,7 @@ void mSupport::AppendDList(char* buffer, uint16_t buflen, const char* formatP, .
 // void *mutex = nullptr;
 //
 // then protect any function with
-// TasAutoMutex m(&mutex, "somename");
+// AutoMutex m(&mutex, "somename");
 // - mutex is automatically initialised if not already intialised.
 // - it will be automagically released when the function is over.
 // - the same thread can take multiple times (recursive).
@@ -864,73 +557,129 @@ void mSupport::AppendDList(char* buffer, uint16_t buflen, const char* formatP, .
 // - if take=false at creat, it will not be initially taken.
 // - name is used in serial log of mutex deadlock.
 // - maxWait in ticks is how long it will wait before failing in a deadlock scenario (and then emitting on serial)
-// class TasAutoMutex {
+// class AutoMutex {
 //   SemaphoreHandle_t mutex;
 //   bool taken;
 //   int maxWait;
 //   const char *name;
 //   public:
-//     TasAutoMutex(SemaphoreHandle_t* mutex, const char *name = "", int maxWait = 40, bool take=true);
-//     ~TasAutoMutex();
+//     AutoMutex(SemaphoreHandle_t* mutex, const char *name = "", int maxWait = 40, bool take=true);
+//     ~AutoMutex();
 //     void give();
 //     void take();
 //     static void init(SemaphoreHandle_t* ptr);
 // };
 //////////////////////////////////////////
+mSupport::AutoMutex::AutoMutex(
+  SemaphoreHandle_t* mutex_a,
+  const char* name_a,
+  int maxWait_a,
+  bool take_a
+)
+{
+  // DEBUG_LINE_HERE3
+  mutex = (SemaphoreHandle_t)nullptr;
+  taken = false;
+  maxWait = maxWait_a;
+  name = name_a ? name_a : "";
 
-mSupport::TasAutoMutex::TasAutoMutex(SemaphoreHandle_t*mutex, const char *name, int maxWait, bool take) {
-  if (mutex) {
-    if (!(*mutex)){
-      TasAutoMutex::init(mutex);
-    }
-    this->mutex = *mutex;
-    this->maxWait = maxWait;
-    this->name = name;
-    if (take) {
-      this->taken = xSemaphoreTakeRecursive(this->mutex, this->maxWait);
-//      if (!this->taken){
-//        Serial.printf("\r\nMutexfail %s\r\n", this->name);
-//      }
-    }
-  } else {
-    this->mutex = (SemaphoreHandle_t)nullptr;
+  // DEBUG_LINE_HERE3
+  if (!mutex_a) {
+    return;
   }
-}
 
-mSupport::TasAutoMutex::~TasAutoMutex() {
-  if (this->mutex) {
-    if (this->taken) {
-      xSemaphoreGiveRecursive(this->mutex);
-      this->taken = false;
-    }
+  // DEBUG_LINE_HERE3
+  if (!(*mutex_a)) {
+    AutoMutex::init(mutex_a);
   }
-}
 
-void mSupport::TasAutoMutex::init(SemaphoreHandle_t* ptr) {
-  SemaphoreHandle_t mutex = xSemaphoreCreateRecursiveMutex();
-  (*ptr) = mutex;
-  // needed, else for ESP8266 as we will initialis more than once in logging
-//  (*ptr) = (void *) 1;
-}
+  // DEBUG_LINE_HERE3
+  mutex = *mutex_a;
 
-void mSupport::TasAutoMutex::give() {
-  if (this->mutex) {
-    if (this->taken) {
-      xSemaphoreGiveRecursive(this->mutex);
-      this->taken= false;
-    }
+  // DEBUG_LINE_HERE3
+  if (!mutex) {
+    Serial.printf("\r\nMutexcreatefail %s\r\n", name);
+    return;
   }
-}
 
-void mSupport::TasAutoMutex::take() {
-  if (this->mutex) {
-    if (!this->taken) {
-      this->taken = xSemaphoreTakeRecursive(this->mutex, this->maxWait);
-//      if (!this->taken){
-//        Serial.printf("\r\nMutexfail %s\r\n", this->name);
-//      }
+  // DEBUG_LINE_HERE3
+  if (take_a) {
+  // DEBUG_LINE_HERE3
+    taken = xSemaphoreTakeRecursive(mutex, maxWait);
+
+  // DEBUG_LINE_HERE3
+    if (!taken) {
+      Serial.printf("\r\nMutexfail %s\r\n", name);
     }
   }
+  // DEBUG_LINE_HERE3
+}
+
+
+mSupport::AutoMutex::~AutoMutex()
+{
+  give();
+}
+
+
+void mSupport::AutoMutex::init(SemaphoreHandle_t* ptr)
+{
+  if (!ptr) {
+    return;
+  }
+
+  if (*ptr) {
+    return;  // Already initialised
+  }
+
+  // DEBUG_LINE_HERE3
+  SemaphoreHandle_t new_mutex = xSemaphoreCreateRecursiveMutex();
+
+  // DEBUG_LINE_HERE3
+  if (!new_mutex) {
+    Serial.printf("\r\nAutoMutex create failed\r\n");
+    return;
+  }
+
+  *ptr = new_mutex;
+  // DEBUG_LINE_HERE3
+}
+
+
+void mSupport::AutoMutex::give()
+{
+  // DEBUG_LINE_HERE3
+  if (!mutex) {
+    return;
+  }
+
+  if (!taken) {
+    return;
+  }
+
+  xSemaphoreGiveRecursive(mutex);
+  taken = false;
+  // DEBUG_LINE_HERE3
+}
+
+
+void mSupport::AutoMutex::take()
+{
+  // DEBUG_LINE_HERE3
+  if (!mutex) {
+    return;
+  }
+
+  if (taken) {
+    return;
+  }
+
+  taken = xSemaphoreTakeRecursive(mutex, maxWait);
+
+  if (!taken) {
+    Serial.printf("\r\nMutexfail %s\r\n", name);
+  }
+  // DEBUG_LINE_HERE3
 }
 
 #endif  // ESP32
@@ -938,144 +687,6 @@ void mSupport::TasAutoMutex::take() {
 #endif // mutex
 
 
-
-#ifdef USE_ARDUINO_OTA
-
-/*********************************************************************************************\
- * Allow updating via the Arduino OTA-protocol.
- *
- * - Once started disables current wifi clients and udp
- * - Perform restart when done to re-init wifi clients
-\*********************************************************************************************/
-
-void mSupport::ArduinoOTAInit(void)
-{
-
-  if(ota_init_success){ return; }
-
-  ArduinoOTA.setHostname(tkr_set->runtime.my_hostname);
-  
-  ArduinoOTA.onStart([this]()
-  {
-    #ifdef ENABLE_DEVFEATURE_ARDUINOOTA__ADVANCED
-      tkr_set->SettingsSave(1);    // Free flash for OTA update
-      #ifdef USE_MODULE_NETWORK_WEBSERVER
-        if (tkr_set->Settings.webserver) { tkr_web->StopWebserver(); }
-      #endif  // USE_MODULE_NETWORK_WEBSERVER
-      AllowInterrupts(0);
-      if (tkr_set->Settings.flag_system.mqtt_enabled) {
-        MqttDisconnect();      // SetOption3  - Enable MQTT
-      }
-    #endif
-
-    ALOG_IMP(PSTR(D_LOG_UPLOAD "OTA " D_UPLOAD_STARTED));
-
-    arduino_ota_triggered = true;
-    arduino_ota_progress_dot_count = 0;
-
-    RtcSettings.boot_was_completed_ota_event = false;
-
-    // Disable parts (e.g. RF receive interrupts) before starting update
-    tkr->Tasker_Interface(TASK_UPDATE_OTA_BEFORE_ON_START);
-
-    tkr_set->Settings.logging.serial_level = LOG_LEVEL_NONE; // Disable serial logging
-    tkr_set->Settings.logging.web_level = LOG_LEVEL_NONE; // Disable web logging
-    
-    delay(200);       // Allow time for message xfer
-  });
-
-
-  ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total)
-  {
-    if (tkr_set->runtime.seriallog_level >= LOG_LEVEL_DEBUG) { // for when hardware serial is in use for modules
-      uint8_t progress_now = (progress/(total/100));
-      if(arduino_ota_progress_dot_count != progress_now){
-        Serial.println(progress_now);
-        arduino_ota_progress_dot_count = progress_now;
-      }
-    }
-
-    #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-    WDT_Reset();
-    #endif
-    
-  });
-
-
-  ArduinoOTA.onError([this](ota_error_t error)
-  {
-    /*
-    From ArduinoOTA.h:
-    typedef enum { OTA_AUTH_ERROR, OTA_BEGIN_ERROR, OTA_CONNECT_ERROR, OTA_RECEIVE_ERROR, OTA_END_ERROR } ota_error_t;
-    */
-    char error_str[30];
-    memset(error_str,0,sizeof(error_str));
-
-    switch (error) {
-      case OTA_AUTH_ERROR:    strncpy_P(error_str, PSTR("OTA_AUTH_ERROR"), sizeof(error_str)); break;    
-      case OTA_BEGIN_ERROR:   strncpy_P(error_str, PSTR(D_UPLOAD_ERR_2), sizeof(error_str)); break;
-      case OTA_CONNECT_ERROR: sprintf(error_str, PSTR("Connect Error")); break;
-      case OTA_RECEIVE_ERROR: strncpy_P(error_str, PSTR(D_UPLOAD_ERR_5), sizeof(error_str)); break;
-      case OTA_END_ERROR:     strncpy_P(error_str, PSTR(D_UPLOAD_ERR_7), sizeof(error_str)); break;
-      default:
-        snprintf_P(error_str, sizeof(error_str), PSTR(D_UPLOAD_ERROR_CODE " %d"), error);
-    }
-
-    ALOG_IMP(PSTR(D_LOG_OTA "Arduino OTA  %s. %d " D_RESTARTING), error_str,ESP.getFreeSketchSpace());
-
-    #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
-    RtcSettings.boot_was_completed_ota_event = false; // Reset the flag as an error has occured
-    #endif
-
-
-    if(error != OTA_BEGIN_ERROR)
-      ESP.restart(); // Should only reach if the first failed
-
-  });
-
-  ArduinoOTA.onEnd([this]()
-  {
-    #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
-    RtcSettings.boot_was_completed_ota_event = true; // To enable skip of delayed WiFi start when this individual device has succesful flash
-        
-    if(ResetReasonPowerOn()) // Only if we can trust stability from a good restart
-    {
-      ALOG_INF(PSTR("Previous start was safe, so RTCSettingsSave trusted"));
-      RtcSettingsSave();
-    }
-    #endif // ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
-
-    delay(150); // Allow time for the OTA success response to reach the host
-
-    ALOG_IMP(PSTR(D_LOG_UPLOAD "OTA " D_SUCCESSFUL ". " D_RESTARTING));
-    Serial.flush();
-    ESP.restart();
-	});
-
-  ArduinoOTA.begin();
-  ota_init_success = true;
-
-  ALOG_IMP(PSTR(D_LOG_OTA "Started"));
-
-}
-
-
-void mSupport::ArduinoOtaLoop(void)
-{
-  #ifdef ESP8266
-  MDNS.update();
-  #endif
-  // if(!ota_init_success){ Serial.println("block OTA"); return; }
-  ArduinoOTA.handle();
-  // Once OTA is triggered, only handle that and dont do other stuff. (otherwise it fails)
-  // Note async stuff can still occur, so I need to disable them
-  while (arduino_ota_triggered){ 
-    ArduinoOTA.handle(); 
-    delay(0); // yield() is ESP8266 specific, delay(0) works for both ESP32 and ESP8266
-  }
-}
-
-#endif  // USE_ARDUINO_OTA
 
 
 char* mSupport::float2CString(float number, unsigned char prec, char *s)
@@ -2449,86 +2060,6 @@ void mSupport::PerformEverySecond(void)
 void mSupport::CheckResetConditions()
 {
 
-  #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
-  if (tkr_set->runtime.restart_flag && CommandsReady()) {
-      if ((214 == tkr_set->runtime.restart_flag) ||          // Reset 4
-          (215 == tkr_set->runtime.restart_flag) ||          // Reset 5
-          (216 == tkr_set->runtime.restart_flag)) {          // Reset 6
-        // Backup current SSIDs and Passwords
-        char storage_ssid1[strlen(SettingsText(SET_STASSID1)) +1];
-        strncpy(storage_ssid1, SettingsText(SET_STASSID1), sizeof(storage_ssid1));
-        char storage_ssid2[strlen(SettingsText(SET_STASSID2)) +1];
-        strncpy(storage_ssid2, SettingsText(SET_STASSID2), sizeof(storage_ssid2));
-        char storage_pass1[strlen(SettingsText(SET_STAPWD1)) +1];
-        strncpy(storage_pass1, SettingsText(SET_STAPWD1), sizeof(storage_pass1));
-        char storage_pass2[strlen(SettingsText(SET_STAPWD2)) +1];
-        strncpy(storage_pass2, SettingsText(SET_STAPWD2), sizeof(storage_pass2));
-
-        char storage_mqtthost[strlen(SettingsText(SET_MQTT_HOST)) +1];
-        strncpy(storage_mqtthost, SettingsText(SET_MQTT_HOST), sizeof(storage_mqtthost));
-        char storage_mqttuser[strlen(SettingsText(SET_MQTT_USER)) +1];
-        strncpy(storage_mqttuser, SettingsText(SET_MQTT_USER), sizeof(storage_mqttuser));
-        char storage_mqttpwd[strlen(SettingsText(SET_MQTT_PWD)) +1];
-        strncpy(storage_mqttpwd, SettingsText(SET_MQTT_PWD), sizeof(storage_mqttpwd));
-        char storage_mqtttopic[strlen(SettingsText(SET_MQTT_TOPIC)) +1];
-        strncpy(storage_mqtttopic, SettingsText(SET_MQTT_TOPIC), sizeof(storage_mqtttopic));
-        uint16_t mqtt_port = Settings->mqtt_port;
-
-//        if (216 == tkr_set->runtime.restart_flag) {
-          // Backup mqtt host, port, client, username and password
-//        }
-        if ((215 == tkr_set->runtime.restart_flag) ||        // Reset 5
-            (216 == tkr_set->runtime.restart_flag)) {        // Reset 6
-          SettingsErase(2);  // Erase all flash from program end to end of physical excluding optional filesystem
-        }
-        SettingsDefault();
-        // Restore current SSIDs and Passwords
-        SettingsUpdateText(SET_STASSID1, storage_ssid1);
-        SettingsUpdateText(SET_STASSID2, storage_ssid2);
-        SettingsUpdateText(SET_STAPWD1, storage_pass1);
-        SettingsUpdateText(SET_STAPWD2, storage_pass2);
-        if (216 == tkr_set->runtime.restart_flag) {          // Reset 6
-          // Restore the mqtt host, port, client, username and password
-          SettingsUpdateText(SET_MQTT_HOST, storage_mqtthost);
-          SettingsUpdateText(SET_MQTT_USER, storage_mqttuser);
-          SettingsUpdateText(SET_MQTT_PWD, storage_mqttpwd);
-          SettingsUpdateText(SET_MQTT_TOPIC, storage_mqtttopic);
-          Settings->mqtt_port = mqtt_port;
-        }
-
-        XdrvCall(FUNC_RESET_SETTINGS);
-
-        tkr_set->runtime.restart_flag = 3;                   // Finish backlog then Restart 1
-      }
-      else if (213 == tkr_set->runtime.restart_flag) {       // Reset 3
-        SettingsSdkErase();  // Erase flash SDK parameters
-        tkr_set->runtime.restart_flag = 2;                   // Restart 1
-      }
-      else if (212 == tkr_set->runtime.restart_flag) {       // Reset 2
-        SettingsErase(0);    // Erase all flash from program end to end of physical flash
-        tkr_set->runtime.restart_flag = 211;                 // Reset 1
-      }
-
-      if (211 == tkr_set->runtime.restart_flag) {            // Reset 1
-        SettingsDefault();
-        tkr_set->runtime.restart_flag = 3;                   // Finish backlog then Restart 1
-      }
-
-      if (2 == tkr_set->runtime.restart_flag) {              // Restart 1
-        XsnsXdrvCall(FUNC_ABOUT_TO_RESTART);
-        SettingsSaveAll();
-      }
-
-      tkr_set->runtime.restart_flag--;
-      if (tkr_set->runtime.restart_flag <= 0) {
-        AddLog(LOG_LEVEL_INFO, PSTR(D_LOG_APPLICATION "%s"), (tkr_set->runtime.restart_halt) ? PSTR("Halted") : (tkr_set->runtime.restart_deepsleep) ? PSTR("Sleeping") : PSTR(D_RESTARTING));
-        EspRestart();
-      }
-    }
-    #endif
-
-
-
     if (tkr_set->runtime.restart_flag && (tkr_set->runtime.backlog_pointer == tkr_set->runtime.backlog_index)) {
       if ((214 == tkr_set->runtime.restart_flag) || (215 == tkr_set->runtime.restart_flag) || (216 == tkr_set->runtime.restart_flag)) {
 // Backup current SSIDs and Passwords
@@ -2723,23 +2254,8 @@ void mSupport::EspRestart(void)
     ESP.restart(); //ESP_Restart();
   // }
 
-  //  ResetPwm();
-  // WiFi_Radio_Shutdown(true);
-  // CrashDumpClear();           // Clear the stack dump in RTC
-
-  // if (restart_halt) {
-  //   while (1) {
-  //     OsWatchLoop();          // Feed OsWatch timer to prevent restart
-  //     SetLedLink(1);          // Wifi led on
-  //     delay(200);             // Satisfy SDK
-  //     SetLedLink(0);          // Wifi led off
-  //     delay(800);             // Satisfy SDK
-  //   }
-  // } else {
-  //   ESP_Restart();
-  // }
   // delay(100);                 // Allow time for message xfer - disabled v6.1.0b
-  // //if (Settings.flag_system.mqtt_enabled) MqttDisconnect();
+  // //if (Settings.sysopt_system.bit.mqtt_enabled) MqttDisconnect();
   // WifiDisconnect();
   // //tkr_sup->CrashDumpClear();
   // ESP.restart();            // This results in exception 3 on restarts on core 2.3.0

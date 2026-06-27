@@ -26,7 +26,9 @@
    // until devices can reliably be used without compiling per device
   
 
+  #ifdef ESP32
   #define USE_MODULE_CORE_FILESYSTEM
+  #endif
     
     
     
@@ -50,7 +52,7 @@
 // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
-  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+  #define ENABLE_FEATURE__DATABUFFER_LOCK
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
   
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
@@ -81,8 +83,11 @@
    // until devices can reliably be used without compiling per device
   
 
+  #ifdef ESP32
   #define USE_MODULE_CORE_FILESYSTEM
+  #endif
     
+#define USE_MODULE_CORE_PINVIEWER
     
 
   //webserver?
@@ -104,7 +109,7 @@
 // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
-  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+  #define ENABLE_FEATURE__DATABUFFER_LOCK
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
   
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
@@ -133,8 +138,9 @@
    // until devices can reliably be used without compiling per device
   
 
+  #ifdef ESP32
   #define USE_MODULE_CORE_FILESYSTEM
-    
+  #endif
     
     
     
@@ -157,7 +163,7 @@
 // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
-  #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+  #define ENABLE_FEATURE__DATABUFFER_LOCK
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
   
   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
@@ -190,7 +196,9 @@
    // until devices can reliably be used without compiling per device
   
 
+  #ifdef ESP32
   #define USE_MODULE_CORE_FILESYSTEM
+  #endif
     
     
     
@@ -214,7 +222,7 @@
 // // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
-//   #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
+//   #define ENABLE_FEATURE__DATABUFFER_LOCK
 //   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
   
 //   #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET

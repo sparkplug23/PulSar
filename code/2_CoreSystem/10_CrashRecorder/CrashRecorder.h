@@ -108,26 +108,26 @@ class CrashRecorder :
 
         // Called by panic wrappers (IRAM_ATTR safe)
         void IRAM_ATTR CaptureFromFrame(void* frame);
-        
-// void CrashRTC_CaptureFromFrame(XtExcFrame* exc_frame);
-bool Create_CrashDumpJSON(char* out, uint16_t out_len) const;
 
-  //         void CrashHook_Install();              // call once in Init()
-  //         bool CrashRTC_HasRecord();             // true if RTC contains crash PCs
-  //         void CrashRTC_Print();
-  //         void CrashRTC_PrintAndClear();         // ALOG_INF print PCs then clear
-          
-  //         bool Create_CrashDump(char* out, uint16_t out_len);
-          void Splash__CrashDump();
+        // void CrashRTC_CaptureFromFrame(XtExcFrame* exc_frame);
+        bool Create_CrashDumpJSON(char* out, uint16_t out_len) const;
 
-  //         void CrashRTC_Clear();
-  // void CrashRTC_CaptureFromFrame(void* frame);
+        //         void CrashHook_Install();              // call once in Init()
+        //         bool CrashRTC_HasRecord();             // true if RTC contains crash PCs
+        //         void CrashRTC_Print();
+        //         void CrashRTC_PrintAndClear();         // ALOG_INF print PCs then clear
 
-          
-          void FS_EnsureCrashReportFile();
-  //         bool CrashDump_WriteToFile(bool clear_rtc_after_write = true);
-          bool FS_FileExists(const char* path) const;
-          bool FS_WriteAll(const char* path, const char* data, size_t len) const;
+        //         bool Create_CrashDump(char* out, uint16_t out_len);
+        void Splash__CrashDump();
+
+        //         void CrashRTC_Clear();
+        // void CrashRTC_CaptureFromFrame(void* frame);
+
+
+        void FS_EnsureCrashReportFile();
+        //         bool CrashDump_WriteToFile(bool clear_rtc_after_write = true);
+        bool FS_FileExists(const char* path) const;
+        bool FS_WriteAll(const char* path, const char* data, size_t len) const;
 
 
       #endif

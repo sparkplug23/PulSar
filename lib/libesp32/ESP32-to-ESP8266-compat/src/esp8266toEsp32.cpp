@@ -121,18 +121,46 @@ void _analogInit(void) {
 
 // set the timer number for a GPIO, ignore if the GPIO is not set or Timer number is invalid
 // Timer range is 0..3
-void ledcSetTimer(uint8_t chan, uint8_t timer) {
-  if (timer >= MAX_TIMERS || chan > MAX_PWMS) { return; }
+// void ledcSetTimer(uint8_t chan, uint8_t timer) {
+//   if (timer >= MAX_TIMERS || chan > MAX_PWMS) { return; }
+//   uint8_t cur_timer = pwm_timer[chan];
+
+//   if (timer != cur_timer) {     // ignore if the timer number is the same
+//     pwm_timer[chan] = timer;    // change the timer value
+//     // apply to hardware
+//     uint8_t group=(chan/8);
+//     uint8_t channel=(chan%8);
+//     esp_err_t ret = ledc_bind_channel_timer((ledc_mode_t) group, (ledc_channel_t) channel, (ledc_timer_t) timer);
+//     if (ret != ESP_OK) {
+//       Serial.printf( "PWM: ledc_bind_channel_timer %i failed ret=%i", timer, ret);
+//     }
+//   }
+// }
+void ledcSetTimer(uint8_t chan, uint8_t timer)
+{
+  if (timer >= MAX_TIMERS || chan >= MAX_PWMS)
+  {
+    return;
+  }
+
   uint8_t cur_timer = pwm_timer[chan];
 
-  if (timer != cur_timer) {     // ignore if the timer number is the same
-    pwm_timer[chan] = timer;    // change the timer value
-    // apply to hardware
-    uint8_t group=(chan/8);
-    uint8_t channel=(chan%8);
-    esp_err_t ret = ledc_bind_channel_timer((ledc_mode_t) group, (ledc_channel_t) channel, (ledc_timer_t) timer);
-    if (ret != ESP_OK) {
-      Serial.printf( "PWM: ledc_bind_channel_timer %i failed ret=%i", timer, ret);
+  if (timer != cur_timer)
+  {
+    pwm_timer[chan] = timer;
+
+    uint8_t group   = chan / 8;
+    uint8_t channel = chan % 8;
+
+    esp_err_t ret = ledc_bind_channel_timer(
+      (ledc_mode_t)group,
+      (ledc_channel_t)channel,
+      (ledc_timer_t)timer
+    );
+
+    if (ret != ESP_OK)
+    {
+      Serial.printf("PWM: ledc_bind_channel_timer %i failed ret=%i", timer, ret);
     }
   }
 }
@@ -144,12 +172,37 @@ int32_t analogGetChannel2(uint32_t pin) {    // returns -1 if uallocated
 }
 
 /* Convert a GPIO number to the pointer of the Timer number */
-int32_t _analog_pin2timer(uint32_t pin) {    // returns -1 if uallocated
-  _analogInit();      // make sure the mapping array is initialized
-  int chan = analogGetChannel2(pin);
-  if (chan < 0) { return -1; }
+// int32_t _analog_pin2timer(uint32_t pin) {    // returns -1 if uallocated
+//   _analogInit();      // make sure the mapping array is initialized
+//   int chan = analogGetChannel2(pin);
+//   if (chan < 0) { return -1; }
+//   int32_t timer = pwm_timer[chan];
+//   if (timer > MAX_TIMERS) { timer = 0; }
+//   return timer;
+// }
+int32_t _analog_pin2timer(uint32_t pin)
+{
+  if (pin >= SOC_GPIO_PIN_COUNT)
+  {
+    return -1;
+  }
+
+  _analogInit();
+
+  int32_t chan = analogGetChannel2(pin);
+
+  if (chan < 0 || chan >= MAX_PWMS)
+  {
+    return -1;
+  }
+
   int32_t timer = pwm_timer[chan];
-  if (timer > MAX_TIMERS) { timer = 0; }
+
+  if (timer >= MAX_TIMERS)
+  {
+    timer = 0;
+  }
+
   return timer;
 }
 
@@ -157,24 +210,49 @@ int32_t _analog_pin2timer(uint32_t pin) {    // returns -1 if uallocated
 // Keep in mind that Timer 0 is reserved, which leaves only 3 timers available
 //
 // This function does not reserve the timer, it is reserved only when you assign a GPIO to it
-static int32_t analogNextFreeTimer() {
-  _analogInit();      // make sure the mapping array is initialized
+// static int32_t analogNextFreeTimer() {
+//   _analogInit();      // make sure the mapping array is initialized
+//   bool assigned[MAX_TIMERS] = {};
+//   assigned[0] = true;
+
+//   for (uint32_t chan = 0; chan < MAX_PWMS; chan++) {
+//     assigned[pwm_timer[chan]] = true;
+//   }
+
+//   // find first free
+//   for (uint32_t j = 0; j < MAX_TIMERS; j++) {
+//     if (!assigned[j]) {
+//       // AddLog(LOG_LEVEL_INFO, "PWM: analogNextFreeTimer next_timer=%i", j);
+//       return j;
+//       }
+//   }
+//   // AddLog(LOG_LEVEL_INFO, "PWM: analogNextFreeTimer no free timer");
+//   return -1;    // none available
+// }
+static int32_t analogNextFreeTimer()
+{
+  _analogInit();
+
   bool assigned[MAX_TIMERS] = {};
   assigned[0] = true;
 
-  for (uint32_t chan = 0; chan < MAX_PWMS; chan++) {
-    assigned[pwm_timer[chan]] = true;
+  for (uint32_t chan = 0; chan < MAX_PWMS; chan++)
+  {
+    if (pwm_timer[chan] < MAX_TIMERS)
+    {
+      assigned[pwm_timer[chan]] = true;
+    }
   }
 
-  // find first free
-  for (uint32_t j = 0; j < MAX_TIMERS; j++) {
-    if (!assigned[j]) {
-      // AddLog(LOG_LEVEL_INFO, "PWM: analogNextFreeTimer next_timer=%i", j);
+  for (uint32_t j = 0; j < MAX_TIMERS; j++)
+  {
+    if (!assigned[j])
+    {
       return j;
-      }
+    }
   }
-  // AddLog(LOG_LEVEL_INFO, "PWM: analogNextFreeTimer no free timer");
-  return -1;    // none available
+
+  return -1;
 }
 
 // input range is in full range, ledc needs bits
@@ -206,57 +284,176 @@ void analogWriteRange(uint32_t range, int32_t pin) {
 // `0`: set to global value
 // `-1`: keep unchanged
 // if pin < 0 then change global value for timer 0
-void analogWriteFreqRange(int32_t freq, int32_t range, int32_t pin) {
-  // AddLog(LOG_LEVEL_INFO, "PWM: analogWriteFreqRange freq=%i range=%i pin=%i", freq, range, pin);
-  _analogInit();      // make sure the mapping array is initialized
-  uint32_t timer0_freq = timer_freq_hz[0];          // global values
-  uint8_t  timer0_res = timer_duty_resolution[0];
+// void analogWriteFreqRange(int32_t freq, int32_t range, int32_t pin) {
+//   // AddLog(LOG_LEVEL_INFO, "PWM: analogWriteFreqRange freq=%i range=%i pin=%i", freq, range, pin);
+//   _analogInit();      // make sure the mapping array is initialized
+//   uint32_t timer0_freq = timer_freq_hz[0];          // global values
+//   uint8_t  timer0_res = timer_duty_resolution[0];
+
+//   int32_t timer = 0;
+//   int32_t res = timer0_res;
+//   if (pin < 0) {
+//     if (freq <= 0) { freq = timer0_freq; }
+//     if (range > 0) {
+//       res = _analogGetResolution(range);
+//       if (res >= LEDC_TIMER_BIT_MAX) { return; }
+//     }
+//   } else {
+//     int32_t chan = analogGetChannel2(pin);
+//     if (chan < 0) { return; }
+//     timer = pwm_timer[chan];
+//     if (freq < 0) { freq = timer_freq_hz[timer]; }
+//     if (freq == 0) { freq = timer0_freq; }
+
+//     res = timer0_res;
+//     if (range < 0) { res = timer_duty_resolution[timer]; }
+//     if (range != 0) { res = _analogGetResolution(range); }
+//     if (res >= LEDC_TIMER_BIT_MAX) { return; }
+
+//     if (freq == timer0_freq && res == timer0_res) {
+//       // settings match with the global value
+//       if (timer != 0) {
+//         ledcSetTimer(chan, 0);
+//         timer = 0;
+//       }
+//       // else nothing to change
+//     } else {
+//       // specific (non-global) values, require a specific timer
+//       if (timer == 0) {   // currently using the global timer, need to change
+//         // we need to allocate a new timer to this pin
+//         int32_t next_timer = analogNextFreeTimer();
+//         if (next_timer < 0) {
+//           Serial.printf( "PWM: failed to assign a timer to GPIO %i", pin);
+//         } else {
+//           ledcSetTimer(chan, next_timer);
+//           timer = next_timer;
+//         }
+//       }
+//     }
+//     pwm_timer[chan] = timer;
+//   }
+
+//   // AddLog(LOG_LEVEL_INFO, "PWM: analogWriteFreq actual freq=%i res=%i pin=%i timer=%i", freq, res, pin, timer);
+//   if (timer_freq_hz[timer] != freq || timer_duty_resolution[timer] != res) {
+//     timer_freq_hz[timer] = freq;
+//     timer_duty_resolution[timer] = res;
+//     _analog_applyTimerConfig(timer);
+//   }
+// }
+void analogWriteFreqRange(int32_t freq, int32_t range, int32_t pin)
+{
+  _analogInit();
+
+  if (pin >= (int32_t)SOC_GPIO_PIN_COUNT)
+  {
+    return;
+  }
+
+  uint32_t timer0_freq = timer_freq_hz[0];
+  uint8_t  timer0_res  = timer_duty_resolution[0];
 
   int32_t timer = 0;
-  int32_t res = timer0_res;
-  if (pin < 0) {
-    if (freq <= 0) { freq = timer0_freq; }
-    if (range > 0) {
-      res = _analogGetResolution(range);
-      if (res >= LEDC_TIMER_BIT_MAX) { return; }
+  int32_t res   = timer0_res;
+
+  if (pin < 0)
+  {
+    if (freq <= 0)
+    {
+      freq = timer0_freq;
     }
-  } else {
+
+    if (range > 0)
+    {
+      res = _analogGetResolution(range);
+
+      if (res >= LEDC_TIMER_BIT_MAX)
+      {
+        return;
+      }
+    }
+  }
+  else
+  {
     int32_t chan = analogGetChannel2(pin);
-    if (chan < 0) { return; }
+
+    if (chan < 0 || chan >= MAX_PWMS)
+    {
+      return;
+    }
+
     timer = pwm_timer[chan];
-    if (freq < 0) { freq = timer_freq_hz[timer]; }
-    if (freq == 0) { freq = timer0_freq; }
+
+    if (timer >= MAX_TIMERS)
+    {
+      timer = 0;
+    }
+
+    if (freq < 0)
+    {
+      freq = timer_freq_hz[timer];
+    }
+
+    if (freq == 0)
+    {
+      freq = timer0_freq;
+    }
 
     res = timer0_res;
-    if (range < 0) { res = timer_duty_resolution[timer]; }
-    if (range != 0) { res = _analogGetResolution(range); }
-    if (res >= LEDC_TIMER_BIT_MAX) { return; }
 
-    if (freq == timer0_freq && res == timer0_res) {
-      // settings match with the global value
-      if (timer != 0) {
+    if (range < 0)
+    {
+      res = timer_duty_resolution[timer];
+    }
+
+    if (range != 0)
+    {
+      res = _analogGetResolution(range);
+    }
+
+    if (res >= LEDC_TIMER_BIT_MAX)
+    {
+      return;
+    }
+
+    if (freq == timer0_freq && res == timer0_res)
+    {
+      if (timer != 0)
+      {
         ledcSetTimer(chan, 0);
         timer = 0;
       }
-      // else nothing to change
-    } else {
-      // specific (non-global) values, require a specific timer
-      if (timer == 0) {   // currently using the global timer, need to change
-        // we need to allocate a new timer to this pin
+    }
+    else
+    {
+      if (timer == 0)
+      {
         int32_t next_timer = analogNextFreeTimer();
-        if (next_timer < 0) {
-          Serial.printf( "PWM: failed to assign a timer to GPIO %i", pin);
-        } else {
+
+        if (next_timer < 0)
+        {
+          Serial.printf("PWM: failed to assign a timer to GPIO %i", pin);
+        }
+        else
+        {
           ledcSetTimer(chan, next_timer);
           timer = next_timer;
         }
       }
     }
-    pwm_timer[chan] = timer;
+
+    if (chan >= 0 && chan < MAX_PWMS)
+    {
+      pwm_timer[chan] = timer;
+    }
   }
 
-  // AddLog(LOG_LEVEL_INFO, "PWM: analogWriteFreq actual freq=%i res=%i pin=%i timer=%i", freq, res, pin, timer);
-  if (timer_freq_hz[timer] != freq || timer_duty_resolution[timer] != res) {
+  if (timer < 0 || timer >= MAX_TIMERS)
+  {
+    return;
+  }
+
+  if (timer_freq_hz[timer] != (uint32_t)freq || timer_duty_resolution[timer] != res)
+  {
     timer_freq_hz[timer] = freq;
     timer_duty_resolution[timer] = res;
     _analog_applyTimerConfig(timer);
@@ -269,66 +466,172 @@ void analogWriteFreq(uint32_t freq, int32_t pin) {
 }
 
 // find next unassigned channel, or -1 if none available
-static int32_t findEmptyChannel() {
+// static int32_t findEmptyChannel() {
+//   bool chan_used[MAX_PWMS] = {0};
+//   for (uint32_t pin = 0; pin < SOC_GPIO_PIN_COUNT; pin++) {
+//     if (pin_to_channel[pin] > 0) {
+//       chan_used[pin_to_channel[pin] - 1] = true;
+//     }
+//   }
+
+//   // find empty slot
+//   for (uint32_t chan = 0; chan < MAX_PWMS; chan++) {
+//     if (!chan_used[chan]) {
+//       return chan;
+//     }
+//   }
+//   return -1;
+// }
+
+static int32_t findEmptyChannel()
+{
   bool chan_used[MAX_PWMS] = {0};
-  for (uint32_t pin = 0; pin < SOC_GPIO_PIN_COUNT; pin++) {
-    if (pin_to_channel[pin] > 0) {
-      chan_used[pin_to_channel[pin] - 1] = true;
+
+// #ifdef USE_MODULE_DRIVERS_CAMERA
+  chan_used[0] = true;  // camera XCLK owns LEDC channel 0
+// #endif
+
+  for (uint32_t pin = 0; pin < SOC_GPIO_PIN_COUNT; pin++)
+  {
+    const int8_t stored_channel = pin_to_channel[pin];
+
+    if ((stored_channel > 0) && (stored_channel <= MAX_PWMS))
+    {
+      chan_used[stored_channel - 1] = true;
     }
   }
 
-  // find empty slot
-  for (uint32_t chan = 0; chan < MAX_PWMS; chan++) {
-    if (!chan_used[chan]) {
+  for (uint32_t chan = 0; chan < MAX_PWMS; chan++)
+  {
+    if (!chan_used[chan])
+    {
       return chan;
     }
   }
+
   return -1;
 }
 
-int32_t analogAttach(uint32_t pin, bool output_invert) {    // returns ledc channel used, or -1 if failed
-  _analogInit();      // make sure the mapping array is initialized
-  // Find if pin is already attached
-  int32_t chan = analogGetChannel2(pin);
-  if (chan >= 0) { return chan; }
-  // Find an empty channel
-  chan = findEmptyChannel();
-  if (chan < 0) {
-    Serial.printf("PWM: no more PWM (ledc) channel for GPIO %i", pin);
+
+// int32_t analogAttach(uint32_t pin, bool output_invert) {    // returns ledc channel used, or -1 if failed
+//   _analogInit();      // make sure the mapping array is initialized
+//   // Find if pin is already attached
+//   int32_t chan = analogGetChannel2(pin);
+//   if (chan >= 0) { return chan; }
+//   // Find an empty channel
+//   chan = findEmptyChannel();
+//   if (chan < 0) {
+//     Serial.printf("PWM: no more PWM (ledc) channel for GPIO %i", pin);
+//     return -1;
+//   }
+
+//   // new channel attached to pin
+//   pin_to_channel[pin] = chan + 1;
+
+//   // ledcAttachPin(pin, channel);  -- replicating here because we want the default duty
+//   // timer0 used by default
+//   uint8_t group=(chan/8);
+//   uint8_t channel=(chan%8);
+//   uint8_t timer=0;
+
+//   // AddLog(LOG_LEVEL_INFO, "PWM: ledc_channel pin=%i out_invert=%i", pin, output_invert);
+//   ledc_channel_config_t ledc_channel = {
+//       (int)pin,          // gpio
+//       (ledc_mode_t)group,        // speed-mode
+//       (ledc_channel_t)channel,      // channel
+//       (ledc_intr_type_t)LEDC_INTR_DISABLE,  // intr_type
+//       (ledc_timer_t)timer,        // timer_sel
+//       0,            // duty
+//       0,            // hpoint
+// #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 4, 0)
+//       (ledc_sleep_mode_t) 2,
+// #endif
+//       { output_invert ? 1u : 0u },// output_invert
+//   };
+//   ledc_channel_config(&ledc_channel);
+
+//   // AddLog(LOG_LEVEL_INFO, "PWM: New attach pin %d to channel %d", pin, channel);
+//   return chan;
+// }
+int32_t analogAttach(uint32_t pin, bool output_invert)
+{
+  if (pin >= SOC_GPIO_PIN_COUNT)
+  {
+    Serial.printf("PWM: analogAttach invalid GPIO %u", pin);
     return -1;
   }
 
-  // new channel attached to pin
+  _analogInit();
+
+  int32_t chan = analogGetChannel2(pin);
+
+  if (chan >= 0)
+  {
+    return chan;
+  }
+
+  chan = findEmptyChannel();
+
+  
+  // Serial.printf("PWM: analogAttach chan %u", chan);
+
+  if (chan < 0 || chan >= MAX_PWMS)
+  {
+    Serial.printf("PWM: no more PWM (ledc) channel for GPIO %u", pin);
+    return -1;
+  }
+
   pin_to_channel[pin] = chan + 1;
 
-  // ledcAttachPin(pin, channel);  -- replicating here because we want the default duty
-  // timer0 used by default
-  uint8_t group=(chan/8);
-  uint8_t channel=(chan%8);
-  uint8_t timer=0;
+  uint8_t group   = chan / 8;
+  uint8_t channel = chan % 8;
+  uint8_t timer   = 0;
 
-  // AddLog(LOG_LEVEL_INFO, "PWM: ledc_channel pin=%i out_invert=%i", pin, output_invert);
   ledc_channel_config_t ledc_channel = {
-      (int)pin,          // gpio
-      (ledc_mode_t)group,        // speed-mode
-      (ledc_channel_t)channel,      // channel
-      (ledc_intr_type_t)LEDC_INTR_DISABLE,  // intr_type
-      (ledc_timer_t)timer,        // timer_sel
-      0,            // duty
-      0,            // hpoint
+      (int)pin,
+      (ledc_mode_t)group,
+      (ledc_channel_t)channel,
+      (ledc_intr_type_t)LEDC_INTR_DISABLE,
+      (ledc_timer_t)timer,
+      0,
+      0,
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 4, 0)
       (ledc_sleep_mode_t) 2,
 #endif
-      { output_invert ? 1u : 0u },// output_invert
+      { output_invert ? 1u : 0u },
   };
-  ledc_channel_config(&ledc_channel);
 
-  // AddLog(LOG_LEVEL_INFO, "PWM: New attach pin %d to channel %d", pin, channel);
+  esp_err_t ret = ledc_channel_config(&ledc_channel);
+
+  if (ret != ESP_OK)
+  {
+    Serial.printf("PWM: ledc_channel_config failed pin=%u chan=%d ret=%d", pin, chan, ret);
+    pin_to_channel[pin] = 0;
+    return -1;
+  }
+
   return chan;
 }
 
-void analogDetach(uint32_t pin) {
-  if (pin_to_channel[pin] > 0) {
+// void analogDetach(uint32_t pin) {
+//   if (pin_to_channel[pin] > 0) {
+// #if ESP_IDF_VERSION_MAJOR < 5
+//     ledcDetachPin(pin);
+// #else
+//     ledcDetach(pin);
+// #endif
+//     pin_to_channel[pin] = 0;
+//   }
+// }
+void analogDetach(uint32_t pin)
+{
+  if (pin >= SOC_GPIO_PIN_COUNT)
+  {
+    return;
+  }
+
+  if (pin_to_channel[pin] > 0)
+  {
 #if ESP_IDF_VERSION_MAJOR < 5
     ledcDetachPin(pin);
 #else
@@ -344,41 +647,108 @@ void analogDetachAll(void) {
   }
 }
 
-extern "C" uint32_t ledcReadFreq2(uint8_t chan) {
-// extern "C" uint32_t __wrap_ledcReadFreq(uint8_t chan) {
-  if (chan > MAX_PWMS) {
-    return 0;     // wrong channel
+// extern "C" uint32_t ledcReadFreq2(uint8_t chan) {
+// // extern "C" uint32_t __wrap_ledcReadFreq(uint8_t chan) {
+//   if (chan > MAX_PWMS) {
+//     return 0;     // wrong channel
+//   }
+//   int32_t timer = pwm_timer[chan];
+//   int32_t freq = timer_freq_hz[timer];
+//   return freq;
+// }
+extern "C" uint32_t ledcReadFreq2(uint8_t chan)
+{
+  if (chan >= MAX_PWMS)
+  {
+    return 0;
   }
+
   int32_t timer = pwm_timer[chan];
-  int32_t freq = timer_freq_hz[timer];
-  return freq;
+
+  if (timer < 0 || timer >= MAX_TIMERS)
+  {
+    return 0;
+  }
+
+  return timer_freq_hz[timer];
 }
 
-uint8_t ledcReadResolution(uint8_t chan) {
-  if (chan > MAX_PWMS) {
-    return 0;     // wrong channel
+// uint8_t ledcReadResolution(uint8_t chan) {
+//   if (chan > MAX_PWMS) {
+//     return 0;     // wrong channel
+//   }
+//   int32_t timer = pwm_timer[chan];
+//   int32_t res = timer_duty_resolution[timer];
+//   return res;
+// }
+uint8_t ledcReadResolution(uint8_t chan)
+{
+  if (chan >= MAX_PWMS)
+  {
+    return 0;
   }
+
   int32_t timer = pwm_timer[chan];
-  int32_t res = timer_duty_resolution[timer];
-  return res;
+
+  if (timer < 0 || timer >= MAX_TIMERS)
+  {
+    return 0;
+  }
+
+  return timer_duty_resolution[timer];
 }
 
-int32_t ledcReadDutyResolution(uint8_t pin) {
+// int32_t ledcReadDutyResolution(uint8_t pin) {
+//   int32_t chan = analogGetChannel2(pin);
+//   if (chan >= 0) {
+//     return (1 << ledcReadResolution(chan));
+//   }
+//   return -1;
+// }
+int32_t ledcReadDutyResolution(uint8_t pin)
+{
+  if (pin >= SOC_GPIO_PIN_COUNT)
+  {
+    return -1;
+  }
+
   int32_t chan = analogGetChannel2(pin);
-  if (chan >= 0) {
+
+  if (chan >= 0 && chan < MAX_PWMS)
+  {
     return (1 << ledcReadResolution(chan));
   }
+
   return -1;
 }
 
 // Version of ledcRead that works for both Core2 and Core3
 // Return -1 if pin is not configured as PWM
-int32_t ledcRead2(uint8_t pin) {
+// int32_t ledcRead2(uint8_t pin) {
+//   int32_t chan = analogGetChannel2(pin);
+//   if (chan >= 0) {
+//     uint8_t group=(chan/8), channel=(chan%8);
+//     return ledc_get_duty((ledc_mode_t)group, (ledc_channel_t)channel);
+//   }
+//   return -1;
+// }
+int32_t ledcRead2(uint8_t pin)
+{
+  if (pin >= SOC_GPIO_PIN_COUNT)
+  {
+    return -1;
+  }
+
   int32_t chan = analogGetChannel2(pin);
-  if (chan >= 0) {
-    uint8_t group=(chan/8), channel=(chan%8);
+
+  if (chan >= 0 && chan < MAX_PWMS)
+  {
+    uint8_t group   = chan / 8;
+    uint8_t channel = chan % 8;
+
     return ledc_get_duty((ledc_mode_t)group, (ledc_channel_t)channel);
   }
+
   return -1;
 }
 
@@ -406,50 +776,145 @@ extern "C" void __wrap__Z11analogWritehi(uint8_t pin, int val) {
   implementation changes.
 */
 
+// void analogWritePhase(uint8_t pin, uint32_t duty, uint32_t phase)
+// {
+//   int32_t chan = analogGetChannel2(pin);
+//   if (chan < 0) {    // not yet allocated, try to allocate
+//     chan = analogAttach(pin);
+//     if (chan < 0) {
+//       Serial.printf( "PWM: analogWritePhase invalid chan=%i", chan);
+//       return;
+//     }   // failed
+//   }
+//   int32_t timer = _analog_pin2timer(pin);
+//   if (timer < 0) {
+//     Serial.printf( "PWM: analogWritePhase invalid timer=%i", timer);
+//     return;
+//   }
+
+//   int32_t pwm_bit_num = timer_duty_resolution[timer];
+//   // AddLog(LOG_LEVEL_INFO, "PWM: analogWritePhase pin=%i chan=%i duty=%03X phase=%03X pwm_bit_num=%i", pin, chan, duty, phase, pwm_bit_num);
+
+//   if (duty >> (pwm_bit_num-1) ) ++duty;   // input is 0..1023 but PWM takes 0..1024 - so we skip at mid-range. It creates a small non-linearity
+//   if (phase >> (pwm_bit_num-1) ) ++phase;
+
+//   uint8_t group=(chan/8), channel=(chan%8);
+
+//   //Fixing if all bits in resolution is set = LEDC FULL ON
+//   uint32_t max_duty = (1 << pwm_bit_num) - 1;
+//   phase = phase & max_duty;
+
+//   esp_err_t err1, err2;
+//   err1 = ledc_set_duty_with_hpoint((ledc_mode_t)group, (ledc_channel_t)channel, duty, phase);
+//   err2 = ledc_update_duty((ledc_mode_t)group, (ledc_channel_t)channel);
+//   // AddLog(LOG_LEVEL_INFO, "PWM: err1=%i err2=%i", err1, err2);
+// }
+
 void analogWritePhase(uint8_t pin, uint32_t duty, uint32_t phase)
 {
-  int32_t chan = analogGetChannel2(pin);
-  if (chan < 0) {    // not yet allocated, try to allocate
-    chan = analogAttach(pin);
-    if (chan < 0) {
-      Serial.printf( "PWM: analogWritePhase invalid chan=%i", chan);
-      return;
-    }   // failed
+  if (pin >= SOC_GPIO_PIN_COUNT)
+  {
+    Serial.printf("PWM: analogWritePhase invalid GPIO %u", pin);
+    return;
   }
+
+  int32_t chan = analogGetChannel2(pin);
+
+  if (chan < 0)
+  {
+    chan = analogAttach(pin);
+
+    if (chan < 0)
+    {
+      Serial.printf("PWM: analogWritePhase invalid chan=%i", chan);
+      return;
+    }
+  }
+
+  if (chan >= MAX_PWMS)
+  {
+    Serial.printf("PWM: analogWritePhase chan out of range=%i", chan);
+    return;
+  }
+
   int32_t timer = _analog_pin2timer(pin);
-  if (timer < 0) {
-    Serial.printf( "PWM: analogWritePhase invalid timer=%i", timer);
+
+  if (timer < 0 || timer >= MAX_TIMERS)
+  {
+    Serial.printf("PWM: analogWritePhase invalid timer=%i", timer);
     return;
   }
 
   int32_t pwm_bit_num = timer_duty_resolution[timer];
-  // AddLog(LOG_LEVEL_INFO, "PWM: analogWritePhase pin=%i chan=%i duty=%03X phase=%03X pwm_bit_num=%i", pin, chan, duty, phase, pwm_bit_num);
 
-  if (duty >> (pwm_bit_num-1) ) ++duty;   // input is 0..1023 but PWM takes 0..1024 - so we skip at mid-range. It creates a small non-linearity
-  if (phase >> (pwm_bit_num-1) ) ++phase;
+  if (pwm_bit_num <= 0)
+  {
+    Serial.printf("PWM: analogWritePhase invalid pwm_bit_num=%i", pwm_bit_num);
+    return;
+  }
 
-  uint8_t group=(chan/8), channel=(chan%8);
+  if (duty >> (pwm_bit_num - 1))
+  {
+    ++duty;
+  }
 
-  //Fixing if all bits in resolution is set = LEDC FULL ON
+  if (phase >> (pwm_bit_num - 1))
+  {
+    ++phase;
+  }
+
+  uint8_t group   = chan / 8;
+  uint8_t channel = chan % 8;
+
   uint32_t max_duty = (1 << pwm_bit_num) - 1;
   phase = phase & max_duty;
 
-  esp_err_t err1, err2;
-  err1 = ledc_set_duty_with_hpoint((ledc_mode_t)group, (ledc_channel_t)channel, duty, phase);
-  err2 = ledc_update_duty((ledc_mode_t)group, (ledc_channel_t)channel);
-  // AddLog(LOG_LEVEL_INFO, "PWM: err1=%i err2=%i", err1, err2);
+  esp_err_t err1 = ledc_set_duty_with_hpoint((ledc_mode_t)group, (ledc_channel_t)channel, duty, phase);
+  esp_err_t err2 = ledc_update_duty((ledc_mode_t)group, (ledc_channel_t)channel);
+
+  if ((err1 != ESP_OK) || (err2 != ESP_OK))
+  {
+    Serial.printf("PWM: analogWritePhase ledc error pin=%u chan=%d err1=%d err2=%d", pin, chan, err1, err2);
+  }
 }
 
 // get the timer number for a GPIO, -1 if not found
-int32_t analogGetTimer(uint8_t pin) {
+// int32_t analogGetTimer(uint8_t pin) {
+//   return _analog_pin2timer(pin);
+// }
+int32_t analogGetTimer(uint8_t pin)
+{
+  if (pin >= SOC_GPIO_PIN_COUNT)
+  {
+    return -1;
+  }
+
   return _analog_pin2timer(pin);
 }
 
-int32_t analogGetTimerForChannel(uint8_t chan) {
-  _analogInit();      // make sure the mapping array is initialized
-  if (chan > MAX_PWMS) { return -1; }
+// int32_t analogGetTimerForChannel(uint8_t chan) {
+//   _analogInit();      // make sure the mapping array is initialized
+//   if (chan > MAX_PWMS) { return -1; }
+//   int32_t timer = pwm_timer[chan];
+//   if (timer > MAX_TIMERS) { timer = 0; }
+//   return timer;
+// }
+int32_t analogGetTimerForChannel(uint8_t chan)
+{
+  _analogInit();
+
+  if (chan >= MAX_PWMS)
+  {
+    return -1;
+  }
+
   int32_t timer = pwm_timer[chan];
-  if (timer > MAX_TIMERS) { timer = 0; }
+
+  if (timer >= MAX_TIMERS)
+  {
+    timer = 0;
+  }
+
   return timer;
 }
 

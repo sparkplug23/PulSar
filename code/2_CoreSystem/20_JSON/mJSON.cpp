@@ -207,7 +207,7 @@ void JsonBuilder::Write_P(const char* formatP, ...)
 
 void JsonBuilder::Start(char* _buffer, uint16_t _length, uint16_t _buffer_size)
 {
-  PRINT_FLUSHED("JsonBuilder::Start(,,)");
+  // PRINT_FLUSHED("JsonBuilder::Start(,,)");
   writer.buffer = _buffer;
   writer.length = _length;
   writer.buffer_size = _buffer_size;

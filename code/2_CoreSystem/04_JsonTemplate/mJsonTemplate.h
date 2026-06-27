@@ -36,46 +36,73 @@ class mJsonTemplate :
      * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
      ************************************************************************************************/
 
-
     /************************************************************************************************
      * SECTION: Internal Functions
      ************************************************************************************************/
+    
+    /************************************************************************************************
+     * FILE: mJsonTemplate.h
+     *
+     * Replace the existing Internal Functions section with this block.
+     ************************************************************************************************/
 
-    void Template_Load();
-    bool ReadModuleTemplateFromProgmem();
-    #ifdef ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
-    void Templates__SaveHardcodedTemplateToFilesystem();
-    #endif
-        
+      void Template_Load();                    // Compatibility wrapper for old/manual task path.
+      bool ReadModuleTemplateFromProgmem();    // Compatibility wrapper for older call sites.
+
+      bool ModuleDeviceTemplate_CompileTime_Load_ModuleOnly(bool override_reloading_pass);
+      bool ModuleDeviceTemplate_CompileTime_Load_Late(bool override_reloading_pass);
+
+      bool ModuleDeviceTemplate_CompileTime_ApplyModuleTemplate_P(
+        const char* template_name,
+        const char* payload_p,
+        size_t payload_size
+      );
+
+      bool ModuleDeviceTemplate_CompileTime_ApplyJsonCommand_P(
+        const char* template_name,
+        const char* payload_p,
+        size_t payload_size
+      );
+
+      void ModuleDeviceTemplate_CompileTime_DevelopmentOverridePass();
+
+      void ModuleDeviceTemplate__LoadDefault();
+
+      #ifdef ENABLE_DEBUGFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+
+    /************************************************************************************************
+     * SECTION: Compile-time template export
+     *
+     * Purpose:
+     * - Saves compile-time PROGMEM templates into the internal filesystem.
+     * - Files are flat root-level JSON files so they can be viewed through /edit.
+     *
+     * Date Modified: 17May26
+     ************************************************************************************************/
+
+      void Templates__SaveHardcodedTemplateToFilesystem();
+
+      bool Templates__SaveProgmemTemplateToFilesystem_P(
+        const char* file_path,
+        const char* template_name,
+        const char* payload_p,
+        size_t payload_size
+      );
+
+      #endif
 
     /************************************************************************************************
      * SECTION: Commands
      ************************************************************************************************/
 
-    // void parse_JSONCommand(JsonParserObject obj);
-
     /************************************************************************************************
      * SECTION: Construct Messages
      ************************************************************************************************/
     
-    // uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
-    // uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
-
      /************************************************************************************************
      * SECITON: MQTT
      ************************************************************************************************/
     
-    // #ifdef USE_MODULE_NETWORK_MQTT
-    // void MQTTHandler_Init();
-    // void MQTTHandler_RefreshAll();
-    // void MQTTHandler_Rate();    
-    // void MQTTHandler_Sender();
-
-    // std::vector<struct handler<mJsonTemplate>*> mqtthandler_list;    
-    // struct handler<mJsonTemplate> mqtthandler_settings;    
-    // struct handler<mJsonTemplate> mqtthandler_sensor_ifchanged;
-    // struct handler<mJsonTemplate> mqtthandler_sensor_teleperiod;    
-    // #endif // USE_MODULE_NETWORK_MQTT
 
 };
 

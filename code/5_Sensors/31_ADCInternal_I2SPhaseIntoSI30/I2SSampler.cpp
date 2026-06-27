@@ -7,7 +7,7 @@
 #include "driver/i2s.h"
 
 #define DMA_BYTE_SIZE 1000
-#define PIN_GPIO_FUNCTION_RXON_SAMPLING_ENABLED_NUM 32 //temp fix to get in scope
+#define PIN_GPIO_RXON_SAMPLING_ENABLED_NUM 32 //temp fix to get in scope
 
 
 uint8_t extern_flag_swap_ringbuffers_before_writting_is2_data = 0;
@@ -48,7 +48,7 @@ void i2sReaderTask(void *param)
 
                     // Push latest DMA read into ringbuffer, itemized
                     //if(sampler->flag_enabled_store_captured_results)
-                    if(digitalRead(PIN_GPIO_FUNCTION_RXON_SAMPLING_ENABLED_NUM)==LOW)
+                    if(digitalRead(PIN_GPIO_RXON_SAMPLING_ENABLED_NUM)==LOW)
                     {
                         // uint16_t* rxon_write = &i2sData[1000];
                         i2sData[1000] = (sampler->item_id_counter) & 0xff;//;

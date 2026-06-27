@@ -11,6 +11,7 @@
 
 #include "6_Lights/00_Interface/mBusManager.h"
 
+
 #include "2_CoreSystem/07_Time/Toki.h"
 
 #include "DynamicBuffer.h"
@@ -874,6 +875,33 @@ class mAnimatorLight :
     
     void Init_Busses();
 
+    bool LightingBusConfig_CheckPinsAvailable(
+      const BusConfig& bus_config,
+      uint8_t bus_i,
+      uint8_t lighting_digital_index,
+      uint8_t lighting_clock_index,
+      uint8_t lighting_pwm_index,
+      uint8_t lighting_onoff_index,
+      bool override_existing
+    );
+
+    bool Lighting_AllocatePin_WithOverride(
+      uint8_t real_pin,
+      uint16_t packed_id,
+      uint16_t owner_id,
+      bool override_existing
+    );
+
+    void LightingBusConfig_AllocatePins(
+      const BusConfig& bus_config,
+      uint8_t bus_i,
+      uint8_t& lighting_digital_index,
+      uint8_t& lighting_clock_index,
+      uint8_t& lighting_pwm_index,
+      uint8_t& lighting_onoff_index,
+      bool override_existing
+    );
+    
 // // Time CONFIG
 // #ifndef WLED_NTP_ENABLED
 //   #define WLED_NTP_ENABLED false

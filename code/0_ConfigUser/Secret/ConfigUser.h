@@ -28,7 +28,7 @@
 
 #include "04_RemoteLocations/05_mFirmwareCustom_Secret__Colorado_2024.h"
 #include "04_RemoteLocations/05_mFirmwareCustom_Secret__Colorado_2025.h"
-#include "04_RemoteLocations/05_mFirmwareCustom_Secret__QTQ.h"
+#include "04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h"
 
 #include "05_Seasonal/Firmware__Christmas_2023__Secret.h"
 #include "05_Seasonal/Firmware__Christmas_2024__Secret.h"

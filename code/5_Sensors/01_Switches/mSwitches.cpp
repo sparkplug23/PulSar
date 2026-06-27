@@ -394,7 +394,7 @@ void mSwitches::Handler(void) {
      **/
     if (Switch.hold_timer[i] & (((switchmode == PUSHHOLDMULTI) | (switchmode == PUSHHOLDMULTI_INV)) ? SM_TIMER_MASK: SM_NO_TIMER_MASK)) {
       Switch.hold_timer[i]--;
-      if ((Switch.hold_timer[i] & SM_TIMER_MASK) == loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 25) {
+      if ((Switch.hold_timer[i] & SM_TIMER_MASK) == loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 25) {
         if ((switchmode == PUSHHOLDMULTI) | (switchmode == PUSHHOLDMULTI_INV)){
           if (((switchmode == PUSHHOLDMULTI) & (NOT_PRESSED == Switch.last_state[i])) | ((switchmode == PUSHHOLDMULTI_INV) & (PRESSED == Switch.last_state[i]))) {
             SendSwitch(i, POWER_INCREMENT);
@@ -418,7 +418,7 @@ void mSwitches::Handler(void) {
             break;
           case PUSHHOLDMULTI:
             if (NOT_PRESSED == button) {
-              Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 25;
+              Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 25;
               SendSwitch(i, POWER_INCREMENT);
             } else {
               Switch.hold_timer[i]= 0;
@@ -427,7 +427,7 @@ void mSwitches::Handler(void) {
             break;
           case PUSHHOLDMULTI_INV:
             if (PRESSED == button) {
-              Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 25;
+              Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 25;
               SendSwitch(i, POWER_INCREMENT); // Execute command via MQTT
             } else {
               Switch.hold_timer[i]= 0;
@@ -468,7 +468,7 @@ void mSwitches::Handler(void) {
         break;
       case PUSHBUTTONHOLD:                 // SwitchMode 5
         if (PRESSED == button) {
-          Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10;  // Start timer on button press
+          Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 10;  // Start timer on button press
         }
         if ((NOT_PRESSED == button) && (Switch.hold_timer[i])) {
           Switch.hold_timer[i] = 0;        // Button released and hold timer not expired : stop timer...
@@ -477,7 +477,7 @@ void mSwitches::Handler(void) {
         break;
       case PUSHBUTTONHOLD_INV:             // SwitchMode 6
         if (NOT_PRESSED == button) {
-          Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10;  // Start timer on button press...
+          Switch.hold_timer[i] = loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 10;  // Start timer on button press...
         }
         if ((PRESSED == button) && (Switch.hold_timer[i])) {
           Switch.hold_timer[i] = 0;        // Button released and hold timer not expired : stop timer.
@@ -501,7 +501,7 @@ void mSwitches::Handler(void) {
             SendSwitch(i, POWER_INV);             // Execute command via MQTT
           }
         } else {
-          if ((Switch.hold_timer[i] & SM_TIMER_MASK) > loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 25) {
+          if ((Switch.hold_timer[i] & SM_TIMER_MASK) > loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 25) {
             if ((Switch.hold_timer[i] & ~SM_TIMER_MASK) != SM_SECOND_PRESS) {
               Switch.hold_timer[i]= SM_FIRST_PRESS;
               switchflag = POWER_TOGGLE;                      // Toggle with pushbutton
@@ -515,7 +515,7 @@ void mSwitches::Handler(void) {
             SendSwitch(i, POWER_RELEASE);         // Execute command via MQTT
           }
         }
-        Switch.hold_timer[i] = (Switch.hold_timer[i] & ~SM_TIMER_MASK) | loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10;
+        Switch.hold_timer[i] = (Switch.hold_timer[i] & ~SM_TIMER_MASK) | loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 10;
         break;
       case PUSHHOLDMULTI_INV:              // SwitchMode 12
         if (PRESSED == button) {
@@ -524,7 +524,7 @@ void mSwitches::Handler(void) {
             SendSwitch(i, POWER_INV);             // Execute command via MQTT
           }
         } else {
-          if ((Switch.hold_timer[i] & SM_TIMER_MASK)> loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 25) {
+          if ((Switch.hold_timer[i] & SM_TIMER_MASK)> loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 25) {
             if ((Switch.hold_timer[i] & ~SM_TIMER_MASK) != SM_SECOND_PRESS) {
               Switch.hold_timer[i]= SM_FIRST_PRESS;
               switchflag = POWER_TOGGLE;                      // Toggle with pushbutton
@@ -538,7 +538,7 @@ void mSwitches::Handler(void) {
             SendSwitch(i, POWER_RELEASE);         // Execute command via MQTT
           }
         }
-        Switch.hold_timer[i] = (Switch.hold_timer[i] & ~SM_TIMER_MASK) | loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_TIME] / 10;
+        Switch.hold_timer[i] = (Switch.hold_timer[i] & ~SM_TIMER_MASK) | loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 10;
         break;
       case PUSHON:                         // SwitchMode 13
         if (PRESSED == button) {

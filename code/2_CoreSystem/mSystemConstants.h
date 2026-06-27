@@ -185,31 +185,4 @@ enum INPUT_TYPE_IDS{ //style fron nextion
   INPUT_TYPE_LENGTH_ID
 };
 
-/**
- * @brief 
- * 
- * Just delete these, dont like the params8
- * 
- */
-enum SO32_49Index { P_HOLD_TIME,              // SetOption32 - (Button/Switch) Key hold time detection in decaseconds (default 40)
-                    P_MAX_POWER_RETRY,        // SetOption33 - (Energy) Maximum number of retries before deciding power limit overflow (default 5)
-                    P_BACKLOG_DELAY,          // SetOption34 - (Backlog) Minimal delay in milliseconds between executing backlog commands (default 200)
-                    P_MDNS_DELAYED_START,     // SetOption35 - (mDNS) Number of seconds before mDNS is started (default 0) - Obsolete
-                    P_BOOT_LOOP_OFFSET,       // SetOption36 - (Restart) Number of restarts to start detecting boot loop (default 1)
-                    P_SO37_FREE,              // SetOption37 - (Light) RGB and White channel separation (default 0)
-                    P_IR_UNKNOW_THRESHOLD,    // SetOption38 - (IR) Set the smallest sized "UNKNOWN" message packets we actually care about (default 6, max 255)
-                    P_CSE7766_INVALID_POWER,  // SetOption39 - (CSE7766) Number of invalid power measurements before declaring it invalid allowing low load measurments (default 128)
-                    P_HOLD_IGNORE,            // SetOption40 - (Button/Shutter) Ignore button change in seconds (default 0)
-                    P_ARP_GRATUITOUS,         // SetOption41 - (Wifi) Interval in seconds between gratuitous ARP requests (default 60)
-                    P_OVER_TEMP,              // SetOption42 - (Energy) Turn all power off at or above this temperature (default 90C)
-                    P_ROTARY_MAX_STEP,        // SetOption43 - (Rotary) Rotary step boundary (default 10)
-                    P_IR_TOLERANCE,           // SetOption44 - (IR) Base tolerance percentage for matching incoming IR messages (default 25, max 100)
-                    P_BISTABLE_PULSE,         // SetOption45 - (Bistable) Pulse time for two coil bistable latching relays (default 40)
-                    P_POWER_ON_DELAY,         // SetOption46 - (PowerOn) Add delay of 10 x value milliseconds at power on
-                    P_POWER_ON_DELAY2,        // SetOption47 - (PowerOn) Add delay of value seconds at power on before activating relays
-                    P_DUMMY_RELAYS,           // SetOption48 - (Energy) Support energy dummy relays
-                    P_SO49_FREE               // SetOption49
-                  };  // Max is PARAM8_SIZE (18) - SetOption32 until SetOption49
-
-
 #endif

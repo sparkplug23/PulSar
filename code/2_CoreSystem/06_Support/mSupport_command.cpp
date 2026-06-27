@@ -68,6 +68,7 @@ void mSupport::CommandSet_Restart(int8_t command)
       ALOG_INF(PSTR("Hard Restart Requested"));
       ESP_Restart_Immediate();
     break;
+    #ifdef ESP32
     case -1:
       tkr_crash_recorder->CmndCrash();    // force a crash
     break;
@@ -78,6 +79,7 @@ void mSupport::CommandSet_Restart(int8_t command)
     // // OSWATCH_RESET_TIME
     //   CmndBlockedLoop();
     // break;
+    #endif
   // case 99:
   //   ALOG_INF(PSTR(D_LOG_APPLICATION D_RESTARTING));
   //   EspRestart();

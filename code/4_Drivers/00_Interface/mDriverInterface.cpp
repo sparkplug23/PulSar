@@ -71,6 +71,10 @@ int8_t mDriverInterface::Tasker(uint8_t function, JsonParserObject obj)
 void mDriverInterface::Pre_Init(void)
 {
 
+  #ifdef ESP32
+  webcam_clk = 0; // needs set to 0 to allow defaults
+  #endif
+
 }
 
 

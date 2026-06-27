@@ -47,6 +47,7 @@
  *   05Jan26  Initial version: recursive discovery of Web/Src -> Web/Gen, single-header output per submodule.
  *   05Jan26  Async/await end-to-end, removed any dependency on deasync/deasync-promise.
  *   05Jan26  Inline behaviour flipped: OPT-IN via "Inline" token in filename.
+ *   04Jun26  Added CoreSystem is also scanned
  */
 
 "use strict";
@@ -69,6 +70,7 @@ const CODE_ROOT = path.join(REPO_ROOT, "code");
 // Top-level module groups to scan for submodules.
 // Keep tight to avoid scanning huge trees accidentally.
 const TOP_GROUPS_TO_SCAN = [
+  "2_CoreSystem",
   "4_Drivers",
   "5_Sensors",
   "7_Energy",

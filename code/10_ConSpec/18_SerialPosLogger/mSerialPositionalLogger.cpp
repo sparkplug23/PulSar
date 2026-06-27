@@ -59,7 +59,7 @@ void IRAM_ATTR ISR_External_Pin_Sync_Frame_Status_Event_Trigger()
 //   // tkr_serial_pos_log->sync_frame_data.flag_pin_active = true;
 //   // // tkr_adc_internal->adc_config[1].flag_external_interrupt_triggered_reading = true;
   
-//   // gpio_num_t pin = (gpio_num_t)(PIN_GPIO_FUNCTION_SYNC_FRAME_ISR_PIN_NUM & 0x1F);
+//   // gpio_num_t pin = (gpio_num_t)(PIN_GPIO_SYNC_FRAME_ISR_PIN_NUM & 0x1F);
 //   // int state = state = (GPIO_REG_READ(GPIO_IN_REG)  >> pin) & 1U;
 
 //   // if(state==LOW)
@@ -239,7 +239,7 @@ void IRAM_ATTR ISR_External_Pin_Sync_Frame_Status_Event_Trigger()
 //   tkr_serial_pos_log->sync_frame_data.flag_pin_active = true;
 //   // tkr_adc_internal->adc_config[1].flag_external_interrupt_triggered_reading = true;
   
-//   gpio_num_t pin = (gpio_num_t)(PIN_GPIO_FUNCTION_SYNC_FRAME_ISR_PIN_NUM & 0x1F);
+//   gpio_num_t pin = (gpio_num_t)(PIN_GPIO_SYNC_FRAME_ISR_PIN_NUM & 0x1F);
 //   int state = state = (GPIO_REG_READ(GPIO_IN_REG)  >> pin) & 1U;
 
 //   if(state==LOW)
@@ -431,7 +431,7 @@ void IRAM_ATTR ISR_External_Pin_ADC_Sync_Period_Completed_Timeslot_Event_Trigger
 
   tkr_serial_pos_log->sync_frame_data.flag_pin_active = true;
 
-  gpio_num_t pin = (gpio_num_t)(PIN_GPIO_FUNCTION_TRIGGER_ADC_SYNC_PERIOD_COMPLETED_TIMESLOT_PERIOD_NUM & 0x1F);
+  gpio_num_t pin = (gpio_num_t)(PIN_GPIO_TRIGGER_ADC_SYNC_PERIOD_COMPLETED_TIMESLOT_PERIOD_NUM & 0x1F);
   int state = state = (GPIO_REG_READ(GPIO_IN_REG)  >> pin) & 1U;
 
   if(state==0)
@@ -621,19 +621,19 @@ void mSerialPositionalLogger::Pre_Init(void)
  * The amount of data to be read from RSS_STREAM will be known as it ends with two 0xFF 0xFF EOF bytes.
  * */
   // #ifdef ENABLE_INTERRUPT_ON_CHANGE_PIN25_FOR_SYNCFRAME_TRANSMIT_STATUS
-  //   pinMode(PIN_GPIO_FUNCTION_SYNC_FRAME_ISR_PIN_NUM, INPUT_PULLUP);
-  //   attachInterrupt(PIN_GPIO_FUNCTION_SYNC_FRAME_ISR_PIN_NUM, ISR_External_Pin_Sync_Frame_Status_Event_Trigger, FALLING);
+  //   pinMode(PIN_GPIO_SYNC_FRAME_ISR_PIN_NUM, INPUT_PULLUP);
+  //   attachInterrupt(PIN_GPIO_SYNC_FRAME_ISR_PIN_NUM, ISR_External_Pin_Sync_Frame_Status_Event_Trigger, FALLING);
   // #endif // ENABLE_INTERRUPT_ON_CHANGE_PIN25_FOR_SYNCFRAME_TRANSMIT_STATUS
   
   #ifdef ENABLE_INTERRUPT_ON_CHANGE_TRIGGER_ADC_SYNC_PERIOD_COMPLETED_TIMESLOT_PERIOD
-    pinMode(PIN_GPIO_FUNCTION_TRIGGER_ADC_SYNC_PERIOD_COMPLETED_TIMESLOT_PERIOD_NUM, INPUT_PULLUP );
-    // attachInterrupt(PIN_GPIO_FUNCTION_TRIGGER_ADC_SYNC_PERIOD_COMPLETED_TIMESLOT_PERIOD_NUM, ISR_External_Pin_ADC_Sync_Period_Completed_Timeslot_Event_Trigger_LOW, FALLING);
-    attachInterrupt(PIN_GPIO_FUNCTION_TRIGGER_ADC_SYNC_PERIOD_COMPLETED_TIMESLOT_PERIOD_NUM, ISR_External_Pin_ADC_Sync_Period_Completed_Timeslot_Event_Trigger, CHANGE);
+    pinMode(PIN_GPIO_TRIGGER_ADC_SYNC_PERIOD_COMPLETED_TIMESLOT_PERIOD_NUM, INPUT_PULLUP );
+    // attachInterrupt(PIN_GPIO_TRIGGER_ADC_SYNC_PERIOD_COMPLETED_TIMESLOT_PERIOD_NUM, ISR_External_Pin_ADC_Sync_Period_Completed_Timeslot_Event_Trigger_LOW, FALLING);
+    attachInterrupt(PIN_GPIO_TRIGGER_ADC_SYNC_PERIOD_COMPLETED_TIMESLOT_PERIOD_NUM, ISR_External_Pin_ADC_Sync_Period_Completed_Timeslot_Event_Trigger, CHANGE);
   #endif // ENABLE_INTERRUPT_ON_CHANGE_TRIGGER_ADC_SYNC_PERIOD_COMPLETED_TIMESLOT_PERIOD
 
 
 
-// PIN_GPIO_FUNCTION_TRIGGER_ADC_SYNC_PERIOD_COMPLETED_TIMESLOT_PERIOD_NUM
+// PIN_GPIO_TRIGGER_ADC_SYNC_PERIOD_COMPLETED_TIMESLOT_PERIOD_NUM
 }
 
 

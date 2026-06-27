@@ -137,10 +137,10 @@ void mSDLoggerIMURadiationPattern::Pre_Init(void)
   }
 
   #ifdef ENABLE_DEVFEATURE_MANUAL_ENABLE_SAMPLING
-  pinMode(GPIO_FUNCTION_MANUAL_ENABLE_SAMPLING_NUMBER, INPUT_PULLUP);
+  pinMode(GPIO_MANUAL_ENABLE_SAMPLING_NUMBER, INPUT_PULLUP);
   #endif
-  #ifdef GPIO_FUNCTION_MANUAL_CC1110_IS_RECEIVING_PACKETS_NUMBER
-  pinMode(GPIO_FUNCTION_MANUAL_CC1110_IS_RECEIVING_PACKETS_NUMBER, INPUT_PULLUP);
+  #ifdef GPIO_MANUAL_CC1110_IS_RECEIVING_PACKETS_NUMBER
+  pinMode(GPIO_MANUAL_CC1110_IS_RECEIVING_PACKETS_NUMBER, INPUT_PULLUP);
   #endif
 
 }
@@ -195,7 +195,7 @@ void mSDLoggerIMURadiationPattern::EveryLoop()
      * */
     #ifdef USE_MODULE_DRIVERS_SDCARD
       #ifdef ENABLE_DEVFEATURE_MANUAL_ENABLE_SAMPLING
-      if(digitalRead(GPIO_FUNCTION_MANUAL_ENABLE_SAMPLING_NUMBER)==0)
+      if(digitalRead(GPIO_MANUAL_ENABLE_SAMPLING_NUMBER)==0)
       {
       #endif
         tkr_sdcard->AppendRingBuffer(JBI->GetPtr(), JBI->GetLength());
@@ -251,7 +251,7 @@ void mSDLoggerIMURadiationPattern::SubTask_UpdateOLED()
   #ifdef USE_DEVFEATURE_ADC_IN_CONTROLLER
   snprintf(line_ctr, sizeof(line_ctr), "%04d %04d%c",
     adc_values.adc2, 
-    adc_values.adc5,digitalRead(GPIO_FUNCTION_MANUAL_CC1110_IS_RECEIVING_PACKETS_NUMBER)?'N':'S'
+    adc_values.adc5,digitalRead(GPIO_MANUAL_CC1110_IS_RECEIVING_PACKETS_NUMBER)?'N':'S'
   );
   tkr_iDisp->LogBuffer_AddRow(line_ctr, 0);
   #endif // USE_DEVFEATURE_ADC_IN_CONTROLLER
@@ -351,7 +351,7 @@ uint8_t mSDLoggerIMURadiationPattern::ConstructJSON_SDCardSuperFrame(uint8_t jso
 
     // Debug data only
     JBI->Add("M",millis());
-    JBI->Add("S", (uint8_t)digitalRead(GPIO_FUNCTION_MANUAL_CC1110_IS_RECEIVING_PACKETS_NUMBER));
+    JBI->Add("S", (uint8_t)digitalRead(GPIO_MANUAL_CC1110_IS_RECEIVING_PACKETS_NUMBER));
 
     #if defined(USE_MODULE_SENSORS_LSM303D) || defined(USE_MODULE_SENSORS_L3G)
     // Force update of sensor here

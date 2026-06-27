@@ -1,7 +1,7 @@
 {
   "env_name": "cm_office__ws2815panel12v",
-  "created_utc": "2026-04-04T11:38:53Z",
-  "created_epoch": 1775302733,
+  "created_utc": "2026-06-24T23:06:29Z",
+  "created_epoch": 1782342389,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
   "platform": "espressif32",
@@ -17,9 +17,9 @@
     "bootloader.bin"
   ],
   "git": {
-    "branch": "development",
-    "commit": "785c1ef293a4b4da6c9f91060dd17278dd4f311c",
-    "describe": "785c1ef2-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/08_Logging/mLogging.cpp\n M code/2_CoreSystem/Version.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M saved_compiles/qtq_server_reset_board_installed/build_meta.json\n M saved_compiles/qtq_server_reset_board_installed/firmware.elf"
+    "branch": "dev_mqtt_transport",
+    "commit": "1f21f1c2f6ca1e4df84eddcd12243f099eec54a5",
+    "describe": "1f21f1c2-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/05_Pins/gpio_bitpacked.cpp\n M code/2_CoreSystem/05_Pins/gpio_enums.h\n M code/2_CoreSystem/05_Pins/gpio_names.cpp\n M code/2_CoreSystem/06_Support/mSupport.h\n M code/2_CoreSystem/11_Languages/mLanguageDefault.h\n M code/2_CoreSystem/20_JSON/mJSON.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/3_Network/10_MQTT/mMQTT_Manager.cpp\n M code/3_Network/21_WebServer/Webpages/Generated/html_ui.h\n M code/5_Sensors/02_Buttons/mButtons.cpp\n M code/5_Sensors/17_SR04/mSR04.cpp\n M code/5_Sensors/26_TOF_VL53L0X/mTOF_VL53L0X.cpp\n M code/5_Sensors/27_TOF_VL53L1X/mTOF_VL53L1X.cpp\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/6_Lights/03_Animator/webpages_generated/html_pixart.h\n M code/6_Lights/03_Animator/webpages_generated/html_pxmagic.h\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_filters/DoubleEMAFilterLib/src/DoubleEMAFilterLib.h\n M lib/lib_filters/SingleEMAFilterLib/src/SingleEMAFilterLib.h\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n M platformio_testbeds.ini\n M platformio_tg_cameras.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M saved_compiles/decode_serial_crashdump_esp32.py\n M saved_compiles/testbed_02__motion_audio/build_meta.json\n M saved_compiles/testbed_02__motion_audio/firmware.elf"
   }
 }

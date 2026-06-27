@@ -44,9 +44,8 @@
     #define MQTT_PORT     1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
   
@@ -106,9 +105,8 @@
 
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   
   #define USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
@@ -301,9 +299,8 @@
     #define MQTT_PORT     1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define ESP8266
 
@@ -345,6 +342,95 @@
 
 
 #endif
+
+
+
+/**
+ * @brief 
+ * 
+ * HVAC X1
+ * 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *                               *I ~PWM 'NC    
+ *                          _____________________
+ *                    3V3  |3V3     |USB|     VIN|
+ *                    GND  |GND               GND| 
+ *                 =BUZZER |15 (fL)            13| RADAR_OUT_MOT4
+ *              =SONIC TX1 |2  (fL, BIL)  (fH) 12| 
+ *              =SONIC RX1 |4             (fH) 14|
+ *              =RADAR TX2 |RX2/17             27| 
+ *              =RADAR RX2 |TX2/16             26| TOF1EN
+ *         PIR_SMALL_MOT2  |5  (fL)            25| TOF1INT
+ *                    aud  |18                 33| TOF0EN
+ *              LM386 SPKR |19                 32| TOF0INT
+ *        OLED,TOF I2C_SDA |21  SDA     (fL) * 35| RADAR_3p18GHZ_MOT3
+ *                         |RX0         (fL) * 34| PIR_LARGE_MOT1
+ *                         |TX0              ' VN| 
+ *        OLED,TOF I2C_SCL |22  SCL          ' VP| 
+ *                     NEO |23               ' EN| 
+ *                          _____________________
+ * 
+ * 
+ */
+#ifdef DEVICE_TEMPLATE__ESP32__30A_RELAY_BOARD_CZZL
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template_30a_relay_board_czzl"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "Template 30A Relay Board CZZL"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "Template 30A Relay Board CZZL"
+  #endif
+                 
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY  
+  #define USE_MODULE_DRIVERS_LEDS
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SWITCHES
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"2\":\""  D_GPIO_REL1_INV_CTR  "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_SWITCHES
+      "\"0\":\""  D_GPIO_SWT1_INV_CTR  "\","
+      #endif
+      "\"4\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_INTERFACE_CTR"\":["
+        "\"" "System" "\""
+      "],"
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+        "\"" "Relay" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+        "\"" "Button" "\""
+      "]"
+    "},"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
+  "}";
+  
+#endif
+
 
 
 

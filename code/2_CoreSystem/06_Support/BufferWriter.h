@@ -3,50 +3,61 @@
 
 #include <stdint.h>
 #include <Arduino.h>
+#include <stdarg.h>
+#include <string.h>
+#include <stdio.h>
 
-// I want to have a non singleton version so I can use these inside functions nicely with buffer that only lasts inside function
-
-
-class BufferWriter{
-    
+/**
+ * @brief Small bounded char-buffer writer.
+ *
+ * Can be used either as:
+ *   - singleton via BufferWriterI / BWI
+ *   - normal local object inside a function
+ */
+class BufferWriter
+{
   private:
-    /* Prevent others from being created */
     BufferWriter(BufferWriter const& other) = delete;
     BufferWriter(BufferWriter&& other) = delete;
-    /* Private constructor to prevent instancing. */
-    BufferWriter(){};
-    
-    struct WRITER_POINTERS{
-        char*     buffer = nullptr;
-        uint16_t  buffer_size = 0;
-        uint16_t  length = 0;
-    }writer;
+    BufferWriter& operator=(BufferWriter const& other) = delete;
+    BufferWriter& operator=(BufferWriter&& other) = delete;
+
+    struct WRITER_POINTERS
+    {
+      char*    buffer      = nullptr;
+      uint16_t buffer_size = 0;
+      uint16_t length      = 0;
+    } writer;
+
+    uint16_t Remaining(void) const;
 
   public:
-    // External function to get instance
+    BufferWriter() = default;
+
     static BufferWriter* GetInstance();
-    /* Here will be the instance stored. */
-    static BufferWriter* instance;    
+    static BufferWriter* instance;
 
-    void Start(char* _buffer, uint16_t _length, uint16_t _buffer_size);
-    void Start();
-    void Clear();
-    bool End();
-    char* GetBufferPtr();
-    uint16_t GetLength();
-    uint16_t GetBufferSize();
-    // void SetLength(uint16_t len);
+    void Start(char* buffer, uint16_t buffer_size);
+    void Start(char* buffer, uint16_t length, uint16_t buffer_size);
+    void Start(void);
 
-    //FUTURE, create iterator that gets values
+    void Clear(void);
+    bool End(void);
 
-    template <typename T>
-    T GetLength(){
-        return writer.length;
-    };
+    bool IsReady(void) const;
+    bool IsEmpty(void) const;
+    bool IsFull(void) const;
 
-    void Append(const char* buff);
+    char* GetBufferPtr(void);
+    const char* GetBufferPtr(void) const;
+
+    uint16_t GetLength(void) const;
+    uint16_t GetBufferSize(void) const;
+
+    void SetLength(uint16_t length);
+
+    void Append(const char* text);
     void Append_P(const char* formatP, ...);
-
 };
 
 #define BufferWriterI BufferWriter::GetInstance()

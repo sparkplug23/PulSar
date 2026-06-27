@@ -1,0 +1,25 @@
+{
+  "env_name": "testbed_11__filesystem",
+  "created_utc": "2026-05-17T19:01:53Z",
+  "created_epoch": 1779044513,
+  "project_dir": "U:\\GitHub\\PulSar",
+  "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\testbed_11__filesystem",
+  "platform": "espressif32",
+  "board": "esp32dev",
+  "framework": [
+    "arduino"
+  ],
+  "copied": [
+    "firmware.bin",
+    "firmware.elf",
+    "firmware.map",
+    "partitions.bin",
+    "bootloader.bin"
+  ],
+  "git": {
+    "branch": "dev_mqtt_transport",
+    "commit": "6201dccfc67efb7a3e99a591927cda8b7a4c355b",
+    "describe": "6201dccf-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/01_Settings/mSettings.cpp\n M code/2_CoreSystem/04_JsonTemplate/mJsonTemplate.cpp\n M code/2_CoreSystem/04_JsonTemplate/mJsonTemplate.h\n M code/2_CoreSystem/mBaseConfig.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M code/Main_PulSar.cpp\n M lib/lib_npb_feb26/NeoPixelBus\n M saved_compiles/testbed_11__filesystem/build_meta.json\n M saved_compiles/testbed_11__filesystem/firmware.elf"
+  }
+}

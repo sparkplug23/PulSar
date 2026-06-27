@@ -1,34 +1,7 @@
 #include "mRuleEngine.h"
 
-/**
- * @brief 
- * 
- * 
- * Create new method that uses filesystem to load rules from a file
- * Append rules to existing ones, or clear existing ones
- * 
- * Hence, I can change them, without needing to reflash firmware
- * 
- * 
- * 
- * 
- */
-
 
 #ifdef USE_MODULE_CORE_RULES
-
-
-// /* Null, because instance will be initialized on demand. */
-// RuleEngine* RuleEngine::instance = nullptr;
-
-// RuleEngine* RuleEngine::GetInstance(){
-//   if (instance == nullptr){
-//     instance = new RuleEngine();
-//     // PRINT_FLUSHED("instance = new RuleEngine()");
-//   }
-//   return instance;
-// }
-
 
 int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
 
@@ -68,7 +41,7 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
     // /************
     //  * SETTINGS SECTION * 
     // *******************/
-    // case TASK_SETTINGS_LOAD_VALUES_INTO_MODULE: 
+    // case TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM: 
     //   // Settings_Load();
     // break;
     // case TASK_SETTINGS_SAVE_VALUES_FROM_MODULE: 
@@ -153,9 +126,7 @@ void mRuleEngine::RulesLoad_From_Progmem()
   memcpy_P(data_buffer.payload.ctr,RULES_TEMPLATE,sizeof(RULES_TEMPLATE));
   data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
-  #ifdef ENABLE_LOG_LEVEL_INFO
   ALOG_INF( PSTR("RULES_TEMPLATE Load = \"%d|%s\""), data_buffer.payload.length_used, data_buffer.payload.ctr);
-  #endif // ENABLE_LOG_LEVEL_INFO
 
   tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
   
@@ -180,7 +151,6 @@ void mRuleEngine::RulesLoad_From_Progmem()
 void mRuleEngine::ShowRuleAddLogByIndex(uint8_t show_type)
 {
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
     ALOG_INF(PSTR("1"
       "\n\rIndex:\t %d\n\r"
       "Trigger>>\n\r"
@@ -213,8 +183,6 @@ void mRuleEngine::ShowRuleAddLogByIndex(uint8_t show_type)
     tkr_rules->rules[tkr_rules->rules_active_index].command.value.data[4]
 
     );
-
-    #endif //  ENABLE_LOG_LEVEL_INFO
     
 }
 
@@ -222,7 +190,6 @@ void mRuleEngine::ShowRuleAddLogByIndex(uint8_t show_type)
 void mRuleEngine::ShowRuleEvent_AddLog(uint8_t show_type)
 {
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
   ALOG_INF(PSTR(""
       "\n\r\n\r"
       "Event>>\n\r"
@@ -241,7 +208,6 @@ void mRuleEngine::ShowRuleEvent_AddLog(uint8_t show_type)
     event_triggered.value.data[4]
   );
     
-    #endif //  ENABLE_LOG_LEVEL_INFO
 }
 
 
@@ -383,12 +349,6 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
 
   bool task_handled = false;
 
-
-
-  // #ifdef ENABLE_LOG_LEVEL_INFO
-  // ALOG_TST(PSTR("\n\r\n\r\n\rMATCHED Tasker_Rules_Interface function_input%d"),function_input);
-  // #endif // ENABLE_LOG_LEVEL_INFO
-
   //maybe need to return rule(s) handled then leave taasker_interface
 
   // D_MAX_RULES
@@ -463,13 +423,11 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
           else // Execute normal state/value method if no jsoncommand was used
           {
             
-            #ifdef ENABLE_LOG_LEVEL_ERROR
-                    ALOG_INF(PSTR("Execute Tasker_Interface(func=%d,module=%d,SourceIsRule=%d)"),
+            ALOG_INF(PSTR("Execute Tasker_Interface(func=%d,module=%d,SourceIsRule=%d)"),
                   rules[rule_index].command.function_id, // function the previous trigger is linked to
                   rules[rule_index].command.module_id, //target module
                   true  // runnig a rule, so don't call this loop back into this function
                     );
-            #endif // ENABLE_LOG_LEVEL_INFO
             
             tkr->Tasker_Interface(
               rules[rule_index].command.function_id
@@ -513,6 +471,11 @@ rules_active_index = 0;
   #endif // USE_MODULE_TEMPLATE_SONOFF_4CHPRO
   #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
     if(tkr_set->Settings.module == mPins::MODULE_SONOFF_BASIC){
+      DefaultRule_Sonoff_Basic_R2();
+    }else
+  #endif // USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
+    if(tkr_set->Settings.module == mPins::MODULE_SONOFF_BASIC_NODEMCU){
       DefaultRule_Sonoff_Basic_R2();
     }else
   #endif // USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
@@ -578,11 +541,10 @@ bool mRuleEngine::AppendEventToRules(EventPackage* trigger_new, EventPackage* co
 *******************************************************************************************************************/
 
 
-void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event){
+void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
+{
 
-    #ifdef ENABLE_LOG_LEVEL_INFO
   ALOG_TST(PSTR("parsesub_Rule_Part"));
-    #endif //  ENABLE_LOG_LEVEL_INFO
 
   JsonParserToken jtok;
   // JsonParserObject jobj2 = &jobj;
@@ -608,10 +570,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
         event->module_id = matched_id;
         data_buffer.isserviced++;
       }
-      // #ifdef ENABLE_LOG_LEVEL_DEBUG
-      ALOG_INF(PSTR("JTOK FOUND Trigger Module module_id = %d"),matched_id);
-      // ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
-      // #endif // ENABLE_LOG_LEVEL_DEBUG
+      
+      ALOG_INF(PSTR("Trigger Module module_id = %d"),matched_id);
     
     }//end trigger
 
@@ -627,10 +587,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
         event->function_id = jtok.getInt();
         data_buffer.isserviced++;
       }
-      #ifdef ENABLE_LOG_LEVEL_DEBUG
-      ALOG_INF(PSTR("JTOK FOUND Trigger Module Function = %d"),matched_id);
-      // ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
-      #endif // ENABLE_LOG_LEVEL_DEBUG
+      
+      ALOG_INF(PSTR("Trigger Module Function = %d"),matched_id);
     
     }//end trigger
 
@@ -647,10 +605,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
         event->device_id = jtok.getInt();
         data_buffer.isserviced++;
       }
-      // #ifdef ENABLE_LOG_LEVEL_DEBUG
-      ALOG_INF(PSTR("JTOK FOUND Trigger Module DeviceName = %d"),event->device_id);
-      // ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
-      // #endif // ENABLE_LOG_LEVEL_DEBUG
+      
+      ALOG_INF(PSTR("Trigger Module DeviceName = %d"),event->device_id);
     
     }//end trigger
 
@@ -673,10 +629,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
 
       // Use state here to also set encoding, as it will know what the value is eg float = 4 bytes
 
-      // #ifdef ENABLE_LOG_LEVEL_DEBUG
-      ALOG_INF(PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
-      // ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
-      // #endif // ENABLE_LOG_LEVEL_DEBUG
+      ALOG_INF(PSTR("Trigger Module State = %d"),event->value.data[0]);
     
     }//end trigger
     if(jtok = jobj["Value"]){
@@ -697,18 +650,13 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
 
       // Use state here to also set encoding, as it will know what the value is eg float = 4 bytes
 
-      // #ifdef ENABLE_LOG_LEVEL_DEBUG
-      ALOG_INF(PSTR("JTOK FOUND Trigger Module State = %d"),event->value.data[0]);
-      // ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
-      // #endif // ENABLE_LOG_LEVEL_DEBUG
+      ALOG_INF(PSTR("Trigger Module State = %d"),event->value.data[0]);
     
     }//end trigger
 
     // if(jtok = jobj["JsonCommands"]){
 
-    // // #ifdef ENABLE_LOG_LEVEL_INFO
     //   ALOG_INF(PSTR("JTOK FOUND Trigger Module JsonCommands = %s"), jtok.getStr());
-    // // #endif //  ENABLE_LOG_LEVEL_INFO
 
 
     //   // if(jsonbuffer.data != nullptr){
@@ -731,10 +679,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
     //       // I need to create the ability to move to add/edit buffer (like tas)
     //       // Rules can therefore only be created once at starttime for now          
 
-    //       #ifdef ENABLE_LOG_LEVEL_INFO
     //       ALOG_INF(PSTR("JTOK FOUND jsonbuffer.data = %s"), jsonbuffer.data);
     //       ALOG_INF(PSTR("JTOK FOUND jsonbuffer.bytes_used = %d"), jsonbuffer.bytes_used);
-    //       #endif // ENABLE_LOG_LEVEL_INFO
 
     //       // snprintf(event->p_json_commands+strlen(event->p_json_commands),available_space,)
     //     }
@@ -749,7 +695,7 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
       const char* s = jtok.getStr();
       if (!s) s = "";
 
-      ALOG_INF(PSTR("JTOK FOUND Trigger Module JsonCommands = %s"), s);
+      ALOG_INF(PSTR("Trigger Module JsonCommands = %s"), s);
 
       const size_t buflen = sizeof(jsonbuffer.data);
       const size_t len    = strnlen(jsonbuffer.data, buflen);
@@ -760,10 +706,8 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
         event->json_commands_dlist_id = jsonbuffer.delims_used++;
         jsonbuffer.bytes_used += strlen(s); // OK if you accept "requested" not "actually appended"
 
-        #ifdef ENABLE_LOG_LEVEL_INFO
-        ALOG_INF(PSTR("JTOK FOUND jsonbuffer.data = %s"), jsonbuffer.data);
-        ALOG_INF(PSTR("JTOK FOUND jsonbuffer.bytes_used = %u"), (unsigned)jsonbuffer.bytes_used);
-        #endif
+        ALOG_INF(PSTR("data = %s"), jsonbuffer.data);
+        ALOG_INF(PSTR("bytes_used = %u"), (unsigned)jsonbuffer.bytes_used);
       }
     }
 
@@ -794,9 +738,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
 
       // Optional: read/display rule name (store if your struct supports it)
       if (JsonParserToken jn = robj["Name"]) {
-        #ifdef ENABLE_LOG_LEVEL_INFO
-          ALOG_HGL(PSTR("RULE[%u] Name: %s"), i, jn.getStr());
-        #endif
+        ALOG_INF(PSTR("RULE[%u] Name: %s"), i, jn.getStr());
         // TODO: if you have storage, copy it: strlcpy(rules[i].name, jn.getStr(), sizeof(rules[i].name));
       }
 
@@ -806,18 +748,14 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
         parsesub_Rule_Part(jobj, &tkr_rules->rules[i].trigger);
         rules[i].flag_configured = true;
         rules[i].flag_enabled    = true;
-        #ifdef ENABLE_LOG_LEVEL_INFO
-          ALOG_HGL(PSTR("RULE[%u] Trigger parsed -> enabled"), i);
-        #endif
+        ALOG_INF(PSTR("RULE[%u] Trigger parsed -> enabled"), i);
       }
 
       // Command
       jobj = robj["Command"];
       if (!jobj.isNull()) {
         parsesub_Rule_Part(jobj, &tkr_rules->rules[i].command);
-        #ifdef ENABLE_LOG_LEVEL_INFO
-          ALOG_HGL(PSTR("RULE[%u] Command parsed"), i);
-        #endif
+        ALOG_INF(PSTR("RULE[%u] Command parsed"), i);
       }
 
       rules_found++;
@@ -840,9 +778,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
       sprintf(rule_name, "Rule%d", rule_index);
       if ((jtok = obj[rule_name])) {
 
-        #ifdef ENABLE_LOG_LEVEL_INFO
-          ALOG_HGL(PSTR("MATCHED %s"), rule_name);
-        #endif
+        ALOG_INF(PSTR("MATCHED %s"), rule_name);
 
         // Trigger
         jobj = obj[rule_name].getObject()["Trigger"];
@@ -884,158 +820,6 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
     mqtthandler_state_ifchanged.flags.SendNow = true;
     #endif
   }
-
-
-// void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
-// {
-
-// // return;
-
-
-//   JsonParserToken jtok = 0; 
-//   JsonParserToken jtok_sub = 0; 
-//   JsonParserObject jobj = 0;
-//   int16_t tmp_id = 0;
-
-//   uint8_t rule_index = 0;
-//   char rule_name[10] = {0};
-//   for(int rule_index=0;rule_index<MAX_RULE_VARS;rule_index++)
-//   {
-//     sprintf(rule_name, "Rule%d", rule_index);
-    
-//     if(jtok = obj[rule_name])
-//     {
-      
-//       #ifdef ENABLE_LOG_LEVEL_INFO
-//         ALOG_HGL(PSTR("MATCHED Rule%d"),rule_index);
-//         // DELAY_DEBUG(1000);
-//       #endif // ENABLE_LOG_LEVEL_INFO
-
-//       EventPackage* p_event = nullptr;
-
-//       jobj = obj[rule_name].getObject()["Trigger"];
-//       if(!jobj.isNull()){
-//         parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].trigger);
-//         // Activate rule
-//         rules[rule_index].flag_configured = true;
-//         rules[rule_index].flag_enabled = true;
-//       }
-
-//       jobj = obj[rule_name].getObject()["Command"];
-//       if(!jobj.isNull()){
-//         parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].command);        
-//       }
-
-//       mqtthandler_settings.flags.SendNow = true;
-
-//     }
-
-//   }  
-
-
-//   if(jtok = obj["AddRule"])
-//   { // Assuming going forward vectors will be used, but for now just slot relative from 0 index 
-
-//     ALOG_INF(PSTR( D_LOG_RULES "AddRule"));
-
-//     if(jtok_sub = jtok.getObject()["Default"])
-//     {
-      
-//       if(jtok_sub.isArray())
-//       {
-        
-//         JsonParserArray array = jtok_sub;
-//         uint8_t index = 0;
-//         for(auto& object:array)
-//         {
-//           // ALOG_INF(PSTR(D_LOG_RULES "AddRule Relay1Follow %s"),object.getStr());
-//           AppendRule_FromDefault_UsingName((char*)object.getStr());
-//         }
-
-//       }
-//     }
-    
-//     // if(strcmp(jtok.getStr(), "Switch1Change->Relay1Follow")==0)
-//     // {
-    
-    
-//     //   ALOG_INF(PSTR(D_LOG_RULES "AddRule Relay1Follow"));
-
-//     // }
-
-
-    
-    
-    
-//     // EventPackage* p_event = nullptr;
-
-
-//     // jobj = obj[rule_name].getObject()["Trigger"];
-//     // if(!jobj.isNull()){
-//     //   parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].trigger);
-
-//     //   // tmp fix, just set but later needs made dynamic
-
-//     //   // Activate rule
-//     //   rules[rule_index].flag_configured = true;
-//     //   rules[rule_index].flag_enabled = true;
-
-
-//     // }
-
-//     // jobj = obj[rule_name].getObject()["Command"];
-//     // if(!jobj.isNull()){
-//     //   parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].command);
-      
-//     // }
-
-    
-//     #ifdef USE_MODULE_NETWORK_MQTT
-//     mqtthandler_state_ifchanged.flags.SendNow = true;
-//     #endif // USE_MODULE_NETWORK_MQTT
-
-//   }
-
-
-
-
-
-    /**
-     * Get modules
-     * */
-    // int8_t module_id = 0;
-    
-    // if(jtok = jobj["Command"].getObject()["Module"]){
-
-    //   if(jtok.isStr()){
-    //     if((tmp_id=tkr->GetModuleIDbyFriendlyName(jtok.getStr()))>=0){
-    //       ALOG_INF(PSTR("22JTOK FOUND Trigger Module tmp_id = %d"),tmp_id);
-    //       p_event->module_id = tmp_id;
-    //       data_buffer.isserviced++;
-    //     }
-    //   }else
-    //   if(jtok.isNum()){
-    //     ALOG_INF(PSTR("JTOK FOUND Trigger Module"));
-    //     // get pointer to rule via rule_index
-    //     // CommandSet_Rule_Module_ID(jtok.getInt(), );
-    //     data_buffer.isserviced++;
-    //   }
-    //   // #ifdef ENABLE_LOG_LEVEL_DEBUG
-    //   // ALOG_DBG(PSTR(D_LOG_LIGHT D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
-    //   // #endif // ENABLE_LOG_LEVEL_DEBUG
-    
-    // }//end trigger
-
-    //Devicename will need to search the shared buffer, possibly just read it in otherwise
-
-
-    //SetPower is getstate (if string), else, just put value in
-
-
-
-
-
-
 
 }
 
@@ -1112,9 +896,7 @@ void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)
 //     tkr_wifi->EspRestart();
 //   }
   
-//   // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 //   // AddLog(LOG_LEVEL_COMMANDS, PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_TRANSITION,D_PIXELS_UPDATE_PERCENTAGE)), value);
-//   // #endif
 
 // }
 
