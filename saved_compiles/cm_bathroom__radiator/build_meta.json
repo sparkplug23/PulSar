@@ -1,7 +1,7 @@
 {
   "env_name": "cm_bathroom__radiator",
-  "created_utc": "2026-04-05T13:36:25Z",
-  "created_epoch": 1775396185,
+  "created_utc": "2026-06-27T10:47:50Z",
+  "created_epoch": 1782557270,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_bathroom__radiator",
   "platform": "espressif32",
@@ -17,9 +17,9 @@
     "bootloader.bin"
   ],
   "git": {
-    "branch": "development",
-    "commit": "785c1ef293a4b4da6c9f91060dd17278dd4f311c",
-    "describe": "785c1ef2-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/08_Logging/mLogging.cpp\n M code/2_CoreSystem/Version.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_meadows.ini\n M platformio_override.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M saved_compiles/nitc_server_reset_board_installed/build_meta.json\n M saved_compiles/nitc_server_reset_board_installed/firmware.elf\n?? saved_compiles/cm_bathroom__radiator/\n?? saved_compiles/cm_garage__furnace/"
+    "branch": "dev_mqtt_transport",
+    "commit": "8ebe74914408809392003d90a4c52499f22ac7c0",
+    "describe": "8ebe7491-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/11_Languages/mLanguageDefault.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_meadows.ini\n M platformio_override.ini\n M saved_compiles/cm_bathroom__radiator/build_meta.json\n M saved_compiles/cm_bathroom__radiator/firmware.elf"
   }
 }

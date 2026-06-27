@@ -14,7 +14,7 @@
 //--------------------------------[Enable Device]-------------------------------------
 
 /// KITCHEN //////////////////////////////////////////////////////////////////////////////////
-#define DEVICE_MEADOWS__KITCHEN__ROOM_SENSOR
+// #define DEVICE_MEADOWS__KITCHEN__ROOM_SENSOR
 // #define DEVICE_MEADOWS__KITCHEN__GLASS_BOX
 // #define DEVICE_MEADOWS__KITCHEN__GREEN_PLANT
 /// LANDING //////////////////////////////////////////////////////////////////////////////////
@@ -6931,7 +6931,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
       "\"15\":\"" D_GPIO_DS18X20_1_CTR "\","
       #endif    
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"2\":\"" D_GPIO_REL_CTR "1" "\",""
+      "\"2\":\"" D_GPIO_REL_CTR "1" "\","
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
