@@ -202,16 +202,17 @@ void mPins::ModuleTemplate__ParseCJSONBuffer(char* buffer){
   if(jtok = rootObj[PM_BASE])
   {    
     const char* base_ctr = jtok.getStr();
-    ALOG_DBG(PSTR(D_LOG_CONFIG "Template BASE Searching \"%s\""), base_ctr);
+    ALOG_INF(PSTR(D_LOG_CONFIG "Template BASE Searching \"%s\""), base_ctr);
     int16_t module_result = GetModuleIDbyName(base_ctr);
     if(module_result >= -1)
     {
       tkr_set->Settings.module = module_result;
-      ALOG_DBG(PSTR(D_LOG_CONFIG "Template BASE Found %d"), tkr_set->Settings.module);
+      ALOG_INF(PSTR(D_LOG_CONFIG "Template BASE Found %d"), tkr_set->Settings.module);
     }
   }
   else
   {
+    ALOG_ERR(PSTR(D_LOG_CONFIG "Template Base Missing"));
     tkr_set->Settings.module = USER_MODULE;
   }
 
@@ -546,13 +547,13 @@ void mPins::GetInternalTemplate(void* ptr, uint32_t module, uint32_t option)
 
   if(module < MODULE_MAXMODULE_8266)
   {
-    ALOG_DBG(PSTR("TemplateGPIOs loading from esp8266 module_template__gpio_map[%d]"), module);
+    ALOG_INF(PSTR("TemplateGPIOs loading from esp8266 module_template__gpio_map[%d]"), module);
     // memcpy_P(ptr, &module_template__gpio_map_ESP8266[module].gp, sizeof(mytmplt8266));
 
     memcpy_P(&template_read, &module_template__gpio_map_ESP8266[module_template], 6 * sizeof(uint16_t));
     memcpy_P(&template_read[8], &module_template__gpio_map_ESP8266[module_template].gp.io[6], 6 * sizeof(uint16_t));
 
-    AddLog_Array_Block(7, PSTR("TemplateGPIOs esp8266 template8"), template_read, ARRAY_SIZE(template_read), 20, false);
+    AddLog_Array_Block(1, PSTR("TemplateGPIOs esp8266 template8"), template_read, ARRAY_SIZE(template_read), 20, false);
 
     // memcpy_P(ptr, template8, sizeof(mytmplt8285)); // copy full width
     // memcpy_P(ptr, template8, sizeof(template8));
@@ -588,7 +589,7 @@ void mPins::GetInternalTemplate(void* ptr, uint32_t module, uint32_t option)
       break;
     }
   }
-  ALOG_DBG(PSTR("TemplateGPIOs option %d, index %d, size %d"), option, index, size);
+  ALOG_INF(PSTR("TemplateGPIOs option %d, index %d, size %d"), option, index, size);
   
   memcpy(ptr, &template_read[index], size);  // Only pins get written back, not the flag (it gets called later, hence the "index" to shift to the flag byte)
 

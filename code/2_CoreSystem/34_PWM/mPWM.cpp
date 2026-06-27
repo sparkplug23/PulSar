@@ -160,7 +160,7 @@ void mPWM::Init(void)
       #endif
 
       #ifdef ESP8266
-        analogWrite(tkr_pins->Pin(GPIO_PWM, i), bitRead(tkr_set->runtime.pwm_inverted, i) ? tkr_set->Settings.pwm_range : 0);
+        analogWrite(tkr_pins->Pin(GPIO_PWM1, i), bitRead(tkr_set->runtime.pwm_inverted, i) ? tkr_set->Settings.pwm_range : 0);
       #endif
       
       tkr_set->runtime.pwm_present = true;

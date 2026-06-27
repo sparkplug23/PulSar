@@ -369,11 +369,11 @@ void mRelays::SetPowerOnState(void)
           && !tkr_set->Settings.flag3.shutter_mode       // SetOption80 - Enable shutter support
           #endif // USE_SHUTTER
         ) {
-        if ((port < MAX_RELAYS_SET) && tkr_pins->PinUsed(GPIO_REL, port)) {
+        if ((port < MAX_RELAYS_SET) && tkr_pins->PinUsed(GPIO_REL1, port)) {
           if (bitRead(rt.bitpacked.rel_bistable, port)) {
             port++;                              // Skip both bistable relays as always 0
           } else {
-            bitWrite(tkr_set->runtime.power, i, digitalRead(tkr_pins->Pin(GPIO_REL, port)) ^ bitRead(rt.bitpacked.rel_inverted, port));
+            bitWrite(tkr_set->runtime.power, i, digitalRead(tkr_pins->Pin(GPIO_REL1, port)) ^ bitRead(rt.bitpacked.rel_inverted, port));
           }
         }
         port++;

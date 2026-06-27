@@ -516,9 +516,9 @@ static const char* GPIOBaseName_ByID(uint16_t base_id, char* B, uint8_t L)
        ****************************************/
 
       // VL53L0X XSHUT pin
-    case GPIO_VL53L0X_XSHUT:                     snprintf_P(B, L, PSTR(D_GPIO_VL53L0X_XSHUT_CTR)); return B;
+    case GPIO_VL53L0X_XSHUT1:                     snprintf_P(B, L, PSTR(D_GPIO_VL53L0X_XSHUT_CTR)); return B;
       // VL53L1X XSHUT pin
-    case GPIO_VL53L1X_XSHUT:                     snprintf_P(B, L, PSTR(D_GPIO_VL53L1X_XSHUT_CTR)); return B;
+    case GPIO_VL53L1X_XSHUT1:                     snprintf_P(B, L, PSTR(D_GPIO_VL53L1X_XSHUT_CTR)); return B;
 
       /****************************************
        * SECTION: Radar HLK LD2410

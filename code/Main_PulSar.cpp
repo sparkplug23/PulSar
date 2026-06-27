@@ -943,11 +943,13 @@ tkr_json_template->ModuleDeviceTemplate__LoadDefault();
 
   tkr_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   #ifdef ENABLE_LOGGING__BOOT_LOGLEVEL_SET_BY_FASTBOOT_COUNTER
+  #ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
   uint8_t fastboot_count = RtcMemory__BootState.fast_reboot_count;
   if(fastboot_count == 0){ tkr_set->runtime.seriallog_level_during_boot = LOG_LEVEL_DEBUG; } //normal boot
   if(fastboot_count >= 1){ tkr_set->runtime.seriallog_level_during_boot = LOG_LEVEL_INFO; }
   if(fastboot_count >= 4){ tkr_set->runtime.seriallog_level_during_boot = LOG_LEVEL_DEBUG_LOWLEVEL; }
   ALOG_DBG(PSTR("seriallog by fastboot %d:%s"), fastboot_count, tkr_log->GetLogLevelNamebyID(tkr_set->runtime.seriallog_level_during_boot));
+  #endif
   #endif
 
   tkr_set->Settings.logging.serial_level = tkr_set->runtime.seriallog_level_during_boot;  

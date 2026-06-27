@@ -222,6 +222,20 @@ const uint16_t SelectablePins_BitPacked[] PROGMEM =
 
 
 
+  
+  /****************************************
+   * SECTION: Drivers
+   ****************************************/
+
+    /****************************************
+     * SECTION: SR04
+     ****************************************/
+  
+    PGPIO(GPIO_SR04_ECHO) + MGPIO(3),
+    PGPIO(GPIO_SR04_TRIG) + MGPIO(3),
+
+    
+
 };
 
 const uint16_t SelectablePins_BitPacked_Count =

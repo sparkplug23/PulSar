@@ -474,6 +474,11 @@ rules_active_index = 0;
       DefaultRule_Sonoff_Basic_R2();
     }else
   #endif // USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
+    if(tkr_set->Settings.module == mPins::MODULE_SONOFF_BASIC_NODEMCU){
+      DefaultRule_Sonoff_Basic_R2();
+    }else
+  #endif // USE_MODULE_TEMPLATE_SONOFF_BASIC_R2
   #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
     if(tkr_set->Settings.module == mPins::MODULE_SONOFF_IFAN03){
       DefaultRule_Sonoff_iFan03();

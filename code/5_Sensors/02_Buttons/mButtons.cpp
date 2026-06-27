@@ -623,9 +623,9 @@ void mButtons::Handler(void) {
              * SECTION: Button hold is used to system factory reset
              */
             #ifdef ENABLE_FEATURE_BUTTON__FACTORY_RESET_WITH_LONG_HOLD
-            if (tkr_set->Settings.sysopt_system.bit.button_restrict) {            // SetOption1 (0) - Control button multipress
-              if (tkr_set->Settings.setoption_255[P_HOLD_IGNORE] > 0) {      // SetOption40 (0) - Do not ignore button hold
-                if (Button.hold_timer[button_index] > loops_per_second * tkr_set->Settings.setoption_255[P_HOLD_IGNORE] / 10) {
+            if (tkr_set->Settings.sysopt_sensors.bit.button_restrict) {            // SetOption1 (0) - Control button multipress
+              if (tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms > 0) {      // SetOption40 (0) - Do not ignore button hold
+                if (Button.hold_timer[button_index] > loops_per_second * tkr_set->Settings.sysopt_sensors.param.key_hold_time_ms / 10) {
                   Button.hold_timer[button_index] = 0;       // Reset button hold counter to stay below hold trigger
                   Button.press_counter[button_index] = 0;    // Discard button press to disable functionality
                 }

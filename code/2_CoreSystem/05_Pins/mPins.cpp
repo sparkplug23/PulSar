@@ -36,6 +36,9 @@ const uint16_t mPins::module_template__ids[] PROGMEM = {
   #ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
     MODULE_SHELLY_DIMMER2,
   #endif  
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC
+    MODULE_SONOFF_BASIC_NODEMCU,
+  #endif  
   /**
   * ESP8285 modules
   **/
@@ -73,6 +76,9 @@ const char mPins::module_template__names[] PROGMEM
   #ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
     D_MODULE_NAME_SHELLY_DIMMER2_CTR "|"
   #endif
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC_NODEMCU
+    D_MODULE_NAME_SONOFF_BASIC_NODEMCU_CTR  "|"
+  #endif
   // ESP8285 modules
   D_MODULE_NAME_USERMODULE_CTR "|"
   #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
@@ -91,9 +97,9 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
   
   #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC
   {                           // MODULE_SONOFF_BASIC_ID    // Sonoff Basic (ESP8266)
-    GPIO_KEY,                // GPIO00 Button
+    GPIO_KEY1,                // GPIO00 Button
     GPIO_USER,                // GPIO01 Serial RXD and Optional sensor
-    PIGPIO_N(GPIO_LED_INV,2),            // GPIO02 Only available on newer Sonoff Basic R2 V1
+    PIGPIO_N(GPIO_LED1_INV,2),            // GPIO02 Only available on newer Sonoff Basic R2 V1
     GPIO_USER,                // GPIO03 Serial TXD and Optional sensor
     GPIO_USER,                // GPIO04 Optional sensor
     0,                        // GPIO05
@@ -103,8 +109,8 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
                               // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
                               // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
                               // GPIO11 (SD_CMD   Flash)
-    PIGPIO_N(GPIO_REL,1),                // GPIO12 Red Led and Relay (0 = Off,    1 = On)
-    PIGPIO_N(GPIO_LED_INV,1),            // GPIO13 Green Led (0 = On, 1 = Off) - Link and Power status
+    PIGPIO_N(GPIO_REL1,1),                // GPIO12 Red Led and Relay (0 = Off,    1 = On)
+    PIGPIO_N(GPIO_LED1_INV,1),            // GPIO13 Green Led (0 = On, 1 = Off) - Link and Power status
     GPIO_USER,                // GPIO14 Optional sensor
     0,                        // GPIO15
     0,                        // GPIO16
@@ -113,10 +119,10 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
   #endif
   #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC_EXTERNAL
   {                   // MODULE_SONOFF_BASIC_EXTERNAL_ID    // Sonoff Basic (ESP8266)
-    PIGPIO_N(GPIO_KEY,1),        // GPIO00 Button
+    PIGPIO_N(GPIO_KEY1,1),        // GPIO00 Button
     GPIO_USER,        // GPIO01 Serial RXD and Optional sensor
-    PIGPIO_N(GPIO_LED_INV,2),    // GPIO02 Only available on newer Sonoff Basic R2 V1
-    PIGPIO_N(GPIO_KEY,2),        // GPIO03 Serial TXD and Optional sensor
+    PIGPIO_N(GPIO_LED1_INV,2),    // GPIO02 Only available on newer Sonoff Basic R2 V1
+    PIGPIO_N(GPIO_KEY1,2),        // GPIO03 Serial TXD and Optional sensor
     GPIO_USER,        // GPIO04 Optional sensor
     0,                // GPIO05
                       // GPIO06 (SD_CLK   Flash)
@@ -125,8 +131,8 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
                       // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
                       // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
                       // GPIO11 (SD_CMD   Flash)
-    PIGPIO_N(GPIO_REL,1),        // GPIO12 Red Led and Relay (0 = Off,    1 = On)
-    PIGPIO_N(GPIO_LED_INV,1),    // GPIO13 Green Led (0 = On, 1 = Off) - Link and Power status
+    PIGPIO_N(GPIO_REL1,1),        // GPIO12 Red Led and Relay (0 = Off,    1 = On)
+    PIGPIO_N(GPIO_LED1_INV,1),    // GPIO13 Green Led (0 = On, 1 = Off) - Link and Power status
     GPIO_USER,        // GPIO14 Optional sensor
     0,                // GPIO15
     0,                // GPIO16
@@ -135,22 +141,22 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
   #endif
   #ifdef USE_MODULE_TEMPLATE_H801
   {                      // MODULE_H801,               // Lixada H801 Wifi (ESP8266)
-    PIGPIO_N(GPIO_KEY,1),           // GPIO00 E-FW Button   // TEMPORARILY FORCING AS A KEY1 HERE, REMOVE WHEN GPIOC IS PROPERLY ADDED INTO CODE
-    PIGPIO_N(GPIO_LED,1),           // GPIO01 Green LED - Link and Power status
+    PIGPIO_N(GPIO_KEY1,1),           // GPIO00 E-FW Button   // TEMPORARILY FORCING AS A KEY1 HERE, REMOVE WHEN GPIOC IS PROPERLY ADDED INTO CODE
+    PIGPIO_N(GPIO_LED1,1),           // GPIO01 Green LED - Link and Power status
     GPIO_USER,           // GPIO02 TX and Optional sensor - Pin next to TX on the PCB
     GPIO_USER,           // GPIO03 RX and Optional sensor - Pin next to GND on the PCB
-    PIGPIO_N(GPIO_PWM,5),           // GPIO04 W2 - PWM5
-    PIGPIO_N(GPIO_LED_INV,2),       // GPIO05 Red LED
+    PIGPIO_N(GPIO_PWM1,5),           // GPIO04 W2 - PWM5
+    PIGPIO_N(GPIO_LED1_INV,2),       // GPIO05 Red LED
                       // GPIO06 (SD_CLK   Flash)
                       // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                       // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
                       // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
                       // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
                       // GPIO11 (SD_CMD   Flash)
-    PIGPIO_N(GPIO_PWM,3),           // GPIO12 Blue
-    PIGPIO_N(GPIO_PWM,2),           // GPIO13 Green
-    PIGPIO_N(GPIO_PWM,4),           // GPIO14 W1 - PWM4
-    PIGPIO_N(GPIO_PWM,1),           // GPIO15 Red
+    PIGPIO_N(GPIO_PWM1,3),           // GPIO12 Blue
+    PIGPIO_N(GPIO_PWM1,2),           // GPIO13 Green
+    PIGPIO_N(GPIO_PWM1,4),           // GPIO14 W1 - PWM4
+    PIGPIO_N(GPIO_PWM1,1),           // GPIO15 Red
     0, // GPIO16
     0 // A0
   },
@@ -160,20 +166,20 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
                       // https://www.aliexpress.com/item/Magic-Home-Mini-RGB-RGBW-Wifi-Controller-For-Led-Strip-Panel-light-Timing-Function-16million-colors/32686853650.html
     0,
     GPIO_USER,           // GPIO01 Serial RXD and Optional sensor
-    PIGPIO_N(GPIO_LED_INV,1),       // GPIO02 Blue onboard LED - Link and Power status
+    PIGPIO_N(GPIO_LED1_INV,1),       // GPIO02 Blue onboard LED - Link and Power status
     GPIO_USER,           // GPIO03 Serial TXD and Optional sensor
     GPIO_USER, //GPIO_ARIRFRCV,       // GPIO04 IR or RF receiver (optional) (Arilux LC10)
-    PIGPIO_N(GPIO_PWM,2),           // GPIO05 RGB LED Green
+    PIGPIO_N(GPIO_PWM1,2),           // GPIO05 RGB LED Green
                       // GPIO06 (SD_CLK   Flash)
                       // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                       // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
                       // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
                       // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
                       // GPIO11 (SD_CMD   Flash)
-    PIGPIO_N(GPIO_PWM,3),           // GPIO12 RGB LED Blue
+    PIGPIO_N(GPIO_PWM1,3),           // GPIO12 RGB LED Blue
     GPIO_USER,           // GPIO13 RGBW LED White (optional - set to PWM4 for Cold White or Warm White as used on Arilux LC10)
-    PIGPIO_N(GPIO_PWM,1),           // GPIO14 RGB LED Red
-    PIGPIO_N(GPIO_LED_INV,4),       // GPIO15 RF receiver control (Arilux LC10)
+    PIGPIO_N(GPIO_PWM1,1),           // GPIO14 RGB LED Red
+    PIGPIO_N(GPIO_LED1_INV,4),       // GPIO15 RF receiver control (Arilux LC10)
     0, 0
   },
   #endif
@@ -183,8 +189,8 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
      0,                // GPIO01 Serial RXD - Can be changed to GPIO_USER, only if Shelly is powered with 12V DC
      0,
      0,                // GPIO03 Serial TXD - Can be changed to GPIO_USER, only if Shelly is powered with 12V DC
-     PIGPIO_N(GPIO_REL,1),           // GPIO04 Relay (0 = Off, 1 = On)
-     PIGPIO_N(GPIO_SWT_NP,1),        // GPIO05 SW pin
+     PIGPIO_N(GPIO_REL1,1),           // GPIO04 Relay (0 = Off, 1 = On)
+     PIGPIO_N(GPIO_SWT1_NP,1),        // GPIO05 SW pin
                        // GPIO06 (SD_CLK   Flash)
                        // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                        // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
@@ -196,12 +202,12 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
   #endif
   #ifdef USE_MODULE_TEMPLATE_SHELLY_2P5  
   {//MODULE_SHELLY2P5     // Shelly2 (ESP8266 - 2MB) - https://shelly.cloud/shelly2/
-    PIGPIO_N(GPIO_LED_INV,1),        // GPIO00 LED1i
+    PIGPIO_N(GPIO_LED1_INV,1),        // GPIO00 LED1i
     0,                    // GPIO01 None
-    PIGPIO_N(GPIO_KEY,1),            // GPIO02 Button1
+    PIGPIO_N(GPIO_KEY1,1),            // GPIO02 Button1
     0,                    // GPIO03 None
-    PIGPIO_N(GPIO_REL,1),            // GPIO04 Relay1
-    PIGPIO_N(GPIO_SWT_NP,2),         // GPIO05 Switch2n
+    PIGPIO_N(GPIO_REL1,1),            // GPIO04 Relay1
+    PIGPIO_N(GPIO_SWT1_NP,2),         // GPIO05 Switch2n
                           // GPIO06 (SD_CLK   Flash)
                           // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                           // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
@@ -209,9 +215,9 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
                           // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
                           // GPIO11 (SD_CMD   Flash)
     GPIO_I2C_SDA,         // GPIO12 I2C_SDA
-    PIGPIO_N(GPIO_SWT_NP,1),         // GPIO13 Switch1n
+    PIGPIO_N(GPIO_SWT1_NP,1),         // GPIO13 Switch1n
     GPIO_I2C_SCL,         // GPIO14 I2C_SCL
-    PIGPIO_N(GPIO_REL,2),            // GPIO15 Relay2
+    PIGPIO_N(GPIO_REL1,2),            // GPIO15 Relay2
     GPIO_ADE7953_IRQ,     // GPIO16 ADE7953_IRQ
     GPIO_FLAG_ADC0_TEMP   // GPIOA0 Tempurature
   },
@@ -230,12 +236,36 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
                                // GPIO09 None 
                                // GPIO10 None 
                                // GPIO11 (SD_CMD   Flash)
-    PIGPIO_N(GPIO_SWT_NP,2),              // GPIO12 Switch2n 
+    PIGPIO_N(GPIO_SWT1_NP,2),              // GPIO12 Switch2n 
     0,                         // GPIO13 None 
-    PIGPIO_N(GPIO_SWT_NP,1),              // GPIO14 Switch1n 
+    PIGPIO_N(GPIO_SWT1_NP,1),              // GPIO14 Switch1n 
     0,                         // GPIO15 None
-    PIGPIO_N(GPIO_LED_INV,1),             // GPIO16 Led1i 
+    PIGPIO_N(GPIO_LED1_INV,1),             // GPIO16 Led1i 
     GPIO_FLAG_ADC0_TEMP        // ADC Temperature
+  },
+  #endif
+  #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC_NODEMCU
+  {                                   // MODULE_SONOFF_BASIC_NODEMCU_TESTER_ID
+    PIGPIO_N(GPIO_KEY1,1),            // GPIO00 / D3  FLASH button, boot strap, must be high at reset
+    GPIO_USER,                        // GPIO01 / TX  Serial TXD, optional only if serial not needed
+    PIGPIO_N(GPIO_LED1_INV,1),        // GPIO02 / D4  NodeMCU onboard LED, status LED, usually inverted
+    GPIO_USER,                        // GPIO03 / RX  Serial RXD, optional only if serial not needed
+    GPIO_USER,                        // GPIO04 / D2  Optional sensor
+    GPIO_USER,                        // GPIO05 / D1  Optional sensor
+
+                                        // GPIO06 SD_CLK   Flash, do not use
+                                        // GPIO07 SD_DATA0 Flash, do not use
+                                        // GPIO08 SD_DATA1 Flash, do not use
+                                        // GPIO09 SD_DATA2 Flash / board-dependent, avoid
+                                        // GPIO10 SD_DATA3 Flash / board-dependent, avoid
+                                        // GPIO11 SD_CMD   Flash, do not use
+
+    0,                                // GPIO12 / D6  Unused in no-wiring tester
+    0,                                // GPIO13 / D7  Unused in no-wiring tester
+    GPIO_USER,                        // GPIO14 / D5  Optional sensor
+    0,                                // GPIO15 / D8  Boot strap, must be low at reset
+    PIGPIO_N(GPIO_REL1,1),            // GPIO16 / D0  Fake relay using second onboard LED
+    0                                 // ADC0 / A0
   },
   #endif
 };
@@ -267,7 +297,7 @@ const mytmplt8285 mPins::module_template__gpio_map_ESP8285[3] PROGMEM = {
   },
   #ifdef USE_MODULE_TEMPLATE_SONOFF_IFAN03
   {          //MODULE_SONOFF_IFAN03_ID                  // SONOFF_IFAN03 - Sonoff iFan03 (ESP8285)
-    PIGPIO_N(GPIO_KEY,1),           // GPIO00 WIFI_KEY0 Button 1
+    PIGPIO_N(GPIO_KEY1,1),           // GPIO00 WIFI_KEY0 Button 1
     PIGPIO_N(GPIO_HWSERIAL_TX,1),   // GPIO01 ESP_TXD Serial RXD connection to P0.5 of RF microcontroller
     0,                              // GPIO02 ESP_LOG
     PIGPIO_N(GPIO_HWSERIAL_RX,1),   // GPIO03 ESP_RXD Serial TXD connection to P0.4 of RF microcontroller
@@ -276,35 +306,35 @@ const mytmplt8285 mPins::module_template__gpio_map_ESP8285[3] PROGMEM = {
                                     // GPIO06 (SD_CLK   Flash)
                                     // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                                     // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
-    PIGPIO_N(GPIO_REL_INV,1),       // GPIO09 WIFI_O0 Relay 1 (0 = Off, 1 = On) controlling the light
+    PIGPIO_N(GPIO_REL1_INV,1),       // GPIO09 WIFI_O0 Relay 1 (0 = Off, 1 = On) controlling the light
     PIGPIO_N(GPIO_BUZZER_INV,1),    // GPIO10 WIFI_O4 Buzzer (0 = Off, 1 = On)
                                     // GPIO11 (SD_CMD   Flash)
-    PIGPIO_N(GPIO_REL,3),           // GPIO12 WIFI_O2 Relay 3 (0 = Off, 1 = On) controlling the fan
-    PIGPIO_N(GPIO_LED_INV,1),       // GPIO13 WIFI_CHK Blue Led on PCA (0 = On, 1 = Off) - Link and Power status
-    PIGPIO_N(GPIO_REL,2),           // GPIO14 WIFI_O1 Relay 2 (0 = Off, 1 = On) controlling the fan
-    PIGPIO_N(GPIO_REL,4),           // GPIO15 WIFI_O3 Relay 4 (0 = Off, 1 = On) controlling the fan
+    PIGPIO_N(GPIO_REL1,3),           // GPIO12 WIFI_O2 Relay 3 (0 = Off, 1 = On) controlling the fan
+    PIGPIO_N(GPIO_LED1_INV,1),       // GPIO13 WIFI_CHK Blue Led on PCA (0 = On, 1 = Off) - Link and Power status
+    PIGPIO_N(GPIO_REL1,2),           // GPIO14 WIFI_O1 Relay 2 (0 = Off, 1 = On) controlling the fan
+    PIGPIO_N(GPIO_REL1,4),           // GPIO15 WIFI_O3 Relay 4 (0 = Off, 1 = On) controlling the fan
     0,                              // GPIO16 None 
     0                               // A0
   },
   #endif
   #ifdef USE_MODULE_TEMPLATE_SONOFF_4CHPRO  
   {                           // SONOFF_4CH - Sonoff 4CH (ESP8285)
-    PIGPIO_N(GPIO_KEY,1),             // GPIO00 Button 1
+    PIGPIO_N(GPIO_KEY1,1),             // GPIO00 Button 1
     GPIO_USER,             // GPIO01 Serial RXD and Optional sensor
     GPIO_RF_433MHZ_RX,             // GPIO02 Optional sensor
     GPIO_USER,             // GPIO03 Serial TXD and Optional sensor
-    PIGPIO_N(GPIO_REL,3),             // GPIO04 Sonoff 4CH Red Led and Relay 3 (0 = Off, 1 = On)
-    PIGPIO_N(GPIO_REL,2),             // GPIO05 Sonoff 4CH Red Led and Relay 2 (0 = Off, 1 = On)
+    PIGPIO_N(GPIO_REL1,3),             // GPIO04 Sonoff 4CH Red Led and Relay 3 (0 = Off, 1 = On)
+    PIGPIO_N(GPIO_REL1,2),             // GPIO05 Sonoff 4CH Red Led and Relay 2 (0 = Off, 1 = On)
                         // GPIO06 (SD_CLK   Flash)
                         // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                         // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
-    PIGPIO_N(GPIO_KEY,2),             // GPIO09 Button 2
-    PIGPIO_N(GPIO_KEY,3),             // GPIO10 Button 3
+    PIGPIO_N(GPIO_KEY1,2),             // GPIO09 Button 2
+    PIGPIO_N(GPIO_KEY1,3),             // GPIO10 Button 3
                         // GPIO11 (SD_CMD   Flash)
-    PIGPIO_N(GPIO_REL,1),             // GPIO12 Red Led and Relay 1 (0 = Off, 1 = On) - Link and Power status
-    PIGPIO_N(GPIO_LED_INV,1),         // GPIO13 Blue Led (0 = On, 1 = Off)
-    PIGPIO_N(GPIO_KEY,4),             // GPIO14 Button 4
-    PIGPIO_N(GPIO_REL,4),             // GPIO15 Red Led and Relay 4 (0 = Off, 1 = On)
+    PIGPIO_N(GPIO_REL1,1),             // GPIO12 Red Led and Relay 1 (0 = Off, 1 = On) - Link and Power status
+    PIGPIO_N(GPIO_LED1_INV,1),         // GPIO13 Blue Led (0 = On, 1 = Off)
+    PIGPIO_N(GPIO_KEY1,4),             // GPIO14 Button 4
+    PIGPIO_N(GPIO_REL1,4),             // GPIO15 Red Led and Relay 4 (0 = Off, 1 = On)
     0, 0
   },
   #endif //  USE_MODULE_TEMPLATE_SONOFF_4CHPRO
@@ -1950,6 +1980,7 @@ int16_t mPins::GetModuleIDbyName(const char* c){
   if(*c=='\0'){ return -1; }
   #ifdef ESP8266
     if(strcmp_P(c,PM_MODULE_NAME_SONOFF_BASIC_CTR)==0){    return MODULE_SONOFF_BASIC; }
+    if(strcmp_P(c,PM_MODULE_NAME_SONOFF_BASIC_NODEMCU_CTR)==0){    return MODULE_SONOFF_BASIC_NODEMCU; }
     if(strcmp_P(c,PM_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR)==0){    return MODULE_SONOFF_BASIC_EXTERNAL; }
     else if(strcmp_P(c,PM_MODULE_NAME_H801_CTR)==0){            return MODULE_H801; }
     else if(strcmp_P(c,PM_MODULE_NAME_MAGICHOME_CTR)==0){       return MODULE_MAGICHOME; }

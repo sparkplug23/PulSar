@@ -23,7 +23,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-
+# //https://touchterrain.geol.iastate.edu/main?DEM_name=JAXA%2FALOS%2FAW3D30%2FV4_1&hsazi=315&hselev=45&maptype=Streets&gamma=1.0&transp=0&hsazi=315&hselev=45&map_lat=54.16645400892218&map_lon=-6.023419748905724&map_zoom=12&trlat=54.209597011711324&trlon=-5.928382873535157&bllat=54.122902273943296&bllon=-6.118469238281251&vp_trlat=54.29629174947934&vp_trlon=-5.738296508789063&vp_bllat=54.036207536175276&vp_bllon=-6.308555603027345&tilewidth=250&ntilesx=1&ntilesy=1&printres=0.4&basethick=1&zscale=1.0&fileformat=STLb&manual=&polyURL=
 # ============================================================
 # >>> PASTE YOUR FULL SERIAL CRASH DUMP HERE <<<
 # ============================================================
@@ -31,58 +31,15 @@ from typing import Dict, List, Optional, Tuple
 def _SerialCrashDumpBlock() -> str:
     return r"""
     
-
-                                                                               
- Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandl
-ed.
-                                                                           
-     
-                                                                         
-Core  1 register dump:
-                                                        
-PC      : 0x4012ffdb  PS      : 0x00060e30  A0      : 0x80130147  A1      : 0x3f
-fb2710  
-                                                                      
-A2      : 0x00000000  A3      : 0x00000023  A4      : 0x3ffb398c  A5      : 0x00
-000004  
-                                                                      
-A6      : 0x3ffb26b0  A7      : 0x00000008  A8      : 0x800d4228  A9      : 0x3f
-fb26e0  
-                                                                      
-A10     : 0x00000001  A11     : 0x3ffb94f8  A12     : 0xffffffff  A13     : 0xff
-ffffff  
-                                                                      
-A14     : 0x3ffc82e4  A15     : 0x00000009  SAR     : 0x0000001d  EXCCAUSE: 0x00
-00001c  
-                                                                      
-EXCVADDR: 0x00000040  LBEG    : 0x4008d1d1  LEND    : 0x4008d1e1  LCOUNT  : 0xff
-fffffd  
-                                                                      
-          
-                                                                    
-            
-                                                                  
-Backtrace:0x4012ffd8:0x3ffb27100x40130144:0x3ffb2730 0x400f1525:0x3ffb2750 0x400
-f1688:0x3ffb2770 0x400f18bb:0x3ffb2790 0x400d4376:0x3ffb27b0 0x40128b2c:0x3ffb27
-f0 0x4014500e:0x3ffb2820 
-                                                     
-                           
-                                                   
-                             
-                                                 
-                               
-                                               
-                                 
-                          
-
-                        
+Stack smashing protect failure!
 
 
-      
- 
-      
+abort() was called at PC 0x4011c40f on core 1
 
-                                                 
+
+Backtrace:0x40083f7d:0x3ffb25800x4008e3c1:0x3ffb25a0 0x40094315:0x3ffb25c0 0x4011c40f:0x3ffb2640 0x400ec322:0x3ffb2660 0x400efa95:0x3ffb26b0 0x400ef8ce:0x3ffb26d0 0x400f0281:0x3ffb2700 0x400d4b99:0x3ffb2720 0x400e6281:0x3ffb2760 0x400e7059:0x3ffb2780 0x400d4b99:0x3ffb27a0 0x400f4b5d:0x3ffb27e0 0x400f4e62:0x3ffb2800 0x4010d8f9:0x3ffb2820 
+
+
 
 
 
@@ -93,7 +50,7 @@ f0 0x4014500e:0x3ffb2820
 # CONFIGURATION
 # ============================================================
 
-ENV_NAME = "testbed_01__sensors_nextion"   # <<< change if needed
+ENV_NAME = "testbed_02__motion_audio"   # <<< change if needed
 PROJECT_ROOT = None                   # None = auto-detect folder containing saved_compiles
 
 DEDUPE_CONSECUTIVE_ONLY = True

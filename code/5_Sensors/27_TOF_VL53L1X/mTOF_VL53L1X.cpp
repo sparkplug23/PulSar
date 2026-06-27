@@ -67,11 +67,11 @@ int8_t mTOF_VL53L1X::Tasker(uint8_t function, JsonParserObject obj){
       {
         if(bitRead(VL53L1X_detected_bitmapped, i))
         {
-          ALOG_INF(PSTR("VL53L1X[%d] Distance: %d mm"), i, data.devices[i].distance_mm);
+          ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X[%d] Distance: %d mm"), i, data.devices[i].distance_mm);
         }
       }
 
-      // ALOG_INF(PSTR("roi_set %d"), roi_set);
+      // ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "roi_set %d"), roi_set);
           
     break;
     case TASK_EVERY_50_MSECOND:
@@ -161,7 +161,7 @@ bool mTOF_VL53L1X::SetSensorROI(uint8_t sensor_index, uint8_t center, uint8_t wi
   // Write encoded ROI size
   if (!VL53L1X_writeReg(i2c_addr, VL53L1X::ROI_CONFIG__USER_ROI_REQUESTED_GLOBAL_XY_SIZE, roi_size)) return false;
 
-  ALOG_INF(PSTR("VL53L1X[%d] ROI set: center=%d, size=%dx%d"), sensor_index, center, width, height);
+  ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X[%d] ROI set: center=%d, size=%dx%d"), sensor_index, center, width, height);
   return true;
 }
 
@@ -242,7 +242,7 @@ void mTOF_VL53L1X::Init(void)
   **************************/
   #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
   if (tkr_tof_vl0x->module_state.devices == 1 && devices_found > 0) {
-      ALOG_INF(PSTR("Adjusting devices_found to exclude VL53L0X alternate address"));
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "Adjusting devices_found to exclude VL53L0X alternate address"));
       devices_found -= 1; // Remove VL53L0X's already assigned alternate address
       module_state.devices = devices_found;
   }
@@ -251,7 +251,7 @@ void mTOF_VL53L1X::Init(void)
   ALOG_HGL(PSTR("devices_found after filtering: %d"), devices_found);
 
   if (module_state.devices == 0) {
-      ALOG_INF(PSTR("No VL53L1X sensors detected, skipping initialization."));
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "No VL53L1X sensors detected, skipping initialization."));
       return;
   }
 
@@ -262,37 +262,37 @@ void mTOF_VL53L1X::Init(void)
   for (uint32_t i = 0; i < module_state.devices; i++, xshut_mask <<= 1) {
       bool use_xshut = tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1, i);
 
-      ALOG_INF(PSTR("VL53L1X[%d] XSHUT %d"), i, use_xshut);
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X[%d] XSHUT %d"), i, use_xshut);
 
       if (use_xshut) {
           digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1, i), HIGH);
           delay(XSHUT_SET_HIGH_BOOT_UNTIL_VALID_DATA_WAKE_TIME); // XSHUT boot delay
       }
       if (!use_xshut) {
-        ALOG_INF(PSTR("Adding delay before init (no XSHUT)"));
+        ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "Adding delay before init (no XSHUT)"));
         delay(20);  // or 20ms if still unstable
       }
 
       // Check if the sensor responds at 0x29
       if (!tkr_i2c->I2cSetDevice(VL53L1X_ADDRESS)) {
-          ALOG_INF(PSTR("VL53L1X[%d] not responding at 0x29"), i);
+          ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X[%d] not responding at 0x29"), i);
           continue;
       }
 
-      ALOG_INF(PSTR("VL53L1X[%d] Init"), i);
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X[%d] Init"), i);
 
       if (settings.devices[i].sensor.init()) {
-          ALOG_INF(PSTR("VL53L1X %d detected at 0x%02X"), i, VL53L1X_ADDRESS);
+          ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X %d detected at 0x%02X"), i, VL53L1X_ADDRESS);
 
           // **Setup 4: Multiple Sensors, Assign Unique Addresses**
           if (module_state.devices > 1 && use_xshut) {
               uint8_t new_address = VL53L1X_XSHUT_ADDRESS + i;
               settings.devices[i].sensor.setAddress(new_address);
               settings.devices[i].address = new_address;
-              ALOG_INF(PSTR("VL53L1X %d assigned new address: 0x%02X"), i, new_address);
+              ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X %d assigned new address: 0x%02X"), i, new_address);
           } else {
             settings.devices[i].address = VL53L1X_ADDRESS;
-              ALOG_INF(PSTR("VL53L1X %d remains at default address (0x29)"), i);
+              ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X %d remains at default address (0x29)"), i);
           }
 
           uint8_t addr = settings.devices[i].sensor.getAddress();
@@ -314,9 +314,9 @@ void mTOF_VL53L1X::Init(void)
 
           VL53L1X_detected_bitmapped |= xshut_mask;
 
-          ALOG_INF(PSTR("VL53L1X[%d] successfully initialized"), i);
+          ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X[%d] successfully initialized"), i);
       } else {
-          ALOG_INF(PSTR("VL53L1X %d failed to initialize"), i);
+          ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X %d failed to initialize"), i);
       }
   }
 
@@ -455,7 +455,7 @@ uint8_t mTOF_VL53L1X::SearchForDevices()
      if(i==0)
      {
        if (tkr_i2c->I2cDevice_IsConnected(VL53L1X_ADDRESS)) {
-         ALOG_INF(PSTR("VL53L1X found at 0x29"));
+         ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X found at 0x29"));
  
          settings.devices[devices].address = VL53L1X_ADDRESS;
  
@@ -464,7 +464,7 @@ uint8_t mTOF_VL53L1X::SearchForDevices()
      }
  
      if (tkr_i2c->I2cDevice_IsConnected(VL53L1X_XSHUT_ADDRESS+i)) {
-       ALOG_INF(PSTR("VL53L1X found at %02X"),VL53L1X_XSHUT_ADDRESS+i);
+       ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X found at %02X"),VL53L1X_XSHUT_ADDRESS+i);
        
        settings.devices[devices].address = VL53L1X_XSHUT_ADDRESS+i;
  
@@ -507,31 +507,31 @@ uint8_t mTOF_VL53L1X::SearchForDevices()
  * @return `true` if the address change was successful, `false` otherwise.
  */
 bool mTOF_VL53L1X::SwitchDeviceAddress(uint8_t device_id, uint8_t new_address) {
-  ALOG_INF(PSTR("Switching VL53L1X[%d] to new address 0x%02X"), device_id, new_address);
+  ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "Switching VL53L1X[%d] to new address 0x%02X"), device_id, new_address);
 
   // Ensure device_id is valid
   if (device_id >= VL53LXX_MAX_SENSORS) {
-      ALOG_INF(PSTR("Invalid device_id: %d"), device_id);
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "Invalid device_id: %d"), device_id);
       return false;
   }
 
   bool use_xshut = tkr_pins->PinUsed(GPIO_VL53L1X_XSHUT1, device_id);
 
   if (use_xshut) {
-      ALOG_INF(PSTR("Enabling XSHUT for VL53L1X[%d]"), device_id);
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "Enabling XSHUT for VL53L1X[%d]"), device_id);
       digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1, device_id), HIGH);
       delay(XSHUT_SET_HIGH_BOOT_UNTIL_VALID_DATA_WAKE_TIME); // XSHUT boot delay
   }
 
   // Ensure the sensor is responding at its default address (0x29)
   if (!tkr_i2c->I2cSetDevice(VL53L1X_ADDRESS)) {
-      ALOG_INF(PSTR("VL53L1X[%d] not responding at 0x29"), device_id);
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X[%d] not responding at 0x29"), device_id);
       return false;
   }
 
   // **Initialize the sensor at 0x29 BEFORE changing the address**
   if (!settings.devices[device_id].sensor.init()) {
-      ALOG_INF(PSTR("VL53L1X[%d] failed to initialize at 0x29"), device_id);
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X[%d] failed to initialize at 0x29"), device_id);
       return false;
   }
 
@@ -541,11 +541,11 @@ bool mTOF_VL53L1X::SwitchDeviceAddress(uint8_t device_id, uint8_t new_address) {
 
   // Verify address change
   if (!tkr_i2c->I2cSetDevice(new_address)) {
-      ALOG_INF(PSTR("VL53L1X[%d] failed to switch to 0x%02X"), device_id, new_address);
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X[%d] failed to switch to 0x%02X"), device_id, new_address);
       return false;
   }
 
-  ALOG_INF(PSTR("VL53L1X[%d] successfully switched to 0x%02X"), device_id, new_address);
+  ALOG_INF(PSTR(D_LOG_TOF_VL53L1X "VL53L1X[%d] successfully switched to 0x%02X"), device_id, new_address);
 
   if (use_xshut) {
       digitalWrite(tkr_pins->Pin(GPIO_VL53L1X_XSHUT1, device_id), LOW);
