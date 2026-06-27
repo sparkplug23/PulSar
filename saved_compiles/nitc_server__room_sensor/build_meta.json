@@ -1,7 +1,7 @@
 {
   "env_name": "nitc_server__room_sensor",
-  "created_utc": "2026-06-23T12:47:10Z",
-  "created_epoch": 1782218830,
+  "created_utc": "2026-06-25T11:13:10Z",
+  "created_epoch": 1782385990,
   "project_dir": "C:\\pool_local\\Github\\Personal\\PulSar",
   "build_dir": "C:\\pool_local\\Github\\Personal\\PulSar\\.pio\\build\\nitc_server__room_sensor",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "dev_mqtt_transport",
-    "commit": "792807c0ff79574913bc5b950ef179cf135869c3",
-    "describe": "792807c0-dirty",
-    "status_short": "M code/0_ConfigUser/Secret/00_Developing/Firmware__Testbeds.h\n M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/05_Pins/gpio_bitpacked.cpp\n M code/2_CoreSystem/11_Languages/mLanguageDefault.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/3_Network/21_WebServer/Webpages/Generated/html_ui.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/6_Lights/03_Animator/webpages_generated/html_pixart.h\n M code/6_Lights/03_Animator/webpages_generated/html_pxmagic.h\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n M saved_compiles/nitc_server__room_sensor/build_meta.json\n M saved_compiles/nitc_server__room_sensor/firmware.elf"
+    "commit": "1f21f1c2f6ca1e4df84eddcd12243f099eec54a5",
+    "describe": "1f21f1c2-dirty",
+    "status_short": "M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_remote.ini\n M saved_compiles/nitc_server__room_sensor/build_meta.json\n M saved_compiles/nitc_server__room_sensor/firmware.elf"
   }
 }
