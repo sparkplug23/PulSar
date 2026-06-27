@@ -1,7 +1,7 @@
 {
   "env_name": "cm_bathroom__immersion",
-  "created_utc": "2026-06-27T13:43:37Z",
-  "created_epoch": 1782567817,
+  "created_utc": "2026-06-27T17:57:43Z",
+  "created_epoch": 1782583063,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_bathroom__immersion",
   "platform": "espressif32",
@@ -17,9 +17,9 @@
     "bootloader.bin"
   ],
   "git": {
-    "branch": "dev_mqtt_transport",
-    "commit": "8ebe74914408809392003d90a4c52499f22ac7c0",
-    "describe": "8ebe7491-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/11_Languages/mLanguageDefault.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_meadows.ini\n M platformio_override.ini\n M saved_compiles/cm_bathroom__radiator/build_meta.json\n M saved_compiles/cm_bathroom__radiator/firmware.elf\n?? saved_compiles/cm_bathroom__immersion/"
+    "branch": "development",
+    "commit": "c2bc6336859f0b84080e5a695d824d199afd7b65",
+    "describe": "c2bc6336-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/3_Network/21_WebServer/Webpages/Generated/html_other.h\n M code/3_Network/21_WebServer/Webpages/Generated/pages_console_esp8266.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M saved_compiles/cm_bathroom__immersion/build_meta.json\n M saved_compiles/cm_bathroom__immersion/firmware.elf\n M tools/cdata_submodules.js"
   }
 }

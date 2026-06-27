@@ -314,7 +314,6 @@ async function buildSubmoduleHeader(submoduleRootDir, webSrcDir, webGenDir) {
   let out = `/*
  * AUTO-GENERATED FILE
  *   Generator: tools/cdata_submodules.js
- *   Time:      ${now}
  *
  * Source:
  *   ${path.relative(REPO_ROOT, webSrcDir).replace(/\\/g, "/")}
