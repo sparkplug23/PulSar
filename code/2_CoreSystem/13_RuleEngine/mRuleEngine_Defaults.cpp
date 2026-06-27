@@ -207,7 +207,7 @@ void mRuleEngine::DefaultRule_Sonoff_Basic_R2()
 void mRuleEngine::DefaultRule_Sonoff_iFan03()
 {
 
-    ALOG_DBM( PSTR("DefaultRule_Sonoff_iFan03"));
+    ALOG_INF( PSTR("DefaultRule_Sonoff_iFan03"));
     
     EventPackage* p_event = nullptr;
 
@@ -245,43 +245,6 @@ void mRuleEngine::DefaultRule_Sonoff_iFan03()
 
 }
 
-// {
-
-//     #ifdef ENABLE_LOG_LEVEL_DEBUG_MORE
-//     ALOG_DBG(PSTR("DefaultRule_Sonoff_iFan03"));
-
-//     #endif // ENABLE_LOG_LEVEL_INFO
-
-//     EventPackage* p_event = nullptr;
-
-//     if(tkr_rules->rules_active_index>2){ return; } //block new rules
-
-//     #if defined(USE_MODULE_SENSORS_BUTTONS) && defined(USE_MODULE_CONTROLLER_SONOFF_IFAN)
-    
-//     // // Trigger0
-//     // p_event = &tkr_rules->rules[tkr_rules->rules_active_index].trigger;   
-//     // p_event->module_id = D_UNIQUE_MODULE_SENSORS_BUTTONS_ID;
-//     // p_event->function_id = TASK_EVENT_INPUT_STATE_CHANGED_ID;
-//     // p_event->device_id = 0; // Button0
-//     // p_event->value.length = 0;
-//     // p_event->value.data[p_event->value.length++] = 1;  // Pressed 
-//     // // Command0
-//     // p_event = &tkr_rules->rules[tkr_rules->rules_active_index].command;   
-//     // p_event->module_id = D_UNIQUE_MODULE_CONTROLLER_CEILINGFAN_ID;
-//     // p_event->function_id = TASK_EVENT_SET_SPEED_ID;
-//     // p_event->device_id = 0; 
-//     // p_event->value.length = 0;
-//     // p_event->value.data[p_event->value.length++] = STATE_NUMBER_INCREMENT_ID;  // Increment 
-//     // tkr_rules->rules_active_index++;
-//     // settings.loaded_default_for_moduled = true;
-
-//     #endif
-
-//         //p_event->value.data[p_event->value.length++] = if just on, then here would be speed;  // 255 means next slot contains command and not value, "255" needs to be control ids 
-    
-
-
-// }
 #endif // USE_MODULE_TEMPLATE_SONOFF_IFAN03
 
 

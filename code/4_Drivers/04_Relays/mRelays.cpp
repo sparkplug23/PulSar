@@ -108,8 +108,9 @@ void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
   }
 
   for (uint32_t i = 0; i < rt.devices_present; i++) {
-    uint32_t port = (i << 1) + ((latching_power >> i) &1);
-    tkr_pins->DigitalWrite(GPIO_REL1 + port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
+    uint32_t index = (i << 1) + ((latching_power >> i) &1);
+          ALOG_INF(PSTR("DigitalWrite Pre %d"), 3);
+    tkr_pins->DigitalWrite(GPIO_REL1, index, bitRead(rt.bitpacked.rel_inverted, index) ? !state : state);
   }
 }
 
@@ -130,7 +131,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
     rpower = tkr_set->runtime.power;
   }
 
-  if (tkr_set->Settings.flag_system.interlock) {          // Allow only one or no relay set - CMND_INTERLOCK - Enable/disable interlock
+  if (tkr_set->Settings.sysopt_system.bit.interlock) {          // Allow only one or no relay set - CMND_INTERLOCK - Enable/disable interlock
     for (uint32_t i = 0; i < MAX_INTERLOCKS; i++) {
       power_t mask = 1;
       uint32_t count = 0;
@@ -188,7 +189,7 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
       port_next = 1;                              // Select next relay
       bool update = true;
       if (bitRead(rt.bitpacked.rel_bistable, port)) {
-        if (tkr_set->Settings.flag6.bistable_single_pin) {  // SetOption152 - (Power) Use single pin bistable
+        if (tkr_set->Settings.sysopt_power.bit.bistable_single_pin) {  // SetOption152 - (Power) Use single pin bistable
           if (0x80000000 == tkr_set->runtime.power_latching) {
             tkr_set->runtime.power_latching = tkr_set->runtime.power;  // Init last known state
           }
@@ -212,9 +213,10 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
         }else{
           gpio_pin = GPIO_REL1;
         }
-        ALOG_INF(PSTR("Am I here?? %d"), i);
-        tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
-        // tkr_pins->DigitalWrite(GPIO_REL1, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
+        
+        ALOG_INF(PSTR("DigitalWrite Pre %d"), 2);
+        tkr_pins->DigitalWrite(gpio_pin,i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+        // tkr_pins->DigitalWrite(GPIO_REL, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
       }
       port += port_next;                          // Select next relay
       rpower >>= 1;                               // Select next power
@@ -226,10 +228,10 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
 
     // Reset bistable relay here to fix non-interlock situations due to fast switching
     if (rt.bitpacked.rel_bistable) {             // If bistable relays in the mix reset them after 40ms
-      delay(tkr_set->Settings.setoption_255[P_BISTABLE_PULSE]);   // SetOption45 - Keep energized for about 5 x operation time
+      delay(tkr_set->Settings.sysopt_power.param.bistable_pulse_ms);   // SetOption45 - Keep energized for about 5 x operation time
       for (uint32_t i = 0; i < port; i++) {       // Reset up to detected amount of ports
         if (bitRead(rt.bitpacked.rel_bistable, i)) {
-          if (tkr_set->Settings.flag6.bistable_single_pin) {  // SetOption152 - (Power) Use single pin bistable
+          if (tkr_set->Settings.sysopt_power.bit.bistable_single_pin) {  // SetOption152 - (Power) Use single pin bistable
             if (!bitRead(bistable, i)) {
               continue;
             }
@@ -242,8 +244,9 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
             gpio_pin = GPIO_REL1;
           }
           power_t state = rpower &1;
-          tkr_pins->DigitalWrite(gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
-          // tkr_pins->DigitalWrite(GPIO_REL1, i, bitRead(rt.bitpacked.rel_inverted, i) ? 1 : 0);
+          ALOG_INF(PSTR("DigitalWrite Pre %d"), 1);
+          tkr_pins->DigitalWrite(gpio_pin, i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+          // tkr_pins->DigitalWrite(GPIO_REL, i, bitRead(rt.bitpacked.rel_inverted, i) ? 1 : 0);
           ALOG_INF(PSTR("Relay DigitalWrite %d, %d"), gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
         }
       }
@@ -335,13 +338,13 @@ void mRelays::SetPowerOnState(void)
         break;
       case POWER_ALL_SAVED_TOGGLE:
         tkr_set->runtime.power = (tkr_set->Settings.power & devices_mask) ^ POWER_MASK;
-        if (tkr_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
+        if (tkr_set->Settings.sysopt_system.bit.save_state) {  // SetOption0 - Save power state and use after restart
           SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
         }
         break;
       case POWER_ALL_SAVED:
         tkr_set->runtime.power = tkr_set->Settings.power & devices_mask;
-        if (tkr_set->Settings.flag_system.save_state) {  // SetOption0 - Save power state and use after restart
+        if (tkr_set->Settings.sysopt_system.bit.save_state) {  // SetOption0 - Save power state and use after restart
           SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
         }
         break;
@@ -349,7 +352,7 @@ void mRelays::SetPowerOnState(void)
 
     } else {
       tkr_set->runtime.power = tkr_set->Settings.power & devices_mask;
-      if (tkr_set->Settings.flag_system.save_state) {    // SetOption0 - Save power state and use after restart
+      if (tkr_set->Settings.sysopt_system.bit.save_state) {    // SetOption0 - Save power state and use after restart
         SetDevicePower(tkr_set->runtime.power, SRC_RESTART);
       }
     }
@@ -360,13 +363,13 @@ void mRelays::SetPowerOnState(void)
     uint32_t port = 0;
     for (uint32_t i = 0; i < rt.devices_present; i++) {
       #ifdef ESP8266
-      if (!tkr_set->Settings.flag3.no_power_feedback &&  // SetOption63 - Don't scan relay power state at restart - #5594 and #5663
+      if (!tkr_set->Settings.sysopt_drivers.bit.no_power_feedback &&  // SetOption63 - Don't scan relay power state at restart - #5594 and #5663
           !tkr_set->runtime.power_on_delay          // SetOption47 - Delay switching relays to reduce power surge at power on
           #ifdef USE_SHUTTER
           && !tkr_set->Settings.flag3.shutter_mode       // SetOption80 - Enable shutter support
           #endif // USE_SHUTTER
         ) {
-        if ((port < MAX_RELAYS) && tkr_pins->PinUsed(GPIO_REL1, port)) {
+        if ((port < MAX_RELAYS_SET) && tkr_pins->PinUsed(GPIO_REL1, port)) {
           if (bitRead(rt.bitpacked.rel_bistable, port)) {
             port++;                              // Skip both bistable relays as always 0
           } else {
@@ -456,7 +459,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
       #endif
     }
 
-    if (tkr_set->Settings.flag_system.interlock &&      // CMND_INTERLOCK - Enable/disable interlock
+    if (tkr_set->Settings.sysopt_system.bit.interlock &&      // CMND_INTERLOCK - Enable/disable interlock
         !interlock_mutex &&
         ((POWER_ON == state) || ((POWER_TOGGLE == state) && !(tkr_set->runtime.power & mask)))
        ) {
@@ -505,7 +508,7 @@ void mRelays::ExecuteCommandPower(uint32_t device, uint32_t state, uint32_t sour
       SendDeviceGroupMessage(device, DGR_MSGTYP_UPDATE, DGR_ITEM_POWER, dgr_power);
     }
 #endif  // USE_DEVICE_GROUPS
-ALOG_INF(PSTR("before SetDeivePower %d,%d,%d %d"),device,state,source,tkr_set->runtime.power);
+ALOG_INF(PSTR("before SetDevicePower %d,%d,%d %d"),device,state,source,tkr_set->runtime.power);
     SetDevicePower(tkr_set->runtime.power, source);
 #ifdef USE_DOMOTICZ
     DomoticzUpdatePowerState(device);
@@ -618,36 +621,99 @@ void mRelays::Load_Module(bool erase)
 #endif // USE_MODULE_CORE_FILESYSTEM
 
 
-void mRelays::Pre_Init(void){
+// void mRelays::Pre_Init(void){
   
+//   module_state.mode = ModuleStatus::Initialising;
+//   module_state.devices = 0;
+
+//   // Lets check each type on their own, normal, inverted etc
+//   for(uint8_t driver_index=0; driver_index<MAX_RELAYS_SET; driver_index++)
+//   {
+//     if(tkr_pins->PinUsed(GPIO_REL, driver_index))
+//     {
+//       uint8_t pin_number = tkr_pins->Pin(GPIO_REL, driver_index);
+//       pinMode(pin_number, OUTPUT);
+//       rt.devices_present++;
+//       if(module_state.devices++ >= MAX_RELAYS_SET){ break; }
+//     }else
+//     if(tkr_pins->PinUsed(GPIO_REL_INV, driver_index))
+//     {
+//       uint8_t pin_number = tkr_pins->Pin(GPIO_REL_INV, driver_index);
+//       pinMode(pin_number, OUTPUT);
+//       bitSet(rt.bitpacked.rel_inverted, driver_index); //temp fix
+//       rt.devices_present++;
+//       if(module_state.devices++ >= MAX_RELAYS_SET){ break; }
+//     }
+//   }
+
+//   if(module_state.devices)
+//   {
+//     module_state.mode = ModuleStatus::Running;
+//   }
+
+// }
+
+void mRelays::Pre_Init(void)
+{
+
+  DEBUG_LINE_HERE3
+
   module_state.mode = ModuleStatus::Initialising;
   module_state.devices = 0;
+  rt.devices_present = 0;
+  rt.bitpacked.rel_inverted = 0;
 
-  // Lets check each type on their own, normal, inverted etc
-  for(uint8_t driver_index=0; driver_index<MAX_RELAYS_SET; driver_index++)
+  for(uint8_t relay_index = 0; relay_index < MAX_RELAYS_SET; relay_index++)
   {
-    if(tkr_pins->PinUsed(GPIO_REL1, driver_index))
+  DEBUG_LINE_HERE3
+    if(tkr_pins->PinUsed(GPIO_REL1_INV, relay_index))
     {
-      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1, driver_index);
+  DEBUG_LINE_HERE3
+      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1_INV, relay_index);
+      Serial.println(pin_number);Serial.flush();
+  DEBUG_LINE_HERE3
       pinMode(pin_number, OUTPUT);
+
+  DEBUG_LINE_HERE3
+      bitSet(rt.bitpacked.rel_inverted, relay_index);
+
+  DEBUG_LINE_HERE3
       rt.devices_present++;
-      if(module_state.devices++ >= MAX_RELAYS_SET){ break; }
-    }else
-    if(tkr_pins->PinUsed(GPIO_REL1_INV, driver_index))
-    {
-      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1_INV, driver_index);
-      pinMode(pin_number, OUTPUT);
-      bitSet(rt.bitpacked.rel_inverted, driver_index); //temp fix
-      rt.devices_present++;
-      if(module_state.devices++ >= MAX_RELAYS_SET){ break; }
+      module_state.devices++;
+      continue;
     }
+
+  DEBUG_LINE_HERE3
+    if(tkr_pins->PinUsed(GPIO_REL1, relay_index))
+    {
+  DEBUG_LINE_HERE3
+      uint8_t pin_number = tkr_pins->Pin(GPIO_REL1, relay_index);
+  DEBUG_LINE_HERE3
+      pinMode(pin_number, OUTPUT);
+
+  DEBUG_LINE_HERE3
+      rt.devices_present++;
+      module_state.devices++;
+      continue;
+    }
+  DEBUG_LINE_HERE3
+
+    break; // critical: stop at first missing relay slot
   }
+  DEBUG_LINE_HERE3
 
   if(module_state.devices)
   {
     module_state.mode = ModuleStatus::Running;
   }
 
+  DEBUG_LINE_HERE3
+  ALOG_INF(
+    PSTR("REL: Pre_Init devices=%d inverted_mask=0x%08X"),
+    rt.devices_present,
+    rt.bitpacked.rel_inverted
+  );
+  DEBUG_LINE_HERE3
 }
 
 
@@ -818,7 +884,7 @@ void mRelays::SubTask_Relay_TimeOn(){
     // Auto time off decounters
     if(rt.relay_status[relay_id].timer_decounter.seconds == 1){ //if =1 then turn off and clear to 0
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      ALOG_INF(PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds==1 and disable"), relay_id);
+      ALOG_INF(PSTR(D_LOG_PIXEL "relay_status[%d].timer_decounter.seconds==1 and disable"), relay_id);
       #endif       
 
       CommandSet_Relay_Power(0, relay_id);
@@ -832,7 +898,7 @@ void mRelays::SubTask_Relay_TimeOn(){
       CommandSet_Relay_Power(1, relay_id);
       
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      ALOG_INF(PSTR(D_LOG_NEO "relay_status[%d].timer_decounter.seconds=%d dec"),relay_id, rt.relay_status[relay_id].timer_decounter.seconds);
+      ALOG_INF(PSTR(D_LOG_PIXEL "relay_status[%d].timer_decounter.seconds=%d dec"),relay_id, rt.relay_status[relay_id].timer_decounter.seconds);
       #endif
 
       mqtthandler_state_ifchanged.flags.SendNow = true; // If active, send every second
@@ -860,7 +926,7 @@ void mRelays::SubTask_Relay_PulseOff(){
     // Auto time off decounters
     if(rt.relay_status[relay_id].timer_off_then_on_decounter.seconds == 1){ //if =1 then turn off and clear to 0
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      ALOG_INF(PSTR(D_LOG_NEO "relay_status[%d].timer_off_then_on_decounter.seconds==1 and disable"), relay_id);
+      ALOG_INF(PSTR(D_LOG_PIXEL "relay_status[%d].timer_off_then_on_decounter.seconds==1 and disable"), relay_id);
       #endif       
 
       CommandSet_Relay_Power(1, relay_id); // TURN ON
@@ -874,7 +940,7 @@ void mRelays::SubTask_Relay_PulseOff(){
       CommandSet_Relay_Power(0, relay_id); // TURN OFF
       
       #ifdef ENABLE_LOG_LEVEL_COMMANDS
-      ALOG_INF(PSTR(D_LOG_NEO "relay_status[%d].timer_off_then_on_decounter.seconds=%d dec"),relay_id, rt.relay_status[relay_id].timer_off_then_on_decounter.seconds);
+      ALOG_INF(PSTR(D_LOG_PIXEL "relay_status[%d].timer_off_then_on_decounter.seconds=%d dec"),relay_id, rt.relay_status[relay_id].timer_off_then_on_decounter.seconds);
       #endif
 
       mqtthandler_state_ifchanged.flags.SendNow = true;

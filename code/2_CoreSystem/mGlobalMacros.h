@@ -24,15 +24,18 @@
 #define PGM_CTR(X) \
   const char X[] PROGMEM =
 
-#define SPGM_CTR(X) \
-  static const char X[] PROGMEM =
+#ifdef ESP8266
+  #define SPGM_CTR(X) static const char X[] = // Cant be progmem on esp8266, as many functions crash or misread flash strings unless using *_P variants, so just use normal string literals
+#else
+  #define SPGM_CTR(X) static const char X[] PROGMEM =
+#endif
+
 
 #define PROGMEM_CTR2(X,Y) \
   const char X[] PROGMEM = Y;
 
 #define CTRP(X) \
   const char* X =
-
 
 
 // fixing "abs" on esp32 later platform API
@@ -124,6 +127,20 @@
 #define G32(c) (byte((c) >> 8))
 #define B32(c) (byte(c))
 #define W32(c) (byte((c) >> 24))
+
+
+
+// ESP-compatible PSTR helper.
+// ESP32: keep PSTR()
+// ESP8266: use normal RAM/string literal because many libc functions crash
+//          or misread flash strings unless using *_P variants.
+#ifdef ESP8266
+  #define EPSTR(x) x
+#else
+  #define EPSTR(x) PSTR(x)
+#endif
+
+
 
 
 /*

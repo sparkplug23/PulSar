@@ -65,7 +65,7 @@ Notes:
 
 //--------------------------------[Enable Device]-------------------------------------
 
-#define DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
+// #define DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
 
 
 // #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__ON_SIM800L__OFFICE_TESTBED // Office window testbed, SIM800L, BK-880Q GPs, onboard IMU, SIM800L
@@ -96,75 +96,79 @@ Notes:
  * - Future: Integrate WebUI map view and webhook dispatch.
  */
 #ifdef DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
-  #define DEVICENAME_CTR          "cellular_locator_02"
-  #define DEVICENAME_FRIENDLY_CTR "Testbed Segment Multiple Pin String"
-  #define DEVICENAME_ROOMHINT_CTR "testbed"
-  #define MQTT_HOST   "192.168.3.70"
+
+  /***********************************
+  * SECTION: Feature Sets
+  ************************************/  
+
+  // #define ENABLE_GROUP_FEATURE__CELLULAR
+  #define ENABLE_GROUP_FEATURE__WIFI
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/  
+
+  #ifdef ENABLE_GROUP_FEATURE__WIFI
+    #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
+    #define USE_MODULE_SENSORS_INTERFACE
+
+    #ifndef ENABLE_GROUP_FEATURE__CELLULAR
+    #define ENABLE_GROUP_FEATURE__MQTT_WIFI
+    #endif
+  #endif
 
 
-  
+  #ifdef ENABLE_GROUP_FEATURE__CELLULAR  
+    #define MQTT_HOST_CELLULAR "sparkequinox2.ddns.net"
+    
+    #define ENABLE_GROUP_FEATURE__MQTT_CELLULAR_AND_WIFI
+    
+    #define USE_MODULE_DRIVERS_MODEM_7000G
 
-  
-#define MQTT_HOST_CELLULAR "sparkequinox2.ddns.net"
+    #define USE_MODULE_NETWORK_CELLULAR
+    #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
+    #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
+    #define USE_MODULE_SENSORS_GPS_MODEM
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
+
+    #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
+
+    #define MODEM_UART_RX_PIN  26  // ESP32 RX pin used by SerialAT
+    #define MODEM_UART_TX_PIN  27  // ESP32 TX pin used by SerialAT
+    #define MODEM_PWRKEY_PIN   4
+
+    #define UART_CELLULAR_BAUD   230400
+
+    // #define USE_MODULE_SENSORS_BATTERY_MODEM
+
+    #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
+
+    #define USE_MODULE_NETWORK_CELLULAR_MODEM_GPS
+
+    #define USE_MODULE_CORE__SERIAL
 
 
-#define  ENABLE_FEATURE_CELLULAR__INCLUDE_MOBILE_NETWORKS
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-  #define USE_MODULE_DRIVERS_MODEM_7000G
-
-  // #define ENABLE_FEATURE_CELLULAR_ATCOMMANDS_STREAM_DEBUGGER_OUTPUT
-  #define ENABLE_FEATURE_SIM__SMS
-
-  // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
-
-  // #define USE_MODULE_NETWORK_MQTT
-  // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
-
-  // #define USE_SSIDS_NONE_DEBUGGING
-  // #define DISABLE_DEVFEATURE_NETWORK_WIFI
+  #endif
+        
 
 
-  #define ENABLE_FEATURE_WIFI__BLOCK_CONNECTION
+  /***********************************
+  * SECTION: Driver Configs
+  ************************************/  
 
-  #define MQTT_USER "lteclient"
-  #define MQTT_PASS "af4d8bc9ab"
-  
-  #define MQTT_PORT 51883 //external mqtt broker on TOWER 
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_SDCARD
 
-  /**
-   * @brief WiFi MQTT
-   * 
-   */
-  // #define USE_MODULE_NETWORK_WIFI
-  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  /***********************************
+  * SECTION: Sensors Configs
+  ************************************/  
+    
 
-  /**
-   * @brief Cellular MQTT
-   * 
-   */  
-  #define DISABLE_NETWORK_WIFI
-  #define USE_MODULE_NETWORK_CELLULAR
-  #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  #define ENABLE_DEVFEATURE_DDNS_MQTT_TEST
-  #define USE_MODULE_SENSORS_GPS_MODEM
-                #define USE_MODULE_SENSORS_INTERFACE
-  #define ENABLE_DEVFEATURE_MQTT_USING_CELLULAR
-
-  #define USE_MODULE_NETWORK_CELLULAR__USE_FASTER_BAUD_SPEED
-
-  // #define UART_CELLULAR_BAUD   115200
-#define UART_CELLULAR_BAUD   921600
-
-  #define USE_MODULE_SENSORS_BATTERY_MODEM
-
-  #define ENABLE_DEBUG_GROUP__CELLULAR_READ_SMS
-
+  /***********************************
+   * SECTION: Module/GPIO Configs
+  ************************************/ 
 
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -172,14 +176,25 @@ Notes:
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
-      #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
-      #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
+      
+      "\"27\":\"" D_GPIO_MODEM_TX_CTR  "1" "\","
+      "\"26\":\"" D_GPIO_MODEM_RX_CTR  "1" "\"," 
+      "\"4\":\""  D_GPIO_MODEM_POWER_KEY_CTR   "\"," 
+
+      #ifdef USE_MODULE_DRIVERS_SDCARD
+      "\"2\":\"" D_GPIO_SDCARD_HSPI_MISO_CTR   "\","
+      "\"15\":\"" D_GPIO_SDCARD_HSPI_MOSI_CTR   "\","   
+      "\"14\":\"" D_GPIO_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_SDCARD_HSPI_CSO_CTR   "\","  
+      #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
+
+  /***********************************
+   * SECTION: Templates
+  ************************************/    
 
   #define D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "CellularTracker01"
 
@@ -190,26 +205,410 @@ Notes:
       "\"" D_MODULE__NETWORK_CELLULAR__CTR "\":["
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "],"
-
+      "\"" D_MODULE_SENSORS_INTERFACE_CTR"\":["
+        "\"" "System" "\""
+      "],"
       "\"" D_MODULE_SENSORS__GPS_MODEM__CTR "\":["
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "],"
-
-      
-
-
       "\"" D_MODULE__SENSORS_BATTERY_MODEM__CTR "\":["
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
-    "},"   
-    "\"" D_DISPLAY "\":{"
-      "\"" "DisplayRows" "\":8,"
-      "\"" "DisplayCols" "\":[21,2],"
-      "\"" "DisplaySize" "\":1"
-    "},"  
+    "},"
     "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
+
+
+  #ifdef ENABLE_GROUP_FEATURE__MQTT_CELLULAR_AND_WIFI
+  #define USE_NETWORK_TEMPLATE
+  DEFINE_PGM_CTR(NETWORK_TEMPLATE)
+  "{"
+    "\"Version\":1,"
+
+    "\"Interface\":{"
+      "\"Policy\":{"
+        "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+        "\"AllowMultipleActive\":true,"
+        "\"BlockRemoteMqttWhenLocalAvailable\":true"
+      "}"
+    "},"
+
+    "\"WiFi\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,60,600],"
+
+      "\"Mode\":{"
+        "\"STA\":true,"
+        "\"AP\":true,"
+        "\"STA_AP\":true,"
+        "\"APBootMins\":10,"
+        "\"APOnSTAFail\":true,"
+        "\"APFailDelayMins\":0,"
+        "\"APAlwaysOn\":false"
+      "},"
+
+      "\"Station\":{"
+        "\"Profiles\":["
+          "{"
+            "\"SSID\":\"" STA_SSID1 "\","
+            "\"Password\":\"" STA_PASS1 "\""
+          "},"
+          "{"
+            "\"SSID\":\"" STA_SSID3 "\","
+            "\"Password\":\"" STA_PASS3 "\""
+          "}"
+        "],"
+
+        "\"IPv4\":{"
+          "\"Static\":false,"
+          "\"IP\":\"0.0.0.0\","
+          "\"Gateway\":\"0.0.0.0\","
+          "\"Subnet\":\"0.0.0.0\","
+          "\"DNS1\":\"0.0.0.0\","
+          "\"DNS2\":\"0.0.0.0\""
+        "}"
+      "},"
+
+      "\"SoftAP\":{"
+        "\"SSID\":\"" SOFTAP_SSID "\","
+        "\"Password\":\"" SOFTAP_PASSWORD "\","
+        "\"Channel\":1"
+      "}"
+    "},"
+
+    "\"Ethernet\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,30,60],"
+
+      "\"IPv4\":{"
+        "\"Static\":false,"
+        "\"IP\":\"0.0.0.0\","
+        "\"Gateway\":\"0.0.0.0\","
+        "\"Subnet\":\"0.0.0.0\","
+        "\"DNS1\":\"0.0.0.0\","
+        "\"DNS2\":\"0.0.0.0\""
+      "}"
+    "},"
+
+    "\"Cellular\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[10,60,600],"
+
+      "\"Modem\":{"
+        "\"EN\":true,"
+        "\"APN\":\"" CELLULAR_APN "\","
+        "\"User\":\"\","
+        "\"Password\":\"\""
+      "},"
+
+      "\"GNSS\":{"
+        "\"EN\":true"
+      "},"
+
+      "\"SMS\":{"
+        "\"EN\":true,"
+        "\"PrivilegedOnly\":true"
+      "}"
+    "},"
+
+    "\"MQTT\":{"
+      "\"EN\":true,"
+
+      "\"UpdateSeconds\":{"
+        "\"IfChanged\":1,"
+        "\"TelePeriod\":60,"
+        "\"ConfigPeriod\":60"
+      "},"
+
+      "\"Brokers\":["
+        "{"
+          "\"Id\":\"home\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST "\","
+          "\"Port\":" STR(MQTT_PORT) ","
+          "\"User\":\"\","
+          "\"Password\":\"\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"Ethernet\",\"WiFi\"],"
+          "\"PrefTransport\":[\"Ethernet\",\"WiFi\"],"
+          "\"OutgoingLevel\":3,"
+          "\"OutgoingLimiterMs\":0"
+        "},"
+        "{"
+          "\"Id\":\"remote\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST_CELLULAR "\","
+          "\"Port\":" STR(MQTT_PORT_CELLULAR) ","
+          "\"User\":\"" MQTT_HOST__USERNAME "\","
+          "\"Password\":\"" MQTT_HOST__PASSWORD "\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"Cellular\",\"WiFi\"],"
+          "\"PrefTransport\":[\"Cellular\"],"
+          "\"OutgoingLevel\":2,"
+          "\"OutgoingLimiterMs\":10"
+        "}"
+      "]"
+    "}"
+  "}";
+  #endif
+
+
+  #ifdef ENABLE_GROUP_FEATURE__MQTT_CELLULAR
+  #define USE_NETWORK_TEMPLATE
+  DEFINE_PGM_CTR(NETWORK_TEMPLATE)
+  "{"
+    "\"Version\":1,"
+
+    "\"Interface\":{"
+      "\"Policy\":{"
+        "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+        "\"AllowMultipleActive\":true,"
+        "\"BlockRemoteMqttWhenLocalAvailable\":true"
+      "}"
+    "},"
+
+    "\"WiFi\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,60,600],"
+
+      "\"Mode\":{"
+        "\"STA\":true,"
+        "\"AP\":true,"
+        "\"STA_AP\":true,"
+        "\"APBootMins\":10,"
+        "\"APOnSTAFail\":true,"
+        "\"APFailDelayMins\":0,"
+        "\"APAlwaysOn\":false"
+      "},"
+
+      "\"Station\":{"
+        "\"Profiles\":["
+          "{"
+            "\"SSID\":\"" STA_SSID1 "\","
+            "\"Password\":\"" STA_PASS1 "\""
+          "},"
+          "{"
+            "\"SSID\":\"" STA_SSID2 "\","
+            "\"Password\":\"" STA_PASS2 "\""
+          "},"
+          "{"
+            "\"SSID\":\"" STA_SSID3 "\","
+            "\"Password\":\"" STA_PASS3 "\""
+          "}"
+        "],"
+
+        "\"IPv4\":{"
+          "\"Static\":false,"
+          "\"IP\":\"0.0.0.0\","
+          "\"Gateway\":\"0.0.0.0\","
+          "\"Subnet\":\"0.0.0.0\","
+          "\"DNS1\":\"0.0.0.0\","
+          "\"DNS2\":\"0.0.0.0\""
+        "}"
+      "},"
+
+      "\"SoftAP\":{"
+        "\"SSID\":\"" SOFTAP_SSID "\","
+        "\"Password\":\"" SOFTAP_PASSWORD "\","
+        "\"Channel\":1"
+      "}"
+    "},"
+
+    "\"Ethernet\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,30,60],"
+
+      "\"IPv4\":{"
+        "\"Static\":false,"
+        "\"IP\":\"0.0.0.0\","
+        "\"Gateway\":\"0.0.0.0\","
+        "\"Subnet\":\"0.0.0.0\","
+        "\"DNS1\":\"0.0.0.0\","
+        "\"DNS2\":\"0.0.0.0\""
+      "}"
+    "},"
+
+    "\"Cellular\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[10,60,600],"
+
+      "\"Modem\":{"
+        "\"EN\":true,"
+        "\"APN\":\"" CELLULAR_APN "\","
+        "\"User\":\"\","
+        "\"Password\":\"\""
+      "},"
+
+      "\"GNSS\":{"
+        "\"EN\":true"
+      "},"
+
+      "\"SMS\":{"
+        "\"EN\":true,"
+        "\"PrivilegedOnly\":true"
+      "}"
+    "},"
+
+    "\"MQTT\":{"
+      "\"EN\":true,"
+
+      "\"UpdateSeconds\":{"
+        "\"IfChanged\":1,"
+        "\"TelePeriod\":60,"
+        "\"ConfigPeriod\":60"
+      "},"
+
+      "\"Brokers\":["
+        "{"
+          "\"Id\":\"home\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST "\","
+          "\"Port\":" STR(MQTT_PORT) ","
+          "\"User\":\"\","
+          "\"Password\":\"\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"WiFi\"],"
+          "\"PrefTransport\":[\"WiFi\"],"
+          "\"OutgoingLevel\":3,"
+          "\"OutgoingLimiterMs\":0"
+        "}"
+      "]"
+    "}"
+  "}";
+
+  #endif
+
+  
+  #ifdef ENABLE_GROUP_FEATURE__MQTT_WIFI
+  #define USE_NETWORK_TEMPLATE
+  DEFINE_PGM_CTR(NETWORK_TEMPLATE)
+  "{"
+    "\"Version\":1,"
+
+    "\"Interface\":{"
+      "\"Policy\":{"
+        "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+        "\"AllowMultipleActive\":true,"
+        "\"BlockRemoteMqttWhenLocalAvailable\":true"
+      "}"
+    "},"
+
+    "\"WiFi\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,60,600],"
+
+      "\"Mode\":{"
+        "\"STA\":true,"
+        "\"AP\":true,"
+        "\"STA_AP\":true,"
+        "\"APBootMins\":10,"
+        "\"APOnSTAFail\":true,"
+        "\"APFailDelayMins\":0,"
+        "\"APAlwaysOn\":false"
+      "},"
+
+      "\"Station\":{"
+        "\"Profiles\":["
+          "{"
+            "\"SSID\":\"" STA_SSID1 "\","
+            "\"Password\":\"" STA_PASS1 "\""
+          "},"
+          "{"
+            "\"SSID\":\"" STA_SSID3 "\","
+            "\"Password\":\"" STA_PASS3 "\""
+          "}"
+        "],"
+
+        "\"IPv4\":{"
+          "\"Static\":false,"
+          "\"IP\":\"0.0.0.0\","
+          "\"Gateway\":\"0.0.0.0\","
+          "\"Subnet\":\"0.0.0.0\","
+          "\"DNS1\":\"0.0.0.0\","
+          "\"DNS2\":\"0.0.0.0\""
+        "}"
+      "},"
+
+      "\"SoftAP\":{"
+        "\"SSID\":\"" SOFTAP_SSID "\","
+        "\"Password\":\"" SOFTAP_PASSWORD "\","
+        "\"Channel\":1"
+      "}"
+    "},"
+
+    "\"Ethernet\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,30,60],"
+
+      "\"IPv4\":{"
+        "\"Static\":false,"
+        "\"IP\":\"0.0.0.0\","
+        "\"Gateway\":\"0.0.0.0\","
+        "\"Subnet\":\"0.0.0.0\","
+        "\"DNS1\":\"0.0.0.0\","
+        "\"DNS2\":\"0.0.0.0\""
+      "}"
+    "},"
+
+    "\"Cellular\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[10,60,600],"
+
+      "\"Modem\":{"
+        "\"EN\":true,"
+        "\"APN\":\"" CELLULAR_APN "\","
+        "\"User\":\"\","
+        "\"Password\":\"\""
+      "},"
+
+      "\"GNSS\":{"
+        "\"EN\":true"
+      "},"
+
+      "\"SMS\":{"
+        "\"EN\":true,"
+        "\"PrivilegedOnly\":true"
+      "}"
+    "},"
+
+    "\"MQTT\":{"
+      "\"EN\":true,"
+
+      "\"UpdateSeconds\":{"
+        "\"IfChanged\":1,"
+        "\"TelePeriod\":60,"
+        "\"ConfigPeriod\":60"
+      "},"
+
+      "\"Brokers\":["
+        "{"
+          "\"Id\":\"home\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST "\","
+          "\"Port\":" STR(MQTT_PORT) ","
+          "\"User\":\"\","
+          "\"Password\":\"\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"Ethernet\",\"WiFi\"],"
+          "\"PrefTransport\":[\"Ethernet\",\"WiFi\"],"
+          "\"OutgoingLevel\":3,"
+          "\"OutgoingLimiterMs\":0"
+        "}"
+      "]"
+    "}"
+  "}";
+  #endif
+
+
 
 #endif // DEVICE_TESTBED_ESP32_LILYGO_SIM7000G
 
@@ -268,7 +667,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -350,7 +748,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
   //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
@@ -424,7 +821,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   // #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
   //   #define USE_MODULE_NETWORK_WIFI
   //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  //   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  //   
   //   #define MQTT_HOST       MQTT_HOST
   //   #define MQTT_PORT     1883
   // #endif
@@ -515,14 +912,14 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
       #ifdef USE_MODULE_NETWORK_CELLULAR
-      "\"25\":\"" D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX__CTR   "\","   
-      "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
-      "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
+      "\"25\":\"" D_GPIO__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
+      "\"27\":\"" D_GPIO__MODEM_TX__CTR   "\","   
+      "\"26\":\"" D_GPIO__MODEM_RX__CTR   "\","   
+      "\"4\":\""  D_GPIO__MODEM_POWER__CTR   "\","   
       #endif // USE_MODULE_NETWORK_CELLULAR   
 
       // modem is on 26/27 per datasheet
@@ -535,23 +932,23 @@ The new smaller LTE board needs testing too, might need as window tester first.
        * Red         VCC, 3V3
        * Black       GND
        * */
-      // "\"32\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
-      // "\"33\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+      // "\"32\":\"" D_GPIO_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+      // "\"33\":\"" D_GPIO_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
 
 
 
       #ifdef USE_MODULE_DRIVERS_SDCARD
-      "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
-      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
-      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
-      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+      "\"2\":\"" D_GPIO_SDCARD_HSPI_MISO_CTR   "\","
+      "\"15\":\"" D_GPIO_SDCARD_HSPI_MOSI_CTR   "\","   
+      "\"14\":\"" D_GPIO_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_SDCARD_HSPI_CSO_CTR   "\","  
       #endif // USE_MODULE_DRIVERS_SDCARD   
       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      "\"19\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+      "\"18\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","   
       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+      "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -712,7 +1109,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
 //   #define ENABLE_FEATURE_WATCHDOG_TIMER
 //     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 //   // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
 //   //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
@@ -789,7 +1185,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
 //   #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
 //     #define USE_MODULE_NETWORK_WIFI
 //     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-//     #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+//     
 //     #define MQTT_HOST       MQTT_HOST
 //     #define MQTT_PORT     1883
 //   #endif
@@ -813,27 +1209,27 @@ The new smaller LTE board needs testing too, might need as window tester first.
 //     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 //     "\"" D_GPIO_NUMBER "\":{"
 //       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-//       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-//       "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+//       "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+//       "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
 //       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
 //       #ifdef USE_MODULE_NETWORK_CELLULAR
-//       "\"25\":\"" D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
-//       "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX__CTR   "\","   
-//       "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
-//       "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
+//       "\"25\":\"" D_GPIO__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
+//       "\"27\":\"" D_GPIO__MODEM_TX__CTR   "\","   
+//       "\"26\":\"" D_GPIO__MODEM_RX__CTR   "\","   
+//       "\"4\":\""  D_GPIO__MODEM_POWER__CTR   "\","   
 //       #endif // USE_MODULE_NETWORK_CELLULAR   
 //       #ifdef USE_MODULE_DRIVERS_SDCARD
-//       "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
-//       "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
-//       "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
-//       "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+//       "\"2\":\"" D_GPIO_SDCARD_HSPI_MISO_CTR   "\","
+//       "\"15\":\"" D_GPIO_SDCARD_HSPI_MOSI_CTR   "\","   
+//       "\"14\":\"" D_GPIO_SDCARD_HSPI_CLK_CTR   "\","
+//       "\"13\":\"" D_GPIO_SDCARD_HSPI_CSO_CTR   "\","  
 //       #endif // USE_MODULE_DRIVERS_SDCARD   
 //       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-//       "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-//       "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+//       "\"19\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+//       "\"18\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","   
 //       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-//       "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-//       "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+//       "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+//       "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
 //     "},"
 //     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
 //     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -870,10 +1266,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define MQTT_HOST   "192.168.1.70"
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   // #define USE_MODULE_NETWORK_MQTT
   // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
@@ -885,7 +1279,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -898,7 +1291,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
    */
   // #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  // 
 
   /**
    * @brief Cellular MQTT
@@ -929,8 +1322,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1016,9 +1409,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   // #define USE_MODULE_NETWORK_MQTT
   // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
@@ -1030,7 +1422,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -1041,7 +1432,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
    */
   // #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  // 
 
   /**
    * @brief Cellular MQTT
@@ -1072,11 +1463,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+      "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1162,9 +1553,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION //fails with no network
-  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // 
+  // 
 
   // #define USE_MODULE_NETWORK_MQTT
   // #define USE_MODULE_NETWORK_MQTT_MULTIPLE
@@ -1176,7 +1566,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -1189,7 +1578,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
    */
   // #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  // 
 
   /**
    * @brief Cellular MQTT
@@ -1221,11 +1610,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+      "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1310,10 +1699,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define MQTT_HOST   "192.168.1.70"
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   
   // #define ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
@@ -1329,8 +1716,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
 
@@ -1342,7 +1727,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
    */
   // #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  // 
 
   /**
    * @brief Cellular MQTT
@@ -1373,8 +1758,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1452,12 +1837,9 @@ The new smaller LTE board needs testing too, might need as window tester first.
 #define MQTT_HOST_CELLULAR "sparkequinox2.ddns.net"
 
 
-#define  ENABLE_FEATURE_CELLULAR__INCLUDE_MOBILE_NETWORKS
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_DRIVERS_MODEM_7000G
 
@@ -1480,7 +1862,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -1493,7 +1874,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
    */
   // #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  // 
 
   /**
    * @brief Cellular MQTT
@@ -1529,8 +1910,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1691,7 +2072,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    
     #define MQTT_HOST       MQTT_HOST
     #define MQTT_PORT     1883
   #endif // USE_GROUPFEATURE__MQTT_AS_WIFI_WHEN_CELLULAR_IS_ACTIVE
@@ -1699,14 +2080,14 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #if !defined(USE_GROUPFEATURE__MQTT_AS_CELLULAR) && !defined(USE_GROUPFEATURE_CELLULAR_ONLY_FOR_SMS)
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    
   #endif
 
   #ifdef USE_GROUPFEATURE__MQTT_ON_WIFI_AND_CELLULAR
 
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    
     #define MQTT_HOST       MQTT_HOST
     #define MQTT_PORT     1883
 
@@ -1739,15 +2120,15 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      "\"19\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+      "\"18\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","   
       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+      "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1895,7 +2276,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
   //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
@@ -1972,7 +2352,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
     #define USE_MODULE_NETWORK_WIFI
     #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-    #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+    
     #define MQTT_HOST       MQTT_HOST
     #define MQTT_PORT     1883
   #endif
@@ -1996,27 +2376,27 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
       #ifdef USE_MODULE_NETWORK_CELLULAR
-      "\"25\":\"" D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX__CTR   "\","   
-      "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
-      "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
+      "\"25\":\"" D_GPIO__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
+      "\"27\":\"" D_GPIO__MODEM_TX__CTR   "\","   
+      "\"26\":\"" D_GPIO__MODEM_RX__CTR   "\","   
+      "\"4\":\""  D_GPIO__MODEM_POWER__CTR   "\","   
       #endif // USE_MODULE_NETWORK_CELLULAR   
       #ifdef USE_MODULE_DRIVERS_SDCARD
-      "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
-      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
-      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
-      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+      "\"2\":\"" D_GPIO_SDCARD_HSPI_MISO_CTR   "\","
+      "\"15\":\"" D_GPIO_SDCARD_HSPI_MOSI_CTR   "\","   
+      "\"14\":\"" D_GPIO_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_SDCARD_HSPI_CSO_CTR   "\","  
       #endif // USE_MODULE_DRIVERS_SDCARD   
       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      "\"19\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+      "\"18\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","   
       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+      "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2130,7 +2510,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -2168,7 +2547,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
   //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
@@ -2242,7 +2620,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
   // #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
   //   #define USE_MODULE_NETWORK_WIFI
   //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  //   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  //   
   //   #define MQTT_HOST       MQTT_HOST
   //   #define MQTT_PORT     1883
   // #endif
@@ -2333,14 +2711,14 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
       #ifdef USE_MODULE_NETWORK_CELLULAR
-      "\"25\":\"" D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX__CTR   "\","   
-      "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
-      "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
+      "\"25\":\"" D_GPIO__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
+      "\"27\":\"" D_GPIO__MODEM_TX__CTR   "\","   
+      "\"26\":\"" D_GPIO__MODEM_RX__CTR   "\","   
+      "\"4\":\""  D_GPIO__MODEM_POWER__CTR   "\","   
       #endif // USE_MODULE_NETWORK_CELLULAR   
 
 
@@ -2351,23 +2729,23 @@ The new smaller LTE board needs testing too, might need as window tester first.
        * Red         VCC, 3V3
        * Black       GND
        * */
-      // "\"32\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
-      // "\"33\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+      // "\"32\":\"" D_GPIO_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+      // "\"33\":\"" D_GPIO_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
 
 
 
       #ifdef USE_MODULE_DRIVERS_SDCARD
-      "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
-      "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
-      "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
-      "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+      "\"2\":\"" D_GPIO_SDCARD_HSPI_MISO_CTR   "\","
+      "\"15\":\"" D_GPIO_SDCARD_HSPI_MOSI_CTR   "\","   
+      "\"14\":\"" D_GPIO_SDCARD_HSPI_CLK_CTR   "\","
+      "\"13\":\"" D_GPIO_SDCARD_HSPI_CSO_CTR   "\","  
       #endif // USE_MODULE_DRIVERS_SDCARD   
       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-      "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      "\"19\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+      "\"18\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","   
       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+      "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2408,10 +2786,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define MQTT_HOST   "192.168.1.70"
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_SUN_TRACKING
@@ -2426,7 +2802,6 @@ The new smaller LTE board needs testing too, might need as window tester first.
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -2437,7 +2812,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
    */
   #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   /**
    * @brief Cellular MQTT
@@ -2468,8 +2843,8 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -2561,15 +2936,15 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_FONA_CELLULAR
-      "\"23\":\"" D_GPIO_FUNCTION__FONA_POWER_KEY__CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION__FONA_POWER_STATUS__CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION__FONA_NETWORK_STATUS__CTR   "\","
-      "\"4\":\"" D_GPIO_FUNCTION__FONA_RESET__CTR   "\","
-      "\"17\":\"" D_GPIO_FUNCTION__FONA_UART_TX__CTR   "\","
-      "\"16\":\"" D_GPIO_FUNCTION__FONA_UART_RX__CTR   "\","
-      "\"19\":\"" D_GPIO_FUNCTION__FONA_RING_INDICATOR__CTR   "\","
+      "\"23\":\"" D_GPIO__FONA_POWER_KEY__CTR   "\","
+      "\"22\":\"" D_GPIO__FONA_POWER_STATUS__CTR   "\","
+      "\"21\":\"" D_GPIO__FONA_NETWORK_STATUS__CTR   "\","
+      "\"4\":\"" D_GPIO__FONA_RESET__CTR   "\","
+      "\"17\":\"" D_GPIO__FONA_UART_TX__CTR   "\","
+      "\"16\":\"" D_GPIO__FONA_UART_RX__CTR   "\","
+      "\"19\":\"" D_GPIO__FONA_RING_INDICATOR__CTR   "\","
       #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"2\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";

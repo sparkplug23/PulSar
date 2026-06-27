@@ -1,5 +1,5 @@
-#ifndef _USE_MODULE_CORE_FILESYSTEM_H
-#define _USE_MODULE_CORE_FILESYSTEM_H 0.3
+#ifndef _MODULE_CORE_FILESYSTEM_H
+#define _MODULE_CORE_FILESYSTEM_H
 
 #define D_UNIQUE_MODULE_CORE_FILESYSTEM_ID 2003 // [(Folder_Number*100)+ID_File]
 
@@ -7,76 +7,63 @@
 
 #ifdef USE_MODULE_CORE_FILESYSTEM
 
+/************************************************************************************************
+ * MODULE: mFileSystem
+ *
+ * SUMMARY:
+ * - Internal PulSar file storage only.
+ * - Owns LittleFS / FFat mounted flash filesystem.
+ * - Does not own SD card.
+ * - SD card is owned by mSDCard.
+ *
+ * CHANGED:
+ * - 31May26: Removed SD ownership and added PFS minimal sector fallback declarations.
+ ************************************************************************************************/
 
 #include <string.h>
 #include <strings.h>
 
-
 #ifdef ESP8266
-  #include <SPIFFSEditor.h>
-  #include <FS.h>
   #include <LittleFS.h>
-  #include <SPI.h>
-  #ifdef USE_SDCARD
-    #include <SD.h>
-    #include <SDFAT.h>
-  #endif  // USE_SDCARD
-#endif  // ESP8266
+  #include <SPIFFSEditor.h>
+#endif
+
 #ifdef ESP32
   #include <LittleFS.h>
-  #ifdef USE_SDCARD
-    #include <SD.h>
-  #endif  // USE_SDCARD
   #include "FFat.h"
   #include "FS.h"
-#endif  // ESP32
+  #include <SPIFFSEditor.h>
+#endif
 
 #ifdef ESP32
   #include <WiFi.h>
   #ifndef DISABLE_NETWORK
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-    #include <AsyncTCP.h>
-    #include <ESPAsyncWebServer.h>
-  #endif // USE_MODULE_NETWORK_WEBSERVER
-  #endif // DISABLE_NETWORK
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+      #include <AsyncTCP.h>
+      #include <ESPAsyncWebServer.h>
+    #endif
+  #endif
 #elif defined(ESP8266)
   #ifdef USE_MODULE_NETWORK_WEBSERVER
-  #include <ESP8266WiFi.h>
-  #include <ESPAsyncTCP.h>
-  #include <ESPAsyncWebServer.h>
-  #endif // USE_MODULE_NETWORK_WEBSERVER
+    #include <ESP8266WiFi.h>
+    #include <ESPAsyncTCP.h>
+    #include <ESPAsyncWebServer.h>
+  #endif
 #endif
-
-#include <SPIFFSEditor.h>
 
 #define ARDUINOJSON_DECODE_UNICODE 0
 #include "3_Network/21_WebServer/AsyncJson-v6.h"
 #include "3_Network/21_WebServer/ArduinoJson-v6.h"
 
-
-// ESP32-WROVER features SPI RAM (aka PSRAM) which can be allocated using ps_malloc()
-// we can create custom PSRAMDynamicJsonDocument to use such feature (replacing DynamicJsonDocument)
-// The following is a construct to enable code to compile without it.
-// There is a code that will still not use PSRAM though:
-//    AsyncJsonResponse is a derived class that implements DynamicJsonDocument (AsyncJson-v6.h)
 #if defined(ARDUINO_ARCH_ESP32)
-// extern bool psramSafe;
 struct PSRAM_Allocator {
-  // void* allocate(size_t size) {
-  //   if (psramSafe && psramFound()) return ps_malloc(size); // use PSRAM if it exists
-  //   else                           return malloc(size);    // fallback
-  // }
-  // void* reallocate(void* ptr, size_t new_size) {
-  //   if (psramSafe && psramFound()) return ps_realloc(ptr, new_size); // use PSRAM if it exists
-  //   else                           return realloc(ptr, new_size);    // fallback
-  // }
   void* allocate(size_t size) {
-    if (1 && psramFound()) return ps_malloc(size); // use PSRAM if it exists
-    else                           return malloc(size);    // fallback
+    if (1 && psramFound()) return ps_malloc(size);
+    else                   return malloc(size);
   }
   void* reallocate(void* ptr, size_t new_size) {
-    if (1 && psramFound()) return ps_realloc(ptr, new_size); // use PSRAM if it exists
-    else                           return realloc(ptr, new_size);    // fallback
+    if (1 && psramFound()) return ps_realloc(ptr, new_size);
+    else                   return realloc(ptr, new_size);
   }
   void deallocate(void* pointer) {
     free(pointer);
@@ -87,207 +74,181 @@ using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
 #define PSRAMDynamicJsonDocument DynamicJsonDocument
 #endif
 
-
 #define FILE_EXTENSION_JSON ".json"
-
-// #define FILE_EXTENSION_BIN ".bin" //release version
-#define FILE_EXTENSION_BIN ".txt"   //debug version so the editor can open the file
-
-
-/*
- * Connect the SD card to the following pins:
- *
- * SD Card | ESP32
- *    D2       12
- *    D3       13
- *    CMD      15
- *    VSS      GND
- *    VDD      3.3V
- *    CLK      14
- *    VSS      GND
- *    D0       2  (add 1K pull up after flashing)
- *    D1       4
- */
-
-// #include "FS.h"
-// #include "SD_MMC.h"
-
+#define FILE_EXTENSION_BIN ".txt"
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
 class mFileSystem :
   public mTaskerInterface
 {
-
   public:
-    bool psramSafe = true;         // is it safe to use PSRAM (on ESP32 rev.1; compiler fix used "-mfix-esp32-psram-cache-issue")
-
-
+    /************************************************************************************************
+     * SECTION: Construct Class Base
+     ************************************************************************************************/
     mFileSystem(){};
+    void Init(void);
+    void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    int8_t Tasker_Web(uint8_t function);
-
-    void FileWrite_Test();
-    
-    void JsonFile_Save__Stored_Module();
-    bool JsonFile_Load__Stored_Module();
-    void JsonFile_Load__Stored_Module_Or_Default_Template();
-
-    void JsonFile_Save__Stored_Secure();
-    void JsonFile_Load__Stored_Secure();    
-
     static constexpr const char* PM_MODULE_CORE_FILESYSTEM_CTR = D_MODULE_CORE_FILESYSTEM_CTR;
-    PGM_P GetModuleName(){         return PM_MODULE_CORE_FILESYSTEM_CTR; }
+    PGM_P GetModuleName(){ return PM_MODULE_CORE_FILESYSTEM_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_FILESYSTEM_ID; }
-    ~mFileSystem() {          }
+
+    struct ClassState
+    {
+      uint8_t devices = 0;
+      uint8_t mode = ModuleStatus::Initialising;
+    } module_state;
+
+    /************************************************************************************************
+     * SECTION: Internal filesystem state
+     ************************************************************************************************/
+
+    #define PFS_TNONE         0
+    #define PFS_TFAT          1
+    #define PFS_TLFS          2
+
+    // Legacy aliases retained while older cpp/helpers are being cleaned.
+    #define UFS_TNONE         PFS_TNONE
+    #define UFS_TFAT          PFS_TFAT
+    #define UFS_TLFS          PFS_TLFS
+
+    struct UfsData_t
+    {
+      int32_t run_file_pos = -1;
+    } UfsData;
+
+    FS* ufsp = nullptr;   // active internal PulSar filesystem
+    FS* ffsp = nullptr;   // mounted flash filesystem
+    FS* dfsp = nullptr;   // directory/listing filesystem
+
+    uint8_t ufs_type = PFS_TNONE;
+    uint8_t ffs_type = PFS_TNONE;
+    uint8_t ufs_dir  = 0;
+
+    /************************************************************************************************
+     * SECTION: PFS - PulSar File Storage
+     *
+     * SUMMARY:
+     * - Internal persistent storage only.
+     * - Normal backend: mounted internal filesystem.
+     * - ESP8266 no-FS fallback: minimal fixed flash sector storage for main settings.
+     ************************************************************************************************/
+
+    #ifndef PFS_SETTINGS_FILE_PATH
+      #define PFS_SETTINGS_FILE_PATH "/settings_main.bin"
+    #endif
+
+    #ifndef PFS_MINIMAL_SECTOR_MAGIC
+      #define PFS_MINIMAL_SECTOR_MAGIC 0x50465331UL  // "PFS1"
+    #endif
+
+    #ifndef PFS_MINIMAL_SECTOR_VERSION
+      #define PFS_MINIMAL_SECTOR_VERSION 1
+    #endif
+
+    #ifndef PFS_MINIMAL_SECTOR_SIZE
+      #define PFS_MINIMAL_SECTOR_SIZE 4096UL
+    #endif
+
+    #ifndef PFS_MINIMAL_SECTOR_SETTINGS_MAIN_OFFSET
+      #define PFS_MINIMAL_SECTOR_SETTINGS_MAIN_OFFSET 0x0000
+    #endif
+
+    enum PFSStorageTarget : uint8_t
+    {
+      PFS_STORAGE_INTERNAL = 0,
+      PFS_STORAGE_ACTIVE   = 1,
+      PFS_STORAGE_FLASH    = PFS_STORAGE_INTERNAL
+    };
+
+    enum PFSBackendType : uint8_t
+    {
+      PFS_BACKEND_NONE = 0,
+      PFS_BACKEND_FILESYSTEM,
+      PFS_BACKEND_MINIMAL_SECTOR
+    };
+
+    struct PFSMinimalSectorHeader
+    {
+      uint32_t magic;
+      uint16_t version;
+      uint16_t header_size;
+      uint32_t data_size;
+      uint32_t data_crc;
+      uint32_t reserved;
+    };
+
+    PFSBackendType pfs_backend = PFS_BACKEND_NONE;
+
+    uint32_t GetFreeStorageSpace(PFSStorageTarget target = PFS_STORAGE_INTERNAL);
+    uint32_t SubCall__GetFreeStorageSpace__Active(void);
+    uint32_t SubCall__GetFreeStorageSpace__LittleFS(void);
+    uint32_t SubCall__GetFreeStorageSpace__FFat(void);
+
+    bool PFS_Init();
+    bool PFS_IsAvailable() const;
+    PFSBackendType PFS_GetBackendType() const;
+    const char* PFS_GetBackendName() const;
+
+    bool PFS_SaveSettings(const uint8_t* data, uint32_t len);
+    bool PFS_LoadSettings(uint8_t* data, uint32_t max_len, uint32_t* loaded_len = nullptr);
+    bool PFS_SettingsExists();
+
+    bool PFS_File_SaveSettings(const uint8_t* data, uint32_t len);
+    bool PFS_File_LoadSettings(uint8_t* data, uint32_t max_len, uint32_t* loaded_len);
+    bool PFS_File_SettingsExists();
+
+    bool PFS_MinimalSector_Init();
+    bool PFS_MinimalSector_Save(uint32_t sector_offset, const uint8_t* data, uint32_t len);
+    bool PFS_MinimalSector_Load(uint32_t sector_offset, uint8_t* data, uint32_t max_len, uint32_t* loaded_len);
+    bool PFS_MinimalSector_Exists(uint32_t sector_offset);
+    uint32_t PFS_MinimalSector_CRC32(const uint8_t* data, uint32_t len) const;
+
+    /************************************************************************************************
+     * SECTION: DATA_RUNTIME saved/restored on boot with filesystem
+     ************************************************************************************************/
+
+    void SystemTask__Execute_Module_Data_Save();
 
     void ByteFile_Save(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
     uint32_t ByteFile_Load(char* filename_With_extension, uint8_t* buffer, uint16_t buflen);
     void JSONFile_Save(char* filename_With_extension, char* buffer, uint16_t buflen);
     void JSONFile_Load(char* filename_With_extension, char* buffer, uint16_t buflen);
 
-    void SystemTask__Execute_Module_Data_Save();
+    bool   FileExists(const char *fname);
+    size_t FileSize(const char *fname);
+    bool   SaveFile(const char *fname, const uint8_t *buf, uint32_t len);
+    bool   InitFile(const char *fname, uint32_t len, uint8_t init_value);
+    bool   LoadFile(const char *fname, uint8_t *buf, uint32_t len);
+    String LoadString(const char *fname);
+    bool   DeleteFile(const char *fname);
+    bool   RenameFile(const char *fname1, const char *fname2);
 
-    
-    /*********************************************************************************************\
-    This driver adds universal file system support for
-    - ESP8266 (sd card or littlefs on  > 1 M devices with special linker file e.g. eagle.flash.4m2m.ld)
-      (makes no sense on 1M devices without sd card)
-    - ESP32 (sd card or littlefs or sfatfile system).
+    #if defined(ARDUINO_ARCH_ESP32)
+    JsonDocument *pDoc = nullptr;
+    SemaphoreHandle_t jsonBufferLockMutex = xSemaphoreCreateRecursiveMutex();
+    #else
+    StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
+    JsonDocument *pDoc = &gDoc;
+    #endif
 
-    The sd card chip select is the standard SDCARD_CS or when not found SDCARD_CS_PIN and initializes
-    the FS System Pointer ufsp which can be used by all standard file system calls.
+    bool IsMounted(void) const;
 
-    The only specific call is UfsInfo() which gets the total size (0) and free size (1).
+    void Handle_FileChanges_WebUIEdits();
 
-    A button is created in the setup section to show up the file directory to download and upload files
-    subdirectories are supported.
-
-    Supported commands:
-    ufs       fs info
-    ufstype   get filesytem type 0=none 1=SD  2=Flashfile
-    ufssize   total size in kB
-    ufsfree   free size in kB
-    \*********************************************************************************************/
-
-    #define UFS_TNONE         0
-    #define UFS_TSDC          1
-    #define UFS_TFAT          2
-    #define UFS_TLFS          3
-
-    // Global file system pointer
-    FS *ufsp = nullptr;
-    // Flash file system pointer
-    FS *ffsp = nullptr;
-    // Local pointer for file managment
-    FS *dfsp = nullptr;
-
-    char ufs_path[48];
-    File ufs_upload_file;
-    uint8_t ufs_dir;
-    // 0 = None, 1 = SD, 2 = ffat, 3 = littlefs
-    uint8_t ufs_type;
-    uint8_t ffs_type;
-
-    struct {
-      char run_file[48];
-      int run_file_pos = -1;
-      bool run_file_mutex = 0;
-      bool download_busy;
-    } UfsData;
-
-    void UfsInitOnce(void);
-    void UfsInit(void);
-
-    uint16_t test_val = 0;
-    uint8_t dir = 0;
-
-    void init();
-    void Pre_Init();
-    int8_t pin = -1;
-    struct SETTINGS{
-      uint8_t fEnableModule = false;
-      uint8_t fShowManualSlider = false;
-    }settings;
-
-
-    char *folderOnly(char *fname);
-    char *fileOnly(char *fname);
-    void UfsCheckSDCardInit(void);
-    uint32_t UfsInfo(uint32_t sel, uint32_t type);
-    uint32_t UfsSize(void);
-    uint32_t UfsFree(void);
-    uint8_t UfsReject(char *name);
-
-
-    bool TfsFileExists(const char *fname);
-    size_t TfsFileSize(const char *fname);
-    bool TfsSaveFile(const char *fname, const uint8_t *buf, uint32_t len);
-    bool TfsInitFile(const char *fname, uint32_t len, uint8_t init_value);
-    bool TfsLoadFile(const char *fname, uint8_t *buf, uint32_t len);
-    String TfsLoadString(const char *fname);
-    bool TfsDeleteFile(const char *fname);
-    bool TfsRenameFile(const char *fname1, const char *fname2);
-
-
-    bool UfsExecuteCommandFileReady(void);
-    void UfsExecuteCommandFileLoop(void);
-    bool UfsExecuteCommandFile(const char *fname);
-    char* UfsFilename(char* fname, char* fname_in);
-    void UFSInfo(void);
-    void UFSType(void);
-    void UFSSize(void);
-    void UFSFree(void);
-    void UFSDelete(void);
-    void UFSRename(void);
-
-    // General filesystem
-    size_t fsBytesUsed =0;
-    size_t fsBytesTotal =0;
-    unsigned long presetsModifiedTime =0L;
-
-    // StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
-    
-// #if defined(ARDUINO_ARCH_ESP32)
-//   // Recursive mutex like WLED
-//   SemaphoreHandle_t jsonMutex = xSemaphoreCreateRecursiveMutex();
-// #else
-//   // Non-ESP32: Static buffer + pointer
-//   StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
-// #endif
-
-// global ArduinoJson buffer
-#if defined(ARDUINO_ARCH_ESP32)
-JsonDocument *pDoc = nullptr;
-SemaphoreHandle_t jsonBufferLockMutex = xSemaphoreCreateRecursiveMutex();
-#else
-StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
-JsonDocument *pDoc = &gDoc;
-#endif
-
-
-
-
-    
-//     StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
-// WLED_GLOBAL JsonDocument *pDoc _INIT(&gDoc);
-
-// FileSystem.h (fields)
-// public:
-  // JsonDocument* pDoc = nullptr;
-void InitJsonDoc(size_t baseSize);// /* e.g., JSON_BUFFER_SIZE */)
-
-void Handle_FileChanges_WebUIEdits();
-
-    bool doCloseFile =false;
+    bool doCloseFile = false;
     byte errorFlag = 0;
-
+    size_t fsBytesUsed = 0;
+    size_t fsBytesTotal = 0;
+    unsigned long presetsModifiedTime = 0L;
+    bool psramSafe = true;
 
     void closeFile();
     bool bufferedFind(const char *target, bool fromStart = true);
     bool bufferedFindSpace(size_t targetLen, bool fromStart = true);
-    bool bufferedFindObjectEnd() ;
+    bool bufferedFindObjectEnd();
     void writeSpace(size_t l);
     bool appendObjectToFile(const char* key, JsonDocument* content, uint32_t s, uint32_t contentLen = 0);
     bool writeObjectToFileUsingId(const char* file, uint16_t id, JsonDocument* content);
@@ -296,56 +257,45 @@ void Handle_FileChanges_WebUIEdits();
     bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest);
     void updateFSInfo();
 
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
     String getContentType(AsyncWebServerRequest* request, String filename);
     bool handleFileRead(AsyncWebServerRequest* request, String path);
-    #endif // USE_MODULE_NETWORK_WEBSERVER
-
 
     void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
-    void createDir(fs::FS &fs, const char * path);
-    void removeDir(fs::FS &fs, const char * path);
     void readFile(fs::FS &fs, const char * path);
-    void writeFile(fs::FS &fs, const char * path, const char * message);
-    void appendFile(fs::FS &fs, const char * path, const char * message);
-    void renameFile(fs::FS &fs, const char * path1, const char * path2);
-    void deleteFile(fs::FS &fs, const char * path);
-    void testFileIO(fs::FS &fs, const char * path);
 
+    /************************************************************************************************
+     * SECTION: Commands
+     ************************************************************************************************/
 
-    void CommandSet_CreateFile_WithName(char* value);
-    void CommandSet_SerialPrint_FileNames(const char* value);
-    void CommandSet_WriteFile(const char* filename, const char* data = nullptr);
-        
+    void parse_JSONCommand(JsonParserObject obj);
     void CommandSet_ReadFile(const char* filename);
 
-
-
-    int8_t CheckAndExecute_JSONCommands();
-    void parse_JSONCommand(JsonParserObject obj);
-
-    uint8_t ConstructJSON_Scene(uint8_t json_level, bool json_appending);
-
-    void WebCommand_Parse(void);
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
 
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
 
-  
+    /************************************************************************************************
+     * SECTION: MQTT
+     ************************************************************************************************/
+
     #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
     void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();    
+    void MQTTHandler_Rate();
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mFileSystem>*> mqtthandler_list;    
-    struct handler<mFileSystem> mqtthandler_settings;    
+    std::vector<struct handler<mFileSystem>*> mqtthandler_list;
+
+    struct handler<mFileSystem> mqtthandler_settings;
     struct handler<mFileSystem> mqtthandler_sensor_ifchanged;
-    struct handler<mFileSystem> mqtthandler_sensor_teleperiod;    
-    #endif // USE_MODULE_NETWORK_MQTT
+    struct handler<mFileSystem> mqtthandler_sensor_teleperiod;
+    #endif
 
 };
 
-#endif
+#endif // USE_MODULE_CORE_FILESYSTEM
 
-#endif
+#endif // _MODULE_CORE_FILESYSTEM_H

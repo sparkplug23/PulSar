@@ -316,7 +316,7 @@ void mSonoffIFan::EverySecond()
   
   if(time_on->UpdateTick())
   {
-    ALOG_INF( PSTR(D_LOG_GARAGE D_COMMAND_NVALUE_K("Running Value")), time_on->Value());
+    ALOG_INF( PSTR(D_LOG_CEILINGFAN D_COMMAND_NVALUE_K("Running Value")), time_on->Value());
     mqtthandler_power_ifchanged.tRateSecs = 1;
   }
   else
@@ -358,7 +358,7 @@ void mSonoffIFan::parse_JSONCommand(JsonParserObject obj){
 
     ALOG_COM( PSTR(D_LOG_CEILINGFAN D_PARSING_MATCHED D_COMMAND_SVALUE), D_LIGHTPOWER, GetLightState()?"On":"Off");
 
-    Response_mP(S_JSON_COMMAND_SVALUE_NVALUE, D_LIGHTPOWER, D_TOGGLE);
+    // Response_mP(S_JSON_COMMAND_SVALUE_NVALUE, D_LIGHTPOWER, D_TOGGLE);
 
   }
 

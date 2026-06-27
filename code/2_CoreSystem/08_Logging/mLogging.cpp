@@ -46,9 +46,10 @@ void AddLogOutput(uint8_t loglevel, const char* log_data)
     #endif
 
     #ifdef ENABLE_FREERAM_APPENDING_SERIAL
+      char buffer[20];
       SERIAL_DEBUG.printf(
-        PSTR("R%05d%c %s %S %s\r\n"),
-        ESP.getFreeHeap(),
+        EPSTR("R%05u%c %s %s %s\r\n"),
+        (unsigned)ESP.getFreeHeap(),
         isconnected ? 'Y' : 'N',
         tkr_time->GetUptime(buffer, sizeof(buffer)),
         tkr_log->GetLogLevelNamebyID(loglevel),
@@ -56,7 +57,7 @@ void AddLogOutput(uint8_t loglevel, const char* log_data)
       );
     #else
       SERIAL_DEBUG.printf(
-        PSTR("%s %S %s\r\n"),
+        PSTR("%s %s %s\r\n"),
         mxtime,
         tkr_log->GetLogLevelNamebyID(loglevel),
         log_data
@@ -126,17 +127,17 @@ void AddLogOutput(uint8_t loglevel, const char* log_data)
       }
 
       // creates line formatted with \1 meaning EOL
-      snprintf_P(
-        tkr_log->weblog.buffer,
+      snprintf_P(tkr_log->weblog.buffer,
         sizeof(tkr_log->weblog.buffer),
         PSTR("%s%c%s %S %s\1"),
         tkr_log->weblog.buffer,
-        tkr_log->weblog.index++,
+        tkr_log->weblog.index,
         mxtime,
         tkr_log->GetLogLevelNamebyID(loglevel),
         log_data
       );
-
+      
+      tkr_log->weblog.index++;
       if (!tkr_log->weblog.index) {
         tkr_log->weblog.index++;   // Index 0 is not allowed as it is the end of char string
       }
@@ -350,7 +351,7 @@ const char* mLogging::GetLogLevelNamebyID(uint8_t id) {
     case LOG_LEVEL_DEBUG_TRACE:    return PM_LOG_LEVEL_DEBUG_TRACE_CTR;
     case LOG_LEVEL_ERROR:          return PM_LOG_LEVEL_ERROR_CTR;
     case LOG_LEVEL_WARNING:        return PM_LOG_LEVEL_WARN_CTR;
-    case LOG_LEVEL_DEV_TEST:           return PM_LOG_LEVEL_TEST_CTR;
+    case LOG_LEVEL_DEV_TEST:       return PM_LOG_LEVEL_TEST_CTR;
     case LOG_LEVEL_HIGHLIGHT:      return PM_LOG_LEVEL_HIGHLIGHT_CTR;
     case LOG_LEVEL_IMPORTANT:      return PM_LOG_LEVEL_IMPORTANT_CTR;
     case LOG_LEVEL_INFO:           return PM_LOG_LEVEL_INFO_CTR;
@@ -385,7 +386,7 @@ uint8_t mLogging::GetLogLevelIDbyName(const char* name) {
 
 
 int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
-{ // KEEP TASKER ON TOP
+{
 
   switch(function){
     case TASK_LOOP: 
@@ -437,7 +438,6 @@ int8_t mLogging::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-
 
     case TASK_NETWORK_CONNECTED__WIFI:
       StartTelnetServer();

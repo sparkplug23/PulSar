@@ -244,7 +244,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
   // When no direct segment is set, assumed they are single segment (or control of first segment)
   if(segments_found == 0)
   {
-    ALOG_INF(PSTR(D_LOG_NEO "Assumed main segment"));
+    ALOG_INF(PSTR(D_LOG_PIXEL "Assumed main segment"));
     subparse_JSONCommand(obj, 0); // Legacy commands
   }
 
@@ -317,7 +317,7 @@ void mAnimatorLight::subparse_MatrixConfig(JsonParserObject obj)
  */
 void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_index)
 {
-  ALOG_HGLT(PSTR("subparse_JSONCommand for segment %d"), segment_index);
+  ALOG_DBG(PSTR("subparse_JSONCommand for segment %d"), segment_index);
 
   JsonParserToken jtok = 0; 
   JsonParserToken jtok_sub = 0; 
@@ -401,7 +401,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   }
 
 #ifndef ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
-  if(jtok = obj[PM_PIXELRANGE])
+  if(jtok = getTokenIncludingAlias(obj, PM_PIXELRANGE, "PR"))//obj[PM_PIXELRANGE])
   { 
     if(jtok.isArray())
     {
@@ -426,7 +426,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     }
   }
   #else
-    if (jtok = obj[PM_PIXELRANGE])
+    if (jtok = getTokenIncludingAlias(obj, PM_PIXELRANGE, "PR"))//obj[PM_PIXELRANGE])
   {
     if (jtok.isArray())
     {
@@ -481,7 +481,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   /*************************************************************************
    *** {"Effects":{X:Y}}
    *************************************************************************/
-  if(jtok_sub = obj[PM_EFFECTS])
+  if(jtok_sub = getTokenIncludingAlias(obj, PM_EFFECTS, "EF"))//obj[PM_EFFECTS])
   {    
     JsonParserObject jobj = jtok_sub.getObject();
 
@@ -1115,13 +1115,13 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   
 
   #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-  if(jtok = obj[PM_RGB_CLOCK].getObject()[PM_MANUAL_NUMBER]){
+  if(jtok = obj[D_RGB_CLOCK].getObject()[D_MANUAL_NUMBER]){
     lcd_display_show_number = jtok.getInt();
     // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
     ALOG_COM(PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_MANUAL_NUMBER)), lcd_display_show_number);
   }
   
-  if(jtok = obj[PM_RGB_CLOCK].getObject()["ManualString"]){
+  if(jtok = obj[D_RGB_CLOCK].getObject()["ManualString"]){
     strcpy(lcd_display_show_string, jtok.getStr());
     // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
     ALOG_COM(PSTR(D_LOG_PIXEL  D_COMMAND_SVALUE_K("ManualString")), lcd_display_show_string);
@@ -2366,7 +2366,7 @@ if (jtok_pwi && jtok_pwi.isArray())
     // segment_animation_override.time_ms = 100;
   }
 
-  ALOG_HGLB(PSTR("REACHED END OF SEGMENT PARSING %d"), data_buffer.isserviced);
+  // ALOG_HGLB(PSTR("REACHED END OF SEGMENT PARSING %d"), data_buffer.isserviced);
   
 } // END PARSE COMMANDS
 

@@ -402,8 +402,8 @@ void mHVAC::WebPage_Root_AddHandlers(){
 //       tkr_web->WebGetArg(tkr_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //       arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //       // animation.brightness = BrtN2F(arg_value);
-//       ALOG_TST(PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
-//       // ALOG_TST(PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+//       ALOG_TST(PSTR(D_LOG_PIXEL "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
+//       // ALOG_TST(PSTR(D_LOG_PIXEL "animation.brightness=%d"),arg_value);
 //       // SetRefreshLEDs();
 
     
@@ -427,8 +427,8 @@ void mHVAC::WebPage_Root_AddHandlers(){
 //       tkr_web->WebGetArg(tkr_web->request_web_command, arg_ctr, tmp, sizeof(tmp));
 //       arg_value = (!strlen(tmp)) ? 0 : atoi(tmp);
 //       // animation.brightness = BrtN2F(arg_value);
-//       ALOG_TST(PSTR(D_LOG_NEO "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
-//       // ALOG_TST(PSTR(D_LOG_NEO "animation.brightness=%d"),arg_value);
+//       ALOG_TST(PSTR(D_LOG_PIXEL "hasParam(\"%s\")=%d %d"),arg_ctr,arg_value,relay_id);
+//       // ALOG_TST(PSTR(D_LOG_PIXEL "animation.brightness=%d"),arg_value);
 //       // SetRefreshLEDs();
 
     

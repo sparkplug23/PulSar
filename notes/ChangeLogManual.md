@@ -4,6 +4,11 @@
 ## FIRMWARE_VERSION_MINOR
 
 
+### 0.136.x.x : Large update
+•	Bitpack gpio, templates, mqtt, all networks, huge rewrite which may need certain flags working
+•	Sd card, filesystem, settings, also all redone. 
+•	Pin mapping in general redone, with initial work on pinstate class. 
+    o	When proper pin logging happens with a clean struct, then lighting busconfig will require to check pin use and claim when done.
 
 ### 0.110.x.x : Moving to MQTT:Crackle
  - Moving LongTerm devices over to new mqtt/OH starting with consumer unit

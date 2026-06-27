@@ -141,7 +141,9 @@ class mInterfaceLight :
     void EveryLoop();
     
     void LightCalcPWMRange();
-    void parseJSONObject__BusConfig(JsonParserObject obj); 
+    
+    void parseJSONObject__BusConfig(JsonParserObject obj, int16_t bus_index_override = -1);
+    void ClearBusConfigs(void);
         
     void Template_Load();
     void Template_Load_DefaultConfig();

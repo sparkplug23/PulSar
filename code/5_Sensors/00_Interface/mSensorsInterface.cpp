@@ -38,11 +38,6 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       #endif
     break;  
     case TASK_EVERY_SECOND:{
-      // Serial.println(sizeof(sensors_reading_t));
-      // Serial.println(tkr_db18->GetSensorReading());
-      // Serial.println(tkr_dht->GetSensorReading());
-      // Serial.println(tkr_db18->test123());
-      // Serial.println(tkr_dht->test123());
 
       // Make nicer later with json command to enable and time period to show
       if(rt.tTicker_Splash_Sensors_To_Logs-- == 1)
@@ -50,7 +45,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
         // Measurement level feedback will be "DebugMore" and show level should be "Debug". "Info" should be reserved for essential stuff not in mqtt
         ALOG_DBM(PSTR(">>> Sensor Readings <<<"));
         tkr->Tasker_Interface(TASK_SENSOR_SHOW_LATEST_LOGGED_ID);
-        rt.tTicker_Splash_Sensors_To_Logs = 30 ; // reset
+        rt.tTicker_Splash_Sensors_To_Logs = 120 ; // reset
       }
       
   
@@ -75,9 +70,6 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       //   pModule[switch_index]->Tasker(function, obj);
 
     }break;
-    case TASK_EVERY_10_SECONDS:
-      // tkr->Tasker_Interface(TASK_SENSOR_SHOW_LATEST_LOGGED_ID);
-    break;
     case TASK_WEB_APPEND_SENSOR_TABLE_VALUES:
       WebAppend__Sensor_Table__As_Ragged();
       // WebAppend__Sensor_Table__As_SensorsRows_Inverted();
@@ -109,13 +101,16 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+      MQTTHandler_Init(); 
+    break;
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      // tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
     break;
     case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
   }
@@ -674,6 +669,9 @@ void mSensorsInterface::Init(void)
   AddFilteredSensor(tkr_bme->GetModuleUniqueID(), 0, 10, 60, SENSOR_TYPE_TEMPERATURE_ID, "BME10Sec");
   #endif
 
+  
+  DLI->AddDeviceName("SensorInterface",GetModuleUniqueID());
+
 
 
 }
@@ -1047,7 +1045,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 {
 
   // if(tkr_time->uptime_seconds_nonreset > 30)
-  //   ALOG_INF(PSTR("ConstructJSON_Sensor()"));
+    // ALOG_INF(PSTR("ConstructJSON_Sensor()"));
 
   JBI->Start();
 
@@ -1072,7 +1070,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
      **/
     for(auto& pmod:tkr->pModule)
     {
-      if( IS_MODULE_SENSOR_SUBMODULE( pmod->GetModuleUniqueID() ) )
+      if( (pmod->GetModuleUniqueID() >= 5000 && pmod->GetModuleUniqueID() <= 5999) )//IS_MODULE_SENSOR_SUBMODULE(  ) )
       {
         //Get any sensors in module
         uint8_t sensors_available = pmod->GetSensorCount();
@@ -1257,290 +1255,6 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 }
 
 
-
-
-  
-//   // for (
-//     uint16_t type_id = SENSOR_TYPE_TEMPERATURE_ID; 
-//   // type_id < SENSOR_TYPE_LENGTH_ID; type_id++)
-//   // {
-
-//     // ALOG_INF( PSTR("type_id = %d %S"), type_id, GetUnifiedSensor_NameByTypeID(type_id));
-    
-//     /**
-//      * @brief Check by sensor reported type
-//      **/
-//     for(auto& pmod:tkr->pModule)
-//     {
-//       //Get any sensors in module
-//       uint8_t sensors_available = pmod->GetSensorCount();
-//       // ALOG_INF( PSTR("GetSensorCount =%d\t%s"), sensors_available, pmod->GetModuleFriendlyName());
-      
-//       if(sensors_available)
-//       {
-//         // ALOG_INF( PSTR("GetSensorCount =%d\t%s"), sensors_available, pmod->GetModuleFriendlyName());
-
-//         for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
-//         {
-//           sensors_reading_t val;
-//           pmod->GetSensorReading(&val, sensor_id);
-          
-//           if(val.Valid())
-//           {
-
-//             if(val.isFloatWaiting_WithSensorType(type_id))
-//             {
-
-//             // if((sensor_data = val.GetFloat(type_id)) != SENSOR_TYPE_INVALID_READING) // "has float needs to perform this check!"
-//             // {
-//             // if(val.HasFloat(sensor_id))
-//             // {
-
-//               sensor_data = val.GetFloat(type_id);
-
-//               // Only add sensor type if any has been found
-//               if(flag_level_started != true)
-//               {     
-//                 JBI->Object_Start("TemperatureHeatMapBrightness");//PM_TEMPERATURE_HEATMAP_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
-//                 flag_level_started = true;
-//                 flag_level_ended_needed = true;
-//               }
-              
-//               // val.sensor_id is used to since the order of devicename list may not match in accending order
-//               // DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
-
-
-//               // Convert into colour
-//               float temperature = sensor_data;//val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
-//               RgbColor colour  = tkr_iLight->GetColourValueUsingMaps_AdjustedBrightness(temperature,0);
-
-//               JBI->Add_FV(
-//                 DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer)),
-//                 PSTR("\"%02X%02X%02X\""),
-//                 colour.R, colour.G, colour.B
-//               );
-
-
-//               // JBI->Add(buffer, sensor_data);
-              
-//             }
-
-
-// // {
-// //   "Temperature":{
-// //     "BedroomDesk-DHT1":"00FF33",
-// //     "BedroomDesk-DHT1":27.900,
-// //     "BedroomDesk-DHT2":"00FF33",
-// //     "BedroomDesk-DHT2":28.000,
-// //     "BedroomDesk-BME":"00FF1D",
-// //     "BedroomDesk-BME":28.750,
-// //     "BedroomDesk-BME2":"00FF22",
-// //     "BedroomDesk-BME2":28.510,
-// //     "DB_04":"00FF19","DB_04":28.937,"DB_03":"00FF1D","DB_03":28.812,"DB_01":"00FF1D","DB_01":28.750,"DB_02":"00FF1D","DB_02":28.687}}
-
-
-//             // if(type_id == SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID)
-//             // {
-//             //   DEBUG_LINE_HERE;
-//             // Serial.println(val.GetString(type_id));
-//             //     sensor_data_string = val.GetString(type_id);
-//             // Serial.println(sensor_data_string);
-//             // Serial.println(sensor_data_string.c_str());
-            
-//             // }
-            
-//             // sensor_data_string = val.GetString(type_id);
-//             // if(!sensor_data_string.equals("error"))
-//             // {
-
-//             #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNFIED_SENSOR_STRING_TYPES
-//             if(val.HasString(sensor_id))
-//             {
-//             // if((sensor_data_string = val.GetString(type_id)) != "error" )
-//             // // if((sensor_data_string = val.GetString(type_id)) != val.error ) //SENSOR_STRING_TYPE_INVALID)
-//             // {
-
-//               sensor_data_string = val.GetString(type_id);
-
-              
-//               // Only add sensor type if any has been found
-//               if(flag_level_started != true)
-//               {              
-//                 JBI->Level_Start_P(GetUnifiedSensor_NameByTypeID(type_id));
-//                 flag_level_started = true;
-//                 flag_level_ended_needed = true;
-//               }
-              
-//               // val.sensor_id is used to since the order of devicename list may not match in accending order
-//               DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
-
-//               JBI->Add(buffer, sensor_data_string.c_str());
-              
-//             }
-//             #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNFIED_SENSOR_STRING_TYPES
-
-//           }
-//         }
-
-//       }
-
-//     } // END modules checking
-    
-//     /**
-//      * @brief Only finish Level if type was added at least once
-//      * 
-//      * @return * Only 
-//      */
-//     if(flag_level_ended_needed)
-//     {
-//       JBI->Object_End();
-//       flag_level_ended_needed = false;
-//       flag_level_started = false;     // closed level
-//     }
-
-
-
-
-
-//   // for (
-//     // uint16_t
-//     type_id = SENSOR_TYPE_TEMPERATURE_ID; 
-//   // type_id < SENSOR_TYPE_LENGTH_ID; type_id++)
-//   // {
-
-//     // ALOG_INF( PSTR("type_id = %d %S"), type_id, GetUnifiedSensor_NameByTypeID(type_id));
-    
-//     /**
-//      * @brief Check by sensor reported type
-//      **/
-//     for(auto& pmod:tkr->pModule)
-//     {
-//       //Get any sensors in module
-//       uint8_t sensors_available = pmod->GetSensorCount();
-//       // ALOG_INF( PSTR("GetSensorCount =%d\t%s"), sensors_available, pmod->GetModuleFriendlyName());
-      
-//       if(sensors_available)
-//       {
-//         // ALOG_INF( PSTR("GetSensorCount =%d\t%s"), sensors_available, pmod->GetModuleFriendlyName());
-
-//         for(int sensor_id=0;sensor_id<sensors_available;sensor_id++)
-//         {
-//           sensors_reading_t val;
-//           pmod->GetSensorReading(&val, sensor_id);
-          
-//           if(val.Valid())
-//           {
-
-//             if(val.isFloatWaiting_WithSensorType(type_id))
-//             {
-
-//             // if((sensor_data = val.GetFloat(type_id)) != SENSOR_TYPE_INVALID_READING) // "has float needs to perform this check!"
-//             // {
-//             // if(val.HasFloat(sensor_id))
-//             // {
-
-//               sensor_data = val.GetFloat(type_id);
-
-//               // Only add sensor type if any has been found
-//               if(flag_level_started != true)
-//               {     
-//                 JBI->Level_Start_P(PM_TEMPERATURE_HEATMAP_RGBSTRING);//GetUnifiedSensor_NameByTypeID(type_id));
-//                 flag_level_started = true;
-//                 flag_level_ended_needed = true;
-//               }
-              
-//               // val.sensor_id is used to since the order of devicename list may not match in accending order
-//               // DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
-
-
-//               // Convert into colour
-//               float temperature = sensor_data;//val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);
-//               RgbColor colour  = tkr_iLight->GetColourValueUsingMaps_FullBrightness(temperature,0);
-
-//               JBI->Add_FV(
-//                 DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer)),
-//                 PSTR("\"%02X%02X%02X\""),
-//                 colour.R, colour.G, colour.B
-//               );
-
-
-//               // JBI->Add(buffer, sensor_data);
-              
-//             }
-
-
-// // {
-// //   "Temperature":{
-// //     "BedroomDesk-DHT1":"00FF33",
-// //     "BedroomDesk-DHT1":27.900,
-// //     "BedroomDesk-DHT2":"00FF33",
-// //     "BedroomDesk-DHT2":28.000,
-// //     "BedroomDesk-BME":"00FF1D",
-// //     "BedroomDesk-BME":28.750,
-// //     "BedroomDesk-BME2":"00FF22",
-// //     "BedroomDesk-BME2":28.510,
-// //     "DB_04":"00FF19","DB_04":28.937,"DB_03":"00FF1D","DB_03":28.812,"DB_01":"00FF1D","DB_01":28.750,"DB_02":"00FF1D","DB_02":28.687}}
-
-
-//             // if(type_id == SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID)
-//             // {
-//             //   DEBUG_LINE_HERE;
-//             // Serial.println(val.GetString(type_id));
-//             //     sensor_data_string = val.GetString(type_id);
-//             // Serial.println(sensor_data_string);
-//             // Serial.println(sensor_data_string.c_str());
-            
-//             // }
-            
-//             // sensor_data_string = val.GetString(type_id);
-//             // if(!sensor_data_string.equals("error"))
-//             // {
-
-//             #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNFIED_SENSOR_STRING_TYPES
-//             if(val.HasString(sensor_id))
-//             {
-//             // if((sensor_data_string = val.GetString(type_id)) != "error" )
-//             // // if((sensor_data_string = val.GetString(type_id)) != val.error ) //SENSOR_STRING_TYPE_INVALID)
-//             // {
-
-//               sensor_data_string = val.GetString(type_id);
-
-              
-//               // Only add sensor type if any has been found
-//               if(flag_level_started != true)
-//               {              
-//                 JBI->Level_Start_P(GetUnifiedSensor_NameByTypeID(type_id));
-//                 flag_level_started = true;
-//                 flag_level_ended_needed = true;
-//               }
-              
-//               // val.sensor_id is used to since the order of devicename list may not match in accending order
-//               DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
-
-//               JBI->Add(buffer, sensor_data_string.c_str());
-              
-//             }
-//             #endif // ENABLE_DEVFEATURE_SENSOR_INTERFACE_UNFIED_SENSOR_STRING_TYPES
-
-//           }
-//         }
-
-//       }
-
-//     } // END modules checking
-    
-//     /**
-//      * @brief Only finish Level if type was added at least once
-//      * 
-//      * @return * Only 
-//      */
-//     if(flag_level_ended_needed)
-//     {
-//       JBI->Object_End();
-//       flag_level_ended_needed = false;
-//       flag_level_started = false;     // closed level
-//     }
-
 #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
 uint8_t mSensorsInterface::ConstructJSON_Unified_Filtered(uint8_t json_level, bool json_appending)
 {
@@ -1672,8 +1386,6 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
 
   JBI->Start();
 
-  // return 0;
-  
   float sensor_data = -1;
   String sensor_data_string = String("none");
   char buffer[100] = {0};
@@ -1694,7 +1406,7 @@ uint8_t mSensorsInterface::ConstructJSON_SensorTemperatureColours(uint8_t json_l
     {
       //Get any sensors in module
       uint8_t sensors_available = pmod->GetSensorCount();
-      // ALOG_INF( PSTR("GetSensorCount =%d\t%s"), sensors_available, pmod->GetModuleFriendlyName());
+      // ALOG_INF( PSTR("GetSensorCount =%d\t%S"), sensors_available, pmod->GetModuleName());
       
       if(sensors_available)
       {
@@ -2195,7 +1907,7 @@ void mSensorsInterface::HsbToRgb(float h, float s, float v, uint8_t* r8, uint8_t
 float mSensorsInterface::ConvertTemp(float c)
 {
   float result = c;
-  // if (!isnan(c) && Settings.flag_system.temperature_conversion) {
+  // if (!isnan(c) && Settings.sysopt_system.bit.temperature_conversion) {
   //   result = c * 1.8 + 32;  // Fahrenheit
   // }
   return result;
@@ -2204,7 +1916,7 @@ float mSensorsInterface::ConvertTemp(float c)
 
 char mSensorsInterface::TempUnit(void)
 {
-  return (tkr_set->Settings.flag_system.temperature_conversion) ? 'F' : 'C';
+  return (tkr_set->Settings.sysopt_sensors.bit.temperature_conversion) ? 'F' : 'C';
 }
 
 
@@ -2212,7 +1924,7 @@ float mSensorsInterface::ConvertPressure(float p)
 {
   // float result = p;
 
-  // if (!isnan(p) && Settings.flag_system.pressure_conversion) {
+  // if (!isnan(p) && Settings.sysopt_system.bit.pressure_conversion) {
   //   result = p * 0.75006375541921;  // mmHg
   // }
   // return result;
@@ -2220,7 +1932,7 @@ float mSensorsInterface::ConvertPressure(float p)
 
 String mSensorsInterface::PressureUnit(void)
 {
-  // return (Settings.flag_system.pressure_conversion) ? String(D_UNIT_MILLIMETER_MERCURY) : String(D_UNIT_PRESSURE);
+  // return (Settings.sysopt_system.bit.pressure_conversion) ? String(D_UNIT_MILLIMETER_MERCURY) : String(D_UNIT_PRESSURE);
 }
 
 
@@ -2297,7 +2009,112 @@ uint8_t mSensorsInterface::ConstructJSON_Event_UserInput(uint8_t json_level, boo
   return JBI->End();
     
 }
+
+
+uint8_t mSensorsInterface::ConstructJSON_System_Location(uint8_t json_level, bool json_appending)
+{
+
+  char buffer[100] = {0};
+
+  JBI->Start();
+
+  const sensorset_location_t& loc = system_location;
+
+  JBI->Add("SystemUptime", tkr_time->uptime_seconds_nonreset);
   
+  // -------------------------------------------------------------------------
+  // Validity / source
+  // -------------------------------------------------------------------------
+  JBI->Add("Valid",        loc.isvalid);
+  JBI->Add("SourceID",     loc.source_id);
+  JBI->Add("FixType",      loc.fix_type);
+  JBI->Add("FixQuality",   loc.fix_quality);
+
+  if(loc.isvalid)
+  {
+
+  // -------------------------------------------------------------------------
+  // Timing
+  // -------------------------------------------------------------------------
+  JBI->Add("UpdatedMs",    loc.updated_millis);
+  JBI->Add("FixAgeMs",     loc.fix_age_ms);
+  JBI->Add("Stale",        loc.is_stale);
+  JBI->Add("TimeValid",    loc.time_valid);
+
+  JBI->Add("Year",         loc.year);
+  JBI->Add("Month",        loc.month);
+  JBI->Add("Day",          loc.day);
+  JBI->Add("Hour",         loc.hour);
+  JBI->Add("Minute",       loc.minute);
+  JBI->Add("Second",       loc.second);
+  JBI->Add("UTCSeconds",   loc.utc_time_secs);
+
+  char utc_buffer[32];
+  snprintf_P(
+    utc_buffer,
+    sizeof(utc_buffer),
+    PSTR("%04u-%02u-%02uT%02u:%02u:%02uZ"),
+    loc.year,
+    loc.month,
+    loc.day,
+    loc.hour,
+    loc.minute,
+    loc.second
+  );
+  JBI->Add("UTC", utc_buffer);
+
+  // -------------------------------------------------------------------------
+  // Position
+  // -------------------------------------------------------------------------
+  JBI->Add("Latitude",     loc.latitude);
+  JBI->Add("Longitude",    loc.longitude);
+  JBI->Add("Altitude",     loc.altitude);
+
+  char convf_lat[TBUFFER_SIZE_FLOAT];  mSupport::float2CString(system_location.latitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lat); 
+  char convf_lon[TBUFFER_SIZE_FLOAT];  mSupport::float2CString(system_location.longitude,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,convf_lon);
+  char convf_fix[TBUFFER_SIZE_FLOAT];  mSupport::float2CString(system_location.accuracy,2,convf_fix);
+  snprintf_P(buffer, sizeof(buffer),   PSTR("https://www.google.com/maps/dir//%s,%s"), convf_lat, convf_lon);
+  JBI->Add("url", buffer);
+
+  // -------------------------------------------------------------------------
+  // Motion
+  // -------------------------------------------------------------------------
+  JBI->Add("Speed",        loc.speed);
+  JBI->Add("Course",       loc.course);
+
+  }
+
+  // -------------------------------------------------------------------------
+  // Accuracy / dilution / precision
+  // -------------------------------------------------------------------------
+  JBI->Add("Accuracy",           loc.accuracy);
+  JBI->Add("AccuracyPosition",   loc.accuracy_position);
+  JBI->Add("AccuracyVertical",   loc.accuracy_vertical);
+
+  JBI->Add("HDOP",               loc.hdop);
+  JBI->Add("VDOP",               loc.vdop);
+  JBI->Add("PDOP",               loc.pdop);
+
+  JBI->Add("HPARaw",             loc.hpa_raw);
+  JBI->Add("VPARaw",             loc.vpa_raw);
+
+  // -------------------------------------------------------------------------
+  // Satellite summary
+  // -------------------------------------------------------------------------
+  JBI->Add("SatellitesUsed",     loc.satellites_used);
+  JBI->Add("SatellitesView",     loc.satellites_view);
+  JBI->Add("SatellitesGPS",      loc.satellites_gps);
+  JBI->Add("SatellitesGLONASS",  loc.satellites_glonass);
+  JBI->Add("CNOMax",             loc.cno_max);
+
+  // -------------------------------------------------------------------------
+  // Selection metadata
+  // -------------------------------------------------------------------------
+  JBI->Add("Priority",           loc.priority);
+
+  return JBI->End();
+}
+
 /******************************************************************************************************************
  * MQTT
 *******************************************************************************************************************/
@@ -2308,6 +2125,8 @@ uint8_t mSensorsInterface::ConstructJSON_Event_UserInput(uint8_t json_level, boo
 void mSensorsInterface::MQTTHandler_Init(){
 
   struct handler<mSensorsInterface>* ptr;
+
+  ALOG_INF(PSTR("MQTTHandler_Init size %d"), mqtthandler_list.size()  );
  
   ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
@@ -2390,44 +2209,19 @@ void mSensorsInterface::MQTTHandler_Init(){
   mqtthandler_list.push_back(ptr);
 
 
-  
+  ptr = &mqtthandler_system_location; 
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = 1; 
+  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_SYSTEM_LOCATION__CTR;
+  ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_System_Location;
+  mqtthandler_list.push_back(ptr);
+
 
 } 
-
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mSensorsInterface::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mSensorsInterface::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-  }
-}
-
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mSensorsInterface::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
 
 #endif // USE_MODULE_NETWORK_MQTT
 

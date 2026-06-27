@@ -20,47 +20,96 @@ template <typename T>
 class SingleEMAFilter
 {
 public:
-	SingleEMAFilter<T>(const double alpha);
-	T AddValue(const T value);
-	T GetLowPass();
-	T GetHighPass();
-	void SetAlpha(const double alpha);
+  SingleEMAFilter<T>(const double alpha);
+
+  T AddValue(const T value);
+  T GetLowPass();
+  T GetHighPass();
+
+  void SetAlpha(const double alpha);
+  void Reset();
+  bool IsReady();
 
 private:
-	double _alpha;
-	T _lowPassFilter;
-	T _highPassFilter;
+  double _alpha = 0.0;
+
+  T _lowPassFilter = static_cast<T>(0);
+  T _highPassFilter = static_cast<T>(0);
+
+  bool _hasValue = false;
 };
 #endif
 
-template<typename T>
-void SingleEMAFilter<T>::SetAlpha(const double alpha)
-{
-	_alpha = alpha;
-}
 
 template<typename T>
 SingleEMAFilter<T>::SingleEMAFilter(const double alpha)
 {
-	_alpha = alpha;
+  SetAlpha(alpha);
+  Reset();
 }
+
+
+template<typename T>
+void SingleEMAFilter<T>::SetAlpha(const double alpha)
+{
+  if (alpha < 0.0)
+  {
+    _alpha = 0.0;
+  }
+  else if (alpha > 1.0)
+  {
+    _alpha = 1.0;
+  }
+  else
+  {
+    _alpha = alpha;
+  }
+}
+
+
+template<typename T>
+void SingleEMAFilter<T>::Reset()
+{
+  _lowPassFilter = static_cast<T>(0);
+  _highPassFilter = static_cast<T>(0);
+  _hasValue = false;
+}
+
+
+template<typename T>
+bool SingleEMAFilter<T>::IsReady()
+{
+  return _hasValue;
+}
+
 
 template<typename T>
 T SingleEMAFilter<T>::AddValue(const T value)
 {
-	_lowPassFilter = static_cast<T>(_alpha * value + (1 - _alpha) * _lowPassFilter);
-	_highPassFilter = value - _lowPassFilter;
-	return GetLowPass();
+  if (!_hasValue)
+  {
+    _lowPassFilter = value;
+    _highPassFilter = static_cast<T>(0);
+    _hasValue = true;
+    return _lowPassFilter;
+  }
+
+  _lowPassFilter = static_cast<T>((_alpha * value) + ((1.0 - _alpha) * _lowPassFilter));
+  _highPassFilter = static_cast<T>(value - _lowPassFilter);
+
+  return _lowPassFilter;
 }
 
-template<typename T>
-inline T SingleEMAFilter<T>::GetLowPass()
-{
-	return _lowPassFilter;
-}
 
 template<typename T>
-inline T SingleEMAFilter<T>::GetHighPass()
+T SingleEMAFilter<T>::GetLowPass()
 {
-	return _highPassFilter;
+  return _lowPassFilter;
+}
+
+
+template<typename T>
+T SingleEMAFilter<T>::GetHighPass()
+{
+  return _highPassFilter;
 }

@@ -37,7 +37,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * STORAGE SECTION * 
     *******************/    
-    case TASK_TEMPLATE_MODULE_LOAD_AFTER_INIT_DEFAULT_CONFIG_ID:
+    case TASK_CONFIG_LOAD_POST_INIT_DEFAULTS_FROM_PROGMEM:
       Template_Load_DefaultConfig();
     break;
     #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA
@@ -180,6 +180,10 @@ void mInterfaceLight::Template_Load()
 
   #endif  // ENABLE_FEATURE_LIGHTING__ENABLE_ALTERANTE_TEMPLATE_USING_GPIO_SWITCH_ONE
 
+
+  #ifdef ENABLE_DEVFEATURE_LIGHTING__LIGHTING_TEMPLATE_NO_LONGER_FROM_SUBMODULE
+  return;
+  #endif
 
 
   #ifdef USE_LIGHTING_TEMPLATE
@@ -812,112 +816,208 @@ void mInterfaceLight::BusManager_Create_DefaultSinglePWM_5CH()
 
 
 /**
- * @brief Testing that each object passed into here is a new busconfig
- * 
- * @param obj 
+ * @brief Parse one BusConfig JSON object.
+ *
+ * Behaviour:
+ *   - If bus_index_override >= 0:
+ *       write exactly to that bus index.
+ *
+ *   - Else if object contains "Index" or "BusIndex":
+ *       write exactly to that bus index.
+ *
+ *   - Else:
+ *       append to the first free busConfigs[] slot.
+ *
+ * Notes:
+ *   - Existing config at the target index is deleted/replaced.
+ *   - Array parsing should call ClearBusConfigs() first, then pass index 0..N.
+ *   - Object parsing can be used for targeted single-bus replacement.
  */
-void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
+void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t bus_index_override)
 {
   JsonParserToken jtok = 0;
   JsonParserToken jtok2 = 0;
 
+  const uint8_t max_busses = WLED_MAX_BUSSES + WLED_MIN_VIRTUAL_BUSSES;
+
   DEBUG_LINE_HERE;
 
-  // busConfigs
-  uint8_t bus_count = 0;//bus_manager->getNumBusses();
-  for(uint8_t ii=0;ii<(WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES);ii++)
+  /********************************************************************************************
+   ** Determine target bus index **************************************************************
+  ********************************************************************************************/
+
+  int16_t bus_index = bus_index_override;
+
+  if (bus_index < 0)
   {
-    if (busConfigs[ii] != nullptr)
+    if (jtok = obj["Index"])
     {
-      bus_count++;
+      bus_index = jtok.getInt();
+    }
+    else if (jtok = obj["BusIndex"])
+    {
+      bus_index = jtok.getInt();
     }
   }
 
-  ALOG_DBM(PSTR("getNumBusses %d"), bus_count);
+  if (bus_index < 0)
+  {
+    for (uint8_t bus_i = 0; bus_i < max_busses; bus_i++)
+    {
+      if (busConfigs[bus_i] == nullptr)
+      {
+        bus_index = bus_i;
+        break;
+      }
+    }
+  }
+
+  if ((bus_index < 0) || (bus_index >= max_busses))
+  {
+    ALOG_ERR(
+      PSTR("BusConfig invalid index %d, max=%d"),
+      bus_index,
+      max_busses
+    );
+    return;
+  }
+
+  ALOG_INF(PSTR("BusConfig target index %d"), bus_index);
+
+
+  /********************************************************************************************
+   ** Defaults ********************************************************************************
+  ********************************************************************************************/
 
   uint16_t start = 0;
   uint16_t length = 10;
   int8_t bus_type = BUSTYPE_NONE;
   uint8_t reversed = 0;
-  uint8_t ColourOrder = 0;//{COLOUR_ORDER_INIT_DISABLED};
-  uint8_t pins[5] = {255}; // 255 is unset
+  uint8_t ColourOrder = 0;
+  uint8_t pins[5] = { 255, 255, 255, 255, 255 };
   uint8_t skip_pixels = 0;
 
-  if(jtok2 = obj["Pin"])
+
+  /********************************************************************************************
+   ** Pin *************************************************************************************
+  ********************************************************************************************/
+
+  if (jtok2 = obj["Pin"])
   {
-    if(jtok2.isNum())
+    if (jtok2.isNum())
     {
       pins[0] = jtok2.getInt();
     }
-    else
-    if(jtok2.isArray())
+    else if (jtok2.isArray())
     {
-      uint8_t ii = 0;
+      uint8_t pin_i = 0;
       JsonParserArray arrobj = jtok2;
-      for(auto value : arrobj) 
+
+      for (auto value : arrobj)
       {
-        pins[ii++] = value.getInt();
+        if (pin_i >= 5)
+        {
+          ALOG_WRN(PSTR("BusConfig Pin array too long, extra pins ignored"));
+          break;
+        }
+
+        pins[pin_i++] = value.getInt();
       }
     }
-    AddLog_Array(LOG_LEVEL_INFO, PSTR("pins"), pins, 5);  
+
+    AddLog_Array(LOG_LEVEL_INFO, PSTR("pins"), pins, 5);
   }
 
 
-  if(jtok = obj["Start"])
+  /********************************************************************************************
+   ** Start ***********************************************************************************
+  ********************************************************************************************/
+
+  if (jtok = obj["Start"])
   {
     start = jtok.getInt();
     ALOG_INF(PSTR("start %d"), start);
   }
 
 
-  if(jtok = obj["Length"])
+  /********************************************************************************************
+   ** Length **********************************************************************************
+  ********************************************************************************************/
+
+  if (jtok = obj["Length"])
   {
     length = jtok.getInt();
     ALOG_INF(PSTR("length %d"), length);
   }
 
 
-  if(jtok = obj["BusType"])
+  /********************************************************************************************
+   ** BusType *********************************************************************************
+  ********************************************************************************************/
+
+  if (jtok = obj["BusType"])
   {
-    if(jtok.isInt())
+    if (jtok.isInt())
     {
       bus_type = jtok.getInt();
     }
-    else
-    if(jtok.isStr())
+    else if (jtok.isStr())
     {
       bus_type = Bus::getTypeIDbyName(jtok.getStr());
     }
+
     ALOG_INF(PSTR("bus_type %d"), bus_type);
   }
-  
 
-  if(jtok = obj[PM_RGB_COLOUR_ORDER])
+
+  /********************************************************************************************
+   ** Colour order ****************************************************************************
+  ********************************************************************************************/
+
+  if (jtok = obj[PM_RGB_COLOUR_ORDER])
   {
-    if(jtok.isStr())
+    if (jtok.isStr())
     {
       ColourOrder = GetColourOrder_FromName(jtok.getStr());
     }
   }
 
 
-  if(jtok = obj["Reversed"])
+  /********************************************************************************************
+   ** Reversed ********************************************************************************
+  ********************************************************************************************/
+
+  if (jtok = obj["Reversed"])
   {
     reversed = jtok.getInt();
     ALOG_INF(PSTR("reversed %d"), reversed);
   }
 
-  if(jtok = obj["Skip"])
+
+  /********************************************************************************************
+   ** Skip ************************************************************************************
+  ********************************************************************************************/
+
+  if (jtok = obj["Skip"])
   {
     skip_pixels = jtok.getInt();
     ALOG_INF(PSTR("Skip %d"), skip_pixels);
   }
 
-  uint8_t bus_index = bus_count; // next bus space 
-  if (busConfigs[bus_index] != nullptr) delete busConfigs[bus_index];
 
+  /********************************************************************************************
+   ** Replace target BusConfig ****************************************************************
+  ********************************************************************************************/
 
-  ALOG_INF(PSTR("BusConfig(type%d,pin0=%d,start%d,len%d,CO%d)"),
+  if (busConfigs[bus_index] != nullptr)
+  {
+    delete busConfigs[bus_index];
+    busConfigs[bus_index] = nullptr;
+  }
+
+  ALOG_INF(
+    PSTR("BusConfig[%d](type%d,pin0=%d,start%d,len%d,CO%d)"),
+    bus_index,
     bus_type,
     pins[0],
     start,
@@ -925,46 +1025,63 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj)
     ColourOrder
   );
 
-
   #ifdef ENABLE_DEVFEATURE_LIGHTING__DOUBLE_BUFFER
 
   DEBUG_LINE_HERE;
+
   busConfigs[bus_index] = new BusConfig(
-    bus_type, 
-    pins, 
-    start, 
+    bus_type,
+    pins,
+    start,
     length,
     ColourOrder,
-    reversed, 
-    0, // skip 
-    RGBW_MODE_MANUAL_ONLY, // autowhite
-    0, // clock
-    true // double buffer
-  );    
+    reversed,
+    skip_pixels,
+    RGBW_MODE_MANUAL_ONLY,
+    0,    // clock
+    true  // double buffer
+  );
 
   #else
 
   DEBUG_LINE_HERE;
+
   busConfigs[bus_index] = new BusConfig(
-    bus_type, 
-    pins, 
-    start, 
+    bus_type,
+    pins,
+    start,
     length,
     ColourOrder,
-    reversed, 
-    skip_pixels, 
+    reversed,
+    skip_pixels,
     RGBW_MODE_MANUAL_ONLY
-  );    
-  
+  );
+
   #endif
 
-  DEBUG_LINE_HERE;
-  tkr_anim->doInitBusses = true; // adds checks
+  tkr_anim->doInitBusses = true;
 
-  ALOG_DBG( PSTR("mInterfaceLight::parseJSONObject__BusConfig Finished"));
+  ALOG_DBG(PSTR("mInterfaceLight::parseJSONObject__BusConfig Finished"));
   DEBUG_LINE_HERE;
-
 }
+
+void mInterfaceLight::ClearBusConfigs(void)
+{
+  for (uint8_t bus_i = 0; bus_i < (WLED_MAX_BUSSES + WLED_MIN_VIRTUAL_BUSSES); bus_i++)
+  {
+    if (busConfigs[bus_i] != nullptr)
+    {
+      delete busConfigs[bus_i];
+      busConfigs[bus_i] = nullptr;
+    }
+  }
+
+  tkr_anim->doInitBusses = true;
+
+  ALOG_INF(PSTR("BusConfig: cleared existing bus config array"));
+}
+
+
 
 
 #include <ctype.h>  // for toupper
@@ -1042,21 +1159,53 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 
+
   /**
-   * @brief Bus needs to be configured first, and probably built immediately from within here so plattes etc next are added properly, otherwise EVERY_LOOP would have to happen
-   **/
-  if(jtok = obj["BusConfig"])
-  { 
-    if(jtok.isArray())
-    {      
-      ALOG_INF(PSTR("BusConfig **************  \t%d"), jtok.getType());
-      JsonParserArray arrobj = jtok;      
-      for(auto value : arrobj) 
+   * BusConfig handling
+   *
+   * Array mode:
+   *   - replacement mode
+   *   - clears all existing busConfigs first
+   *   - array index becomes bus index
+   *
+   * Object mode:
+   *   - single bus update
+   *   - uses optional "Index" / "BusIndex" if provided
+   *   - otherwise appends to first free bus slot
+   */
+  if (jtok = obj["BusConfig"])
+  {
+    if (jtok.isArray())
+    {
+      ALOG_INF(PSTR("BusConfig array detected, replacing existing bus config list"));
+
+      ClearBusConfigs();
+
+      JsonParserArray arrobj = jtok;
+
+      uint8_t bus_i = 0;
+
+      for (auto value : arrobj)
       {
-        parseJSONObject__BusConfig(value.getObject());
+        if (bus_i >= (WLED_MAX_BUSSES + WLED_MIN_VIRTUAL_BUSSES))
+        {
+          ALOG_WRN(
+            PSTR("BusConfig array has more entries than supported, dropping index %d"),
+            bus_i
+          );
+          break;
+        }
+
+        parseJSONObject__BusConfig(value.getObject(), bus_i);
+        bus_i++;
       }
     }
+    else if (jtok.isObject())
+    {
+      parseJSONObject__BusConfig(jtok.getObject(), -1);
+    }
   }
+
 
   /**
    * @brief Master (previously global) shall control the final output, but per segment within animator can exist. 

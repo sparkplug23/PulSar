@@ -1,13 +1,3 @@
-/**
- * @file mTelemetry_ConstructJSON.cpp
- * @author your name (you@domain.com)
- * @brief 
- * @version 0.1
- * @date 2022-08-17
- * 
- * @copyright Copyright (c) 2022
- * 
- */
 #include "mTelemetry.h"
 
 
@@ -18,7 +8,7 @@ uint8_t mTelemetry::ConstructJSON_LWT_Online(uint8_t json_level, bool json_appen
     JBI->Add("LWT", "Online");
     JBI->Add("ResetReason", "TBA");
     #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
-    if(RtcSettings.boot_was_completed_ota_event == 1)
+    if(RtcMemory__RuntimeState.boot_was_completed_ota_event == 1)
     {
       JBI->Add("OTABootReason", "OTAYes");
     }else{
@@ -99,10 +89,10 @@ uint8_t mTelemetry::ConstructJSON_Settings(uint8_t json_level, bool json_appendi
     JBI->Add(PM_SAVESTATE,      0); 
     JBI->Add(PM_SWITCHMODE,     0);
     JBI->Add(PM_BAUDRATE,       (uint16_t)115200);
-    JBI->Add(PM_BUTTONRETAIN,   tkr_set->Settings.flag_system.mqtt_button_retain); 
-    JBI->Add(PM_SWITCHRETAIN,   tkr_set->Settings.flag_system.mqtt_switch_retain); 
-    JBI->Add(PM_SENSORRETAIN,   tkr_set->Settings.flag_system.mqtt_sensor_retain); 
-    JBI->Add(PM_POWERRETAIN,    tkr_set->Settings.flag_system.mqtt_power_retain);
+    JBI->Add(PM_BUTTONRETAIN,   tkr_set->Settings.sysopt_system.bit.mqtt_button_retain); 
+    JBI->Add(PM_SWITCHRETAIN,   tkr_set->Settings.sysopt_system.bit.mqtt_switch_retain); 
+    JBI->Add(PM_SENSORRETAIN,   tkr_set->Settings.sysopt_system.bit.mqtt_sensor_retain); 
+    JBI->Add(PM_POWERRETAIN,    tkr_set->Settings.sysopt_system.bit.mqtt_power_retain);
     JBI->Add(PM_OTAURL,         D_OTA_URL);
     JBI->Add(PM_STARTUPUTC,     "2019-12-10T21:35:44");
     #endif // ENABLE_DEVFEATURE_INCLUDE_INCOMPLETE_TELEMETRY_VALUES
@@ -148,6 +138,10 @@ uint8_t mTelemetry::ConstructJSON_Firmware(uint8_t json_level, bool json_appendi
 
     JBI->Add(PM_SDKVERSION,      ESP.getSdkVersion());    
     JBI->Add(PM_FREESKETCHSPACE,      ESP.getFreeSketchSpace());
+
+    #ifdef DEVICENAME_BUILD_ENVIRONMENT
+    JBI->Add("BuildEnvironment", DEVICENAME_BUILD_ENVIRONMENT);
+    #endif
 
     
     JBI->Array_Start(PM_FASTBOOT_RECOVERY);
@@ -231,15 +225,15 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
 {
    
   IPAddress localip   = WiFi.localIP();
-  IPAddress staticip  = IPAddress(tkr_set->Settings.network.ip_address[0]);
-  IPAddress gatewayip = IPAddress(tkr_set->Settings.network.ip_address[1]);
-  IPAddress subnetip  = IPAddress(tkr_set->Settings.network.ip_address[2]);
-  IPAddress dnsip     = IPAddress(tkr_set->Settings.network.ip_address[3]);
+  IPAddress staticip  = IPAddress(tkr_wifi->config.station.ipv4.ip[0]);
+  IPAddress gatewayip = IPAddress(tkr_wifi->config.station.ipv4.gw[0]);
+  IPAddress subnetip  = IPAddress(tkr_wifi->config.station.ipv4.sn[0]);
+  IPAddress dnsip     = IPAddress(tkr_wifi->config.station.ipv4.dns1[0]);
 
   JBI->Start();
     JBI->Add_FV(PM_IPADDRESS,PSTR("\"%d.%d.%d.%d\""),localip[0],localip[1],localip[2],localip[3]);
     JBI->Add(PM_SSID, WiFi.SSID().c_str());
-    JBI->Add(PM_SSID_NUMBERED, tkr_set->Settings.network.sta_active); // Used to debug switching in grafana
+    JBI->Add(PM_SSID_NUMBERED, tkr_wifi->config.station.active_profile); // Used to debug switching in grafana
     JBI->Add(PM_RSSI, WiFi.RSSI());
     #ifdef ESP32
     JBI->Add("TXPower_dBm", tkr_wifi->WiFiPower_To_dBm(WiFi.getTxPower()) );
@@ -254,14 +248,14 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
     JBI->Add(PM_BSSID, WiFi.BSSIDstr().c_str());
     JBI->Add(PM_MAC, WiFi.macAddress().c_str());
     JBI->Add(PM_WEBSERVER_ENABLED, tkr_set->Settings.webserver);
-    JBI->Add(PM_WIFICONFIG_STATE, tkr_set->Settings.network.sta_config);
+    JBI->Add(PM_WIFICONFIG_STATE, tkr_wifi->config.station.enabled);
 
     JBI->Array_Start(PM_AP_LIST);
     for(int i=0;i<WIFI_MAXIMUM_CONNECTIONS;i++)
     {
-     if(tkr_set->Settings.network.wifi[i].ssid[0] != 0)
+     if(tkr_wifi->config.station.profiles[i].ssid[0] != 0)
      {
-      JBI->Add(tkr_set->Settings.network.wifi[i].ssid); 
+      JBI->Add(tkr_wifi->config.station.profiles[i].ssid); 
      }
     }
     JBI->Array_End();
@@ -513,7 +507,7 @@ uint8_t mTelemetry::ConstructJSON_Reboot(uint8_t json_level, bool json_appending
 
   // OTA boot flag (same behaviour as your LWT)
   #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
-  JBI->Add("OTABootReason", (RtcSettings.boot_was_completed_ota_event == 1) ? "OTAYes" : "OTANo");
+  JBI->Add("OTABootReason", (RtcMemory__RuntimeState.boot_was_completed_ota_event == 1) ? "OTAYes" : "OTANo");
   #else
   JBI->Add("OTABootReason", "Unknown");
   #endif
@@ -572,77 +566,132 @@ uint8_t mTelemetry::ConstructJSON_Debug_Minimal(uint8_t json_level, bool json_ap
 
 }
 
-
-uint8_t mTelemetry::ConstructJSON_Debug_Pins(uint8_t json_level, bool json_appending)
+uint8_t mTelemetry::ConstructJSON_Debug_Pins_GPIO(uint8_t json_level, bool json_appending)
 {
+  char key_buffer[64];
+  char name_buffer[64];
 
-  // return 0;
-
-  char buffer[30];
   JBI->Start();
-  JBI->Add("flag_serial_set_tx_set",tkr_pins-> flag_serial_set_tx_set);
-    // JBI->Object_Start(PM_GPIO);
-    // for(uint16_t i=0;i<sizeof(tkr_set->pin);i++){ 
-    //   if(tkr_pins->PinUsed(i)){ // skip pins not configured
-    //     sprintf_P(buffer, PSTR("TASK_%d"), i);
-    //     JBI->Add(buffer, tkr_pins->GetPin(i));
-    //   }
-    // }
-    // JBI->Object_End();
 
+  /*******************************************************************************************\
+   * GPIO object
+   *
+   * Key   = decoded GPIO function name, e.g. "Modem TX1"
+   * Value = real physical pin number
+  \*******************************************************************************************/
 
-    JBI->Object_Start(PM_GPIO);
-    for(uint16_t i=0;i<ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions);i++)
+  JBI->Object_Start(PM_GPIO);
+
+  for(uint16_t real_pin = 0; real_pin < MAX_GPIO_PIN; real_pin++)
+  {
+    const uint16_t packed_gpio = tkr_pins->pin[real_pin].gpio_function;
+
+    if((packed_gpio == GPIO_NONE) || (packed_gpio == GPIO_USER))
     {
-      if(tkr_pins->PinUsed(tkr_pins->pin_attached_gpio_functions[i]))
-      {
-        sprintf_P(buffer, PSTR("%s"), tkr_pins->GetGPIOFunctionNamebyID(tkr_pins->pin_attached_gpio_functions[i], buffer, sizeof(buffer)));
-        JBI->Add(buffer, tkr_pins->GetPin(tkr_pins->pin_attached_gpio_functions[i],0));
-      }
-    }    
-    JBI->Object_End();
-
-
-    // JBI->Object_Start(D_GPIO "_map");
-    // for(uint16_t i=0;i<MAX_USER_PINS;i++){ 
-    //   sprintf_P(buffer, PSTR("%d"),
-      
-    //   gpio_pin_by_index[i]
-    //   //  i
-    //    );
-    //   JBI->Add(buffer, tkr_pins->GetPin(i));
-    // }
-    // JBI->Object_End();
-
-    // Debug by printing all arrays out
-    JBI->Array_Start("pin_attached_gpio_functions");
-    for(int i=0; i<ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions);i++)
-      JBI->Add(tkr_pins->pin_attached_gpio_functions[i]);
-    JBI->Array_End();
-
-    JBI->Array_Start("user_template_io");
-    for(int i=0; i<ARRAY_SIZE(tkr_set->Settings.user_template.hardware.gp.io);i++)
-      JBI->Add(tkr_set->Settings.user_template.hardware.gp.io[i]);
-    JBI->Array_End();
-
-    JBI->Array_Start("getpin");
-    for(int i=0; i<ARRAY_SIZE(tkr_pins->pin_attached_gpio_functions);i++)
-    {
-      JBI->Add(tkr_pins->GetPin(tkr_pins->pin_attached_gpio_functions[i]));
+      continue;
     }
-    JBI->Array_End();
 
+    tkr_pins->GetGPIOFunctionNamebyID(packed_gpio, name_buffer, sizeof(name_buffer));
 
+    JBI->Add(name_buffer, real_pin);
 
+    // ALOG_INF(
+    //   PSTR("DBG_PIN: real_pin=%u packed=0x%04X dec=%u base=%u idx=%u owner=%u alloc=0x%04X phys=0x%04X name=\"%s\""),
+    //   real_pin,
+    //   packed_gpio,
+    //   packed_gpio,
+    //   UGPIO(packed_gpio),
+    //   packed_gpio & GPIO_INDEX_MASK,
+    //   tkr_pins->pin[real_pin].unique_module_owner_id,
+    //   tkr_pins->pin[real_pin].allocation.data,
+    //   tkr_pins->pin[real_pin].physical.data,
+    //   name_buffer
+    // );
+  }
 
+  JBI->Object_End();
 
   return JBI->End();
-
 }
 
 
-uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level, bool json_appending){ //BuildHealth
-  char buffer[50];
+uint8_t mTelemetry::ConstructJSON_Debug_Pins_Table(uint8_t json_level, bool json_appending)
+{
+  // char key_buffer[64];
+  // char name_buffer[64];
+
+  JBI->Start();
+
+  /*******************************************************************************************\
+   * Detailed pin table
+   *
+   * real_pin      = physical GPIO number
+   * raw           = packed GPIO function
+   * base          = unpacked GPIO function base ID
+   * idx           = packed function instance index
+   * name          = decoded GPIO function name
+   * owner         = current module/core owner ID
+   * allocation    = allocation flags bitfield
+   * physical      = physical capability flags bitfield
+   * allocated     = true only after AllocatePin() accepts ownership
+  \*******************************************************************************************/
+
+  JBI->Array_Start("pin_table");
+
+  for(uint16_t real_pin = 0; real_pin < MAX_GPIO_PIN; real_pin++)
+  {
+    const uint16_t packed_gpio = tkr_pins->pin[real_pin].gpio_function;
+
+    
+    const uint16_t base_id2 = UGPIO(packed_gpio);
+    const uint8_t  func_i2  = packed_gpio & GPIO_INDEX_MASK;
+    ALOG_DBM(PSTR("gpio %d %d"), real_pin, base_id2, func_i2);
+
+
+    if((packed_gpio == GPIO_NONE) || (packed_gpio == GPIO_USER))
+    {
+      continue;
+    }
+
+    const uint16_t base_id = UGPIO(packed_gpio);
+    const uint8_t  func_i  = packed_gpio & GPIO_INDEX_MASK;
+
+    // tkr_pins->GetGPIOFunctionNamebyID(packed_gpio, name_buffer, sizeof(name_buffer));
+
+    JBI->Object_Start();
+      JBI->Add("pin",       real_pin);
+      // JBI->Add("raw",        packed_gpio);
+      JBI->Add("base",       base_id);
+      JBI->Add("i",        func_i);
+      // JBI->Add("name",       name_buffer);
+
+      JBI->Add("m",      tkr_pins->pin[real_pin].unique_module_owner_id);
+
+      JBI->Add("p",   tkr_pins->pin[real_pin].physical.data);
+      JBI->Add("d", tkr_pins->pin[real_pin].allocation.data);
+
+      JBI->Add("a",  tkr_pins->pin[real_pin].allocation.allocated);
+      JBI->Add("l",     tkr_pins->pin[real_pin].allocation.locked);
+      JBI->Add("g",    tkr_pins->pin[real_pin].allocation.grouped);
+      JBI->Add("s",     tkr_pins->pin[real_pin].allocation.shared);
+      JBI->Add("c",   tkr_pins->pin[real_pin].allocation.conflict);
+    JBI->Object_End();
+  }
+
+  JBI->Array_End();
+
+
+  return JBI->End();
+}
+
+
+
+
+
+
+
+uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level, bool json_appending)
+{
   JBI->Start();
 
     JBI->Object_Start("TemplateLoading");
@@ -654,15 +703,24 @@ uint8_t mTelemetry::ConstructJSON_Debug_Template(uint8_t json_level, bool json_a
     JBI->Object_End();
 
     JBI->Add_P(PM_MODULENAME, tkr_pins->AnyModuleName(tkr_set->Settings.module));
-    JBI->Add(PM_MODULEID,   tkr_set->Settings.module);
-    JBI->Add("MyModuleType",tkr_set->runtime.my_module_type);
-    myio cmodule;
-    tkr_pins->TemplateGPIOs(&cmodule);
-    // JBI->Array_AddArray(PM_GPIO, cmodule.io, (uint8_t)sizeof(cmodule.io));
+    JBI->Add(PM_MODULEID,     tkr_set->Settings.module);
+    JBI->Add("MyModuleType",  tkr_set->runtime.my_module_type);
+
+    /*******************************************************************************************\
+     * Resolved runtime GPIO table
+     *
+     * Physical GPIO indexed.
+     * Does not call TemplateGPIOs().
+     * This reports the currently selected GPIO function table after GpioInit().
+    \*******************************************************************************************/
+
     JBI->Array_Start_P(PM_GPIO);
-    for(int i=0;i<ARRAY_SIZE(cmodule.io);i++)
-      JBI->Add(cmodule.io[i]);
+      for(uint8_t real_pin = 0; real_pin < ARRAY_SIZE(tkr_set->runtime.my_module.io); real_pin++)
+      {
+        JBI->Add(tkr_set->runtime.my_module.io[real_pin]);
+      }
     JBI->Array_End();
+
   return JBI->End();
 }
 

@@ -1,4 +1,6 @@
 # pio/build_webpages.py
+
+# run maunally with "npm run build:webpages" or automatically as a PlatformIO pre-build extra_script (configured in platformio.ini).
 #
 # PURPOSE
 #   PlatformIO extra_script (pre-build) to build ALL embedded webpages for PulSar using npm.

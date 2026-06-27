@@ -292,7 +292,7 @@ void mIRtransceiver::MQTTHandler_Init()
 //       iridx = results.decode_type;
 //       if ((iridx < 0) || (iridx > 14)) { iridx = 0; }  // UNKNOWN
 //       char svalue[64];
-//       if (Settings.flag_system.ir_receive_decimal) {
+//       if (Settings.sysopt_system.bit.ir_receive_decimal) {
 //         ulltoa(results.value, svalue, 10);
 //       } else {
 //         snprintf_P(svalue, sizeof(svalue), PSTR("\"%s\""), hvalue);

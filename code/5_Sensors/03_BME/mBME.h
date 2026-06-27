@@ -117,8 +117,6 @@ class mBME :
      ************************************************************************************************/
             
     static constexpr const char* kBmpTypes = "BMP180|BMP280|BME280|BME680";
-
-    void ShowSensor_AddLog();
         
     typedef struct {
       

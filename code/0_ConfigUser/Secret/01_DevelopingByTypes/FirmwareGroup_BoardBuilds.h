@@ -22,9 +22,13 @@
 
 //--------------------------------[Enable Device]-------------------------------------
 
+// Adding just the status led code into each is probably a good tester, eg blinking leds on wifi start up
+
 
 // ======================== ESP8266 ========================
 // #define DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU
+// #define DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU_NO_FILESYSTEM_1M
+// #define DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU_WITH_FILESYSTEM_1M
 // ======================== ESP8285 ========================
 // #define DEVICE_TESTGROUP__BOARDBUILDS__ESP8285__IFAN03
 // ======================== ESP32 ===========================
@@ -62,7 +66,7 @@
  *                      |D0  G16      ADC0  A0| 
  *                       _____________________
  **/
-#ifdef DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU
+#ifdef DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU_NO_FILESYSTEM_1M
   #ifndef DEVICENAME_CTR
   #define DEVICENAME_CTR          "tg_boardbuild__esp8266_nodemcu"
   #endif
@@ -87,13 +91,20 @@
   ///////////////////////////////////////////// System Logs
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
 
+  // #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
+  #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+
+  // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
+  #define ENABLE_DEBUG_LINE_HERE3
+
   /***********************************
   * SECTION: System Configs
   ************************************/    
 
   #define SETTINGS_HOLDER 1239
 
-  #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
+  // #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
 
 
   // #define ENABLE_ADVANCED_DEBUGGING
@@ -103,7 +114,7 @@
   // #define ENABLE_DEBUG_FUNCTION_NAMES
   // #define ENABLE_DEBUG_LINE_HERE
 
-  #define ENABLE_FEATURE_BUILD__11JAN25_WIFI_AND_WEBUI
+  // #define ENABLE_FEATURE_BUILD__11JAN25_WIFI_AND_WEBUI
 
 
   // #define DEBUG_FASTBOOT
@@ -128,7 +139,7 @@
   /***********************************
   * SECTION: Drivers Configs
   ************************************/  
-  #define USE_MODULE_DRIVERS_LEDS // 3 blink - no network, 2 blink = network, no mqtt
+  // #define USE_MODULE_DRIVERS_LEDS // 3 blink - no network, 2 blink = network, no mqtt
     // #define ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN 2
 
   /***********************************
@@ -161,8 +172,320 @@
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"D3\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"D4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"D3\":\"" D_GPIO_KEY_INV_CTR "1" "\","
+      "\"D4\":\"" D_GPIO_LED_CTR "1" "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
+  * SECTION: TEMPLATE: Names
+  ************************************/    
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+  "}";
+
+#endif
+
+
+
+/**
+ * @brief 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *          BIB (Built-in Button) → On some boards, pin is used for onboard button
+ *                               *I ~PWM 'NC    
+ *                       _____________________
+ *                      |3V3     |USB|     VIN|
+ *                      |GND               GND| 
+ *                      |TX  G1, fL        RST| 
+ *                      |RX  G3             EN| 
+ *                      |D8  G15,fL        3V3|
+ *                      |D7  G13           GND| 
+ *                      |D6  G12           CLK| 
+ *                      |D5  G14           SDO| 
+ *                      |GND               CMD| 
+ *                      |3V3               SD1| 
+ *                      |D4  G2,fL,BIL     SD2| 
+ *                      |D3  G0,fL,BIB     SD3| 
+ *                      |D2  G4            RSV| 
+ *                      |D1  G5            RSV| 
+ *                      |D0  G16      ADC0  A0| 
+ *                       _____________________
+ **/
+#ifdef DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU_WITH_FILESYSTEM_1M
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "tg_boardbuild__esp8266_nodemcu"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #ifndef DEVICENAME_ROOMHINT_CTR
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #endif
+
+
+  // #define PULSAR_HAS_FILESYSTEM 1
+  // #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+
+  /***********************************
+  * SECTION: System Debug Options
+  ************************************/    
+  ///////////////////////////////////////////// Enable Logs
+  // #define DISABLE_SERIAL
+
+  #define ESP8266
+
+  ///////////////////////////////////////////// System Logs
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+
+  // #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
+  #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+
+  // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
+  #define ENABLE_DEBUG_LINE_HERE3
+
+  /***********************************
+  * SECTION: System Configs
+  ************************************/    
+
+  #define SETTINGS_HOLDER 1239
+
+  // #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
+
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_LINE_HERE
+
+  // #define ENABLE_FEATURE_BUILD__11JAN25_WIFI_AND_WEBUI
+
+
+  // #define DEBUG_FASTBOOT
+
+  // #define ENABLE_DEVFEATURE_WIFI__FORCE_SOFTAP_MODE_BY_BLOCKING_SSIDS
+
+
+  #define   D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/m/serverrelays"
+      
+  /***********************************
+  * SECTION: Enable Sections
+  ************************************/  
+
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
+  // #define ENABLE_TEMPLATE_SECTION__DRIVERS__LEDS // Status LED
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/    
+
+
+  /***********************************
+  * SECTION: Drivers Configs
+  ************************************/  
+  // #define USE_MODULE_DRIVERS_LEDS // 3 blink - no network, 2 blink = network, no mqtt
+    // #define ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN 2
+
+  /***********************************
+  * SECTION: Sensor Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Lighting Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Energy Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Controller Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Module/GPIO Configs
+  ************************************/  
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      "\"D3\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"D4\":\"" D_GPIO_LED1_CTR  "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
+  * SECTION: TEMPLATE: Names
+  ************************************/    
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+  "}";
+
+#endif
+
+
+
+
+/**
+ * @brief 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *          BIB (Built-in Button) → On some boards, pin is used for onboard button
+ *                               *I ~PWM 'NC    
+ *                       _____________________
+ *                      |3V3     |USB|     VIN|
+ *                      |GND               GND| 
+ *                      |TX  G1, fL        RST| 
+ *                      |RX  G3             EN| 
+ *                      |D8  G15,fL        3V3|
+ *                      |D7  G13           GND| 
+ *                      |D6  G12           CLK| 
+ *                      |D5  G14           SDO| 
+ *                      |GND               CMD| 
+ *                      |3V3               SD1| 
+ *                      |D4  G2,fL,BIL     SD2| 
+ *                      |D3  G0,fL,BIB     SD3| 
+ *                      |D2  G4            RSV| 
+ *                      |D1  G5            RSV| 
+ *                      |D0  G16      ADC0  A0| 
+ *                       _____________________
+ **/
+#ifdef DEVICE_TESTGROUP__BOARDBUILDS__ESP8266__NODEMCU_WITH_FILESYSTEM_4M
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "tg_boardbuild__esp8266_nodemcu"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #ifndef DEVICENAME_ROOMHINT_CTR
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #endif
+   
+  /***********************************
+  * SECTION: System Debug Options
+  ************************************/    
+  ///////////////////////////////////////////// Enable Logs
+  // #define DISABLE_SERIAL
+
+  #define ESP8266
+
+  ///////////////////////////////////////////// System Logs
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+
+  // #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
+  #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+
+  // #define ENABLE_DEBUG_LINE_HERE
+  // #define ENABLE_DEBUG_LINE_HERE2
+  #define ENABLE_DEBUG_LINE_HERE3
+
+  /***********************************
+  * SECTION: System Configs
+  ************************************/    
+
+  #define SETTINGS_HOLDER 1239
+
+  // #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
+
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_DEBUG_LINE_HERE
+
+  // #define ENABLE_FEATURE_BUILD__11JAN25_WIFI_AND_WEBUI
+
+
+  // #define DEBUG_FASTBOOT
+
+  // #define ENABLE_DEVFEATURE_WIFI__FORCE_SOFTAP_MODE_BY_BLOCKING_SSIDS
+
+
+  #define   D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/m/serverrelays"
+      
+  /***********************************
+  * SECTION: Enable Sections
+  ************************************/  
+
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
+  // #define ENABLE_TEMPLATE_SECTION__DRIVERS__LEDS // Status LED
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/    
+
+
+  /***********************************
+  * SECTION: Drivers Configs
+  ************************************/  
+  // #define USE_MODULE_DRIVERS_LEDS // 3 blink - no network, 2 blink = network, no mqtt
+    // #define ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_ON_PIN 2
+
+  /***********************************
+  * SECTION: Sensor Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Lighting Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Energy Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Controller Configs
+  ************************************/  
+
+  /***********************************
+  * SECTION: Module/GPIO Configs
+  ************************************/  
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      "\"D3\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"D4\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -226,9 +549,8 @@
     #define MQTT_PORT     1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define ESP8266
 
@@ -323,7 +645,6 @@
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -420,7 +741,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"
     #ifdef USE_MODULE_SENSORS_BUTTONS
-    "\"18\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+    "\"18\":\"" D_GPIO_KEY1_INV_CTR  "\","
     #endif
   "},"
   "\"" D_BASE     "\":\"" D__MODULE_TEMPLATE__CAMERA_FREENOVE_WROOVER__CTR "\","
@@ -487,7 +808,6 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -737,53 +1057,53 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
-   //  "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-   //  "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+   //  "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+   //  "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
     // #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-    // "\"8\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    // "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\""    
+    // "\"8\":\"" D_GPIO_I2C_SDA_CTR   "\","
+    // "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\""    
     // #endif
     #ifdef USE_MODULE_SENSORS_PIR
-   //  "\"23\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+   //  "\"23\":\""  D_GPIO_PIR_1_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-    "\"33\":\""  D_GPIO_FUNCTION__TOF_VL53L0X_XSHUT1__CTR "\","
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
-   //  "\"26\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+    "\"33\":\""  D_GPIO__TOF_VL53L0X_XSHUT1__CTR "\","
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+   //  "\"26\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
-     // "\"26\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+     // "\"26\":\""  D_GPIO__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS_SR04
-    "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-    "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+    "\"4\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+    "\"2\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
     #endif 
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-    "\"35\":\""  D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
+    "\"35\":\""  D_GPIO_PIR_2_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-    "\"34\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+    "\"34\":\""  D_GPIO_PIR_1_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-    "\"5\":\""  D_GPIO_FUNCTION_PIR_3_INV_CTR "\","
+    "\"5\":\""  D_GPIO_PIR_3_INV_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-    "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-    "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
+    "\"17\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+    "\"16\":\""  D_GPIO__HLK_LD2410_RX__CTR "\","
     #endif
    //  #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-   //  "\"27\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT__CTR "\","
+   //  "\"27\":\""  D_GPIO__TOF_VL53L1X_XSHUT__CTR "\","
    //  #endif
     #ifdef USE_MODULE_SENSORS_BUTTONS
-   //  "\"18\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-   //  "\"19\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-   //  "\"33\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+   //  "\"18\":\"" D_GPIO_KEY1_INV_CTR  "\","
+   //  "\"19\":\"" D_GPIO_KEY2_INV_CTR  "\","
+   //  "\"33\":\"" D_GPIO_KEY3_INV_CTR  "\","
     #endif
     
-   //  "\"4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
-   //  "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\","
-    // "\"8\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+   //  "\"4\":\"" D_GPIO_LED1_CTR  "\","
+   //  "\"5\":\"" D_GPIO_LED2_CTR  "\","
+    // "\"8\":\"" D_GPIO_LED1_CTR  "\""
   "},"
   // "\"" D_BASE     "\":\"" D__MODULE_TEMPLATE__CAMERA_FREENOVE_WROOVER__CTR "\","
   "\"" D_BASE     "\":\"" D__MODULE_TEMPLATE__CAMERA_XIAO_ESP32S3_SENSE__CTR "\","
@@ -912,7 +1232,6 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -1164,53 +1483,53 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
-   //  "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-   //  "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+   //  "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+   //  "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
     // #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-    // "\"8\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    // "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\""    
+    // "\"8\":\"" D_GPIO_I2C_SDA_CTR   "\","
+    // "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\""    
     // #endif
     #ifdef USE_MODULE_SENSORS_PIR
-   //  "\"23\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+   //  "\"23\":\""  D_GPIO_PIR_1_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-    "\"33\":\""  D_GPIO_FUNCTION__TOF_VL53L0X_XSHUT1__CTR "\","
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
-   //  "\"26\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+    "\"33\":\""  D_GPIO__TOF_VL53L0X_XSHUT1__CTR "\","
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+   //  "\"26\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
-     // "\"26\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+     // "\"26\":\""  D_GPIO__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS_SR04
-    "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-    "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+    "\"4\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+    "\"2\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
     #endif 
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-    "\"35\":\""  D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
+    "\"35\":\""  D_GPIO_PIR_2_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-    "\"34\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+    "\"34\":\""  D_GPIO_PIR_1_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-    "\"5\":\""  D_GPIO_FUNCTION_PIR_3_INV_CTR "\","
+    "\"5\":\""  D_GPIO_PIR_3_INV_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-    "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-    "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
+    "\"17\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+    "\"16\":\""  D_GPIO__HLK_LD2410_RX__CTR "\","
     #endif
    //  #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-   //  "\"27\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT__CTR "\","
+   //  "\"27\":\""  D_GPIO__TOF_VL53L1X_XSHUT__CTR "\","
    //  #endif
     #ifdef USE_MODULE_SENSORS_BUTTONS
-   //  "\"18\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-   //  "\"19\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-   //  "\"33\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+   //  "\"18\":\"" D_GPIO_KEY1_INV_CTR  "\","
+   //  "\"19\":\"" D_GPIO_KEY2_INV_CTR  "\","
+   //  "\"33\":\"" D_GPIO_KEY3_INV_CTR  "\","
     #endif
     
-   //  "\"4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
-   //  "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\","
-    // "\"8\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+   //  "\"4\":\"" D_GPIO_LED1_CTR  "\","
+   //  "\"5\":\"" D_GPIO_LED2_CTR  "\","
+    // "\"8\":\"" D_GPIO_LED1_CTR  "\""
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

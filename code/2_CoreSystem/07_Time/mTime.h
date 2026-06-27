@@ -49,6 +49,17 @@ typedef struct weektime{ // used for basic time info only for week period - RENA
   uint16_t millis; // millis into 1 second [0-1000]
 }weektime_t;
 
+typedef union {
+  uint16_t data;
+  struct {
+    uint16_t hemis : 1;                    // bit 0        = 0=Northern, 1=Southern Hemisphere (=Opposite DST/STD)
+    uint16_t week : 3;                     // bits 1 - 3   = 0=Last week of the month, 1=First, 2=Second, 3=Third, 4=Fourth
+    uint16_t month : 4;                    // bits 4 - 7   = 1=Jan, 2=Feb, ... 12=Dec
+    uint16_t dow : 3;                      // bits 8 - 10  = day of week, 1=Sun, 2=Mon, ... 7=Sat
+    uint16_t hour : 5;                     // bits 11 - 15 = 0-23
+  };
+} TimeRule;
+
 
 typedef struct TIMEREACHED_HANDLER{
   uint32_t millis = 0;
@@ -161,6 +172,10 @@ class mTime :
     bool ntp_force_sync;                      // Force NTP sync
     uint16_t lastday_run = 0; // Used to keep the last midnight time, this stops multiple midnight runs at the same midnight
     
+    TimeRule      tflag[2];                  // 2E2
+  
+    bool time_append_timezone = true;
+
 
     uint32_t UtcTime(void);
     uint32_t LocalTime(void);
@@ -205,6 +220,8 @@ class mTime :
     static bool TimeReachedNonReset(TIMEREACHED_HANDLER* tSaved, uint32_t ElapsedTime);
     static uint32_t MillisElapsed(uint32_t* tSaved);
     static uint32_t MillisElapsed(uint32_t tSaved);
+
+    bool UptimeValid(){ return UpTime() > 1; }
 
     String GetTimeStr(uint32_t time, bool include_day_of_week = false);
     
@@ -304,6 +321,17 @@ class mTime :
 
 
 
+
+    int32_t DateTime_DaysFromCivil(int32_t year, uint8_t month, uint8_t day);
+
+    uint32_t DateTime_UTC_ToEpochSeconds(
+      uint16_t year,
+      uint8_t month,
+      uint8_t day,
+      uint8_t hour,
+      uint8_t minute,
+      uint8_t second
+    );
 
     uint8_t day(uint32_t time);
     uint8_t month(uint32_t time);
