@@ -102,7 +102,7 @@ void mBuzzerBasic::BuzzerSet(uint32_t state) {
     state = !state;
   }
 
-  if (tkr_set->Settings.flag_drivers.buzzer_freq_mode) {     // SetOption111 - Enable frequency output mode for buzzer
+  if (tkr_set->Settings.sysopt_drivers.bit.buzzer_freq_mode) {     // SetOption111 - Enable frequency output mode for buzzer
     static uint8_t last_state = 0;
     if (last_state != state) {
       // Set 50% duty cycle for frequency output
@@ -149,7 +149,7 @@ void mBuzzerBasic::BuzzerBeep(uint32_t count, uint32_t on, uint32_t off, uint32_
   Buzzer.count = count * 2;                  // Start buzzer
 
   ALOG_DBG(PSTR("BUZ: Count %d(%d), Time %d/%d, Tune 0x%08X(0x%08X), Size %d, Mode %d"),
-    count, Buzzer.count, on, off, tune, Buzzer.tune, Buzzer.tune_size, tkr_set->Settings.flag_drivers.buzzer_freq_mode);
+    count, Buzzer.count, on, off, tune, Buzzer.tune, Buzzer.tune_size, tkr_set->Settings.sysopt_drivers.bit.buzzer_freq_mode);
 
   Buzzer.enable = (Buzzer.count > 0);
   if (Buzzer.enable) {
@@ -179,7 +179,7 @@ void mBuzzerBasic::BuzzerBeep(uint32_t count) {
 
 
 void mBuzzerBasic::BuzzerEnabledBeep(uint32_t count, uint32_t duration) {
-  // if (tkr_set->Settings.flag_drivers.buzzer_enable) {        // SetOption67 - Enable buzzer when available
+  // if (tkr_set->Settings.sysopt_drivers.bit.buzzer_enable) {        // SetOption67 - Enable buzzer when available
     BuzzerBeep(count, duration, 1, 0, 0);
   // }
 }
@@ -351,7 +351,7 @@ uint8_t mBuzzerBasic::ConstructJSON_State(uint8_t json_level, bool json_appendin
 
   JBI->Start();
 
-    JBI->Object_Start(D_RFRECEIVED);
+    JBI->Object_Start("D_RFRECEIVED");
     
     JBI->Object_End();
   

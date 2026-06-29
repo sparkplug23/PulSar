@@ -85,10 +85,9 @@ class mDB18x20 :
       
     void SetDeviceNameID_WithAddress(const char* device_name, uint8_t device_name_index, uint8_t* array_val, uint8_t array_len);
     void Scan_ReportAsJsonBuilder();
-    void Ds18x20Init(void);
-    void Ds18x20Search(void);
-    void Ds18x20Convert(void);
-    bool Ds18x20Read(uint8_t sensor, float &t);
+    void Search(void);
+    void Convert(void);
+    bool Read(uint8_t sensor, float &t);
     void EverySecond(void);
 
     /************************************************************************************************
@@ -109,6 +108,7 @@ class mDB18x20 :
       value->sensor_id = sensor_vector[index].device_name_index;
       value->resolution = sensor_vector[index].resolution;
     };
+
     /************************************************************************************************
      * SECTION: ConstructJSON
      ************************************************************************************************/

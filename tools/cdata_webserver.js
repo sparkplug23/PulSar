@@ -1,6 +1,9 @@
 /**
  * Writes compressed C arrays of data files (web interface)
  * How to use it?
+ * 
+ * https://nodejs.org/en/download
+ * 
  *
  * 1) Install Node 11+ and npm
  * 2) npm install
@@ -374,11 +377,20 @@ writeChunks(
           )
     },
     {
+      file: "update_web.htm",
+      name: "PAGE_welcome_web2",
+      method: "gzip",
+      filter: "html-minify",
+    },
+
+
+    {
       file: "welcome.htm",
       name: "PAGE_welcome_web",
       method: "gzip",
       filter: "html-minify",
     },
+    
 //     {
 //       file: "liveview.htm",
 //       name: "PAGE_liveview",
@@ -441,12 +453,12 @@ writeChunks(
 writeChunks(
   source_path,
   [
-    // {
-    //   file: "Consoles/console_polling_esp8266.htm",
-    //   name: "PAGE_console_polling",
-    //   method: "gzip",
-    //   filter: "html-minify-ui",
-    // }
+    {
+      file: "Consoles/console_polling_esp8266.htm",
+      name: "PAGE_console_polling",
+      method: "gzip",
+      filter: "html-minify-ui",
+    }
   ],
   destination_path + "pages_console_esp8266.h"
 );
@@ -463,6 +475,37 @@ writeChunks(
   ],
   destination_path + "pages_url_debugs.h"
 );
+
+
+
+writeChunks(
+  source_path,
+  [
+    {
+      file: "sd_editor.htm",
+      name: "PAGE_sd_editor",
+      method: "gzip",
+      filter: "html-minify-ui",
+    }
+  ],
+  destination_path + "html_sdcard_editor.h"
+);
+
+/*** Generate only once when change is needed. Then copy and insert into library */
+writeChunks(
+  source_path,
+  [
+    {
+      file: "edit_fs_darkmode.htm",
+      name: "PAGE_sedit_fs_darkmode",
+      method: "gzip",
+      filter: "html-minify-ui",
+    }
+  ],
+  destination_path + "html_edit_fs_darkmode.h"
+);
+
+
 
 
 writeChunks(

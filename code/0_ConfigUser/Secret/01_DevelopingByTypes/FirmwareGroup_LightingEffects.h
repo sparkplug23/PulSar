@@ -100,7 +100,6 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -121,37 +120,8 @@
    * SECTION: System Configs
   ************************************/     
 
- 
-
-  
-
-  
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  
-
 
   /***********************************
    * SECTION: Network Configs
@@ -253,7 +223,6 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -281,30 +250,6 @@
   
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  
-
 
   /***********************************
    * SECTION: Network Configs
@@ -1604,6 +1549,10 @@
     
   #define MAX_NUM_SEGMENTS 16
 
+  // #define LIGHTING_TEMOPLATES_SPLIT
+
+  #ifdef LIGHTING_TEMOPLATES_SPLIT
+
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -1807,6 +1756,210 @@
     }
   }
   )=====";
+
+  #else
+
+  #define ENABLE_DEVFEATURE_LIGHTING__LIGHTING_TEMPLATE_NO_LONGER_FROM_SUBMODULE
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":256
+      }
+    ],
+    "Segment0": {
+      "PR": [0,16],
+      "Pal":"Rainbow 16",
+      "EF": {
+        "FX":"Static",
+        "RateMs": 1000
+      }
+    },
+    "Segment1": {
+      "PR": [16,32],
+      "Pal":"Snowy 02",
+      "EF": {
+        "FX":"Static",
+        "FX":1,
+        "RateMs": 1000
+      }
+    },
+    "Segment2": {
+      "PR": [32,48],
+      "Pal":"Snowy 02",
+      "EF": {
+        "FX":"Sweep Random",
+        "SX":229,
+        "RateMs": 25
+      }
+    },
+    "Segment3": {
+      "PR": [48,64],
+      "Pal":"RGPBO",
+      "EF": {
+        "FX":"Fireworks 1D",
+        "SX":229,
+        "IX":127,
+        "FX":1,
+        "RateMs": 25
+      }
+    },
+    "Segment4": {
+      "PR": [64,80],
+      "Pal":"RGPBO",
+      "SegColour1": {
+          "Hue": 0,
+          "Sat":0,
+          "BrightnessRGB":5
+        },
+      "EF": {
+        "FX":"Theater",
+        "SX":229,
+        "IX":127,
+        "RateMs": 25
+      }
+    },
+    "Segment5": {
+      "PR": [80,96],
+      "Pal":"RGPBO",
+      "EF": {
+        "FX":"Dissolve Random",
+        "SX":229,
+        "IX":127,
+        "FX":1,
+        "RateMs": 25
+      }
+    },
+    "Segment6": {
+      "PR": [96,112],
+      "Pal":"RGPBO",
+      "EF": {
+        "FX":"Static",
+        "SX":229,
+        "IX":127,
+        "RateMs": 100
+      }
+    },
+    "Segment7": {
+      "PR": [112,128],
+      "Pal":"Blue and White",
+      "EF": {
+        "FX":"Static",
+        "SX":229,
+        "IX":127,
+        "FX":1,
+        "RateMs": 100
+      }
+    },
+    "Segment8": {
+      "PR": [128,144],
+      "Pal":"Hot 16",
+      "EF": {
+        "FX":"Sine",
+        "SX":229,
+        "IX":127,
+        "RateMs": 100
+      },
+      "SegColour1": {
+        "Hue": 0,
+        "Sat":0,
+        "BrightnessRGB":0
+      }
+    },
+    "Segment9": {
+      "PR": [144,160],
+      "Pal":"Rainbow 16",
+      "EF": {
+        "FX":"Meteor Smooth",
+        "SX":229,
+        "IX":127,
+        "FX":1,
+        "RateMs": 100
+      }
+    },
+    "Segment10": {
+      "PR": [160,176],
+      "Pal":"Turbo 16",
+      "EF": {
+        "FX":"Bouncing Balls",
+        "SX":127,
+        "IX":127,
+        "RateMs": 100
+      }
+    },
+    "Segment11": {
+      "PR": [176,192],
+      "Pal":"Sunset",
+      "EF": {
+        "FX":"Hour Progress",
+        "SX":229,
+        "IX":127,
+        "FX":1,
+        "RateMs": 1000
+      }
+    },
+    "Segment12": {
+      "PR": [192,208],
+      "Pal":"Snowy 02",
+      "EF": {
+        "FX":"Twinkle Palette Two on One",
+        "SX":255,
+        "IX":30,
+        "RateMs": 25,
+        "Param0":0
+      },
+      "SegColour0": {
+        "Hue": 0,
+        "Sat":0,
+        "BrightnessRGB":3
+      }
+    },
+    "Segment13": {
+      "PR": [208,224],
+      "Pal":"Snowy 02",
+      "EF": {
+        "FX":"Stepping Palette",
+        "SX":229,
+        "IX":127,
+        "FX":1,
+        "RateMs": 1000
+      }
+    },
+    "Segment14": {
+      "PR": [224,240],
+      "Pal":"Snowy 02",
+      "EF": {
+        "FX":"Wipe Random",
+        "SX":229,
+        "IX":127,
+        "RateMs": 100
+      }
+    },
+    "Segment15": {
+      "PR": [240,256],
+      "Pal":"Random 01",
+      "EF": {
+        "FX":"Randomise Gradient",
+        "SX":229,
+        "IX":20,
+        "FX":1,
+        "RateMs": 1000
+      }
+    },
+    "BrightnessRGB": 8,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+  #endif
 
 #endif
 
@@ -2021,9 +2174,8 @@
 #ifdef DEVICE_TESTGROUP__LIGHTING_MULTIPIN
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
 
   // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
@@ -2043,7 +2195,7 @@
   // #define DISABLE_NETWORK
   // #define DISABLE_NETWORK_WIFI
   #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -2051,19 +2203,13 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-
-  // #undef ESP32
-  // #define ESP8266
-
   
 
   #define ENABLE_DEBUG_MANUAL_DELAYS
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // 
+  // 
 
     
     /********* Group: Needed to build ************************/
@@ -2150,169 +2296,17 @@
     #define MQTT_PORT     1883
 
 
-//   #define USE_SERIAL_ALTERNATE_TX
-//   
-//   // #define USE_MODULE_CORE_PWM
-
-
-  
-
-//     
-
-
-// // Step A: Replicate WLED to function as it was designed on the webui part. Only when this works for effect/colour controls etc, slowly change it to add more of my original stuff. 
-// // Gain complete understanding/implemenation as is, only then start changes. 
-// // WebUI of WLED style should become its own webserver option (not just the debug version).
-
-//   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-//   
-//   
-
-//   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
-//   // 
-
-//   // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_TESTER
-//   // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
-
-//   
-
-
-//   // #define ENABLE_ADVANCED_DEBUGGING
-//   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-//   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-//   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-//   // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-
-//   //mqtt debug
-//   #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
-//   // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
-
-//   // #define DISABLE_NETWORK
-//   // #define DISABLE_NETWORK_WIFI
-//   #define USE_MODULE_NETWORK_WIFI
-//   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-
-//   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
-
-//   #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
-
-//   // #define DISABLE_SERIAL
-//   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
-
-//   // #undef ESP32
-//   // #define ESP8266
-
-//   
-
-//   #define ENABLE_DEBUG_MANUAL_DELAYS
-
-//   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-//     
-//     /********* Group: Needed to build ************************/
-//     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-//     /********* Group: Ready for full integration ************************/
-//     // 
-//     /********* Group: Testing ************************/
-//     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-//     
-//     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-//     
-//     
-//     #define DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
-//     #define ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
-//     
-//     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-//     #define ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
-//     // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-//     // 
-//     /********* Group: Debug options only ************************/
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_ARRAY
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_OBJECT_INDEXED_LIST
-//     #define ENABLE_DEVFEATURE_PALETTE_GET_NAMES_FROM_PALETTE_WHEN_STATIC
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
-//     #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-//     #define ENABLE_DEBUG_SERIAL
-
-//     #define ENABLE_DEVFEATURE_LIGHT__WEBUI_APPEND_EFFECT_CONFIG_TO_JSON_RESPONSE
-
-//     // Needs significant change to merge WLED and HACS
-//     
-//     // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
-
-//     #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
-
-//     #define ENABLE_DEVFEATURE_LIGHT__BRIGHTNESS_GET_IN_SEGMENTS_INCLUDES_BOTH_SEGMENT_AND_GLOBAL
-
-//     #define ENABLE_DEVFEATURE_LIGHT__WLED_WEBUI_SEND_MY_PALETTE_COLOUR_BARS
-
-//     // #define ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-
-//     // #define ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
-//     // #define ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
-    
-//     #define ENABLE_DEBUG_LINE_HERE
-//     #define ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
-
-//     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
-//     // #
-
-//     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
-
-
-//     
-
-
-
-//     // #define ENABLE_DEVFEATURE_LIGHT__PERMIT_PIXEL_INDEXING_GREATER_THAN_FIRST_ON_PWM_CHANNELS_FOR_MULTIPLE_SEGMENTS
-
-
-
-//     // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-//     // #define ENABLE_LOG_LEVEL_DEBUG
-//     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-//     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-//     
-    
-
-//     // #define ENABLE_DEVFEATURE_LIGHT__PRELOAD_BUSCONFIG_FROM_TEMPLATE_AS_TEMPORARY_MEASURE
-//     
-
-
-
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_FUNCTION "\":{" 
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_E_CTR "\":4"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_E_CTR "\":4"  // PWM RGBCCT
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2465,11 +2459,11 @@
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_FUNCTION "\":{" 
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_E_CTR "\":4"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_E_CTR "\":4"  // PWM RGBCCT
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2692,7 +2686,7 @@
   // #define DISABLE_NETWORK
   // #define DISABLE_NETWORK_WIFI
   #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -2700,7 +2694,6 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #undef ESP32
   // #define ESP8266
@@ -2800,9 +2793,8 @@
 // // WebUI of WLED style should become its own webserver option (not just the debug version).
 
 //   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+//   
+//   
 
 //   
 //   
@@ -2831,7 +2823,7 @@
 //   // #define DISABLE_NETWORK
 //   // #define DISABLE_NETWORK_WIFI
 //   #define USE_MODULE_NETWORK_WIFI
-//   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+//   
 
 //   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -2839,7 +2831,6 @@
 
 //   // #define DISABLE_SERIAL
 //   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
 
 //   // #undef ESP32
 //   // #define ESP8266
@@ -2849,9 +2840,8 @@
 //   #define ENABLE_DEBUG_MANUAL_DELAYS
 
 //   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+//   // 
+//   // 
 
 //     /********* Group: Needed to build ************************/
 //     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
@@ -2944,11 +2934,11 @@
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_FUNCTION "\":{" 
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_E_CTR "\":4"    // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_E_CTR "\":4"    // PWM RGBCCT
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -3076,7 +3066,7 @@
   // #define DISABLE_NETWORK
   // #define DISABLE_NETWORK_WIFI
   #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -3084,7 +3074,6 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #undef ESP32
   // #define ESP8266
@@ -3190,9 +3179,8 @@
 // // WebUI of WLED style should become its own webserver option (not just the debug version).
 
 //   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+//   
+//   
 
 //   
 //   
@@ -3220,7 +3208,7 @@
 //   // #define DISABLE_NETWORK
 //   // #define DISABLE_NETWORK_WIFI
 //   #define USE_MODULE_NETWORK_WIFI
-//   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+//   
 
 //   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -3228,7 +3216,6 @@
 
 //   // #define DISABLE_SERIAL
 //   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
 
 //   // #undef ESP32
 //   // #define ESP8266
@@ -3238,9 +3225,8 @@
 //   #define ENABLE_DEBUG_MANUAL_DELAYS
 
 //   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+//   // 
+//   // 
 
 //     /********* Group: Needed to build ************************/
 //     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
@@ -3332,11 +3318,11 @@
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_FUNCTION "\":{" 
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_E_CTR "\":4"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_E_CTR "\":4"  // PWM RGBCCT
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -3557,7 +3543,7 @@
   // #define DISABLE_NETWORK
   // #define DISABLE_NETWORK_WIFI
   #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -3565,7 +3551,6 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #undef ESP32
   // #define ESP8266
@@ -3638,180 +3623,6 @@
     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
 
 
-    // #define ENABLE_DEVFEATURE_LIGHT__PERMIT_PIXEL_INDEXING_GREATER_THAN_FIRST_ON_PWM_CHANNELS_FOR_MULTIPLE_SEGMENTS
-
-
-
-
-    // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-    // #define ENABLE_LOG_LEVEL_DEBUG
-    // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-    // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-    
-    
-
-    // #define ENABLE_DEVFEATURE_LIGHT__PRELOAD_BUSCONFIG_FROM_TEMPLATE_AS_TEMPORARY_MEASURE
-    
-
-
-
-//   #define USE_SERIAL_ALTERNATE_TX
-//   
-//   // #define USE_MODULE_CORE_PWM
-
-
-  
-
-//     
-
-
-// // Step A: Replicate WLED to function as it was designed on the webui part. Only when this works for effect/colour controls etc, slowly change it to add more of my original stuff. 
-// // Gain complete understanding/implemenation as is, only then start changes. 
-// // WebUI of WLED style should become its own webserver option (not just the debug version).
-
-//   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-//   
-//   
-
-//   // #define ESP32
-//   // #undef ESP8266
-
-//   // #define ENABLE_DEVFEATURE_SYSTEM__UNSORTED_CODE
-
-//   // #define ENABLE_DEVFEATURE_MQTT__TRYING_TO_USE_ADDHANDLER_INSIDE_MQTT_CAPTURED
-//   // 
-
-//   // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_TESTER
-//   // #define USE_MODULE_CONTROLLER_CUSTOM__WEBUI_WLED_DEVELOPER
-
-//   
-
-
-//   // #define ENABLE_ADVANCED_DEBUGGING
-//   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-//   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-//   // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-//   // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-
-//   //mqtt debug
-//   #define ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS 2
-//   // #define ENABLE_DEVFEATURE__MQTT_SHOW_SENDING_LIMIT_DEBUT_MESSAGES
-
-//   // #define DISABLE_NETWORK
-//   // #define DISABLE_NETWORK_WIFI
-//   #define USE_MODULE_NETWORK_WIFI
-//   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
-
-//   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
-
-//   #define ENABLE_DEVFEATURE_LIGHT__CREATE_VECTOR_RGBCCT_IN_HEADER_ONLY_NEVER_CLEAR
-
-//   // #define DISABLE_SERIAL
-//   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
-
-//   // #undef ESP32
-//   // #define ESP8266
-
-//   
-
-//   #define ENABLE_DEBUG_MANUAL_DELAYS
-
-//   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-//     
-//     /********* Group: Needed to build ************************/
-//     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-//     /********* Group: Ready for full integration ************************/
-//     // 
-//     /********* Group: Testing ************************/
-//     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-//     
-//     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-//     
-//     
-//     #define DISABLE_DEVFEATURE_MULTIPIN_BUSSES_REMOVING_CODE_NOT_NEEDED
-//     #define ENABLE_DEVFEATURE_REMOVE_OLD_NEOPIXEL_BUS_METHOD_ONLY_WHEN_FULLY_PHASED_OUT
-//     
-//     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-//     #define ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
-//     // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-//     // 
-//     /********* Group: Debug options only ************************/
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_ARRAY
-//     // #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_OBJECT_INDEXED_LIST
-//     #define ENABLE_DEVFEATURE_PALETTE_GET_NAMES_FROM_PALETTE_WHEN_STATIC
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
-//     #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-//     #define ENABLE_DEBUG_SERIAL
-
-//     #define ENABLE_DEVFEATURE_LIGHT__WEBUI_APPEND_EFFECT_CONFIG_TO_JSON_RESPONSE
-
-//     // Needs significant change to merge WLED and HACS
-//     
-//     // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
-
-//     #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
-
-//     #define ENABLE_DEVFEATURE_LIGHT__BRIGHTNESS_GET_IN_SEGMENTS_INCLUDES_BOTH_SEGMENT_AND_GLOBAL
-
-//     #define ENABLE_DEVFEATURE_LIGHT__WLED_WEBUI_SEND_MY_PALETTE_COLOUR_BARS
-
-//     // #define ENABLE_DEVFEATURE__WIFI_BLOCK_BAD_CODE_TEST
-
-//     // #define ENABLE_DEVFEATURE__WIFI_TEST_START_IN_SUPPORT
-//     // #define ENABLE_DEVFEATURE_LIGHT__ONLY_ENABLE_WRITING_TO_ANIMATION_IF_PINNED_TASK_NOT_ACTIVE
-    
-//     #define ENABLE_DEBUG_LINE_HERE
-//     #define ENABLE_DEVFEATURE_PALETTE__FIX_WEBUI_GRADIENT_PREVIEW
-
-//     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
-
-//     #define ENABLE_DEVFEATURE_LIGHT__ESP32_USE_I2S_CHANNELS_AS_PRIMARY_METHOD
-
-
-//     
-
-
-
-
-//     // #define ENABLE_DEVFEATURE_LIGHT__PERMIT_PIXEL_INDEXING_GREATER_THAN_FIRST_ON_PWM_CHANNELS_FOR_MULTIPLE_SEGMENTS
-
-
-
-
-//     // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-//     // #define ENABLE_LOG_LEVEL_DEBUG
-//     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-//     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-//     
-    
-
-//     // #define ENABLE_DEVFEATURE_LIGHT__PRELOAD_BUSCONFIG_FROM_TEMPLATE_AS_TEMPORARY_MEASURE
-//     
-
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
 
 
@@ -3821,11 +3632,11 @@
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_FUNCTION "\":{" 
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_E_CTR "\":4"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_A_CTR "\":15,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_B_CTR "\":13,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_C_CTR "\":12,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_D_CTR "\":14,"  // PWM RGBCCT
+      "\"" D_GPIO_PIXELBUS_01_E_CTR "\":4"  // PWM RGBCCT
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -3967,11 +3778,7 @@
   #define ENABLE_FREERAM_APPENDING_SERIAL
 
   
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
 
 
   #undef ESP32
@@ -3998,7 +3805,7 @@
   // #define DISABLE_NETWORK
   // #define DISABLE_NETWORK_WIFI
   #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   #define ANIMATION_UPDATOR_TIME_MINIMUM 20
 
@@ -4006,7 +3813,6 @@
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #undef ESP32
   // #define ESP8266
@@ -4021,7 +3827,7 @@
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_FUNCTION "\":{" 
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":3"   
+      "\"" D_GPIO_PIXELBUS_01_A_CTR "\":3"   
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -4105,13 +3911,11 @@
    * SECTION: System Configs
   ************************************/    
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4133,7 +3937,7 @@
   // #define DISABLE_NETWORK
   // #define DISABLE_NETWORK_WIFI
   #define USE_MODULE_NETWORK_WIFI
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   
   
@@ -4210,10 +4014,10 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_FUNCTION "\":{" 
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
+      "\"" D_GPIO_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
+      "\"" D_GPIO_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
+      "\"" D_GPIO_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
+      "\"" D_GPIO_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -4256,7 +4060,6 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4408,10 +4211,10 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_FUNCTION "\":{" 
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
-      "\"" D_GPIO_FUNCTION_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
+      "\"" D_GPIO_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
+      "\"" D_GPIO_PIXELBUS_02_A_CTR "\":13,"               // Digital WS2812
+      "\"" D_GPIO_PIXELBUS_03_A_CTR "\":14,"               // Digital WS2812
+      "\"" D_GPIO_PIXELBUS_04_A_CTR "\":27"               // Digital SK6812
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -4452,7 +4255,6 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4467,19 +4269,6 @@
   ************************************/    
  
   #define SETTINGS_HOLDER 1239
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
   /***********************************
    * SECTION: Network Configs
@@ -4671,7 +4460,7 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_FUNCTION "\":{" 
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
+      // "\"" D_GPIO_PIXELBUS_01_A_CTR "\":4,"                // Digital WS2812
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -4712,7 +4501,6 @@
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4728,18 +4516,6 @@
  
   #define SETTINGS_HOLDER 1239
 
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
   /***********************************
    * SECTION: Network Configs
@@ -4836,7 +4612,7 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_FUNCTION "\":{" 
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      // "\"" D_GPIO_FUNCTION_PIXELBUS_01_A_CTR "\":4,"
+      // "\"" D_GPIO_PIXELBUS_01_A_CTR "\":4,"
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -4994,14 +4770,14 @@
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"    
-      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
-      #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
-      #endif
+      // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+    //  "\"15\":\""  D_GPIO_PIR_1_CTR "\","
+    //  "\"2\":\"" D_GPIO_LED1_CTR  "\""
+    //   #ifdef USE_MODULE_SENSORS_BUTTONS
+    //   "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+    //   "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+    //   "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+    //   #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -5280,13 +5056,13 @@
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"    
-      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+     "\"15\":\""  D_GPIO_PIR_1_CTR "\","
+     "\"2\":\"" D_GPIO_LED1_CTR  "\""
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -5503,11 +5279,11 @@
 //   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 //   "\"" D_GPIO_NUMBER "\":{"          
 //     #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-//     "\"9\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-//     "\"10\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
+//     "\"9\":\"" D_GPIO_I2C_SDA_CTR   "\","
+//     "\"10\":\"" D_GPIO_I2C_SCL_CTR   "\","    
 //     #endif
 //     #ifdef USE_MODULE_SENSORS_PIR
-//     "\"4\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\""
+//     "\"4\":\""  D_GPIO_PIR_1_CTR "\""
 //     #endif
 //   "},"
 //   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -5733,11 +5509,11 @@
 //   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 //   "\"" D_GPIO_NUMBER "\":{"          
 //     #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-//     "\"9\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-//     "\"10\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
+//     "\"9\":\"" D_GPIO_I2C_SDA_CTR   "\","
+//     "\"10\":\"" D_GPIO_I2C_SCL_CTR   "\","    
 //     #endif
 //     #ifdef USE_MODULE_SENSORS_PIR
-//     "\"4\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\""
+//     "\"4\":\""  D_GPIO_PIR_1_CTR "\""
 //     #endif
 //   "},"
 //   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -5937,7 +5713,7 @@
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"    
-    "\"48\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\""
+    "\"48\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

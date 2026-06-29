@@ -220,8 +220,8 @@ void mSunTracking::Update_Solar_Tracking_Data()
     }
 
     float  altitude  = ALTITUDE_ABOVE_SEALEVEL;
-    float  latitude  = tkr_set->Settings.sensors.latitude;
-    float  longitude = tkr_set->Settings.sensors.longitude;
+    float  latitude  = tkr_iSensors->system_location.latitude;
+    float  longitude = tkr_iSensors->system_location.longitude;
     time_t utc_time  = tkr_time->UtcTime();
 
     // ALOG_INF(PSTR("utc_time %d"), utc_time);
@@ -1118,15 +1118,15 @@ uint8_t mSunTracking::ConstructJSON_Sensor(uint8_t json_method, bool json_append
     #endif
 
     #ifdef USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
-    JBI->Add(PM__IS_SUN_RISING, (uint8_t)calc.is_sun_rising);
+    JBI->Add(PM_IS_SUN_RISING, (uint8_t)calc.is_sun_rising);
     #endif
 
     #ifdef USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
-    JBI->Object_Start(PM__ANGLES);
-      JBI->Add(PM__AZIMUTH,        (float)calc.position.azimuth);
-      JBI->Add(PM__ELEVATION,      (float)calc.position.elevation);
-      JBI->Add(PM__ELEVATION_MAX,  calc.max_elevation);
-      JBI->Add(PM__ELEVATION_MIN,  calc.min_elevation);
+    JBI->Object_Start(PM_ANGLES);
+      JBI->Add(PM_SUN_AZIMUTH,        (float)calc.position.azimuth);
+      JBI->Add(PM_SUN_ELEVATION,      (float)calc.position.elevation);
+      JBI->Add(PM_SUN_ELEVATION_MAX,  calc.max_elevation);
+      JBI->Add(PM_SUN_ELEVATION_MIN,  calc.min_elevation);
       JBI->Add("SunriseAzimuth",   calc.sunrise_azimuth);
       JBI->Add("SunsetAzimuth",    calc.sunset_azimuth);
       JBI->Add("DawnAzimuth",      calc.dawn_azimuth);
@@ -1168,7 +1168,7 @@ uint8_t mSunTracking::ConstructJSON_Sensor(uint8_t json_method, bool json_append
 
     #if defined(USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY) || defined(USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL)
 
-    JBI->Add(PM__DST_ACTIVE, (uint8_t)calc.daylight_savings_active);
+    JBI->Add(PM_DST_ACTIVE, (uint8_t)calc.daylight_savings_active);
 
     // JBI->Object_Start(PM__TODAY);
 

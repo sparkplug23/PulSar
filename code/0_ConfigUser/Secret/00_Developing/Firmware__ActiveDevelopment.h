@@ -130,9 +130,8 @@
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
   
   //   #define USE_MODULE_SENSORS_INTERFACE
   //   #
@@ -150,17 +149,17 @@
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_SR04
-      "\"19\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+      "\"19\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+      "\"18\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
       #endif 
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," 
+      "\"5\":\"" D_GPIO_DS18X20_1_CTR  "\"," 
       #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -241,8 +240,6 @@ new 26GHz radar sensor
     
   #define SETTINGS_HOLDER 1241
   #define ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
-  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  #define ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #define USE_MODULE_CORE_FILESYSTEM
   #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
 
@@ -253,7 +250,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE 
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -312,26 +308,6 @@ new 26GHz radar sensor
    * SECTION: System Configs
   ************************************/     
 
-  // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
 
   /***********************************
    * SECTION: Storage Configs
@@ -350,11 +326,8 @@ new 26GHz radar sensor
   // I should add new "purely for debugging" "serialise" data struct. So this will be a new way to take important data from the module data struct that will all be saved in binary, but instead 
   // include functions that "pretty print" them for easier comparing. Will use lots of memory, so debug only.
 
-  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+  #define ENABLE_DEBUGFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
 
-  // #define ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
-
-  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   // #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_MINUTE
 
@@ -729,28 +702,28 @@ new 26GHz radar sensor
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"13\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      "\"27\":\"" D_GPIO_FUNCTION_REL2_INV_CTR    "\","
-      "\"26\":\"" D_GPIO_FUNCTION_REL3_INV_CTR      "\","
-      "\"14\":\"" D_GPIO_FUNCTION_REL4_INV_CTR      "\"," //pins need sety on L
+      "\"13\":\"" D_GPIO_REL1_INV_CTR  "\","
+      "\"27\":\"" D_GPIO_REL2_INV_CTR    "\","
+      "\"26\":\"" D_GPIO_REL3_INV_CTR      "\","
+      "\"14\":\"" D_GPIO_REL4_INV_CTR      "\"," //pins need sety on L
       #endif
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"33\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
+      "\"33\":\"" D_GPIO_DS18X20_1_CTR "\"," // DS_DB - 3 pin
       #endif    
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219)
-      "\"23\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"23\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"18\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"19\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"18\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"19\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+      "\"15\":\""  D_GPIO_PIR_1_CTR "\","
       #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
       // 32 - LED Strip External
       // 21 - LED Strip Onboard
       // 25?
@@ -976,7 +949,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE 
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -1026,29 +998,6 @@ new 26GHz radar sensor
   
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  // #define USE_MODULE_SENSORS_SUN_TRACKING
 
   /***********************************
    * SECTION: Storage Configs
@@ -1339,29 +1288,29 @@ new 26GHz radar sensor
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"13\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      "\"27\":\"" D_GPIO_FUNCTION_REL2_INV_CTR    "\","
-      "\"26\":\"" D_GPIO_FUNCTION_REL3_INV_CTR      "\","
-      "\"14\":\"" D_GPIO_FUNCTION_REL4_INV_CTR      "\"," //pins need sety on L
+      "\"13\":\"" D_GPIO_REL1_INV_CTR  "\","
+      "\"27\":\"" D_GPIO_REL2_INV_CTR    "\","
+      "\"26\":\"" D_GPIO_REL3_INV_CTR      "\","
+      "\"14\":\"" D_GPIO_REL4_INV_CTR      "\"," //pins need sety on L
       #endif
-      // "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      // "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      // "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      // "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"33\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
+      "\"33\":\"" D_GPIO_DS18X20_1_CTR "\"," // DS_DB - 3 pin
       #endif    
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219)
-      "\"23\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"23\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"18\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"19\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"18\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"19\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      "\"17\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+      "\"16\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","   
       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
       // 32 - LED Strip External
       // 21 - LED Strip Onboard
       // 25?
@@ -1576,7 +1525,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE 
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -1623,32 +1571,8 @@ new 26GHz radar sensor
    * SECTION: System Configs
   ************************************/     
 
-  
-
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  // #define USE_MODULE_SENSORS_SUN_TRACKING
 
   /***********************************
    * SECTION: Storage Configs
@@ -1830,38 +1754,9 @@ new 26GHz radar sensor
 
   /***********************************
    * SECTION: System Configs
-  ************************************/     
-
- 
-
-  
-
-  
+  ************************************/       
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  
 
 
   /***********************************
@@ -2565,29 +2460,29 @@ new 26GHz radar sensor
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"13\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      "\"27\":\"" D_GPIO_FUNCTION_REL2_INV_CTR    "\","
-      "\"26\":\"" D_GPIO_FUNCTION_REL3_INV_CTR      "\","
-      "\"14\":\"" D_GPIO_FUNCTION_REL4_INV_CTR      "\"," //pins need sety on L
+      "\"13\":\"" D_GPIO_REL1_INV_CTR  "\","
+      "\"27\":\"" D_GPIO_REL2_INV_CTR    "\","
+      "\"26\":\"" D_GPIO_REL3_INV_CTR      "\","
+      "\"14\":\"" D_GPIO_REL4_INV_CTR      "\"," //pins need sety on L
       #endif
-      // "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      // "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      // "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      // "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"33\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
+      "\"33\":\"" D_GPIO_DS18X20_1_CTR "\"," // DS_DB - 3 pin
       #endif    
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219)
-      "\"23\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"23\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"18\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"19\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"18\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"19\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+      "\"17\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+      "\"16\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","   
       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
       // 32 - LED Strip External
       // 21 - LED Strip Onboard
       // 25?
@@ -2791,7 +2686,6 @@ new 26GHz radar sensor
  
 //   // #define DISABLE_SERIAL
 //   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
   
 //   // #define ENABLE_ADVANCED_DEBUGGING
 //   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -2835,9 +2729,6 @@ new 26GHz radar sensor
 //   #define ENABLE_GROUPFEATURE__TESTING_NEW_OPTIONS
 
 
-//   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//     #define D_WATCHDOG_TIMER_TIMEOUT_PERIOD_MS 120000
-//   // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 //   // #define ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
 //   //                                                               #define ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
 
@@ -2911,7 +2802,7 @@ new 26GHz radar sensor
 //   // #ifdef USE_GROUPFEATURE__MQTT_AS_WIFI
 //   //   #define USE_MODULE_NETWORK_WIFI
 //   //   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-//   //   #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+//   //   
 //   //   #define MQTT_HOST       MQTT_HOST
 //   //   #define MQTT_PORT     1883
 //   // #endif
@@ -3002,16 +2893,16 @@ new 26GHz radar sensor
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_CORE__SERIAL
-      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","
+      "\"17\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+      "\"16\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      "\"22\":\"" D_GPIO__RF_433MHZ_TX__CTR   "\","
       #endif  
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"23\":\"" D_GPIO__RF_433MHZ_RX__CTR   "\","
       #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"2\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -3024,14 +2915,14 @@ new 26GHz radar sensor
 //     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 //     "\"" D_GPIO_NUMBER "\":{"
 //       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-//       "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-//       "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+//       "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+//       "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
 //       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
 //       #ifdef USE_MODULE_NETWORK_CELLULAR
-//       "\"25\":\"" D_GPIO_FUNCTION__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
-//       "\"27\":\"" D_GPIO_FUNCTION__MODEM_TX__CTR   "\","   
-//       "\"26\":\"" D_GPIO_FUNCTION__MODEM_RX__CTR   "\","   
-//       "\"4\":\""  D_GPIO_FUNCTION__MODEM_POWER__CTR   "\","   
+//       "\"25\":\"" D_GPIO__MODEM_DATA_TERMINAL_READY_DTR__CTR   "\","
+//       "\"27\":\"" D_GPIO__MODEM_TX__CTR   "\","   
+//       "\"26\":\"" D_GPIO__MODEM_RX__CTR   "\","   
+//       "\"4\":\""  D_GPIO__MODEM_POWER__CTR   "\","   
 //       #endif // USE_MODULE_NETWORK_CELLULAR   
 
 
@@ -3042,23 +2933,23 @@ new 26GHz radar sensor
 //        * Red         VCC, 3V3
 //        * Black       GND
 //        * */
-//       // "\"32\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
-//       // "\"33\":\"" D_GPIO_FUNCTION_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
+//       // "\"32\":\"" D_GPIO_HWSERIAL1_RING_BUFFER_RX_CTR   "\","
+//       // "\"33\":\"" D_GPIO_HWSERIAL1_RING_BUFFER_TX_CTR   "\","
 
 
 
 //       #ifdef USE_MODULE_DRIVERS_SDCARD
-//       "\"2\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MISO_CTR   "\","
-//       "\"15\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_MOSI_CTR   "\","   
-//       "\"14\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CLK_CTR   "\","
-//       "\"13\":\"" D_GPIO_FUNCTION_SDCARD_HSPI_CSO_CTR   "\","  
+//       "\"2\":\"" D_GPIO_SDCARD_HSPI_MISO_CTR   "\","
+//       "\"15\":\"" D_GPIO_SDCARD_HSPI_MOSI_CTR   "\","   
+//       "\"14\":\"" D_GPIO_SDCARD_HSPI_CLK_CTR   "\","
+//       "\"13\":\"" D_GPIO_SDCARD_HSPI_CSO_CTR   "\","  
 //       #endif // USE_MODULE_DRIVERS_SDCARD   
 //       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-//       "\"19\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-//       "\"18\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\","   
+//       "\"19\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+//       "\"18\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\","   
 //       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
-//       "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-//       "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+//       "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+//       "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
 //     "},"
 //     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
 //     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -3270,7 +3161,6 @@ new 26GHz radar sensor
 //   ************************************/    
 //   // #define DISABLE_SERIAL
 //   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
   
 //   // #define ENABLE_ADVANCED_DEBUGGING
 //   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -3296,23 +3186,6 @@ new 26GHz radar sensor
   
 
 //   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-//   // #define USE_MODULE_CORE_FILESYSTEM
-//   //   
-//   //   
-//   //   
-//   //   
-
-//   // Settings saving and loading
-//   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-//   //   
-//   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-//   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-//   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-//   
-//   
-
 //   // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
 //   //  // until devices can reliably be used without compiling per device
 
@@ -3448,25 +3321,25 @@ new 26GHz radar sensor
 //     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 //     "\"" D_GPIOC "\":{"
 //       #ifdef USE_MODULE_DRIVERS_RELAY
-//       "\"13\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-//       "\"27\":\"" D_GPIO_FUNCTION_REL2_INV_CTR    "\","
-//       "\"26\":\"" D_GPIO_FUNCTION_REL3_INV_CTR      "\","
-//       "\"14\":\"" D_GPIO_FUNCTION_REL4_INV_CTR      "\"," //pins need sety on L
+//       "\"13\":\"" D_GPIO_REL1_INV_CTR  "\","
+//       "\"27\":\"" D_GPIO_REL2_INV_CTR    "\","
+//       "\"26\":\"" D_GPIO_REL3_INV_CTR      "\","
+//       "\"14\":\"" D_GPIO_REL4_INV_CTR      "\"," //pins need sety on L
 //       #endif
-//       "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-//       "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+//       "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+//       "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
 //       #ifdef USE_MODULE_SENSORS_DS18X20
-//       "\"33\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
+//       "\"33\":\"" D_GPIO_DS18X20_1_CTR "\"," // DS_DB - 3 pin
 //       #endif    
 //       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-//       "\"23\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-//       "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+//       "\"23\":\"" D_GPIO_I2C_SCL_CTR   "\","
+//       "\"22\":\"" D_GPIO_I2C_SDA_CTR   "\","   
 //       #endif
 //       #ifdef USE_MODULE_DISPLAYS_NEXTION
-//       "\"18\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-//       "\"19\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+//       "\"18\":\"" D_GPIO_NEXTION_TX_CTR "\","
+//       "\"19\":\"" D_GPIO_NEXTION_RX_CTR "\","
 //       #endif
-//       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+//       "\"2\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
 //       // 32 - LED Strip External
 //       // 21 - LED Strip Onboard
 //       // 25?
@@ -3680,7 +3553,6 @@ new 26GHz radar sensor
 //   ************************************/    
 //   // #define DISABLE_SERIAL
 //   // #define DISABLE_SERIAL0_CORE
-//   // #define DISABLE_SERIAL_LOGGING
   
 //   // #define ENABLE_ADVANCED_DEBUGGING
 //   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -3693,27 +3565,6 @@ new 26GHz radar sensor
 //   /***********************************
 //    * SECTION: System Configs
 //   ************************************/     
-
-//   // #define USE_MODULE_CORE_FILESYSTEM
-//   //   
-//   //   
-//   //   
-//   //   
-
-//   // Settings saving and loading
-//   //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-//   //   
-//   //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-//   //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-//   //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-//   
-//   
-
-//   #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-//    // until devices can reliably be used without compiling per device
-
-//   
 
 
 //   /***********************************
@@ -3835,7 +3686,6 @@ new 26GHz radar sensor
   ///////////////////////////////////////////// Enable Logs
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
   
   ///////////////////////////////////////////// System Logs
@@ -3969,8 +3819,8 @@ new 26GHz radar sensor
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -4004,7 +3854,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4020,9 +3869,8 @@ new 26GHz radar sensor
 
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
 
   #define   ENABLE_DEBUG_LINE_HERE
@@ -4068,8 +3916,8 @@ new 26GHz radar sensor
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -4131,7 +3979,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4147,11 +3994,8 @@ new 26GHz radar sensor
    * SECTION: System Configs
   ************************************/     
 
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
 
 
@@ -4207,8 +4051,8 @@ new 26GHz radar sensor
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -4285,8 +4129,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
-  
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
   // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
@@ -4299,11 +4141,8 @@ new 26GHz radar sensor
    * SECTION: System Configs
   ************************************/     
 
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
 
   #define   ENABLE_DEBUG_LINE_HERE
@@ -4353,8 +4192,8 @@ new 26GHz radar sensor
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -4405,7 +4244,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4420,10 +4258,8 @@ new 26GHz radar sensor
   ************************************/     
 
 
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
 
   #define   ENABLE_DEBUG_LINE_HERE
@@ -4470,8 +4306,8 @@ new 26GHz radar sensor
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -4533,7 +4369,6 @@ new 26GHz radar sensor
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -4560,26 +4395,6 @@ new 26GHz radar sensor
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
 
   /***********************************
    * SECTION: Network Configs
@@ -4796,30 +4611,30 @@ new 26GHz radar sensor
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","  // BUILTIN LED as new Status LED, to reflect Network and Relay0 status
+      "\"2\":\"" D_GPIO_LED1_CTR  "\","  // BUILTIN LED as new Status LED, to reflect Network and Relay0 status
       #else
-      "\"2\":\""  D_GPIO_FUNCTION_LED3_CTR  "\"," //builtin BLUE
+      "\"2\":\""  D_GPIO_LED3_CTR  "\"," //builtin BLUE
       #endif  
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"5\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"4\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"26\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
-      "\"15\":\"" D_GPIO_FUNCTION_KEY4_INV_CTR  "\","
+      "\"5\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"4\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"26\":\"" D_GPIO_KEY3_INV_CTR  "\","
+      "\"15\":\"" D_GPIO_KEY4_INV_CTR  "\","
       #ifdef SOC_TOUCH_VERSION_1
-      "\"32\":\"" D_GPIO_FUNCTION_KEY5_TOUCH_CTR  "\","
-      "\"33\":\"" D_GPIO_FUNCTION_KEY6_TOUCH_CTR  "\","
-      "\"0\":\"" D_GPIO_FUNCTION_KEY7_INV_CTR  "\","
+      "\"32\":\"" D_GPIO_KEY5_TOUCH_CTR  "\","
+      "\"33\":\"" D_GPIO_KEY6_TOUCH_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY7_INV_CTR  "\","
       #endif
       #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"18\":\"" D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
-      "\"19\":\"" D_GPIO_FUNCTION_SWT2_INV_CTR  "\","
+      "\"18\":\"" D_GPIO_SWT1_INV_CTR  "\","
+      "\"19\":\"" D_GPIO_SWT2_INV_CTR  "\","
       #endif  
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"27\":\"" D_GPIO_FUNCTION_REL1_CTR  "\","
-      "\"14\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
-      "\"12\":\"" D_GPIO_FUNCTION_REL3_CTR  "\","
-      "\"13\":\"" D_GPIO_FUNCTION_REL4_CTR  "\""
+      "\"27\":\"" D_GPIO_REL_CTR "1" "\","
+      "\"14\":\"" D_GPIO_REL_CTR "2" "\","
+      "\"12\":\"" D_GPIO_REL_CTR "3" "\","
+      "\"13\":\"" D_GPIO_REL_CTR "4" "\",""
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -4989,7 +4804,6 @@ new 26GHz radar sensor
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -5219,29 +5033,29 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
     #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-    "\"10\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //instead of 9
-    "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
+    "\"10\":\"" D_GPIO_I2C_SDA_CTR   "\"," //instead of 9
+    "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\","    
     #endif
     #ifdef USE_MODULE_SENSORS_PIR
-    "\"4\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-    "\"7\":\""  D_GPIO_FUNCTION_PIR_2_CTR "\","
+    "\"4\":\""  D_GPIO_PIR_1_CTR "\","
+    "\"7\":\""  D_GPIO_PIR_2_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS_SR04
-    "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-    "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+    "\"4\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+    "\"2\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
     #endif 
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-    "\"35\":\""  D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
+    "\"35\":\""  D_GPIO_PIR_2_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-    "\"5\":\""  D_GPIO_FUNCTION_PIR_3_INV_CTR "\","
+    "\"5\":\""  D_GPIO_PIR_3_INV_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-    "\"6\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-    "\"5\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\""
+    "\"6\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+    "\"5\":\""  D_GPIO__HLK_LD2410_RX__CTR "\""
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-    "\"34\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\""
+    "\"34\":\""  D_GPIO_PIR_1_INV_CTR "\""
     #endif
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -5341,7 +5155,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -5563,53 +5376,53 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
-   //  "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-   //  "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+   //  "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+   //  "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
     // #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-    // "\"8\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    // "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\""    
+    // "\"8\":\"" D_GPIO_I2C_SDA_CTR   "\","
+    // "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\""    
     // #endif
     #ifdef USE_MODULE_SENSORS_PIR
-   //  "\"23\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+   //  "\"23\":\""  D_GPIO_PIR_1_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-    "\"33\":\""  D_GPIO_FUNCTION__TOF_VL53L0X_XSHUT1__CTR "\","
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
-   //  "\"26\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+    "\"33\":\""  D_GPIO__TOF_VL53L0X_XSHUT1__CTR "\","
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+   //  "\"26\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
-     // "\"26\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+     // "\"26\":\""  D_GPIO__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS_SR04
-    "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-    "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+    "\"4\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+    "\"2\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
     #endif 
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-    "\"35\":\""  D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
+    "\"35\":\""  D_GPIO_PIR_2_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-    "\"34\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+    "\"34\":\""  D_GPIO_PIR_1_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-    "\"5\":\""  D_GPIO_FUNCTION_PIR_3_INV_CTR "\","
+    "\"5\":\""  D_GPIO_PIR_3_INV_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-    "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-    "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
+    "\"17\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+    "\"16\":\""  D_GPIO__HLK_LD2410_RX__CTR "\","
     #endif
    //  #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-   //  "\"27\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT__CTR "\","
+   //  "\"27\":\""  D_GPIO__TOF_VL53L1X_XSHUT__CTR "\","
    //  #endif
     #ifdef USE_MODULE_SENSORS_BUTTONS
-   //  "\"18\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-   //  "\"19\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-   //  "\"33\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+   //  "\"18\":\"" D_GPIO_KEY1_INV_CTR  "\","
+   //  "\"19\":\"" D_GPIO_KEY2_INV_CTR  "\","
+   //  "\"33\":\"" D_GPIO_KEY3_INV_CTR  "\","
     #endif
     
-   //  "\"4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
-   //  "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\","
-    // "\"8\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+   //  "\"4\":\"" D_GPIO_LED1_CTR  "\","
+   //  "\"5\":\"" D_GPIO_LED2_CTR  "\","
+    // "\"8\":\"" D_GPIO_LED1_CTR  "\""
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -5734,7 +5547,6 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 ///////////////////////////////////////////// Enable Logs
 // #define DISABLE_SERIAL
 // #define DISABLE_SERIAL0_CORE
-// #define DISABLE_SERIAL_LOGGING
 // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 ///////////////////////////////////////////// System Logs
@@ -5849,13 +5661,13 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
  "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
  "\"" D_GPIO_NUMBER "\":{"  
    #ifdef USE_MODULE_SENSORS_DS18X20
-   "\"15\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+   "\"15\":\"" D_GPIO_DS18X20_1_CTR "\","
    #endif            
    #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-   "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-   "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\""   
+   "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
+   "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\""   
    #endif
-   "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""  
+   "\"2\":\""  D_GPIO_LED1_INV_CTR "\""  
  "},"
  "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
  "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -5917,7 +5729,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -6144,53 +5955,53 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
-   //  "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-   //  "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+   //  "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+   //  "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
     #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-    "\"8\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\""    
+    "\"8\":\"" D_GPIO_I2C_SDA_CTR   "\","
+    "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\""    
     #endif
     #ifdef USE_MODULE_SENSORS_PIR
-   //  "\"23\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+   //  "\"23\":\""  D_GPIO_PIR_1_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-    "\"33\":\""  D_GPIO_FUNCTION__TOF_VL53L0X_XSHUT1__CTR "\","
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
-   //  "\"26\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+    "\"33\":\""  D_GPIO__TOF_VL53L0X_XSHUT1__CTR "\","
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+   //  "\"26\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
-     // "\"26\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+     // "\"26\":\""  D_GPIO__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS_SR04
-    "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-    "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+    "\"4\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+    "\"2\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
     #endif 
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-    "\"35\":\""  D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
+    "\"35\":\""  D_GPIO_PIR_2_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-    "\"34\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+    "\"34\":\""  D_GPIO_PIR_1_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-    "\"5\":\""  D_GPIO_FUNCTION_PIR_3_INV_CTR "\","
+    "\"5\":\""  D_GPIO_PIR_3_INV_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-    "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-    "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
+    "\"17\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+    "\"16\":\""  D_GPIO__HLK_LD2410_RX__CTR "\","
     #endif
    //  #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-   //  "\"27\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT__CTR "\","
+   //  "\"27\":\""  D_GPIO__TOF_VL53L1X_XSHUT__CTR "\","
    //  #endif
     #ifdef USE_MODULE_SENSORS_BUTTONS
-   //  "\"18\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-   //  "\"19\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-   //  "\"33\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+   //  "\"18\":\"" D_GPIO_KEY1_INV_CTR  "\","
+   //  "\"19\":\"" D_GPIO_KEY2_INV_CTR  "\","
+   //  "\"33\":\"" D_GPIO_KEY3_INV_CTR  "\","
     #endif
     
-   //  "\"4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
-   //  "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\","
-    // "\"8\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+   //  "\"4\":\"" D_GPIO_LED1_CTR  "\","
+   //  "\"5\":\"" D_GPIO_LED2_CTR  "\","
+    // "\"8\":\"" D_GPIO_LED1_CTR  "\""
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -6346,9 +6157,8 @@ Blue (Upstairs Link) ***********************************************************
   #define MQTT_HOST   "192.168.1.70"
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define DISABLE_SLEEP // loops per second less than 1hz // I need to make an "mqtt/alert" channel that lets me know this
   
@@ -6382,9 +6192,9 @@ Blue (Upstairs Link) ***********************************************************
 
 
   // Actual
-  #define GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL1_INV_CTR
-  #define GPIO_NAME_ZONE1_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL2_INV_CTR
-  #define GPIO_NAME_ZONE2_BOILER_RELAY      D_GPIO_FUNCTION_REL3_INV_CTR
+  #define GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  D_GPIO_REL1_INV_CTR
+  #define GPIO_NAME_ZONE1_UPSTAIRS_RELAY    D_GPIO_REL2_INV_CTR
+  #define GPIO_NAME_ZONE2_BOILER_RELAY      D_GPIO_REL3_INV_CTR
 /**
  * 
  * 
@@ -6425,24 +6235,24 @@ Blue (Upstairs Link) ***********************************************************
       "\"19\":\"" GPIO_NAME_ZONE2_BOILER_RELAY      "\","
       #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"33\":\""  D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
-      "\"27\":\""  D_GPIO_FUNCTION_SWT2_INV_CTR  "\","
-      "\"26\":\""  D_GPIO_FUNCTION_SWT3_INV_CTR  "\","
+      "\"33\":\""  D_GPIO_SWT1_INV_CTR  "\","
+      "\"27\":\""  D_GPIO_SWT2_INV_CTR  "\","
+      "\"26\":\""  D_GPIO_SWT3_INV_CTR  "\","
       #endif  
       #ifdef USE_MODULE_SENSORS_DHT
-      "\"25\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // DiningRoom 
+      "\"25\":\"" D_GPIO_DHT22_1_CTR   "\"," // DiningRoom 
       #endif
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"4\":\"" D_GPIO_RGB_DATA_CTR  "\","
       #endif 
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
+      "\"23\":\"" D_GPIO_DS18X20_1_CTR "\"," // DS_DB - 3 pin
       #endif    
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -6587,18 +6397,15 @@ Blue (Upstairs Link) ***********************************************************
   #define MQTT_HOST   "192.168.1.70"
     
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define DISABLE_SERIAL
   #define DISABLE_SERIAL0_CORE
-  #define DISABLE_SERIAL_LOGGING
 
   #define USE_MODULE_CORE_RULES
        
   #define USE_MODULE_SENSORS_INTERFACE
-    #
   #define USE_MODULE_SENSORS_BME
   #define USE_MODULE_SENSORS_SWITCHES
   #define USE_MODULE_SENSORS_PIR
@@ -6611,11 +6418,11 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"3\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"1\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
+      "\"3\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"1\":\"" D_GPIO_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"16\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
+      "\"16\":\"" D_GPIO_SWT1_CTR   "\""
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -6714,10 +6521,8 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_ROOMHINT_CTR "testbed"
   #define MQTT_HOST   "192.168.1.70"
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // 
+  // 
 
   // #define ENABLE_DEBUG_FUNCTION_NAMES
   // #define ENABLE_DEBUG_SHOW_ADVANCED_LOGS_FOR_STARTUP_UPSECONDS 20
@@ -6750,7 +6555,7 @@ Blue (Upstairs Link) ***********************************************************
    */
   #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   /**
    * @brief Cellular MQTT
@@ -6783,12 +6588,12 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
-      "\"17\":\"" D_GPIO_FUNCTION_HWSERIAL2_TX_CTR   "\","
-      "\"16\":\"" D_GPIO_FUNCTION_HWSERIAL2_RX_CTR   "\""   
+      "\"17\":\"" D_GPIO_HWSERIAL2_TX_CTR   "\","
+      "\"16\":\"" D_GPIO_HWSERIAL2_RX_CTR   "\""   
       #endif // USE_MODULE__DRIVERS_MAVLINK_DECODER   
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -6867,7 +6672,6 @@ Blue (Upstairs Link) ***********************************************************
 
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
 
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -6886,13 +6690,11 @@ Blue (Upstairs Link) ***********************************************************
    */
   #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
 
-  // #define ENABLE_FEATURE_WATCHDOG_TIMER
-  // // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION //fails with no network
-  // // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // // 
+  // // 
 
 
   // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -6911,7 +6713,6 @@ Blue (Upstairs Link) ***********************************************************
 
   // // #define DISABLE_SERIAL
   // // #define DISABLE_SERIAL0_CORE
-  // // #define DISABLE_SERIAL_LOGGING
 
   // // #define ENABLE_ADVANCED_DEBUGGING
   // // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -6934,7 +6735,7 @@ Blue (Upstairs Link) ***********************************************************
    */
   #define USE_MODULE_NETWORK_WIFI
   #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  
 
   /**
    * @brief Cellular MQTT
@@ -6962,7 +6763,6 @@ Blue (Upstairs Link) ***********************************************************
 
   // // #define DISABLE_SERIAL
   // // #define DISABLE_SERIAL0_CORE
-  // // #define DISABLE_SERIAL_LOGGING
 
   // // #define ENABLE_ADVANCED_DEBUGGING
   // // #define ENABLE_DEBUG_FUNCTION_NAMES
@@ -6975,7 +6775,7 @@ Blue (Upstairs Link) ***********************************************************
   //  */
   // // #define USE_MODULE_NETWORK_WIFI
   // #define JSON_VARIABLE_FLOAT_PRECISION_LENGTH 10
-  // // #define ENABLE_DEVFEATURE_MQTT_USING_WIFI
+  // // 
 
   // /**
   //  * @brief Cellular MQTT
@@ -7018,11 +6818,11 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #ifdef USE_MODULE_DISPLAYS_OLED_SH1106
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\""   
       #endif // USE_MODULE_DISPLAYS_OLED_SH1106   
-      "\"12\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR "\""
+      "\"12\":\"" D_GPIO_LED1_INV_CTR "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -7109,9 +6909,8 @@ Blue (Upstairs Link) ***********************************************************
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE__DRIVERS_BUZZER_TONES
 
@@ -7123,7 +6922,7 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"23\":\"" D_GPIO_FUNCTION_BUZZER_CTR   "\""
+      "\"23\":\"" D_GPIO_BUZZER_CTR   "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -7224,9 +7023,9 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     // "\"" D_GPIOC "\":{"
     // #ifdef ESP8266 
-    //   "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    //   "\"" PIN_NAME_STRING_ESP8266_DEFAULT "\":\"" D_GPIO_RGB_DATA_CTR  "\""
     // #else
-    //   "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\""
+    //   "\"" PIN_NAME_STRING_ESP32_DEFAULT "\":\"" D_GPIO_RGB_DATA_CTR  "\""
     // #endif
     // "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -7264,8 +7063,8 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"D7\":\""  D_GPIO_FUNCTION_KEY1_CTR  "\","
-      "\"4\":\""   D_GPIO_FUNCTION_REL1_CTR  "\""
+      "\"D7\":\""  D_GPIO_KEY1_CTR  "\","
+      "\"4\":\""   D_GPIO_REL1_CTR  "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -7344,9 +7143,9 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"23\":\"" D_GPIO__RF_433MHZ_RX__CTR   "\","
       #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"2\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -7370,9 +7169,9 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"23\":\"" D_GPIO__RF_433MHZ_RX__CTR   "\","
       #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"2\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -7384,12 +7183,8 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_CTR          "testbed_fastboot_esp8266"
   #define DEVICENAME_FRIENDLY_CTR "Testbed Fona 800L"
 
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // #define ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3 // FI-128
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION // FI-128
-
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
   // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_CREATE_SSID_AP
   // #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
   // #define DEBUG_FASTBOOT
@@ -7408,10 +7203,10 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_CONTROLLER__LOUVOLITE_HUB
-      // "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      // "\"23\":\"" D_GPIO__RF_433MHZ_RX__CTR   "\","
+      "\"22\":\"" D_GPIO__RF_433MHZ_TX__CTR   "\","
       #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"2\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -7430,11 +7225,8 @@ Blue (Upstairs Link) ***********************************************************
   #define DEVICENAME_CTR          "testbed_crashreport" APPEND_ESP_TYPE_MQTT_STRING
   #define DEVICENAME_FRIENDLY_CTR "Testbed CrashReport" APPEND_ESP_TYPE_NAME_STRING
 
-  // #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // // #define ENABLE_DEVFEATURE_RTC_FASTBOOT_GLOBALTEST_V3 // FI-128
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION // FI-128
-  // #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  // 
+  // 
   // // #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_CREATE_SSID_AP
   // // #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
   // // #define DEBUG_FASTBOOT
@@ -7448,7 +7240,7 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"LBI\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"LBI\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -7465,9 +7257,8 @@ Blue (Upstairs Link) ***********************************************************
   // add db18 dropping from the waterproof box to know extra temp, perhaps add two for backup? (independant pin from tank sensors)
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_SENSORS_INTERFACE
     #
@@ -7485,10 +7276,10 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_SR04
-      "\"21\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+      "\"21\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+      "\"22\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
       #endif
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\"" D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -7540,10 +7331,10 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"23\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
+      "\"23\":\"" D_GPIO_REL1_INV_CTR  "\","
 
-      "\"32\":\"" D_GPIO_FUNCTION_ADC1_CH4_CTR   "\","
-      "\"35\":\"" D_GPIO_FUNCTION_ADC1_CH7_CTR   "\""
+      "\"32\":\"" D_GPIO_ADC1_CH4_CTR   "\","
+      "\"35\":\"" D_GPIO_ADC1_CH7_CTR   "\""
 
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
@@ -7583,7 +7374,6 @@ Blue (Upstairs Link) ***********************************************************
   //   #define ENABLE_DEVFEATURE__SETTINGS_STORAGE__SAVE_LOAD_STRUCT
   //   #define ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
   //   #define ENABLE_DEVFEATURE__SETTINGS_STORAGE_ESP_SUPPORT
-  //   #define ENABLE_DEVFEATURE__SETTINGS_NEW_STRUCT_2023
 
   
   // #define USE_MODULE_CORE_FILESYSTEM
@@ -7606,12 +7396,12 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      "\"22\":\"" D_GPIO__RF_433MHZ_TX__CTR   "\","
       #endif  
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"23\":\"" D_GPIO__RF_433MHZ_RX__CTR   "\","
       #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"2\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -7653,7 +7443,6 @@ Blue (Upstairs Link) ***********************************************************
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -7669,32 +7458,6 @@ Blue (Upstairs Link) ***********************************************************
    * SECTION: System Configs
   ************************************/     
 
-  
-
-  
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  // #define USE_MODULE_SENSORS_SUN_TRACKING
 
 
   /***********************************
@@ -7759,7 +7522,7 @@ Blue (Upstairs Link) ***********************************************************
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"32\":\""  D_GPIO_FUNCTION_MOISTURE_ANALOG_CTR "\"" 
+      "\"32\":\""  D_GPIO_MOISTURE_ANALOG_CTR "\"" 
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -7802,6 +7565,138 @@ Blue (Upstairs Link) ***********************************************************
 
   
 #endif
+
+
+#ifdef DEVICE_INTERMEDIATE_FLASH__ESP8266_MINIMAL_OTA
+
+  #ifndef ESP8266
+  #define ESP8266
+  #endif
+
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR "intermediate_flash__esp8266_minimal_OTA"
+  #endif
+
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+
+  #ifndef DEVICENAME_ROOMHINT_CTR
+  #define DEVICENAME_ROOMHINT_CTR "recovery"
+  #endif
+
+  /***********************************
+   * SECTION: Purpose
+   ************************************
+   *
+   * Minimal ESP8266 OTA bridge firmware.
+   *
+   * Intended use:
+   *   1. OTA this small image onto an ESP8266 device that no longer has enough
+   *      free sketch space to accept the full firmware.
+   *   2. Device reboots into minimal AP+STA recovery updater.
+   *   3. OTA or HTTP-upload the full firmware.
+   *
+   * This build should remain intentionally small.
+   ************************************/
+
+  /***********************************
+   * SECTION: Settings
+   ************************************/
+
+  #define SETTINGS_HOLDER 1239
+
+  /***********************************
+   * SECTION: Recovery / OTA
+   ************************************/
+
+  #define ENABLE_FEATURE_SYSTEM__SAFEMODE
+  #define ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID
+  #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
+
+  /*
+   * Keep only the basic HTTP update path.
+   * Do not enable full WebUI.
+   */
+  // #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
+
+  /***********************************
+   * SECTION: Logging
+   ************************************/
+
+  /*
+   * Keep serial logging available for recovery diagnostics.
+   * Avoid heavy debug features.
+   */
+  #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
+
+  /***********************************
+   * SECTION: Drivers
+   ************************************/
+
+  /*
+   * Optional status LED only.
+   * Remove this too if you need the absolute smallest binary.
+   */
+  #define USE_MODULE_DRIVERS_LEDS
+
+  /***********************************
+   * SECTION: Explicitly avoid heavy subsystems
+   ************************************/
+
+  /*
+   * Do not enable:
+   * - filesystem,
+   * - MQTT,
+   * - rules,
+   * - sensors,
+   * - lighting,
+   * - displays,
+   * - crash recorder,
+   * - full WebUI,
+   * - template export.
+   */
+
+  /***********************************
+   * SECTION: Module/GPIO template
+   ************************************/
+
+  #define USE_MODULE_TEMPLATE
+
+  DEFINE_PGM_CTR(MODULE_TEMPLATE)
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      "\"D3\":\"" D_GPIO_KEY1_INV_CTR "\","
+      "\"D4\":\"" D_GPIO_LED1_CTR "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
+   * SECTION: Function template
+   ************************************/
+
+  /*
+   * Keep this empty/minimal.
+   * MQTT is not needed in the bridge image.
+   */
+  #define USE_FUNCTION_TEMPLATE
+
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+  "}";
+
+#endif // DEVICE_INTERMEDIATE_FLASH__ESP8266_MINIMAL_OTA
+
+
+
 
 
 #endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_ACTIVEDEVELOPMENT_H

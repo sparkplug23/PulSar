@@ -1246,7 +1246,7 @@ void mWebServer::SettingsPages_GET(AsyncWebServerRequest* request)
     case SUBPAGE_WEB_DMX:     content = PAGE_settings_dmx;   len = PAGE_settings_dmx_length;   break;
     #endif
     case SUBPAGE_WEB_UM:      content = PAGE_settings_um_web;    len = PAGE_settings_um_web_length;    break;
-    case SUBPAGE_WEB_UPDATE:  content = PAGE_update_web;         len = PAGE_update_web_length;         break;
+    // case SUBPAGE_WEB_UPDATE:  content = PAGE_update_web;         len = PAGE_update_web_length;         break;
     #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     case SUBPAGE_WEB_2D:      content = PAGE_settings_2D;    len = PAGE_settings_2D_length;    break;
     #endif

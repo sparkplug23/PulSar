@@ -7,76 +7,170 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License
  ****************************************************/
 
-// from github, to do later,cliff
-// boxcar filters use a circular buffer of old values, and derive the filter output using some polynomial on all the items. If the coefficients are all the same, it's simple: keep an accumulator, and before you add a new reading into the buffer, subtract what you were about to overwrite and add the new reading to the accumulator. The filter output is then just accumulator/N (for N samples). This creates an accurate moving average of only the last N readings.
-
 #ifndef _DoubleEMAFilterLib_h
 #define _DoubleEMAFilterLib_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
-	#include "arduino.h"
+  #include "arduino.h"
 #else
-	#include "WProgram.h"
+  #include "WProgram.h"
 #endif
+
+#include <math.h>
 
 template <typename T>
 class DoubleEMAFilter
 {
 public:
-	DoubleEMAFilter<T>(const double alpha1, const double alpha2);
-	T AddValue(const T value);
-	T GetBandPass();
-	T GetBandStop();
-	void SetAlpha(const double alpha1, const double alpha2);
+  DoubleEMAFilter<T>(const double alpha1, const double alpha2);
+
+  T AddValue(const T value);
+  T GetBandPass();
+  T GetBandStop();
+
+  void SetAlpha(const double alpha1, const double alpha2);
+  void Reset();
+  bool IsReady();
 
 private:
-	double _alphaLow;
-	double _alphaHigh;
+  double ClampAlpha(const double alpha);
 
-	T _lowPassFilterLow;
-	T _lowPassFilterHigh;
-	T _bandPassFilter;
-	T _bandStopFilter;
+private:
+  double _alphaLow  = 0.0;
+  double _alphaHigh = 0.0;
+
+  T _lowPassFilterLow  = static_cast<T>(0);
+  T _lowPassFilterHigh = static_cast<T>(0);
+  T _bandPassFilter    = static_cast<T>(0);
+  T _bandStopFilter    = static_cast<T>(0);
+
+  bool _hasValue = false;
 };
+
+
+template<typename T>
+double DoubleEMAFilter<T>::ClampAlpha(const double alpha)
+{
+  if (!isfinite(alpha))
+  {
+    return 0.0;
+  }
+
+  if (alpha < 0.0)
+  {
+    return 0.0;
+  }
+
+  if (alpha > 1.0)
+  {
+    return 1.0;
+  }
+
+  return alpha;
+}
 
 
 template<typename T>
 void DoubleEMAFilter<T>::SetAlpha(const double alpha1, const double alpha2)
 {
-	this->_alphaLow = alpha1 < alpha2 ? alpha1 : alpha2;
-	this->_alphaHigh = alpha1 >= alpha2 ? alpha1 : alpha2;
+  const double a1 = ClampAlpha(alpha1);
+  const double a2 = ClampAlpha(alpha2);
+
+  _alphaLow  = (a1 <  a2) ? a1 : a2;
+  _alphaHigh = (a1 >= a2) ? a1 : a2;
 }
+
 
 template<typename T>
 DoubleEMAFilter<T>::DoubleEMAFilter(const double alpha1, const double alpha2)
 {
-	this->_alphaLow = alpha1 < alpha2 ? alpha1 : alpha2;
-	this->_alphaHigh = alpha1 >= alpha2 ? alpha1 : alpha2;
+  SetAlpha(alpha1, alpha2);
+  Reset();
 }
+
+
+template<typename T>
+void DoubleEMAFilter<T>::Reset()
+{
+  _lowPassFilterLow  = static_cast<T>(0);
+  _lowPassFilterHigh = static_cast<T>(0);
+  _bandPassFilter    = static_cast<T>(0);
+  _bandStopFilter    = static_cast<T>(0);
+
+  _hasValue = false;
+}
+
+
+template<typename T>
+bool DoubleEMAFilter<T>::IsReady()
+{
+  return _hasValue;
+}
+
 
 template<typename T>
 T DoubleEMAFilter<T>::AddValue(const T value)
 {
-	// Two basic EMA with cutoff frequency. alpha[0 1] where 0 = fast and 1 = slow ie 0=HPF and 1=LPF
-	this->_lowPassFilterLow  = (T)(this->_alphaLow  * value + (1 - this->_alphaLow)  * this->_lowPassFilterLow);
-	this->_lowPassFilterHigh = (T)(this->_alphaHigh * value + (1 - this->_alphaHigh) * this->_lowPassFilterHigh);
+  if (!isfinite((double)value))
+  {
+    return _bandStopFilter;
+  }
 
-	this->_bandPassFilter    = this->_lowPassFilterHigh - this->_lowPassFilterLow;
-	this->_bandStopFilter    = value - this->_bandPassFilter;
-	// my addition
-	return GetBandStop();
+  if (!_hasValue)
+  {
+    _lowPassFilterLow  = value;
+    _lowPassFilterHigh = value;
+    _bandPassFilter    = static_cast<T>(0);
+    _bandStopFilter    = value;
+
+    _hasValue = true;
+
+    return _bandStopFilter;
+  }
+
+  const double value_d = (double)value;
+
+  const double next_low =
+    (_alphaLow * value_d) +
+    ((1.0 - _alphaLow) * (double)_lowPassFilterLow);
+
+  const double next_high =
+    (_alphaHigh * value_d) +
+    ((1.0 - _alphaHigh) * (double)_lowPassFilterHigh);
+
+  if ((!isfinite(next_low)) || (!isfinite(next_high)))
+  {
+    Reset();
+    return _bandStopFilter;
+  }
+
+  _lowPassFilterLow  = static_cast<T>(next_low);
+  _lowPassFilterHigh = static_cast<T>(next_high);
+
+  _bandPassFilter = static_cast<T>(_lowPassFilterHigh - _lowPassFilterLow);
+  _bandStopFilter = static_cast<T>(value - _bandPassFilter);
+
+  if (!isfinite((double)_bandPassFilter) || !isfinite((double)_bandStopFilter))
+  {
+    Reset();
+    return _bandStopFilter;
+  }
+
+  return _bandStopFilter;
 }
+
 
 template<typename T>
-inline T DoubleEMAFilter<T>::GetBandPass()
+T DoubleEMAFilter<T>::GetBandPass()
 {
-	return this->_bandPassFilter;
+  return _bandPassFilter;
 }
 
+
 template<typename T>
-inline T DoubleEMAFilter<T>::GetBandStop()
+T DoubleEMAFilter<T>::GetBandStop()
 {
-	return this->_bandStopFilter;
+  return _bandStopFilter;
 }
+
 #endif
-

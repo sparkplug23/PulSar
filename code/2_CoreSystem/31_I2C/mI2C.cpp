@@ -112,37 +112,66 @@ void mI2C::Pre_Init()
  * 
  */
 
-  tkr_set->runtime.i2c_enabled = ( tkr_pins->PinUsed(GPIO_I2C_SCL) && tkr_pins->PinUsed(GPIO_I2C_SDA));
+  const uint8_t i2c_bus_i = 0;  // I2C bus 1 in human/template naming, zero-based internally
+
+  tkr_set->runtime.i2c_enabled = ( tkr_pins->PinUsed(GPIO_I2C_SCL, i2c_bus_i) && tkr_pins->PinUsed(GPIO_I2C_SDA, i2c_bus_i) );
+
+  ALOG_INF(PSTR("I2C Enabled: %s"), tkr_set->runtime.i2c_enabled ? "Yes" : "No");
+
   if (tkr_set->runtime.i2c_enabled)
-  { 
-    if(wire == nullptr)
+  {
+    if (wire == nullptr)
     {
+      const int8_t pin_sda = tkr_pins->GetPin(GPIO_I2C_SDA, i2c_bus_i);
+      const int8_t pin_scl = tkr_pins->GetPin(GPIO_I2C_SCL, i2c_bus_i);
+
       #ifdef ESP8266
+
       wire = new TwoWire();
-      wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA), tkr_pins->GetPin(GPIO_I2C_SCL)); // no return to check status
-      #else
-      wire = new TwoWire(0);
-      ALOG_DBM( PSTR("Trying to start i2c 2-wire"));
-      #ifdef ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
-      if(wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA_ID), tkr_pins->GetPin(GPIO_I2C_SCL_ID)))//, 100000))
+      wire->begin(pin_sda, pin_scl); // ESP8266 begin has no status return
+
+      ALOG_HGL(
+        PSTR("STARTED i2c 2-wire bus%d SDA%d SCL%d"),
+        i2c_bus_i + 1,
+        pin_sda,
+        pin_scl
+      );
+
       #else
 
-      if(wire->begin(tkr_pins->GetPin(GPIO_I2C_SDA,0), tkr_pins->GetPin(GPIO_I2C_SCL,0), I2C_BUS_SPEED))
+      wire = new TwoWire(i2c_bus_i);
+
+      ALOG_DBM(PSTR("Trying to start i2c 2-wire bus%d"), i2c_bus_i + 1);
+
+      #ifdef ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
+      if (wire->begin(pin_sda, pin_scl))
+      #else
+      if (wire->begin(pin_sda, pin_scl, I2C_BUS_SPEED))
       #endif // ENABLE_DEVFEATURE_SETTING_I2C_TO_DEFAULT
       {
-        ALOG_HGL( PSTR("STARTED to start i2c 2-wire sda%d scl%d"),tkr_pins->GetPin(GPIO_I2C_SDA,0),tkr_pins->GetPin(GPIO_I2C_SCL,0));
+        ALOG_INF(
+          PSTR("STARTED i2c 2-wire bus%d SDA%d SCL%d"),
+          i2c_bus_i + 1,
+          pin_sda,
+          pin_scl
+        );
       }
       else
       {
-        ALOG_DBM( PSTR("NOT STARTED to start i2c 2-wire"));
+        ALOG_ERR(
+          PSTR("NOT STARTED i2c 2-wire bus%d SDA%d SCL%d"),
+          i2c_bus_i + 1,
+          pin_sda,
+          pin_scl
+        );
       }
-      #endif
-    }   
-    
+
+      #endif // ESP8266
+    }
+
     #ifdef ENABLE_DEVFEATURE_I2C__SET_WIRE_INSTANCE_WITH_TWOWIRE_ZERO
-    Wire = *tkr_i2c->wire; // Forces Compatibility. This copies the instance from tkr_i2c->wire into Wire, ensuring all libraries expecting Wire can still function.
+    Wire = *tkr_i2c->wire; // Compatibility for libraries expecting global Wire
     #endif
-    
   } // i2c_enabled
 
   Debug_I2CScan_To_Serial();
@@ -392,26 +421,6 @@ void mI2C::Debug_I2CScan_To_Serial()
 
 }
 
-// bool mI2C::I2cValidRead(uint8_t addr, uint8_t reg, uint8_t size)
-// {
-//   uint8_t x = I2C_RETRY_COUNTER;
-
-//   i2c_buffer = 0;
-//   do {
-//     wire->beginTransmission(addr);                       // start transmission to device
-//     wire->write(reg);                                    // sends register address to read from
-//     if (0 == wire->endTransmission(false)) {             // Try to become I2C Master, send data and collect bytes, keep master status for next request...
-//       wire->requestFrom((int)addr, (int)size);           // send data n-bytes read
-//       if (wire->available() == size) {
-//         for (uint8_t i = 0; i < size; i++) {
-//           i2c_buffer = i2c_buffer << 8 | wire->read();   // receive DATA
-//         }
-//       }
-//     }
-//     x--;
-//   } while (wire->endTransmission(true) != 0 && x != 0);  // end transmission
-//   return (x);
-// }
 
 bool mI2C::I2cValidRead8(uint8_t *data, uint8_t addr, uint8_t reg)
 {
@@ -597,55 +606,6 @@ void mI2C::I2cScan(char *devs, unsigned int devs_len)
 // #endif
 
 }
-
-// //old function that seems to be changed
-// bool mI2C::I2cDevice(uint8_t addr) // This checks ALL, not just the desired address so is slow
-// {
-
-//   if(!wire){ return false; } // Not started
-  
-//   ALOG_INF( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=search"),addr);
-
-//   for (uint8_t address = 1; address <= 127; address++) {
-//       ALOG_TST(PSTR("I2cDevice(%x|%x)=for"),address,addr);
-//     wire->beginTransmission(address);
-//     if (!wire->endTransmission() && (address == addr)) 
-//     {
-//       ALOG_INF( PSTR("I2cDevice(0x%02X)=true found"),addr);
-//       return true;
-//     }else
-//     if (!wire->endTransmission() && (address != addr))
-//     {
-//       ALOG_INF( PSTR("I2cDevice(%x) also found %x"),address,addr);
-//     }
-//   }
-  
-//   ALOG_ERR(PSTR("I2cDevice(%x)=FALSE no response"),addr);
-  
-//   return false;
-// }
-
-// bool mI2C::I2cDevice_IsConnected(uint8_t addr) // This checks ALL, not just the desired address so is slow
-// {
-
-//   ALOG_DBM( PSTR(DEBUG_INSERT_PAGE_BREAK "I2cDevice(%x)=starting"),addr);
-
-//   uint8_t address = addr;
-//   ALOG_DBM( PSTR("I2cDevice(%x)=for"),addr);
-//   wire->beginTransmission(address);
-//   if (!wire->endTransmission() && (address == addr)) 
-//   {
-//     ALOG_DBM( PSTR("I2cDevice(%x)=true"),addr);
-//     return true;
-//   }else
-//   if (!wire->endTransmission() && (address != addr))
-//   {
-//     ALOG_DBM(PSTR("I2cDevice(%x) also found %x"),address,addr);
-//   }
-//   ALOG_ERR( PSTR("I2cDevice(%x)=FALSE"),addr);
-  
-//   return false;
-// }
 
 
 void mI2C::I2cResetActive(uint32_t addr, uint32_t count)

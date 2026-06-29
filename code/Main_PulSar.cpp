@@ -1,21 +1,5 @@
-
-// #include <Arduino.h>
-
-// void setup(void)
-// { 
-//   Serial.begin(115200); // to be baudrate_tmp later
-//   Serial.println(F("Starting up...")); Serial.flush();  
-// }
-
-// void loop(void)
-// { 
-//   Serial.println(F("Looping...")); Serial.flush();
-//   delay(100);  
-// } 
-
-
 /**
- * @file    HomeControlSystem.cpp
+ * @file    PulSar.cpp
  * @author  Michael Doone (michaeldoonehub@gmail.com)
  * @brief   Primary code setup() and loop()
  * @version 0.1
@@ -49,7 +33,6 @@
 #include <gpio_viewer.h> // Must me the first include in your project
 GPIOViewer gpio_viewer;
 #endif
-
 
 
 /*********************************************************************************************
@@ -135,6 +118,12 @@ void Serial_PrintFirmwareSplash()
     Serial.println(F("Friendly Name:   <DEVICENAME_FRIENDLY_CTR not defined>"));
   #endif
 
+  #ifdef DEVICENAME_BUILD_ENVIRONMENT
+    Serial.printf("Build Environment: %s\r\n", DEVICENAME_BUILD_ENVIRONMENT);
+  #else
+    Serial.println(F("Build Environment:"));
+  #endif
+
   #ifdef FIRMWARE_NAME_CTR
     Serial.printf("Firmware:        %s\r\n", FIRMWARE_NAME_CTR);
   #else
@@ -180,164 +169,625 @@ void Serial_PrintFirmwareSplash()
   Serial.println(F("=================================================="));
   Serial.println();
 }
+
 /********************************************************************************************/
-/*********************SETUP******************************************************************/
+/********************* ENABLE_FEATURE_FASTBOOT__DETECTION ******************************************************************/
 /********************************************************************************************/
+
+
+#ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
+void Fastboot_RecoveryCheck(void)
+{
+  ALOG_DBM(PSTR("ARESET TWICE! \t\t\t%d"), RtcMemory__BootState.fast_reboot_count);
+
+  const uint8_t boot_loop_offset = tkr_set->Settings.sysopt_system.param.boot_loop_offset;
+
+  if (!boot_loop_offset) {
+    return;
+  }
+
+  // Not yet considered a boot loop
+  if (RtcMemory__BootState.fast_reboot_count <= boot_loop_offset) {
+    return;
+  }
+
+  const uint8_t fastboot_stage = RtcMemory__BootState.fast_reboot_count - boot_loop_offset;
+
+  ALOG_DBM(
+    PSTR("Fastboot: Recovery stage %d, fast_reboot_count=%d, offset=%d"),
+    fastboot_stage,
+    RtcMemory__BootState.fast_reboot_count,
+    boot_loop_offset
+  );
+
+  // --------------------------------------------------------------------------
+  // Stage 1:
+  // First detected fast reboot beyond offset.
+  // Log only / reserve for very light test-disable behaviour.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 1) {
+    ALOG_DBG(PSTR("Fastboot: Stage 1 - detected boot loop, no destructive action"));
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 2:
+  // Disable newest experimental/test code.
+  // Modules may listen for this event and disable risky dev features.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 2) {
+    ALOG_DBG(PSTR("Fastboot: Stage 2 - FASTBOOT_EVENT_1"));
+    tkr->Tasker_Interface(TASK_FASTBOOT_EVENT_1);
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 3:
+  // Disable broader experimental code.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 3) {
+    ALOG_DBG(PSTR("Fastboot: Stage 3 - FASTBOOT_EVENT_2"));
+    tkr->Tasker_Interface(TASK_FASTBOOT_EVENT_2);
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 4:
+  // Disable rules first. Rules cross-link modules and are high-risk during boot.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 4) {
+    ALOG_DBG(PSTR("Fastboot: Stage 4 - Disable rules"));
+
+    // Runtime flag preferred, if available:
+    tkr_set->runtime.fastboot.disable_rules = true;
+
+    // Later, also guard rule startup:
+    // if (!tkr_set->runtime.fastboot.disable_rules) {
+    //   tkr->Tasker_Interface(TASK_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID);
+    // }
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 5:
+  // Disable sensors. Sensors touch I2C/SPI/UART/external devices and can block.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 5) {
+    ALOG_DBG(PSTR("Fastboot: Stage 5 - Disable sensors"));
+
+    tkr_set->runtime.fastboot.disable_sensors = true;
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 6:
+  // Disable drivers / actuators.
+  // Keep network, OTA, WebUI, filesystem, logging alive.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 6) {
+    ALOG_DBG(PSTR("Fastboot: Stage 6 - Disable drivers"));
+
+    tkr_set->runtime.fastboot.disable_drivers = true;
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 7:
+  // Skip stored module JSON/config loads.
+  // This recovers from bad module config files, not bad core settings.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 7) {
+    ALOG_DBG(PSTR("Fastboot: Stage 7 - Disable module filesystem config load"));
+
+    tkr_set->runtime.fastboot.disable_module_config_load = true;
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 8:
+  // Skip templates and use compiled-safe module configuration.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 8) {
+    ALOG_DBG(PSTR("Fastboot: Stage 8 - Disable templates, force safe compiled config"));
+
+    tkr_set->runtime.fastboot.disable_templates = true;
+    tkr_set->runtime.fastboot.force_safe_compiled_config = true;
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 9:
+  // Reset settings to defaults, but force known STA WiFi for OTA recovery.
+  // First destructive recovery stage.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage == 9) {
+    ALOG_DBG(PSTR("Fastboot: Stage 9 - Reset settings to defaults with STA recovery"));
+
+    tkr_set->runtime.fastboot.disable_rules = true;
+    tkr_set->runtime.fastboot.disable_sensors = true;
+    tkr_set->runtime.fastboot.disable_drivers = true;
+    tkr_set->runtime.fastboot.disable_module_config_load = true;
+    tkr_set->runtime.fastboot.disable_templates = true;
+
+    // Later implement these as plain/global-safe helpers or thin settings calls.
+    // SettingsSave_Prev();
+    // SettingsDefault();
+    // ApplyHardcodedStaWifiRecoverySettings();
+    // SettingsSaveAll();
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 10:
+  // Factory recovery. Clear settings and boot AP recovery mode with OTA/WebUI.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage == 10) {
+    ALOG_ERR(PSTR("Fastboot: Stage 10 - Factory AP recovery"));
+
+    tkr_set->runtime.fastboot.disable_rules = true;
+    tkr_set->runtime.fastboot.disable_sensors = true;
+    tkr_set->runtime.fastboot.disable_drivers = true;
+    tkr_set->runtime.fastboot.disable_module_config_load = true;
+    tkr_set->runtime.fastboot.disable_templates = true;
+    tkr_set->runtime.fastboot.factory_ap_recovery = true;
+
+    // Later:
+    // SettingsSave_Prev();
+    // SettingsErase(3);
+    // SettingsDefault();
+    // ApplyFactoryApRecoverySettings();
+    // SettingsSaveAll();
+  }
+
+  // --------------------------------------------------------------------------
+  // Stage 11+:
+  // Do not continue normal boot. Recovery only.
+  // --------------------------------------------------------------------------
+  if (fastboot_stage >= 11) {
+    ALOG_ERR(PSTR("Fastboot: Stage 11+ - Blocking safe recovery mode"));
+
+    tkr_set->runtime.fastboot.blocking_safe_mode = true;
+
+    // Later:
+    SafeMode_StartAndAwaitOTA();
+  }
+
+  ALOG_INF(PSTR("FRC: " D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcMemory__BootState.fast_reboot_count);
+}
+#endif // ENABLE_FEATURE_FASTBOOT__DETECTION
+
+
+/********************************************************************************************/
+/********************* SETUP ****************************************************************/
+/********************************************************************************************/
+/************************************************************************************************
+ * FUNCTION: setup
+ *
+ * PURPOSE
+ * -------
+ * Boot the PulSar runtime in a deterministic order:
+ *
+ *   - bring up minimum hardware/recovery support,
+ *   - initialise core services,
+ *   - build RAM defaults,
+ *   - load persistent settings,
+ *   - apply recovery policy,
+ *   - initialise GPIO/modules,
+ *   - load late templates and module-owned filesystem config,
+ *   - start runtime services.
+ *
+ *
+ * BOOT PHASES
+ * -----------
+ *
+ *  0. Early hardware / recovery layer
+ *
+ *     Runs before normal settings, filesystem config, and module activation.
+ *
+ *     Responsibilities:
+ *       - disable brownout if configured,
+ *       - start early Serial for crash/fastboot diagnostics,
+ *       - start watchdog,
+ *       - update RTC fastboot/reboot counter,
+ *       - enter SafeMode OTA/cellular recovery if crash count is excessive.
+ *
+ *     Rule:
+ *       This layer must not depend on loaded settings, module config, or normal AddLog state.
+ *
+ *
+ *  1. Core bootstrap
+ *
+ *     Responsibilities:
+ *       - restore minimal RTC runtime settings where available,
+ *       - print boot splash,
+ *       - start shared JSON/data buffers,
+ *       - initialise global module pointers with tkr->Instance_Init(),
+ *       - initialise internal filesystem.
+ *
+ *
+ *  2. Settings
+ *
+ *     SettingsDefault():
+ *       - builds compiled binary defaults in RAM,
+ *       - does not save,
+ *       - does not erase existing settings.
+ *
+ *     MODULE_TEMPLATE / device manifest:
+ *       - compile-time device identity and GPIO mapping,
+ *       - seeded into RAM defaults before SettingsLoad(),
+ *       - saved settings override this unless USE_MODULE_TEMPLATE__OVERRIDE is enabled.
+ *
+ *     SettingsLoad():
+ *       - loads /settings.txt if valid,
+ *       - validates holder, size, and CRC,
+ *       - restores last-known-good on appropriate corruption paths,
+ *       - falls back to RAM defaults if storage is missing/invalid/incompatible.
+ *
+ *     SettingsDelta():
+ *       - applies version/layout migration for valid loaded settings,
+ *       - is not a default builder,
+ *       - is not a module config loader.
+ *
+ *
+ *  3. Fastboot recovery after settings
+ *
+ *     Fastboot_RecoveryCheck():
+ *       - runs after settings are available,
+ *       - applies staged recovery flags,
+ *       - can disable rules, sensors, drivers, templates, and module filesystem config,
+ *       - must run before GPIO/module init and before late config loading.
+ *
+ *
+ *  4. Pointer initialisation
+ *
+ *     TASK_POINTER_INIT:
+ *       - gives modules their cross-module pointers,
+ *       - must run before GPIO/module init.
+ *
+ *
+ *  5. GPIO and module initialisation
+ *
+ *     Order:
+ *       - GpioInit(),
+ *       - TASK_PRE_INIT,
+ *       - TASK_INIT,
+ *       - TASK_POST_INIT,
+ *       - YTASK_INIT.
+ *
+ *     Rule:
+ *       GPIO/device identity must already be established before this phase.
+ *
+ *
+ *  6. Normal post-init compile-time defaults
+ *
+ *     TASK_CONFIG_LOAD_POST_INIT_DEFAULTS_FROM_PROGMEM:
+ *       - normal boot path,
+ *       - runs after modules exist,
+ *       - uses module JSON command handlers where required,
+ *       - applies late defaults such as LIGHTING_TEMPLATE, FUNCTION_TEMPLATE, RULES_TEMPLATE,
+ *       - is not GPIO/device identity,
+ *       - is not the development override pass.
+ *
+ *
+ *  7. Module-owned filesystem config/data
+ *
+ *     TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM:
+ *       - loads module-owned config files.
+ *
+ *     TASK_FILESYSTEM__LOAD__MODULE_DATA__ID:
+ *       - loads optional module-owned state/data/presets.
+ *
+ *     Examples:
+ *       - module_lighting_config.json,
+ *       - module_lighting_presets.json,
+ *       - module_rules_config.json,
+ *       - module_sensor_calibration.json.
+ *
+ *     Rule:
+ *       These files override normal compile-time defaults.
+ *
+ *
+ *  8. Development compile-time override pass
+ *
+ *     TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM:
+ *       - late development/testing enforcement path,
+ *       - runs after normal defaults and filesystem config,
+ *       - only override templates should apply here,
+ *       - used when compiled templates must win over filesystem/web/UI/user config.
+ *
+ *
+ *  9. Dynamic memory refresh
+ *
+ *     TASK_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID:
+ *       - runs after templates and module filesystem config,
+ *       - allows modules to resize/rebuild buffers after config/presets are known.
+ *
+ *
+ * 10. Runtime services
+ *
+ *     Responsibilities:
+ *       - optional debug export of compile-time templates to filesystem,
+ *       - initialise MQTT handlers,
+ *       - configure default MQTT transmit periods,
+ *       - add default GPIO-derived rules if rules are not disabled,
+ *       - restore saved runtime log level,
+ *       - apply debug/boot override init hooks,
+ *       - mark boot complete,
+ *       - emit boot message.
+ *
+ *
+ * CURRENT HIGH-LEVEL FLOW
+ * -----------------------
+ *
+ *   [Reset]
+ *      |
+ *      v
+ *   [Early Serial / WDT / RTC fastboot counter]
+ *      |
+ *      v
+ *   [Optional SafeMode OTA/cellular recovery]
+ *      |
+ *      v
+ *   [RTC runtime settings]
+ *      |
+ *      v
+ *   [Serial splash]
+ *      |
+ *      v
+ *   [JsonBuilder / BufferWriter]
+ *      |
+ *      v
+ *   [tkr->Instance_Init()]
+ *      |
+ *      v
+ *   [Filesystem Init]
+ *      |
+ *      v
+ *   [SettingsInit]
+ *      |
+ *      v
+ *   [SettingsDefault]
+ *      |
+ *      v
+ *   [MODULE_TEMPLATE seed into RAM defaults]
+ *      |
+ *      v
+ *   [SettingsLoad]
+ *      |
+ *      v
+ *   [SettingsDelta]
+ *      |
+ *      v
+ *   [Optional MODULE_TEMPLATE hard override]
+ *      |
+ *      v
+ *   [Fastboot_RecoveryCheck]
+ *      |
+ *      v
+ *   [TASK_POINTER_INIT]
+ *      |
+ *      v
+ *   [GpioInit]
+ *      |
+ *      v
+ *   [TASK_PRE_INIT]
+ *      |
+ *      v
+ *   [TASK_INIT]
+ *      |
+ *      v
+ *   [TASK_POST_INIT / YTASK_INIT]
+ *      |
+ *      v
+ *   [TASK_CONFIG_LOAD_POST_INIT_DEFAULTS_FROM_PROGMEM]
+ *      |
+ *      v
+ *   [TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM]
+ *      |
+ *      v
+ *   [TASK_FILESYSTEM__LOAD__MODULE_DATA__ID]
+ *      |
+ *      v
+ *   [TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM]
+ *      |
+ *      v
+ *   [TASK_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID]
+ *      |
+ *      v
+ *   [Optional template export to filesystem]
+ *      |
+ *      v
+ *   [MQTT handlers]
+ *      |
+ *      v
+ *   [Rules default GPIO binding]
+ *      |
+ *      v
+ *   [Restore runtime log level]
+ *      |
+ *      v
+ *   [Debug/override init]
+ *      |
+ *      v
+ *   [TASK_ON_BOOT_COMPLETE]
+ *      |
+ *      v
+ *   [TASK_BOOT_MESSAGE]
+ ************************************************************************************************/
+
 
 void setup(void)
 { 
 
-/********************************************************************************************
- ** Brownout ********************************************************************************
- ********************************************************************************************/
- 
+  /********************************************************************************************
+   ** Brownout / Early ESP32 Hardware *********************************************************
+  ********************************************************************************************/
+
   #ifdef ESP32
+
     #ifdef DISABLE_ESP32_BROWNOUT
       DisableBrownout();      // Workaround possible weak LDO resulting in brownout detection during Wifi connection
     #endif  // DISABLE_ESP32_BROWNOUT
 
+    /************************************************************************************************
+     * SECTION: Early Serial
+     *
+     * Keep this early for fastboot/recovery/crash debug.
+     * Normal baudrate refinement can happen later after RTC/settings are available.
+     ************************************************************************************************/
+
     Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT); // to be baudrate_tmp later
+
+    #ifdef ENABLE_DEVFEATURE_SETDEBUGOUTPUT
     Serial.setDebugOutput(true);
+    #endif
+
     #ifdef CONFIG_IDF_TARGET_ESP32
-    // restore GPIO16/17 if no PSRAM is found
-    if (!SupportESP32::FoundPSRAM()) {
-      // // test if the CPU is not pico
+    /************************************************************************************************
+     * SECTION: Restore GPIO16/17 when PSRAM is absent
+     *
+     * These pins can be reserved for PSRAM on some ESP32 packages. If no PSRAM is detected,
+     * release them so normal GPIO use can work.
+     ************************************************************************************************/
+    if (!SupportESP32::FoundPSRAM())
+    {
       uint32_t chip_ver = REG_GET_FIELD(EFUSE_BLK0_RDATA3_REG, EFUSE_RD_CHIP_VER_PKG);
       uint32_t pkg_version = chip_ver & 0x7;
+
       if (pkg_version <= 3) {   // D0WD, S0WD, D2WD
         gpio_reset_pin(GPIO_NUM_16);
         gpio_reset_pin(GPIO_NUM_17);
       }
-      // uint32_t pkg_version = bootloader_common_get_chip_ver_pkg();
-      // if (pkg_version <= 3) {         // D0WD, S0WD, D2WD
-      //   gpio_reset_pin((gpio_num_t)CONFIG_D0WD_PSRAM_CS_IO);
-      //   gpio_reset_pin((gpio_num_t)CONFIG_D0WD_PSRAM_CLK_IO);
-      //   // IDF5.3 fix esp_gpio_reserve used in init PSRAM
-      //   esp_gpio_revoke(BIT64(CONFIG_D0WD_PSRAM_CS_IO) | BIT64(CONFIG_D0WD_PSRAM_CLK_IO));
-      // }
     }
     #endif  // CONFIG_IDF_TARGET_ESP32
-    
+
     #ifdef USE_MODULE_DRIVERS__CAMERA
-    psramInit();               // initialize PSRAM        
-    Serial.printf("psramFound: %d\n\r", psramFound());
-    Serial.printf("esp_spiram_is_initialized: %d\n\r", esp_spiram_is_initialized());
-    Serial.printf("Free PSRAM: %u\n\r", ESP.getFreePsram());
+    /************************************************************************************************
+     * SECTION: Camera PSRAM early init/debug
+     ************************************************************************************************/
+    psramInit();
+
+    // Serial.printf("psramFound: %d\n\r", psramFound());
+    // Serial.printf("esp_spiram_is_initialized: %d\n\r", esp_spiram_is_initialized());
+    // Serial.printf("Free PSRAM: %u\n\r", ESP.getFreePsram());
     #endif
+
   #endif  // ESP32
 
-  /**
-   * @brief WatchDog timer
-   * Code priority: Highest (Before Fastboot, Primary Recovery)
-   **/
-  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-  WDT_Init();
-  #else
-  #warning "No WDT has been enabled, this is not recommended for production code!"
-  #endif
 
   /********************************************************************************************
-   ** Fastboot: >> Base Setup Recovery <<  
-   *     - If Settings, TaskerManager etc is corrupt
-   *     - Minimal code must run above this (Serial start, RTC check)
-   * Code priority: High (Secondary Recovery)
-   * @note AddLog can not be used
+   ** Watchdog ********************************************************************************
   ********************************************************************************************/
 
-  /**
-   * @brief Only enable serial first if fastboot debugging
-   **/
-  #ifdef DEBUG_FASTBOOT
-  Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT);
-  Serial.println(F("\n\rSerial Enabled Early for FastBoot Debug" DEBUG_INSERT_PAGE_BREAK));
+  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+    WDT_Init();
+  #else
+    #warning "No WDT has been enabled, this is not recommended for production code!"
   #endif
 
-  #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
 
-    RtcFastboot_Load();
+  /********************************************************************************************
+   ** Fastboot: Base Setup Recovery ***********************************************************
+  *
+  * Purpose:
+  * - Detects repeated crashes before normal settings/modules are loaded.
+  * - Can enter OTA/cellular recovery before the crashing subsystem is reached.
+  *
+  * Code priority:
+  * - High, before normal settings load and module init.
+  *
+  * Notes:
+  * - AddLog cannot be used here.
+  ********************************************************************************************/
 
-    if (!RtcFastboot_Valid())
+  #ifdef DEBUG_FASTBOOT
+    Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT);
+    Serial.println(F("\n\rSerial Enabled Early for FastBoot Debug" DEBUG_INSERT_PAGE_BREAK));
+  #endif
+
+  #ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
+
+    RtcMemory__BootState_Load();
+
+    if (!RtcMemory__BootState_Valid())
     {
-      RtcFastboot.fast_reboot_count = 0;
+      RtcMemory__BootState.fast_reboot_count = 0;
     }
-    
-    /**
-     * @brief Good Boot: Waking from sleep, keep reseting the counter
-     **/
-    if (ResetReason_g() == REASON_DEEP_SLEEP_AWAKE) 
+
+    /************************************************************************************************
+     * SECTION: Good boot source
+     *
+     * Deep sleep wake is not treated as a crash/reboot loop.
+     ************************************************************************************************/
+
+    if (ResetReason_g() == REASON_DEEP_SLEEP_AWAKE)
     {
-      RtcFastboot.fast_reboot_count = 0;  // Disable fast reboot and quick power cycle detection
-    } 
-    /**
-     * @brief Bad Boot: Increment count
-     **/
+      RtcMemory__BootState.fast_reboot_count = 0;
+    }
+
+    /************************************************************************************************
+     * SECTION: Normal/bad boot source
+     *
+     * Increment early so repeated crashes later in setup are detected.
+     ************************************************************************************************/
+
     else
     {
-      RtcFastboot.fast_reboot_count++;
+      RtcMemory__BootState.fast_reboot_count++;
+
       #ifdef DEBUG_FASTBOOT
-      Serial.printf("FastBoot: Count %d\n\r", RtcFastboot.fast_reboot_count); 
+      Serial.printf("FastBoot: Count %d\n\r", RtcMemory__BootState.fast_reboot_count);
       #endif
     }
-    Serial.printf("FastBoot: Count %u\r\n", RtcFastboot.fast_reboot_count);
 
-    RtcFastboot_Save(); // Save reboot
+    Serial.printf("FastBoot: Count %u\r\n", RtcMemory__BootState.fast_reboot_count);
 
-    /**
-     * @brief If fastboot has exceeded OTA fallback bootcount, then immediately enter safemode/recoverymode
-     * @note:  Code below will first attempt to recover device by disabling feature, this is a last step measure
-     **/
+    RtcMemory__BootState_Save();
+
+    /************************************************************************************************
+     * SECTION: OTA/HTTP recovery fallback
+     ************************************************************************************************/
+
     #if defined(ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
-    if(RtcFastboot.fast_reboot_count > 10)
+    if (RtcMemory__BootState.fast_reboot_count > 10)
     {
       SafeMode_StartAndAwaitOTA();
     }
-    #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-    /**
-     * @brief If fastboot has exceeded OTA fallback bootcount, then immediately enter safemode/recoverymode
-     * @note:  Code below will first attempt to recover device by disabling feature, this is a last step measure
-     **/
-    #if defined(ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID) || defined(ENABLE_DEVFEATURE_FASTBOOT_HTTP_FALLBACK_DEFAULT_SSID)
-    if(RtcFastboot.fast_reboot_count > 10)
-    {
-      SafeMode_CellularConnectionAndSendLocation();
-    }
-    #endif // ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+    #endif
 
-  #endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
+  #endif // ENABLE_FEATURE_FASTBOOT__DETECTION
+
+
+  /********************************************************************************************
+   ** Forced crash test ***********************************************************************
+  ********************************************************************************************/
 
   #ifdef ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
-  Serial.flush();
-  delay(1000);
-  tkr_sup->CmndCrash();
-  #endif  // ENABLE_DEVFEATURE___CAUTION_CAUTION__FORCE_CRASH_FASTBOOT_TESTING
+    Serial.flush();
+    delay(1000);
+    tkr_sup->CmndCrash();
+  #endif
 
 /********************************************************************************************
- ** RTC Settings ********************************************************************************
+ ** RTC Settings ****************************************************************************
  ********************************************************************************************/
   
-  // Load the baudrate from RTC into temp value, and after FlashSettings are loaded, move its value into flash settings
   uint32_t baudrate_tmp = 115200;
 
-  #ifdef ENABLE_DEVFEATURE_RTC_SETTINGS
-  if (RtcSettingsLoad(0)) {
-    uint32_t baudrate = (RtcSettings.baudrate / 300) * 300;  // Make it a valid baudrate
-    if (baudrate) { baudrate_tmp = baudrate; } // Only modify if valid
+  #ifdef ENABLE_FEATURE_RTC__SETTINGS
+  if (RtcMemory__RuntimeState_Load(0)) {
+    uint32_t baudrate = (RtcMemory__RuntimeState.baudrate / 300) * 300;
+    if (baudrate) { baudrate_tmp = baudrate; }
   }
-  #endif // ENABLE_DEVFEATURE_RTC_SETTINGS
+  #endif
 
 /********************************************************************************************
  ** Serial **********************************************************************************
  ********************************************************************************************/
  
   #ifndef DISABLE_SERIAL0_CORE
-  Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT); // to be baudrate_tmp later
+  Serial.begin(SERIAL_DEBUG_BAUD_DEFAULT);
   #endif
+
   #ifdef USE_SERIAL_ALTERNATE_TX
     #ifndef ESP32
       Serial.set_tx(2);
     #endif
   #endif
+
   Serial.println(F("\n\rRebooting,.." DEBUG_INSERT_PAGE_BREAK));
+
   #ifndef DISABLE_SERIAL_LOGGING
   #ifdef ENABLE_BUG_TRACING
   Serial.println(F("DELAYED BOOT for 5 seconds...")); Serial.flush(); delay(5000);
@@ -346,427 +796,332 @@ void setup(void)
   
   Serial_PrintFirmwareSplash();
 
-  Serial.printf("baudrate_tmp = %d\n\r", baudrate_tmp);
+  // Serial.printf("baudrate_tmp = %d\n\r", baudrate_tmp);
 
   #ifdef ENABLE_DEVFEATURE_SETDEBUGOUTPUT
   Serial.setDebugOutput(true);
   #endif 
 
 /********************************************************************************************
- ** Debug: When debugging is crashing, priority is to start wifi and get OTA going and waiting a few seconds to catch an OTA **************************************************************************
- ********************************************************************************************/
-  // #ifdef ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  // if (RtcFastboot.fast_reboot_count > 0) {
-  //   SafeMode_StartAndAwaitOTA(10);
-  // }
-  // #endif
-  
-/********************************************************************************************
  ** Init Pointers ***************************************************************************
  ********************************************************************************************/
  
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-
-  // Init Json builder with memory address and size
-  JsonBuilderI ->Start(data_buffer.payload.ctr, data_buffer.payload.length_used, DATA_BUFFER_PAYLOAD_MAX_LENGTH);
+  JsonBuilderI ->Start(data_buffer.payload.ctr, data_buffer.payload.length_used, DATA_BUFFER_PAYLOAD_MAX_LENGTH);  
+  BufferWriterI->Start(data_buffer.payload.ctr, data_buffer.payload.length_used, DATA_BUFFER_PAYLOAD_MAX_LENGTH);
   
-  DEBUG_LINE_HERE
-
-  if(data_buffer.payload.ctr){
-    DEBUG_LINE_HERE
-  }else{
-    DEBUG_LINE_HERE
-  }
-  
-  
-Serial.print(F("payload.ctr addr = 0x"));
-Serial.println((uintptr_t)data_buffer.payload.ctr, HEX);
-
-Serial.print(F("len_used addr   = 0x"));
-Serial.println((uintptr_t)&data_buffer.payload.length_used, HEX);
-
-Serial.print(F("DATA_BUFFER addr= 0x"));
-Serial.println((uintptr_t)&data_buffer, HEX);
-
-Serial.print(F("size = "));
-Serial.println((unsigned)DATA_BUFFER_PAYLOAD_MAX_LENGTH);
-
-  BufferWriterI->Start(data_buffer.payload.ctr, data_buffer.payload.length_used, DATA_BUFFER_PAYLOAD_MAX_LENGTH); //length prob doesnt need to be set either after its defined in the class
-  
-  /**
-   * @brief Start the Tasker_Interface module
-   **/
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  Serial.printf("time %dms\n\r", millis());
   tkr->Instance_Init();
-  DEBUG_LINE_HERE
-  Serial.printf("time %dms\n\r", millis());
-  DEBUG_LINE_HERE
-  // DEBUG_CRITICAL_STOP_CODE_PRINT
+
 /********************************************************************************************
- ** LOGGING: Set boot log levels *********************************************************************
+ ** LOGGING: Set boot log levels ************************************************************
  ********************************************************************************************/
 
   tkr_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   tkr_set->Settings.logging.serial_level = tkr_set->runtime.seriallog_level_during_boot;
 
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE3
-  
-/********************************************************************************************
- ** Init Pointers ***************************************************************************
- ********************************************************************************************/
- 
   ALOG_DBM(PSTR("AddLog Started"));
 
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE3
-
   #ifdef ENABLE_DEBUGFEATURE_LOGGING__ENABLE_TELNET_IMMEDIATE_WITH_WAIT
-  ALOG_INF(PSTR("Early Wifi connection attempt (up to 20 seconds delay)"));
-  // WiFi.begin(STA_SSID1,STA_PASS1);
-  // for (int i = 0; i < 20; ++i) {   // Retry for ~20 seconds
-  //   delay(1000);
-  //   if ((WiFi.status() == WL_CONNECTED) && WiFi.localIP()){
-  //     tkr_log->StartTelnetServer();
-  //     if(tkr_log->telnet.running){      tkr_log->handleTelnet();    }
-  //     delay(2000);
-  //     ALOG_INF(PSTR("Attempt %d: Successful"), i); 
-  //     break;
-  //   }
-  //   delay(1000);
-  // }
+  ALOG_DBG(PSTR("Early Wifi connection attempt disabled/commented"));
   #endif
-
-  /********************************************************************************************
-   ** Splash boot reason ***************************************************************************
-  ********************************************************************************************/
-
-  DEBUG_LINE_HERE3
-  
-  ALOG_INF(PSTR("ResetReason=%d"), ResetReason_g());
-  
-  DEBUG_LINE_HERE3
 
 /********************************************************************************************
- ** Show PSRAM Present **********************************************************************
+ ** Splash boot reason **********************************************************************
  ********************************************************************************************/
-// #if CONFIG_IDF_TARGET_ESP32
-//   esp_err_t psram_status = esp_psram_init();
-//   if (psram_status != ESP_OK) {
-//     AddLog(LOG_LEVEL_INFO, "PSRAM init failed: 0x%x", psram_status);
-//   }
-// #endif
 
-  #ifdef ESP32
-    // ALOG_INF(PSTR("HDW: %s %s"), GetDeviceHardware().c_str(),
-    //           SupportESP32::FoundPSRAM() ? (SupportESP32::CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
-    // ALOG_DBG(PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), SupportESP32::FoundPSRAM(), SupportESP32::CanUsePSRAM());
-    // #if !defined(HAS_PSRAM_FIX)
-    // if (SupportESP32::FoundPSRAM() && !SupportESP32::CanUsePSRAM()) {
-    //   ALOG_INF(PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
-    // }
-    // #endif
-  #else // ESP32
-    // ALOG_INF(PSTR("HDW: %s"), GetDeviceHardware().c_str());
-  #endif // ESP32
-  DEBUG_LINE_HERE3
-  #ifdef ESP32
-  ALOG_INF(PSTR("HDW: %s %s"), SupportESP32::GetDeviceHardwareRevision().c_str(),SupportESP32::FoundPSRAM() ? (SupportESP32::CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : "" );
-  DEBUG_LINE_HERE3
-  // AddLog(LOG_LEVEL_DEBUG, PSTR("HDW: FoundPSRAM=%i CanUsePSRAM=%i"), FoundPSRAM(), CanUsePSRAM());
-#if !defined(HAS_PSRAM_FIX)
-DEBUG_LINE_HERE3
-  if (SupportESP32::FoundPSRAM() && !SupportESP32::CanUsePSRAM()) {
-    DEBUG_LINE_HERE3
-    ALOG_INF(PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
-  }
-  DEBUG_LINE_HERE3
-  // DELAY_DEBUG(5000); // Allow time to read the log
-#endif  // HAS_PSRAM_FIX
-#else   // ESP8266
-  // AddLog(LOG_LEVEL_INFO, PSTR("HDW: %s"), GetDeviceHardware().c_str());
-#endif  // ESP32
-  DEBUG_LINE_HERE3
-
+  ALOG_DBG(PSTR("ResetReason=%d"), ResetReason_g());
 
 /********************************************************************************************
- ** File System : Init *****************************************************************************
+ ** Hardware splash *************************************************************************
  ********************************************************************************************/
 
-  #ifdef USE_MODULE_CORE_FILESYSTEM
-    tkr_mfile->UfsInit();  // xdrv_50_filesystem.ino
+  #ifdef ESP32
+  ALOG_DBG(
+    PSTR("HDW: %s %s"),
+    SupportESP32::GetDeviceHardwareRevision().c_str(),
+    SupportESP32::FoundPSRAM() ? (SupportESP32::CanUsePSRAM() ? "(PSRAM)" : "(PSRAM disabled)") : ""
+  );
+
+    #if !defined(HAS_PSRAM_FIX)
+    if (SupportESP32::FoundPSRAM() && !SupportESP32::CanUsePSRAM()) {
+      ALOG_DBG(PSTR("HDW: PSRAM is disabled, requires specific compilation on this hardware (see doc)"));
+    }
+    #endif
   #endif
 
-  #ifdef ENABLE_DEVFEATURE__SETTINGS_NEW_STRUCT_2023
-  if (tkr_set->Settings2 == nullptr) {
-    tkr_set->Settings2 = (mSettings::TSettings2*)malloc(sizeof(mSettings::TSettings2));
-  }
-  #endif
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
-  DEBUG_LINE_HERE
+/********************************************************************************************
+ ** File System : Init **********************************************************************
+ ********************************************************************************************/
+
+#ifdef USE_MODULE_CORE_FILESYSTEM
+tkr_mfile->Pre_Init();
+tkr_mfile->Init();
+#endif
 
 /********************************************************************************************
  ** Settings ********************************************************************************
+ *
+ * SettingsDefault():
+ * - Builds compiled binary defaults in RAM.
+ *
+ * SettingsLoad():
+ * - Loads saved binary settings if valid.
+ * - Falls back to defaults if missing/invalid.
+ * - Owns early MODULE_TEMPLATE / device-manifest policy.
+ *
+ * SettingsDelta():
+ * - Applies version-dependent settings migration/fixes.
  ********************************************************************************************/
+tkr_set->SettingsInit();
 
-  tkr_set->SettingsInit();
+#ifdef ENABLE_FEATURE_RESET__EMERGENCY_SERIAL_SETTINGS_RESET_TO_DEFAULT
+EmergencySerial_SettingsReset();
+#endif
 
-  #ifdef ENABLE_FEATURE_RESET__EMERGENCY_SERIAL_SETTINGS_RESET_TO_DEFAULT
-    EmergencySerial_SettingsReset();
-  #endif  // ENABLE_FEATURE_RESET__EMERGENCY_SERIAL_SETTINGS_RESET_TO_DEFAULT
+tkr_sup->init_FirmwareVersion();
 
-  DEBUG_LINE_HERE
-  tkr_sup->init_FirmwareVersion();
-  DEBUG_LINE_HERE
+/**
+ * Build compiled binary defaults in RAM.
+ */
+tkr_set->SettingsDefault();
 
-   //preload minimal required
-  DEBUG_LINE_HERE
-  tkr_set->SettingsDefault();
-  ALOG_DBG(PSTR("Loading minimal defaults"));
-   // Overwrite with latest values, including template if new SETTINGS_CONFIG exists  
-  ALOG_DBG(PSTR("Loading settings from saved memory"));
-  DEBUG_LINE_HERE
-  tkr_set->SettingsLoad();                   // Only the system level settings are loaded here, not the module settings which should happen below
-  
-  DEBUG_LINE_HERE
-  tkr_set->SettingsDelta();
-  DEBUG_LINE_HERE
-  
-  // sprintf(tkr_set->Settings.debug, "debug12\0");
+/**
+ * Seed compiled MODULE_TEMPLATE into the default RAM settings.
+ *
+ * If SettingsLoad() finds no valid saved settings, these seeded defaults remain.
+ * If SettingsLoad() finds valid saved settings, saved settings overwrite this.
+ */
+// tkr_json_template->ModuleDeviceTemplate__LoadDefault();
+
+ALOG_DBG(PSTR("Loading settings from saved memory"));
+
+tkr_set->SettingsLoad();
+tkr_set->SettingsDelta();
+
+/**
+ * Optional hard firmware override.
+ *
+ * This deliberately re-applies the compiled MODULE_TEMPLATE after saved settings
+ * and migration/delta handling, so the firmware template wins.
+ */
+#ifdef USE_MODULE_TEMPLATE__OVERRIDE
+ALOG_WRN(PSTR("SET: USE_MODULE_TEMPLATE__OVERRIDE active, forcing compiled module template"));
+tkr_json_template->ModuleDeviceTemplate__LoadDefault();
+#endif
 
 /********************************************************************************************
- ** LOGGING: Set boot log levels again to override settings load *********************************************************************
+ ** LOGGING: Set boot log levels again to override settings load *****************************
  ********************************************************************************************/
 
   uint8_t saved_serial_loglevel = tkr_set->Settings.logging.serial_level;
   tkr_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
   tkr_set->Settings.logging.serial_level = tkr_set->runtime.seriallog_level_during_boot;
 
-  ALOG_INF(PSTR("Log level for boot: %d"), saved_serial_loglevel);
-
-/********************************************************************************************
- ** System OSWatch: To detect loop hangs that might happen during (OTA) upgrades  ******************
- ********************************************************************************************/
-
-#ifdef ENABLE_FEATURE_SYSTEM__OSWATCH_FOR_LOOP_HANGS
-  // OsWatchInit();
-#endif
+  ALOG_DBG(PSTR("Log level for boot: %d"), saved_serial_loglevel);
 
 /********************************************************************************************
  ** Fastboot ********************************************************************************
  ********************************************************************************************/
 
-  /********************************************************************************************
-   ** Fastboot: >> Configuration Recovery <<  
-   *     - Loaded settings to determine how fastboot is configured
-   *     - This code must run before drivers/sensors are initiated, so they may be disabled if recovery is required
+  #ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
+  Fastboot_RecoveryCheck();
+  #endif
+
+ /********************************************************************************************
+   ** Pointer Init ****************************************************************************
+   *
+   * Must run before GPIO/module init.
+   *
+   * MODULE_TEMPLATE / device-manifest loading is not called directly from setup().
+   * SettingsLoad() owns that early policy.
   ********************************************************************************************/
-  #ifdef ENABLE_DEVFEATURE_FASTBOOT_DETECTION
   
-    ALOG_DBM( PSTR("ARESET TWICE! \t\t\t%d"), RtcFastboot.fast_reboot_count);
-
-    if (tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET]) // SetOption36
-    {         
-      
-      // Disable functionality as possible cause of fast restart within BOOT_LOOP_TIME seconds (Exception, WDT or restarts)
-      if (RtcFastboot.fast_reboot_count > tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET]) {       // Restart twice
-        
-        // Settings->flag3.user_esp8285_enable = 0;       // SetOption51 - Enable ESP8285 user GPIO's - Disable ESP8285 Generic GPIOs interfering with flash SPI
-        if (RtcFastboot.fast_reboot_count > tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +1) {  // Restart 3 times
-          // for (
-            uint32_t i = 0; //i < MAX_RULE_SETS; i++) {
-          //   if (bitRead(Settings->rule_stop, i)) {
-          //     bitWrite(Settings->rule_enabled, i, 0);  // Disable rules causing boot loop
-          ALOG_INF( PSTR("Fastboot: Disable Rule %d"), i );
-          //   }
-          // }
-        }
-        if (RtcFastboot.fast_reboot_count > tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +2) {  // Restarted 4 times
-          // Settings->rule_enabled = 0;                  // Disable all rules
-          // TasmotaGlobal.no_autoexec = true;
-          ALOG_INF( PSTR("Fastboot: Disable All Rules") );
-        }
-        if (RtcFastboot.fast_reboot_count > tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +3) {  // Restarted 5 times
-          // for (uint32_t i = 0; i < nitems(Settings->my_gp.io); i++) {
-          //   Settings->my_gp.io[i] = GPIO_NONE;         // Reset user defined GPIO disabling sensors
-          // }
-          ALOG_INF( PSTR("Fastboot: Disable GPIO Functions") );
-        }
-        if (RtcFastboot.fast_reboot_count > tkr_set->Settings.setoption_255[P_BOOT_LOOP_OFFSET] +4) {  // Restarted 6 times
-          // Settings->module = Settings->fallback_module;  // Reset module to fallback module
-          // Settings->last_module = Settings->fallback_module;
-          ALOG_INF( PSTR("Fastboot: Reset Module") );
-        }
-        ALOG_INF( PSTR("FRC: " D_LOG_SOME_SETTINGS_RESET " (%d)"), RtcFastboot.fast_reboot_count);
-      }
-    }
-
-  #endif // ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-
-/********************************************************************************************
- ** SERIAL: Change baud to module default if module has changed ****************************************
- ********************************************************************************************/
-
-#ifdef ENABLE_FEATURE_BOOT__RESET_BAUDRATE_ON_BOOT_WITH_MODULE_CHANGE
-  // TasmotaGlobal.module_changed = (Settings->module != Settings->last_module);
-  // if (TasmotaGlobal.module_changed) {
-  //   Settings->baudrate = APP_BAUDRATE / 300;
-  //   Settings->serial_config = TS_SERIAL_8N1;
-  // }
-  // SetSerialBaudrate(Settings->baudrate * 300);  // Reset serial interface if current baudrate is different from requested baudrate
-#endif // ENABLE_FEATURE_BOOT__RESET_BAUDRATE_ON_BOOT_WITH_MODULE_CHANGE
-
-/********************************************************************************************
- ** Quick Power Cycle ***********************************************************************
- ********************************************************************************************/
-
-#ifdef ENABLE_FEATURE_BOOT__QUICK_POWER_CYCLE_TO_CAUSE_MANUAL_RESET
-  // if (1 == RtcReboot.fast_reboot_count) {      // Allow setting override only when all is well
-  //   UpdateQuickPowerCycle(true);
-  // }
-#endif // ENABLE_FEATURE_BOOT__QUICK_POWER_CYCLE_TO_CAUSE_MANUAL_RESET
-
-/********************************************************************************************
- ** Load Templates **************************************************************************
- ********************************************************************************************/
-  
-  // configure any memory address needed as part of module init or templates
   tkr->Tasker_Interface(TASK_POINTER_INIT);
 
-  #ifdef ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
-  tkr->Tasker_Interface(TASK_TEMPLATES__MOVE_HARDCODED_TEMPLATES_INTO_FILESYSTEM);
-  #endif
-  
-  /**
-   * @brief DEBUG: Load template from progmem and override settings to ensure my developing devices always enter a known state.
-   *               This should be disabled for production devices, and only enabled for development devices.
-   **/
-  #ifdef ENABLE_FEATURE_TEMPLATES__LOAD_FROM_PROGMEM_TO_OVERRIDE_STORED_SETTINGS_TO_MAINTAIN_KNOWN_WORKING_VALUES
-  ALOG_DBM(PSTR(D_LOG_MEMORY D_LOAD " Temporary loading any progmem templates"));
-  tkr->Tasker_Interface(TASK_TEMPLATES__LOAD_MODULE); // loading module, only interface modules will have these
-  #else
-  #warning "FORCE_TEMPLATE_LOADING is disabled, and production/release is assumed. This REQUIRES valid settings/storage or device may be unstable"
-  #endif
-  
-/********************************************************************************************
- ** Set RUNTIME log values *********************************************************************
- ********************************************************************************************/
+  /********************************************************************************************
+   ** Set RUNTIME log values ******************************************************************
+  ********************************************************************************************/
 
   tkr_set->runtime.seriallog_level_during_boot = SERIAL_LOG_LEVEL_DURING_BOOT;
+  #ifdef ENABLE_LOGGING__BOOT_LOGLEVEL_SET_BY_FASTBOOT_COUNTER
+  #ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
+  uint8_t fastboot_count = RtcMemory__BootState.fast_reboot_count;
+  if(fastboot_count == 0){ tkr_set->runtime.seriallog_level_during_boot = LOG_LEVEL_DEBUG; } //normal boot
+  if(fastboot_count >= 1){ tkr_set->runtime.seriallog_level_during_boot = LOG_LEVEL_INFO; }
+  if(fastboot_count >= 4){ tkr_set->runtime.seriallog_level_during_boot = LOG_LEVEL_DEBUG_LOWLEVEL; }
+  ALOG_DBG(PSTR("seriallog by fastboot %d:%s"), fastboot_count, tkr_log->GetLogLevelNamebyID(tkr_set->runtime.seriallog_level_during_boot));
+  #endif
+  #endif
+
   tkr_set->Settings.logging.serial_level = tkr_set->runtime.seriallog_level_during_boot;  
-    
+  // tkr_set->Settings.logging.serial_level = LOG_LEVEL_DEBUG_LOWLEVEL;//tkr_set->runtime.seriallog_level_during_boot;  
+
   /********************************************************************************************
    ** Initialise System and Modules ***********************************************************
+  *
+  * Order is critical:
+  * - GpioInit()
+  * - TASK_PRE_INIT
+  * - TASK_INIT
+  * - TASK_POST_INIT
+  *
+  * GPIO/device identity must already be established before GpioInit().
   ********************************************************************************************/
 
   #ifdef ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
-  // Must be at the end of your setup
-  // gpio_viewer.setSamplingInterval(25); // You can set the sampling interval in ms, if not set default is 100ms
   gpio_viewer.begin();
   #endif
 
-  // Init the GPIOs
   tkr_pins->GpioInit();
-  // Start pins in modules
-  tkr->Tasker_Interface(TASK_PRE_INIT);
-  // Init devices
-  tkr->Tasker_Interface(TASK_INIT);
-  ALOG_INF(PSTR("TASK_INIT Complete\n\r------------------------------------------------------\n\r------------------------------------------------------"));
-  // Init devices after others have been configured fully
-  tkr->Tasker_Interface(TASK_POST_INIT);
-  // Run system functions 
-  tkr->Tasker_Interface(YTASK_INIT);
-  // Load any stored user values into module
-  tkr->Tasker_Interface(TASK_SETTINGS_LOAD_VALUES_INTO_MODULE); // to be used 2023, this will load module config from filesystem
+
+  tkr_pins->PinTable_SerialPrint("after GpioInit");
   
-  DEBUG_LINE_HERE
-  // Init any dynamic memory buffers
-  tkr->Tasker_Interface(TASK_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
-  DEBUG_LINE_HERE
+  tkr->Tasker_Interface(TASK_PRE_INIT);
+  
+  tkr->Tasker_Interface(TASK_INIT);
 
+  ALOG_DBG(PSTR("TASK_INIT Complete\n\r------------------------------------------------------\n\r------------------------------------------------------"));
+  
+  tkr->Tasker_Interface(TASK_POST_INIT);
+  tkr->Tasker_Interface(YTASK_INIT);
+  
+  /********************************************************************************************
+   ** Normal post-init PROGMEM default config **************************************************
+  *
+  * This is part of normal boot.
+  *
+  * Examples:
+  * - LIGHTING_TEMPLATE
+  * - FUNCTION_TEMPLATE
+  * - RULES_TEMPLATE
+  * - module/class defaults that require active modules and JSON command parsers
+  *
+  * This is not the development override pass.
+  * This is not used for GPIO mapping or device identity.
+  ********************************************************************************************/
+  
+  tkr->Tasker_Interface(TASK_CONFIG_LOAD_POST_INIT_DEFAULTS_FROM_PROGMEM);
 
-  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-  WDT_Reset();
+  /********************************************************************************************
+   ** Module-owned filesystem config **********************************************************
+  *
+  * Optional module-owned config/state/presets from filesystem.
+  *
+  * Examples:
+  * - module_lighting_config.json
+  * - module_lighting_presets.json
+  * - module_rules_config.json
+  *
+  * These should override normal compile-time defaults.
+  ********************************************************************************************/
+
+  #ifndef ENABLE_FEATURE_FASTBOOT__DISABLE_MODULE_FILESYSTEM_CONFIG
+  tkr->Tasker_Interface(TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM);
+  
+  #ifdef ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
+  tkr->Tasker_Interface(TASK_FILESYSTEM__LOAD__MODULE_DATA__ID);
+  #endif
+  #endif  
+
+ /************************************************************************************************
+   * SECTION: Development compile-time template enforcement
+   *
+   * Purpose:
+   * - Development/testing pass only.
+   * - Forces late compile-time templates over normal PROGMEM defaults, filesystem config,
+   *   web UI changes, and saved user changes when matching *_OVERRIDE defines are enabled.
+   *
+   * Notes:
+   * - Must run after module init because it uses TASK_JSON_COMMAND_ID internally.
+   * - Must run after filesystem config if the override should win.
+   * - Does not handle GPIO/device identity.
+   *
+   * Important:
+   * - This calls the JSON template module directly.
+   * - It avoids broadcasting TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM through every module.
+   * - This prevents mSettings and mJsonTemplate from both executing the same override pass.
+   ************************************************************************************************/
+  
+  #if defined(USE_MODULE_CORE__JSON_TEMPLATE) || defined(USE_MODULE_CORE_JSON_TEMPLATE)
+  if (tkr_json_template)
+  {
+    tkr_json_template->ModuleDeviceTemplate_CompileTime_DevelopmentOverridePass();
+  }
   #endif  
 
   /********************************************************************************************
-   ** File System : Load after settings for now, so this method overrides any defaults   ******
+   ** Dynamic memory buffers ******************************************************************
+   *
+   * Runs after normal defaults, filesystem config/data, and late override templates.
   ********************************************************************************************/
+  
+  tkr->Tasker_Interface(TASK_REFRESH_DYNAMIC_MEMORY_BUFFERS_ID);
 
-  #ifdef ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
-  #ifdef ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-    tkr_mfile->JsonFile_Load__Stored_Module_Or_Default_Template();
+  #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
+  WDT_Reset();
   #endif
-  #endif // ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
-  #ifdef ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
-  tkr->Tasker_Interface(TASK_FILESYSTEM__LOAD__MODULE_DATA__ID);
-  #endif // ENABLE_DEVFEATURE_STORAGE__LOAD_TRIGGER_DURING_BOOT
-
-  /**
-   * This can only happen AFTER each module is running/enabled (port init checks). This will override the settings load, so should be tested if needed when settings work
-   * */
-  tkr->Tasker_Interface(TASK_TEMPLATE_DEVICE_LOAD_FROM_PROGMEM); //USED
-  // Configure sensor/drivers to values desired for modules
-  tkr->Tasker_Interface(TASK_CONFIGURE_MODULES_FOR_DEVICE); //??
-
+  
   /********************************************************************************************
-   ** MQTT: Configure mqtt handlers in modules   ******
+   ** SECTION: Debug/export hardcoded templates into filesystem *******************************
+   *
+   * Diagnostic only.
+   * Creates /orig_template_*.json files for /edit viewing.
+   * Not part of boot-critical config loading.
   ********************************************************************************************/
+
+  #ifdef ENABLE_DEBUGFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+  #ifdef USE_MODULE_CORE_FILESYSTEM
+  if (tkr_mfile && tkr_mfile->IsMounted())
+  {
+    tkr->Tasker_Interface(TASK_TEMPLATES__MOVE_HARDCODED_TEMPLATES_INTO_FILESYSTEM);
+  }
+  else
+  {
+    ALOG_WRN(PSTR("Template export skipped, filesystem not mounted"));
+  }
+  #endif
+  #endif 
+
+/********************************************************************************************
+ ** MQTT: Configure mqtt handlers in modules ************************************************
+ ********************************************************************************************/
 
   tkr->Tasker_Interface(TASK_MQTT_HANDLERS_INIT);  
 
-  // Init the refresh periods for mqtt
   #ifndef ENABLE_DEBUGFEATURE_MQTT__DISABLE_SETTING_DYNAMIC_REFRESH_RATES
   tkr->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   #endif
 
-  /********************************************************************************************
-   ** RULES: Configure mqtt handlers in modules   ******
-  ********************************************************************************************/
+/********************************************************************************************
+ ** RULES ***********************************************************************************
+ ********************************************************************************************/
 
   #ifdef USE_MODULE_CORE_RULES
   tkr->Tasker_Interface(TASK_RULES_ADD_DEFAULT_RULES_USING_GPIO_FUNCTIONS_ID);
   #endif 
-  
+
 /********************************************************************************************
- ** LOGGING: Set runtime log levels *********************************************************************
+ ** LOGGING: Set runtime log levels *********************************************************
  ********************************************************************************************/
 
   tkr_set->Settings.logging.serial_level = saved_serial_loglevel;
 
-  /********************************************************************************************
-   ** // For debugging, allow method to override init/loaded values **************************************************************************
-  ********************************************************************************************/
+/********************************************************************************************
+ ** Debug / Override Init *******************************************************************
+ ********************************************************************************************/
   
   #ifdef ENABLE_FUNCTION_DEBUG
-    tkr->Tasker_Interface(TASK_DEBUG_CONFIGURE);
+  tkr->Tasker_Interface(TASK_DEBUG_CONFIGURE);
   #endif
 
   #ifdef ENABLE_BOOT_OVERRIDE_INIT
   tkr->Tasker_Interface(TASK_OVERRIDE_BOOT_INIT);
   #endif
 
-  /********************************************************************************************
-   ** Boot Completed **************************************************************************
-  ********************************************************************************************/
+/********************************************************************************************
+ ** Boot Completed **************************************************************************
+ ********************************************************************************************/
 
   tkr->Tasker_Interface(TASK_ON_BOOT_COMPLETE);
-
-  // Serial.println("END OF SETUP REACHED"); Serial.flush();
 
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
@@ -780,9 +1135,8 @@ DEBUG_LINE_HERE3
   }
   #endif
 
-  tkr->Tasker_Interface(TASK_BOOT_MESSAGE); // Display status of system
+  tkr->Tasker_Interface(TASK_BOOT_MESSAGE);
   
-
 }
 
 
@@ -816,51 +1170,41 @@ void LoopTasker()
 
     tkr->Tasker_Interface(TASK_EVERY_SECOND); 
 
-    if(
-      ((tkr_time->UpTime()%5)==0)&&
-      (tkr_time->UpTime()>20)
-    ){                                      tkr->Tasker_Interface(TASK_EVERY_FIVE_SECOND); }
-    if(
-      ((tkr_time->UpTime()%10)==0)&&
-      (tkr_time->UpTime()>20)
-    ){                                      tkr->Tasker_Interface(TASK_EVERY_10_SECONDS); }
+    DEBUG_LINE_HERE;
 
-    if((tkr_time->UpTime()%30)==0){                  tkr->Tasker_Interface(TASK_EVERY_30_SECOND); }
 
-    if((tkr_time->UpTime()%60)==0){                  tkr->Tasker_Interface(TASK_EVERY_MINUTE); }
-    
+    /***
+     * Upseconds require valid time and be running so not to immediate trigger on uptime=0 at boot
+     */
+    if(tkr_time->UptimeValid())
+    {
 
-    if(
-      ((tkr_time->UpTime()%300)==0)&&
-      (tkr_time->UpTime()>60)
-    ){                                    tkr->Tasker_Interface(TASK_EVERY_FIVE_MINUTE); }
-    if(
-      ((tkr_time->UpTime()%18000)==0)&&
-      (tkr_time->UpTime()>60)
-    ){                                    tkr->Tasker_Interface(TASK_EVERY_30_MINUTES); }
+      if((tkr_time->UpTime()%5)==0){     tkr->Tasker_Interface(TASK_EVERY_FIVE_SECOND); }
+      if((tkr_time->UpTime()%10)==0){    tkr->Tasker_Interface(TASK_EVERY_10_SECONDS); }
+      if((tkr_time->UpTime()%30)==0){    tkr->Tasker_Interface(TASK_EVERY_30_SECOND); }
+      if((tkr_time->UpTime()%60)==0){    tkr->Tasker_Interface(TASK_EVERY_MINUTE); }
+      if((tkr_time->UpTime()%300)==0){   tkr->Tasker_Interface(TASK_EVERY_FIVE_MINUTE); }
+      if((tkr_time->UpTime()%18000)==0){ tkr->Tasker_Interface(TASK_EVERY_30_MINUTES); }
 
-    // Uptime triggers: Fire Once (based on uptime seconds, but due to this function being called every second, it will only fire once)
-    if(tkr_time->UpTime() == 10){   tkr->Tasker_Interface(TASK_UPTIME_10_SECONDS); }
-    if(tkr_time->UpTime() == 30){   tkr->Tasker_Interface(TASK_UPTIME_30_SECONDS); }
-    if(tkr_time->UpTime() == 60){   tkr->Tasker_Interface(TASK_UPTIME_1_MINUTES); }
-    if(tkr_time->UpTime() == 600){   tkr->Tasker_Interface(TASK_UPTIME_10_MINUTES); }
-    if(tkr_time->UpTime() == 36000){ tkr->Tasker_Interface(TASK_UPTIME_60_MINUTES); }
+      // Uptime triggers: Fire Once (based on uptime seconds, but due to this function being called every second, it will only fire once)
+      if(tkr_time->UpTime() == 10){    tkr->Tasker_Interface(TASK_UPTIME_10_SECONDS); }
+      if(tkr_time->UpTime() == 30){    tkr->Tasker_Interface(TASK_UPTIME_30_SECONDS); }
+      if(tkr_time->UpTime() == 60){    tkr->Tasker_Interface(TASK_UPTIME_1_MINUTES);  }
+      if(tkr_time->UpTime() == 600){   tkr->Tasker_Interface(TASK_UPTIME_10_MINUTES); }
+      if(tkr_time->UpTime() == 36000){ tkr->Tasker_Interface(TASK_UPTIME_60_MINUTES); }
+      
+      if(tkr_time->UpTime()==120){     tkr->Tasker_Interface(TASK_ON_BOOT_SUCCESSFUL);}
+      
+    }
 
     // Check for midnight
-    if((tkr_time->RtcTime.hour==0)&&(tkr_time->RtcTime.minute==0)&&(tkr_time->RtcTime.second==0)&&(tkr_time->lastday_run != tkr_time->RtcTime.day_of_year)){
-      tkr_time->lastday_run = tkr_time->RtcTime.day_of_year;
-      tkr->Tasker_Interface(TASK_EVERY_MIDNIGHT); 
+    if (tkr_time->RtcTime.valid)
+    {
+      if((tkr_time->RtcTime.hour==0)&&(tkr_time->RtcTime.minute==0)&&(tkr_time->RtcTime.second==0)&&(tkr_time->lastday_run != tkr_time->RtcTime.day_of_year)){
+        tkr_time->lastday_run = tkr_time->RtcTime.day_of_year;
+        tkr->Tasker_Interface(TASK_EVERY_MIDNIGHT); 
+      }
     }
-
-    if(tkr_time->UpTime()==10){
-      ALOG_INF(PSTR("Boot Message>>>>>>>>>>>>>>>>>>>"));
-      tkr->Tasker_Interface(TASK_BOOT_MESSAGE);
-      ALOG_INF(PSTR("Boot Message<<<<<<<<<<<<<<<<<<<"));
-    }
-
-    if(tkr_time->UpTime()==120){       tkr->Tasker_Interface(TASK_ON_BOOT_SUCCESSFUL);}
-      
-    tkr->Tasker_Interface(TASK_INIT_DELAYED_SECONDS);
 
   } // END secondloop
 
@@ -868,32 +1212,26 @@ void LoopTasker()
   #ifdef ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
   if(tkr->function_event_queue.size())
   {
-    DEBUG_LINE_HERE;
     bool execute_function = false;
     uint8_t iter_count = 0;
     for(auto& queue:tkr->function_event_queue)
     {
       if(queue.delay_millis == 0){ execute_function = true; } // no delay
       if(mTime::TimeReached(&queue.tSaved_millis,queue.delay_millis)){ execute_function = true; }
-    DEBUG_LINE_HERE;
 
       if(execute_function)
       {
         ALOG_HGL(PSTR("Executing Event Queue Item [%d]: func_id %d"), iter_count, queue.function_id);
-    DEBUG_LINE_HERE;
         tkr->Tasker_Interface(queue.function_id);
-    DEBUG_LINE_HERE;
     // std::vector<mTaskerManager::FUNCTION_EXECUTION_EVENT>::iterator index = tkr->function_event_queue.begin()+iter_count;
 
     
         ALOG_INF(PSTR("erase %d/%d"), iter_count, tkr->function_event_queue.size());
 
-        tkr->function_event_queue.erase(tkr->function_event_queue.begin()+iter_count);    
-    DEBUG_LINE_HERE;   
+        tkr->function_event_queue.erase(tkr->function_event_queue.begin()+iter_count);  
       }
       iter_count++;
     }
-    DEBUG_LINE_HERE;
   }
   #endif // ENABLE_DEVFEATURE_TASKER__TASK_FUNCTION_QUEUE
 
@@ -910,7 +1248,7 @@ void SmartLoopDelay()
 
   // #ifndef DISABLE_SLEEP
   // if(tkr_set->Settings.enable_sleep){
-  //   if (tkr_set->Settings.network.flag.sleep_normal) {
+  //   if (tkr_set->Settings.sysopt_network.bit.flag.sleep_normal) {
   //     tkr_sup->SleepDelay(tkr_set->runtime.sleep);
   //   } else {
   //     // Loop time < sleep length of time
@@ -937,17 +1275,21 @@ void SmartLoopDelay()
 
 void loop(void)
 {
+  
   tkr_sup->activity.loop_counter++;
   tkr_sup->loop_start_millis = millis();
   
   #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
   WDT_Reset();
+  #else
+  ESP.wdtFeed(); 
   #endif
   
   LoopTasker();
   
   tkr_sup->loop_runtime_millis = millis() - tkr_sup->loop_start_millis;
-
+// ALOG_INF(PSTR("LOOPSEC = \t\t\t\tLPS=%d, LoopTime=%d"), tkr_sup->activity.cycles_per_sec, tkr_sup->loop_runtime_millis);
+    
   if(mTime::TimeReached(&tkr_set->runtime.tSavedUpdateLoopStatistics, 1000)){
     tkr_sup->activity.cycles_per_sec = tkr_sup->activity.loop_counter; 
     #ifdef ENABLE_DEBUGFEATURE__SPLASH__LOOPS_PER_SECOND
@@ -956,10 +1298,10 @@ void loop(void)
     tkr_sup->activity.loop_counter=0;
   }
 
-  // if(tkr_sup->loop_runtime_millis > 500)
-  // {
-  //   ALOG_ERR(PSTR("LONG_LOOP ============= %d %d %d"), tkr_sup->activity.loop_counter, tkr_sup->activity.cycles_per_sec, tkr_sup->loop_runtime_millis);
-  // }
+  if(tkr_sup->loop_runtime_millis > 500)
+  {
+    ALOG_ERR(PSTR("LONG_LOOP ============= %d %d %d"), tkr_sup->activity.loop_counter, tkr_sup->activity.cycles_per_sec, tkr_sup->loop_runtime_millis);
+  }
 
   #ifdef ENABLE_FEATURE_CORESYSTEM__SMART_LOOP_DELAY
   SmartLoopDelay();

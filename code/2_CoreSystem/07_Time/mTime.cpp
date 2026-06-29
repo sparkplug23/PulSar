@@ -27,18 +27,27 @@ int8_t mTime::Tasker(uint8_t function, JsonParserObject obj)
      * PERIODIC SECTION * 
     *******************/
     case TASK_EVERY_SECOND:    
+
+    DEBUG_LINE_HERE;
       
       #ifdef ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
       char up[16];
+    DEBUG_LINE_HERE;
       ALOG_INF(PSTR("Uptime: %s"), tkr_time->GetUptime(up, sizeof(up)));
       #endif
+      
+    DEBUG_LINE_HERE;
 
       
       if(tkr_interface_network->Network_HasExternalConnectivity())
       {
+    DEBUG_LINE_HERE;
         WifiPollNtp();
+        
+    DEBUG_LINE_HERE;
       }
       
+    DEBUG_LINE_HERE;
       uptime_seconds_nonreset++;
     break;
     /************
@@ -325,6 +334,47 @@ String mTime::GetTimeStr(uint32_t time, bool include_day_of_week)
 
 
 
+int32_t mTime::DateTime_DaysFromCivil(int32_t year, uint8_t month, uint8_t day)
+{
+  year -= month <= 2;
+
+  const int32_t era = (year >= 0 ? year : year - 399) / 400;
+  const uint32_t yoe = (uint32_t)(year - era * 400);
+  const uint32_t doy = (153 * (month + (month > 2 ? -3 : 9)) + 2) / 5 + day - 1;
+  const uint32_t doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+
+  return era * 146097 + (int32_t)doe - 719468;
+}
+
+
+uint32_t mTime::DateTime_UTC_ToEpochSeconds(
+  uint16_t year,
+  uint8_t month,
+  uint8_t day,
+  uint8_t hour,
+  uint8_t minute,
+  uint8_t second
+)
+{
+  if (year < 1970 || month < 1 || month > 12 || day < 1 || day > 31)
+  {
+    return 0;
+  }
+
+  const int32_t days = DateTime_DaysFromCivil(year, month, day);
+
+  if (days < 0)
+  {
+    return 0;
+  }
+
+  return
+    ((uint32_t)days * 86400UL) +
+    ((uint32_t)hour * 3600UL) +
+    ((uint32_t)minute * 60UL) +
+    (uint32_t)second;
+}
+
 
 
 // -----------------------------------------------------------------------------
@@ -478,7 +528,7 @@ String mTime::GetDateAndTime(uint8_t datetime_type)
   if (DT_UTC == datetime_type) {
     dt += "Z";              // 2017-03-07T11:08:02.123Z
   }
-  else if (tkr_set->Settings.flag3.time_append_timezone && (DT_LOCAL == datetime_type)) {  // SetOption52 - Append timezone to JSON time
+  else if (time_append_timezone && (DT_LOCAL == datetime_type)) {  // SetOption52 - Append timezone to JSON time
     dt += GetTimeZone();    // 2017-03-07T11:08:02-07:00
   }
   return dt;                // 2017-03-07T11:08:02-07:00 or 2017-03-07T11:08:02.123-07:00
@@ -714,23 +764,23 @@ void mTime::RtcGetDaylightSavingTimes(uint32_t local_time)
    * @brief Temporary fix for the time rules, since loading of settings is erasing these values.
    * 
    */
-  tkr_set->Settings.tflag[0].hemis = TIME_STD_HEMISPHERE;
-  tkr_set->Settings.tflag[0].week = TIME_STD_WEEK;
-  tkr_set->Settings.tflag[0].dow = TIME_STD_DAY;
-  tkr_set->Settings.tflag[0].month = TIME_STD_MONTH;
-  tkr_set->Settings.tflag[0].hour = TIME_STD_HOUR;
+  tflag[0].hemis = TIME_STD_HEMISPHERE;
+  tflag[0].week = TIME_STD_WEEK;
+  tflag[0].dow = TIME_STD_DAY;
+  tflag[0].month = TIME_STD_MONTH;
+  tflag[0].hour = TIME_STD_HOUR;
   tkr_set->Settings.toffset[0] = TIME_STD_OFFSET;
 
-  tkr_set->Settings.tflag[1].hemis = TIME_DST_HEMISPHERE;
-  tkr_set->Settings.tflag[1].week = TIME_DST_WEEK;
-  tkr_set->Settings.tflag[1].dow = TIME_DST_DAY;
-  tkr_set->Settings.tflag[1].month = TIME_DST_MONTH;
-  tkr_set->Settings.tflag[1].hour = TIME_DST_HOUR;
+  tflag[1].hemis = TIME_DST_HEMISPHERE;
+  tflag[1].week = TIME_DST_WEEK;
+  tflag[1].dow = TIME_DST_DAY;
+  tflag[1].month = TIME_DST_MONTH;
+  tflag[1].hour = TIME_DST_HOUR;
   tkr_set->Settings.toffset[1] = TIME_DST_OFFSET;
 
 
-  Rtc.daylight_saving_time = RuleToTime(tkr_set->Settings.tflag[1], tmpTime.year);
-  Rtc.standard_time = RuleToTime( tkr_set->Settings.tflag[0], tmpTime.year);
+  Rtc.daylight_saving_time = RuleToTime(tflag[1], tmpTime.year);
+  Rtc.standard_time = RuleToTime( tflag[0], tmpTime.year);
 
   // ALOG_HGL(PSTR("RtcGetDaylightSavingTimes: %s %s"), GetDT(Rtc.daylight_saving_time).c_str(), GetDT(Rtc.standard_time).c_str());
 
@@ -755,7 +805,7 @@ uint32_t mTime::RtcTimeZoneOffset(uint32_t local_time)
   {
     int32_t dstoffset = tkr_set->Settings.toffset[1] * SECS_PER_MIN;
     int32_t stdoffset = tkr_set->Settings.toffset[0] * SECS_PER_MIN;
-    if (tkr_set->Settings.tflag[1].hemis) {
+    if (tflag[1].hemis) {
       // Southern hemisphere
       if (
           (local_time >= (Rtc.standard_time        - dstoffset)) && 
@@ -816,9 +866,9 @@ void mTime::RtcSecond(void)
       GetDateAndTime(DT_UTC).c_str(), GetDateAndTime(DT_DST).c_str(), GetDateAndTime(DT_STD).c_str());
 
     if (Rtc.local_time < START_VALID_TIME) {  // 2016-01-01
-      tkr_set->Settings.rules_flag.time_init = 1;
+      tkr_set->Settings.sysopt_rules.bit.time_init = 1;
     } else {
-      tkr_set->Settings.rules_flag.time_set = 1;
+      tkr_set->Settings.sysopt_rules.bit.time_set = 1;
     }
   } else {
     if (Rtc.last_synced) {
@@ -903,19 +953,25 @@ void mTime::Init(void)
 
   Rtc.utc_time = 0;
   BreakTime(Rtc.utc_time, RtcTime);
+
+  DEBUG_LINE_HERE
   
   #ifdef ESP32
     TickerRtc->attach_ms(1000, +[](mTime* instance){ instance->RtcSecond(); }, this);
   #else
     TickerRtc->attach   (1,            [this](void){ this->RtcSecond(); });
   #endif
+  
+  DEBUG_LINE_HERE
 
   if (tkr_set->Settings.cfg_timestamp > START_VALID_TIME) {
     // Fix file timestamp while utctime is not synced
     uint32_t utc_time = tkr_set->Settings.cfg_timestamp;
-    if (RtcSettings.utc_time > utc_time) {
-      utc_time = RtcSettings.utc_time;
+    #ifdef ENABLE_FEATURE_RTC__SETTINGS
+    if (RtcMemory__RuntimeState.utc_time > utc_time) {
+      utc_time = RtcMemory__RuntimeState.utc_time;
     }
+    #endif
     utc_time++;
     RtcGetDaylightSavingTimes(utc_time);
     uint32_t local_time = utc_time + RtcTimeZoneOffset(utc_time);
@@ -992,16 +1048,16 @@ void mTime::WifiPollNtp()
   ntp_force_sync = false;
   ntp_busy = true;
 
-  ALOG_INF(PSTR("NTP: Sync time..."));
+  ALOG_DBG(PSTR("NTP: Sync time..."));
 
   const uint32_t t0 = now_ms;
   const uint64_t ntp_nanos = WifiGetNtp();
   const uint32_t dt_s = (millis() - t0) / 1000;
 
-  ALOG_INF(PSTR("NTP: Runtime %u"), (unsigned)dt_s);
+  ALOG_DBG(PSTR("NTP: Runtime %u"), (unsigned)dt_s);
 
   const uint32_t ntp_time = (uint32_t)(ntp_nanos / 1000000000ULL);
-  ALOG_HGL(PSTR("NTP: ntp_time %u"), (unsigned)ntp_time);
+  ALOG_DBG(PSTR("NTP: ntp_time %u"), (unsigned)ntp_time);
 
   if (ntp_time > START_VALID_TIME) {
     // ---- Success ----
@@ -1476,8 +1532,13 @@ void mTime::DuskTillDawn(uint8_t *hour_up,uint8_t *minute_up, uint8_t *hour_down
   const float h = SUNRISE_DAWN_ANGLE * RAD;
   const float sin_h = sinf(h);    // let GCC pre-compute the sin() at compile time // \phi  is the north latitude of the observer (north is positive, south is negative) on the Earth.
 
-  float lat = tkr_set->Settings.sensors.latitude / (1000000.0f / RAD); // geographische Breite
-  float lon = ((float) tkr_set->Settings.sensors.longitude)/1000000;
+  #ifdef USE_MODULE_SENSORS_INTERFACE
+  float lat = tkr_iSensors->system_location.latitude / (1000000.0f / RAD); // geographische Breite
+  float lon = ((float) tkr_iSensors->system_location.longitude)/1000000;
+  #else
+  float lat = LATITUDE; // geographische Breite
+  float lon = LONGITUDE;
+  #endif
   
   /**
    * The Earth rotates at an angular velocity of 15°/hour. 

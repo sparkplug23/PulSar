@@ -49,18 +49,16 @@ class mPWM :
       bool fEnableSensor = false;
     }settings;
 
-    #define MAX_PWM_PINS 5
     struct PWM_VALUES{
 
       uint16_t value = 0;
-      int8_t pin = -1;
       
       LinearBlendVariable<uint16_t>*  blended_value = nullptr;
 
       uint16_t range_min = 0;
       uint16_t range_max = 1024;
       
-    }pwm[MAX_PWM_PINS];
+    }pwm[MAX_PWMS];
 
     uint8_t dir = 0;
 

@@ -196,14 +196,14 @@ void mShellyDimmer::SubTask_Power_Time_To_Remain_On_Seconds()
   // Auto time off decounters
   if(timer_decounter.seconds == 1){ //if =1 then turn off and clear to 0
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    ALOG_INF(PSTR(D_LOG_NEO "timer_decounter.seconds==1 and disable"));
+    ALOG_INF(PSTR(D_LOG_PIXEL "timer_decounter.seconds==1 and disable"));
     #endif       
 
     uint16_t new_brightness = 0;
     // req_brightness = map(brightness100, 0,100, 0,1000);
     // SetBrightnessReq();
 
-    ALOG_INF(PSTR(D_LOG_NEO "START DIM DOWN timer_decounter.seconds==1 and disable"));
+    ALOG_INF(PSTR(D_LOG_PIXEL "START DIM DOWN timer_decounter.seconds==1 and disable"));
 
 
     
@@ -231,7 +231,7 @@ void mShellyDimmer::SubTask_Power_Time_To_Remain_On_Seconds()
     // SetBrightnessReq();
     
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    ALOG_INF(PSTR(D_LOG_NEO "timer_decounter.seconds=%d dec"), timer_decounter.seconds);
+    ALOG_INF(PSTR(D_LOG_PIXEL "timer_decounter.seconds=%d dec"), timer_decounter.seconds);
     #endif
 
     mqtthandler_state_teleperiod.flags.SendNow = true;

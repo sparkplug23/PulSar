@@ -14,6 +14,7 @@
 //--------------------------------[Enable Device]-------------------------------------
 
 /// KITCHEN //////////////////////////////////////////////////////////////////////////////////
+// #define DEVICE_MEADOWS__KITCHEN__ROOM_SENSOR
 // #define DEVICE_MEADOWS__KITCHEN__GLASS_BOX
 // #define DEVICE_MEADOWS__KITCHEN__GREEN_PLANT
 /// LANDING //////////////////////////////////////////////////////////////////////////////////
@@ -25,11 +26,10 @@
 // #define DEVICE_MEADOWS__MASTER_BEDROOM__BEDLIGHT
 // #define DEVICE_MEADOWS__BED_ALARM_LIGHT
 // #define DEVICE_MEADOWS__ENSUITE_DOOR_FRAME
+// #define DEVICE_MEADOWS__HALLWAY__HEATING
 /// OFFICE ///////////////////////////////////////////////////////////////////////////////////
 // #define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
 /// LIVINGROOM ///////////////////////////////////////////////////////////////////////////////
-
-/// HALLWAY //////////////////////////////////////////////////////////////////////////////////
 
 /// GARAGE ///////////////////////////////////////////////////////////////////////////////////
 
@@ -202,8 +202,8 @@
    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
    "\"" D_GPIO_NUMBER "\":{"
-     "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+     "\"13\":\""  D_GPIO_PIR_1_CTR "\","
+     "\"18\":\"" D_GPIO_LED1_CTR  "\""
    "},"
    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -345,7 +345,6 @@
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -575,29 +574,29 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
     #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-    "\"10\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //instead of 9
-    "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
+    "\"10\":\"" D_GPIO_I2C_SDA_CTR   "\"," //instead of 9
+    "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\","    
     #endif
     #ifdef USE_MODULE_SENSORS_PIR
-    "\"4\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-    "\"7\":\""  D_GPIO_FUNCTION_PIR_2_CTR "\","
+    "\"4\":\""  D_GPIO_PIR_CTR "1" "\","
+    "\"7\":\""  D_GPIO_PIR_CTR "2" "\","
     #endif
     #ifdef USE_MODULE_SENSORS_SR04
-    "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-    "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+    "\"4\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+    "\"2\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
     #endif 
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-    "\"35\":\""  D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
+    "\"35\":\""  D_GPIO_PIR_2_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-    "\"5\":\""  D_GPIO_FUNCTION_PIR_3_INV_CTR "\","
+    "\"5\":\""  D_GPIO_PIR_3_INV_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-    "\"6\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-    "\"5\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\""
+    "\"6\":\""  D_GPIO_LD2410_TX_CTR "\","
+    "\"5\":\""  D_GPIO_LD2410_RX_CTR "\""
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-    "\"34\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\""
+    "\"34\":\""  D_GPIO_PIR_1_INV_CTR "\""
     #endif
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -777,7 +776,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"4\":\""  D_GPIO_FUNCTION_MOISTURE_ANALOG_CTR "\"" 
+      "\"4\":\""  D_GPIO_MOISTURE_ANALOG_CTR "\"" 
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -920,11 +919,11 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
     #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-    "\"9\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    "\"10\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
+    "\"9\":\"" D_GPIO_I2C_SDA_CTR   "\","
+    "\"10\":\"" D_GPIO_I2C_SCL_CTR   "\","    
     #endif
     #ifdef USE_MODULE_SENSORS_PIR
-    "\"4\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\""
+    "\"4\":\""  D_GPIO_PIR_1_CTR "\""
     #endif
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1031,8 +1030,8 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
    "\"" D_GPIO_NUMBER "\":{"
-     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+     "\"15\":\""  D_GPIO_PIR_1_CTR "\","
+     "\"18\":\"" D_GPIO_LED1_CTR  "\""
    "},"
    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1172,8 +1171,8 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
    "\"" D_GPIO_NUMBER "\":{"
-     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+     "\"15\":\""  D_GPIO_PIR_1_CTR "\","
+     "\"18\":\"" D_GPIO_LED1_CTR  "\""
    "},"
    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1310,8 +1309,8 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
    "\"" D_GPIO_NUMBER "\":{"
-     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+     "\"15\":\""  D_GPIO_PIR_1_CTR "\","
+     "\"18\":\"" D_GPIO_LED1_CTR  "\""
    "},"
    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1518,7 +1517,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"    
-    "\"48\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\""
+    "\"48\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1610,11 +1609,11 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
     #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-    "\"10\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
+    "\"10\":\"" D_GPIO_I2C_SDA_CTR   "\","
+    "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\","    
     #endif
     #ifdef USE_MODULE_SENSORS_PIR
-    "\"4\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\""
+    "\"4\":\""  D_GPIO_PIR_1_CTR "\""
     #endif
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1679,7 +1678,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -1694,33 +1693,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   /***********************************
    * SECTION: System Configs
   ************************************/     
-
-  
-
-  
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-  // #define USE_MODULE_SENSORS_SUN_TRACKING
 
 
   /***********************************
@@ -1782,15 +1754,15 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"23\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
+      "\"23\":\"" D_GPIO_SWT1_CTR  "\","
       #endif
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
       // 32 - LED Strip External
       // 21 - LED Strip Onboard
       // 25?
@@ -1837,6 +1809,140 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
   
 #endif
+
+
+
+#ifdef DEVICE_MEADOWS__HALLWAY__HEATING
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "testbed_01__sensors_nextion"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testbeds"
+  
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
+  
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+  
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+        
+   #define USE_MODULE_DRIVERS_INTERFACE
+   #define USE_MODULE_DRIVERS_RELAY
+   #define USE_MODULE_DRIVERS_LEDS
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Energy Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Controller Configs
+  ************************************/  
+ 
+  #define USE_MODULE_CONTROLLER_HVAC
+  #define HEATING_DEVICE_MAX 2
+
+  /***********************************
+   * SECTION: GPIO Template
+  ************************************/  
+  
+  #define ENABLE_DEBUG_POINT_MODULE_TEMPLATE_BOOT_SPLASH
+  #define USE_MODULE_TEMPLATE__OVERRIDE
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"       
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"17\":\"" D_GPIO_REL_CTR "1" "\","     // Left
+      "\"16\":\"" D_GPIO_REL_CTR "2" "\","     // Right
+      #endif
+      #ifdef USE_MODULE_DRIVERS_LEDS
+      "\"23\":\"" D_GPIO_LED1_CTR "\","
+      #endif
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR   "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /**
+   * @brief Drivers and Sensors for HVAC zones
+   **/
+  #define D_DEVICE_HEATER_0_NAME "Radiators"
+  #define D_DEVICE_HEATER_1_NAME "Boiler"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_INTERFACE_CTR "\":["
+        "\"" "Internal" "\""
+      "],"  
+      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+        "\"" D_DEVICE_HEATER_0_NAME "\","
+        "\"" D_DEVICE_HEATER_1_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+        "\"" D_DEVICE_HEATER_0_NAME "\""
+      "],"
+      "\"" D_MODULE_CONTROLLER_HVAC_CTR "\":["
+        "\"" D_DEVICE_HEATER_0_NAME "\","
+        "\"" D_DEVICE_HEATER_1_NAME "\""
+      "]"
+    "},"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" "None" "\","
+        "\"" "None" "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_HEATER_0_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "},"
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_HEATER_1_NAME "\","
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "}"
+      "]"
+    "}"
+  "}";
+
+#endif
+
+
+
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -1965,7 +2071,7 @@ R"=====(
 // ///////////////////////////////////////////// Enable Logs
 // // #define DISABLE_SERIAL
 // // #define DISABLE_SERIAL0_CORE
-// // #define DISABLE_SERIAL_LOGGING
+// 
 // // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
 // ///////////////////////////////////////////// System Logs
@@ -2195,55 +2301,55 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
   // supermini pro has ws2812 on pin8
-   //  "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-   //  "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+   //  "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+   //  "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
     #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-    "\"10\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
+    "\"10\":\"" D_GPIO_I2C_SDA_CTR   "\","
+    "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\","    
     #endif
     #ifdef USE_MODULE_SENSORS_PIR
-    "\"4\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\""
+    "\"4\":\""  D_GPIO_PIR_1_CTR "\""
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-    "\"33\":\""  D_GPIO_FUNCTION__TOF_VL53L0X_XSHUT1__CTR "\","
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
-   //  "\"26\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+    "\"33\":\""  D_GPIO__TOF_VL53L0X_XSHUT1__CTR "\","
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_HIGH_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+   //  "\"26\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS__TOF_VL53L1X
-     // "\"26\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
-   //  "\"33\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
+     // "\"26\":\""  D_GPIO__TOF_VL53L1X_XSHUT1__CTR "\"," // turned off only for testing new sensor interface, needed for dual TOF use
+   //  "\"33\":\""  D_GPIO_UNUSED_FORCED_LOW_CTR "\"," // Connected to XSHUT but not wanted. HIGH for remain enabled
     #endif
     #ifdef USE_MODULE_SENSORS_SR04
-    "\"4\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-    "\"2\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+    "\"4\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+    "\"2\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
     #endif 
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ
-    "\"35\":\""  D_GPIO_FUNCTION_PIR_2_INV_CTR "\","
+    "\"35\":\""  D_GPIO_PIR_2_INV_CTR "\","
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_SMALL
-    "\"5\":\""  D_GPIO_FUNCTION_PIR_3_INV_CTR "\","
+    "\"5\":\""  D_GPIO_PIR_3_INV_CTR "\","
     #endif
     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-    // "\"20\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-    // "\"21\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\","
-    "\"6\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-    "\"5\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\""
+    // "\"20\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+    // "\"21\":\""  D_GPIO__HLK_LD2410_RX__CTR "\","
+    "\"6\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+    "\"5\":\""  D_GPIO__HLK_LD2410_RX__CTR "\""
     #endif
     #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR_LARGE
-    "\"34\":\""  D_GPIO_FUNCTION_PIR_1_INV_CTR "\","
+    "\"34\":\""  D_GPIO_PIR_1_INV_CTR "\","
     #endif
    //  #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
-   //  "\"27\":\""  D_GPIO_FUNCTION__TOF_VL53L1X_XSHUT__CTR "\","
+   //  "\"27\":\""  D_GPIO__TOF_VL53L1X_XSHUT__CTR "\","
    //  #endif
     #ifdef USE_MODULE_SENSORS_BUTTONS
-   //  "\"18\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-   //  "\"19\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-   //  "\"33\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+   //  "\"18\":\"" D_GPIO_KEY1_INV_CTR  "\","
+   //  "\"19\":\"" D_GPIO_KEY2_INV_CTR  "\","
+   //  "\"33\":\"" D_GPIO_KEY3_INV_CTR  "\","
     #endif
     
-   //  "\"4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
-   //  "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\","
-    // "\"8\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+   //  "\"4\":\"" D_GPIO_LED1_CTR  "\","
+   //  "\"5\":\"" D_GPIO_LED2_CTR  "\","
+    // "\"8\":\"" D_GPIO_LED1_CTR  "\""
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
   "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2342,7 +2448,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
    * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
   ************************************/  
   #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
   
   /***********************************
    * SECTION: System Configs
@@ -2351,7 +2457,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   /***********************************
    * SECTION: Storage Configs
   ************************************/    
-
 
   /***********************************
    * SECTION: Network Configs
@@ -2370,47 +2475,12 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   #endif 
 
   /***********************************
-   * SECTION: Display Configs
-  ************************************/  
-
-  /***********************************
    * SECTION: Lighting Configs
   ************************************/    
 
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
   #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
   
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":2,
-  //       "ColourOrder":"GRB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":0,
-  //       "Length":100
-  //     }
-  //   ],
-  //   "Segment0": {
-  //     "PixelRange": [
-  //       0,
-  //       100
-  //     ],
-  //     "ColourPalette":"Cold White",
-  //     "Effects": {
-  //       "Function":"Solid",
-  //       "Speed":127,
-  //       "Intensity":127,
-  //       "Grouping":1,
-  //       "RateMs": 25
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "BrightnessRGB": 0
-  // }
-  // )=====";
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -2438,65 +2508,84 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
         "BusType":"WS2805_RGBWW",
         "Start":66,
         "Length":19
+      },
+      {
+        "Name":"Headboard",
+        "Pin":19,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":85,
+        "Length":100
       }
     ],    
-    "Segment0":{
-      "PixelRange": [
-        0,
-        66
-      ],
-      "ColourType":5,
-      "ColourPalette":"Candy",
-      "SegColour0": {
-        "Hue": 25,
-        "Sat": 100,
-        "BrightnessRGB": 100,
-        "BrightnessCCT": 100,
-        "CCT_TempPercentage":100
+    "Segments":[
+      {
+        "Name":"Under Edge",
+        "PixelRange": [
+          0,
+          66
+        ],
+        "ColourType":5,
+        "ColourPalette":"Candy",
+        "SegColour0": {
+          "Hue": 25,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 100,
+          "CCT_TempPercentage":100
+        },
+        "Effects": {
+          "Function":"Static",
+          "RateMs": 1000,
+          "Speed":127
+        },
+        "BrightnessRGB":100,
+        "BrightnessCCT":100
       },
-      "Effects": {
-        "Function":"Static",
-        "RateMs": 1000,
-        "Speed":127
+      {
+        "Name":"Under Centre",
+        "PixelRange": [
+          67,
+          85
+        ],
+        "ColourType":5,
+        "ColourPalette":"Warm White",
+        "SegColour0": {
+          "Hue": 25,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 100,
+          "CCT_TempPercentage":100
+        },
+        "Effects": {
+          "Function":"Static",
+          "RateMs": 1000,
+          "Speed":127
+        },
+        "BrightnessRGB":100,
+        "BrightnessCCT":100
       },
-      "BrightnessRGB":100,
-      "BrightnessCCT":100
-    },
-    "Segment1":{
-      "PixelRange": [
-        67,
-        85
-      ],
-      "ColourType":5,
-      "ColourPalette":"Warm White",
-      "SegColour0": {
-        "Hue": 25,
-        "Sat": 100,
-        "BrightnessRGB": 100,
-        "BrightnessCCT": 100,
-        "CCT_TempPercentage":100
-      },
-      "Effects": {
-        "Function":"Static",
-        "RateMs": 1000,
-        "Speed":127
-      },
-      "BrightnessRGB":100,
-      "BrightnessCCT":100
-    },
+      {
+        "Name":"Headboard",
+        "PixelRange": [
+          86,
+          186
+        ],
+        "ColourPalette":"Sunset",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":20,
+          "RateMs": 20
+        },
+      }
+    ],
     "BrightnessRGB":0,
     "BrightnessCCT":0
   }
   )=====";
-  /***********************************
-   * SECTION: Energy Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Controller Configs
-  ************************************/  
-
-
 
   /***********************************
    * SECTION: GPIO Template
@@ -2509,12 +2598,12 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"    
     #ifdef USE_MODULE_SENSORS_BUTTONS
-    "\"19\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-    "\"21\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-    "\"22\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+    "\"19\":\"" D_GPIO_KEY_INV_CTR "1"  "\","
+    "\"21\":\"" D_GPIO_KEY_INV_CTR "2" "\","
+    "\"22\":\"" D_GPIO_KEY_INV_CTR "3" "\","
     #endif
     #ifdef USE_MODULE_SENSORS_PIR
-    "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\""
+    "\"13\":\""  D_GPIO_PIR_CTR "1" "\""
     #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -2602,17 +2691,17 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
-      "\"12\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"26\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"32\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"14\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"25\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"33\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -2664,7 +2753,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
    "\"" D_GPIO_NUMBER "\":{"
-     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+     "\"18\":\"" D_GPIO_LED1_CTR  "\""
    "},"
    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -3599,8 +3688,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
     
   #define SETTINGS_HOLDER 1241
   #define ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
-  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  #define ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #define USE_MODULE_CORE_FILESYSTEM
   #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
 
@@ -3611,7 +3698,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE 
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -3691,27 +3778,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: System Configs
   ************************************/     
 
-  // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
-
-
   /***********************************
    * SECTION: Storage Configs
   ************************************/    
@@ -3729,11 +3795,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // I should add new "purely for debugging" "serialise" data struct. So this will be a new way to take important data from the module data struct that will all be saved in binary, but instead 
   // include functions that "pretty print" them for easier comparing. Will use lots of memory, so debug only.
 
-  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+  #define ENABLE_DEBUGFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
 
-  // #define ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
-
-  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
   // #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_MINUTE
 
@@ -4500,34 +4563,34 @@ May need to add two power connections too, so its not just the cat5e wire to let
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"13\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","
-      "\"27\":\"" D_GPIO_FUNCTION_REL2_INV_CTR    "\","
-      "\"26\":\"" D_GPIO_FUNCTION_REL3_INV_CTR      "\","
-      "\"14\":\"" D_GPIO_FUNCTION_REL4_INV_CTR      "\"," //pins need sety on L
+      "\"13\":\"" D_GPIO_REL1_INV_CTR  "\","
+      "\"27\":\"" D_GPIO_REL2_INV_CTR    "\","
+      "\"26\":\"" D_GPIO_REL3_INV_CTR      "\","
+      "\"14\":\"" D_GPIO_REL4_INV_CTR      "\"," //pins need sety on L
       #endif
       #ifdef USE_MODULE_ENERGY_PZEM004T_V3
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"33\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
+      "\"33\":\"" D_GPIO_DS18X20_1_CTR "\"," // DS_DB - 3 pin
       #endif    
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219)
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"18\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"19\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"18\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"19\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+      "\"15\":\""  D_GPIO_PIR_1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"0\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\","
       #endif  
-      // "\"25\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // unused NEO pin
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      // "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // unused NEO pin
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
       // 32 - LED Strip External
       // 21 - LED Strip Onboard
       // 25?
@@ -4811,8 +4874,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
 //    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
 //    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 //    "\"" D_GPIO_NUMBER "\":{"
-//      "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-//      "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+//      "\"13\":\""  D_GPIO_PIR_1_CTR "\","
+//      "\"18\":\"" D_GPIO_LED1_CTR  "\""
 //    "},"
 //    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
 //    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -4986,12 +5049,12 @@ May need to add two power connections too, so its not just the cat5e wire to let
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"    
     #ifdef USE_MODULE_SENSORS_BUTTONS
-    "\"19\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-    "\"21\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-    "\"22\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+    "\"19\":\"" D_GPIO_KEY1_INV_CTR  "\","
+    "\"21\":\"" D_GPIO_KEY2_INV_CTR  "\","
+    "\"22\":\"" D_GPIO_KEY3_INV_CTR  "\","
     #endif
     #ifdef USE_MODULE_SENSORS_PIR
-    "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\""
+    "\"13\":\""  D_GPIO_PIR_1_CTR "\""
     #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -5107,18 +5170,18 @@ May need to add two power connections too, so its not just the cat5e wire to let
    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
    "\"" D_GPIO_NUMBER "\":{"
-     "\"18\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-     "\"19\":\""  D_GPIO_FUNCTION_PIR_2_CTR "\","
-     "\"23\":\""  D_GPIO_FUNCTION_PIR_3_CTR "\","
+     "\"18\":\""  D_GPIO_PIR_1_CTR "\","
+     "\"19\":\""  D_GPIO_PIR_2_CTR "\","
+     "\"23\":\""  D_GPIO_PIR_3_CTR "\","
     #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
-    "\"16\":\""  D_GPIO_FUNCTION__HLK_LD2410_TX__CTR "\","
-    "\"17\":\""  D_GPIO_FUNCTION__HLK_LD2410_RX__CTR "\""
+    "\"16\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+    "\"17\":\""  D_GPIO__HLK_LD2410_RX__CTR "\""
     #endif
     #if defined(USE_MODULE_SENSORS__TOF_VL53L1X)
-    "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
-    "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+    "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
+    "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
     #endif
-     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+     "\"2\":\"" D_GPIO_LED1_CTR  "\""
    "},"
    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -5237,7 +5300,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -5279,7 +5342,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: Storage Configs
   ************************************/  
  
-  // #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+  // #define ENABLE_DEBUGFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
 
   /**
    * For debugging and short term I may want to store everything as JSON, so I can view the data?
@@ -5306,16 +5369,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
   // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   #define USE_MODULE_CORE_FILESYSTEM
-  // //   
-  // //   
-  // //   
-  // //   
-
-  // // Settings saving and loading
-  // //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  // //   
-  // //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  // //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
   // //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
     
   // 
@@ -5490,13 +5543,13 @@ May need to add two power connections too, so its not just the cat5e wire to let
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"    
-      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-     "\"15\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-     "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+     "\"15\":\""  D_GPIO_PIR_1_CTR "\","
+     "\"2\":\"" D_GPIO_LED1_CTR  "\""
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -5757,8 +5810,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
    "\"" D_GPIO_NUMBER "\":{"
-     "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-     "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+     "\"13\":\""  D_GPIO_PIR_1_CTR "\","
+     "\"18\":\"" D_GPIO_LED1_CTR  "\""
    "},"
    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -5815,7 +5868,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -5829,22 +5882,6 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: System Configs
   ************************************/     
 
- 
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  // 
 
   #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
@@ -5885,9 +5922,8 @@ May need to add two power connections too, so its not just the cat5e wire to let
    * SECTION: Lighting Configs
   ************************************/    
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   // #define ENABLE_DEBUGFEATURE_TELEMETRY__MQTT_SEND_HEALTH_EVERY_SECOND
   // #define ENABLE_DEVFEATURE_DEBUG_REMOVE_POSSIBLE_ERROR_CODE
@@ -5980,50 +6016,50 @@ May need to add two power connections too, so its not just the cat5e wire to let
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"26\":\""  D_GPIO_FUNCTION_REL1_CTR    "\","   // Immersion = Also add additonal LED with relay pin
+      "\"26\":\""  D_GPIO_REL1_CTR    "\","   // Immersion = Also add additonal LED with relay pin
       #endif
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"23\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"23\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"4\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," // Group 1 = Basic Set, use just these until device is stable
-      // "\"19\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR  "\"," // Group 2 = Detailed, use these only after stress testing with 3 pins for sensors with rewrite. Read datasheet.
+      "\"4\":\"" D_GPIO_DS18X20_1_CTR  "\"," // Group 1 = Basic Set, use just these until device is stable
+      // "\"19\":\"" D_GPIO_DS18X20_2_CTR  "\"," // Group 2 = Detailed, use these only after stress testing with 3 pins for sensors with rewrite. Read datasheet.
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"32\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","       // Stairs
-      "\"4\":\""  D_GPIO_FUNCTION_SWT2_CTR "\","       // Landing
-      "\"25\":\"" D_GPIO_FUNCTION_SWT3_CTR "\","       // Hotpress (negating need of button? or use non-momentary switch to enable/disable it)
+      "\"32\":\"" D_GPIO_SWT1_CTR "\","       // Stairs
+      "\"4\":\""  D_GPIO_SWT2_CTR "\","       // Landing
+      "\"25\":\"" D_GPIO_SWT3_CTR "\","       // Hotpress (negating need of button? or use non-momentary switch to enable/disable it)
       #endif 
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-        // "\"26\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Orange - Immersional Relay
-        // "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
-        // "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
-        // "\"13\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Brown - Immersion Relay (Label wrong, )
+        // "\"26\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Orange - Immersional Relay
+        // "\"27\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
+        // "\"14\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
+        // "\"13\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Brown - Immersion Relay (Label wrong, )
         #ifdef USE_RGB_OUT_LANDING_PANEL
-        "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
+        "\"14\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
         #endif
         #ifdef USE_RGB_OUT_TANK
-        "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
+        "\"27\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
         #endif      
         #ifdef ENABLE_DEVFEATURE_MULTIPLE_PIXEL_PINS
-        "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA2_CTR  "\","
-        "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA3_CTR  "\","
+        "\"14\":\"" D_GPIO_RGB_DATA2_CTR  "\","
+        "\"27\":\"" D_GPIO_RGB_DATA3_CTR  "\","
         #endif
       #endif
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"33\":\"" D_GPIO_FUNCTION_KEY1_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_CTR  "\","
+      "\"33\":\"" D_GPIO_KEY1_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_CTR  "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"12\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\"," 
-      "\"21\":\""  D_GPIO_FUNCTION_LED3_INV_CTR "\"," 
+      "\"12\":\""  D_GPIO_LED2_INV_CTR "\"," 
+      "\"21\":\""  D_GPIO_LED3_INV_CTR "\"," 
       #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""  // Also optional physical LED to be made external to box (buy one of those drill through ones!)
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""  // Also optional physical LED to be made external to box (buy one of those drill through ones!)
       // 5  // i2c oled needs to be another bus because of BME? or, what if it shared!!
       // 15
     "},"
@@ -6409,11 +6445,11 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
   "\"" D_GPIO_NUMBER "\":{"          
     #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-    "\"10\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-    "\"9\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
+    "\"10\":\"" D_GPIO_I2C_SDA_CTR   "\","
+    "\"9\":\"" D_GPIO_I2C_SCL_CTR   "\","    
     #endif
     #ifdef USE_MODULE_SENSORS_PIR
-    "\"4\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\""
+    "\"4\":\""  D_GPIO_PIR_1_CTR "\""
     #endif
   "},"
   "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -6505,9 +6541,9 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"15\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\","
+      "\"15\":\"" D_GPIO_DS18X20_1_CTR  "\","
       #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -6578,7 +6614,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -6594,30 +6630,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
    * SECTION: System Configs
   ************************************/     
 
-  
-
-  
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
 
   #define USE_MODULE_SENSORS_SUN_TRACKING
 
@@ -6682,15 +6694,15 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"23\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
+      "\"23\":\"" D_GPIO_SWT1_CTR  "\","
       #endif
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
       // 32 - LED Strip External
       // 21 - LED Strip Onboard
       // 25?
@@ -6818,7 +6830,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   ///////////////////////////////////////////// Enable Logs
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
 
   ///////////////////////////////////////////// System Logs
@@ -6895,14 +6907,14 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","    
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","    
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"15\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      "\"15\":\"" D_GPIO_DS18X20_1_CTR "\","
       #endif    
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"2\":\"" D_GPIO_FUNCTION_REL1_CTR  "\""
+      "\"2\":\"" D_GPIO_REL_CTR "1" "\","
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -7032,9 +7044,9 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"15\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\","
+      "\"15\":\"" D_GPIO_DS18X20_1_CTR  "\","
       #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -7146,7 +7158,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
  ///////////////////////////////////////////// Enable Logs
  // #define DISABLE_SERIAL
  // #define DISABLE_SERIAL0_CORE
- // #define DISABLE_SERIAL_LOGGING
+ 
  // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
  
  ///////////////////////////////////////////// System Logs
@@ -7253,11 +7265,11 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
    "\"" D_GPIO_NUMBER "\":{"  
      #ifdef USE_MODULE_SENSORS_DS18X20
-     "\"15\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+     "\"15\":\"" D_GPIO_DS18X20_1_CTR "\","
      #endif            
      #if defined(USE_MODULE_SENSORS__TOF_VL53L0X) || defined(USE_MODULE_SENSORS__TOF_VL53L1X) || defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-     "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-     "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\""   
+     "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
+     "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\""   
      #endif
    "},"
    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -7352,9 +7364,9 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"23\":\"" D_GPIO__RF_433MHZ_RX__CTR   "\","
       #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"2\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -7529,7 +7541,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -7553,7 +7565,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
    * SECTION: Storage Configs
   ************************************/  
  
-  // #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
+  // #define ENABLE_DEBUGFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
 
   /**
    * For debugging and short term I may want to store everything as JSON, so I can view the data?
@@ -7579,26 +7591,6 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 
   // #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
-  // // #define USE_MODULE_CORE_FILESYSTEM
-  // //   
-  // //   
-  // //   
-  // //   
-
-  // // Settings saving and loading
-  // //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  // //   
-  // //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  // //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  // //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  // 
-  // 
-
-  // // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  // //  // until devices can reliably be used without compiling per device
-
-  // // 
 
   // /***********************************
   //  * SECTION: Network Configs
@@ -7812,8 +7804,8 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 //    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
 //    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
 //    "\"" D_GPIO_NUMBER "\":{"
-//      "\"13\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
-//      "\"18\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+//      "\"13\":\""  D_GPIO_PIR_1_CTR "\","
+//      "\"18\":\"" D_GPIO_LED1_CTR  "\""
 //    "},"
 //    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
 //    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -7934,7 +7926,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   ///////////////////////////////////////////// Enable Logs
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
   
   ///////////////////////////////////////////// System Logs
@@ -8068,8 +8060,8 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -8113,7 +8105,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   ///////////////////////////////////////////// Enable Logs
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+  
   #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
   
   ///////////////////////////////////////////// System Logs
@@ -8250,8 +8242,8 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -8306,6 +8298,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 
 
+  #define USE_MODULE_SENSORS_INTERFACE
   #define USE_MODULE_SENSORS_SUN_TRACKING      
   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
   #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
@@ -8369,23 +8362,34 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"    
-      // "\"28\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
-      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"12\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"26\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"32\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"14\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"25\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"33\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      // "\"28\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+      // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","
+      "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "2" "\","
+      "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "3" "\","
+      "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "4" "\","
+      "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "5" "\","
+      "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "6" "\","
+      "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "7" "\","
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+        "\"" "Desk" "\""
+      "]"
+    "}"
   "}";
 
 #endif // END DEVICE

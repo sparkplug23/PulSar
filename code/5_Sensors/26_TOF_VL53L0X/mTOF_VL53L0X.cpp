@@ -157,7 +157,7 @@ void mTOF_VL53L0X::Init(void)
   module_state.devices = devices_found;
   
   if (module_state.devices == 0) {
-    ALOG_INF(PSTR("No VL53L0X sensors detected, skipping initialization."));
+    ALOG_INF(PSTR(D_LOG_TOF_VL53L0X "No VL53L0X sensors detected, skipping initialization."));
     return;
   }
 
@@ -181,23 +181,23 @@ void mTOF_VL53L0X::Init(void)
       delay(XSHUT_SET_HIGH_BOOT_UNTIL_VALID_DATA_WAKE_TIME); // XSHUT boot delay
     }
 
-    ALOG_INF(PSTR("VL53L0X[%d] Init"), i);
+    ALOG_INF(PSTR(D_LOG_TOF_VL53L0X "VL53L0X[%d] Init"), i);
 
     // **Check sensor at 0x29 or alternate address**
     if (!tkr_i2c->I2cSetDevice(VL53L0X_ADDRESS) && !tkr_i2c->I2cSetDevice((uint8_t)(VL53L0X_XSHUT_ADDRESS + i))) {
-      ALOG_INF(PSTR("VL53L0X[%d] not detected"), i);
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L0X "VL53L0X[%d] not detected"), i);
       continue;
     }
 
     if (VL53L0X_device[i].init()) {
-      ALOG_INF(PSTR("VL53L0X %d detected"), i);
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L0X "VL53L0X %d detected"), i);
 
       // **Setup 3 (VL53L0X + VL53L1X Conflict)**
       if (tof1x_devices == 1 && devices_found == 1) {
         uint8_t new_address = VL53L0X_XSHUT_ADDRESS;
         VL53L0X_device[i].setAddress(new_address);
         Vl53l0x_data[i].address = new_address;
-        ALOG_INF(PSTR("VL53L0X %d moved to 0x%02X to resolve conflict"), i, new_address);
+        ALOG_INF(PSTR(D_LOG_TOF_VL53L0X "VL53L0X %d moved to 0x%02X to resolve conflict"), i, new_address);
       }
 
       // **Setup 4: Multiple Sensors, Assign Unique Addresses**
@@ -205,10 +205,10 @@ void mTOF_VL53L0X::Init(void)
         uint8_t new_address = VL53L0X_XSHUT_ADDRESS + i;
         VL53L0X_device[i].setAddress(new_address);
         Vl53l0x_data[i].address = new_address;
-        ALOG_INF(PSTR("VL53L0X %d assigned new address: 0x%02X"), i, new_address);
+        ALOG_INF(PSTR(D_LOG_TOF_VL53L0X "VL53L0X %d assigned new address: 0x%02X"), i, new_address);
       } else {
         Vl53l0x_data[i].address = VL53L0X_ADDRESS;
-        ALOG_INF(PSTR("VL53L0X %d remains at default address (0x29)"), i);
+        ALOG_INF(PSTR(D_LOG_TOF_VL53L0X "VL53L0X %d remains at default address (0x29)"), i);
       }
 
       uint8_t addr = VL53L0X_device[i].getAddress();
@@ -229,18 +229,18 @@ void mTOF_VL53L0X::Init(void)
 
       // **Start Continuous Mode**
       VL53L0X_device[i].startContinuous();
-      ALOG_INF(PSTR("VL53L0X[%d] started continuous mode"), i);
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L0X "VL53L0X[%d] started continuous mode"), i);
 
       Vl53l0x_data[i].ready = true;
       Vl53l0x_data[i].index = 0;
       VL53L0X_detected = true;
     } else {
-        ALOG_INF(PSTR("VL53L0X[%d] failed to start"), i);
+        ALOG_INF(PSTR(D_LOG_TOF_VL53L0X "VL53L0X[%d] failed to start"), i);
     }
 
     // **If using XSHUT, keep it HIGH to retain address**
     if (use_xshut) {
-        ALOG_INF(PSTR("VL53L0X[%d] XSHUT HIGH to retain address"), i);
+        ALOG_INF(PSTR(D_LOG_TOF_VL53L0X "VL53L0X[%d] XSHUT HIGH to retain address"), i);
     }
   }
 
@@ -288,7 +288,7 @@ uint8_t mTOF_VL53L0X::SearchForDevices()
     if(i==0)
     {
       if (tkr_i2c->I2cDevice_IsConnected(address)) {
-        ALOG_INF(PSTR("VL53L1X found at 0x%02X"), address); 
+        ALOG_INF(PSTR(D_LOG_TOF_VL53L0X "VL53L1X found at 0x%02X"), address); 
         Vl53l0x_data[devices].address = address; 
         devices++;
       }
@@ -296,7 +296,7 @@ uint8_t mTOF_VL53L0X::SearchForDevices()
 
     address = VL53L0X_XSHUT_ADDRESS+i;
     if (tkr_i2c->I2cDevice_IsConnected(address)) {
-      ALOG_INF(PSTR("VL53L1X found at %02X"),address);       
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L0X "VL53L1X found at %02X"),address);       
       Vl53l0x_data[devices].address = address; 
       devices++;
     }
@@ -370,7 +370,7 @@ void mTOF_VL53L0X::ReadSensor(void) {
         Vl53l0x_data[i].distance = dist;
       #endif
 
-      ALOG_INF(PSTR("VL53L0X[%d] Distance: %d mm"), i, Vl53l0x_data[i].distance);
+      ALOG_INF(PSTR(D_LOG_TOF_VL53L0X "VL53L0X[%d] Distance: %d mm"), i, Vl53l0x_data[i].distance);
     }
 
     // **Exit loop early if no XSHUT-based devices remain**

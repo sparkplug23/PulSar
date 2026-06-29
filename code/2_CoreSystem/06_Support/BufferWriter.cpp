@@ -1,109 +1,222 @@
 #include "BufferWriter.h"
 
-/* Null, because instance will be initialized on demand. */
 BufferWriter* BufferWriter::instance = nullptr;
 
-BufferWriter* BufferWriter::GetInstance(){
-  if (instance == nullptr){
+BufferWriter* BufferWriter::GetInstance()
+{
+  if(instance == nullptr)
+  {
     instance = new BufferWriter();
   }
+
   return instance;
 }
 
-char* BufferWriter::GetBufferPtr(){
+bool BufferWriter::IsReady(void) const
+{
+  return (writer.buffer != nullptr && writer.buffer_size > 0);
+}
+
+bool BufferWriter::IsEmpty(void) const
+{
+  return (writer.length == 0);
+}
+
+bool BufferWriter::IsFull(void) const
+{
+  if(!IsReady())
+  {
+    return true;
+  }
+
+  return (writer.length >= (writer.buffer_size - 1));
+}
+
+uint16_t BufferWriter::Remaining(void) const
+{
+  if(!IsReady())
+  {
+    return 0;
+  }
+
+  if(writer.length >= writer.buffer_size)
+  {
+    return 0;
+  }
+
+  return writer.buffer_size - writer.length;
+}
+
+char* BufferWriter::GetBufferPtr(void)
+{
   return writer.buffer;
 }
-uint16_t BufferWriter::GetLength(){
-  return strlen(writer.buffer);
-  // return *writer.length; // needs testing, was not working
+
+const char* BufferWriter::GetBufferPtr(void) const
+{
+  return writer.buffer;
 }
 
-// // used in phd to force json and writer to work together
-// void BufferWriter::SetLength(uint16_t len){
-//   rwriter.length = len;
-//   // return *writer.length; // needs testing, was not working
-// }
+uint16_t BufferWriter::GetLength(void) const
+{
+  return writer.length;
+}
 
-
-uint16_t BufferWriter::GetBufferSize(){
+uint16_t BufferWriter::GetBufferSize(void) const
+{
   return writer.buffer_size;
 }
 
-void BufferWriter::Start(char* _buffer, uint16_t _length, uint16_t _buffer_size)
+void BufferWriter::SetLength(uint16_t length)
 {
-  writer.buffer = _buffer;
-  writer.length = _length;
-  writer.buffer_size = _buffer_size;
-  Serial.printf("DEBUG HERE: "); Serial.print(__FILE__); Serial.println(__LINE__); Serial.flush();
-  Start();
-  Serial.printf("DEBUG HERE: "); Serial.print(__FILE__); Serial.println(__LINE__); Serial.flush();
-}
-void BufferWriter::Clear()
-{
-  Serial.printf("DEBUG HERE: "); Serial.print(__FILE__); Serial.println(__LINE__); Serial.flush();
-    if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return; }  
-    // memset(writer.buffer,0,writer.buffer_size);
+  if(!IsReady())
+  {
     writer.length = 0;
-  Serial.printf("DEBUG HERE: "); Serial.print(__FILE__); Serial.println(__LINE__); Serial.flush();
-}
-// void BufferWriter::Start()
-// {
-//     if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return; }  
+    return;
+  }
 
-// // Serial.println(DATA_BUFFER_PAYLOAD_MAX_LENGTH);
-// Serial.println(writer.buffer_size);
+  if(length >= writer.buffer_size)
+  {
+    length = writer.buffer_size - 1;
+  }
 
-
-//     // memset(writer.buffer,0,writer.buffer_size);
-//     Clear();
-//     writer.length = 0;
-// }
-
-
-
-void BufferWriter::Start()
-{
-  // If writer is a global/static, this is safe.
-  // If it's a pointer/singleton, ensure it is valid before calling Start().
-
-
-
-
-  // Serial.printf("BW Start: payload=%p sizeof(topic)=%u\n",
-  //               (void*)writer.buffer,
-  //               (unsigned)sizeof(writer.buffer),
-
-  // // Clear via the real fixed buffers, not via any pointer/size pair
-  // memset(writer.buffer,   0, writer.buffer_size);
-
-  // writer.topic.length_used   = 0;
-  // writer.payload.length_used = 0;
-  writer.length = 0; // if you have a separate aggregate length
+  writer.length = length;
+  writer.buffer[writer.length] = '\0';
 }
 
-
-
-
-bool BufferWriter::End()
+void BufferWriter::Start(char* buffer, uint16_t buffer_size)
 {
-    if((writer.buffer == nullptr)||(writer.buffer_size == 0)) { return false; }  
-    return strlen(writer.buffer)?true:false; //isvalid
+  Start(buffer, 0, buffer_size);
 }
 
-void BufferWriter::Append(const char* buff)
+void BufferWriter::Start(char* buffer, uint16_t length, uint16_t buffer_size)
 {
-    if(writer.buffer == nullptr) { return; }  
-    writer.length += snprintf_P(&writer.buffer[writer.length], writer.buffer_size, buff);
+  writer.buffer      = buffer;
+  writer.buffer_size = buffer_size;
+  writer.length      = 0;
+
+  if(!IsReady())
+  {
+    return;
+  }
+
+  if(length >= writer.buffer_size)
+  {
+    length = writer.buffer_size - 1;
+  }
+
+  writer.length = length;
+  writer.buffer[writer.length] = '\0';
+}
+
+void BufferWriter::Start(void)
+{
+  Clear();
+}
+
+void BufferWriter::Clear(void)
+{
+  if(!IsReady())
+  {
+    writer.length = 0;
+    return;
+  }
+
+  memset(writer.buffer, 0, writer.buffer_size);
+  writer.length = 0;
+}
+
+bool BufferWriter::End(void)
+{
+  if(!IsReady())
+  {
+    return false;
+  }
+
+  writer.buffer[writer.length] = '\0';
+
+  return writer.length > 0;
+}
+
+void BufferWriter::Append(const char* text)
+{
+  if(!IsReady() || text == nullptr || IsFull())
+  {
+    return;
+  }
+
+  const uint16_t remaining = Remaining();
+
+  if(remaining <= 1)
+  {
+    writer.buffer[writer.buffer_size - 1] = '\0';
+    return;
+  }
+
+  const int written = snprintf(
+    &writer.buffer[writer.length],
+    remaining,
+    "%s",
+    text
+  );
+
+  if(written <= 0)
+  {
+    return;
+  }
+
+  if((uint16_t)written >= remaining)
+  {
+    writer.length = writer.buffer_size - 1;
+  }
+  else
+  {
+    writer.length += written;
+  }
+
+  writer.buffer[writer.length] = '\0';
 }
 
 void BufferWriter::Append_P(const char* formatP, ...)
 {
-  if(writer.buffer == nullptr) { return; }  
+  if(!IsReady() || formatP == nullptr || IsFull())
+  {
+    return;
+  }
+
+  const uint16_t remaining = Remaining();
+
+  if(remaining <= 1)
+  {
+    writer.buffer[writer.buffer_size - 1] = '\0';
+    return;
+  }
+
   va_list arg;
   va_start(arg, formatP);
-  writer.length += vsnprintf_P(&writer.buffer[writer.length], writer.buffer_size, formatP, arg);
+
+  const int written = vsnprintf_P(
+    &writer.buffer[writer.length],
+    remaining,
+    formatP,
+    arg
+  );
+
   va_end(arg);
+
+  if(written <= 0)
+  {
+    return;
+  }
+
+  if((uint16_t)written >= remaining)
+  {
+    writer.length = writer.buffer_size - 1;
+  }
+  else
+  {
+    writer.length += written;
+  }
+
+  writer.buffer[writer.length] = '\0';
 }
-
-
-

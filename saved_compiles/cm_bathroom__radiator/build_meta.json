@@ -1,7 +1,7 @@
 {
   "env_name": "cm_bathroom__radiator",
-  "created_utc": "2026-04-05T13:36:25Z",
-  "created_epoch": 1775396185,
+  "created_utc": "2026-06-27T19:40:38Z",
+  "created_epoch": 1782589238,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_bathroom__radiator",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "785c1ef293a4b4da6c9f91060dd17278dd4f311c",
-    "describe": "785c1ef2-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/08_Logging/mLogging.cpp\n M code/2_CoreSystem/Version.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_meadows.ini\n M platformio_override.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M saved_compiles/qtq_server_reset_board_installed/build_meta.json\n M saved_compiles/qtq_server_reset_board_installed/firmware.elf\n?? saved_compiles/cm_bathroom__radiator/\n?? saved_compiles/cm_garage__furnace/"
+    "commit": "54a8f9916bec2f102cde48163c69f91383586c6d",
+    "describe": "54a8f991-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/2_CoreSystem/20_JSON/mJSON.h\n M code/2_CoreSystem/Version.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_meadows.ini\n M platformio_override.ini\n M saved_compiles/cm_bathroom__immersion/build_meta.json\n M saved_compiles/cm_bathroom__immersion/firmware.elf\n M saved_compiles/cm_bathroom__radiator/build_meta.json\n M saved_compiles/cm_bathroom__radiator/firmware.elf\n M saved_compiles/cm_kitchen__room_sensor/build_meta.json\n M saved_compiles/cm_kitchen__room_sensor/firmware.elf\n M saved_compiles/cm_mbedroom__bedlight/build_meta.json\n M saved_compiles/cm_mbedroom__bedlight/firmware.elf\n?? code/2_CoreSystem/Version_md.md"
   }
 }

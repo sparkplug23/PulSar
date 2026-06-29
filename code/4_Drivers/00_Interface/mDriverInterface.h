@@ -60,6 +60,56 @@ class mDriverInterface :
     // uint8_t ConstructJSON_SensorTemperatureColours(uint8_t json_level = 0, bool json_appending = true);
     // uint8_t ConstructJSON_Motion_Event(uint8_t json_level = 0, bool json_appending = true);
 
+typedef union {                            // Restricted by MISRA-C Rule 18.4 but so useful...
+  uint32_t data;
+  struct {
+    uint32_t stream : 1;
+    uint32_t mirror : 1;
+    uint32_t flip : 1;
+    uint32_t rtsp : 1;
+    uint32_t awb : 1;
+    uint32_t awb_gain : 1;
+    uint32_t aec : 1;
+    uint32_t aec2 : 1;
+    uint32_t agc : 1;
+    uint32_t raw_gma : 1;
+    uint32_t lenc : 1;
+    uint32_t colorbar : 1;
+    uint32_t wpc : 1;
+    uint32_t dcw : 1;
+    uint32_t bpc : 1;
+    uint32_t spare15 : 1;
+    uint32_t spare16 : 1;
+    uint32_t feature : 2;
+    uint32_t contrast : 3;
+    uint32_t brightness : 3;
+    uint32_t saturation : 3;
+    uint32_t resolution : 4;
+  };
+} WebCamCfg;
+
+typedef union {
+  uint32_t data;
+  struct {
+    uint32_t wb_mode : 3;
+    uint32_t ae_level : 3;
+    uint32_t aec_value : 11;
+    uint32_t gainceiling : 3;
+    uint32_t agc_gain: 5;
+    uint32_t special_effect : 3;
+    uint32_t auth : 1;
+    uint32_t spare29 : 1;
+    uint32_t spare30 : 1;
+    uint32_t upgraded : 1;
+  };
+} WebCamCfg2;
+  
+  #ifdef ESP32
+  WebCamCfg     webcam_config;             // 44C
+  uint8_t       webcam_clk;                // 72F
+  WebCamCfg2    webcam_config2;            // 460
+  #endif
+
   
     #ifdef USE_MODULE_NETWORK_MQTT 
     void MQTTHandler_Init();

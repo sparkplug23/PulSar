@@ -256,7 +256,7 @@
 // //   // DeserializationError error = deserializeJson(doc, data_buffer.payload.ctr);
   
 // //   // if(error){
-// //   //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_DESERIALIZATION_ERROR));
+// //   //   AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PIXEL D_DESERIALIZATION_ERROR));
 // //   //   Response_mP(S_JSON_COMMAND_SVALUE, D_ERROR,D_DESERIALIZATION_ERROR);
 // //   //   return 0;
 // //   // }
@@ -265,12 +265,12 @@
 // //   // if(!obj["command"].isNull()){ 
 // //   //   const char* command = obj["command"];
 // //   //   if(strstr(command,"system_send_all")){ 
-// //   //     ALOG_INF(PSTR(D_LOG_NEO D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
+// //   //     ALOG_INF(PSTR(D_LOG_PIXEL D_PARSING_MATCHED "\"command\"=\"system_send_all\""));
 // //   //     MQTTHandler_RefreshAll();
 // //   //     isserviced++;
 // //   //   }
 // //   //   else{
-// //   //     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_NEO D_PARSING_NOMATCH));
+// //   //     AddLog(LOG_LEVEL_ERROR, PSTR(D_LOG_PIXEL D_PARSING_NOMATCH));
 // //   //   }
 // //   // }
 

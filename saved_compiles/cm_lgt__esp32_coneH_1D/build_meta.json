@@ -1,7 +1,7 @@
 {
   "env_name": "cm_lgt__esp32_coneH_1D",
-  "created_utc": "2026-02-21T19:15:03Z",
-  "created_epoch": 1771701303,
+  "created_utc": "2026-06-26T13:06:10Z",
+  "created_epoch": 1782479170,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_lgt__esp32_coneH_1D",
   "platform": "espressif32",
@@ -17,9 +17,9 @@
     "bootloader.bin"
   ],
   "git": {
-    "branch": "development",
-    "commit": "8d71b67ae1d061fa5d5447524834fc9c1c9d35a4",
-    "describe": "8d71b67a-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32_coneH_1D/NeoPixelBus\n M .pio/libdeps/cm_lgt__esp32_coneH_1D/integrity.dat\n M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_LightingEffects.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/6_Lights/00_Interface/mBusNeoWrapper.h\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M platformio_lgt.ini\n M saved_compiles/cm_lgt__esp32_coneH_1D/build_meta.json\n M saved_compiles/cm_lgt__esp32_coneH_1D/firmware.elf\n?? lib/lib_npb_himethod/"
+    "branch": "dev_mqtt_transport",
+    "commit": "07583f6b6060374604028586ff4d9fe1b1b67836",
+    "describe": "07583f6b-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/00_Developing/Firmware__Testbeds.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/2_CoreSystem/mBaseConfig.h\n M code/3_Network/21_WebServer/Webpages/Generated/html_ui.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/6_Lights/03_Animator/Commands.cpp\n M code/6_Lights/03_Animator/webpages_generated/html_pixart.h\n M code/6_Lights/03_Animator/webpages_generated/html_pxmagic.h\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_lgt.ini\n M platformio_override.ini\n M saved_compiles/cm_lgt__esp32_coneH_1D/build_meta.json\n M saved_compiles/cm_lgt__esp32_coneH_1D/firmware.elf\n M saved_compiles/tg_lgt__esp32_7segclock/build_meta.json\n M saved_compiles/tg_lgt__esp32_7segclock/firmware.elf\n M saved_compiles/tg_lgt__esp32_matrix_16x16/build_meta.json\n M saved_compiles/tg_lgt__esp32_matrix_16x16/firmware.elf\n M saved_compiles/tg_lgt__esp32_matrix_16x16_16fx/build_meta.json\n M saved_compiles/tg_lgt__esp32_matrix_16x16_16fx/firmware.elf\n M saved_compiles/tg_lgt__esp32_matrix_32w8h/build_meta.json\n M saved_compiles/tg_lgt__esp32_matrix_32w8h/firmware.elf\n M saved_compiles/tg_lgt__esp32_matrix_32w8h_weight/build_meta.json\n M saved_compiles/tg_lgt__esp32_matrix_32w8h_weight/firmware.elf\n M saved_compiles/tg_lgt__esp32_matrix_8w32h/build_meta.json\n M saved_compiles/tg_lgt__esp32_matrix_8w32h/firmware.elf"
   }
 }

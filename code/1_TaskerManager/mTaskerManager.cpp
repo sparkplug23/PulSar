@@ -1,15 +1,3 @@
-/**
- * @file mTaskerManager.cpp
- * @author your name (you@domain.com)
- * @brief 
- * @version 0.1
- * @date 2025-02-14
- * 
- * @copyright Copyright (c) 2025
- * 
- * cooperative multitasking scheduler or a cyclic executive.
- * 
- */
 #include "1_TaskerManager/mTaskerManager.h"
 
 mTaskerManager* mTaskerManager::instance = nullptr;
@@ -186,6 +174,10 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
       // If metrics are disabled, just run the task
     DEBUG_LINE_HERE;
 
+    /***DEBUGGING::  Uncomment to HIGHLIGHT a TASK */
+    // if (task == TASK_PRE_INIT || task == TASK_INIT) {
+    //   ALOG_ERR(PSTR("TASK_PRE_INIT or TASK_INIT called %S %s"), GetTaskName(task), mod->GetModuleName());
+    // }
     /***DEBUGGING::  Uncomment to block a TASK */
     // if (task == TASK_SETTINGS_DEFAULT || task == TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT) {
     //   ALOG_ERR(PSTR("TASK_SETTINGS_DEFAULT or TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT called"));
@@ -206,8 +198,9 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
     // }
 
 
-    result = mod->Tasker(task, obj);
+    
 
+    result = mod->Tasker(task, obj);
 
     /***
      * In the future if we get stuck, remember missing return from task required with platest platform/board
@@ -218,7 +211,6 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
     #endif
   #endif
 
-    
 
     /****************************************************************************************************************
      * Debug: Stats
@@ -329,7 +321,7 @@ void mTaskerManager::JSONCommand_Run(char* json)
 void mTaskerManager::addTasker(mTaskerInterface* mod)
 {
   pModule.push_back(mod);
-  Serial.printf("AddTasker[%d]\t%S \tuid %d\n\r", pModule.size(), mod->GetModuleName(), mod->GetModuleUniqueID());
+  // Serial.printf("AddTasker[%d]\t%S \tuid %d\n\r", pModule.size(), mod->GetModuleName(), mod->GetModuleUniqueID());
 
   assert(heap_caps_check_integrity_all(true));  // will abort on corrupt heap
 }
@@ -389,6 +381,9 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CORE_PWM
   addTasker(new mPWM());
   #endif
+  #if defined(USE_MODULE_CORE_PINVIEWER) && defined(USE_MODULE_NETWORK_WEBSERVER)
+  addTasker(new mPinViewer());
+  #endif 
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING
   addTasker(new mDevelopmentDebugging());
   #endif 
@@ -414,12 +409,6 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_NETWORK_WEBSERVER
   addTasker(new mWebServer());
   #endif
-  #ifdef USE_MODULE_DRIVERS_MODEM_7000G
-  addTasker(new mSIM7000G());
-  #endif
-  #ifdef USE_MODULE_DRIVERS_MODEM_800L
-  addTasker(new mSIM800L());
-  #endif
   /**
    * @brief Drivers
    **/
@@ -431,6 +420,9 @@ void mTaskerManager::Instance_Init()
   #endif
   #ifdef USE_MODULE_DRIVERS_RELAY
   addTasker(new mRelays());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_SDCARD
+  addTasker(new mSDCard());
   #endif
   #ifdef USE_MODULE_DRIVERS_IRTRANSCEIVER
   addTasker(new mIRtransceiver());
@@ -444,9 +436,6 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_DRIVERS_HBRIDGE
   addTasker(new mHBridge());
   #endif
-  #ifdef USE_MODULE_DRIVERS_SDCARD
-  addTasker(new mSDCard());
-  #endif
   #ifdef USE_MODULE_DRIVERS_SHELLY_DIMMER
   addTasker(new mShellyDimmer());
   #endif
@@ -458,6 +447,12 @@ void mTaskerManager::Instance_Init()
   #endif
   #ifdef USE_MODULE_DRIVERS__CAMERA
   addTasker(new mCamera());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_MODEM_7000G
+  addTasker(new mSIM7000G());
+  #endif
+  #ifdef USE_MODULE_DRIVERS_MODEM_800L
+  addTasker(new mSIM800L());
   #endif
   #ifdef USE_MODULE__DRIVERS_MAVLINK_DECODER
   addTasker(new mMAVLink_Decoder());
@@ -550,11 +545,8 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_SENSORS_GPS_SERIAL
   addTasker(new mGPS_Serial());
   #endif
-  #ifdef USE_MODULE_SENSORS_GPS_MODEM
-  addTasker(new mGPS_Modem());
-  #endif
-  #ifdef USE_MODULE_SENSORS_BATTERY_MODEM
-  addTasker(new mBattery_Modem());
+  #ifdef USE_MODULE_SENSORS_ESP32_TEMPERATURE
+  addTasker(new mESP32Temperature());
   #endif
   DEBUG_LINE_HERE
   /**
@@ -707,11 +699,14 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__LIGHTNEO_RADAR_DISTANCE
   addTasker(new mLightNeo_RadarDistance());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_USERMOD_01
-  addTasker(new mUserMod_01());
-  #endif
   #ifdef USE_MODULE_CONTROLLER_CUSTOM__MAVLINK_FLYING_LEDS
   addTasker(new mMavlinkFlyingLEDS());
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_CUSTOM__OLED_NITC_AMBIENT
+  addTasker(new mCustom());
+  #endif
+  #ifdef USE_MODULE_CONTROLLER_USERMOD_01
+  addTasker(new mUserMod_01());
   #endif
   DEBUG_LINE_HERE
 
@@ -720,7 +715,6 @@ void mTaskerManager::Instance_Init()
   #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
   // Causing hang up and crash on ESP32 May2025
   debug_module_time.resize(pModule.size());
-  make error
   #endif
   DEBUG_LINE_HERE
 
@@ -755,7 +749,7 @@ const char* mTaskerManager::GetTaskName_Full(uint16_t task)
     case TASK_TEMPLATES__LOAD_MODULE:                 return PM_TASK_TEMPLATE_LOAD_CTR;
     case TASK_PRE_INIT:                               return PM_TASK_PRE_INIT_CTR;
     case TASK_INIT:                                   return PM_TASK_INIT_CTR;
-    case TASK_CONFIGURE_MODULES_FOR_DEVICE:           return PM_TASK_CONFIGURE_MODULES_FOR_DEVICE_CTR;
+    // case TASK_CONFIGURE_MODULES_FOR_DEVICE:           return PM_TASK_CONFIGURE_MODULES_FOR_DEVICE_CTR;
     case TASK_LOOP:                                   return PM_TASK_LOOP_CTR;
     case TASK_EVERY_50_MSECOND:                       return PM_TASK_EVERY_50_MSECOND_CTR;
     case TASK_EVERY_100_MSECOND:                      return PM_TASK_EVERY_100_MSECOND_CTR;
@@ -774,7 +768,7 @@ const char* mTaskerManager::GetTaskName_Full(uint16_t task)
     // case TASK_SAVE_BEFORE_RESTART:                    return PM_TASK_SAVE_BEFORE_RESTART_CTR;
     case TASK_SETTINGS_DEFAULT:                       return PM_TASK_SETTINGS_DEFAULT_CTR;
     case TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT:    return PM_TASK_SETTINGS_OVERWRITE_SAVED_TO_DEFAULT_CTR;
-    case TASK_SETTINGS_LOAD_VALUES_INTO_MODULE:       return PM_TASK_SETTINGS_LOAD_VALUES_INTO_MODULE_CTR;
+    case TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM:       return PM_TASK_INIT_LOAD_MODULE_CONFIG_FROM_FILESYSTEM_CTR;
     case TASK_SETTINGS_SAVE_VALUES_FROM_MODULE:       return PM_TASK_SETTINGS_SAVE_VALUES_FROM_MODULE_CTR;
     case YTASK_INIT:                   return PM_YTASK_INIT_CTR;
     case YTASK_LOOP:                   return PM_YTASK_LOOP_CTR;

@@ -7,7 +7,9 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
   
   int8_t function_result = 0;
   
+  
   switch(function){
+
     /************
      * INIT SECTION * 
     *******************/
@@ -36,7 +38,7 @@ int8_t mSR04::Tasker(uint8_t function, JsonParserObject obj){
           if (SR04[i].type) 
           {
             Reading(i);
-            ALOG_INF(PSTR(D_LOG_ULTRASONIC "Distance: %d mm"),(int)SR04[0].distance*10);
+            ALOG_INF(PSTR(D_LOG_SR04 "Distance: %d mm"),(int)SR04[0].distance*10);
           }
         }
       // }
@@ -202,7 +204,7 @@ void mSR04::ModeDetect(void) {
         ALOG_INF(PSTR("NewPing %d"), __LINE__); Serial.println();
         if (SR04[i].sonar_serial->hardwareSerial()) {
           ALOG_INF(PSTR("NewPing %d"), __LINE__); Serial.println();
-          tkr_sup->ClaimSerial();
+          tkr_sup->ClaimSerial();// should be within serial module, not support!
           AddLog(LOG_LEVEL_INFO,PSTR("ClaimSerial NotEnabled %d %d"), sr04_trig_pin, sr04_echo_pin);
         }
   #ifdef ESP32
@@ -438,7 +440,7 @@ void mSR04::parse_JSONCommand(JsonParserObject obj)
 
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
-  ALOG_TST(PSTR(D_LOG_LIGHT D_TOPIC "mSR04::parse_JSONCommand %d"),obj.isNull());
+  ALOG_TST(PSTR(D_LOG_LIGHT "mSR04::parse_JSONCommand %d"),obj.isNull());
   #endif // #ifdef ENABLE_LOG_LEVEL_COMMANDS
 
   char buffer[50];
@@ -509,33 +511,52 @@ uint8_t mSR04::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
 uint8_t mSR04::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 {
   JBI->Start();
+
     JBI->Add("Ping", readings.raw.ping_value);
     JBI->Add(D_DISTANCE "_cm", readings.raw.distance_cm);
+
     #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_EMA
     JBI->Object_Start("Filtered_EMA");
       JBI->Add(D_DISTANCE "_cm", readings.average_EMA.distance_cm);
-      JBI->Add("GetLowPass", readings.average_EMA.filter->GetLowPass());
-      JBI->Add("GetHighPass", readings.average_EMA.filter->GetHighPass());
+
+      if (readings.average_EMA.filter)
+      {
+        // Serial.println(readings.average_EMA.filter->GetLowPass());
+        // Serial.println(readings.average_EMA.filter->GetHighPass());
+        // float low = readings.average_EMA.filter->GetLowPass();
+        JBI->Add("GetLowPass", readings.average_EMA.filter->GetLowPass());
+        JBI->Add("GetHighPass", readings.average_EMA.filter->GetHighPass());
+      }
     JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_SR04_FILTERING_EMA
+
     #ifdef ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
     JBI->Object_Start("Filtered_DEMA");
       JBI->Add(D_DISTANCE "_cm", readings.average_DEMA.distance_cm);
-      JBI->Add("GetBandPass", readings.average_DEMA.filter->GetBandPass());
-      JBI->Add("GetBandStop", readings.average_DEMA.filter->GetBandStop());
-    #endif // ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+
+      if (readings.average_DEMA.filter)
+      {
+        // Serial.println(readings.average_DEMA.filter->GetBandPass());
+        // Serial.println(readings.average_DEMA.filter->GetBandStop());
+        JBI->Add("GetBandPass", readings.average_DEMA.filter->GetBandPass());
+        JBI->Add("GetBandStop", readings.average_DEMA.filter->GetBandStop());
+      }
     JBI->Object_End();
+    #endif // ENABLE_DEVFEATURE_SR04_FILTERING_DEMA
+
     #ifdef ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
     JBI->Object_Start("Temperature");
       JBI->Add("Enabled", readings.temp_adj.flag_enabled);
       JBI->Add("Ambient", readings.temp_adj.ambient_temperature);
     JBI->Object_End();
+
     JBI->Object_Start("Conversion");
       JBI->Add("speed_of_sound", readings.conversion_settings.speed_of_sound);
       JBI->Add("flag_distance_conversion_method", readings.conversion_settings.flag_distance_conversion_method);
     JBI->Object_End();
     #endif // ENABLE_DEVFEATURE_TEMPERATURE_SOUND_OF_SOUND_COMPENSATION
-  return JBI->End();    
+
+  return JBI->End();
 }
 
   

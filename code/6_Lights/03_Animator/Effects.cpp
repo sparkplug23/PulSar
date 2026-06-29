@@ -28222,7 +28222,7 @@ void mAnimatorLight::LoadEffects()
   #endif
   #endif
 
-  ALOG_INF(PSTR(D_LOG_NEO "Effects %d/%d"), effectCount, effects_in_header_length);  
+  ALOG_INF(PSTR(D_LOG_PIXEL "Effects %d/%d"), effectCount, effects_in_header_length);  
 
 }
 

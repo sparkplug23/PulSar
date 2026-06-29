@@ -60,9 +60,6 @@
 
 
 
-#define MQTT_HOST__USERNAME "lteclient"
-#define MQTT_HOST__PASSWORD "af4d8bc9ab"
- #define MQTT_PORT_CELLULAR 51883 
  
 // ------------------------------------------------------------------
 // SoftAP defaults (override in user config / ini later)
@@ -87,9 +84,13 @@
 // #endif // D_MQTTSERVER_IP_ADDRESS_COMMA_DELIMITED
 
 #ifndef MQTT_HOST_CELLULAR
-#define MQTT_HOST_CELLULAR "sparkequinox.ddns.net"
-// #define MQTT_HOST  "192.168.1.65" //Parsing the IP String will be the new method
+#define MQTT_HOST_CELLULAR "sparkequinox2.ddns.net"
 #endif
+#define MQTT_HOST__USERNAME "lteclient"
+#define MQTT_HOST__PASSWORD "af4d8bc9ab"
+#define MQTT_PORT_CELLULAR 51883 
+
+
 
 // Belfast
 #undef LATITUDE

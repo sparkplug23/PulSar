@@ -23,7 +23,8 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 
 /**@@@@@ Minor Changes - Aim for Quartely Milestones : Try describe development in this stage, when increased, assumed previous was done.
- * #135 : [26Q2] Created 4April26. Worked on: Addlog,   
+ * #136 : [26v1] Created 13June26. {alreadydone: Bitpack gpio, templates, mqtt, all networks, huge rewrite which may need certain flags working. Sd card, filesystem, settings, also all redone. Pin mapping in general redone}
+ * #135 : [26Q2] Created 4April26. Worked on: Addlog, Network connections and mqtt switched to multi-access structure. MQTT can latch on to any, and its its job to handle that. Filesystem, Settings, SDCard (inside Filesystem).
  * #134 : Created Feb26. Fixed RTC leak causing crashing on solar, new panic_handler added for postcrash decoding
  * #133 : New testbeds created for permenant structured developed.
  * #132 : [26Q1] 24Dec25 Live palettes refactored. New Wifi2, webserver. three html build scripts (lights,webserver,submodules). Ethernet, LTE, SMS. Lights will be either complete/beta/2d only, add new defines within these, not the user config. RMT added back in (eg coneH). Most esp32 versions (s3,c3, working). crash_report and add2line parsing.
@@ -47,14 +48,14 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
  * #113 : Main development branch for 2023
  * #112 : After Colorado, still the lighting only branch
  * #111 : Working on lighting as its own branch. Removing any WLED palette usage until my palatte works!
- * #110 : Before colorado
+ * #110 : Before colorado 2022
  */
-#define FIRMWARE_VERSION_MINOR    135 // Update "ChangeLogManual.md" when incrementing
+#define FIRMWARE_VERSION_MINOR    136 // Update "ChangeLogManual.md" when incrementing
 
 /**@@@@@ Core Changes
  * #00 : 
  */
-#define FIRMWARE_VERSION_CORE     0
+#define FIRMWARE_VERSION_CORE     1
 
 /**@@@@@ Module changes
  * #00 : 

@@ -39,8 +39,16 @@ struct EventPackage{
     uint8_t length = 0;
     }value;
     /**
-     * jsoncommands stored in a dlist
-     * */
-    // uint8_t json_commands_dlist_id = 0; // 0 = none, 1+ is the count
-    int8_t json_commands_dlist_id = -1; // 0 = none, 1+ is the count
+     * JSON command stored in mRuleEngine::jsonbuffer.data dlist.
+     *
+     * 0    = no JSON command
+     * 1..N = valid JSON command slot
+     *
+     * The stored slot is 1-based so memset(EventPackage, 0, ...)
+     * safely means "no JSON command".
+     *
+     * Convert to zero-based dlist index only when reading:
+     *   dlist_index = json_command_slot - 1;
+     */
+    uint8_t json_command_slot = 0;
 };

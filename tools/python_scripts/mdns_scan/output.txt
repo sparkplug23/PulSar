@@ -1,0 +1,384 @@
+PulSar mDNS scan
+Timestamp : 2026-06-15 11:57:32
+Service   : _pulsar._tcp.local.
+Duration  : 8.0 s
+Found     : 29
+
+========================================================================
+Device 1
+========================================================================
+Instance : bathroom--radiator._pulsar._tcp.local.
+Server   : bathroom--radiator.local.
+Port     : 80
+Address  : 192.168.2.9
+MAC      : cc7b5c35bb44
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=cc7b5c35bb44
+
+========================================================================
+Device 2
+========================================================================
+Instance : bedroom--door-frame._pulsar._tcp.local.
+Server   : bedroom--door-frame.local.
+Port     : 80
+Address  : 192.168.2.14
+MAC      : cc7b5c3624a4
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=cc7b5c3624a4
+
+========================================================================
+Device 3
+========================================================================
+Instance : cellular-locator-01._pulsar._tcp.local.
+Server   : cellular-locator-01.local.
+Port     : 80
+Address  : 192.168.2.72
+MAC      : 4022d82221f0
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=4022d82221f0
+
+========================================================================
+Device 4
+========================================================================
+Instance : garage--furnace._pulsar._tcp.local.
+Server   : garage--furnace.local.
+Port     : 80
+Address  : 192.168.2.40
+MAC      : c8f09e5239e0
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=c8f09e5239e0
+
+========================================================================
+Device 5
+========================================================================
+Instance : garage--room-sensor._pulsar._tcp.local.
+Server   : garage--room-sensor.local.
+Port     : 80
+Address  : 192.168.2.44
+MAC      : 7c2c67d38344
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=7c2c67d38344
+
+========================================================================
+Device 6
+========================================================================
+Instance : guest--printer-sensor._pulsar._tcp.local.
+Server   : guest--printer-sensor.local.
+Port     : 80
+Address  : 192.168.2.1
+MAC      : cc7b5c35aed8
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=cc7b5c35aed8
+
+========================================================================
+Device 7
+========================================================================
+Instance : hallway--bluevase-light._pulsar._tcp.local.
+Server   : hallway--bluevase-light.local.
+Port     : 80
+Address  : 192.168.2.28
+MAC      : a0f262ec5b08
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=a0f262ec5b08
+
+========================================================================
+Device 8
+========================================================================
+Instance : hallway--consumer-unit._pulsar._tcp.local.
+Server   : hallway--consumer-unit.local.
+Port     : 80
+Address  : 192.168.2.43
+MAC      : cc7b5c36ca70
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=cc7b5c36ca70
+
+========================================================================
+Device 9
+========================================================================
+Instance : hallway--heating._pulsar._tcp.local.
+Server   : hallway--heating.local.
+Port     : 80
+Address  : 192.168.2.62
+MAC      : b0cbd8e31fa0
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=b0cbd8e31fa0
+
+========================================================================
+Device 10
+========================================================================
+Instance : hallway--room-sensor._pulsar._tcp.local.
+Server   : hallway--room-sensor.local.
+Port     : 80
+Address  : 192.168.2.12
+MAC      : aca704bb0228
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=aca704bb0228
+
+========================================================================
+Device 11
+========================================================================
+Instance : kitchen--glass-box._pulsar._tcp.local.
+Server   : kitchen--glass-box.local.
+Port     : 80
+Address  : 192.168.2.18
+MAC      : f024f945192c
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=f024f945192c
+
+========================================================================
+Device 12
+========================================================================
+Instance : kitchen--room-sensor._pulsar._tcp.local.
+Server   : kitchen--room-sensor.local.
+Port     : 80
+Address  : 192.168.2.16
+MAC      : 7c2c67d41af4
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=7c2c67d41af4
+
+========================================================================
+Device 13
+========================================================================
+Instance : livingroom--pebbles._pulsar._tcp.local.
+Server   : livingroom--pebbles.local.
+Port     : 80
+Address  : 192.168.2.2
+MAC      : cc7b5c36050c
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=cc7b5c36050c
+
+========================================================================
+Device 14
+========================================================================
+Instance : livingroom--tv._pulsar._tcp.local.
+Server   : livingroom--tv.local.
+Port     : 80
+Address  : 192.168.2.5
+MAC      : 5c013b958b8c
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=5c013b958b8c
+
+========================================================================
+Device 15
+========================================================================
+Instance : mbedroom--bedlight._pulsar._tcp.local.
+Server   : mbedroom--bedlight.local.
+Port     : 80
+Address  : 192.168.2.13
+MAC      : f024f944344c
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=f024f944344c
+
+========================================================================
+Device 16
+========================================================================
+Instance : mbedroom--room-sensor._pulsar._tcp.local.
+Server   : mbedroom--room-sensor.local.
+Port     : 80
+Address  : 192.168.2.19
+MAC      : 7c2c67d3a100
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=7c2c67d3a100
+
+========================================================================
+Device 17
+========================================================================
+Instance : office--under-desk._pulsar._tcp.local.
+Server   : office--under-desk.local.
+Port     : 80
+Address  : 192.168.2.20
+MAC      : f024f945807c
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=f024f945807c
+
+========================================================================
+Device 18
+========================================================================
+Instance : office--ws2815panel12v._pulsar._tcp.local.
+Server   : office--ws2815panel12v.local.
+Port     : 80
+Address  : 192.168.2.66
+MAC      : c4dee2858e64
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=c4dee2858e64
+
+========================================================================
+Device 19
+========================================================================
+Instance : office-monitor-backlight._pulsar._tcp.local.
+Server   : office-monitor-backlight.local.
+Port     : 80
+Address  : 192.168.2.11
+MAC      : 08d1f9d115dc
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=08d1f9d115dc
+
+========================================================================
+Device 20
+========================================================================
+Instance : outside--fence-lights._pulsar._tcp.local.
+Server   : outside--fence-lights.local.
+Port     : 80
+Address  : 192.168.2.21
+MAC      : cc7b5c369e58
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=cc7b5c369e58
+
+========================================================================
+Device 21
+========================================================================
+Instance : outside--garage-tree._pulsar._tcp.local.
+Server   : outside--garage-tree.local.
+Port     : 80
+Address  : 192.168.2.3
+MAC      : f4650b47038c
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=f4650b47038c
+
+========================================================================
+Device 22
+========================================================================
+Instance : outside-oiltank._pulsar._tcp.local.
+Server   : outside-oiltank.local.
+Port     : 80
+Address  : 192.168.2.8
+MAC      : cc7b5c34ca1c
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=cc7b5c34ca1c
+
+========================================================================
+Device 23
+========================================================================
+Instance : testbed-01--sensors-nextion._pulsar._tcp.local.
+Server   : testbed-01--sensors-nextion.local.
+Port     : 80
+Address  : 192.168.2.68
+MAC      : 08b61f29eba8
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=08b61f29eba8
+
+========================================================================
+Device 24
+========================================================================
+Instance : testbed-05--switch-button._pulsar._tcp.local.
+Server   : testbed-05--switch-button.local.
+Port     : 80
+Address  : 192.168.2.84
+MAC      : cc7b5c367f3c
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=cc7b5c367f3c
+
+========================================================================
+Device 25
+========================================================================
+Instance : testbed-06--gps-decoder._pulsar._tcp.local.
+Server   : testbed-06--gps-decoder.local.
+Port     : 80
+Address  : 192.168.2.53
+MAC      : 08b61f354c64
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=08b61f354c64
+
+========================================================================
+Device 26
+========================================================================
+Instance : tg-cam--wroover-02._pulsar._tcp.local.
+Server   : tg-cam--wroover-02.local.
+Port     : 80
+Address  : 192.168.2.83
+MAC      : cc7b5c9871e4
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=cc7b5c9871e4
+
+========================================================================
+Device 27
+========================================================================
+Instance : utility--clearvase-light._pulsar._tcp.local.
+Server   : utility--clearvase-light.local.
+Port     : 80
+Address  : 192.168.2.42
+MAC      : f024f9456a34
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=f024f9456a34
+
+========================================================================
+Device 28
+========================================================================
+Instance : utility--room-sensor._pulsar._tcp.local.
+Server   : utility--room-sensor.local.
+Port     : 80
+Address  : 192.168.2.15
+MAC      : 50787d406884
+Name     : <missing>
+Module   : <missing>
+TXT      :
+  mac=50787d406884
+
+========================================================================
+Device 29
+========================================================================
+Instance : tg-cam--wroover-01._pulsar._tcp.local.
+Server   : tg-cam--wroover-01.local.
+Port     : 80
+Address  : 192.168.2.78
+MAC      : cc7b5c979c94
+Name     : tg-cam--wroover-01
+Module   : wifi
+TXT      :
+  mac=cc7b5c979c94
+  module=wifi
+  name=tg-cam--wroover-01

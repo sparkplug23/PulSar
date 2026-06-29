@@ -70,11 +70,6 @@ enum STATE_NUMBER_IDS{
 
 #define P_PHASE_OUT() Serial.println(F("PHASE OUT"));
 
-// Methods for disable (returning from loop early) until an uptime, network established, or network uptime > x amount
-#define DEBUG_OTA_FLASH_BLOCKER_UNTIL_STABLE_RETURN_ZERO()   if(tkr_time->RtcTime.seconds_nonreset < 120){ return 0; }
-#define DEBUG_OTA_FLASH_BLOCKER_UNTIL_UPTIME_X_RETURN_ZERO(X)   if(tkr_time->RtcTime.seconds_nonreset < X){ return 0; }
-// #define DEBUG_OTA_FLASH_BLOCKER_UNTIL_NETWORK_UPTIME_X_RETURN_ZERO(X)   if(tkr_time->RtcTime.seconds_nonreset < X){ return 0; }
-
 
 #define CALL_VOID_FUNCTION(object,ptrToMember)  ((object).*(ptrToMember))
 
@@ -378,8 +373,6 @@ std::string toBinaryString(T value, size_t bitCount = sizeof(T) * 8) {
 
 extern uint32_t ResetReason_g(void);
 
-extern void SafeMode_StartAndAwaitOTA(uint8_t seconds_to_wait = 0 /*default of zero, is indefinitely */);
-
 #ifdef ENABLE_DEVFEATURE_FASTBOOT_CELLULAR_SMS_BEACON_FALLBACK_DEFAULT_SSID
 #define TINY_GSM_MODEM_SIM7000
 #define TINY_GSM_DEBUG Serial
@@ -420,7 +413,7 @@ class mSupport :
 // void *mutex = nullptr;
 //
 // then protect any function with
-// TasAutoMutex m(&mutex, "somename");
+// AutoMutex m(&mutex, "somename");
 // - mutex is automatically initialised if not already intialised.
 // - it will be automagically released when the function is over.
 // - the same thread can take multiple times (recursive).
@@ -429,14 +422,14 @@ class mSupport :
 // - name is used in serial log of mutex deadlock.
 // - maxWait in ticks is how long it will wait before failing in a deadlock scenario (and then emitting on serial)
 // Nested class
-class TasAutoMutex {
+class AutoMutex {
   SemaphoreHandle_t mutex;
   bool taken;
   int maxWait;
   const char *name;
 public:
-  TasAutoMutex(SemaphoreHandle_t* mutex, const char *name = "", int maxWait = 40, bool take=true);
-  ~TasAutoMutex();
+  AutoMutex(SemaphoreHandle_t* mutex, const char *name = "", int maxWait = 40, bool take=true);
+  ~AutoMutex();
   void give();
   void take();
   static void init(SemaphoreHandle_t* ptr);
@@ -447,22 +440,6 @@ public:
 
 
     void CheckResetConditions();
-
-    #ifdef USE_ARDUINO_OTA
-      /*********************************************************************************************\
-       * Allow updating via the Arduino OTA-protocol.
-       *
-       * - Once started disables current wifi clients and udp
-       * - Perform restart when done to re-init wifi clients
-      \*********************************************************************************************/
-
-      bool arduino_ota_triggered = false;
-      uint16_t arduino_ota_progress_dot_count = 0;
-      bool ota_init_success = false;
-
-      void ArduinoOTAInit(void);
-      void ArduinoOtaLoop(void);
-    #endif // USE_ARDUINO_OTA
 
 
     /****
@@ -528,6 +505,10 @@ public:
     char* ReplaceChar(char* p, char find, char replace);
     char* ReplaceCommaWithDot(char* p);    
     char* Unescape(char* buffer, uint32_t* size);
+    void SetSerialBaudrate(int baudrate);
+    void SerialSendRaw(char *codes);
+    uint32_t GetHash(const char *buffer, size_t size);
+    uint8_t GetNormalDistributionRandom(uint8_t mean, uint8_t standard_deviation, uint8_t constrained_min = 0, uint8_t constrained_max = 0);
     #endif
 
     char* LowerCase(char* dest, const char* source);
@@ -537,10 +518,6 @@ public:
 
     bool ValidIpAddress(const char* str);
     bool ParseIPv4(uint32_t* addr, const char* str);
-    
-    #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
-    bool NewerVersion(char* version_str);
-    #endif
     
     void EspRestart(void);
 
@@ -568,13 +545,7 @@ public:
 
     int GetCommandCode(char* destination, size_t destination_size, const char* needle, const char* haystack);
     
-    #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
-    void SetSerialBaudrate(int baudrate);
-    void SerialSendRaw(char *codes);
-    uint32_t GetHash(const char *buffer, size_t size);
-    #endif
-
-    void ClaimSerial(void);
+    void ClaimSerial(void); // should be within serial module, not support!
     void ShowSource(int source);
         
     char* GetPowerDevice(char* dest, uint32_t idx, size_t size, uint32_t option);
@@ -624,10 +595,6 @@ public:
     uint32_t loop_delay_temp = millis();
     uint32_t loops_per_second = millis();
     uint32_t this_cycle_ratio = millis();
-
-    #ifdef ENABLE_DEVFEATURE_FIRMWARE__FOR_FUTURE_RELEASE
-    uint8_t GetNormalDistributionRandom(uint8_t mean, uint8_t standard_deviation, uint8_t constrained_min = 0, uint8_t constrained_max = 0);
-    #endif
 
     static int32_t safeDivideInt(int32_t num, int32_t den);
 

@@ -44,7 +44,7 @@ class mRuleEngine :
     struct JSONCOMMANDS{
       char data[D_COMMAND_BUFFER_LENGTH] = {0}; //use | delims
       uint8_t bytes_used = 0;
-      int8_t delims_used = 0;
+      uint8_t delims_used = 0;
     }jsonbuffer;
 
     void ShowRuleAddLogByIndex(uint8_t show_type = 0); // 0 = basic indexed, 1 = with names
@@ -61,6 +61,17 @@ class mRuleEngine :
     void Preset_Link_ButtonToggleRelay(uint8_t triggered_index, uint8_t output_index); 
     void Preset_Link_SwitchToggleRelay(uint8_t triggered_index, uint8_t output_index); 
     
+    static inline bool HasJsonCommand(const EventPackage* event)
+    {
+      return event && (event->json_command_slot > 0);
+    }
+
+    static inline uint8_t JsonCommandDListIndex(const EventPackage* event)
+    {
+      // json_command_slot is 1-based.
+      // DList indexing is 0-based.
+      return event->json_command_slot - 1;
+    }
 
     // need a group of functions to "add" and remove from the buffer,
     // what about buffers? they can includes ids

@@ -31,9 +31,6 @@
 | NextionMirror    | Optional human-facing mirrored log     | Local attached display           | UART/display text                | Presentation sink, not primary    |
 */
 
-
-
-
 #ifdef USE_SOFTWARE_SERIAL_DEBUG
   #include <SoftwareSerial.h>
   #define SERIAL_DEBUG Serial
@@ -107,6 +104,8 @@ enum LoggingLevels {
   LOG_LEVEL_ALL
 };
 
+#define BOOT_LOG_LEVEL tkr_set->runtime.seriallog_level_during_boot
+
 
 // Can only be used when hardware serial is enabled
 #if defined(USE_DEBUG_LINE) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
@@ -166,6 +165,7 @@ enum LoggingLevels {
   #define DEBUG_PRINT_FUNCTION_NAME   //nothing, no code
 #endif
 
+
 #if defined(USE_DEBUG_PRINT_FUNCTION_NAME_TEST) && !defined(USE_SOFTWARE_SERIAL_DEBUG)
   #define DEBUG_PRINT_FUNCTION_NAME_TEST   SERIAL_DEBUG.print(__FILE__);\
                                       SERIAL_DEBUG.print("\t");\
@@ -177,6 +177,7 @@ enum LoggingLevels {
   #define DEBUG_PRINT_FUNCTION_NAME_TEST   //nothing, no code
 #endif
 
+
 #if defined(ENABLE_DEBUG_LINE_HERE_TRACE)
   #define DEBUG_LINE_HERE_TRACE    SERIAL_DEBUG.printf("DEBUG HERE: ");\
                         SERIAL_DEBUG.print(__FILE__);\
@@ -186,8 +187,7 @@ enum LoggingLevels {
   #define DEBUG_LINE_HERE_TRACE   //nothing, no code
 #endif
 
-//For single test use, no ifdefs
-// #ifdef USE_DEBUG_LINE
+
 #if defined(ENABLE_DEBUG_LINE_HERE)
   #define DEBUG_LINE_HERE    SERIAL_DEBUG.printf("DEBUG HERE: ");\
                         SERIAL_DEBUG.print(__FILE__);\
@@ -196,7 +196,7 @@ enum LoggingLevels {
 #else
   #define DEBUG_LINE_HERE   //nothing, no code
 #endif
-// Serial.printf("DEBUG HERE: "); Serial.print(__FILE__); Serial.println(__LINE__); Serial.flush();
+
 
 #if defined(ENABLE_DEBUG_LINE_HERE2)
   #define DEBUG_LINE_HERE2    SERIAL_DEBUG.printf("DEBUG HERE2: ");\
@@ -206,6 +206,7 @@ enum LoggingLevels {
 #else
   #define DEBUG_LINE_HERE2   //nothing, no code
 #endif
+
 
 #if defined(ENABLE_DEBUG_LINE_HERE3)
   #define DEBUG_LINE_HERE3    SERIAL_DEBUG.printf("DEBUG HERE3: ");\
@@ -226,6 +227,12 @@ enum LoggingLevels {
   #define DEBUG_LINE_HERE4   //nothing, no code
 #endif
 
+
+
+// Used when we need to wait at a point considered safe, but need to allow other threads to potentially cause a crash, proving the code after this test point is not the cause.
+#define DEBUG_WAIT_POINT_MS(ms) SERIAL_DEBUG.printf("[WAIT DEBUG] %s:%d - wait %lu ms START\n", __FILE__, __LINE__, (unsigned long)(ms)); delay(ms); SERIAL_DEBUG.printf("[WAIT DEBUG] %s:%d - %lu ms Continue\n", __FILE__, __LINE__, (unsigned long)(ms));
+
+
 #if defined(ENABLE_WAIT_WITH_PRINT_TICK)
   #define WAIT_WITH_PRINT_TICK(ms) do { \
       SERIAL_DEBUG.printf("[WAIT DEBUG] %s:%d - wait %lu ms START\n", __FILE__, __LINE__, (unsigned long)(ms)); \
@@ -237,7 +244,6 @@ enum LoggingLevels {
 #else
   #define WAIT_WITH_PRINT_TICK(ms)  // No-op
 #endif
-
 
 
 #if defined(ENABLE_DEBUG_LINE_HERE_MILLIS)
@@ -312,19 +318,32 @@ enum LoggingLevels {
 #endif
 
 
+#define DEBUG_CRITICAL_STOP_CODE_PRINT()                                     \
+do {                                                                         \
+  Serial.printf("line %d\n\r", __LINE__);                                    \
+  uint32_t stoptick = 0;                                                     \
+  while(1) {                                                                 \
+    const uint32_t t_start = millis();                                       \
+    while((uint32_t)(millis() - t_start) < 1000) {                           \
+      ESP.wdtFeed();                                                         \
+      delayMicroseconds(1000);                                               \
+    }                                                                        \
+    Serial.printf("STOPPED: tick=%lu millis=%lu\n\r",                        \
+                  (unsigned long)stoptick,                                   \
+                  (unsigned long)millis());                                  \
+    stoptick++;                                                              \
+  }                                                                          \
+} while(0);
+
 
 // Added indexing, as nested debug points need different saved start points. 
 #ifdef ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
 
-    #define DEBUG_LIGHTING__START_TIME_RECORDING(X) lighting_time_critical_logging.start_value[X] = micros();
-    #define DEBUG_LIGHTING__SAVE_TIME_RECORDING(X, Y)  Y = micros() - lighting_time_critical_logging.start_value[X];
+  #define DEBUG_LIGHTING__START_TIME_RECORDING(X) lighting_time_critical_logging.start_value[X] = micros();
+  #define DEBUG_LIGHTING__SAVE_TIME_RECORDING(X, Y)  Y = micros() - lighting_time_critical_logging.start_value[X];
 
-    #define DEBUG_LIGHTING__START_TIME_RECORDING_TASK(X) tkr_anim->lighting_time_critical_logging.start_value[X] = micros();
-    #define DEBUG_LIGHTING__SAVE_TIME_RECORDING_TASK(X, Y)  tkr_anim->Y = micros() - tkr_anim->lighting_time_critical_logging.start_value[X];
-
-
-
-    
+  #define DEBUG_LIGHTING__START_TIME_RECORDING_TASK(X) tkr_anim->lighting_time_critical_logging.start_value[X] = micros();
+  #define DEBUG_LIGHTING__SAVE_TIME_RECORDING_TASK(X, Y)  tkr_anim->Y = micros() - tkr_anim->lighting_time_critical_logging.start_value[X];
 
 #else
 

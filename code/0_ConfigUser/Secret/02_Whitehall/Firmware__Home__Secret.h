@@ -230,6 +230,7 @@ Bathroom
 // #define DEVICE_DEFAULT_SONOFF_BASIC__06
 // #define DEVICE_DEFAULT_SONOFF_BASIC__BLACK_SHORT // Desk floor mat
 // #define DEVICE_DEFAULT_SONOFF_R4_BASIC__24
+// #define DEVICE_SOCKET_NUMBERED_SONOFF_BASIC_R4
 
 
 /**************************************************************************************************************************************************
@@ -409,9 +410,8 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Socket Number " STR2(DEVICENAME_SOCKET_NUMBER_CTR)
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   // #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_RELAY_KEYS_DEFINES_TO_SETTINGS_HEADER
   
@@ -480,8 +480,7 @@ Bathroom
    * Use RX pin, gpio 1, as switch input
    * TX pin should still allow debugging
    * */
-  // #define DISABLE_SERIAL_LOGGING
-  
+
   #define USE_MODULE_CORE_RULES
   
   #define USE_MODULE_SENSORS_INTERFACE
@@ -501,7 +500,7 @@ Bathroom
      * DONT MAKE THIS DEFAULT until I can set this gpio for button here, and hence combine this "DEVICE_...GPIO_BUTTON" with above using ifdef around GPIOC
      * */
     // "\"" D_GPIOC "\":{"
-    //   "\"14\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
+    //   "\"14\":\"" D_GPIO_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
     // "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR "\""
   "}";
@@ -558,16 +557,18 @@ Bathroom
 
 
 #ifdef DEVICE_SOCKET_NUMBERED_SONOFF_BASIC_R4
+  #ifndef DEVICENAME_CTR
   #define DEVICENAME_CTR          "socket_number_" STR2(DEVICENAME_SOCKET_NUMBER_CTR)
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
   #define DEVICENAME_FRIENDLY_CTR "Socket Number " STR2(DEVICENAME_SOCKET_NUMBER_CTR)
-  
+  #endif
+
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   // #define ENABLE_DEVFEATURE_BUILD_REPAIR__FIXING_RELAY_KEYS_DEFINES_TO_SETTINGS_HEADER
-  
 
   // #define ENABLE_DEBUGFEATURE__RELOAD_TEMPLATE__RULES_EVER_MINUTE
 
@@ -586,7 +587,7 @@ Bathroom
   "{"
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_CTR  "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR  "\"," // ESP32 easier to do without custom base
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
@@ -645,7 +646,6 @@ Bathroom
    * Use RX pin, gpio 1, as switch input
    * TX pin should still allow debugging
    * */
-  // #define DISABLE_SERIAL_LOGGING
   
   #define USE_MODULE_CORE_RULES
   
@@ -667,7 +667,7 @@ Bathroom
      * Temporary fix creating a new template, as adding gpio on top of existing default templates is not working
      * */
     // "\"" D_GPIOC "\":{"
-    //   "\"14\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
+    //   "\"14\":\"" D_GPIO_KEY2_INV_CTR   "\"" // RX pin, possibly to leave TX pin (GPIO1) for debugging later
     // "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_SONOFF_BASIC_EXTERNAL_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -828,13 +828,10 @@ Bathroom
   #ifndef DEVICENAME_ROOMHINT_CTR
   #error "DEVICENAME_ROOMHINT_CTR missing"
   #endif
-    
-  #define DISABLE_SERIAL_LOGGING //temp measure
-  
+      
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
   
@@ -912,19 +909,19 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"13\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
-      "\"5\":\""  D_GPIO_FUNCTION_SWT2_NP_CTR  "\","
+      "\"13\":\"" D_GPIO_SWT1_NP_CTR  "\","
+      "\"5\":\""  D_GPIO_SWT2_NP_CTR  "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"4\":\""  D_GPIO_FUNCTION_REL1_CTR  "\","
-      "\"15\":\"" D_GPIO_FUNCTION_REL2_CTR  "\","
+      "\"4\":\""  D_GPIO_REL1_CTR  "\","
+      "\"15\":\"" D_GPIO_REL_CTR "2" "\","
       #endif 
       #ifdef USE_MODULE_ENERGY_ADE7953
-      "\"16\":\""  D_GPIO_FUNCTION_ADE7953_IRQ_CTR  "\","
-      "\"14\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"12\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"16\":\""  D_GPIO_ADE7953_IRQ_CTR  "\","
+      "\"14\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"12\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif 
-      "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+      "\"0\":\"" D_GPIO_LED1_CTR "\""
       // Button1 GPIO2
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1139,12 +1136,12 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"5\":\"" D_GPIO_FUNCTION_SWT1_NP_CTR  "\","
+      "\"5\":\"" D_GPIO_SWT1_NP_CTR  "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"4\":\"" D_GPIO_FUNCTION_REL1_INV_CTR  "\","  // Just so it gets turned off as a known state
+      "\"4\":\"" D_GPIO_REL1_INV_CTR  "\","  // Just so it gets turned off as a known state
       #endif 
-      "\"0\":\"" D_GPIO_FUNCTION_LED1_CTR "\""
+      "\"0\":\"" D_GPIO_LED1_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1319,9 +1316,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -1370,8 +1366,8 @@ Bathroom
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\""
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1418,15 +1414,10 @@ Bathroom
     
   #define SETTINGS_HOLDER 1240
   #define ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
-  #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  #define ENABLE_SYSTEM_SETTINGS_IN_FILESYSTEM
   #define ENABLE_DEBUGFEATURE_SETTINGS_STORAGE__ENABLED_SETTINGS_SAVE_EVERY_MINUTE_FOR_DEBUG
   #define USE_MODULE_CORE_FILESYSTEM
   #define ENABLE_DEVFEATURE_STORAGE__SAVE_MODULE__CORE__MQTT
   #define ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
-
-  // #define ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
-  #define ENABLE_DEVFEATURE_SETTINGS__TFS
 
   #define ENABLE_FEATURE_SETTINGS__LOAD_PRECODED_SETTINGS_ON_BOOT_NO_SAVED_STATES
 
@@ -1437,7 +1428,6 @@ Bathroom
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE 
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -1485,9 +1475,7 @@ Bathroom
   /***********************************
    * SECTION: Storage Configs
   ************************************/  
-  #define ENABLE_DEVFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
-
-  // #define ENABLE_DEVFEATURE_SETTINGS__NVM_NON_VOLATILE_MEMORY
+  #define ENABLE_DEBUGFEATURE__FILESYSTEM__LOAD_HARDCODED_TEMPLATES_INTO_FILESYSTEM
 
   /**
    * For debugging and short term I may want to store everything as JSON, so I can view the data?
@@ -1506,27 +1494,6 @@ Bathroom
   
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
 
   #define USE_MODULE_SENSORS_SUN_TRACKING
 
@@ -1650,9 +1617,9 @@ Bathroom
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"18\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Installed unused NPB output
-      "\"4\":\""  D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\"," // Installed unused NPB output
-      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR   "\""
+      "\"18\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Installed unused NPB output
+      "\"4\":\""  D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Installed unused NPB output
+      "\"5\":\""  D_GPIO_SWT1_CTR   "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1700,92 +1667,6 @@ Bathroom
 #endif
 
 
-// #ifdef DEVICE_RGBSHELF
-//   #define DEVICENAME_CTR          "rgbshelf"
-//   #define DEVICENAME_FRIENDLY_CTR "Shelf Lights"
-//   #define DEVICENAME_ROOMHINT_CTR "Kitchen"
-//   #define MQTT_HOST   "192.168.1.70"
-
-//   // #define DISABLE_NETWORK
-
-//   #define DISABLE_SERIAL
-//   #define DISABLE_SERIAL0_CORE
-//   #define DISABLE_SERIAL_LOGGING
-
-//   #define ENABLE_FEATURE_WATCHDOG_TIMER
-//   #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-//   #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-//   #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
-
-//     
-//     /********* Group: Needed to build ************************/
-//     #define ENABLE_DEVFEATURE_NEOPIXELBUS_INTO_SEGMENTS_STRUCT // Towards making bus dynamic and multiple pins
-//     /********* Group: Ready for full integration ************************/
-//     // 
-//     /********* Group: Testing ************************/
-//     #define ENABLE_DEVFEATURE_NEOSPEED_ESP32_I2S_WS2812_METHOD
-//     
-//     #define ENABLE_DEVFEATURE_COLOR_WHEEL_CHANGED
-//     
-    
-//     // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-//     // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-//     // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-//     // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-//     // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-//     // 
-//     /********* Group: Debug options only ************************/
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_HARDWARE
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-//     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS_NEW
-//     #define ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES // WLED _DEBUG
-//     #define ENABLE_DEBUG_SERIAL
-//     // #define ENABLE_DEBUG_POINTS_GetColourFromPreloadedPalette
-//     // #define ENABLE_LOG_LEVEL_DEBUG
-//     // #define ENABLE_DEBUG_TRACE__ANIMATOR_UPDATE_DESIRED_COLOUR
-//     // #define ENABLE__DEBUG_POINT__ANIMATION_EFFECTS   // "DEBUG_POINT" is the new unified way of turning on temporary debug items
-
-//   #define USE_MODULE_TEMPLATE
-//   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-//   "{"
-//     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-//     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-//     "\"" D_GPIOC "\":{"
-//       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-//       "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-//       #endif
-//       "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
-//     "},"
-//     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-//     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-//   "}";
-
-//   #define STRIP_SIZE_MAX 33
-//   #define USE_LIGHTING_TEMPLATE
-//   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-//   R"=====(
-//   {
-//     "HardwareType":"WS28XX",
-//     "ColourOrder":"RGB",
-//     "AnimationMode":"Effects",
-//     "ColourPalette":"Pastel 02",
-//     "Effects": {
-//       "Function":1,
-//       "Intensity":50,
-//       "RateMs": 1000
-//     },
-//     "BrightnessRGB": 100
-//   }
-//   )=====";
-
-// #endif
-
-
 #ifdef DEVICE_RGBCOOKER
   #define DEVICENAME_CTR          "rgbcooker"
   #define DEVICENAME_FRIENDLY_CTR "RGB Cooker H801"
@@ -1815,8 +1696,8 @@ Bathroom
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+      "\"1\":\""  D_GPIO_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_LED2_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -1878,9 +1759,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
     
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
        
@@ -1897,11 +1777,11 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"25\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
+      "\"26\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"25\":\"" D_GPIO_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"5\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
+      "\"5\":\"" D_GPIO_SWT1_CTR   "\""
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -1982,8 +1862,8 @@ Bathroom
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+      "\"1\":\""  D_GPIO_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_LED2_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2029,10 +1909,10 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_LSM303D)
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
       #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\""
+      "\"2\":\"" D_GPIO_DS18X20_1_CTR  "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\""
   "}";
@@ -2069,8 +1949,8 @@ Bathroom
     "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
-      "\"1\":\""  D_GPIO_FUNCTION_LED1_CTR "\","
-      "\"5\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\""
+      "\"1\":\""  D_GPIO_LED1_CTR "\","
+      "\"5\":\""  D_GPIO_LED2_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_H801_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2128,9 +2008,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_SENSORS_INTERFACE
     #
@@ -2148,17 +2027,17 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
+      "\"26\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_I2C_SDA_CTR   "\""
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
+      "\"5\":\""  D_GPIO_SWT1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
-      "\"18\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
+      "\"18\":\"" D_GPIO_DOOR_OPEN_CTR     "\","
       #endif
-      "\"19\":\"" D_GPIO_FUNCTION_LED2_INV_CTR "\","
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"19\":\"" D_GPIO_LED2_INV_CTR "\","
+      "\"2\":\"" D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2283,7 +2162,6 @@ Bathroom
   ///////////////////////////////////////////// Enable Logs
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
   
   ///////////////////////////////////////////// System Logs
@@ -2501,23 +2379,23 @@ Bathroom
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"          
-      "\"16\":\""  D_GPIO_FUNCTION_PZEM0XX_RX_MODBUS_CTR "\"," 
-      "\"17\":\""  D_GPIO_FUNCTION_PZEM0XX_TX_CTR "\","
+      "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219)
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","   
+      "\"21\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SDA_CTR   "\","   
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"23\":\""  D_GPIO_FUNCTION_PIR_1_CTR "\","
+      "\"23\":\""  D_GPIO_PIR_1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"18\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"19\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"33\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\","
+      "\"18\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"19\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"33\":\"" D_GPIO_KEY3_INV_CTR  "\","
       #endif
-      "\"4\":\"" D_GPIO_FUNCTION_LED1_CTR  "\","
-      "\"5\":\"" D_GPIO_FUNCTION_LED2_CTR  "\","
-      "\"2\":\"" D_GPIO_FUNCTION_LED3_CTR  "\""
+      "\"4\":\"" D_GPIO_LED1_CTR  "\","
+      "\"5\":\"" D_GPIO_LED2_CTR  "\","
+      "\"2\":\"" D_GPIO_LED3_CTR  "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -2726,7 +2604,7 @@ Bathroom
   ///////////////////////////////////////////// Enable Logs
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
+
   #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
   
   ///////////////////////////////////////////// System Logs
@@ -2885,13 +2763,13 @@ Bathroom
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIO_NUMBER "\":{"    
-      // "\"12\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\""       // 3 pin out not being used
-      // "\"14\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\""         // unused top door
-      // "\"13\":\"" D_GPIO_FUNCTION_UNUSED_FORCED_HIGH_CTR   "\","
+      // "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\""       // 3 pin out not being used
+      // "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\""         // unused top door
+      // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"35\":\"" D_GPIO_FUNCTION_KEY1_INV_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_INV_CTR  "\","
-      "\"0\":\"" D_GPIO_FUNCTION_KEY3_INV_CTR  "\""
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
       #endif
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -2924,9 +2802,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
   
   #define USE_MODULE_SENSORS_SUN_TRACKING
 
@@ -2945,17 +2822,17 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_SR04
-      "\"19\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+      "\"19\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+      "\"18\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
       #endif 
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," 
+      "\"5\":\"" D_GPIO_DS18X20_1_CTR  "\"," 
       #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -3022,9 +2899,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
      
@@ -3042,13 +2918,13 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-      "\"D1\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"D2\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"D1\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"D2\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"D6\":\"" D_GPIO_FUNCTION_SWT1_CTR      "\","
+      "\"D6\":\"" D_GPIO_SWT1_CTR      "\","
       #endif
-      "\"D4\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"D4\":\""  D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -3159,9 +3035,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_SENSORS_INTERFACE
     #
@@ -3187,23 +3062,23 @@ Bathroom
     "\"" D_GPIOC "\":{"   
       // 3P - Top Right
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"23\":\""  D_GPIO_FUNCTION_SWT1_CTR     "\","
+      "\"23\":\""  D_GPIO_SWT1_CTR     "\","
       #endif
       // RJ45 Connector   
       #ifdef USE_MODULE_SENSORS_BME
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"26\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DHT
-      "\"18\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\","
+      "\"18\":\"" D_GPIO_DHT22_1_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"5\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\","
+      "\"5\":\"" D_GPIO_DS18X20_1_CTR  "\","
       #endif   
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"4\":\"" D_GPIO_FUNCTION_REL1_INV_CTR   "\","
+      "\"4\":\"" D_GPIO_REL1_INV_CTR   "\","
       #endif
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\"" D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -3372,9 +3247,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define DISABLE_SLEEP // loops per second less than 1hz // I need to make an "mqtt/alert" channel that lets me know this
   
@@ -3408,9 +3282,9 @@ Bathroom
 
 
   // Actual
-  #define GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  D_GPIO_FUNCTION_REL1_INV_CTR
-  #define GPIO_NAME_ZONE1_UPSTAIRS_RELAY    D_GPIO_FUNCTION_REL2_INV_CTR
-  #define GPIO_NAME_ZONE2_BOILER_RELAY      D_GPIO_FUNCTION_REL3_INV_CTR
+  #define GPIO_NAME_ZONE0_DOWNSTAIRS_RELAY  D_GPIO_REL1_INV_CTR
+  #define GPIO_NAME_ZONE1_UPSTAIRS_RELAY    D_GPIO_REL2_INV_CTR
+  #define GPIO_NAME_ZONE2_BOILER_RELAY      D_GPIO_REL3_INV_CTR
 /**
  * 
  * 
@@ -3451,24 +3325,24 @@ Bathroom
       "\"19\":\"" GPIO_NAME_ZONE2_BOILER_RELAY      "\","
       #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"33\":\""  D_GPIO_FUNCTION_SWT1_INV_CTR  "\","
-      "\"27\":\""  D_GPIO_FUNCTION_SWT2_INV_CTR  "\","
-      "\"26\":\""  D_GPIO_FUNCTION_SWT3_INV_CTR  "\","
+      "\"33\":\""  D_GPIO_SWT1_INV_CTR  "\","
+      "\"27\":\""  D_GPIO_SWT2_INV_CTR  "\","
+      "\"26\":\""  D_GPIO_SWT3_INV_CTR  "\","
       #endif  
       #ifdef USE_MODULE_SENSORS_DHT
-      "\"25\":\"" D_GPIO_FUNCTION_DHT22_1_CTR   "\"," // DiningRoom 
+      "\"25\":\"" D_GPIO_DHT22_1_CTR   "\"," // DiningRoom 
       #endif
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"4\":\"" D_GPIO_RGB_DATA_CTR  "\","
       #endif 
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"23\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\"," // DS_DB - 3 pin
+      "\"23\":\"" D_GPIO_DS18X20_1_CTR "\"," // DS_DB - 3 pin
       #endif    
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""   // builtin led
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""   // builtin led
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -3638,9 +3512,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   /*
     Method should only activate if boot loop happens 10 times
@@ -3772,7 +3645,6 @@ Bathroom
   ************************************/    
   // #define DISABLE_SERIAL
   // #define DISABLE_SERIAL0_CORE
-  // #define DISABLE_SERIAL_LOGGING
   
   // #define ENABLE_ADVANCED_DEBUGGING
   // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
@@ -3809,32 +3681,10 @@ Bathroom
   ************************************/     
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
-
-  // #define USE_MODULE_CORE_FILESYSTEM
-  //   
-  //   
-  //   
-  //   
-
-  // Settings saving and loading
-  //   // #define ENABLE_DEVFEATURE_PERIODIC_SETTINGS_SAVING__EVERY_HOUR
-  //   
-  //   #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_AS_FULL_USER_CONFIGURATION_REQUIRING_SETTINGS_HOLDER_CONTROL
-  //   #define ENABLE_DEVFEATURE_SETTINGS__INCLUDE_EXTRA_SETTINGS_IN_STRING_FORMAT_FOR_VISUAL_FILE_DEBUG
-  //   // #define ENABLE_FEATURE_SETTINGS_STORAGE__ENABLED_SAVING_BEFORE_OTA
-    
-  
-  
-
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-
-  // 
 
   /***********************************
    * SECTION: Network Configs
@@ -4201,11 +4051,11 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
-      "\"2\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"15\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR  "\","
+      "\"2\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"15\":\"" D_GPIO_I2C_SDA_CTR  "\","
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"4\":\""  D_GPIO_FUNCTION_SWT1_CTR "\""
+      "\"4\":\""  D_GPIO_SWT1_CTR "\""
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -4284,13 +4134,10 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Landing Room"
   #define DEVICENAME_ROOMHINT_CTR "Garage"
   #define MQTT_HOST   "192.168.1.70"
-  
-  #define DISABLE_SERIAL_LOGGING
-  
+    
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
     
@@ -4381,12 +4228,12 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      "\"22\":\"" D_GPIO__RF_433MHZ_TX__CTR   "\","
       #endif  
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"23\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"23\":\"" D_GPIO__RF_433MHZ_RX__CTR   "\","
       #endif  
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_CTR  "\""
+      "\"2\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -4406,9 +4253,8 @@ Bathroom
   // add db18 dropping from the waterproof box to know extra temp, perhaps add two for backup? (independant pin from tank sensors)
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_SENSORS_INTERFACE
     #
@@ -4429,11 +4275,11 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_SR04
-      "\"19\":\"" D_GPIO_FUNCTION_SR04_ECHO_CTR   "\","
-      "\"18\":\"" D_GPIO_FUNCTION_SR04_TRIG_CTR  "\","  
+      "\"19\":\"" D_GPIO_SR04_ECHO_CTR   "\","
+      "\"18\":\"" D_GPIO_SR04_TRIG_CTR  "\","  
       #endif 
-      "\"27\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"27\":\"" D_GPIO_DS18X20_1_CTR "\","
+      "\"2\":\"" D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -4479,9 +4325,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
 
@@ -4512,23 +4357,23 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
+      "\"26\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_I2C_SDA_CTR   "\""
       #endif
       // #ifdef USE_MODULE_SENSORS_PIR
-      // "\"5\":\""  D_GPIO_FUNCTION_SWT3_CTR "\","
+      // "\"5\":\""  D_GPIO_SWT3_CTR "\","
       // #endif
       #ifdef USE_MODULE_SENSORS_SWITCHES
-      "\"18\":\"" D_GPIO_FUNCTION_SWT1_CTR  "\","
-      "\"4\":\""  D_GPIO_FUNCTION_SWT2_CTR  "\","
+      "\"18\":\"" D_GPIO_SWT1_CTR  "\","
+      "\"4\":\""  D_GPIO_SWT2_CTR  "\","
       #endif  
       #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
-      "\"35\":\"" D_GPIO_FUNCTION_ANALOG_INPUT0_CTR "\","
+      "\"35\":\"" D_GPIO_ANALOG_INPUT0_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"19\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR "\","
+      "\"19\":\"" D_GPIO_DS18X20_1_CTR "\","
       #endif
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"2\":\"" D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -4626,9 +4471,8 @@ Bathroom
 
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
   
   
   //#define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
@@ -4932,7 +4776,6 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "TV Room"
   #define MQTT_HOST       "192.168.1.70"
   
-  #define DISABLE_SERIAL_LOGGING
   #define USE_MODULE_CORE_RULES
     
   #define USE_MODULE_SENSORS_INTERFACE
@@ -5021,7 +4864,6 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Masterbedroom"
   #define MQTT_HOST   "192.168.1.70"
 
-  #define DISABLE_SERIAL_LOGGING
   #define USE_MODULE_CORE_RULES
     
   #define USE_MODULE_SENSORS_INTERFACE
@@ -5102,7 +4944,6 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Masterbedroom"
   #define MQTT_HOST   "192.168.1.70"
 
-  #define DISABLE_SERIAL_LOGGING
   #define USE_MODULE_CORE_RULES
     
   #define USE_MODULE_SENSORS_INTERFACE
@@ -5215,9 +5056,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
     
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
        
@@ -5243,18 +5083,18 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\"," //should be 27, missoldered, repair later
       #endif
       #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
-      "\"27\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      "\"27\":\"" D_GPIO__RF_433MHZ_TX__CTR   "\","
       #endif  
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"14\":\"" D_GPIO_FUNCTION__RF_433MHZ_RX__CTR   "\","
+      "\"14\":\"" D_GPIO__RF_433MHZ_RX__CTR   "\","
       #endif  
-      "\"18\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"18\":\"" D_GPIO_RGB_DATA_CTR  "\","
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"33\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\""
+      "\"33\":\"" D_GPIO_SWT1_CTR   "\""
       #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
@@ -5316,7 +5156,6 @@ Bathroom
   #define DEVICENAME_ROOMHINT_CTR "Ensuite"
   #define MQTT_HOST   "192.168.1.70"
       
-  #define DISABLE_SERIAL_LOGGING
   #define USE_MODULE_CORE_RULES
     
   #define USE_MODULE_SENSORS_INTERFACE
@@ -5408,9 +5247,8 @@ Bathroom
   // #define ENABLE_DEBUGFEATURE_TIME__SHOW_UPTIME_EVERY_SECOND
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
   
   
   // #define DEVICE_DEFAULT_CONFIGURATION_MODE_A_SWITCHES_TOGGLE_OUTPUTS
@@ -5540,9 +5378,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
    
   #define USE_MODULE_NETWORK_MQTT
 
@@ -5668,9 +5505,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
     
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
        
@@ -5721,14 +5557,14 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif
-      "\"19\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
+      "\"19\":\"" D_GPIO_RGB_DATA_CTR  "\","
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"5\":\"" D_GPIO_FUNCTION_SWT1_CTR   "\","
+      "\"5\":\"" D_GPIO_SWT1_CTR   "\","
       #endif
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""  
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""  
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -5817,13 +5653,10 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Landing Room"
   #define DEVICENAME_ROOMHINT_CTR "Landing"
   #define MQTT_HOST   "192.168.1.70"
-  
-  #define DISABLE_SERIAL_LOGGING
-  
+    
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
     
@@ -5997,9 +5830,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   // #define ENABLE_DEBUGFEATURE_TELEMETRY__MQTT_SEND_HEALTH_EVERY_SECOND
   // #define ENABLE_DEVFEATURE_DEBUG_REMOVE_POSSIBLE_ERROR_CODE
@@ -6124,50 +5956,50 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RELAY
-      "\"26\":\""  D_GPIO_FUNCTION_REL1_CTR    "\","   // Immersion = Also add additonal LED with relay pin
+      "\"26\":\""  D_GPIO_REL1_CTR    "\","   // Immersion = Also add additonal LED with relay pin
       #endif
       #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
-      "\"22\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"21\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DS18X20
-      "\"18\":\"" D_GPIO_FUNCTION_DS18X20_1_CTR  "\"," // Group 1 = Basic Set, use just these until device is stable
-      "\"19\":\"" D_GPIO_FUNCTION_DS18X20_2_CTR  "\"," // Group 2 = Detailed, use these only after stress testing with 3 pins for sensors with rewrite. Read datasheet.
+      "\"18\":\"" D_GPIO_DS18X20_1_CTR  "\"," // Group 1 = Basic Set, use just these until device is stable
+      "\"19\":\"" D_GPIO_DS18X20_2_CTR  "\"," // Group 2 = Detailed, use these only after stress testing with 3 pins for sensors with rewrite. Read datasheet.
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"32\":\"" D_GPIO_FUNCTION_SWT1_CTR "\","       // Stairs
-      "\"4\":\""  D_GPIO_FUNCTION_SWT2_CTR "\","       // Landing
-      "\"25\":\"" D_GPIO_FUNCTION_SWT3_CTR "\","       // Hotpress (negating need of button? or use non-momentary switch to enable/disable it)
+      "\"32\":\"" D_GPIO_SWT1_CTR "\","       // Stairs
+      "\"4\":\""  D_GPIO_SWT2_CTR "\","       // Landing
+      "\"25\":\"" D_GPIO_SWT3_CTR "\","       // Hotpress (negating need of button? or use non-momentary switch to enable/disable it)
       #endif 
       #ifdef USE_MODULE_LIGHTS_ADDRESSABLE
-        // "\"26\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Orange - Immersional Relay
-        // "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
-        // "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
-        // "\"13\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Brown - Immersion Relay (Label wrong, )
+        // "\"26\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Orange - Immersional Relay
+        // "\"27\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
+        // "\"14\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
+        // "\"13\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Brown - Immersion Relay (Label wrong, )
         #ifdef USE_RGB_OUT_LANDING_PANEL
-        "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
+        "\"14\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Blue - Landing Panel
         #endif
         #ifdef USE_RGB_OUT_TANK
-        "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
+        "\"27\":\"" D_GPIO_RGB_DATA1_CTR  "\"," // Green - Immersion Tank
         #endif      
         #ifdef ENABLE_DEVFEATURE_MULTIPLE_PIXEL_PINS
-        "\"14\":\"" D_GPIO_FUNCTION_RGB_DATA2_CTR  "\","
-        "\"27\":\"" D_GPIO_FUNCTION_RGB_DATA3_CTR  "\","
+        "\"14\":\"" D_GPIO_RGB_DATA2_CTR  "\","
+        "\"27\":\"" D_GPIO_RGB_DATA3_CTR  "\","
         #endif
       #endif
       #ifdef USE_MODULE_DISPLAYS_NEXTION
-      "\"17\":\"" D_GPIO_FUNCTION_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_FUNCTION_NEXTION_RX_CTR "\","
+      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
+      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"33\":\"" D_GPIO_FUNCTION_KEY1_CTR  "\","
-      "\"34\":\"" D_GPIO_FUNCTION_KEY2_CTR  "\","
+      "\"33\":\"" D_GPIO_KEY1_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_CTR  "\","
       #endif
       #ifdef USE_MODULE_DRIVERS_LEDS
-      "\"12\":\""  D_GPIO_FUNCTION_LED2_INV_CTR "\"," 
-      "\"23\":\""  D_GPIO_FUNCTION_LED3_INV_CTR "\"," 
+      "\"12\":\""  D_GPIO_LED2_INV_CTR "\"," 
+      "\"23\":\""  D_GPIO_LED3_INV_CTR "\"," 
       #endif 
-      "\"2\":\""  D_GPIO_FUNCTION_LED1_INV_CTR "\""  // Also optional physical LED to be made external to box (buy one of those drill through ones!)
+      "\"2\":\""  D_GPIO_LED1_INV_CTR "\""  // Also optional physical LED to be made external to box (buy one of those drill through ones!)
       // 5  // i2c oled needs to be another bus because of BME? or, what if it shared!!
       // 15
     "},"
@@ -6440,13 +6272,10 @@ Bathroom
   #define DEVICENAME_FRIENDLY_CTR "Shelly Dimmer Spare Room"
   #define DEVICENAME_ROOMHINT_CTR "Bedroom"
   #define MQTT_HOST       "192.168.1.70"
-  
-  #define DISABLE_SERIAL_LOGGING
-  
+    
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
     
@@ -6560,9 +6389,8 @@ Bathroom
   #define MQTT_HOST   "192.168.1.70"
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_SENSORS_INTERFACE
     #
@@ -6585,24 +6413,24 @@ Bathroom
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"      
       #ifdef USE_MODULE_SENSORS_BME
-      "\"26\":\"" D_GPIO_FUNCTION_I2C_SCL_CTR   "\","
-      "\"27\":\"" D_GPIO_FUNCTION_I2C_SDA_CTR   "\""
+      "\"26\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"27\":\"" D_GPIO_I2C_SDA_CTR   "\""
       #endif
       #ifdef USE_MODULE_SENSORS_PIR
-      "\"5\":\""  D_GPIO_FUNCTION_SWT1_CTR "\","
+      "\"5\":\""  D_GPIO_SWT1_CTR "\","
       #endif
       #ifdef USE_MODULE_SENSORS_DOOR
-      "\"18\":\"" D_GPIO_FUNCTION_DOOR_OPEN_CTR     "\","
-      "\"19\":\"" D_GPIO_FUNCTION_DOOR_LOCK_CTR     "\","
+      "\"18\":\"" D_GPIO_DOOR_OPEN_CTR     "\","
+      "\"19\":\"" D_GPIO_DOOR_LOCK_CTR     "\","
       #else
-      "\"18\":\""  D_GPIO_FUNCTION_SWT2_INV_CTR "\","
-      "\"19\":\""  D_GPIO_FUNCTION_SWT3_INV_CTR "\","
+      "\"18\":\""  D_GPIO_SWT2_INV_CTR "\","
+      "\"19\":\""  D_GPIO_SWT3_INV_CTR "\","
       #endif
       #if defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB) || defined(USE_MODULE_CONTROLLER__LOUVOLITE_HUB_V2)
-      "\"22\":\"" D_GPIO_FUNCTION__RF_433MHZ_TX__CTR   "\","
+      "\"22\":\"" D_GPIO__RF_433MHZ_TX__CTR   "\","
       #endif  
-      "\"4\":\"" D_GPIO_FUNCTION_RGB_DATA_CTR  "\","
-      "\"2\":\"" D_GPIO_FUNCTION_LED1_INV_CTR "\""
+      "\"4\":\"" D_GPIO_RGB_DATA_CTR  "\","
+      "\"2\":\"" D_GPIO_LED1_INV_CTR "\""
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
@@ -6719,9 +6547,8 @@ HVAC controllers here
     #define MQTT_PORT 1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
   
@@ -6766,9 +6593,8 @@ HVAC controllers here
     #define MQTT_PORT     1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
   
@@ -6819,9 +6645,8 @@ HVAC controllers here
   #define MQTT_HOST       "192.168.1.70"
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
   
@@ -6854,9 +6679,8 @@ HVAC controllers here
     #define MQTT_PORT 1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
   
@@ -6892,9 +6716,8 @@ HVAC controllers here
     #define MQTT_PORT 1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
   
@@ -6929,9 +6752,8 @@ HVAC controllers here
     #define MQTT_PORT 1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
   
@@ -6979,9 +6801,8 @@ HVAC controllers here
     #define MQTT_PORT 1883
   
   #define ENABLE_FEATURE_WATCHDOG_TIMER
-  #define ENABLE_DEVFEATURE_FASTBOOT_DETECTION
-  #define ENABLE_DEVFEATURE_FAST_REBOOT_OTA_SAFEMODE
-  #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
+  
+  
 
   #define USE_MODULE_CORE_RULES
   
