@@ -85,9 +85,9 @@
 
   #ifdef ESP32
   #define USE_MODULE_CORE_FILESYSTEM
+#define USE_MODULE_CORE_PINVIEWER
   #endif
     
-#define USE_MODULE_CORE_PINVIEWER
     
 
   //webserver?

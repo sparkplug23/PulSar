@@ -2448,7 +2448,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
    * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
   ************************************/  
   #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BUTTONS
   
   /***********************************
    * SECTION: System Configs
@@ -2457,7 +2457,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   /***********************************
    * SECTION: Storage Configs
   ************************************/    
-
 
   /***********************************
    * SECTION: Network Configs
@@ -2476,47 +2475,12 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   #endif 
 
   /***********************************
-   * SECTION: Display Configs
-  ************************************/  
-
-  /***********************************
    * SECTION: Lighting Configs
   ************************************/    
 
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
   #define ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
   
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":2,
-  //       "ColourOrder":"GRB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":0,
-  //       "Length":100
-  //     }
-  //   ],
-  //   "Segment0": {
-  //     "PixelRange": [
-  //       0,
-  //       100
-  //     ],
-  //     "ColourPalette":"Cold White",
-  //     "Effects": {
-  //       "Function":"Solid",
-  //       "Speed":127,
-  //       "Intensity":127,
-  //       "Grouping":1,
-  //       "RateMs": 25
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "BrightnessRGB": 0
-  // }
-  // )=====";
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
@@ -2544,65 +2508,84 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
         "BusType":"WS2805_RGBWW",
         "Start":66,
         "Length":19
+      },
+      {
+        "Name":"Headboard",
+        "Pin":19,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":85,
+        "Length":100
       }
     ],    
-    "Segment0":{
-      "PixelRange": [
-        0,
-        66
-      ],
-      "ColourType":5,
-      "ColourPalette":"Candy",
-      "SegColour0": {
-        "Hue": 25,
-        "Sat": 100,
-        "BrightnessRGB": 100,
-        "BrightnessCCT": 100,
-        "CCT_TempPercentage":100
+    "Segments":[
+      {
+        "Name":"Under Edge",
+        "PixelRange": [
+          0,
+          66
+        ],
+        "ColourType":5,
+        "ColourPalette":"Candy",
+        "SegColour0": {
+          "Hue": 25,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 100,
+          "CCT_TempPercentage":100
+        },
+        "Effects": {
+          "Function":"Static",
+          "RateMs": 1000,
+          "Speed":127
+        },
+        "BrightnessRGB":100,
+        "BrightnessCCT":100
       },
-      "Effects": {
-        "Function":"Static",
-        "RateMs": 1000,
-        "Speed":127
+      {
+        "Name":"Under Centre",
+        "PixelRange": [
+          67,
+          85
+        ],
+        "ColourType":5,
+        "ColourPalette":"Warm White",
+        "SegColour0": {
+          "Hue": 25,
+          "Sat": 100,
+          "BrightnessRGB": 100,
+          "BrightnessCCT": 100,
+          "CCT_TempPercentage":100
+        },
+        "Effects": {
+          "Function":"Static",
+          "RateMs": 1000,
+          "Speed":127
+        },
+        "BrightnessRGB":100,
+        "BrightnessCCT":100
       },
-      "BrightnessRGB":100,
-      "BrightnessCCT":100
-    },
-    "Segment1":{
-      "PixelRange": [
-        67,
-        85
-      ],
-      "ColourType":5,
-      "ColourPalette":"Warm White",
-      "SegColour0": {
-        "Hue": 25,
-        "Sat": 100,
-        "BrightnessRGB": 100,
-        "BrightnessCCT": 100,
-        "CCT_TempPercentage":100
-      },
-      "Effects": {
-        "Function":"Static",
-        "RateMs": 1000,
-        "Speed":127
-      },
-      "BrightnessRGB":100,
-      "BrightnessCCT":100
-    },
+      {
+        "Name":"Headboard",
+        "PixelRange": [
+          86,
+          186
+        ],
+        "ColourPalette":"Sunset",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":20,
+          "RateMs": 20
+        },
+      }
+    ],
     "BrightnessRGB":0,
     "BrightnessCCT":0
   }
   )=====";
-  /***********************************
-   * SECTION: Energy Configs
-  ************************************/  
-
-  /***********************************
-   * SECTION: Controller Configs
-  ************************************/  
-
-
 
   /***********************************
    * SECTION: GPIO Template
@@ -2615,12 +2598,12 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"    
     #ifdef USE_MODULE_SENSORS_BUTTONS
-    "\"19\":\"" D_GPIO_KEY1_INV_CTR  "\","
-    "\"21\":\"" D_GPIO_KEY2_INV_CTR  "\","
-    "\"22\":\"" D_GPIO_KEY3_INV_CTR  "\","
+    "\"19\":\"" D_GPIO_KEY_INV_CTR "1"  "\","
+    "\"21\":\"" D_GPIO_KEY_INV_CTR "2" "\","
+    "\"22\":\"" D_GPIO_KEY_INV_CTR "3" "\","
     #endif
     #ifdef USE_MODULE_SENSORS_PIR
-    "\"13\":\""  D_GPIO_PIR_1_CTR "\""
+    "\"13\":\""  D_GPIO_PIR_CTR "1" "\""
     #endif
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","

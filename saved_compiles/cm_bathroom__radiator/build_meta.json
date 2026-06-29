@@ -1,7 +1,7 @@
 {
   "env_name": "cm_bathroom__radiator",
-  "created_utc": "2026-06-27T10:47:50Z",
-  "created_epoch": 1782557270,
+  "created_utc": "2026-06-27T19:40:38Z",
+  "created_epoch": 1782589238,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_bathroom__radiator",
   "platform": "espressif32",
@@ -17,9 +17,9 @@
     "bootloader.bin"
   ],
   "git": {
-    "branch": "dev_mqtt_transport",
-    "commit": "8ebe74914408809392003d90a4c52499f22ac7c0",
-    "describe": "8ebe7491-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/11_Languages/mLanguageDefault.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_meadows.ini\n M platformio_override.ini\n M saved_compiles/cm_bathroom__radiator/build_meta.json\n M saved_compiles/cm_bathroom__radiator/firmware.elf"
+    "branch": "development",
+    "commit": "54a8f9916bec2f102cde48163c69f91383586c6d",
+    "describe": "54a8f991-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/2_CoreSystem/20_JSON/mJSON.h\n M code/2_CoreSystem/Version.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_meadows.ini\n M platformio_override.ini\n M saved_compiles/cm_bathroom__immersion/build_meta.json\n M saved_compiles/cm_bathroom__immersion/firmware.elf\n M saved_compiles/cm_bathroom__radiator/build_meta.json\n M saved_compiles/cm_bathroom__radiator/firmware.elf\n M saved_compiles/cm_kitchen__room_sensor/build_meta.json\n M saved_compiles/cm_kitchen__room_sensor/firmware.elf\n M saved_compiles/cm_mbedroom__bedlight/build_meta.json\n M saved_compiles/cm_mbedroom__bedlight/firmware.elf\n?? code/2_CoreSystem/Version_md.md"
   }
 }

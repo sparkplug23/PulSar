@@ -97,7 +97,7 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
   
   #ifdef USE_MODULE_TEMPLATE_SONOFF_BASIC
   {                           // MODULE_SONOFF_BASIC_ID    // Sonoff Basic (ESP8266)
-    GPIO_KEY1,                // GPIO00 Button
+    PIGPIO_N(GPIO_KEY1,1),                // GPIO00 Button
     GPIO_USER,                // GPIO01 Serial RXD and Optional sensor
     PIGPIO_N(GPIO_LED1_INV,2),            // GPIO02 Only available on newer Sonoff Basic R2 V1
     GPIO_USER,                // GPIO03 Serial TXD and Optional sensor

@@ -381,7 +381,7 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CORE_PWM
   addTasker(new mPWM());
   #endif
-  #ifdef USE_MODULE_CORE_PINVIEWER
+  #if defined(USE_MODULE_CORE_PINVIEWER) && defined(USE_MODULE_NETWORK_WEBSERVER)
   addTasker(new mPinViewer());
   #endif 
   #ifdef USE_MODULE_CORE_DEVELOPMENT_DEBUGGING

@@ -5,7 +5,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef USE_MODULE_CORE_PINVIEWER
+#if defined(USE_MODULE_CORE_PINVIEWER) && defined(USE_MODULE_NETWORK_WEBSERVER)
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
@@ -228,6 +228,7 @@ class mPinViewer :
     struct handler<mPinViewer> mqtthandler_state_teleperiod;
     #endif
 };
+
 
 #endif // USE_MODULE_CORE_PINVIEWER
 #endif // _mPinViewer_H_

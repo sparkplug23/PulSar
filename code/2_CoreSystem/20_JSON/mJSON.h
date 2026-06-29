@@ -455,7 +455,7 @@ void releaseJSONBufferLock(); // duplicate of below, need to JOIN THEM!!
 
         // if (!isfinite(f))
         // {
-          writer.length += snprintf(&writer.buffer[writer.length], writer.remaining(), "\"%s\":null", key);
+          // writer.length += snprintf(&writer.buffer[writer.length], writer.remaining(), "\"%s\":null", key);
         // }
 
         char fvalue[20]; dtostrfd2(f,JSON_VARIABLE_FLOAT_PRECISION_LENGTH,fvalue);

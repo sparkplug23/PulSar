@@ -1,7 +1,6 @@
 #include "mPinViewer.h"
 
-#ifdef USE_MODULE_CORE_PINVIEWER
-
+#if defined(USE_MODULE_CORE_PINVIEWER) && defined(USE_MODULE_NETWORK_WEBSERVER)
 
 /******************************************************************************************************************
  * Tasker
@@ -1203,5 +1202,6 @@ void mPinViewer::MQTTHandler_Init()
 }
 
 #endif // USE_MODULE_NETWORK_MQTT
+
 
 #endif // USE_MODULE_CORE_PINVIEWER

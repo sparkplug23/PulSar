@@ -403,39 +403,36 @@ bool mRuleEngine::Tasker_Rules_Interface(uint16_t function_input){
           ALOG_INF(PSTR(D_LOG_RULES "R%d: MATCHED module_id[%d] : Triggered"), rule_index, rules[rule_index].trigger.module_id);
 
           // Populate any jsoncommands to be executed, this takes precident over "State" controls
-          if(rules[rule_index].command.json_commands_dlist_id>=0)
+          if(HasJsonCommand(&rules[rule_index].command))
           {
+            ALOG_INF(PSTR(D_LOG_RULES "Json command detected"));
 
             data_buffer.ClearDeep();
+
             tkr_sup->GetTextIndexed(
-              data_buffer.payload.ctr, 
-              sizeof(data_buffer.payload.ctr), 
-              tkr_rules->rules[rule_index].command.json_commands_dlist_id, 
+              data_buffer.payload.ctr,
+              sizeof(data_buffer.payload.ctr),
+              JsonCommandDListIndex(&rules[rule_index].command),
               tkr_rules->jsonbuffer.data
-            ); 
-            data_buffer.payload.length_used += strlen(data_buffer.payload.ctr);
-
-            ALOG_INF( PSTR("TASK_JSON_COMMAND_ID mrules=%s"), data_buffer.payload.ctr );
-    
-            tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
-
-          }
-          else // Execute normal state/value method if no jsoncommand was used
-          {
-            
-            ALOG_INF(PSTR("Execute Tasker_Interface(func=%d,module=%d,SourceIsRule=%d)"),
-                  rules[rule_index].command.function_id, // function the previous trigger is linked to
-                  rules[rule_index].command.module_id, //target module
-                  true  // runnig a rule, so don't call this loop back into this function
-                    );
-            
-            tkr->Tasker_Interface(
-              rules[rule_index].command.function_id
-              // , // function the previous trigger is linked to
-              // rules[rule_index].command.module_id //target module
             );
 
+            data_buffer.payload.length_used = strlen(data_buffer.payload.ctr);
 
+            ALOG_INF(PSTR("TASK_JSON_COMMAND_ID mrules=%s"), data_buffer.payload.ctr);
+
+            tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
+          }
+          else
+          {
+            ALOG_INF(PSTR("Execute Tasker_Interface(func=%d,module=%d,SourceIsRule=%d)"),
+                  rules[rule_index].command.function_id,
+                  rules[rule_index].command.module_id,
+                  true
+            );
+
+            tkr->Tasker_Interface(
+              rules[rule_index].command.function_id
+            );
           }
 
         } // trigger.module_id
@@ -506,32 +503,22 @@ rules_active_index = 0;
  * 
  * Perhaps this needs added into each module, ie the way the rule is encoded/decoded is contained within the module eg RF433 
  * */
-bool mRuleEngine::AppendEventToRules(EventPackage* trigger_new, EventPackage* command_new) // CHANGE TO ADD RULE
+bool mRuleEngine::AppendEventToRules(EventPackage* trigger_new, EventPackage* command_new)
 {
-
   uint8_t rule_count = GetConfiguredCount();
-  uint8_t new_index = rule_count;
 
-  if(rule_count>D_MAX_RULES){ return false; } //block new rules
+  if(rule_count >= D_MAX_RULES){ return false; }
 
-  // #if defined(USE_MODULE_SENSORS_SWITCHES) && defined(USE_MODULE_DRIVERS_RELAY)
-
-  // TBD: Add check for unique rule
-
-  // Clear rule
   memset(&rules[rule_count].trigger, 0, sizeof(EventPackage));
   memset(&rules[rule_count].command, 0, sizeof(EventPackage));
 
-  // Copy rule
   memcpy(&rules[rule_count].trigger, trigger_new, sizeof(EventPackage));
   memcpy(&rules[rule_count].command, command_new, sizeof(EventPackage));
-  // Activate rule
+
   rules[rule_count].flag_configured = true;
   rules[rule_count].flag_enabled = true;
-  // If succesfully added
-  return true;
-  // tkr_rules->rules_active_index++;
 
+  return true;
 }
 
 
@@ -701,18 +688,20 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
       const size_t len    = strnlen(jsonbuffer.data, buflen);
 
       if (len < buflen - 2) { // need space for '|' + '\0' at least
+
         tkr_sup->AppendDList_Single(jsonbuffer.data, buflen, s);
 
-        event->json_commands_dlist_id = jsonbuffer.delims_used++;
+        jsonbuffer.delims_used++;
+        event->json_command_slot = jsonbuffer.delims_used;
+
         jsonbuffer.bytes_used += strlen(s); // OK if you accept "requested" not "actually appended"
 
         ALOG_INF(PSTR("data = %s"), jsonbuffer.data);
         ALOG_INF(PSTR("bytes_used = %u"), (unsigned)jsonbuffer.bytes_used);
+        ALOG_INF(PSTR("json_command_slot = %u"), event->json_command_slot);
       }
     }
-
-
-
+    
 
 //Execute test
 
@@ -933,59 +922,49 @@ uint8_t mRuleEngine::ConstructJSON_Settings(uint8_t json_method, bool json_appen
         JBI->Add("Conf", rules[id].flag_configured);
         JBI->Add("Enab", rules[id].flag_enabled);
         JBI->Level_Start_P("Source");
-            JBI->Add("module_id", rules[id].trigger.module_id);
-            JBI->Add("function_id", rules[id].trigger.function_id);
-            JBI->Add("device_id", rules[id].trigger.device_id);
-            JBI->Add("json", rules[id].trigger.json_commands_dlist_id);
-            JBI->Array_AddArray("params", rules[id].trigger.value.data, 5);
-            JBI->Add("len", rules[id].trigger.value.length);
-
-            
-            // if(rules[id].trigger.p_json_commands!=nullptr){
-            //     JBI->Add("json", rules[id].trigger.p_json_commands);
-            // }
+          JBI->Add("module_id", rules[id].trigger.module_id);
+          JBI->Add("function_id", rules[id].trigger.function_id);
+          JBI->Add("device_id", rules[id].trigger.device_id);
+          JBI->Add("json_slot", rules[id].trigger.json_command_slot);
+          JBI->Array_AddArray("params", rules[id].trigger.value.data, 5);
+          JBI->Add("len", rules[id].trigger.value.length);
         JBI->Object_End(); 
 
         JBI->Level_Start_P("Destination");
-            JBI->Add("module_id", rules[id].command.module_id);
-            JBI->Add("function_id", rules[id].command.function_id);
-            JBI->Add("device_id", rules[id].command.device_id);
-            JBI->Add("json", rules[id].command.json_commands_dlist_id);
-            JBI->Array_AddArray("params", rules[id].command.value.data, 5);
-            JBI->Add("len", rules[id].command.value.length);
-            // if(rules[id].command.p_json_commands!=nullptr){
+          JBI->Add("module_id", rules[id].command.module_id);
+          JBI->Add("function_id", rules[id].command.function_id);
+          JBI->Add("device_id", rules[id].command.device_id);
+          JBI->Add("json_slot", rules[id].command.json_command_slot);
+          JBI->Array_AddArray("params", rules[id].command.value.data, 5);
+          JBI->Add("len", rules[id].command.value.length);
 
-            if(rules[id].command.json_commands_dlist_id>=0){
+          if(HasJsonCommand(&rules[id].command))
+          {
+            char buffer_unescaped[D_COMMAND_BUFFER_LENGTH] = {0};
+            char buffer_escaped[D_COMMAND_BUFFER_LENGTH + 50] = {0};
+            uint8_t len = 0;
 
-              // if(tkr_rules->jsonbuffer.data != nullptr){
-            //     JBI->Add("json", rules[id].command.p_json_commands);
+            tkr_sup->GetTextIndexed(
+              buffer_unescaped,
+              sizeof(buffer_unescaped),
+              JsonCommandDListIndex(&rules[id].command),
+              tkr_rules->jsonbuffer.data
+            );
 
-
-                // tkr_sup->GetTextIndexed(buffer, sizeof(buffer), rules[id].command.json_commands_dlist_id, jsonbuffer.data);  // should this be _P?
-                //     JBI->Add("json", buffer); 
-
-                    
-                char buffer_unescaped[D_COMMAND_BUFFER_LENGTH] = {0};
-                char buffer_escaped[D_COMMAND_BUFFER_LENGTH+50] = {0};
-                uint8_t len  = 0;
-                
-                tkr_sup->GetTextIndexed(
-                    buffer_unescaped, 
-                    sizeof(buffer_unescaped), 
-                    tkr_rules->rules[id].command.json_commands_dlist_id, 
-                    tkr_rules->jsonbuffer.data
-                ); 
-
-                for(int i=0;i<strlen(buffer_unescaped);i++){
-                    if(buffer_unescaped[i] == '\"'){
-                    len+=sprintf(buffer_escaped+len,"\\\"");
-                    }else{    
-                    buffer_escaped[len++] = buffer_unescaped[i];
-                    }
-                }
-                JBI->Add("json_es", buffer_escaped); 
-
+            for(uint16_t i = 0; i < strlen(buffer_unescaped); i++)
+            {
+              if(buffer_unescaped[i] == '\"')
+              {
+                len += sprintf(buffer_escaped + len, "\\\"");
+              }
+              else
+              {
+                buffer_escaped[len++] = buffer_unescaped[i];
+              }
             }
+
+            JBI->Add("json_es", buffer_escaped);
+          }
         JBI->Object_End(); 
 
 
