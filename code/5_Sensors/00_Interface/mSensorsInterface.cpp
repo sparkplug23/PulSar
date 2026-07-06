@@ -2133,8 +2133,8 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Settings;
   mqtthandler_list.push_back(ptr);
@@ -2144,8 +2144,8 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
@@ -2155,8 +2155,8 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
@@ -2166,8 +2166,8 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_SensorTemperatureColours;
   mqtthandler_list.push_back(ptr);
@@ -2178,8 +2178,8 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED_FILTERED__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Unified_Filtered;
   mqtthandler_list.push_back(ptr);
@@ -2191,8 +2191,8 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_MOTION__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_Motion;
   mqtthandler_list.push_back(ptr);
@@ -2202,8 +2202,8 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = SEC_IN_HOUR; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_USER_INPUT__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_UserInput;
   mqtthandler_list.push_back(ptr);
@@ -2214,8 +2214,8 @@ void mSensorsInterface::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_SYSTEM_LOCATION__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_System_Location;
   mqtthandler_list.push_back(ptr);

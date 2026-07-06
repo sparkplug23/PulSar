@@ -361,8 +361,8 @@ bool MQTTConnection::publish_ft(const char* module_name, uint8_t topic_type_id, 
     switch(topic_type_id){
       default:    
       case MQTT_TOPIC_TYPE_IFCHANGED_ID:  sprintf(topic_type,"ifchanged/"); break;
-      case MQTT_TOPIC_TYPE_ROC1M_ID:      sprintf(topic_type,"roc1m/");     break;
-      case MQTT_TOPIC_TYPE_ROC10M_ID:     sprintf(topic_type,"roc10m/");    break;
+      // case MQTT_TOPIC_TYPE_ROC1M_ID:      sprintf(topic_type,"roc1m/");     break;
+      // case MQTT_TOPIC_TYPE_ROC10M_ID:     sprintf(topic_type,"roc10m/");    break;
       case MQTT_TOPIC_TYPE_TELEPERIOD_ID: sprintf(topic_type,"tele/");      break;
       case MQTT_TOPIC_TYPE__DEBUG__ID:    sprintf(topic_type,"debug/");     break;
       case MQTT_TOPIC_TYPE_SYSTEM_ID:      /*** none ***/                   break;

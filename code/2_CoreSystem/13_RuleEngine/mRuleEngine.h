@@ -50,6 +50,10 @@ class mRuleEngine :
     void ShowRuleAddLogByIndex(uint8_t show_type = 0); // 0 = basic indexed, 1 = with names
     void ShowRuleEvent_AddLog(uint8_t show_type = 0);
 
+    bool EventPackage_IsExactMatch(const EventPackage* a, const EventPackage* b);
+    bool Rule_IsExactMatch(const EventPackage* trigger_new, const EventPackage* command_new, uint8_t rule_index);
+    bool RuleAlreadyExists(const EventPackage* trigger_new, const EventPackage* command_new);
+
 
     void AddLog_DebugRule(EventPackage* rule);
 

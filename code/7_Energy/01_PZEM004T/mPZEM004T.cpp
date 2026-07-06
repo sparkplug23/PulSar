@@ -98,38 +98,122 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj)
 } // END function
 
 
+// void mEnergyPZEM004T::Pre_Init(void)
+// {
+
+//   if (tkr_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS) && tkr_pins->PinUsed(GPIO_PZEM0XX_TX))
+//   {
+//     module_state.mode = ModuleStatus::Initialising;
+//   }
+  
+// }
+
+
+// void mEnergyPZEM004T::Init(void)
+// {
+
+//   modbus = new TasmotaModbus(tkr_pins->GetPin(GPIO_PZEM0XX_RX_MODBUS), tkr_pins->GetPin(GPIO_PZEM0XX_TX));
+
+//   uint8_t result = modbus->Begin(9600);
+
+//   ALOG_DBG(PSTR("modbus result = %d"),result);
+
+//   if (result) {
+//     // Change this to another function, that doesnt check pin, it just calls claimserial but internally checks if its being used
+//     tkr_sup->ClaimSerial();    
+//     module_state.mode = ModuleStatus::Initialising;
+//   } else {
+//     module_state.mode = ModuleStatus::NoGPIOConfigured;
+//     return;
+//   }
+
+//   module_state.mode = ModuleStatus::Running;
+
+// }
 void mEnergyPZEM004T::Pre_Init(void)
 {
-
-  if (tkr_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS) && tkr_pins->PinUsed(GPIO_PZEM0XX_TX))
+  /*
+   * PZEM uses a TX/RX pin pair in the same style as the serial GPIO options.
+   *
+   * The index is only used to allow selectable GPIO names such as:
+   *
+   *   PZEM Tx0 / PZEM Rx0
+   *   PZEM Tx1 / PZEM Rx1
+   *   PZEM Tx2 / PZEM Rx2
+   *
+   * Internally this driver still creates its own TasmotaModbus instance.
+   * Therefore we only need to find one configured TX/RX pair and pass the
+   * resolved physical pins into TasmotaModbus.
+   */
+  for (uint8_t index = 0; index < 3; index++)
   {
-    module_state.mode = ModuleStatus::Initialising;
+    if (
+      tkr_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS, index) &&
+      tkr_pins->PinUsed(GPIO_PZEM0XX_TX, index)
+    )
+    {
+      module_state.mode = ModuleStatus::Initialising;
+      return;
+    }
   }
-  
+
+  module_state.mode = ModuleStatus::NoGPIOConfigured;
 }
 
 
 void mEnergyPZEM004T::Init(void)
 {
+  int8_t pzem_rx_pin = -1;
+  int8_t pzem_tx_pin = -1;
 
-  modbus = new TasmotaModbus(tkr_pins->GetPin(GPIO_PZEM0XX_RX_MODBUS), tkr_pins->GetPin(GPIO_PZEM0XX_TX));
+  /*
+   * Find the first complete indexed PZEM TX/RX pair.
+   *
+   * Do not assume that index 0 is configured. Templates may expose these as
+   * serial-style selectable options, so any valid pair is acceptable. The
+   * selected physical pins are then passed to TasmotaModbus unchanged.
+   */
+  for (uint8_t index = 0; index < 3; index++)
+  {
+    if (
+      tkr_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS, index) &&
+      tkr_pins->PinUsed(GPIO_PZEM0XX_TX, index)
+    )
+    {
+      pzem_rx_pin = tkr_pins->GetPin(GPIO_PZEM0XX_RX_MODBUS, index);
+      pzem_tx_pin = tkr_pins->GetPin(GPIO_PZEM0XX_TX, index);
+      break;
+    }
+  }
 
-  uint8_t result = modbus->Begin(9600);
-
-  ALOG_DBG(PSTR("modbus result = %d"),result);
-
-  if (result) {
-    // Change this to another function, that doesnt check pin, it just calls claimserial but internally checks if its being used
-    tkr_sup->ClaimSerial();    
-    module_state.mode = ModuleStatus::Initialising;
-  } else {
+  if ((pzem_rx_pin < 0) || (pzem_tx_pin < 0))
+  {
     module_state.mode = ModuleStatus::NoGPIOConfigured;
     return;
   }
 
-  module_state.mode = ModuleStatus::Running;
+  modbus = new TasmotaModbus(pzem_rx_pin, pzem_tx_pin);
 
+  uint8_t result = modbus->Begin(9600);
+
+  ALOG_DBG(PSTR("modbus result = %d"), result);
+
+  if (result)
+  {
+    /*
+     * TasmotaModbus internally decides whether hardware serial or software
+     * serial is actually used. ClaimSerial() is still called after Begin()
+     * succeeds, preserving the original behaviour.
+     */
+    tkr_sup->ClaimSerial();
+
+    module_state.mode = ModuleStatus::Running;
+    return;
+  }
+
+  module_state.mode = ModuleStatus::NoGPIOConfigured;
 }
+
 
 
 void mEnergyPZEM004T::EveryLoop()
@@ -414,8 +498,8 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetConfigPeriod_SubModule(); 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Settings;
   mqtthandler_list.push_back(ptr);
@@ -425,8 +509,8 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);
@@ -436,8 +520,8 @@ void mEnergyPZEM004T::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetIfChangedPeriod_SubModule();
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Sensor;
   mqtthandler_list.push_back(ptr);

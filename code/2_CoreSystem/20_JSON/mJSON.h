@@ -445,7 +445,7 @@ void releaseJSONBufferLock(); // duplicate of below, need to JOIN THEM!!
         writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":\"%s\"",key,value);
       }else
       if(is_char_type<T>::value){   
-        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":'%c'",key,value);
+        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":\"%c\"",key,value);
       }
       // float type handled as template specialization that must be declared outside header
       #ifndef ENABLE_DEVFEATURE_MJSON__FLOAT_SPECIALIZATION

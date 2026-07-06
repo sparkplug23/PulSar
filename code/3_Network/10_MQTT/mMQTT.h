@@ -19,14 +19,14 @@ enum TOPIC_TYPE_IDS
 {
   MQTT_TOPIC_TYPE_SYSTEM_ID=0, 
   MQTT_TOPIC_TYPE_IFCHANGED_ID,
-  MQTT_TOPIC_TYPE_ROC1M_ID,
-  MQTT_TOPIC_TYPE_ROC10M_ID,
+  // MQTT_TOPIC_TYPE_ROC1M_ID,
+  // MQTT_TOPIC_TYPE_ROC10M_ID,
   MQTT_TOPIC_TYPE_SENSOR_TELEPERIOD_ID,   // 1 second
   MQTT_TOPIC_TYPE_SETTINGS_TELEPERIOD_ID, //show settings, but 1 hour increments
   MQTT_TOPIC_LWT_ONLINE_ID,
   MQTT_TOPIC_TYPE_TELEPERIOD_ID,
   MQTT_TOPIC_TYPE__DEBUG__ID,  
-  MQTT_TOPIC_TYPE_LENGTH_ID
+  MQTT_TOPIC_TYPE_LENGTH_ID=8
 };
 
 enum MQTT_FREQUENCY_REDUCTION_LEVEL_IDS
@@ -35,13 +35,20 @@ enum MQTT_FREQUENCY_REDUCTION_LEVEL_IDS
   MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_1_MINUTES_ID = 1,
   MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_10_MINUTES_ID = 2,
   MQTT_FREQUENCY_REDUCTION_LEVEL_REDUCE_AFTER_60_MINUTES_ID = 3,
-  MQTT_FREQUENCY_REDUCTION_LEVEL_LENGTH_ID = 4
+  MQTT_FREQUENCY_REDUCTION_LEVEL_LENGTH_ID = 8
 };
 
 // Put all shared ones here, eg "settings" and "sensor", with specific inside module.h when needed
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_LWT_ONLINE_CTR)   "LWT";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_HEALTH_CTR)       "health";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR)     "settings";    
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_SYSTEM_CTR)  "settings/system";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_NETWORK_CTR) "settings/network";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_DRIVERS_CTR) "settings/drivers";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_SENSORS_CTR) "settings/sensors";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_LIGHTS_CTR)  "settings/lights";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_POWER_CTR)   "settings/power";
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_RULES_CTR)   "settings/rules";
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_LOG_CTR)          "log";        
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_FIRMWARE_CTR)     "firmware";        
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC_MEMORY_CTR)       "memory";    
@@ -79,15 +86,19 @@ DEFINE_PGM_CTR(PM_MQTT_LWT_TOPIC_FORMATED)      "%s/status/LWT";
 #endif
 
 typedef union {
-  uint8_t data;
+  uint16_t data;
   struct {
-    uint8_t PeriodicEnabled : 1; 
-    uint8_t SendNow         : 1;
-    uint8_t FrequencyRedunctionLevel  : 2;     // 0= no redunction, maintain level, 1 = reduce after 1 minute, 1= 10 minutes, 2= 60 minutes    
-    uint8_t retain : 1;
-    uint8_t reserved : 3; 
+    uint16_t PeriodicEnabled          : 1;
+    uint16_t SendNow                  : 1;
+    uint16_t FrequencyRedunctionLevel : 2;  // 0=unchanged, 1=reduce after 1 min, 2=10 min, 3=60 min
+    uint16_t retain                   : 1;
+
+    uint16_t json_level               : 3;  // 0..8, allows 8 levels safely
+    uint16_t topic_type               : 3;  // 0..8, allows future topic types safely
+
+    uint16_t reserved                 : 5;
   };
-}Handler_Flags;
+} Handler_Flags;
 
 template <typename Class>
 struct handler {
@@ -96,17 +107,13 @@ struct handler {
   uint8_t       json_level = 0;
   uint8_t       topic_type = 0;
   const char*   postfix_topic = nullptr;
-  #ifdef ENABLE_PHASEOUT__MQTT_HANDLER_ID
-  uint8_t       handler_id = 0; //phase out, this is not used for anything
-  #endif
   Handler_Flags flags = {0};
-  uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level, bool json_appending); // member-function to sender with two args. Extra "json_appending" will allow calling constructjsons directly and adding them to another without closing the main json object
+  uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level, bool json_appending);
 
   void Send()
   {
     flags.SendNow = true;
   }
-
 };
 
 #include "PubSubClient.h"
@@ -153,7 +160,7 @@ class MQTTConnection
     PubSubClient* pubsub = nullptr; //to be made private
 
     ConnectionClient_t client_type = CLIENT_TYPE_WIFI_ID; //default wifi, 1 ethernet, 2 cellular   
-    uint32_t tSaved_LastOutGoingTopic = 0; //this needs to become inside instance, so multiple connections dont block others
+    uint32_t tSaved_LastOutGoingTopic = 0;
 
     uint16_t connect_count = 0;            // MQTT re-connect count
     uint16_t retry_counter = 1;            // MQTT connection retry counter
@@ -525,6 +532,7 @@ class mMQTTManager :
 
     WiFiClient* mqtt_client = nullptr;
 
+
     /************************************************************************************************
      * SECTION: Internal Functions
      ************************************************************************************************/
@@ -695,6 +703,9 @@ class mMQTTManager :
     uint32_t     rate_limit_send_delay = 0; // 0 means no delay, otherwise it will delay sending if its been less than this amount of milliseconds since last send, this is to help with bursty data and mqtt traffic management
 
 
+    uint32_t tSaved_LastStagedMqttSend = 0;
+
+
     // const char* GetState_PCtr(int8_t state);
     void Load_New_Subscriptions_From_Function_Template();
     
@@ -737,13 +748,116 @@ class mMQTTManager :
     }
 
 
-    template<typename T>
-    void MQTTHandler_Sender(std::vector<struct handler<T>*>& handler_list, T& class_ptr) {
-        for (auto& handle : handler_list) {
-            // Serial.printf("MQTTHandler_Sender");
-            MQTTHandler_Command_UniqueID(class_ptr, class_ptr.GetModuleUniqueID(), handle);
-        }
+    // template<typename T>
+    // void MQTTHandler_Sender(std::vector<struct handler<T>*>& handler_list, T& class_ptr) {
+    //     for (auto& handle : handler_list) {
+    //         // Serial.printf("MQTTHandler_Sender");
+    //         MQTTHandler_Command_UniqueID(class_ptr, class_ptr.GetModuleUniqueID(), handle);
+    //     }
+    // }
+
+    /**
+   * @brief Runs the MQTT send pass for a module's registered MQTT handlers.
+   *
+   * Each module owns a list of MQTT handler descriptors. A handler decides when
+   * its own payload is due using its normal timing state, for example
+   * `tRateSecs`, `tSavedLastSent`, `SendNow`, and the periodic trigger logic
+   * inside `MQTTHandler_Command_UniqueID()`.
+   *
+   * Without staging, this sender iterates the whole handler list in one pass.
+   * Therefore, if several handlers become due at the same time, several MQTT
+   * payloads may be published back-to-back during a single `TASK_MQTT_SENDER`
+   * call. That is acceptable for normal modules, but can create burst traffic for
+   * telemetry modules where many hourly/status payloads mature together.
+   *
+   * The optional `staged_backoff_ms` argument adds a sender-level drain limit.
+   * When non-zero, this wrapper first checks the MQTT manager's shared staged
+   * send timer. If the backoff period has not expired, the whole send pass is
+   * skipped. If the backoff period has expired, the handler list is scanned until
+   * one handler actually publishes a payload. After one successful publish, the
+   * staged timer is updated and the function returns immediately.
+   *
+   * This does not replace the per-handler timing checks. It only controls how
+   * quickly already-due handlers are drained from the list. In other words:
+   *
+   *   - per-handler timing decides whether a specific payload is due;
+   *   - staged backoff decides whether another due payload may be sent now.
+   *
+   * This keeps normal MQTT behaviour unchanged when `staged_backoff_ms == 0`,
+   * while allowing telemetry-heavy modules to opt in to staged publishing:
+   *
+   * @code
+   *   tkr_mqtt->MQTTHandler_Sender(
+   *       mqtthandler_list,
+   *       *this,
+   *       MQTT_TELEMETRY_STAGED_BACKOFF_MS
+   *   );
+   * @endcode
+   *
+   * If `ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS` is defined, it is applied
+   * here as a legacy/default sender-level pacing value only when the caller has
+   * not supplied an explicit staged backoff. This keeps send-rate limiting at the
+   * wrapper/drain-control layer rather than inside the per-handler publish
+   * function.
+   *
+   * The staged timer is intentionally held by the MQTT manager rather than by
+   * each handler. This makes the backoff a sender-level policy and prevents
+   * bursts across any module/list that opts into staged sending, while leaving
+   * unstaged MQTT handlers unaffected unless the legacy/default compile-time
+   * limit is enabled.
+   *
+   * @tparam T Module class type owning the MQTT handlers.
+   * @param handler_list List of MQTT handler descriptors to service.
+   * @param class_ptr Module instance used to construct payloads and resolve the
+   *                  module unique ID.
+   * @param staged_backoff_ms Optional minimum spacing, in milliseconds, between
+   *                          successful staged MQTT publishes. Use 0 to disable
+   *                          staging and preserve the original full-list pass,
+   *                          unless a compile-time default limit is enabled.
+   */
+  template<typename T>
+  void MQTTHandler_Sender(
+      std::vector<struct handler<T>*>& handler_list,
+      T& class_ptr,
+      uint32_t staged_backoff_ms = 0
+  )
+  {
+    /*
+    * Legacy/default sender pacing.
+    *
+    * This used to be handled deeper in the broker-send path. It is cleaner here:
+    * this wrapper controls whether another handler may be drained from the list,
+    * while MQTTHandler_Command_UniqueID() only decides whether one handler should
+    * publish and whether that publish succeeded.
+    *
+    * Only apply the compile-time value if the caller did not pass an explicit
+    * staged backoff.
+    */
+    #ifdef ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
+    if (staged_backoff_ms == 0) {
+      staged_backoff_ms = ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS;
     }
+    #endif
+
+    if (staged_backoff_ms) {
+      if (ABS_FUNCTION(millis() - tSaved_LastStagedMqttSend) < staged_backoff_ms) {
+        return;
+      }
+    }
+
+    for (auto& handle : handler_list) {
+      const bool sent = MQTTHandler_Command_UniqueID(
+        class_ptr,
+        class_ptr.GetModuleUniqueID(),
+        handle
+      );
+
+      if (sent && staged_backoff_ms) {
+        tSaved_LastStagedMqttSend = millis();
+        return;
+      }
+    }
+  }
 
   
 bool IsAnyBrokerConnected() const
@@ -787,159 +901,143 @@ void ServicePeriodicTrigger(handler<T>* handler_ptr)
   #endif
 }
 
-bool CanSendOnBroker(const MQTTConnection* con) const
-// bool CanSendOnBroker(const decltype(brokers[0])& con) const
-{
-  if (!con->uptime_seconds) {
-    return false;
-  }
 
-  if (rate_limit_send_delay == 0U) {
-    return true;
-  }
 
-  return labs(millis() - con->tSaved_LastOutGoingTopic) > rate_limit_send_delay;
-}
-
-// #define DEBUG_NEWORK_MQTT
-
-    /**
-     * @brief Function will take the struct storing the mqtt handler options, and check the variables, sending if required
-     * @param class_ptr Pointer to the instance of a class
-     * @param unique_id Numerical unique ID used to acquire the mqtt topic
-     * @param handler_ptr Pointer to the handler struct with timing and function to be called
-     * @note  If handler is not valid, or no broker is connected, function returns immediately
-     */
-    template<typename T>
-    void MQTTHandler_Command_UniqueID(T& class_ptr, uint16_t unique_id, handler<T>* handler_ptr)
-    {
-      if (handler_ptr == nullptr) {
-        #ifdef DEBUG_NEWORK_MQTT
-        Serial.println("handler_ptr == nullptr");
-        Serial.flush();
-        #endif
-        return;
-      }
-
-      if (!IsAnyBrokerConnected()) {
-        #ifdef DEBUG_NEWORK_MQTT
-        Serial.println("MQTTHandler_Command::Blocked");
-        #endif
-        return;
-      }
-
-      #ifdef ENABLE_DEVFEATURE_MQTT__SUPPRESS_SUBMODULE_IFCHANGED_WHEN_UNIFIED_IS_PREFFERRED
-      if (handler_ptr->tRateSecs == 0) {
-        handler_ptr->flags.PeriodicEnabled = false;
-      }
-      #endif
-
-      ServicePeriodicTrigger(handler_ptr);
-
-      if (!handler_ptr->flags.SendNow) {
-        return;
-      }
-
-      uint8_t fSendPayload = CALL_MEMBER_FUNCTION(class_ptr, handler_ptr->ConstructJSON_function)(handler_ptr->json_level, true);
-
-      if (!fSendPayload) {
-        return;
-      }
-
-      #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
-      Serial.printf(
-        "MQTTHandler_Command::SendNow::fSendPayload::postfix_topic\t=%S %d\n\r",
-        handler_ptr->postfix_topic,
-        unique_id
-      );
+  /**
+   * @brief Checks one MQTT handler and publishes its payload if required.
+   *
+   * This function services a single MQTT handler descriptor. The handler owns the
+   * timing and trigger state for one MQTT payload type, including periodic
+   * scheduling, `SendNow`, JSON construction level, topic postfix, retain flag,
+   * and topic type.
+   *
+   * The function returns `true` only when the handler produced a payload and that
+   * payload was successfully published to at least one connected broker.
+   *
+   * It returns `false` when:
+   *   - the handler pointer is invalid;
+   *   - no broker is connected;
+   *   - the handler is not currently due to send;
+   *   - the handler's JSON construction function reports no payload;
+   *   - all broker publish attempts fail.
+   *
+   * The returned value is used by higher-level sender wrappers to decide whether
+   * a staged/backoff send pass should stop after one successful publish. This
+   * keeps the send pacing policy outside this function. This function is only
+   * responsible for servicing one handler and reporting whether it actually sent.
+   *
+   * @tparam T Module class type owning the MQTT handler.
+   * @param class_ptr Reference to the module instance used to construct the JSON
+   *                  payload.
+   * @param unique_id Numerical module/device ID used to form the MQTT topic.
+   * @param handler_ptr Pointer to the MQTT handler descriptor to service.
+   * @return true if a payload was successfully published to at least one broker.
+   * @return false if no payload was sent successfully.
+   */
+  template<typename T>
+  bool MQTTHandler_Command_UniqueID(T& class_ptr, uint16_t unique_id, handler<T>* handler_ptr)
+  {
+    if (handler_ptr == nullptr) {
+      #ifdef DEBUG_NEWORK_MQTT
+      Serial.println("handler_ptr == nullptr");
       Serial.flush();
       #endif
-
-      bool any_broker_sent_successfully = false;
-
-      for (auto& con : brokers) {
-        if (!CanSendOnBroker(con)) {
-          #ifdef ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
-          if (MQTT_SHOW_SENDING_LIMIT_DEBUG) {
-            Serial.printf(
-              "------------------- packet_successfully_sent %S LIMIT\n\r",
-              handler_ptr->postfix_topic
-            );
-            Serial.printf(
-              "last sent %lu\n\r",
-              static_cast<unsigned long>(millis() - con->tSaved_LastOutGoingTopic)
-            );
-          }
-          #endif
-          continue;
-        }
-
-        const uint32_t tSaved_SendTime = millis();
-
-        const bool packet_successfully_sent =
-          con->MQTTHandler_Send_Formatted_UniqueID(
-            handler_ptr->topic_type,
-            unique_id,
-            handler_ptr->postfix_topic,
-            handler_ptr->flags.retain
-          );
-
-        #ifdef ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
-        if (MQTT_SHOW_SENDING_LIMIT_DEBUG) {
-          Serial.printf(
-            "^^^^^^^^^^^^^^^^^^^ MQTTHandler_Send_Formatted %lums \n\r",
-            static_cast<unsigned long>(millis() - tSaved_SendTime)
-          );
-        }
-        #endif
-
-        if (packet_successfully_sent) {
-          any_broker_sent_successfully = true;
-        }
-
-        #ifdef ENABLE_DEVFEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
-        if (packet_successfully_sent) {
-
-          if (MQTT_SHOW_SENDING_LIMIT_DEBUG) {
-            Serial.printf(
-              "^^^^^^^^^^^^^^^^^^^ packet_successfully_sent %S DONE \n\r",
-              handler_ptr->postfix_topic
-            );
-          }
-
-          #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
-          con->debug_stats.payload_publish_sent++;
-          con->debug_stats.payload_publish_success_percentage =
-            static_cast<float>(con->debug_stats.payload_publish_sent) /
-            static_cast<float>(con->debug_stats.payload_publish_missed + con->debug_stats.payload_publish_sent);
-          #endif
-        }
-        else {
-          if (MQTT_SHOW_SENDING_LIMIT_DEBUG) {
-            Serial.printf(
-              "------------------- packet_successfully_sent %S ERROR\n\r",
-              handler_ptr->postfix_topic
-            );
-          }
-
-          #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
-          con->debug_stats.payload_publish_missed++;
-          con->debug_stats.payload_publish_success_percentage =
-            static_cast<float>(con->debug_stats.payload_publish_sent) /
-            static_cast<float>(con->debug_stats.payload_publish_missed + con->debug_stats.payload_publish_sent);
-          #endif
-        }
-        #endif
-        
-      }
-
-      if (!any_broker_sent_successfully) {
-        return;
-      }
-
-      handler_ptr->flags.SendNow = false;
-      handler_ptr->tSavedLastSent = millis();
+      return false;
     }
+
+    if (!IsAnyBrokerConnected()) {
+      #ifdef DEBUG_NEWORK_MQTT
+      Serial.println("MQTTHandler_Command::Blocked");
+      #endif
+      return false;
+    }
+
+    #ifdef ENABLE_DEVFEATURE_MQTT__SUPPRESS_SUBMODULE_IFCHANGED_WHEN_UNIFIED_IS_PREFFERRED
+    if (handler_ptr->tRateSecs == 0) {
+      handler_ptr->flags.PeriodicEnabled = false;
+    }
+    #endif
+
+    ServicePeriodicTrigger(handler_ptr);
+
+    if (!handler_ptr->flags.SendNow) {
+      return false;
+    }
+
+    const uint8_t fSendPayload =
+      CALL_MEMBER_FUNCTION(class_ptr, handler_ptr->ConstructJSON_function)(
+        handler_ptr->flags.json_level,
+        true
+      );
+
+    if (!fSendPayload) {
+      return false;
+    }
+
+    #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+    Serial.printf(
+      "MQTTHandler_Command::SendNow::fSendPayload::postfix_topic\t=%S %d\n\r",
+      handler_ptr->postfix_topic,
+      unique_id
+    );
+    Serial.flush();
+    #endif
+
+    bool any_broker_sent_successfully = false;
+
+    for (auto& con : brokers) {
+      const uint32_t tSaved_SendTime = millis();
+
+      const bool packet_successfully_sent =
+        con->MQTTHandler_Send_Formatted_UniqueID(
+          handler_ptr->flags.topic_type,
+          unique_id,
+          handler_ptr->postfix_topic,
+          handler_ptr->flags.retain
+        );
+
+      #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_SEND_TIMING
+      Serial.printf(
+        "MQTTHandler_Send_Formatted %lums\n\r",
+        static_cast<unsigned long>(millis() - tSaved_SendTime)
+      );
+      #endif
+
+      if (packet_successfully_sent) {
+        any_broker_sent_successfully = true;
+
+        #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
+        con->debug_stats.payload_publish_sent++;
+        con->debug_stats.payload_publish_success_percentage =
+          static_cast<float>(con->debug_stats.payload_publish_sent) /
+          static_cast<float>(
+            con->debug_stats.payload_publish_missed +
+            con->debug_stats.payload_publish_sent
+          );
+        #endif
+      }
+      else {
+        #ifdef ENABLE_DEBUGFEATURE__MQTT_COUNT_PUBLISH_SUCCESS_RATE
+        con->debug_stats.payload_publish_missed++;
+        con->debug_stats.payload_publish_success_percentage =
+          static_cast<float>(con->debug_stats.payload_publish_sent) /
+          static_cast<float>(
+            con->debug_stats.payload_publish_missed +
+            con->debug_stats.payload_publish_sent
+          );
+        #endif
+      }
+    }
+
+    if (!any_broker_sent_successfully) {
+      return false;
+    }
+
+    handler_ptr->flags.SendNow = false;
+    handler_ptr->tSavedLastSent = millis();
+
+    return true;
+  }
 
 };
 

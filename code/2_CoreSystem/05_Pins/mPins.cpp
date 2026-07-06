@@ -214,22 +214,22 @@ const mytmplt8266 mPins::module_template__gpio_map_ESP8266[MODULE_MAXMODULE_8266
                           // GPIO09 (SD_DATA2 Flash QIO or ESP8285)
                           // GPIO10 (SD_DATA3 Flash QIO or ESP8285)
                           // GPIO11 (SD_CMD   Flash)
-    GPIO_I2C_SDA,         // GPIO12 I2C_SDA
+    PIGPIO_N(GPIO_I2C_SDA,1),         // GPIO12 I2C_SDA
     PIGPIO_N(GPIO_SWT1_NP,1),         // GPIO13 Switch1n
-    GPIO_I2C_SCL,         // GPIO14 I2C_SCL
+    PIGPIO_N(GPIO_I2C_SCL,1),         // GPIO14 I2C_SCL
     PIGPIO_N(GPIO_REL1,2),            // GPIO15 Relay2
-    GPIO_ADE7953_IRQ,     // GPIO16 ADE7953_IRQ
+    PIGPIO_N(GPIO_ADE7953_IRQ,1),     // GPIO16 ADE7953_IRQ
     GPIO_FLAG_ADC0_TEMP   // GPIOA0 Tempurature
   },
   #endif
   #ifdef USE_MODULE_TEMPLATE_SHELLY_DIMMER2
   {//MODULE_SHELLY_DIMMER2     // SHELLY_DIMMER2 - Shelly Dimmer 2 (ESP8285)
     0,                         // GPIO00 None
-    GPIO_HWSERIAL_TX,         // GPIO01 ESP_TXD Serial RXD connection to Dimmer MCU
+    PIGPIO_N(GPIO_HWSERIAL_TX,0),         // GPIO01 ESP_TXD Serial RXD connection to Dimmer MCU
     0,                         // GPIO02 None 
-    GPIO_HWSERIAL_RX,         // GPIO03 ESP_RXD Serial TXD connection to Dimmer MCU
-    GPIO_SHELLY2_SHD_BOOT0,    // GPIO04 SHD Boot 0 
-    GPIO_SHELLY2_SHD_RESET_INV,    // GPIO05 SHD Reset
+    PIGPIO_N(GPIO_HWSERIAL_RX,0),         // GPIO03 ESP_RXD Serial TXD connection to Dimmer MCU
+    PIGPIO_N(GPIO_SHELLY2_SHD_BOOT0,1),    // GPIO04 SHD Boot 0 
+    PIGPIO_N(GPIO_SHELLY2_SHD_RESET_INV,1),    // GPIO05 SHD Reset
                                // GPIO06 (SD_CLK   Flash)
                                // GPIO07 (SD_DATA0 Flash QIO/DIO/DOUT)
                                // GPIO08 (SD_DATA1 Flash QIO/DIO/DOUT)
@@ -321,7 +321,7 @@ const mytmplt8285 mPins::module_template__gpio_map_ESP8285[3] PROGMEM = {
   {                           // SONOFF_4CH - Sonoff 4CH (ESP8285)
     PIGPIO_N(GPIO_KEY1,1),             // GPIO00 Button 1
     GPIO_USER,             // GPIO01 Serial RXD and Optional sensor
-    GPIO_RF_433MHZ_RX,             // GPIO02 Optional sensor
+    PIGPIO_N(GPIO_RF_433MHZ_RX,1),             // GPIO02 Optional sensor
     GPIO_USER,             // GPIO03 Serial TXD and Optional sensor
     PIGPIO_N(GPIO_REL1,3),             // GPIO04 Sonoff 4CH Red Led and Relay 3 (0 = Off, 1 = On)
     PIGPIO_N(GPIO_REL1,2),             // GPIO05 Sonoff 4CH Red Led and Relay 2 (0 = Off, 1 = On)

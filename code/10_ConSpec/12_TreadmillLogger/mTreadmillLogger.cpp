@@ -59,14 +59,14 @@ int8_t mTreadmillLogger::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_MQTT_HANDLERS_INIT:
       MQTTHandler_Init();
     break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
+      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
     break;
     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
-    break; 
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
+      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    break;
+    case TASK_MQTT_SENDER:
+      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
     break;
     #endif  
   }
@@ -145,7 +145,7 @@ void mTreadmillLogger::EverySecond()
 void mTreadmillLogger::SubTask_UpdateOLED()
 {
   
-  tkr_set->Settings.display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
+  tkr_iDisp->display.mode = EM_DISPLAY_MODE_LOG_STATIC_ID;
   char buffer[100] = {0};
   char buffer_f[100] = {0};
   char buffer_n[100] = {0};
@@ -314,8 +314,8 @@ void mTreadmillLogger::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = 120; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mTreadmillLogger::ConstructJSON_Settings;
   mqtthandler_list.push_back(ptr);
@@ -325,47 +325,14 @@ void mTreadmillLogger::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_IFCHANGED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mTreadmillLogger::ConstructJSON_State;
   mqtthandler_list.push_back(ptr);
 
 } 
 
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mTreadmillLogger::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mTreadmillLogger::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-  }
-}
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mTreadmillLogger::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
 
 #endif // USE_MODULE_NETWORK_MQTT
 

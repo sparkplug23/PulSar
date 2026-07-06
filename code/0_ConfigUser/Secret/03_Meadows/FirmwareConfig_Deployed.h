@@ -32,7 +32,7 @@
 /// LIVINGROOM ///////////////////////////////////////////////////////////////////////////////
 
 /// GARAGE ///////////////////////////////////////////////////////////////////////////////////
-
+// #define DEVICE_MEADOWS__TREADMILL_POWER_MONITOR
 /// BATHROOM /////////////////////////////////////////////////////////////////////////////////
 
 /// OUTSIDE //////////////////////////////////////////////////////////////////////////////////
@@ -44,7 +44,6 @@
 // #define DEVICE_MEADOWS__LIVINGROOM__HYPERION_LIGHT_SAMSUNG_65INCH
 // #define DEVICE_MEADOWS__PRUSA_CLIMATE_CONTROL
 // #define DEVICE_MEADOWS__LANDING__GLASS_BOX
-// #define DEVICE_MEADOWS__TREADMILL_POWER_MONITOR
 // #define DEVICE_MEADOWS__OUTSIDE__OILTANK
 // #define DEVICE_MEADOWS__OFFICE__433MHZ_NODE
 // #define DEVICE_MEADOWS__BATHROOM__IMMERSION
@@ -7410,6 +7409,8 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
 #ifdef DEVICE_MEADOWS__OFFICE__SUN_PIXELS_1D
 
   #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+
+  #define USE_MODULE_SENSORS_INTERFACE
 
 
   #define USE_MODULE_SENSORS_SUN_TRACKING 

@@ -44,8 +44,8 @@ void mShellyDimmer::Pre_Init()
   if (
     tkr_pins->PinUsed(GPIO_SHELLY2_SHD_BOOT0) && 
     tkr_pins->PinUsed(GPIO_SHELLY2_SHD_RESET_INV) &&
-    tkr_pins->PinUsed(GPIO_HWSERIAL0_RX) && 
-    tkr_pins->PinUsed(GPIO_HWSERIAL0_TX)
+    tkr_pins->PinUsed(GPIO_HWSERIAL_RX) && 
+    tkr_pins->PinUsed(GPIO_HWSERIAL_TX)
     ) {
       // tkr_set->runtime.devices_present++;
     // TasmotaGlobal.light_type = LT_SERIAL1;
@@ -57,7 +57,7 @@ void mShellyDimmer::Pre_Init()
   buffer = (uint8_t *)malloc(SHD_BUFFER_SIZE);
   if (buffer != nullptr)
   {
-    ShdSerial = new TasmotaSerial(tkr_pins->GetPin(GPIO_HWSERIAL0_RX), tkr_pins->GetPin(GPIO_HWSERIAL0_TX), 2, 0, SHD_BUFFER_SIZE);
+    ShdSerial = new TasmotaSerial(tkr_pins->GetPin(GPIO_HWSERIAL_RX,0), tkr_pins->GetPin(GPIO_HWSERIAL_TX,0), 2, 0, SHD_BUFFER_SIZE);
     if (ShdSerial->begin(115200))
     {
       // hardware_serial_active = true;
@@ -1152,8 +1152,8 @@ void mShellyDimmer::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetConfigPeriod(); 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mShellyDimmer::ConstructJSON_Settings;
   mqtthandler_list.push_back(ptr);
@@ -1163,8 +1163,8 @@ void mShellyDimmer::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetTelePeriod(); 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mShellyDimmer::ConstructJSON_State;
   mqtthandler_list.push_back(ptr);

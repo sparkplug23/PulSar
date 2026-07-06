@@ -119,7 +119,7 @@
 #define D_MODULE_SENSORS_PIR_CTR                  "motion" // to be renamed pir, but only after openhab responds to inteface motion events instead
 // #define D_MODULE_SENSORS_LSM303D_CTR              "lsm303d"
 // #define D_MODULE_SENSORS_L3G_CTR                  "l3g"
-// #define D_MODULE_SENSORS_MOISTURE_ADC_CTR                  "moisure_adc" 
+#define D_MODULE_SENSORS_MOISTURE_ADC_CTR                  "moisure_adc" 
 // #define D_MODULE_SENSORS_MPU9250_CTR              "mpu9250"
 #define D_MODULE__SENSORS_BATTERY_MODEM__CTR      "battery_modem"
 // #define D_MODULE_SENSORS_RESISTIVE_MOISTURE_CTR   "moisture"
@@ -167,7 +167,7 @@
 // #define D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR "oled_show_power"
 // #define D_MODULE_CONTROLLER_CUSTOM__SERVER_RESET_RELAYS_CTR "server_relay_reset"
 // #define D_MODULE_CONTROLLER__ENERGY_OLED_CTR      "energy_oled"
-// #define D_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR "treadmill_logger"
+#define D_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR "treadmill_logger"
 // #define D_MODULE_CONTROLLER_CUSTOM__DESK_SENSORS_ON_OLED_CTR "sensors_oled"
 // #define D_MODULE_CONTROLLERS__SENSOR_COLOUR_BAR__CTR "sensor_colourbar"
 // #define D_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR "relay_state_ledstrip"
@@ -810,6 +810,11 @@
 
 #define D_GPIO_PIR_CTR         "PIR"
 #define D_GPIO_PIR_INV_CTR     "PIR Inv"
+  #define D_GPIO_PIR_1_CTR         "PIR1"
+  #define D_GPIO_PIR_INV_1_CTR     "PIR Inv1"
+
+
+
 
 #define D_GPIO_FAN_PWM_CTR "Fan PWM"
 
@@ -891,6 +896,11 @@
 
 #define D_GPIO_HWSERIAL0_TX_CTR "HWSERIAL0_TX"
 #define D_GPIO_HWSERIAL0_RX_CTR "HWSERIAL0_RX"
+
+
+#define D_GPIO_HWSERIAL0_TX_CTR "HWSERIAL0_TX"
+#define D_GPIO_HWSERIAL0_RX_CTR "HWSERIAL0_RX"
+
 #define D_GPIO_HWSERIAL1_TX_CTR "HWSERIAL1_TX"
 #define D_GPIO_HWSERIAL1_RX_CTR "HWSERIAL1_RX"
 #define D_GPIO_HWSERIAL2_TX_CTR "HWSERIAL2_TX"
@@ -927,8 +937,8 @@
 
 #define D_GPIO_LED_CTR      "Led"
 #define D_GPIO_LED_INV_CTR  "Led Inv"
-#define D_GPIO_LED1_CTR      "Led"
-#define D_GPIO_LED1_INV_CTR  "Led Inv"
+  #define D_GPIO_LED1_CTR      "Led1"
+  #define D_GPIO_LED1_INV_CTR  "Led Inv1"
 
 #define D_GPIO_PWM_CTR             "PWM"
 #define D_GPIO_PWM_INV_CTR         "PWM Inv"

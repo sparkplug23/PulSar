@@ -918,10 +918,10 @@ struct SETTINGS {
   uint64_t      rf_protocol_mask;          // FA8
   uint32_t      power_lock;                // F9C
   uint32_t      bootcount_reset_time;      // FD4
-  uint32_t      ipv4_address[5];           // 544
-  uint32_t      ipv4_rgx_address;          // 558
-  uint32_t      ipv4_rgx_subnetmask;       // 55C
-  uint16_t      dns_timeout;               // 4C8
+  // uint32_t      ipv4_address[5];           // 544
+  // uint32_t      ipv4_rgx_address;          // 558
+  // uint32_t      ipv4_rgx_subnetmask;       // 55C
+  // uint16_t      dns_timeout;               // 4C8
   #ifdef ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
   char local_time_ascii_debug[20];
   #endif

@@ -93,6 +93,170 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
 
 
 
+// // Updated 2025
+// void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
+// {
+//   // power xx00 - toggle REL1 (Off) and REL3 (Off) - device 1 Off, device 2 Off
+//   // power xx01 - toggle REL2 (On)  and REL3 (Off) - device 1 On,  device 2 Off
+//   // power xx10 - toggle REL1 (Off) and REL4 (On)  - device 1 Off, device 2 On
+//   // power xx11 - toggle REL2 (On)  and REL4 (On)  - device 1 On,  device 2 On
+//   static power_t latching_power = 0;     // Power state at latching start
+
+//   if (state && !tkr_set->runtime.latching_relay_pulse) {  // Set latching relay to power if previous pulse has finished
+//     latching_power = lpower;
+//     tkr_set->runtime.latching_relay_pulse = 2;            // max 200mS (initiated by stateloop())
+//   }
+
+//   for (uint32_t i = 0; i < rt.devices_present; i++) {
+//     uint32_t index = (i << 1) + ((latching_power >> i) &1);
+//           ALOG_INF(PSTR("DigitalWrite Pre %d"), 3);
+//     tkr_pins->DigitalWrite(GPIO_REL1, index, bitRead(rt.bitpacked.rel_inverted, index) ? !state : state);
+//   }
+// }
+
+
+// // Updated 2025
+// void mRelays::SetDevicePower(power_t rpower, uint32_t source)
+// {
+//   if (tkr_set->runtime.power_on_delay) {
+//     rt.bitpacked.power_on_delay_state = rpower;
+//     return;
+//   }
+
+//   tkr_sup->ShowSource(source);
+//   tkr_set->runtime.last_source = source;
+
+//   if (POWER_ALL_ALWAYS_ON == tkr_set->Settings.poweronstate) {  // All on and stay on
+//     tkr_set->runtime.power = POWER_MASK >> (POWER_SIZE - rt.devices_present);
+//     rpower = tkr_set->runtime.power;
+//   }
+
+//   if (tkr_set->Settings.sysopt_system.bit.interlock) {          // Allow only one or no relay set - CMND_INTERLOCK - Enable/disable interlock
+//     for (uint32_t i = 0; i < MAX_INTERLOCKS; i++) {
+//       power_t mask = 1;
+//       uint32_t count = 0;
+//       for (uint32_t j = 0; j < rt.devices_present; j++) {
+//         if ((tkr_set->Settings.interlock[i] & mask) && (rpower & mask)) {
+//           count++;
+//         }
+//         mask <<= 1;
+//       }
+//       if (count > 1) {
+//         mask = ~tkr_set->Settings.interlock[i];    // Turn interlocked group off as there would be multiple relays on
+//         tkr_set->runtime.power &= mask;
+//         rpower &= mask;
+//       }
+//     }
+//   }
+
+//   if (rpower) {                           // Any power set
+//     rt.bitpacked.last_power = rpower;
+//   }
+
+//   tkr_events->XdrvMailbox.index = rpower;
+//   // XdrvXsnsCall(FUNC_SET_POWER);           // Signal power state
+
+//   tkr_events->XdrvMailbox.index = rpower;
+//   tkr_events->XdrvMailbox.payload = source;
+//   if (0){//XdrvCall(FUNC_SET_DEVICE_POWER)) {  // Set power state and stop if serviced
+//     // Serviced
+//   }
+// // #ifdef ESP8266
+// //   else if ((SONOFF_DUAL == tkr_set->runtime.module_type) || (CH4 == tkr_set->runtime.module_type)) {
+// //     Serial.write(0xA0);
+// //     Serial.write(0x04);
+// //     Serial.write(rpower &0xFF);
+// //     Serial.write(0xA1);
+// //     Serial.write('\n');
+// //     Serial.flush();
+// //   }
+// //   else if (EXS_RELAY == tkr_set->runtime.module_type) {
+// //     SetLatchingRelay(rpower, 1);
+// //   }
+// // #endif  // ESP8266
+//   else {
+//     uint32_t port = 0;
+//     uint32_t port_next;
+//     power_t bistable = 0;
+
+//     #ifdef ENABLE_FEATURE_POWER__ZERO_CROSS_DETECTION
+//     ZeroCrossMomentStart();
+//     #endif
+
+//     for (uint32_t i = 0; i < rt.devices_present; i++) {
+//       power_t state = rpower &1;
+
+//       port_next = 1;                              // Select next relay
+//       bool update = true;
+//       if (bitRead(rt.bitpacked.rel_bistable, port)) {
+//         if (tkr_set->Settings.sysopt_power.bit.bistable_single_pin) {  // SetOption152 - (Power) Use single pin bistable
+//           if (0x80000000 == tkr_set->runtime.power_latching) {
+//             tkr_set->runtime.power_latching = tkr_set->runtime.power;  // Init last known state
+//           }
+//           update = (bitRead(tkr_set->runtime.power_latching, port) != state);
+//           if (update) {
+//             bitWrite(tkr_set->runtime.power_latching, port, state);
+//             bitSet(bistable, port);
+//           }
+
+//         } else {
+//           if (!state) { port_next = 2; }          // Skip highest relay
+//           port += state;                          // Relay<lowest> = Off, Relay<highest> = On
+//         }
+//         state = 1;                                // Set pulse
+//       }
+//       if (update && (i < MAX_RELAYS_SET)) {        
+//         uint16_t gpio = 0;
+//         if(bitRead(rt.bitpacked.rel_inverted, i))
+//         { //add the gpio mpin shift back in
+//           gpio =  GPIO_REL1_INV;          
+//         }else{
+//           gpio = GPIO_REL1;
+//         }
+        
+//         ALOG_INF(PSTR("DigitalWrite Pre %d"), 2);
+//         tkr_pins->DigitalWrite(gpio, i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+
+        
+//       }
+//       port += port_next;                          // Select next relay
+//       rpower >>= 1;                               // Select next power
+//     }
+    
+//     #ifdef ENABLE_FEATURE_POWER__ZERO_CROSS_DETECTION
+//     ZeroCrossMomentEnd();
+//     #endif 
+
+//     // Reset bistable relay here to fix non-interlock situations due to fast switching
+//     if (rt.bitpacked.rel_bistable) {             // If bistable relays in the mix reset them after 40ms
+//       delay(tkr_set->Settings.sysopt_power.param.bistable_pulse_ms);   // SetOption45 - Keep energized for about 5 x operation time
+//       for (uint32_t i = 0; i < port; i++) {       // Reset up to detected amount of ports
+//         if (bitRead(rt.bitpacked.rel_bistable, i)) {
+//           if (tkr_set->Settings.sysopt_power.bit.bistable_single_pin) {  // SetOption152 - (Power) Use single pin bistable
+//             if (!bitRead(bistable, i)) {
+//               continue;
+//             }
+//           }
+//           uint16_t gpio = 0;
+//           if(bitRead(rt.bitpacked.rel_inverted, i))
+//           { //add the gpio mpin shift back in
+//             gpio = GPIO_REL1_INV;          
+//           }else{
+//             gpio = GPIO_REL1;
+//           }
+//           power_t state = rpower &1;
+//           ALOG_INF(PSTR("DigitalWrite Pre %d"), 1);
+//           tkr_pins->DigitalWrite(gpio, i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+
+//           // tkr_pins->DigitalWrite(GPIO_REL, i, bitRead(rt.bitpacked.rel_inverted, i) ? 1 : 0);
+//           ALOG_INF(PSTR("Relay DigitalWrite %d, %d"), gpio +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+//         }
+//       }
+//     }
+//   }
+
+// }
+
 // Updated 2025
 void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
 {
@@ -109,8 +273,17 @@ void mRelays::SetLatchingRelay(power_t lpower, uint32_t state)
 
   for (uint32_t i = 0; i < rt.devices_present; i++) {
     uint32_t index = (i << 1) + ((latching_power >> i) &1);
-          ALOG_INF(PSTR("DigitalWrite Pre %d"), 3);
-    tkr_pins->DigitalWrite(GPIO_REL1, index, bitRead(rt.bitpacked.rel_inverted, index) ? !state : state);
+
+    uint16_t gpio = 0;
+    if(bitRead(rt.bitpacked.rel_inverted, index))
+    {
+      gpio = GPIO_REL1_INV;
+    }else{
+      gpio = GPIO_REL1;
+    }
+
+    ALOG_INF(PSTR("DigitalWrite Pre %d"), 3);
+    tkr_pins->DigitalWrite(gpio, index, bitRead(rt.bitpacked.rel_inverted, index) ? !state : state);
   }
 }
 
@@ -205,26 +378,25 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
         }
         state = 1;                                // Set pulse
       }
-      if (update && (i < MAX_RELAYS_SET)) {        
-        uint16_t gpio_pin = 0;
-        if(bitRead(rt.bitpacked.rel_inverted, i))
+      if (update && (port < MAX_RELAYS_SET)) {
+        uint16_t gpio = 0;
+        if(bitRead(rt.bitpacked.rel_inverted, port))
         { //add the gpio mpin shift back in
-          gpio_pin = GPIO_REL1_INV;          
+          gpio =  GPIO_REL1_INV;
         }else{
-          gpio_pin = GPIO_REL1;
+          gpio = GPIO_REL1;
         }
-        
+
         ALOG_INF(PSTR("DigitalWrite Pre %d"), 2);
-        tkr_pins->DigitalWrite(gpio_pin,i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
-        // tkr_pins->DigitalWrite(GPIO_REL, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
+        tkr_pins->DigitalWrite(gpio, port, bitRead(rt.bitpacked.rel_inverted, port) ? !state : state);
       }
       port += port_next;                          // Select next relay
       rpower >>= 1;                               // Select next power
     }
-    
+
     #ifdef ENABLE_FEATURE_POWER__ZERO_CROSS_DETECTION
     ZeroCrossMomentEnd();
-    #endif 
+    #endif
 
     // Reset bistable relay here to fix non-interlock situations due to fast switching
     if (rt.bitpacked.rel_bistable) {             // If bistable relays in the mix reset them after 40ms
@@ -236,24 +408,37 @@ void mRelays::SetDevicePower(power_t rpower, uint32_t source)
               continue;
             }
           }
-          uint16_t gpio_pin = 0;
+          uint16_t gpio = 0;
           if(bitRead(rt.bitpacked.rel_inverted, i))
           { //add the gpio mpin shift back in
-            gpio_pin = GPIO_REL1_INV;          
+            gpio = GPIO_REL1_INV;
           }else{
-            gpio_pin = GPIO_REL1;
+            gpio = GPIO_REL1;
           }
-          power_t state = rpower &1;
+          power_t state = 0;
           ALOG_INF(PSTR("DigitalWrite Pre %d"), 1);
-          tkr_pins->DigitalWrite(gpio_pin, i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+          tkr_pins->DigitalWrite(gpio, i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+
           // tkr_pins->DigitalWrite(GPIO_REL, i, bitRead(rt.bitpacked.rel_inverted, i) ? 1 : 0);
-          ALOG_INF(PSTR("Relay DigitalWrite %d, %d"), gpio_pin +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
+          ALOG_INF(PSTR("Relay DigitalWrite %d, %d"), gpio +i, bitRead(rt.bitpacked.rel_inverted, i) ? !state : state);
         }
       }
     }
   }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Updated 2025
 void mRelays::RestorePower(bool publish_power, uint32_t source)
@@ -728,6 +913,8 @@ void mRelays::Init(void)
     rt.relay_status[relay_id].timer_decounter.seconds = 0;
     rt.relay_status[relay_id].timer_decounter.active = false;
   }
+
+  rt.bitpacked.rel_bistable = 0;
 
   #ifdef ENABLE_DEVFEATURE_RELAY_ENABLE_TIME_WINDOW_LOCKS
   flags.enabled_relays_allowed_time_window_checks = true;
@@ -1494,8 +1681,8 @@ void mRelays::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetConfigPeriod(); 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mRelays::ConstructJSON_Settings;
   mqtthandler_list.push_back(ptr);
@@ -1505,8 +1692,8 @@ void mRelays::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetTelePeriod(); 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mRelays::ConstructJSON_State;
   mqtthandler_list.push_back(ptr);
@@ -1516,8 +1703,8 @@ void mRelays::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetIfChangedPeriod(); 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_IFCHANGED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mRelays::ConstructJSON_State;
   mqtthandler_list.push_back(ptr);
@@ -1527,8 +1714,8 @@ void mRelays::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetTelePeriod(); 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SCHEDULED_CTR;
   ptr->ConstructJSON_function = &mRelays::ConstructJSON_Scheduled;
   mqtthandler_list.push_back(ptr);

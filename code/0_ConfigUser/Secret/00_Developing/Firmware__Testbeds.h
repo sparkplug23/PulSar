@@ -12,7 +12,7 @@
 //--------------------------------[Enable Device]-------------------------------------
 
 // #define DEVICE_TESTBED_01__SENSORS_NEXTION
-// #define DEVICE_TESTBED_02__MOTION_AUDIO
+#define DEVICE_TESTBED_02__MOTION_AUDIO
 // #define DEVICE_TESTBED_04__HVAC_X1
 // #define DEVICE_TESTBED_05__SWITCHES_BUTTONS
 // #define DEVICE_TESTBED_06__GPS_DECODER_WITH_SERIAL_SNIFFERS
@@ -106,7 +106,7 @@
   #define ENABLE_TEMPLATE_SECTION__SENSORS__DHT
   #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
   #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
-  #define ENABLE_TEMPLATE_SECTION__DISPLAYS__NEXTION
+  // #define ENABLE_TEMPLATE_SECTION__DISPLAYS__NEXTION
   #define ENABLE_TEMPLATE_SECTION__LIGHTS 
   #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR
 
@@ -588,6 +588,8 @@
  #define MQTT_HOST   "192.168.3.70"
     
     #define MQTT_PORT     1883
+
+    #define SECONDS_FROM_BUILDTIME_TO_ENABLE_SPLASHING_TELEMETRY 10
    
 
    
@@ -1232,6 +1234,76 @@
     "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
   "}";
 
+
+    
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  R"=====(
+  {
+    "AppendRules": [
+      {
+        "Name": "Switch0 toggles Relay0",
+        "Trigger": {
+          "Module": "switches",
+          "Function": "StateChanged",
+          "DeviceName": 0,
+          "State": "On"
+        },
+        "Command": {
+          "Module": "relays",
+          "Function": "SetPower",
+          "DeviceName": 0,
+          "State": 2
+        }
+      },
+      {
+        "Name": "Switch1 toggles Relay1",
+        "Trigger": {
+          "Module": "switches",
+          "Function": "StateChanged",
+          "DeviceName": 1,
+          "State": "On"
+        },
+        "Command": {
+          "Module": "relays",
+          "Function": "SetPower",
+          "DeviceName": 1,
+          "State": 2
+        }
+      },
+      {
+        "Name": "Button0 toggles Relay2",
+        "Trigger": {
+          "Module": "buttons",
+          "Function": "StateChanged",
+          "DeviceName": 0,
+          "State": "On"
+        },
+        "Command": {
+          "Module": "relays",
+          "Function": "SetPower",
+          "DeviceName": 2,
+          "State": 2
+        }
+      },
+      {
+        "Name": "Button1 toggles Relay3",
+        "Trigger": {
+          "Module": "buttons",
+          "Function": "StateChanged",
+          "DeviceName": 1,
+          "State": "On"
+        },
+        "Command": {
+          "Module": "relays",
+          "Function": "SetPower",
+          "DeviceName": 3,
+          "State": 2
+        }
+      }
+    ]
+  }
+  )=====";
 
 #endif
 

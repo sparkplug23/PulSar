@@ -1472,8 +1472,8 @@ void mSerialPositionalLogger::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mSerialPositionalLogger::ConstructJSON_Settings;
 
@@ -1482,8 +1482,8 @@ void mSerialPositionalLogger::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mSerialPositionalLogger::ConstructJSON_Sensor;
 
@@ -1492,8 +1492,8 @@ void mSerialPositionalLogger::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mSerialPositionalLogger::ConstructJSON_Sensor;
 
@@ -1502,8 +1502,8 @@ void mSerialPositionalLogger::MQTTHandler_Init(){
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SDCARD_SUPERFRAME_CTR;
   ptr->ConstructJSON_function = &mSerialPositionalLogger::ConstructJSON_SDCardSuperFrame;
   

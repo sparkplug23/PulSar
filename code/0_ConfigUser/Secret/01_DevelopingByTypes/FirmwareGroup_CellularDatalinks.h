@@ -101,7 +101,7 @@ Notes:
   * SECTION: Feature Sets
   ************************************/  
 
-  // #define ENABLE_GROUP_FEATURE__CELLULAR
+  #define ENABLE_GROUP_FEATURE__CELLULAR
   #define ENABLE_GROUP_FEATURE__WIFI
 
   /***********************************

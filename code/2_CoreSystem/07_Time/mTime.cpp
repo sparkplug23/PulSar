@@ -1099,7 +1099,8 @@ uint64_t mTime::WifiGetNtp(void)
   IPAddress time_server_ip;
 
   char fallback_ntp_server[2][32];
-  ext_snprintf_P(fallback_ntp_server[0], sizeof(fallback_ntp_server[0]), PSTR("%_I"), tkr_set->Settings.ipv4_address[1]);  // local gateway/DNS-ish
+  ext_snprintf_P(fallback_ntp_server[0], sizeof(fallback_ntp_server[0]), PSTR("%s"), WIFI_GATEWAY);
+  // ext_snprintf_P(fallback_ntp_server[0], sizeof(fallback_ntp_server[0]), PSTR("%_I"), PSTR(WIFI_GATEWAY));//tkr_set->Settings.ipv4_address[1]);  // local gateway/DNS-ish
   ext_snprintf_P(fallback_ntp_server[1], sizeof(fallback_ntp_server[1]), PSTR("%d.pool.ntp.org"), (int)random(0, 3));
 
   const uint32_t server_count = MAX_NTP_SERVERS + 2;

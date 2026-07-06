@@ -264,7 +264,6 @@
   // #define USE_MODULE_DRIVERS_LEDS
   #define USE_MODULE_DRIVERS_RELAY
   // #define USE_MODULE_DRIVERS_RF433_CODES
-  #define USE_MODULE_DRIVERS_RF433_CODES
 
   // default key# = relay#
   // RF Key433 using rules to match patterns then need limit to how often RF matches 

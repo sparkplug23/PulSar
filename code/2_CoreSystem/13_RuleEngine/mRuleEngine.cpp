@@ -505,9 +505,24 @@ rules_active_index = 0;
  * */
 bool mRuleEngine::AppendEventToRules(EventPackage* trigger_new, EventPackage* command_new)
 {
+  if(!trigger_new || !command_new)
+  {
+    return false;
+  }
+
+  if(RuleAlreadyExists(trigger_new, command_new))
+  {
+    return false;
+  }
+
   uint8_t rule_count = GetConfiguredCount();
 
-  if(rule_count >= D_MAX_RULES){ return false; }
+  if(rule_count >= D_MAX_RULES)
+  {
+    ALOG_WRN(PSTR(D_LOG_RULES "Append rule failed, table full count=%u max=%u"),
+             rule_count, D_MAX_RULES);
+    return false;
+  }
 
   memset(&rules[rule_count].trigger, 0, sizeof(EventPackage));
   memset(&rules[rule_count].command, 0, sizeof(EventPackage));
@@ -518,10 +533,91 @@ bool mRuleEngine::AppendEventToRules(EventPackage* trigger_new, EventPackage* co
   rules[rule_count].flag_configured = true;
   rules[rule_count].flag_enabled = true;
 
+  ALOG_INF(PSTR(D_LOG_RULES "Rule appended index=%u"), rule_count);
+
   return true;
 }
 
+bool mRuleEngine::EventPackage_IsExactMatch(const EventPackage* a, const EventPackage* b)
+{
+  if(!a || !b)
+  {
+    return false;
+  }
 
+  if(a->isvalid     != b->isvalid)     { return false; }
+  if(a->module_id   != b->module_id)   { return false; }
+  if(a->function_id != b->function_id) { return false; }
+  if(a->device_id   != b->device_id)   { return false; }
+
+  if(a->value.encoding != b->value.encoding) { return false; }
+  if(a->value.length   != b->value.length)   { return false; }
+
+  for(uint8_t i = 0; i < RULE_ENCODED_DATA_MAX_BYTES; i++)
+  {
+    if(a->value.data[i] != b->value.data[i])
+    {
+      return false;
+    }
+  }
+
+  /*
+   * Intentionally do NOT compare json_command_slot here.
+   *
+   * json_command_slot is a storage handle into jsonbuffer.data.
+   * It is not part of the logical rule identity.
+   *
+   * Current duplicate detection is for normal typed rules:
+   *   module/function/device/state -> module/function/device/state
+   *
+   * Later JSON-command rules should compare resolved JSON command text,
+   * not the slot number.
+   */
+
+  return true;
+}
+
+bool mRuleEngine::Rule_IsExactMatch(
+  const EventPackage* trigger_new,
+  const EventPackage* command_new,
+  uint8_t rule_index
+){
+  if(rule_index >= D_MAX_RULES)
+  {
+    return false;
+  }
+
+  if(!rules[rule_index].flag_configured)
+  {
+    return false;
+  }
+
+  if(!EventPackage_IsExactMatch(trigger_new, &rules[rule_index].trigger))
+  {
+    return false;
+  }
+
+  if(!EventPackage_IsExactMatch(command_new, &rules[rule_index].command))
+  {
+    return false;
+  }
+
+  return true;
+}
+
+bool mRuleEngine::RuleAlreadyExists(const EventPackage* trigger_new, const EventPackage* command_new)
+{
+  for(uint8_t i = 0; i < D_MAX_RULES; i++)
+  {
+    if(Rule_IsExactMatch(trigger_new, command_new, i))
+    {
+      ALOG_WRN(PSTR(D_LOG_RULES "Duplicate rule rejected, existing index=%u"), i);
+      return true;
+    }
+  }
+
+  return false;
+}
   
 /******************************************************************************************************************
  * Commands
@@ -708,7 +804,6 @@ void mRuleEngine::parsesub_Rule_Part(JsonParserObject jobj, EventPackage* event)
 
 
 }
-
 void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
 {
   JsonParserToken  jtok      = 0;
@@ -716,41 +811,95 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
   JsonParserObject jobj      = 0;
 
   // ============================================================
-  // [A] New format: "Rules": [ { "Name": "...", "Trigger": {...}, "Command": {...} }, ... ]
+  // [A] Append format:
+  //     "AppendRules": [
+  //       { "Name": "...", "Trigger": {...}, "Command": {...} },
+  //       ...
+  //     ]
+  //
+  //     "Rules": [...] is accepted as an alias, but now also appends.
   // ============================================================
-  uint8_t rules_found = 0;
-  if (obj["Rules"].isArray()) {
-    JsonParserArray rule_arr = obj["Rules"];
-    for (uint8_t i = 0; i < rule_arr.size() && i < MAX_RULE_VARS; i++) {
+  uint8_t rules_appended = 0;
+
+  JsonParserArray rule_arr;
+  bool have_append_array = false;
+
+  if(obj["AppendRules"].isArray())
+  {
+    rule_arr = obj["AppendRules"];
+    have_append_array = true;
+    ALOG_INF(PSTR(D_LOG_RULES "AppendRules array detected"));
+  }
+  else if(obj["Rules"].isArray())
+  {
+    rule_arr = obj["Rules"];
+    have_append_array = true;
+    ALOG_INF(PSTR(D_LOG_RULES "Rules array detected, appending"));
+  }
+
+  if(have_append_array)
+  {
+    for(uint8_t i = 0; i < rule_arr.size(); i++)
+    {
+      if(GetConfiguredCount() >= D_MAX_RULES)
+      {
+        ALOG_WRN(PSTR(D_LOG_RULES "Rule append stopped, table full"));
+        break;
+      }
+
       JsonParserObject robj = rule_arr[i];
-      if (robj.isNull()) { continue; }
-
-      // Optional: read/display rule name (store if your struct supports it)
-      if (JsonParserToken jn = robj["Name"]) {
-        ALOG_INF(PSTR("RULE[%u] Name: %s"), i, jn.getStr());
-        // TODO: if you have storage, copy it: strlcpy(rules[i].name, jn.getStr(), sizeof(rules[i].name));
+      if(robj.isNull())
+      {
+        continue;
       }
 
-      // Trigger
-      jobj = robj["Trigger"];
-      if (!jobj.isNull()) {
-        parsesub_Rule_Part(jobj, &tkr_rules->rules[i].trigger);
-        rules[i].flag_configured = true;
-        rules[i].flag_enabled    = true;
-        ALOG_INF(PSTR("RULE[%u] Trigger parsed -> enabled"), i);
+      if(JsonParserToken jn = robj["Name"])
+      {
+        ALOG_INF(PSTR(D_LOG_RULES "AppendRule[%u] Name: %s"), i, jn.getStr());
       }
 
-      // Command
-      jobj = robj["Command"];
-      if (!jobj.isNull()) {
-        parsesub_Rule_Part(jobj, &tkr_rules->rules[i].command);
-        ALOG_INF(PSTR("RULE[%u] Command parsed"), i);
+      JsonParserObject trig_obj = robj["Trigger"];
+      JsonParserObject comm_obj = robj["Command"];
+
+      if(trig_obj.isNull())
+      {
+        ALOG_WRN(PSTR(D_LOG_RULES "AppendRule[%u] skipped, missing Trigger"), i);
+        continue;
       }
 
-      rules_found++;
+      if(comm_obj.isNull())
+      {
+        ALOG_WRN(PSTR(D_LOG_RULES "AppendRule[%u] skipped, missing Command"), i);
+        continue;
+      }
+
+      EventPackage event_trig;
+      EventPackage event_comm;
+
+      memset(&event_trig, 0, sizeof(EventPackage));
+      memset(&event_comm, 0, sizeof(EventPackage));
+
+      // With the new field:
+      //   uint8_t json_command_slot = 0;
+      // memset is now correct: 0 = no JSON command.
+
+      parsesub_Rule_Part(trig_obj, &event_trig);
+      parsesub_Rule_Part(comm_obj, &event_comm);
+
+      if(AppendEventToRules(&event_trig, &event_comm))
+      {
+        rules_appended++;
+        ALOG_INF(PSTR(D_LOG_RULES "AppendRule[%u] appended"), i);
+      }
+      else
+      {
+        ALOG_WRN(PSTR(D_LOG_RULES "AppendRule[%u] append failed"), i);
+        break;
+      }
     }
 
-    if (rules_found) {
+    if(rules_appended)
+    {
       #ifdef USE_MODULE_NETWORK_MQTT
       mqtthandler_settings.flags.SendNow = true;
       #endif
@@ -758,29 +907,65 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
   }
 
   // ============================================================
-  // [B] Legacy format fallback: "Rule0", "Rule1", ...
-  //     Only if no "Rules" array parsed above.
+  // [B] Legacy format fallback:
+  //     "Rule0", "Rule1", ...
+  //
+  //     Only used if no AppendRules/Rules array appended.
+  //     This now also appends instead of writing to rules[rule_index].
   // ============================================================
-  if (rules_found == 0) {
+  if(rules_appended == 0)
+  {
     char rule_name[10] = {0};
-    for (uint8_t rule_index = 0; rule_index < MAX_RULE_VARS; rule_index++) {
+
+    for(uint8_t rule_index = 0; rule_index < D_MAX_RULES; rule_index++)
+    {
       sprintf(rule_name, "Rule%d", rule_index);
-      if ((jtok = obj[rule_name])) {
 
-        ALOG_INF(PSTR("MATCHED %s"), rule_name);
-
-        // Trigger
-        jobj = obj[rule_name].getObject()["Trigger"];
-        if (!jobj.isNull()) {
-          parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].trigger);
-          rules[rule_index].flag_configured = true;
-          rules[rule_index].flag_enabled    = true;
+      if((jtok = obj[rule_name]))
+      {
+        if(GetConfiguredCount() >= D_MAX_RULES)
+        {
+          ALOG_WRN(PSTR(D_LOG_RULES "Legacy rule append stopped, table full"));
+          break;
         }
 
-        // Command
-        jobj = obj[rule_name].getObject()["Command"];
-        if (!jobj.isNull()) {
-          parsesub_Rule_Part(jobj, &tkr_rules->rules[rule_index].command);
+        ALOG_INF(PSTR(D_LOG_RULES "Matched legacy %s, appending"), rule_name);
+
+        JsonParserObject legacy_rule = obj[rule_name].getObject();
+
+        JsonParserObject trig_obj = legacy_rule["Trigger"];
+        JsonParserObject comm_obj = legacy_rule["Command"];
+
+        if(trig_obj.isNull())
+        {
+          ALOG_WRN(PSTR(D_LOG_RULES "%s skipped, missing Trigger"), rule_name);
+          continue;
+        }
+
+        if(comm_obj.isNull())
+        {
+          ALOG_WRN(PSTR(D_LOG_RULES "%s skipped, missing Command"), rule_name);
+          continue;
+        }
+
+        EventPackage event_trig;
+        EventPackage event_comm;
+
+        memset(&event_trig, 0, sizeof(EventPackage));
+        memset(&event_comm, 0, sizeof(EventPackage));
+
+        parsesub_Rule_Part(trig_obj, &event_trig);
+        parsesub_Rule_Part(comm_obj, &event_comm);
+
+        if(AppendEventToRules(&event_trig, &event_comm))
+        {
+          rules_appended++;
+          ALOG_INF(PSTR(D_LOG_RULES "%s appended"), rule_name);
+        }
+        else
+        {
+          ALOG_WRN(PSTR(D_LOG_RULES "%s append failed"), rule_name);
+          break;
         }
 
         #ifdef USE_MODULE_NETWORK_MQTT
@@ -791,15 +976,20 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
   }
 
   // ============================================================
-  // [C] AddRule support (unchanged except for minor tidy)
+  // [C] AddRule support
   // ============================================================
-  if ((jtok = obj["AddRule"])) {
+  if((jtok = obj["AddRule"]))
+  {
     ALOG_INF(PSTR(D_LOG_RULES "AddRule"));
 
-    if ((jtok_sub = jtok.getObject()["Default"])) {
-      if (jtok_sub.isArray()) {
+    if((jtok_sub = jtok.getObject()["Default"]))
+    {
+      if(jtok_sub.isArray())
+      {
         JsonParserArray array = jtok_sub;
-        for (auto& object : array) {
+
+        for(auto& object : array)
+        {
           AppendRule_FromDefault_UsingName((char*)object.getStr());
         }
       }
@@ -809,9 +999,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
     mqtthandler_state_ifchanged.flags.SendNow = true;
     #endif
   }
-
 }
-
 
 
 void mRuleEngine::AppendRule_FromDefault_UsingName(const char* name)
@@ -1026,8 +1214,8 @@ void mRuleEngine::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mRuleEngine::ConstructJSON_Settings;
   mqtthandler_list.push_back(ptr);
@@ -1037,8 +1225,8 @@ void mRuleEngine::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_IFCHANGED;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mRuleEngine::ConstructJSON_State;
   mqtthandler_list.push_back(ptr);

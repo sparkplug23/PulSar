@@ -132,7 +132,7 @@ bool mWiFi::WiFi_Dns_ResolveHostname(const char* aHostname, IPAddress& aResult) 
 #endif
 #endif // USE_IPV6
 
-  tkr_set->Settings.dns_timeout = 1000;
+  // tkr_set->Settings.dns_timeout = 1000;
 
   uint32_t dns_start = millis();
   bool success = WiFi.hostByName(aHostname, aResult);//, tkr_set->Settings.dns_timeout);

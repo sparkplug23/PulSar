@@ -72,27 +72,22 @@ class mTreadmillLogger :
     
     void parse_JSONCommand(JsonParserObject obj);
 
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
     
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    #ifdef USE_MODULE_NETWORK_MQTT
     void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    
-    void MQTTHandler_Sender();
+    std::vector<struct handler<mTreadmillLogger>*> mqtthandler_list;
+    struct handler<mTreadmillLogger> mqtthandler_settings;    struct handler<mTreadmillLogger> mqtthandler_state_ifchanged;
+    #endif // USE_MODULE_NETWORK_MQTT
 
-    struct handler<mTreadmillLogger> mqtthandler_settings;
-    struct handler<mTreadmillLogger> mqtthandler_state_ifchanged;
-
-    //No extra handlers: ie settings and "state" only
-    
-      
-    struct handler<mTreadmillLogger>* mqtthandler_list[2] = {
-      &mqtthandler_settings,
-      &mqtthandler_state_ifchanged
-    };
-
-};
+  };
 
 #endif // USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
 
