@@ -23,6 +23,8 @@
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
+#include "2_CoreSystem/09_Telemetry/Web/Gen/generated_web.h"
+
 #ifndef SECONDS_FROM_BUILDTIME_TO_ENABLE_SPLASHING_TELEMETRY
 #define SECONDS_FROM_BUILDTIME_TO_ENABLE_SPLASHING_TELEMETRY 600
 #endif
@@ -39,18 +41,30 @@ class mTelemetry :
     static constexpr const char* PM_MODULE_CORE_TELEMETRY_CTR = D_MODULE_CORE_TELEMETRY_CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_TELEMETRY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TELEMETRY_ID; }
+
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    void WebPage_Root_AddHandlers();
+    void Serve_Web_Telemetry(AsyncWebServerRequest* request);
+    void Serve_Web_Telemetry_Page(AsyncWebServerRequest* request);
+    void Serve_Web_Telemetry_JS(AsyncWebServerRequest* request);
+    #endif
+
+
    
     uint8_t ConstructJSON_LWT_Online(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Health(uint8_t json_method = 0, bool json_appending = true);
     #ifndef FIRMWARE_MINIMAL2
     uint8_t ConstructJSON_Settings(uint8_t json_method = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Settings_System(uint8_t json_method = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Settings_Network(uint8_t json_method = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Settings_Drivers(uint8_t json_method = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Settings_Sensors(uint8_t json_method = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Settings_Lights(uint8_t json_method = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Settings_Power(uint8_t json_method = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Settings_Rules(uint8_t json_method = 0, bool json_appending = true);
+      uint8_t ConstructJSON_Settings_System(uint8_t json_method = 0, bool json_appending = true);
+      uint8_t ConstructJSON_Settings_Network(uint8_t json_method = 0, bool json_appending = true);
+      uint8_t ConstructJSON_Settings_Drivers(uint8_t json_method = 0, bool json_appending = true);
+      uint8_t ConstructJSON_Settings_Sensors(uint8_t json_method = 0, bool json_appending = true);
+      uint8_t ConstructJSON_Settings_Lights(uint8_t json_method = 0, bool json_appending = true);
+      uint8_t ConstructJSON_Settings_Power(uint8_t json_method = 0, bool json_appending = true);
+      uint8_t ConstructJSON_Settings_Rules(uint8_t json_method = 0, bool json_appending = true);
+      uint8_t ConstructJSON_Settings_Runtime(uint8_t json_method = 0, bool json_appending = true);
+      uint8_t ConstructJSON_Settings_TextBuffer(uint8_t json_method = 0, bool json_appending = true);
+    uint8_t ConstructJSON_Peripherals(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Firmware(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Log(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Memory(uint8_t json_method = 0, bool json_appending = true);
@@ -58,20 +72,23 @@ class mTelemetry :
     uint8_t ConstructJSON_MQTT(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Time(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Reboot(uint8_t json_method = 0, bool json_appending = true);
+    uint8_t ConstructJSON_TaskerManager(uint8_t json_method = 0, bool json_appending = true);
     #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-    uint8_t ConstructJSON_Debug_Devices(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Debug_Pins_GPIO(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Debug_Pins_Table(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Debug_Template(uint8_t json_method = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Debug_ModuleInterface(uint8_t json_method = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Debug_Minimal(uint8_t json_method = 0, bool json_appending = true);
-    uint8_t ConstructJSON_Debug_System_Stored_Settings(uint8_t json_method = 0, bool json_appending = true);
     uint8_t ConstructJSON_Debug_Tasker_Interface_Performance(uint8_t json_method = 0, bool json_appending = true);
       #ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
       uint8_t ConstructJSON_Debug__Settings_Storage(uint8_t json_method = 0, bool json_appending = true);
       #endif
     #endif
     #endif // FIRMWARE_MINIMAL2
+
+    #ifdef ENABLE_MQTT_SETTINGS_TELEMETRY
+    #endif
+
+
+
 
     #ifdef USE_MODULE_NETWORK_MQTT    
       void MQTTHandler_Init();      
@@ -87,22 +104,22 @@ class mTelemetry :
       handler<mTelemetry> mqtthandler_settings_lights;
       handler<mTelemetry> mqtthandler_settings_power;
       handler<mTelemetry> mqtthandler_settings_rules;
+      handler<mTelemetry> mqtthandler_settings_runtime;
+      handler<mTelemetry> mqtthandler_settings_text_buffer;
       handler<mTelemetry> mqtthandler_log;
+      handler<mTelemetry> mqtthandler_peripherals;
       handler<mTelemetry> mqtthandler_firmware;
       handler<mTelemetry> mqtthandler_memory;
       handler<mTelemetry> mqtthandler_network;
       handler<mTelemetry> mqtthandler_mqtt;
       handler<mTelemetry> mqtthandler_time;
+      handler<mTelemetry> mqtthandler_taskermanager;
       handler<mTelemetry> mqtthandler_reboot;
       handler<mTelemetry> mqtthandler_reboot_event;
       #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-        handler<mTelemetry> mqtthandler_devices;
         handler<mTelemetry> mqtthandler_debug_pins_gpio;
         handler<mTelemetry> mqtthandler_debug_pins_table;
         handler<mTelemetry> mqtthandler_debug_template;
-        handler<mTelemetry> mqtthandler_debug_moduleinterface;
-        handler<mTelemetry> mqtthandler_debug_minimal;
-        handler<mTelemetry> mqtthandler_debug_system_saved_settings;
         #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES) || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_PERFORMANCE)
         handler<mTelemetry> mqtthandler_debug_tasker_interface_performance;
         #endif

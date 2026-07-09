@@ -101,12 +101,185 @@ int8_t mTelemetry::Tasker(uint8_t function, JsonParserObject obj)
       tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this, 1000);
     break;
     #endif //USE_MODULE_NETWORK_MQTT
+    /************
+     * WEBUI SECTION *
+    *******************/
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_ADD_HANDLER:
+      WebPage_Root_AddHandlers();
+    break;
+    #endif
   }
 
   return TASKER_RESULT__UNKNOWN_ID;
 
 }
 
+/******************************************************************************************************************
+ * SECTION: Web
+*******************************************************************************************************************/
+
+#ifdef USE_MODULE_NETWORK_WEBSERVER
+
+static void WebPrint_JSString(AsyncResponseStream& response, const char* s)
+{
+  if (!s) { return; }
+
+  while (*s)
+  {
+    const char c = *s++;
+
+    switch (c)
+    {
+      case '\\': response.print(F("\\\\")); break;
+      case '"':  response.print(F("\\\"")); break;
+      case '\n': response.print(F("\\n"));  break;
+      case '\r': response.print(F("\\r"));  break;
+      case '\t': response.print(F("\\t"));  break;
+
+      default:
+        if ((uint8_t)c < 32) {
+          response.print(' ');
+        } else {
+          response.print(c);
+        }
+      break;
+    }
+  }
+}
+
+
+void mTelemetry::WebPage_Root_AddHandlers()
+{
+  SPGM_CTR(PM_WEB_TELEMETRY_JS) "/m/telemetry/s.js";
+  SPGM_CTR(PM_WEB_TELEMETRY)    "/m/telemetry";
+
+  /**
+   * Route order matters.
+   *
+   * The webserver's URL matching can allow shorter parent routes to catch
+   * longer child paths. Always register the longest/specific telemetry URL
+   * first, otherwise /m/telemetry may catch /m/telemetry/s.js and return the
+   * HTML page instead of the JavaScript data chunk.
+   */
+  tkr_web->server->on(PM_WEB_TELEMETRY_JS, HTTP_GET, [this](AsyncWebServerRequest *request){
+    this->Serve_Web_Telemetry_JS(request);
+  });
+  AddURLtoList(PM_WEB_TELEMETRY_JS, HTTP_GET);
+
+  tkr_web->server->on(PM_WEB_TELEMETRY, HTTP_GET, [this](AsyncWebServerRequest *request){
+    this->Serve_Web_Telemetry_Page(request);
+  });
+  AddURLtoList(PM_WEB_TELEMETRY, HTTP_GET);
+}
+
+
+void mTelemetry::Serve_Web_Telemetry_Page(AsyncWebServerRequest* request)
+{
+  AsyncWebServerResponse *response = request->beginResponse_P(
+    200,
+    FPSTR(CONTENT_TYPE_HTML),
+    WEB_2_CoreSystem_09_Telemetry_telemetry_handler_htm,
+    WEB_2_CoreSystem_09_Telemetry_telemetry_handler_htm_length
+  );
+
+  response->addHeader(F("Content-Encoding"), F("gzip"));
+  response->addHeader(F("Cache-Control"), F("no-store"));
+  response->addHeader(F("Expires"), F("0"));
+  tkr_web->setStaticContentCacheHeaders(response);
+
+  request->send(response);
+}
+
+void mTelemetry::Serve_Web_Telemetry_JS(AsyncWebServerRequest* request)
+{
+  static const uint8_t HANDLERS_PER_PAGE = 2;
+
+  uint16_t page = 0;
+
+  if (request->hasParam("p")) {
+    page = request->getParam("p")->value().toInt();
+  }
+
+  const uint16_t total_handlers = mqtthandler_list.size();
+  const uint16_t total_pages = (total_handlers + HANDLERS_PER_PAGE - 1) / HANDLERS_PER_PAGE;
+
+  AsyncResponseStream *response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JAVASCRIPT));
+
+  response->addHeader(F("Cache-Control"), F("no-store"));
+  response->addHeader(F("Expires"), F("0"));
+
+  if ((total_handlers == 0) || (page >= total_pages))
+  {
+    response->print(F("H(0,0,0);N(-1);"));
+    request->send(response);
+    return;
+  }
+
+  const uint16_t start = page * HANDLERS_PER_PAGE;
+  uint16_t end = start + HANDLERS_PER_PAGE;
+
+  if (end > total_handlers) {
+    end = total_handlers;
+  }
+
+  response->printf_P(
+    PSTR("H(%u,%u,%u);"),
+    page,
+    total_pages,
+    total_handlers
+  );
+
+  for (uint16_t i = start; i < end; i++)
+  {
+    auto handle = mqtthandler_list[i];
+
+    if (!handle || !handle->ConstructJSON_function) {
+      continue;
+    }
+
+    char topic[96] = {0};
+
+    if (handle->postfix_topic)
+    {
+      snprintf_P(topic, sizeof(topic), PSTR("%S"), handle->postfix_topic);
+    }
+    else
+    {
+      snprintf(topic, sizeof(topic), "handler_%u", i);
+    }
+
+    CALL_MEMBER_FUNCTION(*this, handle->ConstructJSON_function)(handle->flags.json_level, true);
+
+    response->printf_P(PSTR("A(%u,\""), i);
+    WebPrint_JSString(*response, topic);
+
+    response->printf_P(
+      PSTR("\",%u,%u,%u,\"%04X\",\""),
+      handle->tRateSecs,
+      handle->flags.json_level,
+      handle->flags.topic_type,
+      handle->flags.data
+    );
+
+    WebPrint_JSString(*response, JBI->GetBuffer());
+
+    response->print(F("\");"));
+  }
+
+  if ((page + 1) < total_pages)
+  {
+    response->printf_P(PSTR("N(%u);"), page + 1);
+  }
+  else
+  {
+    response->print(F("N(-1);"));
+  }
+
+  request->send(response);
+}
+
+#endif // USE_MODULE_NETWORK_WEBSERVER
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
@@ -251,6 +424,45 @@ void mTelemetry::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Settings_Rules;
   mqtthandler_list.push_back(ptr);
 
+  ptr = &mqtthandler_settings_runtime;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
+  ptr->tRateSecs = SEC_IN_HOUR;
+  ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_RUNTIME_CTR;
+  ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Settings_Runtime;
+  mqtthandler_list.push_back(ptr);
+  
+  ptr = &mqtthandler_settings_text_buffer;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
+  ptr->tRateSecs = SEC_IN_HOUR;
+  ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_TEXT_BUFFER_CTR;
+  ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Settings_TextBuffer;
+  mqtthandler_list.push_back(ptr);
+
+  ptr = &mqtthandler_peripherals;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->flags.retain = true;
+  ptr->tRateSecs = SEC_IN_HOUR;
+  ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_PERIPHERALS_CTR;
+  ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Peripherals;
+  mqtthandler_list.push_back(ptr);
+
   ptr = &mqtthandler_log;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
@@ -329,6 +541,18 @@ void mTelemetry::MQTTHandler_Init()
   ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Time;
   mqtthandler_list.push_back(ptr);
     
+  ptr = &mqtthandler_taskermanager;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = SEC_IN_HOUR; 
+  ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_TASKERMANAGER_CTR;
+  ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_TaskerManager;
+  mqtthandler_list.push_back(ptr);
+
   ptr = &mqtthandler_reboot;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
@@ -357,19 +581,6 @@ void mTelemetry::MQTTHandler_Init()
 
   #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
     
-    ptr = &mqtthandler_devices;
-    ptr->tSavedLastSent = 0;
-    ptr->flags.PeriodicEnabled = true;
-    ptr->flags.SendNow = true;
-    ptr->flags.retain = true;
-    ptr->tRateSecs = SEC_IN_HOUR; 
-    ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-    ptr->flags.topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-    ptr->flags.json_level = JSON_LEVEL_DETAILED;
-    ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_DEVICES_CTR;
-    ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Devices;
-    mqtthandler_list.push_back(ptr);
-
     ptr = &mqtthandler_debug_pins_gpio;
     ptr->tSavedLastSent = 0;
     ptr->flags.PeriodicEnabled = true;
@@ -409,31 +620,6 @@ void mTelemetry::MQTTHandler_Init()
     ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Template;
     mqtthandler_list.push_back(ptr);
 
-    ptr = &mqtthandler_debug_moduleinterface;
-    ptr->tSavedLastSent = 0;
-    ptr->flags.PeriodicEnabled = true;
-    ptr->flags.SendNow = true;
-    ptr->tRateSecs = SEC_IN_HOUR; 
-    ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-    ptr->flags.topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-    ptr->flags.json_level = JSON_LEVEL_DETAILED;
-    ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULETEMPLATE_CTR;
-    ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_ModuleInterface;
-    mqtthandler_list.push_back(ptr);
-
-    ptr = &mqtthandler_debug_system_saved_settings;
-    ptr->tSavedLastSent = 0;
-    ptr->flags.PeriodicEnabled = true;
-    ptr->flags.SendNow = true;
-    ptr->flags.retain = true;
-    ptr->tRateSecs = SEC_IN_HOUR; 
-    ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-    ptr->flags.topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-    ptr->flags.json_level = JSON_LEVEL_DETAILED;
-    ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_SYSTEM_STORED_SETTINGS_CTR;
-    ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_System_Stored_Settings;
-    mqtthandler_list.push_back(ptr);
-
     #ifdef ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_PERFORMANCE
     ptr = &mqtthandler_debug_tasker_interface_performance; 
     ptr->tSavedLastSent = 0;
@@ -465,19 +651,6 @@ void mTelemetry::MQTTHandler_Init()
     mqtthandler_list.push_back(ptr);
     #endif // ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
     
-    ptr = &mqtthandler_debug_minimal;
-    ptr->tSavedLastSent = 0;
-    ptr->flags.PeriodicEnabled = true;
-    ptr->flags.SendNow = true;
-    ptr->flags.retain = true;
-    ptr->tRateSecs = DEFAULT_MQTT_SYSTEM_MINIMAL_RATE_SECS;
-    ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
-    ptr->flags.topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
-    ptr->flags.json_level = JSON_LEVEL_DETAILED;
-    ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_MODULEMINIMAL_CTR;
-    ptr->ConstructJSON_function = &mTelemetry::ConstructJSON_Debug_Minimal;
-    mqtthandler_list.push_back(ptr);
-
   #endif // ENABLE_MQTT_DEBUG_TELEMETRY
   
   #endif // FIRMWARE_MINIMAL2

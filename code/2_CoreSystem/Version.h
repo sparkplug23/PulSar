@@ -74,9 +74,9 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 // bits 15-8   (8)  (Range 0-255)   System version (e.g. Wifi, Support)
 // bits 7-0    (8)  (Range 0-255)   Module version (e.g. Sensors, Drivers)
 
-// Generate Version AFTER Hardware defaults have been called, this allows undef VERSION_TYPE for overriding
-const uint32_t PROJECT_VERSION = ((FIRMWARE_VERSION_TYPE & 0x03) << 30) | ((FIRMWARE_VERSION_MAJOR & 0x3F) << 24) | (FIRMWARE_VERSION_MINOR << 16) | (FIRMWARE_VERSION_CORE << 8) | (FIRMWARE_VERSION_MODULE);
 
+// Generate Version AFTER Hardware defaults have been called, this allows undef VERSION_TYPE for overriding
+const uint32_t PROJECT_VERSION         = ((FIRMWARE_VERSION_TYPE & 0x03) << 30) | ((FIRMWARE_VERSION_MAJOR & 0x3F) << 24) | (FIRMWARE_VERSION_MINOR << 16) | (FIRMWARE_VERSION_CORE << 8) | (FIRMWARE_VERSION_MODULE);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// OPTIONAL DEPRECIATION /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

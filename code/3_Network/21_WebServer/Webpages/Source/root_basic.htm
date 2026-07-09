@@ -263,6 +263,11 @@
         <span class="go">/nextion/main</span>
       </button>
 
+    </div>
+
+    <div class="railsec">
+      <h3>System</h3>
+
       <button class="railbtn" type="button" onclick="go('/edit')">
         <span class="l">
           <span class="name">Files</span>
@@ -270,26 +275,14 @@
         </span>
         <span class="go">/edit</span>
       </button>
-    </div>
-
-    <div class="railsec">
-      <h3>System</h3>
-
-      <button class="railbtn" type="button" onclick="go('/version')">
+      <button class="railbtn" type="button" onclick="go('/sdedit')">
         <span class="l">
-          <span class="name">Version</span>
-          <span class="desc">Build + module info</span>
+          <span class="name">SD Files</span>
+          <span class="desc">SD Filesystem editor</span>
         </span>
-        <span class="go">/version</span>
+        <span class="go">/sdedit</span>
       </button>
 
-      <button class="railbtn" type="button" onclick="go('/uptime')">
-        <span class="l">
-          <span class="name">Uptime</span>
-          <span class="desc">Health / timers</span>
-        </span>
-        <span class="go">/uptime</span>
-      </button>
 
       <button class="railbtn" type="button" onclick="go('/reboot')">
         <span class="l">
@@ -305,6 +298,29 @@
           <span class="desc">Reset settings / state</span>
         </span>
         <span class="go">/reset</span>
+      </button>
+
+
+
+    </div>
+    
+    <div class="railsec">
+      <h3>Debug</h3>
+
+      <button class="railbtn" type="button" onclick="go('/version')">
+        <span class="l">
+          <span class="name">Version</span>
+          <span class="desc">Build + module info</span>
+        </span>
+        <span class="go">/version</span>
+      </button>
+
+      <button class="railbtn" type="button" onclick="go('/uptime')">
+        <span class="l">
+          <span class="name">Uptime</span>
+          <span class="desc">Health / timers</span>
+        </span>
+        <span class="go">/uptime</span>
       </button>
 
       
@@ -355,11 +371,6 @@
             <div class="u mono">/lights</div>
           </div>
 
-          <div class="tile" onclick="go('/console')">
-            <div class="t">Console</div>
-            <div class="d">Log stream, command input</div>
-            <div class="u mono">/console</div>
-          </div>
 
           <div class="tile" onclick="go('/nextion/main')">
             <div class="t">Nextion</div>
@@ -373,17 +384,6 @@
             <div class="u mono">/system/controls</div>
           </div>
 
-          <div class="tile" onclick="go('/json')">
-            <div class="t">JSON</div>
-            <div class="d">Status / config API</div>
-            <div class="u mono">/json</div>
-          </div>
-
-          <div class="tile" onclick="go('/edit')">
-            <div class="t">Files</div>
-            <div class="d">Manage on-device content</div>
-            <div class="u mono">/edit</div>
-          </div>
         </div>
       </div>
 

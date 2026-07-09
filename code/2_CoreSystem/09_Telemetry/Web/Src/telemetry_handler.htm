@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Telemetry</title>
+<script src="/common.js"></script>
+<style>@import url("/style.css");</style>
+<style>
+body{font-family:monospace;margin:8px;text-align:left}
+.top{position:sticky;top:0;background:#111;padding:8px 0;z-index:2}
+#st{font-size:12px;opacity:.75}
+pre{white-space:pre-wrap;text-align:left;font-size:12px;line-height:1.25;margin:0}
+button{margin-right:6px}
+</style>
+<script>
+var p=0,tp=0,th=0,n=0;
+
+function S(){
+  getLoc();
+  R();
+}
+
+function R(){
+  p=0;tp=0;th=0;n=0;
+  gId("out").textContent="";
+  gId("st").textContent="loading";
+  L(0);
+}
+
+function L(x){
+  loadJS(getURL("/m/telemetry/s.js?p="+x+"&ts="+Date.now()),false);
+}
+
+function H(page,totalPages,totalHandlers){
+  p=page;
+  tp=totalPages;
+  th=totalHandlers;
+  gId("st").textContent="page "+(p+1)+"/"+tp+", handlers "+n+"/"+th;
+}
+
+function P(s){
+  try{
+    return JSON.stringify(JSON.parse(s),null,2);
+  }catch(e){
+    return s;
+  }
+}
+
+function A(i,topic,rate,level,type,flags,payload){
+  n++;
+
+  var s="";
+  s+="\n>------ "+topic+","+rate+","+level+",type="+type+",flags=0x"+flags+"\n";
+  s+=P(payload);
+  s+="\n";
+
+  gId("out").textContent+=s;
+  gId("st").textContent="page "+(p+1)+"/"+tp+", handlers "+n+"/"+th;
+}
+
+function N(nextPage){
+  if(nextPage>=0){
+    L(nextPage);
+  }else{
+    gId("st").textContent="done, handlers "+n+"/"+th;
+  }
+}
+</script>
+</head>
+
+<body onload="S()">
+<div class="top">
+  <button type="button" onclick="B()">Back</button>
+  <button type="button" onclick="R()">Refresh</button>
+  <span id="st">idle</span>
+  <hr>
+</div>
+
+<h2>Telemetry Handlers</h2>
+<pre id="out"></pre>
+</body>
+</html>

@@ -63,35 +63,35 @@ class mWiFi :
     uint8_t GetRSSPercentage();
 
     const uint8_t WIFI_CHECK_SEC = 20;         // seconds
-
+        
     struct WiFiProfile
     {
       char    id[24] = {0};
       char    ssid[33] = {0};
       char    pass[65] = {0};
       uint8_t priority = 0;
-      uint8_t ssid_hidden = 0;
-      uint8_t has_bssid = 0;
+      bool    ssid_hidden = false;
+      bool    has_bssid   = false;
       uint8_t bssid[6] = {0};
     };
 
 
     struct IPv4Config
     {
-      uint8_t is_static = 0;
-      uint8_t ip[4]   = {0,0,0,0};
-      uint8_t gw[4]   = {0,0,0,0};
-      uint8_t sn[4]   = {255,255,255,0};
-      uint8_t dns1[4] = {0,0,0,0};
-      uint8_t dns2[4] = {0,0,0,0};
+      bool    is_static = false;
+      uint8_t ip[4]   = {0, 0, 0, 0};
+      uint8_t gw[4]   = {0, 0, 0, 0};
+      uint8_t sn[4]   = {255, 255, 255, 0};
+      uint8_t dns1[4] = {0, 0, 0, 0};
+      uint8_t dns2[4] = {0, 0, 0, 0};
     };
 
 
     struct WiFiStationConfig
     {
-      uint8_t enabled = 1;
+      bool enabled = true;
       WiFiProfile profiles[WIFI_MAXIMUM_CONNECTIONS];
-      uint8_t profile_count = 0;
+      uint8_t profile_count  = 0;
       uint8_t active_profile = 0;
       IPv4Config ipv4;
     };
@@ -99,17 +99,18 @@ class mWiFi :
 
     struct WiFiSoftApConfig
     {
-      uint8_t enabled = 1;
+      bool enabled = true;
       char ssid[33] = {0};
       char pass[65] = {0};
       uint8_t channel = 1;
-      uint8_t hidden = 0;
+      bool hidden = false;
     };
+
 
     struct WiFiModuleConfig
     {
       WiFiStationConfig station;
-      WiFiSoftApConfig softap;
+      WiFiSoftApConfig  softap;
     };
 
     WiFiModuleConfig config;
