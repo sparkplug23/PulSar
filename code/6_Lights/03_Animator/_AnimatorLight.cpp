@@ -4328,6 +4328,11 @@ bool mAnimatorLight::Segment::colorFromHexString(byte* rgb, const char* in) {
 }
 
 
+
+
+
+
+
 /*
  * Put a value 0 to 255 in to get a color value.
  * The colours are a transition r -> g -> b -> back to r
@@ -6432,20 +6437,20 @@ uint8_t mAnimatorLight::NeoGammaWLEDMethod::Correct(uint8_t value)
   return gammaT[value];
 }
 
-// used for color gamma correction
-uint32_t mAnimatorLight::NeoGammaWLEDMethod::Correct32(uint32_t color)
-{
-  // if (!gammaCorrectCol) return color;
-  uint8_t w = W(color);
-  uint8_t r = R(color);
-  uint8_t g = G(color);
-  uint8_t b = B(color);
-  w = gammaT[w];
-  r = gammaT[r];
-  g = gammaT[g];
-  b = gammaT[b];
-  return RGBW32(r, g, b, w);
-}
+// // used for color gamma correction
+// uint32_t mAnimatorLight::NeoGammaWLEDMethod::Correct32(uint32_t color)
+// {
+//   // if (!gammaCorrectCol) return color;
+//   uint8_t w = W(color);
+//   uint8_t r = R(color);
+//   uint8_t g = G(color);
+//   uint8_t b = B(color);
+//   w = gammaT[w];
+//   r = gammaT[r];
+//   g = gammaT[g];
+//   b = gammaT[b];
+//   return RGBW32(r, g, b, w);
+// }
 
 uint8_t mAnimatorLight::sin_gap(uint16_t in) {
   if (in & 0x100) return 0;

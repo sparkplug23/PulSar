@@ -26092,6 +26092,877 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__2D__FFT_AKEMI[] PROGMEM =
 #endif // ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D END SECTION /////////////////////////////////////////////////////////////////////////////
 
 
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+
+
+/****************************************************************************************************************************************************************************
+*****************************************************************************************************************************************************************************
+*** Particle System: 1D ****************************************************************************************************************************************************
+*****************************************************************************************************************************************************************************
+****************************************************************************************************************************************************************************/
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Drip 1D
+ *                Temporary placeholder for the WLED particle-system Drip effect.
+ * @note        : Particle implementation pending.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__Drip()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__DRIP[] PROGMEM =
+"Particle Drip@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__DRIP[] PROGMEM =
+"Particle-system 1D drip effect.\n\r"
+"Temporary colour-wipe placeholder until the particle implementation is converted.\n\r"
+"SX: Placeholder speed\n\r"
+"IX: Placeholder intensity";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Pinball 1D
+ *                Temporary placeholder for the WLED particle-system Pinball effect.
+ * @note        : Potential future replacement for Bouncing Balls, Rolling Balls and Popcorn.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__Pinball()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__PINBALL[] PROGMEM =
+"Particle Pinball@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__PINBALL[] PROGMEM =
+"Particle-system 1D pinball effect.\n\r"
+"Potential replacement for legacy bouncing-ball, rolling-ball and popcorn effects.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Dancing Shadows 1D
+ *                Temporary placeholder for the WLED particle-system Dancing Shadows effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__DancingShadows()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__DANCING_SHADOWS[] PROGMEM =
+"Particle Dancing Shadows@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__DANCING_SHADOWS[] PROGMEM =
+"Particle-system 1D dancing-shadows effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Fireworks 1D
+ *                Temporary placeholder for the WLED particle-system 1D Fireworks effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__Fireworks()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__FIREWORKS[] PROGMEM =
+"Particle Fireworks 1D@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__FIREWORKS[] PROGMEM =
+"Particle-system 1D fireworks effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Sparkler 1D
+ *                Temporary placeholder for the WLED particle-system Sparkler effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__Sparkler()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__SPARKLER[] PROGMEM =
+"Particle Sparkler@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__SPARKLER[] PROGMEM =
+"Particle-system 1D sparkler effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Hourglass 1D
+ *                Temporary placeholder for the WLED particle-system Hourglass effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__Hourglass()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__HOURGLASS[] PROGMEM =
+"Particle Hourglass@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__HOURGLASS[] PROGMEM =
+"Particle-system 1D hourglass effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Spray 1D
+ *                Temporary placeholder for the WLED particle-system 1D Spray effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__Spray()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__SPRAY[] PROGMEM =
+"Particle Spray 1D@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__SPRAY[] PROGMEM =
+"Particle-system 1D spray effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Balance 1D
+ *                Temporary placeholder for the WLED particle-system Balance effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__Balance()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__BALANCE[] PROGMEM =
+"Particle Balance@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__BALANCE[] PROGMEM =
+"Particle-system 1D balance effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Chase 1D
+ *                Temporary placeholder for the WLED particle-system Chase effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__Chase()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__CHASE[] PROGMEM =
+"Particle Chase@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__CHASE[] PROGMEM =
+"Particle-system 1D chase effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Starburst 1D
+ *                Temporary placeholder for the WLED particle-system Starburst effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__Starburst()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__STARBURST[] PROGMEM =
+"Particle Starburst@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__STARBURST[] PROGMEM =
+"Particle-system 1D starburst effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle GEQ 1D
+ *                Temporary placeholder for the audio-reactive WLED particle-system 1D GEQ effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__GEQ()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__GEQ[] PROGMEM =
+"Particle GEQ 1D@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1f"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__GEQ[] PROGMEM =
+"Audio-reactive particle-system 1D graphic equaliser.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Fire 1D
+ *                Temporary placeholder for the WLED particle-system 1D Fire effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__Fire()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__FIRE[] PROGMEM =
+"Particle Fire 1D@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__FIRE[] PROGMEM =
+"Particle-system 1D fire effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Sonic Stream 1D
+ *                Temporary placeholder for the WLED audio-reactive particle-system Sonic Stream effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__SonicStream()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__SONIC_STREAM[] PROGMEM =
+"Particle Sonic Stream@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1f"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__SONIC_STREAM[] PROGMEM =
+"Audio-reactive particle-system 1D sonic-stream effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Sonic Boom 1D
+ *                Temporary placeholder for the WLED audio-reactive particle-system Sonic Boom effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__SonicBoom()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__SONIC_BOOM[] PROGMEM =
+"Particle Sonic Boom@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1f"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__SONIC_BOOM[] PROGMEM =
+"Audio-reactive particle-system 1D sonic-boom effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Springy 1D
+ *                Temporary placeholder for the WLED particle-system Springy effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__1D__Springy()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__1D__SPRINGY[] PROGMEM =
+"Particle Springy@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"1"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__1D__SPRINGY[] PROGMEM =
+"Particle-system 1D spring-motion effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+
+/****************************************************************************************************************************************************************************
+*****************************************************************************************************************************************************************************
+*** Particle System: 2D ****************************************************************************************************************************************************
+*****************************************************************************************************************************************************************************
+****************************************************************************************************************************************************************************/
+
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Volcano 2D
+ *                Temporary placeholder for the WLED particle-system Volcano effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__Volcano()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__VOLCANO[] PROGMEM =
+"Particle Volcano@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__VOLCANO[] PROGMEM =
+"Particle-system 2D volcano effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Fire 2D
+ *                Temporary placeholder for the WLED particle-system 2D Fire effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__Fire()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__FIRE[] PROGMEM =
+"Particle Fire 2D@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__FIRE[] PROGMEM =
+"Particle-system 2D fire effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Fireworks 2D
+ *                Temporary placeholder for the WLED particle-system 2D Fireworks effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__Fireworks()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__FIREWORKS[] PROGMEM =
+"Particle Fireworks 2D@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__FIREWORKS[] PROGMEM =
+"Particle-system 2D fireworks effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Vortex 2D
+ *                Temporary placeholder for the WLED particle-system Vortex effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__Vortex()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__VORTEX[] PROGMEM =
+"Particle Vortex@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__VORTEX[] PROGMEM =
+"Particle-system 2D vortex effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Perlin 2D
+ *                Temporary placeholder for the WLED particle-system Perlin effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__Perlin()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__PERLIN[] PROGMEM =
+"Particle Perlin@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__PERLIN[] PROGMEM =
+"Particle-system 2D Perlin-motion effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Pit 2D
+ *                Temporary placeholder for the WLED particle-system Particle Pit effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__Pit()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__PIT[] PROGMEM =
+"Particle Pit@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__PIT[] PROGMEM =
+"Particle-system 2D particle-pit effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Box 2D
+ *                Temporary placeholder for the WLED particle-system Particle Box effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__Box()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__BOX[] PROGMEM =
+"Particle Box@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__BOX[] PROGMEM =
+"Particle-system 2D particle-box effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Attractor 2D
+ *                Temporary placeholder for the WLED particle-system Attractor effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__Attractor()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__ATTRACTOR[] PROGMEM =
+"Particle Attractor@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__ATTRACTOR[] PROGMEM =
+"Particle-system 2D point-attractor effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Impact 2D
+ *                Temporary placeholder for the WLED particle-system Impact effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__Impact()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__IMPACT[] PROGMEM =
+"Particle Impact@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__IMPACT[] PROGMEM =
+"Particle-system 2D impact effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Waterfall 2D
+ *                Temporary placeholder for the WLED particle-system Waterfall effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__Waterfall()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__WATERFALL[] PROGMEM =
+"Particle Waterfall@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__WATERFALL[] PROGMEM =
+"Particle-system 2D waterfall effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Spray 2D
+ *                Temporary placeholder for the WLED particle-system 2D Spray effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__Spray()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__SPRAY[] PROGMEM =
+"Particle Spray 2D@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__SPRAY[] PROGMEM =
+"Particle-system 2D spray effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle GEQ 2D
+ *                Temporary placeholder for the WLED audio-reactive particle-system GEQ effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__GEQ()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__GEQ[] PROGMEM =
+"Particle GEQ 2D@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2f"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__GEQ[] PROGMEM =
+"Audio-reactive particle-system 2D graphic equaliser.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Center GEQ 2D
+ *                Temporary placeholder for the WLED audio-reactive circular or centre GEQ effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__CenterGEQ()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__CENTER_GEQ[] PROGMEM =
+"Particle Center GEQ@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2f"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__CENTER_GEQ[] PROGMEM =
+"Audio-reactive centred particle-system 2D graphic equaliser.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Ghost Rider 2D
+ *                Temporary placeholder for the WLED particle-system Ghost Rider effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__GhostRider()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__GHOST_RIDER[] PROGMEM =
+"Particle Ghost Rider@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__GHOST_RIDER[] PROGMEM =
+"Particle-system 2D Ghost Rider effect.\n\r"
+"Retained separately from the existing legacy 2D implementation.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Blobs 2D
+ *                Temporary placeholder for the WLED particle-system Blobs effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__Blobs()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__BLOBS[] PROGMEM =
+"Particle Blobs@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__BLOBS[] PROGMEM =
+"Particle-system 2D floating-blobs effect.\n\r"
+"Retained separately from the existing legacy 2D implementation.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @description : Particle Galaxy 2D
+ *                Temporary placeholder for the WLED particle-system Galaxy effect.
+ *******************************************************************************************************************************************************************************************************************/
+uint16_t mAnimatorLight::EffectAnim__Particle__2D__Galaxy()
+{
+  return BaseEffectAnim__Base_Colour_Wipe(true, false);
+}
+static const char PM_EFFECT_CONFIG__PARTICLE__2D__GALAXY[] PROGMEM =
+"Particle Galaxy@"
+"Speed,Intensity,,,,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,"
+"ix=127,"
+"ep=25"
+;
+static const char PM_EFFECT_DESCRI__PARTICLE__2D__GALAXY[] PROGMEM =
+"Particle-system 2D galaxy effect.\n\r"
+"Temporary colour-wipe placeholder until converted.";
+
+
+#endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX
+
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+
+
+
+
 void mAnimatorLight::LoadEffects()
 {
   // General Level 1 Minimal Home Effects
@@ -28196,6 +29067,280 @@ void mAnimatorLight::LoadEffects()
   #endif
 
   #endif
+  
+
+  /**
+   * Particle System Effects
+   *
+   * Initially appended as separate effects rather than replacing the
+   * existing legacy implementations. They can be reorganised or used
+   * to replace older effects after validation.
+   **/
+  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+
+  /*******************************************************************
+   * Particle System 1D
+   ******************************************************************/
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__DRIP__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__Drip,
+            PM_EFFECT_CONFIG__PARTICLE__1D__DRIP,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__DRIP,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__PINBALL__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__Pinball,
+            PM_EFFECT_CONFIG__PARTICLE__1D__PINBALL,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__PINBALL,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__DANCING_SHADOWS__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__DancingShadows,
+            PM_EFFECT_CONFIG__PARTICLE__1D__DANCING_SHADOWS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__DANCING_SHADOWS,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__FIREWORKS__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__Fireworks,
+            PM_EFFECT_CONFIG__PARTICLE__1D__FIREWORKS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__FIREWORKS,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__SPARKLER__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__Sparkler,
+            PM_EFFECT_CONFIG__PARTICLE__1D__SPARKLER,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__SPARKLER,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__HOURGLASS__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__Hourglass,
+            PM_EFFECT_CONFIG__PARTICLE__1D__HOURGLASS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__HOURGLASS,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__SPRAY__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__Spray,
+            PM_EFFECT_CONFIG__PARTICLE__1D__SPRAY,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__SPRAY,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__BALANCE__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__Balance,
+            PM_EFFECT_CONFIG__PARTICLE__1D__BALANCE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__BALANCE,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__CHASE__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__Chase,
+            PM_EFFECT_CONFIG__PARTICLE__1D__CHASE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__CHASE,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__STARBURST__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__Starburst,
+            PM_EFFECT_CONFIG__PARTICLE__1D__STARBURST,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__STARBURST,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__GEQ__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__GEQ,
+            PM_EFFECT_CONFIG__PARTICLE__1D__GEQ,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__GEQ,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__FIRE__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__Fire,
+            PM_EFFECT_CONFIG__PARTICLE__1D__FIRE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__FIRE,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__SONIC_STREAM__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__SonicStream,
+            PM_EFFECT_CONFIG__PARTICLE__1D__SONIC_STREAM,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__SONIC_STREAM,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__SONIC_BOOM__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__SonicBoom,
+            PM_EFFECT_CONFIG__PARTICLE__1D__SONIC_BOOM,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__SONIC_BOOM,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__1D__SPRINGY__ID,
+            &mAnimatorLight::EffectAnim__Particle__1D__Springy,
+            PM_EFFECT_CONFIG__PARTICLE__1D__SPRINGY,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__1D__SPRINGY,
+            #endif
+            Effect_DevStage::Alpha);
+
+  /*******************************************************************
+   * Particle System 2D
+   ******************************************************************/
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__VOLCANO__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__Volcano,
+            PM_EFFECT_CONFIG__PARTICLE__2D__VOLCANO,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__VOLCANO,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__FIRE__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__Fire,
+            PM_EFFECT_CONFIG__PARTICLE__2D__FIRE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__FIRE,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__FIREWORKS__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__Fireworks,
+            PM_EFFECT_CONFIG__PARTICLE__2D__FIREWORKS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__FIREWORKS,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__VORTEX__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__Vortex,
+            PM_EFFECT_CONFIG__PARTICLE__2D__VORTEX,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__VORTEX,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__PERLIN__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__Perlin,
+            PM_EFFECT_CONFIG__PARTICLE__2D__PERLIN,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__PERLIN,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__PIT__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__Pit,
+            PM_EFFECT_CONFIG__PARTICLE__2D__PIT,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__PIT,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__BOX__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__Box,
+            PM_EFFECT_CONFIG__PARTICLE__2D__BOX,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__BOX,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__ATTRACTOR__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__Attractor,
+            PM_EFFECT_CONFIG__PARTICLE__2D__ATTRACTOR,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__ATTRACTOR,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__IMPACT__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__Impact,
+            PM_EFFECT_CONFIG__PARTICLE__2D__IMPACT,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__IMPACT,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__WATERFALL__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__Waterfall,
+            PM_EFFECT_CONFIG__PARTICLE__2D__WATERFALL,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__WATERFALL,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__SPRAY__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__Spray,
+            PM_EFFECT_CONFIG__PARTICLE__2D__SPRAY,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__SPRAY,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__GEQ__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__GEQ,
+            PM_EFFECT_CONFIG__PARTICLE__2D__GEQ,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__GEQ,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__CENTER_GEQ__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__CenterGEQ,
+            PM_EFFECT_CONFIG__PARTICLE__2D__CENTER_GEQ,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__CENTER_GEQ,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__GHOST_RIDER__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__GhostRider,
+            PM_EFFECT_CONFIG__PARTICLE__2D__GHOST_RIDER,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__GHOST_RIDER,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__BLOBS__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__Blobs,
+            PM_EFFECT_CONFIG__PARTICLE__2D__BLOBS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__BLOBS,
+            #endif
+            Effect_DevStage::Alpha);
+
+  addEffect(EFFECTS_FUNCTION__PARTICLE__2D__GALAXY__ID,
+            &mAnimatorLight::EffectAnim__Particle__2D__Galaxy,
+            PM_EFFECT_CONFIG__PARTICLE__2D__GALAXY,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__PARTICLE__2D__GALAXY,
+            #endif
+            Effect_DevStage::Alpha);
+
+  #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX
+
+
+  #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+
+
   /**
    * Manual Pixel: Keeping as legacy, but mode change to realtime will remove this
    **/

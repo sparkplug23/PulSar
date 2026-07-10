@@ -16,6 +16,10 @@
 
 #include "DynamicBuffer.h"
 
+
+#define WLED_O2_ATTR __attribute__((optimize("O2")))
+#define WLED_O3_ATTR __attribute__((optimize("O3")))
+
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Should nearly always be enabled as default/minimal cases
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
@@ -1587,7 +1591,59 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
     void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
 
     #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-      
+
+    
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+
+    /****************************************************************************************************************************************************************************
+    *** Particle System: 1D ******************************************************************************************************************************************************
+    *****************************************************************************************************************************************************************************/
+    uint16_t EffectAnim__Particle__1D__Drip();
+    uint16_t EffectAnim__Particle__1D__Pinball();
+    uint16_t EffectAnim__Particle__1D__DancingShadows();
+    uint16_t EffectAnim__Particle__1D__Fireworks();
+    uint16_t EffectAnim__Particle__1D__Sparkler();
+    uint16_t EffectAnim__Particle__1D__Hourglass();
+    uint16_t EffectAnim__Particle__1D__Spray();
+    uint16_t EffectAnim__Particle__1D__Balance();
+    uint16_t EffectAnim__Particle__1D__Chase();
+    uint16_t EffectAnim__Particle__1D__Starburst();
+    uint16_t EffectAnim__Particle__1D__GEQ();
+    uint16_t EffectAnim__Particle__1D__Fire();
+    uint16_t EffectAnim__Particle__1D__SonicStream();
+    uint16_t EffectAnim__Particle__1D__SonicBoom();
+    uint16_t EffectAnim__Particle__1D__Springy();
+
+
+    /****************************************************************************************************************************************************************************
+    *** Particle System: 2D ******************************************************************************************************************************************************
+    **  Requires: ENABLE_FEATURE_LIGHTING__2D_MATRIX                                                                                                                             
+    *****************************************************************************************************************************************************************************/
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    uint16_t EffectAnim__Particle__2D__Volcano();
+    uint16_t EffectAnim__Particle__2D__Fire();
+    uint16_t EffectAnim__Particle__2D__Fireworks();
+    uint16_t EffectAnim__Particle__2D__Vortex();
+    uint16_t EffectAnim__Particle__2D__Perlin();
+    uint16_t EffectAnim__Particle__2D__Pit();
+    uint16_t EffectAnim__Particle__2D__Box();
+    uint16_t EffectAnim__Particle__2D__Attractor();
+    uint16_t EffectAnim__Particle__2D__Impact();
+    uint16_t EffectAnim__Particle__2D__Waterfall();
+    uint16_t EffectAnim__Particle__2D__Spray();
+    uint16_t EffectAnim__Particle__2D__GEQ();
+    uint16_t EffectAnim__Particle__2D__CenterGEQ();
+    uint16_t EffectAnim__Particle__2D__GhostRider();
+    uint16_t EffectAnim__Particle__2D__Blobs();
+    uint16_t EffectAnim__Particle__2D__Galaxy();
+    #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX
+
+    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+     
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+    class ParticleSystem1D;
+    class ParticleSystem2D;
+    #endif
 
     /******************************************************************************************************************************************************************************
     *******************************************************************************************************************************************************************************
@@ -2001,6 +2057,52 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
       EFFECTS_FUNCTION__AUDIOREACTIVE__2D__FFT_FUNKY_PLANK__ID,         
       EFFECTS_FUNCTION__AUDIOREACTIVE__2D__FFT_AKEMI__ID,   
       #endif
+
+      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+
+      /**
+       * Particle System 1D
+       **/
+      EFFECTS_FUNCTION__PARTICLE__1D__DRIP__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__PINBALL__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__DANCING_SHADOWS__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__FIREWORKS__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__SPARKLER__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__HOURGLASS__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__SPRAY__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__BALANCE__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__CHASE__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__STARBURST__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__GEQ__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__FIRE__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__SONIC_STREAM__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__SONIC_BOOM__ID,
+      EFFECTS_FUNCTION__PARTICLE__1D__SPRINGY__ID,
+
+      /**
+       * Particle System 2D
+       **/
+      #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
+      EFFECTS_FUNCTION__PARTICLE__2D__VOLCANO__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__FIRE__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__FIREWORKS__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__VORTEX__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__PERLIN__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__PIT__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__BOX__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__ATTRACTOR__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__IMPACT__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__WATERFALL__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__SPRAY__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__GEQ__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__CENTER_GEQ__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__GHOST_RIDER__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__BLOBS__ID,
+      EFFECTS_FUNCTION__PARTICLE__2D__GALAXY__ID,
+      #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX
+
+      #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+
       EFFECTS_FUNCTION__LENGTH__ID
     };
 
@@ -3463,6 +3565,16 @@ typedef struct Segment
     void colorFromDecOrHexString(byte* rgb, char* in);
     bool colorFromHexString(byte* rgb, const char* in);
 
+    // fast scaling function for colors, performs color*scale/256 for all four channels, speed over accuracy
+    // note: inlining uses less code than actual function calls
+    static inline uint32_t fast_color_scale(const uint32_t c, const uint8_t scale) {
+      uint32_t rb = (((c     & 0x00FF00FF) * scale) >> 8) &  0x00FF00FF;
+      uint32_t wg = (((c>>8) & 0x00FF00FF) * scale)       & ~0x00FF00FF;
+      return rb | wg;
+    }
+
+
+
     // runtime data functions
     inline uint16_t dataSize(void) const { return _dataLen; }
     bool allocateData(size_t len);
@@ -4911,18 +5023,28 @@ void sortEffects(Effect_DevStage promote_first);
 
 
 
-
+    // similar to NeoPixelBus NeoGammaTableMethod but allows dynamic changes (superseded by NPB::NeoGammaDynamicTableMethod)
     class NeoGammaWLEDMethod {
       public:
-        static uint8_t Correct(uint8_t value);      // apply Gamma to single channel
-        static uint32_t Correct32(uint32_t color);  // apply Gamma to RGBW32 color (WLED specific, not used by NPB)
-        static void calcGammaTable(float gamma);    // re-calculates & fills gamma table
+        [[gnu::hot]] static uint8_t Correct(uint8_t value);             // apply Gamma to single channel
+        [[gnu::hot]] static uint32_t inverseGamma32(uint32_t color);    // apply inverse Gamma to RGBW32 color
+        static void calcGammaTable(float gamma);                        // re-calculates & fills gamma tables
         static inline uint8_t rawGamma8(uint8_t val) { return gammaT[val]; }  // get value from Gamma table (WLED specific, not used by NPB)
+        static inline uint8_t rawInverseGamma8(uint8_t val) { return gammaT_inv[val]; }  // get value from inverse Gamma table (WLED specific, not used by NPB)
+        static inline uint32_t Correct32(uint32_t color) { // apply Gamma to RGBW32 color (WLED specific, not used by NPB)
+          // if (!gammaCorrectCol) return color; // no gamma correction
+          uint8_t  w = byte(color>>24), r = byte(color>>16), g = byte(color>>8), b = byte(color); // extract r, g, b, w channels
+          w = gammaT[w]; r = gammaT[r]; g = gammaT[g]; b = gammaT[b];
+          return (uint32_t(w) << 24) | (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b);
+        }
       private:
         static uint8_t gammaT[];
+        static uint8_t gammaT_inv[];
     };
     #define gamma32(c) NeoGammaWLEDMethod::Correct32(c)
     #define gamma8(c)  NeoGammaWLEDMethod::rawGamma8(c)
+    #define gamma32inv(c) NeoGammaWLEDMethod::inverseGamma32(c)
+    #define gamma8inv(c)  NeoGammaWLEDMethod::rawInverseGamma8(c)
 
     #ifndef WLED_USE_REAL_MATH
       // template <typename T> T atan_t(T x);

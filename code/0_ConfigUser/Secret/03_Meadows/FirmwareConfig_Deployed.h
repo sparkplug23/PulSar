@@ -28,7 +28,7 @@
 // #define DEVICE_MEADOWS__ENSUITE_DOOR_FRAME
 // #define DEVICE_MEADOWS__HALLWAY__HEATING
 /// OFFICE ///////////////////////////////////////////////////////////////////////////////////
-// #define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
+#define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
 /// LIVINGROOM ///////////////////////////////////////////////////////////////////////////////
 
 /// GARAGE ///////////////////////////////////////////////////////////////////////////////////
@@ -8296,7 +8296,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
 
 
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
 
 
   #define USE_MODULE_SENSORS_INTERFACE
@@ -8306,6 +8306,22 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
   // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
   // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+
+  
+  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+
+  /***
+   * 
+   * My problem is I use neopixelanimator to give me rgbww blends
+   * I need to keep this to get full 5 channels
+   * but, if I want particle, I likely need the global buffer
+   * to do that, I probably can should switch to global transitions
+   * Its sounding more like making my code closer to wled.. which I dont want, or do i
+   * 
+   * 
+   * 
+   * 
+   */
 
   
   // #define USE_MODULE_NETWORK_WEBSERVER
