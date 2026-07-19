@@ -8307,8 +8307,22 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
   // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
 
-  
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+  #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+  #define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+
+/**
+ * @brief 
+ * Need to add a new "realtime" system mode, which means ANYTHING not critical to the design in use, should have minimal impact
+ * In this case, if effects are running
+ * ** mqtt unless debugging, should reduce to 1hour at most (except health, make it 10 minutes)
+ * ** filesystem operations that are slow, reduce 
+ * 
+ */
+ 
+
+
+
 
   /***
    * 
@@ -8332,8 +8346,10 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   // // #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
   // // #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
 
-  
+  #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+  #define ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
 
+  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
 
   /**
    * @brief tree physical wiring connections
@@ -8359,19 +8375,19 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
       ],
       "ColourPalette":"Snowy 02",
       "Effects": {
-        "Function":"Static",
+        "Function":"Wipe Random",
         "Speed":127,
         "Intensity":127,
         "Grouping":1,
         "RateMs": 25
       },
-      "BrightnessRGB": 100,
-      "Preset":{"Load":1}
+      "Brightness": 5
     },
-    "BrightnessRGB": 100
+    "Brightness": 5
   }
   )=====";
  
+      // ,"Preset":{"Load":1}
       
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 

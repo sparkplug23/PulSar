@@ -1490,13 +1490,113 @@ static uint32_t getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uint8
     }
   }
 
+static unsigned memUsage(unsigned count, unsigned busType)
+{
+  unsigned size = count * 3; // Default RGB: 3 bytes per pixel
+
+  switch (busType)
+  {
+    case BUSTYPE__NONE__ID:
+      size = 0;
+      break;
+
+#ifdef ESP8266
+
+    // UART methods: one RGB pixel buffer
+    case BUSTYPE__8266_U0_3__ID:
+    case BUSTYPE__8266_U1_3__ID:
+      break;
+
+    // UART methods: one RGBW pixel buffer
+    case BUSTYPE__8266_U0_4__ID:
+    case BUSTYPE__8266_U1_4__ID:
+      size += count;
+      break;
+
+    // DMA methods: pixel buffer plus expanded DMA buffer
+    case BUSTYPE__8266_DM_3__ID:
+      size *= 5;
+      break;
+
+    case BUSTYPE__8266_DM_4__ID:
+      size = (size + count) * 5;
+      break;
+
+#else // ESP32
+
+    // RMT: front and back buffers
+    case BUSTYPE__32_RN_3__ID:
+    case BUSTYPE__32_RN_400_3__ID:
+      size *= 2;
+      break;
+
+    case BUSTYPE__32_RN_4__ID:
+      size = (size + count) * 2;
+      break;
+
+    case BUSTYPE__32_RN_5__ID:
+      size = (size + 2 * count) * 2;
+      break;
+
+#ifndef CONFIG_IDF_TARGET_ESP32C3
+
+    // I2S: one front buffer; DMA storage is not included here
+    case BUSTYPE__32_I0_3__ID:
+    case BUSTYPE__32_I1_3__ID:
+    case BUSTYPE__32_I1_3P__ID:
+    case BUSTYPE__32_I0_3P__ID:
+    case BUSTYPE__32_I0_400_3__ID:
+    case BUSTYPE__32_I1_400_3__ID:
+      break;
+
+    case BUSTYPE__32_I0_4__ID:
+    case BUSTYPE__32_I1_4__ID:
+    case BUSTYPE__32_I1_4P__ID:
+    case BUSTYPE__32_I0_4P__ID:
+      size += count;
+      break;
+
+    case BUSTYPE__32_I0_5__ID:
+    case BUSTYPE__32_I1_5__ID:
+    case BUSTYPE__32_I1_5P__ID:
+    case BUSTYPE__32_I0_5P__ID:
+      size += 2 * count;
+      break;
+
+#endif // !CONFIG_IDF_TARGET_ESP32C3
+
+    // Clocked buses: retain the conservative two-buffer estimate for now
+    case BUSTYPE__HS_DOT_3__ID:
+    case BUSTYPE__SS_DOT_3__ID:
+    case BUSTYPE__HS_LPD_3__ID:
+    case BUSTYPE__SS_LPD_3__ID:
+    case BUSTYPE__HS_WS1_3__ID:
+    case BUSTYPE__SS_WS1_3__ID:
+    case BUSTYPE__HS_P98_3__ID:
+    case BUSTYPE__SS_P98_3__ID:
+    case BUSTYPE__HS_LPO_3__ID:
+    case BUSTYPE__SS_LPO_3__ID:
+      size *= 2;
+      break;
+
+    default:
+      size *= 2;
+      break;
+
+#endif // ESP8266
+
+  }
+
+  return size;
+}
+
 
   //gives back the internal type index (I_XX_XXX_X above) for the input 
 static    
 #ifdef USE_DEVFEATURE_IRAM__PIXEL_BUS_INTERFACING
 IRAM_ATTR
 #endif 
-uint8_t getI(uint8_t busType, uint8_t* pins, uint8_t num = 0) 
+uint8_t getI(uint8_t busType, const uint8_t* pins, uint8_t num = 0) 
 {
   // DEBUG_PRINTF("PolyBus::getI busType %d\n\r", busType);
 

@@ -187,12 +187,12 @@ int32_t ParticleSystem2D::sprayEmit(const PSsource &emitter) {
       emitIndex = 0;
     if (particles[emitIndex].ttl == 0) { // find a dead particle
       success = true;
-      int32_t dx = tkr_anim->hw_random16(emitter.var << 1) - emitter.var;
-      int32_t dy = tkr_anim->hw_random16(emitter.var << 1) - emitter.var;
+      int32_t dx = hw_random16(emitter.var << 1) - emitter.var;
+      int32_t dy = hw_random16(emitter.var << 1) - emitter.var;
       if (emitter.var > 5) { // use circular random distribution for large variance to generate nicer "explosions"
         while (dx*dx + dy*dy > emitter.var*emitter.var) { // reject points outside circle
-            dx = tkr_anim->hw_random16(emitter.var << 1) - emitter.var;
-            dy = tkr_anim->hw_random16(emitter.var << 1) - emitter.var;
+            dx = hw_random16(emitter.var << 1) - emitter.var;
+            dy = hw_random16(emitter.var << 1) - emitter.var;
         }
       }
       particles[emitIndex].vx = emitter.vx + dx;
@@ -202,7 +202,7 @@ int32_t ParticleSystem2D::sprayEmit(const PSsource &emitter) {
       particles[emitIndex].hue = emitter.source.hue;
       particles[emitIndex].sat = emitter.source.sat;
       particleFlags[emitIndex].collide = emitter.sourceFlags.collide;
-      particles[emitIndex].ttl = tkr_anim->hw_random16(emitter.minLife, emitter.maxLife);
+      particles[emitIndex].ttl = hw_random16(emitter.minLife, emitter.maxLife);
       if (advPartProps != nullptr)
         advPartProps[emitIndex].size = emitter.size;
       break;
@@ -404,7 +404,7 @@ void ParticleSystem2D::bounce(int8_t &incomingspeed, int8_t &parallelspeed, int3
     int32_t incomingspeed_abs = abs((int32_t)incomingspeed);
     int32_t totalspeed = incomingspeed_abs + abs((int32_t)parallelspeed);
     // transfer an amount of incomingspeed speed to parallel speed
-    int32_t donatespeed = ((tkr_anim->hw_random16(incomingspeed_abs << 1) - incomingspeed_abs) * (int32_t)wallRoughness) / (int32_t)255; // take random portion of + or - perpendicular speed, scaled by roughness
+    int32_t donatespeed = ((hw_random16(incomingspeed_abs << 1) - incomingspeed_abs) * (int32_t)wallRoughness) / (int32_t)255; // take random portion of + or - perpendicular speed, scaled by roughness
     parallelspeed = limitSpeed((int32_t)parallelspeed + donatespeed);
     // give the remainder of the speed to perpendicular speed
     donatespeed = int8_t(totalspeed - abs(parallelspeed)); // keep total speed the same
@@ -608,7 +608,7 @@ void ParticleSystem2D::render() {
         hsv2rgb_spectrum(baseHSV, baseRGB); // convert back to RGB
       }
     }
-    if (tkr_anim->gammaCorrectCol) brightness = pSEGMENT.gamma8(brightness); // apply gamma correction, used for gamma-inverted brightness distribution
+    if (gammaCorrectCol) brightness = gamma8(brightness); // apply gamma correction, used for gamma-inverted brightness distribution
     renderParticle(i, brightness, baseRGB, particlesettings.wrapX, particlesettings.wrapY);
   }
 
@@ -678,7 +678,7 @@ void WLED_O2_ATTR ParticleSystem2D::renderParticle(const uint32_t particleindex,
   // - scale brigthness with gamma correction (done in render())
   // - apply inverse gamma correction to brightness values
   // - gamma is applied again in show() -> the resulting brightness distribution is linear but gamma corrected in total
-  if (tkr_anim->gammaCorrectCol) {
+  if (gammaCorrectCol) {
     for (uint32_t i = 0; i < 4; i++) {
       pxlbrightness[i] = gamma8inv(pxlbrightness[i]); // use look-up-table for invers gamma
     }
@@ -803,7 +803,7 @@ void WLED_O2_ATTR ParticleSystem2D::renderLargeParticle(const uint32_t size, con
       if (pixel_brightness == 0) continue; // skip black pixels
 
       // apply inverse gamma correction if needed, if this is skipped, particles flicker due to changing total brightness
-      if (tkr_anim->gammaCorrectCol) {
+      if (gammaCorrectCol) {
         pixel_brightness = gamma8inv(pixel_brightness); // invert brigthess so brightness distribution is linear after gamma correction
       }
       // Render pixel
@@ -835,7 +835,7 @@ void ParticleSystem2D::handleCollisions() {
   }
   uint16_t binIndices[maxBinParticles]; // creat array on stack for indices, 2kB max for 1024 particles (ESP32_MAXPARTICLES/2)
   uint32_t binParticleCount; // number of particles in the current bin
-  uint32_t nextFrameStartIdx = tkr_anim->hw_random16(usedParticles); // index of the first particle in the next frame (set to fixed value if bin overflow)
+  uint32_t nextFrameStartIdx = hw_random16(usedParticles); // index of the first particle in the next frame (set to fixed value if bin overflow)
   uint32_t pidx = collisionStartIdx; //start index in case a bin is full, process remaining particles next frame
 
   // fill the binIndices array for this bin
@@ -1168,6 +1168,9 @@ ParticleSystem1D::ParticleSystem1D(uint32_t length, uint32_t numberofparticles, 
 
 // update function applies gravity, moves the particles, handles collisions and renders the particles
 void ParticleSystem1D::update(void) {
+
+  // ALOG_INF(PSTR("1d:render"));
+
   //apply gravity globally if enabled
   if (particlesettings.useGravity) //note: in 1D system, applying gravity after collisions also works but may be worse
     applyGravity();
@@ -1455,6 +1458,9 @@ void ParticleSystem1D::render() {
 
     // generate RGB values for particle
     brightness = min(particles[i].ttl << 1, (int)255);
+
+    // pSEGPALETTE = *fastledPalettes[0];
+
     baseRGB = ColorFromPalette(pSEGPALETTE, particles[i].hue, 255, blend);
     if (advPartProps != nullptr) { //saturation is advanced property in 1D system
       if (advPartProps[i].sat < 255) {
@@ -1463,7 +1469,7 @@ void ParticleSystem1D::render() {
         hsv2rgb_spectrum(baseHSV, baseRGB); // convert back to RGB
       }
     }
-    if (tkr_anim->gammaCorrectCol) brightness = gamma8(brightness); // apply gamma correction, used for gamma-inverted brightness distribution
+    if (gammaCorrectCol) brightness = gamma8(brightness); // apply gamma correction, used for gamma-inverted brightness distribution
     renderParticle(i, brightness, baseRGB, particlesettings.wrap);
   }
   // apply smear-blur to rendered frame
@@ -1478,7 +1484,10 @@ void ParticleSystem1D::render() {
       framebuffer[i] = fast_color_scaleAdd(framebuffer[i], bg_color);
     }
   }
-#ifndef WLED_DISABLE_2D
+
+  // framebuffer[0] = RGBW32(random(5)*25,0,0,0);
+
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   // transfer local buffer to segment if using 1D->2D mapping
   if (pSEGMENT.is2D() && pSEGMENT.map1D2D) {
     for (int x = 0; x <= maxXpixel; x++) {
@@ -1491,6 +1500,10 @@ void ParticleSystem1D::render() {
 
 // calculate pixel positions and brightness distribution and render the particle to local buffer or global buffer
 void WLED_O2_ATTR ParticleSystem1D::renderParticle(const uint32_t particleindex, const uint8_t brightness, const CRGBW &color, const bool wrap) {
+  
+  // ALOG_INF(PSTR("renderParticle %d %d,%d"),particleindex,brightness,color.r);
+
+
   uint32_t size = particlesize;
   if (perParticleSize && advPartProps != nullptr) // use advanced size properties
     size = 1 + advPartProps[particleindex].size; // add 1 to avoid single pixel size particles (collisions do not support it)
@@ -1530,7 +1543,7 @@ void WLED_O2_ATTR ParticleSystem1D::renderParticle(const uint32_t particleindex,
   // - scale brigthness with gamma correction (done in render())
   // - apply inverse gamma correction to brightness values
   // - gamma is applied again in show() -> the resulting brightness distribution is linear but gamma corrected in total -> fixes brightness fluctuations
-  if (tkr_anim->gammaCorrectCol) {
+  if (gammaCorrectCol) {
     pxlbrightness[0] = gamma8inv(pxlbrightness[0]); // use look-up-table for invers gamma
     pxlbrightness[1] = gamma8inv(pxlbrightness[1]);
   }
@@ -1554,6 +1567,9 @@ void WLED_O2_ATTR ParticleSystem1D::renderParticle(const uint32_t particleindex,
         return; // both pixels out of frame (safety check)
     }
   }
+
+  // ALOG_INF(PSTR("px brt %d"),pxlbrightness[0]);
+
   for (uint32_t i = 0; i < 2; i++) {
     if (pxlisinframe[i]) {
       framebuffer[pixco[i]] = fast_color_scaleAdd(framebuffer[pixco[i]], color, pxlbrightness[i]);
@@ -1627,7 +1643,7 @@ void ParticleSystem1D::handleCollisions() {
   }
   uint16_t binIndices[maxBinParticles]; // array to store indices of particles in a bin
   uint32_t binParticleCount; // number of particles in the current bin
-  uint32_t nextFrameStartIdx = tkr_anim->hw_random16(usedParticles); // index of the first particle in the next frame (set to fixed value if bin overflow)
+  uint32_t nextFrameStartIdx = hw_random16(usedParticles); // index of the first particle in the next frame (set to fixed value if bin overflow)
   uint32_t pidx = collisionStartIdx; //start index in case a bin is full, process remaining particles next frame
   for (uint32_t bin = 0; bin < numBins; bin++) {
     binParticleCount = 0; // reset for this bin
@@ -1776,7 +1792,7 @@ void ParticleSystem1D::updatePSpointers(bool isadvanced) {
   particleFlags = reinterpret_cast<PSparticleFlags1D *>(particles + numParticles); // pointer to particle flags
   sources = reinterpret_cast<PSsource1D *>(particleFlags + numParticles); // pointer to source(s)
   PSdataEnd = reinterpret_cast<uint8_t *>(sources + numSources);   // pointer to first available byte after the PS for FX additional data (already aligned to 4 byte boundary)
-#ifndef WLED_DISABLE_2D
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   if (pSEGMENT.is2D() && pSEGMENT.map1D2D) {
     framebuffer = reinterpret_cast<uint32_t *>(sources + numSources); // use local framebuffer for 1D->2D mapping
     PSdataEnd = reinterpret_cast<uint8_t *>(framebuffer + pSEGMENT.maxMappingLength()); // pointer to first available byte after the PS for FX additional data (still aligned to 4 byte boundary)
@@ -1831,7 +1847,7 @@ bool allocateParticleSystemMemory1D(const uint32_t numparticles, const uint32_t 
   requiredmemory += sizeof(PSparticleFlags1D) * numparticles;
   requiredmemory += sizeof(PSparticle1D) * numparticles;
   requiredmemory += sizeof(PSsource1D) * numsources;
-#ifndef WLED_DISABLE_2D
+#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   if (pSEGMENT.is2D())
     requiredmemory += sizeof(uint32_t) * pSEGMENT.maxMappingLength(); // need local buffer for mapped rendering
 #endif

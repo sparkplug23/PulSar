@@ -324,6 +324,8 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   int16_t tmp_id = 0;
   char buffer[50];
 
+  bool flag_geometry_updated = false;
+
   uint16_t isserviced_start_count = data_buffer.isserviced; // to know if anything was serviced in this function
 
   /**
@@ -338,7 +340,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   if (jtok = obj["PaletteMappingValues"]) { 
     if (jtok.isArray()) {
       // Pre-allocate space in the vector to avoid repeated memory allocation
-      auto& mapping_values = SEGMENT_I(segment_index).palette->mapping_values;
+      auto& mapping_values = SEGMENT_I(segment_index).palette_loaded->mapping_values;
       mapping_values.clear(); // reset old map
       mapping_values.reserve(16); // reserve space for 16 elements
       JsonParserArray arrobj = jtok;
@@ -424,6 +426,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       ALOG_INF( PSTR(D_LOG_PIXEL "PixelRange = [%d,%d]"), SEGMENT_I(segment_index).start, SEGMENT_I(segment_index).stop );
       data_buffer.isserviced++;
     }
+    flag_geometry_updated = true;
   }
   #else
     if (jtok = getTokenIncludingAlias(obj, PM_PIXELRANGE, "PR"))//obj[PM_PIXELRANGE])
@@ -2022,7 +2025,8 @@ if (jtok_pwi && jtok_pwi.isArray())
             if(arrlen > 5){ break; }
             array[arrlen++] = v.getInt();
           }
-          SEGMENT_I(segment_index).segcol[colour_index].colour = RgbwwColor(array[0],array[1],array[2],array[3],array[4]);
+          SEGMENT_I(segment_index).segcol[colour_index].colour = RGBW32(array[0],array[1],array[2],array[3]);
+          SEGMENT_I(segment_index).segcol[colour_index].cct    = array[4];          
         }
 
         data_buffer.isserviced++;
@@ -2038,9 +2042,8 @@ if (jtok_pwi && jtok_pwi.isArray())
           for(auto v : arrobj){
             if(arrlen > 3){ break; }
             array[arrlen++] = v.getInt();
-          }
-          RgbwwColor current = SEGMENT_I(segment_index).segcol[colour_index].colour; // Keep current WW/CW
-          SEGMENT_I(segment_index).segcol[colour_index].colour = RgbwwColor(array[0],array[1],array[2],current.CW, current.WW);
+          }          
+          SEGMENT_I(segment_index).segcol[colour_index].colour = RGBW32(array[0],array[1],array[2],W(SEGMENT_I(segment_index).segcol[colour_index].colour));
         }
 
         data_buffer.isserviced++;
@@ -2348,6 +2351,11 @@ if (jtok_pwi && jtok_pwi.isArray())
 
   #endif
 
+  if (flag_geometry_updated)
+  {
+    SEGMENT_I(segment_index).refreshGeometry();
+  }
+  
   /**
    * @brief 
    * # Issue : Caused effects to reset when non lighting commands happened

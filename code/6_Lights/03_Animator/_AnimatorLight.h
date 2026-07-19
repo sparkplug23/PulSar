@@ -11,11 +11,41 @@
 
 #include "6_Lights/00_Interface/mBusManager.h"
 
+#include "6_Lights/03_Animator/fastled_slim/fastled_slim.h"
 
+
+#if !(defined(WLED_DISABLE_PARTICLESYSTEM2D) && defined(WLED_DISABLE_PARTICLESYSTEM1D))
+  #include "ParticleSystem.h" // include particle system code only if at least one system is enabled
+  #ifdef WLED_DISABLE_PARTICLESYSTEM2D
+    #define WLED_PS_DONT_REPLACE_2D_FX
+  #endif
+  #ifdef WLED_DISABLE_PARTICLESYSTEM1D
+    #define WLED_PS_DONT_REPLACE_1D_FX
+  #endif
+  #ifdef ESP8266
+    #if !defined(WLED_DISABLE_PARTICLESYSTEM2D) && !defined(WLED_DISABLE_PARTICLESYSTEM1D)
+      #error ESP8266 does not support 1D and 2D particle systems simultaneously. Please disable one of them.
+    #endif
+  #endif
+#else
+  #define WLED_PS_DONT_REPLACE_1D_FX
+  #define WLED_PS_DONT_REPLACE_2D_FX
+#endif
+#ifdef WLED_PS_DONT_REPLACE_FX
+  #define WLED_PS_DONT_REPLACE_1D_FX
+  #define WLED_PS_DONT_REPLACE_2D_FX
+#endif
+
+
+#include "prng.h"
 #include "2_CoreSystem/07_Time/Toki.h"
 
 #include "DynamicBuffer.h"
 
+#include "fcn_declare.h"
+
+#define inoise8 perlin8   // fastled legacy alias
+#define inoise16 perlin16 // fastled legacy alias
 
 #define WLED_O2_ATTR __attribute__((optimize("O2")))
 #define WLED_O3_ATTR __attribute__((optimize("O3")))
@@ -365,7 +395,7 @@ extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 #define SEGCOLOR(x)            segments[getCurrSegmentId()].segcol[x].getU32()
 
 // Pointer-context version (used with tkr_anim).
-#define pSEGCOLOR(x)           pSEGMENT.segcol[x].getU32()
+#define pSEGCOLOR(x)           pSEGMENT.segcol[x].colour// getU32()
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -408,10 +438,10 @@ extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Current segment’s palette data (CRGB16Palette16).
-#define SEGPALETTE             SEGMENT.palette->CRGB16Palette16_Palette.data
+#define SEGPALETTE             SEGMENT.palette_loaded->CRGB16Palette16_Palette.data
 
 // Pointer-context palette data.
-#define pSEGPALETTE            pSEGMENT.palette->CRGB16Palette16_Palette.data
+#define pSEGPALETTE            pSEGMENT.palette_loaded->CRGB16Palette16_Palette.data
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -477,7 +507,7 @@ extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 class mPaletteLoaded;
 
 #define FASTLED_INTERNAL // suppress pragma warning messages
-#include "6_Lights/00_Interface/FastLED/FastLED.h"
+// #include "6_Lights/00_Interface/FastLED/FastLED.h"
 
 
 #ifndef WLED_DEFINE_GLOBAL_VARS
@@ -551,6 +581,8 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "de
   #include "webpages_generated/html_cpal.h"
 #endif // ENABLE_FEATURE_LIGHTING__WEBUI
 
+#include "colors.h"
+
 
 int16_t sin16_t(uint16_t theta);
 int16_t cos16_t(uint16_t theta);
@@ -573,8 +605,13 @@ float fmod_t(float num, float denom);
 #define ANIM_FUNCTION_SIGNATURE                             std::function<void(const AnimationParam& param)>                              anim_function_callback
 #define ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE           std::function<void()>                                                         anim_progress_mqtt_function_callback
 #define ANIM_FUNCTION_SIGNATURE_SEGMENT_INDEXED             std::function<void(const uint8_t segment_index, const AnimationParam& param)> anim_function_callback_indexed
-#define SET_DIRECT_MODE()                                   SEGMENT.anim_function_callback = nullptr 
-#define DIRECT_MODE(x)                                      SEGMENT.anim_function_callback = nullptr; SEGMENT.cycle_time__rate_ms = x;
+// #define SET_DIRECT_MODE()                                   SEGMENT.anim_function_callback = nullptr 
+// #define DIRECT_MODE(x)                                      SEGMENT.anim_function_callback = nullptr; SEGMENT.cycle_time__rate_ms = x;
+
+#define SET_DIRECT_MODE()                                   //SEGMENT.anim_function_callback = nullptr 
+#define DIRECT_MODE(x)                                      //SEGMENT.anim_function_callback = nullptr; SEGMENT.cycle_time__rate_ms = x;
+
+
 
 #ifdef ESP8266
 #define HW_RND_REGISTER RANDOM_REG32
@@ -629,7 +666,17 @@ class mAnimatorLight :
     }
     rt;
 
-    
+    byte errorFlag = 0;
+    byte briS                = 128;//(128);           // default brightness
+    byte bri                 = 128;//(briS);          // global brightness (set)
+    byte briOld              = 0;             // global brightness while in transition loop (previous iteration)
+    byte briT                = 0;             // global brightness during transition
+    byte briLast             = 128;//(128);           // brightness before turned off. Used for toggle function
+    byte whiteLast           = 128;//(128);           // white channel before turned off. Used for toggle function in ir.cpp
+
+
+
+
     bool doInitBusses = false; // debug
     bool     doSerializeConfig = false; // debug
     int8_t loadLedmap = -1;
@@ -661,23 +708,6 @@ class mAnimatorLight :
     char releaseString[7] = WLED_RELEASE_NAME; // must include the quotes when defining, e.g -D WLED_RELEASE_NAME=\"ESP32_MULTI_USREMODS\"
 
 
-
-    // fast (true) random numbers using hardware RNG, all functions return values in the range lowerlimit to upperlimit-1
-    // note: for true random numbers with high entropy, do not call faster than every 200ns (5MHz)
-    // tests show it is still highly random reading it quickly in a loop (better than fastled PRNG)
-    // for 8bit and 16bit random functions: no limit check is done for best speed
-    // 32bit inputs are used for speed and code size, limits don't work if inverted or out of range
-    // inlining does save code size except for random(a,b) and 32bit random with limits
-    // #define random hw_random // replace arduino random()
-    inline uint32_t hw_random() { return HW_RND_REGISTER; };
-    uint32_t hw_random(uint32_t upperlimit); // not inlined for code size
-    int32_t hw_random(int32_t lowerlimit, int32_t upperlimit);
-    inline uint16_t hw_random16() { return HW_RND_REGISTER; };
-    inline uint16_t hw_random16(uint32_t upperlimit) { return (hw_random16() * upperlimit) >> 16; }; // input range 0-65535 (uint16_t)
-    inline int16_t hw_random16(int32_t lowerlimit, int32_t upperlimit) { int32_t range = upperlimit - lowerlimit; return lowerlimit + hw_random16(range); }; // signed limits, use int16_t ranges
-    inline uint8_t hw_random8() { return HW_RND_REGISTER; };
-    inline uint8_t hw_random8(uint32_t upperlimit) { return (hw_random8() * upperlimit) >> 8; }; // input range 0-255
-    inline uint8_t hw_random8(uint32_t lowerlimit, uint32_t upperlimit) { uint32_t range = upperlimit - lowerlimit; return lowerlimit + hw_random8(range); }; // input range 0-255
 
 
 
@@ -718,6 +748,29 @@ class mAnimatorLight :
     void SubTask_Demo();
     #endif
                 
+    static int DebugFindPixelPeriod(const uint32_t* pixels, size_t length)
+{
+  if (!pixels || length < 2) return 0;
+
+  for (size_t period = 1; period <= 64 && period < length; period++)
+  {
+    bool matches = true;
+
+    for (size_t i = period; i < length; i++)
+    {
+      if (pixels[i] != pixels[i % period])
+      {
+        matches = false;
+        break;
+      }
+    }
+
+    if (matches) return period;
+  }
+
+  return 0;
+}
+    
 
     /************************************************************************************************
      * SECTION: Modes
@@ -831,7 +884,7 @@ class mAnimatorLight :
 
       // WARNING: Forced fast redirect
       // Bypassing complex palette handling to improve performance. Will only work on already loaded CRGB16Palettes 
-      // return ColorFromPaletteCRGB16Fast(SEGMENT.palette->CRGB16Palette16_Palette.data, index, brightness, blendType);
+      // return ColorFromPaletteCRGB16Fast(SEGMENT.palette_loaded->CRGB16Palette16_Palette.data, index, brightness, blendType);
 
       // Map WLED blend to your palette mode
       const uint8_t force_mode = (blendType == NOBLEND) 
@@ -865,6 +918,11 @@ class mAnimatorLight :
       return c;
     }
 
+    /******************************************************************************************************************************************************************************
+    **** Pixel buffers ***************************************************************************************************************************************************************************
+    ******************************************************************************************************************************************************************************/
+    
+    void updatePixelBuffer();                        // (re)allocate memory for _pixels[]
 
     /******************************************************************************************************************************************************************************
     *******************************************************************************************************************************************************************************
@@ -971,6 +1029,17 @@ unsigned long lastEditTime _INIT(0);
 // unsigned long countdownTime _INIT(1514764800L);
 bool countdownOverTriggered _INIT(true);
 
+uint8_t blendingStyle = 0;
+bool          transitionActive         _INIT(false);
+uint16_t transitionDelay          _INIT(750);    // global transition duration
+uint16_t      transitionDelayDefault   _INIT(750);    // default transition time (stored in cfg.json)
+unsigned long transitionStartTime;
+
+
+byte scaledBri(byte in);
+void  applyBri();
+void  applyFinalBri();
+
 // // timer
 // byte lastTimerMinute = 0;
 // byte timerHours[10]     = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -984,23 +1053,6 @@ bool countdownOverTriggered _INIT(true);
 // byte timerDayEnd[8]     = { 31, 31, 31, 31, 31, 31, 31, 31 };
 bool doAdvancePlaylist  = false;
 
-
-/*
- * color blend function, based on FastLED blend function
- * the calculation for each color is: result = (A*(amountOfA) + A + B*(amountOfB) + B) / 256 with amountOfA = 255 - amountOfB
- 
- 2025 version
- */
-inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
-  // min / max blend checking is omitted: calls with 0 or 255 are rare, checking lowers overall performance
-  uint32_t rb1 = color1 & 0x00FF00FF;
-  uint32_t wg1 = (color1>>8) & 0x00FF00FF;
-  uint32_t rb2 = color2 & 0x00FF00FF;
-  uint32_t wg2 = (color2>>8) & 0x00FF00FF;
-  uint32_t rb3 = ((((rb1 << 8) | rb2) + (rb2 * blend) - (rb1 * blend)) >> 8) & 0x00FF00FF;
-  uint32_t wg3 = ((((wg1 << 8) | wg2) + (wg2 * blend) - (wg1 * blend))) & 0xFF00FF00;
-  return rb3 | wg3;
-}
 
     void Init_Segments();
 
@@ -1043,6 +1095,8 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
 
     void deletePreset(byte index);
     #endif // ENABLE_FEATURE_LIGHTS__PRESETS
+
+
 
     /******************************************************************************************************************************************************************************
     **** Playlists ***************************************************************************************************************************************************************************
@@ -1640,10 +1694,6 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
 
     #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
      
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
-    class ParticleSystem1D;
-    class ParticleSystem2D;
-    #endif
 
     /******************************************************************************************************************************************************************************
     *******************************************************************************************************************************************************************************
@@ -2120,6 +2170,7 @@ inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
   uint16_t getEffectsAmount(){ return effects.config.size(); }
 
   void SubTask_Effects();
+  void SubTask_Effects_old();
   void Segments_RefreshLEDIndexPattern(uint8_t segment_index = 0);
 
   
@@ -2525,39 +2576,39 @@ inline static uint32_t FadeU32(uint32_t colour32, uint8_t fade) {
       return crc;
     }
 
-    // fastled beatsin: 1:1 replacements to remove the use of fastled sin16()
-    // Generates a 16-bit sine wave at a given BPM that oscillates within a given range. see fastled for details.
-    inline uint16_t beatsin88_t(accum88 beats_per_minute_88, uint16_t lowest = 0, uint16_t highest = 65535, uint32_t timebase = 0, uint16_t phase_offset = 0)
-    {
-        uint16_t beat = beat88( beats_per_minute_88, timebase);
-        uint16_t beatsin (sin16_t( beat + phase_offset) + 32768);
-        uint16_t rangewidth = highest - lowest;
-        uint16_t scaledbeat = scale16( beatsin, rangewidth);
-        uint16_t result = lowest + scaledbeat;
-        return result;
-    }
+    // // fastled beatsin: 1:1 replacements to remove the use of fastled sin16()
+    // // Generates a 16-bit sine wave at a given BPM that oscillates within a given range. see fastled for details.
+    // inline uint16_t beatsin88_t(accum88 beats_per_minute_88, uint16_t lowest = 0, uint16_t highest = 65535, uint32_t timebase = 0, uint16_t phase_offset = 0)
+    // {
+    //     uint16_t beat = beat88( beats_per_minute_88, timebase);
+    //     uint16_t beatsin (sin16_t( beat + phase_offset) + 32768);
+    //     uint16_t rangewidth = highest - lowest;
+    //     uint16_t scaledbeat = scale16( beatsin, rangewidth);
+    //     uint16_t result = lowest + scaledbeat;
+    //     return result;
+    // }
 
-    // Generates a 16-bit sine wave at a given BPM that oscillates within a given range. see fastled for details.
-    inline uint16_t beatsin16_t(accum88 beats_per_minute, uint16_t lowest = 0, uint16_t highest = 65535, uint32_t timebase = 0, uint16_t phase_offset = 0)
-    {
-        uint16_t beat = beat16( beats_per_minute, timebase);
-        uint16_t beatsin = (sin16_t( beat + phase_offset) + 32768);
-        uint16_t rangewidth = highest - lowest;
-        uint16_t scaledbeat = scale16( beatsin, rangewidth);
-        uint16_t result = lowest + scaledbeat;
-        return result;
-    }
+    // // Generates a 16-bit sine wave at a given BPM that oscillates within a given range. see fastled for details.
+    // inline uint16_t beatsin16_t(accum88 beats_per_minute, uint16_t lowest = 0, uint16_t highest = 65535, uint32_t timebase = 0, uint16_t phase_offset = 0)
+    // {
+    //     uint16_t beat = beat16( beats_per_minute, timebase);
+    //     uint16_t beatsin = (sin16_t( beat + phase_offset) + 32768);
+    //     uint16_t rangewidth = highest - lowest;
+    //     uint16_t scaledbeat = scale16( beatsin, rangewidth);
+    //     uint16_t result = lowest + scaledbeat;
+    //     return result;
+    // }
 
-    // Generates an 8-bit sine wave at a given BPM that oscillates within a given range. see fastled for details.
-    inline uint8_t beatsin8_t(accum88 beats_per_minute, uint8_t lowest = 0, uint8_t highest = 255, uint32_t timebase = 0, uint8_t phase_offset = 0)
-    {
-        uint8_t beat = beat8( beats_per_minute, timebase);
-        uint8_t beatsin = sin8_t( beat + phase_offset);
-        uint8_t rangewidth = highest - lowest;
-        uint8_t scaledbeat = scale8( beatsin, rangewidth);
-        uint8_t result = lowest + scaledbeat;
-        return result;
-    }
+    // // Generates an 8-bit sine wave at a given BPM that oscillates within a given range. see fastled for details.
+    // inline uint8_t beatsin8_t(accum88 beats_per_minute, uint8_t lowest = 0, uint8_t highest = 255, uint32_t timebase = 0, uint8_t phase_offset = 0)
+    // {
+    //     uint8_t beat = beat8( beats_per_minute, timebase);
+    //     uint8_t beatsin = sin8_t( beat + phase_offset);
+    //     uint8_t rangewidth = highest - lowest;
+    //     uint8_t scaledbeat = scale8( beatsin, rangewidth);
+    //     uint8_t result = lowest + scaledbeat;
+    //     return result;
+    // }
 
     // Temporary helper functions to be cleaned up and converted
     uint32_t crgb_to_col(CRGB crgb);
@@ -2827,182 +2878,577 @@ uint8_t perlin8(uint16_t x, uint16_t y, uint16_t z) {
 #ifndef CCT_MAX_DEFAULT
   #define CCT_MAX_DEFAULT 500          // 2000K
 #endif
-struct SegmentColour {
-    RgbwwColor colour; // The RgbwwColor object
-    uint8_t bri_rgb;   // Brightness for RGB channels
-    uint8_t bri_ww;    // Brightness for WW and CW channels
+// struct SegmentColour {
+//     RgbwwColor colour; // The RgbwwColor object
+//     uint8_t bri_rgb;   // Brightness for RGB channels
+//     uint8_t bri_ww;    // Brightness for WW and CW channels
 
-    uint16_t cct = CCT_MIN_DEFAULT;             // 153..500, default to 153 (cold white)
-    uint16_t cct_min_range = CCT_MIN_DEFAULT;   // the minimum CT rendered range
-    uint16_t cct_max_range = CCT_MAX_DEFAULT;   // the maximum CT rendered range
+//     uint16_t cct = CCT_MIN_DEFAULT;             // 153..500, default to 153 (cold white)
+//     uint16_t cct_min_range = CCT_MIN_DEFAULT;   // the minimum CT rendered range
+//     uint16_t cct_max_range = CCT_MAX_DEFAULT;   // the maximum CT rendered range
 
-    // Constructor for easy initialization
-    SegmentColour(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, uint8_t ww = 0, uint8_t cw = 0, uint8_t br_rgb = 255, uint8_t br_ww = 255)
-        : colour(r, g, b, ww, cw), bri_rgb(br_rgb), bri_ww(br_ww) {}
+//     // Constructor for easy initialization
+//     SegmentColour(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, uint8_t ww = 0, uint8_t cw = 0, uint8_t br_rgb = 255, uint8_t br_ww = 255)
+//         : colour(r, g, b, ww, cw), bri_rgb(br_rgb), bri_ww(br_ww) {}
     
     
-void setRGB(uint8_t r, uint8_t g, uint8_t b) {
-    colour.R = r; colour.G = g; colour.B = b;
-}
+// void setRGB(uint8_t r, uint8_t g, uint8_t b) {
+//     colour.R = r; colour.G = g; colour.B = b;
+// }
 
 
-    // Set RGB brightness (0-255)
-void setBrightnessRGB(uint8_t brightness) {
-    bri_rgb = brightness;
-}
+//     // Set RGB brightness (0-255)
+// void setBrightnessRGB(uint8_t brightness) {
+//     bri_rgb = brightness;
+// }
 
-// Get RGB brightness (0-255)
-uint8_t getBrightnessRGB() const {
-    return bri_rgb;
-}
+// // Get RGB brightness (0-255)
+// uint8_t getBrightnessRGB() const {
+//     return bri_rgb;
+// }
 
-// Set WW brightness (0-255)
-void setBrightnessWW(uint8_t brightness) {
-    bri_ww = brightness;
-}
+// // Set WW brightness (0-255)
+// void setBrightnessWW(uint8_t brightness) {
+//     bri_ww = brightness;
+// }
 
-// Get WW brightness (0-255)
-uint8_t getBrightnessWW() const {
-    return bri_ww;
-}
-// TMP FUCNTIONS TO REMOVE
-// Set WW brightness (0-255)
-void setBrightnessCCT(uint8_t brightness) {
-    bri_ww = brightness;
-}
-// Get WW brightness (0-255)
-uint8_t getBrightnessCCT() const {
-    return bri_ww;
-}
-
-
-    // Apply brightness levels to the color and return a new RgbwwColor object
-    RgbwwColor WithBrightness() const {
-        RgbwwColor adjusted = colour;
-
-        // Scale RGB values by bri_rgb
-        uint16_t scaleRGB = bri_rgb + 1; // Prevent division by zero
-        adjusted.R = (colour.R * scaleRGB) >> 8;
-        adjusted.G = (colour.G * scaleRGB) >> 8;
-        adjusted.B = (colour.B * scaleRGB) >> 8;
-
-        // Scale WW and CW values by bri_ww
-        uint16_t scaleWW = bri_ww + 1;
-        adjusted.WW = (colour.WW * scaleWW) >> 8;
-        adjusted.CW = (colour.CW * scaleWW) >> 8;
-
-        return adjusted;
-    }
-
-    // Convert the current color with brightness applied to a 32-bit integer
-    uint32_t getU32() const {
-        RgbwwColor adjusted = WithBrightness();
-        return (uint32_t((byte(adjusted.WW) << 24) | (byte(adjusted.R) << 16) | (byte(adjusted.G) << 8) | (byte(adjusted.B))));
-        // return (static_cast<uint32_t>(adjusted.WW) << 24) | 
-        //     (static_cast<uint32_t>(adjusted.R) << 16) | 
-        //     (static_cast<uint32_t>(adjusted.G) << 8) | 
-        //     static_cast<uint32_t>(adjusted.B);
-    }
-
-    uint32_t getU32Raw() const {
-        return (static_cast<uint32_t>(colour.WW) << 24) | 
-            (static_cast<uint32_t>(colour.R) << 16) | 
-            (static_cast<uint32_t>(colour.G) << 8) | 
-            static_cast<uint32_t>(colour.B);
-    }
-
-    // Set CCT in Kelvin
-    void setCCT_Kelvin(uint16_t _cct) {
-      // Serial.println("I dont want this right now");
-        // Clamp CCT to valid range
-        cct = (_cct < cct_min_range) ? cct_min_range : (_cct > cct_max_range ? cct_max_range : _cct);
-
-        // Calculate Warm White and Cool White proportions
-        uint8_t ww_value = ((cct - cct_min_range) * 255) / (cct_max_range - cct_min_range);
-        uint8_t cw_value = 255 - ww_value;
-
-        // Apply brightness scaling for whites
-        uint16_t scaleWW = bri_ww + 1;
-        colour.WW = (ww_value * scaleWW) >> 8;
-        colour.CW = (cw_value * scaleWW) >> 8;
-
-        // Store the current CCT
-        _cct = cct;
-    }// Set CCT as a balance between WW and CW (0-255)
+// // Get WW brightness (0-255)
+// uint8_t getBrightnessWW() const {
+//     return bri_ww;
+// }
+// // TMP FUCNTIONS TO REMOVE
+// // Set WW brightness (0-255)
+// void setBrightnessCCT(uint8_t brightness) {
+//     bri_ww = brightness;
+// }
+// // Get WW brightness (0-255)
+// uint8_t getBrightnessCCT() const {
+//     return bri_ww;
+// }
 
 
-    void setCCT(uint8_t cct_balance) {
-        // Directly set the CCT balance
-        cct = cct_balance;
+//     // Apply brightness levels to the color and return a new RgbwwColor object
+//     RgbwwColor WithBrightness() const {
+//         RgbwwColor adjusted = colour;
 
-    //         Cooler (bluish): cct = 255 should result in more CW and less WW.
-    // Warmer (yellowish): cct = 0 should result in more WW and less CW.
+//         // Scale RGB values by bri_rgb
+//         uint16_t scaleRGB = bri_rgb + 1; // Prevent division by zero
+//         adjusted.R = (colour.R * scaleRGB) >> 8;
+//         adjusted.G = (colour.G * scaleRGB) >> 8;
+//         adjusted.B = (colour.B * scaleRGB) >> 8;
 
-        // Calculate Warm White and Cool White proportions
-        colour.CW = cct;            // Warm White proportion
-        colour.WW = 255 - cct;      // Cool White proportion
-    }
+//         // Scale WW and CW values by bri_ww
+//         uint16_t scaleWW = bri_ww + 1;
+//         adjusted.WW = (colour.WW * scaleWW) >> 8;
+//         adjusted.CW = (colour.CW * scaleWW) >> 8;
+
+//         return adjusted;
+//     }
+
+//     // Convert the current color with brightness applied to a 32-bit integer
+//     uint32_t getU32() const {
+//         RgbwwColor adjusted = WithBrightness();
+//         return (uint32_t((byte(adjusted.WW) << 24) | (byte(adjusted.R) << 16) | (byte(adjusted.G) << 8) | (byte(adjusted.B))));
+//         // return (static_cast<uint32_t>(adjusted.WW) << 24) | 
+//         //     (static_cast<uint32_t>(adjusted.R) << 16) | 
+//         //     (static_cast<uint32_t>(adjusted.G) << 8) | 
+//         //     static_cast<uint32_t>(adjusted.B);
+//     }
+
+//     uint32_t getU32Raw() const {
+//         return (static_cast<uint32_t>(colour.WW) << 24) | 
+//             (static_cast<uint32_t>(colour.R) << 16) | 
+//             (static_cast<uint32_t>(colour.G) << 8) | 
+//             static_cast<uint32_t>(colour.B);
+//     }
+
+//     // Set CCT in Kelvin
+//     void setCCT_Kelvin(uint16_t _cct) {
+//       // Serial.println("I dont want this right now");
+//         // Clamp CCT to valid range
+//         cct = (_cct < cct_min_range) ? cct_min_range : (_cct > cct_max_range ? cct_max_range : _cct);
+
+//         // Calculate Warm White and Cool White proportions
+//         uint8_t ww_value = ((cct - cct_min_range) * 255) / (cct_max_range - cct_min_range);
+//         uint8_t cw_value = 255 - ww_value;
+
+//         // Apply brightness scaling for whites
+//         uint16_t scaleWW = bri_ww + 1;
+//         colour.WW = (ww_value * scaleWW) >> 8;
+//         colour.CW = (cw_value * scaleWW) >> 8;
+
+//         // Store the current CCT
+//         _cct = cct;
+//     }// Set CCT as a balance between WW and CW (0-255)
 
 
-    // Get the current CCT in Kelvin
-    uint16_t getCCT_Kelvin() const {
-        return cct;
-    }
-    // Get the current CCT in Kelvin
-    uint16_t getCCT() const {
-        return cct;
-    }
+//     void setCCT(uint8_t cct_balance) {
+//         // Directly set the CCT balance
+//         cct = cct_balance;
 
-    // Set Hue (0-360 degrees)
-void setHue(uint16_t hue) {
-    // Normalize hue to 0-360 range
-    hue = hue % 360;
+//     //         Cooler (bluish): cct = 255 should result in more CW and less WW.
+//     // Warmer (yellowish): cct = 0 should result in more WW and less CW.
 
-    // Convert current RGB to HSB
-    HsbColor hsb = HsbColor(RgbColor(colour.R, colour.G, colour.B));
+//         // Calculate Warm White and Cool White proportions
+//         colour.CW = cct;            // Warm White proportion
+//         colour.WW = 255 - cct;      // Cool White proportion
+//     }
+
+
+//     // Get the current CCT in Kelvin
+//     uint16_t getCCT_Kelvin() const {
+//         return cct;
+//     }
+//     // Get the current CCT in Kelvin
+//     uint16_t getCCT() const {
+//         return cct;
+//     }
+
+//     // Set Hue (0-360 degrees)
+// void setHue(uint16_t hue) {
+//     // Normalize hue to 0-360 range
+//     hue = hue % 360;
+
+//     // Convert current RGB to HSB
+//     HsbColor hsb = HsbColor(RgbColor(colour.R, colour.G, colour.B));
+//     hsb.H = static_cast<float>(hue) / 360.0f;
+
+//     // Update RGB components based on the new hue
+//     RgbColor newRgb = RgbColor(hsb);
+//     colour.R = newRgb.R;
+//     colour.G = newRgb.G;
+//     colour.B = newRgb.B;
+// }
+
+// // Get Hue (0-360 degrees)
+// uint16_t getHue() const {
+//     // Convert current RGB to HSB
+//     HsbColor hsb = HsbColor(RgbColor(colour.R, colour.G, colour.B));
+//     return static_cast<uint16_t>(hsb.H * 360.0f);
+// }
+
+// // Set Saturation (0-255)
+// void setSaturation(uint8_t saturation) {
+//     // Normalize saturation to 0-1 range
+//     float sat = static_cast<float>(saturation) / 255.0f;
+
+//     // Convert current RGB to HSB
+//     HsbColor hsb = HsbColor(RgbColor(colour.R, colour.G, colour.B));
+//     hsb.S = sat;
+
+//     // Update RGB components based on the new saturation
+//     RgbColor newRgb = RgbColor(hsb);
+//     colour.R = newRgb.R;
+//     colour.G = newRgb.G;
+//     colour.B = newRgb.B;
+// }
+
+// // Get Saturation (0-255)
+// uint8_t getSaturation() const {
+//     // Convert current RGB to HSB
+//     HsbColor hsb = HsbColor(RgbColor(colour.R, colour.G, colour.B));
+//     return static_cast<uint8_t>(hsb.S * 255.0f);
+// }
+    
+// };
+
+
+struct SegmentColour
+{
+  uint32_t colour = 0; // packed RGBW
+  uint8_t cct = 127;   // 0 = warm, 255 = cold
+
+  SegmentColour(
+    uint8_t r = 0,
+    uint8_t g = 0,
+    uint8_t b = 0,
+    uint8_t w = 0,
+    uint8_t cct_balance = 127
+  )
+    : colour(RGBW32(r, g, b, w)),
+      cct(cct_balance)
+  {
+  }
+
+
+  SegmentColour(uint32_t colour_rgbw, uint8_t cct_balance = 127)
+    : colour(colour_rgbw),
+      cct(cct_balance)
+  {
+  }
+
+
+  // -------------------------------------------------------------------------
+  // Raw packed colour
+  // -------------------------------------------------------------------------
+
+  void setU32(uint32_t value)
+  {
+    colour = value;
+  }
+
+
+  uint32_t getU32() const
+  {
+    return colour;
+  }
+
+
+  uint32_t getU32Raw() const
+  {
+    return colour;
+  }
+
+
+  // -------------------------------------------------------------------------
+  // Complete colour assignment
+  // -------------------------------------------------------------------------
+
+  void setRGB(uint8_t r, uint8_t g, uint8_t b)
+  {
+    colour = RGBW32(r, g, b, getWhite());
+  }
+
+
+  void setRGBW(uint8_t r, uint8_t g, uint8_t b, uint8_t w)
+  {
+    colour = RGBW32(r, g, b, w);
+  }
+
+
+  void setColour(uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0)
+  {
+    colour = RGBW32(r, g, b, w);
+  }
+
+
+  // -------------------------------------------------------------------------
+  // Individual RGBW channels
+  // -------------------------------------------------------------------------
+
+  void setRed(uint8_t value)
+  {
+    colour = RGBW32(value, getGreen(), getBlue(), getWhite());
+  }
+
+
+  void setGreen(uint8_t value)
+  {
+    colour = RGBW32(getRed(), value, getBlue(), getWhite());
+  }
+
+
+  void setBlue(uint8_t value)
+  {
+    colour = RGBW32(getRed(), getGreen(), value, getWhite());
+  }
+
+
+  void setWhite(uint8_t value)
+  {
+    colour = RGBW32(getRed(), getGreen(), getBlue(), value);
+  }
+
+
+  uint8_t getRed() const
+  {
+    return R(colour);
+  }
+
+
+  uint8_t getGreen() const
+  {
+    return G(colour);
+  }
+
+
+  uint8_t getBlue() const
+  {
+    return B(colour);
+  }
+
+
+  uint8_t getWhite() const
+  {
+    return W(colour);
+  }
+
+
+  // -------------------------------------------------------------------------
+  // CCT balance
+  //
+  // WLED convention:
+  //   0   = warm white
+  //   255 = cold white
+  // -------------------------------------------------------------------------
+
+  void setCCT(uint8_t cct_balance)
+  {
+    cct = cct_balance;
+  }
+
+
+  uint8_t getCCT() const
+  {
+    return cct;
+  }
+
+
+  uint8_t getCCTBalance() const
+  {
+    return cct;
+  }
+
+
+  /*
+   * Compatibility conversion for old code that used a mired range:
+   *
+   *   153 = cold, approximately 6536 K
+   *   500 = warm, 2000 K
+   *
+   * The old function was named setCCT_Kelvin(), but the supplied range
+   * was actually mired rather than Kelvin.
+   */
+  void setCCT_Kelvin(uint16_t legacy_cct)
+  {
+    legacy_cct = constrain(legacy_cct, CCT_MIN_DEFAULT, CCT_MAX_DEFAULT);
+
+    cct = static_cast<uint8_t>(
+      map(
+        legacy_cct,
+        CCT_MIN_DEFAULT,
+        CCT_MAX_DEFAULT,
+        255,
+        0
+      )
+    );
+  }
+
+
+  /*
+   * Temporary compatibility method.
+   *
+   * Returns the old mired representation, despite the historic Kelvin name.
+   */
+  uint16_t getCCT_Kelvin() const
+  {
+    return static_cast<uint16_t>(
+      map(
+        cct,
+        255,
+        0,
+        CCT_MIN_DEFAULT,
+        CCT_MAX_DEFAULT
+      )
+    );
+  }
+
+
+  // -------------------------------------------------------------------------
+  // Hue and saturation
+  // -------------------------------------------------------------------------
+
+  void setHue(uint16_t hue)
+  {
+    hue %= 360;
+
+    HsbColor hsb = HsbColor(
+      RgbColor(
+        getRed(),
+        getGreen(),
+        getBlue()
+      )
+    );
+
     hsb.H = static_cast<float>(hue) / 360.0f;
 
-    // Update RGB components based on the new hue
-    RgbColor newRgb = RgbColor(hsb);
-    colour.R = newRgb.R;
-    colour.G = newRgb.G;
-    colour.B = newRgb.B;
-}
+    const RgbColor rgb = RgbColor(hsb);
 
-// Get Hue (0-360 degrees)
-uint16_t getHue() const {
-    // Convert current RGB to HSB
-    HsbColor hsb = HsbColor(RgbColor(colour.R, colour.G, colour.B));
+    setRGB(
+      rgb.R,
+      rgb.G,
+      rgb.B
+    );
+  }
+
+
+  uint16_t getHue() const
+  {
+    const HsbColor hsb = HsbColor(
+      RgbColor(
+        getRed(),
+        getGreen(),
+        getBlue()
+      )
+    );
+
     return static_cast<uint16_t>(hsb.H * 360.0f);
-}
+  }
 
-// Set Saturation (0-255)
-void setSaturation(uint8_t saturation) {
-    // Normalize saturation to 0-1 range
-    float sat = static_cast<float>(saturation) / 255.0f;
 
-    // Convert current RGB to HSB
-    HsbColor hsb = HsbColor(RgbColor(colour.R, colour.G, colour.B));
-    hsb.S = sat;
+  void setSaturation(uint8_t saturation)
+  {
+    HsbColor hsb = HsbColor(
+      RgbColor(
+        getRed(),
+        getGreen(),
+        getBlue()
+      )
+    );
 
-    // Update RGB components based on the new saturation
-    RgbColor newRgb = RgbColor(hsb);
-    colour.R = newRgb.R;
-    colour.G = newRgb.G;
-    colour.B = newRgb.B;
-}
+    hsb.S = static_cast<float>(saturation) / 255.0f;
 
-// Get Saturation (0-255)
-uint8_t getSaturation() const {
-    // Convert current RGB to HSB
-    HsbColor hsb = HsbColor(RgbColor(colour.R, colour.G, colour.B));
+    const RgbColor rgb = RgbColor(hsb);
+
+    setRGB(
+      rgb.R,
+      rgb.G,
+      rgb.B
+    );
+  }
+
+
+  uint8_t getSaturation() const
+  {
+    const HsbColor hsb = HsbColor(
+      RgbColor(
+        getRed(),
+        getGreen(),
+        getBlue()
+      )
+    );
+
     return static_cast<uint8_t>(hsb.S * 255.0f);
-}
-    
+  }
+
+
+  // -------------------------------------------------------------------------
+  // Temporary RgbwwColor compatibility
+  // -------------------------------------------------------------------------
+
+  /*
+   * Convert the packed RGBW + CCT representation into the former
+   * RgbwwColor representation.
+   *
+   * The packed W value is divided between WW and CW according to cct.
+   */
+  RgbwwColor getRgbwwColor() const
+  {
+    const uint8_t white = getWhite();
+
+    const uint8_t cw = static_cast<uint8_t>(
+      (static_cast<uint16_t>(white) * (static_cast<uint16_t>(cct) + 1U)) >> 8
+    );
+
+    const uint8_t ww = static_cast<uint8_t>(
+      (static_cast<uint16_t>(white) * (256U - static_cast<uint16_t>(cct))) >> 8
+    );
+
+    return RgbwwColor(
+      getRed(),
+      getGreen(),
+      getBlue(),
+      ww,
+      cw
+    );
+  }
+
+
+  /*
+   * Temporary conversion from the former RgbwwColor representation.
+   *
+   * WW + CW is reduced to one packed W channel. The relative CW share
+   * becomes the CCT balance.
+   */
+  void setRgbwwColor(const RgbwwColor& value)
+  {
+    const uint16_t white_total =
+      static_cast<uint16_t>(value.WW) +
+      static_cast<uint16_t>(value.CW);
+
+    const uint8_t packed_white =
+      static_cast<uint8_t>(MIN(white_total, 255U));
+
+    if (white_total > 0)
+    {
+      cct = static_cast<uint8_t>(
+        (
+          static_cast<uint32_t>(value.CW) *
+          255U
+        ) /
+        white_total
+      );
+    }
+
+    colour = RGBW32(
+      value.R,
+      value.G,
+      value.B,
+      packed_white
+    );
+  }
+
+
+  /*
+   * Temporary replacement for old code expecting WithBrightness().
+   *
+   * Per-colour RGB/CCT brightness is no longer applied here. Segment
+   * opacity and global brightness are applied later in the WLED pipeline.
+   */
+  RgbwwColor WithBrightness() const
+  {
+    return getRgbwwColor();
+  }
+
+
+  // -------------------------------------------------------------------------
+  // Temporary brightness compatibility
+  //
+  // These methods deliberately do not alter the colour.
+  // They allow old callers to compile while brightness handling is migrated
+  // to Segment::opacity and the global bus brightness.
+  // -------------------------------------------------------------------------
+
+  void setBrightnessRGB(uint8_t brightness)
+  {
+    (void)brightness;
+  }
+
+
+  uint8_t getBrightnessRGB() const
+  {
+    return 255;
+  }
+
+
+  void setBrightnessWW(uint8_t brightness)
+  {
+    (void)brightness;
+  }
+
+
+  uint8_t getBrightnessWW() const
+  {
+    return 255;
+  }
+
+
+  void setBrightnessCCT(uint8_t brightness)
+  {
+    (void)brightness;
+  }
+
+
+  uint8_t getBrightnessCCT() const
+  {
+    return 255;
+  }
 };
 
 
-typedef struct Segment 
+
+// typedef struct Segment 
+class Segment 
 {
   public:
     uint16_t start = 0; // start means first led index within segment : start index / start X coordinate 2D (left)
@@ -3059,6 +3505,7 @@ typedef struct Segment
     uint8_t decimate = 0;
     uint8_t grouping = 1;
     uint8_t  spacing = 0;
+    uint8_t  opacity,  cct;       // 0==1900K, 255==10091K
 
     inline void grouping_set(uint8_t g){ grouping = g > 0 ? g : 1; } // Can never be ZERO
     inline uint8_t grouping_get(void){ return grouping; } // Can never be ZERO
@@ -3080,25 +3527,67 @@ typedef struct Segment
     #endif
 
     // Define the size of the color array
+    // #define NUMBER_SEGMENT_COLOURS 5
+
+    // // Initialize the array with default values
+    // SegmentColour segcol[NUMBER_SEGMENT_COLOURS] =  // colors[i] -> colors[i]
+    // {
+    //   SegmentColour(255, 0, 0, 0, 0), // Red
+    //   SegmentColour(0, 255, 0, 0, 0), // Green
+    //   SegmentColour(0, 0, 255, 0, 0), // Blue
+    //   SegmentColour(255, 0, 255, 0, 0), // Magenta
+    //   SegmentColour(255, 255, 0, 0, 0)  // Yellow
+    // };
+    // uint32_t colors[NUM_COLORS] = {255}; // temporary replicate to make wled compile
+
+    // void set_colors(uint8_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t ww, uint8_t cw, uint8_t br_rgb = 255, uint8_t br_ww = 255) {
+    //     if (index >= NUMBER_SEGMENT_COLOURS) {
+    //         Serial.println("ERROR: Index out of bounds");
+    //         return;
+    //     }
+
+    //     segcol[index] = SegmentColour(r, g, b, ww, cw, br_rgb, br_ww);
+    // }
+
+    // Define the size of the colour array
     #define NUMBER_SEGMENT_COLOURS 5
 
-    // Initialize the array with default values
-    SegmentColour segcol[NUMBER_SEGMENT_COLOURS] = 
+    // Primary segment colour storage
+    SegmentColour segcol[NUMBER_SEGMENT_COLOURS] =
     {
-      SegmentColour(255, 0, 0, 0, 0), // Red
-      SegmentColour(0, 255, 0, 0, 0), // Green
-      SegmentColour(0, 0, 255, 0, 0), // Blue
-      SegmentColour(255, 0, 255, 0, 0), // Magenta
-      SegmentColour(255, 255, 0, 0, 0)  // Yellow
+      SegmentColour(255,   0,   0, 0, 127), // Red
+      SegmentColour(  0, 255,   0, 0, 127), // Green
+      SegmentColour(  0,   0, 255, 0, 127), // Blue
+      SegmentColour(255,   0, 255, 0, 127), // Magenta
+      SegmentColour(255, 255,   0, 0, 127)  // Yellow
     };
 
-    void set_colors(uint8_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t ww, uint8_t cw, uint8_t br_rgb = 255, uint8_t br_ww = 255) {
-        if (index >= NUMBER_SEGMENT_COLOURS) {
-            Serial.println("ERROR: Index out of bounds");
-            return;
-        }
+    void set_colors(
+      uint8_t index,
+      uint8_t r,
+      uint8_t g,
+      uint8_t b,
+      uint8_t w,
+      uint8_t cct = 127,
+      uint8_t br_rgb = 255,
+      uint8_t br_ww = 255
+    )
+    {
+      if (index >= NUMBER_SEGMENT_COLOURS)
+      {
+        Serial.println("ERROR: Index out of bounds");
+        return;
+      }
 
-        segcol[index] = SegmentColour(r, g, b, ww, cw, br_rgb, br_ww);
+      // New representation
+      segcol[index].setRGBW(r, g, b, w);
+      segcol[index].setCCT(cct);
+
+      // Temporary compatibility only.
+      // These currently do nothing and can be removed once old callers are migrated.
+      segcol[index].setBrightnessRGB(br_rgb);
+      segcol[index].setBrightnessWW(br_ww);
+
     }
 
 
@@ -3181,7 +3670,9 @@ typedef struct Segment
       return _brightness_cct_combined;
     }
 
-    #define currentBri() getBrightnessRGB()
+    // #define currentBri() getBrightnessRGB()
+      uint8_t  currentCCT() const; // current segment's CCT (blended while in transition)
+    uint8_t  currentBri() const; // current segment's opacity/brightness (blended while in transition)
 
 
     // Flags and states that are used during one transition and reset when completed
@@ -3239,6 +3730,13 @@ typedef struct Segment
     #endif
     }
 
+    inline void setDrawDimensions() const { Segment::_vWidth = virtualWidth(); Segment::_vHeight = virtualHeight(); Segment::_vLength = virtualLength(); }
+
+    void    beginDraw(uint16_t prog = 0xFFFFU);         // set up parameters for current effect
+    void    setGeometry(uint16_t i1, uint16_t i2, uint8_t grp=1, uint8_t spc=0, uint16_t ofs=UINT16_MAX, uint16_t i1Y=0, uint16_t i2Y=1, uint8_t m12=0);
+    void    refreshGeometry();
+    
+
     #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PERFORMANCE_METRICS_SAFE_IN_RELEASE_MODE
     struct PERFORMANCE{
 
@@ -3271,10 +3769,10 @@ typedef struct Segment
     
     uint8_t startY;  // start Y coodrinate 2D (top); there should be no more than 255 rows
     uint8_t stopY;   // stop Y coordinate 2D (bottom); there should be no more than 255 rows
+    uint8_t   blendMode;          // segment blending modes: top, bottom, add, subtract, difference, average, multiply, divide, lighten, darken, screen, overlay, hardlight, softlight, dodge, burn, stencil
     char *name = nullptr; // Keep, segment name to be added later by me
-
     char* getName() { return name; } // Get the name of the segment
-
+    
     // runtime data
     unsigned long next_time;  // millis() of next update
     uint32_t tSaved_EffectStartReferenceTime = 0;
@@ -3287,7 +3785,7 @@ typedef struct Segment
     uint8_t effect_anim_section = 0; // 0 draw, 1 stop draw
 
     bool     _colorScaled;             // color has been scaled prior to setPixelColor() call
-    bool          _modeBlend = true;          // mode/effect blending semaphore
+    // static bool          _modeBlend;// = true;          // mode/effect blending semaphore
 
     
     uint16_t aux0 = 0;  // custom var
@@ -3306,6 +3804,38 @@ typedef struct Segment
 
 
     
+    // transition data, holds values during transition (76 bytes/28 bytes)
+    struct Transition {
+      Segment      *_oldSegment;          // previous segment environment (may be nullptr if effect did not change)
+      unsigned long _start;               // must accommodate millis()
+      uint32_t      _colors[5];  // current colors
+      #ifndef WLED_SAVE_RAM
+      CRGBPalette16 _palT;                // temporary palette (slowly being morphed from old to new)
+      #endif
+      uint16_t      _dur;                 // duration of transition in ms
+      uint16_t      _progress;            // transition progress (0-65535); pre-calculated from _start & _dur in updateTransitionProgress()
+      uint8_t       _prevPaletteBlends;   // number of previous palette blends (there are max 255 blends possible)
+      uint8_t       _palette, _bri, _cct; // palette ID, brightness and CCT at the start of transition (brightness will be 0 if segment was off)
+      Transition(uint16_t dur=750)
+      : _oldSegment(nullptr)
+      , _start(millis())
+      , _colors{0,0,0}
+      #ifndef WLED_SAVE_RAM
+      , _palT(CRGBPalette16())
+      #endif
+      , _dur(dur)
+      , _progress(0)
+      , _prevPaletteBlends(0)
+      , _palette(0)
+      , _bri(0)
+      , _cct(0)
+      {}
+      ~Transition() {
+        //DEBUGFX_PRINTF_P(PSTR("-- Destroying transition: %p\n"), this);
+        if (_oldSegment) delete _oldSegment;
+        _oldSegment = nullptr;
+      }
+    } *_t;
 
 
 
@@ -3317,11 +3847,10 @@ typedef struct Segment
      */
     uint16_t params_user[4] = {0};
 
-    #ifdef ENABLE_DEVFEATURE_LIGHT__PIXELS_BUFFER_RAW    
     uint32_t *pixels;                 // pixel data
-    #endif
-    // CRGB* leds;     // local leds[] array (may be a pointer to global)
-    // static CRGB *_globalLeds;             // global leds[] array
+    uint16_t pixels_allocated_bytes = 0;
+    
+    
     static uint16_t maxWidth, maxHeight;  // these define matrix width & height (max. segment dimensions)
     
   // private:
@@ -3335,6 +3864,26 @@ typedef struct Segment
         uint8_t _reserved : 4;
       };
     };
+
+    // static variables are use to speed up effect calculations by stashing common pre-calculated values
+    // static unsigned      _usedSegmentData;    // amount of data used by all segments
+    static unsigned      _vLength;            // 1D dimension used for current effect
+    static unsigned      _vWidth, _vHeight;   // 2D dimensions used for current effect
+    static uint32_t      _currentColors[NUM_COLORS]; // colors used for current effect (faster access from effect functions)
+    static CRGBPalette16 _currentPalette;     // palette used for current effect (includes transition, used in color_from_palette())
+    static CRGBPalette16 _randomPalette;      // actual random palette
+    static CRGBPalette16 _newRandomPalette;   // target random palette
+    static uint16_t      _lastPaletteChange;  // last random palette change time (in seconds)
+    static uint16_t      _nextPaletteBlend;   // next due time for random palette morph (in millis())
+    static bool          _modeBlend;          // mode/effect blending semaphore
+    // clipping rectangle used for blending
+    static uint16_t      _clipStart, _clipStop;
+    static uint8_t       _clipStartY, _clipStopY;
+        
+//   static bool          _modeBlend;          // mode/effect blending semaphore
+//   // clipping rectangle used for blending
+//   static uint16_t      _clipStart, _clipStop;
+//   static uint8_t       _clipStartY, _clipStopY;
 
 
     /***
@@ -3355,14 +3904,21 @@ typedef struct Segment
     inline const byte* ColourData() const { return coldata; }// add these const overloads
     inline uint16_t ColourDataLength() const { return _coldataLen; }
 
-    mPaletteLoaded* palette = new mPaletteLoaded();
+    // mPaletteLoaded* palette_loaded = new mPaletteLoaded();
+    // NeoPixelAnimator* animator = new NeoPixelAnimator(1, NEO_MILLISECONDS); //one animator for each segment, which is only init when needed or else delete
+
+    mPaletteLoaded* palette_loaded = nullptr;
+    // NeoPixelAnimator* animator = nullptr;
+
+
+    uint8_t palette = 1;
+    uint8_t  mode = 1;
     /**
      * Each segment will have its own animator
      * This will also need to share its index into the animation so it knows what segments to run
      * */
-    NeoPixelAnimator* animator = new NeoPixelAnimator(1, NEO_MILLISECONDS); //one animator for each segment, which is only init when needed or else delete
-
-    uint8_t GetNumberOfColoursInPalette(){ return palette->colours_in_palette; };
+    
+    uint8_t GetNumberOfColoursInPalette(){ return palette_loaded->colours_in_palette; };
   
     bool LoadPalette_AsyncLock = false;
     void LoadPalette(uint8_t palette_id, mPaletteLoaded* palette = nullptr);
@@ -3373,105 +3929,507 @@ typedef struct Segment
     /**
      * Using "index" inside animator as segment index
      * */
-    ANIM_FUNCTION_SIGNATURE;
-    bool animation_has_anim_callback = false; //should be dafult on start but causing no animation on start right now
+    // ANIM_FUNCTION_SIGNATURE;
+    // bool animation_has_anim_callback = false; //should be dafult on start but causing no animation on start right now
 
-    Segment(uint16_t sStart=0, uint16_t sStop=30, const char* segment_name = nullptr) :
-      start(sStart),
-      stop(sStop),
-      offset(0),
-      speed(DEFAULT_SPEED),
-      intensity(DEFAULT_INTENSITY),
-      effect_id(DEFAULT_MODE),
-      options(SELECTED | SEGMENT_ON),
-      grouping(1),
-      spacing(0),
-      cct_slider(127),
-      custom1(DEFAULT_C1),
-      custom2(DEFAULT_C2),
-      custom3(DEFAULT_C3),
-      check1(false),
-      check2(false),
-      check3(false),
-      startY(0),
-      stopY(1),
-      name(nullptr),
-      next_time(0),
-      step(0),
-      call(0),
-      data(nullptr),
-      coldata(nullptr),
-      _capabilities(0),
-      _dataLen(0),
-      _coldataLen(0)
+    // Segment(uint16_t sStart=0, uint16_t sStop=30, const char* segment_name = nullptr) :
+    //   start(sStart),
+    //   stop(sStop),
+    //   offset(0),
+    //   speed(DEFAULT_SPEED),
+    //   intensity(DEFAULT_INTENSITY),
+    //   effect_id(DEFAULT_MODE),
+    //   options(SELECTED | SEGMENT_ON),
+    //   grouping(1),
+    //   spacing(0),
+    //   cct_slider(127),
+    //   custom1(DEFAULT_C1),
+    //   custom2(DEFAULT_C2),
+    //   custom3(DEFAULT_C3),
+    //   check1(false),
+    //   check2(false),
+    //   check3(false),
+    //   startY(0),
+    //   stopY(1),
+    //   name(nullptr),
+    //   next_time(0),
+    //   step(0),
+    //   call(0),
+    //   data(nullptr),
+    //   coldata(nullptr),
+    //   pixels(nullptr),
+    //   palette_loaded(nullptr),
+    //   _t(nullptr),
+    //   _capabilities(0),
+    //   _dataLen(0),
+    //   _coldataLen(0)
+    // {
+    //     #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+    //     Serial.printf(
+    //       "-- Creating segment: S=%p [%u,%u:%u,%u] T[%p]\n",
+    //       this,
+    //       (unsigned)start,
+    //       (unsigned)stop,
+    //       (unsigned)startY,
+    //       (unsigned)stopY,
+    //       (void*)_t
+    //     );
+    //     #endif
+
+    //     refreshLightCapabilities();
+
+    //     if (segment_name)
+    //     {
+    //       name = new(std::nothrow) char[strlen(segment_name) + 1];
+
+    //       if (name)
+    //       {
+    //         strcpy(name, segment_name);
+    //       }
+    //     }
+
+    //     aux0 = 0;
+    //     aux1 = 0;
+    //     aux2 = 0;
+    //     aux3 = 0;
+
+    //     palette_loaded = new(std::nothrow) mPaletteLoaded();
+    //     // animator = new(std::nothrow) NeoPixelAnimator(1, NEO_MILLISECONDS);
+
+    //     pixels = static_cast<uint32_t*>(
+    //       allocate_buffer(
+    //         length() * sizeof(uint32_t),
+    //         BFRALLOC_PREFER_PSRAM |
+    //         BFRALLOC_NOBYTEACCESS |
+    //         BFRALLOC_CLEAR
+    //       )
+    //     );
+
+    //     if (!pixels)
+    //     {
+    //       DEBUG_PRINTLN(F("!!! Not enough RAM for pixel buffer !!!"));
+    //       stop = 0;
+    //     }
+    // }
+Segment(
+  uint16_t sStart = 0,
+  uint16_t sStop = 30,
+  const char* segment_name = nullptr
+) :
+  start(sStart),
+  stop(sStop),
+  offset(0),
+  speed(DEFAULT_SPEED),
+  intensity(DEFAULT_INTENSITY),
+  effect_id(DEFAULT_MODE),
+  options(SELECTED | SEGMENT_ON),
+  grouping(1),
+  spacing(0),
+  cct_slider(127),
+  custom1(DEFAULT_C1),
+  custom2(DEFAULT_C2),
+  custom3(DEFAULT_C3),
+  check1(false),
+  check2(false),
+  check3(false),
+  startY(0),
+  stopY(1),
+  name(nullptr),
+  next_time(0),
+  step(0),
+  call(0),
+  data(nullptr),
+  coldata(nullptr),
+  pixels(nullptr),
+  palette_loaded(nullptr),
+  _t(nullptr),
+  _capabilities(0),
+  _dataLen(0),
+  _coldataLen(0)
+{
+  #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+  Serial.printf(
+    "-- Creating segment: S=%p [%u,%u:%u,%u] T[%p]\n",
+    this,
+    (unsigned)start,
+    (unsigned)stop,
+    (unsigned)startY,
+    (unsigned)stopY,
+    (void*)_t
+  );
+  #endif
+
+  refreshLightCapabilities();
+
+  if (segment_name)
+  {
+    name = new(std::nothrow) char[strlen(segment_name) + 1];
+
+    if (name)
     {
-
-      #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
-      Serial.printf("-- Creating segment: %p\n", this);
-      #endif
-      
-      refreshLightCapabilities();
-      
-      if (segment_name) {
-        name = new char[strlen(segment_name) + 1];
-        strcpy(name, segment_name);
-      }
-
-      aux0 = 0;
-      aux1 = 0;
-      aux2 = 0;
-      aux3 = 0;
-
-      palette = new mPaletteLoaded(); // duplicate of above, but needed for each segment
-      
+      strcpy(name, segment_name);
     }
+  }
+
+  aux0 = 0;
+  aux1 = 0;
+  aux2 = 0;
+  aux3 = 0;
+
+  /*
+   * PulSar addition.
+   *
+   * WLED does not own this palette container as part of Segment.
+   */
+  palette_loaded = new(std::nothrow) mPaletteLoaded();
+
+  // Removed/phased out:
+  // animator = new(std::nothrow) NeoPixelAnimator(1, NEO_MILLISECONDS);
+
+  pixels = static_cast<uint32_t*>(
+    allocate_buffer(
+      static_cast<size_t>(length()) * sizeof(uint32_t),
+      BFRALLOC_PREFER_PSRAM |
+      BFRALLOC_NOBYTEACCESS |
+      BFRALLOC_CLEAR
+    )
+  );
+
+  if (!pixels)
+  {
+    DEBUG_PRINTLN(F("!!! Not enough RAM for pixel buffer !!!"));
+    stop = 0;
+  }
+
+  if (!palette_loaded)
+  {
+    DEBUG_PRINTLN(F("!!! Not enough RAM for palette container !!!"));
+  }
+}
 
 
-    Segment(uint16_t sStartX, uint16_t sStopX, uint16_t sStartY, uint16_t sStopY) : Segment(sStartX, sStopX) {
-      startY = sStartY;
-      stopY  = sStopY;
-    }
 
 
-    Segment(const Segment &orig) // copy constructor
+    // Segment(uint16_t sStartX, uint16_t sStopX, uint16_t sStartY, uint16_t sStopY) : Segment(sStartX, sStopX) {
+    //   startY = sStartY;
+    //   stopY  = sStopY;
+    // }
+
+    Segment(
+  uint16_t sStartX,
+  uint16_t sStopX,
+  uint16_t sStartY,
+  uint16_t sStopY
+) :
+  Segment(sStartX, sStopX)
+{
+  startY = sStartY;
+  stopY  = sStopY;
+
+  /*
+   * The delegated constructor allocated pixels while height() was still 1.
+   * Reallocate using the completed 2D geometry.
+   */
+  p_free(pixels);
+  pixels = nullptr;
+
+  pixels = static_cast<uint32_t*>(
+    allocate_buffer(
+      static_cast<size_t>(length()) * sizeof(uint32_t),
+      BFRALLOC_PREFER_PSRAM |
+      BFRALLOC_NOBYTEACCESS |
+      BFRALLOC_CLEAR
+    )
+  );
+
+  if (!pixels)
+  {
+    DEBUG_PRINTLN(F("!!! Not enough RAM for 2D pixel buffer !!!"));
+    stop = 0;
+    stopY = 0;
+  }
+}
+
+    // Segment(const Segment &orig) // copy constructor
+    // {
+    //   #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+    //   Serial.println(F("-- Copy segment constructor --"));
+    //   #endif
+
+    //   memcpy(this, &orig, sizeof(Segment));
+    //   _t   = nullptr; // copied segment cannot be in transition
+    //   name = nullptr;
+      
+    //   if (orig.name){ 
+    //     name = new char[strlen(orig.name)+1]; 
+    //     if (name){
+    //       strcpy(name, orig.name); 
+    //     }
+    //   }
+
+    //   data = nullptr; _dataLen = 0;
+    //   if (orig.data){ 
+    //     if (allocateData(orig._dataLen)) 
+    //     {
+    //       memcpy(data, orig.data, orig._dataLen); 
+    //     }
+    //   }
+      
+    //   coldata = nullptr; _coldataLen = 0;
+    //   if (orig.coldata) {
+    //     if(allocateColourData(orig._coldataLen)){
+    //       memcpy(coldata, orig.coldata, orig._coldataLen);
+    //     }
+    //   }
+
+    // };
+    // Segment(const Segment& orig)
+    // {
+    //     #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+    //     Serial.printf(
+    //         "-- Copy segment constructor: %p -> %p\n",
+    //         (const void*)&orig,
+    //         (void*)this
+    //     );
+    //     #endif
+
+    //     /*
+    //     * Copy the complete scalar/non-owning state first.
+    //     *
+    //     * Every owned pointer must immediately be detached before any operation
+    //     * which can return or fail.
+    //     */
+    //     memcpy(this, &orig, sizeof(Segment));
+
+    //     /*
+    //     * A copied segment must not share ownership of runtime allocations.
+    //     */
+    //     _t             = nullptr;
+    //     name           = nullptr;
+    //     data           = nullptr;
+    //     coldata        = nullptr;
+    //     pixels         = nullptr;
+    //     palette_loaded = nullptr;
+
+    //     _dataLen    = 0;
+    //     _coldataLen = 0;
+
+    //     /*
+    //     * Inactive source: retain copied configuration, but do not allocate
+    //     * runtime buffers.
+    //     */
+    //     if (!orig.stop)
+    //     {
+    //         return;
+    //     }
+
+    //     /*
+    //     * Deep-copy the segment pixel-render buffer.
+    //     */
+    //     if (orig.pixels && orig.length() > 0)
+    //     {
+    //         const size_t pixel_bytes =
+    //         static_cast<size_t>(orig.length()) * sizeof(uint32_t);
+
+    //         pixels = static_cast<uint32_t*>(
+    //         allocate_buffer(
+    //             pixel_bytes,
+    //             BFRALLOC_PREFER_PSRAM |
+    //             BFRALLOC_NOBYTEACCESS
+    //         )
+    //         );
+
+    //         if (pixels)
+    //         {
+    //         memcpy(pixels, orig.pixels, pixel_bytes);
+    //         }
+    //         else
+    //         {
+    //         DEBUG_PRINTLN(F("!!! Not enough RAM for copied segment pixel buffer !!!"));
+    //         stop = 0;
+    //         return;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         stop = 0;
+    //         return;
+    //     }
+
+    //     /*
+    //     * Deep-copy the segment name.
+    //     */
+    //     if (orig.name)
+    //     {
+    //         name = new(std::nothrow) char[strlen(orig.name) + 1];
+
+    //         if (name)
+    //         {
+    //         strcpy(name, orig.name);
+    //         }
+    //     }
+
+    //     /*
+    //     * Deep-copy effect runtime data.
+    //     */
+    //     if (orig.data && orig._dataLen > 0)
+    //     {
+    //         if (allocateData(orig._dataLen))
+    //         {
+    //         memcpy(data, orig.data, orig._dataLen);
+    //         }
+    //     }
+
+    //     /*
+    //     * Deep-copy colour runtime data.
+    //     */
+    //     if (orig.coldata && orig._coldataLen > 0)
+    //     {
+    //         if (allocateColourData(orig._coldataLen))
+    //         {
+    //         memcpy(coldata, orig.coldata, orig._coldataLen);
+    //         }
+    //     }
+
+    //     /*
+    //     * palette_loaded appears to be owned by the Segment.
+    //     *
+    //     * This assumes mPaletteLoaded has a valid copy constructor.
+    //     */
+    //     if (orig.palette_loaded)
+    //     {
+    //         palette_loaded =
+    //         new(std::nothrow) mPaletteLoaded(*orig.palette_loaded);
+    //     }
+    //     else
+    //     {
+    //         palette_loaded =
+    //         new(std::nothrow) mPaletteLoaded();
+    //     }
+    // }
+
+    Segment(const Segment& orig)
+{
+  #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+  Serial.println(F("-- Copy segment constructor --"));
+  #endif
+
+  /*
+   * WLED pattern:
+   * copy complete scalar/non-owning object state first.
+   */
+  memcpy(this, &orig, sizeof(Segment));
+
+  /*
+   * A copied segment cannot share the source transition or owned allocations.
+   */
+  _t             = nullptr;
+  name           = nullptr;
+  data           = nullptr;
+  coldata        = nullptr;
+  pixels         = nullptr;
+  palette_loaded = nullptr;
+
+  _dataLen    = 0;
+  _coldataLen = 0;
+
+  /*
+   * Inactive segments do not require runtime allocations.
+   */
+  if (!orig.stop)
+  {
+    return;
+  }
+
+  /*
+   * Deep-copy segment name.
+   */
+  if (orig.name)
+  {
+    name = new(std::nothrow) char[strlen(orig.name) + 1];
+
+    if (name)
     {
-      #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
-      Serial.println(F("-- Copy segment constructor --"));
-      #endif
+      strcpy(name, orig.name);
+    }
+  }
 
-      memcpy(this, &orig, sizeof(Segment));
-      name = nullptr;
-      
-      if (orig.name){ 
-        name = new char[strlen(orig.name)+1]; 
-        if (name){
-          strcpy(name, orig.name); 
-        }
-      }
+  /*
+   * Deep-copy WLED effect runtime data.
+   */
+  if (orig.data && orig._dataLen > 0)
+  {
+    if (allocateData(orig._dataLen))
+    {
+      memcpy(data, orig.data, orig._dataLen);
+    }
+  }
 
-      data = nullptr; _dataLen = 0;
-      if (orig.data){ 
-        if (allocateData(orig._dataLen)) 
-        {
-          memcpy(data, orig.data, orig._dataLen); 
-        }
-      }
-      
-      coldata = nullptr; _coldataLen = 0;
-      if (orig.coldata) {
-        if(allocateColourData(orig._coldataLen)){
-          memcpy(coldata, orig.coldata, orig._coldataLen);
-        }
-      }
+  /*
+   * PulSar addition:
+   * coldata follows exactly the same ownership pattern as data.
+   */
+  if (orig.coldata && orig._coldataLen > 0)
+  {
+    if (allocateColourData(orig._coldataLen))
+    {
+      memcpy(coldata, orig.coldata, orig._coldataLen);
+    }
+  }
 
-    };
+  /*
+   * Deep-copy the segment framebuffer.
+   */
+  if (orig.pixels && orig.length() > 0)
+  {
+    const size_t pixel_bytes =
+      static_cast<size_t>(orig.length()) * sizeof(uint32_t);
 
+    pixels = static_cast<uint32_t*>(
+      allocate_buffer(
+        pixel_bytes,
+        BFRALLOC_PREFER_PSRAM |
+        BFRALLOC_NOBYTEACCESS
+      )
+    );
+
+    if (pixels)
+    {
+      memcpy(pixels, orig.pixels, pixel_bytes);
+    }
+    else
+    {
+      DEBUG_PRINTLN(F("!!! Not enough RAM for copied segment pixel buffer !!!"));
+      stop = 0;
+      return;
+    }
+  }
+
+  /*
+   * PulSar addition:
+   * palette_loaded is an owned object and must not remain shallow-copied.
+   */
+  if (orig.palette_loaded)
+  {
+    palette_loaded =
+      new(std::nothrow) mPaletteLoaded(*orig.palette_loaded);
+  }
+  else
+  {
+    palette_loaded =
+      new(std::nothrow) mPaletteLoaded();
+  }
+
+  Serial.printf(("SEG ALLOCATIONS: obj=%p name=%p nameActual=%u palette=%p paletteActual=%u pixels=%p pixelActual=%u\n\r"), (void*)this, (void*)name, name ? (unsigned)heap_caps_get_allocated_size(name) : 0, (void*)palette_loaded, palette_loaded ? (unsigned)heap_caps_get_allocated_size(palette_loaded) : 0, (void*)pixels, pixels ? (unsigned)heap_caps_get_allocated_size(pixels) : 0);
+
+
+}
 
     void NameUpdate(const char* new_name)
     {
       if (name) {
-        delete[] name;
-        name = nullptr;
+        p_free(name);
+name = nullptr;
       }
 
       if (new_name) {
@@ -3484,57 +4442,226 @@ typedef struct Segment
     }
 
 
-    Segment(Segment &&orig) noexcept // move constructor
-    {
+    // Segment(Segment &&orig) noexcept // move constructor
+    // {
 
-      #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
-      Serial.println(F("-- Move segment constructor --"));
-      #endif
+    //   #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+    //   Serial.println(F("-- Move segment constructor --"));
+    //   #endif
 
-      memcpy((void*)this, (void*)&orig, sizeof(mAnimatorLight::Segment));
+    //   memcpy((void*)this, (void*)&orig, sizeof(mAnimatorLight::Segment));
 
-      orig.name = nullptr;
-      orig.data = nullptr;      orig._dataLen = 0;
-      orig.coldata = nullptr;   orig._coldataLen = 0;
+    //   orig._t   = nullptr; // old segment cannot be in transition any more
 
-    }
+    //   orig.name = nullptr;
+    //   orig.data = nullptr;      orig._dataLen = 0;
+    //   orig.coldata = nullptr;   orig._coldataLen = 0;
 
+    // }
+    // Segment(Segment&& orig) noexcept
+    // {
+    //     #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+    //     Serial.printf(
+    //         "-- Move segment constructor: %p -> %p\n",
+    //         (void*)&orig,
+    //         (void*)this
+    //     );
+    //     #endif
 
-    ~Segment() // deconstructor
-    {
-      #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
-        Serial.print(F("Destroying segment:"));
-        if (name) Serial.printf(" %s (%p)", name, name);
-        if (data) Serial.printf(" %d (%p)", (int)_dataLen, data);
-        Serial.println();
-      #endif
-      if (name) delete[] name;
-      deallocateData();
-      deallocateColourData();
-    }
+    //     /*
+    //     * Transfer complete object state, including owned pointers.
+    //     */
+    //     memcpy(this, &orig, sizeof(Segment));
+
+    //     /*
+    //     * Remove ownership from the moved-from object.
+    //     */
+    //     orig._t             = nullptr;
+    //     orig.name           = nullptr;
+    //     orig.data           = nullptr;
+    //     orig.coldata        = nullptr;
+    //     orig.pixels         = nullptr;
+    //     orig.palette_loaded = nullptr;
+
+    //     orig._dataLen    = 0;
+    //     orig._coldataLen = 0;
+
+    //     /*
+    //     * Leave moved-from geometry inactive so it cannot be rendered before
+    //     * destruction.
+    //     */
+    //     orig.start = 0;
+    //     orig.stop  = 0;
+    // }
+
+    Segment(Segment&& orig) noexcept
+{
+  #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+  Serial.println(F("-- Move segment constructor --"));
+  #endif
+
+  /*
+   * WLED pattern:
+   * transfer complete object state, including owned pointers.
+   */
+  memcpy(this, &orig, sizeof(Segment));
+
+  /*
+   * Remove ownership from the moved-from object.
+   */
+  orig._t             = nullptr;
+  orig.name           = nullptr;
+  orig.data           = nullptr;
+  orig.coldata        = nullptr;
+  orig.pixels         = nullptr;
+  orig.palette_loaded = nullptr;
+
+  orig._dataLen    = 0;
+  orig._coldataLen = 0;
+
+  /*
+   * Leave moved-from segment inactive.
+   */
+  orig.start = 0;
+  orig.stop  = 0;
+
+  // Removed/phased out:
+  // orig.animator = nullptr;
+  // orig.anim_function_callback = nullptr;
+}
+
+    // ~Segment() // deconstructor
+    // {
+    //   #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+    //     Serial.print(F("Destroying segment:"));
+    //     if (name) Serial.printf(" %s (%p)", name, name);
+    //     if (data) Serial.printf(" %d (%p)", (int)_dataLen, data);
+    //     Serial.println();
+    //   #endif
+    //   stopTransition();   // deallocate "_t" (transition) and with it "_segOld" note: _segOld has _t=null, see copy constructor
+      
+    //   if (name) delete[] name;
+    //   deallocateData();
+    //   deallocateColourData();
+    //   p_free(pixels);
+    // }
+   ~Segment()
+{
+  #ifdef ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+  Serial.print(F("Destroying segment:"));
+
+  if (name)
+  {
+    Serial.printf(" %s (%p)", name, name);
+  }
+
+  if (data)
+  {
+    Serial.printf(" data=%u (%p)", (unsigned)_dataLen, data);
+  }
+
+  if (coldata)
+  {
+    Serial.printf(" coldata=%u (%p)", (unsigned)_coldataLen, coldata);
+  }
+
+  if (pixels)
+  {
+    Serial.printf(" pixels=%p", pixels);
+  }
+
+  if (palette_loaded)
+  {
+    Serial.printf(" palette=%p", palette_loaded);
+  }
+
+  Serial.println();
+  #endif
+
+  /*
+   * Deallocate _t and its old Segment.
+   * The copied old Segment has _t == nullptr.
+   */
+  stopTransition();
+
+  if (name)
+  {
+    delete[] name;
+    name = nullptr;
+  }
+
+  deallocateData();
+  deallocateColourData();
+
+  if (pixels)
+  {
+    p_free(pixels);
+    pixels = nullptr;
+  }
+
+  /*
+   * PulSar addition.
+   */
+  if (palette_loaded)
+  {
+    delete palette_loaded;
+    palette_loaded = nullptr;
+  }
+
+  // Removed/phased out:
+  // delete animator;
+  // animator = nullptr;
+}
 
 
     Segment& operator= (const Segment &orig); // copy assignment
     Segment& operator= (Segment &&orig) noexcept; // move assignment
 
     #ifdef ENABLE_DEBUG_FEATURE_SEGMENT_PRINT_MESSAGES
-    size_t getSize() const 
-    { 
-      return sizeof(Segment) + (data?_dataLen:0) + 
-        (name?strlen(name):0) + 
-        (!Segment::_globalLeds && leds?sizeof(CRGB)*length():0); 
-    }
+    // size_t getSize() const 
+    // { 
+    //   return sizeof(Segment) + (data?_dataLen:0) + 
+    //     (name?strlen(name):0) + 
+    //     (!Segment::_globalLeds && leds?sizeof(CRGB)*length():0); 
+    // }
+    size_t getSize() const { return sizeof(Segment) + (data?_dataLen:0) + (name?strlen(name):0) + (_t?sizeof(Transition):0) + (pixels?length()*sizeof(uint32_t):0); }
+
     #endif
 
     inline bool     getOption(uint8_t n) const { return ((options >> n) & 0x01); }
     inline bool     isSelected(void)     const { return selected; }
-    inline bool     isActive(void)       const { return stop > start; }
+    inline bool     isInTransition()       const { return false; }//_t != nullptr; }
+    inline bool     isActive()           const { return stop > start && pixels; }
     inline bool     is2D(void)           const { return (width()>1 && height()>1); }
     inline uint16_t width(void)          const { return stop - start; }       // segment width in physical pixels (length if 1D)
     inline uint16_t height(void)         const { return stopY - startY; }     // segment height (if 2D) in physical pixels
     inline uint16_t length(void)         const { return width() * height(); } // segment length (count) in physical pixels
     inline uint16_t groupLength(void)    const { return grouping + spacing; }
     inline uint8_t  getLightCapabilities(void) const { return 0xFF; }// force all default on _capabilities; }
+
+    inline uint32_t *getPixels() const                              { return pixels; }
+    inline void     setPixelColorRaw(unsigned i, uint32_t c) const  { pixels[i] = c; }
+    // inline uint32_t getPixelColorRaw(unsigned i) const              { return RGBW32(i,10,11,12); }// pixels[i]; };
+    inline uint32_t getPixelColorRaw(unsigned i) const              { return pixels[i]; };
+  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    inline void     setPixelColorXYRaw(unsigned x, unsigned y, uint32_t c) const  { auto XY = [](unsigned X, unsigned Y){ return X + Y*Segment::vWidth(); }; pixels[XY(x,y)] = c; }
+    inline uint32_t getPixelColorXYRaw(unsigned x, unsigned y) const              { auto XY = [](unsigned X, unsigned Y){ return X + Y*Segment::vWidth(); }; return pixels[XY(x,y)]; };
+  #endif
+
+  // transition functions
+    void stopTransition();                  // ends transition mode by destroying transition structure (does nothing if not in transition)
+    void updateTransitionProgress() const;  // sets transition progress (0-65535) based on time passed since transition start
+    inline void handleTransition() {
+      updateTransitionProgress();
+      if (isInTransition() && progress() == 0xFFFFU) stopTransition();
+    }
+    inline uint16_t progress() const          { return isInTransition() ? _t->_progress : 0xFFFFU; } // relies on handleTransition()/updateTransitionProgress() to update progression variable
+    inline Segment *getOldSegment() const     { return isInTransition() ? _t->_oldSegment : nullptr; }
+
+    inline static void modeBlend(bool blend)  { Segment::_modeBlend = blend; }  // for isPreviousMode()
+    inline static void setClippingRect(int startX, int stopX, int startY = 0, int stopY = 1) { _clipStart = startX; _clipStop = stopX; _clipStartY = startY; _clipStopY = stopY; };
+    inline static bool isPreviousMode()       { return Segment::_modeBlend; }    // needed for determining CCT/opacity during non-TRANSITION_FADE transition
+
 
     static uint16_t getUsedSegmentData(void)    { return _usedSegmentData; }
     static void     addUsedSegmentData(int len) { _usedSegmentData += len; }
@@ -3547,7 +4674,7 @@ typedef struct Segment
     bool    parseSegColorHex(const char* in, uint8_t& R, uint8_t& G, uint8_t& B, uint8_t& WW, uint8_t& CW);
     void    setPalette(uint8_t pal);
     uint8_t differs(const Segment& b) const;
-    void    refreshLightCapabilities(void);
+    void    refreshLightCapabilities() const;
 
     static uint32_t   color_blend(uint32_t,uint32_t,uint16_t,bool b16=false);
     static RgbwwColor color_blend(RgbwwColor,RgbwwColor,uint16_t,bool b16=false);
@@ -3595,6 +4722,9 @@ typedef struct Segment
 
 
     void resetIfRequired(void);
+
+    void loadPalette(CRGBPalette16 &tgt, uint8_t pal);
+
     /** 
       * Flags that before the next effect is calculated,
       * the internal segment state should be reset. 
@@ -3606,6 +4736,9 @@ typedef struct Segment
       reset = true; 
     }
 
+    
+    void startTransition(uint16_t dur, bool segmentCopy = true);    // transition has to start before actual segment values change
+    
     // 1D strip
     [[gnu::hot]] uint16_t virtualLength(void) const;
 
@@ -3667,6 +4800,7 @@ typedef struct Segment
       void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) { setPixelColor(i, RGBW32(r,g,b,w), aa); }
       void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }
     #endif
+    [[gnu::hot]] bool isPixelClipped(int i) const;
     
       
     [[gnu::hot]] uint32_t getPixelColor(int i) const;  
@@ -3677,6 +4811,9 @@ typedef struct Segment
     void fill(uint32_t c);
     void fill(RgbwwColor c);
     void fill_ranged(uint32_t c);
+
+    // void clear() const { fill(BLACK); } // clear segment
+
 
     void fade_out(uint8_t r);
     void fadeToBlackBy(uint8_t fadeBy);
@@ -3941,10 +5078,10 @@ typedef struct Segment
     
 
     // 2D Blur: shortcuts for bluring columns or rows only (50% faster than full 2D blur)
-    inline void blurCols(fract8 blur_amount, bool smear = false) { // blur all columns
+    inline void blurCols(uint8_t blur_amount, bool smear = false) { // blur all columns
       blur2D(0, blur_amount, smear);
     }
-    inline void blurRows(fract8 blur_amount, bool smear = false) { // blur all rows
+    inline void blurRows(uint8_t blur_amount, bool smear = false) { // blur all rows
       blur2D(blur_amount, 0, smear);
     }
     /** SECTION start ****************************************************************************************************************
@@ -4014,6 +5151,7 @@ typedef struct Segment
       setPixelColorXY(x, y, RGBW32(c.r,c.g,c.b,0), aa); 
     }
 
+    [[gnu::hot]] bool isPixelXYClipped(int x, int y) const;
     uint32_t getPixelColorXY(uint16_t x, uint16_t y) const;
     
     void blur2D(uint8_t blur_x, uint8_t blur_y, bool smear);
@@ -4058,8 +5196,8 @@ typedef struct Segment
     void fill_solid(CRGB c) { fill(RGBW32(c.r,c.g,c.b,0)); }
     void nscale8(uint8_t scale);
   #else
-
-
+  
+  
     uint16_t XY(uint16_t x, uint16_t y)                                    { return x; }
     void setPixelColorXY(int x, int y, uint32_t c)                         { setPixelColor(x, c); }
     void setPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { setPixelColor(x, RGBW32(r,g,b,w)); }
@@ -4069,6 +5207,7 @@ typedef struct Segment
     void setPixelColorXY(float x, float y, byte r, byte g, byte b, byte w = 0, bool aa = true) { setPixelColor(x, RGBW32(r,g,b,w), aa); }
     void setPixelColorXY(float x, float y, CRGB c, bool aa = true)         { setPixelColor(x, RGBW32(c.r,c.g,c.b,0), aa); }
     #endif
+    inline bool isPixelXYClipped(int x, int y)     const                               { return isPixelClipped(x); }
     uint32_t getPixelColorXY(uint16_t x, uint16_t y)                       { return getPixelColor(x); }
     void blendPixelColorXY(uint16_t x, uint16_t y, uint32_t c, uint8_t blend) { blendPixelColor(x, c, blend); }
     void blendPixelColorXY(uint16_t x, uint16_t y, CRGB c, uint8_t blend)  { blendPixelColor(x, RGBW32(c.r,c.g,c.b,0), blend); }
@@ -4076,10 +5215,10 @@ typedef struct Segment
     void addPixelColorXY(int x, int y, byte r, byte g, byte b, byte w = 0) { addPixelColor(x, RGBW32(r,g,b,w)); }
     void addPixelColorXY(int x, int y, CRGB c)                             { addPixelColor(x, RGBW32(c.r,c.g,c.b,0)); }
     void fadePixelColorXY(uint16_t x, uint16_t y, uint8_t fade)            { fadePixelColor(x, fade); }
-    void box_blur(uint16_t i, bool vertical, fract8 blur_amount) {}
+    void box_blur(uint16_t i, bool vertical, uint8_t blur_amount) {}
     inline void blur2D(uint8_t blur_x, uint8_t blur_y, bool smear = false) {}
-    void blurRow(uint16_t row, fract8 blur_amount) {}
-    void blurCol(uint16_t col, fract8 blur_amount) {}
+    void blurRow(uint16_t row, uint8_t blur_amount) {}
+    void blurCol(uint16_t col, uint8_t blur_amount) {}
     inline void moveX(int delta, bool wrap = false) {}
     inline void moveY(int delta, bool wrap = false) {}
     inline void move(uint8_t dir, uint8_t delta, bool wrap = false) {}
@@ -4576,6 +5715,11 @@ inline void AnimationProcess_LinearBlend_Dynamic_BufferU32_FillSegment_Brightnes
 }
 
 
+    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+    class ParticleSystem1D;
+    class ParticleSystem2D;
+    #endif
+
 } segment;
 
 
@@ -4658,14 +5802,15 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
   void setCCT(uint16_t k);
   void setBrightness(uint8_t b, bool direct = false);
   void setRange(uint16_t i, uint16_t i2, uint32_t col);
-  void setTransitionMode(bool t);
+  
   void purgeSegments(bool force = false);
   void setSegment(uint8_t n, uint16_t start, uint16_t stop, uint8_t grouping = 1, uint8_t spacing = 0, uint16_t offset = UINT16_MAX, uint16_t startY=0, uint16_t stopY=1);
   void setMainSegmentId(uint8_t n);
   void restartRuntime();
-  void resetSegments2();
+  void resetSegments();
   void makeAutoSegments(bool forceReset = false);
   void fixInvalidSegments();
+  void blendSegment(const Segment &topSegment) const;//,    // blends topSegment into pixels
   void show(void);
   void setTargetFps(uint8_t fps);
 
@@ -4675,7 +5820,7 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
   uint32_t _colors_t_PHASE_OUT[3]; // color used for effect (includes transition)
   uint16_t _virtualSegmentLength;
 
-  std::vector<segment> segments;
+  std::vector<Segment> segments;
   friend class Segment;
 
   uint16_t _length;
@@ -4684,6 +5829,18 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
   uint8_t  _targetFps;
   uint16_t _frametime;
 
+    uint32_t *_pixels2 = nullptr;
+
+    uint8_t  *_pixelCCT = nullptr;
+
+    uint16_t _pixels_length = 0;
+
+    
+    Segment *_currentSegment;
+
+    volatile bool _suspend;
+
+    uint16_t _transitionDur = 750;
 
   // Fixed-point = store a real number as an integer with an implicit scale.
   //   Scale = 1 << FPS_CALC_SHIFT = 128.
@@ -4696,10 +5853,10 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
     bool _isServicing          : 1;
     bool _isOffRefreshRequired : 1; //periodic refresh is required for the strip to remain off.
     bool _hasWhiteChannel      : 1;
-    bool _force_update : 1; //_triggered            : 1;
+    bool _triggered : 1;//_triggered : 1; //_triggered            : 1;
   };
 
-  inline void force_update(void) { _force_update = true; } // Forces the next frame to be computed on all active segments.
+  inline void force_update(void) { _triggered = true; } // Forces the next frame to be computed on all active segments.
 
 
   void LoadEffects();
@@ -4713,6 +5870,7 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
   
   uint8_t segment_current_index;
   uint8_t _mainSegment;
+
 
   void fill2(uint32_t c) { for (int i = 0; i < _length; i++) setPixelColor(i, c); } // fill whole strip with color (inline)
 
@@ -4767,15 +5925,33 @@ void sortEffects(Effect_DevStage promote_first);
 
 #endif
 
+    void waitForIt();                                // wait until frame is over (service() has finished or time for 1 frame has passed)
 
     inline void setShowCallback(show_callback cb) { _callback = cb; }
-    inline void appendSegment(const Segment &seg = Segment()) {
 
-      Serial.println("Adding Segment");
-       segments.push_back(seg); 
-       Serial.println("Completed Segment Push");
+    inline void setTransition(uint16_t t)                     { _transitionDur = t; } // sets transition time (in ms)
+    inline uint16_t getTransition() const   { return _transitionDur; }    // returns currently set transition time (in ms)    
+    void setTransitionMode(bool t);
+    
+    inline void suspend()                                     { _suspend = true; }    // will suspend (and canacel) strip.service() execution
+    inline void resume()                                      { _suspend = false; }   // will resume strip.service() execution
+    
+    inline void trigger()                                     { _triggered = true; }  // Forces the next frame to be computed on all active segments.
+    inline bool needsUpdate() const          { return _triggered; }             // returns true if strip received a trigger() request
+
+
+
+    // inline void appendSegment(const Segment &seg = Segment()) {
+
+    //   Serial.println("Adding Segment");
+    //    segments.push_back(seg); 
+    //    Serial.println("Completed Segment Push");
        
-       }
+    //    }
+    
+    inline void appendSegment(uint16_t sStart=0, uint16_t sStop=30, uint16_t sStartY = 0, uint16_t sStopY = 1)
+                                                              { if (segments.size() < getMaxSegments()) segments.emplace_back(sStart,sStop,sStartY,sStopY); }
+
 
     bool
       checkSegmentAlignment(void),
@@ -4839,13 +6015,19 @@ void sortEffects(Effect_DevStage promote_first);
 
     inline uint16_t getFrameTime(void) { return _frametime; }
     inline uint16_t getMinShowDelay(void) { return MIN_SHOW_DELAY; }
-    inline uint16_t getLengthTotal(void) { return _length; }
+    uint16_t getLengthTotal(void) { return _length; }
 
     
     inline uint16_t getMappedPixelIndex(uint16_t index) const {           // convert logical address to physical
-      if (index < customMappingSize && (realtimeMode == REALTIME_MODE_INACTIVE || realtimeRespectLedMaps)) index = customMappingTable[index];
-      return index;
+      if (index < customMappingSize && (realtimeMode == REALTIME_MODE_INACTIVE || realtimeRespectLedMaps)) 
+        index = customMappingTable[index];
+      return index; // default is to return raw, so not the error
     };
+
+    inline uint32_t getPixelColor(unsigned n) { return (getMappedPixelIndex(n) < getLengthTotal()) ? _pixels2[n] : 0; } // returns color of pixel n, black if out of (mapped) bounds
+    inline uint32_t getPixelColorNoMap(unsigned n) { return (n < getLengthTotal()) ? _pixels2[n] : 0; } // ignores mapping table
+    
+
 
     uint32_t effect_start_time; // WLED "now", strip.now
     uint32_t timebase;
@@ -5023,28 +6205,52 @@ void sortEffects(Effect_DevStage promote_first);
 
 
 
-    // similar to NeoPixelBus NeoGammaTableMethod but allows dynamic changes (superseded by NPB::NeoGammaDynamicTableMethod)
-    class NeoGammaWLEDMethod {
-      public:
-        [[gnu::hot]] static uint8_t Correct(uint8_t value);             // apply Gamma to single channel
-        [[gnu::hot]] static uint32_t inverseGamma32(uint32_t color);    // apply inverse Gamma to RGBW32 color
-        static void calcGammaTable(float gamma);                        // re-calculates & fills gamma tables
-        static inline uint8_t rawGamma8(uint8_t val) { return gammaT[val]; }  // get value from Gamma table (WLED specific, not used by NPB)
-        static inline uint8_t rawInverseGamma8(uint8_t val) { return gammaT_inv[val]; }  // get value from inverse Gamma table (WLED specific, not used by NPB)
-        static inline uint32_t Correct32(uint32_t color) { // apply Gamma to RGBW32 color (WLED specific, not used by NPB)
-          // if (!gammaCorrectCol) return color; // no gamma correction
-          uint8_t  w = byte(color>>24), r = byte(color>>16), g = byte(color>>8), b = byte(color); // extract r, g, b, w channels
-          w = gammaT[w]; r = gammaT[r]; g = gammaT[g]; b = gammaT[b];
-          return (uint32_t(w) << 24) | (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b);
-        }
-      private:
-        static uint8_t gammaT[];
-        static uint8_t gammaT_inv[];
-    };
-    #define gamma32(c) NeoGammaWLEDMethod::Correct32(c)
-    #define gamma8(c)  NeoGammaWLEDMethod::rawGamma8(c)
-    #define gamma32inv(c) NeoGammaWLEDMethod::inverseGamma32(c)
-    #define gamma8inv(c)  NeoGammaWLEDMethod::rawInverseGamma8(c)
+/*
+ * color blend function, based on FastLED blend function
+ * the calculation for each color is: result = (A*(amountOfA) + A + B*(amountOfB) + B) / 256 with amountOfA = 255 - amountOfB
+ 
+ 2025 version
+ */
+inline uint32_t color_blend(uint32_t color1, uint32_t color2, uint8_t blend) {
+  // min / max blend checking is omitted: calls with 0 or 255 are rare, checking lowers overall performance
+  uint32_t rb1 = color1 & 0x00FF00FF;
+  uint32_t wg1 = (color1>>8) & 0x00FF00FF;
+  uint32_t rb2 = color2 & 0x00FF00FF;
+  uint32_t wg2 = (color2>>8) & 0x00FF00FF;
+  uint32_t rb3 = ((((rb1 << 8) | rb2) + (rb2 * blend) - (rb1 * blend)) >> 8) & 0x00FF00FF;
+  uint32_t wg3 = ((((wg1 << 8) | wg2) + (wg2 * blend) - (wg1 * blend))) & 0xFF00FF00;
+  return rb3 | wg3;
+}
+
+    // // similar to NeoPixelBus NeoGammaTableMethod but allows dynamic changes (superseded by NPB::NeoGammaDynamicTableMethod)
+    // class NeoGammaWLEDMethod {
+    //   public:
+    //     [[gnu::hot]] static uint8_t Correct(uint8_t value);             // apply Gamma to single channel
+    //     [[gnu::hot]] static uint32_t inverseGamma32(uint32_t color);    // apply inverse Gamma to RGBW32 color
+    //     static void calcGammaTable(float gamma);                        // re-calculates & fills gamma tables
+    //     static inline uint8_t rawGamma8(uint8_t val) { return gammaT[val]; }  // get value from Gamma table (WLED specific, not used by NPB)
+    //     static inline uint8_t rawInverseGamma8(uint8_t val) { return gammaT_inv[val]; }  // get value from inverse Gamma table (WLED specific, not used by NPB)
+    //     static inline uint32_t Correct32(uint32_t color) { // apply Gamma to RGBW32 color (WLED specific, not used by NPB)
+    //       // if (!gammaCorrectCol) return color; // no gamma correction
+    //       uint8_t  w = byte(color>>24), r = byte(color>>16), g = byte(color>>8), b = byte(color); // extract r, g, b, w channels
+    //       w = gammaT[w]; r = gammaT[r]; g = gammaT[g]; b = gammaT[b];
+    //       return (uint32_t(w) << 24) | (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b);
+    //     }
+    //   private:
+    //     static uint8_t gammaT[];
+    //     static uint8_t gammaT_inv[];
+    // };
+    // #define gamma32(c) NeoGammaWLEDMethod::Correct32(c)
+    // #define gamma8(c)  NeoGammaWLEDMethod::rawGamma8(c)
+    // #define gamma32inv(c) NeoGammaWLEDMethod::inverseGamma32(c)
+    // #define gamma8inv(c)  NeoGammaWLEDMethod::rawInverseGamma8(c)
+    // // [[gnu::hot, gnu::pure]] uint32_t color_blend(uint32_t c1, uint32_t c2 , uint8_t blend);
+    // inline uint32_t color_blend16(uint32_t c1, uint32_t c2, uint16_t b) { return color_blend(c1, c2, b >> 8); };
+    // [[gnu::hot, gnu::pure]] uint32_t color_add(uint32_t, uint32_t, bool preserveCR = false);
+    // [[gnu::hot, gnu::pure]] uint32_t color_fade(uint32_t c1, uint8_t amount, bool video = false);
+    // void adjust_color(CRGBW& rgb, int32_t hueShift, int32_t satChange,int32_t valueChange);
+
+    
 
     #ifndef WLED_USE_REAL_MATH
       // template <typename T> T atan_t(T x);
@@ -5103,7 +6309,7 @@ void sortEffects(Effect_DevStage promote_first);
 void serializeNetworks(JsonObject root);
     
 void toggleOnOff();
-byte scaledBri(byte in);
+
 
 //udp.cpp
 void notify(byte callMode, bool followUp=false);
@@ -5395,9 +6601,18 @@ byte bootPreset   _INIT(0);                   // save preset to load after power
 bool autoSegments    _INIT(false);
 bool correctWB       _INIT(false); // CCT color correction of RGB color
 bool cctFromRgb      _INIT(false); // CCT is calculated from RGB instead of using seg.cct
-bool gammaCorrectCol _INIT(true ); // use gamma correction on colors
+// bool gammaCorrectCol _INIT(true ); // use gamma correction on colors
 bool gammaCorrectBri _INIT(false); // use gamma correction on brightness
 float gammaCorrectVal _INIT(2.8f); // gamma correction value
+
+
+#ifdef WLED_USE_IC_CCT
+bool cctICused          _INIT(true);  // CCT IC used (Athom 15W bulbs)
+#else
+bool cctICused          _INIT(false); // CCT IC used (Athom 15W bulbs)
+#endif
+
+
 
 byte col[4]    _INIT_N(({ 255, 160, 0, 0 }));  // current RGB(W) primary color. col[] should be updated if you want to change the color.
 byte colSec[4] = UNPACK ({ 0, 0, 0, 0 });      // current RGB(W) secondary color
@@ -5407,7 +6622,7 @@ byte nightlightTargetBri _INIT(0);      // brightness after nightlight is over
 byte nightlightDelayMins _INIT(60);
 byte nightlightMode      _INIT(NL_MODE_FADE); // See const.h for available modes. Was nightlightFade
 bool fadeTransition      _INIT(true);   // enable crossfading color transition
-uint16_t transitionDelay _INIT(750);    // default crossfade duration in ms
+// uint16_t transitionDelay _INIT(750);    // default crossfade duration in ms
 
 byte briMultiplier _INIT(100);          // % of brightness to set (to limit power, if you set it to 50 and set bri to 255, actual brightness will be 127)
 
@@ -5604,11 +6819,6 @@ byte colNlT[4] _INIT_N(({ 0, 0, 0, 0 }));        // current nightlight color
 // brightness
 unsigned long lastOnTime _INIT(0);
 bool offMode             _INIT(!turnOnAtBoot);
-// byte bri                 _INIT(briS);          // global brightness (set)
-byte briOld              _INIT(0);             // global brightnes while in transition loop (previous iteration)
-byte briT                _INIT(0);             // global brightness during transition
-byte briLast             _INIT(128);           // brightness before turned off. Used for toggle function
-byte whiteLast           _INIT(128);           // white channel before turned off. Used for toggle function
 
 #define TOUCH_THRESHOLD 32 // limit to recognize a touch, higher value means more sensitive
 
@@ -5648,11 +6858,11 @@ byte notificationSentCallMode _INIT(CALL_MODE_INIT);
 uint8_t notificationCount _INIT(0);
 
 // effects
-byte effectCurrent _INIT(0);
-byte effectSpeed _INIT(128);
-byte effectIntensity _INIT(128);
-byte effectPalette _INIT(0);
-bool stateChanged _INIT(false);
+byte effectCurrent =0;
+byte effectSpeed =128;
+byte effectIntensity =128;
+byte effectPalette =0;
+bool stateChanged =false;
 
 // network
 bool udpConnected _INIT(false), udp2Connected _INIT(false), udpRgbConnected _INIT(false);

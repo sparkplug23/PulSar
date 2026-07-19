@@ -153,8 +153,9 @@ class mInterfaceLight :
 
 
     
-    BusManager* bus_manager = nullptr;
-    BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
+    // BusManager* bus_manager = nullptr;
+    // BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
+    std::vector<BusConfig> busConfigs;
     
 
     #ifdef USE_MODULE_CORE_RULES

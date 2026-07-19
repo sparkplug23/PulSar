@@ -7,12 +7,15 @@
   Copyright (c) 2024  Damian Schneider
   Licensed under the EUPL v. 1.2 or later
 */
+#ifndef _PARTICLE_SYSTEM_H
+#define _PARTICLE_SYSTEM_H
 
 
 #include <stdint.h>
 
 #include "_AnimatorLight.h"
 
+#include "colors.h"
 
 #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
 
@@ -414,3 +417,5 @@ uint32_t calculateNumberOfSources1D(const uint32_t requestedsources);
 bool allocateParticleSystemMemory1D(const uint32_t numparticles, const uint32_t numsources, const bool isadvanced, const uint32_t additionalbytes);
 
 #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+
+#endif // _PARTICLE_SYSTEM_H

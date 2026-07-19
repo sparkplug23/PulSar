@@ -993,7 +993,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
       dt.configperiod_secs = jtok_sub.getInt();
       ALOG_TST(PSTR("MQTTUpdateSeconds ConfigPeriod %d"), dt.configperiod_secs);
     }
-    tkr->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
+    // tkr->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
   }
 
 

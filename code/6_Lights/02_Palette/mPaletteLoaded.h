@@ -4,9 +4,11 @@
 #include "stdint.h"
 
 #include "6_Lights/02_Palette/mPalette.h"
+#include "6_Lights/03_Animator/fastled_slim/fastled_slim.h"
+
 
 #define FASTLED_INTERNAL // suppress pragma warning messages
-#include "6_Lights/00_Interface/FastLED/FastLED.h"
+// #include "6_Lights/00_Interface/FastLED/FastLED.h"
 
 #include <vector>
 

@@ -7,6 +7,7 @@
  * 
  */
 
+
 #ifndef mPalette_ProgmemPALETTES_H
 #define mPalette_ProgmemPALETTES_H
 
@@ -14,6 +15,8 @@
 #include "2_CoreSystem/mGlobalMacros.h"
 
 #include "internal/mPalette_Encoding_Options.h"
+
+#include "6_Lights/03_Animator/fastled_slim/fastled_slim.h"
 
 #define ELEVATION_DAY_THRESHOLD 10
 #define ELEVATION_NIGHT_THRESHOLD -10
@@ -2745,6 +2748,316 @@ const byte pink_white_purple_blend[] PROGMEM = {
 
   
 
+/*
+ * WLED Color palettes
+ *
+ * Note: palettes imported from http://seaviewsensing.com/pub/cpt-city are gamma corrected using gammas (1.182, 1.0, 1.136)
+ *       this is done to match colors of the palettes after applying the (default) global gamma of 2.2 to versions
+ *       prior to WLED 0.16 which used pre-applied gammas of (2.6,2.2,2.5) for these palettes.
+ *       Palettes from FastLED are intended to be used without gamma correction, an inverse gamma of 2.2 is applied to original colors
+ */
+
+// FastLED Palettes
+// ----------------
+// Palettes imported from FastLED @ 3.6.0 (https://github.com/FastLED/FastLED) are licensed under the MIT license
+// See /src/dependencies/fastled_slim/LICENSE.txt for details
+
+// Cloudy color palette
+const TProgmemRGBPalette16 CloudColors_p PROGMEM = {
+  CRGB::Blue,
+  CRGB::DarkBlue,
+  CRGB::DarkBlue,
+  CRGB::DarkBlue,
+
+  CRGB::DarkBlue,
+  CRGB::DarkBlue,
+  CRGB::DarkBlue,
+  CRGB::DarkBlue,
+
+  CRGB::Blue,
+  CRGB::DarkBlue,
+  CRGB::SkyBlue,
+  CRGB::SkyBlue,
+
+  CRGB::LightBlue,
+  CRGB::White,
+  CRGB::LightBlue,
+  CRGB::SkyBlue
+};
+
+// Lava color palette
+const TProgmemRGBPalette16 LavaColors_p PROGMEM = {
+  CRGB::Black,
+  CRGB::Maroon,
+  CRGB::Black,
+  CRGB::Maroon,
+
+  CRGB::DarkRed,
+  CRGB::DarkRed,
+  CRGB::Maroon,
+  CRGB::DarkRed,
+
+  CRGB::DarkRed,
+  CRGB::DarkRed,
+  CRGB::Red,
+  CRGB::Orange,
+
+  CRGB::White,
+  CRGB::Orange,
+  CRGB::Red,
+  CRGB::DarkRed
+};
+
+// Ocean colors, blues and whites
+const TProgmemRGBPalette16 OceanColors_p PROGMEM = {
+  CRGB::MidnightBlue,
+  CRGB::DarkBlue,
+  CRGB::MidnightBlue,
+  CRGB::Navy,
+
+  CRGB::DarkBlue,
+  CRGB::MediumBlue,
+  CRGB::SeaGreen,
+  CRGB::Teal,
+
+  CRGB::CadetBlue,
+  CRGB::Blue,
+  CRGB::DarkCyan,
+  CRGB::CornflowerBlue,
+
+  CRGB::Aquamarine,
+  CRGB::SeaGreen,
+  CRGB::Aqua,
+  CRGB::LightSkyBlue
+};
+
+// Forest colors, greens
+const TProgmemRGBPalette16 ForestColors_p PROGMEM = {
+  CRGB::DarkGreen,
+  CRGB::DarkGreen,
+  CRGB::DarkOliveGreen,
+  CRGB::DarkGreen,
+
+  CRGB::Green,
+  CRGB::ForestGreen,
+  CRGB::OliveDrab,
+  CRGB::Green,
+
+  CRGB::SeaGreen,
+  CRGB::MediumAquamarine,
+  CRGB::LimeGreen,
+  CRGB::YellowGreen,
+
+  CRGB::LightGreen,
+  CRGB::LawnGreen,
+  CRGB::MediumAquamarine,
+  CRGB::ForestGreen
+};
+
+// FastLed palettes, corrected with inverse gamma of 2.2 to match original looks
+
+// Party colors
+const TProgmemRGBPalette16 PartyColors_gc22 PROGMEM = {
+  0x9B00D5, 0xBD00B8, 0xDA0092, 0xF3005C,
+  0xF45500, 0xDC8F00, 0xD5B400, 0xD5D500,
+  0xD59B00, 0xEF6600, 0xF90044, 0xE10086,
+  0xC400B0, 0xA300CF, 0x7600E8, 0x0032FC};
+
+// Rainbow colors
+const TProgmemRGBPalette16 RainbowColors_gc22 PROGMEM = {
+  0xFF0000, 0xEB7000, 0xD59B00, 0xD5BA00,
+  0xD5D500, 0x9CEB00, 0x00FF00, 0x00EB70,
+  0x00D59B, 0x009CD4, 0x0000FF, 0x7000EB,
+  0x9B00D5, 0xBA00BB, 0xD5009B, 0xEB0072};
+
+// Rainbow colors with alternatating stripes of black
+const TProgmemRGBPalette16 RainbowStripeColors_gc22 PROGMEM = {
+  0xFF0000, 0x000000, 0xD59B00, 0x000000,
+  0xD5D500, 0x000000, 0x00FF00, 0x000000,
+  0x00D59B, 0x000000, 0x0000FF, 0x000000,
+  0x9B00D5, 0x000000, 0xD5009B, 0x000000};
+
+  
+
+/**
+ * @brief 
+ * 
+crgb16__indexs = 16
+
+colourmap = parula(16)
+
+
+rgb_out = mapfloat( colourmap, 0,1, 0,255)
+rgb_out = round(rgb_out)
+
+for i=1:16
+    rgb2_out{i} = sprintf("%02X%02X%02X", rgb_out(i,1),  rgb_out(i,2),  rgb_out(i,3) )
+end
+
+rgb2_out = rgb2_out'
+
+
+
+
+ * 
+ */
+
+/// Matlab
+const TProgmemRGBPalette16 Matlab_Purula_p PROGMEM =
+{
+    0x3E26A8, 0x4538D7, 0x484FF2, 0x4367FD, 
+    0x2F80FA, 0x2797EB, 0x1CAADF, 0x00B9C7,
+    0x29C3AA, 0x48CB86, 0x81CC59, 0xBBC42F,
+    0xEABA30, 0xFEC735, 0xF5E128, 0xF9FB15
+};
+
+/// Matlab
+const TProgmemRGBPalette16 Matlab_Turbo_p PROGMEM =
+{
+    0x30123B, 0x4143A7, 0x4771E9, 0x3E9BFE,
+    0x22C5E2, 0x1AE4B6, 0x46F884, 0x88FF4E,
+    0xB9F635, 0xE1DD37, 0xFABA39, 0xFD8D27,
+    0xF05B12, 0xD63506, 0xAF1801, 0x7A0403
+};
+
+/// Matlab
+const TProgmemRGBPalette16 Matlab_Hot_p PROGMEM =
+{
+0x2B0000,
+0x550000,
+0x800000,
+0xAA0000,
+0xD50000,
+0xFF0000,
+0xFF2B00,
+0xFF5500,
+0xFF8000,
+0xFFAA00,
+0xFFD500,
+0xFFFF00,
+0xFFFF40,
+0xFFFF80,
+0xFFFFBF,
+0xFFFFFF
+};
+
+/// Matlab
+const TProgmemRGBPalette16 Matlab_Cool_p PROGMEM =
+{
+    0x00FFFF,
+0x11EEFF,
+0x22DDFF,
+0x33CCFF,
+0x44BBFF,
+0x55AAFF,
+0x6699FF,
+0x7788FF,
+0x8877FF,
+0x9966FF,
+0xAA55FF,
+0xBB44FF,
+0xCC33FF,
+0xDD22FF,
+0xEE11FF,
+0xFF00FF
+};
+
+/// Matlab
+const TProgmemRGBPalette16 Matlab_Spring_p PROGMEM =
+{
+    0xFF00FF,
+0xFF11EE,
+0xFF22DD,
+0xFF33CC,
+0xFF44BB,
+0xFF55AA,
+0xFF6699,
+0xFF7788,
+0xFF8877,
+0xFF9966,
+0xFFAA55,
+0xFFBB44,
+0xFFCC33,
+0xFFDD22,
+0xFFEE11,
+0xFFFF00
+};
+
+/// Matlab
+const TProgmemRGBPalette16 Matlab_Autumn_p PROGMEM =
+{
+    0xFF0000,
+0xFF1100,
+0xFF2200,
+0xFF3300,
+0xFF4400,
+0xFF5500,
+0xFF6600,
+0xFF7700,
+0xFF8800,
+0xFF9900,
+0xFFAA00,
+0xFFBB00,
+0xFFCC00,
+0xFFDD00,
+0xFFEE00,
+0xFFFF00
+};
+
+
+
+
+/// Matlab
+const TProgmemRGBPalette16 Matlab_Jet_p PROGMEM =
+{
+  0x0000BF,
+0x0000FF,
+0x0040FF,
+0x0080FF,
+0x00BFFF,
+0x00FFFF,
+0x40FFBF,
+0x80FF80,
+0xBFFF40,
+0xFFFF00,
+0xFFBF00,
+0xFF8000,
+0xFF4000,
+0xFF0000,
+0xBF0000,
+0x800000,
+
+};
+
+
+
+// array of fastled palettes (palette 6 - 12)
+const TProgmemRGBPalette16 *const fastledPalettes[] PROGMEM = {
+  // &PartyColors_gc22,            //06-00 Party
+  // &CloudColors_p,               //07-01 Cloud
+  // &LavaColors_p,                //08-02 Lava
+  // &OceanColors_p,               //09-03 Ocean
+  // &ForestColors_p,              //10-04 Forest
+  // &RainbowColors_gc22,          //11-05 Rainbow
+  // &RainbowStripeColors_gc22     //12-06 Rainbow Bands
+
+  &RainbowColors_gc22,
+  &RainbowStripeColors_gc22,
+  &PartyColors_gc22,
+  &CloudColors_p,
+  &LavaColors_p,
+  &OceanColors_p,
+  &ForestColors_p,
+  &Matlab_Purula_p,
+  &Matlab_Hot_p,
+  &Matlab_Turbo_p,
+  &Matlab_Hot_p,
+  &Matlab_Cool_p,
+  &Matlab_Spring_p,
+  &Matlab_Autumn_p,
+  &Matlab_Jet_p
+
+};
 
 // Single array of defined cpt-city color palettes.
 // This will let us programmatically choose one based on

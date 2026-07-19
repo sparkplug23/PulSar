@@ -30,16 +30,33 @@ from typing import Dict, List, Optional, Tuple
 
 def _SerialCrashDumpBlock() -> str:
     return r"""
-    
-Stack smashing protect failure!
+                                                        
+                                 
+         
+Guru Meditation Error: Core  1 panic'ed (IllegalInstruction). Exception was unhandled.
+Memory dump at 0x40121060: 30004136 f27c7430 a0ff4c65
+Core  1 register dump:
+PC      : 0x40121065  PS      : 0x00060230  A0      : 0x8012426d  A1      : 0x3ffb2710  
+A2      : 0x3ffbdc7c  A3      : 0x00000000  A4      : 0x00000001  A5      : 0x00000000  
+A6      : 0x3ffc79ac  A7      : 0x00000f1e  A8      : 0x8012105f  A9      : 0x3ffb26f0  
+A10     : 0x00000f1e  A11     : 0x3ffaf260  A12     : 0x3ffc8af4  A13     : 0x00060223  
+A14     : 0x00060220  A15     : 0x00000001  SAR     : 0x0000000a  EXCCAUSE: 0x00000000  
+EXCVADDR: 0x00000000  LBEG    : 0x4008633d  LEND    : 0x40086345  LCOUNT  : 0x00000027  
 
 
-abort() was called at PC 0x4011c40f on core 1
+Backtrace:0x40121062:0x3ffb27100x4012426a:0x3ffb2730 0x40125b7e:0x3ffb2760 0x40125c8a:0x3ffb2780 0x400d4512:0x3ffb27a0 0x40128465:0x3ffb27e0 0x4012876a:0x3ffb2800 0x401454ed:0x3ffb2820 
 
 
-Backtrace:0x40083f7d:0x3ffb25800x4008e3c1:0x3ffb25a0 0x40094315:0x3ffb25c0 0x4011c40f:0x3ffb2640 0x400ec322:0x3ffb2660 0x400efa95:0x3ffb26b0 0x400ef8ce:0x3ffb26d0 0x400f0281:0x3ffb2700 0x400d4b99:0x3ffb2720 0x400e6281:0x3ffb2760 0x400e7059:0x3ffb2780 0x400d4b99:0x3ffb27a0 0x400f4b5d:0x3ffb27e0 0x400f4e62:0x3ffb2800 0x4010d8f9:0x3ffb2820 
 
 
+ELF file SHA256: 0000000000000000                                         
+             
+                                                                 
+               
+          
+ 
+        
+        
 
 
 
@@ -50,7 +67,7 @@ Backtrace:0x40083f7d:0x3ffb25800x4008e3c1:0x3ffb25a0 0x40094315:0x3ffb25c0 0x401
 # CONFIGURATION
 # ============================================================
 
-ENV_NAME = "testbed_02__motion_audio"   # <<< change if needed
+ENV_NAME = "cm_office__ws2815panel12v"   # <<< change if needed
 PROJECT_ROOT = None                   # None = auto-detect folder containing saved_compiles
 
 DEDUPE_CONSECUTIVE_ONLY = True

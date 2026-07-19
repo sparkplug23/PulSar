@@ -18,6 +18,9 @@ uint16_t PolyBus::total_virtual_length = 0;
  ** ColorOrderMap *************************************************************************************************************************************************** 
  *****************************************************************************************************************************************************************/
 
+static ColorOrderMap _colorOrderMap = {};
+
+
 bool ColorOrderMap::add(uint16_t start, uint16_t len, uint8_t colorOrder) {
   if (count() >= WLED_MAX_COLOR_ORDER_MAPPINGS || len == 0 || (colorOrder & 0x0F) > COL_ORDER_MAX) return false; // upper nibble contains W swap information
   _mappings.push_back({start,len,colorOrder});
@@ -34,6 +37,8 @@ uint8_t IRAM_ATTR ColorOrderMap::getPixelColorOrder(uint16_t pix, uint8_t defaul
   }
   return defaultColorOrder;
 }
+
+ColorOrderMap& BusManager::getColorOrderMap() { return _colorOrderMap; }
 
 /***************************************************************************************************************************************************************** 
  ** Bus: Parent class of BusDigital, BusPwm, and BusNetwork *************************************************************************************************************************************************** 
@@ -122,6 +127,7 @@ uint8_t Bus::getTypeIDbyName(const char* c)
 }
 
 
+
 void Bus::calculateCCT(uint32_t c, uint8_t &ww, uint8_t &cw) {
   unsigned cct = 0; //0 - full warm white, 255 - full cold white
   unsigned w = W(c);
@@ -130,35 +136,56 @@ void Bus::calculateCCT(uint32_t c, uint8_t &ww, uint8_t &cw) {
     if (_cct >= 1900)    cct = (_cct - 1900) >> 5;    // convert K in relative format
     else if (_cct < 256) cct = _cct;                  // already relative
   } else {
-    cct = (mAnimatorLight::approximateKelvinFromRGB(c) - 1900) >> 5;  // convert K (from RGB value) to relative format
+    cct = (tkr_anim->approximateKelvinFromRGB(c) - 1900) >> 5;  // convert K (from RGB value) to relative format
   }
-  
-  //0 - linear (CCT 127 = 50% warm, 50% cold), 127 - additive CCT blending (CCT 127 = 100% warm, 100% cold)
-  if (cct       < _cctBlend) ww = 255;
-  else                       ww = ((255-cct) * 255) / (255 - _cctBlend);
-  if ((255-cct) < _cctBlend) cw = 255;
-  else                       cw = (cct * 255) / (255 - _cctBlend);
+
+  // CCT blending modes (_cctBlend):
+  // blend<0: ww: ▓▓▒░__  | blend=0: ww: ▓▒▒░░ |  blend>0 ww: ▓▓▓▒░
+  //          cw: __░▒▓▓  |          cw: ░░▒▒▓ |          cw: ░▒▓▓▓
+  int32_t ww_val, cw_val;
+  if (_cctBlend < 0) {
+    uint16_t range = 255 - 2 * (uint16_t)(-_cctBlend);
+    if (range > 255) range = 255; // prevent overflow
+    ww_val = range ? ((int32_t)(255 + _cctBlend - cct) * 255) / range : (cct < 128 ? 255 : 0); // exclusive blending
+    cw_val = 255 - ww_val;
+  } else {
+    ww_val = _cctBlend ? ((int32_t)(255 - cct) * 255) / (255 - _cctBlend) : 255 - cct; // additive blending
+    cw_val = _cctBlend ? ((int32_t) cct      * 255) / (255 - _cctBlend) : cct;
+  }
+  ww = (uint8_t)(ww_val < 0 ? 0 : ww_val > 255 ? 255 : ww_val);
+  cw = (uint8_t)(cw_val < 0 ? 0 : cw_val > 255 ? 255 : cw_val);
 
   ww = (w * ww) / 255; //brightness scaling
   cw = (w * cw) / 255;
 }
 
-
-uint32_t Bus::autoWhiteCalc(uint32_t c) const {
+// calculates white channel and CCT values based on given settings
+uint32_t Bus::autoWhiteCalc(uint32_t c, uint8_t &ww, uint8_t &cw) const {
   unsigned aWM = _autoWhiteMode;
   if (_gAWM < AW_GLOBAL_DISABLED) aWM = _gAWM;
-  if (aWM == RGBW_MODE_MANUAL_ONLY) return c;
+  CRGBW cIn = c; // save original color for CCT calculation
   unsigned w = W(c);
-  //ignore auto-white calculation if w>0 and mode DUAL (DUAL behaves as BRIGHTER if w==0)
-  if (w > 0 && aWM == RGBW_MODE_DUAL) return c;
-  unsigned r = R(c);
-  unsigned g = G(c);
-  unsigned b = B(c);
-  if (aWM == RGBW_MODE_MAX) return RGBW32(r, g, b, r > g ? (r > b ? r : b) : (g > b ? g : b)); // brightest RGB channel
-  w = r < g ? (r < b ? r : b) : (g < b ? g : b);
-  if (aWM == RGBW_MODE_AUTO_ACCURATE) { r -= w; g -= w; b -= w; } //subtract w in ACCURATE mode
-  return RGBW32(r, g, b, w);
+  if (aWM != RGBW_MODE_MANUAL_ONLY) {
+    unsigned r = R(c); // note: using uint8_t generates larger code
+    unsigned g = G(c);
+    unsigned b = B(c);
+    if (aWM == RGBW_MODE_DUAL && w > 0) {
+      //ignore auto-white calculation if w>0 and mode DUAL (DUAL behaves as BRIGHTER if w==0)
+    } else if (aWM == RGBW_MODE_MAX) {
+      w = r > g ? (r > b ? r : b) : (g > b ? g : b); // brightest RGB channel
+    } else {
+      w = r < g ? (r < b ? r : b) : (g < b ? g : b); // darkest RGB channel
+      if (aWM == RGBW_MODE_AUTO_ACCURATE) { r -= w; g -= w; b -= w; } //subtract w in ACCURATE mode
+    }
+    c = RGBW32(r, g, b, w);
+  }
+  if (_hasCCT) {
+    cIn.w = w; // need original rgb values in case CCT is derived from RGB
+    calculateCCT(cIn, ww, cw);
+  }
+  return c;
 }
+
 
 uint8_t *Bus::allocateData(size_t size) {
   if (_data) free(_data); // should not happen, but for safety
@@ -171,49 +198,110 @@ uint8_t *Bus::allocateData(size_t size) {
  *****************************************************************************************************************************************************************/
 
 
-BusDigital::BusDigital(BusConfig &bc, uint8_t nr, const ColorOrderMap &com)
-: Bus(bc.type, bc.start, bc.autoWhite, bc.length, bc.reversed, (bc.refreshReq))
+// BusDigital::BusDigital(const BusConfig &bc)//, uint8_t nr, const ColorOrderMap &com)
+// : Bus(bc.type, bc.start, bc.autoWhite, bc.length, bc.reversed, (bc.refreshReq))
+// , _skip(bc.skipAmount) //sacrificial pixels
+// , _colorOrder(bc.colorOrder)
+// , _milliAmpsPerLed(bc.milliAmpsPerLed)
+// , _milliAmpsMax(bc.milliAmpsMax)
+// // , _colorOrderMap(com)
+// {
+
+//   if (!isDigital(bc.type) || !bc.length)
+//   {    
+//     ALOG_ERR(PSTR("BusDigital type%d or length%d"), bc.type, bc.length);
+//     return;
+//   }
+//   _frequencykHz = 0U;
+//   _pins[0] = bc.pins[0];
+//   if (is2Pin(bc.type)) 
+//   {
+//     _pins[1] = bc.pins[1];
+//     _frequencykHz = bc.frequency ? bc.frequency : 2000U; // 2MHz clock if undefined
+//   }
+
+//   _iType = PolyBus::getI(bc.type, _pins, nr);
+//   if (_iType == BUSTYPE__NONE__ID)
+//   {
+//     Serial.println("BusDigital: No Bus");
+//     return;
+//   }
+
+//   _hasRgb = hasRGB(bc.type);
+//   _hasWhite = hasWhite(bc.type);
+//   _hasCCT = hasCCT(bc.type);
+//   /**
+//    * Next line creates the buffer needed to store the pixels
+//    * number of pixels * number of channels [3 (RGB) or 4 (RGBW) ] later I may want to add a check for RGBWW, and making the buffer twice as long for my transition effects 
+//    */
+//   if (bc.doubleBuffer && !allocateData(bc.length * Bus::getNumberOfChannels(bc.type))) return;
+//   //_buffering = bc.doubleBuffer;
+//   uint16_t lenToCreate = bc.length;
+//   if (bc.type == BUSTYPE_WS2812_1CH_X3) lenToCreate = NUM_ICS_WS2812_1CH_3X(bc.length); // only needs a third of "RGB" LEDs for NeoPixelBus
+//   _busPtr = PolyBus::create(_iType, _pins, lenToCreate + _skip, nr);
+//   _valid = (_busPtr != nullptr);
+//   ALOG_INF(PSTR("%successfully inited strip %u (len %u) with type %u and pins %u,%u (itype %u). mA=%d/%d\n"), _valid?"S":"Uns", nr, bc.length, bc.type, _pins[0], is2Pin(bc.type)?_pins[1]:255, _iType, _milliAmpsPerLed, _milliAmpsMax);
+// }
+
+
+
+BusDigital::BusDigital(const BusConfig &bc)
+: Bus(bc.type, bc.start, bc.autoWhite, bc.count, bc.reversed, (bc.refreshReq || bc.type == TYPE_TM1814))
 , _skip(bc.skipAmount) //sacrificial pixels
 , _colorOrder(bc.colorOrder)
 , _milliAmpsPerLed(bc.milliAmpsPerLed)
 , _milliAmpsMax(bc.milliAmpsMax)
-, _colorOrderMap(com)
+, _driverType(bc.driverType) // Store driver preference (0=RMT, 1=I2S)
 {
+  ALOG_INF(PSTR("bc.type %d"), bc.type);
+  DEBUGBUS_PRINTLN(F("Bus: Creating digital bus."));
+  if (!isDigital(bc.type) || !bc.count) { DEBUGBUS_PRINTLN(F("Not digial or empty bus!")); return; }
+  _iType = bc.iType; // reuse the iType that was determined by polyBus in getI() in finalizeInit()
 
-  if (!isDigital(bc.type) || !bc.length)
-  {    
-    ALOG_ERR(PSTR("BusDigital type%d or length%d"), bc.type, bc.length);
-    return;
-  }
+  ALOG_INF(PSTR("type %d"), _iType);
+
+  if (_iType == BUSTYPE__NONE__ID) { DEBUGBUS_PRINTLN(F("Incorrect iType!")); return; }
+
+  // if (!PinManager::allocatePin(bc.pins[0], true, PinOwner::BusDigital)) { DEBUGBUS_PRINTLN(F("Pin 0 allocated!")); return; }
   _frequencykHz = 0U;
+  _colorSum = 0;
   _pins[0] = bc.pins[0];
-  if (is2Pin(bc.type)) 
-  {
+  if (is2Pin(bc.type)) {
+    // if (!PinManager::allocatePin(bc.pins[1], true, PinOwner::BusDigital)) {
+    //   cleanup();
+    //   DEBUGBUS_PRINTLN(F("Pin 1 allocated!"));
+    //   return;
+    // }
     _pins[1] = bc.pins[1];
     _frequencykHz = bc.frequency ? bc.frequency : 2000U; // 2MHz clock if undefined
   }
 
-  _iType = PolyBus::getI(bc.type, _pins, nr);
-  if (_iType == BUSTYPE__NONE__ID)
-  {
-    Serial.println("BusDigital: No Bus");
-    return;
-  }
+  uint8_t nr = 0;
 
   _hasRgb = hasRGB(bc.type);
   _hasWhite = hasWhite(bc.type);
   _hasCCT = hasCCT(bc.type);
-  /**
-   * Next line creates the buffer needed to store the pixels
-   * number of pixels * number of channels [3 (RGB) or 4 (RGBW) ] later I may want to add a check for RGBWW, and making the buffer twice as long for my transition effects 
-   */
-  if (bc.doubleBuffer && !allocateData(bc.length * Bus::getNumberOfChannels(bc.type))) return;
-  //_buffering = bc.doubleBuffer;
-  uint16_t lenToCreate = bc.length;
-  if (bc.type == BUSTYPE_WS2812_1CH_X3) lenToCreate = NUM_ICS_WS2812_1CH_3X(bc.length); // only needs a third of "RGB" LEDs for NeoPixelBus
+  uint16_t lenToCreate = bc.count;
+  if (bc.type == TYPE_WS2812_1CH_X3) lenToCreate = NUM_ICS_WS2812_1CH_3X(bc.count); // only needs a third of "RGB" LEDs for NeoPixelBus
   _busPtr = PolyBus::create(_iType, _pins, lenToCreate + _skip, nr);
-  _valid = (_busPtr != nullptr);
-  ALOG_INF(PSTR("%successfully inited strip %u (len %u) with type %u and pins %u,%u (itype %u). mA=%d/%d\n"), _valid?"S":"Uns", nr, bc.length, bc.type, _pins[0], is2Pin(bc.type)?_pins[1]:255, _iType, _milliAmpsPerLed, _milliAmpsMax);
+  _valid = (_busPtr != nullptr) && bc.count > 0;
+  // fix for wled#4759
+  if (_valid) for (unsigned i = 0; i < _skip; i++) {
+    PolyBus::setPixelColor(_busPtr, _iType, i, 0, COL_ORDER_GRB); // set sacrificial pixels to black (CO does not matter here)
+  }
+  else {
+    cleanup();
+  }
+  DEBUGBUS_PRINTF_P(PSTR("Bus len:%u, type:%u (RGB:%d, W:%d, CCT:%d), pins:%u,%u [itype:%u, driver:%s] mA=%d/%d %s\n"),
+    (int)bc.count,
+    (int)bc.type,
+    (int)_hasRgb, (int)_hasWhite, (int)_hasCCT,
+    (unsigned)_pins[0], is2Pin(bc.type)?(unsigned)_pins[1]:255U,
+    (unsigned)_iType,
+    isI2S() ? "I2S" : "RMT",
+    (int)_milliAmpsPerLed, (int)_milliAmpsMax,
+    _valid ? " " : "FAILED"
+  );
 }
 
 
@@ -422,32 +510,103 @@ void BusDigital::setStatusPixel(uint32_t c) {
 }
 
 
-/**
- * @brief Later these set/get will need to have an ifdef to enable rgbcct methods, so either complete duplication
- * or uses the same functions, but includes subcode that has ifdefs that enable 5 byte encoding for CCT. The bus wrapper will likely need to have rgbww ifdef method to make it easier to use.
- * 
- * @param pix 
- * @param c 
- */
-void IRAM_ATTR BusDigital::setPixelColor(uint32_t pix, ColourBaseType c) {
 
-  // ALOG_INF(PSTR("p\t%d"), pix);
+// note: using WLED_O2_ATTR makes this function ~7% faster at the expense of 600 bytes of flash
+void IRAM_ATTR BusDigital::setPixelColor(unsigned pix, uint32_t c) {
+  if (!_valid) return;
+  // if (Bus::_cct >= 1900) c = tkr_anim->colorBalanceFromKelvin(Bus::_cct, c); //color correction from CCT
+  uint8_t cctWW = 0, cctCW = 0;
+  uint16_t wwcw = 0;
+  // if (hasWhite()) c = autoWhiteCalc(c, cctWW, cctCW);
+  c = color_fade(c, _bri, true); // apply brightness
+
+  // if (hasCCT()) {
+  //   wwcw = ((cctCW + 1) * _bri) & 0xFF00; // apply brightness to CCT (store CW in upper byte)
+  //   wwcw |= ((cctWW + 1) * _bri) >> 8;
+  //   if (_type == TYPE_WS2812_WWA) c = RGBW32(wwcw, wwcw >> 8, 0, W(c)); // ww,cw, 0, w
+  // }
+
+  // if (BusManager::_useABL) {
+  // // if (tkr_iLight->bus_manager->_useABL) {
+  //   // if using ABL, sum all color channels to estimate current and limit brightness in show()
+  //   uint8_t r = R(c), g = G(c), b = B(c);
+  //   if (_milliAmpsPerLed < 255) { // normal ABL
+  //     _colorSum += r + g + b + W(c);
+  //   } else { // wacky WS2815 power model, ignore white channel, use max of RGB (issue #549)
+  //     _colorSum += ((r > g) ? ((r > b) ? r : b) : ((g > b) ? g : b));
+  //   }
+  // }
+
   if (_reversed) pix = _len - pix -1;
-  else pix += _skip;
-  uint8_t co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
-  PolyBus::setPixelColor(_busPtr, _iType, pix, c, co);
+  pix += _skip;
+  const uint8_t co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
+  if (_type == TYPE_WS2812_1CH_X3) { // map to correct IC, each controls 3 LEDs
+    unsigned pOld = pix;
+    pix = IC_INDEX_WS2812_1CH_3X(pix);
+    uint32_t cOld = PolyBus::getPixelColor(_busPtr, _iType, pix, co);
+    switch (pOld % 3) { // change only the single channel (TODO: this can cause loss because of get/set)
+      case 0: c = RGBW32(R(cOld), W(c)   , B(cOld), 0); break;
+      case 1: c = RGBW32(W(c)   , G(cOld), B(cOld), 0); break;
+      case 2: c = RGBW32(R(cOld), G(cOld), W(c)   , 0); break;
+    }
+  }
+
+  PolyBus::setPixelColor(_busPtr, _iType, pix, c, co, wwcw);
 
 }
 
-// returns original color if global buffering is enabled, else returns lossly restored color from bus
-ColourBaseType IRAM_ATTR BusDigital::getPixelColor(uint32_t pix) const {
-
-    if (_reversed) pix = _len - pix -1;
-    else pix += _skip;
-    uint8_t co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
-    return PolyBus::getPixelColor(_busPtr, _iType, pix, co);
-
+// returns lossly restored color from bus
+uint32_t IRAM_ATTR BusDigital::getPixelColor(unsigned pix) const {
+  if (!_valid) return 0;
+  if (_reversed) pix = _len - pix -1;
+  pix += _skip;
+  const uint8_t co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
+  uint32_t c = restoreColorLossy(PolyBus::getPixelColor(_busPtr, _iType, (_type==TYPE_WS2812_1CH_X3) ? IC_INDEX_WS2812_1CH_3X(pix) : pix, co),_NPBbri);
+  if (_type == TYPE_WS2812_1CH_X3) { // map to correct IC, each controls 3 LEDs
+    uint8_t r = R(c);
+    uint8_t g = _reversed ? B(c) : G(c); // should G and B be switched if _reversed?
+    uint8_t b = _reversed ? G(c) : B(c);
+    switch (pix % 3) { // get only the single channel
+      case 0: c = RGBW32(g, g, g, g); break;
+      case 1: c = RGBW32(r, r, r, r); break;
+      case 2: c = RGBW32(b, b, b, b); break;
+    }
+  }
+  if (_type == TYPE_WS2812_WWA) {
+    uint8_t w = R(c) | G(c);
+    c = RGBW32(w, w, 0, w);
+  }
+  return c;
+  
 }
+
+
+// /**
+//  * @brief Later these set/get will need to have an ifdef to enable rgbcct methods, so either complete duplication
+//  * or uses the same functions, but includes subcode that has ifdefs that enable 5 byte encoding for CCT. The bus wrapper will likely need to have rgbww ifdef method to make it easier to use.
+//  * 
+//  * @param pix 
+//  * @param c 
+//  */
+// void IRAM_ATTR BusDigital::setPixelColor(uint32_t pix, ColourBaseType c) {
+
+//   // ALOG_INF(PSTR("p\t%d"), pix);
+//   if (_reversed) pix = _len - pix -1;
+//   else pix += _skip;
+//   uint8_t co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
+//   PolyBus::setPixelColor(_busPtr, _iType, pix, c, co);
+
+// }
+
+// // returns original color if global buffering is enabled, else returns lossly restored color from bus
+// ColourBaseType IRAM_ATTR BusDigital::getPixelColor(uint32_t pix) const {
+
+//     if (_reversed) pix = _len - pix -1;
+//     else pix += _skip;
+//     uint8_t co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
+//     return PolyBus::getPixelColor(_busPtr, _iType, pix, co);
+
+// }
 
 
 uint8_t BusDigital::getPins(uint8_t* pinArray) const
@@ -494,6 +653,10 @@ std::vector<LEDType> BusDigital::getLEDTypes() {
 }
 
 
+bool BusDigital::isI2S() {
+  return (_iType & 0x01) == 0; // I2S types have even iType values
+}
+
 void BusDigital::begin() {
   PolyBus::begin(_busPtr, _iType, _pins);
 }
@@ -506,6 +669,74 @@ void BusDigital::cleanup()
   _valid = false;
   _busPtr = nullptr;
   if (_data != nullptr) freeData();
+}
+
+
+//DISCLAIMER
+//The following function attemps to calculate the current LED power usage,
+//and will limit the brightness to stay below a set amperage threshold.
+//It is NOT a measurement and NOT guaranteed to stay within the ablMilliampsMax margin.
+//Stay safe with high amperage and have a reasonable safety margin!
+//I am NOT to be held liable for burned down garages or houses!
+
+// note on ABL implementation:
+// ABL is set up in finalizeInit()
+// scaled color channels are summed in BusDigital::setPixelColor()
+// the used current is estimated and limited in BusManager::show()
+// if limit is set too low, brightness is limited to 1 to at least show some light
+// to disable brightness limiter for a bus, set LED current to 0
+
+void BusDigital::estimateCurrent() {
+  uint32_t actualMilliampsPerLed = _milliAmpsPerLed;
+  if (_milliAmpsPerLed == 255) {
+    // use wacky WS2815 power model, see WLED issue #549
+    _colorSum *= 3; // sum is sum of max value for each color, need to multiply by three to account for clrUnitsPerChannel being 3*255
+    actualMilliampsPerLed = 12; // from testing an actual strip
+  }
+  // _colorSum has all the values of color channels summed, max would be getLength()*(3*255 + (255 if hasWhite()): convert to milliAmps
+  uint32_t clrUnitsPerChannel = hasWhite() ? 4*255 : 3*255;
+  _milliAmpsTotal = ((uint64_t)_colorSum * actualMilliampsPerLed) / clrUnitsPerChannel + getLength(); // add 1mA standby current per LED to total (WS2812: ~0.7mA, WS2815: ~2mA)
+}
+
+void BusDigital::applyBriLimit(uint8_t newBri) {
+  // a newBri of 0 means calculate per-bus brightness limit
+  _NPBbri = 255; // reset, intermediate value is set below, final value is calculated in bus::show()
+  if (newBri == 0) {
+    if (_milliAmpsLimit == 0 || _milliAmpsTotal == 0) return; // ABL not used for this bus
+    newBri = 255;
+
+    if (_milliAmpsLimit > getLength()) { // each LED uses about 1mA in standby
+      if (_milliAmpsTotal > _milliAmpsLimit) {
+        // scale brightness down to stay in current limit
+        newBri = ((uint32_t)_milliAmpsLimit * 255) / _milliAmpsTotal + 1; // +1 to avoid 0 brightness
+        _milliAmpsTotal = _milliAmpsLimit;
+      }
+    } else {
+      newBri = 1; // limit too low, set brightness to 1, this will dim down all colors to minimum since we use video scaling
+      _milliAmpsTotal = getLength(); // estimate bus current as minimum
+    }
+  }
+
+  if (newBri < 255) {
+    _NPBbri = newBri; // store value so it can be updated in show() (must be updated even if ABL is not used)
+    uint16_t wwcw = 0;
+    unsigned hwLen = _len;
+    if (_type == TYPE_WS2812_1CH_X3) hwLen = NUM_ICS_WS2812_1CH_3X(_len); // only needs a third of "RGB" LEDs for NeoPixelBus
+    for (unsigned i = 0; i < hwLen; i++) {
+      uint8_t co = _colorOrderMap.getPixelColorOrder(i+_start, _colorOrder); // need to revert color order for correct color scaling and CCT calc in case white is swapped
+      uint32_t c = PolyBus::getPixelColor(_busPtr, _iType, i, co); // Note: if ABL would be calculated as a seperate loop (as it was before) it is slower but could use original color, making it more color-accurate
+      if (hasCCT()) {
+        uint8_t cctWW, cctCW;
+        Bus::calculateCCT(c, cctWW, cctCW); // calculate CCT before fade (more accurate) | Note: if using "accurate" white calculation mode, approximateKelvinFromRGB can be very inaccurate (white is subtracted)
+        wwcw = ((cctCW + 1) * newBri) & 0xFF00; // apply brightness to CCT (leave it in upper byte for 16bit NeoPixelBus value)
+        wwcw |= ((cctWW + 1) * newBri) >> 8;
+      }
+      c = color_fade(c, newBri, true); // apply additional dimming  note: using inline version is a bit faster but overhead of getPixelColor() dominates the speed impact by far
+      PolyBus::setPixelColor(_busPtr, _iType, i, c, co, wwcw); // repaint all pixels with new brightness
+    }
+  }
+
+  _colorSum = 0; // reset for next frame
 }
 
 /*****************************************************************************************************************************************************************
@@ -605,7 +836,7 @@ void BusPwm::deallocateLedc(byte pos, byte channels)
 #endif
 
 
-BusPwm::BusPwm(BusConfig &bc)
+BusPwm::BusPwm(const BusConfig &bc)
 : Bus(bc.type, bc.start, bc.autoWhite, 1, bc.reversed, bc.refreshReq) // hijack Off refresh flag to indicate usage of dithering
 {
   if (!isPWM(bc.type)) return;
@@ -678,75 +909,64 @@ BusPwm::BusPwm(BusConfig &bc)
 }
 
 
-void BusPwm::setPixelColor(uint32_t pix, ColourBaseType c) {
-  
-  #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-  _data[0] = c.R; 
-  _data[1] = c.G; 
-  _data[2] = c.B;
-  _data[3] = c.WW;
-  _data[4] = c.CW;
-  #else
+void BusPwm::setPixelColor(unsigned pix, uint32_t c) {
   if (pix != 0 || !_valid) return; //only react to first pixel
-  if (_type != BUSTYPE_ANALOG_3CH) c = autoWhiteCalc(c);
-  if (Bus::_cct >= 1900 && (_type == BUSTYPE_ANALOG_3CH || _type == BUSTYPE_ANALOG_4CH)) {
+  if (Bus::_cct >= 1900 && (_type == TYPE_ANALOG_3CH || _type == TYPE_ANALOG_4CH)) {
     c = tkr_anim->colorBalanceFromKelvin(Bus::_cct, c); //color correction from CCT
   }
-  uint8_t r = R(c);
-  uint8_t g = G(c);
-  uint8_t b = B(c);
-  uint8_t w = W(c);
+  uint8_t cctWW, cctCW;
+  if (_type != TYPE_ANALOG_3CH) c = autoWhiteCalc(c, cctWW, cctCW);
+  uint8_t r = R(c), g = G(c), b = B(c), w = W(c);
+  // note: no color scaling, brightness is applied in show()
 
   switch (_type) {
-    case BUSTYPE_ANALOG_1CH: //one channel (white), relies on auto white calculation
+    case TYPE_ANALOG_1CH: //one channel (white), relies on auto white calculation
       _data[0] = w;
       break;
-    case BUSTYPE_ANALOG_2CH: //warm white + cold white
-      if(0){//if (cctICused) {
+    case TYPE_ANALOG_2CH: //warm white + cold white
+      if (tkr_anim->cctICused) {
         _data[0] = w;
         _data[1] = Bus::_cct < 0 || Bus::_cct > 255 ? 127 : Bus::_cct;
       } else {
-        Bus::calculateCCT(c, _data[0], _data[1]);
+        _data[0] = cctWW;
+        _data[1] = cctCW;
       }
       break;
-    case BUSTYPE_ANALOG_5CH: //RGB + warm white + cold white
-      if(0)//if (cctICused)
+    case TYPE_ANALOG_5CH: //RGB + warm white + cold white
+      if (tkr_anim->cctICused)
         _data[4] = Bus::_cct < 0 || Bus::_cct > 255 ? 127 : Bus::_cct;
-      else
-        Bus::calculateCCT(c, w, _data[4]);
-    case BUSTYPE_ANALOG_4CH: //RGBW
+      else {
+        w = cctWW;
+        _data[4] = cctCW;
+      }
+      // fall through to set RGBW channels
+    case TYPE_ANALOG_4CH: //RGBW
       _data[3] = w;
-    case BUSTYPE_ANALOG_3CH: //standard dumb RGB
+    case TYPE_ANALOG_3CH: //standard dumb RGB
       _data[0] = r; _data[1] = g; _data[2] = b;
       break;
   }
-  #endif
 }
 
-
-ColourBaseType BusPwm::getPixelColor(uint32_t pix) const {
-
-  #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-  return RgbwwColor(_data[0], _data[1], _data[2], _data[3], _data[4]);
-  #else
+//does no index check
+uint32_t BusPwm::getPixelColor(unsigned pix) const {
   if (!_valid) return 0;
   // TODO getting the reverse from CCT is involved (a quick approximation when CCT blending is ste to 0 implemented)
   switch (_type) {
-    case BUSTYPE_ANALOG_1CH: //one channel (white), relies on auto white calculation
+    case TYPE_ANALOG_1CH: //one channel (white), relies on auto white calculation
       return RGBW32(0, 0, 0, _data[0]);
-    case BUSTYPE_ANALOG_2CH: //warm white + cold white
-      if(0)/*if (cctICused)*/ return RGBW32(0, 0, 0, _data[0]);
+    case TYPE_ANALOG_2CH: //warm white + cold white
+      if (tkr_anim->cctICused) return RGBW32(0, 0, 0, _data[0]);
       else           return RGBW32(0, 0, 0, _data[0] + _data[1]);
-    case BUSTYPE_ANALOG_5CH: //RGB + warm white + cold white
-      if(0)/*if (cctICused)*/ return RGBW32(_data[0], _data[1], _data[2], _data[3]);
+    case TYPE_ANALOG_5CH: //RGB + warm white + cold white
+      if (tkr_anim->cctICused) return RGBW32(_data[0], _data[1], _data[2], _data[3]);
       else           return RGBW32(_data[0], _data[1], _data[2], _data[3] + _data[4]);
-    case BUSTYPE_ANALOG_4CH: //RGBW
+    case TYPE_ANALOG_4CH: //RGBW
       return RGBW32(_data[0], _data[1], _data[2], _data[3]);
-    case BUSTYPE_ANALOG_3CH: //standard dumb RGB
+    case TYPE_ANALOG_3CH: //standard dumb RGB
       return RGBW32(_data[0], _data[1], _data[2], 0);
   }
   return RGBW32(_data[0], _data[0], _data[0], _data[0]);
-  #endif
 }
 
 void BusPwm::show() 
@@ -909,7 +1129,7 @@ void BusPwm::deallocatePins()
  ***************************************************************************************************************************************************************** 
  *****************************************************************************************************************************************************************/
 
-BusOnOff::BusOnOff(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite) 
+BusOnOff::BusOnOff(const BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite) 
 {
   _valid = false;
   if (bc.type != BUSTYPE_ONOFF) return;
@@ -920,29 +1140,21 @@ BusOnOff::BusOnOff(BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite)
   _valid = true;
 }
 
-void BusOnOff::setPixelColor(uint32_t pix, ColourBaseType c) {
+
+void BusOnOff::setPixelColor(unsigned pix, uint32_t c) {
   if (pix != 0 || !_valid) return; //only react to first pixel
-  
-  #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-
-  #else
-  c = autoWhiteCalc(c);
-  uint8_t r = R(c);
-  uint8_t g = G(c);
-  uint8_t b = B(c);
-  uint8_t w = W(c);
-  _data[0] = bool(r|g|b|w) && bool(_bri) ? 0xFF : 0;
-  #endif
+  _data = (c > 0) && bool(_bri) ? 0xFF : 0; // if any color channel is on and brightness is not zero, set to on
 }
 
-ColourBaseType BusOnOff::getPixelColor(uint32_t pix) const {
+uint32_t BusOnOff::getPixelColor(unsigned pix) const {
   if (!_valid) return 0;
-  return RGBW32(_data[0], _data[0], _data[0], _data[0]);
+  return RGBW32(_data, _data, _data, _data);
 }
+
 
 void BusOnOff::show() {
   if (!_valid) return;
-  digitalWrite(_pin, _reversed ? !(bool)_data[0] : (bool)_data[0]);
+  digitalWrite(_pin, _reversed ? !(bool)_data : (bool)_data);
 }
 
 uint8_t BusOnOff::getPins(uint8_t* pinArray) const
@@ -966,8 +1178,8 @@ std::vector<LEDType> BusOnOff::getLEDTypes() {
  ***************************************************************************************************************************************************************** 
  *****************************************************************************************************************************************************************/
 
-BusNetwork::BusNetwork(BusConfig &bc)
-: Bus(bc.type, bc.start, bc.autoWhite, bc.length)
+BusNetwork::BusNetwork(const BusConfig &bc)
+: Bus(bc.type, bc.start, bc.autoWhite, bc.count)
 , _broadcastLock(false)
 {
   switch (bc.type) {
@@ -994,33 +1206,24 @@ BusNetwork::BusNetwork(BusConfig &bc)
 }
 
 
-void BusNetwork::setPixelColor(uint32_t pix, ColourBaseType c) {
-  
-  #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-
-  #else
+void BusNetwork::setPixelColor(unsigned pix, uint32_t c) {
   if (!_valid || pix >= _len) return;
-  if (_hasWhite) c = autoWhiteCalc(c);
+  uint8_t ww, cw; // dummy, unused
+  if (_hasWhite) c = autoWhiteCalc(c, ww, cw);
   if (Bus::_cct >= 1900) c = tkr_anim->colorBalanceFromKelvin(Bus::_cct, c); //color correction from CCT
   unsigned offset = pix * _UDPchannels;
   _data[offset]   = R(c);
   _data[offset+1] = G(c);
   _data[offset+2] = B(c);
   if (_hasWhite) _data[offset+3] = W(c);
-  #endif
 }
 
-
-ColourBaseType BusNetwork::getPixelColor(uint32_t pix) const {
-  
-  #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-  
-  #else
+uint32_t BusNetwork::getPixelColor(unsigned pix) const {
   if (!_valid || pix >= _len) return 0;
   unsigned offset = pix * _UDPchannels;
   return RGBW32(_data[offset], _data[offset+1], _data[offset+2], (hasWhite() ? _data[offset+3] : 0));
-  #endif
 }
+
 
 
 void BusNetwork::show() 
@@ -1068,6 +1271,26 @@ std::vector<LEDType> BusNetwork::getLEDTypes() {
 }
 
 
+BusPlaceholder::BusPlaceholder(const BusConfig &bc)
+: Bus(bc.type, bc.start, bc.autoWhite, bc.count, bc.reversed, bc.refreshReq)
+, _colorOrder(bc.colorOrder)
+, _skipAmount(bc.skipAmount)
+, _driverType(bc.driverType)
+, _frequency(bc.frequency)
+, _milliAmpsPerLed(bc.milliAmpsPerLed)
+, _milliAmpsMax(bc.milliAmpsMax)
+, _text(bc.text)
+{
+  memcpy(_pins, bc.pins, sizeof(_pins));
+}
+
+uint8_t BusPlaceholder::getPins(uint8_t* pinArray) const {
+  size_t nPins = Bus::getNumberOfPins(_type);
+  if (pinArray) {
+    for (size_t i = 0; i < nPins; i++) pinArray[i] = _pins[i];
+  }
+  return nPins;
+}
 
 /*****************************************************************************************************************************************************************
  ***************************************************************************************************************************************************************** 
@@ -1076,70 +1299,139 @@ std::vector<LEDType> BusNetwork::getLEDTypes() {
  *****************************************************************************************************************************************************************/
 
 
-//utility to get the approx. memory usage of a given BusConfig
-uint32_t BusManager::memUsage(BusConfig &bc) {
-  if (Bus::isOnOff(bc.type) || Bus::isPWM(bc.type)) return OUTPUT_MAX_PINS_WLED;
 
-  unsigned len = bc.length + bc.skipAmount;
-  unsigned channels = Bus::getNumberOfChannels(bc.type);
-  unsigned multiplier = 1;
-  if (Bus::isDigital(bc.type)) { // digital types
-    if (Bus::is16bit(bc.type)) len *= 2; // 16-bit LEDs
-    #ifdef ESP8266
-      if (bc.pins[0] == 3) { //8266 DMA uses 5x the mem
-        multiplier = 5;
-      }
-    #else //ESP32 RMT uses double buffer, parallel I2S uses 8x buffer (3 times)
-      multiplier = PolyBus::isParallelOutput() ? 24 : 2;
-    #endif
+//utility to get the approx. memory usage of a given BusConfig inclduding segmentbuffer and global buffer (4 bytes per pixel)
+size_t BusConfig::memUsage() const {
+  
+  ALOG_INF(PSTR(D_LOG_PIXEL "count=%d"),count);
+  size_t mem = (count + skipAmount) * 8; // 8 bytes per pixel for segment + global buffer
+  if (Bus::isVirtual(type)) {
+    mem += sizeof(BusNetwork) + (count * Bus::getNumberOfChannels(type)); // note: getNumberOfChannels() includes CCT channel if applicable but virtual buses do not use CCT channel buffer
+  } else if (Bus::isDigital(type)) {
+    // if any of digital buses uses I2S, there is additional common I2S DMA buffer not accounted for here
+    mem += sizeof(BusDigital) + PolyBus::memUsage(count + skipAmount, iType);
+  } else if (Bus::isOnOff(type)) {
+    mem += sizeof(BusOnOff);
+  } else {
+    mem += sizeof(BusPwm);
   }
-  return (len * multiplier + bc.doubleBuffer * (bc.length + bc.skipAmount)) * channels;
+
+  ALOG_INF(PSTR(D_LOG_PIXEL "memUsage=%d"),mem);
+
+  return mem;
 }
 
 
-uint32_t BusManager::memUsage(unsigned maxChannels, unsigned maxCount, unsigned minBuses) {
-  //ESP32 RMT uses double buffer, parallel I2S uses 8x buffer (3 times)
-  unsigned multiplier = PolyBus::isParallelOutput() ? 3 : 2;
-  return (maxChannels * maxCount * minBuses * multiplier);
+// int BusManager::add(BusConfig &bc) 
+// {
+
+//   DEBUG_LINE_HERE;
+
+//   uint8_t bus_count = getNumBusses() - getNumVirtualBusses();
+//   if (bus_count >= WLED_MAX_BUSSES) 
+//   {
+//     Serial.printf("if (bus_count >= WLED_MAX_BUSSES) %d\n\r", bus_count);
+//     return -1;
+//   }
+
+//   DEBUG_LINE_HERE;
+//   if (Bus::isVirtual(bc.type)) {
+//     ALOG_INF(PSTR("BusManager::add::Type BusNetwork"));
+//     busses[numBusses] = new BusNetwork(bc); // IP
+//   } 
+//    else if (Bus::isDigital(bc.type)) {
+//     ALOG_INF(PSTR("BusManager::add::Type BusDigital"));
+//     busses[numBusses] = new BusDigital(bc, numBusses, colorOrderMap); // Neopixel
+   
+//   } else if (Bus::isOnOff(bc.type)) {
+//     ALOG_INF(PSTR("BusManager::add::Type BUSTYPE_ONOFF"));
+//     busses[numBusses] = new BusOnOff(bc); // Relays
+//   } 
+//   else 
+//   {
+//     ALOG_INF(PSTR("BusManager::add::Type ELSE BusPwm"));
+//     busses[numBusses] = new BusPwm(bc); // H801
+//   }
+
+//   numBusses++;
+  
+//   return numBusses;
+
+// }
+
+uint8_t BusManager::getI(uint8_t busType, const uint8_t* pins, uint8_t driverPreference) {
+  return PolyBus::getI(busType, pins, driverPreference);
 }
 
-
-int BusManager::add(BusConfig &bc) 
+int BusManager::add(const BusConfig &bc, bool placeholder) 
 {
 
-  DEBUG_LINE_HERE;
+  DEBUG_PRINTF_P(PSTR("Bus: Adding bus (p:%d v:%d)\n"), getNumBusses(), getNumVirtualBusses());
 
-  uint8_t bus_count = getNumBusses() - getNumVirtualBusses();
-  if (bus_count >= WLED_MAX_BUSSES) 
-  {
-    Serial.printf("if (bus_count >= WLED_MAX_BUSSES) %d\n\r", bus_count);
-    return -1;
+  ALOG_INF(
+    PSTR(
+      "BusConfig: "
+      "type=%u count=%u count=%u start=%u "
+      "colorOrder=%u reversed=%u skipAmount=%u refreshReq=%u autoWhite=%u "
+      "pins=[%u,%u,%u,%u,%u] "
+      "frequency=%u doubleBuffer=%u "
+      "milliAmpsPerLed=%u milliAmpsMax=%u "
+      "driverType=%u iType=%u text=\"%s\""
+    ),
+    (unsigned)bc.type,
+    (unsigned)bc.count,
+    (unsigned)bc.count,
+    (unsigned)bc.start,
+    (unsigned)bc.colorOrder,
+    (unsigned)bc.reversed,
+    (unsigned)bc.skipAmount,
+    (unsigned)bc.refreshReq,
+    (unsigned)bc.autoWhite,
+    (unsigned)bc.pins[0],
+    (unsigned)bc.pins[1],
+    (unsigned)bc.pins[2],
+    (unsigned)bc.pins[3],
+    (unsigned)bc.pins[4],
+    (unsigned)bc.frequency,
+    (unsigned)bc.doubleBuffer,
+    (unsigned)bc.milliAmpsPerLed,
+    (unsigned)bc.milliAmpsMax,
+    (unsigned)bc.driverType,
+    (unsigned)bc.iType,
+    bc.text.c_str()
+  );
+
+  unsigned digital = 0;
+  unsigned analog  = 0;
+  unsigned twoPin  = 0;
+  for (const auto &bus : busses) {
+    if (bus->isPWM()) analog += bus->getPins(); // number of analog channels used
+    if (bus->isDigital() && !bus->is2Pin()) digital++;
+    if (bus->is2Pin()) twoPin++;
   }
-
-  DEBUG_LINE_HERE;
-  if (Bus::isVirtual(bc.type)) {
-    ALOG_INF(PSTR("BusManager::add::Type BusNetwork"));
-    busses[numBusses] = new BusNetwork(bc); // IP
-  } 
-   else if (Bus::isDigital(bc.type)) {
-    ALOG_INF(PSTR("BusManager::add::Type BusDigital"));
-    busses[numBusses] = new BusDigital(bc, numBusses, colorOrderMap); // Neopixel
-   
+  digital += (Bus::isDigital(bc.type) && !Bus::is2Pin(bc.type));
+  analog  += (Bus::isPWM(bc.type) ? Bus::numPWMPins(bc.type) : 0);
+  if (digital > WLED_MAX_DIGITAL_CHANNELS || analog > WLED_MAX_ANALOG_CHANNELS) placeholder = true; // TODO: add errorFlag here
+  if (placeholder) {
+    busses.push_back(make_unique<BusPlaceholder>(bc));
+  } else if (Bus::isVirtual(bc.type)) {
+    busses.push_back(make_unique<BusNetwork>(bc));
+#ifdef WLED_ENABLE_HUB75MATRIX
+  } else if (Bus::isHub75(bc.type)) {
+    busses.push_back(make_unique<BusHub75Matrix>(bc));
+#endif
+  } else if (Bus::isDigital(bc.type)) {
+    ALOG_INF(PSTR("BusManager::add Digital %d"), bc.type);
+    busses.push_back(make_unique<BusDigital>(bc));
   } else if (Bus::isOnOff(bc.type)) {
-    ALOG_INF(PSTR("BusManager::add::Type BUSTYPE_ONOFF"));
-    busses[numBusses] = new BusOnOff(bc); // Relays
-  } 
-  else 
-  {
-    ALOG_INF(PSTR("BusManager::add::Type ELSE BusPwm"));
-    busses[numBusses] = new BusPwm(bc); // H801
+    busses.push_back(make_unique<BusOnOff>(bc));
+  } else {
+    busses.push_back(make_unique<BusPwm>(bc));
   }
-
-  numBusses++;
-  
-  return numBusses;
-
+  return busses.size();
 }
+
+
 
 
 // credit @willmmiles
@@ -1184,84 +1476,185 @@ void BusManager::setRequiredChannels(uint8_t channels)
 //do not call this method from system context (network callback)
 void BusManager::removeAll() 
 {
-  DEBUG_PRINTLN(F("Removing all."));
+  ALOG_INF(PSTR(D_LOG_PIXEL "removeAll"));
+  
   //prevents crashes due to deleting busses while in use.
   uint32_t start = millis();
   while (!canAllShow()) { 
     yield();
     if (millis() - start > 2000) break; // limit to at most 2 seconds
   }
-  for (unsigned i = 0; i < numBusses; i++) delete busses[i];  
-  numBusses = 0;
+  
+  busses.clear();
+
   PolyBus::useParallelOutput(false);
 }
 
 
-void BusManager::show() 
-{
-  _milliAmpsUsed = 0;
-  for (uint8_t i = 0; i < numBusses; i++) 
-  {
-    busses[i]->show();
-    _milliAmpsUsed += busses[i]->getUsedCurrent();
+// void BusManager::show() 
+// {
+//   _milliAmpsUsed = 0;
+//   for (uint8_t i = 0; i < numBusses; i++) 
+//   {
+//     busses[i]->show();
+//     _milliAmpsUsed += busses[i]->getUsedCurrent();
+//   }
+// }
+
+void BusManager::show() {
+  applyABL(); // apply brightness limit, updates _gMilliAmpsUsed
+  for (auto &bus : busses) {
+    bus->show();
   }
 }
 
+// bool BusManager::canAllShow() {
+//   // #ifdef ENABLE_DEVFEATURE_LIGHTING__CANSHOW_BACKOFF
+//   for (unsigned i = 0; i < numBusses; i++) {
+//     if (!busses[i]->canShow()) return false;
+//   }
+//   // #endif
+//   return true;
+// }
 
 bool BusManager::canAllShow() {
-  // #ifdef ENABLE_DEVFEATURE_LIGHTING__CANSHOW_BACKOFF
-  for (unsigned i = 0; i < numBusses; i++) {
-    if (!busses[i]->canShow()) return false;
-  }
-  // #endif
+  for (const auto &bus : busses) if (!bus->canShow()) return false;
   return true;
 }
 
 
-Bus* BusManager::getBus(uint8_t busNr) {
-  if (busNr >= numBusses) return nullptr;
-  return busses[busNr];
+
+
+void BusManager::initializeABL() {
+
+  DEBUG_PRINT_LN("initializeABL");
+
+  _useABL = false; // reset
+  if (_gMilliAmpsMax > 0) {
+    // check global brightness limit
+    for (auto &bus : busses) {
+  DEBUG_PRINT_LN("initializeABL 3"); 
+      if (bus->isDigital() && bus->getLEDCurrent() > 0) {
+        _useABL = true; // at least one bus has valid LED current
+        
+  DEBUG_PRINT_LN("initializeABL 1"); 
+        return;
+      }
+    }
+  } else {
+    // check per bus brightness limit
+    unsigned numABLbuses = 0;
+    for (auto &bus : busses) {
+      if (bus->isDigital() && bus->getLEDCurrent() > 0 && bus->getMaxCurrent() > 0)
+        numABLbuses++; // count ABL enabled buses
+    }
+    if (numABLbuses > 0) {
+      _useABL = true; // at least one bus has ABL set
+      uint32_t ESPshare = MA_FOR_ESP / numABLbuses; // share of ESP current per ABL bus
+      for (auto &bus : busses) {
+        if (bus->isDigital() && bus->isOk()) {
+          BusDigital &busd = static_cast<BusDigital&>(*bus);
+          uint32_t busLength = busd.getLength();
+          uint32_t busDemand = busLength * busd.getLEDCurrent();
+          uint32_t busMax    = busd.getMaxCurrent();
+          if (busMax > ESPshare)  busMax -= ESPshare;
+          if (busMax < busLength) busMax  = busLength; // give each LED 1mA, ABL will dim down to minimum
+          if (busDemand == 0) busMax = 0; // no LED current set, disable ABL for this bus
+          busd.setCurrentLimit(busMax);
+        }
+      }
+    }
+  }
+  DEBUG_PRINT_LN("initializeABL 2");
+}
+
+void BusManager::applyABL() {
+  if (_useABL) {
+    unsigned milliAmpsSum = 0; // use temporary variable to always return a valid _gMilliAmpsUsed to UI
+    unsigned totalLEDs = 0;
+    for (auto &bus : busses) {
+      if (bus->isDigital() && bus->isOk()) {
+        BusDigital &busd = static_cast<BusDigital&>(*bus);
+        busd.estimateCurrent(); // sets _milliAmpsTotal, current is estimated for all buses even if they have the limit set to 0
+        if (_gMilliAmpsMax == 0)
+          busd.applyBriLimit(0); // apply per bus ABL limit, updates _milliAmpsTotal if limit reached
+        milliAmpsSum += busd.getUsedCurrent();
+        totalLEDs += busd.getLength(); // sum total number of LEDs for global Limit
+      }
+    }
+    // check global current limit and apply global ABL limit, total current is summed above
+    if (_gMilliAmpsMax > 0) {
+      uint8_t  newBri = 255;
+      uint32_t globalMax = _gMilliAmpsMax > MA_FOR_ESP ? _gMilliAmpsMax - MA_FOR_ESP : 1; // subtract ESP current consumption, fully limit if too low
+      if (globalMax > totalLEDs) { // check if budget is larger than standby current
+        if (milliAmpsSum > globalMax) {
+          newBri = globalMax * 255 / milliAmpsSum + 1; // scale brightness down to stay in current limit, +1 to avoid 0 brightness
+          milliAmpsSum = globalMax; // update total used current
+        }
+      } else {
+        newBri = 1; // limit too low, set brightness to minimum
+        milliAmpsSum = totalLEDs; // estimate total used current as minimum
+      }
+
+      // apply brightness limit to each bus, if its 255 it will only reset _colorSum
+      for (auto &bus : busses) {
+        if (bus->isDigital() && bus->isOk()) {
+          BusDigital &busd = static_cast<BusDigital&>(*bus);
+          if (busd.getLEDCurrent() > 0)  // skip buses with LED current set to 0
+            busd.applyBriLimit(newBri);
+        }
+      }
+    }
+    _gMilliAmpsUsed = milliAmpsSum;
+  }
+  else
+    _gMilliAmpsUsed = 0; // reset, we have no current estimation without ABL
 }
 
 
-//semi-duplicate of strip.getLengthTotal() (though that just returns strip._length, calculated in finalizeInit())
-uint16_t BusManager::getTotalLength() {
-  uint16_t len = 0;
-  for (uint8_t i=0; i<numBusses; i++) len += busses[i]->getLength();
-  return len;
-}
-
-
-void IRAM_ATTR BusManager::setPixelColor(uint32_t pix, ColourBaseType c) {
+// void IRAM_ATTR BusManager::setPixelColor(uint32_t pix, ColourBaseType c) {
   
-  #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-  Serial.printf("  BusManager::setPixelColor[%d]    = %d,%d,%d,%d,%d\n\r", pix, c.R, c.G, c.B, c.WW, c.CW);
-  #endif
-  for (unsigned i = 0; i < numBusses; i++) {
-    unsigned bstart = busses[i]->getStart();
-    if (pix < bstart || pix >= bstart + busses[i]->getLength()) continue;
-    busses[i]->setPixelColor(pix - bstart, c);
+//   #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
+//   Serial.printf("  BusManager::setPixelColor[%d]    = %d,%d,%d,%d,%d\n\r", pix, c.R, c.G, c.B, c.WW, c.CW);
+//   #endif
+//   for (unsigned i = 0; i < numBusses; i++) {
+//     unsigned bstart = busses[i]->getStart();
+//     if (pix < bstart || pix >= bstart + busses[i]->getLength()) continue;
+//     busses[i]->setPixelColor(pix - bstart, c);
+//   }
+// }
+void IRAM_ATTR BusManager::setPixelColor(unsigned pix, uint32_t c) {
+  for (auto &bus : busses) {
+    if (!bus->containsPixel(pix)) continue;
+    bus->setPixelColor(pix - bus->getStart(), c);
   }
 }
 
 
-ColourBaseType BusManager::getPixelColor(uint32_t pix) {
-  for (unsigned i = 0; i < numBusses; i++) {
-    unsigned bstart = busses[i]->getStart();
-    if (!busses[i]->containsPixel(pix)) continue;
-    DEBUG_LINE_HERE;
-    return busses[i]->getPixelColor(pix - bstart);
+// ColourBaseType BusManager::getPixelColor(uint32_t pix) {
+//   for (unsigned i = 0; i < numBusses; i++) {
+//     unsigned bstart = busses[i]->getStart();
+//     if (!busses[i]->containsPixel(pix)) continue;
+//     DEBUG_LINE_HERE;
+//     return busses[i]->getPixelColor(pix - bstart);
+//   }
+//   return 0;
+// }
+uint32_t BusManager::getPixelColor(unsigned pix) {
+  for (auto &bus : busses) {
+    if (!bus->containsPixel(pix)) continue;
+    return bus->getPixelColor(pix - bus->getStart());
   }
   return 0;
 }
 
 
-void BusManager::setBrightness(uint8_t b) {
-  // ALOG_INF(PSTR("BusManager::setBrightness %d"), b);
-  for (unsigned i = 0; i < numBusses; i++) {
-    busses[i]->setBrightness(b);
-  }
-}
+// void BusManager::setBrightness(uint8_t b) {
+//   // ALOG_INF(PSTR("BusManager::setBrightness %d"), b);
+//   for (unsigned i = 0; i < numBusses; i++) {
+//     busses[i]->setBrightness(b);
+//   }
+// }
 
 
 void BusManager::setSegmentCCT(int16_t cct, bool allowWBCorrection) {
@@ -1281,15 +1674,21 @@ uint8_t Bus::_gAWM = 255;
 
 uint16_t BusDigital::_milliAmpsTotal = 0;
 
-uint8_t       BusManager::numBusses = 0;
-Bus*          BusManager::busses[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES];
-ColorOrderMap BusManager::colorOrderMap = {};
-uint16_t      BusManager::_milliAmpsUsed = 0;
-uint16_t      BusManager::_milliAmpsMax = ABL_MILLIAMPS_DEFAULT;
+// uint8_t       BusManager::numBusses = 0;
+// Bus*          BusManager::busses[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES];
+// ColorOrderMap BusManager::colorOrderMap = {};
+// uint16_t      BusManager::_milliAmpsUsed = 0;
+// uint16_t      BusManager::_milliAmpsMax = ABL_MILLIAMPS_DEFAULT;
 
 bool PolyBus::useParallelI2S = false;
 uint8_t PolyBus::_bri_rgb = 255; // current brightness for RGB
 uint8_t PolyBus::required_channels = 0;
+
+
+std::vector<std::unique_ptr<Bus>> BusManager::busses;
+uint16_t BusManager::_gMilliAmpsUsed = 0;
+uint16_t BusManager::_gMilliAmpsMax = ABL_MILLIAMPS_DEFAULT;
+bool BusManager::_useABL = false;
 
 
 #endif // USE_MODULE_LIGHTS_INTERFACE

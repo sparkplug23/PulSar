@@ -26,7 +26,7 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
 #define FASTLED_INTERNAL // suppress pragma warning messages
-#include "6_Lights/00_Interface/FastLED/FastLED.h"
+#include "6_Lights/03_Animator/fastled_slim/fastled_slim.h"
 
 #include "internal/mPalette_Encoding_Options.h"
 

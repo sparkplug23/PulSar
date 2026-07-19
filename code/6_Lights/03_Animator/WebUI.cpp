@@ -74,11 +74,16 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   for (size_t i = 0; i < 5; i++)
   {
     byte segcol[5]; 
-    segcol[0] = seg.segcol[i].colour.R;
-    segcol[1] = seg.segcol[i].colour.G;
-    segcol[2] = seg.segcol[i].colour.B;
-    segcol[3] = seg.segcol[i].colour.WW; // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
-    segcol[4] = seg.segcol[i].colour.CW; // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
+    // segcol[0] = seg.segcol[i].colour.R;
+    // segcol[1] = seg.segcol[i].colour.G;
+    // segcol[2] = seg.segcol[i].colour.B;
+    // segcol[3] = seg.segcol[i].colour.WW; // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
+    // segcol[4] = seg.segcol[i].colour.CW; // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
+    segcol[0] = seg.segcol[i].getRed();
+    segcol[1] = seg.segcol[i].getGreen();
+    segcol[2] = seg.segcol[i].getBlue();
+    segcol[3] = seg.segcol[i].getWhite(); // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
+    segcol[4] = seg.segcol[i].getWhite(); // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
     char tmpcol[40];
     snprintf_P(tmpcol, sizeof(tmpcol), PSTR("[%u,%u,%u,%u,%u]"), segcol[0], segcol[1], segcol[2], segcol[3], segcol[4]);
     strcat(colstr, i<4 ? strcat(tmpcol, ",") : tmpcol);
@@ -376,7 +381,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
   if(getVal(root["bri"], &tkr_iLight->_briRGB_Global))
   {
     //if it was updated, tmp update this bus
-    tkr_iLight->bus_manager->setBrightness( tkr_iLight->getBriRGB_Global() ); // fix re-initialised bus' brightness
+    BusManager::setBrightness( tkr_iLight->getBriRGB_Global() ); // fix re-initialised bus' brightness
   }
 
 
@@ -568,7 +573,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 void mAnimatorLight::parseNumber(const char* str, byte* val, byte minv, byte maxv)
 {
   if (str == nullptr || str[0] == '\0') return;
-  if (str[0] == 'r') {*val = random8(minv,maxv?maxv:255); return;} // maxv for random cannot be 0
+  if (str[0] == 'r') {*val = hw_random8(minv,maxv?maxv:255); return;} // maxv for random cannot be 0
   bool wrap = false;
   if (str[0] == 'w' && strlen(str) > 1) {str++; wrap = true;}
   if (str[0] == '~') {
@@ -721,14 +726,6 @@ void mAnimatorLight::toggleOnOff()
   stateChanged = true;
 }
 
-
-//scales the brightness with the briMultiplier factor
-byte mAnimatorLight::scaledBri(byte in)
-{
-  uint16_t val = ((uint16_t)in*briMultiplier)/100;
-  if (val > 255) val = 255;
-  return (byte)val;
-}
 
 
 void mAnimatorLight::realtimeLock(uint32_t timeoutMs, byte md)
@@ -903,7 +900,7 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
 
   if (fromFS || !ins.isNull()) {
     uint8_t s = 0;  // bus iterator
-    if (fromFS) tkr_iLight->bus_manager->removeAll(); // can't safely manipulate busses directly in network callback
+    if (fromFS) BusManager::removeAll(); // can't safely manipulate busses directly in network callback
     uint32_t mem = 0;
     bool busesChanged = false;
     for (JsonObject elm : ins) {
@@ -943,22 +940,18 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
     doInitBusses = busesChanged;
     // finalization done in beginStrip()
   }
-  if (hw_led["rev"]) tkr_iLight->bus_manager->getBus(0)->setReversed(true); //set 0.11 global reversed setting for first bus
+  if (hw_led["rev"]) BusManager::getBus(0)->setReversed(true); //set 0.11 global reversed setting for first bus
 
   // read color order map configuration
   JsonArray hw_com = hw[F("com")];
   if (!hw_com.isNull()) {
-    ColorOrderMap com = {};
-    uint8_t s = 0;
+    BusManager::getColorOrderMap().reserve(std::min(hw_com.size(), (size_t)WLED_MAX_COLOR_ORDER_MAPPINGS));
     for (JsonObject entry : hw_com) {
-      if (s > WLED_MAX_COLOR_ORDER_MAPPINGS) break;
       uint16_t start = entry["start"] | 0;
       uint16_t len = entry["len"] | 0;
       uint8_t colorOrder = (int)entry[F("order")];
-      // com.add(start, len, colorOrder);
-      s++;
+      if (!BusManager::getColorOrderMap().add(start, len, colorOrder)) break;
     }
-    tkr_iLight->bus_manager->updateColorOrderMap(com);
   }
 
   CJSON(irEnabled, hw["ir"]["type"]);
@@ -1182,7 +1175,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
     ALOG_HGL(PSTR("DESTROYING SEGMENT, BAD %d %d"), id, getSegmentsNum());
 
-    appendSegment(mAnimatorLight::Segment(0, getLengthTotal()));
+    appendSegment(0, getLengthTotal());
     id = getSegmentsNum()-1; // segments are added at the end of list
   }
 
@@ -2572,7 +2565,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
     #endif
     DEBUG_LINE_HERE_TRACE
 
-    uint16_t colours_in_palette = SEGMENT.palette->colours_in_palette;// GetNumberOfColoursInUNLOADEDPalette(palette_id);
+    uint16_t colours_in_palette = SEGMENT.palette_loaded->colours_in_palette;// GetNumberOfColoursInUNLOADEDPalette(palette_id);
    
     #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
     ALOG_INF(PSTR("colours_in_palette[%d]=%d"),palette_id, colours_in_palette);
@@ -3732,7 +3725,7 @@ void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
   _isServicing = false;
   _isOffRefreshRequired = false;
   _hasWhiteChannel = false;
-  _force_update = false;
+  _triggered = false;
   effects.count = getEffectsAmount();
   _callback = nullptr;
   customMappingTable = nullptr;
@@ -3750,10 +3743,15 @@ void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
 
   DEBUG_LINE_HERE4
   Init_Segments();
+
+
+  NeoGammaWLEDMethod::calcGammaTable(2.8f);
     
   #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
   Standby_Init();
   #endif
+
+  DEBUG_PRINTF_P(PSTR("Heap after strip init: %uB\n"), getFreeHeapSize());
 
   DEBUG_LINE_HERE4
   module_state.mode = ModuleStatus::Running;

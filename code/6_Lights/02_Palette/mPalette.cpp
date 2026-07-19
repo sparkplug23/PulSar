@@ -844,7 +844,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       if (palette_index__format == PALETTE_INDEX__IS_EXACT_COLOUR) {
         // Classic "encoded discrete"
         uint8_t discrete_index = desired_index % 16;
-        pixel_position_adjust = pSEGMENT.palette->CRGB16Palette16_Palette.encoded_index[discrete_index];
+        pixel_position_adjust = pSEGMENT.palette_loaded->CRGB16Palette16_Palette.encoded_index[discrete_index];
       } else {
         // Treat as exact palette index, map 0–15 → 0–240
         // Why 240 instead of 255?
@@ -869,7 +869,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       }
     }
 
-    CRGB fastled_col = ColorFromPaletteU32(pSEGMENT.palette->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, blend);
+    CRGB fastled_col = ColorFromPaletteU32(pSEGMENT.palette_loaded->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, blend);
     colour32 = RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0);
     #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
@@ -930,8 +930,8 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
     colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW( // should make a U32 version for improved performance when only in RGB mode
       data,
       desired_index,
-      pSEGMENT.palette->encoded_colour_width,
-      pSEGMENT.palette->colours_in_palette,
+      pSEGMENT.palette_loaded->encoded_colour_width,
+      pSEGMENT.palette_loaded->colours_in_palette,
       static_palettes[palette_adjusted_id].encoding,
       encoded_index,
       palette_index__format,
@@ -944,8 +944,8 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
     colour32 = SubGet_Encoded_Palette_Colour_U32( // should make a U32 version for improved performance when only in RGB mode
       data,
       desired_index,
-      pSEGMENT.palette->encoded_colour_width,
-      pSEGMENT.palette->colours_in_palette,
+      pSEGMENT.palette_loaded->encoded_colour_width,
+      pSEGMENT.palette_loaded->colours_in_palette,
       static_palettes[palette_adjusted_id].encoding,
       encoded_index,
       palette_index__format,
@@ -973,8 +973,8 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
     colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW(
       data,
       desired_index,
-      pSEGMENT.palette->encoded_colour_width,
-      pSEGMENT.palette->colours_in_palette,
+      pSEGMENT.palette_loaded->encoded_colour_width,
+      pSEGMENT.palette_loaded->colours_in_palette,
       custom_palettes[palette_adjusted_id].encoding,
       encoded_index,
       palette_index__format,
@@ -987,8 +987,8 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
     colour32 = SubGet_Encoded_Palette_Colour_U32(
       data,
       desired_index,
-      pSEGMENT.palette->encoded_colour_width,
-      pSEGMENT.palette->colours_in_palette,
+      pSEGMENT.palette_loaded->encoded_colour_width,
+      pSEGMENT.palette_loaded->colours_in_palette,
       custom_palettes[palette_adjusted_id].encoding,
       encoded_index,
       palette_index__format,
@@ -1029,9 +1029,9 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
           pSEGMENT.Update_LivePalettes(id, 0, false); // once-per-frame call site should do this instead; keep if you must
         }
 
-        colour32 = pSEGMENT.palette->solid_colour.colourRGBW;
+        colour32 = pSEGMENT.palette_loaded->solid_colour.colourRGBW;
         #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-        colour32_white_cold = pSEGMENT.palette->solid_colour.whiteWW;
+        colour32_white_cold = pSEGMENT.palette_loaded->solid_colour.whiteWW;
         #endif
       }
       break;
@@ -1041,16 +1041,16 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
           // serializer calls this repeatedly; Update builds palette + emits preview slice into solid_colour
           pSEGMENT.Update_LivePalettes(id, desired_index, true);
 
-          colour32 = pSEGMENT.palette->solid_colour.colourRGBW;
+          colour32 = pSEGMENT.palette_loaded->solid_colour.colourRGBW;
           #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-          colour32_white_cold = pSEGMENT.palette->solid_colour.whiteWW;
+          colour32_white_cold = pSEGMENT.palette_loaded->solid_colour.whiteWW;
           #endif
           break;
         }
 
         // Runtime GET: just read CRGBPalette16 (assumes Update_LivePalettes() was called once-per-frame elsewhere)
         uint8_t idx255 = (tkr_anim->_virtualSegmentLength <= 1) ? 0 : (uint8_t)((desired_index * 255U) / (uint16_t)(tkr_anim->_virtualSegmentLength - 1));
-        CRGB c = ColorFromPaletteU32(pSEGMENT.palette->CRGB16Palette16_Palette.data, idx255, 255, LINEARBLEND);
+        CRGB c = ColorFromPaletteU32(pSEGMENT.palette_loaded->CRGB16Palette16_Palette.data, idx255, 255, LINEARBLEND);
 
         colour32 = RGBW32(c.r, c.g, c.b, 0);
         #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS

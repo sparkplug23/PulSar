@@ -46,6 +46,66 @@
 #define COL_ORDER_MAX             5
 
 
+#define TRANSITION_FADE            0x00  // universal
+#define TRANSITION_FAIRY_DUST      0x01  // universal
+#define TRANSITION_SWIPE_RIGHT     0x02  // 1D or 2D
+#define TRANSITION_SWIPE_LEFT      0x03  // 1D or 2D
+#define TRANSITION_OUTSIDE_IN      0x04  // 1D or 2D
+#define TRANSITION_INSIDE_OUT      0x05  // 1D or 2D
+#define TRANSITION_SWIPE_UP        0x06  // 2D
+#define TRANSITION_SWIPE_DOWN      0x07  // 2D
+#define TRANSITION_OPEN_H          0x08  // 2D
+#define TRANSITION_OPEN_V          0x09  // 2D
+#define TRANSITION_SWIPE_TL        0x0A  // 2D
+#define TRANSITION_SWIPE_TR        0x0B  // 2D
+#define TRANSITION_SWIPE_BR        0x0C  // 2D
+#define TRANSITION_SWIPE_BL        0x0D  // 2D
+#define TRANSITION_CIRCULAR_OUT    0x0E  // 2D
+#define TRANSITION_CIRCULAR_IN     0x0F  // 2D
+// as there are many push variants to optimise if statements they are groupped together
+#define TRANSITION_PUSH_RIGHT      0x10  // 1D or 2D (& 0b00010000)
+#define TRANSITION_PUSH_LEFT       0x11  // 1D or 2D (& 0b00010000)
+#define TRANSITION_PUSH_UP         0x12  // 2D (& 0b00010000)
+#define TRANSITION_PUSH_DOWN       0x13  // 2D (& 0b00010000)
+#define TRANSITION_PUSH_TL         0x14  // 2D (& 0b00010000)
+#define TRANSITION_PUSH_TR         0x15  // 2D (& 0b00010000)
+#define TRANSITION_PUSH_BR         0x16  // 2D (& 0b00010000)
+#define TRANSITION_PUSH_BL         0x17  // 2D (& 0b00010000)
+#define TRANSITION_PUSH_MASK       0x10
+#define TRANSITION_COUNT           18
+
+#define NUM_COLORS 5
+
+// WLED Error modes
+#define ERR_NONE         0  // All good :)
+#define ERR_DENIED       1  // Permission denied
+#define ERR_CONCURRENCY  2  // Conurrency (client active)
+#define ERR_NOBUF        3  // JSON buffer was not released in time, request cannot be handled at this time
+#define ERR_NOT_IMPL     4  // Not implemented
+#define ERR_NORAM_PX     7  // not enough RAM for pixels
+#define ERR_NORAM        8  // effect RAM depleted
+#define ERR_JSON         9  // JSON parsing failed (input too large?)
+#define ERR_FS_BEGIN    10  // Could not init filesystem (no partition?)
+#define ERR_FS_QUOTA    11  // The FS is full or the maximum file size is reached
+#define ERR_FS_PLOAD    12  // It was attempted to load a preset that does not exist
+#define ERR_FS_IRLOAD   13  // It was attempted to load an IR JSON cmd, but the "ir.json" file does not exist
+#define ERR_FS_RMLOAD   14  // It was attempted to load an remote JSON cmd, but the "remote.json" file does not exist
+#define ERR_FS_GENERAL  19  // A general unspecified filesystem error occurred
+#define ERR_OVERTEMP    30  // An attached temperature sensor has measured above threshold temperature (not implemented)
+#define ERR_OVERCURRENT 31  // An attached current sensor has measured a current above the threshold (not implemented)
+#define ERR_UNDERVOLT   32  // An attached voltmeter has measured a voltage below the threshold (not implemented)
+#define ERR_LOW_MEM     33  // low memory (RAM)
+#define ERR_LOW_SEG_MEM 34  // low memory (effect data RAM)
+#define ERR_LOW_WS_MEM  35  // low memory (ws)
+//#define ERR_LOW_AJAX_MEM 36 // (not used any more) low memory (oappend)
+#define ERR_LOW_BUF     37  // low memory (LED pixels buffer)
+#define ERR_SYS_REBOOT      90  // reboot after error, trying to roll back
+#define ERR_SYS_BROWNOUT    91  // reboot after brownout alert
+#define ERR_PERSISTENT_THRESHOLD 100 // ToDO: errors below this value are non-persistent; persistent errors stay in the UI until restart
+// ERR_PERSISTENT_THRESHOLD is a threshold value only - never assign directly to errorFlag
+#define ERR_REBOOT_NEEDED   100 // reboot needed after changing hardware setting
+#define ERR_POWEROFF_NEEDED 101 // power-cycle needed after changing hardware setting
+
 
 //Light capability byte (unused) 0bRCCCTTTT
 //bits 0/1/2/3: specifies a type of LED driver. A single "driver" may have different chip models but must have the same protocol/behavior
@@ -108,6 +168,60 @@
 #define BUSTYPE_NET_DDP_RGBW        88            //network DDP RGBW bus (master broadcast bus)
 #define BUSTYPE_NET_ARTNET_RGBW     89            //network ArtNet RGB bus (master broadcast bus, unused)
 #define BUSTYPE_VIRTUAL_MAX         95
+
+/*************************
+ * Temporary WLED names in conversion
+ */
+#define TYPE_NONE                 BUSTYPE_NONE
+#define TYPE_RESERVED             BUSTYPE_RESERVED
+
+#define TYPE_DIGITAL_MIN          BUSTYPE_DIGITAL__MIN
+#define TYPE_WS2812_1CH           BUSTYPE_WS2812_1CH
+#define TYPE_WS2812_1CH_X3        BUSTYPE_WS2812_1CH_X3
+#define TYPE_WS2812_2CH_X3        BUSTYPE_WS2812_2CH_X3
+#define TYPE_WS2812_WWA           BUSTYPE_WS2812_WWA
+#define TYPE_WS2812_RGB           BUSTYPE_WS2812_RGB
+#define TYPE_GS8608               BUSTYPE_GS8608
+#define TYPE_WS2811_400KHZ        BUSTYPE_WS2811_400KHZ
+#define TYPE_TM1829               BUSTYPE_TM1829
+#define TYPE_UCS8903              BUSTYPE_UCS8903
+#define TYPE_APA106               BUSTYPE_APA106
+#define TYPE_FW1906               BUSTYPE_FW1906
+#define TYPE_UCS8904              BUSTYPE_UCS8904
+#define TYPE_SK6812_RGBW          BUSTYPE_SK6812_RGBW
+#define TYPE_TM1814               BUSTYPE_TM1814
+#define TYPE_WS2805               BUSTYPE_WS2805
+#define TYPE_TM1914               BUSTYPE_TM1914
+#define TYPE_SM16825              BUSTYPE_SM16825
+#define TYPE_DIGITAL_MAX          BUSTYPE_DIGITAL__MAX
+
+#define TYPE_ONOFF                BUSTYPE_ONOFF
+#define TYPE_ANALOG_MIN           BUSTYPE_ANALOG__MIN
+#define TYPE_ANALOG_1CH           BUSTYPE_ANALOG_1CH
+#define TYPE_ANALOG_2CH           BUSTYPE_ANALOG_2CH
+#define TYPE_ANALOG_3CH           BUSTYPE_ANALOG_3CH
+#define TYPE_ANALOG_4CH           BUSTYPE_ANALOG_4CH
+#define TYPE_ANALOG_5CH           BUSTYPE_ANALOG_5CH
+#define TYPE_ANALOG_6CH           BUSTYPE_ANALOG_6CH
+#define TYPE_ANALOG_MAX           BUSTYPE_ANALOG__MAX
+
+#define TYPE_2PIN_MIN             BUSTYPE_2PIN_MIN
+#define TYPE_WS2801               BUSTYPE_WS2801
+#define TYPE_APA102               BUSTYPE_APA102
+#define TYPE_LPD8806              BUSTYPE_LPD8806
+#define TYPE_P9813                BUSTYPE_P9813
+#define TYPE_LPD6803              BUSTYPE_LPD6803
+#define TYPE_2PIN_MAX             BUSTYPE_2PIN_MAX
+
+#define TYPE_VIRTUAL_MIN          BUSTYPE_VIRTUAL_MIN
+#define TYPE_NET_DDP_RGB          BUSTYPE_NET_DDP_RGB
+#define TYPE_NET_E131_RGB         BUSTYPE_NET_E131_RGB
+#define TYPE_NET_ARTNET_RGB       BUSTYPE_NET_ARTNET_RGB
+#define TYPE_NET_DDP_RGBW         BUSTYPE_NET_DDP_RGBW
+#define TYPE_NET_ARTNET_RGBW      BUSTYPE_NET_ARTNET_RGBW
+#define TYPE_VIRTUAL_MAX          BUSTYPE_VIRTUAL_MAX
+
+
 
 
 /**
@@ -224,12 +338,21 @@
 // #define NTP_PACKET_SIZE 48
 
 //maximum number of rendered LEDs - this does not have to match max. physical LEDs, e.g. if there are virtual busses 
+// #ifndef MAX_LEDS_NEO
+// #ifdef ESP8266
+// #define MAX_LEDS_NEO 1664 //can't rely on memory limit to limit this to 1600 LEDs
+// #else
+// #define MAX_LEDS_NEO 8192 // MAX_LEDS as per WLED
+// #endif
+// #endif
 #ifndef MAX_LEDS_NEO
-#ifdef ESP8266
-#define MAX_LEDS_NEO 1664 //can't rely on memory limit to limit this to 1600 LEDs
-#else
-#define MAX_LEDS_NEO 8192 // MAX_LEDS as per WLED
-#endif
+  #ifdef ESP8266
+    #define MAX_LEDS_NEO 1536 //can't rely on memory limit to limit this to 1536 LEDs
+  #elif defined(CONFIG_IDF_TARGET_ESP32S2)
+    #define MAX_LEDS_NEO 2048 //due to memory constraints S2
+  #else
+    #define MAX_LEDS_NEO 16384
+  #endif
 #endif
 
 #ifndef MAX_LED_MEMORY
