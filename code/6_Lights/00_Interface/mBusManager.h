@@ -7,10 +7,6 @@
  * 
  * @copyright Copyright (c) 2024
  * 
- * @note This file is a derivative of the original WLED project.
- *       The CCT funtionality has been removed, and instead will be handled by effect functions.
- *       The auto white will remain, where the white channel will be adjusted based on the RGB values when desired, but otherwise will be calculated in the effects. 
- * 
  */
 #ifndef BusManager_h
 #define BusManager_h
@@ -189,14 +185,11 @@ typedef struct {
  *****************************************************************************************************************************************************************/
 
 // Defines an LED Strip and its color ordering.
-struct ColorOrderMapEntry 
-{
-  // Mappings here sets what order to use and between which index range
+typedef struct {
   uint16_t start;
   uint16_t len;
   uint8_t colorOrder;
-};
-
+} ColorOrderMapEntry;
 
 struct ColorOrderMap 
 {
@@ -252,10 +245,10 @@ class Bus {
     virtual void     show() = 0;
     virtual bool     canShow() const                          { return true; }
     virtual void     setStatusPixel(uint32_t c)                {}
-    virtual void     setPixelColor(uint32_t pix, ColourBaseType c) = 0;
+    virtual void     setPixelColor(uint32_t pix, uint32_t c) = 0;
     virtual void     setBrightness(uint8_t b)                  { _bri = b; };
     virtual void     setColorOrder(uint8_t co)                 {}
-    virtual ColourBaseType getPixelColor(uint32_t pix) const         { return 0; }
+    virtual uint32_t getPixelColor(uint32_t pix) const         { return 0; }
     virtual uint8_t  getPins(uint8_t* pinArray = nullptr) const { return 0; }
     virtual uint16_t getLength() const                         { return isOk() ? _len : 0; }
     virtual uint8_t  getColorOrder() const                     { return COL_ORDER_RGB; }
@@ -265,7 +258,6 @@ class Bus {
     virtual uint16_t getUsedCurrent() const                    { return 0; }
     virtual uint16_t getMaxCurrent() const                     { return 0; }
     virtual uint8_t  getInterfaceType() const                   { return 0; } // Only digital bus will override
-    
     
     virtual uint8_t  getDriverType() const                      { return 0; } // Default to RMT (0) for non-digital buses
     virtual size_t   getBusSize() const                         { return sizeof(Bus); } // currently unused
@@ -412,20 +404,6 @@ struct BusConfig
   , driverType(driver)
   , iType(0) // default to I_NONE
   , text(sometext)
-  // BusConfig(uint8_t busType, uint8_t* ppins, uint16_t pstart, uint16_t len = 1, uint8_t pcolorOrder = COL_ORDER_GRB, bool rev = false, uint8_t skip = 0, byte aw=RGBW_MODE_MANUAL_ONLY, uint16_t clock_kHz=0U, bool dblBfr=false, uint8_t maPerLed=LED_MILLIAMPS_DEFAULT, uint16_t maMax=ABL_MILLIAMPS_DEFAULT, uint8_t driver=0, String sometext = "")
-  //   : length(len)
-    // , start(pstart)
-    // , colorOrder(pcolorOrder)
-    // , reversed(rev)
-    // , skipAmount(skip)
-    // , autoWhite(aw)
-    // , frequency(clock_kHz)
-    // , doubleBuffer(dblBfr)
-    // , milliAmpsPerLed(maPerLed)
-    // , milliAmpsMax(maMax)
-    // , driverType(0)
-    // , iType(0) // default to I_NONE
-    // , text(sometext)
   {
     refreshReq = (bool) GET_BIT(busType,7);
     type = busType & 0x7F;  // bit 7 may be/is hacked to include refresh info (1=refresh in off state, 0=no refresh)
@@ -444,45 +422,7 @@ struct BusConfig
       driverType == 0 ? "RMT" : "I2S"
     );
 
-
   }
-
-
-
-  // BusConfig(
-  //   uint8_t busType, 
-  //   uint8_t* ppins, 
-  //   uint16_t pstart, 
-  //   uint16_t length = 1,
-  //   uint8_t _ColourOrder = 0,//{COLOUR_ORDER_INIT_DISABLED},
-  //   bool rev = false, 
-  //   uint8_t skip = 0, 
-  //   byte aw = RGBW_MODE_MANUAL_ONLY
-  // ){
-        
-  //   refreshReq = (bool) GET_BIT(busType,7);
-  //   type = busType & 0x7F;  // bit 7 may be/is hacked to include refresh info (1=refresh in off state, 0=no refresh)
-  //   count = length; 
-  //   start = pstart; 
-  //   reversed = rev; 
-  //   skipAmount = skip; 
-  //   autoWhite = aw;
-
-  //   #ifdef ESP32
-  //   doubleBuffer = true; //tmp fix, force here but should be BusConfig arg
-  //   #else
-  //   doubleBuffer = false;
-  //   #endif
-
-  //   uint8_t nPins = 1;
-  //   if (type >= BUSTYPE_NET_DDP_RGB && type < 96) nPins = 4; //virtual network bus. 4 "pins" store IP address
-  //   else if (type > 47) nPins = 2;
-  //   else if (type > 40 && type < 46) nPins = NUM_BUSTYPE_PWM_PINS(type);
-  //   for (uint8_t i = 0; i < nPins; i++) pins[i] = ppins[i];
-
-  //   colorOrder = _ColourOrder;
-
-  // }
 
   //validates start and length and extends total if needed
   bool adjustBounds(uint16_t& total) {
@@ -513,11 +453,10 @@ class BusDigital : public Bus {
 
     void show() override;
     bool canShow() const override;
-    void setBrightness(uint8_t b) override;
     void setStatusPixel(uint32_t c) override;
-    [[gnu::hot]] void setPixelColor(uint32_t pix, ColourBaseType c) override;
+    [[gnu::hot]] void setPixelColor(uint32_t pix, uint32_t c) override;
     void setColorOrder(uint8_t colorOrder) override;
-    [[gnu::hot]] ColourBaseType getPixelColor(uint32_t pix) const override;
+    [[gnu::hot]] uint32_t getPixelColor(uint32_t pix) const override;
     uint8_t  getColorOrder() const override  { return _colorOrder; }
     uint8_t  getPins(uint8_t* pinArray = nullptr) const override;
     uint8_t  skippedLeds() const override    { return _skip; }
@@ -529,6 +468,7 @@ class BusDigital : public Bus {
     void     setCurrentLimit(uint16_t milliAmps) { _milliAmpsLimit = milliAmps; }
     void     estimateCurrent(); // estimate used current from summed colors
     void     applyBriLimit(uint8_t newBri);
+    size_t   getBusSize() const override;
     bool isI2S(); // true if this bus uses I2S driver
     void begin();
     void cleanup();
@@ -583,10 +523,11 @@ class BusPwm : public Bus {
     void setColorOrder(uint8_t colorOrder){ _colorOrder = colorOrder; }
     uint8_t getColorOrder(){ return _colorOrder; }
 
-    void setPixelColor(uint32_t pix, ColourBaseType c) override;
-    ColourBaseType getPixelColor(uint32_t pix) const override; //does no index check
+    void setPixelColor(uint32_t pix, uint32_t c) override;
+    uint32_t getPixelColor(uint32_t pix) const override; //does no index check
     uint8_t  getPins(uint8_t* pinArray = nullptr) const override;
     uint16_t getFrequency() const override { return _frequency; }
+    size_t   getBusSize() const override   { return sizeof(BusPwm); }
     void show() override;
     void cleanup() { deallocatePins(); }
     
@@ -621,9 +562,10 @@ class BusOnOff : public Bus {
     BusOnOff(const BusConfig &bc);
     ~BusOnOff() { cleanup(); }
 
-    void setPixelColor(uint32_t pix, ColourBaseType c) override;
-    ColourBaseType getPixelColor(uint32_t pix) const override;
+    void setPixelColor(uint32_t pix, uint32_t c) override;
+    uint32_t getPixelColor(uint32_t pix) const override;
     uint8_t  getPins(uint8_t* pinArray) const override;
+    size_t   getBusSize() const override { return sizeof(BusOnOff); }
     void show() override;
     void cleanup() {  }
 
@@ -646,9 +588,10 @@ class BusNetwork : public Bus {
     ~BusNetwork() { cleanup(); }
 
     bool canShow() const override  { return !_broadcastLock; } // this should be a return value from UDP routine if it is still sending data out
-    void setPixelColor(uint32_t pix, ColourBaseType c) override;
-    ColourBaseType getPixelColor(uint32_t pix) const override;
+    void setPixelColor(uint32_t pix, uint32_t c) override;
+    uint32_t getPixelColor(uint32_t pix) const override;
     uint8_t  getPins(uint8_t* pinArray = nullptr) const override;
+    size_t getBusSize() const override  { return sizeof(BusNetwork) + (isOk() ? _len * _UDPchannels : 0); }
     void show() override;
     void cleanup();
 
@@ -659,6 +602,10 @@ class BusNetwork : public Bus {
     uint8_t   _UDPtype;
     uint8_t   _UDPchannels;
     bool      _broadcastLock;
+    uint8_t   *_data;
+    #ifdef ARDUINO_ARCH_ESP32
+    String    _hostname;
+    #endif
 };
 
 
@@ -714,77 +661,6 @@ class BusPlaceholder : public Bus {
   #endif
 #endif
 
-// class BusManager 
-// {
-//   public:
-//     BusManager(){};
-
-//     static uint32_t memUsage(BusConfig &bc);
-//     static uint32_t memUsage(unsigned maxChannels, unsigned maxCount, unsigned minBuses);
-
-//       uint16_t _gMilliAmpsUsed;
-//       uint16_t _gMilliAmpsMax;
-//       bool     _useABL;
-//       inline uint16_t currentMilliamps()            { return _gMilliAmpsUsed + MA_FOR_ESP; }
-//       //inline uint16_t ablMilliampsMax()             { unsigned sum = 0; for (auto &bus : busses) sum += bus->getMaxCurrent(); return sum; }
-//       inline uint16_t ablMilliampsMax()             { return _gMilliAmpsMax; }  // used for compatibility reasons (and enabling virtual global ABL)
-//       inline void     setMilliampsMax(uint16_t max) { _gMilliAmpsMax = max;}
-//       void            initializeABL();              // setup automatic brightness limiter parameters, call once after buses are initialized
-//       void            applyABL();                   // apply automatic brightness limiter, global or per bus
-
-//     int  add(const BusConfig &bc, bool placeholder);
-
-//     void useParallelOutput(bool enable); // workaround for inaccessible PolyBus
-//     void setRequiredChannels(uint8_t channels);
-
-//     //do not call this method from system context (network callback)
-//     void removeAll();
-//     static void show();
-    
-//     // static Bus* busses[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES];// = {nullptr};
-//     std::vector<std::unique_ptr<Bus>> busses;
-
-//     [[gnu::hot]] void setPixelColor(uint32_t pix, ColourBaseType c);
-//     ColourBaseType getPixelColor(uint32_t pix);
-    
-//     static void setBrightness(uint8_t b);
-//     // for setSegmentCCT(), cct can only be in [-1,255] range; allowWBCorrection will convert it to K
-//     // WARNING: setSegmentCCT() is a misleading name!!! much better would be setGlobalCCT() or just setCCT()
-//     static void setSegmentCCT(int16_t cct, bool allowWBCorrection = false);
-        
-//     bool canAllShow();
-
-//     static Bus* getBus(uint8_t busNr);
-
-//     uint16_t getTotalLength(); //semi-duplicate of strip.getLengthTotal() (though that just returns strip._length, calculated in finalizeInit())
-
-//     inline void updateColorOrderMap(const ColorOrderMap &com) 
-//     {
-//       memcpy(&colorOrderMap, &com, sizeof(ColorOrderMap));
-//     }
-
-//     static const ColorOrderMap& getColorOrderMap(){ return colorOrderMap; }
-//     // static inline uint8_t getNumBusses(){return numBusses; }
-//     static String getLEDTypesJSONString();
-
-    
-
-//   private:
-//     // static uint8_t numBusses;
-//     static ColorOrderMap colorOrderMap;  
-    
-//     static uint16_t _milliAmpsUsed;
-//     static uint16_t _milliAmpsMax;
-    
-//   inline size_t   getNumVirtualBusses() {
-//     size_t j = 0;
-//     for (const auto &bus : busses) j += bus->isVirtual();
-//     return j;
-//   }
-
-// };
-
-
 namespace BusManager {
 
   extern std::vector<std::unique_ptr<Bus>> busses;
@@ -818,9 +694,8 @@ namespace BusManager {
   void on();
   void off();
 
-  
-    void useParallelOutput(bool enable); // workaround for inaccessible PolyBus
-    void setRequiredChannels(uint8_t channels);
+  void useParallelOutput(bool enable); // workaround for inaccessible PolyBus
+  void setRequiredChannels(uint8_t channels);
 
 
   [[gnu::hot]] void     setPixelColor(unsigned pix, uint32_t c);

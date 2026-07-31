@@ -494,7 +494,7 @@ void mTelemetry::MQTTHandler_Init()
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->flags.retain = true;
-  ptr->tRateSecs = 10;//SEC_IN_HOUR; 
+  ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
@@ -599,7 +599,7 @@ void mTelemetry::MQTTHandler_Init()
     ptr->flags.PeriodicEnabled = true;
     ptr->flags.SendNow = true;
     ptr->flags.retain = true;
-    ptr->tRateSecs = 10;//SEC_IN_HOUR; 
+    ptr->tRateSecs = 120;//SEC_IN_HOUR; 
     ptr->flags.FrequencyRedunctionLevel = MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID;
     ptr->flags.topic_type = MQTT_TOPIC_TYPE_SYSTEM_ID;
     ptr->flags.json_level = JSON_LEVEL_DETAILED;

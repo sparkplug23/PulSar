@@ -891,7 +891,7 @@ void *p_realloc_malloc(void *ptr, size_t size) {
 // if multiple conflicting types are defined, the lowest bits of "type" take priority (see fcn_declare.h for types)
 void *allocate_buffer(size_t size, uint32_t type) {
   
-    DEBUG_PRINT_LN("HERE3");
+    // DEBUG_PRINT_LN("HERE3");
   void *buffer = nullptr;
   #ifdef CONFIG_IDF_TARGET_ESP32
   // only classic ESP32 has "32bit accessible only" aka IRAM type. Using it frees up normal DRAM for other purposes
@@ -899,7 +899,7 @@ void *allocate_buffer(size_t size, uint32_t type) {
   // prefer this type over PSRAM as it is slightly faster, except for _pixels where it is on-par as PSRAM-caching does a good job for mostly sequential access
   if (type & BFRALLOC_NOBYTEACCESS) {
     
-    DEBUG_PRINT_LN("HERE5");
+    // DEBUG_PRINT_LN("HERE5");
 
     // prefer 32bit region, then PSRAM, fallback to any heap. Note: if adding "INTERNAL"-flag this wont work
     buffer = heap_caps_malloc_prefer(size, 3, MALLOC_CAP_32BIT, MALLOC_CAP_SPIRAM, MALLOC_CAP_8BIT);
@@ -930,7 +930,7 @@ void *allocate_buffer(size_t size, uint32_t type) {
   buffer = validateFreeHeap(buffer);
   #endif
   
-    DEBUG_PRINT_LN("HERE4");
+    // DEBUG_PRINT_LN("HERE4");
 
 
   if (buffer && (type & BFRALLOC_CLEAR))

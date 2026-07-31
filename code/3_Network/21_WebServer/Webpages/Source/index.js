@@ -1083,12 +1083,12 @@ function populateSegments(s)
 		updateTrail(gId(`seg${i}bri`));
 		gId(`segr${i}`).classList.add("hide");
 	}
-	if (segCount < 2) {
+	// if (segCount < 2) { // force slider opacity control for development
 		gId(`segd${lSeg}`).classList.add("hide"); // hide delete if only one segment
 		if (parseInt(gId("seg0bri").value)==255) gId(`segp0`).classList.add("hide");
 		// hide segment controls if there is only one segment in simplified UI
 		if (simplifiedUI) gId("segcont").classList.add("hide");
-	}
+	// }
 	if (!isM && !noNewSegs && (cfg.comp.seglen?parseInt(gId(`seg${lSeg}s`).value):0)+parseInt(gId(`seg${lSeg}e`).value)<ledCount) gId(`segr${lSeg}`).classList.remove("hide");
 	gId('segutil2').style.display = (segCount > 1) ? "block":"none"; // rsbtn parent
 

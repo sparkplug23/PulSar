@@ -33,12 +33,29 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
       return TASKER_RESULT__ERROR_ID;
     }
 
+    // for(auto& mod:pModule)
+    // {
+    //   mod->Tasker(task, obj);
+    //   #ifdef ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
+    //   mod->Tasker_DevCode(task, obj);
+    //   #endif
+    // }
     for(auto& mod:pModule)
     {
+      uint32_t start_us = micros();
+
       mod->Tasker(task, obj);
+
       #ifdef ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
       mod->Tasker_DevCode(task, obj);
       #endif
+
+      uint32_t elapsed_us = micros() - start_us;
+
+      if(elapsed_us > 20000)
+      {
+        ALOG_ERR(PSTR("TASKER LONG JSON module=%S id=%u time=%luus"), mod->GetModuleName(), mod->GetModuleUniqueID(), elapsed_us);
+      }
     }
     
     return TASKER_RESULT__SUCCESS_ID;

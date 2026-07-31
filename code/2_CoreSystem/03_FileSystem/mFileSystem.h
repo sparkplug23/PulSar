@@ -253,9 +253,15 @@ class mFileSystem :
     bool appendObjectToFile(const char* key, JsonDocument* content, uint32_t s, uint32_t contentLen = 0);
     bool writeObjectToFileUsingId(const char* file, uint16_t id, JsonDocument* content);
     bool writeObjectToFile(const char* file, const char* key, JsonDocument* content);
-    bool readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest);
-    bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest);
+    bool readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest, const JsonDocument* filter = nullptr);
+    bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest, const JsonDocument* filter = nullptr);
     void updateFSInfo();
+
+    inline bool writeObjectToFileUsingId(const String &file, uint16_t id, const JsonDocument* content) { return writeObjectToFileUsingId(file.c_str(), id, content); };
+    inline bool writeObjectToFile(const String &file, const char* key, const JsonDocument* content) { return writeObjectToFile(file.c_str(), key, content); };
+    inline bool readObjectFromFileUsingId(const String &file, uint16_t id, JsonDocument* dest, const JsonDocument* filter = nullptr) { return readObjectFromFileUsingId(file.c_str(), id, dest); };
+    inline bool readObjectFromFile(const String &file, const char* key, JsonDocument* dest, const JsonDocument* filter = nullptr) { return readObjectFromFile(file.c_str(), key, dest); };
+
 
     String getContentType(AsyncWebServerRequest* request, String filename);
     bool handleFileRead(AsyncWebServerRequest* request, String path);

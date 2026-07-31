@@ -109,12 +109,6 @@ void WiFi_Wps_StatusCallback(wps_cb_status status);
 #undef USE_MQTT_TLS_CA_CERT
 #endif
 
-#ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-struct RgbwwColor;  // Forward declaration
-typedef RgbwwColor ColourBaseType;
-#else
-typedef uint32_t ColourBaseType;
-#endif
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************

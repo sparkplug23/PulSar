@@ -815,7 +815,6 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
   bool flag_request_is_for_full_visual_output
 ){
 
-  RgbwwColor colourRGBWW;
   uint32_t      colour32 = 0;
 
   /**************************************************************
@@ -859,7 +858,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
     // Handle full gradient mode
     else{
       if (palette_index__format) {
-        pixel_position_adjust = (tkr_anim->_virtualSegmentLength == 1) ? 0 : (desired_index * 255) / (tkr_anim->_virtualSegmentLength - 1);
+        pixel_position_adjust = (pSEGMENT.vLength() == 1) ? 0 : (desired_index * 255) / (pSEGMENT.vLength() - 1);
       }
 
       if (rescale_index_wrap_for_hardedge) {
@@ -869,8 +868,9 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       }
     }
 
-    CRGB fastled_col = ColorFromPaletteU32(pSEGMENT.palette_loaded->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, blend);
-    colour32 = RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0);
+    // CRGB fastled_col 
+    colour32 = ColorFromPaletteU32(pSEGMENT.palette_loaded->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, blend);
+    // colour32 = RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0);
     #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
     #endif
@@ -895,6 +895,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
     #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     colour32_white_cold = 0; // No white in PALETTELIST_STATIC_SINGLE_COLOUR
     #endif
+    // ALOG_INF(PSTR("static col %d, %d,%d,%d"), id, R(colour32), G(colour32), B(colour32));
   }  
   /**************************************************************
    * 
@@ -907,8 +908,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
     (id >= PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) && (id < PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID)
   ){  
     uint8_t adjusted_id = id - PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID;
-    colourRGBWW = pSEGMENT.segcol[adjusted_id].colour;
-    colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+    colour32 = pSEGMENT.segcol[adjusted_id].colour;
     #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
     #endif
@@ -925,22 +925,6 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
 
     uint16_t palette_adjusted_id = id - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID; 
     data = &static_palettes[palette_adjusted_id].data[0];
-
-    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-    colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW( // should make a U32 version for improved performance when only in RGB mode
-      data,
-      desired_index,
-      pSEGMENT.palette_loaded->encoded_colour_width,
-      pSEGMENT.palette_loaded->colours_in_palette,
-      static_palettes[palette_adjusted_id].encoding,
-      encoded_index,
-      palette_index__format,
-      rescale_index_wrap_for_hardedge,
-      force_palette_mode,
-      false
-    );
-    colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW); colour32_white_cold = colourRGBWW.CW;
-    #else // Fast RGBW support only
     colour32 = SubGet_Encoded_Palette_Colour_U32( // should make a U32 version for improved performance when only in RGB mode
       data,
       desired_index,
@@ -953,7 +937,6 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       force_palette_mode, // DEPRECIATE: was called override_default_encoding
       false               // DEPRECIATE: was called flag_crgb_exact_colour = false (true: "CRGB exact colour", false: "U32 colour")
     );
-    #endif
   }
   /**************************************************************
    * 
@@ -969,21 +952,6 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
 
     // Serial.printf("pal %d %d \n\r", id, palette_adjusted_id);
 
-    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-    colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW(
-      data,
-      desired_index,
-      pSEGMENT.palette_loaded->encoded_colour_width,
-      pSEGMENT.palette_loaded->colours_in_palette,
-      custom_palettes[palette_adjusted_id].encoding,
-      encoded_index,
-      palette_index__format,
-      rescale_index_wrap_for_hardedge,
-      force_palette_mode,
-      false
-    );
-    colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW); colour32_white_cold = colourRGBWW.CW;
-    #else
     colour32 = SubGet_Encoded_Palette_Colour_U32(
       data,
       desired_index,
@@ -996,7 +964,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       force_palette_mode,
       false
     );
-    #endif
+    
   }
   /**************************************************************
    * 
@@ -1049,7 +1017,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
         }
 
         // Runtime GET: just read CRGBPalette16 (assumes Update_LivePalettes() was called once-per-frame elsewhere)
-        uint8_t idx255 = (tkr_anim->_virtualSegmentLength <= 1) ? 0 : (uint8_t)((desired_index * 255U) / (uint16_t)(tkr_anim->_virtualSegmentLength - 1));
+        uint8_t idx255 = (pSEGMENT.vLength() <= 1) ? 0 : (uint8_t)((desired_index * 255U) / (uint16_t)(pSEGMENT.vLength() - 1));
         CRGB c = ColorFromPaletteU32(pSEGMENT.palette_loaded->CRGB16Palette16_Palette.data, idx255, 255, LINEARBLEND);
 
         colour32 = RGBW32(c.r, c.g, c.b, 0);
@@ -1705,7 +1673,7 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Palette_Colour_R
   if (is_basic_sequence_palette) {
     // Handle non-gradient palette colors, with or without segment spanning
     if (flag_spanned_segment && !is_forced_to_get_discrete) {
-      pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+      pixel_position_adjust = (_pixel_position * 255) / (pSEGMENT.vLength() - 1);
     }
 
     // Map pixel position to color index in the palette
@@ -1724,7 +1692,7 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Palette_Colour_R
   // Handle gradient palettes or forced gradient
   if (encoding.index_gradient || flag_force_gradient) {
     if (flag_spanned_segment) {
-      pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+      pixel_position_adjust = (_pixel_position * 255) / (pSEGMENT.vLength() - 1);
     }
 
     // Set boundaries for gradient mapping
@@ -1806,7 +1774,7 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Palette_Colour_R
 
   // Handle simple spanned palettes
   if (flag_spanned_segment) {
-    pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+    pixel_position_adjust = (_pixel_position * 255) / (pSEGMENT.vLength() - 1);
   }
 
   uint8_t palette_index = scale8(pixel_position_adjust, colours_in_palette - 1);
@@ -1865,8 +1833,8 @@ IRAM_ATTR [[gnu::hot]] uint32_t mPalette::SubGet_Encoded_Palette_Colour_U32(
         && encoding.index_gradient
         && !is_forced_discrete)
     {
-      pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
-        ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
+      pixel_position_adjust = (pSEGMENT.vLength() > 1)
+        ? (uint16_t)((uint32_t)_pixel_position * 255u / (pSEGMENT.vLength() - 1))
         : 0;
     }
 
@@ -1947,8 +1915,8 @@ IRAM_ATTR [[gnu::hot]] uint32_t mPalette::SubGet_Encoded_Palette_Colour_U32(
     uint16_t pixel_position_adjust = _pixel_position;
 
     if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE) {
-      pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
-        ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
+      pixel_position_adjust = (pSEGMENT.vLength() > 1)
+        ? (uint16_t)((uint32_t)_pixel_position * 255u / (pSEGMENT.vLength() - 1))
         : 0;
     } else if (palette_index__format == PALETTE_INDEX__IS_255_RANGE) {
       pixel_position_adjust &= 0xFFu;
@@ -2032,8 +2000,8 @@ IRAM_ATTR [[gnu::hot]] uint32_t mPalette::SubGet_Encoded_Palette_Colour_U32(
     uint16_t pixel_position_adjust = _pixel_position;
 
     if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE) {
-      pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
-        ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
+      pixel_position_adjust = (pSEGMENT.vLength() > 1)
+        ? (uint16_t)((uint32_t)_pixel_position * 255u / (pSEGMENT.vLength() - 1))
         : 0;
     } else if (palette_index__format == PALETTE_INDEX__IS_255_RANGE) {
       pixel_position_adjust &= 0xFFu; // already 0..255

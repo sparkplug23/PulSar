@@ -330,12 +330,8 @@ uint8_t BusDigital::estimateCurrentAndLimitBri() {
 
   uint32_t busPowerSum = 0;
   for (unsigned i = 0; i < getLength(); i++) {  //sum up the usage of each LED
-    ColourBaseType c = getPixelColor(i); // always returns original or restored color without brightness scaling
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-    byte r = c.R, g = c.G, b = c.B, w = c.WW;
-    #else
+    uint32_t c = getPixelColor(i); // always returns original or restored color without brightness scaling
     byte r = R(c), g = G(c), b = B(c), w = W(c);
-    #endif
 
     if (useWackyWS2815PowerModel) { //ignore white component on WS2815 power calculation
       busPowerSum += (max(max(r,g),b)) * 3;
@@ -365,138 +361,136 @@ uint8_t BusDigital::estimateCurrentAndLimitBri() {
 }
 
 
+// void BusDigital::show() {
+
+//   // #ifdef ENABLE_DEVFEATURE_LIGHTING__SHOW_FALLBACK_MINIMAL_2024
+
+//   PolyBus::show(_busPtr, _iType);
+
+// //   #else
+  
+// //   _milliAmpsTotal = 0;
+// //   if (!_valid) return;
+  
+// //       DEBUG_LINE_HERE
+
+// //   uint8_t cctWW = 0, cctCW = 0;
+// //   unsigned newBri = estimateCurrentAndLimitBri();  // will fill _milliAmpsTotal
+// //   if (newBri < _bri) PolyBus::setBrightness(_busPtr, _iType, newBri); // limit brightness to stay within current limits
+
+// //   /**
+// //    * @brief Method: Buffer
+// //    * A internal buffer is used to store the pixel data before it is sent to the bus.
+// //    * This uses more memory, but enables transitions.
+// //    * 
+// //    */
+// //   if (_data) 
+// //   {
+// //     ALOG_INF(PSTR("buffer method active %d %d %d\t %d %d %d"), _len, getNumberOfChannels(), _colorOrder, _data[0], _data[1], _data[2]);
+// //     size_t channels = getNumberOfChannels();
+// //     int16_t oldCCT = Bus::_cct; // temporarily save bus CCT
+// //     for (size_t i=0; i<_len; i++) {
+// //       size_t offset = i * channels;
+// //       unsigned co = _colorOrderMap.getPixelColorOrder(i+_start, _colorOrder);
+// //       uint32_t c;
+// //       if (_type == BUSTYPE_WS2812_1CH_X3) { // map to correct IC, each controls 3 LEDs (_len is always a multiple of 3)
+// //         switch (i%3) {
+// //           case 0: c = RGBW32(_data[offset]  , _data[offset+1], _data[offset+2], 0); break;
+// //           case 1: c = RGBW32(_data[offset-1], _data[offset]  , _data[offset+1], 0); break;
+// //           case 2: c = RGBW32(_data[offset-2], _data[offset-1], _data[offset]  , 0); break;
+// //         }
+// //       } else {
+// //         if (hasRGB()) c = RGBW32(_data[offset], _data[offset+1], _data[offset+2], hasWhite() ? _data[offset+3] : 0);
+// //         else          c = RGBW32(0, 0, 0, _data[offset]);
+// //       }
+// //       if (hasCCT()) {
+// //         // unfortunately as a segment may span multiple buses or a bus may contain multiple segments and each segment may have different CCT
+// //         // we need to extract and appy CCT value for each pixel individually even though all buses share the same _cct variable
+// //         // TODO: there is an issue if CCT is calculated from RGB value (_cct==-1), we cannot do that with double buffer
+// //         Bus::_cct = _data[offset+channels-1];
+// //         Bus::calculateCCT(c, cctWW, cctCW);
+// //       }
+// //       unsigned pix = i;
+// //       if (_reversed) pix = _len - pix -1;
+// //       pix += _skip;
+// //       Serial.printf("Setting pixel %d to %d %d %d %d\n", pix, c, co, (cctCW<<8) | cctWW);
+// //       PolyBus::setPixelColor(_busPtr, _iType, pix, c, co, (cctCW<<8) | cctWW);
+// //     }
+// //     #if !defined(STATUSLED) || STATUSLED>=0
+// //     if (_skip) PolyBus::setPixelColor(_busPtr, _iType, 0, 0, _colorOrderMap.getPixelColorOrder(_start, _colorOrder)); // paint skipped pixels black
+// //     #endif
+// //     for (int i=1; i<_skip; i++) PolyBus::setPixelColor(_busPtr, _iType, i, 0, _colorOrderMap.getPixelColorOrder(_start, _colorOrder)); // paint skipped pixels black
+// //     Bus::_cct = oldCCT;
+// //   }
+// //   /**
+// //    * @brief Method: Direct
+// //    * Pixels are set directly on the bus, no buffer is used.
+// //    * This section sole purpose is to fix colour inaccuracies that may occur when using the buffer method.
+// //    * It reads what has already been set on the bus, but not yet transmitted. 
+// //    */
+// //   else 
+// //   {
+// //     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
+// //     ALOG_INF(PSTR("direct method active %d %d %d"), _len, getNumberOfChannels(), _colorOrder);
+// //     #endif
+// //     if (newBri < _bri) {
+// //       Serial.println("I dont want this");
+// //       unsigned hwLen = _len;
+// //       if (_type == BUSTYPE_WS2812_1CH_X3) hwLen = NUM_ICS_WS2812_1CH_3X(_len); // only needs a third of "RGB" LEDs for NeoPixelBus
+// //       for (unsigned i = 0; i < hwLen; i++) {
+// //         // use 0 as color order, actual order does not matter here as we just update the channel values as-is
+// //         #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
+// //         uint32_t c = PolyBus::getPixelColor(_busPtr, _iType, i, 0); // tmp fix for RGBWW
+// //         ALOG_INF(PSTR("direct method active lossy %d %d %d\t %d %d %d"), i, c.R, c.G, c.B, c.WW, c.CW);
+// //         #else
+// //         uint32_t c = restoreColorLossy(PolyBus::getPixelColor(_busPtr, _iType, i, 0), _bri);
+// //         #endif
+// //         #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
+// //         // if (hasCCT()) Bus::calculateCCT(c, cctWW, cctCW); // this will unfortunately corrupt (segment) CCT data on every bus
+// //         PolyBus::setPixelColor(_busPtr, _iType, i, c, 0);//, 0, (cctCW<<8) | cctWW); // repaint all pixels with new brightness
+// //         #else
+// //         if (hasCCT()) Bus::calculateCCT(c, cctWW, cctCW); // this will unfortunately corrupt (segment) CCT data on every bus
+// //         PolyBus::setPixelColor(_busPtr, _iType, i, c, 0, (cctCW<<8) | cctWW); // repaint all pixels with new brightness
+// //         #endif
+// //       }
+// //     }
+// //   }
+
+
+// //   /**
+// //    * @brief To account for effects that require direct control, the brightness of the bus should be overridden
+// //    * 
+// //    * OR, most likely, what I should be doing is instead writing the "full brightness" output, and hence, it should
+// //    * actually be the "under palette" that is set to a lower brightness. 
+// //    * 
+// //    */
+
+// //   // PolyBus::setPixelColor(_busPtr, _iType, 0, RgbColor(255, 0, 0), 0);
+
+
+
+// //   PolyBus::show(_busPtr, _iType, !_data); // faster if buffer consistency is not important (use !_buffering this causes 20% FPS drop)
+// //   // restore bus brightness to its original value
+// //   // this is done right after show, so this is only OK if LED updates are completed before show() returns
+// //   // or async show has a separate buffer (ESP32 RMT and I2S are ok)
+// //   if (newBri < _bri) PolyBus::setBrightness(_busPtr, _iType, _bri);
+  
+// //   DEBUG_LINE_HERE
+// // #endif
+
+// }
+
 void BusDigital::show() {
-
-  // #ifdef ENABLE_DEVFEATURE_LIGHTING__SHOW_FALLBACK_MINIMAL_2024
-
-  PolyBus::show(_busPtr, _iType);
-
-//   #else
-  
-//   _milliAmpsTotal = 0;
-//   if (!_valid) return;
-  
-//       DEBUG_LINE_HERE
-
-//   uint8_t cctWW = 0, cctCW = 0;
-//   unsigned newBri = estimateCurrentAndLimitBri();  // will fill _milliAmpsTotal
-//   if (newBri < _bri) PolyBus::setBrightness(_busPtr, _iType, newBri); // limit brightness to stay within current limits
-
-//   /**
-//    * @brief Method: Buffer
-//    * A internal buffer is used to store the pixel data before it is sent to the bus.
-//    * This uses more memory, but enables transitions.
-//    * 
-//    */
-//   if (_data) 
-//   {
-//     ALOG_INF(PSTR("buffer method active %d %d %d\t %d %d %d"), _len, getNumberOfChannels(), _colorOrder, _data[0], _data[1], _data[2]);
-//     size_t channels = getNumberOfChannels();
-//     int16_t oldCCT = Bus::_cct; // temporarily save bus CCT
-//     for (size_t i=0; i<_len; i++) {
-//       size_t offset = i * channels;
-//       unsigned co = _colorOrderMap.getPixelColorOrder(i+_start, _colorOrder);
-//       uint32_t c;
-//       if (_type == BUSTYPE_WS2812_1CH_X3) { // map to correct IC, each controls 3 LEDs (_len is always a multiple of 3)
-//         switch (i%3) {
-//           case 0: c = RGBW32(_data[offset]  , _data[offset+1], _data[offset+2], 0); break;
-//           case 1: c = RGBW32(_data[offset-1], _data[offset]  , _data[offset+1], 0); break;
-//           case 2: c = RGBW32(_data[offset-2], _data[offset-1], _data[offset]  , 0); break;
-//         }
-//       } else {
-//         if (hasRGB()) c = RGBW32(_data[offset], _data[offset+1], _data[offset+2], hasWhite() ? _data[offset+3] : 0);
-//         else          c = RGBW32(0, 0, 0, _data[offset]);
-//       }
-//       if (hasCCT()) {
-//         // unfortunately as a segment may span multiple buses or a bus may contain multiple segments and each segment may have different CCT
-//         // we need to extract and appy CCT value for each pixel individually even though all buses share the same _cct variable
-//         // TODO: there is an issue if CCT is calculated from RGB value (_cct==-1), we cannot do that with double buffer
-//         Bus::_cct = _data[offset+channels-1];
-//         Bus::calculateCCT(c, cctWW, cctCW);
-//       }
-//       unsigned pix = i;
-//       if (_reversed) pix = _len - pix -1;
-//       pix += _skip;
-//       Serial.printf("Setting pixel %d to %d %d %d %d\n", pix, c, co, (cctCW<<8) | cctWW);
-//       PolyBus::setPixelColor(_busPtr, _iType, pix, c, co, (cctCW<<8) | cctWW);
-//     }
-//     #if !defined(STATUSLED) || STATUSLED>=0
-//     if (_skip) PolyBus::setPixelColor(_busPtr, _iType, 0, 0, _colorOrderMap.getPixelColorOrder(_start, _colorOrder)); // paint skipped pixels black
-//     #endif
-//     for (int i=1; i<_skip; i++) PolyBus::setPixelColor(_busPtr, _iType, i, 0, _colorOrderMap.getPixelColorOrder(_start, _colorOrder)); // paint skipped pixels black
-//     Bus::_cct = oldCCT;
-//   }
-//   /**
-//    * @brief Method: Direct
-//    * Pixels are set directly on the bus, no buffer is used.
-//    * This section sole purpose is to fix colour inaccuracies that may occur when using the buffer method.
-//    * It reads what has already been set on the bus, but not yet transmitted. 
-//    */
-//   else 
-//   {
-//     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-//     ALOG_INF(PSTR("direct method active %d %d %d"), _len, getNumberOfChannels(), _colorOrder);
-//     #endif
-//     if (newBri < _bri) {
-//       Serial.println("I dont want this");
-//       unsigned hwLen = _len;
-//       if (_type == BUSTYPE_WS2812_1CH_X3) hwLen = NUM_ICS_WS2812_1CH_3X(_len); // only needs a third of "RGB" LEDs for NeoPixelBus
-//       for (unsigned i = 0; i < hwLen; i++) {
-//         // use 0 as color order, actual order does not matter here as we just update the channel values as-is
-//         #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-//         ColourBaseType c = PolyBus::getPixelColor(_busPtr, _iType, i, 0); // tmp fix for RGBWW
-//         ALOG_INF(PSTR("direct method active lossy %d %d %d\t %d %d %d"), i, c.R, c.G, c.B, c.WW, c.CW);
-//         #else
-//         ColourBaseType c = restoreColorLossy(PolyBus::getPixelColor(_busPtr, _iType, i, 0), _bri);
-//         #endif
-//         #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-//         // if (hasCCT()) Bus::calculateCCT(c, cctWW, cctCW); // this will unfortunately corrupt (segment) CCT data on every bus
-//         PolyBus::setPixelColor(_busPtr, _iType, i, c, 0);//, 0, (cctCW<<8) | cctWW); // repaint all pixels with new brightness
-//         #else
-//         if (hasCCT()) Bus::calculateCCT(c, cctWW, cctCW); // this will unfortunately corrupt (segment) CCT data on every bus
-//         PolyBus::setPixelColor(_busPtr, _iType, i, c, 0, (cctCW<<8) | cctWW); // repaint all pixels with new brightness
-//         #endif
-//       }
-//     }
-//   }
-
-
-//   /**
-//    * @brief To account for effects that require direct control, the brightness of the bus should be overridden
-//    * 
-//    * OR, most likely, what I should be doing is instead writing the "full brightness" output, and hence, it should
-//    * actually be the "under palette" that is set to a lower brightness. 
-//    * 
-//    */
-
-//   // PolyBus::setPixelColor(_busPtr, _iType, 0, RgbColor(255, 0, 0), 0);
-
-
-
-//   PolyBus::show(_busPtr, _iType, !_data); // faster if buffer consistency is not important (use !_buffering this causes 20% FPS drop)
-//   // restore bus brightness to its original value
-//   // this is done right after show, so this is only OK if LED updates are completed before show() returns
-//   // or async show has a separate buffer (ESP32 RMT and I2S are ok)
-//   if (newBri < _bri) PolyBus::setBrightness(_busPtr, _iType, _bri);
-  
-//   DEBUG_LINE_HERE
-// #endif
-
+  if (!_valid) return;
+  _NPBbri = (_NPBbri * _bri) / 255;      // total applied brightness for use in restoreColorLossy (see applyBriLimit())
+  PolyBus::show(_busPtr, _iType, _skip); // faster if buffer consistency is not important (no skipped LEDs)
 }
-
 
 bool BusDigital::canShow() const
 {
   if (!_valid) return true;
   // ALOG_INF(PSTR("BusDigital::canShow %d %d"), _busPtr != nullptr, _iType);
   return PolyBus::canShow(_busPtr, _iType);
-}
-
-
-void BusDigital::setBrightness(uint8_t b) {
-  if (_bri == b) return;
-  Bus::setBrightness(b);
-  PolyBus::setBrightness(_busPtr, _iType, b);
 }
 
 
@@ -514,28 +508,29 @@ void BusDigital::setStatusPixel(uint32_t c) {
 // note: using WLED_O2_ATTR makes this function ~7% faster at the expense of 600 bytes of flash
 void IRAM_ATTR BusDigital::setPixelColor(unsigned pix, uint32_t c) {
   if (!_valid) return;
-  // if (Bus::_cct >= 1900) c = tkr_anim->colorBalanceFromKelvin(Bus::_cct, c); //color correction from CCT
+  if (Bus::_cct >= 1900) c = tkr_anim->colorBalanceFromKelvin(Bus::_cct, c); //color correction from CCT
   uint8_t cctWW = 0, cctCW = 0;
   uint16_t wwcw = 0;
-  // if (hasWhite()) c = autoWhiteCalc(c, cctWW, cctCW);
+  if (hasWhite()) c = autoWhiteCalc(c, cctWW, cctCW);
   c = color_fade(c, _bri, true); // apply brightness
 
-  // if (hasCCT()) {
-  //   wwcw = ((cctCW + 1) * _bri) & 0xFF00; // apply brightness to CCT (store CW in upper byte)
-  //   wwcw |= ((cctWW + 1) * _bri) >> 8;
-  //   if (_type == TYPE_WS2812_WWA) c = RGBW32(wwcw, wwcw >> 8, 0, W(c)); // ww,cw, 0, w
-  // }
+  if(pix==0) ALOG_INF(PSTR("_bri %d"),_bri);
 
-  // if (BusManager::_useABL) {
-  // // if (tkr_iLight->bus_manager->_useABL) {
-  //   // if using ABL, sum all color channels to estimate current and limit brightness in show()
-  //   uint8_t r = R(c), g = G(c), b = B(c);
-  //   if (_milliAmpsPerLed < 255) { // normal ABL
-  //     _colorSum += r + g + b + W(c);
-  //   } else { // wacky WS2815 power model, ignore white channel, use max of RGB (issue #549)
-  //     _colorSum += ((r > g) ? ((r > b) ? r : b) : ((g > b) ? g : b));
-  //   }
-  // }
+  if (hasCCT()) {
+    wwcw = ((cctCW + 1) * _bri) & 0xFF00; // apply brightness to CCT (store CW in upper byte)
+    wwcw |= ((cctWW + 1) * _bri) >> 8;
+    if (_type == TYPE_WS2812_WWA) c = RGBW32(wwcw, wwcw >> 8, 0, W(c)); // ww,cw, 0, w
+  }
+
+  if (BusManager::_useABL) {
+    // if using ABL, sum all color channels to estimate current and limit brightness in show()
+    uint8_t r = R(c), g = G(c), b = B(c);
+    if (_milliAmpsPerLed < 255) { // normal ABL
+      _colorSum += r + g + b + W(c);
+    } else { // wacky WS2815 power model, ignore white channel, use max of RGB (issue #549)
+      _colorSum += ((r > g) ? ((r > b) ? r : b) : ((g > b) ? g : b));
+    }
+  }
 
   if (_reversed) pix = _len - pix -1;
   pix += _skip;
@@ -581,34 +576,6 @@ uint32_t IRAM_ATTR BusDigital::getPixelColor(unsigned pix) const {
 }
 
 
-// /**
-//  * @brief Later these set/get will need to have an ifdef to enable rgbcct methods, so either complete duplication
-//  * or uses the same functions, but includes subcode that has ifdefs that enable 5 byte encoding for CCT. The bus wrapper will likely need to have rgbww ifdef method to make it easier to use.
-//  * 
-//  * @param pix 
-//  * @param c 
-//  */
-// void IRAM_ATTR BusDigital::setPixelColor(uint32_t pix, ColourBaseType c) {
-
-//   // ALOG_INF(PSTR("p\t%d"), pix);
-//   if (_reversed) pix = _len - pix -1;
-//   else pix += _skip;
-//   uint8_t co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
-//   PolyBus::setPixelColor(_busPtr, _iType, pix, c, co);
-
-// }
-
-// // returns original color if global buffering is enabled, else returns lossly restored color from bus
-// ColourBaseType IRAM_ATTR BusDigital::getPixelColor(uint32_t pix) const {
-
-//     if (_reversed) pix = _len - pix -1;
-//     else pix += _skip;
-//     uint8_t co = _colorOrderMap.getPixelColorOrder(pix+_start, _colorOrder);
-//     return PolyBus::getPixelColor(_busPtr, _iType, pix, co);
-
-// }
-
-
 uint8_t BusDigital::getPins(uint8_t* pinArray) const
 {
   uint8_t numPins = is2Pin(_type) ? 2 : 1;
@@ -619,6 +586,10 @@ uint8_t BusDigital::getPins(uint8_t* pinArray) const
   return numPins;
 }
 
+
+size_t BusDigital::getBusSize() const {
+  return sizeof(BusDigital) + (isOk() ? PolyBus::getDataSize(_busPtr, _iType) : 0); // does not include common I2S DMA buffer
+}
 
 void BusDigital::setColorOrder(uint8_t colorOrder) 
 {
@@ -1612,17 +1583,6 @@ void BusManager::applyABL() {
 }
 
 
-// void IRAM_ATTR BusManager::setPixelColor(uint32_t pix, ColourBaseType c) {
-  
-//   #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-//   Serial.printf("  BusManager::setPixelColor[%d]    = %d,%d,%d,%d,%d\n\r", pix, c.R, c.G, c.B, c.WW, c.CW);
-//   #endif
-//   for (unsigned i = 0; i < numBusses; i++) {
-//     unsigned bstart = busses[i]->getStart();
-//     if (pix < bstart || pix >= bstart + busses[i]->getLength()) continue;
-//     busses[i]->setPixelColor(pix - bstart, c);
-//   }
-// }
 void IRAM_ATTR BusManager::setPixelColor(unsigned pix, uint32_t c) {
   for (auto &bus : busses) {
     if (!bus->containsPixel(pix)) continue;
@@ -1631,15 +1591,6 @@ void IRAM_ATTR BusManager::setPixelColor(unsigned pix, uint32_t c) {
 }
 
 
-// ColourBaseType BusManager::getPixelColor(uint32_t pix) {
-//   for (unsigned i = 0; i < numBusses; i++) {
-//     unsigned bstart = busses[i]->getStart();
-//     if (!busses[i]->containsPixel(pix)) continue;
-//     DEBUG_LINE_HERE;
-//     return busses[i]->getPixelColor(pix - bstart);
-//   }
-//   return 0;
-// }
 uint32_t BusManager::getPixelColor(unsigned pix) {
   for (auto &bus : busses) {
     if (!bus->containsPixel(pix)) continue;
@@ -1647,14 +1598,6 @@ uint32_t BusManager::getPixelColor(unsigned pix) {
   }
   return 0;
 }
-
-
-// void BusManager::setBrightness(uint8_t b) {
-//   // ALOG_INF(PSTR("BusManager::setBrightness %d"), b);
-//   for (unsigned i = 0; i < numBusses; i++) {
-//     busses[i]->setBrightness(b);
-//   }
-// }
 
 
 void BusManager::setSegmentCCT(int16_t cct, bool allowWBCorrection) {
@@ -1673,12 +1616,6 @@ uint8_t Bus::_cctBlend = 0;
 uint8_t Bus::_gAWM = 255;
 
 uint16_t BusDigital::_milliAmpsTotal = 0;
-
-// uint8_t       BusManager::numBusses = 0;
-// Bus*          BusManager::busses[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES];
-// ColorOrderMap BusManager::colorOrderMap = {};
-// uint16_t      BusManager::_milliAmpsUsed = 0;
-// uint16_t      BusManager::_milliAmpsMax = ABL_MILLIAMPS_DEFAULT;
 
 bool PolyBus::useParallelI2S = false;
 uint8_t PolyBus::_bri_rgb = 255; // current brightness for RGB

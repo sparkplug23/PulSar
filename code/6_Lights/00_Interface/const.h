@@ -46,6 +46,32 @@
 #define COL_ORDER_MAX             5
 
 
+// JSON buffer lock owners
+#define JSON_LOCK_UNKNOWN        255
+#define JSON_LOCK_CFG_DES          1
+#define JSON_LOCK_CFG_SER          2
+#define JSON_LOCK_CFG_SEC_DES      3
+#define JSON_LOCK_CFG_SEC_SER      4
+#define JSON_LOCK_SETTINGS         5
+#define JSON_LOCK_XML              6
+#define JSON_LOCK_LEDMAP           7
+// unused                          8
+#define JSON_LOCK_PRESET_LOAD      9
+#define JSON_LOCK_PRESET_SAVE     10
+#define JSON_LOCK_WS_RECEIVE      11
+#define JSON_LOCK_WS_SEND         12
+#define JSON_LOCK_IR              13
+#define JSON_LOCK_SERVER          14
+#define JSON_LOCK_MQTT            15
+#define JSON_LOCK_SERIAL          16
+#define JSON_LOCK_SERVEJSON       17
+#define JSON_LOCK_NOTIFY          18
+#define JSON_LOCK_PRESET_NAME     19
+#define JSON_LOCK_LEDGAP          20
+#define JSON_LOCK_LEDMAP_ENUM     21
+#define JSON_LOCK_REMOTE          22
+#define JSON_LOCK_OTA             23
+
 #define TRANSITION_FADE            0x00  // universal
 #define TRANSITION_FAIRY_DUST      0x01  // universal
 #define TRANSITION_SWIPE_RIGHT     0x02  // 1D or 2D
@@ -511,5 +537,18 @@
 #endif
 
 // #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
+
+
+
+// IRAM_ATTR for 8266 with 32Kb IRAM causes error: section `.text1' will not fit in region `iram1_0_seg'
+// this hack removes the IRAM flag for some 1D/2D functions - somewhat slower, but it solves problems with some older 8266 chips
+#ifdef WLED_SAVE_IRAM
+  #define IRAM_ATTR_YN
+#else
+  #define IRAM_ATTR_YN IRAM_ATTR
+#endif
+
+#define WLED_O2_ATTR __attribute__((optimize("O2")))
+#define WLED_O3_ATTR __attribute__((optimize("O3")))
 
 #endif // guard

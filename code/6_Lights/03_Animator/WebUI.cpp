@@ -51,7 +51,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   root[F("of")]  = seg.offset;
   root["on"]     = seg.on;
   root["frz"]    = seg.freeze;
-  byte segbri    = seg._brightness_rgb;
+  byte segbri    = seg.opacity;
   root["bri"]    = (segbri) ? segbri : 255;
 
   if (segmentBounds && seg.name != nullptr) root["n"] = reinterpret_cast<const char *>(seg.name); //not good practice, but decreases required JSON buffer
@@ -74,11 +74,6 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   for (size_t i = 0; i < 5; i++)
   {
     byte segcol[5]; 
-    // segcol[0] = seg.segcol[i].colour.R;
-    // segcol[1] = seg.segcol[i].colour.G;
-    // segcol[2] = seg.segcol[i].colour.B;
-    // segcol[3] = seg.segcol[i].colour.WW; // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
-    // segcol[4] = seg.segcol[i].colour.CW; // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
     segcol[0] = seg.segcol[i].getRed();
     segcol[1] = seg.segcol[i].getGreen();
     segcol[2] = seg.segcol[i].getBlue();
@@ -92,8 +87,8 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   // ALOG_INF(PSTR("colstr OUT = %s"), colstr);
   root["col"] = serialized(colstr);
 
-  root["rgbbri"] = seg.getBrightnessRGB();
-  root["cctbri"] = seg.getBrightnessCCT();
+  // root["rgbbri"] = seg.getBrightnessRGB();
+  // root["cctbri"] = seg.getBrightnessCCT();
 
   root["PalIX"] = seg.live_palette.intensity;
 
@@ -268,7 +263,7 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   root[F("ws")] = websocket_lights->count();
   #endif
 
-  root[F("fxcount")] = getModeCount();
+  root[F("fxcount")] = getEffectCount();
   root[F("palcount")] = getPaletteCount();
   root[F("cpalcount")] = customPalettes.size(); //number of custom palettes
 
@@ -377,16 +372,22 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
   netDebugEnabled = root[F("debug")] | netDebugEnabled;
   #endif
 
-  bool onBefore = tkr_iLight->_briRGB_Global ; //bri
-  if(getVal(root["bri"], &tkr_iLight->_briRGB_Global))
-  {
-    //if it was updated, tmp update this bus
-    BusManager::setBrightness( tkr_iLight->getBriRGB_Global() ); // fix re-initialised bus' brightness
-  }
+  bool onBefore = tkr_iLight->_briRGB_Global;
+  getVal(root["bri"], tkr_iLight->_briRGB_Global);
+  if (tkr_iLight->_briRGB_Global != briOld) stateChanged = true;
+
+  ALOG_INF(PSTR("web->>bri %d"),tkr_iLight->_briRGB_Global);
+
+  // bool onBefore = tkr_iLight->_briRGB_Global ; //bri
+  // if(getVal(root["bri"], &tkr_iLight->_briRGB_Global))
+  // {
+  //   //if it was updated, tmp update this bus
+    // BusManager::setBrightness( tkr_iLight->getBriRGB_Global() ); // fix re-initialised bus' brightness
+  // }
 
 
-  getVal(root["cBri"], &tkr_iLight->_briRGB_Global);
-  getVal(root["wBri"], &tkr_iLight->_briCT_Global);
+  // getVal(root["cBri"], &tkr_iLight->_briRGB_Global);
+  // getVal(root["wBri"], &tkr_iLight->_briCT_Global);
 
 
   bool on = root["on"] | (tkr_iLight->_briRGB_Global > 0);
@@ -522,7 +523,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
       
   } else if (!root["ps"].isNull()) {
     ps = presetCycCurr;
-    if (root["win"].isNull() && getVal(root["ps"], &ps, 0, 0) && ps > 0 && ps < 251 && ps != currentPreset) {
+    if (root["win"].isNull() && getVal(root["ps"], ps, 0, 0) && ps > 0 && ps < 251 && ps != currentPreset) {
       // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
       presetCycCurr = ps;
       #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
@@ -558,9 +559,8 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 
   // ALOG_INF(PSTR("deserializeState end =>> does my normal commandjson need done here?"));
 
-  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
-  stateUpdated(callMode);
-  #endif
+  stateUpdated(callMode); // if stateChanged
+  
   if (presetToRestore) currentPreset = presetToRestore;
   
   #endif // ENABLE_FEATURE_LIGHTS__PRESETS
@@ -570,10 +570,10 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 
 
 //helper to get int value with in/decrementing support via ~ syntax
-void mAnimatorLight::parseNumber(const char* str, byte* val, byte minv, byte maxv)
+void mAnimatorLight::parseNumber(const char* str, byte &val, byte minv, byte maxv)
 {
   if (str == nullptr || str[0] == '\0') return;
-  if (str[0] == 'r') {*val = hw_random8(minv,maxv?maxv:255); return;} // maxv for random cannot be 0
+  if (str[0] == 'r') {val = hw_random8(minv,maxv?maxv:255); return;} // maxv for random cannot be 0
   bool wrap = false;
   if (str[0] == 'w' && strlen(str) > 1) {str++; wrap = true;}
   if (str[0] == '~') {
@@ -581,19 +581,19 @@ void mAnimatorLight::parseNumber(const char* str, byte* val, byte minv, byte max
     if (out == 0) {
       if (str[1] == '0') return;
       if (str[1] == '-') {
-        *val = (int)(*val -1) < (int)minv ? maxv : min((int)maxv,(*val -1)); //-1, wrap around
+        val = (int)(val -1) < (int)minv ? maxv : min((int)maxv,(val -1)); //-1, wrap around
       } else {
-        *val = (int)(*val +1) > (int)maxv ? minv : max((int)minv,(*val +1)); //+1, wrap around
+        val = (int)(val +1) > (int)maxv ? minv : max((int)minv,(val +1)); //+1, wrap around
       }
     } else {
-      if (wrap && *val == maxv && out > 0) out = minv;
-      else if (wrap && *val == minv && out < 0) out = maxv;
+      if (wrap && val == maxv && out > 0) out = minv;
+      else if (wrap && val == minv && out < 0) out = maxv;
       else {
-        out += *val;
+        out += val;
         if (out > maxv) out = maxv;
         if (out < minv) out = minv;
       }
-      *val = out;
+      val = out;
     }
     return;
   } else if (minv == maxv && minv == 0) { // limits "unset" i.e. both 0
@@ -608,9 +608,8 @@ void mAnimatorLight::parseNumber(const char* str, byte* val, byte minv, byte max
       }
     }
   }
-  *val = atoi(str);
+  val = atoi(str);
 }
-
 
 
 
@@ -622,10 +621,10 @@ int mAnimatorLight::getNumVal(const String* req, uint16_t pos)
 
 
 //getVal supports inc/decrementing and random ("X~Y(r|~[w][-][Z])" form)
-bool mAnimatorLight::getVal(JsonVariant elem, byte* val, byte vmin, byte vmax) {
+bool  mAnimatorLight::getVal(JsonVariant elem, byte &val, byte vmin, byte vmax) {
   if (elem.is<int>()) {
 		if (elem < 0) return false; //ignore e.g. {"ps":-1}
-    *val = elem;
+    val = elem;
     return true;
   } else if (elem.is<const char*>()) {
     const char* str = elem;
@@ -651,7 +650,7 @@ bool mAnimatorLight::getBoolVal(JsonVariant elem, bool dflt) {
 }
 
 
-bool mAnimatorLight::updateVal(const char* req, const char* key, byte* val, byte minv, byte maxv)
+bool mAnimatorLight::updateVal(const char* req, const char* key, byte &val, byte minv, byte maxv)
 {
   const char *v = strstr(req, key);
   if (v) v += strlen(key);
@@ -985,7 +984,8 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
   JsonObject def = doc["def"];
   CJSON(bootPreset, def["ps"]);
   CJSON(turnOnAtBoot, def["on"]); // true
-  CJSON(tkr_iLight->_briRGB_Global, def["bri"]); // 128
+  // CJSON(tkr_iLight->_briRGB_Global, def["bri"]); // 128
+  CJSON(briS, def["bri"]); // 128
 
   JsonObject interfaces = doc["if"];
 
@@ -1152,6 +1152,63 @@ void mAnimatorLight::sappend(char stype, const char* key, int val)
 }
 
 
+/*
+ * JSON API (De)serialization
+ */
+namespace {
+  typedef struct {
+    uint32_t colors[NUM_COLORS];
+    uint16_t start;
+    uint16_t stop;
+    uint16_t offset;
+    uint16_t grouping;
+    uint16_t spacing;
+    uint16_t startY;
+    uint16_t stopY;
+    uint16_t options;
+    uint8_t  mode;
+    uint8_t  palette;
+    uint8_t  opacity;
+    uint8_t  speed;
+    uint8_t  intensity;
+    uint8_t  custom1;
+    uint8_t  custom2;
+    uint8_t  custom3;
+    bool     check1;
+    bool     check2;
+    bool     check3;
+  } SegmentCopy;
+
+  uint8_t differs(const mAnimatorLight::Segment& b, const SegmentCopy& a) {
+    uint8_t d = 0;
+    if (a.start != b.start)         d |= SEG_DIFFERS_BOUNDS;
+    if (a.stop != b.stop)           d |= SEG_DIFFERS_BOUNDS;
+    if (a.offset != b.offset)       d |= SEG_DIFFERS_GSO;
+    if (a.grouping != b.grouping)   d |= SEG_DIFFERS_GSO;
+    if (a.spacing != b.spacing)     d |= SEG_DIFFERS_GSO;
+    if (a.opacity != b.opacity)     d |= SEG_DIFFERS_BRI;
+    if (a.mode != b.effect_id)           d |= SEG_DIFFERS_FX;
+    if (a.speed != b.speed)         d |= SEG_DIFFERS_FX;
+    if (a.intensity != b.intensity) d |= SEG_DIFFERS_FX;
+    if (a.palette != b.palette)     d |= SEG_DIFFERS_FX;
+    if (a.custom1 != b.custom1)     d |= SEG_DIFFERS_FX;
+    if (a.custom2 != b.custom2)     d |= SEG_DIFFERS_FX;
+    if (a.custom3 != b.custom3)     d |= SEG_DIFFERS_FX;
+    if (a.check1 != b.check1)       d |= SEG_DIFFERS_FX;
+    if (a.check2 != b.check2)       d |= SEG_DIFFERS_FX;
+    if (a.check3 != b.check3)       d |= SEG_DIFFERS_FX;
+    if (a.startY != b.startY)       d |= SEG_DIFFERS_BOUNDS;
+    if (a.stopY != b.stopY)         d |= SEG_DIFFERS_BOUNDS;
+
+    //bit pattern: (msb first)
+    // set:2, sound:2, mapping:3, transposed, mirrorY, reverseY, [reset,] paused, mirrored, on, reverse, [selected]
+    if ((a.options & 0b1111111111011110U) != (b.options & 0b1111111111011110U)) d |= SEG_DIFFERS_OPT;
+    if ((a.options & 0x0001U) != (b.options & 0x0001U))                         d |= SEG_DIFFERS_SEL;
+    for (unsigned i = 0; i < NUM_COLORS; i++) if (a.colors[i] != b.segcol[i].colour)   d |= SEG_DIFFERS_COL;
+
+    return d;
+  }
+}
 
 
 bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
@@ -1166,26 +1223,45 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
     return false;
   }
 
+  bool newSeg = false;
   int stop = elem["stop"] | -1;
 
   // if using vectors use this code to append segment
   if (id >= getSegmentsNum()) {
-
     if (stop <= 0) return false; // ignore empty/inactive segments
-
     ALOG_HGL(PSTR("DESTROYING SEGMENT, BAD %d %d"), id, getSegmentsNum());
-
     appendSegment(0, getLengthTotal());
     id = getSegmentsNum()-1; // segments are added at the end of list
   }
 
-  mAnimatorLight::Segment& seg = getSegment(id);
-
-  /**
-   * @brief Note that making a backup will also allocate memory, this will be destroyed when we leave this function
-   * 
-   */
-  mAnimatorLight::Segment prev = seg; //make a backup so we can tell if something changed
+  Segment& seg = getSegment(id);
+  if (newSeg && presetId == 0) {
+    seg.segcol[0].colour = DEFAULT_COLOR; // set color of newly created segment to warm orange as an indicator to the user
+  }
+  // we do not want to make segment copy as it may use a lot of RAM (effect data and pixel buffer)
+  // so we will create a copy of segment options and compare it with original segment when done processing
+  SegmentCopy prev = {
+    {seg.segcol[0].colour, seg.segcol[1].colour, seg.segcol[2].colour},
+    seg.start,
+    seg.stop,
+    seg.offset,
+    seg.grouping,
+    seg.spacing,
+    seg.startY,
+    seg.stopY,
+    seg.options,
+    seg.effect_id,
+    seg.palette,
+    seg.opacity,
+    seg.speed,
+    seg.intensity,
+    seg.custom1,
+    seg.custom2,
+    seg.custom3,
+    seg.check1,
+    seg.check2,
+    seg.check3
+  };
 
   uint16_t start = elem["start"] | seg.start;
   if (stop < 0) {
@@ -1271,26 +1347,26 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   if (seg.reset && seg.stop == 0) return true; // segment was deleted & is marked for reset, no need to change anything else
 
-  byte segbri = seg._brightness_rgb;//255;//seg.opacity;
-  if (getVal(elem["bri"], &segbri)) {
+  byte segbri = seg.opacity;
+  if (getVal(elem["bri"], segbri)) {
     ALOG_INF(PSTR("getVal(elem[\"bri\"], &segbri) %d"), segbri);
-    // if (segbri > 0) seg.setOpacity(segbri);
+    if (segbri > 0) seg.setOpacity(segbri);
     // seg.setOption(SEG_OPTION_ON, segbri); // use transition
     // ALOG_INF(PSTR("USing the opacity as RGB, but need to decide where to use later"));
-    seg.setBrightnessRGB(segbri);
-    seg.setBrightnessCCT(segbri);
+    // seg.setBrightnessRGB(segbri);
+    // seg.setBrightnessCCT(segbri);
   }
 
-  if (getVal(elem["cBri"], &seg._brightness_rgb)) {
-    ALOG_INF(PSTR("getVal(elem[\"cBri\"], &seg._brightness_rgb) %d"), seg._brightness_rgb);
-    // if (segbri > 0) seg.setOpacity(segbri);
-    // seg.setOption(SEG_OPTION_ON, segbri); // use transition
-  }
-  if (getVal(elem["wBri"], &seg._brightness_cct)) {
-    ALOG_INF(PSTR("getVal(elem[\"wBri\"], &seg._brightness_cct) %d"), seg._brightness_cct);
-    // if (segbri > 0) seg.setOpacity(segbri);
-    // seg.setOption(SEG_OPTION_ON, segbri); // use transition
-  }
+  // if (getVal(elem["cBri"], &seg._brightness_rgb)) {
+  //   ALOG_INF(PSTR("getVal(elem[\"cBri\"], &seg._brightness_rgb) %d"), seg._brightness_rgb);
+  //   // if (segbri > 0) seg.setOpacity(segbri);
+  //   // seg.setOption(SEG_OPTION_ON, segbri); // use transition
+  // }
+  // if (getVal(elem["wBri"], &seg._brightness_cct)) {
+  //   ALOG_INF(PSTR("getVal(elem[\"wBri\"], &seg._brightness_cct) %d"), seg._brightness_cct);
+  //   // if (segbri > 0) seg.setOpacity(segbri);
+  //   // seg.setOption(SEG_OPTION_ON, segbri); // use transition
+  // }
 
 
   bool on = elem["on"] | seg.on;
@@ -1301,8 +1377,8 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   seg.freeze = frz;
 
 
-  seg.setBrightnessRGB(elem["rgbbri"] | seg._brightness_rgb);
-  seg.setBrightnessCCT(elem["cctbri"] | seg._brightness_cct);
+  // seg.setBrightnessRGB(elem["rgbbri"] | seg._brightness_rgb);
+  // seg.setBrightnessCCT(elem["cctbri"] | seg._brightness_cct);
 
   seg.live_palette.intensity  = elem["PalIX"] | seg.live_palette.intensity;
 
@@ -1400,13 +1476,19 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   }else
   {
     // ALOG_INF(PSTR("elem[\"fx\"].is<const char*>() == NUMBER"));
-    if (getVal(elem["fx"], &fx, 0, getModeCount())) { //load effect ('r' random, '~' inc/dec, 0-255 exact value)
+    if (getVal(elem["fx"], fx, 0, getEffectCount())) { //load effect ('r' random, '~' inc/dec, 0-255 exact value)
       // ALOG_INF(PSTR("getVal(elem[\"fx\"], &fx, 0, getModeCount()) %d"), fx);      
       #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
       if (!presetId && currentPlaylist>=0) unloadPlaylist(); // applying a preset unloads the playlist, may be needed here too?
       #endif
       // if (fx != seg.animation_mode_id)
       DEBUG_LINE_HERE; 
+
+      // Segment& seg = SEGMENT_I(segment_index);
+ALOG_INF(PSTR("CommandSet effect seg=%p stored=%p index=%u"), &seg, &segments[0], 0);
+// seg.setEffect(value, true);
+
+
       seg.setEffect(fx, elem[F("fxdef")]); // elem[F("fxdef") effect default, if set, load in defined defaults
     }
   }
@@ -1418,8 +1500,8 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
 
   //getVal also supports inc/decrementing and random
-  getVal(elem["sx"], &seg.speed);
-  getVal(elem["ix"], &seg.intensity);
+  getVal(elem["sx"], seg.speed);
+  getVal(elem["ix"], seg.intensity);
 
   // uint8_t transition_slider_time = 0;
   // getVal(elem["tt"], &transition_slider_time);
@@ -1456,7 +1538,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
       CommandSet_PaletteID(tmp_id, id);
     }
   }else{
-    if (getVal(elem["pal"], &pal)) seg.setPalette(pal);
+    if (getVal(elem["pal"], pal)) seg.setPalette(pal);
   }
 
   if(elem["pal2"].is<const char*>())
@@ -1469,7 +1551,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
       seg.palette2_id = tmp_id;
     }
   }else{
-    if (getVal(elem["pal2"], &pal))
+    if (getVal(elem["pal2"], pal))
       seg.palette2_id = pal;
       //  seg.setPalette(pal);
       ALOG_INF(PSTR("palette2_id=%d"),seg.palette2_id);
@@ -1479,10 +1561,10 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   // }
 
-  getVal(elem["c1"], &seg.custom1);
-  getVal(elem["c2"], &seg.custom2);
+  getVal(elem["c1"], seg.custom1);
+  getVal(elem["c2"], seg.custom2);
   uint8_t cust3 = seg.custom3;
-  getVal(elem["c3"], &cust3); // we can't pass reference to bifield
+  getVal(elem["c3"], cust3); // we can't pass reference to bifield
   seg.custom3 = constrain(cust3, 0, 31);
 
   seg.cycle_time__rate_ms = elem["ep"] | seg.cycle_time__rate_ms;
@@ -1507,7 +1589,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   
 
-  getVal(elem["dec"], &seg.decimate);
+  getVal(elem["dec"], seg.decimate);
 
 
   JsonArray iarr = elem[F("i")]; //set individual LEDs
@@ -1563,9 +1645,11 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   
   // send UDP/WS if segment options changed (except selection; will also deselect current preset)
-  if (seg.differs(prev) & 0x7F) stateChanged = true;
+  // if (seg.differs(prev) & 0x7F) stateChanged = true;
 
-  seg.effect_anim_section = 0; //reset
+  
+  // send UDP/WS if segment options changed (except selection; will also deselect current preset)
+  if (differs(seg, prev) & ~SEG_DIFFERS_SEL) stateChanged = true;
 
   return true;
 }
@@ -1819,13 +1903,7 @@ bool sendLiveLedsWs(uint32_t wsClient)
     if (tkr_anim->isMatrix && n>1 && (i/mAnimatorLight::Segment::maxWidth)%n) i += mAnimatorLight::Segment::maxWidth * (n-1);
 #endif
 
-
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-    RgbwwColor col = tkr_anim->getPixelColor(i);
-    uint32_t c = RGBW32(col.R, col.G, col.B, col.WW);
-    #else
     uint32_t c = tkr_anim->getPixelColor(i);
-    #endif
     
     uint8_t r = R(c);
     uint8_t g = G(c);
@@ -2625,7 +2703,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
 
       encoded_gradient = 0;
       
-      RgbwwColor color;
+      uint32_t color;
 
       #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
       WDT_Reset();
@@ -2734,7 +2812,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
           JsonArray colors = curPalette_obj.createNestedArray();
 
           // Load temporary palette
-          color = GetUnloadedPaletteColour(
+          color = GetPaletteColour_WithTemporaryLoad(
               palette_id,
               j,
               PALETTE_SPAN_OFF, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, // "PALETTE_MODE__FORCE_DISCRETE" should be the only thing to get the basic colors, without gradients
@@ -2746,6 +2824,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
           Serial.print("++++++++++++++++++++++++++++++++++++++++++++++encoded_gradient: ");
           Serial.println(encoded_gradient);
           Serial.flush();
+          ALOG_INF(PSTR("unload col %d,%d,%d"), (uint8_t)R(color), (uint8_t)G(color), (uint8_t)B(color));
           #endif
 
           // Handle the encoded gradient
@@ -2778,9 +2857,9 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
           }
 
           // Add the RGB color components
-          colors.add(color.R);
-          colors.add(color.G);
-          colors.add(color.B);
+          colors.add(R(color));
+          colors.add(G(color));
+          colors.add(B(color));
 
           #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
           ALOG_DBM(PSTR("j=%d,encoded_gradient=%d,rgb=%d,%d,%d"), j, encoded_gradient, color.red, color.green, color.blue);
@@ -2879,7 +2958,7 @@ void mAnimatorLight::serializeNetworks(JsonObject root)
 void mAnimatorLight::serializeModeData(JsonArray fxdata)
 {
   char lineBuffer[256];
-  for (size_t i = 0; i < getModeCount(); i++) {
+  for (size_t i = 0; i < getEffectCount(); i++) {
     strncpy_P(lineBuffer, getModeData_Config(i), sizeof(lineBuffer) - 1);
     lineBuffer[sizeof(lineBuffer) - 1] = '\0'; // terminate string
 
@@ -2964,12 +3043,7 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
 #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
     if (isMatrix && n>1 && (i/Segment::maxWidth)%n) i += Segment::maxWidth * (n-1);
 #endif
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-    RgbwwColor col = getPixelColor(i);
-    uint32_t c = RGBW32(col.R, col.G, col.B, col.WW);
-    #else
     uint32_t c = getPixelColor(i);
-    #endif
     uint8_t r = R(c);
     uint8_t g = G(c);
     uint8_t b = B(c);
@@ -3716,7 +3790,7 @@ void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
   effect_start_time = millis();
   timebase = 0;
   isMatrix = false;
-  _virtualSegmentLength = 0;
+  // _virtualSegmentLength = 0;
   _length = DEFAULT_LED_COUNT;
   _brightness = DEFAULT_BRIGHTNESS;
   _targetFps = 40;
@@ -3726,19 +3800,21 @@ void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
   _isOffRefreshRequired = false;
   _hasWhiteChannel = false;
   _triggered = false;
-  effects.count = getEffectsAmount();
+
   _callback = nullptr;
   customMappingTable = nullptr;
   customMappingSize = 0;
   _lastShow = 0;
-  segment_current_index = 0;
+  segment_index = 0;
   _mainSegment = 0;
 
   DEBUG_LINE_HERE4
-  effects.function.reserve(effects.count);     // allocate memory to prevent initial fragmentation (does not increase size())
-  effects.config.reserve(effects.count); // allocate memory to prevent initial fragmentation (does not increase size())
-    
-  DEBUG_LINE_HERE4
+
+  
+  uint8_t effects_count = getEffectCount();
+  effects.function.reserve(effects_count);     // allocate memory to prevent initial fragmentation (does not increase size())
+  effects.config.reserve(effects_count); // allocate memory to prevent initial fragmentation (does not increase size())
+  
   LoadEffects();
 
   DEBUG_LINE_HERE4

@@ -419,8 +419,8 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
 
       if(arrobj.size() == 4)
       {
-        SEGMENT_I(segment_index).startY = arrobj[3].getInt();
-        SEGMENT_I(segment_index).stopY  = arrobj[4].getInt();
+        SEGMENT_I(segment_index).startY = arrobj[2].getInt();
+        SEGMENT_I(segment_index).stopY  = arrobj[3].getInt();
       }
 
       ALOG_INF( PSTR(D_LOG_PIXEL "PixelRange = [%d,%d]"), SEGMENT_I(segment_index).start, SEGMENT_I(segment_index).stop );
@@ -1952,33 +1952,33 @@ if (jtok_pwi && jtok_pwi.isArray())
   }
 
 
-  if(jtok = obj[PM_BRIGHTNESS_RGB]){ // Range 0-100
-    uint8_t brightness = map(jtok.getInt(), 0,100, 0,255);
-    #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_BRIGHTNESS_BLOCKED
-    ALOG_WRN(PSTR("Brightness RGB command limited due to preset testing mode"));
-    brightness = brightness > 10 ? 10 : brightness;
-    #endif
-    SEGMENT_I(segment_index).setBrightnessRGB( brightness );
-    ALOG_INF(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
-    data_buffer.isserviced++;
-  }else
-  if(jtok = obj[PM_BRIGHTNESS_RGB_255]){
-    SEGMENT_I(segment_index).setBrightnessRGB( jtok.getInt() );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
-    data_buffer.isserviced++;
-  }
+  // if(jtok = obj[PM_BRIGHTNESS_RGB]){ // Range 0-100
+  //   uint8_t brightness = map(jtok.getInt(), 0,100, 0,255);
+  //   #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_BRIGHTNESS_BLOCKED
+  //   ALOG_WRN(PSTR("Brightness RGB command limited due to preset testing mode"));
+  //   brightness = brightness > 10 ? 10 : brightness;
+  //   #endif
+  //   SEGMENT_I(segment_index).setBrightnessRGB( brightness );
+  //   ALOG_INF(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
+  //   data_buffer.isserviced++;
+  // }else
+  // if(jtok = obj[PM_BRIGHTNESS_RGB_255]){
+  //   SEGMENT_I(segment_index).setBrightnessRGB( jtok.getInt() );
+  //   ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
+  //   data_buffer.isserviced++;
+  // }
 
 
-  if(jtok = obj[PM_BRIGHTNESS_CCT]){ // Range 0-100
-    SEGMENT_I(segment_index).setBrightnessCCT( map(jtok.getInt(), 0,100, 0,255) );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessCCT());
-    data_buffer.isserviced++;
-  }else
-  if(jtok = obj[PM_BRIGHTNESS_CCT_255]){
-    SEGMENT_I(segment_index).setBrightnessCCT( jtok.getInt() );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).getBrightnessCCT());
-    data_buffer.isserviced++;
-  }
+  // if(jtok = obj[PM_BRIGHTNESS_CCT]){ // Range 0-100
+  //   SEGMENT_I(segment_index).setBrightnessCCT( map(jtok.getInt(), 0,100, 0,255) );
+  //   ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessCCT());
+  //   data_buffer.isserviced++;
+  // }else
+  // if(jtok = obj[PM_BRIGHTNESS_CCT_255]){
+  //   SEGMENT_I(segment_index).setBrightnessCCT( jtok.getInt() );
+  //   ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).getBrightnessCCT());
+  //   data_buffer.isserviced++;
+  // }
 
 
   if(jtok = obj["Preset"].getObject()["Load"]){
@@ -2163,9 +2163,10 @@ if (jtok_pwi && jtok_pwi.isArray())
 
       ALOG_INF(PSTR("getSegmentsNum() %d|%d %d"), id, getSegmentsNum(), segments[jtok.getInt()].stop);
 
-      // remove all inactive segments (from the back)
-      if(id==255){ purgeSegments(true); }
-      else{        purgeSegments(false); }
+      // // remove all inactive segments (from the back)
+      // if(id==255){ purgeSegments(true); }
+      // else{        purgeSegments(false); }
+      purgeSegments();
 
     }
 
@@ -2543,7 +2544,7 @@ void mAnimatorLight::CommandSet_PaletteID(uint16_t value, uint8_t segment_index)
 {
   char buffer[50];
   SEGMENT_I(segment_index).palette_id = value < mPaletteI->GetPaletteListLength() ? value : 0;  
-  segment_current_index = segment_index;
+  segment_index = segment_index;
   SEGMENT_I(segment_index).live_palette.timing1 = 0; // reset timing to force immediate load
   SEGMENT.LoadPalette(segments[segment_index].palette_id);
 }

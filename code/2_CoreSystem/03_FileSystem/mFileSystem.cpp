@@ -707,16 +707,16 @@ bool mFileSystem::writeObjectToFile(const char* file, const char* key, JsonDocum
 }
 
 
-bool mFileSystem::readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest)
+bool mFileSystem::readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest, const JsonDocument* filter)
 {
   char objKey[10];
   sprintf(objKey, "\"%d\":", id);
-  return readObjectFromFile(file, objKey, dest);
+  return readObjectFromFile(file, objKey, dest, filter);
 }
 
 
 //if the key is a nullptr, deserialize entire object
-bool mFileSystem::readObjectFromFile(const char* file, const char* key, JsonDocument* dest)
+bool mFileSystem::readObjectFromFile(const char* file, const char* key, JsonDocument* dest, const JsonDocument* filter)
 {
   if (doCloseFile) closeFile();
   #ifdef WLED_DEBUG_FS2
@@ -736,7 +736,8 @@ bool mFileSystem::readObjectFromFile(const char* file, const char* key, JsonDocu
     return false;
   }
 
-  deserializeJson(*dest, f);
+  if (filter) deserializeJson(*dest, f, DeserializationOption::Filter(*filter));
+  else        deserializeJson(*dest, f);
 
   f.close();
   // Serial.printf("Read, took %d ms\n", millis() - s);
