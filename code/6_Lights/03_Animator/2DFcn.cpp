@@ -387,7 +387,7 @@ void IRAM_ATTR_YN mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_
 
   if ((unsigned)x >= vWidth() || (unsigned)y >= vHeight()) return;
 
-  #ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS_PIXELS
+  #ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
   if (decimate > 1)
   {
     const uint16_t pattern_width  = vWidth();

@@ -2924,6 +2924,1024 @@ static uint8_t _dummy     (uint8_t a, uint8_t b) { return a; } // dummy (same as
 
 #define BLENDMODES  17 // number of blend modes must match "bm" in index.js, all cases must be handled in segblend() @ blendSegment()
 
+// void mAnimatorLight::blendSegment(const Segment &topSegment) const {
+  
+//   // DEBUG_PRINT_LN("blend start");
+
+//   typedef uint8_t(*FuncType)(uint8_t, uint8_t);
+//   // function pointer array: fill with _dummy if using special case: avoid OOB access and always provide a valid path
+//   // note: making the function array static const uses more ram and comes at no significant speed gain
+//   FuncType funcs[] = {
+//     _dummy,      _dummy,     _dummy,    _subtract,
+//     _difference, _average,   _dummy,    _divide,
+//     _lighten,    _darken,    _screen,   _overlay,
+//     _hardlight,  _softlight, _dodge,    _burn,
+//     _dummy
+//   };
+
+//   const size_t blendMode = topSegment.blendMode < BLENDMODES ? topSegment.blendMode : 0; // default to top if unsupported mode
+//   const auto segblend = [&](uint32_t t, uint32_t b){
+//     // use direct calculations/returns for simple/frequent modes (faster)
+//     switch (blendMode) {
+//       case 0 : return t;                   // top
+//       case 1 : return b;                   // bottom
+//       case 2 : return Segment::color_add(t,b,true); // add with preserve color ratio to avoid color clipping
+//       case 6 : return RGBW32(_multiply(R(t),R(b)), _multiply(G(t),G(b)), _multiply(B(t),B(b)), _multiply(W(t),W(b))); // multiply (7% faster than lambda at 100bytes flash cost)
+//       case 16: return t ? t : b;           // stencil (use top layer if not black, else bottom)
+//     }
+//     // default: use function pointer from array
+//     const auto func = funcs[blendMode];
+//     return RGBW32(func(R(t),R(b)), func(G(t),G(b)), func(B(t),B(b)), func(W(t),W(b)));
+//   };
+
+//   const int     length     = topSegment.length();     // physical segment length (counts all pixels in 2D segment)
+//   const int     width      = topSegment.width();
+//   const int     height     = topSegment.height();
+//   //const uint32_t bgColor   = topSegment.colors[1]; // background color (unused, could add it to stencil mode if requested)
+//   const auto    XY         = [](int x, int y){ return x + y*Segment::maxWidth; };
+//   const size_t  matrixSize = Segment::maxWidth * Segment::maxHeight;
+//   const size_t  startIndx  = XY(topSegment.start, topSegment.startY);
+//   const size_t  stopIndx   = startIndx + length;
+//   uint8_t       opacity    = topSegment.currentBri(); // returns transitioned opacity for style FADE
+//   uint8_t       cct        = topSegment.currentCCT();
+//   if (gammaCorrectCol) opacity = gamma8inv(opacity); // use inverse gamma on brightness for correct color scaling after gamma correction (see #5343 for details)
+
+//   const Segment *segO = topSegment.getOldSegment();
+//   const bool hasGrouping = topSegment.groupLength() != 1;
+
+//   opacity = 255;
+
+// //   if (topSegment.progress() > 63000U)
+// // {
+// //   Serial.printf(
+// //     "BLEND IN prog=%u bri=%u opacity=%u old=%08lX new=%08lX\n",
+// //     topSegment.progress(),
+// //     topSegment.currentBri(),
+// //     opacity,
+// //     (unsigned long)(segO ? segO->getPixelColorRaw(0) : 0),
+// //     (unsigned long)topSegment.getPixelColorRaw(0)
+// //   );
+// // }
+
+
+//   // ALOG_INF(PSTR("seg0 %d, blendStyle %d, hasGrouping %d, mirror %d, mirror_y %d"), segO, blendingStyle, hasGrouping, topSegment.mirror, topSegment.mirror_y);
+//   // ALOG_INF(
+//   //   PSTR(
+//   //     "segO=%p len%d, transition=%u blendStyle=%u fade=%u "
+//   //     "grouping=%u mirror=%u mirrorY=%u isMatrix=%u"
+//   //   ),
+//   //   (void*)segO,
+//   //   length,
+//   //   (unsigned)topSegment.isInTransition(),
+//   //   (unsigned)blendingStyle,
+//   //   (unsigned)TRANSITION_FADE,
+//   //   (unsigned)hasGrouping,
+//   //   (unsigned)topSegment.mirror,
+//   //   (unsigned)topSegment.mirror_y,
+//   //   (unsigned)isMatrix
+//   // );
+
+//   // fast path: handle the default case - no transitions, no grouping/spacing, no mirroring, no CCT
+//   if (!segO && blendingStyle == TRANSITION_FADE && !hasGrouping && !topSegment.mirror && !topSegment.mirror_y) {
+//     // DEBUG_PRINT_LN("Fast Path");
+//     if (isMatrix && stopIndx <= matrixSize && !_pixelCCT) {
+// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS // WLED_DISABLE_2D
+//       // Calculate pointer steps to avoid 'if' and 'XY()' inside loops
+//       int x_inc = 1;
+//       int y_inc = Segment::maxWidth;
+//       int start_offset = XY(topSegment.start, topSegment.startY);
+      
+//       // adjust starting position and steps based on Reverse/Transpose
+//       // note: transpose is handled in separate loop so it is still fast and no branching is needed in default path
+//       if (!topSegment.transpose) {
+//         if (topSegment.reverse)   { start_offset += (width - 1); x_inc = -1; }
+//         if (topSegment.reverse_y) { start_offset += (height - 1) * Segment::maxWidth; y_inc = -Segment::maxWidth; }
+        
+//         for (int y = 0; y < height; y++) {
+//           uint32_t* pRow = &_pixels[start_offset + y * y_inc];
+//           const int y_width = y * width;
+//           for (int x = 0; x < width; x++) {
+//             uint32_t* p = pRow + x * x_inc;
+//             uint32_t c_a = topSegment.getPixelColorRaw(x + y_width);
+//             *p = Segment::color_blend(*p, segblend(c_a, *p), opacity);
+//           }
+//         }
+//       } else { // transposed
+        
+//         for (int y = 0; y < height; y++) {
+//           const int px = topSegment.reverse ? (height - y - 1) : y;  // source pixel: swap y into x, reverse if needed
+//           for (int x = 0; x < width; x++) {
+//             const int py = topSegment.reverse_y ? (width  - x - 1) : x;  // source pixel: swap x into y, reverse if needed
+//             const uint32_t c_a = topSegment.getPixelColorRaw(px + py * height); // height = virtual width
+//             const size_t idx = XY(topSegment.start + x, topSegment.startY + y); // write logical (non swapped) pixel coordinate
+//             _pixels[idx] = Segment::color_blend(_pixels[idx], segblend(c_a, _pixels[idx]), opacity);
+//           }
+//         }
+//       }
+//       return;
+// #endif
+//     } else 
+//     if (!isMatrix) {
+//       // DEBUG_PRINT_LN("1D Fast Path");
+//       // 1D fast path, include CCT as it is more common on 1D setups
+//       // pixels[] -> _pixels[]
+//       uint32_t* strip = _pixels;
+//       int start = topSegment.start;
+//       int off   = topSegment.offset;
+//       // ALOG_INF(PSTR("stop %d"), topSegment.stop);
+//       for (int i = 0; i < length; i++) {
+//         uint32_t c_a = topSegment.getPixelColorRaw(i);
+//         int p = topSegment.reverse ? (length - i - 1) : i;
+//         int idx = start + p + off;
+//         if (idx >= topSegment.stop) idx -= length;
+//         strip[idx] = Segment::color_blend(strip[idx], segblend(c_a, strip[idx]), opacity);
+//         // strip[idx] = c_a;
+//         // ALOG_INF(PSTR("idx i %d %d"), idx, i);
+//         // if (_pixelCCT) _pixelCCT[idx] = cct;
+
+//       }
+//       return;
+//     }
+//   }else{
+//     // DEBUG_PRINT_LN("!Fast Path");
+//   }
+
+
+//   // slow path: handle transitions, grouping/spacing, segments with clipping and CCT pixels
+//   Segment::setClippingRect(0, 0);  // disable clipping by default
+//   const unsigned progress = topSegment.progress();
+//   const unsigned progInv  = 0xFFFFU - progress;
+//   const unsigned dw = (blendingStyle==TRANSITION_OUTSIDE_IN ? progInv : progress) * width / 0xFFFFU + 1;
+//   const unsigned dh = (blendingStyle==TRANSITION_OUTSIDE_IN ? progInv : progress) * height / 0xFFFFU + 1;
+//   const unsigned orgBS = blendingStyle;
+//   if (width*height == 1) tkr_anim->blendingStyle = TRANSITION_FADE; // disable style for single pixel segments (use fade instead)
+//   switch (tkr_anim->blendingStyle) {
+//     case TRANSITION_CIRCULAR_IN: // (must set entire segment, see isPixelXYClipped())
+//     case TRANSITION_CIRCULAR_OUT:// (must set entire segment, see isPixelXYClipped())
+//     case TRANSITION_FAIRY_DUST:  // fairy dust (must set entire segment, see isPixelXYClipped())
+//       Segment::setClippingRect(0, width, 0, height);
+//       break;
+//     case TRANSITION_SWIPE_RIGHT: // left-to-right
+//     case TRANSITION_PUSH_RIGHT:  // left-to-right
+//       Segment::setClippingRect(0, dw, 0, height);
+//       break;
+//     case TRANSITION_SWIPE_LEFT:  // right-to-left
+//     case TRANSITION_PUSH_LEFT:   // right-to-left
+//       Segment::setClippingRect(width - dw, width, 0, height);
+//       break;
+//     case TRANSITION_OUTSIDE_IN:   // corners
+//       Segment::setClippingRect((width + dw)/2, (width - dw)/2, (height + dh)/2, (height - dh)/2); // inverted!!
+//       break;
+//     case TRANSITION_INSIDE_OUT:  // outward
+//       Segment::setClippingRect((width - dw)/2, (width + dw)/2, (height - dh)/2, (height + dh)/2);
+//       break;
+//     case TRANSITION_SWIPE_DOWN:  // top-to-bottom (2D)
+//     case TRANSITION_PUSH_DOWN:   // top-to-bottom (2D)
+//       Segment::setClippingRect(0, width, 0, dh);
+//       break;
+//     case TRANSITION_SWIPE_UP:    // bottom-to-top (2D)
+//     case TRANSITION_PUSH_UP:     // bottom-to-top (2D)
+//       Segment::setClippingRect(0, width, height - dh, height);
+//       break;
+//     case TRANSITION_OPEN_H:      // horizontal-outward (2D) same look as INSIDE_OUT on 1D
+//       Segment::setClippingRect((width - dw)/2, (width + dw)/2, 0, height);
+//       break;
+//     case TRANSITION_OPEN_V:      // vertical-outward (2D)
+//       Segment::setClippingRect(0, width, (height - dh)/2, (height + dh)/2);
+//       break;
+//     case TRANSITION_SWIPE_TL:    // TL-to-BR (2D)
+//     case TRANSITION_PUSH_TL:     // TL-to-BR (2D)
+//       Segment::setClippingRect(0, dw, 0, dh);
+//       break;
+//     case TRANSITION_SWIPE_TR:    // TR-to-BL (2D)
+//     case TRANSITION_PUSH_TR:     // TR-to-BL (2D)
+//       Segment::setClippingRect(width - dw, width, 0, dh);
+//       break;
+//     case TRANSITION_SWIPE_BR:    // BR-to-TL (2D)
+//     case TRANSITION_PUSH_BR:     // BR-to-TL (2D)
+//       Segment::setClippingRect(width - dw, width, height - dh, height);
+//       break;
+//     case TRANSITION_SWIPE_BL:    // BL-to-TR (2D)
+//     case TRANSITION_PUSH_BL:     // BL-to-TR (2D)
+//       Segment::setClippingRect(0, dw, height - dh, height);
+//       break;
+//   }
+
+//   if (isMatrix && stopIndx <= matrixSize) {
+// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+//     const int nCols = topSegment.virtualWidth();
+//     const int nRows = topSegment.virtualHeight();
+//     const int oCols = segO ? segO->virtualWidth() : nCols;
+//     const int oRows = segO ? segO->virtualHeight() : nRows;
+
+//     const auto setMirroredPixel = [&](int x, int y, uint32_t c, uint8_t o) {
+//       const int baseX = topSegment.start  + x;
+//       const int baseY = topSegment.startY + y;
+//       size_t indx = XY(baseX, baseY); // absolute address on strip
+//       _pixels[indx] = Segment::color_blend(_pixels[indx], segblend(c, _pixels[indx]), o);
+//       if (_pixelCCT) _pixelCCT[indx] = cct;
+//       // Apply mirroring if enabled
+//       if (topSegment.mirror || topSegment.mirror_y) {
+//         const int mirrorX = topSegment.start  + width  - x - 1;
+//         const int mirrorY = topSegment.startY + height - y - 1;
+//         const size_t idxMX = XY(topSegment.transpose ? baseX : mirrorX, topSegment.transpose ? mirrorY : baseY);
+//         const size_t idxMY = XY(topSegment.transpose ? mirrorX : baseX, topSegment.transpose ? baseY : mirrorY);
+//         const size_t idxMM = XY(mirrorX, mirrorY);
+//         if (topSegment.mirror)                        _pixels[idxMX] = tkr_anim->color_blend(_pixels[idxMX], segblend(c, _pixels[idxMX]), o);
+//         if (topSegment.mirror_y)                      _pixels[idxMY] = tkr_anim->color_blend(_pixels[idxMY], segblend(c, _pixels[idxMY]), o);
+//         if (topSegment.mirror && topSegment.mirror_y) _pixels[idxMM] = tkr_anim->color_blend(_pixels[idxMM], segblend(c, _pixels[idxMM]), o);
+//         if (_pixelCCT) {
+//           if (topSegment.mirror)                        _pixelCCT[idxMX] = cct;
+//           if (topSegment.mirror_y)                      _pixelCCT[idxMY] = cct;
+//           if (topSegment.mirror && topSegment.mirror_y) _pixelCCT[idxMM] = cct;
+//         }
+//       }
+//     };
+
+//     // if we blend using "push" style we need to "shift" canvas to left/right/up/down
+//     unsigned offsetX = (blendingStyle == TRANSITION_PUSH_UP   || blendingStyle == TRANSITION_PUSH_DOWN)  ? 0 : progInv * nCols / 0xFFFFU;
+//     unsigned offsetY = (blendingStyle == TRANSITION_PUSH_LEFT || blendingStyle == TRANSITION_PUSH_RIGHT) ? 0 : progInv * nRows / 0xFFFFU;
+//     const unsigned groupLen = topSegment.groupLength();
+//     bool applyReverse = topSegment.reverse || topSegment.reverse_y || topSegment.transpose;
+//     int pushOffsetX = 0, pushOffsetY = 0;
+//     // if we blend using "push" style we need to "shift" canvas to left/right/up/down
+//     switch (blendingStyle) {
+//       case TRANSITION_PUSH_RIGHT: pushOffsetX = offsetX; break;
+//       case TRANSITION_PUSH_LEFT:  pushOffsetX = -offsetX + nCols; break;
+//       case TRANSITION_PUSH_DOWN:  pushOffsetY = offsetY; break;
+//       case TRANSITION_PUSH_UP:    pushOffsetY = -offsetY + nRows; break;
+//       case TRANSITION_PUSH_TL:    pushOffsetX = offsetX;            pushOffsetY = offsetY; break;           // unused
+//       case TRANSITION_PUSH_TR:    pushOffsetX = -offsetX + nCols;   pushOffsetY = offsetY; break;           // unused
+//       case TRANSITION_PUSH_BR:    pushOffsetX = -offsetX + nCols;   pushOffsetY = -offsetY + nRows; break;  // unused
+//       case TRANSITION_PUSH_BL:    pushOffsetX = offsetX;            pushOffsetY = -offsetY + nRows; break;  // unused
+//     }
+//     // we only traverse new segment, not old one
+//     for (int r = 0; r < nRows; r++) for (int c = 0; c < nCols; c++) {
+//       const bool clipped = topSegment.isPixelXYClipped(c, r);
+//       // if segment is in transition and pixel is clipped take old segment's pixel and opacity
+//       const Segment *seg = clipped && segO ? segO : &topSegment;  // pixel is never clipped for FADE
+//       int vCols = seg == segO ? oCols : nCols;         // old segment may have different dimensions
+//       int vRows = seg == segO ? oRows : nRows;         // old segment may have different dimensions
+//       int x = c;
+//       int y = r;
+//       if (pushOffsetX != 0) x = (x + pushOffsetX) % nCols;
+//       if (pushOffsetY != 0) y = (y + pushOffsetY) % nRows;
+//       uint32_t c_a = BLACK;
+//       if (x < vCols && y < vRows) c_a = seg->getPixelColorRaw(x + y*vCols); // will get clipped pixel from old segment or unclipped pixel from new segment
+//       // if (segO && blendingStyle == TRANSITION_FADE
+//       //   && (topSegment.effect_id != segO->effect_id || (segO->name != topSegment.name && segO->name && topSegment.name && strncmp(segO->name, topSegment.name, WLED_MAX_SEGNAME_LEN) != 0))
+//       //   && x < oCols && y < oRows) {
+//       //   // we need to blend old segment using fade as pixels are not clipped
+//       //   c_a = color_blend16(c_a, segO->getPixelColorRaw(x + y*oCols), progInv);
+//       // } else if (blendingStyle != TRANSITION_FADE) {
+
+
+//       if (segO && blendingStyle == TRANSITION_FADE && x < oCols && y < oRows) {
+//         // we need to blend old segment using fade as pixels are not clipped
+//         c_a = color_blend16(c_a, segO->getPixelColorRaw(x + y*oCols), progInv);
+//       } else if (blendingStyle != TRANSITION_FADE) {
+
+//         // if we have global brightness change (not On/Off change) we will ignore transition style and just fade brightness (see led.cpp)
+//         // workaround for On/Off transition
+//         // (bri != briT) && !bri => from On to Off
+//         // (bri != briT) &&  bri => from Off to On
+//         uint8_t bri = tkr_iLight->_briRGB_Global;
+//         if ((briOld == 0 || bri == 0) && ((!clipped && (bri != briT) && !bri) || (clipped && (bri != briT) && bri))) c_a = BLACK;
+//       }
+//       // map it into frame buffer
+//       x = c;  // restore coordiates if we were PUSHing
+//       y = r;
+//       if (applyReverse) {
+//         if (topSegment.reverse  ) x = nCols - x - 1;
+//         if (topSegment.reverse_y) y = nRows - y - 1;
+//         if (topSegment.transpose) std::swap(x,y); // swap X & Y if segment transposed
+//       }
+//       // expand pixel
+//       if (groupLen == 1) {
+//         setMirroredPixel(x, y, c_a, opacity);
+//       } else {
+//         // handle grouping and spacing
+//         x *= groupLen; // expand to physical pixels
+//         y *= groupLen; // expand to physical pixels
+//         const int maxX = std::min(x + topSegment.grouping, width);
+//         const int maxY = std::min(y + topSegment.grouping, height);
+//         while (y < maxY) {
+//           int _x = x;
+//           while (_x < maxX) setMirroredPixel(_x++, y, c_a, opacity);
+//           y++;
+//         }
+//       }
+//     }
+// #endif
+//   } else {
+
+//     // ALOG_INF(PSTR("SLOW PATH----------------------------"));
+
+//     // 1D Slow Path
+//     const int nLen = topSegment.virtualLength();
+//     const int oLen = segO ? segO->virtualLength() : nLen;
+
+//     const auto setMirroredPixel = [&](int i, uint32_t c, uint8_t o) {
+//       int indx = topSegment.start + i;
+//       // Apply mirroring
+//       if (topSegment.mirror) {
+//         unsigned indxM = topSegment.stop - i - 1;
+//         indxM += topSegment.offset; // offset/phase
+//         if (indxM >= topSegment.stop) indxM -= length; // wrap
+//         _pixels[indxM] = Segment::color_blend(_pixels[indxM], segblend(c, _pixels[indxM]), o);
+//         if (_pixelCCT) _pixelCCT[indxM] = cct;
+//       }
+//       indx += topSegment.offset; // offset/phase
+//       if (indx >= topSegment.stop) indx -= length; // wrap
+//       _pixels[indx] = Segment::color_blend(_pixels[indx], segblend(c, _pixels[indx]), o);
+//       if (_pixelCCT) _pixelCCT[indx] = cct;
+
+// //       if (i == 0 && topSegment.progress() > 63000U)
+// // {
+// //   Serial.printf(
+// //     "SLOW OUT prog=%u source=%08lX out=%08lX RGBW=%u,%u,%u,%u\n",
+// //     topSegment.progress(),
+// //     (unsigned long)c,
+// //     (unsigned long)_pixels[indx],
+// //     R(_pixels[indx]),
+// //     G(_pixels[indx]),
+// //     B(_pixels[indx]),
+// //     W(_pixels[indx])
+// //   );
+// // }
+
+//     };
+
+//     // if we blend using "push" style we need to "shift" canvas to left/right/
+//     unsigned offsetI = progInv * nLen / 0xFFFFU;
+
+//     for (int k = 0; k < nLen; k++) {
+//       const bool clipped = topSegment.isPixelClipped(k);
+//       // if segment is in transition and pixel is clipped take old segment's pixel and opacity
+//       const Segment *seg = clipped && segO ? segO : &topSegment;  // pixel is never clipped for FADE
+//       const int vLen = seg == segO ? oLen : nLen;
+//       int i = k;
+//       // if we blend using "push" style we need to "shift" canvas to left or right
+//       switch (tkr_anim->blendingStyle) {
+//         case TRANSITION_PUSH_RIGHT: i = (i + offsetI) % nLen;        break;
+//         case TRANSITION_PUSH_LEFT:  i = (i - offsetI + nLen) % nLen; break;
+//       }
+//       uint32_t c_a = BLACK;
+//       if (i < vLen) c_a = seg->getPixelColorRaw(i); // will get clipped pixel from old segment or unclipped pixel from new segment
+//       // if (segO && tkr_anim->blendingStyle == TRANSITION_FADE && topSegment.effect_id != segO->effect_id && i < oLen) {
+//         if (segO && tkr_anim->blendingStyle == TRANSITION_FADE && i < oLen)
+//         {
+//           // static uint32_t last_transition_pixel_log = 0;
+//           // if (millis() - last_transition_pixel_log >= 500)
+//           // {
+//           //   last_transition_pixel_log = millis();
+//           //   ALOG_INF(PSTR("TRANS PIXEL BLEND progress=%u inverse=%u new=%08X old=%08X out=%08X"), topSegment.progress(), progInv, c_a, segO->getPixelColorRaw(i), color_blend16(c_a, segO->getPixelColorRaw(i), progInv));
+//           // }
+//         // we need to blend old segment using fade as pixels are not clipped
+//         c_a = color_blend16(c_a, segO->getPixelColorRaw(i), progInv);
+//       } else if (tkr_anim->blendingStyle != TRANSITION_FADE) {
+//         // if we have global brightness change (not On/Off change) we will ignore transition style and just fade brightness (see led.cpp)
+//         // workaround for On/Off transition
+//         // (bri != briT) && !bri => from On to Off
+//         // (bri != briT) &&  bri => from Off to On
+//         uint8_t bri = tkr_iLight->_briRGB_Global;
+//         if ((briOld == 0 || bri == 0) && ((!clipped && (bri != briT) && !bri) || (clipped && (bri != briT) && bri))) c_a = BLACK;
+//       }
+//       // map into frame buffer
+//       i = k; // restore index if we were PUSHing
+//       if (topSegment.reverse) i = nLen - i - 1; // is segment reversed?
+//       // expand pixel
+//       i *= topSegment.groupLength();
+//       // set all the pixels in the group
+//       const int maxI = std::min(i + topSegment.grouping, length); // make sure to not go beyond physical length
+//       while (i < maxI) setMirroredPixel(i++, c_a, opacity);
+//     }
+//   }
+
+//   tkr_anim->blendingStyle = orgBS;
+//   Segment::setClippingRect(0, 0);             // disable clipping for overlays
+// }
+
+
+
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * @brief Composes one rendered segment into the global frame buffer.
+ *
+ * HIGH-LEVEL RENDERING ARCHITECTURE
+ * ---------------------------------
+ *
+ * The lighting pipeline is split into distinct stages:
+ *
+ *   1. Effect execution
+ *      - An effect runs against a Segment.
+ *      - The effect uses the segment's virtual geometry:
+ *
+ *          virtualLength()
+ *          virtualWidth()
+ *          virtualHeight()
+ *
+ *      - These values define the logical effect domain after grouping, mirroring,
+ *        matrix mapping, and optional pixel decimation have been considered.
+ *
+ *   2. Segment-local rendering
+ *      - Effects write colours through Segment::setPixelColor() or
+ *        Segment::setPixelColorXY().
+ *      - The rendered colours are stored in the segment-local pixels[] buffer.
+ *      - Segment opacity and global brightness are not normally applied here.
+ *
+ *   3. Segment composition
+ *      - blendSegment() reads the segment-local pixels[] buffer.
+ *      - It maps those logical segment pixels onto the physical/global _pixels[]
+ *        frame buffer.
+ *      - This stage handles:
+ *
+ *          segment position
+ *          reverse
+ *          transpose
+ *          grouping
+ *          spacing
+ *          mirroring
+ *          clipping
+ *          transition styles
+ *          old/new segment blending
+ *          segment opacity
+ *          CCT metadata
+ *          segment blend modes
+ *          pixel decimation expansion
+ *
+ *   4. Global output
+ *      - show() reads the completed global _pixels[] frame.
+ *      - Colours are mapped to their physical buses.
+ *      - Gamma correction may be applied.
+ *      - Bus-level/global brightness is applied by the bus layer.
+ *      - The final bus data is transmitted to the LEDs.
+ *
+ *
+ * SEGMENT BUFFER VERSUS GLOBAL FRAME BUFFER
+ * -----------------------------------------
+ *
+ * The Segment::pixels[] buffer contains the colours produced by the effect.
+ *
+ * The mAnimatorLight::_pixels[] buffer is the complete device-wide frame that
+ * will ultimately be sent to all buses.
+ *
+ * blendSegment() is therefore the boundary between:
+ *
+ *      logical segment rendering
+ *
+ * and:
+ *
+ *      physical/global frame composition
+ *
+ * Several segments may overlap the same global pixels. The selected blend mode
+ * determines how the top segment is combined with the existing global pixel.
+ *
+ *
+ * SEGMENT OPACITY
+ * ---------------
+ *
+ * Segment opacity is applied here rather than inside effect rendering.
+ *
+ *     topSegment.currentBri()
+ *
+ * returns the effective segment opacity, including any active opacity transition.
+ *
+ * The colour is combined with the existing global frame using:
+ *
+ *     Segment::color_blend(existing, segblend(segmentColour, existing), opacity)
+ *
+ * The bus/global brightness is a separate later stage and must not be folded
+ * into this function.
+ *
+ *
+ * SEGMENT BLEND MODES
+ * -------------------
+ *
+ * segblend() applies the configured top-versus-bottom blend mode before opacity
+ * is applied.
+ *
+ * Examples include:
+ *
+ *     top
+ *     bottom
+ *     add
+ *     subtract
+ *     difference
+ *     multiply
+ *     screen
+ *     overlay
+ *     stencil
+ *
+ * The "top" colour is the current segment colour. The "bottom" colour is the
+ * pixel already present in the global _pixels[] buffer.
+ *
+ *
+ * FAST PATH
+ * ---------
+ *
+ * The fast path is used when the segment can be copied directly without the
+ * expensive transition/grouping/mirroring logic.
+ *
+ * Conditions include:
+ *
+ *     no old transition segment
+ *     fade-style composition
+ *     no grouping or spacing
+ *     no mirroring
+ *     no mirror_y
+ *
+ * Separate fast paths exist for 2D and 1D.
+ *
+ *
+ * 2D FAST PATH
+ * ------------
+ *
+ * The 2D fast path copies the already-rendered segment buffer directly into the
+ * matrix region of _pixels[].
+ *
+ * It supports:
+ *
+ *     reverse X
+ *     reverse Y
+ *     transpose
+ *
+ * Pointer increments are pre-calculated so the inner pixel loops do not need
+ * repeated coordinate mapping or branching.
+ *
+ * Pixel decimation is deliberately not expanded here.
+ *
+ * Reason:
+ *
+ *     Segment::setPixelColorXY() is responsible for creating the complete raw
+ *     segment buffer used by the normal non-transition path.
+ *
+ * Therefore the fast path reads physical/raw segment pixels directly with:
+ *
+ *     getPixelColorRaw(...)
+ *
+ * It must not remap those reads through virtualWidth(), virtualHeight(), modulo,
+ * or another decimation transform, otherwise already-expanded segment data would
+ * be transformed a second time.
+ *
+ *
+ * 1D FAST PATH
+ * ------------
+ *
+ * The 1D fast path copies the full raw segment buffer into the correct physical
+ * output range.
+ *
+ * It handles:
+ *
+ *     segment start
+ *     segment offset
+ *     reverse
+ *     wrap at segment stop
+ *
+ * Pixel decimation is deliberately not expanded here either.
+ *
+ * For a normal completed frame, the raw segment buffer is expected to already
+ * contain the replicated decimated pattern.
+ *
+ * Example:
+ *
+ *     physical segment length = 100
+ *     decimate               = 2
+ *     virtualLength()        = 50
+ *
+ * The effect calculates logical pixels:
+ *
+ *     0 ... 49
+ *
+ * Segment::setPixelColor() stores them as:
+ *
+ *     raw[0 ... 49]  = calculated pattern
+ *     raw[50 ... 99] = repeated pattern
+ *
+ * The fast path therefore performs a direct physical read:
+ *
+ *     getPixelColorRaw(i)
+ *
+ * for:
+ *
+ *     i = 0 ... length()-1
+ *
+ * No additional decimation mapping belongs in this path.
+ *
+ *
+ * SLOW PATH
+ * ---------
+ *
+ * The slow path is used when composition requires more than a direct copy.
+ *
+ * Typical reasons include:
+ *
+ *     an active old/new segment transition
+ *     grouping
+ *     spacing
+ *     mirroring
+ *     clipping
+ *     non-fade transition styles
+ *     CCT output
+ *     matrix edge clipping
+ *
+ * The slow path operates primarily in logical/virtual segment coordinates and
+ * expands those coordinates into physical output positions.
+ *
+ * This distinction is important for pixel decimation.
+ *
+ *
+ * TRANSITION MODEL
+ * ----------------
+ *
+ * During a transition, the Segment may retain an old Segment snapshot:
+ *
+ *     segO = topSegment.getOldSegment()
+ *
+ * The old and new segment can differ in:
+ *
+ *     effect
+ *     palette
+ *     opacity
+ *     dimensions
+ *     grouping
+ *     mirroring
+ *     decimation
+ *
+ * Depending on the transition style, the output pixel may come from:
+ *
+ *     the new segment
+ *     the old segment
+ *     a blend of both
+ *     black during an on/off transition workaround
+ *
+ * Fade transitions blend old and new colours continuously using progress.
+ *
+ * Swipe, push, circular, inside-out, outside-in and related transitions use the
+ * clipping rectangle to decide whether a logical position currently belongs to
+ * the old or new segment.
+ *
+ *
+ * CLIPPING RECTANGLE
+ * ------------------
+ *
+ * Segment::setClippingRect() configures the current transition region.
+ *
+ * The clipping rectangle is expressed in logical segment coordinates.
+ *
+ * Depending on the transition style, it may represent:
+ *
+ *     the revealed region
+ *     the hidden region
+ *     an inverted centre region
+ *     a moving edge
+ *     a rectangular approximation of a circular transition
+ *
+ * Segment::isPixelClipped() and Segment::isPixelXYClipped() use this state when
+ * deciding whether the old or new segment supplies the source colour.
+ *
+ * Clipping is reset before returning from the function.
+ *
+ *
+ * 2D SLOW PATH
+ * ------------
+ *
+ * The 2D slow path works in logical matrix coordinates:
+ *
+ *     c = logical column
+ *     r = logical row
+ *
+ * New and old segment dimensions are stored separately:
+ *
+ *     nCols / nRows
+ *     oCols / oRows
+ *
+ * This is necessary because a transition may occur while matrix dimensions or
+ * segment geometry are changing.
+ *
+ * Source colours are read from the selected segment using its own logical width:
+ *
+ *     x + y * vCols
+ *
+ * Push transitions temporarily shift the logical source coordinates.
+ *
+ * Reverse, reverse_y and transpose are applied after the source colour has been
+ * selected and before the result is written to the global frame.
+ *
+ *
+ * 2D GROUPING
+ * -----------
+ *
+ * A logical matrix pixel can represent a rectangular physical block.
+ *
+ * For grouping greater than one:
+ *
+ *     logical x -> x * groupLength()
+ *     logical y -> y * groupLength()
+ *
+ * The colour is then written over the configured grouping area while respecting
+ * the physical segment width and height.
+ *
+ * Spacing is represented by groupLength() but is not filled.
+ *
+ *
+ * 2D MIRRORING
+ * ------------
+ *
+ * setMirroredPixel(x, y, ...) writes the primary physical matrix coordinate and,
+ * when enabled, its mirrored equivalents.
+ *
+ * Possible outputs include:
+ *
+ *     original
+ *     mirror X
+ *     mirror Y
+ *     mirror X + Y
+ *
+ * Transpose affects which axis is considered when deriving mirrored positions.
+ *
+ *
+ * 2D PIXEL DECIMATION
+ * -------------------
+ *
+ * Pixel decimation reduces the logical dimensions seen by the effect:
+ *
+ *     virtualWidth()
+ *     virtualHeight()
+ *
+ * The effect therefore calculates only a smaller logical tile.
+ *
+ * During the normal fast path, setPixelColorXY() is expected to have already
+ * expanded that tile into the complete raw segment buffer, so no decimation
+ * mapping is applied there.
+ *
+ * During the slow path, however, output is generated directly from the reduced
+ * logical transition domain. The reduced tile must therefore be repeated into
+ * the complete physical matrix region while composing the frame.
+ *
+ * Decimation handling in this function belongs in the 2D slow-path expansion
+ * stage, where logical x/y positions are converted into one or more physical
+ * matrix positions.
+ *
+ * Conceptually:
+ *
+ *     logical source tile:
+ *
+ *         virtualWidth() x virtualHeight()
+ *
+ *     repeated output:
+ *
+ *         repeat tile across physical width
+ *         repeat tile across physical height
+ *
+ * Boundary checks must use the full physical segment width and height.
+ *
+ * Decimation must not alter the matrix row stride used by the physical/global
+ * frame buffer. Physical writes always use Segment::maxWidth through XY().
+ *
+ *
+ * 1D SLOW PATH
+ * ------------
+ *
+ * The 1D slow path works over:
+ *
+ *     nLen = topSegment.virtualLength()
+ *
+ * This is the logical effect length, not necessarily the physical segment
+ * length.
+ *
+ * For every logical index k:
+ *
+ *     1. Determine whether the pixel is clipped.
+ *     2. Select the old or new segment.
+ *     3. Apply push-transition source offset if required.
+ *     4. Read the logical source colour.
+ *     5. Blend old and new colours for fade transitions.
+ *     6. Restore the original logical output index.
+ *     7. Apply reverse.
+ *     8. Expand grouping.
+ *     9. Expand decimation.
+ *    10. Apply mirroring.
+ *    11. Write to the global _pixels[] frame.
+ *
+ *
+ * 1D GROUPING
+ * -----------
+ *
+ * Grouping expands one logical source pixel into multiple adjacent physical
+ * pixels:
+ *
+ *     physicalStart = logicalIndex * groupLength()
+ *
+ * Pixels from:
+ *
+ *     physicalStart
+ *
+ * through:
+ *
+ *     physicalStart + grouping - 1
+ *
+ * receive the same colour.
+ *
+ * Spacing pixels are left untouched by this grouped write.
+ *
+ *
+ * 1D MIRRORING
+ * ------------
+ *
+ * setMirroredPixel(i, ...) converts the segment-relative physical index into an
+ * absolute global frame index.
+ *
+ * It applies:
+ *
+ *     segment start
+ *     segment offset
+ *     wrap at segment stop
+ *     optional mirror about the segment end
+ *
+ * The mirrored write is performed in the full physical segment domain.
+ *
+ *
+ * 1D PIXEL DECIMATION
+ * -------------------
+ *
+ * Decimation reduces the logical length used by the effect:
+ *
+ *     physical segment length = length()
+ *     logical effect length   = virtualLength()
+ *
+ * Example:
+ *
+ *     length()        = 100
+ *     decimate        = 2
+ *     virtualLength() = 50
+ *
+ * The effect computes:
+ *
+ *     logical pixels 0 ... 49
+ *
+ * The expected physical result is:
+ *
+ *     physical 0  ... 49 = logical 0 ... 49
+ *     physical 50 ... 99 = logical 0 ... 49
+ *
+ * In the normal fast path, Segment::setPixelColor() has already replicated that
+ * data into the full raw segment buffer.
+ *
+ * In the transition slow path, blendSegment() works from the reduced logical
+ * domain and writes directly to the global frame. Replication must therefore be
+ * performed here as part of physical output expansion.
+ *
+ * The correct order is:
+ *
+ *     logical index
+ *         -> reverse in logical domain
+ *         -> grouping expansion
+ *         -> decimation repeat offset
+ *         -> mirror/offset/global write
+ *
+ * A repeated physical block starts at:
+ *
+ *     groupedLogicalIndex
+ *       + repeatIndex * physicalPatternLength
+ *
+ * where:
+ *
+ *     physicalPatternLength = virtualLength() * groupLength()
+ *
+ * The write must stop at the full physical segment length:
+ *
+ *     length()
+ *
+ * The decimation expansion belongs only in the slow-path physical output stage.
+ *
+ * Raw source reads in the slow path normally remain in the reduced logical
+ * domain:
+ *
+ *     seg->getPixelColorRaw(i)
+ *
+ * They should not automatically use modulo against the full physical length.
+ *
+ * A separate old-segment mapping may be required when the old and new segments
+ * have different virtual lengths or decimation factors. Bounds must always be
+ * checked using the dimensions belonging to the segment being read.
+ *
+ *
+ * WHY DECIMATION IS HANDLED DIFFERENTLY IN FAST AND SLOW PATHS
+ * ------------------------------------------------------------
+ *
+ * Fast path:
+ *
+ *     effect
+ *       -> setPixelColor()/setPixelColorXY()
+ *       -> full raw segment buffer already expanded
+ *       -> direct raw physical copy
+ *
+ * Slow transition path:
+ *
+ *     effect
+ *       -> reduced logical segment pattern
+ *       -> transition operates in logical coordinates
+ *       -> blendSegment() performs physical expansion
+ *       -> repeated decimated pattern written into global frame
+ *
+ * Applying decimation in both places would duplicate the transform.
+ *
+ * Omitting it from the slow path would leave only the first logical pattern
+ * region updated during a transition, with remaining physical regions staying
+ * black or retaining stale data until the transition ends.
+ *
+ *
+ * OLD SEGMENT AND DECIMATION
+ * --------------------------
+ *
+ * The old segment snapshot may have a different decimation value from the new
+ * segment.
+ *
+ * Source dimensions must therefore be selected from the actual source segment:
+ *
+ *     seg == segO ? old dimensions : new dimensions
+ *
+ * Fade blending must read the old segment using:
+ *
+ *     old virtual length
+ *     old virtual width
+ *     old virtual height
+ *     old decimation configuration
+ *
+ * Physical output expansion is based on the current top segment because the new
+ * segment defines the active destination region.
+ *
+ *
+ * CCT HANDLING
+ * ------------
+ *
+ * The segment's transitioned CCT value is read once:
+ *
+ *     topSegment.currentCCT()
+ *
+ * When a physical pixel is written, the matching _pixelCCT entry is updated if
+ * the CCT buffer exists.
+ *
+ * Mirrored physical pixels receive the same CCT value as the original.
+ *
+ *
+ * BLEND STYLE RESTORATION
+ * -----------------------
+ *
+ * Single-pixel segments temporarily force fade mode because geometric transition
+ * styles have no meaningful spatial extent.
+ *
+ * The original blend style is saved in orgBS and restored before returning.
+ *
+ *
+ * IMPORTANT INVARIANTS
+ * --------------------
+ *
+ * 1. length(), width() and height() describe the full physical segment domain.
+ *
+ * 2. virtualLength(), virtualWidth() and virtualHeight() describe the logical
+ *    effect domain.
+ *
+ * 3. getPixelColorRaw() performs no mapping, bounds translation, grouping,
+ *    mirroring or decimation.
+ *
+ * 4. Fast paths read the already-expanded raw segment buffer directly.
+ *
+ * 5. Slow paths operate in logical coordinates and perform physical expansion.
+ *
+ * 6. Decimation is expanded in the slow path, not re-applied to fast-path raw
+ *    reads.
+ *
+ * 7. Segment opacity is applied here.
+ *
+ * 8. Global/bus brightness is applied later by the bus output layer.
+ *
+ * 9. Physical output bounds use length(), width() and height(), never the
+ *    reduced virtual dimensions.
+ *
+ * 10. Old-segment source bounds use the old segment's own virtual dimensions.
+ *
+ *
+ * SUMMARY
+ * -------
+ *
+ * blendSegment() is the central segment-composition stage:
+ *
+ *     effect-generated logical segment pixels
+ *         -> transition selection/blending
+ *         -> grouping/spacing
+ *         -> decimation expansion
+ *         -> reverse/transpose/mirroring
+ *         -> segment blend mode
+ *         -> segment opacity
+ *         -> global frame buffer
+ *
+ * The completed global frame is subsequently passed to the bus layer, where
+ * gamma correction, global brightness, current limiting, colour order and final
+ * hardware output are handled.
+ *******************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::blendSegment(const Segment &topSegment) const {
   
   // DEBUG_PRINT_LN("blend start");
@@ -3059,22 +4077,6 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
         // ALOG_INF(PSTR("idx i %d %d"), idx, i);
         // if (_pixelCCT) _pixelCCT[idx] = cct;
 
-//         if (i == 0)
-// {
-//   Serial.printf(
-//     "FAST OUT prog=%u bri=%u opacity=%u source=%08lX out=%08lX RGBW=%u,%u,%u,%u\n",
-//     topSegment.progress(),
-//     topSegment.currentBri(),
-//     opacity,
-//     (unsigned long)c_a,
-//     (unsigned long)strip[idx],
-//     R(strip[idx]),
-//     G(strip[idx]),
-//     B(strip[idx]),
-//     W(strip[idx])
-//   );
-// }
-
       }
       return;
     }
@@ -3082,9 +4084,6 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
     // DEBUG_PRINT_LN("!Fast Path");
   }
 
-
-  // DEBUG_PRINT_LN("blend return");
-  // return;
 
   // slow path: handle transitions, grouping/spacing, segments with clipping and CCT pixels
   Segment::setClippingRect(0, 0);  // disable clipping by default
@@ -3206,6 +4205,13 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
       if (pushOffsetX != 0) x = (x + pushOffsetX) % nCols;
       if (pushOffsetY != 0) y = (y + pushOffsetY) % nRows;
       uint32_t c_a = BLACK;
+#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+      if (seg->decimate > 1 && vCols > 0 && vRows > 0) {
+        const int sourceX = x % vCols;
+        const int sourceY = y % vRows;
+        if (sourceX >= 0 && sourceY >= 0) c_a = seg->getPixelColorRaw(sourceX + sourceY*vCols);
+      } else
+#endif
       if (x < vCols && y < vRows) c_a = seg->getPixelColorRaw(x + y*vCols); // will get clipped pixel from old segment or unclipped pixel from new segment
       // if (segO && blendingStyle == TRANSITION_FADE
       //   && (topSegment.effect_id != segO->effect_id || (segO->name != topSegment.name && segO->name && topSegment.name && strncmp(segO->name, topSegment.name, WLED_MAX_SEGNAME_LEN) != 0))
@@ -3215,9 +4221,21 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
       // } else if (blendingStyle != TRANSITION_FADE) {
 
 
-      if (segO && blendingStyle == TRANSITION_FADE && x < oCols && y < oRows) {
+      if (segO && blendingStyle == TRANSITION_FADE
+#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+          && ((segO->decimate > 1 && oCols > 0 && oRows > 0) || (x < oCols && y < oRows))
+#else
+          && x < oCols && y < oRows
+#endif
+      ) {
         // we need to blend old segment using fade as pixels are not clipped
+#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+        const int oldX = segO->decimate > 1 ? x % oCols : x;
+        const int oldY = segO->decimate > 1 ? y % oRows : y;
+        c_a = color_blend16(c_a, segO->getPixelColorRaw(oldX + oldY*oCols), progInv);
+#else
         c_a = color_blend16(c_a, segO->getPixelColorRaw(x + y*oCols), progInv);
+#endif
       } else if (blendingStyle != TRANSITION_FADE) {
 
         // if we have global brightness change (not On/Off change) we will ignore transition style and just fade brightness (see led.cpp)
@@ -3236,6 +4254,32 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
         if (topSegment.transpose) std::swap(x,y); // swap X & Y if segment transposed
       }
       // expand pixel
+#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+      if (topSegment.decimate > 1) {
+        const int repeatCols = topSegment.transpose ? nRows : nCols;
+        const int repeatRows = topSegment.transpose ? nCols : nRows;
+        for (int repeatY = 0; repeatY < topSegment.decimate; repeatY++) {
+          for (int repeatX = 0; repeatX < topSegment.decimate; repeatX++) {
+            int outX = x + repeatX * repeatCols;
+            int outY = y + repeatY * repeatRows;
+            if (groupLen == 1) {
+              if (outX < width && outY < height) setMirroredPixel(outX, outY, c_a, opacity);
+            } else {
+              // handle grouping and spacing
+              outX *= groupLen; // expand to physical pixels
+              outY *= groupLen; // expand to physical pixels
+              const int maxX = std::min(outX + topSegment.grouping, width);
+              const int maxY = std::min(outY + topSegment.grouping, height);
+              while (outY < maxY) {
+                int _x = outX;
+                while (_x < maxX) setMirroredPixel(_x++, outY, c_a, opacity);
+                outY++;
+              }
+            }
+          }
+        }
+      } else
+#endif
       if (groupLen == 1) {
         setMirroredPixel(x, y, c_a, opacity);
       } else {
@@ -3306,9 +4350,20 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
         case TRANSITION_PUSH_LEFT:  i = (i - offsetI + nLen) % nLen; break;
       }
       uint32_t c_a = BLACK;
+#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+      if (seg->decimate > 1 && vLen > 0) {
+        c_a = seg->getPixelColorRaw(i % vLen);
+      } else
+#endif
       if (i < vLen) c_a = seg->getPixelColorRaw(i); // will get clipped pixel from old segment or unclipped pixel from new segment
       // if (segO && tkr_anim->blendingStyle == TRANSITION_FADE && topSegment.effect_id != segO->effect_id && i < oLen) {
-        if (segO && tkr_anim->blendingStyle == TRANSITION_FADE && i < oLen)
+        if (segO && tkr_anim->blendingStyle == TRANSITION_FADE
+#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+            && ((segO->decimate > 1 && oLen > 0) || i < oLen)
+#else
+            && i < oLen
+#endif
+        )
         {
           // static uint32_t last_transition_pixel_log = 0;
           // if (millis() - last_transition_pixel_log >= 500)
@@ -3317,7 +4372,11 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
           //   ALOG_INF(PSTR("TRANS PIXEL BLEND progress=%u inverse=%u new=%08X old=%08X out=%08X"), topSegment.progress(), progInv, c_a, segO->getPixelColorRaw(i), color_blend16(c_a, segO->getPixelColorRaw(i), progInv));
           // }
         // we need to blend old segment using fade as pixels are not clipped
+#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+        c_a = color_blend16(c_a, segO->getPixelColorRaw(segO->decimate > 1 ? i % oLen : i), progInv);
+#else
         c_a = color_blend16(c_a, segO->getPixelColorRaw(i), progInv);
+#endif
       } else if (tkr_anim->blendingStyle != TRANSITION_FADE) {
         // if we have global brightness change (not On/Off change) we will ignore transition style and just fade brightness (see led.cpp)
         // workaround for On/Off transition
@@ -3331,15 +4390,29 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
       if (topSegment.reverse) i = nLen - i - 1; // is segment reversed?
       // expand pixel
       i *= topSegment.groupLength();
-      // set all the pixels in the group
-      const int maxI = std::min(i + topSegment.grouping, length); // make sure to not go beyond physical length
-      while (i < maxI) setMirroredPixel(i++, c_a, opacity);
+#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+      if (topSegment.decimate > 1) {
+        const int repeatStride = nLen * topSegment.groupLength();
+        for (int repeat = 0; repeat < topSegment.decimate; repeat++) {
+          int outI = i + repeat * repeatStride;
+          // set all the pixels in the group
+          const int maxI = std::min(outI + topSegment.grouping, length); // make sure to not go beyond physical length
+          while (outI < maxI) setMirroredPixel(outI++, c_a, opacity);
+        }
+      } else
+#endif
+      {
+        // set all the pixels in the group
+        const int maxI = std::min(i + topSegment.grouping, length); // make sure to not go beyond physical length
+        while (i < maxI) setMirroredPixel(i++, c_a, opacity);
+      }
     }
   }
 
   tkr_anim->blendingStyle = orgBS;
   Segment::setClippingRect(0, 0);             // disable clipping for overlays
 }
+
 
 
 void mAnimatorLight::show(void)
@@ -4592,6 +5665,9 @@ void mAnimatorLight::Segment::startTransition(uint16_t dur, bool segmentCopy) {
 
     // ALOG_ERR(PSTR("TRANS REJECTED seg=%p dur=%u active=%u"), this, dur, isActive());
     if (isInTransition()) _t->_dur = 0;
+
+    transition_owned_by_effect = false;
+
     return;
   }
   if (isInTransition()) {
@@ -4664,12 +5740,26 @@ void mAnimatorLight::Segment::startTransition(uint16_t dur, bool segmentCopy) {
   };
 }
 
-void mAnimatorLight::Segment::stopTransition() {
-  if (_t == nullptr) return; // no ongoing transition
-  // DEBUG_PRINTF_P(PSTR("-- Stopping transition: S=%p T(%p) O[%p]\n"), this, _t, _t->_oldSegment);
+// void mAnimatorLight::Segment::stopTransition() {
+//   if (_t == nullptr) return; // no ongoing transition
+//   // DEBUG_PRINTF_P(PSTR("-- Stopping transition: S=%p T(%p) O[%p]\n"), this, _t, _t->_oldSegment);
+//   delete _t;
+//   _t = nullptr;
+// }
+void mAnimatorLight::Segment::stopTransition()
+{
+  if (_t == nullptr) // no ongoing transition
+  {
+    transition_owned_by_effect = false;
+    return;
+  }
+
   delete _t;
   _t = nullptr;
+
+  transition_owned_by_effect = false;
 }
+
 
 // sets transition progress variable (0-65535) based on time passed since transition start
 // void mAnimatorLight::Segment::updateTransitionProgress() const {
@@ -5156,23 +6246,24 @@ mAnimatorLight::Segment &mAnimatorLight::Segment::setEffect(uint8_t fx, bool loa
       }
     }
 
-    sOpt = tkr_anim->extractModeDefaults(fx, "ep");   if (sOpt >= 0) cycle_time__rate_ms = sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "c1");   if (sOpt >= 0) custom1 = sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "c2");   if (sOpt >= 0) custom2 = sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "c3");   if (sOpt >= 0) custom3 = sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "o1");   if (sOpt >= 0) check1 = sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "o2");   if (sOpt >= 0) check2 = sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "o3");   if (sOpt >= 0) check3 = sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "m12");  if (sOpt >= 0) map1D2D = constrain(sOpt, 0, 7);
-    sOpt = tkr_anim->extractModeDefaults(fx, "si");   if (sOpt >= 0) soundSim = constrain(sOpt, 0, 7);
-    sOpt = tkr_anim->extractModeDefaults(fx, "rev");  if (sOpt >= 0) reverse = (bool)sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "mi");   if (sOpt >= 0) mirror = (bool)sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "rY");   if (sOpt >= 0) reverse_y = (bool)sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "mY");   if (sOpt >= 0) mirror_y = (bool)sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "p0");   if (sOpt >= 0) params_user[0] = sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "p1");   if (sOpt >= 0) params_user[1] = sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "p2");   if (sOpt >= 0) params_user[2] = sOpt;
-    sOpt = tkr_anim->extractModeDefaults(fx, "p3");   if (sOpt >= 0) params_user[3] = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "ep");    if (sOpt >= 0) cycle_time__rate_ms = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "c1");    if (sOpt >= 0) custom1 = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "c2");    if (sOpt >= 0) custom2 = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "c3");    if (sOpt >= 0) custom3 = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "o1");    if (sOpt >= 0) check1 = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "o2");    if (sOpt >= 0) check2 = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "o3");    if (sOpt >= 0) check3 = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "m12");   if (sOpt >= 0) map1D2D = constrain(sOpt, 0, 7);
+    sOpt = tkr_anim->extractModeDefaults(fx, "si");    if (sOpt >= 0) soundSim = constrain(sOpt, 0, 7);
+    sOpt = tkr_anim->extractModeDefaults(fx, "rev");   if (sOpt >= 0) reverse = (bool)sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "mi");    if (sOpt >= 0) mirror = (bool)sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "rY");    if (sOpt >= 0) reverse_y = (bool)sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "mY");    if (sOpt >= 0) mirror_y = (bool)sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "p0");    if (sOpt >= 0) params_user[0] = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "p1");    if (sOpt >= 0) params_user[1] = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "p2");    if (sOpt >= 0) params_user[2] = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "p3");    if (sOpt >= 0) params_user[3] = sOpt;
+    sOpt = tkr_anim->extractModeDefaults(fx, "palix"); if (sOpt >= 0) live_palette.intensity = sOpt;
 
     for (uint8_t sidx = 0; sidx < 5; ++sidx)
     {
@@ -5216,7 +6307,13 @@ mAnimatorLight::Segment &mAnimatorLight::Segment::setPalette(uint8_t pal)
 
   if (pal != palette_id)
   {
-    startTransition(10000, true);
+    if (!transition_owned_by_effect)
+    {
+      startTransition(
+        tkr_anim->getTransition(),
+        true
+      );
+    }
     ALOG_INF(PSTR("setPalette transition started seg=%p oldPal=%u newPal=%u"), this, palette_id, pal);
 
     palette_id = pal;
@@ -5237,7 +6334,9 @@ mAnimatorLight::Segment &mAnimatorLight::Segment::setName(const char *newName) {
     if (newLen) {
       if (name) p_free(name); // free old name
       name = static_cast<char*>(allocate_buffer(newLen+1, BFRALLOC_PREFER_PSRAM));
+      #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
       if (effect_id == EFFECTS_FUNCTION__2D__SCROLLING_TEXT__ID) startTransition(tkr_anim->getTransition(), true); // if the name changes in scrolling text mode, we need to copy the segment for blending
+      #endif
       if (name) strlcpy(name, newName, newLen+1);
       return *this;
     }
@@ -5445,7 +6544,7 @@ int16_t mAnimatorLight::extractModeDefaults(uint8_t mode, const char* segVar)
 }
 
 
-#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS_PIXELS
+#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
 
 // 2D matrix
 uint16_t mAnimatorLight::Segment::virtualWidth() const {
@@ -5578,7 +6677,7 @@ static void setPinwheelParameters(int i, int vW, int vH, int& startx, int& start
 #endif
 
 
-#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS_PIXELS
+#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
 
 // 1D strip
 uint16_t mAnimatorLight::Segment::virtualLength() const {
@@ -5610,6 +6709,13 @@ uint16_t mAnimatorLight::Segment::virtualLength() const {
   unsigned groupLen = groupLength(); // is always >= 1
   unsigned vLength = (length() + groupLen - 1) / groupLen;
   if (mirror) vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a single LED
+
+  #ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+  if (decimate > 1u){
+    vLength = (vLength + decimate - 1u) / decimate;
+  }
+  #endif
+  
   return vLength;
 }
 
@@ -8056,7 +9162,7 @@ void WLED_O2_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col, bo
 // if(i<1)
 //   ALOG_INF(PSTR("i %d col %d,%d,%d"),i, R(col), G(col), B(col));
 
-  #ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS_PIXELS
+  #ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
     if (decimate > 1)
     {
       const uint16_t pattern_length = vLength();
@@ -8068,6 +9174,8 @@ void WLED_O2_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col, bo
           static_cast<uint32_t>(repeat) * pattern_length;
 
         if (repeated_index >= length()) break;
+
+        // ALOG_INF(PSTR("per %d, %d"), i, repeated_index);
 
         setPixelColorRaw(
           static_cast<uint16_t>(repeated_index),

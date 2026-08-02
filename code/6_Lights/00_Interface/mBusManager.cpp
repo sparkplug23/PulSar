@@ -514,7 +514,7 @@ void IRAM_ATTR BusDigital::setPixelColor(unsigned pix, uint32_t c) {
   if (hasWhite()) c = autoWhiteCalc(c, cctWW, cctCW);
   c = color_fade(c, _bri, true); // apply brightness
 
-  if(pix==0) ALOG_INF(PSTR("_bri %d"),_bri);
+  // if(pix==0) ALOG_INF(PSTR("_bri %d"),_bri);
 
   if (hasCCT()) {
     wwcw = ((cctCW + 1) * _bri) & 0xFF00; // apply brightness to CCT (store CW in upper byte)

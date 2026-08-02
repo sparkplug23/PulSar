@@ -2872,7 +2872,7 @@ uint8_t perlin8(uint16_t x, uint16_t y, uint16_t z) {
 
 
   void setValuesFromMainSeg();
-  
+
   inline void resetTimebase()                               { timebase = 0UL - millis(); }
     
 
@@ -3394,6 +3394,8 @@ class Segment
      **/
     ColourType colour_width__used_in_effect_generate = ColourType::COLOUR_TYPE__RGB__ID; 
     
+
+
     // Define the size of the color array
     // #define NUMBER_SEGMENT_COLOURS 5
 
@@ -4484,6 +4486,20 @@ name = nullptr;
 
   void    refreshGeometry();
 
+    
+    bool transition_owned_by_effect = false; // The currently active Segment transition was started by the effect itself.
+    inline uint16_t startPeriodTransition(bool segmentCopy = true)
+    {
+      const uint16_t transition_time_ms = static_cast<uint16_t>(
+        (static_cast<uint32_t>(cycle_time__rate_ms) *
+        static_cast<uint32_t>(255U - speed)) / 255U
+      );
+
+      transition_owned_by_effect = true;
+      startTransition(transition_time_ms, segmentCopy);
+
+      return transition_time_ms;
+    }
   
   // transition functions
     void stopTransition();                  // ends transition mode by destroying transition structure (does nothing if not in transition)
@@ -4579,10 +4595,13 @@ name = nullptr;
     void setPixelColor(uint16_t n, uint32_t c){ setPixelColor((int)n, c); } // to keep compatibility with RGBWW
     void setPixelColor(int n, byte r, byte g, byte b, byte w = 0) {      setPixelColor(n, RGBW32(r,g,b,w));    }
     inline void setPixelColor(int n, CRGB c) const                             { setPixelColor(n, RGBW32(c.r,c.g,c.b,0)); }
-    // Anti-aliasing functions
+    
+#if defined(ENABLE_ANTIALIAS_WITH_RGBWW)
+// Anti-aliasing functions
     void setPixelColor(float i, uint32_t c, bool aa = true);
     void setPixelColor(float i, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0, bool aa = true) { setPixelColor(i, RGBW32(r,g,b,w), aa); }
     void setPixelColor(float i, CRGB c, bool aa = true)                                         { setPixelColor(i, RGBW32(c.r,c.g,c.b,0), aa); }
+#endif
 
     [[gnu::hot]] bool isPixelClipped(int i) const;  
     [[gnu::hot]] uint32_t getPixelColor(int i) const;      

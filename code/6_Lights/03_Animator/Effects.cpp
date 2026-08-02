@@ -296,8 +296,6 @@ static const char PM_EFFECT_DESCRI__BANDS_PALETTE_SEGWIDTH[] PROGMEM =
 "C1: Segment offset\n\r"
 "O3: Use IX as the exact repetition count\n\r"
 "EP: Refresh period";
-
-
 /*******************************************************************************************************************************************************************************************************************
  * @description : Gradient Palette
  *
@@ -313,6 +311,12 @@ static const char PM_EFFECT_DESCRI__BANDS_PALETTE_SEGWIDTH[] PROGMEM =
  * O1 controls the boundary between repeated gradients:
  *   - Disabled : Smooth interpolation across the repeat boundary.
  *   - Enabled  : Hard boundary between the final and first palette colours.
+ *
+ * SX controls the proportion of the effect period used when an effect-owned
+ * palette transition is started.
+ *
+ * EP defines the complete effect period. The remaining portion after the
+ * transition duration is the static hold time.
  *
  * Palette and setting changes are blended by the segment transition system.
  *******************************************************************************************************************************************************************************************************************/
@@ -379,7 +383,7 @@ void mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
 }
 static const char PM_EFFECT_CONFIG__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 "Gradient@"                                    // Name
-"Speed,,Width,,,Hard edge,,,!,!"               // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"Speed,,Width,,,Hard edge,,,!,"                 // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                            // ----------------------------------------- Sliders/SegCols
 "!,!,!,!,!"                                    // Segment Colour Names
 ";"                                            // ----------------------------------------- SegCols/PalPicker
@@ -387,19 +391,18 @@ static const char PM_EFFECT_CONFIG__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 ";"                                            // ----------------------------------------- PalPicker/is1D2D
 "1"                                            // Icon flags
 ";"                                            // ----------------------------------------- is1D2D/Defaults
-"sx=127,"                                      // Default transition speed
+"sx=127,"                                      // Transition occupies approximately half the effect period
 "c1=255,"                                      // Default gradient width: full segment
 "o1=0,"                                        // Smooth repeat boundary
-"ep=10000"                                     // Refresh period
+"ep=10000"                                     // Complete effect period
 ;                                              // End
 static const char PM_EFFECT_DESCRI__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 "Displays the active palette as a continuous gradient.\n\r"
 "Discrete palettes are interpolated between their colour entries.\n\r"
-"SX: Transition speed\n\r"
+"SX: Proportion of the effect period used for blending\n\r"
 "C1: Gradient repeat width\n\r"
 "O1: Hard repeat boundary\n\r"
-"EP: Refresh period";
-
+"EP: Complete effect period";
 
 /************************************************************************************************************************************
  * @brief Random Gradient Palette
@@ -411,14 +414,24 @@ static const char PM_EFFECT_DESCRI__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
  *   - Auto cycle disabled:
  *       The first random-gradient palette remains selected.
  *   - Auto cycle enabled:
- *       A different random-gradient palette is selected periodically.
+ *       A different random-gradient palette is selected once per effect period.
  *   - Immediate repetition of the current palette is prevented.
+ *
+ * Timing behaviour:
+ *   - EP defines the complete palette cycle period.
+ *   - SX controls what proportion of EP is spent blending to the new palette.
+ *   - The remaining portion of EP is the static hold time.
+ *
+ * Example:
+ *   - EP = 10000 ms
+ *   - SX = 127
+ *   - Transition time is approximately 5000 ms.
+ *   - Static hold time is approximately 5000 ms.
  *
  * Gradient behaviour:
  *   - C1 controls the repeated gradient width.
  *   - O1 controls the hard edge between repeated gradients.
- *   - C2 controls the palette-change interval from 60 seconds to 5 seconds.
- *   - Palette changes use the segment transition system.
+ *   - O2 enables or disables automatic palette cycling.
  *
  * State:
  *   - aux3 stores the last palette-change timestamp.
@@ -448,14 +461,14 @@ void mAnimatorLight::EffectAnim__Randomise_Gradient_Palette_SegWidth()
     return;
   }
 
-  // C2 maps from a 60-second interval down to a 5-second interval.
-  const uint32_t update_period_ms = map(SEGMENT.custom2, 0, 255, 60000UL, 5000UL);
+  const uint32_t period_ms  = SEGMENT.cycle_time__rate_ms;
+  const uint32_t elapsed_ms = effect_start_time - SEGMENT.aux3;
 
   if (SEGMENT.aux3 == 0)
   {
     SEGMENT.aux3 = effect_start_time;
   }
-  else if ((effect_start_time - SEGMENT.aux3) >= update_period_ms)
+  else if ((elapsed_ms >= period_ms) && !SEGMENT.isInTransition())
   {
     SEGMENT.aux3 = effect_start_time;
 
@@ -465,37 +478,37 @@ void mAnimatorLight::EffectAnim__Randomise_Gradient_Palette_SegWidth()
     const uint8_t offset = static_cast<uint8_t>(1U + hw_random8(palette_count - 1U));
     const uint8_t next   = static_cast<uint8_t>((current + offset) % palette_count);
 
-    SEGMENT.setPalette( static_cast<uint8_t>(palette_min + next) );
+    SEGMENT.startPeriodTransition(true);
+    SEGMENT.setPalette(static_cast<uint8_t>(palette_min + next));
   }
 
   EffectAnim__Gradient_Palette_SegWidth();
 }
 static const char PM_EFFECT_CONFIG__RANDOMISE_GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 "Gradient Random@"                             // Name
-"Speed,,Width,New Palette Rate,,Hard edge,Auto cycle,,!,!"
-                                                // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
-";"                                             // ----------------------------------------- Sliders/SegCols
-""                                              // Segment Colour Names
-";"                                             // ----------------------------------------- SegCols/PalPicker
-""                                              // Palette picker disabled
-";"                                             // ----------------------------------------- PalPicker/is1D2D
-"1"                                             // Icon flags
-";"                                             // ----------------------------------------- is1D2D/Defaults
-"sx=127,"                                       // Default transition speed
-"c1=255,"                                       // Default gradient width: full segment
-"c2=127,"                                       // Default palette-change interval
-"o1=0,"                                         // Smooth repeated-gradient boundary
-"o2=1,"                                         // Automatic palette cycling enabled
-"ep=1000"                                       // Refresh period
-;                                               // End
+"Speed,,Width,,,Hard edge,Auto cycle,,!,"       // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                            // ----------------------------------------- Sliders/SegCols
+""                                             // Segment Colour Names
+";"                                            // ----------------------------------------- SegCols/PalPicker
+""                                             // Palette picker disabled
+";"                                            // ----------------------------------------- PalPicker/is1D2D
+"1"                                            // Icon flags
+";"                                            // ----------------------------------------- is1D2D/Defaults
+"sx=127,"                                      // Transition occupies approximately half the effect period
+"c1=255,"                                      // Default gradient width: full segment
+"o1=0,"                                        // Smooth repeated-gradient boundary
+"o2=1,"                                        // Automatic palette cycling enabled
+"palix=10,"                                    // Live Palette Intensity
+"ep=10000"                                     // Complete palette cycle period
+;                                              // End
 static const char PM_EFFECT_DESCRI__RANDOMISE_GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 "Cycles through random gradient palettes.\n\r"
-"SX: Transition speed\n\r"
+"SX: Proportion of the effect period used for blending\n\r"
 "C1: Gradient repeat width\n\r"
-"C2: New palette interval, 60-5 seconds\n\r"
 "O1: Hard repeat boundary\n\r"
 "O2: Automatic palette cycling\n\r"
-"EP: Refresh period";
+"EP: Complete palette cycle period";
+
 
 /**********************************************************************************************************************************
  * EFFECT: Firefly
@@ -536,9 +549,7 @@ void mAnimatorLight::EffectAnim__Firefly()
   if (!first_draw && (elapsed_ms < period_ms)) return;
   if (SEGMENT.isInTransition()) return;
 
-  const uint16_t transition_time_ms = ((uint32_t)period_ms * (255u - SEGMENT.speed)) / 255u;
-
-  SEGMENT.startTransition(transition_time_ms, true);
+  SEGMENT.startPeriodTransition(true);
   SEGMENT.aux3 = effect_start_time;
 
   uint16_t pixels_to_update = mapvalue(SEGMENT.intensity, 0, 255, 0, len);
@@ -565,8 +576,7 @@ void mAnimatorLight::EffectAnim__Firefly()
 }
 static const char PM_EFFECT_CONFIG__FIREFLY[] PROGMEM =
 "Firefly@"                                     // Name
-"Blend Speed,Pixels Changing,,,,DrawOver FirstRun,,,!,"
-                                                // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"Blend Speed,Pixels Changing,,,,DrawOver FirstRun,,,!," // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                            // ----------------------------------------- Sliders/SegCols
 ""                                             // Segment Colour Names
 ";"                                            // ----------------------------------------- SegCols/PalPicker
@@ -574,9 +584,9 @@ static const char PM_EFFECT_CONFIG__FIREFLY[] PROGMEM =
 ";"                                            // ----------------------------------------- PalPicker/is1D2D
 "1"                                            // Icon flags
 ";"                                            // ----------------------------------------- is1D2D/Defaults
-"ep=5000,"                                     // Time between pixel updates
+"ep=5000,"                                     // Complete update period
 "ix=50,"                                       // Default number of changing pixels
-"sx=127,"                                      // Default transition speed
+"sx=127,"                                      // Transition occupies approximately half the effect period
 "paln=Colourful,"                              // Default palette
 "o1=0"                                         // Populate the complete segment on first frame
 ;                                              // End
@@ -584,9 +594,9 @@ static const char PM_EFFECT_DESCRI__FIREFLY[] PROGMEM =
 "Changes random pixels to discrete colours from the active palette.\n\r"
 "Unselected pixels retain their current colour.\n\r"
 "IX: Pixels changing per update\n\r"
-"SX: Transition speed\n\r"
+"SX: Proportion of the effect period used for blending\n\r"
 "O1: Skip complete first-frame population\n\r"
-"EP: Time between updates";
+"EP: Complete update period";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -898,433 +908,688 @@ static const char PM_EFFECT_DESCRI__SHIMMERING_PALETTE_SATURATION[] PROGMEM =
 
 #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC /////////////////////////////////////////////////////////////////////////////////////////////
 
-
 /*******************************************************************************************************************************************************************************************************************
- * @description : Rotates by getting and setting segment pixel colours in *virtual index* space, with wrap-around.
- *                - Uses SEGMENT.vLength() as the valid index range for get/setPixelColor.
- *                - This preserves all current segment mapping (grouping, mirror, offset, reverse, decimate, 2D mapping, etc.).
+ * @description : Rotates the current segment-local pixel colours in virtual index space, with wrap-around.
+ *                - Uses SEGLEN as the valid logical index range for getPixelColor() and setPixelColor().
+ *                - Reads and writes the segment-local pixel buffer rather than the bus or global output buffer.
+ *                - The completed segment buffer is subsequently composed into the global frame by blendSegment().
+ *                - Segment mapping, grouping, mirroring, decimation, transitions and physical output remain within the normal rendering pipeline.
+ *
  * @note        : direction = true  → rotate right  (toward higher virtual indices)
  *                direction = false → rotate left   (toward lower virtual indices)
- *              : Old bug was using SEGLEN (physical length) as if it were the virtual index range; this breaks when grouping/decimate≠1.
  ********************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool direction)
 {
-
- // // Work in virtual index space: [0 .. vLen-1] is what getPixelColor()/setPixelColor() expect.
   const uint16_t vLen = SEGLEN;
-  // if (vLen == 0) return EFFECT_DEFAULT();
 
-  // // Normalize movement to [0 .. vLen-1]
-  const uint16_t move = (movement_amount);// % vLen);
-  // if (move == 0) return FRAMETIME_WITH_SPEED(5, 1000);
+  if (vLen < 2U) return;
 
-  // Temp buffer for the wrapped edge in virtual space
+  const uint16_t move = movement_amount % vLen;
+
+  if (move == 0U) return;
+
+  // Temporary storage for the wrapped edge in virtual segment space.
   std::vector<uint32_t> edge(move);
-  
-  // ------------------------ Rotate right: pixels move toward higher virtual indices ------------------------
-  // Save tail [vLen-move .. vLen-1]
-  for (uint16_t j = 0; j < move; ++j) {
-    edge[j] = BusManager::busses[0]->getPixelColor(SEGMENT.start + (vLen - move + j));
-  }
 
-  // Shift block up: [0 .. vLen-move-1] → [move .. vLen-1]
-  for (int32_t i = (int32_t)vLen - 1; i >= (int32_t)move; --i) {
-    uint32_t srcCol = BusManager::busses[0]->getPixelColor(SEGMENT.start + (i - move));
-    BusManager::busses[0]->setPixelColor(SEGMENT.start + i, srcCol);
-  }
+  if (direction)
+  {
+    // Rotate right: save tail [vLen-move .. vLen-1].
+    for (uint16_t j = 0; j < move; ++j)
+    {
+      edge[j] = SEGMENT.getPixelColor(vLen - move + j);
+    }
 
-  // Wrap saved tail into head [0 .. move-1]
-  for (uint16_t j = 0; j < move; ++j) {
-    BusManager::busses[0]->setPixelColor(SEGMENT.start + j, edge[j]);
-  }
+    // Shift [0 .. vLen-move-1] into [move .. vLen-1].
+    for (int32_t i = static_cast<int32_t>(vLen) - 1;
+         i >= static_cast<int32_t>(move);
+         --i)
+    {
+      SEGMENT.setPixelColor(
+        static_cast<uint16_t>(i),
+        SEGMENT.getPixelColor(static_cast<uint16_t>(i - move))
+      );
+    }
 
+    // Wrap the saved tail into [0 .. move-1].
+    for (uint16_t j = 0; j < move; ++j)
+    {
+      SEGMENT.setPixelColor(j, edge[j]);
+    }
+  }
+  else
+  {
+    // Rotate left: save head [0 .. move-1].
+    for (uint16_t j = 0; j < move; ++j)
+    {
+      edge[j] = SEGMENT.getPixelColor(j);
+    }
+
+    // Shift [move .. vLen-1] into [0 .. vLen-move-1].
+    for (uint16_t i = 0; i < (vLen - move); ++i)
+    {
+      SEGMENT.setPixelColor(
+        i,
+        SEGMENT.getPixelColor(i + move)
+      );
+    }
+
+    // Wrap the saved head into [vLen-move .. vLen-1].
+    for (uint16_t j = 0; j < move; ++j)
+    {
+      SEGMENT.setPixelColor(vLen - move + j, edge[j]);
+    }
+  }
 }
-
-
 /*******************************************************************************************************************************************************************************************************************
- * @description : Rotate the currently displayed colours (pure framebuffer rotate).
- *                - No repaint; rotates whatever is already shown on the LEDs.
+ * @description : Rotates the colours already stored in the current segment-local pixel buffer.
+ *                - Does not repaint the palette or generate a new pattern.
+ *                - The rotated segment buffer is composed into the global frame by blendSegment().
  *
  * Controls:
  *   SX (Speed)      → Base frame time. Rubber-banding scales the frame time only.
- *   IX (Intensity)  → Pixels rotated per frame (stride). Typically 1; independent of rubber-banding.
- *   c1 (custom1)    → 0 = manual mode (C2 used). 1..255 = auto-reverse; random interval in [3s..20s] mapped by slider.
- *   C2 (checkbox)   → Manual reverse (ignored when c1>0).
- *   C3 (checkbox)   → Rubber-banding: pre-slow into a flip (auto mode) and post-ramp after flips.
+ *   IX (Intensity)  → Pixels rotated per frame. Independent of rubber-banding.
+ *   c1 (custom1)    → 0 = manual mode using C2. 1..255 = auto-reverse with a random interval in the configured range.
+ *   C2 (checkbox)   → Manual reverse direction. Ignored when c1 is greater than zero.
+ *   C3 (checkbox)   → Rubber-banding: slows before an automatic reversal and accelerates after a reversal.
+ *
+ * State:
+ *   aux0 → Current direction: 0 = left, 1 = right.
+ *   aux2 → Current pre/post rubber-band window duration.
+ *   aux3 → Next automatic reversal deadline.
+ *   aux4 → End of the current post-reversal acceleration window.
  *
  * Notes:
- *   - Rubber-banding never changes IX (stride). It only stretches/squeezes frame time around reversals.
- *   - Auto mode ignores C2 entirely.
+ *   - Rubber-banding changes frame timing only.
+ *   - IX always controls the rotation stride.
+ *   - Auto-reverse mode ignores C2.
  ********************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__Rotating_Previous_Animation()
 {
   if (SEGLEN == 0) return EFFECT_DEFAULT();
 
-  const uint16_t move_px_base2 = map(SEGMENT.intensity, 0, 255, 1,
-                                    (uint16_t)max<uint16_t>(1, SEGLEN/2)); // IX → pixels/frame
-  EffectAnim__Rotate_Base(move_px_base2, 1);  // ignore its return
+  /**
+   * Capture the currently displayed physical segment on the first frame.
+   *
+   * The previous effect may have used different grouping, spacing, mirroring,
+   * decimation or another virtual geometry. Its segment-local buffer therefore
+   * does not necessarily represent the physical image that was displayed.
+   *
+   * _pixels[] contains the completed frame produced by blendSegment() during
+   * the previous render cycle. Import that visible frame into the new
+   * segment-local buffer before rotation begins.
+   *
+   * Rotate Previous is intended to run with grouping=1 so every physical pixel
+   * can be represented independently in the new segment buffer.
+   */
+  if (SEGMENT.flags.animator_first_run)
+  {
+    const uint16_t physical_length = SEGMENT.length();
+    const uint16_t copy_length     = std::min<uint16_t>(SEGLEN, physical_length);
 
-  const uint32_t now          = effect_start_time;          // ms tick source
-  const uint16_t move_px_base = map(SEGMENT.intensity, 0, 255, 1,
-                                    (uint16_t)max<uint16_t>(1, SEGLEN/2)); // IX → pixels/frame
-  const bool     rubber_band  = SEGMENT.check3;             // C3: rubber-banding
-  const uint16_t c1_auto      = SEGMENT.custom1;            // c1: 0=off; 1..255 → max interval
+    for (uint16_t pixel = 0; pixel < copy_length; ++pixel)
+    {
+      const uint32_t colour = getPixelColor(SEGMENT.start + pixel);
+      SEGMENT.setPixelColor(pixel, colour);
+    }
+
+    SEGMENT.flags.animator_first_run = false;
+  }
+
+  const uint32_t now          = effect_start_time;
+  const uint16_t move_px_base = map(
+    SEGMENT.intensity,
+    0,
+    255,
+    1,
+    static_cast<uint16_t>(max<uint16_t>(1, SEGLEN / 2))
+  );
+  const bool     rubber_band  = SEGMENT.check3;
+  const uint16_t c1_auto      = SEGMENT.custom1;
 
   // --------------------------------------------------------------------------------
-  // Direction & auto-reverse scheduling
-  // aux0 = direction (0=left,1=right)
-  // aux3 = next auto-flip deadline (abs ms)
-  // aux2 = pre/post window (ms for this cycle)
-  // aux4 = post-ramp end (abs ms)
+  // Direction and automatic reversal scheduling.
   // --------------------------------------------------------------------------------
   bool direction = (SEGMENT.aux0 != 0);
 
-  auto map_c1_to_max = [](uint16_t c1)->uint32_t {
+  auto map_c1_to_max = [](uint16_t c1) -> uint32_t
+  {
     if (c1 == 0) return 0;
-    return 3000u + ((uint32_t)(c1 - 1u) * (20000u - 3000u)) / 254u; // 1..255 → 3..20s
+
+    return 3000U +
+      ((static_cast<uint32_t>(c1 - 1U) * (20000U - 3000U)) / 254U);
   };
 
-  // test knob for banding window size (applied everywhere)
-  constexpr float    RB_TEST_FACTOR = 1.0f; // raise to exaggerate window visually
+  constexpr float    RB_TEST_FACTOR = 1.0f;
   constexpr uint16_t RB_MIN_MS      = 300;
   constexpr uint16_t RB_MAX_MS      = 4000;
 
-  if (c1_auto == 0) {
-    // Manual mode: obey C2; snappy flip; optional post-ramp when C3
+  if (c1_auto == 0)
+  {
+    // Manual mode: C2 directly selects the direction.
     const bool manual_reverse = SEGMENT.check2;
-    const bool desired_dir    = !manual_reverse;   // true=right, false=left
-    if (desired_dir != direction) {
+    const bool desired_dir    = !manual_reverse;
+
+    if (desired_dir != direction)
+    {
       direction    = desired_dir;
       SEGMENT.aux0 = direction ? 1 : 0;
 
-      if (rubber_band) {
-        // post-ramp from a nominal 20s window * 10%, scaled by test factor
-        const uint32_t nominal_ms = 20000u;
-        const uint16_t post_ms    = (uint16_t)constrain(
-          (uint32_t)(nominal_ms * 0.10f * RB_TEST_FACTOR), RB_MIN_MS, RB_MAX_MS);
+      if (rubber_band)
+      {
+        const uint32_t nominal_ms = 20000U;
+
+        const uint16_t post_ms = static_cast<uint16_t>(
+          constrain(
+            static_cast<uint32_t>(nominal_ms * 0.10f * RB_TEST_FACTOR),
+            RB_MIN_MS,
+            RB_MAX_MS
+          )
+        );
+
         SEGMENT.aux2 = post_ms;
-        SEGMENT.aux4 = now + post_ms; // post-ramp end
+        SEGMENT.aux4 = now + post_ms;
       }
     }
-  } else {
-    // Auto mode: ignore C2; schedule random flips in [3s .. mappedMax(c1)]
+  }
+  else
+  {
+    // Auto mode: schedule random reversals between 3 seconds and the C1-derived maximum.
     const uint32_t max_ms = map_c1_to_max(c1_auto);
 
-    if (SEGMENT.aux3 == 0) {
-      // first schedule
-      const uint16_t hi = (uint16_t)(max_ms <= 65535u ? (max_ms + 1u) : 65535u);
-      const uint32_t interval_ms = (uint32_t)hw_random16((uint16_t)3000, hi);
+    if (SEGMENT.aux3 == 0)
+    {
+      const uint16_t hi = static_cast<uint16_t>(
+        max_ms <= 65535U ? (max_ms + 1U) : 65535U
+      );
+
+      const uint32_t interval_ms =
+        static_cast<uint32_t>(hw_random16(static_cast<uint16_t>(3000), hi));
+
       SEGMENT.aux3 = now + interval_ms;
 
-      const uint16_t win_ms = (uint16_t)constrain(
-        (uint32_t)(interval_ms * 0.10f * RB_TEST_FACTOR), RB_MIN_MS, RB_MAX_MS);
+      const uint16_t win_ms = static_cast<uint16_t>(
+        constrain(
+          static_cast<uint32_t>(interval_ms * 0.10f * RB_TEST_FACTOR),
+          RB_MIN_MS,
+          RB_MAX_MS
+        )
+      );
+
       SEGMENT.aux2 = win_ms;
-    } else {
-      if (now >= SEGMENT.aux3) {
-        // time to flip
-        direction    = !direction;
-        SEGMENT.aux0 = direction ? 1 : 0;
+    }
+    else if (now >= SEGMENT.aux3)
+    {
+      direction    = !direction;
+      SEGMENT.aux0 = direction ? 1 : 0;
 
-        // schedule next
-        const uint16_t hi = (uint16_t)(max_ms <= 65535u ? (max_ms + 1u) : 65535u);
-        const uint32_t interval_ms = (uint32_t)hw_random16((uint16_t)3000, hi);
-        SEGMENT.aux3 = now + interval_ms;
+      const uint16_t hi = static_cast<uint16_t>(
+        max_ms <= 65535U ? (max_ms + 1U) : 65535U
+      );
 
-        const uint16_t win_ms = (uint16_t)constrain(
-          (uint32_t)(interval_ms * 0.10f * RB_TEST_FACTOR), RB_MIN_MS, RB_MAX_MS);
-        SEGMENT.aux2 = win_ms;
+      const uint32_t interval_ms =
+        static_cast<uint32_t>(hw_random16(static_cast<uint16_t>(3000), hi));
 
-        if (rubber_band) SEGMENT.aux4 = now + win_ms; // start post-ramp
+      SEGMENT.aux3 = now + interval_ms;
+
+      const uint16_t win_ms = static_cast<uint16_t>(
+        constrain(
+          static_cast<uint32_t>(interval_ms * 0.10f * RB_TEST_FACTOR),
+          RB_MIN_MS,
+          RB_MAX_MS
+        )
+      );
+
+      SEGMENT.aux2 = win_ms;
+
+      if (rubber_band)
+      {
+        SEGMENT.aux4 = now + win_ms;
       }
-      // pre-slow handled below
     }
   }
 
   // --------------------------------------------------------------------------------
-  // Rubber-banding → frame time only (never touch move_px)
-  // Pre-slow (auto only): last aux2 ms before aux3
-  // Post-ramp: until aux4 expires
-  // ease ∈ [0.25..1.0] → ft_scaled = base_ft_ms * (1/ease)
+  // Rubber-banding modifies frame timing only.
+  //
+  // Pre-reversal:
+  //   ease moves from 1.0 toward 0.25.
+  //
+  // Post-reversal:
+  //   ease moves from 0.25 toward 1.0.
+  //
+  // The effective frame time is scaled by 1/ease.
   // --------------------------------------------------------------------------------
   float ease = 1.0f;
 
-  if (rubber_band) {
-    if (SEGMENT.aux4 && now < SEGMENT.aux4) {
-      // post-ramp 0.25 → 1.0
+  if (rubber_band)
+  {
+    if (SEGMENT.aux4 && now < SEGMENT.aux4)
+    {
       const uint32_t rem = SEGMENT.aux4 - now;
-      const uint32_t dur = (uint32_t)max<uint16_t>(SEGMENT.aux2, 1);
-      const float t   = 1.0f - (float)rem / (float)dur;
-      ease = 0.25f + 0.75f * (0.5f - 0.5f * cosf(3.1415926f * t));
-    } else {
-      if (SEGMENT.aux4 && now >= SEGMENT.aux4) SEGMENT.aux4 = 0;
+      const uint32_t dur = static_cast<uint32_t>(
+        max<uint16_t>(SEGMENT.aux2, 1)
+      );
 
-      if (c1_auto > 0 && SEGMENT.aux3 && SEGMENT.aux2) {
-        // pre-slow 1.0 → 0.25
+      const float t = 1.0f - static_cast<float>(rem) / static_cast<float>(dur);
+
+      ease =
+        0.25f +
+        0.75f *
+        (0.5f - 0.5f * cosf(3.1415926f * t));
+    }
+    else
+    {
+      if (SEGMENT.aux4 && now >= SEGMENT.aux4)
+      {
+        SEGMENT.aux4 = 0;
+      }
+
+      if (c1_auto > 0 && SEGMENT.aux3 && SEGMENT.aux2)
+      {
         const uint16_t pre_ms = SEGMENT.aux2;
-        if (now + pre_ms >= SEGMENT.aux3 && now < SEGMENT.aux3) {
-          const uint32_t into_pre = pre_ms - (SEGMENT.aux3 - now);
-          const float t_pre = (float)into_pre / (float)pre_ms;
-          ease = 1.0f - 0.75f * (0.5f - 0.5f * cosf(3.1415926f * t_pre));
+
+        if ((now + pre_ms >= SEGMENT.aux3) && (now < SEGMENT.aux3))
+        {
+          const uint32_t into_pre =
+            pre_ms - (SEGMENT.aux3 - now);
+
+          const float t_pre =
+            static_cast<float>(into_pre) /
+            static_cast<float>(pre_ms);
+
+          ease =
+            1.0f -
+            0.75f *
+            (0.5f - 0.5f * cosf(3.1415926f * t_pre));
         }
       }
     }
   }
 
-  // 1) rotate framebuffer using stride from IX (unchanged by banding)
+  // Rotate the segment-local pixel buffer using the IX-derived stride.
   const uint16_t move_px = move_px_base;
-  (void)EffectAnim__Rotate_Base(move_px, direction);  // ignore its return
 
-  // 2) compute frame time purely from SX, shaped by rubber-band ease
-  constexpr uint16_t FT_MIN = 15;//FRAMETIME;  // fast ceiling (~25 ms)
-  constexpr uint16_t FT_MAX = 2000;       // slow cap
-  // SX: 255 → FRAMETIME, 0 → 1000 ms (change 1000 if you want a slower extreme)  
-  // Linear mapping of speed
-  // const uint16_t base_ft_ms = (uint16_t)(FT_MIN + ((uint32_t)(255 - SEGMENT.speed) * (400u - FT_MIN)) / 255u);
-  // Quadratic mapping of speed (more low-end resolution). 250u chosen to keep mid-speed near 500ms
-  const uint16_t base_ft_ms = (uint16_t)(FT_MIN + ((uint32_t)(255 - SEGMENT.speed) * (250u - FT_MIN) * (255 - SEGMENT.speed)) / (255u*255u));
+  EffectAnim__Rotate_Base(move_px, direction);
 
+  // Calculate frame timing from SX and the optional rubber-band envelope.
+  constexpr uint16_t FT_MIN = 15;
+  constexpr uint16_t FT_MAX = 2000;
 
-  const float   inv   = (ease > 0.001f) ? (1.0f / ease) : 4.0f; // cap ~4x slower
-  uint32_t      ft_ms = (uint32_t)((float)base_ft_ms * inv + 0.5f);
+  const uint16_t base_ft_ms = static_cast<uint16_t>(
+    FT_MIN +
+    (
+      static_cast<uint32_t>(255U - SEGMENT.speed) *
+      static_cast<uint32_t>(250U - FT_MIN) *
+      static_cast<uint32_t>(255U - SEGMENT.speed)
+    ) /
+    (255U * 255U)
+  );
+
+  const float inv = ease > 0.001f
+    ? (1.0f / ease)
+    : 4.0f;
+
+  uint32_t ft_ms =
+    static_cast<uint32_t>(
+      static_cast<float>(base_ft_ms) * inv + 0.5f
+    );
+
   if (ft_ms < FT_MIN) ft_ms = FT_MIN;
   if (ft_ms > FT_MAX) ft_ms = FT_MAX;
 
-  // Optional debug
-  // ALOG_DBG(PSTR("prev-rotate dir %u mov %u ease %u ft %u"),
-  //   (unsigned)direction, (unsigned)move_px, (unsigned)(ease*100.0f), (unsigned)ft_ms);
+  // Optional debug.
+  // ALOG_DBG(
+  //   PSTR("prev-rotate dir=%u move=%u ease=%u ft=%u"),
+  //   static_cast<unsigned>(direction),
+  //   static_cast<unsigned>(move_px),
+  //   static_cast<unsigned>(ease * 100.0f),
+  //   static_cast<unsigned>(ft_ms)
+  // );
 
-  // bookkeeping (just rotation progress)
-  if (move_px > 1) SEGMENT.call += (move_px - 1);
-  if (SEGMENT.call >= SEGLEN) SEGMENT.call = 0;
+  // Rotation progress bookkeeping.
+  if (move_px > 1)
+  {
+    SEGMENT.call += move_px - 1;
+  }
 
-  // return (uint16_t)ft_ms;
+  if (SEGMENT.call >= SEGLEN)
+  {
+    SEGMENT.call = 0;
+  }
+
+  // Frame scheduling currently occurs outside the effect return value.
 }
 static const char PM_EFFECT_CONFIG__ROTATING_PREVIOUS_ANIMATION[] PROGMEM =
 "Rotate Previous@"                                  // Name
 "Speed,Shift,Auto-reverse,,,,Reverse,Rubber band"   // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
 ";"
-""                                                  // Segment Colour Names (none)
+""                                                  // Segment Colour Names
 ";"
-"!"                                                 // keep palette picker for UI consistency
+"!"                                                 // Palette picker
 ";"
 "1"                                                 // 1D strip icon
 ";"
-"ix=1,"                                             // stride: 1 px/frame
-"sx=240,"                                           // fast default
-"c1=0,"                                             // auto-reverse off by default
-"o1=0,o2=0,o3=0"                                    // C1 unused here, C2 reverse OFF, C3 rubber band OFF
+"ix=1,"                                             // Default rotation stride
+"sx=240,"                                           // Default rotation speed
+"c1=0,"                                             // Automatic reversal disabled
+"o1=0,o2=0,o3=0"                                    // C2 reverse OFF, C3 rubber-band OFF
 ;
 static const char PM_EFFECT_DESCRI__ROTATING_PREVIOUS_ANIMATION[] PROGMEM =
-"Rotate framebuffer (no repaint).\n\r"
-"IX:Shift px/frame (1..SEGLEN/2)\n\r"
-"SX:Frame time; rubber-band scales at flips\n\r"
-"C1>0:Auto-flip 3-20s\n\r"
-"C2:Manual dir (ignored if C1>0)\n\r"
-"C3:Rubber-band slow+speed ramp";
-
+"Rotates the existing segment pixel buffer.\n\r"
+"IX: Shift pixels per frame\n\r"
+"SX: Frame time; rubber-band scales timing near reversals\n\r"
+"C1>0: Automatic reversal interval, 3-20 seconds\n\r"
+"C2: Manual direction when automatic reversal is disabled\n\r"
+"C3: Rubber-band slowdown and acceleration around reversals";
 
 /*******************************************************************************************************************************************************************************************************************
- * @description : Rotate a freshly painted palette across the segment.
- *                - Paints the current palette across SEGLEN (DEFAULT palette mode, wrap per C1) when:
- *                  • first_run is set, or
- *                  • the repaint signature (palette_id + brightness) changes.
- *                - Rotation is a pure framebuffer rotate (no repaint on flips).
+ * @description : Paints the active palette into the segment-local pixel buffer and rotates it across the segment.
+ *                - The palette is repainted when the effect first runs or when the repaint signature changes.
+ *                - Subsequent frames rotate the existing segment-local pixels without regenerating the palette.
+ *                - The completed segment buffer is composed into the global frame by blendSegment().
  *
  * Controls:
  *   SX (Speed)      → Base frame time. Rubber-banding scales the frame time only.
- *   IX (Intensity)  → Pixels rotated per frame (stride). Typically 1; independent of rubber-banding.
- *   C1 (checkbox)   → Hard-edge vs smooth wrap for gradients at the seam.
- *   c1 (custom1)    → 0 = manual mode (C2 used). 1..255 = auto-reverse; random interval in [3s..20s] mapped by slider.
- *   C2 (checkbox)   → Manual reverse (ignored when c1>0).
- *   C3 (checkbox)   → Rubber-banding: pre-slow into a flip (auto mode) and post-ramp after every flip.
+ *   IX (Intensity)  → Pixels rotated per frame. Independent of rubber-banding.
+ *   C1 (checkbox)   → Selects a hard or smooth palette boundary.
+ *   c1 (custom1)    → 0 = manual mode using C2. 1..255 = auto-reverse with a random interval in the configured range.
+ *   C2 (checkbox)   → Manual reverse direction. Ignored when c1 is greater than zero.
+ *   C3 (checkbox)   → Rubber-banding: slows before an automatic reversal and accelerates after a reversal.
+ *
+ * State:
+ *   aux0 → Current direction: 0 = left, 1 = right.
+ *   aux1 → Palette repaint signature.
+ *   aux2 → Current pre/post rubber-band window duration.
+ *   aux3 → Next automatic reversal deadline.
+ *   aux4 → End of the current post-reversal acceleration window.
  *
  * Notes:
- *   - Rubber-banding never changes IX (stride). It only stretches/squeezes frame time around reversals.
- *   - Auto mode ignores C2 entirely.
- *   - Repaint signature (palette_id + brightness) ensures palette/brightness changes repaint once, then rotate.
+ *   - Palette colours are stored without segment or global brightness scaling.
+ *   - Segment opacity is applied by blendSegment().
+ *   - Global brightness is applied later by the bus output layer.
+ *   - Rubber-banding changes frame timing only.
+ *   - Auto-reverse mode ignores C2.
  ********************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__Rotating_Palette()
 {
   if (SEGLEN == 0) return EFFECT_DEFAULT();
 
-  const uint32_t now          = effect_start_time;          // ms tick source
-  const uint16_t move_px_base = map(SEGMENT.intensity, 0, 255, 1,
-                                    (uint16_t)max<uint16_t>(1, SEGLEN/2)); // IX → pixels/frame
-  const bool     hard_edge    = SEGMENT.check1;             // C1: hard edge vs smooth wrap
-  const bool     rubber_band  = SEGMENT.check3;             // C3: rubber-banding
-  const uint16_t c1_auto      = SEGMENT.custom1;            // c1: 0=off; 1..255 → max interval
+  const uint32_t now          = effect_start_time;
+  const uint16_t move_px_base = map(
+    SEGMENT.intensity,
+    0,
+    255,
+    1,
+    static_cast<uint16_t>(max<uint16_t>(1, SEGLEN / 2))
+  );
+  const bool     hard_edge    = SEGMENT.check1;
+  const bool     rubber_band  = SEGMENT.check3;
+  const uint16_t c1_auto      = SEGMENT.custom1;
 
-  // --- repaint signature (palette + brightness). repaint on change or first_run ---
-  const uint16_t new_sig      = (uint16_t)(SEGMENT.palette_id + SEGMENT.getBrightnessRGB());
-  const bool     need_repaint = SEGMENT.flags.animator_first_run || (new_sig != SEGMENT.aux1);
+  // Repaint when the effect first runs or the palette signature changes.
+  const uint16_t new_sig =
+    static_cast<uint16_t>(SEGMENT.palette_id);
 
-  if (need_repaint) {
-    const bool wrap_mode = hard_edge ? PALETTE_WRAP_HARDEDGE : PALETTE_WRAP_SMOOTH;
-    for (uint16_t p = 0; p < SEGLEN; ++p) {
+  const bool need_repaint =
+    SEGMENT.flags.animator_first_run ||
+    (new_sig != SEGMENT.aux1);
+
+  if (need_repaint)
+  {
+    const bool wrap_mode = hard_edge
+      ? PALETTE_WRAP_HARDEDGE
+      : PALETTE_WRAP_SMOOTH;
+
+    for (uint16_t p = 0; p < SEGLEN; ++p)
+    {
       const uint32_t col = SEGMENT.GetPaletteColour(
         p,
         PALETTE_INDEX__IS_SEGLEN_RANGE,
         PALETTE_MODE__DEFAULT,
         wrap_mode,
         NO_ENCODED_VALUE,
-        PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE                 // apply brightness once
+        false
       );
-      SEGMENT.setPixelColor(p, col, BRIGHTNESS_ALREADY_SET);
+
+      SEGMENT.setPixelColor(p, col);
     }
+
     SEGMENT.aux1 = new_sig;
     SEGMENT.flags.animator_first_run = false;
   }
 
   // --------------------------------------------------------------------------------
-  // Direction & auto-reverse scheduling
-  // aux0 = direction (0=left,1=right)
-  // aux3 = next auto-flip deadline (abs ms)
-  // aux2 = pre/post window (ms for this cycle)
-  // aux4 = post-ramp end (abs ms)
+  // Direction and automatic reversal scheduling.
   // --------------------------------------------------------------------------------
   bool direction = (SEGMENT.aux0 != 0);
 
-  auto map_c1_to_max = [](uint16_t c1)->uint32_t {
+  auto map_c1_to_max = [](uint16_t c1) -> uint32_t
+  {
     if (c1 == 0) return 0;
-    return 3000u + ((uint32_t)(c1 - 1u) * (20000u - 3000u)) / 254u; // 1..255 → 3..20s
+
+    return 3000U +
+      ((static_cast<uint32_t>(c1 - 1U) * (20000U - 3000U)) / 254U);
   };
 
-  // test knob for banding window size (applied everywhere)
-  constexpr float    RB_TEST_FACTOR = 1.0f; // raise to exaggerate window visually
+  constexpr float    RB_TEST_FACTOR = 1.0f;
   constexpr uint16_t RB_MIN_MS      = 300;
   constexpr uint16_t RB_MAX_MS      = 4000;
 
-  if (c1_auto == 0) {
-    // Manual mode: obey C2; snappy flip; optional post-ramp when C3
+  if (c1_auto == 0)
+  {
+    // Manual mode: C2 directly selects the direction.
     const bool manual_reverse = SEGMENT.check2;
-    const bool desired_dir    = !manual_reverse;   // true=right, false=left
-    if (desired_dir != direction) {
+    const bool desired_dir    = !manual_reverse;
+
+    if (desired_dir != direction)
+    {
       direction    = desired_dir;
       SEGMENT.aux0 = direction ? 1 : 0;
 
-      if (rubber_band) {
-        // post-ramp from a nominal 20s window * 10%, scaled by test factor
-        const uint32_t nominal_ms = 20000u;
-        const uint16_t post_ms    = (uint16_t)constrain(
-          (uint32_t)(nominal_ms * 0.10f * RB_TEST_FACTOR), RB_MIN_MS, RB_MAX_MS);
+      if (rubber_band)
+      {
+        const uint32_t nominal_ms = 20000U;
+
+        const uint16_t post_ms = static_cast<uint16_t>(
+          constrain(
+            static_cast<uint32_t>(nominal_ms * 0.10f * RB_TEST_FACTOR),
+            RB_MIN_MS,
+            RB_MAX_MS
+          )
+        );
+
         SEGMENT.aux2 = post_ms;
-        SEGMENT.aux4 = now + post_ms; // post-ramp end
+        SEGMENT.aux4 = now + post_ms;
       }
     }
-  } else {
-    // Auto mode: ignore C2; schedule random flips in [3s .. mappedMax(c1)]
+  }
+  else
+  {
+    // Auto mode: schedule random reversals between 3 seconds and the C1-derived maximum.
     const uint32_t max_ms = map_c1_to_max(c1_auto);
 
-    if (SEGMENT.aux3 == 0) {
-      // first schedule
-      const uint16_t hi = (uint16_t)(max_ms <= 65535u ? (max_ms + 1u) : 65535u);
-      const uint32_t interval_ms = (uint32_t)hw_random16((uint16_t)3000, hi);
+    if (SEGMENT.aux3 == 0)
+    {
+      const uint16_t hi = static_cast<uint16_t>(
+        max_ms <= 65535U ? (max_ms + 1U) : 65535U
+      );
+
+      const uint32_t interval_ms =
+        static_cast<uint32_t>(hw_random16(static_cast<uint16_t>(3000), hi));
+
       SEGMENT.aux3 = now + interval_ms;
 
-      const uint16_t win_ms = (uint16_t)constrain(
-        (uint32_t)(interval_ms * 0.10f * RB_TEST_FACTOR), RB_MIN_MS, RB_MAX_MS);
+      const uint16_t win_ms = static_cast<uint16_t>(
+        constrain(
+          static_cast<uint32_t>(interval_ms * 0.10f * RB_TEST_FACTOR),
+          RB_MIN_MS,
+          RB_MAX_MS
+        )
+      );
+
       SEGMENT.aux2 = win_ms;
-    } else {
-      if (now >= SEGMENT.aux3) {
-        // time to flip
-        direction    = !direction;
-        SEGMENT.aux0 = direction ? 1 : 0;
+    }
+    else if (now >= SEGMENT.aux3)
+    {
+      direction    = !direction;
+      SEGMENT.aux0 = direction ? 1 : 0;
 
-        // schedule next
-        const uint16_t hi = (uint16_t)(max_ms <= 65535u ? (max_ms + 1u) : 65535u);
-        const uint32_t interval_ms = (uint32_t)hw_random16((uint16_t)3000, hi);
-        SEGMENT.aux3 = now + interval_ms;
+      const uint16_t hi = static_cast<uint16_t>(
+        max_ms <= 65535U ? (max_ms + 1U) : 65535U
+      );
 
-        const uint16_t win_ms = (uint16_t)constrain(
-          (uint32_t)(interval_ms * 0.10f * RB_TEST_FACTOR), RB_MIN_MS, RB_MAX_MS);
-        SEGMENT.aux2 = win_ms;
+      const uint32_t interval_ms =
+        static_cast<uint32_t>(hw_random16(static_cast<uint16_t>(3000), hi));
 
-        if (rubber_band) SEGMENT.aux4 = now + win_ms; // start post-ramp
+      SEGMENT.aux3 = now + interval_ms;
+
+      const uint16_t win_ms = static_cast<uint16_t>(
+        constrain(
+          static_cast<uint32_t>(interval_ms * 0.10f * RB_TEST_FACTOR),
+          RB_MIN_MS,
+          RB_MAX_MS
+        )
+      );
+
+      SEGMENT.aux2 = win_ms;
+
+      if (rubber_band)
+      {
+        SEGMENT.aux4 = now + win_ms;
       }
-      // pre-slow handled below
     }
   }
 
   // --------------------------------------------------------------------------------
-  // Rubber-banding → frame time only (never touch move_px)
-  // Pre-slow (auto only): last aux2 ms before aux3
-  // Post-ramp: until aux4 expires
-  // ease ∈ [0.25..1.0] → ft_scaled = base_ft_ms * (1/ease)
+  // Rubber-banding modifies frame timing only.
   // --------------------------------------------------------------------------------
   float ease = 1.0f;
 
-  if (rubber_band) {
-    if (SEGMENT.aux4 && now < SEGMENT.aux4) {
-      // post-ramp 0.25 → 1.0
+  if (rubber_band)
+  {
+    if (SEGMENT.aux4 && now < SEGMENT.aux4)
+    {
       const uint32_t rem = SEGMENT.aux4 - now;
-      const uint32_t dur = (uint32_t)max<uint16_t>(SEGMENT.aux2, 1);
-      const float t   = 1.0f - (float)rem / (float)dur;
-      ease = 0.25f + 0.75f * (0.5f - 0.5f * cosf(3.1415926f * t));
-    } else {
-      if (SEGMENT.aux4 && now >= SEGMENT.aux4) SEGMENT.aux4 = 0;
+      const uint32_t dur = static_cast<uint32_t>(
+        max<uint16_t>(SEGMENT.aux2, 1)
+      );
 
-      if (c1_auto > 0 && SEGMENT.aux3 && SEGMENT.aux2) {
-        // pre-slow 1.0 → 0.25
+      const float t =
+        1.0f -
+        static_cast<float>(rem) /
+        static_cast<float>(dur);
+
+      ease =
+        0.25f +
+        0.75f *
+        (0.5f - 0.5f * cosf(3.1415926f * t));
+    }
+    else
+    {
+      if (SEGMENT.aux4 && now >= SEGMENT.aux4)
+      {
+        SEGMENT.aux4 = 0;
+      }
+
+      if (c1_auto > 0 && SEGMENT.aux3 && SEGMENT.aux2)
+      {
         const uint16_t pre_ms = SEGMENT.aux2;
-        if (now + pre_ms >= SEGMENT.aux3 && now < SEGMENT.aux3) {
-          const uint32_t into_pre = pre_ms - (SEGMENT.aux3 - now);
-          const float t_pre = (float)into_pre / (float)pre_ms;
-          ease = 1.0f - 0.75f * (0.5f - 0.5f * cosf(3.1415926f * t_pre));
+
+        if ((now + pre_ms >= SEGMENT.aux3) && (now < SEGMENT.aux3))
+        {
+          const uint32_t into_pre =
+            pre_ms - (SEGMENT.aux3 - now);
+
+          const float t_pre =
+            static_cast<float>(into_pre) /
+            static_cast<float>(pre_ms);
+
+          ease =
+            1.0f -
+            0.75f *
+            (0.5f - 0.5f * cosf(3.1415926f * t_pre));
         }
       }
     }
   }
 
-  // 1) rotate framebuffer using stride from IX (unchanged by banding)
+  // Rotate the segment-local pixel buffer using the IX-derived stride.
   const uint16_t move_px = move_px_base;
-  (void)EffectAnim__Rotate_Base(move_px, direction);  // ignore its return
 
-  // 2) compute frame time purely from SX, shaped by rubber-band ease
-  constexpr uint16_t FT_MIN = 15;//FRAMETIME;  // fast ceiling (~25 ms)
-  constexpr uint16_t FT_MAX = 2000;       // slow cap
-  // SX: 255 → FRAMETIME, 0 → 1000 ms (tweak 1000 if you want a different slow bound)
-  // const uint16_t base_ft_ms =    (uint16_t)(FT_MIN + ((uint32_t)(255 - SEGMENT.speed) * (1000u - FT_MIN)) / 255u);
-  // Quadratic mapping of speed (more low-end resolution). 250u chosen to keep mid-speed near 500ms
-  const uint16_t base_ft_ms = (uint16_t)(FT_MIN + ((uint32_t)(255 - SEGMENT.speed) * (250u - FT_MIN) * (255 - SEGMENT.speed)) / (255u*255u));
+  EffectAnim__Rotate_Base(move_px, direction);
 
-  const float   inv   = (ease > 0.001f) ? (1.0f / ease) : 4.0f; // cap ~4x slower
-  uint32_t      ft_ms = (uint32_t)((float)base_ft_ms * inv + 0.5f);
+  // Calculate frame timing from SX and the optional rubber-band envelope.
+  constexpr uint16_t FT_MIN = 15;
+  constexpr uint16_t FT_MAX = 2000;
+
+  const uint16_t base_ft_ms = static_cast<uint16_t>(
+    FT_MIN +
+    (
+      static_cast<uint32_t>(255U - SEGMENT.speed) *
+      static_cast<uint32_t>(250U - FT_MIN) *
+      static_cast<uint32_t>(255U - SEGMENT.speed)
+    ) /
+    (255U * 255U)
+  );
+
+  const float inv = ease > 0.001f
+    ? (1.0f / ease)
+    : 4.0f;
+
+  uint32_t ft_ms =
+    static_cast<uint32_t>(
+      static_cast<float>(base_ft_ms) * inv + 0.5f
+    );
+
   if (ft_ms < FT_MIN) ft_ms = FT_MIN;
   if (ft_ms > FT_MAX) ft_ms = FT_MAX;
 
-  // Debug (optional)
-  // ALOG_DBG(PSTR("dir %u mov %u ease %u ft %u"), (unsigned)direction, (unsigned)move_px, (unsigned)(ease*100.0f), (unsigned)ft_ms);
+  // Optional debug.
+  // ALOG_DBG(
+  //   PSTR("rotate-palette dir=%u move=%u ease=%u ft=%u"),
+  //   static_cast<unsigned>(direction),
+  //   static_cast<unsigned>(move_px),
+  //   static_cast<unsigned>(ease * 100.0f),
+  //   static_cast<unsigned>(ft_ms)
+  // );
 
-  // bookkeeping
-  if (move_px > 1) SEGMENT.call += (move_px - 1);
-  if (SEGMENT.call >= SEGLEN) SEGMENT.call = 0;
+  // Rotation progress bookkeeping.
+  if (move_px > 1)
+  {
+    SEGMENT.call += move_px - 1;
+  }
 
-  // return (uint16_t)ft_ms;
+  if (SEGMENT.call >= SEGLEN)
+  {
+    SEGMENT.call = 0;
+  }
+
+  // Frame scheduling currently occurs outside the effect return value.
 }
 static const char PM_EFFECT_CONFIG__ROTATING_PALETTE[] PROGMEM =
 "Rotate Palette@"                                  // Name
 "Speed,Shift,Auto-reverse EN>0,,,Hard edge,Reverse,Rubber band"  // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
 ";"
-""                                                 // Segment Colour Names (none)
+""                                                 // Segment Colour Names
 ";"
-"!"                                                // palette picker (primary)
+"!"                                                // Palette picker
 ";"
 "1"                                                // 1D strip icon
 ";"
-"ix=1,"                                            // stride: 1 px/frame
-"sx=240,"                                          // fast default
-"c1=127,"                                          // auto-reverse mid strength
-"o1=0,o2=0,o3=0,"                                  // C1 hard edge OFF, C2 reverse OFF, C3 rubber band OFF
+"ix=1,"                                            // Default rotation stride
+"sx=240,"                                          // Default rotation speed
+"c1=127,"                                          // Automatic reversal enabled
+"o1=0,o2=0,o3=0,"                                  // Hard edge OFF, reverse OFF, rubber-band OFF
 "paln=Lava Fire"
 ;
 static const char PM_EFFECT_DESCRI__ROTATING_PALETTE[] PROGMEM =
-"Rotate palette across strip.\n\r"
-"IX:Shift px/frame (1..SEGLEN/2)\n\r"
-"SX:Frame time; rubber-band scales at flips\n\r"
-"C1>0:Auto-flip 3-20s\n\r"
-"C2:Manual dir (ignored if C1>0)\n\r"
-"C3:Rubber-band slow+speed ramp\n\r"
-"Hard edge: no blend seam";
+"Paints and rotates the active palette across the segment.\n\r"
+"IX: Shift pixels per frame\n\r"
+"SX: Frame time; rubber-band scales timing near reversals\n\r"
+"C1>0: Automatic reversal interval, 3-20 seconds\n\r"
+"C2: Manual direction when automatic reversal is disabled\n\r"
+"C3: Rubber-band slowdown and acceleration around reversals\n\r"
+"Hard edge: Disable smooth interpolation across the palette seam";
 
 
 /**********************************************************************************************************************************************************************************
@@ -13527,9 +13792,16 @@ void mAnimatorLight::EffectAnim__Bouncing_Balls()
         uint32_t color = pSEGMENT.color_wheel(i*(256/MAX(numBalls, 8)));
           
         int pos = roundf(balls[i].height * (pSEGLEN - 1));
-        #ifndef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-        if (pSEGLEN<32) pSEGMENT.setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
-        else            pSEGMENT.setPixelColor(balls[i].height + (stripNr+1)*10.0f, color);
+        // #ifndef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
+        // if (pSEGLEN<32) pSEGMENT.setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
+        // else            pSEGMENT.setPixelColor(balls[i].height + (stripNr+1)*10.0f, color);
+        // #endif
+        
+        #ifdef WLED_USE_AA_PIXELS
+        if (SEGLEN<32) SEGMENT.setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
+        else           SEGMENT.setPixelColor(balls[i].height + (stripNr+1)*10.0f, color);
+        #else
+        pSEGMENT.setPixelColor(indexToVStrip(pos, stripNr), color); // encode virtual strip into index
         #endif
 
         // Serial.printf("len%d,%d\t%d\t%d\tcolor=%d,%d,%d h=%f iv=%f\n\r", pSEGMENT.virtualLength(),  pos, indexToVStrip(pos, stripNr), stripNr, R(color), G(color), B(color), balls[i].height, balls[i].impactVelocity);

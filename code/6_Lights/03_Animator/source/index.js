@@ -2173,7 +2173,7 @@ function readState(s,command=false)
 	
 	gId('sliderrgbbri').value = i.rgbbri;
 	gId('slidercctbri').value = i.cctbri;
-	gId('sliderpalix').value = i.PalIX;
+	gId('sliderpalix').value = i.palix;
 
 
 	if (s.error && s.error != 0) {
@@ -3850,7 +3850,7 @@ function setCCTBri(cct_brightness)
 
 function setPaletteLiveIX(v)
 {
-	var obj = {"seg": {"PalIX": parseInt(v)}};
+	var obj = {"seg": {"palix": parseInt(v)}};
 	requestJson(obj);
 }
 

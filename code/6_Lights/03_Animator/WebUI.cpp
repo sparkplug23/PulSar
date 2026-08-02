@@ -90,7 +90,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   // root["rgbbri"] = seg.getBrightnessRGB();
   // root["cctbri"] = seg.getBrightnessCCT();
 
-  root["PalIX"] = seg.live_palette.intensity;
+  root["palix"] = seg.live_palette.intensity;
 
   root["fx"]  = seg.effect_id;
   root["sx"]  = seg.speed;
@@ -509,27 +509,82 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
     #endif
   }
 
-  // applying preset (2 cases: a) API call includes all preset values ("pd"), b) API only specifies preset ID ("ps"))
-  byte presetToRestore = 0;
-  // a) already applied preset content (requires "seg" or "win" but will ignore the rest)
-  if (!root["pd"].isNull() && stateChanged) {
-    currentPreset = root[F("pd")] | currentPreset;
-    if (root["win"].isNull()) presetCycCurr = currentPreset; // otherwise it was set in handle__HTTP__GET_QueryAPI() [set.cpp]
-    presetToRestore = currentPreset; // stateUpdated() will clear the preset, so we need to restore it after
+  // // applying preset (2 cases: a) API call includes all preset values ("pd"), b) API only specifies preset ID ("ps"))
+  // byte presetToRestore = 0;
+  // // a) already applied preset content (requires "seg" or "win" but will ignore the rest)
+  // if (!root["pd"].isNull() && stateChanged) {
+  //   currentPreset = root[F("pd")] | currentPreset;
+  //   if (root["win"].isNull()) presetCycCurr = currentPreset; // otherwise it was set in handle__HTTP__GET_QueryAPI() [set.cpp]
+  //   presetToRestore = currentPreset; // stateUpdated() will clear the preset, so we need to restore it after
     
-      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
-      unloadPlaylist();// applying a preset unloads the playlist, may be needed here too?
-      #endif
+  //     #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  //     unloadPlaylist();// applying a preset unloads the playlist, may be needed here too?
+  //     #endif
       
-  } else if (!root["ps"].isNull()) {
-    ps = presetCycCurr;
-    if (root["win"].isNull() && getVal(root["ps"], ps, 0, 0) && ps > 0 && ps < 251 && ps != currentPreset) {
-      // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
-      presetCycCurr = ps;
+  // } else if (!root["ps"].isNull()) {
+  //   ps = presetCycCurr;
+  //   if (root["win"].isNull() && getVal(root["ps"], ps, 0, 0) && ps > 0 && ps < 251 && ps != currentPreset) {
+  //     // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
+  //     presetCycCurr = ps;
+  //     #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  //     unloadPlaylist();          // applying a preset unloads the playlist
+  //     #endif
+  //     applyPreset(ps, callMode); // async load from file system (only preset ID was specified)
+  //     return stateResponse;
+  //   }
+  // }
+    // Applying preset:
+  //
+  //   pd:
+  //     The request already contains, or has already applied, the preset state.
+  //     Record the supplied preset ID as active and stop any running playlist.
+  //
+  //   ps:
+  //     The request contains only a preset ID. Load that preset asynchronously
+  //     from the preset file and stop any running playlist.
+  byte presetToRestore = 0;
+
+  if (!root["pd"].isNull())
+  {
+    const byte appliedPreset = root[F("pd")] | 0;
+
+    if (appliedPreset > 0 && appliedPreset < 251)
+    {
+      currentPreset = appliedPreset;
+
+      if (root["win"].isNull())
+      {
+        presetCycCurr = currentPreset;
+      }
+
       #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
-      unloadPlaylist();          // applying a preset unloads the playlist
+      unloadPlaylist();
       #endif
-      applyPreset(ps, callMode); // async load from file system (only preset ID was specified)
+
+      // stateUpdated() clears currentPreset when normal state values change.
+      // Restore the explicitly selected preset after stateUpdated().
+      presetToRestore = currentPreset;
+    }
+  }
+  else if (!root["ps"].isNull())
+  {
+    ps = presetCycCurr;
+
+    if (
+      root["win"].isNull() &&
+      getVal(root["ps"], ps, 0, 0) &&
+      ps > 0 &&
+      ps < 251 &&
+      ps != currentPreset
+    )
+    {
+      presetCycCurr = ps;
+
+      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+      unloadPlaylist();
+      #endif
+
+      applyPreset(ps, callMode);
       return stateResponse;
     }
   }
@@ -1380,7 +1435,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   // seg.setBrightnessRGB(elem["rgbbri"] | seg._brightness_rgb);
   // seg.setBrightnessCCT(elem["cctbri"] | seg._brightness_cct);
 
-  seg.live_palette.intensity  = elem["PalIX"] | seg.live_palette.intensity;
+  seg.live_palette.intensity  = elem["palix"] | seg.live_palette.intensity;
 
   seg.setCCT(elem["cct"] | seg.cct_slider);
 

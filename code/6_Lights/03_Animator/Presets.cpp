@@ -188,103 +188,6 @@ uint8_t mAnimatorLight::Playlist_SelectAllowedIndexByTime(JsonObject playlist, u
 #endif // ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
 
 
-
-// // Date Modified: 12Dec25
-// #ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
-
-// // struct PresetFileMeta {
-// //   bool     enablePsn;     // 0/1: PSN helper enabled
-// //   uint8_t  parserVersion; // version of PSN parser logic
-// //   uint32_t lastScanMs;    // last PSN scan duration (ms)
-// // };
-
-// static const uint8_t kPresetMetaParserVersion = 1;
-
-// // Date Modified: 12Dec25
-// bool mAnimatorLight::LoadPresetFileMeta(PresetFileMeta &meta)
-// {
-//   // Try to read existing metadata from preset "0"
-//   if (!requestJSONBufferLock(21)) {
-//     ALOG_WRN(PSTR("LoadPresetFileMeta: failed to get JSON buffer lock"));
-//     return false;
-//   }
-
-//   bool ok = tkr_mfile->readObjectFromFileUsingId(getPresetsFileName(), 0, tkr_mfile->pDoc);
-//   JsonObject m;
-//   bool needInit     = false;
-//   bool needRefresh  = false;
-
-//   if (ok) {
-//     m = tkr_mfile->pDoc->as<JsonObject>();
-
-//     // If "0" exists but is empty or missing fields, mark for refresh
-//     bool hasEnable     = m.containsKey("EnablePSN");
-//     bool hasParserVer  = m.containsKey("ParserVersion");
-//     bool hasLastScanMs = m.containsKey("LastScanMs");
-
-//     if (!hasEnable && !hasParserVer && !hasLastScanMs) {
-//       // old style "0": {} or garbage, treat as missing
-//       needInit = true;
-//     } else {
-//       // fill with defaults + existing values
-//       meta.enablePsn     = (bool)(m["EnablePSN"]     | 1); // default ON
-//       meta.parserVersion = (uint8_t)(m["ParserVersion"] | kPresetMetaParserVersion);
-//       meta.lastScanMs    = (uint32_t)(m["LastScanMs"] | 0U);
-
-//       // if some fields are missing, we will rewrite header with full set
-//       needRefresh = (!hasEnable || !hasParserVer || !hasLastScanMs);
-//     }
-//   } else {
-//     // No preset "0" at all → need full initialisation
-//     needInit = true;
-//   }
-
-//   releaseJSONBufferLock();
-
-//   if (needInit) {
-//     // Initialise fresh metadata and write it
-//     meta.enablePsn     = true;
-//     meta.parserVersion = kPresetMetaParserVersion;
-//     meta.lastScanMs    = 0;
-//     ALOG_INF(PSTR("LoadPresetFileMeta: creating metadata in presets.json[0]"));
-//     SavePresetFileMeta(meta);
-//     return true;
-//   }
-
-//   if (needRefresh) {
-//     ALOG_INF(PSTR("LoadPresetFileMeta: refreshing missing metadata fields in presets.json[0]"));
-//     SavePresetFileMeta(meta);
-//   }
-
-//   // If we got here, either we successfully loaded existing meta,
-//   // or we refreshed it; in both cases `meta` is valid.
-//   return ok;
-// }
-
-
-// // Save metadata into preset "0"
-// void mAnimatorLight::SavePresetFileMeta(const PresetFileMeta &meta)
-// {
-//   if (!requestJSONBufferLock(22)) return;
-
-//   tkr_mfile->pDoc->clear();  // make sure we start from a clean doc
-
-//   JsonObject m = tkr_mfile->pDoc->to<JsonObject>();
-//   m["EnablePSN"]     = meta.enablePsn ? 1 : 0;
-//   m["ParserVersion"] = meta.parserVersion;
-//   m["LastScanMs"]    = meta.lastScanMs;
-
-//   tkr_mfile->writeObjectToFileUsingId(getPresetsFileName(), 0, tkr_mfile->pDoc);
-
-//   releaseJSONBufferLock();
-// }
-
-// #endif // ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
-
-
-
-
-
 void mAnimatorLight::doSaveState() 
 {
 
@@ -389,11 +292,7 @@ void mAnimatorLight::doSaveState()
 
   JBI->releaseJSONBufferLock();
 
-  
-
   tkr_mfile->updateFSInfo();
-
-  
 
   // clean up
   saveLedmap   = -1;
@@ -741,7 +640,7 @@ void mAnimatorLight::deletePreset(byte index)
 
 void mAnimatorLight::ScanPresetsFile_GeneratePlaylistIDsFromPSN_2()
 {
-  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN2() begin"));  Serial.flush();
+  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN_2() begin"));  Serial.flush();
 
   uint32_t t_start = millis();
 
@@ -765,14 +664,14 @@ void mAnimatorLight::ScanPresetsFile_GeneratePlaylistIDsFromPSN_2()
   strncpy_P(presetsFileName, getPresetsFileName(true), 32);
   presetsFileName[32] = '\0';
 
-  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN() %s"),presetsFileName);  Serial.flush();
+  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN_2() %s"),presetsFileName);  Serial.flush();
 
   // Sanity: if presets.json doesn't exist, nothing to do
   if (!FILE_SYSTEM.exists(presetsFileName)) {
     ALOG_WRN(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN: %s not found"), presetsFileName);
     return;
   }
-  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN() B"));  Serial.flush();
+  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN_2() B"));  Serial.flush();
 
 #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PLAYLIST_PSN_TO_PS_CREATE_BACKUP_FILE
   // --- Create backup: presets_bu.json ---
@@ -965,7 +864,7 @@ ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN_2() end, took %u ms"),
          (unsigned)t_elapsed);
 
 
-  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN() end"));
+  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN_2() end"));
   Serial.flush();
 }
 

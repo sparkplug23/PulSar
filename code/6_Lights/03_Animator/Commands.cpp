@@ -580,7 +580,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     if(jtok = getTokenIncludingAlias(jobj, PM_DECIMATE, "DC"))
     {
       SEGMENT_I(segment_index).decimate = jtok.getInt();  
-      ALOG_COM(PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_DECIMATE)), SEGMENT_I(segment_index).decimate);
+      ALOG_INF(PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_DECIMATE)), SEGMENT_I(segment_index).decimate);
       data_buffer.isserviced++;
     }
 
@@ -623,12 +623,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       if (dec < 1) dec = 1;   // Safety: min = 1
 
       SEGMENT_I(segment_index).decimate = dec;
-
-      ALOG_INF(
-        PSTR(D_LOG_PIXEL " DecimatePerc = %d -> decimate = %d (compute ≈ %d%%)"),
-        percentage, dec, 100 / dec
-      );
-
+      ALOG_INF( PSTR(D_LOG_PIXEL " DecimatePerc = %d -> decimate = %d (compute ≈ %d%%)"), percentage, dec, 100 / dec );
       data_buffer.isserviced++;
     }
 
@@ -2207,7 +2202,7 @@ if (jtok_pwi && jtok_pwi.isArray())
 
     if(jtok = jObj_debug["PlaylistsPSFromPSN"])
     { 
-      ALOG_INF(PSTR("Debug: forcing ScanPresetsFile_GeneratePlaylistIDsFromPSN()"));
+      ALOG_INF(PSTR("Debug: forcing ScanPresetsFile_GeneratePlaylistIDsFromPSN_2()"));
       ScanPresetsFile_GeneratePlaylistIDsFromPSN_2();
     }
 
