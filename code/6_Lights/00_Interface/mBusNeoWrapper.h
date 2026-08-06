@@ -403,55 +403,54 @@ enum EM_BUS_TYPE
     typedef NeoEsp32I2s1Tm1914Method  X1Tm1914Method;
   #endif
 
-
   /**********************************************************************
    * RMT method selection + BUS DEFINITIONS (explicit per target)
    **********************************************************************/
 
   // ====================================================================
-  // ESP32-C3 (RISC-V) - NO I2S, RMT Only
+  // ESP32-C3 (RISC-V) - RMT only
   // ====================================================================
   #if defined(CONFIG_IDF_TARGET_ESP32C3)
 
-    // Your policy: RMT-only on C3
+    // C3 policy: RMT only
     #define NEOPIXEL_DISABLE_400_PIXELBUS
 
-    // C3: use upstream "N" RMT methods
+    // C3 uses upstream "N" RMT methods
     #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtN ## x ## Method
 
     // ---------- RGB / RGBW ----------
-    #define PIXELBUS_32_RN_3  NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
-    #define PIXELBUS_32_RN_4  NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
+    #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
+    #define PIXELBUS_32_RN_4 NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
 
     // ---------- 400K ----------
-    // disabled above
+    // Disabled above
 
     // ---------- RGBWW (WS2805) ----------
-    #define PIXELBUS_32_RN_5  NeoPixelBus<NeoRgbwwFeature, NeoWs2812xMethod>  // TEMP: RGBWW placeholder on C3 (not true WS2805 timing). You will change later.
+    #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, NeoWs2812xMethod> // TEMP: RGBWW placeholder on C3, not true WS2805 timing
 
-    // Map I2S names to RMT so the rest of the wrapper compiles
-    #define PIXELBUS_32_I0_3   PIXELBUS_32_RN_3
-    #define PIXELBUS_32_I1_3   PIXELBUS_32_RN_3
-    #define PIXELBUS_32_I0_3P  PIXELBUS_32_RN_3
-    #define PIXELBUS_32_I1_3P  PIXELBUS_32_RN_3
+    // Map unsupported I2S names to RMT so common wrapper switch code compiles
+    #define PIXELBUS_32_I0_3  PIXELBUS_32_RN_3
+    #define PIXELBUS_32_I1_3  PIXELBUS_32_RN_3
+    #define PIXELBUS_32_I1_3P PIXELBUS_32_RN_3
+    #define PIXELBUS_32_I0_3P PIXELBUS_32_RN_3
 
-    #define PIXELBUS_32_I0_4   PIXELBUS_32_RN_4
-    #define PIXELBUS_32_I1_4   PIXELBUS_32_RN_4
-    #define PIXELBUS_32_I0_4P  PIXELBUS_32_RN_4
-    #define PIXELBUS_32_I1_4P  PIXELBUS_32_RN_4
+    #define PIXELBUS_32_I0_4  PIXELBUS_32_RN_4
+    #define PIXELBUS_32_I1_4  PIXELBUS_32_RN_4
+    #define PIXELBUS_32_I1_4P PIXELBUS_32_RN_4
+    #define PIXELBUS_32_I0_4P PIXELBUS_32_RN_4
 
-    #define PIXELBUS_32_I0_5   PIXELBUS_32_RN_5
-    #define PIXELBUS_32_I1_5   PIXELBUS_32_RN_5
-    #define PIXELBUS_32_I0_5P  PIXELBUS_32_RN_5
-    #define PIXELBUS_32_I1_5P  PIXELBUS_32_RN_5
+    #define PIXELBUS_32_I0_5  PIXELBUS_32_RN_5
+    #define PIXELBUS_32_I1_5  PIXELBUS_32_RN_5
+    #define PIXELBUS_32_I1_5P PIXELBUS_32_RN_5
+    #define PIXELBUS_32_I0_5P PIXELBUS_32_RN_5
 
 
   // ====================================================================
-  // ESP32-S3 (Xtensa)
+  // ESP32-S3 (Xtensa) - LCD/X8 parallel output
   // ====================================================================
   #elif defined(CONFIG_IDF_TARGET_ESP32S3)
 
-    // Keep EXACT HI-selection logic (as requested)
+    // Keep WLED HI-selection logic
     #if !defined(__riscv) && !defined(WLED_USE_SHARED_RMT)
       #include <NeoEsp32RmtHIMethod.h>
       #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtHIN ## x ## Method
@@ -460,8 +459,8 @@ enum EM_BUS_TYPE
     #endif
 
     // ---------- RGB / RGBW ----------
-    #define PIXELBUS_32_RN_3  NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
-    #define PIXELBUS_32_RN_4  NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
+    #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
+    #define PIXELBUS_32_RN_4 NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
 
     // ---------- 400K ----------
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
@@ -469,23 +468,24 @@ enum EM_BUS_TYPE
     #endif
 
     // ---------- RGBWW (WS2805) ----------
-    #define PIXELBUS_32_RN_5  NeoPixelBus<NeoRgbwwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2805)>
+    #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2805)>
 
-    // I2S mappings (single + parallel)
-    #define PIXELBUS_32_I0_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
-    #define PIXELBUS_32_I1_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
-    #define PIXELBUS_32_I0_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
-    #define PIXELBUS_32_I1_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
+    // S3 NeoPixelBus LCD methods support up to X8 parallel output.
+    // I0/I1 names are compatibility aliases here, not separate usable I2S parallel engines.
+    #define PIXELBUS_32_I0_3  NeoPixelBus<NeoRgbFeature, X1Ws2812xMethod>
+    #define PIXELBUS_32_I1_3  NeoPixelBus<NeoRgbFeature, X1Ws2812xMethod>
+    #define PIXELBUS_32_I1_3P NeoPixelBus<NeoRgbFeature, X8Ws2812xMethod>
+    #define PIXELBUS_32_I0_3P NeoPixelBus<NeoRgbFeature, X8Ws2812xMethod>
 
-    #define PIXELBUS_32_I0_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
-    #define PIXELBUS_32_I1_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
-    #define PIXELBUS_32_I0_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
-    #define PIXELBUS_32_I1_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+    #define PIXELBUS_32_I0_4  NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+    #define PIXELBUS_32_I1_4  NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+    #define PIXELBUS_32_I1_4P NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+    #define PIXELBUS_32_I0_4P NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
 
-    #define PIXELBUS_32_I0_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
-    #define PIXELBUS_32_I1_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
-    #define PIXELBUS_32_I0_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
-    #define PIXELBUS_32_I1_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+    #define PIXELBUS_32_I0_5  NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+    #define PIXELBUS_32_I1_5  NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+    #define PIXELBUS_32_I1_5P NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+    #define PIXELBUS_32_I0_5P NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
 
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
       #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
@@ -494,11 +494,11 @@ enum EM_BUS_TYPE
 
 
   // ====================================================================
-  // ESP32-S2 (Xtensa)
+  // ESP32-S2 (Xtensa) - I2S0 only, up to X8 parallel
   // ====================================================================
   #elif defined(CONFIG_IDF_TARGET_ESP32S2)
 
-    // Keep EXACT HI-selection logic (as requested)
+    // Keep WLED HI-selection logic
     #if !defined(__riscv) && !defined(WLED_USE_SHARED_RMT)
       #include <NeoEsp32RmtHIMethod.h>
       #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtHIN ## x ## Method
@@ -507,8 +507,8 @@ enum EM_BUS_TYPE
     #endif
 
     // ---------- RGB / RGBW ----------
-    #define PIXELBUS_32_RN_3  NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
-    #define PIXELBUS_32_RN_4  NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
+    #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
+    #define PIXELBUS_32_RN_4 NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
 
     // ---------- 400K ----------
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
@@ -516,36 +516,36 @@ enum EM_BUS_TYPE
     #endif
 
     // ---------- RGBWW (WS2805) ----------
-    #define PIXELBUS_32_RN_5  NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>  // WS2805 uses I2S0, not RMT
+    #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method> // WS2805 uses I2S0 on S2
 
-    // I2S0 only; map I1 -> I0
-    #define PIXELBUS_32_I0_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
-    #define PIXELBUS_32_I1_3   PIXELBUS_32_I0_3
-    #define PIXELBUS_32_I0_3P  PIXELBUS_32_I0_3
-    #define PIXELBUS_32_I1_3P  PIXELBUS_32_I0_3
+    // S2 has one usable I2S peripheral. I1 aliases map to the same I2S0 implementation.
+    #define PIXELBUS_32_I0_3  NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0Ws2812xMethod>
+    #define PIXELBUS_32_I1_3  PIXELBUS_32_I0_3
+    #define PIXELBUS_32_I1_3P NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0X8Ws2812xMethod>
+    #define PIXELBUS_32_I0_3P PIXELBUS_32_I1_3P
 
-    #define PIXELBUS_32_I0_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
-    #define PIXELBUS_32_I1_4   PIXELBUS_32_I0_4
-    #define PIXELBUS_32_I0_4P  PIXELBUS_32_I0_4
-    #define PIXELBUS_32_I1_4P  PIXELBUS_32_I0_4
+    #define PIXELBUS_32_I0_4  NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0Sk6812Method>
+    #define PIXELBUS_32_I1_4  PIXELBUS_32_I0_4
+    #define PIXELBUS_32_I1_4P NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0X8Sk6812Method>
+    #define PIXELBUS_32_I0_4P PIXELBUS_32_I1_4P
 
-    #define PIXELBUS_32_I0_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
-    #define PIXELBUS_32_I1_5   PIXELBUS_32_I0_5
-    #define PIXELBUS_32_I0_5P  PIXELBUS_32_I0_5
-    #define PIXELBUS_32_I1_5P  PIXELBUS_32_I0_5
+    #define PIXELBUS_32_I0_5  NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0Ws2805Method>
+    #define PIXELBUS_32_I1_5  PIXELBUS_32_I0_5
+    #define PIXELBUS_32_I1_5P NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0X8Ws2805Method>
+    #define PIXELBUS_32_I0_5P PIXELBUS_32_I1_5P
 
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
-      #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
+      #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0400KbpsMethod>
       #define PIXELBUS_32_I1_400_3 PIXELBUS_32_I0_400_3
     #endif
 
 
   // ====================================================================
-  // Classic ESP32 (Xtensa)
+  // Classic ESP32 (Xtensa) - I2S1 X8 or I2S0 X16
   // ====================================================================
   #else
 
-    // Keep EXACT HI-selection logic (as requested)
+    // Keep WLED HI-selection logic
     #if !defined(__riscv) && !defined(WLED_USE_SHARED_RMT)
       #include <NeoEsp32RmtHIMethod.h>
       #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtHIN ## x ## Method
@@ -554,8 +554,8 @@ enum EM_BUS_TYPE
     #endif
 
     // ---------- RGB / RGBW ----------
-    #define PIXELBUS_32_RN_3  NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
-    #define PIXELBUS_32_RN_4  NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
+    #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
+    #define PIXELBUS_32_RN_4 NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
 
     // ---------- 400K ----------
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
@@ -563,24 +563,31 @@ enum EM_BUS_TYPE
     #endif
 
     // ---------- RGBWW (WS2805) ----------
-    #define PIXELBUS_32_RN_5  NeoPixelBus<NeoRgbwwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2805)>  // WS2805 via RMT (channel-selectable). If HI is available it will pick HI, else N.
+    #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2805)>
 
-    // I2S + parallel (your historical naming)
-    #define PIXELBUS_32_I0_3   NeoPixelBus<NeoRgbFeature,  NeoEsp32I2s0Sk6812Method>
-    #define PIXELBUS_32_I1_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
-    #define PIXELBUS_32_I0_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
-    #define PIXELBUS_32_I1_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
+    // I2S naming is historically significant in PulSar:
+    // I1_*P = I2S1 X8 parallel
+    // I0_*P = I2S0 X16 parallel
 
-    #define PIXELBUS_32_I0_4   NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0Sk6812Method>
-    #define PIXELBUS_32_I1_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
-    #define PIXELBUS_32_I0_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
-    #define PIXELBUS_32_I1_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+    // ---------- RGB ----------
+    #define PIXELBUS_32_I0_3  NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0Sk6812Method>
+    #define PIXELBUS_32_I1_3  NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1Ws2812xMethod>
+    #define PIXELBUS_32_I1_3P NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1X8Ws2812xMethod>
+    #define PIXELBUS_32_I0_3P NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0X16Ws2812xMethod>
 
-    #define PIXELBUS_32_I0_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
-    #define PIXELBUS_32_I1_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
-    #define PIXELBUS_32_I0_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
-    #define PIXELBUS_32_I1_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+    // ---------- RGBW ----------
+    #define PIXELBUS_32_I0_4  NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0Sk6812Method>
+    #define PIXELBUS_32_I1_4  NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s1Sk6812Method>
+    #define PIXELBUS_32_I1_4P NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s1X8Sk6812Method>
+    #define PIXELBUS_32_I0_4P NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0X16Sk6812Method>
 
+    // ---------- RGBWW ----------
+    #define PIXELBUS_32_I0_5  NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0Ws2805Method>
+    #define PIXELBUS_32_I1_5  NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s1Ws2805Method>
+    #define PIXELBUS_32_I1_5P NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s1X8Ws2805Method>
+    #define PIXELBUS_32_I0_5P NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0X16Ws2805Method>
+
+    // ---------- 400K ----------
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
       #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0400KbpsMethod>
       #define PIXELBUS_32_I1_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1400KbpsMethod>
@@ -845,8 +852,10 @@ static void* create(uint8_t busType, uint8_t* pins, uint16_t len, uint8_t channe
     
     // #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
     // DEBUG_PRINTF("PolyBus::show busType %d\n\r", busType);
-    // (static_cast<PIXELBUS_32_I0_3*>(busPtr))->SetPixelColor(0, RgbColor(255,0,0));
+    // (static_cast<PIXELBUS_32_I0_3*>(busPtr))->SetPixelColor(100, RgbColor(255,0,0)); // Debug: Set first pixel to full brightness red
     // #endif 
+
+
     
     switch (busType) {
       case BUSTYPE__NONE__ID: break;
@@ -1432,13 +1441,13 @@ uint8_t getI(uint8_t busType, const uint8_t* pins, uint8_t num = 0)
                       }
                   #elif defined(ENABLE_PIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE)
                       if (num < 8) {
-                          offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
+                          offset_method_inside_group = 3;  // Handled inside library automatically for I2S1 types
                       } else {
                           return BUSTYPE__NONE__ID;
                       }
                   #elif defined(ENABLE_PIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE)
                       if (num < 16) {
-                          offset_method_inside_group = 5;  // Handled inside library automatically for I2S1 types
+                          offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
                       } else {
                           return BUSTYPE__NONE__ID;
                       }

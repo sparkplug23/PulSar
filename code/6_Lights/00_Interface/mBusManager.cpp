@@ -310,7 +310,7 @@ uint8_t BusDigital::estimateCurrentAndLimitBri() {
   bool useWackyWS2815PowerModel = false;
   byte actualMilliampsPerLed = _milliAmpsPerLed;
 
-  return 255; // foorce force, ignore check
+  // return 255; // foorce force, ignore check
 
   if (_milliAmpsMax < MA_FOR_ESP/BusManager::getNumBusses() || actualMilliampsPerLed == 0) { //0 mA per LED and too low numbers turn off calculation
     return _bri;
@@ -1541,6 +1541,7 @@ void BusManager::initializeABL() {
 
 void BusManager::applyABL() {
   if (_useABL) {
+    // ALOG_INF(PSTR(D_LOG_PIXEL "applyABL"));
     unsigned milliAmpsSum = 0; // use temporary variable to always return a valid _gMilliAmpsUsed to UI
     unsigned totalLEDs = 0;
     for (auto &bus : busses) {

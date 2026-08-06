@@ -173,6 +173,167 @@ bool mAnimatorLight::deserializeMap(unsigned n) {
 }
 
 
+// // setUpMatrix() - constructs ledmap array from matrix of panels with WxH pixels
+// // this converts physical (possibly irregular) LED arrangement into well defined
+// // array of logical pixels: fist entry corresponds to left-topmost logical pixel
+// // followed by horizontal pixels, when mAnimatorLight::Segment::maxWidth logical pixels are added they
+// // are followed by next row (down) of mAnimatorLight::Segment::maxWidth pixels (and so forth)
+// // note: matrix may be comprised of multiple panels each with different orientation
+// // but ledmap takes care of that. ledmap is constructed upon initialization
+// // so matrix should disable regular ledmap processing
+// void mAnimatorLight::setUpMatrix() {
+
+//   ALOG_INF(PSTR("setUpMatrix"));
+
+//   ALOG_INF("?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????setUpMatrix()");
+
+//   // erase old ledmap, just in case.
+//   if (customMappingTable != nullptr) delete[] customMappingTable;
+//   customMappingTable = nullptr;
+//   customMappingSize = 0;
+
+//   // isMatrix is set in cfg.cpp or set.cpp
+//   if (isMatrix) {
+
+//     // calculate width dynamically because it will have gaps
+//     Segment::maxWidth = 1;
+//     Segment::maxHeight = 1;
+//     // temporary fix, make sure the start/stop of the segment are right
+//     ALOG_WRN(PSTR("Fixing segment range to match matrix, this needs resolving in the future to allow multiple matrix elements"));
+
+
+
+//     ALOG_INF("panel size %d", panel.size());
+//     if(panel.size()==0)
+//     {
+//       ALOG_INF("panel size 0");
+//     }
+
+//     for (size_t i = 0; i < panel.size(); i++) {
+//       Panel &p = panel[i];
+//       if (p.xOffset + p.width > Segment::maxWidth) {
+//         Segment::maxWidth = p.xOffset + p.width;
+//       }
+//       if (p.yOffset + p.height > Segment::maxHeight) {
+//         Segment::maxHeight = p.yOffset + p.height;
+//       }
+//     }
+
+//     ALOG_INF(PSTR("maxWidth  %d\n\r"), Segment::maxWidth);
+//     ALOG_INF(PSTR("maxHeight %d\n\r"), Segment::maxHeight);
+
+//     // safety check
+//     if (Segment::maxWidth * Segment::maxHeight > MAX_LEDS_NEO || Segment::maxWidth <= 1 || Segment::maxHeight <= 1) {
+//       DEBUG_PRINTLN(F("2D Bounds error."));
+//       isMatrix = false;
+//       Segment::maxWidth = _length;
+//       Segment::maxHeight = 1;
+//       panels = 0;
+//       panel.clear(); // release memory allocated by panels
+//       ALOG_INF(PSTR("panel.clear() HERE B?????????????????????????????????????????????????????"));
+//       resetSegments();
+//       return;
+//     }
+
+//     customMappingTable = new uint16_t[Segment::maxWidth * Segment::maxHeight];
+
+//     if (customMappingTable != nullptr) 
+//     {
+//       customMappingSize = Segment::maxWidth * Segment::maxHeight;
+
+//       // fill with empty in case we don't fill the entire matrix
+//       for (size_t i = 0; i< customMappingSize; i++) {
+//         customMappingTable[i] = (uint16_t)-1;
+//       }
+
+//       // we will try to load a "gap" array (a JSON file)
+//       // the array has to have the same amount of values as mapping array (or larger)
+//       // "gap" array is used while building ledmap (mapping array)
+//       // and discarded afterwards as it has no meaning after the process
+//       // content of the file is just raw JSON array in the form of [val1,val2,val3,...]
+//       // there are no other "key":"value" pairs in it
+//       // allowed values are: -1 (missing pixel/no LED attached), 0 (inactive/unused pixel), 1 (active/used pixel)
+//       char    fileName[32]; strcpy_P(fileName, PSTR("/2d-gaps.json")); // reduce flash footprint
+//       bool    isFile = FILE_SYSTEM.exists(fileName);
+//       size_t  gapSize = 0;
+//       int8_t *gapTable = nullptr;
+
+//       if (isFile && JBI->requestJSONBufferLock(20)) {
+//         DEBUG_PRINT(F("Reading LED gap from "));
+//         DEBUG_PRINTLN(fileName);
+//         // read the array into global JSON buffer
+//         if (tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_mfile->pDoc)) {
+//           // the array is similar to ledmap, except it has only 3 values:
+//           // -1 ... missing pixel (do not increase pixel count)
+//           //  0 ... inactive pixel (it does count, but should be mapped out (-1))
+//           //  1 ... active pixel (it will count and will be mapped)
+//           JsonArray map = tkr_mfile->pDoc->as<JsonArray>();
+//           gapSize = map.size();
+//           if (!map.isNull() && gapSize >= customMappingSize) { // not an empty map
+//             gapTable = new int8_t[gapSize];
+//             if (gapTable) for (size_t i = 0; i < gapSize; i++) {
+//               gapTable[i] = constrain(map[i], -1, 1);
+//             }
+//           }
+//         }
+//         DEBUG_PRINTLN(F("Gaps loaded."));
+//         JBI->releaseJSONBufferLock();
+//       }
+
+//       DEBUG_LINE_HERE;
+
+//       uint16_t x, y, pix=0; //pixel
+//       for (size_t pan = 0; pan < panel.size(); pan++) {
+//         Panel &p = panel[pan];
+//         uint16_t h = p.vertical ? p.height : p.width;
+//         uint16_t v = p.vertical ? p.width  : p.height;
+//         for (size_t j = 0; j < v; j++){
+//           for(size_t i = 0; i < h; i++) {
+//             y = (p.vertical?p.rightStart:p.bottomStart) ? v-j-1 : j;
+//             x = (p.vertical?p.bottomStart:p.rightStart) ? h-i-1 : i;
+//             x = p.serpentine && j%2 ? h-x-1 : x;
+//             size_t index = (p.yOffset + (p.vertical?x:y)) * mAnimatorLight::Segment::maxWidth + p.xOffset + (p.vertical?y:x);
+//             if (!gapTable || (gapTable && gapTable[index] >  0)) customMappingTable[index] = pix; // a useful pixel (otherwise -1 is retained)
+//             if (!gapTable || (gapTable && gapTable[index] >= 0)) pix++; // not a missing pixel
+//           }
+//         }
+//       }
+
+//       DEBUG_LINE_HERE;
+
+//       // delete gap array as we no longer need it
+//       if (gapTable) delete[] gapTable;
+
+//       DEBUG_PRINT(F("Matrix ledmap:"));
+//       for (unsigned i=0; i<customMappingSize; i++) {
+//         if (!(i%mAnimatorLight::Segment::maxWidth)) DEBUG_PRINTLN();
+//         DEBUG_PRINTF("%4d,", customMappingTable[i]);
+//       }
+//       DEBUG_PRINTLN();
+
+//       DEBUG_LINE_HERE;
+//     } 
+//     else  // memory allocation error
+//     {
+//       DEBUG_PRINTLN(F("Ledmap alloc error."));
+//       isMatrix = false;
+//       panels = 0;
+//       panel.clear();
+//       ALOG_INF(PSTR("panel.clear() HERE A?????????????????????????????????????????????????????"));
+//       Segment::maxWidth = _length;
+//       Segment::maxHeight = 1;
+//       resetSegments();
+//     }
+
+//     DEBUG_LINE_HERE;
+    
+//   }
+
+//   ALOG_INF(PSTR("setUpMatrix Complete")); Serial.flush();
+  
+// }
+
+
 // setUpMatrix() - constructs ledmap array from matrix of panels with WxH pixels
 // this converts physical (possibly irregular) LED arrangement into well defined
 // array of logical pixels: fist entry corresponds to left-topmost logical pixel
@@ -181,70 +342,69 @@ bool mAnimatorLight::deserializeMap(unsigned n) {
 // note: matrix may be comprised of multiple panels each with different orientation
 // but ledmap takes care of that. ledmap is constructed upon initialization
 // so matrix should disable regular ledmap processing
-void mAnimatorLight::setUpMatrix() {
-
+// WARNING: effect drawing has to be suspended or this must be called from loop() context
+void mAnimatorLight::setUpMatrix()
+{
   ALOG_INF(PSTR("setUpMatrix"));
 
-  ALOG_INF("?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????setUpMatrix()");
-
-  // erase old ledmap, just in case.
-  if (customMappingTable != nullptr) delete[] customMappingTable;
-  customMappingTable = nullptr;
-  customMappingSize = 0;
+  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 
   // isMatrix is set in cfg.cpp or set.cpp
-  if (isMatrix) {
+  if (isMatrix)
+  {
+    // panel vector is authoritative when using MatrixConfig[]
+    panels = panel.size();
 
-    // calculate width dynamically because it will have gaps
+    ALOG_INF(PSTR("setUpMatrix panels=%u"), static_cast<unsigned>(panel.size()));
+
+    // calculate width dynamically because it may have gaps
     Segment::maxWidth = 1;
     Segment::maxHeight = 1;
-    // temporary fix, make sure the start/stop of the segment are right
-    ALOG_WRN(PSTR("Fixing segment range to match matrix, this needs resolving in the future to allow multiple matrix elements"));
 
-
-
-    ALOG_INF("panel size %d", panel.size());
-    if(panel.size()==0)
+    for (const Panel &p : panel)
     {
-      ALOG_INF("panel size 0");
+      if (p.xOffset + p.width > Segment::maxWidth) Segment::maxWidth = p.xOffset + p.width;
+      if (p.yOffset + p.height > Segment::maxHeight) Segment::maxHeight = p.yOffset + p.height;
     }
 
-    for (size_t i = 0; i < panel.size(); i++) {
-      Panel &p = panel[i];
-      if (p.xOffset + p.width > Segment::maxWidth) {
-        Segment::maxWidth = p.xOffset + p.width;
-      }
-      if (p.yOffset + p.height > Segment::maxHeight) {
-        Segment::maxHeight = p.yOffset + p.height;
-      }
-    }
+    const uint32_t matrixSize = static_cast<uint32_t>(Segment::maxWidth) * Segment::maxHeight;
+    const uint32_t totalLength = getLengthTotal();
+    const uint32_t mappingSize = max<uint32_t>(matrixSize, totalLength);
 
-    ALOG_INF(PSTR("maxWidth  %d\n\r"), Segment::maxWidth);
-    ALOG_INF(PSTR("maxHeight %d\n\r"), Segment::maxHeight);
+    ALOG_INF(PSTR("Matrix bounds panels=%u width=%u height=%u matrixPixels=%u outputPixels=%u"), static_cast<unsigned>(panel.size()), static_cast<unsigned>(Segment::maxWidth), static_cast<unsigned>(Segment::maxHeight), static_cast<unsigned>(matrixSize), static_cast<unsigned>(totalLength));
 
     // safety check
-    if (Segment::maxWidth * Segment::maxHeight > MAX_LEDS_NEO || Segment::maxWidth <= 1 || Segment::maxHeight <= 1) {
-      DEBUG_PRINTLN(F("2D Bounds error."));
+    if (matrixSize > MAX_LEDS_NEO || Segment::maxWidth > 255 || Segment::maxHeight > 255 || Segment::maxWidth <= 1 || Segment::maxHeight <= 1)
+    {
+      ALOG_ERR(PSTR("2D bounds error width=%u height=%u pixels=%u max=%u"), static_cast<unsigned>(Segment::maxWidth), static_cast<unsigned>(Segment::maxHeight), static_cast<unsigned>(matrixSize), static_cast<unsigned>(MAX_LEDS_NEO));
       isMatrix = false;
       Segment::maxWidth = _length;
       Segment::maxHeight = 1;
       panels = 0;
       panel.clear(); // release memory allocated by panels
-      ALOG_INF(PSTR("panel.clear() HERE B?????????????????????????????????????????????????????"));
       resetSegments();
       return;
     }
 
-    customMappingTable = new uint16_t[Segment::maxWidth * Segment::maxHeight];
+    customMappingSize = 0; // prevent use of mapping if anything goes wrong
 
-    if (customMappingTable != nullptr) 
+    if (customMappingTable != nullptr) delete[] customMappingTable;
+    customMappingTable = nullptr;
+
+    // Segment::maxWidth and Segment::maxHeight are set according to panel layout
+    // and the product will include at least all leds in matrix
+    // if actual LEDs are more, getLengthTotal() will return correct number of LEDs
+    customMappingTable = new uint16_t[mappingSize];
+
+    if (customMappingTable != nullptr)
     {
-      customMappingSize = Segment::maxWidth * Segment::maxHeight;
+      customMappingSize = mappingSize;
 
       // fill with empty in case we don't fill the entire matrix
-      for (size_t i = 0; i< customMappingSize; i++) {
-        customMappingTable[i] = (uint16_t)-1;
-      }
+      for (uint32_t i = 0; i < matrixSize; i++) customMappingTable[i] = 0xFFFFU;
+
+      // trailing LEDs for ledmap (after matrix) if they exist
+      for (uint32_t i = matrixSize; i < mappingSize; i++) customMappingTable[i] = static_cast<uint16_t>(i);
 
       // we will try to load a "gap" array (a JSON file)
       // the array has to have the same amount of values as mapping array (or larger)
@@ -253,85 +413,123 @@ void mAnimatorLight::setUpMatrix() {
       // content of the file is just raw JSON array in the form of [val1,val2,val3,...]
       // there are no other "key":"value" pairs in it
       // allowed values are: -1 (missing pixel/no LED attached), 0 (inactive/unused pixel), 1 (active/used pixel)
-      char    fileName[32]; strcpy_P(fileName, PSTR("/2d-gaps.json")); // reduce flash footprint
-      bool    isFile = FILE_SYSTEM.exists(fileName);
-      size_t  gapSize = 0;
+      char fileName[32]; strcpy_P(fileName, PSTR("/2d-gaps.json"));
+      bool isFile = FILE_SYSTEM.exists(fileName);
+      size_t gapSize = 0;
       int8_t *gapTable = nullptr;
 
-      if (isFile && JBI->requestJSONBufferLock(20)) {
+      if (isFile && JBI->requestJSONBufferLock(20))
+      {
         DEBUG_PRINT(F("Reading LED gap from "));
         DEBUG_PRINTLN(fileName);
+
         // read the array into global JSON buffer
-        if (tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_mfile->pDoc)) {
+        if (tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_mfile->pDoc))
+        {
           // the array is similar to ledmap, except it has only 3 values:
           // -1 ... missing pixel (do not increase pixel count)
           //  0 ... inactive pixel (it does count, but should be mapped out (-1))
           //  1 ... active pixel (it will count and will be mapped)
           JsonArray map = tkr_mfile->pDoc->as<JsonArray>();
           gapSize = map.size();
-          if (!map.isNull() && gapSize >= customMappingSize) { // not an empty map
+
+          if (!map.isNull() && gapSize >= matrixSize)
+          {
             gapTable = new int8_t[gapSize];
-            if (gapTable) for (size_t i = 0; i < gapSize; i++) {
-              gapTable[i] = constrain(map[i], -1, 1);
-            }
+            if (gapTable) for (size_t i = 0; i < gapSize; i++) gapTable[i] = constrain(map[i].as<int>(), -1, 1);
           }
         }
+
         DEBUG_PRINTLN(F("Gaps loaded."));
         JBI->releaseJSONBufferLock();
       }
 
-      DEBUG_LINE_HERE;
+      uint32_t pix = 0; // physical pixel number
 
-      uint16_t x, y, pix=0; //pixel
-      for (size_t pan = 0; pan < panel.size(); pan++) {
-        Panel &p = panel[pan];
-        uint16_t h = p.vertical ? p.height : p.width;
-        uint16_t v = p.vertical ? p.width  : p.height;
-        for (size_t j = 0; j < v; j++){
-          for(size_t i = 0; i < h; i++) {
-            y = (p.vertical?p.rightStart:p.bottomStart) ? v-j-1 : j;
-            x = (p.vertical?p.bottomStart:p.rightStart) ? h-i-1 : i;
-            x = p.serpentine && j%2 ? h-x-1 : x;
-            size_t index = (p.yOffset + (p.vertical?x:y)) * mAnimatorLight::Segment::maxWidth + p.xOffset + (p.vertical?y:x);
-            if (!gapTable || (gapTable && gapTable[index] >  0)) customMappingTable[index] = pix; // a useful pixel (otherwise -1 is retained)
-            if (!gapTable || (gapTable && gapTable[index] >= 0)) pix++; // not a missing pixel
+      for (size_t pan = 0; pan < panel.size(); pan++)
+      {
+        const Panel &p = panel[pan];
+        const uint16_t h = p.vertical ? p.height : p.width;
+        const uint16_t v = p.vertical ? p.width : p.height;
+
+        ALOG_INF(PSTR("Matrix panel=%u offset=%u,%u size=%ux%u bottom=%u right=%u vertical=%u serpentine=%u physicalStart=%u"), static_cast<unsigned>(pan), static_cast<unsigned>(p.xOffset), static_cast<unsigned>(p.yOffset), static_cast<unsigned>(p.width), static_cast<unsigned>(p.height), static_cast<unsigned>(p.bottomStart), static_cast<unsigned>(p.rightStart), static_cast<unsigned>(p.vertical), static_cast<unsigned>(p.serpentine), static_cast<unsigned>(pix));
+
+        for (size_t j = 0; j < v; j++)
+        {
+          for (size_t i = 0; i < h; i++)
+          {
+            uint16_t y = (p.vertical ? p.rightStart : p.bottomStart) ? v - j - 1 : j;
+            uint16_t x = (p.vertical ? p.bottomStart : p.rightStart) ? h - i - 1 : i;
+
+            x = p.serpentine && j % 2 ? h - x - 1 : x;
+
+            const size_t index = (p.yOffset + (p.vertical ? x : y)) * Segment::maxWidth + p.xOffset + (p.vertical ? y : x);
+
+            if (index >= matrixSize)
+            {
+              ALOG_ERR(PSTR("Matrix mapping overflow panel=%u index=%u matrixSize=%u"), static_cast<unsigned>(pan), static_cast<unsigned>(index), static_cast<unsigned>(matrixSize));
+              continue;
+            }
+
+            if (!gapTable || gapTable[index] > 0)
+            {
+              if (pix < totalLength) customMappingTable[index] = static_cast<uint16_t>(pix);
+              else ALOG_ERR(PSTR("Matrix physical overflow panel=%u pixel=%u outputPixels=%u"), static_cast<unsigned>(pan), static_cast<unsigned>(pix), static_cast<unsigned>(totalLength));
+            }
+
+            if (!gapTable || gapTable[index] >= 0) pix++;
           }
         }
       }
 
-      DEBUG_LINE_HERE;
-
       // delete gap array as we no longer need it
       if (gapTable) delete[] gapTable;
 
+      ALOG_INF(PSTR("Matrix mapping complete panels=%u width=%u height=%u matrixPixels=%u physicalPixels=%u outputPixels=%u mappingEntries=%u"), static_cast<unsigned>(panel.size()), static_cast<unsigned>(Segment::maxWidth), static_cast<unsigned>(Segment::maxHeight), static_cast<unsigned>(matrixSize), static_cast<unsigned>(pix), static_cast<unsigned>(totalLength), static_cast<unsigned>(customMappingSize));
+
+      if (pix > totalLength) ALOG_ERR(PSTR("Matrix requires more physical pixels than configured required=%u available=%u"), static_cast<unsigned>(pix), static_cast<unsigned>(totalLength));
+      if (!gapTable && pix < matrixSize) ALOG_WRN(PSTR("Matrix panels cover fewer physical pixels than logical matrix physical=%u logical=%u"), static_cast<unsigned>(pix), static_cast<unsigned>(matrixSize));
+
+      #ifdef ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
       DEBUG_PRINT(F("Matrix ledmap:"));
-      for (unsigned i=0; i<customMappingSize; i++) {
-        if (!(i%mAnimatorLight::Segment::maxWidth)) DEBUG_PRINTLN();
+      for (uint32_t i = 0; i < matrixSize; i++)
+      {
+        if (!(i % Segment::maxWidth)) DEBUG_PRINTLN();
         DEBUG_PRINTF("%4d,", customMappingTable[i]);
       }
       DEBUG_PRINTLN();
-
-      DEBUG_LINE_HERE;
-    } 
-    else  // memory allocation error
+      #endif
+    }
+    else // memory allocation error
     {
-      DEBUG_PRINTLN(F("Ledmap alloc error."));
+      ALOG_ERR(PSTR("2D LED map allocation error entries=%u bytes=%u"), static_cast<unsigned>(mappingSize), static_cast<unsigned>(mappingSize * sizeof(uint16_t)));
       isMatrix = false;
       panels = 0;
       panel.clear();
-      ALOG_INF(PSTR("panel.clear() HERE A?????????????????????????????????????????????????????"));
       Segment::maxWidth = _length;
       Segment::maxHeight = 1;
       resetSegments();
     }
-
-    DEBUG_LINE_HERE;
-    
   }
 
-  ALOG_INF(PSTR("setUpMatrix Complete")); Serial.flush();
-  
+  #else
+
+  isMatrix = false; // no matter what config says
+
+  #endif
+
+  ALOG_INF(PSTR("setUpMatrix complete"));
 }
+
+
+
+
+
+
+
+
+
+
 #endif
 
 

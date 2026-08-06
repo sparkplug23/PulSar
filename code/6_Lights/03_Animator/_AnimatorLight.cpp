@@ -2772,6 +2772,11 @@ void mAnimatorLight::SubTask_Effects()
 
     // seg.effect_id = 1;
 
+    // tkr_iLight->_briRGB_Global = 255;
+    // tkr_iLight->_briCT_Global = 255;
+    // seg.opacity = 255;
+
+
     // Process transition (also pre-calculates progress value)
     seg.handleTransition();
 
@@ -4073,6 +4078,8 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
         int idx = start + p + off;
         if (idx >= topSegment.stop) idx -= length;
         strip[idx] = Segment::color_blend(strip[idx], segblend(c_a, strip[idx]), opacity);
+
+        // if(idx==0) ALOG_INF(PSTR("strip %d %d,%d,%d"), idx, R(strip[idx]), G(strip[idx]), B(strip[idx]));
         // strip[idx] = c_a;
         // ALOG_INF(PSTR("idx i %d %d"), idx, i);
         // if (_pixelCCT) _pixelCCT[idx] = cct;
@@ -4678,6 +4685,8 @@ void mAnimatorLight::show(void)
 
   p_free(_pixelCCT);
   _pixelCCT = nullptr;
+
+  // ALOG_INF(PSTR("show %d,%d,%d"),R(_pixels[0]),G(_pixels[0]),B(_pixels[0]));
 
   /**
    * @brief Start physical bus transmission.
@@ -7778,7 +7787,7 @@ void mAnimatorLight::setCCT(uint16_t k) {
 }
 
 void mAnimatorLight::setBrightness(uint8_t b, bool direct) {
-  ALOG_INF(PSTR("setBrightness(%d, %d)"),b,direct);
+  // ALOG_INF(PSTR("setBrightness(%d, %d)"),b,direct);
   // if (gammaCorrectBri) b = gamma8(b);  
   if (_brightness == b) return;
   _brightness = b;

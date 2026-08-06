@@ -150,7 +150,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 
           valid_bus_idx[valid_bus_count++] = b;
         }
-
+s
         if (valid_bus_count == 0)
         {
           ALOG_ERR(PSTR(D_LOG_PIXEL "Segments/MatchBus but no valid BusConfig entries"));
@@ -253,59 +253,37 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 }
 
 #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+
 void mAnimatorLight::subparse_MatrixConfig(JsonParserObject obj)
 {
-
-  JsonParserToken jtok = 0; 
-  JsonParserToken jtok_sub = 0; 
-  int16_t tmp_id = 0;
-  char buffer[50];
+  JsonParserToken jtok = 0;
 
   Panel p;
 
-  if(jtok = obj["Width"])
-  {
-    p.width = jtok.getInt();
-  }
-  if(jtok = obj["Height"])
-  {
-    p.height = jtok.getInt();
-  }
-  if(jtok = obj["StartX"])
-  {
-    p.xOffset = jtok.getInt();
-  }
-  if(jtok = obj["StartY"])
-  {
-    p.yOffset = jtok.getInt();
-  }
-  if(jtok = obj["BottomStart"])
-  {
-    p.bottomStart = jtok.getInt();
-  }
-  if(jtok = obj["RightStart"])
-  {
-    p.rightStart = jtok.getInt();
-  }
-  if(jtok = obj["Vertical"])
-  {
-    p.vertical = jtok.getInt();
-  }
-  if(jtok = obj["Serpentine"])
-  {
-    p.serpentine = jtok.getInt();
-  }
+  if (jtok = obj["Width"]) p.width = jtok.getInt();
+  if (jtok = obj["Height"]) p.height = jtok.getInt();
 
-  ALOG_INF(PSTR(
-    "MatrixConfig[%d]: %dx%d, StartX:%d, StartY:%d, BottomStart:%d, RightStart:%d, Vertical:%d, Serpentine:%d"),
-    panels, p.width, p.height, p.xOffset, p.yOffset, p.bottomStart, p.rightStart, p.vertical, p.serpentine
-  );
-  
+  // Accept both PulSar/WLED-style names so existing templates continue to work
+  if (jtok = obj["StartX"]) p.xOffset = jtok.getInt();
+  else if (jtok = obj["xOffset"]) p.xOffset = jtok.getInt();
+
+  if (jtok = obj["StartY"]) p.yOffset = jtok.getInt();
+  else if (jtok = obj["yOffset"]) p.yOffset = jtok.getInt();
+
+  if (jtok = obj["BottomStart"]) p.bottomStart = jtok.getInt();
+  if (jtok = obj["RightStart"]) p.rightStart = jtok.getInt();
+  if (jtok = obj["Vertical"]) p.vertical = jtok.getInt();
+  if (jtok = obj["Serpentine"]) p.serpentine = jtok.getInt();
+
+  ALOG_INF(PSTR("MatrixConfig[%u]: %ux%u, StartX:%u, StartY:%u, BottomStart:%u, RightStart:%u, Vertical:%u, Serpentine:%u"), static_cast<unsigned>(panel.size()), static_cast<unsigned>(p.width), static_cast<unsigned>(p.height), static_cast<unsigned>(p.xOffset), static_cast<unsigned>(p.yOffset), static_cast<unsigned>(p.bottomStart), static_cast<unsigned>(p.rightStart), static_cast<unsigned>(p.vertical), static_cast<unsigned>(p.serpentine));
+
   panel.push_back(p);
-  ALOG_INF(PSTR("panels %d" ), panel.size());
-  
-  isMatrix = true;
 
+  panels = panel.size();
+
+  ALOG_INF(PSTR("panels %u"), static_cast<unsigned>(panels));
+
+  isMatrix = true;
 }
 #endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 

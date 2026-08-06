@@ -422,6 +422,12 @@ const char PAGETEST_dmxmap_lights[] PROGMEM = R"=====()=====";
       filter: "html-minify",
     },
     {
+      file: "virtualview.htm",
+      name: "PAGE_virtualview",
+      method: "gzip",
+      filter: "html-minify",
+    },
+    {
       file: "404.htm",
       name: "PAGE_404",
       method: "gzip",

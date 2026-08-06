@@ -60,7 +60,7 @@ void mAnimatorLight::EffectAnim__Solid_Colour()
 }
 static const char PM_EFFECT_CONFIG__SOLID_COLOUR[] PROGMEM =
 "Solid@"                                       // Name
-"Speed,Intensity,,,,,,,!,"                     // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Intensity,,,,,,,!,"                     // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                            // ----------------------------------------- Sliders/SegCols
 ""                                             // Segment Colour Names (blank = show all)
 ";"                                            // ----------------------------------------- SegCols/PalPicker
@@ -112,7 +112,7 @@ void mAnimatorLight::EffectAnim__Static_Palette()
 }
 static const char PM_EFFECT_CONFIG__STATIC_PALETTE[] PROGMEM =
 "Static Palette@"                              // Name
-"Speed,,,,,,,,!,!"                             // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,,,,,,,,!,!"                             // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                            // ----------------------------------------- Sliders/SegCols
 "!"                                            // Segment Colour Names
 ";"                                            // ----------------------------------------- SegCols/PalPicker
@@ -296,6 +296,8 @@ static const char PM_EFFECT_DESCRI__BANDS_PALETTE_SEGWIDTH[] PROGMEM =
 "C1: Segment offset\n\r"
 "O3: Use IX as the exact repetition count\n\r"
 "EP: Refresh period";
+
+
 /*******************************************************************************************************************************************************************************************************************
  * @description : Gradient Palette
  *
@@ -383,7 +385,7 @@ void mAnimatorLight::EffectAnim__Gradient_Palette_SegWidth()
 }
 static const char PM_EFFECT_CONFIG__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 "Gradient@"                                    // Name
-"Speed,,Width,,,Hard edge,,,!,"                 // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,,Width,,,Hard edge,,,!,"                 // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                            // ----------------------------------------- Sliders/SegCols
 "!,!,!,!,!"                                    // Segment Colour Names
 ";"                                            // ----------------------------------------- SegCols/PalPicker
@@ -403,6 +405,7 @@ static const char PM_EFFECT_DESCRI__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 "C1: Gradient repeat width\n\r"
 "O1: Hard repeat boundary\n\r"
 "EP: Complete effect period";
+
 
 /************************************************************************************************************************************
  * @brief Random Gradient Palette
@@ -486,7 +489,7 @@ void mAnimatorLight::EffectAnim__Randomise_Gradient_Palette_SegWidth()
 }
 static const char PM_EFFECT_CONFIG__RANDOMISE_GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 "Gradient Random@"                             // Name
-"Speed,,Width,,,Hard edge,Auto cycle,,!,"       // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,,Width,,,Hard edge,Auto cycle,,!,"       // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                            // ----------------------------------------- Sliders/SegCols
 ""                                             // Segment Colour Names
 ";"                                            // ----------------------------------------- SegCols/PalPicker
@@ -780,7 +783,7 @@ void mAnimatorLight::EffectAnim__Candle_Single()
 }
 static const char PM_EFFECT_CONFIG__CANDLE_SINGLE[] PROGMEM =
 "Candle@"                                      // Name
-"Speed,Intensity,,,,,,,,"                      // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Intensity,,,,,,,,"                      // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                            // ----------------------------------------- Sliders/SegCols
 ""                                             // Segment Colour Names
 ";"                                            // ----------------------------------------- SegCols/PalPicker
@@ -816,7 +819,7 @@ void mAnimatorLight::EffectAnim__Candle_Multiple()
 }
 static const char PM_EFFECT_CONFIG__CANDLE_MULTIPLE[] PROGMEM =
 "Candles@"                                     // Name
-"Speed,Intensity,,,,,,,,"                      // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Intensity,,,,,,,,"                      // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                            // ----------------------------------------- Sliders/SegCols
 ""                                             // Segment Colour Names
 ";"                                            // ----------------------------------------- SegCols/PalPicker
@@ -851,7 +854,7 @@ void mAnimatorLight::EffectAnim__Shimmering_Two_Palette()
 }
 static const char PM_EFFECT_CONFIG__SHIMMERING_TWO_PALETTES[] PROGMEM =
 "Shimmering Palettes@"                         // Name
-"Speed,Intensity,,,,,,,,"                      // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Intensity,,,,,,,,"                      // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                            // ----------------------------------------- Sliders/SegCols
 ""                                             // Segment Colour Names
 ";"                                            // ----------------------------------------- SegCols/PalPicker
@@ -886,7 +889,7 @@ void mAnimatorLight::EffectAnim__Shimmering_Palette_Saturation()
 }
 static const char PM_EFFECT_CONFIG__SHIMMERING_PALETTE_SATURATION[] PROGMEM =
 "Shimmering Saturation@"                       // Name
-"Speed,Intensity,,,,,,,,"                      // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Intensity,,,,,,,,"                      // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                            // ----------------------------------------- Sliders/SegCols
 ""                                             // Segment Colour Names
 ";"                                            // ----------------------------------------- SegCols/PalPicker
@@ -980,6 +983,8 @@ void mAnimatorLight::EffectAnim__Rotate_Base(uint16_t movement_amount, bool dire
     }
   }
 }
+
+
 /*******************************************************************************************************************************************************************************************************************
  * @description : Rotates the colours already stored in the current segment-local pixel buffer.
  *                - Does not repaint the palette or generate a new pattern.
@@ -1261,7 +1266,7 @@ void mAnimatorLight::EffectAnim__Rotating_Previous_Animation()
 }
 static const char PM_EFFECT_CONFIG__ROTATING_PREVIOUS_ANIMATION[] PROGMEM =
 "Rotate Previous@"                                  // Name
-"Speed,Shift,Auto-reverse,,,,Reverse,Rubber band"   // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
+"!,Shift,Auto-reverse,,,,Reverse,Rubber band"   // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
 ";"
 ""                                                  // Segment Colour Names
 ";"
@@ -1281,6 +1286,7 @@ static const char PM_EFFECT_DESCRI__ROTATING_PREVIOUS_ANIMATION[] PROGMEM =
 "C1>0: Automatic reversal interval, 3-20 seconds\n\r"
 "C2: Manual direction when automatic reversal is disabled\n\r"
 "C3: Rubber-band slowdown and acceleration around reversals";
+
 
 /*******************************************************************************************************************************************************************************************************************
  * @description : Paints the active palette into the segment-local pixel buffer and rotates it across the segment.
@@ -1568,7 +1574,7 @@ void mAnimatorLight::EffectAnim__Rotating_Palette()
 }
 static const char PM_EFFECT_CONFIG__ROTATING_PALETTE[] PROGMEM =
 "Rotate Palette@"                                  // Name
-"Speed,Shift,Auto-reverse EN>0,,,Hard edge,Reverse,Rubber band"  // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
+"!,Shift,Auto-reverse EN>0,,,Hard edge,Reverse,Rubber band"  // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
 ";"
 ""                                                 // Segment Colour Names
 ";"
@@ -1693,10 +1699,12 @@ static const char PM_EFFECT_DESCRI__ROTATING_PALETTE[] PROGMEM =
  *   A new slot target is not generated while the previous segment transition is still active. This ensures that one
  *   replacement transition completes before the next slot begins changing.
  *
- *   SEGMENT.speed determines the duration of the transition relative to the configured update period:
+ *   SEGMENT.startPeriodTransition() derives the transition duration from the configured effect period and SEGMENT.speed:
  *
- *       Speed = 0     -> transition occupies the complete update period
+ *       Speed = 0     -> transition occupies the complete effect period
  *       Speed = 255   -> immediate target replacement
+ *
+ *   The remaining portion of the effect period is the static hold time before the next slot target is generated.
  *
  *
  * STATE
@@ -1719,19 +1727,19 @@ static const char PM_EFFECT_DESCRI__ROTATING_PALETTE[] PROGMEM =
  * OUTPUT
  *   Colours are written directly into the segment pixel buffer using SEGMENT.setPixelColor().
  *
- *   SEGMENT.startTransition() captures the current segment state before the target pixels are changed. The normal segment
- *   transition system then blends from that captured state into the new pixel values.
+ *   SEGMENT.startPeriodTransition(true) captures the current segment state before the target pixels are changed. The
+ *   segment transition system then blends from that captured state into the new pixel values.
  *
  *
  * CONTROLS
  *   Speed
- *       Controls transition duration between the existing slot colour and the newly assigned slot colour.
+ *       Controls the proportion of the effect period occupied by the transition.
  *
  *   Visible colours
  *       Controls the number of logical colour slots simultaneously displayed.
  *
  *   Effect period
- *       Controls the delay between slot replacements.
+ *       Controls the complete interval between slot replacements.
  *
  *   Palette
  *       Supplies the ordered sequence of colours used by the effect.
@@ -1740,23 +1748,12 @@ void mAnimatorLight::EffectAnim__Stepping_Palette()
 {
   const uint16_t segment_length = SEGMENT.length();
 
-  if (segment_length == 0)
-  {
-    return;
-  }
+  if (segment_length == 0) return;
+  if (SEGMENT.palette_loaded == nullptr) return;
 
-  if (SEGMENT.palette_loaded == nullptr)
-  {
-    return;
-  }
+  const uint8_t palette_count_raw = SEGMENT.palette_loaded->colours_in_palette;
 
-  const uint8_t palette_count_raw =
-    SEGMENT.palette_loaded->colours_in_palette;
-
-  if (palette_count_raw == 0)
-  {
-    return;
-  }
+  if (palette_count_raw == 0) return;
 
   /*
    * Use an even number of palette entries where possible.
@@ -1765,15 +1762,8 @@ void mAnimatorLight::EffectAnim__Stepping_Palette()
    */
   uint8_t palette_count = palette_count_raw;
 
-  if ((palette_count > 1) && ((palette_count & 0x01u) != 0))
-  {
-    palette_count--;
-  }
-
-  if (palette_count == 0)
-  {
-    return;
-  }
+  if ((palette_count > 1) && ((palette_count & 0x01U) != 0)) palette_count--;
+  if (palette_count == 0) return;
 
   /*
    * Map intensity to the number of simultaneously visible logical slots.
@@ -1781,21 +1771,11 @@ void mAnimatorLight::EffectAnim__Stepping_Palette()
    * For three or more colours, one palette entry remains staged outside the
    * visible pattern and becomes the next entering colour.
    */
-  const uint8_t visible_colour_count =
-    (palette_count >= 3)
-      ? static_cast<uint8_t>(
-          2u +
-          (
-            static_cast<uint16_t>(SEGMENT.intensity) *
-            static_cast<uint16_t>(palette_count - 3u)
-          ) / 255u
-        )
-      : palette_count;
+  const uint8_t visible_colour_count = (palette_count >= 3)
+    ? static_cast<uint8_t>(2U + ((static_cast<uint16_t>(SEGMENT.intensity) * static_cast<uint16_t>(palette_count - 3U)) / 255U))
+    : palette_count;
 
-  if (visible_colour_count == 0)
-  {
-    return;
-  }
+  if (visible_colour_count == 0) return;
 
   /*
    * Persistent effect state.
@@ -1805,22 +1785,15 @@ void mAnimatorLight::EffectAnim__Stepping_Palette()
   uint16_t& visible_count_cache = SEGMENT.aux2;
   uint32_t& last_update_time    = SEGMENT.aux3;
 
-  const bool first_effect_call =
-    (SEGMENT.call == 0);
-
-  const bool visible_count_changed =
-    (visible_count_cache != visible_colour_count);
-
-  const bool reseed_pattern =
-    first_effect_call || visible_count_changed;
+  const bool first_effect_call     = (SEGMENT.call == 0);
+  const bool visible_count_changed = (visible_count_cache != visible_colour_count);
+  const bool reseed_pattern        = first_effect_call || visible_count_changed;
 
   /*
-   * The configured effect period defines the delay between target updates.
+   * The configured effect period defines the complete interval between target updates.
    */
-  const uint32_t update_period_ms = SEGMENT.get_effect_period();
-
-  const uint32_t elapsed_since_update =
-    effect_start_time - last_update_time;
+  const uint32_t update_period_ms    = SEGMENT.get_effect_period();
+  const uint32_t elapsed_since_update = effect_start_time - last_update_time;
 
   /*
    * Do not produce a new slot target until the configured period has elapsed.
@@ -1828,42 +1801,21 @@ void mAnimatorLight::EffectAnim__Stepping_Palette()
    * Pattern reseeding occurs immediately because the current slot layout is no
    * longer valid after the visible-colour count changes.
    */
-  if (!reseed_pattern && (elapsed_since_update < update_period_ms))
-  {
-    return;
-  }
+  if (!reseed_pattern && (elapsed_since_update < update_period_ms)) return;
 
   /*
    * Allow the current target transition to complete before assigning another
    * slot target.
    */
-  if (SEGMENT.isInTransition())
-  {
-    return;
-  }
-
-  /*
-   * Speed controls how much of the update period is occupied by blending.
-   *
-   * Higher speed values produce shorter transitions.
-   */
-  const uint16_t transition_duration_ms =
-    static_cast<uint16_t>(
-      (
-        static_cast<uint32_t>(update_period_ms) *
-        static_cast<uint32_t>(255u - SEGMENT.speed)
-      ) / 255u
-    );
-
-  // ALOG_INF(PSTR("transition_duration from stepping pallette %d"), transition_duration_ms);
+  if (SEGMENT.isInTransition()) return;
 
   /*
    * Capture the current segment pixels before modifying the new target state.
+   *
+   * The transition duration is derived from the complete effect period and
+   * SEGMENT.speed.
    */
-  SEGMENT.startTransition(
-    transition_duration_ms,
-    true
-  );
+  SEGMENT.startPeriodTransition(true);
 
   last_update_time = effect_start_time;
 
@@ -1872,34 +1824,21 @@ void mAnimatorLight::EffectAnim__Stepping_Palette()
     /*
      * Generate the complete repeating slot pattern.
      */
-    for (uint16_t pixel_index = 0;
-         pixel_index < segment_length;
-         pixel_index++)
+    for (uint16_t pixel_index = 0; pixel_index < segment_length; pixel_index++)
     {
-      const uint8_t slot_index =
-        static_cast<uint8_t>(
-          pixel_index % visible_colour_count
-        );
+      const uint8_t slot_index    = static_cast<uint8_t>(pixel_index % visible_colour_count);
+      const uint8_t palette_index = static_cast<uint8_t>(slot_index % palette_count);
 
-      const uint8_t palette_index =
-        static_cast<uint8_t>(
-          slot_index % palette_count
-        );
-
-      const uint32_t colour =
-        SEGMENT.GetPaletteColour(
-          palette_index,
-          PALETTE_INDEX__IS_EXACT_COLOUR,
-          PALETTE_MODE__DEFAULT,
-          PALETTE_WRAP_HARDEDGE,
-          NO_ENCODED_VALUE,
-          PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
-        );
-
-      SEGMENT.setPixelColor(
-        pixel_index,
-        colour
+      const uint32_t colour = SEGMENT.GetPaletteColour(
+        palette_index,
+        PALETTE_INDEX__IS_EXACT_COLOUR,
+        PALETTE_MODE__DEFAULT,
+        PALETTE_WRAP_HARDEDGE,
+        NO_ENCODED_VALUE,
+        PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
       );
+
+      SEGMENT.setPixelColor(pixel_index, colour);
     }
 
     /*
@@ -1910,13 +1849,8 @@ void mAnimatorLight::EffectAnim__Stepping_Palette()
     /*
      * The first entering colour follows the currently visible palette window.
      */
-    next_palette_index =
-      static_cast<uint16_t>(
-        visible_colour_count % palette_count
-      );
-
-    visible_count_cache =
-      visible_colour_count;
+    next_palette_index  = static_cast<uint16_t>(visible_colour_count % palette_count);
+    visible_count_cache = visible_colour_count;
 
     return;
   }
@@ -1924,55 +1858,33 @@ void mAnimatorLight::EffectAnim__Stepping_Palette()
   /*
    * Select the palette colour that will replace the current logical slot.
    */
-  const uint8_t palette_index =
-    static_cast<uint8_t>(
-      next_palette_index % palette_count
-    );
+  const uint8_t palette_index = static_cast<uint8_t>(next_palette_index % palette_count);
 
-  const uint32_t colour =
-    SEGMENT.GetPaletteColour(
-      palette_index,
-      PALETTE_INDEX__IS_EXACT_COLOUR,
-      PALETTE_MODE__DEFAULT,
-      PALETTE_WRAP_HARDEDGE,
-      NO_ENCODED_VALUE,
-      PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
-    );
+  const uint32_t colour = SEGMENT.GetPaletteColour(
+    palette_index,
+    PALETTE_INDEX__IS_EXACT_COLOUR,
+    PALETTE_MODE__DEFAULT,
+    PALETTE_WRAP_HARDEDGE,
+    NO_ENCODED_VALUE,
+    PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
+  );
 
   /*
    * Update every pixel belonging to the selected repeating slot.
    *
    * Pixels in all other slots retain their existing target colours.
    */
-  for (uint16_t pixel_index = write_slot;
-       pixel_index < segment_length;
-       pixel_index += visible_colour_count)
-  {
-    SEGMENT.setPixelColor(
-      pixel_index,
-      colour
-    );
-  }
+  for (uint16_t pixel_index = write_slot; pixel_index < segment_length; pixel_index += visible_colour_count) SEGMENT.setPixelColor(pixel_index, colour);
 
   /*
-   * Advance to the next logical slot.
+   * Advance the logical slot and palette entry.
    */
-  write_slot =
-    static_cast<uint16_t>(
-      (write_slot + 1u) % visible_colour_count
-    );
-
-  /*
-   * Advance to the next palette entry.
-   */
-  next_palette_index =
-    static_cast<uint16_t>(
-      (next_palette_index + 1u) % palette_count
-    );
+  write_slot         = static_cast<uint16_t>((write_slot + 1U) % visible_colour_count);
+  next_palette_index = static_cast<uint16_t>((next_palette_index + 1U) % palette_count);
 }
 static const char PM_EFFECT_CONFIG__STEPPING_PALETTE[] PROGMEM =
 "Stepping Palette@"                        // Effect name
-"Speed,Visible colours,,,,,,,ep,g"             // Controls: Speed and Intensity
+"!,Visible colours,,,,,,,!,"           // 10 fields after '@': 1sx,2ix,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"
 ""                                         // No segment colour controls
 ";"
@@ -1980,20 +1892,20 @@ static const char PM_EFFECT_CONFIG__STEPPING_PALETTE[] PROGMEM =
 ";"
 "1"                                        // 1D effect icon
 ";"
-"ep=1000,"                                 // Slot replacement period in milliseconds
-"sx=127,"                                  // Default transition speed
+"ep=5000,"                                 // Complete slot-replacement period
+"sx=127,"                                  // Transition occupies approximately half the effect period
 "ix=1,"                                    // Default visible-colour control
-"paln=Colourful"                           // Default palette
+"paln=Colourful Pairs 01"                           // Default palette
 ;
 static const char PM_EFFECT_DESCRI__STEPPING_PALETTE[] PROGMEM =
 "Replaces one repeating palette slot per update.\n\r"
 "IX: Number of visible colour slots\n\r"
-"SX: Transition duration\n\r"
-"EP: Delay between slot replacements\n\r"
+"SX: Proportion of the effect period used for blending\n\r"
+"EP: Complete interval between slot replacements\n\r"
 "Palette: Ordered colour source";
 
 
- /**********************************************************************************************************************************************************************************
+/**********************************************************************************************************************************************************************************
  * EFFECT: Stepping Palette With Background
  *
  * SUMMARY
@@ -2003,8 +1915,8 @@ static const char PM_EFFECT_DESCRI__STEPPING_PALETTE[] PROGMEM =
  *   every effect update, while the remaining foreground groups retain their current colours. Pixels between foreground
  *   positions are filled from the secondary palette.
  *
- *   The effect constructs a complete target frame directly in the segment pixel buffer. SEGMENT.startTransition() captures
- *   the current frame before the new target is written, allowing the normal segment transition system to blend between them.
+ *   The effect constructs a complete target frame directly in the segment pixel buffer. SEGMENT.startPeriodTransition(true)
+ *   captures the current frame before the new target is written, allowing the segment transition system to blend between them.
  *
  *
  * FOREGROUND PALETTE
@@ -2099,13 +2011,16 @@ static const char PM_EFFECT_DESCRI__STEPPING_PALETTE[] PROGMEM =
  *
  *
  * TIMING AND TRANSITION
- *   SEGMENT.get_effect_period() specifies the delay between target-frame updates.
+ *   SEGMENT.get_effect_period() specifies the complete interval between target-frame updates.
  *
- *   A new target is not created until the current transition has completed. SEGMENT.speed determines how much of the effect
- *   period is used for blending:
+ *   A new target is not created until the current transition has completed.
+ *
+ *   SEGMENT.startPeriodTransition(true) derives the transition duration from the configured effect period and SEGMENT.speed:
  *
  *       Speed = 0     -> transition occupies the complete effect period
  *       Speed = 255   -> immediate target replacement
+ *
+ *   The remaining portion of the effect period is the static hold time before the next target is generated.
  *
  *
  * PERSISTENT STATE
@@ -2117,35 +2032,38 @@ static const char PM_EFFECT_DESCRI__STEPPING_PALETTE[] PROGMEM =
  *
  *
  * CONTROLS
- *   SX       -> transition speed
+ *   SX       -> proportion of the effect period used for blending
  *   IX       -> visible foreground-colour count
  *   Custom2  -> foreground skip spacing
  *   Custom3  -> background brightness
  *   Check1   -> gradient or discrete background rendering
- *   EP       -> delay between foreground slot updates
+ *   EP       -> complete interval between foreground slot updates
  *   Palette  -> foreground colour source
  *   Palette2 -> background colour source
  **********************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
 {
   const uint16_t segment_length = SEGMENT.length();
+
   if (segment_length == 0 || SEGMENT.palette_loaded == nullptr) return;
 
   const uint8_t palette_count_raw = SEGMENT.palette_loaded->colours_in_palette;
+
   if (palette_count_raw == 0) return;
 
   /*
    * Use an even number of primary-palette entries where possible.
    */
   uint8_t palette_count = palette_count_raw;
-  if (palette_count > 1 && (palette_count & 0x01u)) palette_count--;
+
+  if (palette_count > 1 && (palette_count & 0x01U)) palette_count--;
   if (palette_count == 0) return;
 
   /*
    * Map intensity to the number of simultaneously visible foreground colours.
    */
   const uint8_t visible_colour_count = (palette_count >= 3)
-    ? static_cast<uint8_t>(2u + (static_cast<uint16_t>(SEGMENT.intensity) * static_cast<uint16_t>(palette_count - 3u)) / 255u)
+    ? static_cast<uint8_t>(2U + (static_cast<uint16_t>(SEGMENT.intensity) * static_cast<uint16_t>(palette_count - 3U)) / 255U)
     : palette_count;
 
   if (visible_colour_count == 0) return;
@@ -2153,9 +2071,10 @@ void mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
   /*
    * Calculate foreground spacing and repeating period.
    */
-  const uint16_t skip = static_cast<uint16_t>(map(SEGMENT.custom2, 0, 255, 0, segment_length));
-  const uint32_t stride = static_cast<uint32_t>(skip) + 1u;
+  const uint16_t skip              = SEGMENT.custom2;//static_cast<uint16_t>(map(SEGMENT.custom2, 0, 255, 0, segment_length));
+  const uint32_t stride            = static_cast<uint32_t>(skip) + 1U;
   const uint32_t foreground_period = static_cast<uint32_t>(visible_colour_count) * stride;
+
   if (foreground_period == 0) return;
 
   /*
@@ -2172,39 +2091,32 @@ void mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
   uint32_t& last_update_time    = SEGMENT.aux3;
   uint32_t& skip_cache          = SEGMENT.step;
 
-  const bool reseed_pattern =
-    SEGMENT.call == 0 ||
-    visible_count_cache != visible_colour_count ||
-    skip_cache != skip;
+  const bool reseed_pattern = SEGMENT.call == 0 || visible_count_cache != visible_colour_count || skip_cache != skip;
 
   /*
    * Wait for the configured effect period and the active transition.
    */
-  const uint32_t update_period_ms = SEGMENT.get_effect_period();
+  const uint32_t update_period_ms    = SEGMENT.get_effect_period();
   const uint32_t elapsed_since_update = effect_start_time - last_update_time;
 
   if (!reseed_pattern && elapsed_since_update < update_period_ms) return;
   if (SEGMENT.isInTransition()) return;
 
   /*
-   * Higher speed values produce shorter transitions.
-   */
-  const uint16_t transition_duration_ms =
-    static_cast<uint16_t>((static_cast<uint32_t>(update_period_ms) * static_cast<uint32_t>(255u - SEGMENT.speed)) / 255u);
-
-  /*
    * Capture the current frame before constructing the new target.
+   *
+   * The transition duration is derived from the complete effect period and
+   * SEGMENT.speed.
    */
-  SEGMENT.startTransition(transition_duration_ms, true);
+  SEGMENT.startPeriodTransition(true);
   last_update_time = effect_start_time;
 
   /*
    * Background configuration.
    */
-  const bool background_discrete = SEGMENT.check1;
-  const uint8_t background_control = static_cast<uint8_t>(min<uint16_t>(SEGMENT.custom3, 31u));
-  const uint8_t background_scale =
-    static_cast<uint8_t>((static_cast<uint32_t>(background_control) * background_control * 255u) / (31u * 31u));
+  const bool background_discrete   = SEGMENT.check1;
+  const uint8_t background_control = static_cast<uint8_t>(min<uint16_t>(SEGMENT.custom3, 31U));
+  const uint8_t background_scale   = static_cast<uint8_t>((static_cast<uint32_t>(background_control) * background_control * 255U) / (31U * 31U));
 
   /*
    * Populate every non-foreground position from the loaded secondary palette.
@@ -2212,9 +2124,7 @@ void mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
   for (uint16_t pixel_index = 0; pixel_index < segment_length; pixel_index++)
   {
     const uint32_t remainder = static_cast<uint32_t>(pixel_index) % foreground_period;
-    const bool is_foreground_position =
-      ((remainder % stride) == 0) &&
-      ((remainder / stride) < visible_colour_count);
+    const bool is_foreground_position = ((remainder % stride) == 0) && ((remainder / stride) < visible_colour_count);
 
     if (is_foreground_position) continue;
 
@@ -2238,7 +2148,7 @@ void mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
     for (uint8_t slot_index = 0; slot_index < visible_colour_count; slot_index++)
     {
       const uint32_t first_position = static_cast<uint32_t>(slot_index) * stride;
-      const uint8_t palette_index = static_cast<uint8_t>(slot_index % palette_count);
+      const uint8_t palette_index   = static_cast<uint8_t>(slot_index % palette_count);
 
       const uint32_t foreground_colour = SEGMENT.GetPaletteColour(
         palette_index,
@@ -2249,14 +2159,14 @@ void mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
         PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
       );
 
-      for (uint32_t pixel_index = first_position; pixel_index < segment_length; pixel_index += foreground_period)
-        SEGMENT.setPixelColor(static_cast<uint16_t>(pixel_index), foreground_colour);
+      for (uint32_t pixel_index = first_position; pixel_index < segment_length; pixel_index += foreground_period) SEGMENT.setPixelColor(static_cast<uint16_t>(pixel_index), foreground_colour);
     }
 
-    write_slot = 0;
-    next_palette_index = static_cast<uint16_t>(visible_colour_count % palette_count);
+    write_slot          = 0;
+    next_palette_index  = static_cast<uint16_t>(visible_colour_count % palette_count);
     visible_count_cache = visible_colour_count;
-    skip_cache = skip;
+    skip_cache          = skip;
+
     return;
   }
 
@@ -2276,15 +2186,14 @@ void mAnimatorLight::EffectAnim__Stepping_Palette_With_Background()
 
   const uint32_t first_position = static_cast<uint32_t>(write_slot) * stride;
 
-  for (uint32_t pixel_index = first_position; pixel_index < segment_length; pixel_index += foreground_period)
-    SEGMENT.setPixelColor(static_cast<uint16_t>(pixel_index), foreground_colour);
+  for (uint32_t pixel_index = first_position; pixel_index < segment_length; pixel_index += foreground_period) SEGMENT.setPixelColor(static_cast<uint16_t>(pixel_index), foreground_colour);
 
-  write_slot = static_cast<uint16_t>((write_slot + 1u) % visible_colour_count);
-  next_palette_index = static_cast<uint16_t>((next_palette_index + 1u) % palette_count);
+  write_slot         = static_cast<uint16_t>((write_slot + 1U) % visible_colour_count);
+  next_palette_index = static_cast<uint16_t>((next_palette_index + 1U) % palette_count);
 }
 static const char PM_EFFECT_CONFIG__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM =
 "Stepping Palette + Bkg@"
-"Speed,Visible colours,,Skip (fg),Bkg Bright,Grad/Discrete,,,ep,g"
+"!,Visible colours,,Skip (fg),Bkg Bright,Grad/Discrete,,,!,"
 ";"
 ""
 ";"
@@ -2293,9 +2202,10 @@ static const char PM_EFFECT_CONFIG__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM =
 "1"
 ";"
 "sx=127,"
-"ix=100,"
-"c2=5,"
+"ix=1,"
+"c2=2,"
 "c3=31,"
+"paln=Colourful Pairs 01,"                           // Default palette
 "pal2=0,"
 "ep=1000,"
 "s0=fff"
@@ -2305,11 +2215,12 @@ static const char PM_EFFECT_DESCRI__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM =
 "IX: Visible foreground colours\n\r"
 "C2: Foreground skip spacing\n\r"
 "C3: Background brightness\n\r"
-"SX: Transition duration\n\r"
-"EP: Delay between foreground replacements\n\r"
+"SX: Proportion of the effect period used for blending\n\r"
+"EP: Complete interval between foreground replacements\n\r"
 "Check1: Gradient/discrete background\n\r"
 "Palette: Foreground source\n\r"
 "Palette2: Background source";
+
 
 /**********************************************************************************************************************************************************************************
  * EFFECT: Blend Two Palettes
@@ -2354,7 +2265,7 @@ static const char PM_EFFECT_DESCRI__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM =
  *
  *
  * PROGRESS SHAPING
- *   Normalised cycle progress u ranges from 0.0 to 1.0.
+ *   Normalised cycle progress ranges from 0.0 to 1.0.
  *
  *   Intensity blends between linear progress and cosine-eased progress, then applies an intensity-controlled power curve:
  *
@@ -2364,22 +2275,26 @@ static const char PM_EFFECT_DESCRI__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM =
  *       Intensity = 255
  *           Strongly back-loaded activation with relatively few changes near the beginning and many changes near the end.
  *
- *   The resulting fraction Q is converted into a 16-bit activation threshold:
+ *   The resulting activation fraction is converted into a 16-bit activation threshold:
  *
- *       Q = 0.0 -> no pixels have changed to the target palette
- *       Q = 1.0 -> all pixels have changed to the target palette
+ *       Activation fraction = 0.0 -> no pixels have changed to the target palette
+ *       Activation fraction = 1.0 -> all pixels have changed to the target palette
  *
  *
  * TIMING
- *   Speed controls the complete palette-change cycle:
+ *   Custom1 controls the complete primary-to-secondary or secondary-to-primary cycle:
  *
- *       Speed = 0   -> approximately 60 seconds
- *       Speed = 255 -> approximately 1 second
+ *       Custom1 = 0   -> approximately 60 seconds
+ *       Custom1 = 255 -> approximately 1 second
  *
- *   The configured effect period controls the transition duration applied between successive rendered target frames.
+ *   The configured effect period determines the complete interval between generated target frames.
  *
- *   A new target frame is generated after the current segment transition has completed. SEGMENT.startTransition() captures
- *   the current segment frame before the newly calculated palette assignments are written.
+ *   SEGMENT.startPeriodTransition(true) derives the transition duration from the effect period and SEGMENT.speed:
+ *
+ *       Speed = 0     -> transition occupies the complete effect period
+ *       Speed = 255   -> immediate target replacement
+ *
+ *   A new target frame is generated only after the current target-frame transition has completed.
  *
  *
  * PALETTE SAMPLING
@@ -2404,18 +2319,21 @@ static const char PM_EFFECT_DESCRI__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM =
  *       Timestamp at which the current cycle began.
  *
  *   SEGMENT.step
- *       Cached cycle duration. A speed change immediately starts a new cycle.
+ *       Cached cycle duration. A Custom1 change immediately starts a new cycle.
  *
  *
  * CONTROLS
  *   SX
- *       Complete cycle duration, mapped from approximately 60 seconds to 1 second.
+ *       Proportion of the effect period used for blending between generated target frames.
  *
  *   IX
  *       Activation-curve shape, ranging from approximately linear to strongly back-loaded.
  *
+ *   Custom1
+ *       Complete palette-change cycle, mapped from approximately 60 seconds to 1 second.
+ *
  *   EP
- *       Transition duration between generated target frames.
+ *       Complete interval between generated target frames.
  *
  *   Palette
  *       Primary palette.
@@ -2426,6 +2344,7 @@ static const char PM_EFFECT_DESCRI__STEPPING_PALETTE_WITH_BACKGROUND[] PROGMEM =
 void mAnimatorLight::EffectAnim__Blend_Two_Palettes()
 {
   const uint16_t segment_length = SEGMENT.length();
+
   if (segment_length == 0 || SEGMENT.palette_loaded == nullptr) return;
   if (!SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id)) return;
 
@@ -2438,15 +2357,15 @@ void mAnimatorLight::EffectAnim__Blend_Two_Palettes()
   uint32_t& cached_cycle_period = SEGMENT.step;
 
   /*
-   * Map speed from approximately 60 seconds to 1 second.
+   * Map Custom1 from approximately 60 seconds to 1 second.
    */
-  const uint32_t cycle_period_ms = ((static_cast<uint32_t>(255u - SEGMENT.speed) * (60000u - 1000u)) / 255u) + 1000u;
+  const uint32_t cycle_period_ms = ((static_cast<uint32_t>(255U - SEGMENT.custom1) * (60000U - 1000U)) / 255U) + 1000U;
 
-  const uint32_t now = effect_start_time;
-  const bool first_effect_call = (SEGMENT.call == 0);
-  const bool speed_changed = (cached_cycle_period != cycle_period_ms);
-  const bool cycle_complete = !first_effect_call && ((now - cycle_start_time) >= cycle_period_ms);
-  const bool begin_new_cycle = first_effect_call || speed_changed || cycle_complete;
+  const uint32_t now               = effect_start_time;
+  const bool first_effect_call     = (SEGMENT.call == 0);
+  const bool cycle_period_changed  = (cached_cycle_period != cycle_period_ms);
+  const bool cycle_complete        = !first_effect_call && ((now - cycle_start_time) >= cycle_period_ms);
+  const bool begin_new_cycle       = first_effect_call || cycle_period_changed || cycle_complete;
 
   /*
    * Initialise or advance the alternating cycle.
@@ -2454,11 +2373,11 @@ void mAnimatorLight::EffectAnim__Blend_Two_Palettes()
   if (begin_new_cycle)
   {
     if (first_effect_call) direction = 0;
-    else direction ^= 1u;
+    else direction ^= 1U;
 
-    cycle_start_time = now;
+    cycle_start_time    = now;
     cached_cycle_period = cycle_period_ms;
-    random_seed = hw_random16();
+    random_seed         = hw_random16();
   }
 
   /*
@@ -2470,21 +2389,21 @@ void mAnimatorLight::EffectAnim__Blend_Two_Palettes()
    * Calculate normalised cycle progress.
    */
   uint32_t elapsed_ms = now - cycle_start_time;
+
   if (elapsed_ms > cycle_period_ms) elapsed_ms = cycle_period_ms;
 
-  const float progress = static_cast<float>(elapsed_ms) / static_cast<float>(cycle_period_ms);
-  const float intensity = static_cast<float>(SEGMENT.intensity) / 255.0f;
-  const float eased_progress = 0.5f - (0.5f * cosf(3.14159265f * progress));
-  const float gamma = 1.0f + (4.0f * intensity);
+  const float progress            = static_cast<float>(elapsed_ms) / static_cast<float>(cycle_period_ms);
+  const float intensity           = static_cast<float>(SEGMENT.intensity) / 255.0f;
+  const float eased_progress      = 0.5f - (0.5f * cosf(3.14159265f * progress));
+  const float gamma               = 1.0f + (4.0f * intensity);
+  float activation_fraction       = ((1.0f - intensity) * progress) + (intensity * eased_progress);
 
-  float activation_fraction = ((1.0f - intensity) * progress) + (intensity * eased_progress);
   activation_fraction = powf(activation_fraction, gamma);
 
   if (activation_fraction < 0.0f) activation_fraction = 0.0f;
   else if (activation_fraction > 1.0f) activation_fraction = 1.0f;
 
-  const uint16_t activation_threshold =
-    static_cast<uint16_t>((activation_fraction * 65535.0f) + 0.5f);
+  const uint16_t activation_threshold = static_cast<uint16_t>((activation_fraction * 65535.0f) + 0.5f);
 
   /*
    * Stable per-pixel activation hash for the current cycle.
@@ -2492,28 +2411,29 @@ void mAnimatorLight::EffectAnim__Blend_Two_Palettes()
   const auto hash16 = [](uint16_t pixel_index, uint16_t seed) -> uint16_t
   {
     uint16_t value = static_cast<uint16_t>(pixel_index ^ seed);
+
     value ^= static_cast<uint16_t>((value << 7) | (value >> 9));
-    value = static_cast<uint16_t>(value * 0x9E37u);
+    value  = static_cast<uint16_t>(value * 0x9E37U);
     value ^= static_cast<uint16_t>((value << 5) | (value >> 11));
+
     return value;
   };
 
   /*
    * Capture the current frame before writing the newly calculated target.
+   *
+   * The transition duration is derived from the complete effect period and
+   * SEGMENT.speed.
    */
-  SEGMENT.startTransition(SEGMENT.get_effect_period(), true);
+  SEGMENT.startPeriodTransition(true);
 
   /*
    * Build the complete target frame.
    */
   for (uint16_t pixel_index = 0; pixel_index < segment_length; pixel_index++)
   {
-    const bool use_target_palette = (hash16(pixel_index, random_seed) <= activation_threshold);
-
-    const bool use_secondary_palette =
-      (direction == 0)
-        ? use_target_palette
-        : !use_target_palette;
+    const bool use_target_palette    = (hash16(pixel_index, random_seed) <= activation_threshold);
+    const bool use_secondary_palette = (direction == 0) ? use_target_palette : !use_target_palette;
 
     uint32_t colour;
 
@@ -2545,7 +2465,7 @@ void mAnimatorLight::EffectAnim__Blend_Two_Palettes()
 }
 static const char PM_EFFECT_CONFIG__BLEND_TWO_PALETTES[] PROGMEM =
 "Blend Two Palettes@"
-"Speed,Intensity,,,,,,,!,"
+"Blend Speed,Activation Shape,Cycle Duration,,,,,,!,"
 ";"
 ",,,,"
 ";"
@@ -2557,13 +2477,15 @@ static const char PM_EFFECT_CONFIG__BLEND_TWO_PALETTES[] PROGMEM =
 "pal2=0,"
 "sx=127,"
 "ix=200,"
+"c1=127,"
 "ep=500"
 ;
 static const char PM_EFFECT_DESCRI__BLEND_TWO_PALETTES[] PROGMEM =
 "Alternates primary and secondary palettes using a random pixel order.\n\r"
-"SX: Complete cycle duration, 60s to 1s\n\r"
+"SX: Proportion of the effect period used for blending\n\r"
 "IX: Activation shape, linear to back-loaded\n\r"
-"EP: Transition duration between target frames\n\r"
+"C1: Complete palette cycle, 60 seconds to 1 second\n\r"
+"EP: Complete interval between generated target frames\n\r"
 "Palette: Primary source\n\r"
 "Palette2: Secondary source";
 
@@ -2755,7 +2677,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Palette_Onto_Palette()
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_PALETTE_SEC_ON_ORDERED_PALETTE_PRI[] PROGMEM =
 "Flicker Palettes@"
-"Speed,Intensity,Twinkle Brightness,Base Brightness,,,,,,"
+"!,Intensity,Twinkle Brightness,Base Brightness,,,,,,"
 ";"
 ""
 ";"
@@ -3208,7 +3130,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Out()
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_OUT[] PROGMEM =
 "Twinkle Pop@"
-"Speed,Density,Blinking,Duration,,,,,!," 
+"!,Density,Blinking,Duration,,,,,!," 
 ";"
 ""
 ";"
@@ -3243,7 +3165,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Decay()
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_DECAY[] PROGMEM =
 "Twinkle PopFade@"
-"Speed,Density,Blinking,Decay Time,,,,,!,"
+"!,Density,Blinking,Decay Time,,,,,!,"
 ";"
 ""
 ";"
@@ -3278,7 +3200,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Glow()
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_GLOW[] PROGMEM =
 "Twinkle Pulse@"
-"Speed,Density,Blinking,Pulse Time,,,,,!,"
+"!,Density,Blinking,Pulse Time,,,,,!,"
 ";"
 ""
 ";"
@@ -3493,7 +3415,7 @@ void mAnimatorLight::EffectAnim__TimeBased__HourProgress()
 }
 static const char PM_EFFECT_CONFIG__TIMEBASED__HOUR_PROGRESS[] PROGMEM =
 "Hour Progress@"
-"Speed,,Background Brightness,,,,,,!,"
+"!,,Background Brightness,,,,,,!,"
 ";"
 ""
 ";"
@@ -3571,7 +3493,7 @@ void mAnimatorLight::EffectAnim__SunPositions__Sunrise_Alarm_01()
 }
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__SUNRISE_ALARM_01[] PROGMEM =
 "Sunrise Alarm@"
-"Speed,,,,,,,,!,"
+"!,,,,,,,,!,"
 ";"
 ""
 ";"
@@ -3637,7 +3559,7 @@ void mAnimatorLight::EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_Palet
 }
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01[] PROGMEM =
 "Sun Azimuth Palette@"
-"Speed,,,,,,,,!,"
+"!,,,,,,,,!,"
 ";"
 ""
 ";"
@@ -3702,7 +3624,7 @@ void mAnimatorLight::EffectAnim__SunPositions__Sunset_Blended_Palettes_01()
 }
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__SUNSET_BLENDED_PALETTES_01[] PROGMEM =
 "Sunset Blended Palettes@"
-"Speed,,,,,,,,!,"
+"!,,,,,,,,!,"
 ";"
 ""
 ";"
@@ -4471,7 +4393,7 @@ void mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azimuth_
 }
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01[] PROGMEM =
 "Sun 2D Elevation/Azimuth@"
-"Speed,,,,,,,,!,"
+"!,,,,,,,,!,"
 ";"
 ""
 ";"
@@ -4531,7 +4453,7 @@ void mAnimatorLight::EffectAnim__SunPositions__White_Colour_Temperature_CCT_Base
 }
 static const char PM_EFFECT_CONFIG__SUNPOSITIONS__WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01[] PROGMEM =
 "Sun White CCT by Elevation@"
-"Speed,,,,,,,,!,"
+"!,,,,,,,,!,"
 ";"
 ""
 ";"
@@ -4863,7 +4785,7 @@ void mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_01()
 }
 static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__CLOCKTIME_01[] PROGMEM =
 "Clock Basic@"
-"Speed,,,,,,,,!,"
+"!,,,,,,,,!,"
 ";"
 ""
 ";"
@@ -4987,7 +4909,7 @@ void mAnimatorLight::EffectAnim__7SegmentDisplay__ClockTime_02()
 }
 static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__CLOCKTIME_02[] PROGMEM =
 "Clock Basic 02@"
-"Speed,,,,,,,,!,"
+"!,,,,,,,,!,"
 ";"
 ""
 ";"
@@ -5095,7 +5017,7 @@ void mAnimatorLight::EffectAnim__7SegmentDisplay__ManualNumber_01()
 }
 static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALNUMBER_01[] PROGMEM =
 "Seven-Segment Number@"
-"Speed,,,,,,,,!,"
+"!,,,,,,,,!,"
 ";"
 ""
 ";"
@@ -5223,7 +5145,7 @@ void mAnimatorLight::EffectAnim__7SegmentDisplay__ManualString_01()
 }
 static const char PM_EFFECT_CONFIG__7SEGMENTDISPLAY__MANUALSTRING_01[] PROGMEM =
 "Seven-Segment String@"
-"Speed,,,,,,,,!,"
+"!,,,,,,,,!,"
 ";"
 ""
 ";"
@@ -5866,7 +5788,7 @@ void mAnimatorLight::EffectAnim__Chase_Colour()
 }
 static const char PM_EFFECT_CONFIG__CHASE_COLOR[] PROGMEM =
 "Chase@"                                      // Name
-"Speed,Width,,,,,,,,,"                        // 10 fields
+"!,Width,,,,,,,,,"                        // 10 fields
 ";"
 "Bg,Fx,Alt"                                   // Color 1 (Bg), Color 0 (Fx), Color 2 (Alt)
 ";"
@@ -5908,7 +5830,7 @@ void mAnimatorLight::EffectAnim__Chase_Rainbow()
 }
 static const char PM_EFFECT_CONFIG__CHASE_RAINBOW[] PROGMEM =
 "Chase Rainbow@"                              // Name
-"Speed,Width,,,,,,,,,"                        // 10 fields
+"!,Width,,,,,,,,,"                        // 10 fields
 ";"
 "Bg,Fx,Alt"                                   // labels kept consistent (Bg not used; heads use Color 0 & 1)
 ";"
@@ -5966,7 +5888,7 @@ void mAnimatorLight::EffectAnim__Chase_Flash(){
 }
 static const char PM_EFFECT_CONFIG__CHASE_FLASH[] PROGMEM =
 "Chase Flash@"                                 // Name
-"Speed,,,,,,,,,,,"                              // 10 fields
+"!,,,,,,,,,,,"                              // 10 fields
 ";"
 "Bg,Fx"                                         // Bg (palette bg label), Fx = Color 1 flash
 ";"
@@ -6027,7 +5949,7 @@ void mAnimatorLight::EffectAnim__Chase_Flash_Random()
 }
 static const char PM_EFFECT_CONFIG__CHASE_FLASH_RANDOM[] PROGMEM =
 "Chase Flash Rnd@"                             // Name
-"Speed,,,,,,,,,,,"                              // 10 fields
+"!,,,,,,,,,,,"                              // 10 fields
 ";"
 "Fx,Alt"                                        // Color 0 = Fx (flash), Color 1 = Alt/off-phase
 ";"
@@ -6068,7 +5990,7 @@ void mAnimatorLight::EffectAnim__Chase_Rainbow_White()
 }
 static const char PM_EFFECT_CONFIG__CHASE_RAINBOW_WHITE[] PROGMEM =
 "Rainbow Runner@"                               // Name
-"Speed,Size,,,,,,,,,"                           // 10 fields
+"!,Size,,,,,,,,,"                           // 10 fields
 ";"
 "Bg"                                            // Color 0 background
 ";"
@@ -6137,7 +6059,7 @@ void mAnimatorLight::EffectAnim__Chase_Theater(void) {
 }
 static const char PM_EFFECT_CONFIG__THEATER_CHASE[] PROGMEM =
 "Theater@"
-"Speed,Gap size,,,,,,,,"      // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Gap size,,,,,,,,"      // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"
 ""
 ";"
@@ -6170,7 +6092,7 @@ void mAnimatorLight::EffectAnim__Chase_Theatre_Rainbow(void) {
 }
 static const char PM_EFFECT_CONFIG__THEATER_CHASE_RAINBOW[] PROGMEM =
 "Theater Rainbow@"
-"Speed,Gap size,,,,,,,,"      // 10 fields after '@'
+"!,Gap size,,,,,,,,"      // 10 fields after '@'
 ";"
 ""
 ";"
@@ -6201,7 +6123,7 @@ void mAnimatorLight::EffectAnim__Running_Colour(void) {
 }
 static const char PM_EFFECT_CONFIG__RUNNING_COLOR[] PROGMEM =
 "Threate Blocks@"
-"Speed,Block width,,,,,,,,"   // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Block width,,,,,,,,"   // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"
 ",,,,"
 ";"
@@ -6263,7 +6185,7 @@ void mAnimatorLight::EffectAnim__Chase_TriColour(void) {
 }
 static const char PM_EFFECT_CONFIG__TRICOLOR_CHASE[] PROGMEM =
 "Chase 3@"                                   // Name
-"Speed,Size,,,,,,,,"                         // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Size,,,,,,,,"                         // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                           // ----------------------------------------- Sliders/SegCols
 "1,2,3,,"                                    // Segment Colour Names (uses SEGCOLOR slots 1..3 labels)
 ";"                                           // ----------------------------------------- SegCols/PalPicker
@@ -6329,7 +6251,7 @@ void mAnimatorLight::EffectAnim__Chase_Random()
 }
 static const char PM_EFFECT_CONFIG__CHASE_RANDOM[] PROGMEM =
 "Stream 2@"                     // Name
-"Speed,Intensity,,,,,,,,"       // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
+"!,Intensity,,,,,,,,"       // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
 ";"
 ""                               // no segment colours
 ";"
@@ -6374,7 +6296,7 @@ void mAnimatorLight::EffectAnim__Breath()
 }
 static const char PM_EFFECT_CONFIG__BREATH[] PROGMEM =
 "Breath@"                                     // Name
-"Speed,,,,,,,,,"                              // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,,,,,,,,,"                              // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                           // ----------------------------------------- Sliders/SegCols
 ",,,,"                                      // Segment Colour names (SEGCOLOR slots; uses Bg = SEGCOLOR(1))
 ";"                                           // ----------------------------------------- SegCols/PalPicker
@@ -6423,7 +6345,7 @@ void mAnimatorLight::EffectAnim__Fade()
 }
 static const char PM_EFFECT_CONFIG__FADE[] PROGMEM =
 "Fade@"                         // Name
-"Speed,Intensity,,,,,,,,"       // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
+"!,Intensity,,,,,,,,"       // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
 ";"
 ""                               // no segment colour names
 ";"
@@ -7247,7 +7169,7 @@ void mAnimatorLight::EffectAnim__Tetrix(void) {
 }
 static const char PM_EFFECT_CONFIG__TETRIX[] PROGMEM =
 "Tetrix@"
-"Speed,Brick width,,,,One color,,,,"
+"!,Brick width,,,,One color,,,,"
 ";"
 ""              // no segment color labels
 ";"
@@ -7385,7 +7307,7 @@ void mAnimatorLight::EffectAnim__Sparkle()
 }
 static const char PM_EFFECT_CONFIG__SPARKLE[] PROGMEM =
 "Sparkle@"
-"Speed,,,,,,Overlay"
+"!,,,,,,Overlay"
 ";"
 "!,!"   // seg color labels unused here
 ";"
@@ -7536,7 +7458,7 @@ void mAnimatorLight::EffectAnim__Random_Colour()
 }
 static const char PM_EFFECT_CONFIG__RANDOM_COLOR[] PROGMEM =
 "Random Colors@"                          // Name
-"Speed,Fade time,,,,,,,,"                 // 10 fields (sliders/checkbox slots)
+"!,Fade time,,,,,,,,"                 // 10 fields (sliders/checkbox slots)
 ";"
 ""                                        // no segment color labels
 ";"
@@ -7581,7 +7503,7 @@ void mAnimatorLight::EffectAnim__Rainbow_Cycle()
 }
 static const char PM_EFFECT_CONFIG__RAINBOW_CYCLE[] PROGMEM =
 "Rainbow Cycle@"                           // Name (fixed typo)
-"Speed,Size,,,,,,,,"                       // 10 fields
+"!,Size,,,,,,,,"                       // 10 fields
 ";"
 ""                                         // no segment color labels
 ";"
@@ -7803,7 +7725,7 @@ void mAnimatorLight::EffectAnim__Twinkle()
 }
 static const char PM_EFFECT_CONFIG__TWINKLE[] PROGMEM =
 "Twinkle@"                                    // Name
-"Speed,Density,,,,,,,,,"                      // 10 fields
+"!,Density,,,,,,,,,"                      // 10 fields
 ";"
 ""                                            // no segment colour labels
 ";"
@@ -8032,7 +7954,7 @@ void mAnimatorLight::EffectAnim__Android()
 }
 static const char PM_EFFECT_CONFIG__ANDROID[] PROGMEM =
 "Android@"                                    // Name
-"Speed,Width,,,,,,,,,"                        // 10 fields after '@'
+"!,Width,,,,,,,,,"                        // 10 fields after '@'
 ";"
 "Arc"                                         // Segment colour labels (SEGCOLOR(0) = arc)
 ";"
@@ -8103,7 +8025,7 @@ void mAnimatorLight::EffectAnim__TriPops()
 }
 static const char PM_EFFECT_CONFIG__TRIPOPS[] PROGMEM =
 "TriPops@"                                    // Name
-"Speed,Intensity,,,,,,,,,"                    // 10 fields
+"!,Intensity,,,,,,,,,"                    // 10 fields
 ";"
 ""                                            // no segment colour labels (overlays are fixed)
 ";"
@@ -8175,7 +8097,7 @@ void mAnimatorLight::EffectAnim__Running_Random()
 }
 static const char PM_EFFECT_CONFIG__RUNNING_RANDOM[] PROGMEM =
 "Stream@"                       // Name
-"Speed,Zone size,,,,,,,,"       // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
+"!,Zone size,,,,,,,,"       // 1sx,2ix,3c1,4c2,5c3,6cbPal,7cbLay,8cbFav,9ep,10grp
 ";"
 ""                               // no segment colours
 ";"
@@ -8246,7 +8168,7 @@ void mAnimatorLight::EffectAnim__Gradient(void) {
 }
 static const char PM_EFFECT_CONFIG__GRADIENT[] PROGMEM =
 "Gradient@"                                   // Name
-"Speed,Spread,,,,,,,,,"                       // 10 fields after '@'
+"!,Spread,,,,,,,,,"                       // 10 fields after '@'
 ";"
 "Primary"                                     // Segment Colour Names (SEGCOLOR(0) = foreground)
 ";"
@@ -8277,7 +8199,7 @@ void mAnimatorLight::EffectAnim__Loading(void) {
 }
 static const char PM_EFFECT_CONFIG__LOADING[] PROGMEM =
 "Loading@"                                    // Name
-"Speed,Fade,,,,,,,,,"                         // 10 fields
+"!,Fade,,,,,,,,,"                         // 10 fields
 ";"
 "Primary"                                     // SEGCOLOR(0) = front color
 ";"
@@ -8377,7 +8299,7 @@ void mAnimatorLight::EffectAnim__Two_Dots()
 }
 static const char PM_EFFECT_CONFIG__TWO_DOTS[] PROGMEM =
 "Two Dots (Trails)@"
-"Speed,Dot size,Tail persistence,,,,,,,"  // sx, ix, c1
+"!,Dot size,Tail persistence,,,,,,,"  // sx, ix, c1
 ";"
 "1,2,Bg"                                   // segment colors: headA, headB, background
 ";"
@@ -8501,7 +8423,7 @@ void mAnimatorLight::EffectAnim__Fairy(void) {
 }
 static const char PM_EFFECT_CONFIG__FAIRY[] PROGMEM =
 "Fairy@"                                      // Name
-"Speed,Flash density,,,,,,,Overlay,"          // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Flash density,,,,,,,Overlay,"          // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"
 "Fx"                                          // Segment Colour Names (SEGCOLOR(1) = flasher blend tone)
 ";"
@@ -8582,7 +8504,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Fairy(void) {
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_FAIRY[] PROGMEM =
 "Twinkle Fairy@"                              // Name
-"Speed,Intensity,,,,,,,,,"                    // 10 fields
+"!,Intensity,,,,,,,,,"                    // 10 fields
 ";"
 "Fx"                                          // SEGCOLOR(1) as blend tone
 ";"
@@ -8652,7 +8574,7 @@ void mAnimatorLight::EffectAnim__TriColour_Wipe()
 }
 static const char PM_EFFECT_CONFIG__TRICOLOR_WIPE[] PROGMEM =
 "Tri Wipe@"                                   // Name
-"Speed,,,,,,,,,,"                             // 10 fields
+"!,,,,,,,,,,"                             // 10 fields
 ";"
 "1,2,3"                                       // Segment Colour Names (C0,C1,C2)
 ";"
@@ -8722,7 +8644,7 @@ void mAnimatorLight::EffectAnim__Fade_TriColour()
 }
 static const char PM_EFFECT_CONFIG__TRICOLOR_FADE[] PROGMEM =
 "Tri Fade@"                                   // Name
-"Speed,,,,,,,,,,"                             // 10 fields
+"!,,,,,,,,,,"                             // 10 fields
 ";"
 "1,2,3"                                       // Segment Colour Names (C0,C1,C2)
 ";"
@@ -8790,7 +8712,7 @@ void mAnimatorLight::EffectAnim__Multi_Comet()
 }
 static const char PM_EFFECT_CONFIG__MULTI_COMET[] PROGMEM =
 "Multi Comet@"                                // Name
-"Speed,Trail,,,,,,,,,"                        // 10 fields
+"!,Trail,,,,,,,,,"                        // 10 fields
 ";"
 "Alt"                                         // Segment Colour Names (SEGCOLOR(2) = alternate comet color)
 ";"
@@ -8922,7 +8844,7 @@ void mAnimatorLight::EffectAnim__Oscillate()
 }
 static const char PM_EFFECT_CONFIG__OSCILLATE[] PROGMEM =
 "Oscillate@"
-"Speed,Width,Count m20,,,,,,,"   // SX (speed), IX (shown as Width but mapped to intensity internally), C1 (count)
+"!,Width,Count m20,,,,,,,"   // SX (speed), IX (shown as Width but mapped to intensity internally), C1 (count)
 ";"
 ",,,,"
 ";"
@@ -8985,7 +8907,7 @@ void mAnimatorLight::EffectAnim__Pride_2015()
 }
 static const char PM_EFFECT_CONFIG__PRIDE_2015[] PROGMEM =
 "Rainbow Waves@"                  // Name
-"Speed,,,,,,,,,,"             // 10 slider/field entries
+"!,,,,,,,,,,"             // 10 slider/field entries
 ";"
 ""                            // no segment colors
 ";"
@@ -9039,7 +8961,7 @@ void mAnimatorLight::EffectAnim__Juggle()
 }
 static const char PM_EFFECT_CONFIG__JUGGLE[] PROGMEM =
 "Juggle@"                     // Name
-"Speed,Trail,,,,PaletteOrRandom,,,,,"        // 10 fields (SX, IX)
+"!,Trail,,,,PaletteOrRandom,,,,,"        // 10 fields (SX, IX)
 ";"
 ""                            // no segment colors
 ";"
@@ -9280,7 +9202,7 @@ void mAnimatorLight::EffectAnim__ColourWaves()
 }
 static const char PM_EFFECT_CONFIG__COLORWAVES[] PROGMEM =
 "Colour Waves@"                               // Name
-"Speed,Intensity,,,,,,,!,"                    // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Intensity,,,,,,,!,"                    // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                           // ----------------------------------------- Sliders/SegCols
 ""                                            // Segment Colour Names (none)
 ";"                                           // ----------------------------------------- SegCols/PalPicker
@@ -9342,7 +9264,7 @@ void mAnimatorLight::EffectAnim__BPM()
 }
 static const char PM_EFFECT_CONFIG__BPM[] PROGMEM =
 "BPM@"                                        // Name
-"Speed,,,,,,,,!,"                             // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,,,,,,,,!,"                             // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                           // ----------------------------------------- Sliders/SegCols
 ""                                            // Segment Colour Names (none)
 ";"                                           // ----------------------------------------- SegCols/PalPicker
@@ -9578,7 +9500,7 @@ void mAnimatorLight::EffectAnim__Lake()
 }
 static const char PM_EFFECT_CONFIG__LAKE[] PROGMEM =
 "Lake@"                                       // Name
-"Speed,,,,,,,,,,"                             // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,,,,,,,,,,"                             // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"
 ""                                            // Segment Colour Names (none)
 ";"
@@ -9771,7 +9693,7 @@ void mAnimatorLight::EffectAnim__Meteor()
 }
 static const char PM_EFFECT_CONFIG__METEOR[] PROGMEM =
 "Meteor@"                                     // Name
-"Speed,Trail,,,,Gradient,Hard Edge,Smooth,,,"          // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Trail,,,,Gradient,Hard Edge,Smooth,,,"          // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"
 ""                                            // Segment Colour Names (none)
 ";"
@@ -9917,7 +9839,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Smooth()
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_SMOOTH[] PROGMEM =
 "Twinkle Smooth@"                              // Name
-"Speed,Intensity,,,,Cool,,,,,"                 // 10 fields after '@': 1s,2i,3c1,... 
+"!,Intensity,,,,Cool,,,,,"                 // 10 fields after '@': 1s,2i,3c1,... 
 ";"                                            // -----------------------------------------
 ""                                             // Segment Colour Names (none)
 ";"                                            // -----------------------------------------
@@ -9950,7 +9872,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Spark()
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_SPARK[] PROGMEM =
 "Twinkle Spark@"                               // Name
-"Speed,Intensity,,,,Cool,,,,,"                 // 10 fields
+"!,Intensity,,,,Cool,,,,,"                 // 10 fields
 ";"
 ""                                             // no seg colours
 ";"
@@ -10003,7 +9925,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Rise() // Firework_Rain
 }
 static const char PM_EFFECT_CONFIG__TWINKLE_RISE[] PROGMEM =
 "Twinkle Rise@"                // Name
-"Speed,Intensity"              // Controls
+"!,Intensity"              // Controls
 ";"                            // -------------------------------- Sliders/SegCols
 ""                             // Segment Colours
 ";"                            // -------------------------------- SegCols/PalPicker
@@ -10183,7 +10105,7 @@ void mAnimatorLight::EffectAnim__Halloween_Eyes()
 }
 static const char PM_EFFECT_CONFIG__HALLOWEEN_EYES[] PROGMEM =
 "Halloween Eyes@"                             // Name
-"Speed,Intensity,,,,Overlay,,,,,"             // 10 fields after '@': 1s,2i,3c1...
+"!,Intensity,,,,Overlay,,,,,"             // 10 fields after '@': 1s,2i,3c1...
 ";"                                           // -----------------------------------------
 ""                                            // Segment Colour Names (none)
 ";"                                           // -----------------------------------------
@@ -10359,7 +10281,7 @@ void mAnimatorLight::EffectAnim__Glitter()
 }
 static const char PM_EFFECT_CONFIG__GLITTER[] PROGMEM =
 "Glitter@"                                    // Name
-"Speed,Intensity,,,,,,,,Overlay"              // 10 fields
+"!,Intensity,,,,,,,,Overlay"              // 10 fields
 ";"
 ",,Glitter color"                             // segment colour labels: (C3) glitter color
 ";"
@@ -10395,7 +10317,7 @@ void mAnimatorLight::EffectAnim__Solid_Glitter()
 }
 static const char PM_EFFECT_CONFIG__SOLID_GLITTER[] PROGMEM =
 "Solid Glitter@"                               // Name
-"Speed,Intensity,,,,,,,,,"                     // 10 fields (speed unused; kept for UI consistency)
+"!,Intensity,,,,,,,,,"                     // 10 fields (speed unused; kept for UI consistency)
 ";"
 "Bg,,Glitter color"                            // color labels
 ";"
@@ -10725,7 +10647,7 @@ void mAnimatorLight::EffectAnim__GlowSpots()
 }
 static const char PM_EFFECT_CONFIG__GLOW_SPOTS[] PROGMEM =
 "Glow Spots@"
-"Speed,Intensity,,,,,,,,"  // sliders: sx, ix, (c1..c3 empty), (o1..o3 empty), ep, grp
+"!,Intensity,,,,,,,,"  // sliders: sx, ix, (c1..c3 empty), (o1..o3 empty), ep, grp
 ";"
 ""                      // segment colour labels (unused)
 ";"
@@ -10786,7 +10708,7 @@ void mAnimatorLight::EffectAnim__Plasma()
 } 
 static const char PM_EFFECT_CONFIG__PLASMA[] PROGMEM =
 "Plasma@"                                     // Name
-"Speed,Depth,,,,,,,,,"                        // 10 fields
+"!,Depth,,,,,,,,,"                        // 10 fields
 ";"
 ""                                            // no segment colour labels
 ";"
@@ -10873,7 +10795,7 @@ static const char PM_EFFECT_DESCRI__PLASMA[] PROGMEM =
 // }
 // static const char PM_EFFECT_CONFIG__PERCENT[] PROGMEM =
 // "Percent@"                                    // Name
-// "Speed,% of fill,,,,One color,,,,,"           // 10 fields
+// "!,% of fill,,,,One color,,,,,"           // 10 fields
 // ";"
 // "Bg"                                          // segment colour labels (SEGCOLOR1 = background)
 // ";"
@@ -10955,7 +10877,7 @@ void mAnimatorLight::EffectAnim__Percent()
 }
 static const char PM_EFFECT_CONFIG__PERCENT[] PROGMEM =
 "Percent@"
-"Speed,% of fill,,,,One color,Overlay,Percent mode,"   // labels (C1, C2, C3 at the end)
+"!,% of fill,,,,One color,Overlay,Percent mode,"   // labels (C1, C2, C3 at the end)
 ";"
 ",Bg"
 ";"
@@ -11230,7 +11152,7 @@ void mAnimatorLight::EffectAnim__Sinewave()
 }
 static const char PM_EFFECT_CONFIG__SINEWAVE[] PROGMEM =
 "Sine@"                          // Name
-"Speed,Scale,,,,,,,,,"           // 10 fields
+"!,Scale,,,,,,,,,"           // 10 fields
 ";"
 ""                                // no segment color labels
 ";"
@@ -11294,7 +11216,7 @@ void mAnimatorLight::EffectAnim__Flow()
 }
 static const char PM_EFFECT_CONFIG__FLOW[] PROGMEM =
 "Flow@"                          // Name
-"Speed,Zones,,,,,,,,,"           // 10 fields
+"!,Zones,,,,,,,,,"           // 10 fields
 ";"
 ""                                // no segment color labels
 ";"
@@ -11720,7 +11642,7 @@ void mAnimatorLight::EffectAnim__Palettes_Interleaved()
 }
 static const char PM_EFFECT_CONFIG__PALETTES_INTERLEAVED[] PROGMEM =
 "Palettes Interleaved@"                      // Name
-"Speed,Palette 2 ID,,,,,,,,,"                // 10 fields (IX is used as Palette 2 id by your code)
+"!,Palette 2 ID,,,,,,,,,"                // 10 fields (IX is used as Palette 2 id by your code)
 ";"
 ""                                           // no segment color names
 ";"
@@ -11796,7 +11718,7 @@ void mAnimatorLight::EffectAnim__Blink()
 }
 static const char PM_EFFECT_CONFIG__BLINK[] PROGMEM =
 "Blink@"                                     // Name
-"Speed,Duty cycle,,,,,,,,,"                  // 10 fields
+"!,Duty cycle,,,,,,,,,"                  // 10 fields
 ";"
 ""                                           // no segment color labels
 ";"
@@ -11851,7 +11773,7 @@ void mAnimatorLight::EffectAnim__Strobe()
 }
 static const char PM_EFFECT_CONFIG__STROBE[] PROGMEM =
 "Strobe@"                                    // Name
-"Speed,,,,,,,,,,"                            // 10 fields (IX ignored in strobe mode)
+"!,,,,,,,,,,"                            // 10 fields (IX ignored in strobe mode)
 ";"
 ""                                           // no segment color labels
 ";"
@@ -11907,7 +11829,7 @@ void mAnimatorLight::EffectAnim__Strobe_Multi()
 }
 static const char PM_EFFECT_CONFIG__MULTI_STROBE[] PROGMEM =
 "Strobe Multi@"                               // Name
-"Speed,Burst size,,,,,,,,,"                   // 10 fields
+"!,Burst size,,,,,,,,,"                   // 10 fields
 ";"
 ""                                            // no segment color labels
 ";"
@@ -11937,7 +11859,7 @@ void mAnimatorLight::EffectAnim__Strobe_Rainbow()
 }
 static const char PM_EFFECT_CONFIG__STROBE_RAINBOW[] PROGMEM =
 "Strobe Rainbow@"                              // Name
-"Speed,,,,,,,,,,"                              // 10 fields (IX unused)
+"!,,,,,,,,,,"                              // 10 fields (IX unused)
 ";"
 ""                                             // no segment color labels
 ";"
@@ -11977,7 +11899,7 @@ void mAnimatorLight::EffectAnim__Rainbow()
 }
 static const char PM_EFFECT_CONFIG__RAINBOW[] PROGMEM =
 "Colorloop@"                                   // Name
-"Speed,Saturation,,,,,,,,,"                    // 10 fields
+"!,Saturation,,,,,,,,,"                    // 10 fields
 ";"
 ""                                             // no segment color labels
 ";"
@@ -12049,7 +11971,7 @@ void mAnimatorLight::EffectAnim__Lightning()
 }
 static const char PM_EFFECT_CONFIG__LIGHTNING[] PROGMEM =
 "Lightning@"                                   // Name
-"Speed,Intensity,,,,,,,,Overlay"               // 10 fields (last is a toggle label)
+"!,Intensity,,,,,,,,Overlay"               // 10 fields (last is a toggle label)
 ";"
 ""                                             // no segment color labels
 ";"
@@ -12211,7 +12133,7 @@ void mAnimatorLight::EffectAnim__Railway()
 }
 static const char PM_EFFECT_CONFIG__RAILWAY[] PROGMEM =
 "Railway@"                                    // Name
-"Speed,Intensity,,,,,,,!,"                    // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Intensity,,,,,,,!,"                    // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                           // ----------------------------------------- Sliders/SegCols
 ""                                            // Segment Colour Names (none shown)
 ";"                                           // ----------------------------------------- SegCols/PalPicker
@@ -12269,7 +12191,7 @@ void mAnimatorLight::EffectAnim__Heartbeat()
 }
 static const char PM_EFFECT_CONFIG__HEARTBEAT[] PROGMEM =
 "Heartbeat@"                                  // Name
-"Speed,Intensity,,,,,,,,"                     // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Intensity,,,,,,,,"                     // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                           // ----------------------------------------- Sliders/SegCols
 "Bg,,,,"                                      // Segment Colour Names (BG uses SEGCOLOR(1))
 ";"                                           // ----------------------------------------- SegCols/PalPicker
@@ -12312,7 +12234,7 @@ void mAnimatorLight::EffectAnim__FillNoise8()
 }
 static const char PM_EFFECT_CONFIG__FILLNOISE8[] PROGMEM =
 "Fill Noise@"                                  // Name
-"Speed,,,,,,,,,,"                              // 10 fields (only SX used)
+"!,,,,,,,,,,"                              // 10 fields (only SX used)
 ";"
 ""                                             // no segment color labels
 ";"
@@ -12361,7 +12283,7 @@ void mAnimatorLight::EffectAnim__Noise16_1()
 }
 static const char PM_EFFECT_CONFIG__NOISE16_1[] PROGMEM =
 "Noise 1@"                                     // Name
-"Speed,,,,,,,,,,"                              // 10 fields
+"!,,,,,,,,,,"                              // 10 fields
 ";"
 ""                                             // no segment color labels
 ";"
@@ -12404,7 +12326,7 @@ void mAnimatorLight::EffectAnim__Noise16_2()
 }
 static const char PM_EFFECT_CONFIG__NOISE16_2[] PROGMEM =
 "Noise 2@"                                     // Name
-"Speed,,,,,,,,,,"                              // 10 fields
+"!,,,,,,,,,,"                              // 10 fields
 ";"
 ""                                             // no segment color labels
 ";"
@@ -12450,7 +12372,7 @@ void mAnimatorLight::EffectAnim__Noise16_3()
 }
 static const char PM_EFFECT_CONFIG__NOISE16_3[] PROGMEM =
 "Noise 3@"                                     // Name
-"Speed,,,,,,,,,,"                              // 10 fields
+"!,,,,,,,,,,"                              // 10 fields
 ";"
 ""                                             // no segment color labels
 ";"
@@ -12485,7 +12407,7 @@ void mAnimatorLight::EffectAnim__Noise16_4()
 }
 static const char PM_EFFECT_CONFIG__NOISE16_4[] PROGMEM =
 "Noise 4@"                                     // Name
-"Speed,,,,,,,,,,"                              // 10 fields
+"!,,,,,,,,,,"                              // 10 fields
 ";"
 ""                                             // no segment color labels
 ";"
@@ -12551,7 +12473,7 @@ void mAnimatorLight::EffectAnim__Noise_Pal()
 }
 static const char PM_EFFECT_CONFIG__NOISEPAL[] PROGMEM =
 "Noise Pal@"                                   // Name
-"Speed,Scale,,,,,,,,,"                         // 10 fields
+"!,Scale,,,,,,,,,"                         // 10 fields
 ";"
 ""                                             // no segment color labels
 ";"
@@ -12619,7 +12541,7 @@ void mAnimatorLight::EffectAnim__Phased(void) {
 }
 static const char PM_EFFECT_CONFIG__PHASED[] PROGMEM =
 "Phased@"                                      // Name
-"Speed,Cutoff,,,,,,,,,"                        // 10 fields after '@'
+"!,Cutoff,,,,,,,,,"                        // 10 fields after '@'
 ";"
 ""                                             // no segment color labels
 ";"
@@ -12646,7 +12568,7 @@ void mAnimatorLight::EffectAnim__PhasedNoise(void) {
 }
 static const char PM_EFFECT_CONFIG__PHASEDNOISE[] PROGMEM =
 "Phased Noise@"                                // Name
-"Speed,Cutoff,,,,,,,,,"                        // 10 fields
+"!,Cutoff,,,,,,,,,"                        // 10 fields
 ";"
 ""                                             // no segment color labels
 ";"
@@ -12718,7 +12640,7 @@ void mAnimatorLight::EffectAnim__Scan()
 }
 static const char PM_EFFECT_CONFIG__SCAN[] PROGMEM =
 "Scan@"                                        // Name
-"Speed,# of dots,,,,,,,Overlay,"               // 10 fields (cb3 used for 'Overlay')
+"!,# of dots,,,,,,,Overlay,"               // 10 fields (cb3 used for 'Overlay')
 ";"
 ""                                             // no segment color labels
 ";"
@@ -12747,7 +12669,7 @@ void mAnimatorLight::EffectAnim__Scan_Dual()
 }
 static const char PM_EFFECT_CONFIG__DUAL_SCAN[] PROGMEM =
 "Scan Dual@"                                   // Name
-"Speed,# of dots,,,,,,,Overlay,"               // 10 fields
+"!,# of dots,,,,,,,Overlay,"               // 10 fields
 ";"
 ""                                             // no segment color labels
 ";"
@@ -12825,7 +12747,7 @@ void mAnimatorLight::EffectAnim__Larson_Scanner()
 }
 static const char PM_EFFECT_CONFIG__LARSON_SCANNER[] PROGMEM =
 "Scanner@"                                    // Name
-"Speed,Trail,Delay,,,,Dual,Bi-delay,,"        // 10 fields after '@' (1=sx,2=ix,3=c1,7=o1,8=o2)
+"!,Trail,Delay,,,,Dual,Bi-delay,,"        // 10 fields after '@' (1=sx,2=ix,3=c1,7=o1,8=o2)
 ";"
 "Bg,Fx,Alt"                                   // Segment color labels (C1=Bg, C2=Fx, C3=Alt/mirror)
 ";"
@@ -12861,7 +12783,7 @@ void mAnimatorLight::EffectAnim__Larson_Scanner_Dual(void){
 }
 static const char PM_EFFECT_CONFIG__DUAL_LARSON_SCANNER[] PROGMEM =
 "Scanner Dual@"                               // Name
-"Speed,Trail,Delay,,,,Dual,Bi-delay,,"        // same UI as single
+"!,Trail,Delay,,,,Dual,Bi-delay,,"        // same UI as single
 ";"
 "Bg,Fx,Alt"
 ";"
@@ -12968,7 +12890,7 @@ void mAnimatorLight::EffectAnim__ICU()
 }
 static const char PM_EFFECT_CONFIG__ICU[] PROGMEM =
 "ICU@"                                        // Name
-"Speed,Spacing,,,,,,,Overlay,"                // 10 fields (1=sx,2=ix,10=o1 overlay)
+"!,Spacing,,,,,,,Overlay,"                // 10 fields (1=sx,2=ix,10=o1 overlay)
 ";"
 "Bg,Fx"                                       // we repaint Bg when Overlay is off; Fx unused (kept for consistency)
 ";"
@@ -13090,7 +13012,7 @@ void mAnimatorLight::EffectAnim__Ripple(void) {
 }
 static const char PM_EFFECT_CONFIG__RIPPLE[] PROGMEM =
 "Ripple@"                                     // Name
-"Speed,Wave #,Blur,,,,Overlay,,,"             // 10 fields after '@' (1=sx,2=ix,3=c1,7=o1)
+"!,Wave #,Blur,,,,Overlay,,,"             // 10 fields after '@' (1=sx,2=ix,3=c1,7=o1)
 ";"
 "Bg,Fx"                                       // Segment color labels
 ";"
@@ -13141,7 +13063,7 @@ void mAnimatorLight::EffectAnim__Ripple_Rainbow(void) {
 }
 static const char PM_EFFECT_CONFIG__RIPPLE_RAINBOW[] PROGMEM =
 "Ripple Rainbow@"                              // Name
-"Speed,Wave #,,,,,,,,,"                        // 10 fields (1=sx,2=ix)
+"!,Wave #,,,,,,,,,"                        // 10 fields (1=sx,2=ix)
 ";"
 ""                                             // Segment color labels (none)
 ";"
@@ -13195,7 +13117,7 @@ void mAnimatorLight::EffectAnim__Comet()
 }
 static const char PM_EFFECT_CONFIG__COMET[] PROGMEM =
 "Comet@"                                      // Name
-"Speed,Fade rate,,,,,,,,,"                    // 10 fields (1=sx,2=ix)
+"!,Fade rate,,,,,,,,,"                    // 10 fields (1=sx,2=ix)
 ";"
 "Bg,Fx"                                       // colors (Bg unused at runtime, Fx = head color if palette is off)
 ";"
@@ -13244,7 +13166,7 @@ void mAnimatorLight::EffectAnim__Chunchun()
 }
 static const char PM_EFFECT_CONFIG__CHUNCHUN[] PROGMEM =
 "Chunchun@"                                   // Name
-"Speed,Gap size,,,,,,,,,"                     // 10 fields (1=sx,2=ix)
+"!,Gap size,,,,,,,,,"                     // 10 fields (1=sx,2=ix)
 ";"
 "Bg,Fx"
 ";"
@@ -13421,7 +13343,7 @@ void mAnimatorLight::EffectAnim__Dancing_Shadows()
 }
 static const char PM_EFFECT_CONFIG__DANCING_SHADOWS[] PROGMEM =
 "Dancing Shadows@"                             // Name
-"Speed,# of shadows,,,,,,,,,"                  // 10 fields (1=sx,2=ix)
+"!,# of shadows,,,,,,,,,"                  // 10 fields (1=sx,2=ix)
 ";"
 ""                                             // Segment color labels
 ";"
@@ -13467,7 +13389,7 @@ void mAnimatorLight::EffectAnim__Washing_Machine()
 }
 static const char PM_EFFECT_CONFIG__WASHING_MACHINE[] PROGMEM =
 "Washing Machine@"                              // Name
-"Speed,Scale,,,,,,,,,"                          // 10 fields (1=sx,2=ix)
+"!,Scale,,,,,,,,,"                          // 10 fields (1=sx,2=ix)
 ";"
 ""                                              // no seg color names
 ";"
@@ -13681,7 +13603,7 @@ void mAnimatorLight::EffectAnim__TV_Simulator()
 }
 static const char PM_EFFECT_CONFIG__TV_SIMULATOR[] PROGMEM =
 "TV Simulator@"                 // Name
-"Speed,Intensity,,,,,,,,,"      // 10 fields after '@'
+"!,Intensity,,,,,,,,,"      // 10 fields after '@'
 ";"
 ""                               // no segment color labels
 ";"
@@ -13819,7 +13741,7 @@ void mAnimatorLight::EffectAnim__Bouncing_Balls()
 }
 static const char PM_EFFECT_CONFIG__BOUNCINGBALLS[] PROGMEM =
 "Bouncing Balls@"                        // Name
-"Speed,# Balls,,,,,,Overlay"                  // 10 fields
+"!,# Balls,,,,,,Overlay"                  // 10 fields
 ";"
 ""                                       // no seg colours
 ";"
@@ -13970,7 +13892,7 @@ void mAnimatorLight::EffectAnim__Rolling_Balls(void) {
 }
 static const char PM_EFFECT_CONFIG__ROLLINGBALLS[] PROGMEM =
 "Rolling Balls@"                         // Name
-"Speed,# Balls,,,,Collisions,Overlay,Trails" // 10 fields
+"!,# Balls,,,,Collisions,Overlay,Trails" // 10 fields
 ";"
 ""                                       // no seg colours
 ";"
@@ -14086,7 +14008,7 @@ void mAnimatorLight::EffectAnim__Sinelon(void) {
 }
 static const char PM_EFFECT_CONFIG__SINELON[] PROGMEM =
 "Sinelon@"                          // Name
-"Speed,Trail,,,,,,,,"
+"!,Trail,,,,,,,,"
 ";"
 ""                                   // Segment Colour Names (none)
 ";"
@@ -14115,7 +14037,7 @@ void mAnimatorLight::EffectAnim__Sinelon_Dual(void) {
 }
 static const char PM_EFFECT_CONFIG__SINELON_DUAL[] PROGMEM =
 "Sinelon Dual@"                      // Name
-"Speed,Trail,,,,,,,,"
+"!,Trail,,,,,,,,"
 ";"
 ""                                   // Segment Colour Names (none)
 ";"
@@ -14144,7 +14066,7 @@ void mAnimatorLight::EffectAnim__Sinelon_Rainbow(void) {
 }
 static const char PM_EFFECT_CONFIG__SINELON_RAINBOW[] PROGMEM =
 "Sinelon Rainbow@"                   // Name
-"Speed,Trail,,,,,,,,"
+"!,Trail,,,,,,,,"
 ";"
 ""                                   // Segment Colour Names (none)
 ";"
@@ -14357,7 +14279,7 @@ void mAnimatorLight::EffectAnim__WaveSins()
 }
 static const char PM_EFFECT_CONFIG__WAVESINS[] PROGMEM =
 "Wavesins@"                                   // Name
-"Speed,Brightness variation,Starting color,Range of colors,Color variation,,,,,," // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Brightness variation,Starting color,Range of colors,Color variation,,,,,," // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                           // ----------------------------------------- Sliders/SegCols
 "!"                                           // Segment Colour Names (unused)
 ";"                                           // ----------------------------------------- SegCols/PalPicker
@@ -17367,7 +17289,7 @@ void mAnimatorLight::EffectAnim__Christmas_InWaves__01()
 
 static const char PM_EFFECT_CONFIG__CHRISTMAS_INWAVES_01[] PROGMEM =
 "Xmas InWaves@"
-"Speed,Softness,Speed change,Reverse randomness,Colour limit,Paired,Pair flip,Default Pattern,,"
+"!,Softness,Speed change,Reverse randomness,Colour limit,Paired,Pair flip,Default Pattern,,"
 ";"
 ""                  // no segment colours
 ";"
@@ -19317,7 +19239,7 @@ void mAnimatorLight::EffectAnim__Christmas_InWaves__02()
 // =================================================================================================
 static const char PM_EFFECT_CONFIG__CHRISTMAS_INWAVES_02[] PROGMEM =
 "Xmas InWaves@"
-"Speed,Softness,Speed change,Reverse randomness,Colour limit,Paired,Pair flip,,,"
+"!,Softness,Speed change,Reverse randomness,Colour limit,Paired,Pair flip,,,"
 ";"
 ""                  // no segment colours
 ";"
@@ -19554,7 +19476,7 @@ int        i1         = (i0 + 1) % (int)nLogic;
 // =================================================================================================
 static const char PM_EFFECT_CONFIG__CHRISTMAS_CHASING_FLASH_02[] PROGMEM =
 "Xmas Chasing/Flash@"
-"Speed,Softness,Flash count,,Colour limit,2 outputs,Pair flip,Reverse,,"
+"!,Softness,Flash count,,Colour limit,2 outputs,Pair flip,Reverse,,"
 ";"
 ""
 ";"
@@ -19736,7 +19658,7 @@ void mAnimatorLight::EffectAnim__Christmas_TwinkleFlash__02()
 // =================================================================================================
 static const char PM_EFFECT_CONFIG__CHRISTMAS_TWINKLE_FLASH_02[] PROGMEM =
 "Xmas Twinkle/Flash@"
-"Speed,Pulse feel,Flashes,,Colour limit,Paired,Pair flip,Reverse,,"
+"!,Pulse feel,Flashes,,Colour limit,Paired,Pair flip,Reverse,,"
 ";"
 ""                  // no segment colours; palette drives colours
 ";"
@@ -20723,7 +20645,7 @@ void mAnimatorLight::EffectAnim__Christmas_Sequential_Plus__01()
 // =================================================================================================
 static const char PM_EFFECT_CONFIG__CHRISTMAS_SLO_GLO_PLUS_01[] PROGMEM =
 "Christmas: Slo-Glo+@"
-"Speed,Softness,Outputs/Flags,Ramp period (s),Profile,Reverse,Pair flip,8,9,10"  // labels; cb1..cb3 are placeholders
+"!,Softness,Outputs/Flags,Ramp period (s),Profile,Reverse,Pair flip,8,9,10"  // labels; cb1..cb3 are placeholders
 ";"
 ""                                // no segment colour names; colour from palette field
 ";"
@@ -20750,7 +20672,7 @@ static const char PM_EFFECT_DESCRI__CHRISTMAS_SLO_GLO_PLUS_01[] PROGMEM =
 // =================================================================================================
 static const char PM_EFFECT_CONFIG__CHRISTMAS_SEQUENTIAL_PLUS_01[] PROGMEM =
 "Christmas: Sequential+@"
-"Speed,Softness,Outputs/Flags,Ramp period (s),Profile,Reverse,Pair flip,8,9,10"  // labels; cb1..cb3 placeholders
+"!,Softness,Outputs/Flags,Ramp period (s),Profile,Reverse,Pair flip,8,9,10"  // labels; cb1..cb3 placeholders
 ";"
 ""                                // no segment colours; colour from palette field
 ";"
@@ -20939,7 +20861,7 @@ void mAnimatorLight::EffectAnim__2D__ColouredBursts()
 }
 static const char PM_EFFECT_CONFIG__2D__COLOURED_BURSTS[] PROGMEM =
 "Colored Bursts@"                         // name
-"Speed,# of lines,,,Blur,Gradient,,Dots"   // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,# of lines,,,Blur,Gradient,,Dots"   // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                                        // ----------------------------------------- Sliders/SegCols
 ""                                         // Segment Color names (none)
 ";"                                        // ----------------------------------------- SegCols/PalPicker
@@ -22152,7 +22074,7 @@ void mAnimatorLight::EffectAnim__2D__PlasmaBall()
 }
 static const char PM_EFFECT_CONFIG__2D__PLASMA_BALL[] PROGMEM =
 "Plasma Ball@"                   // Name
-"Speed,,Fade,Blur,,,,,,"// 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,,Fade,Blur,,,,,,"// 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                               // ----------------------------------------- Sliders/SegCols
 ""                                // Segment Colour Names (blank = show all)
 ";"                               // ----------------------------------------- SegCols/PalPicker
@@ -22230,7 +22152,7 @@ void mAnimatorLight::EffectAnim__2D__PolarLights()
 }
 static const char PM_EFFECT_CONFIG__2D__POLAR_LIGHTS[] PROGMEM =
 "Polar Lights@"                 // Name
-"Speed,Scale,,,,Flip Palette,,,"// 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Scale,,,,Flip Palette,,,"// 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                              // ----------------------------------------- Sliders/SegCols
 ""                               // Segment Colour Names (blank = show all)
 ";"                              // ----------------------------------------- SegCols/PalPicker
@@ -22806,7 +22728,7 @@ void mAnimatorLight::EffectAnim__2D__CrazyBees()
 #undef MAX_BEES
 static const char PM_EFFECT_CONFIG__2D__CRAZYBEES[] PROGMEM =
 "Crazy Bees@"                 // Name
-"Speed,Blur,,,Smear,,,,"      // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Blur,,,Smear,,,,"      // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                           // ----------------------------------------- Sliders/SegCols
 ""                            // Segment Colour Names (blank = show all)
 ";"                           // ----------------------------------------- SegCols/PalPicker
@@ -24268,7 +24190,7 @@ void mAnimatorLight::EffectAnim__2D__Octopus()
 }
 static const char PM_EFFECT_CONFIG__2D__OCTOPUS[] PROGMEM =
 "Octopus@"                       // Name
-"Speed,Contrast,Offset X,Offset Y,Legs,,,,," // 10 fields: 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Contrast,Offset X,Offset Y,Legs,,,,," // 10 fields: 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"                              // ----------------------------------------- Sliders/SegCols
 ""                               // Segment Colour Names (blank = show all)
 ";"                              // ----------------------------------------- SegCols/PalPicker
@@ -24772,7 +24694,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Perline_Move()
 }
 static const char PM_EFFECT_CONFIG__AUDIOREACTIVE__1D__FFT_PERLINE_MOVE[] PROGMEM =
 "Perlin Move@"                   // Name
-"Speed,# of pixels,Fade rate;;;;;" // 1sx,2ix,3c1,4c2,5c3,6cb1
+"!,# of pixels,Fade rate;;;;;" // 1sx,2ix,3c1,4c2,5c3,6cb1
 ";"
 ""                               // Segment colours (none)
 ";"
@@ -25145,7 +25067,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Matripix()
 }
 static const char PM_EFFECT_CONFIG__AUDIOREACTIVE__1D__FFT_MATRIPIX[] PROGMEM =
 "Matripix@"                    // name
-"Speed,Brightness,,,,,,,,"    // 10 fields after '@': SX, IX, then blanks
+"!,Brightness,,,,,,,,"    // 10 fields after '@': SX, IX, then blanks
 ";"
 ""
 ";"                        // segment color labels (C1 = Base)
@@ -25379,7 +25301,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_PixelWave()
 }
 static const char PM_EFFECT_CONFIG__AUDIOREACTIVE__1D__FFT_PIXEL_WAVE[] PROGMEM =
 "Pixelwave@"                         // effect name
-"Speed,Sensitivity"                  // 1s,2i
+"!,Sensitivity"                  // 1s,2i
 ";"
 ""                                   // segment color names (none)
 ";"
@@ -25776,7 +25698,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_DJLight()
 }
 static const char PM_EFFECT_CONFIG__AUDIOREACTIVE__1D__FFT_DJ_LIGHT[] PROGMEM =
 "DJ Light@"
-"Speed,,,,,,,,;"           // 1s filled, rest empty to 10 fields
+"!,,,,,,,,;"           // 1s filled, rest empty to 10 fields
 ";"                        // No segment colors
 "!;"                       // Keep standard palette picker
 "1f;"                      // 1D + audio-reactive flag
@@ -25928,7 +25850,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_FreqMatrix()
 }
 static const char PM_EFFECT_CONFIG__AUDIOREACTIVE__1D__FFT_FREQ_MATRIX[] PROGMEM =
 "Freqmatrix@"
-"Speed,Sound effect,Low bin,High bin,Sensitivity,,,,,"   // S, I, C1, C2, C3
+"!,Sound effect,Low bin,High bin,Sensitivity,,,,,"   // S, I, C1, C2, C3
 ";"
 "!,!"                                                     // segment colors (2): Base, unused
 ";"
@@ -26073,7 +25995,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_FreqWave()
 }
 static const char PM_EFFECT_CONFIG__AUDIOREACTIVE__1D__FFT_FREQ_WAVE[] PROGMEM =
 "Freqwave@"                           // effect name
-"Speed,Sound effect,Low bin,High bin,Pre-amp"   // 1s,2i,3c1,4c2,5c3
+"!,Sound effect,Low bin,High bin,Pre-amp"   // 1s,2i,3c1,4c2,5c3
 ";"
 ""                                     // segment color names (none/all)
 ";"
@@ -26389,7 +26311,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__2D__Swirl()
 }
 static const char PM_EFFECT_CONFIG__AUDIOREACTIVE__2D__SWIRL[] PROGMEM =
 "Swirl@"
-"Speed,Brightness gain,Blur,,,,,,"   // 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+"!,Brightness gain,Blur,,,,,,"   // 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
 ";"
 ""                                     // no segment color labels
 ";"
@@ -27236,7 +27158,7 @@ void mAnimatorLight::EffectAnim__Particle__2D__Volcano()
 #undef NUMBEROFSOURCES
 static const char PM_EFFECT_CONFIG__PARTICLE__2D__VOLCANO[] PROGMEM =
 "PS Volcano@"
-"Speed,Intensity,Move,Bounce,Spread,AgeColor,Walls,Collide,!,!"
+"!,Intensity,Move,Bounce,Spread,AgeColor,Walls,Collide,!,!"
 ";"
 ""
 ";"
@@ -27354,7 +27276,7 @@ void mAnimatorLight::EffectAnim__Particle__2D__Fire()
 }
 static const char PM_EFFECT_CONFIG__PARTICLE__2D__FIRE[] PROGMEM =
 "PS Fire@"
-"Speed,Intensity,Flame Height,Wind,Spread,Smooth,Cylinder,Turbulence,!,!"
+"!,Intensity,Flame Height,Wind,Spread,Smooth,Cylinder,Turbulence,!,!"
 ";"
 ""
 ";"
@@ -27440,7 +27362,7 @@ void mAnimatorLight::EffectAnim__Particle__2D__Pit()
 }
 static const char PM_EFFECT_CONFIG__PARTICLE__2D__PIT[] PROGMEM =
 "PS Ballpit@"
-"Speed,Intensity,Size,Hardness,Saturation,Cylinder,Walls,Ground,!,!"
+"!,Intensity,Size,Hardness,Saturation,Cylinder,Walls,Ground,!,!"
 ";"
 ""
 ";"
@@ -27527,7 +27449,7 @@ void mAnimatorLight::EffectAnim__Particle__2D__Waterfall()
 }
 static const char PM_EFFECT_CONFIG__PARTICLE__2D__WATERFALL[] PROGMEM =
 "PS Waterfall@"
-"Speed,Intensity,Variation,Collide,Position,Cylinder,Walls,Ground,!,!"
+"!,Intensity,Variation,Collide,Position,Cylinder,Walls,Ground,!,!"
 ";"
 ""
 ";"
@@ -27706,7 +27628,7 @@ void mAnimatorLight::EffectAnim__Particle__2D__Perlin()
 }
 static const char PM_EFFECT_CONFIG__PARTICLE__2D__PERLIN[] PROGMEM =
 "PS Fuzzy Noise@"
-"Speed,Particles,Bounce,Friction,Scale,Cylinder,Smear,Collide,!,!"
+"!,Particles,Bounce,Friction,Scale,Cylinder,Smear,Collide,!,!"
 ";"
 ""
 ";"
@@ -28029,7 +27951,7 @@ void mAnimatorLight::EffectAnim__Particle__2D__Spray()
 }
 static const char PM_EFFECT_CONFIG__PARTICLE__2D__SPRAY[] PROGMEM =
 "PS Spray@"
-"Speed,!,Left/Right,Up/Down,Angle,Gravity,Cylinder/Square,Collide,!,!"
+"!,!,Left/Right,Up/Down,Angle,Gravity,Cylinder/Square,Collide,!,!"
 ";"
 ""
 ";"
@@ -28118,7 +28040,7 @@ void mAnimatorLight::EffectAnim__Particle__2D__GEQ()
 
 static const char PM_EFFECT_CONFIG__PARTICLE__2D__GEQ[] PROGMEM =
 "PS GEQ 2D@"
-"Speed,Intensity,Diverge,Bounce,Gravity,Cylinder,Walls,Floor,!,!"
+"!,Intensity,Diverge,Bounce,Gravity,Cylinder,Walls,Floor,!,!"
 ";"
 ""
 ";"
@@ -28205,7 +28127,7 @@ void mAnimatorLight::EffectAnim__Particle__2D__CenterGEQ()
 }
 static const char PM_EFFECT_CONFIG__PARTICLE__2D__CENTER_GEQ[] PROGMEM =
 "PS GEQ Nova@"
-"Speed,Intensity,Rotation Speed,Color Change,Nozzle,,Direction,,!,!"
+"!,Intensity,Rotation Speed,Color Change,Nozzle,,Direction,,!,!"
 ";"
 ""
 ";"
@@ -28300,7 +28222,7 @@ void mAnimatorLight::EffectAnim__Particle__2D__GhostRider()
 }
 static const char PM_EFFECT_CONFIG__PARTICLE__2D__GHOST_RIDER[] PROGMEM =
 "PS Ghost Rider@"
-"Speed,Spiral,Blur,Color Cycle,Spread,AgeColor,Walls,,!,!"
+"!,Spiral,Blur,Color Cycle,Spread,AgeColor,Walls,,!,!"
 ";"
 ""
 ";"
@@ -28391,7 +28313,7 @@ void mAnimatorLight::EffectAnim__Particle__2D__Blobs()
 }
 static const char PM_EFFECT_CONFIG__PARTICLE__2D__BLOBS[] PROGMEM =
 "PS Blobs@"
-"Speed,Blobs,Size,Life,Blur,Wobble,Collide,Pulsate,!,!"
+"!,Blobs,Size,Life,Blur,Wobble,Collide,Pulsate,!,!"
 ";"
 ""
 ";"
@@ -28637,7 +28559,7 @@ void mAnimatorLight::EffectAnim__Particle__1D__Drip()
 }
 static const char PM_EFFECT_CONFIG__PARTICLE__1D__DRIP[] PROGMEM =
 "PS DripDrop@"
-"Speed,!,Splash,Blur,Gravity,Rain,PushSplash,Smooth,!,!"
+"!,!,Splash,Blur,Gravity,Rain,PushSplash,Smooth,!,!"
 ";"
 ",!"
 ";"
@@ -28769,7 +28691,7 @@ void mAnimatorLight::EffectAnim__Particle__1D__Pinball()
 }
 static const char PM_EFFECT_CONFIG__PARTICLE__1D__PINBALL[] PROGMEM =
 "PS Pinball@"
-"Speed,!,Size,Blur,Gravity,Collide,Rolling,Position Color,!,!"
+"!,!,Size,Blur,Gravity,Collide,Rolling,Position Color,!,!"
 ";"
 ",!"
 ";"
@@ -28783,29 +28705,29 @@ static const char PM_EFFECT_DESCRI__PARTICLE__1D__PINBALL[] PROGMEM =
 "One-dimensional particle pinball with configurable size, gravity, collisions, rolling and position colouring.";
 
 
-#ifdef ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING
-                            typedef struct Spotlight {
-                              float speed;
-                              uint8_t colorIdx;
-                              int16_t position;
-                              unsigned long lastUpdateTime;
-                              uint8_t width;
-                              uint8_t type;
-                            } spotlight;
+// #ifdef ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING
+//                             typedef struct Spotlight {
+//                               float speed;
+//                               uint8_t colorIdx;
+//                               int16_t position;
+//                               unsigned long lastUpdateTime;
+//                               uint8_t width;
+//                               uint8_t type;
+//                             } spotlight;
 
-                            #define SPOT_TYPE_SOLID       0
-                            #define SPOT_TYPE_GRADIENT    1
-                            #define SPOT_TYPE_2X_GRADIENT 2
-                            #define SPOT_TYPE_2X_DOT      3
-                            #define SPOT_TYPE_3X_DOT      4
-                            #define SPOT_TYPE_4X_DOT      5
-                            #define SPOT_TYPES_COUNT      6
-                            #ifdef ESP8266
-                              #define SPOT_MAX_COUNT 17          //Number of simultaneous waves
-                            #else
-                              #define SPOT_MAX_COUNT 49          //Number of simultaneous waves
-                            #endif
-#endif
+//                             #define SPOT_TYPE_SOLID       0
+//                             #define SPOT_TYPE_GRADIENT    1
+//                             #define SPOT_TYPE_2X_GRADIENT 2
+//                             #define SPOT_TYPE_2X_DOT      3
+//                             #define SPOT_TYPE_3X_DOT      4
+//                             #define SPOT_TYPE_4X_DOT      5
+//                             #define SPOT_TYPES_COUNT      6
+//                             #ifdef ESP8266
+//                               #define SPOT_MAX_COUNT 17          //Number of simultaneous waves
+//                             #else
+//                               #define SPOT_MAX_COUNT 49          //Number of simultaneous waves
+//                             #endif
+// #endif
 
 /*
   Particle Replacement for original Dancing Shadows:
@@ -28928,7 +28850,7 @@ void mAnimatorLight::EffectAnim__Particle__1D__DancingShadows()
 }
 static const char PM_EFFECT_CONFIG__PARTICLE__1D__DANCING_SHADOWS[] PROGMEM =
 "PS Dancing Shadows@"
-"Speed,!,Blur,Color Cycle,,Smear,Position Color,Smooth,!,!"
+"!,!,Blur,Color Cycle,,Smear,Position Color,Smooth,!,!"
 ";"
 ",!"
 ";"
@@ -29728,7 +29650,7 @@ void mAnimatorLight::EffectAnim__Particle__1D__GEQ()
 }
 static const char PM_EFFECT_CONFIG__PARTICLE__1D__GEQ[] PROGMEM =
 "PS GEQ 1D@"
-"Speed,!,Size,Blur,,,,,!,!"
+"!,!,Size,Blur,,,,,!,!"
 ";"
 ",!"
 ";"
@@ -33922,14 +33844,6 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Release);
 
-  addEffect(EFFECTS_FUNCTION__STEPPING_PALETTE_WITH_BACKGROUND__ID,
-            &mAnimatorLight::EffectAnim__Stepping_Palette_With_Background,
-            PM_EFFECT_CONFIG__STEPPING_PALETTE_WITH_BACKGROUND,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__STEPPING_PALETTE_WITH_BACKGROUND,
-            #endif
-            Effect_DevStage::Beta);
-
   addEffect(EFFECTS_FUNCTION__STEPPING_PALETTE__ID,
             &mAnimatorLight::EffectAnim__Stepping_Palette,
             PM_EFFECT_CONFIG__STEPPING_PALETTE,
@@ -33937,6 +33851,14 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_DESCRI__STEPPING_PALETTE,
             #endif
             Effect_DevStage::Release);
+
+  addEffect(EFFECTS_FUNCTION__STEPPING_PALETTE_WITH_BACKGROUND__ID,
+            &mAnimatorLight::EffectAnim__Stepping_Palette_With_Background,
+            PM_EFFECT_CONFIG__STEPPING_PALETTE_WITH_BACKGROUND,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__STEPPING_PALETTE_WITH_BACKGROUND,
+            #endif
+            Effect_DevStage::Beta);
 
   addEffect(EFFECTS_FUNCTION__BLEND_PALETTE_BETWEEN_ANOTHER_PALETTE__ID,
             &mAnimatorLight::EffectAnim__Blend_Two_Palettes,

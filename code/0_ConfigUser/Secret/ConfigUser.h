@@ -33,6 +33,7 @@
 #include "05_Seasonal/Firmware__Christmas_2023__Secret.h"
 #include "05_Seasonal/Firmware__Christmas_2024__Secret.h"
 #include "05_Seasonal/Firmware__Christmas_2025__Secret.h"
+#include "05_Seasonal/Firmware__Christmas_2026__Secret.h"
 
 #include "06_TemplateBuilds_From_INI/TemplateBase__Drivers.h"
 #include "06_TemplateBuilds_From_INI/TemplateBase__Lighting.h"

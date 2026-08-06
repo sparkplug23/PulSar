@@ -5634,6 +5634,9 @@ bool serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient = 0);
 void serveJson(AsyncWebServerRequest* request);
 
 void handleWs();
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+void handleVirtualViewWs();
+#endif
 
 AsyncWebSocket* websocket_lights = nullptr;
 #endif

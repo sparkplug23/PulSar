@@ -416,13 +416,27 @@
   #endif
 #endif
 
+
+// The below value I believe is the power source rating, so the LED count is less than this.
 #ifndef ABL_MILLIAMPS_DEFAULT
-  #define ABL_MILLIAMPS_DEFAULT 850   // auto lower brightness to stay close to milliampere limit
+  // #define ABL_MILLIAMPS_DEFAULT 850   // auto lower brightness to stay close to milliampere limit
+  #define ABL_MILLIAMPS_DEFAULT 2000   // auto lower brightness to stay close to milliampere limit
 #else
   #if ABL_MILLIAMPS_DEFAULT == 0      // disable ABL
   #elif ABL_MILLIAMPS_DEFAULT < 250   // make sure value is at least 250
    #warning "make sure value is at least 250"
    #define ABL_MILLIAMPS_DEFAULT 250
+  #endif
+#endif
+
+#ifndef LED_MILLIAMPS_DEFAULT
+  #define LED_MILLIAMPS_DEFAULT 55    // common WS2812B
+  // #define LED_MILLIAMPS_DEFAULT 0    // Should disable ABL by default, as it is not needed for most users and can cause issues with some LED types. Users can enable it in their config if desired.
+#else
+  #if LED_MILLIAMPS_DEFAULT < 1 || LED_MILLIAMPS_DEFAULT > 100
+   #warning "Unusual LED mA current, overriding with default value."
+   #undef LED_MILLIAMPS_DEFAULT
+   #define LED_MILLIAMPS_DEFAULT 55
   #endif
 #endif
 

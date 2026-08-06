@@ -1,0 +1,25 @@
+{
+  "env_name": "cm_office__elite4dexmu_01",
+  "created_utc": "2026-08-06T10:12:48Z",
+  "created_epoch": 1786011168,
+  "project_dir": "U:\\GitHub\\PulSar",
+  "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__elite4dexmu_01",
+  "platform": "espressif32",
+  "board": "esp32dev",
+  "framework": [
+    "arduino"
+  ],
+  "copied": [
+    "firmware.bin",
+    "firmware.elf",
+    "firmware.map",
+    "partitions.bin",
+    "bootloader.bin"
+  ],
+  "git": {
+    "branch": "dev_particle_lights",
+    "commit": "0d867fa6b58f5e4c74c596eacf8d24004cffa835",
+    "describe": "0d867fa6-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_LightingEffects.h\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/0_ConfigUser/Secret/ConfigUser.h\n M code/2_CoreSystem/00_FirmwareDefaults/03_Lighting/mFirmwareDefaults_Lighting.h\n M code/6_Lights/00_Interface/const.h\n M code/6_Lights/00_Interface/mBusManager.cpp\n M code/6_Lights/00_Interface/mBusManager.h\n M code/6_Lights/00_Interface/mBusNeoWrapper.h\n M code/6_Lights/03_Animator/2DFcn.cpp\n M code/6_Lights/03_Animator/Commands.cpp\n M code/6_Lights/03_Animator/Effects.cpp\n M code/6_Lights/03_Animator/WebUI.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M code/6_Lights/03_Animator/source/common.js\n M code/6_Lights/03_Animator/source/liveviewws2D.htm\n M code/6_Lights/03_Animator/webpages_generated/html_other.h\n M code/6_Lights/03_Animator/webpages_generated/html_settings.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_lgt.ini\n M platformio_override.ini\n M platformio_seasonal.ini\n M saved_compiles/cm_lgt__esp32_coneV_1D/build_meta.json\n M saved_compiles/cm_lgt__esp32_coneV_1D/firmware.elf\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M tools/cdata_lights.js\n?? code/0_ConfigUser/Secret/05_Seasonal/Firmware__Christmas_2026__Secret.h\n?? code/6_Lights/03_Animator/source/virtualview.htm\n?? saved_compiles/cm_office__elite4dexmu_01/\n?? saved_compiles/xmas26__meadows__front_tree/"
+  }
+}

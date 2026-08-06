@@ -1713,6 +1713,353 @@ ALOG_INF(PSTR("CommandSet effect seg=%p stored=%p index=%u"), &seg, &segments[0]
 #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
 
 
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+constexpr uint8_t VIRTUALVIEW_PROTOCOL_MARKER  = 'P';
+constexpr uint8_t VIRTUALVIEW_PROTOCOL_VERSION = 1;
+
+constexpr uint8_t VIRTUALVIEW_MODE_SEGMENTS = 0;
+constexpr uint8_t VIRTUALVIEW_MODE_BUSES    = 1;
+
+constexpr uint8_t VIRTUALVIEW_FLAG_2D       = 0x01;
+constexpr uint8_t VIRTUALVIEW_FLAG_REVERSED = 0x02;
+constexpr uint8_t VIRTUALVIEW_FLAG_LAST     = 0x04;
+
+constexpr size_t VIRTUALVIEW_HEADER_SIZE = 25;
+
+#ifdef ESP8266
+constexpr uint16_t VIRTUALVIEW_PIXELS_PER_PACKET = 300;
+#else
+constexpr uint16_t VIRTUALVIEW_PIXELS_PER_PACKET = 1000;
+#endif
+
+constexpr uint32_t VIRTUALVIEW_INTERVAL_MS = 100;
+
+struct VirtualViewState
+{
+  uint32_t client_id   = 0;
+  uint32_t last_send   = 0;
+  uint32_t block_offset = 0;
+  uint8_t mode         = VIRTUALVIEW_MODE_SEGMENTS;
+  uint8_t block_id     = 0;
+};
+
+static VirtualViewState virtual_view;
+
+#endif
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+static inline void VirtualView_WriteU16(uint8_t* output, uint16_t value)
+{
+  output[0] = static_cast<uint8_t>(value >> 8);
+  output[1] = static_cast<uint8_t>(value);
+}
+
+static inline void VirtualView_WriteU32(uint8_t* output, uint32_t value)
+{
+  output[0] = static_cast<uint8_t>(value >> 24);
+  output[1] = static_cast<uint8_t>(value >> 16);
+  output[2] = static_cast<uint8_t>(value >> 8);
+  output[3] = static_cast<uint8_t>(value);
+}
+
+#endif
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+static bool sendVirtualViewPacket(
+  AsyncWebSocketClient* client,
+  uint8_t mode,
+  uint8_t block_id,
+  uint8_t flags,
+  uint32_t global_start,
+  uint32_t total_pixels,
+  uint32_t block_offset,
+  uint16_t width,
+  uint16_t height,
+  const mAnimatorLight::Segment* segment
+)
+{
+  if (!client || client->queueLength() > 0) return false;
+  if (total_pixels == 0 || block_offset >= total_pixels) return false;
+
+  const uint32_t remaining_pixels = total_pixels - block_offset;
+  const uint16_t packet_pixels = static_cast<uint16_t>(
+    remaining_pixels > VIRTUALVIEW_PIXELS_PER_PACKET
+      ? VIRTUALVIEW_PIXELS_PER_PACKET
+      : remaining_pixels
+  );
+
+  const uint32_t chunk_count_u32 = (total_pixels + VIRTUALVIEW_PIXELS_PER_PACKET - 1U) / VIRTUALVIEW_PIXELS_PER_PACKET;
+  const uint32_t chunk_index_u32 = block_offset / VIRTUALVIEW_PIXELS_PER_PACKET;
+
+  const uint8_t chunk_count = static_cast<uint8_t>(chunk_count_u32 > 255U ? 255U : chunk_count_u32);
+  const uint8_t chunk_index = static_cast<uint8_t>(chunk_index_u32 > 255U ? 255U : chunk_index_u32);
+
+  if (block_offset + packet_pixels >= total_pixels) flags |= VIRTUALVIEW_FLAG_LAST;
+
+  const size_t packet_size = VIRTUALVIEW_HEADER_SIZE + static_cast<size_t>(packet_pixels) * 3U;
+
+  AsyncWebSocketBuffer ws_buffer(packet_size);
+  if (!ws_buffer) return false;
+
+  uint8_t* buffer = reinterpret_cast<uint8_t*>(ws_buffer.data());
+  if (!buffer) return false;
+
+  buffer[0] = VIRTUALVIEW_PROTOCOL_MARKER;
+  buffer[1] = VIRTUALVIEW_PROTOCOL_VERSION;
+  buffer[2] = mode;
+  buffer[3] = flags;
+  buffer[4] = block_id;
+  buffer[5] = chunk_index;
+  buffer[6] = chunk_count;
+
+  VirtualView_WriteU32(buffer + 7, global_start);
+  VirtualView_WriteU32(buffer + 11, total_pixels);
+  VirtualView_WriteU32(buffer + 15, block_offset);
+  VirtualView_WriteU16(buffer + 19, packet_pixels);
+  VirtualView_WriteU16(buffer + 21, width);
+  VirtualView_WriteU16(buffer + 23, height);
+
+  size_t position = VIRTUALVIEW_HEADER_SIZE;
+
+  for (uint16_t packet_pixel = 0; packet_pixel < packet_pixels; packet_pixel++)
+  {
+    const uint32_t block_pixel = block_offset + packet_pixel;
+    uint32_t global_pixel;
+
+    if ((flags & VIRTUALVIEW_FLAG_2D) && segment != nullptr)
+    {
+      const uint32_t local_x = block_pixel % width;
+      const uint32_t local_y = block_pixel / width;
+      const uint32_t matrix_x = static_cast<uint32_t>(segment->start) + local_x;
+      const uint32_t matrix_y = static_cast<uint32_t>(segment->startY) + local_y;
+
+      global_pixel = matrix_y * static_cast<uint32_t>(mAnimatorLight::Segment::maxWidth) + matrix_x;
+    }
+    else
+    {
+      global_pixel = global_start + block_pixel;
+    }
+
+    const uint32_t colour = tkr_anim->getPixelColor(global_pixel);
+    const uint8_t white = W(colour);
+
+    buffer[position++] = tkr_iLight->_briRGB_Global ? qadd8(white, R(colour)) : 0;
+    buffer[position++] = tkr_iLight->_briRGB_Global ? qadd8(white, G(colour)) : 0;
+    buffer[position++] = tkr_iLight->_briRGB_Global ? qadd8(white, B(colour)) : 0;
+  }
+
+  client->binary(std::move(ws_buffer));
+  return true;
+}
+
+#endif
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+static bool sendNextVirtualViewSegmentPacket(AsyncWebSocketClient* client)
+{
+  const uint8_t segment_count = static_cast<uint8_t>(
+    tkr_anim->getSegmentsNum() > 255U ? 255U : tkr_anim->getSegmentsNum()
+  );
+
+  if (segment_count == 0)
+  {
+    virtual_view.block_id = 0;
+    virtual_view.block_offset = 0;
+    return false;
+  }
+
+  for (uint16_t attempts = 0; attempts < segment_count; attempts++)
+  {
+    if (virtual_view.block_id >= segment_count)
+    {
+      virtual_view.block_id = 0;
+      virtual_view.block_offset = 0;
+    }
+
+    mAnimatorLight::Segment& segment = tkr_anim->getSegment(virtual_view.block_id);
+
+    if (!segment.isActive())
+    {
+      virtual_view.block_id++;
+      virtual_view.block_offset = 0;
+      continue;
+    }
+
+    uint8_t flags = 0;
+    uint32_t global_start = segment.start;
+    uint32_t total_pixels = segment.stop > segment.start ? segment.stop - segment.start : 0;
+    uint16_t width = static_cast<uint16_t>(total_pixels > 65535U ? 65535U : total_pixels);
+    uint16_t height = 1;
+
+    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    if (tkr_anim->isMatrix && segment.is2D())
+    {
+      width = segment.stop > segment.start ? segment.stop - segment.start : 0;
+      height = segment.stopY > segment.startY ? segment.stopY - segment.startY : 0;
+      total_pixels = static_cast<uint32_t>(width) * static_cast<uint32_t>(height);
+      global_start = static_cast<uint32_t>(segment.startY) * static_cast<uint32_t>(mAnimatorLight::Segment::maxWidth) + segment.start;
+      flags |= VIRTUALVIEW_FLAG_2D;
+    }
+    #endif
+
+    if (total_pixels == 0 || width == 0 || height == 0)
+    {
+      virtual_view.block_id++;
+      virtual_view.block_offset = 0;
+      continue;
+    }
+
+    const uint32_t remaining_pixels = total_pixels - virtual_view.block_offset;
+    const uint16_t packet_pixels = static_cast<uint16_t>(
+      remaining_pixels > VIRTUALVIEW_PIXELS_PER_PACKET
+        ? VIRTUALVIEW_PIXELS_PER_PACKET
+        : remaining_pixels
+    );
+
+    if (!sendVirtualViewPacket(
+      client,
+      VIRTUALVIEW_MODE_SEGMENTS,
+      virtual_view.block_id,
+      flags,
+      global_start,
+      total_pixels,
+      virtual_view.block_offset,
+      width,
+      height,
+      &segment
+    )) return false;
+
+    virtual_view.block_offset += packet_pixels;
+
+    if (virtual_view.block_offset >= total_pixels)
+    {
+      virtual_view.block_offset = 0;
+      virtual_view.block_id++;
+
+      if (virtual_view.block_id >= segment_count) virtual_view.block_id = 0;
+    }
+
+    return true;
+  }
+
+  virtual_view.block_id = 0;
+  virtual_view.block_offset = 0;
+
+  return false;
+}
+
+#endif
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+static bool sendNextVirtualViewBusPacket(AsyncWebSocketClient* client)
+{
+  const uint8_t bus_count = static_cast<uint8_t>(
+    BusManager::getNumBusses() > 255U ? 255U : BusManager::getNumBusses()
+  );
+
+  if (bus_count == 0)
+  {
+    virtual_view.block_id = 0;
+    virtual_view.block_offset = 0;
+    return false;
+  }
+
+  for (uint16_t attempts = 0; attempts < bus_count; attempts++)
+  {
+    if (virtual_view.block_id >= bus_count)
+    {
+      virtual_view.block_id = 0;
+      virtual_view.block_offset = 0;
+    }
+
+    Bus* bus = BusManager::getBus(virtual_view.block_id);
+
+    if (!bus || !bus->isOk() || bus->getLength() == 0)
+    {
+      virtual_view.block_id++;
+      virtual_view.block_offset = 0;
+      continue;
+    }
+
+    const uint32_t global_start = bus->getStart();
+    const uint32_t total_pixels = bus->getLength();
+    const uint16_t width = static_cast<uint16_t>(total_pixels > 65535U ? 65535U : total_pixels);
+    const uint16_t height = 1;
+    uint8_t flags = 0;
+
+    /*
+     * Add this flag later if your Bus base class exposes a public reversed
+     * accessor. Pixel data remains in global animator order for now.
+     */
+    // if (bus->isReversed()) flags |= VIRTUALVIEW_FLAG_REVERSED;
+
+    const uint32_t remaining_pixels = total_pixels - virtual_view.block_offset;
+    const uint16_t packet_pixels = static_cast<uint16_t>(
+      remaining_pixels > VIRTUALVIEW_PIXELS_PER_PACKET
+        ? VIRTUALVIEW_PIXELS_PER_PACKET
+        : remaining_pixels
+    );
+
+    if (!sendVirtualViewPacket(
+      client,
+      VIRTUALVIEW_MODE_BUSES,
+      virtual_view.block_id,
+      flags,
+      global_start,
+      total_pixels,
+      virtual_view.block_offset,
+      width,
+      height,
+      nullptr
+    )) return false;
+
+    virtual_view.block_offset += packet_pixels;
+
+    if (virtual_view.block_offset >= total_pixels)
+    {
+      virtual_view.block_offset = 0;
+      virtual_view.block_id++;
+
+      if (virtual_view.block_id >= bus_count) virtual_view.block_id = 0;
+    }
+
+    return true;
+  }
+
+  virtual_view.block_id = 0;
+  virtual_view.block_offset = 0;
+
+  return false;
+}
+
+#endif
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+void mAnimatorLight::handleVirtualViewWs()
+{
+  if (!virtual_view.client_id) return;
+  if (millis() - virtual_view.last_send < VIRTUALVIEW_INTERVAL_MS) return;
+
+  AsyncWebSocketClient* client = websocket_lights->client(virtual_view.client_id);
+
+  if (!client)
+  {
+    virtual_view = {};
+    return;
+  }
+
+  if (client->queueLength() > 0) return;
+
+  bool sent;
+
+  if (virtual_view.mode == VIRTUALVIEW_MODE_BUSES) sent = sendNextVirtualViewBusPacket(client);
+  else sent = sendNextVirtualViewSegmentPacket(client);
+
+  if (sent) virtual_view.last_send = millis();
+}
+
+#endif
 
 
 
@@ -1721,6 +2068,7 @@ ALOG_INF(PSTR("CommandSet effect seg=%p stored=%p index=%u"), &seg, &segments[0]
  */
 
 uint16_t wsLiveClientId = 0;
+uint16_t wsVirtualViewClientId = 0;
 unsigned long wsLastLiveTime = 0;
 //uint8_t* wsFrameBuffer = nullptr;
 
@@ -1806,6 +2154,9 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
 
   if (type == WS_EVT_DISCONNECT) {
     if (client->id() == wsLiveClientId) wsLiveClientId = 0;
+    #ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+    if (client->id() == virtual_view.client_id) virtual_view = {};
+    #endif
     DEBUG_PRINTLN(F("WS client disconnected."));
     return;
   }
@@ -1861,12 +2212,69 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
           return;
         }
 
-        if (root["v"] && root.size() == 1) {
-          // client asked only for a verbose state reply
+        ALOG_INF(PSTR("wsEvent::WS_EVT_DATA::deserializeJson OK"));
+
+        if (root["v"] && root.size() == 1)
+        {
+          ALOG_INF(PSTR("wsEvent::WS_EVT_DATA::Verbose response request"));
           verboseResponse = true;
-        } else if (root.containsKey("lv")) {
+        }
+        #ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+else if (root.containsKey("vv"))
+{
+  ALOG_INF(PSTR("wsEvent::WS_EVT_DATA::VirtualView request"));
+
+  const int vv_value = root["vv"].as<int>();
+  const bool enabled = vv_value != 0;
+  const uint8_t requested_mode = root["mode"].isNull() ? VIRTUALVIEW_MODE_SEGMENTS : root["mode"].as<uint8_t>();
+
+  ALOG_INF(
+    PSTR("VirtualView request client=%u vv=%d enabled=%u requested_mode=%u"),
+    static_cast<unsigned>(client->id()),
+    vv_value,
+    static_cast<unsigned>(enabled),
+    static_cast<unsigned>(requested_mode)
+  );
+
+  if (enabled)
+  {
+    virtual_view.client_id    = client->id();
+    virtual_view.mode         = requested_mode == VIRTUALVIEW_MODE_BUSES ? VIRTUALVIEW_MODE_BUSES : VIRTUALVIEW_MODE_SEGMENTS;
+    virtual_view.block_id     = 0;
+    virtual_view.block_offset = 0;
+    virtual_view.last_send    = 0;
+
+    ALOG_INF(
+      PSTR("VirtualView enabled client=%u mode=%u"),
+      static_cast<unsigned>(virtual_view.client_id),
+      static_cast<unsigned>(virtual_view.mode)
+    );
+  }
+  else if (virtual_view.client_id == client->id())
+  {
+    virtual_view = {};
+    ALOG_INF(PSTR("VirtualView disabled client=%u"), static_cast<unsigned>(client->id()));
+  }
+  else
+  {
+    ALOG_INF(
+      PSTR("VirtualView disable request ignored for non-owner client=%u owner=%u"),
+      static_cast<unsigned>(client->id()),
+      static_cast<unsigned>(virtual_view.client_id)
+    );
+  }
+
+  verboseResponse = false;
+}
+#endif
+        else if (root.containsKey("lv"))
+        {
+          ALOG_INF(PSTR("wsEvent::WS_EVT_DATA::Live LED request"));
           wsLiveClientId = root["lv"] ? client->id() : 0;
-        } else {
+        }
+        else
+        { 
+          ALOG_INF(PSTR("wsEvent::WS_EVT_DATA::Deserialize state"));
           verboseResponse = tkr_anim->deserializeState(root);
         }
 
@@ -1910,7 +2318,14 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
   DEBUG_PRINTLN(F("WS unknown event."));
 }
 
+/***
 
+1D:
+    L, 1, R, G, B, R, G, B, ...
+2D:
+    L, 2, width, height, R, G, B, R, G, B, ...
+
+ */
 bool sendLiveLedsWs(uint32_t wsClient)
 {
   AsyncWebSocketClient * wsc = tkr_anim->websocket_lights->client(wsClient);
@@ -1964,9 +2379,9 @@ bool sendLiveLedsWs(uint32_t wsClient)
     uint8_t g = G(c);
     uint8_t b = B(c);
     uint8_t w = W(c);
-    buffer[pos++] = r;//tkr_iLight->_briRGB_Global ? qadd8(w, r) : 0; //R, add white channel to RGB channels as a simple RGBW -> RGB map
-    buffer[pos++] = g;//tkr_iLight->_briRGB_Global ? qadd8(w, g) : 0; //G
-    buffer[pos++] = b;//tkr_iLight->_briRGB_Global ? qadd8(w, b) : 0; //B
+    buffer[pos++] = tkr_iLight->_briRGB_Global ? qadd8(w, r) : 0; //R, add white channel to RGB channels as a simple RGBW -> RGB map
+    buffer[pos++] = tkr_iLight->_briRGB_Global ? qadd8(w, g) : 0; //G
+    buffer[pos++] = tkr_iLight->_briRGB_Global ? qadd8(w, b) : 0; //B
     // Serial.println(r);
   }
 
@@ -1985,10 +2400,19 @@ void mAnimatorLight::handleWs()
     websocket_lights->cleanupClients();
     #endif
     bool success = true;
-    if (wsLiveClientId) success = sendLiveLedsWs(wsLiveClientId);
+    // if (wsLiveClientId) success = sendLiveLedsWs(wsLiveClientId);
+    if (wsLiveClientId)
+    {
+      // ALOG_INF(PSTR("Sending live WS frame to client %u"), static_cast<unsigned>(wsLiveClientId));
+      success = sendLiveLedsWs(wsLiveClientId);
+    }
     wsLastLiveTime = millis();
     if (!success) wsLastLiveTime -= 20; //try again in 20ms if failed due to non-empty WS queue
   }
+
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+  handleVirtualViewWs();
+  #endif
 }
 
 
@@ -3066,19 +3490,84 @@ void mAnimatorLight::serializeModeNames(JsonArray arr, bool flag_get_first_name_
 
 
 
+// #define MAX_LIVE_LEDS 256
+
+// bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient)
+// {
+//   AsyncWebSocketClient * wsc = nullptr;
+//   if (!request) { //not HTTP, use Websockets
+//     wsc = websocket_lights->client(wsClient);
+//     if (!wsc || wsc->queueLength() > 0) return false; //only send if queue free
+//   }
+
+//   unsigned used = getLengthTotal();
+//   unsigned n = (used -1) /MAX_LIVE_LEDS +1; //only serve every n'th LED if count over MAX_LIVE_LEDS
+// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+//   if (isMatrix) {
+//     // ignore anything behid matrix (i.e. extra strip)
+//     used = Segment::maxWidth*Segment::maxHeight; // always the size of matrix (more or less than strip.getLengthTotal())
+//     n = 1;
+//     if (used > MAX_LIVE_LEDS) n = 2;
+//     if (used > MAX_LIVE_LEDS*4) n = 4;
+//   }
+// #endif
+
+//   DynamicBuffer buffer(9 + (9*(1+(used/n))) + 7 + 5 + 6 + 5 + 6 + 5 + 2);  
+//   char* buf = buffer.data();      // assign buffer for oappnd() functions
+//   strncpy_P(buffer.data(), PSTR("{\"leds\":["), buffer.size());
+//   buf += 9; // sizeof(PSTR()) from last line
+
+//   for (size_t i = 0; i < used; i += n)
+//   {
+// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+//     if (isMatrix && n>1 && (i/Segment::maxWidth)%n) i += Segment::maxWidth * (n-1);
+// #endif
+//     uint32_t c = getPixelColor(i);
+//     uint8_t r = R(c);
+//     uint8_t g = G(c);
+//     uint8_t b = B(c);
+//     uint8_t w = W(c);
+//     r = scale8(qadd8(w, r), getBrightness()); //R, add white channel to RGB channels as a simple RGBW -> RGB map
+//     g = scale8(qadd8(w, g), getBrightness()); //G
+//     b = scale8(qadd8(w, b), getBrightness()); //B
+//     buf += sprintf_P(buf, PSTR("\"%06X\","), RGBW32(r,g,b,0));
+//   }
+//   buf--;  // remove last comma
+//   buf += sprintf_P(buf, PSTR("],\"n\":%d"), n);
+// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+//   if (isMatrix) {
+//     buf += sprintf_P(buf, PSTR(",\"w\":%d"), Segment::maxWidth/n);
+//     buf += sprintf_P(buf, PSTR(",\"h\":%d"), Segment::maxHeight/n);
+//   }
+// #endif
+//   (*buf++) = '}';
+//   (*buf++) = 0;
+  
+//   if (request) {
+//     request->send(200, "application/json", toString(std::move(buffer)));
+//   }
+//   else {
+//     wsc->text(toString(std::move(buffer)));
+//   }
+//   return true;
+// }
+
+
 #define MAX_LIVE_LEDS 256
 
 bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient)
 {
+  #ifdef WLED_ENABLE_WEBSOCKETS
   AsyncWebSocketClient * wsc = nullptr;
   if (!request) { //not HTTP, use Websockets
     wsc = websocket_lights->client(wsClient);
     if (!wsc || wsc->queueLength() > 0) return false; //only send if queue free
   }
+  #endif
 
   unsigned used = getLengthTotal();
   unsigned n = (used -1) /MAX_LIVE_LEDS +1; //only serve every n'th LED if count over MAX_LIVE_LEDS
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifndef WLED_DISABLE_2D
   if (isMatrix) {
     // ignore anything behid matrix (i.e. extra strip)
     used = Segment::maxWidth*Segment::maxHeight; // always the size of matrix (more or less than strip.getLengthTotal())
@@ -3095,7 +3584,7 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
 
   for (size_t i = 0; i < used; i += n)
   {
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifndef WLED_DISABLE_2D
     if (isMatrix && n>1 && (i/Segment::maxWidth)%n) i += Segment::maxWidth * (n-1);
 #endif
     uint32_t c = getPixelColor(i);
@@ -3110,7 +3599,7 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
   }
   buf--;  // remove last comma
   buf += sprintf_P(buf, PSTR("],\"n\":%d"), n);
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifndef WLED_DISABLE_2D
   if (isMatrix) {
     buf += sprintf_P(buf, PSTR(",\"w\":%d"), Segment::maxWidth/n);
     buf += sprintf_P(buf, PSTR(",\"h\":%d"), Segment::maxHeight/n);
@@ -3120,15 +3609,15 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
   (*buf++) = 0;
   
   if (request) {
-    request->send(200, "application/json", toString(std::move(buffer)));
+    request->send(200, FPSTR(CONTENT_TYPE_JSON), toString(std::move(buffer)));
   }
+  #ifdef WLED_ENABLE_WEBSOCKETS
   else {
     wsc->text(toString(std::move(buffer)));
   }
+  #endif  
   return true;
 }
-
-
 
 // Global buffer locking response helper class (to make sure lock is released when AsyncJsonResponse is destroyed)
 class LockedJsonResponse: public AsyncJsonResponse {
@@ -3552,6 +4041,23 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
     tkr_web->handleStaticContent(request, "", 200, FPSTR(CONTENT_TYPE_HTML), PAGE_liveview, PAGE_liveview_length);
   });
   AddURLtoList(PM_URL_LIVEVIEW, HTTP_GET);
+  
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+  SPGM_CTR(PM_URL_VIRTUALVIEW) "/lights/virtualview";
+
+  tkr_web->server->on(PM_URL_VIRTUALVIEW, HTTP_GET, [](AsyncWebServerRequest *request){
+    tkr_web->handleStaticContent(
+      request,
+      "",
+      200,
+      FPSTR(CONTENT_TYPE_HTML),
+      PAGE_virtualview,
+      PAGE_virtualview_length
+    );
+  });
+
+  AddURLtoList(PM_URL_VIRTUALVIEW, HTTP_GET);
+  #endif
 
   // settings page for LEDs, UI, sync, time, security, usermods, update
   SPGM_CTR(PM_URL_LIGHTS_SETTINGS) "/lights/settings";

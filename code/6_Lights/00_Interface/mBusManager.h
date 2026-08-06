@@ -62,16 +62,6 @@ make_unique(Args&&... args)
 #define IC_INDEX_WS2812_2CH_3X(i)     ((i)*2/3)
 #define WS2812_2CH_3X_SPANS_2_ICS(i)  ((i)&0x01)    // every other LED zone is on two different ICs
 
-#ifndef LED_MILLIAMPS_DEFAULT
-  #define LED_MILLIAMPS_DEFAULT 55    // common WS2812B
-#else
-  #if LED_MILLIAMPS_DEFAULT < 1 || LED_MILLIAMPS_DEFAULT > 100
-   #warning "Unusual LED mA current, overriding with default value."
-   #undef LED_MILLIAMPS_DEFAULT
-   #define LED_MILLIAMPS_DEFAULT 55
-  #endif
-#endif
-
 
 // This needs cleaned out
 #ifndef WLED_MAX_BUSSES
