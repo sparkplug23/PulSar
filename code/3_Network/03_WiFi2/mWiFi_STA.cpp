@@ -4,14 +4,11 @@
 
 void mWiFi::WiFi_Sta_Maintain_Periodic(void)
 {
-//   ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"), __FILE__, __LINE__);
-
   const bool connected = (WiFi.status() == WL_CONNECTED);
 
-  // Good link if connected AND routable
+  // Connected and holding a usable IP address
   if (connected && WiFi_Link_IsIpRoutable())
   {
-    // If previously not connected, we are now connected and should broadcast that
     if (!connection.fConnected)
     {
       WiFi2_Sta_Connected_Enter();
@@ -21,40 +18,56 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
     return;
   }
 
-  // If we preceed beyond this point, connection above was not establashed and we will attempt reconnects
-
-  // Not good (either not connected, or no routable IP)
+  // Previously connected, but the connection has now been lost
   if (connection.fConnected)
   {
     WiFi2_Sta_Disconnected_Enter();
   }
 
-  // Maintain downtime (seconds)
-  if (connection.downtime < 0xFFFFFFFFUL) { connection.downtime++; }
+  // Maintain outage duration
+  if (connection.downtime < 0xFFFFFFFFUL)
+  {
+    connection.downtime++;
+  }
 
-  // If unconfigured: do not start AP here.
-  // AP start is orchestrated by Tasker using seconds_to_wait_for_fresh_connection_attempt.
+  // Nothing to connect to
   if (!WiFi2_HasAnyStaProfileConfigured())
   {
     return;
   }
 
-  // Backoff window using your existing counter
+  // Wait before trying the next profile
   if (connection.counter > 0)
   {
-    ALOG_DBG(PSTR(D_LOG_WIFI "Reconnecting in %d seconds"),connection.counter);
+    ALOG_DBG(
+      PSTR(D_LOG_WIFI "Reconnecting in %u seconds"),
+      connection.counter
+    );
+
     connection.counter--;
     return;
   }
 
-  // Choose profile (scan once on boot; once per outage after threshold)
+  /*
+   * On boot, or after a long outage, allow a scan-based selection.
+   *
+   * During ordinary retries, the selector advances to the next configured
+   * profile after config.station.active_profile.
+   */
   const bool do_scan = WiFi_Sta_ShouldScanNow_OnBootOrOutage();
-  const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_WithScanPreference(do_scan);
 
-  // Connect attempt (the only connect primitive)
+  const uint8_t profile_i =
+    WiFi_Sta_SelectProfileIndex_WithScanPreference(do_scan);
+
+  ALOG_INF(
+    PSTR(D_LOG_WIFI "Trying WiFi profile %u: %s"),
+    profile_i,
+    config.station.profiles[profile_i].ssid
+  );
+
   WiFi_Sta_ProfileIndex_Connect(profile_i);
 
-  // Rearm attempt pacing
+  // Wait before trying another configured profile
   connection.counter = WIFI_CHECK_SEC;
 }
 
@@ -67,7 +80,7 @@ uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured(void) const
   {
     if (config.station.profiles[i].ssid[0] != '\0')
     {
-      // ALOG_DBG(PSTR("config.station.profiles[i].ssid[0] %s %d"),config.station.profiles[i].ssid,i);
+      ALOG_INF(PSTR("config.station.profiles[i].ssid[0] %s %d"),config.station.profiles[i].ssid,i);
       return i;
     } 
   }
@@ -104,105 +117,163 @@ void mWiFi::WiFi_Sta_OnConnected_ResetOutageScanFlags(void)
 
 uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_WithScanPreference(bool force_scan)
 {
-  DEBUG_LINE_HERE3
-  ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
-  DEBUG_LINE_HERE3
-  const uint8_t ordered_first = WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured();
-  DEBUG_LINE_HERE3
-
+  /*
+   * Normal retry behaviour:
+   *
+   * Start after active_profile and return the next configured profile.
+   * This produces:
+   *
+   *   profile 0 -> profile 1 -> profile 2 -> profile 0
+   *
+   * Empty profile slots are skipped.
+   */
   if (!force_scan)
   {
-    return ordered_first;
+    const uint8_t start_i =
+      (config.station.active_profile + 1) % WIFI_MAXIMUM_CONNECTIONS;
+
+    for (uint8_t offset = 0;
+         offset < WIFI_MAXIMUM_CONNECTIONS;
+         offset++)
+    {
+      const uint8_t profile_i =
+        (start_i + offset) % WIFI_MAXIMUM_CONNECTIONS;
+
+      if (config.station.profiles[profile_i].ssid[0] != '\0')
+      {
+        return profile_i;
+      }
+    }
+
+    // Defensive fallback
+    return WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured();
   }
 
-  DEBUG_LINE_HERE3
-  int n = 0;//WiFi.scanNetworks();
-  if (n <= 0)
+  /*
+   * Scan-based selection is used once during boot and once after the
+   * configured long-outage interval.
+   */
+  const uint8_t ordered_first =
+    WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured();
+
+  const int network_count = WiFi.scanNetworks();
+
+  if (network_count <= 0)
   {
     WiFi.scanDelete();
     return ordered_first;
   }
 
-  DEBUG_LINE_HERE3
-  // best RSSI per profile (only for configured SSIDs)
+  // Strongest observed RSSI for every configured profile
   int16_t best_rssi_by_profile[WIFI_MAXIMUM_CONNECTIONS];
-  for (uint8_t p = 0; p < WIFI_MAXIMUM_CONNECTIONS; p++) best_rssi_by_profile[p] = (int16_t)-32768;
 
-  for (int i = 0; i < n; i++)
+  for (uint8_t profile_i = 0;
+       profile_i < WIFI_MAXIMUM_CONNECTIONS;
+       profile_i++)
   {
-    String ssid = WiFi.SSID(i);
-    int16_t rssi = (int16_t)WiFi.RSSI(i);
+    best_rssi_by_profile[profile_i] = INT16_MIN;
+  }
 
-    for (uint8_t p = 0; p < WIFI_MAXIMUM_CONNECTIONS; p++)
+  for (int scan_i = 0; scan_i < network_count; scan_i++)
+  {
+    const String scanned_ssid = WiFi.SSID(scan_i);
+    const int16_t scanned_rssi = (int16_t)WiFi.RSSI(scan_i);
+
+    for (uint8_t profile_i = 0;
+         profile_i < WIFI_MAXIMUM_CONNECTIONS;
+         profile_i++)
     {
-      const char* cfg = config.station.profiles[p].ssid;
-      if (cfg[0] == '\0') continue;
+      const char* configured_ssid =
+        config.station.profiles[profile_i].ssid;
 
-      if (ssid.equals(cfg))
+      if (configured_ssid[0] == '\0')
       {
-        if (rssi > best_rssi_by_profile[p]) best_rssi_by_profile[p] = rssi;
+        continue;
+      }
+
+      if (scanned_ssid.equals(configured_ssid))
+      {
+        if (scanned_rssi > best_rssi_by_profile[profile_i])
+        {
+          best_rssi_by_profile[profile_i] = scanned_rssi;
+        }
       }
     }
   }
 
-  DEBUG_LINE_HERE3
   WiFi.scanDelete();
 
-  // find best + second best among configured profiles seen
-  int8_t  scan_best = -1;
-  int16_t scan_best_rssi = (int16_t)-32768;
-  int16_t scan_second_rssi = (int16_t)-32768;
+  int8_t strongest_profile = -1;
+  int16_t strongest_rssi = INT16_MIN;
+  int16_t second_strongest_rssi = INT16_MIN;
 
-  for (uint8_t p = 0; p < WIFI_MAXIMUM_CONNECTIONS; p++)
+  for (uint8_t profile_i = 0;
+       profile_i < WIFI_MAXIMUM_CONNECTIONS;
+       profile_i++)
   {
-    int16_t r = best_rssi_by_profile[p];
-    if (r == (int16_t)-32768) continue;
+    const int16_t profile_rssi =
+      best_rssi_by_profile[profile_i];
 
-    if (r > scan_best_rssi)
+    if (profile_rssi == INT16_MIN)
     {
-      scan_second_rssi = scan_best_rssi;
-      scan_best_rssi = r;
-      scan_best = (int8_t)p;
+      continue;
     }
-    else if (r > scan_second_rssi)
+
+    if (profile_rssi > strongest_rssi)
     {
-      scan_second_rssi = r;
+      second_strongest_rssi = strongest_rssi;
+      strongest_rssi = profile_rssi;
+      strongest_profile = (int8_t)profile_i;
+    }
+    else if (profile_rssi > second_strongest_rssi)
+    {
+      second_strongest_rssi = profile_rssi;
     }
   }
 
-  if (scan_best < 0)
+  // None of the configured networks were visible
+  if (strongest_profile < 0)
   {
-    // none of our SSIDs found in scan
     return ordered_first;
   }
 
-  if ((uint8_t)scan_best == ordered_first)
+  // Ordered-first profile is already strongest
+  if ((uint8_t)strongest_profile == ordered_first)
   {
     return ordered_first;
   }
 
-  const int16_t ordered_first_rssi = best_rssi_by_profile[ordered_first];
-  const bool ordered_seen = (ordered_first_rssi != (int16_t)-32768);
+  const int16_t ordered_first_rssi =
+    best_rssi_by_profile[ordered_first];
 
-  bool override_order = false;
+  const bool ordered_first_seen =
+    (ordered_first_rssi != INT16_MIN);
 
-  if (ordered_seen)
+  /*
+   * Prefer configured order unless another configured SSID is clearly
+   * stronger by WIFI_RSSI_THRESHOLD.
+   */
+  if (ordered_first_seen)
   {
-    if ((scan_best_rssi - ordered_first_rssi) >= (int16_t)WIFI_RSSI_THRESHOLD) override_order = true;
-  }
-  else
-  {
-    // ordered-first not seen; only override if best clearly stronger than second best
-    if ((scan_second_rssi != (int16_t)-32768) &&
-        ((scan_best_rssi - scan_second_rssi) >= (int16_t)WIFI_RSSI_THRESHOLD))
+    if ((strongest_rssi - ordered_first_rssi) >=
+        (int16_t)WIFI_RSSI_THRESHOLD)
     {
-      override_order = true;
+      return (uint8_t)strongest_profile;
     }
+
+    return ordered_first;
   }
 
-  DEBUG_LINE_HERE3
-  return override_order ? (uint8_t)scan_best : ordered_first;
+  /*
+   * Ordered-first was not visible.
+   *
+   * Use the strongest visible configured profile. The old implementation
+   * could incorrectly return the invisible ordered-first profile when only
+   * one alternative network was visible.
+   */
+  return (uint8_t)strongest_profile;
 }
+
 
 void mWiFi::WiFi_Sta_Connect_Start(void)
 {
@@ -372,22 +443,27 @@ void mWiFi::WiFi2_Sta_Disconnected_Enter(void)
 
 void mWiFi::WiFi2_Sta_EnsureConnecting(void)
 {
-  // ALOG_DBG(PSTR(D_LOG_WIFI "%s|%d"),__FILE__,__LINE__);
-  if (WL_CONNECTED == WiFi.status()) { return; }
-  if (!WiFi2_HasAnyStaProfileConfigured()) { return; }
-
-  // Try in configured order starting from current active
-  uint8_t start_i = config.station.active_profile;
-
-  for (uint8_t off = 0; off < WIFI_MAXIMUM_CONNECTIONS; off++)
+  if (WiFi.status() == WL_CONNECTED)
   {
-    uint8_t i = (start_i + off) % WIFI_MAXIMUM_CONNECTIONS;
-    const auto& p = config.station.profiles[i];
-    if (p.ssid[0] == '\0') { continue; }
-
-    WiFi_Sta_ProfileIndex_Connect(i);
     return;
   }
+
+  if (!WiFi2_HasAnyStaProfileConfigured())
+  {
+    return;
+  }
+
+  // Select the next configured profile after active_profile
+  const uint8_t profile_i =
+    WiFi_Sta_SelectProfileIndex_WithScanPreference(false);
+
+  ALOG_INF(
+    PSTR(D_LOG_WIFI "Ensuring connection using profile %u: %s"),
+    profile_i,
+    config.station.profiles[profile_i].ssid
+  );
+
+  WiFi_Sta_ProfileIndex_Connect(profile_i);
 }
 
 
