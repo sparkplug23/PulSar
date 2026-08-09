@@ -162,7 +162,7 @@ bool JsonBuilder::requestJSONBufferLock(uint16_t moduleID)
 #endif  
   // If the lock is still held - by us, or by another task
   if (jsonBufferLock) {
-    DEBUG_PRINTF_P(PSTR("ERROR: Locking JSON buffer (%d) failed! (still locked by %d)\n"), moduleID, jsonBufferLock);
+    ALOG_ERR(PSTR("ERROR: Locking JSON buffer (%d) failed! (still locked by %d)\n"), moduleID, jsonBufferLock);
 #ifdef ARDUINO_ARCH_ESP32
     xSemaphoreGiveRecursive(tkr_mfile->jsonBufferLockMutex);
 #endif
@@ -170,7 +170,7 @@ bool JsonBuilder::requestJSONBufferLock(uint16_t moduleID)
   }
 
   jsonBufferLock = moduleID ? moduleID : 255;
-  DEBUG_PRINTF_P(PSTR("JSON locked (%d)\n\r"), jsonBufferLock);
+  ALOG_DBM(PSTR("JSON locked (%d)\n\r"), jsonBufferLock);
   #ifdef USE_MODULE_CORE_FILESYSTEM
   tkr_mfile->pDoc->clear();
   #endif
@@ -179,7 +179,7 @@ bool JsonBuilder::requestJSONBufferLock(uint16_t moduleID)
 
 void  JsonBuilder::releaseJSONBufferLock()
 {
-  DEBUG_PRINTF_P(PSTR("JSON released (%d)\n\r"), jsonBufferLock);
+  ALOG_DBM(PSTR("JSON released (%d)\n\r"), jsonBufferLock);
   jsonBufferLock = 0;
 #ifdef ARDUINO_ARCH_ESP32
   xSemaphoreGiveRecursive(tkr_mfile->jsonBufferLockMutex);

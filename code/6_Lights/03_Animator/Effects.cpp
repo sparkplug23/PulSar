@@ -13,28 +13,6 @@
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 
-#if !(defined(WLED_DISABLE_PARTICLESYSTEM2D) && defined(WLED_DISABLE_PARTICLESYSTEM1D))
-  #include "ParticleSystem.h" // include particle system code only if at least one system is enabled
-  #ifdef WLED_DISABLE_PARTICLESYSTEM2D
-    #define WLED_PS_DONT_REPLACE_2D_FX
-  #endif
-  #ifdef WLED_DISABLE_PARTICLESYSTEM1D
-    #define WLED_PS_DONT_REPLACE_1D_FX
-  #endif
-  #ifdef ESP8266
-    #if !defined(WLED_DISABLE_PARTICLESYSTEM2D) && !defined(WLED_DISABLE_PARTICLESYSTEM1D)
-      #error ESP8266 does not support 1D and 2D particle systems simultaneously. Please disable one of them.
-    #endif
-  #endif
-#else
-  #define WLED_PS_DONT_REPLACE_1D_FX
-  #define WLED_PS_DONT_REPLACE_2D_FX
-#endif
-#ifdef WLED_PS_DONT_REPLACE_FX
-  #define WLED_PS_DONT_REPLACE_1D_FX
-  #define WLED_PS_DONT_REPLACE_2D_FX
-#endif
-
 #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
 static PRNG prng(hw_random()); // pseudo-random number generator class, seed = hardware random number

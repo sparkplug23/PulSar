@@ -16,7 +16,7 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE2
-#include "mSunTracking_Fallback.h" // minimal version of below in self contained header
+#include "mSunTracking_FastEstimate.h" // minimal version of below in self contained header
 #endif
 
 #if defined(USE_MODULE_SENSORS_SUN_TRACKING) && !defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)

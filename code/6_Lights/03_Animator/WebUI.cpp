@@ -2084,7 +2084,7 @@ void sendDataWs(AsyncWebSocketClient * client)
     return;
   }
 
-  if (!JBI->requestJSONBufferLock(12)) {
+  if (!JBI->requestJSONBufferLock(JSON_LOCK_WS_SEND)) {
     const char* error = PSTR("{\"error\":3}");
     if (client) {
       client->text(FPSTR(error)); // ERR_NOBUF
@@ -2100,11 +2100,13 @@ void sendDataWs(AsyncWebSocketClient * client)
   tkr_anim->serializeInfo(info);
 
   size_t len = measureJson(*tkr_mfile->pDoc);
-  // DEBUG_PRINTF_P(PSTR("JSON buffer size: %u for WS request (%u).\n"), tkr_anim->pDoc->memoryUsage(), len);
+  #ifdef ENABLE_DEBUG__JSON_BUFFER_LOCKS
+  ALOG_INF(PSTR("JSON buffer size: %u for WS request (%u).\n"), tkr_mfile->pDoc->memoryUsage(), len);
+  #endif
 
   // the following may no longer be necessary as heap management has been fixed by @willmmiles in AWS
   size_t heap1 = ESP.getFreeHeap();
-  // DEBUG_PRINTF_P(PSTR("heap %u\n"), ESP.getFreeHeap());
+  ALOG_INF(PSTR("heap %u\n"), ESP.getFreeHeap());
   #ifdef ESP8266
   if (len>heap1) {
     DEBUG_PRINTLN(F("Out of memory (WS)!"));
@@ -2114,29 +2116,41 @@ void sendDataWs(AsyncWebSocketClient * client)
   AsyncWebSocketBuffer buffer(len);
   #ifdef ESP8266
   size_t heap2 = ESP.getFreeHeap();
-  DEBUG_PRINTF_P(PSTR("heap %u\n"), ESP.getFreeHeap());
+  ALOG_INF(PSTR("heap %u\n"), ESP.getFreeHeap());
   #else
   size_t heap2 = 0; // ESP32 variants do not have the same issue and will work without checking heap allocation
   #endif
   if (!buffer || heap1-heap2<len) {
     JBI->releaseJSONBufferLock();
-    DEBUG_PRINTLN(F("WS buffer allocation failed."));
+    ALOG_ERR(PSTR("WS buffer allocation failed."));
     tkr_anim->websocket_lights->closeAll(1013); //code 1013 = temporary overload, try again later
     tkr_anim->websocket_lights->cleanupClients(0); //disconnect all clients to release memory
     return; //out of memory
   }
   serializeJson(*tkr_mfile->pDoc, (char *)buffer.data(), len);
 
-  DEBUG_PRINT(F("Sending WS data "));
+  ALOG_INF(PSTR("Sending WS data "));
   if (client) {
-    DEBUG_PRINTLN(F("to a single client."));
+    ALOG_INF(PSTR("to a single client."));
     client->text(std::move(buffer));
   } else {
-    DEBUG_PRINTLN(F("to multiple clients."));
+    ALOG_INF(PSTR("to multiple clients."));
     tkr_anim->websocket_lights->textAll(std::move(buffer));
   }
 
   JBI->releaseJSONBufferLock();
+}
+
+void mAnimatorLight::updateInterfaces(uint8_t callMode)
+{
+  if (!interfaceUpdateCallMode || millis() - lastInterfaceUpdate < INTERFACE_UPDATE_COOLDOWN) return;
+
+  sendDataWs();
+  lastInterfaceUpdate = millis();
+  interfaceUpdateCallMode = CALL_MODE_INIT; //disable further updates
+
+  if (callMode == CALL_MODE_WS_SEND) return;
+  
 }
 
 
@@ -3822,8 +3836,10 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
       lDoc["m"] = lDoc.memoryUsage(); // JSON buffer usage, for remote debugging
   }
 
+  #ifdef ENABLE_DEBUG__JSON_BUFFER_LOCKS
   ALOG_DBG(PSTR("JSON buffer size: %u for request: %d\n"), lDoc.memoryUsage(), subJson);
-
+  #endif
+  
   size_t len = response->setLength();
   ALOG_DBG(PSTR("JSON content length: %d"), len);
 

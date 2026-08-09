@@ -1338,7 +1338,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     _palette_container->CRGB16Palette16_Palette.data = *fastledPalettes[palette_id_adj];
     _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
     _palette_container->colours_in_palette = 16;
-    ALOG_INF(PSTR("crgb16 %d"), palette_id);
+    ALOG_DBM(PSTR("crgb16 %d"), palette_id);
   }
   // ------------------------------------------------------------------
   // 2) Static CRGBPalette16 Gradient (FastLED gradient table)
@@ -11580,21 +11580,6 @@ uint8_t realtimeBroadcast(uint8_t type, IPAddress client, uint16_t length, uint8
 
 
 
-
-void mAnimatorLight::updateInterfaces(uint8_t callMode)
-{
-  if (!interfaceUpdateCallMode || millis() - lastInterfaceUpdate < INTERFACE_UPDATE_COOLDOWN) return;
-
-  ALOG_INF(PSTR("Sending Update"));
-
-  // sendDataWs(); //
-  ALOG_ERR(PSTR("REMOVED MAY CAUSE FAULT"));
-  lastInterfaceUpdate = millis();
-  interfaceUpdateCallMode = 0; //disable further updates
-
-  if (callMode == CALL_MODE_WS_SEND) return;
-
-}
 
 
 // legacy method, applies values from col, effectCurrent, ... to selected segments

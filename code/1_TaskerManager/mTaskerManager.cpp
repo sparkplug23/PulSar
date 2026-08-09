@@ -535,8 +535,11 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_SENSORS_ROTARY_ENCODER
   addTasker(new mRotaryEncoder());
   #endif
-  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+  #ifdef USE_MODULE_SENSORS_SUN_TRACKING
   addTasker(new mSunTracking());
+  #endif
+  #ifdef USE_MODULE_SENSORS_SUN_TRACKING_FAST_ESTIMATE
+  addTasker(new mSunTracking_FastEstimate());
   #endif
   #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
   addTasker(new mTOF_VL53L0X());

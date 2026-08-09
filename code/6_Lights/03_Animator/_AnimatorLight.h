@@ -49,6 +49,31 @@
 #define inoise16 perlin16 // fastled legacy alias
 
 
+#if !(defined(WLED_DISABLE_PARTICLESYSTEM2D) && defined(WLED_DISABLE_PARTICLESYSTEM1D))
+  #include "ParticleSystem.h" // include particle system code only if at least one system is enabled
+  #ifdef WLED_DISABLE_PARTICLESYSTEM2D
+    #define WLED_PS_DONT_REPLACE_2D_FX
+  #endif
+  #ifdef WLED_DISABLE_PARTICLESYSTEM1D
+    #define WLED_PS_DONT_REPLACE_1D_FX
+  #endif
+  #ifdef ESP8266
+    #if !defined(WLED_DISABLE_PARTICLESYSTEM2D) && !defined(WLED_DISABLE_PARTICLESYSTEM1D)
+      #error ESP8266 does not support 1D and 2D particle systems simultaneously. Please disable one of them.
+    #endif
+  #endif
+#else
+  #define WLED_PS_DONT_REPLACE_1D_FX
+  #define WLED_PS_DONT_REPLACE_2D_FX
+#endif
+#ifdef WLED_PS_DONT_REPLACE_FX
+  #define WLED_PS_DONT_REPLACE_1D_FX
+  #define WLED_PS_DONT_REPLACE_2D_FX
+#endif
+
+
+
+
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Should nearly always be enabled as default/minimal cases
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
@@ -6084,6 +6109,7 @@ byte presetCycMin _INIT(1);
 byte presetCycMax _INIT(5);
 
 
+
 //realtime override modes
 #define REALTIME_OVERRIDE_NONE    0
 #define REALTIME_OVERRIDE_ONCE    1
@@ -6264,6 +6290,8 @@ private:
   #endif
 #endif
 
+
+// static PRNG prng = PRNG();//();//hw_random()); // pseudo-random number generator class, seed = hardware random number
 
 
     /************************************************************************************************
