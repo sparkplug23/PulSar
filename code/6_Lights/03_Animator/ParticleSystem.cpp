@@ -25,6 +25,12 @@ static uint32_t fast_color_scaleAdd(const uint32_t c1, const uint32_t c2, uint8_
 
 ParticleSystem2D::ParticleSystem2D(uint32_t width, uint32_t height, uint32_t numberofparticles, uint32_t numberofsources, bool isadvanced, bool sizecontrol) {
   PSPRINTLN("\n ParticleSystem2D constructor");
+  
+  particlesettings.asByte = 0;
+  forcecounter = 0;
+  gforcecounter = 0;
+  fireIntesity = 0;
+  
   numSources = numberofsources; // number of sources allocated in init
   numParticles = numberofparticles; // number of particles allocated in init
   usedParticles = numParticles; // use all particles by default

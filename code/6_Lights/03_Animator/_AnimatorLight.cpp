@@ -1159,18 +1159,6 @@ void mAnimatorLight::EverySecond_AutoOff()
 
 } // END EverySecond_AutoOff
 
-
-
-
-#ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-mAnimatorLight& mAnimatorLight::setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE)
-{
-  this->anim_progress_mqtt_function_callback = anim_progress_mqtt_function_callback;
-  return *this;
-}
-#endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-
-
 #ifdef ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
 
 // You provide this to match your packed encoding (RGB, WRGB, etc.)
@@ -1248,28 +1236,6 @@ static inline void buildCRGB16FromPacked(const std::vector<uint8_t>& packed,
 }
 
 #endif
-
-
-  //typedef unsigned int uint32_t
-// array of fastled palettes (palette 6 - 12)
-// const TProgmemRGBPalette16 *const fastledPalettes[] PROGMEM = {
-//   &RainbowColors_gc22,
-//   &RainbowStripeColors_p,
-//   &PartyColors_p,
-//   &CloudColors_p,
-//   &LavaColors_p,
-//   &OceanColors_p,
-//   &ForestColors_p,
-//   &Matlab_Purula_p,
-//   &Matlab_Hot_p,
-//   &Matlab_Turbo_p,
-//   &Matlab_Hot_p,
-//   &Matlab_Cool_p,
-//   &Matlab_Spring_p,
-//   &Matlab_Autumn_p,
-//   &Matlab_Jet_p
-// };
-
 
 /**
  * @brief Loads a palette into RAM for the segment, handling multiple palette types.
@@ -2599,9 +2565,9 @@ void mAnimatorLight::SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg
 // }
 
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
-void mAnimatorLight::addEffect(uint8_t id, EffectFunction function, const char* effect_config, const char* effect_description, uint8_t development_stage)
+void mAnimatorLight::addEffect(uint16_t id, EffectFunction function, const char* effect_config, const char* effect_description, uint8_t development_stage)
 #else
-void mAnimatorLight::addEffect(uint8_t id, EffectFunction function, const char* effect_config, uint8_t development_stage)
+void mAnimatorLight::addEffect(uint16_t id, EffectFunction function, const char* effect_config, uint8_t development_stage)
 #endif
 {
   const size_t function_count = effects.function.size();
@@ -5111,10 +5077,6 @@ uint8_t mAnimatorLight::get_random_wheel_index(uint8_t pos)
 //   ALOG_INF(PSTR("description len=%d"),effects.description.size());
 //   #endif
   
-//   #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-//   setCallback_ConstructJSONBody_Debug_Animations_Progress(nullptr); // clear to be reset
-//   #endif
-  
 //   #ifdef ENABLE_LOG_LEVEL_COMMANDS
 //   char buffer[30];
 //   ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_SVALUE_SVALUE_K(D_EFFECTS, D_FUNCTION)), GetFlasherFunctionName(buffer, sizeof(buffer)));
@@ -5123,7 +5085,7 @@ uint8_t mAnimatorLight::get_random_wheel_index(uint8_t pos)
 // }
 
 void mAnimatorLight::CommandSet_Flasher_FunctionID(
-  uint8_t value,
+  uint16_t value,
   uint8_t segment_index
 )
 {
@@ -5139,7 +5101,7 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(
   }
 
   // Restart the effect even when the same ID is received.
-  seg.markForReset();
+  // seg.markForReset();
 
   seg.aux0 = 0;
   seg.flags.animator_first_run = true;
@@ -5154,10 +5116,6 @@ void mAnimatorLight::CommandSet_Flasher_FunctionID(
   //   ALOG_INF(PSTR("description=%S"), effects.description[value]);
   // }
   // ALOG_INF( PSTR("description len=%d"), effects.description.size()  );
-  #endif
-
-  #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  setCallback_ConstructJSONBody_Debug_Animations_Progress(nullptr);
   #endif
 
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
@@ -5203,7 +5161,7 @@ const char* mAnimatorLight::GetFlasherFunctionName(char* buffer, uint8_t buflen,
 }
 
 
-const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen, bool return_first_option_only)
+const char* mAnimatorLight::GetFlasherFunctionNamebyID(uint16_t id, char* buffer, uint8_t buflen, bool return_first_option_only)
 {
 
   if(id<getEffectsAmount()){
@@ -5572,48 +5530,113 @@ name = nullptr;
 }
 
 
-bool mAnimatorLight::Segment::allocateData(size_t len) 
-{
+// bool mAnimatorLight::Segment::allocateData(size_t len) 
+// {
   
-  if (data && _dataLen == len) return true; //already allocated
-  deallocateData();
-  if (mAnimatorLight::Segment::getUsedSegmentData() + len > MAX_SEGMENT_DATA)
-  { 
-    ALOG_ERR( PM_MEMORY_INSUFFICIENT ); // This is the base case, none will be fallback
-    effect_id = 0;//EFFECTS_FUNCTION__STATIC_PALETTE__ID;
-    return false; //not enough memory
+//   if (data && _dataLen == len) return true; //already allocated
+//   deallocateData();
+//   if (mAnimatorLight::Segment::getUsedSegmentData() + len > MAX_SEGMENT_DATA)
+//   { 
+//     ALOG_ERR( PM_MEMORY_INSUFFICIENT ); // This is the base case, none will be fallback
+//     effect_id = 0;//EFFECTS_FUNCTION__STATIC_PALETTE__ID;
+//     return false; //not enough memory
+//   }
+//   // if possible use SPI RAM on ESP32
+//   #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_PSRAM)
+//   if (psramFound())
+//     data = (byte*) ps_malloc(len);
+//   else
+//   #endif
+
+//   data = (byte*) malloc(len);
+
+//   if (!data){
+//     ALOG_ERR( PM_MEMORY_INSUFFICIENT ); // This is the base case, none will be fallback
+//     effect_id = 0;//EFFECTS_FUNCTION__STATIC_PALETTE__ID;
+//     return false; //allocation failed
+//   }
+
+//   addUsedSegmentData(len);
+//   _dataLen = len;
+//   memset(data, 0, len);
+
+//   DEBUG_LINE_HERE
+
+//   return true;
+// }
+
+
+// void mAnimatorLight::Segment::deallocateData()
+// {
+//   if (!data) return;
+//   free(data);
+//   data = nullptr;
+//   addUsedSegmentData(-_dataLen);
+//   _dataLen = 0;
+// }
+
+
+
+// allocates effect data buffer on heap and initialises (erases) it
+bool mAnimatorLight::Segment::allocateData(size_t len) {
+  if (len == 0) return false;    // nothing to do
+  if (data && _dataLen >= len) { // already allocated enough (reduce fragmentation)
+    if (call == 0) {
+      if (_dataLen < FAIR_DATA_PER_SEG) { // segment data is small
+        DEBUG_PRINTF_P(PSTR("--   Clearing data (%d): %p\n"), len, this);
+        memset(data, 0, len);  // erase buffer if called during effect initialisation
+        return true; // no need to reallocate
+      }
+    }
+    else
+      return true;
   }
-  // if possible use SPI RAM on ESP32
-  #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_PSRAM)
-  if (psramFound())
-    data = (byte*) ps_malloc(len);
-  else
+  #ifdef ENABLE_DEBUG_LIGHTS__ALLOCATE_DATA
+  DEBUG_PRINTF_P(PSTR("--   Allocating data (%d): %p\n"), len, this);
+  #endif
+  // limit to MAX_SEGMENT_DATA if there is no PSRAM, otherwise prefer functionality over speed
+  #ifndef BOARD_HAS_PSRAM
+  if (Segment::getUsedSegmentData() + len - _dataLen > MAX_SEGMENT_DATA) {
+    // not enough memory
+    DEBUG_PRINTF_P(PSTR("SegmentData limit reached: %d/%d\n"), len, Segment::getUsedSegmentData());
+    // errorFlag = ERR_NORAM;
+    return false;
+  }
   #endif
 
-  data = (byte*) malloc(len);
-
-  if (!data){
-    ALOG_ERR( PM_MEMORY_INSUFFICIENT ); // This is the base case, none will be fallback
-    effect_id = 0;//EFFECTS_FUNCTION__STATIC_PALETTE__ID;
-    return false; //allocation failed
+  if (data) {
+    d_free(data); // free data and try to allocate again (segment buffer may be blocking contiguous heap)
+    Segment::addUsedSegmentData(-_dataLen); // subtract buffer size
   }
 
-  addUsedSegmentData(len);
-  _dataLen = len;
-  memset(data, 0, len);
+  data = static_cast<byte*>(allocate_buffer(len, BFRALLOC_PREFER_DRAM | BFRALLOC_CLEAR)); // prefer DRAM over PSRAM for speed
 
-  DEBUG_LINE_HERE
-
-  return true;
+  if (data) {
+    Segment::addUsedSegmentData(len);
+    _dataLen = len;
+    #ifdef ENABLE_DEBUG_LIGHTS__ALLOCATE_DATA
+    DEBUG_PRINTF_P(PSTR("---  Allocated data (%p): %d/%d -> %p\n"), this, len, Segment::getUsedSegmentData(), data);
+    #endif
+    return true;
+  }
+  // allocation failed
+  DEBUG_PRINTLN(F("!!! Allocation failed. !!!"));
+  // errorFlag = ERR_NORAM;
+  return false;
 }
 
-
-void mAnimatorLight::Segment::deallocateData()
-{
-  if (!data) return;
-  free(data);
+void mAnimatorLight::Segment::deallocateData() {
+  if (!data) { _dataLen = 0; return; }
+  if ((Segment::getUsedSegmentData() > 0) && (_dataLen > 0)) { // check that we don't have a dangling / inconsistent data pointer
+    #ifdef ENABLE_DEBUG_LIGHTS__ALLOCATE_DATA
+    DEBUG_PRINTF_P(PSTR("---  Released data (%p): %d/%d -> %p\n"), this, _dataLen, Segment::getUsedSegmentData(), data);
+    #endif
+    d_free(data);
+  } else {
+    DEBUG_PRINTF_P(PSTR("---- Released data (%p): inconsistent UsedSegmentData (%d/%d), cowardly refusing to free nothing.\n"), this, _dataLen, Segment::getUsedSegmentData());
+  }
   data = nullptr;
-  addUsedSegmentData(-_dataLen);
+  Segment::addUsedSegmentData(_dataLen <= Segment::getUsedSegmentData() ? -_dataLen : -Segment::getUsedSegmentData());
   _dataLen = 0;
 }
 
@@ -5626,7 +5649,24 @@ void mAnimatorLight::Segment::deallocateData()
   * may free that data buffer.
   */
 void mAnimatorLight::Segment::resetIfRequired() {
-  if (!reset) return;
+  if (!reset || !isActive()) return;
+  //DEBUG_PRINTF_P(PSTR("-- Segment reset: %p\n"), this);
+  if (data && _dataLen > 0) {
+    if (_dataLen > (MAX_SEGMENT_DATA / tkr_anim->getMaxSegments())) deallocateData(); // do not keep large allocations
+    else memset(data, 0, _dataLen);  // can prevent heap fragmentation
+    #ifdef ENABLE_DEBUG_LIGHTS__ALLOCATE_DATA
+    DEBUG_PRINTF_P(PSTR("-- Segment %p reset, data cleared\n"), this);
+    #endif
+  }
+  if (pixels) for (size_t i = 0; i < length(); i++) pixels[i] = BLACK; // clear pixel buffer
+  step = 0; call = 0; aux0 = 0; aux1 = 0;  aux2 = 0;  aux3 = 0;   aux4 = 0;  
+  effect_init_runtime = millis(); // save when an effect first started
+  reset = false;
+  #ifdef WLED_ENABLE_GIF
+  endImagePlayback(this);
+  #endif
+
+
   // if (reset) {
     
   // ALOG_INF(PSTR(D_LOG_PIXEL "resetIfRequired AuxOptions Segment = %d,%d,%d,%d"),
@@ -6125,7 +6165,7 @@ void mAnimatorLight::Segment::setUp(uint16_t i1, uint16_t i2, uint8_t grp, uint8
   if (stop) fill(BLACK); //turn old segment range off
   if (i2 <= i1) { //disable segment
     stop = 0;
-    markForReset();
+    // markForReset();
     return;
   }
   if (i1 < Segment::maxWidth || (i1 >= Segment::maxWidth*Segment::maxHeight && i1 < tkr_anim->getLengthTotal())) start = i1; // Segment::maxWidth equals tkr_anim->getLengthTotal() for 1D
@@ -6143,7 +6183,7 @@ void mAnimatorLight::Segment::setUp(uint16_t i1, uint16_t i2, uint8_t grp, uint8
     spacing = spc;
   }
   if (ofs < UINT16_MAX) offset = ofs;
-  markForReset();
+  // markForReset();
   if (!boundsUnchanged) refreshLightCapabilities();
 }
 
@@ -6199,7 +6239,7 @@ mAnimatorLight::Segment &mAnimatorLight::Segment::setOption(uint8_t n, bool val)
 }
 
 
-mAnimatorLight::Segment &mAnimatorLight::Segment::setEffect(uint8_t fx, bool loadDefaults) 
+mAnimatorLight::Segment &mAnimatorLight::Segment::setEffect(uint16_t fx, bool loadDefaults) 
 {
   char buffer[10];
   ALOG_INF(PSTR("setEffect %d %s"), fx, tkr_anim->GetFlasherFunctionNamebyID(fx, buffer, sizeof(buffer)));
@@ -6299,10 +6339,10 @@ mAnimatorLight::Segment &mAnimatorLight::Segment::setEffect(uint8_t fx, bool loa
     }
   }
 
-  flags.animator_first_run = true;
+  // flags.animator_first_run = true;
   markForReset();
   // next_time = 0;
-  tkr_anim->force_update();
+  // tkr_anim->force_update();
 
   if (mode_changed) tkr_anim->stateChanged = true;
   
@@ -6420,7 +6460,7 @@ bool mAnimatorLight::Segment::parseSegColorHex(const char* in,
 }
 
 
-bool mAnimatorLight::extractModeDefaults(uint8_t mode, const char* segVar, char* outBuffer, size_t bufferSize)
+bool mAnimatorLight::extractModeDefaults(uint16_t mode, const char* segVar, char* outBuffer, size_t bufferSize)
 {
   if (mode >= getEffectCount() || !segVar || !outBuffer || bufferSize == 0) return false;
 
@@ -6489,7 +6529,7 @@ bool mAnimatorLight::extractModeDefaults(uint8_t mode, const char* segVar, char*
 }
 
 
-int16_t mAnimatorLight::extractModeDefaults(uint8_t mode, const char* segVar)
+int16_t mAnimatorLight::extractModeDefaults(uint16_t mode, const char* segVar)
 {
   if (mode >= getEffectCount() || !segVar) return -1;
 
@@ -6925,7 +6965,7 @@ void mAnimatorLight::sortEffects(Effect_DevStage promote_first)
     });
 
   // Reorder all parallel arrays explicitly
-  std::vector<uint8_t>        id_new;        id_new.reserve(n);
+  std::vector<uint16_t>        id_new;        id_new.reserve(n);
   std::vector<EffectFunction> fn_new;        fn_new.reserve(n);
   std::vector<const char*>    cfg_new;       cfg_new.reserve(n);
   std::vector<uint8_t>        stage_new;     stage_new.reserve(n);
@@ -7742,18 +7782,31 @@ void mAnimatorLight::reset()
 // }
 
 void mAnimatorLight::setTargetFps(uint8_t fps) {
-  if (fps > 0 && fps <= 120) _targetFps = fps;
-  _frametime = 1000 / _targetFps;
+  // if (fps > 0 && fps <= 120) _targetFps = fps;
+  // _frametime = 1000 / _targetFps;
+
+  if (fps == FPS_UNLIMITED)
+  {
+    _targetFps = FPS_UNLIMITED;
+    _frametime = 0;
+    return;
+  }
+
+  if (fps > 120) fps = 120;
+
+  _targetFps = fps;
+  _frametime = 1000U / _targetFps;
 }
 
-void mAnimatorLight::setEffect(uint8_t segid, uint8_t m) {
+void mAnimatorLight::setEffect(uint8_t segid, uint16_t m) {
   
     #ifdef ENABLE_EFFECT_DESCRIPTIONS  
     // ALOG_INF(PSTR("description len=%d"),effects.description.size());
     #endif
   
   if (segid >= segments.size()) return;
-   
+
+  if (!getEffectCount()) return;
   if (m >= getEffectCount()) m = getEffectCount() - 1;
 
   if (segments[segid].animation_mode_id != m) {
@@ -7931,7 +7984,7 @@ void mAnimatorLight::setSegment(uint8_t n, uint16_t i1, uint16_t i2, uint8_t gro
     //}
     // if main segment is deleted, set first active as main segment
     if (n == _mainSegment) setMainSegmentId(0);
-    seg.markForReset();
+    // seg.markForReset();
     return;
   }
   if (isMatrix) {
@@ -7955,7 +8008,7 @@ void mAnimatorLight::setSegment(uint8_t n, uint16_t i1, uint16_t i2, uint8_t gro
     seg.spacing = spacing;
   }
   if (offset < UINT16_MAX) seg.offset = offset;
-  seg.markForReset();
+  // seg.markForReset();
   if (!boundsUnchanged) seg.refreshLightCapabilities();
 }
 
@@ -9734,934 +9787,6 @@ float mAnimatorLight::fmod_t(float num, float denom) {
   #endif
   return res;
 }
-
-/******************************************************************************************************************
- * mInterfaceLight_ConstructJSON.cpp
-*******************************************************************************************************************/
-
-
-
-uint8_t mAnimatorLight::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
-{
-
-  JBI->Start();
-
-    // JBI->Add("light_size_count", settings.light_size_count);
-
-    // JBI->Add("BriRGB_Global",  getBriRGB_Global());
-    // JBI->Add("BriCCT_Global",  getBriCCT_Global());
-
-  return JBI->End();
-
-}
-
-/**
- * @brief Unlike debug_segments, only the useful info here
- * 
- * @param json_level 
- * @param json_appending 
- * @return uint8_t 
- */
-uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level, bool json_appending)
-{
-
-  char buffer[120];
-
-  JBI->Start();
-
-
-    JBI->Add("MinShowDelay", MIN_SHOW_DELAY);
-
-    uint8_t seg_count = getSegmentsNum();
-
-    JBI->Add("SegmentCount", seg_count);
-
-
-    // JBI->Add("millis", millis());
-
-    // for(uint8_t seg_i =0; seg_i < getSegmentsNum(); seg_i++)
-    // {
-    //   JBI->Add("Start", SEGMENT_I(seg_i).start);
-    //   JBI->Add("Stop",  SEGMENT_I(seg_i).stop);
-    //   JBI->Add("StartY", SEGMENT_I(seg_i).startY);
-    //   JBI->Add("StopY",  SEGMENT_I(seg_i).stopY);
-    //   JBI->Add("EffectMicros",   SEGMENT_I(seg_i).performance.effect_build_us);
-
-    // }
-
-
-
-
-    JBI->Add("Brightness_Master",    tkr_iLight->getBri_Global());
-    JBI->Add("BrightnessRGB_Master", tkr_iLight->getBriRGB_Global());
-    JBI->Add("BrightnessCCT_Master", tkr_iLight->getBriCCT_Global());
-
-  JBI->Add("FPS", getFps());
-
-    seg_count = seg_count < 4 ? seg_count : 4; //limit memory overrun, or else later instead of reducing the seg count, reduce the data shared in another topic as overview
-
-    for(uint8_t seg_i =0; seg_i < seg_count; seg_i++)
-    {
-
-      JBI->Object_Start_F("Segment%d", seg_i);
-
-        // JBI->Add("BrightnessRGB", SEGMENT_I(seg_i).getBrightnessRGB());
-        // JBI->Add("BrightnessCCT", SEGMENT_I(seg_i).getBrightnessCCT());
-        
-        // JBI->Add("BrightnessRGB_wMaster", SEGMENT_I(seg_i).getBrightnessRGB_WithGlobalApplied());
-        // JBI->Add("BrightnessCCT_wMaster", SEGMENT_I(seg_i).getBrightnessCCT_WithGlobalApplied());
-        
-        JBI->Array_Start("PixelRange");
-          JBI->Add(SEGMENT_I(seg_i).start);
-          JBI->Add(SEGMENT_I(seg_i).stop);
-          JBI->Add(SEGMENT_I(seg_i).startY);
-          JBI->Add(SEGMENT_I(seg_i).stopY);
-        JBI->Array_End();
-        JBI->Add("Effect",    SEGMENT_I(seg_i).effect_id);
-        JBI->Add("EffectName",    GetFlasherFunctionNamebyID( SEGMENT_I(seg_i).effect_id , buffer, sizeof(buffer), true) );
-        JBI->Add("Offset",    SEGMENT_I(seg_i).offset);
-        JBI->Add("Speed",     SEGMENT_I(seg_i).speed);
-        JBI->Add("Intensity", SEGMENT_I(seg_i).intensity);
-        JBI->Object_Start("Options");
-          JBI->Add("Selected",     SEGMENT_I(seg_i).selected);
-          JBI->Add("Reverse",      SEGMENT_I(seg_i).reverse);
-          JBI->Add("On",           SEGMENT_I(seg_i).on);
-          JBI->Add("Mirror",       SEGMENT_I(seg_i).mirror);
-          JBI->Add("Freeze",       SEGMENT_I(seg_i).freeze);
-          JBI->Add("Spacing",       SEGMENT_I(seg_i).spacing);
-          JBI->Add("Grouping",       SEGMENT_I(seg_i).grouping);
-          JBI->Add("Decimate",       SEGMENT_I(seg_i).decimate);
-          if(seg_i<3)
-          {
-            JBI->Add("Reset",        SEGMENT_I(seg_i).reset);
-            JBI->Add("Transitional", SEGMENT_I(seg_i).transitional);
-            JBI->Add("Reverse_y",    SEGMENT_I(seg_i).reverse_y);
-            JBI->Add("Mirror_y",     SEGMENT_I(seg_i).mirror_y);
-            JBI->Add("Transpose",    SEGMENT_I(seg_i).transpose);
-            JBI->Add("Map1D2D",      SEGMENT_I(seg_i).map1D2D);
-            JBI->Add("SoundSim",     SEGMENT_I(seg_i).soundSim);
-          }
-        JBI->Object_End();
-        JBI->Add("ColourType",     (uint8_t)SEGMENT_I(seg_i).colour_width__used_in_effect_generate);
-        JBI->Object_Start("Transition");
-          JBI->Add("Rate",         SEGMENT_I(seg_i).cycle_time__rate_ms);
-          JBI->Add("Time",         SEGMENT_I(seg_i).animator_blend_time_ms() );
-        JBI->Object_End();
-        // JBI->Object_Start("RgbcctColours");
-        // for(uint8_t rgb_i = 0; rgb_i<2; rgb_i++)
-        // {
-        //   JBI->Array_Start_P("Colour%d", rgb_i);
-        //   for(uint8_t c_i=0;c_i<5;c_i++)
-        //   {
-        //     // JBI->Add(SEGMENT_I(seg_i).segcol[rgb_i].raw[c_i]);
-        //   }
-           
-
-
-        //   JBI->Array_End();
-        //   JBI->Object_Start("ColourTemp");
-        //     // JBI->Add("Min",      SEGMENT_I(seg_i).segcol[rgb_i].get_CTRangeMin());
-        //     // JBI->Add("Max",      SEGMENT_I(seg_i).segcol[rgb_i].get_CTRangeMax());
-        //     // JBI->Add("Set",      SEGMENT_I(seg_i).segcol[rgb_i].getCCT());
-        //   JBI->Object_End();
-        // }
-        // JBI->Object_End();
-
-        // for(uint8_t seg_col = 0; seg_col < 5; seg_col++)
-        //   {
-        //     JBI->Array_Start_P(PSTR("SegColour%d"), seg_col);
-        //       // for(uint8_t p=0;p<5;p++)
-        //       // { 
-        //         JBI->Add(segments[seg_i].segcol[seg_col].colour.R); 
-        //         JBI->Add(segments[seg_i].segcol[seg_col].colour.G); 
-        //         JBI->Add(segments[seg_i].segcol[seg_col].colour.B); 
-        //         JBI->Add(segments[seg_i].segcol[seg_col].colour.WW); 
-        //         JBI->Add(segments[seg_i].segcol[seg_col].colour.CW); 
-        //       // }
-        //     JBI->Array_End();
-        //   }
-        for(uint8_t seg_col = 0; seg_col < 5; seg_col++)
-        {
-          JBI->Array_Start_P(PSTR("SegBrtRGB%d"), seg_col);
-            for(uint8_t p=0;p<5;p++)
-            { 
-              // JBI->Add(segments[seg_i].segcol[seg_col].bri_rgb); 
-            }
-          JBI->Array_End();
-        }
-          
-      JBI->Object_End();
-
-    } // END seg_i
-
-
-
-
-
-  return JBI->End();
-
-}
-
-/**
- * @brief Unlike debug_segments, only the useful info here
- * 
- * @param json_level 
- * @param json_appending 
- * @return uint8_t 
- */
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS  
-uint8_t mAnimatorLight::ConstructJSON_Matrix(uint8_t json_level, bool json_appending)
-{
-
-  JBI->Start();
-
-    JBI->Add("isMatrix", isMatrix);
-    JBI->Add("panels", panels);
-
-    // for(uint8_t seg_i =0; seg_i < getSegmentsNum(); seg_i++)
-    // {
-    //   JBI->Add("Start", SEGMENT_I(seg_i).start);
-    //   JBI->Add("Stop",  SEGMENT_I(seg_i).stop);
-    //   JBI->Add("EffectMicros",   SEGMENT_I(seg_i).performance.effect_build_us);
-
-    // }
-
-    uint8_t i = 0;
-    JBI->Object_Start_F("Panel");
-    for (Panel p : panel)
-    {
-      JBI->Object_Start_F("%d", i++);
-        JBI->Add("Width", p.width);
-        JBI->Add("Height", p.height);
-        JBI->Add("xOffset", p.xOffset);
-        JBI->Add("yOffset", p.yOffset);
-        JBI->Add("bottomStart", p.bottomStart);
-        JBI->Add("rightStart", p.rightStart);
-        JBI->Add("vertical", p.vertical);
-        JBI->Add("serpentine", p.serpentine);
-      JBI->Object_End();
-    }
-    JBI->Object_End();
-
-
-
-
-
-
-
-  return JBI->End();
-
-}
-#endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS  
-
-
-
-uint8_t mAnimatorLight::ConstructJSON_Playlist(uint8_t json_level, bool json_appending)
-{
-
-  JBI->Start();
-  
-    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
-    JBI->Add("Length", playlistLen);
-
-    JBI->Array_Start("Loaded");
-    for(int i=0;i<playlistLen;i++)
-    {
-      JBI->Object_Start();
-        JBI->Add("preset",  playlistEntries[i].preset);
-        JBI->Add("dur",     playlistEntries[i].dur);
-        JBI->Add("tr",      playlistEntries[i].tr);
-      JBI->Object_End();
-    }
-    JBI->Array_End();
-    #endif 
-
-
-
-
-    JBI->Add("millis", millis());
-
-  return JBI->End();
-
-}
-
-
-
-#ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-uint8_t mAnimatorLight::ConstructJSON_Mode_Ambilight(uint8_t json_level, bool json_appending)
-{
-
-  JBI->Start();
-
-    JBI->Add("millis", millis());
-
-  return JBI->End();
-
-}
-#endif
-
-
-#ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-uint8_t mAnimatorLight::ConstructJSON_Mode_SetManual(uint8_t json_level, bool json_appending)
-{
-
-JBI->Start();
-
-  JBI->Add("millis", millis());
-
-return JBI->End();
-
-}
-#endif
-
-
-/**
- * @brief Debug 
- */
-#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-uint8_t mAnimatorLight::ConstructJSON_Debug_Palette(uint8_t json_level, bool json_appending)
-{
-
-char buffer[100];
-
-JBI->Start();
-
-    JBI->Add("AvailablePalettes", (uint16_t)mPaletteI->GetPaletteListLength() );
-
-    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-    for(uint8_t seg_i = 0; seg_i<  segments.size(); seg_i++)
-    {
-      JBI->Object_Start_F("Segment%d",seg_i);      
-        JBI->Add("dataLen", SEGMENT_I(seg_i).palette_loaded->pData.size());
-        JBI->Array_Start("data");
-        for(uint8_t i=0;i<SEGMENT_I(seg_i).palette_loaded->pData.size();i++)
-        {
-          JBI->Add(SEGMENT_I(seg_i).palette_loaded->pData[i]);
-        }
-        JBI->Array_End();
-      JBI->Object_End();
-    }
-    #endif// ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CONTAINER
-
-    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
-    uint8_t seg_i = 0;
-
-    if(segments.size())
-    {
-
-      JBI->Array_Start("CRGB16Palette16");   
-
-      for(uint8_t elem_i=0;elem_i<16;elem_i++)
-      {
-        JBI->Array_Start();
-          JBI->Add( SEGMENT_I(seg_i).palette_loaded->CRGB16Palette16_Palette.data[elem_i].r );
-          JBI->Add( SEGMENT_I(seg_i).palette_loaded->CRGB16Palette16_Palette.data[elem_i].g );
-          JBI->Add( SEGMENT_I(seg_i).palette_loaded->CRGB16Palette16_Palette.data[elem_i].b );
-        JBI->Array_End();          
-      }
-      JBI->Array_End();
-
-      JBI->Array_Start("CRGB16Palette16MAN");
-      for(uint8_t elem_i=0;elem_i<16;elem_i++)
-      {
-        JBI->Array_Start();
-          JBI->Add( SEGMENT_I(seg_i).palette_loaded->CRGB16Palette16_Palette.data[elem_i].r );
-          JBI->Add( SEGMENT_I(seg_i).palette_loaded->CRGB16Palette16_Palette.data[elem_i].g );
-          JBI->Add( SEGMENT_I(seg_i).palette_loaded->CRGB16Palette16_Palette.data[elem_i].b );
-        JBI->Array_End();          
-      }
-      JBI->Array_End();
-
-    }
-    #endif// ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_CRGB16PALETTE
-
-
-    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-    JBI->Object_Start("Encoding");
-      for(uint8_t palette_id=mPalette::PALETTELIST_STATIC_HOLLOWEEN_OP__ID;palette_id<mPaletteI->PALETTELIST_STATIC_CHRISTMAS_01__ID;palette_id++)
-      {
-        // JBI->Array_Start_P("%s", mPaletteI->GetPaletteNameByID( palette_id, buffer, sizeof(buffer) ));
-        JBI->Array_Start_P("P_%d", palette_id );        
-          mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
-          uint16_t value = ptr->encoding.data;
-          char buffer[33] = {0}; //null terminated
-          for(uint8_t i=0;i<16;i++)
-          {
-            buffer[15-i] = bitRead(value,i) ? '1' : '0';
-          }
-          JBI->Add(buffer);
-        JBI->Array_End();
-      }
-    JBI->Object_End();
-    #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_ENCODING
-
-
-    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-    JBI->Array_Start_P("DataLength");
-      for(uint8_t palette_id=mPalette::PALETTELIST_VARIABLE_HSBID_01__ID;palette_id<mPaletteI->PALETTELIST_STATIC_CHRISTMAS_28__ID;palette_id++)
-      {
-        mPalette::PALETTELIST::PALETTE *ptr = mPaletteI->GetPalettePointerByID(palette_id);
-        JBI->Add(ptr->data_length);
-      }
-    JBI->Array_End();
-    #endif  // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE_DATA_LENGTH
-
-    // #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_ARRAY
-    // JBI->Array_Start_P("PaletteNames");
-    //   for(uint8_t palette_id=mPalette::PALETTELIST_VARIABLE_HSBID_01__ID;palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID;palette_id++) // Some
-    //   // for(uint16_t palette_id=mPalette::PALETTELIST_VARIABLE_HSBID_01__ID;palette_id<mPaletteI->PALETTELIST_VARIABLE_GENERIC_LENGTH__ID;palette_id++) // All
-    //   {
-    //     JBI->Add(GetPaletteNameByID(palette_id, buffer, sizeof(buffer)));
-    //     // ALOG_INF(PSTR("Name[%d] = %s"),palette_id,GetPaletteNameByID(palette_id, buffer, sizeof(buffer)));
-    //   }
-    // JBI->Array_End();
-    // #endif  // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_ARRAY
-    #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_OBJECT_INDEXED_LIST
-    JBI->Array_Start_P("PaletteNames");
-      for(uint16_t palette_id=mPalette::PALETTELIST_VARIABLE_HSBID_01__ID;palette_id<mPaletteI->PALETTELIST_STATIC_CHRISTMAS_28__ID;palette_id++) // Some
-      // for(uint8_t palette_id=mPalette::PALETTELIST_VARIABLE_HSBID_01__ID;palette_id<mPaletteI->PALETTELIST_TOTAL_LENGTH;palette_id++) // All
-      {
-        // Option 
-        // ALOG_INF(PSTR("Name[%d] = %s"),GetPaletteNameByID(palette_id, buffer, sizeof(buffer)));
-
-        // JBI->Add(GetPaletteNameByID(palette_id, buffer, sizeof(buffer)));
-      }
-    JBI->Array_End();
-    #endif  // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE__SHOW_ALL_PALETTE_NAMES_AS_OBJECT_INDEXED_LIST
-
-
-    uint16_t id = 0;
-    uint16_t pixel = 0;
-    uint8_t encoded_value = 0;
-    
-    // // uint16_t count   = mPaletteI->GetLengthFromPaletteAdvanced(id,pixel,&encoded_value,true,true,255);
-    // RgbcctColor colour = mPaletteI->GetColourFromPaletteAdvanced(id,pixel,&encoded_value,true,true,255);
-
-    // JBI->Array_Start("Palette");
-    // for(int i=0;i<MAX_NUM_SEGMENTS;i++)
-    // {
-    //   JBI->Add(encoded_value);
-    //   JBI->Add(colour.R);
-    //   JBI->Add(colour.G);
-    //   JBI->Add(colour.B);
-    //   JBI->Add(colour.W1);
-    //   JBI->Add(colour.W2);
-    // }
-    // JBI->Array_End();
-    
-//   JBI->Start();  
-//     JBI->Add_P(PM_SIZE, tkr_iLight->settings.light_size_count);
-//     JBI->Add("PaletteMaxID", (uint8_t)mPalette::PALETTELIST_STATIC_LENGTH__ID);
-//     JBI->Add("ColourPaletteID", tkr_anim->SEGMENT_I(0).palette_id );
-//     JBI->Add("ColourPalette", mPaletteI->GetPaletteNameByID( SEGMENT_I(0).palette_id, buffer, sizeof(buffer)));
-//     // JBI->Array_Start("rgb");
-//     // for(int i=0;i<numpixels;i++){
-//     //   RgbTypeColor c = getPixelColor(i);
-//     //   JBI->Add_FV(PSTR("%02X%02X%02X"),c.R,c.G,c.B);
-//     // }
-//     // JBI->Array_End();
-//   return JBI->End();
-
-
-    /**
-     * @brief Moving towards preloading palettes from memory into ram/heap for speed (then iram will work)
-     * 
-     */
-    JBI->Object_Start("LoadPalette");
-
-      uint8_t segment_index = 0;
-
-    JBI->Object_End();
-    
-
-return JBI->End();
-
-}
-
-#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-
-
-#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
-uint8_t mAnimatorLight::ConstructJSON_Debug__CustomMappingTable(uint8_t json_level, bool json_appending)
-{
-  JBI->Start();
-
-  JBI->Add("pixleng", _pixels_length);
-  JBI->Add("pixleng2", getLengthTotal());
-
-    JBI->Add("customMappingSize",    customMappingSize);
-
-    if(customMappingSize)
-    {
-      JBI->Array_Start("MappingTable");
-      uint16_t send_size = customMappingSize < 400 ? customMappingSize : 400;
-      for(int i=0;i<send_size;i++)
-      {
-        JBI->Add(customMappingTable[i]);
-      }
-      JBI->Array_End();
-    }
-
-  return JBI->End();
-}
-#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
-
-
-#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-
-/**
- * @brief Multiple large segments may require mutiple topics
- */
-uint8_t mAnimatorLight::ConstructJSON_Debug_Segments(uint8_t json_level, bool json_appending)
-{
-  JBI->Start();
-
-  JBI->Add("Brightness",    tkr_iLight->getBri_Global());
-  JBI->Add("BrightnessRGB", tkr_iLight->getBriRGB_Global());
-  JBI->Add("BrightnessCCT", tkr_iLight->getBriCCT_Global());
-  
-  uint8_t seg_count = getSegmentsNum();
-  seg_count = seg_count < 3 ? seg_count : 3; //limit memory overrun, or else later instead of reducing the seg count, reduce the data shared in another topic as overview
-
-  for(uint8_t seg_i =0; seg_i < seg_count; seg_i++)
-  {
-
-    JBI->Object_Start_F("Segment%d", seg_i);
-
-      // JBI->Add("BrightnessRGB", SEGMENT_I(seg_i).getBrightnessRGB());
-      // JBI->Add("BrightnessCCT", SEGMENT_I(seg_i).getBrightnessCCT());
-      
-      // JBI->Add("BrightnessRGB_wMaster", SEGMENT_I(seg_i).getBrightnessRGB_WithGlobalApplied());
-      // JBI->Add("BrightnessCCT_wMaster", SEGMENT_I(seg_i).getBrightnessCCT_WithGlobalApplied());
-      
-      JBI->Array_Start("PixelRange");
-        JBI->Add(SEGMENT_I(seg_i).start);
-        JBI->Add(SEGMENT_I(seg_i).stop);
-        JBI->Add(SEGMENT_I(seg_i).startY);
-        JBI->Add(SEGMENT_I(seg_i).stopY);
-      JBI->Array_End();
-      JBI->Add("Offset",    SEGMENT_I(seg_i).offset);
-      JBI->Add("Speed",     SEGMENT_I(seg_i).speed);
-      JBI->Add("Intensity", SEGMENT_I(seg_i).intensity);
-      JBI->Object_Start("Options");
-        JBI->Add("Selected",     SEGMENT_I(seg_i).selected);
-        JBI->Add("Reverse",      SEGMENT_I(seg_i).reverse);
-        JBI->Add("On",           SEGMENT_I(seg_i).on);
-        JBI->Add("Mirror",       SEGMENT_I(seg_i).mirror);
-        JBI->Add("Freeze",       SEGMENT_I(seg_i).freeze);
-        JBI->Add("Reset",        SEGMENT_I(seg_i).reset);
-        JBI->Add("Transitional", SEGMENT_I(seg_i).transitional);
-        JBI->Add("Reverse_y",    SEGMENT_I(seg_i).reverse_y);
-        JBI->Add("Mirror_y",     SEGMENT_I(seg_i).mirror_y);
-        JBI->Add("Transpose",    SEGMENT_I(seg_i).transpose);
-        JBI->Add("Map1D2D",      SEGMENT_I(seg_i).map1D2D);
-        JBI->Add("SoundSim",     SEGMENT_I(seg_i).soundSim);
-      JBI->Object_End();
-      JBI->Add("ColourType",     (uint8_t)SEGMENT_I(seg_i).colour_width__used_in_effect_generate);
-      JBI->Object_Start("Transition");
-        JBI->Add("Rate",         SEGMENT_I(seg_i).cycle_time__rate_ms);
-        JBI->Add("Time",         SEGMENT_I(seg_i).animator_blend_time_ms() );
-      JBI->Object_End();
-      JBI->Object_Start("SegmentColours");
-      for(uint8_t rgb_i = 0; rgb_i<2; rgb_i++)
-      {
-        JBI->Array_Start_P("Colour%d", rgb_i);
-        for(uint8_t c_i=0;c_i<5;c_i++)
-        {
-          // JBI->Add(SEGMENT_I(seg_i).segcol[rgb_i].raw[c_i]);
-        }
-        JBI->Array_End();
-        JBI->Object_Start("ColourTemp");
-          // JBI->Add("Min",      SEGMENT_I(seg_i).segcol[rgb_i].get_CTRangeMin());
-          // JBI->Add("Max",      SEGMENT_I(seg_i).segcol[rgb_i].get_CTRangeMax());
-          // JBI->Add("Set",      SEGMENT_I(seg_i).segcol[rgb_i].getCCT());
-        JBI->Object_End();
-      }
-      JBI->Object_End();
-        
-    JBI->Object_End();
-
-  } // END seg_i
-
-  return JBI->End();
-
-}
-
-#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-
-
-#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
-
-/**
- * @brief Multiple large segments may require mutiple topics
- */
-uint8_t mAnimatorLight::ConstructJSON_Debug_Palette_Vector(uint8_t json_level, bool json_appending)
-{
-
-  JBI->Start();
-  JBI->Add("size", mPaletteI->static_palettes.size());
-
-
-    char lineBuffer[100] = {0};
-    bool flag_get_first_name_only = true;
-
-    JBI->Array_Start("pals");
-    // for(uint8_t i=0;i<20;i++)//auto& pal: mPaletteI->palettelist)
-
-    uint16_t i = 0;
-
-    for(auto& pal: mPaletteI->static_palettes)
-    {
-      // mPalette::PALETTE pal = mPaletteI->palettelist[i];
-      JBI->Object_Start();
-          
-          // tkr_anim->GetPaletteNameByID(i, lineBuffer, sizeof(lineBuffer));
-          // // snprintf_P(lineBuffer,sizeof(lineBuffer),"%S",pal.friendly_name_ctr); 
-          // if(flag_get_first_name_only)
-          // {    
-          //   char* dataPtr = strchr(lineBuffer,'|');
-          //   if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
-          // }
-          // // ALOG_INF(PSTR("pal=\"%s\""), lineBuffer);
-          // // ALOG_INF(PSTR("pal[%d]=\"%s\""), i, lineBuffer);
-          // if(i<10)
-          //   JBI->Add("n",lineBuffer);
-
-
-
-        // JBI->Add("n", pal.friendly_name_ctr);
-        // JBI->Add("i", pal.id);
-        
-        // uint8_t colours_in_palette = tkr_anim->GetNumberOfColoursInUNLOADEDPalette(i);
-        // JBI->Add("s",colours_in_palette);
-
-
-
-    
-        // JBI->Add_FV("e", "%4X", pal.encoding);
-        // JBI->Array_Start("d");
-        //   for(uint8_t i=0;i<pal.data_length;i++)
-        //   {
-        //     JBI->Add(pal.data[i]);
-        //   }
-        // JBI->Array_End();
-      JBI->Object_End();
-
-      i++;
-    }
-    JBI->Array_End();
-
-  return JBI->End();
-
-}
-
-#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
-
-
-
-#ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
-uint8_t mAnimatorLight::ConstructJSON_Debug_Performance(uint8_t json_level, bool json_appending)
-{
-  
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE_FAST_MQTT_UPDATE
-  mqtthandler_debug__performance.tRateSecs = 1; // Force update to 1 second
-  #endif
-
-  JBI->Start();  
-
-    JBI->Add("targetFPS", getTargetFps() );
-    JBI->Add("FPS", getFps());
-    
-    #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PERFORMANCE_METRICS_SAFE_IN_RELEASE_MODE
-
-
-    // Time: Generate Pixels
-    // JBI->Array_Start_P("EffectCall_us");
-    // for (segment &seg : segments){ JBI->Add(seg.performance.effect_build_us); }
-    // JBI->Array_End();
-    JBI->Array_Start_P("EffectCall_ms");
-    for (segment &seg : segments){ JBI->Add(seg.performance.effect_build_us/1000); }
-    JBI->Array_End();
-
-
-    // Time: Bus Writing Single
-    JBI->Array_Start_P("BusWrite_us");
-    for (segment &seg : segments){ JBI->Add(seg.performance.bus_write_single_us); }
-    JBI->Array_End();
-    JBI->Array_Start_P("BusRead_us");
-    for (segment &seg : segments){ JBI->Add(seg.performance.bus_read_single_us); }
-    JBI->Array_End();
-
-    // JBI->Array_Start_P("BusWrite_ms");
-    // for (segment &seg : segments){ JBI->Add(seg.performance.bus_write_us/1000); }
-    // JBI->Array_End();
-    // JBI->Array_Start_P("BusRead_ms");
-    // for (segment &seg : segments){ JBI->Add(seg.performance.bus_read_us/1000); }
-    // JBI->Array_End();
-
-
-    // Time: Bus Writing Complate (From Static Palette Effect)
-    // JBI->Array_Start_P("BusWriteTotal_us");
-    // for (segment &seg : segments){ JBI->Add(seg.performance.bus_write_total_us); }
-    // JBI->Array_End();
-    // JBI->Array_Start_P("BusReadTotal_us");
-    // for (segment &seg : segments){ JBI->Add(seg.performance.bus_read_total_us); }
-    // JBI->Array_End();
-
-    JBI->Array_Start_P("BusWriteTotal_ms");
-    for (segment &seg : segments){ JBI->Add(seg.performance.bus_write_total_us/1000); }
-    JBI->Array_End();
-    JBI->Array_Start_P("BusReadTotal_ms");
-    for (segment &seg : segments){ JBI->Add(seg.performance.bus_read_total_us/1000); }
-    JBI->Array_End();
-    #endif
-
-  
-    #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PERFORMANCE_METRICS_SAFE_IN_RELEASE_MODE    
-    JBI->Array_Start_P("elapsed_last_show");
-    for (segment &seg : segments){ JBI->Add(seg.performance.elapsed_last_show); }
-    JBI->Array_End();
-    JBI->Array_Start_P("millis_last_show");
-    for (segment &seg : segments){ JBI->Add(seg.performance.millis_last_show); }
-    JBI->Array_End();
-    JBI->Array_Start_P("fps");
-    for (segment &seg : segments){ JBI->Add(seg.performance.fps); }
-    JBI->Array_End();
-    #endif 
-
-    // Show allocated data from segments
-    JBI->Array_Start_P("dataSize");
-    for (segment &seg : segments){ JBI->Add(seg.dataSize()); }
-    JBI->Array_End();
-
-    JBI->Array_Start_P("seglen");
-    for (segment &seg : segments){ JBI->Add(seg.virtualLength()); }
-    JBI->Array_End();
-
-
-  return JBI->End();
-
-}
-
-#endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
-
-
-
-
-#ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
-  mAnimatorLight& setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE);  
-#endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-
-
-#ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-uint8_t mAnimatorLight::ConstructJSON_Debug_Animations_Progress(uint8_t json_level, bool json_appending)
-{
-
-  if(anim_progress_mqtt_function_callback)
-  {
-    JBI->Start();
-    anim_progress_mqtt_function_callback(); // Call the function
-    return JBI->End();
-  }
-  return false;
-
-}
-#endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-
-
-/******************************************************************************************************************
- * mInterfaceLight_MQTT.cpp
-*******************************************************************************************************************/
-
-
-#ifdef USE_MODULE_NETWORK_MQTT
-
-void mAnimatorLight::MQTTHandler_Init()
-{
-
-  struct handler<mAnimatorLight>* ptr;
-  
-  ptr = &mqtthandler_settings;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
-
-  ptr = &mqtthandler_segments_teleperiod;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SEGMENTS_CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Segments;
-  mqtthandler_list.push_back(ptr);
-
-  ptr = &mqtthandler_playlists_teleperiod;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__PLAYLISTS_CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Playlist;
-  mqtthandler_list.push_back(ptr);
-
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-  ptr = &mqtthandler_matrix_teleperiod;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 120;//tkr_mqtt->dt.teleperiod_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MATRIX_CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Matrix;
-  mqtthandler_list.push_back(ptr);
-  #endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-  
-  #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-  ptr = &mqtthandler_mode_ambilight_teleperiod;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_AMBILIGHT__CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_Ambilight;
-  mqtthandler_list.push_back(ptr);
-  #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-
-  #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-  ptr = &mqtthandler_manual_setpixel;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_SetManual;
-  mqtthandler_list.push_back(ptr);
-  #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-    
-  // #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  // ptr = &mqtthandler_automation_presets;
-  // ptr->tSavedLastSent = 0;
-  // ptr->flags.PeriodicEnabled = true;
-  // ptr->flags.SendNow = true;
-  // ptr->tRateSecs = 1;//tkr_mqtt->dt.teleperiod_secs; 
-  // ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  // ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  // ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PRESETS_CTR;
-  // ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Auto_Presets;
-  // mqtthandler_list.push_back(ptr);
-  // #endif // ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-    
-  #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
-  ptr = &mqtthandler_manual_setpixel;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_SetManual;
-  mqtthandler_list.push_back(ptr);
-  #endif // ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
-
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-  ptr = &mqtthandler_debug_palette;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette;
-  mqtthandler_list.push_back(ptr);
-  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
-  ptr = &mqtthandler_debug__custom_mapping_table;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette;
-  mqtthandler_list.push_back(ptr);
-  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
-  ptr                         = &mqtthandler_debug_segments;
-  ptr->tSavedLastSent         = millis();
-  ptr->flags.PeriodicEnabled  = true;
-  ptr->flags.SendNow          = true;
-  ptr->tRateSecs              = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->flags.topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level             = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_CUSTOM_MAPPING_TABLE__CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug__CustomMappingTable;
-  mqtthandler_list.push_back(ptr);
-  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
-
-  #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-  ptr = &mqtthandler_debug_animations_progress;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//tkr_mqtt->dt.teleperiod_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Animations_Progress;
-  mqtthandler_list.push_back(ptr);
-  #endif
-
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
-  ptr                         = &mqtthandler_debug_palette_vector;
-  ptr->tSavedLastSent         = millis();
-  ptr->flags.PeriodicEnabled  = true;
-  ptr->flags.SendNow          = true;
-  ptr->tRateSecs              = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->flags.topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level             = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE_VECTOR__CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette_Vector;
-  mqtthandler_list.push_back(ptr);
-  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
-
-
-  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
-  ptr                         = &mqtthandler_debug__performance;
-  ptr->tSavedLastSent         = millis();
-  ptr->flags.PeriodicEnabled  = true;
-  ptr->flags.SendNow          = true;
-  ptr->tRateSecs              = 1; 
-  ptr->flags.topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level             = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR;
-  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Performance;
-  mqtthandler_list.push_back(ptr);
-  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
-
-} 
-  
-#endif// USE_MODULE_NETWORK_MQTT
 
 
 

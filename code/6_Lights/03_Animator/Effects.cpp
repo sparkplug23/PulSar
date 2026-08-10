@@ -4330,66 +4330,6 @@ static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_1D_AZIMUTH_02[] PROGME
 
 
 /**********************************************************************************************************************************************************************************
- * EFFECT: Sun 2D Elevation/Azimuth
- *
- * SUMMARY
- *   Placeholder palette renderer for the future 2-D solar-position display. Until matrix coordinate rendering is added, the
- *   active primary palette is distributed across the segment and updated through the standard transition system.
- *
- * TIMING
- *   EP defines the complete target-update period. SX controls the proportion of EP used for blending.
- **********************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azimuth_01()
-{
-  const uint16_t segment_length = SEGMENT.length();
-  if (segment_length == 0 || SEGMENT.palette_loaded == nullptr) return;
-
-  uint32_t& last_update_time = SEGMENT.aux3;
-  const uint32_t effect_period_ms = SEGMENT.get_effect_period();
-  const bool first_effect_call = SEGMENT.call == 0;
-  const bool update_due = (effect_start_time - last_update_time) >= effect_period_ms;
-  if (!first_effect_call && !update_due) return;
-  if (SEGMENT.isInTransition()) return;
-
-  const uint32_t transition_duration_long = (effect_period_ms * static_cast<uint32_t>(255u - SEGMENT.speed)) / 255u;
-  const uint16_t transition_duration_ms = static_cast<uint16_t>(min<uint32_t>(transition_duration_long, 65535u));
-
-  SEGMENT.startTransition(transition_duration_ms, true);
-  last_update_time = effect_start_time;
-
-  for (uint16_t pixel = 0; pixel < segment_length; pixel++)
-  {
-    SEGMENT.setPixelColor(pixel, SEGMENT.GetPaletteColour(
-      pixel,
-      PALETTE_INDEX__IS_SEGLEN_RANGE,
-      PALETTE_MODE__FORCE_DISCRETE,
-      PALETTE_WRAP_HARDEDGE,
-      NO_ENCODED_VALUE,
-      PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
-    ));
-  }
-}
-static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01[] PROGMEM =
-"Sun 2D Elevation/Azimuth@"
-"!,,,,,,,,!,"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"paln=Yellow,"
-"sx=127,"
-"ep=1000"
-;
-static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01[] PROGMEM =
-"Placeholder target for a 2D solar-position renderer.\n\r"
-"SX: Portion of EP used for blending\n\r"
-"EP: Complete update period\n\r"
-"Palette: Current placeholder colour source";
-
-/**********************************************************************************************************************************************************************************
  * EFFECT: Sun White CCT by Elevation
  *
  * SUMMARY
@@ -4451,6 +4391,642 @@ static const char PM_EFFECT_DESCRI__SUNPOSITIONS__WHITE_COLOUR_TEMPERATURE_CCT_B
 
 
 #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+
+/**********************************************************************************************************************************************************************************
+ * EFFECT BASE: Sun 2D
+ *
+ * C3:
+ *   0..10  = 24 hour
+ *   11..21 = dawn -> dusk
+ *   22..31 = sunrise -> sunset
+ *
+ * SX: Sun size
+ * IX: Sun glow
+ * C1: Path brightness
+ * C2: Sky brightness
+ * C3: Axis range
+ * O1: Markers
+ * O2: Palette sun
+ * O3: Inset path so complete sun/glow remains inside matrix
+ **********************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Base(bool draw_path, bool draw_sky)
+{
+  if (!isMatrix || !SEGMENT.is2D()) return EFFECT_DEFAULT();
+  if (!tkr_solar->Valid()) return;
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (cols < 2 || rows < 2) return;
+
+  const auto& solar_table = tkr_solar->GetDayTable();
+  if (!solar_table.valid) return;
+
+  SEGMENT.fill(BLACK);
+
+  const float current_elevation = tkr_solar->Get_Elevation();
+
+  /*
+   * C3:
+   *   0..10  = 24 hour
+   *   11..21 = dawn -> dusk
+   *   22..31 = sunrise -> sunset
+   */
+  uint8_t axis_mode = 0;
+  if (SEGMENT.custom3 >= 22) axis_mode = 2;
+  else if (SEGMENT.custom3 >= 11) axis_mode = 1;
+
+  /*
+   * Select displayed time/elevation range.
+   */
+  float range_start_minutes = 0.0f;
+  float range_end_minutes = 1440.0f;
+  float elevation_min = solar_table.min_elevation;
+
+  if (axis_mode == 1)
+  {
+    range_start_minutes = solar_table.dawn_minutes;
+    range_end_minutes = solar_table.dusk_minutes;
+    elevation_min = -6.0f;
+  }
+  else if (axis_mode == 2)
+  {
+    range_start_minutes = solar_table.sunrise_minutes;
+    range_end_minutes = solar_table.sunset_minutes;
+    elevation_min = 0.0f;
+  }
+
+  const float time_range_minutes = range_end_minutes - range_start_minutes;
+  const float elevation_range = solar_table.max_elevation - elevation_min;
+
+  if (time_range_minutes <= 0.0f || elevation_range <= 0.0f) return;
+
+  /*
+   * Sun size/glow.
+   *
+   * Calculated before position because O3 can reserve enough room around
+   * the path to keep the complete glow inside the matrix.
+   */
+  const uint16_t matrix_min_dimension = min<uint16_t>(cols, rows);
+
+  uint8_t max_sun_radius = matrix_min_dimension / 4;
+  if (max_sun_radius < 1) max_sun_radius = 1;
+
+  uint8_t sun_radius = 1;
+  if (max_sun_radius > 1) sun_radius += ((uint16_t)SEGMENT.speed * (max_sun_radius - 1)) / 255U;
+
+  uint8_t glow_radius = sun_radius + (((uint16_t)SEGMENT.intensity * max_sun_radius) / 255U);
+  if (glow_radius < sun_radius) glow_radius = sun_radius;
+
+  /*
+   * O3: Inset path.
+   *
+   * OFF:
+   *   path centre may reach matrix edges.
+   *
+   * ON:
+   *   path centre is moved inward by glow_radius so the complete glow remains
+   *   visible at the minimum and maximum path positions.
+   */
+  const bool inset_path = SEGMENT.check3;
+
+  const uint16_t inset_x = inset_path ? min<uint16_t>(glow_radius, (cols - 1U) / 2U) : 0U;
+  const uint16_t inset_y = inset_path ? min<uint16_t>(glow_radius, (rows - 1U) / 2U) : 0U;
+
+  const uint16_t drawable_width = (cols - 1U) - (inset_x * 2U);
+  const uint16_t drawable_height = (rows - 1U) - (inset_y * 2U);
+
+  /*
+   * Current local time.
+   */
+  const uint32_t local_time = tkr_time->LocalTime();
+  const uint32_t seconds_today = local_time % 86400UL;
+  const float current_minutes = (float)seconds_today / 60.0f;
+
+  /*
+   * Current sun position.
+   *
+   * X increases with time.
+   * Y=0 is treated as the top of the matrix, therefore increasing solar
+   * elevation moves upward.
+   */
+  float current_x_norm = (current_minutes - range_start_minutes) / time_range_minutes;
+  float current_y_norm = (current_elevation - elevation_min) / elevation_range;
+
+  current_x_norm = constrain(current_x_norm, 0.0f, 1.0f);
+  current_y_norm = constrain(current_y_norm, 0.0f, 1.0f);
+
+  const int16_t sun_x = inset_x + (int16_t)roundf(current_x_norm * drawable_width);
+  const int16_t sun_y = inset_y + (int16_t)roundf((1.0f - current_y_norm) * drawable_height);
+
+  /************************************************************************************************
+   * Sky Background
+   ************************************************************************************************/
+  if (draw_sky)
+  {
+    /*
+     * <= -8 deg = night
+     * >= +10 deg = full daytime
+     */
+    const float daylight = constrain((current_elevation + 8.0f) / 18.0f, 0.0f, 1.0f);
+    const uint8_t sky_brightness = SEGMENT.custom2;
+
+    for (uint16_t y = 0; y < rows; y++)
+    {
+      /*
+       * y=0 is top, so vertical=1 at zenith and 0 at the bottom/horizon.
+       */
+      const float vertical = 1.0f - ((float)y / (float)(rows - 1U));
+
+      const float night_r = 0.0f;
+      const float night_g = 2.0f + (5.0f * vertical);
+      const float night_b = 8.0f + (18.0f * vertical);
+
+      const float day_r = 15.0f + (20.0f * vertical);
+      const float day_g = 70.0f + (90.0f * vertical);
+      const float day_b = 160.0f + (95.0f * vertical);
+
+      const uint8_t r = (uint8_t)((night_r + ((day_r - night_r) * daylight)) * sky_brightness / 255.0f);
+      const uint8_t g = (uint8_t)((night_g + ((day_g - night_g) * daylight)) * sky_brightness / 255.0f);
+      const uint8_t b = (uint8_t)((night_b + ((day_b - night_b) * daylight)) * sky_brightness / 255.0f);
+
+      for (uint16_t x = 0; x < cols; x++) SEGMENT.setPixelColorXY(x, y, RGBW32(r, g, b, 0));
+    }
+  }
+
+  /************************************************************************************************
+   * Precalculated Solar Path
+   ************************************************************************************************/
+  if (draw_path)
+  {
+    const uint8_t path_brightness = SEGMENT.custom1;
+
+    const uint16_t path_x_start = inset_x;
+    const uint16_t path_x_end = cols - 1U - inset_x;
+
+    for (uint16_t x = path_x_start; x <= path_x_end; x++)
+    {
+      const float x_fraction = drawable_width ? (float)(x - inset_x) / (float)drawable_width : 0.5f;
+      const float target_minutes = range_start_minutes + (x_fraction * time_range_minutes);
+
+      float table_position = constrain(target_minutes / 60.0f, 0.0f, (float)(mSunTracking_FastEstimate::SUN_TABLE_POINTS - 1));
+      uint8_t table_index = (uint8_t)table_position;
+      float table_fraction = table_position - (float)table_index;
+
+      if (table_index >= (mSunTracking_FastEstimate::SUN_TABLE_POINTS - 1))
+      {
+        table_index = mSunTracking_FastEstimate::SUN_TABLE_POINTS - 2;
+        table_fraction = 1.0f;
+      }
+
+      const auto& point_start = solar_table.hour[table_index];
+      const auto& point_end = solar_table.hour[table_index + 1];
+
+      const float path_elevation = point_start.elevation + ((point_end.elevation - point_start.elevation) * table_fraction);
+      const float path_y_norm = constrain((path_elevation - elevation_min) / elevation_range, 0.0f, 1.0f);
+
+      /*
+       * Inverted matrix Y: larger elevation moves upward.
+       */
+      const int16_t path_y = inset_y + (int16_t)roundf((1.0f - path_y_norm) * drawable_height);
+
+      SEGMENT.setPixelColorXY(x, path_y, RGBW32(path_brightness, path_brightness, path_brightness, 0));
+    }
+  }
+
+  /************************************************************************************************
+   * Solar Event Markers
+   ************************************************************************************************/
+  if (SEGMENT.check1)
+  {
+    const uint32_t colour_twilight = RGBW32(20, 30, 90, 0);
+    const uint32_t colour_horizon = RGBW32(120, 50, 0, 0);
+    const uint32_t colour_noon = RGBW32(30, 120, 120, 0);
+
+    auto DrawEventMarker = [&](float event_minutes, uint32_t colour)
+    {
+      if (event_minutes < range_start_minutes || event_minutes > range_end_minutes) return;
+
+      const float marker_fraction = (event_minutes - range_start_minutes) / time_range_minutes;
+      const int16_t marker_x = inset_x + (int16_t)roundf(marker_fraction * drawable_width);
+
+      float table_position = constrain(event_minutes / 60.0f, 0.0f, (float)(mSunTracking_FastEstimate::SUN_TABLE_POINTS - 1));
+      uint8_t table_index = (uint8_t)table_position;
+      float table_fraction = table_position - (float)table_index;
+
+      if (table_index >= (mSunTracking_FastEstimate::SUN_TABLE_POINTS - 1))
+      {
+        table_index = mSunTracking_FastEstimate::SUN_TABLE_POINTS - 2;
+        table_fraction = 1.0f;
+      }
+
+      const auto& point_start = solar_table.hour[table_index];
+      const auto& point_end = solar_table.hour[table_index + 1];
+
+      const float marker_elevation = point_start.elevation + ((point_end.elevation - point_start.elevation) * table_fraction);
+      const float marker_y_norm = constrain((marker_elevation - elevation_min) / elevation_range, 0.0f, 1.0f);
+      const int16_t marker_y = inset_y + (int16_t)roundf((1.0f - marker_y_norm) * drawable_height);
+
+      SEGMENT.setPixelColorXY(marker_x, marker_y, colour);
+    };
+
+    DrawEventMarker(solar_table.dawn_minutes, colour_twilight);
+    DrawEventMarker(solar_table.sunrise_minutes, colour_horizon);
+    DrawEventMarker(solar_table.solar_noon_minutes, colour_noon);
+    DrawEventMarker(solar_table.sunset_minutes, colour_horizon);
+    DrawEventMarker(solar_table.dusk_minutes, colour_twilight);
+  }
+
+  /************************************************************************************************
+   * Sun Colour
+   ************************************************************************************************/
+  uint32_t sun_colour;
+
+  if (SEGMENT.check2)
+  {
+    const uint8_t palette_index = (uint8_t)constrain((int)(current_elevation * 4.0f + 128.0f), 0, 255);
+    sun_colour = SEGMENT.GetPaletteColour(palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE);
+  }
+  else
+  {
+    const float colour_amount = constrain((current_elevation + 6.0f) / 16.0f, 0.0f, 1.0f);
+
+    const uint8_t r = 255;
+    const uint8_t g = (uint8_t)(20.0f + (190.0f * colour_amount));
+    const uint8_t b = (uint8_t)(2.0f + (38.0f * colour_amount));
+
+    sun_colour = RGBW32(r, g, b, 0);
+  }
+
+  /************************************************************************************************
+   * Draw Sun Glow / Disc
+   ************************************************************************************************/
+  for (int16_t dy = -(int16_t)glow_radius; dy <= (int16_t)glow_radius; dy++)
+  {
+    for (int16_t dx = -(int16_t)glow_radius; dx <= (int16_t)glow_radius; dx++)
+    {
+      const int16_t pixel_x = sun_x + dx;
+      const int16_t pixel_y = sun_y + dy;
+
+      if (pixel_x < 0 || pixel_y < 0 || pixel_x >= cols || pixel_y >= rows) continue;
+
+      const float distance = sqrtf((float)(dx * dx + dy * dy));
+      if (distance > glow_radius) continue;
+
+      if (distance <= sun_radius)
+      {
+        SEGMENT.setPixelColorXY(pixel_x, pixel_y, sun_colour);
+      }
+      else
+      {
+        const float glow_width = (float)(glow_radius - sun_radius);
+        if (glow_width <= 0.0f) continue;
+
+        const float glow_amount = constrain(1.0f - ((distance - sun_radius) / glow_width), 0.0f, 1.0f);
+        const uint8_t blend_amount = (uint8_t)(glow_amount * 180.0f);
+
+        SEGMENT.blendPixelColorXY(pixel_x, pixel_y, sun_colour, blend_amount);
+      }
+    }
+  }
+}
+
+
+/**********************************************************************************************************************************************************************************
+ * EFFECT: Sun 2D Position
+ **********************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Position_01()
+{
+  EffectAnim__SunPositions__DrawSun_2D_Base(false, false);
+}
+
+static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_POSITION_01[] PROGMEM =
+"Sun 2D Position@"
+"Sun Size,Glow,,,Axis Range,Markers,Palette Sun,Inset Path,!,"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=64,ix=80,c3=0,o1=1,o2=0,o3=1,paln=Yellow,ep=1000"
+;
+
+static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_POSITION_01[] PROGMEM =
+"Draws the current solar position on a 2D matrix.\n\r"
+"SX: Sun size\n\r"
+"IX: Sun glow\n\r"
+"C3: 24H / Dawn-Dusk / Sunrise-Sunset X-axis\n\r"
+"O1: Reference markers\n\r"
+"O2: Palette sun\n\r"
+"O3: Keep complete sun/glow inside matrix";
+
+
+/**********************************************************************************************************************************************************************************
+ * EFFECT: Sun 2D Path 24H
+ **********************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Path_24H_01()
+{
+  EffectAnim__SunPositions__DrawSun_2D_Base(true, false);
+}
+
+static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_PATH_24H_01[] PROGMEM =
+"Sun 2D Path 24H@"
+"Sun Size,Glow,Path Brightness,,Axis Range,Markers,Palette Sun,Inset Path,!,"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=64,ix=80,c1=35,c3=0,o1=1,o2=0,o3=1,paln=Yellow,ep=1000"
+;
+
+static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_PATH_24H_01[] PROGMEM =
+"Draws the current sun over a dim complete 24-hour solar arc.\n\r"
+"C1: Path brightness\n\r"
+"C3: X-axis range; defaults to 24H\n\r"
+"O3: Keep complete sun/glow inside matrix";
+
+
+/**********************************************************************************************************************************************************************************
+ * EFFECT: Sun 2D Path Dawn-Dusk
+ **********************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Path_DawnDusk_01()
+{
+  EffectAnim__SunPositions__DrawSun_2D_Base(true, false);
+}
+
+static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_PATH_DAWNDUSK_01[] PROGMEM =
+"Sun 2D Path DawnDusk@"
+"Sun Size,Glow,Path Brightness,,Axis Range,Markers,Palette Sun,Inset Path,!,"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=64,ix=80,c1=35,c3=16,o1=1,o2=0,o3=1,paln=Yellow,ep=1000"
+;
+
+static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_PATH_DAWNDUSK_01[] PROGMEM =
+"Draws the solar arc scaled from civil dawn to civil dusk.\n\r"
+"C1: Path brightness\n\r"
+"C3: X-axis range; defaults to Dawn-Dusk\n\r"
+"O3: Keep complete sun/glow inside matrix";
+
+
+/**********************************************************************************************************************************************************************************
+ * EFFECT: Sun 2D Path Sunrise-Sunset
+ **********************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Path_SunriseSunset_01()
+{
+  EffectAnim__SunPositions__DrawSun_2D_Base(true, false);
+}
+
+static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_PATH_SUNRISESUNSET_01[] PROGMEM =
+"Sun 2D Path RiseSet@"
+"Sun Size,Glow,Path Brightness,,Axis Range,Markers,Palette Sun,Inset Path,!,"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=64,ix=80,c1=35,c3=27,o1=1,o2=0,o3=1,paln=Yellow,ep=1000"
+;
+
+static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_PATH_SUNRISESUNSET_01[] PROGMEM =
+"Draws the visible daytime solar arc from sunrise to sunset.\n\r"
+"C1: Path brightness\n\r"
+"C3: X-axis range; defaults to Sunrise-Sunset\n\r"
+"O3: Keep complete sun/glow inside matrix";
+
+
+/**********************************************************************************************************************************************************************************
+ * EFFECT: Sun 2D Sky
+ **********************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Sky_01()
+{
+  EffectAnim__SunPositions__DrawSun_2D_Base(false, true);
+}
+
+static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_SKY_01[] PROGMEM =
+"Sun 2D Sky@"
+"Sun Size,Glow,,Sky Brightness,Axis Range,Markers,Palette Sun,Inset Path,!,"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=64,ix=80,c2=180,c3=0,o1=0,o2=0,o3=1,paln=Yellow,ep=1000"
+;
+
+static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_SKY_01[] PROGMEM =
+"Current sun over a sky whose colour follows solar elevation.\n\r"
+"C2: Sky brightness\n\r"
+"C3: X-axis range\n\r"
+"O3: Keep complete sun/glow inside matrix";
+
+
+/**********************************************************************************************************************************************************************************
+ * EFFECT: Sun 2D Sky + Path
+ **********************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Sky_Path_01()
+{
+  EffectAnim__SunPositions__DrawSun_2D_Base(true, true);
+}
+
+static const char PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_SKY_PATH_01[] PROGMEM =
+"Sun 2D Sky Path@"
+"Sun Size,Glow,Path Brightness,Sky Brightness,Axis Range,Markers,Palette Sun,Inset Path,!,"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=64,ix=139,c1=35,c2=180,c3=0,o1=1,o2=0,o3=1,paln=Yellow,ep=1000"
+;
+
+static const char PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_SKY_PATH_01[] PROGMEM =
+"Complete 2D solar display with sky, expected path and current sun.\n\r"
+"C1: Path brightness\n\r"
+"C2: Sky brightness\n\r"
+"C3: 24H / Dawn-Dusk / Sunrise-Sunset X-axis\n\r"
+"O3: Keep complete sun/glow inside matrix";
+
+
+#endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+
+#ifdef USE_MODULE_SENSORS_MOON_TRACKING
+
+/**********************************************************************************************************************************************************************************
+ * EFFECT BASE: Moon 2D
+ *
+ * SX: Moon size
+ * IX: Glow
+ * C1: Earthshine
+ * C2: Sky brightness
+ **********************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__MoonPositions__DrawMoon_2D_Base(bool draw_sky)
+{
+  if (!isMatrix || !SEGMENT.is2D()) return EFFECT_DEFAULT();
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+  if (cols < 2 || rows < 2) return;
+
+  /*
+   * Replace this with the MoonTracking getter when that module is implemented.
+   *
+   * Required convention:
+   *   0.00 = new moon
+   *   0.25 = first quarter
+   *   0.50 = full moon
+   *   0.75 = last quarter
+   *   1.00 = new moon
+   */
+  const float phase = 0.50f;
+
+  if (draw_sky)
+  {
+    const uint8_t sky_brightness = SEGMENT.custom2;
+
+    for (uint16_t y = 0; y < rows; y++)
+    {
+      const float vertical = (float)y / (float)(rows - 1);
+      const uint8_t r = (uint8_t)(2.0f * sky_brightness / 255.0f);
+      const uint8_t g = (uint8_t)((4.0f + 5.0f * vertical) * sky_brightness / 255.0f);
+      const uint8_t b = (uint8_t)((12.0f + 20.0f * vertical) * sky_brightness / 255.0f);
+
+      for (uint16_t x = 0; x < cols; x++) SEGMENT.setPixelColorXY(x, y, RGBW32(r, g, b, 0));
+    }
+  }
+  else
+  {
+    SEGMENT.fill(BLACK);
+  }
+
+  const int16_t cx = (cols - 1) / 2;
+  const int16_t cy = (rows - 1) / 2;
+
+  const uint8_t max_radius = max<uint8_t>(2, min<uint16_t>(cols, rows) / 2 - 1);
+  const uint8_t radius = 2 + ((uint16_t)SEGMENT.speed * max<uint8_t>(1, max_radius - 2)) / 255;
+  const uint8_t glow_radius = radius + ((uint16_t)SEGMENT.intensity * max<uint8_t>(1, radius / 2)) / 255;
+  const uint8_t earthshine = SEGMENT.custom1;
+
+  const float illumination = 0.5f * (1.0f - cosf(TWO_PI * phase));
+  const bool waxing = phase < 0.5f;
+  const float terminator = 1.0f - 2.0f * illumination;
+
+  const uint32_t moon_colour = RGBW32(220, 225, 210, 0);
+  const uint32_t dark_colour = RGBW32(earthshine / 5, earthshine / 5, earthshine / 4, 0);
+
+  for (int16_t dy = -glow_radius; dy <= glow_radius; dy++)
+  {
+    for (int16_t dx = -glow_radius; dx <= glow_radius; dx++)
+    {
+      const float distance = sqrtf((float)(dx * dx + dy * dy));
+      if (distance <= radius || distance > glow_radius) continue;
+
+      const int16_t px = cx + dx;
+      const int16_t py = cy + dy;
+      if (px < 0 || py < 0 || px >= cols || py >= rows) continue;
+
+      const float fade = 1.0f - ((distance - radius) / max<float>(1.0f, glow_radius - radius));
+      SEGMENT.blendPixelColorXY(px, py, RGBW32(80, 90, 100, 0), (uint8_t)(fade * 80.0f));
+    }
+  }
+
+  for (int16_t dy = -radius; dy <= radius; dy++)
+  {
+    const float yy = (float)dy / (float)radius;
+    const float half_width = sqrtf(max(0.0f, 1.0f - yy * yy));
+
+    for (int16_t dx = -radius; dx <= radius; dx++)
+    {
+      const float xx = (float)dx / (float)radius;
+      if (fabsf(xx) > half_width) continue;
+
+      bool illuminated;
+
+      if (waxing) illuminated = xx >= terminator * half_width;
+      else illuminated = xx <= -terminator * half_width;
+
+      const int16_t px = cx + dx;
+      const int16_t py = cy + dy;
+      if (px < 0 || py < 0 || px >= cols || py >= rows) continue;
+
+      SEGMENT.setPixelColorXY(px, py, illuminated ? moon_colour : dark_colour);
+    }
+  }
+}
+
+
+/**********************************************************************************************************************************************************************************
+ * EFFECT: Moon 2D Phase
+ **********************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__MoonPositions__DrawMoon_2D_Phase_01()
+{
+  EffectAnim__MoonPositions__DrawMoon_2D_Base(false);
+}
+static const char PM_EFFECT_CONFIG__MOONPOSITIONS__DRAWMOON_2D_PHASE_01[] PROGMEM =
+"Moon 2D Phase@"
+"Moon Size,Glow,Earthshine,,,,,,,!,"
+";"
+""
+";"
+""
+";"
+"2"
+";"
+"sx=128,ix=80,c1=20,ep=1000"
+;
+static const char PM_EFFECT_DESCRI__MOONPOSITIONS__DRAWMOON_2D_PHASE_01[] PROGMEM =
+"Draws a circular moon with the illuminated disc shaped by lunar phase.\n\r"
+"SX: Moon size\n\r"
+"IX: Moon glow\n\r"
+"C1: Dark-side earthshine";
+
+
+/**********************************************************************************************************************************************************************************
+ * EFFECT: Moon 2D Sky Phase
+ **********************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__MoonPositions__DrawMoon_2D_Sky_Phase_01()
+{
+  EffectAnim__MoonPositions__DrawMoon_2D_Base(true);
+}
+static const char PM_EFFECT_CONFIG__MOONPOSITIONS__DRAWMOON_2D_SKY_PHASE_01[] PROGMEM =
+"Moon 2D Sky@"
+"Moon Size,Glow,Earthshine,Sky Brightness,,,,,,!,"
+";"
+""
+";"
+""
+";"
+"2"
+";"
+"sx=128,ix=80,c1=20,c2=100,ep=1000"
+;
+static const char PM_EFFECT_DESCRI__MOONPOSITIONS__DRAWMOON_2D_SKY_PHASE_01[] PROGMEM =
+"Draws the current lunar phase over a dark night-sky background.\n\r"
+"SX: Moon size\n\r"
+"IX: Moon glow\n\r"
+"C1: Dark-side earthshine\n\r"
+"C2: Sky brightness";
+
+
+#endif // USE_MODULE_SENSORS_MOON_TRACKING
+
+
 
 
 /**********************************************************************************************************************************************************************************
@@ -20748,7 +21324,7 @@ static const char PM_EFFECT_CONFIG__2D__BLACK_HOLE[] PROGMEM =
 ";"                                     // ----------------------------------------- PalPicker/is1D2D
 "2"                                     // icon flags: 2 = 2D
 ";"                                     // ----------------------------------------- is1D2D/Defaults
-"ix=127,pal=11"                         // defaults (mid outer Y freq, Rainbow 16 palette or similar)
+"sx=226,ix=127,c1=127,c2=127,c3=15,o3=0,paln=Rainbow"                         // defaults (mid outer Y freq, Rainbow 16 palette or similar)
 ;
 static const char PM_EFFECT_DESCRI__2D__BLACK_HOLE[] PROGMEM =
 "Two orbiting star fields around a bright core with palette coloring and trails.\n\r"
@@ -21809,7 +22385,7 @@ static const char PM_EFFECT_CONFIG__2D__MATRIX[] PROGMEM =
 ";"                                // ----------------------------------------- Sliders/SegCols
 "Spawn,Trail"                      // Segment Colour Names (C0=head, C1=trail) — only used if CB1 is ON
 ";"                                // ----------------------------------------- SegCols/PalPicker
-""                                 // Palette picker off (not palette-driven)
+"!"                                 // Palette picker off (not palette-driven)
 ";"                                // ----------------------------------------- PalPicker/is1D2D
 "2"                                // Icon flags: 2D matrix
 ";"                                // ----------------------------------------- is1D2D/Defaults
@@ -21851,16 +22427,7 @@ const char PM_EFFECT_DESCRI__2D__MATRIX[] PROGMEM =
  ********************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__2D__Metaballs()
 {
-  ALOG_INF(PSTR("EffectAnim__2D__Metaballs()"));
-  if (!isMatrix || !SEGMENT.is2D()){
-
-  ALOG_INF(PSTR("reutnr here"));
- 
- 
-    return EFFECT_DEFAULT(); // not a 2D set-up
-
-
-}
+  if (!isMatrix || !SEGMENT.is2D()){ return EFFECT_DEFAULT(); }
   const int cols = SEG_W;
   const int rows = SEG_H;
 
@@ -21908,9 +22475,6 @@ void mAnimatorLight::EffectAnim__2D__Metaballs()
       SEGMENT.setPixelColorXY(x3, y3, WHITE);
     }
   }
-
-  ALOG_INF(PSTR("here"));
-
   
 }
 static const char PM_EFFECT_CONFIG__2D__METABALLS[] PROGMEM =
@@ -22177,7 +22741,7 @@ static const char PM_EFFECT_DESCRI__2D__POLAR_LIGHTS[] PROGMEM =
  ********************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__2D__Pulser()
 {
-  ALOG_INF(PSTR("EffectAnim__2D__Pulser"));
+  
   if (!isMatrix || !SEGMENT.is2D()) return EFFECT_DEFAULT(); // not a 2D set-up
 
   const int cols = SEG_W;
@@ -34855,8 +35419,6 @@ void mAnimatorLight::LoadEffects()
             Effect_DevStage::Release);
   
   #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-
-
   /**
    * Sun Position
    **/
@@ -34900,7 +35462,7 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_1D_ELEVATION_02,
             #endif
             Effect_DevStage::Dev);
-      
+
   addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_AZIMUTH_01__ID,
             &mAnimatorLight::EffectAnim__SunPositions__DrawSun_1D_Azimuth_01,
             PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_1D_AZIMUTH_01,
@@ -34917,11 +35479,51 @@ void mAnimatorLight::LoadEffects()
             #endif
             Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01__ID,
-            &mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azimuth_01,
-            PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01,
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_POSITION_01__ID,
+            &mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Position_01,
+            PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_POSITION_01,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01,
+            PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_POSITION_01,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_PATH_24H_01__ID,
+            &mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Path_24H_01,
+            PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_PATH_24H_01,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_PATH_24H_01,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_PATH_DAWNDUSK_01__ID,
+            &mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Path_DawnDusk_01,
+            PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_PATH_DAWNDUSK_01,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_PATH_DAWNDUSK_01,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_PATH_SUNRISESUNSET_01__ID,
+            &mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Path_SunriseSunset_01,
+            PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_PATH_SUNRISESUNSET_01,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_PATH_SUNRISESUNSET_01,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_SKY_01__ID,
+            &mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Sky_01,
+            PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_SKY_01,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_SKY_01,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_SKY_PATH_01__ID,
+            &mAnimatorLight::EffectAnim__SunPositions__DrawSun_2D_Sky_Path_01,
+            PM_EFFECT_CONFIG__SUNPOSITIONS__DRAWSUN_2D_SKY_PATH_01,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__SUNPOSITIONS__DRAWSUN_2D_SKY_PATH_01,
             #endif
             Effect_DevStage::Dev);
 
@@ -34930,6 +35532,27 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_CONFIG__SUNPOSITIONS__WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__SUNPOSITIONS__WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01,
+            #endif
+            Effect_DevStage::Dev);
+  #endif
+
+  /**
+   * Moon Position
+   **/
+  #ifdef USE_MODULE_SENSORS_MOON_TRACKING
+  addEffect(EFFECTS_FUNCTION__MOONPOSITIONS_DRAWMOON_2D_PHASE_01__ID,
+            &mAnimatorLight::EffectAnim__MoonPositions__DrawMoon_2D_Phase_01,
+            PM_EFFECT_CONFIG__MOONPOSITIONS__DRAWMOON_2D_PHASE_01,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__MOONPOSITIONS__DRAWMOON_2D_PHASE_01,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__MOONPOSITIONS_DRAWMOON_2D_SKY_PHASE_01__ID,
+            &mAnimatorLight::EffectAnim__MoonPositions__DrawMoon_2D_Sky_Phase_01,
+            PM_EFFECT_CONFIG__MOONPOSITIONS__DRAWMOON_2D_SKY_PHASE_01,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__MOONPOSITIONS__DRAWMOON_2D_SKY_PHASE_01,
             #endif
             Effect_DevStage::Dev);
   #endif

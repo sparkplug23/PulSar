@@ -4378,6 +4378,11 @@ void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
   _hasWhiteChannel = false;
   _triggered = false;
 
+  
+  _targetFps = WLED_FPS;
+  _frametime = FRAMETIME_FIXED; 
+  _cumulativeFps = WLED_FPS << FPS_CALC_SHIFT;
+
   _callback = nullptr;
   customMappingTable = nullptr;
   customMappingSize = 0;

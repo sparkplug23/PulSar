@@ -1,7 +1,7 @@
 {
   "env_name": "cm_office__ws2815panel12v",
-  "created_utc": "2026-08-09T09:23:22Z",
-  "created_epoch": 1786267402,
+  "created_utc": "2026-08-09T23:17:27Z",
+  "created_epoch": 1786317447,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "dev_particle_lights",
-    "commit": "5b83a1b15ba7a0545df07cf3c7f2390784c8d907",
-    "describe": "5b83a1b1-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/2_CoreSystem/20_JSON/mJSON.cpp\n M code/2_CoreSystem/20_JSON/mJSON.h\n M code/3_Network/21_WebServer/mWebServer_Pages.cpp\n M code/6_Lights/03_Animator/Effects.cpp\n M code/6_Lights/03_Animator/WebUI.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf"
+    "commit": "94c5ce1ce9b75b960433a1ecf1e5214c251b2b97",
+    "describe": "94c5ce1c-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/3_Network/10_MQTT/mMQTT.h\n M code/3_Network/10_MQTT/mMQTT_Manager.cpp\n M code/5_Sensors/23_SunTracking_FastEstimate/mSunTracking_FastEstimate.cpp\n M code/5_Sensors/23_SunTracking_FastEstimate/mSunTracking_FastEstimate.h\n M code/6_Lights/00_Interface/const.h\n M code/6_Lights/03_Animator/Effects.cpp\n M code/6_Lights/03_Animator/ParticleSystem.cpp\n M code/6_Lights/03_Animator/Presets.cpp\n M code/6_Lights/03_Animator/WebUI.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M code/6_Lights/03_Animator/source/virtualview.htm\n M code/6_Lights/03_Animator/webpages_generated/html_other.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_lgt.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n?? code/6_Lights/03_Animator/source/virtualview_old.htm"
   }
 }
