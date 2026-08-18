@@ -587,9 +587,6 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS__CTR)        "debug
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE_VECTOR__CTR)        "debug/palette_vector";
 #endif 
-#ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug/animation_progress";
-#endif 
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "debug/performance";
 #endif 
@@ -3601,7 +3598,7 @@ class Segment
     
 
     // Effects (Scenes & Flasher), Ambilight, Adalight    
-    uint8_t animation_mode_id = 0; // rename to "effect_id"
+    uint16_t animation_mode_id = 0; // rename to "effect_id"
 
     
     // removing, as name is ambiguous now without neopixel animator
@@ -6308,6 +6305,8 @@ void EverySecond_Standby();
 
 // static PRNG prng = PRNG();//();//hw_random()); // pseudo-random number generator class, seed = hardware random number
 
+// static PRNG prng = PRNG();//();//hw_random()); // pseudo-random number generator class, seed = hardware random number
+
 
     /************************************************************************************************
      * SECTION: ConstructJSON
@@ -6349,11 +6348,6 @@ void EverySecond_Standby();
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
     uint8_t ConstructJSON_Debug_Performance(uint8_t json_level = 0, bool json_appending = true);
     #endif 
-    #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-      uint8_t ConstructJSON_Debug_Animations_Progress(uint8_t json_level = 0, bool json_appending = true);  
-      ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
-      mAnimatorLight& setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE);  
-    #endif
 
     /************************************************************************************************
      * SECTION: MQTT
@@ -6403,9 +6397,12 @@ void EverySecond_Standby();
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
       struct telemetry_handler<mAnimatorLight> telemetry_debug__performance;
       #endif
+<<<<<<< HEAD
+=======
       #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
       struct telemetry_handler<mAnimatorLight> telemetry_debug_animations_progress;
       #endif
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
       
     #endif // USE_MODULE_NETWORK_MQTT
 

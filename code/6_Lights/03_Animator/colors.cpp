@@ -1,5 +1,4 @@
 
-
 #include "_AnimatorLight.h"
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
@@ -689,5 +688,8 @@ uint32_t NeoGammaWLEDMethod::inverseGamma32(uint32_t color)
   return RGBW32(r, g, b, w);
 }
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
 #endif

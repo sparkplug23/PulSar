@@ -2,7 +2,10 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
 #include "fcn_declare.h"
 // #include "const.h"
 // #include "src/dependencies/fastled_slim/fastled_slim.h"
@@ -1386,4 +1389,8 @@ String getDeviceId() {
 }
 
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
 #endif

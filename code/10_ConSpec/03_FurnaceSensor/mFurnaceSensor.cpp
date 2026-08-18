@@ -46,33 +46,23 @@ int8_t mFurnaceSensor::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-     /************
-     * TELEMETRY SECTION * 
+    /************
+     * MQTT SECTION * 
     *******************/
-    case TASK_TELEMETRY_HANDLERS_INIT:
-      Telemetry_Init();
-    break;
-    case TASK_TELEMETRY_REFRESH_SEND_ALL:
-      tkr_tele->Telemetry_RefreshAll(telemetry_list);
-    break;
-    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_tele->Telemetry_Rate(telemetry_list);
-    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_TELEMETRY__SENDER_MQTT:
-      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
+    case TASK_MQTT_HANDLERS_INIT:
+      MQTTHandler_Init();
     break;
-    #endif
-    #ifdef USE_MODULE_SERIAL
-    case TASK_SERIAL_TELEMETRY:
-      tkr_serial->Telemetry_Sender(telemetry_list, *this);
+    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+      MQTTHandler_Rate();
     break;
-    #endif
-    #ifdef USE_MODULE_NETWORK_WEBSERVER
-    case TASK_WEB_TELEMETRY:
-      tkr_web->Telemetry_Sender(telemetry_list, *this);
+    case TASK_MQTT_SENDER:
+      MQTTHandler_Sender();
     break;
-    #endif
+    case TASK_MQTT_CONNECTED:
+      MQTTHandler_RefreshAll();
+    break;
+    #endif //USE_MODULE_NETWORK_MQTT
   }
 
   return TASKER_RESULT__UNKNOWN_ID;
@@ -260,7 +250,7 @@ void mFurnaceSensor::EveryLoop()
 
 
 //   // tkr_relay->CommandSet_Relay_Power(0);
-//   // telemetry_state_ifchanged.flags.SendNow = true;
+//   // mqtthandler_state_ifchanged.flags.SendNow = true;
 
 
 
@@ -336,53 +326,53 @@ void mFurnaceSensor::parse_JSONCommand(JsonParserObject obj){
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mFurnaceSensor::Telemetry_Init()
+void mFurnaceSensor::MQTTHandler_Init()
 {
 
-  struct telemetry_handler<mFurnaceSensor>* ptr;
+  struct handler<mFurnaceSensor>* ptr;
 
-  ptr = &telemetry_settings;
+  ptr = &mqtthandler_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = 120; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mFurnaceSensor::ConstructJSON_Settings;
-  telemetry_list.push_back(ptr);
+  mqtthandler_list.push_back(ptr);
 
-  ptr = &telemetry_state_teleperiod;
+  ptr = &mqtthandler_state_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mFurnaceSensor::ConstructJSON_State;
-  telemetry_list.push_back(ptr);
+  mqtthandler_list.push_back(ptr);
 
-  ptr = &telemetry_state_ifchanged;
+  ptr = &mqtthandler_state_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
-  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mFurnaceSensor::ConstructJSON_State;
-  telemetry_list.push_back(ptr);
+  mqtthandler_list.push_back(ptr);
 
 } 
 
 
 /**
- * @brief Set flag for all telemetryhandlers to send
+ * @brief Set flag for all mqtthandlers to send
  * */
 void mFurnaceSensor::MQTTHandler_RefreshAll()
 {
-  for(auto& handle:telemetry_list){
+  for(auto& handle:mqtthandler_list){
     handle->flags.SendNow = true;
   }
 }
@@ -392,7 +382,7 @@ void mFurnaceSensor::MQTTHandler_RefreshAll()
  * */
 void mFurnaceSensor::MQTTHandler_Rate()
 {
-  // for(auto& handle:telemetry_list){
+  // for(auto& handle:mqtthandler_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
   //     handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
@@ -405,7 +395,7 @@ void mFurnaceSensor::MQTTHandler_Rate()
  * */
 void mFurnaceSensor::MQTTHandler_Sender()
 {
-  for(auto& handle:telemetry_list){
+  for(auto& handle:mqtthandler_list){
     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }

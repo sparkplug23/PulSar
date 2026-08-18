@@ -1,0 +1,25 @@
+{
+  "env_name": "cm_office__elite4dexmu_01",
+  "created_utc": "2026-08-13T14:13:08Z",
+  "created_epoch": 1786630388,
+  "project_dir": "C:\\Users\\3058467\\Github\\PulSar",
+  "build_dir": "C:\\Users\\3058467\\Github\\PulSar\\.pio\\build\\cm_office__elite4dexmu_01",
+  "platform": "espressif32",
+  "board": "esp32dev",
+  "framework": [
+    "arduino"
+  ],
+  "copied": [
+    "firmware.bin",
+    "firmware.elf",
+    "firmware.map",
+    "partitions.bin",
+    "bootloader.bin"
+  ],
+  "git": {
+    "branch": "dev_particle_lights",
+    "commit": "5b83a1b15ba7a0545df07cf3c7f2390784c8d907",
+    "describe": "5b83a1b1-dirty",
+    "status_short": "M lib/lib_network_web/ESPAsyncWebServerWLED\n M lib/lib_npb_feb26/NeoPixelBus\n M lib/lib_wled32/LittleFS_esp32\n M platformio_lgt.ini\n M saved_compiles/cm_office__elite4dexmu_01/build_meta.json\n M saved_compiles/cm_office__elite4dexmu_01/firmware.elf"
+  }
+}
