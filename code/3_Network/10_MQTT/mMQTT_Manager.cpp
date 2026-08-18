@@ -976,7 +976,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj["MQTT"].getObject()["StatusAll"]) //change all to be value
   {    
-    tkr->Tasker_Interface(TASK_MQTT_STATUS_REFRESH_SEND_ALL);
+    tkr->Tasker_Interface(TASK_TELEMETRY_REFRESH_SEND_ALL);
   }
 
 
@@ -998,7 +998,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
       dt.configperiod_secs = jtok_sub.getInt();
       ALOG_TST(PSTR("MQTTUpdateSeconds ConfigPeriod %d"), dt.configperiod_secs);
     }
-    // tkr->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
+    // tkr->Tasker_Interface(TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD);
   }
 
 
@@ -1259,7 +1259,7 @@ void mMQTTManager::CallMQTTSenders()
 {
   if(AnyBrokerConnected())
   {
-    tkr->Tasker_Interface(TASK_MQTT_SENDER);
+    tkr->Tasker_Interface(TASK_TELEMETRY__SENDER_MQTT);
   }
 }
 

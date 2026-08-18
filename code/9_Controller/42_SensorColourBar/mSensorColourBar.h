@@ -154,15 +154,15 @@ class mSensorColourBar :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mSensorColourBar>*> mqtthandler_list;
-    struct handler<mSensorColourBar> mqtthandler_settings;
-    struct handler<mSensorColourBar> mqtthandler_state_ifchanged;
-    struct handler<mSensorColourBar> mqtthandler_state_teleperiod;
+    std::vector<struct telemetry_handler<mSensorColourBar>*> telemetry_list;
+    struct telemetry_handler<mSensorColourBar> telemetry_settings;
+    struct telemetry_handler<mSensorColourBar> telemetry_state_ifchanged;
+    struct telemetry_handler<mSensorColourBar> telemetry_state_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
     
 };

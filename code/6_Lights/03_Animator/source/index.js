@@ -1,9 +1,8 @@
 //page js
 var loc = false, locip, locproto = "http:";
-var isOn = false, nlA = false, isLv = false, isInfo = false, isNodes = false, syncSend = false/*, syncTglRecv = true*/;
+var isOn = false, isLv = false, isInfo = false, isNodes = false, isStandby = false, syncSend = false;
 var hasWhite = false, hasRGB = false, hasCCT = false, has2D = false;
-var nlDur = 60, nlTar = 0;
-var nlMode = false;
+
 var segLmax = 0; // size (in pixels) of largest selected segment
 var selectedFx = 0;
 var selectedPal = 0;
@@ -11,6 +10,7 @@ var selectedPal2 = 0; // secondary palette for segments
 // // default: range mode (≤)
 let devStageExactMode = false;
 var csel = 0; // selected color slot (0-4)
+var cpick; // iro color picker
 var currentPreset = -1;
 var lastUpdate = 0;
 var segCount = 0, ledCount = 0, lowestUnused = 0, maxSeg = 0, lSeg = 0;
@@ -46,18 +46,39 @@ var hol = [
 	[0, 0, 1, 1, "https://images.alphacoders.com/119/1198800.jpg"]	// new year
 ];
 
-var cpick = new iro.ColorPicker("#picker", {
-	width: 260,
-	wheelLightness: false,
-	wheelAngle: 270,
-	wheelDirection: "clockwise",
-	layout: [{
-		component: iro.ui.Wheel,
-		options: {}
-	}]
-});
-let devStages = []; // Global array to store development stages
+// var cpick = new iro.ColorPicker("#picker", {
+// 	width: 260,
+// 	wheelLightness: false,
+// 	wheelAngle: 270,
+// 	wheelDirection: "clockwise",
+// 	layout: [{
+// 		component: iro.ui.Wheel,
+// 		options: {}
+// 	}]
+// });
 
+// load iro.js sequentially to avoid 503 errors, retries until successful
+(function loadIro() {
+	const l = d.createElement('script');
+	l.src = '/lights/iro.js';
+	l.onload = () => {
+		cpick = new iro.ColorPicker("#picker", {
+			width: 260,
+			wheelLightness: false,
+			wheelAngle: 270,
+			wheelDirection: "clockwise",
+			layout: [{component: iro.ui.Wheel, options: {}}]
+		});
+		d.readyState === 'complete' ? onLoad() : window.addEventListener('load', onLoad);
+	};
+	l.onerror = () => setTimeout(loadIro, 100);
+	document.head.appendChild(l);
+})();
+
+
+
+
+let devStages = []; // Global array to store development stages
 
 function handleVisibilityChange() {if (!d.hidden && new Date () - lastUpdate > 3000) requestJson();}
 function sCol(na, col) {d.documentElement.style.setProperty(na, col);}
@@ -272,32 +293,37 @@ function loadSkinCSS(cId)
 //   console.log("getURL3:", newp); 
 //   return newp;
 // }
+// function getURL(path) {
+//   // Date Modified: 30Dec25
+//   // Robust: remove mount prefix from BOTH base (locip) and path.
+
+//   // Ensure path is absolute
+//   if (path && path[0] !== "/") path = "/" + path;
+
+//   // Normalise base
+//   let base = "";
+//   if (loc) {
+//     let ip = (locip || "");
+
+//     // If locip accidentally includes "/lights" (or "/lights/.."), strip it.
+//     // Works for: "192.168.2.109/lights" or "192.168.2.109/lights/anything"
+//     ip = ip.replace(/\/lights(\/.*)?$/i, "");
+
+//     base = locproto + "//" + ip;
+//   }
+
+//   // Strip "/lights" prefix from path as well (covers any hardcoded calls)
+//   if (path === "/lights") path = "/";
+//   else if (path.startsWith("/lights/")) path = path.substring(7); // remove "/lights"
+
+//   console.log("loc:", loc, "locproto:", locproto, "locip:", locip, "pathname:", location.pathname);
+
+//   return base + path;
+// }
 function getURL(path) {
-  // Date Modified: 30Dec25
-  // Robust: remove mount prefix from BOTH base (locip) and path.
-
-  // Ensure path is absolute
-  if (path && path[0] !== "/") path = "/" + path;
-
-  // Normalise base
-  let base = "";
-  if (loc) {
-    let ip = (locip || "");
-
-    // If locip accidentally includes "/lights" (or "/lights/.."), strip it.
-    // Works for: "192.168.2.109/lights" or "192.168.2.109/lights/anything"
-    ip = ip.replace(/\/lights(\/.*)?$/i, "");
-
-    base = locproto + "//" + ip;
-  }
-
-  // Strip "/lights" prefix from path as well (covers any hardcoded calls)
-  if (path === "/lights") path = "/";
-  else if (path.startsWith("/lights/")) path = path.substring(7); // remove "/lights"
-
-  console.log("loc:", loc, "locproto:", locproto, "locip:", locip, "pathname:", location.pathname);
-
-  return base + path;
+	path = path || "/";
+	if (path[0] != "/") path = "/" + path;
+	return location.origin + path;
 }
 
 
@@ -662,7 +688,7 @@ function loadPresets(callback = null)
 
 function loadPalettes(callback = null)
 {
-		console.log("DB: loadPalettes");
+		// console.log("DB: loadPalettes");
 	fetch(getURL('/json/palettes'), {
 		method: 'get'
 	})
@@ -678,7 +704,7 @@ function loadPalettes(callback = null)
 		return res.json();
 	})
 	.then((json)=>{
-		console.log("DB:json>>", json);
+		// console.log("DB:json>>", json);
 		lJson = Object.entries(json);
 		populatePalettes();
 		retry = false;
@@ -688,7 +714,7 @@ function loadPalettes(callback = null)
 			retry = true;
 			setTimeout(loadPalettes, 500); // retry
 		}
-		console.log("DB: WE ARE HERE");
+		// console.log("DB: WE ARE HERE");
 		console.log(e);
 		showToast(e, true);
 	})
@@ -703,14 +729,14 @@ function validatePalettesEtag(response) {
 	const currentEtag = response.headers.get('ETag');
 	const storedEtag = localStorage.getItem('palettesEtag');
 
-	console.log('Current ETag:', currentEtag);
-	console.log('Stored ETag:', storedEtag);
-  
 	// Check if the ETag matches
 	if (currentEtag && currentEtag === storedEtag) {
 	  console.log('ETag: NO CHANGE. Using cached palettes');
 	  return false; // No need to reload
-	}
+	}else{
+		console.log('Current ETag:', currentEtag);
+		console.log('Stored ETag:', storedEtag);
+  	}
   
 	// ETag mismatch or not found, reset cache
 	console.log('ETag: INVALID. Resetting localstorage');
@@ -752,7 +778,7 @@ function loadFX(callback = null)
 
 function loadFXData(callback = null)
 {
-	console.log("DB:loadFXData");
+	// console.log("DB:loadFXData");
 	fetch(getURL('/json/fxdata'), {
 		method: 'get'
 	})
@@ -870,7 +896,7 @@ function parseInfo(i) {
 	//syncTglRecv   = i.str;
 	maxSeg       = i.leds.maxseg;
 	pmt          = i.fs.pmt;
-	if (pcMode && !i.wifi.ap) gId('edit').classList.remove("hide"); else gId('edit').classList.add("hide");
+	
 	gId('buttonNodes').style.display = lastinfo.ndc > 0 ? null:"none";
 	// do we have a matrix set-up
 	mw = i.leds.matrix ? i.leds.matrix.w : 0;
@@ -1083,12 +1109,12 @@ function populateSegments(s)
 		updateTrail(gId(`seg${i}bri`));
 		gId(`segr${i}`).classList.add("hide");
 	}
-	if (segCount < 2) {
+	// if (segCount < 2) { // force slider opacity control for development
 		gId(`segd${lSeg}`).classList.add("hide"); // hide delete if only one segment
 		if (parseInt(gId("seg0bri").value)==255) gId(`segp0`).classList.add("hide");
 		// hide segment controls if there is only one segment in simplified UI
 		if (simplifiedUI) gId("segcont").classList.add("hide");
-	}
+	// }
 	if (!isM && !noNewSegs && (cfg.comp.seglen?parseInt(gId(`seg${lSeg}s`).value):0)+parseInt(gId(`seg${lSeg}e`).value)<ledCount) gId(`segr${lSeg}`).classList.remove("hide");
 	gId('segutil2').style.display = (segCount > 1) ? "block":"none"; // rsbtn parent
 
@@ -1194,11 +1220,11 @@ function populateEffects() {
 		  let eP = fd === '' ? [] : fd.split(";"); // effect parameters
 		  let p = (eP.length < 3 || eP[2] === '') ? [] : eP[2].split(","); // palette data
 
-		  if(i==30)
-		  {
-		  console.log(eP);
-		  console.log(p);
-		  }
+		//   if(i==30)
+		//   {
+		//   console.log(eP);
+		//   console.log(p);
+		//   }
   
 		  // Add palette indicator
 		  if (p.length > 0 && p[0] !== "" && !isNumeric(p[0])) nm += "&#x1F3A8;"; // 🎨 Palette icon
@@ -1206,12 +1232,12 @@ function populateEffects() {
 		  let m = (eP.length < 4 || eP[3] === '') ? '1' : eP[3]; // flags
 		  //   if (id == 0) m = ''; // solid has no flags
 
-		  if(i==30)
-		  {
-		  console.log((eP.length < 4 || eP[3] === ''));
-		  console.log(eP[3]);
-		  console.log(m);
-		  }
+		//   if(i==30)
+		//   {
+		//   console.log((eP.length < 4 || eP[3] === ''));
+		//   console.log(eP[3]);
+		//   console.log(m);
+		//   }
   
   
 		  // Add effect type icons
@@ -1396,8 +1422,8 @@ function populatePalettes()
 			);
 		}
 	}
-	if (li.cpalcount>0) gId("rmPal").classList.remove("hide");
-	else                gId("rmPal").classList.add("hide");
+	// if (li.cpalcount>0) gId("rmPal").classList.remove("hide");
+	// else                gId("rmPal").classList.add("hide");
 }
 
 
@@ -1804,10 +1830,9 @@ function updatePalLiveIXView() { // If "Live" is active palette, then show palet
 
 function updateUI()
 {
-	gId('buttonPower').className = (isOn) ? 'active':'';
-	gId('buttonNl').className = (nlA) ? 'active':'';
-	gId('buttonSync').className = (syncSend) ? 'active':'';
-	gId('pxmb').style.display = (isM) ? "inline-block" : "none";
+		
+	gId('buttonPower').className = isOn ? 'active':'';
+	gId('buttonSync').className = syncSend ? 'active':'';
 
 	updateSelectedFx();
 	// updateSelectedPalette(selectedPal); // must be after updateSelectedFx() to un-hide color slots for * palettes
@@ -1825,6 +1850,8 @@ function updateUI()
 	updateTrail(gId('sliderEffectTimePeriod'));
 	updateTrail(gId('sliderGrouping'));
 	updateTrail(gId('sliderDecimate'));
+
+	updateTrail(gId('sliderpalix'));
 
 
 	if (hasRGB) {
@@ -2047,7 +2074,7 @@ function makeWS() {
 	ws = new WebSocket(url);
 	ws.binaryType = "arraybuffer";
 	ws.onmessage = (e)=>{
-		console.log(e.data);
+		// console.log(e.data);
 		// console.log(e.data);
 		if (e.data instanceof ArrayBuffer)
 		{
@@ -2096,10 +2123,7 @@ function readState(s,command=false)
 
 	isOn = s.on;
 	gId('sliderBri').value = s.bri;
-	nlA = s.nl.on;
-	nlDur = s.nl.dur;
-	nlTar = s.nl.tbri;
-	nlFade = s.nl.fade;
+	
 	syncSend = s.udpn.send;
 	if (s.pl<0)	currentPreset = s.ps;
 	else currentPreset = s.pl;
@@ -2171,8 +2195,8 @@ function readState(s,command=false)
 	gId('checkO3').checked = !(!i.o3);
 
 	
-	gId('sliderrgbbri').value = i.rgbbri;
-	gId('slidercctbri').value = i.cctbri;
+	// gId('sliderrgbbri').value = i.rgbbri;
+	// gId('slidercctbri').value = i.cctbri;
 	gId('sliderpalix').value = i.palix;
 
 
@@ -2223,15 +2247,6 @@ function readState(s,command=false)
 	updateUI();
 	return true;
 }
-
-//STANDBY MODE  keep a fresh copy of last state JSON for "Use current as Standby"
-(function(){
-  const _readState = window.readState;
-  window.readState = function(s, command=false){
-    try { if (s && !s.success) window._lastStateJSON = JSON.stringify(s); } catch(e){}
-    return _readState(s, command);
-  };
-})();
 
 
 // control HTML elements for Slider and Color Control (original ported form WLED-SR)
@@ -2503,10 +2518,10 @@ function requestJson(command=null)
 		body: req
 	})
 	.then(res => {
-		console.log("Fetch response received. URL:", getURL('/json/si'), "Payload:", req);
+		// console.log("Fetch response received. URL:", getURL('/json/si'), "Payload:", req);
     
 		clearTimeout(jsonTimeout);
-		console.log("clearTimeout");
+		// console.log("clearTimeout");
 		jsonTimeout = null;
 		// if (!res.ok) showErrorToast("json/si");
 		if (!res.ok) {
@@ -2524,9 +2539,9 @@ function requestJson(command=null)
 		if (json.success) return;
 		if (json.info) {
 			let i = json.info;
-			console.log("parseInfo");
+			// console.log("parseInfo");
 			parseInfo(i);
-			console.log("populatePalettes");
+			// console.log("populatePalettes");
 			populatePalettes(i);
 			if (isInfo) populateInfo(i);
 			if (simplifiedUI) simplifyUI();
@@ -2567,17 +2582,46 @@ function togglePower()
 	requestJson(obj);
 }
 
-function toggleNl()
+function toggleStandby()
 {
-	nlA = !nlA;
-	if (nlA)
-	{
-		showToast(`Timer active. Your light will turn ${nlTar > 0 ? "on":"off"} ${nlMode ? "over":"after"} ${nlDur} minutes.`);
-	} else {
-		showToast('Timer deactivated.');
-	}
-	var obj = {"nl": {"on": nlA}};
-	requestJson(obj);
+	if (isInfo) toggleInfo();
+	if (isNodes) toggleNodes();
+	if (isLv && isM) toggleLiveview();
+
+	isStandby = !isStandby;
+
+	gId('standby').style.transform = isStandby ? "translateY(0px)" : "translateY(100%)";
+	gId('buttonStandby').className = isStandby ? "active" : "";
+}
+function standbySend(o)
+{
+	requestJson({Standby:o});
+}
+
+function standbyArm(v)
+{
+	standbySend({Arm:v});
+}
+
+function standbySleep()
+{
+	standbySend({Sleep:1});
+}
+
+function standbyWake()
+{
+	standbySend({Wake:1});
+}
+
+function standbyApplyConfig()
+{
+	standbySend({
+		Target:parseInt(gId('standbyTarget').value),
+		AwakeSecs:parseInt(gId('standbyAwakeSecs').value),
+		StandbySecs:parseInt(gId('standbyStandbySecs').value),
+		WakeTransitionSecs:parseInt(gId('standbyWakeTransitionSecs').value),
+		SleepTransitionSecs:parseInt(gId('standbySleepTransitionSecs').value)
+	});
 }
 
 function toggleSync()
@@ -2617,6 +2661,7 @@ function toggleInfo()
 {
 	if (isNodes) toggleNodes();
 	if (isLv && isM) toggleLiveview();
+	if (isStandby) toggleStandby();
 	isInfo = !isInfo;
 	if (isInfo) requestJson();
 	gId('info').style.transform = (isInfo) ? "translateY(0px)":"translateY(100%)";
@@ -2625,6 +2670,7 @@ function toggleInfo()
 
 function toggleNodes()
 {
+	if (isStandby) toggleStandby();
 	if (isInfo) toggleInfo();
 	if (isLv && isM) toggleLiveview();
 	isNodes = !isNodes;
@@ -2877,158 +2923,8 @@ function makePUtil()
 	});
 	gId('psFind').classList.remove('staytop');
 
-	ensureStandbyCard();   // <— add me here
 }
 
-/****
- * SECTION START: Standby utility
- */
-
-// ---------- Standby card (after "+ Preset") ----------
-function standbyCardHTML(collapsed=true) {
-  return `
-  <div class="pres" id="stbyCard">
-    <div class="presin ${collapsed ? "" : "expanded"}" id="stbyInner">
-      <div class="h" style="display:flex;align-items:center;gap:.5rem;">
-        <button class="btn btn-s" onclick="toggleStandbyCard()" style="display:flex;align-items:center;gap:.5rem;">
-          <i class="icons btn-icon">&#xe18a;</i>
-          <span>Standby</span>
-          <i id="stbyCaret" class="icons sel" style="margin-left:.25rem;">&#xe5cf;</i>
-        </button>
-        <span id="stbyMeta" class="lbl-l" style="opacity:.8;"></span>
-      </div>
-
-      <div class="c">
-        Transition override (ms)
-        <input id="stbyFadeMs" class="segn" type="number" min="0" value="0" style="width:120px;">
-      </div>
-
-      <div class="c">
-        <button class="btn btn-p" onclick="stbyStart()"><i class="icons btn-icon">&#xe038;</i>Start</button>
-        <button class="btn btn-p" onclick="stbyStop()"><i class="icons btn-icon">&#xe03b;</i>Stop</button>
-      </div>
-
-      <div class="c">
-        <button class="btn btn-p" onclick="stbySnapshot()"><i class="icons btn-icon">&#xe41a;</i>Snapshot state</button>
-        <button class="btn btn-p" onclick="stbyRestore()"><i class="icons btn-icon">&#xe41b;</i>Restore state</button>
-      </div>
-
-      <div class="hrz"></div>
-
-      <div class="c">
-        <button class="btn btn-p" onclick="stbyCaptureCurrent()"><i class="icons btn-icon">&#xe39f;</i>Use current as Standby</button>
-        <span class="lbl-l">or from preset:</span>
-        <div class="sel-p">
-          <select id="stbyFromPresetSel">${makePlSel(0,true)}</select>
-        </div>
-        <button class="btn btn-p" onclick="stbyCopyFromPreset()"><i class="icons btn-icon">&#xe8d1;</i>Copy</button>
-      </div>
-
-      <div class="hrz"></div>
-
-      <div class="c">Standby JSON</div>
-      <textarea id="stbyJson" class="apitxt" style="min-height:140px"></textarea>
-      <div class="c">
-        <button class="btn btn-p" onclick="stbyLoadJson()"><i class="icons btn-icon">&#xe2c4;</i>Load</button>
-        <button class="btn btn-p" onclick="stbyApplyJson()"><i class="icons btn-icon">&#xe161;</i>Apply & Save</button>
-        <button class="btn btn-s" onclick="stbyReloadTemplate()"><i class="icons btn-icon">&#xe86a;</i>Reload compiled template</button>
-      </div>
-
-      <div class="idn">Standby</div>
-    </div>
-  </div>`;
-}
-
-function ensureStandbyCard() {
-  if (gId('stbyCard')) return;
-  const util = gId('putil');
-  const host = util ? util : gId('pcont');     // fallback
-  if (!host) return;
-
-  const html = standbyCardHTML(true);
-  if (util) util.insertAdjacentHTML('afterend', html);
-  else host.insertAdjacentHTML('beforeend', html);
-}
-
-
-function toggleStandbyCard() {
-  const inner = gId('stbyInner');
-  const card  = gId('stbyCard');
-  if (!inner || !card) return;
-
-  inner.classList.toggle('expanded');
-  const open = inner.classList.contains('expanded');
-  card.classList.toggle('full', open);   // <— add this line
-
-  if (open) stbyLoadJson();
-}
-
-
-// ---------- Standby actions ----------
-function stbyStart() {
-  const fade = parseInt(gId('stbyFadeMs').value)||0;
-  const obj  = fade>0
-    ? {"Debug":{"StandbyStart":{"fadeMs":fade,"callMode":5}}}
-    : {"Debug":{"StandbyStart":true}};
-  requestJson(obj);
-}
-
-function stbyStop() {
-  const fade = parseInt(gId('stbyFadeMs').value)||0;
-  const obj  = fade>0
-    ? {"Debug":{"StandbyStop":{"fadeMs":fade,"callMode":5}}}
-    : {"Debug":{"StandbyStop":true}};
-  requestJson(obj);
-}
-
-function stbySnapshot() { requestJson({"Debug":{"SaveState":true}}); }
-function stbyRestore()  { requestJson({"Debug":{"LoadState":true}}); }
-
-function stbyCaptureCurrent() {
-  if (!window._lastStateJSON) { showToast("No live state captured yet.", true); return; }
-  requestJson({"Debug":{"StandbySetProfile":{"json": window._lastStateJSON}}});
-  showToast("Standby profile set from current state");
-}
-
-function stbyCopyFromPreset() {
-  const sel = gId('stbyFromPresetSel'); if (!sel) return;
-  const pid = parseInt(sel.value)||0;
-  const raw = papiVal(pid);
-  if (!raw) { showToast("Preset has no JSON payload.", true); return; }
-  requestJson({"Debug":{"StandbySetProfile":{"json": raw}}});
-  showToast(`Standby profile copied from preset ${pid}`);
-}
-
-function stbyLoadJson() {
-  fetch(getURL('/lgt_standby.json'))
-    .then(r=>r.text())
-    .then(txt=>{
-      const ta = gId('stbyJson'); if (ta) ta.value = txt;
-      // lite meta
-      try { const j = JSON.parse(txt);
-        gId('stbyMeta').textContent = `template_id: ${('template_id' in j)? j.template_id : '—'} • ${txt.length} bytes`;
-      } catch { gId('stbyMeta').textContent = `Invalid JSON • ${txt.length} bytes`; }
-    })
-    .catch(e=>showToast(e,true));
-}
-
-function stbyApplyJson() {
-  const ta = gId('stbyJson'); if (!ta) return;
-  try {
-    const v = JSON.parse(ta.value);
-    requestJson({"Debug":{"StandbySetProfile":{"json": JSON.stringify(v)}}});
-    showToast("Standby profile saved.");
-  } catch {
-    showToast("JSON invalid. Fix it and try again.", true);
-  }
-}
-
-function stbyReloadTemplate() {
-  requestJson({"Debug":{"StandbyReloadTemplate":{"persist":true}}});
-}
-
-
-/////// SECTION END: Standby utility
 
 
 
@@ -3097,18 +2993,6 @@ function resetPUtil() {
   p.innerHTML =
     `<button class="btn btn-s" onclick="makePUtil()" style="float:left;"><i class="icons btn-icon">&#xe18a;</i>Preset</button>` +
     `<button class="btn btn-s" onclick="makePlUtil()" style="float:right;"><i class="icons btn-icon">&#xe18a;</i>Playlist</button>`;
-  ensureStandbyCard(); // renders the full-width Standby panel right below
-}
-
-
-// STANDBY utility
-function makeStbyUtil() {
-  ensureStandbyCard();
-  const inner = gId('stbyInner');
-  if (!inner) return;
-  const open = !inner.classList.contains('expanded');
-  if (open) { inner.classList.add('expanded'); stbyLoadJson(); }
-  gId('stbyCard').scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
 
@@ -4011,7 +3895,7 @@ function palFetchStatus(text) {
 // }
 function getPalettesData(page, callback)
 {
-  console.log("DB:Loading palettes data, page " + page);
+//   console.log("DB:Loading palettes data, page " + page);
   if (page === 0) { _palFetchMax = 0; palFetchStatus('Fetching palettes…'); }
 
   fetch(getURL(`/json/palx?page=${page}`), { method: 'get' })
@@ -4395,20 +4279,18 @@ function size()
 
 function togglePcMode(fromB = false)
 {
-	let ap = (fromB && !lastinfo) || (lastinfo && lastinfo.wifi && lastinfo.wifi.ap);
 	if (fromB) {
 		pcModeA = !pcModeA;
 		localStorage.setItem('pcm', pcModeA);
 	}
 	pcMode = (wW >= 1024) && pcModeA;
-	if (cpick) cpick.resize(pcMode && wW>1023 && wW<1250 ? 230 : 260); // for tablet in landscape
-	if (!fromB && ((wW < 1024 && lastw < 1024) || (wW >= 1024 && lastw >= 1024))) return; // no change in size and called from size()
+	if (cpick) cpick.resize(pcMode && wW>1023 && wW<1250 ? 230 : 260);
+	if (!fromB && ((wW < 1024 && lastw < 1024) || (wW >= 1024 && lastw >= 1024))) return;
 	if (pcMode) openTab(0, true);
-	gId('buttonPcm').className = (pcMode) ? "active":"";
-	if (pcMode && !ap) gId('edit').classList.remove("hide"); else gId('edit').classList.add("hide");
+	gId('buttonPcm').className = pcMode ? "active":"";
 	gId('bot').style.height = (pcMode && !cfg.comp.pcmbot) ? "0":"auto";
 	sCol('--bh', gId('bot').clientHeight + "px");
-	_C.style.width = (pcMode || simplifiedUI)?'100%':'400%';
+	_C.style.width = (pcMode || simplifiedUI) ? '100%':'400%';
 }
 
 
@@ -4566,7 +4448,7 @@ function simplifyUI() {
 	gId("modeLabel").style.display = "none";
 
 	// Hide buttons in top bar
-	gId("buttonNl").style.display = "none";
+	
 	gId("buttonSync").style.display = "none";
 	gId("buttonSr").style.display = "none";
 	gId("buttonPcm").style.display = "none";

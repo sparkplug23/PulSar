@@ -80,27 +80,33 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-
-    /************
-     * MQTT SECTION
-     *******************/
-    #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
-    break;
-
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
-    break;
-
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
-    break;
-
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
-    break;
-    #endif
+     /************
+     * TELEMETRY SECTION * 
+    *******************/
+    // case TASK_TELEMETRY_HANDLERS_INIT:
+    //   Telemetry_Init();
+    // break;
+    // case TASK_TELEMETRY_REFRESH_SEND_ALL:
+    //   tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    // break;
+    // case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+    //   tkr_tele->Telemetry_Rate(telemetry_list);
+    // break;
+    // #ifdef USE_MODULE_NETWORK_MQTT
+    // case TASK_TELEMETRY__SENDER_MQTT:
+    //   //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
+    // break;
+    // #endif
+    // #ifdef USE_MODULE_SERIAL
+    // case TASK_SERIAL_TELEMETRY:
+    //   tkr_serial->Telemetry_Sender(telemetry_list, *this);
+    // break;
+    // #endif
+    // #ifdef USE_MODULE_NETWORK_WEBSERVER
+    // case TASK_WEB_TELEMETRY:
+    //   tkr_web->Telemetry_Sender(telemetry_list, *this);
+    // break;
+    // #endif
   }
 
   return TASKER_RESULT__UNKNOWN_ID;
@@ -886,16 +892,16 @@ void mFileSystem::Handle_FileChanges_WebUIEdits()
   String changedFile;
 
   // Check if any file changes have occurred (clears the flag if true)
-  if (!SPIFFSEditor::Check_AnyFilesEdited()) {
+  if (!FileEditor::Check_AnyFilesEdited()) {
     ALOG_DBG(PSTR("No file change detected.")); //debug for now
     return;
   }
 
-  ALOG_DBG(PSTR("File change detected: %s"), SPIFFSEditor::Get_LastEditedFileName().c_str());
+  ALOG_DBG(PSTR("File change detected: %s"), FileEditor::Get_LastEditedFileName().c_str());
 
   tkr->Tasker_Interface(TASK_FILESYSTEM__HANDLE_FILE_CHANGES_FROM_EDIT_URL__ID);
 
-  SPIFFSEditor::Check_ClearFilesEditFlag();
+  FileEditor::Check_ClearFilesEditFlag();
   
   return;
 }
@@ -1158,20 +1164,20 @@ uint8_t mFileSystem::ConstructJSON_Settings(uint8_t json_level, bool json_append
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mFileSystem::MQTTHandler_Init(){
+void mFileSystem::Telemetry_Init(){
 
-  struct handler<mFileSystem>* ptr;
+  struct telemetry_handler<mFileSystem>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 600;//tkr_mqtt->dt.configperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mFileSystem::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 } 
 
 #endif // USE_MODULE_NETWORK_MQTT

@@ -383,60 +383,60 @@ class mMAVLink_Decoder :
 
 
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    std::vector<struct handler<mMAVLink_Decoder>*> mqtthandler_list;
+    std::vector<struct telemetry_handler<mMAVLink_Decoder>*> telemetry_list;
 
-    struct handler<mMAVLink_Decoder> mqtthandler_settings;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_settings;
 
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__ahrs;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__ahrs2;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__attitude;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__autopilot_version;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__battery_status;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__ekf_status_report;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__fence_status;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__gimbal_report;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__gimbal_torque_cmd_report;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__global_position_int;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__gopro_heartbeat;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__gps_raw_int;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__heartbeat;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__home_position;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__hwstatus;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__local_position_ned;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__meminfo;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__mission_current;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__mount_status;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__nav_controller_output;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__param_value;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__power_status;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__raw_imu;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__rc_channels;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__rc_channels_raw;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__rc_channels_scaled;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__request_data_stream;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__scaled_imu2;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__scaled_imu3;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__scaled_pressure;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__scaled_pressure2;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__sensor_offsets;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__servo_output_raw;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__statustext;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__sys_status;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__system_time;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__timesync;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__terrain_report;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__vfr_hud;
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__vibration;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__ahrs;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__ahrs2;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__attitude;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__autopilot_version;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__battery_status;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__ekf_status_report;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__fence_status;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__gimbal_report;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__gimbal_torque_cmd_report;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__global_position_int;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__gopro_heartbeat;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__gps_raw_int;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__heartbeat;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__home_position;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__hwstatus;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__local_position_ned;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__meminfo;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__mission_current;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__mount_status;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__nav_controller_output;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__param_value;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__power_status;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__raw_imu;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__rc_channels;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__rc_channels_raw;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__rc_channels_scaled;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__request_data_stream;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__scaled_imu2;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__scaled_imu3;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__scaled_pressure;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__scaled_pressure2;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__sensor_offsets;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__servo_output_raw;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__statustext;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__sys_status;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__system_time;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__timesync;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__terrain_report;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__vfr_hud;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__vibration;
 
-    struct handler<mMAVLink_Decoder> mqtthandler_mavlink_packet__debug_receive_stats;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_mavlink_packet__debug_receive_stats;
 
-    struct handler<mMAVLink_Decoder> mqtthandler_overview_01;
-    struct handler<mMAVLink_Decoder> mqtthandler_overview_02;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_overview_01;
+    struct telemetry_handler<mMAVLink_Decoder> telemetry_overview_02;
 
     #endif // USE_MODULE_NETWORK_MQTT
 

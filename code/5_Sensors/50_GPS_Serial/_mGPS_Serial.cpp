@@ -41,23 +41,33 @@ int8_t mGPS_Serial::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      // tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
     /************
      * WEBUI SECTION * 
     *******************/   
@@ -364,124 +374,124 @@ void mGPS_Serial::parse_JSONCommand(JsonParserObject obj){
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mGPS_Serial::MQTTHandler_Init(){
+void mGPS_Serial::Telemetry_Init(){
 
-  struct handler<mGPS_Serial>* ptr;
+  struct telemetry_handler<mGPS_Serial>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60;//tkr_mqtt->dt.configperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_gpspacket_debug; //also ifchanged together
+  ptr = &telemetry_gpspacket_debug; //also ifchanged together
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60;//tkr_mqtt->dt.configperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_DEBUG_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_DEBUG_CTR;
   ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_GPSPacket_Debug;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_gpspacket_micro; //also ifchanged together
+  ptr = &telemetry_gpspacket_micro; //also ifchanged together
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60;//tkr_mqtt->dt.configperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MICRO_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MICRO_CTR;
   ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_GPSPacket_Micro;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
 
-ptr = &mqtthandler_gpspacket_all1;
+ptr = &telemetry_gpspacket_all1;
 ptr->tSavedLastSent = 0;
 ptr->flags.PeriodicEnabled = true;
 ptr->flags.SendNow = true;
 ptr->tRateSecs = 1;
 ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 ptr->flags.json_level = JSON_LEVEL_DETAILED;
-ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL1_CTR;
+ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL1_CTR;
 ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_GPSPacket_All1;
-mqtthandler_list.push_back(ptr);
+telemetry_list.push_back(ptr);
 
-ptr = &mqtthandler_gpspacket_all2;
+ptr = &telemetry_gpspacket_all2;
 ptr->tSavedLastSent = 0;
 ptr->flags.PeriodicEnabled = true;
 ptr->flags.SendNow = true;
 ptr->tRateSecs = 10;
 ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 ptr->flags.json_level = JSON_LEVEL_DETAILED;
-ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL2_CTR;
+ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL2_CTR;
 ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_GPSPacket_All2;
-mqtthandler_list.push_back(ptr);
+telemetry_list.push_back(ptr);
 
-ptr = &mqtthandler_gpspacket_all3;
+ptr = &telemetry_gpspacket_all3;
 ptr->tSavedLastSent = 0;
 ptr->flags.PeriodicEnabled = true;
 ptr->flags.SendNow = true;
 ptr->tRateSecs = 10;
 ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 ptr->flags.json_level = JSON_LEVEL_DETAILED;
-ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL3_CTR;
+ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL3_CTR;
 ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_GPSPacket_All3;
-mqtthandler_list.push_back(ptr);
+telemetry_list.push_back(ptr);
 
-ptr = &mqtthandler_gpspacket_all4;
+ptr = &telemetry_gpspacket_all4;
 ptr->tSavedLastSent = 0;
 ptr->flags.PeriodicEnabled = true;
 ptr->flags.SendNow = true;
 ptr->tRateSecs = 10;
 ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 ptr->flags.json_level = JSON_LEVEL_DETAILED;
-ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL4_CTR;
+ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL4_CTR;
 ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_GPSPacket_All4;
-mqtthandler_list.push_back(ptr);
+telemetry_list.push_back(ptr);
 
 
-  ptr = &mqtthandler_gpspacket_minimal_teleperiod; //also ifchanged together
+  ptr = &telemetry_gpspacket_minimal_teleperiod; //also ifchanged together
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 10;//tkr_mqtt->dt.configperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MINIMAL_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_MINIMAL_CTR;
   ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_GPSPacket_Minimal;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   // All sensor readings I had on pic32
-  ptr = &mqtthandler_gpspacket_required;
+  ptr = &telemetry_gpspacket_required;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 10;//tkr_mqtt->dt.configperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_REQUIRED_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_REQUIRED_CTR;
   ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_GPSPacket_Required;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   // New from 2026
 
-  ptr = &mqtthandler_nav__pvt;
+  ptr = &telemetry_nav__pvt;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 10;//tkr_mqtt->dt.configperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__NAV_PVT;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__NAV_PVT;
   ptr->ConstructJSON_function = &mGPS_Serial::ConstructJSON_NAV_PVT;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
 }
 

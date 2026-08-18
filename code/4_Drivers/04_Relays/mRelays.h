@@ -186,12 +186,12 @@ class mRelays :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mRelays>*> mqtthandler_list;
-    struct handler<mRelays> mqtthandler_settings;
-    struct handler<mRelays> mqtthandler_state_ifchanged;
-    struct handler<mRelays> mqtthandler_state_teleperiod;
-    struct handler<mRelays> mqtthandler_scheduled_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mRelays>*> telemetry_list;
+    struct telemetry_handler<mRelays> telemetry_settings;
+    struct telemetry_handler<mRelays> telemetry_state_ifchanged;
+    struct telemetry_handler<mRelays> telemetry_state_teleperiod;
+    struct telemetry_handler<mRelays> telemetry_scheduled_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
     
 };

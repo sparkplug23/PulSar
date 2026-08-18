@@ -408,18 +408,18 @@ class JsonBuilder{
     void Add(const char* key, T value)
     {
 
-      if((writer.buffer == nullptr))
-      {
-
-        Serial.println("ERROR: JsonBuilder::Add() buffer nullptr not valid");
-        return;
-      }
-      if((writer.buffer_size == 0))
-      {
-
-        Serial.println("ERROR: JsonBuilder::Add() buffer size zero not valid");
-        return;
-      }
+  if(writer.buffer == nullptr){
+    Serial.println("ERROR: JsonBuilder::Add() buffer nullptr not valid");
+    return;
+  }
+  if(writer.buffer_size == 0){
+    Serial.println("ERROR: JsonBuilder::Add() buffer size zero not valid");
+    return;
+  }
+  if(key == nullptr){
+    Serial.println("ERROR: JsonBuilder::Add() key nullptr");
+    return;
+  }
 
       if(
         (writer.length>1)&&
@@ -447,9 +447,13 @@ class JsonBuilder{
       }else
       if(is_signed_number_type<T>::value){ 
         writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%d",key,value);
+      // }else
+      // if(is_string_type<T>::value){ 
+      //   writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":\"%s\"",key,value);
+      // }else
       }else
-      if(is_string_type<T>::value){ 
-        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":\"%s\"",key,value);
+      if(is_string_type<T>::value){
+        writer.length += snprintf(&writer.buffer[writer.length], writer.remaining(), "\"%s\":\"%s\"", key ? key : "", value);
       }else
       if(is_char_type<T>::value){   
         writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":\"%c\"",key,value);

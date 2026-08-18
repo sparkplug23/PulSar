@@ -587,6 +587,9 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS__CTR)        "debug
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE_VECTOR__CTR)        "debug/palette_vector";
 #endif 
+#ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug/animation_progress";
+#endif 
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "debug/performance";
 #endif 
@@ -604,6 +607,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "de
   #endif
   #include "webpages_generated/html_settings.h"
   #include "webpages_generated/html_other.h"
+  #include "webpages_generated/js_iro.h"
   #ifdef WLED_ENABLE_PIXART
     #include "webpages_generated/html_pixart.h"
   #endif
@@ -1138,79 +1142,164 @@ bool doAdvancePlaylist  = false;
 
 
 
-    /******************************************************************************************************************************************************************************
-    **** Playlists ***************************************************************************************************************************************************************************
-    ******************************************************************************************************************************************************************************/
-    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+    // /******************************************************************************************************************************************************************************
+    // **** Playlists ***************************************************************************************************************************************************************************
+    // ******************************************************************************************************************************************************************************/
+    // #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
 
-    typedef struct PlaylistEntry 
-    {
-      uint8_t preset; //ID of the preset to apply, since they can be any order
-      uint16_t dur;   //Duration of the entry (in tenths of seconds)
-      uint16_t tr;    //Duration of the transition TO this entry (in tenths of seconds)
-    } ple;
+    // typedef struct PlaylistEntry 
+    // {
+    //   uint8_t preset; //ID of the preset to apply, since they can be any order
+    //   uint16_t dur;   //Duration of the entry (in tenths of seconds)
+    //   uint16_t tr;    //Duration of the transition TO this entry (in tenths of seconds)
+    // } ple;
 
 
-    byte           playlistRepeat = 1;        //how many times to repeat the playlist (0 = infinitely)
-    byte           playlistEndPreset = 0;     //what preset to apply after playlist end (0 = stay on last preset)
-    byte           playlistOptions = 0;       //bit 0: shuffle playlist after each iteration. bits 1-7 TBD
+    // byte           playlistRepeat = 1;        //how many times to repeat the playlist (0 = infinitely)
+    // byte           playlistEndPreset = 0;     //what preset to apply after playlist end (0 = stay on last preset)
+    // byte           playlistOptions = 0;       //bit 0: shuffle playlist after each iteration. bits 1-7 TBD
 
-    PlaylistEntry *playlistEntries = nullptr;
-    byte           playlistLen = 0;               //number of playlist entries
-    int8_t         playlistIndex = -1;
-    uint16_t       playlistEntryDur = 0;      //duration of the current entry in tenths of seconds
+    // PlaylistEntry *playlistEntries = nullptr;
+    // byte           playlistLen = 0;               //number of playlist entries
+    // int8_t         playlistIndex = -1;
+    // uint16_t       playlistEntryDur = 0;      //duration of the current entry in tenths of seconds
     
-    int16_t currentPlaylist = -1;
+    // int16_t currentPlaylist = -1;
 
-    uint32_t tSaved_playlist_debug = 0;
-
-
-    void shufflePlaylist();
-    void unloadPlaylist();
-    int16_t loadPlaylist(JsonObject playlistObj, byte presetId);
-    void SubTask_Playlist();
-    void serializePlaylist(JsonObject sObj);
-
-    void ScanPresetsFile_GeneratePlaylistIDsFromPSN_2();
-
-    #ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
-    struct PresetFileMeta {
-      bool     enablePsn;     // 0/1: PSN helper enabled
-      bool     enablePlaylistTimeLocks; // NEW
-      uint8_t  parserVersion; // version of PSN parser logic
-      uint32_t lastScanMs;    // last PSN scan duration (ms)
-    };
-    bool LoadPresetFileMeta(PresetFileMeta &meta);
-    bool SavePresetFileMeta(const PresetFileMeta &meta);
-    bool IsPlaylistTimeLocksEnabled();
-    static const uint8_t kPresetMetaParserVersion = 2;
-    // Date Modified: 13Dec25
-    #ifdef ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
-    // todStart/todEnd in HHMM (e.g. 1400 = 14:00), 0 => no lock.
-    // nowHHMM in HHMM form (hour*100 + minute).
-    static bool playlistEntryAllowedAtTime(int16_t todStart, int16_t todEnd, uint16_t nowHHMM)
-    {
-      // No lock if both are zero
-      if (todStart == 0 && todEnd == 0) return true;
-
-      // Basic range sanity; treat invalid as unlocked
-      if (todStart < 0 || todStart > 2359 || todEnd < 0 || todEnd > 2359) return true;
-
-      // Normal case: window does not wrap midnight
-      if (todStart <= todEnd) {
-        return (nowHHMM >= todStart && nowHHMM < todEnd);
-      }
-
-      // Wraps midnight: e.g. 2200 -> 0200
-      return (nowHHMM >= todStart || nowHHMM < todEnd);
-    }
-    uint8_t Playlist_SelectAllowedIndexByTime(JsonObject playlist, uint8_t currentIndex, uint16_t nowHHMM);
-    #endif
-
-    #endif
+    // uint32_t tSaved_playlist_debug = 0;
 
 
-    #endif // ENABLE_FEATURE_LIGHTS__PLAYLISTS
+    // void shufflePlaylist();
+    // void unloadPlaylist();
+    // int16_t loadPlaylist(JsonObject playlistObj, byte presetId);
+    // void SubTask_Playlist();
+    // void serializePlaylist(JsonObject sObj);
+
+    // void ScanPresetsFile_GeneratePlaylistIDsFromPSN_2();
+
+    // #ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+    // struct PresetFileMeta {
+    //   bool     enablePsn;     // 0/1: PSN helper enabled
+    //   bool     enablePlaylistTimeLocks; // NEW
+    //   uint8_t  parserVersion; // version of PSN parser logic
+    //   uint32_t lastScanMs;    // last PSN scan duration (ms)
+    // };
+    // bool LoadPresetFileMeta(PresetFileMeta &meta);
+    // bool SavePresetFileMeta(const PresetFileMeta &meta);
+    // bool IsPlaylistTimeLocksEnabled();
+    // static const uint8_t kPresetMetaParserVersion = 2;
+    // // Date Modified: 13Dec25
+    // #ifdef ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
+    // // todStart/todEnd in HHMM (e.g. 1400 = 14:00), 0 => no lock.
+    // // nowHHMM in HHMM form (hour*100 + minute).
+    // static bool playlistEntryAllowedAtTime(int16_t todStart, int16_t todEnd, uint16_t nowHHMM)
+    // {
+    //   // No lock if both are zero
+    //   if (todStart == 0 && todEnd == 0) return true;
+
+    //   // Basic range sanity; treat invalid as unlocked
+    //   if (todStart < 0 || todStart > 2359 || todEnd < 0 || todEnd > 2359) return true;
+
+    //   // Normal case: window does not wrap midnight
+    //   if (todStart <= todEnd) {
+    //     return (nowHHMM >= todStart && nowHHMM < todEnd);
+    //   }
+
+    //   // Wraps midnight: e.g. 2200 -> 0200
+    //   return (nowHHMM >= todStart || nowHHMM < todEnd);
+    // }
+    // uint8_t Playlist_SelectAllowedIndexByTime(JsonObject playlist, uint8_t currentIndex, uint16_t nowHHMM);
+    // #endif
+
+    // #endif
+
+
+    // #endif // ENABLE_FEATURE_LIGHTS__PLAYLISTS
+
+    /******************************************************************************************************************************************************************************
+**** Playlists ***************************************************************************************************************************************************************************
+******************************************************************************************************************************************************************************/
+#ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+
+typedef struct PlaylistEntry
+{
+  uint8_t preset;
+
+  // Existing WLED playlist timing units:
+  // 100 = 10 seconds because runtime multiplies by 100 ms.
+  uint32_t dur;
+
+  // Transition TO this entry.
+  // Kept as uint32_t for future long transitions.
+  uint32_t tr;
+
+  #ifdef ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
+  bool time_window_enabled;
+  uint16_t time_start_minute;
+  uint16_t time_end_minute;
+  #endif
+
+} ple;
+
+
+byte playlistRepeat = 1;
+byte playlistEndPreset = 0;
+byte playlistDefaultPreset = 0;
+byte playlistOptions = 0;
+
+PlaylistEntry *playlistEntries = nullptr;
+
+byte playlistLen = 0;
+int8_t playlistIndex = -1;
+
+uint32_t playlistEntryDur = 0;
+
+int16_t currentPlaylist = -1;
+
+bool playlistFallbackActive = false;
+
+uint32_t tSaved_playlist_debug = 0;
+
+
+void shufflePlaylist();
+void unloadPlaylist();
+int16_t loadPlaylist(JsonObject playlistObj, byte presetId);
+void SubTask_Playlist();
+void serializePlaylist(JsonObject sObj);
+
+void ScanPresetsFile_GeneratePlaylistIDsFromPSN_2();
+
+
+#ifdef ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
+
+static bool Playlist_ParseTime(const char* value, uint16_t& minute);
+static void Playlist_MinuteToString(uint16_t minute, char* buffer);
+static bool Playlist_TimeAllowed(uint16_t startMinute, uint16_t endMinute, uint16_t nowMinute);
+
+int16_t Playlist_SelectAllowedIndexByTime(uint8_t startIndex, uint16_t nowMinute);
+
+#endif // ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
+
+
+#ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+
+struct PresetFileMeta
+{
+  bool enablePsn;
+  uint8_t parserVersion;
+  uint32_t lastScanMs;
+};
+
+bool LoadPresetFileMeta(PresetFileMeta &meta);
+bool SavePresetFileMeta(const PresetFileMeta &meta);
+
+static const uint8_t kPresetMetaParserVersion = 2;
+
+#endif // ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+
+#endif // ENABLE_FEATURE_LIGHTS__PLAYLISTS
+
+
 
     void Handle_FileSave_Edits();
 
@@ -3512,7 +3601,7 @@ class Segment
     
 
     // Effects (Scenes & Flasher), Ambilight, Adalight    
-    uint16_t animation_mode_id = 0; // rename to "effect_id"
+    uint8_t animation_mode_id = 0; // rename to "effect_id"
 
     
     // removing, as name is ambiguous now without neopixel animator
@@ -5599,6 +5688,9 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
     #include "3_Network/21_WebServer/ArduinoJson-v6.h"
 
 void serializeNetworks(JsonObject root);
+void serializeNodes(JsonObject root);
+void serializePins(JsonObject root);
+void serializeConfig(JsonObject root);
     
 void toggleOnOff();
 
@@ -5652,6 +5744,7 @@ void serializeModeData(JsonArray root);
 void serializePalettes(JsonObject root, int page);
 
 
+void respondModeData(AsyncWebServerRequest* request);
 
     
 //Notifier callMode
@@ -5720,14 +5813,15 @@ bool deserializeState(JsonObject root, byte callMode = CALL_MODE_DIRECT_CHANGE, 
 bool isIp(String str);
 
 
-#define JSON_PATH_STATE      1
-#define JSON_PATH_INFO       2
-#define JSON_PATH_STATE_INFO 3
-#define JSON_PATH_NODES      4
-#define JSON_PATH_PALETTES   5
-#define JSON_PATH_FXDATA     6
-#define JSON_PATH_NETWORKS   7
-#define JSON_PATH_EFFECTS    8
+// #define JSON_PATH_STATE      1
+// #define JSON_PATH_INFO       2
+// #define JSON_PATH_STATE_INFO 3
+// #define JSON_PATH_NODES      4
+// #define JSON_PATH_PALETTES   5
+// #define JSON_PATH_FXDATA     6
+// #define JSON_PATH_NETWORKS   7
+// #define JSON_PATH_EFFECTS    8
+// #define JSON_PATH_PINS       9
 
 
 bool doReboot = false;
@@ -5923,7 +6017,7 @@ bool fadeTransition      _INIT(true);   // enable crossfading color transition
 byte briMultiplier _INIT(100);          // % of brightness to set (to limit power, if you set it to 50 and set bri to 255, actual brightness will be 127)
 
 // // Sync CONFIG
-// NodesMap Nodes;
+NodesMap Nodes;
 bool nodeListEnabled _INIT(true);
 bool nodeBroadcastEnabled _INIT(true);
 
@@ -6146,172 +6240,71 @@ uint16_t tpmPayloadFrameSize _INIT(0);
 bool useMainSegmentOnly _INIT(false);
 
 
+#ifdef ENABLE_FEATURE_LIGHTING__STANDBY_MODE
 
-// #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+#include "Decounter.h"
 
-// // ---------- Standby meta ----------
-// enum class STBY_SRC : uint8_t { Unknown=0, Template, Uploaded, Current, FS };
+struct STANDBY
+{
+  // ---------------------------------------------------------
+  // Persistent configuration - /standby.json
+  // ---------------------------------------------------------
+  bool armed = false;
+  uint8_t target_id = 0;
 
-// struct STANDBY {
-//   // runtime status
-//   bool     active        = false;
-//   bool     haveResumeRAM = false;
-//   uint8_t  callModeLast  = CALL_MODE_NO_NOTIFY;
+  uint32_t awake_secs = 0;
+  uint32_t standby_secs = 0;
 
-//   // fades
-//   uint16_t fade_in_ms    = 600;
-//   uint16_t fade_out_ms   = 600;
+  uint16_t wake_transition_secs = 1;
+  uint16_t sleep_transition_secs = 30;
 
-//   // inactivity timeout (optional)
-//   uint32_t timeout_ms    = 0;
-//   uint32_t deadline_ms   = 0;
+  // ---------------------------------------------------------
+  // Runtime only - NEVER written to /standby.json
+  // ---------------------------------------------------------
+  bool active = false;
 
-//   // profile + snapshot blobs
-//   char*    profileRAM    = nullptr;
-//   size_t   profileLen    = 0;
-//   char*    resumeRAM     = nullptr;
-//   size_t   resumeLen     = 0;
+  char* resumeRAM = nullptr;
+  size_t resumeLen = 0;
 
-//   // provenance
-//   STBY_SRC last_src      = STBY_SRC::Unknown;
-//   int      last_ver      = -1;
-
-//   // delayed-start scheduling
-//   bool     delayedStartPending = false;
-//   uint32_t delayedStartAtMs    = 0;
-//   uint8_t  delayedStartCallMode= CALL_MODE_NO_NOTIFY;
-// };
-
-// public:
-//   // ---------- Standby state ----------
-//   STANDBY standby;
-
-//   // ---------- Profile management ----------
-//   bool Standby_Init();  // load/gate profile, enforce template version if compiled
-//   bool Standby_ReloadTemplate(bool persist = true);
-//   bool Standby_SetProfileFromJson(const char* json,
-//                                   STBY_SRC src = STBY_SRC::Uploaded);
-//   bool Standby_SaveProfileToFS();
-
-//   // ---------- Start/Stop ----------
-//   bool Standby_Start(uint16_t fadeMs = 0, uint8_t callMode = CALL_MODE_NO_NOTIFY);
-//   bool Standby_Stop (uint16_t fadeMs = 0, uint8_t callMode = CALL_MODE_NO_NOTIFY);
-//   inline bool Standby_IsActive() const { return standby.active; }
-
-//   // ---------- Timeout / activity hooks ----------
-//   void Standby_OnActivity();  // resets deadline based on timeout_ms
-//   void EverySecond_Standby();        // call each loop to handle timeout & delayed start
-
-//   // ---------- Delayed start API ----------
-//   bool Standby_ScheduleStart(uint32_t delay_ms,
-//                              uint8_t callMode = CALL_MODE_NO_NOTIFY);
-//   void Standby_CancelScheduledStart();
-
-//   // ---------- Snapshot & validation ----------
-//   bool FileSave__State(bool includeBounds = true, bool includeBri = true,
-//                        bool selectedOnly = false, bool fullGlobals = false);
-//   bool FileLoad__State(uint8_t callMode = CALL_MODE_NO_NOTIFY);
-//   bool ValidateJSON(const char* json_str);
-
-// private:
-//   // ---------- Helpers ----------
-//   bool Standby_CaptureResumeToRAM();
-//   bool Standby_JsonCommand_Run(const char* json, size_t len, uint8_t callMode);
-
-//   // ---------- FS paths ----------
-//   static const char kStandbyProfilePath[]  PROGMEM; // "/lgt_standby.json"
-//   static const char kStateSnapshotPath[]   PROGMEM; // "/lgt_state.json"
-//   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
-//   static const char kResumeSnapshotPath[] PROGMEM;  // "/lgt_state_resume.json"
-//   #endif
-
-//   // ---------- FS I/O ----------
-//   bool Standby_LoadProfileFromFS();
-//   bool Standby_WriteProfileToFS(const char* json);
-
-//   // ---------- Template loader ----------
-//   bool Load_StandbyTemplate_Into_ProfileRAM(bool injectTemplateId = true);
-
-//   // ---------- Logging ----------
-//   static const char* StbySrcName(STBY_SRC s);
-// #endif
-
-
-#ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
-#include "Decounter.h"   // your header shown earlier
-
-enum class STBY_SRC : uint8_t { Unknown=0, Template, Uploaded, Current, FS };
-
-struct STANDBY {
-  bool     active        = false;
-  bool     haveResumeRAM = false;
-  uint8_t  callModeLast  = CALL_MODE_NO_NOTIFY;
-
-  uint16_t fade_in_ms    = 600;
-  uint16_t fade_out_ms   = 600;
-
-  uint32_t timeout_ms    = 0;     // (unused with Decounter; keep if you want)
-  uint32_t deadline_ms   = 0;     // (unused with Decounter; keep if you want)
-
-  // runtime RAM blobs
-  char*    profileRAM    = nullptr;
-  size_t   profileLen    = 0;
-  char*    resumeRAM     = nullptr;
-  size_t   resumeLen     = 0;
-
-  STBY_SRC last_src      = STBY_SRC::Unknown;
-  int      last_ver      = -1;
-
-  // --- New: single remain-awake countdown ---
-  // When running, and it hits 0, enter Standby.
-  Decounter<uint32_t> tick__awake;     // seconds
-  uint16_t            fade_override_ms = 0;  // optional override on Standby_Stop (Wake)
- 
-  // ctor-like defaults for clarity
-  STANDBY() : active(false), haveResumeRAM(false), callModeLast(CALL_MODE_NO_NOTIFY) {}
+  Decounter<uint32_t> tick__awake;
+  Decounter<uint32_t> tick__standby;
 };
 
-public:
-  STANDBY standby;
+STANDBY standby;
 
-  // profile mgmt
-  bool Standby_Init();
-  bool Standby_ReloadTemplate(bool persist = true);
-  bool Standby_SetProfileFromJson(const char* json, STBY_SRC src = STBY_SRC::Uploaded);
-  bool Standby_SaveProfileToFS();
+bool Standby_Init();
+bool Standby_LoadConfig();
+bool Standby_SaveConfig();
 
-  // start/stop
-  bool Standby_Start(uint16_t fadeMs = 0, uint8_t callMode = CALL_MODE_NO_NOTIFY);
-  bool Standby_Stop (uint16_t fadeMs = 0, uint8_t callMode = CALL_MODE_NO_NOTIFY);
-  inline bool Standby_IsActive() const { return standby.active; }
+bool Standby_SetArm(bool armed);
+bool Standby_SetTarget(uint8_t preset_id);
 
-  // remain-awake control (single timer)
-  inline void Standby_SetRemainAwake(uint32_t secs) { standby.tick__awake.Start(secs); }
-  inline void Standby_CancelRemainAwake()          { standby.tick__awake.Stop(); }
-  void        EverySecond_Standby();  // call this from your 1 Hz task
+bool Standby_Enter(uint8_t callMode = CALL_MODE_NO_NOTIFY);
+bool Standby_Leave(uint8_t callMode = CALL_MODE_NO_NOTIFY);
+bool Standby_Wake(uint8_t callMode = CALL_MODE_NO_NOTIFY);
+bool Standby_Sleep(uint8_t callMode = CALL_MODE_NO_NOTIFY);
 
-  // hooks / helpers
-  void Standby_OnActivity();      // e.g. reset remain-awake on motion, if desired
-  bool Load_StandbyTemplate_Into_ProfileRAM(bool injectTemplateId = true);
-  bool FileSave__State(bool includeBounds = true, bool includeBri = true,
-                       bool selectedOnly = false, bool fullGlobals = false);
-  bool FileLoad__State(uint8_t callMode = CALL_MODE_NO_NOTIFY);
-  bool ValidateJSON(const char* json_str);
+inline bool Standby_IsActive() const { return standby.active; }
+inline bool Standby_IsArmed() const { return standby.armed; }
 
-private:
-  bool Standby_CaptureResumeToRAM();
-  bool Standby_JsonCommand_Run(const char* json, size_t len, uint8_t callMode);
-  bool Standby_LoadProfileFromFS();
-  bool Standby_WriteProfileToFS(const char* json);
-  static const char* StbySrcName(STBY_SRC s);
+void Standby_SetAwakeDuration(uint32_t seconds);
+void Standby_SetStandbyDuration(uint32_t seconds);
+void Standby_SetWakeTransition(uint16_t seconds);
+void Standby_SetSleepTransition(uint16_t seconds);
 
-  static const char kStandbyProfilePath[]  PROGMEM;
-  static const char kStateSnapshotPath[]   PROGMEM;
-  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
-  static const char kResumeSnapshotPath[] PROGMEM;
-  #endif
+void Standby_StartAwakeTimer();
+void Standby_StartStandbyTimer();
+void Standby_CancelTimers();
+
+bool Standby_CaptureResumeToRAM();
+bool Standby_RestoreResumeFromRAM(uint8_t callMode = CALL_MODE_NO_NOTIFY);
+void Standby_ClearResumeRAM();
+
+void Standby_ApplyTransition(uint16_t seconds);
+
+void EverySecond_Standby();
+
 #endif
-
 
 // static PRNG prng = PRNG();//();//hw_random()); // pseudo-random number generator class, seed = hardware random number
 
@@ -6356,54 +6349,62 @@ private:
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
     uint8_t ConstructJSON_Debug_Performance(uint8_t json_level = 0, bool json_appending = true);
     #endif 
+    #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+      uint8_t ConstructJSON_Debug_Animations_Progress(uint8_t json_level = 0, bool json_appending = true);  
+      ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
+      mAnimatorLight& setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE);  
+    #endif
 
     /************************************************************************************************
      * SECTION: MQTT
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT
-      void MQTTHandler_Init();
+      void Telemetry_Init();
       
-      std::vector<struct handler<mAnimatorLight>*> mqtthandler_list;
+      std::vector<struct telemetry_handler<mAnimatorLight>*> telemetry_list;
     
-      struct handler<mAnimatorLight> mqtthandler_settings;    
-      struct handler<mAnimatorLight> mqtthandler_segments_teleperiod;  
-      struct handler<mAnimatorLight> mqtthandler_playlists_teleperiod;
+      struct telemetry_handler<mAnimatorLight> telemetry_settings;    
+      struct telemetry_handler<mAnimatorLight> telemetry_segments_teleperiod;  
+      struct telemetry_handler<mAnimatorLight> telemetry_playlists_teleperiod;
       /**
        * @brief Each mode
        **/
       #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
-      struct handler<mAnimatorLight> mqtthandler_mode_ambilight_teleperiod;
+      struct telemetry_handler<mAnimatorLight> telemetry_mode_ambilight_teleperiod;
       #endif
       #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
-      struct handler<mAnimatorLight> mqtthandler_manual_setpixel;
+      struct telemetry_handler<mAnimatorLight> telemetry_manual_setpixel;
       #endif
       #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-      struct handler<mAnimatorLight> mqtthandler_automation_presets;
+      struct telemetry_handler<mAnimatorLight> telemetry_automation_presets;
       #endif
       #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
-      struct handler<mAnimatorLight> mqtthandler_automation_playlists;
+      struct telemetry_handler<mAnimatorLight> telemetry_automation_playlists;
       #endif
       #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS 
-      struct handler<mAnimatorLight> mqtthandler_matrix_teleperiod;
+      struct telemetry_handler<mAnimatorLight> telemetry_matrix_teleperiod;
       #endif
       /**
        * @brief Debug
        **/
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
-      struct handler<mAnimatorLight> mqtthandler_debug_palette;
+      struct telemetry_handler<mAnimatorLight> telemetry_debug_palette;
       #endif
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_SEGMENTS
-      struct handler<mAnimatorLight> mqtthandler_debug_segments;
+      struct telemetry_handler<mAnimatorLight> telemetry_debug_segments;
       #endif
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
-      struct handler<mAnimatorLight> mqtthandler_debug__custom_mapping_table;
+      struct telemetry_handler<mAnimatorLight> telemetry_debug__custom_mapping_table;
       #endif
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
-      struct handler<mAnimatorLight> mqtthandler_debug_palette_vector;
+      struct telemetry_handler<mAnimatorLight> telemetry_debug_palette_vector;
       #endif
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
-      struct handler<mAnimatorLight> mqtthandler_debug__performance;
+      struct telemetry_handler<mAnimatorLight> telemetry_debug__performance;
+      #endif
+      #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
+      struct telemetry_handler<mAnimatorLight> telemetry_debug_animations_progress;
       #endif
       
     #endif // USE_MODULE_NETWORK_MQTT

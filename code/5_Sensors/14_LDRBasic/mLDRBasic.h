@@ -94,11 +94,11 @@ class mLDRBasic :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mLDRBasic>*> mqtthandler_list;
-    struct handler<mLDRBasic> mqtthandler_settings;
-    struct handler<mLDRBasic> mqtthandler_sensor_ifchanged;
-    struct handler<mLDRBasic> mqtthandler_sensor_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mLDRBasic>*> telemetry_list;
+    struct telemetry_handler<mLDRBasic> telemetry_settings;
+    struct telemetry_handler<mLDRBasic> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mLDRBasic> telemetry_sensor_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

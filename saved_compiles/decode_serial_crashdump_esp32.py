@@ -31,26 +31,46 @@ from typing import Dict, List, Optional, Tuple
 def _SerialCrashDumpBlock() -> str:
     return r"""
                                                         
-                                 
-         
-Guru Meditation Error: Core  1 panic'ed (IllegalInstruction). Exception was unhandled.
-Memory dump at 0x40121060: 30004136 f27c7430 a0ff4c65
+                                           
+Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandle
+d.
+
+                                                                          
+                                                                                
 Core  1 register dump:
-PC      : 0x40121065  PS      : 0x00060230  A0      : 0x8012426d  A1      : 0x3ffb2710  
-A2      : 0x3ffbdc7c  A3      : 0x00000000  A4      : 0x00000001  A5      : 0x00000000  
-A6      : 0x3ffc79ac  A7      : 0x00000f1e  A8      : 0x8012105f  A9      : 0x3ffb26f0  
-A10     : 0x00000f1e  A11     : 0x3ffaf260  A12     : 0x3ffc8af4  A13     : 0x00060223  
-A14     : 0x00060220  A15     : 0x00000001  SAR     : 0x0000000a  EXCCAUSE: 0x00000000  
-EXCVADDR: 0x00000000  LBEG    : 0x4008633d  LEND    : 0x40086345  LCOUNT  : 0x00000027  
+                                                        
+PC      : 0x4008cf21  PS      : 0x00060b30  A0      : 0x801f4534  A1      : 0x3f
+fb21c0  
+                                                                      
+A2      : 0x00000000  A3      : 0xfffffffc  A4      : 0x000000ff  A5      : 0x00
+00ff00  
+                                                                      
+A6      : 0x00ff0000  A7      : 0xff000000  A8      : 0x00000000  A9      : 0x3f
+fc3be8  
+                                                                      
+A10     : 0x3ffc3be2  A11     : 0x3f403c75  A12     : 0x00000006  A13     : 0x3f
+fc7f84  
+                                                                      
+A14     : 0x00040000  A15     : 0x000f4240  SAR     : 0x0000001b  EXCCAUSE: 0x00
+00001c  
+                                                                      
+EXCVADDR: 0x00000000  LBEG    : 0x4008cf21  LEND    : 0x4008cf31  LCOUNT  : 0xff
+ffffff  
+                                                                      
+          
+                                                                    
+            
+                                                                  
+Backtrace:0x4008cf1e:0x3ffb21c00x401f4531:0x3ffb21d0 0x401f1269:0x3ffb24e0 0x400
+df8d1:0x3ffb25a0 0x400f5dc1:0x3ffb25c0 0x400f4875:0x3ffb26c0 0x400f5c22:0x3ffb27
+00 0x400d499f:0x3ffb2720 0x400edbb9:0x3ffb2760 0x400eea36:0x3ffb2780 0x400d499f:
+0x3ffb27a0 0x4013c8e5:0x3ffb27e0 0x4013cbea:0x3ffb2800 0x4015c9d9:0x3ffb2820 
+ 
+                                                                               
 
-
-Backtrace:0x40121062:0x3ffb27100x4012426a:0x3ffb2730 0x40125b7e:0x3ffb2760 0x40125c8a:0x3ffb2780 0x400d4512:0x3ffb27a0 0x40128465:0x3ffb27e0 0x4012876a:0x3ffb2800 0x401454ed:0x3ffb2820 
-
-
-
-
-ELF file SHA256: 0000000000000000                                         
+                                                          
              
+
                                                                  
                
           

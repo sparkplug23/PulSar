@@ -73,21 +73,21 @@ class mImmersionPanel :
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
     
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
 
-    struct handler<mImmersionPanel> mqtthandler_settings;
-    struct handler<mImmersionPanel> mqtthandler_state_ifchanged;
+    struct telemetry_handler<mImmersionPanel> telemetry_settings;
+    struct telemetry_handler<mImmersionPanel> telemetry_state_ifchanged;
 
     //No extra handlers: ie settings and "state" only
     
       
-    struct handler<mImmersionPanel>* mqtthandler_list[2] = {
-      &mqtthandler_settings,
-      &mqtthandler_state_ifchanged
+    struct telemetry_handler<mImmersionPanel>* telemetry_list[2] = {
+      &telemetry_settings,
+      &telemetry_state_ifchanged
     };
 
 

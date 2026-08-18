@@ -182,10 +182,10 @@ class mHBridge :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mHBridge>*> mqtthandler_list;
-    struct handler<mHBridge> mqtthandler_settings;
-    struct handler<mHBridge> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mHBridge>*> telemetry_list;
+    struct telemetry_handler<mHBridge> telemetry_settings;
+    struct telemetry_handler<mHBridge> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

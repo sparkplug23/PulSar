@@ -59,15 +59,15 @@ class mSPI :
      ************************************************************************************************/
     
     // #ifdef USE_MODULE_NETWORK_MQTT
-    // void MQTTHandler_Init();
+    // void Telemetry_Init();
     // void MQTTHandler_RefreshAll();
     // void MQTTHandler_Rate();    
     // void MQTTHandler_Sender();
 
-    // std::vector<struct handler<mSPI>*> mqtthandler_list;    
-    // struct handler<mSPI> mqtthandler_settings;    
-    // struct handler<mSPI> mqtthandler_sensor_ifchanged;
-    // struct handler<mSPI> mqtthandler_sensor_teleperiod;    
+    // std::vector<struct telemetry_handler<mSPI>*> telemetry_list;    
+    // struct telemetry_handler<mSPI> telemetry_settings;    
+    // struct telemetry_handler<mSPI> telemetry_sensor_ifchanged;
+    // struct telemetry_handler<mSPI> telemetry_sensor_teleperiod;    
     // #endif // USE_MODULE_NETWORK_MQTT
 
 };

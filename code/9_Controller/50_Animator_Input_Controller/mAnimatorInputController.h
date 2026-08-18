@@ -60,17 +60,17 @@
 
 //     #ifdef USE_MODULE_NETWORK_MQTT
   
-//     void MQTTHandler_Init();
+//     void Telemetry_Init();
 //     void MQTTHandler_RefreshAll();
 //     void MQTTHandler_Rate();
     
 //     void MQTTHandler_Sender();
 
-//     std::vector<struct handler<mSonoffIFan>*> mqtthandler_list;
+//     std::vector<struct telemetry_handler<mSonoffIFan>*> telemetry_list;
 
-//     struct handler<mSonoffIFan> mqtthandler_settings;
-//     struct handler<mSonoffIFan> mqtthandler_power_ifchanged;
-//     struct handler<mSonoffIFan> mqtthandler_power_teleperiod;
+//     struct telemetry_handler<mSonoffIFan> telemetry_settings;
+//     struct telemetry_handler<mSonoffIFan> telemetry_power_ifchanged;
+//     struct telemetry_handler<mSonoffIFan> telemetry_power_teleperiod;
 
 //     #endif // USE_MODULE_NETWORK_MQTT
 

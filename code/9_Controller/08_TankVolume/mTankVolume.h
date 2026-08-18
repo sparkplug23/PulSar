@@ -438,15 +438,15 @@ float GetOilHeightCMReadingAdjustedFromTemp(int duration);
   
   //#ifdef USE_CORE_MQTT 
 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
-    struct handler<mTankVolume>* ptr;
+    struct telemetry_handler<mTankVolume>* ptr;
     void MQTTHandler_Sender();
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mTankVolume> mqtthandler_settings;
+    struct telemetry_handler<mTankVolume> telemetry_settings;
     
     // Extra module only handlers
     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
@@ -458,19 +458,19 @@ float GetOilHeightCMReadingAdjustedFromTemp(int duration);
     };
 
     // const char* postfix_topic_litres = "litres";
-    struct handler<mTankVolume> mqtthandler_litres_ifchanged;
-    struct handler<mTankVolume> mqtthandler_litres_teleperiod;
+    struct telemetry_handler<mTankVolume> telemetry_litres_ifchanged;
+    struct telemetry_handler<mTankVolume> telemetry_litres_teleperiod;
     // const char* postfix_topic_furnace = "furnace";
-    struct handler<mTankVolume> mqtthandler_furnace_ifchanged;
-    struct handler<mTankVolume> mqtthandler_furnace_teleperiod;
+    struct telemetry_handler<mTankVolume> telemetry_furnace_ifchanged;
+    struct telemetry_handler<mTankVolume> telemetry_furnace_teleperiod;
   //#endif
 
-    struct handler<mTankVolume>* mqtthandler_list[5] = {
-      &mqtthandler_settings,
-      &mqtthandler_litres_ifchanged,
-      &mqtthandler_litres_teleperiod,
-      &mqtthandler_furnace_ifchanged,
-      &mqtthandler_furnace_teleperiod
+    struct telemetry_handler<mTankVolume>* telemetry_list[5] = {
+      &telemetry_settings,
+      &telemetry_litres_ifchanged,
+      &telemetry_litres_teleperiod,
+      &telemetry_furnace_ifchanged,
+      &telemetry_furnace_teleperiod
     };
 
 

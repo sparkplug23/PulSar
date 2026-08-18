@@ -256,10 +256,10 @@ uint8_t ledlnk_inverted = 0;                // Link LED inverted flag (1 = (0 = 
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mIRRemote>*> mqtthandler_list;
-    struct handler<mIRRemote> mqtthandler_settings;
-    struct handler<mIRRemote> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mIRRemote>*> telemetry_list;
+    struct telemetry_handler<mIRRemote> telemetry_settings;
+    struct telemetry_handler<mIRRemote> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
     
 };

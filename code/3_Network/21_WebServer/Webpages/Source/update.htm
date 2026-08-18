@@ -1,29 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta content='width=device-width' name='viewport'>
-	<title>PulSar Update</title>
+	<meta charset="UTF-8">
+	<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
+	<title>PulSar Firmware Update</title>
+
+	<style>html{visibility:hidden}</style>
 	<script>
-		function B() { window.history.back(); }
-		function U() { document.getElementById("uf").style.display="none";document.getElementById("msg").style.display="block"; }
-		function GetV() {/*injected values here*/}
+		(function loadFiles(){
+			const l=document.createElement('script');
+			l.src='/common.js';
+			l.onload=()=>loadResources(['/style.css'],S);
+			l.onerror=()=>setTimeout(loadFiles,100);
+			document.head.appendChild(l);
+		})();
+
+		function S(){getLoc();}
+
+		function U(){
+			gId("uf").style.display="none";
+			gId("msg").style.display="block";
+			return true;
+		}
 	</script>
-	<style>
-		@import url("style.css");
-	</style>
 </head>
 
-<body onload="GetV()">
-	<h2>PulSar Software Update</h2>
-	<form method='POST' action='./update' id='uf' enctype='multipart/form-data' onsubmit="U()">
-		Installed version: <span class="sip">##VERSION##</span><br>
-		Download the latest binary: <a href="https://github.com/Aircoookie/WLED/releases" target="_blank" 
-		style="vertical-align: text-bottom; display: inline-flex;">
-		<img src="https://img.shields.io/github/release/Aircoookie/WLED.svg?style=flat-square"></a><br>
-		<input type='file' name='update' required><br> <!--should have accept='.bin', but it prevents file upload from android app-->
-		<button type="submit">Update!</button><br>
-		<button type="button" onclick="B()">Back</button>
-	</form>
-	<div id="msg"><b>Updating...</b><br>Please do not close or refresh the page :)</div>
+<body>
+<h2>Firmware Update</h2>
+
+<form method="POST" action="/update" id="uf" enctype="multipart/form-data" onsubmit="return U()">
+
+<div class="sec">
+	<h3>Upload Firmware</h3>
+	Select the compiled firmware binary for this device.<br>
+	<input type="file" name="update" accept=".bin,application/octet-stream" required><br>
+	<button type="submit">Upload & Flash</button>
+</div>
+
+<button type="button" onclick="B()">Back</button>
+</form>
+
+<div id="msg" class="sec" style="display:none">
+	<h3>Updating...</h3>
+	Please do not close or refresh this page.<br>
+	The device will restart when the update is complete.
+</div>
+
+<div id="toast"></div>
 </body>
 </html>

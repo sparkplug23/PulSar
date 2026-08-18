@@ -1085,10 +1085,10 @@ tkr_json_template->ModuleDeviceTemplate__LoadDefault();
  ** MQTT: Configure mqtt handlers in modules ************************************************
  ********************************************************************************************/
 
-  tkr->Tasker_Interface(TASK_MQTT_HANDLERS_INIT);  
+  tkr->Tasker_Interface(TASK_TELEMETRY_HANDLERS_INIT);  
 
   #ifndef ENABLE_DEBUGFEATURE_MQTT__DISABLE_SETTING_DYNAMIC_REFRESH_RATES
-  tkr->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
+  tkr->Tasker_Interface(TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD);
   #endif
 
 /********************************************************************************************

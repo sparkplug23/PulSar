@@ -1,6 +1,9 @@
 
 
 #include "_AnimatorLight.h"
+
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
+
 #include "colors.h"
 
 bool gammaCorrectCol = true;
@@ -685,3 +688,6 @@ uint32_t NeoGammaWLEDMethod::inverseGamma32(uint32_t color)
   b = gammaT_inv[b];
   return RGBW32(r, g, b, w);
 }
+
+
+#endif

@@ -176,10 +176,10 @@ class mTOF_VL53L1X :
      ************************************************************************************************/
    
     #ifdef USE_MODULE_NETWORK_MQTT
-        void MQTTHandler_Init();
-        std::vector<struct handler<mTOF_VL53L1X>*> mqtthandler_list;    
-        struct handler<mTOF_VL53L1X> mqtthandler_settings;
-        struct handler<mTOF_VL53L1X> mqtthandler_sensor_ifchanged;
+        void Telemetry_Init();
+        std::vector<struct telemetry_handler<mTOF_VL53L1X>*> telemetry_list;    
+        struct telemetry_handler<mTOF_VL53L1X> telemetry_settings;
+        struct telemetry_handler<mTOF_VL53L1X> telemetry_sensor_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

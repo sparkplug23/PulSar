@@ -33,7 +33,7 @@ void MQTTConnection::MqttConnected(void)
   #ifndef ENABLE_DEVFEATURE__MQTT_STOP_SENDING_EVERYTHING_ON_RECONNECT
   tkr->Tasker_Interface(TASK_MQTT_CONNECTED);
   tkr->Tasker_Interface(TASK_MQTT_SUBSCRIBE);
-  tkr->Tasker_Interface(TASK_MQTT_STATUS_REFRESH_SEND_ALL);
+  tkr->Tasker_Interface(TASK_TELEMETRY_REFRESH_SEND_ALL);
   #endif
 
 }

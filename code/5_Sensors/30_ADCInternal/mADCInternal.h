@@ -309,11 +309,11 @@ void Update_Channel1_ADC_Readings();
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();    
-    std::vector<struct handler<mADCInternal>*> mqtthandler_list;
-    struct handler<mADCInternal> mqtthandler_settings;
-    struct handler<mADCInternal> mqtthandler_sensor_ifchanged;
-    struct handler<mADCInternal> mqtthandler_sensor_teleperiod;    
+    void Telemetry_Init();    
+    std::vector<struct telemetry_handler<mADCInternal>*> telemetry_list;
+    struct telemetry_handler<mADCInternal> telemetry_settings;
+    struct telemetry_handler<mADCInternal> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mADCInternal> telemetry_sensor_teleperiod;    
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

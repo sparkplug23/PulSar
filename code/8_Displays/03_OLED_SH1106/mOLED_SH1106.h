@@ -89,10 +89,10 @@ class mOLED_SH1106 :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mOLED_SH1106>*> mqtthandler_list;
-    struct handler<mOLED_SH1106> mqtthandler_settings;
-    struct handler<mOLED_SH1106> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mOLED_SH1106>*> telemetry_list;
+    struct telemetry_handler<mOLED_SH1106> telemetry_settings;
+    struct telemetry_handler<mOLED_SH1106> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
     

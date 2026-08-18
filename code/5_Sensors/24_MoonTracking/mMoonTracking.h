@@ -158,18 +158,18 @@ class mMoonTracking :
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
   
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    struct handler<mMoonTracking> mqtthandler_settings;
-    struct handler<mMoonTracking> mqtthandler_sensor_ifchanged;
-    struct handler<mMoonTracking> mqtthandler_sensor_teleperiod;
+    struct telemetry_handler<mMoonTracking> telemetry_settings;
+    struct telemetry_handler<mMoonTracking> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mMoonTracking> telemetry_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
     
 
-    std::vector<struct handler<mMoonTracking>*> mqtthandler_list;    
+    std::vector<struct telemetry_handler<mMoonTracking>*> telemetry_list;    
     #endif // USE_MODULE_NETWORK_MQTT 
 
 

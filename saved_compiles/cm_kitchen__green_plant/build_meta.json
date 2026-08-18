@@ -1,7 +1,7 @@
 {
   "env_name": "cm_kitchen__green_plant",
-  "created_utc": "2026-06-30T19:51:55Z",
-  "created_epoch": 1782849115,
+  "created_utc": "2026-08-10T16:01:41Z",
+  "created_epoch": 1786377701,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_kitchen__green_plant",
   "platform": "espressif32",
@@ -17,9 +17,9 @@
     "bootloader.bin"
   ],
   "git": {
-    "branch": "development",
-    "commit": "b5186accef8e50bbda815901ab71a7dcd81b2514",
-    "describe": "b5186acc-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/00_Developing/Firmware__Testbeds.h\n M code/0_ConfigUser/Secret/06_TemplateBuilds_From_INI/TemplateBase__HardwareSpecific.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/05_Pins/mPins.cpp\n M code/2_CoreSystem/11_Languages/mLanguageDefault.h\n M code/2_CoreSystem/13_RuleEngine/mRuleEngine.cpp\n M code/2_CoreSystem/13_RuleEngine/mRuleEngine.h\n M code/2_CoreSystem/Version.h\n M code/2_CoreSystem/Version_md.md\n M code/4_Drivers/04_Relays/mRelays.cpp\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_lgt.ini\n M platformio_meadows.ini\n M platformio_override.ini\n M saved_compiles/cm_bathroom__immersion/build_meta.json\n M saved_compiles/cm_bathroom__immersion/firmware.elf\n M saved_compiles/cm_hallway__bluevase_light/build_meta.json\n M saved_compiles/cm_hallway__bluevase_light/firmware.elf\n M saved_compiles/cm_hallway__heating/build_meta.json\n M saved_compiles/cm_hallway__heating/firmware.elf\n M saved_compiles/cm_kitchen__glass_box/build_meta.json\n M saved_compiles/cm_kitchen__glass_box/firmware.elf\n M saved_compiles/cm_kitchen__room_sensor/build_meta.json\n M saved_compiles/cm_kitchen__room_sensor/firmware.elf\n M saved_compiles/testbed_05__switch_button/build_meta.json\n M saved_compiles/testbed_05__switch_button/firmware.elf\n?? saved_compiles/cm_kitchen__green_plant/"
+    "branch": "dev_particle_lights",
+    "commit": "fb7f2ab95cd10829b64ae53bf9696363b3f8f7ea",
+    "describe": "fb7f2ab9-dirty",
+    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/5_Sensors/16_Moisture/mMoistureSensor.cpp\n M code/6_Lights/03_Animator/colors.cpp\n M code/6_Lights/03_Animator/util.cpp\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n M saved_compiles/cm_kitchen__green_plant/build_meta.json\n M saved_compiles/cm_kitchen__green_plant/firmware.elf"
   }
 }

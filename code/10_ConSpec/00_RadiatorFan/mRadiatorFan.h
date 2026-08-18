@@ -43,23 +43,23 @@ class mRadiatorFan :
   
     #ifdef USE_MODULE_NETWORK_MQTT
 
-      void MQTTHandler_Init();
+      void Telemetry_Init();
       void MQTTHandler_RefreshAll();
       void MQTTHandler_Rate();
       
       void MQTTHandler_Sender();
 
-      struct handler<mRadiatorFan> mqtthandler_settings;
-      struct handler<mRadiatorFan> mqtthandler_state_ifchanged;
-      struct handler<mRadiatorFan> mqtthandler_state_teleperiod;
+      struct telemetry_handler<mRadiatorFan> telemetry_settings;
+      struct telemetry_handler<mRadiatorFan> telemetry_state_ifchanged;
+      struct telemetry_handler<mRadiatorFan> telemetry_state_teleperiod;
 
       // No specialised payload therefore use system default instead of enum
       
       
-      struct handler<mRadiatorFan>* mqtthandler_list[3] = {
-        &mqtthandler_settings,
-        &mqtthandler_state_ifchanged,
-        &mqtthandler_state_teleperiod
+      struct telemetry_handler<mRadiatorFan>* telemetry_list[3] = {
+        &telemetry_settings,
+        &telemetry_state_ifchanged,
+        &telemetry_state_teleperiod
       };
 
     #endif // USE_MODULE_NETWORK_MQTT

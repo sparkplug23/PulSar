@@ -168,20 +168,33 @@ void mPulseCounter::Tasker(uint8_t function, JsonParserObject obj){
       WebAppend_Root_Status_Table_Data();
     break;
     #endif //USE_MODULE_NETWORK_WEBSERVER
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); 
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
   } // END switch
 
 }// END Tasker
@@ -227,7 +240,7 @@ void mPulseCounter::EveryLoop(){
       if(!WithinLimits(settings.min_reading_ms,(uint16_t)sensor[sensor_id].instant.tDeltaTime,settings.max_reading_ms)){
         AddLog(LOG_LEVEL_DEV_TEST,PSTR(D_LOG_PIR "PIR %s %d"),"Out of range",sensor_id);
         sensor[sensor_id].instant.ischanged = true;
-        mqtthandler_sensor_ifchanged.flags.SendNow = true;
+        telemetry_sensor_ifchanged.flags.SendNow = true;
       }
 
 
@@ -376,9 +389,9 @@ uint8_t mPulseCounter::ConstructJSON_Settings(uint8_t json_level, bool json_appe
 
     root["name_buffer"] = name_buffer;
 
-    root["sens_tele_rate"] =mqtthandler_sensor_teleperiod.tRateSecs;
-    root["sens_ifchanged_rate"] =mqtthandler_sensor_ifchanged.tRateSecs;
-    root["sett_tele_rate"] =mqtthandler_settings.tRateSecs;
+    root["sens_tele_rate"] =telemetry_sensor_teleperiod.tRateSecs;
+    root["sens_ifchanged_rate"] =telemetry_sensor_ifchanged.tRateSecs;
+    root["sett_tele_rate"] =telemetry_settings.tRateSecs;
 
 
     data_buffer.payload.len = measureJson(root)+1;
@@ -458,36 +471,36 @@ for(uint8_t sensor_id=0;sensor_id<fSensorCount;sensor_id++){
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-void mPulseCounter::MQTTHandler_Init(){
+void mPulseCounter::Telemetry_Init(){
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mPulseCounter::ConstructJSON_Settings;
 
-  ptr = &mqtthandler_sensor_teleperiod;
+  ptr = &telemetry_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mPulseCounter::ConstructJSON_Sensor;
 
-  ptr = &mqtthandler_sensor_ifchanged;
+  ptr = &telemetry_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1;//tkr_mqtt->dt.ifchanged_secs;
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mPulseCounter::ConstructJSON_Sensor;
   
 } 
@@ -495,38 +508,38 @@ void mPulseCounter::MQTTHandler_Init(){
 
 void mPulseCounter::MQTTHandler_RefreshAll(){
 
-  mqtthandler_settings.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
+  telemetry_settings.flags.SendNow = true;
+  telemetry_sensor_ifchanged.flags.SendNow = true;
+  telemetry_sensor_teleperiod.flags.SendNow = true;
 
 } 
 
 
 void mPulseCounter::MQTTHandler_Rate(){
 
-  mqtthandler_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+  telemetry_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+  telemetry_sensor_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Rate"
 
 
 void mPulseCounter::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t mqtthandler_list_ids[] = {
+  uint8_t telemetry_list_ids[] = {
     MQTT_HANDLER_SETTINGS_ID, 
     MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
     MQTT_HANDLER_SENSOR_TELEPERIOD_ID
   };
   
-  struct handler<mSensorsDHT>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
+  struct telemetry_handler<mSensorsDHT>* telemetry_list_ptr[] = {
+    &telemetry_settings,
+    &telemetry_sensor_ifchanged,
+    &telemetry_sensor_teleperiod
   };
 
   tkr_mqtt->MQTTHandler_Command_Array_Group(*this, D_MODULE_SENSORS_DHT_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    telemetry_list_ptr, telemetry_list_ids,
+    sizeof(telemetry_list_ptr)/sizeof(telemetry_list_ptr[0]),
     mqtt_handler_id
   );
   uint8_t flag_handle_all = false, handler_found = false
@@ -535,9 +548,9 @@ void mPulseCounter::MQTTHandler_Sender(uint8_t mqtt_handler_id){
   do{
 
     switch(mqtt_handler_id){
-      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; ptr=&mqtthandler_settings; break;
-      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; ptr=&mqtthandler_sensor_ifchanged; break;
-      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; ptr=&mqtthandler_sensor_teleperiod; break;
+      case MQTT_HANDLER_SETTINGS_ID:                       handler_found=true; ptr=&telemetry_settings; break;
+      case MQTT_HANDLER_SENSOR_IFCHANGED_ID:               handler_found=true; ptr=&telemetry_sensor_ifchanged; break;
+      case MQTT_HANDLER_SENSOR_TELEPERIOD_ID:              handler_found=true; ptr=&telemetry_sensor_teleperiod; break;
       // No specialised needed
       default: handler_found=false; break; // nothing 
     } // switch

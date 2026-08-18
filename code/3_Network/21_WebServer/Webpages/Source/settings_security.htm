@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
+	<title>Security Settings</title>
+	<style>html{visibility:hidden}</style>
+	<script>
+		(function loadFiles(){const l=document.createElement('script');l.src='/common.js';l.onload=()=>loadResources(['/style.css'],S);l.onerror=()=>setTimeout(loadFiles,100);document.head.appendChild(l);})();
+		function S(){getLoc();}
+	</script>
+</head>
+<body>
+<form id="form_s" name="Sf" method="post">
+<div class="toprow"><button type="button" onclick="B()">Back</button><button type="submit">Save</button><hr></div>
+<h2>Security</h2>
+
+<div class="sec">
+<h3>Settings Access</h3>
+Enable settings protection: <input name="SEC_EN" type="checkbox"><br>
+Settings PIN: <input name="SEC_PIN" type="password" maxlength="8" inputmode="numeric"><br>
+</div>
+
+<div class="sec">
+<h3>Firmware Update</h3>
+Lock OTA updates: <input name="OTA_LOCK" type="checkbox"><br>
+OTA password: <input name="OTA_PASS" type="password" maxlength="64"><br>
+Enable ArduinoOTA: <input name="ARDUINO_OTA" type="checkbox"><br>
+<button type="button" onclick="window.location=getURL('/update')">Firmware Update</button>
+</div>
+
+<div class="sec">
+<h3>Administrative Actions</h3>
+<button type="button" onclick="if(confirm('Restart device?'))window.location=getURL('/reboot')">Restart</button>
+<button type="button" onclick="if(confirm('Factory reset all settings?'))window.location=getURL('/reset?force=1')">Factory Reset</button>
+</div>
+
+<hr><button type="button" onclick="B()">Back</button><button type="submit">Save</button>
+</form>
+<div id="toast"></div>
+</body>
+</html>

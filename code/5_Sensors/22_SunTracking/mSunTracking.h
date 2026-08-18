@@ -405,14 +405,14 @@ class mSunTracking :
      ************************************************************************************************/
   
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    std::vector<struct handler<mSunTracking>*> mqtthandler_list;    
-    struct handler<mSunTracking> mqtthandler_settings;
-    struct handler<mSunTracking> mqtthandler_sensor_ifchanged;
-    struct handler<mSunTracking> mqtthandler_sensor_teleperiod;
+    std::vector<struct telemetry_handler<mSunTracking>*> telemetry_list;    
+    struct telemetry_handler<mSunTracking> telemetry_settings;
+    struct telemetry_handler<mSunTracking> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mSunTracking> telemetry_sensor_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT 
 
   private: 

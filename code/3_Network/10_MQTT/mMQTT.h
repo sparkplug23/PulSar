@@ -95,6 +95,7 @@ enum MQTT_HANDLER_PRIORITY_IDS
   MQTT_HANDLER_PRIORITY_CRITICAL_ID   = 3
 };
 
+// move to telemetry header
 typedef union {
   uint16_t data;
   struct {
@@ -111,12 +112,12 @@ typedef union {
 
 
 template <typename Class>
-struct handler {
+struct telemetry_handler {
   uint32_t      tSavedLastSent = 0;
   uint16_t      tRateSecs = 1;
   uint8_t       json_level = 0;
   uint8_t       topic_type = 0;
-  const char*   postfix_topic = nullptr;
+  const char*   key = nullptr;
   Handler_Flags flags = {0};
   uint8_t       (Class::*ConstructJSON_function)(uint8_t json_level, bool json_appending);
 
@@ -728,43 +729,22 @@ class mMQTTManager :
 
 
     /**
-     * Special MQTT functions that manupulate the generic mqtthandler_list from any class
-     * handler<mAnimatorLight> *mAnimatorLight::mqtthandler_list[5]
+     * Special MQTT functions that manupulate the generic telemetry_list from any class
+     * telemetry_handler<mAnimatorLight> *mAnimatorLight::telemetry_list[5]
      * Future idea:
      * Issue: Unknown how to also send length or array, so for(auto&) type loops probably wont work
      * */
     // template<typename T>
-    // void MQTTHandler_Flags_SendNow(std::vector<struct handler<T>*> mqtthandler_list)
+    // void MQTTHandler_Flags_SendNow(std::vector<struct telemetry_handler<T>*> telemetry_list)
     // {     
-    //   for(auto& handle:mqtthandler_list){
+    //   for(auto& handle:telemetry_list){
     //     handle->flags.SendNow = true;
     //   }
     // }
 
-    // Centralized template function
-    template <typename HandlerType>
-    void MQTTHandler_RefreshAll(std::vector<struct handler<HandlerType>*>& handler_list) {
-        for (auto& handle : handler_list) {
-            handle->flags.SendNow = true;
-        }
-    }
-
-    // Centralized template function
-    template <typename HandlerType>
-    void MQTTHandler_Rate(std::vector<struct handler<HandlerType>*>& handler_list) 
-    {
-      for (auto& handle : handler_list) 
-      {
-        if (handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-          handle->tRateSecs = GetTelePeriod_SubModule();
-        else if (handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-          handle->tRateSecs = GetIfChangedPeriod_SubModule();
-      }
-    }
-
 
     // template<typename T>
-    // void MQTTHandler_Sender(std::vector<struct handler<T>*>& handler_list, T& class_ptr) {
+    // void MQTTHandler_Sender(std::vector<struct telemetry_handler<T>*>& handler_list, T& class_ptr) {
     //     for (auto& handle : handler_list) {
     //         // Serial.printf("MQTTHandler_Sender");
     //         MQTTHandler_Command_UniqueID(class_ptr, class_ptr.GetModuleUniqueID(), handle);
@@ -781,7 +761,7 @@ class mMQTTManager :
    *
    * Without staging, this sender iterates the whole handler list in one pass.
    * Therefore, if several handlers become due at the same time, several MQTT
-   * payloads may be published back-to-back during a single `TASK_MQTT_SENDER`
+   * payloads may be published back-to-back during a single `TASK_TELEMETRY__SENDER_MQTT`
    * call. That is acceptable for normal modules, but can create burst traffic for
    * telemetry modules where many hourly/status payloads mature together.
    *
@@ -803,7 +783,7 @@ class mMQTTManager :
    *
    * @code
    *   tkr_mqtt->MQTTHandler_Sender(
-   *       mqtthandler_list,
+   *       telemetry_list,
    *       *this,
    *       MQTT_TELEMETRY_STAGED_BACKOFF_MS
    *   );
@@ -831,12 +811,13 @@ class mMQTTManager :
    *                          unless a compile-time default limit is enabled.
    */
   template<typename T>
-  void MQTTHandler_Sender(
-      std::vector<struct handler<T>*>& handler_list,
+  void Telemetry_Sender(
+      std::vector<struct telemetry_handler<T>*>& handler_list,
       T& class_ptr,
       uint32_t staged_backoff_ms = 0
   )
   {
+
     /*
     * Legacy/default sender pacing.
     *
@@ -886,7 +867,7 @@ bool IsAnyBrokerConnected() const
 }
 
 // template<typename T>
-// void ServicePeriodicTrigger(handler<T>* handler_ptr)
+// void ServicePeriodicTrigger(telemetry_handler<T>* handler_ptr)
 // {
 //   if (!handler_ptr->flags.PeriodicEnabled) {
 //     return;
@@ -917,7 +898,7 @@ bool IsAnyBrokerConnected() const
 // }
 
 template<typename T>
-void ServicePeriodicTrigger(handler<T>* handler_ptr)
+void ServicePeriodicTrigger(telemetry_handler<T>* handler_ptr)
 {
   if (!handler_ptr->flags.PeriodicEnabled) return;
 
@@ -978,7 +959,7 @@ void ServicePeriodicTrigger(handler<T>* handler_ptr)
    * @return false if no payload was sent successfully.
    */
   template<typename T>
-  bool MQTTHandler_Command_UniqueID(T& class_ptr, uint16_t unique_id, handler<T>* handler_ptr)
+  bool MQTTHandler_Command_UniqueID(T& class_ptr, uint16_t unique_id, telemetry_handler<T>* handler_ptr)
   {
     if (handler_ptr == nullptr) {
       #ifdef DEBUG_NEWORK_MQTT
@@ -1022,8 +1003,8 @@ void ServicePeriodicTrigger(handler<T>* handler_ptr)
 
     #ifdef ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
     Serial.printf(
-      "MQTTHandler_Command::SendNow::fSendPayload::postfix_topic\t=%S %d\n\r",
-      handler_ptr->postfix_topic,
+      "MQTTHandler_Command::SendNow::fSendPayload::key\t=%S %d\n\r",
+      handler_ptr->key,
       unique_id
     );
     Serial.flush();
@@ -1038,7 +1019,7 @@ void ServicePeriodicTrigger(handler<T>* handler_ptr)
         con->MQTTHandler_Send_Formatted_UniqueID(
           handler_ptr->flags.topic_type,
           unique_id,
-          handler_ptr->postfix_topic,
+          handler_ptr->key,
           handler_ptr->flags.retain
         );
 

@@ -30,6 +30,7 @@
 /// OFFICE ///////////////////////////////////////////////////////////////////////////////////
 #define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
 // #define DEVICE_MEADOWS__OFFICE__ELITE4DEXMU_01
+// #define DEVICE_MEADOWS__OFFICE__ELITE4DEXMU_02
 /// LIVINGROOM ///////////////////////////////////////////////////////////////////////////////
 
 /// GARAGE ///////////////////////////////////////////////////////////////////////////////////
@@ -2922,7 +2923,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
   #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
 
-  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
   #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
 
 
@@ -3145,7 +3146,7 @@ R"=====(
   #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
   #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
 
-  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
   #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
 
 
@@ -3358,7 +3359,7 @@ R"=====(
   #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
   #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
 
-  #define ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
   #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
 
 
@@ -8283,6 +8284,9 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   // #define ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
   #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__SINGLE_PANEL
   // #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__EIGHT_PANELS
+
+  #define   ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+  // #define ENABLE_DEBUGFEATURE_TELEMETRY__MQTT_SEND_HEALTH_EVERY_SECOND
   
 
   #ifdef ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
@@ -8463,7 +8467,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
     #define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D
 
 
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+    // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
 
     #define ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
     #define ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION_ON_PULSAR_PALETTES
@@ -8550,6 +8554,12 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
     /***********************************
      * SECTION: Lighting Configs
     ************************************/   
+
+#define ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
+    
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
 
     // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
 
@@ -9550,6 +9560,351 @@ R"=====(
 #endif // END DEVICE
 
 
+
+
+
+
+#ifdef DEVICE_MEADOWS__OFFICE__ELITE4DEXMU_02
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+
+  #define ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
+  
+
+  #ifdef ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
+
+  // #define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+  #define ENABLE_DEBUGFEATURE_LIGHTING__TRANSITION_ENDPOINT_PIXEL0
+
+  #define ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION_ON_PULSAR_PALETTES
+
+  /***********************************
+  * SECTION: Enable Grouped
+  ************************************/  
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/  
+
+  #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+
+  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SUN_TRACKING      
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+  //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+
+  #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+  #define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+
+  #define ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+
+
+  #define ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+  #define USE_MODULE_SENSORS_SUN_TRACKING_FAST_ESTIMATE
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+
+
+
+  /**
+   * @brief 
+   * Need to add a new "realtime" system mode, which means ANYTHING not critical to the design in use, should have minimal impact
+   * In this case, if effects are running
+   * ** mqtt unless debugging, should reduce to 1hour at most (except health, make it 10 minutes)
+   * ** filesystem operations that are slow, reduce 
+   * 
+   */
+  
+  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 500
+
+
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI
+  // // #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  // #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+  // #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+  // // #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  // // #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+
+  #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+  // #define ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+
+  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
+
+  /**
+   * @brief tree physical wiring connections
+   * 16 outputs
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":256
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        256
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Wipe Random",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "Brightness": 100
+    },
+    "Brightness": 1
+  }
+  )=====";
+ 
+      // ,"Preset":{"Load":1}
+      
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      // "\"28\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+      // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","
+      "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "2" "\","
+      "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "3" "\","
+      "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "4" "\","
+      "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "5" "\","
+      "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "6" "\","
+      "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "7" "\","
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+        "\"" "Desk" "\""
+      "]"
+    "}"
+  "}";
+/**
+ * @brief 
+ * 
+ 
+                    NETWORK INTERFACES
+                           │
+              ┌────────────┼────────────┐
+              │            │            │
+           Ethernet       WiFi       Cellular
+                           │
+                  ┌────────┼────────┐
+                  │        │        │
+             ServerOffice ServerRoom HACS2400
+                           │
+                           ▼
+                    IP connectivity
+                           │
+                           ▼
+                     MQTT manager
+                    /            \
+                   /              \
+          office broker         home broker
+          10.10.10.18          192.168.3.70
+             WiFi                  WiFi
+
+  
+ */
+  #define USE_NETWORK_TEMPLATE
+DEFINE_PGM_CTR(NETWORK_TEMPLATE)
+"{"
+  "\"Version\":1,"
+
+  "\"Interface\":{"
+    "\"Policy\":{"
+      "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+      "\"AllowMultipleActive\":true,"
+      "\"BlockRemoteMqttWhenLocalAvailable\":false"
+    "}"
+  "},"
+
+  "\"WiFi\":{"
+    "\"EN\":true,"
+    "\"Backoff\":[5,60,600],"
+
+    "\"Mode\":{"
+      "\"STA\":true,"
+      "\"AP\":true,"
+      "\"STA_AP\":true,"
+      "\"APBootMins\":10,"
+      "\"APOnSTAFail\":true,"
+      "\"APFailDelayMins\":0,"
+      "\"APAlwaysOn\":true"
+    "},"
+
+    "\"Station\":{"
+      "\"Profiles\":["
+        "{"
+          "\"SSID\":\"" STA_SSID1 "\","
+          "\"Password\":\"" STA_PASS1 "\""
+        "},"
+        "{"
+          "\"SSID\":\"" STA_SSID2 "\","
+          "\"Password\":\"" STA_PASS2 "\""
+        "},"
+        "{"
+          "\"SSID\":\"" STA_SSID3 "\","
+          "\"Password\":\"" STA_PASS3 "\""
+        "}"
+      "],"
+
+      "\"IPv4\":{"
+        "\"Static\":false,"
+        "\"IP\":\"0.0.0.0\","
+        "\"Gateway\":\"0.0.0.0\","
+        "\"Subnet\":\"0.0.0.0\","
+        "\"DNS1\":\"0.0.0.0\","
+        "\"DNS2\":\"0.0.0.0\""
+      "}"
+    "},"
+
+    "\"SoftAP\":{"
+      "\"SSID\":\"" SOFTAP_SSID "\","
+      "\"Password\":\"" SOFTAP_PASSWORD "\","
+      "\"Channel\":1"
+    "}"
+  "},"
+
+  "\"Ethernet\":{"
+    "\"EN\":true,"
+    "\"Backoff\":[5,30,60],"
+
+    "\"IPv4\":{"
+      "\"Static\":false,"
+      "\"IP\":\"0.0.0.0\","
+      "\"Gateway\":\"0.0.0.0\","
+      "\"Subnet\":\"0.0.0.0\","
+      "\"DNS1\":\"0.0.0.0\","
+      "\"DNS2\":\"0.0.0.0\""
+    "}"
+  "},"
+
+  "\"Cellular\":{"
+    "\"EN\":true,"
+    "\"Backoff\":[10,60,600],"
+
+    "\"Modem\":{"
+      "\"EN\":true,"
+      "\"APN\":\"" CELLULAR_APN "\","
+      "\"User\":\"\","
+      "\"Password\":\"\""
+    "},"
+
+    "\"GNSS\":{"
+      "\"EN\":true"
+    "},"
+
+    "\"SMS\":{"
+      "\"EN\":true,"
+      "\"PrivilegedOnly\":true"
+    "}"
+  "},"
+
+  "\"MQTT\":{"
+    "\"EN\":true,"
+
+    "\"UpdateSeconds\":{"
+      "\"IfChanged\":1,"
+      "\"TelePeriod\":60,"
+      "\"ConfigPeriod\":60"
+    "},"
+
+    "\"Brokers\":["
+      "{"
+        "\"Id\":\"office\","
+        "\"EN\":true,"
+        "\"Host\":\"" MQTT_HOST_OFFICE "\","
+        "\"Port\":" STR(MQTT_PORT_OFFICE) ","
+        "\"User\":\"\","
+        "\"Password\":\"\","
+        "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+        "\"ClientName\":\"" DEVICENAME_CTR "\","
+        "\"Backoff\":[5,10,60],"
+        "\"Transport\":[\"WiFi\"],"
+        "\"PrefTransport\":[\"WiFi\"],"
+        "\"OutgoingLevel\":3,"
+        "\"OutgoingLimiterMs\":0"
+      "},"
+      "{"
+        "\"Id\":\"home\","
+        "\"EN\":true,"
+        "\"Host\":\"" MQTT_HOST_HOME "\","
+        "\"Port\":" STR(MQTT_PORT_HOME) ","
+        "\"User\":\"\","
+        "\"Password\":\"\","
+        "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+        "\"ClientName\":\"" DEVICENAME_CTR "\","
+        "\"Backoff\":[5,10,60],"
+        "\"Transport\":[\"WiFi\"],"
+        "\"PrefTransport\":[\"WiFi\"],"
+        "\"OutgoingLevel\":3,"
+        "\"OutgoingLimiterMs\":0"
+      "}"
+    "]"
+  "}"
+"}";
+
+
+  #endif
+
+#endif // END DEVICE
 
 
 

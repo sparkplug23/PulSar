@@ -162,26 +162,25 @@ bool mWebServer::HttpCheckPriviledgedAccess()
   return true; // admin by default
 }
 
-
-
-void mWebServer::createEditHandler(bool enable) 
+void mWebServer::createEditHandler(bool enable)
 {
-  if (editHandler != nullptr) server->removeHandler(editHandler);
-  if (enable) 
+  if(editHandler != nullptr)
+  {
+    server->removeHandler(editHandler);
+    editHandler = nullptr;
+  }
+
+  if(enable)
   {
     #ifdef USE_MODULE_CORE_FILESYSTEM
-      #ifdef ARDUINO_ARCH_ESP32
-      editHandler = &server->addHandler(new SPIFFSEditor(FILE_SYSTEM));
-      #else
-      editHandler = &server->addHandler(new SPIFFSEditor("","",FILE_SYSTEM));
-      #endif
+    editHandler = &server->addHandler(new FileEditor(FILE_SYSTEM));
     #else
-      editHandler = &server->on("/edit", HTTP_GET, [this](AsyncWebServerRequest *request){
-        this->serveMessage(request, 501, "Not implemented", F("The FS editor is disabled in this build."), 254);
-      });
+    editHandler = &server->on("/edit", HTTP_GET, [this](AsyncWebServerRequest *request){
+      this->serveMessage(request, 501, "Not implemented", F("The FS editor is disabled in this build."), 254);
+    });
     #endif
-  } 
-  else 
+  }
+  else
   {
     editHandler = &server->on("/edit", HTTP_ANY, [this](AsyncWebServerRequest *request){
       this->serveMessage(request, 500, "Access Denied", FPSTR(s_unlock_cfg), 254);

@@ -95,11 +95,11 @@ class mLightNeo_RadarDistance :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mLightNeo_RadarDistance>*> mqtthandler_list;
-    struct handler<mLightNeo_RadarDistance> mqtthandler_settings;
-    struct handler<mLightNeo_RadarDistance> mqtthandler_state_ifchanged;
-    struct handler<mLightNeo_RadarDistance> mqtthandler_state_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mLightNeo_RadarDistance>*> telemetry_list;
+    struct telemetry_handler<mLightNeo_RadarDistance> telemetry_settings;
+    struct telemetry_handler<mLightNeo_RadarDistance> telemetry_state_ifchanged;
+    struct telemetry_handler<mLightNeo_RadarDistance> telemetry_state_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

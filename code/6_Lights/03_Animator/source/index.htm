@@ -7,33 +7,50 @@
 	<meta name="theme-color" content="#222222">
 	<meta content="yes" name="apple-mobile-web-app-capable">
 	<link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAGACGAAAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAQAAAAEAgGAAAAH/P/YQAAAE1JREFUOI1j/P//PwOxgNGeAUMxE9G6cQCKDWAhpADZ2f8PMjBS3QW08QK20KaZC2gfC9hCnqouoNgARgY7zMxAyNlUdQHlXiAlO2MDAD63EVqNHAe0AAAAAElFTkSuQmCC"/>
-	<title>PulSar 2025</title>
+	<title>PulSar</title>
 	<link rel="stylesheet" href="index.css">
 </head>
-<body onload="onLoad()">
+<!-- <body onload="onLoad()"> -->
+<body>
 
-<div id="cv" class="overlay">Loading PulSar</div>
-<noscript><div class="overlay" style="opacity:1;">Sorry, PulSar UI needs JavaScript!</div></noscript>
+
+<div id="cv" class="overlay">Loading</div>
+<noscript><div class="overlay" style="opacity:1;">Needs JavaScript!</div></noscript>
 <div id="bg"></div>
+
 
 <div class="wrapper" id="top">
 	<div class="tab top">
 		<div class="btnwrap">
+			<button onclick="window.location.href=getURL('/');"><i class="icons">&#xe0a2;</i><p class="tab-label">Main</p></button>
 			<button id="buttonPower" onclick="togglePower()" class="tgl"><i class="icons">&#xe08f;</i><p class="tab-label">Power</p></button>
-			<button id="buttonNl" onclick="toggleNl()"><i class="icons">&#xe2a2;</i><p class="tab-label">Timer</p></button>
+			<button id="buttonStandby" onclick="toggleStandby()"><i class="icons">&#xe2a2;</i><p class="tab-label">Standby</p></button>
 			<button id="buttonSync" onclick="toggleSync()"><i class="icons">&#xe116;</i><p class="tab-label">Sync</p></button>
 			<button id="buttonSr" onclick="toggleLiveview()"><i class="icons">&#xe410;</i><p class="tab-label">Live</p></button>
 			<button id="buttonI" onclick="toggleInfo()"><i class="icons">&#xe066;</i><p class="tab-label">Info</p></button>
 			<button id="buttonNodes" onclick="toggleNodes()"><i class="icons">&#xe22d;</i><p class="tab-label">Nodes</p></button>
 			<button onclick="window.location.href=getURL('/lights/settings');"><i class="icons">&#xe0a2;</i><p class="tab-label">Config</p></button>
-			<button id="buttonDebug" onclick="palettesData=null;localStorage.removeItem('wledPalx');localStorage.removeItem('wledPmt');requestJson({rmcpal:true});setTimeout(loadPalettes,250,loadPalettesData);"><i class="icons">&#xe22d;</i><p class="tab-label">ClearCache</p></button>
-			
-			<button id="buttonPresetRefresh"
-				onclick="presetRefresh();">
-				<i class="icons">&#xe8b6;</i><p class="tab-label">PresetRefresh</p>
+			<button id="buttonPcm" onclick="togglePcMode(true)"><i class="icons">&#xe23d;</i><p class="tab-label">PC Mode</p></button>
+
+			<!-- Debug options to reset the webui config for forced loading -->
+			<button id="buttonDebug"
+				style="position:absolute;right:45px;width:24px;height:24px;padding:0;opacity:.5"
+				title="Clear cache"
+				onclick="palettesData=null;
+				localStorage.removeItem('PulSarPalx');
+				localStorage.removeItem('PulSarPmt');
+				requestJson({rmcpal:true});
+				setTimeout(loadPalettes,250,loadPalettesData);">
+				<i class="icons">&#xe22d;</i>
 			</button>
 
-			<button id="buttonPcm" onclick="togglePcMode(true)"><i class="icons">&#xe23d;</i><p class="tab-label">PC Mode</p></button>
+			<button id="buttonPresetRefresh"
+				style="position:absolute;right:15px;width:24px;height:24px;padding:0;opacity:.5"
+				title="Preset refresh"
+				onclick="presetRefresh();">
+				<i class="icons">&#xe22d;</i>
+			</button>
+
 		</div>
 		<div id="briwrap">
 			<p class="hd">Brightness</p>
@@ -53,6 +70,89 @@
 <div class ="container">
 	<div id="Colors" class="tabcontent">
 		<div id="picker" class="noslide"></div>
+		
+<!-- <div style="font-size:12px">
+<script>
+['037','04c','066','08f','0a1','0a2','0e8','116','139','18a','22d','23d','2a2','2a6','2b3','2c6','325','333','34b','38f','390','395','409','410'].forEach(x=>document.write(`<span style="display:inline-block;width:55px;margin:5px"><i class="icons">&#xe${x};</i><br>e${x}</span>`));
+</script>
+</div> -->
+
+
+		<!-- <div id="picker" class="noslide"></div>
+		<div id="hwrap" class="slider">
+			<div title="Hue" class="sliderwrap il">
+				<input id="sliderH" class="noslide" oninput="fromH()" onchange="setColor(0)" max="359" min="0" type="range" value="0" step="any">
+				<div class="sliderdisplay" style="background: linear-gradient(90deg, #f00 2%, #ff0 19%, #0f0 35%, #0ff 52%, #00f 68%, #f0f 85%, #f00)"></div>
+			</div>
+		</div>
+		<div id="swrap" class="slider">
+			<div title="Saturation" class="sliderwrap il">
+				<input id="sliderS" class="noslide" oninput="fromS()" onchange="setColor(0)" max="100" min="0" type="range" value="100" step="any">
+				<div class="sliderdisplay" style="background: linear-gradient(90deg, #aaa 0%, #f00)"></div>
+			</div>
+		</div> -->
+		<!-- <div id="vwrap" class="slider">
+			<div title="Segment Colour Brightness" class="sliderwrap il">
+				<input id="sliderV" class="noslide" oninput="fromV()" onchange="setColor(0)" max="100" min="0" type="range" value="100" step="any" />
+				<div class="sliderdisplay"></div>
+			</div>
+		</div> -->
+		<!-- <div id="kwrap" class="slider">
+			<div title="Kelvin/Temperature" class="sliderwrap il">
+				<input id="sliderK" class="noslide" oninput="fromK()" onchange="setColor(0)" max="10091" min="1900" type="range" value="6550" />
+				<div class="sliderdisplay"></div>
+			</div>
+		</div> -->
+		<!-- <div id="rgbwrap">
+			<div id="rwrap" class="slider">
+				<div title="Red channel" class="sliderwrap il">
+					<input id="sliderR" class="noslide" oninput="fromRgb()" onchange="setColor(0)" max="255" min="0" type="range" value="128" />
+					<div class="sliderdisplay"></div>
+				</div>
+			</div>
+			<div id="gwrap" class="slider">
+				<div title="Green channel" class="sliderwrap il">
+					<input id="sliderG" class="noslide" oninput="fromRgb()" onchange="setColor(0)" max="255" min="0" type="range" value="128" />
+					<div class="sliderdisplay"></div>
+				</div>
+			</div>
+			<div id="bwrap" class="slider">
+				<div title="Blue channel" class="sliderwrap il">
+					<input id="sliderB" class="noslide" oninput="fromRgb()" onchange="setColor(0)" max="255" min="0" type="range" value="128" />
+					<div class="sliderdisplay"></div>
+				</div>
+			</div>
+		</div> -->
+		<!-- <div id="wwrap" class="slider">
+			<div id="whibri" title="White" class="sliderwrap il">
+				<input id="sliderW" class="noslide" oninput="fromW()" onchange="setColor(0)" max="255" min="0" type="range" value="128" />
+				<div class="sliderdisplay"></div>
+			</div>
+		</div> -->
+		<!-- <div id="wbal" class="slider">
+			<div title="White Balance" class="sliderwrap il">
+				<input id="sliderA" class="noslide" onchange="setBalance(this.value)" max="255" min="0" type="range" value="128" />
+				<div class="sliderdisplay"></div>
+			</div>
+		</div> -->
+
+
+		<!-- <div id="rgbbriwrap" class="slider">
+			<div title="Seg Colour Brightness" class="sliderwrap il">
+				<input id="sliderrgbbri" class="noslide" onchange="setRGBBri(this.value)" max="255" min="0" type="range" value="128" />
+				<div class="sliderdisplay"></div>
+			</div>
+		</div>
+		<div id="cctbriwrap" class="slider">
+			<div title="Seg White Brightness" class="sliderwrap il">
+				<input id="slidercctbri" class="noslide" onchange="setCCTBri(this.value)" max="255" min="0" type="range" value="128" />
+				<div class="sliderdisplay"></div>
+			</div>
+		</div> -->
+
+		<!-- the above needs removed and cleaned up -->
+
+		
 		<div id="hwrap" class="slider">
 			<div title="Hue" class="sliderwrap il">
 				<input id="sliderH" class="noslide" oninput="fromH()" onchange="setColor(0)" max="359" min="0" type="range" value="0" step="any">
@@ -66,7 +166,7 @@
 			</div>
 		</div>
 		<div id="vwrap" class="slider">
-			<div title="Segment Colour Brightness" class="sliderwrap il">
+			<div title="Value/Brightness" class="sliderwrap il">
 				<input id="sliderV" class="noslide" oninput="fromV()" onchange="setColor(0)" max="100" min="0" type="range" value="100" step="any" />
 				<div class="sliderdisplay"></div>
 			</div>
@@ -98,33 +198,17 @@
 			</div>
 		</div>
 		<div id="wwrap" class="slider">
-			<div id="whibri" title="White" class="sliderwrap il">
+			<div id="whibri" title="White channel" class="sliderwrap il">
 				<input id="sliderW" class="noslide" oninput="fromW()" onchange="setColor(0)" max="255" min="0" type="range" value="128" />
 				<div class="sliderdisplay"></div>
 			</div>
 		</div>
 		<div id="wbal" class="slider">
-			<div title="White Balance" class="sliderwrap il">
+			<div title="White balance" class="sliderwrap il">
 				<input id="sliderA" class="noslide" onchange="setBalance(this.value)" max="255" min="0" type="range" value="128" />
 				<div class="sliderdisplay"></div>
 			</div>
 		</div>
-
-
-		<div id="rgbbriwrap" class="slider">
-			<div title="Seg Colour Brightness" class="sliderwrap il">
-				<input id="sliderrgbbri" class="noslide" onchange="setRGBBri(this.value)" max="255" min="0" type="range" value="128" />
-				<div class="sliderdisplay"></div>
-			</div>
-		</div>
-		<div id="cctbriwrap" class="slider">
-			<div title="Seg White Brightness" class="sliderwrap il">
-				<input id="slidercctbri" class="noslide" onchange="setCCTBri(this.value)" max="255" min="0" type="range" value="128" />
-				<div class="sliderdisplay"></div>
-			</div>
-		</div>
-
-
 
 
 		<div id="qcs-w">
@@ -153,13 +237,45 @@
 			<input id="hexc" title="Hex RGB" type="text" class="noslide" onkeydown="hexEnter()" autocomplete="off" maxlength="8" />
 			<button id="hexcnf" class="btn btn-xs" onclick="fromHex();"><i class="icons btn-icon">&#xe390;</i></button>
 		</div>
-		<div style="padding: 8px 0;" id="btns">
-			<button class="btn btn-xs" title="File editor" type="button" id="edit" onclick="window.location.href=getURL('/edit')"><i class="icons btn-icon">&#xe2c6;</i></button>
-			<button class="btn btn-xs" title="Pixel Magic Tool" type="button" id="pxmb" onclick="window.location.href=getURL('/pxmagic.htm')"><i class="icons btn-icon">&#xe410;</i></button>
-			<button class="btn btn-xs" title="Add custom palette" type="button" onclick="window.location.href=getURL('/cpal.htm')"><i class="icons btn-icon">&#xe18a;</i></button>
-			<button class="btn btn-xs" title="Remove last custom palette" type="button" id="rmPal" onclick="palettesData=null;localStorage.removeItem('wledPalx');requestJson({rmcpal:true});setTimeout(loadPalettes,250,loadPalettesData);"><i class="icons btn-icon">&#xe037;</i></button>
-			<button class="btn btn-xs" title="Secondary Palette (P+)" type="button" id="secPalToggle" aria-pressed="false">P+</button>
+
+		
+		<div style="padding: 12px 0; display:flex; justify-content:center; gap:16px;" id="btns">
+			<div>
+				<button class="btn btn-xs" title="File editor" type="button" onclick="window.location.href=getURL('/edit')">
+				<i class="icons btn-icon">&#xe901;</i>
+				</button>
+				<div class="iconlabel">Files</div>
+			</div>
+			<div>
+				<button class="btn btn-xs" title="PixelForge" type="button" onclick="window.location.href=getURL('/pixelforge.htm')">
+				<i class="icons btn-icon">&#xe900;</i>
+				</button>
+				<div class="iconlabel">PixelForge</div>
+			</div>
+			<div>
+				<button class="btn btn-xs" title="Custom palettes" type="button" onclick="window.location.href=getURL('/cpal.htm')">
+				<i class="icons btn-icon">&#xe2b3;</i>
+				</button>
+				<div class="iconlabel">Palettes</div>
+			</div>
+			<!-- <button class="btn btn-xs" title="Remove last custom palette" type="button" id="rmPal" onclick="palettesData=null;localStorage.removeItem('PulSarPalx');requestJson({rmcpal:true});setTimeout(loadPalettes,250,loadPalettesData);"><i class="icons btn-icon">&#xe037;</i></button> -->
+			
+			<div>
+				<button class="btn btn-xs" title="Secondary Palette (P+)" type="button" id="secPalToggle" aria-pressed="false">P+</button>
+				<div class="iconlabel">Palette 2</div>
+			</div>
+
 		</div>
+
+
+
+		<!-- <div style="padding: 8px 0;" id="btns"> -->
+			<!-- <button class="btn btn-xs" title="File editor" type="button" id="edit" onclick="window.location.href=getURL('/edit')"><i class="icons btn-icon">&#xe2c6;</i></button> -->
+			<!-- <button class="btn btn-xs" title="Pixel Magic Tool" type="button" id="pxmb" onclick="window.location.href=getURL('/pxmagic.htm')"><i class="icons btn-icon">&#xe410;</i></button> -->
+			<!-- <button class="btn btn-xs" title="Add custom palette" type="button" onclick="window.location.href=getURL('/cpal.htm')"><i class="icons btn-icon">&#xe18a;</i></button> -->
+			<!-- <button class="btn btn-xs" title="Remove last custom palette" type="button" id="rmPal" onclick="palettesData=null;localStorage.removeItem('PulSarPalx');requestJson({rmcpal:true});setTimeout(loadPalettes,250,loadPalettesData);"><i class="icons btn-icon">&#xe037;</i></button> -->
+			<!-- <button class="btn btn-xs" title="Secondary Palette (P+)" type="button" id="secPalToggle" aria-pressed="false">P+</button> -->
+		<!-- </div> -->
 		
 		<!-- Add new live palette intensity slider -->
 		<div id="palixwrap" class="slider">
@@ -200,7 +316,7 @@
 			</div>
 			<div style="padding-bottom: 10px;">
 				<button class="btn btn-xs" type="button" onclick="window.location.href=getURL('/cpal.htm')"><i class="icons btn-icon">&#xe18a;</i></button>
-				<button class="btn btn-xs" type="button" onclick="palettesData=null;localStorage.removeItem('wledPalx');requestJson({rmcpal:true});setTimeout(loadPalettes,250,loadPalettesData);"><i class="icons btn-icon">&#xe037;</i></button>
+				<button class="btn btn-xs" type="button" onclick="palettesData=null;localStorage.removeItem('PulSarPalx');requestJson({rmcpal:true});setTimeout(loadPalettes,250,loadPalettesData);"><i class="icons btn-icon">&#xe037;</i></button>
 			</div>
 		</div>
 	</div>
@@ -296,7 +412,7 @@
 				<output class="sliderbubble"></output>
 			</div>
 			<div id="slider5" class="slider">
-				<i class="icons slider-icon" onclick="tglFreeze()">&#8767;</i>
+				<i class="icons slider-icon">&#8767;</i>
 				<div title="Effect Period" class="sliderwrap il">
 					<input id="sliderEffectTimePeriod" class="noslide" onchange="setEffectTimePeriod()" oninput="updateTrail(this)" max="10000" min="0" type="range" value="1000" />
 					<div class="sliderdisplay"></div>
@@ -304,7 +420,7 @@
 				<output class="sliderbubble"></output>
 			</div>
 			<div id="slider6" class="slider">
-				<i class="icons slider-icon" onclick="tglFreeze()">&#x2687;</i>
+				<i class="icons slider-icon">&#x2687;</i>
 				<div title="Grouping" class="sliderwrap il">
 					<input id="sliderGrouping" class="noslide" onchange="setGrouping()" oninput="updateTrail(this)" max="255" min="1" type="range" value="1" />
 					<div class="sliderdisplay"></div>
@@ -312,11 +428,9 @@
 				<output class="sliderbubble"></output>
 			</div>
 			<div id="slider7" class="slider hide">
-				<i class="icons slider-icon" onclick="tglFreeze()">D</i>
+				<i class="icons slider-icon">D</i>
 				<div title="Decimate" class="sliderwrap il">
-					<input id="sliderDecimate" class="noslide"
-					onchange="setDecimate()" oninput="updateTrail(this)"
-					max="15" min="1" type="range" value="1" />
+					<input id="sliderDecimate" class="noslide" onchange="setDecimate()" oninput="updateTrail(this)" max="15" min="1" type="range" value="1" />
 					<div class="sliderdisplay"></div>
 				</div>
 				<output class="sliderbubble"></output>
@@ -339,7 +453,7 @@
 		</div>
 	</div>
 
-	<div id="Segments" class="tabcontent">
+	<!-- <div id="Segments" class="tabcontent">
 		<p class="labels hd" id="segLabel">Segments</p>
 		<div id="segcont">
 			Loading...
@@ -350,6 +464,41 @@
 			<button class="btn btn-s" id="rsbtn" onclick="rSegs()">Reset segments</button>
 		</div>
 		<p>Transition: <input id="tt" type="number" min="0" max="65.5" step="0.1" value="0.7">&nbsp;s</p>
+		<p id="ledmap" class="hide"></p>
+	</div> -->
+	<div id="Segments" class="tabcontent">
+		<p class="labels hd" id="segLabel">Segments</p>
+		<div id="segcont">
+			Loading...
+		</div>
+		<div id="segutil" class="staybot">
+		</div>
+		<div id="segutil2">
+			<button class="btn btn-s" id="rsbtn" onclick="rSegs()">Reset segments</button>
+		</div>
+		<p>Transition: <input id="tt" type="number" min="0" max="65.5" step="0.1" value="0.7" onchange="parseFloat(this.value)===0?gId('bsp').classList.add('hide'):gId('bsp').classList.remove('hide');">&nbsp;s</p>
+		<div id="bsp" class="sel-p"><select id="bs" class="sel-ple" onchange="requestJson({'bs':parseInt(this.value)})">
+			<option value="0">Fade</option>
+			<option value="1">Fairy Dust</option>
+			<option value="2">Swipe right</option>
+			<option value="3">Swipe left</option>
+			<option value="16">Push right</option>
+			<option value="17">Push left</option>
+			<option value="4">Outside-in</option>
+			<option value="5">Inside-out</option>
+			<option value="6" data-type="2D">Swipe up</option>
+			<option value="7" data-type="2D">Swipe down</option>
+			<option value="8" data-type="2D">Open H</option>
+			<option value="9" data-type="2D">Open V</option>
+			<option value="18" data-type="2D">Push up</option>
+			<option value="19" data-type="2D">Push down</option>
+			<option value="10" data-type="2D">Swipe TL</option>
+			<option value="11" data-type="2D">Swipe TR</option>
+			<option value="12" data-type="2D">Swipe BR</option>
+			<option value="13" data-type="2D">Swipe BL</option>
+			<option value="14" data-type="2D">Circular Out</option>
+			<option value="15" data-type="2D">Circular In</option>
+		</select></div>
 		<p id="ledmap" class="hide"></p>
 	</div>
 
@@ -381,25 +530,86 @@
 <div id="connind"></div>
 <div id="toast" onclick="clearErrorToast(100);"></div>
 <div id="namelabel" onclick="toggleNodes()"></div>
+
+<div id="standby" class="modal">
+	<button class="btn btn-xs close" onclick="toggleStandby()"><i class="icons rot45">&#xe18a;</i></button>
+
+	<div id="standbykv">
+		<p class="labels hd">Standby</p>
+
+		<p>State: <b id="standbyState">Unknown</b></p>
+		<p>Armed: <b id="standbyArmed">Unknown</b></p>
+
+		<p>
+			Target:
+			<input id="standbyTarget" type="number" min="1" max="250" value="1">
+		</p>
+
+		<p>
+			Awake time:
+			<input id="standbyAwakeSecs" type="number" min="0" value="300">
+			seconds
+		</p>
+
+		<p>
+			Standby time:
+			<input id="standbyStandbySecs" type="number" min="0" value="0">
+			seconds
+		</p>
+
+		<p>
+			Wake transition:
+			<input id="standbyWakeTransitionSecs" type="number" min="0" value="1">
+			seconds
+		</p>
+
+		<p>
+			Sleep transition:
+			<input id="standbySleepTransitionSecs" type="number" min="0" value="30">
+			seconds
+		</p>
+	</div>
+
+	<div>
+		<button class="btn ibtn" onclick="standbyArm(1)">Arm</button>
+		<button class="btn ibtn" onclick="standbyArm(0)">Disarm</button>
+		<button class="btn ibtn" onclick="standbySleep()">Standby Now</button>
+		<button class="btn ibtn" onclick="standbyWake()">Wake</button>
+		<button class="btn ibtn" onclick="standbyApplyConfig()">Apply Config</button>
+	</div>
+</div>
+
+
+
 <div id="info" class="modal">
 	<button class="btn btn-xs close" onclick="toggleInfo()"><i class="icons rot45">&#xe18a;</i></button>
 	<div id="imgw">
 		<img class="wi" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB0AAAAFCAYAAAC5Fuf5AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABbSURBVChTlY9bDoAwDMNW7n9nwCipytQN4Z8tbrTHmDmF4oPzyldwRqp1SSdnV/NuZuzqerAByxXznBw3igkeFEfXyUuhK/yFM0CxJfyqXZEOc6/Sr9/bf7uIC5Nwd7orMvAPAAAAAElFTkSuQmCC" />
 	</div>
+
 	<div id="kv">Loading...</div><br>
+
+	<div class="info-group">
+		<p class="labels hd">Build Information</p>
+		Version: ##VERSION##<br>
+		Build: ##BUILD_DATE##<br>
+		Environment: ##BUILD_ENV##<br>
+		Branch: ##GIT_BRANCH##
+	</div><br>
+
 	<div>
 		<button class="btn ibtn" onclick="requestJson()">Refresh</button>
 		<button class="btn ibtn" onclick="toggleNodes()">Instance List</button>
-		<button class="btn ibtn" onclick="window.open(getURL('/update'),'_self');">Update WLED</button>
-		<button class="btn ibtn" id="resetbtn" onclick="cnfReset()">Reboot WLED</button>
+		<button class="btn ibtn" onclick="window.open(getURL('/update'),'_self');">Update PulSar</button>
+		<button class="btn ibtn" id="resetbtn" onclick="cnfReset()">Reboot PulSar</button>
 	</div>
 	<br>
-	<span class="h">Made with&#32;<span id="heart">&#10084;&#xFE0E;</span>&#32;by&#32;<a href="https://github.com/Aircoookie/" target="_blank">Aircoookie</a>&#32;and the&#32;<a href="https://wled.discourse.group/" target="_blank">WLED community</a></span>
 </div>
+
 
 <div id="nodes" class="modal">
 	<button class="btn btn-xs close" onclick="toggleNodes()"><i class="icons rot45">&#xe18a;</i></button>
-	<div id="ndlt">WLED instances</div>
+	<div id="ndlt">PulSar instances</div>
 	<div id="kn">Loading...</div>
 	<div style="position:sticky;bottom:0;">
 		<button class="btn ibtn" onclick="loadNodes()">Refresh</button>
@@ -422,12 +632,16 @@
 
 <i id="roverstar" class="icons huge" onclick="setLor(0)">&#xe410;</i><br>
 
+
 <!-- 
 	If you want to load iro.js and rangetouch.js as consecutive requests, you can do it like it was done in 0.14.0:
-	https://github.com/Aircoookie/WLED/blob/v0.14.0/wled00/data/index.htm
+	https://github.com/wled/WLED/blob/v0.14.0/wled00/data/index.htm
+	A more compact approach is implemented to load iro.js at the beginning of index.js.
 -->
-<script src="iro.js"></script>
+<!--  <script src="iro.js"></script> NOTE: iro.js is loaded at the beginning of index.js -->
 <script src="rangetouch.js"></script>
 <script src="index.js"></script>
+
+
 </body>
 </html>

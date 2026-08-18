@@ -61,23 +61,33 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     // Leave standy
     // Start standy
     #endif// USE_MODULE_CORE_RULES
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
 
   } // end switch
 
@@ -1704,7 +1714,7 @@ uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_level, bool json_appen
   JBI->Start();  
 
     #ifdef ENABLE_DEVFEATURE_DEBUG_PWM_CHANNELS_MQTT
-    mqtthandler__state__ifchanged.tRateSecs = 1; // force this to be 1 second for this debug message
+    telemetry__state__ifchanged.tRateSecs = 1; // force this to be 1 second for this debug message
     JBI->Array_Start("PWM_Channels_Read");
     for (uint8_t i = 0; i < 5; i++) {
       if (tkr_pins->PinUsed(GPIO_PWM1_ID, i)) 
@@ -1936,83 +1946,83 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__PowerProfiles(uint8_t json_level, 
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mInterfaceLight::MQTTHandler_Init()
+void mInterfaceLight::Telemetry_Init()
 {
 
-  struct handler<mInterfaceLight>* ptr;  
+  struct telemetry_handler<mInterfaceLight>* ptr;  
 
-  ptr = &mqtthandler__settings__teleperiod;
+  ptr = &telemetry__settings__teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler__state__ifchanged;
+  ptr = &telemetry__state__ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_State;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
-  ptr = &mqtthandler__debug_module_config__teleperiod;
+  ptr = &telemetry__debug_module_config__teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_MODULE_CONFIG__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_MODULE_CONFIG__CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Debug_Module_Config;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
 
   
   #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
-  ptr = &mqtthandler__debug_bus_config__teleperiod;
+  ptr = &telemetry__debug_bus_config__teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 120; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_BUS_CONFIG__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_BUS_CONFIG__CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Debug__BusConfig;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
 
   
   #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
-  ptr = &mqtthandler__debug_power_profiles__teleperiod;
+  ptr = &telemetry__debug_power_profiles__teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_POWER_PROFILES__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_POWER_PROFILES__CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Debug__PowerProfiles;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
 
 
 } 
 
 /**
- * @brief Set flag for all mqtthandlers to send
+ * @brief Set flag for all telemetryhandlers to send
  * */
 void mInterfaceLight::MQTTHandler_RefreshAll()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     handle->flags.SendNow = true;
   }
 }
@@ -2022,7 +2032,7 @@ void mInterfaceLight::MQTTHandler_RefreshAll()
  * */
 void mInterfaceLight::MQTTHandler_Rate()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
       handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
@@ -2035,7 +2045,7 @@ void mInterfaceLight::MQTTHandler_Rate()
  * */
 void mInterfaceLight::MQTTHandler_Sender()
 {    
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }
