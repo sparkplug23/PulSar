@@ -95,10 +95,7 @@ enum MQTT_HANDLER_PRIORITY_IDS
   MQTT_HANDLER_PRIORITY_CRITICAL_ID   = 3
 };
 
-<<<<<<< HEAD
-=======
 // move to telemetry header
->>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
 typedef union {
   uint16_t data;
   struct {
@@ -870,11 +867,7 @@ bool IsAnyBrokerConnected() const
 }
 
 // template<typename T>
-<<<<<<< HEAD
-// void ServicePeriodicTrigger(handler<T>* handler_ptr)
-=======
 // void ServicePeriodicTrigger(telemetry_handler<T>* handler_ptr)
->>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
 // {
 //   if (!handler_ptr->flags.PeriodicEnabled) {
 //     return;

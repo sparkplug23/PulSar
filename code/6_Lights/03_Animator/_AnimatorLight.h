@@ -6397,12 +6397,9 @@ void EverySecond_Standby();
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
       struct telemetry_handler<mAnimatorLight> telemetry_debug__performance;
       #endif
-<<<<<<< HEAD
-=======
       #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
       struct telemetry_handler<mAnimatorLight> telemetry_debug_animations_progress;
       #endif
->>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
       
     #endif // USE_MODULE_NETWORK_MQTT
 
