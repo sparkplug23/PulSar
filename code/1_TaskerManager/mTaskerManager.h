@@ -531,9 +531,13 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
   #include "5_Sensors/21_RotaryEncoder/mRotaryEncoder.h"
   #define tkr_rotary_encoder                     static_cast<mRotaryEncoder*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_ROTARY_ENCODER_ID))
 #endif
-#if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+#if defined(USE_MODULE_SENSORS_SUN_TRACKING)
   #include "5_Sensors/22_SunTracking/mSunTracking.h"
   #define   tkr_solar                            static_cast<mSunTracking*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID))
+#endif
+#if defined(USE_MODULE_SENSORS_SUN_TRACKING_FAST_ESTIMATE) 
+  #include "5_Sensors/23_SunTracking_FastEstimate/mSunTracking_FastEstimate.h"
+  #define   tkr_solar                            static_cast<mSunTracking_FastEstimate*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_FAST_ESTIMATE_ID))
 #endif
 #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
   #include "5_Sensors/26_TOF_VL53L0X/mTOF_VL53L0X.h"

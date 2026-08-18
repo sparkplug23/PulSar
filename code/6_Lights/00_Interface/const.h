@@ -460,6 +460,7 @@
 // 16	1220.703125
 
 
+
 // PWM settings
 #ifndef WLED_PWM_FREQ
 #ifdef ESP8266

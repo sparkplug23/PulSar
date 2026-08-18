@@ -4479,15 +4479,6 @@
 //     SEGMENT.AnimationProcess_LinearBlend_Dynamic_BufferU32_BrightnessAlreadySet(param);
 //   });
 
-
-//   // #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-//   // this->setCallback_ConstructJSONBody_Debug_Animations_Progress(
-//   //   [this](void){
-//   //     this->ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
-//   //   }
-//   // );
-//   // #endif // USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-
 //   return USE_ANIMATOR;
 
 // }

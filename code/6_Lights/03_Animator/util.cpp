@@ -1,4 +1,7 @@
 #include "_AnimatorLight.h"
+
+#ifdef USE_MODULE_LIGHTS_ANIMATOR
+
 #include "fcn_declare.h"
 // #include "const.h"
 // #include "src/dependencies/fastled_slim/fastled_slim.h"
@@ -1381,3 +1384,6 @@ String getDeviceId() {
   return cachedDeviceId;
 }
 
+
+
+#endif

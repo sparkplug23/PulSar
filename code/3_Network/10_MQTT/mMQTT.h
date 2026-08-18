@@ -87,20 +87,28 @@ DEFINE_PGM_CTR(PM_MQTT_LWT_TOPIC_FORMATED)      "%s/status/LWT";
 #define MQTT_MAX_BROKERS 4
 #endif
 
+enum MQTT_HANDLER_PRIORITY_IDS
+{
+  MQTT_HANDLER_PRIORITY_BACKGROUND_ID = 0,
+  MQTT_HANDLER_PRIORITY_NORMAL_ID     = 1,
+  MQTT_HANDLER_PRIORITY_IMPORTANT_ID  = 2,
+  MQTT_HANDLER_PRIORITY_CRITICAL_ID   = 3
+};
+
 typedef union {
   uint16_t data;
   struct {
     uint16_t PeriodicEnabled          : 1;
     uint16_t SendNow                  : 1;
-    uint16_t FrequencyRedunctionLevel : 2;  // 0=unchanged, 1=reduce after 1 min, 2=10 min, 3=60 min
+    uint16_t FrequencyRedunctionLevel : 2;
     uint16_t retain                   : 1;
-
-    uint16_t json_level               : 3;  // 0..8, allows 8 levels safely
-    uint16_t topic_type               : 3;  // 0..8, allows future topic types safely
-
-    uint16_t reserved                 : 5;
+    uint16_t json_level               : 3;
+    uint16_t topic_type               : 3;
+    uint16_t priority                 : 2;
+    uint16_t reserved                 : 3;
   };
 } Handler_Flags;
+
 
 template <typename Class>
 struct handler {
@@ -534,6 +542,11 @@ class mMQTTManager :
 
     WiFiClient* mqtt_client = nullptr;
 
+    bool flag_mqtt_realtime_reduced_rates = false;
+
+    void EnableRealtimeReducedMQTTRates();
+    uint16_t GetRealtimeReducedMQTTRate(uint16_t unique_id, uint16_t current_rate_secs, uint8_t priority);
+
 
     /************************************************************************************************
      * SECTION: Internal Functions
@@ -872,37 +885,65 @@ bool IsAnyBrokerConnected() const
   return false;
 }
 
+// template<typename T>
+// void ServicePeriodicTrigger(handler<T>* handler_ptr)
+// {
+//   if (!handler_ptr->flags.PeriodicEnabled) {
+//     return;
+//   }
+
+//   const uint32_t now = millis();
+
+//   // First send after boot / init
+//   if (handler_ptr->tSavedLastSent == 0) {
+//     handler_ptr->tSavedLastSent = now;
+//     handler_ptr->flags.SendNow = true;
+//     return;
+//   }
+
+//   if (ABS_FUNCTION(now - handler_ptr->tSavedLastSent) < (handler_ptr->tRateSecs * 1000UL)) {
+//     return;
+//   }
+
+//   handler_ptr->tSavedLastSent = now;
+//   handler_ptr->flags.SendNow = true;
+
+//   #ifndef ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
+//   if (flag_uptime_reached_reduce_frequency &&
+//       (handler_ptr->flags.FrequencyRedunctionLevel > MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID)) {
+//     handler_ptr->tRateSecs = handler_ptr->tRateSecs < 120 ? 120 : handler_ptr->tRateSecs;
+//   }
+//   #endif
+// }
+
 template<typename T>
 void ServicePeriodicTrigger(handler<T>* handler_ptr)
 {
-  if (!handler_ptr->flags.PeriodicEnabled) {
-    return;
-  }
+  if (!handler_ptr->flags.PeriodicEnabled) return;
 
   const uint32_t now = millis();
 
-  // First send after boot / init
-  if (handler_ptr->tSavedLastSent == 0) {
+  // First service after boot/init: always send once so MQTT/logging state is populated.
+  if (handler_ptr->tSavedLastSent == 0)
+  {
     handler_ptr->tSavedLastSent = now;
     handler_ptr->flags.SendNow = true;
     return;
   }
 
-  if (ABS_FUNCTION(now - handler_ptr->tSavedLastSent) < (handler_ptr->tRateSecs * 1000UL)) {
-    return;
-  }
+  // Explicit/event-triggered sends bypass the periodic timer.
+  if (handler_ptr->flags.SendNow) return;
+
+  if (ABS_FUNCTION(now - handler_ptr->tSavedLastSent) < (handler_ptr->tRateSecs * 1000UL)) return;
 
   handler_ptr->tSavedLastSent = now;
   handler_ptr->flags.SendNow = true;
 
   #ifndef ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
-  if (flag_uptime_reached_reduce_frequency &&
-      (handler_ptr->flags.FrequencyRedunctionLevel > MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID)) {
-    handler_ptr->tRateSecs = handler_ptr->tRateSecs < 120 ? 120 : handler_ptr->tRateSecs;
-  }
+  if (flag_uptime_reached_reduce_frequency && handler_ptr->flags.FrequencyRedunctionLevel > MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID)
+    handler_ptr->tRateSecs = max<uint16_t>(handler_ptr->tRateSecs, 120);
   #endif
 }
-
 
 
   /**
@@ -955,9 +996,12 @@ void ServicePeriodicTrigger(handler<T>* handler_ptr)
     }
 
     #ifdef ENABLE_DEVFEATURE_MQTT__SUPPRESS_SUBMODULE_IFCHANGED_WHEN_UNIFIED_IS_PREFFERRED
-    if (handler_ptr->tRateSecs == 0) {
-      handler_ptr->flags.PeriodicEnabled = false;
-    }
+    if (handler_ptr->tRateSecs == 0) handler_ptr->flags.PeriodicEnabled = false;
+    #endif
+
+    #ifdef USE_MODULE_LIGHTS_ANIMATOR
+    if (flag_mqtt_realtime_reduced_rates)
+      handler_ptr->tRateSecs = GetRealtimeReducedMQTTRate(unique_id, handler_ptr->tRateSecs, handler_ptr->flags.priority);
     #endif
 
     ServicePeriodicTrigger(handler_ptr);

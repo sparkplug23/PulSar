@@ -1045,8 +1045,10 @@ void mWebServer::serveJson(AsyncWebServerRequest* request)
   //     lDoc["m"] = lDoc.memoryUsage(); // JSON buffer usage, for remote debugging
   // }
 
+  #ifdef ENABLE_DEBUG__JSON_BUFFER_LOCKS
   ALOG_DBG(PSTR("JSON buffer size: %u for request: %d\n"), lDoc.memoryUsage(), subJson);
-
+  #endif
+  
   size_t len = response->setLength();
   ALOG_DBG(PSTR("JSON content length: %d"), len);
 

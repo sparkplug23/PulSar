@@ -49,6 +49,31 @@
 #define inoise16 perlin16 // fastled legacy alias
 
 
+#if !(defined(WLED_DISABLE_PARTICLESYSTEM2D) && defined(WLED_DISABLE_PARTICLESYSTEM1D))
+  #include "ParticleSystem.h" // include particle system code only if at least one system is enabled
+  #ifdef WLED_DISABLE_PARTICLESYSTEM2D
+    #define WLED_PS_DONT_REPLACE_2D_FX
+  #endif
+  #ifdef WLED_DISABLE_PARTICLESYSTEM1D
+    #define WLED_PS_DONT_REPLACE_1D_FX
+  #endif
+  #ifdef ESP8266
+    #if !defined(WLED_DISABLE_PARTICLESYSTEM2D) && !defined(WLED_DISABLE_PARTICLESYSTEM1D)
+      #error ESP8266 does not support 1D and 2D particle systems simultaneously. Please disable one of them.
+    #endif
+  #endif
+#else
+  #define WLED_PS_DONT_REPLACE_1D_FX
+  #define WLED_PS_DONT_REPLACE_2D_FX
+#endif
+#ifdef WLED_PS_DONT_REPLACE_FX
+  #define WLED_PS_DONT_REPLACE_1D_FX
+  #define WLED_PS_DONT_REPLACE_2D_FX
+#endif
+
+
+
+
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Should nearly always be enabled as default/minimal cases
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
@@ -330,7 +355,7 @@ extern bool realtimeRespectLedMaps; // used in getMappedPixelIndex()
 
 /* How much data bytes each segment should max allocate to leave enough space for other segments,
   assuming each segment uses the same amount of data. 256 for ESP8266, 640 for ESP32. */
-#define FAIR_DATA_PER_SEG (MAX_SEGMENT_DATA / getMaxSegments())
+#define FAIR_DATA_PER_SEG (MAX_SEGMENT_DATA / tkr_anim->getMaxSegments())
 
 #define indexToVStrip(index, stripNr) ((index) | (int((stripNr)+1)<<16))
 
@@ -561,9 +586,6 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_SEGMENTS__CTR)        "debug
 #endif 
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE_VECTOR__CTR)        "debug/palette_vector";
-#endif 
-#ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__ANIMATIONS_PROGRESS_CTR)    "debug/animation_progress";
 #endif 
 #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "debug/performance";
@@ -830,10 +852,10 @@ class mAnimatorLight :
     void CommandSet_PaletteID(uint16_t value, uint8_t segment_index = 0);
     void CommandSet_Palette2ID(uint16_t value, uint8_t segment_index = 0);
 
-    void CommandSet_Flasher_FunctionID(uint8_t value, uint8_t segment_index = 0);
+    void CommandSet_Flasher_FunctionID(uint16_t value, uint8_t segment_index = 0);
     int16_t GetFlasherFunctionIDbyName(const char* f);
     const char* GetFlasherFunctionName(char* buffer, uint8_t buflen, uint8_t segment_index = 0);
-    const char* GetFlasherFunctionNamebyID(uint8_t id, char* buffer, uint8_t buflen, bool return_first_option_if_not_found = false);
+    const char* GetFlasherFunctionNamebyID(uint16_t id, char* buffer, uint8_t buflen, bool return_first_option_if_not_found = false);
 
     void CommandSet_Flasher_UpdateColourRegion_RefreshSecs(uint8_t value, uint8_t segment_index = 0);
 
@@ -1104,7 +1126,7 @@ bool doAdvancePlaylist  = false;
     bool getPresetName(byte index, String& name);
     void initPresetsFile();
     bool applyPreset(byte index, byte callMode = CALL_MODE_DIRECT_CHANGE);
-    void applyPresetWithFallback(uint8_t presetID, uint8_t callMode, uint8_t effectID = 0, uint8_t paletteID = 0);
+    void applyPresetWithFallback(uint8_t presetID, uint8_t callMode, uint16_t effectID = 0, uint8_t paletteID = 0);
     void SubTask_Presets();
     inline bool applyTemporaryPreset() {return applyPreset(255);};
 
@@ -1438,9 +1460,20 @@ bool doAdvancePlaylist  = false;
     void EffectAnim__SunPositions__DrawSun_1D_Azimuth_Base(bool include_duskdawn);
     void EffectAnim__SunPositions__DrawSun_1D_Azimuth_01();
     void EffectAnim__SunPositions__DrawSun_1D_Azimuth_02();
-    void EffectAnim__SunPositions__DrawSun_2D_Elevation_And_Azimuth_01();
+    void EffectAnim__SunPositions__DrawSun_2D_Base(bool draw_path, bool draw_sky);
+    void EffectAnim__SunPositions__DrawSun_2D_Position_01();
+    void EffectAnim__SunPositions__DrawSun_2D_Path_24H_01();
+    void EffectAnim__SunPositions__DrawSun_2D_Path_DawnDusk_01();
+    void EffectAnim__SunPositions__DrawSun_2D_Path_SunriseSunset_01();
+    void EffectAnim__SunPositions__DrawSun_2D_Sky_01();
+    void EffectAnim__SunPositions__DrawSun_2D_Sky_Path_01();
     void EffectAnim__SunPositions__White_Colour_Temperature_CCT_Based_On_Elevation_01();
     #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+    #ifdef USE_MODULE_SENSORS_MOON_TRACKING
+    void EffectAnim__MoonPositions__DrawMoon_2D_Base(bool draw_sky);
+    void EffectAnim__MoonPositions__DrawMoon_2D_Phase_01();
+    void EffectAnim__MoonPositions__DrawMoon_2D_Sky_Phase_01();
+    #endif // USE_MODULE_SENSORS_MOON_TRACKING
     #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
     void EffectAnim__Manual__ControlledFromAnotherModule();
     #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
@@ -1969,8 +2002,21 @@ bool doAdvancePlaylist  = false;
       EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_ELEVATION_02__ID,
       EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_AZIMUTH_01__ID,
       EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_1D_AZIMUTH_02__ID,
-      EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_ELEVATION_AND_AZIMUTH_01__ID,
+      EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_POSITION_01__ID,
+      EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_PATH_24H_01__ID,
+      EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_PATH_DAWNDUSK_01__ID,
+      EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_PATH_SUNRISESUNSET_01__ID,
+      EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_SKY_01__ID,
+      EFFECTS_FUNCTION__SUNPOSITIONS_DRAWSUN_2D_SKY_PATH_01__ID,
       EFFECTS_FUNCTION__SUNPOSITIONS_WHITE_COLOUR_TEMPERATURE_CCT_BASED_ON_ELEVATION_01__ID,
+      #endif
+
+      /**
+       * Moon Position
+       **/
+      #ifdef USE_MODULE_SENSORS_MOON_TRACKING
+      EFFECTS_FUNCTION__MOONPOSITIONS_DRAWMOON_2D_PHASE_01__ID,
+      EFFECTS_FUNCTION__MOONPOSITIONS_DRAWMOON_2D_SKY_PHASE_01__ID,
       #endif
 
       /**
@@ -2899,8 +2945,8 @@ uint8_t perlin8(uint16_t x, uint16_t y, uint16_t z) {
 
   void SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg_i = 0);
 
-  int16_t extractModeDefaults(uint8_t mode, const char *segVar);
-  bool extractModeDefaults(uint8_t mode, const char *segVar, char *outBuffer, size_t bufferSize);
+  int16_t extractModeDefaults(uint16_t mode, const char *segVar);
+  bool extractModeDefaults(uint16_t mode, const char *segVar, char *outBuffer, size_t bufferSize);
 
     void Reset_CustomPalette_NamesDefault();
 
@@ -3343,8 +3389,8 @@ class Segment
 
     uint16_t palette_id = 0; 
     uint16_t palette2_id = 0; // never loaded, but used as secondary instead of slider access
-    uint8_t effect_id = 0;    
-    uint8_t effect_id_next = 0;   //e.g. For rotating effect, preload the initial animation and then rotate it/
+    uint16_t effect_id = 0;    
+    uint16_t effect_id_next = 0;   //e.g. For rotating effect, preload the initial animation and then rotate it/
 
 
     /**
@@ -3466,7 +3512,7 @@ class Segment
     
 
     // Effects (Scenes & Flasher), Ambilight, Adalight    
-    uint8_t animation_mode_id = 0; // rename to "effect_id"
+    uint16_t animation_mode_id = 0; // rename to "effect_id"
 
     
     // removing, as name is ambiguous now without neopixel animator
@@ -4471,7 +4517,7 @@ name = nullptr;
     Segment &setCCT(uint16_t k);
     Segment &setOpacity(uint8_t o);
     Segment &setOption(uint8_t n, bool val);
-    Segment &setEffect(uint8_t fx, bool loadDefaults = false);
+    Segment &setEffect(uint16_t fx, bool loadDefaults = false);
     Segment &setPalette(uint8_t pal);
     Segment &setName(const char* name);
     void    refreshLightCapabilities() const;
@@ -5101,15 +5147,15 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
 
   typedef void (*show_callback)(void); // pre show callback
   typedef struct ModeData {
-    uint8_t     _id;   // mode (effect) id
+    uint16_t     _id;   // mode (effect) id
     mode_ptr    _fcn;  // mode (effect) function
     const char *_data; // mode (effect) name and its UI control data
-    ModeData(uint8_t id, void (*fcn)(void), const char *data) : _id(id), _fcn(fcn), _data(data) {}
+    ModeData(uint16_t id, void (*fcn)(void), const char *data) : _id(id), _fcn(fcn), _data(data) {}
   } mode_data_t;
 
   void finalizeInit();
   void service(void);
-  void setEffect(uint8_t segid, uint8_t m);
+  void setEffect(uint8_t segid, uint16_t m);
   void setColor(uint8_t slot, uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0);
   void setColor(uint8_t slot, uint32_t c);
   void setCCT(uint16_t k);
@@ -5139,8 +5185,9 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
   uint16_t _length;
   uint8_t  _brightness;
 
-  uint8_t  _targetFps;
-  uint16_t _frametime;
+  uint8_t  _targetFps = WLED_FPS;
+  uint16_t _frametime = FRAMETIME_FIXED; 
+  uint16_t _cumulativeFps = WLED_FPS << FPS_CALC_SHIFT;
 
     uint32_t *_pixels = nullptr;
 
@@ -5159,7 +5206,7 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
   //   Scale = 1 << FPS_CALC_SHIFT = 128.
   //   _cumulativeFps holds FPS × 128 (no decimals stored, just an int).
   //   This is often written as Q7 (7 fractional bits).
-  uint16_t _cumulativeFps; // _cumulativeFps is fixed-point in units of FPS × 2^FPS_CALC_SHIFT (default 128)
+  // _cumulativeFps is fixed-point in units of FPS × 2^FPS_CALC_SHIFT (default 128)
 
   // will require only 1 byte
   struct {
@@ -5205,16 +5252,16 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
     typedef void (mAnimatorLight::*EffectFunction)();    
     
     #ifdef ENABLE_EFFECT_DESCRIPTIONS    
-    void addEffect(uint8_t id, EffectFunction function, const char* config = nullptr, const char* effect_description = nullptr, uint8_t development_stage = Effect_DevStage::Dev); // add effect to the list; defined in FX.cpp
+    void addEffect(uint16_t id, EffectFunction function, const char* config = nullptr, const char* effect_description = nullptr, uint8_t development_stage = Effect_DevStage::Dev); // add effect to the list; defined in FX.cpp
     #else
-    void addEffect(uint8_t id, EffectFunction function, const char* config = nullptr, uint8_t development_stage=3);// = Effect_DevStage::Dev); // add effect to the list; defined in FX.cpp
+    void addEffect(uint16_t id, EffectFunction function, const char* config = nullptr, uint8_t development_stage=3);// = Effect_DevStage::Dev); // add effect to the list; defined in FX.cpp
     #endif
 
     struct EFFECTS
     {
       std::vector<EffectFunction>     function;    // SRAM footprint: 4 bytes per element
       std::vector<uint8_t>            development_stage; // 0:stable, 1:beta, 2:alpha, 3:dev
-      std::vector<uint8_t>            id;          //
+      std::vector<uint16_t>            id;          //
       std::vector<const char*>        config;      //
       #ifdef ENABLE_EFFECT_DESCRIPTIONS
       std::vector<const char*>        description;       //       
@@ -5290,7 +5337,7 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
     inline uint8_t getMainSegmentId(void) { return _mainSegment; }
     inline uint8_t getPaletteCount() { return 13 + GRADIENT_PALETTE_COUNT; }  // will only return built-in palette count
     inline uint8_t getTargetFps() { return _targetFps; }
-    inline uint8_t getEffectCount() const { return static_cast<uint8_t>(effects.id.size()); }
+    inline uint16_t getEffectCount() const { return static_cast<uint16_t>(effects.id.size()); }
 
     uint16_t getLengthPhysical() const;
     uint16_t getLengthTotal() const; // will include virtual/nonexistent pixels in matrix
@@ -5343,8 +5390,8 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
     inline uint32_t getLastShow(void) { return _lastShow; }
     inline uint32_t segColor(uint8_t i) { return _colors_t_PHASE_OUT[i]; }
 
-    const char* getModeData(uint8_t id = 0) { return (id && id<getEffectCount()) ? effects.config[id] : PSTR("Solid"); }
-    const char* getModeData_Config(uint8_t id = 0) { return (id<getEffectCount()) ? effects.config[id] : PSTR("Unknown"); }
+    const char* getModeData(uint16_t id = 0) { return (id && id<getEffectCount()) ? effects.config[id] : PSTR("Solid"); }
+    const char* getModeData_Config(uint16_t id = 0) { return (id<getEffectCount()) ? effects.config[id] : PSTR("Unknown"); }
 
     const char** getModeDataSrc(void) { return &(effects.config[0]); } // vectors use arrays for underlying data
 
@@ -6064,7 +6111,7 @@ byte notificationSentCallMode _INIT(CALL_MODE_INIT);
 uint8_t notificationCount _INIT(0);
 
 // effects
-byte effectCurrent =0;
+uint16_t effectCurrent =0;
 byte effectSpeed =128;
 byte effectIntensity =128;
 byte effectPalette =0;
@@ -6082,6 +6129,7 @@ bool showWelcomePage _INIT(false);
 byte presetCycCurr _INIT(0);
 byte presetCycMin _INIT(1);
 byte presetCycMax _INIT(5);
+
 
 
 //realtime override modes
@@ -6265,6 +6313,8 @@ private:
 #endif
 
 
+// static PRNG prng = PRNG();//();//hw_random()); // pseudo-random number generator class, seed = hardware random number
+
 
     /************************************************************************************************
      * SECTION: ConstructJSON
@@ -6306,11 +6356,6 @@ private:
     #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
     uint8_t ConstructJSON_Debug_Performance(uint8_t json_level = 0, bool json_appending = true);
     #endif 
-    #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-      uint8_t ConstructJSON_Debug_Animations_Progress(uint8_t json_level = 0, bool json_appending = true);  
-      ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE;
-      mAnimatorLight& setCallback_ConstructJSONBody_Debug_Animations_Progress(ANIMIMATION_DEBUG_MQTT_FUNCTION_SIGNATURE);  
-    #endif
 
     /************************************************************************************************
      * SECTION: MQTT
@@ -6359,9 +6404,6 @@ private:
       #endif
       #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
       struct handler<mAnimatorLight> mqtthandler_debug__performance;
-      #endif
-      #ifdef USE_DEVFEATURE_ENABLE_ANIMATION_SPECIAL_DEBUG_FEEDBACK_OVER_MQTT_WITH_FUNCTION_CALLBACK
-      struct handler<mAnimatorLight> mqtthandler_debug_animations_progress;
       #endif
       
     #endif // USE_MODULE_NETWORK_MQTT
