@@ -82,9 +82,9 @@ class mTreadmillLogger :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mTreadmillLogger>*> mqtthandler_list;
-    struct handler<mTreadmillLogger> mqtthandler_settings;    struct handler<mTreadmillLogger> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mTreadmillLogger>*> telemetry_list;
+    struct telemetry_handler<mTreadmillLogger> telemetry_settings;    struct telemetry_handler<mTreadmillLogger> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
   };

@@ -76,7 +76,7 @@ bool mAnimatorLight::LoadPresetFileMeta(PresetFileMeta &meta)
   JsonObject m = tkr_mfile->pDoc->as<JsonObject>();
 
   meta.enablePsn              = (bool)(m["EnablePSN"]              | 1);
-  meta.enablePlaylistTimeLocks= (bool)(m["EnablePlaylistTimeLocks"]| 0); // default OFF
+  // meta.enablePlaylistTimeLocks= (bool)(m["EnablePlaylistTimeLocks"]| 0); // default OFF
   meta.parserVersion          = (uint8_t)(m["ParserVersion"]       | kPresetMetaParserVersion);
   meta.lastScanMs             = (uint32_t)(m["LastScanMs"]         | 0U);
 
@@ -96,7 +96,7 @@ bool mAnimatorLight::SavePresetFileMeta(const PresetFileMeta &meta)
   JsonObject m = tkr_mfile->pDoc->to<JsonObject>();
 
   m["EnablePSN"]              = meta.enablePsn ? 1 : 0;
-  m["EnablePlaylistTimeLocks"]= meta.enablePlaylistTimeLocks ? 1 : 0;
+  // m["EnablePlaylistTimeLocks"]= meta.enablePlaylistTimeLocks ? 1 : 0;
   m["ParserVersion"]          = meta.parserVersion;
   m["LastScanMs"]             = meta.lastScanMs;
 
@@ -125,64 +125,66 @@ bool mAnimatorLight::SavePresetFileMeta(const PresetFileMeta &meta)
   return true;
 }
 
-// Date Modified: 13Dec25
-bool mAnimatorLight::IsPlaylistTimeLocksEnabled()
-{
-#ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
-  PresetFileMeta meta;
-  if (!LoadPresetFileMeta(meta)) {
-    // If meta missing/unreadable, choose your default:
-    return false; // or true if you want it on by default
-  }
-  return meta.enablePlaylistTimeLocks;
-#else
-  return false;
-#endif
-}
+// // Date Modified: 13Dec25
+// bool mAnimatorLight::IsPlaylistTimeLocksEnabled()
+// {
+// #ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+//   PresetFileMeta meta;
+//   if (!LoadPresetFileMeta(meta)) {
+//     // If meta missing/unreadable, choose your default:
+//     return false; // or true if you want it on by default
+//   }
+//   return meta.enablePlaylistTimeLocks;
+// #else
+//   return false;
+// #endif
+// }
 
-// Date Modified: 13Dec25
-#ifdef ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
-uint8_t mAnimatorLight::Playlist_SelectAllowedIndexByTime(JsonObject playlist, uint8_t currentIndex, uint16_t nowHHMM)
-{
-  if (!IsPlaylistTimeLocksEnabled()) return currentIndex;
+// // Date Modified: 13Dec25
+// #ifdef ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
+// uint8_t mAnimatorLight::Playlist_SelectAllowedIndexByTime(JsonObject playlist, uint8_t currentIndex, uint16_t nowHHMM)
+// {
+//   if (!IsPlaylistTimeLocksEnabled()) return currentIndex;
 
-  JsonArray ps   = playlist["ps"];
-  if (ps.isNull()) return currentIndex;
+//   JsonArray ps   = playlist["ps"];
+//   if (ps.isNull()) return currentIndex;
 
-  uint8_t count = ps.size();
-  if (count == 0) return currentIndex;
+//   uint8_t count = ps.size();
+//   if (count == 0) return currentIndex;
 
-  JsonArray todS = playlist["todS"];
-  JsonArray todE = playlist["todE"];
+//   JsonArray todS = playlist["todS"];
+//   JsonArray todE = playlist["todE"];
 
-  // If no time arrays, nothing to do
-  if (todS.isNull() || todE.isNull()) return currentIndex;
+//   // If no time arrays, nothing to do
+//   if (todS.isNull() || todE.isNull()) return currentIndex;
 
-  uint8_t idx       = currentIndex;
-  uint8_t attempts  = 0;
+//   uint8_t idx       = currentIndex;
+//   uint8_t attempts  = 0;
 
-  while (attempts < count) {
-    int16_t s = 0;
-    int16_t e = 0;
+//   while (attempts < count) {
+//     int16_t s = 0;
+//     int16_t e = 0;
 
-    if (idx < todS.size()) s = todS[idx] | 0;
-    if (idx < todE.size()) e = todE[idx] | 0;
+//     if (idx < todS.size()) s = todS[idx] | 0;
+//     if (idx < todE.size()) e = todE[idx] | 0;
 
-    if (playlistEntryAllowedAtTime(s, e, nowHHMM)) {
-      return idx; // allowed
-    }
+//     if (playlistEntryAllowedAtTime(s, e, nowHHMM)) {
+//       return idx; // allowed
+//     }
 
-    // Skip this entry, move to next
-    idx = (idx + 1) % count;
-    attempts++;
-  }
+//     // Skip this entry, move to next
+//     idx = (idx + 1) % count;
+//     attempts++;
+//   }
 
-  // All entries locked out at this time. Options:
-  //  - return currentIndex (hold)
-  //  - or return some sentinel to pause playlist
-  return currentIndex;
-}
-#endif
+//   // All entries locked out at this time. Options:
+//   //  - return currentIndex (hold)
+//   //  - or return some sentinel to pause playlist
+//   return currentIndex;
+// }
+
+
+// #endif
 
 
 #endif // ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
@@ -517,7 +519,16 @@ void mAnimatorLight::SubTask_Presets()
     if (!fdo["seg"].isNull() || !fdo["on"].isNull() || !fdo["bri"].isNull() || !fdo["nl"].isNull() || !fdo["ps"].isNull() || !fdo[F("playlist")].isNull()) changePreset = true;
     if (!(tmpMode == CALL_MODE_BUTTON_PRESET && fdo["ps"].is<const char *>() && strchr(fdo["ps"].as<const char *>(),'~') != strrchr(fdo["ps"].as<const char *>(),'~')))
       fdo.remove("ps"); // remove load request for presets to prevent recursive crash (if not called by button and contains preset cycling string "1~5~")
-    deserializeState(fdo, CALL_MODE_NO_NOTIFY, tmpPreset); // may change presetToApply by calling applyPreset()
+    // deserializeState(fdo, CALL_MODE_NO_NOTIFY, tmpPreset); // may change presetToApply by calling applyPreset()
+
+    if (!fdo[F("playlist")].isNull() ||
+    !fdo["seg"].isNull() ||
+    !fdo["on"].isNull() ||
+    !fdo["bri"].isNull() ||
+    !fdo["nl"].isNull())
+    {
+      deserializeState(fdo, CALL_MODE_NO_NOTIFY, tmpPreset);
+    }
 
   }
 
@@ -542,10 +553,11 @@ void mAnimatorLight::SubTask_Presets()
 
   if (changePreset) notify(tmpMode); // force UDP notification
 
-  // stateUpdated(tmpMode);  // was colorUpdated() if anything breaks
+  stateUpdated(tmpMode);  // was colorUpdated() if anything breaks
   Serial.println("stateUpdated() missing");
-  // updateInterfaces(tmpMode);
+  updateInterfaces(tmpMode);
   Serial.println("updateInterfaces() missing");
+
 
 }
 

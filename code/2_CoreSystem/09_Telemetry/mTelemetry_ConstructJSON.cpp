@@ -1592,7 +1592,7 @@ uint8_t mTelemetry::ConstructJSON_TaskerManager(uint8_t json_level, bool json_ap
                             uint8_t mTelemetry::ConstructJSON_Debug__Settings_Storage(uint8_t json_level, bool json_appending)
                             {
 
-                              mqtthandler_debug__settings_storage.tRateSecs = 1;
+                              telemetry_debug__settings_storage.tRateSecs = 1;
 
                               JBI->Start();
 

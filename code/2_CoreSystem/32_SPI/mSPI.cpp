@@ -54,13 +54,13 @@ int8_t mSPI::Tasker(uint8_t function, JsonParserObject obj)
   //    * MQTT SECTION * 
   //   *******************/
   //   #ifdef USE_MODULE_NETWORK_MQTT
-  //   case TASK_MQTT_HANDLERS_INIT:
-  //     MQTTHandler_Init();
+  //   case TASK_TELEMETRY_HANDLERS_INIT:
+  //     Telemetry_Init();
   //   break;
-  //   case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+  //   case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
   //     MQTTHandler_Rate();
   //   break;
-  //   case TASK_MQTT_SENDER:
+  //   case TASK_TELEMETRY__SENDER_MQTT:
   //     MQTTHandler_Sender();
   //   break;
   //   case TASK_MQTT_CONNECTED:

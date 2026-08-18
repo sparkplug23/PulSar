@@ -144,18 +144,33 @@ int8_t mDoorBell::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
     break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender(); //optional pass parameter
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
     break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
     break;
+    #ifdef USE_MODULE_NETWORK_MQTT
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
+    break;
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
+    break;
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
+    break;
+    #endif
   }
   
   /************
@@ -197,7 +212,7 @@ void mDoorBell::EveryLoop(){
     // doorbell_switch.changedtime = tkr_time->RtcTime;
     doorbell_switch.event.detected_time = tkr_time->GetTimeShortNowU32();
     // fUpdateSendDoorSensor = true;
-    mqtthandler_sensor_ifchanged.flags.SendNow = true;
+    telemetry_sensor_ifchanged.flags.SendNow = true;
     
   }
 
@@ -239,36 +254,36 @@ uint8_t mDoorBell::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-void mDoorBell::MQTTHandler_Init(){
+void mDoorBell::Telemetry_Init(){
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 600; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mDoorBell::ConstructJSON_Settings;
 
-  ptr = &mqtthandler_sensor_teleperiod;
+  ptr = &telemetry_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 600; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MOTION_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_MOTION_CTR;
   ptr->ConstructJSON_function = &mDoorBell::ConstructJSON_Sensor;
 
-  ptr = &mqtthandler_sensor_ifchanged;
+  ptr = &telemetry_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_MOTION_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_MOTION_CTR;
   ptr->ConstructJSON_function = &mDoorBell::ConstructJSON_Sensor;
   
 } 
@@ -276,38 +291,38 @@ void mDoorBell::MQTTHandler_Init(){
 
 void mDoorBell::MQTTHandler_RefreshAll(){
 
-  mqtthandler_settings.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
+  telemetry_settings.flags.SendNow = true;
+  telemetry_sensor_ifchanged.flags.SendNow = true;
+  telemetry_sensor_teleperiod.flags.SendNow = true;
 
 } 
 
 
 void mDoorBell::MQTTHandler_Rate(){
 
-  // mqtthandler_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-  // mqtthandler_sensor_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+  // telemetry_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+  // telemetry_sensor_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Rate"
 
 
 void mDoorBell::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-  uint8_t mqtthandler_list_ids[] = {
+  uint8_t telemetry_list_ids[] = {
     MQTT_HANDLER_SETTINGS_ID, 
     MQTT_HANDLER_SENSOR_IFCHANGED_ID, 
     MQTT_HANDLER_SENSOR_TELEPERIOD_ID
   };
   
-  struct handler<mDoorBell>* mqtthandler_list_ptr[] = {
-    &mqtthandler_settings,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
+  struct telemetry_handler<mDoorBell>* telemetry_list_ptr[] = {
+    &telemetry_settings,
+    &telemetry_sensor_ifchanged,
+    &telemetry_sensor_teleperiod
   };
 
   tkr_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_CONTROLLER_DOORBELL_ID,
-    mqtthandler_list_ptr, mqtthandler_list_ids,
-    sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+    telemetry_list_ptr, telemetry_list_ids,
+    sizeof(telemetry_list_ptr)/sizeof(telemetry_list_ptr[0]),
     mqtt_handler_id
   );
 

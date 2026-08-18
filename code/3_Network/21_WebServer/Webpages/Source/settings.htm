@@ -2,50 +2,35 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
-	<title>PulSar Settings2</title>
-	<script src="common.js" async type="text/javascript"></script>
+	<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
+	<title>PulSar Settings</title>
+	<style>html{visibility:hidden}</style>
 	<script>
-		function S() {
-			getLoc();
-			loadJS(getURL('/lights/settings/s.js?p=0'), false);	// If we set async false, file is loaded and executed, then next statement is processed
-		}
+		(function loadFiles(){
+			const l=document.createElement('script');
+			l.src='/common.js';
+			l.onload=()=>loadResources(['/style.css'],S);
+			l.onerror=()=>setTimeout(loadFiles,100);
+			document.head.appendChild(l);
+		})();
+		function S(){getLoc();}
 	</script>
 	<style>
-		body {
-			text-align: center;
-			background: #222;
-			height: 100px;
-			margin: 0;
-		}
-		html {
-			--h: 9vh;
-		}
-		button {
-			background: #333;
-			color: #fff;
-			font-family: Verdana, Helvetica, sans-serif;
-			display: block;
-			border: 1px solid #333;
-			border-radius: var(--h);
-			font-size: 6vmin;
-			height: var(--h);
-			width: calc(100% - 40px);
-			margin: 2vh auto 0;
-			cursor: pointer;
-		}
+		body{height:100px;margin:0 auto;max-width:520px}
+		html{--h:9vh}
+		button{display:block;border-radius:var(--h);font-size:clamp(1rem,6vw,2rem);height:var(--h);width:calc(100% - 40px);margin:2vh auto 0;padding:0}
 	</style>
 </head>
-<body onload="S()">
-<button type=submit id="b" onclick="window.location=getURL('/lights')">Back to /lights</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/wifi')">WiFi Setup</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/leds')">LED Preferences</button>
-<button id="2dbtn" type="submit" onclick="window.location=getURL('/lights/settings/2D')">2D Configuration</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/ui')">User Interface</button>
-<button id="dmxbtn" style="display:none;" type="submit" onclick="window.location=getURL('/settings2/dmx')">DMX Output</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/sync')">Sync Interfaces</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/time')">Time & Macros</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/um')">Usermods</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/sec')">Security & Updates</button>
+<body>
+<h2>PulSar Settings</h2>
+<button type="submit" onclick="window.location=getURL('/settings/network')">Network</button>
+<button type="submit" onclick="window.location=getURL('/settings/hardware')">Hardware</button>
+<button type="submit" onclick="window.location=getURL('/settings/system')">System</button>
+<button type="submit" onclick="window.location=getURL('/settings/modules')">Modules</button>
+<button type="submit" onclick="window.location=getURL('/settings/storage')">Storage</button>
+<button type="submit" onclick="window.location=getURL('/settings/logging')">Logging</button>
+<button type="submit" onclick="window.location=getURL('/settings/security')">Security</button>
+<button type="submit" onclick="window.location=getURL('/update')">Firmware Update</button>
+<button type="submit" onclick="window.location=getURL('/')">Back</button>
 </body>
 </html>

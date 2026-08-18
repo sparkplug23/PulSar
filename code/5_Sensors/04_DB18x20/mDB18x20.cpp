@@ -66,23 +66,33 @@ int8_t mDB18x20::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID:
       Scan_ReportAsJsonBuilder();
     break;
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT    
+    #endif   
   }
   return 1;
 
@@ -556,54 +566,54 @@ void mDB18x20::parse_JSONCommand(JsonParserObject obj)
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mDB18x20::MQTTHandler_Init(){
+void mDB18x20::Telemetry_Init(){
 
-  struct handler<mDB18x20>* ptr;
+  struct telemetry_handler<mDB18x20>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetConfigPeriod_SubModule(); 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mDB18x20::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_teleperiod;
+  ptr = &telemetry_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false; 
   ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mDB18x20::ConstructJSON_Sensor;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_ifchanged;
+  ptr = &telemetry_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false; 
   ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mDB18x20::ConstructJSON_Sensor;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   #ifdef ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
-  ptr = &mqtthandler_debug; // Each sensor should have its own debug channel for extra output only when needed
+  ptr = &telemetry_debug; // Each sensor should have its own debug channel for extra output only when needed
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false; 
   ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE__DEBUG__ID;
   ptr->flags.json_level = JSON_LEVEL_ALL;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mDB18x20::ConstructJSON_Debug;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   #endif // ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
 
 } 

@@ -103,10 +103,10 @@ class mDoorSensor :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mDoorSensor>*> mqtthandler_list;
-    struct handler<mDoorSensor> mqtthandler_settings;
-    struct handler<mDoorSensor> mqtthandler_sensor_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mDoorSensor>*> telemetry_list;
+    struct telemetry_handler<mDoorSensor> telemetry_settings;
+    struct telemetry_handler<mDoorSensor> telemetry_sensor_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

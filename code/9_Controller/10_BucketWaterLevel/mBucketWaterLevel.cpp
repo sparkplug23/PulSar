@@ -36,23 +36,33 @@ int8_t mBucketWaterLevel::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
   }
 
 }
@@ -226,7 +236,7 @@ void mBucketWaterLevel::MeasureADCWithRelay()
 
 
   tkr_relay->CommandSet_Relay_Power(0);
-  mqtthandler_state_ifchanged.flags.SendNow = true;
+  telemetry_state_ifchanged.flags.SendNow = true;
 
 
 

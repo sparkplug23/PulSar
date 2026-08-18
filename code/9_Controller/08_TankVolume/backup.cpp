@@ -333,8 +333,8 @@
       
 //       // if(mTime::TimeReached(&tSavedSendMQTTIfChanged,10*1000)){
 //       //   MQTTHandler_RefreshAll();
-//       //   // mqtthandler_.flags.SendNow = true;
-//       //   // mqtthandler_ifchanged_detailed.flags.SendNow = true;
+//       //   // telemetry_.flags.SendNow = true;
+//       //   // telemetry_ifchanged_detailed.flags.SendNow = true;
 //       // }
 
 //     break;
@@ -354,14 +354,14 @@
 //     /************
 //      * MQTT SECTION * 
 //     *******************/
-//     case TASK_MQTT_HANDLERS_INIT:
+//     case TASK_TELEMETRY_HANDLERS_INIT:
 //     case TASK_MQTT_HANDLERS_RESET:
-//       MQTTHandler_Init(); // Reset to the initial parameters
+//       Telemetry_Init(); // Reset to the initial parameters
 //     break;
-//     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+//     case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
 //       MQTTHandler_Rate(); // Load teleperiod setting into local handlers
 //     break;
-//     case TASK_MQTT_SENDER:
+//     case TASK_TELEMETRY__SENDER_MQTT:
 //       MQTTHandler_Sender(); //optional pass parameter
 //     break;
 //     case TASK_MQTT_CONNECTED:
@@ -833,56 +833,56 @@
 
 // ////////////////////// START OF MQTT /////////////////////////
 
-// void mTankVolumeUltrasonic::MQTTHandler_Init(){
+// void mTankVolumeUltrasonic::Telemetry_Init(){
 
-//   ptr = &mqtthandler_settings;
+//   ptr = &telemetry_settings;
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
 //   ptr->tRateSecs = 60; 
 //   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+//   ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
 //   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Settings;
   
-//   ptr = &mqtthandler_litres_ifchanged;
+//   ptr = &telemetry_litres_ifchanged;
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
 //   ptr->tRateSecs = 60; 
 //   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
+//   ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
 //   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Litres;
   
-//   ptr = &mqtthandler_litres_teleperiod;
+//   ptr = &telemetry_litres_teleperiod;
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
 //   ptr->tRateSecs = 60*60; 
 //   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 //   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
+//   ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
 //   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Litres;
 
-//   ptr = &mqtthandler_furnace_ifchanged;
+//   ptr = &telemetry_furnace_ifchanged;
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
 //   ptr->tRateSecs = 60; 
 //   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
+//   ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
 //   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Furnace;
   
-//   ptr = &mqtthandler_furnace_teleperiod;
+//   ptr = &telemetry_furnace_teleperiod;
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true;
 //   ptr->tRateSecs = 60*60; 
 //   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 //   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
+//   ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
 //   ptr->ConstructJSON_function = &mTankVolumeUltrasonic::ConstructJSON_Furnace;
 
 // } 
@@ -890,20 +890,20 @@
 
 // void mTankVolumeUltrasonic::MQTTHandler_RefreshAll(){
 
-//   mqtthandler_settings.flags.SendNow = true;
-//   mqtthandler_litres_ifchanged.flags.SendNow = true;
-//   mqtthandler_litres_teleperiod.flags.SendNow = true;
-//   mqtthandler_furnace_ifchanged.flags.SendNow = true;
-//   mqtthandler_furnace_teleperiod.flags.SendNow = true;
+//   telemetry_settings.flags.SendNow = true;
+//   telemetry_litres_ifchanged.flags.SendNow = true;
+//   telemetry_litres_teleperiod.flags.SendNow = true;
+//   telemetry_furnace_ifchanged.flags.SendNow = true;
+//   telemetry_furnace_teleperiod.flags.SendNow = true;
 
 // } 
 
 
 // void mTankVolumeUltrasonic::MQTTHandler_Rate(){
 
-//   mqtthandler_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-//   mqtthandler_litres_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-//   mqtthandler_furnace_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+//   telemetry_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+//   telemetry_litres_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+//   telemetry_furnace_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 
 // } //end "MQTTHandler_Rate"
 
@@ -911,7 +911,7 @@
 
 // void mTankVolumeUltrasonic::MQTTHandler_Sender(uint8_t mqtt_handler_id){
 
-//   uint8_t mqtthandler_list_ids[] = {
+//   uint8_t telemetry_list_ids[] = {
 //     MQTT_HANDLER_SETTINGS_ID, 
 //     MQTT_HANDLER_MODULE_LITRES_IFCHANGED_ID, 
 //     MQTT_HANDLER_MODULE_LITRES_TELEPERIOD_ID,
@@ -919,17 +919,17 @@
 //     MQTT_HANDLER_MODULE_FURNACE_TELEPERIOD_ID
 //   };
   
-//   struct handler<mTankVolumeUltrasonic>* mqtthandler_list_ptr[] = {
-//     &mqtthandler_settings,
-//     &mqtthandler_litres_ifchanged,
-//     &mqtthandler_litres_teleperiod,
-//     &mqtthandler_furnace_ifchanged,
-//     &mqtthandler_furnace_teleperiod
+//   struct telemetry_handler<mTankVolumeUltrasonic>* telemetry_list_ptr[] = {
+//     &telemetry_settings,
+//     &telemetry_litres_ifchanged,
+//     &telemetry_litres_teleperiod,
+//     &telemetry_furnace_ifchanged,
+//     &telemetry_furnace_teleperiod
 //   };
 
 //   tkr_mqtt->MQTTHandler_Command_Array_Group(*this, EM_MODULE_CONTROLLER_TANKVOLUME_ID,
-//     mqtthandler_list_ptr, mqtthandler_list_ids,
-//     sizeof(mqtthandler_list_ptr)/sizeof(mqtthandler_list_ptr[0]),
+//     telemetry_list_ptr, telemetry_list_ids,
+//     sizeof(telemetry_list_ptr)/sizeof(telemetry_list_ptr[0]),
 //     mqtt_handler_id
 //   );
 

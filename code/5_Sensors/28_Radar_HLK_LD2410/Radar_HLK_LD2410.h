@@ -165,10 +165,10 @@ class mHLK_LD2410 :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-      void MQTTHandler_Init();
-      std::vector<struct handler<mHLK_LD2410>*> mqtthandler_list;    
-      struct handler<mHLK_LD2410> mqtthandler_settings;
-      struct handler<mHLK_LD2410> mqtthandler_sensor_ifchanged;
+      void Telemetry_Init();
+      std::vector<struct telemetry_handler<mHLK_LD2410>*> telemetry_list;    
+      struct telemetry_handler<mHLK_LD2410> telemetry_settings;
+      struct telemetry_handler<mHLK_LD2410> telemetry_sensor_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

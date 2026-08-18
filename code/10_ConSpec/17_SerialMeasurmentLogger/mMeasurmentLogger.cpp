@@ -54,14 +54,14 @@
 //      * MQTT SECTION * 
 //     *******************/
 //     #ifdef USE_MODULE_NETWORK_MQTT
-//     case TASK_MQTT_HANDLERS_INIT:
+//     case TASK_TELEMETRY_HANDLERS_INIT:
 //     case TASK_MQTT_HANDLERS_RESET:
-//       MQTTHandler_Init();
+//       Telemetry_Init();
 //     break;
-//     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+//     case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
 //       MQTTHandler_Rate();
 //     break;
-//     case TASK_MQTT_SENDER:
+//     case TASK_TELEMETRY__SENDER_MQTT:
 //       MQTTHandler_Sender();
 //     break;
 //     #endif //USE_MODULE_NETWORK_MQTT

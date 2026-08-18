@@ -238,7 +238,7 @@
 #define D_TASK_MQTT_CONNECTED_CTR                           "MQTT_CONNECTED"
 #define D_TASK_MQTT_DISCONNECTED_CTR                        "MQTT_DISCONNECTED"
 #define D_TASK_MQTT_COMMAND_CTR                             "MQTT_COMMAND"
-#define D_TASK_MQTT_SENDER_CTR                              "MQTT_SENDER"
+#define D_TASK_TELEMETRY__SENDER_MQTT_CTR                              "MQTT_SENDER"
 #define D_TASK_MQTT_HANDLERS_RESET_CTR                      "MQTT_HANDLERS_RESET"
 #define D_TASK_MQTT_HANDLERS_INIT_CTR                       "MQTT_HANDLERS_INIT"
 #define D_TASK_MQTT_HANDLERS_REFRESH_TELEPERIOD_CTR         "MQTT_HANDLERS_REFRESH_TELEPERIOD"

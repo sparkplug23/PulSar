@@ -94,26 +94,26 @@ void WebAppend_Root_Status_Table();
   
   //#ifdef USE_CORE_MQTT 
 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
-    struct handler<mFan>* ptr;
+    struct telemetry_handler<mFan>* ptr;
     void MQTTHandler_Sender();
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mFan> mqtthandler_settings;
+    struct telemetry_handler<mFan> telemetry_settings;
     
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "power";
-    struct handler<mFan> mqtthandler_sensor_ifchanged;
-    struct handler<mFan> mqtthandler_sensor_teleperiod;
+    struct telemetry_handler<mFan> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mFan> telemetry_sensor_teleperiod;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
-  struct handler<mFan>* mqtthandler_list[3] = {
-    &mqtthandler_settings,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
+  struct telemetry_handler<mFan>* telemetry_list[3] = {
+    &telemetry_settings,
+    &telemetry_sensor_ifchanged,
+    &telemetry_sensor_teleperiod
   };
 
 };

@@ -3211,7 +3211,7 @@ void mAnimatorLight::SubLoad_Sequencer_Device(uint8_t id)
 
   sequencer_runtime.seconds_remaining_on_item = 0; // Load now
 
-  mqtthandler_automation_sequencer.flags.SendNow = true;
+  telemetry_automation_sequencer.flags.SendNow = true;
 
 
   sequencer_runtime.loaded_sequence_set = id;
@@ -6394,7 +6394,7 @@ void mAnimatorLight::SubLoad_Sequencer_Device(uint8_t id)
 
 //   sequencer_runtime.seconds_remaining_on_item = 0; // Load now
 
-//   mqtthandler_automation_sequencer.flags.SendNow = true;
+//   telemetry_automation_sequencer.flags.SendNow = true;
 
 //   #endif // ENABBLE_FEATURE_SEQUENCE__PLAYLIST_OUTSIDE_CHRISTMAS_TREE__VERSION_ONE__NO_TIME_RESTRAINTS
 

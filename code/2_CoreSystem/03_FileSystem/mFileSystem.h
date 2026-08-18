@@ -288,16 +288,16 @@ class mFileSystem :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mFileSystem>*> mqtthandler_list;
+    std::vector<struct telemetry_handler<mFileSystem>*> telemetry_list;
 
-    struct handler<mFileSystem> mqtthandler_settings;
-    struct handler<mFileSystem> mqtthandler_sensor_ifchanged;
-    struct handler<mFileSystem> mqtthandler_sensor_teleperiod;
+    struct telemetry_handler<mFileSystem> telemetry_settings;
+    struct telemetry_handler<mFileSystem> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mFileSystem> telemetry_sensor_teleperiod;
     #endif
 
 };

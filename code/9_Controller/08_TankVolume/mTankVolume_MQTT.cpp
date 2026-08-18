@@ -4,68 +4,68 @@
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mTankVolume::MQTTHandler_Init(){
+void mTankVolume::Telemetry_Init(){
 
-  struct handler<mTankVolume>* ptr;
+  struct telemetry_handler<mTankVolume>* ptr;
  
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mTankVolume::ConstructJSON_Settings;
   
-  ptr = &mqtthandler_litres_ifchanged;
+  ptr = &telemetry_litres_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
   ptr->ConstructJSON_function = &mTankVolume::ConstructJSON_Litres;
   
-  ptr = &mqtthandler_litres_teleperiod;
+  ptr = &telemetry_litres_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 120; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_LITRES_CTR;
   ptr->ConstructJSON_function = &mTankVolume::ConstructJSON_Litres;
 
-  ptr = &mqtthandler_furnace_ifchanged;
+  ptr = &telemetry_furnace_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
   ptr->ConstructJSON_function = &mTankVolume::ConstructJSON_Furnace;
   
-  ptr = &mqtthandler_furnace_teleperiod;
+  ptr = &telemetry_furnace_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60*60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_FURNACE_CTR;
   ptr->ConstructJSON_function = &mTankVolume::ConstructJSON_Furnace;
   
 } 
 
 /**
- * @brief Set flag for all mqtthandlers to send
+ * @brief Set flag for all telemetryhandlers to send
  * */
 void mTankVolume::MQTTHandler_RefreshAll()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     handle->flags.SendNow = true;
   }
 }
@@ -75,7 +75,7 @@ void mTankVolume::MQTTHandler_RefreshAll()
  * */
 void mTankVolume::MQTTHandler_Rate()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
       handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
@@ -88,7 +88,7 @@ void mTankVolume::MQTTHandler_Rate()
  * */
 void mTankVolume::MQTTHandler_Sender()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }

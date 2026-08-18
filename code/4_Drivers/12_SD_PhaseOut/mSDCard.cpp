@@ -564,17 +564,17 @@
 //      * MQTT SECTION * 
 //     *******************/
 //     #ifdef USE_MODULE_NETWORK_MQTT
-//     case TASK_MQTT_HANDLERS_INIT:
-//       MQTTHandler_Init();
+//     case TASK_TELEMETRY_HANDLERS_INIT:
+//       Telemetry_Init();
 //     break;
-//     case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-//       tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+//     case TASK_TELEMETRY_REFRESH_SEND_ALL:
+//       tkr_tele->TelemetryHandler_RefreshAll(telemetry_list);
 //     break;
-//     case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-//       tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+//     case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+//       tkr_mqtt->MQTTHandler_Rate(telemetry_list);
 //     break;
-//     case TASK_MQTT_SENDER:
-//       tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+//     case TASK_TELEMETRY__SENDER_MQTT:
+//       tkr_mqtt->MQTTHandler_Sender(telemetry_list, *this);
 //     break;
 //     #endif // USE_MODULE_NETWORK_MQTT
 //   }
@@ -983,7 +983,7 @@
 //   // }
 
 //   #ifdef USE_MODULE_NETWORK_MQTT
-//   mqtthandler_file_writer.flags.SendNow = true;
+//   telemetry_file_writer.flags.SendNow = true;
 //   #endif// USE_MODULE_NETWORK_MQTT
 
 //   // if(write_test_count++ > 1)
@@ -1122,7 +1122,7 @@
 
 //   // }
   
-//   tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+//   tkr_tele->TelemetryHandler_RefreshAll(telemetry_list);
 
 // }
 
@@ -1192,43 +1192,43 @@
 
 // #ifdef USE_MODULE_NETWORK_MQTT
 
-// void mSDCard::MQTTHandler_Init()
+// void mSDCard::Telemetry_Init()
 // {
 
-//   struct handler<mSDCard>* ptr;
+//   struct telemetry_handler<mSDCard>* ptr;
 
-//   ptr = &mqtthandler_settings;
+//   ptr = &telemetry_settings;
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = true;
 //   ptr->flags.SendNow = true; // DEBUG CHANGE
 //   ptr->tRateSecs = 120; 
 //   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
 //   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+//   ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
 //   ptr->ConstructJSON_function = &mSDCard::ConstructJSON_Settings;
-//   mqtthandler_list.push_back(ptr);
+//   telemetry_list.push_back(ptr);
 
-//   ptr = &mqtthandler_file_writer;
+//   ptr = &telemetry_file_writer;
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = false;
 //   ptr->flags.SendNow = false;
 //   ptr->tRateSecs = 1; 
 //   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 //   ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_FILE_WRITER_CTR;
+//   ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_FILE_WRITER_CTR;
 //   ptr->ConstructJSON_function = &mSDCard::ConstructJSON_FileWriter;
-//   mqtthandler_list.push_back(ptr);
+//   telemetry_list.push_back(ptr);
 
-//   ptr = &mqtthandler_debug_write_times;
+//   ptr = &telemetry_debug_write_times;
 //   ptr->tSavedLastSent = 0;
 //   ptr->flags.PeriodicEnabled = false;
 //   ptr->flags.SendNow = false;
 //   ptr->tRateSecs = 1; 
 //   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
 //   ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
-//   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_WRITE_TIMES_CTR;
+//   ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_WRITE_TIMES_CTR;
 //   ptr->ConstructJSON_function = &mSDCard::ConstructJSON_Debug_WriteTimes;
-//   mqtthandler_list.push_back(ptr);
+//   telemetry_list.push_back(ptr);
 
 // } 
 

@@ -100,9 +100,9 @@ class mServerResetRelays :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mServerResetRelays>*> mqtthandler_list;
-    struct handler<mServerResetRelays> mqtthandler_settings;    struct handler<mServerResetRelays> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mServerResetRelays>*> telemetry_list;
+    struct telemetry_handler<mServerResetRelays> telemetry_settings;    struct telemetry_handler<mServerResetRelays> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

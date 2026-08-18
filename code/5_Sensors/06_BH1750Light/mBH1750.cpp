@@ -65,23 +65,33 @@ int8_t mBH1750::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
   }
   
   return function_result;
@@ -335,43 +345,43 @@ uint8_t mBH1750::ConstructJSON_Sensor(uint8_t json_level, bool json_appending)
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mBH1750::MQTTHandler_Init()
+void mBH1750::Telemetry_Init()
 {
 
-  struct handler<mBH1750>* ptr;
+  struct telemetry_handler<mBH1750>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetConfigPeriod(); 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mBH1750::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_teleperiod;
+  ptr = &telemetry_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetTelePeriod(); 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mBH1750::ConstructJSON_Sensor;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_ifchanged;
+  ptr = &telemetry_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetIfChangedPeriod(); 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mBH1750::ConstructJSON_Sensor;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
 } 
   

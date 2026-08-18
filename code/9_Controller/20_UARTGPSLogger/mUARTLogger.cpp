@@ -53,20 +53,33 @@ int8_t mUARTLogger::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
   }
   
   return function_result;
@@ -192,38 +205,38 @@ uint8_t mUARTLogger::ConstructJSON_Sensor(uint8_t json_level, bool json_appendin
 **********************************************************************************************************************************************
 ********************************************************************************************************************************************/
 
-void mUARTLogger::MQTTHandler_Init(){
+void mUARTLogger::Telemetry_Init(){
 
-  struct handler<mUARTLogger>* ptr;
+  struct telemetry_handler<mUARTLogger>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mUARTLogger::ConstructJSON_Settings;
 
-  ptr = &mqtthandler_sensor_teleperiod;
+  ptr = &telemetry_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mUARTLogger::ConstructJSON_Sensor;
 
-  ptr = &mqtthandler_sensor_ifchanged;
+  ptr = &telemetry_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mUARTLogger::ConstructJSON_Sensor;
   
 } 
@@ -231,17 +244,17 @@ void mUARTLogger::MQTTHandler_Init(){
 
 void mUARTLogger::MQTTHandler_RefreshAll(){
 
-  mqtthandler_settings.flags.SendNow = true;
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  mqtthandler_sensor_teleperiod.flags.SendNow = true;
+  telemetry_settings.flags.SendNow = true;
+  telemetry_sensor_ifchanged.flags.SendNow = true;
+  telemetry_sensor_teleperiod.flags.SendNow = true;
 
 } 
 
 
 void mUARTLogger::MQTTHandler_Rate(){
 
-  mqtthandler_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-  mqtthandler_sensor_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+  telemetry_settings.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
+  telemetry_sensor_teleperiod.tRateSecs = tkr_mqtt->dt.teleperiod_secs;
 
 } //end "MQTTHandler_Rate"
 

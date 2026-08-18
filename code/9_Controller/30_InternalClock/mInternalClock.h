@@ -61,22 +61,22 @@ class mInternalClock :
     uint8_t ConstructJSON_Power(uint8_t json_level = 0, bool json_appending = true);
 
   
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
 
-    struct handler<mInternalClock> mqtthandler_settings;
-    struct handler<mInternalClock> mqtthandler_power_ifchanged;
-    struct handler<mInternalClock> mqtthandler_power_teleperiod;
+    struct telemetry_handler<mInternalClock> telemetry_settings;
+    struct telemetry_handler<mInternalClock> telemetry_power_ifchanged;
+    struct telemetry_handler<mInternalClock> telemetry_power_teleperiod;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
-    struct handler<mInternalClock>* mqtthandler_list[3] = {
-      &mqtthandler_settings,
-      &mqtthandler_power_ifchanged,
-      &mqtthandler_power_teleperiod
+    struct telemetry_handler<mInternalClock>* telemetry_list[3] = {
+      &telemetry_settings,
+      &telemetry_power_ifchanged,
+      &telemetry_power_teleperiod
     };
 
 };

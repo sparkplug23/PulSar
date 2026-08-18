@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
+	<title>Module Settings</title>
+	<style>html{visibility:hidden}</style>
+	<script>
+		(function loadFiles(){const l=document.createElement('script');l.src='/common.js';l.onload=()=>loadResources(['/style.css'],S);l.onerror=()=>setTimeout(loadFiles,100);document.head.appendChild(l);})();
+		function S(){getLoc();}
+	</script>
+</head>
+<body>
+<form id="form_s" name="Sf" method="post">
+<div class="toprow"><button type="button" onclick="B()">Back</button><button type="submit">Save</button><hr></div>
+<h2>Modules</h2>
+
+<div class="sec">
+<h3>Installed Modules</h3>
+<div id="module_list"><i>Enabled PulSar modules will appear here.</i></div>
+</div>
+
+<div class="sec">
+<h3>Module Control</h3>
+<div id="module_controls"><i>Module-specific configuration links and controls will appear here.</i></div>
+</div>
+
+<hr><button type="button" onclick="B()">Back</button><button type="submit">Save</button>
+</form>
+<div id="toast"></div>
+</body>
+</html>

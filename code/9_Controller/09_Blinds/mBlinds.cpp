@@ -27,7 +27,7 @@ int8_t mBlinds::Tasker(uint8_t function, JsonParserObject obj){ //Serial.println
     case TASK_LOOP: 
       //SubTasker_ADC_Measure();
     break;
-    case TASK_MQTT_SENDER:
+    case TASK_TELEMETRY__SENDER_MQTT:
       //SubTasker_MQTTSender();
       
       // if(abs(millis()-tSaved)>(ISACTIVE()?1000:120000)){tSaved=millis();

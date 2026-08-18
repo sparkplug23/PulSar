@@ -46,20 +46,33 @@ int8_t mMAVLink_Decoder::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
   }
   
   return function_result;
@@ -1796,548 +1809,548 @@ uint8_t mMAVLink_Decoder::ConstructJSON_vibration(uint8_t json_level, bool json_
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mMAVLink_Decoder::MQTTHandler_Init()
+void mMAVLink_Decoder::Telemetry_Init()
 {
 
-  struct handler<mMAVLink_Decoder>* ptr;
+  struct telemetry_handler<mMAVLink_Decoder>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_overview_01;
+  ptr = &telemetry_overview_01;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_OVERVIEW_01_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_OVERVIEW_01_CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Overview_01;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_overview_02;
+  ptr = &telemetry_overview_02;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_OVERVIEW_02_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_OVERVIEW_02_CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Overview_02;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   #ifdef ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
 
   // 163,AHRS
-  ptr = &mqtthandler_mavlink_packet__ahrs;
+  ptr = &telemetry_mavlink_packet__ahrs;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__AHRS__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__AHRS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_ahrs;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   // 178,AHRS2
-  ptr = &mqtthandler_mavlink_packet__ahrs2;
+  ptr = &telemetry_mavlink_packet__ahrs2;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__AHRS2__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__AHRS2__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_ahrs2;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   // 30,ATTITUDE
-  ptr = &mqtthandler_mavlink_packet__attitude;
+  ptr = &telemetry_mavlink_packet__attitude;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__ATTITUDE__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__ATTITUDE__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_attitude;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   // 183,AUTOPILOT_VERSION_REQUEST
-  ptr = &mqtthandler_mavlink_packet__autopilot_version;
+  ptr = &telemetry_mavlink_packet__autopilot_version;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__AUTOPILOT_VERSION_REQUEST__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__AUTOPILOT_VERSION_REQUEST__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_autopilot_version;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   //147,BATTERY_STATUS
-  ptr = &mqtthandler_mavlink_packet__battery_status;
+  ptr = &telemetry_mavlink_packet__battery_status;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__BATTERY_STATUS__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__BATTERY_STATUS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_battery_status;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   // 193,EKF_STATUS_REPORT
-  ptr = &mqtthandler_mavlink_packet__ekf_status_report;
+  ptr = &telemetry_mavlink_packet__ekf_status_report;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__EKF_STATUS_REPORT__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__EKF_STATUS_REPORT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_ekf_status_report;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   // 162,FENCE_STATUS
-  ptr = &mqtthandler_mavlink_packet__fence_status;
+  ptr = &telemetry_mavlink_packet__fence_status;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__FENCE_STATUS__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__FENCE_STATUS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_fence_status;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   // 200,GIMBAL_REPORT
-  ptr = &mqtthandler_mavlink_packet__gimbal_report;
+  ptr = &telemetry_mavlink_packet__gimbal_report;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_REPORT__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_REPORT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_gimbal_report;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   // 214,GIMBAL_TORQUE_CMD_REPORT
-  ptr = &mqtthandler_mavlink_packet__gimbal_torque_cmd_report;
+  ptr = &telemetry_mavlink_packet__gimbal_torque_cmd_report;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_TORQUE_CMD_REPORT__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__GIMBAL_TORQUE_CMD_REPORT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_gimbal_torque_cmd_report;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   // 33,GLOBAL_POSITION_INT
-  ptr = &mqtthandler_mavlink_packet__global_position_int;
+  ptr = &telemetry_mavlink_packet__global_position_int;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_POSITION_INT__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__GLOBAL_POSITION_INT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_global_position_int;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 215,GOPRO_HEARTBEAT
-  ptr = &mqtthandler_mavlink_packet__gopro_heartbeat;
+  ptr = &telemetry_mavlink_packet__gopro_heartbeat;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GOPRO_HEARTBEAT__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__GOPRO_HEARTBEAT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_gopro_heartbeat;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 24,GPS_RAW_INT
-  ptr = &mqtthandler_mavlink_packet__gps_raw_int;
+  ptr = &telemetry_mavlink_packet__gps_raw_int;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__GPS_RAW_INT__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__GPS_RAW_INT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_gps_raw_int;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 0,HEARTBEAT
-  ptr = &mqtthandler_mavlink_packet__heartbeat;
+  ptr = &telemetry_mavlink_packet__heartbeat;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__HEARTBEAT__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__HEARTBEAT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_heartbeat;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 0,HEARTBEAT
-  ptr = &mqtthandler_mavlink_packet__home_position;
+  ptr = &telemetry_mavlink_packet__home_position;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__HOME_POSITION__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__HOME_POSITION__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_home_position;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 165,HWSTATUS
-  ptr = &mqtthandler_mavlink_packet__hwstatus;
+  ptr = &telemetry_mavlink_packet__hwstatus;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__HWSTATUS__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__HWSTATUS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_hwstatus;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 165,HWSTATUS
-  ptr = &mqtthandler_mavlink_packet__local_position_ned;
+  ptr = &telemetry_mavlink_packet__local_position_ned;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__LOCAL_POSITION_NED__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__LOCAL_POSITION_NED__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_local_position_ned;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 152,MEMINFO
-  ptr = &mqtthandler_mavlink_packet__meminfo;
+  ptr = &telemetry_mavlink_packet__meminfo;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__MEMINFO__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__MEMINFO__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_meminfo;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 42,MISSION_CURRENT
-  ptr = &mqtthandler_mavlink_packet__mission_current;
+  ptr = &telemetry_mavlink_packet__mission_current;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__MISSION_CURRENT__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__MISSION_CURRENT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_mission_current;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 158,MOUNT_STATUS
-  ptr = &mqtthandler_mavlink_packet__mount_status;
+  ptr = &telemetry_mavlink_packet__mount_status;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__MOUNT_STATUS__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__MOUNT_STATUS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_mount_status;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 62,NAV_CONTROLLER_OUTPUT
-  ptr = &mqtthandler_mavlink_packet__nav_controller_output;
+  ptr = &telemetry_mavlink_packet__nav_controller_output;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__NAV_CONTROLLER_OUTPUT__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__NAV_CONTROLLER_OUTPUT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_nav_controller_output;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 22,PARAM_VALUE
-  ptr = &mqtthandler_mavlink_packet__param_value;
+  ptr = &telemetry_mavlink_packet__param_value;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__PARAM_VALUE__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__PARAM_VALUE__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_param_value;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 125,POWER_STATUS
-  ptr = &mqtthandler_mavlink_packet__power_status;
+  ptr = &telemetry_mavlink_packet__power_status;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__POWER_STATUS__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__POWER_STATUS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_power_status;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 27,RAW_IMU
-  ptr = &mqtthandler_mavlink_packet__raw_imu;
+  ptr = &telemetry_mavlink_packet__raw_imu;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RAW_IMU__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__RAW_IMU__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_raw_imu;   
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 65,RC_CHANNELS
-  ptr = &mqtthandler_mavlink_packet__rc_channels;
+  ptr = &telemetry_mavlink_packet__rc_channels;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_rc_channels;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 35,RC_CHANNELS_RAW
-  ptr = &mqtthandler_mavlink_packet__rc_channels_raw;
+  ptr = &telemetry_mavlink_packet__rc_channels_raw;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS_RAW__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS_RAW__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_rc_channels_raw;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 34,RC_CHANNELS_SCALED
-  ptr = &mqtthandler_mavlink_packet__rc_channels_scaled;
+  ptr = &telemetry_mavlink_packet__rc_channels_scaled;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS_SCALED__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__RC_CHANNELS_SCALED__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_rc_channels_scaled;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 66,REQUEST_DATA_STREAM
-  ptr = &mqtthandler_mavlink_packet__request_data_stream;
+  ptr = &telemetry_mavlink_packet__request_data_stream;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__REQUEST_DATA_STREAM__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__REQUEST_DATA_STREAM__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_request_data_stream;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 116,SCALED_IMU2
-  ptr = &mqtthandler_mavlink_packet__scaled_imu2;
+  ptr = &telemetry_mavlink_packet__scaled_imu2;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_IMU2__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__SCALED_IMU2__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_imu2;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 129,SCALED_IMU3
-  ptr = &mqtthandler_mavlink_packet__scaled_imu3;
+  ptr = &telemetry_mavlink_packet__scaled_imu3;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_IMU3__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__SCALED_IMU3__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_imu3;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 29,SCALED_PRESSURE
-  ptr = &mqtthandler_mavlink_packet__scaled_pressure;
+  ptr = &telemetry_mavlink_packet__scaled_pressure;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_PRESSURE__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__SCALED_PRESSURE__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_scaled_pressure;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 137,SCALED_PRESSURE2
-  ptr = &mqtthandler_mavlink_packet__scaled_pressure2;
+  ptr = &telemetry_mavlink_packet__scaled_pressure2;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SCALED_PRESSURE2__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__SCALED_PRESSURE2__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_scaled_pressure2;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 150,SENSOR_OFFSETS
-  ptr = &mqtthandler_mavlink_packet__sensor_offsets;
+  ptr = &telemetry_mavlink_packet__sensor_offsets;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SENSOR_OFFSETS__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__SENSOR_OFFSETS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_sensor_offsets;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 36,SERVO_OUTPUT_RAW
-  ptr = &mqtthandler_mavlink_packet__servo_output_raw;
+  ptr = &telemetry_mavlink_packet__servo_output_raw;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SERVO_OUTPUT_RAW__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__SERVO_OUTPUT_RAW__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_servo_output_raw;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 253,STATUSTEXT
-  ptr = &mqtthandler_mavlink_packet__statustext;
+  ptr = &telemetry_mavlink_packet__statustext;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__STATUSTEXT__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__STATUSTEXT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_statustext;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 60,SYS_STATUS
-  ptr = &mqtthandler_mavlink_packet__sys_status;
+  ptr = &telemetry_mavlink_packet__sys_status;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SYS_STATUS__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__SYS_STATUS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_sys_status;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 2,SYSTEM_TIME
-  ptr = &mqtthandler_mavlink_packet__system_time;
+  ptr = &telemetry_mavlink_packet__system_time;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__SYSTEM_TIME__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__SYSTEM_TIME__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_system_time;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 111,TIMESYNC
-  ptr = &mqtthandler_mavlink_packet__timesync;
+  ptr = &telemetry_mavlink_packet__timesync;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__TIMESYNC__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__TIMESYNC__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_timesync;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 
-  ptr = &mqtthandler_mavlink_packet__terrain_report;
+  ptr = &telemetry_mavlink_packet__terrain_report;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__TERRAIN_REPORT__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__TERRAIN_REPORT__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_terrain_report;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   // 74,VFR_HUD
-  ptr = &mqtthandler_mavlink_packet__vfr_hud;
+  ptr = &telemetry_mavlink_packet__vfr_hud;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__VFR_HUD__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__VFR_HUD__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_vfr_hud;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   // 241,VIBRATION
-  ptr = &mqtthandler_mavlink_packet__vibration;
+  ptr = &telemetry_mavlink_packet__vibration;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MAVLINK_MSG_PACKET_NAME__VIBRATION__CTR;
+  ptr->key = PM_MAVLINK_MSG_PACKET_NAME__VIBRATION__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_vibration;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   // debug_receive_stats
-  ptr = &mqtthandler_mavlink_packet__debug_receive_stats;
+  ptr = &telemetry_mavlink_packet__debug_receive_stats;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_RECEIVE_STATS__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_DEBUG_RECEIVE_STATS__CTR;
   ptr->ConstructJSON_function = &mMAVLink_Decoder::ConstructJSON_Debug_ReceiveStats;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
   #endif // ENABLE_FEATURE_MAVLINK_MQTT_SEND_ALL_PACKETS_AS_TELEMETRY_TOPICS
   
 } 
 
 /**
- * @brief Set flag for all mqtthandlers to send
+ * @brief Set flag for all telemetryhandlers to send
  * */
 void mMAVLink_Decoder::MQTTHandler_RefreshAll()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     handle->flags.SendNow = true;
   }
 }
@@ -2347,7 +2360,7 @@ void mMAVLink_Decoder::MQTTHandler_RefreshAll()
  * */
 void mMAVLink_Decoder::MQTTHandler_Rate()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
       handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
@@ -2360,7 +2373,7 @@ void mMAVLink_Decoder::MQTTHandler_Rate()
  * */
 void mMAVLink_Decoder::MQTTHandler_Sender()
 {    
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }

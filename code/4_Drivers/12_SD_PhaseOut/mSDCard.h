@@ -296,11 +296,11 @@
 //      ************************************************************************************************/
     
 //     #ifdef USE_MODULE_NETWORK_MQTT 
-//     void MQTTHandler_Init();
-//     std::vector<struct handler<mSDCard>*> mqtthandler_list;
-//     struct handler<mSDCard> mqtthandler_settings;
-//     struct handler<mSDCard> mqtthandler_file_writer;
-//     struct handler<mSDCard> mqtthandler_debug_write_times;
+//     void Telemetry_Init();
+//     std::vector<struct telemetry_handler<mSDCard>*> telemetry_list;
+//     struct telemetry_handler<mSDCard> telemetry_settings;
+//     struct telemetry_handler<mSDCard> telemetry_file_writer;
+//     struct telemetry_handler<mSDCard> telemetry_debug_write_times;
 //     #endif // USE_MODULE_NETWORK_MQTT
 
 // };

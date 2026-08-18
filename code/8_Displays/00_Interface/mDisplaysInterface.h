@@ -323,11 +323,11 @@ struct DisplaySettings{
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mDisplaysInterface>*> mqtthandler_list;
-    struct handler<mDisplaysInterface> mqtthandler_settings;
-    struct handler<mDisplaysInterface> mqtthandler_state_teleperiod;
-    struct handler<mDisplaysInterface> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mDisplaysInterface>*> telemetry_list;
+    struct telemetry_handler<mDisplaysInterface> telemetry_settings;
+    struct telemetry_handler<mDisplaysInterface> telemetry_state_teleperiod;
+    struct telemetry_handler<mDisplaysInterface> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

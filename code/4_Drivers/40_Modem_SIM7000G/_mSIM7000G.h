@@ -609,14 +609,14 @@ bool Modem_EnsurePowerOnAndBaud(uint32_t target_baud = MODEM_TARGET_BAUD);
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
   
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
-    std::vector<struct handler<mSIM7000G>*> mqtthandler_list;
+    std::vector<struct telemetry_handler<mSIM7000G>*> telemetry_list;
     
-    struct handler<mSIM7000G> mqtthandler_settings;
-    struct handler<mSIM7000G> mqtthandler_state_ifchanged;
+    struct telemetry_handler<mSIM7000G> telemetry_settings;
+    struct telemetry_handler<mSIM7000G> telemetry_state_ifchanged;
 
     // No specialised payload therefore use system default instead of enum
       

@@ -228,23 +228,33 @@ int8_t mSIM800L::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT    
+    #endif  
   }
 
 } // END function
@@ -2495,42 +2505,42 @@ uint8_t mSIM800L::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mSIM800L::MQTTHandler_Init()
+void mSIM800L::Telemetry_Init()
 {
 
-  struct handler<mSIM800L>* ptr;
+  struct telemetry_handler<mSIM800L>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mSIM800L::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_state_ifchanged;
+  ptr = &telemetry_state_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mSIM800L::ConstructJSON_State;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
 } 
 
 
 /**
- * @brief Set flag for all mqtthandlers to send
+ * @brief Set flag for all telemetryhandlers to send
  * */
 void mSIM800L::MQTTHandler_RefreshAll()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     handle->flags.SendNow = true;
   }
 }
@@ -2542,7 +2552,7 @@ void mSIM800L::MQTTHandler_Rate()
 {
   // While developing, set these by the Init() function to make independent
 
-  // for(auto& handle:mqtthandler_list){
+  // for(auto& handle:telemetry_list){
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
   //     handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
   //   if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
@@ -2555,7 +2565,7 @@ void mSIM800L::MQTTHandler_Rate()
  * */
 void mSIM800L::MQTTHandler_Sender()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }

@@ -308,7 +308,7 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
 #endif 
 #ifdef USE_MODULE_CORE_TELEMETRY
   #include "2_CoreSystem/09_Telemetry/mTelemetry.h"
-  #define   tkr_tel                               static_cast<mTelemetry*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_TELEMETRY_ID))
+  #define   tkr_tele                               static_cast<mTelemetry*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_TELEMETRY_ID))
 #endif 
 #ifdef USE_MODULE_CORE__CRASH_RECORDER
   #include "2_CoreSystem/10_CrashRecorder/CrashRecorder.h"
@@ -362,7 +362,7 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
   #define tkr_interface_network                  static_cast<mInterfaceNetwork*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__NETWORK_INTERFACE__ID))
 #endif 
 #ifdef USE_MODULE_NETWORK_WIFI
-  #include "3_Network/03_WiFi2/mWiFi.h"
+  #include "3_Network/03_WiFi/mWiFi.h"
   #define tkr_wifi                               static_cast<mWiFi*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_NETWORK_WIFI_ID))
 #endif 
 #ifdef USE_MODULE_NETWORK_ETHERNET

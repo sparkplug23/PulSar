@@ -773,10 +773,10 @@ class mCamera :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mCamera>*> mqtthandler_list;    
-    struct handler<mCamera> mqtthandler_settings;
-    struct handler<mCamera> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mCamera>*> telemetry_list;    
+    struct telemetry_handler<mCamera> telemetry_settings;
+    struct telemetry_handler<mCamera> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT 
 
 

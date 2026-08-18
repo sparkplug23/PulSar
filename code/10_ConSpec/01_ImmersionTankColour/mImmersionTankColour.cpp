@@ -60,18 +60,33 @@ int8_t mImmersionTankColour::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_EVENT_INPUT_STATE_CHANGED_ID:
       Event_Handle_Light_Toggle_Button(); // one press = toggle, multipress is 15 minute increment of on time, hold = stay on
     break;
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
     break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
     break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
     break;
+    #ifdef USE_MODULE_NETWORK_MQTT
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
+    break;
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
+    break;
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
+    break;
+    #endif
   }
   
   /************
@@ -147,12 +162,12 @@ void mImmersionTankColour::EverySecond()
   {
     flag_show_enabled = true;
     ALOG_INF( PSTR(D_LOG_GARAGE D_COMMAND_NVALUE_K("Running Value")), data.time_on->Value());
-    mqtthandler_sensor_ifchanged.tRateSecs = 1;
+    telemetry_sensor_ifchanged.tRateSecs = 1;
   }
   else
   {
     flag_show_enabled = false;
-    mqtthandler_sensor_ifchanged.tRateSecs = 60;
+    telemetry_sensor_ifchanged.tRateSecs = 60;
     // ALOG_INF( PSTR(D_LOG_GARAGE D_COMMAND_NVALUE_K("Not Running Value")), data.time_on->Value());
   }
 
@@ -488,46 +503,46 @@ void mImmersionTankColour::parse_JSONCommand(JsonParserObject obj)
  * MQTT
 *******************************************************************************************************************/
 
-void mImmersionTankColour::MQTTHandler_Init(){
+void mImmersionTankColour::Telemetry_Init(){
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 600; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mImmersionTankColour::ConstructJSON_Settings;
 
-  ptr = &mqtthandler_sensor_teleperiod;
+  ptr = &telemetry_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
   ptr->ConstructJSON_function = &mImmersionTankColour::ConstructJSON_Sensor;
 
-  ptr = &mqtthandler_sensor_ifchanged;
+  ptr = &telemetry_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; // water never changes fast 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_POWER_CTR;
   ptr->ConstructJSON_function = &mImmersionTankColour::ConstructJSON_Sensor;
   
 }
 
 /**
- * @brief Set flag for all mqtthandlers to send
+ * @brief Set flag for all telemetryhandlers to send
  * */
 void mImmersionTankColour::MQTTHandler_RefreshAll()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     handle->flags.SendNow = true;
   }
 }
@@ -537,7 +552,7 @@ void mImmersionTankColour::MQTTHandler_RefreshAll()
  * */
 void mImmersionTankColour::MQTTHandler_Rate()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
       handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
@@ -550,7 +565,7 @@ void mImmersionTankColour::MQTTHandler_Rate()
  * */
 void mImmersionTankColour::MQTTHandler_Sender()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }

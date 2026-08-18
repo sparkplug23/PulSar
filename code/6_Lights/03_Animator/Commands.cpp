@@ -2187,144 +2187,71 @@ if (jtok_pwi && jtok_pwi.isArray())
 
   } // end Debug options
 
-  #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
-  
-  if (jtok = obj["Standby"]) {
-    ALOG_INF(PSTR("Standby command FOUND"));
-    JsonParserObject jDbg = jtok.getObject();
-    JsonParserToken  jtok2 = 0;
+ #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_MODE
 
-    uint16_t fadeMs = 0;
-    if (jtok2 = jDbg["FadeMs"]) {
-      fadeMs = (uint16_t)jtok2.getInt();
-      standby.fade_override_ms = fadeMs;   // store override for this wake cycle
-      ALOG_INF(PSTR("Standby: FadeMs=%u"), (unsigned)fadeMs);
-    }
+if (jtok = obj["Standby"])
+{
+  JsonParserObject jobj = jtok.getObject();
+  JsonParserToken jtok2 = 0;
 
-    if (jtok2 = jDbg["Start"]) {
-      uint8_t callMode = CALL_MODE_NO_NOTIFY;
-      if (jtok2.getInt()) {
-        Standby_Start(/*fadeMs=*/0, callMode);
-        // If you want: cancel remain-awake because we explicitly entered standby
-        Standby_CancelRemainAwake();
-      }
-    }
-
-    if (jtok2 = jDbg["Stop"]) {
-      uint8_t callMode = CALL_MODE_NO_NOTIFY;
-      if (jtok2.getInt()) {
-        // Use fade override if provided in this command
-        uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
-        Standby_Stop(f, callMode);
-        // Do NOT start any timer here; Stop is a pure "leave standby"
-      }
-    }
-
-    // Wake semantics:
-    //   0  → cancel any pending remain-awake (no state change)
-    //   1  → if in standby, leave now (with optional FadeMs), no auto return
-    //   >1 → leave standby if active (with FadeMs), then stay awake for N seconds, auto-enter standby
-    if (jtok2 = jDbg["Wake"]) {
-      uint32_t secs = jtok2.getInt();
-
-      if (secs == 0) {
-        ALOG_INF(PSTR("Standby: Wake<=0 → cancel remain-awake"));
-        Standby_CancelRemainAwake();
-        // no state change
-      } else if (secs == 1) {
-        if (standby.active) {
-          uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
-          ALOG_INF(PSTR("Standby: Wake==1 → leave standby now (fade=%u)"), (unsigned)f);
-          Standby_Stop(f, CALL_MODE_NO_NOTIFY);
-        } else {
-          ALOG_INF(PSTR("Standby: Wake==1 while already awake → no-op"));
-        }
-        Standby_CancelRemainAwake(); // no auto return
-      } else { // secs > 1
-        ALOG_INF(PSTR("Wake s>1 "));
-        uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
-        if (standby.active) {
-          ALOG_INF(PSTR("Standby: Wake %ld s → leave standby now (fade=%u)"), (long)secs, (unsigned)f);
-          Standby_Stop(f, CALL_MODE_NO_NOTIFY);
-        } else {
-          ALOG_INF(PSTR("Standby: Wake %ld s while already awake"), (long)secs);
-        }
-        //Serial.println("here3");Serial.flush();
-        Standby_SetRemainAwake(secs);
-        ALOG_INF(PSTR("Standby: remain-awake started: %u s"), (unsigned)secs);
-      }
-
-      SEGMENT_I(0).single_animation_override.time_ms = 2000;
-
-    }
-
-    if (jtok2 = jDbg["Init"]) {
-      if (jtok2.getInt()) Standby_Init();
-    }
-
-    if (jDbg["SetProfile"]) {
-      const char* s = nullptr;
-      auto t = jDbg["SetProfile"]; JsonParserObject o = t.getObject();
-      if (o && o["json"]) s = o["json"].getStr();
-      if (s) {
-        ALOG_INF(PSTR("Debug:SetProfile len=%u"), (unsigned)strlen(s));
-        Standby_SetProfileFromJson(s);
-      }
-    }
-
-    if (jDbg["StandbySaveCurrentAsProfile"]) {
-      DynamicJsonDocument d(12*1024);
-      JsonObject root = d.to<JsonObject>();
-      serializeState(root, /*forPreset=*/true, /*includeBri=*/true, /*segmentBounds=*/true, /*selectedOnly=*/false);
-      String tmp; serializeJson(d, tmp);
-      Standby_SetProfileFromJson(tmp.c_str());
-      ALOG_INF(PSTR("Debug:StandbySaveCurrentAsProfile saved (%u bytes)"), (unsigned)tmp.length());
-    }
-
-    Serial.println("ABOUT TO WAIT FOR STABILITY");
-    //delay(4000);
-  }
-
-  if (jtok = obj["Debug"])
+  if (jtok2 = jobj["Arm"])
   {
-
-    ALOG_INF(PSTR("Debug command FOUND"));
-
-    JsonParserObject jDbg = jtok.getObject();
-    JsonParserToken jtok2 = 0; 
-  // ---------------- Save/Load full STATE snapshot (debug only) ----------------
-    if (jtok2 = jDbg["SaveState"]) {
-      bool includeBounds = true;
-      bool includeBri    = true;
-      bool selectedOnly  = false;
-      bool fullGlobals   = false;
-
-    //   auto t = jDbg["SaveState"]; JsonParserObject o = t.getObject();
-    //   if (o) {
-    //     if (o["includeBounds"]) includeBounds = (bool)o["includeBounds"].getInt();
-    //     if (o["includeBri"])    includeBri    = (bool)o["includeBri"].getInt();
-    //     if (o["selectedOnly"])  selectedOnly  = (bool)o["selectedOnly"].getInt();
-    //     if (o["fullGlobals"])   fullGlobals   = (bool)o["fullGlobals"].getInt();
-    //   }
-    //   ALOG_DBG(PSTR("Debug:SaveState bounds=%d bri=%d sel=%d full=%d"),
-    //            includeBounds, includeBri, selectedOnly, fullGlobals);
-      if(jtok2.getInt())
-      FileSave__State(includeBounds, includeBri, selectedOnly, fullGlobals);
-    }
-
-    if (jtok2 = jDbg["LoadState"]) {
-      uint8_t callMode = CALL_MODE_NO_NOTIFY;
-    //   auto t = jDbg["LoadState"]; JsonParserObject o = t.getObject();
-    //   if (o && o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
-    //   ALOG_DBG(PSTR("Debug:LoadState callMode=%u"), callMode);
-      if(jtok2.getInt())
-      FileLoad__State(callMode);
-    }
-
+    Standby_SetArm(jtok2.getInt() != 0);
+    data_buffer.isserviced++;
   }
 
-  #endif
+  if (jtok2 = jobj["Target"])
+  {
+    Standby_SetTarget((uint8_t)jtok2.getInt());
+    data_buffer.isserviced++;
+  }
 
+  if (jtok2 = jobj["AwakeSecs"])
+  {
+    Standby_SetAwakeDuration((uint32_t)jtok2.getInt());
+    data_buffer.isserviced++;
+  }
+
+  if (jtok2 = jobj["StandbySecs"])
+  {
+    Standby_SetStandbyDuration((uint32_t)jtok2.getInt());
+    data_buffer.isserviced++;
+  }
+
+  if (jtok2 = jobj["WakeTransitionSecs"])
+  {
+    Standby_SetWakeTransition((uint16_t)jtok2.getInt());
+    data_buffer.isserviced++;
+  }
+
+  if (jtok2 = jobj["SleepTransitionSecs"])
+  {
+    Standby_SetSleepTransition((uint16_t)jtok2.getInt());
+    data_buffer.isserviced++;
+  }
+
+  if (jtok2 = jobj["Wake"])
+  {
+    if (jtok2.getInt())
+    {
+      Standby_Wake(CALL_MODE_NO_NOTIFY);
+    }
+
+    data_buffer.isserviced++;
+  }
+
+  if (jtok2 = jobj["Sleep"])
+  {
+    if (jtok2.getInt())
+    {
+      Standby_Sleep(CALL_MODE_NO_NOTIFY);
+    }
+
+    data_buffer.isserviced++;
+  }
+}
+
+#endif
   if (flag_geometry_updated)
   {
     SEGMENT_I(segment_index).refreshGeometry();

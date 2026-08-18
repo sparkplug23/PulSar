@@ -464,18 +464,18 @@ class mGPS_Serial :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mGPS_Serial>*> mqtthandler_list;
-    struct handler<mGPS_Serial> mqtthandler_settings;
-    struct handler<mGPS_Serial> mqtthandler_gpspacket_minimal_teleperiod;
-    struct handler<mGPS_Serial> mqtthandler_gpspacket_required;
-    struct handler<mGPS_Serial> mqtthandler_gpspacket_all1;                   CTRP(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL1_CTR) "debug/all1";
-    struct handler<mGPS_Serial> mqtthandler_gpspacket_all2;                   CTRP(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL2_CTR) "debug/all2";
-    struct handler<mGPS_Serial> mqtthandler_gpspacket_all3;                   CTRP(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL3_CTR) "debug/all3";
-    struct handler<mGPS_Serial> mqtthandler_gpspacket_all4;                   CTRP(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL4_CTR) "debug/all4";
-    struct handler<mGPS_Serial> mqtthandler_gpspacket_micro;
-    struct handler<mGPS_Serial> mqtthandler_gpspacket_debug;
-    struct handler<mGPS_Serial> mqtthandler_nav__pvt;                         CTRP(PM_MQTT_HANDLER_POSTFIX_TOPIC__NAV_PVT) "nav/pvt";
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mGPS_Serial>*> telemetry_list;
+    struct telemetry_handler<mGPS_Serial> telemetry_settings;
+    struct telemetry_handler<mGPS_Serial> telemetry_gpspacket_minimal_teleperiod;
+    struct telemetry_handler<mGPS_Serial> telemetry_gpspacket_required;
+    struct telemetry_handler<mGPS_Serial> telemetry_gpspacket_all1;                   CTRP(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL1_CTR) "debug/all1";
+    struct telemetry_handler<mGPS_Serial> telemetry_gpspacket_all2;                   CTRP(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL2_CTR) "debug/all2";
+    struct telemetry_handler<mGPS_Serial> telemetry_gpspacket_all3;                   CTRP(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL3_CTR) "debug/all3";
+    struct telemetry_handler<mGPS_Serial> telemetry_gpspacket_all4;                   CTRP(PM_MQTT_HANDLER_POSTFIX_TOPIC_GPSPACKET_ALL4_CTR) "debug/all4";
+    struct telemetry_handler<mGPS_Serial> telemetry_gpspacket_micro;
+    struct telemetry_handler<mGPS_Serial> telemetry_gpspacket_debug;
+    struct telemetry_handler<mGPS_Serial> telemetry_nav__pvt;                         CTRP(PM_MQTT_HANDLER_POSTFIX_TOPIC__NAV_PVT) "nav/pvt";
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

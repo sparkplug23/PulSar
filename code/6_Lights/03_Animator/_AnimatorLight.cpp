@@ -48,7 +48,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       Serial.printf_P(PSTR("FPS: %f\n\r"), getFpsFloat());
       #endif
 
-      #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+      #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_MODE
       EverySecond_Standby();
       #endif
 
@@ -86,21 +86,31 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     KeyInput__ControlLights();
     #endif
     break;
-    /************
-     * MQTT SECTION * 
-    *******************/   
+     /************
+     * TELEMETRY SECTION * 
+    *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
-    break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
     #endif
     /************
@@ -172,9 +182,9 @@ void mAnimatorLight::updatePixelBuffer()
 void mAnimatorLight::Handle_FileSave_Edits()
 {
   // If nothing pending, bail early (paranoid guard; optional if caller already checks)
-  if (!SPIFFSEditor::Check_AnyFilesEdited()) return;
+  if (!FileEditor::Check_AnyFilesEdited()) return;
 
-  if (SPIFFSEditor::Check_FileEditedIs(F("presets.json"))) {
+  if (FileEditor::Check_FileEditedIs(F("presets.json"))) {
     static bool use_new_parser = false;   // toggles each time
 
     uint32_t t_start = millis();
@@ -196,7 +206,7 @@ void mAnimatorLight::Handle_FileSave_Edits()
   }
 
   // Future:
-  // if (SPIFFSEditor::Check_FileEditedIs(F("some_other.json"))) { ... }
+  // if (FileEditor::Check_FileEditedIs(F("some_other.json"))) { ... }
 }
 
 

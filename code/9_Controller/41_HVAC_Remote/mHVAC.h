@@ -338,7 +338,7 @@ class mHVAC :
   
   #ifdef USE_MODULE_NETWORK_MQTT
 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
@@ -361,34 +361,34 @@ class mHVAC :
       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
     };
 
-    struct handler<mHVAC> mqtthandler_settings;
-    struct handler<mHVAC> mqtthandler_program_timers_ifchanged;
-    struct handler<mHVAC> mqtthandler_program_timers_teleperiod;
-    struct handler<mHVAC> mqtthandler_program_temps_ifchanged;
-    struct handler<mHVAC> mqtthandler_program_temps_teleperiod;
-    struct handler<mHVAC> mqtthandler_program_overview_ifchanged;
-    struct handler<mHVAC> mqtthandler_program_overview_teleperiod;
-    struct handler<mHVAC> mqtthandler_sensor_zone_ifchanged;
-    struct handler<mHVAC> mqtthandler_sensor_zone_teleperiod;
-    struct handler<mHVAC> mqtthandler_sensor_zone_roc1m;
-    struct handler<mHVAC> mqtthandler_sensor_zone_roc10m;
-    struct handler<mHVAC> mqtthandler_relays_ifchanged;
-    struct handler<mHVAC> mqtthandler_relays_teleperiod;
+    struct telemetry_handler<mHVAC> telemetry_settings;
+    struct telemetry_handler<mHVAC> telemetry_program_timers_ifchanged;
+    struct telemetry_handler<mHVAC> telemetry_program_timers_teleperiod;
+    struct telemetry_handler<mHVAC> telemetry_program_temps_ifchanged;
+    struct telemetry_handler<mHVAC> telemetry_program_temps_teleperiod;
+    struct telemetry_handler<mHVAC> telemetry_program_overview_ifchanged;
+    struct telemetry_handler<mHVAC> telemetry_program_overview_teleperiod;
+    struct telemetry_handler<mHVAC> telemetry_sensor_zone_ifchanged;
+    struct telemetry_handler<mHVAC> telemetry_sensor_zone_teleperiod;
+    struct telemetry_handler<mHVAC> telemetry_sensor_zone_roc1m;
+    struct telemetry_handler<mHVAC> telemetry_sensor_zone_roc10m;
+    struct telemetry_handler<mHVAC> telemetry_relays_ifchanged;
+    struct telemetry_handler<mHVAC> telemetry_relays_teleperiod;
   
-  struct handler<mHVAC>* mqtthandler_list[13] = {
-    &mqtthandler_settings,
-    &mqtthandler_program_timers_ifchanged,
-    &mqtthandler_program_timers_teleperiod,
-    &mqtthandler_program_temps_ifchanged,
-    &mqtthandler_program_temps_teleperiod,
-    &mqtthandler_program_overview_ifchanged,
-    &mqtthandler_program_overview_teleperiod,
-    &mqtthandler_sensor_zone_ifchanged,
-    &mqtthandler_sensor_zone_teleperiod,
-    &mqtthandler_sensor_zone_roc1m,
-    &mqtthandler_sensor_zone_roc10m,
-    &mqtthandler_relays_ifchanged,
-    &mqtthandler_relays_teleperiod
+  struct telemetry_handler<mHVAC>* telemetry_list[13] = {
+    &telemetry_settings,
+    &telemetry_program_timers_ifchanged,
+    &telemetry_program_timers_teleperiod,
+    &telemetry_program_temps_ifchanged,
+    &telemetry_program_temps_teleperiod,
+    &telemetry_program_overview_ifchanged,
+    &telemetry_program_overview_teleperiod,
+    &telemetry_sensor_zone_ifchanged,
+    &telemetry_sensor_zone_teleperiod,
+    &telemetry_sensor_zone_roc1m,
+    &telemetry_sensor_zone_roc10m,
+    &telemetry_relays_ifchanged,
+    &telemetry_relays_teleperiod
   };
 
   #endif // USE_MODULE_NETWORK_MQTT

@@ -131,6 +131,212 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 }
 
 
+#ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+
+void mWebServer::WebTelemetry_PrintJSONString(AsyncResponseStream* response, const char* str)
+{
+  if (!response || !str) return;
+
+  while (*str)
+  {
+    const char c = *str++;
+
+    switch(c)
+    {
+      case '\\': response->print(F("\\\\")); break;
+      case '"':  response->print(F("\\\"")); break;
+      case '\n': response->print(F("\\n")); break;
+      case '\r': response->print(F("\\r")); break;
+      case '\t': response->print(F("\\t")); break;
+      default:
+        if ((uint8_t)c >= 32) response->print(c);
+      break;
+    }
+  }
+}
+
+#endif
+#ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+
+void mWebServer::HandlePage_DebugTelemetry(AsyncWebServerRequest* request)
+{
+  handleStaticContent(request, F("/debug/telemetry"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_debug_telemetry_web, PAGE_debug_telemetry_web_length, true);
+}
+
+#endif
+#ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+
+void mWebServer::HandleAPI_DebugTelemetry(AsyncWebServerRequest* request)
+{
+  /********************************************************************
+   * Catalogue
+  ********************************************************************/
+  if (!request->hasParam("topic"))
+  {
+    AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
+    if (!response) {
+      request->send(500);
+      return;
+    }
+
+    response->addHeader(F("Cache-Control"), F("no-store"));
+    response->print(F("{\"topics\":["));
+
+    web_telemetry_request.mode = WebTelemetryRequestMode::Catalogue;
+    web_telemetry_request.catalogue_response = response;
+    web_telemetry_request.catalogue_first = true;
+
+    tkr->Tasker_Interface(TASK_WEB_TELEMETRY);
+
+    web_telemetry_request.mode = WebTelemetryRequestMode::None;
+    web_telemetry_request.catalogue_response = nullptr;
+
+    response->print(F("]}"));
+    request->send(response);
+    return;
+  }
+
+  /********************************************************************
+   * Web telemetry backoff
+  ********************************************************************/
+  const uint32_t now = millis();
+
+  if (web_telemetry_json_last_used_ms && (now - web_telemetry_json_last_used_ms) < WEB_TELEMETRY_JSON_BACKOFF_MS)
+  {
+    const uint32_t retry_ms = WEB_TELEMETRY_JSON_BACKOFF_MS - (now - web_telemetry_json_last_used_ms);
+
+    AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
+    response->setCode(429);
+    response->addHeader(F("Cache-Control"), F("no-store"));
+    response->printf_P(PSTR("{\"error\":\"json buffer backoff\",\"retry_ms\":%lu}"), retry_ms);
+    request->send(response);
+    return;
+  }
+
+  /********************************************************************
+   * Prepare requested topic
+  ********************************************************************/
+  const String requested = request->getParam("topic")->value();
+
+  if (!requested.length() || requested.length() >= sizeof(web_telemetry_request.requested_key))
+  {
+    request->send(400, FPSTR(CONTENT_TYPE_JSON), F("{\"error\":\"invalid topic\"}"));
+    return;
+  }
+
+  strlcpy(web_telemetry_request.requested_key, requested.c_str(), sizeof(web_telemetry_request.requested_key));
+
+  web_telemetry_request.mode = WebTelemetryRequestMode::Topic;
+  web_telemetry_request.found = false;
+  web_telemetry_request.buffer_busy = false;
+  web_telemetry_request.rate = 0;
+  web_telemetry_request.packet = "";
+
+  /********************************************************************
+   * Ask every module.
+   *
+   * Matching module will reach:
+   *
+   *   tkr_web->Telemetry_Sender(telemetry_list, *this);
+  ********************************************************************/
+  tkr->Tasker_Interface(TASK_WEB_TELEMETRY);
+
+  web_telemetry_request.mode = WebTelemetryRequestMode::None;
+
+  /********************************************************************
+   * Shared JBI was occupied
+  ********************************************************************/
+  if (web_telemetry_request.buffer_busy)
+  {
+    AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
+    response->setCode(503);
+    response->addHeader(F("Cache-Control"), F("no-store"));
+    response->print(F("{\"error\":\"json buffer busy\",\"retry_ms\":500}"));
+    request->send(response);
+    return;
+  }
+
+  /********************************************************************
+   * No module exposed this key
+  ********************************************************************/
+  if (!web_telemetry_request.found)
+  {
+    AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
+    response->setCode(404);
+    response->addHeader(F("Cache-Control"), F("no-store"));
+    response->print(F("{\"error\":\"topic not found\"}"));
+    request->send(response);
+    return;
+  }
+
+  /********************************************************************
+   * Constructor produced no packet
+  ********************************************************************/
+  if (!web_telemetry_request.packet.length())
+  {
+    AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
+    response->setCode(500);
+    response->addHeader(F("Cache-Control"), F("no-store"));
+    response->print(F("{\"error\":\"empty telemetry packet\"}"));
+    request->send(response);
+    return;
+  }
+
+  /********************************************************************
+   * Reply
+  ********************************************************************/
+  AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
+  if (!response) {
+    request->send(500);
+    return;
+  }
+
+  response->addHeader(F("Cache-Control"), F("no-store"));
+
+  response->print(F("{\"topic\":\""));
+  WebTelemetry_PrintJSONString(response, web_telemetry_request.requested_key);
+  response->printf_P(PSTR("\",\"rate\":%u,\"packet\":"), web_telemetry_request.rate);
+  response->print(web_telemetry_request.packet);
+  response->print('}');
+
+  request->send(response);
+}
+
+#ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+
+bool mWebServer::WebTelemetry_Construct_Begin(const char* full_key, uint16_t rate)
+{
+  web_telemetry_request.found = true;
+  web_telemetry_request.rate = rate;
+
+  if (!JBI->RequestLock(GetModuleUniqueID()))
+  {
+    web_telemetry_request.buffer_busy = true;
+    return false;
+  }
+
+  return true;
+}
+
+void mWebServer::WebTelemetry_Construct_End()
+{
+  const char* buffer = JBI->GetBuffer();
+
+  if (buffer && buffer[0]) {
+    web_telemetry_request.packet = buffer;
+  } else {
+    web_telemetry_request.packet = "";
+  }
+
+  JBI->ReleaseLock();
+  web_telemetry_json_last_used_ms = millis();
+}
+
+#endif
+
+#endif
+
+
 void mWebServer::Server_Start()
 {
   ALOG_INF(PSTR(D_LOG_HTTP "Starting web server")); 
@@ -242,19 +448,7 @@ void mWebServer::HandlePage_SystemControls_C3(AsyncWebServerRequest *request)
 void mWebServer::WebPage_Root_AddHandlers()
 {
   ALOG_DBG(PSTR("mWebServer::WebPage_Root_AddHandlers()"));
-  
-  SPGM_CTR(PM_URL_VERSION) "/version";
-  server->on(PM_URL_VERSION, HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/plain", (String)PROJECT_VERSION);
-  });
-  AddURLtoList(PM_URL_VERSION, HTTP_GET);
-
-  SPGM_CTR(PM_URL_UPTIME) "/uptime";
-  server->on(PM_URL_UPTIME, HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/plain", (String)millis());
-  });
-  AddURLtoList(PM_URL_UPTIME, HTTP_GET);
-  
+    
 
   SPGM_CTR(PM_URL_REBOOT) "/reboot";
   server->on(PM_URL_REBOOT, HTTP_GET, [this](AsyncWebServerRequest *request){
@@ -280,12 +474,18 @@ void mWebServer::WebPage_Root_AddHandlers()
   });
   AddURLtoList(PM_URL_RESET, HTTP_GET);
 
-  
-    SPGM_CTR(PM_URL_STYLE_CSS) "/style.css";
-    server->on(PM_URL_STYLE_CSS, HTTP_GET, [this](AsyncWebServerRequest *request){
-      handleStaticContent(request, FPSTR(PM_URL_STYLE_CSS), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss2_web, PAGE_settingsCss2_web_length);
-    });
-    AddURLtoList(PM_URL_STYLE_CSS, HTTP_GET);
+    
+  SPGM_CTR(PM_URL_STYLE_CSS) "/style.css";
+  server->on(PM_URL_STYLE_CSS, HTTP_GET, [this](AsyncWebServerRequest *request){
+    handleStaticContent(request, FPSTR(PM_URL_STYLE_CSS), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss_web, PAGE_settingsCss_web_length);
+  });
+  AddURLtoList(PM_URL_STYLE_CSS, HTTP_GET);
+
+  SPGM_CTR(PM_URL_COMMON_JS) "/common.js";
+  server->on(PM_URL_COMMON_JS, HTTP_GET, [this](AsyncWebServerRequest *request){
+    handleStaticContent(request, FPSTR(PM_URL_COMMON_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common_web, JS_common_web_length);
+  });
+  AddURLtoList(PM_URL_COMMON_JS, HTTP_GET);
 
     SPGM_CTR(PM_URL_SKIN_CSS) "/skin.css";
     server->on(PM_URL_SKIN_CSS, HTTP_GET, [](AsyncWebServerRequest *request){
@@ -295,12 +495,10 @@ void mWebServer::WebPage_Root_AddHandlers()
     });
     AddURLtoList(PM_URL_SKIN_CSS, HTTP_GET);
 
-
-    SPGM_CTR(PM_URL_COMMON_JS) "/common.js";
-    server->on(PM_URL_COMMON_JS, HTTP_GET, [this](AsyncWebServerRequest *request){    
-      this->handleStaticContent(request, FPSTR(PM_URL_COMMON_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common2_web, JS_common2_web_length);
-    });
-    AddURLtoList(PM_URL_COMMON_JS, HTTP_GET);
+server->on("/debug/main", HTTP_GET, [this](AsyncWebServerRequest *request){
+  handleStaticContent(request, F("/debug/main"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_debug_main_web, PAGE_debug_main_web_length);
+});
+AddURLtoList(PSTR("/debug/main"), HTTP_GET);
 
   // --------------------------------------------------------------------------
   // Console
@@ -342,7 +540,7 @@ void mWebServer::WebPage_Root_AddHandlers()
     SPGM_CTR(PM_URL_ROOT) "/";
     server->on(PM_URL_ROOT, HTTP_GET, [this](AsyncWebServerRequest *request){
       if (captivePortal(request)) return;
-      this->handleStaticContent(request, F("/"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_root_basic_web, PAGE_root_basic_web_length, true);
+      this->handleStaticContent(request, F("/"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_root_main_web, PAGE_root_main_web_L, true);
     });
     AddURLtoList(PM_URL_ROOT, HTTP_GET);
 
@@ -383,7 +581,7 @@ void mWebServer::WebPage_Root_AddHandlers()
     #endif // ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
 
 
-    SPGM_CTR(PM_URL_SETTINGS2) "/settings2";
+    SPGM_CTR(PM_URL_SETTINGS2) "/settings";
     server->on(PM_URL_SETTINGS2, HTTP_GET, [this](AsyncWebServerRequest *request){
       this->SettingsPages_GET(request);
     });
@@ -417,15 +615,6 @@ void mWebServer::WebPage_Root_AddHandlers()
     });
     AddURLtoList(PM_URL_FAVICON_ICO, HTTP_GET);
 
-
-
-
-    SPGM_CTR(PM_URL_DEBUG_MAIN) "/debug/main";
-    server->on(PM_URL_DEBUG_MAIN, HTTP_GET, [this](AsyncWebServerRequest *request){
-      if (captivePortal(request)) return;
-      this->handleStaticContent(request, F("/debug/main"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_debug_main_web, PAGE_debug_main_web_length, true);
-    });
-    AddURLtoList(PM_URL_DEBUG_MAIN, HTTP_GET);
 
     SPGM_CTR(PM_URL_SYSTEM_CONTROLS_C1) "/system/controls/c1";
     server->on(PM_URL_SYSTEM_CONTROLS_C1, HTTP_GET, [this](AsyncWebServerRequest *request){
@@ -470,6 +659,30 @@ void mWebServer::WebPage_Root_AddHandlers()
     });
     AddURLtoList(PM_URL_URL_LIST_JSON, HTTP_GET);
   #endif
+
+#ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+SPGM_CTR(PM_URL_DEBUG_TELEMETRY) "/debug/telemetry";
+server->on(PM_URL_DEBUG_TELEMETRY, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_DebugTelemetry(request); });
+AddURLtoList(PM_URL_DEBUG_TELEMETRY, HTTP_GET);
+
+SPGM_CTR(PM_URL_DEBUG_API_TELEMETRY) "/debug/api/telemetry";
+server->on(PM_URL_DEBUG_API_TELEMETRY, HTTP_GET, [this](AsyncWebServerRequest* request){ HandleAPI_DebugTelemetry(request); });
+AddURLtoList(PM_URL_DEBUG_API_TELEMETRY, HTTP_GET);
+#endif
+  
+  SPGM_CTR(PM_URL_SETTINGS)      "/settings";       AddURLtoList(PM_URL_SETTINGS,      HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_WIFI) "/settings/wifi";  AddURLtoList(PM_URL_SETTINGS_WIFI, HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_LEDS) "/settings/leds";  AddURLtoList(PM_URL_SETTINGS_LEDS, HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_2D)   "/settings/2D";    AddURLtoList(PM_URL_SETTINGS_2D,   HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_UI)   "/settings/ui";    AddURLtoList(PM_URL_SETTINGS_UI,   HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_DMX)  "/settings/dmx";   AddURLtoList(PM_URL_SETTINGS_DMX,  HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_SYNC) "/settings/sync";  AddURLtoList(PM_URL_SETTINGS_SYNC, HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_TIME) "/settings/time";  AddURLtoList(PM_URL_SETTINGS_TIME, HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_UM)   "/settings/um";    AddURLtoList(PM_URL_SETTINGS_UM,   HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_SEC)  "/settings/sec";   AddURLtoList(PM_URL_SETTINGS_SEC,  HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_LOCK) "/settings/lock";  AddURLtoList(PM_URL_SETTINGS_LOCK, HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_JS)   "/settings/s.js";  AddURLtoList(PM_URL_SETTINGS_JS,   HTTP_POST);
+
 
   //called when the url is not defined here, ajax-in; get-settings
   server->onNotFound([this](AsyncWebServerRequest *request)

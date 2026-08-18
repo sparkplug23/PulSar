@@ -221,11 +221,11 @@ class mPinViewer :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mPinViewer>*> mqtthandler_list;
-    struct handler<mPinViewer> mqtthandler_settings;
-    struct handler<mPinViewer> mqtthandler_state_ifchanged;
-    struct handler<mPinViewer> mqtthandler_state_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mPinViewer>*> telemetry_list;
+    struct telemetry_handler<mPinViewer> telemetry_settings;
+    struct telemetry_handler<mPinViewer> telemetry_state_ifchanged;
+    struct telemetry_handler<mPinViewer> telemetry_state_teleperiod;
     #endif
 };
 

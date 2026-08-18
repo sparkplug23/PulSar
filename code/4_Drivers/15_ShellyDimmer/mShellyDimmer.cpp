@@ -156,23 +156,33 @@ int8_t mShellyDimmer::Tasker(uint8_t function, JsonParserObject obj)
       RulesEvent_Set_Power();
     break;
     #endif// USE_MODULE_CORE_RULES
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
-    break;
-    #endif // USE_MODULE_NETWORK_MQTT
+    #endif
   }
   
   /************
@@ -220,7 +230,7 @@ void mShellyDimmer::SubTask_Power_Time_To_Remain_On_Seconds()
 
     timer_decounter.seconds=0;
 
-    mqtthandler_state_teleperiod.flags.SendNow = true; // To show cleared back to zero and off
+    telemetry_state_teleperiod.flags.SendNow = true; // To show cleared back to zero and off
 
   }else
   if(timer_decounter.seconds>1){ // if =1 then turn off and clear to 0
@@ -234,7 +244,7 @@ void mShellyDimmer::SubTask_Power_Time_To_Remain_On_Seconds()
     ALOG_INF(PSTR(D_LOG_PIXEL "timer_decounter.seconds=%d dec"), timer_decounter.seconds);
     #endif
 
-    mqtthandler_state_teleperiod.flags.SendNow = true;
+    telemetry_state_teleperiod.flags.SendNow = true;
 
   }else{
     //assumed off ie == 0
@@ -987,7 +997,7 @@ void mShellyDimmer::parse_JSONCommand(JsonParserObject obj)
     CommandSet_Timer_Decounter(jtok.getInt()*60);
   }
   
-  mqtthandler_state_teleperiod.flags.SendNow = true;
+  telemetry_state_teleperiod.flags.SendNow = true;
 
 }
 
@@ -1143,31 +1153,31 @@ void CmndShdWarmupTime(void)
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mShellyDimmer::MQTTHandler_Init(){
+void mShellyDimmer::Telemetry_Init(){
 
-  struct handler<mShellyDimmer>* ptr;
+  struct telemetry_handler<mShellyDimmer>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetConfigPeriod(); 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mShellyDimmer::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_state_teleperiod;
+  ptr = &telemetry_state_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetTelePeriod(); 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mShellyDimmer::ConstructJSON_State;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
 } 
 

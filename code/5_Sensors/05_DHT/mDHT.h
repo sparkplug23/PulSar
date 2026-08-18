@@ -112,11 +112,11 @@ class mSensorsDHT :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mSensorsDHT>*> mqtthandler_list;    
-    struct handler<mSensorsDHT> mqtthandler_settings;
-    struct handler<mSensorsDHT> mqtthandler_sensor_ifchanged;
-    struct handler<mSensorsDHT> mqtthandler_sensor_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mSensorsDHT>*> telemetry_list;    
+    struct telemetry_handler<mSensorsDHT> telemetry_settings;
+    struct telemetry_handler<mSensorsDHT> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mSensorsDHT> telemetry_sensor_teleperiod;
     #endif
 
 };

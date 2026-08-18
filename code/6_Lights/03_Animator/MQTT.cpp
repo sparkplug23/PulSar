@@ -633,7 +633,11 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Performance(uint8_t json_level, bool
 {
   
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE_FAST_MQTT_UPDATE
+<<<<<<< HEAD
   mqtthandler_debug__performance.tRateSecs = 1; // Force update to 1 second
+=======
+  telemetry_debug__performance.tRateSecs = 1; // Force update to 1 second
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   #endif
 
   JBI->Start();  
@@ -723,52 +727,87 @@ uint8_t mAnimatorLight::ConstructJSON_Debug_Performance(uint8_t json_level, bool
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
+<<<<<<< HEAD
 void mAnimatorLight::MQTTHandler_Init()
 {
 
   struct handler<mAnimatorLight>* ptr;
   
   ptr = &mqtthandler_settings;
+=======
+void mAnimatorLight::Telemetry_Init()
+{
+    
+  struct telemetry_handler<mAnimatorLight>* ptr;
+  
+  ptr = &telemetry_settings;
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
+<<<<<<< HEAD
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Settings;
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_segments_teleperiod;
+=======
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Settings;
+  telemetry_list.push_back(ptr);
+
+  ptr = &telemetry_segments_teleperiod;
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
+<<<<<<< HEAD
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SEGMENTS_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Segments;
   mqtthandler_list.push_back(ptr);
 
   ptr = &mqtthandler_playlists_teleperiod;
+=======
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SEGMENTS_CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Segments;
+  telemetry_list.push_back(ptr);
+
+  ptr = &telemetry_playlists_teleperiod;
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
+<<<<<<< HEAD
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__PLAYLISTS_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Playlist;
   mqtthandler_list.push_back(ptr);
 
   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   ptr = &mqtthandler_matrix_teleperiod;
+=======
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__PLAYLISTS_CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Playlist;
+  telemetry_list.push_back(ptr);
+
+  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  ptr = &telemetry_matrix_teleperiod;
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 120;//tkr_mqtt->dt.teleperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
+<<<<<<< HEAD
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MATRIX_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Matrix;
   mqtthandler_list.push_back(ptr);
@@ -776,12 +815,22 @@ void mAnimatorLight::MQTTHandler_Init()
   
   #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
   ptr = &mqtthandler_mode_ambilight_teleperiod;
+=======
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__MATRIX_CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Matrix;
+  telemetry_list.push_back(ptr);
+  #endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  
+  #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+  ptr = &telemetry_mode_ambilight_teleperiod;
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
+<<<<<<< HEAD
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_AMBILIGHT__CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_Ambilight;
   mqtthandler_list.push_back(ptr);
@@ -789,12 +838,22 @@ void mAnimatorLight::MQTTHandler_Init()
 
   #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
   ptr = &mqtthandler_manual_setpixel;
+=======
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_AMBILIGHT__CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_Ambilight;
+  telemetry_list.push_back(ptr);
+  #endif // ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
+
+  #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+  ptr = &telemetry_manual_setpixel;
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
+<<<<<<< HEAD
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_SetManual;
   mqtthandler_list.push_back(ptr);
@@ -802,12 +861,22 @@ void mAnimatorLight::MQTTHandler_Init()
     
   // #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
   // ptr = &mqtthandler_automation_presets;
+=======
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_SetManual;
+  telemetry_list.push_back(ptr);
+  #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
+    
+  // #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  // ptr = &telemetry_automation_presets;
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   // ptr->tSavedLastSent = 0;
   // ptr->flags.PeriodicEnabled = true;
   // ptr->flags.SendNow = true;
   // ptr->tRateSecs = 1;//tkr_mqtt->dt.teleperiod_secs; 
   // ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   // ptr->flags.json_level = JSON_LEVEL_DETAILED;
+<<<<<<< HEAD
   // ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PRESETS_CTR;
   // ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Auto_Presets;
   // mqtthandler_list.push_back(ptr);
@@ -815,12 +884,22 @@ void mAnimatorLight::MQTTHandler_Init()
     
   #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
   ptr = &mqtthandler_manual_setpixel;
+=======
+  // ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PRESETS_CTR;
+  // ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Auto_Presets;
+  // telemetry_list.push_back(ptr);
+  // #endif // ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    
+  #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
+  ptr = &telemetry_manual_setpixel;
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
+<<<<<<< HEAD
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_SetManual;
   mqtthandler_list.push_back(ptr);
@@ -828,12 +907,22 @@ void mAnimatorLight::MQTTHandler_Init()
 
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
   ptr = &mqtthandler_debug_palette;
+=======
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Mode_SetManual;
+  telemetry_list.push_back(ptr);
+  #endif // ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
+
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+  ptr = &telemetry_debug_palette;
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
+<<<<<<< HEAD
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette;
   mqtthandler_list.push_back(ptr);
@@ -841,12 +930,22 @@ void mAnimatorLight::MQTTHandler_Init()
 
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
   ptr = &mqtthandler_debug__custom_mapping_table;
+=======
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette;
+  telemetry_list.push_back(ptr);
+  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+  ptr = &telemetry_debug__custom_mapping_table;
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
+<<<<<<< HEAD
   ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette;
   mqtthandler_list.push_back(ptr);
@@ -854,12 +953,22 @@ void mAnimatorLight::MQTTHandler_Init()
 
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
   ptr                         = &mqtthandler_debug_segments;
+=======
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE__CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette;
+  telemetry_list.push_back(ptr);
+  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
+
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+  ptr                         = &telemetry_debug_segments;
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   ptr->tSavedLastSent         = millis();
   ptr->flags.PeriodicEnabled  = true;
   ptr->flags.SendNow          = true;
   ptr->tRateSecs              = tkr_mqtt->dt.ifchanged_secs; 
   ptr->flags.topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level             = JSON_LEVEL_DETAILED;
+<<<<<<< HEAD
   ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_CUSTOM_MAPPING_TABLE__CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug__CustomMappingTable;
   mqtthandler_list.push_back(ptr);
@@ -867,29 +976,54 @@ void mAnimatorLight::MQTTHandler_Init()
 
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
   ptr                         = &mqtthandler_debug_palette_vector;
+=======
+  ptr->key          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_CUSTOM_MAPPING_TABLE__CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug__CustomMappingTable;
+  telemetry_list.push_back(ptr);
+  #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+
+  #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
+  ptr                         = &telemetry_debug_palette_vector;
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   ptr->tSavedLastSent         = millis();
   ptr->flags.PeriodicEnabled  = true;
   ptr->flags.SendNow          = true;
   ptr->tRateSecs              = tkr_mqtt->dt.ifchanged_secs; 
   ptr->flags.topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level             = JSON_LEVEL_DETAILED;
+<<<<<<< HEAD
   ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE_VECTOR__CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette_Vector;
   mqtthandler_list.push_back(ptr);
+=======
+  ptr->key          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PALETTE_VECTOR__CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Palette_Vector;
+  telemetry_list.push_back(ptr);
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PALETTE_VECTOR
 
 
   #ifdef ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
+<<<<<<< HEAD
   ptr                         = &mqtthandler_debug__performance;
+=======
+  ptr                         = &telemetry_debug__performance;
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   ptr->tSavedLastSent         = millis();
   ptr->flags.PeriodicEnabled  = true;
   ptr->flags.SendNow          = true;
   ptr->tRateSecs              = 1; 
   ptr->flags.topic_type             = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level             = JSON_LEVEL_DETAILED;
+<<<<<<< HEAD
   ptr->postfix_topic          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Performance;
   mqtthandler_list.push_back(ptr);
+=======
+  ptr->key          = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR;
+  ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Debug_Performance;
+  telemetry_list.push_back(ptr);
+>>>>>>> 5c7962ae6a38a6d065993ed30fd13d2e994344f6
   #endif // ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR__DEBUG_PERFORMANCE
 
 } 

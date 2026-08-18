@@ -96,23 +96,33 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     //   RulesEvent_Set_Power();
     // break;
     #endif// USE_MODULE_CORE_RULES
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); 
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      // tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
   }
   
   return function_result;
@@ -711,8 +721,8 @@ void mSensorsInterface::Broadcast_Event_MotionDetected()
 {
 
   #ifdef USE_MODULE_NETWORK_MQTT
-  mqtthandler_motion_event_ifchanged.flags.SendNow = true;
-  Tasker(TASK_MQTT_SENDER);
+  telemetry_motion_event_ifchanged.flags.SendNow = true;
+  Tasker(TASK_TELEMETRY__SENDER_MQTT);
   #endif // USE_MODULE_NETWORK_MQTT
 
 }
@@ -720,8 +730,8 @@ void mSensorsInterface::Broadcast_Event_MotionDetected()
 void mSensorsInterface::Broadcast_Event_UserInput()
 {
   #ifdef USE_MODULE_NETWORK_MQTT
-  mqtthandler_event_input.flags.SendNow = true;
-  Tasker(TASK_MQTT_SENDER);
+  telemetry_event_input.flags.SendNow = true;
+  Tasker(TASK_TELEMETRY__SENDER_MQTT);
   #endif // USE_MODULE_NETWORK_MQTT
 }
 
@@ -1049,7 +1059,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 
   JBI->Start();
 
-    // JBI->Add("Redunction", mqtthandler_sensor_ifchanged.flags.FrequencyRedunctionLevel);
+    // JBI->Add("Redunction", telemetry_sensor_ifchanged.flags.FrequencyRedunctionLevel);
   // return 0;
   
   float sensor_data = -1;
@@ -1248,7 +1258,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
   } // END sensor_type
 
 
-    JBI->Add("Rate", mqtthandler_sensor_ifchanged.tRateSecs);
+    JBI->Add("Rate", telemetry_sensor_ifchanged.tRateSecs);
 
   return JBI->End();
     
@@ -2122,103 +2132,103 @@ uint8_t mSensorsInterface::ConstructJSON_System_Location(uint8_t json_level, boo
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mSensorsInterface::MQTTHandler_Init(){
+void mSensorsInterface::Telemetry_Init(){
 
-  struct handler<mSensorsInterface>* ptr;
+  struct telemetry_handler<mSensorsInterface>* ptr;
 
-  ALOG_INF(PSTR("MQTTHandler_Init size %d"), mqtthandler_list.size()  );
+  ALOG_INF(PSTR("Telemetry_Init size %d"), telemetry_list.size()  );
  
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_teleperiod;
+  ptr = &telemetry_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Sensor;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_ifchanged;
+  ptr = &telemetry_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Sensor;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_temperature_colours;
+  ptr = &telemetry_sensor_temperature_colours;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_SensorTemperatureColours;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
-  ptr = &mqtthandler_sensor_unified_filtered;
+  ptr = &telemetry_sensor_unified_filtered;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED_FILTERED__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED_FILTERED__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Unified_Filtered;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   #endif
 
   //motion events
-  ptr = &mqtthandler_motion_event_ifchanged;
+  ptr = &telemetry_motion_event_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_MOTION__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_MOTION__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_Motion;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_event_input;
+  ptr = &telemetry_event_input;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_USER_INPUT__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_USER_INPUT__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_UserInput;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
 
-  ptr = &mqtthandler_system_location; 
+  ptr = &telemetry_system_location; 
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = SEC_IN_HOUR; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_SYSTEM_LOCATION__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_SYSTEM_LOCATION__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_System_Location;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
 
 } 

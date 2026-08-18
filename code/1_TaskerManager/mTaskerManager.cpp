@@ -804,9 +804,9 @@ const char* mTaskerManager::GetTaskName_Full(uint16_t task)
     case TASK_MQTT_CONNECTED:                         return PM_TASK_MQTT_CONNECTED_CTR;
     case TASK_MQTT_DISCONNECTED:                      return PM_TASK_MQTT_DISCONNECTED_CTR;
     case TASK_MQTT_COMMAND:                           return PM_TASK_MQTT_COMMAND_CTR;
-    case TASK_MQTT_SENDER:                            return PM_TASK_MQTT_SENDER_CTR;
-    case TASK_MQTT_HANDLERS_INIT:                     return PM_TASK_MQTT_HANDLERS_INIT_CTR;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:       return PM_TASK_MQTT_HANDLERS_REFRESH_TELEPERIOD_CTR;
+    case TASK_TELEMETRY__SENDER_MQTT:                            return PM_TASK_TELEMETRY__SENDER_MQTT_CTR;
+    case TASK_TELEMETRY_HANDLERS_INIT:                     return PM_TASK_MQTT_HANDLERS_INIT_CTR;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:       return PM_TASK_MQTT_HANDLERS_REFRESH_TELEPERIOD_CTR;
     case TASK_SET_POWER:                              return PM_TASK_SET_POWER_CTR;
     case TASK_SET_DEVICE_POWER:                       return PM_TASK_SET_DEVICE_POWER_CTR;
     case TASK_SHOW_SENSOR:                            return PM_TASK_SHOW_SENSOR_CTR;

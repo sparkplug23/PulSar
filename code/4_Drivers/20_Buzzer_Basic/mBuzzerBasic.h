@@ -83,10 +83,10 @@ class mBuzzerBasic :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mBuzzerBasic>*> mqtthandler_list;
-    struct handler<mBuzzerBasic> mqtthandler_settings;
-    struct handler<mBuzzerBasic> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mBuzzerBasic>*> telemetry_list;
+    struct telemetry_handler<mBuzzerBasic> telemetry_settings;
+    struct telemetry_handler<mBuzzerBasic> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
     
 };

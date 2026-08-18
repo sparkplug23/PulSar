@@ -29,6 +29,10 @@
 #define SECONDS_FROM_BUILDTIME_TO_ENABLE_SPLASHING_TELEMETRY 600
 #endif
 
+
+
+
+
 class mTelemetry :
   public mTaskerInterface
 {
@@ -48,6 +52,29 @@ class mTelemetry :
     void Serve_Web_Telemetry_Page(AsyncWebServerRequest* request);
     void Serve_Web_Telemetry_JS(AsyncWebServerRequest* request);
     #endif
+
+
+    // Centralized template function
+    template <typename HandlerType>
+    void Telemetry_RefreshAll(std::vector<struct telemetry_handler<HandlerType>*>& handler_list) 
+    {
+      for (auto& handle : handler_list) {
+          handle->flags.SendNow = true;
+      }
+    }
+
+    // Centralized template function
+    template <typename HandlerType>
+    void Telemetry_Rate(std::vector<struct telemetry_handler<HandlerType>*>& handler_list) 
+    {
+      for (auto& handle : handler_list) 
+      {
+        if (handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
+          handle->tRateSecs = 120;//GetTelePeriod_SubModule();
+        else if (handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
+          handle->tRateSecs = 10;//GetIfChangedPeriod_SubModule();
+      }
+    }
 
 
    
@@ -91,40 +118,40 @@ class mTelemetry :
 
 
     #ifdef USE_MODULE_NETWORK_MQTT    
-      void MQTTHandler_Init();      
-      std::vector<struct handler<mTelemetry>*> mqtthandler_list;    
-      handler<mTelemetry> mqtthandler_lwt_online;
-      handler<mTelemetry> mqtthandler_health;
+      void Telemetry_Init();      
+      std::vector<struct telemetry_handler<mTelemetry>*> telemetry_list;    
+      telemetry_handler<mTelemetry> telemetry_lwt_online;
+      telemetry_handler<mTelemetry> telemetry_health;
       #ifndef FIRMWARE_MINIMAL2
-      handler<mTelemetry> mqtthandler_settings;
-      handler<mTelemetry> mqtthandler_settings_system;
-      handler<mTelemetry> mqtthandler_settings_network;
-      handler<mTelemetry> mqtthandler_settings_drivers;
-      handler<mTelemetry> mqtthandler_settings_sensors;
-      handler<mTelemetry> mqtthandler_settings_lights;
-      handler<mTelemetry> mqtthandler_settings_power;
-      handler<mTelemetry> mqtthandler_settings_rules;
-      handler<mTelemetry> mqtthandler_settings_runtime;
-      handler<mTelemetry> mqtthandler_settings_text_buffer;
-      handler<mTelemetry> mqtthandler_log;
-      handler<mTelemetry> mqtthandler_peripherals;
-      handler<mTelemetry> mqtthandler_firmware;
-      handler<mTelemetry> mqtthandler_memory;
-      handler<mTelemetry> mqtthandler_network;
-      handler<mTelemetry> mqtthandler_mqtt;
-      handler<mTelemetry> mqtthandler_time;
-      handler<mTelemetry> mqtthandler_taskermanager;
-      handler<mTelemetry> mqtthandler_reboot;
-      handler<mTelemetry> mqtthandler_reboot_event;
+      telemetry_handler<mTelemetry> telemetry_settings;
+      telemetry_handler<mTelemetry> telemetry_settings_system;
+      telemetry_handler<mTelemetry> telemetry_settings_network;
+      telemetry_handler<mTelemetry> telemetry_settings_drivers;
+      telemetry_handler<mTelemetry> telemetry_settings_sensors;
+      telemetry_handler<mTelemetry> telemetry_settings_lights;
+      telemetry_handler<mTelemetry> telemetry_settings_power;
+      telemetry_handler<mTelemetry> telemetry_settings_rules;
+      telemetry_handler<mTelemetry> telemetry_settings_runtime;
+      telemetry_handler<mTelemetry> telemetry_settings_text_buffer;
+      telemetry_handler<mTelemetry> telemetry_log;
+      telemetry_handler<mTelemetry> telemetry_peripherals;
+      telemetry_handler<mTelemetry> telemetry_firmware;
+      telemetry_handler<mTelemetry> telemetry_memory;
+      telemetry_handler<mTelemetry> telemetry_network;
+      telemetry_handler<mTelemetry> telemetry_mqtt;
+      telemetry_handler<mTelemetry> telemetry_time;
+      telemetry_handler<mTelemetry> telemetry_taskermanager;
+      telemetry_handler<mTelemetry> telemetry_reboot;
+      telemetry_handler<mTelemetry> telemetry_reboot_event;
       #ifdef ENABLE_MQTT_DEBUG_TELEMETRY
-        handler<mTelemetry> mqtthandler_debug_pins_gpio;
-        handler<mTelemetry> mqtthandler_debug_pins_table;
-        handler<mTelemetry> mqtthandler_debug_template;
+        telemetry_handler<mTelemetry> telemetry_debug_pins_gpio;
+        telemetry_handler<mTelemetry> telemetry_debug_pins_table;
+        telemetry_handler<mTelemetry> telemetry_debug_template;
         #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES) || defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_PERFORMANCE)
-        handler<mTelemetry> mqtthandler_debug_tasker_interface_performance;
+        telemetry_handler<mTelemetry> telemetry_debug_tasker_interface_performance;
         #endif
         #ifdef ENABLE_DEVFEATURE__SETTINGS_STORAGE__SEND_DEBUG_MQTT_MESSAGES
-        handler<mTelemetry> mqtthandler_debug__settings_storage;
+        telemetry_handler<mTelemetry> telemetry_debug__settings_storage;
         #endif
       #endif // ENABLE_MQTT_DEBUG_TELEMETRY
       #endif // FIRMWARE_MINIMAL2

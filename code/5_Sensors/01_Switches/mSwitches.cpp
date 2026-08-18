@@ -25,23 +25,33 @@ int8_t mSwitches::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_LOOP: 
       Loop();
     break;
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); 
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      // tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
   }
 
   return TASKER_RESULT__SUCCESS_ID;
@@ -553,8 +563,8 @@ void mSwitches::Handler(void) {
       case PUSH_IGNORE:                    // SwitchMode 15
       case PUSH_IGNORE_INV:                // SwitchMode 16
         Switch.last_state[i] = button;                        // Update switch state before publishing
-        mqtthandler_sensor_ifchanged.flags.SendNow = true;
-        Tasker(TASK_MQTT_SENDER); // MqttPublishSensor
+        telemetry_sensor_ifchanged.flags.SendNow = true;
+        Tasker(TASK_TELEMETRY__SENDER_MQTT); // MqttPublishSensor
         break;
       }
       Switch.last_state[i] = button;
@@ -616,8 +626,8 @@ bool mSwitches::SendSwitch(uint32_t index, uint32_t state)
     state); // Event has occured, save and check it      
   #endif
 
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
-  Tasker(TASK_MQTT_SENDER);
+  telemetry_sensor_ifchanged.flags.SendNow = true;
+  Tasker(TASK_TELEMETRY__SENDER_MQTT);
   
   event.waiting = false;
 
@@ -713,31 +723,31 @@ char* mSwitches::GetStateName(uint8_t state, char* buffer, uint8_t buflen)
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mSwitches::MQTTHandler_Init(){
+void mSwitches::Telemetry_Init(){
 
-  struct handler<mSwitches>* ptr;
+  struct telemetry_handler<mSwitches>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mSwitches::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_ifchanged;
+  ptr = &telemetry_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mSwitches::ConstructJSON_Sensor;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
 } 
 

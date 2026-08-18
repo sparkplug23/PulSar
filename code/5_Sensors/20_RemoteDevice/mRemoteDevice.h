@@ -166,22 +166,22 @@ class mRemoteDevice :
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
   
 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    struct handler<mRemoteDevice> mqtthandler_settings;
-    struct handler<mRemoteDevice> mqtthandler_sensor_ifchanged;
-    struct handler<mRemoteDevice> mqtthandler_sensor_teleperiod;
+    struct telemetry_handler<mRemoteDevice> telemetry_settings;
+    struct telemetry_handler<mRemoteDevice> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mRemoteDevice> telemetry_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
     
       
-    struct handler<mRemoteDevice>* mqtthandler_list[3] = {
-      &mqtthandler_settings,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
+    struct telemetry_handler<mRemoteDevice>* telemetry_list[3] = {
+      &telemetry_settings,
+      &telemetry_sensor_ifchanged,
+      &telemetry_sensor_teleperiod
     };
 };
 #endif

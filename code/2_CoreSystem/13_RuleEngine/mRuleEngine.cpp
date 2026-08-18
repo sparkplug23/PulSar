@@ -83,23 +83,33 @@ int8_t mRuleEngine::Tasker(uint8_t function, JsonParserObject obj){
     //   WebAppend_Root_Status_Table_Data();
     //   break;
     // #endif //USE_MODULE_NETWORK_WEBSERVER
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
-      break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
   }
 
   return function_result;
@@ -133,7 +143,7 @@ void mRuleEngine::RulesLoad_From_Progmem()
   //IF TASKER RESULT WAS TRUE, THEN SUCCESS
   // tkr_set->runtime.boot_status.rules_template_parse_success = 1;
 
-  mqtthandler_settings.flags.SendNow = true;
+  telemetry_settings.flags.SendNow = true;
 
 
   #endif //USE_RULES_TEMPLATE
@@ -901,7 +911,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
     if(rules_appended)
     {
       #ifdef USE_MODULE_NETWORK_MQTT
-      mqtthandler_settings.flags.SendNow = true;
+      telemetry_settings.flags.SendNow = true;
       #endif
     }
   }
@@ -969,7 +979,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
         }
 
         #ifdef USE_MODULE_NETWORK_MQTT
-        mqtthandler_settings.flags.SendNow = true;
+        telemetry_settings.flags.SendNow = true;
         #endif
       }
     }
@@ -996,7 +1006,7 @@ void mRuleEngine::parse_JSONCommand(JsonParserObject obj)
     }
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    mqtthandler_state_ifchanged.flags.SendNow = true;
+    telemetry_state_ifchanged.flags.SendNow = true;
     #endif
   }
 }
@@ -1204,32 +1214,32 @@ uint8_t mRuleEngine::ConstructJSON_State(uint8_t json_method, bool json_appendin
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mRuleEngine::MQTTHandler_Init()
+void mRuleEngine::Telemetry_Init()
 {
 
-  struct handler<mRuleEngine>* ptr;
+  struct telemetry_handler<mRuleEngine>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mRuleEngine::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_state_ifchanged;
+  ptr = &telemetry_state_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mRuleEngine::ConstructJSON_State;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
 } 
 
