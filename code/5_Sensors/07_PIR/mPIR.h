@@ -71,10 +71,10 @@ class mPIR :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mPIR>*> mqtthandler_list;
-    struct handler<mPIR> mqtthandler_settings;
-    struct handler<mPIR> mqtthandler_sensor_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mPIR>*> telemetry_list;
+    struct telemetry_handler<mPIR> telemetry_settings;
+    struct telemetry_handler<mPIR> telemetry_sensor_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
     
 };

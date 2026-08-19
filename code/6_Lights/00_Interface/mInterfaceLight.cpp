@@ -61,23 +61,33 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     // Leave standy
     // Start standy
     #endif// USE_MODULE_CORE_RULES
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      MQTTHandler_Rate();
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_CONNECTED:
-      MQTTHandler_RefreshAll();
-    break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
 
   } // end switch
 
@@ -89,7 +99,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
 void mInterfaceLight::Pre_Init(void)
 {
 
-  bus_manager = new BusManager();
+  // bus_manager = new BusManager();
 
 }
 
@@ -381,19 +391,21 @@ void mInterfaceLight::Save_Module()
 
   
     JBI->Array_Start("BusConfig");
-    for(uint8_t bus_i = 0; bus_i < bus_manager->getNumBusses(); bus_i++)
+    for(uint8_t i = 0; i < BusManager::getNumBusses(); i++)
     {    
       JBI->Object_Start();
 
+        Bus *bus = BusManager::getBus(i);
+
         uint8_t pins[5] = {0};
-        uint8_t pin_count = bus_manager->busses[bus_i]->getPins(pins);
+        uint8_t pin_count = bus->getPins(pins);
         JBI->Array_Start("Pin");
           for(uint8_t ii=0;ii<pin_count;ii++){ JBI->Add(pins[ii]); }
         JBI->Array_End();
 
-        JBI->Add("Start", bus_manager->busses[bus_i]->getStart());
-        JBI->Add("Length", bus_manager->busses[bus_i]->getLength());
-        JBI->Add_P("BusType", bus_manager->busses[bus_i]->getTypeName());
+        JBI->Add("Start", bus->getStart());
+        JBI->Add("Length", bus->getLength());
+        JBI->Add_P("BusType", bus->getTypeName());
 
 
         // JBI->Add_P("ColourOrder", bus_manager->getColourOrderName(bus_manager->busses[bus_i]->getColorOrder(), buffer, sizeof(buffer)) );
@@ -771,7 +783,7 @@ void mInterfaceLight::BusManager_Create_DefaultSingleNeoPixel()
     uint16_t count = defCounts[(i < defNumCounts) ? i : defNumCounts -1];
     prevLen += count;
     BusConfig defCfg = BusConfig(DEFAULT_LED_TYPE, defPin, start, count);
-    if(bus_manager->add(defCfg) == -1) 
+    if(BusManager::add(defCfg) == -1) 
     {
       ALOG_ERR(PSTR("bus_manager->add(defCfg) == -1"));
       break;
@@ -802,7 +814,8 @@ void mInterfaceLight::BusManager_Create_DefaultSinglePWM_5CH()
 
 
     BusConfig defCfg = BusConfig(BUSTYPE_ANALOG_4CH, defPin, start, count);
-    if(bus_manager->add(defCfg) == -1) 
+    
+    if(BusManager::add(defCfg) == -1) 
     {
       ALOG_ERR(PSTR("bus_manager->add(defCfg) == -1"));
       break;
@@ -833,14 +846,262 @@ void mInterfaceLight::BusManager_Create_DefaultSinglePWM_5CH()
  *   - Array parsing should call ClearBusConfigs() first, then pass index 0..N.
  *   - Object parsing can be used for targeted single-bus replacement.
  */
+// void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t bus_index_override)
+// {
+//   JsonParserToken jtok = 0;
+//   JsonParserToken jtok2 = 0;
+
+//   const uint8_t max_busses = WLED_MAX_BUSSES + WLED_MIN_VIRTUAL_BUSSES;
+
+//   DEBUG_LINE_HERE;
+
+//   /********************************************************************************************
+//    ** Determine target bus index **************************************************************
+//   ********************************************************************************************/
+
+//   int16_t bus_index = bus_index_override;
+
+//   if (bus_index < 0)
+//   {
+//     if (jtok = obj["Index"])
+//     {
+//       bus_index = jtok.getInt();
+//     }
+//     else if (jtok = obj["BusIndex"])
+//     {
+//       bus_index = jtok.getInt();
+//     }
+//   }
+
+//   if (bus_index < 0)
+//   {
+//     for (uint8_t bus_i = 0; bus_i < max_busses; bus_i++)
+//     {
+//       if (busConfigs[bus_i] == nullptr)
+//       {
+//         bus_index = bus_i;
+//         break;
+//       }
+//     }
+//   }
+
+//   if ((bus_index < 0) || (bus_index >= max_busses))
+//   {
+//     ALOG_ERR(
+//       PSTR("BusConfig invalid index %d, max=%d"),
+//       bus_index,
+//       max_busses
+//     );
+//     return;
+//   }
+
+//   ALOG_INF(PSTR("BusConfig target index %d"), bus_index);
+
+
+//   /********************************************************************************************
+//    ** Defaults ********************************************************************************
+//   ********************************************************************************************/
+
+//   uint16_t start = 0;
+//   uint16_t length = 10;
+//   int8_t bus_type = BUSTYPE_NONE;
+//   uint8_t reversed = 0;
+//   uint8_t ColourOrder = 0;
+//   uint8_t pins[5] = { 255, 255, 255, 255, 255 };
+//   uint8_t skip_pixels = 0;
+
+
+//   /********************************************************************************************
+//    ** Pin *************************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok2 = obj["Pin"])
+//   {
+//     if (jtok2.isNum())
+//     {
+//       pins[0] = jtok2.getInt();
+//     }
+//     else if (jtok2.isArray())
+//     {
+//       uint8_t pin_i = 0;
+//       JsonParserArray arrobj = jtok2;
+
+//       for (auto value : arrobj)
+//       {
+//         if (pin_i >= 5)
+//         {
+//           ALOG_WRN(PSTR("BusConfig Pin array too long, extra pins ignored"));
+//           break;
+//         }
+
+//         pins[pin_i++] = value.getInt();
+//       }
+//     }
+
+//     AddLog_Array(LOG_LEVEL_INFO, PSTR("pins"), pins, 5);
+//   }
+
+
+//   /********************************************************************************************
+//    ** Start ***********************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok = obj["Start"])
+//   {
+//     start = jtok.getInt();
+//     ALOG_INF(PSTR("start %d"), start);
+//   }
+
+
+//   /********************************************************************************************
+//    ** Length **********************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok = obj["Length"])
+//   {
+//     length = jtok.getInt();
+//     ALOG_INF(PSTR("length %d"), length);
+//   }
+
+
+//   /********************************************************************************************
+//    ** BusType *********************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok = obj["BusType"])
+//   {
+//     if (jtok.isInt())
+//     {
+//       bus_type = jtok.getInt();
+//     }
+//     else if (jtok.isStr())
+//     {
+//       bus_type = Bus::getTypeIDbyName(jtok.getStr());
+//     }
+
+//     ALOG_INF(PSTR("bus_type %d"), bus_type);
+//   }
+
+
+//   /********************************************************************************************
+//    ** Colour order ****************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok = obj[PM_RGB_COLOUR_ORDER])
+//   {
+//     if (jtok.isStr())
+//     {
+//       ColourOrder = GetColourOrder_FromName(jtok.getStr());
+//     }
+//   }
+
+
+//   /********************************************************************************************
+//    ** Reversed ********************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok = obj["Reversed"])
+//   {
+//     reversed = jtok.getInt();
+//     ALOG_INF(PSTR("reversed %d"), reversed);
+//   }
+
+
+//   /********************************************************************************************
+//    ** Skip ************************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok = obj["Skip"])
+//   {
+//     skip_pixels = jtok.getInt();
+//     ALOG_INF(PSTR("Skip %d"), skip_pixels);
+//   }
+
+
+//   /********************************************************************************************
+//    ** Replace target BusConfig ****************************************************************
+//   ********************************************************************************************/
+
+
+
+//   if (busConfigs[bus_index] != nullptr)
+//   {
+//     delete busConfigs[bus_index];
+//     busConfigs[bus_index] = nullptr;
+//   }
+
+//   ALOG_INF(
+//     PSTR("BusConfig[%d](type%d,pin0=%d,start%d,len%d,CO%d)"),
+//     bus_index,
+//     bus_type,
+//     pins[0],
+//     start,
+//     length,
+//     ColourOrder
+//   );
+
+//   #ifdef ENABLE_DEVFEATURE_LIGHTING__DOUBLE_BUFFER
+
+//   DEBUG_LINE_HERE;
+
+//   busConfigs[bus_index] = new BusConfig(
+//     bus_type,
+//     pins,
+//     start,
+//     length,
+//     ColourOrder,
+//     reversed,
+//     skip_pixels,
+//     RGBW_MODE_MANUAL_ONLY,
+//     0,    // clock
+//     true  // double buffer
+//   );
+
+//   #else
+
+//   DEBUG_LINE_HERE;
+
+//   busConfigs[bus_index] = new BusConfig(
+//     bus_type,
+//     pins,
+//     start,
+//     length,
+//     ColourOrder,
+//     reversed,
+//     skip_pixels,
+//     RGBW_MODE_MANUAL_ONLY
+//   );
+
+//   #endif
+
+//   tkr_anim->doInitBusses = true;
+
+//   ALOG_INF(PSTR("mInterfaceLight::parseJSONObject__BusConfig Finished"));
+//   DEBUG_LINE_HERE;
+// }
+
+// void mInterfaceLight::ClearBusConfigs(void)
+// {
+//   for (uint8_t bus_i = 0; bus_i < (WLED_MAX_BUSSES + WLED_MIN_VIRTUAL_BUSSES); bus_i++)
+//   {
+//     if (busConfigs[bus_i] != nullptr)
+//     {
+//       delete busConfigs[bus_i];
+//       busConfigs[bus_i] = nullptr;
+//     }
+//   }
+
+//   tkr_anim->doInitBusses = true;
+
+//   ALOG_INF(PSTR("BusConfig: cleared existing bus config array"));
+// }
+
 void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t bus_index_override)
 {
   JsonParserToken jtok = 0;
   JsonParserToken jtok2 = 0;
 
-  const uint8_t max_busses = WLED_MAX_BUSSES + WLED_MIN_VIRTUAL_BUSSES;
-
-  DEBUG_LINE_HERE;
+  const size_t max_busses = WLED_MAX_BUSSES + WLED_MIN_VIRTUAL_BUSSES;
 
   /********************************************************************************************
    ** Determine target bus index **************************************************************
@@ -860,29 +1121,38 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t b
     }
   }
 
+  // No explicit index: append to the end of the vector.
   if (bus_index < 0)
   {
-    for (uint8_t bus_i = 0; bus_i < max_busses; bus_i++)
-    {
-      if (busConfigs[bus_i] == nullptr)
-      {
-        bus_index = bus_i;
-        break;
-      }
-    }
+    bus_index = busConfigs.size();
   }
 
-  if ((bus_index < 0) || (bus_index >= max_busses))
+  if ((bus_index < 0) || (static_cast<size_t>(bus_index) >= max_busses))
   {
     ALOG_ERR(
-      PSTR("BusConfig invalid index %d, max=%d"),
+      PSTR("BusConfig invalid index %d, max=%u"),
       bus_index,
-      max_busses
+      static_cast<unsigned>(max_busses)
     );
     return;
   }
 
-  ALOG_INF(PSTR("BusConfig target index %d"), bus_index);
+  // Vectors are contiguous. Do not create empty index gaps.
+  if (static_cast<size_t>(bus_index) > busConfigs.size())
+  {
+    ALOG_ERR(
+      PSTR("BusConfig index gap index=%d size=%u"),
+      bus_index,
+      static_cast<unsigned>(busConfigs.size())
+    );
+    return;
+  }
+
+  ALOG_INF(
+    PSTR("BusConfig target index %d current_size=%u"),
+    bus_index,
+    static_cast<unsigned>(busConfigs.size())
+  );
 
 
   /********************************************************************************************
@@ -890,11 +1160,11 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t b
   ********************************************************************************************/
 
   uint16_t start = 0;
-  uint16_t length = 10;
+  uint16_t count = 10;
   int8_t bus_type = BUSTYPE_NONE;
   uint8_t reversed = 0;
   uint8_t ColourOrder = 0;
-  uint8_t pins[5] = { 255, 255, 255, 255, 255 };
+  uint8_t pins[5] = {255, 255, 255, 255, 255};
   uint8_t skip_pixels = 0;
 
 
@@ -936,7 +1206,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t b
   if (jtok = obj["Start"])
   {
     start = jtok.getInt();
-    ALOG_INF(PSTR("start %d"), start);
+    ALOG_INF(PSTR("start %u"), static_cast<unsigned>(start));
   }
 
 
@@ -946,8 +1216,8 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t b
 
   if (jtok = obj["Length"])
   {
-    length = jtok.getInt();
-    ALOG_INF(PSTR("length %d"), length);
+    count = jtok.getInt();
+    ALOG_INF(PSTR("count %u"), static_cast<unsigned>(count));
   }
 
 
@@ -990,7 +1260,7 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t b
   if (jtok = obj["Reversed"])
   {
     reversed = jtok.getInt();
-    ALOG_INF(PSTR("reversed %d"), reversed);
+    ALOG_INF(PSTR("reversed %u"), static_cast<unsigned>(reversed));
   }
 
 
@@ -1001,39 +1271,31 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t b
   if (jtok = obj["Skip"])
   {
     skip_pixels = jtok.getInt();
-    ALOG_INF(PSTR("Skip %d"), skip_pixels);
+    ALOG_INF(PSTR("Skip %u"), static_cast<unsigned>(skip_pixels));
   }
 
 
   /********************************************************************************************
-   ** Replace target BusConfig ****************************************************************
+   ** Construct BusConfig *********************************************************************
   ********************************************************************************************/
 
-  if (busConfigs[bus_index] != nullptr)
-  {
-    delete busConfigs[bus_index];
-    busConfigs[bus_index] = nullptr;
-  }
-
   ALOG_INF(
-    PSTR("BusConfig[%d](type%d,pin0=%d,start%d,len%d,CO%d)"),
+    PSTR("BusConfig[%d](type%d,pin0=%u,start%u,len%u,CO%u)"),
     bus_index,
     bus_type,
-    pins[0],
-    start,
-    length,
-    ColourOrder
+    static_cast<unsigned>(pins[0]),
+    static_cast<unsigned>(start),
+    static_cast<unsigned>(count),
+    static_cast<unsigned>(ColourOrder)
   );
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTING__DOUBLE_BUFFER
+#ifdef ENABLE_DEVFEATURE_LIGHTING__DOUBLE_BUFFER
 
-  DEBUG_LINE_HERE;
-
-  busConfigs[bus_index] = new BusConfig(
+  BusConfig new_config(
     bus_type,
     pins,
     start,
-    length,
+    count,
     ColourOrder,
     reversed,
     skip_pixels,
@@ -1042,45 +1304,66 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t b
     true  // double buffer
   );
 
-  #else
+#else
 
-  DEBUG_LINE_HERE;
-
-  busConfigs[bus_index] = new BusConfig(
+  BusConfig new_config(
     bus_type,
     pins,
     start,
-    length,
+    count,
     ColourOrder,
     reversed,
     skip_pixels,
     RGBW_MODE_MANUAL_ONLY
   );
 
-  #endif
+#endif
 
-  tkr_anim->doInitBusses = true;
 
-  ALOG_DBG(PSTR("mInterfaceLight::parseJSONObject__BusConfig Finished"));
-  DEBUG_LINE_HERE;
-}
+  /********************************************************************************************
+   ** Replace or append ***********************************************************************
+  ********************************************************************************************/
 
-void mInterfaceLight::ClearBusConfigs(void)
-{
-  for (uint8_t bus_i = 0; bus_i < (WLED_MAX_BUSSES + WLED_MIN_VIRTUAL_BUSSES); bus_i++)
+  if (static_cast<size_t>(bus_index) < busConfigs.size())
   {
-    if (busConfigs[bus_i] != nullptr)
-    {
-      delete busConfigs[bus_i];
-      busConfigs[bus_i] = nullptr;
-    }
+    busConfigs[bus_index] = std::move(new_config);
+
+    ALOG_INF(
+      PSTR("BusConfig replaced index=%d size=%u"),
+      bus_index,
+      static_cast<unsigned>(busConfigs.size())
+    );
+  }
+  else
+  {
+    busConfigs.emplace_back(std::move(new_config));
+
+    ALOG_INF(
+      PSTR("BusConfig appended index=%d size=%u"),
+      bus_index,
+      static_cast<unsigned>(busConfigs.size())
+    );
   }
 
   tkr_anim->doInitBusses = true;
 
-  ALOG_INF(PSTR("BusConfig: cleared existing bus config array"));
+  ALOG_INF(PSTR("mInterfaceLight::parseJSONObject__BusConfig Finished"));
 }
 
+void mInterfaceLight::ClearBusConfigs(void)
+{
+  const size_t previous_size = busConfigs.size();
+
+  busConfigs.clear();
+
+  tkr_anim->doInitBusses = true;
+
+  ALOG_INF(
+    PSTR("BusConfig: cleared vector previous_size=%u current_size=%u"),
+    static_cast<unsigned>(previous_size),
+    static_cast<unsigned>(busConfigs.size())
+  );
+}
 
 
 
@@ -1298,7 +1581,6 @@ void mInterfaceLight::CommandSet_LightPowerState(uint8_t state)
     pSEGMENT_I(0).single_animation_override.time_ms =  pSEGMENT_I(0).single_animation_override_turning_off.time_ms; // slow turn on
     ALOG_INF(PSTR("Setting override for off %d"), pSEGMENT_I(0).single_animation_override.time_ms);
     tkr_anim->force_update();
-    pSEGMENT_I(0).effect_anim_section = 0; // for effects that are only generated once, we need to trigger it again to make the brightness dim down
     CommandSet_Brt_255(0);    
   }
   else
@@ -1343,14 +1625,10 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new)
   }
   #endif
   
- if(tkr_anim->segments.size())
-  {
-    tkr_anim->SEGMENT_I(0).effect_anim_section = 0; // for effects that are only generated once, we need to trigger it again to make the brightness dim down
-  }
   setBriRGB_Global(brt_new);
   setBriCT_Global(brt_new);
   
-  bus_manager->setBrightness( getBriRGB_Global() ); // fix re-initialised bus' brightness
+  BusManager::setBrightness( getBriRGB_Global() ); // fix re-initialised bus' brightness
 
 }
 
@@ -1369,11 +1647,6 @@ void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_
 
   tkr_anim->force_update();
  
-  if(tkr_anim->segments.size())
-  {
-    tkr_anim->SEGMENT_I(0).effect_anim_section = 0; // for effects that are only generated once, we need to trigger it again to make the brightness dim down
-  }
-
   _briRGB_Global = bri;
   setBriRGB_Global(bri);
   
@@ -1389,11 +1662,6 @@ void mInterfaceLight::CommandSet_Global_BrtCCT_255(uint8_t bri, uint8_t segment_
 {
   tkr_anim->force_update();
   
-  if(tkr_anim->segments.size())
-  {
-    tkr_anim->SEGMENT_I(0).effect_anim_section = 0; // for effects that are only generated once, we need to trigger it again to make the brightness dim down
-  }
-
   setBriCT_Global(bri);
   #ifdef ENABLE_LOG_LEVEL_COMMANDS
   // ALOG_INF(PSTR(D_LOG_LIGHT D_COMMAND_NVALUE_K(D_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).rgbcct_controller->getBrightnessCCT255());
@@ -1446,7 +1714,7 @@ uint8_t mInterfaceLight::ConstructJSON_State(uint8_t json_level, bool json_appen
   JBI->Start();  
 
     #ifdef ENABLE_DEVFEATURE_DEBUG_PWM_CHANNELS_MQTT
-    mqtthandler__state__ifchanged.tRateSecs = 1; // force this to be 1 second for this debug message
+    telemetry__state__ifchanged.tRateSecs = 1; // force this to be 1 second for this debug message
     JBI->Array_Start("PWM_Channels_Read");
     for (uint8_t i = 0; i < 5; i++) {
       if (tkr_pins->PinUsed(GPIO_PWM1_ID, i)) 
@@ -1537,15 +1805,20 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool
 
   JBI->Start();
 
-  for(uint8_t bus_i = 0; bus_i < bus_manager->getNumBusses(); bus_i++)
+  uint8_t length = BusManager::busses.size();
+
+  for(uint8_t bus_i = 0; bus_i < length; bus_i++)
   {
     JBI->Object_Start_F("Bus%d", bus_i);
+      
+      Bus *bus = BusManager::getBus(bus_i);
+      if (!bus || !bus->isOk()) break;
 
-      JBI->Add("getLength", bus_manager->busses[bus_i]->getLength());
-      JBI->Add("s", bus_manager->busses[bus_i]->_start);
-      JBI->Add("l", bus_manager->busses[bus_i]->_len);
+      JBI->Add("getLength", bus->getLength());
+      JBI->Add("s", bus->_start);
+      JBI->Add("l", bus->_len);
 
-      uint8_t colour_order = bus_manager->busses[bus_i]->getColorOrder();
+      uint8_t colour_order = bus->getColorOrder();
       JBI->Array_Start("CO");
         JBI->Add(GetColourOrderString(colour_order).c_str());// colour_order.red);
         // JBI->Add(colour_order.green);
@@ -1554,18 +1827,18 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__BusConfig(uint8_t json_level, bool
         // JBI->Add(colour_order.white_warm);
       JBI->Array_End();
 
-      JBI->Add("getType", (uint8_t)bus_manager->busses[bus_i]->getType());
+      JBI->Add("getType", (uint8_t)bus->getType());
 
-      JBI->Add("getTypeName", bus_manager->busses[bus_i]->getTypeName());
+      JBI->Add("getTypeName", bus->getTypeName());
 
-      if(IS_BUSTYPE_DIGITAL(bus_manager->busses[bus_i]->getType()))
+      if(IS_BUSTYPE_DIGITAL(bus->getType()))
       {
-        JBI->Add("interfaceType", bus_manager->busses[bus_i]->getInterfaceType()); 
+        JBI->Add("interfaceType", bus->getInterfaceType()); 
       }
 
       uint8_t pins[5] = {0};
       uint8_t pin_count = 0;
-      pin_count = bus_manager->busses[bus_i]->getPins(pins);
+      pin_count = bus->getPins(pins);
       JBI->Array_Start("p");
       // JBI->Add(pin_count);
       for(uint8_t ii=0;ii<pin_count;ii++)
@@ -1673,83 +1946,83 @@ uint8_t mInterfaceLight::ConstructJSON_Debug__PowerProfiles(uint8_t json_level, 
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mInterfaceLight::MQTTHandler_Init()
+void mInterfaceLight::Telemetry_Init()
 {
 
-  struct handler<mInterfaceLight>* ptr;  
+  struct telemetry_handler<mInterfaceLight>* ptr;  
 
-  ptr = &mqtthandler__settings__teleperiod;
+  ptr = &telemetry__settings__teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.configperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler__state__ifchanged;
+  ptr = &telemetry__state__ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__STATE__CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_State;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
-  ptr = &mqtthandler__debug_module_config__teleperiod;
+  ptr = &telemetry__debug_module_config__teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_MODULE_CONFIG__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_MODULE_CONFIG__CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Debug_Module_Config;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
 
   
   #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__BUS_CONFIG
-  ptr = &mqtthandler__debug_bus_config__teleperiod;
+  ptr = &telemetry__debug_bus_config__teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1; 
+  ptr->tRateSecs = 120; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_BUS_CONFIG__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_BUS_CONFIG__CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Debug__BusConfig;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE_DEBUG_CONFIG
 
   
   #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
-  ptr = &mqtthandler__debug_power_profiles__teleperiod;
+  ptr = &telemetry__debug_power_profiles__teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_POWER_PROFILES__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_POWER_PROFILES__CTR;
   ptr->ConstructJSON_function = &mInterfaceLight::ConstructJSON_Debug__PowerProfiles;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   #endif // ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
 
 
 } 
 
 /**
- * @brief Set flag for all mqtthandlers to send
+ * @brief Set flag for all telemetryhandlers to send
  * */
 void mInterfaceLight::MQTTHandler_RefreshAll()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     handle->flags.SendNow = true;
   }
 }
@@ -1759,7 +2032,7 @@ void mInterfaceLight::MQTTHandler_RefreshAll()
  * */
 void mInterfaceLight::MQTTHandler_Rate()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
       handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
@@ -1772,7 +2045,7 @@ void mInterfaceLight::MQTTHandler_Rate()
  * */
 void mInterfaceLight::MQTTHandler_Sender()
 {    
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }

@@ -127,17 +127,17 @@ uint8_t Change_Detected(uint8_t sensor_id);
   
   //#ifdef USE_CORE_MQTT 
 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    struct handler<mPulseCounter>* ptr;
+    struct telemetry_handler<mPulseCounter>* ptr;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mPulseCounter> mqtthandler_settings;
+    struct telemetry_handler<mPulseCounter> telemetry_settings;
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "sensors";
-    struct handler<mPulseCounter> mqtthandler_sensor_ifchanged;
-    struct handler<mPulseCounter> mqtthandler_sensor_teleperiod;
+    struct telemetry_handler<mPulseCounter> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mPulseCounter> telemetry_sensor_teleperiod;
 
     // No specialised payload therefore use system default instead of enum
     

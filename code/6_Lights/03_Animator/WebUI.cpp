@@ -51,7 +51,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   root[F("of")]  = seg.offset;
   root["on"]     = seg.on;
   root["frz"]    = seg.freeze;
-  byte segbri    = seg._brightness_rgb;
+  byte segbri    = seg.opacity;
   root["bri"]    = (segbri) ? segbri : 255;
 
   if (segmentBounds && seg.name != nullptr) root["n"] = reinterpret_cast<const char *>(seg.name); //not good practice, but decreases required JSON buffer
@@ -74,11 +74,11 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   for (size_t i = 0; i < 5; i++)
   {
     byte segcol[5]; 
-    segcol[0] = seg.segcol[i].colour.R;
-    segcol[1] = seg.segcol[i].colour.G;
-    segcol[2] = seg.segcol[i].colour.B;
-    segcol[3] = seg.segcol[i].colour.WW; // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
-    segcol[4] = seg.segcol[i].colour.CW; // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
+    segcol[0] = seg.segcol[i].getRed();
+    segcol[1] = seg.segcol[i].getGreen();
+    segcol[2] = seg.segcol[i].getBlue();
+    segcol[3] = seg.segcol[i].getWhite(); // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
+    segcol[4] = seg.segcol[i].getWhite(); // white channels inside RgbwwColor is always stored as max value, so slider should reflect the global CCT brightness
     char tmpcol[40];
     snprintf_P(tmpcol, sizeof(tmpcol), PSTR("[%u,%u,%u,%u,%u]"), segcol[0], segcol[1], segcol[2], segcol[3], segcol[4]);
     strcat(colstr, i<4 ? strcat(tmpcol, ",") : tmpcol);
@@ -87,10 +87,10 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   // ALOG_INF(PSTR("colstr OUT = %s"), colstr);
   root["col"] = serialized(colstr);
 
-  root["rgbbri"] = seg.getBrightnessRGB();
-  root["cctbri"] = seg.getBrightnessCCT();
+  // root["rgbbri"] = seg.getBrightnessRGB();
+  // root["cctbri"] = seg.getBrightnessCCT();
 
-  root["PalIX"] = seg.live_palette.intensity;
+  root["palix"] = seg.live_palette.intensity;
 
   root["fx"]  = seg.effect_id;
   root["sx"]  = seg.speed;
@@ -263,7 +263,7 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   root[F("ws")] = websocket_lights->count();
   #endif
 
-  root[F("fxcount")] = getModeCount();
+  root[F("fxcount")] = getEffectCount();
   root[F("palcount")] = getPaletteCount();
   root[F("cpalcount")] = customPalettes.size(); //number of custom palettes
 
@@ -372,16 +372,22 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
   netDebugEnabled = root[F("debug")] | netDebugEnabled;
   #endif
 
-  bool onBefore = tkr_iLight->_briRGB_Global ; //bri
-  if(getVal(root["bri"], &tkr_iLight->_briRGB_Global))
-  {
-    //if it was updated, tmp update this bus
-    tkr_iLight->bus_manager->setBrightness( tkr_iLight->getBriRGB_Global() ); // fix re-initialised bus' brightness
-  }
+  bool onBefore = tkr_iLight->_briRGB_Global;
+  getVal(root["bri"], tkr_iLight->_briRGB_Global);
+  if (tkr_iLight->_briRGB_Global != briOld) stateChanged = true;
+
+  ALOG_INF(PSTR("web->>bri %d"),tkr_iLight->_briRGB_Global);
+
+  // bool onBefore = tkr_iLight->_briRGB_Global ; //bri
+  // if(getVal(root["bri"], &tkr_iLight->_briRGB_Global))
+  // {
+  //   //if it was updated, tmp update this bus
+    // BusManager::setBrightness( tkr_iLight->getBriRGB_Global() ); // fix re-initialised bus' brightness
+  // }
 
 
-  getVal(root["cBri"], &tkr_iLight->_briRGB_Global);
-  getVal(root["wBri"], &tkr_iLight->_briCT_Global);
+  // getVal(root["cBri"], &tkr_iLight->_briRGB_Global);
+  // getVal(root["wBri"], &tkr_iLight->_briCT_Global);
 
 
   bool on = root["on"] | (tkr_iLight->_briRGB_Global > 0);
@@ -503,27 +509,82 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
     #endif
   }
 
-  // applying preset (2 cases: a) API call includes all preset values ("pd"), b) API only specifies preset ID ("ps"))
-  byte presetToRestore = 0;
-  // a) already applied preset content (requires "seg" or "win" but will ignore the rest)
-  if (!root["pd"].isNull() && stateChanged) {
-    currentPreset = root[F("pd")] | currentPreset;
-    if (root["win"].isNull()) presetCycCurr = currentPreset; // otherwise it was set in handle__HTTP__GET_QueryAPI() [set.cpp]
-    presetToRestore = currentPreset; // stateUpdated() will clear the preset, so we need to restore it after
+  // // applying preset (2 cases: a) API call includes all preset values ("pd"), b) API only specifies preset ID ("ps"))
+  // byte presetToRestore = 0;
+  // // a) already applied preset content (requires "seg" or "win" but will ignore the rest)
+  // if (!root["pd"].isNull() && stateChanged) {
+  //   currentPreset = root[F("pd")] | currentPreset;
+  //   if (root["win"].isNull()) presetCycCurr = currentPreset; // otherwise it was set in handle__HTTP__GET_QueryAPI() [set.cpp]
+  //   presetToRestore = currentPreset; // stateUpdated() will clear the preset, so we need to restore it after
     
-      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
-      unloadPlaylist();// applying a preset unloads the playlist, may be needed here too?
-      #endif
+  //     #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  //     unloadPlaylist();// applying a preset unloads the playlist, may be needed here too?
+  //     #endif
       
-  } else if (!root["ps"].isNull()) {
-    ps = presetCycCurr;
-    if (root["win"].isNull() && getVal(root["ps"], &ps, 0, 0) && ps > 0 && ps < 251 && ps != currentPreset) {
-      // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
-      presetCycCurr = ps;
+  // } else if (!root["ps"].isNull()) {
+  //   ps = presetCycCurr;
+  //   if (root["win"].isNull() && getVal(root["ps"], ps, 0, 0) && ps > 0 && ps < 251 && ps != currentPreset) {
+  //     // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
+  //     presetCycCurr = ps;
+  //     #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  //     unloadPlaylist();          // applying a preset unloads the playlist
+  //     #endif
+  //     applyPreset(ps, callMode); // async load from file system (only preset ID was specified)
+  //     return stateResponse;
+  //   }
+  // }
+    // Applying preset:
+  //
+  //   pd:
+  //     The request already contains, or has already applied, the preset state.
+  //     Record the supplied preset ID as active and stop any running playlist.
+  //
+  //   ps:
+  //     The request contains only a preset ID. Load that preset asynchronously
+  //     from the preset file and stop any running playlist.
+  byte presetToRestore = 0;
+
+  if (!root["pd"].isNull())
+  {
+    const byte appliedPreset = root[F("pd")] | 0;
+
+    if (appliedPreset > 0 && appliedPreset < 251)
+    {
+      currentPreset = appliedPreset;
+
+      if (root["win"].isNull())
+      {
+        presetCycCurr = currentPreset;
+      }
+
       #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
-      unloadPlaylist();          // applying a preset unloads the playlist
+      unloadPlaylist();
       #endif
-      applyPreset(ps, callMode); // async load from file system (only preset ID was specified)
+
+      // stateUpdated() clears currentPreset when normal state values change.
+      // Restore the explicitly selected preset after stateUpdated().
+      presetToRestore = currentPreset;
+    }
+  }
+  else if (!root["ps"].isNull())
+  {
+    ps = presetCycCurr;
+
+    if (
+      root["win"].isNull() &&
+      getVal(root["ps"], ps, 0, 0) &&
+      ps > 0 &&
+      ps < 251 &&
+      ps != currentPreset
+    )
+    {
+      presetCycCurr = ps;
+
+      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+      unloadPlaylist();
+      #endif
+
+      applyPreset(ps, callMode);
       return stateResponse;
     }
   }
@@ -553,9 +614,8 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 
   // ALOG_INF(PSTR("deserializeState end =>> does my normal commandjson need done here?"));
 
-  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
-  stateUpdated(callMode);
-  #endif
+  stateUpdated(callMode); // if stateChanged
+  
   if (presetToRestore) currentPreset = presetToRestore;
   
   #endif // ENABLE_FEATURE_LIGHTS__PRESETS
@@ -565,10 +625,10 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 
 
 //helper to get int value with in/decrementing support via ~ syntax
-void mAnimatorLight::parseNumber(const char* str, byte* val, byte minv, byte maxv)
+void mAnimatorLight::parseNumber(const char* str, byte &val, byte minv, byte maxv)
 {
   if (str == nullptr || str[0] == '\0') return;
-  if (str[0] == 'r') {*val = random8(minv,maxv?maxv:255); return;} // maxv for random cannot be 0
+  if (str[0] == 'r') {val = hw_random8(minv,maxv?maxv:255); return;} // maxv for random cannot be 0
   bool wrap = false;
   if (str[0] == 'w' && strlen(str) > 1) {str++; wrap = true;}
   if (str[0] == '~') {
@@ -576,19 +636,19 @@ void mAnimatorLight::parseNumber(const char* str, byte* val, byte minv, byte max
     if (out == 0) {
       if (str[1] == '0') return;
       if (str[1] == '-') {
-        *val = (int)(*val -1) < (int)minv ? maxv : min((int)maxv,(*val -1)); //-1, wrap around
+        val = (int)(val -1) < (int)minv ? maxv : min((int)maxv,(val -1)); //-1, wrap around
       } else {
-        *val = (int)(*val +1) > (int)maxv ? minv : max((int)minv,(*val +1)); //+1, wrap around
+        val = (int)(val +1) > (int)maxv ? minv : max((int)minv,(val +1)); //+1, wrap around
       }
     } else {
-      if (wrap && *val == maxv && out > 0) out = minv;
-      else if (wrap && *val == minv && out < 0) out = maxv;
+      if (wrap && val == maxv && out > 0) out = minv;
+      else if (wrap && val == minv && out < 0) out = maxv;
       else {
-        out += *val;
+        out += val;
         if (out > maxv) out = maxv;
         if (out < minv) out = minv;
       }
-      *val = out;
+      val = out;
     }
     return;
   } else if (minv == maxv && minv == 0) { // limits "unset" i.e. both 0
@@ -603,9 +663,8 @@ void mAnimatorLight::parseNumber(const char* str, byte* val, byte minv, byte max
       }
     }
   }
-  *val = atoi(str);
+  val = atoi(str);
 }
-
 
 
 
@@ -617,10 +676,10 @@ int mAnimatorLight::getNumVal(const String* req, uint16_t pos)
 
 
 //getVal supports inc/decrementing and random ("X~Y(r|~[w][-][Z])" form)
-bool mAnimatorLight::getVal(JsonVariant elem, byte* val, byte vmin, byte vmax) {
+bool  mAnimatorLight::getVal(JsonVariant elem, byte &val, byte vmin, byte vmax) {
   if (elem.is<int>()) {
 		if (elem < 0) return false; //ignore e.g. {"ps":-1}
-    *val = elem;
+    val = elem;
     return true;
   } else if (elem.is<const char*>()) {
     const char* str = elem;
@@ -646,7 +705,7 @@ bool mAnimatorLight::getBoolVal(JsonVariant elem, bool dflt) {
 }
 
 
-bool mAnimatorLight::updateVal(const char* req, const char* key, byte* val, byte minv, byte maxv)
+bool mAnimatorLight::updateVal(const char* req, const char* key, byte &val, byte minv, byte maxv)
 {
   const char *v = strstr(req, key);
   if (v) v += strlen(key);
@@ -721,14 +780,6 @@ void mAnimatorLight::toggleOnOff()
   stateChanged = true;
 }
 
-
-//scales the brightness with the briMultiplier factor
-byte mAnimatorLight::scaledBri(byte in)
-{
-  uint16_t val = ((uint16_t)in*briMultiplier)/100;
-  if (val > 255) val = 255;
-  return (byte)val;
-}
 
 
 void mAnimatorLight::realtimeLock(uint32_t timeoutMs, byte md)
@@ -903,7 +954,7 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
 
   if (fromFS || !ins.isNull()) {
     uint8_t s = 0;  // bus iterator
-    if (fromFS) tkr_iLight->bus_manager->removeAll(); // can't safely manipulate busses directly in network callback
+    if (fromFS) BusManager::removeAll(); // can't safely manipulate busses directly in network callback
     uint32_t mem = 0;
     bool busesChanged = false;
     for (JsonObject elm : ins) {
@@ -943,22 +994,18 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
     doInitBusses = busesChanged;
     // finalization done in beginStrip()
   }
-  if (hw_led["rev"]) tkr_iLight->bus_manager->getBus(0)->setReversed(true); //set 0.11 global reversed setting for first bus
+  if (hw_led["rev"]) BusManager::getBus(0)->setReversed(true); //set 0.11 global reversed setting for first bus
 
   // read color order map configuration
   JsonArray hw_com = hw[F("com")];
   if (!hw_com.isNull()) {
-    ColorOrderMap com = {};
-    uint8_t s = 0;
+    BusManager::getColorOrderMap().reserve(std::min(hw_com.size(), (size_t)WLED_MAX_COLOR_ORDER_MAPPINGS));
     for (JsonObject entry : hw_com) {
-      if (s > WLED_MAX_COLOR_ORDER_MAPPINGS) break;
       uint16_t start = entry["start"] | 0;
       uint16_t len = entry["len"] | 0;
       uint8_t colorOrder = (int)entry[F("order")];
-      // com.add(start, len, colorOrder);
-      s++;
+      if (!BusManager::getColorOrderMap().add(start, len, colorOrder)) break;
     }
-    tkr_iLight->bus_manager->updateColorOrderMap(com);
   }
 
   CJSON(irEnabled, hw["ir"]["type"]);
@@ -992,7 +1039,8 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
   JsonObject def = doc["def"];
   CJSON(bootPreset, def["ps"]);
   CJSON(turnOnAtBoot, def["on"]); // true
-  CJSON(tkr_iLight->_briRGB_Global, def["bri"]); // 128
+  // CJSON(tkr_iLight->_briRGB_Global, def["bri"]); // 128
+  CJSON(briS, def["bri"]); // 128
 
   JsonObject interfaces = doc["if"];
 
@@ -1080,6 +1128,436 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
 }
 
 
+
+void mAnimatorLight::serializeConfig(JsonObject root) {
+  JsonArray rev = root.createNestedArray("rev");
+  rev.add(1); //major settings revision
+  rev.add(0); //minor settings revision
+
+  // root[F("vid")] = VERSION;
+
+  JsonObject id = root.createNestedObject("id");
+  // id[F("mdns")] = cmDNS;
+  id[F("name")] = serverDescription;
+// #ifndef WLED_DISABLE_ALEXA
+//   id[F("inv")] = alexaInvocationName;
+// #endif
+  id[F("sui")] = simplifiedUI;
+
+  JsonObject nw = root.createNestedObject("nw");
+// #ifndef WLED_DISABLE_ESPNOW
+//   nw[F("espnow")] = enableESPNow;
+//   JsonArray lrem = nw.createNestedArray(F("linked_remote"));
+//   for (size_t i = 0; i < linked_remotes.size(); i++) {
+//     lrem.add(linked_remotes[i].data());
+//   }
+// #endif
+
+  JsonArray nw_ins = nw.createNestedArray("ins");
+//   for (size_t n = 0; n < multiWiFi.size(); n++) {
+//     JsonObject wifi = nw_ins.createNestedObject();
+//     wifi[F("ssid")] = multiWiFi[n].clientSSID;
+//     wifi[F("pskl")] = strlen(multiWiFi[n].clientPass);
+//     char bssid[13];
+//     fillMAC2Str(bssid, multiWiFi[n].bssid);
+//     wifi[F("bssid")] = bssid;
+//     JsonArray wifi_ip = wifi.createNestedArray("ip");
+//     JsonArray wifi_gw = wifi.createNestedArray("gw");
+//     JsonArray wifi_sn = wifi.createNestedArray("sn");
+//     for (size_t i = 0; i < 4; i++) {
+//       wifi_ip.add(multiWiFi[n].staticIP[i]);
+//       wifi_gw.add(multiWiFi[n].staticGW[i]);
+//       wifi_sn.add(multiWiFi[n].staticSN[i]);
+//     }
+// #ifdef WLED_ENABLE_WPA_ENTERPRISE
+//     wifi[F("enc_type")] = multiWiFi[n].encryptionType;
+//     if (multiWiFi[n].encryptionType == WIFI_ENCRYPTION_TYPE_ENTERPRISE) {
+//       wifi[F("e_anon_ident")] = multiWiFi[n].enterpriseAnonIdentity;
+//       wifi[F("e_ident")] = multiWiFi[n].enterpriseIdentity;
+//     }
+// #endif
+//   }
+
+  JsonArray dns = nw.createNestedArray(F("dns"));
+  // for (size_t i = 0; i < 4; i++) {
+  //   dns.add(dnsAddress[i]);
+  // }
+
+  JsonObject ap = root.createNestedObject("ap");
+  ap[F("ssid")] = apSSID;
+  ap[F("pskl")] = strlen(apPass);
+  ap[F("chan")] = apChannel;
+  ap[F("hide")] = apHide;
+  ap[F("behav")] = apBehavior;
+
+  JsonArray ap_ip = ap.createNestedArray("ip");
+  ap_ip.add(4);
+  ap_ip.add(3);
+  ap_ip.add(2);
+  ap_ip.add(1);
+
+  JsonObject wifi = root.createNestedObject(F("wifi"));
+  wifi[F("sleep")] = !noWifiSleep;
+//   wifi[F("phy")] = force802_3g;
+// #ifdef ARDUINO_ARCH_ESP32
+//   wifi[F("txpwr")] = txPower;
+// #endif
+
+#if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_ETHERNET)
+  JsonObject ethernet = root.createNestedObject("eth");
+  ethernet["type"] = ethernetType;
+  if (ethernetType != WLED_ETH_NONE && ethernetType < WLED_NUM_ETH_TYPES) {
+    JsonArray pins = ethernet.createNestedArray("pin");
+    for (unsigned p=0; p<WLED_ETH_RSVD_PINS_COUNT; p++) pins.add(esp32_nonconfigurable_ethernet_pins[p].pin);
+    if (ethernetBoards[ethernetType].eth_power>=0)     pins.add(ethernetBoards[ethernetType].eth_power);
+    if (ethernetBoards[ethernetType].eth_mdc>=0)       pins.add(ethernetBoards[ethernetType].eth_mdc);
+    if (ethernetBoards[ethernetType].eth_mdio>=0)      pins.add(ethernetBoards[ethernetType].eth_mdio);
+    switch (ethernetBoards[ethernetType].eth_clk_mode) {
+      case ETH_CLOCK_GPIO0_IN:
+      case ETH_CLOCK_GPIO0_OUT:
+        pins.add(0);
+        break;
+      case ETH_CLOCK_GPIO16_OUT:
+        pins.add(16);
+        break;
+      case ETH_CLOCK_GPIO17_OUT:
+        pins.add(17);
+        break;
+    }
+  }
+#endif
+
+  JsonObject hw = root.createNestedObject(F("hw"));
+
+  JsonObject hw_led = hw.createNestedObject("led");
+  hw_led[F("total")] = getLengthTotal(); //provided for compatibility on downgrade and per-output ABL
+  hw_led[F("maxpwr")] = BusManager::ablMilliampsMax();
+//  hw_led[F("ledma")] = 0; // no longer used
+  hw_led["cct"] = correctWB;
+  hw_led[F("cr")] = cctFromRgb;
+  hw_led[F("ic")] = cctICused;
+  hw_led[F("cb")] = Bus::getCCTBlend();
+  hw_led["fps"] = getTargetFps();
+  hw_led[F("rgbwm")] = Bus::getGlobalAWMode(); // global auto white mode override
+
+  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  // 2D Matrix Settings
+  if (isMatrix) {
+    JsonObject matrix = hw_led.createNestedObject(F("matrix"));
+    matrix[F("mpc")] = panel.size();
+    JsonArray panels = matrix.createNestedArray(F("panels"));
+    for (size_t i = 0; i < panel.size(); i++) {
+      JsonObject pnl = panels.createNestedObject();
+      pnl["b"] = panel[i].bottomStart;
+      pnl["r"] = panel[i].rightStart;
+      pnl["v"] = panel[i].vertical;
+      pnl["s"] = panel[i].serpentine;
+      pnl["x"] = panel[i].xOffset;
+      pnl["y"] = panel[i].yOffset;
+      pnl["h"] = panel[i].height;
+      pnl["w"] = panel[i].width;
+    }
+  }
+  #endif
+
+  JsonArray hw_led_ins = hw_led.createNestedArray("ins");
+
+  for (size_t s = 0; s < BusManager::getNumBusses(); s++) {
+    DEBUG_PRINTF_P(PSTR("Cfg: Saving bus #%u\n"), s);
+    const Bus *bus = BusManager::getBus(s);
+    if (!bus) break;  // Memory corruption, iterator invalid
+    DEBUG_PRINTF_P(PSTR("  (%d-%d, type:%d, CO:%d, rev:%d, skip:%d, AW:%d kHz:%d, mA:%d/%d)\n"),
+      (int)bus->getStart(), (int)(bus->getStart()+bus->getLength()),
+      (int)(bus->getType() & 0x7F),
+      (int)bus->getColorOrder(),
+      (int)bus->isReversed(),
+      (int)bus->skippedLeds(),
+      (int)bus->getAutoWhiteMode(),
+      (int)bus->getFrequency(),
+      (int)bus->getLEDCurrent(), (int)bus->getMaxCurrent()
+    );
+    JsonObject ins = hw_led_ins.createNestedObject();
+    ins["start"] = bus->getStart();
+    ins["len"]   = bus->getLength();
+    JsonArray ins_pin = ins.createNestedArray("pin");
+    uint8_t pins[5];
+    uint8_t nPins = bus->getPins(pins);
+    for (int i = 0; i < nPins; i++) ins_pin.add(pins[i]);
+    ins[F("order")]  = bus->getColorOrder();
+    ins["rev"]       = bus->isReversed();
+    ins[F("skip")]   = bus->skippedLeds();
+    ins["type"]      = bus->getType() & 0x7F;
+    ins["ref"]       = bus->isOffRefreshRequired();
+    ins[F("rgbwm")]  = bus->getAutoWhiteMode();
+    ins[F("freq")]   = bus->getFrequency();
+    ins[F("maxpwr")] = bus->getMaxCurrent();
+    ins[F("ledma")]  = bus->getLEDCurrent();
+    ins[F("drv")]    = bus->getDriverType();
+    ins[F("text")]   = bus->getCustomText();
+  }
+
+  JsonArray hw_com = hw.createNestedArray(F("com"));
+  const ColorOrderMap& com = BusManager::getColorOrderMap();
+  for (size_t s = 0; s < com.count(); s++) {
+    const ColorOrderMapEntry *entry = com.get(s);
+    if (!entry || !entry->len) break;
+    JsonObject co = hw_com.createNestedObject();
+    co["start"] = entry->start;
+    co["len"] = entry->len;
+    co[F("order")] = entry->colorOrder;
+  }
+
+  // button(s)
+  JsonObject hw_btn = hw.createNestedObject("btn");
+  hw_btn["max"] = WLED_MAX_BUTTONS; // just information about max number of buttons (not actually used)
+  hw_btn[F("pull")] = !disablePullUp;
+  JsonArray hw_btn_ins = hw_btn.createNestedArray("ins");
+
+  // // configuration for all buttons
+  // for (const auto &button : buttons) {
+  //   JsonObject hw_btn_ins_0 = hw_btn_ins.createNestedObject();
+  //   hw_btn_ins_0["type"] = button.type;
+  //   JsonArray hw_btn_ins_0_pin = hw_btn_ins_0.createNestedArray("pin");
+  //   hw_btn_ins_0_pin.add(button.pin);
+  //   JsonArray hw_btn_ins_0_macros = hw_btn_ins_0.createNestedArray("macros");
+  //   hw_btn_ins_0_macros.add(button.macroButton);
+  //   hw_btn_ins_0_macros.add(button.macroLongPress);
+  //   hw_btn_ins_0_macros.add(button.macroDoublePress);
+  // }
+
+  hw_btn[F("tt")] = touchThreshold;
+  hw_btn["mqtt"] = buttonPublishMqtt;
+
+  JsonObject hw_ir = hw.createNestedObject("ir");
+  #ifndef WLED_DISABLE_INFRARED
+  // hw_ir["pin"] = irPin;
+  hw_ir["type"] = irEnabled;  // the byte 'irEnabled' does contain the IR-Remote Type ( 0=disabled )
+  #endif
+  hw_ir["sel"] = irApplyToAllSelected;
+
+  JsonObject hw_relay = hw.createNestedObject(F("relay"));
+  // hw_relay["pin"] = rlyPin;
+  // hw_relay["rev"] = !rlyMde;
+  // hw_relay[F("odrain")] = rlyOpenDrain;
+
+  // hw[F("baud")] = serialBaud;
+
+  JsonObject hw_if = hw.createNestedObject(F("if"));
+  JsonArray hw_if_i2c = hw_if.createNestedArray("i2c-pin");
+  // hw_if_i2c.add(i2c_sda);
+  // hw_if_i2c.add(i2c_scl);
+  JsonArray hw_if_spi = hw_if.createNestedArray("spi-pin");
+  // hw_if_spi.add(spi_mosi);
+  // hw_if_spi.add(spi_sclk);
+  // hw_if_spi.add(spi_miso);
+
+  //JsonObject hw_status = hw.createNestedObject("status");
+  //hw_status["pin"] = -1;
+
+  JsonObject light = root.createNestedObject(F("light"));
+  light[F("scale-bri")] = briMultiplier;
+  light[F("pal-mode")] = paletteBlend;
+  light[F("aseg")] = autoSegments;
+
+  JsonObject light_gc = light.createNestedObject("gc");
+  light_gc["bri"] = (gammaCorrectBri) ? gammaCorrectVal : 1.0f;  // keep compatibility
+  light_gc["col"] = (gammaCorrectCol) ? gammaCorrectVal : 1.0f;  // keep compatibility
+  light_gc["val"] = gammaCorrectVal;
+
+  JsonObject light_tr = light.createNestedObject("tr");
+  light_tr["dur"] = transitionDelayDefault / 100;
+  light_tr[F("rpc")] = randomPaletteChangeTime;
+  // light_tr[F("hrp")] = useHarmonicRandomPalette;
+
+  JsonObject light_nl = light.createNestedObject("nl");
+  light_nl["mode"] = nightlightMode;
+  light_nl["dur"] = nightlightDelayMinsDefault;
+  light_nl[F("tbri")] = nightlightTargetBri;
+  // light_nl["macro"] = macroNl;
+
+  JsonObject def = root.createNestedObject("def");
+  def["ps"] = bootPreset;
+  def["on"] = turnOnAtBoot;
+  def["bri"] = briS;
+
+  JsonObject interfaces = root.createNestedObject("if");
+
+  JsonObject if_sync = interfaces.createNestedObject("sync");
+  if_sync[F("port0")] = udpPort;
+  if_sync[F("port1")] = udpPort2;
+
+// #ifndef WLED_DISABLE_ESPNOW
+//   if_sync[F("espnow")] = useESPNowSync;
+// #endif
+
+  JsonObject if_sync_recv = if_sync.createNestedObject(F("recv"));
+  if_sync_recv["bri"] = receiveNotificationBrightness;
+  if_sync_recv["col"] = receiveNotificationColor;
+  if_sync_recv["fx"]  = receiveNotificationEffects;
+  // if_sync_recv["pal"] = receiveNotificationPalette;
+  if_sync_recv["grp"] = receiveGroups;
+  if_sync_recv["seg"] = receiveSegmentOptions;
+  if_sync_recv["sb"]  = receiveSegmentBounds;
+
+  JsonObject if_sync_send = if_sync.createNestedObject(F("send"));
+  // if_sync_send["en"] = sendNotifications;
+  if_sync_send[F("dir")] = notifyDirect;
+  if_sync_send["btn"] = notifyButton;
+  if_sync_send["va"] = notifyAlexa;
+  if_sync_send["hue"] = notifyHue;
+  if_sync_send["grp"] = syncGroups;
+  if_sync_send["ret"] = udpNumRetries;
+
+  JsonObject if_nodes = interfaces.createNestedObject("nodes");
+  if_nodes[F("list")] = nodeListEnabled;
+  if_nodes[F("bcast")] = nodeBroadcastEnabled;
+
+  JsonObject if_live = interfaces.createNestedObject("live");
+  if_live["en"] = receiveDirect; // UDP/Hyperion realtime
+  if_live[F("mso")] = useMainSegmentOnly;
+  if_live[F("rlm")] = realtimeRespectLedMaps;
+  if_live["port"] = e131Port;
+  if_live[F("mc")] = e131Multicast;
+
+  JsonObject if_live_dmx = if_live.createNestedObject("dmx");
+  if_live_dmx[F("uni")] = e131Universe;
+  if_live_dmx[F("seqskip")] = e131SkipOutOfSequence;
+  // if_live_dmx[F("e131prio")] = e131Priority;
+  if_live_dmx[F("addr")] = DMXAddress;
+  if_live_dmx[F("dss")] = DMXSegmentSpacing;
+  if_live_dmx["mode"] = DMXMode;
+  #ifdef WLED_ENABLE_DMX_INPUT
+    if_live_dmx[F("inputRxPin")] = dmxInputTransmitPin;
+    if_live_dmx[F("inputTxPin")] = dmxInputReceivePin;
+    if_live_dmx[F("inputEnablePin")] = dmxInputEnablePin;
+    if_live_dmx[F("dmxInputPort")] = dmxInputPort;
+  #endif
+
+  if_live[F("timeout")] = realtimeTimeoutMs / 100;
+  if_live[F("maxbri")] = arlsForceMaxBri;
+  if_live[F("no-gc")] = arlsDisableGammaCorrection;
+  if_live[F("offset")] = arlsOffset;
+
+#ifndef WLED_DISABLE_ALEXA
+  JsonObject if_va = interfaces.createNestedObject("va");
+  // if_va[F("alexa")] = alexaEnabled;
+
+  JsonArray if_va_macros = if_va.createNestedArray("macros");
+  // if_va_macros.add(macroAlexaOn);
+  // if_va_macros.add(macroAlexaOff);
+
+  // if_va["p"] = alexaNumPresets;
+#endif
+
+// #ifndef WLED_DISABLE_MQTT
+//   JsonObject if_mqtt = interfaces.createNestedObject("mqtt");
+//   if_mqtt["en"] = mqttEnabled;
+//   if_mqtt[F("broker")] = mqttServer;
+//   if_mqtt["port"] = mqttPort;
+//   if_mqtt[F("user")] = mqttUser;
+//   if_mqtt[F("pskl")] = strlen(mqttPass);
+//   if_mqtt[F("cid")] = mqttClientID;
+//   if_mqtt[F("rtn")] = retainMqttMsg;
+
+//   JsonObject if_mqtt_topics = if_mqtt.createNestedObject(F("topics"));
+//   if_mqtt_topics[F("device")] = mqttDeviceTopic;
+//   if_mqtt_topics[F("group")] = mqttGroupTopic;
+// #endif
+
+#ifndef WLED_DISABLE_HUESYNC
+  JsonObject if_hue = interfaces.createNestedObject("hue");
+  // if_hue["en"] = huePollingEnabled;
+  // if_hue["id"] = huePollLightId;
+  // if_hue[F("iv")] = huePollIntervalMs / 100;
+
+  JsonObject if_hue_recv = if_hue.createNestedObject(F("recv"));
+  // if_hue_recv["on"] = hueApplyOnOff;
+  // if_hue_recv["bri"] = hueApplyBri;
+  // if_hue_recv["col"] = hueApplyColor;
+
+  JsonArray if_hue_ip = if_hue.createNestedArray("ip");
+  // for (unsigned i = 0; i < 4; i++) {
+  //   if_hue_ip.add(hueIP[i]);
+  // }
+#endif
+
+  JsonObject if_ntp = interfaces.createNestedObject("ntp");
+  // if_ntp["en"] = ntpEnabled;
+  if_ntp[F("host")] = ntpServerName;
+  // if_ntp[F("tz")] = currentTimezone;
+  // if_ntp[F("offset")] = utcOffsetSecs;
+  if_ntp[F("ampm")] = useAMPM;
+  if_ntp[F("ln")] = longitude;
+  if_ntp[F("lt")] = latitude;
+
+  JsonObject ol = root.createNestedObject("ol");
+  // ol[F("clock")] = overlayCurrent;
+  ol[F("cntdwn")] = countdownMode;
+
+  // ol["min"] = overlayMin;
+  // ol[F("max")] = overlayMax;
+  // ol[F("o12pix")] = analogClock12pixel;
+  // ol[F("o5m")] = analogClock5MinuteMarks;
+  // ol[F("osec")] = analogClockSecondsTrail;
+  // ol[F("osb")] = analogClockSolidBlack;
+
+  JsonObject timers = root.createNestedObject(F("timers"));
+
+  JsonObject cntdwn = timers.createNestedObject(F("cntdwn"));
+  JsonArray goal = cntdwn.createNestedArray(F("goal"));
+  goal.add(countdownYear); goal.add(countdownMonth); goal.add(countdownDay);
+  goal.add(countdownHour); goal.add(countdownMin); goal.add(countdownSec);
+  // cntdwn["macro"] = macroCountdown;
+
+  JsonArray timers_ins = timers.createNestedArray("ins");
+  // for (size_t i = 0; i < ::timers.size(); i++) {
+  //   const Timer& t = ::timers[i];
+  //   if (t.preset == 0 && t.hour == 0 && t.minute == 0) continue;
+  //   JsonObject ti = timers_ins.createNestedObject();
+  //   ti[F("en")] = t.isEnabled() ? 1 : 0;
+  //   ti[F("hour")] = t.hour;
+  //   ti[F("min")] = t.minute;
+  //   ti[F("macro")] = t.preset;
+  //   ti[F("dow")] = t.weekdays >> 1;
+  //   JsonObject start = ti.createNestedObject(F("start"));
+  //   start[F("mon")] = t.monthStart;
+  //   start[F("day")] = t.dayStart;
+  //   JsonObject end = ti.createNestedObject(F("end"));
+  //   end[F("mon")] = t.monthEnd;
+  //   end[F("day")] = t.dayEnd;
+  // }
+
+  JsonObject ota = root.createNestedObject("ota");
+  ota[F("lock")] = otaLock;
+  ota[F("lock-wifi")] = wifiLock;
+  ota[F("pskl")] = strlen(otaPass);
+  // #ifndef WLED_DISABLE_OTA
+  // ota[F("aota")] = aOtaEnabled;
+  // #endif
+  // ota[F("same-subnet")] = otaSameSubnet;
+
+  #ifdef WLED_ENABLE_DMX
+  JsonObject dmx = root.createNestedObject("dmx");
+  dmx[F("chan")] = DMXChannels;
+  dmx[F("gap")] = DMXGap;
+  dmx["start"] = DMXStart;
+  dmx[F("start-led")] = DMXStartLED;
+
+  JsonArray dmx_fixmap = dmx.createNestedArray(F("fixmap"));
+  for (unsigned i = 0; i < 15; i++) {
+    dmx_fixmap.add(DMXFixtureMap[i]);
+  }
+
+  dmx[F("e131proxy")] = e131ProxyUniverse;
+  #endif
+
+  JsonObject usermods_settings = root.createNestedObject("um");
+  // UsermodManager::addToConfig(usermods_settings);
+}
+
+
+
+
 //macro to convert F to const
 #define SET_F(x)  (const char*)F(x)
 
@@ -1159,6 +1637,63 @@ void mAnimatorLight::sappend(char stype, const char* key, int val)
 }
 
 
+/*
+ * JSON API (De)serialization
+ */
+namespace {
+  typedef struct {
+    uint32_t colors[NUM_COLORS];
+    uint16_t start;
+    uint16_t stop;
+    uint16_t offset;
+    uint16_t grouping;
+    uint16_t spacing;
+    uint16_t startY;
+    uint16_t stopY;
+    uint16_t options;
+    uint8_t  mode;
+    uint8_t  palette;
+    uint8_t  opacity;
+    uint8_t  speed;
+    uint8_t  intensity;
+    uint8_t  custom1;
+    uint8_t  custom2;
+    uint8_t  custom3;
+    bool     check1;
+    bool     check2;
+    bool     check3;
+  } SegmentCopy;
+
+  uint8_t differs(const mAnimatorLight::Segment& b, const SegmentCopy& a) {
+    uint8_t d = 0;
+    if (a.start != b.start)         d |= SEG_DIFFERS_BOUNDS;
+    if (a.stop != b.stop)           d |= SEG_DIFFERS_BOUNDS;
+    if (a.offset != b.offset)       d |= SEG_DIFFERS_GSO;
+    if (a.grouping != b.grouping)   d |= SEG_DIFFERS_GSO;
+    if (a.spacing != b.spacing)     d |= SEG_DIFFERS_GSO;
+    if (a.opacity != b.opacity)     d |= SEG_DIFFERS_BRI;
+    if (a.mode != b.effect_id)           d |= SEG_DIFFERS_FX;
+    if (a.speed != b.speed)         d |= SEG_DIFFERS_FX;
+    if (a.intensity != b.intensity) d |= SEG_DIFFERS_FX;
+    if (a.palette != b.palette)     d |= SEG_DIFFERS_FX;
+    if (a.custom1 != b.custom1)     d |= SEG_DIFFERS_FX;
+    if (a.custom2 != b.custom2)     d |= SEG_DIFFERS_FX;
+    if (a.custom3 != b.custom3)     d |= SEG_DIFFERS_FX;
+    if (a.check1 != b.check1)       d |= SEG_DIFFERS_FX;
+    if (a.check2 != b.check2)       d |= SEG_DIFFERS_FX;
+    if (a.check3 != b.check3)       d |= SEG_DIFFERS_FX;
+    if (a.startY != b.startY)       d |= SEG_DIFFERS_BOUNDS;
+    if (a.stopY != b.stopY)         d |= SEG_DIFFERS_BOUNDS;
+
+    //bit pattern: (msb first)
+    // set:2, sound:2, mapping:3, transposed, mirrorY, reverseY, [reset,] paused, mirrored, on, reverse, [selected]
+    if ((a.options & 0b1111111111011110U) != (b.options & 0b1111111111011110U)) d |= SEG_DIFFERS_OPT;
+    if ((a.options & 0x0001U) != (b.options & 0x0001U))                         d |= SEG_DIFFERS_SEL;
+    for (unsigned i = 0; i < NUM_COLORS; i++) if (a.colors[i] != b.segcol[i].colour)   d |= SEG_DIFFERS_COL;
+
+    return d;
+  }
+}
 
 
 bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
@@ -1173,26 +1708,45 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
     return false;
   }
 
+  bool newSeg = false;
   int stop = elem["stop"] | -1;
 
   // if using vectors use this code to append segment
   if (id >= getSegmentsNum()) {
-
     if (stop <= 0) return false; // ignore empty/inactive segments
-
     ALOG_HGL(PSTR("DESTROYING SEGMENT, BAD %d %d"), id, getSegmentsNum());
-
-    appendSegment(mAnimatorLight::Segment(0, getLengthTotal()));
+    appendSegment(0, getLengthTotal());
     id = getSegmentsNum()-1; // segments are added at the end of list
   }
 
-  mAnimatorLight::Segment& seg = getSegment(id);
-
-  /**
-   * @brief Note that making a backup will also allocate memory, this will be destroyed when we leave this function
-   * 
-   */
-  mAnimatorLight::Segment prev = seg; //make a backup so we can tell if something changed
+  Segment& seg = getSegment(id);
+  if (newSeg && presetId == 0) {
+    seg.segcol[0].colour = DEFAULT_COLOR; // set color of newly created segment to warm orange as an indicator to the user
+  }
+  // we do not want to make segment copy as it may use a lot of RAM (effect data and pixel buffer)
+  // so we will create a copy of segment options and compare it with original segment when done processing
+  SegmentCopy prev = {
+    {seg.segcol[0].colour, seg.segcol[1].colour, seg.segcol[2].colour},
+    seg.start,
+    seg.stop,
+    seg.offset,
+    seg.grouping,
+    seg.spacing,
+    seg.startY,
+    seg.stopY,
+    seg.options,
+    seg.effect_id,
+    seg.palette,
+    seg.opacity,
+    seg.speed,
+    seg.intensity,
+    seg.custom1,
+    seg.custom2,
+    seg.custom3,
+    seg.check1,
+    seg.check2,
+    seg.check3
+  };
 
   uint16_t start = elem["start"] | seg.start;
   if (stop < 0) {
@@ -1278,26 +1832,26 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   if (seg.reset && seg.stop == 0) return true; // segment was deleted & is marked for reset, no need to change anything else
 
-  byte segbri = seg._brightness_rgb;//255;//seg.opacity;
-  if (getVal(elem["bri"], &segbri)) {
+  byte segbri = seg.opacity;
+  if (getVal(elem["bri"], segbri)) {
     ALOG_INF(PSTR("getVal(elem[\"bri\"], &segbri) %d"), segbri);
-    // if (segbri > 0) seg.setOpacity(segbri);
+    if (segbri > 0) seg.setOpacity(segbri);
     // seg.setOption(SEG_OPTION_ON, segbri); // use transition
     // ALOG_INF(PSTR("USing the opacity as RGB, but need to decide where to use later"));
-    seg.setBrightnessRGB(segbri);
-    seg.setBrightnessCCT(segbri);
+    // seg.setBrightnessRGB(segbri);
+    // seg.setBrightnessCCT(segbri);
   }
 
-  if (getVal(elem["cBri"], &seg._brightness_rgb)) {
-    ALOG_INF(PSTR("getVal(elem[\"cBri\"], &seg._brightness_rgb) %d"), seg._brightness_rgb);
-    // if (segbri > 0) seg.setOpacity(segbri);
-    // seg.setOption(SEG_OPTION_ON, segbri); // use transition
-  }
-  if (getVal(elem["wBri"], &seg._brightness_cct)) {
-    ALOG_INF(PSTR("getVal(elem[\"wBri\"], &seg._brightness_cct) %d"), seg._brightness_cct);
-    // if (segbri > 0) seg.setOpacity(segbri);
-    // seg.setOption(SEG_OPTION_ON, segbri); // use transition
-  }
+  // if (getVal(elem["cBri"], &seg._brightness_rgb)) {
+  //   ALOG_INF(PSTR("getVal(elem[\"cBri\"], &seg._brightness_rgb) %d"), seg._brightness_rgb);
+  //   // if (segbri > 0) seg.setOpacity(segbri);
+  //   // seg.setOption(SEG_OPTION_ON, segbri); // use transition
+  // }
+  // if (getVal(elem["wBri"], &seg._brightness_cct)) {
+  //   ALOG_INF(PSTR("getVal(elem[\"wBri\"], &seg._brightness_cct) %d"), seg._brightness_cct);
+  //   // if (segbri > 0) seg.setOpacity(segbri);
+  //   // seg.setOption(SEG_OPTION_ON, segbri); // use transition
+  // }
 
 
   bool on = elem["on"] | seg.on;
@@ -1308,10 +1862,10 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   seg.freeze = frz;
 
 
-  seg.setBrightnessRGB(elem["rgbbri"] | seg._brightness_rgb);
-  seg.setBrightnessCCT(elem["cctbri"] | seg._brightness_cct);
+  // seg.setBrightnessRGB(elem["rgbbri"] | seg._brightness_rgb);
+  // seg.setBrightnessCCT(elem["cctbri"] | seg._brightness_cct);
 
-  seg.live_palette.intensity  = elem["PalIX"] | seg.live_palette.intensity;
+  seg.live_palette.intensity  = elem["palix"] | seg.live_palette.intensity;
 
   seg.setCCT(elem["cct"] | seg.cct_slider);
 
@@ -1407,13 +1961,19 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
   }else
   {
     // ALOG_INF(PSTR("elem[\"fx\"].is<const char*>() == NUMBER"));
-    if (getVal(elem["fx"], &fx, 0, getModeCount())) { //load effect ('r' random, '~' inc/dec, 0-255 exact value)
+    if (getVal(elem["fx"], fx, 0, getEffectCount())) { //load effect ('r' random, '~' inc/dec, 0-255 exact value)
       // ALOG_INF(PSTR("getVal(elem[\"fx\"], &fx, 0, getModeCount()) %d"), fx);      
       #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
       if (!presetId && currentPlaylist>=0) unloadPlaylist(); // applying a preset unloads the playlist, may be needed here too?
       #endif
       // if (fx != seg.animation_mode_id)
       DEBUG_LINE_HERE; 
+
+      // Segment& seg = SEGMENT_I(segment_index);
+ALOG_INF(PSTR("CommandSet effect seg=%p stored=%p index=%u"), &seg, &segments[0], 0);
+// seg.setEffect(value, true);
+
+
       seg.setEffect(fx, elem[F("fxdef")]); // elem[F("fxdef") effect default, if set, load in defined defaults
     }
   }
@@ -1425,8 +1985,8 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
 
   //getVal also supports inc/decrementing and random
-  getVal(elem["sx"], &seg.speed);
-  getVal(elem["ix"], &seg.intensity);
+  getVal(elem["sx"], seg.speed);
+  getVal(elem["ix"], seg.intensity);
 
   // uint8_t transition_slider_time = 0;
   // getVal(elem["tt"], &transition_slider_time);
@@ -1463,7 +2023,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
       CommandSet_PaletteID(tmp_id, id);
     }
   }else{
-    if (getVal(elem["pal"], &pal)) seg.setPalette(pal);
+    if (getVal(elem["pal"], pal)) seg.setPalette(pal);
   }
 
   if(elem["pal2"].is<const char*>())
@@ -1476,7 +2036,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
       seg.palette2_id = tmp_id;
     }
   }else{
-    if (getVal(elem["pal2"], &pal))
+    if (getVal(elem["pal2"], pal))
       seg.palette2_id = pal;
       //  seg.setPalette(pal);
       ALOG_INF(PSTR("palette2_id=%d"),seg.palette2_id);
@@ -1486,10 +2046,10 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   // }
 
-  getVal(elem["c1"], &seg.custom1);
-  getVal(elem["c2"], &seg.custom2);
+  getVal(elem["c1"], seg.custom1);
+  getVal(elem["c2"], seg.custom2);
   uint8_t cust3 = seg.custom3;
-  getVal(elem["c3"], &cust3); // we can't pass reference to bifield
+  getVal(elem["c3"], cust3); // we can't pass reference to bifield
   seg.custom3 = constrain(cust3, 0, 31);
 
   seg.cycle_time__rate_ms = elem["ep"] | seg.cycle_time__rate_ms;
@@ -1514,7 +2074,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   
 
-  getVal(elem["dec"], &seg.decimate);
+  getVal(elem["dec"], seg.decimate);
 
 
   JsonArray iarr = elem[F("i")]; //set individual LEDs
@@ -1570,9 +2130,11 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 
   
   // send UDP/WS if segment options changed (except selection; will also deselect current preset)
-  if (seg.differs(prev) & 0x7F) stateChanged = true;
+  // if (seg.differs(prev) & 0x7F) stateChanged = true;
 
-  seg.effect_anim_section = 0; //reset
+  
+  // send UDP/WS if segment options changed (except selection; will also deselect current preset)
+  if (differs(seg, prev) & ~SEG_DIFFERS_SEL) stateChanged = true;
 
   return true;
 }
@@ -1581,6 +2143,353 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
 #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
 
 
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+constexpr uint8_t VIRTUALVIEW_PROTOCOL_MARKER  = 'P';
+constexpr uint8_t VIRTUALVIEW_PROTOCOL_VERSION = 1;
+
+constexpr uint8_t VIRTUALVIEW_MODE_SEGMENTS = 0;
+constexpr uint8_t VIRTUALVIEW_MODE_BUSES    = 1;
+
+constexpr uint8_t VIRTUALVIEW_FLAG_2D       = 0x01;
+constexpr uint8_t VIRTUALVIEW_FLAG_REVERSED = 0x02;
+constexpr uint8_t VIRTUALVIEW_FLAG_LAST     = 0x04;
+
+constexpr size_t VIRTUALVIEW_HEADER_SIZE = 25;
+
+#ifdef ESP8266
+constexpr uint16_t VIRTUALVIEW_PIXELS_PER_PACKET = 300;
+#else
+constexpr uint16_t VIRTUALVIEW_PIXELS_PER_PACKET = 1000;
+#endif
+
+constexpr uint32_t VIRTUALVIEW_INTERVAL_MS = 100;
+
+struct VirtualViewState
+{
+  uint32_t client_id   = 0;
+  uint32_t last_send   = 0;
+  uint32_t block_offset = 0;
+  uint8_t mode         = VIRTUALVIEW_MODE_SEGMENTS;
+  uint8_t block_id     = 0;
+};
+
+static VirtualViewState virtual_view;
+
+#endif
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+static inline void VirtualView_WriteU16(uint8_t* output, uint16_t value)
+{
+  output[0] = static_cast<uint8_t>(value >> 8);
+  output[1] = static_cast<uint8_t>(value);
+}
+
+static inline void VirtualView_WriteU32(uint8_t* output, uint32_t value)
+{
+  output[0] = static_cast<uint8_t>(value >> 24);
+  output[1] = static_cast<uint8_t>(value >> 16);
+  output[2] = static_cast<uint8_t>(value >> 8);
+  output[3] = static_cast<uint8_t>(value);
+}
+
+#endif
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+static bool sendVirtualViewPacket(
+  AsyncWebSocketClient* client,
+  uint8_t mode,
+  uint8_t block_id,
+  uint8_t flags,
+  uint32_t global_start,
+  uint32_t total_pixels,
+  uint32_t block_offset,
+  uint16_t width,
+  uint16_t height,
+  const mAnimatorLight::Segment* segment
+)
+{
+  if (!client || client->queueLength() > 0) return false;
+  if (total_pixels == 0 || block_offset >= total_pixels) return false;
+
+  const uint32_t remaining_pixels = total_pixels - block_offset;
+  const uint16_t packet_pixels = static_cast<uint16_t>(
+    remaining_pixels > VIRTUALVIEW_PIXELS_PER_PACKET
+      ? VIRTUALVIEW_PIXELS_PER_PACKET
+      : remaining_pixels
+  );
+
+  const uint32_t chunk_count_u32 = (total_pixels + VIRTUALVIEW_PIXELS_PER_PACKET - 1U) / VIRTUALVIEW_PIXELS_PER_PACKET;
+  const uint32_t chunk_index_u32 = block_offset / VIRTUALVIEW_PIXELS_PER_PACKET;
+
+  const uint8_t chunk_count = static_cast<uint8_t>(chunk_count_u32 > 255U ? 255U : chunk_count_u32);
+  const uint8_t chunk_index = static_cast<uint8_t>(chunk_index_u32 > 255U ? 255U : chunk_index_u32);
+
+  if (block_offset + packet_pixels >= total_pixels) flags |= VIRTUALVIEW_FLAG_LAST;
+
+  const size_t packet_size = VIRTUALVIEW_HEADER_SIZE + static_cast<size_t>(packet_pixels) * 3U;
+
+  AsyncWebSocketBuffer ws_buffer(packet_size);
+  if (!ws_buffer) return false;
+
+  uint8_t* buffer = reinterpret_cast<uint8_t*>(ws_buffer.data());
+  if (!buffer) return false;
+
+  buffer[0] = VIRTUALVIEW_PROTOCOL_MARKER;
+  buffer[1] = VIRTUALVIEW_PROTOCOL_VERSION;
+  buffer[2] = mode;
+  buffer[3] = flags;
+  buffer[4] = block_id;
+  buffer[5] = chunk_index;
+  buffer[6] = chunk_count;
+
+  VirtualView_WriteU32(buffer + 7, global_start);
+  VirtualView_WriteU32(buffer + 11, total_pixels);
+  VirtualView_WriteU32(buffer + 15, block_offset);
+  VirtualView_WriteU16(buffer + 19, packet_pixels);
+  VirtualView_WriteU16(buffer + 21, width);
+  VirtualView_WriteU16(buffer + 23, height);
+
+  size_t position = VIRTUALVIEW_HEADER_SIZE;
+
+  for (uint16_t packet_pixel = 0; packet_pixel < packet_pixels; packet_pixel++)
+  {
+    const uint32_t block_pixel = block_offset + packet_pixel;
+    uint32_t global_pixel;
+
+    if ((flags & VIRTUALVIEW_FLAG_2D) && segment != nullptr)
+    {
+      const uint32_t local_x = block_pixel % width;
+      const uint32_t local_y = block_pixel / width;
+      const uint32_t matrix_x = static_cast<uint32_t>(segment->start) + local_x;
+      const uint32_t matrix_y = static_cast<uint32_t>(segment->startY) + local_y;
+
+      global_pixel = matrix_y * static_cast<uint32_t>(mAnimatorLight::Segment::maxWidth) + matrix_x;
+    }
+    else
+    {
+      global_pixel = global_start + block_pixel;
+    }
+
+    const uint32_t colour = tkr_anim->getPixelColor(global_pixel);
+    const uint8_t white = W(colour);
+
+    buffer[position++] = tkr_iLight->_briRGB_Global ? qadd8(white, R(colour)) : 0;
+    buffer[position++] = tkr_iLight->_briRGB_Global ? qadd8(white, G(colour)) : 0;
+    buffer[position++] = tkr_iLight->_briRGB_Global ? qadd8(white, B(colour)) : 0;
+  }
+
+  client->binary(std::move(ws_buffer));
+  return true;
+}
+
+#endif
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+static bool sendNextVirtualViewSegmentPacket(AsyncWebSocketClient* client)
+{
+  const uint8_t segment_count = static_cast<uint8_t>(
+    tkr_anim->getSegmentsNum() > 255U ? 255U : tkr_anim->getSegmentsNum()
+  );
+
+  if (segment_count == 0)
+  {
+    virtual_view.block_id = 0;
+    virtual_view.block_offset = 0;
+    return false;
+  }
+
+  for (uint16_t attempts = 0; attempts < segment_count; attempts++)
+  {
+    if (virtual_view.block_id >= segment_count)
+    {
+      virtual_view.block_id = 0;
+      virtual_view.block_offset = 0;
+    }
+
+    mAnimatorLight::Segment& segment = tkr_anim->getSegment(virtual_view.block_id);
+
+    if (!segment.isActive())
+    {
+      virtual_view.block_id++;
+      virtual_view.block_offset = 0;
+      continue;
+    }
+
+    uint8_t flags = 0;
+    uint32_t global_start = segment.start;
+    uint32_t total_pixels = segment.stop > segment.start ? segment.stop - segment.start : 0;
+    uint16_t width = static_cast<uint16_t>(total_pixels > 65535U ? 65535U : total_pixels);
+    uint16_t height = 1;
+
+    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    if (tkr_anim->isMatrix && segment.is2D())
+    {
+      width = segment.stop > segment.start ? segment.stop - segment.start : 0;
+      height = segment.stopY > segment.startY ? segment.stopY - segment.startY : 0;
+      total_pixels = static_cast<uint32_t>(width) * static_cast<uint32_t>(height);
+      global_start = static_cast<uint32_t>(segment.startY) * static_cast<uint32_t>(mAnimatorLight::Segment::maxWidth) + segment.start;
+      flags |= VIRTUALVIEW_FLAG_2D;
+    }
+    #endif
+
+    if (total_pixels == 0 || width == 0 || height == 0)
+    {
+      virtual_view.block_id++;
+      virtual_view.block_offset = 0;
+      continue;
+    }
+
+    const uint32_t remaining_pixels = total_pixels - virtual_view.block_offset;
+    const uint16_t packet_pixels = static_cast<uint16_t>(
+      remaining_pixels > VIRTUALVIEW_PIXELS_PER_PACKET
+        ? VIRTUALVIEW_PIXELS_PER_PACKET
+        : remaining_pixels
+    );
+
+    if (!sendVirtualViewPacket(
+      client,
+      VIRTUALVIEW_MODE_SEGMENTS,
+      virtual_view.block_id,
+      flags,
+      global_start,
+      total_pixels,
+      virtual_view.block_offset,
+      width,
+      height,
+      &segment
+    )) return false;
+
+    virtual_view.block_offset += packet_pixels;
+
+    if (virtual_view.block_offset >= total_pixels)
+    {
+      virtual_view.block_offset = 0;
+      virtual_view.block_id++;
+
+      if (virtual_view.block_id >= segment_count) virtual_view.block_id = 0;
+    }
+
+    return true;
+  }
+
+  virtual_view.block_id = 0;
+  virtual_view.block_offset = 0;
+
+  return false;
+}
+
+#endif
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+static bool sendNextVirtualViewBusPacket(AsyncWebSocketClient* client)
+{
+  const uint8_t bus_count = static_cast<uint8_t>(
+    BusManager::getNumBusses() > 255U ? 255U : BusManager::getNumBusses()
+  );
+
+  if (bus_count == 0)
+  {
+    virtual_view.block_id = 0;
+    virtual_view.block_offset = 0;
+    return false;
+  }
+
+  for (uint16_t attempts = 0; attempts < bus_count; attempts++)
+  {
+    if (virtual_view.block_id >= bus_count)
+    {
+      virtual_view.block_id = 0;
+      virtual_view.block_offset = 0;
+    }
+
+    Bus* bus = BusManager::getBus(virtual_view.block_id);
+
+    if (!bus || !bus->isOk() || bus->getLength() == 0)
+    {
+      virtual_view.block_id++;
+      virtual_view.block_offset = 0;
+      continue;
+    }
+
+    const uint32_t global_start = bus->getStart();
+    const uint32_t total_pixels = bus->getLength();
+    const uint16_t width = static_cast<uint16_t>(total_pixels > 65535U ? 65535U : total_pixels);
+    const uint16_t height = 1;
+    uint8_t flags = 0;
+
+    /*
+     * Add this flag later if your Bus base class exposes a public reversed
+     * accessor. Pixel data remains in global animator order for now.
+     */
+    // if (bus->isReversed()) flags |= VIRTUALVIEW_FLAG_REVERSED;
+
+    const uint32_t remaining_pixels = total_pixels - virtual_view.block_offset;
+    const uint16_t packet_pixels = static_cast<uint16_t>(
+      remaining_pixels > VIRTUALVIEW_PIXELS_PER_PACKET
+        ? VIRTUALVIEW_PIXELS_PER_PACKET
+        : remaining_pixels
+    );
+
+    if (!sendVirtualViewPacket(
+      client,
+      VIRTUALVIEW_MODE_BUSES,
+      virtual_view.block_id,
+      flags,
+      global_start,
+      total_pixels,
+      virtual_view.block_offset,
+      width,
+      height,
+      nullptr
+    )) return false;
+
+    virtual_view.block_offset += packet_pixels;
+
+    if (virtual_view.block_offset >= total_pixels)
+    {
+      virtual_view.block_offset = 0;
+      virtual_view.block_id++;
+
+      if (virtual_view.block_id >= bus_count) virtual_view.block_id = 0;
+    }
+
+    return true;
+  }
+
+  virtual_view.block_id = 0;
+  virtual_view.block_offset = 0;
+
+  return false;
+}
+
+#endif
+#ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+void mAnimatorLight::handleVirtualViewWs()
+{
+  if (!virtual_view.client_id) return;
+  if (millis() - virtual_view.last_send < VIRTUALVIEW_INTERVAL_MS) return;
+
+  AsyncWebSocketClient* client = websocket_lights->client(virtual_view.client_id);
+
+  if (!client)
+  {
+    virtual_view = {};
+    return;
+  }
+
+  if (client->queueLength() > 0) return;
+
+  bool sent;
+
+  if (virtual_view.mode == VIRTUALVIEW_MODE_BUSES) sent = sendNextVirtualViewBusPacket(client);
+  else sent = sendNextVirtualViewSegmentPacket(client);
+
+  if (sent) virtual_view.last_send = millis();
+}
+
+#endif
 
 
 
@@ -1589,6 +2498,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
  */
 
 uint16_t wsLiveClientId = 0;
+uint16_t wsVirtualViewClientId = 0;
 unsigned long wsLastLiveTime = 0;
 //uint8_t* wsFrameBuffer = nullptr;
 
@@ -1604,7 +2514,7 @@ void sendDataWs(AsyncWebSocketClient * client)
     return;
   }
 
-  if (!JBI->requestJSONBufferLock(12)) {
+  if (!JBI->requestJSONBufferLock(JSON_LOCK_WS_SEND)) {
     const char* error = PSTR("{\"error\":3}");
     if (client) {
       client->text(FPSTR(error)); // ERR_NOBUF
@@ -1620,11 +2530,13 @@ void sendDataWs(AsyncWebSocketClient * client)
   tkr_anim->serializeInfo(info);
 
   size_t len = measureJson(*tkr_mfile->pDoc);
-  // DEBUG_PRINTF_P(PSTR("JSON buffer size: %u for WS request (%u).\n"), tkr_anim->pDoc->memoryUsage(), len);
+  #ifdef ENABLE_DEBUG__JSON_BUFFER_LOCKS
+  ALOG_INF(PSTR("JSON buffer size: %u for WS request (%u).\n"), tkr_mfile->pDoc->memoryUsage(), len);
+  #endif
 
   // the following may no longer be necessary as heap management has been fixed by @willmmiles in AWS
   size_t heap1 = ESP.getFreeHeap();
-  // DEBUG_PRINTF_P(PSTR("heap %u\n"), ESP.getFreeHeap());
+  ALOG_INF(PSTR("heap %u\n"), ESP.getFreeHeap());
   #ifdef ESP8266
   if (len>heap1) {
     DEBUG_PRINTLN(F("Out of memory (WS)!"));
@@ -1634,29 +2546,41 @@ void sendDataWs(AsyncWebSocketClient * client)
   AsyncWebSocketBuffer buffer(len);
   #ifdef ESP8266
   size_t heap2 = ESP.getFreeHeap();
-  DEBUG_PRINTF_P(PSTR("heap %u\n"), ESP.getFreeHeap());
+  ALOG_INF(PSTR("heap %u\n"), ESP.getFreeHeap());
   #else
   size_t heap2 = 0; // ESP32 variants do not have the same issue and will work without checking heap allocation
   #endif
   if (!buffer || heap1-heap2<len) {
     JBI->releaseJSONBufferLock();
-    DEBUG_PRINTLN(F("WS buffer allocation failed."));
+    ALOG_ERR(PSTR("WS buffer allocation failed."));
     tkr_anim->websocket_lights->closeAll(1013); //code 1013 = temporary overload, try again later
     tkr_anim->websocket_lights->cleanupClients(0); //disconnect all clients to release memory
     return; //out of memory
   }
   serializeJson(*tkr_mfile->pDoc, (char *)buffer.data(), len);
 
-  DEBUG_PRINT(F("Sending WS data "));
+  ALOG_INF(PSTR("Sending WS data "));
   if (client) {
-    DEBUG_PRINTLN(F("to a single client."));
+    ALOG_INF(PSTR("to a single client."));
     client->text(std::move(buffer));
   } else {
-    DEBUG_PRINTLN(F("to multiple clients."));
+    ALOG_INF(PSTR("to multiple clients."));
     tkr_anim->websocket_lights->textAll(std::move(buffer));
   }
 
   JBI->releaseJSONBufferLock();
+}
+
+void mAnimatorLight::updateInterfaces(uint8_t callMode)
+{
+  if (!interfaceUpdateCallMode || millis() - lastInterfaceUpdate < INTERFACE_UPDATE_COOLDOWN) return;
+
+  sendDataWs();
+  lastInterfaceUpdate = millis();
+  interfaceUpdateCallMode = CALL_MODE_INIT; //disable further updates
+
+  if (callMode == CALL_MODE_WS_SEND) return;
+  
 }
 
 
@@ -1674,6 +2598,9 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
 
   if (type == WS_EVT_DISCONNECT) {
     if (client->id() == wsLiveClientId) wsLiveClientId = 0;
+    #ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+    if (client->id() == virtual_view.client_id) virtual_view = {};
+    #endif
     DEBUG_PRINTLN(F("WS client disconnected."));
     return;
   }
@@ -1729,12 +2656,69 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
           return;
         }
 
-        if (root["v"] && root.size() == 1) {
-          // client asked only for a verbose state reply
+        ALOG_INF(PSTR("wsEvent::WS_EVT_DATA::deserializeJson OK"));
+
+        if (root["v"] && root.size() == 1)
+        {
+          ALOG_INF(PSTR("wsEvent::WS_EVT_DATA::Verbose response request"));
           verboseResponse = true;
-        } else if (root.containsKey("lv")) {
+        }
+        #ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+else if (root.containsKey("vv"))
+{
+  ALOG_INF(PSTR("wsEvent::WS_EVT_DATA::VirtualView request"));
+
+  const int vv_value = root["vv"].as<int>();
+  const bool enabled = vv_value != 0;
+  const uint8_t requested_mode = root["mode"].isNull() ? VIRTUALVIEW_MODE_SEGMENTS : root["mode"].as<uint8_t>();
+
+  ALOG_INF(
+    PSTR("VirtualView request client=%u vv=%d enabled=%u requested_mode=%u"),
+    static_cast<unsigned>(client->id()),
+    vv_value,
+    static_cast<unsigned>(enabled),
+    static_cast<unsigned>(requested_mode)
+  );
+
+  if (enabled)
+  {
+    virtual_view.client_id    = client->id();
+    virtual_view.mode         = requested_mode == VIRTUALVIEW_MODE_BUSES ? VIRTUALVIEW_MODE_BUSES : VIRTUALVIEW_MODE_SEGMENTS;
+    virtual_view.block_id     = 0;
+    virtual_view.block_offset = 0;
+    virtual_view.last_send    = 0;
+
+    ALOG_INF(
+      PSTR("VirtualView enabled client=%u mode=%u"),
+      static_cast<unsigned>(virtual_view.client_id),
+      static_cast<unsigned>(virtual_view.mode)
+    );
+  }
+  else if (virtual_view.client_id == client->id())
+  {
+    virtual_view = {};
+    ALOG_INF(PSTR("VirtualView disabled client=%u"), static_cast<unsigned>(client->id()));
+  }
+  else
+  {
+    ALOG_INF(
+      PSTR("VirtualView disable request ignored for non-owner client=%u owner=%u"),
+      static_cast<unsigned>(client->id()),
+      static_cast<unsigned>(virtual_view.client_id)
+    );
+  }
+
+  verboseResponse = false;
+}
+#endif
+        else if (root.containsKey("lv"))
+        {
+          ALOG_INF(PSTR("wsEvent::WS_EVT_DATA::Live LED request"));
           wsLiveClientId = root["lv"] ? client->id() : 0;
-        } else {
+        }
+        else
+        { 
+          ALOG_INF(PSTR("wsEvent::WS_EVT_DATA::Deserialize state"));
           verboseResponse = tkr_anim->deserializeState(root);
         }
 
@@ -1778,7 +2762,14 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
   DEBUG_PRINTLN(F("WS unknown event."));
 }
 
+/***
 
+1D:
+    L, 1, R, G, B, R, G, B, ...
+2D:
+    L, 2, width, height, R, G, B, R, G, B, ...
+
+ */
 bool sendLiveLedsWs(uint32_t wsClient)
 {
   AsyncWebSocketClient * wsc = tkr_anim->websocket_lights->client(wsClient);
@@ -1826,21 +2817,15 @@ bool sendLiveLedsWs(uint32_t wsClient)
     if (tkr_anim->isMatrix && n>1 && (i/mAnimatorLight::Segment::maxWidth)%n) i += mAnimatorLight::Segment::maxWidth * (n-1);
 #endif
 
-
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-    RgbwwColor col = tkr_anim->getPixelColor(i);
-    uint32_t c = RGBW32(col.R, col.G, col.B, col.WW);
-    #else
     uint32_t c = tkr_anim->getPixelColor(i);
-    #endif
     
     uint8_t r = R(c);
     uint8_t g = G(c);
     uint8_t b = B(c);
     uint8_t w = W(c);
-    buffer[pos++] = r;//tkr_iLight->_briRGB_Global ? qadd8(w, r) : 0; //R, add white channel to RGB channels as a simple RGBW -> RGB map
-    buffer[pos++] = g;//tkr_iLight->_briRGB_Global ? qadd8(w, g) : 0; //G
-    buffer[pos++] = b;//tkr_iLight->_briRGB_Global ? qadd8(w, b) : 0; //B
+    buffer[pos++] = tkr_iLight->_briRGB_Global ? qadd8(w, r) : 0; //R, add white channel to RGB channels as a simple RGBW -> RGB map
+    buffer[pos++] = tkr_iLight->_briRGB_Global ? qadd8(w, g) : 0; //G
+    buffer[pos++] = tkr_iLight->_briRGB_Global ? qadd8(w, b) : 0; //B
     // Serial.println(r);
   }
 
@@ -1859,10 +2844,19 @@ void mAnimatorLight::handleWs()
     websocket_lights->cleanupClients();
     #endif
     bool success = true;
-    if (wsLiveClientId) success = sendLiveLedsWs(wsLiveClientId);
+    // if (wsLiveClientId) success = sendLiveLedsWs(wsLiveClientId);
+    if (wsLiveClientId)
+    {
+      // ALOG_INF(PSTR("Sending live WS frame to client %u"), static_cast<unsigned>(wsLiveClientId));
+      success = sendLiveLedsWs(wsLiveClientId);
+    }
     wsLastLiveTime = millis();
     if (!success) wsLastLiveTime -= 20; //try again in 20ms if failed due to non-empty WS queue
   }
+
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+  handleVirtualViewWs();
+  #endif
 }
 
 
@@ -2572,7 +3566,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
     #endif
     DEBUG_LINE_HERE_TRACE
 
-    uint16_t colours_in_palette = SEGMENT.palette->colours_in_palette;// GetNumberOfColoursInUNLOADEDPalette(palette_id);
+    uint16_t colours_in_palette = SEGMENT.palette_loaded->colours_in_palette;// GetNumberOfColoursInUNLOADEDPalette(palette_id);
    
     #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
     ALOG_INF(PSTR("colours_in_palette[%d]=%d"),palette_id, colours_in_palette);
@@ -2632,7 +3626,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
 
       encoded_gradient = 0;
       
-      RgbwwColor color;
+      uint32_t color;
 
       #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
       WDT_Reset();
@@ -2741,7 +3735,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
           JsonArray colors = curPalette_obj.createNestedArray();
 
           // Load temporary palette
-          color = GetUnloadedPaletteColour(
+          color = GetPaletteColour_WithTemporaryLoad(
               palette_id,
               j,
               PALETTE_SPAN_OFF, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, // "PALETTE_MODE__FORCE_DISCRETE" should be the only thing to get the basic colors, without gradients
@@ -2753,6 +3747,7 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
           Serial.print("++++++++++++++++++++++++++++++++++++++++++++++encoded_gradient: ");
           Serial.println(encoded_gradient);
           Serial.flush();
+          ALOG_INF(PSTR("unload col %d,%d,%d"), (uint8_t)R(color), (uint8_t)G(color), (uint8_t)B(color));
           #endif
 
           // Handle the encoded gradient
@@ -2785,9 +3780,9 @@ void mAnimatorLight::serializePalettes(JsonObject root, int page)
           }
 
           // Add the RGB color components
-          colors.add(color.R);
-          colors.add(color.G);
-          colors.add(color.B);
+          colors.add(R(color));
+          colors.add(G(color));
+          colors.add(B(color));
 
           #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
           ALOG_DBM(PSTR("j=%d,encoded_gradient=%d,rgb=%d,%d,%d"), j, encoded_gradient, color.red, color.green, color.blue);
@@ -2882,11 +3877,157 @@ void mAnimatorLight::serializeNetworks(JsonObject root)
   }
 }
 
+
+
+void  mAnimatorLight::serializeNodes(JsonObject root)
+{
+  JsonArray nodes = root.createNestedArray("nodes");
+
+  for (NodesMap::iterator it = Nodes.begin(); it != Nodes.end(); ++it)
+  {
+    if (it->second.ip[0] != 0)
+    {
+      JsonObject node = nodes.createNestedObject();
+      node[F("name")] = it->second.nodeName;
+      node["type"]    = it->second.nodeType;
+      node["ip"]      = it->second.ip.toString();
+      node[F("age")]  = it->second.age;
+      node[F("vid")]  = it->second.build;
+    }
+  }
+}
+
+void  mAnimatorLight::serializePins(JsonObject root)
+{
+  JsonArray pins = root.createNestedArray(F("pins"));
+  // #ifdef ESP8266
+  // constexpr int ENUM_PINS = WLED_NUM_PINS; // GPIO0-16 (A0 (17) is analog input only and always assigned to any analog input, even if set "unused") TODO: can currently not be handled
+  // #else
+  // constexpr int ENUM_PINS = WLED_NUM_PINS;
+  // #endif
+  // for (int gpio = 0; gpio < ENUM_PINS; gpio++) {
+  //   bool canInput = PinManager::isPinOk(gpio, false);
+  //   bool canOutput = PinManager::isPinOk(gpio, true);
+  //   bool isAllocated = PinManager::isPinAllocated(gpio);
+  //   // Skip pins that are neither usable nor allocated (truly unusable pins)
+  //   if (!canInput && !canOutput && !isAllocated) continue;
+
+  //   JsonObject pinObj = pins.createNestedObject();
+  //   pinObj["p"] = gpio;  // pin number
+
+  //   // Pin capabilities
+  //   // Touch capability is provided by appendGPIOinfo() via d.touch
+  //   uint8_t caps = 0;
+
+  //   #ifdef ARDUINO_ARCH_ESP32
+  //   if (PinManager::isAnalogPin(gpio)) caps |= PIN_CAP_ADC;
+
+  //   // PWM on all ESP32 variants: all output pins can use ledc PWM so this is redundant
+  //   //if (canOutput) caps |= PIN_CAP_PWM;
+
+  //   // Input-only pins (ESP32 classic: GPIO34-39)
+  //   if (canInput && !canOutput) caps |= PIN_CAP_INPUT_ONLY;
+
+  //   // Bootloader/strapping pins
+  //   #if defined(CONFIG_IDF_TARGET_ESP32S3)
+  //   if (gpio == 0) caps |= PIN_CAP_BOOT;  // pull low to enter bootloader mode
+  //   if (gpio == 45 || gpio == 46) caps |= PIN_CAP_BOOTSTRAP; // IO46 must be low to enter bootloader mode, IO45 controls flash voltage, keep low for 3.3V flash
+  //   #elif defined(CONFIG_IDF_TARGET_ESP32S2)
+  //   if (gpio == 0) caps |= PIN_CAP_BOOT; // pull low to enter bootloader mode
+  //   if (gpio == 45 || gpio == 46) caps |= PIN_CAP_BOOTSTRAP; // IO46 must be low to enter bootloader mode, IO45 controls flash voltage, keep low for 3.3V flash
+  //   #elif defined(CONFIG_IDF_TARGET_ESP32C3)
+  //   if (gpio == 9) caps |= PIN_CAP_BOOT; // pull low to enter bootloader mode
+  //   if (gpio == 2 || gpio == 8) caps |= PIN_CAP_BOOTSTRAP; // both GPIO2 and GPIO8 must be high to enter bootloader mode
+  //   #elif defined(CONFIG_IDF_TARGET_ESP32) // ESP32 classic
+  //   if (gpio == 0) caps |= PIN_CAP_BOOT; // pull low to enter bootloader mode
+  //   if (gpio == 2 || gpio == 12) caps |= PIN_CAP_BOOTSTRAP; // note: if GPIO12 must be low at boot, (high=1.8V flash mode), GPIO 2 must be low or floating to enter bootloader mode
+  //   #endif
+  //   #else
+  //   // ESP8266: GPIO 0-16 + GPIO17=A0
+  //   // if (gpio < 16) caps |= PIN_CAP_PWM;  // software PWM available on all GPIO except GPIO16
+  //   // ESP8266 strapping pins
+  //   if (gpio == 0) caps |= PIN_CAP_BOOT;
+  //   if (gpio == 2 || gpio == 15) caps |= PIN_CAP_BOOTSTRAP; // GPIO2 must be high, GPIO15 low to boot normally
+  //   if (gpio == 17) caps = PIN_CAP_INPUT_ONLY | PIN_CAP_ADC; // TODO: display as A0 pin
+  //   #endif
+
+  //   pinObj["c"] = caps;  // capabilities
+
+  //   // Add allocated status and owner
+  //   pinObj["a"] = isAllocated;  // allocated status
+
+  //   // check if this pin is used as a button (need to get button type for owner name)
+  //   int buttonIndex = PinManager::getButtonIndex(gpio); // returns -1 if not a button pin, otherwise returns index in buttons array
+
+  //   // Add owner ID and name
+  //   PinOwner owner = PinManager::getPinOwner(gpio);
+  //   if (isAllocated) {
+  //     pinObj["o"] = static_cast<uint8_t>(owner);  // owner ID (can be used for UI lookup)
+  //     pinObj["n"] = PinManager::getPinOwnerName(gpio);  // owner name (string)
+
+  //     // Relay pin
+  //     if (owner == PinOwner::Relay) {
+  //       pinObj["m"] = 1;  // mode: output
+  //       pinObj["s"] = digitalRead(rlyPin); // read state from hardware (digitalRead returns output state for output pins)
+  //     }
+  //     // Button pins, get type and state using isButtonPressed()
+  //     else if (buttonIndex >= 0) {
+  //       pinObj["m"] = 0;  // mode: input
+  //       pinObj["t"] = buttons[buttonIndex].type; // button type
+  //       pinObj["s"] = isButtonPressed(buttonIndex) ? 1 : 0;  // state
+
+  //       // for touch buttons, get raw reading value (useful for debugging threshold)
+  //       #if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+  //       if (buttons[buttonIndex].type == BTN_TYPE_TOUCH || buttons[buttonIndex].type == BTN_TYPE_TOUCH_SWITCH) {
+  //         if (digitalPinToTouchChannel(gpio) >= 0) {
+  //           #ifdef SOC_TOUCH_VERSION_2 // ESP32 S2 and S3
+  //           pinObj["r"] = touchRead(gpio) >> 4; // Touch V2 returns larger values, right shift by 4 to match threshold range, see set.cpp
+  //           #else
+  //           pinObj["r"] = touchRead(gpio); // send raw value
+  //           #endif
+  //         }
+  //       }
+  //       #endif
+  //       // for analog buttons, get raw reading value
+  //       if (buttons[buttonIndex].type == BTN_TYPE_ANALOG || buttons[buttonIndex].type == BTN_TYPE_ANALOG_INVERTED) {
+  //         int analogRaw = 0;
+  //         #ifdef ESP8266
+  //         analogRaw = analogRead(A0) >> 2;   // convert 10bit read to 8bit, ESP8266 only has one analog pin
+  //         #else
+  //         if (digitalPinToAnalogChannel(gpio) >= 0) {
+  //           analogRaw = (analogRead(gpio)>>4); // right shift to match button value (8bit) see button.cpp
+  //         }
+  //         #endif
+  //         if (buttons[buttonIndex].type == BTN_TYPE_ANALOG_INVERTED) analogRaw = 255 - analogRaw;
+  //         pinObj["r"] = analogRaw; // send raw value
+  //       }
+  //     }
+  //     // other allocated output pins that are simple GPIO (BusOnOff, Multi Relay, etc.) TODO: expand for other pin owners as needed
+  //     else if (owner == PinOwner::BusOnOff || owner == PinOwner::UM_MultiRelay) {
+  //       pinObj["m"] = 1;  // mode: output
+  //       pinObj["s"] = digitalRead(gpio);  // read state from hardware (digitalRead returns output state for output pins)
+  //     }
+  //   }
+  // }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 // deserializes mode data string into JsonArray
 void mAnimatorLight::serializeModeData(JsonArray fxdata)
 {
   char lineBuffer[256];
-  for (size_t i = 0; i < getModeCount(); i++) {
+  for (size_t i = 0; i < getEffectCount(); i++) {
     strncpy_P(lineBuffer, getModeData_Config(i), sizeof(lineBuffer) - 1);
     lineBuffer[sizeof(lineBuffer) - 1] = '\0'; // terminate string
 
@@ -2908,6 +4049,80 @@ void mAnimatorLight::serializeModeData(JsonArray fxdata)
       }
     }
   }
+}
+
+
+
+// Writes a JSON-escaped string (with surrounding quotes) into dest[0..maxLen-1].
+// Returns bytes written, or 0 if the buffer was too small.
+static size_t writeJSONString(uint8_t* dest, size_t maxLen, const char* src) {
+  size_t pos = 0;
+
+  auto emit = [&](char c) -> bool {
+    if (pos >= maxLen) return false;
+    dest[pos++] = (uint8_t)c;
+    return true;
+  };
+
+  if (!emit('"')) return 0;
+
+  for (const char* p = src; *p; ++p) {
+    char esc = ARDUINOJSON_NAMESPACE::EscapeSequence::escapeChar(*p);
+    if (esc) {
+      if (!emit('\\') || !emit(esc)) return 0;
+    } else {
+      if (!emit(*p)) return 0;
+    }
+  }
+
+  if (!emit('"')) return 0;
+  return pos;
+}
+
+// Writes ,"<escaped_src>" into dest[0..maxLen-1] (no null terminator).
+// Returns bytes written, or 0 if the buffer was too small.
+static size_t writeJSONStringElement(uint8_t* dest, size_t maxLen, const char* src) {
+  if (maxLen == 0) return 0;
+  dest[0] = ',';
+  size_t n = writeJSONString(dest + 1, maxLen - 1, src);
+  if (n == 0) return 0;
+  return 1 + n;
+}
+
+// Generate a streamed JSON response for the mode data
+// This uses sendChunked to send the reply in blocks based on how much fit in the outbound
+// packet buffer, minimizing the required state (ie. just the next index to send).  This
+// allows us to send an arbitrarily large response without using any significant amount of
+// memory (so no worries about buffer limits).
+void mAnimatorLight::respondModeData(AsyncWebServerRequest* request) {
+  size_t fx_index = 0;
+  request->sendChunked(FPSTR(CONTENT_TYPE_JSON),
+    [fx_index](uint8_t* data, size_t len, size_t) mutable {
+      size_t bytes_written = 0;
+      char lineBuffer[256];
+      while (fx_index < tkr_anim->getEffectCount()) {
+        strncpy_P(lineBuffer, tkr_anim->getModeData(fx_index), sizeof(lineBuffer)-1); // Copy to stack buffer for strchr
+        if (lineBuffer[0] != 0) {
+          lineBuffer[sizeof(lineBuffer)-1] = '\0'; // terminate string (only needed if strncpy filled the buffer)
+          const char* dataPtr = strchr(lineBuffer,'@'); // Find '@', if there is one
+          size_t mode_bytes = writeJSONStringElement(data, len, dataPtr ? dataPtr + 1 : "");
+          if (mode_bytes == 0) break;  // didn't fit; break loop and try again next packet
+          if (fx_index == 0) *data = '[';
+          data += mode_bytes;
+          len -= mode_bytes;
+          bytes_written += mode_bytes;
+        }
+        ++fx_index;        
+      }
+
+      if ((fx_index == tkr_anim->getEffectCount()) && (len >= 1)) {
+        *data = ']';
+        ++bytes_written;
+        ++fx_index; // we're really done
+      }
+
+      return bytes_written;
+  });
 }
 
 
@@ -2939,19 +4154,84 @@ void mAnimatorLight::serializeModeNames(JsonArray arr, bool flag_get_first_name_
 
 
 
+// #define MAX_LIVE_LEDS 256
+
+// bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient)
+// {
+//   AsyncWebSocketClient * wsc = nullptr;
+//   if (!request) { //not HTTP, use Websockets
+//     wsc = websocket_lights->client(wsClient);
+//     if (!wsc || wsc->queueLength() > 0) return false; //only send if queue free
+//   }
+
+//   unsigned used = getLengthTotal();
+//   unsigned n = (used -1) /MAX_LIVE_LEDS +1; //only serve every n'th LED if count over MAX_LIVE_LEDS
+// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+//   if (isMatrix) {
+//     // ignore anything behid matrix (i.e. extra strip)
+//     used = Segment::maxWidth*Segment::maxHeight; // always the size of matrix (more or less than strip.getLengthTotal())
+//     n = 1;
+//     if (used > MAX_LIVE_LEDS) n = 2;
+//     if (used > MAX_LIVE_LEDS*4) n = 4;
+//   }
+// #endif
+
+//   DynamicBuffer buffer(9 + (9*(1+(used/n))) + 7 + 5 + 6 + 5 + 6 + 5 + 2);  
+//   char* buf = buffer.data();      // assign buffer for oappnd() functions
+//   strncpy_P(buffer.data(), PSTR("{\"leds\":["), buffer.size());
+//   buf += 9; // sizeof(PSTR()) from last line
+
+//   for (size_t i = 0; i < used; i += n)
+//   {
+// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+//     if (isMatrix && n>1 && (i/Segment::maxWidth)%n) i += Segment::maxWidth * (n-1);
+// #endif
+//     uint32_t c = getPixelColor(i);
+//     uint8_t r = R(c);
+//     uint8_t g = G(c);
+//     uint8_t b = B(c);
+//     uint8_t w = W(c);
+//     r = scale8(qadd8(w, r), getBrightness()); //R, add white channel to RGB channels as a simple RGBW -> RGB map
+//     g = scale8(qadd8(w, g), getBrightness()); //G
+//     b = scale8(qadd8(w, b), getBrightness()); //B
+//     buf += sprintf_P(buf, PSTR("\"%06X\","), RGBW32(r,g,b,0));
+//   }
+//   buf--;  // remove last comma
+//   buf += sprintf_P(buf, PSTR("],\"n\":%d"), n);
+// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+//   if (isMatrix) {
+//     buf += sprintf_P(buf, PSTR(",\"w\":%d"), Segment::maxWidth/n);
+//     buf += sprintf_P(buf, PSTR(",\"h\":%d"), Segment::maxHeight/n);
+//   }
+// #endif
+//   (*buf++) = '}';
+//   (*buf++) = 0;
+  
+//   if (request) {
+//     request->send(200, "application/json", toString(std::move(buffer)));
+//   }
+//   else {
+//     wsc->text(toString(std::move(buffer)));
+//   }
+//   return true;
+// }
+
+
 #define MAX_LIVE_LEDS 256
 
 bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient)
 {
+  #ifdef WLED_ENABLE_WEBSOCKETS
   AsyncWebSocketClient * wsc = nullptr;
   if (!request) { //not HTTP, use Websockets
     wsc = websocket_lights->client(wsClient);
     if (!wsc || wsc->queueLength() > 0) return false; //only send if queue free
   }
+  #endif
 
   unsigned used = getLengthTotal();
   unsigned n = (used -1) /MAX_LIVE_LEDS +1; //only serve every n'th LED if count over MAX_LIVE_LEDS
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifndef WLED_DISABLE_2D
   if (isMatrix) {
     // ignore anything behid matrix (i.e. extra strip)
     used = Segment::maxWidth*Segment::maxHeight; // always the size of matrix (more or less than strip.getLengthTotal())
@@ -2968,15 +4248,10 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
 
   for (size_t i = 0; i < used; i += n)
   {
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifndef WLED_DISABLE_2D
     if (isMatrix && n>1 && (i/Segment::maxWidth)%n) i += Segment::maxWidth * (n-1);
 #endif
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-    RgbwwColor col = getPixelColor(i);
-    uint32_t c = RGBW32(col.R, col.G, col.B, col.WW);
-    #else
     uint32_t c = getPixelColor(i);
-    #endif
     uint8_t r = R(c);
     uint8_t g = G(c);
     uint8_t b = B(c);
@@ -2988,7 +4263,7 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
   }
   buf--;  // remove last comma
   buf += sprintf_P(buf, PSTR("],\"n\":%d"), n);
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifndef WLED_DISABLE_2D
   if (isMatrix) {
     buf += sprintf_P(buf, PSTR(",\"w\":%d"), Segment::maxWidth/n);
     buf += sprintf_P(buf, PSTR(",\"h\":%d"), Segment::maxHeight/n);
@@ -2998,15 +4273,15 @@ bool mAnimatorLight::serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsCl
   (*buf++) = 0;
   
   if (request) {
-    request->send(200, "application/json", toString(std::move(buffer)));
+    request->send(200, FPSTR(CONTENT_TYPE_JSON), toString(std::move(buffer)));
   }
+  #ifdef WLED_ENABLE_WEBSOCKETS
   else {
     wsc->text(toString(std::move(buffer)));
   }
+  #endif  
   return true;
 }
-
-
 
 // Global buffer locking response helper class (to make sure lock is released when AsyncJsonResponse is destroyed)
 class LockedJsonResponse: public AsyncJsonResponse {
@@ -3036,65 +4311,26 @@ class LockedJsonResponse: public AsyncJsonResponse {
 void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
 {
 
-  byte subJson = 0;
+  enum class json_target {
+    all, state, info, state_info, nodes, effects, palettes, networks, config, pins
+  };
+  json_target subJson = json_target::all;
+  
   const String& url = request->url();
-  if      (url.indexOf("state") > 0) subJson = JSON_PATH_STATE;
-  else if (url.indexOf("info")  > 0) subJson = JSON_PATH_INFO;
-  else if (url.indexOf("si")    > 0) subJson = JSON_PATH_STATE_INFO;
-  else if (url.indexOf("nodes") > 0) subJson = JSON_PATH_NODES;
-  else if (url.indexOf("eff")   > 0) subJson = JSON_PATH_EFFECTS;
-  else if (url.indexOf("palx")  > 0) subJson = JSON_PATH_PALETTES;
-  else if (url.indexOf("fxda")  > 0) subJson = JSON_PATH_FXDATA;
-  else if (url.indexOf("net")   > 0) subJson = JSON_PATH_NETWORKS;
+  if      (url.indexOf("state") > 0) subJson = json_target::state;
+  else if (url.indexOf("info")  > 0) subJson = json_target::info;
+  else if (url.indexOf("si")    > 0) subJson = json_target::state_info;
+  else if (url.indexOf("nodes") > 0) subJson = json_target::nodes;
+  else if (url.indexOf("eff")   > 0) subJson = json_target::effects;
+  else if (url.indexOf("palx")  > 0) subJson = json_target::palettes;
+  else if (url.indexOf("fxda")  > 0) { respondModeData(request); return; }
+  else if (url.indexOf("net")   > 0) subJson = json_target::networks;
+  else if (url.indexOf(F("cfg"))   > 0) subJson = json_target::config;
+  else if (url.indexOf(F("pins"))  > 0) subJson = json_target::pins;
   else if (url.indexOf("live")  > 0) { 
     serveLiveLeds(request);
     return;
   }
-  // else if (url.indexOf("pal") > 0) { // "/json/palettes"
-
-  //   JBI->Start();
-  //     JBI->Array_Start();
-
-  //     char lineBuffer[100] = {0};
-  //     bool flag_get_first_name_only = true;
-        
-  //     for(uint16_t i = 0; i < mPaletteI->GetPaletteListLength(); i++)
-  //     {
-
-  //       GetPaletteNameByID(i, lineBuffer, sizeof(lineBuffer));
-  //       if(flag_get_first_name_only)
-  //       {    
-  //         char* dataPtr = strchr(lineBuffer, PALETTE_MULTIPLE_NAME_DELIMETER);
-  //         if (dataPtr) *dataPtr = 0; // replace name dividor with null termination early
-  //       }
-  //       ALOG_DBM(PSTR("pal[%d]=\"%s\""), i, lineBuffer);
-  //       JBI->Add(lineBuffer);
-  //     }
-
-  //     JBI->Array_End();
-  //   JBI->End();
-
-  //   // remove leading and trailing json parts as temp measure
-  //   char* data = JBI->GetBufferPtr();
-  //   uint16_t data_len = strlen(data);
-  //   if(data) data[data_len-1] = '\0';
-  //   Serial.println();
-
-  //   /**
-  //    * @brief It actually makes perfect sense to embedded the ETag into the names of palettes, 
-  //    * since its this that forces the reload of the palette colours if needed too.
-  //    * 
-  //    */
-  //   // Generate the ETag
-  //   char etag[32];
-  //   tkr_web->generateEtag(etag, JSON_PATH_PALETTES);
-  //   // Send the response with the ETag header
-  //   AsyncWebServerResponse *response = request->beginResponse_P(200, "application/json", &data[1]);   [1] possible cause of toast#1] SyntaxError: Unexpected token '}', "}
-  //   response->addHeader(F("ETag"), etag); // Add the ETag header to the response
-  //   request->send(response);
-
-  //   return;
-  // }
   else if (url.indexOf("pal") > 0) { // "/json/palettes" - names only (flat array)
     // Build JSON into a local String to avoid races with the global JBI buffer
     String out;
@@ -3129,14 +4365,11 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
 
     // Creating ETAGs which differ on a fresh compile, forcing palettes to be reloaded on first webpage load
     char etag[32];
-    tkr_web->generateEtag(etag, JSON_PATH_PALETTES);
+    tkr_web->generateEtag(etag, (uint16_t)json_target::palettes);
     AsyncWebServerResponse* resp = request->beginResponse(200, "application/json", out);
     resp->addHeader(F("ETag"), etag);
     request->send(resp);
 
-    return;
-  }
-  else if (url.indexOf("cfg") > 0 && tkr_mfile->handleFileRead(request, "/cfg.json")) {
     return;
   }
   else if (url.length() > 6) { //not just /json
@@ -3144,16 +4377,14 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
     return;
   }
 
-  if (!JBI->requestJSONBufferLock(17)) {
+  if (!JBI->requestJSONBufferLock(JSON_LOCK_SERVEJSON)) {
     request->send(503, "application/json", F("{\"error\":3}"));
     return;
   }
 
-  // AsyncJsonResponse *response = new AsyncJsonResponse(tkr_mfile->pDoc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
-
   // releaseJSONBufferLock() will be called when "response" is destroyed (from AsyncWebServer)
   // make sure you delete "response" if no "request->send(response);" is made
-  LockedJsonResponse *response = new LockedJsonResponse(tkr_mfile->pDoc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
+  LockedJsonResponse *response = new LockedJsonResponse(tkr_mfile->pDoc, subJson==json_target::effects); // will clear and convert JsonDocument into JsonArray if necessary
 
 
 
@@ -3161,36 +4392,34 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
 
   switch (subJson)
   {
-    case JSON_PATH_STATE:
-      serializeState(lDoc); 
-    break;
-    case JSON_PATH_INFO:
-      serializeInfo(lDoc);     
-    break;
-    case JSON_PATH_PALETTES:
-      serializePalettes(lDoc, request->hasParam("page") ? request->getParam("page")->value().toInt() : 0); 
-    break;
-    case JSON_PATH_EFFECTS:
-      serializeModeNames(lDoc); 
-    break;
-    case JSON_PATH_FXDATA:
-      serializeModeData(lDoc); 
-    break;
-    case JSON_PATH_NETWORKS:
-      serializeNetworks(lDoc); 
-    break;
-    default: // All
+    case json_target::state:
+      serializeState(lDoc);     break;
+    case json_target::info:
+      serializeInfo(lDoc);        break;
+    case json_target::nodes:
+      serializeNodes(lDoc); break;
+    case json_target::palettes:
+      serializePalettes(lDoc, request->hasParam("page") ? request->getParam("page")->value().toInt() : 0);     break;
+    case json_target::effects:
+      serializeModeNames(lDoc);     break;
+    case json_target::networks:
+      serializeNetworks(lDoc);     break;      
+    case json_target::config:
+      serializeConfig(lDoc);     break;
+    case json_target::pins:
+      serializePins(lDoc); break;      
+    case json_target::state_info:
+    case json_target::all:
       JsonObject state = lDoc.createNestedObject("state");
       serializeState(state);
       JsonObject info = lDoc.createNestedObject("info");
       serializeInfo(info);
-
-      tkr_anim->force_update(); // New data in, so we should update
-
-      if (subJson != JSON_PATH_STATE_INFO)
+      if (subJson == json_target::all)
       {
         JsonArray effects = lDoc.createNestedArray(F("effects"));
         serializeModeNames(effects);
+
+        tkr_anim->force_update(); // New data in, so we should update
 
         bool flag_get_first_name_only = true;        
         char lineBuffer[100] = {0};
@@ -3211,8 +4440,10 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
       lDoc["m"] = lDoc.memoryUsage(); // JSON buffer usage, for remote debugging
   }
 
+  #ifdef ENABLE_DEBUG__JSON_BUFFER_LOCKS
   ALOG_DBG(PSTR("JSON buffer size: %u for request: %d\n"), lDoc.memoryUsage(), subJson);
-
+  #endif
+  
   size_t len = response->setLength();
   ALOG_DBG(PSTR("JSON content length: %d"), len);
 
@@ -3278,7 +4509,6 @@ void mAnimatorLight::serveSettings(AsyncWebServerRequest* request, bool post)
     #endif
     else if (url.indexOf("lock") > 0) subPage = SUBPAGE_LOCK;
   }
-  else if (url.indexOf("/update") >= 0) subPage = SUBPAGE_UPDATE; // update page, for PIN check
   else subPage = SUBPAGE_MENU;
 
   if(
@@ -3347,17 +4577,17 @@ void mAnimatorLight::serveSettings(AsyncWebServerRequest* request, bool post)
   AsyncWebServerResponse *response;
   switch (subPage)
   {
-    case SUBPAGE_WIFI    : response = request->beginResponse_P(200, "text/html", PAGE_settings_wifi, PAGE_settings_wifi_length); break;
+    // case SUBPAGE_WIFI    : response = request->beginResponse_P(200, "text/html", PAGE_settings_wifi, PAGE_settings_wifi_length); break;
     case SUBPAGE_LEDS    : response = request->beginResponse_P(200, "text/html", PAGE_settings_leds, PAGE_settings_leds_length); break;
     case SUBPAGE_UI      : response = request->beginResponse_P(200, "text/html", PAGE_settings_ui,   PAGE_settings_ui_length);   break;
     case SUBPAGE_SYNC    : response = request->beginResponse_P(200, "text/html", PAGE_settings_sync, PAGE_settings_sync_length); break;
-    case SUBPAGE_TIME    : response = request->beginResponse_P(200, "text/html", PAGE_settings_time, PAGE_settings_time_length); break;
-    case SUBPAGE_SEC     : response = request->beginResponse_P(200, "text/html", PAGE_settings_sec,  PAGE_settings_sec_length);  break;
+    // case SUBPAGE_TIME    : response = request->beginResponse_P(200, "text/html", PAGE_settings_time, PAGE_settings_time_length); break;
+    // case SUBPAGE_SEC     : response = request->beginResponse_P(200, "text/html", PAGE_settings_sec,  PAGE_settings_sec_length);  break;
     #ifdef ENABLE_FEATURE_LIGHTING__DMX
     case SUBPAGE_DMX     : response = request->beginResponse_P(200, "text/html", PAGE_settings_dmx,  PAGE_settings_dmx_length);  break;
     #endif
-    case SUBPAGE_UM      : response = request->beginResponse_P(200, "text/html", PAGE_settings_um,   PAGE_settings_um_length);   break;
-    case SUBPAGE_UPDATE  : response = request->beginResponse_P(200, "text/html", PAGE_update,        PAGE_update_length);        break;
+    // case SUBPAGE_UM      : response = request->beginResponse_P(200, "text/html", PAGE_settings_um,   PAGE_settings_um_length);   break;
+    // case SUBPAGE_UPDATE  : response = request->beginResponse_P(200, "text/html", PAGE_update,        PAGE_update_length);        break;
     #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
     case SUBPAGE_2D      : response = request->beginResponse_P(200, "text/html", PAGE_settings_2D,   PAGE_settings_2D_length);   break;
     #endif
@@ -3369,8 +4599,8 @@ void mAnimatorLight::serveSettings(AsyncWebServerRequest* request, bool post)
       return;
     }
     #endif
-    case SUBPAGE_PINREQ  : response = request->beginResponse_P(200, "text/html", PAGE_settings_pin,  PAGE_settings_pin_length);  break;
-    case SUBPAGE_CSS     : response = request->beginResponse_P(200, "text/css",  PAGE_settingsCss,   PAGE_settingsCss_length);   break;
+    // case SUBPAGE_PINREQ  : response = request->beginResponse_P(200, "text/html", PAGE_settings_pin,  PAGE_settings_pin_length);  break;
+    // case SUBPAGE_CSS     : response = request->beginResponse_P(200, "text/css",  PAGE_settingsCss,   PAGE_settingsCss_length);   break;
     case SUBPAGE_JS      : serveSettingsJS(request); return;
     default:  response = request->beginResponse_P(200, "text/html", PAGE_settings,      PAGE_settings_length);      break;
   }
@@ -3430,6 +4660,23 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
     tkr_web->handleStaticContent(request, "", 200, FPSTR(CONTENT_TYPE_HTML), PAGE_liveview, PAGE_liveview_length);
   });
   AddURLtoList(PM_URL_LIVEVIEW, HTTP_GET);
+  
+  #ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+  SPGM_CTR(PM_URL_VIRTUALVIEW) "/lights/virtualview";
+
+  tkr_web->server->on(PM_URL_VIRTUALVIEW, HTTP_GET, [](AsyncWebServerRequest *request){
+    tkr_web->handleStaticContent(
+      request,
+      "",
+      200,
+      FPSTR(CONTENT_TYPE_HTML),
+      PAGE_virtualview,
+      PAGE_virtualview_length
+    );
+  });
+
+  AddURLtoList(PM_URL_VIRTUALVIEW, HTTP_GET);
+  #endif
 
   // settings page for LEDs, UI, sync, time, security, usermods, update
   SPGM_CTR(PM_URL_LIGHTS_SETTINGS) "/lights/settings";
@@ -3445,6 +4692,14 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
     tkr_web->handleStaticContent(request, FPSTR(PM_URL_LIGHTS_COMMON_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common, JS_common_length);
   });
   AddURLtoList(PM_URL_LIGHTS_COMMON_JS, HTTP_GET);
+
+  
+  SPGM_CTR(PM_URL_LIGHTS_IRO_JS) "/lights/iro.js";
+  tkr_web->server->on(PM_URL_LIGHTS_IRO_JS, HTTP_GET, [this](AsyncWebServerRequest *request){
+    tkr_web->handleStaticContent(request, FPSTR(PM_URL_LIGHTS_IRO_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_iro, JS_iro_length);
+  });
+  AddURLtoList(PM_URL_LIGHTS_IRO_JS, HTTP_GET);
+
 
   #ifndef ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
 
@@ -3657,6 +4912,21 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
     tkr_web->handleStaticContent(request, FPSTR(PM_URL_CPAL_HTM), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_cpal, PAGE_cpal_L);
   });
   AddURLtoList(PM_URL_CPAL_HTM, HTTP_GET);
+
+  
+  SPGM_CTR(PM_URL_LIGHTS_SETTINGS_WIFI) "/lights/settings/wifi";  AddURLtoList(PM_URL_LIGHTS_SETTINGS_WIFI, HTTP_POST);
+  SPGM_CTR(PM_URL_LIGHTS_SETTINGS_LEDS) "/lights/settings/leds";  AddURLtoList(PM_URL_LIGHTS_SETTINGS_LEDS, HTTP_POST);
+  SPGM_CTR(PM_URL_LIGHTS_SETTINGS_2D)   "/lights/settings/2D";    AddURLtoList(PM_URL_LIGHTS_SETTINGS_2D,   HTTP_POST);
+  SPGM_CTR(PM_URL_LIGHTS_SETTINGS_UI)   "/lights/settings/ui";    AddURLtoList(PM_URL_LIGHTS_SETTINGS_UI,   HTTP_POST);
+  SPGM_CTR(PM_URL_LIGHTS_SETTINGS_DMX)  "/lights/settings/dmx";   AddURLtoList(PM_URL_LIGHTS_SETTINGS_DMX,  HTTP_POST);
+  SPGM_CTR(PM_URL_LIGHTS_SETTINGS_SYNC) "/lights/settings/sync";  AddURLtoList(PM_URL_LIGHTS_SETTINGS_SYNC, HTTP_POST);
+  SPGM_CTR(PM_URL_LIGHTS_SETTINGS_TIME) "/lights/settings/time";  AddURLtoList(PM_URL_LIGHTS_SETTINGS_TIME, HTTP_POST);
+  SPGM_CTR(PM_URL_LIGHTS_SETTINGS_UM)   "/lights/settings/um";    AddURLtoList(PM_URL_LIGHTS_SETTINGS_UM,   HTTP_POST);
+  SPGM_CTR(PM_URL_LIGHTS_SETTINGS_SEC)  "/lights/settings/sec";   AddURLtoList(PM_URL_LIGHTS_SETTINGS_SEC,  HTTP_POST);
+  SPGM_CTR(PM_URL_LIGHTS_SETTINGS_LOCK) "/lights/settings/lock";  AddURLtoList(PM_URL_LIGHTS_SETTINGS_LOCK, HTTP_POST);
+  SPGM_CTR(PM_URL_LIGHTS_SETTINGS_JS)   "/lights/settings/s.js";  AddURLtoList(PM_URL_LIGHTS_SETTINGS_JS,   HTTP_POST);
+  SPGM_CTR(PM_URL_LIGHTS_UPDATE)        "/lights/update";         AddURLtoList(PM_URL_LIGHTS_UPDATE,        HTTP_POST);
+
 }
 
 
@@ -3723,7 +4993,7 @@ void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
   effect_start_time = millis();
   timebase = 0;
   isMatrix = false;
-  _virtualSegmentLength = 0;
+  // _virtualSegmentLength = 0;
   _length = DEFAULT_LED_COUNT;
   _brightness = DEFAULT_BRIGHTNESS;
   _targetFps = 40;
@@ -3732,28 +5002,40 @@ void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
   _isServicing = false;
   _isOffRefreshRequired = false;
   _hasWhiteChannel = false;
-  _force_update = false;
-  effects.count = getEffectsAmount();
+  _triggered = false;
+
+  
+  _targetFps = WLED_FPS;
+  _frametime = FRAMETIME_FIXED; 
+  _cumulativeFps = WLED_FPS << FPS_CALC_SHIFT;
+
   _callback = nullptr;
   customMappingTable = nullptr;
   customMappingSize = 0;
   _lastShow = 0;
-  segment_current_index = 0;
+  segment_index = 0;
   _mainSegment = 0;
 
   DEBUG_LINE_HERE4
-  effects.function.reserve(effects.count);     // allocate memory to prevent initial fragmentation (does not increase size())
-  effects.config.reserve(effects.count); // allocate memory to prevent initial fragmentation (does not increase size())
-    
-  DEBUG_LINE_HERE4
+
+  
+  uint8_t effects_count = getEffectCount();
+  effects.function.reserve(effects_count);     // allocate memory to prevent initial fragmentation (does not increase size())
+  effects.config.reserve(effects_count); // allocate memory to prevent initial fragmentation (does not increase size())
+  
   LoadEffects();
 
   DEBUG_LINE_HERE4
   Init_Segments();
+
+
+  NeoGammaWLEDMethod::calcGammaTable(2.8f);
     
-  #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
+  #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_MODE
   Standby_Init();
   #endif
+
+  DEBUG_PRINTF_P(PSTR("Heap after strip init: %uB\n"), getFreeHeapSize());
 
   DEBUG_LINE_HERE4
   module_state.mode = ModuleStatus::Running;

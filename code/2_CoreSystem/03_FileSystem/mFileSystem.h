@@ -253,9 +253,15 @@ class mFileSystem :
     bool appendObjectToFile(const char* key, JsonDocument* content, uint32_t s, uint32_t contentLen = 0);
     bool writeObjectToFileUsingId(const char* file, uint16_t id, JsonDocument* content);
     bool writeObjectToFile(const char* file, const char* key, JsonDocument* content);
-    bool readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest);
-    bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest);
+    bool readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest, const JsonDocument* filter = nullptr);
+    bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest, const JsonDocument* filter = nullptr);
     void updateFSInfo();
+
+    inline bool writeObjectToFileUsingId(const String &file, uint16_t id, const JsonDocument* content) { return writeObjectToFileUsingId(file.c_str(), id, content); };
+    inline bool writeObjectToFile(const String &file, const char* key, const JsonDocument* content) { return writeObjectToFile(file.c_str(), key, content); };
+    inline bool readObjectFromFileUsingId(const String &file, uint16_t id, JsonDocument* dest, const JsonDocument* filter = nullptr) { return readObjectFromFileUsingId(file.c_str(), id, dest); };
+    inline bool readObjectFromFile(const String &file, const char* key, JsonDocument* dest, const JsonDocument* filter = nullptr) { return readObjectFromFile(file.c_str(), key, dest); };
+
 
     String getContentType(AsyncWebServerRequest* request, String filename);
     bool handleFileRead(AsyncWebServerRequest* request, String path);
@@ -282,16 +288,16 @@ class mFileSystem :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mFileSystem>*> mqtthandler_list;
+    std::vector<struct telemetry_handler<mFileSystem>*> telemetry_list;
 
-    struct handler<mFileSystem> mqtthandler_settings;
-    struct handler<mFileSystem> mqtthandler_sensor_ifchanged;
-    struct handler<mFileSystem> mqtthandler_sensor_teleperiod;
+    struct telemetry_handler<mFileSystem> telemetry_settings;
+    struct telemetry_handler<mFileSystem> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mFileSystem> telemetry_sensor_teleperiod;
     #endif
 
 };

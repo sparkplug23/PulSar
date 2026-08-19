@@ -113,10 +113,10 @@ class mRF433Codes :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mRF433Codes>*> mqtthandler_list;
-    struct handler<mRF433Codes> mqtthandler_settings;
-    struct handler<mRF433Codes> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mRF433Codes>*> telemetry_list;
+    struct telemetry_handler<mRF433Codes> telemetry_settings;
+    struct telemetry_handler<mRF433Codes> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

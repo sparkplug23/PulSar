@@ -192,11 +192,11 @@ class mSensorsLSM303D :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mSensorsLSM303D>*> mqtthandler_list;
-    struct handler<mSensorsLSM303D> mqtthandler_settings;
-    struct handler<mSensorsLSM303D> mqtthandler_sensor_ifchanged;
-    struct handler<mSensorsLSM303D> mqtthandler_sensor_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mSensorsLSM303D>*> telemetry_list;
+    struct telemetry_handler<mSensorsLSM303D> telemetry_settings;
+    struct telemetry_handler<mSensorsLSM303D> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mSensorsLSM303D> telemetry_sensor_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

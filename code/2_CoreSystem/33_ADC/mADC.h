@@ -59,15 +59,15 @@ class mADC :
      ************************************************************************************************/
     
     // #ifdef USE_MODULE_NETWORK_MQTT
-    // void MQTTHandler_Init();
+    // void Telemetry_Init();
     // void MQTTHandler_RefreshAll();
     // void MQTTHandler_Rate();    
     // void MQTTHandler_Sender();
 
-    // std::vector<struct handler<mADC>*> mqtthandler_list;    
-    // struct handler<mADC> mqtthandler_settings;    
-    // struct handler<mADC> mqtthandler_sensor_ifchanged;
-    // struct handler<mADC> mqtthandler_sensor_teleperiod;    
+    // std::vector<struct telemetry_handler<mADC>*> telemetry_list;    
+    // struct telemetry_handler<mADC> telemetry_settings;    
+    // struct telemetry_handler<mADC> telemetry_sensor_ifchanged;
+    // struct telemetry_handler<mADC> telemetry_sensor_teleperiod;    
     // #endif // USE_MODULE_NETWORK_MQTT
 
 };

@@ -79,10 +79,10 @@ class mIRtransceiver :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mIRtransceiver>*> mqtthandler_list;
-    struct handler<mIRtransceiver> mqtthandler_settings;
-    struct handler<mIRtransceiver> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mIRtransceiver>*> telemetry_list;
+    struct telemetry_handler<mIRtransceiver> telemetry_settings;
+    struct telemetry_handler<mIRtransceiver> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

@@ -95,11 +95,11 @@ class mLightNeo_MotionAlerts :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mLightNeo_MotionAlerts>*> mqtthandler_list;
-    struct handler<mLightNeo_MotionAlerts> mqtthandler_settings;
-    struct handler<mLightNeo_MotionAlerts> mqtthandler_state_ifchanged;
-    struct handler<mLightNeo_MotionAlerts> mqtthandler_state_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mLightNeo_MotionAlerts>*> telemetry_list;
+    struct telemetry_handler<mLightNeo_MotionAlerts> telemetry_settings;
+    struct telemetry_handler<mLightNeo_MotionAlerts> telemetry_state_ifchanged;
+    struct telemetry_handler<mLightNeo_MotionAlerts> telemetry_state_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

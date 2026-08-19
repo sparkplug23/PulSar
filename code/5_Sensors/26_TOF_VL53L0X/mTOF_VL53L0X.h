@@ -172,10 +172,10 @@ uint8_t SearchForDevices();
   uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
 
   #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mTOF_VL53L0X>*> mqtthandler_list;    
-    struct handler<mTOF_VL53L0X> mqtthandler_settings;
-    struct handler<mTOF_VL53L0X> mqtthandler_sensor_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mTOF_VL53L0X>*> telemetry_list;    
+    struct telemetry_handler<mTOF_VL53L0X> telemetry_settings;
+    struct telemetry_handler<mTOF_VL53L0X> telemetry_sensor_ifchanged;
   #endif // USE_MODULE_NETWORK_MQTT
 
 

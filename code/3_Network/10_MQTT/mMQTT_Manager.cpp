@@ -49,6 +49,11 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
     case TASK_UPTIME_10_MINUTES:
       flag_uptime_reached_reduce_frequency = true;
     break;     
+    case TASK_ON_BOOT_SUCCESSFUL:
+      #ifdef USE_MODULE_LIGHTS_ANIMATOR
+      EnableRealtimeReducedMQTTRates();
+      #endif
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -971,7 +976,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
 
   if(jtok = obj["MQTT"].getObject()["StatusAll"]) //change all to be value
   {    
-    tkr->Tasker_Interface(TASK_MQTT_STATUS_REFRESH_SEND_ALL);
+    tkr->Tasker_Interface(TASK_TELEMETRY_REFRESH_SEND_ALL);
   }
 
 
@@ -993,7 +998,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
       dt.configperiod_secs = jtok_sub.getInt();
       ALOG_TST(PSTR("MQTTUpdateSeconds ConfigPeriod %d"), dt.configperiod_secs);
     }
-    tkr->Tasker_Interface(TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD);
+    // tkr->Tasker_Interface(TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD);
   }
 
 
@@ -1254,7 +1259,7 @@ void mMQTTManager::CallMQTTSenders()
 {
   if(AnyBrokerConnected())
   {
-    tkr->Tasker_Interface(TASK_MQTT_SENDER);
+    tkr->Tasker_Interface(TASK_TELEMETRY__SENDER_MQTT);
   }
 }
 
@@ -1323,5 +1328,71 @@ boolean mMQTTManager::Subscribe(const char* topic, uint8_t qos)
   }
 
 }
+void mMQTTManager::EnableRealtimeReducedMQTTRates()
+{
+  if (flag_mqtt_realtime_reduced_rates) return;
+
+  flag_mqtt_realtime_reduced_rates = true;
+
+  ALOG_INF(PSTR(D_LOG_MQTT "Realtime lighting MQTT rate reduction enabled"));
+}
+
+
+uint16_t mMQTTManager::GetRealtimeReducedMQTTRate(uint16_t unique_id, uint16_t current_rate_secs, uint8_t priority)
+{
+  uint16_t minimum_rate_secs = SEC_IN_HOUR;
+
+  /*
+   * Default policy when realtime lighting mode is active:
+   *
+   * BACKGROUND = minimum 1 hour
+   * NORMAL     = minimum 10 minutes
+   * IMPORTANT  = minimum 2 minutes
+   * CRITICAL   = unchanged
+   *
+   * All existing handlers are BACKGROUND by default because Handler_Flags
+   * initialises to zero.
+   */
+  switch(priority)
+  {
+    default:
+    case MQTT_HANDLER_PRIORITY_BACKGROUND_ID:
+      minimum_rate_secs = SEC_IN_HOUR;
+    break;
+
+    case MQTT_HANDLER_PRIORITY_NORMAL_ID:
+      minimum_rate_secs = 600;
+    break;
+
+    case MQTT_HANDLER_PRIORITY_IMPORTANT_ID:
+      minimum_rate_secs = 120;
+    break;
+
+    case MQTT_HANDLER_PRIORITY_CRITICAL_ID:
+      return current_rate_secs;
+  }
+
+  /*
+   * Module-specific overrides.
+   *
+   * Put broad module-ID ranges here when required.
+   *
+   * Examples:
+   *
+   * if (unique_id >= 4000 && unique_id < 5000)
+   *   minimum_rate_secs = 600;
+   *
+   * if (unique_id >= 5000 && unique_id < 6000)
+   *   minimum_rate_secs = 600;
+   *
+   * Specific modules can retain their original periodic rate:
+   *
+   * if (unique_id == D_UNIQUE_MODULE_SOMETHING_ID)
+   *   return current_rate_secs;
+   */
+
+  return max<uint16_t>(current_rate_secs, minimum_rate_secs);
+}
+
 
 #endif // USE_MODULE_NETWORK_MQTT

@@ -331,11 +331,11 @@ class mBME :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();    
-    std::vector<struct handler<mBME>*> mqtthandler_list;
-    struct handler<mBME> mqtthandler_settings;
-    struct handler<mBME> mqtthandler_sensor_ifchanged;
-    struct handler<mBME> mqtthandler_sensor_teleperiod;    
+    void Telemetry_Init();    
+    std::vector<struct telemetry_handler<mBME>*> telemetry_list;
+    struct telemetry_handler<mBME> telemetry_settings;
+    struct telemetry_handler<mBME> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mBME> telemetry_sensor_teleperiod;    
     #endif // USE_MODULE_NETWORK_MQTT
  
 };

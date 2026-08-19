@@ -37,7 +37,7 @@ void mInternalClock::parse_JSONCommand(JsonParserObject obj){
     // Response_mP(S_JSON_COMMAND_NVALUE,D_FANSPEED,speed);
   }
   
-  mqtthandler_power_ifchanged.flags.SendNow = true;
+  telemetry_power_ifchanged.flags.SendNow = true;
 
 }
 

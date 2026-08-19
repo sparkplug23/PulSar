@@ -182,10 +182,10 @@ class mCellular :
      * SECITON: MQTT
      ************************************************************************************************/
       
-    void MQTTHandler_Init();
-    std::vector<struct handler<mCellular>*> mqtthandler_list;    
-    struct handler<mCellular> mqtthandler_settings;
-    struct handler<mCellular> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mCellular>*> telemetry_list;    
+    struct telemetry_handler<mCellular> telemetry_settings;
+    struct telemetry_handler<mCellular> telemetry_state_ifchanged;
 
 };
 

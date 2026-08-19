@@ -167,10 +167,10 @@ class CrashRecorder :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<CrashRecorder>*> mqtthandler_list;
-    struct handler<CrashRecorder> mqtthandler_settings;
-    struct handler<CrashRecorder> mqtthandler_sensor_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<CrashRecorder>*> telemetry_list;
+    struct telemetry_handler<CrashRecorder> telemetry_settings;
+    struct telemetry_handler<CrashRecorder> telemetry_sensor_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
     
 };

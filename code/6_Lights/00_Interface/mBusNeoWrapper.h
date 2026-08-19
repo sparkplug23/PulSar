@@ -403,55 +403,54 @@ enum EM_BUS_TYPE
     typedef NeoEsp32I2s1Tm1914Method  X1Tm1914Method;
   #endif
 
-
   /**********************************************************************
    * RMT method selection + BUS DEFINITIONS (explicit per target)
    **********************************************************************/
 
   // ====================================================================
-  // ESP32-C3 (RISC-V) - NO I2S, RMT Only
+  // ESP32-C3 (RISC-V) - RMT only
   // ====================================================================
   #if defined(CONFIG_IDF_TARGET_ESP32C3)
 
-    // Your policy: RMT-only on C3
+    // C3 policy: RMT only
     #define NEOPIXEL_DISABLE_400_PIXELBUS
 
-    // C3: use upstream "N" RMT methods
+    // C3 uses upstream "N" RMT methods
     #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtN ## x ## Method
 
     // ---------- RGB / RGBW ----------
-    #define PIXELBUS_32_RN_3  NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
-    #define PIXELBUS_32_RN_4  NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
+    #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
+    #define PIXELBUS_32_RN_4 NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
 
     // ---------- 400K ----------
-    // disabled above
+    // Disabled above
 
     // ---------- RGBWW (WS2805) ----------
-    #define PIXELBUS_32_RN_5  NeoPixelBus<NeoRgbwwFeature, NeoWs2812xMethod>  // TEMP: RGBWW placeholder on C3 (not true WS2805 timing). You will change later.
+    #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, NeoWs2812xMethod> // TEMP: RGBWW placeholder on C3, not true WS2805 timing
 
-    // Map I2S names to RMT so the rest of the wrapper compiles
-    #define PIXELBUS_32_I0_3   PIXELBUS_32_RN_3
-    #define PIXELBUS_32_I1_3   PIXELBUS_32_RN_3
-    #define PIXELBUS_32_I0_3P  PIXELBUS_32_RN_3
-    #define PIXELBUS_32_I1_3P  PIXELBUS_32_RN_3
+    // Map unsupported I2S names to RMT so common wrapper switch code compiles
+    #define PIXELBUS_32_I0_3  PIXELBUS_32_RN_3
+    #define PIXELBUS_32_I1_3  PIXELBUS_32_RN_3
+    #define PIXELBUS_32_I1_3P PIXELBUS_32_RN_3
+    #define PIXELBUS_32_I0_3P PIXELBUS_32_RN_3
 
-    #define PIXELBUS_32_I0_4   PIXELBUS_32_RN_4
-    #define PIXELBUS_32_I1_4   PIXELBUS_32_RN_4
-    #define PIXELBUS_32_I0_4P  PIXELBUS_32_RN_4
-    #define PIXELBUS_32_I1_4P  PIXELBUS_32_RN_4
+    #define PIXELBUS_32_I0_4  PIXELBUS_32_RN_4
+    #define PIXELBUS_32_I1_4  PIXELBUS_32_RN_4
+    #define PIXELBUS_32_I1_4P PIXELBUS_32_RN_4
+    #define PIXELBUS_32_I0_4P PIXELBUS_32_RN_4
 
-    #define PIXELBUS_32_I0_5   PIXELBUS_32_RN_5
-    #define PIXELBUS_32_I1_5   PIXELBUS_32_RN_5
-    #define PIXELBUS_32_I0_5P  PIXELBUS_32_RN_5
-    #define PIXELBUS_32_I1_5P  PIXELBUS_32_RN_5
+    #define PIXELBUS_32_I0_5  PIXELBUS_32_RN_5
+    #define PIXELBUS_32_I1_5  PIXELBUS_32_RN_5
+    #define PIXELBUS_32_I1_5P PIXELBUS_32_RN_5
+    #define PIXELBUS_32_I0_5P PIXELBUS_32_RN_5
 
 
   // ====================================================================
-  // ESP32-S3 (Xtensa)
+  // ESP32-S3 (Xtensa) - LCD/X8 parallel output
   // ====================================================================
   #elif defined(CONFIG_IDF_TARGET_ESP32S3)
 
-    // Keep EXACT HI-selection logic (as requested)
+    // Keep WLED HI-selection logic
     #if !defined(__riscv) && !defined(WLED_USE_SHARED_RMT)
       #include <NeoEsp32RmtHIMethod.h>
       #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtHIN ## x ## Method
@@ -460,8 +459,8 @@ enum EM_BUS_TYPE
     #endif
 
     // ---------- RGB / RGBW ----------
-    #define PIXELBUS_32_RN_3  NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
-    #define PIXELBUS_32_RN_4  NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
+    #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
+    #define PIXELBUS_32_RN_4 NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
 
     // ---------- 400K ----------
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
@@ -469,23 +468,24 @@ enum EM_BUS_TYPE
     #endif
 
     // ---------- RGBWW (WS2805) ----------
-    #define PIXELBUS_32_RN_5  NeoPixelBus<NeoRgbwwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2805)>
+    #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2805)>
 
-    // I2S mappings (single + parallel)
-    #define PIXELBUS_32_I0_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
-    #define PIXELBUS_32_I1_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
-    #define PIXELBUS_32_I0_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
-    #define PIXELBUS_32_I1_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
+    // S3 NeoPixelBus LCD methods support up to X8 parallel output.
+    // I0/I1 names are compatibility aliases here, not separate usable I2S parallel engines.
+    #define PIXELBUS_32_I0_3  NeoPixelBus<NeoRgbFeature, X1Ws2812xMethod>
+    #define PIXELBUS_32_I1_3  NeoPixelBus<NeoRgbFeature, X1Ws2812xMethod>
+    #define PIXELBUS_32_I1_3P NeoPixelBus<NeoRgbFeature, X8Ws2812xMethod>
+    #define PIXELBUS_32_I0_3P NeoPixelBus<NeoRgbFeature, X8Ws2812xMethod>
 
-    #define PIXELBUS_32_I0_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
-    #define PIXELBUS_32_I1_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
-    #define PIXELBUS_32_I0_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
-    #define PIXELBUS_32_I1_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+    #define PIXELBUS_32_I0_4  NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+    #define PIXELBUS_32_I1_4  NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+    #define PIXELBUS_32_I1_4P NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+    #define PIXELBUS_32_I0_4P NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
 
-    #define PIXELBUS_32_I0_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
-    #define PIXELBUS_32_I1_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
-    #define PIXELBUS_32_I0_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
-    #define PIXELBUS_32_I1_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+    #define PIXELBUS_32_I0_5  NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+    #define PIXELBUS_32_I1_5  NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+    #define PIXELBUS_32_I1_5P NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+    #define PIXELBUS_32_I0_5P NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
 
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
       #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
@@ -494,11 +494,11 @@ enum EM_BUS_TYPE
 
 
   // ====================================================================
-  // ESP32-S2 (Xtensa)
+  // ESP32-S2 (Xtensa) - I2S0 only, up to X8 parallel
   // ====================================================================
   #elif defined(CONFIG_IDF_TARGET_ESP32S2)
 
-    // Keep EXACT HI-selection logic (as requested)
+    // Keep WLED HI-selection logic
     #if !defined(__riscv) && !defined(WLED_USE_SHARED_RMT)
       #include <NeoEsp32RmtHIMethod.h>
       #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtHIN ## x ## Method
@@ -507,8 +507,8 @@ enum EM_BUS_TYPE
     #endif
 
     // ---------- RGB / RGBW ----------
-    #define PIXELBUS_32_RN_3  NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
-    #define PIXELBUS_32_RN_4  NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
+    #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
+    #define PIXELBUS_32_RN_4 NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
 
     // ---------- 400K ----------
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
@@ -516,36 +516,36 @@ enum EM_BUS_TYPE
     #endif
 
     // ---------- RGBWW (WS2805) ----------
-    #define PIXELBUS_32_RN_5  NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>  // WS2805 uses I2S0, not RMT
+    #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method> // WS2805 uses I2S0 on S2
 
-    // I2S0 only; map I1 -> I0
-    #define PIXELBUS_32_I0_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
-    #define PIXELBUS_32_I1_3   PIXELBUS_32_I0_3
-    #define PIXELBUS_32_I0_3P  PIXELBUS_32_I0_3
-    #define PIXELBUS_32_I1_3P  PIXELBUS_32_I0_3
+    // S2 has one usable I2S peripheral. I1 aliases map to the same I2S0 implementation.
+    #define PIXELBUS_32_I0_3  NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0Ws2812xMethod>
+    #define PIXELBUS_32_I1_3  PIXELBUS_32_I0_3
+    #define PIXELBUS_32_I1_3P NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0X8Ws2812xMethod>
+    #define PIXELBUS_32_I0_3P PIXELBUS_32_I1_3P
 
-    #define PIXELBUS_32_I0_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
-    #define PIXELBUS_32_I1_4   PIXELBUS_32_I0_4
-    #define PIXELBUS_32_I0_4P  PIXELBUS_32_I0_4
-    #define PIXELBUS_32_I1_4P  PIXELBUS_32_I0_4
+    #define PIXELBUS_32_I0_4  NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0Sk6812Method>
+    #define PIXELBUS_32_I1_4  PIXELBUS_32_I0_4
+    #define PIXELBUS_32_I1_4P NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0X8Sk6812Method>
+    #define PIXELBUS_32_I0_4P PIXELBUS_32_I1_4P
 
-    #define PIXELBUS_32_I0_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
-    #define PIXELBUS_32_I1_5   PIXELBUS_32_I0_5
-    #define PIXELBUS_32_I0_5P  PIXELBUS_32_I0_5
-    #define PIXELBUS_32_I1_5P  PIXELBUS_32_I0_5
+    #define PIXELBUS_32_I0_5  NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0Ws2805Method>
+    #define PIXELBUS_32_I1_5  PIXELBUS_32_I0_5
+    #define PIXELBUS_32_I1_5P NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0X8Ws2805Method>
+    #define PIXELBUS_32_I0_5P PIXELBUS_32_I1_5P
 
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
-      #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
+      #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0400KbpsMethod>
       #define PIXELBUS_32_I1_400_3 PIXELBUS_32_I0_400_3
     #endif
 
 
   // ====================================================================
-  // Classic ESP32 (Xtensa)
+  // Classic ESP32 (Xtensa) - I2S1 X8 or I2S0 X16
   // ====================================================================
   #else
 
-    // Keep EXACT HI-selection logic (as requested)
+    // Keep WLED HI-selection logic
     #if !defined(__riscv) && !defined(WLED_USE_SHARED_RMT)
       #include <NeoEsp32RmtHIMethod.h>
       #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtHIN ## x ## Method
@@ -554,8 +554,8 @@ enum EM_BUS_TYPE
     #endif
 
     // ---------- RGB / RGBW ----------
-    #define PIXELBUS_32_RN_3  NeoPixelBus<NeoRgbFeature,  NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
-    #define PIXELBUS_32_RN_4  NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
+    #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
+    #define PIXELBUS_32_RN_4 NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
 
     // ---------- 400K ----------
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
@@ -563,24 +563,31 @@ enum EM_BUS_TYPE
     #endif
 
     // ---------- RGBWW (WS2805) ----------
-    #define PIXELBUS_32_RN_5  NeoPixelBus<NeoRgbwwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2805)>  // WS2805 via RMT (channel-selectable). If HI is available it will pick HI, else N.
+    #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2805)>
 
-    // I2S + parallel (your historical naming)
-    #define PIXELBUS_32_I0_3   NeoPixelBus<NeoRgbFeature,  NeoEsp32I2s0Sk6812Method>
-    #define PIXELBUS_32_I1_3   NeoPixelBus<NeoRgbFeature,  X1Ws2812xMethod>
-    #define PIXELBUS_32_I0_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
-    #define PIXELBUS_32_I1_3P  NeoPixelBus<NeoRgbFeature,  X8Ws2812xMethod>
+    // I2S naming is historically significant in PulSar:
+    // I1_*P = I2S1 X8 parallel
+    // I0_*P = I2S0 X16 parallel
 
-    #define PIXELBUS_32_I0_4   NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0Sk6812Method>
-    #define PIXELBUS_32_I1_4   NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
-    #define PIXELBUS_32_I0_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
-    #define PIXELBUS_32_I1_4P  NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+    // ---------- RGB ----------
+    #define PIXELBUS_32_I0_3  NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0Sk6812Method>
+    #define PIXELBUS_32_I1_3  NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1Ws2812xMethod>
+    #define PIXELBUS_32_I1_3P NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1X8Ws2812xMethod>
+    #define PIXELBUS_32_I0_3P NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0X16Ws2812xMethod>
 
-    #define PIXELBUS_32_I0_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
-    #define PIXELBUS_32_I1_5   NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
-    #define PIXELBUS_32_I0_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
-    #define PIXELBUS_32_I1_5P  NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+    // ---------- RGBW ----------
+    #define PIXELBUS_32_I0_4  NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0Sk6812Method>
+    #define PIXELBUS_32_I1_4  NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s1Sk6812Method>
+    #define PIXELBUS_32_I1_4P NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s1X8Sk6812Method>
+    #define PIXELBUS_32_I0_4P NeoPixelBus<NeoRgbwFeature, NeoEsp32I2s0X16Sk6812Method>
 
+    // ---------- RGBWW ----------
+    #define PIXELBUS_32_I0_5  NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0Ws2805Method>
+    #define PIXELBUS_32_I1_5  NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s1Ws2805Method>
+    #define PIXELBUS_32_I1_5P NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s1X8Ws2805Method>
+    #define PIXELBUS_32_I0_5P NeoPixelBus<NeoRgbwwFeature, NeoEsp32I2s0X16Ws2805Method>
+
+    // ---------- 400K ----------
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
       #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s0400KbpsMethod>
       #define PIXELBUS_32_I1_400_3 NeoPixelBus<NeoRgbFeature, NeoEsp32I2s1400KbpsMethod>
@@ -843,9 +850,12 @@ static void* create(uint8_t busType, uint8_t* pins, uint16_t len, uint8_t channe
   static void show(void* busPtr, uint8_t busType, bool consistent = true) 
   {
     
-    #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
-    DEBUG_PRINTF("PolyBus::show busType %d\n\r", busType);
-    #endif 
+    // #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
+    // DEBUG_PRINTF("PolyBus::show busType %d\n\r", busType);
+    // (static_cast<PIXELBUS_32_I0_3*>(busPtr))->SetPixelColor(100, RgbColor(255,0,0)); // Debug: Set first pixel to full brightness red
+    // #endif 
+
+
     
     switch (busType) {
       case BUSTYPE__NONE__ID: break;
@@ -937,270 +947,6 @@ static void* create(uint8_t busType, uint8_t* pins, uint16_t len, uint8_t channe
     return true;
   };
 
-  #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-
-  // Function to set pixel color based on color ordering
-  static void setPixelColor(void* busPtr, uint8_t busType, uint16_t pix, RgbwwColor c, uint8_t co, uint16_t wwcw = 0)
-  {
-    
-    // c.WW = c.CW = 0; // Clear WW and CW for now;
-
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-    if(pix==0)
-      Serial.printf("    rgbww set bt%d               = %d,%d,%d,%d,%d\n\r", busType, c.R, c.G, c.B, c.WW, c.CW); Serial.flush();
-    #endif
-
-  // DEBUG_LINE_HERE;
-    // #ifdef ENABLE_DEVFEATURE_LIGHTING__TEMPORARY_DISABLE_CODE_FOR_SPEED_TESTING
-    // DEBUG_TIME__START
-    // uint32_t __debug_time_start__ = micros();
-    // #endif
-
-    // Debug feature to map a large number of virtual pixels to a smaller physical display
-    #ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
-      pix = MapToReduced(pix);
-    #endif
-
-
-    RgbwwColor col = c;
-
-    // Reorder RGB channels based on the provided color order
-    switch (co & COLOUR_ORDER_RGB_MASK) {
-      default: break;                                      // Default: GRB
-      case 1:  std::swap(col.R, col.G); break;            // RGB
-      case 2:  std::swap(col.R, col.B); break;            // BRG
-      case 3:  std::swap(col.G, col.B); break;            // RBG
-      case 4:  std::swap(col.R, col.B); std::swap(col.G, col.R); break; // BGR
-      case 5:  std::swap(col.R, col.B); break;            // GBR
-    }
-
-    // // Handle White channel reordering (upper nibble)
-    // switch (co >> COLOUR_ORDER_WHITE_MASK) {
-    //   case 1: col.CW = col.WW; col.WW = 0; break;         // Only CW used
-    //   case 2: col.WW = col.CW; col.CW = 0; break;         // Only WW used
-    //   case 3: col.WW = 0; col.CW = 0; break;              // Disable both whites
-    //   case 4: std::swap(col.WW, col.CW); break;           // Swap WW and CW
-    //   default: break;                                     // No swap
-    // }
-
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-    // if(pix==0)
-      Serial.printf("    rgbww setw bt%d              = %d,%d,%d,%d,%d\n\r", busType, col.R, col.G, col.B, col.WW, col.CW); Serial.flush();
-    #endif
-    
-// Log the resulting white channels
-#ifdef ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
-Serial.printf("After white channel processing: WW=%d, CW=%d\n", col.WW, col.CW);
-#endif
-
-    // Optional logging for debugging
-    #ifdef ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
-    if(pix == 0){ // Just log for the first pixel
-        Serial.printf("set colour R=%d, G=%d, B=%d, CW=%d, WW=%d %d/%d/%d/%d/%d\n\r",
-            (colour_order & 0x07),   // Red
-            ((colour_order >> 3) & 0x07), // Green
-            ((colour_order >> 6) & 0x07), // Blue
-            colour_hardware.CW,
-            colour_hardware.WW,
-            colour_internal.R,
-            colour_internal.G,
-            colour_internal.B,
-            colour_internal.CW,
-            colour_internal.WW
-        );
-    }
-    #endif    
-    #ifdef ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS // Debug pixel color value log
-    if (pix < 1) { // Just log for the first pixel
-        Serial.printf("Polybus::setPixelColor[%d] R=%d, G=%d, B=%d, WW=%d, CW=%d\n\r", pix, 
-            col.R,col.G,col.B,col.WW,col.CW
-        );
-    }
-    #endif
-    
-    switch (busType) {
-      case BUSTYPE__NONE__ID: break;
-    #ifdef ESP8266
-      case BUSTYPE__8266_U0_3__ID: (static_cast<PIXELBUS_8266_U0_3*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
-      case BUSTYPE__8266_U1_3__ID: (static_cast<PIXELBUS_8266_U1_3*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
-      case BUSTYPE__8266_DM_3__ID: (static_cast<PIXELBUS_8266_DM_3*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
-      case BUSTYPE__8266_U0_4__ID: (static_cast<PIXELBUS_8266_U0_4*>(busPtr))->SetPixelColor(pix, col); break;
-      case BUSTYPE__8266_U1_4__ID: (static_cast<PIXELBUS_8266_U1_4*>(busPtr))->SetPixelColor(pix, col); break;
-      case BUSTYPE__8266_DM_4__ID: (static_cast<PIXELBUS_8266_DM_4*>(busPtr))->SetPixelColor(pix, col); break;
-    #endif
-    #ifdef ARDUINO_ARCH_ESP32
-      case BUSTYPE__32_RN_3__ID:      (static_cast<PIXELBUS_32_RN_3*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
-      case BUSTYPE__32_RN_4__ID:      (static_cast<PIXELBUS_32_RN_4*>(busPtr))->SetPixelColor(pix, RgbwColor(col)); break;
-      case BUSTYPE__32_RN_5__ID:   
-      
-
-
-      (static_cast<PIXELBUS_32_RN_5*>(busPtr))->SetPixelColor(pix, col);
-      
-      
-       break;
-      case BUSTYPE__32_RN_400_3__ID:  (static_cast<PIXELBUS_32_RN_400_3*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
-      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
-      case BUSTYPE__32_I0_3__ID:      (static_cast<PIXELBUS_32_I0_3*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
-      case BUSTYPE__32_I0_4__ID:      (static_cast<PIXELBUS_32_I0_4*>(busPtr))->SetPixelColor(pix, RgbwColor(col)); break;
-      case BUSTYPE__32_I0_5__ID:      
-      {
-      
-
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-      
-      Serial.printf("%d SetPixelColor[%d] R=%d, G=%d, B=%d, WW=%d, CW=%d\n\r", busType,pix, 
-            col.R,col.G,col.B,col.WW,col.CW
-        );
-      #endif
-      // (static_cast<PIXELBUS_32_I0_5*>(busPtr))->SetLuminance(255); 
-      
-      (static_cast<PIXELBUS_32_I0_5*>(busPtr))->SetPixelColor(pix, col); 
-      
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-      RgbwwColor col2 = (static_cast<PIXELBUS_32_I0_5*>(busPtr))->GetPixelColor(pix); 
-      
-      Serial.printf("%d GetPixelColor[%d] R=%d, G=%d, B=%d, WW=%d, CW=%d\n\r", busType,pix, 
-            col2.R,col2.G,col2.B,col2.WW,col2.CW
-        );
-        #endif
-      
-      }
-      break;
-      case BUSTYPE__32_I0_400_3__ID:  (static_cast<PIXELBUS_32_I0_400_3*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
-      case BUSTYPE__32_I0_3P__ID:     (static_cast<PIXELBUS_32_I0_3P*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
-      case BUSTYPE__32_I0_4P__ID:     (static_cast<PIXELBUS_32_I0_4P*>(busPtr))->SetPixelColor(pix, RgbwColor(col)); break;
-      case BUSTYPE__32_I0_5P__ID:     (static_cast<PIXELBUS_32_I0_5P*>(busPtr))->SetPixelColor(pix, col); break;
-      #endif
-      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
-      case BUSTYPE__32_I1_3__ID: (static_cast<PIXELBUS_32_I1_3*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
-      case BUSTYPE__32_I1_4__ID: (static_cast<PIXELBUS_32_I1_4*>(busPtr))->SetPixelColor(pix, RgbwColor(col)); break;
-      case BUSTYPE__32_I1_5__ID: (static_cast<PIXELBUS_32_I1_5*>(busPtr))->SetPixelColor(pix, col); break;
-      case BUSTYPE__32_I1_400_3__ID: (static_cast<PIXELBUS_32_I1_400_3*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
-      case BUSTYPE__32_I1_3P__ID: (static_cast<PIXELBUS_32_I1_3P*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
-      case BUSTYPE__32_I1_4P__ID: (static_cast<PIXELBUS_32_I1_4P*>(busPtr))->SetPixelColor(pix, RgbwColor(col)); break;
-      case BUSTYPE__32_I1_5P__ID: (static_cast<PIXELBUS_32_I1_5P*>(busPtr))->SetPixelColor(pix, col); break;
-      #endif
-    #endif
-
-    }
-
-    // #ifdef ENABLE_DEVFEATURE_LIGHTING__TEMPORARY_DISABLE_CODE_FOR_SPEED_TESTING
-    // #define SERIAL_DEBUG Serial
-    // if(pix==0)
-    // SERIAL_DEBUG.printf("(%s:%d) %luus %dms\n\r", \
-    //                         __FILE__, __LINE__, micros() - __debug_time_start__, (micros() - __debug_time_start__)/1000); \
-    //     SERIAL_DEBUG.flush();
-    // #endif
-}
-
-
-static RgbwwColor getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uint8_t co)
-{
-
-  #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-  Serial.printf("getPixelColor[%d] busType %d\n\r", pix, busType);
-  #endif
-
-  RgbwwColor col;
-
-#ifdef ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
-  pix = MapToReduced(pix);
-#endif
-
-
-    switch (busType) {
-      case BUSTYPE__NONE__ID: break;
-    #ifdef ESP8266    
-      case BUSTYPE__8266_U0_3__ID: col = (static_cast<PIXELBUS_8266_U0_3*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__8266_U1_3__ID: col = (static_cast<PIXELBUS_8266_U1_3*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__8266_DM_3__ID: col = (static_cast<PIXELBUS_8266_DM_3*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__8266_U0_4__ID: col = (static_cast<PIXELBUS_8266_U0_4*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__8266_U1_4__ID: col = (static_cast<PIXELBUS_8266_U1_4*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__8266_DM_4__ID: col = (static_cast<PIXELBUS_8266_DM_4*>(busPtr))->GetPixelColor(pix); break;
-    #endif
-    #ifdef ARDUINO_ARCH_ESP32
-      case BUSTYPE__32_RN_3__ID: col = (static_cast<PIXELBUS_32_RN_3*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_RN_4__ID: col = (static_cast<PIXELBUS_32_RN_4*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_RN_5__ID:  col = (static_cast<PIXELBUS_32_RN_5*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_RN_400_3__ID: col = (static_cast<PIXELBUS_32_RN_400_3*>(busPtr))->GetPixelColor(pix); break;
-      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
-      case BUSTYPE__32_I0_3__ID: col = (static_cast<PIXELBUS_32_I0_3*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_I0_4__ID: col = (static_cast<PIXELBUS_32_I0_4*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_I0_5__ID: 
-      
-      col = (static_cast<PIXELBUS_32_I0_5*>(busPtr))->GetPixelColor(pix); 
-            
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-      Serial.printf("%dFGetPixelColor[%d] R=%d, G=%d, B=%d, WW=%d, CW=%d\n\r", busType,pix, 
-            col.R,col.G,col.B,col.WW,col.CW
-        );
-        #endif
-      
-      break;
-      case BUSTYPE__32_I0_400_3__ID: col = (static_cast<PIXELBUS_32_I0_400_3*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_I0_3P__ID: col = (static_cast<PIXELBUS_32_I0_3P*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_I0_4P__ID: col = (static_cast<PIXELBUS_32_I0_4P*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_I0_5P__ID: col = (static_cast<PIXELBUS_32_I0_5P*>(busPtr))->GetPixelColor(pix); break;
-      #endif
-      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
-      case BUSTYPE__32_I1_3__ID: col = (static_cast<PIXELBUS_32_I1_3*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_I1_4__ID: col = (static_cast<PIXELBUS_32_I1_4*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_I1_5__ID: col = (static_cast<PIXELBUS_32_I1_5*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_I1_400_3__ID: col = (static_cast<PIXELBUS_32_I1_400_3*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_I1_3P__ID: col = (static_cast<PIXELBUS_32_I1_3P*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_I1_4P__ID: col = (static_cast<PIXELBUS_32_I1_4P*>(busPtr))->GetPixelColor(pix); break;
-      case BUSTYPE__32_I1_5P__ID: col = (static_cast<PIXELBUS_32_I1_5P*>(busPtr))->GetPixelColor(pix); break;
-      #endif
-    #endif
-    }
-
-    // Reorder RGB channels back to their original order
-    switch (co & COLOUR_ORDER_RGB_MASK) {
-      default: break;                                      // Default: GRB
-      case 1:  std::swap(col.R, col.G); break;            // RGB
-      case 2:  std::swap(col.R, col.B); break;            // BRG
-      case 3:  std::swap(col.G, col.B); break;            // RBG
-      case 4:  std::swap(col.G, col.R); std::swap(col.R, col.B); break; // BGR
-      case 5:  std::swap(col.R, col.B); break;            // GBR
-    }
-
-    // // Reorder White channels back to their original order
-    // switch (co >> COLOUR_ORDER_WHITE_MASK) {
-    //   case 1: col.WW = col.CW; col.CW = 0; break;         // Only CW was used
-    //   case 2: col.CW = col.WW; col.WW = 0; break;         // Only WW was used
-    //   case 3: col.WW = 0; col.CW = 0; break;              // Both whites were disabled
-    //   case 4: std::swap(col.WW, col.CW); break;           // Swap WW and CW back
-    //   default: break;                                     // No swap
-    // }
-    
-    #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-    // if(pix==0)
-      Serial.printf("     rgbww get bt%d                %d,%d,%d,%d,%d\n\r", busType, col.R, col.G, col.B, col.WW, col.CW); Serial.flush();
-#endif
-      // col = RgbwwColor(21,22,23,20);
-
-    #ifdef ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
-    if (pix < 5) { // Just first few pixels
-      Serial.printf("get colour_order R=%d, G=%d, B=%d, CW=%d, WW=%d\n\r",
-        rgb_order,
-        white_order,
-        color_internal.R,
-        color_internal.G,
-        color_internal.B,
-        color_internal.CW,
-        color_internal.WW
-      );
-    }
-    #endif // ENABLE_DEVFEATURE__PIXEL_COLOUR_ORDER_IN_MULTIPIN_SHOW_LOGS
-
-    // col.WW = col.CW = 0; // Clear WW and CW for now;
-
-    return col;
-}
-
-
-  #else
 
   // Function to set pixel color based on color ordering
   static void setPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uint32_t c, uint8_t co, uint16_t wwcw = 0)
@@ -1390,58 +1136,6 @@ static uint32_t getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uint8
     return 0;
 }
 
-#endif // ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-
-  static void setBrightness(void* busPtr, uint8_t busType, uint8_t b) 
-  {
-    #ifdef ENABLE_FEATURE_LIGHTING__USE_NEOPIXELBUS_LIGHT_GAMMA_LG
-    
-    #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
-    DEBUG_PRINTF("PolyBus::show busType %d\n\r", busType);
-    #endif 
-    
-    switch (busType) {
-      case BUSTYPE__NONE__ID: break;
-    #ifdef ESP8266
-      case BUSTYPE__8266_U0_3__ID: (static_cast<PIXELBUS_8266_U0_3*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__8266_U1_3__ID: (static_cast<PIXELBUS_8266_U1_3*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__8266_DM_3__ID: (static_cast<PIXELBUS_8266_DM_3*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__8266_U0_4__ID: (static_cast<PIXELBUS_8266_U0_4*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__8266_U1_4__ID: (static_cast<PIXELBUS_8266_U1_4*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__8266_DM_4__ID: (static_cast<PIXELBUS_8266_DM_4*>(busPtr))->SetLuminance(b); break;
-    #endif
-    #ifdef ARDUINO_ARCH_ESP32
-      case BUSTYPE__32_RN_3__ID: (static_cast<PIXELBUS_32_RN_3*>(busPtr))->SetLuminance(b);   
-      case BUSTYPE__32_RN_4__ID: (static_cast<PIXELBUS_32_RN_4*>(busPtr))->SetLuminance(b); break;  
-      case BUSTYPE__32_RN_5__ID: (static_cast<PIXELBUS_32_RN_5*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__32_RN_400_3__ID: (static_cast<PIXELBUS_32_RN_400_3*>(busPtr))->SetLuminance(b); break;
-      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
-      case BUSTYPE__32_I0_3__ID: (static_cast<PIXELBUS_32_I0_3*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__32_I0_4__ID: (static_cast<PIXELBUS_32_I0_4*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__32_I0_5__ID: (static_cast<PIXELBUS_32_I0_5*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__32_I0_400_3__ID: (static_cast<PIXELBUS_32_I0_400_3*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__32_I0_3P__ID: (static_cast<PIXELBUS_32_I0_3P*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__32_I0_4P__ID: (static_cast<PIXELBUS_32_I0_4P*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__32_I0_5P__ID: (static_cast<PIXELBUS_32_I0_5P*>(busPtr))->SetLuminance(b); break;
-      #endif
-      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
-      case BUSTYPE__32_I1_3__ID: (static_cast<PIXELBUS_32_I1_3*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__32_I1_4__ID: (static_cast<PIXELBUS_32_I1_4*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__32_I1_5__ID: (static_cast<PIXELBUS_32_I1_5*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__32_I1_400_3__ID: (static_cast<PIXELBUS_32_I1_400_3*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__32_I1_3P__ID: (static_cast<PIXELBUS_32_I1_3P*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__32_I1_4P__ID: (static_cast<PIXELBUS_32_I1_4P*>(busPtr))->SetLuminance(b); break;
-      case BUSTYPE__32_I1_5P__ID: (static_cast<PIXELBUS_32_I1_5P*>(busPtr))->SetLuminance(b); break;
-      #endif
-    #endif
-    }
-
-    #else
-    _bri_rgb = b;
-
-    #endif // ENABLE_FEATURE_LIGHTING__USE_NEOPIXELBUS_LIGHT_GAMMA_LG
-
-  };
 
 
 
@@ -1489,14 +1183,151 @@ static uint32_t getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uint8
     #endif
     }
   }
+    
+  static unsigned getDataSize(void* busPtr, uint8_t busType)
+  {
+    if (busPtr == nullptr) return 0;
 
+    unsigned size = 0;
+
+    #ifdef ARDUINO_ARCH_ESP32
+    size = 100;
+    #endif
+
+    switch (busType)
+    {
+      case BUSTYPE__NONE__ID: size = 0; break;
+
+      #ifdef ESP8266
+      case BUSTYPE__8266_U0_3__ID: size = static_cast<PIXELBUS_8266_U0_3*>(busPtr)->PixelsSize(); break;
+      case BUSTYPE__8266_U1_3__ID: size = static_cast<PIXELBUS_8266_U1_3*>(busPtr)->PixelsSize(); break;
+      case BUSTYPE__8266_DM_3__ID: size = static_cast<PIXELBUS_8266_DM_3*>(busPtr)->PixelsSize() * 5; break;
+      case BUSTYPE__8266_U0_4__ID: size = static_cast<PIXELBUS_8266_U0_4*>(busPtr)->PixelsSize(); break;
+      case BUSTYPE__8266_U1_4__ID: size = static_cast<PIXELBUS_8266_U1_4*>(busPtr)->PixelsSize(); break;
+      case BUSTYPE__8266_DM_4__ID: size = static_cast<PIXELBUS_8266_DM_4*>(busPtr)->PixelsSize() * 5; break;
+      #endif
+
+      #ifdef ARDUINO_ARCH_ESP32
+      case BUSTYPE__32_RN_3__ID: size += static_cast<PIXELBUS_32_RN_3*>(busPtr)->PixelsSize() * 2; break;
+      case BUSTYPE__32_RN_4__ID: size += static_cast<PIXELBUS_32_RN_4*>(busPtr)->PixelsSize() * 2; break;
+      case BUSTYPE__32_RN_5__ID: size += static_cast<PIXELBUS_32_RN_5*>(busPtr)->PixelsSize() * 2; break;
+
+      #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+      case BUSTYPE__32_RN_400_3__ID: size += static_cast<PIXELBUS_32_RN_400_3*>(busPtr)->PixelsSize() * 2; break;
+      #endif
+
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_I0_3__ID: size += static_cast<PIXELBUS_32_I0_3*>(busPtr)->PixelsSize() * 4; break;
+      case BUSTYPE__32_I0_4__ID: size += static_cast<PIXELBUS_32_I0_4*>(busPtr)->PixelsSize() * 4; break;
+      case BUSTYPE__32_I0_5__ID: size += static_cast<PIXELBUS_32_I0_5*>(busPtr)->PixelsSize() * 4; break;
+      case BUSTYPE__32_I0_3P__ID: size += static_cast<PIXELBUS_32_I0_3P*>(busPtr)->PixelsSize() * 4; break;
+      case BUSTYPE__32_I0_4P__ID: size += static_cast<PIXELBUS_32_I0_4P*>(busPtr)->PixelsSize() * 4; break;
+      case BUSTYPE__32_I0_5P__ID: size += static_cast<PIXELBUS_32_I0_5P*>(busPtr)->PixelsSize() * 4; break;
+      #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+      case BUSTYPE__32_I0_400_3__ID: size += static_cast<PIXELBUS_32_I0_400_3*>(busPtr)->PixelsSize() * 4; break;
+      #endif
+      #endif
+
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I1_3__ID: size += static_cast<PIXELBUS_32_I1_3*>(busPtr)->PixelsSize() * 4; break;
+      case BUSTYPE__32_I1_4__ID: size += static_cast<PIXELBUS_32_I1_4*>(busPtr)->PixelsSize() * 4; break;
+      case BUSTYPE__32_I1_5__ID: size += static_cast<PIXELBUS_32_I1_5*>(busPtr)->PixelsSize() * 4; break;
+      case BUSTYPE__32_I1_3P__ID: size += static_cast<PIXELBUS_32_I1_3P*>(busPtr)->PixelsSize() * 4; break;
+      case BUSTYPE__32_I1_4P__ID: size += static_cast<PIXELBUS_32_I1_4P*>(busPtr)->PixelsSize() * 4; break;
+      case BUSTYPE__32_I1_5P__ID: size += static_cast<PIXELBUS_32_I1_5P*>(busPtr)->PixelsSize() * 4; break;
+      #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+      case BUSTYPE__32_I1_400_3__ID: size += static_cast<PIXELBUS_32_I1_400_3*>(busPtr)->PixelsSize() * 4; break;
+      #endif
+      #endif
+      #endif
+
+      // case BUSTYPE__HS_DOT_3__ID: size = static_cast<PIXELBUS_HS_DOT_3*>(busPtr)->PixelsSize() * 2; break;
+      // case BUSTYPE__SS_DOT_3__ID: size = static_cast<PIXELBUS_SS_DOT_3*>(busPtr)->PixelsSize() * 2; break;
+      // case BUSTYPE__HS_LPD_3__ID: size = static_cast<PIXELBUS_HS_LPD_3*>(busPtr)->PixelsSize() * 2; break;
+      // case BUSTYPE__SS_LPD_3__ID: size = static_cast<PIXELBUS_SS_LPD_3*>(busPtr)->PixelsSize() * 2; break;
+      // case BUSTYPE__HS_WS1_3__ID: size = static_cast<PIXELBUS_HS_WS1_3*>(busPtr)->PixelsSize() * 2; break;
+      // case BUSTYPE__SS_WS1_3__ID: size = static_cast<PIXELBUS_SS_WS1_3*>(busPtr)->PixelsSize() * 2; break;
+      // case BUSTYPE__HS_P98_3__ID: size = static_cast<PIXELBUS_HS_P98_3*>(busPtr)->PixelsSize() * 2; break;
+      // case BUSTYPE__SS_P98_3__ID: size = static_cast<PIXELBUS_SS_P98_3*>(busPtr)->PixelsSize() * 2; break;
+      // case BUSTYPE__HS_LPO_3__ID: size = static_cast<PIXELBUS_HS_LPO_3*>(busPtr)->PixelsSize() * 2; break;
+      // case BUSTYPE__SS_LPO_3__ID: size = static_cast<PIXELBUS_SS_LPO_3*>(busPtr)->PixelsSize() * 2; break;
+    }
+
+    return size;
+  }
+
+  static unsigned memUsage(unsigned count, unsigned busType)
+  {
+    unsigned size = count * 3;
+
+    switch (busType)
+    {
+      case BUSTYPE__NONE__ID: size = 0; break;
+
+      #ifdef ESP8266
+      case BUSTYPE__8266_U0_3__ID: break;
+      case BUSTYPE__8266_U1_3__ID: break;
+      case BUSTYPE__8266_DM_3__ID: size *= 5; break;
+      case BUSTYPE__8266_U0_4__ID: size += count; break;
+      case BUSTYPE__8266_U1_4__ID: size += count; break;
+      case BUSTYPE__8266_DM_4__ID: size = (size + count) * 5; break;
+      #endif
+
+      #ifdef ARDUINO_ARCH_ESP32
+      case BUSTYPE__32_RN_3__ID: size *= 2; break;
+      case BUSTYPE__32_RN_4__ID: size = (size + count) * 2; break;
+      case BUSTYPE__32_RN_5__ID: size = (size + (2 * count)) * 2; break;
+
+      #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+      case BUSTYPE__32_RN_400_3__ID: size *= 2; break;
+      #endif
+
+      #ifndef NEOPIXEL_DISABLE_I2S0_PIXELBUS
+      case BUSTYPE__32_I0_3__ID: size *= 4; break;
+      case BUSTYPE__32_I0_4__ID: size = (size + count) * 4; break;
+      case BUSTYPE__32_I0_5__ID: size = (size + (2 * count)) * 4; break;
+      case BUSTYPE__32_I0_3P__ID: size *= 4; break;
+      case BUSTYPE__32_I0_4P__ID: size = (size + count) * 4; break;
+      case BUSTYPE__32_I0_5P__ID: size = (size + (2 * count)) * 4; break;
+      #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+      case BUSTYPE__32_I0_400_3__ID: size *= 4; break;
+      #endif
+      #endif
+
+      #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
+      case BUSTYPE__32_I1_3__ID: size *= 4; break;
+      case BUSTYPE__32_I1_4__ID: size = (size + count) * 4; break;
+      case BUSTYPE__32_I1_5__ID: size = (size + (2 * count)) * 4; break;
+      case BUSTYPE__32_I1_3P__ID: size *= 4; break;
+      case BUSTYPE__32_I1_4P__ID: size = (size + count) * 4; break;
+      case BUSTYPE__32_I1_5P__ID: size = (size + (2 * count)) * 4; break;
+      #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
+      case BUSTYPE__32_I1_400_3__ID: size *= 4; break;
+      #endif
+      #endif
+      #endif
+
+      case BUSTYPE__HS_DOT_3__ID: size *= 2; break;
+      case BUSTYPE__SS_DOT_3__ID: size *= 2; break;
+      case BUSTYPE__HS_LPD_3__ID: size *= 2; break;
+      case BUSTYPE__SS_LPD_3__ID: size *= 2; break;
+      case BUSTYPE__HS_WS1_3__ID: size *= 2; break;
+      case BUSTYPE__SS_WS1_3__ID: size *= 2; break;
+      case BUSTYPE__HS_P98_3__ID: size *= 2; break;
+      case BUSTYPE__SS_P98_3__ID: size *= 2; break;
+      case BUSTYPE__HS_LPO_3__ID: size *= 2; break;
+      case BUSTYPE__SS_LPO_3__ID: size *= 2; break;
+    }
+
+    return size;
+  }
 
   //gives back the internal type index (I_XX_XXX_X above) for the input 
 static    
 #ifdef USE_DEVFEATURE_IRAM__PIXEL_BUS_INTERFACING
 IRAM_ATTR
 #endif 
-uint8_t getI(uint8_t busType, uint8_t* pins, uint8_t num = 0) 
+uint8_t getI(uint8_t busType, const uint8_t* pins, uint8_t num = 0) 
 {
   // DEBUG_PRINTF("PolyBus::getI busType %d\n\r", busType);
 
@@ -1610,13 +1441,13 @@ uint8_t getI(uint8_t busType, uint8_t* pins, uint8_t num = 0)
                       }
                   #elif defined(ENABLE_PIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE)
                       if (num < 8) {
-                          offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
+                          offset_method_inside_group = 3;  // Handled inside library automatically for I2S1 types
                       } else {
                           return BUSTYPE__NONE__ID;
                       }
                   #elif defined(ENABLE_PIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE)
                       if (num < 16) {
-                          offset_method_inside_group = 5;  // Handled inside library automatically for I2S1 types
+                          offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
                       } else {
                           return BUSTYPE__NONE__ID;
                       }

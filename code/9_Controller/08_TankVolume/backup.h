@@ -411,15 +411,15 @@
   
 //   //#ifdef USE_CORE_MQTT 
 
-//     void MQTTHandler_Init();
+//     void Telemetry_Init();
 //     void MQTTHandler_RefreshAll();
 //     void MQTTHandler_Rate();
     
-//     struct handler<mTankVolumeUltrasonic>* ptr;
+//     struct telemetry_handler<mTankVolumeUltrasonic>* ptr;
 //     void MQTTHandler_Sender();
 
 //     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-//     struct handler<mTankVolumeUltrasonic> mqtthandler_settings;
+//     struct telemetry_handler<mTankVolumeUltrasonic> telemetry_settings;
     
 //     // Extra module only handlers
 //     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
@@ -431,11 +431,11 @@
 //     };
 
 //     // const char* postfix_topic_litres = "litres";
-//     struct handler<mTankVolumeUltrasonic> mqtthandler_litres_ifchanged;
-//     struct handler<mTankVolumeUltrasonic> mqtthandler_litres_teleperiod;
+//     struct telemetry_handler<mTankVolumeUltrasonic> telemetry_litres_ifchanged;
+//     struct telemetry_handler<mTankVolumeUltrasonic> telemetry_litres_teleperiod;
 //     // const char* postfix_topic_furnace = "furnace";
-//     struct handler<mTankVolumeUltrasonic> mqtthandler_furnace_ifchanged;
-//     struct handler<mTankVolumeUltrasonic> mqtthandler_furnace_teleperiod;
+//     struct telemetry_handler<mTankVolumeUltrasonic> telemetry_furnace_ifchanged;
+//     struct telemetry_handler<mTankVolumeUltrasonic> telemetry_furnace_teleperiod;
 //   //#endif
 
 

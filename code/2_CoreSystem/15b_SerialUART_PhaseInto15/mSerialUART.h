@@ -218,21 +218,21 @@
 //     uint8_t ConstructJSON_UARTInfo(uint8_t json_level = 0, bool json_appending = true);
   
 //     #ifdef USE_MODULE_NETWORK_MQTT
-//     void MQTTHandler_Init();
+//     void Telemetry_Init();
 //     void MQTTHandler_RefreshAll();
 //     void MQTTHandler_Rate();
     
 //     void MQTTHandler_Sender();
 
-//     struct handler<mSerialUART> mqtthandler_settings;
-//     struct handler<mSerialUART> mqtthandler_uartinfo_teleperiod;
+//     struct telemetry_handler<mSerialUART> telemetry_settings;
+//     struct telemetry_handler<mSerialUART> telemetry_uartinfo_teleperiod;
 
 //     /**
 //      * @brief List (Array) of handler structs
 //      * */
-//     struct handler<mSerialUART>* mqtthandler_list[2] = {
-//       &mqtthandler_settings,
-//       &mqtthandler_uartinfo_teleperiod
+//     struct telemetry_handler<mSerialUART>* telemetry_list[2] = {
+//       &telemetry_settings,
+//       &telemetry_uartinfo_teleperiod
 //     };
     
 //     /**

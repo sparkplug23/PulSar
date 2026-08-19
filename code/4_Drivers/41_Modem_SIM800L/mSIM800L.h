@@ -400,14 +400,14 @@ class mSIM800L :
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
   
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
-    std::vector<struct handler<mSIM800L>*> mqtthandler_list;
+    std::vector<struct telemetry_handler<mSIM800L>*> telemetry_list;
     
-    struct handler<mSIM800L> mqtthandler_settings;
-    struct handler<mSIM800L> mqtthandler_state_ifchanged;
+    struct telemetry_handler<mSIM800L> telemetry_settings;
+    struct telemetry_handler<mSIM800L> telemetry_state_ifchanged;
 
     // No specialised payload therefore use system default instead of enum
       

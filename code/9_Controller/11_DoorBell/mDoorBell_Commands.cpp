@@ -80,7 +80,7 @@ void mDoorBell::parse_JSONCommand(JsonParserObject obj)
   }
 
   
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  telemetry_sensor_ifchanged.flags.SendNow = true;
 
 }
 

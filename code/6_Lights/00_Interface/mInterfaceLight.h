@@ -153,8 +153,9 @@ class mInterfaceLight :
 
 
     
-    BusManager* bus_manager = nullptr;
-    BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
+    // BusManager* bus_manager = nullptr;
+    // BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
+    std::vector<BusConfig> busConfigs;
     
 
     #ifdef USE_MODULE_CORE_RULES
@@ -245,20 +246,20 @@ class mInterfaceLight :
     *******************************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mInterfaceLight> mqtthandler__settings__teleperiod;
-    struct handler<mInterfaceLight> mqtthandler__state__ifchanged;
-    struct handler<mInterfaceLight> mqtthandler__debug_module_config__teleperiod;
-    struct handler<mInterfaceLight> mqtthandler__debug_bus_config__teleperiod;
+    struct telemetry_handler<mInterfaceLight> telemetry__settings__teleperiod;
+    struct telemetry_handler<mInterfaceLight> telemetry__state__ifchanged;
+    struct telemetry_handler<mInterfaceLight> telemetry__debug_module_config__teleperiod;
+    struct telemetry_handler<mInterfaceLight> telemetry__debug_bus_config__teleperiod;
     #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
-    struct handler<mInterfaceLight> mqtthandler__debug_power_profiles__teleperiod;
+    struct telemetry_handler<mInterfaceLight> telemetry__debug_power_profiles__teleperiod;
     #endif
                 
-    std::vector<struct handler<mInterfaceLight>*> mqtthandler_list;
+    std::vector<struct telemetry_handler<mInterfaceLight>*> telemetry_list;
 
     #endif
 

@@ -104,15 +104,15 @@ class mNextion :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mNextion>*> mqtthandler_list;
-    struct handler<mNextion> mqtthandler_settings;
-    struct handler<mNextion> mqtthandler_sensor_ifchanged;
-    struct handler<mNextion> mqtthandler_sensor_teleperiod;
+    std::vector<struct telemetry_handler<mNextion>*> telemetry_list;
+    struct telemetry_handler<mNextion> telemetry_settings;
+    struct telemetry_handler<mNextion> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mNextion> telemetry_sensor_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

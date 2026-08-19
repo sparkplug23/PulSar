@@ -81,12 +81,12 @@ void mHVAC::YTask_Programs_Timers(void){
   {
     if(zone[zone_id].program_timer_method->IsRunning())
     {
-      mqtthandler_program_timers_ifchanged.tRateSecs = 1;
+      telemetry_program_timers_ifchanged.tRateSecs = 1;
       break; // Stop if any are true
     }
     else
     {
-      mqtthandler_program_timers_ifchanged.tRateSecs = 10;
+      telemetry_program_timers_ifchanged.tRateSecs = 10;
     }
   }
 

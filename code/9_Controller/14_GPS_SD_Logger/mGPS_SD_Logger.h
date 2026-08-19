@@ -106,25 +106,25 @@ class mGPS_SD_Logger :
 
   
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mGPS_SD_Logger> mqtthandler_settings;
-    struct handler<mGPS_SD_Logger> mqtthandler_sensor_ifchanged;
-    struct handler<mGPS_SD_Logger> mqtthandler_sensor_teleperiod;
-    struct handler<mGPS_SD_Logger> mqtthandler_sdcard_superframe;
+    struct telemetry_handler<mGPS_SD_Logger> telemetry_settings;
+    struct telemetry_handler<mGPS_SD_Logger> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mGPS_SD_Logger> telemetry_sensor_teleperiod;
+    struct telemetry_handler<mGPS_SD_Logger> telemetry_sdcard_superframe;
 
     //No extra handlers example
     
     //with extra handlers example
         
-    struct handler<mGPS_SD_Logger>* mqtthandler_list[4] = {
-      &mqtthandler_settings,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod,
-      &mqtthandler_sdcard_superframe
+    struct telemetry_handler<mGPS_SD_Logger>* telemetry_list[4] = {
+      &telemetry_settings,
+      &telemetry_sensor_ifchanged,
+      &telemetry_sensor_teleperiod,
+      &telemetry_sdcard_superframe
     };
     #endif // USE_MODULE_NETWORK_MQTT
 

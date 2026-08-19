@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
+	<title>Network Settings</title>
+
+	<style>html{visibility:hidden}</style>
+	<script>
+		(function loadFiles(){
+			const l=document.createElement('script');
+			l.src='/common.js';
+			l.onload=()=>loadResources(['/style.css'],S);
+			l.onerror=()=>setTimeout(loadFiles,100);
+			document.head.appendChild(l);
+		})();
+
+		function S(){
+			getLoc();
+			// Later:
+			// loadJS(getURL('/settings/s.js?p=1'),false);
+			// if(loc)d.Sf.action=getURL('/settings/network');
+		}
+
+		function showSection(id){
+			gId(id).classList.toggle("hide");
+		}
+
+		function addMQTT(){
+			const n=gId("mqtt_instances").children.length;
+			gId("mqtt_instances").insertAdjacentHTML("beforeend",`
+				<div class="sec">
+					<h3>MQTT Connection ${n}</h3>
+					Name: <input name="MQ${n}_NAME" type="text" maxlength="32" value="MQTT ${n}"><br>
+					Enabled: <input name="MQ${n}_EN" type="checkbox"><br>
+					Broker: <input name="MQ${n}_HOST" type="text" maxlength="64"><br>
+					Port: <input name="MQ${n}_PORT" type="number" min="1" max="65535" value="1883"><br>
+					Username: <input name="MQ${n}_USER" type="text" maxlength="40"><br>
+					Password: <input name="MQ${n}_PASS" type="password" maxlength="64"><br>
+					Client ID: <input name="MQ${n}_CID" type="text" maxlength="40"><br>
+					Interface policy:
+					<select name="MQ${n}_IF">
+						<option value="auto">Automatic</option>
+						<option value="ethernet">Ethernet</option>
+						<option value="wifi">WiFi</option>
+						<option value="cellular">Cellular</option>
+					</select><br>
+				</div>`);
+		}
+	</script>
+</head>
+
+<body onload="S()">
+<form id="form_s" name="Sf" method="post">
+
+<div class="toprow">
+	<button type="button" onclick="B()">Back</button>
+	<button type="submit">Save</button>
+	<hr>
+</div>
+
+<h2>Network</h2>
+
+
+<div class="sec">
+	<h3>Network Policy</h3>
+
+	Preferred interface order:<br>
+	<select name="NP0">
+		<option>Ethernet</option>
+		<option>WiFi</option>
+		<option>Cellular</option>
+	</select>
+	<select name="NP1">
+		<option>WiFi</option>
+		<option>Ethernet</option>
+		<option>Cellular</option>
+	</select>
+	<select name="NP2">
+		<option>Cellular</option>
+		<option>Ethernet</option>
+		<option>WiFi</option>
+	</select><br>
+
+	Allow multiple active interfaces: <input name="NMA" type="checkbox"><br>
+	Prefer local connections where available: <input name="NPL" type="checkbox"><br>
+</div>
+
+
+<div class="sec">
+	<h3>Network Interfaces</h3>
+
+	<button type="button" onclick="showSection('wifi')">WiFi</button>
+	<button type="button" onclick="showSection('ethernet')">Ethernet</button>
+	<button type="button" onclick="showSection('cellular')">Cellular</button>
+</div>
+
+
+<div id="wifi" class="sec hide">
+	<h3>WiFi</h3>
+
+	Enabled: <input name="WIFI_EN" type="checkbox"><br>
+	Hostname: <input name="WIFI_HOST" type="text" maxlength="32"><br>
+
+	<h4>Networks</h4>
+	<div id="wifi_instances">
+		<i>WiFi network instances will be populated here.</i>
+	</div>
+
+	<button type="button">Add WiFi Network</button>
+</div>
+
+
+<div id="ethernet" class="sec hide">
+	<h3>Ethernet</h3>
+
+	Enabled: <input name="ETH_EN" type="checkbox"><br>
+	DHCP: <input name="ETH_DHCP" type="checkbox"><br>
+	IP Address: <input name="ETH_IP" type="text"><br>
+	Gateway: <input name="ETH_GW" type="text"><br>
+	Subnet: <input name="ETH_SN" type="text"><br>
+	DNS: <input name="ETH_DNS" type="text"><br>
+</div>
+
+
+<div id="cellular" class="sec hide">
+	<h3>Cellular</h3>
+
+	Enabled: <input name="CELL_EN" type="checkbox"><br>
+	APN: <input name="CELL_APN" type="text" maxlength="64"><br>
+	Username: <input name="CELL_USER" type="text" maxlength="40"><br>
+	Password: <input name="CELL_PASS" type="password" maxlength="64"><br>
+	PIN: <input name="CELL_PIN" type="password" maxlength="8"><br>
+
+	<i>Modem, SIM and connection status will be shown here.</i>
+</div>
+
+
+<div class="sec">
+	<h3>Connections / Transports</h3>
+
+	<p>Application connections using the available network interfaces.</p>
+
+	<h4>MQTT</h4>
+	<div id="mqtt_instances"></div>
+	<button type="button" onclick="addMQTT()">Add MQTT Connection</button>
+</div>
+
+
+<div class="sec">
+	<h3>Network Services</h3>
+
+	mDNS: <input name="MDNS_EN" type="checkbox"><br>
+	mDNS hostname: <input name="MDNS_NAME" type="text" maxlength="32"><br>
+</div>
+
+
+<hr>
+<button type="button" onclick="B()">Back</button>
+<button type="submit">Save</button>
+
+</form>
+<div id="toast"></div>
+</body>
+</html>

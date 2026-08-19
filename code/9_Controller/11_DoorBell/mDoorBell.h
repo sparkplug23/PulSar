@@ -125,19 +125,19 @@ class mDoorBell :
   
   //#ifdef USE_CORE_MQTT 
 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
-    struct handler<mDoorBell>* ptr;
+    struct telemetry_handler<mDoorBell>* ptr;
     void MQTTHandler_Sender();
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mDoorBell> mqtthandler_settings;
+    struct telemetry_handler<mDoorBell> telemetry_settings;
     
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "power";
-    struct handler<mDoorBell> mqtthandler_sensor_ifchanged;
-    struct handler<mDoorBell> mqtthandler_sensor_teleperiod;
+    struct telemetry_handler<mDoorBell> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mDoorBell> telemetry_sensor_teleperiod;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 

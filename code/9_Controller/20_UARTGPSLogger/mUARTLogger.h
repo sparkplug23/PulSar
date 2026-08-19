@@ -45,15 +45,15 @@ class mUARTLogger :
 
   
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mUARTLogger> mqtthandler_settings;
+    struct telemetry_handler<mUARTLogger> telemetry_settings;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
-    struct handler<mUARTLogger> mqtthandler_sensor_ifchanged;
-    struct handler<mUARTLogger> mqtthandler_sensor_teleperiod;
+    struct telemetry_handler<mUARTLogger> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mUARTLogger> telemetry_sensor_teleperiod;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
     //No extra handlers example
@@ -66,10 +66,10 @@ class mUARTLogger :
       MQTT_HANDLER_SENSOR_TELEPERIOD_ID
     };
     
-    struct handler<mUARTLogger>* list_ptr[3] = {
-      &mqtthandler_settings,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
+    struct telemetry_handler<mUARTLogger>* list_ptr[3] = {
+      &telemetry_settings,
+      &telemetry_sensor_ifchanged,
+      &telemetry_sensor_teleperiod
     };
     #endif // USE_MODULE_NETWORK_MQTT
 

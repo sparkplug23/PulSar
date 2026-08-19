@@ -4,137 +4,180 @@
  *
  * 1) Install Node 11+ and npm
  * 2) npm install
- * 3) npm run build
+ * 3) npm run build:lights
  *
- * If you change data folder often, you can run it in monitoring mode (it will recompile and update *.h on every file change)
+ * "npm run build:lights" to run this file directly and generate the *.h files in
+ * code/6_Lights/03_Animator/webpages_generated/
+ *
+ * If you change data folder often, you can run it in monitoring mode:
  *
  * > npm run dev
  *
- * How it works?
- *
- * It uses NodeJS packages to inline, minify and GZIP files. See writeHtmlGzipped and writeChunks invocations at the bottom of the page.
+ * It uses NodeJS packages to inline, minify and GZIP files.
  */
 
 const fs = require("fs");
-const inliner = require("inliner");
 const zlib = require("zlib");
 const CleanCSS = require("clean-css");
-const MinifyHTML = require("html-minifier-terser").minify; // npm install html-minifier-terser
+const MinifyHTML = require("html-minifier-terser").minify;
 const packageJson = require("../package.json");
+const { execSync } = require("child_process");
+const inliner = require("inliner");
 
-let source_path      = "code/6_Lights/03_Animator/source"
-let destination_path = "code/6_Lights/03_Animator/webpages_generated/"
+let source_path      = "code/6_Lights/03_Animator/source";
+let destination_path = "code/6_Lights/03_Animator/webpages_generated/";
 
 function ensureDir(p) {
   if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
 }
 
-ensureDir(destination_path)
+ensureDir(destination_path);
 
-/**
- *
- */
-function hexdump(buffer,isHex=false) {
-  let lines = [];
 
-  for (let i = 0; i < buffer.length; i +=(isHex?32:16)) {
-    var block;
-    let hexArray = [];
-    if (isHex) {
-      block = buffer.slice(i, i + 32)
-      for (let j = 0; j < block.length; j +=2 ) {
-        hexArray.push("0x" + block.slice(j,j+2))
-      }
-    } else {
-      block = buffer.slice(i, i + 16); // cut buffer into blocks of 16
-      for (let value of block) {
-        hexArray.push("0x" + value.toString(16).padStart(2, "0"));
-      }
-    }
-
-    let hexString = hexArray.join(", ");
-    let line = `  ${hexString}`;
-    lines.push(line);
-  }
-
-  return lines.join(",\n");
-}
+/************************************************************************************************
+ * Build metadata
+ ************************************************************************************************/
 
 function strReplace(str, search, replacement) {
   return str.split(search).join(replacement);
 }
 
-function adoptVersionAndRepo(html) {
-  let repoUrl = packageJson.repository ? packageJson.repository.url : undefined;
-  if (repoUrl) {
-    repoUrl = repoUrl.replace(/^git\+/, "");
-    repoUrl = repoUrl.replace(/\.git$/, "");
-    // Replace we
-    html = strReplace(html, "https://github.com/atuline/WLED", repoUrl);
-    html = strReplace(html, "https://github.com/Aircoookie/WLED", repoUrl);
+function getGitBranch() {
+  try {
+    return execSync("git rev-parse --abbrev-ref HEAD", {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"]
+    }).trim();
+  } catch {
+    return "";
   }
-  let version = packageJson.version;
-  if (version) {
-    html = strReplace(html, "##VERSION##", version);
-  }
-  return html;
 }
 
+function getGitCommit() {
+  try {
+    return execSync("git rev-parse --short HEAD", {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"]
+    }).trim();
+  } catch {
+    return "";
+  }
+}
+
+function adoptBuildMetadata(str) {
+  const repo = packageJson.repository?.url
+    ?.replace(/^git\+/, "")
+    ?.replace(/\.git$/, "");
+
+  const values = {
+    "##PROJECT##":    packageJson.name || "PulSar",
+    "##VERSION##":    packageJson.version || "",
+    "##BUILD_DATE##": process.env.BUILD_DATE || new Date().toISOString().slice(0, 10),
+    "##BUILD_ENV##":  process.env.PIOENV || process.env.BUILD_ENV || "",
+    "##GIT_BRANCH##": process.env.GIT_BRANCH || getGitBranch(),
+    "##GIT_COMMIT##": process.env.GIT_COMMIT || getGitCommit(),
+    "##REPO##":       repo || "",
+  };
+
+  for (const [key, value] of Object.entries(values)) str = strReplace(str, key, value);
+
+  return str;
+}
+
+
+/************************************************************************************************
+ * Conversion helpers
+ ************************************************************************************************/
+
+function hexdump(buffer, isHex = false) {
+  let lines = [];
+
+  for (let i = 0; i < buffer.length; i += (isHex ? 32 : 16)) {
+    let block;
+    let hexArray = [];
+
+    if (isHex) {
+      block = buffer.slice(i, i + 32);
+
+      for (let j = 0; j < block.length; j += 2) {
+        hexArray.push("0x" + block.slice(j, j + 2));
+      }
+    } else {
+      block = buffer.slice(i, i + 16);
+
+      for (let value of block) {
+        hexArray.push("0x" + value.toString(16).padStart(2, "0"));
+      }
+    }
+
+    lines.push(`  ${hexArray.join(", ")}`);
+  }
+
+  return lines.join(",\n");
+}
+
+
 function filter(str, type) {
-  str = adoptVersionAndRepo(str);
+  str = adoptBuildMetadata(str);
+
   if (type === undefined) {
     return str;
-  } else if (type == "css-minify") {
+  }
+  else if (type == "css-minify") {
     return new CleanCSS({}).minify(str).styles;
-  } else if (type == "js-minify") {
-    return MinifyHTML('<script>' + str + '</script>', {
+  }
+  else if (type == "js-minify") {
+    return MinifyHTML("<script>" + str + "</script>", {
       collapseWhitespace: true,
-      minifyJS: true, 
+      minifyJS: true,
       continueOnParseError: false,
       removeComments: true,
-    }).replace(/<[\/]*script>/g,'');
-  } else if (type == "html-minify") {
+    }).replace(/<[\/]*script>/g, "");
+  }
+  else if (type == "html-minify") {
     return MinifyHTML(str, {
       collapseWhitespace: true,
       maxLineLength: 80,
       minifyCSS: true,
-      minifyJS: true, 
+      minifyJS: true,
       continueOnParseError: false,
       removeComments: true,
     });
-  } else if (type == "html-minify-ui") {
+  }
+  else if (type == "html-minify-ui") {
     return MinifyHTML(str, {
       collapseWhitespace: true,
       conservativeCollapse: true,
       maxLineLength: 80,
       minifyCSS: true,
-      minifyJS: true, 
+      minifyJS: true,
       continueOnParseError: false,
       removeComments: true,
     });
-  } else {
-    console.warn("Unknown filter: " + type);
-    return str;
   }
+
+  console.warn("Unknown filter: " + type);
+  return str;
 }
 
+
 function writeHtmlGzipped(sourceFile, resultFile, page2) {
-
-   const page = page2// + "_lights" // fix for duplicate webserver/lights
-
+  const page = page2;
 
   console.info("Reading " + sourceFile);
-  new inliner(sourceFile, function (error, html) {
-    console.info("Inlined " + html.length + " characters");
-    html = filter(html, "html-minify-ui");
-    console.info("Minified to " + html.length + " characters");
 
+  new inliner(sourceFile, function (error, html) {
     if (error) {
       console.warn(error);
       throw error;
     }
 
-    html = adoptVersionAndRepo(html);
+    console.info("Inlined " + html.length + " characters");
+
+    html = filter(html, "html-minify-ui");
+
+    console.info("Minified to " + html.length + " characters");
+
     zlib.gzip(html, { level: zlib.constants.Z_BEST_COMPRESSION }, function (error, result) {
       if (error) {
         console.warn(error);
@@ -142,47 +185,59 @@ function writeHtmlGzipped(sourceFile, resultFile, page2) {
       }
 
       console.info("Compressed " + result.length + " bytes");
+
       const array = hexdump(result);
+
       const src = `/*
  * Binary array for the Web UI.
  * gzip is used for smaller size and improved speeds.
- * 
  */
 
 #pragma once
- 
+
 // Autogenerated from ${sourceFile}, do not edit!!
 const uint16_t PAGE_${page}_L = ${result.length};
 const uint8_t PAGE_${page}[] PROGMEM = {
 ${array}
 };
 `;
+
       console.info("Writing " + resultFile);
       fs.writeFileSync(resultFile, src);
     });
   });
 }
 
+
 function specToChunk(srcDir, s) {
   if (s.method == "plaintext") {
     const buf = fs.readFileSync(srcDir + "/" + s.file);
     const str = buf.toString("utf-8");
+
     const chunk = `
 
 // Autogenerated from ${srcDir}/${s.file}, do not edit!!
-const char ${s.name}[] PROGMEM = R"${s.prepend || ""}${filter(str, s.filter)}${
-      s.append || ""
-    }";
+const char ${s.name}[] PROGMEM = R"${s.prepend || ""}${filter(str, s.filter)}${s.append || ""}";
 
 `;
+
     return s.mangle ? s.mangle(chunk) : chunk;
-  } else if (s.method == "gzip") {
+  }
+
+  else if (s.method == "gzip") {
     const buf = fs.readFileSync(srcDir + "/" + s.file);
-    var str = buf.toString('utf-8');
+    let str = buf.toString("utf-8");
+
     if (s.mangle) str = s.mangle(str);
-    const zip = zlib.gzipSync(filter(str, s.filter), { level: zlib.constants.Z_BEST_COMPRESSION });
-    const result = hexdump(zip.toString('hex'), true);
-    const chunk = `
+
+    const zip = zlib.gzipSync(
+      filter(str, s.filter),
+      { level: zlib.constants.Z_BEST_COMPRESSION }
+    );
+
+    const result = hexdump(zip.toString("hex"), true);
+
+    return `
 // Autogenerated from ${srcDir}/${s.file}, do not edit!!
 const uint16_t ${s.name}_length = ${zip.length};
 const uint8_t ${s.name}[] PROGMEM = {
@@ -190,37 +245,35 @@ ${result}
 };
 
 `;
-    return chunk;
-  } else if (s.method == "binary") {
+  }
+
+  else if (s.method == "binary") {
     const buf = fs.readFileSync(srcDir + "/" + s.file);
     const result = hexdump(buf);
-    const chunk = `
+
+    return `
 // Autogenerated from ${srcDir}/${s.file}, do not edit!!
-const uint16_t ${s.name}_length = ${result.length};
+const uint16_t ${s.name}_length = ${buf.length};
 const uint8_t ${s.name}[] PROGMEM = {
 ${result}
 };
 
 `;
-    return chunk;
-  } else {
-    console.warn("Unknown method: " + s.method);
-    return undefined;
   }
+
+  console.warn("Unknown method: " + s.method);
+  return undefined;
 }
+
 
 function writeChunks(srcDir, specs, resultFile) {
   let src = `/*
  * This file is auto generated, please don't make any changes manually via "cdata_lights.js and npm run"
- */ 
-  #pragma once
+ */
+#pragma once
 `;
 
   specs.forEach((s) => {
-
-    s.name = s.name //+ "_lights" // 
-
-
     try {
       console.info("Reading " + srcDir + "/" + s.file + " as " + s.name);
       src += specToChunk(srcDir, s);
@@ -231,61 +284,48 @@ function writeChunks(srcDir, specs, resultFile) {
       );
     }
   });
+
   console.info("Writing " + src.length + " characters into " + resultFile);
   fs.writeFileSync(resultFile, src);
 }
 
 
-writeHtmlGzipped(source_path + "/index.htm", destination_path + "html_ui.h", 'index');
-// writeHtmlGzipped(source_path + "/simple.htm", destination_path + "html_simple.h", 'simple'); //now create dynamically by hiding elements
-writeHtmlGzipped(source_path + "/pixart/pixart.htm", destination_path + "html_pixart.h", 'pixart');
-writeHtmlGzipped(source_path + "/cpal/cpal.htm", destination_path + "html_cpal.h", 'cpal');
-writeHtmlGzipped(source_path + "/pxmagic/pxmagic.htm", destination_path + "html_pxmagic.h", 'pxmagic');
+/************************************************************************************************
+ * Main Lights UI
+ ************************************************************************************************/
 
-
-
-// writeHtmlGzipped(source_path + "/console.htm", destination_path + "console.h", 'console');
-
-
-
-/*
-writeChunks(
-  "code/data23",
-  [
-    {
-      file: "simple.css",
-      name: "PAGE_simpleCss",
-      method: "gzip",
-      filter: "css-minify",
-    },
-    {
-      file: "simple.js",
-      name: "PAGE_simpleJs",
-      method: "gzip",
-      filter: "js-minify",
-    },
-    {
-      file: "simple.htm",
-      name: "PAGE_simple",
-      method: "gzip",
-      filter: "html-minify-ui",
-    }
-  ],
-  "code/html_simplex.h"
+writeHtmlGzipped(
+  source_path + "/index.htm",
+  destination_path + "html_ui.h",
+  "index"
 );
-*/
+
+writeHtmlGzipped(
+  source_path + "/pixart/pixart.htm",
+  destination_path + "html_pixart.h",
+  "pixart"
+);
+
+writeHtmlGzipped(
+  source_path + "/cpal/cpal.htm",
+  destination_path + "html_cpal.h",
+  "cpal"
+);
+
+writeHtmlGzipped(
+  source_path + "/pxmagic/pxmagic.htm",
+  destination_path + "html_pxmagic.h",
+  "pxmagic"
+);
+
+
+/************************************************************************************************
+ * Lights settings
+ ************************************************************************************************/
+
 writeChunks(
   source_path,
   [
-    {
-      file: "style.css",
-      name: "PAGE_settingsCss",
-      method: "gzip",
-      filter: "css-minify",
-      mangle: (str) =>
-        str
-          .replace("%%","%")
-    },
     {
       file: "common.js",
       name: "JS_common",
@@ -295,12 +335,6 @@ writeChunks(
     {
       file: "settings.htm",
       name: "PAGE_settings",
-      method: "gzip",
-      filter: "html-minify",
-    },
-    {
-      file: "settings_wifi.htm",
-      name: "PAGE_settings_wifi",
       method: "gzip",
       filter: "html-minify",
     },
@@ -329,50 +363,23 @@ writeChunks(
       filter: "html-minify",
     },
     {
-      file: "settings_time.htm",
-      name: "PAGE_settings_time",
-      method: "gzip",
-      filter: "html-minify",
-    },
-    {
-      file: "settings_sec.htm",
-      name: "PAGE_settings_sec",
-      method: "gzip",
-      filter: "html-minify",
-    },
-    {
-      file: "settings_um.htm",
-      name: "PAGE_settings_um",
-      method: "gzip",
-      filter: "html-minify",
-    },
-    {
       file: "settings_2D.htm",
       name: "PAGE_settings_2D",
       method: "gzip",
       filter: "html-minify",
-    },
-    {
-      file: "settings_pin.htm",
-      name: "PAGE_settings_pin",
-      method: "gzip",
-      filter: "html-minify"
     }
   ],
   destination_path + "html_settings.h"
 );
 
+
+/************************************************************************************************
+ * Other Lights pages/assets
+ ************************************************************************************************/
+
 writeChunks(
   source_path,
   [
-    {
-      file: "usermod.htm",
-      name: "PAGE_usermod",
-      method: "gzip",
-      filter: "html-minify",
-      mangle: (str) =>
-        str.replace(/fetch\("http\:\/\/.*\/win/gms, 'fetch("/win'),
-    },
     {
       file: "msg.htm",
       name: "PAGE_msg",
@@ -398,18 +405,6 @@ const char PAGETEST_dmxmap_lights[] PROGMEM = R"=====()=====";
 `,
     },
     {
-      file: "update.htm",
-      name: "PAGE_update",
-      method: "gzip",
-      filter: "html-minify",
-      mangle: (str) =>
-        str
-          .replace(
-            /function GetV().*\<\/script\>/gms,
-            "</script><script src=\"/settings/s.js?p=9\"></script>"
-          )
-    },
-    {
       file: "liveview.htm",
       name: "PAGE_liveview",
       method: "gzip",
@@ -422,8 +417,8 @@ const char PAGETEST_dmxmap_lights[] PROGMEM = R"=====()=====";
       filter: "html-minify",
     },
     {
-      file: "404.htm",
-      name: "PAGE_404",
+      file: "virtualview.htm",
+      name: "PAGE_virtualview",
       method: "gzip",
       filter: "html-minify",
     },
@@ -432,18 +427,22 @@ const char PAGETEST_dmxmap_lights[] PROGMEM = R"=====()=====";
       name: "favicon",
       method: "binary",
     }
-    // ,
-    // {
-    //   file: "iro.js",
-    //   name: "iroJs",
-    //   method: "gzip"
-    // },
-    // {
-    //   file: "rangetouch.js",
-    //   name: "rangetouchJs",
-    //   method: "gzip"
-    // }
   ],
   destination_path + "html_other.h"
+);
+
+
+writeChunks(
+  source_path,
+  [
+    {
+      file: "iro.js",
+      name: "JS_iro",
+      method: "gzip",
+      filter: "plain", // no minification, it is already minified
+      mangle: (s) => s.replace(/^\/\*![\s\S]*?\*\//, '') // remove license comment at the top
+    }
+  ],
+  destination_path + "js_iro.h"
 );
 

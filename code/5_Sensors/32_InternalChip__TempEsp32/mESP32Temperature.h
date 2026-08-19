@@ -104,10 +104,10 @@ class mESP32Temperature :
      * SECTION: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init(void);
-    std::vector<struct handler<mESP32Temperature>*> mqtthandler_list;
-    struct handler<mESP32Temperature> mqtthandler_settings;
-    struct handler<mESP32Temperature> mqtthandler_sensor_teleperiod;
+    void Telemetry_Init(void);
+    std::vector<struct telemetry_handler<mESP32Temperature>*> telemetry_list;
+    struct telemetry_handler<mESP32Temperature> telemetry_settings;
+    struct telemetry_handler<mESP32Temperature> telemetry_sensor_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

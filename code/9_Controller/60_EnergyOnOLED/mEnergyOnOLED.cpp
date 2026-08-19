@@ -72,13 +72,13 @@ int8_t mEnergyOLED::Tasker(uint8_t function, JsonParserObject obj){
      * MQTT SECTION * 
     *******************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
     break;
-    case TASK_MQTT_SENDER:
+    case TASK_TELEMETRY__SENDER_MQTT:
       MQTTHandler_Sender();
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
       MQTTHandler_Rate();
     break; 
     case TASK_MQTT_CONNECTED:
@@ -341,42 +341,42 @@ uint8_t mEnergyOLED::ConstructJSON_State(uint8_t json_level, bool json_appending
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mEnergyOLED::MQTTHandler_Init()
+void mEnergyOLED::Telemetry_Init()
 {
 
-  struct handler<mEnergyOLED>* ptr;
+  struct telemetry_handler<mEnergyOLED>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = 120; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mEnergyOLED::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_state_ifchanged;
+  ptr = &telemetry_state_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = 1; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mEnergyOLED::ConstructJSON_State;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
 } 
 
 
 /**
- * @brief Set flag for all mqtthandlers to send
+ * @brief Set flag for all telemetryhandlers to send
  * */
 void mEnergyOLED::MQTTHandler_RefreshAll()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     handle->flags.SendNow = true;
   }
 }
@@ -386,7 +386,7 @@ void mEnergyOLED::MQTTHandler_RefreshAll()
  * */
 void mEnergyOLED::MQTTHandler_Rate()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
       handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
     if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
@@ -399,7 +399,7 @@ void mEnergyOLED::MQTTHandler_Rate()
  * */
 void mEnergyOLED::MQTTHandler_Sender()
 {
-  for(auto& handle:mqtthandler_list){
+  for(auto& handle:telemetry_list){
     tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
   }
 }

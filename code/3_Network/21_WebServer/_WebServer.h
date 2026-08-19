@@ -15,9 +15,9 @@
 
 #include "2_CoreSystem/01_Settings/mSettings.h"
 
-#include <SPIFFSEditor.h>
-
 #define Network WiFi
+
+#include "FileEditor.h"
 
 #ifdef ESP32
   #include <WiFi.h>
@@ -25,7 +25,6 @@
   #ifdef USE_MODULE_NETWORK_WEBSERVER
     #include <AsyncTCP.h>
     #include <ESPAsyncWebServer.h>
-    #include <SPIFFSEditor.h>
   #endif // USE_MODULE_NETWORK_WEBSERVER
   #endif // DISABLE_NETWORK
 #elif defined(ESP8266)
@@ -46,6 +45,7 @@
 #endif
 
 #include <stdint.h>
+
 
 #include "mWebUrlTracker.h" // Must be included so #else blanks are inserted
 
@@ -74,9 +74,9 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 
 
 #include "3_Network/21_WebServer/Webpages/Generated/html_settings.h"
-#include "3_Network/21_WebServer/Webpages/Generated/html_settings2.h"
 #include "3_Network/21_WebServer/Webpages/Generated/html_other.h"
-#include "3_Network/21_WebServer/Webpages/Generated/root_basic.h"
+#include "3_Network/21_WebServer/Webpages/Generated/debug_pages.h"
+#include "3_Network/21_WebServer/Webpages/Generated/root_main.h"
 #include "3_Network/21_WebServer/Webpages/Generated/submodule_assets.h"
 #include "3_Network/21_WebServer/Webpages/Generated/submodule_unified_pages.h"
 #ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
@@ -98,20 +98,21 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 // THESE ALL NEED IMMEDIATE RENAMES
 #define SUBPAGE_WEB_MENU              0
 #define SUBPAGE_WEB_WIFI              1
-#define SUBPAGE_WEB_LEDS              2
-#define SUBPAGE_WEB_UI                3
-#define SUBPAGE_WEB_SYNC              4
+// #define SUBPAGE_WEB_LEDS              2
+// #define SUBPAGE_WEB_UI                3
+// #define SUBPAGE_WEB_SYNC              4
 #define SUBPAGE_WEB_TIME              5
 #define SUBPAGE_WEB_SEC               6
-#define SUBPAGE_WEB_DMX               7
-#define SUBPAGE_WEB_UM                8
+// #define SUBPAGE_WEB_DMX               7
+// #define SUBPAGE_WEB_UM                8
 #define SUBPAGE_WEB_UPDATE            9
-#define SUBPAGE_WEB_2D               10
+// #define SUBPAGE_WEB_2D               10
 #define SUBPAGE_WEB_LOCK            251
 #define SUBPAGE_WEB_PINREQ          252
 #define SUBPAGE_WEB_CSS             253
 #define SUBPAGE_WEB_JS              254
 #define SUBPAGE_WEB_WELCOME         255
+#define SUBPAGE_WEB_NETWORK               11
 
 #define JSON_PATH_WEB_STATE      1
 #define JSON_PATH_WEB_INFO       2
@@ -146,6 +147,23 @@ const char HTTP_SCAN_LINK3[] PROGMEM       = "<br/><div class=\"c\"><a href=\"/w
 const char HTTP_SAVED3[] PROGMEM           = "<div>Credentials Saved<br />Trying to connect Weread to network.<br />If it fails reconnect to AP to try again</div>";
 const char HTTP_END3[] PROGMEM             = "</div></body></html>";
 
+
+    enum WebSettingsSubPage : uint8_t
+    {
+      MENU = 0,
+      NETWORK,
+      HARDWARE,
+      SYSTEM,
+      MODULES,
+      STORAGE,
+      LOGGING,
+      SECURITY,
+
+      PINREQ  = 252,
+      CSS     = 253,
+      JS      = 254,
+      WELCOME = 255
+    };
 
 
 #include "1_TaskerManager/mTaskerInterface.h"
@@ -262,6 +280,97 @@ AsyncWebHandler *editHandler = nullptr;
 
     #endif
   #endif
+
+
+  #ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+
+enum class WebTelemetryRequestMode : uint8_t
+{
+  None = 0,
+  Catalogue,
+  Topic
+};
+
+struct WebTelemetryRequest
+{
+  WebTelemetryRequestMode mode = WebTelemetryRequestMode::None;
+
+  char requested_key[128] = {0};
+
+  AsyncResponseStream* catalogue_response = nullptr;
+
+  bool catalogue_first = true;
+  bool found = false;
+  bool buffer_busy = false;
+
+  uint16_t rate = 0;
+
+  String packet;
+};
+
+WebTelemetryRequest web_telemetry_request;
+
+uint32_t web_telemetry_json_last_used_ms = 0;
+static constexpr uint32_t WEB_TELEMETRY_JSON_BACKOFF_MS = 350;
+
+void HandlePage_DebugTelemetry(AsyncWebServerRequest* request);
+void HandleAPI_DebugTelemetry(AsyncWebServerRequest* request);
+void WebTelemetry_PrintJSONString(AsyncResponseStream* response, const char* str);
+bool WebTelemetry_Construct_Begin(const char* full_key, uint16_t rate);
+void WebTelemetry_Construct_End();
+
+template<typename T>
+void Telemetry_Sender(std::vector<telemetry_handler<T>*>& telemetry_list, T& class_ptr)
+{
+  if (web_telemetry_request.mode == WebTelemetryRequestMode::None) return;
+
+  char full_key[160];
+
+  for (auto* handle : telemetry_list)
+  {
+    if (!handle || !handle->key || !handle->ConstructJSON_function) continue;
+
+    snprintf_P(full_key, sizeof(full_key), PSTR("%S/%S"), class_ptr.GetModuleName(), handle->key);
+
+    /********************************************************************
+     * Catalogue
+    ********************************************************************/
+    if (web_telemetry_request.mode == WebTelemetryRequestMode::Catalogue)
+    {
+      AsyncResponseStream* response = web_telemetry_request.catalogue_response;
+      if (!response) return;
+
+      if (!web_telemetry_request.catalogue_first) response->print(',');
+      web_telemetry_request.catalogue_first = false;
+
+      response->print(F("{\"topic\":\""));
+      WebTelemetry_PrintJSONString(response, full_key);
+      response->printf_P(PSTR("\",\"rate\":%u}"), handle->tRateSecs);
+
+      continue;
+    }
+
+    /********************************************************************
+     * Requested topic
+    ********************************************************************/
+    if (web_telemetry_request.mode == WebTelemetryRequestMode::Topic)
+    {
+      if (strcmp(full_key, web_telemetry_request.requested_key)) continue;
+      if (!WebTelemetry_Construct_Begin(full_key, handle->tRateSecs)) return;
+
+      CALL_MEMBER_FUNCTION(class_ptr, handle->ConstructJSON_function)(handle->json_level, false);
+
+      WebTelemetry_Construct_End();
+      return;
+    }
+  }
+}
+#else
+
+template<typename T>
+void Telemetry_Sender(std::vector<telemetry_handler<T>*>& telemetry_list, T& class_ptr)
+{}
+#endif
 
 
 void serveSettingsJS(AsyncWebServerRequest* request);

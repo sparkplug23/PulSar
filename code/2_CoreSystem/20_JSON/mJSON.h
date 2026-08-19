@@ -90,10 +90,12 @@ class JsonBuilder{
     uint16_t GetLength();
     uint16_t GetBufferSize();
 
-// global ArduinoJson buffer
-volatile uint16_t jsonBufferLock = 0;
-bool requestJSONBufferLock(uint16_t module);
-void releaseJSONBufferLock(); // duplicate of below, need to JOIN THEM!!
+    // global ArduinoJson buffer
+    volatile uint16_t jsonBufferLock = 0;
+    bool requestJSONBufferLock(uint16_t module);
+    void releaseJSONBufferLock(); // duplicate of below, need to JOIN THEM!!
+
+    // #define ENABLE_DEBUG__JSON_BUFFER_LOCKS
 
     char* GetBuffer() // New versions, remove above
     {
@@ -113,16 +115,20 @@ void releaseJSONBufferLock(); // duplicate of below, need to JOIN THEM!!
       while (locked_by_module_unique_id && millis()-now < 1000) delay(1); // wait for a second for buffer lock
 
       if (millis()-now >= 1000) {
+        #ifdef ENABLE_DEBUG__JSON_BUFFER_LOCKS
         DEBUG_PRINT(F("ERROR: Locking JSON buffer failed! ("));
         DEBUG_PRINT(locked_by_module_unique_id);
         DEBUG_PRINT(")\n\r");
+        #endif
         return false; // waiting time-outed
       }
 
       locked_by_module_unique_id = module_unique_id;
+      #ifdef ENABLE_DEBUG__JSON_BUFFER_LOCKS
       DEBUG_PRINT(F("JSON locked ("));
       DEBUG_PRINT(locked_by_module_unique_id);
       DEBUG_PRINT(")\n\r");
+      #endif
 
       // gDoc = &doc;  // used for applying presets (presets.cpp)
       // doc.clear();
@@ -133,10 +139,11 @@ void releaseJSONBufferLock(); // duplicate of below, need to JOIN THEM!!
 
     void ReleaseLock()
     {
-
+      #ifdef ENABLE_DEBUG__JSON_BUFFER_LOCKS
       DEBUG_PRINT(F("JSON released ("));
       DEBUG_PRINT(locked_by_module_unique_id);
       DEBUG_PRINT(")\n\r");
+      #endif
 
       locked_by_module_unique_id = 0;
     }
@@ -401,18 +408,18 @@ void releaseJSONBufferLock(); // duplicate of below, need to JOIN THEM!!
     void Add(const char* key, T value)
     {
 
-      if((writer.buffer == nullptr))
-      {
-
-        Serial.println("ERROR: JsonBuilder::Add() buffer nullptr not valid");
-        return;
-      }
-      if((writer.buffer_size == 0))
-      {
-
-        Serial.println("ERROR: JsonBuilder::Add() buffer size zero not valid");
-        return;
-      }
+  if(writer.buffer == nullptr){
+    Serial.println("ERROR: JsonBuilder::Add() buffer nullptr not valid");
+    return;
+  }
+  if(writer.buffer_size == 0){
+    Serial.println("ERROR: JsonBuilder::Add() buffer size zero not valid");
+    return;
+  }
+  if(key == nullptr){
+    Serial.println("ERROR: JsonBuilder::Add() key nullptr");
+    return;
+  }
 
       if(
         (writer.length>1)&&
@@ -440,9 +447,13 @@ void releaseJSONBufferLock(); // duplicate of below, need to JOIN THEM!!
       }else
       if(is_signed_number_type<T>::value){ 
         writer.length += snprintf_P(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":%d",key,value);
+      // }else
+      // if(is_string_type<T>::value){ 
+      //   writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":\"%s\"",key,value);
+      // }else
       }else
-      if(is_string_type<T>::value){ 
-        writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":\"%s\"",key,value);
+      if(is_string_type<T>::value){
+        writer.length += snprintf(&writer.buffer[writer.length], writer.remaining(), "\"%s\":\"%s\"", key ? key : "", value);
       }else
       if(is_char_type<T>::value){   
         writer.length += snprintf(&writer.buffer[writer.length],writer.buffer_size,"\"%s\":\"%c\"",key,value);

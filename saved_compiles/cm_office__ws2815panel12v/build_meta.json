@@ -1,7 +1,7 @@
 {
   "env_name": "cm_office__ws2815panel12v",
-  "created_utc": "2026-07-10T21:32:04Z",
-  "created_epoch": 1783719124,
+  "created_utc": "2026-08-18T22:59:11Z",
+  "created_epoch": 1787093951,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
   "platform": "espressif32",
@@ -17,9 +17,9 @@
     "bootloader.bin"
   ],
   "git": {
-    "branch": "development",
-    "commit": "3627e60e9aef61ddcdfb58641a2cc8612dbe55f9",
-    "describe": "3627e60e-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/00_Developing/Firmware__Testbeds.h\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/6_Lights/03_Animator/Effects.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n?? code/6_Lights/03_Animator/ParticleSystem.cpp\n?? code/6_Lights/03_Animator/ParticleSystem.h"
+    "branch": "dev_particle_lights",
+    "commit": "85b2875009cf92ae528aff3229c94906f5a23bb2",
+    "describe": "85b28750-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/3_Network/10_MQTT/mMQTT.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/MQTT.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M code/6_Lights/03_Animator/colors.cpp\n M code/6_Lights/03_Animator/util.cpp\n M code/6_Lights/03_Animator/webpages_generated/html_other.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_lgt.ini\n M platformio_override.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf"
   }
 }

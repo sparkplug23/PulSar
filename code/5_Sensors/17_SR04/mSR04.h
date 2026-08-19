@@ -198,10 +198,10 @@ class mSR04 :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mSR04>*> mqtthandler_list;
-    struct handler<mSR04> mqtthandler_settings;
-    struct handler<mSR04> mqtthandler_sensor_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mSR04>*> telemetry_list;
+    struct telemetry_handler<mSR04> telemetry_settings;
+    struct telemetry_handler<mSR04> telemetry_sensor_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
     
 

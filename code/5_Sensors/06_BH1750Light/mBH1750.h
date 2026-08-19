@@ -108,11 +108,11 @@ class mBH1750 :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mBH1750>*> mqtthandler_list;
-    struct handler<mBH1750> mqtthandler_settings;
-    struct handler<mBH1750> mqtthandler_sensor_ifchanged;
-    struct handler<mBH1750> mqtthandler_sensor_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mBH1750>*> telemetry_list;
+    struct telemetry_handler<mBH1750> telemetry_settings;
+    struct telemetry_handler<mBH1750> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mBH1750> telemetry_sensor_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

@@ -944,7 +944,7 @@ bool mAnimatorLight::handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, 
   if (pos > 0) presetCycMax = getNumVal(&req, pos);
 
   //apply preset
-  if (updateVal(req.c_str(), "PL=", &presetCycCurr, presetCycMin, presetCycMax)) {
+  if (updateVal(req.c_str(), "PL=", presetCycCurr, presetCycMin, presetCycMax)) {
     applyPreset(presetCycCurr);
   }
 
@@ -952,19 +952,19 @@ bool mAnimatorLight::handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, 
   if (pos > 0) doAdvancePlaylist = true;
   
   //set brightness
-  updateVal(req.c_str(), "&A=", &tkr_iLight->_briRGB_Global);
+  updateVal(req.c_str(), "&A=", tkr_iLight->_briRGB_Global);
 
   bool col0Changed = false, col1Changed = false, col2Changed = false;
   //set colors
-  col0Changed |= updateVal(req.c_str(), "&R=", &colIn[0]);
-  col0Changed |= updateVal(req.c_str(), "&G=", &colIn[1]);
-  col0Changed |= updateVal(req.c_str(), "&B=", &colIn[2]);
-  col0Changed |= updateVal(req.c_str(), "&W=", &colIn[3]);
+  col0Changed |= updateVal(req.c_str(), "&R=", colIn[0]);
+  col0Changed |= updateVal(req.c_str(), "&G=", colIn[1]);
+  col0Changed |= updateVal(req.c_str(), "&B=", colIn[2]);
+  col0Changed |= updateVal(req.c_str(), "&W=", colIn[3]);
 
-  col1Changed |= updateVal(req.c_str(), "R2=", &colInSec[0]);
-  col1Changed |= updateVal(req.c_str(), "G2=", &colInSec[1]);
-  col1Changed |= updateVal(req.c_str(), "B2=", &colInSec[2]);
-  col1Changed |= updateVal(req.c_str(), "W2=", &colInSec[3]);
+  col1Changed |= updateVal(req.c_str(), "R2=", colInSec[0]);
+  col1Changed |= updateVal(req.c_str(), "G2=", colInSec[1]);
+  col1Changed |= updateVal(req.c_str(), "B2=", colInSec[2]);
+  col1Changed |= updateVal(req.c_str(), "W2=", colInSec[3]);
 
   #ifdef WLED_ENABLE_LOXONE
   //lox parser
@@ -1059,19 +1059,19 @@ bool mAnimatorLight::handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, 
   bool fxModeChanged = false, speedChanged = false, intensityChanged = false, paletteChanged = false;
   bool custom1Changed = false, custom2Changed = false, custom3Changed = false, check1Changed = false, check2Changed = false, check3Changed = false;
   // set effect parameters
-  if (updateVal(req.c_str(), "FX=", &effectIn, 0, getModeCount()-1)) {
+  if (updateVal(req.c_str(), "FX=", effectIn, 0, getEffectCount()-1)) {
     if (request != nullptr) unloadPlaylist(); // unload playlist if changing FX using web request
     fxModeChanged = true;
   }
-  speedChanged     = updateVal(req.c_str(), "SX=", &speedIn);
-  intensityChanged = updateVal(req.c_str(), "IX=", &intensityIn);
-  paletteChanged   = updateVal(req.c_str(), "FP=", &paletteIn, 0, getPaletteCount()-1);
-  custom1Changed   = updateVal(req.c_str(), "X1=", &custom1In);
-  custom2Changed   = updateVal(req.c_str(), "X2=", &custom2In);
-  custom3Changed   = updateVal(req.c_str(), "X3=", &custom3In);
-  check1Changed    = updateVal(req.c_str(), "M1=", &check1In);
-  check2Changed    = updateVal(req.c_str(), "M2=", &check2In);
-  check3Changed    = updateVal(req.c_str(), "M3=", &check3In);
+  speedChanged     = updateVal(req.c_str(), "SX=", speedIn);
+  intensityChanged = updateVal(req.c_str(), "IX=", intensityIn);
+  paletteChanged   = updateVal(req.c_str(), "FP=", paletteIn, 0, getPaletteCount()-1);
+  custom1Changed   = updateVal(req.c_str(), "X1=", custom1In);
+  custom2Changed   = updateVal(req.c_str(), "X2=", custom2In);
+  custom3Changed   = updateVal(req.c_str(), "X3=", custom3In);
+  check1Changed    = updateVal(req.c_str(), "M1=", check1In);
+  check2Changed    = updateVal(req.c_str(), "M2=", check2In);
+  check3Changed    = updateVal(req.c_str(), "M3=", check3In);
 
   stateChanged |= (fxModeChanged || speedChanged || intensityChanged || paletteChanged || custom1Changed || custom2Changed || custom3Changed || check1Changed || check2Changed || check3Changed);
 

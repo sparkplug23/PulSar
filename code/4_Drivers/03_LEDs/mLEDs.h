@@ -254,10 +254,10 @@ class mLEDs :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mLEDs>*> mqtthandler_list;    
-    struct handler<mLEDs> mqtthandler_settings;
-    struct handler<mLEDs> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mLEDs>*> telemetry_list;    
+    struct telemetry_handler<mLEDs> telemetry_settings;
+    struct telemetry_handler<mLEDs> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT 
 
 

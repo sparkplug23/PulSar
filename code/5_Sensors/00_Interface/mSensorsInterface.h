@@ -268,18 +268,18 @@ class mSensorsInterface :
      ************************************************************************************************/
       
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mSensorsInterface>*> mqtthandler_list;
-    struct handler<mSensorsInterface> mqtthandler_settings;
-    struct handler<mSensorsInterface> mqtthandler_sensor_ifchanged; // polling non-user interactive sensing
-    struct handler<mSensorsInterface> mqtthandler_sensor_teleperiod;
-    struct handler<mSensorsInterface> mqtthandler_sensor_temperature_colours;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mSensorsInterface>*> telemetry_list;
+    struct telemetry_handler<mSensorsInterface> telemetry_settings;
+    struct telemetry_handler<mSensorsInterface> telemetry_sensor_ifchanged; // polling non-user interactive sensing
+    struct telemetry_handler<mSensorsInterface> telemetry_sensor_teleperiod;
+    struct telemetry_handler<mSensorsInterface> telemetry_sensor_temperature_colours;
     #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
-    struct handler<mSensorsInterface> mqtthandler_sensor_unified_filtered;
+    struct telemetry_handler<mSensorsInterface> telemetry_sensor_unified_filtered;
     #endif
-    struct handler<mSensorsInterface> mqtthandler_motion_event_ifchanged;
-    struct handler<mSensorsInterface> mqtthandler_event_input; // events triggered by user input
-    struct handler<mSensorsInterface> mqtthandler_system_location; 
+    struct telemetry_handler<mSensorsInterface> telemetry_motion_event_ifchanged;
+    struct telemetry_handler<mSensorsInterface> telemetry_event_input; // events triggered by user input
+    struct telemetry_handler<mSensorsInterface> telemetry_system_location; 
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

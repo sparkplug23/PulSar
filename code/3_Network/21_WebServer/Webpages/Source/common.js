@@ -104,7 +104,19 @@ function getLoc() {
 		}
 	}
 }
-function getURL(path) { return (loc ? locproto + "//" + locip : "") + path; }
+// function getURL(path) {
+// 	console.log("getURL in web:common.js", loc, locip, path);
+	
+// 	return (loc ? locproto + "//" + locip : "") + path; }
+
+
+function getURL(path) {
+	path = path || "/";
+	if (path[0] != "/") path = "/" + path;
+	return location.origin + path;
+}
+
+
 function B()          { window.open(getURL("/"),"_self"); }
 function B2()          { window.open(getURL("/settings2"),"_self"); }
 var timeout;
@@ -207,4 +219,42 @@ function TSetValue(tableId, row, html){
 
 function TSetNotes(tableId, row, html){
   TSet(tableId, row, 2, html);
+}
+
+
+// sequential loading of external resources (JS or CSS) with retry, calls init() when done
+function loadResources(files, init) {
+	let i = 0;
+	const loadNext = () => {
+		if (i >= files.length) {
+			if (init) {
+				d.documentElement.style.visibility = 'visible';
+				d.readyState === 'complete' ? init() : window.addEventListener('load', init);
+			}
+			return;
+		}
+
+		const file = files[i++];
+		const isCSS = file.endsWith('.css');
+		const el = d.createElement(isCSS ? 'link' : 'script');
+
+		if (isCSS) {
+			el.rel = 'stylesheet';
+			el.href = file;
+			const st = d.head.querySelector('style');
+			if (st) d.head.insertBefore(el, st);
+			else d.head.appendChild(el);
+		} else {
+			el.src = file;
+			d.head.appendChild(el);
+		}
+
+		el.onload = () => loadNext();
+		el.onerror = () => {
+			i--;
+			setTimeout(loadNext, 100);
+		};
+	};
+
+	loadNext();
 }

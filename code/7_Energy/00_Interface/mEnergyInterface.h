@@ -107,11 +107,11 @@ struct EnergyUsageNew{
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mEnergyInterface>*> mqtthandler_list;
-    struct handler<mEnergyInterface> mqtthandler_settings;
-    struct handler<mEnergyInterface> mqtthandler_state_ifchanged;
-    struct handler<mEnergyInterface> mqtthandler_state_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mEnergyInterface>*> telemetry_list;
+    struct telemetry_handler<mEnergyInterface> telemetry_settings;
+    struct telemetry_handler<mEnergyInterface> telemetry_state_ifchanged;
+    struct telemetry_handler<mEnergyInterface> telemetry_state_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };
@@ -485,19 +485,19 @@ struct EnergyUsageNew{
   
 //   //#ifdef USE_CORE_MQTT 
 
-//     void MQTTHandler_Init();
+//     void Telemetry_Init();
 //     void MQTTHandler_RefreshAll();
 //     void MQTTHandler_Rate();
     
 //     void MQTTHandler_Sender();
 
-//     struct handler<mEnergyInterface> mqtthandler_settings;
-//     struct handler<mEnergyInterface> mqtthandler_sensor_ifchanged;
-//     struct handler<mEnergyInterface> mqtthandler_sensor_teleperiod;
-//     struct handler<mEnergyInterface> mqtthandler_thresholdlimits_ifchanged; //will contain alert status
-//     struct handler<mEnergyInterface> mqtthandler_thresholdlimits_teleperiod;
-//     struct handler<mEnergyInterface> mqtthandler_energystats_ifchanged;
-//     struct handler<mEnergyInterface> mqtthandler_energystats_teleperiod;
+//     struct telemetry_handler<mEnergyInterface> telemetry_settings;
+//     struct telemetry_handler<mEnergyInterface> telemetry_sensor_ifchanged;
+//     struct telemetry_handler<mEnergyInterface> telemetry_sensor_teleperiod;
+//     struct telemetry_handler<mEnergyInterface> telemetry_thresholdlimits_ifchanged; //will contain alert status
+//     struct telemetry_handler<mEnergyInterface> telemetry_thresholdlimits_teleperiod;
+//     struct telemetry_handler<mEnergyInterface> telemetry_energystats_ifchanged;
+//     struct telemetry_handler<mEnergyInterface> telemetry_energystats_teleperiod;
     
 //     // Extra module only handlers
 //     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
@@ -508,16 +508,16 @@ struct EnergyUsageNew{
 //       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
 //     };
     
-//     struct handler<mEnergyInterface>* mqtthandler_list[3] = {
-//       &mqtthandler_settings,
-//       &mqtthandler_sensor_ifchanged,
-//       &mqtthandler_sensor_teleperiod
+//     struct telemetry_handler<mEnergyInterface>* telemetry_list[3] = {
+//       &telemetry_settings,
+//       &telemetry_sensor_ifchanged,
+//       &telemetry_sensor_teleperiod
 //       // ,
-//       // &mqtthandler_energystats_ifchanged,  
-//       // &mqtthandler_energystats_teleperiod
+//       // &telemetry_energystats_ifchanged,  
+//       // &telemetry_energystats_teleperiod
 //       // ,  
-//       // &mqtthandler_thresholdlimits_ifchanged,  
-//       // &mqtthandler_thresholdlimits_teleperiod  
+//       // &telemetry_thresholdlimits_ifchanged,  
+//       // &telemetry_thresholdlimits_teleperiod  
 //     };
 
 

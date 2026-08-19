@@ -72,14 +72,14 @@ class mEnergyOLED :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mEnergyOLED>*> mqtthandler_list;
-    struct handler<mEnergyOLED> mqtthandler_settings;
-    struct handler<mEnergyOLED> mqtthandler_state_ifchanged;
+    std::vector<struct telemetry_handler<mEnergyOLED>*> telemetry_list;
+    struct telemetry_handler<mEnergyOLED> telemetry_settings;
+    struct telemetry_handler<mEnergyOLED> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

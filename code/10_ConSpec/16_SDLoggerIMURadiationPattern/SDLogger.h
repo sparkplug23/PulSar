@@ -170,25 +170,25 @@ class mSDLoggerIMURadiationPattern :
 
   
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mSDLoggerIMURadiationPattern> mqtthandler_settings;
-    struct handler<mSDLoggerIMURadiationPattern> mqtthandler_sensor_ifchanged;
-    struct handler<mSDLoggerIMURadiationPattern> mqtthandler_sensor_teleperiod;
-    struct handler<mSDLoggerIMURadiationPattern> mqtthandler_sdcard_superframe;
+    struct telemetry_handler<mSDLoggerIMURadiationPattern> telemetry_settings;
+    struct telemetry_handler<mSDLoggerIMURadiationPattern> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mSDLoggerIMURadiationPattern> telemetry_sensor_teleperiod;
+    struct telemetry_handler<mSDLoggerIMURadiationPattern> telemetry_sdcard_superframe;
 
     //No extra handlers example
     
     //with extra handlers example
         
-    struct handler<mSDLoggerIMURadiationPattern>* mqtthandler_list[4] = {
-      &mqtthandler_settings,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod,
-      &mqtthandler_sdcard_superframe
+    struct telemetry_handler<mSDLoggerIMURadiationPattern>* telemetry_list[4] = {
+      &telemetry_settings,
+      &telemetry_sensor_ifchanged,
+      &telemetry_sensor_teleperiod,
+      &telemetry_sdcard_superframe
     };
     #endif // USE_MODULE_NETWORK_MQTT
 

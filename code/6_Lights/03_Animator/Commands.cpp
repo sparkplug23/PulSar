@@ -150,7 +150,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 
           valid_bus_idx[valid_bus_count++] = b;
         }
-
+s
         if (valid_bus_count == 0)
         {
           ALOG_ERR(PSTR(D_LOG_PIXEL "Segments/MatchBus but no valid BusConfig entries"));
@@ -253,59 +253,37 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 }
 
 #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+
 void mAnimatorLight::subparse_MatrixConfig(JsonParserObject obj)
 {
-
-  JsonParserToken jtok = 0; 
-  JsonParserToken jtok_sub = 0; 
-  int16_t tmp_id = 0;
-  char buffer[50];
+  JsonParserToken jtok = 0;
 
   Panel p;
 
-  if(jtok = obj["Width"])
-  {
-    p.width = jtok.getInt();
-  }
-  if(jtok = obj["Height"])
-  {
-    p.height = jtok.getInt();
-  }
-  if(jtok = obj["StartX"])
-  {
-    p.xOffset = jtok.getInt();
-  }
-  if(jtok = obj["StartY"])
-  {
-    p.yOffset = jtok.getInt();
-  }
-  if(jtok = obj["BottomStart"])
-  {
-    p.bottomStart = jtok.getInt();
-  }
-  if(jtok = obj["RightStart"])
-  {
-    p.rightStart = jtok.getInt();
-  }
-  if(jtok = obj["Vertical"])
-  {
-    p.vertical = jtok.getInt();
-  }
-  if(jtok = obj["Serpentine"])
-  {
-    p.serpentine = jtok.getInt();
-  }
+  if (jtok = obj["Width"]) p.width = jtok.getInt();
+  if (jtok = obj["Height"]) p.height = jtok.getInt();
 
-  ALOG_INF(PSTR(
-    "MatrixConfig[%d]: %dx%d, StartX:%d, StartY:%d, BottomStart:%d, RightStart:%d, Vertical:%d, Serpentine:%d"),
-    panels, p.width, p.height, p.xOffset, p.yOffset, p.bottomStart, p.rightStart, p.vertical, p.serpentine
-  );
-  
+  // Accept both PulSar/WLED-style names so existing templates continue to work
+  if (jtok = obj["StartX"]) p.xOffset = jtok.getInt();
+  else if (jtok = obj["xOffset"]) p.xOffset = jtok.getInt();
+
+  if (jtok = obj["StartY"]) p.yOffset = jtok.getInt();
+  else if (jtok = obj["yOffset"]) p.yOffset = jtok.getInt();
+
+  if (jtok = obj["BottomStart"]) p.bottomStart = jtok.getInt();
+  if (jtok = obj["RightStart"]) p.rightStart = jtok.getInt();
+  if (jtok = obj["Vertical"]) p.vertical = jtok.getInt();
+  if (jtok = obj["Serpentine"]) p.serpentine = jtok.getInt();
+
+  ALOG_INF(PSTR("MatrixConfig[%u]: %ux%u, StartX:%u, StartY:%u, BottomStart:%u, RightStart:%u, Vertical:%u, Serpentine:%u"), static_cast<unsigned>(panel.size()), static_cast<unsigned>(p.width), static_cast<unsigned>(p.height), static_cast<unsigned>(p.xOffset), static_cast<unsigned>(p.yOffset), static_cast<unsigned>(p.bottomStart), static_cast<unsigned>(p.rightStart), static_cast<unsigned>(p.vertical), static_cast<unsigned>(p.serpentine));
+
   panel.push_back(p);
-  ALOG_INF(PSTR("panels %d" ), panel.size());
-  
-  isMatrix = true;
 
+  panels = panel.size();
+
+  ALOG_INF(PSTR("panels %u"), static_cast<unsigned>(panels));
+
+  isMatrix = true;
 }
 #endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
 
@@ -324,6 +302,8 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   int16_t tmp_id = 0;
   char buffer[50];
 
+  bool flag_geometry_updated = false;
+
   uint16_t isserviced_start_count = data_buffer.isserviced; // to know if anything was serviced in this function
 
   /**
@@ -338,7 +318,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   if (jtok = obj["PaletteMappingValues"]) { 
     if (jtok.isArray()) {
       // Pre-allocate space in the vector to avoid repeated memory allocation
-      auto& mapping_values = SEGMENT_I(segment_index).palette->mapping_values;
+      auto& mapping_values = SEGMENT_I(segment_index).palette_loaded->mapping_values;
       mapping_values.clear(); // reset old map
       mapping_values.reserve(16); // reserve space for 16 elements
       JsonParserArray arrobj = jtok;
@@ -417,13 +397,14 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
 
       if(arrobj.size() == 4)
       {
-        SEGMENT_I(segment_index).startY = arrobj[3].getInt();
-        SEGMENT_I(segment_index).stopY  = arrobj[4].getInt();
+        SEGMENT_I(segment_index).startY = arrobj[2].getInt();
+        SEGMENT_I(segment_index).stopY  = arrobj[3].getInt();
       }
 
       ALOG_INF( PSTR(D_LOG_PIXEL "PixelRange = [%d,%d]"), SEGMENT_I(segment_index).start, SEGMENT_I(segment_index).stop );
       data_buffer.isserviced++;
     }
+    flag_geometry_updated = true;
   }
   #else
     if (jtok = getTokenIncludingAlias(obj, PM_PIXELRANGE, "PR"))//obj[PM_PIXELRANGE])
@@ -577,7 +558,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     if(jtok = getTokenIncludingAlias(jobj, PM_DECIMATE, "DC"))
     {
       SEGMENT_I(segment_index).decimate = jtok.getInt();  
-      ALOG_COM(PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_DECIMATE)), SEGMENT_I(segment_index).decimate);
+      ALOG_INF(PSTR(D_LOG_PIXEL  D_COMMAND_NVALUE_K(D_EFFECTS D_DECIMATE)), SEGMENT_I(segment_index).decimate);
       data_buffer.isserviced++;
     }
 
@@ -620,12 +601,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
       if (dec < 1) dec = 1;   // Safety: min = 1
 
       SEGMENT_I(segment_index).decimate = dec;
-
-      ALOG_INF(
-        PSTR(D_LOG_PIXEL " DecimatePerc = %d -> decimate = %d (compute ≈ %d%%)"),
-        percentage, dec, 100 / dec
-      );
-
+      ALOG_INF( PSTR(D_LOG_PIXEL " DecimatePerc = %d -> decimate = %d (compute ≈ %d%%)"), percentage, dec, 100 / dec );
       data_buffer.isserviced++;
     }
 
@@ -1949,33 +1925,33 @@ if (jtok_pwi && jtok_pwi.isArray())
   }
 
 
-  if(jtok = obj[PM_BRIGHTNESS_RGB]){ // Range 0-100
-    uint8_t brightness = map(jtok.getInt(), 0,100, 0,255);
-    #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_BRIGHTNESS_BLOCKED
-    ALOG_WRN(PSTR("Brightness RGB command limited due to preset testing mode"));
-    brightness = brightness > 10 ? 10 : brightness;
-    #endif
-    SEGMENT_I(segment_index).setBrightnessRGB( brightness );
-    ALOG_INF(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
-    data_buffer.isserviced++;
-  }else
-  if(jtok = obj[PM_BRIGHTNESS_RGB_255]){
-    SEGMENT_I(segment_index).setBrightnessRGB( jtok.getInt() );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
-    data_buffer.isserviced++;
-  }
+  // if(jtok = obj[PM_BRIGHTNESS_RGB]){ // Range 0-100
+  //   uint8_t brightness = map(jtok.getInt(), 0,100, 0,255);
+  //   #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_BRIGHTNESS_BLOCKED
+  //   ALOG_WRN(PSTR("Brightness RGB command limited due to preset testing mode"));
+  //   brightness = brightness > 10 ? 10 : brightness;
+  //   #endif
+  //   SEGMENT_I(segment_index).setBrightnessRGB( brightness );
+  //   ALOG_INF(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
+  //   data_buffer.isserviced++;
+  // }else
+  // if(jtok = obj[PM_BRIGHTNESS_RGB_255]){
+  //   SEGMENT_I(segment_index).setBrightnessRGB( jtok.getInt() );
+  //   ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
+  //   data_buffer.isserviced++;
+  // }
 
 
-  if(jtok = obj[PM_BRIGHTNESS_CCT]){ // Range 0-100
-    SEGMENT_I(segment_index).setBrightnessCCT( map(jtok.getInt(), 0,100, 0,255) );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessCCT());
-    data_buffer.isserviced++;
-  }else
-  if(jtok = obj[PM_BRIGHTNESS_CCT_255]){
-    SEGMENT_I(segment_index).setBrightnessCCT( jtok.getInt() );
-    ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).getBrightnessCCT());
-    data_buffer.isserviced++;
-  }
+  // if(jtok = obj[PM_BRIGHTNESS_CCT]){ // Range 0-100
+  //   SEGMENT_I(segment_index).setBrightnessCCT( map(jtok.getInt(), 0,100, 0,255) );
+  //   ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessCCT());
+  //   data_buffer.isserviced++;
+  // }else
+  // if(jtok = obj[PM_BRIGHTNESS_CCT_255]){
+  //   SEGMENT_I(segment_index).setBrightnessCCT( jtok.getInt() );
+  //   ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).getBrightnessCCT());
+  //   data_buffer.isserviced++;
+  // }
 
 
   if(jtok = obj["Preset"].getObject()["Load"]){
@@ -2022,7 +1998,8 @@ if (jtok_pwi && jtok_pwi.isArray())
             if(arrlen > 5){ break; }
             array[arrlen++] = v.getInt();
           }
-          SEGMENT_I(segment_index).segcol[colour_index].colour = RgbwwColor(array[0],array[1],array[2],array[3],array[4]);
+          SEGMENT_I(segment_index).segcol[colour_index].colour = RGBW32(array[0],array[1],array[2],array[3]);
+          SEGMENT_I(segment_index).segcol[colour_index].cct    = array[4];          
         }
 
         data_buffer.isserviced++;
@@ -2038,9 +2015,8 @@ if (jtok_pwi && jtok_pwi.isArray())
           for(auto v : arrobj){
             if(arrlen > 3){ break; }
             array[arrlen++] = v.getInt();
-          }
-          RgbwwColor current = SEGMENT_I(segment_index).segcol[colour_index].colour; // Keep current WW/CW
-          SEGMENT_I(segment_index).segcol[colour_index].colour = RgbwwColor(array[0],array[1],array[2],current.CW, current.WW);
+          }          
+          SEGMENT_I(segment_index).segcol[colour_index].colour = RGBW32(array[0],array[1],array[2],W(SEGMENT_I(segment_index).segcol[colour_index].colour));
         }
 
         data_buffer.isserviced++;
@@ -2160,9 +2136,10 @@ if (jtok_pwi && jtok_pwi.isArray())
 
       ALOG_INF(PSTR("getSegmentsNum() %d|%d %d"), id, getSegmentsNum(), segments[jtok.getInt()].stop);
 
-      // remove all inactive segments (from the back)
-      if(id==255){ purgeSegments(true); }
-      else{        purgeSegments(false); }
+      // // remove all inactive segments (from the back)
+      // if(id==255){ purgeSegments(true); }
+      // else{        purgeSegments(false); }
+      purgeSegments();
 
     }
 
@@ -2203,151 +2180,83 @@ if (jtok_pwi && jtok_pwi.isArray())
 
     if(jtok = jObj_debug["PlaylistsPSFromPSN"])
     { 
-      ALOG_INF(PSTR("Debug: forcing ScanPresetsFile_GeneratePlaylistIDsFromPSN()"));
+      ALOG_INF(PSTR("Debug: forcing ScanPresetsFile_GeneratePlaylistIDsFromPSN_2()"));
       ScanPresetsFile_GeneratePlaylistIDsFromPSN_2();
     }
 
 
   } // end Debug options
 
-  #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_VIRTUAL_PRESET
-  
-  if (jtok = obj["Standby"]) {
-    ALOG_INF(PSTR("Standby command FOUND"));
-    JsonParserObject jDbg = jtok.getObject();
-    JsonParserToken  jtok2 = 0;
+ #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_MODE
 
-    uint16_t fadeMs = 0;
-    if (jtok2 = jDbg["FadeMs"]) {
-      fadeMs = (uint16_t)jtok2.getInt();
-      standby.fade_override_ms = fadeMs;   // store override for this wake cycle
-      ALOG_INF(PSTR("Standby: FadeMs=%u"), (unsigned)fadeMs);
-    }
+if (jtok = obj["Standby"])
+{
+  JsonParserObject jobj = jtok.getObject();
+  JsonParserToken jtok2 = 0;
 
-    if (jtok2 = jDbg["Start"]) {
-      uint8_t callMode = CALL_MODE_NO_NOTIFY;
-      if (jtok2.getInt()) {
-        Standby_Start(/*fadeMs=*/0, callMode);
-        // If you want: cancel remain-awake because we explicitly entered standby
-        Standby_CancelRemainAwake();
-      }
-    }
-
-    if (jtok2 = jDbg["Stop"]) {
-      uint8_t callMode = CALL_MODE_NO_NOTIFY;
-      if (jtok2.getInt()) {
-        // Use fade override if provided in this command
-        uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
-        Standby_Stop(f, callMode);
-        // Do NOT start any timer here; Stop is a pure "leave standby"
-      }
-    }
-
-    // Wake semantics:
-    //   0  → cancel any pending remain-awake (no state change)
-    //   1  → if in standby, leave now (with optional FadeMs), no auto return
-    //   >1 → leave standby if active (with FadeMs), then stay awake for N seconds, auto-enter standby
-    if (jtok2 = jDbg["Wake"]) {
-      uint32_t secs = jtok2.getInt();
-
-      if (secs == 0) {
-        ALOG_INF(PSTR("Standby: Wake<=0 → cancel remain-awake"));
-        Standby_CancelRemainAwake();
-        // no state change
-      } else if (secs == 1) {
-        if (standby.active) {
-          uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
-          ALOG_INF(PSTR("Standby: Wake==1 → leave standby now (fade=%u)"), (unsigned)f);
-          Standby_Stop(f, CALL_MODE_NO_NOTIFY);
-        } else {
-          ALOG_INF(PSTR("Standby: Wake==1 while already awake → no-op"));
-        }
-        Standby_CancelRemainAwake(); // no auto return
-      } else { // secs > 1
-        ALOG_INF(PSTR("Wake s>1 "));
-        uint16_t f = standby.fade_override_ms ? standby.fade_override_ms : 0;
-        if (standby.active) {
-          ALOG_INF(PSTR("Standby: Wake %ld s → leave standby now (fade=%u)"), (long)secs, (unsigned)f);
-          Standby_Stop(f, CALL_MODE_NO_NOTIFY);
-        } else {
-          ALOG_INF(PSTR("Standby: Wake %ld s while already awake"), (long)secs);
-        }
-        //Serial.println("here3");Serial.flush();
-        Standby_SetRemainAwake(secs);
-        ALOG_INF(PSTR("Standby: remain-awake started: %u s"), (unsigned)secs);
-      }
-
-      SEGMENT_I(0).single_animation_override.time_ms = 2000;
-
-    }
-
-    if (jtok2 = jDbg["Init"]) {
-      if (jtok2.getInt()) Standby_Init();
-    }
-
-    if (jDbg["SetProfile"]) {
-      const char* s = nullptr;
-      auto t = jDbg["SetProfile"]; JsonParserObject o = t.getObject();
-      if (o && o["json"]) s = o["json"].getStr();
-      if (s) {
-        ALOG_INF(PSTR("Debug:SetProfile len=%u"), (unsigned)strlen(s));
-        Standby_SetProfileFromJson(s);
-      }
-    }
-
-    if (jDbg["StandbySaveCurrentAsProfile"]) {
-      DynamicJsonDocument d(12*1024);
-      JsonObject root = d.to<JsonObject>();
-      serializeState(root, /*forPreset=*/true, /*includeBri=*/true, /*segmentBounds=*/true, /*selectedOnly=*/false);
-      String tmp; serializeJson(d, tmp);
-      Standby_SetProfileFromJson(tmp.c_str());
-      ALOG_INF(PSTR("Debug:StandbySaveCurrentAsProfile saved (%u bytes)"), (unsigned)tmp.length());
-    }
-
-    Serial.println("ABOUT TO WAIT FOR STABILITY");
-    //delay(4000);
-  }
-
-  if (jtok = obj["Debug"])
+  if (jtok2 = jobj["Arm"])
   {
-
-    ALOG_INF(PSTR("Debug command FOUND"));
-
-    JsonParserObject jDbg = jtok.getObject();
-    JsonParserToken jtok2 = 0; 
-  // ---------------- Save/Load full STATE snapshot (debug only) ----------------
-    if (jtok2 = jDbg["SaveState"]) {
-      bool includeBounds = true;
-      bool includeBri    = true;
-      bool selectedOnly  = false;
-      bool fullGlobals   = false;
-
-    //   auto t = jDbg["SaveState"]; JsonParserObject o = t.getObject();
-    //   if (o) {
-    //     if (o["includeBounds"]) includeBounds = (bool)o["includeBounds"].getInt();
-    //     if (o["includeBri"])    includeBri    = (bool)o["includeBri"].getInt();
-    //     if (o["selectedOnly"])  selectedOnly  = (bool)o["selectedOnly"].getInt();
-    //     if (o["fullGlobals"])   fullGlobals   = (bool)o["fullGlobals"].getInt();
-    //   }
-    //   ALOG_DBG(PSTR("Debug:SaveState bounds=%d bri=%d sel=%d full=%d"),
-    //            includeBounds, includeBri, selectedOnly, fullGlobals);
-      if(jtok2.getInt())
-      FileSave__State(includeBounds, includeBri, selectedOnly, fullGlobals);
-    }
-
-    if (jtok2 = jDbg["LoadState"]) {
-      uint8_t callMode = CALL_MODE_NO_NOTIFY;
-    //   auto t = jDbg["LoadState"]; JsonParserObject o = t.getObject();
-    //   if (o && o["callMode"]) callMode = (uint8_t)o["callMode"].getInt();
-    //   ALOG_DBG(PSTR("Debug:LoadState callMode=%u"), callMode);
-      if(jtok2.getInt())
-      FileLoad__State(callMode);
-    }
-
+    Standby_SetArm(jtok2.getInt() != 0);
+    data_buffer.isserviced++;
   }
 
-  #endif
+  if (jtok2 = jobj["Target"])
+  {
+    Standby_SetTarget((uint8_t)jtok2.getInt());
+    data_buffer.isserviced++;
+  }
 
+  if (jtok2 = jobj["AwakeSecs"])
+  {
+    Standby_SetAwakeDuration((uint32_t)jtok2.getInt());
+    data_buffer.isserviced++;
+  }
+
+  if (jtok2 = jobj["StandbySecs"])
+  {
+    Standby_SetStandbyDuration((uint32_t)jtok2.getInt());
+    data_buffer.isserviced++;
+  }
+
+  if (jtok2 = jobj["WakeTransitionSecs"])
+  {
+    Standby_SetWakeTransition((uint16_t)jtok2.getInt());
+    data_buffer.isserviced++;
+  }
+
+  if (jtok2 = jobj["SleepTransitionSecs"])
+  {
+    Standby_SetSleepTransition((uint16_t)jtok2.getInt());
+    data_buffer.isserviced++;
+  }
+
+  if (jtok2 = jobj["Wake"])
+  {
+    if (jtok2.getInt())
+    {
+      Standby_Wake(CALL_MODE_NO_NOTIFY);
+    }
+
+    data_buffer.isserviced++;
+  }
+
+  if (jtok2 = jobj["Sleep"])
+  {
+    if (jtok2.getInt())
+    {
+      Standby_Sleep(CALL_MODE_NO_NOTIFY);
+    }
+
+    data_buffer.isserviced++;
+  }
+}
+
+#endif
+  if (flag_geometry_updated)
+  {
+    SEGMENT_I(segment_index).refreshGeometry();
+  }
+  
   /**
    * @brief 
    * # Issue : Caused effects to reset when non lighting commands happened
@@ -2535,7 +2444,7 @@ void mAnimatorLight::CommandSet_PaletteID(uint16_t value, uint8_t segment_index)
 {
   char buffer[50];
   SEGMENT_I(segment_index).palette_id = value < mPaletteI->GetPaletteListLength() ? value : 0;  
-  segment_current_index = segment_index;
+  segment_index = segment_index;
   SEGMENT_I(segment_index).live_palette.timing1 = 0; // reset timing to force immediate load
   SEGMENT.LoadPalette(segments[segment_index].palette_id);
 }

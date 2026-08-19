@@ -93,15 +93,15 @@ class mI2C :
      ************************************************************************************************/
     
     // #ifdef USE_MODULE_NETWORK_MQTT
-    // void MQTTHandler_Init();
+    // void Telemetry_Init();
     // void MQTTHandler_RefreshAll();
     // void MQTTHandler_Rate();    
     // void MQTTHandler_Sender();
 
-    // std::vector<struct handler<mI2C>*> mqtthandler_list;    
-    // struct handler<mI2C> mqtthandler_settings;    
-    // struct handler<mI2C> mqtthandler_sensor_ifchanged;
-    // struct handler<mI2C> mqtthandler_sensor_teleperiod;    
+    // std::vector<struct telemetry_handler<mI2C>*> telemetry_list;    
+    // struct telemetry_handler<mI2C> telemetry_settings;    
+    // struct telemetry_handler<mI2C> telemetry_sensor_ifchanged;
+    // struct telemetry_handler<mI2C> telemetry_sensor_teleperiod;    
     // #endif // USE_MODULE_NETWORK_MQTT
 
 };

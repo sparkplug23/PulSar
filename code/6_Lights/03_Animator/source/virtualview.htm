@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
+<meta charset="utf-8">
+<meta name="theme-color" content="#111">
+<title>PulSar Virtual View</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#111;color:#eee;font:14px Arial,sans-serif}
+header{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:10px;background:#222;border-bottom:1px solid #555}
+button{padding:7px 13px;border:1px solid #777;border-radius:4px;background:#333;color:#eee;cursor:pointer}
+button.on{background:#eee;color:#111}
+#pause.on{background:#a84c18;color:#fff}
+#pixelSize{width:180px}
+#pixelSizeValue{min-width:42px;color:#bbb}
+#status{margin-left:auto;color:#aaa}
+.block{padding:14px 10px 18px;border-bottom:5px solid #fff}
+.title{margin-bottom:8px;font-weight:bold}
+.row{display:flex;align-items:center;gap:8px;margin:2px 0}
+.row canvas{display:block;background:#000;image-rendering:pixelated}
+.range{min-width:128px;text-align:right;color:#bbb;white-space:nowrap}
+.matrix{display:block;max-width:100%;background:#000;image-rendering:pixelated}
+</style>
+</head>
+<body>
+<header>
+	<strong>Virtual View</strong>
+	<button id="seg" class="on">Segments</button>
+	<button id="bus">Buses</button>
+	<button id="pause">Pause</button>
+	<span>Pixel size</span>
+	<input id="pixelSize" type="range" min="20" max="64" step="1" value="20">
+	<span id="pixelSizeValue">20 px</span>
+	<span id="status">Connecting…</span>
+</header>
+<main id="out"></main>
+<script>
+const VV_MARKER=80;
+const VV_VERSION=1;
+const VV_HEADER_SIZE=25;
+const VV_FLAG_2D=1;
+const VV_PIXEL_SIZE=20;
+const vvOutput=document.getElementById("out");
+const vvStatus=document.getElementById("status");
+const vvBlocks={};
+let vvMode=0;
+let vvSocket;
+let vvResizeTimer;
+let vvPaused=false;
+let vvPixelSize=VV_PIXEL_SIZE;
+function vvReadU16(data,position){
+	return(data[position]<<8)|data[position+1];
+}
+function vvReadU32(data,position){
+	return((data[position]*16777216)+(data[position+1]<<16)+(data[position+2]<<8)+data[position+3])>>>0;
+}
+function vvSubscribe(){
+	if(!vvSocket||vvSocket.readyState!==WebSocket.OPEN)return;
+	if(vvPaused){
+		vvSocket.send(JSON.stringify({vv:0}));
+		return;
+	}
+	vvSocket.send(JSON.stringify({vv:1,mode:vvMode}));
+}
+function vvClearBlocks(){
+	vvOutput.innerHTML="";
+	for(const key in vvBlocks)delete vvBlocks[key];
+}
+function vvSelectMode(mode){
+	vvMode=mode;
+	document.getElementById("seg").classList.toggle("on",vvMode===0);
+	document.getElementById("bus").classList.toggle("on",vvMode===1);
+	vvClearBlocks();
+	if(!vvPaused)vvSubscribe();
+}
+function vvTogglePause(){
+	vvPaused=!vvPaused;
+	const button=document.getElementById("pause");
+	button.textContent=vvPaused?"Resume":"Pause";
+	button.classList.toggle("on",vvPaused);
+	vvStatus.textContent=vvPaused?"Paused":"Connected";
+	vvSubscribe();
+}
+function vvSetPixelSize(size){
+	vvPixelSize=Number(size);
+	document.getElementById("pixelSizeValue").textContent=vvPixelSize+" px";
+	for(const key in vvBlocks)vvBuildBlock(vvBlocks[key]);
+}
+document.getElementById("seg").onclick=()=>vvSelectMode(0);
+document.getElementById("bus").onclick=()=>vvSelectMode(1);
+document.getElementById("pause").onclick=vvTogglePause;
+document.getElementById("pixelSize").oninput=function(){vvSetPixelSize(this.value);};
+function vvCreateBlock(id,flags,start,count,width,height){
+	const key=vvMode+"-"+id;
+	const section=document.createElement("section");
+	const title=document.createElement("div");
+	const body=document.createElement("div");
+	section.className="block";
+	title.className="title";
+	body.className="body";
+	section.append(title,body);
+	vvOutput.appendChild(section);
+	const is2D=(flags&VV_FLAG_2D)!==0;
+	title.textContent=(vvMode?"Bus ":"Segment ")+id+" — pixels "+start+"–"+(start+count-1)+(is2D?" — "+width+" × "+height:" — "+count+" pixels");
+	const block={id,flags,start,count,width,height,is2D,section,title,body,pixels:new Uint8Array(count*3),rows:[]};
+	vvBlocks[key]=block;
+	vvBuildBlock(block);
+	return block;
+}
+function vvBuildBlock(block){
+	block.body.innerHTML="";
+	block.rows=[];
+	if(block.is2D){
+		const canvas=document.createElement("canvas");
+		canvas.className="matrix";
+		canvas.width=block.width;
+		canvas.height=block.height;
+		canvas.style.width=Math.max(block.width*vvPixelSize,block.width)+"px";
+		canvas.style.height=Math.max(block.height*vvPixelSize,block.height)+"px";
+		block.body.appendChild(canvas);
+		block.canvas=canvas;
+		block.context=canvas.getContext("2d");
+		vvRedraw2D(block);
+		return;
+	}
+	const availableWidth=Math.max(1,window.innerWidth-170);
+	const pixelsPerRow=Math.max(1,Math.floor(availableWidth/vvPixelSize));
+	for(let firstPixel=0;firstPixel<block.count;firstPixel+=pixelsPerRow){
+		const rowPixelCount=Math.min(pixelsPerRow,block.count-firstPixel);
+		const row=document.createElement("div");
+		const canvas=document.createElement("canvas");
+		const label=document.createElement("span");
+		row.className="row";
+		canvas.width=rowPixelCount;
+		canvas.height=1;
+		canvas.style.width=rowPixelCount*vvPixelSize+"px";
+		canvas.style.height=vvPixelSize+"px";
+		label.className="range";
+		label.textContent="Pixels "+(block.start+firstPixel)+"–"+(block.start+firstPixel+rowPixelCount-1);
+		row.append(canvas,label);
+		block.body.appendChild(row);
+		block.rows.push({first:firstPixel,count:rowPixelCount,canvas,context:canvas.getContext("2d")});
+	}
+	vvRedraw1D(block);
+}
+function vvRedraw2D(block){
+	if(!block.context)return;
+	const image=block.context.createImageData(block.width,block.height);
+	const pixelCount=Math.min(block.count,block.width*block.height);
+	for(let pixel=0;pixel<pixelCount;pixel++){
+		const source=pixel*3;
+		const destination=pixel*4;
+		image.data[destination]=block.pixels[source];
+		image.data[destination+1]=block.pixels[source+1];
+		image.data[destination+2]=block.pixels[source+2];
+		image.data[destination+3]=255;
+	}
+	block.context.putImageData(image,0,0);
+}
+function vvDrawRow(block,row){
+	const image=row.context.createImageData(row.count,1);
+	for(let pixel=0;pixel<row.count;pixel++){
+		const source=(row.first+pixel)*3;
+		const destination=pixel*4;
+		image.data[destination]=block.pixels[source];
+		image.data[destination+1]=block.pixels[source+1];
+		image.data[destination+2]=block.pixels[source+2];
+		image.data[destination+3]=255;
+	}
+	row.context.putImageData(image,0,0);
+}
+function vvRedraw1D(block){
+	for(const row of block.rows)vvDrawRow(block,row);
+}
+function vvDrawChangedPixels(block,offset,count){
+	if(block.is2D){
+		vvRedraw2D(block);
+		return;
+	}
+	const end=offset+count;
+	for(const row of block.rows){
+		if(row.first<end&&row.first+row.count>offset)vvDrawRow(block,row);
+	}
+}
+function vvReceive(event){
+	if(vvPaused)return;
+	if(Object.prototype.toString.call(event.data)!=="[object ArrayBuffer]")return;
+	const data=new Uint8Array(event.data);
+	if(data.length<VV_HEADER_SIZE)return;
+	if(data[0]!==VV_MARKER)return;
+	if(data[1]!==VV_VERSION)return;
+	if(data[2]!==vvMode)return;
+	const flags=data[3];
+	const id=data[4];
+	const start=vvReadU32(data,7);
+	const totalPixels=vvReadU32(data,11);
+	const blockOffset=vvReadU32(data,15);
+	const packetPixels=vvReadU16(data,19);
+	const width=vvReadU16(data,21);
+	const height=vvReadU16(data,23);
+	if(totalPixels===0)return;
+	if(blockOffset>=totalPixels)return;
+	if(VV_HEADER_SIZE+packetPixels*3>data.length)return;
+	const key=vvMode+"-"+id;
+	let block=vvBlocks[key];
+	if(!block||block.start!==start||block.count!==totalPixels||block.width!==width||block.height!==height){
+		if(block)block.section.remove();
+		block=vvCreateBlock(id,flags,start,totalPixels,width,height);
+	}
+	const usablePixels=Math.min(packetPixels,totalPixels-blockOffset);
+	const sourceStart=VV_HEADER_SIZE;
+	const sourceEnd=sourceStart+usablePixels*3;
+	block.pixels.set(data.subarray(sourceStart,sourceEnd),blockOffset*3);
+	vvDrawChangedPixels(block,blockOffset,usablePixels);
+	vvStatus.textContent=(vvMode?"Bus ":"Segment ")+id+" • "+totalPixels+" px";
+}
+function vvStart(){
+	document.getElementById("pixelSize").value=vvPixelSize;
+	document.getElementById("pixelSizeValue").textContent=vvPixelSize+" px";
+	vvSocket=connectWs(socket=>{
+		vvStatus.textContent=vvPaused?"Paused":"Connected";
+		vvSubscribe();
+	});
+	vvSocket.addEventListener("message",vvReceive);
+	vvSocket.addEventListener("close",()=>vvStatus.textContent="Disconnected");
+	vvSocket.addEventListener("error",()=>vvStatus.textContent="WebSocket error");
+}
+window.addEventListener("resize",()=>{
+	clearTimeout(vvResizeTimer);
+	vvResizeTimer=setTimeout(()=>{
+		for(const key in vvBlocks){
+			if(!vvBlocks[key].is2D)vvBuildBlock(vvBlocks[key]);
+		}
+	},150);
+});
+!function vvLoadCommon(){
+	const script=document.createElement("script");
+	script.src="/lights/common.js";
+	script.onload=vvStart;
+	script.onerror=()=>setTimeout(vvLoadCommon,100);
+	document.head.appendChild(script);
+}();
+</script>
+</body>
+</html>

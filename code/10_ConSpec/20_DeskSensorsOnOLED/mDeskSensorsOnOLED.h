@@ -74,14 +74,14 @@ class mDeskSensorsOnOLED :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mDeskSensorsOnOLED>*> mqtthandler_list;
-    struct handler<mDeskSensorsOnOLED> mqtthandler_settings;
-    struct handler<mDeskSensorsOnOLED> mqtthandler_state_ifchanged;
+    std::vector<struct telemetry_handler<mDeskSensorsOnOLED>*> telemetry_list;
+    struct telemetry_handler<mDeskSensorsOnOLED> telemetry_settings;
+    struct telemetry_handler<mDeskSensorsOnOLED> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

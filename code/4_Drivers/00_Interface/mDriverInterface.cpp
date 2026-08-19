@@ -45,20 +45,33 @@ int8_t mDriverInterface::Tasker(uint8_t function, JsonParserObject obj)
     //   RulesEvent_Set_Power();
     // break;
     #endif// USE_MODULE_CORE_RULES
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      // MQTTHandler_Rate();
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      MQTTHandler_Sender();
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    #endif //USE_MODULE_NETWORK_MQTT
+    #endif
   }
   
   return function_result;
@@ -323,67 +336,33 @@ uint8_t mDriverInterface::ConstructJson_DriverStatus(uint8_t json_method, bool j
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mDriverInterface::MQTTHandler_Init(){
+void mDriverInterface::Telemetry_Init(){
 
-  struct handler<mDriverInterface>* ptr;
+  struct telemetry_handler<mDriverInterface>* ptr;
  
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mDriverInterface::ConstructJSON_Settings;
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_driver_status_teleperiod;
+  ptr = &telemetry_driver_status_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__DRIVERS_UNIFIED__CTR;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__DRIVERS_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mDriverInterface::ConstructJson_DriverStatus;
+  telemetry_list.push_back(ptr);
 
 } 
-
-
-/**
- * @brief Set flag for all mqtthandlers to send
- * */
-void mDriverInterface::MQTTHandler_RefreshAll()
-{
-  for(auto& handle:mqtthandler_list){
-    handle->flags.SendNow = true;
-  }
-}
-
-/**
- * @brief Update 'tRateSecs' with shared teleperiod
- * */
-void mDriverInterface::MQTTHandler_Rate()
-{
-  for(auto& handle:mqtthandler_list){
-    if(handle->topic_type == MQTT_TOPIC_TYPE_TELEPERIOD_ID)
-      handle->tRateSecs = tkr_mqtt->dt.teleperiod_secs;
-    if(handle->topic_type == MQTT_TOPIC_TYPE_IFCHANGED_ID)
-      handle->tRateSecs = tkr_mqtt->dt.ifchanged_secs;
-  }
-}
-
-
-/**
- * @brief MQTTHandler_Sender
- * */
-void mDriverInterface::MQTTHandler_Sender()
-{
-  for(auto& handle:mqtthandler_list){
-    tkr_mqtt->MQTTHandler_Command_UniqueID(*this, GetModuleUniqueID(), handle);
-  }
-}
-
 #endif // USE_MODULE_NETWORK_MQTT
 
 

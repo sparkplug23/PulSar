@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
+<meta name="theme-color" content="#141414">
+<title>PulSar</title>
+
+<style>
+:root{
+  --bg:#121212;
+  --panel:#1a1a1a;
+  --panel2:#171717;
+  --border:#2b2b2b;
+  --text:#e8e8e8;
+  --muted:#a6a6a6;
+  --btn:#232323;
+  --btnh:#2c2c2c;
+  --accent:#4da3ff;
+  --radius:14px;
+  --shadow:0 8px 24px rgba(0,0,0,.25);
+}
+
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Segoe UI,Roboto,Arial,sans-serif}
+button{font:inherit;color:inherit}
+.mono{font-family:Consolas,Menlo,Monaco,monospace}
+
+.wrap{
+  min-height:100%;
+  display:grid;
+  grid-template-columns:250px 1fr;
+  gap:12px;
+  padding:12px;
+  box-sizing:border-box;
+}
+
+.rail,.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+.rail{
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  border-radius:12px;
+  background:linear-gradient(180deg,#1c1c1c,#171717);
+  border:1px solid var(--border);
+}
+
+.brand .dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 0 4px rgba(77,163,255,.15);
+}
+
+.brand .title{font-size:17px;font-weight:600}
+.brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+.railsec{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px;
+  background:var(--panel2);
+}
+
+.railsec h3{
+  margin:0 0 8px;
+  font-size:12px;
+  color:var(--muted);
+  font-weight:600;
+  letter-spacing:.35px;
+  text-transform:uppercase;
+}
+
+.railbtn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:10px;
+  margin-top:6px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--btn);
+  cursor:pointer;
+}
+
+.railbtn:first-of-type{margin-top:0}
+.railbtn:hover,.tile:hover,.link:hover{background:var(--btnh)}
+.railbtn:active,.tile:active{transform:translateY(1px)}
+
+.railbtn .l{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:2px;
+}
+
+.railbtn .name{font-size:14px;font-weight:600}
+.railbtn .desc{font-size:12px;color:var(--muted)}
+.railbtn .go{font-size:12px;color:var(--muted)}
+
+.main{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.card{
+  padding:16px;
+  box-sizing:border-box;
+}
+
+.card h2{
+  margin:0 0 8px;
+  font-size:17px;
+}
+
+.card p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+}
+
+.grid{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+
+.tile{
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--btn);
+  padding:14px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-height:82px;
+}
+
+.tile .t{font-size:15px;font-weight:700}
+.tile .d{font-size:12px;color:var(--muted);line-height:1.35}
+.tile .u{font-size:12px;color:var(--muted);margin-top:auto}
+
+.kv{
+  display:grid;
+  grid-template-columns:130px 1fr;
+  gap:8px 10px;
+  margin-top:12px;
+  font-size:12px;
+}
+
+.k{color:var(--muted)}
+.v{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.foot{
+  margin-top:auto;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.pill,.link{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#101010;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.link{cursor:pointer}
+
+.pill .b{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--accent);
+}
+
+.module-dependent{
+  display:none;
+}
+
+.module-dependent.module-active{
+  display:flex;
+}
+
+@media(max-width:1000px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:860px){
+  .wrap{grid-template-columns:1fr}
+}
+
+@media(max-width:520px){
+  .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <aside class="rail">
+
+    <div class="brand">
+      <div class="dot"></div>
+      <div>
+        <div class="title">PulSar</div>
+      </div>
+    </div>
+
+    <div class="railsec">
+      <h3>Applications</h3>
+
+      <button class="railbtn module-dependent" data-module="pixels" type="button" onclick="go('/lights')">
+        <span class="l"><span class="name">Lights</span><span class="desc">Lighting and animation</span></span>
+        <span class="go">›</span>
+      </button>
+
+      <button class="railbtn module-dependent" data-module="nextion" type="button" onclick="go('/nextion/main')">
+        <span class="l"><span class="name">Nextion</span><span class="desc">Display and HMI</span></span>
+        <span class="go">›</span>
+      </button>
+
+      <button class="railbtn" type="button" onclick="go('/system/controls')">
+        <span class="l"><span class="name">System Controls</span><span class="desc">Device controls</span></span>
+        <span class="go">›</span>
+      </button>
+    </div>
+
+    <div class="railsec">
+      <h3>System</h3>
+
+      <button class="railbtn" type="button" onclick="go('/settings')">
+        <span class="l"><span class="name">Settings</span><span class="desc">Device configuration</span></span>
+        <span class="go">›</span>
+      </button>
+
+      <button class="railbtn" type="button" onclick="go('/console')">
+        <span class="l"><span class="name">Console</span><span class="desc">Live log and commands</span></span>
+        <span class="go">›</span>
+      </button>
+
+      <button class="railbtn" type="button" onclick="go('/edit')">
+        <span class="l"><span class="name">Files</span><span class="desc">Internal filesystem</span></span>
+        <span class="go">›</span>
+      </button>
+
+      <button class="railbtn" type="button" onclick="go('/sdedit')">
+        <span class="l"><span class="name">SD Files</span><span class="desc">SD card filesystem</span></span>
+        <span class="go">›</span>
+      </button>
+
+      <button class="railbtn" type="button" onclick="go('/update')">
+        <span class="l"><span class="name">Firmware Update</span><span class="desc">Upload and flash firmware</span></span>
+        <span class="go">›</span>
+      </button>
+    </div>
+
+    <div class="railsec">
+      <h3>Advanced</h3>
+
+      <button class="railbtn" type="button" onclick="go('/debug/main')">
+        <span class="l"><span class="name">Advanced</span><span class="desc">Diagnostics and developer tools</span></span>
+        <span class="go">›</span>
+      </button>
+    </div>
+
+    <div class="foot">
+      <span class="pill"><span class="b"></span><span id="st">ready</span></span>
+      <span class="pill mono" id="host">host:—</span>
+    </div>
+
+  </aside>
+
+
+  <main class="main">
+
+    <section class="card">
+      <h2>Overview</h2>
+      <p>PulSar provides a common control layer for installed modules and services.</p>
+
+      <div class="kv">
+        <div class="k">Device</div><div class="v mono" id="device">PulSar</div>
+        <div class="k">Host</div><div class="v mono" id="origin">—</div>
+        <div class="k">Version</div><div class="v mono">##VERSION##</div>
+        <div class="k">Firmware Branch</div><div class="v mono">##FIRMWARE_BRANCH##</div>
+        <div class="k">Build</div><div class="v mono">##BUILD_DATETIME##</div>
+        <div class="k">Environment</div><div class="v mono">##BUILD_ENV##</div>
+        <div class="k">Build Host</div><div class="v mono">##BUILD_HOST##</div>
+        <div class="k">Git Branch</div><div class="v mono">##GIT_BRANCH##</div>
+        <div class="k">Git Commit</div><div class="v mono">##GIT_COMMIT##</div>
+      </div>
+    </section>
+
+
+    <section class="card">
+      <h2>Applications</h2>
+
+      <div class="grid">
+
+        <div class="tile module-dependent" data-module="pixels" onclick="go('/lights')">
+          <div class="t">Lights</div>
+          <div class="d">Effects, palettes, segments, presets and lighting control.</div>
+          <div class="u mono">/lights</div>
+        </div>
+
+        <div class="tile module-dependent" data-module="nextion" onclick="go('/nextion/main')">
+          <div class="t">Nextion</div>
+          <div class="d">Display control, upload and HMI management.</div>
+          <div class="u mono">/nextion/main</div>
+        </div>
+
+        <div class="tile" onclick="go('/system/controls')">
+          <div class="t">System Controls</div>
+          <div class="d">Direct device and system-level controls.</div>
+          <div class="u mono">/system/controls</div>
+        </div>
+
+        <div class="tile" onclick="go('/settings')">
+          <div class="t">Settings</div>
+          <div class="d">Network, hardware, system, modules, storage and security.</div>
+          <div class="u mono">/settings</div>
+        </div>
+
+        <div class="tile" onclick="go('/console')">
+          <div class="t">Console</div>
+          <div class="d">Runtime logs and command interface.</div>
+          <div class="u mono">/console</div>
+        </div>
+
+        <div class="tile" onclick="go('/debug/main')">
+          <div class="t">Advanced</div>
+          <div class="d">Diagnostics, internal state and developer tools.</div>
+          <div class="u mono">/debug/main</div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+
+<script>
+const TELEMETRY_API = '/debug/api/telemetry';
+const MODULE_QUERY_TIMEOUT_MS = 1500;
+
+function go(path){
+  if (!path) return;
+
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    location.href = path;
+    return;
+  }
+
+  if (path[0] !== "/") path = "/" + path;
+  location.href = path;
+}
+
+function moduleMatches(required, activeModules)
+{
+  if (!required) return false;
+
+  const names = required
+    .split(',')
+    .map(name => name.trim().toLowerCase())
+    .filter(name => name.length);
+
+  for (const name of names)
+  {
+    if (activeModules.has(name)) return true;
+  }
+
+  return false;
+}
+
+async function updateModuleVisibility()
+{
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), MODULE_QUERY_TIMEOUT_MS);
+
+  try
+  {
+    const res = await fetch(
+      TELEMETRY_API + '?topic=' + encodeURIComponent('telemetry/taskermanager'),
+      {
+        cache:'no-store',
+        signal:controller.signal
+      }
+    );
+
+    if (!res.ok) return;
+
+    const data = await res.json();
+
+    if (!data || !data.packet || !Array.isArray(data.packet.Modules)) return;
+
+    const activeModules = new Set();
+
+    for (const module of data.packet.Modules)
+    {
+      if (!module || !module.Name) continue;
+      activeModules.add(String(module.Name).trim().toLowerCase());
+    }
+
+    document.querySelectorAll('[data-module]').forEach(element =>
+    {
+      element.classList.toggle(
+        'module-active',
+        moduleMatches(element.dataset.module, activeModules)
+      );
+    });
+  }
+  catch(e)
+  {
+  }
+  finally
+  {
+    clearTimeout(timeout);
+  }
+}
+
+(function init(){
+  const host = document.getElementById("host");
+  const origin = document.getElementById("origin");
+
+  host.textContent = "host:" + (location.host || "—");
+  origin.textContent = location.origin || "—";
+
+  updateModuleVisibility();
+})();
+</script>
+
+</body>
+</html>

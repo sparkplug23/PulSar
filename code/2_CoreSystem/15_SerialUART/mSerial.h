@@ -151,14 +151,14 @@ class mSerial :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mSerial>*> mqtthandler_list;
-    struct handler<mSerial> mqtthandler_settings;
-    struct handler<mSerial> mqtthandler_uartinfo_teleperiod;
+    std::vector<struct telemetry_handler<mSerial>*> telemetry_list;
+    struct telemetry_handler<mSerial> telemetry_settings;
+    struct telemetry_handler<mSerial> telemetry_uartinfo_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
     /************************************************************************************************

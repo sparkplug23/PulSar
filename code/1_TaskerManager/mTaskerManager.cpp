@@ -33,12 +33,29 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
       return TASKER_RESULT__ERROR_ID;
     }
 
+    // for(auto& mod:pModule)
+    // {
+    //   mod->Tasker(task, obj);
+    //   #ifdef ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
+    //   mod->Tasker_DevCode(task, obj);
+    //   #endif
+    // }
     for(auto& mod:pModule)
     {
+      uint32_t start_us = micros();
+
       mod->Tasker(task, obj);
+
       #ifdef ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
       mod->Tasker_DevCode(task, obj);
       #endif
+
+      uint32_t elapsed_us = micros() - start_us;
+
+      if(elapsed_us > 20000)
+      {
+        ALOG_ERR(PSTR("TASKER LONG JSON module=%S id=%u time=%luus"), mod->GetModuleName(), mod->GetModuleUniqueID(), elapsed_us);
+      }
     }
     
     return TASKER_RESULT__SUCCESS_ID;
@@ -518,8 +535,11 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_SENSORS_ROTARY_ENCODER
   addTasker(new mRotaryEncoder());
   #endif
-  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+  #ifdef USE_MODULE_SENSORS_SUN_TRACKING
   addTasker(new mSunTracking());
+  #endif
+  #ifdef USE_MODULE_SENSORS_SUN_TRACKING_FAST_ESTIMATE
+  addTasker(new mSunTracking_FastEstimate());
   #endif
   #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
   addTasker(new mTOF_VL53L0X());
@@ -784,9 +804,9 @@ const char* mTaskerManager::GetTaskName_Full(uint16_t task)
     case TASK_MQTT_CONNECTED:                         return PM_TASK_MQTT_CONNECTED_CTR;
     case TASK_MQTT_DISCONNECTED:                      return PM_TASK_MQTT_DISCONNECTED_CTR;
     case TASK_MQTT_COMMAND:                           return PM_TASK_MQTT_COMMAND_CTR;
-    case TASK_MQTT_SENDER:                            return PM_TASK_MQTT_SENDER_CTR;
-    case TASK_MQTT_HANDLERS_INIT:                     return PM_TASK_MQTT_HANDLERS_INIT_CTR;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:       return PM_TASK_MQTT_HANDLERS_REFRESH_TELEPERIOD_CTR;
+    case TASK_TELEMETRY__SENDER_MQTT:                            return PM_TASK_TELEMETRY__SENDER_MQTT_CTR;
+    case TASK_TELEMETRY_HANDLERS_INIT:                     return PM_TASK_MQTT_HANDLERS_INIT_CTR;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:       return PM_TASK_MQTT_HANDLERS_REFRESH_TELEPERIOD_CTR;
     case TASK_SET_POWER:                              return PM_TASK_SET_POWER_CTR;
     case TASK_SET_DEVICE_POWER:                       return PM_TASK_SET_DEVICE_POWER_CTR;
     case TASK_SHOW_SENSOR:                            return PM_TASK_SHOW_SENSOR_CTR;

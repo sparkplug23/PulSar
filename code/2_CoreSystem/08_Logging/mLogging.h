@@ -392,6 +392,7 @@ do {                                                                         \
 #endif
 
 
+#define DEBUG_PRINT_LN(x) Serial.println(x); Serial.flush();
 
 
 
@@ -477,6 +478,7 @@ do {                                                                         \
 #else
   #define DEBUG_LINE_LED   //nothing, no code
 #endif
+
 
 
 /**

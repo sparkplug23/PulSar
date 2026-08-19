@@ -350,13 +350,13 @@ class mSDCard :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
+    void Telemetry_Init();
 
-    std::vector<struct handler<mSDCard>*> mqtthandler_list;
+    std::vector<struct telemetry_handler<mSDCard>*> telemetry_list;
 
-    struct handler<mSDCard> mqtthandler_settings;
-    struct handler<mSDCard> mqtthandler_state_ifchanged;
-    struct handler<mSDCard> mqtthandler_state_teleperiod;
+    struct telemetry_handler<mSDCard> telemetry_settings;
+    struct telemetry_handler<mSDCard> telemetry_state_ifchanged;
+    struct telemetry_handler<mSDCard> telemetry_state_teleperiod;
     #endif
 
 };

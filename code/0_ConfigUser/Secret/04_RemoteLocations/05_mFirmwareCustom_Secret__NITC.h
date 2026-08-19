@@ -19,6 +19,7 @@
 // #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__TESTBOARD
 // #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__INSTALLED_BOARD
 // #define DEVICE_NITC__SERVER_ROOM__AMBIENT_SENSOR
+// #define DEVICE_NITC__SERVER_ROOM__ACVENT_SENSOR
 
 
 
@@ -995,6 +996,298 @@
 
 
 #endif
+
+
+
+/**
+ * @description: 
+ * 
+ * **********************************************************************************************************************************************************************************/
+#ifdef DEVICE_NITC__SERVER_ROOM__ACVENT_SENSOR
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template_name"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "Template Name"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "Template Description"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
+  
+  #define SETTINGS_HOLDER 1239
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+ 
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+  /***********************************
+   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+  ************************************/  
+  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+  #define ENABLE_TEMPLATE_SECTION__DISPLAY_OLED
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
+    #define USE_MODULE_SENSORS_DS18X20
+      #define DS18X20_MAX_SENSORS 20
+        #define ENABLE_DEBUG_MQTT_CHANNEL_DB18X20    
+  #endif
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
+    #define USE_MODULE_SENSORS_BME
+  #endif  
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+    #define USE_MODULE_SENSORS_BH1750
+  #endif
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION)
+   #define USE_MODULE_SENSORS_INTERFACE
+   #define USE_MODULE_SENSORS_PIR
+  #endif
+  
+  /***********************************
+   * SECTION: Drivers Configs
+  ************************************/
+ 
+  // #define USE_MODULE_DRIVERS_INTERFACE
+  // #define USE_MODULE_DRIVERS_LEDS
+  
+  /***********************************
+   * SECTION: Displays Configs
+  ************************************/
+
+  #ifdef ENABLE_TEMPLATE_SECTION__DISPLAY_OLED
+  #define USE_MODULE_DISPLAYS_INTERFACE
+  #define USE_MODULE_DISPLAYS_OLED_SH1106
+    #define SHOW_SPLASH
+    // 4x10
+    // Uptime so I know its working by glance
+    // Relay Minutes On
+    // Shower Temp /     Bath Temp
+  #endif
+  
+  /***********************************
+   * SECTION: Controllers Configs
+  ************************************/
+
+  #define USE_MODULE_CONTROLLER_CUSTOM__OLED_NITC_AMBIENT
+
+ 
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR "1"  "\"," // if no index, assume its 1, only set as 0 when defined (eg serial0). perhaps easier to just understand serial as offset?
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR "1"  "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_DS18X20
+      "\"23\":\"" D_GPIO_DS18X20_1_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_PIR
+      "\"4\":\"" D_GPIO_PIR_CTR "1" "\","       // Room
+      #endif 
+      "\"2\":\""  D_GPIO_LED_INV_CTR "1" "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  /***********************************
+   * SECTION: Device Configs
+  ************************************/    
+
+  #define D_DEVICE_SENSOR_DB18S20_01_NAME        "Hub Room"
+  #define D_DEVICE_SENSOR_DB18S20_01_ADDRESS     "[40,169,117,83,0,0,0,59]"
+  #define D_DEVICE_SENSOR_DB18S20_02_NAME        "DB3m"
+  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS     "[40,227,225,191,0,0,0,114]"
+
+  #define D_DEVICE_SENSOR_DB18S20_03_NAME        "FrontRight50"
+  #define D_DEVICE_SENSOR_DB18S20_03_ADDRESS     "[40,38,95,51,0,0,0,32]"
+  #define D_DEVICE_SENSOR_DB18S20_04_NAME        "FrontRight75"
+  #define D_DEVICE_SENSOR_DB18S20_04_ADDRESS     "[40,15,153,47,0,0,0,148]"
+  #define D_DEVICE_SENSOR_DB18S20_05_NAME        "FrontRight100"
+  #define D_DEVICE_SENSOR_DB18S20_05_ADDRESS     "[40,217,113,51,0,0,0,44]"
+  
+  #define D_DEVICE_SENSOR_BME_LONG_WIRE_NAME  "Room"
+  #define D_DEVICE_SENSOR_BME_SHORT_WIRE_NAME "None"
+
+  #define D_DEVICE_SENSOR_BH1750_NAME "Room"
+
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "NITC Server Room"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+        "\"" "PRINTER" "\""
+      "],"
+      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+        "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
+      "],"
+      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+        "\"" D_DEVICE_SENSOR_BME_LONG_WIRE_NAME "\","   // 0x76
+        "\"" D_DEVICE_SENSOR_BME_SHORT_WIRE_NAME  "\""  // 0x77
+      "],"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+        // Group 1
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_05_NAME "\""    
+      "]"
+    "},"
+    "\"" D_SENSORADDRESS "\":{"
+      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\":" D_DEVICE_SENSOR_DB18S20_04_ADDRESS ","      
+        "\"" D_DEVICE_SENSOR_DB18S20_05_NAME "\":" D_DEVICE_SENSOR_DB18S20_05_ADDRESS ""
+      "}"  
+    "}"
+  "}";
+
+
+//   /**
+//    * @brief Should make the display layout via json, which negates the need of a custom controller each time
+//    * DH %d.%d, 
+//    * 
+//    */
+
+   
+// // [AP] SSID: ServerLink_AP
+// // [AP] Password: 
+// // [AP] IP: 192.168.50.1
+// // [AP] MAC: 5C:01:3B:95:96:25
+
+// #define STA_SSID4 "ServerLink32"
+// #define STA_PASS4 "af4d8bc9ab"
+// #define MQTT_HOST   "192.168.50.2" //ecit01818 wifi via esp32
+// #define MQTT_PORT     1883
+
+
+// #define USE_NETWORK_TEMPLATE__OVERRIDE
+// #define USE_NETWORK_TEMPLATE
+//   DEFINE_PGM_CTR(NETWORK_TEMPLATE)
+//   "{"
+//     "\"Version\":2,"
+
+//     "\"Interface\":{"
+//       "\"Policy\":{"
+//         "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+//         "\"AllowMultipleActive\":true,"
+//         "\"BlockRemoteMqttWhenLocalAvailable\":true"
+//       "}"
+//     "},"
+
+//     "\"WiFi\":{"
+//       "\"EN\":true,"
+//       "\"Backoff\":[5,60,600],"
+
+//       "\"Mode\":{"
+//         "\"STA\":true,"
+//         "\"AP\":true,"
+//         "\"STA_AP\":true,"
+//         "\"APBootMins\":10,"
+//         "\"APOnSTAFail\":true,"
+//         "\"APFailDelayMins\":0,"
+//         "\"APAlwaysOn\":false"
+//       "},"
+
+//       "\"Station\":{"
+//         "\"Profiles\":["
+//           "{"
+//             "\"SSID\":\"" STA_SSID4 "\","
+//             "\"Password\":\"" STA_PASS4 "\""
+//           "},"
+//           "{"
+//             "\"SSID\":\"" STA_SSID1 "\","
+//             "\"Password\":\"" STA_PASS1 "\""
+//           "}"
+//         "],"
+
+//         "\"IPv4\":{"
+//           "\"Static\":true,"
+//           "\"IP\":\"192.168.50.50\","
+//           "\"Subnet\":\"255.255.255.0\","
+//           "\"Gateway\":\"0.0.0.0\","
+//           "\"DNS1\":\"0.0.0.0\","
+//           "\"DNS2\":\"0.0.0.0\""
+//         "}"
+//       "},"
+
+//       "\"SoftAP\":{"
+//         "\"SSID\":\"" SOFTAP_SSID "AmSen" "\","
+//         "\"Password\":\"" SOFTAP_PASSWORD "\","
+//         "\"Channel\":1"
+//       "}"
+//     "},"
+
+
+//     "\"MQTT\":{"
+//       "\"EN\":true,"
+
+//       "\"UpdateSeconds\":{"
+//         "\"IfChanged\":1,"
+//         "\"TelePeriod\":60,"
+//         "\"ConfigPeriod\":60"
+//       "},"
+
+//       "\"Brokers\":["
+//         "{"
+//           "\"Id\":\"home\","
+//           "\"EN\":true,"
+//           "\"Host\":\"" MQTT_HOST "\","
+//           "\"Port\":" STR(MQTT_PORT) ","
+//           "\"User\":\"\","
+//           "\"Password\":\"\","
+//           "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+//           "\"ClientName\":\"" DEVICENAME_CTR "\","
+//           "\"Backoff\":[5,10,60],"
+//           "\"Transport\":[\"Ethernet\",\"WiFi\"],"
+//           "\"PrefTransport\":[\"Ethernet\",\"WiFi\"],"
+//           "\"OutgoingLevel\":3,"
+//           "\"OutgoingLimiterMs\":0"
+//         "}"
+//       "]"
+//     "}"
+//   "}";
+
+
+// 1840 has the only esp32, which is the AP for now
+
+
+
+#endif
+
 
 
 
