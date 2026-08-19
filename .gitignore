@@ -32,3 +32,4 @@ build_output/
 *.gz
 
 
+.pio/
