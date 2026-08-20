@@ -163,7 +163,7 @@ uint8_t rule_count2 = 0;
     }rules[D_MAX_RULES];
 
     // This will need to become an array or queue, that way consecutive rules can trigger at the same time
-    EventPackage event_triggered;
+    EventPackage event_triggered;// = {0};
 
 
     uint8_t rules_active_index = 0;

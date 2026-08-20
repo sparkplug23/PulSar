@@ -362,6 +362,8 @@ class MQTTConnection
     void MqttDataHandler(char* mqtt_topic, uint8_t* mqtt_data, unsigned int data_len);     
     void MqttDisconnected(int state);
     void SetPubSubClient(Client* client);
+    void ClearPubSubClient(void);
+
     bool MQTTHandler_Send_Formatted_UniqueID(uint8_t topic_type, uint16_t unique_id, const char* postfix_topic_ctr, bool retain_flag = false);
     void Send_Prefixed_P(const char* topic, PGM_P formatP, ...);
     bool publish_ft( const char* module_name,uint8_t topic_type_id, const char* topic_postfix, const char* payload, uint8_t retain_flag);

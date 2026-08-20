@@ -1985,39 +1985,112 @@ uint8_t mSensorsInterface::ConstructJSON_Event_Motion(uint8_t json_level, bool j
 
 
 
-uint8_t mSensorsInterface::ConstructJSON_Event_UserInput(uint8_t json_level, bool json_appending){
+// uint8_t mSensorsInterface::ConstructJSON_Event_UserInput(uint8_t json_level, bool json_appending){
 
-  char buffer[100];
+//   char buffer[100];
 
-  if(!tkr_rules->event_triggered.isvalid) return JBI->End();
+//   if(!tkr_rules->event_triggered.isvalid) return JBI->End();
+
+//   JBI->Start();
+
+//   JBI->Add("Source", tkr->GetModuleName( tkr_rules->event_triggered.module_id ));
+//   JBI->Add("Name", DLI->GetDeviceName_WithModuleUniqueID( tkr_rules->event_triggered.module_id, tkr_rules->event_triggered.device_id, buffer, sizeof(buffer)));
+//   JBI->Add("Value", tkr_rules->event_triggered.value.data[0]);
+
+//   char state[100];
+
+//   #ifdef USE_MODULE_SENSORS_SWITCHES
+//   if(tkr_rules->event_triggered.module_id == tkr_switch->GetModuleUniqueID())
+//   {
+//     tkr_switch->GetStateName(tkr_rules->event_triggered.value.data[0], state, sizeof(state));
+//   }
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_BUTTONS
+//   if(tkr_rules->event_triggered.module_id == tkr_button->GetModuleUniqueID())
+//   {
+//     tkr_button->GetStateName(tkr_rules->event_triggered.value.data[0], tkr_rules->event_triggered.value.data[1], state, sizeof(state)); // data0=type, data1=presses
+//   }
+//   #endif
+
+//   JBI->Add("State", state);
+//   JBI->Add("LocalTime", tkr_time->GetTime().c_str());
+
+
+//   return JBI->End();
+    
+// }
+uint8_t mSensorsInterface::ConstructJSON_Event_UserInput(uint8_t json_level, bool json_appending)
+{
+  if(!tkr_rules->event_triggered.isvalid)
+  {
+    JBI->Start();
+    return JBI->End();
+  }
 
   JBI->Start();
 
-  JBI->Add("Source", tkr->GetModuleName( tkr_rules->event_triggered.module_id ));
-  JBI->Add("Name", DLI->GetDeviceName_WithModuleUniqueID( tkr_rules->event_triggered.module_id, tkr_rules->event_triggered.device_id, buffer, sizeof(buffer)));
+  char buffer[100] = {0};
+  char state[100] = {0};
+
+  const uint16_t module_id = tkr_rules->event_triggered.module_id;
+  const uint16_t device_id = tkr_rules->event_triggered.device_id;
+
+  const char* module_name = tkr->GetModuleName(module_id);
+
+  if(module_name)
+  {
+    JBI->Add("Source", module_name);
+  }
+  else
+  {
+    JBI->Add("SourceID", module_id);
+  }
+
+  const char* device_name = DLI->GetDeviceName_WithModuleUniqueID(module_id, device_id, buffer, sizeof(buffer));
+
+  if(device_name && device_name[0] != '\0')
+  {
+    JBI->Add("Name", device_name);
+  }
+  else
+  {
+    JBI->Add("DeviceID", device_id);
+  }
+
   JBI->Add("Value", tkr_rules->event_triggered.value.data[0]);
 
-  char state[100];
+  bool state_valid = false;
 
   #ifdef USE_MODULE_SENSORS_SWITCHES
-  if(tkr_rules->event_triggered.module_id == tkr_switch->GetModuleUniqueID())
+  if(module_id == tkr_switch->GetModuleUniqueID())
   {
     tkr_switch->GetStateName(tkr_rules->event_triggered.value.data[0], state, sizeof(state));
-  }
-  #endif
-  #ifdef USE_MODULE_SENSORS_BUTTONS
-  if(tkr_rules->event_triggered.module_id == tkr_button->GetModuleUniqueID())
-  {
-    tkr_button->GetStateName(tkr_rules->event_triggered.value.data[0], tkr_rules->event_triggered.value.data[1], state, sizeof(state)); // data0=type, data1=presses
+    state_valid = state[0] != '\0';
   }
   #endif
 
-  JBI->Add("State", state);
+  #ifdef USE_MODULE_SENSORS_BUTTONS
+  if(module_id == tkr_button->GetModuleUniqueID())
+  {
+    tkr_button->GetStateName(
+      tkr_rules->event_triggered.value.data[0],
+      tkr_rules->event_triggered.value.data[1],
+      state,
+      sizeof(state)
+    );
+
+    state_valid = state[0] != '\0';
+  }
+  #endif
+
+  if(state_valid)
+  {
+    JBI->Add("State", state);
+  }
+
   JBI->Add("LocalTime", tkr_time->GetTime().c_str());
 
-
   return JBI->End();
-    
 }
 
 
@@ -2138,16 +2211,16 @@ void mSensorsInterface::Telemetry_Init(){
 
   ALOG_INF(PSTR("Telemetry_Init size %d"), telemetry_list.size()  );
  
-  // ptr = &telemetry_settings;
-  // ptr->tSavedLastSent = 0;
-  // ptr->flags.PeriodicEnabled = true;
-  // ptr->flags.SendNow = true;
-  // ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
-  // ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  // ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  // ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  // ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Settings;
-  // telemetry_list.push_back(ptr);
+  ptr = &telemetry_settings;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Settings;
+  telemetry_list.push_back(ptr);
 
   ptr = &telemetry_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
@@ -2171,59 +2244,59 @@ void mSensorsInterface::Telemetry_Init(){
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Sensor;
   telemetry_list.push_back(ptr);
 
-  // ptr = &telemetry_sensor_temperature_colours;
-  // ptr->tSavedLastSent = 0;
-  // ptr->flags.PeriodicEnabled = true;
-  // ptr->flags.SendNow = true;
-  // ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  // ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  // ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  // ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
-  // ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_SensorTemperatureColours;
-  // telemetry_list.push_back(ptr);
+  ptr = &telemetry_sensor_temperature_colours;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
+  ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_SensorTemperatureColours;
+  telemetry_list.push_back(ptr);
   
-  // #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
-  // ptr = &telemetry_sensor_unified_filtered;
-  // ptr->tSavedLastSent = 0;
-  // ptr->flags.PeriodicEnabled = true;
-  // ptr->flags.SendNow = true;
-  // ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  // ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  // ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  // ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED_FILTERED__CTR;
-  // ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Unified_Filtered;
-  // telemetry_list.push_back(ptr);
-  // #endif
+  #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
+  ptr = &telemetry_sensor_unified_filtered;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = true;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED_FILTERED__CTR;
+  ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Unified_Filtered;
+  telemetry_list.push_back(ptr);
+  #endif
 
-  // //motion events
-  // ptr = &telemetry_motion_event_ifchanged;
-  // ptr->tSavedLastSent = 0;
-  // ptr->flags.PeriodicEnabled = false;
-  // ptr->flags.SendNow = false;
-  // ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  // ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  // ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  // ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_MOTION__CTR;
-  // ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_Motion;
-  // telemetry_list.push_back(ptr);
+  //motion events
+  ptr = &telemetry_motion_event_ifchanged;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_MOTION__CTR;
+  ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_Motion;
+  telemetry_list.push_back(ptr);
 
-  // ptr = &telemetry_event_input;
-  // ptr->tSavedLastSent = 0;
-  // ptr->flags.PeriodicEnabled = false;
-  // ptr->flags.SendNow = false;
-  // ptr->tRateSecs = SEC_IN_HOUR; 
-  // ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  // ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  // ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_USER_INPUT__CTR;
-  // ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_UserInput;
-  // telemetry_list.push_back(ptr);
+  ptr = &telemetry_event_input;
+  ptr->tSavedLastSent = 0;
+  ptr->flags.PeriodicEnabled = false;
+  ptr->flags.SendNow = false;
+  ptr->tRateSecs = SEC_IN_HOUR; 
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_USER_INPUT__CTR;
+  ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_UserInput;
+  telemetry_list.push_back(ptr);
 
 
   ptr = &telemetry_system_location; 
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = SEC_IN_HOUR; 
+  ptr->tRateSecs = 1;//SEC_IN_HOUR; 
   ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_SYSTEM_LOCATION__CTR;

@@ -536,6 +536,21 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(
     }
   }
 
+  // if(flag_respond_nomatch_if_not_found)
+  // {
+  //   snprintf(buffer, buffer_size, "%S", PM_SEARCH_NOMATCH);
+  // }
+  // else
+  // {
+  //   #ifdef ENABLE_DEVFEATURE_DEVICENAMES__USE_DEVICE_ID_WHEN_NO_NAME_MATCHED
+  //   snprintf(buffer, buffer_size, "%S_%02d", tkr->GetModuleName(unique_module_id), device_id);
+  //   #else
+  //   snprintf(buffer, buffer_size, "%S_Unknown_%03d", tkr->GetModuleName(unique_module_id), random(1000));
+  //   #endif
+  // }
+
+  const char* module_name = tkr->GetModuleName(unique_module_id);
+
   if(flag_respond_nomatch_if_not_found)
   {
     snprintf(buffer, buffer_size, "%S", PM_SEARCH_NOMATCH);
@@ -543,11 +558,34 @@ const char* DeviceNameList::GetDeviceName_WithModuleUniqueID(
   else
   {
     #ifdef ENABLE_DEVFEATURE_DEVICENAMES__USE_DEVICE_ID_WHEN_NO_NAME_MATCHED
-    snprintf(buffer, buffer_size, "%S_%02d", tkr->GetModuleName(unique_module_id), device_id);
+
+    if(module_name)
+    {
+      snprintf(buffer, buffer_size, "%S_%02d", module_name, device_id);
+    }
+    else
+    {
+      snprintf(buffer, buffer_size, "Module_%u_%02d", (uint16_t)unique_module_id, device_id);
+    }
+
     #else
-    snprintf(buffer, buffer_size, "%S_Unknown_%03d", tkr->GetModuleName(unique_module_id), random(1000));
+
+    if(module_name)
+    {
+      snprintf(buffer, buffer_size, "%S_Unknown_%03d", module_name, random(1000));
+    }
+    else
+    {
+      snprintf(buffer, buffer_size, "Module_%u_Unknown_%03d", (uint16_t)unique_module_id, random(1000));
+    }
+
     #endif
   }
+
+  ALOG_WRN(PSTR("DeviceName Undefined >> module=%u device=%d name=%s"), (uint16_t)unique_module_id, device_id, buffer);
+
+  return buffer;
+
 
   ALOG_WRN(PSTR("DeviceName Undefined >> %s"), buffer);
 

@@ -142,22 +142,48 @@ void mSIM7000G::ModemInit_Tick(uint32_t now_ms)
   ALOG_DBG(PSTR(D_LOG_CELLULAR "Modem restart complete"));
 }
 
+// TinyGsmClient* mSIM7000G::DataNetwork_GetOrCreateClient(bool force_recreate)
+// {
+//   if (!modem) return nullptr;
+
+//   if (force_recreate && gsm_client) {
+//     gsm_client->stop();
+//     delete gsm_client;
+//     gsm_client = nullptr;
+//   }
+
+//   if (!gsm_client) {
+//     gsm_client = new TinyGsmClient(*modem);
+//   }
+
+//   return gsm_client;
+// }
 TinyGsmClient* mSIM7000G::DataNetwork_GetOrCreateClient(bool force_recreate)
 {
-  if (!modem) return nullptr;
+  if(!modem) return nullptr;
 
-  if (force_recreate && gsm_client) {
-    gsm_client->stop();
-    delete gsm_client;
-    gsm_client = nullptr;
-  }
-
-  if (!gsm_client) {
+  if(!gsm_client)
+  {
     gsm_client = new TinyGsmClient(*modem);
+
+    if(!gsm_client)
+    {
+      ALOG_ERR(PSTR(D_LOG_CELLULAR "Failed to allocate TinyGsmClient"));
+      return nullptr;
+    }
+
+    ALOG_INF(PSTR(D_LOG_CELLULAR "TinyGsmClient created ptr=%p"),gsm_client);
+  }
+  else if(force_recreate)
+  {
+    ALOG_WRN(PSTR(D_LOG_CELLULAR "TinyGsmClient recreate requested but persistent client retained ptr=%p"),gsm_client);
+
+    gsm_client->stop();
   }
 
   return gsm_client;
 }
+
 
 
 void mSIM7000G::ModemInit_SM_Enter(mSIM7000G::modem_init_sm_t& sm,
