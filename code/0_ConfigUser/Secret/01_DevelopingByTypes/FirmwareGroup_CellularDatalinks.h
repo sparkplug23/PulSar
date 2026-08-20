@@ -65,7 +65,7 @@ Notes:
 
 //--------------------------------[Enable Device]-------------------------------------
 
-// #define DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
+#define DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
 
 
 // #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__ON_SIM800L__OFFICE_TESTBED // Office window testbed, SIM800L, BK-880Q GPs, onboard IMU, SIM800L
@@ -94,7 +94,83 @@ Notes:
  * * DEVELOPMENT NOTES:
  * - Focus: Establish foundational LTE and MQTT handshake stability.
  * - Future: Integrate WebUI map view and webhook dispatch.
- */
+ * 
+ * 
+ * 
+
+
+
+we are now going to focus on this. the lilygo device, has an active 4g sim in it. 
+
+
+
+as stated in the comments, I plan on placing this device in my car, with a large lipo battery, which gets recharged when I drive. Otherwise it will remain on its own battery. 
+
+
+
+I want it to initial constantly track the modem GPS. 
+
+I expect with lte available, it will be connected. With Wifi available, that should also connect. That means two mqtt connections should happen (remember I have 2 on my home computers, one local/wifi based, another secure with vpn connection. 
+
+
+
+So short term, I expect to be able to view all positions in both over grafana. You should remember, this all exists and does work. The aim now is getting stable and long term running of the code for true LTE testing. 
+
+
+
+Later, we will store the GPS at a higher poll rate (though as this is modem, it may still be limited to 1hz anyway) onto the SD Card as ndjson. Hence, we will write some python code later that will be able to connect via wifi (via mdns) and retrieve the file form the sdcard, and create some nice kml/kmz for viewing in google earth pro. 
+
+
+
+again, this is all "steps" to making a truly remote device. 
+
+
+
+Once this is working, I will put the sim card into another lilygo, which will be equiped with canbus and other sensors for more detailed car logging. Including a uart enabled GPS module for much higher polling, we can also include gyro too for car accelaration etc. Then make a nice html based webpage that presents all this data on my local computers. We will either use the json data, or, use the json data to write into the influxdb as another datebase, with timestamps (using gps time). Then a nice html page served from my desktop can read the data from influxdb directly. This again are all steps to advancing my esp32/network abilities far beyond what I have now. 
+ 
+LilyGO SIM7000G Locator
+    |
+    +-- GNSS continuously maintained
+    |
+    +-- Cellular continuously maintained
+    |
+    +-- WiFi opportunistically maintained
+    |
+    +-- MQTT "home" broker over WiFi when available
+    |
+    +-- MQTT "remote" broker over Cellular, and optionally WiFi
+    |
+    +-- GPS telemetry reaches both broker paths
+    |
+    +-- survives loss/recovery of:
+          GNSS
+          LTE
+          WiFi
+          MQTT
+    |
+    +-- runs indefinitely without heap growth / modem wedging
+
+boot with no SIM/network
+LTE appears later
+
+LTE established
+then antenna/network disappears
+then comes back
+
+WiFi appears while LTE is active
+
+WiFi disappears while both brokers are active
+
+MQTT server unavailable while LTE remains healthy
+
+GNSS starts indoors with no fix
+then gains fix outdoors
+
+modem stops responding to AT commands
+
+ESP32 remains alive while modem wedges
+
+*/
 #ifdef DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
 
   /***********************************
@@ -111,6 +187,8 @@ Notes:
   #ifdef ENABLE_GROUP_FEATURE__WIFI
     #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
     #define USE_MODULE_SENSORS_INTERFACE
+
+    #define USE_MODULE_NETWORK_WEBSERVER
 
     #ifndef ENABLE_GROUP_FEATURE__CELLULAR
     #define ENABLE_GROUP_FEATURE__MQTT_WIFI
@@ -1545,6 +1623,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
 /**
  * @brief 
  * Primary testbed for all new lighting code on nodemcu
+ * Date: 19August206
  */
 #ifdef DEVICE_TESTBED_ESP32_LILYGO_SIM7000G_CELLULAR_LOCATOR_01
   #define DEVICENAME_CTR          "cellular_locator_01"

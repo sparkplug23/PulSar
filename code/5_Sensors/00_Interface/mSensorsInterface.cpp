@@ -110,7 +110,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     break;
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_TELEMETRY__SENDER_MQTT:
-      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
     #endif
     #ifdef USE_MODULE_SERIAL
@@ -2138,16 +2138,16 @@ void mSensorsInterface::Telemetry_Init(){
 
   ALOG_INF(PSTR("Telemetry_Init size %d"), telemetry_list.size()  );
  
-  ptr = &telemetry_settings;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
-  ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Settings;
-  telemetry_list.push_back(ptr);
+  // ptr = &telemetry_settings;
+  // ptr->tSavedLastSent = 0;
+  // ptr->flags.PeriodicEnabled = true;
+  // ptr->flags.SendNow = true;
+  // ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
+  // ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  // ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  // ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  // ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Settings;
+  // telemetry_list.push_back(ptr);
 
   ptr = &telemetry_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
@@ -2171,52 +2171,52 @@ void mSensorsInterface::Telemetry_Init(){
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Sensor;
   telemetry_list.push_back(ptr);
 
-  ptr = &telemetry_sensor_temperature_colours;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
-  ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_SensorTemperatureColours;
-  telemetry_list.push_back(ptr);
+  // ptr = &telemetry_sensor_temperature_colours;
+  // ptr->tSavedLastSent = 0;
+  // ptr->flags.PeriodicEnabled = true;
+  // ptr->flags.SendNow = true;
+  // ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
+  // ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  // ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  // ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
+  // ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_SensorTemperatureColours;
+  // telemetry_list.push_back(ptr);
   
-  #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
-  ptr = &telemetry_sensor_unified_filtered;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true;
-  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED_FILTERED__CTR;
-  ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Unified_Filtered;
-  telemetry_list.push_back(ptr);
-  #endif
+  // #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
+  // ptr = &telemetry_sensor_unified_filtered;
+  // ptr->tSavedLastSent = 0;
+  // ptr->flags.PeriodicEnabled = true;
+  // ptr->flags.SendNow = true;
+  // ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
+  // ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  // ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  // ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED_FILTERED__CTR;
+  // ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Unified_Filtered;
+  // telemetry_list.push_back(ptr);
+  // #endif
 
-  //motion events
-  ptr = &telemetry_motion_event_ifchanged;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = false;
-  ptr->flags.SendNow = false;
-  ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_MOTION__CTR;
-  ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_Motion;
-  telemetry_list.push_back(ptr);
+  // //motion events
+  // ptr = &telemetry_motion_event_ifchanged;
+  // ptr->tSavedLastSent = 0;
+  // ptr->flags.PeriodicEnabled = false;
+  // ptr->flags.SendNow = false;
+  // ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
+  // ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  // ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  // ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_MOTION__CTR;
+  // ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_Motion;
+  // telemetry_list.push_back(ptr);
 
-  ptr = &telemetry_event_input;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = false;
-  ptr->flags.SendNow = false;
-  ptr->tRateSecs = SEC_IN_HOUR; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_USER_INPUT__CTR;
-  ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_UserInput;
-  telemetry_list.push_back(ptr);
+  // ptr = &telemetry_event_input;
+  // ptr->tSavedLastSent = 0;
+  // ptr->flags.PeriodicEnabled = false;
+  // ptr->flags.SendNow = false;
+  // ptr->tRateSecs = SEC_IN_HOUR; 
+  // ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  // ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  // ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_USER_INPUT__CTR;
+  // ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_UserInput;
+  // telemetry_list.push_back(ptr);
 
 
   ptr = &telemetry_system_location; 

@@ -1,0 +1,25 @@
+{
+  "env_name": "tb_celullar__lilygo_sim7000g_01",
+  "created_utc": "2026-08-20T07:23:30Z",
+  "created_epoch": 1787210610,
+  "project_dir": "U:\\GitHub\\PulSar",
+  "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\tb_celullar__lilygo_sim7000g_01",
+  "platform": "espressif32",
+  "board": "esp32dev",
+  "framework": [
+    "arduino"
+  ],
+  "copied": [
+    "firmware.bin",
+    "firmware.elf",
+    "firmware.map",
+    "partitions.bin",
+    "bootloader.bin"
+  ],
+  "git": {
+    "branch": "development",
+    "commit": "f210269e0034499203cece958dce170527bee24c",
+    "describe": "f210269e-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_CellularDatalinks.h\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/2_CoreSystem/02_RtcMemory/RtcMemory.cpp\n M code/2_CoreSystem/02_RtcMemory/RtcMemory.h\n M code/2_CoreSystem/03_FileSystem/mFileSystem.h\n M code/2_CoreSystem/14_Updates/mUpdates.cpp\n D code/2_CoreSystem/15b_SerialUART_PhaseInto15/mSerialUART.cpp\n D code/2_CoreSystem/15b_SerialUART_PhaseInto15/mSerialUART.h\n D code/2_CoreSystem/15b_SerialUART_PhaseInto15/mSerialUART_Other.txt\n M code/2_CoreSystem/Version.h\n M code/3_Network/03_WiFi/mWiFi.cpp\n M code/3_Network/03_WiFi/mWiFi.h\n M code/3_Network/03_WiFi/mWiFi_STA.cpp\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/4_Drivers/40_Modem_SIM7000G/Internal.cpp\n M code/5_Sensors/00_Interface/mSensorsInterface.cpp\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_cellular.ini\n M platformio_override.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n?? code/2_CoreSystem/15_SerialUART/mSerialUART_ISR.cpp\n?? code/2_CoreSystem/15_SerialUART/mSerialUART_ISR.h\n?? code/2_CoreSystem/15_SerialUART/mSerialUART_Other.txt\n?? saved_compiles/tb_celullar__lilygo_sim7000g_01/"
+  }
+}

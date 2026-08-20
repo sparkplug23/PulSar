@@ -1388,103 +1388,201 @@ bool mSIM7000G::SimNetwork__CheckConnection()
 
 }
 
-
 /**
- * @brief Commands required after restart
- * 
+ * @brief Commands required after restart.
+ *
+ * IMPORTANT:
+ * This function must never wait indefinitely for network registration.
+ *
+ * Its job is to:
+ * - configure the modem radio/network preferences,
+ * - inspect current registration state once,
+ * - perform network-dependent setup only when registration already exists,
+ * - return control to mCellular so retry/backoff remains handled by the
+ *   cellular connection manager.
+ *
+ * No LTE service is a normal operating condition and must not block Tasker.
  */
 bool mSIM7000G::DataNetwork__InitConfig()
 {
-  
   ALOG_HGL(PSTR(D_LOG_CELLULAR "DataNetwork__InitConfig()"));
 
-
-    //Set mobile operation band
-    modem->sendAT("+CBAND=ALL_MODE");
-    modem->waitResponse();
-
-    // Args:
-    // 1 CAT-M
-    // 2 NB-IoT
-    // 3 CAT-M and NB-IoT
-    // Set network preferre to auto
-    modem->setPreferredMode(3);
-
-    // Args:
-    // 2 Automatic
-    // 13 GSM only
-    // 38 LTE only
-    // 51 GSM and LTE only
-    // Set network mode to auto
-    modem->setNetworkMode(2);
-
-    uint32_t  timeout = millis();
-    // Check network signal and registration information
-    // ALOG_DBG(PSTR(D_LOG_CELLULAR "> SIM7000/SIM7070 uses automatic mode to access the network. The access speed may be slow. Please wait patiently"));
-    RegStatus status;
-    timeout = millis();
-    do {
-      int16_t sq =  modem->getSignalQuality();
-
-      status = modem->getRegistrationStatus();
-
-      if (status == REG_DENIED) {
-        ALOG_DBG(PSTR(D_LOG_CELLULAR "The SIM card you use has been rejected by the network operator"));
-        return false;
-      } else {
-        ALOG_DBG(PSTR(D_LOG_CELLULAR "Signal %d dBm, %d, pause %d"), (int)GetSignalQualityPower(sq), status, 10000-(timeout-millis()) );
-      }
-
-      if (millis() - timeout > 10000 ) { //!! THIS IS BLOCKING CODE, NEEDS RESOLVED TO RETRY AGAIN
-        if (sq == 99) {
-          ALOG_DBG(PSTR(D_LOG_CELLULAR "It seems that there is no signal."));
-          return false;
-        }
-        timeout = millis();
-      }
-
-      delay(50);
-      // DEBUG_LINE_HERE;
-    } while (status != REG_OK_HOME && status != REG_OK_ROAMING);
+  if(!modem)
+  {
+    ALOG_ERR(PSTR(D_LOG_CELLULAR "DataNetwork__InitConfig: modem=null"));
+    return false;
+  }
 
 
-    String res;
+  /************************************************************************************************
+   * SECTION: Radio configuration
+   ************************************************************************************************/
 
-    ALOG_DBG(PSTR(D_LOG_CELLULAR "Obtain the APN issued by the network"));
-    modem->sendAT("+CGNAPN");
-    if (modem->waitResponse(3000, res) == 1) 
+  modem->sendAT("+CBAND=ALL_MODE");
+
+  if(modem->waitResponse(1000) != 1)
+  {
+    ALOG_WRN(PSTR(D_LOG_CELLULAR "CBAND configuration failed/timeout"));
+  }
+
+
+  // Args:
+  // 1 CAT-M
+  // 2 NB-IoT
+  // 3 CAT-M and NB-IoT
+  if(!modem->setPreferredMode(3))
+  {
+    ALOG_WRN(PSTR(D_LOG_CELLULAR "setPreferredMode(3) failed"));
+  }
+
+
+  // Args:
+  // 2  Automatic
+  // 13 GSM only
+  // 38 LTE only
+  // 51 GSM and LTE only
+  if(!modem->setNetworkMode(2))
+  {
+    ALOG_WRN(PSTR(D_LOG_CELLULAR "setNetworkMode(2) failed"));
+  }
+
+
+  /************************************************************************************************
+   * SECTION: Current network state
+   *
+   * Do NOT wait here for registration.
+   *
+   * mCellular owns retry/backoff policy. If there is no service, this function
+   * must return so WiFi, GNSS, WebUI, MQTT and the rest of Tasker continue.
+   ************************************************************************************************/
+
+  const int16_t sq = modem->getSignalQuality();
+  const RegStatus status = modem->getRegistrationStatus();
+
+  ALOG_INF(
+    PSTR(D_LOG_CELLULAR "Network status | CSQ=%d | RSSI=%d dBm | REG=%d"),
+    sq,
+    (int)GetSignalQualityPower(sq),
+    status
+  );
+
+
+  if(status == REG_DENIED)
+  {
+    ALOG_WRN(PSTR(D_LOG_CELLULAR "SIM/network registration denied"));
+    return false;
+  }
+
+
+  if(status != REG_OK_HOME && status != REG_OK_ROAMING)
+  {
+    if(sq == 99)
     {
-      res = res.substring(res.indexOf(",") + 1);
-      res.replace("\"", "");
-      res.replace("\r", "");
-      res.replace("\n", "");
-      res.replace("OK", "");
-      ALOG_DBG(PSTR(D_LOG_CELLULAR "The APN issued by the network is: %s"), res.c_str());
+      ALOG_INF(PSTR(D_LOG_CELLULAR "No usable cellular signal; registration deferred"));
+    }
+    else
+    {
+      ALOG_INF(PSTR(D_LOG_CELLULAR "Cellular network not registered yet; registration deferred"));
     }
 
-    modem->sendAT("+CNACT=1");
-    modem->waitResponse();
+    return false;
+  }
 
-    modem->sendAT("+CNACT?");
-    // modem->waitResponse();
-    if (modem->waitResponse("+CNACT: ") == 1) 
+
+  /************************************************************************************************
+   * SECTION: Registered network configuration
+   ************************************************************************************************/
+
+  String res;
+
+  ALOG_DBG(PSTR(D_LOG_CELLULAR "Obtain the APN issued by the network"));
+
+  modem->sendAT("+CGNAPN");
+
+  if(modem->waitResponse(1500,res) == 1)
+  {
+    const int comma_index = res.indexOf(",");
+
+    if(comma_index >= 0)
     {
-      modem->stream.read();
-      modem->stream.read();
-      res = modem->stream.readStringUntil('\n');
-      res.replace("\"", "");
-      res.replace("\r", "");
-      res.replace("\n", "");
-      modem->waitResponse();
-      ALOG_DBG(PSTR(D_LOG_CELLULAR "The current network IP address is: %s"), res.c_str());
+      res = res.substring(comma_index + 1);
+      res.replace("\"","");
+      res.replace("\r","");
+      res.replace("\n","");
+      res.replace("OK","");
+      res.trim();
+
+      ALOG_DBG(PSTR(D_LOG_CELLULAR "The APN issued by the network is: %s"),res.c_str());
     }
+  }
+  else
+  {
+    ALOG_WRN(PSTR(D_LOG_CELLULAR "CGNAPN query failed/timeout"));
+  }
 
-    
-    gprs.enabled = true;
 
-    return true;
+  /************************************************************************************************
+   * SECTION: Activate network context
+   ************************************************************************************************/
 
+  modem->sendAT("+CNACT=1");
+
+  if(modem->waitResponse(2000) != 1)
+  {
+    ALOG_WRN(PSTR(D_LOG_CELLULAR "CNACT activation failed/timeout"));
+    return false;
+  }
+
+
+  /************************************************************************************************
+   * SECTION: Query current context/IP
+   ************************************************************************************************/
+
+  modem->sendAT("+CNACT?");
+
+  if(modem->waitResponse("+CNACT: ") == 1)
+  {
+    modem->stream.read();
+    modem->stream.read();
+
+    res = modem->stream.readStringUntil('\n');
+
+    res.replace("\"","");
+    res.replace("\r","");
+    res.replace("\n","");
+    res.trim();
+
+    modem->waitResponse(1000);
+
+    ALOG_DBG(PSTR(D_LOG_CELLULAR "The current network IP address is: %s"),res.c_str());
+  }
+  else
+  {
+    ALOG_WRN(PSTR(D_LOG_CELLULAR "CNACT status query failed/timeout"));
+  }
+
+
+  gprs.enabled = true;
+
+  ALOG_INF(PSTR(D_LOG_CELLULAR "DataNetwork__InitConfig complete"));
+
+  return true;
 }
+
+
+// uint32_t Cellular_GetRetryIntervalMs(uint32_t outage_seconds, cellular_failure_reason_t reason)
+// {
+//   if(reason == CELLULAR_FAILURE_NO_SIGNAL || reason == CELLULAR_FAILURE_NOT_REGISTERED)
+//   {
+//     if(outage_seconds < 60)        return 1000;
+//     if(outage_seconds < 1800)      return 10000;
+//     if(outage_seconds < 3600)      return 30000;
+//     return 60000;
+//   }
+
+//   ...
+// }
+
 
 /**
  * @brief Commands required to connect

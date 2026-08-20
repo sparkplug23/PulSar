@@ -25,14 +25,14 @@
 
 #ifdef ESP8266
   #include <LittleFS.h>
-  #include <SPIFFSEditor.h>
+  // #include <SPIFFSEditor.h>
 #endif
 
 #ifdef ESP32
   #include <LittleFS.h>
   #include "FFat.h"
   #include "FS.h"
-  #include <SPIFFSEditor.h>
+  // #include <SPIFFSEditor.h>
 #endif
 
 #ifdef ESP32

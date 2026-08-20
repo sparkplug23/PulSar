@@ -30,6 +30,25 @@
   #include <ArduinoOTA.h>
 #endif
 
+static void OTA_WiFiQuickConnect_Save(void)
+{
+  #if defined(ENABLE_FEATURE_WIFI__SSID_QUICK_CONNECT_AFTER_OTA) && defined(ENABLE_FEATURE_RTC__SETTINGS) && defined(USE_MODULE_NETWORK_WIFI)
+  if(tkr_wifi)
+  {
+    tkr_wifi->WiFi_QuickConnect_SaveToRTC();
+  }
+  #endif
+}
+
+
+static void OTA_WiFiQuickConnect_Clear(void)
+{
+  #if defined(ENABLE_FEATURE_WIFI__SSID_QUICK_CONNECT_AFTER_OTA) && defined(ENABLE_FEATURE_RTC__SETTINGS)
+  RtcMemory__WiFiQuickConnect_Clear();
+  #endif
+}
+
+
 
 #if defined(ESP8266) || defined(ESP32)
 
@@ -300,21 +319,21 @@ void SafeMode_StartAndAwaitOTA(uint8_t seconds_to_wait)
 
 void mUpdates::ArduinoOTAInit(void)
 {
-  if (ota_init_success) return;
+  if(ota_init_success) return;
 
   ArduinoOTA.setHostname(tkr_set->runtime.my_hostname);
 
   ArduinoOTA.onStart([this](){
     #ifdef ENABLE_DEVFEATURE_ARDUINOOTA__ADVANCED
-      tkr_set->SettingsSave(1);
+    tkr_set->SettingsSave(1);
 
-      #ifdef USE_MODULE_NETWORK_WEBSERVER
-        if (tkr_set->Settings.webserver) tkr_web->StopWebserver();
-      #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    if(tkr_set->Settings.webserver) tkr_web->StopWebserver();
+    #endif
 
-      AllowInterrupts(0);
+    AllowInterrupts(0);
 
-      if (tkr_set->Settings.sysopt_system.bit.mqtt_enabled) MqttDisconnect();
+    if(tkr_set->Settings.sysopt_system.bit.mqtt_enabled) MqttDisconnect();
     #endif
 
     ALOG_IMP(PSTR(D_LOG_UPLOAD "OTA " D_UPLOAD_STARTED));
@@ -323,7 +342,7 @@ void mUpdates::ArduinoOTAInit(void)
     arduino_ota_progress_dot_count = 0;
 
     #ifdef ENABLE_FEATURE_RTC__SETTINGS
-      RtcMemory__RuntimeState.boot_was_completed_ota_event = false;
+    RtcMemory__RuntimeState.boot_was_completed_ota_event = false;
     #endif
 
     tkr->Tasker_Interface(TASK_UPDATE_OTA_BEFORE_ON_START);
@@ -335,50 +354,69 @@ void mUpdates::ArduinoOTAInit(void)
   });
 
   ArduinoOTA.onProgress([this](unsigned int progress, unsigned int total){
-    if (tkr_set->runtime.seriallog_level >= LOG_LEVEL_DEBUG && total)
+    if(tkr_set->runtime.seriallog_level >= LOG_LEVEL_DEBUG && total)
     {
       const uint8_t progress_now = (progress * 100U) / total;
 
-      if (arduino_ota_progress_dot_count != progress_now)
+      if(arduino_ota_progress_dot_count != progress_now)
       {
         arduino_ota_progress_dot_count = progress_now;
-        Serial.printf("%u%%\r", progress_now);
+        Serial.printf("%u%%\r",progress_now);
       }
     }
 
     #ifdef ENABLE_FEATURE_WATCHDOG_TIMER
-      WDT_Reset();
+    WDT_Reset();
     #endif
   });
 
   ArduinoOTA.onError([this](ota_error_t error){
     char error_str[24] = {0};
 
-    switch (error)
-    {
-      case OTA_AUTH_ERROR:    strncpy_P(error_str, PSTR("AUTH"), sizeof(error_str)); break;
-      case OTA_BEGIN_ERROR:   strncpy_P(error_str, PSTR(D_UPLOAD_ERR_2), sizeof(error_str)); break;
-      case OTA_CONNECT_ERROR: strncpy_P(error_str, PSTR("CONNECT"), sizeof(error_str)); break;
-      case OTA_RECEIVE_ERROR: strncpy_P(error_str, PSTR(D_UPLOAD_ERR_5), sizeof(error_str)); break;
-      case OTA_END_ERROR:     strncpy_P(error_str, PSTR(D_UPLOAD_ERR_7), sizeof(error_str)); break;
-      default: snprintf_P(error_str, sizeof(error_str), PSTR("ERR %u"), error); break;
+    switch(error){
+      case OTA_AUTH_ERROR:    strncpy_P(error_str,PSTR("AUTH"),sizeof(error_str)); break;
+      case OTA_BEGIN_ERROR:   strncpy_P(error_str,PSTR(D_UPLOAD_ERR_2),sizeof(error_str)); break;
+      case OTA_CONNECT_ERROR: strncpy_P(error_str,PSTR("CONNECT"),sizeof(error_str)); break;
+      case OTA_RECEIVE_ERROR: strncpy_P(error_str,PSTR(D_UPLOAD_ERR_5),sizeof(error_str)); break;
+      case OTA_END_ERROR:     strncpy_P(error_str,PSTR(D_UPLOAD_ERR_7),sizeof(error_str)); break;
+      default: snprintf_P(error_str,sizeof(error_str),PSTR("ERR %u"),error); break;
     }
 
-    ALOG_IMP(PSTR(D_LOG_OTA "OTA %s"), error_str);
+    ALOG_IMP(PSTR(D_LOG_OTA "OTA %s"),error_str);
 
     #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
-      RtcMemory__RuntimeState.boot_was_completed_ota_event = false;
+    RtcMemory__RuntimeState.boot_was_completed_ota_event = false;
     #endif
 
-    if (error != OTA_BEGIN_ERROR) ESP.restart();
+    OTA_WiFiQuickConnect_Clear();
+
+    if(error != OTA_BEGIN_ERROR) ESP.restart();
   });
 
   ArduinoOTA.onEnd([this](){
-    #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
-      RtcMemory__RuntimeState.boot_was_completed_ota_event = true;
-
-      if (ResetReasonPowerOn()) RtcMemory__RuntimeState_Save();
+    #ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
+    RtcMemory__BootState.fast_reboot_count = 0;
+    RtcMemory__BootState_Save();
     #endif
+
+    #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
+    RtcMemory__RuntimeState.boot_was_completed_ota_event = true;
+
+    if(ResetReasonPowerOn()) RtcMemory__RuntimeState_Save();
+    #endif
+
+    /*
+     * Capture the exact WiFi association which successfully carried this OTA.
+     *
+     * This includes:
+     *   profile
+     *   BSSID
+     *   channel
+     *
+     * RtcMemory__WiFiQuickConnect_Set() performs its own raw RTC write, so it
+     * does not depend on the legacy boot-reason RTC save above.
+     */
+    OTA_WiFiQuickConnect_Save();
 
     delay(150);
 
@@ -461,26 +499,32 @@ int8_t mUpdates::Tasker(uint8_t function, JsonParserObject obj)
 
 void mUpdates::WebPage_Root_AddHandlers()
 {
-  tkr_web->server->on("/update", HTTP_GET, [this](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(request, F("/update"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_update_web, PAGE_update_web_length, true);
+  tkr_web->server->on("/update",HTTP_GET,[this](AsyncWebServerRequest *request){
+    tkr_web->handleStaticContent(request,F("/update"),200,FPSTR(CONTENT_TYPE_HTML),PAGE_update_web,PAGE_update_web_length,true);
   });
 
-  tkr_web->server->on("/update", HTTP_POST,
+  tkr_web->server->on("/update",HTTP_POST,
     [this](AsyncWebServerRequest *request){
-      if (Update.hasError() || update_upload_failed)
+      if(Update.hasError() || update_upload_failed)
       {
-        ALOG_ERR(PSTR("OTA fail %u"), Update.getError());
-        tkr_web->serveMessage(request, 500, F("Update failed"), F("Invalid firmware or upload error."), 254);
+        ALOG_ERR(PSTR("OTA fail %u"),Update.getError());
+        tkr_web->serveMessage(request,500,F("Update failed"),F("Invalid firmware or upload error."),254);
         return;
       }
+
+      /*
+       * The HTTP response still gets time to return before the delayed reboot,
+       * but the current WiFi association is captured now while it is known-good.
+       */
+      OTA_WiFiQuickConnect_Save();
 
       update_reboot_pending = true;
       update_reboot_at_ms = millis() + 1000;
 
-      tkr_web->serveMessage(request, 200, F("Update successful"), F("Rebooting..."), 131);
+      tkr_web->serveMessage(request,200,F("Update successful"),F("Rebooting..."),131);
     },
     [this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
-      HandleFirmwareUpload(request, filename, index, data, len, final);
+      HandleFirmwareUpload(request,filename,index,data,len,final);
     }
   );
 }
