@@ -1,0 +1,25 @@
+{
+  "env_name": "testbed_01__sensors_nextion",
+  "created_utc": "2026-08-21T10:23:50Z",
+  "created_epoch": 1787307830,
+  "project_dir": "U:\\GitHub\\PulSar",
+  "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\testbed_01__sensors_nextion",
+  "platform": "espressif32",
+  "board": "esp32dev",
+  "framework": [
+    "arduino"
+  ],
+  "copied": [
+    "firmware.bin",
+    "firmware.elf",
+    "firmware.map",
+    "partitions.bin",
+    "bootloader.bin"
+  ],
+  "git": {
+    "branch": "development",
+    "commit": "d02de90fd2b69a68820ec49cb40465e696ab251d",
+    "describe": "d02de90f-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/00_Developing/Firmware__Testbeds.h\n M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_CellularDatalinks.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n?? saved_compiles/testbed_01__sensors_nextion/"
+  }
+}

@@ -65,7 +65,7 @@ Notes:
 
 //--------------------------------[Enable Device]-------------------------------------
 
-#define DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
+// #define DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
 
 
 // #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__ON_SIM800L__OFFICE_TESTBED // Office window testbed, SIM800L, BK-880Q GPs, onboard IMU, SIM800L

@@ -11,7 +11,7 @@
 
 //--------------------------------[Enable Device]-------------------------------------
 
-// #define DEVICE_TESTBED_01__SENSORS_NEXTION
+#define DEVICE_TESTBED_01__SENSORS_NEXTION
 // #define DEVICE_TESTBED_02__MOTION_AUDIO
 // #define DEVICE_TESTBED_04__HVAC_X1
 // #define DEVICE_TESTBED_05__SWITCHES_BUTTONS
