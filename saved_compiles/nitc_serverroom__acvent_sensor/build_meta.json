@@ -1,9 +1,9 @@
 {
   "env_name": "nitc_serverroom__acvent_sensor",
-  "created_utc": "2026-08-20T12:50:27Z",
-  "created_epoch": 1787230227,
-  "project_dir": "C:\\Users\\3058467\\Github\\PulSar",
-  "build_dir": "C:\\Users\\3058467\\Github\\PulSar\\.pio\\build\\nitc_serverroom__acvent_sensor",
+  "created_utc": "2026-08-21T14:46:35Z",
+  "created_epoch": 1787323595,
+  "project_dir": "C:\\Users\\3058467\\Documents\\GitHub\\PulSar",
+  "build_dir": "C:\\Users\\3058467\\Documents\\GitHub\\PulSar\\.pio\\build\\nitc_serverroom__acvent_sensor",
   "platform": "espressif32",
   "board": "esp32dev",
   "framework": [
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "f210269e0034499203cece958dce170527bee24c",
-    "describe": "f210269e-dirty",
-    "status_short": "M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/5_Sensors/00_Interface/mSensorsInterface.cpp\n M code/5_Sensors/04_DB18x20/mDB18x20.cpp\n M lib/lib_network_web/ESPAsyncWebServerWLED\n M lib/lib_npb_feb26/NeoPixelBus\n M lib/lib_wled32/LittleFS_esp32\n M platformio_override.ini\n M platformio_remote.ini\n M saved_compiles/nitc_serverroom__acvent_sensor/build_meta.json\n M saved_compiles/nitc_serverroom__acvent_sensor/firmware.elf"
+    "commit": "0e01c623a179d3ef94816c62bf4e537c6e3616f5",
+    "describe": "0e01c623-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/00_Developing/Firmware__Testbeds.h\n M platformio_override.ini\n M platformio_remote.ini\n M saved_compiles/nitc_office__elite4dexmu_01/build_meta.json\n M saved_compiles/nitc_office__elite4dexmu_01/firmware.elf\n M saved_compiles/nitc_office__elite4dexmu_03/build_meta.json\n M saved_compiles/nitc_office__elite4dexmu_03/firmware.elf\n M saved_compiles/nitc_serverroom__acvent_sensor/build_meta.json\n M saved_compiles/nitc_serverroom__acvent_sensor/firmware.elf\n M saved_compiles/testbed_01__sensors_nextion/build_meta.json\n M saved_compiles/testbed_01__sensors_nextion/firmware.elf"
   }
 }
