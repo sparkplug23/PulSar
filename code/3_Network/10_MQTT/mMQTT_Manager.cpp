@@ -43,6 +43,9 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
       Handle__ServiceBrokerConnects_With_Transports();
       MM_EverySecond();  
     break;
+    case TASK_EVERY_MINUTE:
+      MM_EveryMinute();  
+    break;
     case TASK_EVERY_HOUR:
       Send_LWT_To_Any_Connected_Brokers();
     break;
@@ -50,9 +53,11 @@ int8_t mMQTTManager::Tasker(uint8_t function, JsonParserObject obj){ DEBUG_PRINT
       flag_uptime_reached_reduce_frequency = true;
     break;     
     case TASK_ON_BOOT_SUCCESSFUL:
-      #ifdef USE_MODULE_LIGHTS_ANIMATOR
-      EnableRealtimeReducedMQTTRates();
-      #endif
+      if(mode_mqtt_realtime_reduced_rates == 2)
+      {
+        mode_mqtt_realtime_reduced_rates = 1;
+        ALOG_INF(PSTR(D_LOG_MQTT D_REALTIME_SLOWDOWN " 2->1"));
+      }
     break;
     /************
      * COMMANDS SECTION * 
@@ -555,25 +560,6 @@ void mMQTTManager::Default_Module()
    **/
   Default_Module__Connection_WiFi();
 
-  
-  // strlcpy(dt.connection[idx].host_address, MQTT_HOST, sizeof(dt.connection[idx].host_address));
-  // dt.connection[idx].port = MQTT_PORT;
-  // strlcpy(dt.connection[idx].user, MQTT_USER, sizeof(dt.connection[idx].user));
-  // strlcpy(dt.connection[idx].pwd, MQTT_PASS, sizeof(dt.connection[idx].pwd));
-  // dt.connection[idx].retry = MQTT_RETRY_SECS;
-  // snprintf_P(dt.connection[idx].client, sizeof(dt.connection[idx].client), PSTR("%s-%s"), tkr_set->Settings.system_name.device, WiFi.macAddress().c_str());
-  // strlcpy(dt.connection[idx].prefixtopic, tkr_set->Settings.system_name.device, sizeof(dt.connection[idx].prefixtopic));
-  // dt.connection[idx].status = 1;
-    
-  // ALOG_DBG(PSTR("Ghost_address: %s"), dt.connection[idx].host_address);
-  // ALOG_DBG(PSTR("port: %d"), dt.connection[idx].port);
-  // ALOG_DBG(PSTR("user: %s"), dt.connection[idx].user);
-  // ALOG_DBG(PSTR("pwd: %s"), dt.connection[idx].pwd);
-  // ALOG_DBG(PSTR("retry: %d"), dt.connection[idx].retry);
-  // ALOG_DBG(PSTR("client: %s"), dt.connection[idx].client);
-  // ALOG_DBG(PSTR("prefixtopic: %s"), dt.connection[idx].prefixtopic);
-  // ALOG_DBG(PSTR("status: %d"), dt.connection[idx].status);
-
   #ifdef ENABLE_FEATURE__MQTT_ENABLE_SENDING_LIMIT_MS
   rate_limit_send_delay = ENABLE_FEATURE__MQTT_ENABLE_SENDING_LIMIT_MS;
   #endif
@@ -858,17 +844,75 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
 
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
-
-  ALOG_DBG(PSTR(D_LOG_MQTT "mMQTTManager::parse_JSONCommand"));
-
   
   JsonParserObject jobj = 0; 
 
+  
+  if(jtok = obj["MQTTSend"])
+  {
+    ALOG_DBG(PSTR("mMQTTManager::parse_JSONCommand MQTTSend"));
+    
+    JsonParserToken jtok_topic = jtok.getObject()["Topic"];
+    JsonParserToken jtok_payload = jtok.getObject()["Payload"];
+
+    ALOG_DBG(PSTR("mMQTTManager::parse_JSONCommand MQTTSend %d"),jtok_topic.size());
+    ALOG_DBG(PSTR("mMQTTManager::parse_JSONCommand MQTTSend %d"),jtok_payload.size());
+   
+    char topic_ctr[100] = {0};
+    char payload_ctr[300] = {0};
+
+    snprintf(topic_ctr, sizeof(topic_ctr), jtok_topic.getStr());
+    snprintf(payload_ctr, sizeof(payload_ctr), jtok_payload.getStr());
+
+    char buffer_escaped[200] = {0};
+    uint8_t len  = 0;
+    for(int i=0;i<strlen(payload_ctr);i++){
+      if(payload_ctr[i] == '~'){
+        len+=sprintf(buffer_escaped+len,"\"");
+      }else{    
+        buffer_escaped[len++] = payload_ctr[i];
+      }
+    }
+
+    ALOG_DBG(PSTR("Topic=%s"),topic_ctr);
+    ALOG_DBG(PSTR("Payload=%s"),payload_ctr);
+    ALOG_DBG(PSTR("buffer_escaped=%s"),buffer_escaped);
+    
+    // publish_device(jtok_topic.getStr(),jtok_payload.getStr(),false);
+    brokers[0]->pubsub->publish(topic_ctr,buffer_escaped,false);
+
+  }
+
+  
+  /***************************************************************************************
+   * All commands below must be nested inside module name with "MQTT":{....}"
+   ***************************************************************************************/
+
   if(!(jobj = obj[D_MODULE_NETWORK_MQTT_CTR].getObject()))
   {
-    // ALOG_ERR(PSTR(D_LOG_MQTT "No MQTT object found"));
     return;
   }
+
+
+  if(jtok = jobj[D_REALTIME_SLOWDOWN])
+  {
+    uint8_t v = jtok.getInt();
+    mode_mqtt_realtime_reduced_rates = v <= 2 ? v : 0;
+    ALOG_COM(PSTR(D_LOG_MQTT D_COMMAND_NVALUE_K(D_REALTIME_SLOWDOWN)), mode_mqtt_realtime_reduced_rates);
+  }
+
+
+  if(jtok = jobj[D_SHOW_TRANSMIT_TOPIC_ON_SERIAL])
+  {
+    show_transmit_topic_to_serial = jtok.getBool();
+    ALOG_COM(PSTR(D_LOG_MQTT D_COMMAND_NVALUE_K(D_SHOW_TRANSMIT_TOPIC_ON_SERIAL)), show_transmit_topic_to_serial);
+  }
+  if(jtok = jobj[D_SHOW_TRANSMIT_PAYLOAD_ON_SERIAL])
+  {
+    show_transmit_payload_to_serial = jtok.getBool();
+    ALOG_COM(PSTR(D_LOG_MQTT D_COMMAND_NVALUE_K(D_SHOW_TRANSMIT_PAYLOAD_ON_SERIAL)), show_transmit_payload_to_serial);
+  }
+
   
   if(jtok = jobj["Brokers"])
   {
@@ -929,78 +973,32 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
   }
   
 
-  ALOG_DBG(PSTR(D_LOG_MQTT "mMQTTManager::parse_JSONCommand2"));
-
-  uint8_t connection_idx = 0; // should be like Segments, assumes 0 when only 1
-
-  if(jtok = obj["MQTT"].getObject()["RetrySecs"])
-  {
-    // dt.connection[0].retry = jtok.getInt();
-  }
-
-  if(jtok = obj["MQTTSend"])
-  {
-    ALOG_DBG(PSTR("mMQTTManager::parse_JSONCommand MQTTSend"));
-    
-    JsonParserToken jtok_topic = jtok.getObject()["Topic"];
-    JsonParserToken jtok_payload = jtok.getObject()["Payload"];
-
-    ALOG_DBG(PSTR("mMQTTManager::parse_JSONCommand MQTTSend %d"),jtok_topic.size());
-    ALOG_DBG(PSTR("mMQTTManager::parse_JSONCommand MQTTSend %d"),jtok_payload.size());
-   
-    char topic_ctr[100] = {0};
-    char payload_ctr[300] = {0};
-
-    snprintf(topic_ctr, sizeof(topic_ctr), jtok_topic.getStr());
-    snprintf(payload_ctr, sizeof(payload_ctr), jtok_payload.getStr());
-
-    char buffer_escaped[200] = {0};
-    uint8_t len  = 0;
-    for(int i=0;i<strlen(payload_ctr);i++){
-      if(payload_ctr[i] == '~'){
-        len+=sprintf(buffer_escaped+len,"\"");
-      }else{    
-        buffer_escaped[len++] = payload_ctr[i];
-      }
-    }
-
-    ALOG_DBG(PSTR("Topic=%s"),topic_ctr);
-    ALOG_DBG(PSTR("Payload=%s"),payload_ctr);
-    ALOG_DBG(PSTR("buffer_escaped=%s"),buffer_escaped);
-    
-    // publish_device(jtok_topic.getStr(),jtok_payload.getStr(),false);
-    brokers[0]->pubsub->publish(topic_ctr,buffer_escaped,false);
-
-  }
-
-
-  if(jtok = obj["MQTT"].getObject()["StatusAll"]) //change all to be value
+  if(jtok = jobj["StatusAll"]) //change all to be value
   {    
     tkr->Tasker_Interface(TASK_TELEMETRY_REFRESH_SEND_ALL);
   }
 
 
   JsonParserToken jtok_sub = 0; 
-  if(jtok = obj["MQTTUpdateSeconds"])
+  if(jtok = jobj["UpdateSeconds"])
   {
     if(jtok_sub = jtok.getObject()["IfChanged"])
     {
       dt.ifchanged_secs = jtok_sub.getInt();
-      ALOG_TST(PSTR("MQTTUpdateSeconds IfChanged %d"), dt.ifchanged_secs);
+      ALOG_TST(PSTR("UpdateSeconds IfChanged %d"), dt.ifchanged_secs);
     }
     if(jtok_sub = jtok.getObject()["TelePeriod"])
     {
       dt.teleperiod_secs = jtok_sub.getInt();
-      ALOG_TST(PSTR("MQTTUpdateSeconds TelePeriod %d"), dt.teleperiod_secs);
+      ALOG_TST(PSTR("UpdateSeconds TelePeriod %d"), dt.teleperiod_secs);
     }
     if(jtok_sub = jtok.getObject()["ConfigPeriod"])
     {
       dt.configperiod_secs = jtok_sub.getInt();
-      ALOG_TST(PSTR("MQTTUpdateSeconds ConfigPeriod %d"), dt.configperiod_secs);
+      ALOG_TST(PSTR("UpdateSeconds ConfigPeriod %d"), dt.configperiod_secs);
     }
     // tkr->Tasker_Interface(TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD);
   }
-
 
 
 }//end function
@@ -1113,6 +1111,11 @@ void mMQTTManager::subparse_JSONCommand__Broker(JsonParserObject obj, uint8_t br
     }
   }
 
+  if(jtok = obj["Retry"])
+  {
+    broker->retry = jtok.getInt();
+  }
+
   if(jtok = obj["Transport"])
   {
     broker->transport_count = 0;
@@ -1210,14 +1213,7 @@ void mMQTTManager::subparse_JSONCommand__Broker(JsonParserObject obj, uint8_t br
 
   broker->allowed = broker->en && broker->host_address[0];
 
-  ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] id=%s en=%u host=%s port=%u allowed=%u"),
-    broker_i,
-    broker->id,
-    broker->en,
-    broker->host_address,
-    broker->port,
-    broker->allowed
-  );
+  ALOG_DBG(PSTR(D_LOG_MQTT "Broker[%u] id=%s en=%u host=%s port=%u allowed=%u"),broker_i,broker->id,broker->en,broker->host_address,broker->port,broker->allowed);
 
   if (tkr_set->Settings.logging.serial_level > LOG_LEVEL_DEBUG)
     broker->Debug_PrintConnectionInfo();
@@ -1245,7 +1241,7 @@ bool mMQTTManager::AnyBrokerConnected(void)
     if(!broker->en) { continue; }
     if(!broker->allowed) { continue; }
     if(!broker->uptime_seconds) { continue; }
-    if(broker->downtime_counter != 0) { continue; }
+    if( broker->downtime_counter != 0) { continue; }
     if(!broker->MqttIsConnected()) { continue; }
 
     return true;
@@ -1274,28 +1270,21 @@ void mMQTTManager::CallMQTTSenders()
  */
 boolean mMQTTManager::Publish(const char* topic, const char* payload, boolean retained)
 {
-  DEBUG_LINE_HERE3
   Serial.println("mMQTTManager::Publish"); Serial.flush();
-  DEBUG_LINE_HERE3
+
   if(brokers.size())
   {
-    DEBUG_LINE_HERE3
     if(brokers[0]->uptime_seconds && brokers[0]->downtime_counter==0)
     {
-      DEBUG_LINE_HERE3
       for (auto& broker : brokers)
       {
-        DEBUG_LINE_HERE3
         if(broker->pubsub->connected())
         {
-          DEBUG_LINE_HERE3
           return broker->publish_device(topic,payload,retained);
         }
-        DEBUG_LINE_HERE3
       }
     }
   }
-  DEBUG_LINE_HERE3
 
   return false; // No broker connected or not available, return false
 
@@ -1328,15 +1317,6 @@ boolean mMQTTManager::Subscribe(const char* topic, uint8_t qos)
   }
 
 }
-void mMQTTManager::EnableRealtimeReducedMQTTRates()
-{
-  if (flag_mqtt_realtime_reduced_rates) return;
-
-  flag_mqtt_realtime_reduced_rates = true;
-
-  ALOG_INF(PSTR(D_LOG_MQTT "Realtime lighting MQTT rate reduction enabled"));
-}
-
 
 uint16_t mMQTTManager::GetRealtimeReducedMQTTRate(uint16_t unique_id, uint16_t current_rate_secs, uint8_t priority)
 {

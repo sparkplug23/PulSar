@@ -61,6 +61,9 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
       
     }
     break;
+    case TASK_EVERY_30_SECOND:
+      Cellular_ConnMgr_LogStatus_30s();
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -354,6 +357,57 @@ void mCellular::Cellular_ConnMgr_Tick_1s(uint32_t now_ms)
   }
 }
 
+void mCellular::Cellular_ConnMgr_LogStatus_30s(void)
+{
+  const uint32_t now_ms = millis();
+
+  uint32_t state_age_secs = (now_ms - conn_sm_.t_enter_ms) / 1000UL;
+  uint32_t next_action_secs = 0;
+
+  if(conn_sm_.t_next_action_ms && (int32_t)(conn_sm_.t_next_action_ms - now_ms) > 0)
+  {
+    next_action_secs = (conn_sm_.t_next_action_ms - now_ms + 999UL) / 1000UL;
+  }
+
+  const char* state_name = "UNKNOWN";
+
+  switch(conn_sm_.state)
+  {
+    case cellular_conn_state_t::WAIT_MODEM_READY: state_name = "WAIT_MODEM_READY"; break;
+    case cellular_conn_state_t::INIT_CONFIG:      state_name = "INIT_CONFIG"; break;
+    case cellular_conn_state_t::START_CONNECTION: state_name = "START_CONNECTION"; break;
+    case cellular_conn_state_t::ONLINE:           state_name = "ONLINE"; break;
+    case cellular_conn_state_t::BACKOFF:          state_name = "BACKOFF"; break;
+  }
+
+  if(!tkr_modem)
+  {
+    ALOG_WRN(PSTR(D_LOG_CELLULAR "DIAG30 CELL state=%s age=%lus next=%lus attempts=%u init=%u drops=%u modem=NULL"),
+      state_name,
+      (unsigned long)state_age_secs,
+      (unsigned long)next_action_secs,
+      conn_sm_.attempts,
+      conn_sm_.init_config_done,
+      conn_sm_.gprs_drop_count
+    );
+    return;
+  }
+
+  ALOG_INF(PSTR(D_LOG_CELLULAR "DIAG30 CELL state=%s age=%lus next=%lus attempts=%u init=%u drops=%u ready=%u gprs=%u"),
+    state_name,
+    (unsigned long)state_age_secs,
+    (unsigned long)next_action_secs,
+    conn_sm_.attempts,
+    conn_sm_.init_config_done,
+    conn_sm_.gprs_drop_count,
+    tkr_modem->IsReady(),
+    tkr_modem->DataNetwork_IsConnected()
+  );
+
+  #ifdef USE_MODULE_DRIVERS_MODEM_7000G
+  tkr_modem->DataNetwork_LogDiagnostics();
+  #endif
+}
 
 /******************************************************************************************************************
  * Commands

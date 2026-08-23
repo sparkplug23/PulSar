@@ -100,7 +100,7 @@ class mDisplaysInterface :
     
 struct DisplaySettings{
   uint8_t       model; 
-  uint8_t       mode;
+  uint8_t       mode = 1;
   uint8_t       refresh;
   uint8_t       rows;
   uint8_t       cols[2];

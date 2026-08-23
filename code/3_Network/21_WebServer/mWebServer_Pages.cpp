@@ -409,7 +409,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   if (subPage <0 || subPage >10) return;
   char nS[32];
 
-  if (subPage == SUBPAGE_WEB_MENU)
+  if (subPage == WebSettingsSubPage::MENU)
   {
   #ifndef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS // include only if 2D is not compiled in
     settingsScript.print(F("gId('2dbtn').style.display='none';"));
@@ -419,7 +419,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   #endif
   }
 
-  if (subPage == SUBPAGE_WEB_WIFI)
+  if (subPage == WebSettingsSubPage::WIFI)
   {
     size_t l;
     settingsScript.printf_P(PSTR("resetWiFi(%d);"), 0);//WLED_MAX_WIFI_COUNT);
@@ -517,10 +517,10 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
     // #endif
   }
 
-//   if (subPage == SUBPAGE_WEB_LEDS)
+//   if (subPage == WebSettingsSubPage::LEDS)
 //   {
     
-// //     #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_WEB_LEDS
+// //     #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__WebSettingsSubPage::LEDS
 
 // //     appendGPIOinfo(settingsScript);
 
@@ -651,18 +651,18 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
 // // #endif    
 // //     printSetFormCheckbox(settingsScript,PSTR("MSO"),!irApplyToAllSelected);
 
-// //     #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_WEB_LEDS
+// //     #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__WebSettingsSubPage::LEDS
 //   }
 
-  // if (subPage == SUBPAGE_WEB_UI)
+  // if (subPage == WebSettingsSubPage::UI)
   // {
   //   // printSetFormValue(settingsScript,PSTR("DS"),serverDescription);
   //   // printSetFormCheckbox(settingsScript,PSTR("SU"),simplifiedUI);
   // }
 
-  // if (subPage == SUBPAGE_WEB_SYNC)
+  // if (subPage == WebSettingsSubPage::SYNC)
   // {
-  // //   #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_WEB_SYNC
+  // //   #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__WebSettingsSubPage::SYNC
 
   // //   printSetFormValue(settingsScript,PSTR("UP"),tkr_anim->udpPort);
   // //   printSetFormValue(settingsScript,PSTR("U2"),udpPort2);
@@ -769,7 +769,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   // //   #endif
   // }
 
-  if (subPage == SUBPAGE_WEB_TIME)
+  if (subPage == WebSettingsSubPage::TIME)
   {
     // printSetFormCheckbox(settingsScript,PSTR("NT"),ntpEnabled);
     // printSetFormValue(settingsScript,PSTR("NS"),ntpServerName);
@@ -829,10 +829,10 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
     //   }
     // }
 
-    // #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_WEB_SYNC
+    // #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__WebSettingsSubPage::SYNC
   }
 
-  if (subPage == SUBPAGE_WEB_SEC)
+  if (subPage == WebSettingsSubPage::SECURITY)
   {
     // byte l = strlen(settingsPIN);
     // char fpass[l+1]; //fill PIN field with 0000
@@ -849,7 +849,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   }
 
   #ifdef ENABLE_FEATURE_LIGHTING__DMX // include only if DMX is enabled
-  if (subPage == SUBPAGE_WEB_DMX)
+  if (subPage == WebSettingsSubPage::DMX)
   {
     printSetFormValue(settingsScript,PSTR("PU"),e131ProxyUniverse);
 
@@ -876,7 +876,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   }
   #endif
 
-  // if (subPage == SUBPAGE_WEB_UM) //usermods
+  // if (subPage == WebSettingsSubPage::UM) //usermods
   // {
   //   appendGPIOinfo(settingsScript);
   //   // settingsScript.printf_P(PSTR("numM=%d;"), UsermodManager::getModCount());
@@ -895,7 +895,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   //   // UsermodManager::appendConfigData(settingsScript);
   // }
 
-  if (subPage == SUBPAGE_WEB_UPDATE) // update
+  if (subPage == WebSettingsSubPage::UPDATE) // update
   {
     // char tmp_buf[128];
     // snprintf_P(tmp_buf,sizeof(tmp_buf),PSTR("WLED %s<br>%s<br>(%s build %d)"),
@@ -911,7 +911,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
     // printSetClassElementHTML(settingsScript,PSTR("sip"),0,tmp_buf);
   }
 
-  // if (subPage == SUBPAGE_WEB_2D) // 2D matrices
+  // if (subPage == WebSettingsSubPage::2D) // 2D matrices
   // {
   //   // printSetFormValue(settingsScript,PSTR("SOMP"),isMatrix);
   //   // #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS

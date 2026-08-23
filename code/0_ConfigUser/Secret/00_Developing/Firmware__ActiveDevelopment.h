@@ -336,7 +336,7 @@ new 26GHz radar sensor
    * Longer term, a mixture of JSON/Binary for space.
    * Options should just be ifdef to switch between methods. 
   */
-  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+  //  // this will require methods to serialise and deserialise all data
 
   
   
@@ -904,7 +904,10 @@ new 26GHz radar sensor
         "}"
       "]"
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"MQTTSubscribe\":["
       "\"openhab_broadcast/nextion/group/hvac_home\","
       "\"openhab_broadcast/nextion/group/hvac_desk_power\""
@@ -989,7 +992,7 @@ new 26GHz radar sensor
    * Longer term, a mixture of JSON/Binary for space.
    * Options should just be ifdef to switch between methods. 
   */
-  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+  //  // this will require methods to serialise and deserialise all data
 
   /***********************************
    * SECTION: System Configs
@@ -1479,8 +1482,11 @@ new 26GHz radar sensor
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
         "}"
       "]"
+    "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
     "\"MQTTSubscribe\":["
       "\"openhab_broadcast/nextion/group/hvac_home\","
       "\"openhab_broadcast/nextion/group/hvac_desk_power\""
@@ -1565,7 +1571,7 @@ new 26GHz radar sensor
    * Longer term, a mixture of JSON/Binary for space.
    * Options should just be ifdef to switch between methods. 
   */
-  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+  //  // this will require methods to serialise and deserialise all data
 
   /***********************************
    * SECTION: System Configs
@@ -2651,8 +2657,11 @@ new 26GHz radar sensor
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
         "}"
       "]"
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
+    "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}," 
     "\"MQTTSubscribe\":["
       "\"openhab_broadcast/nextion/group/hvac_home\","
       "\"openhab_broadcast/nextion/group/hvac_desk_power\""
@@ -2973,8 +2982,11 @@ new 26GHz radar sensor
       "\"" D_MODULE__SENSORS_BATTERY_MODEM__CTR "\":["
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
-    "},"   
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}," // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     // "\"SMSAuto_GPS\":"  SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR ","
     "\"MQTT\":{\"RetrySecs\":"  TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR "}"
   "}";
@@ -3509,7 +3521,11 @@ new 26GHz radar sensor
 //         "}"
 //       "]"
 //     "},"
-//     "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
+//         
+    // "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    //   "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+    //   "\"" D_REALTIME_SLOWDOWN "\":0"
+    // "}"
 //   "}";
 
 
@@ -3648,17 +3664,6 @@ new 26GHz radar sensor
 //     "\"" D_GPIO_FUNCTION "\":{},"
 //     "\"" D_BASE          "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
 //     "\"" D_ROOMHINT      "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-//   "}";
-
-//   /***********************************
-//    * SECTION: Device Configs
-//   ************************************/    
-
-//   #define USE_FUNCTION_TEMPLATE
-//   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-//   "{"
-//     "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
-//     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
 //   "}";
 
 // #endif // DEVICE_CHRISTMAS__OUTSIDE_WREATH
@@ -3831,7 +3836,11 @@ new 26GHz radar sensor
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
+        
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}," 
     "\"MQTTSubscribe\":["
       "\"openhab_broadcast/nextion/group/#\""
     "],"
@@ -4105,7 +4114,11 @@ new 26GHz radar sensor
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
+        
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"MQTTSubscribe\":["
       "\"openhab_broadcast/nextion/group/#\""
     "],"
@@ -4712,8 +4725,11 @@ new 26GHz radar sensor
       "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":[" 
         D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
       "]"  
+    "},"        
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
     "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
   "}";
 
@@ -5121,8 +5137,11 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_MODULE_SENSORS_BME_CTR "\":["
       "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
     "]"
+  "},"    
+  "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+    "\"" D_REALTIME_SLOWDOWN "\":0"
   "},"
-  "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
   "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
 "}";
 
@@ -5487,7 +5506,11 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 //       "\"" D_DEVICE_SENSOR_CLIMATE "\""
 //     "]"
 //   "},"
-//   "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    
+    // "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    //   "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+    //   "\"" D_REALTIME_SLOWDOWN "\":0"
+    // "}"
 //   "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
 // "}";
 
@@ -5695,8 +5718,11 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
       "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ""
     "}"   
-  "},"
- "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}"
+  "},"    
+  "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+    "\"" D_REALTIME_SLOWDOWN "\":0"
+  "}"
 "}";
 
 
@@ -6066,7 +6092,11 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 //       "\"" D_DEVICE_SENSOR_CLIMATE "\""
 //     "]"
 //   "},"
-//   "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    
+    // "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    //   "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+    //   "\"" D_REALTIME_SLOWDOWN "\":0"
+    // "}"
 //   "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
 // "}";
 
@@ -6378,8 +6408,11 @@ Blue (Upstairs Link) ***********************************************************
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
         "}"
       "]"
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
+    "},"        
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
   "}";
   
 #endif
@@ -6449,8 +6482,11 @@ Blue (Upstairs Link) ***********************************************************
       "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
-    "},"    
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "},"        
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
 
   "}";
 
@@ -6617,8 +6653,11 @@ Blue (Upstairs Link) ***********************************************************
       "\"" "DisplayRows" "\":8,"
       "\"" "DisplayCols" "\":[21,2],"
       "\"" "DisplaySize" "\":1"
-    "},"  
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    "},"      
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 
@@ -6847,13 +6886,11 @@ Blue (Upstairs Link) ***********************************************************
       "\"" "DisplayRows" "\":8,"
       "\"" "DisplayCols" "\":[21,2],"
       "\"" "DisplaySize" "\":1"
-    "},"    
-
-
-
-
-
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "},"        
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}," // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 
@@ -6950,12 +6987,11 @@ Blue (Upstairs Link) ***********************************************************
     "},"    
 
     "\"BuzzerMode\":{\"FreqMode\":1},"
-
-
-
-
-
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 
@@ -7557,8 +7593,11 @@ Blue (Upstairs Link) ***********************************************************
       "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":[" 
         D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
       "]"  
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
+    "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
   "}";
 
 

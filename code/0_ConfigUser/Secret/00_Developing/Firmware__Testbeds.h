@@ -11,7 +11,7 @@
 
 //--------------------------------[Enable Device]-------------------------------------
 
-#define DEVICE_TESTBED_01__SENSORS_NEXTION
+// #define DEVICE_TESTBED_01__SENSORS_NEXTION
 // #define DEVICE_TESTBED_02__MOTION_AUDIO
 // #define DEVICE_TESTBED_04__HVAC_X1
 // #define DEVICE_TESTBED_05__SWITCHES_BUTTONS
@@ -72,66 +72,31 @@
   /***********************************
    * SECTION: System Debug Options
   ************************************/    
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE 
-
-  #define ENABLE_DEBUG_MODULE_HARDWAREPINS_SUBSECTION_TEMPLATES
-
-  #define ENABLE_LOG_LEVEL_DEBUG
-  
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  // #define ENABLE_DEBUG_LINE_HERE_TRACE
-  // #define ENABLE_DEBUG_LINE_HERE
-  // #define ENABLE_DEBUG_LINE_HERE_MILLIS
-
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // #define ENABLE_DEBUGFEATURE_TASKER__DELAYED_START_OF_MODULES_SECONDS 10
-
-  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
-
-  // #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
-  //   #define ENABLE_DEBUG_FUNCTION_NAMES
 
   /***********************************
-   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+   * SECTION: Enable System
   ************************************/  
   
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__SOLAR
   #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
   #define ENABLE_TEMPLATE_SECTION__SENSORS__DHT
   #define ENABLE_TEMPLATE_SECTION__SENSORS__DS18X20
   #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
-  // #define ENABLE_TEMPLATE_SECTION__DISPLAYS__NEXTION
-  #define ENABLE_TEMPLATE_SECTION__LIGHTS 
+  #define ENABLE_TEMPLATE_SECTION__DISPLAYS__OLED_SH1106
+  #define ENABLE_TEMPLATE_SECTION__DISPLAYS__NEXTION
+  // #define ENABLE_TEMPLATE_SECTION__LIGHTS 
   #define ENABLE_TEMPLATE_SECTION__SENSORS__PIR
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__LDR_ANALOG
 
   /***********************************
    * SECTION: Storage Configs
   ************************************/  
-  /**
-   * For debugging and short term I may want to store everything as JSON, so I can view the data?
-   * Longer term, a mixture of JSON/Binary for space.
-   * Options should just be ifdef to switch between methods. 
-  */
-  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
-
+ 
   /***********************************
    * SECTION: System Configs
   ************************************/     
 
   #define USE_MODULE_CORE__CRASH_RECORDER
-
-  /***********************************
-   * SECTION: Storage Configs
-  ************************************/    
-
-  // I should add new "purely for debugging" "serialise" data struct. So this will be a new way to take important data from the module data struct that will all be saved in binary, but instead 
-  // include functions that "pretty print" them for easier comparing. Will use lots of memory, so debug only.
 
   /***********************************
    * SECTION: Network Configs
@@ -167,21 +132,24 @@
   #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__PIR
     #define USE_MODULE_SENSORS_PIR
   #endif
-  #ifdef USE_MODULE_SENSORS_LDR_BASIC  // leave until analog sensor is redone, then use it. actually, analog although sensor, should become a core part (like i2c etc)
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__LDR_ANALOG  // leave until analog sensor is redone, then use it. actually, analog although sensor, should become a core part (like i2c etc)
     #define USE_MODULE_SENSORS_LDR_BASIC_DIGITAL
     #define USE_MODULE_SENSORS_LDR_BASIC_ANALOG
   #endif
-
-  #define USE_MODULE_DRIVERS_LEDS
   
   /***********************************
    * SECTION: Display Configs
   ************************************/  
 
-  #define USE_MODULE_DISPLAYS_INTERFACE
+  #if defined(ENABLE_TEMPLATE_SECTION__DISPLAYS__OLED_SH1106) || defined(ENABLE_TEMPLATE_SECTION__DISPLAYS__NEXTION)
+    #define USE_MODULE_DISPLAYS_INTERFACE
+  #endif
+
+  #ifdef ENABLE_TEMPLATE_SECTION__DISPLAYS__OLED_SH1106
   #define USE_MODULE_DISPLAYS_OLED_SH1106
     #define ENABLE_DEVFEATURE_DISPLAY__INVERT
     #define SHOW_SPLASH
+  #endif
 
   #ifdef ENABLE_TEMPLATE_SECTION__DISPLAYS__NEXTION
     #define USE_MODULE_DISPLAYS_NEXTION
@@ -196,6 +164,7 @@
     DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
     R"=====(
     {
+      "DisplayMode":1,
       "PageNames": [
         "boot_flash",
         "boot",
@@ -240,8 +209,9 @@
    * SECTION: Driver Configs
   ************************************/  
         
-  //  #define USE_MODULE_DRIVERS_INTERFACE
-  //  #define USE_MODULE_DRIVERS_RELAY
+  #define USE_MODULE_DRIVERS_INTERFACE 
+  #define USE_MODULE_DRIVERS_LEDS
+    #define ENABLE_DRIVERS_LEDS__STATUS_LED
 
   /***********************************
    * SECTION: Lighting Configs
@@ -356,7 +326,7 @@
       // 32 - Touch9 (Debug Header 1)
       // 33 - Touch8 (Debug Header 2)
       // 25 - DAC1 = LM386 Amplifier Module (Debug Header 3)
-      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(ENABLE_TEMPLATE_SECTION__DISPLAYS__OLED_SH1106)
       "\"26\":\"" D_GPIO_I2C_SCL_CTR   "\","
       "\"27\":\"" D_GPIO_I2C_SDA_CTR   "\","  
       #endif    
@@ -510,12 +480,18 @@
         "\"" D_DEVICE_SENSOR_DB18S20_05_NAME "\":" D_DEVICE_SENSOR_DB18S20_05_ADDRESS ""
       "}"  
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"MQTTSubscribe\":["
       "\"openhab_broadcast/nextion/group/hvac_home\","
       "\"openhab_broadcast/nextion/group/hvac_desk_power\""
     "]"
   "}";
+
+
+
 
   #define D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "motion"
 
@@ -899,8 +875,11 @@
      "\"" D_MODULE_SENSORS_BME_CTR "\":["
        "\"" D_DEVICE_SENSOR_CLIMATE "\""
      "]"
-   "},"
-   "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+   "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
    "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
  "}";
 
@@ -993,8 +972,11 @@
       "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
         "\"" "Button" "\""
       "]"
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
+    "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
   "}";
   
 #endif
@@ -1229,8 +1211,11 @@
       "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":[" 
         D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
       "]"  
+    "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
     "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
   "}";
 
@@ -1665,8 +1650,11 @@
      "\"" D_MODULE_SENSORS_BME_CTR "\":["
        "\"" D_DEVICE_SENSOR_CLIMATE "\""
      "]"
-   "},"
-   "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+   "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
    "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
  "}";
 
@@ -1739,7 +1727,7 @@
    * Longer term, a mixture of JSON/Binary for space.
    * Options should just be ifdef to switch between methods. 
   */
-  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+  //  // this will require methods to serialise and deserialise all data
 
   /***********************************
    * SECTION: System Configs
@@ -2005,8 +1993,11 @@
         "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\":" D_DEVICE_SENSOR_DB18S20_04_ADDRESS ""
       "}"  
+    "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120},"  
     "\"MQTTSubscribe\":["
       "\"openhab_broadcast/nextion/group/hvac_home\","
       "\"openhab_broadcast/nextion/group/hvac_desk_power\""

@@ -65,7 +65,7 @@ Notes:
 
 //--------------------------------[Enable Device]-------------------------------------
 
-// #define DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
+#define DEVICE_CELLULAR__LILYGO_SIM7000G__LOCATOR_01
 
 
 // #define DEVICE_CELLULAR_LTE__GPS_POSITION_LOCATOR_01__ON_SIM800L__OFFICE_TESTBED // Office window testbed, SIM800L, BK-880Q GPs, onboard IMU, SIM800L
@@ -292,8 +292,11 @@ ESP32 remains alive while modem wedges
       "\"" D_MODULE__SENSORS_BATTERY_MODEM__CTR "\":["
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
+    "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 
@@ -1047,8 +1050,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" D_MODULE__SENSORS_BATTERY_MODEM__CTR "\":["
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
-    "},"   
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "},"       
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"SMSAuto_GPS\":"  SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR ","
     "\"MQTT\":{\"RetrySecs\":"  TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR "}"
   "}";
@@ -1324,8 +1330,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
 //       "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
 //         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
 //       "]"
-//     "},"   
-//     "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+//     "},"       
+    // "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    //   "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+    //   "\"" D_REALTIME_SLOWDOWN "\":0"
+    // "}"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
 //     "\"SMSAuto_GPS\":"  SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR ","
 //     "\"MQTT\":{\"RetrySecs\":"  TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR "}"
 //   "}";
@@ -1429,11 +1438,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" "DisplaySize" "\":1"
     "},"    
 
-
-
-
-
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 
@@ -1572,11 +1581,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" "DisplaySize" "\":1"
     "},"    
 
-
-
-
-
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 
@@ -1719,12 +1728,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" "DisplayCols" "\":[21,2],"
       "\"" "DisplaySize" "\":1"
     "},"    
-
-
-
-
-
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 
@@ -1862,8 +1870,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" "DisplayRows" "\":8,"
       "\"" "DisplayCols" "\":[21,2],"
       "\"" "DisplaySize" "\":1"
-    "},"  
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    "},"      
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 
@@ -2014,8 +2025,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" "DisplayRows" "\":8,"
       "\"" "DisplayCols" "\":[21,2],"
       "\"" "DisplaySize" "\":1"
-    "},"  
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+    "},"      
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 
@@ -2230,8 +2244,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" "DisplayRows" "\":8,"
       "\"" "DisplayCols" "\":[21,2],"
       "\"" "DisplaySize" "\":1"
-    "},"    
-    // "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "},"        
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}," // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 
@@ -2492,8 +2509,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
-    "},"   
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "},"       
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"SMSAuto_GPS\":"  SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR ","
     "\"MQTT\":{\"RetrySecs\":"  TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR "}"
   "}";
@@ -2845,8 +2865,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" D_MODULE__SENSORS_BATTERY_MODEM__FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
-    "},"   
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "},"       
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"SMSAuto_GPS\":"  SMS_AUTO_GPS_TIME_SECONDS_RATE_CTR ","
     "\"MQTT\":{\"RetrySecs\":"  TEMP_MQTT_RECONNECT_SECOND_BACKOFF_CTR "}"
   "}";
@@ -2950,12 +2973,11 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" "DisplayCols" "\":[21,2],"
       "\"" "DisplaySize" "\":1"
     "},"    
-
-
-
-
-
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":60},"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
     "\"MQTT\":{\"RetrySecs\":10}"
   "}";
 

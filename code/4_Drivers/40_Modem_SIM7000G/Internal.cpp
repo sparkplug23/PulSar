@@ -184,6 +184,51 @@ TinyGsmClient* mSIM7000G::DataNetwork_GetOrCreateClient(bool force_recreate)
   return gsm_client;
 }
 
+void mSIM7000G::DataNetwork_LogDiagnostics(void)
+{
+  if(!modem)
+  {
+    ALOG_WRN(PSTR(D_LOG_CELLULAR "DIAG30 MODEM modem=NULL sm=%u ready=%u busy=%u restart=%u"),
+      (unsigned)modem_sm_.state,
+      modem_sm_.ready,
+      modem_sm_.busy,
+      modem_sm_.restart_requested
+    );
+    return;
+  }
+
+  const bool ready = ModemInit_IsReady();
+  const bool at_ok = modem->testAT(200);
+
+  if(!at_ok)
+  {
+    ALOG_WRN(PSTR(D_LOG_CELLULAR "DIAG30 MODEM sm=%u ready=%u busy=%u restart=%u AT=FAIL client=%p"),
+      (unsigned)modem_sm_.state,
+      ready,
+      modem_sm_.busy,
+      modem_sm_.restart_requested,
+      gsm_client
+    );
+    return;
+  }
+
+  const int16_t csq = modem->getSignalQuality();
+  const RegStatus reg = modem->getRegistrationStatus();
+  const bool network_connected = modem->isNetworkConnected();
+  const bool gprs_connected = modem->isGprsConnected();
+
+  ALOG_INF(PSTR(D_LOG_CELLULAR "DIAG30 MODEM sm=%u ready=%u busy=%u AT=OK CSQ=%d RSSI=%d REG=%d NET=%u GPRS=%u client=%p"),
+    (unsigned)modem_sm_.state,
+    ready,
+    modem_sm_.busy,
+    (int)csq,
+    (int)GetSignalQualityPower(csq),
+    (int)reg,
+    network_connected,
+    gprs_connected,
+    gsm_client
+  );
+}
 
 
 void mSIM7000G::ModemInit_SM_Enter(mSIM7000G::modem_init_sm_t& sm,

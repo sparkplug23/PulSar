@@ -95,10 +95,24 @@ void MQTTConnection::EverySecond()
     tkr_set->runtime.global_state.mqtt_down = 0;
     downtime_counter = 0;
     uptime_seconds++;
-  }  
+  }
 
 }
 
+
+void MQTTConnection::EveryMinute(void)
+{
+
+  if(missed_payload_transmits)
+  {
+    ALOG_ERR(PSTR(D_LOG_MQTT "MQTT %s: missed %d payload transmits"), host_address, missed_payload_transmits);
+    missed_payload_transmits = 0;
+  }
+
+
+
+
+}
 
 void MQTTConnection::MqttReconnect(void)
 {
@@ -356,7 +370,8 @@ bool MQTTConnection::MQTTHandler_Send_Formatted_UniqueID(uint8_t topic_type, uin
   {
     tSaved_LastOutGoingTopic = millis();
   }else{
-    ALOG_ERR(PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted_UniqueID failed"));
+    missed_payload_transmits++;
+    // ALOG_ERR(PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted_UniqueID failed"));
   }
 
   return sent_status;
@@ -387,13 +402,10 @@ bool MQTTConnection::publish_ft(const char* module_name, uint8_t topic_type_id, 
     snprintf_P(topic, sizeof(topic), "%s/%s/%s%S", D_TOPIC_STATUS, module_name, topic_type, topic_postfix); // PSTR around string will crash
   }
 
-  #ifdef ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-  ALOG_DBG( PSTR(D_LOG_MQTT "topic=\"%s\""), topic );
-  #endif
-  #ifdef ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
-  ALOG_DBG( PSTR(D_LOG_MQTT "payload=\"%s\""), payload_ctr );
-  #endif
-  
+  // Dynamic switching of showing outgoing mqtt messages in logs
+  AddLog(tkr_mqtt->show_transmit_topic_to_serial   ? LOG_LEVEL_INFO : LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_MQTT "topic=\"%s\""), topic );
+  AddLog(tkr_mqtt->show_transmit_payload_to_serial ? LOG_LEVEL_INFO : LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_MQTT "payload=\"%s\""), payload_ctr );
+    
   return publish_device(topic, payload_ctr, retain_flag);
 
 }
@@ -425,7 +437,7 @@ boolean MQTTConnection::publish_device(const char* topic, const char* payload, b
 
   if(!network_client)
   {
-    ALOG_WRN(PSTR(D_LOG_PUBSUB "Unable to publish, network_client=null id=%s"),id);
+    // ALOG_WRN(PSTR(D_LOG_PUBSUB "Unable to publish, network_client=null id=%s"),id);
     connected = false;
     flag_start_reconnect = true;
     return false;

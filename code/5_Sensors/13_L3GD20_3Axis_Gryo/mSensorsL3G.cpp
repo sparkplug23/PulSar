@@ -43,7 +43,7 @@ int8_t mSensorsL3G::Tasker(uint8_t function, JsonParserObject obj)
     break;
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_TELEMETRY__SENDER_MQTT:
-      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
     #endif
     #ifdef USE_MODULE_SERIAL

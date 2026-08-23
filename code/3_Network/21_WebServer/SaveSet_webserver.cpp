@@ -89,7 +89,7 @@ Summary
 void mWebServer::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage)
 {
 
-  if (subPage == SUBPAGE_WEB_PINREQ)
+  if (subPage == WebSettingsSubPage::PINREQ)
   {
     #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_PINREQ
     checkSettingsPIN(request->arg(F("PIN")).c_str());
@@ -101,7 +101,7 @@ void mWebServer::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte s
   // if (subPage < 1 || subPage > 10 || !correctPIN) return;
 
   //WIFI SETTINGS
-  if (subPage == SUBPAGE_WEB_WIFI)
+  if (subPage == WebSettingsSubPage::WIFI)
   {
   #define WLED_MAX_WIFI_COUNT 3
     
@@ -310,7 +310,7 @@ void mWebServer::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte s
   }
 
   //LED SETTINGS
-  // if (subPage == SUBPAGE_WEB_LEDS)
+  // if (subPage == WebSettingsSubPage::LEDS)
   // {
   //   #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_LEDS
   //   int t = 0;
@@ -562,7 +562,7 @@ void mWebServer::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte s
   // }
 
   // //UI
-  // if (subPage == SUBPAGE_WEB_UI)
+  // if (subPage == WebSettingsSubPage::UI)
   // {
   //   #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_UI
   //   strlcpy(serverDescription, request->arg(F("DS")).c_str(), 33);
@@ -576,7 +576,7 @@ void mWebServer::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte s
   // }
 
   // //SYNC
-  // if (subPage == SUBPAGE_WEB_SYNC)
+  // if (subPage == WebSettingsSubPage::SYNC)
   // {
   //   #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_SYNC
   //   int t = request->arg(F("UP")).toInt();
@@ -683,7 +683,7 @@ void mWebServer::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte s
   // }
 
   //TIME
-  if (subPage == SUBPAGE_WEB_TIME)
+  if (subPage == WebSettingsSubPage::TIME)
   {
     #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_TIME
     ntpEnabled = request->hasArg(F("NT"));
@@ -760,7 +760,7 @@ void mWebServer::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte s
   }
 
   //SECURITY
-  if (subPage == SUBPAGE_WEB_SEC)
+  if (subPage == WebSettingsSubPage::SECURITY)
   {
     #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_SEC
     if (request->hasArg(F("RS"))) //complete factory reset
@@ -841,7 +841,7 @@ void mWebServer::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte s
   #endif
 
   //USERMODS
-  // if (subPage == SUBPAGE_WEB_UM)
+  // if (subPage == WebSettingsSubPage::UM)
   // {
   //   #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_UM
   //   if (!requestJSONBufferLock(5)) return;

@@ -73,7 +73,7 @@ int8_t mOLED_SH1106::Tasker(uint8_t function, JsonParserObject obj)
     break;
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_TELEMETRY__SENDER_MQTT:
-      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
     #endif
     #ifdef USE_MODULE_SERIAL
@@ -130,6 +130,9 @@ void mOLED_SH1106::RefreshDisplay()
 
   switch (tkr_iDisp->display.mode) {
     default:
+    case EM_DISPLAY_MODE_UTC_TIME_ID:
+      ShowUTCTime();
+    break;
     case EM_DISPLAY_MODE_LOG_SCROLLING_ID:
       ShowScrollingLog();
     break;
@@ -139,9 +142,6 @@ void mOLED_SH1106::RefreshDisplay()
     case EM_DISPLAY_MODE_USER_TEXT_SERIALISED_ID: 
     case EM_DISPLAY_MODE_USER_TEXT_ADVANCED_ID:
       // Refresh not needed, drawn directly on execution
-    break;
-    case EM_DISPLAY_MODE_UTC_TIME_ID:
-      ShowUTCTime();
     break;
   }
 
@@ -168,9 +168,12 @@ void mOLED_SH1106::InitDriver(void)
       tkr_iDisp->display.address[0] = OLED_ADDRESS2;
       tkr_iDisp->display.model = D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID;
     }
+  }else{
+    ALOG_INF(PSTR(D_LOG_SH1106 "Model already set %d"), tkr_iDisp->display.model);
   }
 
-  ALOG_INF(PSTR("DSP: SD1306 address[0] %d"),tkr_iDisp->display.address[0]);
+  ALOG_INF(PSTR("DSP: SH1106 address[0] %d"),tkr_iDisp->display.address[0]);
+  ALOG_INF(PSTR("DSP: model %d"),tkr_iDisp->display.model);
   
   if(tkr_iDisp->display.model == D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID)
   {
@@ -202,14 +205,14 @@ void mOLED_SH1106::InitDriver(void)
     tkr_iDisp->renderer->setTextFont(0);
     tkr_iDisp->renderer->setTextSize(2);
     tkr_iDisp->renderer->setCursor(20,20);
-    tkr_iDisp->renderer->println(F("SH1106"));
+    tkr_iDisp->renderer->println(F("SH1106a"));
     tkr_iDisp->renderer->Updateframe();
     tkr_iDisp->renderer->DisplayOnff(true);
     #endif
 
 
 
-    ALOG_INF(PSTR("DSP: SD1306"));
+    ALOG_INF(PSTR("DSP: SH1106"));
   }
 
     tkr_iDisp->display.invert = 0;

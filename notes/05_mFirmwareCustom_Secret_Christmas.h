@@ -87,8 +87,11 @@
       "\"" D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSORS_ANALOG_1_CTR "\""
       "]"
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+    "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
   "}";
 
 #endif

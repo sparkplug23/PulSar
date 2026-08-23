@@ -213,7 +213,6 @@ void SMS2_Task_Tick(uint32_t now_ms);
 void SMS2_Request_List_Unread();          // AT+CMGL="REC UNREAD" (optional sweep)
 void SMS2_QueueIndexUnique(int idx);
 
-
     struct SMS_STATUS
     {
       timereached_t tReached_Update;
@@ -236,6 +235,7 @@ void SMS2_QueueIndexUnique(int idx);
 #endif
 
 
+void DataNetwork_LogDiagnostics(void);
     sensorset_location_t location;
     // uint8_t GetSensorCount(void) override
     // {

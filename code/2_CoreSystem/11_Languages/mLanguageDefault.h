@@ -446,9 +446,9 @@
 // #define D_TO                    "to"
 #define D_TOGGLE                "Toggle"
 #define D_TIME_ON               "Time_On"
-// #define D_TOPIC                 "Topic"
+#define D_TOPIC                 "Topic"
 // #define D_TIMERS                "Timers"
-// #define D_PAYLOAD               "Payload"
+#define D_PAYLOAD               "Payload"
 #define D_TOTAL_USAGE           "Total Usage"
 // #define D_TRANSMIT              "Transmit"
 #define D_TRUE                  "True"
@@ -1265,7 +1265,8 @@
 #define D_LOG_WIFI "WIF: "         // Wifi
 // #define D_LOG_ETHERNET "ETH: "
 
-
+#define D_LOG_SH1106 "SH1: "
+#define D_LOG_DISPLAY "DSP: "
 
 // //SDM220
 // #define D_PHASE_ANGLE     "Phase Angle"
@@ -1458,10 +1459,15 @@
 // #define D_REFERENCETEMPERATURE "ReferenceTemperature"
 // #define D_RELATIVE "Relative"
 // #define D_RESET "Reset"
+#define D_REALTIME_SLOWDOWN "RealtimeSlowdown"
 #define D_RESOLUTION "Resolution"
 #define D_RESTARTING "Restarting"
 // #define D_RESTARTREASON "RestartReason"
 #define D_RSSI "RSSI"
+
+#define D_SHOW_TRANSMIT_TOPIC_ON_SERIAL "ShowTopicSerial"
+#define D_SHOW_TRANSMIT_PAYLOAD_ON_SERIAL "ShowPayloadSerial"
+
 #define D_SAVEADDRESS "SaveAddress"
 #define D_SAVECOUNT "SaveCount"
 // #define D_SAVED "Saved"

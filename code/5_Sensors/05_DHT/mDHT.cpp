@@ -55,7 +55,7 @@ int8_t mSensorsDHT::Tasker(uint8_t function, JsonParserObject obj){
     break;
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_TELEMETRY__SENDER_MQTT:
-      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
     #endif
     #ifdef USE_MODULE_SERIAL
@@ -236,7 +236,7 @@ void mSensorsDHT::EveryLoop(void)
 
   for (uint8_t i = 0; i < module_state.devices; i++) {
 
-    if (!mTime::TimeReachedNonReset(&s[i].next_poll_ms, 0)) continue;
+    if (!mTime::TimeReachedNonReset(&s[i].next_poll_ms, 500)) continue;
 
     const bool ok = PollOne(i);
 

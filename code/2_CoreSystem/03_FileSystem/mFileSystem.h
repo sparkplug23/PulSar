@@ -25,14 +25,12 @@
 
 #ifdef ESP8266
   #include <LittleFS.h>
-  // #include <SPIFFSEditor.h>
 #endif
 
 #ifdef ESP32
   #include <LittleFS.h>
   #include "FFat.h"
   #include "FS.h"
-  // #include <SPIFFSEditor.h>
 #endif
 
 #ifdef ESP32
@@ -41,6 +39,7 @@
     #ifdef USE_MODULE_NETWORK_WEBSERVER
       #include <AsyncTCP.h>
       #include <ESPAsyncWebServer.h>
+      #include "3_Network/21_WebServer/FileEditor.h"
     #endif
   #endif
 #elif defined(ESP8266)
@@ -50,6 +49,9 @@
     #include <ESPAsyncWebServer.h>
   #endif
 #endif
+
+
+
 
 #define ARDUINOJSON_DECODE_UNICODE 0
 #include "3_Network/21_WebServer/AsyncJson-v6.h"

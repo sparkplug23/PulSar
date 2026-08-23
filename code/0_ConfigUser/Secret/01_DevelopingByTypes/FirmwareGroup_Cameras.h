@@ -562,8 +562,11 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 //       "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":[" 
 //         D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
 //       "]"  
-//     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
+//     "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
   "}";
 
 
@@ -933,8 +936,11 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 //     "\"" D_MODULE_SENSORS_BME_CTR "\":["
 //       "\"" D_DEVICE_SENSOR_CLIMATE "\""
 //     "]"
-//   "},"
-//   "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
+//   "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
 //   "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
 // "}";
 
@@ -1129,8 +1135,11 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "\"" D_MODULE_SENSORS_BME_CTR "\":["
       "\"" D_DEVICE_SENSOR_BME_680_NAME "\""
     "]"
-  "},"
-  "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}"
+  "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
 "}";
 
 

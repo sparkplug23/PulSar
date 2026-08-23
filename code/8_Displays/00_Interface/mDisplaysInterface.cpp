@@ -57,7 +57,7 @@ int8_t mDisplaysInterface::Tasker(uint8_t function, JsonParserObject obj){
     break;
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_TELEMETRY__SENDER_MQTT:
-      //tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
     #endif
     #ifdef USE_MODULE_SERIAL
@@ -96,6 +96,23 @@ int8_t mDisplaysInterface::Tasker(uint8_t function, JsonParserObject obj){
 void mDisplaysInterface::Pre_Init(void)
 {
   module_state.mode = ModuleStatus::Initialising;
+  
+  
+  // --------------------------------------------------------------------------
+  // 15. Display defaults
+  // --------------------------------------------------------------------------
+  display.model   = 0;
+  display.mode    = 0;
+  display.refresh = 2;
+  display.rows    = 4;
+  display.cols[0] = 16;
+  display.cols[1] = 8;
+  display.dimmer  = 7;
+  display.size    = 2;
+  display.font    = 1;
+  display.rotate  = 0;
+
+
   
   tkr->Tasker_Interface(TASK_DISPLAY_INIT_DRIVER);
 
@@ -162,20 +179,6 @@ void mDisplaysInterface::Init(void)
 {
 
   
-  // --------------------------------------------------------------------------
-  // 15. Display defaults
-  // --------------------------------------------------------------------------
-  display.model   = 0;
-  display.mode    = 0;
-  display.refresh = 2;
-  display.rows    = 4;
-  display.cols[0] = 16;
-  display.cols[1] = 8;
-  display.dimmer  = 7;
-  display.size    = 2;
-  display.font    = 1;
-  display.rotate  = 0;
-
 
 }
 
@@ -764,7 +767,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     LogBuffer_Add((char*)jtok.getStr());
 
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());//D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+    ALOG_INF(PSTR(D_LOG_DISPLAY "DisplayAddLog %s"),jtok.getStr());//D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     #endif
   }
 
@@ -780,7 +783,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
       LogBuffer_AddRow((char*)jtok.getStr(), row_number);
     }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());
+    ALOG_INF(PSTR(D_LOG_DISPLAY "DisplayAddLog %s"),jtok.getStr());
     #endif
   }
 
@@ -801,7 +804,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
       }
     }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());
+    ALOG_INF(PSTR(D_LOG_DISPLAY "DisplayAddLog %s"),jtok.getStr());
     #endif
   }
 

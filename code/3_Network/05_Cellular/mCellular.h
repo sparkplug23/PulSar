@@ -163,6 +163,7 @@ class mCellular :
 
     void Cellular_ConnMgr_Reset();
     void Cellular_ConnMgr_Tick_1s(uint32_t now_ms);
+    void Cellular_ConnMgr_LogStatus_30s(void);
 
     bool Cellular_HasExternalConnectivity(void);
     Client* Cellular_GetNetworkClient(void);

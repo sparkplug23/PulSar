@@ -8,12 +8,10 @@
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 
 #include <Arduino.h>
-#include "2_CoreSystem/08_Logging/mLogging.h"
 
-// #include "html_ui.h"
 #include "1_TaskerManager/mTaskerManager.h"
-
 #include "2_CoreSystem/01_Settings/mSettings.h"
+#include "2_CoreSystem/08_Logging/mLogging.h"
 
 #define Network WiFi
 
@@ -34,18 +32,6 @@
   #include <ESPAsyncWebServer.h>
   #endif // USE_MODULE_NETWORK_WEBSERVER
 #endif
-
-#ifdef ESP32
-  #include <AsyncTCP.h>
-  #include <ESPAsyncWebServer.h>
-#endif
-#ifdef ESP8266
-  #include <ESPAsyncTCP.h>
-  #include <ESPAsyncWebServer.h>
-#endif
-
-#include <stdint.h>
-
 
 #include "mWebUrlTracker.h" // Must be included so #else blanks are inserted
 
@@ -79,40 +65,15 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 #include "3_Network/21_WebServer/Webpages/Generated/root_main.h"
 #include "3_Network/21_WebServer/Webpages/Generated/submodule_assets.h"
 #include "3_Network/21_WebServer/Webpages/Generated/submodule_unified_pages.h"
+#ifdef ESP32
+  #include "3_Network/21_WebServer/Webpages/Generated/pages_console_esp32.h"
+#else
+  #include "3_Network/21_WebServer/Webpages/Generated/pages_console_esp8266.h"
+#endif
 #ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
 #include "3_Network/21_WebServer/Webpages/Generated/pages_url_debugs.h"
 #endif
 
-
-
-// pages_console_select.h
-#if defined(ESP8266)
-  #include "3_Network/21_WebServer/Webpages/Generated/pages_console_esp8266.h"
-#else
-  #include "3_Network/21_WebServer/Webpages/Generated/pages_console_esp32.h"
-#endif
-
-
-
-// Settings sub page IDs
-// THESE ALL NEED IMMEDIATE RENAMES
-#define SUBPAGE_WEB_MENU              0
-#define SUBPAGE_WEB_WIFI              1
-// #define SUBPAGE_WEB_LEDS              2
-// #define SUBPAGE_WEB_UI                3
-// #define SUBPAGE_WEB_SYNC              4
-#define SUBPAGE_WEB_TIME              5
-#define SUBPAGE_WEB_SEC               6
-// #define SUBPAGE_WEB_DMX               7
-// #define SUBPAGE_WEB_UM                8
-#define SUBPAGE_WEB_UPDATE            9
-// #define SUBPAGE_WEB_2D               10
-#define SUBPAGE_WEB_LOCK            251
-#define SUBPAGE_WEB_PINREQ          252
-#define SUBPAGE_WEB_CSS             253
-#define SUBPAGE_WEB_JS              254
-#define SUBPAGE_WEB_WELCOME         255
-#define SUBPAGE_WEB_NETWORK               11
 
 #define JSON_PATH_WEB_STATE      1
 #define JSON_PATH_WEB_INFO       2
@@ -122,31 +83,6 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 #define JSON_PATH_WEB_FXDATA     6
 #define JSON_PATH_WEB_NETWORKS   7
 #define JSON_PATH_WEB_EFFECTS    8
-
-
-
-
-static const char HTTP_HEAD_START[] PROGMEM = "<!DOCTYPE html><html lang=\"en\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><title>{v}</title>";
-
-// // URL for auto-update check of "version.json"
-// const char UPDATE_URL[] PROGMEM = "https://raw.githubusercontent.com/HASwitchPlate/HASPone/main/update/version.json";
-// // Additional CSS style to match Hass theme
-static const char HASP_STYLE[] PROGMEM = "<style>button{background-color:#03A9F4;}body{width:60%;margin:auto;}input:invalid{border:1px solid red;}input[type=checkbox]{width:20px;}.wrap{text-align:left;display:inline-block;min-width:260px;max-width:1000px}</style>";
-
-const char HTTP_HEAD3[] PROGMEM            = "<!DOCTYPE html><html lang=\"en\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><title>{v}</title>";
-const char HTTP_STYLE3[] PROGMEM           = "<style>.c{text-align: center;} div,input{padding:5px;font-size:1em;} input{width:95%;} body{text-align: center;font-family:verdana;} button{border:0;border-radius:0.3rem;background-color:#1fa3ec;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%;} .q{float: right;width: 64px;text-align: right;} .l{background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAALVBMVEX///8EBwfBwsLw8PAzNjaCg4NTVVUjJiZDRUUUFxdiZGSho6OSk5Pg4eFydHTCjaf3AAAAZElEQVQ4je2NSw7AIAhEBamKn97/uMXEGBvozkWb9C2Zx4xzWykBhFAeYp9gkLyZE0zIMno9n4g19hmdY39scwqVkOXaxph0ZCXQcqxSpgQpONa59wkRDOL93eAXvimwlbPbwwVAegLS1HGfZAAAAABJRU5ErkJggg==\") no-repeat left center;background-size: 1em;}</style>";
-const char  HTTP_SCRIPT3[] PROGMEM          = "<script>function c(l){document.getElementById('s').value=l.innerText||l.textContent;document.getElementById('p').focus();}</script>";
-const char HTTP_HEAD_END3[] PROGMEM        = "</head><body><div style='text-align:left;display:inline-block;min-width:260px;'>";
-const char HTTP_PORTAL_OPTIONS3[] PROGMEM  = "<form action=\"/wifi\" method=\"get\"><button>Configure WiFi</button></form><br/><form action=\"/0wifi\" method=\"get\"><button>Configure WiFi (No Scan)</button></form><br/>";
-//<form action=\"/i\" method=\"get\"><button>Info</button></form><br/><form action=\"/r\" method=\"post\"><button>Reset</button></form>";
-const char HTTP_ITEM3[] PROGMEM            = "<div><a href='#p' onclick='c(this)'>{v}</a>&nbsp;<span class='q {i}'>{r}%</span></div>";
-const char HTTP_FORM_START3[] PROGMEM      = "<form method='get' action='wifisave'><input id='s' name='s' length=32 placeholder='SSID'><br/><input id='p' name='p' length=64 type='password' placeholder='password'><br/>";
-const char HTTP_FORM_PARAM3[] PROGMEM      = "<br/><input id='{i}' name='{n}' length={l} placeholder='{p}' value='{v}' {c}>";
-const char HTTP_FORM_END3[] PROGMEM        = "<br/><button type='submit'>save</button></form>";
-const char HTTP_SCAN_LINK3[] PROGMEM       = "<br/><div class=\"c\"><a href=\"/wifi\">Scan</a></div>";
-const char HTTP_SAVED3[] PROGMEM           = "<div>Credentials Saved<br />Trying to connect Weread to network.<br />If it fails reconnect to AP to try again</div>";
-const char HTTP_END3[] PROGMEM             = "</div></body></html>";
-
 
     enum WebSettingsSubPage : uint8_t
     {
@@ -158,6 +94,11 @@ const char HTTP_END3[] PROGMEM             = "</div></body></html>";
       STORAGE,
       LOGGING,
       SECURITY,
+
+      // these are likely to be removed
+      WIFI,
+      UPDATE,
+      TIME,
 
       PINREQ  = 252,
       CSS     = 253,

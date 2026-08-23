@@ -178,6 +178,12 @@ class MQTTConnection
     uint16_t retry_counter_start_value = 5; // will be set 5 for wifi, 60 for LTE    
     uint16_t downtime_counter = 0;
     uint32_t uptime_seconds = 0;
+
+    uint16_t missed_payload_transmits = 0;
+
+
+
+
     bool connected = false;                // MQTT virtual connection status
     bool allowed = false;                  // MQTT enabled and parameters valid
     bool mqtt_tls = false;                 // MQTT TLS is enabled
@@ -338,9 +344,10 @@ class MQTTConnection
 
     void TaskerHandlers();
 
-    void EverySecond();
-
     void EveryLoop(){}
+    void EverySecond();
+    void EveryMinute();
+
 
     void Send_LWT_Online();
     
@@ -545,9 +552,17 @@ class mMQTTManager :
 
     WiFiClient* mqtt_client = nullptr;
 
-    bool flag_mqtt_realtime_reduced_rates = false;
+    
+    bool show_transmit_topic_to_serial = false;
+    bool show_transmit_payload_to_serial = false;
 
-    void EnableRealtimeReducedMQTTRates();
+
+    /**
+     * 0: disabled
+     * 1: active immediately
+     * 2: arm it, activate after boot successful
+     */
+    uint8_t mode_mqtt_realtime_reduced_rates = 0; 
     uint16_t GetRealtimeReducedMQTTRate(uint16_t unique_id, uint16_t current_rate_secs, uint8_t priority);
 
 
@@ -674,11 +689,20 @@ class mMQTTManager :
     void MM_EverySecond()
     {
       for(auto& con:brokers)
-      {
-        
+      {        
         con->EverySecond();
       }
     }
+
+
+    void MM_EveryMinute()
+    {
+      for(auto& con:brokers)
+      {        
+        con->EveryMinute();
+      }
+    }
+    
 
     void MM_Every50mSecond()
     {
@@ -868,36 +892,6 @@ bool IsAnyBrokerConnected() const
   return false;
 }
 
-// template<typename T>
-// void ServicePeriodicTrigger(telemetry_handler<T>* handler_ptr)
-// {
-//   if (!handler_ptr->flags.PeriodicEnabled) {
-//     return;
-//   }
-
-//   const uint32_t now = millis();
-
-//   // First send after boot / init
-//   if (handler_ptr->tSavedLastSent == 0) {
-//     handler_ptr->tSavedLastSent = now;
-//     handler_ptr->flags.SendNow = true;
-//     return;
-//   }
-
-//   if (ABS_FUNCTION(now - handler_ptr->tSavedLastSent) < (handler_ptr->tRateSecs * 1000UL)) {
-//     return;
-//   }
-
-//   handler_ptr->tSavedLastSent = now;
-//   handler_ptr->flags.SendNow = true;
-
-//   #ifndef ENABLE_DEVFEATURE_DISABLE_MQTT_FREQUENCY_REDUNCTION_RATE
-//   if (flag_uptime_reached_reduce_frequency &&
-//       (handler_ptr->flags.FrequencyRedunctionLevel > MQTT_FREQUENCY_REDUCTION_LEVEL_UNCHANGED_ID)) {
-//     handler_ptr->tRateSecs = handler_ptr->tRateSecs < 120 ? 120 : handler_ptr->tRateSecs;
-//   }
-//   #endif
-// }
 
 template<typename T>
 void ServicePeriodicTrigger(telemetry_handler<T>* handler_ptr)
@@ -982,10 +976,8 @@ void ServicePeriodicTrigger(telemetry_handler<T>* handler_ptr)
     if (handler_ptr->tRateSecs == 0) handler_ptr->flags.PeriodicEnabled = false;
     #endif
 
-    #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    if (flag_mqtt_realtime_reduced_rates)
+    if(mode_mqtt_realtime_reduced_rates == 1)
       handler_ptr->tRateSecs = GetRealtimeReducedMQTTRate(unique_id, handler_ptr->tRateSecs, handler_ptr->flags.priority);
-    #endif
 
     ServicePeriodicTrigger(handler_ptr);
 
