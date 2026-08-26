@@ -850,7 +850,58 @@ class mTaskerManager{
 
         return nullptr; // Return nullptr if the module is not found
     }
-    
+
+    const char* GetModuleNameDisplay(uint16_t uniqueID, char* buffer, size_t buflen) const
+    {
+      const char* name = GetModuleName(uniqueID);
+
+      if(!name || !buflen)
+      {
+        return nullptr;
+      }
+
+      strlcpy(buffer, name, buflen);
+
+      if(buffer[0] >= 'a' && buffer[0] <= 'z')
+      {
+        buffer[0] -= ('a' - 'A');
+      }
+
+      return buffer;
+    }
+
+    const char* GetModuleNameDisplayEachWord(uint16_t uniqueID, char* buffer, size_t buflen) const
+    {
+      const char* name = GetModuleName(uniqueID);
+
+      if(!name || !buflen)
+      {
+        return nullptr;
+      }
+
+      strlcpy(buffer, name, buflen);
+
+      bool upper_next = true;
+
+      for(size_t i = 0; buffer[i]; i++)
+      {
+        if(buffer[i] == ' ' || buffer[i] == '_' || buffer[i] == '-')
+        {
+          upper_next = true;
+          continue;
+        }
+
+        if(upper_next && buffer[i] >= 'a' && buffer[i] <= 'z')
+        {
+          buffer[i] -= ('a' - 'A');
+        }
+
+        upper_next = false;
+      }
+
+      return buffer;
+    }
+        
     
     uint16_t GetModuleID(const char* name, bool caseInsensitive = false) const {
       auto it = std::find_if(pModule.begin(), pModule.end(),

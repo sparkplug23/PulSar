@@ -51,7 +51,7 @@ static const char s_unlock_cfg [] PROGMEM = "Please unlock settings using PIN co
 #define D_WEB_HANDLE_CONSOLE "/console" // change to animator_settings
 #define D_WEB_HANDLE_CONSOLE_PAGE "/PAGEconsole" // change to animator_settings
 DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
-#define D_BUTTO
+// #define D_BUTTO
 
 #ifndef D_CAPTIVE_PORTAL_URL_REDIRECT_PATH
 #define D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/settings2/welcome"
@@ -64,7 +64,6 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 #include "3_Network/21_WebServer/Webpages/Generated/debug_pages.h"
 #include "3_Network/21_WebServer/Webpages/Generated/root_main.h"
 #include "3_Network/21_WebServer/Webpages/Generated/submodule_assets.h"
-#include "3_Network/21_WebServer/Webpages/Generated/submodule_unified_pages.h"
 #ifdef ESP32
   #include "3_Network/21_WebServer/Webpages/Generated/pages_console_esp32.h"
 #else
@@ -152,8 +151,85 @@ public mTaskerInterface{
       CONTENT_TYPE_TEXT_CSS_ID,
     };
 
+    struct WebApplicationURL
+    {
+      uint16_t module_id = 0;
+      String url;
+      String friendly_name;
+    };
+    std::vector<WebApplicationURL> application_urls;
+    void AddURLasApplication(uint16_t module_id, const char* url, const char* friendly_name = nullptr);
+    void AddURLasApplication(uint16_t module_id, const String& url, const char* friendly_name = nullptr);
+    void HandleAPI_URLApplications(AsyncWebServerRequest* request);
+
+    #ifdef ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
+    enum class WebUIControlType : uint8_t
+    {
+      Toggle = 0,
+      Momentary,
+      TestSwitch,
+      ButtonRow,
+      Value,
+      Indicator
+    };
 
 
+    struct WebUIContext
+    {
+      AsyncResponseStream* response = nullptr;
+
+      bool first_module = true;
+      bool first_control = true;
+      bool module_open = false;
+      bool button_row_open = false;
+      bool first_option = true;
+    };
+
+    WebUIContext webui;
+
+
+    /**
+     * Generic WebUI output helpers.
+     */
+    bool WebUI_Begin(AsyncResponseStream* response);
+    void WebUI_End();
+
+    void WebUI_Module_Start(uint16_t module_id, const char* module_name);
+    void WebUI_Module_End();
+
+    void WebUI_AddToggle(const char* command, uint8_t device_id, const char* name, bool state);
+    void WebUI_AddMomentary(const char* command, uint8_t device_id, const char* name, bool state);
+    void WebUI_AddTestSwitch(const char* command, uint8_t device_id, const char* name, bool physical_state);
+
+    void WebUI_AddButtonRow_Start(const char* command, uint8_t device_id, const char* name, const char* description = nullptr, int32_t selected_value = -1);
+    void WebUI_AddButtonRow_Option(const char* name, int32_t value);
+    void WebUI_AddButtonRow_End();
+
+    void WebUI_AddValue(uint8_t device_id, const char* name, const char* value, const char* units = nullptr);
+    void WebUI_AddValue(uint8_t device_id, const char* name, int32_t value, const char* units = nullptr);
+    void WebUI_AddValue(uint8_t device_id, const char* name, float value, const char* units = nullptr, uint8_t precision = 2);
+
+    void WebUI_AddIndicator(uint8_t device_id, const char* name, bool state);
+
+    void WebUI_PrintJSONString(AsyncResponseStream* response, const char* str);
+
+
+    /**
+     * WebUI endpoints.
+     */
+    void HandleAPI_WebUI(AsyncWebServerRequest* request);
+    void HandleAPI_WebUICommand(AsyncWebServerRequest* request);
+
+
+    /**
+     * Build and dispatch:
+     *
+     *   {"ui":{"RP":[device,value]}}
+     */
+    bool WebUI_DispatchCommand(const char* command, uint8_t device_id, bool has_value, int32_t value);
+
+
+    #endif // ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
 
 // server library objects
 AsyncWebServer* server = nullptr;
@@ -330,8 +406,8 @@ size_t printSetFormIndex(Print& settingsScript, const char* key, int index);
 size_t printSetFormValue(Print& settingsScript, const char* key, const char* val);
 size_t printSetClassElementHTML(Print& settingsScript, const char* key, const int index, const char* val);
 size_t printSetFormInput(Print& settingsScript, const char* key, const char* selector, int value) ;
-size_t printSetElementStyle(Print& settingsScript, const char* element_id, const char* css_prop, const char* css_val);
-size_t printToggleElementClass(Print& settingsScript,  const char* element_id,  const char* class_name,  bool enable);
+// size_t printSetElementStyle(Print& settingsScript, const char* element_id, const char* css_prop, const char* css_val);
+// size_t printToggleElementClass(Print& settingsScript,  const char* element_id,  const char* class_name,  bool enable);
 
 
 size_t printTableSetCell(Print& s, const char* table_id, uint16_t row, uint8_t col, const char* val);
@@ -350,37 +426,6 @@ size_t printSetElementHTML(
 
     void SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage);
 
-// ---- System Controls (polling containers) ----
-void HandlePage_SystemControls(AsyncWebServerRequest *request);
-void HandlePage_SystemControls_C1(AsyncWebServerRequest *request);
-void HandlePage_SystemControls_C2(AsyncWebServerRequest *request);
-void HandlePage_SystemControls_C3(AsyncWebServerRequest *request);
-
-// Active append stream context for Tasker-based append (shared within request scope)
-AsyncResponseStream* web_controls_stream = nullptr;
-uint8_t web_controls_container_id = 0;
-
-// Helpers modules may call (via tkr_web pointer) while handling TASK_WEB_APPEND_* events
-inline Print* WebControls_GetPrint() { return (Print*)web_controls_stream; }
-inline uint8_t WebControls_GetContainerId() const { return web_controls_container_id; }
-size_t WebUI_Print_SectionBegin(Print& out, const char* title);
-size_t WebUI_Print_SectionEnd(Print& out);
-
-size_t WebUI_Print_TableBegin(Print& out);
-size_t WebUI_Print_TableEnd(Print& out);
-
-size_t WebUI_Print_KV_Float(Print& out, const char* key, float value, uint8_t decimals, const char* units);
-size_t WebUI_Print_KV_U32(Print& out, const char* key, uint32_t value, const char* units);
-size_t WebUI_Print_KV_Str(Print& out, const char* key, const char* value);
-size_t WebUI_Print_TableHeaderRow_Begin(Print& out);
-size_t WebUI_Print_TableHeaderCell(Print& out, const char* text, bool is_first_blank = false);
-size_t WebUI_Print_TableHeaderRow_End(Print& out);
-
-size_t WebUI_Print_RowBegin(Print& out, const char* key);
-size_t WebUI_Print_CellText(Print& out, const char* text);
-size_t WebUI_Print_CellFloat(Print& out, float value, uint8_t decimals, const char* units);
-size_t WebUI_Print_CellDash(Print& out);
-size_t WebUI_Print_RowEnd(Print& out);
 
 #ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
 void HandlePage_UrlList(AsyncWebServerRequest *request);

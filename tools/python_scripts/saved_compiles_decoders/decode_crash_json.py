@@ -193,7 +193,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
 
     
-    ap.add_argument("--env", default="testbed_01__sensors_nextion", help="PlatformIO env name")
+    ap.add_argument("--env", default="testbed__sensors_nextion", help="PlatformIO env name")
     # ap.add_argument("--env", default="tg_lgt__esp32_matrix_32w8h", help="PlatformIO env name")
     # ap.add_argument("--env", default="tg_lgt__esp32_matrix_16x16", help="PlatformIO env name")
     # ap.add_argument("--env", default="tg_lgt__esp32_matrix_16x16_16fx", help="PlatformIO env name")

@@ -102,11 +102,6 @@ class mSensorsInterface :
     // but, sun position is here, so perhaps needs to anyway.
 
 
-    void WebAppend__Sensor_Table__As_TypesRows();
-    void WebAppend__Sensor_Table__As_SensorsRows_Inverted();
-    void WebAppend__Sensor_Table__As_Ragged();
-
-
     #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
     struct filtered_sensor_entry_t 
     {
@@ -235,6 +230,7 @@ class mSensorsInterface :
       value->sensor_type.push_back(0); value->sensor_id = 0; return; // Return nothing if we reach here
     };
    
+    void WebPage_Root_AddHandlers();
     
     /************************************************************************************************
      * SECTION: Construct Messages

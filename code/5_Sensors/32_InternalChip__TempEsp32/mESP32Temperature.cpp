@@ -129,16 +129,7 @@ void mESP32Temperature::Init(void)
 void mESP32Temperature::BootMessage(void)
 {
   #ifdef ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
-
-  if(sensor.supported)
-  {
-    ALOG_IMP(PSTR("ESP32Temp: supported"));
-  }
-  else
-  {
-    ALOG_IMP(PSTR("ESP32Temp: unsupported"));
-  }
-
+  ALOG_IMP(PSTR("ESP32Temp: %ssupported"),sensor.supported?"":"Un");
   #endif // ENABLE_FEATURE_SYSTEM__SHOW_BOOT_MESSAGE
 }
 

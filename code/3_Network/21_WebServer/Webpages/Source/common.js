@@ -145,20 +145,20 @@ function uploadFile(fileObj, name) {
 
 // Date Modified: 25Jan26
 function SHTML(id, html){ var e=gId(id); if(e) e.innerHTML = html; }
-function STXT(id, txt){ var e=gId(id); if(e) e.textContent = txt; }
-function SCLS(id, cls, en){ var e=gId(id); if(e) e.classList.toggle(cls, !!en); }
-function SATTR(id, k, v){ var e=gId(id); if(e) e.setAttribute(k, v); }
+// function STXT(id, txt){ var e=gId(id); if(e) e.textContent = txt; }
+// function SCLS(id, cls, en){ var e=gId(id); if(e) e.classList.toggle(cls, !!en); }
+// function SATTR(id, k, v){ var e=gId(id); if(e) e.setAttribute(k, v); }
 
-// “build helpers” (optional)
-function KVRow(k, v){
-  return "<tr><td class='key'>" + k + "</td><td class='val'>" + v + "</td></tr>";
-}
-function KVTable(rowsHtml){
-  return "<table class='kv'>" + rowsHtml + "</table>";
-}
-function Section(title, innerHtml){
-  return "<div class='section'><div class='title'>" + title + "</div>" + innerHtml + "</div>";
-}
+// // “build helpers” (optional)
+// function KVRow(k, v){
+//   return "<tr><td class='key'>" + k + "</td><td class='val'>" + v + "</td></tr>";
+// }
+// function KVTable(rowsHtml){
+//   return "<table class='kv'>" + rowsHtml + "</table>";
+// }
+// function Section(title, innerHtml){
+//   return "<div class='section'><div class='title'>" + title + "</div>" + innerHtml + "</div>";
+// }
 
 
 

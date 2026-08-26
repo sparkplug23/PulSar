@@ -172,6 +172,11 @@ class mRelays :
 
     void CommandSet_PowerCycle_Interval();
     void CommandSet_PowerTimeOnLimit_Until_Reset();
+    
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    void parse_JSONCommand_WebUI(JsonParserObject obj);
+    void WebUI_Append();
+    #endif
 
     /************************************************************************************************
      * SECTION: Construct Messages

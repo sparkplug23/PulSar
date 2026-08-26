@@ -23,7 +23,8 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 #define FIRMWARE_VERSION_MAJOR    0 // Reserved for webserver working, settings saving, and being able to export (as json AND bytes) that settings
 
 /**@@@@@ Minor Changes - Aim for Quartely Milestones : Try describe development in this stage, when increased, assumed previous was done.
- * #137 : Aug26 from dev_particle_lights, new telemetry, lots of webpages cleaned towards usuable. 
+ *          [26Q3] End of September Q3 milestone
+ * #137 : [Aug26] from dev_particle_lights, new telemetry, lots of webpages cleaned towards usuable. 
  * #136 : [26v1] Created 13June26. {alreadydone: Bitpack gpio, templates, mqtt, all networks, huge rewrite which may need certain flags working. Sd card, filesystem, settings, also all redone. Pin mapping in general redone}
  * #135 : [26Q2] Created 4April26. Worked on: Addlog, Network connections and mqtt switched to multi-access structure. MQTT can latch on to any, and its its job to handle that. Filesystem, Settings, SDCard (inside Filesystem).
  * #134 : Created Feb26. Fixed RTC leak causing crashing on solar, new panic_handler added for postcrash decoding

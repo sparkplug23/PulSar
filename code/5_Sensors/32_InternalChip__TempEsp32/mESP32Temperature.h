@@ -1,7 +1,7 @@
 #ifndef _mESP32Temperature_H
 #define _mESP32Temperature_H
 
-#define D_UNIQUE_MODULE_SENSORS_ESP32_TEMPERATURE__ID 3032 // [(Folder_Number*100)+ID_File]
+#define D_UNIQUE_MODULE_SENSORS_ESP32_TEMPERATURE__ID 5032 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -76,12 +76,7 @@ class mESP32Temperature :
 
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      if(index >= module_state.devices)
-      {
-        value->sensor_type.push_back(0);
-        return;
-      }
-
+      if(index >= module_state.devices){ value->sensor_type.push_back(0); return; }
       value->timestamp = sensor.utc_measured_timestamp;
       value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
       value->data_f.push_back(sensor.reading.val);

@@ -33,25 +33,29 @@ int8_t mButtons::Tasker(uint8_t function, JsonParserObject obj){
      * TELEMETRY SECTION * 
     *******************/
     case TASK_TELEMETRY_HANDLERS_INIT:
-      TelemetryHandler_Init();
+      Telemetry_Init();
     break;
     case TASK_TELEMETRY_REFRESH_SEND_ALL:
-      tkr_tele->TelemetryHandler_RefreshAll(telemetry_list);
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
     break;
     case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_tele->TelemetryHandler_Rate(telemetry_list);
+      tkr_tele->Telemetry_Rate(telemetry_list);
     break;
     #ifdef USE_MODULE_NETWORK_MQTT
     case TASK_TELEMETRY__SENDER_MQTT:
-      tkr_mqtt->MQTTHandler_Sender(telemetry_list, *this);
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
     #endif
+    #ifdef USE_MODULE_SERIAL
     case TASK_SERIAL_TELEMETRY:
       tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
     case TASK_WEB_TELEMETRY:
       tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
+    #endif
   }
 
   return TASKER_RESULT__SUCCESS_ID;

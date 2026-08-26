@@ -1822,7 +1822,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 #ifdef DEVICE_MEADOWS__HALLWAY__HEATING
   #ifndef DEVICENAME_CTR
-  #define DEVICENAME_CTR          "testbed_01__sensors_nextion"
+  #define DEVICENAME_CTR          "testbed__sensors_nextion"
   #endif
   #ifndef DEVICENAME_FRIENDLY_CTR
   #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR

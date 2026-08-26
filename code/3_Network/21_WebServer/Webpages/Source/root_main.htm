@@ -21,9 +21,22 @@
   --shadow:0 8px 24px rgba(0,0,0,.25);
 }
 
-html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Segoe UI,Roboto,Arial,sans-serif}
-button{font:inherit;color:inherit}
-.mono{font-family:Consolas,Menlo,Monaco,monospace}
+html,body{
+  height:100%;
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Segoe UI,Roboto,Arial,sans-serif;
+}
+
+button{
+  font:inherit;
+  color:inherit;
+}
+
+.mono{
+  font-family:Consolas,Menlo,Monaco,monospace;
+}
 
 .wrap{
   min-height:100%;
@@ -66,8 +79,10 @@ button{font:inherit;color:inherit}
   box-shadow:0 0 0 4px rgba(77,163,255,.15);
 }
 
-.brand .title{font-size:17px;font-weight:600}
-.brand .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.brand .title{
+  font-size:17px;
+  font-weight:600;
+}
 
 .railsec{
   border:1px solid var(--border);
@@ -99,9 +114,23 @@ button{font:inherit;color:inherit}
   cursor:pointer;
 }
 
-.railbtn:first-of-type{margin-top:0}
-.railbtn:hover,.tile:hover,.link:hover{background:var(--btnh)}
-.railbtn:active,.tile:active{transform:translateY(1px)}
+.railbtn:first-of-type{
+  margin-top:0;
+}
+
+.railbtn:hover,
+.tile:hover,
+.applink:hover,
+.ctrlbtn:hover{
+  background:var(--btnh);
+}
+
+.railbtn:active,
+.tile:active,
+.applink:active,
+.ctrlbtn:active{
+  transform:translateY(1px);
+}
 
 .railbtn .l{
   display:flex;
@@ -110,9 +139,49 @@ button{font:inherit;color:inherit}
   gap:2px;
 }
 
-.railbtn .name{font-size:14px;font-weight:600}
-.railbtn .desc{font-size:12px;color:var(--muted)}
-.railbtn .go{font-size:12px;color:var(--muted)}
+.railbtn .name{
+  font-size:14px;
+  font-weight:600;
+}
+
+.railbtn .desc{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.railbtn .go{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.overview{
+  margin-top:auto;
+}
+
+.overview .kv{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:2px;
+  font-size:11px;
+}
+
+.overview .row{
+  display:grid;
+  grid-template-columns:78px 1fr;
+  gap:6px;
+  padding:2px 0;
+}
+
+.overview .k{
+  color:var(--muted);
+}
+
+.overview .v{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
 
 .main{
   min-width:0;
@@ -150,150 +219,414 @@ button{font:inherit;color:inherit}
   border-radius:14px;
   background:var(--btn);
   padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-height:92px;
+}
+
+.tile.clickable{
   cursor:pointer;
+}
+
+.tile .t{
+  font-size:15px;
+  font-weight:700;
+}
+
+.tile .d{
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.35;
+}
+
+.applinks{
   display:flex;
   flex-direction:column;
   gap:6px;
-  min-height:82px;
+  margin-top:4px;
 }
 
-.tile .t{font-size:15px;font-weight:700}
-.tile .d{font-size:12px;color:var(--muted);line-height:1.35}
-.tile .u{font-size:12px;color:var(--muted);margin-top:auto}
+.applink{
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:#1d1d1d;
+  padding:8px 10px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
 
-.kv{
+.applink .txt{
+  min-width:0;
+  flex:1;
+}
+
+.applink .an{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  font-weight:600;
+}
+
+.applink .au{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:11px;
+  color:var(--muted);
+}
+
+.applink .go{
+  flex:0 0 auto;
+  color:var(--muted);
+}
+
+
+/* -------------------------------------------------------
+ * System Controls
+ * ------------------------------------------------------- */
+
+.system-controls{
   display:grid;
-  grid-template-columns:130px 1fr;
-  gap:8px 10px;
+  grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);
+  gap:12px;
   margin-top:12px;
+}
+
+.control-pane{
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--panel2);
+  padding:12px;
+  min-width:0;
+}
+
+.control-pane-title{
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:10px;
+}
+
+.control-module,
+.sensor-group{
+  border:1px solid var(--border);
+  border-radius:11px;
+  background:var(--btn);
+  padding:10px;
+  margin-top:8px;
+}
+
+.control-module:first-child,
+.sensor-group:first-child{
+  margin-top:0;
+}
+
+.control-module-title,
+.sensor-title{
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:8px;
+}
+
+.control-row{
+  display:grid;
+  grid-template-columns:minmax(100px,1fr) minmax(100px,.8fr) auto;
+  align-items:center;
+  gap:10px;
+  padding:8px 0;
+  border-top:1px solid var(--border);
+}
+
+.control-row:first-of-type{
+  border-top:0;
+}
+
+.control-name{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:12px;
+  font-weight:600;
+}
+
+.control-description{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:11px;
+  color:var(--muted);
+}
+
+.control-description:empty{
+  display:block;
+}
+
+.control-actions{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  align-items:center;
+  gap:5px;
+}
+
+.ctrlbtn{
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:#1d1d1d;
+  padding:5px 9px;
+  min-width:44px;
+  cursor:pointer;
   font-size:12px;
 }
 
-.k{color:var(--muted)}
-.v{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-.foot{
-  margin-top:auto;
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
+.ctrlbtn.on,
+.ctrlbtn.selected{
+  border-color:var(--accent);
+  box-shadow:0 0 0 1px rgba(77,163,255,.18);
 }
 
-.pill,.link{
+.indicator{
   display:inline-flex;
   align-items:center;
   gap:6px;
-  padding:6px 10px;
-  border:1px solid var(--border);
-  border-radius:999px;
-  background:#101010;
+  font-size:12px;
   color:var(--muted);
+}
+
+.indicator-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#555;
+}
+
+.indicator.on .indicator-dot{
+  background:var(--accent);
+  box-shadow:0 0 0 3px rgba(77,163,255,.14);
+}
+
+
+/* -------------------------------------------------------
+ * Sensor tables
+ * ------------------------------------------------------- */
+
+.sensor-table{
+  width:100%;
+  border-collapse:collapse;
   font-size:12px;
 }
 
-.link{cursor:pointer}
-
-.pill .b{
-  width:7px;
-  height:7px;
-  border-radius:50%;
-  background:var(--accent);
+.sensor-table td{
+  padding:5px 4px;
+  border-top:1px solid var(--border);
 }
 
-.module-dependent{
-  display:none;
+.sensor-table tr:first-child td{
+  border-top:0;
 }
 
-.module-dependent.module-active{
-  display:flex;
+.sensor-table td:first-child{
+  color:var(--muted);
+}
+
+.sensor-table td:last-child{
+  text-align:right;
+  font-family:Consolas,Menlo,Monaco,monospace;
+}
+
+.empty{
+  color:var(--muted);
+  font-size:12px;
+  padding:8px 2px;
+}
+
+@media(max-width:1200px){
+  .control-row{
+    grid-template-columns:minmax(100px,1fr) auto;
+  }
+
+  .control-description{
+    grid-column:1;
+    grid-row:2;
+  }
+
+  .control-actions{
+    grid-column:2;
+    grid-row:1 / span 2;
+  }
 }
 
 @media(max-width:1000px){
-  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .system-controls{
+    grid-template-columns:1fr;
+  }
 }
 
 @media(max-width:860px){
-  .wrap{grid-template-columns:1fr}
+  .wrap{
+    grid-template-columns:1fr;
+  }
+
+  .overview{
+    margin-top:0;
+  }
 }
 
 @media(max-width:520px){
-  .grid{grid-template-columns:1fr}
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .control-row{
+    grid-template-columns:1fr;
+  }
+
+  .control-description,
+  .control-actions{
+    grid-column:auto;
+    grid-row:auto;
+  }
+
+  .control-actions{
+    justify-content:flex-start;
+  }
 }
 </style>
 </head>
 
 <body>
+
 <div class="wrap">
 
   <aside class="rail">
 
     <div class="brand">
       <div class="dot"></div>
-      <div>
-        <div class="title">PulSar</div>
-      </div>
+      <div class="title">PulSar</div>
     </div>
 
-    <div class="railsec">
-      <h3>Applications</h3>
-
-      <button class="railbtn module-dependent" data-module="pixels" type="button" onclick="go('/lights')">
-        <span class="l"><span class="name">Lights</span><span class="desc">Lighting and animation</span></span>
-        <span class="go">›</span>
-      </button>
-
-      <button class="railbtn module-dependent" data-module="nextion" type="button" onclick="go('/nextion/main')">
-        <span class="l"><span class="name">Nextion</span><span class="desc">Display and HMI</span></span>
-        <span class="go">›</span>
-      </button>
-
-      <button class="railbtn" type="button" onclick="go('/system/controls')">
-        <span class="l"><span class="name">System Controls</span><span class="desc">Device controls</span></span>
-        <span class="go">›</span>
-      </button>
-    </div>
 
     <div class="railsec">
       <h3>System</h3>
 
       <button class="railbtn" type="button" onclick="go('/settings')">
-        <span class="l"><span class="name">Settings</span><span class="desc">Device configuration</span></span>
+        <span class="l">
+          <span class="name">Settings</span>
+          <span class="desc">Device configuration</span>
+        </span>
         <span class="go">›</span>
       </button>
 
       <button class="railbtn" type="button" onclick="go('/console')">
-        <span class="l"><span class="name">Console</span><span class="desc">Live log and commands</span></span>
+        <span class="l">
+          <span class="name">Console</span>
+          <span class="desc">Live log and commands</span>
+        </span>
         <span class="go">›</span>
       </button>
 
       <button class="railbtn" type="button" onclick="go('/edit')">
-        <span class="l"><span class="name">Files</span><span class="desc">Internal filesystem</span></span>
+        <span class="l">
+          <span class="name">Files</span>
+          <span class="desc">Internal filesystem</span>
+        </span>
         <span class="go">›</span>
       </button>
 
       <button class="railbtn" type="button" onclick="go('/sdedit')">
-        <span class="l"><span class="name">SD Files</span><span class="desc">SD card filesystem</span></span>
+        <span class="l">
+          <span class="name">SD Files</span>
+          <span class="desc">SD card filesystem</span>
+        </span>
         <span class="go">›</span>
       </button>
 
       <button class="railbtn" type="button" onclick="go('/update')">
-        <span class="l"><span class="name">Firmware Update</span><span class="desc">Upload and flash firmware</span></span>
+        <span class="l">
+          <span class="name">Firmware Update</span>
+          <span class="desc">Upload and flash firmware</span>
+        </span>
         <span class="go">›</span>
       </button>
     </div>
+
 
     <div class="railsec">
       <h3>Advanced</h3>
 
       <button class="railbtn" type="button" onclick="go('/debug/main')">
-        <span class="l"><span class="name">Advanced</span><span class="desc">Diagnostics and developer tools</span></span>
+        <span class="l">
+          <span class="name">Advanced</span>
+          <span class="desc">Diagnostics and developer tools</span>
+        </span>
         <span class="go">›</span>
       </button>
     </div>
 
-    <div class="foot">
-      <span class="pill"><span class="b"></span><span id="st">ready</span></span>
-      <span class="pill mono" id="host">host:—</span>
+
+    <div class="railsec overview">
+      <h3>Overview</h3>
+
+      <div class="kv">
+
+        <div class="row">
+          <div class="k">Device</div>
+          <div class="v mono">PulSar</div>
+        </div>
+
+        <div class="row">
+          <div class="k">Host</div>
+          <div class="v mono" id="origin">—</div>
+        </div>
+
+        <div class="row">
+          <div class="k">Version</div>
+          <div class="v mono">##VERSION##</div>
+        </div>
+
+        <div class="row">
+          <div class="k">Firmware</div>
+          <div class="v mono">##FIRMWARE_BRANCH##</div>
+        </div>
+
+        <div class="row">
+          <div class="k">Build</div>
+          <div class="v mono">##BUILD_DATETIME##</div>
+        </div>
+
+        <div class="row">
+          <div class="k">Environment</div>
+          <div class="v mono">##BUILD_ENV##</div>
+        </div>
+
+        <div class="row">
+          <div class="k">Build Host</div>
+          <div class="v mono">##BUILD_HOST##</div>
+        </div>
+
+        <div class="row">
+          <div class="k">Git Branch</div>
+          <div class="v mono">##GIT_BRANCH##</div>
+        </div>
+
+        <div class="row">
+          <div class="k">Git Commit</div>
+          <div class="v mono">##GIT_COMMIT##</div>
+        </div>
+
+      </div>
     </div>
 
   </aside>
@@ -302,62 +635,32 @@ button{font:inherit;color:inherit}
   <main class="main">
 
     <section class="card">
-      <h2>Overview</h2>
-      <p>PulSar provides a common control layer for installed modules and services.</p>
+      <h2>Applications</h2>
+      <p>Installed applications and module interfaces available in this firmware.</p>
 
-      <div class="kv">
-        <div class="k">Device</div><div class="v mono" id="device">PulSar</div>
-        <div class="k">Host</div><div class="v mono" id="origin">—</div>
-        <div class="k">Version</div><div class="v mono">##VERSION##</div>
-        <div class="k">Firmware Branch</div><div class="v mono">##FIRMWARE_BRANCH##</div>
-        <div class="k">Build</div><div class="v mono">##BUILD_DATETIME##</div>
-        <div class="k">Environment</div><div class="v mono">##BUILD_ENV##</div>
-        <div class="k">Build Host</div><div class="v mono">##BUILD_HOST##</div>
-        <div class="k">Git Branch</div><div class="v mono">##GIT_BRANCH##</div>
-        <div class="k">Git Commit</div><div class="v mono">##GIT_COMMIT##</div>
+      <div class="grid" id="applicationGrid">
       </div>
     </section>
 
 
     <section class="card">
-      <h2>Applications</h2>
+      <h2>System Controls</h2>
+      <p>Live control, physical I/O and unified sensor state.</p>
 
-      <div class="grid">
+      <div class="system-controls">
 
-        <div class="tile module-dependent" data-module="pixels" onclick="go('/lights')">
-          <div class="t">Lights</div>
-          <div class="d">Effects, palettes, segments, presets and lighting control.</div>
-          <div class="u mono">/lights</div>
+        <div class="control-pane">
+          <div class="control-pane-title">Controls / I/O</div>
+          <div id="controlsContainer">
+            <div class="empty" id="controlsEmpty">Loading controls…</div>
+          </div>
         </div>
 
-        <div class="tile module-dependent" data-module="nextion" onclick="go('/nextion/main')">
-          <div class="t">Nextion</div>
-          <div class="d">Display control, upload and HMI management.</div>
-          <div class="u mono">/nextion/main</div>
-        </div>
-
-        <div class="tile" onclick="go('/system/controls')">
-          <div class="t">System Controls</div>
-          <div class="d">Direct device and system-level controls.</div>
-          <div class="u mono">/system/controls</div>
-        </div>
-
-        <div class="tile" onclick="go('/settings')">
-          <div class="t">Settings</div>
-          <div class="d">Network, hardware, system, modules, storage and security.</div>
-          <div class="u mono">/settings</div>
-        </div>
-
-        <div class="tile" onclick="go('/console')">
-          <div class="t">Console</div>
-          <div class="d">Runtime logs and command interface.</div>
-          <div class="u mono">/console</div>
-        </div>
-
-        <div class="tile" onclick="go('/debug/main')">
-          <div class="t">Advanced</div>
-          <div class="d">Diagnostics, internal state and developer tools.</div>
-          <div class="u mono">/debug/main</div>
+        <div class="control-pane">
+          <div class="control-pane-title">Live Data</div>
+          <div id="sensorContainer">
+            <div class="empty" id="sensorsEmpty">Loading sensor data…</div>
+          </div>
         </div>
 
       </div>
@@ -369,93 +672,755 @@ button{font:inherit;color:inherit}
 
 
 <script>
-const TELEMETRY_API = '/debug/api/telemetry';
-const MODULE_QUERY_TIMEOUT_MS = 1500;
 
-function go(path){
-  if (!path) return;
+const APPLICATIONS_API = '/url_apps';
+const CONTROLS_API = '/system/controls/ui';
+const COMMAND_API = '/system/controls/cmd';
+const SENSOR_API = '/sensor/unified.json';
 
-  if (path.startsWith("http://") || path.startsWith("https://")) {
+
+/* -------------------------------------------------------
+ * Navigation
+ * ------------------------------------------------------- */
+
+function go(path)
+{
+  if(!path) return;
+
+  if(path.startsWith('http://') || path.startsWith('https://'))
+  {
     location.href = path;
     return;
   }
 
-  if (path[0] !== "/") path = "/" + path;
+  if(path[0] !== '/')
+  {
+    path = '/' + path;
+  }
+
   location.href = path;
 }
 
-function moduleMatches(required, activeModules)
+
+/* -------------------------------------------------------
+ * Utility IDs
+ * ------------------------------------------------------- */
+
+function safeId(value)
 {
-  if (!required) return false;
-
-  const names = required
-    .split(',')
-    .map(name => name.trim().toLowerCase())
-    .filter(name => name.length);
-
-  for (const name of names)
-  {
-    if (activeModules.has(name)) return true;
-  }
-
-  return false;
+  return String(value).replace(/[^a-zA-Z0-9_-]/g, '_');
 }
 
-async function updateModuleVisibility()
+function applicationModuleId(module)
 {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), MODULE_QUERY_TIMEOUT_MS);
+  return 'app_' + safeId(module.ModuleID !== undefined ? module.ModuleID : module.Module);
+}
+
+function controlModuleId(moduleId)
+{
+  return 'ctrlmodule_' + safeId(moduleId);
+}
+
+function controlElementId(moduleId, command, device)
+{
+  return 'ctrl_' + safeId(moduleId) + '_' + safeId(command || 'x') + '_' + safeId(device);
+}
+
+function sensorGroupId(name)
+{
+  return 'sensor_' + safeId(name);
+}
+
+function sensorValueId(group, device)
+{
+  return sensorGroupId(group) + '_' + safeId(device);
+}
+
+
+/* -------------------------------------------------------
+ * Applications
+ * ------------------------------------------------------- */
+
+function appendApplicationModule(module)
+{
+  if(!module || !Array.isArray(module.Links) || !module.Links.length)
+  {
+    return;
+  }
+
+  const grid = document.getElementById('applicationGrid');
+  if(!grid) return;
+
+  const id = applicationModuleId(module);
+
+  if(document.getElementById(id))
+  {
+    return;
+  }
+
+  const tile = document.createElement('div');
+  tile.className = 'tile';
+  tile.id = id;
+
+  const title = document.createElement('div');
+  title.className = 't';
+  title.textContent = module.Module || 'Module';
+
+  const links = document.createElement('div');
+  links.className = 'applinks';
+
+  tile.appendChild(title);
+  tile.appendChild(links);
+
+  for(const item of module.Links)
+  {
+    if(!Array.isArray(item) || item.length < 2 || !item[1])
+    {
+      continue;
+    }
+
+    const friendlyName = item[0] || item[1];
+    const urlValue = item[1];
+
+    const link = document.createElement('div');
+    link.className = 'applink';
+
+    link.onclick = function()
+    {
+      go(urlValue);
+    };
+
+    const text = document.createElement('div');
+    text.className = 'txt';
+
+    const name = document.createElement('div');
+    name.className = 'an';
+    name.textContent = friendlyName;
+
+    const url = document.createElement('div');
+    url.className = 'au mono';
+    url.textContent = urlValue;
+
+    const arrow = document.createElement('span');
+    arrow.className = 'go';
+    arrow.textContent = '›';
+
+    text.appendChild(name);
+    text.appendChild(url);
+
+    link.appendChild(text);
+    link.appendChild(arrow);
+
+    links.appendChild(link);
+  }
+
+  if(links.children.length)
+  {
+    grid.appendChild(tile);
+  }
+}
+
+
+async function loadApplications()
+{
+  try
+  {
+    const response = await fetch(APPLICATIONS_API, {cache:'no-store'});
+    if(!response.ok) return;
+
+    const data = await response.json();
+
+    if(!data || !Array.isArray(data.Applications))
+    {
+      return;
+    }
+
+    for(const module of data.Applications)
+    {
+      appendApplicationModule(module);
+    }
+  }
+  catch(e)
+  {
+  }
+}
+
+
+/* -------------------------------------------------------
+ * Commands
+ * ------------------------------------------------------- */
+
+async function sendControlCommand(command, device, value, includeValue = true)
+{
+  let url = COMMAND_API +
+    '?k=' + encodeURIComponent(command) +
+    '&d=' + encodeURIComponent(device);
+
+  if(includeValue)
+  {
+    url += '&v=' + encodeURIComponent(value);
+  }
 
   try
   {
-    const res = await fetch(
-      TELEMETRY_API + '?topic=' + encodeURIComponent('telemetry/taskermanager'),
-      {
-        cache:'no-store',
-        signal:controller.signal
-      }
-    );
-
-    if (!res.ok) return;
-
-    const data = await res.json();
-
-    if (!data || !data.packet || !Array.isArray(data.packet.Modules)) return;
-
-    const activeModules = new Set();
-
-    for (const module of data.packet.Modules)
-    {
-      if (!module || !module.Name) continue;
-      activeModules.add(String(module.Name).trim().toLowerCase());
-    }
-
-    document.querySelectorAll('[data-module]').forEach(element =>
-    {
-      element.classList.toggle(
-        'module-active',
-        moduleMatches(element.dataset.module, activeModules)
-      );
+    await fetch(url, {
+      method:'GET',
+      cache:'no-store'
     });
   }
   catch(e)
   {
   }
-  finally
+}
+
+
+/* -------------------------------------------------------
+ * Controls - append structure once
+ * ------------------------------------------------------- */
+
+function ensureControlModule(module)
+{
+  const container = document.getElementById('controlsContainer');
+
+  if(!container || !module)
   {
-    clearTimeout(timeout);
+    return null;
+  }
+
+  const empty = document.getElementById('controlsEmpty');
+
+  if(empty)
+  {
+    empty.remove();
+  }
+
+  const id = controlModuleId(module.ID);
+
+  let section = document.getElementById(id);
+
+  if(section)
+  {
+    return section;
+  }
+
+  section = document.createElement('div');
+  section.className = 'control-module';
+  section.id = id;
+
+  const title = document.createElement('div');
+  title.className = 'control-module-title';
+  title.textContent = module.Name || ('Module ' + module.ID);
+
+  section.appendChild(title);
+  container.appendChild(section);
+
+  return section;
+}
+
+
+function createControlElement(moduleId, control)
+{
+  if(!control || !control.T)
+  {
+    return null;
+  }
+
+  const row = document.createElement('div');
+  row.className = 'control-row';
+  row.id = controlElementId(moduleId, control.C, control.D);
+
+  const name = document.createElement('div');
+  name.className = 'control-name';
+  name.textContent = control.N || ('Device ' + control.D);
+
+  const description = document.createElement('div');
+  description.className = 'control-description';
+  description.textContent = control.S || '';
+
+  const actions = document.createElement('div');
+  actions.className = 'control-actions';
+
+  row.appendChild(name);
+  row.appendChild(description);
+  row.appendChild(actions);
+
+
+  if(control.T === 'toggle')
+  {
+    const button = document.createElement('button');
+
+    button.className = 'ctrlbtn';
+    button.dataset.role = 'toggle';
+
+    button.onclick = function()
+    {
+      const current = button.dataset.value === '1' ? 1 : 0;
+      sendControlCommand(control.C, control.D, current ? 0 : 1);
+    };
+
+    actions.appendChild(button);
+  }
+  else if(control.T === 'momentary')
+  {
+    const button = document.createElement('button');
+
+    button.className = 'ctrlbtn';
+    button.dataset.role = 'momentary';
+    button.textContent = 'Press';
+
+    button.onpointerdown = function()
+    {
+      sendControlCommand(control.C, control.D, 1);
+    };
+
+    button.onpointerup = function()
+    {
+      sendControlCommand(control.C, control.D, 0);
+    };
+
+    button.onpointercancel = function()
+    {
+      sendControlCommand(control.C, control.D, 0);
+    };
+
+    button.onpointerleave = function(event)
+    {
+      if(event.buttons)
+      {
+        sendControlCommand(control.C, control.D, 0);
+      }
+    };
+
+    actions.appendChild(button);
+  }
+  else if(control.T === 'testswitch')
+  {
+    const indicator = document.createElement('span');
+    indicator.className = 'indicator';
+    indicator.dataset.role = 'indicator';
+
+    const dot = document.createElement('span');
+    dot.className = 'indicator-dot';
+
+    const state = document.createElement('span');
+    state.dataset.role = 'indicator-state';
+
+    indicator.appendChild(dot);
+    indicator.appendChild(state);
+
+    const button = document.createElement('button');
+    button.className = 'ctrlbtn';
+    button.textContent = 'Test';
+
+    button.onclick = function()
+    {
+      sendControlCommand(control.C, control.D, 0, false);
+    };
+
+    actions.appendChild(indicator);
+    actions.appendChild(button);
+  }
+  else if(control.T === 'buttons')
+  {
+    if(Array.isArray(control.O))
+    {
+      for(let i = 0; i < control.O.length; i++)
+      {
+        const option = control.O[i];
+
+        if(!Array.isArray(option) || option.length < 2)
+        {
+          continue;
+        }
+
+        const button = document.createElement('button');
+
+        button.className = 'ctrlbtn';
+        button.dataset.role = 'option';
+        button.dataset.option = option[1];
+        button.textContent = option[0];
+
+        button.onclick = function()
+        {
+          sendControlCommand(control.C, control.D, option[1]);
+        };
+
+        actions.appendChild(button);
+      }
+    }
+  }
+  else if(control.T === 'indicator')
+  {
+    const indicator = document.createElement('span');
+    indicator.className = 'indicator';
+    indicator.dataset.role = 'indicator';
+
+    const dot = document.createElement('span');
+    dot.className = 'indicator-dot';
+
+    const state = document.createElement('span');
+    state.dataset.role = 'indicator-state';
+
+    indicator.appendChild(dot);
+    indicator.appendChild(state);
+
+    actions.appendChild(indicator);
+  }
+  else if(control.T === 'value')
+  {
+    const value = document.createElement('span');
+
+    value.className = 'mono';
+    value.dataset.role = 'value';
+
+    actions.appendChild(value);
+  }
+
+  return row;
+}
+
+
+/* -------------------------------------------------------
+ * Controls - update values only
+ * ------------------------------------------------------- */
+
+function updateControlElement(moduleId, control)
+{
+  let row = document.getElementById(
+    controlElementId(moduleId, control.C, control.D)
+  );
+
+  if(!row)
+  {
+    return false;
+  }
+
+  const name = row.querySelector('.control-name');
+
+  if(name)
+  {
+    name.textContent = control.N || ('Device ' + control.D);
+  }
+
+  const description = row.querySelector('.control-description');
+
+  if(description)
+  {
+    description.textContent = control.S || '';
+  }
+
+
+  if(control.T === 'toggle')
+  {
+    const button = row.querySelector('[data-role="toggle"]');
+
+    if(button)
+    {
+      button.dataset.value = control.V ? '1' : '0';
+      button.textContent = control.V ? 'ON' : 'OFF';
+      button.classList.toggle('on', !!control.V);
+    }
+  }
+  else if(control.T === 'testswitch' || control.T === 'indicator')
+  {
+    const indicator = row.querySelector('[data-role="indicator"]');
+
+    if(indicator)
+    {
+      indicator.classList.toggle('on', !!control.V);
+    }
+
+    const state = row.querySelector('[data-role="indicator-state"]');
+
+    if(state)
+    {
+      state.textContent = control.V ? 'ON' : 'OFF';
+    }
+  }
+  else if(control.T === 'buttons')
+  {
+    const buttons = row.querySelectorAll('[data-role="option"]');
+
+    for(const button of buttons)
+    {
+      button.classList.toggle(
+        'selected',
+        Number(button.dataset.option) === Number(control.V)
+      );
+    }
+  }
+  else if(control.T === 'value')
+  {
+    const value = row.querySelector('[data-role="value"]');
+
+    if(value)
+    {
+      value.textContent =
+        String(control.V) +
+        (control.U ? ' ' + control.U : '');
+    }
+  }
+
+  return true;
+}
+
+
+function syncControls(data)
+{
+  if(!data || !Array.isArray(data.Modules))
+  {
+    return;
+  }
+
+  for(const module of data.Modules)
+  {
+    if(!module || !Array.isArray(module.Controls))
+    {
+      continue;
+    }
+
+    const section = ensureControlModule(module);
+
+    if(!section)
+    {
+      continue;
+    }
+
+    for(const control of module.Controls)
+    {
+      if(!control || !control.T)
+      {
+        continue;
+      }
+
+      let row = document.getElementById(
+        controlElementId(module.ID, control.C, control.D)
+      );
+
+      if(!row)
+      {
+        row = createControlElement(module.ID, control);
+
+        if(row)
+        {
+          section.appendChild(row);
+        }
+      }
+
+      updateControlElement(module.ID, control);
+    }
   }
 }
 
-(function init(){
-  const host = document.getElementById("host");
-  const origin = document.getElementById("origin");
 
-  host.textContent = "host:" + (location.host || "—");
-  origin.textContent = location.origin || "—";
+async function refreshControls()
+{
+  try
+  {
+    const response = await fetch(CONTROLS_API, {cache:'no-store'});
 
-  updateModuleVisibility();
+    if(!response.ok)
+    {
+      return;
+    }
+
+    const data = await response.json();
+
+    syncControls(data);
+  }
+  catch(e)
+  {
+  }
+}
+
+
+/* -------------------------------------------------------
+ * Unified sensor data
+ * ------------------------------------------------------- */
+
+function ensureSensorGroup(groupName)
+{
+  const container = document.getElementById('sensorContainer');
+
+  if(!container)
+  {
+    return null;
+  }
+
+  const empty = document.getElementById('sensorsEmpty');
+
+  if(empty)
+  {
+    empty.remove();
+  }
+
+  const id = sensorGroupId(groupName);
+
+  let group = document.getElementById(id);
+
+  if(group)
+  {
+    return group;
+  }
+
+  group = document.createElement('div');
+  group.className = 'sensor-group';
+  group.id = id;
+
+  const title = document.createElement('div');
+  title.className = 'sensor-title';
+  title.textContent = groupName;
+
+  const table = document.createElement('table');
+  table.className = 'sensor-table';
+
+  const body = document.createElement('tbody');
+  body.dataset.role = 'sensor-body';
+
+  table.appendChild(body);
+
+  group.appendChild(title);
+  group.appendChild(table);
+
+  container.appendChild(group);
+
+  return group;
+}
+
+
+function ensureSensorValue(groupName, deviceName)
+{
+  const group = ensureSensorGroup(groupName);
+
+  if(!group)
+  {
+    return null;
+  }
+
+  const id = sensorValueId(groupName, deviceName);
+
+  let valueCell = document.getElementById(id);
+
+  if(valueCell)
+  {
+    return valueCell;
+  }
+
+  const body = group.querySelector('[data-role="sensor-body"]');
+
+  if(!body)
+  {
+    return null;
+  }
+
+  const row = document.createElement('tr');
+
+  const nameCell = document.createElement('td');
+  nameCell.textContent = deviceName;
+
+  valueCell = document.createElement('td');
+  valueCell.id = id;
+
+  row.appendChild(nameCell);
+  row.appendChild(valueCell);
+
+  body.appendChild(row);
+
+  return valueCell;
+}
+
+
+function formatSensorValue(value)
+{
+  if(typeof value === 'number')
+  {
+    if(Number.isInteger(value))
+    {
+      return String(value);
+    }
+
+    return value.toFixed(3);
+  }
+
+  return String(value);
+}
+
+
+function syncSensorTables(data)
+{
+  if(!data)
+  {
+    return;
+  }
+
+  for(const [groupName, values] of Object.entries(data))
+  {
+    if(groupName === 'Rate')
+    {
+      continue;
+    }
+
+    if(!values || typeof values !== 'object' || Array.isArray(values))
+    {
+      continue;
+    }
+
+    for(const [deviceName, value] of Object.entries(values))
+    {
+      const valueCell = ensureSensorValue(groupName, deviceName);
+
+      if(valueCell)
+      {
+        valueCell.textContent = formatSensorValue(value);
+      }
+    }
+  }
+}
+
+
+async function refreshSensors()
+{
+  try
+  {
+    const response = await fetch(SENSOR_API, {cache:'no-store'});
+
+    if(!response.ok)
+    {
+      return;
+    }
+
+    const data = await response.json();
+
+    syncSensorTables(data);
+  }
+  catch(e)
+  {
+  }
+}
+
+
+/* -------------------------------------------------------
+ * Init
+ * ------------------------------------------------------- */
+
+(function init()
+{
+  const origin = document.getElementById('origin');
+
+  if(origin)
+  {
+    origin.textContent = location.origin || '—';
+  }
+
+  loadApplications();
+
+  refreshControls();
+  refreshSensors();
+
+  setInterval(refreshControls, 1000);
+  setInterval(refreshSensors, 10000);
 })();
+
 </script>
 
 </body>

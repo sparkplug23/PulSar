@@ -50,7 +50,7 @@ Backtrace:0x40083f7d:0x3ffb25800x4008e3c1:0x3ffb25a0 0x40094315:0x3ffb25c0 0x401
 # CONFIGURATION
 # ============================================================
 
-ENV_NAME = "testbed_02__motion_audio"   # <<< change if needed
+ENV_NAME = "testbed__motion_audio"   # <<< change if needed
 PROJECT_ROOT = None                   # None = auto-detect folder containing saved_compiles
 
 DEDUPE_CONSECUTIVE_ONLY = True

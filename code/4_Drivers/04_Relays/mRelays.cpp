@@ -94,6 +94,35 @@ int8_t mRelays::Tasker(uint8_t function, JsonParserObject obj)
       tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
     #endif
+    
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    #ifdef ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
+    case TASK_WEBUI_APPEND:
+      WebUI_Append();
+    break;
+    #endif
+    #endif
+
+/*
+    case TASK_WEBUI_APPEND:
+      tkr_web->WebUI_AddToggle("RP", 0, "Dryer", true);
+    
+    tkr_web->WebUI_AddButtonRow_Start("RT", relay_id, "Auto Off", timer_minutes);
+
+tkr_web->WebUI_AddButtonRow_Option("Off", 0);
+tkr_web->WebUI_AddButtonRow_Option("15m", 15);
+tkr_web->WebUI_AddButtonRow_Option("30m", 30);
+tkr_web->WebUI_AddButtonRow_Option("1h", 60);
+tkr_web->WebUI_AddButtonRow_Option("2h", 120);
+
+tkr_web->WebUI_AddButtonRow_End();
+    
+    break;
+
+    */
+
+
+
   } // end switch
 
   return TASKER_RESULT__UNKNOWN_ID;
@@ -1230,6 +1259,17 @@ void mRelays::parse_JSONCommand(JsonParserObject obj)
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
   JsonParserObject jobj = 0;
+
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
+  if(jtok = obj["ui"])
+  {
+    parse_JSONCommand_WebUI(jtok.getObject());
+  }
+  #endif
+
+  // JsonParserObject jobj = obj[GetModuleName()];
+
+  // if(!jobj) return;
  
   int8_t relay_id= -1,state=-1;    //assume index 0 if none given
 
@@ -1341,6 +1381,127 @@ void mRelays::SubCommandSet_EnabledTime(JsonParserObject jobj, uint8_t relay_id)
 }
 
 
+
+#ifdef USE_MODULE_NETWORK_WEBSERVER
+
+void mRelays::parse_JSONCommand_WebUI(JsonParserObject obj)
+{
+  JsonParserToken jtok;
+
+  if(jtok = obj["RP"])
+  {
+    JsonParserArray arr = jtok.getArray();
+
+    const uint8_t device_id = arr[0].getInt();
+    const uint8_t state = arr[1].getInt();
+
+    // Call the same internal relay function used by the normal JSON parser.
+    // Do NOT duplicate relay behaviour here.
+    CommandSet_Relay_Power(device_id, state);
+  }
+  if(jtok = obj["RT"])
+  {
+    JsonParserArray arr = jtok.getArray();
+
+    const uint8_t device_id = arr[0].getInt();
+    const uint8_t state = arr[1].getInt();
+
+    uint8_t new_state = !CommandGet_Relay_Power(device_id);
+
+    // Call the same internal relay function used by the normal JSON parser.
+    // Do NOT duplicate relay behaviour here.
+    CommandSet_Relay_Power(device_id, new_state);
+  }
+
+    
+  if(jtok = obj["RM"])
+  {
+    JsonParserArray arr = jtok.getArray();
+
+    uint8_t device_id = arr[0].getInt();
+    uint8_t option_id = arr[1].getInt();
+
+    static const uint16_t options[] = {0, 1, 15, 30, 60, 120};
+
+    if(device_id >= module_state.devices) return;
+    if(option_id >= ARRAY_SIZE(options)) return;
+
+    uint16_t value = options[option_id];
+
+    if(value <= 1)
+    {
+      CommandSet_Timer_Decounter(0, device_id);
+      CommandSet_Relay_Power(value, device_id);
+    }
+    else
+    {
+      CommandSet_Relay_Power(1, device_id);
+      CommandSet_Timer_Decounter(value * 60, device_id);
+    }
+  }
+
+
+}
+
+#endif
+
+
+#ifdef USE_MODULE_NETWORK_WEBSERVER
+
+void mRelays::WebUI_Append()
+{
+  char name_buffer[100];
+  char desc_buffer[50];
+
+  static const uint16_t options[] = {0, 1, 15, 30, 60, 120};
+
+  tkr_web->WebUI_Module_Start(GetModuleUniqueID(), GetModuleName());
+
+  for(uint8_t device_id = 0; device_id < module_state.devices; device_id++)
+  {
+    uint16_t timer_secs = CommandGet_SecondsToRemainOn(device_id);
+    uint16_t timer_mins = (timer_secs + 59) / 60;
+    uint8_t selected_option = CommandGet_Relay_Power(device_id) ? 1 : 0;
+
+    if(timer_secs > 0)
+    {
+      selected_option = 2;
+
+      for(uint8_t i = 2; i < ARRAY_SIZE(options); i++)
+      {
+        selected_option = i;
+        if(timer_mins <= options[i]) break;
+      }
+
+      snprintf(desc_buffer, sizeof(desc_buffer), "%u mins remaining", timer_mins);
+    }
+    else
+    {
+      snprintf(desc_buffer, sizeof(desc_buffer), "%s", CommandGet_Relay_Power(device_id) ? "ON" : "OFF");
+    }
+
+    tkr_web->WebUI_AddButtonRow_Start(
+      "RM",
+      device_id,
+      GetRelayNamebyIDCtr(device_id,name_buffer,sizeof(name_buffer)),
+      desc_buffer,
+      selected_option
+    );
+
+    tkr_web->WebUI_AddButtonRow_Option("OFF", 0);
+    tkr_web->WebUI_AddButtonRow_Option("ON", 1);
+    tkr_web->WebUI_AddButtonRow_Option("15m", 2);
+    tkr_web->WebUI_AddButtonRow_Option("30m", 3);
+    tkr_web->WebUI_AddButtonRow_Option("1hr", 4);
+    tkr_web->WebUI_AddButtonRow_Option("2hr", 5);
+
+    tkr_web->WebUI_AddButtonRow_End();
+  }
+
+  tkr_web->WebUI_Module_End();
+}
+
+#endif
 
 
 /*********************************************************************************************

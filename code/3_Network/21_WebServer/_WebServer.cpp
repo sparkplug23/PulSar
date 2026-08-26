@@ -130,6 +130,36 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 // DEBUG_LINE_HERE;
 }
 
+void mWebServer::AddURLasApplication(uint16_t module_id, const char* url, const char* friendly_name)
+{
+  if(!url || !url[0]) return;
+
+  for(const auto& entry : application_urls)
+  {
+    if(entry.module_id == module_id && entry.url == url)
+    {
+      return;
+    }
+  }
+
+  WebApplicationURL entry;
+  entry.module_id = module_id;
+  entry.url = url;
+
+  if(friendly_name && friendly_name[0])
+  {
+    entry.friendly_name = friendly_name;
+  }
+
+  application_urls.push_back(std::move(entry));
+}
+
+
+void mWebServer::AddURLasApplication(uint16_t module_id, const String& url, const char* friendly_name)
+{
+  AddURLasApplication(module_id, url.c_str(), friendly_name);
+}
+
 
 #ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
 
@@ -368,83 +398,6 @@ void mWebServer::Server_Start()
 
 
 
-void mWebServer::HandlePage_SystemControls(AsyncWebServerRequest *request)
-{
-  // If you want captive portal redirects to hit here, you can add:
-  // if (captivePortal(request)) return;
-
-  static const char _path[] PROGMEM = "/system/controls";
-  this->handleStaticContent(
-    request,
-    FPSTR(_path),
-    200,
-    FPSTR(CONTENT_TYPE_HTML),
-    PAGE_system_controls_web,
-    PAGE_system_controls_web_length,
-    true
-  );
-}
-
-
-void mWebServer::HandlePage_SystemControls_C1(AsyncWebServerRequest *request)
-{
-
-  // DELETED METHOD??
-
-
-  AsyncResponseStream *response = request->beginResponseStream(FPSTR(PM_WEB_CONTENT_TYPE_TEXT_HTML));
-  if (!response) { request->send(500); return; }
-  setStaticContentCacheHeaders(response, 200, 0);
-
-  // Set append context for Tasker-driven modules
-  web_controls_stream = response;
-  web_controls_container_id = 1;
-
-  // Let modules append their blocks (modules will use tkr_web->WebControls_GetPrint())
-  tkr->Tasker_Interface(TASK_WEB_APPEND_SENSOR_TABLE_VALUES);
-
-  // Clear context
-  web_controls_stream = nullptr;
-  web_controls_container_id = 0;
-
-  request->send(response);
-}
-
-
-
-void mWebServer::HandlePage_SystemControls_C2(AsyncWebServerRequest *request)
-{
-  AsyncResponseStream *response = request->beginResponseStream(FPSTR(PM_WEB_CONTENT_TYPE_TEXT_HTML));
-  setStaticContentCacheHeaders(response, 200, 0);
-
-  web_controls_stream = response;
-  web_controls_container_id = 2;
-
-  tkr->Tasker_Interface(TASK_WEB_APPEND_DRIVER_TABLE_VALUES);
-
-  web_controls_stream = nullptr;
-  web_controls_container_id = 0;
-
-  request->send(response);
-}
-
-void mWebServer::HandlePage_SystemControls_C3(AsyncWebServerRequest *request)
-{
-  AsyncResponseStream *response = request->beginResponseStream(FPSTR(PM_WEB_CONTENT_TYPE_TEXT_HTML));
-  setStaticContentCacheHeaders(response, 200, 0);
-
-  web_controls_stream = response;
-  web_controls_container_id = 3;
-
-  tkr->Tasker_Interface(TASK_WEB_APPEND_CONTROLLER_TABLE_VALUES);
-
-  web_controls_stream = nullptr;
-  web_controls_container_id = 0;
-
-  request->send(response);
-}
-
-
 void mWebServer::WebPage_Root_AddHandlers()
 {
   ALOG_DBG(PSTR("mWebServer::WebPage_Root_AddHandlers()"));
@@ -535,6 +488,27 @@ AddURLtoList(PSTR("/debug/main"), HTTP_GET);
 
   #endif // ESP32
 
+  
+#ifdef ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
+SPGM_CTR(PM_URL_SYSTEM_CONTROLS_UI) "/system/controls/ui";
+server->on(PM_URL_SYSTEM_CONTROLS_UI, HTTP_GET, [this](AsyncWebServerRequest *request){
+  this->HandleAPI_WebUI(request);
+});
+AddURLtoList(PM_URL_SYSTEM_CONTROLS_UI, HTTP_GET);
+
+
+SPGM_CTR(PM_URL_SYSTEM_CONTROLS_CMD) "/system/controls/cmd";
+server->on(PM_URL_SYSTEM_CONTROLS_CMD, HTTP_GET, [this](AsyncWebServerRequest *request){
+  this->HandleAPI_WebUICommand(request);
+});
+AddURLtoList(PM_URL_SYSTEM_CONTROLS_CMD, HTTP_GET);
+
+
+#endif // ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
+
+
+
+
   #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
 
     SPGM_CTR(PM_URL_ROOT) "/";
@@ -616,33 +590,6 @@ AddURLtoList(PSTR("/debug/main"), HTTP_GET);
     AddURLtoList(PM_URL_FAVICON_ICO, HTTP_GET);
 
 
-    SPGM_CTR(PM_URL_SYSTEM_CONTROLS_C1) "/system/controls/c1";
-    server->on(PM_URL_SYSTEM_CONTROLS_C1, HTTP_GET, [this](AsyncWebServerRequest *request){
-      this->HandlePage_SystemControls_C1(request);
-    });
-    AddURLtoList(PM_URL_SYSTEM_CONTROLS_C1, HTTP_GET);
-
-
-    SPGM_CTR(PM_URL_SYSTEM_CONTROLS_C2) "/system/controls/c2";
-    server->on(PM_URL_SYSTEM_CONTROLS_C2, HTTP_GET, [this](AsyncWebServerRequest *request){
-      this->HandlePage_SystemControls_C2(request);
-    });
-    AddURLtoList(PM_URL_SYSTEM_CONTROLS_C2, HTTP_GET);
-
-
-    SPGM_CTR(PM_URL_SYSTEM_CONTROLS_C3) "/system/controls/c3";
-    server->on(PM_URL_SYSTEM_CONTROLS_C3, HTTP_GET, [this](AsyncWebServerRequest *request){
-      this->HandlePage_SystemControls_C3(request);
-    });
-    AddURLtoList(PM_URL_SYSTEM_CONTROLS_C3, HTTP_GET);
-
-
-    SPGM_CTR(PM_URL_SYSTEM_CONTROLS) "/system/controls";
-    server->on(PM_URL_SYSTEM_CONTROLS, HTTP_GET, [this](AsyncWebServerRequest *request){
-      this->HandlePage_SystemControls(request);
-    });
-    AddURLtoList(PM_URL_SYSTEM_CONTROLS, HTTP_GET);
-
 
   #endif // ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
   
@@ -669,6 +616,19 @@ SPGM_CTR(PM_URL_DEBUG_API_TELEMETRY) "/debug/api/telemetry";
 server->on(PM_URL_DEBUG_API_TELEMETRY, HTTP_GET, [this](AsyncWebServerRequest* request){ HandleAPI_DebugTelemetry(request); });
 AddURLtoList(PM_URL_DEBUG_API_TELEMETRY, HTTP_GET);
 #endif
+
+SPGM_CTR(PM_URL_APPLICATIONS) "/url_apps";
+server->on(PM_URL_APPLICATIONS, HTTP_GET, [this](AsyncWebServerRequest *request){
+  this->HandleAPI_URLApplications(request);
+});
+AddURLtoList(PM_URL_APPLICATIONS, HTTP_GET);
+
+
+
+
+
+
+
   
   SPGM_CTR(PM_URL_SETTINGS)      "/settings";       AddURLtoList(PM_URL_SETTINGS,      HTTP_POST);
   SPGM_CTR(PM_URL_SETTINGS_WIFI) "/settings/wifi";  AddURLtoList(PM_URL_SETTINGS_WIFI, HTTP_POST);
@@ -708,6 +668,103 @@ AddURLtoList(PM_URL_DEBUG_API_TELEMETRY, HTTP_GET);
   });
 
   
+}
+
+void mWebServer::HandleAPI_URLApplications(AsyncWebServerRequest* request)
+{
+  AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
+
+  if(!response)
+  {
+    request->send(500);
+    return;
+  }
+
+  response->addHeader(F("Cache-Control"), F("no-store"));
+
+  response->print(F("{\"Applications\":["));
+
+  bool first_module = true;
+
+  for(size_t i = 0; i < application_urls.size(); i++)
+  {
+    const uint16_t module_id = application_urls[i].module_id;
+
+    // Only output this module once
+    bool already_output = false;
+
+    for(size_t j = 0; j < i; j++)
+    {
+      if(application_urls[j].module_id == module_id)
+      {
+        already_output = true;
+        break;
+      }
+    }
+
+    if(already_output) continue;
+
+    char buffer[50];
+
+    const char* module_name = tkr->GetModuleNameDisplayEachWord(module_id, buffer, sizeof(buffer));
+
+    if(!module_name)
+    {
+      module_name = "Unknown";
+    }
+
+    if(!first_module)
+    {
+      response->print(',');
+    }
+
+    first_module = false;
+
+    response->print(F("{\"Module\":\""));
+    response->print(module_name);
+    response->print(F("\",\"Links\":["));
+
+    bool first_link = true;
+
+    for(size_t j = i; j < application_urls.size(); j++)
+    {
+      if(application_urls[j].module_id != module_id) continue;
+
+      if(!first_link)
+      {
+        response->print(',');
+      }
+
+      first_link = false;
+
+      response->print('[');
+
+      if(application_urls[j].friendly_name.length())
+      {
+        response->print('"');
+        response->print(application_urls[j].friendly_name);
+        response->print(F("\",\""));
+        response->print(application_urls[j].url);
+        response->print('"');
+      }
+      else
+      {
+        response->print('"');
+        response->print(application_urls[j].url);
+        response->print(F("\",\""));
+        response->print(application_urls[j].url);
+        response->print('"');
+      }
+
+      response->print(']');
+    }
+
+    response->print(F("]}"));
+  }
+
+  response->print(F("]}"));
+
+  request->send(response);
 }
 
 
@@ -774,5 +831,494 @@ void mWebServer::HandlePage_UrlList_JSON(AsyncWebServerRequest *request)
   request->send(response);
 }
 #endif
+
+
+
+#ifdef ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
+void mWebServer::WebUI_PrintJSONString(AsyncResponseStream* response, const char* str)
+{
+  if(!response || !str) return;
+
+  while(*str)
+  {
+    const char c = *str++;
+
+    switch(c)
+    {
+      case '\\': response->print(F("\\\\")); break;
+      case '"':  response->print(F("\\\"")); break;
+      case '\n': response->print(F("\\n")); break;
+      case '\r': response->print(F("\\r")); break;
+      case '\t': response->print(F("\\t")); break;
+
+      default:
+        if((uint8_t)c >= 32)
+        {
+          response->print(c);
+        }
+      break;
+    }
+  }
+}
+bool mWebServer::WebUI_Begin(AsyncResponseStream* response)
+{
+  if(!response) return false;
+
+  webui.response = response;
+  webui.first_module = true;
+  webui.first_control = true;
+  webui.module_open = false;
+
+  response->print(F("{\"Modules\":["));
+
+  return true;
+}
+
+
+void mWebServer::WebUI_End()
+{
+  if(!webui.response) return;
+
+  if(webui.module_open)
+  {
+    WebUI_Module_End();
+  }
+
+  webui.response->print(F("]}"));
+
+  webui.response = nullptr;
+  webui.first_module = true;
+  webui.first_control = true;
+  webui.module_open = false;
+}
+void mWebServer::WebUI_Module_Start(uint16_t module_id, const char* module_name)
+{
+  if(!webui.response) return;
+
+  if(webui.module_open)
+  {
+    WebUI_Module_End();
+  }
+
+  if(!webui.first_module)
+  {
+    webui.response->print(',');
+  }
+
+  webui.first_module = false;
+  webui.first_control = true;
+  webui.module_open = true;
+
+  webui.response->print(F("{\"ID\":"));
+  webui.response->print(module_id);
+
+  webui.response->print(F(",\"Name\":\""));
+  WebUI_PrintJSONString(webui.response, module_name ? module_name : "");
+  webui.response->print(F("\",\"Controls\":["));
+}
+
+
+void mWebServer::WebUI_Module_End()
+{
+  if(!webui.response || !webui.module_open) return;
+
+  webui.response->print(F("]}"));
+
+  webui.module_open = false;
+}
+static void WebUI_ControlComma(mWebServer::WebUIContext& ctx)
+{
+  if(!ctx.response) return;
+
+  if(!ctx.first_control)
+  {
+    ctx.response->print(',');
+  }
+
+  ctx.first_control = false;
+}
+void mWebServer::WebUI_AddToggle(const char* command, uint8_t device_id, const char* name, bool state)
+{
+  if(!webui.response || !webui.module_open) return;
+
+  if(!webui.first_control)
+  {
+    webui.response->print(',');
+  }
+
+  webui.first_control = false;
+
+  webui.response->print(F("{\"T\":\"toggle\",\"C\":\""));
+  WebUI_PrintJSONString(webui.response, command);
+
+  webui.response->print(F("\",\"D\":"));
+  webui.response->print(device_id);
+
+  webui.response->print(F(",\"N\":\""));
+  WebUI_PrintJSONString(webui.response, name ? name : "");
+
+  webui.response->print(F("\",\"V\":"));
+  webui.response->print(state ? 1 : 0);
+
+  webui.response->print('}');
+}
+void mWebServer::WebUI_AddMomentary(const char* command, uint8_t device_id, const char* name, bool state)
+{
+  if(!webui.response || !webui.module_open) return;
+
+  if(!webui.first_control)
+  {
+    webui.response->print(',');
+  }
+
+  webui.first_control = false;
+
+  webui.response->print(F("{\"T\":\"momentary\",\"C\":\""));
+  WebUI_PrintJSONString(webui.response, command);
+
+  webui.response->print(F("\",\"D\":"));
+  webui.response->print(device_id);
+
+  webui.response->print(F(",\"N\":\""));
+  WebUI_PrintJSONString(webui.response, name ? name : "");
+
+  webui.response->print(F("\",\"V\":"));
+  webui.response->print(state ? 1 : 0);
+
+  webui.response->print('}');
+}
+void mWebServer::WebUI_AddTestSwitch(const char* command, uint8_t device_id, const char* name, bool physical_state)
+{
+  if(!webui.response || !webui.module_open) return;
+
+  if(!webui.first_control)
+  {
+    webui.response->print(',');
+  }
+
+  webui.first_control = false;
+
+  webui.response->print(F("{\"T\":\"testswitch\",\"C\":\""));
+  WebUI_PrintJSONString(webui.response, command);
+
+  webui.response->print(F("\",\"D\":"));
+  webui.response->print(device_id);
+
+  webui.response->print(F(",\"N\":\""));
+  WebUI_PrintJSONString(webui.response, name ? name : "");
+
+  webui.response->print(F("\",\"V\":"));
+  webui.response->print(physical_state ? 1 : 0);
+
+  webui.response->print('}');
+}
+
+void mWebServer::WebUI_AddButtonRow_Start(const char* command, uint8_t device_id, const char* name, const char* description, int32_t selected_value)
+{
+  if(!webui.response || !webui.module_open) return;
+
+  if(!webui.first_control){
+    webui.response->print(',');
+  }
+
+  webui.first_control = false;
+
+  webui.response->print(F("{\"T\":\"buttons\",\"C\":\""));
+  WebUI_PrintJSONString(webui.response, command);
+
+  webui.response->print(F("\",\"D\":"));
+  webui.response->print(device_id);
+
+  webui.response->print(F(",\"N\":\""));
+  WebUI_PrintJSONString(webui.response, name ? name : "");
+
+  if(description && description[0]){
+    webui.response->print(F("\",\"S\":\""));
+    WebUI_PrintJSONString(webui.response, description);
+  }
+
+  webui.response->print(F("\",\"V\":"));
+  webui.response->print(selected_value);
+
+  webui.response->print(F(",\"O\":["));
+
+  webui.button_row_open = true;
+  webui.first_option = true;
+}
+
+void mWebServer::WebUI_AddButtonRow_Option(const char* name, int32_t value)
+{
+  if(!webui.response || !webui.button_row_open) return;
+
+  if(!webui.first_option)
+  {
+    webui.response->print(',');
+  }
+
+  webui.first_option = false;
+
+  webui.response->print(F("[\""));
+  WebUI_PrintJSONString(webui.response, name ? name : "");
+  webui.response->print(F("\","));
+  webui.response->print(value);
+  webui.response->print(']');
+}
+
+
+void mWebServer::WebUI_AddButtonRow_End()
+{
+  if(!webui.response || !webui.button_row_open) return;
+
+  webui.response->print(F("]}"));
+
+  webui.button_row_open = false;
+  webui.first_option = true;
+}
+
+void mWebServer::WebUI_AddIndicator(uint8_t device_id, const char* name, bool state)
+{
+  if(!webui.response || !webui.module_open) return;
+
+  if(!webui.first_control)
+  {
+    webui.response->print(',');
+  }
+
+  webui.first_control = false;
+
+  webui.response->print(F("{\"T\":\"indicator\",\"D\":"));
+  webui.response->print(device_id);
+
+  webui.response->print(F(",\"N\":\""));
+  WebUI_PrintJSONString(webui.response, name ? name : "");
+
+  webui.response->print(F("\",\"V\":"));
+  webui.response->print(state ? 1 : 0);
+
+  webui.response->print('}');
+}
+
+void mWebServer::WebUI_AddValue(uint8_t device_id, const char* name, const char* value, const char* units)
+{
+  if(!webui.response || !webui.module_open) return;
+
+  if(!webui.first_control)
+  {
+    webui.response->print(',');
+  }
+
+  webui.first_control = false;
+
+  webui.response->print(F("{\"T\":\"value\",\"D\":"));
+  webui.response->print(device_id);
+
+  webui.response->print(F(",\"N\":\""));
+  WebUI_PrintJSONString(webui.response, name ? name : "");
+
+  webui.response->print(F("\",\"V\":\""));
+  WebUI_PrintJSONString(webui.response, value ? value : "");
+  webui.response->print('"');
+
+  if(units && units[0])
+  {
+    webui.response->print(F(",\"U\":\""));
+    WebUI_PrintJSONString(webui.response, units);
+    webui.response->print('"');
+  }
+
+  webui.response->print('}');
+}
+
+void mWebServer::WebUI_AddValue(uint8_t device_id, const char* name, int32_t value, const char* units)
+{
+  if(!webui.response || !webui.module_open) return;
+
+  if(!webui.first_control)
+  {
+    webui.response->print(',');
+  }
+
+  webui.first_control = false;
+
+  webui.response->print(F("{\"T\":\"value\",\"D\":"));
+  webui.response->print(device_id);
+
+  webui.response->print(F(",\"N\":\""));
+  WebUI_PrintJSONString(webui.response, name ? name : "");
+
+  webui.response->print(F("\",\"V\":"));
+  webui.response->print(value);
+
+  if(units && units[0])
+  {
+    webui.response->print(F(",\"U\":\""));
+    WebUI_PrintJSONString(webui.response, units);
+    webui.response->print('"');
+  }
+
+  webui.response->print('}');
+}
+
+void mWebServer::WebUI_AddValue(uint8_t device_id, const char* name, float value, const char* units, uint8_t precision)
+{
+  if(!webui.response || !webui.module_open) return;
+
+  if(!webui.first_control)
+  {
+    webui.response->print(',');
+  }
+
+  webui.first_control = false;
+
+  webui.response->print(F("{\"T\":\"value\",\"D\":"));
+  webui.response->print(device_id);
+
+  webui.response->print(F(",\"N\":\""));
+  WebUI_PrintJSONString(webui.response, name ? name : "");
+
+  webui.response->print(F("\",\"V\":"));
+  webui.response->print(value, precision);
+
+  if(units && units[0])
+  {
+    webui.response->print(F(",\"U\":\""));
+    WebUI_PrintJSONString(webui.response, units);
+    webui.response->print('"');
+  }
+
+  webui.response->print('}');
+}
+
+void mWebServer::HandleAPI_WebUI(AsyncWebServerRequest* request)
+{
+  AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
+
+  if(!response)
+  {
+    request->send(500);
+    return;
+  }
+
+  response->addHeader(F("Cache-Control"), F("no-store"));
+
+  if(!WebUI_Begin(response))
+  {
+    request->send(500);
+    return;
+  }
+
+  tkr->Tasker_Interface(TASK_WEBUI_APPEND);
+
+  WebUI_End();
+
+  request->send(response);
+}
+
+bool mWebServer::WebUI_DispatchCommand(const char* command, uint8_t device_id, bool has_value, int32_t value)
+{
+  if(!command || !command[0] || !command[1] || command[2])
+  {
+    return false;
+  }
+
+  char json[64];
+
+  if(has_value)
+  {
+    snprintf_P(
+      json,
+      sizeof(json),
+      PSTR("{\"ui\":{\"%s\":[%u,%ld]}}"),
+      command,
+      device_id,
+      (long)value
+    );
+  }
+  else
+  {
+    snprintf_P(
+      json,
+      sizeof(json),
+      PSTR("{\"ui\":{\"%s\":[%u]}}"),
+      command,
+      device_id
+    );
+  }
+
+  if(!data_buffer.requestLock(GetModuleUniqueID()))
+  {
+    return false;
+  }
+
+  data_buffer.ClearSoft();
+
+  const size_t len = strlen(json);
+
+  if(len >= sizeof(data_buffer.payload.ctr))
+  {
+    data_buffer.releaseLock();
+    return false;
+  }
+
+  memcpy(data_buffer.payload.ctr, json, len + 1);
+  data_buffer.payload.length_used = len;
+
+  tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
+
+  data_buffer.releaseLock();
+
+  return true;
+}
+void mWebServer::HandleAPI_WebUICommand(AsyncWebServerRequest* request)
+{
+  if(!request->hasParam("k") || !request->hasParam("d"))
+  {
+    request->send(400, FPSTR(CONTENT_TYPE_JSON), F("{\"error\":\"missing k or d\"}"));
+    return;
+  }
+
+  const String command = request->getParam("k")->value();
+
+  if(command.length() != 2)
+  {
+    request->send(400, FPSTR(CONTENT_TYPE_JSON), F("{\"error\":\"invalid command\"}"));
+    return;
+  }
+
+  const int device = request->getParam("d")->value().toInt();
+
+  if(device < 0 || device > 255)
+  {
+    request->send(400, FPSTR(CONTENT_TYPE_JSON), F("{\"error\":\"invalid device\"}"));
+    return;
+  }
+
+  const bool has_value = request->hasParam("v");
+  int32_t value = 0;
+
+  if(has_value)
+  {
+    value = request->getParam("v")->value().toInt();
+  }
+
+  if(!WebUI_DispatchCommand(command.c_str(), (uint8_t)device, has_value, value))
+  {
+    request->send(503, FPSTR(CONTENT_TYPE_JSON), F("{\"ok\":0}"));
+    return;
+  }
+
+  request->send(200, FPSTR(CONTENT_TYPE_JSON), F("{\"ok\":1}"));
+}
+
+#endif // ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
+
+
+
+
+
+
+
+
+
 
 #endif
