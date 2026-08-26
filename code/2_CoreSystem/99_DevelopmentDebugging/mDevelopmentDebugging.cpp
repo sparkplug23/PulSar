@@ -26,7 +26,7 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
       //
       Init_DebugPin();
 
-      #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+      #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
       // tkr->monitor_task.push_back(TASK_LOOP);           // Add TASK_LOOP to the monitor list
       // tkr->monitor_task.push_back(TASK_EVERY_SECOND);   // Add TASK_EVERY_SECOND to the monitor list
       tkr->monitor_task.push_back(TASKER_FUNCTION_TYPES(0));   // Any
@@ -88,7 +88,7 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
       // ALOG_INF( PSTR("this_cycle_ratio %d"), tkr_sup->this_cycle_ratio);
       // ALOG_INF( PSTR("loop_load_avg %d"), tkr_set->loop_load_avg);
 
-      #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+      #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
       for (const auto& metrics : tkr->task_metrics) {
           // Get the module name based on the unique ID
           const char* module_name = tkr->GetModuleName(metrics.unique_id);
@@ -194,7 +194,7 @@ void mDevelopmentDebugging::parse_JSONCommand(JsonParserObject obj)
     ALOG_INF(PSTR("DebugInput Float1: %s"), buffer);
 	}
 
-  #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
 	if(jtok = obj["Debug"].getObject()["ResetTaskMetrics"])
 	{
     // Reset all task metrics
@@ -206,7 +206,7 @@ void mDevelopmentDebugging::parse_JSONCommand(JsonParserObject obj)
         metrics.avg_time = 0;        // Reset average time
     }
 	}
-  #endif // ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  #endif // ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
 
 
 

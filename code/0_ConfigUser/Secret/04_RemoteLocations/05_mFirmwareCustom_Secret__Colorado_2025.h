@@ -264,7 +264,7 @@
   // 
   // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // // #define ENABLE_DEBUG_LINE_HERE3
-  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // // #define USE_DEBUG_PRINT
 
   // ///////////////////////////////////////////// Module Logs
@@ -1090,7 +1090,7 @@ R"=====(
   // 
   // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // // #define ENABLE_DEBUG_LINE_HERE3
-  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // // #define USE_DEBUG_PRINT
 
   // ///////////////////////////////////////////// Module Logs
@@ -1471,7 +1471,7 @@ R"=====(
   // 
   // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // // #define ENABLE_DEBUG_LINE_HERE3
-  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // // #define USE_DEBUG_PRINT
 
   // ///////////////////////////////////////////// Module Logs
@@ -1849,7 +1849,7 @@ R"=====(
   // 
   // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // // #define ENABLE_DEBUG_LINE_HERE3
-  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // // #define USE_DEBUG_PRINT
 
   // ///////////////////////////////////////////// Module Logs
@@ -2485,7 +2485,7 @@ R"=====(
   // 
   // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // // #define ENABLE_DEBUG_LINE_HERE3
-  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // // #define USE_DEBUG_PRINT
 
   // ///////////////////////////////////////////// Module Logs
@@ -2884,7 +2884,7 @@ R"=====(
   
   #define SERIAL_LOG_LEVEL_DURING_BOOT 12
   // #define ENABLE_DEBUG_LINE_HERE3
-  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // #define USE_DEBUG_PRINT
 
   ///////////////////////////////////////////// Module Logs
@@ -3108,7 +3108,7 @@ R"=====(
   
   #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE3
-  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // #define USE_DEBUG_PRINT
 
   ///////////////////////////////////////////// Module Logs
@@ -3264,7 +3264,7 @@ R"=====(
   // 
   #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE3
-  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // #define USE_DEBUG_PRINT
 
   ///////////////////////////////////////////// Module Logs
@@ -3455,7 +3455,7 @@ R"=====(
   
   #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE3
-  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // #define USE_DEBUG_PRINT
 
   ///////////////////////////////////////////// Module Logs
@@ -3604,7 +3604,7 @@ R"=====(
   
   #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE3
-  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // #define USE_DEBUG_PRINT
 
   ///////////////////////////////////////////// Module Logs
@@ -3807,7 +3807,7 @@ R"=====(
   #define ENABLE_FREERAM_APPENDING_SERIAL
   // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
 
-  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
 
 
   /***********************************
@@ -4343,7 +4343,7 @@ R"=====(
   #define ENABLE_FREERAM_APPENDING_SERIAL
   #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
 
-  #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
 
 
   /***********************************

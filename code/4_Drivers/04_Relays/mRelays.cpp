@@ -1381,7 +1381,6 @@ void mRelays::SubCommandSet_EnabledTime(JsonParserObject jobj, uint8_t relay_id)
 }
 
 
-
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 
 void mRelays::parse_JSONCommand_WebUI(JsonParserObject obj)
@@ -1392,41 +1391,46 @@ void mRelays::parse_JSONCommand_WebUI(JsonParserObject obj)
   {
     JsonParserArray arr = jtok.getArray();
 
+    if(arr.size() < 2) return;
+
     const uint8_t device_id = arr[0].getInt();
     const uint8_t state = arr[1].getInt();
 
-    // Call the same internal relay function used by the normal JSON parser.
-    // Do NOT duplicate relay behaviour here.
-    CommandSet_Relay_Power(device_id, state);
+    if(device_id >= module_state.devices) return;
+
+    CommandSet_Relay_Power(state, device_id);
   }
+
   if(jtok = obj["RT"])
   {
     JsonParserArray arr = jtok.getArray();
 
+    if(arr.size() < 1) return;
+
     const uint8_t device_id = arr[0].getInt();
-    const uint8_t state = arr[1].getInt();
 
-    uint8_t new_state = !CommandGet_Relay_Power(device_id);
+    if(device_id >= module_state.devices) return;
 
-    // Call the same internal relay function used by the normal JSON parser.
-    // Do NOT duplicate relay behaviour here.
-    CommandSet_Relay_Power(device_id, new_state);
+    const uint8_t new_state = !CommandGet_Relay_Power(device_id);
+
+    CommandSet_Relay_Power(new_state, device_id);
   }
 
-    
   if(jtok = obj["RM"])
   {
     JsonParserArray arr = jtok.getArray();
 
-    uint8_t device_id = arr[0].getInt();
-    uint8_t option_id = arr[1].getInt();
+    if(arr.size() < 2) return;
+
+    const uint8_t device_id = arr[0].getInt();
+    const uint8_t option_id = arr[1].getInt();
 
     static const uint16_t options[] = {0, 1, 15, 30, 60, 120};
 
     if(device_id >= module_state.devices) return;
     if(option_id >= ARRAY_SIZE(options)) return;
 
-    uint16_t value = options[option_id];
+    const uint16_t value = options[option_id];
 
     if(value <= 1)
     {
@@ -1439,8 +1443,6 @@ void mRelays::parse_JSONCommand_WebUI(JsonParserObject obj)
       CommandSet_Timer_Decounter(value * 60, device_id);
     }
   }
-
-
 }
 
 #endif

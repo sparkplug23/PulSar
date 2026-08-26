@@ -133,29 +133,7 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
 
 void mSensorsInterface::WebPage_Root_AddHandlers()
 {
-  SPGM_CTR(PM_URL_SENSOR_UNIFIED_JSON) "/sensor/unified.json";
-
-  tkr_web->server->on(PM_URL_SENSOR_UNIFIED_JSON, HTTP_GET, [this](AsyncWebServerRequest *request){
-    if(!JBI->requestJSONBufferLock(GetModuleUniqueID())){
-      request->send(503, FPSTR(CONTENT_TYPE_JSON), F("{\"error\":\"json buffer busy\"}"));
-      return;
-    }
-
-    bool data_to_send = ConstructJSON_Sensor();
-
-    if(data_to_send){
-      AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
-      response->write((const uint8_t*)JBI->GetBufferPtr(), JBI->GetLength());
-      response->addHeader(F("Cache-Control"), F("no-store"));
-      request->send(response);
-    }else{
-      request->send(200, FPSTR(CONTENT_TYPE_JSON), F("{}"));
-    }
-
-    JBI->releaseJSONBufferLock();
-  });
-
-  AddURLtoList(PM_URL_SENSOR_UNIFIED_JSON, HTTP_GET);
+  
 }
 
 

@@ -176,7 +176,7 @@ public mTaskerInterface{
 
     struct WebUIContext
     {
-      AsyncResponseStream* response = nullptr;
+      Print* response = nullptr;
 
       bool first_module = true;
       bool first_control = true;
@@ -191,7 +191,8 @@ public mTaskerInterface{
     /**
      * Generic WebUI output helpers.
      */
-    bool WebUI_Begin(AsyncResponseStream* response);
+    bool WebUI_Begin(Print* response);
+    void WebUI_PrintJSONString(Print* response, const char* str);
     void WebUI_End();
 
     void WebUI_Module_Start(uint16_t module_id, const char* module_name);
@@ -211,25 +212,30 @@ public mTaskerInterface{
 
     void WebUI_AddIndicator(uint8_t device_id, const char* name, bool state);
 
-    void WebUI_PrintJSONString(AsyncResponseStream* response, const char* str);
-
-
-    /**
-     * WebUI endpoints.
-     */
-    void HandleAPI_WebUI(AsyncWebServerRequest* request);
-    void HandleAPI_WebUICommand(AsyncWebServerRequest* request);
-
-
-    /**
-     * Build and dispatch:
-     *
-     *   {"ui":{"RP":[device,value]}}
-     */
-    bool WebUI_DispatchCommand(const char* command, uint8_t device_id, bool has_value, int32_t value);
-
-
     #endif // ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
+    #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+
+    AsyncWebSocket* websocket_pages = nullptr;
+
+    void wsEventPages(
+      AsyncWebSocket *server,
+      AsyncWebSocketClient *client,
+      AwsEventType type,
+      void *arg,
+      uint8_t *data,
+      size_t len
+    );
+
+    bool WebSocket_SendText(AsyncWebSocketClient* client, const char* data, size_t len);
+    bool WebSocket_SendWrappedJSON(AsyncWebSocketClient* client, const char* key, const char* json, size_t json_len);
+    bool WebSocket_SendSensors(AsyncWebSocketClient* client);
+    bool WebSocket_SendEnergy(AsyncWebSocketClient* client);
+
+    #ifdef ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
+    bool WebSocket_SendControls(AsyncWebSocketClient* client);
+    #endif
+
+    #endif
 
 // server library objects
 AsyncWebServer* server = nullptr;
@@ -335,6 +341,11 @@ void HandleAPI_DebugTelemetry(AsyncWebServerRequest* request);
 void WebTelemetry_PrintJSONString(AsyncResponseStream* response, const char* str);
 bool WebTelemetry_Construct_Begin(const char* full_key, uint16_t rate);
 void WebTelemetry_Construct_End();
+
+#ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+void HandlePage_DebugTaskerMetrics(AsyncWebServerRequest* request);
+void HandleAPI_DebugTaskerMetrics(AsyncWebServerRequest* request);
+#endif
 
 template<typename T>
 void Telemetry_Sender(std::vector<telemetry_handler<T>*>& telemetry_list, T& class_ptr)

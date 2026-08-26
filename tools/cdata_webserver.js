@@ -683,6 +683,12 @@ writeChunks(
       name: "PAGE_debug_telemetry_web",
       method: "gzip",
       filter: "html-minify-ui",
+    },
+    {
+      file: "debug_telemetry_metrics.htm",
+      name: "PAGE_debug_telemetry_metrics_web",
+      method: "gzip",
+      filter: "html-minify-ui",
     }
   ],
   destination_path + "debug_pages.h"

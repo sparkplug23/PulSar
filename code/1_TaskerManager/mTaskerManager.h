@@ -131,7 +131,14 @@ enum ModuleStatus{
 #include "2_CoreSystem/05_Pins/mPins_Templates.h"                // Hardware configuration
 #include "2_CoreSystem/06_Support/BufferWriter.h"
 
+
+
 #include "1_TaskerManager/mTasks.h"
+
+
+#include "1_TaskerManager/Metrics.h"
+
+
 #include <WiFiClient.h>
 #ifdef ESP8266
   #include <core_version.h>                   // Arduino_Esp8266 version information (ARDUINO_ESP8266_RELEASE and ARDUINO_ESP8266_RELEASE_2_3_0)
@@ -231,6 +238,7 @@ enum ModuleStatus{
 #include "2_CoreSystem/02_RtcMemory/RtcMemory.h"
 
 #include "3_Network/10_MQTT/mMQTT.h"
+
   
 
 template <size_t N>
@@ -974,6 +982,10 @@ class mTaskerManager{
       return pModule.size();
     }
 
+    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+    TaskerMetrics metrics;
+    #endif
+
     const char* GetTaskName(uint16_t task);
     const char* GetTaskName_Full(uint16_t task);
         
@@ -1019,7 +1031,7 @@ class mTaskerManager{
     std::vector<DEBUG_MODULE_TIME> debug_module_time;
     #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 
-    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
     struct TaskMetrics {
       TASKER_FUNCTION_TYPES task_id;   // Task being monitored
       uint16_t unique_id;
@@ -1030,7 +1042,7 @@ class mTaskerManager{
       uint32_t avg_time;      // Average time in microseconds
     };
     #endif
-    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
     std::vector<TASKER_FUNCTION_TYPES> monitor_task; // Vector to hold the tasks to monitor
     std::vector<TaskMetrics> task_metrics;
     #endif

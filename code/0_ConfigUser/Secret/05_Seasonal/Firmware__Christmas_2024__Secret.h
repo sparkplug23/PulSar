@@ -2880,7 +2880,7 @@
   
   #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE3
-  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // #define USE_DEBUG_PRINT
 
   ///////////////////////////////////////////// Module Logs
@@ -3318,7 +3318,7 @@
   
   #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE3
-  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // #define USE_DEBUG_PRINT
 
   ///////////////////////////////////////////// Module Logs
@@ -4740,7 +4740,7 @@
   
   #define SERIAL_LOG_LEVEL_DURING_BOOT 8
   // #define ENABLE_DEBUG_LINE_HERE3
-  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // #define USE_DEBUG_PRINT
 
   ///////////////////////////////////////////// Module Logs

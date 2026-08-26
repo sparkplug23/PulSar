@@ -121,14 +121,16 @@ button{
 .railbtn:hover,
 .tile:hover,
 .applink:hover,
-.ctrlbtn:hover{
+.ctrlbtn:hover,
+.refreshbtn:hover{
   background:var(--btnh);
 }
 
 .railbtn:active,
 .tile:active,
 .applink:active,
-.ctrlbtn:active{
+.ctrlbtn:active,
+.refreshbtn:active{
   transform:translateY(1px);
 }
 
@@ -307,10 +309,42 @@ button{
   min-width:0;
 }
 
+.control-pane-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+
 .control-pane-title{
   font-size:14px;
   font-weight:700;
-  margin-bottom:10px;
+}
+
+.control-pane-tools{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.refreshbtn{
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:#1d1d1d;
+  padding:5px 9px;
+  cursor:pointer;
+  font-size:12px;
+}
+
+.fastcheck{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  color:var(--muted);
+  font-size:12px;
+  user-select:none;
+  cursor:pointer;
 }
 
 .control-module,
@@ -415,7 +449,7 @@ button{
 
 
 /* -------------------------------------------------------
- * Sensor tables
+ * Live data tables
  * ------------------------------------------------------- */
 
 .sensor-table{
@@ -556,7 +590,7 @@ button{
       <button class="railbtn" type="button" onclick="go('/update')">
         <span class="l">
           <span class="name">Firmware Update</span>
-          <span class="desc">Upload and flash firmware</span>
+          <span class="desc"></span>
         </span>
         <span class="go">›</span>
       </button>
@@ -569,7 +603,7 @@ button{
       <button class="railbtn" type="button" onclick="go('/debug/main')">
         <span class="l">
           <span class="name">Advanced</span>
-          <span class="desc">Diagnostics and developer tools</span>
+          <span class="desc">Diagnostic tools</span>
         </span>
         <span class="go">›</span>
       </button>
@@ -645,21 +679,37 @@ button{
 
     <section class="card">
       <h2>System Controls</h2>
-      <p>Live control, physical I/O and unified sensor state.</p>
+      <p>Live control, physical I/O and unified device data.</p>
 
       <div class="system-controls">
 
         <div class="control-pane">
-          <div class="control-pane-title">Controls / I/O</div>
-          <div id="controlsContainer">
-            <div class="empty" id="controlsEmpty">Loading controls…</div>
+          <div class="control-pane-head">
+            <div class="control-pane-title">Live Data</div>
+
+            <div class="control-pane-tools">
+              <button class="refreshbtn" type="button" onclick="refreshLiveData()">Refresh</button>
+
+              <label class="fastcheck">
+                <input id="fastLive" type="checkbox" onchange="setFastLive(this.checked)">
+                Fast
+              </label>
+            </div>
+          </div>
+
+          <div id="sensorContainer">
+            <div class="empty" id="sensorsEmpty">Loading live data…</div>
           </div>
         </div>
 
+
         <div class="control-pane">
-          <div class="control-pane-title">Live Data</div>
-          <div id="sensorContainer">
-            <div class="empty" id="sensorsEmpty">Loading sensor data…</div>
+          <div class="control-pane-head">
+            <div class="control-pane-title">Controls</div>
+          </div>
+
+          <div id="controlsContainer">
+            <div class="empty" id="controlsEmpty">Loading controls…</div>
           </div>
         </div>
 
@@ -674,9 +724,13 @@ button{
 <script>
 
 const APPLICATIONS_API = '/url_apps';
-const CONTROLS_API = '/system/controls/ui';
-const COMMAND_API = '/system/controls/cmd';
-const SENSOR_API = '/sensor/unified.json';
+const PAGE_WS_PATH = '/ws/page';
+
+let pageSocket = null;
+let reconnectTimer = 0;
+let controlsTimer = 0;
+let liveTimer = 0;
+let fastLive = false;
 
 
 /* -------------------------------------------------------
@@ -847,30 +901,121 @@ async function loadApplications()
 
 
 /* -------------------------------------------------------
+ * Generic webpage WebSocket
+ * ------------------------------------------------------- */
+
+function pageSocketURL()
+{
+  const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
+  return protocol + location.host + PAGE_WS_PATH;
+}
+
+
+function sendPageJSON(data)
+{
+  if(!pageSocket || pageSocket.readyState !== WebSocket.OPEN)
+  {
+    return false;
+  }
+
+  pageSocket.send(JSON.stringify(data));
+
+  return true;
+}
+
+
+function requestPageData(name)
+{
+  return sendPageJSON({request:name});
+}
+
+
+function connectPageSocket()
+{
+  if(pageSocket && (pageSocket.readyState === WebSocket.OPEN || pageSocket.readyState === WebSocket.CONNECTING))
+  {
+    return;
+  }
+
+  pageSocket = new WebSocket(pageSocketURL());
+
+  pageSocket.onopen = function()
+  {
+    requestPageData('controls');
+    refreshLiveData();
+  };
+
+  pageSocket.onmessage = function(event)
+  {
+    let data;
+
+    try
+    {
+      data = JSON.parse(event.data);
+    }
+    catch(e)
+    {
+      return;
+    }
+
+    if(data.controls)
+    {
+      syncControls(data.controls);
+    }
+
+    if(data.sensors)
+    {
+      syncSensorTables(data.sensors);
+    }
+
+    if(data.energy)
+    {
+      syncSensorTables(data.energy);
+    }
+  };
+
+  pageSocket.onclose = function()
+  {
+    pageSocket = null;
+
+    if(!reconnectTimer)
+    {
+      reconnectTimer = setTimeout(function()
+      {
+        reconnectTimer = 0;
+        connectPageSocket();
+      }, 2000);
+    }
+  };
+
+  pageSocket.onerror = function()
+  {
+    if(pageSocket)
+    {
+      pageSocket.close();
+    }
+  };
+}
+
+
+/* -------------------------------------------------------
  * Commands
  * ------------------------------------------------------- */
 
-async function sendControlCommand(command, device, value, includeValue = true)
+function sendControlCommand(command, device, value, includeValue = true)
 {
-  let url = COMMAND_API +
-    '?k=' + encodeURIComponent(command) +
-    '&d=' + encodeURIComponent(device);
+  const message = {ui:{}};
 
   if(includeValue)
   {
-    url += '&v=' + encodeURIComponent(value);
+    message.ui[command] = [device, value];
+  }
+  else
+  {
+    message.ui[command] = [device];
   }
 
-  try
-  {
-    await fetch(url, {
-      method:'GET',
-      cache:'no-store'
-    });
-  }
-  catch(e)
-  {
-  }
+  sendPageJSON(message);
 }
 
 
@@ -943,7 +1088,6 @@ function createControlElement(moduleId, control)
   row.appendChild(name);
   row.appendChild(description);
   row.appendChild(actions);
-
 
   if(control.T === 'toggle')
   {
@@ -1086,7 +1230,7 @@ function createControlElement(moduleId, control)
 
 function updateControlElement(moduleId, control)
 {
-  let row = document.getElementById(
+  const row = document.getElementById(
     controlElementId(moduleId, control.C, control.D)
   );
 
@@ -1108,7 +1252,6 @@ function updateControlElement(moduleId, control)
   {
     description.textContent = control.S || '';
   }
-
 
   if(control.T === 'toggle')
   {
@@ -1213,29 +1356,14 @@ function syncControls(data)
 }
 
 
-async function refreshControls()
+function refreshControls()
 {
-  try
-  {
-    const response = await fetch(CONTROLS_API, {cache:'no-store'});
-
-    if(!response.ok)
-    {
-      return;
-    }
-
-    const data = await response.json();
-
-    syncControls(data);
-  }
-  catch(e)
-  {
-  }
+  requestPageData('controls');
 }
 
 
 /* -------------------------------------------------------
- * Unified sensor data
+ * Unified live data
  * ------------------------------------------------------- */
 
 function ensureSensorGroup(groupName)
@@ -1378,24 +1506,33 @@ function syncSensorTables(data)
 }
 
 
-async function refreshSensors()
+function refreshLiveData()
 {
-  try
+  requestPageData('sensors');
+  requestPageData('energy');
+}
+
+
+function restartLiveTimer()
+{
+  if(liveTimer)
   {
-    const response = await fetch(SENSOR_API, {cache:'no-store'});
-
-    if(!response.ok)
-    {
-      return;
-    }
-
-    const data = await response.json();
-
-    syncSensorTables(data);
+    clearInterval(liveTimer);
   }
-  catch(e)
-  {
-  }
+
+  liveTimer = setInterval(
+    refreshLiveData,
+    fastLive ? 1000 : 10000
+  );
+}
+
+
+function setFastLive(enabled)
+{
+  fastLive = !!enabled;
+
+  refreshLiveData();
+  restartLiveTimer();
 }
 
 
@@ -1413,12 +1550,11 @@ async function refreshSensors()
   }
 
   loadApplications();
+  connectPageSocket();
 
-  refreshControls();
-  refreshSensors();
+  controlsTimer = setInterval(refreshControls, 1000);
 
-  setInterval(refreshControls, 1000);
-  setInterval(refreshSensors, 10000);
+  restartLiveTimer();
 })();
 
 </script>
