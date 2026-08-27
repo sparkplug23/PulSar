@@ -4600,7 +4600,7 @@ void mAnimatorLight::serveSettings(AsyncWebServerRequest* request, bool post)
     }
     #endif
     // case SUBPAGE_PINREQ  : response = request->beginResponse_P(200, "text/html", PAGE_settings_pin,  PAGE_settings_pin_length);  break;
-    // case SUBPAGE_CSS     : response = request->beginResponse_P(200, "text/css",  PAGE_settingsCss,   PAGE_settingsCss_length);   break;
+    case SUBPAGE_CSS     : response = request->beginResponse_P(200, "text/css",  PAGE_settingsCss,   PAGE_settingsCss_length);   break;
     case SUBPAGE_JS      : serveSettingsJS(request); return;
     default:  response = request->beginResponse_P(200, "text/html", PAGE_settings,      PAGE_settings_length);      break;
   }
@@ -4701,29 +4701,18 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   AddURLtoList(PM_URL_LIGHTS_IRO_JS, HTTP_GET);
 
 
-  #ifndef ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
-
-  SPGM_CTR(PM_URL_STYLE_CSS) "/style.css";
+  SPGM_CTR(PM_URL_STYLE_CSS) "/lights/style.css";
   tkr_web->server->on(PM_URL_STYLE_CSS, HTTP_GET, [this](AsyncWebServerRequest *request){
     tkr_web->handleStaticContent(request, FPSTR(PM_URL_STYLE_CSS), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss, PAGE_settingsCss_length);
   });
   AddURLtoList(PM_URL_STYLE_CSS, HTTP_GET);
 
-  SPGM_CTR(PM_URL_FAVICON_ICO) "/favicon.ico";
-  tkr_web->server->on(PM_URL_FAVICON_ICO, HTTP_GET, [](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(request, FPSTR(PM_URL_FAVICON_ICO), 200, F("image/x-icon"), favicon, favicon_length, false);
-  });
-  AddURLtoList(PM_URL_FAVICON_ICO, HTTP_GET);
+  // SPGM_CTR(PM_URL_COMMON_JS) "/common.js";
+  // server->on(PM_URL_COMMON_JS, HTTP_GET, [this](AsyncWebServerRequest *request){
+  //   handleStaticContent(request, FPSTR(PM_URL_COMMON_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common_web, JS_common_web_length);
+  // });
+  // AddURLtoList(PM_URL_COMMON_JS, HTTP_GET);
 
-  SPGM_CTR(PM_URL_SKIN_CSS) "/skin.css";
-  tkr_web->server->on(PM_URL_SKIN_CSS, HTTP_GET, [](AsyncWebServerRequest *request){
-    if (tkr_mfile->handleFileRead(request, FPSTR(PM_URL_SKIN_CSS))) return;
-    AsyncWebServerResponse *response = request->beginResponse(200, FPSTR(CONTENT_TYPE_CSS));
-    request->send(response);
-  });
-  AddURLtoList(PM_URL_SKIN_CSS, HTTP_GET);
-
-  #endif
 
   SPGM_CTR(PM_URL_WELCOME) "/welcome";
   tkr_web->server->on(PM_URL_WELCOME, HTTP_GET, [this](AsyncWebServerRequest *request){

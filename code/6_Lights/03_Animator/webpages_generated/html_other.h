@@ -8,7 +8,7 @@
 const char PAGE_msg[] PROGMEM = R"=====(<!DOCTYPE html><html><head><meta content="width=device-width" name="viewport">
 <title>PulSar Message</title><script>
 function BL(){window.history.back()}function RS(){window.location="../settings"}function RP(){top.location.href="../"}
-</script><style>@import url("style.css");</style></head><body><h2>%MSG%</body></html>)=====";
+</script><style>@import url("/lights/style.css");</style></head><body><h2>%MSG%</body></html>)=====";
 
 
 #ifdef ENABLE_FEATURE_LIGHTING__DMX

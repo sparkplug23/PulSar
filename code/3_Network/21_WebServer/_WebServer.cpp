@@ -457,18 +457,23 @@ void mWebServer::WebPage_Root_AddHandlers()
   });
   AddURLtoList(PM_URL_RESET, HTTP_GET);
 
-    
-  SPGM_CTR(PM_URL_STYLE_CSS) "/style.css";
-  server->on(PM_URL_STYLE_CSS, HTTP_GET, [this](AsyncWebServerRequest *request){
-    handleStaticContent(request, FPSTR(PM_URL_STYLE_CSS), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_settingsCss_web, PAGE_settingsCss_web_length);
-  });
-  AddURLtoList(PM_URL_STYLE_CSS, HTTP_GET);
+    SPGM_CTR(PM_URL_PULSAR_CSS) "/pulsar.css";
+server->on(PM_URL_PULSAR_CSS, HTTP_GET, [this](AsyncWebServerRequest* request){
+  handleStaticContent(request, FPSTR(PM_URL_PULSAR_CSS), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_pulsar_css_web, PAGE_pulsar_css_web_length);
+});
+AddURLtoList(PM_URL_PULSAR_CSS, HTTP_GET);
 
-  SPGM_CTR(PM_URL_COMMON_JS) "/common.js";
-  server->on(PM_URL_COMMON_JS, HTTP_GET, [this](AsyncWebServerRequest *request){
-    handleStaticContent(request, FPSTR(PM_URL_COMMON_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common_web, JS_common_web_length);
-  });
-  AddURLtoList(PM_URL_COMMON_JS, HTTP_GET);
+SPGM_CTR(PM_URL_PULSAR_JS) "/pulsar.js";
+server->on(PM_URL_PULSAR_JS, HTTP_GET, [this](AsyncWebServerRequest* request){
+  handleStaticContent(request, FPSTR(PM_URL_PULSAR_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_pulsar_web, JS_pulsar_web_length);
+});
+AddURLtoList(PM_URL_PULSAR_JS, HTTP_GET);
+
+SPGM_CTR(PM_URL_PULSAR_DATA_JS) "/pulsar_data.js";
+server->on(PM_URL_PULSAR_DATA_JS, HTTP_GET, [this](AsyncWebServerRequest* request){
+  handleStaticContent(request, FPSTR(PM_URL_PULSAR_DATA_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_pulsar_data_web, JS_pulsar_data_web_length);
+});
+AddURLtoList(PM_URL_PULSAR_DATA_JS, HTTP_GET);
 
     SPGM_CTR(PM_URL_SKIN_CSS) "/skin.css";
     server->on(PM_URL_SKIN_CSS, HTTP_GET, [](AsyncWebServerRequest *request){

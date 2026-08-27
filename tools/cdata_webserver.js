@@ -441,15 +441,21 @@ writeChunks(
   source_path,
   [
     {
-      file: "style.css",
-      name: "PAGE_settingsCss_web",
+      file: "pulsar.css",
+      name: "PAGE_pulsar_css_web",
       method: "gzip",
       filter: "css-minify",
       mangle: (str) => str.replace("%%", "%")
     },
     {
-      file: "common.js",
-      name: "JS_common_web",
+      file: "pulsar.js",
+      name: "JS_pulsar_web",
+      method: "gzip",
+      filter: "js-minify",
+    },
+    {
+      file: "pulsar_data.js",
+      name: "JS_pulsar_data_web",
       method: "gzip",
       filter: "js-minify",
     },

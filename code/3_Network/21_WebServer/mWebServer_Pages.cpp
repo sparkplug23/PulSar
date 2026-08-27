@@ -1063,11 +1063,11 @@ void mWebServer::serveSettingsJS(AsyncWebServerRequest* request)
 
   ALOG_INF(PSTR("serveSettingsJS url %s"), request->url().c_str());
 
-  static const char _common_js[] PROGMEM = "/common.js";
-  if (request->url().indexOf(FPSTR(_common_js)) > 0) {
-    handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common_web, JS_common_web_length);
-    return;
-  }
+  // static const char _common_js[] PROGMEM = "/common.js";
+  // if (request->url().indexOf(FPSTR(_common_js)) > 0) {
+  //   handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common_web, JS_common_web_length);
+  //   return;
+  // }
   
   byte subPage = request->arg(F("p")).toInt();
   if (subPage > 10) {
@@ -1098,7 +1098,7 @@ static inline WebSettingsSubPage GetSubPageID_FromURLPath(const String& url)
   if (url.indexOf("settings") >= 0)
   {
     if      (url.indexOf(".js")      > 0) return WebSettingsSubPage::JS;
-    else if (url.indexOf(".css")     > 0) return WebSettingsSubPage::CSS;
+    // else if (url.indexOf(".css")     > 0) return WebSettingsSubPage::CSS;
     else if (url.indexOf("network")  > 0) return WebSettingsSubPage::NETWORK;
     else if (url.indexOf("hardware") > 0) return WebSettingsSubPage::HARDWARE;
     else if (url.indexOf("system")   > 0) return WebSettingsSubPage::SYSTEM;
@@ -1245,7 +1245,7 @@ void mWebServer::SettingsPages_GET(AsyncWebServerRequest* request)
     case WebSettingsSubPage::SECURITY: content = PAGE_settings_security_web; len = PAGE_settings_security_web_length; break;
 
     case WebSettingsSubPage::PINREQ:   content = PAGE_settings_unlock_web; len = PAGE_settings_unlock_web_length; code = 401; break;
-    case WebSettingsSubPage::CSS:      content = PAGE_settingsCss_web; len = PAGE_settingsCss_web_length; contentType = FPSTR(CONTENT_TYPE_CSS); break;
+    // case WebSettingsSubPage::CSS:      content = PAGE_settingsCss_web; len = PAGE_settingsCss_web_length; contentType = FPSTR(CONTENT_TYPE_CSS); break;
     case WebSettingsSubPage::JS:       serveSettingsJS(request); return;
     case WebSettingsSubPage::WELCOME:  content = PAGE_welcome_web; len = PAGE_welcome_web_length; break;
 

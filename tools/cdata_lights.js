@@ -327,6 +327,13 @@ writeChunks(
   source_path,
   [
     {
+      file: "style.css",
+      name: "PAGE_settingsCss",
+      method: "gzip",
+      filter: "css-minify",
+      mangle: (str) => str.replace("%%", "%")
+    },
+    {
       file: "common.js",
       name: "JS_common",
       method: "gzip",
