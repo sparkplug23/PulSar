@@ -1,720 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
-<meta name="theme-color" content="#141414">
-<title>PulSar</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<style>
-:root{
-  --bg:#121212;
-  --panel:#1a1a1a;
-  --panel2:#171717;
-  --border:#2b2b2b;
-  --text:#e8e8e8;
-  --muted:#a6a6a6;
-  --btn:#232323;
-  --btnh:#2c2c2c;
-  --accent:#4da3ff;
-  --radius:14px;
-  --shadow:0 8px 24px rgba(0,0,0,.25);
-}
+  <title>PulSar</title>
 
-html,body{
-  height:100%;
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Segoe UI,Roboto,Arial,sans-serif;
-}
+  <link rel="stylesheet" href="/pulsar.css">
 
-button{
-  font:inherit;
-  color:inherit;
-}
-
-.mono{
-  font-family:Consolas,Menlo,Monaco,monospace;
-}
-
-.wrap{
-  min-height:100%;
-  display:grid;
-  grid-template-columns:250px 1fr;
-  gap:12px;
-  padding:12px;
-  box-sizing:border-box;
-}
-
-.rail,.card{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-}
-
-.rail{
-  padding:14px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:10px;
-  border-radius:12px;
-  background:linear-gradient(180deg,#1c1c1c,#171717);
-  border:1px solid var(--border);
-}
-
-.brand .dot{
-  width:10px;
-  height:10px;
-  border-radius:50%;
-  background:var(--accent);
-  box-shadow:0 0 0 4px rgba(77,163,255,.15);
-}
-
-.brand .title{
-  font-size:17px;
-  font-weight:600;
-}
-
-.railsec{
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:10px;
-  background:var(--panel2);
-}
-
-.railsec h3{
-  margin:0 0 8px;
-  font-size:12px;
-  color:var(--muted);
-  font-weight:600;
-  letter-spacing:.35px;
-  text-transform:uppercase;
-}
-
-.railbtn{
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  padding:10px;
-  margin-top:6px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:var(--btn);
-  cursor:pointer;
-}
-
-.railbtn:first-of-type{
-  margin-top:0;
-}
-
-.railbtn:hover,
-.tile:hover,
-.applink:hover,
-.ctrlbtn:hover,
-.refreshbtn:hover{
-  background:var(--btnh);
-}
-
-.railbtn:active,
-.tile:active,
-.applink:active,
-.ctrlbtn:active,
-.refreshbtn:active{
-  transform:translateY(1px);
-}
-
-.railbtn .l{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-start;
-  gap:2px;
-}
-
-.railbtn .name{
-  font-size:14px;
-  font-weight:600;
-}
-
-.railbtn .desc{
-  font-size:12px;
-  color:var(--muted);
-}
-
-.railbtn .go{
-  font-size:12px;
-  color:var(--muted);
-}
-
-.overview{
-  margin-top:auto;
-}
-
-.overview .kv{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:2px;
-  font-size:11px;
-}
-
-.overview .row{
-  display:grid;
-  grid-template-columns:78px 1fr;
-  gap:6px;
-  padding:2px 0;
-}
-
-.overview .k{
-  color:var(--muted);
-}
-
-.overview .v{
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
-.main{
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.card{
-  padding:16px;
-  box-sizing:border-box;
-}
-
-.card h2{
-  margin:0 0 8px;
-  font-size:17px;
-}
-
-.card p{
-  margin:0;
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.45;
-}
-
-.grid{
-  margin-top:12px;
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:10px;
-}
-
-.tile{
-  border:1px solid var(--border);
-  border-radius:14px;
-  background:var(--btn);
-  padding:14px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  min-height:92px;
-}
-
-.tile.clickable{
-  cursor:pointer;
-}
-
-.tile .t{
-  font-size:15px;
-  font-weight:700;
-}
-
-.tile .d{
-  font-size:12px;
-  color:var(--muted);
-  line-height:1.35;
-}
-
-.applinks{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  margin-top:4px;
-}
-
-.applink{
-  border:1px solid var(--border);
-  border-radius:9px;
-  background:#1d1d1d;
-  padding:8px 10px;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-}
-
-.applink .txt{
-  min-width:0;
-  flex:1;
-}
-
-.applink .an{
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-size:13px;
-  font-weight:600;
-}
-
-.applink .au{
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-size:11px;
-  color:var(--muted);
-}
-
-.applink .go{
-  flex:0 0 auto;
-  color:var(--muted);
-}
-
-
-/* -------------------------------------------------------
- * System Controls
- * ------------------------------------------------------- */
-
-.system-controls{
-  display:grid;
-  grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);
-  gap:12px;
-  margin-top:12px;
-}
-
-.control-pane{
-  border:1px solid var(--border);
-  border-radius:14px;
-  background:var(--panel2);
-  padding:12px;
-  min-width:0;
-}
-
-.control-pane-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:10px;
-}
-
-.control-pane-title{
-  font-size:14px;
-  font-weight:700;
-}
-
-.control-pane-tools{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.refreshbtn{
-  border:1px solid var(--border);
-  border-radius:8px;
-  background:#1d1d1d;
-  padding:5px 9px;
-  cursor:pointer;
-  font-size:12px;
-}
-
-.fastcheck{
-  display:flex;
-  align-items:center;
-  gap:5px;
-  color:var(--muted);
-  font-size:12px;
-  user-select:none;
-  cursor:pointer;
-}
-
-.control-module,
-.sensor-group{
-  border:1px solid var(--border);
-  border-radius:11px;
-  background:var(--btn);
-  padding:10px;
-  margin-top:8px;
-}
-
-.control-module:first-child,
-.sensor-group:first-child{
-  margin-top:0;
-}
-
-.control-module-title,
-.sensor-title{
-  font-size:13px;
-  font-weight:700;
-  margin-bottom:8px;
-}
-
-.control-row{
-  display:grid;
-  grid-template-columns:minmax(100px,1fr) minmax(100px,.8fr) auto;
-  align-items:center;
-  gap:10px;
-  padding:8px 0;
-  border-top:1px solid var(--border);
-}
-
-.control-row:first-of-type{
-  border-top:0;
-}
-
-.control-name{
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-size:12px;
-  font-weight:600;
-}
-
-.control-description{
-  min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-size:11px;
-  color:var(--muted);
-}
-
-.control-description:empty{
-  display:block;
-}
-
-.control-actions{
-  display:flex;
-  flex-wrap:wrap;
-  justify-content:flex-end;
-  align-items:center;
-  gap:5px;
-}
-
-.ctrlbtn{
-  border:1px solid var(--border);
-  border-radius:8px;
-  background:#1d1d1d;
-  padding:5px 9px;
-  min-width:44px;
-  cursor:pointer;
-  font-size:12px;
-}
-
-.ctrlbtn.on,
-.ctrlbtn.selected{
-  border-color:var(--accent);
-  box-shadow:0 0 0 1px rgba(77,163,255,.18);
-}
-
-.indicator{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  font-size:12px;
-  color:var(--muted);
-}
-
-.indicator-dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:#555;
-}
-
-.indicator.on .indicator-dot{
-  background:var(--accent);
-  box-shadow:0 0 0 3px rgba(77,163,255,.14);
-}
-
-
-/* -------------------------------------------------------
- * Live data tables
- * ------------------------------------------------------- */
-
-.sensor-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:12px;
-}
-
-.sensor-table td{
-  padding:5px 4px;
-  border-top:1px solid var(--border);
-}
-
-.sensor-table tr:first-child td{
-  border-top:0;
-}
-
-.sensor-table td:first-child{
-  color:var(--muted);
-}
-
-.sensor-table td:last-child{
-  text-align:right;
-  font-family:Consolas,Menlo,Monaco,monospace;
-}
-
-.empty{
-  color:var(--muted);
-  font-size:12px;
-  padding:8px 2px;
-}
-
-@media(max-width:1200px){
-  .control-row{
-    grid-template-columns:minmax(100px,1fr) auto;
-  }
-
-  .control-description{
-    grid-column:1;
-    grid-row:2;
-  }
-
-  .control-actions{
-    grid-column:2;
-    grid-row:1 / span 2;
-  }
-}
-
-@media(max-width:1000px){
-  .grid{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-  }
-
-  .system-controls{
-    grid-template-columns:1fr;
-  }
-}
-
-@media(max-width:860px){
-  .wrap{
-    grid-template-columns:1fr;
-  }
-
-  .overview{
-    margin-top:0;
-  }
-}
-
-@media(max-width:520px){
-  .grid{
-    grid-template-columns:1fr;
-  }
-
-  .control-row{
-    grid-template-columns:1fr;
-  }
-
-  .control-description,
-  .control-actions{
-    grid-column:auto;
-    grid-row:auto;
-  }
-
-  .control-actions{
-    justify-content:flex-start;
-  }
-}
-</style>
+  <script src="/pulsar.js"></script>
+  <script src="/pulsar_data.js"></script>
 </head>
+
 
 <body>
 
-<div class="wrap">
+<div class="root-shell">
+
 
   <aside class="rail">
 
     <div class="brand">
-      <div class="dot"></div>
-      <div class="title">PulSar</div>
+      <span class="brand-dot"></span>
+      <span class="brand-title">PulSar</span>
     </div>
 
 
     <div class="railsec">
+
       <h3>System</h3>
 
-      <button class="railbtn" type="button" onclick="go('/settings')">
-        <span class="l">
-          <span class="name">Settings</span>
-          <span class="desc">Device configuration</span>
+      <button class="railbtn" onclick="go('/settings')">
+        <span class="railbtn-text">
+          <b>Settings</b>
+          <span class="railbtn-desc">Device configuration</span>
         </span>
-        <span class="go">›</span>
+        <span>›</span>
       </button>
 
-      <button class="railbtn" type="button" onclick="go('/console')">
-        <span class="l">
-          <span class="name">Console</span>
-          <span class="desc">Live log and commands</span>
+      <button class="railbtn" onclick="go('/console')">
+        <span class="railbtn-text">
+          <b>Console</b>
+          <span class="railbtn-desc">Logs and commands</span>
         </span>
-        <span class="go">›</span>
+        <span>›</span>
       </button>
 
-      <button class="railbtn" type="button" onclick="go('/edit')">
-        <span class="l">
-          <span class="name">Files</span>
-          <span class="desc">Internal filesystem</span>
+      <button class="railbtn" onclick="go('/edit')">
+        <span class="railbtn-text">
+          <b>Files</b>
+          <span class="railbtn-desc">Internal filesystem</span>
         </span>
-        <span class="go">›</span>
+        <span>›</span>
       </button>
 
-      <button class="railbtn" type="button" onclick="go('/sdedit')">
-        <span class="l">
-          <span class="name">SD Files</span>
-          <span class="desc">SD card filesystem</span>
+      <button class="railbtn" onclick="go('/sdedit')">
+        <span class="railbtn-text">
+          <b>SD Files</b>
+          <span class="railbtn-desc">SD filesystem</span>
         </span>
-        <span class="go">›</span>
+        <span>›</span>
       </button>
 
-      <button class="railbtn" type="button" onclick="go('/update')">
-        <span class="l">
-          <span class="name">Firmware Update</span>
-          <span class="desc"></span>
+      <button class="railbtn" onclick="go('/update')">
+        <span class="railbtn-text">
+          <b>Firmware Update</b>
         </span>
-        <span class="go">›</span>
+        <span>›</span>
       </button>
+
     </div>
 
 
     <div class="railsec">
+
       <h3>Advanced</h3>
 
-      <button class="railbtn" type="button" onclick="go('/debug/main')">
-        <span class="l">
-          <span class="name">Advanced</span>
-          <span class="desc">Diagnostic tools</span>
+      <button class="railbtn" onclick="go('/debug/main')">
+        <span class="railbtn-text">
+          <b>Advanced</b>
+          <span class="railbtn-desc">Diagnostics</span>
         </span>
-        <span class="go">›</span>
+        <span>›</span>
       </button>
+
     </div>
 
 
     <div class="railsec overview">
+
       <h3>Overview</h3>
 
-      <div class="kv">
-
-        <div class="row">
-          <div class="k">Device</div>
-          <div class="v mono">PulSar</div>
-        </div>
-
-        <div class="row">
-          <div class="k">Host</div>
-          <div class="v mono" id="origin">—</div>
-        </div>
-
-        <div class="row">
-          <div class="k">Version</div>
-          <div class="v mono">##VERSION##</div>
-        </div>
-
-        <div class="row">
-          <div class="k">Firmware</div>
-          <div class="v mono">##FIRMWARE_BRANCH##</div>
-        </div>
-
-        <div class="row">
-          <div class="k">Build</div>
-          <div class="v mono">##BUILD_DATETIME##</div>
-        </div>
-
-        <div class="row">
-          <div class="k">Environment</div>
-          <div class="v mono">##BUILD_ENV##</div>
-        </div>
-
-        <div class="row">
-          <div class="k">Build Host</div>
-          <div class="v mono">##BUILD_HOST##</div>
-        </div>
-
-        <div class="row">
-          <div class="k">Git Branch</div>
-          <div class="v mono">##GIT_BRANCH##</div>
-        </div>
-
-        <div class="row">
-          <div class="k">Git Commit</div>
-          <div class="v mono">##GIT_COMMIT##</div>
-        </div>
-
+      <div class="overview-row">
+        <span class="overview-key">Device</span>
+        <span id="overview_device" class="overview-value mono">—</span>
       </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Friendly</span>
+        <span id="overview_friendly" class="overview-value mono">—</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Room</span>
+        <span id="overview_room" class="overview-value mono">—</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Module</span>
+        <span id="overview_module" class="overview-value mono">—</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Host</span>
+        <span id="origin" class="overview-value mono">—</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Version</span>
+        <span class="overview-value mono">##VERSION##</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Firmware</span>
+        <span class="overview-value mono">##FIRMWARE_BRANCH##</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Build</span>
+        <span class="overview-value mono">##BUILD_DATETIME##</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Environment</span>
+        <span class="overview-value mono">##BUILD_ENV##</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Build Host</span>
+        <span class="overview-value mono">##BUILD_HOST##</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Git Branch</span>
+        <span class="overview-value mono">##GIT_BRANCH##</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Git Commit</span>
+        <span class="overview-value mono">##GIT_COMMIT##</span>
+      </div>
+
     </div>
 
   </aside>
 
 
-  <main class="main">
+  <main class="root-main">
+
 
     <section class="card">
-      <h2>Applications</h2>
-      <p>Installed applications and module interfaces available in this firmware.</p>
 
-      <div class="grid" id="applicationGrid">
-      </div>
+      <h2>Applications</h2>
+
+      <div id="apps" class="grid application-grid"></div>
+
     </section>
 
 
     <section class="card">
+
       <h2>System Controls</h2>
-      <p>Live control, physical I/O and unified device data.</p>
 
       <div class="system-controls">
 
+
         <div class="control-pane">
+
           <div class="control-pane-head">
-            <div class="control-pane-title">Live Data</div>
+
+            <b>Live Data</b>
 
             <div class="control-pane-tools">
-              <button class="refreshbtn" type="button" onclick="refreshLiveData()">Refresh</button>
+
+              <button class="small" onclick="live()">
+                Refresh
+              </button>
 
               <label class="fastcheck">
-                <input id="fastLive" type="checkbox" onchange="setFastLive(this.checked)">
+                <input id="fast" type="checkbox">
                 Fast
               </label>
+
             </div>
+
           </div>
 
-          <div id="sensorContainer">
-            <div class="empty" id="sensorsEmpty">Loading live data…</div>
+          <div id="sensors">
+            <div class="empty">Loading…</div>
           </div>
+
         </div>
 
 
         <div class="control-pane">
+
           <div class="control-pane-head">
-            <div class="control-pane-title">Controls</div>
+            <b>Controls</b>
           </div>
 
-          <div id="controlsContainer">
-            <div class="empty" id="controlsEmpty">Loading controls…</div>
+          <div id="controls">
+            <div class="empty">Loading…</div>
           </div>
+
         </div>
 
+
       </div>
+
     </section>
+
 
   </main>
 
@@ -723,841 +229,648 @@ button{
 
 <script>
 
-const APPLICATIONS_API = '/url_apps';
-const PAGE_WS_PATH = '/ws/page';
-
-let pageSocket = null;
-let reconnectTimer = 0;
-let controlsTimer = 0;
-let liveTimer = 0;
-let fastLive = false;
+let ws;
+let livePoll;
 
 
-/* -------------------------------------------------------
- * Navigation
- * ------------------------------------------------------- */
+/**************************************************************************************************
+ * Common IDs
+ **************************************************************************************************/
 
-function go(path)
+function appId(item)
 {
-  if(!path) return;
-
-  if(path.startsWith('http://') || path.startsWith('https://'))
-  {
-    location.href = path;
-    return;
-  }
-
-  if(path[0] !== '/')
-  {
-    path = '/' + path;
-  }
-
-  location.href = path;
+  return 'app_' + safeId(item.ModuleID ?? item.Module);
 }
 
 
-/* -------------------------------------------------------
- * Utility IDs
- * ------------------------------------------------------- */
-
-function safeId(value)
+function ctrlId(moduleId, control)
 {
-  return String(value).replace(/[^a-zA-Z0-9_-]/g, '_');
-}
-
-function applicationModuleId(module)
-{
-  return 'app_' + safeId(module.ModuleID !== undefined ? module.ModuleID : module.Module);
-}
-
-function controlModuleId(moduleId)
-{
-  return 'ctrlmodule_' + safeId(moduleId);
-}
-
-function controlElementId(moduleId, command, device)
-{
-  return 'ctrl_' + safeId(moduleId) + '_' + safeId(command || 'x') + '_' + safeId(device);
-}
-
-function sensorGroupId(name)
-{
-  return 'sensor_' + safeId(name);
-}
-
-function sensorValueId(group, device)
-{
-  return sensorGroupId(group) + '_' + safeId(device);
+  return 'c_' +
+         safeId(moduleId) + '_' +
+         safeId(control.C || 'x') + '_' +
+         safeId(control.D);
 }
 
 
-/* -------------------------------------------------------
- * Applications
- * ------------------------------------------------------- */
-
-function appendApplicationModule(module)
+function sensorId(group, name)
 {
-  if(!module || !Array.isArray(module.Links) || !module.Links.length)
-  {
-    return;
-  }
-
-  const grid = document.getElementById('applicationGrid');
-  if(!grid) return;
-
-  const id = applicationModuleId(module);
-
-  if(document.getElementById(id))
-  {
-    return;
-  }
-
-  const tile = document.createElement('div');
-  tile.className = 'tile';
-  tile.id = id;
-
-  const title = document.createElement('div');
-  title.className = 't';
-  title.textContent = module.Module || 'Module';
-
-  const links = document.createElement('div');
-  links.className = 'applinks';
-
-  tile.appendChild(title);
-  tile.appendChild(links);
-
-  for(const item of module.Links)
-  {
-    if(!Array.isArray(item) || item.length < 2 || !item[1])
-    {
-      continue;
-    }
-
-    const friendlyName = item[0] || item[1];
-    const urlValue = item[1];
-
-    const link = document.createElement('div');
-    link.className = 'applink';
-
-    link.onclick = function()
-    {
-      go(urlValue);
-    };
-
-    const text = document.createElement('div');
-    text.className = 'txt';
-
-    const name = document.createElement('div');
-    name.className = 'an';
-    name.textContent = friendlyName;
-
-    const url = document.createElement('div');
-    url.className = 'au mono';
-    url.textContent = urlValue;
-
-    const arrow = document.createElement('span');
-    arrow.className = 'go';
-    arrow.textContent = '›';
-
-    text.appendChild(name);
-    text.appendChild(url);
-
-    link.appendChild(text);
-    link.appendChild(arrow);
-
-    links.appendChild(link);
-  }
-
-  if(links.children.length)
-  {
-    grid.appendChild(tile);
-  }
+  return 's_' + safeId(group) + '_' + safeId(name);
 }
 
 
-async function loadApplications()
+/**************************************************************************************************
+ * Overview
+ **************************************************************************************************/
+
+function syncOverviewSettings(packet)
+{
+  if (!packet) return;
+
+  const name = packet.Name || {};
+
+  setText(
+    'overview_device',
+    name.Device || '—'
+  );
+
+  setText(
+    'overview_friendly',
+    name.Friendly || '—'
+  );
+
+  setText(
+    'overview_room',
+    name.Room || '—'
+  );
+
+  setText(
+    'overview_module',
+    name.ModuleName || '—'
+  );
+}
+
+
+async function loadOverviewSettings()
 {
   try
   {
-    const response = await fetch(APPLICATIONS_API, {cache:'no-store'});
-    if(!response.ok) return;
+    /**********************************************************************************************
+     * Discover the registered settings telemetry topic.
+     *
+     * This avoids hardcoding the module prefix. The telemetry API itself defines the available
+     * topic names.
+     **********************************************************************************************/
 
-    const data = await response.json();
+    const catalogue = await getJSON('/api/telemetry');
 
-    if(!data || !Array.isArray(data.Applications))
+    const topicEntry = (catalogue.topics || []).find(
+      item => item.topic && item.topic.endsWith('/settings')
+    );
+
+    if (!topicEntry)
     {
-      return;
+      throw new Error('Settings telemetry topic not found');
     }
 
-    for(const module of data.Applications)
-    {
-      appendApplicationModule(module);
-    }
+
+    /**********************************************************************************************
+     * Request only the settings payload.
+     **********************************************************************************************/
+
+    const response = await getJSON(
+      '/api/telemetry?topic=' + encodeURIComponent(topicEntry.topic)
+    );
+
+    syncOverviewSettings(response.packet);
   }
-  catch(e)
+  catch (e)
   {
+    console.warn('Unable to load Overview settings:', e);
+
+    setText('overview_device', '—');
+    setText('overview_friendly', '—');
+    setText('overview_room', '—');
+    setText('overview_module', '—');
   }
 }
 
 
-/* -------------------------------------------------------
- * Generic webpage WebSocket
- * ------------------------------------------------------- */
+/**************************************************************************************************
+ * Applications
+ **************************************************************************************************/
 
-function pageSocketURL()
+async function loadApps()
 {
-  const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
-  return protocol + location.host + PAGE_WS_PATH;
-}
-
-
-function sendPageJSON(data)
-{
-  if(!pageSocket || pageSocket.readyState !== WebSocket.OPEN)
+  try
   {
-    return false;
-  }
+    const data = await getJSON('/url_apps');
 
-  pageSocket.send(JSON.stringify(data));
-
-  return true;
-}
-
-
-function requestPageData(name)
-{
-  return sendPageJSON({request:name});
-}
-
-
-function connectPageSocket()
-{
-  if(pageSocket && (pageSocket.readyState === WebSocket.OPEN || pageSocket.readyState === WebSocket.CONNECTING))
-  {
-    return;
-  }
-
-  pageSocket = new WebSocket(pageSocketURL());
-
-  pageSocket.onopen = function()
-  {
-    requestPageData('controls');
-    refreshLiveData();
-  };
-
-  pageSocket.onmessage = function(event)
-  {
-    let data;
-
-    try
+    for (const module of data.Applications || [])
     {
-      data = JSON.parse(event.data);
-    }
-    catch(e)
-    {
-      return;
-    }
+      if (!module.Links?.length || gId(appId(module))) continue;
 
-    if(data.controls)
-    {
-      syncControls(data.controls);
-    }
+      const tile = cE('div');
 
-    if(data.sensors)
-    {
-      syncSensorTables(data.sensors);
-    }
+      tile.className = 'tile application-tile';
+      tile.id = appId(module);
 
-    if(data.energy)
-    {
-      syncSensorTables(data.energy);
-    }
-  };
+      tile.innerHTML =
+        '<div class="tile-title"></div>' +
+        '<div class="application-links"></div>';
 
-  pageSocket.onclose = function()
-  {
-    pageSocket = null;
-
-    if(!reconnectTimer)
-    {
-      reconnectTimer = setTimeout(function()
-      {
-        reconnectTimer = 0;
-        connectPageSocket();
-      }, 2000);
-    }
-  };
-
-  pageSocket.onerror = function()
-  {
-    if(pageSocket)
-    {
-      pageSocket.close();
-    }
-  };
-}
-
-
-/* -------------------------------------------------------
- * Commands
- * ------------------------------------------------------- */
-
-function sendControlCommand(command, device, value, includeValue = true)
-{
-  const message = {ui:{}};
-
-  if(includeValue)
-  {
-    message.ui[command] = [device, value];
-  }
-  else
-  {
-    message.ui[command] = [device];
-  }
-
-  sendPageJSON(message);
-}
-
-
-/* -------------------------------------------------------
- * Controls - append structure once
- * ------------------------------------------------------- */
-
-function ensureControlModule(module)
-{
-  const container = document.getElementById('controlsContainer');
-
-  if(!container || !module)
-  {
-    return null;
-  }
-
-  const empty = document.getElementById('controlsEmpty');
-
-  if(empty)
-  {
-    empty.remove();
-  }
-
-  const id = controlModuleId(module.ID);
-
-  let section = document.getElementById(id);
-
-  if(section)
-  {
-    return section;
-  }
-
-  section = document.createElement('div');
-  section.className = 'control-module';
-  section.id = id;
-
-  const title = document.createElement('div');
-  title.className = 'control-module-title';
-  title.textContent = module.Name || ('Module ' + module.ID);
-
-  section.appendChild(title);
-  container.appendChild(section);
-
-  return section;
-}
-
-
-function createControlElement(moduleId, control)
-{
-  if(!control || !control.T)
-  {
-    return null;
-  }
-
-  const row = document.createElement('div');
-  row.className = 'control-row';
-  row.id = controlElementId(moduleId, control.C, control.D);
-
-  const name = document.createElement('div');
-  name.className = 'control-name';
-  name.textContent = control.N || ('Device ' + control.D);
-
-  const description = document.createElement('div');
-  description.className = 'control-description';
-  description.textContent = control.S || '';
-
-  const actions = document.createElement('div');
-  actions.className = 'control-actions';
-
-  row.appendChild(name);
-  row.appendChild(description);
-  row.appendChild(actions);
-
-  if(control.T === 'toggle')
-  {
-    const button = document.createElement('button');
-
-    button.className = 'ctrlbtn';
-    button.dataset.role = 'toggle';
-
-    button.onclick = function()
-    {
-      const current = button.dataset.value === '1' ? 1 : 0;
-      sendControlCommand(control.C, control.D, current ? 0 : 1);
-    };
-
-    actions.appendChild(button);
-  }
-  else if(control.T === 'momentary')
-  {
-    const button = document.createElement('button');
-
-    button.className = 'ctrlbtn';
-    button.dataset.role = 'momentary';
-    button.textContent = 'Press';
-
-    button.onpointerdown = function()
-    {
-      sendControlCommand(control.C, control.D, 1);
-    };
-
-    button.onpointerup = function()
-    {
-      sendControlCommand(control.C, control.D, 0);
-    };
-
-    button.onpointercancel = function()
-    {
-      sendControlCommand(control.C, control.D, 0);
-    };
-
-    button.onpointerleave = function(event)
-    {
-      if(event.buttons)
-      {
-        sendControlCommand(control.C, control.D, 0);
-      }
-    };
-
-    actions.appendChild(button);
-  }
-  else if(control.T === 'testswitch')
-  {
-    const indicator = document.createElement('span');
-    indicator.className = 'indicator';
-    indicator.dataset.role = 'indicator';
-
-    const dot = document.createElement('span');
-    dot.className = 'indicator-dot';
-
-    const state = document.createElement('span');
-    state.dataset.role = 'indicator-state';
-
-    indicator.appendChild(dot);
-    indicator.appendChild(state);
-
-    const button = document.createElement('button');
-    button.className = 'ctrlbtn';
-    button.textContent = 'Test';
-
-    button.onclick = function()
-    {
-      sendControlCommand(control.C, control.D, 0, false);
-    };
-
-    actions.appendChild(indicator);
-    actions.appendChild(button);
-  }
-  else if(control.T === 'buttons')
-  {
-    if(Array.isArray(control.O))
-    {
-      for(let i = 0; i < control.O.length; i++)
-      {
-        const option = control.O[i];
-
-        if(!Array.isArray(option) || option.length < 2)
-        {
-          continue;
-        }
-
-        const button = document.createElement('button');
-
-        button.className = 'ctrlbtn';
-        button.dataset.role = 'option';
-        button.dataset.option = option[1];
-        button.textContent = option[0];
-
-        button.onclick = function()
-        {
-          sendControlCommand(control.C, control.D, option[1]);
-        };
-
-        actions.appendChild(button);
-      }
-    }
-  }
-  else if(control.T === 'indicator')
-  {
-    const indicator = document.createElement('span');
-    indicator.className = 'indicator';
-    indicator.dataset.role = 'indicator';
-
-    const dot = document.createElement('span');
-    dot.className = 'indicator-dot';
-
-    const state = document.createElement('span');
-    state.dataset.role = 'indicator-state';
-
-    indicator.appendChild(dot);
-    indicator.appendChild(state);
-
-    actions.appendChild(indicator);
-  }
-  else if(control.T === 'value')
-  {
-    const value = document.createElement('span');
-
-    value.className = 'mono';
-    value.dataset.role = 'value';
-
-    actions.appendChild(value);
-  }
-
-  return row;
-}
-
-
-/* -------------------------------------------------------
- * Controls - update values only
- * ------------------------------------------------------- */
-
-function updateControlElement(moduleId, control)
-{
-  const row = document.getElementById(
-    controlElementId(moduleId, control.C, control.D)
-  );
-
-  if(!row)
-  {
-    return false;
-  }
-
-  const name = row.querySelector('.control-name');
-
-  if(name)
-  {
-    name.textContent = control.N || ('Device ' + control.D);
-  }
-
-  const description = row.querySelector('.control-description');
-
-  if(description)
-  {
-    description.textContent = control.S || '';
-  }
-
-  if(control.T === 'toggle')
-  {
-    const button = row.querySelector('[data-role="toggle"]');
-
-    if(button)
-    {
-      button.dataset.value = control.V ? '1' : '0';
-      button.textContent = control.V ? 'ON' : 'OFF';
-      button.classList.toggle('on', !!control.V);
-    }
-  }
-  else if(control.T === 'testswitch' || control.T === 'indicator')
-  {
-    const indicator = row.querySelector('[data-role="indicator"]');
-
-    if(indicator)
-    {
-      indicator.classList.toggle('on', !!control.V);
-    }
-
-    const state = row.querySelector('[data-role="indicator-state"]');
-
-    if(state)
-    {
-      state.textContent = control.V ? 'ON' : 'OFF';
-    }
-  }
-  else if(control.T === 'buttons')
-  {
-    const buttons = row.querySelectorAll('[data-role="option"]');
-
-    for(const button of buttons)
-    {
-      button.classList.toggle(
-        'selected',
-        Number(button.dataset.option) === Number(control.V)
+      setText(
+        tile.firstChild,
+        module.Module || 'Module'
       );
+
+
+      for (const item of module.Links)
+      {
+        if (!item?.[1]) continue;
+
+        const link = cE('div');
+
+        link.className = 'application-link';
+        link.onclick = () => go(item[1]);
+
+        link.innerHTML =
+          '<div class="application-link-text">' +
+            '<div class="application-link-name"></div>' +
+            '<div class="application-link-url"></div>' +
+          '</div>' +
+          '<span>›</span>';
+
+        setText(
+          link.querySelector('.application-link-name'),
+          item[0] || item[1]
+        );
+
+        setText(
+          link.querySelector('.application-link-url'),
+          item[1]
+        );
+
+        tile.lastChild.appendChild(link);
+      }
+
+
+      gId('apps').appendChild(tile);
     }
   }
-  else if(control.T === 'value')
+  catch (e)
   {
-    const value = row.querySelector('[data-role="value"]');
-
-    if(value)
-    {
-      value.textContent =
-        String(control.V) +
-        (control.U ? ' ' + control.U : '');
-    }
+    console.warn('Unable to load Applications:', e);
   }
-
-  return true;
 }
 
+
+/**************************************************************************************************
+ * Page WebSocket
+ **************************************************************************************************/
+
+function request(name)
+{
+  ws.send({
+    request: name
+  });
+}
+
+
+function live()
+{
+  request('sensors');
+  request('energy');
+}
+
+
+/**************************************************************************************************
+ * Control helpers
+ **************************************************************************************************/
+
+function indicator()
+{
+  const element = cE('span');
+
+  element.className = 'indicator';
+
+  element.innerHTML =
+    '<span class="indicator-dot"></span>' +
+    '<span class="state"></span>';
+
+  return element;
+}
+
+
+/**************************************************************************************************
+ * Controls
+ **************************************************************************************************/
 
 function syncControls(data)
 {
-  if(!data || !Array.isArray(data.Modules))
+  for (const module of data.Modules || [])
   {
-    return;
-  }
+    let box = gId('cm_' + module.ID);
 
-  for(const module of data.Modules)
-  {
-    if(!module || !Array.isArray(module.Controls))
+    if (!box)
     {
-      continue;
-    }
+      box = cE('div');
 
-    const section = ensureControlModule(module);
+      box.className = 'control-module';
+      box.id = 'cm_' + module.ID;
 
-    if(!section)
-    {
-      continue;
-    }
+      box.innerHTML =
+        '<div class="control-module-title"></div>';
 
-    for(const control of module.Controls)
-    {
-      if(!control || !control.T)
-      {
-        continue;
-      }
-
-      let row = document.getElementById(
-        controlElementId(module.ID, control.C, control.D)
+      setText(
+        box.firstChild,
+        module.Name || ('Module ' + module.ID)
       );
 
-      if(!row)
-      {
-        row = createControlElement(module.ID, control);
+      gId('controls').appendChild(box);
+    }
 
-        if(row)
+
+    for (const control of module.Controls || [])
+    {
+      let row = gId(
+        ctrlId(module.ID, control)
+      );
+
+
+      if (!row)
+      {
+        row = cE('div');
+
+        row.className = 'control-row';
+        row.id = ctrlId(module.ID, control);
+
+        row.innerHTML =
+          '<div class="control-name"></div>' +
+          '<div class="control-description"></div>' +
+          '<div class="control-actions"></div>';
+
+        box.appendChild(row);
+      }
+
+
+      setText(
+        row.children[0],
+        control.N || ('Device ' + control.D)
+      );
+
+      setText(
+        row.children[1],
+        control.S || ''
+      );
+
+
+      const actions = row.children[2];
+
+
+      /********************************************************************************************
+       * Create the control only once.
+       ********************************************************************************************/
+
+      if (!actions.children.length)
+      {
+        if (control.T === 'toggle')
         {
-          section.appendChild(row);
+          actions.appendChild(
+            makeButton(
+              '',
+              () => ws.send({
+                ui: {
+                  [control.C]: [
+                    control.D,
+                    actions.firstChild.dataset.v === '1' ? 0 : 1
+                  ]
+                }
+              }),
+              'small'
+            )
+          );
+        }
+
+
+        else if (control.T === 'momentary')
+        {
+          const button = makeButton(
+            'Press',
+            null,
+            'small'
+          );
+
+          button.onpointerdown = () =>
+            ws.send({
+              ui: {
+                [control.C]: [control.D, 1]
+              }
+            });
+
+          button.onpointerup =
+          button.onpointercancel = () =>
+            ws.send({
+              ui: {
+                [control.C]: [control.D, 0]
+              }
+            });
+
+          actions.appendChild(button);
+        }
+
+
+        else if (control.T === 'testswitch')
+        {
+          actions.append(
+            indicator(),
+            makeButton(
+              'Test',
+              () => ws.send({
+                ui: {
+                  [control.C]: [control.D]
+                }
+              }),
+              'small'
+            )
+          );
+        }
+
+
+        else if (control.T === 'buttons')
+        {
+          for (const option of control.O || [])
+          {
+            const button = makeButton(
+              option[0],
+              () => ws.send({
+                ui: {
+                  [control.C]: [
+                    control.D,
+                    option[1]
+                  ]
+                }
+              }),
+              'small'
+            );
+
+            button.dataset.o = option[1];
+
+            actions.appendChild(button);
+          }
+        }
+
+
+        else if (control.T === 'indicator')
+        {
+          actions.appendChild(
+            indicator()
+          );
+        }
+
+
+        else if (control.T === 'value')
+        {
+          const value = cE('span');
+
+          value.className = 'mono';
+
+          actions.appendChild(value);
         }
       }
 
-      updateControlElement(module.ID, control);
-    }
-  }
-}
 
+      /********************************************************************************************
+       * Update the current state.
+       ********************************************************************************************/
 
-function refreshControls()
-{
-  requestPageData('controls');
-}
-
-
-/* -------------------------------------------------------
- * Unified live data
- * ------------------------------------------------------- */
-
-function ensureSensorGroup(groupName)
-{
-  const container = document.getElementById('sensorContainer');
-
-  if(!container)
-  {
-    return null;
-  }
-
-  const empty = document.getElementById('sensorsEmpty');
-
-  if(empty)
-  {
-    empty.remove();
-  }
-
-  const id = sensorGroupId(groupName);
-
-  let group = document.getElementById(id);
-
-  if(group)
-  {
-    return group;
-  }
-
-  group = document.createElement('div');
-  group.className = 'sensor-group';
-  group.id = id;
-
-  const title = document.createElement('div');
-  title.className = 'sensor-title';
-  title.textContent = groupName;
-
-  const table = document.createElement('table');
-  table.className = 'sensor-table';
-
-  const body = document.createElement('tbody');
-  body.dataset.role = 'sensor-body';
-
-  table.appendChild(body);
-
-  group.appendChild(title);
-  group.appendChild(table);
-
-  container.appendChild(group);
-
-  return group;
-}
-
-
-function ensureSensorValue(groupName, deviceName)
-{
-  const group = ensureSensorGroup(groupName);
-
-  if(!group)
-  {
-    return null;
-  }
-
-  const id = sensorValueId(groupName, deviceName);
-
-  let valueCell = document.getElementById(id);
-
-  if(valueCell)
-  {
-    return valueCell;
-  }
-
-  const body = group.querySelector('[data-role="sensor-body"]');
-
-  if(!body)
-  {
-    return null;
-  }
-
-  const row = document.createElement('tr');
-
-  const nameCell = document.createElement('td');
-  nameCell.textContent = deviceName;
-
-  valueCell = document.createElement('td');
-  valueCell.id = id;
-
-  row.appendChild(nameCell);
-  row.appendChild(valueCell);
-
-  body.appendChild(row);
-
-  return valueCell;
-}
-
-
-function formatSensorValue(value)
-{
-  if(typeof value === 'number')
-  {
-    if(Number.isInteger(value))
-    {
-      return String(value);
-    }
-
-    return value.toFixed(3);
-  }
-
-  return String(value);
-}
-
-
-function syncSensorTables(data)
-{
-  if(!data)
-  {
-    return;
-  }
-
-  for(const [groupName, values] of Object.entries(data))
-  {
-    if(groupName === 'Rate')
-    {
-      continue;
-    }
-
-    if(!values || typeof values !== 'object' || Array.isArray(values))
-    {
-      continue;
-    }
-
-    for(const [deviceName, value] of Object.entries(values))
-    {
-      const valueCell = ensureSensorValue(groupName, deviceName);
-
-      if(valueCell)
+      if (control.T === 'toggle')
       {
-        valueCell.textContent = formatSensorValue(value);
+        const button = actions.firstChild;
+
+        button.dataset.v = control.V ? '1' : '0';
+        button.textContent = control.V ? 'ON' : 'OFF';
+
+        button.classList.toggle(
+          'active',
+          !!control.V
+        );
+      }
+
+
+      else if (
+        control.T === 'indicator' ||
+        control.T === 'testswitch'
+      )
+      {
+        const item = actions.querySelector('.indicator');
+
+        item?.classList.toggle(
+          'on',
+          !!control.V
+        );
+
+        setText(
+          item?.querySelector('.state'),
+          control.V ? 'ON' : 'OFF'
+        );
+      }
+
+
+      else if (control.T === 'buttons')
+      {
+        for (const button of actions.children)
+        {
+          button.classList.toggle(
+            'active',
+            Number(button.dataset.o) === Number(control.V)
+          );
+        }
+      }
+
+
+      else if (control.T === 'value')
+      {
+        setText(
+          actions.firstChild,
+          String(control.V) +
+          (control.U ? ' ' + control.U : '')
+        );
       }
     }
   }
-}
 
 
-function refreshLiveData()
-{
-  requestPageData('sensors');
-  requestPageData('energy');
-}
+  const empty = gId('controls').querySelector('.empty');
 
-
-function restartLiveTimer()
-{
-  if(liveTimer)
+  if (empty)
   {
-    clearInterval(liveTimer);
+    empty.remove();
+  }
+}
+
+
+/**************************************************************************************************
+ * Live sensor / energy data
+ **************************************************************************************************/
+
+function syncSensors(data)
+{
+  for (const [groupName, values] of Object.entries(data || {}))
+  {
+    if (
+      groupName === 'Rate' ||
+      !values ||
+      typeof values !== 'object' ||
+      Array.isArray(values)
+    )
+    {
+      continue;
+    }
+
+
+    let group = gId(
+      'sg_' + safeId(groupName)
+    );
+
+
+    if (!group)
+    {
+      group = cE('div');
+
+      group.className = 'sensor-group';
+      group.id = 'sg_' + safeId(groupName);
+
+      group.innerHTML =
+        '<div class="sensor-title"></div>' +
+        '<table class="compact">' +
+          '<tbody></tbody>' +
+        '</table>';
+
+      setText(
+        group.firstChild,
+        groupName
+      );
+
+      gId('sensors').appendChild(group);
+    }
+
+
+    for (const [name, value] of Object.entries(values))
+    {
+      let cell = gId(
+        sensorId(groupName, name)
+      );
+
+
+      if (!cell)
+      {
+        const row = cE('tr');
+
+        row.append(
+          makeCell(name, 'muted'),
+          makeCell('', 'value right')
+        );
+
+        cell = row.lastChild;
+        cell.id = sensorId(groupName, name);
+
+        group
+          .querySelector('tbody')
+          .appendChild(row);
+      }
+
+
+      cell.textContent =
+        formatDataValue(value);
+    }
   }
 
-  liveTimer = setInterval(
-    refreshLiveData,
-    fastLive ? 1000 : 10000
+
+  const empty = gId('sensors').querySelector('.empty');
+
+  if (empty)
+  {
+    empty.remove();
+  }
+}
+
+
+/**************************************************************************************************
+ * Initialise
+ **************************************************************************************************/
+
+onReady(() =>
+{
+  setOriginText();
+
+  /**********************************************************************************************
+   * One-shot page information.
+   **********************************************************************************************/
+
+  loadOverviewSettings();
+  loadApps();
+
+
+  /**********************************************************************************************
+   * Live WebSocket data.
+   **********************************************************************************************/
+
+  ws = createWebSocketClient(
+    '/ws/page',
+
+    data =>
+    {
+      if (data.controls)
+      {
+        syncControls(data.controls);
+      }
+
+      if (data.sensors)
+      {
+        syncSensors(data.sensors);
+      }
+
+      if (data.energy)
+      {
+        syncSensors(data.energy);
+      }
+    },
+
+    () =>
+    {
+      request('controls');
+      live();
+    }
   );
-}
 
 
-function setFastLive(enabled)
-{
-  fastLive = !!enabled;
-
-  refreshLiveData();
-  restartLiveTimer();
-}
+  ws.connect();
 
 
-/* -------------------------------------------------------
- * Init
- * ------------------------------------------------------- */
+  /**********************************************************************************************
+   * Normal live-data polling.
+   **********************************************************************************************/
 
-(function init()
-{
-  const origin = document.getElementById('origin');
+  livePoll = createPoller(
+    live,
+    10000
+  );
 
-  if(origin)
+  livePoll.start(false);
+
+
+  /**********************************************************************************************
+   * Fast live-data mode.
+   **********************************************************************************************/
+
+  gId('fast').onchange = () =>
   {
-    origin.textContent = location.origin || '—';
+    live();
+
+    livePoll.setInterval(
+      gId('fast').checked
+        ? 1000
+        : 10000
+    );
+  };
+});
+
+
+/**************************************************************************************************
+ * Cleanup
+ **************************************************************************************************/
+
+addEventListener(
+  'pagehide',
+  () =>
+  {
+    ws?.close();
+    livePoll?.stop();
   }
-
-  loadApplications();
-  connectPageSocket();
-
-  controlsTimer = setInterval(refreshControls, 1000);
-
-  restartLiveTimer();
-})();
+);
 
 </script>
 
 </body>
+
 </html>

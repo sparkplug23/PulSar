@@ -1,58 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
-	<title>Hardware Settings</title>
-	<style>html{visibility:hidden}</style>
-	<script>
-		(function loadFiles(){const l=document.createElement('script');l.src='/common.js';l.onload=()=>loadResources(['/style.css'],S);l.onerror=()=>setTimeout(loadFiles,100);document.head.appendChild(l);})();
-		function S(){getLoc();}
-	</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hardware Settings</title>
+<link rel="stylesheet" href="/pulsar.css"><script defer src="/pulsar.js"></script>
 </head>
-<body>
+<body class="settings-page">
 <form id="form_s" name="Sf" method="post">
-<div class="toprow"><button type="button" onclick="B()">Back</button><button type="submit">Save</button><hr></div>
-<h2>Hardware</h2>
 
-<div class="sec">
-<h3>GPIO / Pin Manager</h3>
-<div id="gpio_table"><i>Configured GPIO assignments will appear here.</i></div>
-<button type="button">Configure Pins</button>
-</div>
+<header class="page-header"><div class="page-title"><h1>Hardware</h1><div class="page-subtitle">GPIO, buses and physical interfaces</div></div><div class="page-actions"><button type="button" onclick="go('/settings')">Back</button><button class="primary">Save</button></div></header>
 
-<div class="sec">
-<h3>I²C</h3>
-Enabled: <input name="I2C_EN" type="checkbox"><br>
-SDA: <input name="I2C_SDA" type="number" class="s" min="-1" max="99"><br>
-SCL: <input name="I2C_SCL" type="number" class="s" min="-1" max="99"><br>
-Frequency: <input name="I2C_FREQ" type="number"> Hz<br>
-</div>
+<section class="settings-section"><h2>GPIO / Pin Manager</h2><div id="gpio_table" class="empty">Configured GPIO assignments will appear here.</div><button type="button">Configure Pins</button></section>
 
-<div class="sec">
-<h3>SPI</h3>
-Enabled: <input name="SPI_EN" type="checkbox"><br>
-MOSI: <input name="SPI_MOSI" type="number" class="s" min="-1" max="99"><br>
-MISO: <input name="SPI_MISO" type="number" class="s" min="-1" max="99"><br>
-SCLK: <input name="SPI_SCLK" type="number" class="s" min="-1" max="99"><br>
-</div>
+<section class="settings-section"><h2>I²C</h2>
+<label class="setting"><span>Enabled</span><input name="I2C_EN" type="checkbox"></label>
+<label class="setting"><span>SDA</span><input name="I2C_SDA" type="number" min="-1" max="99"></label>
+<label class="setting"><span>SCL</span><input name="I2C_SCL" type="number" min="-1" max="99"></label>
+<label class="setting"><span>Frequency</span><input name="I2C_FREQ" type="number"></label>
+</section>
 
-<div class="sec">
-<h3>Serial / UART</h3>
-<div id="uart_instances"><i>Configured UART instances will appear here.</i></div>
-<button type="button">Add Serial Interface</button>
-</div>
+<section class="settings-section"><h2>SPI</h2>
+<label class="setting"><span>Enabled</span><input name="SPI_EN" type="checkbox"></label>
+<label class="setting"><span>MOSI</span><input name="SPI_MOSI" type="number" min="-1" max="99"></label>
+<label class="setting"><span>MISO</span><input name="SPI_MISO" type="number" min="-1" max="99"></label>
+<label class="setting"><span>SCLK</span><input name="SPI_SCLK" type="number" min="-1" max="99"></label>
+</section>
 
-<div class="sec">
-<h3>Hardware Information</h3>
-Board: <span id="hw_board">Unknown</span><br>
-Chip: <span id="hw_chip">Unknown</span><br>
-Flash: <span id="hw_flash">Unknown</span><br>
-PSRAM: <span id="hw_psram">Unknown</span><br>
-</div>
+<section class="settings-section"><h2>Serial / UART</h2><div id="uart_instances" class="empty">Configured UART instances will appear here.</div><button type="button">Add Serial Interface</button></section>
 
-<hr><button type="button" onclick="B()">Back</button><button type="submit">Save</button>
-</form>
-<div id="toast"></div>
-</body>
-</html>
+<section class="settings-section"><h2>Hardware Information</h2><div class="kv">
+<div class="kv-row"><div class="kv-key">Board</div><div class="kv-value" id="hw_board">Unknown</div></div>
+<div class="kv-row"><div class="kv-key">Chip</div><div class="kv-value" id="hw_chip">Unknown</div></div>
+<div class="kv-row"><div class="kv-key">Flash</div><div class="kv-value" id="hw_flash">Unknown</div></div>
+<div class="kv-row"><div class="kv-key">PSRAM</div><div class="kv-value" id="hw_psram">Unknown</div></div>
+</div></section>
+
+</form><div id="toast"></div>
+</body></html>

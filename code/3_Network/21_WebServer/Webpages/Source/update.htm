@@ -1,51 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
-	<title>PulSar Firmware Update</title>
-
-	<style>html{visibility:hidden}</style>
-	<script>
-		(function loadFiles(){
-			const l=document.createElement('script');
-			l.src='/common.js';
-			l.onload=()=>loadResources(['/style.css'],S);
-			l.onerror=()=>setTimeout(loadFiles,100);
-			document.head.appendChild(l);
-		})();
-
-		function S(){getLoc();}
-
-		function U(){
-			gId("uf").style.display="none";
-			gId("msg").style.display="block";
-			return true;
-		}
-	</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Firmware Update</title>
+<link rel="stylesheet" href="/pulsar.css"><script defer src="/pulsar.js"></script>
 </head>
+<body class="settings-page">
+<header class="page-header"><div class="page-title"><h1>Firmware Update</h1></div><button onclick="go('/settings')">Back</button></header>
 
-<body>
-<h2>Firmware Update</h2>
-
-<form method="POST" action="/update" id="uf" enctype="multipart/form-data" onsubmit="return U()">
-
-<div class="sec">
-	<h3>Upload Firmware</h3>
-	Select the compiled firmware binary for this device.<br>
-	<input type="file" name="update" accept=".bin,application/octet-stream" required><br>
-	<button type="submit">Upload & Flash</button>
-</div>
-
-<button type="button" onclick="B()">Back</button>
+<form method="POST" action="/update" id="uf" enctype="multipart/form-data" onsubmit="show('uf',false);show('msg');">
+<section class="settings-section"><h2>Upload Firmware</h2>
+<p class="muted">Select the compiled firmware binary for this device.</p>
+<p><input type="file" name="update" accept=".bin,application/octet-stream" required></p>
+<button class="primary">Upload &amp; Flash</button>
+</section>
 </form>
 
-<div id="msg" class="sec" style="display:none">
-	<h3>Updating...</h3>
-	Please do not close or refresh this page.<br>
-	The device will restart when the update is complete.
-</div>
-
-<div id="toast"></div>
-</body>
-</html>
+<section id="msg" class="settings-section hide"><h2>Updating…</h2><p>Please do not close or refresh this page. The device will restart when complete.</p></section>
+</body></html>

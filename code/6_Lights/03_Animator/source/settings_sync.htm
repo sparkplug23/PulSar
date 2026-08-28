@@ -10,7 +10,7 @@
 	(function loadFiles() {
 		const l = document.createElement('script');
 		l.src = '/lights/common.js';
-		l.onload = () => loadResources(['/style.css'], S); // load style.css then call S()
+		l.onload = () => loadResources(['/lights/style.css'], S); // load style.css then call S()
 		l.onerror = () => setTimeout(loadFiles, 100);
 		document.head.appendChild(l);
 	})();

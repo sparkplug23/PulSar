@@ -1,635 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tasker Metrics</title>
-
-<link rel="stylesheet" href="/style.css">
-
-<style>
-body{
-  margin:0;
-  padding:16px;
-  box-sizing:border-box;
-}
-
-.wrap{
-  width:100%;
-}
-
-.head{
-  display:flex;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:12px;
-  margin-bottom:12px;
-}
-
-.head h2{
-  margin:0 16px 0 0;
-}
-
-.controls{
-  display:flex;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:10px;
-}
-
-.controls label{
-  display:flex;
-  align-items:center;
-  gap:4px;
-  white-space:nowrap;
-}
-
-.controls button{
-  width:auto;
-  min-width:90px;
-}
-
-.state{
-  margin-left:auto;
-  font-family:monospace;
-}
-
-.summary{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin:10px 0 16px;
-}
-
-.summary div{
-  padding:6px 10px;
-  border:1px solid rgba(127,127,127,.35);
-  border-radius:5px;
-  font-family:monospace;
-}
-
-.section{
-  margin-top:18px;
-}
-
-.section h3{
-  margin:0 0 7px;
-}
-
-.table-wrap{
-  width:100%;
-  overflow-x:auto;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  white-space:nowrap;
-  font-size:12px;
-}
-
-th,td{
-  padding:5px 7px;
-  border-bottom:1px solid rgba(127,127,127,.25);
-  text-align:right;
-}
-
-th:first-child,
-td:first-child,
-th:nth-child(2),
-td:nth-child(2){
-  text-align:left;
-}
-
-tbody tr:hover{
-  background:rgba(127,127,127,.1);
-}
-
-.hot{
-  font-weight:700;
-}
-
-.muted{
-  opacity:.65;
-}
-
-.error{
-  color:#e44;
-  font-weight:700;
-}
-</style>
+<link rel="stylesheet" href="/pulsar.css"><script defer src="/pulsar.js"></script><script defer src="/pulsar_data.js"></script>
 </head>
+<body class="page-wide">
 
-<body>
+<header class="page-header">
+<div class="page-title"><h1>Tasker Advanced Metrics</h1></div>
+<div class="page-actions">
+<label><input id="r1" type="checkbox"> 1s</label>
+<label><input id="r10" type="checkbox" checked> 10s</label>
+<button id="refresh">Refresh</button><button id="reset">Reset</button><button id="stop">Stop</button><button onclick="go('/debug/main')">Back</button>
+<span id="state" class="status">Starting…</span>
+</div></header>
 
-<div class="wrap">
-
-  <div class="head">
-
-    <h2>Tasker Advanced Metrics</h2>
-
-    <div class="controls">
-
-      <label>
-        <input id="rate1" type="checkbox">
-        1 second
-      </label>
-
-      <label>
-        <input id="rate10" type="checkbox" checked>
-        10 seconds
-      </label>
-
-      <button id="refresh" type="button">Refresh</button>
-      <button id="reset" type="button">Reset</button>
-      <button id="stop" type="button">Stop</button>
-
-    </div>
-
-    <div id="state" class="state">Starting…</div>
-
-  </div>
-
-
-  <div class="summary">
-
-    <div>
-      Capture:
-      <strong id="captureAge">—</strong>
-    </div>
-
-    <div>
-      Modules:
-      <strong id="moduleCount">—</strong>
-    </div>
-
-    <div>
-      Details:
-      <strong id="detailCount">—</strong>
-    </div>
-
-    <div>
-      Refresh:
-      <strong id="refreshMode">10 s</strong>
-    </div>
-
-  </div>
-
-
-  <div class="section">
-
-    <h3>Module Summary</h3>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Module</th>
-            <th>ID</th>
-            <th>Calls</th>
-            <th>Last µs</th>
-            <th>Avg µs</th>
-            <th>Min µs</th>
-            <th>Max µs</th>
-            <th>Max Task</th>
-            <th>Total ms</th>
-            <th>µs/sec</th>
-            <th>Load %</th>
-          </tr>
-        </thead>
-
-        <tbody id="moduleBody"></tbody>
-      </table>
-    </div>
-
-  </div>
-
-
-  <div class="section">
-
-    <h3>Detailed Tasks</h3>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Module</th>
-            <th>Task</th>
-            <th>ID</th>
-            <th>Calls</th>
-            <th>Last µs</th>
-            <th>Avg µs</th>
-            <th>Min µs</th>
-            <th>Max µs</th>
-            <th>Total ms</th>
-            <th>Load %</th>
-          </tr>
-        </thead>
-
-        <tbody id="detailBody"></tbody>
-      </table>
-    </div>
-
-  </div>
-
+<div class="summary">
+<div class="summary-item">Capture: <b id="age">—</b></div>
+<div class="summary-item">Modules: <b id="mc">—</b></div>
+<div class="summary-item">Details: <b id="dc">—</b></div>
+<div class="summary-item">Refresh: <b id="rm">10 s</b></div>
 </div>
 
+<section class="section"><h2>Module Summary</h2><div class="table-wrap"><table class="compact metrics-table">
+<thead><tr><th>Module</th><th>ID</th><th>Calls</th><th>Last µs</th><th>Avg µs</th><th>Min µs</th><th>Max µs</th><th>Max Task</th><th>Total ms</th><th>µs/sec</th><th>Load %</th></tr></thead><tbody id="mods"></tbody>
+</table></div></section>
 
-<script src="/common.js"></script>
+<section class="section"><h2>Detailed Tasks</h2><div class="table-wrap"><table class="compact metrics-table">
+<thead><tr><th>Module</th><th>Task</th><th>ID</th><th>Calls</th><th>Last µs</th><th>Avg µs</th><th>Min µs</th><th>Max µs</th><th>Total ms</th><th>Load %</th></tr></thead><tbody id="details"></tbody>
+</table></div></section>
 
 <script>
-'use strict';
+const API='/debug/api/tasker';
+let timer=0,rate=10000,busy=false,stopped=false;
 
-const API = '/debug/api/tasker';
-
-let timer = 0;
-let rate = 10000;
-let busy = false;
-let stopped = false;
-
-const rate1 = document.getElementById('rate1');
-const rate10 = document.getElementById('rate10');
-
-const state = document.getElementById('state');
-const captureAge = document.getElementById('captureAge');
-const moduleCount = document.getElementById('moduleCount');
-const detailCount = document.getElementById('detailCount');
-const refreshMode = document.getElementById('refreshMode');
-
-const moduleBody = document.getElementById('moduleBody');
-const detailBody = document.getElementById('detailBody');
-
-
-function esc(v)
-{
-  return String(v ?? '')
-    .replaceAll('&','&amp;')
-    .replaceAll('<','&lt;')
-    .replaceAll('>','&gt;')
-    .replaceAll('"','&quot;')
-    .replaceAll("'",'&#039;');
+async function action(a){
+ const r=await fetch(API+'?action='+a,{cache:'no-store'});
+ if(!r.ok&&r.status!==202)throw Error('HTTP '+r.status);
+ return r.status===204?null:r.json().catch(()=>null);
 }
 
-
-function num(v, digits = 0)
-{
-  const n = Number(v);
-
-  if(!Number.isFinite(n))
-  {
-    return '—';
-  }
-
-  return n.toLocaleString(undefined,{
-    minimumFractionDigits:digits,
-    maximumFractionDigits:digits
-  });
+async function snapshot(){
+ await action('snapshot');
+ for(let i=0;i<50;i++){
+  const r=await fetch(API+'?action=data',{cache:'no-store'});
+  if(r.status===200)return r.json();
+  if(r.status!==202)throw Error('HTTP '+r.status);
+  await sleep(20);
+ }
+ throw Error('Snapshot timeout');
 }
 
+function rows(id,items,detail=false){
+ const body=clearElement(id);
+ if(!items.length)return setTableEmpty(body,detail?10:11,'No samples yet');
 
-function age(ms)
-{
-  ms = Number(ms) || 0;
-
-  if(ms < 60000)
-  {
-    return (ms / 1000).toFixed(1) + ' s';
-  }
-
-  if(ms < 3600000)
-  {
-    return (ms / 60000).toFixed(1) + ' min';
-  }
-
-  return (ms / 3600000).toFixed(2) + ' hr';
+ for(const x of items){
+  const vals=detail?[
+   x.module_name,x.task_name||x.task_id,x.task_id,x.calls,x.last_us,x.avg_us,x.min_us,x.max_us,Number(x.total_us||0)/1000,x.load_pct
+  ]:[
+   x.name,x.module_id,x.calls,x.last_us,x.avg_us,x.min_us,x.max_us,x.max_task_name||x.max_task_id,Number(x.total_us||0)/1000,x.us_per_second,x.load_pct
+  ];
+  const tr=appendRow(body,vals.map((v,i)=>typeof v==='number'?formatNumber(v,i>7?3:0):v));
+  if(Number(x.max_us)>=20000||!detail&&Number(x.load_pct)>=10)tr.className='hot';
+ }
 }
 
-
-function td(v)
-{
-  return '<td>' + v + '</td>';
+async function refresh(){
+ if(busy||stopped)return;
+ busy=true;setStatus('state','Reading…');
+ try{
+  const x=await snapshot();
+  setText('age',formatDuration(x.capture_age_ms));
+  setText('mc',x.module_records+' / '+x.module_capacity);
+  setText('dc',x.detail_records+' / '+x.detail_capacity);
+  rows('mods',[...(x.modules||[])].sort((a,b)=>b.load_pct-a.load_pct));
+  rows('details',[...(x.details||[])].sort((a,b)=>b.max_us-a.max_us),true);
+  setStatus('state','Recording','ok');
+ }catch(e){setStatus('state',e.message,'bad');}
+ busy=false;
 }
 
-
-function row(values, hot = false)
-{
-  return '<tr' + (hot ? ' class="hot"' : '') + '>' +
-    values.map(td).join('') +
-    '</tr>';
+function setRate(ms){
+ rate=ms;if(timer)clearInterval(timer);timer=0;
+ setText('rm',ms===1000?'1 s':ms===10000?'10 s':'Manual');
+ if(ms)timer=setInterval(refresh,ms);
 }
 
+onReady(async()=>{
+ gId('r1').onchange=()=>{if(gId('r1').checked){gId('r10').checked=false;setRate(1000);refresh();}else if(!gId('r10').checked)setRate(0);};
+ gId('r10').onchange=()=>{if(gId('r10').checked){gId('r1').checked=false;setRate(10000);refresh();}else if(!gId('r1').checked)setRate(0);};
+ gId('refresh').onclick=refresh;
+ gId('reset').onclick=async()=>{await action('reset');await sleep(20);refresh();};
+ gId('stop').onclick=async()=>{stopped=true;setRate(0);await action('disable').catch(()=>{});setStatus('state','Stopped');};
 
-async function action(name)
-{
-  const response = await fetch(
-    API + '?action=' + encodeURIComponent(name),
-    {cache:'no-store'}
-  );
-
-  if(!response.ok && response.status !== 202)
-  {
-    throw new Error('HTTP ' + response.status);
-  }
-
-  if(response.status === 204)
-  {
-    return null;
-  }
-
-  return response.json();
-}
-
-
-async function getSnapshot()
-{
-  await action('snapshot');
-
-  for(let attempt = 0; attempt < 50; attempt++)
-  {
-    const response = await fetch(
-      API + '?action=data',
-      {cache:'no-store'}
-    );
-
-    if(response.status === 200)
-    {
-      return response.json();
-    }
-
-    if(response.status !== 202)
-    {
-      throw new Error('HTTP ' + response.status);
-    }
-
-    await new Promise(resolve => setTimeout(resolve,20));
-  }
-
-  throw new Error('Snapshot timeout');
-}
-
-
-function renderModules(items)
-{
-  const sorted = [...items].sort(
-    (a,b) => Number(b.load_pct || 0) - Number(a.load_pct || 0)
-  );
-
-  let strhtml = '';
-
-  for(const item of sorted)
-  {
-    const hot =
-      Number(item.max_us || 0) >= 20000 ||
-      Number(item.load_pct || 0) >= 10;
-
-    strhtml += row([
-      esc(item.name),
-      num(item.module_id),
-      num(item.calls),
-      num(item.last_us),
-      num(item.avg_us),
-      num(item.min_us),
-      num(item.max_us),
-      esc(item.max_task_name || item.max_task_id),
-      num(Number(item.total_us || 0) / 1000,3),
-      num(item.us_per_second),
-      num(item.load_pct,3)
-    ],hot);
-  }
-
-  moduleBody.innerHTML =
-    strhtml ||
-    '<tr><td colspan="11" class="muted">No samples yet</td></tr>';
-}
-
-
-function renderDetails(items)
-{
-  const sorted = [...items].sort(
-    (a,b) => Number(b.max_us || 0) - Number(a.max_us || 0)
-  );
-
-  let strhtml = '';
-
-  for(const item of sorted)
-  {
-    strhtml += row([
-      esc(item.module_name),
-      esc(item.task_name || item.task_id),
-      num(item.task_id),
-      num(item.calls),
-      num(item.last_us),
-      num(item.avg_us),
-      num(item.min_us),
-      num(item.max_us),
-      num(Number(item.total_us || 0) / 1000,3),
-      num(item.load_pct,3)
-    ],Number(item.max_us || 0) >= 20000);
-  }
-
-  detailBody.innerHTML =
-    strhtml ||
-    '<tr><td colspan="10" class="muted">No detailed samples yet</td></tr>';
-}
-
-
-function render(data)
-{
-  captureAge.textContent = age(data.capture_age_ms);
-
-  moduleCount.textContent =
-    data.module_records + ' / ' + data.module_capacity;
-
-  detailCount.textContent =
-    data.detail_records + ' / ' + data.detail_capacity;
-
-  renderModules(data.modules || []);
-  renderDetails(data.details || []);
-}
-
-
-async function refresh()
-{
-  if(busy || stopped)
-  {
-    return;
-  }
-
-  busy = true;
-
-  try
-  {
-    state.textContent = 'Reading…';
-
-    const data = await getSnapshot();
-
-    render(data);
-
-    state.textContent = 'Recording';
-  }
-  catch(e)
-  {
-    state.innerHTML =
-      '<span class="error">' +
-      esc(e.message) +
-      '</span>';
-  }
-
-  busy = false;
-}
-
-
-function setRate(ms)
-{
-  rate = ms;
-
-  if(timer)
-  {
-    clearInterval(timer);
-    timer = 0;
-  }
-
-  if(ms === 1000)
-  {
-    refreshMode.textContent = '1 s';
-  }
-  else if(ms === 10000)
-  {
-    refreshMode.textContent = '10 s';
-  }
-  else
-  {
-    refreshMode.textContent = 'Manual';
-  }
-
-  if(ms)
-  {
-    timer = setInterval(refresh,ms);
-  }
-}
-
-
-rate1.onchange = function()
-{
-  if(rate1.checked)
-  {
-    rate10.checked = false;
-    setRate(1000);
-    refresh();
-  }
-  else if(!rate10.checked)
-  {
-    setRate(0);
-  }
-};
-
-
-rate10.onchange = function()
-{
-  if(rate10.checked)
-  {
-    rate1.checked = false;
-    setRate(10000);
-    refresh();
-  }
-  else if(!rate1.checked)
-  {
-    setRate(0);
-  }
-};
-
-
-document.getElementById('refresh').onclick = refresh;
-
-
-document.getElementById('reset').onclick = async function()
-{
-  try
-  {
-    await action('reset');
-
-    await new Promise(resolve => setTimeout(resolve,20));
-
-    await refresh();
-  }
-  catch(e)
-  {
-    state.textContent = 'Reset failed: ' + e.message;
-  }
-};
-
-
-document.getElementById('stop').onclick = async function()
-{
-  stopped = true;
-  setRate(0);
-
-  try
-  {
-    await action('disable');
-  }
-  catch(e)
-  {
-  }
-
-  state.textContent = 'Stopped';
-};
-
-
-setInterval(function()
-{
-  if(!stopped && rate === 0)
-  {
-    action('touch').catch(function(){});
-  }
-},10000);
-
-
-window.addEventListener('pagehide',function()
-{
-  if(stopped)
-  {
-    return;
-  }
-
-  fetch(
-    API + '?action=disable',
-    {
-      method:'GET',
-      cache:'no-store',
-      keepalive:true
-    }
-  ).catch(function(){});
+ await action('enable');
+ setRate(10000);
+ refresh();
 });
 
-
-async function start()
-{
-  try
-  {
-    state.textContent = 'Enabling…';
-
-    await action('enable');
-
-    await new Promise(resolve => setTimeout(resolve,20));
-
-    stopped = false;
-    setRate(10000);
-
-    await refresh();
-  }
-  catch(e)
-  {
-    state.innerHTML =
-      '<span class="error">' +
-      esc(e.message) +
-      '</span>';
-  }
-}
-
-
-start();
+setInterval(()=>{if(!stopped&&!rate)action('touch').catch(()=>{});},10000);
+addEventListener('pagehide',()=>{if(!stopped)fetch(API+'?action=disable',{keepalive:true}).catch(()=>{});});
 </script>
-
-</body>
-</html>
+</body></html>

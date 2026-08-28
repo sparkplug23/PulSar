@@ -1,151 +1,53 @@
-/*
- * PulSar Core Web UI
- *
- * Lightweight helpers intended for all native PulSar pages.
- */
-
 'use strict';
 
-const d = document;
+const d=document;
 
+function gId(id){return d.getElementById(id);}
+function cE(tag){return d.createElement(tag);}
+function qS(s,p=d){return p.querySelector(s);}
+function qSA(s,p=d){return p.querySelectorAll(s);}
 
-/**************************************************************************************************
- * DOM
- **************************************************************************************************/
+function el(v){return typeof v==='string'?gId(v):v;}
 
-function gId(id)
-{
-  return d.getElementById(id);
+function setText(id,v){
+  const e=el(id);
+  if(e)e.textContent=v==null?'':v;
+  return e;
 }
 
-
-function cE(tag)
-{
-  return d.createElement(tag);
+function setHTML(id,v){
+  const e=el(id);
+  if(e)e.innerHTML=v==null?'':v;
+  return e;
 }
 
-
-function qS(selector, parent = d)
-{
-  return parent.querySelector(selector);
+function show(id,on=true){
+  const e=el(id);
+  if(e)e.classList.toggle('hide',!on);
+  return e;
 }
 
-
-function qSA(selector, parent = d)
-{
-  return parent.querySelectorAll(selector);
+function clearElement(id){
+  const e=el(id);
+  if(e)e.replaceChildren();
+  return e;
 }
 
-
-function setText(id, value)
-{
-  const el = typeof id === 'string' ? gId(id) : id;
-
-  if(el)
-  {
-    el.textContent = value == null ? '' : value;
-  }
-
-  return el;
+function go(path){
+  if(!path)return;
+  if(!/^https?:\/\//i.test(path)&&path[0]!=='/')path='/'+path;
+  location.href=path;
 }
 
+function back(){history.back();}
 
-function setHTML(id, value)
-{
-  const el = typeof id === 'string' ? gId(id) : id;
-
-  if(el)
-  {
-    el.innerHTML = value == null ? '' : value;
-  }
-
-  return el;
+function getURL(path='/'){
+  if(path[0]!=='/')path='/'+path;
+  return location.origin+path;
 }
 
-
-function setVisible(id, visible)
-{
-  const el = typeof id === 'string' ? gId(id) : id;
-
-  if(el)
-  {
-    el.classList.toggle('hide', !visible);
-  }
-
-  return el;
-}
-
-
-function clearElement(id)
-{
-  const el = typeof id === 'string' ? gId(id) : id;
-
-  if(!el)
-  {
-    return null;
-  }
-
-  while(el.firstChild)
-  {
-    el.removeChild(el.firstChild);
-  }
-
-  return el;
-}
-
-
-/**************************************************************************************************
- * Navigation
- **************************************************************************************************/
-
-function go(path)
-{
-  if(!path)
-  {
-    return;
-  }
-
-  if(/^https?:\/\//i.test(path))
-  {
-    location.href = path;
-    return;
-  }
-
-  if(path[0] !== '/')
-  {
-    path = '/' + path;
-  }
-
-  location.href = path;
-}
-
-
-function back()
-{
-  history.back();
-}
-
-
-function getURL(path)
-{
-  path = path || '/';
-
-  if(path[0] !== '/')
-  {
-    path = '/' + path;
-  }
-
-  return location.origin + path;
-}
-
-
-/**************************************************************************************************
- * Strings / IDs
- **************************************************************************************************/
-
-function esc(value)
-{
-  return String(value ?? '')
+function esc(v){
+  return String(v??'')
     .replaceAll('&','&amp;')
     .replaceAll('<','&lt;')
     .replaceAll('>','&gt;')
@@ -153,158 +55,68 @@ function esc(value)
     .replaceAll("'",'&#039;');
 }
 
+function safeId(v){return String(v??'').replace(/[^a-zA-Z0-9_-]/g,'_');}
 
-function safeId(value)
-{
-  return String(value ?? '').replace(/[^a-zA-Z0-9_-]/g,'_');
+function setStatus(id,text,state=''){
+  const e=el(id);
+  if(!e)return;
+  e.textContent=text??'';
+  e.classList.remove('ok','warn','bad');
+  if(state)e.classList.add(state);
+  return e;
 }
 
-
-/**************************************************************************************************
- * Status
- **************************************************************************************************/
-
-function setStatus(id, text, state = '')
-{
-  const el = typeof id === 'string' ? gId(id) : id;
-
-  if(!el)
-  {
-    return null;
-  }
-
-  el.textContent = text == null ? '' : text;
-  el.classList.remove('ok','warn','bad');
-
-  if(state === 'ok' || state === 'warn' || state === 'bad')
-  {
-    el.classList.add(state);
-  }
-
-  return el;
+let toastTimer=0;
+function showToast(text,error=false,timeout=2900){
+  const e=gId('toast');
+  if(!e)return;
+  e.textContent=text;
+  e.className=error?'error':'show';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>e.className='',timeout);
 }
 
-
-/**************************************************************************************************
- * Toast
- **************************************************************************************************/
-
-let pulsarToastTimer = 0;
-
-
-function showToast(text, error = false, timeout = 2900)
-{
-  const el = gId('toast');
-
-  if(!el)
-  {
-    return;
-  }
-
-  el.textContent = text;
-  el.className = error ? 'error' : 'show';
-
-  clearTimeout(pulsarToastTimer);
-
-  pulsarToastTimer = setTimeout(function()
-  {
-    el.className = '';
-  },timeout);
+function makeButton(text,fn,cls=''){
+  const b=cE('button');
+  b.type='button';
+  b.textContent=text;
+  if(cls)b.className=cls;
+  if(fn)b.onclick=fn;
+  return b;
 }
 
+function makeTile(title,desc='',url='',showUrl=false){
+  const t=cE('div');
+  t.className='tile menu-tile clickable';
+  t.onclick=()=>go(url);
 
-/**************************************************************************************************
- * Generic element builders
- **************************************************************************************************/
+  t.innerHTML=
+    '<div class="tile-title"></div>'+
+    '<div class="tile-description"></div>'+
+    (showUrl&&url?'<div class="tile-url"></div>':'');
 
-function makeButton(text, onclick, options = {})
-{
-  const button = cE('button');
+  setText(t.children[0],title);
+  setText(t.children[1],desc);
 
-  button.type = options.type || 'button';
-  button.textContent = text == null ? '' : text;
-
-  if(options.className)
+  if(showUrl&&url)
   {
-    button.className = options.className;
+    setText(t.children[2],url);
   }
 
-  if(options.title)
-  {
-    button.title = options.title;
-  }
-
-  if(onclick)
-  {
-    button.onclick = onclick;
-  }
-
-  return button;
+  return t;
 }
 
-
-function makeTile(title, description = '', options = {})
-{
-  const tile = cE('div');
-
-  tile.className = 'tile';
-
-  const titleElement = cE('div');
-  titleElement.className = 'tile-title';
-  titleElement.textContent = title;
-
-  tile.appendChild(titleElement);
-
-  if(description)
-  {
-    const descriptionElement = cE('div');
-    descriptionElement.className = 'tile-description';
-    descriptionElement.textContent = description;
-    tile.appendChild(descriptionElement);
-  }
-
-  if(options.url)
-  {
-    const urlElement = cE('div');
-    urlElement.className = 'tile-url';
-    urlElement.textContent = options.url;
-    tile.appendChild(urlElement);
-  }
-
-  if(options.onclick)
-  {
-    tile.classList.add('clickable');
-    tile.onclick = options.onclick;
-  }
-
-  return tile;
+function renderMenu(id,items){
+  const box=clearElement(id);
+  if(!box)return;
+  for(const i of items)box.appendChild(makeTile(i[0],i[1]||'',i[2]||''));
 }
 
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 
-/**************************************************************************************************
- * Timing
- **************************************************************************************************/
+function setOriginText(id='origin'){setText(id,location.origin||'—');}
 
-function sleep(ms)
-{
-  return new Promise(resolve => setTimeout(resolve,ms));
-}
-
-
-/**************************************************************************************************
- * Misc
- **************************************************************************************************/
-
-function setDocumentTitle(title)
-{
-  if(title)
-  {
-    document.title = title;
-  }
-}
-
-
-function setOriginText(id = 'origin')
-{
-  setText(id,location.origin || '—');
+function onReady(fn){
+  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',fn,{once:true});
+  else fn();
 }

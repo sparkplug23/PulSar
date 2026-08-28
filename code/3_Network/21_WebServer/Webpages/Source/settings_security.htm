@@ -1,42 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
-	<title>Security Settings</title>
-	<style>html{visibility:hidden}</style>
-	<script>
-		(function loadFiles(){const l=document.createElement('script');l.src='/common.js';l.onload=()=>loadResources(['/style.css'],S);l.onerror=()=>setTimeout(loadFiles,100);document.head.appendChild(l);})();
-		function S(){getLoc();}
-	</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Security Settings</title>
+<link rel="stylesheet" href="/pulsar.css"><script defer src="/pulsar.js"></script>
 </head>
-<body>
-<form id="form_s" name="Sf" method="post">
-<div class="toprow"><button type="button" onclick="B()">Back</button><button type="submit">Save</button><hr></div>
-<h2>Security</h2>
+<body class="settings-page"><form id="form_s" name="Sf" method="post">
 
-<div class="sec">
-<h3>Settings Access</h3>
-Enable settings protection: <input name="SEC_EN" type="checkbox"><br>
-Settings PIN: <input name="SEC_PIN" type="password" maxlength="8" inputmode="numeric"><br>
-</div>
+<header class="page-header"><div class="page-title"><h1>Security</h1></div><div class="page-actions"><button type="button" onclick="go('/settings')">Back</button><button class="primary">Save</button></div></header>
 
-<div class="sec">
-<h3>Firmware Update</h3>
-Lock OTA updates: <input name="OTA_LOCK" type="checkbox"><br>
-OTA password: <input name="OTA_PASS" type="password" maxlength="64"><br>
-Enable ArduinoOTA: <input name="ARDUINO_OTA" type="checkbox"><br>
-<button type="button" onclick="window.location=getURL('/update')">Firmware Update</button>
-</div>
+<section class="settings-section"><h2>Settings Access</h2>
+<label class="setting"><span>Protection</span><input name="SEC_EN" type="checkbox"></label>
+<label class="setting"><span>PIN</span><input name="SEC_PIN" type="password" maxlength="8" inputmode="numeric"></label>
+</section>
 
-<div class="sec">
-<h3>Administrative Actions</h3>
-<button type="button" onclick="if(confirm('Restart device?'))window.location=getURL('/reboot')">Restart</button>
-<button type="button" onclick="if(confirm('Factory reset all settings?'))window.location=getURL('/reset?force=1')">Factory Reset</button>
-</div>
+<section class="settings-section"><h2>Firmware Update</h2>
+<label class="setting"><span>Lock OTA</span><input name="OTA_LOCK" type="checkbox"></label>
+<label class="setting"><span>OTA password</span><input name="OTA_PASS" type="password" maxlength="64"></label>
+<label class="setting"><span>ArduinoOTA</span><input name="ARDUINO_OTA" type="checkbox"></label>
+</section>
 
-<hr><button type="button" onclick="B()">Back</button><button type="submit">Save</button>
-</form>
-<div id="toast"></div>
-</body>
-</html>
+<section class="settings-section"><h2>Administrative Actions</h2><div class="page-actions"><button type="button" onclick="if(confirm('Restart device?'))go('/reboot')">Restart</button><button class="danger" type="button" onclick="if(confirm('Factory reset all settings?'))go('/reset?force=1')">Factory Reset</button></div></section>
+
+</form><div id="toast"></div></body></html>

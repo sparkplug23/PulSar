@@ -1,184 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
-<meta name="theme-color" content="#141414">
-<title>PulSar Advanced</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<style>
-:root{
-  --bg:#121212;
-  --panel:#1a1a1a;
-  --border:#2b2b2b;
-  --text:#e8e8e8;
-  --muted:#a6a6a6;
-  --btn:#232323;
-  --btnh:#2c2c2c;
-  --accent:#4da3ff;
-}
+  <title>PulSar Advanced</title>
 
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Segoe UI,Roboto,Arial,sans-serif}
-body{max-width:900px;margin:auto;padding:14px;box-sizing:border-box}
-button{font:inherit;color:inherit}
+  <link rel="stylesheet" href="/pulsar.css">
 
-.top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:14px;
-}
-
-h1{font-size:20px;margin:0}
-.sub{font-size:12px;color:var(--muted);margin-top:4px}
-
-.back{
-  border:1px solid var(--border);
-  background:var(--btn);
-  border-radius:10px;
-  padding:8px 12px;
-  cursor:pointer;
-}
-.back:hover,.tile:hover{background:var(--btnh)}
-
-.section{
-  margin-top:14px;
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px;
-}
-
-.section h2{
-  margin:0 0 10px;
-  font-size:15px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:10px;
-}
-
-.tile{
-  border:1px solid var(--border);
-  background:var(--btn);
-  border-radius:12px;
-  padding:12px;
-  cursor:pointer;
-  min-height:72px;
-  display:flex;
-  flex-direction:column;
-  gap:5px;
-}
-
-.tile .t{font-size:14px;font-weight:600}
-.tile .d{font-size:12px;color:var(--muted);line-height:1.35}
-.tile .u{font-size:11px;color:var(--muted);margin-top:auto;font-family:Consolas,monospace}
-
-@media(max-width:700px){.grid{grid-template-columns:1fr}}
-</style>
+  <script src="/pulsar.js"></script>
 </head>
 
-<body>
 
-<div class="top">
-  <div>
-    <h1>Advanced</h1>
-    <div class="sub">Diagnostics, internal state and developer tools</div>
-  </div>
-  <button class="back" type="button" onclick="go('/')">Back</button>
-</div>
+<body class="page">
 
-<div class="section">
-  <h2>Network</h2>
 
-  <div class="grid">
+  <header class="page-header">
 
-    <div class="tile" onclick="go('/debug/telemetry')">
-    <div class="t">Telemetry</div>
-    <div class="d">Inspect module telemetry and ConstructJSON output.</div>
-    <div class="u">/debug/telemetry</div>
+    <div class="page-title">
+      <h1>Advanced</h1>
+      <div class="page-subtitle">
+        Diagnostics, internal state and developer tools
+      </div>
     </div>
 
-    <div class="tile" onclick="go('/debug/network')">
-      <div class="t">Network State</div>
-      <div class="d">Interfaces, addresses and connection state.</div>
-      <div class="u">/debug/network</div>
+    <div class="page-actions">
+      <button onclick="go('/')">Back</button>
     </div>
 
-    <div class="tile" onclick="go('/url_list')">
-      <div class="t">Registered URLs</div>
-      <div class="d">List currently registered web routes.</div>
-      <div class="u">/url_list</div>
+  </header>
+
+
+  <!-- =========================================================================================
+       System
+       ========================================================================================= -->
+
+  <section class="section">
+
+    <div class="section-head">
+      <div class="section-title">System</div>
     </div>
 
-  </div>
-</div>
+    <div class="grid">
 
+      <div class="tile clickable" onclick="go('/system/controls')">
+        <div class="tile-title">System Controls</div>
+        <div class="tile-description">
+          Low-level system controls and state.
+        </div>
+        <div class="tile-url">/system/controls</div>
+      </div>
 
-<div class="section">
-  <h2>Runtime</h2>
-
-  <div class="grid">
-
-    <div class="tile" onclick="go('/console')">
-      <div class="t">Console</div>
-      <div class="d">Runtime log output and command interface.</div>
-      <div class="u">/console</div>
     </div>
 
-    <div class="tile" onclick="go('/debug/modules')">
-      <div class="t">Modules</div>
-      <div class="d">Tasker modules, states and internal diagnostics.</div>
-      <div class="u">/debug/modules</div>
+  </section>
+
+
+  <!-- =========================================================================================
+       Network
+       ========================================================================================= -->
+
+  <section class="section">
+
+    <div class="section-head">
+      <div class="section-title">Network</div>
     </div>
 
-    <div class="tile" onclick="go('/debug/tasker')">
-      <div class="t">Tasker</div>
-      <div class="d">Task dispatch and module execution state.</div>
-      <div class="u">/debug/tasker</div>
+    <div class="grid">
+
+      <div class="tile clickable" onclick="go('/debug/telemetry')">
+        <div class="tile-title">Telemetry</div>
+        <div class="tile-description">
+          Inspect module telemetry and ConstructJSON output.
+        </div>
+        <div class="tile-url">/debug/telemetry</div>
+      </div>
+
+
+      <div class="tile clickable" onclick="go('/debug/network')">
+        <div class="tile-title">Network State</div>
+        <div class="tile-description">
+          Interfaces, addresses and connection state.
+        </div>
+        <div class="tile-url">/debug/network</div>
+      </div>
+
+
+      <div class="tile clickable" onclick="go('/url_list')">
+        <div class="tile-title">Registered URLs</div>
+        <div class="tile-description">
+          List currently registered web routes.
+        </div>
+        <div class="tile-url">/url_list</div>
+      </div>
+
     </div>
 
-  </div>
-</div>
+  </section>
 
 
-<div class="section">
-  <h2>Storage</h2>
+  <!-- =========================================================================================
+       Runtime
+       ========================================================================================= -->
 
-  <div class="grid">
+  <section class="section">
 
-    <div class="tile" onclick="go('/edit')">
-      <div class="t">Filesystem</div>
-      <div class="d">Internal filesystem editor.</div>
-      <div class="u">/edit</div>
+    <div class="section-head">
+      <div class="section-title">Runtime</div>
     </div>
 
-    <div class="tile" onclick="go('/sdedit')">
-      <div class="t">SD Filesystem</div>
-      <div class="d">Browse and edit SD card content.</div>
-      <div class="u">/sdedit</div>
+    <div class="grid">
+
+      <div class="tile clickable" onclick="go('/console')">
+        <div class="tile-title">Console</div>
+        <div class="tile-description">
+          Runtime log output and command interface.
+        </div>
+        <div class="tile-url">/console</div>
+      </div>
+
+
+      <div class="tile clickable" onclick="go('/debug/modules')">
+        <div class="tile-title">Modules</div>
+        <div class="tile-description">
+          Tasker modules, states and internal diagnostics.
+        </div>
+        <div class="tile-url">/debug/modules</div>
+      </div>
+
+
+      <div class="tile clickable" onclick="go('/debug/tasker')">
+        <div class="tile-title">Tasker</div>
+        <div class="tile-description">
+          Task dispatch and module execution state.
+        </div>
+        <div class="tile-url">/debug/tasker</div>
+      </div>
+
     </div>
 
-    <div class="tile" onclick="go('/debug/filesystem')">
-      <div class="t">Storage State</div>
-      <div class="d">Filesystem usage and diagnostics.</div>
-      <div class="u">/debug/filesystem</div>
+  </section>
+
+
+  <!-- =========================================================================================
+       Storage
+       ========================================================================================= -->
+
+  <section class="section">
+
+    <div class="section-head">
+      <div class="section-title">Storage</div>
     </div>
 
-  </div>
-</div>
+    <div class="grid">
+
+      <div class="tile clickable" onclick="go('/edit')">
+        <div class="tile-title">Filesystem</div>
+        <div class="tile-description">
+          Internal filesystem editor.
+        </div>
+        <div class="tile-url">/edit</div>
+      </div>
 
 
-<script>
-function go(path){
-  if (!path) return;
-  if (path[0] !== "/") path = "/" + path;
-  location.href = path;
-}
-</script>
+      <div class="tile clickable" onclick="go('/sdedit')">
+        <div class="tile-title">SD Filesystem</div>
+        <div class="tile-description">
+          Browse and edit SD card content.
+        </div>
+        <div class="tile-url">/sdedit</div>
+      </div>
+
+
+      <div class="tile clickable" onclick="go('/debug/filesystem')">
+        <div class="tile-title">Storage State</div>
+        <div class="tile-description">
+          Filesystem usage and diagnostics.
+        </div>
+        <div class="tile-url">/debug/filesystem</div>
+      </div>
+
+    </div>
+
+  </section>
+
 
 </body>
+
 </html>

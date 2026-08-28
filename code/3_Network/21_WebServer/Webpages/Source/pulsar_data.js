@@ -1,596 +1,162 @@
-/*
- * PulSar Data Web UI
- *
- * Optional helpers for data-heavy PulSar pages.
- *
- * Requires:
- *   /pulsar.js
- *
- * Intended for:
- *   diagnostics
- *   telemetry
- *   Tasker metrics
- *   runtime/system information
- *   dynamic tables
- *   polling pages
- */
-
-
-/**************************************************************************************************
- * Number / time formatting
- **************************************************************************************************/
-
-function formatNumber(value, digits = 0)
-{
-  const number = Number(value);
-
-  if(!Number.isFinite(number))
-  {
-    return '—';
-  }
-
-  return number.toLocaleString(undefined,{
-    minimumFractionDigits:digits,
-    maximumFractionDigits:digits
-  });
+function formatNumber(v,digits=0){
+  const n=Number(v);
+  return Number.isFinite(n)?n.toLocaleString(undefined,{minimumFractionDigits:digits,maximumFractionDigits:digits}):'—';
 }
 
+function formatPercent(v,d=2){return formatNumber(v,d)+'%';}
 
-function formatPercent(value, digits = 2)
-{
-  const number = Number(value);
-
-  if(!Number.isFinite(number))
-  {
-    return '—';
-  }
-
-  return formatNumber(number,digits) + '%';
+function formatBytes(v,d=1){
+  let n=Number(v);
+  if(!Number.isFinite(n))return '—';
+  const u=['B','KB','MB','GB','TB'];
+  let i=0;
+  while(Math.abs(n)>=1024&&i<u.length-1){n/=1024;i++;}
+  return formatNumber(n,i?d:0)+' '+u[i];
 }
 
-
-function formatBytes(bytes, digits = 1)
-{
-  let value = Number(bytes);
-
-  if(!Number.isFinite(value))
-  {
-    return '—';
-  }
-
-  const units = ['B','KB','MB','GB','TB'];
-  let unit = 0;
-
-  while(Math.abs(value) >= 1024 && unit < units.length - 1)
-  {
-    value /= 1024;
-    unit++;
-  }
-
-  return formatNumber(value,unit ? digits : 0) + ' ' + units[unit];
+function formatDuration(ms){
+  const n=Number(ms);
+  if(!Number.isFinite(n)||n<0)return '—';
+  if(n<1000)return formatNumber(n)+' ms';
+  if(n<60000)return formatNumber(n/1000,1)+' s';
+  if(n<3600000)return formatNumber(n/60000,1)+' min';
+  if(n<86400000)return formatNumber(n/3600000,2)+' hr';
+  return formatNumber(n/86400000,2)+' d';
 }
 
-
-function formatDuration(ms)
-{
-  let value = Number(ms);
-
-  if(!Number.isFinite(value) || value < 0)
-  {
-    return '—';
-  }
-
-  if(value < 1000)
-  {
-    return formatNumber(value,0) + ' ms';
-  }
-
-  if(value < 60000)
-  {
-    return formatNumber(value / 1000,1) + ' s';
-  }
-
-  if(value < 3600000)
-  {
-    return formatNumber(value / 60000,1) + ' min';
-  }
-
-  if(value < 86400000)
-  {
-    return formatNumber(value / 3600000,2) + ' hr';
-  }
-
-  return formatNumber(value / 86400000,2) + ' d';
+function formatTime(v){
+  const x=new Date(v);
+  return Number.isNaN(x.getTime())?'—':x.toLocaleTimeString();
 }
 
-
-function formatTimestamp(value)
-{
-  const date = value instanceof Date ? value : new Date(value);
-
-  if(Number.isNaN(date.getTime()))
-  {
-    return '—';
+async function fetchResponse(url,opt={}){
+  const r=await fetch(url,Object.assign({cache:'no-store'},opt));
+  if(!r.ok){
+    let t='';
+    try{t=await r.text();}catch(e){}
+    const x=new Error(t||'HTTP '+r.status);
+    x.status=r.status;
+    x.response=r;
+    throw x;
   }
-
-  return date.toLocaleString();
+  return r;
 }
 
+async function getJSON(url,opt={}){return (await fetchResponse(url,opt)).json();}
+async function getText(url,opt={}){return (await fetchResponse(url,opt)).text();}
 
-function formatTime(value)
-{
-  const date = value instanceof Date ? value : new Date(value);
-
-  if(Number.isNaN(date.getTime()))
-  {
-    return '—';
-  }
-
-  return date.toLocaleTimeString();
-}
-
-
-/**************************************************************************************************
- * Fetch
- **************************************************************************************************/
-
-async function fetchResponse(url, options = {})
-{
-  const config = Object.assign({
-    cache:'no-store'
-  },options);
-
-  const response = await fetch(url,config);
-
-  if(!response.ok)
-  {
-    let detail = '';
-
-    try
-    {
-      detail = await response.text();
-    }
-    catch(e)
-    {
-    }
-
-    const error = new Error(detail || ('HTTP ' + response.status));
-
-    error.status = response.status;
-    error.response = response;
-
-    throw error;
-  }
-
-  return response;
-}
-
-
-async function getJSON(url, options = {})
-{
-  const response = await fetchResponse(url,options);
-  return response.json();
-}
-
-
-async function getText(url, options = {})
-{
-  const response = await fetchResponse(url,options);
-  return response.text();
-}
-
-
-async function postJSON(url, data, options = {})
-{
-  const config = Object.assign({},options,{
+async function postJSON(url,data,opt={}){
+  const r=await fetchResponse(url,Object.assign({},opt,{
     method:'POST',
-    headers:Object.assign({
-      'Content-Type':'application/json'
-    },options.headers || {}),
+    headers:Object.assign({'Content-Type':'application/json'},opt.headers||{}),
     body:JSON.stringify(data)
-  });
-
-  const response = await fetchResponse(url,config);
-
-  if(response.status === 204)
-  {
-    return null;
-  }
-
-  return response.json();
+  }));
+  return r.status===204?null:r.json();
 }
 
+function createPoller(fn,interval=10000){
+  let timer=0,running=false;
 
-/**************************************************************************************************
- * Polling
- **************************************************************************************************/
-
-async function pollUntil(fn, options = {})
-{
-  const interval = Number(options.interval ?? 100);
-  const attempts = Number(options.attempts ?? 50);
-
-  for(let attempt = 0; attempt < attempts; attempt++)
-  {
-    const result = await fn(attempt);
-
-    if(result)
-    {
-      return result;
-    }
-
-    if(attempt < attempts - 1)
-    {
-      await sleep(interval);
-    }
-  }
-
-  return null;
-}
-
-
-function createPoller(callback, interval = 10000)
-{
-  let timer = 0;
-  let running = false;
-
-  async function run()
-  {
-    if(running)
-    {
-      return;
-    }
-
-    running = true;
-
-    try
-    {
-      await callback();
-    }
-    finally
-    {
-      running = false;
-    }
+  async function run(){
+    if(running)return;
+    running=true;
+    try{await fn();}
+    finally{running=false;}
   }
 
   return {
-    start(immediate = true)
-    {
+    start(immediate=true){
       this.stop();
-
-      if(immediate)
-      {
-        run();
-      }
-
-      timer = setInterval(run,interval);
+      if(immediate)run();
+      if(interval)timer=setInterval(run,interval);
     },
-
-    stop()
-    {
-      if(timer)
-      {
-        clearInterval(timer);
-        timer = 0;
-      }
+    stop(){
+      if(timer){clearInterval(timer);timer=0;}
     },
-
-    refresh()
-    {
-      return run();
-    },
-
-    setInterval(ms)
-    {
-      interval = Number(ms) || 0;
-
-      if(timer)
-      {
-        this.start(false);
-      }
-    },
-
-    isRunning()
-    {
-      return running;
+    refresh:run,
+    setInterval(ms){
+      interval=Number(ms)||0;
+      if(timer)this.start(false);
     }
   };
 }
 
-
-/**************************************************************************************************
- * Generic tables
- **************************************************************************************************/
-
-function makeCell(value, className = '')
-{
-  const td = cE('td');
-
-  if(className)
-  {
-    td.className = className;
-  }
-
-  td.textContent = value == null ? '' : value;
-
+function makeCell(v,cls=''){
+  const td=cE('td');
+  if(cls)td.className=cls;
+  td.textContent=v==null?'':v;
   return td;
 }
 
-
-function makeHTMLCell(html, className = '')
-{
-  const td = cE('td');
-
-  if(className)
-  {
-    td.className = className;
-  }
-
-  td.innerHTML = html == null ? '' : html;
-
-  return td;
-}
-
-
-function makeRow(values, options = {})
-{
-  const tr = cE('tr');
-
-  if(options.className)
-  {
-    tr.className = options.className;
-  }
-
-  for(const value of values)
-  {
-    if(value instanceof Node)
-    {
-      const td = cE('td');
-      td.appendChild(value);
-      tr.appendChild(td);
-    }
-    else
-    {
-      tr.appendChild(makeCell(value));
-    }
-  }
-
+function appendRow(body,values,cls=''){
+  body=el(body);
+  if(!body)return;
+  const tr=cE('tr');
+  if(cls)tr.className=cls;
+  for(const v of values)tr.appendChild(makeCell(v));
+  body.appendChild(tr);
   return tr;
 }
 
-
-function appendRow(body, values, options = {})
-{
-  if(typeof body === 'string')
-  {
-    body = gId(body);
-  }
-
-  if(!body)
-  {
-    return null;
-  }
-
-  const row = makeRow(values,options);
-
-  body.appendChild(row);
-
-  return row;
-}
-
-
-function clearTable(body)
-{
-  return clearElement(body);
-}
-
-
-function setTableEmpty(body, colspan, text = 'No data')
-{
-  if(typeof body === 'string')
-  {
-    body = gId(body);
-  }
-
-  if(!body)
-  {
-    return null;
-  }
-
-  clearElement(body);
-
-  const tr = cE('tr');
-  const td = cE('td');
-
-  td.colSpan = colspan;
-  td.className = 'empty';
-  td.textContent = text;
-
+function setTableEmpty(body,cols,text='No data'){
+  body=clearElement(body);
+  if(!body)return;
+  const tr=cE('tr'),td=makeCell(text,'empty');
+  td.colSpan=cols;
   tr.appendChild(td);
   body.appendChild(tr);
-
-  return tr;
 }
 
-
-/**************************************************************************************************
- * Key / value builders
- **************************************************************************************************/
-
-function appendKVRow(container, key, value, options = {})
-{
-  if(typeof container === 'string')
-  {
-    container = gId(container);
+function formatDataValue(v,digits=3){
+  if(v==null)return '—';
+  if(typeof v==='boolean')return v?'Yes':'No';
+  if(typeof v==='number')return formatNumber(v,Number.isInteger(v)?0:digits);
+  if(Array.isArray(v))return v.join(', ');
+  if(typeof v==='object'){
+    try{return JSON.stringify(v);}
+    catch(e){}
   }
-
-  if(!container)
-  {
-    return null;
-  }
-
-  const row = cE('div');
-  row.className = 'kv-row';
-
-  const keyElement = cE('div');
-  keyElement.className = 'kv-key';
-  keyElement.textContent = key == null ? '' : key;
-
-  const valueElement = cE('div');
-  valueElement.className = 'kv-value';
-
-  if(options.html)
-  {
-    valueElement.innerHTML = value == null ? '' : value;
-  }
-  else
-  {
-    valueElement.textContent = value == null ? '' : value;
-  }
-
-  row.appendChild(keyElement);
-  row.appendChild(valueElement);
-
-  container.appendChild(row);
-
-  return row;
+  return String(v);
 }
 
+function createWebSocketClient(path,onMessage,onOpen,retry=2000){
+  let ws=null,timer=0,closed=false;
 
-/**************************************************************************************************
- * Generic object rendering
- **************************************************************************************************/
+  function connect(){
+    if(closed||ws&&(ws.readyState===0||ws.readyState===1))return;
 
-function flattenObject(source, prefix = '', output = {})
-{
-  if(!source || typeof source !== 'object' || Array.isArray(source))
-  {
-    return output;
+    ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+path);
+
+    ws.onopen=()=>{if(onOpen)onOpen(client);};
+
+    ws.onmessage=e=>{
+      let data;
+      try{data=JSON.parse(e.data);}
+      catch(x){return;}
+      if(onMessage)onMessage(data,client);
+    };
+
+    ws.onclose=()=>{
+      ws=null;
+      if(!closed&&!timer)timer=setTimeout(()=>{timer=0;connect();},retry);
+    };
+
+    ws.onerror=()=>{if(ws)ws.close();};
   }
 
-  for(const [key,value] of Object.entries(source))
-  {
-    const path = prefix ? prefix + '.' + key : key;
-
-    if(value && typeof value === 'object' && !Array.isArray(value))
-    {
-      flattenObject(value,path,output);
+  const client={
+    connect,
+    send(data){
+      if(!ws||ws.readyState!==1)return false;
+      ws.send(typeof data==='string'?data:JSON.stringify(data));
+      return true;
+    },
+    close(){
+      closed=true;
+      if(timer)clearTimeout(timer);
+      if(ws)ws.close();
     }
-    else
-    {
-      output[path] = value;
-    }
-  }
+  };
 
-  return output;
-}
-
-
-function renderObjectKV(container, data, options = {})
-{
-  if(typeof container === 'string')
-  {
-    container = gId(container);
-  }
-
-  if(!container)
-  {
-    return;
-  }
-
-  clearElement(container);
-
-  const source = options.flatten === false ? data : flattenObject(data);
-
-  for(const [key,value] of Object.entries(source || {}))
-  {
-    appendKVRow(container,key,formatDataValue(value,options));
-  }
-}
-
-
-/**************************************************************************************************
- * Generic data formatting
- **************************************************************************************************/
-
-function formatDataValue(value, options = {})
-{
-  if(value === null || value === undefined)
-  {
-    return options.empty ?? '—';
-  }
-
-  if(typeof value === 'boolean')
-  {
-    return value ? 'Yes' : 'No';
-  }
-
-  if(typeof value === 'number')
-  {
-    return formatNumber(value,options.digits ?? (Number.isInteger(value) ? 0 : 3));
-  }
-
-  if(Array.isArray(value))
-  {
-    return value.join(', ');
-  }
-
-  if(typeof value === 'object')
-  {
-    try
-    {
-      return JSON.stringify(value);
-    }
-    catch(e)
-    {
-      return String(value);
-    }
-  }
-
-  return String(value);
-}
-
-
-/**************************************************************************************************
- * Forms
- **************************************************************************************************/
-
-function formToObject(form)
-{
-  if(typeof form === 'string')
-  {
-    form = gId(form);
-  }
-
-  if(!form)
-  {
-    return {};
-  }
-
-  const result = {};
-  const data = new FormData(form);
-
-  for(const [key,value] of data.entries())
-  {
-    if(Object.prototype.hasOwnProperty.call(result,key))
-    {
-      if(!Array.isArray(result[key]))
-      {
-        result[key] = [result[key]];
-      }
-
-      result[key].push(value);
-    }
-    else
-    {
-      result[key] = value;
-    }
-  }
-
-  for(const input of form.querySelectorAll('input[type="checkbox"][name]'))
-  {
-    result[input.name] = input.checked;
-  }
-
-  return result;
+  return client;
 }

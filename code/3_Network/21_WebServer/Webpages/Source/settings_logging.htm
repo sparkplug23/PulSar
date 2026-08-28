@@ -1,39 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
-	<title>Logging Settings</title>
-	<style>html{visibility:hidden}</style>
-	<script>
-		(function loadFiles(){const l=document.createElement('script');l.src='/common.js';l.onload=()=>loadResources(['/style.css'],S);l.onerror=()=>setTimeout(loadFiles,100);document.head.appendChild(l);})();
-		function S(){getLoc();}
-	</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Logging Settings</title>
+<link rel="stylesheet" href="/pulsar.css"><script defer src="/pulsar.js"></script>
 </head>
-<body>
-<form id="form_s" name="Sf" method="post">
-<div class="toprow"><button type="button" onclick="B()">Back</button><button type="submit">Save</button><hr></div>
-<h2>Logging</h2>
+<body class="settings-page"><form id="form_s" name="Sf" method="post">
 
-<div class="sec">
-<h3>Log Levels</h3>
-Serial: <select name="LOG_SERIAL"><option>Disabled</option><option>Error</option><option>Info</option><option>Debug</option></select><br>
-Web: <select name="LOG_WEB"><option>Disabled</option><option>Error</option><option>Info</option><option>Debug</option></select><br>
-</div>
+<header class="page-header"><div class="page-title"><h1>Logging</h1><div class="page-subtitle">Runtime logging and diagnostics</div></div><div class="page-actions"><button type="button" onclick="go('/settings')">Back</button><button class="primary">Save</button></div></header>
 
-<div class="sec">
-<h3>Console</h3>
-<button type="button" onclick="window.location=getURL('/console')">Open Console</button>
-</div>
+<section class="settings-section"><h2>Log Levels</h2>
+<label class="setting"><span>Serial</span><select name="LOG_SERIAL"><option>Disabled</option><option>Error</option><option>Info</option><option>Debug</option></select></label>
+<label class="setting"><span>Web</span><select name="LOG_WEB"><option>Disabled</option><option>Error</option><option>Info</option><option>Debug</option></select></label>
+</section>
 
-<div class="sec">
-<h3>Diagnostics</h3>
-<button type="button" onclick="window.location=getURL('/debug/main')">Debug Information</button>
-<button type="button" onclick="window.location=getURL('/url_list')">Registered URLs</button>
-</div>
+<section class="settings-section"><h2>Tools</h2><div class="page-actions"><button type="button" onclick="go('/console')">Console</button><button type="button" onclick="go('/debug/main')">Diagnostics</button><button type="button" onclick="go('/url_list')">URLs</button></div></section>
 
-<hr><button type="button" onclick="B()">Back</button><button type="submit">Save</button>
-</form>
-<div id="toast"></div>
-</body>
-</html>
+</form><div id="toast"></div></body></html>

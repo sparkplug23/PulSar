@@ -1,183 +1,36 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <title>PulSar URL List</title>
-
-  <script src="/common.js"></script>
-  <style>@import url("/style.css");</style>
-
-  <script>
-    // Date Modified: 21Mar26
-
-    var url_items = [];
-
-    function S() {
-      getLoc();
-      LoadUrlList();
-    }
-
-    function LoadUrlList() {
-      var xhr = new XMLHttpRequest();
-      xhr.open("GET", getURL("/url_list.json"), true);
-
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState !== 4) return;
-
-        if (xhr.status !== 200) {
-          SetStatus("Failed to load URL list. HTTP " + xhr.status);
-          return;
-        }
-
-        try {
-          var obj = JSON.parse(xhr.responseText);
-          url_items = obj.items || [];
-          RenderUrlList();
-        } catch (e) {
-          SetStatus("Failed to parse URL list JSON.");
-        }
-      };
-
-      xhr.send();
-    }
-
-    function SetStatus(text) {
-      var el = document.getElementById("status");
-      if (el) el.textContent = text;
-    }
-
-    function EscapeHtml(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
-
-    function MethodToText(method) {
-      switch (method) {
-        case 0: return "HTTP_ANY";
-        case 1: return "HTTP_GET";
-        case 2: return "HTTP_POST";
-        case 3: return "HTTP_DELETE";
-        case 4: return "HTTP_PUT";
-        case 5: return "HTTP_PATCH";
-        case 6: return "HTTP_HEAD";
-        case 7: return "HTTP_OPTIONS";
-        default: return String(method);
-      }
-    }
-
-    function MakeHref(item) {
-      var url = item.url || "/";
-      var port = Number(item.port || 80);
-
-      if (port === 80) {
-        return url;
-      }
-
-      return location.protocol + "//" + location.hostname + ":" + port + url;
-    }
-
-    function RenderUrlList() {
-      var el = document.getElementById("url_rows");
-      var html = "";
-      var i, item, href;
-
-      if (!url_items.length) {
-        el.innerHTML = "<tr><td colspan='5'>No tracked URLs.</td></tr>";
-        SetStatus("No tracked URLs.");
-        return;
-      }
-
-      for (i = 0; i < url_items.length; i++) {
-        item = url_items[i];
-        href = MakeHref(item);
-
-        html += "<tr>";
-        html +=   "<td>" + i + "</td>";
-        html +=   "<td>" + EscapeHtml(MethodToText(item.method)) + "</td>";
-        html +=   "<td>" + EscapeHtml(String(item.port)) + "</td>";
-        html +=   "<td><code>" + EscapeHtml(item.url || "") + "</code></td>";
-        html +=   "<td><a href=\"" + EscapeHtml(href) + "\">" + EscapeHtml(href) + "</a></td>";
-        html += "</tr>";
-      }
-
-      el.innerHTML = html;
-      SetStatus("Loaded " + url_items.length + " URLs.");
-    }
-
-    function RefreshNow() {
-      SetStatus("Refreshing...");
-      LoadUrlList();
-    }
-  </script>
-
-  <style>
-    .wrap {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 12px;
-    }
-
-    .toolbar {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .status {
-      opacity: 0.8;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      text-align: left;
-      vertical-align: top;
-      padding: 8px;
-      border-bottom: 1px solid #444;
-    }
-
-    code {
-      white-space: nowrap;
-    }
-
-    a {
-      word-break: break-all;
-    }
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Registered URLs</title>
+<link rel="stylesheet" href="/pulsar.css"><script defer src="/pulsar.js"></script><script defer src="/pulsar_data.js"></script>
 </head>
-<body onload="S()">
-  <div class="wrap">
-    <h2>Registered URLs</h2>
+<body class="data-page">
 
-    <div class="toolbar">
-      <button type="button" onclick="RefreshNow()">Refresh</button>
-      <span id="status" class="status">Loading...</span>
-    </div>
+<header class="page-header"><div class="page-title"><h1>Registered URLs</h1></div><div class="page-actions"><button onclick="load()">Refresh</button><span id="status" class="status">Loading…</span><button onclick="go('/debug/main')">Back</button></div></header>
 
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Method</th>
-          <th>Port</th>
-          <th>URL</th>
-          <th>Link</th>
-        </tr>
-      </thead>
-      <tbody id="url_rows">
-        <tr><td colspan="5">Loading...</td></tr>
-      </tbody>
-    </table>
-  </div>
-</body>
-</html>
+<section class="section"><div class="table-wrap"><table class="compact url-table">
+<thead><tr><th>#</th><th>Method</th><th>Port</th><th>URL</th><th>Link</th></tr></thead>
+<tbody id="rows"></tbody>
+</table></div></section>
+
+<script>
+const methods=['HTTP_ANY','HTTP_GET','HTTP_POST','HTTP_DELETE','HTTP_PUT','HTTP_PATCH','HTTP_HEAD','HTTP_OPTIONS'];
+
+async function load(){
+ setStatus('status','Loading…');
+ try{
+  const data=await getJSON('/url_list.json'),body=clearElement('rows'),items=data.items||[];
+  if(!items.length){setTableEmpty(body,5,'No tracked URLs');return setStatus('status','No URLs');}
+  items.forEach((x,i)=>{
+   const port=Number(x.port||80),href=port===80?(x.url||'/'):location.protocol+'//'+location.hostname+':'+port+(x.url||'/');
+   const tr=cE('tr');
+   tr.append(makeCell(i),makeCell(methods[x.method]||x.method),makeCell(port),makeCell(x.url||''));
+   const td=cE('td'),a=cE('a');a.href=href;a.textContent=href;td.appendChild(a);tr.appendChild(td);body.appendChild(tr);
+  });
+  setStatus('status','Loaded '+items.length,'ok');
+ }catch(e){setTableEmpty('rows',5,'Failed to load');setStatus('status',e.message,'bad');}
+}
+onReady(load);
+</script>
+</body></html>

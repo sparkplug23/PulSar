@@ -1,36 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
-	<title>PulSar Settings</title>
-	<style>html{visibility:hidden}</style>
-	<script>
-		(function loadFiles(){
-			const l=document.createElement('script');
-			l.src='/common.js';
-			l.onload=()=>loadResources(['/style.css'],S);
-			l.onerror=()=>setTimeout(loadFiles,100);
-			document.head.appendChild(l);
-		})();
-		function S(){getLoc();}
-	</script>
-	<style>
-		body{height:100px;margin:0 auto;max-width:520px}
-		html{--h:9vh}
-		button{display:block;border-radius:var(--h);font-size:clamp(1rem,6vw,2rem);height:var(--h);width:calc(100% - 40px);margin:2vh auto 0;padding:0}
-	</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PulSar Settings</title>
+<link rel="stylesheet" href="/pulsar.css">
+<script src="/pulsar.js"></script>
 </head>
-<body>
-<h2>PulSar Settings</h2>
-<button type="submit" onclick="window.location=getURL('/settings/network')">Network</button>
-<button type="submit" onclick="window.location=getURL('/settings/hardware')">Hardware</button>
-<button type="submit" onclick="window.location=getURL('/settings/system')">System</button>
-<button type="submit" onclick="window.location=getURL('/settings/modules')">Modules</button>
-<button type="submit" onclick="window.location=getURL('/settings/storage')">Storage</button>
-<button type="submit" onclick="window.location=getURL('/settings/logging')">Logging</button>
-<button type="submit" onclick="window.location=getURL('/settings/security')">Security</button>
-<button type="submit" onclick="window.location=getURL('/update')">Firmware Update</button>
-<button type="submit" onclick="window.location=getURL('/')">Back</button>
+<body class="menu-page">
+
+<header class="page-header">
+  <div class="page-title">
+    <h1>PulSar Settings</h1>
+    <div class="page-subtitle">Device configuration</div>
+  </div>
+  <button onclick="go('/')">Back</button>
+</header>
+
+<div id="menu" class="menu-grid"></div>
+
+<script>
+onReady(()=>renderMenu('menu',[
+  ['Network','Interfaces and network services','/settings/network'],
+  ['Hardware','GPIO, buses and serial interfaces','/settings/hardware'],
+  ['System','Identity, time and runtime state','/settings/system'],
+  ['Modules','Installed PulSar modules','/settings/modules'],
+  ['Storage','Filesystem and SD storage','/settings/storage'],
+  ['Logging','Runtime logging and diagnostics','/settings/logging'],
+  ['Security','Protection and administrative actions','/settings/security'],
+  ['Firmware Update','Upload and install firmware','/update']
+]));
+</script>
+
 </body>
 </html>

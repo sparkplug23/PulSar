@@ -1,59 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
-	<title>System Settings</title>
-	<style>html{visibility:hidden}</style>
-	<script>
-		(function loadFiles(){const l=document.createElement('script');l.src='/common.js';l.onload=()=>loadResources(['/style.css'],S);l.onerror=()=>setTimeout(loadFiles,100);document.head.appendChild(l);})();
-		function S(){getLoc();}
-	</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>System Settings</title>
+<link rel="stylesheet" href="/pulsar.css"><script defer src="/pulsar.js"></script>
 </head>
-<body>
-<form id="form_s" name="Sf" method="post">
-<div class="toprow"><button type="button" onclick="B()">Back</button><button type="submit">Save</button><hr></div>
-<h2>System</h2>
+<body class="settings-page"><form id="form_s" name="Sf" method="post">
 
-<div class="sec">
-<h3>Device</h3>
-Device name: <input name="SYS_NAME" type="text" maxlength="32"><br>
-Friendly name: <input name="SYS_FRIENDLY" type="text" maxlength="64"><br>
-</div>
+<header class="page-header"><div class="page-title"><h1>System</h1><div class="page-subtitle">Identity, time and runtime state</div></div><div class="page-actions"><button type="button" onclick="go('/settings')">Back</button><button class="primary">Save</button></div></header>
 
-<div class="sec">
-<h3>Time</h3>
-Use NTP: <input name="NTP_EN" type="checkbox"><br>
-NTP server: <input name="NTP_SERVER" type="text" maxlength="64"><br>
-24-hour format: <input name="TIME_24H" type="checkbox"><br>
-Time zone: <select name="TZ"><option value="0">UTC</option><option value="1">GMT/BST</option></select><br>
-UTC offset: <input name="UTC_OFFSET" type="number"> seconds<br>
-Current time: <span id="current_time">Unknown</span><br>
-</div>
+<section class="settings-section"><h2>Device</h2>
+<label class="setting"><span>Device name</span><input name="SYS_NAME" maxlength="32"></label>
+<label class="setting"><span>Friendly name</span><input name="SYS_FRIENDLY" maxlength="64"></label>
+</section>
 
-<div class="sec">
-<h3>Location</h3>
-Latitude: <input name="LAT" type="number" step="0.000001" min="-90" max="90"><br>
-Longitude: <input name="LON" type="number" step="0.000001" min="-180" max="180"><br>
-Sunrise: <span id="sunrise">Unknown</span><br>
-Sunset: <span id="sunset">Unknown</span><br>
-</div>
+<section class="settings-section"><h2>Time</h2>
+<label class="setting"><span>Use NTP</span><input name="NTP_EN" type="checkbox"></label>
+<label class="setting"><span>NTP server</span><input name="NTP_SERVER" maxlength="64"></label>
+<label class="setting"><span>24-hour format</span><input name="TIME_24H" type="checkbox"></label>
+<label class="setting"><span>Time zone</span><select name="TZ"><option value="0">UTC</option><option value="1">GMT/BST</option></select></label>
+<label class="setting"><span>UTC offset</span><input name="UTC_OFFSET" type="number"></label>
+</section>
 
-<div class="sec">
-<h3>Runtime</h3>
-Uptime: <span id="sys_uptime">Unknown</span><br>
-Boot count: <span id="sys_boots">Unknown</span><br>
-Reset reason: <span id="sys_reset">Unknown</span><br>
-Firmware: <span id="sys_fw">Unknown</span><br>
-</div>
+<section class="settings-section"><h2>Location</h2>
+<label class="setting"><span>Latitude</span><input name="LAT" type="number" step=".000001" min="-90" max="90"></label>
+<label class="setting"><span>Longitude</span><input name="LON" type="number" step=".000001" min="-180" max="180"></label>
+</section>
 
-<div class="sec">
-<h3>System Control</h3>
-<button type="button" onclick="window.location=getURL('/reboot')">Restart Device</button>
-</div>
+<section class="settings-section"><h2>Runtime</h2><div class="kv">
+<div class="kv-row"><div class="kv-key">Uptime</div><div class="kv-value" id="sys_uptime">Unknown</div></div>
+<div class="kv-row"><div class="kv-key">Boot count</div><div class="kv-value" id="sys_boots">Unknown</div></div>
+<div class="kv-row"><div class="kv-key">Reset reason</div><div class="kv-value" id="sys_reset">Unknown</div></div>
+<div class="kv-row"><div class="kv-key">Firmware</div><div class="kv-value" id="sys_fw">Unknown</div></div>
+</div></section>
 
-<hr><button type="button" onclick="B()">Back</button><button type="submit">Save</button>
-</form>
-<div id="toast"></div>
-</body>
-</html>
+<section class="settings-section"><h2>System Control</h2><button type="button" onclick="go('/reboot')">Restart Device</button></section>
+
+</form><div id="toast"></div></body></html>

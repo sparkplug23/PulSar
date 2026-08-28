@@ -1,502 +1,435 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1">
-<meta name="theme-color" content="#141414">
-<title>Telemetry</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<style>
-:root{
-  --bg:#121212;
-  --panel:#1a1a1a;
-  --border:#2b2b2b;
-  --text:#e8e8e8;
-  --muted:#a6a6a6;
-  --btn:#232323;
-  --btnh:#2c2c2c;
-  --accent:#4da3ff;
-  --bad:#ff5c5c;
-}
+  <title>Telemetry</title>
 
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Segoe UI,Roboto,Arial,sans-serif}
-body{max-width:1200px;margin:auto;padding:14px;box-sizing:border-box}
-button{font:inherit;color:inherit}
+  <link rel="stylesheet" href="/pulsar.css">
 
-.top{
-  position:sticky;
-  top:0;
-  z-index:10;
-  background:var(--bg);
-  padding:6px 0 12px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.title h1{font-size:20px;margin:0}
-.title .sub{font-size:12px;color:var(--muted);margin-top:4px}
-.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-
-.btn{
-  border:1px solid var(--border);
-  background:var(--btn);
-  border-radius:10px;
-  padding:8px 12px;
-  cursor:pointer;
-}
-
-.btn:hover{background:var(--btnh)}
-.btn.active{border-color:var(--accent);color:#fff}
-
-.status{
-  font-size:12px;
-  color:var(--muted);
-  padding:6px 10px;
-  border:1px solid var(--border);
-  border-radius:999px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
-}
-
-.card{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:14px;
-  overflow:hidden;
-}
-
-.cardhead{
-  padding:10px 12px;
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:10px;
-  border-bottom:1px solid var(--border);
-}
-
-.topic{
-  font-family:Consolas,Menlo,monospace;
-  font-size:12px;
-  word-break:break-all;
-}
-
-.meta{
-  color:var(--muted);
-  font-size:11px;
-  margin-top:4px;
-}
-
-.cardcontrols{
-  display:flex;
-  gap:6px;
-  flex-shrink:0;
-}
-
-.small{
-  padding:5px 8px;
-  font-size:11px;
-}
-
-.packet{
-  margin:0;
-  padding:12px;
-  min-height:120px;
-  max-height:500px;
-  overflow:auto;
-  background:#101010;
-  color:#ddd;
-  font:12px/1.45 Consolas,Menlo,monospace;
-  white-space:pre-wrap;
-  word-break:break-word;
-}
-
-.error{color:var(--bad)}
-.loading{opacity:.6}
-
-@media(max-width:800px){
-  .grid{grid-template-columns:1fr}
-}
-</style>
+  <script src="/pulsar.js"></script>
+  <script src="/pulsar_data.js"></script>
 </head>
 
-<body>
 
-<div class="top">
-  <div class="title">
-    <h1>Telemetry</h1>
-    <div class="sub">Module ConstructJSON inspection</div>
-  </div>
+<body class="data-page">
 
-  <div class="controls">
-    <button class="btn" type="button" onclick="refreshAll()">Refresh All</button>
-    <button class="btn" id="autoAll" type="button" onclick="toggleAutoAll()">Auto All 10s</button>
-    <span class="status" id="status">Loading...</span>
-    <button class="btn" type="button" onclick="location.href='/debug/main'">Back</button>
-  </div>
-</div>
+  <header class="page-header sticky-header">
 
-<div class="grid" id="grid"></div>
+    <div class="page-title">
+      <h1>Telemetry</h1>
+      <div class="page-subtitle">Module ConstructJSON inspection</div>
+    </div>
 
-<script>
+    <div class="page-actions">
+      <button onclick="refreshAll()">Refresh All</button>
+      <button id="auto" onclick="toggleAll()">Auto 10s</button>
+      <span id="status" class="status">Loading…</span>
+      <button onclick="go('/debug/main')">Back</button>
+    </div>
 
-const API = '/debug/api/telemetry';
-
-const REQUEST_GAP_MS = 400;
-const REQUEST_TIMEOUT_MS = 1000;
-const TOPIC_AUTO_MS = 1000;
-const ALL_AUTO_MS = 10000;
-
-const topics = new Map();
-const queue = [];
-
-let busy = false;
-let autoAll = false;
-let autoAllTimer = null;
-let lastRequestFinished = 0;
+  </header>
 
 
-function sleep(ms)
-{
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+  <div id="grid" class="telemetry-grid"></div>
 
 
-function makeId(topic)
-{
-  let h = 2166136261;
+  <script>
+    const API = '/api/telemetry';
 
-  for(let i=0;i<topic.length;i++)
-  {
-    h ^= topic.charCodeAt(i);
-    h = Math.imul(h,16777619);
-  }
+    const REQUEST_GAP_MS = 400;
+    const REQUEST_TIMEOUT_MS = 1000;
+    const TOPIC_AUTO_MS = 1000;
+    const ALL_AUTO_MS = 10000;
 
-  return 't' + (h >>> 0).toString(16);
-}
+    const topics = new Map();
+    const queue = [];
+
+    let busy = false;
+    let lastRequestFinished = 0;
+
+    let autoAll = false;
+    let autoAllTimer = 0;
 
 
-function queueTopic(topic, priority=false)
-{
-  if (!topics.has(topic)) return;
+    /**************************************************************************************************
+     * Queue
+     **************************************************************************************************/
 
-  const existing = queue.indexOf(topic);
-
-  if (existing >= 0)
-  {
-    if (priority && existing > 0)
+    function queueTopic(topic, priority = false)
     {
-      queue.splice(existing,1);
-      queue.unshift(topic);
-    }
+      if (!topics.has(topic)) return;
 
-    return;
-  }
+      const existing = queue.indexOf(topic);
 
-  if (priority) queue.unshift(topic);
-  else queue.push(topic);
-
-  processQueue();
-}
-
-
-async function processQueue()
-{
-  if (busy || !queue.length) return;
-
-  busy = true;
-
-  const elapsed = Date.now() - lastRequestFinished;
-  const wait = REQUEST_GAP_MS - elapsed;
-
-  if (wait > 0) await sleep(wait);
-
-  const topic = queue.shift();
-
-  try
-  {
-    const result = await refreshTopic(topic);
-
-    if (result && result.retry)
-    {
-      await sleep(result.retry);
-      queue.unshift(topic);
-    }
-  }
-  catch(e)
-  {
-    setError(topic,e);
-  }
-
-  lastRequestFinished = Date.now();
-  busy = false;
-
-  if (queue.length) processQueue();
-}
-
-
-async function loadTopics()
-{
-  const res = await fetch(API,{cache:'no-store'});
-
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-
-  const data = await res.json();
-
-  topics.clear();
-
-  for (const entry of (data.topics || []))
-  {
-    topics.set(entry.topic,{
-      topic:entry.topic,
-      rate:Number(entry.rate) || 0,
-      auto:false,
-      timer:null,
-      last:0,
-      el:null
-    });
-  }
-
-  buildCards();
-
-  document.getElementById('status').textContent = topics.size + ' topics';
-
-  refreshAll();
-}
-
-
-function buildCards()
-{
-  const grid = document.getElementById('grid');
-
-  grid.innerHTML = '';
-
-  for (const item of topics.values())
-  {
-    const card = document.createElement('div');
-
-    card.className = 'card';
-    card.id = makeId(item.topic);
-
-    card.innerHTML =
-      `<div class="cardhead">` +
-        `<div>` +
-          `<div class="topic"></div>` +
-          `<div class="meta">Rate: <span class="rate"></span> · Updated: <span class="updated">Never</span></div>` +
-        `</div>` +
-        `<div class="cardcontrols">` +
-          `<button class="btn small refresh">Refresh</button>` +
-          `<button class="btn small auto">Auto 1s</button>` +
-        `</div>` +
-      `</div>` +
-      `<pre class="packet">Waiting...</pre>`;
-
-    card.querySelector('.topic').textContent = item.topic;
-    card.querySelector('.rate').textContent = item.rate ? item.rate + 's' : 'event';
-    card.querySelector('.refresh').onclick = () => queueTopic(item.topic,true);
-    card.querySelector('.auto').onclick = () => toggleTopicAuto(item.topic);
-
-    grid.appendChild(card);
-
-    item.el = card;
-  }
-}
-
-
-async function refreshTopic(topic)
-{
-  const item = topics.get(topic);
-
-  if (!item || !item.el) return;
-
-  const packet = item.el.querySelector('.packet');
-
-  item.el.classList.add('loading');
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-  let res = null;
-
-  try
-  {
-    res = await fetch(
-      API + '?topic=' + encodeURIComponent(topic),
+      if (existing >= 0)
       {
-        cache:'no-store',
-        signal:controller.signal
+        if (priority && existing > 0)
+        {
+          queue.splice(existing, 1);
+          queue.unshift(topic);
+        }
+
+        return;
       }
-    );
-  }
-  catch(e)
-  {
-    clearTimeout(timeout);
-    item.el.classList.remove('loading');
 
-    if (e.name === 'AbortError')
+      if (priority)
+      {
+        queue.unshift(topic);
+      }
+      else
+      {
+        queue.push(topic);
+      }
+
+      processQueue();
+    }
+
+
+    async function processQueue()
     {
+      if (busy || !queue.length) return;
+
+      busy = true;
+
+      const elapsed = Date.now() - lastRequestFinished;
+      const wait = REQUEST_GAP_MS - elapsed;
+
+      if (wait > 0)
+      {
+        await sleep(wait);
+      }
+
+      const topic = queue.shift();
+
+      try
+      {
+        const retry = await refreshTopic(topic);
+
+        if (retry)
+        {
+          await sleep(retry);
+          queue.unshift(topic);
+        }
+      }
+      catch (e)
+      {
+        errorTopic(topic, e);
+      }
+
+      lastRequestFinished = Date.now();
+      busy = false;
+
+      processQueue();
+    }
+
+
+    /**************************************************************************************************
+     * Build topic cards
+     **************************************************************************************************/
+
+    function build()
+    {
+      const grid = clearElement('grid');
+
+      for (const item of topics.values())
+      {
+        const card = cE('section');
+        card.className = 'card telemetry-card';
+
+        card.innerHTML =
+          '<div class="telemetry-card-head">' +
+            '<div class="grow">' +
+              '<div class="telemetry-topic"></div>' +
+              '<div class="telemetry-meta">' +
+                'Rate: <span class="rate"></span> · ' +
+                'Updated: <span class="updated">Never</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="telemetry-actions"></div>' +
+          '</div>' +
+          '<pre class="telemetry-packet">Waiting…</pre>';
+
+        setText(
+          card.querySelector('.telemetry-topic'),
+          item.topic
+        );
+
+        setText(
+          card.querySelector('.rate'),
+          item.rate ? item.rate + 's' : 'event'
+        );
+
+        const actions = card.querySelector('.telemetry-actions');
+
+        actions.appendChild(
+          makeButton(
+            'Refresh',
+            () => queueTopic(item.topic, true),
+            'small'
+          )
+        );
+
+        const autoButton = makeButton(
+          'Auto 1s',
+          () => toggleTopic(item),
+          'small auto'
+        );
+
+        actions.appendChild(autoButton);
+
+        grid.appendChild(card);
+
+        item.el = card;
+      }
+    }
+
+
+    /**************************************************************************************************
+     * Fetch one topic
+     **************************************************************************************************/
+
+    async function refreshTopic(topic)
+    {
+      const item = topics.get(topic);
+
+      if (!item || !item.el) return 0;
+
+      const packet = item.el.querySelector('.telemetry-packet');
+
+      item.el.classList.add('loading');
+
+      const controller = new AbortController();
+
+      const timeout = setTimeout(
+        () => controller.abort(),
+        REQUEST_TIMEOUT_MS
+      );
+
+      let response;
+
+      try
+      {
+        response = await fetch(
+          API + '?topic=' + encodeURIComponent(topic),
+          {
+            cache: 'no-store',
+            signal: controller.signal
+          }
+        );
+      }
+      catch (e)
+      {
+        clearTimeout(timeout);
+
+        item.el.classList.remove('loading');
+
+        if (e.name === 'AbortError')
+        {
+          packet.classList.remove('error');
+          packet.textContent = 'No data';
+          return 0;
+        }
+
+        throw e;
+      }
+
+      clearTimeout(timeout);
+
+      let data = null;
+
+      try
+      {
+        data = await response.json();
+      }
+      catch (e)
+      {
+      }
+
+      if (response.status === 429 || response.status === 503)
+      {
+        item.el.classList.remove('loading');
+
+        return data && data.retry_ms
+          ? Number(data.retry_ms) + 50
+          : 500;
+      }
+
+      if (!response.ok)
+      {
+        item.el.classList.remove('loading');
+
+        throw new Error(
+          data && data.error
+            ? data.error
+            : 'HTTP ' + response.status
+        );
+      }
+
       packet.classList.remove('error');
-      packet.textContent = 'No data';
-      return {retry:0};
+      packet.textContent = JSON.stringify(data.packet, null, 2);
+
+      item.rate = Number(data.rate) || item.rate;
+      item.last = Date.now();
+
+      setText(
+        item.el.querySelector('.rate'),
+        item.rate ? item.rate + 's' : 'event'
+      );
+
+      setText(
+        item.el.querySelector('.updated'),
+        formatTime(item.last)
+      );
+
+      item.el.classList.remove('loading');
+
+      return 0;
     }
 
-    throw e;
-  }
 
-  clearTimeout(timeout);
-
-  let data = null;
-
-  try
-  {
-    data = await res.json();
-  }
-  catch(e)
-  {
-  }
-
-  if (res.status === 429 || res.status === 503)
-  {
-    item.el.classList.remove('loading');
-
-    return {
-      retry:data && data.retry_ms ? Number(data.retry_ms) + 50 : 500
-    };
-  }
-
-  if (!res.ok)
-  {
-    item.el.classList.remove('loading');
-    throw new Error(data && data.error ? data.error : 'HTTP ' + res.status);
-  }
-
-  packet.classList.remove('error');
-  packet.textContent = JSON.stringify(data.packet,null,2);
-
-  item.rate = Number(data.rate) || item.rate;
-  item.last = Date.now();
-
-  item.el.querySelector('.rate').textContent = item.rate ? item.rate + 's' : 'event';
-  item.el.querySelector('.updated').textContent = new Date(item.last).toLocaleTimeString();
-
-  item.el.classList.remove('loading');
-
-  return {retry:0};
-}
-
-
-function setError(topic,error)
-{
-  const item = topics.get(topic);
-
-  if (!item || !item.el) return;
-
-  const packet = item.el.querySelector('.packet');
-
-  packet.classList.add('error');
-  packet.textContent = String(error);
-
-  item.el.classList.remove('loading');
-}
-
-
-function refreshAll()
-{
-  for (const item of topics.values()) queueTopic(item.topic);
-}
-
-
-function toggleTopicAuto(topic)
-{
-  const item = topics.get(topic);
-
-  if (!item) return;
-
-  item.auto = !item.auto;
-
-  const button = item.el.querySelector('.auto');
-
-  button.classList.toggle('active',item.auto);
-
-  if (item.auto)
-  {
-    queueTopic(topic,true);
-
-    item.timer = setInterval(() => {
-      queueTopic(topic,true);
-    },TOPIC_AUTO_MS);
-  }
-  else
-  {
-    if (item.timer)
+    function errorTopic(topic, error)
     {
-      clearInterval(item.timer);
-      item.timer = null;
+      const item = topics.get(topic);
+
+      if (!item || !item.el) return;
+
+      const packet = item.el.querySelector('.telemetry-packet');
+
+      packet.classList.add('error');
+      packet.textContent = String(error);
+
+      item.el.classList.remove('loading');
     }
-  }
-}
 
 
-function toggleAutoAll()
-{
-  autoAll = !autoAll;
+    /**************************************************************************************************
+     * Refresh controls
+     **************************************************************************************************/
 
-  const button = document.getElementById('autoAll');
-
-  button.classList.toggle('active',autoAll);
-
-  if (autoAll)
-  {
-    scheduleNextAutoAll(true);
-  }
-  else
-  {
-    if (autoAllTimer)
+    function refreshAll()
     {
-      clearTimeout(autoAllTimer);
-      autoAllTimer = null;
+      for (const item of topics.values())
+      {
+        queueTopic(item.topic);
+      }
     }
-  }
-}
 
 
-function scheduleNextAutoAll(immediate=false)
-{
-  if (!autoAll) return;
+    function toggleTopic(item)
+    {
+      item.auto = !item.auto;
 
-  if (autoAllTimer) clearTimeout(autoAllTimer);
+      const button = item.el.querySelector('.auto');
 
-  autoAllTimer = setTimeout(async () =>
-  {
-    if (!autoAll) return;
+      if (button)
+      {
+        button.classList.toggle('active', item.auto);
+      }
 
-    refreshAll();
+      if (item.auto)
+      {
+        queueTopic(item.topic, true);
 
-    await waitForQueueIdle();
+        item.timer = setInterval(
+          () => queueTopic(item.topic, true),
+          TOPIC_AUTO_MS
+        );
+      }
+      else
+      {
+        clearInterval(item.timer);
+        item.timer = 0;
+      }
+    }
 
-    scheduleNextAutoAll(false);
 
-  },immediate ? 0 : ALL_AUTO_MS);
-}
+    function toggleAll()
+    {
+      autoAll = !autoAll;
+
+      gId('auto').classList.toggle('active', autoAll);
+
+      clearInterval(autoAllTimer);
+      autoAllTimer = 0;
+
+      if (autoAll)
+      {
+        refreshAll();
+
+        autoAllTimer = setInterval(
+          refreshAll,
+          ALL_AUTO_MS
+        );
+      }
+    }
 
 
-async function waitForQueueIdle()
-{
-  while (busy || queue.length) await sleep(100);
-}
+    /**************************************************************************************************
+     * Initialise
+     **************************************************************************************************/
+
+    onReady(async () =>
+    {
+      try
+      {
+        const data = await getJSON(API);
+
+        for (const entry of data.topics || [])
+        {
+          if (!entry || !entry.topic) continue;
+
+          topics.set(
+            entry.topic,
+            {
+              topic: entry.topic,
+              rate: Number(entry.rate) || 0,
+              auto: false,
+              timer: 0,
+              last: 0,
+              el: null
+            }
+          );
+        }
+
+        build();
+
+        setStatus(
+          'status',
+          topics.size + ' topics',
+          'ok'
+        );
+
+        refreshAll();
+      }
+      catch (e)
+      {
+        setStatus(
+          'status',
+          e.message || String(e),
+          'bad'
+        );
+      }
+    });
 
 
-loadTopics().catch(e => {
-  document.getElementById('status').textContent = String(e);
-});
+    /**************************************************************************************************
+     * Cleanup
+     **************************************************************************************************/
 
-</script>
+    addEventListener('pagehide', () =>
+    {
+      clearInterval(autoAllTimer);
+
+      for (const item of topics.values())
+      {
+        clearInterval(item.timer);
+      }
+    });
+
+  </script>
 
 </body>
 </html>

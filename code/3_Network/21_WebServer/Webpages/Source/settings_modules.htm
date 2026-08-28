@@ -1,32 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" name="viewport">
-	<title>Module Settings</title>
-	<style>html{visibility:hidden}</style>
-	<script>
-		(function loadFiles(){const l=document.createElement('script');l.src='/common.js';l.onload=()=>loadResources(['/style.css'],S);l.onerror=()=>setTimeout(loadFiles,100);document.head.appendChild(l);})();
-		function S(){getLoc();}
-	</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Module Settings</title>
+<link rel="stylesheet" href="/pulsar.css"><script defer src="/pulsar.js"></script>
 </head>
-<body>
-<form id="form_s" name="Sf" method="post">
-<div class="toprow"><button type="button" onclick="B()">Back</button><button type="submit">Save</button><hr></div>
-<h2>Modules</h2>
+<body class="settings-page"><form id="form_s" name="Sf" method="post">
 
-<div class="sec">
-<h3>Installed Modules</h3>
-<div id="module_list"><i>Enabled PulSar modules will appear here.</i></div>
-</div>
+<header class="page-header"><div class="page-title"><h1>Modules</h1><div class="page-subtitle">Installed PulSar modules</div></div><div class="page-actions"><button type="button" onclick="go('/settings')">Back</button><button class="primary">Save</button></div></header>
 
-<div class="sec">
-<h3>Module Control</h3>
-<div id="module_controls"><i>Module-specific configuration links and controls will appear here.</i></div>
-</div>
+<section class="settings-section"><h2>Installed Modules</h2><div id="module_list" class="empty">Enabled modules will appear here.</div></section>
+<section class="settings-section"><h2>Module Control</h2><div id="module_controls" class="empty">Module controls will appear here.</div></section>
 
-<hr><button type="button" onclick="B()">Back</button><button type="submit">Save</button>
-</form>
-<div id="toast"></div>
-</body>
-</html>
+</form><div id="toast"></div></body></html>

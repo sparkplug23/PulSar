@@ -305,100 +305,103 @@ AsyncWebHandler *editHandler = nullptr;
   #endif
 
 
-  #ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+  
 
-enum class WebTelemetryRequestMode : uint8_t
-{
-  None = 0,
-  Catalogue,
-  Topic
-};
+  /**************************************************************************************************
+   * Generic Telemetry API
+   **************************************************************************************************/
 
-struct WebTelemetryRequest
-{
-  WebTelemetryRequestMode mode = WebTelemetryRequestMode::None;
-
-  char requested_key[128] = {0};
-
-  AsyncResponseStream* catalogue_response = nullptr;
-
-  bool catalogue_first = true;
-  bool found = false;
-  bool buffer_busy = false;
-
-  uint16_t rate = 0;
-
-  String packet;
-};
-
-WebTelemetryRequest web_telemetry_request;
-
-uint32_t web_telemetry_json_last_used_ms = 0;
-static constexpr uint32_t WEB_TELEMETRY_JSON_BACKOFF_MS = 350;
-
-void HandlePage_DebugTelemetry(AsyncWebServerRequest* request);
-void HandleAPI_DebugTelemetry(AsyncWebServerRequest* request);
-void WebTelemetry_PrintJSONString(AsyncResponseStream* response, const char* str);
-bool WebTelemetry_Construct_Begin(const char* full_key, uint16_t rate);
-void WebTelemetry_Construct_End();
-
-#ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
-void HandlePage_DebugTaskerMetrics(AsyncWebServerRequest* request);
-void HandleAPI_DebugTaskerMetrics(AsyncWebServerRequest* request);
-#endif
-
-template<typename T>
-void Telemetry_Sender(std::vector<telemetry_handler<T>*>& telemetry_list, T& class_ptr)
-{
-  if (web_telemetry_request.mode == WebTelemetryRequestMode::None) return;
-
-  char full_key[160];
-
-  for (auto* handle : telemetry_list)
+  enum class TelemetryAPIRequestMode : uint8_t
   {
-    if (!handle || !handle->key || !handle->ConstructJSON_function) continue;
+    None = 0,
+    Catalogue,
+    Topic
+  };
 
-    snprintf_P(full_key, sizeof(full_key), PSTR("%S/%S"), class_ptr.GetModuleName(), handle->key);
+  struct TelemetryAPIRequest
+  {
+    TelemetryAPIRequestMode mode = TelemetryAPIRequestMode::None;
+    char requested_key[128] = {0};
+    AsyncResponseStream* catalogue_response = nullptr;
+    bool catalogue_first = true;
+    bool found = false;
+    bool buffer_busy = false;
+    uint16_t rate = 0;
+    String packet;
+  };
 
-    /********************************************************************
-     * Catalogue
-    ********************************************************************/
-    if (web_telemetry_request.mode == WebTelemetryRequestMode::Catalogue)
+  TelemetryAPIRequest telemetry_api_request;
+
+  uint32_t telemetry_api_json_last_used_ms = 0;
+  static constexpr uint32_t TELEMETRY_API_JSON_BACKOFF_MS = 350;
+
+  void HandleAPI_Telemetry(AsyncWebServerRequest* request);
+  void TelemetryAPI_PrintJSONString(AsyncResponseStream* response, const char* str);
+  bool TelemetryAPI_Construct_Begin(const char* full_key, uint16_t rate);
+  void TelemetryAPI_Construct_End();
+
+  template<typename T>
+  void Telemetry_Sender(std::vector<telemetry_handler<T>*>& telemetry_list, T& class_ptr)
+  {
+    if(telemetry_api_request.mode == TelemetryAPIRequestMode::None) return;
+
+    char full_key[160];
+
+    for(auto* handle : telemetry_list)
     {
-      AsyncResponseStream* response = web_telemetry_request.catalogue_response;
-      if (!response) return;
+      if(!handle || !handle->key || !handle->ConstructJSON_function) continue;
 
-      if (!web_telemetry_request.catalogue_first) response->print(',');
-      web_telemetry_request.catalogue_first = false;
+      snprintf_P(full_key, sizeof(full_key), PSTR("%S/%S"), class_ptr.GetModuleName(), handle->key);
 
-      response->print(F("{\"topic\":\""));
-      WebTelemetry_PrintJSONString(response, full_key);
-      response->printf_P(PSTR("\",\"rate\":%u}"), handle->tRateSecs);
+      if(telemetry_api_request.mode == TelemetryAPIRequestMode::Catalogue)
+      {
+        AsyncResponseStream* response = telemetry_api_request.catalogue_response;
+        if(!response) return;
 
-      continue;
-    }
+        if(!telemetry_api_request.catalogue_first) response->print(',');
+        telemetry_api_request.catalogue_first = false;
 
-    /********************************************************************
-     * Requested topic
-    ********************************************************************/
-    if (web_telemetry_request.mode == WebTelemetryRequestMode::Topic)
-    {
-      if (strcmp(full_key, web_telemetry_request.requested_key)) continue;
-      if (!WebTelemetry_Construct_Begin(full_key, handle->tRateSecs)) return;
+        response->print(F("{\"topic\":\""));
+        TelemetryAPI_PrintJSONString(response, full_key);
+        response->printf_P(PSTR("\",\"rate\":%u}"), handle->tRateSecs);
+        continue;
+      }
 
-      CALL_MEMBER_FUNCTION(class_ptr, handle->ConstructJSON_function)(handle->json_level, false);
+      if(telemetry_api_request.mode == TelemetryAPIRequestMode::Topic)
+      {
+        if(strcmp(full_key, telemetry_api_request.requested_key)) continue;
+        if(!TelemetryAPI_Construct_Begin(full_key, handle->tRateSecs)) return;
 
-      WebTelemetry_Construct_End();
-      return;
+        CALL_MEMBER_FUNCTION(class_ptr, handle->ConstructJSON_function)(handle->json_level, false);
+
+        TelemetryAPI_Construct_End();
+        return;
+      }
     }
   }
-}
-#else
 
-template<typename T>
-void Telemetry_Sender(std::vector<telemetry_handler<T>*>& telemetry_list, T& class_ptr)
-{}
-#endif
+
+  /**************************************************************************************************
+   * Telemetry Debug Page
+   **************************************************************************************************/
+
+  #ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+  void HandlePage_DebugTelemetry(AsyncWebServerRequest* request);
+  #endif
+
+
+  /**************************************************************************************************
+   * Tasker Metrics Debug Page / API
+   **************************************************************************************************/
+
+  #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  void HandlePage_DebugTaskerMetrics(AsyncWebServerRequest* request);
+  void HandleAPI_DebugTaskerMetrics(AsyncWebServerRequest* request);
+  #endif
+
+
+
+
 
 
 void serveSettingsJS(AsyncWebServerRequest* request);
