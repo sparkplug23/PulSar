@@ -652,33 +652,6 @@ writeChunks(
   source_path,
   [
     {
-      file: "submodule_style.css",
-      name: "PAGE_submodule_style_web",
-      method: "gzip",
-      filter: "css-minify",
-      mangle: (str) => str.replace(/%%/g, "%")
-    }
-  ],
-  destination_path + "submodule_assets.h"
-);
-
-// writeChunks(
-//   source_path,
-//   [
-//     {
-//       file: "system_controls.htm",
-//       name: "PAGE_system_controls_web",
-//       method: "gzip",
-//       filter: "html-minify-ui",
-//     }
-//   ],
-//   destination_path + "submodule_unified_pages.h"
-// );
-
-writeChunks(
-  source_path,
-  [
-    {
       file: "debug_main.htm",
       name: "PAGE_debug_main_web",
       method: "gzip",

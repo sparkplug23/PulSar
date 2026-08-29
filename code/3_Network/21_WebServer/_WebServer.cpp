@@ -466,18 +466,18 @@ void mWebServer::Server_Start()
 }
 
 
-
 void mWebServer::WebPage_Root_AddHandlers()
 {
   ALOG_DBG(PSTR("mWebServer::WebPage_Root_AddHandlers()"));
-    
+
+
+  /**************************************************************************************************
+   * Core system actions
+   **************************************************************************************************/
 
   SPGM_CTR(PM_URL_REBOOT) "/reboot";
-  server->on(PM_URL_REBOOT, HTTP_GET, [this](AsyncWebServerRequest *request){
-    serveMessage(request, 200,
-                F("Rebooting now..."),
-                F("Please wait ~10 seconds..."),
-                129);
+  server->on(PM_URL_REBOOT, HTTP_GET, [this](AsyncWebServerRequest* request){
+    serveMessage(request, 200, F("Rebooting now..."), F("Please wait ~10 seconds..."), 129);
 
     // Grace period for sockets + subsystems
     tkr_sup->ESP_Restart_InSeconds(2);
@@ -486,275 +486,327 @@ void mWebServer::WebPage_Root_AddHandlers()
 
 
   SPGM_CTR(PM_URL_RESET) "/reset";
-  server->on(PM_URL_RESET, HTTP_GET, [this](AsyncWebServerRequest *request){
-    if (!request->hasArg("force")) {
-      request->send(403, "text/plain", F("Forbidden: ?force=1 required"));
+  server->on(PM_URL_RESET, HTTP_GET, [this](AsyncWebServerRequest* request){
+    if(!request->hasArg("force")){
+      request->send(403, FPSTR(CONTENT_TYPE_PLAIN), F("Forbidden: ?force=1 required"));
       return;
     }
+
     request->send(204);
     ESP.restart();
   });
   AddURLtoList(PM_URL_RESET, HTTP_GET);
 
-    SPGM_CTR(PM_URL_PULSAR_CSS) "/pulsar.css";
-server->on(PM_URL_PULSAR_CSS, HTTP_GET, [this](AsyncWebServerRequest* request){
-  handleStaticContent(request, FPSTR(PM_URL_PULSAR_CSS), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_pulsar_css_web, PAGE_pulsar_css_web_length);
-});
-AddURLtoList(PM_URL_PULSAR_CSS, HTTP_GET);
 
-SPGM_CTR(PM_URL_PULSAR_JS) "/pulsar.js";
-server->on(PM_URL_PULSAR_JS, HTTP_GET, [this](AsyncWebServerRequest* request){
-  handleStaticContent(request, FPSTR(PM_URL_PULSAR_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_pulsar_web, JS_pulsar_web_length);
-});
-AddURLtoList(PM_URL_PULSAR_JS, HTTP_GET);
+  /**************************************************************************************************
+   * Shared PulSar WebUI assets
+   *
+   * pulsar.css     - common PulSar theme/layout
+   * pulsar.js      - common DOM/navigation/UI helpers
+   * pulsar_data.js - common API/data/table/polling/WebSocket helpers
+   **************************************************************************************************/
 
-SPGM_CTR(PM_URL_PULSAR_DATA_JS) "/pulsar_data.js";
-server->on(PM_URL_PULSAR_DATA_JS, HTTP_GET, [this](AsyncWebServerRequest* request){
-  handleStaticContent(request, FPSTR(PM_URL_PULSAR_DATA_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_pulsar_data_web, JS_pulsar_data_web_length);
-});
-AddURLtoList(PM_URL_PULSAR_DATA_JS, HTTP_GET);
-
-    SPGM_CTR(PM_URL_SKIN_CSS) "/skin.css";
-    server->on(PM_URL_SKIN_CSS, HTTP_GET, [](AsyncWebServerRequest *request){
-      if (tkr_mfile->handleFileRead(request, FPSTR(PM_URL_SKIN_CSS))) return;
-      AsyncWebServerResponse *response = request->beginResponse(200, FPSTR(CONTENT_TYPE_CSS));
-      request->send(response);
-    });
-    AddURLtoList(PM_URL_SKIN_CSS, HTTP_GET);
-
-server->on("/debug/main", HTTP_GET, [this](AsyncWebServerRequest *request){
-  handleStaticContent(request, F("/debug/main"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_debug_main_web, PAGE_debug_main_web_length);
-});
-AddURLtoList(PSTR("/debug/main"), HTTP_GET);
-
-  // --------------------------------------------------------------------------
-  // Console
-  //   - ESP8266: polling only (and likely lightweight page)
-  //   - ESP32  : websocket default, polling endpoint exists only for testing
-  // --------------------------------------------------------------------------
-
-  #ifdef ESP8266
-
-    // ESP8266: only /console, polling
-    SPGM_CTR(PM_URL_CONSOLE) "/console";
-    server->on(PM_URL_CONSOLE, HTTP_GET, [this](AsyncWebServerRequest *request){
-      this->HandlePage_Console_Poll(request);
-    });
-    AddURLtoList(PM_URL_CONSOLE, HTTP_GET);
-
-  #else // ESP32 (and others)
-
-    // ESP32: /console is websocket
-    SPGM_CTR(PM_URL_CONSOLE) "/console";
-    server->on(PM_URL_CONSOLE, HTTP_GET, [this](AsyncWebServerRequest *request){
-      this->HandlePage_Console_WebSocket(request);
-    });
-    AddURLtoList(PM_URL_CONSOLE, HTTP_GET);
-
-    // ESP32: polling exists only for testing, and only when not minimal
-    #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
-    SPGM_CTR(PM_URL_CONSOLE_POLL) "/console_poll";
-    server->on(PM_URL_CONSOLE_POLL, HTTP_GET, [this](AsyncWebServerRequest *request){
-      this->HandlePage_Console_Poll(request);
-    });
-    AddURLtoList(PM_URL_CONSOLE_POLL, HTTP_GET);
-    #endif
-
-  #endif // ESP32
-
-  
+  SPGM_CTR(PM_URL_PULSAR_CSS) "/pulsar.css";
+  server->on(PM_URL_PULSAR_CSS, HTTP_GET, [this](AsyncWebServerRequest* request){
+    handleStaticContent(request, FPSTR(PM_URL_PULSAR_CSS), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_pulsar_css_web, PAGE_pulsar_css_web_length);
+  });
+  AddURLtoList(PM_URL_PULSAR_CSS, HTTP_GET);
 
 
-#endif // ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
+  SPGM_CTR(PM_URL_PULSAR_JS) "/pulsar.js";
+  server->on(PM_URL_PULSAR_JS, HTTP_GET, [this](AsyncWebServerRequest* request){
+    handleStaticContent(request, FPSTR(PM_URL_PULSAR_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_pulsar_web, JS_pulsar_web_length);
+  });
+  AddURLtoList(PM_URL_PULSAR_JS, HTTP_GET);
 
-#ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
 
-SPGM_CTR(PM_URL_DEBUG_TASKER_METRICS) "/debug/tasker";
-server->on(PM_URL_DEBUG_TASKER_METRICS, HTTP_GET, [this](AsyncWebServerRequest* request){
-  HandlePage_DebugTaskerMetrics(request);
-});
-AddURLtoList(PM_URL_DEBUG_TASKER_METRICS, HTTP_GET);
+  SPGM_CTR(PM_URL_PULSAR_DATA_JS) "/pulsar_data.js";
+  server->on(PM_URL_PULSAR_DATA_JS, HTTP_GET, [this](AsyncWebServerRequest* request){
+    handleStaticContent(request, FPSTR(PM_URL_PULSAR_DATA_JS), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_pulsar_data_web, JS_pulsar_data_web_length);
+  });
+  AddURLtoList(PM_URL_PULSAR_DATA_JS, HTTP_GET);
 
-SPGM_CTR(PM_URL_DEBUG_API_TASKER_METRICS) "/debug/api/tasker";
-server->on(PM_URL_DEBUG_API_TASKER_METRICS, HTTP_GET, [this](AsyncWebServerRequest* request){
-  HandleAPI_DebugTaskerMetrics(request);
-});
-AddURLtoList(PM_URL_DEBUG_API_TASKER_METRICS, HTTP_GET);
 
-#endif
+  /**************************************************************************************************
+   * Optional/shared styling assets
+   **************************************************************************************************/
+
+  SPGM_CTR(PM_URL_SKIN_CSS) "/skin.css";
+  server->on(PM_URL_SKIN_CSS, HTTP_GET, [](AsyncWebServerRequest* request){
+    if(tkr_mfile->handleFileRead(request, FPSTR(PM_URL_SKIN_CSS))) return;
+
+    AsyncWebServerResponse* response = request->beginResponse(200, FPSTR(CONTENT_TYPE_CSS));
+    request->send(response);
+  });
+  AddURLtoList(PM_URL_SKIN_CSS, HTTP_GET);
 
 
   #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
 
-    SPGM_CTR(PM_URL_ROOT) "/";
-    server->on(PM_URL_ROOT, HTTP_GET, [this](AsyncWebServerRequest *request){
-      if (captivePortal(request)) return;
-      this->handleStaticContent(request, F("/"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_root_main_web, PAGE_root_main_web_L, true);
-    });
-    AddURLtoList(PM_URL_ROOT, HTTP_GET);
 
+  SPGM_CTR(PM_URL_FAVICON_ICO) "/favicon.ico";
+  server->on(PM_URL_FAVICON_ICO, HTTP_GET, [this](AsyncWebServerRequest* request){
+    handleStaticContent(request, FPSTR(PM_URL_FAVICON_ICO), 200, F("image/x-icon"), favicon2_web, favicon2_web_length, false);
+  });
+  AddURLtoList(PM_URL_FAVICON_ICO, HTTP_GET);
 
-    #ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
-
-      SPGM_CTR(PM_URL_GENERATE_204) "/generate_204";
-      server->on(PM_URL_GENERATE_204, HTTP_GET, [this](AsyncWebServerRequest *request){
-        if (this->captivePortal(request)) return;
-        request->redirect("/");
-      });
-      AddURLtoList(PM_URL_GENERATE_204, HTTP_GET);
-
-
-      SPGM_CTR(PM_URL_HOTSPOT_DETECT) "/hotspot-detect.html";
-      server->on(PM_URL_HOTSPOT_DETECT, HTTP_GET, [this](AsyncWebServerRequest *request){
-        if (this->captivePortal(request)) return;
-        request->redirect("/");
-      });
-      AddURLtoList(PM_URL_HOTSPOT_DETECT, HTTP_GET);
-
-
-      SPGM_CTR(PM_URL_NCSI) "/ncsi.txt";
-      server->on(PM_URL_NCSI, HTTP_GET, [this](AsyncWebServerRequest *request){
-        if (this->captivePortal(request)) return;
-        request->send(200, "text/plain", "Microsoft NCSI");
-      });
-      AddURLtoList(PM_URL_NCSI, HTTP_GET);
-
-
-      SPGM_CTR(PM_URL_CONNECTTEST) "/connecttest.txt";
-      server->on(PM_URL_CONNECTTEST, HTTP_GET, [this](AsyncWebServerRequest *request){
-        if (this->captivePortal(request)) return;
-        request->send(200, "text/plain", "Microsoft Connect Test");
-      });
-      AddURLtoList(PM_URL_CONNECTTEST, HTTP_GET);
-
-    #endif // ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
-
-
-    SPGM_CTR(PM_URL_SETTINGS2) "/settings";
-    server->on(PM_URL_SETTINGS2, HTTP_GET, [this](AsyncWebServerRequest *request){
-      this->SettingsPages_GET(request);
-    });
-    AddURLtoList(PM_URL_SETTINGS2, HTTP_GET);
-
-
-    server->on(PM_URL_SETTINGS2, HTTP_POST, [this](AsyncWebServerRequest *request){
-      this->SettingsPages_POST(request);
-    });
-    AddURLtoList(PM_URL_SETTINGS2, HTTP_POST);
-
-
-    SPGM_CTR(PM_URL_JSON2) "/json2";
-    server->on(PM_URL_JSON2, HTTP_GET, [this](AsyncWebServerRequest *request){
-      this->serveJson(request);
-    });
-    AddURLtoList(PM_URL_JSON2, HTTP_GET);
-
-
-    SPGM_CTR(PM_URL_SUBMODULE_STYLE_CSS) "/submodule_style.css";
-    server->on(PM_URL_SUBMODULE_STYLE_CSS, HTTP_GET, [this](AsyncWebServerRequest *request){
-      handleStaticContent(request, FPSTR(PM_URL_SUBMODULE_STYLE_CSS), 200, FPSTR(CONTENT_TYPE_CSS), PAGE_submodule_style_web, PAGE_submodule_style_web_length);
-    });
-    AddURLtoList(PM_URL_SUBMODULE_STYLE_CSS, HTTP_GET);
-
-    
-
-    SPGM_CTR(PM_URL_FAVICON_ICO) "/favicon.ico";
-    server->on(PM_URL_FAVICON_ICO, HTTP_GET, [this](AsyncWebServerRequest *request){
-      this->handleStaticContent(request, FPSTR(PM_URL_FAVICON_ICO), 200, F("image/x-icon"), favicon2_web, favicon2_web_length, false);
-    });
-    AddURLtoList(PM_URL_FAVICON_ICO, HTTP_GET);
-
-
-
-  #endif // ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
-  
-  #ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
-    SPGM_CTR(PM_URL_URL_LIST) "/url_list";
-    server->on(PM_URL_URL_LIST, HTTP_GET, [this](AsyncWebServerRequest *request){
-      this->HandlePage_UrlList(request);
-    });
-    AddURLtoList(PM_URL_URL_LIST, HTTP_GET);
-
-    SPGM_CTR(PM_URL_URL_LIST_JSON) "/url_list.json";
-    server->on(PM_URL_URL_LIST_JSON, HTTP_GET, [this](AsyncWebServerRequest *request){
-      this->HandlePage_UrlList_JSON(request);
-    });
-    AddURLtoList(PM_URL_URL_LIST_JSON, HTTP_GET);
   #endif
-  
-/**************************************************************************************************
- * Generic Telemetry API
- **************************************************************************************************/
-
-SPGM_CTR(PM_URL_API_TELEMETRY) "/api/telemetry";
-server->on(PM_URL_API_TELEMETRY, HTTP_GET, [this](AsyncWebServerRequest* request){ HandleAPI_Telemetry(request); });
-AddURLtoList(PM_URL_API_TELEMETRY, HTTP_GET);
 
 
-/**************************************************************************************************
- * Telemetry Debug Page
- **************************************************************************************************/
+  /**************************************************************************************************
+   * Generic PulSar APIs
+   *
+   * These are normal application APIs, not debug/advanced-only endpoints.
+   **************************************************************************************************/
 
-#ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
-
-SPGM_CTR(PM_URL_DEBUG_TELEMETRY) "/debug/telemetry";
-server->on(PM_URL_DEBUG_TELEMETRY, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_DebugTelemetry(request); });
-AddURLtoList(PM_URL_DEBUG_TELEMETRY, HTTP_GET);
-
-#endif
-
-SPGM_CTR(PM_URL_APPLICATIONS) "/url_apps";
-server->on(PM_URL_APPLICATIONS, HTTP_GET, [this](AsyncWebServerRequest *request){
-  this->HandleAPI_URLApplications(request);
-});
-AddURLtoList(PM_URL_APPLICATIONS, HTTP_GET);
+  SPGM_CTR(PM_URL_API_TELEMETRY) "/api/telemetry";
+  server->on(PM_URL_API_TELEMETRY, HTTP_GET, [this](AsyncWebServerRequest* request){ HandleAPI_Telemetry(request); });
+  AddURLtoList(PM_URL_API_TELEMETRY, HTTP_GET);
 
 
+  SPGM_CTR(PM_URL_APPLICATIONS) "/url_apps";
+  server->on(PM_URL_APPLICATIONS, HTTP_GET, [this](AsyncWebServerRequest* request){ HandleAPI_URLApplications(request); });
+  AddURLtoList(PM_URL_APPLICATIONS, HTTP_GET);
 
 
+  /**************************************************************************************************
+   * Main PulSar page
+   **************************************************************************************************/
+
+  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+
+  SPGM_CTR(PM_URL_ROOT) "/";
+  server->on(PM_URL_ROOT, HTTP_GET, [this](AsyncWebServerRequest* request){
+    if(captivePortal(request)) return;
+    handleStaticContent(request, F("/"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_root_main_web, PAGE_root_main_web_L, true);
+  });
+  AddURLtoList(PM_URL_ROOT, HTTP_GET);
+
+  #endif
 
 
+  /**************************************************************************************************
+   * Captive portal OS detection
+   *
+   * Phones/tablets/computers probe known URLs when joining WiFi:
+   *
+   *   /generate_204       - Android / ChromeOS
+   *   /hotspot-detect.html- Apple iOS / macOS
+   *   /ncsi.txt           - Windows NCSI
+   *   /connecttest.txt    - Windows connectivity test
+   *
+   * captivePortal() gets first refusal and redirects the client to the PulSar setup portal.
+   * If no captive redirect is required, return the normal success response expected by that OS.
+   **************************************************************************************************/
 
-  
-  SPGM_CTR(PM_URL_SETTINGS)      "/settings";       AddURLtoList(PM_URL_SETTINGS,      HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_WIFI) "/settings/wifi";  AddURLtoList(PM_URL_SETTINGS_WIFI, HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_LEDS) "/settings/leds";  AddURLtoList(PM_URL_SETTINGS_LEDS, HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_2D)   "/settings/2D";    AddURLtoList(PM_URL_SETTINGS_2D,   HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_UI)   "/settings/ui";    AddURLtoList(PM_URL_SETTINGS_UI,   HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_DMX)  "/settings/dmx";   AddURLtoList(PM_URL_SETTINGS_DMX,  HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_SYNC) "/settings/sync";  AddURLtoList(PM_URL_SETTINGS_SYNC, HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_TIME) "/settings/time";  AddURLtoList(PM_URL_SETTINGS_TIME, HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_UM)   "/settings/um";    AddURLtoList(PM_URL_SETTINGS_UM,   HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_SEC)  "/settings/sec";   AddURLtoList(PM_URL_SETTINGS_SEC,  HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_LOCK) "/settings/lock";  AddURLtoList(PM_URL_SETTINGS_LOCK, HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_JS)   "/settings/s.js";  AddURLtoList(PM_URL_SETTINGS_JS,   HTTP_POST);
+  #ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+
+  SPGM_CTR(PM_URL_GENERATE_204) "/generate_204";
+  server->on(PM_URL_GENERATE_204, HTTP_GET, [this](AsyncWebServerRequest* request){
+    if(captivePortal(request)) return;
+    request->send(204);
+  });
+  AddURLtoList(PM_URL_GENERATE_204, HTTP_GET);
 
 
-  //called when the url is not defined here, ajax-in; get-settings
-  server->onNotFound([this](AsyncWebServerRequest *request)
-  {
-    ALOG_ERR(PSTR("HTTP URI Not-Found: %s"), request->url().c_str());    
-    if (captivePortal(request)) return;
+  SPGM_CTR(PM_URL_HOTSPOT_DETECT) "/hotspot-detect.html";
+  server->on(PM_URL_HOTSPOT_DETECT, HTTP_GET, [this](AsyncWebServerRequest* request){
+    if(captivePortal(request)) return;
+    request->send(200, FPSTR(CONTENT_TYPE_HTML), F("<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>"));
+  });
+  AddURLtoList(PM_URL_HOTSPOT_DETECT, HTTP_GET);
 
-    //make API CORS compatible
-    if (request->method() == HTTP_OPTIONS)
+
+  SPGM_CTR(PM_URL_NCSI) "/ncsi.txt";
+  server->on(PM_URL_NCSI, HTTP_GET, [this](AsyncWebServerRequest* request){
+    if(captivePortal(request)) return;
+    request->send(200, FPSTR(CONTENT_TYPE_PLAIN), F("Microsoft NCSI"));
+  });
+  AddURLtoList(PM_URL_NCSI, HTTP_GET);
+
+
+  SPGM_CTR(PM_URL_CONNECTTEST) "/connecttest.txt";
+  server->on(PM_URL_CONNECTTEST, HTTP_GET, [this](AsyncWebServerRequest* request){
+    if(captivePortal(request)) return;
+    request->send(200, FPSTR(CONTENT_TYPE_PLAIN), F("Microsoft Connect Test"));
+  });
+  AddURLtoList(PM_URL_CONNECTTEST, HTTP_GET);
+
+  #endif
+
+
+  /**************************************************************************************************
+   * Settings
+   *
+   * One shared GET/POST dispatcher owns the settings namespace.
+   * SettingsPages_GET/POST inspect request->url() and select WebSettingsSubPage.
+   *
+   * Subpage entries below are URL catalogue entries only; they are NOT separate handlers.
+   **************************************************************************************************/
+
+  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+
+  SPGM_CTR(PM_URL_SETTINGS) "/settings";
+  server->on(PM_URL_SETTINGS, HTTP_GET, [this](AsyncWebServerRequest* request){ SettingsPages_GET(request); });
+  server->on(PM_URL_SETTINGS, HTTP_POST, [this](AsyncWebServerRequest* request){ SettingsPages_POST(request); });
+  AddURLtoList(PM_URL_SETTINGS, HTTP_GET);
+  AddURLtoList(PM_URL_SETTINGS, HTTP_POST);
+
+
+  SPGM_CTR(PM_URL_SETTINGS_NETWORK)  "/settings/network";  AddURLtoList(PM_URL_SETTINGS_NETWORK,  HTTP_GET); AddURLtoList(PM_URL_SETTINGS_NETWORK,  HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_HARDWARE) "/settings/hardware"; AddURLtoList(PM_URL_SETTINGS_HARDWARE, HTTP_GET); AddURLtoList(PM_URL_SETTINGS_HARDWARE, HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_SYSTEM)   "/settings/system";   AddURLtoList(PM_URL_SETTINGS_SYSTEM,   HTTP_GET); AddURLtoList(PM_URL_SETTINGS_SYSTEM,   HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_MODULES)  "/settings/modules";  AddURLtoList(PM_URL_SETTINGS_MODULES,  HTTP_GET); AddURLtoList(PM_URL_SETTINGS_MODULES,  HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_STORAGE)  "/settings/storage";  AddURLtoList(PM_URL_SETTINGS_STORAGE,  HTTP_GET); AddURLtoList(PM_URL_SETTINGS_STORAGE,  HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_LOGGING)  "/settings/logging";  AddURLtoList(PM_URL_SETTINGS_LOGGING,  HTTP_GET); AddURLtoList(PM_URL_SETTINGS_LOGGING,  HTTP_POST);
+  SPGM_CTR(PM_URL_SETTINGS_SECURITY) "/settings/security"; AddURLtoList(PM_URL_SETTINGS_SECURITY, HTTP_GET); AddURLtoList(PM_URL_SETTINGS_SECURITY, HTTP_POST);
+
+
+  /**************************************************************************************************
+   * Legacy/general JSON endpoint
+   *
+   * Keep for now until all remaining callers of /json2 have been identified.
+   **************************************************************************************************/
+
+  SPGM_CTR(PM_URL_JSON2) "/json2";
+  server->on(PM_URL_JSON2, HTTP_GET, [this](AsyncWebServerRequest* request){ serveJson(request); });
+  AddURLtoList(PM_URL_JSON2, HTTP_GET);
+
+  #endif
+
+
+  /**************************************************************************************************
+   * Console
+   *
+   * ESP8266: polling
+   * ESP32:   WebSocket, with optional polling test page
+   **************************************************************************************************/
+
+  #ifdef ESP8266
+
+  SPGM_CTR(PM_URL_CONSOLE) "/console";
+  server->on(PM_URL_CONSOLE, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_Console_Poll(request); });
+  AddURLtoList(PM_URL_CONSOLE, HTTP_GET);
+
+  #else
+
+  SPGM_CTR(PM_URL_CONSOLE) "/console";
+  server->on(PM_URL_CONSOLE, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_Console_WebSocket(request); });
+  AddURLtoList(PM_URL_CONSOLE, HTTP_GET);
+
+    #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+
+    SPGM_CTR(PM_URL_CONSOLE_POLL) "/console_poll";
+    server->on(PM_URL_CONSOLE_POLL, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_Console_Poll(request); });
+    AddURLtoList(PM_URL_CONSOLE_POLL, HTTP_GET);
+
+    #endif
+
+  #endif
+
+
+  /**************************************************************************************************
+   * Advanced landing page
+   *
+   * Public URL uses /adv rather than /debug. Internal feature flags/functions can remain named
+   * DEBUG because they describe how the firmware feature is compiled, not its user-facing URL.
+   **************************************************************************************************/
+
+  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+
+  SPGM_CTR(PM_URL_ADV) "/adv";
+  server->on(PM_URL_ADV, HTTP_GET, [this](AsyncWebServerRequest* request){
+    handleStaticContent(request, FPSTR(PM_URL_ADV), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_debug_main_web, PAGE_debug_main_web_length);
+  });
+  AddURLtoList(PM_URL_ADV, HTTP_GET);
+
+  #endif
+
+
+  /**************************************************************************************************
+   * Advanced - Telemetry viewer
+   *
+   * Viewer is optional/debug. The underlying /api/telemetry endpoint above is always available.
+   **************************************************************************************************/
+
+  #ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+
+  SPGM_CTR(PM_URL_ADV_TELEMETRY) "/adv/telemetry";
+  server->on(PM_URL_ADV_TELEMETRY, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_DebugTelemetry(request); });
+  AddURLtoList(PM_URL_ADV_TELEMETRY, HTTP_GET);
+
+  #endif
+
+
+  /**************************************************************************************************
+   * Advanced - Tasker metrics
+   **************************************************************************************************/
+
+  #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+
+  SPGM_CTR(PM_URL_ADV_TASKER) "/adv/tasker";
+  server->on(PM_URL_ADV_TASKER, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_DebugTaskerMetrics(request); });
+  AddURLtoList(PM_URL_ADV_TASKER, HTTP_GET);
+
+
+  SPGM_CTR(PM_URL_ADV_API_TASKER) "/adv/api/tasker";
+  server->on(PM_URL_ADV_API_TASKER, HTTP_GET, [this](AsyncWebServerRequest* request){ HandleAPI_DebugTaskerMetrics(request); });
+  AddURLtoList(PM_URL_ADV_API_TASKER, HTTP_GET);
+
+  #endif
+
+
+  /**************************************************************************************************
+   * Advanced - Registered URLs
+   **************************************************************************************************/
+
+  #ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+
+  SPGM_CTR(PM_URL_ADV_URLS) "/adv/urls";
+  server->on(PM_URL_ADV_URLS, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_UrlList(request); });
+  AddURLtoList(PM_URL_ADV_URLS, HTTP_GET);
+
+
+  SPGM_CTR(PM_URL_ADV_API_URLS) "/adv/api/urls";
+  server->on(PM_URL_ADV_API_URLS, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_UrlList_JSON(request); });
+  AddURLtoList(PM_URL_ADV_API_URLS, HTTP_GET);
+
+  #endif
+
+
+  /**************************************************************************************************
+   * Fallback
+   *
+   * OPTIONS supports CORS preflight.
+   * Lighting fallback remains temporarily while remaining lighting routes are migrated to explicit
+   * module-owned handlers. Anything still unresolved returns the PulSar 404 page.
+   **************************************************************************************************/
+
+  server->onNotFound([this](AsyncWebServerRequest* request){
+    ALOG_ERR(PSTR("HTTP URI Not-Found: %s"), request->url().c_str());
+
+    if(captivePortal(request)) return;
+
+    if(request->method() == HTTP_OPTIONS)
     {
-      AsyncWebServerResponse *response = request->beginResponse(200);
+      AsyncWebServerResponse* response = request->beginResponse(200);
       response->addHeader(F("Access-Control-Max-Age"), F("7200"));
       request->send(response);
       return;
     }
+
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
     #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
-    ALOG_ERR(PSTR("Not sure this needs to stay or not"));
     if(tkr_anim->handle__HTTP__GET_QueryAPI(request, request->url())) return;
     #endif
     #endif
+
     handleStaticContent(request, request->url(), 404, FPSTR(CONTENT_TYPE_HTML), PAGE_404_web, PAGE_404_web_length);
   });
-
-  
 }
+
+
+
 
 void mWebServer::HandleAPI_URLApplications(AsyncWebServerRequest* request)
 {

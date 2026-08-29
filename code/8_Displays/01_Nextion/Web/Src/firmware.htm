@@ -1,126 +1,158 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+
   <title>Nextion Firmware Update</title>
 
-  <!-- Shared styling -->
-  <link rel="stylesheet" href="/submodule_style.css">
+  <link rel="stylesheet" href="/pulsar.css">
+  <script src="/pulsar.js"></script>
 </head>
 
-<body>
-  <div class="wrap">
-    <h1 id="deviceName">Device</h1>
-    <hr>
-    <h2>Nextion Firmware Update</h2>
 
-    <!-- ========================================================= -->
-    <!-- Local TFT upload                                          -->
-    <!-- ========================================================= -->
-    <div class="card">
-      <b>Update Nextion LCD from file</b>
+<body class="page">
 
-      <form method="POST"
-            action="/nextion/lcdupload"
-            enctype="multipart/form-data">
-
-        <div class="row">
-          <div style="flex: 1 1 420px;">
-            <label for="lcdSelect">TFT file</label>
-            <input type="file"
-                   id="lcdSelect"
-                   name="files[]"
-                   accept=".tft"
-                   required>
-          </div>
-
-          <div style="flex: 0 0 auto; align-self: end;">
-            <button type="submit"
-                    class="primary"
-                    id="lcdUploadSubmit"
-                    onclick="ackLcdUploadSubmit()">
-              Update LCD from file
-            </button>
-          </div>
-        </div>
-
-        <div class="small hint">
-          File size is sent to <code>/nextion/tftFileSize</code> before upload.
-        </div>
-      </form>
+  <header class="page-header">
+    <div class="page-title">
+      <h1>Nextion Firmware Update</h1>
+      <div class="page-subtitle">Update the connected Nextion LCD</div>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- TFT update from URL                                       -->
-    <!-- ========================================================= -->
-    <div class="card">
-      <b>Update Nextion LCD from URL</b>
+    <div class="page-actions">
+      <button onclick="go('/nextion')">Back</button>
+    </div>
+  </header>
 
-      <div class="small hint">
-        https://raw.githubusercontent.com/&lt;user&gt;/&lt;repo&gt;/&lt;branch&gt;/path/file.tft
+
+  <section class="card">
+    <h2>Update from File</h2>
+
+    <p class="muted">
+      Upload a local Nextion <code>.tft</code> firmware file.
+    </p>
+
+    <form
+      method="POST"
+      action="/nextion/lcdupload"
+      enctype="multipart/form-data"
+    >
+
+      <div class="form-row">
+        <label for="lcdSelect">TFT File</label>
+
+        <input
+          type="file"
+          id="lcdSelect"
+          name="files[]"
+          accept=".tft"
+          required
+        >
       </div>
 
-      <form method="GET" action="/nextion/lcddownload">
-        <div class="row">
-          <div style="flex: 1 1 520px;">
-            <label for="lcdFirmwareUrl">TFT URL</label>
-            <input type="url"
-                   id="lcdFirmwareUrl"
-                   name="lcdFirmware"
-                   required>
-          </div>
+      <div class="page-actions">
+        <button
+          type="submit"
+          class="primary"
+          id="lcdUploadSubmit"
+        >
+          Update LCD from File
+        </button>
+      </div>
 
-          <div style="flex: 0 0 auto; align-self: end;">
-            <button type="submit"
-                    class="primary"
-                    id="lcdUrlSubmit"
-                    onclick="ackLcdUrlSubmit()">
-              Update LCD from URL
-            </button>
-          </div>
-        </div>
+      <div class="hint">
+        File size is sent to <code>/nextion/tftFileSize</code> before upload.
+      </div>
 
-        <div class="small">
-          Available only when
-          <code>ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL</code>
-          is enabled.
-        </div>
-      </form>
+    </form>
+  </section>
+
+
+  <section class="card">
+    <h2>Update from URL</h2>
+
+    <p class="muted">
+      Download a Nextion firmware file directly from a remote URL.
+    </p>
+
+    <div class="hint">
+      Example:
+      <code>https://raw.githubusercontent.com/&lt;user&gt;/&lt;repo&gt;/&lt;branch&gt;/path/file.tft</code>
     </div>
 
-    <script>
-      function handleLcdFileSelect(evt) {
-        var file = evt.target.files[0];
-        if (!file) return;
+    <form method="GET" action="/nextion/lcddownload">
 
-        document.getElementById('lcdUploadSubmit').innerHTML =
-          'Upload LCD firmware ' + file.name;
+      <div class="form-row">
+        <label for="lcdFirmwareUrl">TFT URL</label>
 
-        var req = new XMLHttpRequest();
-        req.open(
-          'GET',
-          '/nextion/tftFileSize?tftFileSize=' + file.size,
-          true
-        );
-        req.send();
+        <input
+          type="url"
+          id="lcdFirmwareUrl"
+          name="lcdFirmware"
+          required
+        >
+      </div>
+
+      <div class="page-actions">
+        <button
+          type="submit"
+          class="primary"
+          id="lcdUrlSubmit"
+        >
+          Update LCD from URL
+        </button>
+      </div>
+
+      <div class="hint">
+        Available only when
+        <code>ENABLE_DEBUGFEATURE_NEXTION__LCD_UPDATE_VIA_URL</code>
+        is enabled.
+      </div>
+
+    </form>
+  </section>
+
+
+  <script>
+    function handleLcdFileSelect(event)
+    {
+      const file = event.target.files[0];
+      if(!file) return;
+
+      setText('lcdUploadSubmit', 'Upload ' + file.name);
+
+      fetch(
+        '/nextion/tftFileSize?tftFileSize=' + encodeURIComponent(file.size),
+        {
+          method: 'GET',
+          cache: 'no-store'
+        }
+      ).catch(()=>{});
+    }
+
+
+    onReady(()=>{
+      const file = gId('lcdSelect');
+      const upload = gId('lcdUploadSubmit');
+      const url = gId('lcdUrlSubmit');
+
+      if(file) file.addEventListener('change', handleLcdFileSelect);
+
+      if(upload){
+        upload.addEventListener('click', ()=>{
+          setText(upload, 'Uploading LCD firmware...');
+        });
       }
 
-      function ackLcdUploadSubmit() {
-        document.getElementById('lcdUploadSubmit').innerHTML =
-          'Uploading LCD firmware...';
+      if(url){
+        url.addEventListener('click', ()=>{
+          setText(url, 'Starting URL download...');
+        });
       }
+    });
+  </script>
 
-      function ackLcdUrlSubmit() {
-        var el = document.getElementById('lcdUrlSubmit');
-        if (el) el.innerHTML = 'Starting URL download...';
-      }
-
-      var lcdEl = document.getElementById('lcdSelect');
-      if (lcdEl) {
-        lcdEl.addEventListener('change', handleLcdFileSelect, false);
-      }
-    </script>
-  </div>
 </body>
+
 </html>

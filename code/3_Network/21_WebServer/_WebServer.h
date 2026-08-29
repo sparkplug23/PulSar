@@ -63,7 +63,6 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 #include "3_Network/21_WebServer/Webpages/Generated/html_other.h"
 #include "3_Network/21_WebServer/Webpages/Generated/debug_pages.h"
 #include "3_Network/21_WebServer/Webpages/Generated/root_main.h"
-#include "3_Network/21_WebServer/Webpages/Generated/submodule_assets.h"
 #ifdef ESP32
   #include "3_Network/21_WebServer/Webpages/Generated/pages_console_esp32.h"
 #else
@@ -93,14 +92,7 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
       STORAGE,
       LOGGING,
       SECURITY,
-
-      // these are likely to be removed
-      WIFI,
-      UPDATE,
-      TIME,
-
       PINREQ  = 252,
-      CSS     = 253,
       JS      = 254,
       WELCOME = 255
     };

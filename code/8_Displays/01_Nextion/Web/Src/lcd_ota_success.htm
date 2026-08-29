@@ -1,16 +1,46 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta http-equiv="refresh" content="15;url=/">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+
   <title>LCD Firmware Update Success</title>
+
+  <link rel="stylesheet" href="/pulsar.css">
+  <script src="/pulsar.js"></script>
 </head>
 
-<body>
-  <h1>LCD Update</h1>
-  <br>
-  <p>LCD firmware update completed successfully.</p>
-  <p>Redirecting shortly…</p>
+
+<body class="page">
+
+  <header class="page-header">
+    <div class="page-title">
+      <h1>LCD Update</h1>
+      <div class="page-subtitle">Nextion firmware update</div>
+    </div>
+  </header>
+
+
+  <section class="card">
+    <h2>Update Complete</h2>
+
+    <p>
+      LCD firmware update completed successfully.
+    </p>
+
+    <p class="muted">
+      Returning to PulSar in 15 seconds.
+    </p>
+
+    <div class="page-actions">
+      <button class="primary" onclick="go('/')">
+        Return Now
+      </button>
+    </div>
+  </section>
+
 </body>
+
 </html>
