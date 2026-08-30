@@ -3,29 +3,9 @@
 
 #ifdef USE_MODULE_CORE__JSON_ARDUINO
 
-int8_t mJsonArduino::Tasker(uint8_t function, JsonParserObject obj)
+
+void mJsonArduino::Init()
 {
-
-  /************
-   * INIT SECTION * 
-  *******************/
-  switch(function){
-    case TASK_PRE_INIT:
-      Pre_Init();
-    break;
-  }
-
-
-
-
-  return 1;
-
-
-}
-
-
-
-void mJsonArduino::Pre_Init(){
 
     
   static bool done = false;

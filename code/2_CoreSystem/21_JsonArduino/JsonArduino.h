@@ -36,22 +36,27 @@ using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
 #endif
 
 
-class mJsonArduino :
-  public mTaskerInterface
+class mJsonArduino 
 {
 
 
-  public:
-    /************************************************************************************************
-     * SECTION: Construct Class Base
-     ************************************************************************************************/
+  private:
+    /* Prevent others from being created */
+    mJsonArduino(mJsonArduino const& other) = delete;
+    mJsonArduino(mJsonArduino&& other) = delete;
+    /* Private constructor to prevent instancing. */
     mJsonArduino(){};
-    int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
-    void Pre_Init(void);
+    
+
+
+  public:
+    // External function to get instance
+    static mJsonArduino* GetInstance();
+    /* Here will be the instance stored. */
+    static mJsonArduino* instance;
+  
+    void Init(void);
         
-    static constexpr const char* PM_MODULE_CORE__JSON_ARDUINO__CTR = D_MODULE_CORE__JSON_ARDUINO__CTR;
-    PGM_P GetModuleName(){          return PM_MODULE_CORE__JSON_ARDUINO__CTR; }
-    uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE__JSON_ARDUINO__ID; }
     
     #if defined(ARDUINO_ARCH_ESP32)
     JsonDocument *pDoc = nullptr;
@@ -70,6 +75,11 @@ class mJsonArduino :
 
 
 };
+
+
+#define mJsonArduinoI mJsonArduino::GetInstance()
+#define tkr_jsona mJsonArduinoI
+
 
 
 #endif

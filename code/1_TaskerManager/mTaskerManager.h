@@ -338,10 +338,6 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
   #include "2_CoreSystem/15_SerialUART/mSerial.h"
   #define   tkr_Serial                            static_cast<mSerial*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE__SERIAL__ID))
 #endif
-#ifdef USE_MODULE_CORE__JSON_ARDUINO
-  #include "2_CoreSystem/21_JsonArduino/JsonArduino.h"
-  #define tkr_jsona                               static_cast<mJsonArduino*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE__JSON_ARDUINO__ID))
-#endif
 #ifdef USE_MODULE_CORE_I2C
   #include "2_CoreSystem/31_I2C/mI2C.h"
   #define tkr_i2c                                 static_cast<mI2C*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE__I2C__ID))

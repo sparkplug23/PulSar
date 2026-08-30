@@ -415,9 +415,6 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CORE_UPDATES
   addTasker(new mUpdates());
   #endif
-  #ifdef USE_MODULE_CORE__JSON_ARDUINO
-  addTasker(new mJsonArduino());
-  #endif
   #ifdef USE_MODULE_CORE__SERIAL
   addTasker(new mSerial());
   #endif
