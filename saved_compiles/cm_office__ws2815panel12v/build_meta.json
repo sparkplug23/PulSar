@@ -1,7 +1,7 @@
 {
   "env_name": "cm_office__ws2815panel12v",
-  "created_utc": "2026-08-23T17:52:23Z",
-  "created_epoch": 1787507543,
+  "created_utc": "2026-08-30T12:50:08Z",
+  "created_epoch": 1788094208,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "7e9e912d5c3469b768f4d7062796c7366785ae1b",
-    "describe": "7e9e912d-dirty",
-    "status_short": "M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_CellularDatalinks.h\n M code/2_CoreSystem/Version.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M saved_compiles/tb_celullar__lilygo_sim7000g_01/build_meta.json\n M saved_compiles/tb_celullar__lilygo_sim7000g_01/firmware.elf"
+    "commit": "313a56cbc30c0a5a7c3dc1484bb74ac4d7fe08fd",
+    "describe": "313a56cb-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_Cameras.h\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/2_CoreSystem/03_FileSystem/mFileSystem.h\n D code/3_Network/21_WebServer/ArduinoJson-v6.h\n D code/3_Network/21_WebServer/AsyncJson-v6.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/3_Network/21_WebServer/_WebServer.h\n M code/6_Lights/03_Animator/WebUI.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M platformio_override.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n?? code/2_CoreSystem/21_JsonArduino/"
   }
 }

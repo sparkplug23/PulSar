@@ -90,10 +90,6 @@ class JsonBuilder{
     uint16_t GetLength();
     uint16_t GetBufferSize();
 
-    // global ArduinoJson buffer
-    volatile uint16_t jsonBufferLock = 0;
-    bool requestJSONBufferLock(uint16_t module);
-    void releaseJSONBufferLock(); // duplicate of below, need to JOIN THEM!!
 
     // #define ENABLE_DEBUG__JSON_BUFFER_LOCKS
 

@@ -89,12 +89,12 @@ void mAnimatorLight::appendGPIOinfo(Print& settingsScript) {
     settingsScript.printf_P(PSTR(",%d,%d"), spi_mosi, spi_sclk);
   }
   // usermod pin reservations will become unnecessary when settings pages will read cfg.json directly
-  if (JBI->requestJSONBufferLock(6)) {
+  if (tkr_jsona->requestJSONBufferLock(6)) {
     // if we can't allocate JSON buffer ignore usermod pins
-    JsonObject mods = tkr_mfile->pDoc->createNestedObject("um");
+    JsonObject mods = tkr_jsona->pDoc->createNestedObject("um");
     // UsermodManager::addToConfig(mods);
     if (!mods.isNull()) fillUMPins(settingsScript, mods);
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
   }
   settingsScript.print(F("];"));
 

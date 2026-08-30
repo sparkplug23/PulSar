@@ -96,8 +96,8 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 
 
 #define ARDUINOJSON_DECODE_UNICODE 0
-#include "3_Network/21_WebServer/AsyncJson-v6.h"
-#include "3_Network/21_WebServer/ArduinoJson-v6.h"
+#include "2_CoreSystem/21_JsonArduino/AsyncJson-v6.h"
+#include "2_CoreSystem/21_JsonArduino/ArduinoJson-v6.h"
 
 
 class mWebServer : 

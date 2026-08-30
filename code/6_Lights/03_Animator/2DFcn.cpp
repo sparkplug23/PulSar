@@ -40,13 +40,13 @@
 
 //   if (!isFile || !JBI->requestJSONBufferLock(7)) return false;
 
-//   if (!tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_mfile->pDoc)) {
+//   if (!tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_jsona->pDoc)) {
 //     DEBUG_PRINT(F("ERROR Invalid ledmap in ")); DEBUG_PRINTLN(fileName);
 //     JBI->releaseJSONBufferLock();
 //     return false; // if file does not load properly then exit
 //   }
 
-//   JsonObject root = tkr_mfile->pDoc->as<JsonObject>();
+//   JsonObject root = tkr_jsona->pDoc->as<JsonObject>();
 //   // if we are loading default ledmap (at boot) set matrix width and height from the ledmap (compatible with WLED MM ledmaps)
 //   if (isMatrix && n == 0 && (!root[F("width")].isNull() || !root[F("height")].isNull())) {
 //     Segment::maxWidth  = min(max(root[F("width")].as<int>(), 1), 128);
@@ -95,19 +95,19 @@ bool mAnimatorLight::deserializeMap(unsigned n) {
     return false;
   }
 
-  if (!isFile || !JBI->requestJSONBufferLock(JSON_LOCK_LEDMAP)) return false;
+  if (!isFile || !tkr_jsona->requestJSONBufferLock(JSON_LOCK_LEDMAP)) return false;
 
   StaticJsonDocument<64> filter;
   filter[F("width")]  = true;
   filter[F("height")] = true;
-  if (!tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_mfile->pDoc, &filter)) {
+  if (!tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_jsona->pDoc, &filter)) {
     DEBUG_PRINTF_P(PSTR("ERROR Invalid ledmap in %s\n"), fileName);
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
     return false; // if file does not load properly then exit
   } else
     DEBUG_PRINTF_P(PSTR("Reading LED map from %s\n"), fileName);
 
-  JsonObject root = tkr_mfile->pDoc->as<JsonObject>();
+  JsonObject root = tkr_jsona->pDoc->as<JsonObject>();
   // if we are loading default ledmap (at boot) set matrix width and height from the ledmap (compatible with WLED MM ledmaps)
   if (n == 0 && (!root[F("width")].isNull() || !root[F("height")].isNull())) {
     Segment::maxWidth  = min(max(root[F("width")].as<int>(), 1), 255);
@@ -166,7 +166,7 @@ bool mAnimatorLight::deserializeMap(unsigned n) {
     DEBUG_PRINTLN(F("ERROR LED map allocation error."));
   }
 
-  JBI->releaseJSONBufferLock();
+  tkr_jsona->releaseJSONBufferLock();
   if (getLengthTotal() != lengthTotalBefore)
     updatePixelBuffer(); // allocate _pixels[] to match new length
   return (customMappingSize > 0);
@@ -262,12 +262,12 @@ bool mAnimatorLight::deserializeMap(unsigned n) {
 //         DEBUG_PRINT(F("Reading LED gap from "));
 //         DEBUG_PRINTLN(fileName);
 //         // read the array into global JSON buffer
-//         if (tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_mfile->pDoc)) {
+//         if (tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_jsona->pDoc)) {
 //           // the array is similar to ledmap, except it has only 3 values:
 //           // -1 ... missing pixel (do not increase pixel count)
 //           //  0 ... inactive pixel (it does count, but should be mapped out (-1))
 //           //  1 ... active pixel (it will count and will be mapped)
-//           JsonArray map = tkr_mfile->pDoc->as<JsonArray>();
+//           JsonArray map = tkr_jsona->pDoc->as<JsonArray>();
 //           gapSize = map.size();
 //           if (!map.isNull() && gapSize >= customMappingSize) { // not an empty map
 //             gapTable = new int8_t[gapSize];
@@ -418,19 +418,19 @@ void mAnimatorLight::setUpMatrix()
       size_t gapSize = 0;
       int8_t *gapTable = nullptr;
 
-      if (isFile && JBI->requestJSONBufferLock(20))
+      if (isFile && tkr_jsona->requestJSONBufferLock(20))
       {
         DEBUG_PRINT(F("Reading LED gap from "));
         DEBUG_PRINTLN(fileName);
 
         // read the array into global JSON buffer
-        if (tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_mfile->pDoc))
+        if (tkr_mfile->readObjectFromFile(fileName, nullptr, tkr_jsona->pDoc))
         {
           // the array is similar to ledmap, except it has only 3 values:
           // -1 ... missing pixel (do not increase pixel count)
           //  0 ... inactive pixel (it does count, but should be mapped out (-1))
           //  1 ... active pixel (it will count and will be mapped)
-          JsonArray map = tkr_mfile->pDoc->as<JsonArray>();
+          JsonArray map = tkr_jsona->pDoc->as<JsonArray>();
           gapSize = map.size();
 
           if (!map.isNull() && gapSize >= matrixSize)
@@ -441,7 +441,7 @@ void mAnimatorLight::setUpMatrix()
         }
 
         DEBUG_PRINTLN(F("Gaps loaded."));
-        JBI->releaseJSONBufferLock();
+        tkr_jsona->releaseJSONBufferLock();
       }
 
       uint32_t pix = 0; // physical pixel number

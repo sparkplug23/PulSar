@@ -232,14 +232,14 @@ class LockedJsonResponse2:
     size_t result = AsyncJsonResponse::_fillBuffer(buf, maxLen);
     // Release lock as soon as we're done filling content
     if (((result + _sentLength) >= (_contentLength)) && _holding_lock) {
-      JBI->releaseJSONBufferLock();
+      tkr_jsona->releaseJSONBufferLock();
       _holding_lock = false;
     }
     return result;
   }
 
   // destructor will remove JSON buffer lock when response is destroyed in AsyncWebServer
-  virtual ~LockedJsonResponse2() { if (_holding_lock) JBI->releaseJSONBufferLock(); };
+  virtual ~LockedJsonResponse2() { if (_holding_lock) tkr_jsona->releaseJSONBufferLock(); };
 };
 
 
@@ -330,12 +330,12 @@ void mWebServer::appendGPIOinfo(Print& settingsScript) {
     settingsScript.printf_P(PSTR(",%d,%d"), spi_mosi, spi_sclk);
   }
   // usermod pin reservations will become unnecessary when settings pages will read cfg.json directly
-  if (JBI->requestJSONBufferLock(6)) {
+  if (tkr_jsona->requestJSONBufferLock(6)) {
     // if we can't allocate JSON buffer ignore usermod pins
-    JsonObject mods = tkr_mfile->pDoc->createNestedObject("um");
+    JsonObject mods = tkr_jsona->pDoc->createNestedObject("um");
     // UsermodManager::addToConfig(mods);
     // if (!mods.isNull()) fillUMPins(settingsScript, mods);
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
   }
   settingsScript.print(F("];"));
 
@@ -504,11 +504,11 @@ void mWebServer::serveJson(AsyncWebServerRequest* request)
     return;
   // }
 
-  // AsyncJsonResponse *response = new AsyncJsonResponse(tkr_mfile->pDoc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
+  // AsyncJsonResponse *response = new AsyncJsonResponse(tkr_jsona->pDoc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
 
   // releaseJSONBufferLock() will be called when "response" is destroyed (from AsyncWebServer)
   // make sure you delete "response" if no "request->send(response);" is made
-  LockedJsonResponse2 *response = new LockedJsonResponse2(tkr_mfile->pDoc, subJson==JSON_PATH_WEB_FXDATA || subJson==JSON_PATH_WEB_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
+  LockedJsonResponse2 *response = new LockedJsonResponse2(tkr_jsona->pDoc, subJson==JSON_PATH_WEB_FXDATA || subJson==JSON_PATH_WEB_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
 
 
 

@@ -72,6 +72,7 @@
 #define D_MODULE_DRIVERS_SHELLY_DIMMER_CTR         "shellydimmer"
 #define D_MODULE_CORE_FILESYSTEM_CTR               "filesystem"
 #define D_MODULE_CORE__TEMPLATE_LOADING__CTR       "templates"
+#define D_MODULE_CORE__JSON_ARDUINO__CTR           "jsona"
 #define D_MODULE_CORE__I2C__CTR                    "i2c"
 #define D_MODULE_CORE__SPI__CTR                    "spi"
 #define D_MODULE_DRIVERS_BUZZER_CTR                "buzzer"

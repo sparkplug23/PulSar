@@ -175,7 +175,7 @@ bool mWebServer::WebSocket_SendSensors(AsyncWebSocketClient* client)
 
   #ifdef USE_MODULE_SENSORS_INTERFACE
 
-  if(!JBI->requestJSONBufferLock(GetModuleUniqueID()))
+  if(!JBI->RequestLock(GetModuleUniqueID()))
   {
     client->text(F("{\"error\":\"json buffer busy\"}"));
     return false;
@@ -199,7 +199,7 @@ bool mWebServer::WebSocket_SendSensors(AsyncWebSocketClient* client)
     result = WebSocket_SendWrappedJSON(client, "sensors", "{}", 2);
   }
 
-  JBI->releaseJSONBufferLock();
+  JBI->ReleaseLock();
 
   return result;
 

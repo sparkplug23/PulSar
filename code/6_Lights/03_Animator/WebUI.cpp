@@ -6,33 +6,6 @@
 #define Network WiFi
 
 
-// ESP32-WROVER features SPI RAM (aka PSRAM) which can be allocated using ps_malloc()
-// we can create custom PSRAMDynamicJsonDocument to use such feature (replacing DynamicJsonDocument)
-// The following is a construct to enable code to compile without it.
-// There is a code thet will still not use PSRAM though:
-//    AsyncJsonResponse is a derived class that implements DynamicJsonDocument (AsyncJson-v6.h)
-#if defined(ARDUINO_ARCH_ESP32) && defined(BOARD_HAS_PSRAM) && defined(WLED_USE_PSRAM)
-struct PSRAM_Allocator {
-  void* allocate(size_t size) {
-    if (psramFound()) return ps_malloc(size); // use PSRAM if it exists
-    else              return malloc(size);    // fallback
-  }
-  void* reallocate(void* ptr, size_t new_size) {
-    if (psramFound()) return ps_realloc(ptr, new_size); // use PSRAM if it exists
-    else              return realloc(ptr, new_size);    // fallback
-  }
-  void deallocate(void* pointer) {
-    free(pointer);
-  }
-};
-using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
-#elses
-#define PSRAMDynamicJsonDocument DynamicJsonDocument
-#endif
-
-
-
-
 void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment& seg, byte id, bool forPreset, bool segmentBounds)
 {
   root["id"] = id;
@@ -2514,7 +2487,7 @@ void sendDataWs(AsyncWebSocketClient * client)
     return;
   }
 
-  if (!JBI->requestJSONBufferLock(JSON_LOCK_WS_SEND)) {
+  if (!tkr_jsona->requestJSONBufferLock(JSON_LOCK_WS_SEND)) {
     const char* error = PSTR("{\"error\":3}");
     if (client) {
       client->text(FPSTR(error)); // ERR_NOBUF
@@ -2524,14 +2497,14 @@ void sendDataWs(AsyncWebSocketClient * client)
     return;
   }
 
-  JsonObject state = tkr_mfile->pDoc->createNestedObject("state");
+  JsonObject state = tkr_jsona->pDoc->createNestedObject("state");
   tkr_anim->serializeState(state);
-  JsonObject info  = tkr_mfile->pDoc->createNestedObject("info");
+  JsonObject info  = tkr_jsona->pDoc->createNestedObject("info");
   tkr_anim->serializeInfo(info);
 
-  size_t len = measureJson(*tkr_mfile->pDoc);
+  size_t len = measureJson(*tkr_jsona->pDoc);
   #ifdef ENABLE_DEBUG__JSON_BUFFER_LOCKS
-  ALOG_INF(PSTR("JSON buffer size: %u for WS request (%u).\n"), tkr_mfile->pDoc->memoryUsage(), len);
+  ALOG_INF(PSTR("JSON buffer size: %u for WS request (%u).\n"), tkr_jsona->pDoc->memoryUsage(), len);
   #endif
 
   // the following may no longer be necessary as heap management has been fixed by @willmmiles in AWS
@@ -2551,13 +2524,13 @@ void sendDataWs(AsyncWebSocketClient * client)
   size_t heap2 = 0; // ESP32 variants do not have the same issue and will work without checking heap allocation
   #endif
   if (!buffer || heap1-heap2<len) {
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
     ALOG_ERR(PSTR("WS buffer allocation failed."));
     tkr_anim->websocket_lights->closeAll(1013); //code 1013 = temporary overload, try again later
     tkr_anim->websocket_lights->cleanupClients(0); //disconnect all clients to release memory
     return; //out of memory
   }
-  serializeJson(*tkr_mfile->pDoc, (char *)buffer.data(), len);
+  serializeJson(*tkr_jsona->pDoc, (char *)buffer.data(), len);
 
   ALOG_INF(PSTR("Sending WS data "));
   if (client) {
@@ -2568,7 +2541,7 @@ void sendDataWs(AsyncWebSocketClient * client)
     tkr_anim->websocket_lights->textAll(std::move(buffer));
   }
 
-  JBI->releaseJSONBufferLock();
+  tkr_jsona->releaseJSONBufferLock();
 }
 
 void mAnimatorLight::updateInterfaces(uint8_t callMode)
@@ -2643,15 +2616,15 @@ void wsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
         // -------- Pass 2: ArduinoJson parse + lighting state (with JSON buffer lock) -----------
         bool verboseResponse = false;
 
-        if (!JBI->requestJSONBufferLock(11)) {
+        if (!tkr_jsona->requestJSONBufferLock(11)) {
           client->text(F("{\"error\":3}")); // ERR_NOBUF
           return;
         }
 
-        DeserializationError error = deserializeJson(*tkr_mfile->pDoc, data, len);
-        JsonObject root = tkr_mfile->pDoc->as<JsonObject>();
+        DeserializationError error = deserializeJson(*tkr_jsona->pDoc, data, len);
+        JsonObject root = tkr_jsona->pDoc->as<JsonObject>();
         if (error || root.isNull()) {
-          JBI->releaseJSONBufferLock();
+          tkr_jsona->releaseJSONBufferLock();
           ALOG(log, PSTR("{\"error\":2}")); // ERR_JSON
           return;
         }
@@ -2722,7 +2695,7 @@ else if (root.containsKey("vv"))
           verboseResponse = tkr_anim->deserializeState(root);
         }
 
-        JBI->releaseJSONBufferLock();
+        tkr_jsona->releaseJSONBufferLock();
 
         // Per-client response if no broadcast queued
         if (!tkr_anim->interfaceUpdateCallMode) {
@@ -4297,14 +4270,14 @@ class LockedJsonResponse: public AsyncJsonResponse {
     size_t result = AsyncJsonResponse::_fillBuffer(buf, maxLen);
     // Release lock as soon as we're done filling content
     if (((result + _sentLength) >= (_contentLength)) && _holding_lock) {
-      JBI->releaseJSONBufferLock();
+      tkr_jsona->releaseJSONBufferLock();
       _holding_lock = false;
     }
     return result;
   }
 
   // destructor will remove JSON buffer lock when response is destroyed in AsyncWebServer
-  virtual ~LockedJsonResponse() { if (_holding_lock) JBI->releaseJSONBufferLock(); };
+  virtual ~LockedJsonResponse() { if (_holding_lock) tkr_jsona->releaseJSONBufferLock(); };
 };
 
 
@@ -4332,7 +4305,7 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
     return;
   }
   else if (url.indexOf("pal") > 0) { // "/json/palettes" - names only (flat array)
-    // Build JSON into a local String to avoid races with the global JBI buffer
+    // Build JSON into a local String to avoid races with the global tkr_jsona buffer
     String out;
     out.reserve(64 + 24 * mPaletteI->GetPaletteListLength()); // rough reserve
 
@@ -4377,14 +4350,14 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
     return;
   }
 
-  if (!JBI->requestJSONBufferLock(JSON_LOCK_SERVEJSON)) {
+  if (!tkr_jsona->requestJSONBufferLock(JSON_LOCK_SERVEJSON)) {
     request->send(503, "application/json", F("{\"error\":3}"));
     return;
   }
 
   // releaseJSONBufferLock() will be called when "response" is destroyed (from AsyncWebServer)
   // make sure you delete "response" if no "request->send(response);" is made
-  LockedJsonResponse *response = new LockedJsonResponse(tkr_mfile->pDoc, subJson==json_target::effects); // will clear and convert JsonDocument into JsonArray if necessary
+  LockedJsonResponse *response = new LockedJsonResponse(tkr_jsona->pDoc, subJson==json_target::effects); // will clear and convert JsonDocument into JsonArray if necessary
 
 
 
@@ -4448,7 +4421,7 @@ void mAnimatorLight::serveJson(AsyncWebServerRequest* request)
   ALOG_DBG(PSTR("JSON content length: %d"), len);
 
   request->send(response);
-  JBI->releaseJSONBufferLock();
+  tkr_jsona->releaseJSONBufferLock();
 }
 
 
@@ -4643,7 +4616,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   tkr_web->server->addHandler(websocket_lights);
   // AddURLtoList(PM_URL_WS_LIGHTS, HTTP_GET); // add manually here if websocket_lights path is known
 
-  JBI->releaseJSONBufferLock();
+  tkr_jsona->releaseJSONBufferLock();
 
   #ifdef ENABLE_FEATURE_LIGHTING__WEBSOCKETS
   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
@@ -4740,7 +4713,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
     Serial.println((char*)request->_tempObject);
 
-    if (!JBI->requestJSONBufferLock(14)) return;
+    if (!tkr_jsona->requestJSONBufferLock(14)) return;
 
     #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS_INCLUDE_PRIMARY_JSON_COMMANDS
 
@@ -4779,10 +4752,10 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
     #endif
 
-    DeserializationError error = deserializeJson(*tkr_mfile->pDoc, (uint8_t*)(request->_tempObject));
-    JsonObject root = tkr_mfile->pDoc->as<JsonObject>();
+    DeserializationError error = deserializeJson(*tkr_jsona->pDoc, (uint8_t*)(request->_tempObject));
+    JsonObject root = tkr_jsona->pDoc->as<JsonObject>();
     if (error || root.isNull()) {
-      JBI->releaseJSONBufferLock();
+      tkr_jsona->releaseJSONBufferLock();
       request->send(400, "application/json", F("{\"error\":9}")); // ERR_JSON
       return;
     }
@@ -4800,7 +4773,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
       verboseResponse = this->deserializeConfig(root); // use verboseResponse to determine whether cfg change should be saved immediately
     }
 
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
 
     if (verboseResponse) {
       if (!isConfig) {

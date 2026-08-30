@@ -37,12 +37,12 @@ static const char* getPresetsMetaFileName() { //likely not needed, do direct lat
 // Load metadata from /presets_meta.json
 bool mAnimatorLight::LoadPresetFileMeta(PresetFileMeta &meta)
 {
-  if (!JBI->requestJSONBufferLock(21)) {
+  if (!tkr_jsona->requestJSONBufferLock(21)) {
     ALOG_WRN(PSTR("LoadPresetFileMeta: failed to get JSON buffer lock"));
     return false;
   }
 
-  tkr_mfile->pDoc->clear();
+  tkr_jsona->pDoc->clear();
 
   char fname[33];
   strncpy_P(fname, presets_meta_json, 32);
@@ -53,47 +53,47 @@ bool mAnimatorLight::LoadPresetFileMeta(PresetFileMeta &meta)
     meta.enablePsn     = true;
     meta.parserVersion = kPresetMetaParserVersion;
     meta.lastScanMs    = 0;
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
     return false;
   }
 
   File f = FILE_SYSTEM.open(fname, "r");
   if (!f) {
     ALOG_WRN(PSTR("LoadPresetFileMeta: failed to open %s"), fname);
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
     return false;
   }
 
-  DeserializationError err = deserializeJson(*tkr_mfile->pDoc, f);
+  DeserializationError err = deserializeJson(*tkr_jsona->pDoc, f);
   f.close();
 
   if (err) {
     ALOG_WRN(PSTR("LoadPresetFileMeta: JSON parse error (%d)"), (int)err.code());
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
     return false;
   }
 
-  JsonObject m = tkr_mfile->pDoc->as<JsonObject>();
+  JsonObject m = tkr_jsona->pDoc->as<JsonObject>();
 
   meta.enablePsn              = (bool)(m["EnablePSN"]              | 1);
   // meta.enablePlaylistTimeLocks= (bool)(m["EnablePlaylistTimeLocks"]| 0); // default OFF
   meta.parserVersion          = (uint8_t)(m["ParserVersion"]       | kPresetMetaParserVersion);
   meta.lastScanMs             = (uint32_t)(m["LastScanMs"]         | 0U);
 
-  JBI->releaseJSONBufferLock();
+  tkr_jsona->releaseJSONBufferLock();
   return true;
 }
 
 // Save metadata into /presets_meta.json
 bool mAnimatorLight::SavePresetFileMeta(const PresetFileMeta &meta)
 {
-  if (!JBI->requestJSONBufferLock(22)) {
+  if (!tkr_jsona->requestJSONBufferLock(22)) {
     ALOG_WRN(PSTR("SavePresetFileMeta: failed to get JSON buffer lock"));
     return false;
   }
 
-  tkr_mfile->pDoc->clear();
-  JsonObject m = tkr_mfile->pDoc->to<JsonObject>();
+  tkr_jsona->pDoc->clear();
+  JsonObject m = tkr_jsona->pDoc->to<JsonObject>();
 
   m["EnablePSN"]              = meta.enablePsn ? 1 : 0;
   // m["EnablePlaylistTimeLocks"]= meta.enablePlaylistTimeLocks ? 1 : 0;
@@ -107,21 +107,21 @@ bool mAnimatorLight::SavePresetFileMeta(const PresetFileMeta &meta)
   File f = FILE_SYSTEM.open(fname, "w");
   if (!f) {
     ALOG_WRN(PSTR("SavePresetFileMeta: failed to open %s for write"), fname);
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
     return false;
   }
 
-  size_t written = serializeJson(*tkr_mfile->pDoc, f);
+  size_t written = serializeJson(*tkr_jsona->pDoc, f);
   f.close();
 
   if (written == 0) {
     ALOG_WRN(PSTR("SavePresetFileMeta: serializeJson wrote 0 bytes"));
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
     return false;
   }
 
   tkr_mfile->updateFSInfo();
-  JBI->releaseJSONBufferLock();
+  tkr_jsona->releaseJSONBufferLock();
   return true;
 }
 
@@ -204,11 +204,11 @@ void mAnimatorLight::doSaveState()
   bool persist = (presetToSave < 251);
   const char *filename = getPresetsFileName(persist);
   
-  if (!JBI->requestJSONBufferLock(10)) return; // will set gDoc
+  if (!tkr_jsona->requestJSONBufferLock(10)) return; // will set gDoc
 
   initPresetsFile(); // just in case if someone deleted presets.json using /edit
 
-  JsonObject sObj = tkr_mfile->pDoc->to<JsonObject>(); //needs done
+  JsonObject sObj = tkr_jsona->pDoc->to<JsonObject>(); //needs done
 
   DEBUG_PRINTLN(F("Serialize current state"));
     
@@ -254,7 +254,7 @@ void mAnimatorLight::doSaveState()
 
     if (tmpRAMbuffer!=nullptr) free(tmpRAMbuffer);
 
-    size_t len = measureJson(*tkr_mfile->pDoc) + 1;
+    size_t len = measureJson(*tkr_jsona->pDoc) + 1;
 
     ALOG_INF(PSTR("JSON Len=%d"),len);
   
@@ -270,20 +270,20 @@ void mAnimatorLight::doSaveState()
     if (tmpRAMbuffer!=nullptr) 
     {
         
-      serializeJson(*tkr_mfile->pDoc, tmpRAMbuffer, len);
+      serializeJson(*tkr_jsona->pDoc, tmpRAMbuffer, len);
       
     }
     else
     {
   
-      tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_mfile->pDoc);
+      tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_jsona->pDoc);
   
     }
   } 
   else
   {
   
-    tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_mfile->pDoc);
+    tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_jsona->pDoc);
   
   }
   #endif
@@ -292,7 +292,7 @@ void mAnimatorLight::doSaveState()
   
   
 
-  JBI->releaseJSONBufferLock();
+  tkr_jsona->releaseJSONBufferLock();
 
   tkr_mfile->updateFSInfo();
 
@@ -314,22 +314,22 @@ void mAnimatorLight::doSaveState()
 bool mAnimatorLight::getPresetName(byte index, String& name)
 {
 
-  if (!JBI->requestJSONBufferLock(9))
+  if (!tkr_jsona->requestJSONBufferLock(9))
   {
     ALOG_INF(PSTR("getPresetName() failed to get JSON buffer lock"));
     return false;  
   }  
   
   bool presetExists = false;
-  if (tkr_mfile->readObjectFromFileUsingId(getPresetsFileName(), index, tkr_mfile->pDoc))
+  if (tkr_mfile->readObjectFromFileUsingId(getPresetsFileName(), index, tkr_jsona->pDoc))
   {
-    JsonObject fdo = tkr_mfile->pDoc->as<JsonObject>();
+    JsonObject fdo = tkr_jsona->pDoc->as<JsonObject>();
     if (fdo["n"]) {
       name = (const char*)(fdo["n"]);
       presetExists = true;
     }
   }
-  JBI->releaseJSONBufferLock();
+  tkr_jsona->releaseJSONBufferLock();
   return presetExists;
 
 }
@@ -408,7 +408,7 @@ void mAnimatorLight::SubTask_Presets()
     return;
   }
 
-  if (presetToApply == 0 || !JBI->requestJSONBufferLock(9))
+  if (presetToApply == 0 || !tkr_jsona->requestJSONBufferLock(9))
   {
     // ALOG_INF(PSTR("(presetToApply == 0 || gDoc)()"));    
     return; // no preset waiting to apply, or JSON buffer is already allocated, return to loop until free
@@ -444,7 +444,7 @@ void mAnimatorLight::SubTask_Presets()
   #ifdef ARDUINO_ARCH_ESP32
   if (tmpPreset==255 && tmpRAMbuffer!=nullptr) 
   { 
-    deserializeJson(*tkr_mfile->pDoc,tmpRAMbuffer);
+    deserializeJson(*tkr_jsona->pDoc,tmpRAMbuffer);
     tkr_mfile->errorFlag = ERR_NONE;
   } 
   else
@@ -452,13 +452,13 @@ void mAnimatorLight::SubTask_Presets()
   { 
 
 
-    tkr_mfile->errorFlag = tkr_mfile->readObjectFromFileUsingId(filename, tmpPreset, tkr_mfile->pDoc) ? ERR_NONE : ERR_FS_PLOAD;
+    tkr_mfile->errorFlag = tkr_mfile->readObjectFromFileUsingId(filename, tmpPreset, tkr_jsona->pDoc) ? ERR_NONE : ERR_FS_PLOAD;
 
   } 
 
   
 
-  fdo = tkr_mfile->pDoc->as<JsonObject>();
+  fdo = tkr_jsona->pDoc->as<JsonObject>();
 
   
 
@@ -478,7 +478,7 @@ void mAnimatorLight::SubTask_Presets()
     data_buffer.ClearSoft();
 
     // Serialise from ArduinoJson into buffer for parser to load
-    serializeJson(*tkr_mfile->pDoc, data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr));
+    serializeJson(*tkr_jsona->pDoc, data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr));
 
     LoggingLevels level = LOG_LEVEL_INFO;
     #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
@@ -549,7 +549,7 @@ void mAnimatorLight::SubTask_Presets()
 
   
 
-  JBI->releaseJSONBufferLock(); // will also clear gDoc
+  tkr_jsona->releaseJSONBufferLock(); // will also clear gDoc
 
   if (changePreset) notify(tmpMode); // force UDP notification
 
@@ -608,7 +608,7 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
     {
       // we will save API call immediately (often causes presets.json corruption)
       presetToSave = 0;
-      if (index > 250 || !tkr_mfile->pDoc) return; // cannot save API calls to temporary preset (255)
+      if (index > 250 || !tkr_jsona->pDoc) return; // cannot save API calls to temporary preset (255)
       sObj.remove("o");
       sObj.remove("v");
       sObj.remove("time");
@@ -616,7 +616,7 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
       sObj.remove(F("psave"));
       if (sObj["n"].isNull()) sObj["n"] = saveName;
       initPresetsFile(); // just in case if someone deleted presets.json using /edit
-      tkr_mfile->writeObjectToFileUsingId(getPresetsFileName(index<255), index, tkr_mfile->pDoc);    
+      tkr_mfile->writeObjectToFileUsingId(getPresetsFileName(index<255), index, tkr_jsona->pDoc);    
       
       tkr_mfile->presetsModifiedTime = toki.second(); //unix time  
 

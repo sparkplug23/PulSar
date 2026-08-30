@@ -50,31 +50,11 @@
   #endif
 #endif
 
-
-
-
+#include "2_CoreSystem/21_JsonArduino/JsonArduino.h"
 #define ARDUINOJSON_DECODE_UNICODE 0
-#include "3_Network/21_WebServer/AsyncJson-v6.h"
-#include "3_Network/21_WebServer/ArduinoJson-v6.h"
+#include "2_CoreSystem/21_JsonArduino/AsyncJson-v6.h"
+#include "2_CoreSystem/21_JsonArduino/ArduinoJson-v6.h"
 
-#if defined(ARDUINO_ARCH_ESP32)
-struct PSRAM_Allocator {
-  void* allocate(size_t size) {
-    if (1 && psramFound()) return ps_malloc(size);
-    else                   return malloc(size);
-  }
-  void* reallocate(void* ptr, size_t new_size) {
-    if (1 && psramFound()) return ps_realloc(ptr, new_size);
-    else                   return realloc(ptr, new_size);
-  }
-  void deallocate(void* pointer) {
-    free(pointer);
-  }
-};
-using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
-#else
-#define PSRAMDynamicJsonDocument DynamicJsonDocument
-#endif
 
 #define FILE_EXTENSION_JSON ".json"
 #define FILE_EXTENSION_BIN ".txt"
@@ -228,14 +208,6 @@ class mFileSystem :
     bool   DeleteFile(const char *fname);
     bool   RenameFile(const char *fname1, const char *fname2);
 
-    #if defined(ARDUINO_ARCH_ESP32)
-    JsonDocument *pDoc = nullptr;
-    SemaphoreHandle_t jsonBufferLockMutex = xSemaphoreCreateRecursiveMutex();
-    #else
-    StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
-    JsonDocument *pDoc = &gDoc;
-    #endif
-
     bool IsMounted(void) const;
 
     void Handle_FileChanges_WebUIEdits();
@@ -245,7 +217,6 @@ class mFileSystem :
     size_t fsBytesUsed = 0;
     size_t fsBytesTotal = 0;
     unsigned long presetsModifiedTime = 0L;
-    bool psramSafe = true;
 
     void closeFile();
     bool bufferedFind(const char *target, bool fromStart = true);

@@ -1147,7 +1147,7 @@ void mAnimatorLight::serializePlaylist(JsonObject sObj)
 //   static unsigned long presetCycledTime = 0;
 
 //   // if gDoc is not null JSON buffer is in use so just quit
-//   // if (currentPlaylist < 0 || playlistEntries == nullptr || tkr_mfile->pDoc != nullptr) 
+//   // if (currentPlaylist < 0 || playlistEntries == nullptr || tkr_jsona->pDoc != nullptr) 
 //   // {
 //   //   ALOG_INF(PSTR("SubTask_Playlist return early"));    
 //   //   return;
@@ -1184,9 +1184,9 @@ void mAnimatorLight::serializePlaylist(JsonObject sObj)
 //         if (requestJSONBufferLock(31)) {
 //             if (tkr_mfile->readObjectFromFileUsingId(getPresetsFileName(true),
 //                                                     currentPlaylist,
-//                                                     tkr_mfile->pDoc))
+//                                                     tkr_jsona->pDoc))
 //             {
-//                 JsonObject presetObj = tkr_mfile->pDoc->as<JsonObject>();
+//                 JsonObject presetObj = tkr_jsona->pDoc->as<JsonObject>();
 //                 JsonObject playlist  = presetObj["playlist"];
 
 //                 if (!playlist.isNull()) {

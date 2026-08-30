@@ -593,11 +593,11 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "de
 
 
 #define ARDUINOJSON_DECODE_UNICODE 0
-#include "3_Network/21_WebServer/ArduinoJson-v6.h"
+#include "2_CoreSystem/21_JsonArduino/ArduinoJson-v6.h"
 
 
 #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
-  #include "3_Network/21_WebServer/AsyncJson-v6.h"
+  #include "2_CoreSystem/21_JsonArduino/AsyncJson-v6.h"
   #include "webpages_generated/html_ui.h"
   #ifdef WLED_ENABLE_SIMPLE_UI
     #include "webpages_generated/html_simple.h"
@@ -5681,8 +5681,8 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
 
 
     #define ARDUINOJSON_DECODE_UNICODE 0
-    #include "3_Network/21_WebServer/AsyncJson-v6.h"
-    #include "3_Network/21_WebServer/ArduinoJson-v6.h"
+    #include "2_CoreSystem/21_JsonArduino/AsyncJson-v6.h"
+    #include "2_CoreSystem/21_JsonArduino/ArduinoJson-v6.h"
 
 void serializeNetworks(JsonObject root);
 void serializeNodes(JsonObject root);

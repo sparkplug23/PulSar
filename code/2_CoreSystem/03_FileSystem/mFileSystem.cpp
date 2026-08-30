@@ -125,79 +125,9 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
 void mFileSystem::Pre_Init()
 {
   
-  static bool done = false;
-  if(done) { return; }
-  done = true;
-
-  /************************************************************************************************
-   * SECTION: JSON BUFFER / PSRAM INITIALISATION
-   *
-   * SD card mounting is intentionally NOT done here.
-   ************************************************************************************************/
-
-#if defined(ARDUINO_ARCH_ESP32)
-  #if !defined(BOARD_HAS_PSRAM) && !(defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3))
-  if (psramFound() && ESP.getChipRevision() < 3) psramSafe = false;
-  if (!psramSafe) DEBUG_PRINTLN(F("Not using PSRAM."));
-  #endif
-
-  if(!pDoc)
-  {
-    pDoc = new PSRAMDynamicJsonDocument((psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE);
-
-    DEBUG_PRINTF_P(
-      PSTR("JSON buffer allocated: %u\n"),
-      (psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE
-    );
-
-    if (psramFound()) {
-      DEBUG_PRINTF_P(
-        PSTR("PSRAM: %dkB/%dkB\n"),
-        ESP.getFreePsram() / 1024,
-        ESP.getPsramSize() / 1024
-      );
-    }
-  }
-#endif
 }
 
 
-
-// void mFileSystem::Pre_Init()
-// {
-//   /************************************************************************************************
-//    * SECTION: JSON BUFFER / PSRAM INITIALISATION
-//    *
-//    * SD card mounting is intentionally NOT done here.
-//    *
-//    * Reason:
-//    * - Pre_Init should only prepare filesystem module memory/state.
-//    * - SD mount requires the pin manager to be ready.
-//    * - SD is mounted from Init() after flash filesystem state is prepared.
-//    ************************************************************************************************/
-
-// #if defined(ARDUINO_ARCH_ESP32)
-//   #if !defined(BOARD_HAS_PSRAM) && !(defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3))
-//   if (psramFound() && ESP.getChipRevision() < 3) psramSafe = false;
-//   if (!psramSafe) DEBUG_PRINTLN(F("Not using PSRAM."));
-//   #endif
-
-//   pDoc = new PSRAMDynamicJsonDocument((psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE);
-
-//   DEBUG_PRINTF_P(
-//     PSTR("JSON buffer allocated: %u\n"),
-//     (psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE
-//   );
-
-//   if (psramFound()) {
-//     DEBUG_PRINTF_P(
-//       PSTR("PSRAM: %dkB/%dkB\n"),
-//       ESP.getFreePsram() / 1024,
-//       ESP.getPsramSize() / 1024
-//     );
-//   }
-// #endif
-// }
 
 #if defined(ESP8266)
 extern "C" {
@@ -855,7 +785,7 @@ bool mFileSystem::handleFileRead(AsyncWebServerRequest* request, String path){
   if(path.endsWith("/")) path += "index.htm";
   if(path.indexOf(F("sec")) > -1) return false;
   #ifdef ARDUINO_ARCH_ESP32
-  if (psramSafe && psramFound() && path.endsWith(FPSTR(  tkr_anim->getPresetsFileName() ))) {
+  if (tkr_jsona->psramSafe && psramFound() && path.endsWith(FPSTR(  tkr_anim->getPresetsFileName() ))) {
     size_t psize;
     const uint8_t *presets = getPresetCache(psize);
     if (presets) {
