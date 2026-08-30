@@ -83,30 +83,39 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
      /************
      * TELEMETRY SECTION * 
     *******************/
-    // case TASK_TELEMETRY_HANDLERS_INIT:
-    //   Telemetry_Init();
-    // break;
-    // case TASK_TELEMETRY_REFRESH_SEND_ALL:
-    //   tkr_tele->Telemetry_RefreshAll(telemetry_list);
-    // break;
-    // case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
-    //   tkr_tele->Telemetry_Rate(telemetry_list);
-    // break;
-    // #ifdef USE_MODULE_NETWORK_MQTT
-    // case TASK_TELEMETRY__SENDER_MQTT:
-    //   tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
-    // break;
-    // #endif
-    // #ifdef USE_MODULE_SERIAL
-    // case TASK_SERIAL_TELEMETRY:
-    //   tkr_serial->Telemetry_Sender(telemetry_list, *this);
-    // break;
-    // #endif
-    // #ifdef USE_MODULE_NETWORK_WEBSERVER
-    // case TASK_WEB_TELEMETRY:
-    //   tkr_web->Telemetry_Sender(telemetry_list, *this);
-    // break;
-    // #endif
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
+    #ifdef USE_MODULE_NETWORK_MQTT
+    case TASK_TELEMETRY__SENDER_MQTT:
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
+    break;
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
+    break;
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
+    break;
+    #endif
+    /************
+     * WEBUI SECTION * 
+    *******************/   
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_ADD_HANDLER:      
+      // tkr_web->AddURLasApplication(GetModuleUniqueID(), "sdedit", "SD Card");
+    break;
+    #endif
+
   }
 
   return TASKER_RESULT__UNKNOWN_ID;

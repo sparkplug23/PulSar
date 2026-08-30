@@ -1,19 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Logging Settings</title>
-<link rel="stylesheet" href="/pulsar.css"><script defer src="/pulsar.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Logging Settings</title>
+
+  <link rel="stylesheet" href="/pulsar.css">
+
+  <script src="/pulsar.js"></script>
 </head>
-<body class="settings-page"><form id="form_s" name="Sf" method="post">
 
-<header class="page-header"><div class="page-title"><h1>Logging</h1><div class="page-subtitle">Runtime logging and diagnostics</div></div><div class="page-actions"><button type="button" onclick="go('/settings')">Back</button><button class="primary">Save</button></div></header>
 
-<section class="settings-section"><h2>Log Levels</h2>
-<label class="setting"><span>Serial</span><select name="LOG_SERIAL"><option>Disabled</option><option>Error</option><option>Info</option><option>Debug</option></select></label>
-<label class="setting"><span>Web</span><select name="LOG_WEB"><option>Disabled</option><option>Error</option><option>Info</option><option>Debug</option></select></label>
-</section>
+<body class="settings-page">
 
-<section class="settings-section"><h2>Tools</h2><div class="page-actions"><button type="button" onclick="go('/console')">Console</button><button type="button" onclick="go('/debug/main')">Diagnostics</button><button type="button" onclick="go('/url_list')">URLs</button></div></section>
+  <form id="form_s" name="Sf" method="post">
 
-</form><div id="toast"></div></body></html>
+    <header class="page-header">
+
+      <div class="page-title">
+        <h1>Logging</h1>
+        <div class="page-subtitle">
+          Runtime logging and diagnostics
+        </div>
+      </div>
+
+      <div class="page-actions">
+        <button type="button" onclick="go('/settings')">Back</button>
+        <button class="primary">Save</button>
+      </div>
+
+    </header>
+
+
+    <section class="settings-section">
+
+      <h2>Log Levels</h2>
+
+      <label class="setting">
+        <span>Serial</span>
+
+        <select name="LOG_SERIAL">
+          <option>Disabled</option>
+          <option>Error</option>
+          <option>Info</option>
+          <option>Debug</option>
+        </select>
+      </label>
+
+      <label class="setting">
+        <span>Web</span>
+
+        <select name="LOG_WEB">
+          <option>Disabled</option>
+          <option>Error</option>
+          <option>Info</option>
+          <option>Debug</option>
+        </select>
+      </label>
+
+    </section>
+
+
+    <section class="settings-section">
+
+      <h2>Tools</h2>
+
+      <div class="page-actions">
+        <button type="button" onclick="go('/console')">Console</button>
+        <button type="button" onclick="go('/adv')">Advanced</button>
+        <button type="button" onclick="go('/adv/urls')">URLs</button>
+      </div>
+
+    </section>
+
+  </form>
+
+
+  <div id="toast"></div>
+
+</body>
+
+</html>

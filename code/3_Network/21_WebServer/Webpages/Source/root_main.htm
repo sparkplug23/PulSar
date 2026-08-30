@@ -77,7 +77,7 @@
 
       <h3>Advanced</h3>
 
-      <button class="railbtn" onclick="go('/debug/main')">
+      <button class="railbtn" onclick="go('/adv')">
         <span class="railbtn-text">
           <b>Advanced</b>
           <span class="railbtn-desc">Diagnostics</span>
@@ -231,6 +231,7 @@
 
 let ws;
 let livePoll;
+let controlsPoll;
 
 
 /**************************************************************************************************
@@ -264,7 +265,7 @@ function sensorId(group, name)
 
 function syncOverviewSettings(packet)
 {
-  if (!packet) return;
+  if(!packet) return;
 
   const name = packet.Name || {};
 
@@ -294,28 +295,16 @@ async function loadOverviewSettings()
 {
   try
   {
-    /**********************************************************************************************
-     * Discover the registered settings telemetry topic.
-     *
-     * This avoids hardcoding the module prefix. The telemetry API itself defines the available
-     * topic names.
-     **********************************************************************************************/
-
     const catalogue = await getJSON('/api/telemetry');
 
     const topicEntry = (catalogue.topics || []).find(
       item => item.topic && item.topic.endsWith('/settings')
     );
 
-    if (!topicEntry)
+    if(!topicEntry)
     {
       throw new Error('Settings telemetry topic not found');
     }
-
-
-    /**********************************************************************************************
-     * Request only the settings payload.
-     **********************************************************************************************/
 
     const response = await getJSON(
       '/api/telemetry?topic=' + encodeURIComponent(topicEntry.topic)
@@ -323,7 +312,7 @@ async function loadOverviewSettings()
 
     syncOverviewSettings(response.packet);
   }
-  catch (e)
+  catch(e)
   {
     console.warn('Unable to load Overview settings:', e);
 
@@ -345,9 +334,9 @@ async function loadApps()
   {
     const data = await getJSON('/url_apps');
 
-    for (const module of data.Applications || [])
+    for(const module of data.Applications || [])
     {
-      if (!module.Links?.length || gId(appId(module))) continue;
+      if(!module.Links?.length || gId(appId(module))) continue;
 
       const tile = cE('div');
 
@@ -364,40 +353,49 @@ async function loadApps()
       );
 
 
-      for (const item of module.Links)
+      for(const item of module.Links)
       {
-        if (!item?.[1]) continue;
+        if(!item?.[1]) continue;
+
+        const name = item[0] || item[1];
+        const path = item[1][0] === '/' ? item[1] : '/' + item[1];
+        const port = Number(item[2] || 80);
+
+        const target =
+          port === 80
+            ? path
+            : location.protocol + '//' + location.hostname + ':' + port + path;
 
         const link = cE('div');
 
         link.className = 'application-link';
-        link.onclick = () => go(item[1]);
+        link.onclick = () => go(target);
 
         link.innerHTML =
           '<div class="application-link-text">' +
             '<div class="application-link-name"></div>' +
-            '<div class="application-link-url"></div>' +
+            // '<div class="application-link-url"></div>' +
           '</div>' +
           '<span>›</span>';
 
         setText(
           link.querySelector('.application-link-name'),
-          item[0] || item[1]
+          name
         );
 
-        setText(
-          link.querySelector('.application-link-url'),
-          item[1]
-        );
+        // Keep available if URL display is restored later.
+        // setText(
+        //   link.querySelector('.application-link-url'),
+        //   target
+        // );
 
         tile.lastChild.appendChild(link);
       }
 
-
       gId('apps').appendChild(tile);
     }
   }
-  catch (e)
+  catch(e)
   {
     console.warn('Unable to load Applications:', e);
   }
@@ -413,6 +411,12 @@ function request(name)
   ws.send({
     request: name
   });
+}
+
+
+function controls()
+{
+  request('controls');
 }
 
 
@@ -447,11 +451,11 @@ function indicator()
 
 function syncControls(data)
 {
-  for (const module of data.Modules || [])
+  for(const module of data.Modules || [])
   {
     let box = gId('cm_' + module.ID);
 
-    if (!box)
+    if(!box)
     {
       box = cE('div');
 
@@ -470,14 +474,14 @@ function syncControls(data)
     }
 
 
-    for (const control of module.Controls || [])
+    for(const control of module.Controls || [])
     {
       let row = gId(
         ctrlId(module.ID, control)
       );
 
 
-      if (!row)
+      if(!row)
       {
         row = cE('div');
 
@@ -511,9 +515,9 @@ function syncControls(data)
        * Create the control only once.
        ********************************************************************************************/
 
-      if (!actions.children.length)
+      if(!actions.children.length)
       {
-        if (control.T === 'toggle')
+        if(control.T === 'toggle')
         {
           actions.appendChild(
             makeButton(
@@ -532,7 +536,7 @@ function syncControls(data)
         }
 
 
-        else if (control.T === 'momentary')
+        else if(control.T === 'momentary')
         {
           const button = makeButton(
             'Press',
@@ -559,7 +563,7 @@ function syncControls(data)
         }
 
 
-        else if (control.T === 'testswitch')
+        else if(control.T === 'testswitch')
         {
           actions.append(
             indicator(),
@@ -576,9 +580,9 @@ function syncControls(data)
         }
 
 
-        else if (control.T === 'buttons')
+        else if(control.T === 'buttons')
         {
-          for (const option of control.O || [])
+          for(const option of control.O || [])
           {
             const button = makeButton(
               option[0],
@@ -600,7 +604,7 @@ function syncControls(data)
         }
 
 
-        else if (control.T === 'indicator')
+        else if(control.T === 'indicator')
         {
           actions.appendChild(
             indicator()
@@ -608,7 +612,7 @@ function syncControls(data)
         }
 
 
-        else if (control.T === 'value')
+        else if(control.T === 'value')
         {
           const value = cE('span');
 
@@ -620,10 +624,10 @@ function syncControls(data)
 
 
       /********************************************************************************************
-       * Update the current state.
+       * Update current state.
        ********************************************************************************************/
 
-      if (control.T === 'toggle')
+      if(control.T === 'toggle')
       {
         const button = actions.firstChild;
 
@@ -637,7 +641,7 @@ function syncControls(data)
       }
 
 
-      else if (
+      else if(
         control.T === 'indicator' ||
         control.T === 'testswitch'
       )
@@ -656,9 +660,9 @@ function syncControls(data)
       }
 
 
-      else if (control.T === 'buttons')
+      else if(control.T === 'buttons')
       {
-        for (const button of actions.children)
+        for(const button of actions.children)
         {
           button.classList.toggle(
             'active',
@@ -668,7 +672,7 @@ function syncControls(data)
       }
 
 
-      else if (control.T === 'value')
+      else if(control.T === 'value')
       {
         setText(
           actions.firstChild,
@@ -682,7 +686,7 @@ function syncControls(data)
 
   const empty = gId('controls').querySelector('.empty');
 
-  if (empty)
+  if(empty)
   {
     empty.remove();
   }
@@ -695,9 +699,9 @@ function syncControls(data)
 
 function syncSensors(data)
 {
-  for (const [groupName, values] of Object.entries(data || {}))
+  for(const [groupName, values] of Object.entries(data || {}))
   {
-    if (
+    if(
       groupName === 'Rate' ||
       !values ||
       typeof values !== 'object' ||
@@ -713,7 +717,7 @@ function syncSensors(data)
     );
 
 
-    if (!group)
+    if(!group)
     {
       group = cE('div');
 
@@ -735,14 +739,14 @@ function syncSensors(data)
     }
 
 
-    for (const [name, value] of Object.entries(values))
+    for(const [name, value] of Object.entries(values))
     {
       let cell = gId(
         sensorId(groupName, name)
       );
 
 
-      if (!cell)
+      if(!cell)
       {
         const row = cE('tr');
 
@@ -768,7 +772,7 @@ function syncSensors(data)
 
   const empty = gId('sensors').querySelector('.empty');
 
-  if (empty)
+  if(empty)
   {
     empty.remove();
   }
@@ -783,10 +787,6 @@ onReady(() =>
 {
   setOriginText();
 
-  /**********************************************************************************************
-   * One-shot page information.
-   **********************************************************************************************/
-
   loadOverviewSettings();
   loadApps();
 
@@ -800,17 +800,17 @@ onReady(() =>
 
     data =>
     {
-      if (data.controls)
+      if(data.controls)
       {
         syncControls(data.controls);
       }
 
-      if (data.sensors)
+      if(data.sensors)
       {
         syncSensors(data.sensors);
       }
 
-      if (data.energy)
+      if(data.energy)
       {
         syncSensors(data.energy);
       }
@@ -818,13 +818,28 @@ onReady(() =>
 
     () =>
     {
-      request('controls');
+      controls();
       live();
     }
   );
 
 
   ws.connect();
+
+
+  /**********************************************************************************************
+   * Control refresh.
+   *
+   * Controls are requested every second while the page is open so changes made by MQTT,
+   * rules, physical switches, timers, or other modules are reflected without user action.
+   **********************************************************************************************/
+
+  controlsPoll = createPoller(
+    controls,
+    1000
+  );
+
+  controlsPoll.start(false);
 
 
   /**********************************************************************************************
@@ -865,6 +880,7 @@ addEventListener(
   () =>
   {
     ws?.close();
+    controlsPoll?.stop();
     livePoll?.stop();
   }
 );

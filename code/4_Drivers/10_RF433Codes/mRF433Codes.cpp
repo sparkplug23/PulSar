@@ -764,7 +764,7 @@ void mRF433Codes::ReceiveCheck(void)
     return;
   }
 
-  // ALOG_INF(PSTR("RFR: ReceiveCheck() %d"), mySwitch->available());
+  ALOG_INF(PSTR("RFR: ReceiveCheck() %d"), mySwitch->available());
 
   if (mySwitch->available())
   {

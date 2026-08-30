@@ -8,13 +8,11 @@
   <title>PulSar Advanced</title>
 
   <link rel="stylesheet" href="/pulsar.css">
-
   <script src="/pulsar.js"></script>
 </head>
 
 
 <body class="page">
-
 
   <header class="page-header">
 
@@ -32,77 +30,44 @@
   </header>
 
 
-  <!-- =========================================================================================
-       System
-       ========================================================================================= -->
-
   <section class="section">
 
     <div class="section-head">
-      <div class="section-title">System</div>
+      <div class="section-title">Diagnostics</div>
     </div>
 
     <div class="grid">
 
-      <div class="tile clickable" onclick="go('/system/controls')">
-        <div class="tile-title">System Controls</div>
-        <div class="tile-description">
-          Low-level system controls and state.
-        </div>
-        <div class="tile-url">/system/controls</div>
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =========================================================================================
-       Network
-       ========================================================================================= -->
-
-  <section class="section">
-
-    <div class="section-head">
-      <div class="section-title">Network</div>
-    </div>
-
-    <div class="grid">
-
-      <div class="tile clickable" onclick="go('/debug/telemetry')">
+      <div class="tile clickable" onclick="go('/adv/telemetry')">
         <div class="tile-title">Telemetry</div>
         <div class="tile-description">
           Inspect module telemetry and ConstructJSON output.
         </div>
-        <div class="tile-url">/debug/telemetry</div>
+        <div class="tile-url">/adv/telemetry</div>
       </div>
 
 
-      <div class="tile clickable" onclick="go('/debug/network')">
-        <div class="tile-title">Network State</div>
+      <div class="tile clickable" onclick="go('/adv/tasker')">
+        <div class="tile-title">Tasker</div>
         <div class="tile-description">
-          Interfaces, addresses and connection state.
+          Task dispatch and module execution metrics.
         </div>
-        <div class="tile-url">/debug/network</div>
+        <div class="tile-url">/adv/tasker</div>
       </div>
 
 
-      <div class="tile clickable" onclick="go('/url_list')">
+      <div class="tile clickable" onclick="go('/adv/urls')">
         <div class="tile-title">Registered URLs</div>
         <div class="tile-description">
           List currently registered web routes.
         </div>
-        <div class="tile-url">/url_list</div>
+        <div class="tile-url">/adv/urls</div>
       </div>
 
     </div>
 
   </section>
 
-
-  <!-- =========================================================================================
-       Runtime
-       ========================================================================================= -->
 
   <section class="section">
 
@@ -120,32 +85,10 @@
         <div class="tile-url">/console</div>
       </div>
 
-
-      <div class="tile clickable" onclick="go('/debug/modules')">
-        <div class="tile-title">Modules</div>
-        <div class="tile-description">
-          Tasker modules, states and internal diagnostics.
-        </div>
-        <div class="tile-url">/debug/modules</div>
-      </div>
-
-
-      <div class="tile clickable" onclick="go('/debug/tasker')">
-        <div class="tile-title">Tasker</div>
-        <div class="tile-description">
-          Task dispatch and module execution state.
-        </div>
-        <div class="tile-url">/debug/tasker</div>
-      </div>
-
     </div>
 
   </section>
 
-
-  <!-- =========================================================================================
-       Storage
-       ========================================================================================= -->
 
   <section class="section">
 
@@ -172,19 +115,9 @@
         <div class="tile-url">/sdedit</div>
       </div>
 
-
-      <div class="tile clickable" onclick="go('/debug/filesystem')">
-        <div class="tile-title">Storage State</div>
-        <div class="tile-description">
-          Filesystem usage and diagnostics.
-        </div>
-        <div class="tile-url">/debug/filesystem</div>
-      </div>
-
     </div>
 
   </section>
-
 
 </body>
 

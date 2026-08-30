@@ -722,6 +722,16 @@ uint32_t mCamera::Stream_SetEnabled(uint32_t flag)
 
       ALOG_DBG(PSTR(D_LOG_CAMERA "Strm init"));
       rt.CamServer->begin();
+
+      
+  
+      tkr_web->AddURLasApplication(GetModuleUniqueID(), "stream", "Stream", 81);
+      tkr_web->AddURLasApplication(GetModuleUniqueID(), "picture", "Picture", 81);
+
+      #ifdef USE_MODULE_NETWORK_WEBSERVER
+        tkr_web->AddURLasApplication(GetModuleUniqueID(), "sdedit", "SD Card");
+      #endif
+
     }else{
       
       ALOG_DBG(PSTR("=========================CAM: else (!rt.CamServer) {"));
@@ -786,6 +796,7 @@ void mCamera::Init(void)
   FrameTask_Start();
   
   tkr_iDrivers->webcam_config.rtsp = 1;
+
 
   // Configured already
   module_state.mode = ModuleStatus::Running;

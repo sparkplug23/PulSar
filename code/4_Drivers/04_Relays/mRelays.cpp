@@ -1425,7 +1425,7 @@ void mRelays::parse_JSONCommand_WebUI(JsonParserObject obj)
     const uint8_t device_id = arr[0].getInt();
     const uint8_t option_id = arr[1].getInt();
 
-    static const uint16_t options[] = {0, 1, 15, 30, 60, 120};
+    static const uint16_t options[] = {0, 1, 2, 15, 30, 60, 120};
 
     if(device_id >= module_state.devices) return;
     if(option_id >= ARRAY_SIZE(options)) return;
@@ -1455,7 +1455,7 @@ void mRelays::WebUI_Append()
   char name_buffer[100];
   char desc_buffer[50];
 
-  static const uint16_t options[] = {0, 1, 15, 30, 60, 120};
+  static const uint16_t options[] = {0, 1, 2, 15, 30, 60, 120};
 
   tkr_web->WebUI_Module_Start(GetModuleUniqueID(), GetModuleName());
 
@@ -1475,7 +1475,11 @@ void mRelays::WebUI_Append()
         if(timer_mins <= options[i]) break;
       }
 
-      snprintf(desc_buffer, sizeof(desc_buffer), "%u mins remaining", timer_mins);
+      if(timer_secs < 60)
+        snprintf(desc_buffer, sizeof(desc_buffer), "%u secs remaining", timer_secs);
+      else
+        snprintf(desc_buffer, sizeof(desc_buffer), "%u mins remaining", timer_mins);
+
     }
     else
     {
@@ -1492,10 +1496,11 @@ void mRelays::WebUI_Append()
 
     tkr_web->WebUI_AddButtonRow_Option("OFF", 0);
     tkr_web->WebUI_AddButtonRow_Option("ON", 1);
-    tkr_web->WebUI_AddButtonRow_Option("15m", 2);
-    tkr_web->WebUI_AddButtonRow_Option("30m", 3);
-    tkr_web->WebUI_AddButtonRow_Option("1hr", 4);
-    tkr_web->WebUI_AddButtonRow_Option("2hr", 5);
+    tkr_web->WebUI_AddButtonRow_Option("2m", 2);
+    tkr_web->WebUI_AddButtonRow_Option("15m", 3);
+    tkr_web->WebUI_AddButtonRow_Option("30m", 4);
+    tkr_web->WebUI_AddButtonRow_Option("1hr", 5);
+    tkr_web->WebUI_AddButtonRow_Option("2hr", 6);
 
     tkr_web->WebUI_AddButtonRow_End();
   }

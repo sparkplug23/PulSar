@@ -949,7 +949,7 @@
 #define D_GPIO_KEY1_INV_NP_CTR    "Key Inv NP"
 #define D_GPIO_KEY1_TOUCH_CTR    "Key Touch"
 
-#define D_GPIO_RF_433MHZ_RX_CTR "RF 433 RX"
+#define D_GPIO__RF_433MHZ_RX__CTR "RF 433 RX"
 #define D_GPIO_RF_433MHZ_TX_CTR "RF 433 TX"
 
 #define D_GPIO_SUN_TRACKING_CTR "Sun Tracking"
@@ -1409,7 +1409,7 @@
 #define D_MODEL "Model"
 #define D_MQTT "MQTT"
 // #define D_MQTT_COUNT "MqttCount"
-// #define D_MILLIS "millis"
+#define D_MILLIS "millis"
 // #define D_NO "No"
 // #define D_NOISE "Noise"
 // #define D_NONE "None"
@@ -2040,7 +2040,7 @@
 //   #define D_LEARNED "Learned"
 // #define D_RFLOW "RfLow"
 // #define D_RFSYNC "RfSync"
-//   #define D_RFRECEIVED "RfReceived"
+#define D_RFRECEIVED "RfReceived"
 // #define D_RFRAW "RfRaw"
 
 // // Commands xdrv_08_serial_bridge.ino

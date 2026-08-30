@@ -15,18 +15,23 @@
 <body class="page">
 
   <header class="page-header">
+
     <div class="page-title">
       <h1>Nextion Command Console</h1>
-      <div class="page-subtitle">Direct panel command interface</div>
+      <div class="page-subtitle">
+        Direct panel command interface
+      </div>
     </div>
 
     <div class="page-actions">
       <button onclick="go('/nextion')">Back</button>
     </div>
+
   </header>
 
 
   <section class="card">
+
     <h2>Send Command</h2>
 
     <p class="muted">
@@ -37,15 +42,20 @@
     <form method="get" action="/nextion/cmd">
 
       <div class="form-row">
-        <label for="cmd">Command</label>
+
+        <label for="cmd">
+          Command
+        </label>
 
         <input
           type="text"
           id="cmd"
           name="cmd"
           placeholder="e.g. page main"
+          autocomplete="off"
           required
         >
+
       </div>
 
       <div class="page-actions">
@@ -55,23 +65,28 @@
       </div>
 
     </form>
+
   </section>
 
 
   <section class="card">
-    <h2>Quick Actions</h2>
+
+    <h2>Panel Control</h2>
 
     <p class="muted">
-      Direct maintenance actions for the connected display.
+      Maintenance commands for the connected display.
     </p>
 
     <form method="get" action="/nextion/reboot_panel">
+
       <div class="page-actions">
         <button type="submit" class="danger">
           Reboot Nextion Panel
         </button>
       </div>
+
     </form>
+
   </section>
 
 </body>

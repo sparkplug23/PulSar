@@ -4916,6 +4916,9 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   SPGM_CTR(PM_URL_LIGHTS_SETTINGS_JS)   "/lights/settings/s.js";  AddURLtoList(PM_URL_LIGHTS_SETTINGS_JS,   HTTP_POST);
   SPGM_CTR(PM_URL_LIGHTS_UPDATE)        "/lights/update";         AddURLtoList(PM_URL_LIGHTS_UPDATE,        HTTP_POST);
 
+
+  tkr_web->AddURLasApplication(GetModuleUniqueID(), "/lights", "Lights");
+
 }
 
 

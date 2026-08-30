@@ -7381,7 +7381,39 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   // #define USE_MODULE_DRIVERS_INTERFACE
 
   #define USE_MODULE_DRIVERS_RF433_CODES
-    // #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
+    #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
+
+    
+  /************************************************************************
+   * WEBPAGE:
+   ************************************************************************/
+  
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_FEATURE_LIGHTING__WEBUI
+  #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+
+
+  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+  #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+
+  #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+
+  
+  #define ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION_ON_PULSAR_PALETTES
+
+  #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+  #define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
+  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+
+  #define ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+
+  
+  #ifndef ESP8266
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  #endif
+
+
   
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -8338,7 +8370,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
   * SECTION: Network Configs
   ************************************/  
 
-  #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
   /***********************************
    * SECTION: Lighting Configs
@@ -8583,7 +8615,7 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
     /***********************************
      * SECTION: Lighting Configs
@@ -8857,7 +8889,7 @@ R"=====(
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
     /***********************************
      * SECTION: Lighting Configs

@@ -901,7 +901,7 @@
   #define WEB_PORT             80                // Web server Port for User and Admin mode
 
 
-#define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
 
 

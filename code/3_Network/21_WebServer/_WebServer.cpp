@@ -8,8 +8,6 @@
 int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 {
 
-// DEBUG_LINE_HERE;
-
   switch(function)
   {
     case TASK_INIT:
@@ -126,17 +124,11 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 
 
       #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
-      if(websocket_pages)
-      {
+      if(websocket_pages){
         websocket_pages->cleanupClients();
       }
       #endif
 
-      #ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
-      // for(int i=0;i<gWebUrlTracker.urls.size();i++){
-      //   ALOG_INF(PSTR("url %d, %s"), i, gWebUrlTracker.urls[i]);
-      // }
-      #endif
     break;
     case TASK_NETWORK_CONNECTED__WIFI:
     case TASK_NETWORK_CONNECTED__ETHERNET:
@@ -153,21 +145,27 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 // DEBUG_LINE_HERE;
 }
 
-void mWebServer::AddURLasApplication(uint16_t module_id, const char* url, const char* friendly_name)
+
+void mWebServer::AddURLasApplication(uint16_t module_id, const char* url, const char* friendly_name, uint16_t port)
 {
   if(!url || !url[0]) return;
 
+  String normalised_url = url;
+  if(normalised_url[0] != '/') normalised_url = "/" + normalised_url;
+
   for(const auto& entry : application_urls)
   {
-    if(entry.module_id == module_id && entry.url == url)
+    if(entry.module_id == module_id && entry.url == normalised_url && entry.port == port)
     {
       return;
     }
   }
 
   WebApplicationURL entry;
+
   entry.module_id = module_id;
-  entry.url = url;
+  entry.url = normalised_url;
+  entry.port = port;
 
   if(friendly_name && friendly_name[0])
   {
@@ -178,256 +176,11 @@ void mWebServer::AddURLasApplication(uint16_t module_id, const char* url, const 
 }
 
 
-void mWebServer::AddURLasApplication(uint16_t module_id, const String& url, const char* friendly_name)
+void mWebServer::AddURLasApplication(uint16_t module_id, const String& url, const char* friendly_name, uint16_t port)
 {
-  AddURLasApplication(module_id, url.c_str(), friendly_name);
+  AddURLasApplication(module_id, url.c_str(), friendly_name, port);
 }
 
-/**************************************************************************************************
- * Generic Telemetry API
- **************************************************************************************************/
-
-void mWebServer::TelemetryAPI_PrintJSONString(AsyncResponseStream* response, const char* str)
-{
-  if(!response || !str) return;
-
-  while(*str)
-  {
-    const char c = *str++;
-
-    switch(c)
-    {
-      case '\\': response->print(F("\\\\")); break;
-      case '"':  response->print(F("\\\"")); break;
-      case '\n': response->print(F("\\n")); break;
-      case '\r': response->print(F("\\r")); break;
-      case '\t': response->print(F("\\t")); break;
-      default:
-        if((uint8_t)c >= 32) response->print(c);
-      break;
-    }
-  }
-}
-
-
-void mWebServer::HandleAPI_Telemetry(AsyncWebServerRequest* request)
-{
-  /************************************************************************************************
-   * Catalogue
-   ************************************************************************************************/
-
-  if(!request->hasParam("topic"))
-  {
-    AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
-
-    if(!response)
-    {
-      request->send(500);
-      return;
-    }
-
-    response->addHeader(F("Cache-Control"), F("no-store"));
-    response->print(F("{\"topics\":["));
-
-    telemetry_api_request.mode = TelemetryAPIRequestMode::Catalogue;
-    telemetry_api_request.catalogue_response = response;
-    telemetry_api_request.catalogue_first = true;
-
-    tkr->Tasker_Interface(TASK_WEB_TELEMETRY);
-
-    telemetry_api_request.mode = TelemetryAPIRequestMode::None;
-    telemetry_api_request.catalogue_response = nullptr;
-
-    response->print(F("]}"));
-    request->send(response);
-    return;
-  }
-
-
-  /************************************************************************************************
-   * JSON buffer backoff
-   ************************************************************************************************/
-
-  const uint32_t now = millis();
-
-  if(telemetry_api_json_last_used_ms && (now - telemetry_api_json_last_used_ms) < TELEMETRY_API_JSON_BACKOFF_MS)
-  {
-    const uint32_t retry_ms = TELEMETRY_API_JSON_BACKOFF_MS - (now - telemetry_api_json_last_used_ms);
-
-    AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
-
-    if(!response)
-    {
-      request->send(500);
-      return;
-    }
-
-    response->setCode(429);
-    response->addHeader(F("Cache-Control"), F("no-store"));
-    response->printf_P(PSTR("{\"error\":\"json buffer backoff\",\"retry_ms\":%lu}"), retry_ms);
-
-    request->send(response);
-    return;
-  }
-
-
-  /************************************************************************************************
-   * Requested topic
-   ************************************************************************************************/
-
-  const String requested = request->getParam("topic")->value();
-
-  if(!requested.length() || requested.length() >= sizeof(telemetry_api_request.requested_key))
-  {
-    request->send(400, FPSTR(CONTENT_TYPE_JSON), F("{\"error\":\"invalid topic\"}"));
-    return;
-  }
-
-  strlcpy(telemetry_api_request.requested_key, requested.c_str(), sizeof(telemetry_api_request.requested_key));
-
-  telemetry_api_request.mode = TelemetryAPIRequestMode::Topic;
-  telemetry_api_request.found = false;
-  telemetry_api_request.buffer_busy = false;
-  telemetry_api_request.rate = 0;
-  telemetry_api_request.packet = "";
-
-  tkr->Tasker_Interface(TASK_WEB_TELEMETRY);
-
-  telemetry_api_request.mode = TelemetryAPIRequestMode::None;
-
-
-  /************************************************************************************************
-   * Shared JSON buffer busy
-   ************************************************************************************************/
-
-  if(telemetry_api_request.buffer_busy)
-  {
-    AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
-
-    if(!response)
-    {
-      request->send(500);
-      return;
-    }
-
-    response->setCode(503);
-    response->addHeader(F("Cache-Control"), F("no-store"));
-    response->print(F("{\"error\":\"json buffer busy\",\"retry_ms\":500}"));
-
-    request->send(response);
-    return;
-  }
-
-
-  /************************************************************************************************
-   * Topic not found
-   ************************************************************************************************/
-
-  if(!telemetry_api_request.found)
-  {
-    AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
-
-    if(!response)
-    {
-      request->send(500);
-      return;
-    }
-
-    response->setCode(404);
-    response->addHeader(F("Cache-Control"), F("no-store"));
-    response->print(F("{\"error\":\"topic not found\"}"));
-
-    request->send(response);
-    return;
-  }
-
-
-  /************************************************************************************************
-   * Empty packet
-   ************************************************************************************************/
-
-  if(!telemetry_api_request.packet.length())
-  {
-    AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
-
-    if(!response)
-    {
-      request->send(500);
-      return;
-    }
-
-    response->setCode(500);
-    response->addHeader(F("Cache-Control"), F("no-store"));
-    response->print(F("{\"error\":\"empty telemetry packet\"}"));
-
-    request->send(response);
-    return;
-  }
-
-
-  /************************************************************************************************
-   * Reply
-   ************************************************************************************************/
-
-  AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
-
-  if(!response)
-  {
-    request->send(500);
-    return;
-  }
-
-  response->addHeader(F("Cache-Control"), F("no-store"));
-
-  response->print(F("{\"topic\":\""));
-  TelemetryAPI_PrintJSONString(response, telemetry_api_request.requested_key);
-  response->printf_P(PSTR("\",\"rate\":%u,\"packet\":"), telemetry_api_request.rate);
-  response->print(telemetry_api_request.packet);
-  response->print('}');
-
-  request->send(response);
-}
-
-
-bool mWebServer::TelemetryAPI_Construct_Begin(const char* full_key, uint16_t rate)
-{
-  telemetry_api_request.found = true;
-  telemetry_api_request.rate = rate;
-
-  if(!JBI->RequestLock(GetModuleUniqueID()))
-  {
-    telemetry_api_request.buffer_busy = true;
-    return false;
-  }
-
-  return true;
-}
-
-
-void mWebServer::TelemetryAPI_Construct_End()
-{
-  const char* buffer = JBI->GetBuffer();
-
-  telemetry_api_request.packet = (buffer && buffer[0]) ? buffer : "";
-
-  JBI->ReleaseLock();
-
-  telemetry_api_json_last_used_ms = millis();
-}
-
-
-/**************************************************************************************************
- * Telemetry Debug Page
- **************************************************************************************************/
-
-#ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
-
-void mWebServer::HandlePage_DebugTelemetry(AsyncWebServerRequest* request)
-{
-  handleStaticContent(request, F("/debug/telemetry"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_debug_telemetry_web, PAGE_debug_telemetry_web_length, true);
-}
-
-#endif
 
 void mWebServer::Server_Start()
 {
@@ -447,8 +200,7 @@ void mWebServer::Server_Start()
   #endif
 
   #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
-  if(websocket_pages)
-  {
+  if(websocket_pages){
     server->addHandler(websocket_pages);
   }
   #endif
@@ -478,8 +230,6 @@ void mWebServer::WebPage_Root_AddHandlers()
   SPGM_CTR(PM_URL_REBOOT) "/reboot";
   server->on(PM_URL_REBOOT, HTTP_GET, [this](AsyncWebServerRequest* request){
     serveMessage(request, 200, F("Rebooting now..."), F("Please wait ~10 seconds..."), 129);
-
-    // Grace period for sockets + subsystems
     tkr_sup->ESP_Restart_InSeconds(2);
   });
   AddURLtoList(PM_URL_REBOOT, HTTP_GET);
@@ -500,10 +250,6 @@ void mWebServer::WebPage_Root_AddHandlers()
 
   /**************************************************************************************************
    * Shared PulSar WebUI assets
-   *
-   * pulsar.css     - common PulSar theme/layout
-   * pulsar.js      - common DOM/navigation/UI helpers
-   * pulsar_data.js - common API/data/table/polling/WebSocket helpers
    **************************************************************************************************/
 
   SPGM_CTR(PM_URL_PULSAR_CSS) "/pulsar.css";
@@ -543,7 +289,6 @@ void mWebServer::WebPage_Root_AddHandlers()
 
   #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
 
-
   SPGM_CTR(PM_URL_FAVICON_ICO) "/favicon.ico";
   server->on(PM_URL_FAVICON_ICO, HTTP_GET, [this](AsyncWebServerRequest* request){
     handleStaticContent(request, FPSTR(PM_URL_FAVICON_ICO), 200, F("image/x-icon"), favicon2_web, favicon2_web_length, false);
@@ -555,8 +300,6 @@ void mWebServer::WebPage_Root_AddHandlers()
 
   /**************************************************************************************************
    * Generic PulSar APIs
-   *
-   * These are normal application APIs, not debug/advanced-only endpoints.
    **************************************************************************************************/
 
   SPGM_CTR(PM_URL_API_TELEMETRY) "/api/telemetry";
@@ -570,116 +313,66 @@ void mWebServer::WebPage_Root_AddHandlers()
 
 
   /**************************************************************************************************
-   * Main PulSar page
+   * Advanced APIs
+   *
+   * IMPORTANT:
+   * Register the longest / most specific paths first.
+   * This AsyncWebServer setup matches parent prefixes, so /adv must come LAST.
    **************************************************************************************************/
 
-  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
 
-  SPGM_CTR(PM_URL_ROOT) "/";
-  server->on(PM_URL_ROOT, HTTP_GET, [this](AsyncWebServerRequest* request){
-    if(captivePortal(request)) return;
-    handleStaticContent(request, F("/"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_root_main_web, PAGE_root_main_web_L, true);
-  });
-  AddURLtoList(PM_URL_ROOT, HTTP_GET);
+  SPGM_CTR(PM_URL_ADV_API_TASKER) "/adv/api/tasker";
+  server->on(PM_URL_ADV_API_TASKER, HTTP_GET, [this](AsyncWebServerRequest* request){ HandleAPI_DebugTaskerMetrics(request); });
+  AddURLtoList(PM_URL_ADV_API_TASKER, HTTP_GET);
+
+  #endif
+
+
+  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+
+  SPGM_CTR(PM_URL_ADV_API_URLS) "/adv/api/urls";
+  server->on(PM_URL_ADV_API_URLS, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_UrlList_JSON(request); });
+  AddURLtoList(PM_URL_ADV_API_URLS, HTTP_GET);
 
   #endif
 
 
   /**************************************************************************************************
-   * Captive portal OS detection
+   * Advanced pages
    *
-   * Phones/tablets/computers probe known URLs when joining WiFi:
-   *
-   *   /generate_204       - Android / ChromeOS
-   *   /hotspot-detect.html- Apple iOS / macOS
-   *   /ncsi.txt           - Windows NCSI
-   *   /connecttest.txt    - Windows connectivity test
-   *
-   * captivePortal() gets first refusal and redirects the client to the PulSar setup portal.
-   * If no captive redirect is required, return the normal success response expected by that OS.
+   * Again: child routes before /adv.
    **************************************************************************************************/
 
-  #ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  #ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
 
-  SPGM_CTR(PM_URL_GENERATE_204) "/generate_204";
-  server->on(PM_URL_GENERATE_204, HTTP_GET, [this](AsyncWebServerRequest* request){
-    if(captivePortal(request)) return;
-    request->send(204);
-  });
-  AddURLtoList(PM_URL_GENERATE_204, HTTP_GET);
-
-
-  SPGM_CTR(PM_URL_HOTSPOT_DETECT) "/hotspot-detect.html";
-  server->on(PM_URL_HOTSPOT_DETECT, HTTP_GET, [this](AsyncWebServerRequest* request){
-    if(captivePortal(request)) return;
-    request->send(200, FPSTR(CONTENT_TYPE_HTML), F("<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>"));
-  });
-  AddURLtoList(PM_URL_HOTSPOT_DETECT, HTTP_GET);
-
-
-  SPGM_CTR(PM_URL_NCSI) "/ncsi.txt";
-  server->on(PM_URL_NCSI, HTTP_GET, [this](AsyncWebServerRequest* request){
-    if(captivePortal(request)) return;
-    request->send(200, FPSTR(CONTENT_TYPE_PLAIN), F("Microsoft NCSI"));
-  });
-  AddURLtoList(PM_URL_NCSI, HTTP_GET);
-
-
-  SPGM_CTR(PM_URL_CONNECTTEST) "/connecttest.txt";
-  server->on(PM_URL_CONNECTTEST, HTTP_GET, [this](AsyncWebServerRequest* request){
-    if(captivePortal(request)) return;
-    request->send(200, FPSTR(CONTENT_TYPE_PLAIN), F("Microsoft Connect Test"));
-  });
-  AddURLtoList(PM_URL_CONNECTTEST, HTTP_GET);
+  SPGM_CTR(PM_URL_ADV_TELEMETRY) "/adv/telemetry";
+  server->on(PM_URL_ADV_TELEMETRY, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_DebugTelemetry(request); });
+  AddURLtoList(PM_URL_ADV_TELEMETRY, HTTP_GET);
 
   #endif
 
 
-  /**************************************************************************************************
-   * Settings
-   *
-   * One shared GET/POST dispatcher owns the settings namespace.
-   * SettingsPages_GET/POST inspect request->url() and select WebSettingsSubPage.
-   *
-   * Subpage entries below are URL catalogue entries only; they are NOT separate handlers.
-   **************************************************************************************************/
+  #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
 
-  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  SPGM_CTR(PM_URL_ADV_TASKER) "/adv/tasker";
+  server->on(PM_URL_ADV_TASKER, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_DebugTaskerMetrics(request); });
+  AddURLtoList(PM_URL_ADV_TASKER, HTTP_GET);
 
-  SPGM_CTR(PM_URL_SETTINGS) "/settings";
-  server->on(PM_URL_SETTINGS, HTTP_GET, [this](AsyncWebServerRequest* request){ SettingsPages_GET(request); });
-  server->on(PM_URL_SETTINGS, HTTP_POST, [this](AsyncWebServerRequest* request){ SettingsPages_POST(request); });
-  AddURLtoList(PM_URL_SETTINGS, HTTP_GET);
-  AddURLtoList(PM_URL_SETTINGS, HTTP_POST);
+  #endif
 
 
-  SPGM_CTR(PM_URL_SETTINGS_NETWORK)  "/settings/network";  AddURLtoList(PM_URL_SETTINGS_NETWORK,  HTTP_GET); AddURLtoList(PM_URL_SETTINGS_NETWORK,  HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_HARDWARE) "/settings/hardware"; AddURLtoList(PM_URL_SETTINGS_HARDWARE, HTTP_GET); AddURLtoList(PM_URL_SETTINGS_HARDWARE, HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_SYSTEM)   "/settings/system";   AddURLtoList(PM_URL_SETTINGS_SYSTEM,   HTTP_GET); AddURLtoList(PM_URL_SETTINGS_SYSTEM,   HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_MODULES)  "/settings/modules";  AddURLtoList(PM_URL_SETTINGS_MODULES,  HTTP_GET); AddURLtoList(PM_URL_SETTINGS_MODULES,  HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_STORAGE)  "/settings/storage";  AddURLtoList(PM_URL_SETTINGS_STORAGE,  HTTP_GET); AddURLtoList(PM_URL_SETTINGS_STORAGE,  HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_LOGGING)  "/settings/logging";  AddURLtoList(PM_URL_SETTINGS_LOGGING,  HTTP_GET); AddURLtoList(PM_URL_SETTINGS_LOGGING,  HTTP_POST);
-  SPGM_CTR(PM_URL_SETTINGS_SECURITY) "/settings/security"; AddURLtoList(PM_URL_SETTINGS_SECURITY, HTTP_GET); AddURLtoList(PM_URL_SETTINGS_SECURITY, HTTP_POST);
+  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
-
-  /**************************************************************************************************
-   * Legacy/general JSON endpoint
-   *
-   * Keep for now until all remaining callers of /json2 have been identified.
-   **************************************************************************************************/
-
-  SPGM_CTR(PM_URL_JSON2) "/json2";
-  server->on(PM_URL_JSON2, HTTP_GET, [this](AsyncWebServerRequest* request){ serveJson(request); });
-  AddURLtoList(PM_URL_JSON2, HTTP_GET);
+  SPGM_CTR(PM_URL_ADV_URLS) "/adv/urls";
+  server->on(PM_URL_ADV_URLS, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_UrlList(request); });
+  AddURLtoList(PM_URL_ADV_URLS, HTTP_GET);
 
   #endif
 
 
   /**************************************************************************************************
    * Console
-   *
-   * ESP8266: polling
-   * ESP32:   WebSocket, with optional polling test page
    **************************************************************************************************/
 
   #ifdef ESP8266
@@ -706,10 +399,76 @@ void mWebServer::WebPage_Root_AddHandlers()
 
 
   /**************************************************************************************************
+   * Settings
+   *
+   * One shared GET/POST dispatcher owns the settings namespace.
+   * SettingsPages_GET/POST inspect request->url() and select WebSettingsSubPage.
+   **************************************************************************************************/
+
+  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+
+  SPGM_CTR(PM_URL_SETTINGS2) "/settings";
+  server->on(PM_URL_SETTINGS2, HTTP_GET, [this](AsyncWebServerRequest* request){ SettingsPages_GET(request); });
+  server->on(PM_URL_SETTINGS2, HTTP_POST, [this](AsyncWebServerRequest* request){ SettingsPages_POST(request); });
+  AddURLtoList(PM_URL_SETTINGS2, HTTP_GET);
+  AddURLtoList(PM_URL_SETTINGS2, HTTP_POST);
+
+
+  /**************************************************************************************************
+   * Legacy/general JSON endpoint
+   **************************************************************************************************/
+
+  SPGM_CTR(PM_URL_JSON2) "/json2";
+  server->on(PM_URL_JSON2, HTTP_GET, [this](AsyncWebServerRequest* request){ serveJson(request); });
+  AddURLtoList(PM_URL_JSON2, HTTP_GET);
+
+  #endif
+
+
+  /**************************************************************************************************
+   * Captive portal OS detection
+   **************************************************************************************************/
+
+  #ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+
+  SPGM_CTR(PM_URL_HOTSPOT_DETECT) "/hotspot-detect.html";
+  server->on(PM_URL_HOTSPOT_DETECT, HTTP_GET, [this](AsyncWebServerRequest* request){
+    if(captivePortal(request)) return;
+    request->send(200, FPSTR(CONTENT_TYPE_HTML), F("<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>"));
+  });
+  AddURLtoList(PM_URL_HOTSPOT_DETECT, HTTP_GET);
+
+
+  SPGM_CTR(PM_URL_CONNECTTEST) "/connecttest.txt";
+  server->on(PM_URL_CONNECTTEST, HTTP_GET, [this](AsyncWebServerRequest* request){
+    if(captivePortal(request)) return;
+    request->send(200, FPSTR(CONTENT_TYPE_PLAIN), F("Microsoft Connect Test"));
+  });
+  AddURLtoList(PM_URL_CONNECTTEST, HTTP_GET);
+
+
+  SPGM_CTR(PM_URL_GENERATE_204) "/generate_204";
+  server->on(PM_URL_GENERATE_204, HTTP_GET, [this](AsyncWebServerRequest* request){
+    if(captivePortal(request)) return;
+    request->send(204);
+  });
+  AddURLtoList(PM_URL_GENERATE_204, HTTP_GET);
+
+
+  SPGM_CTR(PM_URL_NCSI) "/ncsi.txt";
+  server->on(PM_URL_NCSI, HTTP_GET, [this](AsyncWebServerRequest* request){
+    if(captivePortal(request)) return;
+    request->send(200, FPSTR(CONTENT_TYPE_PLAIN), F("Microsoft NCSI"));
+  });
+  AddURLtoList(PM_URL_NCSI, HTTP_GET);
+
+  #endif
+
+
+  /**************************************************************************************************
    * Advanced landing page
    *
-   * Public URL uses /adv rather than /debug. Internal feature flags/functions can remain named
-   * DEBUG because they describe how the firmware feature is compiled, not its user-facing URL.
+   * MUST come after every /adv/... child route.
    **************************************************************************************************/
 
   #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
@@ -724,62 +483,25 @@ void mWebServer::WebPage_Root_AddHandlers()
 
 
   /**************************************************************************************************
-   * Advanced - Telemetry viewer
+   * Root
    *
-   * Viewer is optional/debug. The underlying /api/telemetry endpoint above is always available.
+   * "/" is the broadest route and therefore belongs near the end.
    **************************************************************************************************/
 
-  #ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
 
-  SPGM_CTR(PM_URL_ADV_TELEMETRY) "/adv/telemetry";
-  server->on(PM_URL_ADV_TELEMETRY, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_DebugTelemetry(request); });
-  AddURLtoList(PM_URL_ADV_TELEMETRY, HTTP_GET);
-
-  #endif
-
-
-  /**************************************************************************************************
-   * Advanced - Tasker metrics
-   **************************************************************************************************/
-
-  #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
-
-  SPGM_CTR(PM_URL_ADV_TASKER) "/adv/tasker";
-  server->on(PM_URL_ADV_TASKER, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_DebugTaskerMetrics(request); });
-  AddURLtoList(PM_URL_ADV_TASKER, HTTP_GET);
-
-
-  SPGM_CTR(PM_URL_ADV_API_TASKER) "/adv/api/tasker";
-  server->on(PM_URL_ADV_API_TASKER, HTTP_GET, [this](AsyncWebServerRequest* request){ HandleAPI_DebugTaskerMetrics(request); });
-  AddURLtoList(PM_URL_ADV_API_TASKER, HTTP_GET);
-
-  #endif
-
-
-  /**************************************************************************************************
-   * Advanced - Registered URLs
-   **************************************************************************************************/
-
-  #ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
-
-  SPGM_CTR(PM_URL_ADV_URLS) "/adv/urls";
-  server->on(PM_URL_ADV_URLS, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_UrlList(request); });
-  AddURLtoList(PM_URL_ADV_URLS, HTTP_GET);
-
-
-  SPGM_CTR(PM_URL_ADV_API_URLS) "/adv/api/urls";
-  server->on(PM_URL_ADV_API_URLS, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_UrlList_JSON(request); });
-  AddURLtoList(PM_URL_ADV_API_URLS, HTTP_GET);
+  SPGM_CTR(PM_URL_ROOT) "/";
+  server->on(PM_URL_ROOT, HTTP_GET, [this](AsyncWebServerRequest* request){
+    if(captivePortal(request)) return;
+    handleStaticContent(request, F("/"), 200, FPSTR(CONTENT_TYPE_HTML), PAGE_root_main_web, PAGE_root_main_web_L, true);
+  });
+  AddURLtoList(PM_URL_ROOT, HTTP_GET);
 
   #endif
 
 
   /**************************************************************************************************
    * Fallback
-   *
-   * OPTIONS supports CORS preflight.
-   * Lighting fallback remains temporarily while remaining lighting routes are migrated to explicit
-   * module-owned handlers. Anything still unresolved returns the PulSar 404 page.
    **************************************************************************************************/
 
   server->onNotFound([this](AsyncWebServerRequest* request){
@@ -859,7 +581,7 @@ void mWebServer::HandleAPI_URLApplications(AsyncWebServerRequest* request)
     first_module = false;
 
     response->print(F("{\"Module\":\""));
-    response->print(module_name);
+    PrintJSONString(*response, module_name);
     response->print(F("\",\"Links\":["));
 
     bool first_link = true;
@@ -868,11 +590,7 @@ void mWebServer::HandleAPI_URLApplications(AsyncWebServerRequest* request)
     {
       if(application_urls[j].module_id != module_id) continue;
 
-      if(!first_link)
-      {
-        response->print(',');
-      }
-
+      if(!first_link) response->print(',');
       first_link = false;
 
       response->print('[');
@@ -880,20 +598,18 @@ void mWebServer::HandleAPI_URLApplications(AsyncWebServerRequest* request)
       if(application_urls[j].friendly_name.length())
       {
         response->print('"');
-        response->print(application_urls[j].friendly_name);
-        response->print(F("\",\""));
-        response->print(application_urls[j].url);
-        response->print('"');
+        PrintJSONString(*response, application_urls[j].friendly_name.c_str());
       }
       else
       {
         response->print('"');
-        response->print(application_urls[j].url);
-        response->print(F("\",\""));
-        response->print(application_urls[j].url);
-        response->print('"');
+        PrintJSONString(*response, application_urls[j].url.c_str());
       }
 
+      response->print(F("\",\""));
+      PrintJSONString(*response, application_urls[j].url.c_str());
+      response->print(F("\","));
+      response->print(application_urls[j].port);
       response->print(']');
     }
 
@@ -906,20 +622,12 @@ void mWebServer::HandleAPI_URLApplications(AsyncWebServerRequest* request)
 }
 
 
-#ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+
 void mWebServer::HandlePage_UrlList(AsyncWebServerRequest *request)
 {
   if (captivePortal(request)) return;
-
-  handleStaticContent(
-    request,
-    F("/url_list.htm"),
-    200,
-    FPSTR(CONTENT_TYPE_HTML),
-    PAGE_url_list,
-    PAGE_url_list_length,
-    true
-  );
+  handleStaticContent(request,F("/url_list.htm"),200,FPSTR(CONTENT_TYPE_HTML),PAGE_url_list,PAGE_url_list_length,true);
 }
 
 
@@ -942,22 +650,7 @@ void mWebServer::HandlePage_UrlList_JSON(AsyncWebServerRequest *request)
     }
 
     response->print(F("{\"url\":\""));
-
-    // minimal JSON escaping for url
-    for (size_t j = 0; j < entry.url.length(); j++)
-    {
-      char c = entry.url[j];
-      switch (c)
-      {
-        case '\"': response->print(F("\\\"")); break;
-        case '\\': response->print(F("\\\\")); break;
-        case '\n': response->print(F("\\n"));  break;
-        case '\r': response->print(F("\\r"));  break;
-        case '\t': response->print(F("\\t"));  break;
-        default:   response->write(c);         break;
-      }
-    }
-
+    PrintJSONString(*response, entry.url.c_str());
     response->print(F("\",\"method\":"));
     response->print(entry.method);
     response->print(F(",\"port\":"));
@@ -972,829 +665,5 @@ void mWebServer::HandlePage_UrlList_JSON(AsyncWebServerRequest *request)
 
 
 
-#ifdef ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
-void mWebServer::WebUI_PrintJSONString(Print* response, const char* str)
-{
-  if(!response || !str) return;
 
-  while(*str)
-  {
-    const char c = *str++;
-
-    switch(c)
-    {
-      case '\\': response->print(F("\\\\")); break;
-      case '"':  response->print(F("\\\"")); break;
-      case '\n': response->print(F("\\n")); break;
-      case '\r': response->print(F("\\r")); break;
-      case '\t': response->print(F("\\t")); break;
-
-      default:
-        if((uint8_t)c >= 32)
-        {
-          response->print(c);
-        }
-      break;
-    }
-  }
-}
-
-bool mWebServer::WebUI_Begin(Print* response)
-{
-  if(!response) return false;
-  if(webui.response) return false;
-
-  webui.response = response;
-  webui.first_module = true;
-  webui.first_control = true;
-  webui.module_open = false;
-  webui.button_row_open = false;
-  webui.first_option = true;
-
-  response->print(F("{\"controls\":{\"Modules\":["));
-
-  return true;
-}
-
-
-void mWebServer::WebUI_End()
-{
-  if(!webui.response) return;
-
-  if(webui.button_row_open)
-  {
-    WebUI_AddButtonRow_End();
-  }
-
-  if(webui.module_open)
-  {
-    WebUI_Module_End();
-  }
-
-  webui.response->print(F("]}}"));
-
-  webui.response = nullptr;
-  webui.first_module = true;
-  webui.first_control = true;
-  webui.module_open = false;
-  webui.button_row_open = false;
-  webui.first_option = true;
-}
-
-void mWebServer::WebUI_Module_Start(uint16_t module_id, const char* module_name)
-{
-  if(!webui.response) return;
-
-  if(webui.module_open)
-  {
-    WebUI_Module_End();
-  }
-
-  if(!webui.first_module)
-  {
-    webui.response->print(',');
-  }
-
-  webui.first_module = false;
-  webui.first_control = true;
-  webui.module_open = true;
-
-  char display_name_buffer[50];
-
-  const char* display_name = tkr->GetModuleNameDisplayEachWord(
-    module_id,
-    display_name_buffer,
-    sizeof(display_name_buffer)
-  );
-
-  if(!display_name)
-  {
-    display_name = module_name ? module_name : "";
-  }
-
-  webui.response->print(F("{\"ID\":"));
-  webui.response->print(module_id);
-
-  webui.response->print(F(",\"Name\":\""));
-  WebUI_PrintJSONString(webui.response, display_name);
-  webui.response->print(F("\",\"Controls\":["));
-}
-
-
-void mWebServer::WebUI_Module_End()
-{
-  if(!webui.response || !webui.module_open) return;
-
-  webui.response->print(F("]}"));
-
-  webui.module_open = false;
-}
-
-
-class WebUIStringPrint : public Print
-{
-  public:
-
-  String value;
-
-  size_t write(uint8_t c) override
-  {
-    value += (char)c;
-    return 1;
-  }
-
-  size_t write(const uint8_t* buffer, size_t size) override
-  {
-    if(!buffer || !size) return 0;
-
-    value.reserve(value.length() + size);
-
-    for(size_t i = 0; i < size; i++)
-    {
-      value += (char)buffer[i];
-    }
-
-    return size;
-  }
-};
-
-
-bool mWebServer::WebSocket_SendControls(AsyncWebSocketClient* client)
-{
-  if(!client) return false;
-
-  WebUIStringPrint output;
-
-  output.value.reserve(2048);
-
-  if(!WebUI_Begin(&output))
-  {
-    client->text(F("{\"error\":\"webui busy\"}"));
-    return false;
-  }
-
-  tkr->Tasker_Interface(TASK_WEBUI_APPEND);
-
-  WebUI_End();
-
-  return WebSocket_SendText(
-    client,
-    output.value.c_str(),
-    output.value.length()
-  );
-}
-
-
-static void WebUI_ControlComma(mWebServer::WebUIContext& ctx)
-{
-  if(!ctx.response) return;
-
-  if(!ctx.first_control)
-  {
-    ctx.response->print(',');
-  }
-
-  ctx.first_control = false;
-}
-void mWebServer::WebUI_AddToggle(const char* command, uint8_t device_id, const char* name, bool state)
-{
-  if(!webui.response || !webui.module_open) return;
-
-  if(!webui.first_control)
-  {
-    webui.response->print(',');
-  }
-
-  webui.first_control = false;
-
-  webui.response->print(F("{\"T\":\"toggle\",\"C\":\""));
-  WebUI_PrintJSONString(webui.response, command);
-
-  webui.response->print(F("\",\"D\":"));
-  webui.response->print(device_id);
-
-  webui.response->print(F(",\"N\":\""));
-  WebUI_PrintJSONString(webui.response, name ? name : "");
-
-  webui.response->print(F("\",\"V\":"));
-  webui.response->print(state ? 1 : 0);
-
-  webui.response->print('}');
-}
-void mWebServer::WebUI_AddMomentary(const char* command, uint8_t device_id, const char* name, bool state)
-{
-  if(!webui.response || !webui.module_open) return;
-
-  if(!webui.first_control)
-  {
-    webui.response->print(',');
-  }
-
-  webui.first_control = false;
-
-  webui.response->print(F("{\"T\":\"momentary\",\"C\":\""));
-  WebUI_PrintJSONString(webui.response, command);
-
-  webui.response->print(F("\",\"D\":"));
-  webui.response->print(device_id);
-
-  webui.response->print(F(",\"N\":\""));
-  WebUI_PrintJSONString(webui.response, name ? name : "");
-
-  webui.response->print(F("\",\"V\":"));
-  webui.response->print(state ? 1 : 0);
-
-  webui.response->print('}');
-}
-void mWebServer::WebUI_AddTestSwitch(const char* command, uint8_t device_id, const char* name, bool physical_state)
-{
-  if(!webui.response || !webui.module_open) return;
-
-  if(!webui.first_control)
-  {
-    webui.response->print(',');
-  }
-
-  webui.first_control = false;
-
-  webui.response->print(F("{\"T\":\"testswitch\",\"C\":\""));
-  WebUI_PrintJSONString(webui.response, command);
-
-  webui.response->print(F("\",\"D\":"));
-  webui.response->print(device_id);
-
-  webui.response->print(F(",\"N\":\""));
-  WebUI_PrintJSONString(webui.response, name ? name : "");
-
-  webui.response->print(F("\",\"V\":"));
-  webui.response->print(physical_state ? 1 : 0);
-
-  webui.response->print('}');
-}
-
-void mWebServer::WebUI_AddButtonRow_Start(const char* command, uint8_t device_id, const char* name, const char* description, int32_t selected_value)
-{
-  if(!webui.response || !webui.module_open) return;
-
-  if(!webui.first_control){
-    webui.response->print(',');
-  }
-
-  webui.first_control = false;
-
-  webui.response->print(F("{\"T\":\"buttons\",\"C\":\""));
-  WebUI_PrintJSONString(webui.response, command);
-
-  webui.response->print(F("\",\"D\":"));
-  webui.response->print(device_id);
-
-  webui.response->print(F(",\"N\":\""));
-  WebUI_PrintJSONString(webui.response, name ? name : "");
-
-  if(description && description[0]){
-    webui.response->print(F("\",\"S\":\""));
-    WebUI_PrintJSONString(webui.response, description);
-  }
-
-  webui.response->print(F("\",\"V\":"));
-  webui.response->print(selected_value);
-
-  webui.response->print(F(",\"O\":["));
-
-  webui.button_row_open = true;
-  webui.first_option = true;
-}
-
-void mWebServer::WebUI_AddButtonRow_Option(const char* name, int32_t value)
-{
-  if(!webui.response || !webui.button_row_open) return;
-
-  if(!webui.first_option)
-  {
-    webui.response->print(',');
-  }
-
-  webui.first_option = false;
-
-  webui.response->print(F("[\""));
-  WebUI_PrintJSONString(webui.response, name ? name : "");
-  webui.response->print(F("\","));
-  webui.response->print(value);
-  webui.response->print(']');
-}
-
-
-void mWebServer::WebUI_AddButtonRow_End()
-{
-  if(!webui.response || !webui.button_row_open) return;
-
-  webui.response->print(F("]}"));
-
-  webui.button_row_open = false;
-  webui.first_option = true;
-}
-
-void mWebServer::WebUI_AddIndicator(uint8_t device_id, const char* name, bool state)
-{
-  if(!webui.response || !webui.module_open) return;
-
-  if(!webui.first_control)
-  {
-    webui.response->print(',');
-  }
-
-  webui.first_control = false;
-
-  webui.response->print(F("{\"T\":\"indicator\",\"D\":"));
-  webui.response->print(device_id);
-
-  webui.response->print(F(",\"N\":\""));
-  WebUI_PrintJSONString(webui.response, name ? name : "");
-
-  webui.response->print(F("\",\"V\":"));
-  webui.response->print(state ? 1 : 0);
-
-  webui.response->print('}');
-}
-
-void mWebServer::WebUI_AddValue(uint8_t device_id, const char* name, const char* value, const char* units)
-{
-  if(!webui.response || !webui.module_open) return;
-
-  if(!webui.first_control)
-  {
-    webui.response->print(',');
-  }
-
-  webui.first_control = false;
-
-  webui.response->print(F("{\"T\":\"value\",\"D\":"));
-  webui.response->print(device_id);
-
-  webui.response->print(F(",\"N\":\""));
-  WebUI_PrintJSONString(webui.response, name ? name : "");
-
-  webui.response->print(F("\",\"V\":\""));
-  WebUI_PrintJSONString(webui.response, value ? value : "");
-  webui.response->print('"');
-
-  if(units && units[0])
-  {
-    webui.response->print(F(",\"U\":\""));
-    WebUI_PrintJSONString(webui.response, units);
-    webui.response->print('"');
-  }
-
-  webui.response->print('}');
-}
-
-void mWebServer::WebUI_AddValue(uint8_t device_id, const char* name, int32_t value, const char* units)
-{
-  if(!webui.response || !webui.module_open) return;
-
-  if(!webui.first_control)
-  {
-    webui.response->print(',');
-  }
-
-  webui.first_control = false;
-
-  webui.response->print(F("{\"T\":\"value\",\"D\":"));
-  webui.response->print(device_id);
-
-  webui.response->print(F(",\"N\":\""));
-  WebUI_PrintJSONString(webui.response, name ? name : "");
-
-  webui.response->print(F("\",\"V\":"));
-  webui.response->print(value);
-
-  if(units && units[0])
-  {
-    webui.response->print(F(",\"U\":\""));
-    WebUI_PrintJSONString(webui.response, units);
-    webui.response->print('"');
-  }
-
-  webui.response->print('}');
-}
-
-void mWebServer::WebUI_AddValue(uint8_t device_id, const char* name, float value, const char* units, uint8_t precision)
-{
-  if(!webui.response || !webui.module_open) return;
-
-  if(!webui.first_control)
-  {
-    webui.response->print(',');
-  }
-
-  webui.first_control = false;
-
-  webui.response->print(F("{\"T\":\"value\",\"D\":"));
-  webui.response->print(device_id);
-
-  webui.response->print(F(",\"N\":\""));
-  WebUI_PrintJSONString(webui.response, name ? name : "");
-
-  webui.response->print(F("\",\"V\":"));
-  webui.response->print(value, precision);
-
-  if(units && units[0])
-  {
-    webui.response->print(F(",\"U\":\""));
-    WebUI_PrintJSONString(webui.response, units);
-    webui.response->print('"');
-  }
-
-  webui.response->print('}');
-}
-
-
-#endif // ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
-
-
-#ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
-
-void mWebServer::HandlePage_DebugTaskerMetrics(AsyncWebServerRequest* request)
-{
-  handleStaticContent(
-    request,
-    F("/debug/tasker"),
-    200,
-    FPSTR(CONTENT_TYPE_HTML),
-    PAGE_debug_telemetry_metrics_web,
-    PAGE_debug_telemetry_metrics_web_length,
-    true
-  );
-}
-
-
-void mWebServer::HandleAPI_DebugTaskerMetrics(AsyncWebServerRequest* request)
-{
-  const String action = request->hasParam("action") ? request->getParam("action")->value() : F("data");
-
-  if(action == F("enable"))
-  {
-    tkr->metrics.RequestEnable(tkr->GetClassCount());
-    tkr->metrics.Touch();
-
-    request->send(200, FPSTR(CONTENT_TYPE_JSON), F("{\"ok\":1}"));
-    return;
-  }
-
-  if(action == F("disable"))
-  {
-    tkr->metrics.RequestDisable();
-
-    request->send(200, FPSTR(CONTENT_TYPE_JSON), F("{\"ok\":1}"));
-    return;
-  }
-
-  if(action == F("reset"))
-  {
-    tkr->metrics.Touch();
-    tkr->metrics.RequestReset();
-
-    request->send(200, FPSTR(CONTENT_TYPE_JSON), F("{\"ok\":1}"));
-    return;
-  }
-
-  if(action == F("touch"))
-  {
-    tkr->metrics.Touch();
-
-    request->send(204);
-    return;
-  }
-
-  if(action == F("snapshot"))
-  {
-    tkr->metrics.Touch();
-    tkr->metrics.RequestSnapshot();
-
-    request->send(200, FPSTR(CONTENT_TYPE_JSON), F("{\"ok\":1}"));
-    return;
-  }
-
-  if(action == F("data"))
-  {
-    if(!tkr->metrics.IsSnapshotReady())
-    {
-      request->send(202, FPSTR(CONTENT_TYPE_JSON), F("{\"ready\":false}"));
-      return;
-    }
-
-    AsyncResponseStream* response = request->beginResponseStream(FPSTR(CONTENT_TYPE_JSON));
-
-    if(!response)
-    {
-      request->send(500);
-      return;
-    }
-
-    response->addHeader(F("Cache-Control"), F("no-store"));
-
-    tkr->metrics.WriteSnapshotJSON(*response, *tkr);
-
-    request->send(response);
-    return;
-  }
-
-  request->send(400, FPSTR(CONTENT_TYPE_JSON), F("{\"error\":\"unknown action\"}"));
-}
-
-#endif
-
-
-
-#ifdef ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
-
-
-
-#ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
-
-bool mWebServer::WebSocket_SendText(AsyncWebSocketClient* client, const char* data, size_t len)
-{
-  if(!client || !data || !len) return false;
-
-  AsyncWebSocketBuffer buffer(len);
-
-  if(!buffer)
-  {
-    return false;
-  }
-
-  memcpy(buffer.data(), data, len);
-
-  client->text(std::move(buffer));
-
-  return true;
-}
-
-
-bool mWebServer::WebSocket_SendWrappedJSON(AsyncWebSocketClient* client, const char* key, const char* json, size_t json_len)
-{
-  if(!client || !key || !key[0]) return false;
-
-  static const char empty_json[] = "{}";
-
-  if(!json || !json_len)
-  {
-    json = empty_json;
-    json_len = sizeof(empty_json) - 1;
-  }
-
-  const size_t key_len = strlen(key);
-  const size_t total_len = key_len + json_len + 5;
-
-  AsyncWebSocketBuffer buffer(total_len);
-
-  if(!buffer)
-  {
-    return false;
-  }
-
-  uint8_t* out = reinterpret_cast<uint8_t*>(buffer.data());
-  size_t pos = 0;
-
-  out[pos++] = '{';
-  out[pos++] = '"';
-
-  memcpy(out + pos, key, key_len);
-  pos += key_len;
-
-  out[pos++] = '"';
-  out[pos++] = ':';
-
-  memcpy(out + pos, json, json_len);
-  pos += json_len;
-
-  out[pos++] = '}';
-
-  client->text(std::move(buffer));
-
-  return true;
-}
-
-
-bool mWebServer::WebSocket_SendSensors(AsyncWebSocketClient* client)
-{
-  if(!client) return false;
-
-  #ifdef USE_MODULE_SENSORS_INTERFACE
-
-  if(!JBI->requestJSONBufferLock(GetModuleUniqueID()))
-  {
-    client->text(F("{\"error\":\"json buffer busy\"}"));
-    return false;
-  }
-
-  bool data_to_send = tkr_iSensors->ConstructJSON_Sensor();
-
-  bool result;
-
-  if(data_to_send)
-  {
-    result = WebSocket_SendWrappedJSON(
-      client,
-      "sensors",
-      JBI->GetBufferPtr(),
-      JBI->GetLength()
-    );
-  }
-  else
-  {
-    result = WebSocket_SendWrappedJSON(client, "sensors", "{}", 2);
-  }
-
-  JBI->releaseJSONBufferLock();
-
-  return result;
-
-  #else
-
-  return WebSocket_SendWrappedJSON(client, "sensors", "{}", 2);
-
-  #endif
-}
-
-
-bool mWebServer::WebSocket_SendEnergy(AsyncWebSocketClient* client)
-{
-  if(!client) return false;
-
-  #ifdef USE_MODULE_ENERGY_INTERFACE
-
-  if(!JBI->requestJSONBufferLock(GetModuleUniqueID()))
-  {
-    client->text(F("{\"error\":\"json buffer busy\"}"));
-    return false;
-  }
-
-  bool data_to_send = tkr_iEnergy->ConstructJSON_Sensor();
-
-  bool result;
-
-  if(data_to_send)
-  {
-    result = WebSocket_SendWrappedJSON(
-      client,
-      "energy",
-      JBI->GetBufferPtr(),
-      JBI->GetLength()
-    );
-  }
-  else
-  {
-    result = WebSocket_SendWrappedJSON(client, "energy", "{}", 2);
-  }
-
-  JBI->releaseJSONBufferLock();
-
-  return result;
-
-  #else
-
-  return WebSocket_SendWrappedJSON(client, "energy", "{}", 2);
-
-  #endif
-}
-
-
-void mWebServer::wsEventPages(
-  AsyncWebSocket *server,
-  AsyncWebSocketClient *client,
-  AwsEventType type,
-  void *arg,
-  uint8_t *data,
-  size_t len
-)
-{
-  if(type == WS_EVT_CONNECT)
-  {
-    return;
-  }
-
-  if(type == WS_EVT_DISCONNECT)
-  {
-    return;
-  }
-
-  if(type == WS_EVT_ERROR)
-  {
-    return;
-  }
-
-  if(type == WS_EVT_PONG)
-  {
-    return;
-  }
-
-  if(type != WS_EVT_DATA)
-  {
-    return;
-  }
-
-  AwsFrameInfo* info = reinterpret_cast<AwsFrameInfo*>(arg);
-
-  if(!info || !info->final || info->index != 0 || info->len != len || info->opcode != WS_TEXT)
-  {
-    client->text(F("{\"error\":\"multipart unsupported\"}"));
-    return;
-  }
-
-
-  /********************************************************************
-   * Fixed webpage data requests.
-   *
-   * These deliberately bypass JsonParser/TASK_JSON_COMMAND_ID.
-   * The webpage controls the exact compact request strings.
-   ********************************************************************/
-
-  static const char request_controls[] = "{\"request\":\"controls\"}";
-  static const char request_sensors[]  = "{\"request\":\"sensors\"}";
-  static const char request_energy[]   = "{\"request\":\"energy\"}";
-
-  #ifdef ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
-  if(len == sizeof(request_controls) - 1 && !memcmp(data, request_controls, len))
-  {
-    WebSocket_SendControls(client);
-    return;
-  }
-  #endif
-
-  if(len == sizeof(request_sensors) - 1 && !memcmp(data, request_sensors, len))
-  {
-    WebSocket_SendSensors(client);
-    return;
-  }
-
-  if(len == sizeof(request_energy) - 1 && !memcmp(data, request_energy, len))
-  {
-    WebSocket_SendEnergy(client);
-    return;
-  }
-
-
-  /********************************************************************
-   * Everything else on the webpage socket is a normal PulSar JSON
-   * command and therefore uses the existing single JSON parse path.
-   ********************************************************************/
-
-  if(len < 2 || data[0] != '{' || data[len - 1] != '}')
-  {
-    client->text(F("{\"error\":\"invalid message\"}"));
-    return;
-  }
-
-  if(len >= sizeof(data_buffer.payload.ctr))
-  {
-    client->text(F("{\"error\":\"command too large\"}"));
-    return;
-  }
-
-  if(!data_buffer.requestLock(GetModuleUniqueID()))
-  {
-    client->text(F("{\"error\":\"command buffer busy\"}"));
-    return;
-  }
-
-  data_buffer.ClearSoft();
-
-  memcpy(data_buffer.payload.ctr, data, len);
-
-  data_buffer.payload.ctr[len] = '\0';
-  data_buffer.payload.length_used = len;
-
-  const int8_t result = tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
-
-  data_buffer.releaseLock();
-
-  if(result != TASKER_RESULT__SUCCESS_ID)
-  {
-    client->text(F("{\"error\":\"json command failed\"}"));
-    return;
-  }
-
-
-  /********************************************************************
-   * A command was completed.
-   * Immediately return authoritative post-command control state.
-   ********************************************************************/
-
-  #ifdef ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
-  WebSocket_SendControls(client);
-  #else
-  client->text(F("{\"ok\":1}"));
-  #endif
-}
-
-#endif
-
-
-
-
-
-
-
-
-#endif
+#endif // USE_MODULE_NETWORK_WEBSERVER

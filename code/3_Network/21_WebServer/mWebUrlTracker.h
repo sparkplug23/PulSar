@@ -2,7 +2,7 @@
 
 #include "1_TaskerManager/mTaskerManager.h"
 
-#ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
 #include <vector>
 #include <Arduino.h>
@@ -25,11 +25,16 @@ public:
 
   void Add(const char* url, int method, uint16_t port = 80)
   {
-    urls.emplace_back(String(url), method, port);
+    if(!url) return;
+    Add(String(url), method, port);
   }
 
   void Add(const String& url, int method, uint16_t port = 80)
   {
+    for(const auto& entry : urls)
+    {
+      if(entry.url == url && entry.method == method && entry.port == port) return;
+    }
     urls.emplace_back(url, method, port);
   }
 

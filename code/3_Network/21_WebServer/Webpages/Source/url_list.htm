@@ -1,36 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Registered URLs</title>
-<link rel="stylesheet" href="/pulsar.css"><script defer src="/pulsar.js"></script><script defer src="/pulsar_data.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Registered URLs</title>
+
+  <link rel="stylesheet" href="/pulsar.css">
+
+  <script src="/pulsar.js"></script>
+  <script src="/pulsar_data.js"></script>
 </head>
+
+
 <body class="data-page">
 
-<header class="page-header"><div class="page-title"><h1>Registered URLs</h1></div><div class="page-actions"><button onclick="load()">Refresh</button><span id="status" class="status">Loading…</span><button onclick="go('/debug/main')">Back</button></div></header>
+  <header class="page-header">
 
-<section class="section"><div class="table-wrap"><table class="compact url-table">
-<thead><tr><th>#</th><th>Method</th><th>Port</th><th>URL</th><th>Link</th></tr></thead>
-<tbody id="rows"></tbody>
-</table></div></section>
+    <div class="page-title">
+      <h1>Registered URLs</h1>
+    </div>
 
-<script>
-const methods=['HTTP_ANY','HTTP_GET','HTTP_POST','HTTP_DELETE','HTTP_PUT','HTTP_PATCH','HTTP_HEAD','HTTP_OPTIONS'];
+    <div class="page-actions">
+      <button onclick="load()">Refresh</button>
+      <span id="status" class="status">Loading…</span>
+      <button onclick="go('/adv')">Back</button>
+    </div>
 
-async function load(){
- setStatus('status','Loading…');
- try{
-  const data=await getJSON('/url_list.json'),body=clearElement('rows'),items=data.items||[];
-  if(!items.length){setTableEmpty(body,5,'No tracked URLs');return setStatus('status','No URLs');}
-  items.forEach((x,i)=>{
-   const port=Number(x.port||80),href=port===80?(x.url||'/'):location.protocol+'//'+location.hostname+':'+port+(x.url||'/');
-   const tr=cE('tr');
-   tr.append(makeCell(i),makeCell(methods[x.method]||x.method),makeCell(port),makeCell(x.url||''));
-   const td=cE('td'),a=cE('a');a.href=href;a.textContent=href;td.appendChild(a);tr.appendChild(td);body.appendChild(tr);
-  });
-  setStatus('status','Loaded '+items.length,'ok');
- }catch(e){setTableEmpty('rows',5,'Failed to load');setStatus('status',e.message,'bad');}
-}
-onReady(load);
-</script>
-</body></html>
+  </header>
+
+
+  <section class="section">
+
+    <div class="table-wrap">
+
+      <table class="compact url-table">
+
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Method</th>
+            <th>Port</th>
+            <th>URL</th>
+            <th>Link</th>
+          </tr>
+        </thead>
+
+        <tbody id="rows"></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <script>
+    const API = '/adv/api/urls';
+
+    const methods = [
+      'HTTP_ANY',
+      'HTTP_GET',
+      'HTTP_POST',
+      'HTTP_DELETE',
+      'HTTP_PUT',
+      'HTTP_PATCH',
+      'HTTP_HEAD',
+      'HTTP_OPTIONS'
+    ];
+
+
+    async function load()
+    {
+      setStatus('status', 'Loading…');
+
+      try
+      {
+        const data = await getJSON(API);
+        const body = clearElement('rows');
+        const items = data.items || [];
+
+        if(!items.length)
+        {
+          setTableEmpty(body, 5, 'No tracked URLs');
+          setStatus('status', 'No URLs');
+          return;
+        }
+
+        items.forEach((item, index)=>{
+          const port = Number(item.port || 80);
+
+          const href = port === 80
+            ? (item.url || '/')
+            : location.protocol +
+              '//' +
+              location.hostname +
+              ':' +
+              port +
+              (item.url || '/');
+
+          const row = cE('tr');
+
+          row.append(
+            makeCell(index),
+            makeCell(methods[item.method] || item.method),
+            makeCell(port),
+            makeCell(item.url || '')
+          );
+
+          const linkCell = cE('td');
+          const link = cE('a');
+
+          link.href = href;
+          link.textContent = href;
+
+          linkCell.appendChild(link);
+          row.appendChild(linkCell);
+          body.appendChild(row);
+        });
+
+        setStatus(
+          'status',
+          'Loaded ' + items.length,
+          'ok'
+        );
+      }
+      catch(e)
+      {
+        setTableEmpty('rows', 5, 'Failed to load');
+        setStatus('status', e.message, 'bad');
+      }
+    }
+
+
+    onReady(load);
+  </script>
+
+</body>
+
+</html>

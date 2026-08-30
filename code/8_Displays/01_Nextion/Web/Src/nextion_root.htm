@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <title>Nextion Control</title>
+  <title>Nextion</title>
 
   <link rel="stylesheet" href="/pulsar.css">
   <script src="/pulsar.js"></script>
@@ -15,44 +15,46 @@
 <body class="page">
 
   <header class="page-header">
+
     <div class="page-title">
       <h1>Nextion Panel</h1>
-      <div class="page-subtitle">Display control and maintenance</div>
+      <div class="page-subtitle">
+        Display control, diagnostics and firmware maintenance
+      </div>
     </div>
 
     <div class="page-actions">
       <button onclick="go('/')">Back</button>
     </div>
+
   </header>
 
 
-  <section class="card">
-    <h2>Firmware</h2>
+  <section class="section">
 
-    <p class="muted">
-      Update or reflash the connected Nextion LCD.
-    </p>
-
-    <div class="page-actions">
-      <button class="primary" onclick="go('/nextion/firmware')">
-        Open Firmware Update
-      </button>
+    <div class="section-head">
+      <div class="section-title">Control</div>
     </div>
-  </section>
+
+    <div class="grid">
+
+      <div class="tile clickable" onclick="go('/nextion/command')">
+        <div class="tile-title">Command Console</div>
+        <div class="tile-description">
+          Send raw commands directly to the connected Nextion panel.
+        </div>
+      </div>
 
 
-  <section class="card">
-    <h2>Commands</h2>
+      <div class="tile clickable" onclick="go('/nextion/firmware')">
+        <div class="tile-title">Firmware Update</div>
+        <div class="tile-description">
+          Upload or download TFT firmware to the connected panel.
+        </div>
+      </div>
 
-    <p class="muted">
-      Send raw commands directly to the Nextion panel.
-    </p>
-
-    <div class="page-actions">
-      <button onclick="go('/nextion/command')">
-        Open Command Console
-      </button>
     </div>
+
   </section>
 
 </body>

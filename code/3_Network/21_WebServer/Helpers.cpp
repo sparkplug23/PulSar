@@ -251,4 +251,34 @@ void mWebServer::serveMessage(AsyncWebServerRequest* request,
 }
 
 
+/**************************************************************************************************
+ * Shared output helpers
+ **************************************************************************************************/
+
+void mWebServer::PrintJSONString(Print& out, const char* str)
+{
+  if(!str) return;
+
+  while(*str)
+  {
+    const char c = *str++;
+
+    switch(c)
+    {
+      case '\\': out.print(F("\\\\")); break;
+      case '"':  out.print(F("\\\"")); break;
+      case '\b': out.print(F("\\b"));  break;
+      case '\f': out.print(F("\\f"));  break;
+      case '\n': out.print(F("\\n"));  break;
+      case '\r': out.print(F("\\r"));  break;
+      case '\t': out.print(F("\\t"));  break;
+      default:
+        if((uint8_t)c >= 32) out.print(c);
+      break;
+    }
+  }
+}
+
+
+
 #endif // USE_MODULE_NETWORK_WEBSERVER

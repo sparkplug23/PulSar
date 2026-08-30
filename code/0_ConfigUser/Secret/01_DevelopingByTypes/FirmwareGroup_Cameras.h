@@ -15,7 +15,7 @@
 //--------------------------------[Enable Device]-------------------------------------
 
 //    ;;;;;;;;;;;; ESP32 ;;;;;;;;;;;;;;;;
-// #define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_01
+#define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_01
 // #define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_02
 // #define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_03
 // #define DEVICE_GROUP__CAMERAS__ESP32_CAM_EYE_SENSOR_01
@@ -42,7 +42,7 @@
 * SECTION: Network Configs
 ************************************/  
 
-#define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
   
 /***********************************
@@ -246,7 +246,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 * SECTION: Network Configs
 ************************************/  
 
-#define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
   
 /***********************************
@@ -334,7 +334,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 * SECTION: Network Configs
 ************************************/  
 
-#define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
   
 /***********************************

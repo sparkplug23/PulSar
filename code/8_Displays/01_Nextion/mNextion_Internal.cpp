@@ -876,33 +876,56 @@ const char*  mNextion::GetObjectName_FromID(uint8_t id, char* objname, uint8_t o
 
 void mNextion::WebPage_AddHandlers()
 {
-  // =====================================================
-  // Static Nextion pages (served via handleStaticContent)
-  // =====================================================
+  /**************************************************************************************************
+   * Dynamic Nextion endpoints
+   *
+   * IMPORTANT:
+   * Register the longest / most specific paths first.
+   * /nextion is the broad parent route and must be registered last.
+   **************************************************************************************************/
 
-  tkr_web->server->on("/nextion/main", HTTP_GET, [](AsyncWebServerRequest* request){
-    tkr_web->handleStaticContent(
-      request, "", 200, FPSTR(CONTENT_TYPE_HTML),
-      WEB_8_Displays_01_Nextion_nextion_root_htm,
-      WEB_8_Displays_01_Nextion_nextion_root_htm_length
-    );
+  tkr_web->server->on("/nextion/tftFileSize", HTTP_GET, [this](AsyncWebServerRequest* request){
+    webHandleTftFileSize(request);
   });
+  AddURLtoList("/nextion/tftFileSize", HTTP_GET);
 
-  tkr_web->server->on("/nextion/firmware", HTTP_GET, [](AsyncWebServerRequest* request){
-    tkr_web->handleStaticContent(
-      request, "", 200, FPSTR(CONTENT_TYPE_HTML),
-      WEB_8_Displays_01_Nextion_firmware_htm,
-      WEB_8_Displays_01_Nextion_firmware_htm_length
-    );
-  });
 
-  tkr_web->server->on("/nextion/command", HTTP_GET, [](AsyncWebServerRequest* request){
-    tkr_web->handleStaticContent(
-      request, "", 200, FPSTR(CONTENT_TYPE_HTML),
-      WEB_8_Displays_01_Nextion_nextion_command_htm,
-      WEB_8_Displays_01_Nextion_nextion_command_htm_length
-    );
+  tkr_web->server->on("/nextion/lcdupload", HTTP_POST,
+    [](AsyncWebServerRequest* request){},
+    [this](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final){
+      webHandleLcdUpload(request, filename, index, data, len, final);
+    }
+  );
+  AddURLtoList("/nextion/lcdupload", HTTP_POST);
+
+
+  tkr_web->server->on("/nextion/lcddownload", HTTP_GET, [this](AsyncWebServerRequest* request){
+    webHandleLcdDownload(request);
   });
+  AddURLtoList("/nextion/lcddownload", HTTP_GET);
+
+
+  tkr_web->server->on("/nextion/reboot_panel", HTTP_GET, [this](AsyncWebServerRequest* request){
+    webHandleNextionRebootPanel(request);
+  });
+  AddURLtoList("/nextion/reboot_panel", HTTP_GET);
+
+
+  tkr_web->server->on("/nextion/cmd", HTTP_GET, [this](AsyncWebServerRequest* request){
+    webHandleNextionCmd(request);
+  });
+  AddURLtoList("/nextion/cmd", HTTP_GET);
+
+
+  tkr_web->server->on("/nextion/cmd", HTTP_POST, [this](AsyncWebServerRequest* request){
+    webHandleNextionCmd(request);
+  });
+  AddURLtoList("/nextion/cmd", HTTP_POST);
+
+
+  /**************************************************************************************************
+   * Result pages
+   **************************************************************************************************/
 
   tkr_web->server->on("/nextion/lcdOtaSuccess", HTTP_GET, [](AsyncWebServerRequest* request){
     tkr_web->handleStaticContent(
@@ -911,6 +934,8 @@ void mNextion::WebPage_AddHandlers()
       WEB_8_Displays_01_Nextion_lcd_ota_success_htm_length
     );
   });
+  AddURLtoList("/nextion/lcdOtaSuccess", HTTP_GET);
+
 
   tkr_web->server->on("/nextion/lcdOtaFailure", HTTP_GET, [](AsyncWebServerRequest* request){
     tkr_web->handleStaticContent(
@@ -919,60 +944,57 @@ void mNextion::WebPage_AddHandlers()
       WEB_8_Displays_01_Nextion_lcd_ota_failure_htm_length
     );
   });
+  AddURLtoList("/nextion/lcdOtaFailure", HTTP_GET);
 
-  // =====================================================
-  // Dynamic Nextion endpoints
-  // =====================================================
 
-  // TFT filesize (used by JS before upload)
-  tkr_web->server->on("/nextion/tftFileSize", HTTP_GET,
-    [this](AsyncWebServerRequest* request){
-      this->webHandleTftFileSize(request);
-    }
-  );
+  /**************************************************************************************************
+   * User-facing Nextion pages
+   **************************************************************************************************/
 
-  // TFT upload (multipart)
-  tkr_web->server->on(
-    "/nextion/lcdupload",
-    HTTP_POST,
-    [](AsyncWebServerRequest* request){ /* completion handled in final */ },
-    [this](AsyncWebServerRequest* request,
-           String filename,
-           size_t index,
-           uint8_t* data,
-           size_t len,
-           bool final)
-    {
-      this->webHandleLcdUpload(request, filename, index, data, len, final);
-    }
-  );
+  tkr_web->server->on("/nextion/firmware", HTTP_GET, [](AsyncWebServerRequest* request){
+    tkr_web->handleStaticContent(
+      request, "", 200, FPSTR(CONTENT_TYPE_HTML),
+      WEB_8_Displays_01_Nextion_firmware_htm,
+      WEB_8_Displays_01_Nextion_firmware_htm_length
+    );
+  });
+  AddURLtoList("/nextion/firmware", HTTP_GET);
 
-  // TFT download via URL
-  tkr_web->server->on("/nextion/lcddownload", HTTP_GET,
-    [this](AsyncWebServerRequest* request){
-      this->webHandleLcdDownload(request);
-    }
-  );
 
-  // Raw Nextion command receiver (GET + POST)
-  tkr_web->server->on("/nextion/cmd", HTTP_GET,
-    [this](AsyncWebServerRequest* request){
-      this->webHandleNextionCmd(request);
-    }
-  );
+  tkr_web->server->on("/nextion/command", HTTP_GET, [](AsyncWebServerRequest* request){
+    tkr_web->handleStaticContent(
+      request, "", 200, FPSTR(CONTENT_TYPE_HTML),
+      WEB_8_Displays_01_Nextion_nextion_command_htm,
+      WEB_8_Displays_01_Nextion_nextion_command_htm_length
+    );
+  });
+ AddURLtoList("/nextion/command", HTTP_GET);
 
-  tkr_web->server->on("/nextion/cmd", HTTP_POST,
-    [this](AsyncWebServerRequest* request){
-      this->webHandleNextionCmd(request);
-    }
-  );
 
-  // Reboot Nextion panel ONLY (not ESP)
-  tkr_web->server->on("/nextion/reboot_panel", HTTP_GET,
-    [this](AsyncWebServerRequest* request){
-      this->webHandleNextionRebootPanel(request);
-    }
-  );
+  /**************************************************************************************************
+   * Nextion landing page
+   *
+   * Broad parent route comes last so it cannot catch /nextion/... child routes.
+   **************************************************************************************************/
+
+  tkr_web->server->on("/nextion", HTTP_GET, [](AsyncWebServerRequest* request){
+    tkr_web->handleStaticContent(
+      request, "", 200, FPSTR(CONTENT_TYPE_HTML),
+      WEB_8_Displays_01_Nextion_nextion_root_htm,
+      WEB_8_Displays_01_Nextion_nextion_root_htm_length
+    );
+  });
+  AddURLtoList("/nextion", HTTP_GET);
+
+
+  /**************************************************************************************************
+   * Main PulSar Applications registration
+   *
+   * Only user-facing pages are advertised here. Internal API/upload endpoints remain hidden.
+   **************************************************************************************************/
+
+  tkr_web->AddURLasApplication(GetModuleUniqueID(), "/nextion", "Overview");
+
 }
 
 

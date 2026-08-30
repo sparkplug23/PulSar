@@ -1,106 +1,404 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tasker Metrics</title>
-<link rel="stylesheet" href="/pulsar.css"><script defer src="/pulsar.js"></script><script defer src="/pulsar_data.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Tasker Metrics</title>
+
+  <link rel="stylesheet" href="/pulsar.css">
+
+  <script src="/pulsar.js"></script>
+  <script src="/pulsar_data.js"></script>
 </head>
+
+
 <body class="page-wide">
 
-<header class="page-header">
-<div class="page-title"><h1>Tasker Advanced Metrics</h1></div>
-<div class="page-actions">
-<label><input id="r1" type="checkbox"> 1s</label>
-<label><input id="r10" type="checkbox" checked> 10s</label>
-<button id="refresh">Refresh</button><button id="reset">Reset</button><button id="stop">Stop</button><button onclick="go('/debug/main')">Back</button>
-<span id="state" class="status">Starting…</span>
-</div></header>
+  <header class="page-header">
 
-<div class="summary">
-<div class="summary-item">Capture: <b id="age">—</b></div>
-<div class="summary-item">Modules: <b id="mc">—</b></div>
-<div class="summary-item">Details: <b id="dc">—</b></div>
-<div class="summary-item">Refresh: <b id="rm">10 s</b></div>
-</div>
+    <div class="page-title">
+      <h1>Tasker Advanced Metrics</h1>
+    </div>
 
-<section class="section"><h2>Module Summary</h2><div class="table-wrap"><table class="compact metrics-table">
-<thead><tr><th>Module</th><th>ID</th><th>Calls</th><th>Last µs</th><th>Avg µs</th><th>Min µs</th><th>Max µs</th><th>Max Task</th><th>Total ms</th><th>µs/sec</th><th>Load %</th></tr></thead><tbody id="mods"></tbody>
-</table></div></section>
+    <div class="page-actions">
 
-<section class="section"><h2>Detailed Tasks</h2><div class="table-wrap"><table class="compact metrics-table">
-<thead><tr><th>Module</th><th>Task</th><th>ID</th><th>Calls</th><th>Last µs</th><th>Avg µs</th><th>Min µs</th><th>Max µs</th><th>Total ms</th><th>Load %</th></tr></thead><tbody id="details"></tbody>
-</table></div></section>
+      <label>
+        <input id="r1" type="checkbox">
+        1s
+      </label>
 
-<script>
-const API='/debug/api/tasker';
-let timer=0,rate=10000,busy=false,stopped=false;
+      <label>
+        <input id="r10" type="checkbox" checked>
+        10s
+      </label>
 
-async function action(a){
- const r=await fetch(API+'?action='+a,{cache:'no-store'});
- if(!r.ok&&r.status!==202)throw Error('HTTP '+r.status);
- return r.status===204?null:r.json().catch(()=>null);
-}
+      <button id="refresh">Refresh</button>
+      <button id="reset">Reset</button>
+      <button id="stop">Stop</button>
+      <button onclick="go('/adv')">Back</button>
 
-async function snapshot(){
- await action('snapshot');
- for(let i=0;i<50;i++){
-  const r=await fetch(API+'?action=data',{cache:'no-store'});
-  if(r.status===200)return r.json();
-  if(r.status!==202)throw Error('HTTP '+r.status);
-  await sleep(20);
- }
- throw Error('Snapshot timeout');
-}
+      <span id="state" class="status">Starting…</span>
 
-function rows(id,items,detail=false){
- const body=clearElement(id);
- if(!items.length)return setTableEmpty(body,detail?10:11,'No samples yet');
+    </div>
 
- for(const x of items){
-  const vals=detail?[
-   x.module_name,x.task_name||x.task_id,x.task_id,x.calls,x.last_us,x.avg_us,x.min_us,x.max_us,Number(x.total_us||0)/1000,x.load_pct
-  ]:[
-   x.name,x.module_id,x.calls,x.last_us,x.avg_us,x.min_us,x.max_us,x.max_task_name||x.max_task_id,Number(x.total_us||0)/1000,x.us_per_second,x.load_pct
-  ];
-  const tr=appendRow(body,vals.map((v,i)=>typeof v==='number'?formatNumber(v,i>7?3:0):v));
-  if(Number(x.max_us)>=20000||!detail&&Number(x.load_pct)>=10)tr.className='hot';
- }
-}
+  </header>
 
-async function refresh(){
- if(busy||stopped)return;
- busy=true;setStatus('state','Reading…');
- try{
-  const x=await snapshot();
-  setText('age',formatDuration(x.capture_age_ms));
-  setText('mc',x.module_records+' / '+x.module_capacity);
-  setText('dc',x.detail_records+' / '+x.detail_capacity);
-  rows('mods',[...(x.modules||[])].sort((a,b)=>b.load_pct-a.load_pct));
-  rows('details',[...(x.details||[])].sort((a,b)=>b.max_us-a.max_us),true);
-  setStatus('state','Recording','ok');
- }catch(e){setStatus('state',e.message,'bad');}
- busy=false;
-}
 
-function setRate(ms){
- rate=ms;if(timer)clearInterval(timer);timer=0;
- setText('rm',ms===1000?'1 s':ms===10000?'10 s':'Manual');
- if(ms)timer=setInterval(refresh,ms);
-}
+  <div class="summary">
 
-onReady(async()=>{
- gId('r1').onchange=()=>{if(gId('r1').checked){gId('r10').checked=false;setRate(1000);refresh();}else if(!gId('r10').checked)setRate(0);};
- gId('r10').onchange=()=>{if(gId('r10').checked){gId('r1').checked=false;setRate(10000);refresh();}else if(!gId('r1').checked)setRate(0);};
- gId('refresh').onclick=refresh;
- gId('reset').onclick=async()=>{await action('reset');await sleep(20);refresh();};
- gId('stop').onclick=async()=>{stopped=true;setRate(0);await action('disable').catch(()=>{});setStatus('state','Stopped');};
+    <div class="summary-item">
+      Capture: <b id="age">—</b>
+    </div>
 
- await action('enable');
- setRate(10000);
- refresh();
-});
+    <div class="summary-item">
+      Modules: <b id="mc">—</b>
+    </div>
 
-setInterval(()=>{if(!stopped&&!rate)action('touch').catch(()=>{});},10000);
-addEventListener('pagehide',()=>{if(!stopped)fetch(API+'?action=disable',{keepalive:true}).catch(()=>{});});
-</script>
-</body></html>
+    <div class="summary-item">
+      Details: <b id="dc">—</b>
+    </div>
+
+    <div class="summary-item">
+      Refresh: <b id="rm">10 s</b>
+    </div>
+
+  </div>
+
+
+  <section class="section">
+
+    <h2>Module Summary</h2>
+
+    <div class="table-wrap">
+
+      <table class="compact metrics-table">
+
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>ID</th>
+            <th>Calls</th>
+            <th>Last µs</th>
+            <th>Avg µs</th>
+            <th>Min µs</th>
+            <th>Max µs</th>
+            <th>Max Task</th>
+            <th>Total ms</th>
+            <th>µs/sec</th>
+            <th>Load %</th>
+          </tr>
+        </thead>
+
+        <tbody id="mods"></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <section class="section">
+
+    <h2>Detailed Tasks</h2>
+
+    <div class="table-wrap">
+
+      <table class="compact metrics-table">
+
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Task</th>
+            <th>ID</th>
+            <th>Calls</th>
+            <th>Last µs</th>
+            <th>Avg µs</th>
+            <th>Min µs</th>
+            <th>Max µs</th>
+            <th>Total ms</th>
+            <th>Load %</th>
+          </tr>
+        </thead>
+
+        <tbody id="details"></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <script>
+    const API = '/adv/api/tasker';
+
+    let timer = 0;
+    let rate = 10000;
+    let busy = false;
+    let stopped = false;
+
+
+    async function action(actionName)
+    {
+      const response = await fetch(
+        API + '?action=' + actionName,
+        {
+          cache: 'no-store'
+        }
+      );
+
+      if(!response.ok && response.status !== 202)
+      {
+        throw Error('HTTP ' + response.status);
+      }
+
+      return response.status === 204
+        ? null
+        : response.json().catch(()=>null);
+    }
+
+
+    async function snapshot()
+    {
+      await action('snapshot');
+
+      for(let i = 0; i < 50; i++)
+      {
+        const response = await fetch(
+          API + '?action=data',
+          {
+            cache: 'no-store'
+          }
+        );
+
+        if(response.status === 200)
+        {
+          return response.json();
+        }
+
+        if(response.status !== 202)
+        {
+          throw Error('HTTP ' + response.status);
+        }
+
+        await sleep(20);
+      }
+
+      throw Error('Snapshot timeout');
+    }
+
+
+    function rows(id, items, detail = false)
+    {
+      const body = clearElement(id);
+
+      if(!items.length)
+      {
+        return setTableEmpty(
+          body,
+          detail ? 10 : 11,
+          'No samples yet'
+        );
+      }
+
+      for(const item of items)
+      {
+        const values = detail
+          ? [
+              item.module_name,
+              item.task_name || item.task_id,
+              item.task_id,
+              item.calls,
+              item.last_us,
+              item.avg_us,
+              item.min_us,
+              item.max_us,
+              Number(item.total_us || 0) / 1000,
+              item.load_pct
+            ]
+          : [
+              item.name,
+              item.module_id,
+              item.calls,
+              item.last_us,
+              item.avg_us,
+              item.min_us,
+              item.max_us,
+              item.max_task_name || item.max_task_id,
+              Number(item.total_us || 0) / 1000,
+              item.us_per_second,
+              item.load_pct
+            ];
+
+        const row = appendRow(
+          body,
+          values.map(
+            (value, index) =>
+              typeof value === 'number'
+                ? formatNumber(value, index > 7 ? 3 : 0)
+                : value
+          )
+        );
+
+        if(
+          Number(item.max_us) >= 20000 ||
+          (!detail && Number(item.load_pct) >= 10)
+        )
+        {
+          row.className = 'hot';
+        }
+      }
+    }
+
+
+    async function refresh()
+    {
+      if(busy || stopped) return;
+
+      busy = true;
+
+      setStatus('state', 'Reading…');
+
+      try
+      {
+        const data = await snapshot();
+
+        setText('age', formatDuration(data.capture_age_ms));
+        setText('mc', data.module_records + ' / ' + data.module_capacity);
+        setText('dc', data.detail_records + ' / ' + data.detail_capacity);
+
+        rows(
+          'mods',
+          [...(data.modules || [])].sort(
+            (a, b) => b.load_pct - a.load_pct
+          )
+        );
+
+        rows(
+          'details',
+          [...(data.details || [])].sort(
+            (a, b) => b.max_us - a.max_us
+          ),
+          true
+        );
+
+        setStatus('state', 'Recording', 'ok');
+      }
+      catch(e)
+      {
+        setStatus('state', e.message, 'bad');
+      }
+
+      busy = false;
+    }
+
+
+    function setRate(milliseconds)
+    {
+      rate = milliseconds;
+
+      if(timer)
+      {
+        clearInterval(timer);
+      }
+
+      timer = 0;
+
+      setText(
+        'rm',
+        milliseconds === 1000
+          ? '1 s'
+          : milliseconds === 10000
+            ? '10 s'
+            : 'Manual'
+      );
+
+      if(milliseconds)
+      {
+        timer = setInterval(
+          refresh,
+          milliseconds
+        );
+      }
+    }
+
+
+    onReady(async()=>{
+      gId('r1').onchange = ()=>{
+        if(gId('r1').checked)
+        {
+          gId('r10').checked = false;
+          setRate(1000);
+          refresh();
+        }
+        else if(!gId('r10').checked)
+        {
+          setRate(0);
+        }
+      };
+
+      gId('r10').onchange = ()=>{
+        if(gId('r10').checked)
+        {
+          gId('r1').checked = false;
+          setRate(10000);
+          refresh();
+        }
+        else if(!gId('r1').checked)
+        {
+          setRate(0);
+        }
+      };
+
+      gId('refresh').onclick = refresh;
+
+      gId('reset').onclick = async()=>{
+        await action('reset');
+        await sleep(20);
+        refresh();
+      };
+
+      gId('stop').onclick = async()=>{
+        stopped = true;
+        setRate(0);
+
+        await action('disable').catch(()=>{});
+
+        setStatus('state', 'Stopped');
+      };
+
+      await action('enable');
+
+      setRate(10000);
+      refresh();
+    });
+
+
+    setInterval(()=>{
+      if(!stopped && !rate)
+      {
+        action('touch').catch(()=>{});
+      }
+    }, 10000);
+
+
+    addEventListener('pagehide', ()=>{
+      if(!stopped)
+      {
+        fetch(
+          API + '?action=disable',
+          {
+            keepalive: true
+          }
+        ).catch(()=>{});
+      }
+    });
+
+  </script>
+
+</body>
+
+</html>

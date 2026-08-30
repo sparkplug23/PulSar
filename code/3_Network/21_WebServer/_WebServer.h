@@ -19,21 +19,16 @@
 
 #ifdef ESP32
   #include <WiFi.h>
-  #ifndef DISABLE_NETWORK
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-    #include <AsyncTCP.h>
-    #include <ESPAsyncWebServer.h>
-  #endif // USE_MODULE_NETWORK_WEBSERVER
-  #endif // DISABLE_NETWORK
 #elif defined(ESP8266)
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
   #include <ESP8266WiFi.h>
-  #include <ESPAsyncTCP.h>
-  #include <ESPAsyncWebServer.h>
-  #endif // USE_MODULE_NETWORK_WEBSERVER
 #endif
 
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+
 #include "mWebUrlTracker.h" // Must be included so #else blanks are inserted
+
+// #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
 
 const char PM_WEB_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html";
 const char PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT[] PROGMEM = "text/javascript";
@@ -54,8 +49,7 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 // #define D_BUTTO
 
 #ifndef D_CAPTIVE_PORTAL_URL_REDIRECT_PATH
-#define D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/settings2/welcome"
-// #define D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/settings2/wifi"
+#define D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/settings/welcome"
 #endif
 
 
@@ -68,7 +62,7 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 #else
   #include "3_Network/21_WebServer/Webpages/Generated/pages_console_esp8266.h"
 #endif
-#ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 #include "3_Network/21_WebServer/Webpages/Generated/pages_url_debugs.h"
 #endif
 
@@ -148,10 +142,11 @@ public mTaskerInterface{
       uint16_t module_id = 0;
       String url;
       String friendly_name;
+      uint16_t port = 80;
     };
     std::vector<WebApplicationURL> application_urls;
-    void AddURLasApplication(uint16_t module_id, const char* url, const char* friendly_name = nullptr);
-    void AddURLasApplication(uint16_t module_id, const String& url, const char* friendly_name = nullptr);
+    void AddURLasApplication(uint16_t module_id, const char* url, const char* friendly_name = nullptr, uint16_t port = 80);
+    void AddURLasApplication(uint16_t module_id, const String& url, const char* friendly_name = nullptr, uint16_t port = 80);
     void HandleAPI_URLApplications(AsyncWebServerRequest* request);
 
     #ifdef ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
@@ -180,11 +175,12 @@ public mTaskerInterface{
     WebUIContext webui;
 
 
+    void PrintJSONString(Print& out, const char* str);
+
     /**
      * Generic WebUI output helpers.
      */
     bool WebUI_Begin(Print* response);
-    void WebUI_PrintJSONString(Print* response, const char* str);
     void WebUI_End();
 
     void WebUI_Module_Start(uint16_t module_id, const char* module_name);
@@ -235,10 +231,12 @@ AsyncWebServer* server = nullptr;
 
 AsyncWebHandler *editHandler = nullptr;
 
+
   #ifndef ESP8266
     #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
 
     void HandlePage_Console_WebSocket(AsyncWebServerRequest *request);
+
 
     AsyncWebSocket* websocket_console = nullptr;
     void sendConsoleWs(AsyncWebSocketClient *client = nullptr);
@@ -328,7 +326,6 @@ AsyncWebHandler *editHandler = nullptr;
   static constexpr uint32_t TELEMETRY_API_JSON_BACKOFF_MS = 350;
 
   void HandleAPI_Telemetry(AsyncWebServerRequest* request);
-  void TelemetryAPI_PrintJSONString(AsyncResponseStream* response, const char* str);
   bool TelemetryAPI_Construct_Begin(const char* full_key, uint16_t rate);
   void TelemetryAPI_Construct_End();
 
@@ -354,7 +351,7 @@ AsyncWebHandler *editHandler = nullptr;
         telemetry_api_request.catalogue_first = false;
 
         response->print(F("{\"topic\":\""));
-        TelemetryAPI_PrintJSONString(response, full_key);
+        PrintJSONString(*response, full_key);
         response->printf_P(PSTR("\",\"rate\":%u}"), handle->tRateSecs);
         continue;
       }
@@ -433,7 +430,7 @@ size_t printSetElementHTML(
     void SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage);
 
 
-#ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 void HandlePage_UrlList(AsyncWebServerRequest *request);
 void HandlePage_UrlList_JSON(AsyncWebServerRequest *request);
 #endif

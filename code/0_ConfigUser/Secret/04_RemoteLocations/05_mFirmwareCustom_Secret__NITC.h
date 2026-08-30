@@ -412,7 +412,7 @@
    * SECTION: Network Configs
   ************************************/    
 
-  #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST  
+  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST  
   
   /************************************************************************
    * FILESYSTEM: 
@@ -1337,7 +1337,7 @@
   * SECTION: Network Configs
   ************************************/  
 
-  #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
   /***********************************
    * SECTION: Lighting Configs
@@ -1582,7 +1582,7 @@
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
     /***********************************
      * SECTION: Lighting Configs
@@ -1868,7 +1868,7 @@ R"=====(
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
     /***********************************
      * SECTION: Lighting Configs
@@ -1990,7 +1990,7 @@ R"=====(
   * SECTION: Network Configs
   ************************************/  
 
-  #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
   /***********************************
    * SECTION: Lighting Configs
@@ -2235,7 +2235,7 @@ R"=====(
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
     /***********************************
      * SECTION: Lighting Configs
@@ -2521,7 +2521,7 @@ R"=====(
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
     /***********************************
      * SECTION: Lighting Configs
@@ -2640,7 +2640,7 @@ R"=====(
   * SECTION: Network Configs
   ************************************/  
 
-  #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
   /***********************************
    * SECTION: Lighting Configs
@@ -2885,7 +2885,7 @@ R"=====(
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
     /***********************************
      * SECTION: Lighting Configs
@@ -3171,7 +3171,7 @@ R"=====(
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
     /***********************************
      * SECTION: Lighting Configs
