@@ -1,0 +1,1615 @@
+{
+  "0": {},
+  "1": {
+    "n": "A*3Jan26a Static Snowy02",
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Static",
+      "IX": 127,
+      "SX": 0,
+      "GP": 1,
+      "DC": 0,
+      "Reverse": 0,
+      "RA": 4000
+    },
+    "BrightnessRGB": 100
+  },
+  "2": {
+    "n": "A*FastPops Snowy02",
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Firefly",
+      "IX": 20,
+      "SX": 255,
+      "GP": 1,
+      "DC": 7,
+      "RA": 50
+    },
+    "BrightnessRGB": 100
+  },
+  "3": {
+    "n": "A*Steps 2ColG1",
+    "Pal": "Colourful Pairs 01",
+    "Effects": {
+      "FX": "Stepping Palette",
+      "IX": 1,
+      "SX": 50,
+      "GP": 1,
+      "DC": 0,
+      "RA": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "4": {
+    "n": "A**Steps 2ColG150",
+    "Pal": "Colourful Pairs 01",
+    "Effects": {
+      "FX": "Stepping Palette",
+      "IX": 0,
+      "SX": 20,
+      "GP": 150,
+      "DC": 0,
+      "RA": 1500
+    },
+    "BrightnessRGB": 100
+  },
+  "5": {
+    "n": "A**Static ColG150",
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Static",
+      "IX": 20,
+      "SX": 200,
+      "GP": 150,
+      "DC": 0,
+      "RA": 4000
+    },
+    "BrightnessRGB": 100
+  },
+  "6": {
+    "n": "A**Rotate Previous",
+    "Effects": {
+      "FX": "Rotate Previous",
+      "IX": 1,
+      "SX": 10,
+      "GP": 1,
+      "DC": 0,
+      "Custom1": 0,
+      "Check2": 1,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "7": {
+    "n": "A*Spanned Random Gradient",
+    "Pal": "Hue Cyclone",
+    "Effects": {
+      "FX": "Gradient",
+      "PalIX": 10,
+      "IX": 255,
+      "SX": 1,
+      "GP": 1,
+      "Custom1": 255,
+      "DC": 0,
+      "RA": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "8": {
+    "n": "A*Sweep Random",
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Sweep Random",
+      "SX": 80,
+      "IX": 50,
+      "GP": 1,
+      "DC": 0,
+      "RA": 25
+    },
+    "BrightnessRGB": 100
+  },
+  "10": {
+    "n": "A**Twinkle Colours",
+    "Pal": "Snowy 02",
+    "Pal2": "Cold White",
+    "Effects": {
+      "FX": "Twinkle Colours",
+      "IX": 255,
+      "SX": 255,
+      "GP": 1,
+      "DC": 6,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "11": {
+    "n": "A**Candles Snowy 02",
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Candles",
+      "IX": 255,
+      "SX": 255,
+      "GP": 1,
+      "DC": 6,
+      "RA": 0
+    },
+    "BrightnessRGB": 100
+  },
+  "12": {
+    "n": "A**Meteor Orange&Teal",
+    "Pal": "Orange & Teal",
+    "Effects": {
+      "FX": "Meteor",
+      "IX": 50,
+      "SX": 255,
+      "GP": 1,
+      "Check1": 1,
+      "Check2": 1,
+      "Check3": 1,
+      "DC": 0,
+      "RA": 25
+    },
+    "BrightnessRGB": 100
+  },
+  "13": {
+    "n": "A**Meteor Colours Warm",
+    "Pal": "Colours Warm",
+    "Effects": {
+      "FX": "Meteor",
+      "IX": 50,
+      "SX": 255,
+      "GP": 1,
+      "Check1": 1,
+      "Check2": 1,
+      "Check3": 1,
+      "DC": 0,
+      "RA": 23
+    },
+    "BrightnessRGB": 100
+  },
+  "23": {
+    "n": "A*Juggle Snowy 02",
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Juggle",
+      "RA": 0,
+      "SX": 255,
+      "IX": 49,
+      "DC": 5,
+      "GP": 1
+    },
+    "BrightnessRGB": 100
+  },
+  "24": {
+    "n": "A*Colour Waves Snowy02",
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Colour Waves",
+      "RA": 0,
+      "SX": 255,
+      "IX": 49,
+      "DC": 0,
+      "GP": 1
+    },
+    "BrightnessRGB": 100
+  },
+  "25": {
+    "n": "A*FastPops C&W",
+    "Effects": {
+      "FX": "Firefly",
+      "IX": 49,
+      "SX": 255,
+      "GP": 1,
+      "DC": 0,
+      "RA": 0
+    },
+    "BrightnessRGB": 100,
+    "Pal": "Colour and White Swipe"
+  },
+  "32": {
+    "n": "A*Meteor Smooth Snowy 02",
+    "Effects": {
+      "FX": "Meteor Smooth",
+      "IX": 142,
+      "SX": 70,
+      "GP": 1,
+      "DC": 0,
+      "RA": 0
+    },
+    "BrightnessRGB": 100,
+    "Pal": "Snowy 01"
+  },
+  "34": {
+    "n": "A*Meteor Smooth Snowy 02",
+    "Pal": "Berry Orange"
+  },
+  "35": {
+    "n": "A*Twinkle Out Palette",
+    "Effects": {
+      "FX": "Twinkle Out Palette",
+      "IX": 142,
+      "SX": 70,
+      "GP": 1,
+      "DC": 10,
+      "RA": 0
+    },
+    "BrightnessRGB": 100,
+    "Pal": "Snowy 02"
+  },
+  "40": {
+    "n": "A*Twinkle W/Snow",
+    "Pal": "Snowy 02",
+    "Pal2": "Cold White",
+    "Effects": {
+      "FX": "Flicker Palettes",
+      "IX": 1,
+      "SX": 0,
+      "GP": 1,
+      "DC": 10,
+      "Custom1": 255,
+      "Custom2": 200,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "41": {
+    "n": "A*Twinkle W/Blue",
+    "Pal": "Blue",
+    "Pal2": "Cold White",
+    "Effects": {
+      "FX": "Flicker Palettes",
+      "IX": 1,
+      "SX": 0,
+      "GP": 1,
+      "DC": 10,
+      "Custom1": 255,
+      "Custom2": 36,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "42": {
+    "n": "A*Twinkle W/Green",
+    "Pal": "Green",
+    "Pal2": "Cold White",
+    "Effects": {
+      "FX": "Flicker Palettes",
+      "IX": 1,
+      "SX": 0,
+      "GP": 1,
+      "DC": 10,
+      "Custom1": 255,
+      "Custom2": 36,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "43": {
+    "n": "A*Twinkle W/DOrange",
+    "Pal": "Orange",
+    "Pal2": "Cold White",
+    "Effects": {
+      "FX": "Flicker Palettes",
+      "IX": 1,
+      "SX": 0,
+      "GP": 1,
+      "DC": 10,
+      "Custom1": 255,
+      "Custom2": 36,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "44": {
+    "n": "A*Twinkle W/Red",
+    "Pal": "Red",
+    "Pal2": "Cold White",
+    "Effects": {
+      "FX": "Flicker Palettes",
+      "IX": 1,
+      "SX": 0,
+      "GP": 1,
+      "DC": 10,
+      "Custom1": 255,
+      "Custom2": 36,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "45": {
+    "n": "A*Twinkle W/cycleIM",
+    "Pal": "SegCol Cycle Immediate",
+    "Pal2": "Cold White",
+    "SegColour0": {
+      "RGB": [
+        255,
+        0,
+        0
+      ]
+    },
+    "SegColour1": {
+      "RGB": [
+        0,
+        255,
+        0
+      ]
+    },
+    "SegColour2": {
+      "RGB": [
+        0,
+        0,
+        255
+      ]
+    },
+    "SegColour3": {
+      "RGB": [
+        255,
+        100,
+        0
+      ]
+    },
+    "SegColour4": {
+      "RGB": [
+        21,
+        0,
+        26
+      ]
+    },
+    "Effects": {
+      "FX": "Flicker Palettes",
+      "IX": 1,
+      "SX": 0,
+      "GP": 1,
+      "DC": 10,
+      "PalIX": 255,
+      "Custom1": 255,
+      "Custom2": 36,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "46": {
+    "n": "A*Twinkle W/cycleBL",
+    "Pal": "SegCol Cycle Blending",
+    "Pal2": "Cold White",
+    "SegColour0": {
+      "RGB": [
+        255,
+        0,
+        0
+      ]
+    },
+    "SegColour1": {
+      "RGB": [
+        0,
+        255,
+        0
+      ]
+    },
+    "SegColour2": {
+      "RGB": [
+        0,
+        0,
+        255
+      ]
+    },
+    "SegColour3": {
+      "RGB": [
+        255,
+        100,
+        0
+      ]
+    },
+    "SegColour4": {
+      "RGB": [
+        255,
+        0,
+        255
+      ]
+    },
+    "Effects": {
+      "FX": "Flicker Palettes",
+      "IX": 1,
+      "SX": 0,
+      "GP": 1,
+      "DC": 10,
+      "PalIX": 255,
+      "Custom1": 255,
+      "Custom2": 36,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "47": {
+    "n": "A*Twinkle W/cycleBL",
+    "Pal": "SegCol Cycle Blending",
+    "Pal2": "Cold White",
+    "SegColour0": {
+      "RGB": [
+        255,
+        0,
+        0
+      ]
+    },
+    "SegColour1": {
+      "RGB": [
+        0,
+        255,
+        0
+      ]
+    },
+    "SegColour2": {
+      "RGB": [
+        0,
+        0,
+        255
+      ]
+    },
+    "SegColour3": {
+      "RGB": [
+        255,
+        100,
+        0
+      ]
+    },
+    "SegColour4": {
+      "RGB": [
+        255,
+        0,
+        255
+      ]
+    },
+    "Effects": {
+      "FX": "Flicker Palettes",
+      "IX": 1,
+      "SX": 0,
+      "GP": 1,
+      "DC": 10,
+      "PalIX": 255,
+      "Custom1": 255,
+      "Custom2": 100,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "49": {
+    "n": "A*Tri Wipe",
+    "Effects": {
+      "FX": "Tri Wipe",
+      "IX": 255,
+      "SX": 151,
+      "GP": 1,
+      "DC": 0,
+      "RA": 23
+    },
+    "SegColour0": {
+      "BrightnessRGB": 70,
+      "RGBWC": [
+        130,
+        137,
+        142,
+        0,
+        0
+      ]
+    },
+    "SegColour1": {
+      "BrightnessRGB": 70,
+      "RGBWC": [
+        130,
+        86,
+        25,
+        0,
+        0
+      ]
+    },
+    "BrightnessRGB": 100,
+    "Pal": "Snowy 02"
+  },
+  "50": {
+    "n": "A*B&W,Gp16",
+    "Pal": "Blue and White",
+    "Effects": {
+      "FX": "Static",
+      "IX": 20,
+      "SX": 255,
+      "GroupingPerc": 16,
+      "DC": 0,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "51": {
+    "n": "A*Static G20 Snowy02",
+    "Effects": {
+      "FX": "Static",
+      "IX": 255,
+      "SX": 0,
+      "GP": 20,
+      "DC": 0,
+      "RA": 2000
+    },
+    "BrightnessRGB": 100,
+    "Pal": "Snowy 02"
+  },
+  "52": {
+    "n": "A*Col&W,Gp16",
+    "Pal": "Colour and White Stripe",
+    "Effects": {
+      "FX": "Static",
+      "IX": 20,
+      "SX": 255,
+      "GroupingPerc": 16,
+      "DC": 0,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "53": {
+    "n": "A*#Rotate",
+    "Effects": {
+      "FX": "Rotate Previous",
+      "IX": 12,
+      "SX": 255,
+      "GP": 1,
+      "DC": 0,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "54": {
+    "n": "A*IceCream,TwiWipe",
+    "Pal": "IceCream Floats",
+    "Effects": {
+      "FX": "Tri Wipe",
+      "IX": 255,
+      "SX": 151,
+      "GP": 1,
+      "DC": 0,
+      "RA": 23
+    },
+    "SegColour0": {
+      "RGBWC": [
+        255,
+        0,
+        0,
+        0,
+        0
+      ],
+      "BrightnessRGB": 100
+    },
+    "SegColour1": {
+      "RGBWC": [
+        0,
+        255,
+        0,
+        0,
+        0
+      ],
+      "BrightnessRGB": 100
+    },
+    "BrightnessRGB": 100
+  },
+  "55": {
+    "n": "A*Rot Prev Fast",
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Rotate Previous",
+      "IX": 5,
+      "SX": 255,
+      "GP": 1,
+      "DC": 0,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "56": {
+    "n": "A*Tri Wipe",
+    "Effects": {
+      "FX": "Tri Wipe",
+      "IX": 255,
+      "SX": 151,
+      "GP": 1,
+      "DC": 0,
+      "RA": 23
+    },
+    "SegColour0": {
+      "BrightnessRGB": 100,
+      "RGBWC": [
+        255,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "SegColour1": {
+      "BrightnessRGB": 100,
+      "RGBWC": [
+        0,
+        255,
+        0,
+        0,
+        0
+      ]
+    },
+    "BrightnessRGB": 100,
+    "Pal": "Snowy 01"
+  },
+  "58": {
+    "n": "A*Twinkle FastIn/SlowOut",
+    "Pal": "Party 16",
+    "Effects": {
+      "FX": "Twinkle FastIn/SlowOut",
+      "IX": 255,
+      "SX": 213,
+      "GP": 1,
+      "DC": 5,
+      "RA": 23
+    },
+    "BrightnessRGB": 100
+  },
+  "59": {
+    "n": "A*Running Dual",
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Running Dual",
+      "IX": 255,
+      "SX": 64,
+      "GP": 1,
+      "DC": 0,
+      "RA": 23
+    },
+    "SegColour1": {
+      "RGBWC": [
+        53,
+        49,
+        53,
+        0,
+        0
+      ],
+      "BrightnessRGB": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "60": {
+    "n": "A*Day: C&W,G210",
+    "Effects": {
+      "FX": "Static",
+      "IX": 20,
+      "SX": 255,
+      "GP": 10,
+      "DC": 0,
+      "RA": 4000
+    },
+    "BrightnessRGB": 100,
+    "Pal": "Snowy 02"
+  },
+  "61": {
+    "n": "A*Day: C&W,G210",
+    "Pal": "Snowy 01"
+  },
+  "62": {
+    "n": "A*Day: C&W,G210",
+    "Pal": "Berry Orange"
+  },
+  "63": {
+    "n": "A*Day: C&W,G210",
+    "Pal": "Colours Warm"
+  },
+  "64": {
+    "n": "A*Day: C&W,G210",
+    "Pal": "Pink Red Yellow"
+  },
+  "65": {
+    "n": "A*Day: C&W,G210",
+    "Pal": "IceCream Floats+"
+  },
+  "66": {
+    "n": "A*Day: C&W,G210",
+    "Pal": "Colourful Greenless"
+  },
+  "67": {
+    "n": "A*Day: C&W,G210",
+    "Effects": {
+      "FX": "Saw",
+      "IX": 134,
+      "SX": 64,
+      "GP": 1,
+      "RA": 23
+    },
+    "SegColour0": {
+      "RGBWC": [
+        40,
+        40,
+        40,
+        0,
+        0
+      ]
+    },
+    "SegColour1": {
+      "RGBWC": [
+        40,
+        40,
+        40,
+        0,
+        0
+      ]
+    },
+    "BrightnessRGB": 100,
+    "Pal": "Snowy 01"
+  },
+  "68": {
+    "n": "A*Rainbow Runner",
+    "SegColour0": {
+      "RGBWC": [
+        20,
+        20,
+        20,
+        0,
+        0
+      ]
+    },
+    "Effects": {
+      "FX": "Rainbow Runner",
+      "IX": 133,
+      "SX": 11,
+      "GP": 1,
+      "RA": 40
+    },
+    "BrightnessRGB": 100
+  },
+  "69": {
+    "n": "A*Span-PinkBlueCyan",
+    "Effects": {
+      "Custom1": 255,
+      "FX": "Gradient Random",
+      "IX": 255,
+      "SX": 1,
+      "GP": 1,
+      "DC": 0,
+      "RA": 2000
+    },
+    "BrightnessRGB": 100,
+    "Pal": "Hult"
+  },
+  "70": {
+    "n": "A*Brightness 100%",
+    "BrightnessRGB": 100
+  },
+  "71": {
+    "n": "A*Brightness 40%",
+    "BrightnessRGB": 40
+  },
+  "72": {
+    "n": "A*Brightness 20%",
+    "BrightnessRGB": 20
+  },
+  "73": {
+    "n": "A*Statics-Grad-NoBrightness",
+    "Effects": {
+      "Custom1": 255,
+      "FX": "Gradient",
+      "IX": 255,
+      "SX": 1,
+      "GP": 1,
+      "DC": 0,
+      "RA": 10000
+    },
+    "Pal": "Hult"
+  },
+  "74": {
+    "n": "A*Statics-Grad-NoBrightness",
+    "Pal": "Spring 16"
+  },
+  "75": {
+    "n": "A*Statics-Grad-NoBrightness",
+    "Pal": "Party 16"
+  },
+  "76": {
+    "n": "A*Statics-Grad-NoBrightness",
+    "Pal": "Candy"
+  },
+  "77": {
+    "n": "A*Statics-Grad-NoBrightness",
+    "Pal": "Pink White Purple Grad"
+  },
+  "78": {
+    "n": "A*Statics-Grad-NoBrightness",
+    "Pal": "Snowy 01"
+  },
+  "79": {
+    "n": "A*Statics-Grad-NoBrightness",
+    "Pal": "Colours and White Stripe"
+  },
+  "80": {
+    "n": "A*Statics-Grad-NoBrightness",
+    "Pal": "Colourful Greenless"
+  },
+  "81": {
+    "n": "A*Statics-Grad-NoBrightness",
+    "Pal": "Sunrise Blue SR02"
+  },
+  "83": {
+    "n": "A*Rot Prev Fast",
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Rotate Previous",
+      "IX": 2,
+      "SX": 255,
+      "GP": 1,
+      "DC": 0,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "85": {
+    "n": "A*Candles Pastel Pinks",
+    "Effects": {
+      "FX": "Candles",
+      "IX": 255,
+      "SX": 255,
+      "GP": 1,
+      "DC": 10,
+      "RA": 0
+    },
+    "Pal": "Pastel Pinks"
+  },
+  "86": {
+    "n": "A*30Twinkle SnowyONWhite, Snowy 02, 0/100, G1, D0",
+    "Effects": {
+      "FX": "Flicker Palettes",
+      "IX": 20,
+      "SX": 255,
+      "GP": 1,
+      "DC": 6,
+      "RA": 100,
+      "v0": 125,
+      "v1": 255,
+      "v2": 60
+    },
+    "BrightnessRGB": 100,
+    "Pal": "Cold White"
+  },
+  "91": {
+    "playlist": {
+      "ps": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        55,
+        7,
+        40,
+        10
+      ],
+      "dur": [
+        100,
+        100,
+        200,
+        100,
+        50,
+        200,
+        100,
+        200,
+        200,
+        200
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*N1 Init Test"
+  },
+  "93": {
+    "playlist": {
+      "ps": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        55,
+        7,
+        40,
+        10,
+        41,
+        42
+      ],
+      "dur": [
+        100,
+        100,
+        200,
+        100,
+        50,
+        200,
+        100,
+        200,
+        200,
+        200,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*N2 Night"
+  },
+  "96": {
+    "playlist": {
+      "ps": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        55,
+        7,
+        40,
+        10,
+        41,
+        42
+      ],
+      "dur": [
+        100,
+        100,
+        400,
+        400,
+        50,
+        200,
+        100,
+        200,
+        200,
+        200,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*N3 Night"
+  },
+  "100": {
+    "playlist": {
+      "ps": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        55,
+        7,
+        40,
+        10
+      ],
+      "dur": [
+        100,
+        100,
+        200,
+        100,
+        50,
+        200,
+        100,
+        200,
+        200,
+        200
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*2025 N1 Test"
+  },
+  "110": {
+    "n": "A*Bands C&W D2",
+    "Pal": "Colour and White Stripe",
+    "Effects": {
+      "FX": "Bands",
+      "IX": 1,
+      "SX": 127,
+      "GP": 1,
+      "DC": 0,
+      "RA": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "111": {
+    "n": "A*Palettes InterLit RetroClown/dW",
+    "Pal": "Retro Clown",
+    "Effects": {
+      "FX": "Palettes InterLit",
+      "IX": 44,
+      "SX": 20,
+      "Custom1": 255,
+      "Custom2": 3,
+      "Check1": 1,
+      "GP": 1,
+      "DC": 0,
+      "RA": 5000
+    },
+    "BrightnessRGB": 100
+  },
+  "112": {
+    "n": "A*RotatePrev 1pix",
+    "Effects": {
+      "FX": "Rotate Previous",
+      "IX": 0,
+      "SX": 255,
+      "GP": 1,
+      "Custom1": 0,
+      "DC": 0,
+      "RA": 30
+    },
+    "BrightnessRGB": 100
+  },
+  "150": {
+    "n": "A*MeadFront1",
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Twinkle Colours",
+      "IX": 127,
+      "SX": 0,
+      "GP": 1,
+      "DC": 0,
+      "RV": 0,
+      "RA": 0
+    },
+    "BrightnessRGB": 100
+  },
+  "151": {
+    "n": "A*Saw C/W",
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Saw",
+      "IX": 212,
+      "SX": 64,
+      "GP": 1,
+      "DC": 5,
+      "RA": 0
+    },
+    "SegColour1": {
+      "RGBWC": [
+        5,
+        5,
+        5,
+        0,
+        0
+      ]
+    },
+    "BrightnessRGB": 100
+  },
+  "152": {
+    "n": "A**Twinkle Colours",
+    "Pal": "Snowy 02",
+    "Pal2": "Cold White",
+    "Effects": {
+      "FX": "Twinkle Colours",
+      "IX": 255,
+      "SX": 255,
+      "GP": 1,
+      "DC": 50,
+      "RA": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "153": {
+    "n": "A*Static Override",
+    "Pal": "Snowy 02",
+    "Effects": {
+      "FX": "Static",
+      "IX": 127,
+      "SX": 0,
+      "GP": 1,
+      "DC": 0,
+      "Reverse": 0,
+      "RA": 4000
+    },
+    "BrightnessRGB": 100,
+    "Override": {
+      "Animation": {
+        "TimeMs": 2000
+      }
+    }
+  },
+  "163": {
+    "n": "A*Steps 2ColG1b",
+    "Pal": "Colourful Pairs 01",
+    "Effects": {
+      "FX": "Stepping Palette",
+      "IX": 1,
+      "SX": 80,
+      "GP": 1,
+      "DC": 5,
+      "RA": 3000
+    },
+    "BrightnessRGB": 100
+  },
+  "200": {
+    "playlist": {
+      "ps": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        55,
+        1,
+        7,
+        40,
+        10
+      ],
+      "dur": [
+        100,
+        100,
+        200,
+        100,
+        50,
+        200,
+        100,
+        50,
+        200,
+        200,
+        200
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*2025 Whitehall N1"
+  },
+  "201": {
+    "playlist": {
+      "psn": [
+        "*FastPops Snowy02",
+        "*Steps 2ColG1",
+        "*Steps 2ColG150"
+      ],
+      "dur": [
+        100,
+        100,
+        200
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*2025 Test 201"
+  },
+  "204": {
+    "playlist": {
+      "ps": [
+        2,
+        1,
+        163,
+        4,
+        5,
+        112,
+        83,
+        7,
+        10
+      ],
+      "dur": [
+        100,
+        100,
+        200,
+        200,
+        100,
+        200,
+        80,
+        200,
+        400
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*MeFront N1"
+  },
+  "205": {
+    "playlist": {
+      "ps": [
+        2,
+        1,
+        163,
+        4,
+        5,
+        112,
+        83,
+        7,
+        152,
+        68,
+        151,
+        41,
+        42,
+        43,
+        44,
+        110,
+        112,
+        111,
+        112
+      ],
+      "dur": [
+        100,
+        100,
+        200,
+        200,
+        200,
+        200,
+        100,
+        300,
+        300,
+        300,
+        200,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*ME BoxingDay N2"
+  },
+  "206": {
+    "playlist": {
+      "ps": [
+        153,
+        163,
+        4,
+        5,
+        112,
+        83,
+        7,
+        152,
+        68,
+        151,
+        41,
+        42,
+        43,
+        44,
+        111,
+        112,
+        2,
+        110,
+        112
+      ],
+      "dur": [
+        100,
+        200,
+        200,
+        200,
+        200,
+        100,
+        300,
+        300,
+        300,
+        200,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*ME3"
+  },
+  "207": {
+    "playlist": {
+      "ps": [
+        153,
+        163,
+        4,
+        5,
+        112,
+        83,
+        7,
+        152,
+        68,
+        151,
+        46,
+        111,
+        112,
+        2,
+        110,
+        112
+      ],
+      "dur": [
+        100,
+        200,
+        200,
+        200,
+        200,
+        100,
+        300,
+        300,
+        300,
+        200,
+        500,
+        100,
+        300,
+        100,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*ME4-29Dec"
+  },
+  "208": {
+    "playlist": {
+      "ps": [
+        153,
+        163,
+        4,
+        5,
+        112,
+        83,
+        7,
+        152,
+        68,
+        151,
+        47,
+        111,
+        112,
+        2,
+        110,
+        112
+      ],
+      "dur": [
+        100,
+        200,
+        200,
+        200,
+        200,
+        100,
+        300,
+        300,
+        300,
+        200,
+        500,
+        100,
+        300,
+        100,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*WH4-29Dec"
+  },
+  "210": {
+    "playlist": {
+      "ps": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        55,
+        7,
+        40,
+        10,
+        41,
+        42
+      ],
+      "dur": [
+        100,
+        100,
+        400,
+        400,
+        50,
+        200,
+        100,
+        200,
+        200,
+        200,
+        100,
+        100
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*25WhiteN2"
+  },
+  "220": {
+    "playlist": {
+      "ps": [
+        5,
+        223
+      ],
+      "dur": [
+        50,
+        50
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*TBRotate Grp150"
+  },
+  "221": {
+    "playlist": {
+      "ps": [
+        222,
+        224
+      ],
+      "dur": [
+        50,
+        50
+      ],
+      "repeat": 0,
+      "end": 0,
+      "r": 1
+    },
+    "on": true,
+    "n": "A*TBRotate NoGrp"
+  },
+  "222": {
+    "n": "A*Rainbow Gradient",
+    "Pal": "Rainbow",
+    "Effects": {
+      "FX": "Gradient",
+      "PalIX": 10,
+      "IX": 255,
+      "SX": 1,
+      "GP": 1,
+      "Custom1": 255,
+      "DC": 0,
+      "RA": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "223": {
+    "n": "A*RotatePrev 1pix TEST",
+    "Effects": {
+      "FX": "Rotate Previous",
+      "IX": 1,
+      "SX": 255,
+      "GP": 1,
+      "Custom1": 0,
+      "DC": 0,
+      "RA": 30
+    },
+    "BrightnessRGB": 100
+  },
+  "224": {
+    "n": "A*RotatePrev 40IX TEST",
+    "Effects": {
+      "FX": "Rotate Previous",
+      "IX": 40,
+      "SX": 255,
+      "GP": 1,
+      "Custom1": 0,
+      "DC": 0,
+      "RA": 30
+    },
+    "BrightnessRGB": 100
+  },
+  "225": {
+    "n": "A*Soft Warm White 60%",
+    "Pal": "Warm White",
+    "Effects": {
+      "FX": "Static",
+      "IX": 127,
+      "SX": 255,
+      "GP": 1,
+      "DC": 0,
+      "Reverse": 0,
+      "RA": 4000
+    },
+    "BrightnessRGB": 60
+  },
+  "300": {
+    "n": "A*Intensity 2,G1",
+    "Effects": {
+      "IX": 2,
+      "GP": 1
+    }
+  },
+  "301": {
+    "n": "A*Intensity 7,G1",
+    "Effects": {
+      "IX": 7,
+      "GP": 1
+    }
+  },
+  "302": {
+    "n": "A*Intensity 12,G1",
+    "Effects": {
+      "IX": 12,
+      "GP": 1
+    }
+  },
+  "303": {
+    "n": "A*Intensity 20,G1",
+    "Effects": {
+      "IX": 20,
+      "GP": 1
+    }
+  },
+  "304": {
+    "n": "A*Intensity 30,G1",
+    "Effects": {
+      "IX": 30,
+      "GP": 1
+    }
+  },
+  "305": {
+    "n": "A*Intensity 100,G1",
+    "Effects": {
+      "IX": 100,
+      "GP": 1
+    }
+  },
+  "306": {
+    "n": "A*Intensity 150,G1",
+    "Effects": {
+      "IX": 150,
+      "GP": 1
+    }
+  },
+  "307": {
+    "n": "A*Candles Pastel+",
+    "Effects": {
+      "FX": "Candles",
+      "IX": 255,
+      "SX": 255,
+      "GP": 1,
+      "DC": 7,
+      "RA": 23
+    },
+    "BrightnessRGB": 100,
+    "Pal": "IceCream Floats+"
+  },
+  "308": {
+    "n": "A*MT RotatePrev",
+    "Effects": {
+      "Custom1": 0,
+      "FX": "Rotate Previous",
+      "IX": 1,
+      "SX": 255,
+      "GP": 1,
+      "DC": 0,
+      "RA": 5000
+    },
+    "BrightnessRGB": 100
+  }
+}

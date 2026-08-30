@@ -194,7 +194,7 @@ int16_t mAnimatorLight::Playlist_SelectAllowedIndexByTime(uint8_t startIndex, ui
 /*******************************************************************************************************************************************************************************************************************
  * @description : Load playlist JSON into runtime playlistEntries[].
  ********************************************************************************************************************************************************************************************************************/
-int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
+int32_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, uint16_t presetId)
 {
   ALOG_INF(PSTR("mAnimatorLight::loadPlaylist"));
 
@@ -279,7 +279,7 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
         break;
       }
 
-      uint8_t foundIndex = 0;
+      uint16_t foundIndex = PRESET_ID_NONE;
 
       for (byte p = 1; p < 251; p++)
       {
@@ -313,14 +313,14 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
   {
     ALOG_INF(PSTR("Loading playlist via preset indices (ps)"));
 
-    for (int ps : presets)
+    for (uint32_t ps : presets)
     {
       if (it >= playlistLen)
       {
         break;
       }
 
-      playlistEntries[it].preset = (uint8_t)ps;
+      playlistEntries[it].preset = (ps > 0 && ps < PRESET_ID_TEMP) ? (uint16_t)ps : PRESET_ID_NONE;
 
       ALOG_INF(PSTR("Playlist: ps[%u] -> %u"), it, playlistEntries[it].preset);
 
@@ -545,16 +545,10 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
 
   playlistEndPreset = playlistObj["end"] | 0;
 
-  if (playlistEndPreset == 255 && currentPreset > 0)
+  if (playlistEndPreset == PRESET_ID_TEMP && currentPreset > 0)
   {
     playlistEndPreset = currentPreset;
   }
-
-  if (playlistEndPreset > 250)
-  {
-    playlistEndPreset = 0;
-  }
-
 
   // ==================================================================
   // Default / fallback preset
@@ -563,12 +557,6 @@ int16_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, byte presetId)
   // ==================================================================
 
   playlistDefaultPreset = playlistObj["default"] | 0;
-
-  if (playlistDefaultPreset > 250)
-  {
-    playlistDefaultPreset = 0;
-  }
-
 
   // ==================================================================
   // Shuffle

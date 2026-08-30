@@ -335,7 +335,7 @@ void mAnimatorLight::serializeInfo(JsonObject root)
 
 // deserializes WLED state (gDoc points to doc object if called from web server)
 // presetId is non-0 if called from handlePreset()
-bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte presetId)
+bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, uint16_t presetId)
 {
   ALOG_INF(PSTR("deserializeState"));
 
@@ -466,10 +466,12 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 
 
   #ifdef ENABLE_FEATURE_LIGHTS__PRESETS
-  byte ps = root[F("psave")];
-  if (ps > 0 && ps < 251) savePreset(ps, nullptr, root);
+
+  uint16_t ps = root[F("psave")];
+  if(ps > PRESET_ID_NONE && ps != PRESET_ID_TEMP) savePreset(ps, nullptr, root);
+
   ps = root[F("pdel")]; //deletion
-  if (ps > 0 && ps < 251) deletePreset(ps);
+  if(ps > PRESET_ID_NONE && ps != PRESET_ID_TEMP) deletePreset(ps);
 
   // HTTP API commands (must be handled before "ps")
   const char* httpwin = root["win"];
@@ -545,7 +547,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, byte pres
 
     if (
       root["win"].isNull() &&
-      getVal(root["ps"], ps, 0, 0) &&
+      getVal(root["ps"], ps, (uint16_t)0, (uint16_t)0) &&
       ps > 0 &&
       ps < 251 &&
       ps != currentPreset
@@ -639,7 +641,113 @@ void mAnimatorLight::parseNumber(const char* str, byte &val, byte minv, byte max
   val = atoi(str);
 }
 
+//helper to get uint16_t value with in/decrementing support via ~ syntax
+void mAnimatorLight::parseNumber(const char* str, uint16_t &val, uint16_t minv, uint16_t maxv)
+{
+  if (str == nullptr || str[0] == '\0') return;
 
+  if (str[0] == 'r')
+  {
+    uint32_t upper = maxv ? maxv : UINT16_MAX;
+    if (upper <= minv) upper = (uint32_t)minv + 1;
+    val = (uint16_t)random((uint32_t)minv, upper);
+    return;
+  }
+
+  bool wrap = false;
+
+  if (str[0] == 'w' && strlen(str) > 1)
+  {
+    str++;
+    wrap = true;
+  }
+
+  if (str[0] == '~')
+  {
+    int32_t out = strtol(str + 1, nullptr, 10);
+
+    if (out == 0)
+    {
+      if (str[1] == '0') return;
+
+      if (str[1] == '-')
+      {
+        val = ((int32_t)val - 1 < (int32_t)minv) ? maxv : min((int32_t)maxv, (int32_t)val - 1);
+      }
+      else
+      {
+        val = ((int32_t)val + 1 > (int32_t)maxv) ? minv : max((int32_t)minv, (int32_t)val + 1);
+      }
+    }
+    else
+    {
+      if (wrap && val == maxv && out > 0)
+      {
+        out = minv;
+      }
+      else if (wrap && val == minv && out < 0)
+      {
+        out = maxv;
+      }
+      else
+      {
+        out += val;
+
+        if (out > maxv) out = maxv;
+        if (out < minv) out = minv;
+      }
+
+      val = (uint16_t)out;
+    }
+
+    return;
+  }
+  else if (minv == maxv && minv == 0)
+  {
+    uint16_t p1 = (uint16_t)strtoul(str, nullptr, 10);
+
+    const char* str2 = strchr(str, '~');
+
+    if (str2)
+    {
+      uint16_t p2 = (uint16_t)strtoul(++str2, nullptr, 10);
+
+      if (p2 > 0)
+      {
+        while (isdigit(*(++str2)));
+        parseNumber(str2, val, p1, p2);
+        return;
+      }
+    }
+  }
+
+  uint32_t parsed = strtoul(str, nullptr, 10);
+
+  if (parsed > UINT16_MAX) parsed = UINT16_MAX;
+
+  val = (uint16_t)parsed;
+}
+//getVal supports inc/decrementing and random ("X~Y(r|~[w][-][Z])" form)
+bool mAnimatorLight::getVal(JsonVariant elem, uint16_t &val, uint16_t vmin, uint16_t vmax)
+{
+  if (elem.is<int>()) {
+    int32_t value = elem.as<int32_t>();
+    if (value < 0 || value > UINT16_MAX) return false; //ignore e.g. {"ps":-1}
+    val = (uint16_t)value;
+    return true;
+  } else if (elem.is<const char*>()) {
+    const char* str = elem;
+    size_t len = strnlen(str, 14);
+    if (len == 0 || len > 12) return false;
+    // fix for #3605 & #4346
+    // ignore vmin and vmax and use as specified in API
+    if (len > 3 && (strchr(str,'r') || strchr(str,'~') != strrchr(str,'~'))) vmax = vmin = 0; // we have "X~Y(r|~[w][-][Z])" form
+    // end fix
+    parseNumber(str, val, vmin, vmax);
+    return true;
+  }
+  return false; //key does not exist
+}
 
 //helper to get int value at a position in string
 int mAnimatorLight::getNumVal(const String* req, uint16_t pos)
@@ -678,7 +786,16 @@ bool mAnimatorLight::getBoolVal(JsonVariant elem, bool dflt) {
 }
 
 
+
 bool mAnimatorLight::updateVal(const char* req, const char* key, byte &val, byte minv, byte maxv)
+{
+  const char *v = strstr(req, key);
+  if (v) v += strlen(key);
+  else return false;
+  parseNumber(v, val, minv, maxv);
+  return true;
+}
+bool mAnimatorLight::updateVal(const char* req, const char* key, uint16_t &val, uint16_t minv, uint16_t maxv)
 {
   const char *v = strstr(req, key);
   if (v) v += strlen(key);
@@ -1669,7 +1786,7 @@ namespace {
 }
 
 
-bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, byte presetId)
+bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, uint16_t presetId)
 {
 
   // ALOG_INF(PSTR("================deserializeSegment"));

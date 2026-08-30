@@ -694,11 +694,18 @@ void mAnimatorLight::Init_Busses()
  #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
 
  
+  // for (auto &bus : tkr_iLight->busConfigs) {
+  //   // assign bus types: call to getI() determines bus types/drivers, allocates and tracks polybus channels
+  //   // store the result in iType for later use during bus creation (getI() must only be called once per BusConfig)
+  //   // note: this needs to be determined for all buses prior to creating them as it also determines parallel I2S usage
+  //   bus.iType = BusManager::getI(bus.type, bus.pins, bus.driverType);
+  // }
+  uint8_t bus_index = 0;
   for (auto &bus : tkr_iLight->busConfigs) {
-    // assign bus types: call to getI() determines bus types/drivers, allocates and tracks polybus channels
-    // store the result in iType for later use during bus creation (getI() must only be called once per BusConfig)
-    // note: this needs to be determined for all buses prior to creating them as it also determines parallel I2S usage
-    bus.iType = BusManager::getI(bus.type, bus.pins, bus.driverType);
+    // getI() requires the physical digital bus index so it can select
+    // the appropriate RMT/I2S method for that output.
+    bus.iType = BusManager::getI(bus.type, bus.pins, bus_index);
+    bus_index++;
   }
 
  /*****************************************************************************

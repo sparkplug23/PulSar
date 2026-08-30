@@ -28,7 +28,7 @@
 // #define DEVICE_MEADOWS__ENSUITE_DOOR_FRAME
 // #define DEVICE_MEADOWS__HALLWAY__HEATING
 /// OFFICE ///////////////////////////////////////////////////////////////////////////////////
-#define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
+// #define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
 // #define DEVICE_MEADOWS__OFFICE__ELITE4DEXMU_01
 // #define DEVICE_MEADOWS__OFFICE__ELITE4DEXMU_02
 // #define DEVICE_MEADOWS__OFFICE__ELITE4DEXMU_03

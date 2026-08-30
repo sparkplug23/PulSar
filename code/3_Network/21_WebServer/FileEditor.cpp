@@ -24,6 +24,9 @@ FileEditor::FileEditor(const fs::FS& fs, const String& username, const String& p
 
 bool FileEditor::canHandle(AsyncWebServerRequest *request)
 {
+
+  ALOG_INF(PSTR("FileEditor"));
+
   if(request->url().equalsIgnoreCase(F("/edit")))
   {
     if(request->method() == HTTP_GET)

@@ -1,7 +1,7 @@
 {
   "env_name": "cm_office__ws2815panel12v",
-  "created_utc": "2026-08-30T14:50:13Z",
-  "created_epoch": 1788101413,
+  "created_utc": "2026-08-30T21:30:54Z",
+  "created_epoch": 1788125454,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "9fb8ffcf2c93507dca5f880accdbfbc79959bdaf",
-    "describe": "9fb8ffcf-dirty",
-    "status_short": "M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf"
+    "commit": "38adfdcc2361764d5e6e9b1d25353586ac3848da",
+    "describe": "38adfdcc-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_LightingEffects.h\n M code/2_CoreSystem/21_JsonArduino/JsonArduino.cpp\n M code/3_Network/21_WebServer/FileEditor.cpp\n M code/3_Network/21_WebServer/FileEditor.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/Commands.cpp\n M code/6_Lights/03_Animator/Playlist.cpp\n M code/6_Lights/03_Animator/Presets.cpp\n M code/6_Lights/03_Animator/WebUI.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M platformio_lgt.ini\n M platformio_override.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n?? notes/PresetJsonFiles/September2026/\n?? saved_compiles/cm_lgt__esp32_coneH_1D/"
   }
 }

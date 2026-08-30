@@ -72,6 +72,9 @@
 #endif
 
 
+    #define PRESET_ID_NONE 0
+    #define PRESET_ID_TEMP 65535
+
 
 
 // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
@@ -1099,9 +1102,10 @@ bool doAdvancePlaylist  = false;
 
 
     #ifdef ENABLE_FEATURE_LIGHTS__PRESETS
-    volatile byte presetToApply = 0;
-    volatile byte callModeToApply = 0;
-    volatile byte presetToSave = 0;
+  volatile uint16_t presetToApply = PRESET_ID_NONE;
+volatile byte callModeToApply = 0;
+volatile uint16_t presetToSave = PRESET_ID_NONE;
+
     volatile int8_t saveLedmap = -1;
     char quickLoad[9] = {0};
     char saveName[33] = {0};
@@ -1124,17 +1128,23 @@ bool doAdvancePlaylist  = false;
 
     
     void doSaveState();
-    bool getPresetName(byte index, String& name);
-    void initPresetsFile();
-    bool applyPreset(byte index, byte callMode = CALL_MODE_DIRECT_CHANGE);
-    void applyPresetWithFallback(uint8_t presetID, uint8_t callMode, uint16_t effectID = 0, uint8_t paletteID = 0);
+    
+    bool getPresetName(uint16_t index, String& name);
+    bool applyPreset(uint16_t index, byte callMode = CALL_MODE_DIRECT_CHANGE);
+    void applyPresetWithFallback(uint16_t presetID, uint8_t callMode, uint16_t effectID = 0, uint8_t paletteID = 0);
     void SubTask_Presets();
-    inline bool applyTemporaryPreset() {return applyPreset(255);};
+    inline bool applyTemporaryPreset() {return applyPreset(PRESET_ID_TEMP);};
 
-    void savePreset(byte index, const char* pname = nullptr, JsonObject saveobj = JsonObject());
-    inline void saveTemporaryPreset() {savePreset(255);};
+    void savePreset(uint16_t index, const char* pname = nullptr, JsonObject saveobj = JsonObject());
+    inline void saveTemporaryPreset() {savePreset(PRESET_ID_TEMP);};
 
-    void deletePreset(byte index);
+    void deletePreset(uint16_t index);
+
+
+
+
+    void initPresetsFile();
+
     #endif // ENABLE_FEATURE_LIGHTS__PRESETS
 
 
@@ -1218,9 +1228,12 @@ bool doAdvancePlaylist  = false;
 ******************************************************************************************************************************************************************************/
 #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
 
+
+uint16_t currentPreset = PRESET_ID_NONE;
+
 typedef struct PlaylistEntry
 {
-  uint8_t preset;
+  uint16_t preset;
 
   // Existing WLED playlist timing units:
   // 100 = 10 seconds because runtime multiplies by 100 ms.
@@ -1240,8 +1253,8 @@ typedef struct PlaylistEntry
 
 
 byte playlistRepeat = 1;
-byte playlistEndPreset = 0;
-byte playlistDefaultPreset = 0;
+uint16_t playlistEndPreset = PRESET_ID_NONE;
+uint16_t playlistDefaultPreset = PRESET_ID_NONE;
 byte playlistOptions = 0;
 
 PlaylistEntry *playlistEntries = nullptr;
@@ -1251,7 +1264,7 @@ int8_t playlistIndex = -1;
 
 uint32_t playlistEntryDur = 0;
 
-int16_t currentPlaylist = -1;
+int32_t currentPlaylist = -1;
 
 bool playlistFallbackActive = false;
 
@@ -1260,7 +1273,7 @@ uint32_t tSaved_playlist_debug = 0;
 
 void shufflePlaylist();
 void unloadPlaylist();
-int16_t loadPlaylist(JsonObject playlistObj, byte presetId);
+int32_t loadPlaylist(JsonObject playlistObj, uint16_t presetId);
 void SubTask_Playlist();
 void serializePlaylist(JsonObject sObj);
 
@@ -5609,7 +5622,8 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
 
     WiFiUDP notifierUdp, rgbUdp, notifier2Udp;
     bool e131NewData = false;
-    byte currentPreset = 0;
+    
+    
 
 
     /*
@@ -5781,20 +5795,28 @@ AsyncWebSocket* websocket_lights = nullptr;
 
 
 
+bool deserializeState(JsonObject root, byte callMode = CALL_MODE_DIRECT_CHANGE, uint16_t presetId = PRESET_ID_NONE);
 
+bool deserializeSegment(JsonObject elem, byte it, uint16_t presetId = PRESET_ID_NONE);
+
+int getNumVal(const String* req, uint16_t pos);
+
+void parseNumber(const char* str, byte &val, byte minv=0, byte maxv=255);
+void parseNumber(const char* str, uint16_t &val, uint16_t minv=0, uint16_t maxv=UINT16_MAX);
+
+bool getVal(JsonVariant elem, byte &val, byte vmin=0, byte vmax=255);
+bool getVal(JsonVariant elem, uint16_t &val, uint16_t vmin=0, uint16_t vmax=UINT16_MAX);
+
+bool updateVal(const char* req, const char* key, byte &val, byte minv=0, byte maxv=255);
+bool updateVal(const char* req, const char* key, uint16_t &val, uint16_t minv=0, uint16_t maxv=UINT16_MAX);
 
 
 
 void setPaletteColors(JsonArray json, CRGBPalette16 palette);
 
-bool deserializeSegment(JsonObject elem, byte it, byte presetId = 0);
-
-int getNumVal(const String* req, uint16_t pos);
-void parseNumber(const char* str, byte &val, byte minv=0, byte maxv=255);
-bool getVal(JsonVariant elem, byte &val, byte vmin=0, byte vmax=255); // getVal supports inc/decrementing and random ("X~Y(r|[w]~[-][Z])" form)
 
 bool getBoolVal(JsonVariant elem, bool dflt);
-bool updateVal(const char* req, const char* key, byte &val, byte minv=0, byte maxv=255);
+
 size_t printSetFormCheckbox(Print& settingsScript, const char* key, int val);
 size_t printSetFormValue(Print& settingsScript, const char* key, int val);
 size_t printSetFormIndex(Print& settingsScript, const char* key, int index);
@@ -5805,7 +5827,7 @@ size_t printSetFormInput(Print& settingsScript, const char* key, const char* sel
 
 
 bool colorFromHexString(byte* rgb, const char* in);
-bool deserializeState(JsonObject root, byte callMode = CALL_MODE_DIRECT_CHANGE, byte presetId = 0);
+
 
 bool isIp(String str);
 
@@ -6217,10 +6239,9 @@ bool showWelcomePage _INIT(false);
 //playlists
 // int16_t currentPlaylist _INIT(-1);
 //still used for "PL=~" HTTP API command
-byte presetCycCurr _INIT(0);
-byte presetCycMin _INIT(1);
-byte presetCycMax _INIT(5);
-
+uint16_t presetCycCurr _INIT(PRESET_ID_NONE);
+uint16_t presetCycMin _INIT(1);
+uint16_t presetCycMax _INIT(5);
 
 
 //realtime override modes

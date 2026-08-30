@@ -5,6 +5,8 @@
 
 #include "3_Network/21_WebServer/Webpages/Generated/file_editor.h"
 
+#include "2_CoreSystem/08_Logging/mLogging.h"
+
 #ifdef ESP8266
 #include <LittleFS.h>
 #endif

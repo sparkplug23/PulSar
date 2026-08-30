@@ -6,15 +6,25 @@
 /*
  * Methods to handle saving and loading presets to/from the filesystem
  * TODO:I want to serialise the preset file and send over mqtt anytime it changes as debug
+ * 
+ * lets keep the preset as you gave it, update the other code to now work with u16. This is because I would like to index things into ranges of presets
+<100 steady
+100-500 flashy etc
+preset 1000+
+
+just because it makes it a lot easier to add new presets/playlists without worrying of collision. Of course my file space wont support that many at the same time, but this can lead to perhaps me making some custom presets that are "mine", then using like a python script to take from a toolbox of designed presets and build a custom preset.json for a device. We can simply make all preset names completely unique, think of this as "effects customed"
+
+
+
  */
 
 #ifdef ARDUINO_ARCH_ESP32
 static char *tmpRAMbuffer = nullptr;
 #endif
 
-static volatile byte presetToApply = 0;
+static volatile uint16_t presetToApply = PRESET_ID_NONE;
 static volatile byte callModeToApply = 0;
-static volatile byte presetToSave = 0;
+static volatile uint16_t presetToSave = PRESET_ID_NONE;
 static volatile int8_t saveLedmap = -1;
 static char *quickLoad = nullptr;
 static char *saveName = nullptr;
@@ -201,7 +211,7 @@ void mAnimatorLight::doSaveState()
   unsigned long start = millis();
   while (isUpdating() && millis()-start < (2*FRAMETIME)+1) yield(); // wait 2 frames
 
-  bool persist = (presetToSave < 251);
+  bool persist = (presetToSave != PRESET_ID_TEMP);
   const char *filename = getPresetsFileName(persist);
   
   if (!tkr_jsona->requestJSONBufferLock(10)) return; // will set gDoc
@@ -298,7 +308,7 @@ void mAnimatorLight::doSaveState()
 
   // clean up
   saveLedmap   = -1;
-  presetToSave = 0;
+  presetToSave = PRESET_ID_NONE;
   saveName[0]  = '\0';
   quickLoad[0] = '\0';
   playlistSave = false;
@@ -311,7 +321,7 @@ void mAnimatorLight::doSaveState()
 }
 
 
-bool mAnimatorLight::getPresetName(byte index, String& name)
+bool mAnimatorLight::getPresetName(uint16_t index, String& name)
 {
 
   if (!tkr_jsona->requestJSONBufferLock(9))
@@ -376,7 +386,7 @@ void mAnimatorLight::initPresetsFile()
 }
 
 
-bool mAnimatorLight::applyPreset(byte index, byte callMode)
+bool mAnimatorLight::applyPreset(uint16_t index, byte callMode)
 {
   ALOG_INF(PSTR("Request to apply preset: %d"), index);
   presetToApply = index;
@@ -386,7 +396,7 @@ bool mAnimatorLight::applyPreset(byte index, byte callMode)
 
 
 // apply preset or fallback to a effect and palette if it doesn't exist
-void mAnimatorLight::applyPresetWithFallback(uint8_t index, uint8_t callMode, uint16_t effectID, uint8_t paletteID)
+void mAnimatorLight::applyPresetWithFallback(uint16_t index, uint8_t callMode, uint16_t effectID, uint8_t paletteID)
 {
   applyPreset(index, callMode);  
   effectCurrent = effectID; // these two will be overwritten if preset exists in SubTask_Presets()
@@ -420,18 +430,18 @@ void mAnimatorLight::SubTask_Presets()
   
 
   bool changePreset = false;
-  uint8_t tmpPreset = presetToApply; // store temporary since deserializeState() may call applyPreset()
+  uint16_t tmpPreset = presetToApply; // store temporary since deserializeState() may call applyPreset()
   uint8_t tmpMode   = callModeToApply;
  
   
 
   JsonObject fdo;
-  const char *filename = getPresetsFileName(tmpPreset < 255);
+  const char *filename = getPresetsFileName(tmpPreset != PRESET_ID_TEMP);
 
   // allocate buffer
   // if (!requestJSONBufferLock(9)) return;  // will also assign gDoc
 
-  presetToApply = 0; //clear request for preset
+  presetToApply = PRESET_ID_NONE; //clear request for preset
   callModeToApply = 0;
 
   ALOG_INF(PSTR("Applying preset:%d"), tmpPreset);
@@ -442,7 +452,7 @@ void mAnimatorLight::SubTask_Presets()
   #endif
 
   #ifdef ARDUINO_ARCH_ESP32
-  if (tmpPreset==255 && tmpRAMbuffer!=nullptr) 
+  if (tmpPreset==PRESET_ID_TEMP && tmpRAMbuffer!=nullptr) 
   { 
     deserializeJson(*tkr_jsona->pDoc,tmpRAMbuffer);
     tkr_mfile->errorFlag = ERR_NONE;
@@ -532,7 +542,7 @@ void mAnimatorLight::SubTask_Presets()
 
   }
 
-  if (!tkr_mfile->errorFlag && tmpPreset < 255 && changePreset)
+  if (!tkr_mfile->errorFlag && tmpPreset != PRESET_ID_TEMP && changePreset)
   {
     presetCycCurr = currentPreset = tmpPreset;
   }
@@ -541,7 +551,7 @@ void mAnimatorLight::SubTask_Presets()
 
   #if defined(ARDUINO_ARCH_ESP32)
   //Aircoookie recommended not to delete buffer
-  if (tmpPreset==255 && tmpRAMbuffer!=nullptr) {
+  if (tmpPreset==PRESET_ID_TEMP && tmpRAMbuffer!=nullptr) {
     free(tmpRAMbuffer);
     tmpRAMbuffer = nullptr;
   }
@@ -570,16 +580,16 @@ void mAnimatorLight::SubTask_Demo()
 
 
 //called from handle__HTTP__GET_QueryAPI(PS=) [network callback (gDoc==nullptr), IR (irrational), deserializeState, UDP] and deserializeState() [network callback (filedoc!=nullptr)]
-void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
+void mAnimatorLight::savePreset(uint16_t index, const char* pname, JsonObject sObj)
 {
 
   ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "savePreset()"));
 
-  if (index == 0 || (index > 250 && index < 255)) return;
+  if (index == PRESET_ID_NONE) return;
   if (pname) strlcpy(saveName, pname, 33);
   else {
     if (sObj["n"].is<const char*>()) strlcpy(saveName, sObj["n"].as<const char*>(), 33);
-    else                             sprintf_P(saveName, PSTR("Preset %d"), index);
+    else                             sprintf_P(saveName, PSTR("Preset %u"), index);
   }
 
   DEBUG_PRINT(F("Saving preset (")); DEBUG_PRINT(index); DEBUG_PRINT(F(") ")); DEBUG_PRINTLN(saveName);
@@ -594,8 +604,8 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
   if (sObj["o"].isNull()) 
   { // no "o" means not a playlist or custom API call, saving of state is async (not immediately)
 
-    includeBri   = sObj["ib"].as<bool>() || index==255; // temporary preset needs brightness
-    segBounds    = sObj["sb"].as<bool>() || index==255; // temporary preset needs bounds
+    includeBri   = sObj["ib"].as<bool>() || index==PRESET_ID_TEMP; // temporary preset needs brightness
+    segBounds    = sObj["sb"].as<bool>() || index==PRESET_ID_TEMP; // temporary preset needs bounds
     selectedOnly = sObj[F("sc")].as<bool>();
     saveLedmap   = sObj[F("ledmap")] | -1;
 
@@ -607,8 +617,8 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
     if (sObj[F("playlist")].isNull()) 
     {
       // we will save API call immediately (often causes presets.json corruption)
-      presetToSave = 0;
-      if (index > 250 || !tkr_jsona->pDoc) return; // cannot save API calls to temporary preset (255)
+      presetToSave = PRESET_ID_NONE;
+      if (index == PRESET_ID_TEMP || !tkr_jsona->pDoc) return; // cannot save API calls to temporary preset
       sObj.remove("o");
       sObj.remove("v");
       sObj.remove("time");
@@ -616,7 +626,7 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
       sObj.remove(F("psave"));
       if (sObj["n"].isNull()) sObj["n"] = saveName;
       initPresetsFile(); // just in case if someone deleted presets.json using /edit
-      tkr_mfile->writeObjectToFileUsingId(getPresetsFileName(index<255), index, tkr_jsona->pDoc);    
+      tkr_mfile->writeObjectToFileUsingId(getPresetsFileName(index != PRESET_ID_TEMP), index, tkr_jsona->pDoc);    
       
       tkr_mfile->presetsModifiedTime = toki.second(); //unix time  
 
@@ -639,7 +649,7 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
 }
 
 
-void mAnimatorLight::deletePreset(byte index) 
+void mAnimatorLight::deletePreset(uint16_t index) 
 {
 
   StaticJsonDocument<24> empty;

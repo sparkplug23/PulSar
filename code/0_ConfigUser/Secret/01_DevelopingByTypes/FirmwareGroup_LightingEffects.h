@@ -4877,7 +4877,7 @@
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
 
-  #define ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
+  // #define ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
 
  /***********************************
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
@@ -4901,22 +4901,9 @@
 
   #define ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
   #define ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+  // #define ENABLE_PIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
 
  
-  //     {
-  //       "Pin":18,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":2000,
-  //       "Length":1000
-  //     },
-  //     {
-  //       "Pin":19,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":3000,
-  //       "Length":1000
-  //     }
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -4927,33 +4914,33 @@
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
-        "Length":1000
+        "Length":10
       },
       {
         "Pin":4,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":1000,
-        "Length":1000
+        "Start":10,
+        "Length":10
       },
       {
         "Pin":18,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":2000,
-        "Length":1000
+        "Start":20,
+        "Length":10
       },
       {
         "Pin":19,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":3000,
-        "Length":1000
+        "Start":30,
+        "Length":10
       }
     ],
     "Segments":[
       {
-        "PixelRange":[0,4000],
+        "PixelRange":[0,40],
         "ColourPalette":"Rainbow",
         "ColourType":3,
         "Effects": {
@@ -4969,9 +4956,61 @@
     "BrightnessRGB": 100
   }
   )=====";
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[     
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":1000
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":1000,
+  //       "Length":1000
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":2000,
+  //       "Length":1000
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":3000,
+  //       "Length":1000
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "PixelRange":[0,4000],
+  //       "ColourPalette":"Rainbow",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Gradient",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
   #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
   #define MAX_LED_MEMORY 64000*5
-  #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
+  // #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
 
   /***********************************
    * SECTION: Template Configs

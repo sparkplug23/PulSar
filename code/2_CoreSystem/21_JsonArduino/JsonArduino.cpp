@@ -4,6 +4,22 @@
 #ifdef USE_MODULE_CORE__JSON_ARDUINO
 
 
+/* Null, because instance will be initialized on demand. */
+mJsonArduino* mJsonArduino::instance = nullptr;
+
+mJsonArduino* mJsonArduino::GetInstance(){
+  if (instance == nullptr){
+    instance = new mJsonArduino();
+    // PRINT_FLUSHED("instance = new mJsonArduino()");
+  }
+  return instance;
+}
+
+
+
+
+
+
 void mJsonArduino::Init()
 {
 

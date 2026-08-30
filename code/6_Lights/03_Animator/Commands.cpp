@@ -150,7 +150,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 
           valid_bus_idx[valid_bus_count++] = b;
         }
-s
+
         if (valid_bus_count == 0)
         {
           ALOG_ERR(PSTR(D_LOG_PIXEL "Segments/MatchBus but no valid BusConfig entries"));
