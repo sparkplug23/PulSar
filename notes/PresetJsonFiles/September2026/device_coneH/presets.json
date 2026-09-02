@@ -4,7 +4,7 @@
     "n": "A*3Jan26a Static Snowy02",
     "Pal": "Snowy 02",
     "Effects": {
-      "FX": "Static",
+      "FX": "Static Palette",
       "IX": 127,
       "SX": 0,
       "GP": 1,
@@ -57,7 +57,7 @@
     "n": "A**Static ColG150",
     "Pal": "Snowy 02",
     "Effects": {
-      "FX": "Static",
+      "FX": "Static Palette",
       "IX": 20,
       "SX": 200,
       "GP": 150,
@@ -509,7 +509,7 @@
     "n": "A*B&W,Gp16",
     "Pal": "Blue and White",
     "Effects": {
-      "FX": "Static",
+      "FX": "Static Palette",
       "IX": 20,
       "SX": 255,
       "GroupingPerc": 16,
@@ -521,7 +521,7 @@
   "51": {
     "n": "A*Static G20 Snowy02",
     "Effects": {
-      "FX": "Static",
+      "FX": "Static Palette",
       "IX": 255,
       "SX": 0,
       "GP": 20,
@@ -535,7 +535,7 @@
     "n": "A*Col&W,Gp16",
     "Pal": "Colour and White Stripe",
     "Effects": {
-      "FX": "Static",
+      "FX": "Static Palette",
       "IX": 20,
       "SX": 255,
       "GroupingPerc": 16,
@@ -674,7 +674,7 @@
   "60": {
     "n": "A*Day: C&W,G210",
     "Effects": {
-      "FX": "Static",
+      "FX": "Static Palette",
       "IX": 20,
       "SX": 255,
       "GP": 10,
@@ -798,35 +798,35 @@
     "Pal": "Hult"
   },
   "74": {
-    "n": "A*Statics-Grad-NoBrightness",
+    "n": "Pal:Spring 16",
     "Pal": "Spring 16"
   },
   "75": {
-    "n": "A*Statics-Grad-NoBrightness",
+    "n": "Pal:Party 16",
     "Pal": "Party 16"
   },
   "76": {
-    "n": "A*Statics-Grad-NoBrightness",
+    "n": "Pal:Candy",
     "Pal": "Candy"
   },
   "77": {
-    "n": "A*Statics-Grad-NoBrightness",
+    "n": "Pal:Pink White Purple Grad",
     "Pal": "Pink White Purple Grad"
   },
   "78": {
-    "n": "A*Statics-Grad-NoBrightness",
+    "n": "Pal:Snowy 01",
     "Pal": "Snowy 01"
   },
   "79": {
-    "n": "A*Statics-Grad-NoBrightness",
+    "n": "Pal:Colours and White Stripe",
     "Pal": "Colours and White Stripe"
   },
   "80": {
-    "n": "A*Statics-Grad-NoBrightness",
+    "n": "Pal:Colourful Greenless",
     "Pal": "Colourful Greenless"
   },
   "81": {
-    "n": "A*Statics-Grad-NoBrightness",
+    "n": "Pal:Sunrise Blue SR02",
     "Pal": "Sunrise Blue SR02"
   },
   "83": {
@@ -1106,7 +1106,7 @@
     "n": "A*Static Override",
     "Pal": "Snowy 02",
     "Effects": {
-      "FX": "Static",
+      "FX": "Static Palette",
       "IX": 127,
       "SX": 0,
       "GP": 1,
@@ -1527,7 +1527,7 @@
     "n": "A*Soft Warm White 60%",
     "Pal": "Warm White",
     "Effects": {
-      "FX": "Static",
+      "FX": "Static Palette",
       "IX": 127,
       "SX": 255,
       "GP": 1,
@@ -1536,55 +1536,6 @@
       "RA": 4000
     },
     "BrightnessRGB": 60
-  },
-  "300": {
-    "n": "A*Intensity 2,G1",
-    "Effects": {
-      "IX": 2,
-      "GP": 1
-    }
-  },
-  "301": {
-    "n": "A*Intensity 7,G1",
-    "Effects": {
-      "IX": 7,
-      "GP": 1
-    }
-  },
-  "302": {
-    "n": "A*Intensity 12,G1",
-    "Effects": {
-      "IX": 12,
-      "GP": 1
-    }
-  },
-  "303": {
-    "n": "A*Intensity 20,G1",
-    "Effects": {
-      "IX": 20,
-      "GP": 1
-    }
-  },
-  "304": {
-    "n": "A*Intensity 30,G1",
-    "Effects": {
-      "IX": 30,
-      "GP": 1
-    }
-  },
-  "305": {
-    "n": "A*Intensity 100,G1",
-    "Effects": {
-      "IX": 100,
-      "GP": 1
-    }
-  },
-  "306": {
-    "n": "A*Intensity 150,G1",
-    "Effects": {
-      "IX": 150,
-      "GP": 1
-    }
   },
   "307": {
     "n": "A*Candles Pastel+",

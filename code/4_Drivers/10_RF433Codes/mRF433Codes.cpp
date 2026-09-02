@@ -302,6 +302,112 @@ int8_t mRF433Codes::Tasker(uint8_t function, JsonParserObject obj){
 
 }//end
 
+#ifdef ENABLE_FEATURE_DRIVERS__RF433_TRANSMIT_BITBANG_TEST
+void mRF433Codes::TransmitTest()
+{
+  static constexpr uint8_t TX_PIN = 22;
+
+  /**
+   * ComfyShade / ZN-115T
+   *
+   * One captured DOWN frame, normalized to T = 333 us.
+   *
+   * Array starts HIGH and alternates:
+   *
+   *   [0] HIGH
+   *   [1] LOW
+   *   [2] HIGH
+   *   [3] LOW
+   *   ...
+   *
+   * Entire frame:
+   *   150 timing cells
+   *   ~49.95 ms
+   *
+   * Send same frame 5 times continuously.
+   */
+  static const uint16_t down_command_raw[] = {
+
+    4995,  // HIGH 15T
+    2331,  // LOW   7T
+    1665,  // HIGH  5T
+     666,  // LOW   2T
+     333,  // HIGH  1T
+    1332,  // LOW   4T
+     666,  // HIGH  2T
+    2331,  // LOW   7T
+     666,  // HIGH  2T
+     333,  // LOW   1T
+
+     333,  // HIGH  1T
+    1332,  // LOW   4T
+     333,  // HIGH  1T
+     333,  // LOW   1T
+     666,  // HIGH  2T
+     666,  // LOW   2T
+     999,  // HIGH  3T
+    1332,  // LOW   4T
+     666,  // HIGH  2T
+     333,  // LOW   1T
+
+     333,  // HIGH  1T
+    2331,  // LOW   7T
+     333,  // HIGH  1T
+    3663,  // LOW  11T
+     333,  // HIGH  1T
+     999,  // LOW   3T
+     333,  // HIGH  1T
+     999,  // LOW   3T
+     333,  // HIGH  1T
+    1998,  // LOW   6T
+
+     666,  // HIGH  2T
+    1998,  // LOW   6T
+     666,  // HIGH  2T
+     333,  // LOW   1T
+     666,  // HIGH  2T
+    1665,  // LOW   5T
+     666,  // HIGH  2T
+    1998,  // LOW   6T
+     666,  // HIGH  2T
+     333,  // LOW   1T
+
+     333,  // HIGH  1T
+    1332,  // LOW   4T
+     999,  // HIGH  3T
+     666,  // LOW   2T
+     333,  // HIGH  1T
+     666,  // LOW   2T
+     666,  // HIGH  2T
+     333,  // LOW   1T
+     666,  // HIGH  2T
+     333   // LOW   1T
+  };
+
+  pinMode(TX_PIN, OUTPUT);
+
+  // Known idle state.
+  digitalWrite(TX_PIN, LOW);
+  delayMicroseconds(5000);
+
+  for (uint8_t repeat = 0; repeat < 5; repeat++)
+  {
+    for (uint16_t i = 0; i < ARRAY_SIZE(down_command_raw); i++)
+    {
+      // Frame begins HIGH and alternates thereafter.
+      digitalWrite(TX_PIN, (i & 1) ? LOW : HIGH);
+      delayMicroseconds(down_command_raw[i]);
+    }
+
+    // Last array entry is already LOW.
+    digitalWrite(TX_PIN, LOW);
+  }
+
+  digitalWrite(TX_PIN, LOW);
+}
+#endif
+
+
 
 void mRF433Codes::SubTask_SendCommand_Up()
 {
@@ -764,7 +870,7 @@ void mRF433Codes::ReceiveCheck(void)
     return;
   }
 
-  ALOG_INF(PSTR("RFR: ReceiveCheck() %d"), mySwitch->available());
+  // ALOG_INF(PSTR("RFR: ReceiveCheck() %d"), mySwitch->available());
 
   if (mySwitch->available())
   {
@@ -1046,6 +1152,15 @@ void mRF433Codes::parse_JSONCommand(JsonParserObject obj)
 
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
+
+  
+  #ifdef ENABLE_FEATURE_DRIVERS__RF433_TRANSMIT_BITBANG_TEST
+	if(jtok = obj["TransmitTest"])
+	{
+    TransmitTest();
+  }
+  #endif
+
 
 	if(jtok = obj["RfMask"])
 	{

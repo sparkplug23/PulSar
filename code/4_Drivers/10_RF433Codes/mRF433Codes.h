@@ -89,6 +89,10 @@ class mRF433Codes :
     #define D_RF_PULSE              "Pulse"
 
     void ReceiveCheck(void);
+    
+    #ifdef ENABLE_FEATURE_DRIVERS__RF433_TRANSMIT_BITBANG_TEST
+    void TransmitTest();
+    #endif
 
     /************************************************************************************************
      * SECTION: Commands

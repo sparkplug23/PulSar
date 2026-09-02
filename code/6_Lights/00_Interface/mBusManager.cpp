@@ -276,14 +276,14 @@ BusDigital::BusDigital(const BusConfig &bc)
     _frequencykHz = bc.frequency ? bc.frequency : 2000U; // 2MHz clock if undefined
   }
 
-  uint8_t nr = 0;
+  // uint8_t nr = 0;
 
   _hasRgb = hasRGB(bc.type);
   _hasWhite = hasWhite(bc.type);
   _hasCCT = hasCCT(bc.type);
   uint16_t lenToCreate = bc.count;
   if (bc.type == TYPE_WS2812_1CH_X3) lenToCreate = NUM_ICS_WS2812_1CH_3X(bc.count); // only needs a third of "RGB" LEDs for NeoPixelBus
-  _busPtr = PolyBus::create(_iType, _pins, lenToCreate + _skip, nr);
+  _busPtr = PolyBus::create(_iType, _pins, lenToCreate + _skip, bc.channel);
   _valid = (_busPtr != nullptr) && bc.count > 0;
   // fix for wled#4759
   if (_valid) for (unsigned i = 0; i < _skip; i++) {
@@ -292,16 +292,17 @@ BusDigital::BusDigital(const BusConfig &bc)
   else {
     cleanup();
   }
-  DEBUGBUS_PRINTF_P(PSTR("Bus len:%u, type:%u (RGB:%d, W:%d, CCT:%d), pins:%u,%u [itype:%u, driver:%s] mA=%d/%d %s\n"),
-    (int)bc.count,
-    (int)bc.type,
-    (int)_hasRgb, (int)_hasWhite, (int)_hasCCT,
-    (unsigned)_pins[0], is2Pin(bc.type)?(unsigned)_pins[1]:255U,
-    (unsigned)_iType,
-    isI2S() ? "I2S" : "RMT",
-    (int)_milliAmpsPerLed, (int)_milliAmpsMax,
-    _valid ? " " : "FAILED"
-  );
+  DEBUGBUS_PRINTF_P(PSTR("Bus len:%u, type:%u (RGB:%d, W:%d, CCT:%d), pins:%u,%u [itype:%u, channel:%u, driver:%s] mA=%d/%d %s\n"),
+  (int)bc.count,
+  (int)bc.type,
+  (int)_hasRgb, (int)_hasWhite, (int)_hasCCT,
+  (unsigned)_pins[0], is2Pin(bc.type)?(unsigned)_pins[1]:255U,
+  (unsigned)_iType,
+  (unsigned)bc.channel,
+  isI2S() ? "I2S" : "RMT",
+  (int)_milliAmpsPerLed, (int)_milliAmpsMax,
+  _valid ? " " : "FAILED"
+);
 }
 
 
@@ -1625,7 +1626,7 @@ uint8_t PolyBus::required_channels = 0;
 
 std::vector<std::unique_ptr<Bus>> BusManager::busses;
 uint16_t BusManager::_gMilliAmpsUsed = 0;
-uint16_t BusManager::_gMilliAmpsMax = ABL_MILLIAMPS_DEFAULT;
+uint16_t BusManager::_gMilliAmpsMax = ABL_MILLIAMPS_DEFAULT_MAX_SUPPLY_CURRENT;
 bool BusManager::_useABL = false;
 
 

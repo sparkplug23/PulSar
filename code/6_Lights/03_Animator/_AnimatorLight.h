@@ -617,6 +617,8 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "de
   #include "webpages_generated/html_cpal.h"
 #endif // ENABLE_FEATURE_LIGHTING__WEBUI
 
+#include "webpages_generated/advanced_playlist.h"
+
 #include "colors.h"
 
 

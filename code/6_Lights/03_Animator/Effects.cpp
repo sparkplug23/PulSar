@@ -391,20 +391,16 @@ static const char PM_EFFECT_DESCRI__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
  * Cycles through the dynamic random-gradient palette range and renders the
  * selected palette using EffectAnim__Gradient_Palette_SegWidth().
  *
- * Palette behaviour:
- *   - Auto cycle disabled:
- *       The first random-gradient palette remains selected.
- *   - Auto cycle enabled:
- *       A different random-gradient palette is selected once per effect period.
- *   - Immediate repetition of the current palette is prevented.
- *
  * Timing behaviour:
- *   - EP defines the complete palette cycle period.
- *   - SX controls what proportion of EP is spent blending to the new palette.
- *   - The remaining portion of EP is the static hold time.
+ *   - PALIX defines the complete palette cycle period.
+ *   - PALIX maps from approximately 1.0 to 26.5 seconds:
+ *       period_ms = 1000 + (PALIX * 100)
+ *   - SX controls what proportion of the complete period is spent blending.
+ *   - The remainder of the period is the static hold time.
  *
  * Example:
- *   - EP = 10000 ms
+ *   - PALIX = 90
+ *   - Complete period = 10000 ms
  *   - SX = 127
  *   - Transition time is approximately 5000 ms.
  *   - Static hold time is approximately 5000 ms.
@@ -415,7 +411,7 @@ static const char PM_EFFECT_DESCRI__GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
  *   - O2 enables or disables automatic palette cycling.
  *
  * State:
- *   - aux3 stores the last palette-change timestamp.
+ *   - aux3 stores the current palette-period timestamp.
  ************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__Randomise_Gradient_Palette_SegWidth()
 {
@@ -423,13 +419,21 @@ void mAnimatorLight::EffectAnim__Randomise_Gradient_Palette_SegWidth()
   const uint8_t palette_max   = mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID;
   const uint8_t palette_count = static_cast<uint8_t>(palette_max - palette_min + 1U);
 
-  // Ensure the selected palette remains inside the supported random-gradient range.
+  // PALIX is the single timing source for this effect.
+  // 0 -> 1000 ms, 90 -> 10000 ms, 255 -> 26500 ms.
+  const uint32_t period_ms = 1000UL + (static_cast<uint32_t>(SEGMENT.live_palette.intensity) * 100UL);
+
+  // startPeriodTransition() uses cycle_time__rate_ms together with SX/speed,
+  // so derive the effect period directly from PALIX rather than using EP independently.
+  SEGMENT.cycle_time__rate_ms = period_ms;
+
+  // Keep the active palette inside the supported random-gradient range.
   if ((SEGMENT.palette_id < palette_min) || (SEGMENT.palette_id > palette_max))
   {
     SEGMENT.setPalette(palette_min);
   }
 
-  // O2 enables automatic cycling. When disabled, retain the first random palette.
+  // O2 disabled: remain on the first random-gradient palette.
   if (!SEGMENT.check2)
   {
     if (SEGMENT.palette_id != palette_min)
@@ -442,16 +446,18 @@ void mAnimatorLight::EffectAnim__Randomise_Gradient_Palette_SegWidth()
     return;
   }
 
-  const uint32_t period_ms  = SEGMENT.cycle_time__rate_ms;
-  const uint32_t elapsed_ms = effect_start_time - SEGMENT.aux3;
-
+  // Initialise the palette-period timer.
   if (SEGMENT.aux3 == 0)
   {
     SEGMENT.aux3 = effect_start_time;
   }
-  else if ((elapsed_ms >= period_ms) && !SEGMENT.isInTransition())
+  // Change palette once the complete PALIX period has elapsed.
+  // Do not replace the palette while the previous transition is still active.
+  else if (((effect_start_time - SEGMENT.aux3) >= period_ms) && !SEGMENT.isInTransition())
   {
-    SEGMENT.aux3 = effect_start_time;
+    // Advance by one complete period rather than assigning "now",
+    // preventing frame-time drift from accumulating.
+    SEGMENT.aux3 += period_ms;
 
     const uint8_t current = static_cast<uint8_t>(SEGMENT.palette_id - palette_min);
 
@@ -459,36 +465,39 @@ void mAnimatorLight::EffectAnim__Randomise_Gradient_Palette_SegWidth()
     const uint8_t offset = static_cast<uint8_t>(1U + hw_random8(palette_count - 1U));
     const uint8_t next   = static_cast<uint8_t>((current + offset) % palette_count);
 
+    // Snapshot the current segment and begin the SX-controlled transition.
     SEGMENT.startPeriodTransition(true);
+
+    // Switch to the newly selected random-gradient palette.
     SEGMENT.setPalette(static_cast<uint8_t>(palette_min + next));
   }
 
   EffectAnim__Gradient_Palette_SegWidth();
 }
 static const char PM_EFFECT_CONFIG__RANDOMISE_GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
-"Gradient Random@"                             // Name
-"!,,Width,,,Hard edge,Auto cycle,,!,"       // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
-";"                                            // ----------------------------------------- Sliders/SegCols
-""                                             // Segment Colour Names
-";"                                            // ----------------------------------------- SegCols/PalPicker
-""                                             // Palette picker disabled
-";"                                            // ----------------------------------------- PalPicker/is1D2D
-"1"                                            // Icon flags
-";"                                            // ----------------------------------------- is1D2D/Defaults
-"sx=127,"                                      // Transition occupies approximately half the effect period
-"c1=255,"                                      // Default gradient width: full segment
-"o1=0,"                                        // Smooth repeated-gradient boundary
-"o2=1,"                                        // Automatic palette cycling enabled
-"palix=10,"                                    // Live Palette Intensity
-"ep=10000"                                     // Complete palette cycle period
-;                                              // End
+"Gradient Random@"                           // Name
+"!,,Width,,,Hard edge,Auto cycle,,,"        // 10 fields after '@': 1s,2i,3c1,4c2,5c3,6cb1,7cb2,8cb3,9ep,10grp
+";"                                          // ----------------------------------------- Sliders/SegCols
+""                                           // Segment Colour Names
+";"                                          // ----------------------------------------- SegCols/PalPicker
+""                                           // Palette picker disabled
+";"                                          // ----------------------------------------- PalPicker/is1D2D
+"1"                                          // Icon flags
+";"                                          // ----------------------------------------- is1D2D/Defaults
+"sx=127,"                                    // Approximately half the period used for blending
+"c1=255,"                                    // Default gradient width: full segment
+"o1=0,"                                      // Smooth repeated-gradient boundary
+"o2=1,"                                      // Automatic palette cycling enabled
+"palix=90"                                   // Complete palette cycle period = 10 seconds
+;
 static const char PM_EFFECT_DESCRI__RANDOMISE_GRADIENT_PALETTE_SEGWIDTH[] PROGMEM =
 "Cycles through random gradient palettes.\n\r"
-"SX: Proportion of the effect period used for blending\n\r"
+"SX: Proportion of the palette period used for blending\n\r"
 "C1: Gradient repeat width\n\r"
 "O1: Hard repeat boundary\n\r"
 "O2: Automatic palette cycling\n\r"
-"EP: Complete palette cycle period";
+"PALIX: Complete palette cycle period (1.0-26.5 seconds)";
+
 
 
 /**********************************************************************************************************************************

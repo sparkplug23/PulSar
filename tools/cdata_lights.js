@@ -453,3 +453,45 @@ writeChunks(
   destination_path + "js_iro.h"
 );
 
+
+
+/************************************************************************************************
+ * Advanced extra pages (higher memory usage)
+ ************************************************************************************************/
+
+writeChunks(
+  source_path,
+  [
+    // {
+    //   file: "adv_playlist_1.htm",
+    //   name: "PAGE_adv_playlist_1",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
+    // {
+    //   file: "adv_playlist_2.htm",
+    //   name: "PAGE_adv_playlist_2",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
+    // {
+    //   file: "adv_playlist_3.htm",
+    //   name: "PAGE_adv_playlist_3",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
+    // {
+    //   file: "adv_playlist_4.htm",
+    //   name: "PAGE_adv_playlist_4",
+    //   method: "gzip",
+    //   filter: "html-minify",
+    // },
+    {
+      file: "playlist_viewer.htm",
+      name: "PAGE_playlist_viewer",
+      method: "gzip",
+      filter: "html-minify",
+    },
+  ],
+  destination_path + "advanced_playlist.h"
+);

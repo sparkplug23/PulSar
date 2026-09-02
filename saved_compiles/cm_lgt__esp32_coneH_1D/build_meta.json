@@ -1,7 +1,7 @@
 {
   "env_name": "cm_lgt__esp32_coneH_1D",
-  "created_utc": "2026-08-30T21:38:08Z",
-  "created_epoch": 1788125888,
+  "created_utc": "2026-09-02T18:00:28Z",
+  "created_epoch": 1788372028,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_lgt__esp32_coneH_1D",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "38adfdcc2361764d5e6e9b1d25353586ac3848da",
-    "describe": "38adfdcc-dirty",
-    "status_short": "M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_LightingEffects.h\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/2_CoreSystem/21_JsonArduino/JsonArduino.cpp\n M code/3_Network/21_WebServer/FileEditor.cpp\n M code/3_Network/21_WebServer/FileEditor.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/Commands.cpp\n M code/6_Lights/03_Animator/Playlist.cpp\n M code/6_Lights/03_Animator/Presets.cpp\n M code/6_Lights/03_Animator/WebUI.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M platformio_lgt.ini\n M platformio_override.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n?? notes/PresetJsonFiles/September2026/\n?? saved_compiles/cm_lgt__esp32_coneH_1D/"
+    "commit": "10da98fbec2527fcae438d0ea056d9d0b0322755",
+    "describe": "10da98fb-dirty",
+    "status_short": "M build_verbose.txt\n M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_LightingEffects.h\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/00_Interface/const.h\n M code/6_Lights/00_Interface/mBusManager.cpp\n M code/6_Lights/00_Interface/mBusManager.h\n M code/6_Lights/00_Interface/mInterfaceLight.cpp\n M code/6_Lights/00_Interface/mInterfaceLight.h\n M code/6_Lights/03_Animator/Commands.cpp\n M code/6_Lights/03_Animator/Effects.cpp\n M code/6_Lights/03_Animator/WebUI.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M notes/PresetJsonFiles/September2026/device_coneH/presets.json\n M platformio_compile_testers.ini\n M platformio_lgt.ini\n M platformio_remote.ini\n M platformio_seasonal.ini\n M saved_compiles/cm_lgt__esp32_coneH_1D/build_meta.json\n M saved_compiles/cm_lgt__esp32_coneH_1D/firmware.elf\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M tools/cdata_lights.js\n?? code/6_Lights/03_Animator/source/adv_playlist_1.htm\n?? code/6_Lights/03_Animator/source/adv_playlist_2.htm\n?? code/6_Lights/03_Animator/source/adv_playlist_3.htm\n?? code/6_Lights/03_Animator/source/adv_playlist_4.htm\n?? code/6_Lights/03_Animator/source/playlist_viewer.htm\n?? code/6_Lights/03_Animator/webpages_generated/advanced_playlist.h"
   }
 }

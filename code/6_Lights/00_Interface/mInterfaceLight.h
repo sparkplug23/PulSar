@@ -197,6 +197,9 @@ class mInterfaceLight :
 
     uint8_t  _briRGB_Global = 255;  // in place of WLED "bri" 0..255 // Used for ws28xx
     uint8_t  _briCT_Global = 255;
+    #ifdef ENABLE_FEATURE_LIGHTS__RUNTIME_BRIGHTNESS_MAXIMUM
+    uint8_t brightness_maximum_override = 255;
+    #endif
 
     inline uint8_t getBri_Global(void) { // return the max of _briCT and _briRGB
       return (_briRGB_Global >= _briCT_Global) ? _briRGB_Global : _briCT_Global;

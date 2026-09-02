@@ -1536,6 +1536,14 @@ void mInterfaceLight::parse_JSONCommand(JsonParserObject obj)
   }
 
 
+  #ifdef ENABLE_FEATURE_LIGHTS__RUNTIME_BRIGHTNESS_MAXIMUM
+  if(jtok = obj["BrightnessOverrideMax"]){
+    uint8_t brt = jtok.getInt();
+    ALOG_INF(PSTR("BrightnessOverrideMax set %d->%d"),brightness_maximum_override,brt);
+    brightness_maximum_override = brt;
+  }
+  #endif
+
   if(jtok = obj[PM_LIGHTPOWER])
   {
     int8_t state = 0;
@@ -1618,10 +1626,17 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new)
     
   tkr_anim->force_update();
   
-  #ifdef ENABLE_DEBUGFEATURE_LIGHTS__GLOBAL_BRIGHTNESS_LIMIT_VALUE
-  if(brt_new > ENABLE_DEBUGFEATURE_LIGHTS__GLOBAL_BRIGHTNESS_LIMIT_VALUE)
+  #ifdef ENABLE_FEATURE_LIGHTS__COMPILE_BRIGHTNESS_MAXIMUM_VALUE
+  if(brt_new > ENABLE_FEATURE_LIGHTS__COMPILE_BRIGHTNESS_MAXIMUM_VALUE)
   {
-    brt_new = ENABLE_DEBUGFEATURE_LIGHTS__GLOBAL_BRIGHTNESS_LIMIT_VALUE;
+    brt_new = ENABLE_FEATURE_LIGHTS__COMPILE_BRIGHTNESS_MAXIMUM_VALUE;
+  }
+  #endif
+  #ifdef ENABLE_FEATURE_LIGHTS__RUNTIME_BRIGHTNESS_MAXIMUM
+  if(brightness_maximum_override)
+  {
+    ALOG_WRN(PSTR("Brightness limited to %d"), brightness_maximum_override);
+    brt_new = brt_new > brightness_maximum_override ? brightness_maximum_override : brt_new;
   }
   #endif
   
@@ -1640,13 +1655,23 @@ void mInterfaceLight::CommandSet_Brt_255(uint8_t brt_new)
 
 void mInterfaceLight::CommandSet_Global_BrtRGB_255(uint8_t bri, uint8_t segment_index)
 {
+  #warning "phase this out"
 
-  #ifdef ENABLE_DEBUGFEATURE_LIGHTS__GLOBAL_BRIGHTNESS_LIMIT_VALUE
-  if(bri > ENABLE_DEBUGFEATURE_LIGHTS__GLOBAL_BRIGHTNESS_LIMIT_VALUE) bri = ENABLE_DEBUGFEATURE_LIGHTS__GLOBAL_BRIGHTNESS_LIMIT_VALUE;
+  #ifdef ENABLE_FEATURE_LIGHTS__COMPILE_BRIGHTNESS_MAXIMUM_VALUE
+  if(bri > ENABLE_FEATURE_LIGHTS__COMPILE_BRIGHTNESS_MAXIMUM_VALUE) bri = ENABLE_FEATURE_LIGHTS__COMPILE_BRIGHTNESS_MAXIMUM_VALUE;
+  #endif
+  #ifdef ENABLE_FEATURE_LIGHTS__RUNTIME_BRIGHTNESS_MAXIMUM
+  if(brightness_maximum_override)
+  {
+    ALOG_WRN(PSTR("Brightness limited to %d"), brightness_maximum_override);
+    bri = bri > brightness_maximum_override ? brightness_maximum_override : bri;
+  }
   #endif
 
   tkr_anim->force_update();
  
+
+
   _briRGB_Global = bri;
   setBriRGB_Global(bri);
   

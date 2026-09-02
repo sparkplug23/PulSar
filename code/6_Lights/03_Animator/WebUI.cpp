@@ -4735,6 +4735,15 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
   tkr_jsona->releaseJSONBufferLock();
 
+
+  SPGM_CTR(PM_URL_PLAYLIST_VIEWER) "/lights/playlist_viewer";
+  tkr_web->server->on(PM_URL_PLAYLIST_VIEWER, HTTP_GET, [](AsyncWebServerRequest *request){
+    tkr_web->handleStaticContent(request, "", 200, FPSTR(CONTENT_TYPE_HTML), PAGE_playlist_viewer, PAGE_playlist_viewer_length);
+  });
+  AddURLtoList(PM_URL_PLAYLIST_VIEWER, HTTP_GET);
+
+
+
   #ifdef ENABLE_FEATURE_LIGHTING__WEBSOCKETS
   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
   SPGM_CTR(PM_URL_LIVEVIEW2D) "/liveview2D";
@@ -5005,6 +5014,9 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   SPGM_CTR(PM_URL_LIGHTS_SETTINGS_LOCK) "/lights/settings/lock";  AddURLtoList(PM_URL_LIGHTS_SETTINGS_LOCK, HTTP_POST);
   SPGM_CTR(PM_URL_LIGHTS_SETTINGS_JS)   "/lights/settings/s.js";  AddURLtoList(PM_URL_LIGHTS_SETTINGS_JS,   HTTP_POST);
   SPGM_CTR(PM_URL_LIGHTS_UPDATE)        "/lights/update";         AddURLtoList(PM_URL_LIGHTS_UPDATE,        HTTP_POST);
+
+
+
 
 
   tkr_web->AddURLasApplication(GetModuleUniqueID(), "/lights", "Lights");

@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Playlist / Preset Viewer</title>
+
+<style>
+:root {
+  --bg: #101010;
+  --panel: #191919;
+  --panel2: #222;
+  --panel3: #2b2b2b;
+  --border: #3a3a3a;
+  --border2: #303030;
+  --text: #eee;
+  --muted: #929292;
+  --hover: #303030;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 1000px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  font-size: 13px;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 58px;
+  padding: 0 18px;
+  background: rgba(16,16,16,0.98);
+  border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 600;
+}
+
+#summary {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.header-spacer {
+  flex: 1;
+}
+
+#search {
+  width: 300px;
+  padding: 8px 10px;
+  color: var(--text);
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+}
+
+main {
+  padding: 18px;
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 10px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.section-subtitle {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: normal;
+}
+
+
+/* =================================================================================================
+ * PLAYLIST TABLE/CARD VIEW
+ * ===============================================================================================*/
+
+#playlistGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(620px, 1fr));
+  gap: 8px;
+}
+
+.playlist-card {
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+
+.playlist-header {
+  display: grid;
+  grid-template-columns: 7px 48px minmax(200px,1fr) auto;
+  align-items: center;
+  min-height: 44px;
+  background: var(--panel2);
+}
+
+.playlist-colour {
+  align-self: stretch;
+}
+
+.playlist-id {
+  padding-left: 10px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.playlist-name {
+  overflow: hidden;
+  padding: 10px 6px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.playlist-count {
+  padding-right: 12px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  text-decoration: underline;
+}
+
+.entry-head,
+.entry {
+  display: grid;
+  grid-template-columns: 45px minmax(220px,1fr) 78px 82px 38px;
+  align-items: center;
+}
+
+.entry-head {
+  min-height: 25px;
+  padding: 0 9px;
+  color: var(--muted);
+  font-size: 9px;
+  background: #181818;
+  border-top: 1px solid var(--border2);
+  border-bottom: 1px solid var(--border2);
+}
+
+.entry {
+  min-height: 33px;
+  padding: 0 9px;
+  border-bottom: 1px solid var(--border2);
+}
+
+.entry:last-child {
+  border-bottom: none;
+}
+
+.entry:hover {
+  background: var(--hover);
+}
+
+.entry-id {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.entry-name {
+  overflow: hidden;
+  padding-right: 8px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.entry-duration,
+.entry-transition,
+.entry-index {
+  color: #aaa;
+  font-size: 9px;
+}
+
+.entry-index {
+  text-align: right;
+}
+
+
+/* =================================================================================================
+ * PRESET TILE VIEWS
+ * ===============================================================================================*/
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+  gap: 6px;
+}
+
+.preset-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 49px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.preset-card:hover {
+  background: var(--hover);
+}
+
+.preset-content {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 7px 8px 9px;
+}
+
+.preset-id {
+  flex: 0 0 29px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.preset-name {
+  overflow: hidden;
+  font-size: 11px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.usage-count {
+  margin-left: auto;
+  padding-left: 5px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.usage-bands {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  height: 5px;
+}
+
+.usage-band {
+  flex: 1 1 0;
+}
+
+.unused-section .preset-card {
+  opacity: 0.68;
+}
+
+.unused-section .preset-card:hover {
+  opacity: 1;
+}
+
+
+/* =================================================================================================
+ * MATRIX
+ * ===============================================================================================*/
+
+.matrix-controls {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 10px;
+  padding: 9px 11px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.matrix-control {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #ccc;
+  font-size: 11px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.matrix-control input {
+  margin: 0;
+}
+
+.matrix-info {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 210px;
+  padding: 5px 7px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+
+.legend-colour {
+  flex: 0 0 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.legend-id {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.legend-name {
+  overflow: hidden;
+  font-size: 10px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.matrix-wrap {
+  max-height: 78vh;
+  overflow: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+#matrix {
+  width: max-content;
+  min-width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--panel);
+}
+
+#matrix th,
+#matrix td {
+  height: 31px;
+  padding: 0;
+  border-right: 1px solid var(--border2);
+  border-bottom: 1px solid var(--border2);
+}
+
+
+/* -------------------------------------------------------------------------------------------------
+ * Matrix header
+ * -----------------------------------------------------------------------------------------------*/
+
+#matrix thead th {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: 72px;
+  background: #202020;
+  vertical-align: middle;
+}
+
+#matrix th.preset-head {
+  left: 0;
+  z-index: 30;
+  width: 220px;
+  min-width: 220px;
+  max-width: 220px;
+  padding: 0 8px;
+  text-align: left;
+}
+
+#matrix th.playlist-head,
+#matrix td.matrix-cell {
+  width: 92px;
+  min-width: 92px;
+  max-width: 92px;
+}
+
+.playlist-head-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 5px 4px;
+  font-size: 9px;
+  line-height: 1.15;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  cursor: pointer;
+}
+
+.playlist-head-id {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: normal;
+}
+
+.playlist-head-name {
+  display: block;
+  color: var(--text);
+}
+
+
+/* -------------------------------------------------------------------------------------------------
+ * Preset rows
+ * -----------------------------------------------------------------------------------------------*/
+
+#matrix tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  width: 220px;
+  min-width: 220px;
+  max-width: 220px;
+  padding: 0 8px;
+  background: #202020;
+  text-align: left;
+}
+
+.matrix-preset {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+}
+
+.matrix-preset-id {
+  flex: 0 0 28px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.matrix-preset-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: normal;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.matrix-usage-count {
+  flex: 0 0 auto;
+  padding-left: 5px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+
+/* -------------------------------------------------------------------------------------------------
+ * Matrix cells
+ * -----------------------------------------------------------------------------------------------*/
+
+.matrix-cell {
+  position: relative;
+}
+
+.matrix-hit {
+  position: absolute;
+  inset: 3px;
+  border-radius: 2px;
+  opacity: .92;
+}
+
+.matrix-hit:hover {
+  inset: 1px;
+  opacity: 1;
+}
+
+.matrix-row:hover th,
+.matrix-row:hover td {
+  background-color: #292929;
+}
+
+.matrix-row-unused {
+  opacity: .55;
+}
+
+.matrix-row-unused:hover {
+  opacity: 1;
+}
+
+.matrix-separator th {
+  height: 36px !important;
+  padding: 0 9px !important;
+  color: #aaa;
+  background: #151515 !important;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+
+/* =================================================================================================
+ * GENERAL
+ * ===============================================================================================*/
+
+.empty {
+  padding: 16px;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+#toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 200;
+  max-width: 420px;
+  padding: 10px 14px;
+  color: white;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 6px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: .15s;
+  pointer-events: none;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#toast.error {
+  background: #681f1f;
+}
+</style>
+</head>
+
+
+<body>
+
+<header>
+
+  <h1>Playlist / Preset Viewer</h1>
+
+  <div id="summary">
+    Loading...
+  </div>
+
+  <div class="header-spacer"></div>
+
+  <input id="search" type="search" placeholder="Search playlists / presets..." autocomplete="off">
+
+</header>
+
+
+<main>
+
+
+  <!-- ===========================================================================================
+       PLAYLIST VIEW
+       =========================================================================================-->
+
+  <section class="section">
+
+    <div class="section-title">
+
+      Playlist entries
+
+      <span class="section-subtitle">
+        Click playlist or preset names to load them.
+      </span>
+
+    </div>
+
+    <div id="playlistGrid">
+      Loading presets.json...
+    </div>
+
+  </section>
+
+
+  <!-- ===========================================================================================
+       USED PRESETS
+       =========================================================================================-->
+
+  <section class="section">
+
+    <div class="section-title">
+
+      Presets used by playlists
+
+      <span class="section-subtitle">
+        Colour bands show every playlist referencing each preset.
+      </span>
+
+    </div>
+
+    <div id="usedPresetGrid" class="preset-grid"></div>
+
+  </section>
+
+
+  <!-- ===========================================================================================
+       UNUSED PRESETS
+       =========================================================================================-->
+
+  <section class="section unused-section">
+
+    <div class="section-title">
+
+      Presets not used by playlists
+
+      <span class="section-subtitle">
+        These are unreferenced, not necessarily obsolete.
+      </span>
+
+    </div>
+
+    <div id="unusedPresetGrid" class="preset-grid"></div>
+
+  </section>
+
+
+  <!-- ===========================================================================================
+       MATRIX
+       =========================================================================================-->
+
+  <section class="section">
+
+    <div class="section-title">
+
+      Preset / Playlist Matrix
+
+      <span class="section-subtitle">
+        Shows playlist distribution across the complete preset library.
+      </span>
+
+    </div>
+
+
+    <div class="matrix-controls">
+
+      <label class="matrix-control">
+
+        <input id="matrixUnusedInline" type="checkbox" checked>
+
+        Unreferenced presets inline by ID
+
+      </label>
+
+      <div class="matrix-info" id="matrixInfo"></div>
+
+    </div>
+
+
+    <div id="legend" class="legend"></div>
+
+
+    <div class="matrix-wrap">
+
+      <table id="matrix">
+
+        <thead></thead>
+
+        <tbody></tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+</main>
+
+
+<div id="toast"></div>
+
+
+<script>
+
+var pJson = {};
+var playlists = [];
+var presetUsage = new Map();
+
+var toastTimer = null;
+
+
+/************************************************************************************************************************************
+ * URL helper
+ ************************************************************************************************************************************/
+function getURL(path)
+{
+  path = path || "/";
+
+  if (path[0] !== "/") path = "/" + path;
+
+  return location.origin + path;
+}
+
+
+/************************************************************************************************************************************
+ * Basic preset helpers
+ ************************************************************************************************************************************/
+function isObj(v)
+{
+  return v && typeof v === "object" && !Array.isArray(v);
+}
+
+
+function isPlaylist(id)
+{
+  return !!(
+    pJson[id] &&
+    pJson[id].playlist &&
+    Array.isArray(pJson[id].playlist.ps)
+  );
+}
+
+
+function pName(id)
+{
+  if (pJson[id] && pJson[id].n) return pJson[id].n;
+
+  return "Preset " + id;
+}
+
+
+/************************************************************************************************************************************
+ * HTML escaping
+ ************************************************************************************************************************************/
+function escapeHtml(value)
+{
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+/************************************************************************************************************************************
+ * Toast
+ ************************************************************************************************************************************/
+function showToast(text, error = false)
+{
+  const toast = document.getElementById("toast");
+
+  toast.textContent = text;
+
+  toast.className = error ? "show error" : "show";
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    toast.className = "";
+  }, 2200);
+}
+
+
+/************************************************************************************************************************************
+ * Lightweight JSON command sender
+ ************************************************************************************************************************************/
+function requestJson(command)
+{
+  if (!command) return;
+
+
+  command.v = true;
+
+  command.time = Math.floor(Date.now() / 1000);
+
+
+  return fetch(getURL("/json/si"), {
+
+    method: "POST",
+
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+
+    body: JSON.stringify(command)
+
+  })
+
+  .then(res => {
+
+    if (!res.ok)
+    {
+      throw new Error("HTTP " + res.status);
+    }
+
+    return res.json();
+
+  })
+
+  .catch(err => {
+
+    console.error(err);
+
+    showToast(
+      "Command failed: " + err.message,
+      true
+    );
+
+  });
+}
+
+
+/************************************************************************************************************************************
+ * Apply preset / playlist
+ ************************************************************************************************************************************/
+function setPreset(id)
+{
+  id = parseInt(id, 10);
+
+
+  if (!pJson[id]) return;
+
+
+  let obj = {
+    ps: id
+  };
+
+
+  if (
+    !isPlaylist(id) &&
+    (!pJson[id].win || pJson[id].win.indexOf("Please") <= 0)
+  )
+  {
+    obj = {
+      pd: id
+    };
+
+
+    Object.assign(
+      obj,
+      pJson[id]
+    );
+
+
+    delete obj.ql;
+
+    delete obj.n;
+  }
+
+
+  if (isPlaylist(id))
+  {
+    obj.on = true;
+  }
+
+
+  showToast(
+    "Loading " + pName(id) + " (" + id + ")"
+  );
+
+
+  requestJson(obj);
+}
+
+
+/************************************************************************************************************************************
+ * Playlist colour
+ *
+ * Deterministic from playlist ID so a playlist always receives the same colour.
+ ************************************************************************************************************************************/
+function playlistColour(id)
+{
+  const hue = (parseInt(id, 10) * 137.508) % 360;
+
+  return `hsl(${hue},72%,58%)`;
+}
+
+
+/************************************************************************************************************************************
+ * Expand scalar playlist fields to entry-length arrays.
+ ************************************************************************************************************************************/
+function normaliseArray(value, length, fallback)
+{
+  if (Array.isArray(value))
+  {
+    const out = value.slice();
+
+
+    while (out.length < length)
+    {
+      out.push(
+        out.length ?
+        out[out.length - 1] :
+        fallback
+      );
+    }
+
+
+    return out;
+  }
+
+
+  const scalar = Number.isFinite(Number(value)) ?
+    Number(value) :
+    fallback;
+
+
+  return Array(length).fill(scalar);
+}
+
+
+/************************************************************************************************************************************
+ * Build playlist list and reverse preset usage lookup.
+ ************************************************************************************************************************************/
+function buildRelationships()
+{
+  playlists = [];
+
+  presetUsage = new Map();
+
+
+  for (const [idString, obj] of Object.entries(pJson))
+  {
+    if (!isObj(obj)) continue;
+
+
+    const id = parseInt(idString, 10);
+
+
+    if (!Number.isFinite(id) || id <= 0) continue;
+
+    if (!isPlaylist(id)) continue;
+
+
+    const ps = obj.playlist.ps.map(v => parseInt(v, 10));
+
+
+    const dur = normaliseArray(
+      obj.playlist.dur,
+      ps.length,
+      100
+    );
+
+
+    const transition = normaliseArray(
+      obj.playlist.transition,
+      ps.length,
+      7
+    );
+
+
+    const playlist = {
+
+      id: id,
+
+      name: pName(id),
+
+      colour: playlistColour(id),
+
+      entries: ps.map((presetId, index) => ({
+
+        presetId: presetId,
+
+        duration: dur[index],
+
+        transition: transition[index]
+
+      }))
+
+    };
+
+
+    playlists.push(playlist);
+
+
+    for (const entry of playlist.entries)
+    {
+      if (!presetUsage.has(entry.presetId))
+      {
+        presetUsage.set(
+          entry.presetId,
+          []
+        );
+      }
+
+
+      presetUsage.get(entry.presetId).push(id);
+    }
+  }
+
+
+  playlists.sort(
+    (a, b) => a.id - b.id
+  );
+}
+
+
+/************************************************************************************************************************************
+ * Playlist card
+ ************************************************************************************************************************************/
+function makePlaylistCard(pl)
+{
+  let entries = "";
+
+
+  pl.entries.forEach((entry, index) => {
+
+    const presetExists = !!pJson[entry.presetId];
+
+    const name = presetExists ?
+      pName(entry.presetId) :
+      "[Missing preset]";
+
+
+    entries += `
+
+      <div class="entry"
+           data-search="${escapeHtml((pl.id + " " + pl.name + " " + entry.presetId + " " + name).toLowerCase())}">
+
+        <div class="entry-id">
+          ${entry.presetId}
+        </div>
+
+        <div class="entry-name clickable"
+             title="Load preset ${entry.presetId}"
+             onclick="event.stopPropagation();setPreset(${entry.presetId});">
+          ${escapeHtml(name)}
+        </div>
+
+        <div class="entry-duration">
+          ${(entry.duration / 10).toFixed(1)} s
+        </div>
+
+        <div class="entry-transition">
+          ${(entry.transition / 10).toFixed(1)} s
+        </div>
+
+        <div class="entry-index">
+          #${index + 1}
+        </div>
+
+      </div>`;
+
+  });
+
+
+  return `
+
+    <article class="playlist-card"
+             data-search="${escapeHtml((pl.id + " " + pl.name).toLowerCase())}">
+
+      <div class="playlist-header">
+
+        <div class="playlist-colour"
+             style="background:${pl.colour}">
+        </div>
+
+        <div class="playlist-id">
+          ${pl.id}
+        </div>
+
+        <div class="playlist-name clickable"
+             title="Load playlist ${pl.id}"
+             onclick="setPreset(${pl.id});">
+          ${escapeHtml(pl.name)}
+        </div>
+
+        <div class="playlist-count">
+          ${pl.entries.length} entries
+        </div>
+
+      </div>
+
+
+      <div class="entry-head">
+
+        <div>ID</div>
+
+        <div>Preset</div>
+
+        <div>Duration</div>
+
+        <div>Transition</div>
+
+        <div>#</div>
+
+      </div>
+
+
+      ${entries}
+
+    </article>`;
+
+}
+
+
+/************************************************************************************************************************************
+ * Preset usage tile
+ ************************************************************************************************************************************/
+function makePresetCard(id, usage)
+{
+  const name = pName(id);
+
+  let bands = "";
+
+
+  for (const playlistId of usage)
+  {
+    const pl = playlists.find(
+      p => p.id === playlistId
+    );
+
+
+    bands += `
+
+      <span class="usage-band"
+            title="${escapeHtml(pl ? pl.name : ("Playlist " + playlistId))}"
+            style="background:${playlistColour(playlistId)}">
+      </span>`;
+
+  }
+
+
+  return `
+
+    <div class="preset-card"
+         data-search="${escapeHtml((id + " " + name).toLowerCase())}">
+
+      <div class="preset-content">
+
+        <div class="preset-id">
+          ${id}
+        </div>
+
+        <div class="preset-name clickable"
+             title="Load preset ${id}"
+             onclick="setPreset(${id});">
+          ${escapeHtml(name)}
+        </div>
+
+        ${
+          usage.length ?
+          `<div class="usage-count">${usage.length}×</div>` :
+          ""
+        }
+
+      </div>
+
+
+      <div class="usage-bands">
+        ${bands}
+      </div>
+
+    </div>`;
+
+}
+
+
+/************************************************************************************************************************************
+ * Return real presets only, sorted numerically by preset ID.
+ ************************************************************************************************************************************/
+function getPresetIds()
+{
+  return Object.keys(pJson)
+    .map(Number)
+    .filter(id =>
+      id > 0 &&
+      pJson[id] &&
+      !isPlaylist(id)
+    )
+    .sort((a, b) => a - b);
+}
+
+
+/************************************************************************************************************************************
+ * Render playlist cards and preset usage sections.
+ ************************************************************************************************************************************/
+function renderMainViews()
+{
+  const playlistGrid = document.getElementById("playlistGrid");
+
+  const usedGrid = document.getElementById("usedPresetGrid");
+
+  const unusedGrid = document.getElementById("unusedPresetGrid");
+
+
+  playlistGrid.innerHTML = playlists.length ?
+    playlists.map(makePlaylistCard).join("") :
+    `<div class="empty">No playlists found.</div>`;
+
+
+  const presetIds = getPresetIds();
+
+
+  const used = presetIds.filter(
+    id => presetUsage.has(id)
+  );
+
+
+  const unused = presetIds.filter(
+    id => !presetUsage.has(id)
+  );
+
+
+  usedGrid.innerHTML = used
+    .map(id => makePresetCard(id, presetUsage.get(id)))
+    .join("");
+
+
+  unusedGrid.innerHTML = unused
+    .map(id => makePresetCard(id, []))
+    .join("");
+
+
+  document.getElementById("summary").textContent =
+    `${playlists.length} playlists · ` +
+    `${presetIds.length} presets · ` +
+    `${used.length} referenced · ` +
+    `${unused.length} unreferenced`;
+}
+
+
+/************************************************************************************************************************************
+ * Matrix playlist legend.
+ ************************************************************************************************************************************/
+function renderLegend()
+{
+  document.getElementById("legend").innerHTML =
+
+    playlists.map(pl => `
+
+      <div class="legend-item">
+
+        <div class="legend-colour"
+             style="background:${pl.colour}">
+        </div>
+
+        <div class="legend-id">
+          ${pl.id}
+        </div>
+
+        <div class="legend-name clickable"
+             title="Load playlist ${pl.id}"
+             onclick="setPreset(${pl.id});">
+          ${escapeHtml(pl.name)}
+        </div>
+
+      </div>
+
+    `).join("");
+}
+
+
+/************************************************************************************************************************************
+ * Render one matrix preset row.
+ ************************************************************************************************************************************/
+function makeMatrixRow(id, unused)
+{
+  const usage = presetUsage.get(id) || [];
+
+  let cells = "";
+
+
+  for (const pl of playlists)
+  {
+    const usedHere = usage.includes(pl.id);
+
+
+    cells += `
+
+      <td class="matrix-cell">
+
+        ${
+          usedHere ?
+
+          `<div class="matrix-hit"
+                style="background:${pl.colour}"
+                title="${escapeHtml(pName(id))} → ${escapeHtml(pl.name)}">
+           </div>`
+
+          :
+
+          ""
+        }
+
+      </td>`;
+
+  }
+
+
+  return `
+
+    <tr class="matrix-row ${unused ? "matrix-row-unused" : ""}"
+        data-search="${escapeHtml((id + " " + pName(id)).toLowerCase())}">
+
+      <th>
+
+        <div class="matrix-preset">
+
+          <div class="matrix-preset-id">
+            ${id}
+          </div>
+
+          <div class="matrix-preset-name clickable"
+               title="Load preset ${id}"
+               onclick="setPreset(${id});">
+            ${escapeHtml(pName(id))}
+          </div>
+
+          <div class="matrix-usage-count">
+            ${usage.length ? usage.length + "×" : ""}
+          </div>
+
+        </div>
+
+      </th>
+
+      ${cells}
+
+    </tr>`;
+
+}
+
+
+/************************************************************************************************************************************
+ * Render matrix.
+ *
+ * Checked:
+ *   All presets appear in true numeric ID order, including unreferenced presets.
+ *
+ * Unchecked:
+ *   Referenced presets first, then unreferenced presets.
+ ************************************************************************************************************************************/
+function renderMatrix()
+{
+  const matrix = document.getElementById("matrix");
+
+  const thead = matrix.querySelector("thead");
+
+  const tbody = matrix.querySelector("tbody");
+
+
+  const inlineUnused =
+    document.getElementById("matrixUnusedInline").checked;
+
+
+  thead.innerHTML = `
+
+    <tr>
+
+      <th class="preset-head">
+        Preset
+      </th>
+
+      ${playlists.map(pl => `
+
+        <th class="playlist-head"
+            title="${escapeHtml(pl.name)}">
+
+          <div class="playlist-head-inner clickable"
+               onclick="setPreset(${pl.id});">
+
+            <div>
+
+              <span class="playlist-head-id">
+                ${pl.id}
+              </span>
+
+              <span class="playlist-head-name">
+                ${escapeHtml(pl.name)}
+              </span>
+
+            </div>
+
+          </div>
+
+        </th>
+
+      `).join("")}
+
+    </tr>`;
+
+
+  const presetIds = getPresetIds();
+
+
+  const used = presetIds.filter(
+    id => presetUsage.has(id)
+  );
+
+
+  const unused = presetIds.filter(
+    id => !presetUsage.has(id)
+  );
+
+
+  let html = "";
+
+
+  if (inlineUnused)
+  {
+    for (const id of presetIds)
+    {
+      html += makeMatrixRow(
+        id,
+        !presetUsage.has(id)
+      );
+    }
+  }
+  else
+  {
+    for (const id of used)
+    {
+      html += makeMatrixRow(
+        id,
+        false
+      );
+    }
+
+
+    if (unused.length)
+    {
+      html += `
+
+        <tr class="matrix-separator">
+
+          <th colspan="${playlists.length + 1}">
+            Presets not referenced by any playlist
+          </th>
+
+        </tr>`;
+
+
+      for (const id of unused)
+      {
+        html += makeMatrixRow(
+          id,
+          true
+        );
+      }
+    }
+  }
+
+
+  tbody.innerHTML = html;
+
+
+  document.getElementById("matrixInfo").textContent =
+
+    inlineUnused ?
+
+    `${presetIds.length} presets shown in true ID order`
+
+    :
+
+    `${used.length} referenced presets, then ${unused.length} unreferenced`;
+
+
+  applySearch();
+}
+
+
+/************************************************************************************************************************************
+ * Global search.
+ ************************************************************************************************************************************/
+function applySearch()
+{
+  const term = document.getElementById("search")
+    .value
+    .trim()
+    .toLowerCase();
+
+
+  document.querySelectorAll("[data-search]").forEach(el => {
+
+    el.style.display =
+      !term ||
+      el.dataset.search.includes(term) ?
+      "" :
+      "none";
+
+  });
+}
+
+
+/************************************************************************************************************************************
+ * Load presets.json.
+ ************************************************************************************************************************************/
+function loadPresets()
+{
+  fetch(
+    getURL("/presets.json"),
+    {
+      method: "GET",
+      cache: "no-store"
+    }
+  )
+
+  .then(res => {
+
+    if (!res.ok)
+    {
+      throw new Error(
+        "HTTP " + res.status
+      );
+    }
+
+
+    return res.json();
+
+  })
+
+  .then(json => {
+
+    pJson = json || {};
+
+
+    delete pJson["0"];
+
+
+    buildRelationships();
+
+    renderMainViews();
+
+    renderLegend();
+
+    renderMatrix();
+
+  })
+
+  .catch(err => {
+
+    console.error(err);
+
+
+    document.getElementById("playlistGrid").innerHTML =
+
+      `<div class="empty">
+        Failed to load presets.json: ${escapeHtml(err.message)}
+      </div>`;
+
+
+    document.getElementById("summary").textContent =
+      "Preset load failed";
+
+  });
+}
+
+
+/************************************************************************************************************************************
+ * Events
+ ************************************************************************************************************************************/
+document.getElementById("search").addEventListener(
+  "input",
+  applySearch
+);
+
+
+document.getElementById("matrixUnusedInline").addEventListener(
+  "change",
+  renderMatrix
+);
+
+
+/************************************************************************************************************************************
+ * Initial load
+ ************************************************************************************************************************************/
+loadPresets();
+
+</script>
+
+</body>
+</html>

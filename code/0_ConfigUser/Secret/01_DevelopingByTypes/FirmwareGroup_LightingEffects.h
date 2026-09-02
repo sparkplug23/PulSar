@@ -4877,6 +4877,15 @@
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
 
+  // #define ENABLE_FEATURE_LIGHTS__RUNTIME_BRIGHTNESS_MAXIMUM
+
+  /***
+   * Using as high density pixel tester
+   * USE_LIGHTING_TEMPLATE__1D_1000PIXELS
+   */
+  // #define USE_LIGHTING_TEMPLATE__1D_1000PIXELS
+  #define USE_LIGHTING_TEMPLATE__1D_3000PIXELS
+
   // #define ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
 
  /***********************************
@@ -4899,48 +4908,45 @@
    * SECTION: Lighting Configs
   ************************************/   
 
-  #define ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
-  #define ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
-  // #define ENABLE_PIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
+  #ifdef USE_LIGHTING_TEMPLATE__1D_1000PIXELS
 
- 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
     "BusConfig":[     
       {
-        "Pin":2,
+        "Pin":19,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
-        "Length":10
-      },
-      {
-        "Pin":4,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":10,
-        "Length":10
+        "Length":1000
       },
       {
         "Pin":18,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":20,
-        "Length":10
+        "Start":1000,
+        "Length":1
       },
       {
-        "Pin":19,
+        "Pin":4,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":30,
-        "Length":10
+        "Start":1001,
+        "Length":1
+      },
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1002,
+        "Length":1
       }
     ],
     "Segments":[
       {
-        "PixelRange":[0,40],
+        "PixelRange":[0,1003],
         "ColourPalette":"Rainbow",
         "ColourType":3,
         "Effects": {
@@ -4956,6 +4962,123 @@
     "BrightnessRGB": 100
   }
   )=====";
+
+  #endif
+  
+  #ifdef USE_LIGHTING_TEMPLATE__1D_3000PIXELS
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[     
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":1000
+      },
+      {
+        "Pin":18,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1000,
+        "Length":1000
+      },
+      {
+        "Pin":19,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2000,
+        "Length":1000
+      },
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":3002,
+        "Length":1
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,3003],
+        "ColourPalette":"Rainbow",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Gradient",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 100
+  }
+  )=====";
+
+  #endif
+
+  #define ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
+  #define ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+  // #define ENABLE_PIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
+
+ 
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[     
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":10
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":10,
+  //       "Length":10
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":20,
+  //       "Length":10
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":30,
+  //       "Length":10
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "PixelRange":[0,40],
+  //       "ColourPalette":"Rainbow",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Gradient",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
   // #define USE_LIGHTING_TEMPLATE
   // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   // R"=====(

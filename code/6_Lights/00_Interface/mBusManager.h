@@ -379,9 +379,10 @@ struct BusConfig
   uint16_t milliAmpsMax;
   uint8_t driverType; // 0=RMT (default), 1=I2S
   uint8_t iType; // internal bus type (I_*) determined during memory estimation, used for bus creation
+  uint8_t channel; // physical RMT/output channel used by PolyBus::create()
   String text;
 
-  BusConfig(uint8_t busType, uint8_t* ppins, uint16_t pstart, uint16_t len = 1, uint8_t pcolorOrder = COL_ORDER_GRB, bool rev = false, uint8_t skip = 0, byte aw=RGBW_MODE_MANUAL_ONLY, uint16_t clock_kHz=0U, uint8_t maPerLed=LED_MILLIAMPS_DEFAULT, uint16_t maMax=ABL_MILLIAMPS_DEFAULT, uint8_t driver=0, String sometext = "")
+  BusConfig(uint8_t busType, uint8_t* ppins, uint16_t pstart, uint16_t len = 1, uint8_t pcolorOrder = COL_ORDER_GRB, bool rev = false, uint8_t skip = 0, byte aw=RGBW_MODE_MANUAL_ONLY, uint16_t clock_kHz=0U, uint8_t maPerLed=LED_MILLIAMPS_DEFAULT, uint16_t maMax=ABL_MILLIAMPS_DEFAULT_MAX_SUPPLY_CURRENT, uint8_t driver=0, String sometext = "")
   : count(std::max(len,(uint16_t)1))
   , start(pstart)
   , colorOrder(pcolorOrder)
@@ -393,6 +394,7 @@ struct BusConfig
   , milliAmpsMax(maMax)
   , driverType(driver)
   , iType(0) // default to I_NONE
+  , channel(0)
   , text(sometext)
   {
     refreshReq = (bool) GET_BIT(busType,7);

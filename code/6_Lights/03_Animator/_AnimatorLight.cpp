@@ -184,6 +184,8 @@ void mAnimatorLight::Handle_FileSave_Edits()
   // If nothing pending, bail early (paranoid guard; optional if caller already checks)
   if (!FileEditor::Check_AnyFilesEdited()) return;
 
+  #ifdef ENABLE_FEATURE_LIGHTS__SCAN_PRESET_FILE_ON_UPDATE_FOR_PLAYLIST_TO_PRESET_LINKED_LIST
+
   if (FileEditor::Check_FileEditedIs(F("presets.json"))) {
     static bool use_new_parser = false;   // toggles each time
 
@@ -204,6 +206,8 @@ void mAnimatorLight::Handle_FileSave_Edits()
 
     use_new_parser = !use_new_parser; // toggle for next time
   }
+
+  #endif
 
   // Future:
   // if (FileEditor::Check_FileEditedIs(F("some_other.json"))) { ... }
@@ -700,12 +704,21 @@ void mAnimatorLight::Init_Busses()
   //   // note: this needs to be determined for all buses prior to creating them as it also determines parallel I2S usage
   //   bus.iType = BusManager::getI(bus.type, bus.pins, bus.driverType);
   // }
-  uint8_t bus_index = 0;
-  for (auto &bus : tkr_iLight->busConfigs) {
-    // getI() requires the physical digital bus index so it can select
-    // the appropriate RMT/I2S method for that output.
-    bus.iType = BusManager::getI(bus.type, bus.pins, bus_index);
-    bus_index++;
+  uint8_t digital_bus_index = 0;
+
+  for(auto &bus : tkr_iLight->busConfigs)
+  {
+    if(Bus::isDigital(bus.type) && !Bus::is2Pin(bus.type))
+    {
+      bus.channel = digital_bus_index;
+      bus.iType = BusManager::getI(bus.type, bus.pins, digital_bus_index);
+      digital_bus_index++;
+    }
+    else
+    {
+      bus.channel = 0;
+      bus.iType = BusManager::getI(bus.type, bus.pins, 0);
+    }
   }
 
  /*****************************************************************************
@@ -1560,12 +1573,12 @@ if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE
 
   // --- Guard: ensure effect cycle time >= palette refresh interval when blending is active ---
   // (This needs to run each time, because speed/intensity can change live.)
-  if (speed != 255) {
-    const uint32_t new_colour_rate_ms = 1000UL + (uint32_t)(live_palette.intensity * 100UL);
-    if (new_colour_rate_ms >= cycle_time__rate_ms) {
-      cycle_time__rate_ms = new_colour_rate_ms + 100UL;
-    }
-  }
+  // if (speed != 255) {
+  //   const uint32_t new_colour_rate_ms = 1000UL + (uint32_t)(live_palette.intensity * 100UL);
+  //   if (new_colour_rate_ms >= cycle_time__rate_ms) {
+  //     cycle_time__rate_ms = new_colour_rate_ms + 100UL;
+  //   }
+  // }
 
   const uint32_t now_ms = millis();
 
@@ -4640,9 +4653,9 @@ void mAnimatorLight::show(void)
 
   #ifdef ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION_ON_PULSAR_PALETTES
   const bool useGammaCorrection =
-  frame_use_gamma_correction &&
-  gammaCorrectCol &&
-  !(realtimeMode && arlsDisableGammaCorrection && !realtimeOverride);
+    frame_use_gamma_correction &&
+    gammaCorrectCol &&
+    !(realtimeMode && arlsDisableGammaCorrection && !realtimeOverride);
   #else
   const bool useGammaCorrection =
     gammaCorrectCol &&

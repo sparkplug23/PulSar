@@ -314,6 +314,20 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     return; 
   }
 
+  if (jtok = obj["ABLMax"])
+  {
+    uint16_t ma_max = jtok.getInt();
+    ALOG_INF(PSTR("Auto Brightness Max MA %d"),ma_max);
+    BusManager::setMilliampsMax(ma_max);
+  }
+  if (jtok = obj["BrightnessLimiter"])
+  {
+    uint16_t ma_max = jtok.getInt();
+    ALOG_INF(PSTR("Auto Brightness Max MA %d"),ma_max);
+    BusManager::setMilliampsMax(ma_max);
+  }
+  
+
 
   if (jtok = obj["PaletteMappingValues"]) { 
     if (jtok.isArray()) {

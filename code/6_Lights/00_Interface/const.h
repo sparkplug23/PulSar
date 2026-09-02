@@ -418,14 +418,14 @@
 
 
 // The below value I believe is the power source rating, so the LED count is less than this.
-#ifndef ABL_MILLIAMPS_DEFAULT
-  // #define ABL_MILLIAMPS_DEFAULT 850   // auto lower brightness to stay close to milliampere limit
-  #define ABL_MILLIAMPS_DEFAULT 2000   // auto lower brightness to stay close to milliampere limit
+#ifndef ABL_MILLIAMPS_DEFAULT_MAX_SUPPLY_CURRENT
+  // #define ABL_MILLIAMPS_DEFAULT_MAX_SUPPLY_CURRENT 850   // auto lower brightness to stay close to milliampere limit
+  #define ABL_MILLIAMPS_DEFAULT_MAX_SUPPLY_CURRENT 4000   //0=nolock, auto lower brightness to stay close to milliampere limit
 #else
-  #if ABL_MILLIAMPS_DEFAULT == 0      // disable ABL
-  #elif ABL_MILLIAMPS_DEFAULT < 250   // make sure value is at least 250
+  #if ABL_MILLIAMPS_DEFAULT_MAX_SUPPLY_CURRENT == 0      // disable ABL
+  #elif ABL_MILLIAMPS_DEFAULT_MAX_SUPPLY_CURRENT < 250   // make sure value is at least 250
    #warning "make sure value is at least 250"
-   #define ABL_MILLIAMPS_DEFAULT 250
+   #define ABL_MILLIAMPS_DEFAULT_MAX_SUPPLY_CURRENT 250
   #endif
 #endif
 
