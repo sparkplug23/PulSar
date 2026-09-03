@@ -1,22 +1,3 @@
-/**
-  mRF433Codes.ino - RF transceiver using RcSwitch library
-
-  Copyright (C) 2022    Michael Doone
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-**/
-
 #include "mRF433Codes.h"
 
 #ifdef USE_MODULE_DRIVERS_RF433_CODES
@@ -51,215 +32,6 @@ int8_t mRF433Codes::Tasker(uint8_t function, JsonParserObject obj){
       mySwitch->disableReceive();
     break;
     case TASK_EVERY_FIVE_SECOND:{
-      
-      // AddLog(LOG_LEVEL_INFO,PSTR("tkr_set->Settings.rf_protocol_mask=%d"), tkr_set->Settings.rf_protocol_mask);
-
-      
-    // mySwitch->disableReceive();
-
-    //   SubTask_SendCommand_Up();
-    //   SubTask_SendCommand_Up();
-    //   SubTask_SendCommand_Up();
-
-      
-// // low, 8 high then low, held high 5000ms... code
-
-
-// uint16_t pre_command_raw[] = {
-
-//   // 2000, //low
-//   400, 600,
-//   400, 600,
-//   400, 600,
-//   400, 600,
-//   400, 600,
-//   400, 600,
-//   400, 600,
-//   400, 600,
-
-
-
-
-// };
-
-
-// digitalWrite(22, LOW); // set low first, header will toggle high again
-// delayMicroseconds(2000);
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(2500);
-
-// digitalWrite(22, LOW); // set low first, header will toggle high again
-// delayMicroseconds(2200);
-
-
-
-// for(uint16_t i=0;i<ARRAY_SIZE(pre_command_raw); i++)
-// {
-//   // if(i%2)
-  
-//   digitalWrite(22, ((i%2)==1)?LOW:HIGH);
-//   delayMicroseconds(pre_command_raw[i]);
-// }
-// digitalWrite(22, LOW);
-
-
-
-
-// /**
-//  * @brief State starts high, toggles ie [0] = high, [1] = low..... finish with assert low
-//  * 
-//  */
-// uint16_t up_command_raw[] = {
-  
-// 4958,655,
-// 550,333,
-// 227,652,
-// 549,331,
-// 228,653, //10
-
-// 547,338,
-// 543,336,
-// 224,656,
-// 225,661,
-// 542,337, //20
-
-// 222,658,
-// 544,339,
-// 222,655,
-// 225,658,
-// 227,653, //30
-
-// 228,651,
-// 225,657,
-// 545,336,
-// 546,334,
-// 547,337, //40
-
-// 544,335,
-// 225,655,
-// 226,655,
-// 548,333,
-// 227,655, //50
-
-// 547,336,
-// 546,336,
-// 543,341,
-// 541,336,
-// 224,658, //60
-
-// 544,337,
-// 545,337,
-// 544,340,
-// 221,660,
-// 220,658, //70
-
-// 544,338,
-// 543,339,
-// 543,335,
-// 546,339,
-// 541,338, //80
-
-// 542,338,      //6of6 fat tops
-// //start of 12 narrow tops
-// 223,655,   // 1/12 up as thin
-// 225,657,
-// 225,656,
-// 225,655, //90
-
-// 226,660,
-// 220,658,
-// 223,656,
-// 226,655,
-// 226,657, //100
-// 224,661, //wrong after this   10/12
-// 224, 661, //short here manually added   11/12
-// 224, 661, //completely added by me
-
-// //
-// // after 12 short top pulses
-
-// 551,334,
-// 223,664,
-// 548,336,
-// 546,337,
-// 554,335,
-
-// 546,335,
-// 226,658,544,335,226,655,226,653,547,338,544,334,545
-
-
-
-
-// // 550,335,
-// // 226,661,
-// // 543,334,
-// // 547,334,
-// // 547,339,
-// // 541,338,
-// // 228,653,
-// // 553,328,
-// // 232,648,
-// // 231,654,
-// // 548,332,
-// // 550,330,
-
-// // 548
-
-// // 653,223,
-// // 657,547, //110
-
-// // 333, //110
-
-// // 227,655,
-// // 226,653,
-// // 548,339,
-// // 543,338,
-// // 542,338, //120
-
-// // 223,655,
-// // 545,338,
-// // 544,334,
-
-
-// // 227,656,224
-
-// };
-
-// uint8_t logic_level = LOW;
-
-// // digitalWrite(22, HIGH); // set low first, header will toggle high again
-// // delayMicroseconds(8000);
-
-
-// // digitalWrite(22, LOW); // set low first, header will toggle high again
-// // delayMicroseconds(10000);
-
-// // digitalWrite(22, HIGH); // set low first, header will toggle high again
-// // delayMicroseconds(10000);
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(5000);
-
-// for(uint8_t j=0;j<11;j++)
-// {
-
-
-
-// for(uint16_t i=0;i<ARRAY_SIZE(up_command_raw); i++)
-// {
-
-// digitalWrite(22, !digitalRead(22));
-// delayMicroseconds(up_command_raw[i]);
-
-
-// }
-// digitalWrite(22, LOW);
-
-// delayMicroseconds(5000);
-
-
-// }
 
 
     }break;
@@ -302,511 +74,6 @@ int8_t mRF433Codes::Tasker(uint8_t function, JsonParserObject obj){
 
 }//end
 
-#ifdef ENABLE_FEATURE_DRIVERS__RF433_TRANSMIT_BITBANG_TEST
-void mRF433Codes::TransmitTest()
-{
-  static constexpr uint8_t TX_PIN = 22;
-
-  /**
-   * ComfyShade / ZN-115T
-   *
-   * One captured DOWN frame, normalized to T = 333 us.
-   *
-   * Array starts HIGH and alternates:
-   *
-   *   [0] HIGH
-   *   [1] LOW
-   *   [2] HIGH
-   *   [3] LOW
-   *   ...
-   *
-   * Entire frame:
-   *   150 timing cells
-   *   ~49.95 ms
-   *
-   * Send same frame 5 times continuously.
-   */
-  static const uint16_t down_command_raw[] = {
-
-    4995,  // HIGH 15T
-    2331,  // LOW   7T
-    1665,  // HIGH  5T
-     666,  // LOW   2T
-     333,  // HIGH  1T
-    1332,  // LOW   4T
-     666,  // HIGH  2T
-    2331,  // LOW   7T
-     666,  // HIGH  2T
-     333,  // LOW   1T
-
-     333,  // HIGH  1T
-    1332,  // LOW   4T
-     333,  // HIGH  1T
-     333,  // LOW   1T
-     666,  // HIGH  2T
-     666,  // LOW   2T
-     999,  // HIGH  3T
-    1332,  // LOW   4T
-     666,  // HIGH  2T
-     333,  // LOW   1T
-
-     333,  // HIGH  1T
-    2331,  // LOW   7T
-     333,  // HIGH  1T
-    3663,  // LOW  11T
-     333,  // HIGH  1T
-     999,  // LOW   3T
-     333,  // HIGH  1T
-     999,  // LOW   3T
-     333,  // HIGH  1T
-    1998,  // LOW   6T
-
-     666,  // HIGH  2T
-    1998,  // LOW   6T
-     666,  // HIGH  2T
-     333,  // LOW   1T
-     666,  // HIGH  2T
-    1665,  // LOW   5T
-     666,  // HIGH  2T
-    1998,  // LOW   6T
-     666,  // HIGH  2T
-     333,  // LOW   1T
-
-     333,  // HIGH  1T
-    1332,  // LOW   4T
-     999,  // HIGH  3T
-     666,  // LOW   2T
-     333,  // HIGH  1T
-     666,  // LOW   2T
-     666,  // HIGH  2T
-     333,  // LOW   1T
-     666,  // HIGH  2T
-     333   // LOW   1T
-  };
-
-  pinMode(TX_PIN, OUTPUT);
-
-  // Known idle state.
-  digitalWrite(TX_PIN, LOW);
-  delayMicroseconds(5000);
-
-  for (uint8_t repeat = 0; repeat < 5; repeat++)
-  {
-    for (uint16_t i = 0; i < ARRAY_SIZE(down_command_raw); i++)
-    {
-      // Frame begins HIGH and alternates thereafter.
-      digitalWrite(TX_PIN, (i & 1) ? LOW : HIGH);
-      delayMicroseconds(down_command_raw[i]);
-    }
-
-    // Last array entry is already LOW.
-    digitalWrite(TX_PIN, LOW);
-  }
-
-  digitalWrite(TX_PIN, LOW);
-}
-#endif
-
-
-
-void mRF433Codes::SubTask_SendCommand_Up()
-{
-  SubTask_SendCommand_Up_PreTrain();
-  SubTask_SendCommand_Up_Block2(10);
-  SubTask_SendCommand_Up_Block2(10);
-  SubTask_SendCommand_Up_Block2(11);
-
-
-}
-
-#define PULSE_SHORT 280
-#define PULSE_LONG 600 
-
-void mRF433Codes::SubTask_SendCommand_Up_PreTrain()
-{
-
-      /**
-       * @brief 
-       * Start frame to notidy device of incoming message
-       * 
-       */
-// low, 8 high then low, held high 5000ms... code
-
-uint8_t  pre_command_raw_start_state = HIGH;
-uint16_t pre_command_raw[] = {
-
-  PULSE_SHORT, PULSE_LONG,  // HIGH, LOW
-  PULSE_SHORT, PULSE_LONG,
-  PULSE_SHORT, PULSE_LONG,
-  PULSE_SHORT, PULSE_LONG,
-  PULSE_SHORT, PULSE_LONG,
-  PULSE_SHORT, PULSE_LONG,
-  PULSE_SHORT, PULSE_LONG,
-  PULSE_SHORT, PULSE_LONG,
-
-  // 5000, //5 ms up
-
-  //final 5000ms down should be part of repeating code gaurd period and sent as first bit below
-
-
-
-
-};
-
-
-digitalWrite(22, LOW); // Starting with down state
-delay(27);
-
-for(uint16_t i=0;i<ARRAY_SIZE(pre_command_raw); i++)
-{
-  // if(i%2)
-  
-  // digitalWrite(22, ((i%2)==0)?LOW:HIGH);
-      digitalWrite(22, !digitalRead(22));
-  delayMicroseconds(pre_command_raw[i]);
-}
-
-// digitalWrite(22, HIGH);
-// delayMicroseconds(5000);
-
-// NO DELAY, START PULSE AS HEADER 
-
-
-
-
-}
-
-
-void mRF433Codes::SubTask_SendCommand_Up_Block2(int repeats)
-{
-
-
-
-/**
- * @brief State starts high, toggles ie [0] = high, [1] = low..... finish with assert low
- * 
- */
-uint16_t up_command_raw[] = {
-  
-5000, //header high
-PULSE_LONG, //low, still part of header in 3state
-
-
-PULSE_LONG,PULSE_SHORT, //h,l
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG, //10
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT, //20
-
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG, //30
-
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT, //40
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG, //50
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG, //60
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG, //70
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT, //80
-
-PULSE_LONG,PULSE_SHORT,      //6of6 fat tops
-//start of 12 narrow tops
-PULSE_SHORT,PULSE_LONG,   // 1/12 up as thin
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG, //90
-
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG, //100
-PULSE_SHORT,PULSE_LONG, //wrong after this   10/12
-PULSE_SHORT, PULSE_LONG, //short here manually added   11/12
-PULSE_SHORT, PULSE_LONG, //completely added by me
-
-//
-// after 12 short top pulses
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-
-PULSE_LONG,
-
-5000//tailer guard of LOW signal
-
-
-// 550,335,
-// 226,661,
-// 543,334,
-// 547,334,
-// 547,339,
-// 541,338,
-// 228,653,
-// 553,328,
-// 232,648,
-// 231,654,
-// 548,332,
-// 550,330,
-
-// 548
-
-// 653,223,
-// 657,547, //110
-
-// 333, //110
-
-// 227,655,
-// 226,653,
-// 548,339,
-// 543,338,
-// 542,338, //120
-
-// 223,655,
-// 545,338,
-// 544,334,
-
-
-// 227,656,224
-
-};
-
-uint8_t logic_level = LOW;
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(8000);
-
-
-// digitalWrite(22, LOW); // set low first, header will toggle high again
-// delayMicroseconds(10000);
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(10000);
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(5000);
-
-  for(uint8_t j=0;j<repeats;j++)
-  {
-
-    digitalWrite(22, LOW);
-    for(uint16_t i=0;i<ARRAY_SIZE(up_command_raw); i++)
-    {
-      digitalWrite(22, !digitalRead(22));
-      // digitalWrite(22, ((i%2)==0)?LOW:HIGH);
-      // ALOG_INF("i=%d,state=%d", i, ((i%2)==0)?LOW:HIGH );
-      delayMicroseconds(up_command_raw[i]);
-    }
-    digitalWrite(22, LOW);
-
-  // delayMicroseconds(5000);
-  }
-
-
-}
-
-
-
-
-void mRF433Codes::SubTask_SendCommand_Up_Block(int repeats)
-{
-
-
-
-/**
- * @brief State starts high, toggles ie [0] = high, [1] = low..... finish with assert low
- * 
- */
-uint16_t up_command_raw[] = {
-  
-4958,655, // header
-550,333,
-227,652,
-549,331,
-228,653, //10
-
-547,338,
-543,336,
-224,656,
-225,661,
-542,337, //20
-
-222,658,
-544,339,
-222,655,
-225,658,
-227,653, //30
-
-228,651,
-225,657,
-545,336,
-546,334,
-547,337, //40
-
-544,335,
-225,655,
-226,655,
-548,333,
-227,655, //50
-
-547,336,
-546,336,
-543,341,
-541,336,
-224,658, //60
-
-544,337,
-545,337,
-544,340,
-221,660,
-220,658, //70
-
-544,338,
-543,339,
-543,335,
-546,339,
-541,338, //80
-
-542,338,      //6of6 fat tops
-//start of 12 narrow tops
-223,655,   // 1/12 up as thin
-225,657,
-225,656,
-225,655, //90
-
-226,660,
-220,658,
-223,656,
-226,655,
-226,657, //100
-224,661, //wrong after this   10/12
-224, 661, //short here manually added   11/12
-224, 661, //completely added by me
-
-//
-// after 12 short top pulses
-
-551,334,
-223,664,
-548,336,
-546,337,
-554,335,
-
-546,335,
-226,658,544,335,226,655,226,653,547,338,544,334,545,
-
-5000//tailer guard of LOW signal
-
-
-// 550,335,
-// 226,661,
-// 543,334,
-// 547,334,
-// 547,339,
-// 541,338,
-// 228,653,
-// 553,328,
-// 232,648,
-// 231,654,
-// 548,332,
-// 550,330,
-
-// 548
-
-// 653,223,
-// 657,547, //110
-
-// 333, //110
-
-// 227,655,
-// 226,653,
-// 548,339,
-// 543,338,
-// 542,338, //120
-
-// 223,655,
-// 545,338,
-// 544,334,
-
-
-// 227,656,224
-
-};
-
-uint8_t logic_level = LOW;
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(8000);
-
-
-// digitalWrite(22, LOW); // set low first, header will toggle high again
-// delayMicroseconds(10000);
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(10000);
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(5000);
-
-  for(uint8_t j=0;j<repeats;j++)
-  {
-
-    digitalWrite(22, LOW);
-    for(uint16_t i=0;i<ARRAY_SIZE(up_command_raw); i++)
-    {
-      digitalWrite(22, !digitalRead(22));
-      // digitalWrite(22, ((i%2)==0)?LOW:HIGH);
-      // ALOG_INF("i=%d,state=%d", i, ((i%2)==0)?LOW:HIGH );
-      delayMicroseconds(up_command_raw[i]);
-    }
-    digitalWrite(22, LOW);
-
-  // delayMicroseconds(5000);
-  }
-
-
-}
 
 void mRF433Codes::Pre_Init(void)
 {
@@ -924,9 +191,182 @@ void mRF433Codes::ReceiveCheck(void)
 }
 
 
-// /*********************************************************************************************\
-//  * Commands
-// \*********************************************************************************************/
+
+
+/******************************************************************************************************************
+ * Commands
+*******************************************************************************************************************/
+
+void mRF433Codes::parse_JSONCommand(JsonParserObject obj)
+{
+
+  JsonParserToken jtok = 0; 
+  int8_t tmp_id = 0;
+
+  
+  #ifdef ENABLE_FEATURE_DRIVERS__RF433_TRANSMIT_BITBANG_TEST
+	if(jtok = obj["TransmitTest"])
+	{
+    TransmitTest();
+  }
+  #endif
+
+
+	if(jtok = obj["RfMask"])
+	{
+
+		if(jtok.isNum())
+		{
+			mySwitch->setReceiveProtocolMask(jtok.getUInt());
+			telemetry_settings.flags.SendNow = true;
+		}
+
+		// JBI->Start();
+
+		// tkr->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
+
+		// bool ready_to_send = JBI->End();
+
+		// if(!ready_to_send)
+		// {
+		// 	// Nothing was found, create new message
+		// 	JBI->Start();
+		// 		JBI->Add("SensorScan", "No Devices Found");
+		// 	ready_to_send = JBI->End();
+		// }
+
+
+		// if(ready_to_send)
+		// {			
+    	ALOG_TST(PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
+		// 	tkr_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
+		// }
+
+	}
+	if(jtok = obj["RfSend"])
+	{
+
+		if(jtok.isNum())
+		{
+			mySwitch->send(jtok.getInt(), 24);
+		}
+
+    ALOG_TST(PSTR("RfSend = %d / %d"), jtok.getInt(), 24 );
+
+	}
+
+
+
+    
+}
+
+
+
+#ifdef ENABLE_FEATURE_DRIVERS__RF433_TRANSMIT_BITBANG_TEST
+void mRF433Codes::TransmitTest()
+{
+  static constexpr uint8_t TX_PIN = 22;
+
+  /**
+   * ComfyShade / ZN-115T
+   *
+   * One captured DOWN frame, normalized to T = 333 us.
+   *
+   * Array starts HIGH and alternates:
+   *
+   *   [0] HIGH
+   *   [1] LOW
+   *   [2] HIGH
+   *   [3] LOW
+   *   ...
+   *
+   * Entire frame:
+   *   150 timing cells
+   *   ~49.95 ms
+   *
+   * Send same frame 5 times continuously.
+   */
+  static const uint16_t down_command_raw[] = {
+
+    4995,  // HIGH 15T
+    2331,  // LOW   7T
+    1665,  // HIGH  5T
+     666,  // LOW   2T
+     333,  // HIGH  1T
+    1332,  // LOW   4T
+     666,  // HIGH  2T
+    2331,  // LOW   7T
+     666,  // HIGH  2T
+     333,  // LOW   1T
+
+     333,  // HIGH  1T
+    1332,  // LOW   4T
+     333,  // HIGH  1T
+     333,  // LOW   1T
+     666,  // HIGH  2T
+     666,  // LOW   2T
+     999,  // HIGH  3T
+    1332,  // LOW   4T
+     666,  // HIGH  2T
+     333,  // LOW   1T
+
+     333,  // HIGH  1T
+    2331,  // LOW   7T
+     333,  // HIGH  1T
+    3663,  // LOW  11T
+     333,  // HIGH  1T
+     999,  // LOW   3T
+     333,  // HIGH  1T
+     999,  // LOW   3T
+     333,  // HIGH  1T
+    1998,  // LOW   6T
+
+     666,  // HIGH  2T
+    1998,  // LOW   6T
+     666,  // HIGH  2T
+     333,  // LOW   1T
+     666,  // HIGH  2T
+    1665,  // LOW   5T
+     666,  // HIGH  2T
+    1998,  // LOW   6T
+     666,  // HIGH  2T
+     333,  // LOW   1T
+
+     333,  // HIGH  1T
+    1332,  // LOW   4T
+     999,  // HIGH  3T
+     666,  // LOW   2T
+     333,  // HIGH  1T
+     666,  // LOW   2T
+     666,  // HIGH  2T
+     333,  // LOW   1T
+     666,  // HIGH  2T
+     333   // LOW   1T
+  };
+
+  pinMode(TX_PIN, OUTPUT);
+
+  // Known idle state.
+  digitalWrite(TX_PIN, LOW);
+  delayMicroseconds(5000);
+
+  for (uint8_t repeat = 0; repeat < 5; repeat++)
+  {
+    for (uint16_t i = 0; i < ARRAY_SIZE(down_command_raw); i++)
+    {
+      // Frame begins HIGH and alternates thereafter.
+      digitalWrite(TX_PIN, (i & 1) ? LOW : HIGH);
+      delayMicroseconds(down_command_raw[i]);
+    }
+
+    // Last array entry is already LOW.
+    digitalWrite(TX_PIN, LOW);
+  }
+
+  digitalWrite(TX_PIN, LOW);
+}
+#endif
+
 
 // void CmndRfProtocol(void) {
 //   if (!PinUsed(GPIO_RFRECV)) { return; }
@@ -1052,165 +492,10 @@ void mRF433Codes::ReceiveCheck(void)
 //   ResponseCmndNumber(tkr_set->Settings.rf_duplicate_time);
 // }
 
-/**
- * @brief 
- * 
- *  Raw: holding up button with 6 channels active
-Decimal: 1056974060 (64Bit) Binary: 0000000000000000000000000000000000111111000000000000000011111100 Tri-State: 00000000000000000111000000001110 PulseLength: 225 microseconds Protocol: 2
-Raw data: 4958,655,550,333,227,652,549,331,228,653,547,338,543,336,224,656,225,661,542,337,222,658,544,339,222,655,225,658,227,653,228,651,225,657,545,336,546,334,547,337,544,335,225,655,226,655,548,333,227,655,547,336,546,336,543,341,541,336,224,658,544,337,545,337,544,340,221,660,220,658,544,338,543,339,543,335,546,339,541,338,542,338,223,655,225,657,225,656,225,655,226,660,220,658,223,656,226,655,226,657,224,661,542,336,227,653,223,657,547,333,227,655,226,653,548,339,543,338,542,338,223,655,545,338,544,334,227,656,224,
-
-
-
-Raw data: 
-
-4958,655,   1,0
-
-550,333,    
-227,652,
-549,331,
-228,653,
-547,338,
-543,336,
-224,656,
-225,661,
-542,337,
-222,658,
-544,339,
-222,655,
-225,658,
-227,653,
-228,651,
-225,657,
-545,336,
-546,334,
-547,337,
-544,335,
-225,655,
-226,655,
-548,333,
-227,655,
-547,336,
-546,336,
-543,341,
-541,336,
-224,658,
-544,337,
-545,337,
-544,340,
-221,660,
-220,658,
-544,338,
-543,339,
-543,335,
-546,339,
-541,338,
-542,338,
-223,655,
-225,657,
-225,656,
-225,655,
-226,660,
-220,658,
-223,656,
-226,655,
-226,657,
-224,661,
-542,336,
-227,653,
-223,657,
-547,333,
-227,655,
-226,653,
-548,339,
-543,338,
-542,338,
-223,655,
-545,338,
-544,334,
-227,656,
-224,
-
-
-
- * 
- */
 
 
 
 
-/******************************************************************************************************************
- * 
-*******************************************************************************************************************/
-
-  
-/******************************************************************************************************************
- * Commands
-*******************************************************************************************************************/
-
-void mRF433Codes::parse_JSONCommand(JsonParserObject obj)
-{
-
-  JsonParserToken jtok = 0; 
-  int8_t tmp_id = 0;
-
-  
-  #ifdef ENABLE_FEATURE_DRIVERS__RF433_TRANSMIT_BITBANG_TEST
-	if(jtok = obj["TransmitTest"])
-	{
-    TransmitTest();
-  }
-  #endif
-
-
-	if(jtok = obj["RfMask"])
-	{
-
-		if(jtok.isNum())
-		{
-			mySwitch->setReceiveProtocolMask(jtok.getUInt());
-			telemetry_settings.flags.SendNow = true;
-		}
-
-		// JBI->Start();
-
-		// tkr->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
-
-		// bool ready_to_send = JBI->End();
-
-		// if(!ready_to_send)
-		// {
-		// 	// Nothing was found, create new message
-		// 	JBI->Start();
-		// 		JBI->Add("SensorScan", "No Devices Found");
-		// 	ready_to_send = JBI->End();
-		// }
-
-
-		// if(ready_to_send)
-		// {			
-    	ALOG_TST(PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
-		// 	tkr_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
-		// }
-
-	}
-	if(jtok = obj["RfSend"])
-	{
-
-		if(jtok.isNum())
-		{
-			mySwitch->send(jtok.getInt(), 24);
-		}
-
-    ALOG_TST(PSTR("RfSend = %d / %d"), jtok.getInt(), 24 );
-
-	}
-
-
-
-    
-}
-
-  
 /******************************************************************************************************************
  * ConstructJson
 *******************************************************************************************************************/

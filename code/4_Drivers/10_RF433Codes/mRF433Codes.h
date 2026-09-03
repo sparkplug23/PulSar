@@ -1,21 +1,4 @@
-/*
-  mPZEM004T.h - PZEM004T v3 MODBUS
 
-  Copyright (C) 2021  Michael
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 #ifndef HEADER_DRIVERS_RF433_CODES_EXTENDED_H
 #define HEADER_DRIVERS_RF433_CODES_EXTENDED_H
   
@@ -99,12 +82,7 @@ class mRF433Codes :
      ************************************************************************************************/
     
     void parse_JSONCommand(JsonParserObject obj);
-
-     void SubTask_SendCommand_Up();
-     void SubTask_SendCommand_Up_PreTrain();
-     void SubTask_SendCommand_Up_Block(int repeats);
-     void SubTask_SendCommand_Up_Block2(int repeats);
-
+    
     /************************************************************************************************
      * SECTION: Construct Messages
      ************************************************************************************************/

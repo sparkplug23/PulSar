@@ -1,17 +1,15 @@
 /*
-  RCSwitch - Arduino libary for remote control outlet switches
-  Copyright (c) 2011 Suat Özgür.  All right reserved.
+  RCSwitch - Arduino library for remote control outlet switches
+  Copyright (c) 2011 Suat Özgür. All rights reserved.
 
-  Contributors:
-  - Andre Koehler / info(at)tomate-online(dot)de
-  - Gordeev Andrey Vladimirovich / gordeev(at)openpyro(dot)com
-  - Skineffect / http://forum.ardumote.com/viewtopic.php?f=2&t=46
-  - Dominik Fischer / dom_fischer(at)web(dot)de
-  - Frank Oltmanns / <first name>.<last name>(at)gmail(dot)com
-  - Max Horn / max(at)quendi(dot)de
-  - Robert ter Vehn / <first name>.<last name>(at)gmail(dot)com
+  Original project:
+  https://github.com/sui77/rc-switch/
 
-  Project home: https://github.com/sui77/rc-switch/
+  PulSar custom version:
+  lib/lib_rf_extended/rc-switch-custom
+
+  This copy retains the original rc-switch protocol support and adds
+  PulSar-specific protocol extensions and raw OOK transmission helpers.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -20,26 +18,25 @@
 
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
-#ifndef _RCSwitch_h2
-#define _RCSwitch_h2
+
+#ifndef RCSWITCH_EXTENDED_H
+#define RCSWITCH_EXTENDED_H
 
 #if defined(ARDUINO) && ARDUINO >= 100
     #include "Arduino.h"
-#elif defined(ENERGIA) // LaunchPad, FraunchPad and StellarPad specific
+#elif defined(ENERGIA)
     #include "Energia.h"
-#elif defined(RPI) // Raspberry Pi
+#elif defined(RPI)
     #define RaspberryPi
-
-    // Include libraries for RPi:
-    #include <string.h> /* memcpy */
-    #include <stdlib.h> /* abs */
+    #include <string.h>
+    #include <stdlib.h>
     #include <wiringPi.h>
 #elif defined(SPARK)
     #include "application.h"
@@ -50,22 +47,23 @@
 #include <stdint.h>
 
 
-// At least for the ATTiny X4/X5, receiving has to be disabled due to
-// missing libm depencies (udivmodhi4)
-#if defined( __AVR_ATtinyX5__ ) or defined ( __AVR_ATtinyX4__ )
+// ATTiny X4/X5 builds disable receiving because the required division
+// helpers may not be available.
+#if defined(__AVR_ATtinyX5__) || defined(__AVR_ATtinyX4__)
 #define RCSwitchDisableReceiving
 #endif
 
-// Number of maximum high/Low changes per packet.
-// We can handle up to (unsigned long) => 32 bit * 2 H/L changes per bit + 2 for sync
-// Для keeloq нужно увеличить RCSWITCH_MAX_CHANGES до 23+1+66*2+1=157
-#define RCSWITCH_MAX_CHANGES 67        // default 67
+// Maximum number of captured HIGH/LOW timing changes per packet.
+//
+// 160 allows the existing extended 64/66-bit and KeeLoq-style receive
+// paths to reach the 156-change boundary already handled by the ISR.
+#define RCSWITCH_MAX_CHANGES 160
 
-// separationLimit: minimum microseconds between received codes, closer codes are ignored.
-// according to discussion on issue #14 it might be more suitable to set the separation
-// limit to the same time as the 'low' part of the sync signal for the current protocol.
-// should be set to the minimum value of pulselength * the sync signal
+// Minimum duration in microseconds used to identify a separation between
+// received frames. Protocols with a shorter sync/separation period may
+// require this value to be reduced.
 #define RCSWITCH_SEPARATION_LIMIT 4100
+
 
 class RCSwitch {
 
@@ -74,8 +72,6 @@ class RCSwitch {
 
     void switchOn(int nGroupNumber, int nSwitchNumber);
     void switchOff(int nGroupNumber, int nSwitchNumber);
-    void switchOn(const char* sGroup, int nSwitchNumber);
-    void switchOff(const char* sGroup, int nSwitchNumber);
     void switchOn(char sFamily, int nGroup, int nDevice);
     void switchOff(char sFamily, int nGroup, int nDevice);
     void switchOn(const char* sGroup, const char* sDevice);
@@ -87,7 +83,36 @@ class RCSwitch {
     void send(unsigned long long code, unsigned int length);
     void send(const char* sCodeWord);
 
-    #if not defined( RCSwitchDisableReceiving )
+    /**
+     * Transmit an arbitrary raw OOK waveform.
+     *
+     * timings[] contains alternating durations in microseconds.
+     * The first duration is transmitted using startLevel.
+     * The complete waveform is repeated nRepeatTransmit times.
+     */
+    void sendRaw(
+      const uint16_t* timings,
+      unsigned int length,
+      uint8_t startLevel = HIGH
+    );
+
+    /**
+     * Transmit an arbitrary raw OOK waveform using integer multiples
+     * of a base pulse length.
+     *
+     * timings[] contains alternating pulse multipliers.
+     * Each duration is timings[i] * basePulseLength microseconds.
+     */
+    void sendRawMultiples(
+      const uint16_t* timings,
+      unsigned int length,
+      uint16_t basePulseLength,
+      uint8_t startLevel = HIGH
+    );
+
+    uint8_t getNumProtos();
+
+    #if !defined(RCSwitchDisableReceiving)
     void enableReceive(int interrupt);
     void enableReceive();
     void disableReceive();
@@ -99,23 +124,32 @@ class RCSwitch {
     unsigned int getReceivedDelay();
     unsigned int getReceivedProtocol();
     unsigned int* getReceivedRawdata();
-    uint8_t getNumProtos();
+
+    void setReceiveTolerance(int nPercent);
+    void setReceiveProtocolMask(unsigned long long mask);
+
+    unsigned long long getReceiveProtocolMask() const
+    {
+        return nReceiveProtocolMask;
+    }
+
+    // Legacy PulSar spelling retained for existing module compatibility.
+    unsigned long long GetReceiveProtolMask() const
+    {
+        return getReceiveProtocolMask();
+    }
     #endif
 
     void enableTransmit(int nTransmitterPin);
     void disableTransmit();
     void setPulseLength(int nPulseLength);
     void setRepeatTransmit(int nRepeatTransmit);
-    #if not defined( RCSwitchDisableReceiving )
-    void setReceiveTolerance(int nPercent);
-    void setReceiveProtocolMask(unsigned long long mask);
-    #endif
 
     /**
-     * Description of a single pule, which consists of a high signal
-     * whose duration is "high" times the base pulse length, followed
-     * by a low signal lasting "low" times the base pulse length.
-     * Thus, the pulse overall lasts (high+low)*pulseLength
+     * Description of one HIGH/LOW pulse pair.
+     *
+     * The HIGH state lasts high * pulseLength microseconds and the LOW
+     * state lasts low * pulseLength microseconds.
      */
     struct HighLow {
         uint8_t high;
@@ -123,14 +157,16 @@ class RCSwitch {
     };
 
     /**
-     * A "protocol" describes how zero and one bits are encoded into high/low
-     * pulses.
+     * A protocol describes how zero and one bits are encoded into
+     * HIGH/LOW pulse pairs, together with optional preamble, header
+     * and guard timing.
      */
     struct Protocol {
-        /** base pulse length in microseconds, e.g. 350 */
         uint16_t pulseLength;
+
         uint8_t PreambleFactor;
         HighLow Preamble;
+
         uint8_t HeaderFactor;
         HighLow Header;
 
@@ -138,33 +174,17 @@ class RCSwitch {
         HighLow one;
 
         /**
-         * If true, interchange high and low logic levels in all transmissions.
-         *
-         * By default, RCSwitch assumes that any signals it sends or receives
-         * can be broken down into pulses which start with a high signal level,
-         * followed by a a low signal level. This is e.g. the case for the
-         * popular PT 2260 encoder chip, and thus many switches out there.
-         *
-         * But some devices do it the other way around, and start with a low
-         * signal level, followed by a high signal level, e.g. the HT6P20B. To
-         * accommodate this, one can set invertedSignal to true, which causes
-         * RCSwitch to change how it interprets any HighLow struct FOO: It will
-         * then assume transmissions start with a low signal lasting
-         * FOO.high*pulseLength microseconds, followed by a high signal lasting
-         * FOO.low*pulseLength microseconds.
+         * If true, invert the physical logic levels used for all
+         * HighLow pulse definitions.
          */
         bool invertedSignal;
+
         uint16_t Guard;
     };
 
     void setProtocol(Protocol protocol);
     void setProtocol(int nProtocol);
     void setProtocol(int nProtocol, int nPulseLength);
-
-    unsigned long long GetReceiveProtolMask()
-    {
-        return nReceiveProtocolMask;
-    }
 
   private:
     char* getCodeWordA(const char* sGroup, const char* sDevice, bool bStatus);
@@ -173,16 +193,17 @@ class RCSwitch {
     char* getCodeWordD(char group, int nDevice, bool bStatus);
     void transmit(HighLow pulses);
 
-    #if not defined( RCSwitchDisableReceiving )
+    #if !defined(RCSwitchDisableReceiving)
     static void handleInterrupt();
     static bool receiveProtocol(const int p, unsigned int changeCount);
     int nReceiverInterrupt;
     #endif
+
     int nTransmitterPin;
     int nRepeatTransmit;
     Protocol protocol;
 
-    #if not defined( RCSwitchDisableReceiving )
+    #if !defined(RCSwitchDisableReceiving)
     static int nReceiveTolerance;
     volatile static unsigned long long nReceivedValue;
     volatile static unsigned long long nReceiveProtocolMask;
@@ -190,15 +211,15 @@ class RCSwitch {
     volatile static unsigned int nReceivedDelay;
     volatile static unsigned int nReceivedProtocol;
     const static unsigned int nSeparationLimit;
-    /*
-     * timings[0] contains sync timing, followed by a number of bits
-     */
+
+    // timings[0] contains the sync/separation timing followed by pulse timings.
     static unsigned int timings[RCSWITCH_MAX_CHANGES];
-    // буфер длительностей последних четырех пакетов, [0] - последний
+
+    // Duration buffer for the four most recent captured transitions.
+    // buftimings[0] is the newest duration.
     static unsigned int buftimings[4];
     #endif
-
-
 };
+
 
 #endif
