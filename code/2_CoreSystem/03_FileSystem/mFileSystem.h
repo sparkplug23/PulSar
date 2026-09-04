@@ -242,6 +242,9 @@ class mFileSystem :
     void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
     void readFile(fs::FS &fs, const char * path);
 
+    void CompiledFile_Init();
+    bool CompiledFile_Load(const char* filename,PGM_P data,bool overwrite = true);
+
     /************************************************************************************************
      * SECTION: Commands
      ************************************************************************************************/

@@ -282,7 +282,7 @@ static const char* GPIOBaseName_ByID(uint16_t base_id, char* B, uint8_t L)
     case GPIO_RFSEND:                            snprintf_P(B, L, PSTR(D_GPIO_RFSEND_CTR)); return B;
     case GPIO_RFRECV:                            snprintf_P(B, L, PSTR(D_GPIO_RFRECV_CTR)); return B;
       // 433 MHz RF send/receive
-    case GPIO_RF_433MHZ_RX:                      snprintf_P(B, L, PSTR(D_GPIO__RF_433MHZ_RX__CTR)); return B;
+    case GPIO_RF_433MHZ_RX:                      snprintf_P(B, L, PSTR(D_GPIO_RF_433MHZ_RX_CTR)); return B;
     case GPIO_RF_433MHZ_TX:                      snprintf_P(B, L, PSTR(D_GPIO_RF_433MHZ_TX_CTR)); return B;
 
       /****************************************

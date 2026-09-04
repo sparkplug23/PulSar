@@ -90,12 +90,7 @@ class RCSwitch {
      * The first duration is transmitted using startLevel.
      * The complete waveform is repeated nRepeatTransmit times.
      */
-    void sendRaw(
-      const uint16_t* timings,
-      unsigned int length,
-      uint8_t startLevel = HIGH
-    );
-
+    void sendRaw(const uint16_t* timings, unsigned int length, uint8_t startLevel = HIGH, uint32_t preFrameLowUs = 0);
     /**
      * Transmit an arbitrary raw OOK waveform using integer multiples
      * of a base pulse length.
@@ -103,12 +98,7 @@ class RCSwitch {
      * timings[] contains alternating pulse multipliers.
      * Each duration is timings[i] * basePulseLength microseconds.
      */
-    void sendRawMultiples(
-      const uint16_t* timings,
-      unsigned int length,
-      uint16_t basePulseLength,
-      uint8_t startLevel = HIGH
-    );
+    void sendRawMultiples(const uint16_t* timings, unsigned int length, uint16_t basePulseLength, uint8_t startLevel = HIGH, uint32_t preFrameLowUs = 0);
 
     uint8_t getNumProtos();
 

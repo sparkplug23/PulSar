@@ -550,33 +550,31 @@ static inline void safeDelayMicroseconds(unsigned long duration) {
  * after every timing entry. The complete waveform is repeated using
  * nRepeatTransmit.
  */
-void RCSwitch::sendRaw(const uint16_t* timings, unsigned int length, uint8_t startLevel) {
-  if (this->nTransmitterPin == -1 || timings == nullptr || length == 0)
-    return;
+void RCSwitch::sendRaw(const uint16_t* timings, unsigned int length, uint8_t startLevel, uint32_t preFrameLowUs) {
+  if(this->nTransmitterPin == -1 || timings == nullptr || length == 0) return;
 
 #if !defined(RCSwitchDisableReceiving)
   int nReceiverInterrupt_backup = nReceiverInterrupt;
-  if (nReceiverInterrupt_backup != -1) {
-    this->disableReceive();
-  }
+  if(nReceiverInterrupt_backup != -1) this->disableReceive();
 #endif
 
-  for (int nRepeat = 0; nRepeat < nRepeatTransmit; nRepeat++) {
+  digitalWrite(this->nTransmitterPin,LOW);
+  if(preFrameLowUs) delayMicroseconds(preFrameLowUs);
+
+  for(int nRepeat = 0; nRepeat < nRepeatTransmit; nRepeat++) {
     uint8_t level = startLevel;
 
-    for (unsigned int i = 0; i < length; i++) {
-      digitalWrite(this->nTransmitterPin, level);
-      safeDelayMicroseconds(timings[i]);
+    for(unsigned int i = 0; i < length; i++) {
+      digitalWrite(this->nTransmitterPin,level);
+      delayMicroseconds(timings[i]);
       level = !level;
     }
   }
 
-  digitalWrite(this->nTransmitterPin, LOW);
+  digitalWrite(this->nTransmitterPin,LOW);
 
 #if !defined(RCSwitchDisableReceiving)
-  if (nReceiverInterrupt_backup != -1) {
-    this->enableReceive(nReceiverInterrupt_backup);
-  }
+  if(nReceiverInterrupt_backup != -1) this->enableReceive(nReceiverInterrupt_backup);
 #endif
 }
 
@@ -590,35 +588,49 @@ void RCSwitch::sendRaw(const uint16_t* timings, unsigned int length, uint8_t sta
  *   {15, 7, 5, 2} -> 4995 us HIGH, 2331 us LOW,
  *                     1665 us HIGH, 666 us LOW.
  */
-void RCSwitch::sendRawMultiples(const uint16_t* timings, unsigned int length, uint16_t basePulseLength, uint8_t startLevel) {
-  if (this->nTransmitterPin == -1 || timings == nullptr || length == 0 || basePulseLength == 0)
-    return;
+void RCSwitch::sendRawMultiples(const uint16_t* timings, unsigned int length, uint16_t basePulseLength, uint8_t startLevel, uint32_t preFrameLowUs) {
+  if(this->nTransmitterPin == -1 || timings == nullptr || length == 0 || basePulseLength == 0) return;
+
+  Serial.printf(
+  "RCSW RAWMULT len=%u base=%u repeat=%d data17-23=%u,%u,%u,%u,%u,%u,%u\n",
+  length,
+  basePulseLength,
+  nRepeatTransmit,
+  timings[17],
+  timings[18],
+  timings[19],
+  timings[20],
+  timings[21],
+  timings[22],
+  timings[23]
+);
+
 
 #if !defined(RCSwitchDisableReceiving)
   int nReceiverInterrupt_backup = nReceiverInterrupt;
-  if (nReceiverInterrupt_backup != -1) {
-    this->disableReceive();
-  }
+  if(nReceiverInterrupt_backup != -1) this->disableReceive();
 #endif
 
-  for (int nRepeat = 0; nRepeat < nRepeatTransmit; nRepeat++) {
+  digitalWrite(this->nTransmitterPin,LOW);
+  if(preFrameLowUs) delayMicroseconds(preFrameLowUs);
+
+  for(int nRepeat = 0; nRepeat < nRepeatTransmit; nRepeat++) {
     uint8_t level = startLevel;
 
-    for (unsigned int i = 0; i < length; i++) {
-      digitalWrite(this->nTransmitterPin, level);
-      safeDelayMicroseconds((unsigned long)timings[i] * basePulseLength);
+    for(unsigned int i = 0; i < length; i++) {
+      digitalWrite(this->nTransmitterPin,level);
+      delayMicroseconds((uint32_t)timings[i] * basePulseLength);
       level = !level;
     }
   }
 
-  digitalWrite(this->nTransmitterPin, LOW);
+  digitalWrite(this->nTransmitterPin,LOW);
 
 #if !defined(RCSwitchDisableReceiving)
-  if (nReceiverInterrupt_backup != -1) {
-    this->enableReceive(nReceiverInterrupt_backup);
-  }
+  if(nReceiverInterrupt_backup != -1) this->enableReceive(nReceiverInterrupt_backup);
 #endif
 }
+
 
 /**
  * @param sCodeWord   a binary code word consisting of the letter 0, 1

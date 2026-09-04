@@ -267,6 +267,9 @@ void mFileSystem::Init(void)
 
   module_state.mode = ModuleStatus::Running;
 
+  // Immediately load any provision files that are from compiled-in templates, so that they are available for the rest of the system to use.
+  CompiledFile_Init();
+
   ALOG_DBG(
     PSTR(D_LOG_FILESYSTEM "FlashFS mounted with %d kB free"),
     GetFreeStorageSpace()
@@ -1552,10 +1555,114 @@ void mFileSystem::JSONFile_Load(char* filename_With_extension, char* buffer, uin
 }
 
 
+void mFileSystem::CompiledFile_Init()
+{
 
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_01
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_01,FILESYSTEM_FILE_PROVISION_DATA_01,true);
+  #endif
 
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_02
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_02,FILESYSTEM_FILE_PROVISION_DATA_02,true);
+  #endif
 
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_03
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_03,FILESYSTEM_FILE_PROVISION_DATA_03,true);
+  #endif
 
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_04
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_04,FILESYSTEM_FILE_PROVISION_DATA_04,true);
+  #endif
+
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_05
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_05,FILESYSTEM_FILE_PROVISION_DATA_05,true);
+  #endif
+
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_06
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_06,FILESYSTEM_FILE_PROVISION_DATA_06,true);
+  #endif
+
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_07
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_07,FILESYSTEM_FILE_PROVISION_DATA_07,true);
+  #endif
+
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_08
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_08,FILESYSTEM_FILE_PROVISION_DATA_08,true);
+  #endif
+
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_09
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_09,FILESYSTEM_FILE_PROVISION_DATA_09,true);
+  #endif
+
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_10
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_10,FILESYSTEM_FILE_PROVISION_DATA_10,true);
+  #endif
+
+}
+
+bool mFileSystem::CompiledFile_Load(
+  const char* filename,
+  PGM_P data,
+  bool overwrite
+)
+{
+  if(!IsMounted()){ return false; }
+  if(filename == nullptr || data == nullptr){ return false; }
+
+  char filepath[96];
+
+  if(filename[0] == '/')
+  {
+    snprintf(filepath, sizeof(filepath), "%s", filename);
+  }
+  else
+  {
+    snprintf(filepath, sizeof(filepath), "/%s", filename);
+  }
+
+  if(!overwrite && FileExists(filepath))
+  {
+    ALOG_INF(PSTR(D_LOG_FILESYSTEM "Compiled file exists, keeping: %s"), filepath);
+    return true;
+  }
+
+  const uint32_t data_length = strlen_P(data);
+
+  if(data_length == 0)
+  {
+    ALOG_WRN(PSTR(D_LOG_FILESYSTEM "Compiled file data empty: %s"), filepath);
+    return false;
+  }
+
+  uint8_t* buffer = new uint8_t[data_length];
+
+  if(buffer == nullptr)
+  {
+    ALOG_ERR(PSTR(D_LOG_FILESYSTEM "Compiled file allocation failed: %s"), filepath);
+    return false;
+  }
+
+  memcpy_P(buffer, data, data_length);
+
+  const bool result = SaveFile(
+    filepath,
+    buffer,
+    data_length
+  );
+
+  delete[] buffer;
+
+  if(result)
+  {
+    ALOG_INF(PSTR(D_LOG_FILESYSTEM "Compiled file loaded: %s (%u bytes)"), filepath, data_length);
+  }
+  else
+  {
+    ALOG_ERR(PSTR(D_LOG_FILESYSTEM "Compiled file write failed: %s"), filepath);
+  }
+
+  return result;
+}
 
 
 

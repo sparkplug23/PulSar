@@ -22,11 +22,12 @@
 /// HALLWAY //////////////////////////////////////////////////////////////////////////////////
 // #define DEVICE_MEADOWS__HALLWAY__VASE_LIGHT
 /// MASTER BEDROOM ///////////////////////////////////////////////////////////////////////////
-// #define DEVICE_MEADOWS__MASTER_BEDROOM__AMBIENT_SENSOR
+// #define DEVICE_MEADOWS__MASTER_BEDROOM__AMBIENT_SENSOR_OLD_PRO_MINI
 // #define DEVICE_MEADOWS__MASTER_BEDROOM__BEDLIGHT
 // #define DEVICE_MEADOWS__BED_ALARM_LIGHT
 // #define DEVICE_MEADOWS__ENSUITE_DOOR_FRAME
 // #define DEVICE_MEADOWS__HALLWAY__HEATING
+#define DEVICE_MEADOWS__MASTER_BEDROOM__AMBIENT_SENSOR
 /// OFFICE ///////////////////////////////////////////////////////////////////////////////////
 // #define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
 // #define DEVICE_MEADOWS__OFFICE__ELITE4DEXMU_01
@@ -48,7 +49,7 @@
 // #define DEVICE_MEADOWS__PRUSA_CLIMATE_CONTROL
 // #define DEVICE_MEADOWS__LANDING__GLASS_BOX
 // #define DEVICE_MEADOWS__OUTSIDE__OILTANK
-#define DEVICE_MEADOWS__OFFICE__433MHZ_NODE
+// #define DEVICE_MEADOWS__OFFICE__433MHZ_NODE
 // #define DEVICE_MEADOWS__BATHROOM__IMMERSION
 
 // #define DEVICE_MEADOWS__OFFICE__SUN_PIXELS_1D
@@ -2053,7 +2054,7 @@ R"=====(
 
 
 // supermini pro has ws2812 on pin8
-#ifdef DEVICE_MEADOWS__MASTER_BEDROOM__AMBIENT_SENSOR
+#ifdef DEVICE_MEADOWS__MASTER_BEDROOM__AMBIENT_SENSOR_OLD_PRO_MINI
 #ifndef DEVICENAME_CTR
 #define DEVICENAME_CTR          "consumerunit"
 #endif
@@ -2432,6 +2433,245 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 
 #endif
+
+
+
+/**
+ * @brief 
+ * 
+ * Masterbedroom climate, blinds controller, and ensuite motion
+ * 
+ *          fH (Boot Fail - Pulled High) → Pin must be LOW at boot, else boot may fail
+ *          fL (Boot Fail - Pulled Low) → Pin must be HIGH at boot, else boot may fail
+ *          key (Key Pin) → GPIO0 on DOIT DevKit v1 (not )
+ *          BIL (Built-in LED) → On some boards, pin is used for onboard LED
+ *                               *I ~PWM 'NC    
+ *                          _____________________
+ *                    3V3  |3V3     |USB|     VIN|
+ *                    GND  |GND               GND| 
+ *                 SAW TX  |15 (fL)            13| PIR Ensuite
+ *                         |2  (fL, BIL)  (fH) 12| 
+ *                         |4             (fH) 14|
+ *                         |RX2/17             27| 
+ *                         |TX2/16             26| 
+ *                         |5  (fL)            25| 
+ *                         |18                 33| 
+ *                         |19                 32| 
+ *       BME, BH1 I2C_SDA  |21  SDA     (fL) * 35|  
+ *                         |RX0         (fL) * 34| 
+ *                         |TX0              ' VN| 
+ *        BME, BH1 I2C_SCL |22  SCL          ' VP| 
+ *                     NEO |23               ' EN| 
+ *                          _____________________
+ * 
+ * 
+ */
+#ifdef DEVICE_MEADOWS__MASTER_BEDROOM__AMBIENT_SENSOR
+#ifndef DEVICENAME_CTR
+#define DEVICENAME_CTR          "testbed_default"
+#endif
+#ifndef DEVICENAME_FRIENDLY_CTR
+#define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
+#endif
+#ifndef DEVICENAME_DESCRIPTION_CTR
+#define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
+#endif
+#define DEVICENAME_ROOMHINT_CTR "testgroup"
+#define MQTT_HOST   "192.168.3.70"
+  
+  #define MQTT_PORT     1883
+  
+  // #define USE_MODULE_DRIVERS_INTERFACE
+
+  #define USE_MODULE_DRIVERS_RF433_CODES
+    #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
+    #define ENABLE_FEATURE_DRIVERS__RF433_TRANSMIT_BITBANG_TEST
+
+    
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+
+  // #define ENABLE_DEBUGFEATURE_SENSORS__SPLASH_I2C_SCAN
+
+ /***********************************
+  * SECTION: Network Configs
+ ************************************/    
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+
+#define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+#define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+//  #define ENABLE_DEBUGFEATURE_WIFI__SUPERMINI_REDUCE_WIFI_BAD_ANTENNA_HARDWARE
+
+#define USE_MODULE_SENSORS_INTERFACE
+#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+  #define USE_MODULE_SENSORS_BH1750
+#endif
+#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
+  #define USE_MODULE_SENSORS_BME    
+#endif
+#define USE_MODULE_SENSORS_PIR
+
+
+
+
+
+
+
+
+
+    
+  /************************************************************************
+   * WEBPAGE:
+   ************************************************************************/
+  
+  #define USE_MODULE_NETWORK_WEBSERVER
+  #define ENABLE_FEATURE_LIGHTING__WEBUI
+  #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+
+
+  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+  #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+
+  #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+
+  
+  #define ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION_ON_PULSAR_PALETTES
+
+  #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+  #define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
+  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+
+  #define ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+
+  
+  #ifndef ESP8266
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  #endif
+
+
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"    
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750)
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","    
+      #endif
+      #ifdef USE_MODULE_DRIVERS_RF433_CODES
+      // "\"23\":\"" D_GPIO_RF_433MHZ_RX_CTR   "\","
+      "\"15\":\"" D_GPIO_RF_433MHZ_TX_CTR   "\","
+      #endif  
+      #ifdef USE_MODULE_SENSORS_PIR
+      "\"13\":\""  D_GPIO_PIR_1_CTR "\","
+      #endif
+      "\"2\":\"" D_GPIO_LED1_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+  
+#define D_DEVICE_SENSOR_BH1750_NAME "MasterBedroom"
+#define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "EnsuiteDoor"
+
+
+#define USE_FUNCTION_TEMPLATE
+DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+"{"
+  "\"" D_DEVICENAME "\":{"
+    "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+      "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\","
+    "],"
+    "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
+    "],"
+    "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
+    "]"
+  "},"    
+    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
+  "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+"}";
+
+
+
+
+  #define USE_FILESYSTEM_FILE_PROVISION_01
+  #define FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_01 "rfcodes.json"
+ DEFINE_PGM_CTR(FILESYSTEM_FILE_PROVISION_DATA_01)
+R"=====(
+{
+  "Version": 1,
+  "Codes": {
+    "UP": {
+      "Type": "RawMultiples",
+      "BasePulseUs": 333,
+      "StartLevel": 1,
+      "PreFrameLowUs": 5000,
+      "Repeat": 10,
+      "Data": [
+        15,7,5,2,1,4,2,7,2,1,
+        1,4,1,1,2,2,3,5,2,8,
+        1,8,2,5,1,3,1,6,2,6,
+        2,1,2,5,2,6,2,1,1,4,
+        3,1,1,1,1,2,1,2,1,1
+      ]
+    },
+    "DOWN": {
+      "Type": "RawMultiples",
+      "BasePulseUs": 333,
+      "StartLevel": 1,
+      "PreFrameLowUs": 5000,
+      "Repeat": 10,
+      "Data": [
+        15,7,5,2,1,4,2,7,2,1,
+        1,4,1,1,2,2,3,4,2,1,
+        1,7,1,11,1,3,1,3,1,6,
+        2,6,2,1,2,5,2,6,2,1,
+        1,4,3,2,1,2,2,1,2,1
+      ]
+    },
+    "STOP": {
+      "Type": "RawMultiples",
+      "BasePulseUs": 333,
+      "StartLevel": 1,
+      "PreFrameLowUs": 5000,
+      "Repeat": 10,
+      "Data": [
+        15,7,5,2,1,4,2,7,2,1,
+        1,4,1,1,2,2,3,4,1,1,
+        1,8,1,9,1,1,1,3,1,3,
+        1,6,2,6,2,1,2,5,2,6,
+        2,1,1,4,3,4,1,4,1,1
+      ]
+    }
+  }
+}
+)=====";
+
+  
+#endif
+
+
+
+
 
 
 #ifdef DEVICE_MEADOWS__MASTER_BEDROOM__BEDLIGHT
@@ -7423,13 +7663,69 @@ WHERE time >= '2025-05-10T20:00:00Z' AND time <= '2025-05-11T10:30:00Z'
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
     "\"" D_GPIOC "\":{"
       #ifdef USE_MODULE_DRIVERS_RF433_CODES
-      "\"23\":\"" D_GPIO__RF_433MHZ_RX__CTR   "\","
+      "\"23\":\"" D_GPIO_RF_433MHZ_RX_CTR   "\","
+      "\"22\":\"" D_GPIO_RF_433MHZ_TX_CTR   "\","
       #endif  
       "\"2\":\"" D_GPIO_LED1_CTR  "\""
     "},"
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
+
+
+  #define USE_FILESYSTEM_FILE_PROVISION_01
+  #define FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_01 "rfcodes.json"
+ DEFINE_PGM_CTR(FILESYSTEM_FILE_PROVISION_DATA_01)
+R"=====(
+{
+  "Version": 1,
+  "Codes": {
+    "UP": {
+      "Type": "RawMultiples",
+      "BasePulseUs": 333,
+      "StartLevel": 1,
+      "PreFrameLowUs": 5000,
+      "Repeat": 10,
+      "Data": [
+        15,7,5,2,1,4,2,7,2,1,
+        1,4,1,1,2,2,3,5,2,8,
+        1,8,2,5,1,3,1,6,2,6,
+        2,1,2,5,2,6,2,1,1,4,
+        3,1,1,1,1,2,1,2,1,1
+      ]
+    },
+    "DOWN": {
+      "Type": "RawMultiples",
+      "BasePulseUs": 333,
+      "StartLevel": 1,
+      "PreFrameLowUs": 5000,
+      "Repeat": 10,
+      "Data": [
+        15,7,5,2,1,4,2,7,2,1,
+        1,4,1,1,2,2,3,4,2,1,
+        1,7,1,11,1,3,1,3,1,6,
+        2,6,2,1,2,5,2,6,2,1,
+        1,4,3,2,1,2,2,1,2,1
+      ]
+    },
+    "STOP": {
+      "Type": "RawMultiples",
+      "BasePulseUs": 333,
+      "StartLevel": 1,
+      "PreFrameLowUs": 5000,
+      "Repeat": 10,
+      "Data": [
+        15,7,5,2,1,4,2,7,2,1,
+        1,4,1,1,2,2,3,4,1,1,
+        1,8,1,9,1,1,1,3,1,3,
+        1,6,2,6,2,1,2,5,2,6,
+        2,1,1,4,3,4,1,4,1,1
+      ]
+    }
+  }
+}
+)=====";
+
   
 #endif
 

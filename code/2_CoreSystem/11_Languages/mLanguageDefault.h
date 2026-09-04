@@ -950,7 +950,7 @@
 #define D_GPIO_KEY1_INV_NP_CTR    "Key Inv NP"
 #define D_GPIO_KEY1_TOUCH_CTR    "Key Touch"
 
-#define D_GPIO__RF_433MHZ_RX__CTR "RF 433 RX"
+#define D_GPIO_RF_433MHZ_RX_CTR "RF 433 RX"
 #define D_GPIO_RF_433MHZ_TX_CTR "RF 433 TX"
 
 #define D_GPIO_SUN_TRACKING_CTR "Sun Tracking"

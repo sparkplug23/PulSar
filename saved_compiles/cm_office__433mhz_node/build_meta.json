@@ -1,7 +1,7 @@
 {
   "env_name": "cm_office__433mhz_node",
-  "created_utc": "2026-09-02T21:25:28Z",
-  "created_epoch": 1788384328,
+  "created_utc": "2026-09-04T10:57:43Z",
+  "created_epoch": 1788519463,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__433mhz_node",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "10da98fbec2527fcae438d0ea056d9d0b0322755",
-    "describe": "10da98fb-dirty",
-    "status_short": "M build_verbose.txt\n M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_LightingEffects.h\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/4_Drivers/10_RF433Codes/mRF433Codes.cpp\n M code/4_Drivers/10_RF433Codes/mRF433Codes.h\n M code/6_Lights/00_Interface/const.h\n M code/6_Lights/00_Interface/mBusManager.cpp\n M code/6_Lights/00_Interface/mBusManager.h\n M code/6_Lights/00_Interface/mInterfaceLight.cpp\n M code/6_Lights/00_Interface/mInterfaceLight.h\n M code/6_Lights/03_Animator/Commands.cpp\n M code/6_Lights/03_Animator/Effects.cpp\n M code/6_Lights/03_Animator/WebUI.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M lib/lib_rf_extended/rc-switch/src/RCSwitchExtended.cpp\n M notes/PresetJsonFiles/September2026/device_coneH/presets.json\n M platformio_compile_testers.ini\n M platformio_lgt.ini\n M platformio_meadows.ini\n M platformio_override.ini\n M platformio_remote.ini\n M platformio_seasonal.ini\n M saved_compiles/cm_lgt__esp32_coneH_1D/build_meta.json\n M saved_compiles/cm_lgt__esp32_coneH_1D/firmware.elf\n M saved_compiles/cm_office__433mhz_node/build_meta.json\n M saved_compiles/cm_office__433mhz_node/firmware.elf\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M tools/cdata_lights.js\n?? code/6_Lights/03_Animator/source/adv_playlist_1.htm\n?? code/6_Lights/03_Animator/source/adv_playlist_2.htm\n?? code/6_Lights/03_Animator/source/adv_playlist_3.htm\n?? code/6_Lights/03_Animator/source/adv_playlist_4.htm\n?? code/6_Lights/03_Animator/source/playlist_viewer.htm\n?? code/6_Lights/03_Animator/webpages_generated/advanced_playlist.h"
+    "commit": "81ab05057e4cd71c5461c422e265e07a58603d92",
+    "describe": "81ab0505-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/2_CoreSystem/03_FileSystem/mFileSystem.cpp\n M code/2_CoreSystem/03_FileSystem/mFileSystem.h\n M code/2_CoreSystem/05_Pins/gpio_names.cpp\n M code/2_CoreSystem/11_Languages/mLanguageDefault.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/4_Drivers/10_RF433Codes/mRF433Codes.cpp\n M code/4_Drivers/10_RF433Codes/mRF433Codes.h\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M lib/lib_rf_extended/rc-switch-custom/src/RCSwitchExtended.cpp\n M lib/lib_rf_extended/rc-switch-custom/src/RCSwitchExtended.h\n M platformio_meadows.ini\n M saved_compiles/cm_office__433mhz_node/build_meta.json\n M saved_compiles/cm_office__433mhz_node/firmware.elf"
   }
 }
