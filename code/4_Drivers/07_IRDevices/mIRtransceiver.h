@@ -31,7 +31,7 @@ class mIRtransceiver :
     void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static constexpr const char* PM_MODULE_DRIVERS_IRTRANSCEIVER_CTR = D_MODULE_DRIVERS_IRTRANSCEIVER_CTR;
+    static constexpr const char* PM_MODULE_DRIVERS_IRTRANSCEIVER_CTR = D_MODULE__DRIVERS__IRTRANSCEIVER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_IRTRANSCEIVER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_IRTRANSCEIVER_ID; }
    

@@ -174,7 +174,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
    *****************************/
   #ifdef USE_MODULE_SENSORS_BME
 
-  if( DLI->GetModuleAndSensorIDs(D_MODULE_SENSORS_BME_CTR, D_DEVICE_SENSOR_BME_680_NAME, &out_module_id, &out_sensor_id ) )
+  if( DLI->GetModuleAndSensorIDs(D_MODULE__SENSORS__BME__CTR, D_DEVICE_SENSOR_BME_680_NAME, &out_module_id, &out_sensor_id ) )
   {
     ALOG_DBM(PSTR("mod %d %d"), out_module_id, out_sensor_id );
     sensors_reading_t val;
@@ -196,7 +196,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
    *****************************/
   #ifdef USE_MODULE_SENSORS_BME
 
-  if( DLI->GetModuleAndSensorIDs(D_MODULE_SENSORS_BME_CTR, D_DEVICE_SENSOR_BME_280_NAME, &out_module_id, &out_sensor_id ) )
+  if( DLI->GetModuleAndSensorIDs(D_MODULE__SENSORS__BME__CTR, D_DEVICE_SENSOR_BME_280_NAME, &out_module_id, &out_sensor_id ) )
   {
     ALOG_DBM(PSTR("mod %d %d"), out_module_id, out_sensor_id );
     sensors_reading_t val;
@@ -218,7 +218,7 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page1()
    *****************************/
   #ifdef USE_MODULE_SENSORS_BME
 
-  if( DLI->GetModuleAndSensorIDs(D_MODULE_SENSORS_BH1750_CTR, D_DEVICE_SENSOR_BH1750_NAME, &out_module_id, &out_sensor_id ) )
+  if( DLI->GetModuleAndSensorIDs(D_MODULE__SENSORS__BH1750__CTR, D_DEVICE_SENSOR_BH1750_NAME, &out_module_id, &out_sensor_id ) )
   {
     ALOG_DBM(PSTR("mod %d %d"), out_module_id, out_sensor_id );
     sensors_reading_t val;
@@ -290,12 +290,12 @@ void mDeskSensorsOnOLED::SubTask_UpdateOLED_Page2()
     line = -1;
     sensors_reading_t val;
     #ifdef USE_MODULE_SENSORS_DS18X20
-    tkr->GetModule_P(D_MODULE_SENSORS_DB18S20_CTR)->GetSensorReading(&val, sensor_id);   
+    tkr->GetModule_P(D_MODULE__SENSORS__DB18S20__CTR)->GetSensorReading(&val, sensor_id);   
     if(val.Valid())
     {
 
       sensor_data = val.GetFloat(SENSOR_TYPE_TEMPERATURE_ID);        
-      DLI->GetDeviceName_WithModuleUniqueID( tkr->GetModule_P(D_MODULE_SENSORS_DB18S20_CTR)->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
+      DLI->GetDeviceName_WithModuleUniqueID( tkr->GetModule_P(D_MODULE__SENSORS__DB18S20__CTR)->GetModuleUniqueID(), val.sensor_id, buffer_n, sizeof(buffer_n));
 
       /**
        * @brief Check for name and replace with OLED friendly short name

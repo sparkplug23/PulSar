@@ -1157,11 +1157,11 @@ void mCamera::parse_JSONCommand(JsonParserObject obj)
   JsonParserToken jtok_sub = 0; 
   int8_t tmp_id = 0;
 
-  if(jtok = obj[D_MODULE_DRIVERS__CAMERA_CTR].getObject()["Init"])
+  if(jtok = obj[D_MODULE__DRIVERS__CAMERA__CTR].getObject()["Init"])
   {
     Init();
   }
-  if(jtok = obj[D_MODULE_DRIVERS__CAMERA_CTR].getObject()["psramInit"])
+  if(jtok = obj[D_MODULE__DRIVERS__CAMERA__CTR].getObject()["psramInit"])
   {
     psramInit();               // initialize PSRAM
         
@@ -1175,7 +1175,7 @@ void mCamera::parse_JSONCommand(JsonParserObject obj)
 
   JsonParserObject jobj = 0; 
   
-  if(!(jobj = obj[D_MODULE_DRIVERS__CAMERA_CTR].getObject()))
+  if(!(jobj = obj[D_MODULE__DRIVERS__CAMERA__CTR].getObject()))
   {
     ALOG_ERR(PSTR(D_LOG_CAMERA "No Cam object found"));
     return;

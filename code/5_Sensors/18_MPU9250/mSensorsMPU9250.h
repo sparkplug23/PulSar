@@ -48,7 +48,7 @@ class mSensorsMPU9250 :
     void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static constexpr const char* PM_MODULE_SENSORS_MPU9250_CTR = D_MODULE_SENSORS_MPU9250_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_MPU9250_CTR = D_MODULE__SENSORS__MPU9250__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MPU9250_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MPU9250_ID; }
     

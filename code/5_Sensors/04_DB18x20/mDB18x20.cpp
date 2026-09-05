@@ -516,7 +516,7 @@ void mDB18x20::parse_JSONCommand(JsonParserObject obj)
    *        A uint8_t saves that index, so looking up the name of the address will require the correct index (or left as -1 to unknown)
    * 
    */
-  if(jtok = obj[PM_SENSORADDRESS].getObject()[D_MODULE_SENSORS_DB18S20_CTR])
+  if(jtok = obj[PM_SENSORADDRESS].getObject()[D_MODULE__SENSORS__DB18S20__CTR])
   {
 
     ALOG_INF(PSTR("Setting Address")); delay (2000);

@@ -42,7 +42,7 @@ class mTelemetry :
 
     uint8_t serial_messages_remaining_to_send = 0;
     
-    static constexpr const char* PM_MODULE_CORE_TELEMETRY_CTR = D_MODULE_CORE_TELEMETRY_CTR;
+    static constexpr const char* PM_MODULE_CORE_TELEMETRY_CTR = D_MODULE__CORE__TELEMETRY__CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_TELEMETRY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_TELEMETRY_ID; }
 

@@ -111,7 +111,7 @@ class mIRRemote :
     void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static constexpr const char* PM_MODULE_DRIVERS_IRREMOTE_CTR = D_MODULE_DRIVERS_IRREMOTE_CTR;
+    static constexpr const char* PM_MODULE_DRIVERS_IRREMOTE_CTR = D_MODULE__DRIVERS__IRREMOTE__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_IRREMOTE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_IRREMOTE_ID; }
    

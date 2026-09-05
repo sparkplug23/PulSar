@@ -316,7 +316,7 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+      "\"" D_MODULE__SENSORS__BUTTONS__CTR "\":["
         "\"" "WallRed" "\","
         "\"" "WallBlue" "\","
         "\"" "DoorAlert" "\""
@@ -325,7 +325,7 @@
         "\"" "BUT6" "\","
         "\"" "ResetGPIO0" "\""
       "],"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_NAME "\","
         "\"" D_DEVICE_RELAY_1_NAME "\","
         "\"" D_DEVICE_RELAY_2_NAME "\","
@@ -336,11 +336,11 @@
         "\"" D_DEVICE_RELAY_7_NAME "\""
       "]"
     "},"    
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
-    "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+    "\"MQTT_Interface_Priority\":{\"" D_MODULE__ENERGY__INTERFACE__CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
   "}";
 
 #endif // END DEVICE
@@ -684,7 +684,7 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+      "\"" D_MODULE__SENSORS__BUTTONS__CTR "\":["
         "\"" "WallRed" "\","
         "\"" "WallBlue" "\","
         "\"" "DoorAlert" "\""
@@ -693,7 +693,7 @@
         "\"" "BUT6" "\","
         "\"" "ResetGPIO0" "\""
       "],"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_NAME "\","
         "\"" D_DEVICE_RELAY_1_NAME "\","
         "\"" D_DEVICE_RELAY_2_NAME "\","
@@ -704,11 +704,11 @@
         "\"" D_DEVICE_RELAY_7_NAME "\""
       "]"
     "},"    
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
-    "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+    "\"MQTT_Interface_Priority\":{\"" D_MODULE__ENERGY__INTERFACE__CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
   "}";
 
 #endif // END DEVICE
@@ -860,20 +860,20 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
         "\"" "PRINTER" "\""
       "],"
-      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
         "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_BME_LONG_WIRE_NAME "\","   // 0x76
         "\"" D_DEVICE_SENSOR_BME_SHORT_WIRE_NAME  "\""  // 0x77
       "],"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
         // Group 1
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
@@ -883,7 +883,7 @@
       "]"
     "},"
     "\"" D_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
@@ -1153,20 +1153,20 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
         "\"" "PRINTER" "\""
       "],"
-      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
         "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_BME_LONG_WIRE_NAME "\","   // 0x76
         "\"" D_DEVICE_SENSOR_BME_SHORT_WIRE_NAME  "\""  // 0x77
       "],"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
         // Group 1
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
@@ -1176,7 +1176,7 @@
       "]"
     "},"
     "\"" D_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
@@ -1463,7 +1463,7 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
         "\"" "Desk" "\""
       "]"
     "}"
@@ -1654,7 +1654,7 @@
     DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "{"
       "\"" D_DEVICENAME "\":{"
-        "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+        "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
           "\"" "Desk" "\""
         "]"
       "}"
@@ -1940,7 +1940,7 @@ R"=====(
     DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "{"
       "\"" D_DEVICENAME "\":{"
-        "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+        "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
           "\"" "Desk" "\""
         "]"
       "}"
@@ -2116,7 +2116,7 @@ R"=====(
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
         "\"" "Desk" "\""
       "]"
     "}"
@@ -2307,7 +2307,7 @@ R"=====(
     DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "{"
       "\"" D_DEVICENAME "\":{"
-        "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+        "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
           "\"" "Desk" "\""
         "]"
       "}"
@@ -2593,7 +2593,7 @@ R"=====(
     DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "{"
       "\"" D_DEVICENAME "\":{"
-        "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+        "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
           "\"" "Desk2" "\""
         "]"
       "}"
@@ -2766,7 +2766,7 @@ R"=====(
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
         "\"" "Desk" "\""
       "]"
     "}"
@@ -2957,7 +2957,7 @@ R"=====(
     DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "{"
       "\"" D_DEVICENAME "\":{"
-        "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+        "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
           "\"" "Desk" "\""
         "]"
       "}"
@@ -3243,7 +3243,7 @@ R"=====(
     DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
     "{"
       "\"" D_DEVICENAME "\":{"
-        "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+        "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
           "\"" "Desk2" "\""
         "]"
       "}"

@@ -110,7 +110,7 @@ public mTaskerInterface{
       
     };
     
-    static constexpr const char* PM_MODULE_NETWORK_WEBSERVER_CTR = D_MODULE_NETWORK_WEBSERVER_CTR;
+    static constexpr const char* PM_MODULE_NETWORK_WEBSERVER_CTR = D_MODULE__NETWORK__WEBSERVER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_NETWORK_WEBSERVER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_WEBSERVER_ID; }
 

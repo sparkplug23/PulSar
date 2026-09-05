@@ -888,7 +888,7 @@ void mMQTTManager::parse_JSONCommand(JsonParserObject obj){
    * All commands below must be nested inside module name with "MQTT":{....}"
    ***************************************************************************************/
 
-  if(!(jobj = obj[D_MODULE_NETWORK_MQTT_CTR].getObject()))
+  if(!(jobj = obj[D_MODULE__NETWORK__MQTT__CTR].getObject()))
   {
     return;
   }

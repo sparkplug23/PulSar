@@ -75,7 +75,7 @@ class CrashRecorder :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage();
     
-    static constexpr const char* PM_MODULE_CORE__CRASH_RECORDER__CTR = D_MODULE_CORE__CRASH_RECORDER__CTR;
+    static constexpr const char* PM_MODULE_CORE__CRASH_RECORDER__CTR = D_MODULE__CORE__CRASH_RECORDER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE__CRASH_RECORDER__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE__CRASH_RECORDER__ID; }
     

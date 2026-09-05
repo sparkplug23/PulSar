@@ -39,7 +39,7 @@ class mDB18x20 :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage();
     
-    static constexpr const char* PM_MODULE_SENSORS_DS18X20__CTR = D_MODULE_SENSORS_DB18S20_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_DS18X20__CTR = D_MODULE__SENSORS__DB18S20__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_DS18X20__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DS18X20__ID; }
     

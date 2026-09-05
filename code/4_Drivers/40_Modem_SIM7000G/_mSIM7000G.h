@@ -116,7 +116,7 @@ class mSIM7000G :
     void Pre_Init();
     void Init(void);
 
-    static constexpr const char* PM_MODULE__DRIVERS_MODEM_7000G__CTR = D_MODULE__DRIVERS_MODEM_7000G__CTR;
+    static constexpr const char* PM_MODULE__DRIVERS_MODEM_7000G__CTR = D_MODULE__DRIVERS__MODEM_7000G__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__DRIVERS_MODEM_7000G__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_MODEM_7000G_ID; }
         

@@ -16,7 +16,7 @@
 
 class mRemoteDevice :
   public mTaskerInterface
-{
+{D_MODULE__SENSORS__REMOTE_DEVICE__CTR
 
   private:
   public:

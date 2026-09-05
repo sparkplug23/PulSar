@@ -34,7 +34,7 @@ class mMoonTracking :
     
     int8_t Tasker(uint8_t function, JsonParserObject obj);
     
-    static constexpr const char* PM_MODULE_SENSORS_MOON_TRACKING_CTR = D_MODULE_SENSORS_MOON_TRACKING_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_MOON_TRACKING_CTR = D_MODULE__SENSORS__MOON_TRACKING__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MOON_TRACKING_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MOON_TRACKING_ID; }
     

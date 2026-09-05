@@ -564,10 +564,10 @@ R"=====(
  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
  "{"
    "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
         "\"" "Roaming" "\""
       "],"  
-     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
      "]"
    "}"
@@ -790,7 +790,7 @@ R"=====(
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "]"
     "}"
@@ -979,7 +979,7 @@ R"=====(
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "]"
     "}"
@@ -1001,7 +1001,7 @@ R"=====(
   // "{"
   //   "\"Rule0\":{" //switch example
   //     "\"Trigger\":{"
-  //       "\"Module\":\"" D_MODULE_SENSORS_PIR_CTR "\","
+  //       "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
   //       "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
   //       "\"DeviceName\":0," 
   //       "\"State\":1"
@@ -1409,7 +1409,7 @@ R"=====(
  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
  "{"
    "\"" D_DEVICENAME "\":{"
-     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
      "]"
    "}"
@@ -1790,7 +1790,7 @@ R"=====(
  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
  "{"
    "\"" D_DEVICENAME "\":{"
-     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
      "]"
    "}"
@@ -2153,7 +2153,7 @@ R"=====(
  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
  "{"
    "\"" D_DEVICENAME "\":{"
-     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
      "]"
    "}"
@@ -2414,7 +2414,7 @@ R"=====(
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "]"
     "}"
@@ -2827,7 +2827,7 @@ R"=====(
  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
  "{"
    "\"" D_DEVICENAME "\":{"
-     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
      "]"
    "}"
@@ -3064,7 +3064,7 @@ R"=====(
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"    
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
@@ -3903,7 +3903,7 @@ R"=====(
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"    
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
@@ -4451,7 +4451,7 @@ R"=====(
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"    
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
@@ -5200,22 +5200,22 @@ R"=====(
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_UNIQUE_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_UNIQUE_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
         "\"" D_DEVICE_UNIQUE_NAME "\""
       "],"      
-      "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":["
+      "\"" D_MODULE__ENERGY__INTERFACE__CTR "\":["
         "\"" D_DEVICE_UNIQUE_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_UNIQUE_NAME "\""
       "],"
       "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":["
@@ -5223,10 +5223,10 @@ R"=====(
       "]"
     "},"
     "\"" D_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\":" D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
       "},"  
-      "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":[" 
+      "\"" D_MODULE__ENERGY__INTERFACE__CTR "\":[" 
         D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
       "]"  
     "},"
@@ -5239,17 +5239,17 @@ R"=====(
       "],"
       "\"" "SetOutput" "\":["
         "{"
-          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+          "\"" "ModuleID" "\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
           "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
         "}"
       "]"
     "},"    
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
-    "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+    "\"MQTT_Interface_Priority\":{\"" D_MODULE__ENERGY__INTERFACE__CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
   "}";
 
 

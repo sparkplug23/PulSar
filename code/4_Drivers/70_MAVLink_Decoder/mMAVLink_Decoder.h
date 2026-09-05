@@ -263,7 +263,7 @@ class mMAVLink_Decoder :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void   parse_JSONCommand(JsonParserObject obj);
 
-    static constexpr const char* PM_MODULE__DRIVERS_MAVLINK_DECODER__CTR = D_MODULE__DRIVERS_MAVLINK_DECODER__CTR;
+    static constexpr const char* PM_MODULE__DRIVERS_MAVLINK_DECODER__CTR = D_MODULE__DRIVERS__MAVLINK_DECODER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__DRIVERS_MAVLINK_DECODER__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__DRIVERS_MAVLINK_DECODER__ID; }    
     

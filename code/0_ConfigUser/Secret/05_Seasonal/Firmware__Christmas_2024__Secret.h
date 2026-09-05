@@ -670,7 +670,7 @@
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"    
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
@@ -1047,7 +1047,7 @@
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"    
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
@@ -1675,7 +1675,7 @@
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"    
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "}," 
@@ -2564,7 +2564,7 @@
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"    
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
@@ -4808,14 +4808,14 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_ADC_INTERNAL_CTR "\":["
+      "\"" D_MODULE__SENSORS__ADC_INTERNAL__CTR "\":["
         "\"" D_DEVICE_SENSORS_ANALOG_1_CTR "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSORS_ANALOG_1_CTR "\""
       "]"
     "},"    
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "}"

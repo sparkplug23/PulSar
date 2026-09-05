@@ -283,7 +283,7 @@ ESP32 remains alive while modem wedges
       "\"" D_MODULE__NETWORK_CELLULAR__CTR "\":["
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_INTERFACE_CTR"\":["
+      "\"" D_MODULE__SENSORS__INTERFACE__CTR"\":["
         "\"" "System" "\""
       "],"
       "\"" D_MODULE_SENSORS__GPS_MODEM__CTR "\":["
@@ -293,7 +293,7 @@ ESP32 remains alive while modem wedges
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
     "},"    
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
@@ -1051,7 +1051,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
     "},"       
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
@@ -1331,7 +1331,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
 //         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
 //       "]"
 //     "},"       
-    // "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    // "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
     //   "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
     //   "\"" D_REALTIME_SLOWDOWN "\":0"
     // "}"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
@@ -1439,7 +1439,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "},"    
 
     
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
@@ -1582,7 +1582,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
     "},"    
 
     
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
@@ -1729,7 +1729,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" "DisplaySize" "\":1"
     "},"    
     
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
@@ -1871,7 +1871,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" "DisplayCols" "\":[21,2],"
       "\"" "DisplaySize" "\":1"
     "},"      
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
@@ -2026,7 +2026,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" "DisplayCols" "\":[21,2],"
       "\"" "DisplaySize" "\":1"
     "},"      
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
@@ -2245,7 +2245,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" "DisplayCols" "\":[21,2],"
       "\"" "DisplaySize" "\":1"
     "},"        
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "}," // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
@@ -2510,7 +2510,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
     "},"       
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
@@ -2866,7 +2866,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
         "\"" D_DEVICE_SENSOR_GPS_MODEM_FRIENDLY_NAME_LONG "\""
       "]"
     "},"       
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
@@ -2974,7 +2974,7 @@ The new smaller LTE board needs testing too, might need as window tester first.
       "\"" "DisplaySize" "\":1"
     "},"    
     
-    "\"" D_MODULE_NETWORK_MQTT_CTR "\":{"
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
       "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
       "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"  // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
@@ -3058,14 +3058,14 @@ The new smaller LTE board needs testing too, might need as window tester first.
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
         "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\""
       "]"
     "},"
     "\"" D_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
         "[40,143,81,7,51,20,1,189],"   //D6 group of 3                                           
         "[40,255,100,29,205,201,168,203],"                                             
         "[40,255,100,29,205,248,248,249]"  

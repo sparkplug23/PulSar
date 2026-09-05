@@ -72,7 +72,7 @@ class mADCInternal :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage();
     
-    static constexpr const char* PM_MODULE_SENSORS_ADC_INTERNAL_CTR = D_MODULE_SENSORS_ADC_INTERNAL_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_ADC_INTERNAL_CTR = D_MODULE__SENSORS__ADC_INTERNAL__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_ADC_INTERNAL_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_ADC_INTERNAL_ID; }
     

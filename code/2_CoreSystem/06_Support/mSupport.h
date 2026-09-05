@@ -395,7 +395,7 @@ class mSupport :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void init(void);
 
-    static constexpr const char* PM_MODULE_CORE_SUPPORT_CTR = D_MODULE_CORE_SUPPORT_CTR;
+    static constexpr const char* PM_MODULE_CORE_SUPPORT_CTR = D_MODULE__CORE__SUPPORT__CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_SUPPORT_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SUPPORT_ID; }
     ~mSupport() {          }

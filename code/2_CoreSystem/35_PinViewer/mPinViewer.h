@@ -52,7 +52,7 @@ class mPinViewer :
     void Pre_Init(void);
     void Init(void);
 
-    static constexpr const char* PM_MODULE_CORE_PINVIEWER_CTR = D_MODULE_CORE_PINVIEWER_CTR;
+    static constexpr const char* PM_MODULE_CORE_PINVIEWER_CTR = D_MODULE__CORE__PINVIEWER__CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_PINVIEWER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_PINVIEWER_ID; }
 

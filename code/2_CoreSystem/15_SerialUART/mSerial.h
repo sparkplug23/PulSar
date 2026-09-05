@@ -109,7 +109,7 @@ class mSerial :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void   parse_JSONCommand(JsonParserObject obj);
 
-    static constexpr const char* PM_MODULE_CORE__SERIAL__CTR = D_MODULE_CORE__SERIAL__CTR;
+    static constexpr const char* PM_MODULE_CORE__SERIAL__CTR = D_MODULE__CORE__SERIAL__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE__SERIAL__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE__SERIAL__ID; }     
 

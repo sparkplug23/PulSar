@@ -118,7 +118,7 @@ class mDevelopmentDebugging :
 
     void Init_DebugPin();
 
-    static constexpr const char* PM_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR = D_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR;
+    static constexpr const char* PM_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR = D_MODULE__CORE__DEVELOPMENT_DEBUGGING__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID; }
     

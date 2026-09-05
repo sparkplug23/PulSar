@@ -40,7 +40,7 @@ class mSwitches :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage(){};
     
-    static constexpr const char* PM_MODULE_SENSORS_SWITCHES_CTR = D_MODULE_SENSORS_SWITCHES_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_SWITCHES_CTR = D_MODULE__SENSORS__SWITCHES__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_SWITCHES_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_SWITCHES_ID; }
 

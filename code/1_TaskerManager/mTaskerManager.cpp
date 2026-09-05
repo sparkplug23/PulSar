@@ -585,9 +585,6 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
   addTasker(new mADCInternal());
   #endif
-  #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
-  addTasker(new mDB18x20());
-  #endif
   #ifdef USE_MODULE_SENSORS_DS18X20
   addTasker(new mDB18x20());
   #endif

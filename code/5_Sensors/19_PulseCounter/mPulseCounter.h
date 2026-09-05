@@ -21,7 +21,7 @@
 class mPulseCounter :
   public mTaskerInterface
 {
-
+D_MODULE__SENSORS__PULSECOUNTER__CTR
   private:
   public:
     mPulseCounter();

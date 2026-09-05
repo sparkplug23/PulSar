@@ -555,7 +555,7 @@ void mRF433Codes::parse_JSONCommand(JsonParserObject obj)
    * Direct protocol:
    * {"rf433":{"Type":"Protocol","Protocol":36,"Bits":64,"Repeat":5,"Data":"0x123456789ABCDEF0"}}
    */
-  if(jtok = obj[D_MODULE_DRIVERS__RF433_CODES_CTR])
+  if(jtok = obj[D_MODULE__DRIVERS__RF433_CODES__CTR])
   {
     if(jtok.isObject())
     {

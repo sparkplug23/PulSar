@@ -23,7 +23,7 @@ class mEvent :
   
     mEvent(){};
     
-    static constexpr const char* PM_MODULE_CORE_EVENTS_CTR = D_MODULE_CORE_EVENTS_CTR;
+    static constexpr const char* PM_MODULE_CORE_EVENTS_CTR = D_MODULE__CORE__EVENTS__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_EVENTS_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_EVENTS_ID; }
 
