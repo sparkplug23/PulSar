@@ -1923,7 +1923,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
       "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_HEATER_0_NAME "\""
       "],"
-      "\"" D_MODULE_CONTROLLER_HVAC_CTR "\":["
+      "\"" D_MODULE__CONTROLLER__HVAC__CTR "\":["
         "\"" D_DEVICE_HEATER_0_NAME "\","
         "\"" D_DEVICE_HEATER_1_NAME "\""
       "]"
@@ -2468,26 +2468,13 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
  */
 #ifdef DEVICE_MEADOWS__MASTER_BEDROOM__AMBIENT_SENSOR
 #ifndef DEVICENAME_CTR
-#define DEVICENAME_CTR          "testbed_default"
+#define DEVICENAME_CTR          "template_default"
 #endif
 #ifndef DEVICENAME_FRIENDLY_CTR
-#define DEVICENAME_FRIENDLY_CTR "TestBed ESP32 WEBUI Neopixel"
-#endif
-#ifndef DEVICENAME_DESCRIPTION_CTR
-#define DEVICENAME_DESCRIPTION_CTR "TestBed ESP32 WEBUI Neopixel"
+#define DEVICENAME_FRIENDLY_CTR "Template ESP32"
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
-#define MQTT_HOST   "192.168.3.70"
-  
-  #define MQTT_PORT     1883
-  
-  // #define USE_MODULE_DRIVERS_INTERFACE
-
-  #define USE_MODULE_DRIVERS_RF433_CODES
-    #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
-    #define ENABLE_FEATURE_DRIVERS__RF433_TRANSMIT_BITBANG_TEST
-
-    
+      
   /***********************************
    * SECTION: System Configs
   ************************************/    
@@ -2502,64 +2489,34 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
  ************************************/  
 
-#define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
-#define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
 
  /***********************************
   * SECTION: Sensor Configs
  ************************************/  
 
-//  #define ENABLE_DEBUGFEATURE_WIFI__SUPERMINI_REDUCE_WIFI_BAD_ANTENNA_HARDWARE
-
-#define USE_MODULE_SENSORS_INTERFACE
-#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
-  #define USE_MODULE_SENSORS_BH1750
-#endif
-#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
-  #define USE_MODULE_SENSORS_BME    
-#endif
-#define USE_MODULE_SENSORS_PIR
-
-
-
-
-
-
-
-
-
-    
-  /************************************************************************
-   * WEBPAGE:
-   ************************************************************************/
-  
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_FEATURE_LIGHTING__WEBUI
-  #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
-
-
-  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
-  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-  #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
-
-  #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
-
-  
-  #define ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION_ON_PULSAR_PALETTES
-
-  #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
-  #define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
-
-  #define ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
-
-  
-  #ifndef ESP8266
-    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  #define USE_MODULE_SENSORS_INTERFACE
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BH1750
+    #define USE_MODULE_SENSORS_BH1750
   #endif
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
+    #define USE_MODULE_SENSORS_BME    
+  #endif
+  #define USE_MODULE_SENSORS_PIR
 
+ /***********************************
+  * SECTION: Driver Configs
+ ************************************/  
 
-  
+  #define USE_MODULE_DRIVERS_RF433_CODES
+    #define ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
+    #define ENABLE_FEATURE_DRIVERS__RF433_TRANSMIT_BITBANG_TEST
+
+  /***********************************
+   * SECTION: GPIO Template
+  ************************************/  
+    
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -2584,87 +2541,92 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "}";
 
 
-  
-#define D_DEVICE_SENSOR_BH1750_NAME "MasterBedroom"
-#define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "EnsuiteDoor"
+  /***********************************
+   * SECTION: Templates
+  ************************************/  
+    
+    
+  #define D_DEVICE_SENSOR_BH1750_NAME "MasterBedroom"
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "EnsuiteDoor"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\","
+      "],"
+      "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
+        "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
+      "],"
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
+        "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
+      "]"
+    "},"    
+      "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+        "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+        "\"" D_REALTIME_SLOWDOWN "\":0"
+      "},"
+    "\"MQTT_Interface_Priority\":{\"" D_MODULE__ENERGY__INTERFACE__CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+  "}";
 
 
-#define USE_FUNCTION_TEMPLATE
-DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-"{"
-  "\"" D_DEVICENAME "\":{"
-    "\"" D_MODULE__SENSORS__PIR__CTR "\":["
-      "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\","
-    "],"
-    "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
-      "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
-    "],"
-    "\"" D_MODULE__SENSORS__BME__CTR "\":["
-      "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
-    "]"
-  "},"    
-    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
-      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
-      "\"" D_REALTIME_SLOWDOWN "\":0"
-    "},"
-  "\"MQTT_Interface_Priority\":{\"" D_MODULE__ENERGY__INTERFACE__CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
-"}";
-
-
-
+  /***********************************
+   * SECTION: Filesystem File Adding
+  ************************************/  
 
   #define USE_FILESYSTEM_FILE_PROVISION_01
   #define FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_01 "rfcodes.json"
- DEFINE_PGM_CTR(FILESYSTEM_FILE_PROVISION_DATA_01)
-R"=====(
-{
-  "Version": 1,
-  "Codes": {
-    "UP": {
-      "Type": "RawMultiples",
-      "BasePulseUs": 333,
-      "StartLevel": 1,
-      "PreFrameLowUs": 5000,
-      "Repeat": 10,
-      "Data": [
-        15,7,5,2,1,4,2,7,2,1,
-        1,4,1,1,2,2,3,5,2,8,
-        1,8,2,5,1,3,1,6,2,6,
-        2,1,2,5,2,6,2,1,1,4,
-        3,1,1,1,1,2,1,2,1,1
-      ]
-    },
-    "DOWN": {
-      "Type": "RawMultiples",
-      "BasePulseUs": 333,
-      "StartLevel": 1,
-      "PreFrameLowUs": 5000,
-      "Repeat": 10,
-      "Data": [
-        15,7,5,2,1,4,2,7,2,1,
-        1,4,1,1,2,2,3,4,2,1,
-        1,7,1,11,1,3,1,3,1,6,
-        2,6,2,1,2,5,2,6,2,1,
-        1,4,3,2,1,2,2,1,2,1
-      ]
-    },
-    "STOP": {
-      "Type": "RawMultiples",
-      "BasePulseUs": 333,
-      "StartLevel": 1,
-      "PreFrameLowUs": 5000,
-      "Repeat": 10,
-      "Data": [
-        15,7,5,2,1,4,2,7,2,1,
-        1,4,1,1,2,2,3,4,1,1,
-        1,8,1,9,1,1,1,3,1,3,
-        1,6,2,6,2,1,2,5,2,6,
-        2,1,1,4,3,4,1,4,1,1
-      ]
+  DEFINE_PGM_CTR(FILESYSTEM_FILE_PROVISION_DATA_01)
+  R"=====(
+  {
+    "Version": 1,
+    "Codes": {
+      "UP": {
+        "Type": "RawMultiples",
+        "BasePulseUs": 333,
+        "StartLevel": 1,
+        "PreFrameLowUs": 5000,
+        "Repeat": 10,
+        "Data": [
+          15,7,5,2,1,4,2,7,2,1,
+          1,4,1,1,2,2,3,5,2,8,
+          1,8,2,5,1,3,1,6,2,6,
+          2,1,2,5,2,6,2,1,1,4,
+          3,1,1,1,1,2,1,2,1,1
+        ]
+      },
+      "DOWN": {
+        "Type": "RawMultiples",
+        "BasePulseUs": 333,
+        "StartLevel": 1,
+        "PreFrameLowUs": 5000,
+        "Repeat": 10,
+        "Data": [
+          15,7,5,2,1,4,2,7,2,1,
+          1,4,1,1,2,2,3,4,2,1,
+          1,7,1,11,1,3,1,3,1,6,
+          2,6,2,1,2,5,2,6,2,1,
+          1,4,3,2,1,2,2,1,2,1
+        ]
+      },
+      "STOP": {
+        "Type": "RawMultiples",
+        "BasePulseUs": 333,
+        "StartLevel": 1,
+        "PreFrameLowUs": 5000,
+        "Repeat": 10,
+        "Data": [
+          15,7,5,2,1,4,2,7,2,1,
+          1,4,1,1,2,2,3,4,1,1,
+          1,8,1,9,1,1,1,3,1,3,
+          1,6,2,6,2,1,2,5,2,6,
+          2,1,1,4,3,4,1,4,1,1
+        ]
+      }
     }
   }
-}
-)=====";
+  )=====";
 
   
 #endif
@@ -4972,7 +4934,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
         "\"" D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR "\","
         "\"" D_SENSOR_PZEM004T_3_FRIENDLY_NAME_CTR "\""
       "],"
-      "\"" D_MODULE_CONTROLLER_HVAC_CTR "\":["
+      "\"" D_MODULE__CONTROLLER__HVAC__CTR "\":["
         "\"" D_DEVICE_HEATER_0_NAME "\","
         "\"" D_DEVICE_HEATER_1_NAME "\","
         "\"" D_DEVICE_HEATER_2_NAME "\","
@@ -6440,7 +6402,7 @@ May need to add two power connections too, so its not just the cat5e wire to let
         "\"" D_DEVICE_SENSOR_DB18S20_14_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_15_NAME "\""    
       "],"
-      "\"" D_MODULE_CONTROLLER_HVAC_CTR "\":["
+      "\"" D_MODULE__CONTROLLER__HVAC__CTR "\":["
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\""
       "]"
     "},"
@@ -7216,7 +7178,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
       "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_HEATER_0_NAME "\""
       "],"
-      "\"" D_MODULE_CONTROLLER_HVAC_CTR "\":["
+      "\"" D_MODULE__CONTROLLER__HVAC__CTR "\":["
         "\"" D_DEVICE_HEATER_0_NAME "\""
       "]"
     "},"    

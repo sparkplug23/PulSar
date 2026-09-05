@@ -12,6 +12,9 @@
 class mBucketWaterLevel :
   public mTaskerInterface
 {
+  D_MODULE__CONTROLLER__BUCKET_WATER_LEVEL__CTR
+
+  
   public:
     mBucketWaterLevel(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);

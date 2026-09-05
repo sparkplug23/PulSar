@@ -11,7 +11,7 @@
 // class mSonoffIFan :
 //   public mTaskerInterface
 // {
-
+// D_MODULE__CONTROLLER__ANIMATOR_BUTTON_CONTROLS__CTR
 //   private:
 //   public:
 //     mSonoffIFan(){};

@@ -42,7 +42,7 @@ class mSerialPositionalLogger :
     void Pre_Init(void);
     void Init(void);
     
-    static constexpr const char* PM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_CTR = D_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_CTR = D_MODULE__CONTROLLER_CUSTOM__POSITIONAL_LOGGER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID; }
 

@@ -14,6 +14,10 @@
 class mFurnaceSensor :
   public mTaskerInterface
 {
+
+  D_MODULE__CONTROLLER_CUSTOM__FURNACE_SENSOR__CTR
+
+  
   public:
     mFurnaceSensor(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);

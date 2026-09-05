@@ -111,7 +111,7 @@ class mHVAC :
   public:
     mHVAC(){};
     
-    static constexpr const char* PM_MODULE_CONTROLLER_HVAC_CTR = D_MODULE_CONTROLLER_HVAC_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_HVAC_CTR = D_MODULE__CONTROLLER__HVAC_REMOTE__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_HVAC_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_HVAC_ID; }
 

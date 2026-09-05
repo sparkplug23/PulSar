@@ -118,7 +118,7 @@ void mNextion::parse_JSONCommand(JsonParserObject obj)
 
 
   // JsonParserObject jobj2 = 0;
-  // if(!(jobj2 = obj[D_MODULE_DISPLAYS_NEXTION_CTR].getObject()))
+  // if(!(jobj2 = obj[D_MODULE__DISPLAYS__NEXTION__CTR].getObject()))
   // {
   //   ALOG_ERR(PSTR(D_LOG_CAMERA "No Nextion object found"));
   //   return;

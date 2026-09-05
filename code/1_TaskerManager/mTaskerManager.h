@@ -641,10 +641,6 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
   #include "9_Controller/08_TankVolume/mTankVolume.h"
   #define tkr_tankvolume                         static_cast<mTankVolume*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLER_TANKVOLUME_ID))
 #endif
-#ifdef USE_MODULE_CONTROLLER_BLINDS
-  #include "9_Controller/Blinds/mBlinds.h"
-  #define tkr_sbut                               static_cast<mBlinds*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLER_BLINDS_ID))
-#endif
 #ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
   #include "9_Controller/BucketWaterLevel/mBucketWaterLevel.h"
   #define tkr_bucket_water_level                 static_cast<mBucketWaterLevel*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL_ID))

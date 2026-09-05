@@ -651,9 +651,6 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
   addTasker(new mTankVolume());
   #endif
-  #ifdef USE_MODULE_CONTROLLER_BLINDS
-  addTasker(new mBlinds());
-  #endif
   #ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
   addTasker(new mBucketWaterLevel());
   #endif

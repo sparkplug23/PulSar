@@ -43,7 +43,7 @@ class mOLED_SSD1306 :
     void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static constexpr const char* PM_MODULE_DISPLAYS_OLED_SSD1306_CTR = D_MODULE_DISPLAYS_OLED_SSD1306_CTR;
+    static constexpr const char* PM_MODULE_DISPLAYS_OLED_SSD1306_CTR = D_MODULE__DISPLAYS__OLED_SSD1306__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DISPLAYS_OLED_SSD1306_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DISPLAYS_OLED_SSD1306_ID; }
    

@@ -21,7 +21,7 @@ class mGPS_SD_Logger :
     void Pre_Init(void);
     void Init(void);
     
-    static constexpr const char* PM_MODULE_CONTROLLER_GPS_SD_LOGGER_CTR = D_MODULE_CONTROLLER_GPS_SD_LOGGER_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_GPS_SD_LOGGER_CTR = D_MODULE__CONTROLLER__GPS_SD_LOGGER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_GPS_SD_LOGGER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_GPS_SD_LOGGER_ID; }
 

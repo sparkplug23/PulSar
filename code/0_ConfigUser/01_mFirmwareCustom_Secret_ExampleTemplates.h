@@ -1141,7 +1141,7 @@
       "\"" D_MODULE_SENSORS_REMOTE_DEVICE_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSOR_REMOTE_BME_BEDROOM_NAME "\""
       "],"
-      "\"" D_MODULE_CONTROLLER_HVAC_CTR "\":["
+      "\"" D_MODULE__CONTROLLER__HVAC__CTR "\":["
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\""
       "],"

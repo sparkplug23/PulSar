@@ -22,7 +22,7 @@ class mRelayStateLEDStrip :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void   parse_JSONCommand(JsonParserObject obj);
 
-    static constexpr const char* PM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR = D_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR;
+    static constexpr const char* PM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR = D_MODULE__CONTROLLER__RELAY_STATE_LEDSTRIP__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID; }    
     

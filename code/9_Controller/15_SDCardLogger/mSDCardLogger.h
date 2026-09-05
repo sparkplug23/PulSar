@@ -15,7 +15,7 @@ class mSDCardLogger :
     void Pre_Init(void);
     void Init(void);
     
-    static constexpr const char* PM_MODULE_CONTROLLER_SDCARDLOGGER_CTR = D_MODULE_CONTROLLER_SDCARDLOGGER_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_SDCARDLOGGER_CTR = D_MODULE__CONTROLLER__SDCARDLOGGER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_SDCARDLOGGER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_SDCARDLOGGER_ID; }
 

@@ -70,7 +70,7 @@ class mTankVolume :
 
     mTankVolume(){};
     
-    static constexpr const char* PM_MODULE_CONTROLLER_TANKVOLUME_CTR = D_MODULE_CONTROLLER_TANKVOLUME_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_TANKVOLUME_CTR = D_MODULE__CONTROLLER__TANKVOLUME__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_TANKVOLUME_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_TANKVOLUME_ID; }
 
