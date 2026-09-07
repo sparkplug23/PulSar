@@ -14,7 +14,7 @@
 #include "stdint.h"
 #include "2_CoreSystem/mGlobalMacros.h"
 
-#include "internal/mPalette_Encoding_Options.h"
+#include "mPalette_Encoding_Options.h"
 
 #include "6_Lights/03_Animator/fastled_slim/fastled_slim.h"
 
@@ -2877,7 +2877,30 @@ const TProgmemRGBPalette16 RainbowStripeColors_gc22 PROGMEM = {
   0x00D59B, 0x000000, 0x0000FF, 0x000000,
   0x9B00D5, 0x000000, 0xD5009B, 0x000000};
 
+// Party colors
+const TProgmemRGBPalette16 PartyColors_p PROGMEM = {
+    0x5500AB, 0x84007C, 0xB5004B, 0xE5001B,
+    0xE81700, 0xB84700, 0xAB7700, 0xABAB00,
+    0xAB5500, 0xDD2200, 0xF2000E, 0xC2003E,
+    0x8F0071, 0x5F00A1, 0x2F00D0, 0x0007F9};
+
+// Rainbow colors
+const TProgmemRGBPalette16 RainbowColors_p PROGMEM = {
+  0xFF0000, 0xD52A00, 0xAB5500, 0xAB7F00,
+  0xABAB00, 0x56D500, 0x00FF00, 0x00D52A,
+  0x00AB55, 0x0056AA, 0x0000FF, 0x2A00D5,
+  0x5500AB, 0x7F0081, 0xAB0055, 0xD5002B
+};
+
+// Rainbow colors with alternatating stripes of black
+const TProgmemRGBPalette16 RainbowStripeColors_p PROGMEM = {
+    0xFF0000, 0x000000, 0xAB5500, 0x000000,
+    0xABAB00, 0x000000, 0x00FF00, 0x000000,
+    0x00AB55, 0x000000, 0x0000FF, 0x000000,
+    0x5500AB, 0x000000, 0xAB0055, 0x000000
+};
   
+
 
 /**
  * @brief 
@@ -3041,15 +3064,21 @@ const TProgmemRGBPalette16 *const fastledPalettes[] PROGMEM = {
   // &RainbowColors_gc22,          //11-05 Rainbow
   // &RainbowStripeColors_gc22     //12-06 Rainbow Bands
 
+  #ifdef ENABLE_FASTLED_PALETTES__PRECOMPENSATE_FOR_OUTPUT_GAMMA
   &RainbowColors_gc22,
   &RainbowStripeColors_gc22,
   &PartyColors_gc22,
+  #else
+  &RainbowColors_p,
+  &RainbowStripeColors_p,
+  &PartyColors_p,
+  #endif
   &CloudColors_p,
   &LavaColors_p,
   &OceanColors_p,
   &ForestColors_p,
+
   &Matlab_Purula_p,
-  &Matlab_Hot_p,
   &Matlab_Turbo_p,
   &Matlab_Hot_p,
   &Matlab_Cool_p,
@@ -3058,6 +3087,9 @@ const TProgmemRGBPalette16 *const fastledPalettes[] PROGMEM = {
   &Matlab_Jet_p
 
 };
+
+
+
 
 // Single array of defined cpt-city color palettes.
 // This will let us programmatically choose one based on
@@ -3228,7 +3260,7 @@ DEFINE_PGM_CTR(PM_DYNAMIC_PALETTES_NAMES_CTR)
 
 DEFINE_PGM_CTR(PM_STATIC_CRGBPALETTE16_NAMES_CTR)
 {
-  "Rainbow|Rainbow Stripe|Party|Cloud|Lava|Ocean|Forest|Heat|Parula|Turbo|Hot|Cool|Spring|Autumn|Jet" // Name are not unique here!
+  "Rainbow|Rainbow Stripe|Party|Cloud|Lava|Ocean|Forest|Parula|Turbo|Hot|Cool|Spring|Autumn|Jet" // Name are not unique here!
 };
 
 

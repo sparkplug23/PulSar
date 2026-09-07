@@ -1513,7 +1513,6 @@ uint8_t mPalette::GetEncodedColourWidth( PALETTE_ENCODING_DATA encoding )
   // if(encoding.index_exact){ encoded_colour_width++; }
   if(encoding.index_gradient){ encoded_colour_width++; }
   if(encoding.index_is_trigger_value_exact){ encoded_colour_width++; }
-  if(encoding.index_is_trigger_value_scaled100){ encoded_colour_width++; }
   
   // if(encoding.encoded_as_hsb_ids){ encoded_colour_width++; }
   if(encoding.encoded_as_crgb_palette_16){ encoded_colour_width++; }

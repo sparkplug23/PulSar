@@ -99,7 +99,6 @@ Kitchen/Dining
 // #define DEVICE_RGBSHELF
 // #define DEVICE_RGBCOOKER
 // #define DEVICE_KITCHENSENSOR
-// #define DEVICE_NEXTION_HEATING_KITCHEN_DISPLAY
 // #define DEVICE_RGBFRIDGE
 // #define DEVICE_DEFAULT_SONOFF_BASIC__KITCHEN_EXTRACTOR_FAN
 
@@ -1306,104 +1305,6 @@ Bathroom
 //cct_temp, 100% should be highest colour temp (more white?)
 
 
-/**
- * This will become the final version of a panel, but requires animation fixing first
- * */
-#ifdef DEVICE_NEXTION_HEATING_KITCHEN_DISPLAY
-  #define DEVICENAME_CTR            "kitchenpanel"
-  #define DEVICENAME_FRIENDLY_CTR   "Heating Kitchen Display"
-  #define DEVICENAME_ROOMHINT_CTR   "Kitchen"
-  #define MQTT_HOST   "192.168.1.70"
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  
-  
-
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  #define   ENABLE_DEBUG_LINE_HERE
-
-
-  #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-   
-
-
-  #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-    
-    
-  #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // #define USE_MODULE_SENSORS_INTERFACE
-  // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_PIR
-
-  // #define USE_MODULE_DISPLAYS_INTERFACE
-  #define USE_MODULE_DISPLAYS_NEXTION
-
-  
-  #define USE_MODULE_DISPLAYS_NEXTION
-    #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  #define NEXTION_DEFAULT_PAGE_NUMBER 2  
-    
-    //  // change to be code option later
-    #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
-    #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
-
-  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  
-  #define ENABLE_DEVFEATURE_NEXTION_WEBUI
-
-  // 
-  
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIOC "\":{"
-      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\""
-    "},"
-    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-  
-  DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
-  R"=====(
-  {
-    "ObjectNameID": {
-      "hIconUS": 2,
-      "hTimeUS": 6,
-      "hBoostUS": 11,
-      "hAutoUS": 16,
-      "hIconDS": 3,
-      "hTimeDS": 7,
-      "hBoostDS": 12,
-      "hAutoDS": 17,
-      "hIconIH": 4,
-      "hTimeIH": 8,
-      "hBoostIH": 13,
-      "hAutoIH": 18,
-      "hIconWB": 5,
-      "hTimeWB": 9,
-      "hBoostWB": 14,
-      "hAutoWB": 19,
-      "hIconDryer": 122,
-      "hTimeDryer": 123,
-      "hBoostDryer": 124,
-      "hAutoDryer": 125
-    }
-  }
-  )=====";
-
-#endif
-
 
 #ifdef DEVICE_RGBSHELF
   #define DEVICENAME_CTR          "rgbshelf"
@@ -2498,7 +2399,7 @@ Bathroom
       "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"
-      "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":["
+      "\"" D_MODULE__ENERGY__PZEM004T__CTR "\":["
         "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\","
         "\"" D_SENSOR_PZEM004T_1_FRIENDLY_NAME_CTR "\","
         "\"" D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR "\","

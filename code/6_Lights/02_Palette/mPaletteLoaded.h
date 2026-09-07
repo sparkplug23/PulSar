@@ -59,7 +59,7 @@ class mPaletteLoaded
 
 	struct SolidPalette{
 		uint32_t colourRGBW = 0; // packed RGBW
-		uint8_t  whiteWW = 0;    // white warmth
+		uint8_t  cct = 0;        // 0 = warm, 255 = cold
 	};
 	SolidPalette solid_colour;
 

@@ -1503,7 +1503,6 @@
 #define D_SENSORS "Sensors"
 #define D_SENSORCOUNT "SensorCount"
 #define D_SENTCOUNT "SentCount"
-#define D_SENTPERMINUTE "SentPerMinute"
 // #define D_SERIALRECEIVED "SerialReceived"
 #define D_SSID "SSID"
 #define D_STARTDST "StartDST"       // Start Daylight Savings Time
@@ -1596,13 +1595,6 @@
 #define D_DEVICEID "DeviceID"
 #define D_DEVICES_CONNECTED "DevicesConnected"
 #define D_DEVICES "Devices"
-
-#define D_SCENE "Scene"
-#define D_COLOUR "Colour"
-
-// #define D_SENSOR_TYPE "SensorType"
-
-
 
 #define D_HVAC_DEVICE "HeatingDevice"
 
@@ -1757,10 +1749,6 @@
 #define D_STATUS "Status"
 
 // #define D_SENSOR_MEASURERATE "Sensor_MeasureRate"
-
-#define D_SCENE "Scene"
-#define D_SCENE_COLOUR "SceneColour"
-#define D_SCENE_NAME   "SceneName"
 
 #define D_SCHEDULE "Schedule"
 #define D_SCHEDULED_OFF D_OFF

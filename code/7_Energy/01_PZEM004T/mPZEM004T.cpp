@@ -108,38 +108,6 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj)
 } // END function
 
 
-// void mEnergyPZEM004T::Pre_Init(void)
-// {
-
-//   if (tkr_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS) && tkr_pins->PinUsed(GPIO_PZEM0XX_TX))
-//   {
-//     module_state.mode = ModuleStatus::Initialising;
-//   }
-  
-// }
-
-
-// void mEnergyPZEM004T::Init(void)
-// {
-
-//   modbus = new TasmotaModbus(tkr_pins->GetPin(GPIO_PZEM0XX_RX_MODBUS), tkr_pins->GetPin(GPIO_PZEM0XX_TX));
-
-//   uint8_t result = modbus->Begin(9600);
-
-//   ALOG_DBG(PSTR("modbus result = %d"),result);
-
-//   if (result) {
-//     // Change this to another function, that doesnt check pin, it just calls claimserial but internally checks if its being used
-//     tkr_sup->ClaimSerial();    
-//     module_state.mode = ModuleStatus::Initialising;
-//   } else {
-//     module_state.mode = ModuleStatus::NoGPIOConfigured;
-//     return;
-//   }
-
-//   module_state.mode = ModuleStatus::Running;
-
-// }
 void mEnergyPZEM004T::Pre_Init(void)
 {
   /*
@@ -412,9 +380,9 @@ void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
 
   JsonParserObject jobj = 0;
 
-  if(!(jobj = obj[D_MODULE_ENERGY_PZEM004T_CTR].getObject()))
+  if(!(jobj = obj[D_MODULE__ENERGY__PZEM004T__CTR].getObject()))
   {
-    ALOG_DBM(PSTR("No valid %s JSON object"), D_MODULE_ENERGY_PZEM004T_CTR);
+    ALOG_DBM(PSTR("No valid %s JSON object"), D_MODULE__ENERGY__PZEM004T__CTR);
     return;
   }
   

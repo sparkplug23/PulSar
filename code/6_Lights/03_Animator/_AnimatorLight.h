@@ -678,7 +678,7 @@ class mAnimatorLight :
     #endif
     void   parse_JSONCommand(JsonParserObject obj);
     
-    static constexpr const char* PM_MODULE_LIGHTS_ANIMATOR_CTR = D_MODULE_LIGHTS_ANIMATOR_CTR;
+    static constexpr const char* PM_MODULE_LIGHTS_ANIMATOR_CTR = D_MODULE__LIGHTS__ANIMATOR__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_LIGHTS_ANIMATOR_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID; }
     

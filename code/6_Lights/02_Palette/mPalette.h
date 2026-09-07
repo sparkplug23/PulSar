@@ -28,7 +28,7 @@
 #define FASTLED_INTERNAL // suppress pragma warning messages
 #include "6_Lights/03_Animator/fastled_slim/fastled_slim.h"
 
-#include "internal/mPalette_Encoding_Options.h"
+#include "mPalette_Encoding_Options.h"
 
 
 class mPalette 
@@ -107,7 +107,7 @@ class mPalette
       PALETTELIST_STATIC_CRGBPALETTE16__LAVA_COLOURS__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__OCEAN_COLOUR__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__FOREST_COLOUR__ID,
-      PALETTELIST_STATIC_CRGBPALETTE16__HEAT_COLOUR__ID,
+      
       PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_PARULA__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_TURBO__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__COLOURMAP_HOT__ID,
@@ -392,14 +392,14 @@ class mPalette
         uint16_t white_warm_enabled               : 1; // bit 12
         uint16_t white_cold_enabled               : 1; // bit 11       
         uint16_t encoded_value_byte_width         : 3; // bit 10-8 (3 bits wide, 9 value options)
-        uint16_t reserved1                        : 1; // bit 7 // Specialised, maybe also could be removed as not useful. The effect itself should treat this index as special        
+        uint16_t gamma_skip_send_raw              : 1; // bit 7 Pulsar palettes by default are saved as they are intended to reach the pixels without correction        
         uint16_t index_gradient                   : 1; // bit 6 // To rename, again, "index_gradient" worded as effect style, whereas it should simply be "index_gradient" // Rename from "index_ scaled_to_segment" to "index_gradient"
         uint16_t index_is_trigger_value_exact     : 1; // bit 5
-        uint16_t index_is_trigger_value_scaled100 : 1; // bit 4 probably remove this, why bother having 100% when 0-255 is the same
+        uint16_t reserved1                        : 1; // bit 4 UNUSED
         uint16_t reserved2                        : 1; // bit 3 UNUSED
         uint16_t encoded_as_crgb_palette_16       : 1; // bit 2
         uint16_t encoded_as_crgb_palette_256      : 1; // bit 1
-        uint16_t palette_can_be_modified          : 1; // bit 0        
+        uint16_t palette_can_be_modified          : 1; // bit 0  - probably remove.       
       };
     } PALETTE_ENCODING_DATA;
 

@@ -5,7 +5,23 @@
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 
 
-
+/*****
+ * Things to do:
+ * 1. [Meadows] Front tree needs new controller
+ * 2. [Whitehall] Snow tree needs new controller
+ * 3. [Meadows] Need to test pebble lights, specifically issues with power, flicker, and gamma
+ * 4. [Meadows] Possible icicle lights, would need another set of lights
+ * 5. [Whitehall] Put snow tree up in garage attic, so I can control it. This needs a camera (2nd roaming one)
+ * 6. [Meadows] Install front controller lights onto wall for testing while in colorado?
+ *               - Hang wood from ceiling using rope
+ *               - Then light I did before, wire them all up
+ *               - Use my energy_socket for control and power
+ *               - If hung high enough, I could have 2m drops, and make a test curtain of sorts
+ * - Without garage tree/fence lights, I should use the 5cm lights or similar to add the others needed. 
+ * - Plan on 3000 lights again, perhaps test up to 4000 for FPS but expect not going to work. This is where more 20cm spaced lights would be ideal.
+ * 
+ * 
+ */
 
 
 

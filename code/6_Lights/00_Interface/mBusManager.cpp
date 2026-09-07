@@ -197,54 +197,6 @@ uint8_t *Bus::allocateData(size_t size) {
  ** BusDigital *************************************************************************************************************************************************** 
  *****************************************************************************************************************************************************************/
 
-
-// BusDigital::BusDigital(const BusConfig &bc)//, uint8_t nr, const ColorOrderMap &com)
-// : Bus(bc.type, bc.start, bc.autoWhite, bc.length, bc.reversed, (bc.refreshReq))
-// , _skip(bc.skipAmount) //sacrificial pixels
-// , _colorOrder(bc.colorOrder)
-// , _milliAmpsPerLed(bc.milliAmpsPerLed)
-// , _milliAmpsMax(bc.milliAmpsMax)
-// // , _colorOrderMap(com)
-// {
-
-//   if (!isDigital(bc.type) || !bc.length)
-//   {    
-//     ALOG_ERR(PSTR("BusDigital type%d or length%d"), bc.type, bc.length);
-//     return;
-//   }
-//   _frequencykHz = 0U;
-//   _pins[0] = bc.pins[0];
-//   if (is2Pin(bc.type)) 
-//   {
-//     _pins[1] = bc.pins[1];
-//     _frequencykHz = bc.frequency ? bc.frequency : 2000U; // 2MHz clock if undefined
-//   }
-
-//   _iType = PolyBus::getI(bc.type, _pins, nr);
-//   if (_iType == BUSTYPE__NONE__ID)
-//   {
-//     Serial.println("BusDigital: No Bus");
-//     return;
-//   }
-
-//   _hasRgb = hasRGB(bc.type);
-//   _hasWhite = hasWhite(bc.type);
-//   _hasCCT = hasCCT(bc.type);
-//   /**
-//    * Next line creates the buffer needed to store the pixels
-//    * number of pixels * number of channels [3 (RGB) or 4 (RGBW) ] later I may want to add a check for RGBWW, and making the buffer twice as long for my transition effects 
-//    */
-//   if (bc.doubleBuffer && !allocateData(bc.length * Bus::getNumberOfChannels(bc.type))) return;
-//   //_buffering = bc.doubleBuffer;
-//   uint16_t lenToCreate = bc.length;
-//   if (bc.type == BUSTYPE_WS2812_1CH_X3) lenToCreate = NUM_ICS_WS2812_1CH_3X(bc.length); // only needs a third of "RGB" LEDs for NeoPixelBus
-//   _busPtr = PolyBus::create(_iType, _pins, lenToCreate + _skip, nr);
-//   _valid = (_busPtr != nullptr);
-//   ALOG_INF(PSTR("%successfully inited strip %u (len %u) with type %u and pins %u,%u (itype %u). mA=%d/%d\n"), _valid?"S":"Uns", nr, bc.length, bc.type, _pins[0], is2Pin(bc.type)?_pins[1]:255, _iType, _milliAmpsPerLed, _milliAmpsMax);
-// }
-
-
-
 BusDigital::BusDigital(const BusConfig &bc)
 : Bus(bc.type, bc.start, bc.autoWhite, bc.count, bc.reversed, (bc.refreshReq || bc.type == TYPE_TM1814))
 , _skip(bc.skipAmount) //sacrificial pixels

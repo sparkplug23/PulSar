@@ -2,35 +2,6 @@
 
 #ifdef USE_MODULE_ENERGY_ADE7953
 
-void mEnergyADE7953::Pre_Init(void)
-{
-
-  if (!tkr_i2c->I2cEnabled(XI2C_07)) { 
-    return; 
-  }
-
-  module_state.mode = ModuleStatus::Initialising;
-
-  if (tkr_pins->PinUsed(GPIO_ADE7953_IRQ)) {                // Irq on GPIO16 is not supported...
-    pinMode(tkr_pins->GetPin(GPIO_ADE7953_IRQ), INPUT);     // Related to resetPins() - Must be set to input
-    delay(100);                                                  // Need 100mS to init ADE7953
-    if (tkr_i2c->I2cSetDevice(ADE7953_ADDR)) {
-      if (HLW_PREF_PULSE == tkr_set->Settings.energy_usage.energy_power_calibration) {
-        tkr_set->Settings.energy_usage.energy_power_calibration = ADE7953_PREF;
-        tkr_set->Settings.energy_usage.energy_voltage_calibration = ADE7953_UREF;
-        tkr_set->Settings.energy_usage.energy_current_calibration = ADE7953_IREF;
-      }
-      tkr_i2c->I2cSetActiveFound(ADE7953_ADDR, "ADE7953");
-      module_state.mode = ModuleStatus::Running;
-      measured.init_step = 2;
-      tkr_iEnergy->Energy.phase_count = 2;                     // Handle two channels as two phases
-      tkr_iEnergy->Energy.voltage_common = true;               // Use common voltage
-      // tkr_iEnergy->Energy.frequency_common = true;             // Use common frequency
-      // tkr_set->runtime.energy_driver = D_GROUP_MODULE_ENERGY_ADE7953_ID;
-    }
-  }
-}
-
 
 int8_t mEnergyADE7953::Tasker(uint8_t function, JsonParserObject obj){
     
@@ -89,6 +60,35 @@ int8_t mEnergyADE7953::Tasker(uint8_t function, JsonParserObject obj){
 
 } // END function
 
+
+void mEnergyADE7953::Pre_Init(void)
+{
+
+  if (!tkr_i2c->I2cEnabled(XI2C_07)) { 
+    return; 
+  }
+
+  module_state.mode = ModuleStatus::Initialising;
+
+  if (tkr_pins->PinUsed(GPIO_ADE7953_IRQ)) {                // Irq on GPIO16 is not supported...
+    pinMode(tkr_pins->GetPin(GPIO_ADE7953_IRQ), INPUT);     // Related to resetPins() - Must be set to input
+    delay(100);                                                  // Need 100mS to init ADE7953
+    if (tkr_i2c->I2cSetDevice(ADE7953_ADDR)) {
+      if (HLW_PREF_PULSE == tkr_set->Settings.energy_usage.energy_power_calibration) {
+        tkr_set->Settings.energy_usage.energy_power_calibration = ADE7953_PREF;
+        tkr_set->Settings.energy_usage.energy_voltage_calibration = ADE7953_UREF;
+        tkr_set->Settings.energy_usage.energy_current_calibration = ADE7953_IREF;
+      }
+      tkr_i2c->I2cSetActiveFound(ADE7953_ADDR, "ADE7953");
+      module_state.mode = ModuleStatus::Running;
+      measured.init_step = 2;
+      tkr_iEnergy->Energy.phase_count = 2;                     // Handle two channels as two phases
+      tkr_iEnergy->Energy.voltage_common = true;               // Use common voltage
+      // tkr_iEnergy->Energy.frequency_common = true;             // Use common frequency
+      // tkr_set->runtime.energy_driver = D_GROUP_MODULE_ENERGY_ADE7953_ID;
+    }
+  }
+}
 
 void mEnergyADE7953::Init(void)
 {

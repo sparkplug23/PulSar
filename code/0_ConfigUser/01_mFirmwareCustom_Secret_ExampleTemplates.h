@@ -1145,7 +1145,7 @@
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\""
       "],"
-      "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":["
+      "\"" D_MODULE__ENERGY__PZEM004T__CTR "\":["
         "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\""
       "],"
       "\"" D_MODULE__ENERGY__INTERFACE__CTR "\":["

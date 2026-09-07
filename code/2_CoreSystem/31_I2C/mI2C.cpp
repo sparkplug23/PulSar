@@ -12,6 +12,9 @@ int8_t mI2C::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_PRE_INIT:
       Pre_Init();
     break;
+    case TASK_EVERY_10_SECONDS:
+      Debug_I2CScan_To_Serial();
+    break;
   }
 
   if(module_state.mode != ModuleStatus::Running){ return TASKER_RESULT__MODULE_DISABLED_ID; }

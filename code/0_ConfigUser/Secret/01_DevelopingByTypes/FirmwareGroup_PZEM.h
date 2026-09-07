@@ -212,7 +212,7 @@
       "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_UNIQUE_NAME "\""
       "],"
-      "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":["
+      "\"" D_MODULE__ENERGY__PZEM004T__CTR "\":["
         "\"" D_DEVICE_UNIQUE_NAME "\""
       "]"
     "},"
