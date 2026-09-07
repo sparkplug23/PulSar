@@ -5827,14 +5827,18 @@ void mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomCo
   if (rem > 255) rem = 255;
 
   uint32_t col_wipe = 0;
+  uint32_t col_base_fixed = 0;
+
   if(useRandomColors)
   {
     col_wipe = SEGMENT.color_wheel(SEGMENT.aux1);
+    col_base_fixed = SEGMENT.color_wheel(SEGMENT.aux0);
   }
   else
   if(useIterateOverPalette)
   {
-    col_wipe = SEGMENT.GetPaletteColour_Legacy(SEGMENT.aux1, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
+    col_wipe = SEGMENT.GetPaletteColour(SEGMENT.aux1, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__FORCE_DISCRETE, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
+    col_base_fixed = SEGMENT.GetPaletteColour(SEGMENT.aux0, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__FORCE_DISCRETE, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
   }
   else
   {
@@ -5847,19 +5851,11 @@ void mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomCo
   {
     uint16_t indexPixel = (rev && back) ? SEGLEN -1 -i : i;
 
-    uint32_t col_base = 0;
-    if(useRandomColors)
+    uint32_t col_base = col_base_fixed;
+
+    if(!useRandomColors && !useIterateOverPalette)
     {
-      col_base = SEGMENT.color_wheel(SEGMENT.aux0);
-    }
-    else
-    if(useIterateOverPalette)
-    {
-      col_base = SEGMENT.GetPaletteColour_Legacy(SEGMENT.aux0, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
-    }
-    else
-    {
-      col_base = SEGMENT.GetPaletteColour_Legacy(indexPixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
+      col_base = SEGMENT.GetPaletteColour(indexPixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__FORCE_DISCRETE, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
     }
 
     if (i < ledIndex) 
@@ -5872,8 +5868,6 @@ void mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomCo
     }
     
   } 
-
-  
 
 }
 
@@ -6590,7 +6584,7 @@ void mAnimatorLight::EffectAnim__Base_Chase_Theater(uint32_t color1, uint32_t co
 
   for (unsigned i = 0; i < SEGLEN; i++) {
     uint32_t col = color2;
-    if (usePalette) color1 = SEGMENT.GetPaletteColour_Legacy(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
+    if (usePalette) color1 = SEGMENT.GetPaletteColour(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH, NO_ENCODED_VALUE);
     if (theatre) {
       if ((i % width) == SEGMENT.aux0) col = color1;
     } else {
@@ -6605,8 +6599,6 @@ void mAnimatorLight::EffectAnim__Base_Chase_Theater(uint32_t color1, uint32_t co
     SEGMENT.step = it;
   }
 
-  
-  
 }
 
 
@@ -6900,7 +6892,7 @@ void mAnimatorLight::EffectAnim__Fade()
   uint8_t lum = triwave16(counter) >> 8;
 
   for(unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, ColourBlend(SEGCOLOR_U32(1), SEGMENT.GetPaletteColour_Legacy(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH), lum) );
+    SEGMENT.setPixelColor(i, ColourBlend(SEGCOLOR_U32(1), SEGMENT.GetPaletteColour(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH), lum) );
   }
 
   
@@ -12033,130 +12025,6 @@ static const char PM_EFFECT_DESCRI__PALETTES_INTERLEAVED_LIT_PATTERN[] PROGMEM =
 "\n\rCheck1=1: palettes span each band; gradients/discretes repeat per band."
 "\n\rPrimary palette via picker; secondary = palette2_id.";
 
-// /*******************************************************************************************************************************************************************************************************************
-//  * @description : Palettes Interleaved (Lit Pattern) — using *_ModeWrap APIs
-//  *                C1=0: SX/IX are per-band lengths (px). Alternate pal1/pal2 bands; each band maps that palette’s full 0→255.
-//  *                C1=1: Both palettes span the full segment (0→255 over SEGLEN); SX/IX only switch which palette shows.
-//  *                Primary palette via SEGMENT.GetPaletteColour; secondary via GetUnloadedPaletteColour_ModeWrap.
-//  ********************************************************************************************************************************************************************************************************************/
-// void mAnimatorLight::EffectAnim__Palettes_Interleaved_Lit_Pattern()
-// {
-//   if (SEGLEN == 0) return EFFECT_DEFAULT();
-
-//   const uint16_t len1 = (uint16_t)max<int>(1, SEGMENT.speed);     // Pal1 band length (px)
-//   const uint16_t len2 = (uint16_t)max<int>(1, SEGMENT.intensity); // Pal2 band length (px)
-//   const bool span_segment = SEGMENT.check1;                       // C1: 0=per-band index, 1=span full segment
-
-//   if (!span_segment)
-//   {
-//     // Per-band indexing: pal1(len1) then pal2(len2), repeating
-//     bool use_pal1 = true;
-//     uint16_t run_left = len1;
-//     uint16_t offset_in_run = 0;
-
-//     for (uint16_t i = 0; i < SEGLEN; ++i)
-//     {
-//       const uint16_t run_len = use_pal1 ? len1 : len2;
-
-//       // exclusive-top mapping: 0..run_len-1 -> 0..255
-//       const uint8_t idx8 = (run_len <= 1) ? 0 : (uint8_t)((offset_in_run * 256u) / run_len);
-
-//       uint32_t col;
-//       if (use_pal1) {
-//         col = SEGMENT.GetPaletteColour(
-//           idx8,
-//           PALETTE_INDEX__IS_255_RANGE,   // we generated a 0–255 index
-//           PALETTE_MODE__DEFAULT,
-//           PALETTE_WRAP_HARDEDGE,
-//           NO_ENCODED_VALUE
-//         );
-//       } else {
-//         const RgbwwColor c2 = GetUnloadedPaletteColour_ModeWrap(
-//           SEGMENT.palette2_id,
-//           idx8,
-//           PALETTE_INDEX__IS_255_RANGE,
-//           PALETTE_MODE__DEFAULT,
-//           PALETTE_WRAP_HARDEDGE,
-//           NO_ENCODED_VALUE
-//         );
-//         col = RGBW32(c2.R, c2.G, c2.B, c2.CW);
-//       }
-
-//       SEGMENT.setPixelColor(i, col);
-
-//       ++offset_in_run;
-//       if (--run_left == 0) {
-//         use_pal1 = !use_pal1;
-//         run_left = use_pal1 ? len1 : len2;
-//         offset_in_run = 0;
-//       }
-//     }
-//   }
-//   else
-//   {
-//     // Span full segment: both palettes map 0..255 over SEGLEN; SX/IX only switch which palette is active
-//     const uint16_t cycle_len = len1 + len2;
-//     uint16_t pos_in_cycle = 0;
-
-//     for (uint16_t i = 0; i < SEGLEN; ++i)
-//     {
-//       // map 0..SEGLEN-1 -> 0..255
-//       const uint8_t gidx = (SEGLEN <= 1) ? 0 : (uint8_t)((i * 256u) / SEGLEN);
-
-//       uint32_t col;
-//       if (pos_in_cycle < len1) {
-//         col = SEGMENT.GetPaletteColour(
-//           gidx,
-//           PALETTE_INDEX__IS_255_RANGE,   // already scaled to 0–255
-//           PALETTE_MODE__DEFAULT,
-//           PALETTE_WRAP_HARDEDGE,
-//           NO_ENCODED_VALUE
-//         );
-//       } else {
-//         const RgbwwColor c2 = GetUnloadedPaletteColour_ModeWrap(
-//           SEGMENT.palette2_id,
-//           gidx,
-//           PALETTE_INDEX__IS_255_RANGE,
-//           PALETTE_MODE__DEFAULT,
-//           PALETTE_WRAP_HARDEDGE,
-//           NO_ENCODED_VALUE,
-//           /*full_visual*/ true
-//         );
-//         col = RGBW32(c2.R, c2.G, c2.B, c2.CW);
-//       }
-
-//       SEGMENT.setPixelColor(i, col);
-
-//       if (++pos_in_cycle >= cycle_len) pos_in_cycle = 0;
-//     }
-//   }
-
-//   
-// }
-// static const char PM_EFFECT_CONFIG__PALETTES_INTERLEAVED_LIT_PATTERN[] PROGMEM =
-// "Palettes InterLit@"                        // Name
-// "Pal1 size,Pal2 size,,,,Span segment,,,,,"     // 10 fields after '@'
-// ";"
-// ""                                             // no seg colours
-// ";"
-// "!"                                            // primary palette picker
-// ";"
-// "1p"                                            // 1D strip icon & Pal+
-// ";"
-// "paln=Rainbow 16,"
-// "pal2n=Cold White,"
-// "sx=20,"
-// "ix=8,"
-// "c1=0,"
-// "ep=500"
-// ;
-// static const char PM_EFFECT_DESCRI__PALETTES_INTERLEAVED_LIT_PATTERN[] PROGMEM =
-// "Interleave two palettes along the strip."
-// "\n\rC1=0: SX/IX are per-band lengths (pixels). Each band compresses its palette over that run."
-// "\n\rC1=1: Both palettes span the full segment; SX/IX only switch which palette is active."
-// "\n\rSX: Pal1 band length   IX: Pal2 band length"
-// "\n\rPrimary palette via picker; secondary = palette2_id.";
-
 
 /*******************************************************************************************************************************************************************************************************************
  * @description : Interleaves two palettes across the strip: even pixels from Palette 1, odd pixels from Palette 2.
@@ -12176,8 +12044,12 @@ static const char PM_EFFECT_DESCRI__PALETTES_INTERLEAVED_LIT_PATTERN[] PROGMEM =
 void mAnimatorLight::EffectAnim__Palettes_Interleaved()
 {
   // Get lengths of both palettes
-  uint16_t palette1Length = mPaletteI->GetColoursInPalette(SEGMENT.palette_id); // Palette 1
-  uint16_t palette2Length = mPaletteI->GetColoursInPalette(SEGMENT.intensity); // Palette 2
+  uint16_t palette1Length = SEGMENT.palette_loaded->colours_in_palette; // Palette 1
+
+  // Palette 2 is selected using intensity
+  if (!SEGMENT.EnsurePalette2Loaded(SEGMENT.intensity)) return;
+
+  uint16_t palette2Length = SEGMENT.palette2_loaded->colours_in_palette; // Palette 2
 
   // Track indices for palettes
   uint16_t index1 = 0; // Palette 1 index
@@ -12187,21 +12059,22 @@ void mAnimatorLight::EffectAnim__Palettes_Interleaved()
     uint32_t colour;
 
     // Alternate between Palette 1 and Palette 2
-    if (i % 2 == 0) {
+    if ((i & 1) == 0) {
       // Use Palette 1 for even indices
-      colour = SEGMENT.GetPaletteColour_Legacy(index1, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
-      index1 = (index1 + 1) % palette1Length; // Wrap Palette 1
+      colour = SEGMENT.GetPaletteColour(index1, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
+      index1++;
+      if (index1 >= palette1Length) index1 = 0; // Wrap Palette 1
     } else {
       // Use Palette 2 for odd indices
-      colour = SEGMENT.GetPaletteColour_Legacy(index2, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
-      index2 = (index2 + 1) % palette2Length; // Wrap Palette 2
+      colour = SEGMENT.GetPalette2Colour(index2, PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE);
+      index2++;
+      if (index2 >= palette2Length) index2 = 0; // Wrap Palette 2
     }
 
     // Set pixel colour
     SEGMENT.setPixelColor(i, colour);
   }
 
-  
 }
 static const char PM_EFFECT_CONFIG__PALETTES_INTERLEAVED[] PROGMEM =
 "Palettes Interleaved@"                      // Name
@@ -12258,7 +12131,7 @@ void mAnimatorLight::EffectAnim__Base_Blink(uint32_t color1, uint32_t color2, bo
   if (color == color1 && do_palette)
   {
     for (int i = 0; i < SEGLEN; i++) {
-      SEGMENT.setPixelColor(i, SEGMENT.GetPaletteColour_Legacy(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE));
+      SEGMENT.setPixelColor(i, SEGMENT.GetPaletteColour(i, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE));
     }
   }
   else
@@ -15233,7 +15106,7 @@ void mAnimatorLight::EffectAnim__BorderWallpaper__TwoColour_Gradient()
   // RgbcctColor colour = RgbcctColor();
   // for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   // {    
-  //   colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
+  //   colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
   //   SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour);
   // }
 
@@ -15484,7 +15357,7 @@ void mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Gradient()
   uint32_t colour = 0;//RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {    
-    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
   
   
@@ -15522,7 +15395,7 @@ void mAnimatorLight::EffectAnim__BorderWallpaper__FourColour_Solid()
   uint32_t colour = 0;//RgbcctColor();
   for(uint16_t pixel = 0; pixel < SEGLEN; pixel++)
   {    
-    colour = SEGMENT.GetPaletteColour_Legacy(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
+    colour = SEGMENT.GetPaletteColour(pixel, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE);
     // SetTransitionColourBuffer_DesiredColour(SEGMENT.Data(), SEGMENT.DataLength(), pixel, SEGMENT.colour_width__used_in_effect_generate, colour.WithBrightness(brightness) );
   
   
@@ -23900,7 +23773,7 @@ void mAnimatorLight::EffectAnim__2D__ScrollingText()
   for (int i = 0; i < numberOfLetters; i++) {
     int xoffset = int(cols) - int(SEGMENT.aux0) + rotLW*i;
     if (xoffset + rotLW < 0) continue; // don't draw characters off-screen
-    uint32_t col1 = SEGMENT.GetPaletteColour_Legacy(SEGMENT.aux1, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT); //SEGMENT.color_from_palette(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
+    uint32_t col1 = SEGMENT.GetPaletteColour(SEGMENT.aux1, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT); //SEGMENT.color_from_palette(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
     uint32_t col2 = BLACK;
     if (SEGMENT.check1 && SEGMENT.palette_id == 0) {
       col1 = SEGCOLOR_U32(0); //SEGCOLOR_U32(0);

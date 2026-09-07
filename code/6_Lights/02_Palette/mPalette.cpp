@@ -861,7 +861,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
         pixel_position_adjust = (pSEGMENT.vLength() == 1) ? 0 : (desired_index * 255) / (pSEGMENT.vLength() - 1);
       }
 
-      if (rescale_index_wrap_for_hardedge) {
+      if (rescale_index_wrap_for_hardedge == PALETTE_WRAP_HARDEDGE) {
         pixel_position_adjust = scale8(pixel_position_adjust, 240);  // Avoid wraparound
         // if(pixel_position_adjust > 235)
         // Serial.printf("rescale_index_wrap_for_hardedge %d \n\r", pixel_position_adjust);

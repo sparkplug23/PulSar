@@ -5,7 +5,7 @@
 
 #include "colors.h"
 
-bool gammaCorrectCol = true;
+bool gammaCorrectCol = false; //default for pulsar should be off
 
 
 /*

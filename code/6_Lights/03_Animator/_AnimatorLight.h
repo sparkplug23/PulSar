@@ -2689,45 +2689,6 @@ inline static uint32_t FadeU32(uint32_t colour32, uint8_t fade) {
     **********************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
 
-    // RgbwwColor IRAM_ATTR
-    // GetPaletteColour_WithTemporaryLoad(
-    //   uint16_t palette_id,
-    //   uint16_t desired_index_from_palette = 0,
-    //   bool     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-    //   bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-    //   bool     flag_crgb_exact_colour = false,
-    //   uint8_t* encoded_index = nullptr,
-    //   bool flag_request_is_for_full_visual_output = false
-    // );
-
-    // RgbwwColor IRAM_ATTR GetUnloadedPaletteColour_ModeWrap( "modewrap" was the improved version, removing its name on newest version
-    //   uint16_t palette_id,
-    //   uint16_t index_or_pos = 0,
-    //   uint8_t  palette_index_mode = 0,           // e.g. PALETTE_INDEX__IS_EXACT_COLOUR, PALETTE_INDEX__IS_SEGLEN_RANGE
-    //   uint8_t  palette_mode = 0,                 // e.g. PALETTE_MODE__DEFAULT / __EXACT / __DISCRETE, etc.
-    //   uint8_t  palette_wrap = 0,                 // e.g. PALETTE_WRAP_OFF / __ON
-    //   uint8_t* encoded_value = nullptr,                // pass NO_ENCODED_VALUE if unused
-    //   bool     flag_request_is_for_full_visual_output = false
-    // );
-
-    // uint32_t IRAM_ATTR
-    // GetColourFromUnloadedPalette3_U32(
-    //   uint16_t palette_id,
-    //   uint16_t desired_index_from_palette = 0,
-    //   bool     flag_spanned_segment = true, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-    //   bool     flag_wrap_hard_edge = true,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-    //   bool     flag_crgb_exact_colour = false,
-    //   uint8_t* encoded_index = nullptr,
-    //   bool flag_request_is_for_full_visual_output = false
-    // ){
-    //   RgbwwColor crgb_ = GetPaletteColour_WithTemporaryLoad(palette_id, desired_index_from_palette, flag_spanned_segment, flag_wrap_hard_edge, flag_crgb_exact_colour, encoded_index, flag_request_is_for_full_visual_output);
-    //   return ((uint32_t)crgb_.CW << 24) | ((uint32_t)crgb_.R << 16) | ((uint32_t)crgb_.G << 8) | (uint32_t)crgb_.B;
-    // }
-
-
-    CRGB ColorFromPalette_WithLoad(const CRGBPalette16 &pal, uint8_t index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND);
-    
-
     uint32_t IRAM_ATTR GetPaletteColour_WithTemporaryLoad(
       uint16_t palette_id,
       uint16_t _pixel_position = 0,
@@ -2762,39 +2723,7 @@ inline static uint32_t FadeU32(uint32_t colour32, uint8_t fade) {
       }
       return crc;
     }
-
-    // // fastled beatsin: 1:1 replacements to remove the use of fastled sin16()
-    // // Generates a 16-bit sine wave at a given BPM that oscillates within a given range. see fastled for details.
-    // inline uint16_t beatsin88_t(accum88 beats_per_minute_88, uint16_t lowest = 0, uint16_t highest = 65535, uint32_t timebase = 0, uint16_t phase_offset = 0)
-    // {
-    //     uint16_t beat = beat88( beats_per_minute_88, timebase);
-    //     uint16_t beatsin (sin16_t( beat + phase_offset) + 32768);
-    //     uint16_t rangewidth = highest - lowest;
-    //     uint16_t scaledbeat = scale16( beatsin, rangewidth);
-    //     uint16_t result = lowest + scaledbeat;
-    //     return result;
-    // }
-
-    // // Generates a 16-bit sine wave at a given BPM that oscillates within a given range. see fastled for details.
-    // inline uint16_t beatsin16_t(accum88 beats_per_minute, uint16_t lowest = 0, uint16_t highest = 65535, uint32_t timebase = 0, uint16_t phase_offset = 0)
-    // {
-    //     uint16_t beat = beat16( beats_per_minute, timebase);
-    //     uint16_t beatsin = (sin16_t( beat + phase_offset) + 32768);
-    //     uint16_t rangewidth = highest - lowest;
-    //     uint16_t scaledbeat = scale16( beatsin, rangewidth);
-    //     uint16_t result = lowest + scaledbeat;
-    //     return result;
-    // }
-
-    // // Generates an 8-bit sine wave at a given BPM that oscillates within a given range. see fastled for details.
-    // inline uint8_t beatsin8_t(accum88 beats_per_minute, uint8_t lowest = 0, uint8_t highest = 255, uint32_t timebase = 0, uint8_t phase_offset = 0)
-    // {
-    //     uint8_t beat = beat8( beats_per_minute, timebase);
-    //     uint8_t beatsin = sin8_t( beat + phase_offset);
-    //     uint8_t rangewidth = highest - lowest;
-    //     uint8_t scaledbeat = scale8( beatsin, rangewidth);
-    //     uint8_t result = lowest + scaledbeat;
-    //     return result;
+;
     // }
 
     // Temporary helper functions to be cleaned up and converted
@@ -2806,24 +2735,6 @@ inline static uint32_t FadeU32(uint32_t colour32, uint8_t fade) {
     uint16_t triwave16(uint16_t in);
     int8_t tristate_square8(uint8_t x, uint8_t pulsewidth, uint8_t attdec);
     
-    // void colorFromUint32(uint32_t in, bool secondary = false);
-    // void colorFromUint24(uint32_t in, bool secondary = false);
-    // void relativeChangeWhite(int8_t amount, byte lowerBoundary = 0);
-    // void colorHStoRGB(uint16_t hue, byte sat, byte* rgb); //hue, sat to rgb
-    // void colorCTtoRGB(uint16_t mired, byte* rgb); //white spectrum to rgb
-    // void colorFromDecOrHexString(byte* rgb, char* in);
-    // void colorRGBtoRGBW(byte* rgb); //rgb to rgbw (http://codewelt.com/rgbw). (RGBW_MODE_LEGACY)
-
-    // int32_t perlin1D_raw(uint32_t x, bool is16bit = false);
-    // int32_t perlin2D_raw(uint32_t x, uint32_t y, bool is16bit = false);
-    // int32_t perlin3D_raw(uint32_t x, uint32_t y, uint32_t z, bool is16bit = false);
-    // uint16_t perlin16(uint32_t x);
-    // uint16_t perlin16(uint32_t x, uint32_t y);
-    // uint16_t perlin16(uint32_t x, uint32_t y, uint32_t z);
-    // uint8_t perlin8(uint16_t x);
-    // uint8_t perlin8(uint16_t x, uint16_t y);
-    // uint8_t perlin8(uint16_t x, uint16_t y, uint16_t z);
-
     
 /*
  * Fixed point integer based Perlin noise functions by @dedehai
@@ -4991,110 +4902,6 @@ name = nullptr;
      ******************************************************************************************************************************************************/
 
 
-    /**
-     * @brief Depending on the build settings later, I will want to keep a Rgbcct and U32 palette method
-     * Hence a new U32 palette structure will exist that always foregoes the Rgbcct and handles in U32 format
-     * This may be hardcorded with a define, or use if to switch
-     * #ifdef XX
-     * #define GetPaletteColour_Legacy GetPaletteColour_U32
-     * #else
-     * #define GetPaletteColour_Legacy GetPaletteColourRGBCCT
-     * #endif
-     **/
-    uint8_t white_warm_GetPaletteColour = 0;
-    [[gnu::hot]] uint32_t GetPaletteColour_Legacy(
-      /**
-       * @brief _pixel_position
-       * ** [0-SEGLEN]
-       * ** [0-255]   
-       */
-      uint16_t pixel_position = 0,
-      /**
-       * @brief flag_position_scaled255
-       * ** [true] : pixel_position should be between 0-255
-       * ** [false]: pixel is exact, and will automatically wrap around (ie 5 pixels inside palette will be 0,1,2,3,4,0,1,2,3,4)
-       */
-      uint8_t     flag_position_scaled255 = false,
-      /**
-       * @brief flag_wrap_hard_edge
-       * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
-       * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
-       */
-      uint8_t     flag_wrap_hard_edge = false,
-      /**
-       * @brief flag_crgb_exact_colour
-       * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
-       * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
-       */
-      uint8_t     flag_crgb_exact_colour = false,
-      /**
-       * @brief encoded_value
-       * ** [uint32_t*] : encoded value from palette
-       */
-      uint8_t* encoded_value = nullptr, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-      /**
-       * @brief apply_brightness
-       * ** [false] : Apply brightness to the colour
-       * ** [true]  : Get the "full" 255 range colour object
-       */
-      bool apply_brightness = false,
-
-      uint8_t pbri = 255,
-
-      uint8_t mcol = 0
-    );
-
-
-    // /*****
-    //  * Some effects allow for RGBWW to be generated, but this has performance implications
-    //  *****/
-    // [[gnu::hot]] RgbwwColor GetPaletteColour_RGBWW(
-    //   /**
-    //    * @brief _pixel_position
-    //    * ** [0-SEGLEN]
-    //    * ** [0-255]   
-    //    */
-    //   uint16_t pixel_position = 0,
-    //   /**
-    //    * @brief flag_position_scaled255
-    //    * ** [true] : pixel_position should be between 0-255
-    //    * ** [false]: pixel is exact, and will automatically wrap around (ie 5 pixels inside palette will be 0,1,2,3,4,0,1,2,3,4)
-    //    */
-    //   uint8_t     flag_position_scaled255 = false,
-    //   /**
-    //    * @brief flag_wrap_hard_edge
-    //    * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
-    //    * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
-    //    */
-    //   uint8_t     flag_wrap_hard_edge = false,
-    //   /**
-    //    * @brief flag_crgb_exact_colour
-    //    * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
-    //    * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
-    //    */
-    //   uint8_t     flag_crgb_exact_colour = false,
-    //   /**
-    //    * @brief encoded_value
-    //    * ** [uint32_t*] : encoded value from palette
-    //    */
-    //   uint8_t* encoded_value = nullptr, // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-
-      
-
-    //   bool apply_brightness = false
-    // );
-
-    
-    /**
-     * @brief Depending on the build settings later, I will want to keep a Rgbcct and U32 palette method
-     * Hence a new U32 palette structure will exist that always foregoes the Rgbcct and handles in U32 format
-     * This may be hardcorded with a define, or use if to switch
-     * #ifdef XX
-     * #define GetPaletteColour_Legacy GetPaletteColour_U32
-     * #else
-     * #define GetPaletteColour_Legacy GetPaletteColourRGBCCT
-     * #endif
-     **/
     // uint8_t white_warm_GetPaletteColour = 0;
     [[gnu::hot]] uint32_t GetPaletteColour( // GetPaletteColour_ModeWrap was temporary as this, should be converted.
       /**

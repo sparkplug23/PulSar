@@ -1264,7 +1264,7 @@ if (jtok = obj["MQTTPixel"])
         ALOG_INF(PSTR("OnPixel %d (processed %d)"), pixelIndex, count);
 
         // Palette-driven colour, repeats across selected pixels
-        colour = SEGMENT.GetPaletteColour_Legacy(
+        colour = SEGMENT.GetPaletteColour(
           pixel++,
           PALETTE_INDEX__IS_SEGLEN_RANGE,
           PALETTE_WRAP_HARDEDGE,
@@ -1375,7 +1375,7 @@ if (jtok = obj["MQTTPixel"])
 //       const uint8_t palIdx = (uint8_t)groupTok.getInt();
 
 //       // Fetch the colour ONCE per group (exact palette entry)
-//       uint32_t colour = SEGMENT.GetPaletteColour_Legacy(
+//       uint32_t colour = SEGMENT.GetPaletteColour(
 //         palIdx,
 //         PALETTE_INDEX__IS_EXACT_COLOUR,
 //         PALETTE_WRAP_HARDEDGE,
@@ -1637,7 +1637,7 @@ if (jtok_pwi && jtok_pwi.isArray())
 
     const uint8_t palIdx = (uint8_t)tokPal.getInt();
 
-    uint32_t colour = SEGMENT.GetPaletteColour_Legacy(
+    uint32_t colour = SEGMENT.GetPaletteColour(
       palIdx,
       PALETTE_INDEX__IS_EXACT_COLOUR,
       PALETTE_WRAP_HARDEDGE,
@@ -1849,7 +1849,7 @@ if (jtok_pwi && jtok_pwi.isArray())
                 colour = RGBW32(255, 255, 255, 255);
               } else {
                 // Get color from the palette using the current palette index
-                colour = SEGMENT.GetPaletteColour_Legacy(paletteIndex, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
+                colour = SEGMENT.GetPaletteColour(paletteIndex, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_HARDEDGE, PALETTE_MODE__FORCE_DISCRETE, NO_ENCODED_VALUE);
               }
 
               // Apply brightness and set the pixel
