@@ -1038,7 +1038,7 @@ FASTLED_NAMESPACE_END
 // } HSVHue;
 
 // //colors.cpp
-// // #define ColorFromPalette ColorFromPaletteU32 // override fastled version
+// // #define ColorFromPalette ColorFromPalette16 // override fastled version
 
 // /// Representation of an RGB pixel (Red, Green, Blue)
 // struct CRGB {

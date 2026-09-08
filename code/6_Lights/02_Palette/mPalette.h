@@ -431,7 +431,7 @@ class mPalette
     uint8_t  tracked_frac                  = 0; // fractional accumulator (Bresenham-style)
 
 
-     [[gnu::hot]] static uint32_t ColorFromPaletteU32(const CRGBPalette16 &pal, unsigned index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND);
+     [[gnu::hot]] static uint32_t ColorFromPalette16(const CRGBPalette16 &pal, unsigned index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND);
 
     #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     

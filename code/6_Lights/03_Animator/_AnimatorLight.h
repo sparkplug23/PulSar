@@ -914,48 +914,82 @@ class mAnimatorLight :
     
     // WLED-compat wrapper: ignores 'pal' and uses SEGMENT.palette_id via SEGMENT.GetPaletteColour()
     // Keeps WLED call-sites working: ColorFromPalette(SEGPALETTE, idx, bri, blend)
-    inline uint32_t ColorFromPaletteRedirect(
-      const CRGBPalette16& /*pal_ignored*/,
-      uint8_t index,
-      uint8_t brightness = 255,
-      TBlendType blendType = NOBLEND
-    ){
+    // inline uint32_t ColorFromPaletteRedirect(
+    //   const CRGBPalette16& /*pal_ignored*/,
+    //   uint8_t index,
+    //   uint8_t brightness = 255,
+    //   TBlendType blendType = NOBLEND
+    // ){
 
-      // WARNING: Forced fast redirect
-      // Bypassing complex palette handling to improve performance. Will only work on already loaded CRGB16Palettes 
-      // return ColorFromPaletteCRGB16Fast(SEGMENT.palette_loaded->CRGB16Palette16_Palette.data, index, brightness, blendType);
+    //   // WARNING: Forced fast redirect
+    //   // Bypassing complex palette handling to improve performance. Will only work on already loaded CRGB16Palettes 
+    //   // return ColorFromPaletteCRGB16Fast(SEGMENT.palette_loaded->CRGB16Palette16_Palette.data, index, brightness, blendType);
 
-      // Map WLED blend to your palette mode
-      const uint8_t force_mode = (blendType == NOBLEND) 
-                                 ? PALETTE_MODE__FORCE_DISCRETE
-                                 : PALETTE_MODE__FORCE_GRADIENT;
+    //   // Map WLED blend to your palette mode
+    //   const uint8_t force_mode = (blendType == NOBLEND) 
+    //                              ? PALETTE_MODE__FORCE_DISCRETE
+    //                              : PALETTE_MODE__FORCE_GRADIENT;
 
-      // Pull from segment-selected palette (auto-load happens inside GetPaletteColour)
-      uint32_t c = SEGMENT.GetPaletteColour(
-          index,                      // 0-255
-          PALETTE_INDEX__IS_255_RANGE, // WLED-style indexing
-          force_mode,
-          PALETTE_WRAP_HARDEDGE,       // keep consistent with your current shim usage
-          nullptr,
-          /*apply_brightness*/ false,  // IMPORTANT: wrapper handles WLED 'brightness'
-          255, // Brightness at maximum for now, handled below
-          0
-      );
+    //   // Pull from segment-selected palette (auto-load happens inside GetPaletteColour)
+    //   uint32_t c = SEGMENT.GetPaletteColour(
+    //       index,                      // 0-255
+    //       PALETTE_INDEX__IS_255_RANGE, // WLED-style indexing
+    //       force_mode,
+    //       PALETTE_WRAP_HARDEDGE,       // keep consistent with your current shim usage
+    //       nullptr,
+    //       /*apply_brightness*/ false,  // IMPORTANT: wrapper handles WLED 'brightness'
+    //       255, // Brightness at maximum for now, handled below
+    //       0
+    //   );
 
-      // Apply WLED brightness argument (independent of seg/global brightness)
-      // The brightness is built into the "GetPaletteColour" function above, so this can likely be removed by simply passing pbri
-      if (brightness < 255) {
-        const uint16_t scale = uint16_t(brightness) + 1;
-        c = RGBW32(
-          (R(c) * scale) >> 8,
-          (G(c) * scale) >> 8,
-          (B(c) * scale) >> 8,
-          (W(c) * scale) >> 8
-        );
-      }
+    //   // Apply WLED brightness argument (independent of seg/global brightness)
+    //   // The brightness is built into the "GetPaletteColour" function above, so this can likely be removed by simply passing pbri
+    //   if (brightness < 255) {
+    //     const uint16_t scale = uint16_t(brightness) + 1;
+    //     c = RGBW32(
+    //       (R(c) * scale) >> 8,
+    //       (G(c) * scale) >> 8,
+    //       (B(c) * scale) >> 8,
+    //       (W(c) * scale) >> 8
+    //     );
+    //   }
 
-      return c;
-    }
+    //   return c;
+    // }
+
+    // WLED-compat wrapper.
+    // Fast-paths already loaded CRGBPalette16 palettes directly.
+    // Other PulSar palette types fall back to GetPaletteColour().
+    inline uint32_t ColorFromPaletteRedirect(const CRGBPalette16& /*pal_ignored*/, uint8_t index, uint8_t brightness = 255, TBlendType blendType = NOBLEND);
+    // {
+    //   const uint16_t pal_id = SEGMENT.palette_id;
+
+    //   // Immediately jump to low level colour return if possible
+
+    //   const bool isCRGB16 =
+    //     ((pal_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID)                      && (pal_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
+    //     ((pal_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)                     && (pal_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)) ||
+    //     ((pal_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)     && (pal_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)) ||
+    //     ((pal_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (pal_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID));
+
+    //   if (isCRGB16 && SEGMENT.palette_loaded && (SEGMENT.palette_loaded->loaded_palette_id == pal_id)) {
+    //     return mPalette::ColorFromPalette16(SEGMENT.palette_loaded->CRGB16Palette16_Palette.data, index, brightness, blendType);
+    //   }
+
+    //   // Otherwise, proceed with the general palette colour retrieval
+
+    //   const uint8_t force_mode = (blendType == NOBLEND) ? PALETTE_MODE__FORCE_DISCRETE : PALETTE_MODE__FORCE_GRADIENT;
+    //   const uint8_t wrap_mode = (blendType == LINEARBLEND) ? PALETTE_WRAP_SMOOTH : PALETTE_WRAP_HARDEDGE;
+
+    //   uint32_t c = SEGMENT.GetPaletteColour(index, PALETTE_INDEX__IS_255_RANGE, force_mode, wrap_mode, NO_ENCODED_VALUE, false, 255, 0);
+
+    //   if (brightness < 255) {
+    //     const uint16_t scale = uint16_t(brightness) + 1;
+    //     c = RGBW32((R(c) * scale) >> 8, (G(c) * scale) >> 8, (B(c) * scale) >> 8, (W(c) * scale) >> 8);
+    //   }
+
+    //   return c;
+    // }
 
     /******************************************************************************************************************************************************************************
     **** Pixel buffers ***************************************************************************************************************************************************************************

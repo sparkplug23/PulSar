@@ -21272,7 +21272,7 @@ void mAnimatorLight::EffectAnim__2D__ColouredBursts()
     byte x2 = beatsin8_t(1 + SEGMENT.speed/16, 0, (rows - 1));
     byte y1 = beatsin8_t(5 + SEGMENT.speed/16, 0, (cols - 1), 0, i * 24);
     byte y2 = beatsin8_t(3 + SEGMENT.speed/16, 0, (rows - 1), 0, i * 48 + 64);
-    uint32_t color = mPalette::ColorFromPaletteU32(SEGPALETTE, i * 255 / numLines + (SEGMENT.aux0&0xFF), 255, LINEARBLEND);
+    uint32_t color = mPalette::ColorFromPalette16(SEGPALETTE, i * 255 / numLines + (SEGMENT.aux0&0xFF), 255, LINEARBLEND);
 
     byte xsteps = abs8(x1 - y1) + 1;
     byte ysteps = abs8(x2 - y2) + 1;
@@ -21555,7 +21555,7 @@ static const char PM_EFFECT_DESCRI__2D__DRIFT[] PROGMEM =
  *   Notes
  *   • Initializes to black on first call.
  *   • Requires a 2D matrix segment (returns EFFECT_DEFAULT if not 2D).
- *   • Uses mPalette::ColorFromPaletteU32-compatible ColorFromPaletteRedirect helper.
+ *   • Uses mPalette::ColorFromPalette16-compatible ColorFromPaletteRedirect helper.
  *
  * @return      : FRAMETIME
  * @description : firenoise2d. By Andrew Tuline. Yet another short routine.
@@ -23009,7 +23009,7 @@ void mAnimatorLight::EffectAnim__2D__SpaceShips()
   for (size_t i = 0; i < 8; i++) {
     int x = beatsin8_t(12 + i, 2, cols - 3);
     int y = beatsin8_t(15 + i, 2, rows - 3);
-    uint32_t color = mPalette::ColorFromPaletteU32(SEGPALETTE, beatsin8_t(12 + i, 0, 255), 255);
+    uint32_t color = mPalette::ColorFromPalette16(SEGPALETTE, beatsin8_t(12 + i, 0, 255), 255);
     SEGMENT.addPixelColorXY(x, y, color);
     if (cols > 24 || rows > 24) {
       SEGMENT.addPixelColorXY(x+1, y, color);
@@ -23937,7 +23937,7 @@ static const char PM_EFFECT_DESCRI__2D__SCROLLING_TEXT_WITH_BASELINE[] PROGMEM =
  *            radius_i = beatsin8(i, 0, L*2) - L     // L = min(W,H)/2
  *            x = CX + sin(angle) * radius_i
  *            y = CY + cos(angle) * radius_i
- *            color = (palette ? ColorFromPaletteU32(SEGPALETTE, i*10) : CHSV(i*10,255,255))
+ *            color = (palette ? ColorFromPalette16(SEGPALETTE, i*10) : CHSV(i*10,255,255))
  *            wu_pixel(x*255, y*255, color)          // sub-pixel write
  *     3) Optional blur:
  *        • blur( IX >> 4, CB1 ) — IX sets blur strength; CB1 toggles a stronger “smear” mode.
@@ -23977,7 +23977,7 @@ void mAnimatorLight::EffectAnim__2D__DriftRose()
     if(SEGMENT.palette == 0){
       SEGMENT.wu_pixel(x, y, CHSV(i * 10, 255, 255));
     }else{
-      uint32_t col = mPalette::ColorFromPaletteU32(SEGPALETTE, i * 10);
+      uint32_t col = mPalette::ColorFromPalette16(SEGPALETTE, i * 10);
       SEGMENT.wu_pixel(x, y, CRGBfromRGBW32(col) );
     }
   }
@@ -24424,9 +24424,9 @@ void mAnimatorLight::EffectAnim__2D__Soap_Base(bool isRow, uint8_t *noise3d, CRG
       CRGB PixelA;
       CRGB PixelB;
       if ((zD >= 0) && (zD < tCR)) PixelA = pixels[indxA];
-      else                         PixelA = mPalette::ColorFromPaletteU32(SEGPALETTE, ~noise3d[indxA]*3);
+      else                         PixelA = mPalette::ColorFromPalette16(SEGPALETTE, ~noise3d[indxA]*3);
       if ((zF >= 0) && (zF < tCR)) PixelB = pixels[indxB];
-      else                         PixelB = mPalette::ColorFromPaletteU32(SEGPALETTE, ~noise3d[indxB]*3);
+      else                         PixelB = mPalette::ColorFromPalette16(SEGPALETTE, ~noise3d[indxB]*3);
       ledsbuff[j] = (PixelA.nscale8(ease8InOutCubic(255 - fraction))) + (PixelB.nscale8(ease8InOutCubic(fraction)));
     }
     for (int j = 0; j < tCR; j++) {
@@ -24461,7 +24461,7 @@ void mAnimatorLight::EffectAnim__2D__Soap_Base(bool isRow, uint8_t *noise3d, CRG
  *     • C2, C3          : Reserved/unused in this implementation.
  *
  *   Colors:
- *     • Uses CRGB16 palette via mPalette::ColorFromPaletteU32(SEGPALETTE, index).
+ *     • Uses CRGB16 palette via mPalette::ColorFromPalette16(SEGPALETTE, index).
  *     • The index is ~noise3d[x,y] * 3 (simple mapping with inversion & gain).
  *
  *   Notes:
@@ -24509,7 +24509,7 @@ void mAnimatorLight::EffectAnim__2D__Soap() {
     SEGMENT.aux1 = rows;
     for (int i = 0; i < cols; i++) {
       for (int j = 0; j < rows; j++) {
-        SEGMENT.setPixelColorXY(i, j, mPalette::ColorFromPaletteU32(SEGPALETTE,~noise3d[XY(i,j)]*3));
+        SEGMENT.setPixelColorXY(i, j, mPalette::ColorFromPalette16(SEGPALETTE,~noise3d[XY(i,j)]*3));
       }
     }
   }
@@ -24554,7 +24554,7 @@ static const char PM_EFFECT_DESCRI__2D__SOAP[] PROGMEM =
  * Notes
  *   • Requires a 2D matrix; effect aborts on non-2D segments.
  *   • Precomputes angle & radius map for each pixel once (on first call or dimension/offset change).
- *   • Uses SEGPALETTE + ColorFromPaletteU32 for fast color lookups.
+ *   • Uses SEGPALETTE + ColorFromPalette16 for fast color lookups.
  *   • Non-linear brightness mapping improves contrast and visual clarity.
  *
  * Idea from https://www.youtube.com/watch?v=HsA-6KIbgto&ab_channel=GreatScott%21 Octopus (https://editor.soulmatelights.com/gallery/671-octopus) Stepko and Sutaburosu adapted for WLED by @blazoncek
@@ -24607,7 +24607,7 @@ void mAnimatorLight::EffectAnim__2D__Octopus()
       byte radius = rMap[XY(x,y)].radius;
       unsigned intensity = sin8_t(sin8_t((angle * 4 - radius) / 4 + SEGMENT.step/2) + radius - SEGMENT.step + angle * (SEGMENT.custom3/4+1));
       intensity = map((intensity*intensity) & 0xFFFF, 0, 65535, 0, 255); // add a bit of non-linearity for cleaner display
-      SEGMENT.setPixelColorXY(x, y, mPalette::ColorFromPaletteU32(SEGPALETTE, SEGMENT.step / 2 - radius, intensity));
+      SEGMENT.setPixelColorXY(x, y, mPalette::ColorFromPalette16(SEGPALETTE, SEGMENT.step / 2 - radius, intensity));
     }
   }
   
@@ -24643,7 +24643,7 @@ static const char PM_EFFECT_DESCRI__2D__OCTOPUS[] PROGMEM =
  *                 then we apply a post blur for soft cellular boundaries.
  *
  *                 Palette sampling uses the fast uint32_t helper:
- *                   mPalette::ColorFromPaletteU32(SEGPALETTE, index[, brightness, blend])
+ *                   mPalette::ColorFromPalette16(SEGPALETTE, index[, brightness, blend])
  *                 which directly returns WRGB-packed colors.
  *
  * Controls
@@ -24658,7 +24658,7 @@ static const char PM_EFFECT_DESCRI__2D__OCTOPUS[] PROGMEM =
  *   • Requires a 2D segment (matrix); returns EFFECT_DEFAULT() if not 2D.
  *   • Ignores segment solid colors; fully palette-driven.
  *   • Uses SEGPALETTE = SEGMENT.palette_loaded->CRGB16Palette16_Palette.data
- *     and ColorFromPaletteU32 for fast blended lookups.
+ *     and ColorFromPalette16 for fast blended lookups.
  * Waving Cell @Stepko (https://editor.soulmatelights.com/gallery/1704-wavingcells) adapted for WLED by @blazoncek, improvements by @dedehai
  * @note : Converted from WLED Effects "mode_2Dwavingcell"
  ********************************************************************************************************************************************************************************************************************/
@@ -24677,7 +24677,7 @@ void mAnimatorLight::EffectAnim__2D__WavingCell()
     for (int y = 0; y < rows; y++) {
       uint32_t wave = sin8_t((x * aX) + sin8_t((((y<<8) + t) * aY)>>8)) + cos8_t(y * aZ); // bit shifts to increase temporal resolution
       uint8_t colorIndex = wave + (t>>(8-(SEGMENT.check2*3)));
-      uint32_t col = mPalette::ColorFromPaletteU32(SEGPALETTE, colorIndex);
+      uint32_t col = mPalette::ColorFromPalette16(SEGPALETTE, colorIndex);
       SEGMENT.setPixelColorXY(x, y, col);
     }
   }
@@ -25614,7 +25614,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_NoiseFire()
     index = (255 - i*256/SEGLEN) * index/(256-SEGMENT.intensity);                       // Now we need to scale index so that it gets blacker as we get close to one of the ends.
                                                                                         // This is a simple y=mx+b equation that's been scaled. index/128 is another scaling.
 
-    SEGMENT.setPixelColor((int)i, mPalette::ColorFromPaletteU32(myPal, index, volumeSmth*2, LINEARBLEND)); // Use my own palette.
+    SEGMENT.setPixelColor((int)i, mPalette::ColorFromPalette16(myPal, index, volumeSmth*2, LINEARBLEND)); // Use my own palette.
   }
 
   
