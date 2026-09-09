@@ -9502,16 +9502,12 @@ void mAnimatorLight::EffectAnim__Juggle()
   for (int i = 0; i < 8; i++) {
     int index = beatsin88_t((16 + SEGMENT.speed) * (i + 7), 0, SEGLEN - 1);
     fastled_col = CRGB(SEGMENT.getPixelColor(index));
-    // fastled_col |= (SEGMENT.palette_id == 0)
-    //   ? CHSV(dothue, 220, 255)
-    //   : CRGB(ColorFromPaletteRedirect(SEGPALETTE, dothue, 255));
     fastled_col |= (SEGMENT.check1 == 0)
       ? CHSV(dothue, 220, 255)
-      : CRGB(ColorFromPaletteRedirect(SEGPALETTE, dothue, 255)); // another check would be needed to stop gradeints for exact colours.
+      : CRGB(ColorFromPaletteRedirect(SEGPALETTE, dothue, 255));
     SEGMENT.setPixelColor(index, fastled_col);
     dothue += 32;
   }
-
   
 }
 static const char PM_EFFECT_CONFIG__JUGGLE[] PROGMEM =

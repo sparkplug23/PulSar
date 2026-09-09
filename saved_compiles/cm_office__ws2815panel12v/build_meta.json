@@ -1,7 +1,7 @@
 {
   "env_name": "cm_office__ws2815panel12v",
-  "created_utc": "2026-09-07T22:06:17Z",
-  "created_epoch": 1788818777,
+  "created_utc": "2026-09-09T08:12:05Z",
+  "created_epoch": 1788941525,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "cdbac95d395d4a4761a2df51ad90f8e4bf85e2cb",
-    "describe": "cdbac95d-dirty",
-    "status_short": "M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf"
+    "commit": "9c3fe626afebbfca1e2556b52f553e61a9d8bb79",
+    "describe": "9c3fe626-dirty",
+    "status_short": "M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/Effects.cpp\n M code/6_Lights/03_Animator/Palettes.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M saved_compiles/decode_serial_crashdump_esp32.py"
   }
 }

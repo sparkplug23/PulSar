@@ -1300,36 +1300,36 @@ uint32_t IRAM_ATTR mAnimatorLight::GetPaletteColour_WithTemporaryLoad(
 
 
 
- inline uint32_t mAnimatorLight::ColorFromPaletteRedirect(const CRGBPalette16& /*pal_ignored*/, uint8_t index, uint8_t brightness, TBlendType blendType)
-    {
-      const uint16_t pal_id = SEGMENT.palette_id;
+//  uint32_t mAnimatorLight::ColorFromPaletteRedirect(const CRGBPalette16& /*pal_ignored*/, uint8_t index, uint8_t brightness, TBlendType blendType)
+//     {
+//       const uint16_t pal_id = SEGMENT.palette_id;
 
-      // Immediately jump to low level colour return if possible
+//       // Immediately jump to low level colour return if possible
       
-      const bool isCRGB16 =
-        ((pal_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID)                      && (pal_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
-        ((pal_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)                     && (pal_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)) ||
-        ((pal_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)     && (pal_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)) ||
-        ((pal_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (pal_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID));
+//       const bool isCRGB16 =
+//         ((pal_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID)                      && (pal_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
+//         ((pal_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)                     && (pal_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)) ||
+//         ((pal_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)     && (pal_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)) ||
+//         ((pal_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (pal_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID));
 
-      if (isCRGB16 && SEGMENT.palette_loaded && (SEGMENT.palette_loaded->loaded_palette_id == pal_id)) {
-        return mPalette::ColorFromPalette16(SEGMENT.palette_loaded->CRGB16Palette16_Palette.data, index, brightness, blendType);
-      }
+//       if (isCRGB16 && SEGMENT.palette_loaded && (SEGMENT.palette_loaded->loaded_palette_id == pal_id)) {
+//         return mPalette::ColorFromPalette16(SEGMENT.palette_loaded->CRGB16Palette16_Palette.data, index, brightness, blendType);
+//       }
 
-      // Otherwise, proceed with the general palette colour retrieval
+//       // Otherwise, proceed with the general palette colour retrieval
 
-      const uint8_t force_mode = (blendType == NOBLEND) ? PALETTE_MODE__FORCE_DISCRETE : PALETTE_MODE__FORCE_GRADIENT;
-      const uint8_t wrap_mode = (blendType == LINEARBLEND) ? PALETTE_WRAP_SMOOTH : PALETTE_WRAP_HARDEDGE;
+//       const uint8_t force_mode = (blendType == NOBLEND) ? PALETTE_MODE__FORCE_DISCRETE : PALETTE_MODE__FORCE_GRADIENT;
+//       const uint8_t wrap_mode = (blendType == LINEARBLEND) ? PALETTE_WRAP_SMOOTH : PALETTE_WRAP_HARDEDGE;
 
-      uint32_t c = SEGMENT.GetPaletteColour(index, PALETTE_INDEX__IS_255_RANGE, force_mode, wrap_mode, NO_ENCODED_VALUE, false, 255, 0);
+//       uint32_t c = SEGMENT.GetPaletteColour(index, PALETTE_INDEX__IS_255_RANGE, force_mode, wrap_mode, NO_ENCODED_VALUE, false, 255, 0);
 
-      if (brightness < 255) {
-        const uint16_t scale = uint16_t(brightness) + 1;
-        c = RGBW32((R(c) * scale) >> 8, (G(c) * scale) >> 8, (B(c) * scale) >> 8, (W(c) * scale) >> 8);
-      }
+//       if (brightness < 255) {
+//         const uint16_t scale = uint16_t(brightness) + 1;
+//         c = RGBW32((R(c) * scale) >> 8, (G(c) * scale) >> 8, (B(c) * scale) >> 8, (W(c) * scale) >> 8);
+//       }
 
-      return c;
-    }
+//       return c;
+//     }
 
 
 #endif

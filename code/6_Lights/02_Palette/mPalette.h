@@ -61,6 +61,19 @@ class mPalette
     /************************************************************************************************************************************
      * ************************************************************************************************************************************
      * @brief  Static palettes read from inside this class
+     * 
+     *      
+      | Group                                    | What makes it distinct                                                                                 | Keep?              |
+      | ---------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------ |
+      | SEGMENT__SEGMENT_COLOUR                | Direct references to the segment's 1–5 user colours                                                    | **Yes**            |
+      | SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES | Synthesised 16-entry palettes built from those segment colours                                         | **Yes**            |
+      | STATIC_CRGBPALETTE16                   | Native fixed FastLED `CRGBPalette16` palettes                                                          | **Yes**            |
+      | STATIC_CRGBPALETTE16_GRADIENT          | WLED/FastLED gradient definitions which are loaded/generated into a palette                            | **Yes**            |
+      | STATIC_SINGLE_COLOURS                  | Named constant single-colour sources, including RGB/CCT concepts                                       | **Yes**            |
+      | STATIC__IDS                            | PulSar encoded/vector palettes, arbitrary number/spacing/encoding of colours                           | **Definitely yes** |
+      | DYNAMIC__ELASPEDTIME__CRGBPALETTE16    | Runtime-generated palettes whose resulting representation is a changing `CRGBPalette16`                | **Yes**            |
+      | DYNAMIC__COLOUR                        | Procedural/contextual colours derived from solar/time/segment state rather than a stored fixed palette | **Yes**            |
+     * 
      ************************************************************************************************************************************
      ***************************************************************************************************************************************/
    
@@ -93,14 +106,26 @@ class mPalette
       PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID    
     };
 
+    /**
+     * @brief
+     * Procedural palettes calculated directly from the requested palette index.
+     * No palette data is stored or loaded.
+     */
+    enum PALETTELIST_PROCEDURAL__IDS
+    {
+      PALETTELIST_PROCEDURAL__COLOUR_WHEEL__ID = PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID,
+
+      PALETTELIST_PROCEDURAL__LENGTH__ID
+    };
+
 
     /**
-     * @brief 
+     * @brief
      * Sourced from WLED, part of FastLED. Common palettes found in MATLAB are also included for heatmaps
      **/
     enum PALETTELIST_STATIC_CRGBPALETTE16__IDS
-    {      
-      PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID = PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID,
+    {
+      PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID = PALETTELIST_PROCEDURAL__LENGTH__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_STRIPE_COLOUR__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__PARTY_COLOUR__ID,
       PALETTELIST_STATIC_CRGBPALETTE16__CLOUD_COLOURS__ID,

@@ -32,51 +32,66 @@ def _SerialCrashDumpBlock() -> str:
     return r"""
     
 
-                   
-Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandle
-d.
-                                                                            
-    
-                                                                          
+                                       
+                
 Core  1 register dump:
                                                         
-PC      : 0x4008baa9  PS      : 0x00060d30  A0      : 0x801b2fb0  A1      : 0x3f
-fb2220  
+PC      : 0x4008f946  PS      : 0x00040636  A0      : 0x80107568  A1      : 0x3f
+fb0760  
                                                                       
-A2      : 0x00000000  A3      : 0xfffffffc  A4      : 0x000000ff  A5      : 0x00
-00ff00  
+A2      : 0x3ffaf770  A3      : 0x00000076  A4      : 0x000404fe  A5      : 0x00
+00a580  
                                                                       
-A6      : 0x00ff0000  A7      : 0xff000000  A8      : 0x00000000  A9      : 0x3f
-fb24f0  
+A6      : 0x00000008  A7      : 0x00000000  A8      : 0x40080080  A9      : 0x3f
+fb0920  
                                                                       
-A10     : 0x00000003  A11     : 0x00060d23  A12     : 0x00060d20  A13     : 0x3f
-fc5864  
+A10     : 0x00060836  A11     : 0x00040026  A12     : 0x000404fe  A13     : 0x3f
+fbc13c  
                                                                       
-A14     : 0x3ffb24cc  A15     : 0x3ffb23a4  SAR     : 0x0000001b  EXCCAUSE: 0x00
-00001c  
+A14     : 0x00000000  A15     : 0x000037a2  SAR     : 0x0000001f  EXCCAUSE: 0x00
+000002  
                                                                       
-EXCVADDR: 0x00000000  LBEG    : 0x4008baa9  LEND    : 0x4008bab9  LCOUNT  : 0xff
-ffffff  
+EXCVADDR: 0xffffffe0  LBEG    : 0x400860a9  LEND    : 0x400860b1  LCOUNT  : 0x00
+000027  
                                                                       
           
                                                                     
             
                                                                   
-Backtrace:0x4008baa6:0x3ffb22200x401b2fad:0x3ffb2230 0x401afd51:0x3ffb2540 0x400
-e2731:0x3ffb2600 0x400f910d:0x3ffb2630 0x400f94d5:0x3ffb26d0 0x400f95f5:0x3ffb27
-00 0x400d5389:0x3ffb2720 0x400eb795:0x3ffb2760 0x400ec5ce:0x3ffb2780 0x400d5389:
-0x3ffb27a0 0x400faa91:0x3ffb27e0 0x400fad96:0x3ffb2800 0x40119e9d:0x3ffb2820 
- 
-                                                                               
-
-                                                                               
-
-                                                                               
-
-                                                                               
-
-ELF file SHA256: 0000000000000000
-            
+Backtrace:0x4008f943:0x3ffb07600x40107565:0x3ffb07a0 0x4008f943:0x3ffb07e0 0x400
+8f943:0x3ffb0820 0x4008f943:0x3ffb0860 0x4008f943:0x3ffb08a0 0x4008f943:0x3ffb08
+e0 0x4008f943:0x3ffb0920 0x4008007d:0x3ffb0760 0x40107565:0x3ffb07a0 0x4008f943:
+0x3ffb07e0 0x4008f943:0x3ffb0820 0x4008f943:0x3ffb0860 0x4008f943:0x3ffb08a0 0x4
+008f943:0x3ffb08e0 0x4008f943:0x3ffb0920 0x4008007d:0x3ffb0760 0x40107565:0x3ffb
+07a0 0x4008f943:0x3ffb07e0 0x4008f943:0x3ffb0820 0x4008f943:0x3ffb0860 0x4008f94
+3:0x3ffb08a0 0x4008f943:0x3ffb08e0 0x4008f943:0x3ffb0920 0x4008007d:0x3ffb0760 0
+x40107565:0x3ffb07a0 0x4008f943:0x3ffb07e0 0x4008f943:0x3ffb0820 0x4008f943:0x3f
+fb0860 0x4008f943:0x3ffb08a0 0x4008f943:0x3ffb08e0 0x4008f943:0x3ffb0920 0x40080
+07d:0x3ffb0760 0x40107565:0x3ffb07a0 0x4008f943:0x3ffb07e0 0x4008f943:0x3ffb0820
+ 0x4008f943:0x3ffb0860 0x4008f943:0x3ffb08a0 0x4008f943:0x3ffb08e0 0x4008f943:0x
+3ffb0920 0x4008007d:0x3ffb0760 0x40107565:0x3ffb07a0 0x4008f943:0x3ffb07e0 0x400
+8f943:0x3ffb0820 0x4008f943:0x3ffb0860 0x4008f943:0x3ffb08a0 0x4008f943:0x3ffb08
+e0 0x4008f943:0x3ffb0920 0x4008007d:0x3ffb0760 0x40107565:0x3ffb07a0 0x4008f943:
+0x3ffb07e0 0x4008f943:0x3ffb0820 0x4008f943:0x3ffb0860 0x4008f943:0x3ffb08a0 0x4
+008f943:0x3ffb08e0 0x4008f943:0x3ffb0920 0x4008007d:0x3ffb0760 0x40107565:0x3ffb
+07a0 0x4008f943:0x3ffb07e0 0x4008f943:0x3ffb0820 0x4008f943:0x3ffb0860 0x4008f94
+3:0x3ffb08a0 0x4008f943:0x3ffb08e0 0x4008f943:0x3ffb0920 0x4008007d:0x3ffb0760 0
+x40107565:0x3ffb07a0 0x4008f943:0x3ffb07e0 0x4008f943:0x3ffb0820 0x4008f943:0x3f
+fb0860 0x4008f943:0x3ffb08a0 0x4008f943:0x3ffb08e0 0x4008f943:0x3ffb0920 0x40080
+07d:0x3ffb0760 0x40107565:0x3ffb07a0 0x4008f943:0x3ffb07e0 0x4008f943:0x3ffb0820
+ 0x4008f943:0x3ffb0860 0x4008f943:0x3ffb08a0 0x4008f943:0x3ffb08e0 0x4008f943:0x
+3ffb0920 0x4008007d:0x3ffb0760 0x40107565:0x3ffb07a0 0x4008f943:0x3ffb07e0 0x400
+8f943:0x3ffb0820 0x4008f943:0x3ffb0860 0x4008f943:0x3ffb08a0 0x4008f943:0x3ffb08
+e0 0x4008f943:0x3ffb0920 0x4008007d:0x3ffb0760 0x40107565:0x3ffb07a0 0x4008f943:
+0x3ffb07e0 0x4008f943:0x3ffb0820 0x4008f943:0x3ffb0860 0x4008f943:0x3ffb08a0 0x4
+008f943:0x3ffb08e0 0x4008f943:0x3ffb0920 0x4008007d:0x3ffb0760 0x40107565:0x3ffb
+07a0 0x4008f943:0x3ffb07e0 0x4008f943:0x3ffb0820 0x4008f943:0x3ffb0860  |<-CONTI
+NUES
+                                                                          
+      
+                                                                        
+        
+                        
 
                                                                                
 
@@ -92,7 +107,7 @@ ELF file SHA256: 0000000000000000
 # CONFIGURATION
 # ============================================================
 
-ENV_NAME = "tb_celullar__lilygo_sim7000g_01"   # <<< change if needed
+ENV_NAME = "cm_office__ws2815panel12v"   # <<< change if needed
 PROJECT_ROOT = None                   # None = auto-detect folder containing saved_compiles
 
 DEDUPE_CONSECUTIVE_ONLY = True

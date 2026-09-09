@@ -914,53 +914,55 @@ class mAnimatorLight :
     
     // WLED-compat wrapper: ignores 'pal' and uses SEGMENT.palette_id via SEGMENT.GetPaletteColour()
     // Keeps WLED call-sites working: ColorFromPalette(SEGPALETTE, idx, bri, blend)
-    // inline uint32_t ColorFromPaletteRedirect(
-    //   const CRGBPalette16& /*pal_ignored*/,
-    //   uint8_t index,
-    //   uint8_t brightness = 255,
-    //   TBlendType blendType = NOBLEND
-    // ){
+    inline uint32_t ColorFromPaletteRedirect(
+      const CRGBPalette16& /*pal_ignored*/,
+      uint8_t index,
+      uint8_t brightness = 255,
+      TBlendType blendType = NOBLEND
+    ){
 
-    //   // WARNING: Forced fast redirect
-    //   // Bypassing complex palette handling to improve performance. Will only work on already loaded CRGB16Palettes 
-    //   // return ColorFromPaletteCRGB16Fast(SEGMENT.palette_loaded->CRGB16Palette16_Palette.data, index, brightness, blendType);
+  Serial.printf("ColorFromPaletteRedirect %d\n\r", index);
+  Serial.flush();
+      // WARNING: Forced fast redirect
+      // Bypassing complex palette handling to improve performance. Will only work on already loaded CRGB16Palettes 
+      // return ColorFromPaletteCRGB16Fast(SEGMENT.palette_loaded->CRGB16Palette16_Palette.data, index, brightness, blendType);
 
-    //   // Map WLED blend to your palette mode
-    //   const uint8_t force_mode = (blendType == NOBLEND) 
-    //                              ? PALETTE_MODE__FORCE_DISCRETE
-    //                              : PALETTE_MODE__FORCE_GRADIENT;
+      // Map WLED blend to your palette mode
+      const uint8_t force_mode = (blendType == NOBLEND) 
+                                 ? PALETTE_MODE__FORCE_DISCRETE
+                                 : PALETTE_MODE__FORCE_GRADIENT;
 
-    //   // Pull from segment-selected palette (auto-load happens inside GetPaletteColour)
-    //   uint32_t c = SEGMENT.GetPaletteColour(
-    //       index,                      // 0-255
-    //       PALETTE_INDEX__IS_255_RANGE, // WLED-style indexing
-    //       force_mode,
-    //       PALETTE_WRAP_HARDEDGE,       // keep consistent with your current shim usage
-    //       nullptr,
-    //       /*apply_brightness*/ false,  // IMPORTANT: wrapper handles WLED 'brightness'
-    //       255, // Brightness at maximum for now, handled below
-    //       0
-    //   );
+      // Pull from segment-selected palette (auto-load happens inside GetPaletteColour)
+      uint32_t c = SEGMENT.GetPaletteColour(
+          index,                      // 0-255
+          PALETTE_INDEX__IS_255_RANGE, // WLED-style indexing
+          force_mode,
+          PALETTE_WRAP_HARDEDGE,       // keep consistent with your current shim usage
+          nullptr,
+          /*apply_brightness*/ false,  // IMPORTANT: wrapper handles WLED 'brightness'
+          255, // Brightness at maximum for now, handled below
+          0
+      );
 
-    //   // Apply WLED brightness argument (independent of seg/global brightness)
-    //   // The brightness is built into the "GetPaletteColour" function above, so this can likely be removed by simply passing pbri
-    //   if (brightness < 255) {
-    //     const uint16_t scale = uint16_t(brightness) + 1;
-    //     c = RGBW32(
-    //       (R(c) * scale) >> 8,
-    //       (G(c) * scale) >> 8,
-    //       (B(c) * scale) >> 8,
-    //       (W(c) * scale) >> 8
-    //     );
-    //   }
+      // Apply WLED brightness argument (independent of seg/global brightness)
+      // The brightness is built into the "GetPaletteColour" function above, so this can likely be removed by simply passing pbri
+      if (brightness < 255) {
+        const uint16_t scale = uint16_t(brightness) + 1;
+        c = RGBW32(
+          (R(c) * scale) >> 8,
+          (G(c) * scale) >> 8,
+          (B(c) * scale) >> 8,
+          (W(c) * scale) >> 8
+        );
+      }
 
-    //   return c;
-    // }
+      return c;
+    }
 
     // WLED-compat wrapper.
     // Fast-paths already loaded CRGBPalette16 palettes directly.
     // Other PulSar palette types fall back to GetPaletteColour().
-    inline uint32_t ColorFromPaletteRedirect(const CRGBPalette16& /*pal_ignored*/, uint8_t index, uint8_t brightness = 255, TBlendType blendType = NOBLEND);
+    // uint32_t ColorFromPaletteRedirect(const CRGBPalette16& /*pal_ignored*/, uint8_t index, uint8_t brightness = 255, TBlendType blendType = NOBLEND);
     // {
     //   const uint16_t pal_id = SEGMENT.palette_id;
 
@@ -4686,7 +4688,7 @@ name = nullptr;
     void setPixelColor(unsigned n, uint32_t c){ setPixelColor((int)n, c); } // to keep compatibility with RGBWW
     void setPixelColor(uint16_t n, uint32_t c){ setPixelColor((int)n, c); } // to keep compatibility with RGBWW
     void setPixelColor(int n, byte r, byte g, byte b, byte w = 0) {      setPixelColor(n, RGBW32(r,g,b,w));    }
-    inline void setPixelColor(int n, CRGB c) const                             { setPixelColor(n, RGBW32(c.r,c.g,c.b,0)); }
+    inline void setPixelColor(int n, CRGB c)                              { setPixelColor(n, RGBW32(c.r,c.g,c.b,0)); }
     
 #if defined(ENABLE_ANTIALIAS_WITH_RGBWW)
 // Anti-aliasing functions
@@ -4711,7 +4713,7 @@ name = nullptr;
     void addPixelColor(int n, uint32_t color);
     void addPixelColor(int n, byte r, byte g, byte b, byte w = 0) { addPixelColor(n, RGBW32(r,g,b,w)); } // automatically inline
     void addPixelColor(int n, CRGB c)                             { addPixelColor(n, RGBW32(c.r,c.g,c.b,0)); } // automatically inline
-    inline void fadePixelColor(uint16_t n, uint8_t fade) const                     { setPixelColor(n, color_fade(getPixelColor(n), fade, true)); }
+    inline void fadePixelColor(uint16_t n, uint8_t fade)                      { setPixelColor(n, color_fade(getPixelColor(n), fade, true)); }
     
 
     uint8_t get_random_wheel_index(uint8_t pos);
