@@ -1925,7 +1925,7 @@ if (jtok_pwi && jtok_pwi.isArray())
 
     // Needs added into the new animation
 
-    
+
     if(jtok = jtok_sub.getObject()["Animation"].getObject()["TimeMs"])
     {
       SEGMENT_I(segment_index).single_animation_override.time_ms = jtok.getInt();
@@ -2244,6 +2244,38 @@ if (jtok = obj["Standby"])
       Standby_Sleep(CALL_MODE_NO_NOTIFY);
     }
 
+    data_buffer.isserviced++;
+  }
+}
+
+#endif
+#ifdef ENABLE_FEATURE_LIGHTING__STANDBY_NEW
+
+if (jtok = obj["Standby"])
+{
+  JsonParserObject jobj_standby = jtok.getObject();
+  JsonParserToken jtok_standby = 0;
+
+  if (jtok_standby = jobj_standby["Enabled"])
+  {
+    if (jtok_standby.getBool()) {
+      Standby_Enter(CALL_MODE_NO_NOTIFY);
+    } else {
+      Standby_Leave(CALL_MODE_NO_NOTIFY);
+    }
+
+    data_buffer.isserviced++;
+  }
+
+  if (jtok_standby = jobj_standby["WakeTransitionSecs"])
+  {
+    Standby_SetWakeTransition(jtok_standby.getInt());
+    data_buffer.isserviced++;
+  }
+
+  if (jtok_standby = jobj_standby["StandbyTransitionSecs"])
+  {
+    Standby_SetStandbyTransition(jtok_standby.getInt());
     data_buffer.isserviced++;
   }
 }

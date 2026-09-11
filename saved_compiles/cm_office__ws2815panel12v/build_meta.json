@@ -1,7 +1,7 @@
 {
   "env_name": "cm_office__ws2815panel12v",
-  "created_utc": "2026-09-09T18:55:09Z",
-  "created_epoch": 1788980109,
+  "created_utc": "2026-09-11T19:11:18Z",
+  "created_epoch": 1789153878,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "b9951c538c3702e0e5e0a2714858e24c2ffd861a",
-    "describe": "b9951c53-dirty",
-    "status_short": "M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/2_CoreSystem/99_DevelopmentDebugging/mDevelopmentDebugging.cpp\n M code/2_CoreSystem/99_DevelopmentDebugging/mDevelopmentDebugging.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/02_Palette/mPalette.cpp\n M code/6_Lights/03_Animator/Commands.cpp\n M code/6_Lights/03_Animator/Effects.cpp\n M code/6_Lights/03_Animator/Palettes.cpp\n M code/6_Lights/03_Animator/WebUI.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n?? tools/python_scripts/UnitTesting/"
+    "commit": "4fed4a1ddac315a2924c3ace5c5048af7851a1eb",
+    "describe": "4fed4a1d-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/Commands.cpp\n M code/6_Lights/03_Animator/WebUI.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n?? code/6_Lights/03_Animator/Standby_New.cpp"
   }
 }

@@ -51,6 +51,9 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
       #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_MODE
       EverySecond_Standby();
       #endif
+      #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_NEW
+      EverySecond_Standby();
+      #endif
 
     }break;
     case TASK_LOOP:

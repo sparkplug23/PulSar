@@ -6167,6 +6167,75 @@ void EverySecond_Standby();
 
 #endif
 
+
+
+#ifdef ENABLE_FEATURE_LIGHTING__STANDBY_NEW
+
+struct STANDBY_TARGET
+{
+  bool enabled = false;
+  uint16_t target_id = 0;
+
+  char start[6] = "00:00";
+  char end[6] = "00:00";
+
+  // One bit per minute of the day:
+  // 1440 minutes / 8 = 180 bytes.
+  uint8_t allowed_minutes[180] = {0};
+};
+
+struct STANDBY
+{
+  // Runtime only. Does not survive reboot.
+  bool enabled = false;
+
+  // Persistent configuration loaded from /standby.json.
+  std::vector<STANDBY_TARGET> targets;
+
+  uint16_t wake_transition_secs = 1;
+  uint16_t standby_transition_secs = 30;
+
+  // Runtime selected standby target.
+  int16_t active_target_index = -1;
+  uint16_t active_target_id = 0;
+
+  // RAM-only snapshot of the lighting state before entering standby.
+  char* resumeRAM = nullptr;
+  size_t resumeLen = 0;
+};
+
+STANDBY standby;
+
+bool Standby_Init();
+
+bool Standby_LoadConfig();
+bool Standby_SaveConfig();
+
+bool Standby_Enter(uint8_t callMode = CALL_MODE_NO_NOTIFY);
+bool Standby_Leave(uint8_t callMode = CALL_MODE_NO_NOTIFY);
+bool Standby_Update(uint8_t callMode = CALL_MODE_NO_NOTIFY);
+
+bool Standby_CaptureResumeToRAM();
+bool Standby_RestoreResumeFromRAM(uint8_t callMode);
+void Standby_ClearResumeRAM();
+
+void Standby_ApplyTransition(uint16_t seconds);
+
+bool Standby_SelectTarget(int16_t& target_index, uint16_t& target_id);
+bool Standby_ApplyTarget(int16_t target_index, uint16_t target_id, uint8_t callMode);
+
+bool Standby_ValidateTimePattern(const char* value);
+bool Standby_TimePatternMatches(const char* pattern, uint16_t minute);
+bool Standby_CompileTargetSchedule(STANDBY_TARGET& target);
+bool Standby_TargetTimeAllowed(const STANDBY_TARGET& target, uint16_t minute);
+
+void Standby_SetWakeTransition(uint16_t seconds);
+void Standby_SetStandbyTransition(uint16_t seconds);
+
+void EverySecond_Standby();
+
+#endif
+
 // static PRNG prng = PRNG();//();//hw_random()); // pseudo-random number generator class, seed = hardware random number
 
 // static PRNG prng = PRNG();//();//hw_random()); // pseudo-random number generator class, seed = hardware random number

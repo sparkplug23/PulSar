@@ -5240,6 +5240,9 @@ void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
   #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_MODE
   Standby_Init();
   #endif
+  #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_NEW
+  Standby_Init();
+  #endif
 
   DEBUG_PRINTF_P(PSTR("Heap after strip init: %uB\n"), getFreeHeapSize());
 
