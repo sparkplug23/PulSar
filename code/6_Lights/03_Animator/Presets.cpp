@@ -8,14 +8,11 @@
  * TODO:I want to serialise the preset file and send over mqtt anytime it changes as debug
  * 
  * lets keep the preset as you gave it, update the other code to now work with u16. This is because I would like to index things into ranges of presets
-<100 steady
-100-500 flashy etc
-preset 1000+
+    <100 steady
+    100-500 flashy etc
+    preset 1000+
 
-just because it makes it a lot easier to add new presets/playlists without worrying of collision. Of course my file space wont support that many at the same time, but this can lead to perhaps me making some custom presets that are "mine", then using like a python script to take from a toolbox of designed presets and build a custom preset.json for a device. We can simply make all preset names completely unique, think of this as "effects customed"
-
-
-
+    just because it makes it a lot easier to add new presets/playlists without worrying of collision. Of course my file space wont support that many at the same time, but this can lead to perhaps me making some custom presets that are "mine", then using like a python script to take from a toolbox of designed presets and build a custom preset.json for a device. We can simply make all preset names completely unique, think of this as "effects customed"
  */
 
 #ifdef ARDUINO_ARCH_ESP32

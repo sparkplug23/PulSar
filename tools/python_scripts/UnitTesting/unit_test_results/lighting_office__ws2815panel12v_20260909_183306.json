@@ -1,0 +1,14 @@
+{
+  "device": "office__ws2815panel12v",
+  "timestamp": "2026-09-09T18:33:06",
+  "configuration": {
+    "dwell_seconds": 10,
+    "response_timeout_seconds": 120
+  },
+  "summary": {
+    "total": 0,
+    "passed": 0,
+    "failed": 0
+  },
+  "results": []
+}

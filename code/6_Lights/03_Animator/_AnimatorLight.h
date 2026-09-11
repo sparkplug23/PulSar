@@ -1449,7 +1449,6 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void EffectAnim__Colour_Sweep_Random();
     void EffectAnim__Colour_Sweep_Palette();
     void EffectAnim__Dynamic();
-    void EffectAnim__Dynamic_Smooth();
     void EffectAnim__TriColour_Wipe();
     void EffectAnim__Android();
     void EffectAnim__Base_RunningWaves(bool saw, bool dual=false);
@@ -1979,7 +1978,6 @@ static const uint8_t kPresetMetaParserVersion = 2;
       EFFECTS_FUNCTION__COLOR_SWEEP_RANDOM__ID,
       EFFECTS_FUNCTION__COLOR_SWEEP_PALETTE__ID,       
       EFFECTS_FUNCTION__DYNAMIC__ID,                  
-      EFFECTS_FUNCTION__DYNAMIC_SMOOTH__ID,                
       EFFECTS_FUNCTION__RUNNING_COLOR__ID,
       EFFECTS_FUNCTION__RUNNING_RANDOM__ID,      
       EFFECTS_FUNCTION__ANDROID__ID,               
@@ -4717,7 +4715,7 @@ name = nullptr;
     
 
     uint8_t get_random_wheel_index(uint8_t pos);
-    uint32_t color_wheel(uint8_t pos);
+    uint32_t color_wheel(uint8_t pos, bool force_colour_wheel = false);
 
 
 

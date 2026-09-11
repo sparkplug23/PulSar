@@ -811,6 +811,65 @@ IRAM_ATTR [[gnu::hot]] uint32_t mPalette::GetColourFromPreloadedPaletteBuffer_U3
 
   /**************************************************************
    * 
+   * Procedural Palettes
+   * * These palettes do not store colour data in flash or RAM.
+   * * The requested colour is calculated directly from the palette index.
+   * * Colour Wheel uses the full 0-255 input range.
+   * 
+  ***************************************************************/
+  if(
+    id == PALETTELIST_PROCEDURAL__COLOUR_WHEEL__ID
+  ){
+
+    uint16_t pixel_position_adjust = desired_index;
+
+    /**
+     * @brief Convert segment-relative position into the normal 0-255
+     * palette range when the caller requests segment spanning.
+     */
+    if(
+      palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE
+    ){
+      pixel_position_adjust = (pSEGMENT.vLength() <= 1) ? 0 : (desired_index * 255U) / (pSEGMENT.vLength() - 1);
+    }
+
+    uint8_t pos = (uint8_t)pixel_position_adjust;
+
+    /**
+     * @brief Classic WLED/Adafruit colour wheel.
+     *
+     * The wheel transitions:
+     *   Red -> Blue -> Green -> Red
+     *
+     * The subtraction preserves the existing WLED colour_wheel()
+     * direction/orientation.
+     */
+    pos = 255 - pos;
+
+    if(pos < 85)
+    {
+      colour32 = RGBW32(255 - pos * 3, 0, pos * 3, 0);
+    }
+    else
+    if(pos < 170)
+    {
+      pos -= 85;
+      colour32 = RGBW32(0, pos * 3, 255 - pos * 3, 0);
+    }
+    else
+    {
+      pos -= 170;
+      colour32 = RGBW32(pos * 3, 255 - pos * 3, 0, 0);
+    }
+
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+    colour32_white_cold = 0;
+    #endif
+
+  }
+
+  /**************************************************************
+   * 
    * CRGBPALETTE16 palette
    * * Preloaded into CRGB16Palette16_Palette
    * * Includes:

@@ -1,0 +1,447 @@
+{
+  "device": "office__ws2815panel12v",
+  "timestamp": "2026-09-09T19:08:19",
+  "configuration": {
+    "dwell_seconds": 10,
+    "response_timeout_seconds": 120
+  },
+  "summary": {
+    "total": 16,
+    "passed": 16,
+    "failed": 0
+  },
+  "results": [
+    {
+      "test_group": "palettes",
+      "test_name": "palette_0",
+      "command": {
+        "Palette": 0,
+        "EchoAlive": {
+          "Token": "972e576169b4420a84964cc09ade41f7",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "972e576169b4420a84964cc09ade41f7",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:05:39",
+      "finished": "2026-09-09T19:05:49",
+      "response_seconds": 10.10899999999674,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "972e576169b4420a84964cc09ade41f7",
+          "Uptime": 745,
+          "FreeHeap": 118740,
+          "MinFreeHeap": 86916,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_1",
+      "command": {
+        "Palette": 1,
+        "EchoAlive": {
+          "Token": "e39e4df1ab4941a49545a7b5c004236e",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "e39e4df1ab4941a49545a7b5c004236e",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:05:49",
+      "finished": "2026-09-09T19:05:59",
+      "response_seconds": 10.01600000000326,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "e39e4df1ab4941a49545a7b5c004236e",
+          "Uptime": 755,
+          "FreeHeap": 118740,
+          "MinFreeHeap": 86916,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_2",
+      "command": {
+        "Palette": 2,
+        "EchoAlive": {
+          "Token": "3a5551257d9c434c9d4a68b785d612de",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "3a5551257d9c434c9d4a68b785d612de",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:05:59",
+      "finished": "2026-09-09T19:06:09",
+      "response_seconds": 10.01600000000326,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "3a5551257d9c434c9d4a68b785d612de",
+          "Uptime": 765,
+          "FreeHeap": 118728,
+          "MinFreeHeap": 86916,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_3",
+      "command": {
+        "Palette": 3,
+        "EchoAlive": {
+          "Token": "e232b06f86174caa9eb3886073401130",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "e232b06f86174caa9eb3886073401130",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:06:09",
+      "finished": "2026-09-09T19:06:19",
+      "response_seconds": 10.061999999976251,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "e232b06f86174caa9eb3886073401130",
+          "Uptime": 775,
+          "FreeHeap": 116232,
+          "MinFreeHeap": 85972,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_4",
+      "command": {
+        "Palette": 4,
+        "EchoAlive": {
+          "Token": "4dec7413c96f4ee69bbfef0d8cccf5ac",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "4dec7413c96f4ee69bbfef0d8cccf5ac",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:06:19",
+      "finished": "2026-09-09T19:06:29",
+      "response_seconds": 10.01600000000326,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "4dec7413c96f4ee69bbfef0d8cccf5ac",
+          "Uptime": 785,
+          "FreeHeap": 118632,
+          "MinFreeHeap": 85972,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_5",
+      "command": {
+        "Palette": 5,
+        "EchoAlive": {
+          "Token": "73a76d80c3234b2f811bd1738055e48f",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "73a76d80c3234b2f811bd1738055e48f",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:06:29",
+      "finished": "2026-09-09T19:06:39",
+      "response_seconds": 10.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "73a76d80c3234b2f811bd1738055e48f",
+          "Uptime": 795,
+          "FreeHeap": 118644,
+          "MinFreeHeap": 85972,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_6",
+      "command": {
+        "Palette": 6,
+        "EchoAlive": {
+          "Token": "d970dd46902a46f381fe66c0ddfe128a",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "d970dd46902a46f381fe66c0ddfe128a",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:06:39",
+      "finished": "2026-09-09T19:06:49",
+      "response_seconds": 10.01600000000326,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "d970dd46902a46f381fe66c0ddfe128a",
+          "Uptime": 805,
+          "FreeHeap": 118632,
+          "MinFreeHeap": 85972,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_7",
+      "command": {
+        "Palette": 7,
+        "EchoAlive": {
+          "Token": "4f87742101324ae981016d5979e634a3",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "4f87742101324ae981016d5979e634a3",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:06:49",
+      "finished": "2026-09-09T19:06:59",
+      "response_seconds": 10.077999999979511,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "4f87742101324ae981016d5979e634a3",
+          "Uptime": 815,
+          "FreeHeap": 118644,
+          "MinFreeHeap": 85972,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_8",
+      "command": {
+        "Palette": 8,
+        "EchoAlive": {
+          "Token": "b47619ec265d4d5497b6b7f494bff853",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "b47619ec265d4d5497b6b7f494bff853",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:06:59",
+      "finished": "2026-09-09T19:07:09",
+      "response_seconds": 10.01600000000326,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "b47619ec265d4d5497b6b7f494bff853",
+          "Uptime": 825,
+          "FreeHeap": 118632,
+          "MinFreeHeap": 85972,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_9",
+      "command": {
+        "Palette": 9,
+        "EchoAlive": {
+          "Token": "1c69b1e2d9ea4b2e8cdaae882fde25fa",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "1c69b1e2d9ea4b2e8cdaae882fde25fa",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:07:09",
+      "finished": "2026-09-09T19:07:19",
+      "response_seconds": 10.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "1c69b1e2d9ea4b2e8cdaae882fde25fa",
+          "Uptime": 835,
+          "FreeHeap": 118632,
+          "MinFreeHeap": 85972,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_10",
+      "command": {
+        "Palette": 10,
+        "EchoAlive": {
+          "Token": "170a0359e9624b3eb0a698a938e11e16",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "170a0359e9624b3eb0a698a938e11e16",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:07:19",
+      "finished": "2026-09-09T19:07:29",
+      "response_seconds": 10.01600000000326,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "170a0359e9624b3eb0a698a938e11e16",
+          "Uptime": 845,
+          "FreeHeap": 118632,
+          "MinFreeHeap": 85972,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_11",
+      "command": {
+        "Palette": 11,
+        "EchoAlive": {
+          "Token": "a27827813c3f491eb651cb708c07a555",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "a27827813c3f491eb651cb708c07a555",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:07:29",
+      "finished": "2026-09-09T19:07:39",
+      "response_seconds": 10.03100000001723,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "a27827813c3f491eb651cb708c07a555",
+          "Uptime": 855,
+          "FreeHeap": 118508,
+          "MinFreeHeap": 85972,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_12",
+      "command": {
+        "Palette": 12,
+        "EchoAlive": {
+          "Token": "446795f4062a4c4ca12e4f76c1894868",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "446795f4062a4c4ca12e4f76c1894868",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:07:39",
+      "finished": "2026-09-09T19:07:49",
+      "response_seconds": 10.062999999965541,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "446795f4062a4c4ca12e4f76c1894868",
+          "Uptime": 865,
+          "FreeHeap": 118644,
+          "MinFreeHeap": 85972,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_13",
+      "command": {
+        "Palette": 13,
+        "EchoAlive": {
+          "Token": "df8cf1a4a7ab424ab419217f1967ed6e",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "df8cf1a4a7ab424ab419217f1967ed6e",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:07:49",
+      "finished": "2026-09-09T19:07:59",
+      "response_seconds": 10.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "df8cf1a4a7ab424ab419217f1967ed6e",
+          "Uptime": 875,
+          "FreeHeap": 118644,
+          "MinFreeHeap": 85972,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_14",
+      "command": {
+        "Palette": 14,
+        "EchoAlive": {
+          "Token": "763ae464519c499fbffac76fb5c262d6",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "763ae464519c499fbffac76fb5c262d6",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:07:59",
+      "finished": "2026-09-09T19:08:09",
+      "response_seconds": 10.01600000000326,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "763ae464519c499fbffac76fb5c262d6",
+          "Uptime": 885,
+          "FreeHeap": 118644,
+          "MinFreeHeap": 85972,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_15",
+      "command": {
+        "Palette": 15,
+        "EchoAlive": {
+          "Token": "79d47c2b4698465382b192339f8c3afd",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "79d47c2b4698465382b192339f8c3afd",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:08:09",
+      "finished": "2026-09-09T19:08:19",
+      "response_seconds": 10.01600000000326,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "79d47c2b4698465382b192339f8c3afd",
+          "Uptime": 895,
+          "FreeHeap": 118644,
+          "MinFreeHeap": 85972,
+          "FreePSRAM": 0
+        }
+      }
+    }
+  ]
+}

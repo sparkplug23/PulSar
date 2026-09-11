@@ -1,0 +1,709 @@
+{
+  "device": "office__ws2815panel12v",
+  "timestamp": "2026-09-09T20:06:08",
+  "mqtt": {
+    "broker": "192.168.3.70",
+    "port": 1883,
+    "command_topic": "office__ws2815panel12v/set/python",
+    "echo_topic": "office__ws2815panel12v/status/unit_test",
+    "lwt_topic": "office__ws2815panel12v/LWT"
+  },
+  "configuration": {
+    "palette_count": 179,
+    "effect_count": 185,
+    "palette_dwell_seconds": 2,
+    "effect_dwell_seconds": 3,
+    "palette_effect_dwell_seconds": 3,
+    "preset_dwell_seconds": 10,
+    "response_timeout_allowance_seconds": 120
+  },
+  "summary": {
+    "total": 22,
+    "passed": 22,
+    "failed": 0
+  },
+  "results": [
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_0",
+      "command": {
+        "Effects": {
+          "Function": 0,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "77f06295a1f94101bf5463dfc1c410de",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "77f06295a1f94101bf5463dfc1c410de",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:00",
+      "finished": "2026-09-09T20:05:03",
+      "response_seconds": 3.125,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "77f06295a1f94101bf5463dfc1c410de",
+          "Uptime": 572,
+          "FreeHeap": 118120,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_1",
+      "command": {
+        "Effects": {
+          "Function": 1,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "f393b9bbce0243de889081fee218e6d4",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "f393b9bbce0243de889081fee218e6d4",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:03",
+      "finished": "2026-09-09T20:05:06",
+      "response_seconds": 3.077999999979511,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "f393b9bbce0243de889081fee218e6d4",
+          "Uptime": 575,
+          "FreeHeap": 118120,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_2",
+      "command": {
+        "Effects": {
+          "Function": 2,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "7168a4df745e45829c807378a4f97b6a",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "7168a4df745e45829c807378a4f97b6a",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:06",
+      "finished": "2026-09-09T20:05:09",
+      "response_seconds": 2.969000000040978,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "7168a4df745e45829c807378a4f97b6a",
+          "Uptime": 578,
+          "FreeHeap": 118120,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_3",
+      "command": {
+        "Effects": {
+          "Function": 3,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "967022423321428cb6b7c74d3f15fff8",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "967022423321428cb6b7c74d3f15fff8",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:09",
+      "finished": "2026-09-09T20:05:12",
+      "response_seconds": 2.9689999999827705,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "967022423321428cb6b7c74d3f15fff8",
+          "Uptime": 581,
+          "FreeHeap": 118120,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_4",
+      "command": {
+        "Effects": {
+          "Function": 4,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "ccf3222899ad472a90d7ce1bf0ac02dc",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "ccf3222899ad472a90d7ce1bf0ac02dc",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:12",
+      "finished": "2026-09-09T20:05:15",
+      "response_seconds": 3.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "ccf3222899ad472a90d7ce1bf0ac02dc",
+          "Uptime": 584,
+          "FreeHeap": 118204,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_5",
+      "command": {
+        "Effects": {
+          "Function": 5,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "2ccee471179b478b8257cf74ddd814a5",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "2ccee471179b478b8257cf74ddd814a5",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:15",
+      "finished": "2026-09-09T20:05:18",
+      "response_seconds": 3.0310000000172295,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "2ccee471179b478b8257cf74ddd814a5",
+          "Uptime": 587,
+          "FreeHeap": 115824,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_6",
+      "command": {
+        "Effects": {
+          "Function": 6,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "0530715ac9694bc8adbf4b2b9170e429",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "0530715ac9694bc8adbf4b2b9170e429",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:18",
+      "finished": "2026-09-09T20:05:21",
+      "response_seconds": 3.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "0530715ac9694bc8adbf4b2b9170e429",
+          "Uptime": 590,
+          "FreeHeap": 115824,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_7",
+      "command": {
+        "Effects": {
+          "Function": 7,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "615fe87f8acc4431945bef57f30272df",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "615fe87f8acc4431945bef57f30272df",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:21",
+      "finished": "2026-09-09T20:05:24",
+      "response_seconds": 2.969000000040978,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "615fe87f8acc4431945bef57f30272df",
+          "Uptime": 593,
+          "FreeHeap": 118120,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_8",
+      "command": {
+        "Effects": {
+          "Function": 8,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "e578615a9be248a1b485263c175652ff",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "e578615a9be248a1b485263c175652ff",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:24",
+      "finished": "2026-09-09T20:05:27",
+      "response_seconds": 3.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "e578615a9be248a1b485263c175652ff",
+          "Uptime": 596,
+          "FreeHeap": 118124,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_9",
+      "command": {
+        "Effects": {
+          "Function": 9,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "c916b2bcfd294ce5905f81a2e86561fc",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "c916b2bcfd294ce5905f81a2e86561fc",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:27",
+      "finished": "2026-09-09T20:05:30",
+      "response_seconds": 3.125,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "c916b2bcfd294ce5905f81a2e86561fc",
+          "Uptime": 599,
+          "FreeHeap": 118124,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_10",
+      "command": {
+        "Effects": {
+          "Function": 10,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "324780da29ea41768b612d3ba790d74d",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "324780da29ea41768b612d3ba790d74d",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:30",
+      "finished": "2026-09-09T20:05:33",
+      "response_seconds": 2.9689999999827705,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "324780da29ea41768b612d3ba790d74d",
+          "Uptime": 602,
+          "FreeHeap": 118124,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_11",
+      "command": {
+        "Effects": {
+          "Function": 11,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "54a35ad0245f4e10af0e896b82c1043a",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "54a35ad0245f4e10af0e896b82c1043a",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:33",
+      "finished": "2026-09-09T20:05:36",
+      "response_seconds": 3.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "54a35ad0245f4e10af0e896b82c1043a",
+          "Uptime": 605,
+          "FreeHeap": 118124,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_12",
+      "command": {
+        "Effects": {
+          "Function": 12,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "d66b668b430d4497b692866b571ff961",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "d66b668b430d4497b692866b571ff961",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:36",
+      "finished": "2026-09-09T20:05:39",
+      "response_seconds": 3.125,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "d66b668b430d4497b692866b571ff961",
+          "Uptime": 608,
+          "FreeHeap": 118124,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_13",
+      "command": {
+        "Effects": {
+          "Function": 13,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "8671175ecbc04330b416069a17df6fa3",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "8671175ecbc04330b416069a17df6fa3",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:39",
+      "finished": "2026-09-09T20:05:42",
+      "response_seconds": 2.875,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "8671175ecbc04330b416069a17df6fa3",
+          "Uptime": 611,
+          "FreeHeap": 115712,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_14",
+      "command": {
+        "Effects": {
+          "Function": 14,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "a470ecc2ce334c5aa6dd823a424390b6",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "a470ecc2ce334c5aa6dd823a424390b6",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:42",
+      "finished": "2026-09-09T20:05:45",
+      "response_seconds": 3.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "a470ecc2ce334c5aa6dd823a424390b6",
+          "Uptime": 614,
+          "FreeHeap": 115712,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_15",
+      "command": {
+        "Effects": {
+          "Function": 15,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "a620f58c2c8a45e184c8ff620d41d227",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "a620f58c2c8a45e184c8ff620d41d227",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:45",
+      "finished": "2026-09-09T20:05:48",
+      "response_seconds": 3.1719999999622814,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "a620f58c2c8a45e184c8ff620d41d227",
+          "Uptime": 617,
+          "FreeHeap": 115712,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_16",
+      "command": {
+        "Effects": {
+          "Function": 16,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "359e0545e5794f7b90dba3bcd10f5e94",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "359e0545e5794f7b90dba3bcd10f5e94",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:48",
+      "finished": "2026-09-09T20:05:51",
+      "response_seconds": 2.9679999999934807,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "359e0545e5794f7b90dba3bcd10f5e94",
+          "Uptime": 620,
+          "FreeHeap": 115712,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_17",
+      "command": {
+        "Effects": {
+          "Function": 17,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "6fb328fe70dd435ab37e93891191efe3",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "6fb328fe70dd435ab37e93891191efe3",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:51",
+      "finished": "2026-09-09T20:05:54",
+      "response_seconds": 3.125,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "6fb328fe70dd435ab37e93891191efe3",
+          "Uptime": 623,
+          "FreeHeap": 115576,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_18",
+      "command": {
+        "Effects": {
+          "Function": 18,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "4934fc737a3a46468859ecec7708fa22",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "4934fc737a3a46468859ecec7708fa22",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:54",
+      "finished": "2026-09-09T20:05:57",
+      "response_seconds": 2.922000000020489,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "4934fc737a3a46468859ecec7708fa22",
+          "Uptime": 626,
+          "FreeHeap": 118124,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_19",
+      "command": {
+        "Effects": {
+          "Function": 19,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "48cfaff63654463ab4f396b71d0c57a0",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "48cfaff63654463ab4f396b71d0c57a0",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:05:57",
+      "finished": "2026-09-09T20:06:00",
+      "response_seconds": 3.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "48cfaff63654463ab4f396b71d0c57a0",
+          "Uptime": 629,
+          "FreeHeap": 118124,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_20",
+      "command": {
+        "Effects": {
+          "Function": 20,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "810b69f24f154e5298dd6684eec73c98",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "810b69f24f154e5298dd6684eec73c98",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:06:00",
+      "finished": "2026-09-09T20:06:03",
+      "response_seconds": 3.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "810b69f24f154e5298dd6684eec73c98",
+          "Uptime": 632,
+          "FreeHeap": 118036,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "effects_defaults",
+      "test_name": "effect_21",
+      "command": {
+        "Effects": {
+          "Function": 21,
+          "LoadDefaults": true
+        },
+        "EchoAlive": {
+          "Token": "75cb52cbaf514938bf0135a18771e8be",
+          "DelaySeconds": 3
+        }
+      },
+      "token": "75cb52cbaf514938bf0135a18771e8be",
+      "dwell_seconds": 3,
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T20:06:03",
+      "finished": "2026-09-09T20:06:06",
+      "response_seconds": 2.9679999999934807,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "75cb52cbaf514938bf0135a18771e8be",
+          "Uptime": 635,
+          "FreeHeap": 118036,
+          "MinFreeHeap": 79232,
+          "FreePSRAM": 0
+        }
+      }
+    }
+  ]
+}

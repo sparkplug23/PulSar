@@ -5831,8 +5831,8 @@ void mAnimatorLight::BaseEffectAnim__Base_Colour_Wipe(bool rev, bool useRandomCo
 
   if(useRandomColors)
   {
-    col_wipe = SEGMENT.color_wheel(SEGMENT.aux1);
-    col_base_fixed = SEGMENT.color_wheel(SEGMENT.aux0);
+    col_wipe = SEGMENT.color_wheel(SEGMENT.aux1, /*force colour wheel*/ true);
+    col_base_fixed = SEGMENT.color_wheel(SEGMENT.aux0, /*force colour wheel*/ true);
   }
   else
   if(useIterateOverPalette)
@@ -6174,48 +6174,6 @@ static const char PM_EFFECT_CONFIG__DYNAMIC[] PROGMEM =
 static const char PM_EFFECT_DESCRI__DYNAMIC[] PROGMEM =
 "Each LED picks a random color; all LEDs may update simultaneously.\n\r"
 "SX: update cadence (faster right)  |  IX: per-pixel change probability  |  CB1: smooth blend instead of hard cut.";
-
-
-/********************************************************************************************************************************************************************************************************************
- * @function    : EffectAnim__Dynamic_Smooth
- * @description : Smooth version of Dynamic. LEDs gradually fade between colors instead of instant jumps.
- *
- * HOW IT WORKS
- *  - Calls EffectAnim__Dynamic() but forces CB1 (Smooth) = ON.
- *  - This guarantees all color updates use blending.
- *  - Other behavior identical to Dynamic (random per-pixel colors with cadence controlled by Speed).
- *
- * CONTROLS
- *  - Speed (SX): update cadence. Higher Speed = faster updates.
- *  - Intensity (IX): per-pixel probability of changing color at each cycle.
- *
- * NOTES
- *  - Same memory and runtime as Dynamic.
- *  - Better for subtle background animations where hard jumps are undesirable.
- * @note : Converted from WLED Effects "mode_dynamic_smooth"
- ********************************************************************************************************************************************************************************************************************/
-void mAnimatorLight::EffectAnim__Dynamic_Smooth(void) {
-  bool old = SEGMENT.check1;
-  SEGMENT.check1 = true;
-  EffectAnim__Dynamic();
-  SEGMENT.check1 = old;
-  
-}
-static const char PM_EFFECT_CONFIG__DYNAMIC_SMOOTH[] PROGMEM =
-"Dynamic Smooth@"                    // Name
-"Change rate,Change probability,,,,,,,,"  // same controls, smoothing is implicit
-";"
-""                                   // Segment color names (none)
-";"
-"!"                                  // Palette picker (standard)
-";"
-"1"                                  // 1D icon
-";"
-"sx=128,ix=160"                      // Defaults: mid rate, higher change prob
-;
-static const char PM_EFFECT_DESCRI__DYNAMIC_SMOOTH[] PROGMEM =
-"Like “Dynamic”, but colors crossfade smoothly.\n\r"
-"SX: update cadence (faster right)  |  IX: per-pixel change probability.";
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -34426,14 +34384,6 @@ void mAnimatorLight::LoadEffects()
             PM_EFFECT_CONFIG__DYNAMIC,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
             PM_EFFECT_DESCRI__DYNAMIC,
-            #endif
-            Effect_DevStage::Release);
-
-  addEffect(EFFECTS_FUNCTION__DYNAMIC_SMOOTH__ID,
-            &mAnimatorLight::EffectAnim__Dynamic_Smooth,
-            PM_EFFECT_CONFIG__DYNAMIC_SMOOTH,
-            #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__DYNAMIC_SMOOTH,
             #endif
             Effect_DevStage::Release);
             

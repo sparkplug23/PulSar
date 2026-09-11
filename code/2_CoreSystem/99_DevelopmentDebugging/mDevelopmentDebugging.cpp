@@ -68,6 +68,10 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
     }break;
     case TASK_EVERY_SECOND:{
 
+      #ifdef ENABLE_FEATURE_DEVELOPMENT_DEBUGGING__MQTT_UNIT_TEST_ECHO
+      SubTask_MQTT_UnitTest_Echo();
+      #endif
+
       #ifdef ENABLE_DEBUG_SPLASH__PSRAM_USAGE
         AddLog(LOG_LEVEL_INFO, "PSRAM: Found=%d Useable=%d", 
         SupportESP32::FoundPSRAM(), 
@@ -186,13 +190,94 @@ void mDevelopmentDebugging::parse_JSONCommand(JsonParserObject obj)
   JsonParserToken jtok = 0; 
   int8_t tmp_id = 0;
 
-	if(jtok = obj["DebugInput"].getObject()["Float1"])
-	{
-		debug_data.input_float1 = jtok.getFloat();
+
+  /**
+   * @brief Unit-test echo response.
+   *
+   * Command:
+   * {
+   *   "EchoAlive":{
+   *     "Token":"abc123"
+   *   }
+   * }
+   *
+   * Response:
+   * <device>/status/unit_test
+   *
+   * {
+   *   "EchoAlive":{
+   *     "Token":"abc123",
+   *     "Uptime":12345,
+   *     "FreeHeap":123456,
+   *     "FreePSRAM":123456
+   *   }
+   * }
+   */
+  #ifdef ENABLE_FEATURE_DEVELOPMENT_DEBUGGING__MQTT_UNIT_TEST_ECHO
+
+  if(jtok = obj["EchoAlive"].getObject()["Token"])
+  {
+    if(jtok.isStr())
+    {
+      strlcpy(
+        mqtt_unit_test_echo.token,
+        jtok.getStr(),
+        sizeof(mqtt_unit_test_echo.token)
+      );
+
+      mqtt_unit_test_echo.seconds_remaining = 10;
+
+      JsonParserToken jtok_delay = 0;
+
+      if(jtok_delay = obj["EchoAlive"].getObject()["DelaySeconds"])
+      {
+        int32_t delay_seconds = jtok_delay.getInt();
+
+        if(delay_seconds < 1)
+        {
+          delay_seconds = 1;
+        }
+
+        if(delay_seconds > 120)
+        {
+          delay_seconds = 120;
+        }
+
+        mqtt_unit_test_echo.seconds_remaining = delay_seconds;
+      }
+
+      mqtt_unit_test_echo.pending = true;
+
+      ALOG_INF(
+        PSTR("UnitTest EchoAlive armed: Token=%s Delay=%u sec"),
+        mqtt_unit_test_echo.token,
+        mqtt_unit_test_echo.seconds_remaining
+      );
+
+      data_buffer.isserviced++;
+    }
+  }
+
+  #endif // ENABLE_FEATURE_DEVELOPMENT_DEBUGGING__MQTT_UNIT_TEST_ECHO
+
+
+  if(jtok = obj["DebugInput"].getObject()["Float1"])
+  {
+    debug_data.input_float1 = jtok.getFloat();
+
     char buffer[20];
-    mSupport::float2CString(debug_data.input_float1, JSON_VARIABLE_FLOAT_PRECISION_LENGTH, buffer);    
-    ALOG_INF(PSTR("DebugInput Float1: %s"), buffer);
-	}
+
+    mSupport::float2CString(
+      debug_data.input_float1,
+      JSON_VARIABLE_FLOAT_PRECISION_LENGTH,
+      buffer
+    );    
+
+    ALOG_INF(
+      PSTR("DebugInput Float1: %s"),
+      buffer
+    );
+  }
 
   #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
 	if(jtok = obj["Debug"].getObject()["ResetTaskMetrics"])
@@ -212,6 +297,75 @@ void mDevelopmentDebugging::parse_JSONCommand(JsonParserObject obj)
 
     
 }
+
+#ifdef ENABLE_FEATURE_DEVELOPMENT_DEBUGGING__MQTT_UNIT_TEST_ECHO
+
+void mDevelopmentDebugging::SubTask_MQTT_UnitTest_Echo()
+{
+  if(!mqtt_unit_test_echo.pending)
+  {
+    return;
+  }
+
+  if(mqtt_unit_test_echo.seconds_remaining > 0)
+  {
+    mqtt_unit_test_echo.seconds_remaining--;
+  }
+
+  if(mqtt_unit_test_echo.seconds_remaining == 0)
+  {
+    Send_MQTT_UnitTest_Echo();
+  }
+}
+
+#endif // ENABLE_FEATURE_DEVELOPMENT_DEBUGGING__MQTT_UNIT_TEST_ECHO
+#ifdef ENABLE_FEATURE_DEVELOPMENT_DEBUGGING__MQTT_UNIT_TEST_ECHO
+
+void mDevelopmentDebugging::Send_MQTT_UnitTest_Echo()
+{
+  if(!mqtt_unit_test_echo.pending)
+  {
+    return;
+  }
+
+  JBI->Start();
+
+    JBI->Object_Start("EchoAlive");
+
+      JBI->Add("Token", mqtt_unit_test_echo.token);
+      JBI->Add("Uptime", tkr_time->uptime_seconds_nonreset);
+
+      #ifdef ESP32
+      JBI->Add("FreeHeap", ESP.getFreeHeap());
+      JBI->Add("MinFreeHeap", ESP.getMinFreeHeap());
+      JBI->Add("FreePSRAM", ESP.getFreePsram());
+      #endif
+
+    JBI->Object_End();
+
+  JBI->End();
+
+  #ifdef USE_MODULE_NETWORK_MQTT
+  tkr_mqtt->Publish(
+    "status/unit_test",
+    JBI->GetBufferPtr(),
+    false
+  );
+  #endif
+
+  ALOG_INF(
+    PSTR("UnitTest EchoAlive response: Token=%s"),
+    mqtt_unit_test_echo.token
+  );
+
+  mqtt_unit_test_echo.pending = false;
+  mqtt_unit_test_echo.seconds_remaining = 0;
+  mqtt_unit_test_echo.token[0] = '\0';
+}
+
+#endif // ENABLE_FEATURE_DEVELOPMENT_DEBUGGING__MQTT_UNIT_TEST_ECHO
+
+
 
 void mDevelopmentDebugging::SubTask_Show_Defines_Ready_To_Phase_Out()
 {

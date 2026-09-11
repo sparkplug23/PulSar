@@ -1923,6 +1923,9 @@ if (jtok_pwi && jtok_pwi.isArray())
   if(jtok_sub = obj[PM_OVERRIDE])
   {  
 
+    // Needs added into the new animation
+
+    
     if(jtok = jtok_sub.getObject()["Animation"].getObject()["TimeMs"])
     {
       SEGMENT_I(segment_index).single_animation_override.time_ms = jtok.getInt();
@@ -1937,35 +1940,6 @@ if (jtok_pwi && jtok_pwi.isArray())
     }
 
   }
-
-
-  // if(jtok = obj[PM_BRIGHTNESS_RGB]){ // Range 0-100
-  //   uint8_t brightness = map(jtok.getInt(), 0,100, 0,255);
-  //   #ifdef ENABLE_DEVFEATURE_LIGHTS__PRESET_TESTING_BRIGHTNESS_BLOCKED
-  //   ALOG_WRN(PSTR("Brightness RGB command limited due to preset testing mode"));
-  //   brightness = brightness > 10 ? 10 : brightness;
-  //   #endif
-  //   SEGMENT_I(segment_index).setBrightnessRGB( brightness );
-  //   ALOG_INF(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
-  //   data_buffer.isserviced++;
-  // }else
-  // if(jtok = obj[PM_BRIGHTNESS_RGB_255]){
-  //   SEGMENT_I(segment_index).setBrightnessRGB( jtok.getInt() );
-  //   ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessRGB());
-  //   data_buffer.isserviced++;
-  // }
-
-
-  // if(jtok = obj[PM_BRIGHTNESS_CCT]){ // Range 0-100
-  //   SEGMENT_I(segment_index).setBrightnessCCT( map(jtok.getInt(), 0,100, 0,255) );
-  //   ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_RGB)), SEGMENT_I(segment_index).getBrightnessCCT());
-  //   data_buffer.isserviced++;
-  // }else
-  // if(jtok = obj[PM_BRIGHTNESS_CCT_255]){
-  //   SEGMENT_I(segment_index).setBrightnessCCT( jtok.getInt() );
-  //   ALOG_COM(PSTR(D_LOG_PIXEL D_COMMAND_NVALUE_K(D_BRIGHTNESS_CCT)), SEGMENT_I(segment_index).getBrightnessCCT());
-  //   data_buffer.isserviced++;
-  // }
 
 
   if(jtok = obj["Preset"].getObject()["Load"]){
@@ -1984,6 +1958,14 @@ if (jtok_pwi && jtok_pwi.isArray())
     ALOG_INF(PSTR("auto_timeoff %d"), SEGMENT_I(segment_index).auto_timeoff.Value());
   }
 
+  
+  if(jtok_sub = obj["LoadDefaults"])
+  {
+    bool load_effect_defaults = jtok_sub.getBool();
+    ALOG_INF(PSTR("LoadDefaults %d"), load_effect_defaults);
+    SEGMENT_I(segment_index).setEffect(SEGMENT_I(segment_index).effect_id, load_effect_defaults);
+  }
+ 
 
   /**
    * @brief Segment Colours (ie 1-5)
@@ -2102,7 +2084,8 @@ if (jtok_pwi && jtok_pwi.isArray())
     }
   
   }
- 
+
+  
 
   /***********************************************************************************************************************************************************************************
    *********************************************************************************************************************************************************************************** 
@@ -2266,6 +2249,12 @@ if (jtok = obj["Standby"])
 }
 
 #endif
+
+
+
+
+
+
   if (flag_geometry_updated)
   {
     SEGMENT_I(segment_index).refreshGeometry();

@@ -94,6 +94,7 @@ static inline void buildCRGB16FromPacked(const std::vector<uint8_t>& packed,
 
 #endif
 
+
 /**
  * @brief Loads a palette into RAM for the segment, handling multiple palette types.
  *
@@ -101,11 +102,18 @@ static inline void buildCRGB16FromPacked(const std::vector<uint8_t>& packed,
  * construction step (not per-frame). Any temporal/sensor-driven changes belong in Update_LivePalettes().
  *
  * Palette families handled here:
- * - Static CRGBPalette16 palettes (FastLED PROGMEM pointers)
- * - FastLED gradient palettes (parsed into CRGBPalette16 + stop indices)
+ * - Static CRGBPalette16 palettes:
+ *    - All static CRGB16 palettes are now stored as indexed byte gradients in gGradientPalettes[]
+ *    - The source gradient is expanded once at load time into a 16-entry CRGBPalette16
+ *    - Runtime colour lookup therefore does not care whether the source originally came from
+ *      FastLED fixed palettes, WLED gradients or MATLAB colour maps
+ * - Procedural palettes:
+ *    - No stored palette data is loaded; colour is generated directly from the requested index
  * - Static encoded palettes (byte-packed)
  * - Custom encoded palettes (user-defined, already in RAM)
+ * - Segment colours
  * - Segment-colour derived palettes (built from segcol[])
+ * - Static named single colours
  * - Live palettes (dynamic):
  *    A) Byte-packed live palettes  : PALETTELIST_DYNAMIC__COLOUR__ID_START..__LENGTH__ID
  *       - Data buffer is owned by mPaletteI->dynamic_palettes[] and refreshed by Update_LivePalettes()
@@ -136,173 +144,240 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
 
   // ---- Helpers (local, no ABI impact) ----
   auto setPackedPtrAndMeta = [&](mPalette::PALETTE_DATA* ptr) {
-    _palette_container->pData                = ptr->data;
+    _palette_container->pData = ptr->data;
     _palette_container->encoded_colour_width = mPaletteI->GetEncodedColourWidth(ptr->encoding);
-    _palette_container->colours_in_palette   = ptr->data.size() / _palette_container->encoded_colour_width;
+    _palette_container->colours_in_palette = ptr->data.size() / _palette_container->encoded_colour_width;
   };
 
   auto mirrorPackedIntoCRGB16 = [&]() {
     #ifdef ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
     _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
-    buildCRGB16FromPacked(_palette_container->pData,
-                          _palette_container->encoded_colour_width,
-                          _palette_container->colours_in_palette,
-                          _palette_container->CRGB16Palette16_Palette.data);
+    buildCRGB16FromPacked(_palette_container->pData, _palette_container->encoded_colour_width, _palette_container->colours_in_palette, _palette_container->CRGB16Palette16_Palette.data);
     #endif
   };
 
+
   // ------------------------------------------------------------------
-  // 1) Static CRGBPalette16 (FastLED)
+  // 1) Static CRGBPalette16
+  //
+  // All static CRGB16 palettes now use the same source representation:
+  // indexed byte gradients in gGradientPalettes[].
+  //
+  // Source representation:
+  //   [index, R, G, B] ... [255, R, G, B]
+  //
+  // Loaded/runtime representation:
+  //   CRGBPalette16
+  //
+  // The source may contain any sensible number of gradient stops. At load
+  // time it is expanded into the normal 16-entry CRGBPalette16. Runtime
+  // lookup therefore has one common path for every static CRGB16 palette.
   // ------------------------------------------------------------------
   if ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) &&
       (palette_id <  mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID))
   {
     const uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID;
-    _palette_container->CRGB16Palette16_Palette.data = *fastledPalettes[palette_id_adj];
-    _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
-    _palette_container->colours_in_palette = 16;
-    ALOG_DBM(PSTR("crgb16 %d"), palette_id);
-  }
-  // ------------------------------------------------------------------
-  // 2) Static CRGBPalette16 Gradient (FastLED gradient table)
-  // ------------------------------------------------------------------
-  else if ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID) &&
-           (palette_id <  mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
-  {
-    const uint16_t gradient_id = palette_id - mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
 
-    byte tcp[72]; // up to 18 entries
-    memcpy_P(tcp, (byte*)pgm_read_dword(&(gGradientPalettes[gradient_id])), sizeof(tcp));
+    /**
+     * loadDynamicGradientPalette() expects the gradient bytes in normal RAM.
+     *
+     * The definitions themselves live in PROGMEM, so copy only the actual
+     * entries until the mandatory final index 255 is reached.
+     *
+     * 72 bytes = maximum 18 gradient entries retained from the previous
+     * WLED/FastLED implementation.
+     */
+    byte tcp[72];
+    const byte* gradient_ptr = (const byte*)pgm_read_dword(&(gGradientPalettes[palette_id_adj]));
 
-    // Build CRGBPalette16 from gradient
-    _palette_container->CRGB16Palette16_Palette.data.loadDynamicGradientPalette(tcp);
+    uint8_t entry_count = 0;
+    while (entry_count < 18)
+    {
+      const uint8_t offset = entry_count * 4;
 
-    // Parse gradient stop indices exactly
-    _palette_container->CRGB16Palette16_Palette.encoded_index.clear();
-    TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(tcp);
-    TRGBGradientPaletteEntryUnion u;
+      tcp[offset + 0] = pgm_read_byte(gradient_ptr + offset + 0);
+      tcp[offset + 1] = pgm_read_byte(gradient_ptr + offset + 1);
+      tcp[offset + 2] = pgm_read_byte(gradient_ptr + offset + 2);
+      tcp[offset + 3] = pgm_read_byte(gradient_ptr + offset + 3);
 
-    // Count entries (kept for parity; not required otherwise)
-    uint16_t count = 0;
-    do {
-      u = *(ent + count);
-      count++;
-    } while (u.index != 255);
+      entry_count++;
 
-    u = *ent;
-    int indexstart = 0;
-    while (indexstart < 255) {
-      indexstart = u.index;
-      _palette_container->CRGB16Palette16_Palette.encoded_index.push_back(u.index);
-      ent++;
-      u = *ent;
+      // Every gradient definition terminates with an index of 255.
+      if (tcp[offset] == 255) {
+        break;
+      }
     }
 
+    // Build the common 16-entry runtime palette from the stored gradient.
+    _palette_container->CRGB16Palette16_Palette.data.loadDynamicGradientPalette(tcp);
+
+    /**
+     * IMPORTANT:
+     *
+     * encoded_index now describes the loaded CRGBPalette16, NOT the number
+     * of source gradient control points.
+     *
+     * For example Matlab_Cool_gp only needs two source control points, but
+     * once loaded it is still a normal 16-entry CRGBPalette16. Keeping the
+     * runtime indexing normalized to 16 entries means the hot lookup path
+     * never needs to care how many source gradient stops were stored.
+     */
+    _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
+
+    _palette_container->encoded_colour_width = 3;
     _palette_container->colours_in_palette = 16;
+
+    ALOG_DBM(PSTR("crgb16 %d"), palette_id);
   }
+
+
+  // ------------------------------------------------------------------
+  // 2) Procedural palettes
+  //
+  // These have no stored palette data to load. The selected palette ID
+  // identifies which procedural colour generator is used by the lookup path.
+  // ------------------------------------------------------------------
+  else if (palette_id == mPalette::PALETTELIST_PROCEDURAL__COLOUR_WHEEL__ID)
+  {
+    _palette_container->encoded_colour_width = 0;
+    _palette_container->colours_in_palette = 0;
+  }
+
+
   // ------------------------------------------------------------------
   // 3) Static byte-packed palettes
   // ------------------------------------------------------------------
-  else if ((palette_id >= mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID) &&
-           (palette_id <  mPalette::PALETTELIST_STATIC_LENGTH__ID))
+  else if ((palette_id >= mPalette::PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID) &&
+           (palette_id <  mPalette::PALETTELIST_STATIC__LENGTH__ID))
   {
-    const uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;
+    const uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID;
 
     #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-    ALOG_INF(PSTR("LOADING PALETTELIST_STATIC palette_id_adj %d %d %d"),
-             palette_id_adj, palette_id, mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID);
+    ALOG_INF(PSTR("LOADING PALETTELIST_STATIC palette_id_adj %d %d %d"), palette_id_adj, palette_id, mPalette::PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID);
     #endif
 
     mPalette::PALETTE_DATA* ptr = &mPaletteI->static_palettes[palette_id_adj];
     setPackedPtrAndMeta(ptr);
     mirrorPackedIntoCRGB16();
   }
+
+
   // ------------------------------------------------------------------
   // 4) Custom palettes (user-defined, already in RAM)
   // ------------------------------------------------------------------
-  else if ((palette_id >= mPalette::PALETTELIST_DYNAMIC__LENGTH__ID) &&
+  else if ((palette_id >= mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED) &&
            (palette_id <  mPaletteI->GetPaletteListLength()))
   {
-    const uint16_t palette_id_adj =
-      palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
+    const uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
 
     mPalette::PALETTE_DATA* ptr = &mPaletteI->custom_palettes[palette_id_adj];
     setPackedPtrAndMeta(ptr);
     mirrorPackedIntoCRGB16();
   }
+
+
   // ------------------------------------------------------------------
-  // 5) Single segment colour (no preload needed)
+  // 5) Single segment colour
+  //
+  // Directly stored in segcol[], so there is no palette data to preload.
   // ------------------------------------------------------------------
   else if ((palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) &&
            (palette_id <  mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID))
   {
+    _palette_container->encoded_colour_width = 0;
     _palette_container->colours_in_palette = 1;
   }
+
+
   // ------------------------------------------------------------------
-  // Segment-colour derived CRGBPalette16 palettes
+  // 6) Static named single colours
+  //
+  // These are read directly from PM_STATIC_SINGLE_COLOURS__DATA during
+  // colour lookup, so there is no palette data to preload here.
+  // ------------------------------------------------------------------
+  else if ((palette_id >= mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) &&
+           (palette_id <  mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID))
+  {
+    _palette_container->encoded_colour_width = 3;
+    _palette_container->colours_in_palette = 1;
+  }
+
+
+  // ------------------------------------------------------------------
+  // 7) Segment-colour derived CRGBPalette16 palettes
   // ------------------------------------------------------------------
   else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)
   {
     _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
+    _palette_container->encoded_colour_width = 3;
     _palette_container->colours_in_palette = 16;
 
     const CRGB prim = segcol[0].getU32();
-    const CRGB sec  = segcol[1].getU32();
+    const CRGB sec = segcol[1].getU32();
+
     _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim, prim, sec, sec);
   }
+
   else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_THREE_123__ID)
   {
     _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
+    _palette_container->encoded_colour_width = 3;
     _palette_container->colours_in_palette = 16;
 
     const CRGB prim = segcol[0].getU32();
-    const CRGB sec  = segcol[1].getU32();
-    const CRGB ter  = segcol[2].getU32();
+    const CRGB sec = segcol[1].getU32();
+    const CRGB ter = segcol[2].getU32();
+
     _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim, sec, ter);
   }
+
   else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FOUR_1234__ID)
   {
     _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
+    _palette_container->encoded_colour_width = 3;
     _palette_container->colours_in_palette = 16;
 
     const CRGB prim = segcol[0].getU32();
-    const CRGB sec  = segcol[1].getU32();
-    const CRGB ter  = segcol[2].getU32();
+    const CRGB sec = segcol[1].getU32();
+    const CRGB ter = segcol[2].getU32();
     const CRGB four = segcol[3].getU32();
+
     _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim, sec, ter, four);
   }
+
   else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FIVE_12345__ID)
   {
     _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
+    _palette_container->encoded_colour_width = 3;
     _palette_container->colours_in_palette = 16;
 
     const CRGB prim = segcol[0].getU32();
-    const CRGB sec  = segcol[1].getU32();
-    const CRGB ter  = segcol[2].getU32();
+    const CRGB sec = segcol[1].getU32();
+    const CRGB ter = segcol[2].getU32();
     const CRGB four = segcol[3].getU32();
     const CRGB five = segcol[4].getU32();
-    _palette_container->CRGB16Palette16_Palette.data =
-      CRGBPalette16(prim, prim, prim, sec, sec, sec, ter, ter, ter, four, four, four, five, five, five, five);
+
+    _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim, prim, prim, sec, sec, sec, ter, ter, ter, four, four, four, five, five, five, five);
   }
+
   else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID)
   {
     _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
+    _palette_container->encoded_colour_width = 3;
     _palette_container->colours_in_palette = 16;
 
     const CRGB prim = segcol[0].getU32();
-    const CRGB sec  = segcol[1].getU32();
-    const CRGB ter  = segcol[2].getU32();
+    const CRGB sec = segcol[1].getU32();
+    const CRGB ter = segcol[2].getU32();
     const CRGB four = segcol[3].getU32();
     const CRGB five = segcol[4].getU32();
 
-    _palette_container->CRGB16Palette16_Palette.data =
-      CRGBPalette16(prim, sec, ter, four, five,
-                    prim, sec, ter, four, five,
-                    prim, sec, ter, four, five,
-                    five);
+    _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim, sec, ter, four, five, prim, sec, ter, four, five, prim, sec, ter, four, five, five);
   }
+
+
   // ------------------------------------------------------------------
-  // 7) Live palettes (dynamic) - BYTE PACKED
+  // 8) Live palettes (dynamic) - BYTE PACKED
   //    (Update_LivePalettes() owns refresh; Load just points at the buffer)
   // ------------------------------------------------------------------
   else if ((palette_id >= mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START) &&
@@ -311,16 +386,17 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     const uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START;
 
     #ifdef ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-    ALOG_HGL(PSTR("LOADING LIVE(BYTEPACK) palette_id_adj %d %d %d"),
-             palette_id_adj, palette_id, mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START);
+    ALOG_HGL(PSTR("LOADING LIVE(BYTEPACK) palette_id_adj %d %d %d"), palette_id_adj, palette_id, mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START);
     #endif
 
     mPalette::PALETTE_DATA* ptr = &mPaletteI->dynamic_palettes[palette_id_adj];
     setPackedPtrAndMeta(ptr);
     mirrorPackedIntoCRGB16();
   }
+
+
   // ------------------------------------------------------------------
-  // 8) Live palettes (dynamic) - CRGBPALETTE16 (randomised etc.)
+  // 9) Live palettes (dynamic) - CRGBPALETTE16 (randomised etc.)
   //    (Seed once here; periodic refresh is only Update_LivePalettes)
   // ------------------------------------------------------------------
   else if ((palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) &&
@@ -328,11 +404,21 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
   {
     _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
     _palette_container->encoded_colour_width = 3;
-    _palette_container->colours_in_palette   = 16;
+    _palette_container->colours_in_palette = 16;
 
     // Seed once via the single source of truth (no periodic timing here).
     Update_LivePalettes(palette_id);
   }
+
+
+  // ------------------------------------------------------------------
+  // Unknown palette ID
+  // ------------------------------------------------------------------
+  else
+  {
+    ALOG_INF(PSTR("LoadPalette missing palette ID %d"), palette_id);
+  }
+
 
   #ifdef ENABLE_DEVFEATURE_LIGHTING__LOAD_PALETTE_ASYNC_LOCK
   LoadPalette_AsyncLock = false;
@@ -356,21 +442,11 @@ void mAnimatorLight::Segment::Update_LivePalettes(
   const bool default_runtime_call = (pal_id == 0xFFFF) && !preview_mode;
   const uint16_t resolved_pal_id  = (pal_id == 0xFFFF) ? palette_id : pal_id;
 
-  Update_LivePalette(
-    resolved_pal_id,
-    palette_loaded,
-    preview_index,
-    preview_mode
-  );
+  Update_LivePalette(resolved_pal_id, palette_loaded, preview_index, preview_mode);
 
   if (default_runtime_call && (palette2_loaded != nullptr))
   {
-    Update_LivePalette(
-      palette2_loaded->loaded_palette_id,
-      palette2_loaded,
-      0,
-      false
-    );
+    Update_LivePalette(palette2_loaded->loaded_palette_id, palette2_loaded, 0, false);
   }
 }
 
@@ -857,7 +933,6 @@ int16_t mAnimatorLight::GetPaletteIDbyName(char* buffer)
 
 
 
-
 uint8_t mAnimatorLight::GetNumberOfColoursInUNLOADEDPalette(uint16_t palette_id)
 {
 
@@ -865,79 +940,157 @@ uint8_t mAnimatorLight::GetNumberOfColoursInUNLOADEDPalette(uint16_t palette_id)
 
   // ALOG_INF(PSTR("============LoadPalette %d %d %d"), palette_id, 0, tkr_anim->segment_current_index);
 
-  /**
-   * @brief PaletteList Vectors should have the length stored in it. Actual pixel count depends on encoding type
-   **/
+
+  /**************************************************************
+   * 
+   * Static byte-packed palettes
+   *
+   * PaletteList vectors already contain the encoded palette data.
+   * Actual colour count depends on the encoding width.
+   * 
+  ***************************************************************/
   if(
-    ((palette_id >= mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID) && (palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID))
-  ){   
+    (palette_id >= mPalette::PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID) &&
+    (palette_id < mPalette::PALETTELIST_STATIC__LENGTH__ID)
+  ){
 
-    uint16_t encoded_colour_width = 0;
+    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID;
+    mPalette::PALETTE_DATA pal = mPaletteI->static_palettes[constrain(palette_id_adj, 0, mPaletteI->static_palettes.size() - 1)];
 
-    uint16_t palette_id_adj = palette_id - mPalette::PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;
-    mPalette::PALETTE_DATA pal = mPaletteI->static_palettes[constrain(palette_id_adj,0,mPaletteI->static_palettes.size()-1)];
+    // Serial.println(pal.encoding.data, BIN);
 
-    // Serial.println(ptr->encoding.data, BIN);
+    uint8_t encoded_colour_width = mPaletteI->GetEncodedColourWidth(pal.encoding);
 
-    if(pal.encoding.red_enabled){ encoded_colour_width++; }
-    if(pal.encoding.green_enabled){ encoded_colour_width++; }
-    if(pal.encoding.blue_enabled){ encoded_colour_width++; }
-    if(pal.encoding.white_warm_enabled){ encoded_colour_width++; }
-
-    if(pal.encoding.white_cold_enabled){ encoded_colour_width++; }
-    if(pal.encoding.encoded_value_byte_width){ encoded_colour_width += pal.encoding.encoded_value_byte_width; }
-
-    // if(pal.encoding.index_exact){ encoded_colour_width++; }
-    if(pal.encoding.index_gradient){ encoded_colour_width++; }
-    if(pal.encoding.index_is_trigger_value_exact){ encoded_colour_width++; }
-    
-    // if(pal.encoding.encoded_as_hsb_ids){ encoded_colour_width++; }
-    if(pal.encoding.encoded_as_crgb_palette_16){ encoded_colour_width++; }
-    if(pal.encoding.encoded_as_crgb_palette_256){ encoded_colour_width++; }
-    if(pal.encoding.palette_can_be_modified){ encoded_colour_width++; }
-
-
-    if(encoded_colour_width==0)
+    if(encoded_colour_width == 0)
     {
       // ALOG_ERR(PSTR("encoded_colour_width==0, crash errorAA =%S"), pal.friendly_name_ctr);
       return palette_colour_count;
     }
-  
-    palette_colour_count = pal.data.size()/encoded_colour_width; 
-    
-    // ALOG_INF(PSTR("============  data_length/encoded_width %d %d"),  pal.data.size(), encoded_colour_width);
- 
+
+    palette_colour_count = pal.data.size() / encoded_colour_width;
+
+    // ALOG_INF(PSTR("============  data_length/encoded_width %d %d"), pal.data.size(), encoded_colour_width);
+
   }
+
+
+  /**************************************************************
+   * 
+   * Segment colours
+   *
+   * Direct references to segcol[], therefore always one colour.
+   * 
+  ***************************************************************/
   else
   if(
-    (palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID)
+    (palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) &&
+    (palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID)
   ){
     palette_colour_count = 1;
   }
+
+
+  /**************************************************************
+   * 
+   * Segment-colour generated CRGBPalette16 palettes
+   *
+   * Regardless of how many segment colours are used to construct them,
+   * the loaded runtime representation is always CRGBPalette16.
+   * 
+  ***************************************************************/
   else
   if(
-    (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)
+    (palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) &&
+    (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)
   ){
     palette_colour_count = 16;
   }
+
+
+  /**************************************************************
+   * 
+   * Procedural palettes
+   *
+   * Colour Wheel has no stored palette entries. It accepts the full
+   * 0-255 procedural index range, so expose 256 logical positions.
+   * 
+  ***************************************************************/
   else
   if(
-    (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
-  ){  
-    palette_colour_count = 16;    
+    palette_id == mPalette::PALETTELIST_PROCEDURAL__COLOUR_WHEEL__ID
+  ){
+    // NOTE: return type is currently uint8_t, therefore 256 cannot be represented.
+    // Until this function is changed to uint16_t, 255 is the maximum representable value.
+    palette_colour_count = 255;
   }
+
+
+  /**************************************************************
+   * 
+   * Static CRGBPalette16
+   *
+   * All former FastLED fixed palettes, WLED gradient palettes and
+   * MATLAB colour maps are now stored in gGradientPalettes[] and
+   * normalized at load time into the same 16-entry CRGBPalette16.
+   * 
+  ***************************************************************/
   else
   if(
-    (palette_id >= mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) && (palette_id < mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)
-  ){  
-    palette_colour_count = 1;    
+    (palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) &&
+    (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)
+  ){
+    palette_colour_count = 16;
   }
+
+
+  /**************************************************************
+   * 
+   * Static single colours
+   * 
+  ***************************************************************/
   else
   if(
-    (palette_id >= mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START) && (palette_id < mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)
-  ){  
+    (palette_id >= mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) &&
+    (palette_id < mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)
+  ){
+    palette_colour_count = 1;
+  }
+
+
+  /**************************************************************
+   * 
+   * Dynamic CRGBPalette16 palettes
+   *
+   * These are generated/updated at runtime, but their runtime
+   * representation is always CRGBPalette16.
+   * 
+  ***************************************************************/
+  else
+  if(
+    (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) &&
+    (palette_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID)
+  ){
+    palette_colour_count = 16;
+  }
+
+
+  /**************************************************************
+   * 
+   * Dynamic palettes
+   *
+   * Dynamic/Live palettes can use different runtime representations,
+   * so the number of colours depends on the selected palette.
+   * 
+  ***************************************************************/
+  else
+  if(
+    (palette_id >= mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START) &&
+    (palette_id < mPalette::PALETTELIST_DYNAMIC__LENGTH__ID)
+  ){
     ALOG_INF(PSTR("Temporary fix, needs its own palette count"));
-    palette_colour_count = 1;    
+
+    palette_colour_count = 1;
+
     /**
      * @brief These are all different, doing a temporary fix for now
      * 
@@ -945,50 +1098,70 @@ uint8_t mAnimatorLight::GetNumberOfColoursInUNLOADEDPalette(uint16_t palette_id)
     switch(palette_id)
     {
       default:
+
       case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__WHITE_COLOUR_TEMPERATURE_01__ID:
         palette_colour_count = 1;
       break;
+
       case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__SEGMENT_COLOUR_BLEND_DAYTIME_01__ID:
         palette_colour_count = 1;
       break;
+
       case mPalette::PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_IMMEDIATE_01__ID:
         palette_colour_count = 1;
       break;
+
       case mPalette::PALETTELIST_DYNAMIC__ELAPSEDTIME_PALIX__SEGCOLOUR_CYCLE_BLENDING_02__ID:
         palette_colour_count = 1;
       break;
+
       case mPalette::PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__ID:
-        palette_colour_count = sizeof(PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__DATA)/6;
+        palette_colour_count = sizeof(PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__DATA) / 6;
       break;
     }
   }
+
+
+  /**************************************************************
+   * 
+   * Custom palettes
+   * 
+  ***************************************************************/
   else
   if(
-    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
-    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
-  ){   
-    palette_colour_count = 16;
-  }else
+    (palette_id >= mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED) &&
+    (palette_id < mPaletteI->GetPaletteListLength())
+  ){
 
-  /**
-   * @brief CustomPalettes
-   * 
-   */
-  if(
-    (palette_id >= mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED) && (palette_id < mPaletteI->GetPaletteListLength())
-  ){  
+    uint16_t palette_adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
+    uint8_t colour_width = mPaletteI->GetEncodedColourWidth(mPaletteI->custom_palettes[palette_adjusted_id].encoding);
 
-    uint16_t palette_adjusted_id = palette_id - mPalette::PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED; // adjust back into correct indexing
-    uint8_t colour_width  = mPaletteI->GetEncodedColourWidth(mPaletteI->custom_palettes[palette_adjusted_id].encoding); 
-    palette_colour_count = mPaletteI->custom_palettes[palette_adjusted_id].data.size()/colour_width;    
-    ALOG_INF(PSTR("LoadPalette %d %d %d %d"),palette_id, palette_adjusted_id, colour_width, palette_colour_count); delay(3000);
+    if(colour_width == 0)
+    {
+      return palette_colour_count;
+    }
 
+    palette_colour_count = mPaletteI->custom_palettes[palette_adjusted_id].data.size() / colour_width;
+
+    ALOG_INF(PSTR("LoadPalette %d %d %d %d"), palette_id, palette_adjusted_id, colour_width, palette_colour_count);
+    // delay(3000);
   }
-    
+
+
+  /**************************************************************
+   * 
+   * Errors
+   * 
+  ***************************************************************/
+  else
+  {
+    ALOG_INF(PSTR("Missing palette count %d"), palette_id);
+  }
+
+
   return palette_colour_count;
 
 }
-
 
 void mAnimatorLight::loadCustomPalettes()
 {
@@ -1235,6 +1408,7 @@ void mAnimatorLight::Segment::ReleasePalette2()
   palette2_loaded = nullptr;
 }
 
+
 /**
  * @brief Loads the requested palette into a temporary container when required.
  *
@@ -1247,23 +1421,22 @@ void mAnimatorLight::Segment::ReleasePalette2()
 uint32_t IRAM_ATTR mAnimatorLight::GetPaletteColour_WithTemporaryLoad(
   uint16_t palette_id,
   uint16_t _pixel_position,
-  bool     flag_spanned_segment,
-  bool     flag_wrap_hard_edge,
-  bool     flag_crgb_exact_colour,
+  bool flag_spanned_segment,
+  bool flag_wrap_hard_edge,
+  bool flag_crgb_exact_colour,
   uint8_t* encoded_value,
-  bool     flag_request_is_for_full_visual_output
+  bool flag_request_is_for_full_visual_output
 ){
+
   /**
    * @brief Directly handle certain palette types that don't need loading.
    * These palette types are handled directly, bypassing the LoadPalette function.
    */
-  if (
-    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
-    ((palette_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID) && (palette_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)) ||
-    ((palette_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)) ||
+  if(
+    ((palette_id >= mPalette::PALETTELIST_PROCEDURAL__COLOUR_WHEEL__ID) && (palette_id < mPalette::PALETTELIST_PROCEDURAL__LENGTH__ID)) ||
     ((palette_id >= mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) && (palette_id < mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)) ||
     ((palette_id >= mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) && (palette_id < mPalette::PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID))
-  ) {
+  ){
     DEBUG_LINE_HERE_TRACE
 
     return mPaletteI->GetColourFromPreloadedPaletteBuffer_U32(
@@ -1280,6 +1453,9 @@ uint32_t IRAM_ATTR mAnimatorLight::GetPaletteColour_WithTemporaryLoad(
 
   /**
    * @brief Load is required for other palette types, so we call LoadPalette.
+   *
+   * Static CRGBPalette16 palettes are now all loaded through the unified
+   * PALETTELIST_STATIC_CRGBPALETTE16 group.
    */
   mPaletteLoaded palette_container_temp = mPaletteLoaded();
 
@@ -1296,7 +1472,6 @@ uint32_t IRAM_ATTR mAnimatorLight::GetPaletteColour_WithTemporaryLoad(
     flag_request_is_for_full_visual_output
   );
 }
-
 
 
 

@@ -1781,405 +1781,6 @@ static uint8_t _dummy     (uint8_t a, uint8_t b) { return a; } // dummy (same as
 
 #define BLENDMODES  17 // number of blend modes must match "bm" in index.js, all cases must be handled in segblend() @ blendSegment()
 
-// void mAnimatorLight::blendSegment(const Segment &topSegment) const {
-  
-//   // DEBUG_PRINT_LN("blend start");
-
-//   typedef uint8_t(*FuncType)(uint8_t, uint8_t);
-//   // function pointer array: fill with _dummy if using special case: avoid OOB access and always provide a valid path
-//   // note: making the function array static const uses more ram and comes at no significant speed gain
-//   FuncType funcs[] = {
-//     _dummy,      _dummy,     _dummy,    _subtract,
-//     _difference, _average,   _dummy,    _divide,
-//     _lighten,    _darken,    _screen,   _overlay,
-//     _hardlight,  _softlight, _dodge,    _burn,
-//     _dummy
-//   };
-
-//   const size_t blendMode = topSegment.blendMode < BLENDMODES ? topSegment.blendMode : 0; // default to top if unsupported mode
-//   const auto segblend = [&](uint32_t t, uint32_t b){
-//     // use direct calculations/returns for simple/frequent modes (faster)
-//     switch (blendMode) {
-//       case 0 : return t;                   // top
-//       case 1 : return b;                   // bottom
-//       case 2 : return Segment::color_add(t,b,true); // add with preserve color ratio to avoid color clipping
-//       case 6 : return RGBW32(_multiply(R(t),R(b)), _multiply(G(t),G(b)), _multiply(B(t),B(b)), _multiply(W(t),W(b))); // multiply (7% faster than lambda at 100bytes flash cost)
-//       case 16: return t ? t : b;           // stencil (use top layer if not black, else bottom)
-//     }
-//     // default: use function pointer from array
-//     const auto func = funcs[blendMode];
-//     return RGBW32(func(R(t),R(b)), func(G(t),G(b)), func(B(t),B(b)), func(W(t),W(b)));
-//   };
-
-//   const int     length     = topSegment.length();     // physical segment length (counts all pixels in 2D segment)
-//   const int     width      = topSegment.width();
-//   const int     height     = topSegment.height();
-//   //const uint32_t bgColor   = topSegment.colors[1]; // background color (unused, could add it to stencil mode if requested)
-//   const auto    XY         = [](int x, int y){ return x + y*Segment::maxWidth; };
-//   const size_t  matrixSize = Segment::maxWidth * Segment::maxHeight;
-//   const size_t  startIndx  = XY(topSegment.start, topSegment.startY);
-//   const size_t  stopIndx   = startIndx + length;
-//   uint8_t       opacity    = topSegment.currentBri(); // returns transitioned opacity for style FADE
-//   uint8_t       cct        = topSegment.currentCCT();
-//   if (gammaCorrectCol) opacity = gamma8inv(opacity); // use inverse gamma on brightness for correct color scaling after gamma correction (see #5343 for details)
-
-//   const Segment *segO = topSegment.getOldSegment();
-//   const bool hasGrouping = topSegment.groupLength() != 1;
-
-//   opacity = 255;
-
-// //   if (topSegment.progress() > 63000U)
-// // {
-// //   Serial.printf(
-// //     "BLEND IN prog=%u bri=%u opacity=%u old=%08lX new=%08lX\n",
-// //     topSegment.progress(),
-// //     topSegment.currentBri(),
-// //     opacity,
-// //     (unsigned long)(segO ? segO->getPixelColorRaw(0) : 0),
-// //     (unsigned long)topSegment.getPixelColorRaw(0)
-// //   );
-// // }
-
-
-//   // ALOG_INF(PSTR("seg0 %d, blendStyle %d, hasGrouping %d, mirror %d, mirror_y %d"), segO, blendingStyle, hasGrouping, topSegment.mirror, topSegment.mirror_y);
-//   // ALOG_INF(
-//   //   PSTR(
-//   //     "segO=%p len%d, transition=%u blendStyle=%u fade=%u "
-//   //     "grouping=%u mirror=%u mirrorY=%u isMatrix=%u"
-//   //   ),
-//   //   (void*)segO,
-//   //   length,
-//   //   (unsigned)topSegment.isInTransition(),
-//   //   (unsigned)blendingStyle,
-//   //   (unsigned)TRANSITION_FADE,
-//   //   (unsigned)hasGrouping,
-//   //   (unsigned)topSegment.mirror,
-//   //   (unsigned)topSegment.mirror_y,
-//   //   (unsigned)isMatrix
-//   // );
-
-//   // fast path: handle the default case - no transitions, no grouping/spacing, no mirroring, no CCT
-//   if (!segO && blendingStyle == TRANSITION_FADE && !hasGrouping && !topSegment.mirror && !topSegment.mirror_y) {
-//     // DEBUG_PRINT_LN("Fast Path");
-//     if (isMatrix && stopIndx <= matrixSize && !_pixelCCT) {
-// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS // WLED_DISABLE_2D
-//       // Calculate pointer steps to avoid 'if' and 'XY()' inside loops
-//       int x_inc = 1;
-//       int y_inc = Segment::maxWidth;
-//       int start_offset = XY(topSegment.start, topSegment.startY);
-      
-//       // adjust starting position and steps based on Reverse/Transpose
-//       // note: transpose is handled in separate loop so it is still fast and no branching is needed in default path
-//       if (!topSegment.transpose) {
-//         if (topSegment.reverse)   { start_offset += (width - 1); x_inc = -1; }
-//         if (topSegment.reverse_y) { start_offset += (height - 1) * Segment::maxWidth; y_inc = -Segment::maxWidth; }
-        
-//         for (int y = 0; y < height; y++) {
-//           uint32_t* pRow = &_pixels[start_offset + y * y_inc];
-//           const int y_width = y * width;
-//           for (int x = 0; x < width; x++) {
-//             uint32_t* p = pRow + x * x_inc;
-//             uint32_t c_a = topSegment.getPixelColorRaw(x + y_width);
-//             *p = Segment::color_blend(*p, segblend(c_a, *p), opacity);
-//           }
-//         }
-//       } else { // transposed
-        
-//         for (int y = 0; y < height; y++) {
-//           const int px = topSegment.reverse ? (height - y - 1) : y;  // source pixel: swap y into x, reverse if needed
-//           for (int x = 0; x < width; x++) {
-//             const int py = topSegment.reverse_y ? (width  - x - 1) : x;  // source pixel: swap x into y, reverse if needed
-//             const uint32_t c_a = topSegment.getPixelColorRaw(px + py * height); // height = virtual width
-//             const size_t idx = XY(topSegment.start + x, topSegment.startY + y); // write logical (non swapped) pixel coordinate
-//             _pixels[idx] = Segment::color_blend(_pixels[idx], segblend(c_a, _pixels[idx]), opacity);
-//           }
-//         }
-//       }
-//       return;
-// #endif
-//     } else 
-//     if (!isMatrix) {
-//       // DEBUG_PRINT_LN("1D Fast Path");
-//       // 1D fast path, include CCT as it is more common on 1D setups
-//       // pixels[] -> _pixels[]
-//       uint32_t* strip = _pixels;
-//       int start = topSegment.start;
-//       int off   = topSegment.offset;
-//       // ALOG_INF(PSTR("stop %d"), topSegment.stop);
-//       for (int i = 0; i < length; i++) {
-//         uint32_t c_a = topSegment.getPixelColorRaw(i);
-//         int p = topSegment.reverse ? (length - i - 1) : i;
-//         int idx = start + p + off;
-//         if (idx >= topSegment.stop) idx -= length;
-//         strip[idx] = Segment::color_blend(strip[idx], segblend(c_a, strip[idx]), opacity);
-//         // strip[idx] = c_a;
-//         // ALOG_INF(PSTR("idx i %d %d"), idx, i);
-//         // if (_pixelCCT) _pixelCCT[idx] = cct;
-
-//       }
-//       return;
-//     }
-//   }else{
-//     // DEBUG_PRINT_LN("!Fast Path");
-//   }
-
-
-//   // slow path: handle transitions, grouping/spacing, segments with clipping and CCT pixels
-//   Segment::setClippingRect(0, 0);  // disable clipping by default
-//   const unsigned progress = topSegment.progress();
-//   const unsigned progInv  = 0xFFFFU - progress;
-//   const unsigned dw = (blendingStyle==TRANSITION_OUTSIDE_IN ? progInv : progress) * width / 0xFFFFU + 1;
-//   const unsigned dh = (blendingStyle==TRANSITION_OUTSIDE_IN ? progInv : progress) * height / 0xFFFFU + 1;
-//   const unsigned orgBS = blendingStyle;
-//   if (width*height == 1) tkr_anim->blendingStyle = TRANSITION_FADE; // disable style for single pixel segments (use fade instead)
-//   switch (tkr_anim->blendingStyle) {
-//     case TRANSITION_CIRCULAR_IN: // (must set entire segment, see isPixelXYClipped())
-//     case TRANSITION_CIRCULAR_OUT:// (must set entire segment, see isPixelXYClipped())
-//     case TRANSITION_FAIRY_DUST:  // fairy dust (must set entire segment, see isPixelXYClipped())
-//       Segment::setClippingRect(0, width, 0, height);
-//       break;
-//     case TRANSITION_SWIPE_RIGHT: // left-to-right
-//     case TRANSITION_PUSH_RIGHT:  // left-to-right
-//       Segment::setClippingRect(0, dw, 0, height);
-//       break;
-//     case TRANSITION_SWIPE_LEFT:  // right-to-left
-//     case TRANSITION_PUSH_LEFT:   // right-to-left
-//       Segment::setClippingRect(width - dw, width, 0, height);
-//       break;
-//     case TRANSITION_OUTSIDE_IN:   // corners
-//       Segment::setClippingRect((width + dw)/2, (width - dw)/2, (height + dh)/2, (height - dh)/2); // inverted!!
-//       break;
-//     case TRANSITION_INSIDE_OUT:  // outward
-//       Segment::setClippingRect((width - dw)/2, (width + dw)/2, (height - dh)/2, (height + dh)/2);
-//       break;
-//     case TRANSITION_SWIPE_DOWN:  // top-to-bottom (2D)
-//     case TRANSITION_PUSH_DOWN:   // top-to-bottom (2D)
-//       Segment::setClippingRect(0, width, 0, dh);
-//       break;
-//     case TRANSITION_SWIPE_UP:    // bottom-to-top (2D)
-//     case TRANSITION_PUSH_UP:     // bottom-to-top (2D)
-//       Segment::setClippingRect(0, width, height - dh, height);
-//       break;
-//     case TRANSITION_OPEN_H:      // horizontal-outward (2D) same look as INSIDE_OUT on 1D
-//       Segment::setClippingRect((width - dw)/2, (width + dw)/2, 0, height);
-//       break;
-//     case TRANSITION_OPEN_V:      // vertical-outward (2D)
-//       Segment::setClippingRect(0, width, (height - dh)/2, (height + dh)/2);
-//       break;
-//     case TRANSITION_SWIPE_TL:    // TL-to-BR (2D)
-//     case TRANSITION_PUSH_TL:     // TL-to-BR (2D)
-//       Segment::setClippingRect(0, dw, 0, dh);
-//       break;
-//     case TRANSITION_SWIPE_TR:    // TR-to-BL (2D)
-//     case TRANSITION_PUSH_TR:     // TR-to-BL (2D)
-//       Segment::setClippingRect(width - dw, width, 0, dh);
-//       break;
-//     case TRANSITION_SWIPE_BR:    // BR-to-TL (2D)
-//     case TRANSITION_PUSH_BR:     // BR-to-TL (2D)
-//       Segment::setClippingRect(width - dw, width, height - dh, height);
-//       break;
-//     case TRANSITION_SWIPE_BL:    // BL-to-TR (2D)
-//     case TRANSITION_PUSH_BL:     // BL-to-TR (2D)
-//       Segment::setClippingRect(0, dw, height - dh, height);
-//       break;
-//   }
-
-//   if (isMatrix && stopIndx <= matrixSize) {
-// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-//     const int nCols = topSegment.virtualWidth();
-//     const int nRows = topSegment.virtualHeight();
-//     const int oCols = segO ? segO->virtualWidth() : nCols;
-//     const int oRows = segO ? segO->virtualHeight() : nRows;
-
-//     const auto setMirroredPixel = [&](int x, int y, uint32_t c, uint8_t o) {
-//       const int baseX = topSegment.start  + x;
-//       const int baseY = topSegment.startY + y;
-//       size_t indx = XY(baseX, baseY); // absolute address on strip
-//       _pixels[indx] = Segment::color_blend(_pixels[indx], segblend(c, _pixels[indx]), o);
-//       if (_pixelCCT) _pixelCCT[indx] = cct;
-//       // Apply mirroring if enabled
-//       if (topSegment.mirror || topSegment.mirror_y) {
-//         const int mirrorX = topSegment.start  + width  - x - 1;
-//         const int mirrorY = topSegment.startY + height - y - 1;
-//         const size_t idxMX = XY(topSegment.transpose ? baseX : mirrorX, topSegment.transpose ? mirrorY : baseY);
-//         const size_t idxMY = XY(topSegment.transpose ? mirrorX : baseX, topSegment.transpose ? baseY : mirrorY);
-//         const size_t idxMM = XY(mirrorX, mirrorY);
-//         if (topSegment.mirror)                        _pixels[idxMX] = tkr_anim->color_blend(_pixels[idxMX], segblend(c, _pixels[idxMX]), o);
-//         if (topSegment.mirror_y)                      _pixels[idxMY] = tkr_anim->color_blend(_pixels[idxMY], segblend(c, _pixels[idxMY]), o);
-//         if (topSegment.mirror && topSegment.mirror_y) _pixels[idxMM] = tkr_anim->color_blend(_pixels[idxMM], segblend(c, _pixels[idxMM]), o);
-//         if (_pixelCCT) {
-//           if (topSegment.mirror)                        _pixelCCT[idxMX] = cct;
-//           if (topSegment.mirror_y)                      _pixelCCT[idxMY] = cct;
-//           if (topSegment.mirror && topSegment.mirror_y) _pixelCCT[idxMM] = cct;
-//         }
-//       }
-//     };
-
-//     // if we blend using "push" style we need to "shift" canvas to left/right/up/down
-//     unsigned offsetX = (blendingStyle == TRANSITION_PUSH_UP   || blendingStyle == TRANSITION_PUSH_DOWN)  ? 0 : progInv * nCols / 0xFFFFU;
-//     unsigned offsetY = (blendingStyle == TRANSITION_PUSH_LEFT || blendingStyle == TRANSITION_PUSH_RIGHT) ? 0 : progInv * nRows / 0xFFFFU;
-//     const unsigned groupLen = topSegment.groupLength();
-//     bool applyReverse = topSegment.reverse || topSegment.reverse_y || topSegment.transpose;
-//     int pushOffsetX = 0, pushOffsetY = 0;
-//     // if we blend using "push" style we need to "shift" canvas to left/right/up/down
-//     switch (blendingStyle) {
-//       case TRANSITION_PUSH_RIGHT: pushOffsetX = offsetX; break;
-//       case TRANSITION_PUSH_LEFT:  pushOffsetX = -offsetX + nCols; break;
-//       case TRANSITION_PUSH_DOWN:  pushOffsetY = offsetY; break;
-//       case TRANSITION_PUSH_UP:    pushOffsetY = -offsetY + nRows; break;
-//       case TRANSITION_PUSH_TL:    pushOffsetX = offsetX;            pushOffsetY = offsetY; break;           // unused
-//       case TRANSITION_PUSH_TR:    pushOffsetX = -offsetX + nCols;   pushOffsetY = offsetY; break;           // unused
-//       case TRANSITION_PUSH_BR:    pushOffsetX = -offsetX + nCols;   pushOffsetY = -offsetY + nRows; break;  // unused
-//       case TRANSITION_PUSH_BL:    pushOffsetX = offsetX;            pushOffsetY = -offsetY + nRows; break;  // unused
-//     }
-//     // we only traverse new segment, not old one
-//     for (int r = 0; r < nRows; r++) for (int c = 0; c < nCols; c++) {
-//       const bool clipped = topSegment.isPixelXYClipped(c, r);
-//       // if segment is in transition and pixel is clipped take old segment's pixel and opacity
-//       const Segment *seg = clipped && segO ? segO : &topSegment;  // pixel is never clipped for FADE
-//       int vCols = seg == segO ? oCols : nCols;         // old segment may have different dimensions
-//       int vRows = seg == segO ? oRows : nRows;         // old segment may have different dimensions
-//       int x = c;
-//       int y = r;
-//       if (pushOffsetX != 0) x = (x + pushOffsetX) % nCols;
-//       if (pushOffsetY != 0) y = (y + pushOffsetY) % nRows;
-//       uint32_t c_a = BLACK;
-//       if (x < vCols && y < vRows) c_a = seg->getPixelColorRaw(x + y*vCols); // will get clipped pixel from old segment or unclipped pixel from new segment
-//       // if (segO && blendingStyle == TRANSITION_FADE
-//       //   && (topSegment.effect_id != segO->effect_id || (segO->name != topSegment.name && segO->name && topSegment.name && strncmp(segO->name, topSegment.name, WLED_MAX_SEGNAME_LEN) != 0))
-//       //   && x < oCols && y < oRows) {
-//       //   // we need to blend old segment using fade as pixels are not clipped
-//       //   c_a = color_blend16(c_a, segO->getPixelColorRaw(x + y*oCols), progInv);
-//       // } else if (blendingStyle != TRANSITION_FADE) {
-
-
-//       if (segO && blendingStyle == TRANSITION_FADE && x < oCols && y < oRows) {
-//         // we need to blend old segment using fade as pixels are not clipped
-//         c_a = color_blend16(c_a, segO->getPixelColorRaw(x + y*oCols), progInv);
-//       } else if (blendingStyle != TRANSITION_FADE) {
-
-//         // if we have global brightness change (not On/Off change) we will ignore transition style and just fade brightness (see led.cpp)
-//         // workaround for On/Off transition
-//         // (bri != briT) && !bri => from On to Off
-//         // (bri != briT) &&  bri => from Off to On
-//         uint8_t bri = tkr_iLight->_briRGB_Global;
-//         if ((briOld == 0 || bri == 0) && ((!clipped && (bri != briT) && !bri) || (clipped && (bri != briT) && bri))) c_a = BLACK;
-//       }
-//       // map it into frame buffer
-//       x = c;  // restore coordiates if we were PUSHing
-//       y = r;
-//       if (applyReverse) {
-//         if (topSegment.reverse  ) x = nCols - x - 1;
-//         if (topSegment.reverse_y) y = nRows - y - 1;
-//         if (topSegment.transpose) std::swap(x,y); // swap X & Y if segment transposed
-//       }
-//       // expand pixel
-//       if (groupLen == 1) {
-//         setMirroredPixel(x, y, c_a, opacity);
-//       } else {
-//         // handle grouping and spacing
-//         x *= groupLen; // expand to physical pixels
-//         y *= groupLen; // expand to physical pixels
-//         const int maxX = std::min(x + topSegment.grouping, width);
-//         const int maxY = std::min(y + topSegment.grouping, height);
-//         while (y < maxY) {
-//           int _x = x;
-//           while (_x < maxX) setMirroredPixel(_x++, y, c_a, opacity);
-//           y++;
-//         }
-//       }
-//     }
-// #endif
-//   } else {
-
-//     // ALOG_INF(PSTR("SLOW PATH----------------------------"));
-
-//     // 1D Slow Path
-//     const int nLen = topSegment.virtualLength();
-//     const int oLen = segO ? segO->virtualLength() : nLen;
-
-//     const auto setMirroredPixel = [&](int i, uint32_t c, uint8_t o) {
-//       int indx = topSegment.start + i;
-//       // Apply mirroring
-//       if (topSegment.mirror) {
-//         unsigned indxM = topSegment.stop - i - 1;
-//         indxM += topSegment.offset; // offset/phase
-//         if (indxM >= topSegment.stop) indxM -= length; // wrap
-//         _pixels[indxM] = Segment::color_blend(_pixels[indxM], segblend(c, _pixels[indxM]), o);
-//         if (_pixelCCT) _pixelCCT[indxM] = cct;
-//       }
-//       indx += topSegment.offset; // offset/phase
-//       if (indx >= topSegment.stop) indx -= length; // wrap
-//       _pixels[indx] = Segment::color_blend(_pixels[indx], segblend(c, _pixels[indx]), o);
-//       if (_pixelCCT) _pixelCCT[indx] = cct;
-
-// //       if (i == 0 && topSegment.progress() > 63000U)
-// // {
-// //   Serial.printf(
-// //     "SLOW OUT prog=%u source=%08lX out=%08lX RGBW=%u,%u,%u,%u\n",
-// //     topSegment.progress(),
-// //     (unsigned long)c,
-// //     (unsigned long)_pixels[indx],
-// //     R(_pixels[indx]),
-// //     G(_pixels[indx]),
-// //     B(_pixels[indx]),
-// //     W(_pixels[indx])
-// //   );
-// // }
-
-//     };
-
-//     // if we blend using "push" style we need to "shift" canvas to left/right/
-//     unsigned offsetI = progInv * nLen / 0xFFFFU;
-
-//     for (int k = 0; k < nLen; k++) {
-//       const bool clipped = topSegment.isPixelClipped(k);
-//       // if segment is in transition and pixel is clipped take old segment's pixel and opacity
-//       const Segment *seg = clipped && segO ? segO : &topSegment;  // pixel is never clipped for FADE
-//       const int vLen = seg == segO ? oLen : nLen;
-//       int i = k;
-//       // if we blend using "push" style we need to "shift" canvas to left or right
-//       switch (tkr_anim->blendingStyle) {
-//         case TRANSITION_PUSH_RIGHT: i = (i + offsetI) % nLen;        break;
-//         case TRANSITION_PUSH_LEFT:  i = (i - offsetI + nLen) % nLen; break;
-//       }
-//       uint32_t c_a = BLACK;
-//       if (i < vLen) c_a = seg->getPixelColorRaw(i); // will get clipped pixel from old segment or unclipped pixel from new segment
-//       // if (segO && tkr_anim->blendingStyle == TRANSITION_FADE && topSegment.effect_id != segO->effect_id && i < oLen) {
-//         if (segO && tkr_anim->blendingStyle == TRANSITION_FADE && i < oLen)
-//         {
-//           // static uint32_t last_transition_pixel_log = 0;
-//           // if (millis() - last_transition_pixel_log >= 500)
-//           // {
-//           //   last_transition_pixel_log = millis();
-//           //   ALOG_INF(PSTR("TRANS PIXEL BLEND progress=%u inverse=%u new=%08X old=%08X out=%08X"), topSegment.progress(), progInv, c_a, segO->getPixelColorRaw(i), color_blend16(c_a, segO->getPixelColorRaw(i), progInv));
-//           // }
-//         // we need to blend old segment using fade as pixels are not clipped
-//         c_a = color_blend16(c_a, segO->getPixelColorRaw(i), progInv);
-//       } else if (tkr_anim->blendingStyle != TRANSITION_FADE) {
-//         // if we have global brightness change (not On/Off change) we will ignore transition style and just fade brightness (see led.cpp)
-//         // workaround for On/Off transition
-//         // (bri != briT) && !bri => from On to Off
-//         // (bri != briT) &&  bri => from Off to On
-//         uint8_t bri = tkr_iLight->_briRGB_Global;
-//         if ((briOld == 0 || bri == 0) && ((!clipped && (bri != briT) && !bri) || (clipped && (bri != briT) && bri))) c_a = BLACK;
-//       }
-//       // map into frame buffer
-//       i = k; // restore index if we were PUSHing
-//       if (topSegment.reverse) i = nLen - i - 1; // is segment reversed?
-//       // expand pixel
-//       i *= topSegment.groupLength();
-//       // set all the pixels in the group
-//       const int maxI = std::min(i + topSegment.grouping, length); // make sure to not go beyond physical length
-//       while (i < maxI) setMirroredPixel(i++, c_a, opacity);
-//     }
-//   }
-
-//   tkr_anim->blendingStyle = orgBS;
-//   Segment::setClippingRect(0, 0);             // disable clipping for overlays
-// }
-
-
 
 
 
@@ -3574,111 +3175,6 @@ void mAnimatorLight::show(void)
 
 
 }
-
-
-
-// #define ENABLE_DEVFEATURE_LIGHTS__UPDATED_SHOW_RMT_FIX
-
-// #ifdef ENABLE_DEVFEATURE_LIGHTS__UPDATED_SHOW_RMT_FIX
-
-// void mAnimatorLight::show(void)
-// {
-//   // Dual-core safe re-entrancy guard
-//   static portMUX_TYPE g_show_mux = portMUX_INITIALIZER_UNLOCKED;
-//   static bool g_show_inflight = false;
-
-//   // Acquire guard
-//   portENTER_CRITICAL(&g_show_mux);
-//   if (g_show_inflight) {
-//     portEXIT_CRITICAL(&g_show_mux);
-//     return;
-//   }
-//   g_show_inflight = true;
-//   portEXIT_CRITICAL(&g_show_mux);
-
-//   // Optional: gate here too (keeps show() self-contained safe)
-//   // If you don't want this here because caller already checked, you can remove it.
-//   if (!BusManager::canAllShow()) {
-//     portENTER_CRITICAL(&g_show_mux);
-//     g_show_inflight = false;
-//     portEXIT_CRITICAL(&g_show_mux);
-//     return;
-//   }
-
-//   // Avoid race condition: capture _callback value (but execute while guarded)
-//   show_callback callback = _callback;
-//   if (callback) {
-//     callback();
-//   }
-
-//   const unsigned long showNow = millis();
-
-//   // Do the actual output
-//   BusManager::show();
-
-//   // Release guard ASAP after output
-//   portENTER_CRITICAL(&g_show_mux);
-//   g_show_inflight = false;
-//   portEXIT_CRITICAL(&g_show_mux);
-
-//   // FPS / timing (preserve your behaviour)
-//   const unsigned long diff = showNow - _lastShow;
-//   if (diff > 0) {
-//     const size_t fpsCurr = (1000 << FPS_CALC_SHIFT) / diff; // fixed point math
-//     _cumulativeFps = (FPS_CALC_AVG * _cumulativeFps + fpsCurr + FPS_CALC_AVG / 2) / (FPS_CALC_AVG + 1);
-//     _lastShow = showNow;
-//   }
-
-//   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
-//   const uint32_t elapsed = millis() - tSaved_LoopTime;
-//   if (elapsed > 10) Serial.printf("LoopElapsed %d(fps%d)\n\r", elapsed, 1000 / elapsed);
-//   tSaved_LoopTime = millis();
-//   #endif
-// }
-
-// #else
-
-// static volatile bool g_show_inflight = false;
-
-// void mAnimatorLight::show(void) 
-// {  
-
-//   // avoid race condition, caputre _callback value
-//   show_callback callback = _callback;
-//   if (callback) callback();
-
-//   unsigned long showNow = millis();
-
-//   if (g_show_inflight) return;
-//   g_show_inflight = true;
-
-//   BusManager::show();
-  
-//   g_show_inflight = false;
-
-//   unsigned long diff = showNow - _lastShow;
-//   if (diff > 0) { // skip calculation if no time has passed
-//     size_t fpsCurr = (1000 << FPS_CALC_SHIFT) / diff; // fixed point math
-//     _cumulativeFps = (FPS_CALC_AVG * _cumulativeFps + fpsCurr + FPS_CALC_AVG / 2) / (FPS_CALC_AVG + 1);   // "+FPS_CALC_AVG/2" for proper rounding
-//     _lastShow = showNow;
-//   }
-//   // uint16_t fpsCurr = 200;
-//   // if (diff > 0) fpsCurr = 1000 / diff;
-//   // _cumulativeFps = (3 * _cumulativeFps + fpsCurr) >> 2;
-//   // _lastShow = showNow;
-//   // Serial.printf("%d lastshow\n\r", _lastShow);
-
-//   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
-//   // DEBUG_TIME__START
-//   uint32_t elapsed = millis() - tSaved_LoopTime;
-//   if(elapsed > 10) Serial.printf("LoopElapsed %d(fps%d)\n\r", elapsed, 1000/elapsed);
-//   tSaved_LoopTime = millis();
-//   #endif
-// }
-// #endif
-
-
-
 
 
 /********************************************************************************************************************************************************************************************************************
@@ -6256,27 +5752,61 @@ bool mAnimatorLight::Segment::colorFromHexString(byte* rgb, const char* in) {
 
 
 
-
-
-
-
 /*
  * Put a value 0 to 255 in to get a color value.
- * The colours are a transition r -> g -> b -> back to r
+ * The colours are a transition r -> g -> b -> back to r.
  * Inspired by the Adafruit examples.
+ *
+ * WLED compatibility behaviour:
+ * - If the selected palette is the PulSar procedural Colour Wheel, retain the
+ *   original WLED colour-wheel calculation directly in this function.
+ * - If any other palette is selected, redirect the 0-255 wheel position into
+ *   the normal PulSar palette lookup path.
+ *
+ * Keeping the wheel calculation here preserves the relationship with the
+ * original WLED effect code, while still allowing WLED effects which call
+ * color_wheel() to use any PulSar palette.
+ *
+ * By default, WLED calls into the selected PulSar palette. When
+ * force_colour_wheel is true, the original WLED colour wheel is used
+ * regardless of the currently selected palette.
  */
-uint32_t mAnimatorLight::Segment::color_wheel(uint8_t pos) { // TODO
-  // if (palette_id) return color_from_palette(pos, false, true, 0);
-  pos = 255 - pos;
-  if(pos < 85) {
-    return ((uint32_t)(255 - pos * 3) << 16) | ((uint32_t)(0) << 8) | (pos * 3);
-  } else if(pos < 170) {
-    pos -= 85;
-    return ((uint32_t)(0) << 16) | ((uint32_t)(pos * 3) << 8) | (255 - pos * 3);
-  } else {
-    pos -= 170;
-    return ((uint32_t)(pos * 3) << 16) | ((uint32_t)(255 - pos * 3) << 8) | (0);
+uint32_t mAnimatorLight::Segment::color_wheel(uint8_t pos, bool force_colour_wheel)
+{
+
+  /**
+   * @brief A non-wheel palette has been selected.
+   *
+   * WLED supplies pos directly in the 0-255 colour-wheel range, so pass it
+   * through as a raw 0-255 palette index. Do not remap it to segment length.
+   *
+   * Use the selected PulSar palette unless the caller explicitly requires
+   * the original colour-wheel behaviour.
+   */
+  if(
+    !force_colour_wheel &&
+    palette_id != mPalette::PALETTELIST_PROCEDURAL__COLOUR_WHEEL__ID
+  ){
+    return GetPaletteColour(pos, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_SMOOTH, NO_ENCODED_VALUE);
   }
+
+  /**
+   * @brief Original WLED/Adafruit colour wheel.
+   *
+   * Used when:
+   * - Colour Wheel is the selected PulSar palette, or
+   * - the caller explicitly forces colour-wheel behaviour, such as effects
+   *   whose "random colour" mode is defined in terms of random wheel indexes.
+   *
+   * The colours transition:
+   *   red -> blue -> green -> red
+   */
+  pos = 255 - pos;
+
+  if     (pos < 85) {              return RGBW32(255 - pos * 3,             0,       pos * 3, 0); }
+  else if(pos < 170){ pos -= 85;   return RGBW32(            0,       pos * 3, 255 - pos * 3, 0); }
+  else              { pos -= 170;  return RGBW32(      pos * 3, 255 - pos * 3,             0, 0); }
+
 }
 
 /*
