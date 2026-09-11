@@ -199,9 +199,9 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   
   tkr_anim->force_update(); // New data in, so we should update
 
-  root[F("ver")] = "versionString";
+  // root[F("ver")] = "versionString";
   root[F("vid")] = PROJECT_VERSION;
-  root[F("cn")] = "WLED_CODENAME";
+  // root[F("cn")] = "WLED_CODENAME";
 
   JsonObject leds = root.createNestedObject("leds");
   leds[F("count")] = getLengthTotal();
@@ -283,16 +283,16 @@ void mAnimatorLight::serializeInfo(JsonObject root)
 
   JsonObject wifi_info = root.createNestedObject("wifi");
   wifi_info[F("bssid")] = WiFi.BSSIDstr();
+
   int qrssi = WiFi.RSSI();
+
   wifi_info[F("rssi")] = qrssi;
-  wifi_info[F("signal")] = 126;//getSignalQuality(qrssi);
   wifi_info[F("channel")] = WiFi.channel();
 
-  // JsonObject fs_info = root.createNestedObject("fs");
-  // fs_info["u"] = 123;//fsBytesUsed / 1000;
-  // fs_info["t"] = 123;//fsBytesTotal / 1000;
-  // fs_info[F("pmt")] = 123;//presetsModifiedTime;
   JsonObject fs_info = root.createNestedObject("fs");
+  fs_info["u"] = tkr_mfile->fsBytesUsed / 1024;
+  fs_info["t"] = tkr_mfile->fsBytesTotal / 1024;
+  fs_info[F("pmt")] = tkr_mfile->presetsModifiedTime;
 
   // root[F("ndc")] =123;// nodeListEnabled ? (int)Nodes.size() : -1;
 

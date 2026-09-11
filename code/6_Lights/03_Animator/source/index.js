@@ -1925,7 +1925,7 @@ function updateUI()
 {
 		
 	gId('buttonPower').className = isOn ? 'active':'';
-	gId('buttonSync').className = syncSend ? 'active':'';
+	// gId('buttonSync').className = syncSend ? 'active':'';
 
 	updateSelectedFx();
 	// updateSelectedPalette(selectedPal); // must be after updateSelectedFx() to un-hide color slots for * palettes
@@ -4729,7 +4729,7 @@ function simplifyUI() {
 
 	// Hide buttons in top bar
 	
-	gId("buttonSync").style.display = "none";
+	// gId("buttonSync").style.display = "none";
 	gId("buttonSr").style.display = "none";
 	gId("buttonPcm").style.display = "none";
 
