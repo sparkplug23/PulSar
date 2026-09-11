@@ -202,7 +202,7 @@ function cTheme(light) {
 	sCol('--c-tb','rgba(204, 204, 204, var(--t-b))');
 	sCol('--c-tba','rgba(170, 170, 170, var(--t-b))');
 	sCol('--c-tbh','rgba(204, 204, 204, var(--t-b))');
-	gId('imgw').style.filter = "invert(0.8)";
+	// gId('imgw').style.filter = "invert(0.8)";
 	} else {
 	sCol('--c-1','#111');
 	sCol('--c-f','#fff');
@@ -224,7 +224,7 @@ function cTheme(light) {
 	sCol('--c-tb','rgba(34, 34, 34, var(--t-b))');
 	sCol('--c-tba','rgba(102, 102, 102, var(--t-b))');
 	sCol('--c-tbh','rgba(51, 51, 51, var(--t-b))');
-	gId('imgw').style.filter = "unset";
+	// gId('imgw').style.filter = "unset";
 	}
 }
 
@@ -897,7 +897,7 @@ function parseInfo(i) {
 	maxSeg       = i.leds.maxseg;
 	pmt          = i.fs.pmt;
 	
-	gId('buttonNodes').style.display = lastinfo.ndc > 0 ? null:"none";
+	// gId('buttonNodes').style.display = lastinfo.ndc > 0 ? null:"none";
 	// do we have a matrix set-up
 	mw = i.leds.matrix ? i.leds.matrix.w : 0;
 	mh = i.leds.matrix ? i.leds.matrix.h : 0;
@@ -932,47 +932,140 @@ function parseInfo(i) {
 
 function populateInfo(i)
 {
-	var cn="";
-	var pwr = i.leds.pwr;
-	var pwru = "Not calculated";
-	if (pwr > 1000) {pwr /= 1000; pwr = pwr.toFixed((pwr > 10) ? 0 : 1); pwru = pwr + " A";}
-	else if (pwr > 0) {pwr = 50 * Math.round(pwr/50); pwru = pwr + " mA";}
-	var urows="";
-	if (i.u) {
-		for (const [k, val] of Object.entries(i.u)) {
-			if (val[1])
-				urows += inforow(k,val[0],val[1]);
-			else
-				urows += inforow(k,val);
+	if (!i) return;
+
+	var cn = "";
+
+	cn += `<div class="info-group">`;
+	cn += `<p class="labels hd">Device</p>`;
+	cn += `<table>`;
+
+	if (i.name != null) cn += inforow("Name", i.name);
+	if (i.ip != null) cn += inforow("IP address", i.ip);
+
+	if (i.arch != null)
+	{
+		let env = i.arch;
+
+		if (i.core != null) env += " " + i.core;
+
+		cn += inforow("Platform", env);
+	}
+
+	cn += `</table>`;
+	cn += `</div>`;
+
+
+	cn += `<div class="info-group">`;
+	cn += `<p class="labels hd">Runtime</p>`;
+	cn += `<table>`;
+
+	if (i.uptime != null) cn += inforow("Uptime", getRuntimeStr(i.uptime));
+
+	if (i.time != null && i.time !== "")
+	{
+		cn += inforow("Time", i.time);
+	}
+
+	if (i.freeheap != null)
+	{
+		cn += inforow("Free heap", (i.freeheap / 1024).toFixed(1), " kB");
+	}
+
+	if (i.psram != null && i.psram > 0)
+	{
+		cn += inforow("Free PSRAM", (i.psram / 1024).toFixed(1), " kB");
+	}
+
+	if (i.leds && i.leds.fps != null)
+	{
+		cn += inforow("Average FPS", i.leds.fps);
+	}
+
+	cn += `</table>`;
+	cn += `</div>`;
+
+
+	cn += `<div class="info-group">`;
+	cn += `<p class="labels hd">Network</p>`;
+	cn += `<table>`;
+
+	if (i.wifi)
+	{
+		if (i.wifi.rssi != null)
+		{
+			cn += inforow("Wi-Fi RSSI", i.wifi.rssi, " dBm");
+		}
+
+		if (i.wifi.signal != null)
+		{
+			cn += inforow("Signal", i.wifi.signal, "%");
+		}
+
+		if (i.wifi.channel != null)
+		{
+			cn += inforow("Wi-Fi channel", i.wifi.channel);
+		}
+
+		if (i.wifi.txPower != null)
+		{
+			cn += inforow("TX power", i.wifi.txPower);
 		}
 	}
-	var vcn = "Kuuhaku";
-	if (i.cn) vcn = i.cn;
 
-	cn += `v${i.ver} "${vcn}"<br><br><table>
-${urows}
-${urows===""?'':'<tr><td colspan=2><hr style="height:1px;border-width:0;color:gray;background-color:gray"></td></tr>'}
-${i.opt&0x100?inforow("Debug","<button class=\"btn btn-xs\" onclick=\"requestJson({'debug':"+(i.opt&0x0080?"false":"true")+"});\"><i class=\"icons "+(i.opt&0x0080?"on":"off")+"\">&#xe08f;</i></button>"):''}
-${inforow("Build",i.vid)}
-${inforow("Signal strength",i.wifi.signal +"% ("+ i.wifi.rssi, " dBm)")}
-${inforow("Uptime",getRuntimeStr(i.uptime))}
-${inforow("Time",i.time)}
-${inforow("Free heap",(i.freeheap/1024).toFixed(1)," kB")}
-${i.psram?inforow("Free PSRAM",(i.psram/1024).toFixed(1)," kB"):""}
-${inforow("Estimated current",pwru)}
-${inforow("Average FPS",i.leds.fps)}
-${inforow("MAC address",i.mac)}
-${inforow("CPU clock",i.clock," MHz")}
-${inforow("Flash size",i.flash," MB")}
-${inforow("Filesystem",i.fs.u + "/" + i.fs.t + " kB (" +Math.round(i.fs.u*100/i.fs.t) + "%)")}
-${inforow("Environment",i.arch + " " + i.core + " (" + i.lwip + ")")}
-</table>`;
+	if (i.mac != null && i.mac !== "")
+	{
+		cn += inforow("MAC address", i.mac);
+	}
+
+	if (i.ws != null)
+	{
+		cn += inforow("WebSocket clients", i.ws);
+	}
+
+	cn += `</table>`;
+	cn += `</div>`;
+
+
+	cn += `<div class="info-group">`;
+	cn += `<p class="labels hd">Lighting</p>`;
+	cn += `<table>`;
+
+	if (i.leds)
+	{
+		if (i.leds.count != null)
+		{
+			cn += inforow("LED count", i.leds.count);
+		}
+
+		if (i.leds.actseg != null)
+		{
+			cn += inforow("Active segments", i.leds.actseg);
+		}
+
+		if (i.leds.pwr != null && i.leds.pwr > 0)
+		{
+			let pwr = i.leds.pwr;
+			let text = "";
+
+			if (pwr >= 1000)
+			{
+				text = (pwr / 1000).toFixed(pwr >= 10000 ? 0 : 1) + " A";
+			}
+			else
+			{
+				text = pwr + " mA";
+			}
+
+			cn += inforow("Estimated current", text);
+		}
+	}
+
+	cn += `</table>`;
+	cn += `</div>`;
+
+
 	gId('kv').innerHTML = cn;
-	//  update all sliders in Info
-	d.querySelectorAll('#kv .sliderdisplay').forEach((sd,i) => {
-		let s = sd.previousElementSibling;
-		if (s) updateTrail(s);
-	});
 }
 
 function populateSegments(s)
@@ -2123,6 +2216,11 @@ function readState(s,command=false)
 
 	isOn = s.on;
 	gId('sliderBri').value = s.bri;
+
+	if (s.standby)
+	{
+		standbyUpdateFromState(s.standby);
+	}
 	
 	syncSend = s.udpn.send;
 	if (s.pl<0)	currentPreset = s.ps;

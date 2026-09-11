@@ -129,87 +129,67 @@ bool mAnimatorLight::Standby_CompileTargetSchedule(STANDBY_TARGET& target)
 {
   memset(target.allowed_minutes, 0, sizeof(target.allowed_minutes));
 
-  if (!Standby_ValidateTimePattern(target.start)) {
+  if (!Standby_ValidateTimePattern(target.start))
+  {
     ALOG_WRN(PSTR("Standby: invalid start pattern %s"), target.start);
     return false;
   }
 
-  if (!Standby_ValidateTimePattern(target.end)) {
+  if (!Standby_ValidateTimePattern(target.end))
+  {
     ALOG_WRN(PSTR("Standby: invalid end pattern %s"), target.end);
     return false;
   }
 
-  bool found_window = false;
-
-  for (uint16_t start = 0; start < 1440; start++)
+  // Same start/end expression means unrestricted / full day.
+  if (strcmp(target.start, target.end) == 0)
   {
-    if (!Standby_TimePatternMatches(target.start, start)) continue;
+    memset(target.allowed_minutes, 0xFF, sizeof(target.allowed_minutes));
+    return true;
+  }
 
-    char start_text[6];
-    snprintf(start_text, sizeof(start_text), "%02u:%02u", start / 60, start % 60);
+  bool active = false;
+  bool found_start = false;
+  bool found_end = false;
 
-    for (uint16_t end = 0; end < 1440; end++)
+  // Run twice through the day.
+  //
+  // Pass 0 establishes the state at midnight for wrapping windows such as:
+  //   18:00 -> 06:00
+  //   **:50 -> **:00
+  //
+  // Pass 1 records the actual 1440-minute schedule.
+  for (uint8_t pass = 0; pass < 2; pass++)
+  {
+    for (uint16_t minute = 0; minute < 1440; minute++)
     {
-      if (!Standby_TimePatternMatches(target.end, end)) continue;
+      bool start_match = Standby_TimePatternMatches(target.start, minute);
+      bool end_match = Standby_TimePatternMatches(target.end, minute);
 
-      char end_text[6];
-      snprintf(end_text, sizeof(end_text), "%02u:%02u", end / 60, end % 60);
+      if (start_match) found_start = true;
+      if (end_match) found_end = true;
 
-      bool compatible = true;
+      // End is exclusive.
+      if (end_match) active = false;
 
-      // If the same position is wildcarded at both ends, require the
-      // generated concrete values to match at that position.
-      //
-      // This is what pairs:
-      //
-      //   **:10 -> **:20
-      //
-      // within the same hour rather than pairing 01:10 with 17:20.
-      for (uint8_t pos = 0; pos < 5; pos++)
+      // Start is inclusive.
+      if (start_match) active = true;
+
+      if (pass == 1 && active)
       {
-        if (pos == 2) continue;
-
-        bool start_wildcard = target.start[pos] == '*';
-        bool end_wildcard = target.end[pos] == '*';
-
-        if (start_wildcard && end_wildcard && start_text[pos] != end_text[pos]) {
-          compatible = false;
-          break;
-        }
-      }
-
-      if (!compatible) continue;
-
-      found_window = true;
-
-      // Same resolved start/end means full day.
-      if (start == end)
-      {
-        memset(target.allowed_minutes, 0xFF, sizeof(target.allowed_minutes));
-        return true;
-      }
-
-      if (start < end)
-      {
-        for (uint16_t minute = start; minute < end; minute++) {
-          target.allowed_minutes[minute >> 3] |= (1U << (minute & 7));
-        }
-      }
-      else
-      {
-        // Midnight-wrapping window.
-        for (uint16_t minute = start; minute < 1440; minute++) {
-          target.allowed_minutes[minute >> 3] |= (1U << (minute & 7));
-        }
-
-        for (uint16_t minute = 0; minute < end; minute++) {
-          target.allowed_minutes[minute >> 3] |= (1U << (minute & 7));
-        }
+        target.allowed_minutes[minute >> 3] |= (1U << (minute & 7));
       }
     }
   }
 
-  return found_window;
+  if (!found_start || !found_end)
+  {
+    ALOG_WRN(PSTR("Standby: schedule pattern produced no usable window Start=%s End=%s"), target.start, target.end);
+    memset(target.allowed_minutes, 0, sizeof(target.allowed_minutes));
+    return false;
+  }
+
+  return true;
 }
 
 

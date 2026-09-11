@@ -25,7 +25,7 @@
 			<button onclick="window.location.href=getURL('/');"><i class="icons">&#xe0a2;</i><p class="tab-label">Main</p></button>
 			<button id="buttonPower" onclick="togglePower()" class="tgl"><i class="icons">&#xe08f;</i><p class="tab-label">Power</p></button>
 			<button id="buttonStandby" onclick="toggleStandby()"><i class="icons">&#xe2a2;</i><p class="tab-label">Standby</p></button>
-			<button id="buttonSync" onclick="toggleSync()"><i class="icons">&#xe116;</i><p class="tab-label">Sync</p></button>
+			<!-- <button id="buttonSync" onclick="toggleSync()"><i class="icons">&#xe116;</i><p class="tab-label">Sync</p></button> -->
 			<button id="buttonSr" onclick="toggleLiveview()"><i class="icons">&#xe410;</i><p class="tab-label">Live</p></button>
 			<button id="buttonI" onclick="toggleInfo()"><i class="icons">&#xe066;</i><p class="tab-label">Info</p></button>
 			<button id="buttonNodes" onclick="toggleNodes()"><i class="icons">&#xe22d;</i><p class="tab-label">Nodes</p></button>
@@ -594,26 +594,40 @@
 
 <div id="info" class="modal">
 	<button class="btn btn-xs close" onclick="toggleInfo()"><i class="icons rot45">&#xe18a;</i></button>
-	<div id="imgw">
-		<img class="wi" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB0AAAAFCAYAAAC5Fuf5AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABbSURBVChTlY9bDoAwDMNW7n9nwCipytQN4Z8tbrTHmDmF4oPzyldwRqp1SSdnV/NuZuzqerAByxXznBw3igkeFEfXyUuhK/yFM0CxJfyqXZEOc6/Sr9/bf7uIC5Nwd7orMvAPAAAAAElFTkSuQmCC" />
-	</div>
 
-	<div id="kv">Loading...</div><br>
+	<p class="labels hd">PulSar</p>
+
+	<div id="kv">Loading...</div>
 
 	<div class="info-group">
-		<p class="labels hd">Build Information</p>
-		Version: ##VERSION##<br>
-		Build: ##BUILD_DATE##<br>
-		Environment: ##BUILD_ENV##<br>
-		Branch: ##GIT_BRANCH##
-	</div><br>
+		<p class="labels hd">Firmware</p>
+
+		<table>
+			<tr>
+				<td>Version</td>
+				<td><b>##VERSION##</b></td>
+			</tr>
+			<tr>
+				<td>Build</td>
+				<td><b>##BUILD_DATE##</b></td>
+			</tr>
+			<tr>
+				<td>Environment</td>
+				<td><b>##BUILD_ENV##</b></td>
+			</tr>
+			<tr>
+				<td>Branch</td>
+				<td><b>##GIT_BRANCH##</b></td>
+			</tr>
+		</table>
+	</div>
 
 	<div>
 		<button class="btn ibtn" onclick="requestJson()">Refresh</button>
-		<button class="btn ibtn" onclick="toggleNodes()">Instance List</button>
 		<button class="btn ibtn" onclick="window.open(getURL('/update'),'_self');">Update PulSar</button>
 		<button class="btn ibtn" id="resetbtn" onclick="cnfReset()">Reboot PulSar</button>
 	</div>
+
 	<br>
 </div>
 

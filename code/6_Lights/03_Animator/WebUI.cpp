@@ -204,8 +204,8 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   root[F("cn")] = "WLED_CODENAME";
 
   JsonObject leds = root.createNestedObject("leds");
-  leds[F("count")] = 123;//getLengthTotal();
-  leds[F("pwr")] = 123;//currentMilliamps;
+  leds[F("count")] = getLengthTotal();
+  leds[F("pwr")] = currentMilliamps;
   leds["fps"] = getFps();
   leds[F("maxpwr")] = (currentMilliamps)? ablMilliampsMax : 0;
   leds[F("maxseg")] = getMaxSegments();
@@ -239,7 +239,7 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   root[F("str")] = syncToggleReceive;
 
   root[F("name")] = serverDescription;
-  root[F("udpport")] = 123;//udpPort;
+  // root[F("udpport")] = 123;//udpPort;
   root["live"] = (bool)realtimeMode;
   root[F("liveseg")] = -1;//useMainSegmentOnly ? getMainSegmentId() : -1;  // if using main segment only for live
 
@@ -288,12 +288,13 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   wifi_info[F("signal")] = 126;//getSignalQuality(qrssi);
   wifi_info[F("channel")] = WiFi.channel();
 
+  // JsonObject fs_info = root.createNestedObject("fs");
+  // fs_info["u"] = 123;//fsBytesUsed / 1000;
+  // fs_info["t"] = 123;//fsBytesTotal / 1000;
+  // fs_info[F("pmt")] = 123;//presetsModifiedTime;
   JsonObject fs_info = root.createNestedObject("fs");
-  fs_info["u"] = 123;//fsBytesUsed / 1000;
-  fs_info["t"] = 123;//fsBytesTotal / 1000;
-  fs_info[F("pmt")] = 123;//presetsModifiedTime;
 
-  root[F("ndc")] =123;// nodeListEnabled ? (int)Nodes.size() : -1;
+  // root[F("ndc")] =123;// nodeListEnabled ? (int)Nodes.size() : -1;
 
   #ifdef ARDUINO_ARCH_ESP32
     wifi_info[F("txPower")] = (int) WiFi.getTxPower();
