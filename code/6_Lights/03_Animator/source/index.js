@@ -4045,16 +4045,16 @@ function rmtTgl(ip,i) {
 	});
 }
 
-var hc = 0;
-setInterval(()=>{
-	if (!isInfo) return;
-	hc+=18;
-	if (hc>300) hc=0;
-	if (hc>200)hc=306;
-	if (hc==144) hc+=36;
-	if (hc==108) hc+=18;
-	gId('heart').style.color = `hsl(${hc}, 100%, 50%)`;
-}, 910);
+// var hc = 0;
+// setInterval(()=>{
+// 	if (!isInfo) return;
+// 	hc+=18;
+// 	if (hc>300) hc=0;
+// 	if (hc>200)hc=306;
+// 	if (hc==144) hc+=36;
+// 	if (hc==108) hc+=18;
+// 	gId('heart').style.color = `hsl(${hc}, 100%, 50%)`;
+// }, 910);
 
 function openGH() { window.open("https://github.com/sparkplug23/PulSar"); }
 

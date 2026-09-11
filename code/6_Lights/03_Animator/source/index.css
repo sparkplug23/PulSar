@@ -658,11 +658,11 @@ button {
 	display: inline-block;
 }
 
-#heart {
+/* #heart {
 	transition: color .9s;
 	font-size: 16px;
 	color: #f00;
-}
+} */
 
 img {
 	max-width: 100%;
