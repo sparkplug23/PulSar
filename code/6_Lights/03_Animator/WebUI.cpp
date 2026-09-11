@@ -161,6 +161,36 @@ void mAnimatorLight::serializeState(JsonObject root, bool forPreset, bool includ
     }
   }
 
+  #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_NEW
+
+  if (!forPreset)
+  {
+    JsonObject standby_obj = root.createNestedObject("standby");
+
+    standby_obj["Enabled"] = standby.enabled;
+    standby_obj["ActiveTargetIndex"] = standby.active_target_index;
+    standby_obj["ActiveTargetID"] = standby.active_target_id;
+
+    standby_obj["WakeTransitionSecs"] = standby.wake_transition_secs;
+    standby_obj["StandbyTransitionSecs"] = standby.standby_transition_secs;
+
+    JsonArray targets = standby_obj.createNestedArray("Targets");
+
+    for (uint16_t i = 0; i < standby.targets.size(); i++)
+    {
+      const STANDBY_TARGET& target = standby.targets[i];
+
+      JsonObject target_obj = targets.createNestedObject();
+
+      target_obj["Enabled"] = target.enabled;
+      target_obj["Start"] = target.start;
+      target_obj["End"] = target.end;
+      target_obj["TargetID"] = target.target_id;
+    }
+  }
+
+  #endif
+
 
 }
 

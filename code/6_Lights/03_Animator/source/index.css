@@ -1704,3 +1704,89 @@ dialog {
 }
 
 
+#standbykv {
+	max-width: 900px;
+	margin: auto;
+	padding: 10px 16px 24px 16px;
+}
+
+.standby-status {
+	display: flex;
+	justify-content: center;
+	gap: 30px;
+	flex-wrap: wrap;
+	margin: 10px 0 16px 0;
+}
+
+.standby-actions {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	margin: 14px 0;
+}
+
+.standby-config-row {
+	display: grid;
+	grid-template-columns: minmax(150px, 1fr) 90px auto;
+	align-items: center;
+	gap: 8px;
+	max-width: 500px;
+	margin: 8px auto;
+}
+
+.standby-config-row input {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.standby-section-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin: 22px 0 8px 0;
+	font-weight: bold;
+}
+
+.standby-table-wrap {
+	width: 100%;
+	overflow-x: auto;
+}
+
+.standby-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.standby-table th,
+.standby-table td {
+	padding: 6px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.standby-table input[type="text"] {
+	width: 72px;
+	text-align: center;
+}
+
+.standby-table input[type="number"] {
+	width: 80px;
+	text-align: center;
+}
+
+.standby-table input[type="checkbox"] {
+	transform: scale(1.2);
+}
+
+@media (max-width: 600px) {
+	.standby-config-row {
+		grid-template-columns: 1fr 80px auto;
+	}
+
+	.standby-table th,
+	.standby-table td {
+		padding: 4px 2px;
+	}
+}

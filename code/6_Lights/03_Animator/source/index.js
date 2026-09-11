@@ -2598,30 +2598,212 @@ function standbySend(o)
 	requestJson({Standby:o});
 }
 
-function standbyArm(v)
+let standbyTargets = [];
+
+
+function standbyEnter()
 {
-	standbySend({Arm:v});
+	standbySend({
+		Enabled:true
+	});
 }
 
-function standbySleep()
+
+function standbyLeave()
 {
-	standbySend({Sleep:1});
+	standbySend({
+		Enabled:false
+	});
 }
 
-function standbyWake()
+
+function standbyAddTarget(target=null)
 {
-	standbySend({Wake:1});
+	if (!target)
+	{
+		target = {
+			Enabled:true,
+			Start:"00:00",
+			End:"00:00",
+			TargetID:1
+		};
+	}
+
+	standbyTargets.push({
+		Enabled:target.Enabled !== false,
+		Start:target.Start || "00:00",
+		End:target.End || "00:00",
+		TargetID:parseInt(target.TargetID) || 0
+	});
+
+	standbyRenderTargets();
 }
+
+
+function standbyDeleteTarget(index)
+{
+	if (index < 0 || index >= standbyTargets.length) return;
+
+	standbyTargets.splice(index, 1);
+
+	standbyRenderTargets();
+}
+
+
+function standbyRenderTargets()
+{
+	const body = gId('standbyTargetsBody');
+
+	if (!body) return;
+
+	body.innerHTML = '';
+
+	for (let i = 0; i < standbyTargets.length; i++)
+	{
+		const target = standbyTargets[i];
+
+		const row = d.createElement('tr');
+
+		row.innerHTML =
+			'<td>' +
+				'<input type="checkbox" ' +
+					'id="standbyTargetEnabled_' + i + '" ' +
+					(target.Enabled ? 'checked' : '') +
+				'>' +
+			'</td>' +
+
+			'<td>' +
+				'<input type="text" ' +
+					'id="standbyTargetStart_' + i + '" ' +
+					'maxlength="5" ' +
+					'value="' + standbyEscapeHtml(target.Start) + '">' +
+			'</td>' +
+
+			'<td>' +
+				'<input type="text" ' +
+					'id="standbyTargetEnd_' + i + '" ' +
+					'maxlength="5" ' +
+					'value="' + standbyEscapeHtml(target.End) + '">' +
+			'</td>' +
+
+			'<td>' +
+				'<input type="number" ' +
+					'id="standbyTargetID_' + i + '" ' +
+					'min="0" max="65534" ' +
+					'value="' + target.TargetID + '">' +
+			'</td>' +
+
+			'<td>' +
+				'<button class="btn btn-xs" ' +
+					'onclick="standbyDeleteTarget(' + i + ')">' +
+					'&#10005;' +
+				'</button>' +
+			'</td>';
+
+		body.appendChild(row);
+	}
+}
+
+
+function standbyEscapeHtml(value)
+{
+	return String(value)
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;')
+		.replaceAll("'", '&#039;');
+}
+
+
+function standbyReadTargetsFromUI()
+{
+	const targets = [];
+
+	for (let i = 0; i < standbyTargets.length; i++)
+	{
+		const enabledElement = gId('standbyTargetEnabled_' + i);
+		const startElement = gId('standbyTargetStart_' + i);
+		const endElement = gId('standbyTargetEnd_' + i);
+		const idElement = gId('standbyTargetID_' + i);
+
+		if (!enabledElement || !startElement || !endElement || !idElement) continue;
+
+		targets.push({
+			Enabled:enabledElement.checked,
+			Start:startElement.value.trim(),
+			End:endElement.value.trim(),
+			TargetID:parseInt(idElement.value) || 0
+		});
+	}
+
+	return targets;
+}
+
 
 function standbyApplyConfig()
 {
+	const targets = standbyReadTargetsFromUI();
+
+	standbyTargets = targets;
+
 	standbySend({
-		Target:parseInt(gId('standbyTarget').value),
-		AwakeSecs:parseInt(gId('standbyAwakeSecs').value),
-		StandbySecs:parseInt(gId('standbyStandbySecs').value),
-		WakeTransitionSecs:parseInt(gId('standbyWakeTransitionSecs').value),
-		SleepTransitionSecs:parseInt(gId('standbySleepTransitionSecs').value)
+		WakeTransitionSecs:parseInt(gId('standbyWakeTransitionSecs').value) || 0,
+		StandbyTransitionSecs:parseInt(gId('standbyStandbyTransitionSecs').value) || 0,
+		Targets:targets
 	});
+}
+
+
+function standbyUpdateFromState(state)
+{
+	if (!state) return;
+
+	if (gId('standbyState'))
+	{
+		gId('standbyState').innerText = state.Enabled ? 'Enabled' : 'Disabled';
+	}
+
+	if (gId('standbyActiveTarget'))
+	{
+		if (state.ActiveTargetID)
+		{
+			let text = String(state.ActiveTargetID);
+
+			if (state.ActiveTargetIndex != null && state.ActiveTargetIndex >= 0)
+			{
+				text += ' (row ' + state.ActiveTargetIndex + ')';
+			}
+
+			gId('standbyActiveTarget').innerText = text;
+		}
+		else
+		{
+			gId('standbyActiveTarget').innerText = 'None';
+		}
+	}
+
+	if (gId('standbyWakeTransitionSecs') && state.WakeTransitionSecs != null)
+	{
+		gId('standbyWakeTransitionSecs').value = state.WakeTransitionSecs;
+	}
+
+	if (gId('standbyStandbyTransitionSecs') && state.StandbyTransitionSecs != null)
+	{
+		gId('standbyStandbyTransitionSecs').value = state.StandbyTransitionSecs;
+	}
+
+	if (Array.isArray(state.Targets))
+	{
+		standbyTargets = state.Targets.map(target => ({
+			Enabled:target.Enabled !== false,
+			Start:target.Start || "00:00",
+			End:target.End || "00:00",
+			TargetID:parseInt(target.TargetID) || 0
+		}));
+
+		standbyRenderTargets();
+	}
 }
 
 function toggleSync()

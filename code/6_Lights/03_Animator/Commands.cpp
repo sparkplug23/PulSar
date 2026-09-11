@@ -2256,27 +2256,130 @@ if (jtok = obj["Standby"])
   JsonParserObject jobj_standby = jtok.getObject();
   JsonParserToken jtok_standby = 0;
 
+
   if (jtok_standby = jobj_standby["Enabled"])
   {
-    if (jtok_standby.getBool()) {
+    if (jtok_standby.getBool())
+    {
       Standby_Enter(CALL_MODE_NO_NOTIFY);
-    } else {
+    }
+    else
+    {
       Standby_Leave(CALL_MODE_NO_NOTIFY);
     }
 
     data_buffer.isserviced++;
   }
 
+
   if (jtok_standby = jobj_standby["WakeTransitionSecs"])
   {
-    Standby_SetWakeTransition(jtok_standby.getInt());
+    standby.wake_transition_secs = jtok_standby.getInt();
+
     data_buffer.isserviced++;
   }
 
+
   if (jtok_standby = jobj_standby["StandbyTransitionSecs"])
   {
-    Standby_SetStandbyTransition(jtok_standby.getInt());
+    standby.standby_transition_secs = jtok_standby.getInt();
+
     data_buffer.isserviced++;
+  }
+
+
+  if (jtok_standby = jobj_standby["Targets"])
+  {
+    if (jtok_standby.isArray())
+    {
+      JsonParserArray targets_array = jtok_standby;
+
+      std::vector<STANDBY_TARGET> new_targets;
+
+      for (auto target_token : targets_array)
+      {
+        JsonParserObject target_obj = target_token.getObject();
+
+        STANDBY_TARGET target;
+
+        JsonParserToken target_value = 0;
+
+
+        if (target_value = target_obj["Enabled"])
+        {
+          target.enabled = target_value.getBool();
+        }
+
+
+        if (target_value = target_obj["TargetID"])
+        {
+          target.target_id = target_value.getInt();
+        }
+
+
+        if (target_value = target_obj["Start"])
+        {
+          if (target_value.isStr())
+          {
+            strlcpy(
+              target.start,
+              target_value.getStr(),
+              sizeof(target.start)
+            );
+          }
+        }
+
+
+        if (target_value = target_obj["End"])
+        {
+          if (target_value.isStr())
+          {
+            strlcpy(
+              target.end,
+              target_value.getStr(),
+              sizeof(target.end)
+            );
+          }
+        }
+
+
+        if (!Standby_CompileTargetSchedule(target))
+        {
+          ALOG_WRN(
+            PSTR(
+              "Standby: rejected target "
+              "Enabled=%u Start=%s End=%s TargetID=%u"
+            ),
+            target.enabled,
+            target.start,
+            target.end,
+            target.target_id
+          );
+
+          continue;
+        }
+
+
+        new_targets.push_back(target);
+      }
+
+
+      standby.targets = std::move(new_targets);
+
+      standby.active_target_index = -1;
+      standby.active_target_id = 0;
+
+      data_buffer.isserviced++;
+    }
+  }
+
+
+  Standby_SaveConfig();
+
+
+  if (standby.enabled)
+  {
+    Standby_Update(CALL_MODE_NO_NOTIFY);
   }
 }
 

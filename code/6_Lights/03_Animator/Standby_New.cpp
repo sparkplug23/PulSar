@@ -376,14 +376,12 @@ bool mAnimatorLight::Standby_Init()
 void mAnimatorLight::Standby_SetWakeTransition(uint16_t seconds)
 {
   standby.wake_transition_secs = seconds;
-  Standby_SaveConfig();
 }
 
 
 void mAnimatorLight::Standby_SetStandbyTransition(uint16_t seconds)
 {
   standby.standby_transition_secs = seconds;
-  Standby_SaveConfig();
 }
 
 

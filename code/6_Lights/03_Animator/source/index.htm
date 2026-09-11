@@ -532,50 +532,61 @@
 <div id="namelabel" onclick="toggleNodes()"></div>
 
 <div id="standby" class="modal">
-	<button class="btn btn-xs close" onclick="toggleStandby()"><i class="icons rot45">&#xe18a;</i></button>
+	<button class="btn btn-xs close" onclick="toggleStandby()">
+		<i class="icons rot45">&#xe18a;</i>
+	</button>
 
 	<div id="standbykv">
 		<p class="labels hd">Standby</p>
 
-		<p>State: <b id="standbyState">Unknown</b></p>
-		<p>Armed: <b id="standbyArmed">Unknown</b></p>
+		<div class="standby-status">
+			<div>State: <b id="standbyState">Unknown</b></div>
+			<div>Active target: <b id="standbyActiveTarget">None</b></div>
+		</div>
 
-		<p>
-			Target:
-			<input id="standbyTarget" type="number" min="1" max="250" value="1">
-		</p>
+		<div class="standby-actions">
+			<button class="btn" onclick="standbyEnter()">Enter Standby</button>
+			<button class="btn" onclick="standbyLeave()">Leave Standby</button>
+		</div>
 
-		<p>
-			Awake time:
-			<input id="standbyAwakeSecs" type="number" min="0" value="300">
-			seconds
-		</p>
+		<hr>
 
-		<p>
-			Standby time:
-			<input id="standbyStandbySecs" type="number" min="0" value="0">
-			seconds
-		</p>
+		<div class="standby-config-row">
+			<label for="standbyWakeTransitionSecs">Wake transition</label>
+			<input id="standbyWakeTransitionSecs" type="number" min="0" max="3600" value="1">
+			<span>seconds</span>
+		</div>
 
-		<p>
-			Wake transition:
-			<input id="standbyWakeTransitionSecs" type="number" min="0" value="1">
-			seconds
-		</p>
+		<div class="standby-config-row">
+			<label for="standbyStandbyTransitionSecs">Standby transition</label>
+			<input id="standbyStandbyTransitionSecs" type="number" min="0" max="3600" value="30">
+			<span>seconds</span>
+		</div>
 
-		<p>
-			Sleep transition:
-			<input id="standbySleepTransitionSecs" type="number" min="0" value="30">
-			seconds
-		</p>
-	</div>
+		<div class="standby-section-head">
+			<span>Standby Targets</span>
+			<button class="btn btn-xs" onclick="standbyAddTarget()">+ Add Target</button>
+		</div>
 
-	<div>
-		<button class="btn ibtn" onclick="standbyArm(1)">Arm</button>
-		<button class="btn ibtn" onclick="standbyArm(0)">Disarm</button>
-		<button class="btn ibtn" onclick="standbySleep()">Standby Now</button>
-		<button class="btn ibtn" onclick="standbyWake()">Wake</button>
-		<button class="btn ibtn" onclick="standbyApplyConfig()">Apply Config</button>
+		<div class="standby-table-wrap">
+			<table id="standbyTargetsTable" class="standby-table">
+				<thead>
+					<tr>
+						<th>Enabled</th>
+						<th>Start</th>
+						<th>End</th>
+						<th>Target ID</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody id="standbyTargetsBody">
+				</tbody>
+			</table>
+		</div>
+
+		<div class="standby-actions">
+			<button class="btn" onclick="standbyApplyConfig()">Save Config</button>
+		</div>
 	</div>
 </div>
 
