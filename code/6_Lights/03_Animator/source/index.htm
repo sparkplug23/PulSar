@@ -35,16 +35,9 @@
 			<!-- Debug options to reset cached/generated WebUI data -->
 			<button id="buttonDebug"
 				class="top-debug"
-				onclick="
-					palettesData=null;
-					localStorage.removeItem('PulSarPalx');
-					localStorage.removeItem('PulSarPmt');
-					requestJson({rmcpal:true});
-					setTimeout(loadPalettes,250,loadPalettesData);
-				">
+				onclick="paletteRefresh();">
 				CPal
 			</button>
-
 			<button id="buttonPresetRefresh"
 				class="top-debug"
 				onclick="presetRefresh();">

@@ -865,6 +865,9 @@ function populatePresets(fromls)
 	populateQL();
 }
 
+/****
+ * Primarily used by the debug buttons, to force clean load in testing.
+ */
 function presetRefresh() {
   // Clear preset local storage only
   localStorage.removeItem('wledP');     // presets blob
@@ -879,6 +882,19 @@ function presetRefresh() {
     populatePresets(false);
   }, 250);
 }
+function paletteRefresh()
+{
+	palettesData = null;
+
+	localStorage.removeItem('wledPalx');
+	localStorage.removeItem('palettesEtag');
+
+	requestJson({rmcpal:true});
+
+	setTimeout(loadPalettes, 250, loadPalettesData);
+}
+
+
 
 
 function parseInfo(i) {
