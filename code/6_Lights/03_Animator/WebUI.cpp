@@ -4112,23 +4112,53 @@ void mAnimatorLight::serializeNetworks(JsonObject root)
 
 
 
-void  mAnimatorLight::serializeNodes(JsonObject root)
+// void  mAnimatorLight::serializeNodes(JsonObject root)
+// {
+//   JsonArray nodes = root.createNestedArray("nodes");
+
+//   for (NodesMap::iterator it = Nodes.begin(); it != Nodes.end(); ++it)
+//   {
+//     if (it->second.ip[0] != 0)
+//     {
+//       JsonObject node = nodes.createNestedObject();
+//       node[F("name")] = it->second.nodeName;
+//       node["type"]    = it->second.nodeType;
+//       node["ip"]      = it->second.ip.toString();
+//       node[F("age")]  = it->second.age;
+//       node[F("vid")]  = it->second.build;
+//     }
+//   }
+// }
+void mAnimatorLight::serializeNodes(JsonObject root)
 {
   JsonArray nodes = root.createNestedArray("nodes");
 
-  for (NodesMap::iterator it = Nodes.begin(); it != Nodes.end(); ++it)
+#if defined(ESP32) && defined(USE_DISCOVERY)
+
+  const int count = MDNS.queryService("pulsar", "tcp");
+
+  ALOG_DBG(PSTR("PulSar mDNS nodes found: %d"), count);
+
+  for (int i = 0; i < count; i++)
   {
-    if (it->second.ip[0] != 0)
-    {
-      JsonObject node = nodes.createNestedObject();
-      node[F("name")] = it->second.nodeName;
-      node["type"]    = it->second.nodeType;
-      node["ip"]      = it->second.ip.toString();
-      node[F("age")]  = it->second.age;
-      node[F("vid")]  = it->second.build;
-    }
+    const String hostname = MDNS.hostname(i);
+    const IPAddress ip = MDNS.IP(i);
+
+    if (hostname.length() == 0) continue;
+    if ((uint32_t)ip == 0) continue;
+
+    JsonObject node = nodes.createNestedObject();
+
+    node["name"] = hostname;
+    node["ip"] = ip.toString();
+    node["type"] = 0x80;
   }
+
+#endif
 }
+
+
+
 
 void  mAnimatorLight::serializePins(JsonObject root)
 {

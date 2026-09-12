@@ -32,23 +32,23 @@
 			<button onclick="window.location.href=getURL('/lights/settings');"><i class="icons">&#xe0a2;</i><p class="tab-label">Config</p></button>
 			<button id="buttonPcm" onclick="togglePcMode(true)"><i class="icons">&#xe23d;</i><p class="tab-label">PC Mode</p></button>
 
-			<!-- Debug options to reset the webui config for forced loading -->
+			<!-- Debug options to reset cached/generated WebUI data -->
 			<button id="buttonDebug"
-				style="position:absolute;right:45px;width:24px;height:24px;padding:0;opacity:.5"
-				title="Clear cache"
-				onclick="palettesData=null;
-				localStorage.removeItem('PulSarPalx');
-				localStorage.removeItem('PulSarPmt');
-				requestJson({rmcpal:true});
-				setTimeout(loadPalettes,250,loadPalettesData);">
-				<i class="icons">&#xe22d;</i>
+				class="top-debug"
+				onclick="
+					palettesData=null;
+					localStorage.removeItem('PulSarPalx');
+					localStorage.removeItem('PulSarPmt');
+					requestJson({rmcpal:true});
+					setTimeout(loadPalettes,250,loadPalettesData);
+				">
+				CPal
 			</button>
 
 			<button id="buttonPresetRefresh"
-				style="position:absolute;right:15px;width:24px;height:24px;padding:0;opacity:.5"
-				title="Preset refresh"
+				class="top-debug"
 				onclick="presetRefresh();">
-				<i class="icons">&#xe22d;</i>
+				CPre
 			</button>
 
 		</div>

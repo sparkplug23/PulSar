@@ -644,7 +644,8 @@ button {
 	margin: 5px;
 }
 
-#info div, #nodes div {
+#info > div,
+#nodes > div {
 	max-width: 490px;
 	margin: 0 auto;
 }
@@ -1793,90 +1794,116 @@ dialog {
 
 
 
-.nodes-header {
-	margin: 10px 0 18px 0;
+/* Nodes */
+
+#nodes {
 	text-align: left;
+}
+
+.nodes-header {
+	margin: 8px auto 12px;
 }
 
 .nodes-title {
 	font-size: 20px;
-	font-weight: 600;
+	font-weight: bold;
 }
 
 .nodes-subtitle {
-	margin-top: 4px;
 	font-size: 13px;
-	opacity: 0.65;
+	color: var(--c-b);
+	margin-top: 2px;
 }
 
 .nodes-toolbar {
-	display: flex;
-	justify-content: flex-end;
-	margin-bottom: 10px;
+	margin: 0 auto 12px;
+	text-align: center;
+}
+
+.nodes-toolbar .btn {
+	width: auto;
+	min-width: 100px;
+	padding: 6px 18px;
+	font-size: 16px;
 }
 
 .nodes-list {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
+	max-width: 600px !important;
+	margin: 0 auto !important;
 }
 
 .node-card {
-	display: flex;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto auto;
 	align-items: center;
-	justify-content: space-between;
+	gap: 10px;
 
-	padding: 10px 12px;
+	width: 100%;
+	box-sizing: border-box;
 
-	border-radius: 8px;
+	padding: 8px 10px;
+	margin: 0 !important;
 
-	background: var(--c-2);
+	border-bottom: 1px solid var(--c-3);
 }
 
 .node-main {
 	min-width: 0;
-	text-align: left;
+	margin: 0 !important;
 }
 
 .node-name {
 	font-size: 16px;
-	font-weight: 600;
-
+	font-weight: bold;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	margin: 0 !important;
 }
 
 .node-ip {
-	margin-top: 3px;
-
 	font-size: 12px;
-	opacity: 0.6;
+	color: var(--c-b);
+	margin: 1px 0 0 !important;
 }
 
 .node-actions {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-
-	margin-left: 12px;
+	display: contents;
 }
 
 .node-status {
-	font-size: 11px;
-	font-weight: 600;
-}
-
-.node-status.online {
+	font-size: 12px;
 	color: var(--c-g);
+	white-space: nowrap;
 }
 
-.node-status.offline {
-	opacity: 0.45;
+.node-open {
+	width: auto;
+	min-width: 52px;
+	padding: 5px 10px;
+	margin: 0;
+	font-size: 14px;
+	border-radius: 18px;
 }
 
 .nodes-empty {
-	padding: 20px;
 	text-align: center;
-	opacity: 0.6;
+	color: var(--c-b);
+	padding: 20px;
+}
+
+
+
+/* Small developer/debug buttons in the top toolbar */
+.top .top-debug {
+	width: 42px;
+	min-width: 42px;
+	padding: 12px 2px 10px;
+	opacity: .55;
+	font-size: 11px;
+	font-weight: bold;
+}
+
+.top .top-debug:hover {
+	opacity: 1;
 }
