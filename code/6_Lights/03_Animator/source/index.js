@@ -1656,29 +1656,121 @@ function bname(o)
 	return o.name;
 }
 
-function populateNodes(i,n)
+// function populateNodes(i,n)
+// {
+// 	var cn="";
+// 	var urows="";
+// 	var nnodes = 0;
+// 	if (n.nodes) {
+// 		n.nodes.sort((a,b) => (a.name).localeCompare(b.name));
+// 		for (var o of n.nodes) {
+// 			if (o.name) {
+// 				let onoff = `<i class="icons e-icon flr ${o.type&0x80?'':'off'}" onclick="rmtTgl('${o.ip}',this);"">&#xe08f;</i>`;
+// 				var url = `<a class="btn" title="${o.ip}" href="http://${o.ip}">${bname(o)}${o.vid<2307130?'':onoff}</a>`;
+// 				urows += inforow(url,`${btype(o.type&0x7F)}<br><i>${o.vid==0?"N/A":o.vid}</i>`);
+// 				nnodes++;
+// 			}
+// 		}
+// 	}
+// 	if (i.ndc < 0) cn += `Instance List is disabled.`;
+// 	else if (nnodes == 0) cn += `No other instances found.`;
+// 	cn += `<table>
+// 	${inforow("Current instance:",i.name)}
+// 	${urows}
+// 	</table>`;
+// 	gId('kn').innerHTML = cn;
+// }
+function populateNodes(i, n)
 {
-	var cn="";
-	var urows="";
-	var nnodes = 0;
-	if (n.nodes) {
-		n.nodes.sort((a,b) => (a.name).localeCompare(b.name));
-		for (var o of n.nodes) {
-			if (o.name) {
-				let onoff = `<i class="icons e-icon flr ${o.type&0x80?'':'off'}" onclick="rmtTgl('${o.ip}',this);"">&#xe08f;</i>`;
-				var url = `<a class="btn" title="${o.ip}" href="http://${o.ip}">${bname(o)}${o.vid<2307130?'':onoff}</a>`;
-				urows += inforow(url,`${btype(o.type&0x7F)}<br><i>${o.vid==0?"N/A":o.vid}</i>`);
-				nnodes++;
-			}
-		}
+	const container = gId('kn');
+
+	if (!container) return;
+
+	if (!n || !Array.isArray(n.nodes) || n.nodes.length === 0)
+	{
+		container.innerHTML =
+			'<div class="nodes-empty">No PulSar nodes discovered.</div>';
+
+		return;
 	}
-	if (i.ndc < 0) cn += `Instance List is disabled.`;
-	else if (nnodes == 0) cn += `No other instances found.`;
-	cn += `<table>
-	${inforow("Current instance:",i.name)}
-	${urows}
-	</table>`;
-	gId('kn').innerHTML = cn;
+
+	const nodes = [...n.nodes];
+
+	nodes.sort((a, b) =>
+	{
+		const an = a.name || '';
+		const bn = b.name || '';
+
+		return an.localeCompare(bn);
+	});
+
+	let html = '';
+
+	for (const node of nodes)
+	{
+		if (!node || !node.name) continue;
+
+		const name = escapeNodeHtml(node.name);
+		const ip = escapeNodeHtml(node.ip || '');
+		const online = (node.type & 0x80) !== 0;
+
+		html +=
+			'<div class="node-card">' +
+
+				'<div class="node-main">' +
+
+					'<div class="node-name">' +
+						name +
+					'</div>' +
+
+					'<div class="node-ip">' +
+						ip +
+					'</div>' +
+
+				'</div>' +
+
+				'<div class="node-actions">' +
+
+					'<span class="node-status ' +
+						(online ? 'online' : 'offline') +
+					'">' +
+						(online ? 'Online' : 'Offline') +
+					'</span>' +
+
+					'<button class="btn btn-xs" ' +
+						'onclick="openNode(\'' + ip + '\')">' +
+						'Open' +
+					'</button>' +
+
+				'</div>' +
+
+			'</div>';
+	}
+
+	if (!html)
+	{
+		html =
+			'<div class="nodes-empty">No PulSar nodes discovered.</div>';
+	}
+
+	container.innerHTML = html;
+}
+function escapeNodeHtml(value)
+{
+	return String(value)
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;')
+		.replaceAll("'", '&#039;');
+}
+
+
+function openNode(ip)
+{
+	if (!ip) return;
+
+	window.open('http://' + ip, '_blank');
 }
 
 function loadNodes()

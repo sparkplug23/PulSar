@@ -1790,3 +1790,93 @@ dialog {
 		padding: 4px 2px;
 	}
 }
+
+
+
+.nodes-header {
+	margin: 10px 0 18px 0;
+	text-align: left;
+}
+
+.nodes-title {
+	font-size: 20px;
+	font-weight: 600;
+}
+
+.nodes-subtitle {
+	margin-top: 4px;
+	font-size: 13px;
+	opacity: 0.65;
+}
+
+.nodes-toolbar {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 10px;
+}
+
+.nodes-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.node-card {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+
+	padding: 10px 12px;
+
+	border-radius: 8px;
+
+	background: var(--c-2);
+}
+
+.node-main {
+	min-width: 0;
+	text-align: left;
+}
+
+.node-name {
+	font-size: 16px;
+	font-weight: 600;
+
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.node-ip {
+	margin-top: 3px;
+
+	font-size: 12px;
+	opacity: 0.6;
+}
+
+.node-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+
+	margin-left: 12px;
+}
+
+.node-status {
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.node-status.online {
+	color: var(--c-g);
+}
+
+.node-status.offline {
+	opacity: 0.45;
+}
+
+.nodes-empty {
+	padding: 20px;
+	text-align: center;
+	opacity: 0.6;
+}

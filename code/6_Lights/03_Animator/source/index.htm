@@ -633,12 +633,28 @@
 
 
 <div id="nodes" class="modal">
-	<button class="btn btn-xs close" onclick="toggleNodes()"><i class="icons rot45">&#xe18a;</i></button>
-	<div id="ndlt">PulSar instances</div>
-	<div id="kn">Loading...</div>
-	<div style="position:sticky;bottom:0;">
-		<button class="btn ibtn" onclick="loadNodes()">Refresh</button>
+
+	<button class="btn btn-xs close" onclick="toggleNodes()">
+		<i class="icons rot45">&#xe18a;</i>
+	</button>
+
+	<div class="nodes-header">
+		<div class="nodes-title">PulSar Nodes</div>
+		<div class="nodes-subtitle">
+			Discovered devices on the local network
+		</div>
 	</div>
+
+	<div class="nodes-toolbar">
+		<button class="btn btn-s" onclick="loadNodes()">
+			Refresh
+		</button>
+	</div>
+
+	<div id="kn" class="nodes-list">
+		Loading...
+	</div>
+
 </div>
 
 <div id="mlv2D" class="modal">
