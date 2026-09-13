@@ -1,7 +1,7 @@
 {
   "env_name": "cm_office__ws2815panel12v",
-  "created_utc": "2026-09-13T13:01:40Z",
-  "created_epoch": 1789304500,
+  "created_utc": "2026-09-13T16:05:03Z",
+  "created_epoch": 1789315503,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "12e33e8f4d94c72aff7d95d88615fe5ccf3bdf98",
-    "describe": "12e33e8f-dirty",
-    "status_short": "M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf"
+    "commit": "1643edde5d15a0f377f7adabfc3f4f0d3cd55112",
+    "describe": "1643edde-dirty",
+    "status_short": "M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/source/index.css\n M code/6_Lights/03_Animator/source/index_tmp.css\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf"
   }
 }
