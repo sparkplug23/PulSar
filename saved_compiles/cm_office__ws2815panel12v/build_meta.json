@@ -1,7 +1,7 @@
 {
   "env_name": "cm_office__ws2815panel12v",
-  "created_utc": "2026-09-13T16:05:03Z",
-  "created_epoch": 1789315503,
+  "created_utc": "2026-09-13T16:42:07Z",
+  "created_epoch": 1789317727,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "1643edde5d15a0f377f7adabfc3f4f0d3cd55112",
-    "describe": "1643edde-dirty",
-    "status_short": "M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/source/index.css\n M code/6_Lights/03_Animator/source/index_tmp.css\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf"
+    "commit": "430197270e4434efbecfd9987a86e4dc8828cf3a",
+    "describe": "43019727-dirty",
+    "status_short": "M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/source/index.css\n M code/6_Lights/03_Animator/source/index.htm\n D code/6_Lights/03_Animator/source/index_tmp.css\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf"
   }
 }

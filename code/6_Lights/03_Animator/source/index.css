@@ -54,7 +54,7 @@
 	--tbp: 14px 14px 10px 14px;
 	--bbp: 9px 0 7px 0;
 	--bhd: none;
-	--sgp: "block";
+	--sgp: block;
 	--bmt: 0;
 	--sti: 42px;
 	--stp: 42px;
@@ -139,6 +139,23 @@ img {
 	font-size: 19px;
 }
 
+::-webkit-scrollbar {
+	width: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--c-sb);
+	opacity: .2;
+	border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--c-sbh);
+}
 
 /**************************************************************************************************
  * 03. ICONS / FONTS
@@ -259,11 +276,18 @@ img {
 	bottom: 5px;
 }
 
-.rot45,
-.check .checkmark::after {
+.rot45 {
 	-webkit-transform: rotate(45deg);
 	-ms-transform: rotate(45deg);
 	transform: rotate(45deg);
+}
+
+.m6 {
+	margin: 6px 0;
+}
+
+.c {
+	text-align: center;
 }
 
 /**************************************************************************************************
@@ -314,6 +338,12 @@ img {
 
 .simplified #pql .hd {
 	display: var(--bhd) !important;
+}
+
+@media all and (max-width: 639px) {
+	.hd {
+		display: none !important;
+	}
 }
 
 /**************************************************************************************************
@@ -387,6 +417,11 @@ img {
 	color: var(--c-8);
 	cursor: pointer;
 	writing-mode: vertical-rl;
+	text-shadow:
+		-1px -1px 0 var(--c-1),
+		1px -1px 0 var(--c-1),
+		-1px 1px 0 var(--c-1),
+		1px 1px 0 var(--c-1);
 }
 
 .tab-label {
@@ -395,14 +430,30 @@ img {
 	display: var(--bhd);
 }
 
-#namelabel {
-	text-shadow:
-		-1px -1px 0 var(--c-1),
-		1px -1px 0 var(--c-1),
-		-1px 1px 0 var(--c-1),
-		1px 1px 0 var(--c-1);
+@media all and (max-width: 1023px) {
+	.top button {
+		width: 8%;
+		padding: 10px 0 8px 0;
+	}
+
+	#buttonPcm {
+		display: none;
+	}
 }
 
+@media all and (max-width: 639px) {
+	.top button {
+		width: 16.6%;
+		padding: 8px 0 4px 0;
+	}
+}
+
+@media all and (min-width: 420px) and (max-width: 639px) {
+	.top button {
+		width: 14.28%;
+		padding: 8px 0 4px 0;
+	}
+}
 
 /**************************************************************************************************
  * 07. MAIN PAGE / TAB LAYOUT
@@ -503,11 +554,9 @@ img {
  *   - .btn-s
  *   - .btn-xs
  *   - icon buttons
- *
- * Rules not yet migrated from index_tmp.css.
  **************************************************************************************************/
 
- .btn {
+.btn {
 	padding: 8px;
 	width: 230px;
 	font-size: 19px;
@@ -525,33 +574,29 @@ img {
 	background-color: var(--c-3);
 }
 
-#segutil .btn-s:hover,
-#segutil2 .btn-s:hover,
-#putil .btn-s:hover,
-.btn:hover {
-	border: 1px solid var(--c-5);
-	background-color: var(--c-5);
-}
-
 .btn-s {
 	width: 100%;
 	margin: 0;
+	border: 1px solid var(--c-2);
+	background-color: var(--c-2);
+}
+
+.btn-n {
+	width: 230px;
+	margin: 0 8px 0 0;
+	border: 1px solid var(--c-2);
+	background-color: var(--c-2);
+}
+
+.btn-p {
+	width: 120px;
+	margin: 5px 0;
 }
 
 .btn-icon {
 	margin: -4px 4px -1px 0;
 	vertical-align: middle;
 	display: inline-block;
-}
-
-.btn-n {
-	width: 230px;
-	margin: 0 8px 0 0;
-}
-
-.btn-p {
-	width: 120px;
-	margin: 5px 0;
 }
 
 .btn-xs,
@@ -597,6 +642,15 @@ a.btn {
 	line-height: 24px;
 }
 
+#segutil .btn-s:hover,
+#segutil2 .btn-s:hover,
+#putil .btn-s:hover,
+.btn:hover,
+.modal .btn:hover {
+	border: 1px solid var(--c-5);
+	background-color: var(--c-5);
+}
+
 /**************************************************************************************************
  * 09. GENERIC FORMS
  *
@@ -607,11 +661,9 @@ a.btn {
  *   - textarea
  *   - checkbox
  *   - radio
- *
- * Rules not yet migrated from index_tmp.css.
  **************************************************************************************************/
 
- select {
+select {
 	padding: 4px 8px;
 	margin: 0;
 	font-size: 19px;
@@ -771,6 +823,10 @@ td .revchkl {
 	border: 1px solid var(--c-2);
 }
 
+.checkmark {
+	border-radius: 10px;
+}
+
 .radiomark {
 	top: 8px;
 	left: 8px;
@@ -778,10 +834,6 @@ td .revchkl {
 	width: 22px;
 	border-radius: 50%;
 	background-color: transparent;
-}
-
-.checkmark {
-	border-radius: 10px;
 }
 
 .radio:hover input ~ .radiomark,
@@ -803,6 +855,9 @@ td .revchkl {
 	height: 10px;
 	border: solid var(--c-f);
 	border-width: 0 3px 3px 0;
+	-webkit-transform: rotate(45deg);
+	-ms-transform: rotate(45deg);
+	transform: rotate(45deg);
 }
 
 .radio .radiomark::after {
@@ -813,6 +868,11 @@ td .revchkl {
 	margin: -7px;
 	border-radius: 50%;
 	background: var(--c-f);
+}
+
+.check input:checked ~ .checkmark::after,
+.radio input:checked ~ .radiomark::after {
+	display: inline-block !important;
 }
 
 td .checkmark,
@@ -980,6 +1040,27 @@ input[type="range"]::-moz-range-thumb {
 	margin-top: var(--bmt);
 }
 
+@media not all and (hover: none) {
+	.sliderwrap:hover + output.sliderbubble {
+		visibility: visible;
+		opacity: 1;
+	}
+}
+
+@media all and (max-width: 335px) {
+	.sliderbubble {
+		display: none;
+	}
+}
+
+@media all and (max-width: 639px) {
+	#briwrap {
+		margin: 0 auto !important;
+		float: none;
+		display: inline-block;
+	}
+}
+
 /**************************************************************************************************
  * 11. GENERIC LISTS / CARDS
  *
@@ -988,11 +1069,9 @@ input[type="range"]::-moz-range-thumb {
  *   - list item containers
  *   - expanded/collapsed content
  *   - reusable card internals
- *
- * Most rules not yet migrated from index_tmp.css.
  **************************************************************************************************/
 
- .ptxt {
+.ptxt {
 	margin: -1px 4px 8px !important;
 }
 
@@ -1059,7 +1138,6 @@ input[type="text"].ptxt {
 	background: var(--c-4);
 }
 
-#segcont .seg:hover:not([class*="expanded"]),
 .lstI:hover:not([class*="expanded"]) {
 	background: var(--c-5);
 }
@@ -1133,27 +1211,6 @@ input[type="text"].ptxt {
 	margin-bottom: 8px;
 }
 
-#pcont .selected:not([class*="expanded"]) {
-	bottom: 52px;
-	top: 42px;
-}
-
-#fxlist .lstI.selected {
-	top: calc(var(--sti) + 42px);
-}
-
-#pallist .lstI.selected {
-	top: calc(var(--stp) + 42px);
-}
-
-#fxlist .lstI.sticky {
-	top: var(--sti);
-}
-
-#pallist .lstI.sticky {
-	top: var(--stp);
-}
-
 .pwr {
 	color: var(--c-6);
 	cursor: pointer;
@@ -1167,6 +1224,40 @@ input[type="text"].ptxt {
 	position: absolute;
 	bottom: 8px;
 	right: 8px;
+}
+
+.segin,
+.presin {
+	padding: 8px;
+	position: relative;
+}
+
+.presin {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.pres .lstIcontent,
+.segin {
+	display: none;
+}
+
+.show,
+.expanded .edit-icon,
+.expanded .segin,
+.expanded .presin,
+.expanded .sbs,
+.expanded {
+	display: inline-block !important;
+}
+
+.hide,
+.expanded .segin.hide,
+.expanded .presin.hide,
+.expanded .sbs.hide,
+.expanded .frz,
+.expanded .g-icon {
+	display: none !important;
 }
 
 /**************************************************************************************************
@@ -1228,6 +1319,33 @@ input[type="text"].ptxt {
 	margin: 0 4px;
 	min-width: 20px;
 	pointer-events: auto;
+}
+
+.fnd {
+	position: relative;
+}
+
+.fnd input[type="text"] {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 8px 40px 8px 44px;
+	margin: 4px auto 12px;
+	text-align: left;
+	border-radius: 21px;
+	background: var(--c-2);
+	border: 1px solid var(--c-3);
+	-webkit-filter: grayscale(100%);
+	filter: grayscale(100%);
+}
+
+.fnd input[type="text"]:focus {
+	background-color: var(--c-4);
+}
+
+.fnd input[type="text"]:not(:placeholder-shown),
+.fnd input[type="text"]:hover {
+	background-color: var(--c-3);
 }
 
 /**************************************************************************************************
@@ -1405,11 +1523,9 @@ dialog {
  *   - quick colour buttons
  *   - colour slots
  *   - hex input
- *
- * Rules not yet migrated from index_tmp.css.
  **************************************************************************************************/
 
- #picker {
+#picker {
 	margin: 4px auto 0 !important;
 	max-width: max-content;
 }
@@ -1440,6 +1556,11 @@ dialog {
 	width: 28px;
 	height: 28px;
 	line-height: 28px;
+	text-shadow:
+		-1px -1px 0 var(--c-1),
+		1px -1px 0 var(--c-1),
+		-1px 1px 0 var(--c-1),
+		1px 1px 0 var(--c-1);
 }
 
 .qcsb,
@@ -1473,32 +1594,13 @@ dialog {
 	border-width: 5px !important;
 }
 
-.qcs,
-#namelabel {
-	text-shadow:
-		-1px -1px 0 var(--c-1),
-		1px -1px 0 var(--c-1),
-		-1px 1px 0 var(--c-1),
-		1px 1px 0 var(--c-1);
-}
-
-.qcs {
-	text-shadow:
-		-1px -1px 0 var(--c-1),
-		1px -1px 0 var(--c-1),
-		-1px 1px 0 var(--c-1),
-		1px 1px 0 var(--c-1);
-}
-
 /**************************************************************************************************
  * 15. PALETTES
  *
  * Palette browser, palette previews, secondary palette controls and palette-specific controls.
- *
- * Rules not yet migrated from index_tmp.css.
  **************************************************************************************************/
 
- #secPalToggle {
+#secPalToggle {
 	margin-left: 4px;
 	opacity: .75;
 	border-radius: 50%;
@@ -1512,15 +1614,35 @@ dialog {
 	outline: 2px solid var(--c-3, #f44);
 }
 
+#pallist .lstI.selected {
+	top: calc(var(--stp) + 42px);
+}
+
+#pallist .lstI.sticky {
+	top: var(--stp);
+}
+
 /**************************************************************************************************
  * 16. EFFECTS
  *
  * Effect browser, effect list, effect-specific controls and parameter controls.
- *
- * Rules not yet migrated from index_tmp.css.
  **************************************************************************************************/
+
 #fxFind {
 	margin-top: 4px;
+	margin-bottom: 12px;
+}
+
+#fxFind.fnd input[type="text"] {
+	margin-bottom: 0;
+}
+
+#fxlist .lstI.selected {
+	top: calc(var(--sti) + 42px);
+}
+
+#fxlist .lstI.sticky {
+	top: var(--sti);
 }
 
 /**************************************************************************************************
@@ -1529,28 +1651,18 @@ dialog {
  * Segment cards, segment controls, segment selection and expanded segment editor.
  **************************************************************************************************/
 
-#segcont > div:first-child,
-#fxFind {
-	margin-top: 4px;
-}
-
-.segt,
-.plentry TABLE {
+.segt {
 	table-layout: fixed;
 	width: 100%;
 }
 
-.segt TD {
+.segt td {
+	font-size: 13px;
 	padding: 2px 0 !important;
 	text-align: center;
-}
-
-.segt TD,
-.plentry TD {
-	font-size: 13px;
-	padding: 0;
 	vertical-align: middle;
 }
+
 .sbs {
 	display: var(--sgp);
 	width: 100%;
@@ -1588,20 +1700,28 @@ dialog {
 	margin-top: 4px;
 }
 
+#segcont .seg:hover:not([class*="expanded"]) {
+	background: var(--c-5);
+}
+
 .simplified #segcont .lstI {
 	margin-top: 4px;
 	min-height: unset;
 }
 
+.segin .btn:hover {
+	border: 1px solid var(--c-5);
+	background-color: var(--c-5);
+}
+
+
 /**************************************************************************************************
  * 18. PRESETS
  *
  * Preset cards, preset controls, preset editor and preset-specific layout.
- *
- * Rules not yet migrated from index_tmp.css.
  **************************************************************************************************/
 
- .pid {
+.pid {
 	position: absolute;
 	top: 8px;
 	left: 12px;
@@ -1615,14 +1735,43 @@ dialog {
 	margin: 4px;
 }
 
+.po2 {
+	display: none;
+	margin-top: 8px;
+}
+
+.pwarn {
+	color: red;
+}
+
+#pcont .selected:not([class*="expanded"]) {
+	bottom: 52px;
+	top: 42px;
+}
+
 /**************************************************************************************************
  * 19. PLAYLISTS
  *
  * Playlist entries, playlist controls and playlist editor.
- *
- * Rules not yet migrated from index_tmp.css.
  **************************************************************************************************/
 
+.plentry table {
+	table-layout: fixed;
+	width: 100%;
+}
+
+.plentry td {
+	font-size: 13px;
+	padding: 0;
+	vertical-align: middle;
+}
+
+.hrz {
+	width: auto;
+	height: 2px;
+	background-color: var(--c-b);
+	margin: 3px 0;
+}
 
 /**************************************************************************************************
  * 20. INFO MODAL
@@ -1983,6 +2132,74 @@ dialog {
  * Keep responsive rules grouped with their feature where practical.
  * Only place truly global responsive behaviour here.
  **************************************************************************************************/
+
+ /* Small screen / tablet PC mode */
+@media all and (min-width: 1024px) and (max-width: 1249px) {
+	#segutil,
+	#segutil2,
+	#segcont,
+	#putil,
+	#pcont,
+	#pql,
+	#fx,
+	#palw,
+	#psFind,
+	#sliders {
+		width: 100%;
+		max-width: 280px;
+		font-size: 18px;
+	}
+
+	#putil .btn-s {
+		width: 114px;
+	}
+
+	#sliders .sliderbubble {
+		display: none;
+	}
+
+	#sliders .sliderwrap,
+	.sbs .sliderwrap {
+		width: calc(100% - 42px);
+	}
+
+	#sliders .slider {
+		padding-right: 0;
+	}
+
+	#sliders .sliderwrap {
+		left: 12px;
+	}
+
+	.segname {
+		max-width: calc(100% - 110px);
+	}
+
+	.segt td {
+		padding: 0 !important;
+	}
+
+	input[type="number"],
+	input[type="text"],
+	select,
+	textarea {
+		font-size: 18px;
+	}
+
+	input[type="number"] {
+		width: 32px;
+	}
+
+	.lstIcontent {
+		padding-left: 8px;
+	}
+
+	.revchkl {
+		max-width: 183px;
+		text-overflow: ellipsis;
+		overflow-x: clip;
+	}
+}
 
 
 /**************************************************************************************************
