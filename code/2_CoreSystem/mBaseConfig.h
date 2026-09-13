@@ -890,6 +890,13 @@
  *********************************************************************************************
  *********************************************************************************************/
 
+// •	no server at all
+// •	Lighting without server
+// •	Lighting with server (full webui running, core +lightweb)
+// •	Only core webserver (so needs to compile when lights do not)
+
+
+
 #define WEB_SERVER             2                 // [WebServer] Web server (0 = Off, 1 = Start as User, 2 = Start as Admin)
 #define WEB_PASSWORD           ""                // [WebPassword] Web server Admin mode Password for WEB_USERNAME (empty string = Disable)
 
@@ -904,6 +911,13 @@
 
 #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
+
+#ifdef FIRMWARE_DEFAULT__WEBSERVER_BASIC_WHEN_NO_LIGHTS_ARE_USED
+
+  #define USE_MODULE_NETWORK_WEBSERVER  
+  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+
+#endif
 
 
 /*********************************************************************************************

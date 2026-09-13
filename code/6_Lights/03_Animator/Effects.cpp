@@ -24662,9 +24662,7 @@ static const char PM_EFFECT_DESCRI__2D__WAVING_CELL[] PROGMEM =
 /********************     audio enhanced routines     ************************/
 ///////////////////////////////////////////////////////////////////////////////
 
-// #ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
-
-
+#if defined(ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D) || defined (ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D)
 mAnimatorLight::um_data_t* mAnimatorLight::getAudioData() {
   um_data_t *um_data;
   // if (!usermods.getUMData(&um_data, USERMOD_ID_AUDIOREACTIVE)) {
@@ -24673,9 +24671,7 @@ mAnimatorLight::um_data_t* mAnimatorLight::getAudioData() {
   // }
   return um_data;
 }
-
-
-// #endif
+#endif
 
 
 

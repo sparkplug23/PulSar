@@ -219,9 +219,7 @@ public mTaskerInterface{
     bool WebSocket_SendSensors(AsyncWebSocketClient* client);
     bool WebSocket_SendEnergy(AsyncWebSocketClient* client);
 
-    #ifdef ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
     bool WebSocket_SendControls(AsyncWebSocketClient* client);
-    #endif
 
     #endif
 

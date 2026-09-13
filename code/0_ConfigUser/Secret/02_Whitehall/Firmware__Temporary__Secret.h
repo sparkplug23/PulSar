@@ -132,7 +132,7 @@
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""

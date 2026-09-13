@@ -493,7 +493,7 @@
 
 
 
-  #define D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "motion"
+  #define D_MODULE__SENSORS__PIR__CTR "motion"
 
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)  // needs appending method 
@@ -506,7 +506,7 @@
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -2711,7 +2711,7 @@ new 26GHz radar sensor
     "],"
   "}";
 
-  #define D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "motion"
+  #define D_MODULE__SENSORS__PIR__CTR "motion"
 
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)  // needs appending method 
@@ -2724,7 +2724,7 @@ new 26GHz radar sensor
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""

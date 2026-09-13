@@ -385,7 +385,7 @@ void mWebServer::handleConsoleWs()
   // ---------------------------------------------------------------------------
   const bool active_now = (websocket_console->count() > 0);
   #ifndef ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
-  tkr_fConsole_active = active_now; // Only enable turning off console logging if not in conflict with console1
+  fConsole_active = active_now; // Only enable turning off console logging if not in conflict with console1
   #endif
 
   // If no clients, do nothing else.

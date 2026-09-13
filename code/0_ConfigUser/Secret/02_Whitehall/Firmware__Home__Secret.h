@@ -1696,7 +1696,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
@@ -1726,7 +1726,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -1957,7 +1957,7 @@ Bathroom
       "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["         // so this is probably to be phased out?
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["         // so this is probably to be phased out?
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "],"  
       "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
@@ -1984,7 +1984,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -2760,7 +2760,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      // "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      // "\"" D_MODULE__SENSORS__PIR__CTR "\":["
       //   "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       // "],"
       "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
@@ -2844,7 +2844,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
@@ -2870,7 +2870,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -3048,7 +3048,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -3481,7 +3481,7 @@ Bathroom
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "]"    
@@ -3592,16 +3592,12 @@ Bathroom
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   
-  
-
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  
-  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -3625,191 +3621,11 @@ Bathroom
    * SECTION: Lighting Configs
   ************************************/  
 
-  #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
-
-  #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
-
-  
-  #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+  #define ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
+  #define ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
   
 
   #define USE_LIGHTING_TEMPLATE
-
-  /**
-   * @brief 
-   * Tree Left:  200
-   * Tree Right: 200
-   * Ceiling Near: 250
-   * Ceiling Further: 250
-   */
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":5,
-  //       "ColourOrder":"GRBCW",
-  //       "BusType":"WS2805_RGBWW",
-  //       "Start":0,
-  //       "Length":250
-  //     },
-  //     {
-  //       "Pin":18,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":250,
-  //       "Length":250
-  //     },
-  //     {
-  //       "Pin":21,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":500,
-  //       "Length":250
-  //     },
-  //     {
-  //       "Pin":18,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":750,
-  //       "Length":250
-  //     }
-  //   ],
-  //   "Segment0": {
-  //     "PixelRange": [
-  //       0,
-  //       500
-  //     ],
-  //     "ColourPalette":"Purple Pink",
-  //     "Effects": {
-  //       "Function":"Slow Glow",
-  //       "Speed":127,
-  //       "Intensity":1,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 0,
-  //       "RateMs": 100
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "Segment1": {
-  //     "PixelRange": [
-  //       500,
-  //       1000
-  //     ],
-  //     "ColourPalette":"Snowy 02",
-  //     "Effects": {
-  //       "Function":"Static",
-  //       "Speed":127,
-  //       "Intensity":127,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 0,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "BrightnessRGB": 100,
-  //   "BrightnessCCT": 0
-  // }
-  // )=====";
-  
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE)  //group A
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":5,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":0,
-  //       "Length":250
-  //     },
-  //     {
-  //       "Pin":18,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":250,
-  //       "Length":250
-  //     },
-  //     {
-  //       "Pin":19,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":500,
-  //       "Length":250
-  //     },
-  //     {
-  //       "Pin":21,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":750,
-  //       "Length":250
-  //     }
-  //   ],
-  //   "Segment0": {
-  //     "PixelRange": [
-  //       0,
-  //       500
-  //     ],
-  //     "ColourPalette":"Sweetpea",
-  //     "Effects": {
-  //       "Function":"Static",
-  //       "Speed":127,
-  //       "Intensity":127,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 0,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "Segment1": {
-  //     "PixelRange": [
-  //       500,
-  //       750
-  //     ],
-  //     "ColourPalette":"IceCream Floats",
-  //     "Effects": {
-  //       "Function":"Static",
-  //       "Speed":127,
-  //       "Intensity":127,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 0,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "Segment2": {
-  //     "PixelRange": [
-  //       750,
-  //       1000
-  //     ],
-  //     "ColourPalette":172,
-  //     "CustomPalette":{"Encoding":"RGB","Index":9,"Data":[255,255,255,255,0,43]},
-  //     "Effects": {
-  //       "Function":"Static",
-  //       "Speed":127,
-  //       "Intensity":127,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 0,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "BrightnessRGB": 100,
-  //   "BrightnessCCT": 0
-  // }
-  // )=====";
-
-
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)  // side 2
   R"=====(
   {
@@ -3843,22 +3659,23 @@ Bathroom
         "Length":250
       }
     ],
-    "Segment0": {
-      "PixelRange": [
-        0,
-        500
-      ],
-      "ColourPalette":"Sweetpea",
-      "Effects": {
-        "Function":"Static",
-        "Speed":127,
-        "Intensity":127,
-        "Grouping":1,
-        "RateMs": 1000
+    "Segments":[
+      {
+        "PixelRange": [
+          0,
+          500
+        ],
+        "ColourPalette":"Sweetpea",
+        "Effects": {
+          "Function":"Static",
+          "Speed":127,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 100
       },
-      "BrightnessRGB": 100
-    },
-    "Segment1": {
+      {
       "PixelRange": [
         500,
         750
@@ -3872,23 +3689,24 @@ Bathroom
         "RateMs": 1000
       },
       "BrightnessRGB": 100
-    },
-    "Segment2": {
-      "PixelRange": [
-        750,
-        1000
-      ],
-      "ColourPalette":172,
-      "CustomPalette":{"Encoding":"RGB","Index":9,"Data":[255,255,255,255,0,43]},
-      "Effects": {
-        "Function":"Static",
-        "Speed":127,
-        "Intensity":127,
-        "Grouping":1,
-        "RateMs": 1000
       },
-      "BrightnessRGB": 100
-    },
+      {
+        "PixelRange": [
+          750,
+          1000
+        ],
+        "ColourPalette":172,
+        "CustomPalette":{"Encoding":"RGB","Index":9,"Data":[255,255,255,255,0,43]},
+        "Effects": {
+          "Function":"Static",
+          "Speed":127,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 100
+      }
+    ],
     "BrightnessRGB": 100,
     "BrightnessCCT": 0
   }
@@ -3992,7 +3810,7 @@ Bathroom
       "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "],"  
       "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
@@ -4020,7 +3838,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -4316,7 +4134,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
@@ -4367,7 +4185,7 @@ Bathroom
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":2" // Started
@@ -4442,7 +4260,7 @@ Bathroom
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "]"    
@@ -4575,7 +4393,7 @@ Bathroom
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":1" // Started
@@ -4590,7 +4408,7 @@ Bathroom
         "\"State\":1" // 
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":1" // Started        
@@ -4651,7 +4469,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -4666,7 +4484,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1," 
         "\"State\":\"Follow\""
@@ -5025,7 +4843,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
@@ -5058,7 +4876,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -5496,7 +5314,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
       "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
@@ -5554,7 +5372,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -5986,7 +5804,7 @@ Bathroom
       "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_DRIVER_RELAY_01_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_STAIRS_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_LANDING_FRIENDLY_NAME_LONG "\""
       "],"
@@ -6132,7 +5950,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -6146,7 +5964,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1," 
         "\"State\":\"Follow\""
@@ -6376,7 +6194,7 @@ Bathroom
       "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["         // so this is probably to be phased out?
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["         // so this is probably to be phased out?
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION1_FRIENDLY_NAME_LONG "1m\""
         "\"" D_DEVICE_SENSOR_MOTION2_FRIENDLY_NAME_LONG "2m\","
@@ -6407,7 +6225,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -6421,7 +6239,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1," 
         "\"State\":\"Follow\""
@@ -6435,7 +6253,7 @@ Bathroom
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":2," 
         "\"State\":\"Follow\""

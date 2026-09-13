@@ -130,6 +130,7 @@ class WebUIStringPrint : public Print
 };
 
 
+#ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
 bool mWebServer::WebSocket_SendControls(AsyncWebSocketClient* client)
 {
   if(!client) return false;
@@ -154,6 +155,7 @@ bool mWebServer::WebSocket_SendControls(AsyncWebSocketClient* client)
     output.value.length()
   );
 }
+#endif
 
 
 
