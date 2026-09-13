@@ -349,6 +349,12 @@ button {
 	writing-mode: vertical-rl;
 }
 
+.tab-label {
+	margin: 0 0 -5px 0;
+	padding-bottom: 4px;
+	display: var(--bhd);
+}
+
 
 /**************************************************************************************************
  * 07. MAIN PAGE / TAB LAYOUT
@@ -380,6 +386,100 @@ button {
 	overscroll-behavior: none;
 	padding: 0 4px;
 	-webkit-overflow-scrolling: touch;
+}
+
+#Segments,
+#Presets,
+#Effects,
+#Colors {
+	font-size: 19px;
+	padding: 4px 0 0;
+}
+
+#segutil,
+#segutil2,
+#segcont,
+#putil,
+#pcont,
+#pql,
+#fx,
+#palw,
+.fnd {
+	max-width: 280px;
+}
+
+#putil,
+#segutil,
+#segutil2 {
+	min-height: 42px;
+	margin: 0 auto;
+}
+
+#segutil .segin {
+	padding-top: 12px;
+}
+
+#fx,
+#pql,
+#segcont,
+#pcont,
+#sliders,
+#qcs-w,
+#hexw,
+#pall,
+#ledmap,
+.slider,
+.filter,
+.option,
+.segname,
+.pname,
+.fnd {
+	margin: 0 auto;
+}
+
+#putil {
+	padding: 5px 0 0;
+}
+
+.simplified #pql,
+.simplified #palw,
+.simplified #fx {
+	margin-bottom: 8px;
+}
+
+.smooth {
+	transition: transform calc(var(--f, 1) * .5s) ease-out;
+}
+
+.overlay {
+	position: fixed;
+	height: 100%;
+	width: 100%;
+	top: 0;
+	left: 0;
+	background-color: var(--c-3);
+	font-size: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 11;
+	opacity: .95;
+	transition: .7s;
+	pointer-events: none;
+}
+
+.staytop,
+.staybot {
+	display: block;
+	position: -webkit-sticky;
+	position: sticky !important;
+	top: 0;
+	z-index: 2;
+	margin: 0 auto auto;
+}
+
+.staybot {
+	bottom: 5px;
 }
 
 /**************************************************************************************************
@@ -418,6 +518,68 @@ button {
  *   - slider icons
  **************************************************************************************************/
 
+ #sliders {
+	position: -webkit-sticky;
+	position: sticky;
+	bottom: 0;
+	max-width: 300px;
+	z-index: 2;
+}
+
+#sliders .labels {
+	padding-top: 3px;
+	font-size: small;
+}
+
+.slider {
+	border-radius: 24px;
+	position: relative;
+	padding-bottom: 2px;
+}
+
+.sliderwrap {
+	height: 30px;
+	width: 230px;
+	max-width: 230px;
+	position: relative;
+	z-index: 0;
+}
+
+#sliders .slider {
+	padding-right: 64px;
+}
+
+#sliders .slider,
+#info .slider {
+	background-color: var(--c-2);
+}
+
+#sliders .sliderwrap,
+.sbs .sliderwrap {
+	left: 32px;
+}
+
+.filter,
+.option {
+	background-color: var(--c-4);
+	border-radius: 26px;
+	height: 26px;
+	max-width: 300px;
+	padding: 4px 2px;
+	position: relative;
+	opacity: 1;
+	transition: opacity .25s linear, height .2s, transform .2s;
+}
+
+.filter {
+	z-index: 1;
+	border-radius: 0 0 16px 16px;
+	max-width: 220px;
+	height: 54px;
+	line-height: 1.5;
+	padding-bottom: 8px;
+	pointer-events: none;
+}
 
 /**************************************************************************************************
  * 11. GENERIC LISTS / CARDS
