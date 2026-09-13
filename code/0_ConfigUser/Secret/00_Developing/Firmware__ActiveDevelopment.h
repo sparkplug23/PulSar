@@ -3669,6 +3669,8 @@
   #define MQTT_HOST   "192.168.1.70"
     #define MQTT_PORT     1883
 
+    #error "DELETED AS NOW DEVICE_WHITEHALL__HALLWAY__PEBBLES"
+
   /***********************************
    * SECTION: System Debug Options
   ************************************/    

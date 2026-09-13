@@ -46,16 +46,6 @@ var hol = [
 	[0, 0, 1, 1, "https://images.alphacoders.com/119/1198800.jpg"]	// new year
 ];
 
-// var cpick = new iro.ColorPicker("#picker", {
-// 	width: 260,
-// 	wheelLightness: false,
-// 	wheelAngle: 270,
-// 	wheelDirection: "clockwise",
-// 	layout: [{
-// 		component: iro.ui.Wheel,
-// 		options: {}
-// 	}]
-// });
 
 // load iro.js sequentially to avoid 503 errors, retries until successful
 (function loadIro() {
@@ -202,7 +192,6 @@ function cTheme(light) {
 	sCol('--c-tb','rgba(204, 204, 204, var(--t-b))');
 	sCol('--c-tba','rgba(170, 170, 170, var(--t-b))');
 	sCol('--c-tbh','rgba(204, 204, 204, var(--t-b))');
-	// gId('imgw').style.filter = "invert(0.8)";
 	} else {
 	sCol('--c-1','#111');
 	sCol('--c-f','#fff');
@@ -224,7 +213,6 @@ function cTheme(light) {
 	sCol('--c-tb','rgba(34, 34, 34, var(--t-b))');
 	sCol('--c-tba','rgba(102, 102, 102, var(--t-b))');
 	sCol('--c-tbh','rgba(51, 51, 51, var(--t-b))');
-	// gId('imgw').style.filter = "unset";
 	}
 }
 

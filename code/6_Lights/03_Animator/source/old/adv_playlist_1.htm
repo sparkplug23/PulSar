@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Playlist Viewer - Layout 1</title>
+
+<style>
+:root {
+  --bg: #111;
+  --panel: #1c1c1c;
+  --panel2: #252525;
+  --panel3: #303030;
+  --border: #414141;
+  --text: #eee;
+  --muted: #999;
+  --hover: #383838;
+  --active: #4a4a4a;
+  --green: #65c466;
+  --red: #e05252;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  min-width: 900px;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 22px;
+  background: rgba(17,17,17,0.97);
+  border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+header .summary {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+header input {
+  margin-left: auto;
+  width: 320px;
+  padding: 9px 12px;
+  color: var(--text);
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  outline: none;
+}
+
+main {
+  padding: 20px;
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 12px;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.section-subtitle {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: normal;
+}
+
+#playlistGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+  gap: 14px;
+}
+
+.playlist-card {
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.playlist-header {
+  display: grid;
+  grid-template-columns: 8px 54px 1fr auto;
+  align-items: center;
+  min-height: 50px;
+  background: var(--panel2);
+}
+
+.playlist-colour {
+  align-self: stretch;
+}
+
+.playlist-id {
+  padding-left: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  text-decoration: underline;
+}
+
+.playlist-name {
+  padding: 13px 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.playlist-count {
+  padding-right: 14px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.entry-head,
+.entry {
+  display: grid;
+  grid-template-columns: 52px minmax(200px,1fr) 84px 92px;
+  align-items: center;
+}
+
+.entry-head {
+  min-height: 29px;
+  padding: 0 12px;
+  color: var(--muted);
+  font-size: 11px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.entry {
+  min-height: 38px;
+  padding: 0 12px;
+  border-bottom: 1px solid #303030;
+}
+
+.entry:last-child {
+  border-bottom: none;
+}
+
+.entry:hover {
+  background: var(--hover);
+}
+
+.entry-id {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.entry-name {
+  overflow: hidden;
+  padding-right: 10px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.entry-duration,
+.entry-transition {
+  color: #bbb;
+  font-size: 12px;
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+  gap: 8px;
+}
+
+.preset-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 54px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.preset-card:hover {
+  background: var(--hover);
+}
+
+.preset-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 49px;
+  padding: 8px 10px 10px;
+}
+
+.preset-id {
+  flex: 0 0 32px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.preset-name {
+  overflow: hidden;
+  font-size: 13px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.usage-count {
+  margin-left: auto;
+  padding-left: 7px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.usage-bands {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  height: 5px;
+}
+
+.usage-band {
+  flex: 1 1 0;
+}
+
+.unused .preset-card {
+  opacity: 0.76;
+}
+
+.unused .preset-card:hover {
+  opacity: 1;
+}
+
+.empty {
+  padding: 20px;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+#toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 100;
+  max-width: 420px;
+  padding: 11px 15px;
+  color: white;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 8px;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: 0.18s;
+  pointer-events: none;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#toast.error {
+  background: #641d1d;
+}
+
+.loading {
+  color: var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Playlist / Preset Relationships</h1>
+  <div class="summary" id="summary">Loading...</div>
+  <input id="search" type="search" placeholder="Filter playlists or presets..." autocomplete="off">
+</header>
+
+<main>
+
+  <section class="section">
+    <div class="section-title">
+      Playlists
+      <span class="section-subtitle">Click a playlist name to load it. Click a preset name to load that preset.</span>
+    </div>
+
+    <div id="playlistGrid" class="loading">Loading presets.json...</div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">
+      Presets used by playlists
+      <span class="section-subtitle">Colour bands show every playlist that references each preset.</span>
+    </div>
+
+    <div id="usedPresetGrid" class="preset-grid"></div>
+  </section>
+
+  <section class="section unused">
+    <div class="section-title">
+      Presets not used by playlists
+      <span class="section-subtitle">Not necessarily obsolete; simply not referenced by a playlist.</span>
+    </div>
+
+    <div id="unusedPresetGrid" class="preset-grid"></div>
+  </section>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+var pJson = {};
+var playlistData = [];
+var presetUsage = new Map();
+var toastTimer = null;
+
+function getURL(path) {
+  path = path || "/";
+  if (path[0] !== "/") path = "/" + path;
+  return location.origin + path;
+}
+
+function isObj(v) {
+  return v && typeof v === "object" && !Array.isArray(v);
+}
+
+function isPlaylist(id) {
+  return !!(pJson[id] && pJson[id].playlist && Array.isArray(pJson[id].playlist.ps));
+}
+
+function pName(id) {
+  if (pJson[id] && pJson[id].n) return pJson[id].n;
+  return "Preset " + id;
+}
+
+function showToast(text, error) {
+  const toast = document.getElementById("toast");
+  toast.textContent = text;
+  toast.className = error ? "show error" : "show";
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.className = "";
+  }, 2200);
+}
+
+function requestJson(command) {
+  if (!command) return;
+
+  command.v = true;
+  command.time = Math.floor(Date.now() / 1000);
+
+  return fetch(getURL("/json/si"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8"
+    },
+    body: JSON.stringify(command)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  })
+  .catch(err => {
+    console.error(err);
+    showToast("Command failed: " + err.message, true);
+  });
+}
+
+function setPreset(id) {
+  id = parseInt(id, 10);
+  if (!pJson[id]) return;
+
+  let obj = { ps: id };
+
+  if (!isPlaylist(id) && (!pJson[id].win || pJson[id].win.indexOf("Please") <= 0)) {
+    obj = { pd: id };
+    Object.assign(obj, pJson[id]);
+
+    delete obj.ql;
+    delete obj.n;
+  }
+
+  if (isPlaylist(id)) obj.on = true;
+
+  showToast("Loading " + pName(id) + " (" + id + ")");
+  requestJson(obj);
+}
+
+function playlistColour(id) {
+  const hue = (parseInt(id, 10) * 137.508) % 360;
+  return `hsl(${hue},72%,58%)`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function normaliseArray(value, length, fallback) {
+  if (Array.isArray(value)) {
+    const out = value.slice();
+
+    while (out.length < length) {
+      out.push(out.length ? out[out.length - 1] : fallback);
+    }
+
+    return out;
+  }
+
+  const scalar = Number.isFinite(Number(value)) ? Number(value) : fallback;
+  return Array(length).fill(scalar);
+}
+
+function buildRelationships() {
+  playlistData = [];
+  presetUsage = new Map();
+
+  for (const [idString, obj] of Object.entries(pJson)) {
+    if (!isObj(obj)) continue;
+
+    const id = parseInt(idString, 10);
+    if (!Number.isFinite(id) || id <= 0) continue;
+    if (!isPlaylist(id)) continue;
+
+    const ps = obj.playlist.ps.map(v => parseInt(v, 10));
+    const dur = normaliseArray(obj.playlist.dur, ps.length, 100);
+    const transition = normaliseArray(obj.playlist.transition, ps.length, 7);
+
+    const playlist = {
+      id,
+      name: pName(id),
+      colour: playlistColour(id),
+      entries: ps.map((presetId, index) => ({
+        presetId,
+        duration: dur[index],
+        transition: transition[index]
+      }))
+    };
+
+    playlistData.push(playlist);
+
+    for (const entry of playlist.entries) {
+      if (!presetUsage.has(entry.presetId)) presetUsage.set(entry.presetId, []);
+      presetUsage.get(entry.presetId).push(id);
+    }
+  }
+
+  playlistData.sort((a, b) => a.id - b.id);
+}
+
+function makePlaylistCard(pl) {
+  let entries = "";
+
+  for (const entry of pl.entries) {
+    const presetExists = !!pJson[entry.presetId];
+    const name = presetExists ? pName(entry.presetId) : "[Missing preset]";
+
+    entries += `
+      <div class="entry" data-search="${escapeHtml((pl.name + " " + name).toLowerCase())}">
+        <div class="entry-id">${entry.presetId}</div>
+        <div class="entry-name clickable"
+             title="Load preset ${entry.presetId}"
+             onclick="event.stopPropagation(); setPreset(${entry.presetId});">
+          ${escapeHtml(name)}
+        </div>
+        <div class="entry-duration">${(entry.duration / 10).toFixed(1)} s</div>
+        <div class="entry-transition">${(entry.transition / 10).toFixed(1)} s</div>
+      </div>`;
+  }
+
+  return `
+    <article class="playlist-card"
+             data-search="${escapeHtml(pl.name.toLowerCase())}">
+
+      <div class="playlist-header">
+        <div class="playlist-colour" style="background:${pl.colour}"></div>
+        <div class="playlist-id">${pl.id}</div>
+        <div class="playlist-name clickable"
+             title="Load playlist ${pl.id}"
+             onclick="setPreset(${pl.id});">
+          ${escapeHtml(pl.name)}
+        </div>
+        <div class="playlist-count">${pl.entries.length} entries</div>
+      </div>
+
+      <div class="entry-head">
+        <div>ID</div>
+        <div>Preset</div>
+        <div>Duration</div>
+        <div>Transition</div>
+      </div>
+
+      ${entries}
+    </article>`;
+}
+
+function makePresetCard(id, usage) {
+  const name = pName(id);
+
+  let bands = "";
+
+  for (const playlistId of usage) {
+    const pl = playlistData.find(p => p.id === playlistId);
+
+    bands += `
+      <span class="usage-band"
+            title="${escapeHtml(pl ? pl.name : ("Playlist " + playlistId))}"
+            style="background:${playlistColour(playlistId)}"></span>`;
+  }
+
+  return `
+    <div class="preset-card"
+         data-search="${escapeHtml((id + " " + name).toLowerCase())}">
+      <div class="preset-content">
+        <div class="preset-id">${id}</div>
+        <div class="preset-name clickable"
+             title="Load preset ${id}"
+             onclick="setPreset(${id});">
+          ${escapeHtml(name)}
+        </div>
+        ${usage.length ? `<div class="usage-count">${usage.length}×</div>` : ""}
+      </div>
+      <div class="usage-bands">${bands}</div>
+    </div>`;
+}
+
+function render() {
+  const playlistGrid = document.getElementById("playlistGrid");
+  const usedGrid = document.getElementById("usedPresetGrid");
+  const unusedGrid = document.getElementById("unusedPresetGrid");
+
+  playlistGrid.classList.remove("loading");
+
+  playlistGrid.innerHTML = playlistData.length
+    ? playlistData.map(makePlaylistCard).join("")
+    : `<div class="empty">No playlists found.</div>`;
+
+  const presetIds = Object.keys(pJson)
+    .map(Number)
+    .filter(id => id > 0 && pJson[id] && !isPlaylist(id))
+    .sort((a, b) => a - b);
+
+  const used = presetIds.filter(id => presetUsage.has(id));
+  const unused = presetIds.filter(id => !presetUsage.has(id));
+
+  usedGrid.innerHTML = used.map(id => makePresetCard(id, presetUsage.get(id))).join("");
+  unusedGrid.innerHTML = unused.map(id => makePresetCard(id, [])).join("");
+
+  document.getElementById("summary").textContent =
+    `${playlistData.length} playlists · ${presetIds.length} presets · ${used.length} used · ${unused.length} unused`;
+}
+
+function applySearch() {
+  const term = document.getElementById("search").value.trim().toLowerCase();
+
+  document.querySelectorAll("[data-search]").forEach(el => {
+    el.style.display = !term || el.dataset.search.includes(term) ? "" : "none";
+  });
+}
+
+function loadPresets() {
+  fetch(getURL("/presets.json"), {
+    method: "GET",
+    cache: "no-store"
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  })
+  .then(json => {
+    pJson = json || {};
+    delete pJson["0"];
+
+    buildRelationships();
+    render();
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById("playlistGrid").innerHTML =
+      `<div class="empty">Failed to load presets.json: ${escapeHtml(err.message)}</div>`;
+  });
+}
+
+document.getElementById("search").addEventListener("input", applySearch);
+
+loadPresets();
+</script>
+
+</body>
+</html>

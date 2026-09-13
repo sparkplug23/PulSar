@@ -8932,7 +8932,7 @@ testbed__switch_button                    IGNORED
 testbed__gps_decoder                      IGNORED
 testbed_06__gps_decoder_02                   IGNORED
 testbed__filesystem                       IGNORED
-testbed_09__sonoff_basic_nodemcu             IGNORED
+testbed__nodemcu__sonoff_basic             IGNORED
 tg_cam__wroover_01                           IGNORED
 tg_cam__wroover_02                           IGNORED
 tg_cam__wroover_03                           IGNORED

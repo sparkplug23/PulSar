@@ -3,6 +3,9 @@
 
 #ifdef USE_MODULE_CORE__JSON_ARDUINO
 
+#if defined(ARDUINO_ARCH_ESP8266)
+#include <coredecls.h>
+#endif
 
 /* Null, because instance will be initialized on demand. */
 mJsonArduino* mJsonArduino::instance = nullptr;

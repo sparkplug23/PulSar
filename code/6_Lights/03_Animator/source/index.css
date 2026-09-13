@@ -581,13 +581,6 @@ img {
 	background-color: var(--c-2);
 }
 
-.btn-n {
-	width: 230px;
-	margin: 0 8px 0 0;
-	border: 1px solid var(--c-2);
-	background-color: var(--c-2);
-}
-
 .btn-p {
 	width: 120px;
 	margin: 5px 0;
@@ -1563,8 +1556,7 @@ dialog {
 		1px 1px 0 var(--c-1);
 }
 
-.qcsb,
-.qcsw {
+.qcsb{
 	width: 26px;
 	height: 26px;
 	line-height: 26px;
@@ -1611,7 +1603,7 @@ dialog {
 #secPalToggle.active,
 #secPalToggle[aria-pressed="true"] {
 	opacity: 1;
-	outline: 2px solid var(--c-3, #f44);
+	outline: 2px solid var(--c-3, rgb(0, 60, 102));
 }
 
 #pallist .lstI.selected {

@@ -50,8 +50,8 @@ uint8_t mTelemetry::ConstructJSON_Health(uint8_t json_level, bool json_appending
     JBI->Add(PM_FREEHEAP,             ESP.getFreeHeap());
 
     #ifdef ESP8266
-    JBI->Add(PM_HEAPFRAGMENTATION,    ESP.getHeapFragmentation());
-    JBI->Add(PM_MAXFREEBLOCKSIZE,     ESP.getMaxFreeBlockSize());
+    // JBI->Add(PM_HEAPFRAGMENTATION,    ESP.getHeapFragmentation());
+    // JBI->Add(PM_MAXFREEBLOCKSIZE,     ESP.getMaxFreeBlockSize());
     #endif
 
     #ifdef ESP32
