@@ -7,7 +7,6 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
 {
   const bool connected = (WiFi.status() == WL_CONNECTED);
 
-  // Connected and holding a usable IP address
   if(connected && WiFi_Link_IsIpRoutable())
   {
     if(!connection.fConnected)
@@ -15,19 +14,18 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
       WiFi2_Sta_Connected_Enter();
     }
 
-    #ifdef ENABLE_FEATURE_WIFI__SSID_QUICK_CONNECT_AFTER_OTA
+#ifdef ENABLE_FEATURE_WIFI__SSID_QUICK_CONNECT_AFTER_OTA
     connection.quick_connect_active = false;
-    #endif
+#endif
 
-    #ifdef ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES
+#if defined(ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES) && !defined(ESP8266)
     WiFi_Sta_CandidateList_Clear();
-    #endif
+#endif
 
     WiFi_Sta_OnConnected_ResetOutageScanFlags();
     return;
   }
 
-  // Previously connected, but the connection has now been lost
   if(connection.fConnected)
   {
     WiFi2_Sta_Disconnected_Enter();
@@ -43,21 +41,11 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
     return;
   }
 
-  // -------------------------------------------------------------------------
-  // Active connection-attempt timeout
-  // -------------------------------------------------------------------------
   if(connection.counter > 0)
   {
     const wl_status_t status_now = WiFi.status();
 
-    bool immediate_failure = false;
-
     if(status_now == WL_NO_SSID_AVAIL || status_now == WL_CONNECT_FAILED)
-    {
-      immediate_failure = true;
-    }
-
-    if(immediate_failure)
     {
       connection.counter = 0;
     }
@@ -69,28 +57,16 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
     }
   }
 
-  // -------------------------------------------------------------------------
-  // OTA quick-connect has now timed out.
-  //
-  // The RTC record has already been consumed. Fall through into the normal
-  // boot scan path. Since s_wifi2_scanned_on_boot is still false, this will
-  // perform the normal initial scan.
-  // -------------------------------------------------------------------------
-  #ifdef ENABLE_FEATURE_WIFI__SSID_QUICK_CONNECT_AFTER_OTA
+#ifdef ENABLE_FEATURE_WIFI__SSID_QUICK_CONNECT_AFTER_OTA
   if(connection.quick_connect_active)
   {
     connection.quick_connect_active = false;
     ALOG_INF(PSTR(D_LOG_WIFI "OTA quick-connect failed, falling back to normal selection"));
   }
-  #endif
+#endif
 
-  // -------------------------------------------------------------------------
-  // Ranked visible candidate list
-  //
-  // If a scan previously produced several configured visible networks,
-  // rapidly try the next one before falling back to ordinary profile cycling.
-  // -------------------------------------------------------------------------
-  #ifdef ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES
+#if defined(ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES) && !defined(ESP8266)
+
   if(wifi_candidate_index < wifi_candidate_count)
   {
     if(WiFi_Sta_CandidateList_TryNext())
@@ -103,17 +79,11 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
   {
     ALOG_INF(PSTR(D_LOG_WIFI "Visible candidate list exhausted"));
     WiFi_Sta_CandidateList_Clear();
-
-    // All networks that were known-visible have failed.
-    // Re-enter the normal slower retry policy rather than hammering them.
     connection.counter = WIFI_CHECK_SEC;
     return;
   }
-  #endif
 
   const bool do_scan = WiFi_Sta_ShouldScanNow_OnBootOrOutage();
-
-  #ifdef ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES
 
   if(do_scan)
   {
@@ -125,7 +95,6 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
       }
     }
 
-    // Scan found none of our configured profiles.
     const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured();
 
     ALOG_INF(PSTR(D_LOG_WIFI "No configured SSID visible; fallback profile %u: %s"),profile_i,config.station.profiles[profile_i].ssid);
@@ -135,9 +104,13 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
     return;
   }
 
-  #endif
+  const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_WithScanPreference(false);
 
-  const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_WithScanPreference(do_scan);
+#else
+
+  const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_WithScanPreference(false);
+
+#endif
 
   ALOG_INF(PSTR(D_LOG_WIFI "Trying WiFi profile %u: %s"),profile_i,config.station.profiles[profile_i].ssid);
 
@@ -191,12 +164,10 @@ void mWiFi::WiFi_Sta_OnConnected_ResetOutageScanFlags(void)
 
 uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_WithScanPreference(bool force_scan)
 {
-  /*
-   * Existing/default behaviour.
-   *
-   * This remains in place so builds without
-   * ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES behave as before.
-   */
+#ifdef ESP8266
+  force_scan = false;
+#endif
+
   if(!force_scan)
   {
     const uint8_t start_i = (config.station.active_profile + 1) % WIFI_MAXIMUM_CONNECTIONS;
@@ -213,6 +184,12 @@ uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_WithScanPreference(bool force_scan)
 
     return WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured();
   }
+
+#if defined(ESP8266)
+
+  return WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured();
+
+#else
 
   const uint8_t ordered_first = WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured();
 
@@ -306,6 +283,8 @@ uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_WithScanPreference(bool force_scan)
   }
 
   return (uint8_t)strongest_profile;
+
+#endif
 }
 
 
@@ -313,7 +292,7 @@ uint8_t mWiFi::WiFi_Sta_SelectProfileIndex_WithScanPreference(bool force_scan)
  * SECTION: Scan and ranked visible candidates
  ************************************************************************************************/
 
-#ifdef ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES
+#if defined(ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES) && !defined(ESP8266)
 
 void mWiFi::WiFi_Sta_CandidateList_Clear(void)
 {
@@ -654,9 +633,9 @@ void mWiFi::WiFi_Sta_Connect_Start(void)
     return;
   }
 
-  const bool do_scan = WiFi_Sta_ShouldScanNow_OnBootOrOutage();
+#if defined(ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES) && !defined(ESP8266)
 
-  #ifdef ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES
+  const bool do_scan = WiFi_Sta_ShouldScanNow_OnBootOrOutage();
 
   if(do_scan)
   {
@@ -669,14 +648,23 @@ void mWiFi::WiFi_Sta_Connect_Start(void)
     }
 
     const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured();
+
+    ALOG_INF(PSTR(D_LOG_WIFI "No configured SSID visible; fallback profile %u: %s"),profile_i,config.station.profiles[profile_i].ssid);
+
     WiFi_Sta_ProfileIndex_Connect(profile_i);
     connection.counter = WIFI_CHECK_SEC;
     return;
   }
 
-  #endif
+  const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_WithScanPreference(false);
 
-  const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_WithScanPreference(do_scan);
+#else
+
+  const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_WithScanPreference(false);
+
+#endif
+
+  ALOG_INF(PSTR(D_LOG_WIFI "Starting WiFi using profile %u: %s"),profile_i,config.station.profiles[profile_i].ssid);
 
   WiFi_Sta_ProfileIndex_Connect(profile_i);
   connection.counter = WIFI_CHECK_SEC;

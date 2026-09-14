@@ -362,14 +362,14 @@ size_t AsyncAbstractResponse::_ack(AsyncWebServerRequest *request, size_t len, u
     // We require two packet buffers - one allocated here, and one belonging to the TCP stack
     {      
       auto old_space = _packet.capacity();
-      auto max_block_size = ESP.getMaxFreeBlockSize() - 128;
+      size_t max_block_size = (size_t)ESP.getMaxFreeBlockSize() - 128;
       if ((old_space < outLen) || (outLen > max_block_size)) {
         DEBUG_PRINTFP("(%d) Space adjustment, have %d, want %d, avail %d\n", (intptr_t)this, old_space, outLen, max_block_size);
         do { 
           dealloc_vector(_packet);
           outLen = std::min(outLen, max_block_size);
           _packet.resize(outLen);
-          max_block_size = ESP.getMaxFreeBlockSize() - 128;
+          max_block_size = (size_t)ESP.getMaxFreeBlockSize() - 128;
           DEBUG_PRINTFP("(%d) Checking %d vs %d\n", (intptr_t)this, outLen, max_block_size);
         } while (max_block_size < outLen);
       } else {

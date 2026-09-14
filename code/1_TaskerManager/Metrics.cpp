@@ -44,44 +44,80 @@ TaskerMetrics::~TaskerMetrics()
 
 void TaskerMetrics::RequestEnable(uint16_t expected_module_count)
 {
+#ifdef ESP8266
+  pending_expected_module_count = expected_module_count;
+  pending_action = ACTION_ENABLE;
+#else
   pending_expected_module_count.store(expected_module_count, std::memory_order_relaxed);
   pending_action.store(ACTION_ENABLE, std::memory_order_release);
+#endif
 }
 
 void TaskerMetrics::RequestDisable()
 {
+#ifdef ESP8266
+  pending_action = ACTION_DISABLE;
+#else
   pending_action.store(ACTION_DISABLE, std::memory_order_release);
+#endif
 }
 
 void TaskerMetrics::RequestReset()
 {
+#ifdef ESP8266
+  pending_action = ACTION_RESET;
+#else
   pending_action.store(ACTION_RESET, std::memory_order_release);
+#endif
 }
 
 void TaskerMetrics::RequestSnapshot()
 {
+#ifdef ESP8266
+  snapshot_ready = false;
+  snapshot_requested = true;
+#else
   snapshot_ready.store(false, std::memory_order_release);
   snapshot_requested.store(true, std::memory_order_release);
+#endif
+
   Touch();
 }
 
 bool TaskerMetrics::IsSnapshotReady() const
 {
+#ifdef ESP8266
+  return snapshot_ready;
+#else
   return snapshot_ready.load(std::memory_order_acquire);
+#endif
 }
 
 void TaskerMetrics::Touch()
 {
+#ifdef ESP8266
+  last_client_touch_ms = millis();
+#else
   last_client_touch_ms.store(millis(), std::memory_order_relaxed);
+#endif
 }
 
 void TaskerMetrics::ProcessPendingRequest()
 {
+#ifdef ESP8266
+  const uint8_t action = pending_action;
+  pending_action = ACTION_NONE;
+#else
   const uint8_t action = pending_action.exchange(ACTION_NONE, std::memory_order_acquire);
+#endif
 
   switch(action)
   {
+#ifdef ESP8266
+    case ACTION_ENABLE:  EnableNow(pending_expected_module_count); break;
+#else
     case ACTION_ENABLE:  EnableNow(pending_expected_module_count.load(std::memory_order_relaxed)); break;
+#endif
     case ACTION_DISABLE: DisableNow(); break;
     case ACTION_RESET:   ResetNow(); break;
   }
@@ -99,8 +135,13 @@ void TaskerMetrics::EnableNow(uint16_t expected_module_count)
 
   const size_t detailed_count = (size_t)expected_module_count * TASKER_METRICS_DETAILED_TASK_COUNT;
 
+#ifdef ESP8266
+  ModuleMetrics* new_modules = new ModuleMetrics[expected_module_count];
+  DetailedTaskMetrics* new_detailed_tasks = new DetailedTaskMetrics[detailed_count];
+#else
   ModuleMetrics* new_modules = new(std::nothrow) ModuleMetrics[expected_module_count];
   DetailedTaskMetrics* new_detailed_tasks = new(std::nothrow) DetailedTaskMetrics[detailed_count];
+#endif
 
   if(!new_modules || !new_detailed_tasks)
   {
@@ -122,15 +163,27 @@ void TaskerMetrics::EnableNow(uint16_t expected_module_count)
   }
 
   capture_started_ms = millis();
+
+#ifdef ESP8266
+  last_client_touch_ms = capture_started_ms;
+#else
   last_client_touch_ms.store(capture_started_ms, std::memory_order_relaxed);
+#endif
+
   enabled = true;
 }
 
 void TaskerMetrics::DisableNow()
 {
   enabled = false;
+
+#ifdef ESP8266
+  snapshot_ready = false;
+  snapshot_requested = false;
+#else
   snapshot_ready.store(false, std::memory_order_release);
   snapshot_requested.store(false, std::memory_order_release);
+#endif
 
   delete[] modules;
   delete[] detailed_tasks;
@@ -147,7 +200,11 @@ void TaskerMetrics::DisableNow()
   snapshot_capture_age_ms = 0;
   capture_started_ms = 0;
 
+#ifdef ESP8266
+  last_client_touch_ms = 0;
+#else
   last_client_touch_ms.store(0, std::memory_order_relaxed);
+#endif
 }
 
 void TaskerMetrics::ResetNow()
@@ -160,7 +217,12 @@ void TaskerMetrics::ResetNow()
   for(size_t i = 0; i < detailed_count; i++) detailed_tasks[i].timing = TimingStats{};
 
   capture_started_ms = millis();
+
+#ifdef ESP8266
+  last_client_touch_ms = capture_started_ms;
+#else
   last_client_touch_ms.store(capture_started_ms, std::memory_order_relaxed);
+#endif
 }
 
 bool TaskerMetrics::IsEnabled()
@@ -171,7 +233,12 @@ bool TaskerMetrics::IsEnabled()
   if(!enabled) return false;
 
   const uint32_t now = millis();
+
+#ifdef ESP8266
+  const uint32_t last_touch = last_client_touch_ms;
+#else
   const uint32_t last_touch = last_client_touch_ms.load(std::memory_order_relaxed);
+#endif
 
   if((now - last_touch) > CLIENT_LEASE_TIMEOUT_MS)
   {
@@ -231,7 +298,13 @@ void TaskerMetrics::Record(uint16_t module_index, uint16_t module_id, TASKER_FUN
 
 void TaskerMetrics::WriteSnapshotJSON(Print& out, mTaskerManager& manager)
 {
-  if(!snapshot_ready.load(std::memory_order_acquire) || !snapshot_modules || !snapshot_detailed_tasks)
+#ifdef ESP8266
+  const bool ready = snapshot_ready;
+#else
+  const bool ready = snapshot_ready.load(std::memory_order_acquire);
+#endif
+
+  if(!ready || !snapshot_modules || !snapshot_detailed_tasks)
   {
     out.print(F("{\"ready\":false}"));
     return;
@@ -341,13 +414,23 @@ void TaskerMetrics::WriteSnapshotJSON(Print& out, mTaskerManager& manager)
 
 void TaskerMetrics::ProcessSnapshotRequest()
 {
+#ifdef ESP8266
+  if(!snapshot_requested) return;
+  snapshot_requested = false;
+#else
   if(!snapshot_requested.exchange(false, std::memory_order_acquire)) return;
+#endif
+
   SnapshotNow();
 }
 
 void TaskerMetrics::SnapshotNow()
 {
+#ifdef ESP8266
+  snapshot_ready = false;
+#else
   snapshot_ready.store(false, std::memory_order_release);
+#endif
 
   delete[] snapshot_modules;
   delete[] snapshot_detailed_tasks;
@@ -359,9 +442,14 @@ void TaskerMetrics::SnapshotNow()
   if(!enabled || !modules || !detailed_tasks || !module_count) return;
 
   const size_t detailed_count = (size_t)module_count * TASKER_METRICS_DETAILED_TASK_COUNT;
-
+  
+#ifdef ESP8266
+  snapshot_modules = new ModuleMetrics[module_count];
+  snapshot_detailed_tasks = new DetailedTaskMetrics[detailed_count];
+#else
   snapshot_modules = new(std::nothrow) ModuleMetrics[module_count];
   snapshot_detailed_tasks = new(std::nothrow) DetailedTaskMetrics[detailed_count];
+#endif
 
   if(!snapshot_modules || !snapshot_detailed_tasks)
   {
@@ -380,7 +468,11 @@ void TaskerMetrics::SnapshotNow()
   snapshot_module_count = module_count;
   snapshot_capture_age_ms = GetCaptureAgeMs();
 
+#ifdef ESP8266
+  snapshot_ready = true;
+#else
   snapshot_ready.store(true, std::memory_order_release);
+#endif
 }
 
 #endif

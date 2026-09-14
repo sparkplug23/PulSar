@@ -2803,6 +2803,96 @@ new 26GHz radar sensor
 
 
 
+#ifdef DEVICE_TESTBED__SHELLY_DIMMER_CLONE_NODEMCU
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "template_name"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR "Template Name"
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR "Template Description"
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
+  #define MQTT_HOST   "192.168.3.70"
+    
+    #define MQTT_PORT     1883
+
+  //#define FORCE_TEMPLATE_LOADING
+  #define SETTINGS_HOLDER 1
+
+  #define USE_MODULE_CORE_RULES
+    
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SWITCHES
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_SHELLY_DIMMER
+
+  
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_SHELLY_DIMMER2_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #define D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "Light"
+  #define D_DEVICE_SWITCH_STAIRS_FRIENDLY_NAME_LONG "Stairs"
+  #define D_DEVICE_SWITCH_BATHROOM_FRIENDLY_NAME_LONG "Landing"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__DRIVERS__SHELLY_DIMMER__CTR "\":["
+        "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
+        "\"" D_DEVICE_SWITCH_STAIRS_FRIENDLY_NAME_LONG "\","
+        "\"" D_DEVICE_SWITCH_BATHROOM_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+  
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  "{"
+    "\"Rule0\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Switches\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":0,"
+        "\"State\":2"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"ShellyDimmer\","
+        "\"Function\":\"SetPower\"," 
+        "\"DeviceName\":0,"
+        "\"State\":2,"
+        "\"Value\":50"
+      "}"
+    "},"
+    "\"Rule1\":{"
+      "\"Trigger\":{"
+        "\"Module\":\"Switches\","
+        "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
+        "\"DeviceName\":1,"
+        "\"State\":2"
+      "},"
+      "\"Command\":{"
+        "\"Module\":\"ShellyDimmer\","
+        "\"Function\":\"SetPower\","
+        "\"DeviceName\":0,"
+        "\"State\":2,"
+        "\"Value\":100"
+      "}"
+    "}"   
+  "}";
+
+#endif
 
 
 

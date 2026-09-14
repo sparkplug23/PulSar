@@ -241,19 +241,31 @@ void mWiFi::WiFi_Radio_Shutdown(bool option)
 
 #ifdef USE_DISCOVERY
 
+  /***
+   * Requires Bonjour Print Services to be installed on windows to resolve commands
+   * Powershell Commands below
+     dns-sd -B _pulsar._tcp local
+     dns-sd -B _http._tcp local
+     dns-sd -L <shown-instance-name> _pulsar._tcp local
+     dns-sd -L tg-cam--wroover-01 _pulsar._tcp local            
+      ->  11:46:39.454  tg-cam--wroover-01._pulsar._tcp.local. can be reached at tg-cam--wroover-01.local.:80 (interface 20)
+          module=wifi name=tg-cam--wroover-01 mac=cc7b5c979c94
+*/
+
+
 void mWiFi::WiFi_Mdns_StartOrRestart(void)
 {
-  if (Mdns.begun) return;
+  if(Mdns.begun) return;
 
   const char* originalName = tkr_set->Settings.system_name.device;
 
   char hostname[64];
-  strncpy(hostname, originalName, sizeof(hostname) - 1);
+  strncpy(hostname,originalName,sizeof(hostname) - 1);
   hostname[sizeof(hostname) - 1] = '\0';
 
-  for (char* p = hostname; *p; ++p)
+  for(char* p = hostname; *p; ++p)
   {
-    if (*p == '_') *p = '-';
+    if(*p == '_') *p = '-';
   }
 
 #if defined(ESP8266)
@@ -264,43 +276,32 @@ void mWiFi::WiFi_Mdns_StartOrRestart(void)
 
   ArduinoOTA.setHostname(hostname);
 
+#if defined(ESP32)
   MDNS.end();
+#endif
 
   Mdns.begun = (uint8_t)MDNS.begin(hostname);
 
-  ALOG_DBG(PSTR(D_LOG_MDNS "%s with %s"), Mdns.begun ? PSTR(D_INITIALIZED) : PSTR(D_FAILED), hostname);
+  ALOG_DBG(PSTR(D_LOG_MDNS "%s with %s"),Mdns.begun ? PSTR(D_INITIALIZED) : PSTR(D_FAILED),hostname);
 
-  if (!Mdns.begun) return;
+  if(!Mdns.begun) return;
 
-  /***
-   * Requires Bonjour Print Services to be installed on windows to resolve commands
-   * Powershell Commands below
-     dns-sd -B _pulsar._tcp local
-     dns-sd -B _http._tcp local
-     dns-sd -L <shown-instance-name> _pulsar._tcp local
-     dns-sd -L tg-cam--wroover-01 _pulsar._tcp local            
-      ->  11:46:39.454  tg-cam--wroover-01._pulsar._tcp.local. can be reached at tg-cam--wroover-01.local.:80 (interface 20)
-          module=wifi name=tg-cam--wroover-01 mac=cc7b5c979c94
-
-
-     
-   */
 #if defined(ESP32)
   String escapedMac = WiFi.macAddress();
-  escapedMac.replace(":", "");
+  escapedMac.replace(":","");
   escapedMac.toLowerCase();
 
-  bool http_ok   = MDNS.addService("http", "tcp", 80);
-  bool pulsar_ok = MDNS.addService("pulsar", "tcp", 80);
+  bool http_ok = MDNS.addService("http","tcp",80);
+  bool pulsar_ok = MDNS.addService("pulsar","tcp",80);
 
-  if (pulsar_ok)
+  if(pulsar_ok)
   {
-    MDNS.addServiceTxt("pulsar", "tcp", "mac", escapedMac.c_str());
-    MDNS.addServiceTxt("pulsar", "tcp", "name", (const char*)hostname);
-    MDNS.addServiceTxt("pulsar", "tcp", "module", GetModuleName());
+    MDNS.addServiceTxt("pulsar","tcp","mac",escapedMac.c_str());
+    MDNS.addServiceTxt("pulsar","tcp","name",hostname);
+    MDNS.addServiceTxt("pulsar","tcp","module",GetModuleName());
   }
 
-  ALOG_DBG(PSTR(D_LOG_MDNS "services http=%u pulsar=%u mac=%s"), http_ok, pulsar_ok, escapedMac.c_str());
+  ALOG_DBG(PSTR(D_LOG_MDNS "services http=%u pulsar=%u mac=%s"),http_ok,pulsar_ok,escapedMac.c_str());
 #endif
 }
 
@@ -347,16 +348,13 @@ void mWiFi::WiFi_Mdns_AdvertiseHttpService(void) {
 
 
 
-#if defined(USE_NETWORK_MDNS) && defined(ESP8266) //Not needed with esp32 mdns
-void mWiFi::WiFi_Mdns_Tick(void) 
+#if defined(USE_NETWORK_MDNS) && defined(ESP8266)
+void mWiFi::WiFi_Mdns_Tick(void)
 {
+  if (!Mdns.begun) return;
   MDNS.update();
-  if (2 == Mdns.begun) {
-    MDNS.update(); // this is basically passpacket like a webserver
-   // ALOG_DBM( PSTR(D_LOG_MDNS "MDNS.update"));
-  }
 }
-#endif  // ESP8266
+#endif
 
 
 #endif

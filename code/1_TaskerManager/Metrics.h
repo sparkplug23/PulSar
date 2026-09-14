@@ -74,7 +74,6 @@ private:
   uint16_t module_count = 0;
 
   uint32_t capture_started_ms = 0;
-  std::atomic<uint32_t> last_client_touch_ms{0};
 
   static constexpr uint32_t CLIENT_LEASE_TIMEOUT_MS = 30000;
 
@@ -86,11 +85,19 @@ private:
   uint16_t snapshot_module_count = 0;
   uint32_t snapshot_capture_age_ms = 0;
 
+#ifdef ESP8266
+  volatile uint32_t last_client_touch_ms = 0;
+  volatile uint16_t pending_expected_module_count = 0;
+  volatile uint8_t pending_action = ACTION_NONE;
+  volatile bool snapshot_requested = false;
+  volatile bool snapshot_ready = false;
+#else
+  std::atomic<uint32_t> last_client_touch_ms{0};
+  std::atomic<uint16_t> pending_expected_module_count{0};
+  std::atomic<uint8_t> pending_action{ACTION_NONE};
   std::atomic<bool> snapshot_requested{false};
   std::atomic<bool> snapshot_ready{false};
-
-  std::atomic<uint8_t> pending_action{ACTION_NONE};
-  std::atomic<uint16_t> pending_expected_module_count{0};
+#endif
 
   void ProcessPendingRequest();
   void ProcessSnapshotRequest();
