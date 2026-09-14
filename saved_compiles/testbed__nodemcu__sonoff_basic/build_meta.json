@@ -1,7 +1,7 @@
 {
   "env_name": "testbed__nodemcu__sonoff_basic",
-  "created_utc": "2026-09-14T18:51:21Z",
-  "created_epoch": 1789411881,
+  "created_utc": "2026-09-14T21:21:47Z",
+  "created_epoch": 1789420907,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\testbed__nodemcu__sonoff_basic",
   "platform": "espressif8266",
@@ -15,8 +15,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "373e5e4f6153c504dc7df4ebbc1ab8e30b27243f",
-    "describe": "373e5e4f-dirty",
-    "status_short": "M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M lib/lib_tasserial2/TasmotaSerial-3.6.0/src/TasmotaSerial.h\n M platformio_testbeds.ini\n M saved_compiles/decode_serial_exception_esp8266.py\n M saved_compiles/testbed__nodemcu__sonoff_basic/build_meta.json\n M saved_compiles/testbed__nodemcu__sonoff_basic/firmware.elf"
+    "commit": "6e3e81c62ed5a91fac0f32c4534569dc82a834b1",
+    "describe": "6e3e81c6-dirty",
+    "status_short": "M code/3_Network/03_WiFi/WiFi_Helpers.cpp\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M platformio_testbeds.ini\n M saved_compiles/testbed__nodemcu__sonoff_basic/build_meta.json\n M saved_compiles/testbed__nodemcu__sonoff_basic/firmware.elf"
   }
 }

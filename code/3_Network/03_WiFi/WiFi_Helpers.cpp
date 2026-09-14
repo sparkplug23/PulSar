@@ -351,6 +351,17 @@ void mWiFi::WiFi_Mdns_AdvertiseHttpService(void) {
 #if defined(USE_NETWORK_MDNS) && defined(ESP8266)
 void mWiFi::WiFi_Mdns_Tick(void)
 {
+  
+  uint32_t heap_free = 0;
+uint16_t heap_max = 0;
+uint8_t heap_frag = 0;
+
+ESP.getHeapStats(&heap_free,&heap_max,&heap_frag);
+
+ALOG_INF(PSTR("HEAP free=%u max=%u frag=%u%%"),heap_free,heap_max,heap_frag);
+
+
+
   if (!Mdns.begun) return;
   MDNS.update();
 }
