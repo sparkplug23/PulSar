@@ -81,6 +81,8 @@
 
 #include "2_CoreSystem/mSystemConstants.h"
 
+#include "2_CoreSystem/21_JsonArduino/JsonArduino.h"
+
 // Returns via tasker that report special status
 enum TASKER_RESULT__IDS{
   // Errors

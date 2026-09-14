@@ -24,7 +24,7 @@ bool mWiFi::WiFi2_Ap_EnsureStarted(void)
   // -------------------------------------------------------------------------
   const bool sta_required = config.softap.always_on && WiFi2_HasAnyStaProfileConfigured();
 
-  const wifi_mode_t required_mode = sta_required ? WIFI_AP_STA : WIFI_AP;
+  const auto required_mode = sta_required ? WIFI_AP_STA : WIFI_AP;
 
 
   // -------------------------------------------------------------------------

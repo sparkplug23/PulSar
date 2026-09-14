@@ -108,24 +108,13 @@ void FileEditor::handleRequest(AsyncWebServerRequest *request)
     if(request->hasParam("list"))
     {
       String path = request->getParam("list")->value();
-
-      #ifdef ESP32
-      File dir = _fs.open(path);
-      #else
-      Dir dir = _fs.openDir(path);
-      #endif
-
-      path = String();
       String output = "[";
 
-      #ifdef ESP32
+#ifdef ESP32
+      File dir = _fs.open(path);
       File entry = dir.openNextFile();
+
       while(entry)
-      #else
-      while(dir.next())
-      {
-        fs::File entry = dir.openFile("r");
-      #endif
       {
         String fname = entry.name();
 
@@ -141,20 +130,36 @@ void FileEditor::handleRequest(AsyncWebServerRequest *request)
           output += '}';
         }
 
-        #ifdef ESP32
         entry = dir.openNextFile();
-        #else
-        entry.close();
-        #endif
       }
 
-      #ifdef ESP32
       dir.close();
-      #endif
+#else
+      Dir dir = _fs.openDir(path);
+
+      while(dir.next())
+      {
+        fs::File entry = dir.openFile("r");
+        String fname = entry.name();
+
+        if(fname.indexOf("wsec") == -1)
+        {
+          if(output != "[") output += ',';
+
+          output += F("{\"type\":\"file\",\"name\":\"");
+          if(fname[0] != '/') output += '/';
+          output += fname;
+          output += F("\",\"size\":");
+          output += String(entry.size());
+          output += '}';
+        }
+
+        entry.close();
+      }
+#endif
 
       output += ']';
       request->send(200, FPSTR(CONTENT_TYPE_JSON), output);
-      output = String();
       return;
     }
 
