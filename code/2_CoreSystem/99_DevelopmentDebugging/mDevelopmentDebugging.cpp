@@ -101,6 +101,15 @@ int8_t mDevelopmentDebugging::Tasker(uint8_t function, JsonParserObject obj){
                         metrics.task_id, module_name, metrics.max_time, metrics.min_time, metrics.avg_time);
       }
       #endif
+
+      
+      uint32_t heap_free = 0;
+      uint16_t heap_max = 0;
+      uint8_t heap_frag = 0;
+      ESP.getHeapStats(&heap_free,&heap_max,&heap_frag);
+      ALOG_INF(PSTR("HEAP free=%u max=%u frag=%u%%"),heap_free,heap_max,heap_frag);
+
+
         
     }break;
     case TASK_EVERY_FIVE_SECOND:

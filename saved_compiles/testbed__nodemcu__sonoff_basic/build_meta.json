@@ -1,7 +1,7 @@
 {
   "env_name": "testbed__nodemcu__sonoff_basic",
-  "created_utc": "2026-09-14T21:21:47Z",
-  "created_epoch": 1789420907,
+  "created_utc": "2026-09-15T05:53:26Z",
+  "created_epoch": 1789451606,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\testbed__nodemcu__sonoff_basic",
   "platform": "espressif8266",
@@ -15,8 +15,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "6e3e81c62ed5a91fac0f32c4534569dc82a834b1",
-    "describe": "6e3e81c6-dirty",
-    "status_short": "M code/3_Network/03_WiFi/WiFi_Helpers.cpp\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M platformio_testbeds.ini\n M saved_compiles/testbed__nodemcu__sonoff_basic/build_meta.json\n M saved_compiles/testbed__nodemcu__sonoff_basic/firmware.elf"
+    "commit": "aa41ac2a71345add575b0eaa5b19b0d9c1902a15",
+    "describe": "aa41ac2a-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/00_Developing/Firmware__Testbeds.h\n M code/2_CoreSystem/14_Updates/mUpdates.cpp\n M code/2_CoreSystem/99_DevelopmentDebugging/mDevelopmentDebugging.cpp\n M code/3_Network/03_WiFi/WiFi_Helpers.cpp\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M platformio_testbeds.ini\n M saved_compiles/testbed__nodemcu__sonoff_basic/build_meta.json\n M saved_compiles/testbed__nodemcu__sonoff_basic/firmware.elf"
   }
 }

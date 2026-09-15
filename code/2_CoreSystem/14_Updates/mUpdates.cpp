@@ -435,9 +435,6 @@ void mUpdates::ArduinoOTAInit(void)
 
 void mUpdates::ArduinoOtaLoop(void)
 {
-  #ifdef ESP8266
-    MDNS.update();
-  #endif
 
   ArduinoOTA.handle();
 
