@@ -32,7 +32,14 @@ typedef union
 // #define ENABLE_DEVFEATURE_DATABUFFER_LOCK
 
 #define DATA_BUFFER_TOPIC_MAX_LENGTH    100
+
+#ifdef ESP32
 #define DATA_BUFFER_PAYLOAD_MAX_LENGTH 4000 
+#else
+#define DATA_BUFFER_PAYLOAD_MAX_LENGTH 2000 
+#endif
+
+
 
 struct DATA_BUFFER {
   struct TOPIC {

@@ -329,7 +329,7 @@ void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, by
     if (t <= 250) bootPreset = t;
     gammaCorrectBri = request->hasArg(F("GB"));
     gammaCorrectCol = request->hasArg(F("GC"));
-    gammaCorrectVal = request->arg(F("GV")).toFloat();
+    gammaCorrectVal = tkr_sup->CharToFloat(request->arg(F("GV")).c_str());
     if (gammaCorrectVal <= 1.0f || gammaCorrectVal > 3) {
       gammaCorrectVal = 1.0f; // no gamma correction
       gammaCorrectBri = false;
@@ -496,8 +496,8 @@ void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, by
     if (ntpEnabled && WLED_CONNECTED && !ntpConnected) ntpConnected = ntpUdp.begin(ntpLocalPort);
     ntpLastSyncTime = NTP_NEVER; // force new NTP query
 
-    longitude = request->arg(F("LN")).toFloat();
-    latitude = request->arg(F("LT")).toFloat();
+    longitude = tkr_sup->CharToFloat(request->arg(F("LN")).c_str());
+    latitude  = tkr_sup->CharToFloat(request->arg(F("LT")).c_str());
     // force a sunrise/sunset re-calculation
     calculateSunriseAndSunset();
 
@@ -737,40 +737,55 @@ void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, by
 
       // check if parameters represent array
       if (name.endsWith("[]")) {
-        name.replace("[]","");
-        value.replace(",",".");      // just in case conversion
+        name.replace("[]", "");
+        value.replace(",", ".");
+
         if (!subObj[name].is<JsonArray>()) {
           JsonArray ar = subObj.createNestedArray(name);
-          if (value.indexOf(".") >= 0) ar.add(value.toFloat());  // we do have a float
-          else                         ar.add(value.toInt());    // we may have an int
-          j=0;
+
+          if (value.indexOf(".") >= 0) ar.add(tkr_sup->CharToFloat(value.c_str()));
+          else                         ar.add(value.toInt());
+
+          j = 0;
         } else {
-          if (value.indexOf(".") >= 0) subObj[name].add(value.toFloat());  // we do have a float
-          else                         subObj[name].add(value.toInt());    // we may have an int
+          if (value.indexOf(".") >= 0) subObj[name].add(tkr_sup->CharToFloat(value.c_str()));
+          else                         subObj[name].add(value.toInt());
+
           j++;
         }
+
         DEBUG_PRINTF_P(PSTR("[%d] = %s\n"), j, value.c_str());
+
       } else {
-        // we are using a hidden field with the same name as our parameter (!before the actual parameter!)
-        // to describe the type of parameter (text,float,int), for boolean parameters the first field contains "off"
-        // so checkboxes have one or two fields (first is always "false", existence of second depends on checkmark and may be "true")
+        // We are using a hidden field with the same name as our parameter
+        // to describe the type of parameter (text, float, int).
+        // For boolean parameters the first field contains "off".
         if (subObj[name].isNull()) {
-          // the first occurrence of the field describes the parameter type (used in next loop)
-          if (value == "false") subObj[name] = false; // checkboxes may have only one field
+          if (value == "false") subObj[name] = false;
           else                  subObj[name] = value;
+
         } else {
-          String type = subObj[name].as<String>();  // get previously stored value as a type
-          if (subObj[name].is<bool>())   subObj[name] = true;   // checkbox/boolean
-          else if (type == "number") {
-            value.replace(",",".");      // just in case conversion
-            if (value.indexOf(".") >= 0) subObj[name] = value.toFloat();  // we do have a float
-            else                         subObj[name] = value.toInt();    // we may have an int
-          } else if (type == "int")      subObj[name] = value.toInt();
-          else                           subObj[name] = value;  // text fields
+          String type = subObj[name].as<String>();
+
+          if (subObj[name].is<bool>()) {
+            subObj[name] = true;
+
+          } else if (type == "number") {
+            value.replace(",", ".");
+
+            if (value.indexOf(".") >= 0) subObj[name] = tkr_sup->CharToFloat(value.c_str());
+            else                         subObj[name] = value.toInt();
+
+          } else if (type == "int") {
+            subObj[name] = value.toInt();
+
+          } else {
+            subObj[name] = value;
+          }
         }
+
         DEBUG_PRINTF_P(PSTR(" = %s\n"), value.c_str());
       }
-    }
     UsermodManager::readFromConfig(um);  // force change of usermod parameters
     DEBUG_PRINTLN(F("Done re-init UsermodManager::"));
     releaseJSONBufferLock();

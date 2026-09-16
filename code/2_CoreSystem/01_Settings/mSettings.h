@@ -117,7 +117,14 @@ DEFINE_PGM_CTR(PM_LEVEL_ALL_CTR)         "All";
 DEFINE_PGM_CTR(PM_LEVEL_DEBUG_CTR)       "Debug";
   
 
+#ifdef ESP32
 const uint32_t settings_text_size = 699;   // Settings->text_pool[size] = Settings->display_model (2D2) - Settings->text_pool (017)
+#else
+const uint32_t settings_text_size = 199;   // Settings->text_pool[size] = Settings->display_model (2D2) - Settings->text_pool (017)
+#warning "To reduce esp8266 ram pressure"
+#endif
+
+
 const uint8_t MAX_TUYA_FUNCTIONS = 16;
 const uint8_t PARAM8_SIZE = 18;            // Number of param bytes (SetOption)
 
@@ -788,7 +795,16 @@ struct SystemOptions__Rules
 #define DEVICENAMEBUFFER_NAME_INDEX_LENGTH 70 
 #endif // DEVICENAMEBUFFER_NAME_INDEX_LENGTH
 #ifndef DEVICENAMEBUFFER_NAME_BUFFER_LENGTH // Memory reduction
-#define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 400 
+
+
+
+  #ifdef ESP32
+  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 400
+  #else
+  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 100
+  #warning "To reduce esp8266 ram pressure"
+  #endif
+
 #endif // DEVICENAMEBUFFER_NAME_BUFFER_LENGTH
 struct DeviceNameBuffer{ // size(230)
   // delimeter name list
