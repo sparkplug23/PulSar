@@ -13,6 +13,10 @@
 
 #include "6_Lights/03_Animator/fastled_slim/fastled_slim.h"
 
+#ifdef ESP32
+#include <map>
+#endif
+
 #include "dynarray.h"
 
 #if !(defined(WLED_DISABLE_PARTICLESYSTEM2D) && defined(WLED_DISABLE_PARTICLESYSTEM1D))

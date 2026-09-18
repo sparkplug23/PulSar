@@ -18,6 +18,8 @@
 
 #include "ArduinoJson-v6.h"
 #include <Print.h>
+#include <ESPAsyncWebServer.h>
+
 
 #ifdef ESP8266
   #define DYNAMIC_JSON_DOCUMENT_SIZE 8192

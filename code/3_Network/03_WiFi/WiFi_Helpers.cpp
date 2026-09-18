@@ -297,7 +297,7 @@ void mWiFi::WiFi_Mdns_StartOrRestart(void)
   if(pulsar_ok)
   {
     MDNS.addServiceTxt("pulsar","tcp","mac",escapedMac.c_str());
-    MDNS.addServiceTxt("pulsar","tcp","name",hostname);
+    MDNS.addServiceTxt("pulsar", "tcp", "name", static_cast<const char*>(hostname));
     MDNS.addServiceTxt("pulsar","tcp","module",GetModuleName());
   }
 
