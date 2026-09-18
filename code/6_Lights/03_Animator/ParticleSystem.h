@@ -17,7 +17,7 @@
 
 #include "colors.h"
 
-#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+#ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
 
 
 #define PS_P_MAXSPEED 120 // maximum speed a particle can have (vx/vy is int8), limiting below 127 to avoid overflows in collisions due to rounding errors
@@ -416,6 +416,6 @@ uint32_t calculateNumberOfParticles1D(const uint32_t fraction, const bool isadva
 uint32_t calculateNumberOfSources1D(const uint32_t requestedsources);
 bool allocateParticleSystemMemory1D(const uint32_t numparticles, const uint32_t numsources, const bool isadvanced, const uint32_t additionalbytes);
 
-#endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+#endif // ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
 
 #endif // _PARTICLE_SYSTEM_H

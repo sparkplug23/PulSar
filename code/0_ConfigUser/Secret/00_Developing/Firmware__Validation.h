@@ -181,7 +181,7 @@
                   //  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
                   //  #define  ENABLE_FEATURE_BUILD__11JAN25_WIFI_AND_WEBUI
                   // #define  STRIP_DEFAULT_LENGTH  100
-                  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+                  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
 
 
   /***********************************
@@ -600,7 +600,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 
 // 
 // 
-// #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+// #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
 //  // until devices can reliably be used without compiling per device
 // 
     
@@ -932,7 +932,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 
 // 
 // 
-// #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+// #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
 //  // until devices can reliably be used without compiling per device
 // 
     

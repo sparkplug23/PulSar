@@ -583,7 +583,7 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
   #include "6_Lights/03_Animator/_AnimatorLight.h"
   #define tkr_lAni                               static_cast<mAnimatorLight*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID))
-  #ifdef ENABLE_FEATURE_LIGHTS__GLOBAL_ANIMATOR_LIGHT_CLASS_ACCESS
+  #ifdef ENABLE_FEATURE_LIGHTING__ANIMATOR__GLOBAL_LIGHT_ACCESS
   #define tkr_anim tkr_extern_lAni // using a more direct access method, with a local pointer in the class header
   #else
   #define tkr_anim tkr_lAni // pointer to the instance of the mAnimatorLight class

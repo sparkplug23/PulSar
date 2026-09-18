@@ -3,7 +3,7 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 // font courtesy of https://github.com/idispatch/raster-fonts
 static const unsigned char console_font_7x9[] PROGMEM = {
 
@@ -3341,4 +3341,4 @@ static const unsigned char console_font_7x9[] PROGMEM = {
 
 #endif // USE_MODULE_LIGHTS_ANIMATOR
 
-#endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX

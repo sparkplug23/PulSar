@@ -5,16 +5,6 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-
-#ifdef ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
-
-#undef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
-
-
-#endif
-
-
-
 /**
  * @brief 
  * C3: I2S0 and I2S1 methods not supported (has one I2S bus)
@@ -1392,7 +1382,7 @@ uint8_t getI(uint8_t busType, const uint8_t* pins, uint8_t num = 0)
 
           #else
 
-              #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+              #ifdef ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
 
                 if(useParallelI2S)
                 {
@@ -1431,7 +1421,7 @@ uint8_t getI(uint8_t busType, const uint8_t* pins, uint8_t num = 0)
                 }
 
               #else
-                  #if defined(ENABLE_PIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS)
+                  #if defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT)
                       if (num < 2) {
                           offset_method_inside_group = num + 1;  // To skip that RMT was entered first in enum
                       } else if (num < 9) {
@@ -1439,19 +1429,19 @@ uint8_t getI(uint8_t busType, const uint8_t* pins, uint8_t num = 0)
                       } else {
                           return BUSTYPE__NONE__ID;
                       }
-                  #elif defined(ENABLE_PIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE)
+                  #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X8)
                       if (num < 8) {
                           offset_method_inside_group = 3;  // Handled inside library automatically for I2S1 types
                       } else {
                           return BUSTYPE__NONE__ID;
                       }
-                  #elif defined(ENABLE_PIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE)
+                  #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16)
                       if (num < 16) {
                           offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
                       } else {
                           return BUSTYPE__NONE__ID;
                       }
-                  #elif defined(ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS)
+                  #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S)
                       if (num > 9) {
                           return BUSTYPE__NONE__ID;
                       }
@@ -1485,184 +1475,6 @@ uint8_t getI(uint8_t busType, const uint8_t* pins, uint8_t num = 0)
 }
 
 
-
-//   static
-// #ifdef USE_DEVFEATURE_IRAM__PIXEL_BUS_INTERFACING
-// IRAM_ATTR
-// #endif
-// uint8_t getI(uint8_t busType, uint8_t* pins, uint8_t num = 0)
-// {
-//   if (!IS_BUSTYPE_DIGITAL(busType)) return BUSTYPE__NONE__ID;
-
-//   // ---------------------------------------------------------------------------
-//   // 2-pin SPI LED chips (kept as-is: you had HSPI/SSPI mapping here)
-//   // ---------------------------------------------------------------------------
-//   if (IS_BUSTYPE_2PIN(busType)) {
-//     bool isHSPI = false;
-
-//     #ifdef ESP8266
-//       if (pins[0] == P_8266_HS_MOSI && pins[1] == P_8266_HS_CLK) isHSPI = true;
-//     #else
-//       if (!num) isHSPI = true;
-//     #endif
-
-//     uint8_t t = BUSTYPE__NONE__ID;
-//     switch (busType) {
-//       case BUSTYPE_APA102:  t = BUSTYPE__SS_DOT_3__ID; break;
-//       case BUSTYPE_LPD8806: t = BUSTYPE__SS_LPD_3__ID; break;
-//       case BUSTYPE_LPD6803: t = BUSTYPE__SS_LPO_3__ID; break;
-//       case BUSTYPE_WS2801:  t = BUSTYPE__SS_WS1_3__ID; break;
-//       case BUSTYPE_P9813:   t = BUSTYPE__SS_P98_3__ID; break;
-//       default:              t = BUSTYPE__NONE__ID;     break;
-//     }
-//     if (t > BUSTYPE__NONE__ID && isHSPI) t--; // HW SPI has one smaller ID than SW
-//     return t;
-//   }
-
-//   // ---------------------------------------------------------------------------
-//   // ESP8266 digital (unchanged behaviour: U0/U1/DM based on pin)
-//   // ---------------------------------------------------------------------------
-//   #ifdef ESP8266
-//     uint8_t offset = pins[0] - 1;
-//     if (offset > 3) offset = 3;
-
-//     switch (busType) {
-//       case BUSTYPE_WS2812_RGB:
-//       case BUSTYPE_WS2812_WWA:
-//         return BUSTYPE__8266_U0_3__ID + offset;
-
-//       case BUSTYPE_SK6812_RGBW:
-//         return BUSTYPE__8266_U0_4__ID + offset;
-
-//       default:
-//         return BUSTYPE__NONE__ID;
-//     }
-//   #else
-//   // ---------------------------------------------------------------------------
-//   // ESP32 digital: IMPORTANT
-//   // - Your enum encodes METHOD FAMILY, not RMT channel.
-//   // - RMT channel is selected by "num" passed into PolyBus::create(..., channel).
-//   // - Therefore: return RN/I0/I1/I*P ONLY. No offset games.
-//   // ---------------------------------------------------------------------------
-
-//     // Target-specific hard limits (optional; keeps you honest)
-//     #if defined(CONFIG_IDF_TARGET_ESP32C3)
-//       // You said: only first 2 RMT channels usable for TX on your C3 setup
-//       if (num > 1) return BUSTYPE__NONE__ID;
-
-//       // Force RMT family on C3 (your policy)
-//       switch (busType) {
-//         case BUSTYPE_WS2812_RGB:
-//         case BUSTYPE_WS2812_WWA:
-//           return BUSTYPE__32_RN_3__ID;
-//         case BUSTYPE_SK6812_RGBW:
-//           return BUSTYPE__32_RN_4__ID;
-//         case BUSTYPE_WS2805_RGBWW:
-//           return BUSTYPE__32_RN_5__ID;
-//         case BUSTYPE_WS2811_400KHZ:
-//           return BUSTYPE__32_RN_400_3__ID;
-//         default:
-//           return BUSTYPE__NONE__ID;
-//       }
-
-//     #elif defined(CONFIG_IDF_TARGET_ESP32S3)
-//       // If you want to restrict RMT TX channels on S3 (you previously said 4), do it here:
-//       // if (num > 3) return BUSTYPE__NONE__ID;
-
-//       // If you want RMT primary, return RN; otherwise pick I2S family below.
-//       #ifdef ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
-//         switch (busType) {
-//           case BUSTYPE_WS2812_RGB:
-//           case BUSTYPE_WS2812_WWA:   return BUSTYPE__32_RN_3__ID;
-//           case BUSTYPE_SK6812_RGBW:  return BUSTYPE__32_RN_4__ID;
-//           case BUSTYPE_WS2805_RGBWW: return BUSTYPE__32_RN_5__ID;
-//           case BUSTYPE_WS2811_400KHZ:return BUSTYPE__32_RN_400_3__ID;
-//           default:                   return BUSTYPE__NONE__ID;
-//         }
-//       #else
-//         // Default: single-output I2S family (your X1 typedefs handle S3 internally)
-//         switch (busType) {
-//           case BUSTYPE_WS2812_RGB:
-//           case BUSTYPE_WS2812_WWA:   return BUSTYPE__32_I1_3__ID;
-//           case BUSTYPE_SK6812_RGBW:  return BUSTYPE__32_I1_4__ID;
-//           case BUSTYPE_WS2805_RGBWW: return BUSTYPE__32_I1_5__ID;
-//           case BUSTYPE_WS2811_400KHZ:return BUSTYPE__32_I1_400_3__ID;
-//           default:                   return BUSTYPE__NONE__ID;
-//         }
-//       #endif
-
-//     #elif defined(CONFIG_IDF_TARGET_ESP32S2)
-//       // S2: if you want to restrict RMT channels, do it here (optional)
-//       // if (num > 3) return BUSTYPE__NONE__ID;
-
-//       #ifdef ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
-//         switch (busType) {
-//           case BUSTYPE_WS2812_RGB:
-//           case BUSTYPE_WS2812_WWA:   return BUSTYPE__32_RN_3__ID;
-//           case BUSTYPE_SK6812_RGBW:  return BUSTYPE__32_RN_4__ID;
-//           case BUSTYPE_WS2805_RGBWW: return BUSTYPE__32_RN_5__ID;
-//           case BUSTYPE_WS2811_400KHZ:return BUSTYPE__32_RN_400_3__ID;
-//           default:                   return BUSTYPE__NONE__ID;
-//         }
-//       #else
-//         // S2 uses I2S0 family
-//         switch (busType) {
-//           case BUSTYPE_WS2812_RGB:
-//           case BUSTYPE_WS2812_WWA:   return BUSTYPE__32_I0_3__ID;
-//           case BUSTYPE_SK6812_RGBW:  return BUSTYPE__32_I0_4__ID;
-//           case BUSTYPE_WS2805_RGBWW: return BUSTYPE__32_I0_5__ID;
-//           case BUSTYPE_WS2811_400KHZ:return BUSTYPE__32_I0_400_3__ID;
-//           default:                   return BUSTYPE__NONE__ID;
-//         }
-//       #endif
-
-//     #else
-//       // Classic ESP32
-//       // If RMT is primary, always return RN family. Channel comes from "num".
-//       #ifdef ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
-//         switch (busType) {
-//           case BUSTYPE_WS2812_RGB:
-//           case BUSTYPE_WS2812_WWA:   return BUSTYPE__32_RN_3__ID;
-//           case BUSTYPE_SK6812_RGBW:  return BUSTYPE__32_RN_4__ID;
-//           case BUSTYPE_WS2805_RGBWW: return BUSTYPE__32_RN_5__ID;
-//           case BUSTYPE_WS2811_400KHZ:return BUSTYPE__32_RN_400_3__ID;
-//           default:                   return BUSTYPE__NONE__ID;
-//         }
-//       #else
-//         // Otherwise, use your existing auto-detect / parallel policy.
-//         // Here’s a sane, minimal policy: I0 for bus 0, I1 for bus 1, then RN thereafter.
-//         // If you want parallel I2S selection, put it here, but do NOT encode RMT channel in type.
-//         switch (busType) {
-//           case BUSTYPE_WS2812_RGB:
-//           case BUSTYPE_WS2812_WWA:
-//             if (num == 0) return BUSTYPE__32_I0_3__ID;
-//             if (num == 1) return BUSTYPE__32_I1_3__ID;
-//             return BUSTYPE__32_RN_3__ID;
-
-//           case BUSTYPE_SK6812_RGBW:
-//             if (num == 0) return BUSTYPE__32_I0_4__ID;
-//             if (num == 1) return BUSTYPE__32_I1_4__ID;
-//             return BUSTYPE__32_RN_4__ID;
-
-//           case BUSTYPE_WS2805_RGBWW:
-//             if (num == 0) return BUSTYPE__32_I0_5__ID;
-//             if (num == 1) return BUSTYPE__32_I1_5__ID;
-//             return BUSTYPE__32_RN_5__ID;
-
-//           case BUSTYPE_WS2811_400KHZ:
-//             if (num == 0) return BUSTYPE__32_I0_400_3__ID;
-//             if (num == 1) return BUSTYPE__32_I1_400_3__ID;
-//             return BUSTYPE__32_RN_400_3__ID;
-
-//           default:
-//             return BUSTYPE__NONE__ID;
-//         }
-//       #endif
-
-//     #endif // target select
-
-//   #endif // ESP32/!ESP8266
-// }
 
 };
 

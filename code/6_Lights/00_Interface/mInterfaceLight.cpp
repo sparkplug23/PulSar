@@ -40,7 +40,7 @@ int8_t mInterfaceLight::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_CONFIG_LOAD_POST_INIT_DEFAULTS_FROM_PROGMEM:
       Template_Load_DefaultConfig();
     break;
-    #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+    #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
     case TASK_FILESYSTEM__SAVE__MODULE_DATA__ID:
       Save_Module();
     break;
@@ -554,7 +554,7 @@ RgbColor mInterfaceLight::GetColourValueUsingMaps_FullBrightness(float value,
 
 
 
-#ifdef ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__GAMMA_CORRECTION
 
 /*********************************************************************************************\
  * Change scales from 8 bits to 10 bits and vice versa
@@ -729,7 +729,7 @@ uint16_t mInterfaceLight::fadeGammaReverse(uint32_t channel, uint16_t vg) {
   }
 }
 
-#endif // ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
+#endif // ENABLE_FEATURE_LIGHTING__CORE__GAMMA_CORRECTION
 
 
 bool mInterfaceLight::CommandGet_LightPowerState()

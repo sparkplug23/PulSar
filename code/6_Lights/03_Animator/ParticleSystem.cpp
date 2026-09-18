@@ -12,7 +12,7 @@
 #include "ParticleSystem.h"
 
 
-#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+#ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
 
 
 
@@ -1493,7 +1493,7 @@ void ParticleSystem1D::render() {
 
   // framebuffer[0] = RGBW32(random(5)*25,0,0,0);
 
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   // transfer local buffer to segment if using 1D->2D mapping
   if (pSEGMENT.is2D() && pSEGMENT.map1D2D) {
     for (int x = 0; x <= maxXpixel; x++) {
@@ -1798,7 +1798,7 @@ void ParticleSystem1D::updatePSpointers(bool isadvanced) {
   particleFlags = reinterpret_cast<PSparticleFlags1D *>(particles + numParticles); // pointer to particle flags
   sources = reinterpret_cast<PSsource1D *>(particleFlags + numParticles); // pointer to source(s)
   PSdataEnd = reinterpret_cast<uint8_t *>(sources + numSources);   // pointer to first available byte after the PS for FX additional data (already aligned to 4 byte boundary)
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (pSEGMENT.is2D() && pSEGMENT.map1D2D) {
     framebuffer = reinterpret_cast<uint32_t *>(sources + numSources); // use local framebuffer for 1D->2D mapping
     PSdataEnd = reinterpret_cast<uint8_t *>(framebuffer + pSEGMENT.maxMappingLength()); // pointer to first available byte after the PS for FX additional data (still aligned to 4 byte boundary)
@@ -1853,7 +1853,7 @@ bool allocateParticleSystemMemory1D(const uint32_t numparticles, const uint32_t 
   requiredmemory += sizeof(PSparticleFlags1D) * numparticles;
   requiredmemory += sizeof(PSparticle1D) * numparticles;
   requiredmemory += sizeof(PSsource1D) * numsources;
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (pSEGMENT.is2D())
     requiredmemory += sizeof(uint32_t) * pSEGMENT.maxMappingLength(); // need local buffer for mapped rendering
 #endif
@@ -1962,4 +1962,4 @@ static uint32_t fast_color_scaleAdd(const uint32_t c1, const uint32_t c2, const 
     return rb | g;
 }
 
-#endif  // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+#endif  // ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM

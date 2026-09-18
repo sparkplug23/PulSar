@@ -1,7 +1,7 @@
 #include "_AnimatorLight.h"
 
 
-#ifdef ENABLE_FEATURE_LIGHTS__PRESETS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PRESETS
 
 /*
  * Methods to handle saving and loading presets to/from the filesystem
@@ -39,7 +39,7 @@ static const char* getPresetsMetaFileName() { //likely not needed, do direct lat
 }
 
 // Date Modified: 12Dec25
-#ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+#ifdef ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
 
 // Load metadata from /presets_meta.json
 bool mAnimatorLight::LoadPresetFileMeta(PresetFileMeta &meta)
@@ -135,7 +135,7 @@ bool mAnimatorLight::SavePresetFileMeta(const PresetFileMeta &meta)
 // // Date Modified: 13Dec25
 // bool mAnimatorLight::IsPlaylistTimeLocksEnabled()
 // {
-// #ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+// #ifdef ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
 //   PresetFileMeta meta;
 //   if (!LoadPresetFileMeta(meta)) {
 //     // If meta missing/unreadable, choose your default:
@@ -194,13 +194,13 @@ bool mAnimatorLight::SavePresetFileMeta(const PresetFileMeta &meta)
 // #endif
 
 
-#endif // ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+#endif // ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
 
 
 void mAnimatorLight::doSaveState() 
 {
 
-  #ifdef ENABLE_FEATURE_LIGHTS__PRESETS_DEBUG
+  #ifdef ENABLE_FEATURE_LIGHTING__PRESETS__DEBUG
   ALOG_INF(PSTR("doSaveState() START"));
   // CommandSet_ReadFile("/presets.json");
   #endif
@@ -220,7 +220,7 @@ void mAnimatorLight::doSaveState()
   DEBUG_PRINTLN(F("Serialize current state"));
     
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_BY_NAME_AUTOGENERATE_ID_LIST
+  #ifdef ENABLE_FEATURE_LIGHTING__PLAYLISTS__AUTOGENERATE_ID_LIST
 
 
   #else
@@ -229,7 +229,7 @@ void mAnimatorLight::doSaveState()
   if (playlistSave) 
   {
   
-    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+    #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
     serializePlaylist(sObj);
     #endif
   
@@ -310,7 +310,7 @@ void mAnimatorLight::doSaveState()
   quickLoad[0] = '\0';
   playlistSave = false;
 
-  #ifdef ENABLE_FEATURE_LIGHTS__PRESETS_DEBUG
+  #ifdef ENABLE_FEATURE_LIGHTING__PRESETS__DEBUG
   ALOG_INF(PSTR("doSaveState() END"));
   // CommandSet_ReadFile("/presets.json");
   #endif
@@ -350,7 +350,7 @@ void mAnimatorLight::initPresetsFile()
 
   if (FILE_SYSTEM.exists(fileName)) return;
 
-  #ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+  #ifdef ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
     // Create presets.json with metadata object at "0"
     StaticJsonDocument<128> doc;
     JsonObject root = doc.to<JsonObject>();
@@ -663,7 +663,7 @@ void mAnimatorLight::ScanPresetsFile_GeneratePlaylistIDsFromPSN_2()
 
   uint32_t t_start = millis();
 
-  #ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+  #ifdef ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
   PresetFileMeta meta;
   bool haveMeta = LoadPresetFileMeta(meta);
 
@@ -869,7 +869,7 @@ void mAnimatorLight::ScanPresetsFile_GeneratePlaylistIDsFromPSN_2()
   }
 
 
-#ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+#ifdef ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
   uint32_t t_elapsed = millis() - t_start;
 
   meta.parserVersion = kPresetMetaParserVersion;
@@ -888,4 +888,4 @@ ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN_2() end, took %u ms"),
 }
 
 
-#endif // ENABLE_FEATURE_LIGHTS__PRESETS
+#endif // ENABLE_FEATURE_LIGHTING__CORE__PRESETS

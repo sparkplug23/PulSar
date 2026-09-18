@@ -81,15 +81,15 @@
 
 
 
-// #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-// #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Should nearly always be enabled as default/minimal cases
-// #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-// #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-// #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
-// #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-// #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
-// #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
-// #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Should nearly always be enabled as default/minimal cases
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_BORDER_WALLPAPERS
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_NOTIFICATIONS
 
 #ifdef ESP32
 #define PIXEL_RANGE_LIMIT 4000
@@ -226,7 +226,7 @@
  * @brief 1D and 2D level of development
  * Show the max level of devstage only when 2D is active, otherwise, ignore the 2D level
  */
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 #define EFFECT_DEVSTAGE_12D_CHECK(X,Y) max(X,Y) // Take the highest devstage
 #else
 #define EFFECT_DEVSTAGE_12D_CHECK(X,Y) X // Take only the 1D devstage, ignore the 2D devstage.
@@ -576,7 +576,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_AMBILIGHT__CTR)        "mode_
 #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__MODE_MANUAL_SETPIXEL_CTR)   "mode_setpixel";
 #endif
-#ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__AUTOMATION_PRESETS
 DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PRESETS_CTR)   "presets";
 #endif
 #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
@@ -603,7 +603,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "de
 #include "2_CoreSystem/21_JsonArduino/ArduinoJson-v6.h"
 
 
-#ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
   #include "2_CoreSystem/21_JsonArduino/AsyncJson-v6.h"
   #include "webpages_generated/html_ui.h"
   #ifdef WLED_ENABLE_SIMPLE_UI
@@ -619,7 +619,7 @@ DEFINE_PGM_CTR(PM_MQTT_HANDLER_POSTFIX_TOPIC__DEBUG_PERFORMANCE__CTR)        "de
     #include "webpages_generated/html_pxmagic.h"
   #endif
   #include "webpages_generated/html_cpal.h"
-#endif // ENABLE_FEATURE_LIGHTING__WEBUI
+#endif // ENABLE_FEATURE_LIGHTING__WEBUI__CORE
 
 #include "webpages_generated/advanced_playlist.h"
 
@@ -1143,7 +1143,7 @@ bool doAdvancePlaylist  = false;
     void Init_Segments();
 
 
-    #ifdef ENABLE_FEATURE_LIGHTS__PRESETS
+    #ifdef ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   volatile uint16_t presetToApply = PRESET_ID_NONE;
 volatile byte callModeToApply = 0;
 volatile uint16_t presetToSave = PRESET_ID_NONE;
@@ -1187,14 +1187,14 @@ volatile uint16_t presetToSave = PRESET_ID_NONE;
 
     void initPresetsFile();
 
-    #endif // ENABLE_FEATURE_LIGHTS__PRESETS
+    #endif // ENABLE_FEATURE_LIGHTING__CORE__PRESETS
 
 
 
     // /******************************************************************************************************************************************************************************
     // **** Playlists ***************************************************************************************************************************************************************************
     // ******************************************************************************************************************************************************************************/
-    // #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+    // #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
 
     // typedef struct PlaylistEntry 
     // {
@@ -1226,7 +1226,7 @@ volatile uint16_t presetToSave = PRESET_ID_NONE;
 
     // void ScanPresetsFile_GeneratePlaylistIDsFromPSN_2();
 
-    // #ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+    // #ifdef ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
     // struct PresetFileMeta {
     //   bool     enablePsn;     // 0/1: PSN helper enabled
     //   bool     enablePlaylistTimeLocks; // NEW
@@ -1263,12 +1263,12 @@ volatile uint16_t presetToSave = PRESET_ID_NONE;
     // #endif
 
 
-    // #endif // ENABLE_FEATURE_LIGHTS__PLAYLISTS
+    // #endif // ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
 
     /******************************************************************************************************************************************************************************
 **** Playlists ***************************************************************************************************************************************************************************
 ******************************************************************************************************************************************************************************/
-#ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
 
 
 uint16_t currentPreset = PRESET_ID_NONE;
@@ -1333,7 +1333,7 @@ int16_t Playlist_SelectAllowedIndexByTime(uint8_t startIndex, uint16_t nowMinute
 #endif // ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
 
 
-#ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+#ifdef ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
 
 struct PresetFileMeta
 {
@@ -1347,9 +1347,9 @@ bool SavePresetFileMeta(const PresetFileMeta &meta);
 
 static const uint8_t kPresetMetaParserVersion = 2;
 
-#endif // ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+#endif // ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
 
-#endif // ENABLE_FEATURE_LIGHTS__PLAYLISTS
+#endif // ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
 
 
 
@@ -1359,10 +1359,10 @@ static const uint8_t kPresetMetaParserVersion = 2;
     bool isAsterisksOnly(const char* str, byte maxLen);
 
 
-    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
     void SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage);
     bool handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, const String& req, bool apply=true);
-    #endif // ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
+    #endif // ENABLE_FEATURE_LIGHTING__WEBUI__URL_QUERY_SETTINGS
 
     /******************************************************************************************************************************************************************************
     *******************************************************************************************************************************************************************************
@@ -1372,68 +1372,68 @@ static const uint8_t kPresetMetaParserVersion = 2;
     *******************************************************************************************************************************************************************************
     *******************************************************************************************************************************************************************************
     ******************************************************************************************************************************************************************************/
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
     void EffectAnim__Solid_Colour(); 
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
     void EffectAnim__Static_Palette();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
     void EffectAnim__Firefly();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
     void EffectAnim__Flicker_Base(bool use_multi = false, uint16_t flicker_palette = 0);
     void EffectAnim__Candle_Single();
     void EffectAnim__Candle_Multiple();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
     void EffectAnim__Shimmering_Two_Palette();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
     void EffectAnim__Shimmering_Palette_Saturation();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
     void EffectAnim__Gradient_Palette_SegWidth();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
     void EffectAnim__Stepping_Palette();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
     void EffectAnim__TimeBased__HourProgress();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
     void EffectAnim__Palette_Variation();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
     void EffectAnim__Stepping_Palette_With_Background();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
     void EffectAnim__Twinkle_Out();
     void EffectAnim__Twinkle_Decay();
     void EffectAnim__Twinkle_Glow();
     void EffectAnim__Twinkle_Base(uint8_t mode);
     #endif 
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
     void EffectAnim__Bands_Palette_SegWidth();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
     void EffectAnim__Randomise_Gradient_Palette_SegWidth();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
     void EffectAnim__Rotate_Base(uint16_t movement_amount=1, bool direction=false);
     void EffectAnim__Rotating_Palette();
     void EffectAnim__Rotating_Previous_Animation();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
     void Segments_RotateDesiredColour(uint8_t pixels_amount_to_shift, uint8_t direction);
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
     void EffectAnim__Blend_Two_Palettes();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
     void EffectAnim__Twinkle_Palette_Onto_Palette();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
     // Static
     void EffectAnim__Palette_Lit_Pattern();
     void EffectAnim__TriSegCol_Lit_Pattern();
@@ -1578,8 +1578,8 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void EffectAnim__Drip();
     void EffectAnim__FlowStripe();
     void EffectAnim__WaveSins();
-    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
+    #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
     void EffectAnim__Hardware__Show_Bus();
     void EffectAnim__Hardware__Show_Bus_Dotted();
     void EffectAnim__Hardware__Manual_Pixel_Counting();
@@ -1588,8 +1588,8 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void LightSensorIndexing__SaveResults_To_File();
     void LightSensorIndexing__LoadResults_To_File();
     void EffectAnim__Hardware__Light_Sensor_Pixel_Indexing_Button_Triggered();
-    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+    #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
     void EffectAnim__SunPositions__Sunrise_Alarm_01();
     void EffectAnim__SunPositions__Azimuth_Selects_Gradient_Of_Palette_01();
     void EffectAnim__SunPositions__Sunset_Blended_Palettes_01();
@@ -1608,16 +1608,16 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void EffectAnim__SunPositions__DrawSun_2D_Sky_01();
     void EffectAnim__SunPositions__DrawSun_2D_Sky_Path_01();
     void EffectAnim__SunPositions__White_Colour_Temperature_CCT_Based_On_Elevation_01();
-    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+    #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
     #ifdef USE_MODULE_SENSORS_MOON_TRACKING
     void EffectAnim__MoonPositions__DrawMoon_2D_Base(bool draw_sky);
     void EffectAnim__MoonPositions__DrawMoon_2D_Phase_01();
     void EffectAnim__MoonPositions__DrawMoon_2D_Sky_Phase_01();
     #endif // USE_MODULE_SENSORS_MOON_TRACKING
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_EXTERNAL_MODULE_CONTROL
     void EffectAnim__Manual__ControlledFromAnotherModule();
-    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
+    #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_EXTERNAL_MODULE_CONTROL
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_CHRISTMAS_CONTROLLER
     void EffectAnim__Christmas_Slo_Glo__01();
     void EffectAnim__Christmas_Sequential__01();
     void EffectAnim__Christmas_InWaves__01();
@@ -1636,20 +1636,20 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void EffectAnim__Christmas_Slo_Glo_Plus__01();
     void EffectAnim__Christmas_Sequential_Plus__01();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT
     void SubTask_Flasher_Animate_Function_Tester_01();
     void SubTask_Flasher_Animate_Function_Tester_02();
-    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
+    #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_BORDER_WALLPAPERS
     void EffectAnim__BorderWallpaper__TwoColour_Gradient();
     void EffectAnim__BorderWallpaper__FourColour_Gradient();
     void EffectAnim__BorderWallpaper__FourColour_Solid();
-    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
+    #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_BORDER_WALLPAPERS
     #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_TRACKING
     void EffectAnim__SolarTriggers__Sunrise_01();
     #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_TRACKING
     
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT
     void EffectAnim__Christmas_Musical__01();
     #endif 
         
@@ -1698,7 +1698,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
     *** Specialised: 1D (Audio Reactive) ****************************************************************************************************************************************
     **  Requires:     ***********************************************************************************************************************************************************
     *****************************************************************************************************************************************************************************/
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
     void EffectAnim__AudioReactive__1D__FFT_Ripple_Peak();
     void EffectAnim__AudioReactive__1D__FFT_Perline_Move();
     void EffectAnim__AudioReactive__1D__FFT_Aurora();
@@ -1732,7 +1732,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
     *** Specialised: 2D (Audio Reactive) ****************************************************************************************************************************************
     **  Requires:     ***********************************************************************************************************************************************************
     *****************************************************************************************************************************************************************************/
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
     void EffectAnim__AudioReactive__2D__Swirl();
     void EffectAnim__AudioReactive__2D__Waverly();
     void EffectAnim__AudioReactive__2D__FFT_GED();
@@ -1743,18 +1743,18 @@ static const uint8_t kPresetMetaParserVersion = 2;
     *** Specialised: Notifcations ****************************************************************************************************************************************
     **  Requires:     ***********************************************************************************************************************************************************
     *****************************************************************************************************************************************************************************/
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_NOTIFICATIONS
     void SubTask_Segment_Animate_Function__Notification_Static();
     void SubTask_Segment_Animate_Function__Notification_Fade();
     void SubTask_Segment_Animate_Function__Notification_Blinking();
     void SubTask_Segment_Animate_Function__Notification_Pulsing();
     void SubTask_Segment_Animate_Function__Notification_Base(bool flag_static = false, bool flag_blink = false, bool flag_pulse = false);
-    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
+    #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_NOTIFICATIONS
     /****************************************************************************************************************************************************************************
     *** Specialised: Notifcations ****************************************************************************************************************************************
     **  Requires:     ***********************************************************************************************************************************************************
     *****************************************************************************************************************************************************************************/
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
     
     #define LED_DIGITS 4                             // 4 or 6 digits, can only be an even number as...
     // #define LED_PER_DIGITS_STRIP 47                  // ...two digits are made out of one piece of led strip with 47 leds...
@@ -1834,10 +1834,10 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_01();
     void ConstructJSONBody_Animation_Progress__LCD_Clock_Time_Basic_02();
 
-    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+    #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
 
     
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
 
     /****************************************************************************************************************************************************************************
     *** Particle System: 1D ******************************************************************************************************************************************************
@@ -1882,7 +1882,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void EffectAnim__Particle__2D__Galaxy();
     #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX
 
-    #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+    #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
     #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
 
     void EffectAnim__RayTracing__Shooting_And_Bouncing();
@@ -1928,7 +1928,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
     enum EFFECTS_FUNCTION__IDS
     {
       // General Level 1 Minimal Home Effects
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
       EFFECTS_FUNCTION__SOLID_COLOUR__ID,
       EFFECTS_FUNCTION__STATIC_PALETTE__ID,
       EFFECTS_FUNCTION__BANDS_PALETTE_SEGWIDTH__ID,
@@ -1942,7 +1942,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       #endif
 
       // General Level 2 Flashing Basic Effects
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
       EFFECTS_FUNCTION__SHIMMERING_PALETTE_DOUBLE__ID,
       EFFECTS_FUNCTION__SHIMMERING_PALETTE_SATURATION__ID,
       EFFECTS_FUNCTION__ROTATING_PALETTE__ID,
@@ -1955,7 +1955,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       #endif
 
       // General Level 3 Flashing Extended Effects
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
       EFFECTS_FUNCTION__TWINKLE_OUT__ID,
       EFFECTS_FUNCTION__TWINKLE_DECAY__ID,
       EFFECTS_FUNCTION__TWINKLE_GLOW__ID,
@@ -1965,7 +1965,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       EFFECTS_FUNCTION__PALETTES_INTERLEAVED__ID,
       #endif
 
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
 
       // General Level 4 Flashing Complete Effects
       EFFECTS_FUNCTION__SPOTS__ID,
@@ -2114,12 +2114,12 @@ static const uint8_t kPresetMetaParserVersion = 2;
       EFFECTS_FUNCTION__FLOWSTRIPE__ID, 
       EFFECTS_FUNCTION__WAVESINS__ID, 
 
-      #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+      #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
 
       /**
        * Hardware Installation Helpers
        **/
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
       EFFECTS_FUNCTION__HARDWARE__SHOW_BUS__ID,
       EFFECTS_FUNCTION__HARDWARE__SHOW_BUS_DOTTED__ID,
       EFFECTS_FUNCTION__HARDWARE__MANUAL_PIXEL_COUNTING__ID,
@@ -2133,7 +2133,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       /**
        * Sun Position
        **/
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
       EFFECTS_FUNCTION__SUNPOSITIONS_SUNRISE_ALARM_01__ID,
       EFFECTS_FUNCTION__SUNPOSITIONS_AZIMUTH_SELECTS_GRADIENT_OF_PALETTE_01__ID,
       EFFECTS_FUNCTION__SUNPOSITIONS_SUNSET_BLENDED_PALETTES_01__ID,
@@ -2161,7 +2161,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       /**
        * LED Segment Clock
        **/
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
       EFFECTS_FUNCTION__LCD_CLOCK_BASIC_01__ID,
       EFFECTS_FUNCTION__LCD_CLOCK_BASIC_02__ID,
       EFFECTS_FUNCTION__LCD_DISPLAY_MANUAL_NUMBER_01__ID,
@@ -2171,7 +2171,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       /**
        * Notifications
        **/
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_NOTIFICATIONS
       EFFECTS_FUNCTION__NOTIFICATION_STATIC__ID,
       EFFECTS_FUNCTION__NOTIFICATION_FADE__ID,
       EFFECTS_FUNCTION__NOTIFICATION_BLINKING__ID,
@@ -2181,7 +2181,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       /**
        * Border/Frame/Edge Wallpapers
        **/
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_BORDER_WALLPAPERS
       EFFECTS_FUNCTION__BORDER_WALLPAPER__TWOCOLOUR_GRADIENT__ID,
       EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_GRADIENT__ID,
       EFFECTS_FUNCTION__BORDER_WALLPAPER__FOURCOLOUR_SOLID__ID,
@@ -2191,7 +2191,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
        * Manual Pixel: Keeping as legacy, but mode change to realtime will remove this
        * Removing this, Feb25, it should be handled by a realtime mode (ie not effects)
        **/
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_EXTERNAL_MODULE_CONTROL
       EFFECTS_FUNCTION__MANUAL__CONTROLLED_FROM_ANOTHER_MODULE__ID,
       #endif
 
@@ -2199,7 +2199,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
        * Christmas Multifunction Controller: Replication of vintage 8 function controllers
        * Replicate how traditional 2/4 ouput controllers and their effects look
        **/
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_CHRISTMAS_CONTROLLER
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_01_ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_01_ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__INWAVES_01_ID,
@@ -2267,7 +2267,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       /**
        * Audio Reactive 1D
        **/
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
       EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_RIPPLE_PEAK__ID,
       EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_PERLINE_MOVE__ID,
       EFFECTS_FUNCTION__AUDIOREACTIVE__1D__FFT_AURORA__ID,
@@ -2300,7 +2300,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       /**
        * Christmas Musical
        **/
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT
       EFFECTS_FUNCTION__CHRISTMAS_MUSICAL__01_ID,
       // pulsing lights to music as music mode, instead of off or waves, go from 30% to 100% brightness in time with music beat
       #endif
@@ -2308,7 +2308,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       /**
        * Audio Reactive 2D
        **/
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
       EFFECTS_FUNCTION__AUDIOREACTIVE__2D__SWIRL__ID,         
       EFFECTS_FUNCTION__AUDIOREACTIVE__2D__WAVERLY__ID,   
       EFFECTS_FUNCTION__AUDIOREACTIVE__2D__FFT_GED__ID,         
@@ -2316,7 +2316,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       EFFECTS_FUNCTION__AUDIOREACTIVE__2D__FFT_AKEMI__ID,   
       #endif
 
-      #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
 
       /**
        * Particle System 1D
@@ -2359,7 +2359,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
       EFFECTS_FUNCTION__PARTICLE__2D__GALAXY__ID,
       #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX
 
-      #endif // ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+      #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
 
       #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
       EFFECTS_FUNCTION__RAY_TRACING__SHOOTING_AND_BOUNCING__ID,
@@ -2375,7 +2375,7 @@ static const uint8_t kPresetMetaParserVersion = 2;
   #define WLED_GROUP_IDS_LAST   EFFECTS_FUNCTION__DRIP__ID
 
 
-  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+  #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
   #define DEFAULT_EFFECTS_FUNCTION    EFFECTS_FUNCTION__STATIC_PALETTE__ID
   #else
   #define DEFAULT_EFFECTS_FUNCTION    0
@@ -2511,7 +2511,7 @@ inline static uint32_t FadeU32(uint32_t colour32, uint8_t fade) {
   #endif // ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
 
 
-  #ifdef ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+  #ifdef ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
   //um_manager.cpp
   typedef enum UM_Data_Types {
     UMT_BYTE = 0,
@@ -2651,7 +2651,7 @@ inline static uint32_t FadeU32(uint32_t colour32, uint8_t fade) {
 
   UsermodManager usermods = UsermodManager();
 
-  #endif // ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+  #endif // ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
 
 
     /*****************************************************************************************************************************************************************************
@@ -2981,7 +2981,7 @@ uint8_t perlin8(uint16_t x, uint16_t y, uint16_t z) {
   
 
 
-  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
   void updateInterfaces(uint8_t callMode);
   #endif
 
@@ -3568,7 +3568,7 @@ class Segment
     // removing, as name is ambiguous now without neopixel animator
     uint16_t get_transition_rate_ms() // Effect that require call for every update, must be called at FRAMETIME_MS, otherwise, can manually be set
     {
-      // #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+      // #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
       // if(effect_id >= WLED_GROUP_IDS_FIRST)
       // {
         return FRAMETIME;
@@ -3674,12 +3674,12 @@ class Segment
     //   uint16_t vLength = (length() + groupLen - 1) / groupLen;
     //   if(mirror) vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a signle LED
 
-    //   #ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+    //   #ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
     //   if(decimate > 1)   // only shrink when factor >= 2. 0 and 1 means no decimation
     //   {
     //     vLength = (vLength + decimate - 1) / decimate;
     //   }
-    //   #endif // ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+    //   #endif // ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
 
     //   return vLength;
     // }
@@ -3687,7 +3687,7 @@ class Segment
     // inline static unsigned vWidth()                        { return virtualLength(); }
     
     inline unsigned nrOfVStrips() const {        // returns number of virtual vertical strips in 2D matrix (used to expand 1D effects into 2D)
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
       return (is2D() &&  map1D2D == M12_pBar) ? virtualWidth() : 1;
     #else
       return 1;
@@ -4575,7 +4575,7 @@ name = nullptr;
     inline uint32_t *getPixels() const                              { return pixels; }
     inline void     setPixelColorRaw(unsigned i, uint32_t c) const  { pixels[i] = c; }
     inline uint32_t getPixelColorRaw(unsigned i) const              { return pixels[i]; };
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     inline void     setPixelColorXYRaw(unsigned x, unsigned y, uint32_t c) const  { auto XY = [](unsigned X, unsigned Y){ return X + Y*Segment::vWidth(); }; pixels[XY(x,y)] = c; }
     inline uint32_t getPixelColorXYRaw(unsigned x, unsigned y) const              { auto XY = [](unsigned X, unsigned Y){ return X + Y*Segment::vWidth(); }; return pixels[XY(x,y)]; };
   #endif
@@ -4656,7 +4656,7 @@ name = nullptr;
     inline uint32_t *getPixels() const                              { return pixels; }
     inline void     setPixelColorRaw(unsigned i, uint32_t c) const  { pixels[i] = c; }
     inline uint32_t getPixelColorRaw(unsigned i) const              { return pixels[i]; };
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     inline void     setPixelColorXYRaw(unsigned x, unsigned y, uint32_t c) const  { auto XY = [](unsigned X, unsigned Y){ return X + Y*Segment::vWidth(); }; pixels[XY(x,y)] = c; }
     inline uint32_t getPixelColorXYRaw(unsigned x, unsigned y) const              { auto XY = [](unsigned X, unsigned Y){ return X + Y*Segment::vWidth(); }; return pixels[XY(x,y)]; };
     #endif
@@ -4735,7 +4735,7 @@ name = nullptr;
     uint16_t virtualHeight(void) const;
 
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 
     inline bool is2D() const                                                            { return (width()>1 && height()>1); }
     [[gnu::hot]] void setPixelColorXY(int x, int y, uint32_t c) const; // set relative pixel within segment with color
@@ -5032,7 +5032,7 @@ name = nullptr;
       return c;
     }
 
-    #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
+    #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
     class ParticleSystem1D;
     class ParticleSystem2D;
     #endif
@@ -5368,13 +5368,13 @@ inline uint32_t HueSatBrt(uint16_t hue, uint8_t sat, uint8_t brt, bool white_fro
   * *****************************************************************************************************************
   **/
  
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     bool isMatrix = true;
   #else
     bool isMatrix = false;
   #endif
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     #define WLED_MAX_PANELS 64
     uint8_t  panels;
 
@@ -5579,14 +5579,14 @@ void sappend(char stype, const char* key, int val);
 
 
 
-#ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
 void serveSettingsJS(AsyncWebServerRequest* request);
 void serveSettings(AsyncWebServerRequest* request, bool post = false);
 // bool handleIfNoneMatchCacheHeader(AsyncWebServerRequest* request);
 // void setStaticContentCacheHeaders(AsyncWebServerResponse *response);
 void serveIndex(AsyncWebServerRequest* request);
 
-#ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__XML_API
 // void getSettingsJS(byte subPage, Print& settingsScript);
 #else
 void getSettingsJS(byte subPage, char* dest); // phase out
@@ -5625,7 +5625,7 @@ void respondModeData(AsyncWebServerRequest* request);
 void serializeModeNames(JsonArray arr, bool flag_get_first_name_only = true);
 
 
-#ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
 void handleUpload(AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final);
 bool serveLiveLeds(AsyncWebServerRequest* request, uint32_t wsClient = 0);
 
@@ -5741,7 +5741,7 @@ bool doReboot = false;
 #define _INIT_N(x) UNPACK x
 // #endif
 
-#ifdef ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__SHOW_BUILD_DATETIME
 char serverDescription[80];
 #else
 char serverDescription[40];
@@ -5799,7 +5799,7 @@ typedef enum mapping1D2D {
 
 
 
-#ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__XML_API
 
 static void extractPin(Print& settingsScript, JsonObject &obj, const char *key);
 void XML_response(Print& dest);
@@ -5917,7 +5917,7 @@ uint16_t realtimeTimeoutMs _INIT(2500);               // ms timeout of realtime 
 int arlsOffset _INIT(0);                              // realtime LED offset
 bool receiveDirect _INIT(true);                       // receive UDP realtime
 bool arlsDisableGammaCorrection _INIT(true);          // activate if gamma correction is handled by the source
-#ifdef ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION_ON_PULSAR_PALETTES
+#ifdef ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
 bool frame_use_gamma_correction = true;
 #endif
 bool arlsForceMaxBri _INIT(false);                    // enable to force max brightness if source has very dark colors that would be black
@@ -6261,10 +6261,10 @@ void EverySecond_Standby();
     #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
     uint8_t ConstructJSON_Mode_SetManual(uint8_t json_level = 0, bool json_appending = true); // probably falls into the E131 type, but here set my mqtt
     #endif
-    #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+    #ifdef ENABLE_FEATURE_LIGHTING__CORE__AUTOMATION_PRESETS
     uint8_t ConstructJSON_Auto_Presets(uint8_t json_level = 0, bool json_appending = true);
     #endif 
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS 
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX 
     uint8_t ConstructJSON_Matrix(uint8_t json_level = 0, bool json_appending = true);
     #endif
     /**
@@ -6307,13 +6307,13 @@ void EverySecond_Standby();
       #ifdef ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
       struct telemetry_handler<mAnimatorLight> telemetry_manual_setpixel;
       #endif
-      #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+      #ifdef ENABLE_FEATURE_LIGHTING__CORE__AUTOMATION_PRESETS
       struct telemetry_handler<mAnimatorLight> telemetry_automation_presets;
       #endif
       #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
       struct telemetry_handler<mAnimatorLight> telemetry_automation_playlists;
       #endif
-      #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS 
+      #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX 
       struct telemetry_handler<mAnimatorLight> telemetry_matrix_teleperiod;
       #endif
       /**
@@ -6353,7 +6353,7 @@ void EverySecond_Standby();
 
 };
 
-#ifdef ENABLE_FEATURE_LIGHTS__GLOBAL_ANIMATOR_LIGHT_CLASS_ACCESS
+#ifdef ENABLE_FEATURE_LIGHTING__ANIMATOR__GLOBAL_LIGHT_ACCESS
 // Extern declaration of the global instance
 extern mAnimatorLight* tkr_extern_lAni;  // global instance of the mAnimatorLight class for performance reasons
 #endif

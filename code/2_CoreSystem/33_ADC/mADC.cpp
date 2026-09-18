@@ -38,7 +38,7 @@ int8_t mADC::Tasker(uint8_t function, JsonParserObject obj)
   //     #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_FIVE_SECONDS
   //   break;
   //   case TASK_EVERY_MINUTE:
-  //     // #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA // This will in the future only occur once an hour, or before planned boot
+  //     // #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA // This will in the future only occur once an hour, or before planned boot
   //     #ifdef ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE
   //     SystemTask__Execute_Module_Data_Save();
   //     #endif // ENABLE_DEVFEATURE_STORAGE__SAVE_TRIGGER_EVERY_MINUTE

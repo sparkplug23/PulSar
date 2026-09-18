@@ -18,7 +18,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
       server = new AsyncWebServer(80);
 
       #ifndef ESP8266
-      #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+      #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
       websocket_console = new AsyncWebSocket("/ws/console");
       websocket_console->onEvent(
         [this](AsyncWebSocket *server,
@@ -34,7 +34,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
       AddURLtoList("/ws/console", HTTP_GET);
       #endif
       #endif
-      #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+      #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
       websocket_pages = new AsyncWebSocket("/ws/page");
       websocket_pages->onEvent(
         [this](AsyncWebSocket *server,
@@ -112,7 +112,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
       #endif
 
       #ifndef ESP8266
-      #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+      #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
       handleConsoleWs();
       #endif
       #endif
@@ -123,7 +123,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_EVERY_SECOND:
 
 
-      #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+      #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
       if(websocket_pages){
         websocket_pages->cleanupClients();
       }
@@ -194,12 +194,12 @@ void mWebServer::Server_Start()
   createEditHandler(true);
   
   #ifndef ESP8266
-  #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
   server->addHandler(websocket_console);
   #endif
   #endif
 
-  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
   if(websocket_pages){
     server->addHandler(websocket_pages);
   }
@@ -287,7 +287,7 @@ void mWebServer::WebPage_Root_AddHandlers()
   AddURLtoList(PM_URL_SKIN_CSS, HTTP_GET);
 
 
-  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
 
   SPGM_CTR(PM_URL_FAVICON_ICO) "/favicon.ico";
   server->on(PM_URL_FAVICON_ICO, HTTP_GET, [this](AsyncWebServerRequest* request){
@@ -387,7 +387,7 @@ void mWebServer::WebPage_Root_AddHandlers()
   server->on(PM_URL_CONSOLE, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_Console_WebSocket(request); });
   AddURLtoList(PM_URL_CONSOLE, HTTP_GET);
 
-    #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
 
     SPGM_CTR(PM_URL_CONSOLE_POLL) "/console_poll";
     server->on(PM_URL_CONSOLE_POLL, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_Console_Poll(request); });
@@ -405,7 +405,7 @@ void mWebServer::WebPage_Root_AddHandlers()
    * SettingsPages_GET/POST inspect request->url() and select WebSettingsSubPage.
    **************************************************************************************************/
 
-  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
 
   SPGM_CTR(PM_URL_SETTINGS2) "/settings";
   server->on(PM_URL_SETTINGS2, HTTP_GET, [this](AsyncWebServerRequest* request){ SettingsPages_GET(request); });
@@ -429,7 +429,7 @@ void mWebServer::WebPage_Root_AddHandlers()
    * Captive portal OS detection
    **************************************************************************************************/
 
-  #ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
 
   SPGM_CTR(PM_URL_HOTSPOT_DETECT) "/hotspot-detect.html";
   server->on(PM_URL_HOTSPOT_DETECT, HTTP_GET, [this](AsyncWebServerRequest* request){
@@ -471,7 +471,7 @@ void mWebServer::WebPage_Root_AddHandlers()
    * MUST come after every /adv/... child route.
    **************************************************************************************************/
 
-  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
 
   SPGM_CTR(PM_URL_ADV) "/adv";
   server->on(PM_URL_ADV, HTTP_GET, [this](AsyncWebServerRequest* request){
@@ -488,7 +488,7 @@ void mWebServer::WebPage_Root_AddHandlers()
    * "/" is the broadest route and therefore belongs near the end.
    **************************************************************************************************/
 
-  #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
 
   SPGM_CTR(PM_URL_ROOT) "/";
   server->on(PM_URL_ROOT, HTTP_GET, [this](AsyncWebServerRequest* request){
@@ -518,7 +518,7 @@ void mWebServer::WebPage_Root_AddHandlers()
     }
 
     #ifdef USE_MODULE_LIGHTS_ANIMATOR
-    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
     if(tkr_anim->handle__HTTP__GET_QueryAPI(request, request->url())) return;
     #endif
     #endif

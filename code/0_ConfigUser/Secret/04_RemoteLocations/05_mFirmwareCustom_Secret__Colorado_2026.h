@@ -293,7 +293,7 @@
 
   // 
   // 
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
   //  // until devices can reliably be used without compiling per device
   // 
       
@@ -1119,7 +1119,7 @@ R"=====(
 
   // 
   // 
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
   //  // until devices can reliably be used without compiling per device
   // 
       
@@ -1500,7 +1500,7 @@ R"=====(
 
   // 
   // 
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
   //  // until devices can reliably be used without compiling per device
   // 
       
@@ -1878,7 +1878,7 @@ R"=====(
 
   // 
   // 
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
   //  // until devices can reliably be used without compiling per device
   // 
       
@@ -2514,7 +2514,7 @@ R"=====(
 
   // 
   // 
-  // #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  // #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
   //  // until devices can reliably be used without compiling per device
   // 
       
@@ -2912,7 +2912,7 @@ R"=====(
   #define SETTINGS_HOLDER 1239
 
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
@@ -2954,11 +2954,11 @@ R"=====(
     /********* Group: Testing ************************/
       // Phase out
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     /********* Group: Debug options only ************************/
     // #define ENABLE_DEBUG_LINE_HERE
     #define ENABLE_DEBUG_SERIAL    
@@ -2968,16 +2968,16 @@ R"=====(
   // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
   // #define ENABLE_NEOPIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
 
-    #define ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+    #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
 
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
@@ -3137,7 +3137,7 @@ R"=====(
 
   
   
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
   
       
@@ -3293,7 +3293,7 @@ R"=====(
 
   
   
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
   
       
@@ -3484,7 +3484,7 @@ R"=====(
 
   
   
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
   
       
@@ -3633,7 +3633,7 @@ R"=====(
 
   
   
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
   
       
@@ -3830,7 +3830,7 @@ R"=====(
   #define SETTINGS_HOLDER 1239
 
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
@@ -3872,11 +3872,11 @@ R"=====(
     /********* Group: Testing ************************/
       // Phase out
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     /********* Group: Debug options only ************************/
     // #define ENABLE_DEBUG_LINE_HERE
     #define ENABLE_DEBUG_SERIAL    
@@ -3889,12 +3889,12 @@ R"=====(
     
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
@@ -3943,7 +3943,7 @@ R"=====(
   
 
   // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
- #define ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+ #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
 
   #define ENABLE_BUSCONFIG_OPTION_01
 
@@ -4366,7 +4366,7 @@ R"=====(
   #define SETTINGS_HOLDER 1239
 
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
@@ -4397,9 +4397,9 @@ R"=====(
    * SECTION: Lighting Configs
   ************************************/  
 
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   
   
 
@@ -4413,25 +4413,25 @@ R"=====(
     /********* Group: Testing ************************/
       // Phase out
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     /********* Group: Debug options only ************************/
     // #define ENABLE_DEBUG_LINE_HERE
     #define ENABLE_DEBUG_SERIAL    
 
 
-// #define ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+// #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS  
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX  
     #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
-    #define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D
-    #define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
     
     #define ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP  
-    #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+    #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
     // #define ENABLE_DEVFEATURE_LIGHT__MATRIX_LOAD_PALETTE_PATCH_IN_WEBUI_PALETTE_CHANGE
   
   
@@ -4452,12 +4452,12 @@ R"=====(
     
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
@@ -4493,7 +4493,7 @@ R"=====(
 
   // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
 
-#define ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+#define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
 
   #define ENABLE_BUSCONFIG_OPTION_01
 

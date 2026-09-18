@@ -2,7 +2,7 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-#ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__XML_API
 
 
 /*
@@ -171,7 +171,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
 
   if (subPage == SUBPAGE_MENU)
   {
-  #ifndef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS // include only if 2D is not compiled in
+  #ifndef ENABLE_FEATURE_LIGHTING__2D_MATRIX // include only if 2D is not compiled in
     settingsScript.print(F("gId('2dbtn').style.display='none';"));
   #endif
   #ifdef ENABLE_FEATURE_LIGHTING__DMX // include only if DMX is enabled
@@ -278,7 +278,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
   if (subPage == SUBPAGE_LEDS)
   {
     
-    #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_LEDS
 
     appendGPIOinfo(settingsScript);
 
@@ -409,7 +409,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
 #endif    
     printSetFormCheckbox(settingsScript,PSTR("MSO"),!irApplyToAllSelected);
 
-    #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
+    #endif // ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_LEDS
   }
 
   if (subPage == SUBPAGE_UI)
@@ -420,7 +420,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
 
   if (subPage == SUBPAGE_SYNC)
   {
-    #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_SYNC
 
     printSetFormValue(settingsScript,PSTR("UP"),udpPort);
     printSetFormValue(settingsScript,PSTR("U2"),udpPort2);
@@ -562,7 +562,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
       // }
     }
 
-    #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
+    #endif // ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_SYNC
   }
 
   if (subPage == SUBPAGE_SEC)
@@ -647,7 +647,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
   if (subPage == SUBPAGE_2D) // 2D matrices
   {
     printSetFormValue(settingsScript,PSTR("SOMP"),isMatrix);
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     settingsScript.printf_P(PSTR("maxPanels=%d;resetPanels();"),WLED_MAX_PANELS);
     if (isMatrix) {
       if(panels>0){
@@ -680,5 +680,5 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
 }
 
 
-#endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS
+#endif // ENABLE_FEATURE_LIGHTING__WEBUI__XML_API
 #endif

@@ -205,12 +205,12 @@ void WiFi_Wps_StatusCallback(wps_cb_status status);
  * @brief This method allows the storage to be loaded, but will always then load templates and override anything from settings
  *        to make sure the device starts in a known state. This will make sure SSID etc are loaded 
  */
-#ifdef ENABLE_FEATURE_FIRMWAREDEFAULT__LOAD_WITH_TEMPLATES_OVERRIDE
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PERSISTENT_CONFIG
 
   #define USE_MODULE_CORE_FILESYSTEM
     
 
-#endif // ENABLE_FEATURE_FIRMWAREDEFAULT__LOAD_WITH_TEMPLATES_OVERRIDE
+#endif // ENABLE_FEATURE_LIGHTING__CORE__PERSISTENT_CONFIG
 
 
 /**

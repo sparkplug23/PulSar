@@ -82,12 +82,12 @@ Summary
     For example: http://IP/?key1=value1&key2=value2 sends key1 and key2 with their respective values to the server.
  * 
  */
-#ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__URL_QUERY_SETTINGS
 /*
  * Receives client input
  */
 
-  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
 //called upon POST settings form submit
 void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage)
 {
@@ -792,7 +792,7 @@ void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, by
     #endif // ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_UM
   }
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   //2D panels
   if (subPage == SUBPAGE_2D)
   {

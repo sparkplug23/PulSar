@@ -161,9 +161,9 @@
    * SECTION: Lighting Configs
   ************************************/  
 
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   
 
   
@@ -172,12 +172,12 @@
 
 
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
   
@@ -202,23 +202,23 @@
   /********* Group: Testing ************************/
     // Phase out
   #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   /********* Group: Debug options only ************************/
   // #define ENABLE_DEBUG_LINE_HERE
   #define ENABLE_DEBUG_SERIAL    
  
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
@@ -398,9 +398,9 @@
    * SECTION: Lighting Configs
   ************************************/  
 
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   
 
   
@@ -411,12 +411,12 @@
 
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
   
@@ -440,23 +440,23 @@
   /********* Group: Testing ************************/
     // Phase out
   #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   /********* Group: Debug options only ************************/
   // #define ENABLE_DEBUG_LINE_HERE
   #define ENABLE_DEBUG_SERIAL    
  
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
@@ -607,7 +607,7 @@
   #define SETTINGS_HOLDER 1239
 
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
@@ -624,9 +624,9 @@
    * SECTION: Lighting Configs
   ************************************/  
 
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   
   
 
@@ -640,11 +640,11 @@
     /********* Group: Testing ************************/
       // Phase out
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     /********* Group: Debug options only ************************/
     // #define ENABLE_DEBUG_LINE_HERE
     #define ENABLE_DEBUG_SERIAL    
@@ -657,12 +657,12 @@
     
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
@@ -927,7 +927,7 @@
 
   
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
@@ -943,9 +943,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
 //////////////////////////////////////// START OF BASE CODE
 // DOING THIS DIRECT TO MAKE SURE BUILDS REMAIN PREDICTABLE, SO AVOID ANY DEFAULT BASE BUILD
@@ -999,9 +999,9 @@
    * SECTION: Lighting Configs
   ************************************/  
 
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   
   
 
@@ -1016,11 +1016,11 @@
     /********* Group: Testing ************************/
       // Phase out
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     /********* Group: Debug options only ************************/
     // #define ENABLE_DEBUG_LINE_HERE
     #define ENABLE_DEBUG_SERIAL    
@@ -1034,12 +1034,12 @@
     
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
@@ -1612,7 +1612,7 @@
  
   #define SETTINGS_HOLDER 1239
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
@@ -1629,9 +1629,9 @@
    * SECTION: Lighting Configs
   ************************************/  
 
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   
   
 
@@ -1645,11 +1645,11 @@
     /********* Group: Testing ************************/
       // Phase out
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     /********* Group: Debug options only ************************/
     // #define ENABLE_DEBUG_LINE_HERE
     #define ENABLE_DEBUG_SERIAL    
@@ -1662,12 +1662,12 @@
     
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
@@ -2015,9 +2015,9 @@
    * SECTION: Lighting Configs
   ************************************/  
 
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   
 
   
@@ -2028,12 +2028,12 @@
 
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
   
@@ -2058,23 +2058,23 @@
   /********* Group: Testing ************************/
     // Phase out
   #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   /********* Group: Debug options only ************************/
   // #define ENABLE_DEBUG_LINE_HERE
   #define ENABLE_DEBUG_SERIAL    
  
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
@@ -2261,9 +2261,9 @@
    * SECTION: Lighting Configs
   ************************************/  
 
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   
 
   
@@ -2274,12 +2274,12 @@
 
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
   
@@ -2303,23 +2303,23 @@
   /********* Group: Testing ************************/
     // Phase out
   #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   /********* Group: Debug options only ************************/
   // #define ENABLE_DEBUG_LINE_HERE
   #define ENABLE_DEBUG_SERIAL    
  
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
@@ -2503,7 +2503,7 @@
   #define SETTINGS_HOLDER 1239
 
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
@@ -2520,8 +2520,8 @@
    * SECTION: Lighting Configs
   ************************************/  
 
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
   // #define ENABLE
 
   
@@ -2534,11 +2534,11 @@
     /********* Group: Testing ************************/
       // Phase out
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     /********* Group: Debug options only ************************/
     // #define ENABLE_DEBUG_LINE_HERE
     #define ENABLE_DEBUG_SERIAL    
@@ -2551,12 +2551,12 @@
     
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
@@ -2895,7 +2895,7 @@
 
   
   
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
   
       
@@ -3333,7 +3333,7 @@
 
   
   
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
   
       
@@ -4307,9 +4307,9 @@
    * SECTION: Lighting Configs
   ************************************/  
 
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   
 
   
@@ -4317,12 +4317,12 @@
 
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
   
@@ -4346,23 +4346,23 @@
   /********* Group: Testing ************************/
     // Phase out
   #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   /********* Group: Debug options only ************************/
   // #define ENABLE_DEBUG_LINE_HERE
   #define ENABLE_DEBUG_SERIAL    
  
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
@@ -4563,9 +4563,9 @@
    * SECTION: Lighting Configs
   ************************************/  
 
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   
 
   
@@ -4574,12 +4574,12 @@
 
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
   
@@ -4602,23 +4602,23 @@
   /********* Group: Testing ************************/
     // Phase out
   #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   /********* Group: Debug options only ************************/
   // #define ENABLE_DEBUG_LINE_HERE
   #define ENABLE_DEBUG_SERIAL    
  
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
@@ -4756,7 +4756,7 @@
 
   
   
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
   
 

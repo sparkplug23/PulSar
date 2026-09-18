@@ -611,7 +611,7 @@
 
  
  
- #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+ #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
   // until devices can reliably be used without compiling per device
  
      
@@ -1384,7 +1384,7 @@
 
  
  
- #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+ #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
   // until devices can reliably be used without compiling per device
  
      
@@ -1937,11 +1937,11 @@ new 26GHz radar sensor
 
   #ifdef ENABLE_TEMPLATE_SECTION__LIGHTING
 
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_EXTERNAL_MODULE_CONTROL
 
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC_HEATMAPS
     // #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_NO_GRADIENT

@@ -5,7 +5,7 @@
 #pragma once
 
 
-#ifdef ENABLE_FEATURE_JSON__ASYNCJSON_V6
+#if defined(ENABLE_FEATURE_JSON__ASYNCJSON_V6) || defined (USE_MODULE_CORE__JSON_ARDUINO)
 
 
 #ifdef __cplusplus

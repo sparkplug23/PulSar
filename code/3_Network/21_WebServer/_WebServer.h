@@ -28,7 +28,7 @@
 
 #include "mWebUrlTracker.h" // Must be included so #else blanks are inserted
 
-// #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+// #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
 
 const char PM_WEB_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html";
 const char PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT[] PROGMEM = "text/javascript";
@@ -201,7 +201,7 @@ public mTaskerInterface{
     void WebUI_AddIndicator(uint8_t device_id, const char* name, bool state);
 
     #endif // ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
-    #ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
 
     AsyncWebSocket* websocket_pages = nullptr;
 
@@ -231,7 +231,7 @@ AsyncWebHandler *editHandler = nullptr;
 
 
   #ifndef ESP8266
-    #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
 
     void HandlePage_Console_WebSocket(AsyncWebServerRequest *request);
 
@@ -466,7 +466,7 @@ bool HttpCheckPriviledgedAccess();
     void WebPage_Root_AddHandlers();
     
     
-    #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
     void HandlePage_Console_Poll(AsyncWebServerRequest *request);
     void HandleConsoleRefresh(AsyncWebServerRequest *request);
     #endif

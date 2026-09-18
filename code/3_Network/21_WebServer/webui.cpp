@@ -130,7 +130,7 @@ class WebUIStringPrint : public Print
 };
 
 
-#ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
 bool mWebServer::WebSocket_SendControls(AsyncWebSocketClient* client)
 {
   if(!client) return false;

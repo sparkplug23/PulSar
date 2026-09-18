@@ -21,6 +21,18 @@
  * - Plan on 3000 lights again, perhaps test up to 4000 for FPS but expect not going to work. This is where more 20cm spaced lights would be ideal.
  * 
  * 
+ * hub75 over
+ * esp32s3
+ * make 3 esp32s3 little boards, with the 5v green pebbles leds
+ * ideally figure out the proper "decimate hardware" where I can view 4000 pixels, but only seeing the 100.
+ * I will want to compare normal esp32 running and esp32s3 running same playlists, ideally get python to log FPS (poll state mid preset run) and save to a json file on computer, just do with mqtt commands (ie make a get, save response). This will let me test lots of types of hardware for xmas26
+ * 
+ * 
+ * before going
+ * need to make X16 esp32s3 boards, probably aim for 3 (all outdoor trees)
+ * 
+ * 
+ * 
  */
 
 
@@ -97,7 +109,7 @@
   
   #define ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
 
-  #define ENABLE_PIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
+  #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16
 
   
   #ifdef ENABLE_BUSCONFIG_8X_TEST_OUTPUTS

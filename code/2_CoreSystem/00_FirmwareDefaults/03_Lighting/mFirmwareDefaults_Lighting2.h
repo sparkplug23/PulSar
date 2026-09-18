@@ -258,67 +258,61 @@
 #endif
 
 
-
 /**
  * ============================================================================
  * SECTION 4
  * GENERAL EFFECT PACKS
  * ============================================================================
  *
- * IMPORTANT:
- *
- * THESE PACKS ARE INDEPENDENT.
+ * Effect packs are independent and may be combined freely.
  *
  * LEVEL4 DOES NOT ENABLE LEVEL1, LEVEL2 OR LEVEL3.
  *
- * This makes it possible to:
+ * If no general effect pack is explicitly selected, the default is:
  *
- *   - test one effect pack in isolation
- *   - minimise flash use
- *   - construct purpose-specific firmware
+ *   LEVEL1_MINIMAL_HOME
+ *   LEVEL2_FLASHING_BASIC
  *
  * ============================================================================
  */
 
-
-/**
- * Experimental/development effects.
- */
-// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT // replaces ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING
-
-
-/**
- * Minimal/static/general household effects.
- */
-// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME // replaces ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
 
 
-/**
- * Basic animated/flashing effects.
- */
-// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC // replaces ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
+// Primary desired amount included
+#ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_DEFAULT
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+#endif
 
 
-/**
- * Extended animated/seasonal effects.
- */
-// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED // replaces ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
+// Default if none are defined
+#if !defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT) && \
+    !defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME) && \
+    !defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC) && \
+    !defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED) && \
+    !defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE) && \
+    !defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM)
 
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
 
-/**
- * Additional large/general flashing effect collection.
- *
- * This is a pack name only.
- * It DOES NOT imply Levels 1-3.
- */
-// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE // replaces ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
+#endif
 
-
-/**
- * Particle-system effects.
- */
-// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM // replaces ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL5_PARTICLE_SYSTEM
-
+// If particle is added, currently this requires audiodata
+#ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+#define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+#define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+#endif
 
 
 /**
@@ -327,85 +321,21 @@
  * SPECIALISED EFFECT PACKS
  * ============================================================================
  *
- * These remain independent from the normal general effect packs.
+ * Specialised effect packs are independent from the general effect packs and
+ * may be enabled individually as required.
  *
- * EVERYTHING intentionally does NOT enable every specialised effect because
- * some require application-specific hardware, modules or configuration.
- * ============================================================================
- */
-
-
-/**
- * Visual hardware / bus / pixel testing effects.
- */
-// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING // replaces ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
-
-
-/**
- * Effects whose state/data is driven directly from another PulSar module.
- */
-// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_EXTERNAL_MODULE_CONTROL // replaces ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
-
-
-/**
- * Solar-position based effects.
- */
-// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION // replaces ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
-
-
-/**
- * LED / seven-segment clock effects.
- */
-// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK // replaces ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-
-
-/**
- * Christmas multifunction-controller effects.
- */
-// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_CHRISTMAS_CONTROLLER // replaces ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
-
-
-/**
- * Border / wallpaper effects.
- */
-// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_BORDER_WALLPAPERS // replaces ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__BORDER_WALLPAPERS
-
-
-/**
- * Notification effects.
- */
-// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_NOTIFICATIONS // replaces ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__NOTIFICATIONS
-
-
-
-/**
- * ============================================================================
- * SECTION 6
- * EVERYTHING PROFILE EFFECT SELECTION
- * ============================================================================
+ * There is no specialised-effect fallback/default.
  *
- * General effect levels remain independent everywhere else.
- *
- * EVERYTHING explicitly requests each one because that is the purpose of the
- * EVERYTHING profile.
  * ============================================================================
  */
 
-
-#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__EVERYTHING
-
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
-
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
-
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
-
-#endif
-
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_EXTERNAL_MODULE_CONTROL
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_CHRISTMAS_CONTROLLER
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_BORDER_WALLPAPERS
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_NOTIFICATIONS
 
 
 /**
@@ -421,11 +351,11 @@
   /**
    * Core lighting engine.
    */
-  #define ENABLE_FEATURE_LIGHTING__CORE__INTERFACE // replaces USE_MODULE_LIGHTS_INTERFACE
+  #define USE_MODULE_LIGHTS_INTERFACE
 
-  #define ENABLE_FEATURE_LIGHTING__CORE__ANIMATOR // replaces USE_MODULE_LIGHTS_ANIMATOR
+  #define USE_MODULE_LIGHTS_ANIMATOR
 
-  #define ENABLE_FEATURE_LIGHTING__CORE__EFFECT_ENGINE // replaces ENABLE_FEATURE_LIGHTING__EFFECTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__EFFECT_ENGINE
 
 
   /**
@@ -433,8 +363,7 @@
    */
   #ifndef DISABLE_FILESYSTEM
 
-    #define ENABLE_FEATURE_LIGHTING__CORE__FILESYSTEM
-    // replaces USE_MODULE_CORE_FILESYSTEM
+    #define USE_MODULE_CORE_FILESYSTEM
 
   #endif
 
@@ -462,29 +391,20 @@
   /**
    * Core feature infrastructure.
    */
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__AUTOMATION_PRESETS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PERSISTENT_CONFIG
+  #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
+  #define ENABLE_FEATURE_LIGHTING__CORE__GAMMA_CORRECTION
 
-  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS // replaces ENABLE_FEATURE_LIGHTS__PRESETS
-
-  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS // replaces ENABLE_FEATURE_LIGHTS__PLAYLISTS
-
-  #define ENABLE_FEATURE_LIGHTING__CORE__AUTOMATION_PRESETS // replaces ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-
-  #define ENABLE_FEATURE_LIGHTING__CORE__ASYNC_JSON // replaces ENABLE_FEATURE_JSON__ASYNCJSON_V6
-
-  #define ENABLE_FEATURE_LIGHTING__CORE__PERSISTENT_CONFIG // replaces ENABLE_FEATURE_FIRMWAREDEFAULT__LOAD_WITH_TEMPLATES_OVERRIDE
-
-  #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION // replaces ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
-
-  #define ENABLE_FEATURE_LIGHTING__CORE__GAMMA_CORRECTION // replaces ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
-
+  #define USE_MODULE_CORE__JSON_ARDUINO
 
   /**
    * Preset / playlist support.
    */
-
-  #define ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA // replaces ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
-
-  #define ENABLE_FEATURE_LIGHTING__PLAYLISTS__PRIMARY_JSON_COMMANDS // replaces ENABLE_FEATURE_LIGHTS__PLAYLISTS_INCLUDE_PRIMARY_JSON_COMMANDS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
+  #define ENABLE_FEATURE_LIGHTING__PLAYLISTS__PRIMARY_JSON_COMMANDS
 
 
   /**
@@ -492,13 +412,8 @@
    */
 
   #ifndef DISABLE_FILESYSTEM
-
     #define ENABLE_FEATURE_LIGHTING__FILESYSTEM__TIMESTAMP_SAVED_FILES
-    // replaces ENABLE_FEATURE_FILESYSTEM__ADD_TIMESTAMP_ON_SAVE_FILES
-
     #define ENABLE_FEATURE_LIGHTING__FILESYSTEM__LOAD_MODULE_CONFIG_ON_BOOT
-    // replaces ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-
   #endif
 
 
@@ -506,21 +421,21 @@
    * Colour processing.
    */
 
-  #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES // replaces ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION_ON_PULSAR_PALETTES
+  #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
 
 
   /**
    * Animator access.
    */
 
-  #define ENABLE_FEATURE_LIGHTING__ANIMATOR__GLOBAL_LIGHT_ACCESS // replaces ENABLE_FEATURE_LIGHTS__GLOBAL_ANIMATOR_LIGHT_CLASS_ACCESS
+  #define ENABLE_FEATURE_LIGHTING__ANIMATOR__GLOBAL_LIGHT_ACCESS
 
 
   /**
    * Existing stable optimisation.
    */
 
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__CHRISTMAS_PRECOMPUTE_POWF // replaces ENABLE_FEATURE_LIGHTING__CHRISTMAS_EFFECT_PRECOMPUTE_POWF_INTO_COLOURDATA_BUFFER
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__CHRISTMAS_PRECOMPUTE_POWF
 
 
   /**
@@ -530,7 +445,7 @@
    * handling is cleaned up.
    */
 
-  #define ENABLE_FEATURE_LIGHTING__ANIMATOR__REQUIRE_BRIGHTNESS_PHASE true // replaces PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
+  #define PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE true
 
 #endif
 
@@ -554,9 +469,7 @@
 
 #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
 
-  #define ENABLE_FEATURE_LIGHTING__MATRIX__CORE // replaces ENABLE_FEATURE_LIGHTING__2D_MATRIX
-
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__2D // replaces ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
 
 #endif
 
@@ -589,7 +502,7 @@
 
   #define ENABLE_FEATURE_LIGHTING__AUDIO__CORE
 
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D // replaces ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
 
 
   /**
@@ -601,15 +514,11 @@
    * Once audio reactive becomes a normal part of the lighting subsystem this
    * extra gate should disappear entirely.
    */
-
-  #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION // replaces ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+  #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
 
 
   #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
-
     #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
-    // replaces ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D
-
   #endif
 
 #endif
@@ -667,12 +576,9 @@
 
 
 // #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__NONE
-
 // #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__MINIMAL
-
 // #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__NORMAL
-
-// #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
+#define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
 
 
 
@@ -722,7 +628,7 @@
     defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__NORMAL) || \
     defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED)
 
-  #define ENABLE_FEATURE_LIGHTING__WEBUI__CORE // replaces ENABLE_FEATURE_LIGHTING__WEBUI
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__CORE
 
   #define USE_MODULE_NETWORK_WEBSERVER
 
@@ -734,14 +640,10 @@
     defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED)
 
   #define ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS
-
-  #define ENABLE_FEATURE_LIGHTING__WEBUI__XML_API // replaces ENABLE_FEATURE_LIGHTING__XML_REQUESTS
-
-  #define ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_LEDS // replaces ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
-
-  #define ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_SYNC // replaces ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
-
-  #define ENABLE_FEATURE_LIGHTING__WEBUI__URL_QUERY_SETTINGS // replaces ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__XML_API
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_LEDS
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_SYNC
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__URL_QUERY_SETTINGS
 
 #endif
 
@@ -749,15 +651,11 @@
 
 #ifdef FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
 
-  #define ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES // replaces ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
-
-  #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING // replaces ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
-
-  #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET // replaces ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-
-  #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL // replaces ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
-
-  #define ENABLE_FEATURE_LIGHTING__WEBUI__SHARED_STYLES // replaces ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__SHARED_STYLES
 
 #endif
 
@@ -765,121 +663,80 @@
 
 #if !defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__NONE)
 
-  #define ENABLE_FEATURE_LIGHTING__WEBUI__SHOW_BUILD_DATETIME // replaces ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__SHOW_BUILD_DATETIME
 
 #endif
-
 
 
 /**
  * ============================================================================
  * SECTION 13
- * PIXEL BUS OUTPUT POLICY
+ * PIXEL BUS OUTPUT METHODS
  * ============================================================================
  *
- * These are allocation PRIORITIES.
+ * These define the output allocation method used by the lighting bus wrapper.
  *
- * They do NOT mean that only one output peripheral is permitted.
+ * Only one should normally be enabled.
  *
+ * AUTO_PARALLEL
+ * -------------
+ * Starts with the normal individual-output arrangement, but automatically
+ * decides whether parallel output should be used from the configured bus count
+ * and output size.
  *
- * AUTO
- * ----
- *
- * Architecture-aware/default policy.
- *
- * The bus wrapper decides the preferred combination based on:
- *
- *   - ESP target
- *   - output count
- *   - available RMT channels
- *   - I2S/LCD capability
- *   - parallel-output suitability
+ * When parallel output is selected:
+ *   <= 8 outputs  -> X8 parallel
+ *   <= 16 outputs -> X16 parallel
  *
  *
  * I2S_THEN_RMT
  * ------------
- *
- * Prefer individual I2S-capable outputs first, then use RMT for additional
- * outputs where appropriate.
+ * Use the individual I2S outputs first, followed by RMT outputs.
  *
  *
  * RMT_THEN_I2S
  * ------------
- *
- * Prefer RMT first, then use I2S-capable outputs when required.
- *
- *
- * PARALLEL_8_PREFERRED
- * --------------------
- *
- * Prefer an 8-channel parallel implementation where output topology and target
- * support make that appropriate.
- *
- * Other methods may still be used when required.
+ * Use the available RMT outputs first, followed by individual I2S outputs.
  *
  *
- * PARALLEL_16_PREFERRED
- * ---------------------
- *
- * Prefer a 16-channel parallel implementation where supported and appropriate.
- *
- * Other methods may still be used when required.
+ * PARALLEL_X8
+ * -----------
+ * Explicit X8 parallel output method.
  *
  *
- * Exactly one policy should normally be active.
+ * PARALLEL_X16
+ * ------------
+ * Explicit X16 parallel output method.
  * ============================================================================
  */
 
-
-// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__AUTO // replaces ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
-
-
-// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__I2S_THEN_RMT // replaces ENABLE_PIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
-
-
-// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__RMT_THEN_I2S // replaces ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT
+// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S
+// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
+// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X8
+// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16
 
 
-// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__PARALLEL_8_PREFERRED // replaces ENABLE_PIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+#if (defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT) + \
+     defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S) + \
+     defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO) + \
+     defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X8) + \
+     defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16)) > 1
 
-
-// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__PARALLEL_16_PREFERRED // replaces ENABLE_PIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
-
-
-// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__RMT_PRIMARY // replaces ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
-
-
-
-/**
- * Default policy.
- */
-
-
-#if !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__AUTO) && \
-    !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__I2S_THEN_RMT) && \
-    !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__RMT_THEN_I2S) && \
-    !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__PARALLEL_8_PREFERRED) && \
-    !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__PARALLEL_16_PREFERRED) && \
-    !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__RMT_PRIMARY)
-
-  #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__AUTO
+  #error "Only one ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__xxx may be selected"
 
 #endif
 
+#if !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT) && \
+    !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S) && \
+    !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO) && \
+    !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X8) && \
+    !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16)
 
-
-#if (defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__AUTO) + \
-     defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__I2S_THEN_RMT) + \
-     defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__RMT_THEN_I2S) + \
-     defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__PARALLEL_8_PREFERRED) + \
-     defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__PARALLEL_16_PREFERRED) + \
-     defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__RMT_PRIMARY)) > 1
-
-  #error "Only one ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_POLICY__xxx may be selected"
+  // Fallback to default
+  #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT
 
 #endif
-
-
 
 /**
  * ============================================================================
@@ -931,7 +788,6 @@
    */
 
   #define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR
-
   #define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
 
 
@@ -939,36 +795,32 @@
    * Playlist development.
    */
 
-  #define ENABLE_FEATURE_LIGHTING__PLAYLISTS__LOAD_BY_NAME // replaces ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_NAME_BASED_LOADING
-
-  #define ENABLE_FEATURE_LIGHTING__PLAYLISTS__AUTOGENERATE_ID_LIST // replaces ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_BY_NAME_AUTOGENERATE_ID_LIST
+  #define ENABLE_FEATURE_LIGHTING__PLAYLISTS__LOAD_BY_NAME
+  #define ENABLE_FEATURE_LIGHTING__PLAYLISTS__AUTOGENERATE_ID_LIST
 
 
   /**
    * Preset development.
    */
 
-  #define ENABLE_FEATURE_LIGHTING__PRESETS__DEBUG // replaces ENABLE_FEATURE_LIGHTS__PRESETS_DEBUG
-
-  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE // replaces ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__DEBUG
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
 
 
   /**
    * Settings/persistence development.
    */
 
-  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_AFTER_SUCCESSFUL_BOOT_TEST // replaces ENABLE_DEVFEATURE_SETTINGS__SAVE_SETTINGS_ON_SUCCESFUL_BOOT__THEN_SPLASH_ON_REBOOT_PRIOR_TO_DEFAULT_LOAD_FOR_SAVE_TESTING
-
-  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA // replaces ENABLE_DEVFEATURE__SAVE_MODULE_DATA
-
-  #define ENABLE_FEATURE_LIGHTING__CORE__DATABUFFER_LOCK // replaces ENABLE_FEATURE__DATABUFFER_LOCK
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_AFTER_SUCCESSFUL_BOOT_TEST
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__CORE__DATABUFFER_LOCK
 
 
   /**
    * Temporary RGBWW / white-output workaround.
    */
 
-  #define ENABLE_FEATURE_LIGHTING__OUTPUT__SUPPRESS_WHITE // replaces ENABLE_DEVFEATURE_LIGHTING__SUPPRESS_WHITE_OUTPUT
+  #define ENABLE_FEATURE_LIGHTING__OUTPUT__SUPPRESS_WHITE
 
 
   /**
@@ -1140,37 +992,6 @@
   #endif
 
 #endif
-
-
-
-/**
- * ============================================================================
- * SECTION 19
- * NOTES FOR SOURCE-TREE MIGRATION
- * ============================================================================
- *
- * The comments marked:
- *
- *      replaces OLD_DEFINE
- *
- * are intentional migration markers.
- *
- * Migration process:
- *
- *   1. adopt this file
- *   2. compile one device/profile at a time
- *   3. find OLD_DEFINE through the source tree
- *   4. replace with the new define
- *   5. remove the corresponding "replaces" comment
- *   6. continue until no old lighting feature names remain
- *
- * There is deliberately NO legacy compatibility alias layer in this file.
- *
- * This avoids creating another temporary configuration architecture that would
- * itself later need to be removed.
- *
- * ============================================================================
- */
 
 
 #endif // _FIRMWARE_DEFAULTS__LIGHTING2_H_

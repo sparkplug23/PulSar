@@ -81,7 +81,7 @@ void mAnimatorLight::serializeSegment(JsonObject& root, mAnimatorLight::Segment&
   root["sel"] = seg.isSelected();
   root["rev"] = seg.reverse;
   root["mi"]  = seg.mirror;
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (isMatrix) {
     root["rY"] = seg.reverse_y;
     root["mY"] = seg.mirror_y;
@@ -112,7 +112,7 @@ void mAnimatorLight::serializeState(JsonObject root, bool forPreset, bool includ
 
     root["ps"] = (currentPreset > 0) ? currentPreset : -1;    
     
-    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+    #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
     root[F("pl")] = currentPlaylist;
     #endif
 
@@ -212,7 +212,7 @@ void mAnimatorLight::serializeInfo(JsonObject root)
   leds[F("actseg")] = getActiveSegmentsNum();
   leds[F("seglock")] = false; //might be used in the future to prevent modifications to segment config
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (isMatrix) {
     JsonObject matrix = leds.createNestedObject("matrix");
     matrix["w"] = Segment::maxWidth;
@@ -262,7 +262,7 @@ void mAnimatorLight::serializeInfo(JsonObject root)
     root[F("lip")] = realtimeIP.toString();
   }
 
-  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
   root[F("ws")] = websocket_lights->count();
   #endif
 
@@ -496,7 +496,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, uint16_t 
   // loadLedmap = root[F("ledmap")] | loadLedmap;
 
 
-  #ifdef ENABLE_FEATURE_LIGHTS__PRESETS
+  #ifdef ENABLE_FEATURE_LIGHTING__CORE__PRESETS
 
   uint16_t ps = root[F("psave")];
   if(ps > PRESET_ID_NONE && ps != PRESET_ID_TEMP) savePreset(ps, nullptr, root);
@@ -510,7 +510,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, uint16_t 
     String apireq = "win"; apireq += '&'; // reduce flash string usage
     apireq += httpwin;
     ALOG_INF(PSTR("Did I enter here 1?"));
-    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
     handle__HTTP__GET_QueryAPI(nullptr, apireq, false);    // may set stateChanged
     #endif
   }
@@ -523,7 +523,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, uint16_t 
   //   if (root["win"].isNull()) presetCycCurr = currentPreset; // otherwise it was set in handle__HTTP__GET_QueryAPI() [set.cpp]
   //   presetToRestore = currentPreset; // stateUpdated() will clear the preset, so we need to restore it after
     
-  //     #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  //     #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   //     unloadPlaylist();// applying a preset unloads the playlist, may be needed here too?
   //     #endif
       
@@ -532,7 +532,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, uint16_t 
   //   if (root["win"].isNull() && getVal(root["ps"], ps, 0, 0) && ps > 0 && ps < 251 && ps != currentPreset) {
   //     // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
   //     presetCycCurr = ps;
-  //     #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  //     #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   //     unloadPlaylist();          // applying a preset unloads the playlist
   //     #endif
   //     applyPreset(ps, callMode); // async load from file system (only preset ID was specified)
@@ -563,7 +563,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, uint16_t 
         presetCycCurr = currentPreset;
       }
 
-      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+      #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
       unloadPlaylist();
       #endif
 
@@ -586,7 +586,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, uint16_t 
     {
       presetCycCurr = ps;
 
-      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+      #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
       unloadPlaylist();
       #endif
 
@@ -596,7 +596,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, uint16_t 
   }
 
 
-  #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   JsonObject playlist = root[F("playlist")];
   if (!playlist.isNull() && loadPlaylist(playlist, presetId)) {
     //do not notify here, because the first playlist entry will do
@@ -624,7 +624,7 @@ bool  mAnimatorLight::deserializeState(JsonObject root, byte callMode, uint16_t 
   
   if (presetToRestore) currentPreset = presetToRestore;
   
-  #endif // ENABLE_FEATURE_LIGHTS__PRESETS
+  #endif // ENABLE_FEATURE_LIGHTING__CORE__PRESETS
 
   return stateResponse;
 }
@@ -1033,7 +1033,7 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
   setTargetFps(hw_led["fps"]); //NOP if 0, default 42 FPS
   CJSON(useLedsArray, hw_led[F("ld")]);
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   // 2D Matrix Settings
   JsonObject matrix = hw_led[F("matrix")];
   if (!matrix.isNull()) {
@@ -1361,7 +1361,7 @@ void mAnimatorLight::serializeConfig(JsonObject root) {
   hw_led["fps"] = getTargetFps();
   hw_led[F("rgbwm")] = Bus::getGlobalAWMode(); // global auto white mode override
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   // 2D Matrix Settings
   if (isMatrix) {
     JsonObject matrix = hw_led.createNestedObject(F("matrix"));
@@ -2042,14 +2042,14 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, uint16_t prese
     }
   }
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   bool reverse  = seg.reverse;
   bool mirror   = seg.mirror;
   #endif
   seg.selected  = elem["sel"] | seg.selected;
   seg.reverse   = elem["rev"] | seg.reverse;
   seg.mirror    = elem["mi"]  | seg.mirror;
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   bool reverse_y = seg.reverse_y;
   bool mirror_y  = seg.mirror_y;
   seg.reverse_y  = elem["rY"]  | seg.reverse_y;
@@ -2084,7 +2084,7 @@ bool mAnimatorLight::deserializeSegment(JsonObject elem, byte it, uint16_t prese
     // ALOG_INF(PSTR("elem[\"fx\"].is<const char*>() == NUMBER"));
     if (getVal(elem["fx"], fx, 0, getEffectCount())) { //load effect ('r' random, '~' inc/dec, 0-255 exact value)
       // ALOG_INF(PSTR("getVal(elem[\"fx\"], &fx, 0, getModeCount()) %d"), fx);      
-      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+      #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
       if (!presetId && currentPlaylist>=0) unloadPlaylist(); // applying a preset unloads the playlist, may be needed here too?
       #endif
       // if (fx != seg.animation_mode_id)
@@ -2261,7 +2261,7 @@ ALOG_INF(PSTR("CommandSet effect seg=%p stored=%p index=%u"), &seg, &segments[0]
 }
           
 
-#ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
 
 
 #ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
@@ -2443,7 +2443,7 @@ static bool sendNextVirtualViewSegmentPacket(AsyncWebSocketClient* client)
     uint16_t width = static_cast<uint16_t>(total_pixels > 65535U ? 65535U : total_pixels);
     uint16_t height = 1;
 
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     if (tkr_anim->isMatrix && segment.is2D())
     {
       width = segment.stop > segment.start ? segment.stop - segment.start : 0;
@@ -2904,7 +2904,7 @@ bool sendLiveLedsWs(uint32_t wsClient)
 #endif
   size_t n = ((used -1)/MAX_LIVE_LEDS_WS) +1; //only serve every n'th LED if count over MAX_LIVE_LEDS_WS
   size_t pos = 2;  // start of data
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (tkr_anim->isMatrix) {
     // ignore anything behid matrix (i.e. extra strip)
     used = mAnimatorLight::Segment::maxWidth*mAnimatorLight::Segment::maxHeight; // always the size of matrix (more or less than strip.getLengthTotal())
@@ -2923,7 +2923,7 @@ bool sendLiveLedsWs(uint32_t wsClient)
   buffer[0] = 'L';
   buffer[1] = 1; //version
 
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (tkr_anim->isMatrix) {
     buffer[1] = 2; //version
     buffer[2] = mAnimatorLight::Segment::maxWidth/n;
@@ -2934,7 +2934,7 @@ bool sendLiveLedsWs(uint32_t wsClient)
   // Serial.println("Sending live data to WS client");
   for (size_t i = 0; pos < bufSize -2; i += n)
   {
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     if (tkr_anim->isMatrix && n>1 && (i/mAnimatorLight::Segment::maxWidth)%n) i += mAnimatorLight::Segment::maxWidth * (n-1);
 #endif
 
@@ -2993,31 +2993,31 @@ void mAnimatorLight::handleWs()
 
 
 
-#ifndef ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-bool mAnimatorLight::handleFileRead(AsyncWebServerRequest* request, String path){
-  DEBUG_PRINTLN("WS FileRead: " + path);
-  DEBUG_LINE_HERE;
-  if(path.endsWith("/")) path += "index.htm";
-  DEBUG_LINE_HERE;
-  if(path.indexOf("sec") > -1) return false;
-  DEBUG_LINE_HERE;
-  String contentType = getContentType(request, path);
-  DEBUG_LINE_HERE;
-  /*String pathWithGz = path + ".gz";
-  if(FILE_SYSTEM.exists(pathWithGz)){
-    request->send(FILE_SYSTEM, pathWithGz, contentType);
-    return true;
-  }*/
-  ALOG_INF(PSTR("mAnimatorLight::handleFileReadA"));
-  if(FILE_SYSTEM.exists(path)) {
-  ALOG_INF(PSTR("mAnimatorLight::handleFileReadB"));
-    request->send(FILE_SYSTEM, path, contentType);
-    return true;
-  }
-  ALOG_INF(PSTR("mAnimatorLight::handleFileReadC"));
-  return false;
-}
-#endif// ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
+// #ifndef ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+// bool mAnimatorLight::handleFileRead(AsyncWebServerRequest* request, String path){
+//   DEBUG_PRINTLN("WS FileRead: " + path);
+//   DEBUG_LINE_HERE;
+//   if(path.endsWith("/")) path += "index.htm";
+//   DEBUG_LINE_HERE;
+//   if(path.indexOf("sec") > -1) return false;
+//   DEBUG_LINE_HERE;
+//   String contentType = getContentType(request, path);
+//   DEBUG_LINE_HERE;
+//   /*String pathWithGz = path + ".gz";
+//   if(FILE_SYSTEM.exists(pathWithGz)){
+//     request->send(FILE_SYSTEM, pathWithGz, contentType);
+//     return true;
+//   }*/
+//   ALOG_INF(PSTR("mAnimatorLight::handleFileReadA"));
+//   if(FILE_SYSTEM.exists(path)) {
+//   ALOG_INF(PSTR("mAnimatorLight::handleFileReadB"));
+//     request->send(FILE_SYSTEM, path, contentType);
+//     return true;
+//   }
+//   ALOG_INF(PSTR("mAnimatorLight::handleFileReadC"));
+//   return false;
+// }
+// #endif// ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
 
 
 
@@ -3049,7 +3049,7 @@ void mAnimatorLight::serveIndex(AsyncWebServerRequest* request)
 
 
 
-// #ifndef ENABLE_FEATURE_LIGHTING__XML_REQUESTS  // phase out
+// #ifndef ENABLE_FEATURE_LIGHTING__WEBUI__XML_API  // phase out
 
 // //get values for settings form in javascript
 // void mAnimatorLight::getSettingsJS(byte subPage, char* dest)
@@ -3064,7 +3064,7 @@ void mAnimatorLight::serveIndex(AsyncWebServerRequest* request)
 
 //   if (subPage == SUBPAGE_MENU)
 //   {
-//   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS // include only if 2D is compiled in
+//   #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX // include only if 2D is compiled in
 //     oappend(PSTR("gId('2dbtn').style.display='';"));
 //   #endif
 //   #ifdef ENABLE_FEATURE_LIGHTING__DMX // include only if DMX is enabled
@@ -3546,7 +3546,7 @@ void mAnimatorLight::serveIndex(AsyncWebServerRequest* request)
 //   // if (subPage == SUBPAGE_2D) // 2D matrices
 //   // {
 //   //   sappend('v',SET_F("SOMP"),isMatrix);
-//   //   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+//   //   #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 //   //   oappend(SET_F("maxPanels=")); oappendi(WLED_MAX_PANELS); oappend(SET_F(";"));
 //   //   oappend(SET_F("resetPanels();"));
 //   //   if (isMatrix) {
@@ -3582,7 +3582,7 @@ void mAnimatorLight::serveIndex(AsyncWebServerRequest* request)
 //   }
 // }
 
-// #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS
+// #endif // ENABLE_FEATURE_LIGHTING__WEBUI__XML_API
 
 
 
@@ -4429,7 +4429,7 @@ void mAnimatorLight::serializeModeNames(JsonArray arr, bool flag_get_first_name_
 
 //   unsigned used = getLengthTotal();
 //   unsigned n = (used -1) /MAX_LIVE_LEDS +1; //only serve every n'th LED if count over MAX_LIVE_LEDS
-// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+// #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 //   if (isMatrix) {
 //     // ignore anything behid matrix (i.e. extra strip)
 //     used = Segment::maxWidth*Segment::maxHeight; // always the size of matrix (more or less than strip.getLengthTotal())
@@ -4446,7 +4446,7 @@ void mAnimatorLight::serializeModeNames(JsonArray arr, bool flag_get_first_name_
 
 //   for (size_t i = 0; i < used; i += n)
 //   {
-// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+// #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 //     if (isMatrix && n>1 && (i/Segment::maxWidth)%n) i += Segment::maxWidth * (n-1);
 // #endif
 //     uint32_t c = getPixelColor(i);
@@ -4461,7 +4461,7 @@ void mAnimatorLight::serializeModeNames(JsonArray arr, bool flag_get_first_name_
 //   }
 //   buf--;  // remove last comma
 //   buf += sprintf_P(buf, PSTR("],\"n\":%d"), n);
-// #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+// #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 //   if (isMatrix) {
 //     buf += sprintf_P(buf, PSTR(",\"w\":%d"), Segment::maxWidth/n);
 //     buf += sprintf_P(buf, PSTR(",\"h\":%d"), Segment::maxHeight/n);
@@ -4796,7 +4796,7 @@ void mAnimatorLight::serveSettings(AsyncWebServerRequest* request, bool post)
 
   if (post) { //settings/set POST request, saving
 
-    #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__URL_QUERY_SETTINGS
     if (subPage != SUBPAGE_WIFI || !(wifiLock && otaLock)) SettingsPages__ParseForm(request, subPage);   // I should have this?
     #endif
 
@@ -4851,7 +4851,7 @@ void mAnimatorLight::serveSettings(AsyncWebServerRequest* request, bool post)
     #endif
     // case SUBPAGE_UM      : response = request->beginResponse_P(200, "text/html", PAGE_settings_um,   PAGE_settings_um_length);   break;
     // case SUBPAGE_UPDATE  : response = request->beginResponse_P(200, "text/html", PAGE_update,        PAGE_update_length);        break;
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     case SUBPAGE_2D      : response = request->beginResponse_P(200, "text/html", PAGE_settings_2D,   PAGE_settings_2D_length);   break;
     #endif
     #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
@@ -4918,7 +4918,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
 
   #ifdef ENABLE_FEATURE_LIGHTING__WEBSOCKETS
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   SPGM_CTR(PM_URL_LIVEVIEW2D) "/liveview2D";
   tkr_web->server->on(PM_URL_LIVEVIEW2D, HTTP_GET, [](AsyncWebServerRequest *request){
     tkr_web->handleStaticContent(request, "", 200, FPSTR(CONTENT_TYPE_HTML), PAGE_liveviewws2D, PAGE_liveviewws2D_length);
@@ -5014,7 +5014,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
     if (!tkr_jsona->requestJSONBufferLock(14)) return;
 
-    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS_INCLUDE_PRIMARY_JSON_COMMANDS
+    #ifdef ENABLE_FEATURE_LIGHTING__PLAYLISTS__PRIMARY_JSON_COMMANDS
 
       uint16_t jsonBufferLength = request->contentLength();
       if(jsonBufferLength < DATA_BUFFER_PAYLOAD_MAX_LENGTH)
@@ -5197,20 +5197,20 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 }
 
 
-#endif // ENABLE_FEATURE_LIGHTING__WEBUI
+#endif // ENABLE_FEATURE_LIGHTING__WEBUI__CORE
 
 
 void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
 { 
   
   #ifdef USE_DEBUGFEATURE_DEVICE_CLONE_TESTBED
-  #ifdef ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__SHOW_BUILD_DATETIME
   snprintf(serverDescription, sizeof(serverDescription), "PulSar %s \"%s\" [%s]", tkr_set->Settings.system_name.friendly, DEVICENAME_DESCRIPTION_CTR, tkr_time->GetBuildDateAndTime().c_str() );
   #else
   snprintf(serverDescription, sizeof(serverDescription), tkr_set->Settings.system_name.friendly);
   #endif
   #else
-  #ifdef ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__SHOW_BUILD_DATETIME
   #ifdef DEVICENAME_DESCRIPTION_CTR
   snprintf(serverDescription, sizeof(serverDescription), "PulSar \"%s\" [%s] %s", tkr_set->Settings.system_name.friendly, tkr_time->GetBuildDateAndTime().c_str() , tkr_set->runtime.firmware_version.current.name_ctr);
   #else
@@ -5232,9 +5232,9 @@ void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
   WAIT_WITH_PRINT_TICK(1000);
 
   DEBUG_LINE_HERE4
-  #ifdef ENABLE_FEATURE_LIGHTS__PRESETS
+  #ifdef ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   initPresetsFile();
-  #endif // ENABLE_FEATURE_LIGHTS__PRESETS
+  #endif // ENABLE_FEATURE_LIGHTING__CORE__PRESETS
 
   DEBUG_LINE_HERE4
   WAIT_WITH_PRINT_TICK(1000);
@@ -5245,7 +5245,7 @@ void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
   
   
   websocket_lights = new AsyncWebSocket("/ws");
-  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
   websocket_lights->onEvent(wsEvent);
   #endif
   

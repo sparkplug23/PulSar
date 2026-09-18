@@ -690,7 +690,7 @@
 
 // 
 // 
-// #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+// #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
 //  // until devices can reliably be used without compiling per device
 // 
     
@@ -860,7 +860,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 
 // 
 // 
-// #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+// #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
 //  // until devices can reliably be used without compiling per device
 // 
     
@@ -1290,7 +1290,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 
 // 
 // 
-// #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+// #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
 //  // until devices can reliably be used without compiling per device
 // 
     

@@ -1,6 +1,6 @@
 #include "_AnimatorLight.h"
 
-#ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
 
 
 /*******************************************************************************************************************************************************************************************************************
@@ -266,7 +266,7 @@ int32_t mAnimatorLight::loadPlaylist(JsonObject playlistObj, uint16_t presetId)
 
   uint8_t it = 0;
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_NAME_BASED_LOADING
+  #ifdef ENABLE_FEATURE_LIGHTING__PLAYLISTS__LOAD_BY_NAME
 
   if (useNames)
   {
@@ -896,7 +896,7 @@ void mAnimatorLight::serializePlaylist(JsonObject sObj)
 }
 
 
-#endif // ENABLE_FEATURE_LIGHTS__PLAYLISTS
+#endif // ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
 
 
 /*

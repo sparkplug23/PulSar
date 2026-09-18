@@ -3,7 +3,7 @@
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
 
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 
 /**
  * Creates map for 2D Matrix
@@ -29,7 +29,7 @@
 //   currentLedmap = 0;
 //   if (n == 0 || isFile) interfaceUpdateCallMode = CALL_MODE_WS_SEND; // schedule WS update (to inform UI)
 
-//   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+//   #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 //   if (!isFile && n==0 && isMatrix) {
 //     setUpMatrix();
 //     if (getLengthTotal() != lengthTotalBefore)
@@ -347,7 +347,7 @@ void mAnimatorLight::setUpMatrix()
 {
   ALOG_INF(PSTR("setUpMatrix"));
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 
   // isMatrix is set in cfg.cpp or set.cpp
   if (isMatrix)
@@ -537,7 +537,7 @@ void mAnimatorLight::setUpMatrix()
 // mAnimatorLight::Segment:: routines
 ///////////////////////////////////////////////////////////
 
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 
 
 // pixel is clipped if it falls outside clipping range
@@ -585,7 +585,7 @@ void IRAM_ATTR_YN mAnimatorLight::Segment::setPixelColorXY(int x, int y, uint32_
 
   if ((unsigned)x >= vWidth() || (unsigned)y >= vHeight()) return;
 
-  #ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+  #ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
   if (decimate > 1)
   {
     const uint16_t pattern_width  = vWidth();
@@ -1662,7 +1662,7 @@ void mAnimatorLight::Segment::wu_pixel(uint32_t x, uint32_t y, CRGB c) const {  
 }
 #undef WU_WEIGHT
 
-#endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX
 
 
 #endif //USE_MODULE_LIGHTS_ANIMATOR

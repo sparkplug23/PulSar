@@ -25,7 +25,7 @@
 // -----------------------------------------------------------------------------
 // WebSocket Console (ESP32)
 // -----------------------------------------------------------------------------
-#ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
 
 void mWebServer::HandlePage_Console_WebSocket(AsyncWebServerRequest *request)
 {
@@ -384,7 +384,7 @@ void mWebServer::handleConsoleWs()
   // This is the critical piece for WS mode (poll mode used to imply "active").
   // ---------------------------------------------------------------------------
   const bool active_now = (websocket_console->count() > 0);
-  #ifndef ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+  #ifndef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
   fConsole_active = active_now; // Only enable turning off console logging if not in conflict with console1
   #endif
 
@@ -408,14 +408,14 @@ void mWebServer::handleConsoleWs()
 }
 
 
-#endif // ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+#endif // ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
 
 
 
 // -----------------------------------------------------------------------------
 // Polling Console (ESP32) - testing only
 // -----------------------------------------------------------------------------
-#ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
 
 void mWebServer::HandlePage_Console_Poll(AsyncWebServerRequest *request)
 {
@@ -539,7 +539,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
   request->send(response);
 }
 
-#endif // ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+#endif // ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
 
 
 // End ESP32
@@ -550,7 +550,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
 // ============================================================================
 // ESP8266 (Polling only, lightweight page mapped to PAGE_console)
 // ============================================================================
-#ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
 
 void mWebServer::HandlePage_Console_Poll(AsyncWebServerRequest *request)
 {
@@ -675,7 +675,7 @@ void mWebServer::HandleConsoleRefresh(AsyncWebServerRequest *request)
   request->send(response);
 }
 
-#endif // ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+#endif // ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
 
 #endif // ESP32
 

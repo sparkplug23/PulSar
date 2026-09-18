@@ -178,7 +178,7 @@ uint8_t mAnimatorLight::ConstructJSON_Segments(uint8_t json_level, bool json_app
  * @param json_appending 
  * @return uint8_t 
  */
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS  
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX  
 uint8_t mAnimatorLight::ConstructJSON_Matrix(uint8_t json_level, bool json_appending)
 {
 
@@ -221,7 +221,7 @@ uint8_t mAnimatorLight::ConstructJSON_Matrix(uint8_t json_level, bool json_appen
   return JBI->End();
 
 }
-#endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS  
+#endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX  
 
 
 
@@ -230,7 +230,7 @@ uint8_t mAnimatorLight::ConstructJSON_Playlist(uint8_t json_level, bool json_app
 
   JBI->Start();
   
-    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+    #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
     JBI->Add("Length", playlistLen);
 
     JBI->Array_Start("Loaded");
@@ -761,7 +761,7 @@ void mAnimatorLight::Telemetry_Init()
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Playlist;
   telemetry_list.push_back(ptr);
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   ptr = &telemetry_matrix_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
@@ -772,7 +772,7 @@ void mAnimatorLight::Telemetry_Init()
   ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__MATRIX_CTR;
   ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Matrix;
   telemetry_list.push_back(ptr);
-  #endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX
   
   #ifdef ENABLE_FEATURE_PIXEL__MODE_AMBILIGHT
   ptr = &telemetry_mode_ambilight_teleperiod;
@@ -800,7 +800,7 @@ void mAnimatorLight::Telemetry_Init()
   telemetry_list.push_back(ptr);
   #endif // ENABLE_FEATURE_PIXEL__MODE_MANUAL_SETPIXEL
     
-  // #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  // #ifdef ENABLE_FEATURE_LIGHTING__CORE__AUTOMATION_PRESETS
   // ptr = &telemetry_automation_presets;
   // ptr->tSavedLastSent = 0;
   // ptr->flags.PeriodicEnabled = true;
@@ -811,7 +811,7 @@ void mAnimatorLight::Telemetry_Init()
   // ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__AUTOMATION_PRESETS_CTR;
   // ptr->ConstructJSON_function = &mAnimatorLight::ConstructJSON_Auto_Presets;
   // telemetry_list.push_back(ptr);
-  // #endif // ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
+  // #endif // ENABLE_FEATURE_LIGHTING__CORE__AUTOMATION_PRESETS
     
   #ifdef ENABLE_FEATURE_PIXEL__AUTOMATION_PLAYLISTS
   ptr = &telemetry_manual_setpixel;

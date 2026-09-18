@@ -113,7 +113,7 @@ bool mWiFi::WiFi2_Ap_EnsureStarted(void)
   // -------------------------------------------------------------------------
   // Captive portal
   // -------------------------------------------------------------------------
-  #ifdef ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
     WiFi2_Ap_Dns_Start();
   #endif
 

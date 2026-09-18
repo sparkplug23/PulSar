@@ -497,7 +497,7 @@ bool mAnimatorLight::Standby_ApplyTarget(int16_t target_index, uint16_t target_i
 {
   if (target_index < 0 || !target_id) return false;
 
-  #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   if (currentPlaylist >= 0) {
     ALOG_INF(PSTR("Standby: unloading active playlist=%d"), currentPlaylist);
     unloadPlaylist();
@@ -576,7 +576,7 @@ bool mAnimatorLight::Standby_Enter(uint8_t callMode)
     return false;
   }
 
-  #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   if (currentPlaylist >= 0) {
     ALOG_INF(PSTR("Standby: unloading normal playlist=%d"), currentPlaylist);
     unloadPlaylist();
@@ -614,7 +614,7 @@ bool mAnimatorLight::Standby_Leave(uint8_t callMode)
     return true;
   }
 
-  #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   if (currentPlaylist >= 0) {
     ALOG_INF(PSTR("Standby: unloading standby playlist=%d"), currentPlaylist);
     unloadPlaylist();

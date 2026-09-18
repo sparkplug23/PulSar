@@ -103,7 +103,7 @@ void mWebServer::HandleAPI_DebugTaskerMetrics(AsyncWebServerRequest* request)
 
 
 
-#ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
 
 bool mWebServer::WebSocket_SendText(AsyncWebSocketClient* client, const char* data, size_t len)
 {
@@ -381,7 +381,7 @@ void mWebServer::wsEventPages(
   #endif
 }
 
-#endif // ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+#endif // ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
 
 #endif // ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
 

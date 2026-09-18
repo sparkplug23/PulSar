@@ -37,7 +37,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 
   uint8_t segments_found = 0;
   
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   /**
    * Can be either a single matrix or multiple matrices
    * One function will be used to parse a matrix object, here it will iter over them and append to the panels
@@ -252,7 +252,7 @@ void mAnimatorLight::parse_JSONCommand(JsonParserObject obj)
 
 }
 
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 
 void mAnimatorLight::subparse_MatrixConfig(JsonParserObject obj)
 {
@@ -285,7 +285,7 @@ void mAnimatorLight::subparse_MatrixConfig(JsonParserObject obj)
 
   isMatrix = true;
 }
-#endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX
 
 
 /**
@@ -1104,7 +1104,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
   #endif // FIRMWARE_VERSION_MIN
   
 
-  #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+  #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
   if(jtok = obj[D_RGB_CLOCK].getObject()[D_MANUAL_NUMBER]){
     lcd_display_show_number = jtok.getInt();
     // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
@@ -1116,7 +1116,7 @@ void mAnimatorLight::subparse_JSONCommand(JsonParserObject obj, uint8_t segment_
     // CommandSet_Palette_Generation_Randomise_Brightness_Mode(jtok.getInt());
     ALOG_COM(PSTR(D_LOG_PIXEL  D_COMMAND_SVALUE_K("ManualString")), lcd_display_show_string);
   }
-  #endif // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+  #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
 
 
   #ifdef ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
@@ -1945,7 +1945,7 @@ if (jtok_pwi && jtok_pwi.isArray())
   if(jtok = obj["Preset"].getObject()["Load"]){
     uint8_t ps = jtok.getInt();
     // b) preset ID only or preset that does not change state (use embedded cycling limits if they exist in getVal())
-    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+    #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
     unloadPlaylist();          // applying a preset unloads the playlist, to stop any already running playlist
     #endif
     applyPreset(ps, CALL_MODE_DIRECT_CHANGE); // async load from file system (only preset ID was specified)

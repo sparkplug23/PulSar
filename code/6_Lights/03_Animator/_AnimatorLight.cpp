@@ -2,7 +2,7 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-#ifdef ENABLE_FEATURE_LIGHTS__GLOBAL_ANIMATOR_LIGHT_CLASS_ACCESS
+#ifdef ENABLE_FEATURE_LIGHTING__ANIMATOR__GLOBAL_LIGHT_ACCESS
 mAnimatorLight* tkr_extern_lAni = nullptr; // Define the global instance
 #endif
 
@@ -30,7 +30,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
      * SYSTEM SECTION * 
     *******************/    
     case TASK_RESTART_SET_DO_FINAL_CLEANUP: 
-      #ifdef ENABLE_FEATURE_LIGHTING__WEBUI      
+      #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE      
       websocket_lights->closeAll(1012);
       #endif
     break;
@@ -40,7 +40,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_EVERY_SECOND:{
       EverySecond_AutoOff(); 
 
-      #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+      #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
       updateInterfaces(CALL_MODE_WS_SEND); //tmp fix sending here
       #endif 
 
@@ -73,7 +73,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * STORAGE SECTION * 
     *******************/  
-    #ifdef ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+    #ifdef ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
     case TASK_FILESYSTEM__SAVE__MODULE_DATA__ID:
       Save_Module();
     break;
@@ -120,7 +120,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
      * WEBUI SECTION * 
     *******************/   
     #ifdef USE_MODULE_NETWORK_WEBSERVER
-    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
     case TASK_WEB_ADD_HANDLER:
       WebPage_Root_AddHandlers();
     break;
@@ -327,7 +327,7 @@ void mAnimatorLight::Save_Module()
 //     /*****************************************************************************
 //      * Detect type of NPB methods
 //     ******************************************************************************/
-//    #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+//    #ifdef ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
 //    // determine if it is sensible to use parallel I2S outputs on ESP32 (i.e. more than 5 outputs = 1 I2S + 4 RMT)
 //    bool useParallel = false;
 //    #if defined(ARDUINO_ARCH_ESP32) && !defined(ARDUINO_ARCH_ESP32S2) && !defined(ARDUINO_ARCH_ESP32S3) && !defined(ARDUINO_ARCH_ESP32C3)
@@ -371,7 +371,7 @@ void mAnimatorLight::Save_Module()
 //      BusManager::useParallelOutput(false);
 //    }
 //    #endif
-//  #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+//  #endif // ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
 
 //  DELAY_DEBUG(1000);
 
@@ -383,14 +383,14 @@ void mAnimatorLight::Save_Module()
 //    if (tkr_iLight->busConfigs[i] == nullptr) break;
 //    // mem += BusManager::memUsage(*tkr_iLight->busConfigs[i]);
 
-//    #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+//    #ifdef ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
 //    if (useParallel && i < 16) {
 //      // if for some unexplained reason the above pre-calculation was wrong, update
 //      unsigned memT = BusManager::memUsage(*tkr_iLight->busConfigs[i]); // includes x8 memory allocation for parallel I2S
 //      if (memT > mem) mem = memT; // if we have unequal LED count use the largest
 //    } 
 //    else
-//    #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+//    #endif // ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
 //    {
 //      mem += BusManager::memUsage(*tkr_iLight->busConfigs[i]); // includes global buffer
 //    }
@@ -653,7 +653,7 @@ void mAnimatorLight::Init_Busses()
     /*****************************************************************************
      * Detect type of NPB methods
     ******************************************************************************/
-   #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+   #ifdef ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
    // determine if it is sensible to use parallel I2S outputs on ESP32 (i.e. more than 5 outputs = 1 I2S + 4 RMT)
    bool useParallel = false;
    #if defined(ARDUINO_ARCH_ESP32) && !defined(ARDUINO_ARCH_ESP32S2) && !defined(ARDUINO_ARCH_ESP32S3) && !defined(ARDUINO_ARCH_ESP32C3)
@@ -698,7 +698,7 @@ void mAnimatorLight::Init_Busses()
      BusManager::useParallelOutput(false);
    }
    #endif
- #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+ #endif // ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
 
  
   // for (auto &bus : tkr_iLight->busConfigs) {
@@ -734,14 +734,14 @@ uint8_t i = 0;
   //  if (tkr_iLight->busConfigs[i] == nullptr) break;
    // mem += BusManager::memUsage(*tkr_iLight->busConfigs[i]);
 
-   #ifdef ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+   #ifdef ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
    if (useParallel && i < 16) {
      // if for some unexplained reason the above pre-calculation was wrong, update
      unsigned memT = bus.memUsage(); // includes x8 memory allocation for parallel I2S
      if (memT > mem) mem = memT; // if we have unequal LED count use the largest
    } 
    else
-   #endif // ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+   #endif // ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
    {
      mem += bus.memUsage(); // includes global buffer
    }
@@ -827,7 +827,7 @@ void mAnimatorLight::EveryLoop()
     
     BusManager::setBrightness(bri); // fix re-initialised bus' brightness
 
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     /***
      * Matrix can only be loaded after the busses have been created, and segments have been created.
      * An easy way to do this to ensure order is perhaps have "isMatrix" not started (ie not loading panels)
@@ -852,7 +852,7 @@ void mAnimatorLight::EveryLoop()
 
     
 
-    #endif // ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX
 
       
     // allocate frame buffer after matrix has been set up (gaps!)
@@ -864,7 +864,7 @@ void mAnimatorLight::EveryLoop()
     // serializeConfig(); // in WLED This saved everything to json memory
   }
     
-  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
   handleWs();
   #endif
 
@@ -904,16 +904,16 @@ void mAnimatorLight::EveryLoop()
        * ie grp 150 tto 1 (via jsoncommand), but effect happened before this completed since preset to load is a flag, not a hard change
        * 
        */
-      #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+      #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
       SubTask_Playlist();
       #endif
 
-      #ifdef ENABLE_FEATURE_LIGHTS__PRESETS
+      #ifdef ENABLE_FEATURE_LIGHTING__CORE__PRESETS
       SubTask_Presets();
       #endif
 
       // ALOG_INF(PSTR("Loop1b"));Serial.flush();
-      #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS
+      #ifdef ENABLE_FEATURE_LIGHTING__CORE__EFFECT_ENGINE
       DEBUG_LIGHTING__START_TIME_RECORDING(1)
       SubTask_Effects();
       DEBUG_LIGHTING__SAVE_TIME_RECORDING(1, lighting_time_critical_logging.segment_effects); 
@@ -1015,7 +1015,7 @@ void mAnimatorLight::BootMessage()
 void mAnimatorLight::Pre_Init(void)
 {
 
-  #ifdef ENABLE_FEATURE_LIGHTS__GLOBAL_ANIMATOR_LIGHT_CLASS_ACCESS
+  #ifdef ENABLE_FEATURE_LIGHTING__ANIMATOR__GLOBAL_LIGHT_ACCESS
   // On preinit, make sure to init the local class pointer to the global instance
   tkr_extern_lAni = this;
   #endif
@@ -1646,7 +1646,7 @@ void mAnimatorLight::SubTask_Effects()
       {
         ALOG_DBM_IF(seg.name, PSTR("Segment if %s [%d,%d]"), seg.name, seg.start, seg.stop);
 
-        // #ifdef ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION_ON_PULSAR_PALETTES
+        // #ifdef ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
         // const bool is_personal_palette =
         //   (seg.palette_id >= mPalette::PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) && (seg.palette_id < mPalette::PALETTELIST_STATIC_LENGTH__ID)
         //   ||
@@ -2484,7 +2484,7 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
   if (!segO && blendingStyle == TRANSITION_FADE && !hasGrouping && !topSegment.mirror && !topSegment.mirror_y) {
     // DEBUG_PRINT_LN("Fast Path");
     if (isMatrix && stopIndx <= matrixSize && !_pixelCCT) {
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS // WLED_DISABLE_2D
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX // WLED_DISABLE_2D
       // Calculate pointer steps to avoid 'if' and 'XY()' inside loops
       int x_inc = 1;
       int y_inc = Segment::maxWidth;
@@ -2609,7 +2609,7 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
   }
 
   if (isMatrix && stopIndx <= matrixSize) {
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     const int nCols = topSegment.virtualWidth();
     const int nRows = topSegment.virtualHeight();
     const int oCols = segO ? segO->virtualWidth() : nCols;
@@ -2668,7 +2668,7 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
       if (pushOffsetX != 0) x = (x + pushOffsetX) % nCols;
       if (pushOffsetY != 0) y = (y + pushOffsetY) % nRows;
       uint32_t c_a = BLACK;
-#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
       if (seg->decimate > 1 && vCols > 0 && vRows > 0) {
         const int sourceX = x % vCols;
         const int sourceY = y % vRows;
@@ -2685,14 +2685,14 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
 
 
       if (segO && blendingStyle == TRANSITION_FADE
-#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
           && ((segO->decimate > 1 && oCols > 0 && oRows > 0) || (x < oCols && y < oRows))
 #else
           && x < oCols && y < oRows
 #endif
       ) {
         // we need to blend old segment using fade as pixels are not clipped
-#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
         const int oldX = segO->decimate > 1 ? x % oCols : x;
         const int oldY = segO->decimate > 1 ? y % oRows : y;
         c_a = color_blend16(c_a, segO->getPixelColorRaw(oldX + oldY*oCols), progInv);
@@ -2717,7 +2717,7 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
         if (topSegment.transpose) std::swap(x,y); // swap X & Y if segment transposed
       }
       // expand pixel
-#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
       if (topSegment.decimate > 1) {
         const int repeatCols = topSegment.transpose ? nRows : nCols;
         const int repeatRows = topSegment.transpose ? nCols : nRows;
@@ -2813,7 +2813,7 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
         case TRANSITION_PUSH_LEFT:  i = (i - offsetI + nLen) % nLen; break;
       }
       uint32_t c_a = BLACK;
-#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
       if (seg->decimate > 1 && vLen > 0) {
         c_a = seg->getPixelColorRaw(i % vLen);
       } else
@@ -2821,7 +2821,7 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
       if (i < vLen) c_a = seg->getPixelColorRaw(i); // will get clipped pixel from old segment or unclipped pixel from new segment
       // if (segO && tkr_anim->blendingStyle == TRANSITION_FADE && topSegment.effect_id != segO->effect_id && i < oLen) {
         if (segO && tkr_anim->blendingStyle == TRANSITION_FADE
-#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
             && ((segO->decimate > 1 && oLen > 0) || i < oLen)
 #else
             && i < oLen
@@ -2835,7 +2835,7 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
           //   ALOG_INF(PSTR("TRANS PIXEL BLEND progress=%u inverse=%u new=%08X old=%08X out=%08X"), topSegment.progress(), progInv, c_a, segO->getPixelColorRaw(i), color_blend16(c_a, segO->getPixelColorRaw(i), progInv));
           // }
         // we need to blend old segment using fade as pixels are not clipped
-#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
         c_a = color_blend16(c_a, segO->getPixelColorRaw(segO->decimate > 1 ? i % oLen : i), progInv);
 #else
         c_a = color_blend16(c_a, segO->getPixelColorRaw(i), progInv);
@@ -2853,7 +2853,7 @@ void mAnimatorLight::blendSegment(const Segment &topSegment) const {
       if (topSegment.reverse) i = nLen - i - 1; // is segment reversed?
       // expand pixel
       i *= topSegment.groupLength();
-#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
       if (topSegment.decimate > 1) {
         const int repeatStride = nLen * topSegment.groupLength();
         for (int repeat = 0; repeat < topSegment.decimate; repeat++) {
@@ -3111,7 +3111,7 @@ void mAnimatorLight::show(void)
   // CCT is calculated from RGB when this mode is enabled.
   if (cctFromRgb) BusManager::setSegmentCCT(-1);
 
-  #ifdef ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION_ON_PULSAR_PALETTES
+  #ifdef ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
   const bool useGammaCorrection =
     frame_use_gamma_correction &&
     gammaCorrectCol &&
@@ -4164,7 +4164,7 @@ void mAnimatorLight::Segment::setGeometry(
   // return if neither bounds nor grouping have changed
   bool boundsUnchanged = (start == i1 && stop == i2);
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   boundsUnchanged &= (startY == i1Y && stopY == i2Y); // 2D
   #endif
 
@@ -4243,7 +4243,7 @@ void mAnimatorLight::Segment::setGeometry(
   startY = 0;
   stopY = 1;
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (Segment::maxHeight > 1)
   {
     // 2D
@@ -4407,7 +4407,7 @@ void mAnimatorLight::Segment::loadPalette(CRGBPalette16 &targetPalette, uint8_t 
 void mAnimatorLight::Segment::setUp(uint16_t i1, uint16_t i2, uint8_t grp, uint8_t spc, uint16_t ofs, uint16_t i1Y, uint16_t i2Y) {
   //return if neither bounds nor grouping have changed
   bool boundsUnchanged = (start == i1 && stop == i2);
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (Segment::maxHeight>1) boundsUnchanged &= (startY == i1Y && stopY == i2Y); // 2D
   #endif
   if (boundsUnchanged
@@ -4424,7 +4424,7 @@ void mAnimatorLight::Segment::setUp(uint16_t i1, uint16_t i2, uint8_t grp, uint8
   stop = i2 > Segment::maxWidth*Segment::maxHeight ? MIN(i2,tkr_anim->getLengthTotal()) : (i2 > Segment::maxWidth ? Segment::maxWidth : MAX(1,i2));
   startY = 0;
   stopY  = 1;
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (Segment::maxHeight>1) { // 2D
     if (i1Y < Segment::maxHeight) startY = i1Y;
     stopY = i2Y > Segment::maxHeight ? Segment::maxHeight : MAX(1,i2Y);
@@ -4635,7 +4635,7 @@ mAnimatorLight::Segment &mAnimatorLight::Segment::setName(const char *newName) {
     if (newLen) {
       if (name) p_free(name); // free old name
       name = static_cast<char*>(allocate_buffer(newLen+1, BFRALLOC_PREFER_PSRAM));
-      #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+      #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
       if (effect_id == EFFECTS_FUNCTION__2D__SCROLLING_TEXT__ID) startTransition(tkr_anim->getTransition(), true); // if the name changes in scrolling text mode, we need to copy the segment for blending
       #endif
       if (name) strlcpy(name, newName, newLen+1);
@@ -4845,7 +4845,7 @@ int16_t mAnimatorLight::extractModeDefaults(uint16_t mode, const char* segVar)
 }
 
 
-#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
 
 // 2D matrix
 uint16_t mAnimatorLight::Segment::virtualWidth() const {
@@ -4918,7 +4918,7 @@ uint16_t mAnimatorLight::Segment::virtualHeight() const {
 
 
 // Constants for mapping mode "Pinwheel"
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 // constexpr int Pinwheel_Steps_Small = 72;       // no holes up to 16x16
 // constexpr int Pinwheel_Size_Small  = 16;       // larger than this -> use "Medium"
 // constexpr int Pinwheel_Steps_Medium = 192;     // no holes up to 32x32
@@ -4978,11 +4978,11 @@ static void setPinwheelParameters(int i, int vW, int vH, int& startx, int& start
 #endif
 
 
-#ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
 
 // 1D strip
 uint16_t mAnimatorLight::Segment::virtualLength() const {
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (is2D()) {
     unsigned vW = virtualWidth();
     unsigned vH = virtualHeight();
@@ -5011,7 +5011,7 @@ uint16_t mAnimatorLight::Segment::virtualLength() const {
   unsigned vLength = (length() + groupLen - 1) / groupLen;
   if (mirror) vLength = (vLength + 1) /2;  // divide by 2 if mirror, leave at least a single LED
 
-  #ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+  #ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
   if (decimate > 1u){
     vLength = (vLength + decimate - 1u) / decimate;
   }
@@ -5026,7 +5026,7 @@ uint16_t mAnimatorLight::Segment::virtualLength() const {
 // 1D strip
 uint16_t mAnimatorLight::Segment::virtualLength() const {
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (is2D())
   {
     const unsigned vW = virtualWidth();
@@ -5071,7 +5071,7 @@ uint16_t mAnimatorLight::Segment::virtualLength() const {
 #endif
 
 
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS  
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX  
 // maximum length of a mapped 1D segment, used in PS for buffer allocation
 uint16_t mAnimatorLight::Segment::maxMappingLength() const {
   uint32_t vW = virtualWidth();
@@ -5254,13 +5254,13 @@ uint32_t WLED_O2_ATTR mAnimatorLight::Segment::getPixelColor(int i) const
 {
   if (!isActive() || i < 0) return 0; // not active or invalid index
 
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   int vStrip = i>>16; // virtual strips are only relevant in Bar expansion mode
   i &= 0xFFFF;
 #endif
   if (i >= (int)vLength()) return 0;
 
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (is2D()) {
     const int vW = vWidth();   // segment width in logical pixels (can be 0 if segment is inactive)
     const int vH = vHeight();  // segment height in logical pixels (is always >= 1)
@@ -5534,9 +5534,9 @@ void mAnimatorLight::Segment::fadeToBlackBy(uint8_t fadeBy) {
  */
 void mAnimatorLight::Segment::blur(uint8_t blur_amount, bool smear) {
   if (!isActive() || blur_amount == 0) return; // optimization: 0 means "don't blur"
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (is2D()) {
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     // compatibility with 2D
     blur2D(blur_amount, blur_amount, smear); // symmetrical 2D blur
     //box_blur(map(blur_amount,1,255,1,3), smear);
@@ -6274,7 +6274,7 @@ void mAnimatorLight::setSegment(uint8_t n, uint16_t i1, uint16_t i2, uint8_t gro
     return;
   }
   if (isMatrix) {
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     if (i1 < mAnimatorLight::Segment::maxWidth) seg.start = i1;
     seg.stop = i2 > mAnimatorLight::Segment::maxWidth ? mAnimatorLight::Segment::maxWidth : i2;
     if (startY < mAnimatorLight::Segment::maxHeight) seg.startY = startY;
@@ -6325,7 +6325,7 @@ void mAnimatorLight::makeAutoSegments(bool forceReset) {
     unsigned segStops [MAX_NUM_SEGMENTS] = {0};
     size_t s = 0;
 
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     // 2D segment is the 1st one using entire matrix
     if (isMatrix) {
       segStarts[0] = 0;
@@ -6341,7 +6341,7 @@ void mAnimatorLight::makeAutoSegments(bool forceReset) {
       segStarts[s] = bus->getStart();
       segStops[s]  = segStarts[s] + bus->getLength();
 
-      #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+      #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
       if (isMatrix && segStops[s] <= Segment::maxWidth*Segment::maxHeight) continue; // ignore buses comprising matrix
       if (isMatrix && segStarts[s] < Segment::maxWidth*Segment::maxHeight) segStarts[s] = Segment::maxWidth*Segment::maxHeight;
       #endif
@@ -6361,7 +6361,7 @@ void mAnimatorLight::makeAutoSegments(bool forceReset) {
     segments.clear();
     segments.reserve(s); // prevent reallocations
     // there is always at least one segment (but we need to differentiate between 1D and 2D)
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     if (isMatrix)
       segments.emplace_back(0, Segment::maxWidth, 0, Segment::maxHeight);
     else
@@ -6381,7 +6381,7 @@ void mAnimatorLight::makeAutoSegments(bool forceReset) {
     //expand the main seg to the entire length, but only if there are no other segments, or reset is forced
     else if (getActiveSegmentsNum() == 1) {
       size_t i = getLastActiveSegmentId();
-      #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+      #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
       segments[i].setGeometry(0, Segment::maxWidth, 1, 0, 0xFFFF, 0, Segment::maxHeight);
       #else
       segments[i].setGeometry(0, _length);
@@ -6398,7 +6398,7 @@ void mAnimatorLight::fixInvalidSegments() {
   //make sure no segment is longer than total (sanity check)
   for (size_t i = getSegmentsNum()-1; i > 0; i--) {
     if (isMatrix) {
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
       if (segments[i].start >= Segment::maxWidth * Segment::maxHeight) {
         // 1D segment at the end of matrix
         if (segments[i].start >= _length || segments[i].startY > 0 || segments[i].stopY > 1) { segments.erase(segments.begin()+i); continue; }
@@ -6426,7 +6426,7 @@ void mAnimatorLight::fixInvalidSegments() {
 
 // void mAnimatorLight::resetSegments2() {
 //   segments.clear(); // destructs all mAnimatorLight::Segment as part of clearing
-//   #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+//   #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 //   segment seg = isMatrix ? mAnimatorLight::Segment(0, mAnimatorLight::Segment::maxWidth, 0, mAnimatorLight::Segment::maxHeight) : mAnimatorLight::Segment(0, _length);
 //   #else
 //   segment seg = mAnimatorLight::Segment(0, _length);
@@ -6438,7 +6438,7 @@ void mAnimatorLight::fixInvalidSegments() {
 // void mAnimatorLight::makeAutoSegments(bool forceReset) {
 //   ALOG_INF(PSTR("makeAutoSegments(%d) %d==============================="),forceReset, isMatrix);
 //   if (isMatrix) {
-//     #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+//     #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 //     // only create 1 2D segment
 //     if (forceReset || getSegmentsNum() == 0) resetSegments2(); // initialises 1 segment
 //     else if (getActiveSegmentsNum() == 1) {
@@ -6510,7 +6510,7 @@ void mAnimatorLight::fixInvalidSegments() {
 //     // this is always called as the last step after finalizeInit(), update covered bus types
 //     segments[i].refreshLightCapabilities();
 
-//     #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+//     #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
 //     // Added by me to fix bad matrix setting, the order of matrix and segment creation needs fixing
 //     if(segments[i].stopY > mAnimatorLight::Segment::maxHeight) segments[i].stopY = mAnimatorLight::Segment::maxHeight;
 //     if(segments[i].stop  > mAnimatorLight::Segment::maxWidth)  segments[i].stop  = mAnimatorLight::Segment::maxWidth; ///fixing X length
@@ -6594,7 +6594,7 @@ void WLED_O2_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col, bo
 //   ALOG_INF(PSTR("Ai %d col %d,%d,%d"),i, R(col), G(col), B(col));
 
 
-  #ifndef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifndef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   int vStrip = i>>16; // hack to allow running on virtual strips (2D segment columns/rows) REQUIRED for bouncing balls effect. Assumes this means int is 32 bit here?
   i &= 0xFFFF;
   #endif
@@ -6607,7 +6607,7 @@ void WLED_O2_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col, bo
     // if(i<1) ALOG_INF(PSTR("Ci %d col %d,%d,%d"),i, R(col), G(col), B(col));
 
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     int vStrip = 0;
   #endif
   int vL = vLength();
@@ -6615,7 +6615,7 @@ void WLED_O2_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col, bo
   // in such case "i" will be > virtualLength()
   if (i >= vL) {
     // check if this is a virtual strip
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     vStrip = i>>16; // hack to allow running on virtual strips (2D segment columns/rows)
     i &= 0xFFFF;    //truncate vstrip index
     if (i >= vL) 
@@ -6628,7 +6628,7 @@ void WLED_O2_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col, bo
     #endif
   }
 
-#ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+#ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   if (is2D()) {
     
     const int vW = vWidth();
@@ -6786,7 +6786,7 @@ void WLED_O2_ATTR mAnimatorLight::Segment::setPixelColor(int i, uint32_t col, bo
 // if(i<1)
 //   ALOG_INF(PSTR("i %d col %d,%d,%d"),i, R(col), G(col), B(col));
 
-  #ifdef ENABLE_FEATURE_LIGHTS__DECIMATE_PIXELS
+  #ifdef ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
     if (decimate > 1)
     {
       const uint16_t pattern_length = vLength();
@@ -7146,7 +7146,7 @@ int8_t mAnimatorLight::tristate_square8(uint8_t x, uint8_t pulsewidth, uint8_t a
 
 
 
-#ifdef ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+#ifdef ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
 
 ///////////////////////////////////////////////////////////////////////////////
 // Begin simulateSound (to enable audio enhanced effects to display something)
@@ -7265,7 +7265,7 @@ mAnimatorLight::um_data_t* mAnimatorLight::simulateSound(uint8_t simulationId)
   return um_data;
 }
 
-#endif // ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
+#endif // ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
 
 
 // // similar to NeoPixelBus NeoGammaTableMethod but allows dynamic changes (superseded by NPB::NeoGammaDynamicTableMethod)
@@ -7536,7 +7536,7 @@ void mAnimatorLight::notify(byte callMode, bool followUp)
 }
 
 
-#ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
 
 
 void realtimeLock2(uint32_t timeoutMs, byte md)
@@ -8277,7 +8277,7 @@ void mAnimatorLight::colorUpdated(byte callMode) {
 
 
 
-#endif // ENABLE_FEATURE_LIGHTING__WEBUI
+#endif // ENABLE_FEATURE_LIGHTING__WEBUI__CORE
 
 
 
