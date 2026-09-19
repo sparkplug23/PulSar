@@ -174,8 +174,6 @@
 #endif
 
 
-#define ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
-
 #define USE_MODULE_SENSORS_ESP32_TEMPERATURE
 #define ENABLE_FEATURE_INTERNAL_CHIP_TEMPERATURE__ALLOW_CLASSIC_ESP32
 
@@ -659,7 +657,6 @@
  *********************************************************************************************
  *********************************************************************************************/
 
-#define USE_MODULE_CORE_PINVIEWER
 
 /*********************************************************************************************
  *********************************************************************************************
@@ -909,7 +906,6 @@
   #define WEB_PORT             80                // Web server Port for User and Admin mode
 
 
-#define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 
 
 #ifdef FIRMWARE_DEFAULT__WEBSERVER_BASIC_WHEN_NO_LIGHTS_ARE_USED

@@ -1847,7 +1847,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
    * SECTION: Network Configs
   ************************************/    
 
-  #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
+  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
   
   /***********************************
    * SECTION: Sensor Configs
@@ -8212,7 +8212,7 @@ R"=====(
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
 
-  #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
+  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
 
 
   #define ENABLE_FEATURE_DEVELOPMENT_DEBUGGING__MQTT_UNIT_TEST_ECHO

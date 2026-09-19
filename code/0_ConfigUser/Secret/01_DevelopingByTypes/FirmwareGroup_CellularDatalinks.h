@@ -185,7 +185,7 @@ ESP32 remains alive while modem wedges
   ************************************/  
 
   #ifdef ENABLE_GROUP_FEATURE__WIFI
-    #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
+    #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
     #define USE_MODULE_SENSORS_INTERFACE
 
     #define USE_MODULE_NETWORK_WEBSERVER

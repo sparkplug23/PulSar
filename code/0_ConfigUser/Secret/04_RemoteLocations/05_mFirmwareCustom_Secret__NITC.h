@@ -425,7 +425,7 @@
    * WEBPAGE:
    ************************************************************************/
   
-  #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
+  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
     
   
 

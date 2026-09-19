@@ -46,11 +46,7 @@ void WiFi_Wps_StatusCallback(wps_cb_status status);
  * @brief This file will become a wrapper to the subfolders
  **/
 #include "2_CoreSystem/00_FirmwareDefaults/01_Base/mFirmwareDefaults_Base.h"
-#ifdef FIRMWARE_DEFAULT__USE_DEFAULT2
-#include "2_CoreSystem/00_FirmwareDefaults/03_Lighting/mFirmwareDefaults_Lighting2.h"
-#else
 #include "2_CoreSystem/00_FirmwareDefaults/03_Lighting/mFirmwareDefaults_Lighting.h"
-#endif
 
 /*********************************************************************************************\
  * Default global defines

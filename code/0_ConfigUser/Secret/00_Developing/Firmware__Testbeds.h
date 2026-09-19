@@ -103,7 +103,7 @@
    * SECTION: Network Configs
   ************************************/    
 
-  #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
+  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
   
   /***********************************
    * SECTION: Sensor Configs
@@ -1392,7 +1392,7 @@
   * SECTION: Network Configs
  ************************************/    
 
- #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
+ #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
  #define ENABLE_FEATURE_WEBSERVER__GPS_CONFIG_DEVICE
  #define ENABLE_FEATURE_WEBSERVER__GPS_OVERVIEW
@@ -2454,7 +2454,7 @@ new 26GHz radar sensor
    * SECTION: Network Configs
   ************************************/    
 
-  #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
+  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
   
   /***********************************
    * SECTION: Sensor Configs
