@@ -52,7 +52,6 @@
 // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
-  #define ENABLE_FEATURE_LIGHTING__CORE__DATABUFFER_LOCK
   #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
   
   #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
@@ -85,12 +84,9 @@
 
   #ifdef ESP32
   #define USE_MODULE_CORE_FILESYSTEM
-#define USE_MODULE_CORE_PINVIEWER
+  #define USE_MODULE_CORE_PINVIEWER
   #endif
     
-    
-
-  //webserver?
   
   #define ENABLE_FEATURE_JSON__ASYNCJSON_V6
   #define USE_MODULE_NETWORK_WEBSERVER
@@ -111,7 +107,6 @@
 // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
-  #define ENABLE_FEATURE_LIGHTING__CORE__DATABUFFER_LOCK
   #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
   
   #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
@@ -164,8 +159,6 @@
 
 // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
-
-  #define ENABLE_FEATURE_LIGHTING__CORE__DATABUFFER_LOCK
   #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
   
   #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
@@ -224,7 +217,6 @@
 // // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
-//   #define ENABLE_FEATURE_LIGHTING__CORE__DATABUFFER_LOCK
 //   #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
   
 //   #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET

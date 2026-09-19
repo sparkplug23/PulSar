@@ -135,8 +135,6 @@
 
   
   
-  #define ENABLE_FEATURE_LIGHTING__CORE__DATABUFFER_LOCK
-  
   #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
   #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
   #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
@@ -441,8 +439,6 @@
                               // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
-
-                                #define ENABLE_FEATURE_LIGHTING__CORE__DATABUFFER_LOCK
                                 #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
                                 #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
                                 #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL

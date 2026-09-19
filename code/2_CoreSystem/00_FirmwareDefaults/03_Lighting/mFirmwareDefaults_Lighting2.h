@@ -406,17 +406,6 @@
   #define ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
   #define ENABLE_FEATURE_LIGHTING__PLAYLISTS__PRIMARY_JSON_COMMANDS
 
-
-  /**
-   * Filesystem behaviour.
-   */
-
-  #ifndef DISABLE_FILESYSTEM
-    #define ENABLE_FEATURE_LIGHTING__FILESYSTEM__TIMESTAMP_SAVED_FILES
-    #define ENABLE_FEATURE_LIGHTING__FILESYSTEM__LOAD_MODULE_CONFIG_ON_BOOT
-  #endif
-
-
   /**
    * Colour processing.
    */
@@ -499,8 +488,6 @@
 
 
 #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
-
-  #define ENABLE_FEATURE_LIGHTING__AUDIO__CORE
 
   #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
 
@@ -738,35 +725,6 @@
 
 #endif
 
-/**
- * ============================================================================
- * SECTION 14
- * FILESYSTEM POLICY
- * ============================================================================
- *
- * Filesystem support is expected for normal lighting firmware.
- *
- * The source should still retain defensive compile-time guards around
- * filesystem-specific implementation.
- *
- * DISABLE_FILESYSTEM remains the explicit exception.
- * ============================================================================
- */
-
-
-#if defined(FIRMWARE_DEFAULT__LIGHTING_CONFIG__BASIC) || \
-    defined(FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE) || \
-    defined(FIRMWARE_DEFAULT__LIGHTING_CONFIG__EVERYTHING)
-
-  #ifndef DISABLE_FILESYSTEM
-
-    #define ENABLE_FEATURE_LIGHTING__CORE__FILESYSTEM
-
-  #endif
-
-#endif
-
-
 
 /**
  * ============================================================================
@@ -811,17 +769,7 @@
    * Settings/persistence development.
    */
 
-  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_AFTER_SUCCESSFUL_BOOT_TEST
   #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
-  #define ENABLE_FEATURE_LIGHTING__CORE__DATABUFFER_LOCK
-
-
-  /**
-   * Temporary RGBWW / white-output workaround.
-   */
-
-  #define ENABLE_FEATURE_LIGHTING__OUTPUT__SUPPRESS_WHITE
-
 
   /**
    * Async library debugging.
@@ -938,7 +886,6 @@
     defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_CHRISTMAS_CONTROLLER) || \
     defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_BORDER_WALLPAPERS) || \
     defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_NOTIFICATIONS) || \
-    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__2D) || \
     defined(ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D) || \
     defined(ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D)
 

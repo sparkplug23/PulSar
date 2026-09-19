@@ -88,10 +88,7 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   // Everything moved into complete, anything working unless in tests phase will be phased in.
 
 
-  
-  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_AFTER_SUCCESSFUL_BOOT_TEST
   #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA  
-  #define ENABLE_FEATURE_LIGHTING__CORE__DATABUFFER_LOCK
   // #define USE_MODULE_SENSORS_SUN_TRACKING
   // #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
   // #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
@@ -109,8 +106,6 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
 
   #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
   
-  #define ENABLE_FEATURE_LIGHTING__OUTPUT__SUPPRESS_WHITE // Fix flickering of white channel
-
   /************************************************************************
    * SECTION: defines for external libaries
    ************************************************************************/
