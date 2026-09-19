@@ -22,7 +22,7 @@
 #include "WebResponseImpl.h"
 #include "WebAuthentication.h"
 
-// #define DEBUG_ASYNC
+// #define ENABLE_DEBUG_ASYNC
 
 #ifndef ESP8266
 #define os_strlen strlen
@@ -238,7 +238,7 @@ void AsyncWebServerRequest::_onPoll(){
   //os_printf("p\n");
   if(_response != NULL && _client != NULL && _client->canSend() && !_response->_finished()){
     
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
     Serial.printf("_onPoll\n\r");
   #endif
     _response->_ack(this, 0, 0);
@@ -248,7 +248,7 @@ void AsyncWebServerRequest::_onPoll(){
 void AsyncWebServerRequest::_onAck(size_t len, uint32_t time){
   //os_printf("a:%u:%u\n", len, time);
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
     Serial.printf("_onAck\n\r");
   #endif
 
@@ -258,12 +258,12 @@ void AsyncWebServerRequest::_onAck(size_t len, uint32_t time){
     } else {
       AsyncWebServerResponse* r = _response;
       _response = NULL;
-      #ifdef DEBUG_ASYNC
+      #ifdef ENABLE_DEBUG_ASYNC
     Serial.printf("delete r %dB to ",ESP.getFreeHeap()); Serial.flush();
     #endif
       delete r;
       
-      #ifdef DEBUG_ASYNC
+      #ifdef ENABLE_DEBUG_ASYNC
     Serial.printf("%dB\n\r",ESP.getFreeHeap()); Serial.flush();
     #endif
     }
@@ -285,7 +285,7 @@ void AsyncWebServerRequest::onDisconnect (ArDisconnectHandler fn){
 
 
 // void AsyncWebServerRequest::addHeader(const char* name, const char* value){
-//   #ifdef DEBUG_ASYNC
+//   #ifdef ENABLE_DEBUG_ASYNC
 //     Serial.printf("addHeader\n\r");
 //   #endif
 //   _headers2.add(new AsyncWebHeader(String(name), String(value)));
@@ -782,19 +782,19 @@ void AsyncWebServerRequest::addInterestingHeader(const String& name){
     _interestingHeaders.add(name);
 }
 
-#define DEBUG_ASYNC
+#define ENABLE_DEBUG_ASYNC
 /**
  * 
  *  Sending function, which handles transmission of data (now using pointer method for body)
  * * */
 void AsyncWebServerRequest::send(AsyncWebServerResponse *response){
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println("AsyncWebServerRequest::sendONE=S for "); Serial.flush();
   #endif
   _response = response;
   if(_response == NULL){    
-    #ifdef DEBUG_ASYNC
+    #ifdef ENABLE_DEBUG_ASYNC
     Serial.println("_response == NULL"); Serial.flush();
     #endif
     _client->close(true);
@@ -802,7 +802,7 @@ void AsyncWebServerRequest::send(AsyncWebServerResponse *response){
     return;
   }
   if(!_response->_sourceValid()){
-    #ifdef DEBUG_ASYNC
+    #ifdef ENABLE_DEBUG_ASYNC
     Serial.println("!_response->_sourceValid()"); Serial.flush();
     #endif
     delete response;
@@ -810,22 +810,22 @@ void AsyncWebServerRequest::send(AsyncWebServerResponse *response){
     send(500);
   }
   else {
-    #ifdef DEBUG_ASYNC
+    #ifdef ENABLE_DEBUG_ASYNC
       Serial.println("else _response->_respond(this)"); Serial.flush();
     #endif
     _client->setRxTimeout(0);
     // _client->setRxTimeout(5); //test, 5 seconds?
-    #ifdef DEBUG_ASYNC
+    #ifdef ENABLE_DEBUG_ASYNC
       Serial.println("DONE setRxTimeout"); Serial.flush();
     #endif
     // _response->addHeader("michael","test");
     _response->_respond(this);
-    #ifdef DEBUG_ASYNC
+    #ifdef ENABLE_DEBUG_ASYNC
       Serial.println("DONE _response->_respond(this)"); Serial.flush();
     #endif
     
   }
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println("AsyncWebServerRequest::send=E");
   #endif
 }
@@ -835,7 +835,7 @@ void AsyncWebServerRequest::send(AsyncWebServerResponse *response){
  *  LEGACY METHOD - String to remove
  * * */
 // AsyncWebServerResponse * AsyncWebServerRequest::beginResponse_serial(int code, const char* contentType, char* content){
-//   #ifdef DEBUG_ASYNC
+//   #ifdef ENABLE_DEBUG_ASYNC
 //   Serial.println(F("WRONG FUNCTION AsyncWebServerRequest::beginResponse(int code, const char* contentType, const char* content"));
 //   #endif
 //   return new AsyncBasicResponse(code, contentType, content);
@@ -843,14 +843,14 @@ void AsyncWebServerRequest::send(AsyncWebServerResponse *response){
 
 
 // AsyncWebServerResponse * AsyncWebServerRequest::beginResponse(int code, const char* contentType, char* content_ptr, uint16_t content_len){
-//   #ifdef DEBUG_ASYNC
+//   #ifdef ENABLE_DEBUG_ASYNC
 //   Serial.println(F("AsyncWebServerRequest::beginResponse(int code, const char* contentType, char* content_ptr, uint16_t content_len"));
 //   #endif
 //   return new AsyncBasicResponse(code, contentType, content_ptr, content_len);
 // }
 
 AsyncWebServerResponse * AsyncWebServerRequest::beginResponse(int code, uint8_t contentType_id, char* content_ptr, uint16_t content_len){
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println(F("AsyncWebServerRequest::beginResponse(int code, const char* contentType, char* content_ptr, uint16_t content_len"));
   #endif
   return new AsyncBasicResponse(code, contentType_id, content_ptr, content_len);
@@ -870,7 +870,7 @@ AsyncWebServerResponse * AsyncWebServerRequest::beginResponse(int code, uint8_t 
 
 // AsyncWebServerResponse * AsyncWebServerRequest::beginResponse(Stream &stream, uint8_t contentType, size_t len, AwsTemplateProcessor callback){
   
-//   #ifdef DEBUG_ASYNC
+//   #ifdef ENABLE_DEBUG_ASYNC
 //   Serial.println(F("AsyncWebServerRequest::beginResponse(stream"));
 //   #endif
 //   return new AsyncStreamResponse(stream, contentType, len, callback);
@@ -878,7 +878,7 @@ AsyncWebServerResponse * AsyncWebServerRequest::beginResponse(int code, uint8_t 
 
 AsyncWebServerResponse * AsyncWebServerRequest::beginResponse(uint8_t contentType, size_t len, AwsResponseFiller callback, AwsTemplateProcessor templateCallback){
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println(F("AsyncWebServerRequest::beginResponse(const St"));
   #endif
   // return new AsyncCallbackResponse(contentType, len, callback, templateCallback);
@@ -892,7 +892,7 @@ AsyncWebServerResponse * AsyncWebServerRequest::beginChunkedResponse(uint8_t con
 
 AsyncResponseStream * AsyncWebServerRequest::beginResponseStream(uint8_t contentType, size_t bufferSize){
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println("AsyncWebServerRequest::send=beginResponseStream");
   #endif
   return new AsyncResponseStream(contentType, bufferSize);
@@ -900,7 +900,7 @@ AsyncResponseStream * AsyncWebServerRequest::beginResponseStream(uint8_t content
 
 // AsyncWebServerResponse * AsyncWebServerRequest::beginResponse_P(int code, const char* contentType, const uint8_t * content, size_t len, AwsTemplateProcessor callback){
   
-//   #ifdef DEBUG_ASYNC
+//   #ifdef ENABLE_DEBUG_ASYNC
 //   Serial.println("AsyncWebServerRequest::send=beginResponse_P AsyncProgmemResponse");
 //   #endif
 //   return new AsyncProgmemResponse(code, contentType, content, len, callback);
@@ -908,14 +908,14 @@ AsyncResponseStream * AsyncWebServerRequest::beginResponseStream(uint8_t content
 
 // AsyncWebServerResponse * AsyncWebServerRequest::beginResponse_P(int code, const char* contentType, PGM_P content, AwsTemplateProcessor callback){
   
-//   #ifdef DEBUG_ASYNC
+//   #ifdef ENABLE_DEBUG_ASYNC
 //   Serial.println(F("AsyncWebServerRequest::beginResponse_P(code"));
 //   #endif
 //   return beginResponse_P(code, contentType, (const uint8_t *)content, strlen_P(content), callback);
 // }
 AsyncWebServerResponse * AsyncWebServerRequest::beginResponse_P(int code, uint8_t contentType, const uint8_t * content, size_t len, AwsTemplateProcessor callback){
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println("AsyncWebServerRequest::send=beginResponse_P AsyncProgmemResponse 1"); Serial.flush();
   // delay(5000);
   #endif
@@ -924,7 +924,7 @@ AsyncWebServerResponse * AsyncWebServerRequest::beginResponse_P(int code, uint8_
 
 AsyncWebServerResponse * AsyncWebServerRequest::beginResponse_P(int code, uint8_t contentType, PGM_P content, AwsTemplateProcessor callback){
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println(F("AsyncWebServerRequest::beginResponse_P(code -1"));
   #endif
   return beginResponse_P(code, contentType, (const uint8_t *)content, strlen_P(content), callback);
@@ -937,13 +937,13 @@ AsyncWebServerResponse * AsyncWebServerRequest::beginResponse_P(int code, uint8_
  * * */
 void AsyncWebServerRequest::send_serial(int code, uint8_t contentType, char* content){
   
-      #ifdef DEBUG_ASYNC
+      #ifdef ENABLE_DEBUG_ASYNC
     Serial.printf("WARNING: String method called\n\r");
   #endif
   
   send(code, contentType);
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
     Serial.println(F("send(beginResponse(code, contentType, content)); DONE"));
   #endif
 }
@@ -980,7 +980,7 @@ void AsyncWebServerRequest::send(int code, uint8_t contentType, char* content_pt
   send(beginResponse(code, contentType, content_ptr, content_len));
   
   // Serial.println(F("send2END(beginResponse2(code, contentType, content)); DONE"));Serial.flush();
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println(F("send2(beginResponse2(code, contentType, content)); DONE"));
   #endif
 }
@@ -995,7 +995,7 @@ void AsyncWebServerRequest::send(int code, uint8_t contentType, char* content_pt
 
 //   send(beginResponse(code, contentType, content_ptr, content_len));
   
-//   #ifdef DEBUG_ASYNC
+//   #ifdef ENABLE_DEBUG_ASYNC
 //   Serial.println(F("send2(beginResponse2(code, contentType, content)); DONE"));
 //   #endif
 // }
@@ -1009,7 +1009,7 @@ void AsyncWebServerRequest::send(int code, uint8_t contentType, char* content_pt
 
 // void AsyncWebServerRequest::send(File content, char* path, uint8_t contentType, bool download, AwsTemplateProcessor callback){
   
-//   #ifdef DEBUG_ASYNC
+//   #ifdef ENABLE_DEBUG_ASYNC
 //   Serial.println("AsyncWebServerRequest::send=File");
 //   #endif
 //   if(content == true){
@@ -1019,7 +1019,7 @@ void AsyncWebServerRequest::send(int code, uint8_t contentType, char* content_pt
 
 // void AsyncWebServerRequest::send(Stream &stream, uint8_t contentType, size_t len, AwsTemplateProcessor callback){
   
-//   #ifdef DEBUG_ASYNC
+//   #ifdef ENABLE_DEBUG_ASYNC
 //   Serial.println("AsyncWebServerRequest::send=Stream");
 //   #endif
 //   send(beginResponse(stream, contentType, len, callback));
@@ -1027,7 +1027,7 @@ void AsyncWebServerRequest::send(int code, uint8_t contentType, char* content_pt
 
 void AsyncWebServerRequest::send(uint8_t contentType, size_t len, AwsResponseFiller callback, AwsTemplateProcessor templateCallback){
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println("AsyncWebServerRequest::send=String");
   #endif
   send(beginResponse(contentType, len, callback, templateCallback));
@@ -1035,7 +1035,7 @@ void AsyncWebServerRequest::send(uint8_t contentType, size_t len, AwsResponseFil
 
 void AsyncWebServerRequest::sendChunked(uint8_t contentType, AwsResponseFiller callback, AwsTemplateProcessor templateCallback){
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println("AsyncWebServerRequest::send=Sendchunked");
   #endif
   send(beginChunkedResponse(contentType, callback, templateCallback));
@@ -1043,7 +1043,7 @@ void AsyncWebServerRequest::sendChunked(uint8_t contentType, AwsResponseFiller c
 
 // void AsyncWebServerRequest::send_P(int code, const char* contentType, const uint8_t * content, size_t len, AwsTemplateProcessor callback){
   
-//   #ifdef DEBUG_ASYNC
+//   #ifdef ENABLE_DEBUG_ASYNC
 //   Serial.println("AsyncWebServerRequest::send_P TEST1");
 //   #endif
 //   send(beginResponse_P(code, (char*)contentType, content, len, callback));
@@ -1051,14 +1051,14 @@ void AsyncWebServerRequest::sendChunked(uint8_t contentType, AwsResponseFiller c
 
 // void AsyncWebServerRequest::send_P(int code, const char* contentType, PGM_P content, AwsTemplateProcessor callback){
   
-//   #ifdef DEBUG_ASYNC
+//   #ifdef ENABLE_DEBUG_ASYNC
 //   Serial.println("AsyncWebServerRequest::send=Sendp3");
 //   #endif
 //   send(beginResponse_P(code, contentType, content, callback));
 // }
 void AsyncWebServerRequest::send_P(int code, uint8_t contentType, const uint8_t * content, size_t len, AwsTemplateProcessor callback){
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println("AsyncWebServerRequest::send_P TEST1");
   #endif
   send(beginResponse_P(code, contentType, content, len, callback));
@@ -1066,7 +1066,7 @@ void AsyncWebServerRequest::send_P(int code, uint8_t contentType, const uint8_t 
 
 void AsyncWebServerRequest::send_P(int code, uint8_t contentType, PGM_P content, AwsTemplateProcessor callback){
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println("AsyncWebServerRequest::send=Sendp3");
   #endif
   

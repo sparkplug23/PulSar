@@ -85,7 +85,7 @@ int8_t mAnimatorLight::Tasker(uint8_t function, JsonParserObject obj)
      * TRIGGERS SECTION * 
     *******************/
     case TASK_EVENT_INPUT_STATE_CHANGED_ID:
-    #ifdef ENABLE_FEATURE_LIGHTS__KEY_INPUT_CONTROLS
+    #ifdef ENABLE_FEATURE_LIGHTING__INPUT__BUTTON_CONTROLS
     KeyInput__ControlLights();
     #endif
     break;
@@ -217,7 +217,7 @@ void mAnimatorLight::Handle_FileSave_Edits()
 }
 
 
-#ifdef ENABLE_FEATURE_LIGHTS__KEY_INPUT_CONTROLS
+#ifdef ENABLE_FEATURE_LIGHTING__INPUT__BUTTON_CONTROLS
 /**
  * @brief KeySet1: single button, palette and brightness
  * KeySet2: dual button (as??)
@@ -240,7 +240,7 @@ void mAnimatorLight::KeyInput__ControlLights()
 
 
 }
-#endif // ENABLE_FEATURE_LIGHTS__KEY_INPUT_CONTROLS
+#endif // ENABLE_FEATURE_LIGHTING__INPUT__BUTTON_CONTROLS
 
 
 void mAnimatorLight::Save_Module()
@@ -891,7 +891,7 @@ void mAnimatorLight::EveryLoop()
   {
     case ANIMATION_MODE__EFFECTS:{ // Effects created on device, local control
 
-      #ifdef ENABLE_FEATURE_LIGHTS__DEMO_MODE
+      #ifdef ENABLE_FEATURE_LIGHTING__DEMO_MODE
       SubTask_Demo();
       #endif
 

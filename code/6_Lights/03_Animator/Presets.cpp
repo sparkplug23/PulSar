@@ -568,7 +568,7 @@ void mAnimatorLight::SubTask_Presets()
 
 }
 
-#ifdef ENABLE_FEATURE_LIGHTS__DEMO_MODE
+#ifdef ENABLE_FEATURE_LIGHTING__DEMO_MODE
 void mAnimatorLight::SubTask_Demo()
 {
 

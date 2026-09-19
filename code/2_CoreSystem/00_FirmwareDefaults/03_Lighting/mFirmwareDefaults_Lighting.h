@@ -114,7 +114,7 @@ FIRMWARE DEFAULT:: LIGHTING CONFIGS
   /************************************************************************
    * SECTION: defines for external libaries
    ************************************************************************/
-  #define DEBUG_ASYNC
+  #define ENABLE_DEBUG_ASYNC
 
 
 #endif
@@ -343,7 +343,7 @@ This enables switching to newer firmware versions, but falling back when an issu
 
 
 
-#ifdef ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_AS_DEMO_MODE
+#ifdef ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
 /**
  * @brief This section enables the use of a single button (as default, KEY1) that must be set outside of this
  * When pressed, a few methods will automatically be useful for debugging and testing
@@ -377,11 +377,11 @@ This enables switching to newer firmware versions, but falling back when an issu
   #define USE_MODULE_SENSORS_BUTTONS
     
 
-  // #define ENABLE_FEATURE_LIGHTS__KEY_INPUT_CONTROLS
-  // #define ENABLE_FEATURE_LIGHTS__DEMO_MODE
+  // #define ENABLE_FEATURE_LIGHTING__INPUT__BUTTON_CONTROLS
+  // #define ENABLE_FEATURE_LIGHTING__DEMO_MODE
 
 
-#endif // ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_AS_DEMO_MODE
+#endif // ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
 
   
 #endif

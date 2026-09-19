@@ -31,7 +31,9 @@
  * before going
  * need to make X16 esp32s3 boards, probably aim for 3 (all outdoor trees)
  * 
- * 
+ * https://github.com/sparkplug23/WLED-3D-Locator
+ * bring pixel 4xl for this task
+ * bring glasses sock + smarttag!
  * 
  */
 

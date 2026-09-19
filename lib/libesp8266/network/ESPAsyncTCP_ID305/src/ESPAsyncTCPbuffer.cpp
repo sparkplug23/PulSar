@@ -91,7 +91,7 @@ size_t AsyncTCPbuffer::write(const char* data) {
 }
 
 size_t AsyncTCPbuffer::write(const char *data, size_t len) {
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
     Serial.println("HERE");
     #endif
     return write((const uint8_t *) data, len);
@@ -104,7 +104,7 @@ size_t AsyncTCPbuffer::write(const char *data, size_t len) {
  * @return
  */
 size_t AsyncTCPbuffer::write(const uint8_t *data, size_t len) {
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
     Serial.println("AsyncTCPbuffer::write(const uint8_t *data, size_t len)");
     #endif
     if(_TXbufferWrite == NULL || _client == NULL || !_client->connected() || data == NULL || len == 0) {
@@ -332,7 +332,7 @@ void AsyncTCPbuffer::_attachCallbacks() {
 void AsyncTCPbuffer::_sendBuffer() {
     //DEBUG_ASYNC_TCP("[A-TCP] _sendBuffer...\n");
 
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
     Serial.println("AsyncTCPbuffer::_sendBuffer()");
     #endif
 
@@ -345,7 +345,7 @@ void AsyncTCPbuffer::_sendBuffer() {
 
         available = _TXbufferRead->available();
 
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
     Serial.printf("available=%d\n\r",available);
     #endif
         if(available > _client->space()) {
@@ -365,7 +365,7 @@ void AsyncTCPbuffer::_sendBuffer() {
         size_t send = _client->write((const char*) out, available);
         if(send != available) {
             
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
     Serial.printf("[A-TCP] write failed send: %d available: %d \n\r", send, available);
     #endif
             DEBUG_ASYNC_TCP("[A-TCP] write failed send: %d available: %d \n", send, available);
@@ -376,7 +376,7 @@ void AsyncTCPbuffer::_sendBuffer() {
 
         // if buffer is empty and there is a other buffer in chain delete the empty one
         if(_TXbufferRead->available() == 0 && _TXbufferRead->next != NULL) {
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
     Serial.printf("_TXbufferRead->available() == 0\n\r");
     #endif
             cbuf * old = _TXbufferRead;

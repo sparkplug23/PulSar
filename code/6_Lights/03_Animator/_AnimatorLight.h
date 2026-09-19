@@ -772,7 +772,7 @@ class mAnimatorLight :
     void EverySecond_AutoOff();
     void BootMessage();
 
-    #ifdef ENABLE_FEATURE_LIGHTS__KEY_INPUT_CONTROLS
+    #ifdef ENABLE_FEATURE_LIGHTING__INPUT__BUTTON_CONTROLS
     // This should be made into a custom controller
     struct KeyInput_ControlLights_s{
       /**
@@ -787,7 +787,7 @@ class mAnimatorLight :
     }keyinput_control;
     void KeyInput__ControlLights();
     #endif
-    #ifdef ENABLE_FEATURE_LIGHTS__DEMO_MODE
+    #ifdef ENABLE_FEATURE_LIGHTING__DEMO_MODE
     void SubTask_Demo();
     #endif
                 

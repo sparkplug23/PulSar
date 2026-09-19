@@ -827,7 +827,7 @@
    * Async library debugging.
    */
 
-  #define ENABLE_DEBUG_ASYNC // replaces DEBUG_ASYNC
+  #define ENABLE_DEBUG_ASYNC
 
 #endif
 
@@ -879,7 +879,7 @@
  */
 
 
-#ifdef ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE // replaces ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_AS_DEMO_MODE
+#ifdef ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
 
   #define USE_MODULE_SENSORS_INTERFACE
 
@@ -900,9 +900,9 @@
    *   power / brightness control
    */
 
-  // #define ENABLE_FEATURE_LIGHTING__INPUT__BUTTON_CONTROLS // replaces ENABLE_FEATURE_LIGHTS__KEY_INPUT_CONTROLS
+  // #define ENABLE_FEATURE_LIGHTING__INPUT__BUTTON_CONTROLS
 
-  // #define ENABLE_FEATURE_LIGHTING__DEMO_MODE // replaces ENABLE_FEATURE_LIGHTS__DEMO_MODE
+  // #define ENABLE_FEATURE_LIGHTING__DEMO_MODE
 
 #endif
 
@@ -955,8 +955,8 @@
 
 #ifdef ENABLE_FEATURE_LIGHTING__CORE__PRESETS
 
-  #ifndef DISABLE_FILESYSTEM
-    #define ENABLE_FEATURE_LIGHTING__CORE__FILESYSTEM
+  #if defined(DISABLE_FILESYSTEM) || !defined(USE_MODULE_CORE_FILESYSTEM)
+    #error "DEFINE: Presets require filesystem" // lets not silently enable filesystem here
   #endif
 
 #endif
