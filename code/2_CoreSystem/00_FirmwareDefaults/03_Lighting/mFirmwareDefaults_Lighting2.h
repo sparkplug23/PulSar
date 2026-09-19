@@ -601,6 +601,15 @@
 
 #endif
 
+#if defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__MINIMAL) || \
+    defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__NORMAL) || \
+    defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED)
+
+  #ifndef USE_MODULE_NETWORK_WEBSERVER
+    #error "Lighting WebUI requires USE_MODULE_NETWORK_WEBSERVER"
+  #endif
+
+#endif
 
 
 /**
