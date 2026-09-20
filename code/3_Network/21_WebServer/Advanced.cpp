@@ -217,7 +217,7 @@ bool mWebServer::WebSocket_SendEnergy(AsyncWebSocketClient* client)
 
   #ifdef USE_MODULE_ENERGY_INTERFACE
 
-  if(!JBI->requestJSONBufferLock(GetModuleUniqueID()))
+  if(!JBI->RequestLock(GetModuleUniqueID()))
   {
     client->text(F("{\"error\":\"json buffer busy\"}"));
     return false;
@@ -241,7 +241,7 @@ bool mWebServer::WebSocket_SendEnergy(AsyncWebSocketClient* client)
     result = WebSocket_SendWrappedJSON(client, "energy", "{}", 2);
   }
 
-  JBI->releaseJSONBufferLock();
+  JBI->ReleaseLock();
 
   return result;
 

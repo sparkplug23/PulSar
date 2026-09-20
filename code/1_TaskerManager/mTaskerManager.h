@@ -64,7 +64,7 @@
 /**
  * SECTION: User defined options/build patterns 
  */
-#ifdef USE_USER_MICHAEL
+#ifndef USE_USER_CUSTOM // inverted from before, setting custom means others need this enabled as my secret configs are missing.
 #include "0_ConfigUser/Secret/ConfigUser.h"
 #else
 #include "0_ConfigUser/mFirmwareCustom_Secret.h"  // Fallback to generic as endpoint users

@@ -1184,23 +1184,6 @@ uint8_t mHVAC::ConstructJSON_ZoneSensors(uint8_t json_level, bool json_appending
 }
 
 
-uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC1m(uint8_t json_level, bool json_appending){
-
-  JBI->Start();
-  // DEBUG_LINE_HERE;
-  return JBI->End();
-
-}
-
-
-uint8_t mHVAC::ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level, bool json_appending){
-
-  JBI->Start();
-  // DEBUG_LINE_HERE;
-  return JBI->End();
-}
-
-
 uint8_t mHVAC::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
 
   // return 0;
@@ -1417,28 +1400,6 @@ void mHVAC::Telemetry_Init(){
   ptr->flags.json_level = JSON_LEVEL_DETAILED;
   ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_ZONE_CTR;
   ptr->ConstructJSON_function = &mHVAC::ConstructJSON_ZoneSensors;
-  telemetry_list.push_back(ptr);
-
-  ptr = &telemetry_sensor_zone_roc1m;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = false;
-  ptr->flags.SendNow = false;
-  ptr->tRateSecs = 60; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_ROC1M_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_ZONE_CTR;
-  ptr->ConstructJSON_function = &mHVAC::ConstructJSON_ZoneSensors_ROC1m;
-  telemetry_list.push_back(ptr);
-  
-  ptr = &telemetry_sensor_zone_roc10m;
-  ptr->tSavedLastSent = 0;
-  ptr->flags.PeriodicEnabled = false;
-  ptr->flags.SendNow = false;
-  ptr->tRateSecs = 60*10; 
-  ptr->flags.topic_type = MQTT_TOPIC_TYPE_ROC10M_ID;
-  ptr->flags.json_level = JSON_LEVEL_DETAILED;
-  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSOR_ZONE_CTR;
-  ptr->ConstructJSON_function = &mHVAC::ConstructJSON_ZoneSensors_ROC10m;
   telemetry_list.push_back(ptr);
 
 }

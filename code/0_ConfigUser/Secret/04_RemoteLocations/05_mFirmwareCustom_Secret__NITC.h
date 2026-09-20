@@ -20,7 +20,7 @@
 // #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__INSTALLED_BOARD
 // #define DEVICE_NITC__SERVER_ROOM__AMBIENT_SENSOR
 // #define DEVICE_NITC__SERVER_ROOM__ACVENT_SENSOR
-// #define DEVICE_NITC__OFFICE__ELITE4DEXMU_01
+#define DEVICE_NITC__OFFICE__ELITE4DEXMU_01
 // #define DEVICE_NITC__OFFICE__ELITE4DEXMU_02
 // #define DEVICE_NITC__OFFICE__ELITE4DEXMU_03
 
@@ -410,7 +410,7 @@
    * SECTION: Network Configs
   ************************************/    
 
-  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST  
+    
   
   /************************************************************************
    * FILESYSTEM: 
@@ -1333,7 +1333,7 @@
   * SECTION: Network Configs
   ************************************/  
 
-  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+  
 
   /***********************************
    * SECTION: Lighting Configs
@@ -1578,7 +1578,7 @@
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+    
 
     /***********************************
      * SECTION: Lighting Configs
@@ -1664,11 +1664,11 @@
   #ifdef ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__EIGHT_PANELS
 
 
-  #define ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+    #define ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
 
   
     // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
-    #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+    // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
 
     // at somepoint make "liveoutput" which I want this to trigger sending the complete output (possibly via read neopixelbus)
     // meant for debugging or virtual view prior to hardware install.
@@ -1693,166 +1693,166 @@
 
     #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
 
-    #define ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
-    #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
-    #define ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION
+    // #define ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+    // #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
+    // #define ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION
 
     #define USE_LIGHTING_TEMPLATE
-DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
-R"=====(
-{
-  "BusConfig":[
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+    R"=====(
     {
-      "Pin":16,
-      "ColourOrder":"GRB",
-      "BusType":"WS2812_RGB",
-      "Start":0,
-      "Length":512
-    },
-    {
-      "Pin":12,
-      "ColourOrder":"GRB",
-      "BusType":"WS2812_RGB",
-      "Start":512,
-      "Length":512
-    },
-    {
-      "Pin":4,
-      "ColourOrder":"GRB",
-      "BusType":"WS2812_RGB",
-      "Start":1024,
-      "Length":512
-    },
-    {
-      "Pin":2,
-      "ColourOrder":"GRB",
-      "BusType":"WS2812_RGB",
-      "Start":1536,
-      "Length":512
+      "BusConfig":[
+        {
+          "Pin":16,
+          "ColourOrder":"GRB",
+          "BusType":"WS2812_RGB",
+          "Start":0,
+          "Length":512
+        },
+        {
+          "Pin":12,
+          "ColourOrder":"GRB",
+          "BusType":"WS2812_RGB",
+          "Start":512,
+          "Length":512
+        },
+        {
+          "Pin":4,
+          "ColourOrder":"GRB",
+          "BusType":"WS2812_RGB",
+          "Start":1024,
+          "Length":512
+        },
+        {
+          "Pin":2,
+          "ColourOrder":"GRB",
+          "BusType":"WS2812_RGB",
+          "Start":1536,
+          "Length":512
+        }
+      ],
+      "MatrixConfig":[
+        {
+          "Width":16,
+          "Height":16,
+          "BottomStart":0,
+          "RightStart":0,
+          "Vertical":1,
+          "Serpentine":1,
+          "xOffset":0,
+          "yOffset":0
+        },
+        {
+          "Width":16,
+          "Height":16,
+          "BottomStart":0,
+          "RightStart":0,
+          "Vertical":1,
+          "Serpentine":1,
+          "xOffset":16,
+          "yOffset":0
+        },
+        {
+          "Width":16,
+          "Height":16,
+          "BottomStart":0,
+          "RightStart":0,
+          "Vertical":1,
+          "Serpentine":1,
+          "xOffset":32,
+          "yOffset":0
+        },
+        {
+          "Width":16,
+          "Height":16,
+          "BottomStart":0,
+          "RightStart":0,
+          "Vertical":1,
+          "Serpentine":1,
+          "xOffset":48,
+          "yOffset":0
+        },
+        {
+          "Width":16,
+          "Height":16,
+          "BottomStart":0,
+          "RightStart":0,
+          "Vertical":1,
+          "Serpentine":1,
+          "xOffset":0,
+          "yOffset":16
+        },
+        {
+          "Width":16,
+          "Height":16,
+          "BottomStart":0,
+          "RightStart":0,
+          "Vertical":1,
+          "Serpentine":1,
+          "xOffset":16,
+          "yOffset":16
+        },
+        {
+          "Width":16,
+          "Height":16,
+          "BottomStart":0,
+          "RightStart":0,
+          "Vertical":1,
+          "Serpentine":1,
+          "xOffset":32,
+          "yOffset":16
+        },
+        {
+          "Width":16,
+          "Height":16,
+          "BottomStart":0,
+          "RightStart":0,
+          "Vertical":1,
+          "Serpentine":1,
+          "xOffset":48,
+          "yOffset":16
+        }
+      ],
+      "Segment0":{
+        "PixelRange":[
+          0,64,
+          0,32
+        ],
+        "ColourPalette":"Rainbow",
+        "PaletteMappingValues":[10,15,20],
+        "SegColour0":{
+          "Hue":0,
+          "Sat":0,
+          "BrightnessRGB":100
+        },
+        "SegColour1":{
+          "Hue":120,
+          "Sat":0,
+          "BrightnessRGB":100
+        },
+        "SegColour2":{
+          "Hue":240,
+          "Sat":100,
+          "BrightnessRGB":100
+        },
+        "Effects":{
+          "Function":"Squared Swirl",
+          "Speed":141,
+          "Intensity":203,
+          "Custom1":255,
+          "Custom2":128,
+          "Custom3":128,
+          "Grouping":1,
+          "Decimate":0,
+          "RateMs":25
+        },
+        "BrightnessRGB":100,
+        "BrightnessCCT":0
+      },
+      "BrightnessRGB":20,
+      "BrightnessCCT":0
     }
-  ],
-  "MatrixConfig":[
-    {
-      "Width":16,
-      "Height":16,
-      "BottomStart":0,
-      "RightStart":0,
-      "Vertical":1,
-      "Serpentine":1,
-      "xOffset":0,
-      "yOffset":0
-    },
-    {
-      "Width":16,
-      "Height":16,
-      "BottomStart":0,
-      "RightStart":0,
-      "Vertical":1,
-      "Serpentine":1,
-      "xOffset":16,
-      "yOffset":0
-    },
-    {
-      "Width":16,
-      "Height":16,
-      "BottomStart":0,
-      "RightStart":0,
-      "Vertical":1,
-      "Serpentine":1,
-      "xOffset":32,
-      "yOffset":0
-    },
-    {
-      "Width":16,
-      "Height":16,
-      "BottomStart":0,
-      "RightStart":0,
-      "Vertical":1,
-      "Serpentine":1,
-      "xOffset":48,
-      "yOffset":0
-    },
-    {
-      "Width":16,
-      "Height":16,
-      "BottomStart":0,
-      "RightStart":0,
-      "Vertical":1,
-      "Serpentine":1,
-      "xOffset":0,
-      "yOffset":16
-    },
-    {
-      "Width":16,
-      "Height":16,
-      "BottomStart":0,
-      "RightStart":0,
-      "Vertical":1,
-      "Serpentine":1,
-      "xOffset":16,
-      "yOffset":16
-    },
-    {
-      "Width":16,
-      "Height":16,
-      "BottomStart":0,
-      "RightStart":0,
-      "Vertical":1,
-      "Serpentine":1,
-      "xOffset":32,
-      "yOffset":16
-    },
-    {
-      "Width":16,
-      "Height":16,
-      "BottomStart":0,
-      "RightStart":0,
-      "Vertical":1,
-      "Serpentine":1,
-      "xOffset":48,
-      "yOffset":16
-    }
-  ],
-  "Segment0":{
-    "PixelRange":[
-      0,64,
-      0,32
-    ],
-    "ColourPalette":"Rainbow",
-    "PaletteMappingValues":[10,15,20],
-    "SegColour0":{
-      "Hue":0,
-      "Sat":0,
-      "BrightnessRGB":100
-    },
-    "SegColour1":{
-      "Hue":120,
-      "Sat":0,
-      "BrightnessRGB":100
-    },
-    "SegColour2":{
-      "Hue":240,
-      "Sat":100,
-      "BrightnessRGB":100
-    },
-    "Effects":{
-      "Function":"Squared Swirl",
-      "Speed":141,
-      "Intensity":203,
-      "Custom1":255,
-      "Custom2":128,
-      "Custom3":128,
-      "Grouping":1,
-      "Decimate":0,
-      "RateMs":25
-    },
-    "BrightnessRGB":100,
-    "BrightnessCCT":0
-  },
-  "BrightnessRGB":20,
-  "BrightnessCCT":0
-}
-)=====";
+    )=====";
             // "Function":"Black Hole",
 
 
@@ -1864,7 +1864,7 @@ R"=====(
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+    
 
     /***********************************
      * SECTION: Lighting Configs
@@ -1986,7 +1986,7 @@ R"=====(
   * SECTION: Network Configs
   ************************************/  
 
-  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+  
 
   /***********************************
    * SECTION: Lighting Configs
@@ -2231,7 +2231,7 @@ R"=====(
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+    
 
     /***********************************
      * SECTION: Lighting Configs
@@ -2517,7 +2517,7 @@ R"=====(
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+    
 
     /***********************************
      * SECTION: Lighting Configs
@@ -2636,7 +2636,7 @@ R"=====(
   * SECTION: Network Configs
   ************************************/  
 
-  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+  
 
   /***********************************
    * SECTION: Lighting Configs
@@ -2881,7 +2881,7 @@ R"=====(
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+    
 
     /***********************************
      * SECTION: Lighting Configs
@@ -3167,7 +3167,7 @@ R"=====(
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+    
 
     /***********************************
      * SECTION: Lighting Configs

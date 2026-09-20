@@ -2710,6 +2710,8 @@ struct Twinkle
 };
 
 
+#ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+
 /**********************************************************************************************************************************************************************************
  * EFFECT ENGINE: Twinkle Particle Base
  *
@@ -3209,6 +3211,8 @@ static const char PM_EFFECT_DESCRI__TWINKLE_GLOW[] PROGMEM =
 "C1: Blinking strength\n\r"
 "C2: Complete pulse duration\n\r"
 "SEGCOLOR(1): Background";
+
+#endif // ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
 
 
 /**********************************************************************************************************************************************************************************
