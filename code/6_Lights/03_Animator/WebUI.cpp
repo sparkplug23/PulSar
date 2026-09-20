@@ -977,39 +977,43 @@ bool mAnimatorLight::deserializeConfig(JsonObject doc, bool fromFS) {
     CJSON(simplifiedUI, id[F("sui")]);
   #endif
 
-  JsonObject nw_ins_0 = doc["nw"]["ins"][0];
-  getStringFromJson(clientSSID, nw_ins_0[F("ssid")], 33);
-  //int nw_ins_0_pskl = nw_ins_0[F("pskl")];
-  //The WiFi PSK is normally not contained in the regular file for security reasons.
-  //If it is present however, we will use it
-  getStringFromJson(clientPass, nw_ins_0["psk"], 65);
+#ifndef ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
 
-  JsonArray nw_ins_0_ip = nw_ins_0["ip"];
-  JsonArray nw_ins_0_gw = nw_ins_0["gw"];
-  JsonArray nw_ins_0_sn = nw_ins_0["sn"];
+            JsonObject nw_ins_0 = doc["nw"]["ins"][0];
+            getStringFromJson(clientSSID, nw_ins_0[F("ssid")], 33);
+            //int nw_ins_0_pskl = nw_ins_0[F("pskl")];
+            //The WiFi PSK is normally not contained in the regular file for security reasons.
+            //If it is present however, we will use it
+            getStringFromJson(clientPass, nw_ins_0["psk"], 65);
 
-  for (byte i = 0; i < 4; i++) {
-    CJSON(staticIP[i], nw_ins_0_ip[i]);
-    CJSON(staticGateway[i], nw_ins_0_gw[i]);
-    CJSON(staticSubnet[i], nw_ins_0_sn[i]);
-  }
+            JsonArray nw_ins_0_ip = nw_ins_0["ip"];
+            JsonArray nw_ins_0_gw = nw_ins_0["gw"];
+            JsonArray nw_ins_0_sn = nw_ins_0["sn"];
 
-  JsonObject ap = doc["ap"];
-  getStringFromJson(apSSID, ap[F("ssid")], 33);
-  getStringFromJson(apPass, ap["psk"] , 65); //normally not present due to security
-  //int ap_pskl = ap[F("pskl")];
+            for (byte i = 0; i < 4; i++) {
+              CJSON(staticIP[i], nw_ins_0_ip[i]);
+              CJSON(staticGateway[i], nw_ins_0_gw[i]);
+              CJSON(staticSubnet[i], nw_ins_0_sn[i]);
+            }
 
-  CJSON(apChannel, ap[F("chan")]);
-  if (apChannel > 13 || apChannel < 1) apChannel = 1;
+            JsonObject ap = doc["ap"];
+            getStringFromJson(apSSID, ap[F("ssid")], 33);
+            getStringFromJson(apPass, ap["psk"] , 65); //normally not present due to security
+            //int ap_pskl = ap[F("pskl")];
 
-  CJSON(apHide, ap[F("hide")]);
-  if (apHide > 1) apHide = 1;
+            CJSON(apChannel, ap[F("chan")]);
+            if (apChannel > 13 || apChannel < 1) apChannel = 1;
 
-  CJSON(apBehavior, ap[F("behav")]);
+            CJSON(apHide, ap[F("hide")]);
+            if (apHide > 1) apHide = 1;
 
-  noWifiSleep = doc[F("wifi")][F("sleep")] | !noWifiSleep; // inverted
-  noWifiSleep = !noWifiSleep;
-  //int wifi_phy = doc[F("wifi")][F("phy")]; //force phy mode n?
+            CJSON(apBehavior, ap[F("behav")]);
+
+            noWifiSleep = doc[F("wifi")][F("sleep")] | !noWifiSleep; // inverted
+            noWifiSleep = !noWifiSleep;
+            //int wifi_phy = doc[F("wifi")][F("phy")]; //force phy mode n?
+#endif 
+
 
   JsonObject hw = doc[F("hw")];
 
@@ -1304,6 +1308,7 @@ void mAnimatorLight::serializeConfig(JsonObject root) {
   //   dns.add(dnsAddress[i]);
   // }
 
+#ifndef ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
   JsonObject ap = root.createNestedObject("ap");
   ap[F("ssid")] = apSSID;
   ap[F("pskl")] = strlen(apPass);
@@ -1323,6 +1328,7 @@ void mAnimatorLight::serializeConfig(JsonObject root) {
 // #ifdef ARDUINO_ARCH_ESP32
 //   wifi[F("txpwr")] = txPower;
 // #endif
+#endif
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_ETHERNET)
   JsonObject ethernet = root.createNestedObject("eth");
@@ -1602,6 +1608,7 @@ void mAnimatorLight::serializeConfig(JsonObject root) {
   // }
 #endif
 
+#ifndef ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
   JsonObject if_ntp = interfaces.createNestedObject("ntp");
   // if_ntp["en"] = ntpEnabled;
   if_ntp[F("host")] = ntpServerName;
@@ -1610,6 +1617,7 @@ void mAnimatorLight::serializeConfig(JsonObject root) {
   if_ntp[F("ampm")] = useAMPM;
   if_ntp[F("ln")] = longitude;
   if_ntp[F("lt")] = latitude;
+  #endif
 
   JsonObject ol = root.createNestedObject("ol");
   // ol[F("clock")] = overlayCurrent;
@@ -1651,7 +1659,10 @@ void mAnimatorLight::serializeConfig(JsonObject root) {
   JsonObject ota = root.createNestedObject("ota");
   ota[F("lock")] = otaLock;
   ota[F("lock-wifi")] = wifiLock;
+  
+  #ifndef ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
   ota[F("pskl")] = strlen(otaPass);
+  #endif
   // #ifndef WLED_DISABLE_OTA
   // ota[F("aota")] = aOtaEnabled;
   // #endif
@@ -5222,11 +5233,13 @@ void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
   #endif
   DEBUG_LINE_HERE4
 
+#ifndef ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
   sprintf(ntpServerName, NTP_SERVER1);  
   sprintf(apPass, CLIENT_SSID);
   sprintf(otaPass, "PulSar");
   sprintf(clientSSID, CLIENT_SSID);
   sprintf(clientPass, CLIENT_PASS);
+  #endif
   
 
   WAIT_WITH_PRINT_TICK(1000);

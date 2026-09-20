@@ -5758,37 +5758,39 @@ char last_signal_src[13] = {0};//   _INIT("");
 #endif
 
 
+
+#ifndef ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
+
 char ntpServerName[33] = {0};//  _INIT("0.wled.pool.ntp.org");   // NTP server to use
+            //Access point behavior
+            #define AP_BEHAVIOR_BOOT_NO_CONN          0     //Open AP when no connection after boot
+            #define AP_BEHAVIOR_NO_CONN               1     //Open when no connection (either after boot or if connection is lost)
+            #define AP_BEHAVIOR_ALWAYS                2     //Always open
+            #define AP_BEHAVIOR_BUTTON_ONLY           3     //Only when button pressed for 6 sec
 
-// #define MDNS_NAME DEVICENAME_CTR ".local"
-#define CLIENT_SSID "HACS2400"
-#define CLIENT_PASS "af4d8bc9ab"
-//Access point behavior
-#define AP_BEHAVIOR_BOOT_NO_CONN          0     //Open AP when no connection after boot
-#define AP_BEHAVIOR_NO_CONN               1     //Open when no connection (either after boot or if connection is lost)
-#define AP_BEHAVIOR_ALWAYS                2     //Always open
-#define AP_BEHAVIOR_BUTTON_ONLY           3     //Only when button pressed for 6 sec
+            // AP and OTA default passwords (for maximum security change them!)
+            char apPass[65]  = {0};//  _INIT(CLIENT_SSID);
+            char otaPass[33]  = {0};// _INIT("");
 
-// AP and OTA default passwords (for maximum security change them!)
-char apPass[65]  = {0};//  _INIT(CLIENT_SSID);
-char otaPass[33]  = {0};// _INIT("");
+            // WiFi CONFIG (all these can be changed via web UI, no need to set them here)
+            char clientSSID[33]   = {0};//_INIT(CLIENT_SSID);
+            char clientPass[65]  = {0};// _INIT(CLIENT_PASS);
+            // char cmDNS[] _INIT(MDNS_NAME);                       // mDNS address (*.local, replaced by wledXXXXXX if default is used)
+            char apSSID[33]  = {0};// _INIT("");                             // AP off by default (unless setup)
+            byte apChannel _INIT(1);                               // 2.4GHz WiFi AP channel (1-13)
+            byte apHide    _INIT(0);                               // hidden AP SSID
+            byte apBehavior _INIT(AP_BEHAVIOR_BOOT_NO_CONN);       // access point opens when no connection after boot by default
+            IPAddress staticIP   ;//   _INIT_N(((  0,   0,  0,  0))); // static IP of ESP
+            IPAddress staticGateway ;//_INIT_N(((  0,   0,  0,  0))); // gateway (router) IP
+            IPAddress staticSubnet;//  _INIT_N(((255, 255, 255, 0))); // most common subnet in home networks
+            #ifdef ARDUINO_ARCH_ESP32
+            bool noWifiSleep _INIT(true);                          // disabling modem sleep modes will increase heat output and power usage, but may help with connection issues
+            #else
+            bool noWifiSleep _INIT(false);
+            #endif
 
-// WiFi CONFIG (all these can be changed via web UI, no need to set them here)
-char clientSSID[33]   = {0};//_INIT(CLIENT_SSID);
-char clientPass[65]  = {0};// _INIT(CLIENT_PASS);
-// char cmDNS[] _INIT(MDNS_NAME);                       // mDNS address (*.local, replaced by wledXXXXXX if default is used)
-char apSSID[33]  = {0};// _INIT("");                             // AP off by default (unless setup)
-byte apChannel _INIT(1);                               // 2.4GHz WiFi AP channel (1-13)
-byte apHide    _INIT(0);                               // hidden AP SSID
-byte apBehavior _INIT(AP_BEHAVIOR_BOOT_NO_CONN);       // access point opens when no connection after boot by default
-IPAddress staticIP   ;//   _INIT_N(((  0,   0,  0,  0))); // static IP of ESP
-IPAddress staticGateway ;//_INIT_N(((  0,   0,  0,  0))); // gateway (router) IP
-IPAddress staticSubnet;//  _INIT_N(((255, 255, 255, 0))); // most common subnet in home networks
-#ifdef ARDUINO_ARCH_ESP32
-bool noWifiSleep _INIT(true);                          // disabling modem sleep modes will increase heat output and power usage, but may help with connection issues
-#else
-bool noWifiSleep _INIT(false);
 #endif
+
 typedef enum mapping1D2D {
   M12_Pixels = 0,
   M12_pBar = 1,

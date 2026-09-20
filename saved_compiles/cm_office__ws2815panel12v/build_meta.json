@@ -1,7 +1,7 @@
 {
   "env_name": "cm_office__ws2815panel12v",
-  "created_utc": "2026-09-19T07:48:45Z",
-  "created_epoch": 1789804125,
+  "created_utc": "2026-09-19T20:58:14Z",
+  "created_epoch": 1789851494,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "c20279c8d8c562ee56e33cbc5fbe9e2a0d28b8c8",
-    "describe": "c20279c8-dirty",
-    "status_short": "M build_verbose.txt\n M code/0_ConfigUser/Secret/00_Developing/Firmware__Testbeds.h\n M code/0_ConfigUser/Secret/00_Developing/Firmware__Validation.h\n M code/0_ConfigUser/Secret/01_DevelopingByTypes/FirmwareGroup_CellularDatalinks.h\n M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/2_CoreSystem/00_FirmwareDefaults/01_Base/mFirmwareDefaults_Base.h\n M code/2_CoreSystem/00_FirmwareDefaults/03_Lighting/mFirmwareDefaults_Lighting2.h\n M code/2_CoreSystem/mBaseConfig.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M platformio_compile_testers.ini\n M platformio_lgt.ini\n M platformio_meadows.ini\n M platformio_remote.ini\n M platformio_seasonal.ini\n M platformio_templates.ini\n M platformio_testbeds.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf"
+    "commit": "18f2a543fc4bde23839e8a323fb6b1821a26fa92",
+    "describe": "18f2a543-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/2_CoreSystem/00_FirmwareDefaults/03_Lighting/mFirmwareDefaults_Lighting.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/WebUI.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M code/6_Lights/03_Animator/xml.cpp\n M platformio_lgt.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf"
   }
 }

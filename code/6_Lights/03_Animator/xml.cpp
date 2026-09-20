@@ -204,6 +204,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
     printSetFormValue(settingsScript,PSTR("D3"),dnsAddress[3]);
 
     printSetFormValue(settingsScript,PSTR("CM"), tkr_web->cmDNS);
+    #ifndef ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
     printSetFormIndex(settingsScript,PSTR("AB"),apBehavior);
     printSetFormValue(settingsScript,PSTR("AS"),apSSID);
     printSetFormCheckbox(settingsScript,PSTR("AH"),apHide);
@@ -213,6 +214,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
     fapass[l] = 0;
     memset(fapass,'*',l);
     printSetFormValue(settingsScript,PSTR("AP"),0);//fapass);
+    #endif
 
     printSetFormValue(settingsScript,PSTR("AC"),0);//apChannel);
     #ifdef ARDUINO_ARCH_ESP32
@@ -505,7 +507,9 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
   if (subPage == SUBPAGE_TIME)
   {
     // printSetFormCheckbox(settingsScript,PSTR("NT"),ntpEnabled);
+    #ifndef ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
     printSetFormValue(settingsScript,PSTR("NS"),ntpServerName);
+    #endif
     // printSetFormCheckbox(settingsScript,PSTR("CF"),!useAMPM);
     // printSetFormIndex(settingsScript,PSTR("TZ"),currentTimezone);
     // printSetFormValue(settingsScript,PSTR("UO"),utcOffsetSecs);
