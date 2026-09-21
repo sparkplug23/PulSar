@@ -19,6 +19,8 @@ platformio_override.ini
 code/0_ConfigUser/G1_mUserConfig_Secret.h
 code/0_ConfigUser/G0_mFirmwareCustom_Secret.h
 
+saved_compiles/**/*.elf
+
 ## Visual Studio Code specific ######
 .vscode
 .vscode/.browse.c_cpp.db*
