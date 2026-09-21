@@ -86,7 +86,10 @@ int8_t mDisplaysInterface::Tasker(uint8_t function, JsonParserObject obj){
 void mDisplaysInterface::Pre_Init(void)
 {
   module_state.mode = ModuleStatus::Initialising;
-  
+ 
+  display.model = 0; // will autodetect based on i2c address
+
+
   tkr->Tasker_Interface(TASK_DISPLAY_INIT_DRIVER);
 
   #ifdef USE_MULTI_DISPLAY

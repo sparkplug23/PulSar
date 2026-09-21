@@ -1178,7 +1178,7 @@
 // #define D_CMND_RESET "CommandReset"
 
 
-
+#define D_LOG_SH1106 "SH6: "
 #define D_LOG_APPLICATION "APP: "  // Application
 // #define D_LOG_ASYNC "ASC: "
 #define D_LOG_BH1750 "BH1: "

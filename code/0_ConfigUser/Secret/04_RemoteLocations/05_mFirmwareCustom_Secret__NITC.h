@@ -896,10 +896,16 @@
 // [AP] IP: 192.168.50.1
 // [AP] MAC: 5C:01:3B:95:96:25
 
-#define STA_SSID4 "ServerLink32"
-#define STA_PASS4 "af4d8bc9ab"
-#define MQTT_HOST   "192.168.50.2" //ecit01818 wifi via esp32
+// #define STA_SSID4 "ServerLink32"
+// #define STA_PASS4 "af4d8bc9ab"
+// #define MQTT_HOST   "192.168.50.2" //ecit01818 wifi via esp32
+// #define MQTT_PORT     1883
+
+#define STA_SSID4 "ServerRoom"
+#define STA_PASS4 "20807429"
+#define MQTT_HOST   "10.10.10.18" //ecit01818 wifi via esp32
 #define MQTT_PORT     1883
+
 
 
 #define USE_NETWORK_TEMPLATE__OVERRIDE
@@ -940,16 +946,8 @@
             "\"SSID\":\"" STA_SSID1 "\","
             "\"Password\":\"" STA_PASS1 "\""
           "}"
-        "],"
+        "]"
 
-        "\"IPv4\":{"
-          "\"Static\":true,"
-          "\"IP\":\"192.168.50.50\","
-          "\"Subnet\":\"255.255.255.0\","
-          "\"Gateway\":\"0.0.0.0\","
-          "\"DNS1\":\"0.0.0.0\","
-          "\"DNS2\":\"0.0.0.0\""
-        "}"
       "},"
 
       "\"SoftAP\":{"
@@ -989,6 +987,92 @@
     "}"
   "}";
 
+// #define USE_NETWORK_TEMPLATE__OVERRIDE
+// #define USE_NETWORK_TEMPLATE
+//   DEFINE_PGM_CTR(NETWORK_TEMPLATE)
+//   "{"
+//     "\"Version\":2,"
+
+//     "\"Interface\":{"
+//       "\"Policy\":{"
+//         "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+//         "\"AllowMultipleActive\":true,"
+//         "\"BlockRemoteMqttWhenLocalAvailable\":true"
+//       "}"
+//     "},"
+
+//     "\"WiFi\":{"
+//       "\"EN\":true,"
+//       "\"Backoff\":[5,60,600],"
+
+//       "\"Mode\":{"
+//         "\"STA\":true,"
+//         "\"AP\":true,"
+//         "\"STA_AP\":true,"
+//         "\"APBootMins\":10,"
+//         "\"APOnSTAFail\":true,"
+//         "\"APFailDelayMins\":0,"
+//         "\"APAlwaysOn\":false"
+//       "},"
+
+//       "\"Station\":{"
+//         "\"Profiles\":["
+//           "{"
+//             "\"SSID\":\"" STA_SSID4 "\","
+//             "\"Password\":\"" STA_PASS4 "\""
+//           "},"
+//           "{"
+//             "\"SSID\":\"" STA_SSID1 "\","
+//             "\"Password\":\"" STA_PASS1 "\""
+//           "}"
+//         "],"
+
+//         "\"IPv4\":{"
+//           "\"Static\":true,"
+//           "\"IP\":\"192.168.50.50\","
+//           "\"Subnet\":\"255.255.255.0\","
+//           "\"Gateway\":\"0.0.0.0\","
+//           "\"DNS1\":\"0.0.0.0\","
+//           "\"DNS2\":\"0.0.0.0\""
+//         "}"
+//       "},"
+
+//       "\"SoftAP\":{"
+//         "\"SSID\":\"" SOFTAP_SSID "AmSen" "\","
+//         "\"Password\":\"" SOFTAP_PASSWORD "\","
+//         "\"Channel\":1"
+//       "}"
+//     "},"
+
+
+//     "\"MQTT\":{"
+//       "\"EN\":true,"
+
+//       "\"UpdateSeconds\":{"
+//         "\"IfChanged\":1,"
+//         "\"TelePeriod\":60,"
+//         "\"ConfigPeriod\":60"
+//       "},"
+
+//       "\"Brokers\":["
+//         "{"
+//           "\"Id\":\"home\","
+//           "\"EN\":true,"
+//           "\"Host\":\"" MQTT_HOST "\","
+//           "\"Port\":" STR(MQTT_PORT) ","
+//           "\"User\":\"\","
+//           "\"Password\":\"\","
+//           "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+//           "\"ClientName\":\"" DEVICENAME_CTR "\","
+//           "\"Backoff\":[5,10,60],"
+//           "\"Transport\":[\"Ethernet\",\"WiFi\"],"
+//           "\"PrefTransport\":[\"Ethernet\",\"WiFi\"],"
+//           "\"OutgoingLevel\":3,"
+//           "\"OutgoingLimiterMs\":0"
+//         "}"
+//       "]"
+//     "}"
+//   "}";
 
 // 1840 has the only esp32, which is the AP for now
 
