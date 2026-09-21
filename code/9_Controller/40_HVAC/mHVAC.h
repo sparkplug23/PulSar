@@ -339,8 +339,6 @@ class mHVAC :
     uint8_t ConstructJSON_ProgramTemps(uint8_t json_level = 0, bool json_appending = false);
 
     uint8_t ConstructJSON_ZoneSensors(uint8_t json_level = 0, bool json_appending = false);
-    uint8_t ConstructJSON_ZoneSensors_ROC1m(uint8_t json_level = 0, bool json_appending = false);
-    uint8_t ConstructJSON_ZoneSensors_ROC10m(uint8_t json_level = 0, bool json_appending = false);
 
     uint8_t ConstructJSON_ProgramActive(uint8_t json_level = 0, bool json_appending = false);
     uint8_t ConstructJSON_HardwareInfo(uint8_t json_level = 0, bool json_appending = false);
@@ -361,8 +359,6 @@ class mHVAC :
     struct telemetry_handler<mHVAC> telemetry_program_overview_teleperiod;
     struct telemetry_handler<mHVAC> telemetry_sensor_zone_ifchanged;
     struct telemetry_handler<mHVAC> telemetry_sensor_zone_teleperiod;
-    struct telemetry_handler<mHVAC> telemetry_sensor_zone_roc1m;
-    struct telemetry_handler<mHVAC> telemetry_sensor_zone_roc10m;
     struct telemetry_handler<mHVAC> telemetry_relays_ifchanged;
     struct telemetry_handler<mHVAC> telemetry_relays_teleperiod;  
     #endif // USE_MODULE_NETWORK_MQTT

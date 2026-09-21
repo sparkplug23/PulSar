@@ -20,14 +20,15 @@
 /// LANDING //////////////////////////////////////////////////////////////////////////////////
 
 /// HALLWAY //////////////////////////////////////////////////////////////////////////////////
-// #define DEVICE_MEADOWS__HALLWAY__VASE_LIGHT
+// #define DEVICE_MEADOWS__HALLWAY__BLUE_VASE_LIGHT
+// #define DEVICE_MEADOWS__HALLWAY__CONSUMER_UNIT_POWER
 /// MASTER BEDROOM ///////////////////////////////////////////////////////////////////////////
 // #define DEVICE_MEADOWS__MASTER_BEDROOM__BEDLIGHT
 // #define DEVICE_MEADOWS__ENSUITE_DOOR_FRAME
 // #define DEVICE_MEADOWS__HALLWAY__HEATING
 // #define DEVICE_MEADOWS__MASTER_BEDROOM__AMBIENT_SENSOR
 /// OFFICE ///////////////////////////////////////////////////////////////////////////////////
-#define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
+// #define DEVICE_MEADOWS__OFFICE__WS2815_PANEL_12V
 // #define DEVICE_MEADOWS__OFFICE__ELITE4DEXMU_01
 // #define DEVICE_MEADOWS__OFFICE__ELITE4DEXMU_02
 // #define DEVICE_MEADOWS__OFFICE__ELITE4DEXMU_03
@@ -1513,7 +1514,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   )=====";
   #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
   #define MAX_LED_MEMORY 64000*5
-  #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
 
   /***********************************
    * SECTION: Template Configs
@@ -1847,8 +1847,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
    * SECTION: Network Configs
   ************************************/    
 
-  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
-  
   /***********************************
    * SECTION: Sensor Configs
   ************************************/  
@@ -6222,10 +6220,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
-#define MQTT_HOST   "192.168.3.70"
-   
-   #define MQTT_PORT     1883
-    
+
   /***********************************
    * SECTION: System Configs
   ************************************/    
@@ -6327,8 +6322,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   #define DEVICENAME_DESCRIPTION_CTR "Template Description"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_PORT     1883
 
   /***********************************
    * SECTION: System Debug Options
@@ -6426,39 +6419,14 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   #define DEVICENAME_DESCRIPTION_CTR "Template Description"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_PORT     1883
-
-  // #define DEVICENAME_CTR          "treadmill_power_monitor"
-  // #define DEVICENAME_FRIENDLY_CTR "HVAC Desk DevPlatform"
-  // #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  // #define MQTT_HOST   "192.168.1.70" // primary
-  //   #define MQTT_PORT     1883
-    
-  #define SETTINGS_HOLDER 1239
-
 
   /***********************************
    * SECTION: System Debug Options
   ************************************/    
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE
-  
-  
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 
   /***********************************
    * SECTION: System Configs
   ************************************/     
-
 
   #define USE_MODULE_SENSORS_SUN_TRACKING
 
@@ -6475,7 +6443,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_SWITCHES
-    #
 
   /***********************************
    * SECTION: Display Configs
@@ -8212,33 +8179,6 @@ R"=====(
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
 
-  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
-
-  #define ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
-
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_DEFAULT
-
-
-  #define ENABLE_FEATURE_DEVELOPMENT_DEBUGGING__MQTT_UNIT_TEST_ECHO
-  #define ENABLE_FEATURE_LIGHTING__STANDBY_NEW
-
-  #define ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
-  // #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__SINGLE_PANEL
-  // #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__EIGHT_PANELS
-
-  #define   ENABLE_DEBUGFEATURE_WEB__TELEMETRY
-  // #define ENABLE_DEBUGFEATURE_TELEMETRY__MQTT_SEND_HEALTH_EVERY_SECOND
-
-  // #define ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES
-// #define ENABLE_FEATURE_WIFI__SSID_QUICK_CONNECT_AFTER_OTA
-  
-
-  #ifdef ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
-
-  // #define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
-  #define ENABLE_DEBUGFEATURE_LIGHTING__TRANSITION_ENDPOINT_PIXEL0
-
-  #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
 
   /***********************************
   * SECTION: Enable Grouped
@@ -8248,70 +8188,43 @@ R"=====(
   * SECTION: Network Configs
   ************************************/  
 
-  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
-
   /***********************************
    * SECTION: Lighting Configs
   ************************************/   
 
-  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+    /**************************************************************
+     * Normal/Debug Running Options (defines that are permenant)
+     **************************************************************/
+
+      // Normal
+
+        #define ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
+        // #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__SINGLE_PANEL
+        // #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__EIGHT_PANELS
+
+      // Debug   
+
+        #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+        #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
+
+    /**************************************************************
+     * Dev Options (defines that should be phased in, or erased)
+     **************************************************************/
+      // #define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+      #define ENABLE_DEBUGFEATURE_LIGHTING__TRANSITION_ENDPOINT_PIXEL0
+      #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES            
+      #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
+      #define ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
+      #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_DEFAULT
+      #define ENABLE_FEATURE_DEVELOPMENT_DEBUGGING__MQTT_UNIT_TEST_ECHO
+      #define ENABLE_FEATURE_LIGHTING__STANDBY_NEW    
+      #define   ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+      // #define ENABLE_DEBUGFEATURE_TELEMETRY__MQTT_SEND_HEALTH_EVERY_SECOND
+      // #define ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES
+      // #define ENABLE_FEATURE_WIFI__SSID_QUICK_CONNECT_AFTER_OTA      
 
 
-  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
-
-
-  // #define USE_MODULE_SENSORS_INTERFACE
-  // #define USE_MODULE_SENSORS_SUN_TRACKING      
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
-  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
-
-
-  //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
-
-  // #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
-  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
-  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
-
-  // #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
-
-  /**
-   * @brief 
-   * Need to add a new "realtime" system mode, which means ANYTHING not critical to the design in use, should have minimal impact
-   * In this case, if effects are running
-   * ** mqtt unless debugging, should reduce to 1hour at most (except health, make it 10 minutes)
-   * ** filesystem operations that are slow, reduce 
-   * 
-   */
-  
-  // #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 500
-
-
-  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
-  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
-  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
-
-  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
-
-  // #define USE_MODULE_NETWORK_WEBSERVER
-  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CORE
-  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__SHOW_BUILD_DATETIME
-  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
-  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
-  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
-  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__SHARED_STYLES
-
-  #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
-  // #define ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
-
-  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
-
-  /**
-   * @brief tree physical wiring connections
-   * 16 outputs
-   */
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -8495,7 +8408,7 @@ R"=====(
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+    
 
     /***********************************
      * SECTION: Lighting Configs
@@ -8769,7 +8682,7 @@ R"=====(
     * SECTION: Network Configs
     ************************************/  
 
-    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+    
 
     /***********************************
      * SECTION: Lighting Configs
@@ -8848,7 +8761,6 @@ R"=====(
     "}";
 
 
-  #endif
 
 #endif // END DEVICE
 

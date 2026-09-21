@@ -1,0 +1,25 @@
+{
+  "env_name": "cm_kitchen__glass_box",
+  "created_utc": "2026-09-20T22:29:21Z",
+  "created_epoch": 1789943361,
+  "project_dir": "U:\\GitHub\\PulSar",
+  "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_kitchen__glass_box",
+  "platform": "espressif32",
+  "board": "esp32dev",
+  "framework": [
+    "arduino"
+  ],
+  "copied": [
+    "firmware.bin",
+    "firmware.elf",
+    "firmware.map",
+    "partitions.bin",
+    "bootloader.bin"
+  ],
+  "git": {
+    "branch": "development",
+    "commit": "6bf60b41850b6e64e510c3d664b4c7385906eda5",
+    "describe": "6bf60b41-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/00_Interface/mBusNeoWrapper.h\n M code/6_Lights/03_Animator/_AnimatorLight.cpp\n M saved_compiles/cm_kitchen__glass_box/build_meta.json\n M saved_compiles/cm_kitchen__glass_box/firmware.elf\n M saved_compiles/nitc_office__elite4dexmu_01/build_meta.json\n M saved_compiles/nitc_office__elite4dexmu_01/firmware.elf\n M zplatformio_override.ini"
+  }
+}

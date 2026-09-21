@@ -1245,7 +1245,7 @@ if (jtok = obj["MQTTPixel"])
 
     SEGMENT.fill(0); // Clear all to off
 
-    uint8_t brightness = SEGMENT.getBrightnessRGB_WithGlobalApplied(); // Prefetch brightness
+    uint8_t brightness = tkr_iLight->getBri_Global();//SEGMENT.getBrightnessRGB_WithGlobalApplied(); // Prefetch brightness
     ALOG_INF(PSTR("brightness %d"), brightness);
 
     uint32_t colour;
@@ -1782,7 +1782,7 @@ if (jtok_pwi && jtok_pwi.isArray())
 
       SEGMENT.fill(0); // Clear all pixels
 
-      uint8_t brightness = SEGMENT.getBrightnessRGB_WithGlobalApplied(); // Prefetch brightness
+      uint8_t brightness = tkr_iLight->getBri_Global();// SEGMENT.getBrightnessRGB_WithGlobalApplied(); // Prefetch brightness
 
       JsonParserArray arrayOfArrays = jtok;
       JsonParserToken outerToken = arrayOfArrays;

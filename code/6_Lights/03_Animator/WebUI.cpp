@@ -5233,7 +5233,9 @@ void mAnimatorLight::Init(void) // tmp thrown in this file for wsevent
   #endif
   DEBUG_LINE_HERE4
 
-#ifndef ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
+  #ifndef ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
+  #define CLIENT_SSID "HACS2400"
+  #define CLIENT_PASS "af4d8bc9ab"
   sprintf(ntpServerName, NTP_SERVER1);  
   sprintf(apPass, CLIENT_SSID);
   sprintf(otaPass, "PulSar");
