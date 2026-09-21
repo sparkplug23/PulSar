@@ -1,4 +1,6 @@
 from pathlib import Path
+import os
+import shutil
 import subprocess
 import sys
 import time
@@ -17,6 +19,70 @@ REPORT_DIR = REPORT_ROOT / TIMESTAMP
 
 FULL_LOG_FILE = REPORT_DIR / "build_full.log"
 SUMMARY_FILE = REPORT_DIR / "build_summary.md"
+
+
+PLATFORMIO_ENV_VAR = "PLATFORMIO_EXE"
+
+
+def resolve_platformio_executable():
+    """Return a usable PlatformIO CLI executable path.
+
+    Resolution order:
+      1. PLATFORMIO_EXE environment variable
+      2. pio available on PATH
+      3. platformio available on PATH
+      4. Standard per-user PlatformIO Core virtualenv locations
+
+    This keeps the build matrix portable between machines where the VS Code
+    PlatformIO extension is installed but its CLI directory is not on PATH.
+    """
+    candidates = []
+
+    explicit = os.environ.get(PLATFORMIO_ENV_VAR, "").strip().strip('"')
+    if explicit:
+        candidates.append(Path(explicit).expanduser())
+
+    for name in ("pio", "platformio"):
+        resolved = shutil.which(name)
+        if resolved:
+            candidates.append(Path(resolved))
+
+    home = Path.home()
+    candidates.extend(
+        [
+            home / ".platformio" / "penv" / "Scripts" / "platformio.exe",
+            home / ".platformio" / "penv" / "Scripts" / "pio.exe",
+            home / ".platformio" / "penv" / "bin" / "platformio",
+            home / ".platformio" / "penv" / "bin" / "pio",
+        ]
+    )
+
+    seen = set()
+
+    for candidate in candidates:
+        try:
+            candidate = candidate.expanduser().resolve()
+        except OSError:
+            continue
+
+        key = str(candidate).lower() if os.name == "nt" else str(candidate)
+        if key in seen:
+            continue
+
+        seen.add(key)
+
+        if candidate.is_file():
+            return str(candidate)
+
+    searched = "\n".join(f"  - {candidate}" for candidate in candidates) or "  - no candidates found"
+
+    raise FileNotFoundError(
+        "PlatformIO CLI could not be found.\n"
+        "Install PlatformIO Core, add its Scripts/bin directory to PATH, or set "\
+        f"{PLATFORMIO_ENV_VAR} to the full PlatformIO executable path.\n"
+        "Candidates checked:\n"
+        f"{searched}"
+    )
 
 
 def strip_block_comments(text):
@@ -132,8 +198,8 @@ def get_git_info():
     return branch, commit, dirty
 
 
-def get_platformio_version():
-    return get_command_output(["pio", "--version"])
+def get_platformio_version(platformio_executable):
+    return get_command_output([platformio_executable, "--version"])
 
 
 def extract_failure_reason(output):
@@ -176,8 +242,8 @@ def extract_failure_reason(output):
     return "No failure reason detected."
 
 
-def run_build(target, log_handle):
-    command = ["pio", "run", "-e", target]
+def run_build(target, log_handle, platformio_executable):
+    command = [platformio_executable, "run", "-e", target]
 
     separator = "=" * 100
 
@@ -308,8 +374,16 @@ def main():
         print(f"No active build targets found in: {TARGETS_FILE}")
         return 1
 
+    try:
+        platformio_executable = resolve_platformio_executable()
+    except FileNotFoundError as exc:
+        print("")
+        print("ERROR: PlatformIO CLI not found.")
+        print(exc)
+        return 2
+
     branch, commit, dirty = get_git_info()
-    pio_version = get_platformio_version()
+    pio_version = get_platformio_version(platformio_executable)
 
     print("")
     print("PulSar Firmware Build Matrix")
@@ -317,6 +391,7 @@ def main():
     print(f"Targets : {len(targets)}")
     print(f"Source  : {TARGETS_FILE}")
     print(f"Reports : {REPORT_DIR}")
+    print(f"PIO CLI : {platformio_executable}")
     print("")
 
     results = []
@@ -332,6 +407,7 @@ def main():
         log_handle.write(f"Git commit        : {commit}\n")
         log_handle.write(f"Working tree dirty: {dirty}\n")
         log_handle.write(f"PlatformIO        : {pio_version}\n")
+        log_handle.write(f"PlatformIO CLI    : {platformio_executable}\n")
         log_handle.write(f"Targets           : {len(targets)}\n")
 
         for index, target in enumerate(targets, start=1):
@@ -339,7 +415,7 @@ def main():
             print(f"[{index}/{len(targets)}] Building {target}")
             print("-" * 100)
 
-            result = run_build(target, log_handle)
+            result = run_build(target, log_handle, platformio_executable)
             results.append(result)
 
             status = "SUCCESS" if result["success"] else "FAILED"
