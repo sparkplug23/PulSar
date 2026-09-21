@@ -1,0 +1,25 @@
+{
+  "env_name": "xmas26__meadows__front_tree_esp32s3_n16r8",
+  "created_utc": "2026-09-21T20:01:32Z",
+  "created_epoch": 1790020892,
+  "project_dir": "U:\\GitHub\\PulSar",
+  "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\xmas26__meadows__front_tree_esp32s3_n16r8",
+  "platform": "espressif32",
+  "board": "esp32-s3-devkitc-1",
+  "framework": [
+    "arduino"
+  ],
+  "copied": [
+    "firmware.bin",
+    "firmware.elf",
+    "firmware.map",
+    "partitions.bin",
+    "bootloader.bin"
+  ],
+  "git": {
+    "branch": "development",
+    "commit": "7edd15812313b5022d47da0af0d941bb7219a9ac",
+    "describe": "7edd1581-dirty",
+    "status_short": "M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/00_Interface/const.h\n M code/6_Lights/03_Animator/util.cpp\n M platformio_meadows.ini\n M platformio_seasonal.ini\n M saved_compiles/cm_kitchen__room_sensor/build_meta.json\n M saved_compiles/cm_kitchen__room_sensor/firmware.elf\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M saved_compiles/testbed__sensors_nextion/build_meta.json\n M tools/python_scripts/firmware_build_matrix/build_targets.c\n M zplatformio_config/platformio_base.ini\n M zplatformio_override.ini\n?? partitions/esp32s3_16mb_50_50_ota.csv\n?? saved_compiles/xmas26__meadows__front_tree_esp32s3_n16r8/"
+  }
+}

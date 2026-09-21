@@ -893,26 +893,24 @@ void *p_realloc_malloc(void *ptr, size_t size) {
 // optimises the use of memory types to balance speed and heap availability, always favours DRAM if possible
 // if multiple conflicting types are defined, the lowest bits of "type" take priority (see fcn_declare.h for types)
 void *allocate_buffer(size_t size, uint32_t type) {
-  
-    // DEBUG_PRINT_LN("HERE3");
   void *buffer = nullptr;
+
   #ifdef CONFIG_IDF_TARGET_ESP32
   // only classic ESP32 has "32bit accessible only" aka IRAM type. Using it frees up normal DRAM for other purposes
   // this memory region is used for IRAM_ATTR functions, whatever is left is unused and can be used for pixel buffers
   // prefer this type over PSRAM as it is slightly faster, except for _pixels where it is on-par as PSRAM-caching does a good job for mostly sequential access
   if (type & BFRALLOC_NOBYTEACCESS) {
-    
-    // DEBUG_PRINT_LN("HERE5");
-
     // prefer 32bit region, then PSRAM, fallback to any heap. Note: if adding "INTERNAL"-flag this wont work
     buffer = heap_caps_malloc_prefer(size, 3, MALLOC_CAP_32BIT, MALLOC_CAP_SPIRAM, MALLOC_CAP_8BIT);
     buffer = validateFreeHeap(buffer);
   }
   else
   #endif
+
   #if !defined(BOARD_HAS_PSRAM)
   buffer = d_malloc(size);
   #else
+
   if (type & BFRALLOC_PREFER_DRAM) {
     if (getContiguousFreeHeap() < 3*(MIN_HEAP_SIZE/2) + size && size > PSRAM_THRESHOLD)
       buffer = p_malloc(size); // prefer PSRAM for large allocations & when DRAM is low
@@ -923,44 +921,21 @@ void *allocate_buffer(size_t size, uint32_t type) {
     buffer = heap_caps_malloc(size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT); // use DRAM only, otherwise return nullptr
   else if (type & BFRALLOC_PREFER_PSRAM) {
     // if DRAM is plenty, prefer it over PSRAM for speed, reserve enough DRAM for segment data: if MAX_SEGMENT_DATA is exceeded, always uses PSRAM
-    if (getContiguousFreeHeap() > 4*MIN_HEAP_SIZE + size + ((uint32_t)(MAX_SEGMENT_DATA - Segment::getUsedSegmentData())))
+    if (getContiguousFreeHeap() > 4*MIN_HEAP_SIZE + size + ((uint32_t)(MAX_SEGMENT_DATA - mAnimatorLight::Segment::getUsedSegmentData())))
       buffer = d_malloc(size);
     else
       buffer = p_malloc(size); // prefer PSRAM
   }
   else if (type & BFRALLOC_ENFORCE_PSRAM)
-    buffer = p_malloc(size); // use PSRAM if available, fall back to DRAM if not (safeguard for boards without PSRAM #5629)
-  buffer = validateFreeHeap(buffer);
-  #endif
-  
-    // DEBUG_PRINT_LN("HERE4");
+    buffer = p_malloc(size); // use PSRAM if available, fall back to DRAM if not
 
+  buffer = validateFreeHeap(buffer);
+
+  #endif
 
   if (buffer && (type & BFRALLOC_CLEAR))
-    memset(buffer, 0, size); // clear allocated buffer
-  /*
-  #if !defined(ESP8266) && defined(WLED_DEBUG)
-  if (buffer) {
-    DEBUG_PRINTF_P(PSTR("*Buffer allocated: size:%d, address:%p"), size, (uintptr_t)buffer);
-    if ((uintptr_t)buffer > SOC_DRAM_LOW && (uintptr_t)buffer < SOC_DRAM_HIGH)
-      DEBUG_PRINTLN(F(" in DRAM"));
-    #ifndef CONFIG_IDF_TARGET_ESP32C3
-    else if ((uintptr_t)buffer > SOC_EXTRAM_DATA_LOW && (uintptr_t)buffer < SOC_EXTRAM_DATA_HIGH)
-      DEBUG_PRINTLN(F(" in PSRAM"));
-    #endif
-    #ifdef CONFIG_IDF_TARGET_ESP32
-    else if ((uintptr_t)buffer > SOC_IRAM_LOW && (uintptr_t)buffer < SOC_IRAM_HIGH)
-      DEBUG_PRINTLN(F(" in IRAM"));   // only used on ESP32 (MALLOC_CAP_32BIT)
-    #else
-    else if ((uintptr_t)buffer > SOC_RTC_DRAM_LOW && (uintptr_t)buffer < SOC_RTC_DRAM_HIGH)
-      DEBUG_PRINTLN(F(" in RTCRAM")); // not available on ESP32
-    #endif
-    else
-      DEBUG_PRINTLN(F(" in ???")); // unknown (check soc.h for other memory regions)
-  } else
-    DEBUG_PRINTF_P(PSTR("Buffer allocation failed: size:%d\n"), size);
-  #endif 
-  */
+    memset(buffer, 0, size);
+
   return buffer;
 }
 
