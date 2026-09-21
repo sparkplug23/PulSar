@@ -16,4 +16,11 @@ cm_hallway__bluevase_light
 cm_hallway__room_sensor
 cm_hallway__consumer_unit
 cm_hallway__heating
+cm_livingroom__pebbles
+cm_livingroom__tv
+cm_outside__fence_lights
+cm_outside__garage_tree
+cm_garage__room_sensor
+cm_garage__furnace
+cm_treadmill_power
 nitc_office__elite4dexmu_01

@@ -1422,10 +1422,12 @@ uint8_t getI(uint8_t busType, const uint8_t* pins, uint8_t num = 0)
 
               #else
                   #if defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT)
-                      if (num < 2) {
-                          offset_method_inside_group = num + 1;  // To skip that RMT was entered first in enum
-                      } else if (num < 9) {
-                          offset_method_inside_group = num - 7;
+                      if (num == 0) {
+                          offset_method_inside_group = 1; // I2S0
+                      } else if (num == 1) {
+                          offset_method_inside_group = 2; // I2S1
+                      } else if (num < 10) {
+                          offset_method_inside_group = 0; // RMT
                       } else {
                           return BUSTYPE__NONE__ID;
                       }

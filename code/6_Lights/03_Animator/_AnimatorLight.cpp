@@ -713,7 +713,12 @@ void mAnimatorLight::Init_Busses()
   {
     if(Bus::isDigital(bus.type) && !Bus::is2Pin(bus.type))
     {
+      #if defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT)
+      bus.channel = digital_bus_index >= 2 ? digital_bus_index - 2 : 0;
+      #else
       bus.channel = digital_bus_index;
+      #endif
+
       bus.iType = BusManager::getI(bus.type, bus.pins, digital_bus_index);
       digital_bus_index++;
     }
@@ -1149,37 +1154,61 @@ void mAnimatorLight::SubTask_RealTime_SetPixel()
 
 
 
+// void mAnimatorLight::EverySecond_AutoOff()
+// {
+
+//   for (Segment &seg : segments) 
+//   {
+  
+//     if(seg.auto_timeoff.UpdateTick())
+//     {
+//       ALOG_INF( PSTR(D_LOG_LED D_COMMAND_NVALUE_K("Running Value")), seg.auto_timeoff.Value());
+//     }
+
+//     if(seg.auto_timeoff.IsLastTick())
+//     {
+//       ALOG_INF(PSTR("Segment Turn OFF"));
+//       // Set intensity to make all LEDs refresh
+//       seg.intensity = 255;
+//       seg.single_animation_override.time_ms = seg.single_animation_override_turning_off.time_ms;// 1000; // slow and smooth turn off
+//       seg.cycle_time__rate_ms = seg.single_animation_override.time_ms+10; // exceed the time to turn off to let it cycle through
+
+//       ALOG_INF(PSTR("Setting override for off %d"), seg.single_animation_override.time_ms);
+
+//       tkr_anim->force_update();
+
+//       // seg.setBrightnessRGB(0);
+//       // seg.setBrightnessCCT(0);    
+//     }
+
+//   }
+
+// } // END EverySecond_AutoOff
 void mAnimatorLight::EverySecond_AutoOff()
 {
-
-  for (Segment &seg : segments) 
+  for (Segment &seg : segments)
   {
-  
     if(seg.auto_timeoff.UpdateTick())
     {
-      ALOG_INF( PSTR(D_LOG_LED D_COMMAND_NVALUE_K("Running Value")), seg.auto_timeoff.Value());
+      ALOG_INF(PSTR(D_LOG_LED D_COMMAND_NVALUE_K("AutoOff")), seg.auto_timeoff.Value());
     }
 
     if(seg.auto_timeoff.IsLastTick())
     {
       ALOG_INF(PSTR("Segment Turn OFF"));
-      // Set intensity to make all LEDs refresh
+
       seg.intensity = 255;
-      seg.single_animation_override.time_ms = seg.single_animation_override_turning_off.time_ms;// 1000; // slow and smooth turn off
-      seg.cycle_time__rate_ms = seg.single_animation_override.time_ms+10; // exceed the time to turn off to let it cycle through
+      seg.single_animation_override.time_ms = seg.single_animation_override_turning_off.time_ms;
+      seg.cycle_time__rate_ms = seg.single_animation_override.time_ms + 10;
 
       ALOG_INF(PSTR("Setting override for off %d"), seg.single_animation_override.time_ms);
 
       tkr_anim->force_update();
 
-      // seg.setBrightnessRGB(0);
-      // seg.setBrightnessCCT(0);    
+      tkr_iLight->CommandSet_Brt_255(0);
     }
-
   }
-
-} // END EverySecond_AutoOff
-
+}
 
 //get RGB values from color temperature in K (https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html)
 void mAnimatorLight::colorKtoRGB(uint16_t kelvin, byte* rgb) //white spectrum to rgb, calc

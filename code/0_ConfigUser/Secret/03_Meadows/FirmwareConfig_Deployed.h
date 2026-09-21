@@ -6220,10 +6220,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
-#define MQTT_HOST   "192.168.3.70"
-   
-   #define MQTT_PORT     1883
-    
+
   /***********************************
    * SECTION: System Configs
   ************************************/    
@@ -6325,8 +6322,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   #define DEVICENAME_DESCRIPTION_CTR "Template Description"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_PORT     1883
 
   /***********************************
    * SECTION: System Debug Options
@@ -6424,39 +6419,14 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   #define DEVICENAME_DESCRIPTION_CTR "Template Description"
   #endif
   #define DEVICENAME_ROOMHINT_CTR "template_roomhint"
-  #define MQTT_HOST   "192.168.3.70"
-    #define MQTT_PORT     1883
-
-  // #define DEVICENAME_CTR          "treadmill_power_monitor"
-  // #define DEVICENAME_FRIENDLY_CTR "HVAC Desk DevPlatform"
-  // #define DEVICENAME_ROOMHINT_CTR "Bedroom"
-  // #define MQTT_HOST   "192.168.1.70" // primary
-  //   #define MQTT_PORT     1883
-    
-  #define SETTINGS_HOLDER 1239
-
 
   /***********************************
    * SECTION: System Debug Options
   ************************************/    
-  // #define DISABLE_SERIAL
-  // #define DISABLE_SERIAL0_CORE
-  
-  
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // #define ENABLE_DEBUGFEATURE__OVERIDE_FASTBOOT_DISABLE
 
   /***********************************
    * SECTION: System Configs
   ************************************/     
-
 
   #define USE_MODULE_SENSORS_SUN_TRACKING
 
@@ -6473,7 +6443,6 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
   #define USE_MODULE_SENSORS_INTERFACE  
   #define USE_MODULE_SENSORS_SWITCHES
-    #
 
   /***********************************
    * SECTION: Display Configs
