@@ -8,7 +8,7 @@ from datetime import datetime
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parents[2]
 
-TARGETS_FILE = SCRIPT_DIR / "build_targets.txt"
+TARGETS_FILE = SCRIPT_DIR / "build_targets.c"
 
 REPORT_ROOT = SCRIPT_DIR / "build_reports"
 
@@ -19,19 +19,66 @@ FULL_LOG_FILE = REPORT_DIR / "build_full.log"
 SUMMARY_FILE = REPORT_DIR / "build_summary.md"
 
 
+def strip_block_comments(text):
+    output = []
+    index = 0
+    in_block_comment = False
+
+    while index < len(text):
+        if not in_block_comment and text.startswith("/*", index):
+            in_block_comment = True
+            index += 2
+            continue
+
+        if in_block_comment and text.startswith("*/", index):
+            in_block_comment = False
+            index += 2
+            continue
+
+        if in_block_comment:
+            if text[index] == "\n":
+                output.append("\n")
+
+            index += 1
+            continue
+
+        output.append(text[index])
+        index += 1
+
+    return "".join(output)
+
+
+def strip_line_comments(line):
+    comment_positions = []
+
+    slash_index = line.find("//")
+    if slash_index >= 0:
+        comment_positions.append(slash_index)
+
+    semicolon_index = line.find(";")
+    if semicolon_index >= 0:
+        comment_positions.append(semicolon_index)
+
+    if comment_positions:
+        line = line[:min(comment_positions)]
+
+    return line.strip()
+
+
 def load_targets():
     targets = []
 
     if not TARGETS_FILE.exists():
         raise FileNotFoundError(f"Target list not found: {TARGETS_FILE}")
 
-    for raw_line in TARGETS_FILE.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
+    raw_text = TARGETS_FILE.read_text(encoding="utf-8")
+
+    text_without_block_comments = strip_block_comments(raw_text)
+
+    for raw_line in text_without_block_comments.splitlines():
+        line = strip_line_comments(raw_line)
 
         if not line:
-            continue
-
-        if line.startswith("#"):
             continue
 
         targets.append(line)
@@ -208,6 +255,7 @@ def write_summary(results, overall_duration, branch, commit, dirty, pio_version)
     lines.append(f"- Git commit: `{commit or 'unknown'}`")
     lines.append(f"- Working tree dirty: `{dirty}`")
     lines.append(f"- PlatformIO: `{pio_version or 'unknown'}`")
+    lines.append(f"- Targets file: `{TARGETS_FILE.name}`")
     lines.append(f"- Targets: `{len(results)}`")
     lines.append(f"- Passed: `{passed}`")
     lines.append(f"- Failed: `{failed}`")
@@ -257,7 +305,7 @@ def main():
     targets = load_targets()
 
     if not targets:
-        print(f"No build targets found in: {TARGETS_FILE}")
+        print(f"No active build targets found in: {TARGETS_FILE}")
         return 1
 
     branch, commit, dirty = get_git_info()
@@ -267,6 +315,7 @@ def main():
     print("PulSar Firmware Build Matrix")
     print(f"Project : {PROJECT_ROOT}")
     print(f"Targets : {len(targets)}")
+    print(f"Source  : {TARGETS_FILE}")
     print(f"Reports : {REPORT_DIR}")
     print("")
 
@@ -278,6 +327,7 @@ def main():
         log_handle.write("PulSar Firmware Build Matrix\n")
         log_handle.write(f"Date              : {datetime.now().isoformat(timespec='seconds')}\n")
         log_handle.write(f"Project root      : {PROJECT_ROOT}\n")
+        log_handle.write(f"Targets file      : {TARGETS_FILE}\n")
         log_handle.write(f"Git branch        : {branch}\n")
         log_handle.write(f"Git commit        : {commit}\n")
         log_handle.write(f"Working tree dirty: {dirty}\n")

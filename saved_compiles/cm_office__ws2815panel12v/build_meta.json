@@ -1,7 +1,7 @@
 {
   "env_name": "cm_office__ws2815panel12v",
-  "created_utc": "2026-09-19T20:58:14Z",
-  "created_epoch": 1789851494,
+  "created_utc": "2026-09-21T16:07:38Z",
+  "created_epoch": 1790006858,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "18f2a543fc4bde23839e8a323fb6b1821a26fa92",
-    "describe": "18f2a543-dirty",
-    "status_short": "M code/0_ConfigUser/Secret/03_Meadows/FirmwareConfig_Deployed.h\n M code/2_CoreSystem/00_FirmwareDefaults/03_Lighting/mFirmwareDefaults_Lighting.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/WebUI.cpp\n M code/6_Lights/03_Animator/_AnimatorLight.h\n M code/6_Lights/03_Animator/xml.cpp\n M platformio_lgt.ini\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf"
+    "commit": "043769640aa9f7096e0c89ded0c4cb19719b81e2",
+    "describe": "04376964-dirty",
+    "status_short": "M code/2_CoreSystem/Version.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M tools/python_scripts/firmware_build_matrix/build_all.py\n D tools/python_scripts/firmware_build_matrix/build_targets.txt\n M zplatformio_override.ini\n?? tools/python_scripts/firmware_build_matrix/build_targets.c"
   }
 }
