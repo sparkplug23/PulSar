@@ -95,10 +95,10 @@ int8_t mOLED_SH1106::Tasker(uint8_t function, JsonParserObject obj)
 
 void mOLED_SH1106::Pre_Init(void)
 {
-  if (tkr_i2c->I2cEnabled(XI2C_04))
-  { 
+  // if (tkr_i2c->I2cEnabled(XI2C_04))
+  // { 
     module_state.mode = ModuleStatus::Running;
-  }
+  // }
 }
 
 
@@ -167,6 +167,8 @@ void mOLED_SH1106::InitDriver(void)
     {
       tkr_iDisp->display.address[0] = OLED_ADDRESS2;
       tkr_iDisp->display.model = D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID;
+    }else{
+      ALOG_INF(PSTR(D_LOG_SH1106 "Display not found"));
     }
   }else{
     ALOG_INF(PSTR(D_LOG_SH1106 "Model already set %d"), tkr_iDisp->display.model);
