@@ -162,26 +162,25 @@ bool mWebServer::HttpCheckPriviledgedAccess()
   return true; // admin by default
 }
 
-
-
-void mWebServer::createEditHandler(bool enable) 
+void mWebServer::createEditHandler(bool enable)
 {
-  if (editHandler != nullptr) server->removeHandler(editHandler);
-  if (enable) 
+  if(editHandler != nullptr)
+  {
+    server->removeHandler(editHandler);
+    editHandler = nullptr;
+  }
+
+  if(enable)
   {
     #ifdef USE_MODULE_CORE_FILESYSTEM
-      #ifdef ARDUINO_ARCH_ESP32
-      editHandler = &server->addHandler(new SPIFFSEditor(FILE_SYSTEM));
-      #else
-      editHandler = &server->addHandler(new SPIFFSEditor("","",FILE_SYSTEM));
-      #endif
+    editHandler = &server->addHandler(new FileEditor(FILE_SYSTEM));
     #else
-      editHandler = &server->on("/edit", HTTP_GET, [this](AsyncWebServerRequest *request){
-        this->serveMessage(request, 501, "Not implemented", F("The FS editor is disabled in this build."), 254);
-      });
+    editHandler = &server->on("/edit", HTTP_GET, [this](AsyncWebServerRequest *request){
+      this->serveMessage(request, 501, "Not implemented", F("The FS editor is disabled in this build."), 254);
+    });
     #endif
-  } 
-  else 
+  }
+  else
   {
     editHandler = &server->on("/edit", HTTP_ANY, [this](AsyncWebServerRequest *request){
       this->serveMessage(request, 500, "Access Denied", FPSTR(s_unlock_cfg), 254);
@@ -250,6 +249,36 @@ void mWebServer::serveMessage(AsyncWebServerRequest* request,
     }
   );
 }
+
+
+/**************************************************************************************************
+ * Shared output helpers
+ **************************************************************************************************/
+
+void mWebServer::PrintJSONString(Print& out, const char* str)
+{
+  if(!str) return;
+
+  while(*str)
+  {
+    const char c = *str++;
+
+    switch(c)
+    {
+      case '\\': out.print(F("\\\\")); break;
+      case '"':  out.print(F("\\\"")); break;
+      case '\b': out.print(F("\\b"));  break;
+      case '\f': out.print(F("\\f"));  break;
+      case '\n': out.print(F("\\n"));  break;
+      case '\r': out.print(F("\\r"));  break;
+      case '\t': out.print(F("\\t"));  break;
+      default:
+        if((uint8_t)c >= 32) out.print(c);
+      break;
+    }
+  }
+}
+
 
 
 #endif // USE_MODULE_NETWORK_WEBSERVER

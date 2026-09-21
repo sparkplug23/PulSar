@@ -1,20 +1,27 @@
 #include "_AnimatorLight.h"
 
 
-#ifdef ENABLE_FEATURE_LIGHTS__PRESETS
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PRESETS
 
 /*
  * Methods to handle saving and loading presets to/from the filesystem
  * TODO:I want to serialise the preset file and send over mqtt anytime it changes as debug
+ * 
+ * lets keep the preset as you gave it, update the other code to now work with u16. This is because I would like to index things into ranges of presets
+    <100 steady
+    100-500 flashy etc
+    preset 1000+
+
+    just because it makes it a lot easier to add new presets/playlists without worrying of collision. Of course my file space wont support that many at the same time, but this can lead to perhaps me making some custom presets that are "mine", then using like a python script to take from a toolbox of designed presets and build a custom preset.json for a device. We can simply make all preset names completely unique, think of this as "effects customed"
  */
 
 #ifdef ARDUINO_ARCH_ESP32
 static char *tmpRAMbuffer = nullptr;
 #endif
 
-static volatile byte presetToApply = 0;
+static volatile uint16_t presetToApply = PRESET_ID_NONE;
 static volatile byte callModeToApply = 0;
-static volatile byte presetToSave = 0;
+static volatile uint16_t presetToSave = PRESET_ID_NONE;
 static volatile int8_t saveLedmap = -1;
 static char *quickLoad = nullptr;
 static char *saveName = nullptr;
@@ -32,17 +39,17 @@ static const char* getPresetsMetaFileName() { //likely not needed, do direct lat
 }
 
 // Date Modified: 12Dec25
-#ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+#ifdef ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
 
 // Load metadata from /presets_meta.json
 bool mAnimatorLight::LoadPresetFileMeta(PresetFileMeta &meta)
 {
-  if (!JBI->requestJSONBufferLock(21)) {
+  if (!tkr_jsona->requestJSONBufferLock(21)) {
     ALOG_WRN(PSTR("LoadPresetFileMeta: failed to get JSON buffer lock"));
     return false;
   }
 
-  tkr_mfile->pDoc->clear();
+  tkr_jsona->pDoc->clear();
 
   char fname[33];
   strncpy_P(fname, presets_meta_json, 32);
@@ -53,50 +60,50 @@ bool mAnimatorLight::LoadPresetFileMeta(PresetFileMeta &meta)
     meta.enablePsn     = true;
     meta.parserVersion = kPresetMetaParserVersion;
     meta.lastScanMs    = 0;
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
     return false;
   }
 
   File f = FILE_SYSTEM.open(fname, "r");
   if (!f) {
     ALOG_WRN(PSTR("LoadPresetFileMeta: failed to open %s"), fname);
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
     return false;
   }
 
-  DeserializationError err = deserializeJson(*tkr_mfile->pDoc, f);
+  DeserializationError err = deserializeJson(*tkr_jsona->pDoc, f);
   f.close();
 
   if (err) {
     ALOG_WRN(PSTR("LoadPresetFileMeta: JSON parse error (%d)"), (int)err.code());
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
     return false;
   }
 
-  JsonObject m = tkr_mfile->pDoc->as<JsonObject>();
+  JsonObject m = tkr_jsona->pDoc->as<JsonObject>();
 
   meta.enablePsn              = (bool)(m["EnablePSN"]              | 1);
-  meta.enablePlaylistTimeLocks= (bool)(m["EnablePlaylistTimeLocks"]| 0); // default OFF
+  // meta.enablePlaylistTimeLocks= (bool)(m["EnablePlaylistTimeLocks"]| 0); // default OFF
   meta.parserVersion          = (uint8_t)(m["ParserVersion"]       | kPresetMetaParserVersion);
   meta.lastScanMs             = (uint32_t)(m["LastScanMs"]         | 0U);
 
-  JBI->releaseJSONBufferLock();
+  tkr_jsona->releaseJSONBufferLock();
   return true;
 }
 
 // Save metadata into /presets_meta.json
 bool mAnimatorLight::SavePresetFileMeta(const PresetFileMeta &meta)
 {
-  if (!JBI->requestJSONBufferLock(22)) {
+  if (!tkr_jsona->requestJSONBufferLock(22)) {
     ALOG_WRN(PSTR("SavePresetFileMeta: failed to get JSON buffer lock"));
     return false;
   }
 
-  tkr_mfile->pDoc->clear();
-  JsonObject m = tkr_mfile->pDoc->to<JsonObject>();
+  tkr_jsona->pDoc->clear();
+  JsonObject m = tkr_jsona->pDoc->to<JsonObject>();
 
   m["EnablePSN"]              = meta.enablePsn ? 1 : 0;
-  m["EnablePlaylistTimeLocks"]= meta.enablePlaylistTimeLocks ? 1 : 0;
+  // m["EnablePlaylistTimeLocks"]= meta.enablePlaylistTimeLocks ? 1 : 0;
   m["ParserVersion"]          = meta.parserVersion;
   m["LastScanMs"]             = meta.lastScanMs;
 
@@ -107,188 +114,93 @@ bool mAnimatorLight::SavePresetFileMeta(const PresetFileMeta &meta)
   File f = FILE_SYSTEM.open(fname, "w");
   if (!f) {
     ALOG_WRN(PSTR("SavePresetFileMeta: failed to open %s for write"), fname);
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
     return false;
   }
 
-  size_t written = serializeJson(*tkr_mfile->pDoc, f);
+  size_t written = serializeJson(*tkr_jsona->pDoc, f);
   f.close();
 
   if (written == 0) {
     ALOG_WRN(PSTR("SavePresetFileMeta: serializeJson wrote 0 bytes"));
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
     return false;
   }
 
   tkr_mfile->updateFSInfo();
-  JBI->releaseJSONBufferLock();
+  tkr_jsona->releaseJSONBufferLock();
   return true;
 }
 
-// Date Modified: 13Dec25
-bool mAnimatorLight::IsPlaylistTimeLocksEnabled()
-{
-#ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
-  PresetFileMeta meta;
-  if (!LoadPresetFileMeta(meta)) {
-    // If meta missing/unreadable, choose your default:
-    return false; // or true if you want it on by default
-  }
-  return meta.enablePlaylistTimeLocks;
-#else
-  return false;
-#endif
-}
-
-// Date Modified: 13Dec25
-#ifdef ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
-uint8_t mAnimatorLight::Playlist_SelectAllowedIndexByTime(JsonObject playlist, uint8_t currentIndex, uint16_t nowHHMM)
-{
-  if (!IsPlaylistTimeLocksEnabled()) return currentIndex;
-
-  JsonArray ps   = playlist["ps"];
-  if (ps.isNull()) return currentIndex;
-
-  uint8_t count = ps.size();
-  if (count == 0) return currentIndex;
-
-  JsonArray todS = playlist["todS"];
-  JsonArray todE = playlist["todE"];
-
-  // If no time arrays, nothing to do
-  if (todS.isNull() || todE.isNull()) return currentIndex;
-
-  uint8_t idx       = currentIndex;
-  uint8_t attempts  = 0;
-
-  while (attempts < count) {
-    int16_t s = 0;
-    int16_t e = 0;
-
-    if (idx < todS.size()) s = todS[idx] | 0;
-    if (idx < todE.size()) e = todE[idx] | 0;
-
-    if (playlistEntryAllowedAtTime(s, e, nowHHMM)) {
-      return idx; // allowed
-    }
-
-    // Skip this entry, move to next
-    idx = (idx + 1) % count;
-    attempts++;
-  }
-
-  // All entries locked out at this time. Options:
-  //  - return currentIndex (hold)
-  //  - or return some sentinel to pause playlist
-  return currentIndex;
-}
-#endif
-
-
-#endif // ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
-
-
-
-// // Date Modified: 12Dec25
-// #ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
-
-// // struct PresetFileMeta {
-// //   bool     enablePsn;     // 0/1: PSN helper enabled
-// //   uint8_t  parserVersion; // version of PSN parser logic
-// //   uint32_t lastScanMs;    // last PSN scan duration (ms)
-// // };
-
-// static const uint8_t kPresetMetaParserVersion = 1;
-
-// // Date Modified: 12Dec25
-// bool mAnimatorLight::LoadPresetFileMeta(PresetFileMeta &meta)
+// // Date Modified: 13Dec25
+// bool mAnimatorLight::IsPlaylistTimeLocksEnabled()
 // {
-//   // Try to read existing metadata from preset "0"
-//   if (!requestJSONBufferLock(21)) {
-//     ALOG_WRN(PSTR("LoadPresetFileMeta: failed to get JSON buffer lock"));
-//     return false;
+// #ifdef ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
+//   PresetFileMeta meta;
+//   if (!LoadPresetFileMeta(meta)) {
+//     // If meta missing/unreadable, choose your default:
+//     return false; // or true if you want it on by default
 //   }
+//   return meta.enablePlaylistTimeLocks;
+// #else
+//   return false;
+// #endif
+// }
 
-//   bool ok = tkr_mfile->readObjectFromFileUsingId(getPresetsFileName(), 0, tkr_mfile->pDoc);
-//   JsonObject m;
-//   bool needInit     = false;
-//   bool needRefresh  = false;
+// // Date Modified: 13Dec25
+// #ifdef ENABLE_FEATURE_LIGHTING__PLAYLIST_TIMELOCKS
+// uint8_t mAnimatorLight::Playlist_SelectAllowedIndexByTime(JsonObject playlist, uint8_t currentIndex, uint16_t nowHHMM)
+// {
+//   if (!IsPlaylistTimeLocksEnabled()) return currentIndex;
 
-//   if (ok) {
-//     m = tkr_mfile->pDoc->as<JsonObject>();
+//   JsonArray ps   = playlist["ps"];
+//   if (ps.isNull()) return currentIndex;
 
-//     // If "0" exists but is empty or missing fields, mark for refresh
-//     bool hasEnable     = m.containsKey("EnablePSN");
-//     bool hasParserVer  = m.containsKey("ParserVersion");
-//     bool hasLastScanMs = m.containsKey("LastScanMs");
+//   uint8_t count = ps.size();
+//   if (count == 0) return currentIndex;
 
-//     if (!hasEnable && !hasParserVer && !hasLastScanMs) {
-//       // old style "0": {} or garbage, treat as missing
-//       needInit = true;
-//     } else {
-//       // fill with defaults + existing values
-//       meta.enablePsn     = (bool)(m["EnablePSN"]     | 1); // default ON
-//       meta.parserVersion = (uint8_t)(m["ParserVersion"] | kPresetMetaParserVersion);
-//       meta.lastScanMs    = (uint32_t)(m["LastScanMs"] | 0U);
+//   JsonArray todS = playlist["todS"];
+//   JsonArray todE = playlist["todE"];
 
-//       // if some fields are missing, we will rewrite header with full set
-//       needRefresh = (!hasEnable || !hasParserVer || !hasLastScanMs);
+//   // If no time arrays, nothing to do
+//   if (todS.isNull() || todE.isNull()) return currentIndex;
+
+//   uint8_t idx       = currentIndex;
+//   uint8_t attempts  = 0;
+
+//   while (attempts < count) {
+//     int16_t s = 0;
+//     int16_t e = 0;
+
+//     if (idx < todS.size()) s = todS[idx] | 0;
+//     if (idx < todE.size()) e = todE[idx] | 0;
+
+//     if (playlistEntryAllowedAtTime(s, e, nowHHMM)) {
+//       return idx; // allowed
 //     }
-//   } else {
-//     // No preset "0" at all → need full initialisation
-//     needInit = true;
+
+//     // Skip this entry, move to next
+//     idx = (idx + 1) % count;
+//     attempts++;
 //   }
 
-//   releaseJSONBufferLock();
-
-//   if (needInit) {
-//     // Initialise fresh metadata and write it
-//     meta.enablePsn     = true;
-//     meta.parserVersion = kPresetMetaParserVersion;
-//     meta.lastScanMs    = 0;
-//     ALOG_INF(PSTR("LoadPresetFileMeta: creating metadata in presets.json[0]"));
-//     SavePresetFileMeta(meta);
-//     return true;
-//   }
-
-//   if (needRefresh) {
-//     ALOG_INF(PSTR("LoadPresetFileMeta: refreshing missing metadata fields in presets.json[0]"));
-//     SavePresetFileMeta(meta);
-//   }
-
-//   // If we got here, either we successfully loaded existing meta,
-//   // or we refreshed it; in both cases `meta` is valid.
-//   return ok;
+//   // All entries locked out at this time. Options:
+//   //  - return currentIndex (hold)
+//   //  - or return some sentinel to pause playlist
+//   return currentIndex;
 // }
 
 
-// // Save metadata into preset "0"
-// void mAnimatorLight::SavePresetFileMeta(const PresetFileMeta &meta)
-// {
-//   if (!requestJSONBufferLock(22)) return;
-
-//   tkr_mfile->pDoc->clear();  // make sure we start from a clean doc
-
-//   JsonObject m = tkr_mfile->pDoc->to<JsonObject>();
-//   m["EnablePSN"]     = meta.enablePsn ? 1 : 0;
-//   m["ParserVersion"] = meta.parserVersion;
-//   m["LastScanMs"]    = meta.lastScanMs;
-
-//   tkr_mfile->writeObjectToFileUsingId(getPresetsFileName(), 0, tkr_mfile->pDoc);
-
-//   releaseJSONBufferLock();
-// }
-
-// #endif // ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+// #endif
 
 
-
+#endif // ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
 
 
 void mAnimatorLight::doSaveState() 
 {
 
-  #ifdef ENABLE_FEATURE_LIGHTS__PRESETS_DEBUG
+  #ifdef ENABLE_FEATURE_LIGHTING__PRESETS__DEBUG
   ALOG_INF(PSTR("doSaveState() START"));
   // CommandSet_ReadFile("/presets.json");
   #endif
@@ -296,19 +208,19 @@ void mAnimatorLight::doSaveState()
   unsigned long start = millis();
   while (isUpdating() && millis()-start < (2*FRAMETIME)+1) yield(); // wait 2 frames
 
-  bool persist = (presetToSave < 251);
+  bool persist = (presetToSave != PRESET_ID_TEMP);
   const char *filename = getPresetsFileName(persist);
   
-  if (!JBI->requestJSONBufferLock(10)) return; // will set gDoc
+  if (!tkr_jsona->requestJSONBufferLock(10)) return; // will set gDoc
 
   initPresetsFile(); // just in case if someone deleted presets.json using /edit
 
-  JsonObject sObj = tkr_mfile->pDoc->to<JsonObject>(); //needs done
+  JsonObject sObj = tkr_jsona->pDoc->to<JsonObject>(); //needs done
 
   DEBUG_PRINTLN(F("Serialize current state"));
     
 
-  #ifdef ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_BY_NAME_AUTOGENERATE_ID_LIST
+  #ifdef ENABLE_FEATURE_LIGHTING__PLAYLISTS__AUTOGENERATE_ID_LIST
 
 
   #else
@@ -317,7 +229,7 @@ void mAnimatorLight::doSaveState()
   if (playlistSave) 
   {
   
-    #ifdef ENABLE_FEATURE_LIGHTS__PLAYLISTS
+    #ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
     serializePlaylist(sObj);
     #endif
   
@@ -349,7 +261,7 @@ void mAnimatorLight::doSaveState()
 
     if (tmpRAMbuffer!=nullptr) free(tmpRAMbuffer);
 
-    size_t len = measureJson(*tkr_mfile->pDoc) + 1;
+    size_t len = measureJson(*tkr_jsona->pDoc) + 1;
 
     ALOG_INF(PSTR("JSON Len=%d"),len);
   
@@ -365,20 +277,20 @@ void mAnimatorLight::doSaveState()
     if (tmpRAMbuffer!=nullptr) 
     {
         
-      serializeJson(*tkr_mfile->pDoc, tmpRAMbuffer, len);
+      serializeJson(*tkr_jsona->pDoc, tmpRAMbuffer, len);
       
     }
     else
     {
   
-      tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_mfile->pDoc);
+      tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_jsona->pDoc);
   
     }
   } 
   else
   {
   
-    tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_mfile->pDoc);
+    tkr_mfile->writeObjectToFileUsingId(filename, presetToSave, tkr_jsona->pDoc);
   
   }
   #endif
@@ -387,22 +299,18 @@ void mAnimatorLight::doSaveState()
   
   
 
-  JBI->releaseJSONBufferLock();
-
-  
+  tkr_jsona->releaseJSONBufferLock();
 
   tkr_mfile->updateFSInfo();
 
-  
-
   // clean up
   saveLedmap   = -1;
-  presetToSave = 0;
+  presetToSave = PRESET_ID_NONE;
   saveName[0]  = '\0';
   quickLoad[0] = '\0';
   playlistSave = false;
 
-  #ifdef ENABLE_FEATURE_LIGHTS__PRESETS_DEBUG
+  #ifdef ENABLE_FEATURE_LIGHTING__PRESETS__DEBUG
   ALOG_INF(PSTR("doSaveState() END"));
   // CommandSet_ReadFile("/presets.json");
   #endif
@@ -410,25 +318,25 @@ void mAnimatorLight::doSaveState()
 }
 
 
-bool mAnimatorLight::getPresetName(byte index, String& name)
+bool mAnimatorLight::getPresetName(uint16_t index, String& name)
 {
 
-  if (!JBI->requestJSONBufferLock(9))
+  if (!tkr_jsona->requestJSONBufferLock(9))
   {
     ALOG_INF(PSTR("getPresetName() failed to get JSON buffer lock"));
     return false;  
   }  
   
   bool presetExists = false;
-  if (tkr_mfile->readObjectFromFileUsingId(getPresetsFileName(), index, tkr_mfile->pDoc))
+  if (tkr_mfile->readObjectFromFileUsingId(getPresetsFileName(), index, tkr_jsona->pDoc))
   {
-    JsonObject fdo = tkr_mfile->pDoc->as<JsonObject>();
+    JsonObject fdo = tkr_jsona->pDoc->as<JsonObject>();
     if (fdo["n"]) {
       name = (const char*)(fdo["n"]);
       presetExists = true;
     }
   }
-  JBI->releaseJSONBufferLock();
+  tkr_jsona->releaseJSONBufferLock();
   return presetExists;
 
 }
@@ -442,7 +350,7 @@ void mAnimatorLight::initPresetsFile()
 
   if (FILE_SYSTEM.exists(fileName)) return;
 
-  #ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+  #ifdef ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
     // Create presets.json with metadata object at "0"
     StaticJsonDocument<128> doc;
     JsonObject root = doc.to<JsonObject>();
@@ -475,7 +383,7 @@ void mAnimatorLight::initPresetsFile()
 }
 
 
-bool mAnimatorLight::applyPreset(byte index, byte callMode)
+bool mAnimatorLight::applyPreset(uint16_t index, byte callMode)
 {
   ALOG_INF(PSTR("Request to apply preset: %d"), index);
   presetToApply = index;
@@ -485,7 +393,7 @@ bool mAnimatorLight::applyPreset(byte index, byte callMode)
 
 
 // apply preset or fallback to a effect and palette if it doesn't exist
-void mAnimatorLight::applyPresetWithFallback(uint8_t index, uint8_t callMode, uint8_t effectID, uint8_t paletteID)
+void mAnimatorLight::applyPresetWithFallback(uint16_t index, uint8_t callMode, uint16_t effectID, uint8_t paletteID)
 {
   applyPreset(index, callMode);  
   effectCurrent = effectID; // these two will be overwritten if preset exists in SubTask_Presets()
@@ -507,7 +415,7 @@ void mAnimatorLight::SubTask_Presets()
     return;
   }
 
-  if (presetToApply == 0 || !JBI->requestJSONBufferLock(9))
+  if (presetToApply == 0 || !tkr_jsona->requestJSONBufferLock(9))
   {
     // ALOG_INF(PSTR("(presetToApply == 0 || gDoc)()"));    
     return; // no preset waiting to apply, or JSON buffer is already allocated, return to loop until free
@@ -519,18 +427,18 @@ void mAnimatorLight::SubTask_Presets()
   
 
   bool changePreset = false;
-  uint8_t tmpPreset = presetToApply; // store temporary since deserializeState() may call applyPreset()
+  uint16_t tmpPreset = presetToApply; // store temporary since deserializeState() may call applyPreset()
   uint8_t tmpMode   = callModeToApply;
  
   
 
   JsonObject fdo;
-  const char *filename = getPresetsFileName(tmpPreset < 255);
+  const char *filename = getPresetsFileName(tmpPreset != PRESET_ID_TEMP);
 
   // allocate buffer
   // if (!requestJSONBufferLock(9)) return;  // will also assign gDoc
 
-  presetToApply = 0; //clear request for preset
+  presetToApply = PRESET_ID_NONE; //clear request for preset
   callModeToApply = 0;
 
   ALOG_INF(PSTR("Applying preset:%d"), tmpPreset);
@@ -541,9 +449,9 @@ void mAnimatorLight::SubTask_Presets()
   #endif
 
   #ifdef ARDUINO_ARCH_ESP32
-  if (tmpPreset==255 && tmpRAMbuffer!=nullptr) 
+  if (tmpPreset==PRESET_ID_TEMP && tmpRAMbuffer!=nullptr) 
   { 
-    deserializeJson(*tkr_mfile->pDoc,tmpRAMbuffer);
+    deserializeJson(*tkr_jsona->pDoc,tmpRAMbuffer);
     tkr_mfile->errorFlag = ERR_NONE;
   } 
   else
@@ -551,13 +459,13 @@ void mAnimatorLight::SubTask_Presets()
   { 
 
 
-    tkr_mfile->errorFlag = tkr_mfile->readObjectFromFileUsingId(filename, tmpPreset, tkr_mfile->pDoc) ? ERR_NONE : ERR_FS_PLOAD;
+    tkr_mfile->errorFlag = tkr_mfile->readObjectFromFileUsingId(filename, tmpPreset, tkr_jsona->pDoc) ? ERR_NONE : ERR_FS_PLOAD;
 
   } 
 
   
 
-  fdo = tkr_mfile->pDoc->as<JsonObject>();
+  fdo = tkr_jsona->pDoc->as<JsonObject>();
 
   
 
@@ -577,7 +485,7 @@ void mAnimatorLight::SubTask_Presets()
     data_buffer.ClearSoft();
 
     // Serialise from ArduinoJson into buffer for parser to load
-    serializeJson(*tkr_mfile->pDoc, data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr));
+    serializeJson(*tkr_jsona->pDoc, data_buffer.payload.ctr, sizeof(data_buffer.payload.ctr));
 
     LoggingLevels level = LOG_LEVEL_INFO;
     #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
@@ -618,11 +526,20 @@ void mAnimatorLight::SubTask_Presets()
     if (!fdo["seg"].isNull() || !fdo["on"].isNull() || !fdo["bri"].isNull() || !fdo["nl"].isNull() || !fdo["ps"].isNull() || !fdo[F("playlist")].isNull()) changePreset = true;
     if (!(tmpMode == CALL_MODE_BUTTON_PRESET && fdo["ps"].is<const char *>() && strchr(fdo["ps"].as<const char *>(),'~') != strrchr(fdo["ps"].as<const char *>(),'~')))
       fdo.remove("ps"); // remove load request for presets to prevent recursive crash (if not called by button and contains preset cycling string "1~5~")
-    deserializeState(fdo, CALL_MODE_NO_NOTIFY, tmpPreset); // may change presetToApply by calling applyPreset()
+    // deserializeState(fdo, CALL_MODE_NO_NOTIFY, tmpPreset); // may change presetToApply by calling applyPreset()
+
+    if (!fdo[F("playlist")].isNull() ||
+    !fdo["seg"].isNull() ||
+    !fdo["on"].isNull() ||
+    !fdo["bri"].isNull() ||
+    !fdo["nl"].isNull())
+    {
+      deserializeState(fdo, CALL_MODE_NO_NOTIFY, tmpPreset);
+    }
 
   }
 
-  if (!tkr_mfile->errorFlag && tmpPreset < 255 && changePreset)
+  if (!tkr_mfile->errorFlag && tmpPreset != PRESET_ID_TEMP && changePreset)
   {
     presetCycCurr = currentPreset = tmpPreset;
   }
@@ -631,7 +548,7 @@ void mAnimatorLight::SubTask_Presets()
 
   #if defined(ARDUINO_ARCH_ESP32)
   //Aircoookie recommended not to delete buffer
-  if (tmpPreset==255 && tmpRAMbuffer!=nullptr) {
+  if (tmpPreset==PRESET_ID_TEMP && tmpRAMbuffer!=nullptr) {
     free(tmpRAMbuffer);
     tmpRAMbuffer = nullptr;
   }
@@ -639,18 +556,19 @@ void mAnimatorLight::SubTask_Presets()
 
   
 
-  JBI->releaseJSONBufferLock(); // will also clear gDoc
+  tkr_jsona->releaseJSONBufferLock(); // will also clear gDoc
 
   if (changePreset) notify(tmpMode); // force UDP notification
 
-  // stateUpdated(tmpMode);  // was colorUpdated() if anything breaks
+  stateUpdated(tmpMode);  // was colorUpdated() if anything breaks
   Serial.println("stateUpdated() missing");
-  // updateInterfaces(tmpMode);
+  updateInterfaces(tmpMode);
   Serial.println("updateInterfaces() missing");
+
 
 }
 
-#ifdef ENABLE_FEATURE_LIGHTS__DEMO_MODE
+#ifdef ENABLE_FEATURE_LIGHTING__DEMO_MODE
 void mAnimatorLight::SubTask_Demo()
 {
 
@@ -659,16 +577,16 @@ void mAnimatorLight::SubTask_Demo()
 
 
 //called from handle__HTTP__GET_QueryAPI(PS=) [network callback (gDoc==nullptr), IR (irrational), deserializeState, UDP] and deserializeState() [network callback (filedoc!=nullptr)]
-void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
+void mAnimatorLight::savePreset(uint16_t index, const char* pname, JsonObject sObj)
 {
 
   ALOG_INF(PSTR(DEBUG_INSERT_PAGE_BREAK "savePreset()"));
 
-  if (index == 0 || (index > 250 && index < 255)) return;
+  if (index == PRESET_ID_NONE) return;
   if (pname) strlcpy(saveName, pname, 33);
   else {
     if (sObj["n"].is<const char*>()) strlcpy(saveName, sObj["n"].as<const char*>(), 33);
-    else                             sprintf_P(saveName, PSTR("Preset %d"), index);
+    else                             sprintf_P(saveName, PSTR("Preset %u"), index);
   }
 
   DEBUG_PRINT(F("Saving preset (")); DEBUG_PRINT(index); DEBUG_PRINT(F(") ")); DEBUG_PRINTLN(saveName);
@@ -683,8 +601,8 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
   if (sObj["o"].isNull()) 
   { // no "o" means not a playlist or custom API call, saving of state is async (not immediately)
 
-    includeBri   = sObj["ib"].as<bool>() || index==255; // temporary preset needs brightness
-    segBounds    = sObj["sb"].as<bool>() || index==255; // temporary preset needs bounds
+    includeBri   = sObj["ib"].as<bool>() || index==PRESET_ID_TEMP; // temporary preset needs brightness
+    segBounds    = sObj["sb"].as<bool>() || index==PRESET_ID_TEMP; // temporary preset needs bounds
     selectedOnly = sObj[F("sc")].as<bool>();
     saveLedmap   = sObj[F("ledmap")] | -1;
 
@@ -696,8 +614,8 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
     if (sObj[F("playlist")].isNull()) 
     {
       // we will save API call immediately (often causes presets.json corruption)
-      presetToSave = 0;
-      if (index > 250 || !tkr_mfile->pDoc) return; // cannot save API calls to temporary preset (255)
+      presetToSave = PRESET_ID_NONE;
+      if (index == PRESET_ID_TEMP || !tkr_jsona->pDoc) return; // cannot save API calls to temporary preset
       sObj.remove("o");
       sObj.remove("v");
       sObj.remove("time");
@@ -705,7 +623,7 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
       sObj.remove(F("psave"));
       if (sObj["n"].isNull()) sObj["n"] = saveName;
       initPresetsFile(); // just in case if someone deleted presets.json using /edit
-      tkr_mfile->writeObjectToFileUsingId(getPresetsFileName(index<255), index, tkr_mfile->pDoc);    
+      tkr_mfile->writeObjectToFileUsingId(getPresetsFileName(index != PRESET_ID_TEMP), index, tkr_jsona->pDoc);    
       
       tkr_mfile->presetsModifiedTime = toki.second(); //unix time  
 
@@ -728,7 +646,7 @@ void mAnimatorLight::savePreset(byte index, const char* pname, JsonObject sObj)
 }
 
 
-void mAnimatorLight::deletePreset(byte index) 
+void mAnimatorLight::deletePreset(uint16_t index) 
 {
 
   StaticJsonDocument<24> empty;
@@ -741,11 +659,11 @@ void mAnimatorLight::deletePreset(byte index)
 
 void mAnimatorLight::ScanPresetsFile_GeneratePlaylistIDsFromPSN_2()
 {
-  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN2() begin"));  Serial.flush();
+  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN_2() begin"));  Serial.flush();
 
   uint32_t t_start = millis();
 
-  #ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+  #ifdef ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
   PresetFileMeta meta;
   bool haveMeta = LoadPresetFileMeta(meta);
 
@@ -765,14 +683,14 @@ void mAnimatorLight::ScanPresetsFile_GeneratePlaylistIDsFromPSN_2()
   strncpy_P(presetsFileName, getPresetsFileName(true), 32);
   presetsFileName[32] = '\0';
 
-  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN() %s"),presetsFileName);  Serial.flush();
+  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN_2() %s"),presetsFileName);  Serial.flush();
 
   // Sanity: if presets.json doesn't exist, nothing to do
   if (!FILE_SYSTEM.exists(presetsFileName)) {
     ALOG_WRN(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN: %s not found"), presetsFileName);
     return;
   }
-  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN() B"));  Serial.flush();
+  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN_2() B"));  Serial.flush();
 
 #ifdef ENABLE_DEBUGFEATURE_LIGHTING__PLAYLIST_PSN_TO_PS_CREATE_BACKUP_FILE
   // --- Create backup: presets_bu.json ---
@@ -951,7 +869,7 @@ void mAnimatorLight::ScanPresetsFile_GeneratePlaylistIDsFromPSN_2()
   }
 
 
-#ifdef ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
+#ifdef ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
   uint32_t t_elapsed = millis() - t_start;
 
   meta.parserVersion = kPresetMetaParserVersion;
@@ -965,9 +883,9 @@ ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN_2() end, took %u ms"),
          (unsigned)t_elapsed);
 
 
-  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN() end"));
+  ALOG_INF(PSTR("ScanPresetsFile_GeneratePlaylistIDsFromPSN_2() end"));
   Serial.flush();
 }
 
 
-#endif // ENABLE_FEATURE_LIGHTS__PRESETS
+#endif // ENABLE_FEATURE_LIGHTING__CORE__PRESETS

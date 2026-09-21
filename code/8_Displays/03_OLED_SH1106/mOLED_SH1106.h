@@ -42,7 +42,7 @@ class mOLED_SH1106 :
     void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static constexpr const char* PM_MODULE_DISPLAYS_OLED_SH1106_CTR = D_MODULE_DISPLAYS_OLED_SH1106_CTR;
+    static constexpr const char* PM_MODULE_DISPLAYS_OLED_SH1106_CTR = D_MODULE__DISPLAYS__OLED_SH1106__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DISPLAYS_OLED_SH1106_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DISPLAYS_OLED_SH1106_ID; }
    
@@ -89,10 +89,10 @@ class mOLED_SH1106 :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mOLED_SH1106>*> mqtthandler_list;
-    struct handler<mOLED_SH1106> mqtthandler_settings;
-    struct handler<mOLED_SH1106> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mOLED_SH1106>*> telemetry_list;
+    struct telemetry_handler<mOLED_SH1106> telemetry_settings;
+    struct telemetry_handler<mOLED_SH1106> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
     

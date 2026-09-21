@@ -3,9 +3,14 @@
 
 #define D_UNIQUE_MODULE_DRIVERS_BUZZER_BASIC_ID   4020 // [(Folder_Number*100)+ID_File]
 
+
+
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
+
+this and tones need rolled into one module
+
 
 class mBuzzerBasic :
   public mTaskerInterface
@@ -20,7 +25,7 @@ class mBuzzerBasic :
     void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static constexpr const char* PM_MODULE_DRIVERS_BUZZER_CTR = D_MODULE_DRIVERS_BUZZER_CTR;
+    static constexpr const char* PM_MODULE_DRIVERS_BUZZER_CTR = D_MODULE__DRIVERS__BUZZER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_BUZZER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_BUZZER_BASIC_ID; }
    
@@ -83,10 +88,10 @@ class mBuzzerBasic :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mBuzzerBasic>*> mqtthandler_list;
-    struct handler<mBuzzerBasic> mqtthandler_settings;
-    struct handler<mBuzzerBasic> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mBuzzerBasic>*> telemetry_list;
+    struct telemetry_handler<mBuzzerBasic> telemetry_settings;
+    struct telemetry_handler<mBuzzerBasic> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
     
 };

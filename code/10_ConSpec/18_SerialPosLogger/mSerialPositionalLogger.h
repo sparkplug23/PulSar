@@ -42,7 +42,7 @@ class mSerialPositionalLogger :
     void Pre_Init(void);
     void Init(void);
     
-    static constexpr const char* PM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_CTR = D_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_CTR = D_MODULE__CONTROLLER_CUSTOM__POSITIONAL_LOGGER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_SERIAL_POSITIONAL_LOGGER_ID; }
 
@@ -129,25 +129,25 @@ class mSerialPositionalLogger :
 
   
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mSerialPositionalLogger> mqtthandler_settings;
-    struct handler<mSerialPositionalLogger> mqtthandler_sensor_ifchanged;
-    struct handler<mSerialPositionalLogger> mqtthandler_sensor_teleperiod;
-    struct handler<mSerialPositionalLogger> mqtthandler_sdcard_superframe;
+    struct telemetry_handler<mSerialPositionalLogger> telemetry_settings;
+    struct telemetry_handler<mSerialPositionalLogger> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mSerialPositionalLogger> telemetry_sensor_teleperiod;
+    struct telemetry_handler<mSerialPositionalLogger> telemetry_sdcard_superframe;
 
     //No extra handlers example
     
     //with extra handlers example
         
-    struct handler<mSerialPositionalLogger>* mqtthandler_list[4] = {
-      &mqtthandler_settings,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod,
-      &mqtthandler_sdcard_superframe
+    struct telemetry_handler<mSerialPositionalLogger>* telemetry_list[4] = {
+      &telemetry_settings,
+      &telemetry_sensor_ifchanged,
+      &telemetry_sensor_teleperiod,
+      &telemetry_sdcard_superframe
     };
     #endif // USE_MODULE_NETWORK_MQTT
 

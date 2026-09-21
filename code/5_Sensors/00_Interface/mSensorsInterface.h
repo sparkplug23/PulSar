@@ -46,7 +46,7 @@ class mSensorsInterface :
     void Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static constexpr const char* PM_MODULE_SENSORS_INTERFACE_CTR = D_MODULE_SENSORS_INTERFACE_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_INTERFACE_CTR = D_MODULE__SENSORS__INTERFACE__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_INTERFACE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_INTERFACE_ID; }
 
@@ -100,11 +100,6 @@ class mSensorsInterface :
 
     sensorset_location_t system_location; // actually, although sensor related, to compile outside of anything, should be system
     // but, sun position is here, so perhaps needs to anyway.
-
-
-    void WebAppend__Sensor_Table__As_TypesRows();
-    void WebAppend__Sensor_Table__As_SensorsRows_Inverted();
-    void WebAppend__Sensor_Table__As_Ragged();
 
 
     #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
@@ -235,6 +230,7 @@ class mSensorsInterface :
       value->sensor_type.push_back(0); value->sensor_id = 0; return; // Return nothing if we reach here
     };
    
+    void WebPage_Root_AddHandlers();
     
     /************************************************************************************************
      * SECTION: Construct Messages
@@ -268,18 +264,18 @@ class mSensorsInterface :
      ************************************************************************************************/
       
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mSensorsInterface>*> mqtthandler_list;
-    struct handler<mSensorsInterface> mqtthandler_settings;
-    struct handler<mSensorsInterface> mqtthandler_sensor_ifchanged; // polling non-user interactive sensing
-    struct handler<mSensorsInterface> mqtthandler_sensor_teleperiod;
-    struct handler<mSensorsInterface> mqtthandler_sensor_temperature_colours;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mSensorsInterface>*> telemetry_list;
+    struct telemetry_handler<mSensorsInterface> telemetry_settings;
+    struct telemetry_handler<mSensorsInterface> telemetry_sensor_ifchanged; // polling non-user interactive sensing
+    struct telemetry_handler<mSensorsInterface> telemetry_sensor_teleperiod;
+    struct telemetry_handler<mSensorsInterface> telemetry_sensor_temperature_colours;
     #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
-    struct handler<mSensorsInterface> mqtthandler_sensor_unified_filtered;
+    struct telemetry_handler<mSensorsInterface> telemetry_sensor_unified_filtered;
     #endif
-    struct handler<mSensorsInterface> mqtthandler_motion_event_ifchanged;
-    struct handler<mSensorsInterface> mqtthandler_event_input; // events triggered by user input
-    struct handler<mSensorsInterface> mqtthandler_system_location; 
+    struct telemetry_handler<mSensorsInterface> telemetry_motion_event_ifchanged;
+    struct telemetry_handler<mSensorsInterface> telemetry_event_input; // events triggered by user input
+    struct telemetry_handler<mSensorsInterface> telemetry_system_location; 
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

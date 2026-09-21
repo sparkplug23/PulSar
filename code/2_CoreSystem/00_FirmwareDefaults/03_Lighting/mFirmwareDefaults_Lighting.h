@@ -1,372 +1,938 @@
-
-#ifndef _FIRMWARE_DEFAULTS__LIGHTING_H_
-#define _FIRMWARE_DEFAULTS__LIGHTING_H_
-
+#ifndef _FIRMWARE_DEFAULTS__LIGHTING2_H_
+#define _FIRMWARE_DEFAULTS__LIGHTING2_H_
 
 
-/**-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
----
-FIRMWARE DEFAULT:: LIGHTING CONFIGS
----
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-/***
- * Below will be replaced with these core options. Only actual things under test will be used in FIRMWARE_DEVTEST__LIGHTING_CONFIG__AUGUST2025
- * 
- * FIRMWARE_DEFAULT__LIGHTING_CONFIG__BASIC     // ie home and webui
- * FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE  // all 1D
- * FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D        // all 1D and 2D
- * FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE // all 1D and sound reactive (2D must be activated too if desired)
- * FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA      // all light code ready to cross-test with other modules for inclusion in the next release
- * 
+/**
+ * ============================================================================
+ * PulSar Lighting Firmware Defaults - Generation 2
+ * ============================================================================
+ *
+ * PURPOSE
+ * -------
+ *
+ * This file defines the high-level compile-time policy for the PulSar lighting
+ * subsystem.
+ *
+ * Device configurations should select HIGH-LEVEL INTENT:
+ *
+ *   - BASIC / COMPLETE / EVERYTHING
+ *   - optional 2D matrix support
+ *   - optional sound-reactive support
+ *   - independent general effect packs
+ *   - independent specialised effect packs
+ *   - WebUI capability level
+ *   - pixel-bus output allocation policy
+ *
+ * Low-level implementation features should then be derived here.
+ *
+ *
+ * ============================================================================
+ * DESIGN RULES
+ * ============================================================================
+ *
+ * 1. DEVICE CONFIG SELECTS POLICY
+ *
+ *    Device INI/config files should increasingly contain only meaningful
+ *    high-level selections.
+ *
+ *
+ * 2. INTERNAL FEATURES ARE DERIVED
+ *
+ *    Presets, playlists, animator plumbing, filesystem integration, WebUI
+ *    implementation details, audio-reactive implementation gates, etc. should
+ *    not normally be selected individually by devices.
+ *
+ *
+ * 3. EFFECT LEVELS ARE INDEPENDENT
+ *
+ *    LEVEL4 DOES NOT imply LEVEL1 + LEVEL2 + LEVEL3.
+ *
+ *    This is intentional.
+ *
+ *    Individual effect packs must be independently compilable so constrained
+ *    devices and effect-development builds can include only the required code.
+ *
+ *
+ * 4. 2D AND SOUND REACTIVE ARE ORTHOGONAL
+ *
+ *    2D:
+ *      - matrix infrastructure
+ *      - normal 2D effects
+ *
+ *    SOUND_REACTIVE:
+ *      - audio-reactive infrastructure
+ *      - 1D audio-reactive effects
+ *
+ *    2D + SOUND_REACTIVE:
+ *      - matrix infrastructure
+ *      - normal 2D effects
+ *      - 1D audio-reactive effects
+ *      - 2D audio-reactive effects
+ *
+ *    2D alone MUST NOT enable audio-reactive effects.
+ *
+ *
+ * 5. AUDIO SOURCE IS INDEPENDENT
+ *
+ *    "Sound reactive" describes the data/effect processing capability.
+ *
+ *    The audio data may come from:
+ *
+ *      - simulated/test data
+ *      - microphone
+ *      - network source
+ *      - another module
+ *      - future input mechanism
+ *
+ *    A physical microphone is therefore NOT implied by SOUND_REACTIVE.
+ *
+ *
+ * 6. BUS OUTPUT SELECTION IS A POLICY
+ *
+ *    Bus policy does NOT mean:
+ *
+ *      "use only RMT"
+ *      "use only I2S"
+ *
+ *    It specifies the preferred allocation strategy.
+ *
+ *    The bus implementation may use several hardware methods depending on:
+ *
+ *      - ESP32 target
+ *      - number of outputs
+ *      - available RMT channels
+ *      - available I2S/LCD hardware
+ *      - parallel output suitability
+ *      - LED protocol
+ *
+ *
+ * 7. FILESYSTEM IS EXPECTED
+ *
+ *    Normal lighting firmware assumes filesystem support.
+ *
+ *    Filesystem-dependent implementation code should still retain compile
+ *    guards as good defensive practice.
+ *
+ *    Explicit filesystem-less builds remain possible using DISABLE_FILESYSTEM.
+ *
+ *
+ * 8. WEBUI HAS FOUR EXPLICIT LEVELS
+ *
+ *      NONE
+ *      MINIMAL
+ *      NORMAL
+ *      ADVANCED
+ *
+ *    WebUI capability is deliberately independent from the effect set.
+ *
+ * ============================================================================
  */
 
-// #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA // FORCE ON
-// #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
-  
-
-// -------------------------------------------------------------------------------------------------------------------------------------------------------
-#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D // auto inherit all baseline COMPLETE + 2D
 
 
-  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE // Inherit base config
+/**
+ * ============================================================================
+ * SECTION 1
+ * HIGH-LEVEL LIGHTING PROFILES
+ * ============================================================================
+ *
+ * BASIC
+ * -----
+ *
+ * Small, usable lighting firmware.
+ *
+ * Intended for:
+ *
+ *   - constrained devices
+ *   - simple room lighting
+ *   - devices where flash/RAM need to be controlled carefully
+ *
+ *
+ * COMPLETE
+ * --------
+ *
+ * Normal full PulSar lighting firmware.
+ *
+ * Provides the standard stable infrastructure:
+ *
+ *   - light interface
+ *   - animator
+ *   - effect engine
+ *   - presets
+ *   - playlists
+ *   - filesystem
+ *   - persistence
+ *   - JSON support
+ *
+ * COMPLETE does NOT mean every effect pack is compiled.
+ *
+ *
+ * EVERYTHING
+ * ----------
+ *
+ * Large-memory general-purpose lighting build.
+ *
+ * Intended particularly for hardware such as ESP32-S3 N16R8 where flash/RAM
+ * constraints are substantially relaxed.
+ *
+ * EVERYTHING explicitly enables:
+ *
+ *   - COMPLETE
+ *   - all general effect packs
+ *   - particle system
+ *   - 2D
+ *   - sound reactive
+ *   - advanced WebUI
+ *
+ * Application-specific specialised effects remain separate.
+ *
+ *
+ * BETA
+ * ----
+ *
+ * Development overlay.
+ *
+ * BETA implies COMPLETE, but COMPLETE does NOT imply BETA.
+ *
+ * Only features genuinely undergoing validation should live under BETA.
+ * ============================================================================
+ */
 
-  #define ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-  
-  // temporary fix until rgbww is added with matrix support functions
-  #ifndef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE // setPixelXY needs to be added to rgbww
-  #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
-  #define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D
-  #endif // ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
 
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+// #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BASIC
 
+// #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+// #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__EVERYTHING
+
+// #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+
+
+
+/**
+ * ============================================================================
+ * SECTION 2
+ * OPTIONAL HIGH-LEVEL CAPABILITIES
+ * ============================================================================
+ */
+
+
+/**
+ * Enable matrix infrastructure and all normal 2D effects.
+ *
+ * DOES NOT enable audio-reactive 2D effects by itself.
+ */
+// #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+
+
+/**
+ * Enable sound-reactive infrastructure and 1D audio effects.
+ *
+ * When FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D is also enabled, 2D audio effects
+ * are additionally included.
+ */
+// #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+
+
+/**
+ * ============================================================================
+ * SECTION 3
+ * PROFILE RELATIONSHIPS
+ * ============================================================================
+ */
+
+
+#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
 #endif
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------------------
+#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BASIC
+#endif
 
-// For Jan2026, BETA is alway considered as complete.
-#if defined(FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA) ||  defined(FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE)
-// #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+
+/**
+ * ============================================================================
+ * SECTION 4
+ * GENERAL EFFECT PACKS
+ * ============================================================================
+ *
+ * Effect packs are independent and may be combined freely.
+ *
+ * LEVEL4 DOES NOT ENABLE LEVEL1, LEVEL2 OR LEVEL3.
+ *
+ * If no general effect pack is explicitly selected, the default is:
+ *
+ *   LEVEL1_MINIMAL_HOME
+ *   LEVEL2_FLASHING_BASIC
+ *
+ * ============================================================================
+ */
+
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+
+
+// Primary desired amount included
+#ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_DEFAULT
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+#endif
+
+
+// Default if none are defined
+#if !defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT) && \
+    !defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME) && \
+    !defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC) && \
+    !defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED) && \
+    !defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE) && \
+    !defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM)
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
+
+#endif
+
+// If particle is added, currently this requires audiodata
+#ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+#define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+#define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+#endif
+
+
+/**
+ * ============================================================================
+ * SECTION 5
+ * SPECIALISED EFFECT PACKS
+ * ============================================================================
+ *
+ * Specialised effect packs are independent from the general effect packs and
+ * may be enabled individually as required.
+ *
+ * There is no specialised-effect fallback/default.
+ *
+ * ============================================================================
+ */
+
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_EXTERNAL_MODULE_CONTROL
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_CHRISTMAS_CONTROLLER
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_BORDER_WALLPAPERS
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_NOTIFICATIONS
+
+
+/**
+ * ============================================================================
+ * SECTION 7
+ * BASIC PROFILE
+ * ============================================================================
+ */
+
+
+#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__BASIC
 
   /**
-   * Permenant Development Tools
-   **/
-  #define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  
-  #define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
+   * Core lighting engine.
+   */
+  #define USE_MODULE_LIGHTS_INTERFACE
+
+  #define USE_MODULE_LIGHTS_ANIMATOR
+
+  #define ENABLE_FEATURE_LIGHTING__CORE__EFFECT_ENGINE
+
 
   /**
-   * Actual beta features 2026
-   **/
-  #define ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_NAME_BASED_LOADING
-  #define ENABLE_DEVFEATURE_LIGHTS__PLAYLIST_BY_NAME_AUTOGENERATE_ID_LIST  
-  #define ENABLE_FEATURE_LIGHTS__PRESETS_DEBUG
+   * Filesystem is considered part of normal lighting firmware.
+   */
+  #ifndef DISABLE_FILESYSTEM
 
+    #define USE_MODULE_CORE_FILESYSTEM
 
-
-  // Everything moved into complete, anything working unless in tests phase will be phased in.
-
-
-  
-  #define ENABLE_DEVFEATURE_SETTINGS__SAVE_SETTINGS_ON_SUCCESFUL_BOOT__THEN_SPLASH_ON_REBOOT_PRIOR_TO_DEFAULT_LOAD_FOR_SAVE_TESTING
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA  
-  #define ENABLE_FEATURE__DATABUFFER_LOCK
-  // #define USE_MODULE_SENSORS_SUN_TRACKING
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
-
-  #ifndef ENABLE_FEATURE_LIGHTING__DISABLE_WEBPAGE_TO_REDUCE_MEMORY_USAGE
-    #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS
-    #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
-    #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
-    #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS 
   #endif
 
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  
-  #define ENABLE_DEVFEATURE_LIGHTING__SUPPRESS_WHITE_OUTPUT // Fix flickering of white channel
-
-  /************************************************************************
-   * SECTION: defines for external libaries
-   ************************************************************************/
-  #define DEBUG_ASYNC
-
-
-#endif
-
-// -------------------------------------------------------------------------------------------------------------------------------------------------------
-#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
   /**
-   * SOUND: Reactive can be just 1D or 2D, so it does not really cause 2D base, for sound+2D 2D still needs manually added
-   **/
-
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE // Inherit base config
-
-  #define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
-  
-  #if defined(ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D) || defined(ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D)
-    #define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
-  #endif
+   * BASIC receives the minimal general effect pack unless another build
+   * deliberately changes this policy later.
+   */
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME
 
 #endif
 
-// -------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+/**
+ * ============================================================================
+ * SECTION 8
+ * COMPLETE PROFILE
+ * ============================================================================
+ */
+
 
 #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
 
+  /**
+   * Core feature infrastructure.
+   */
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__AUTOMATION_PRESETS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PERSISTENT_CONFIG
+  #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
+  #define ENABLE_FEATURE_LIGHTING__CORE__GAMMA_CORRECTION
 
-#ifdef ENABLE_FEATURE_LIGHTING__DISABLE_WEBPAGE_TO_REDUCE_MEMORY_USAGE // lower memory footprint
-  #warning "WEBPAGE disabled for lighting to conserve memory
-#else // default includes full webpage
+  #define USE_MODULE_CORE__JSON_ARDUINO
+
+  /**
+   * Preset / playlist support.
+   */
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__FILE_METADATA
+  #define ENABLE_FEATURE_LIGHTING__PLAYLISTS__PRIMARY_JSON_COMMANDS
+
+  /**
+   * Colour processing.
+   */
+
+  #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
 
 
-  /************************************************************************
-   * WEBPAGE:
-   ************************************************************************/
-  
-  #define USE_MODULE_NETWORK_WEBSERVER
-  #define ENABLE_FEATURE_LIGHTING__WEBUI
-  #define ENABLE_DEBUGFEATURE_WEBUI__SHOW_BUILD_DATETIME_IN_FOOTER
+  /**
+   * Animator access.
+   */
+
+  #define ENABLE_FEATURE_LIGHTING__ANIMATOR__GLOBAL_LIGHT_ACCESS
 
 
-  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
-  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-  #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  /**
+   * Existing stable optimisation.
+   */
 
-  #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__CHRISTMAS_PRECOMPUTE_POWF
 
-  
-  #ifndef ESP8266
-    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_WEBPAGES
+
+  /**
+   * Existing brightness implementation requirement.
+   *
+   * This should eventually be reviewed/removed as the NeoPixelBus luminance
+   * handling is cleaned up.
+   */
+
+  #define PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE true
+
+#endif
+
+
+
+/**
+ * ============================================================================
+ * SECTION 9
+ * 2D MATRIX SUPPORT
+ * ============================================================================
+ *
+ * 2D enables:
+ *
+ *   - matrix addressing/infrastructure
+ *   - normal 2D effects
+ *
+ * 2D DOES NOT enable audio-reactive effects.
+ * ============================================================================
+ */
+
+
+#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+
+  #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+
+#endif
+
+
+
+/**
+ * ============================================================================
+ * SECTION 10
+ * SOUND REACTIVE
+ * ============================================================================
+ *
+ * SOUND_REACTIVE enables:
+ *
+ *   - audio-reactive processing infrastructure
+ *   - 1D audio-reactive effects
+ *
+ * If 2D is ALSO enabled:
+ *
+ *   - 2D audio-reactive effects are enabled
+ *
+ *
+ * The source of audio data is not defined here.
+ *
+ * It may be simulated, microphone-derived, externally supplied, etc.
+ * ============================================================================
+ */
+
+
+#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+
+
+  /**
+   * Temporary implementation gate.
+   *
+   * This remains because the audio-reactive implementation is still wrapped
+   * as a development/usermod feature internally.
+   *
+   * Once audio reactive becomes a normal part of the lighting subsystem this
+   * extra gate should disappear entirely.
+   */
+  #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+
+
+  #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
   #endif
 
-
-#endif
-
-  /************************************************************************
-   * SECTION: Inherit other defaults
-   ************************************************************************/
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BASIC
-
-  /************************************************************************
-   * SECTION: New defines
-   ************************************************************************/
-  #define ENABLE_FEATURE_JSON__ASYNCJSON_V6
-
-  #define  ENABLE_FEATURE_FIRMWAREDEFAULT__LOAD_WITH_TEMPLATES_OVERRIDE
-
-  #define USE_MODULE_LIGHTS_INTERFACE
-  #define USE_MODULE_LIGHTS_ANIMATOR
-  #define ENABLE_FEATURE_LIGHTS__GLOBAL_ANIMATOR_LIGHT_CLASS_ACCESS
-
-  #define ENABLE_FEATURE_LIGHTING__CHRISTMAS_EFFECT_PRECOMPUTE_POWF_INTO_COLOURDATA_BUFFER
-
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS_INCLUDE_PRIMARY_JSON_COMMANDS
-
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
-
-  /************************************************************************
-   * EFFECTS: 
-   ************************************************************************/
-
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__HARDWARE_TESTING
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CONTROLLED_FROM_ANOTHER_MODULE
-
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS
-  #define ENABLE_FEATURE_LIGHTS__DECIMATE
-  
-  
-  #define ENABLE_ANIMATION_MODE__INTERNAL_CONTROL_FROM_ANOTHER_MODULE
-
-  #define ENABLE_FEATURE_FILESYSTEM__ADD_TIMESTAMP_ON_SAVE_FILES
-
-
-  #define ENABLE_FEATURE_PIXEL__AUTOMATION_PRESETS
-  #define ENABLE_FEATURE_LIGHTING__PRESET_FILE_METADATA
-  #define ENABLE_FEATURE_FILESYSTEM__LOAD_MODULE_CONFIG_JSON_ON_BOOT
-  #define ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
-  
-  #define PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE true // MUST be true, as we are not using NPB_LG method
-
-
-  
-  /************************************************************************
-   * FILESYSTEM: 
-   ************************************************************************/
-  #define USE_MODULE_CORE_FILESYSTEM
-
 #endif
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------------------
-#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__BASIC
 
-  /************************************************************************
-   * FILESYSTEM: 
-   ************************************************************************/
+/**
+ * ============================================================================
+ * SECTION 11
+ * WEB UI POLICY
+ * ============================================================================
+ *
+ * Exactly ONE WebUI level should be active.
+ *
+ *
+ * NONE
+ * ----
+ *
+ * No lighting WebUI.
+ *
+ * Control remains available through MQTT / JSON / other non-WebUI mechanisms.
+ *
+ *
+ * MINIMAL
+ * -------
+ *
+ * Main lighting control page only.
+ *
+ *
+ * NORMAL
+ * ------
+ *
+ * Main lighting control page
+ * + normal lighting settings pages.
+ *
+ *
+ * ADVANCED
+ * --------
+ *
+ * Everything in NORMAL
+ * + newer/advanced lighting subpages
+ * + playlist viewer
+ * + richer tooling/diagnostics.
+ *
+ *
+ * Defaults:
+ *
+ *   BASIC      -> MINIMAL
+ *   COMPLETE   -> NORMAL
+ *   EVERYTHING -> ADVANCED
+ *
+ * A device may explicitly override the default.
+ * ============================================================================
+ */
 
-  /************************************************************************
-   * WEBPAGE:
-   ************************************************************************/
 
-  /************************************************************************
-  * LIGHTING:
-  ************************************************************************/
+// #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__NONE
+// #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__MINIMAL
+// #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__NORMAL
+#define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
 
 
-  /************************************************************************
-   * EFFECTS: 
-   ************************************************************************/
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME
 
-  /************************************************************************
-   * BUS:
-   ************************************************************************/
-  #ifndef ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
-  #define ENABLE_FEATURE_LIGHTING__I2S_SINGLE_AND_PARALLEL_AUTO_DETECT
+#if (defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__NONE) + \
+     defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__MINIMAL) + \
+     defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__NORMAL) + \
+     defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED)) > 1
+
+  #error "Only one FIRMWARE_DEFAULT__LIGHTING_WEBUI__xxx may be selected"
+
+#endif
+
+
+
+#if !defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__NONE) && \
+    !defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__MINIMAL) && \
+    !defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__NORMAL) && \
+    !defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED)
+
+  #ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__EVERYTHING
+
+    #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
+
+  #elif defined(FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE)
+
+    #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__NORMAL
+
+  #elif defined(FIRMWARE_DEFAULT__LIGHTING_CONFIG__BASIC)
+
+    #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__MINIMAL
+
   #endif
 
-  /************************************************************************
-   * BRIGHTNESS:
-   ************************************************************************/
+#endif
 
-  /************************************************************************
-   * PRESETS:
-   ************************************************************************/
+#if defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__MINIMAL) || \
+    defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__NORMAL) || \
+    defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED)
 
-  /************************************************************************
-   * PLAYLISTS:
-   ************************************************************************/
+  #ifndef USE_MODULE_NETWORK_WEBSERVER
+    #error "Lighting WebUI requires USE_MODULE_NETWORK_WEBSERVER"
+  #endif
 
+#endif
+
+
+/**
+ * ============================================================================
+ * SECTION 12
+ * WEB UI FEATURE EXPANSION
+ * ============================================================================
+ */
+
+
+#if defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__NORMAL) || \
+    defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED)
+
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__CORE
+
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__XML_API
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_LEDS
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_SYNC
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__URL_QUERY_SETTINGS
 
 #endif
 
 
 
-// This stays after the lighting, since depending on basic/advanced what is included here will differ
-// long term though, as solar is complex, we need to make a high speed version
-// ie, at boot (or midnight), create a TOD vs elevation/azimuth map (this can probably be done with simple sine wave and TOD offset)
-// Lighting infact, should never use the complex version which will remain of rules based only.
+#ifdef FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
+
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__SHARED_STYLES
+
+#endif
+
+
+
+#if !defined(FIRMWARE_DEFAULT__LIGHTING_WEBUI__NONE)
+
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__SHOW_BUILD_DATETIME
+
+#endif
+
+
+/**
+ * ============================================================================
+ * SECTION 13
+ * PIXEL BUS OUTPUT METHODS
+ * ============================================================================
+ *
+ * These define the output allocation method used by the lighting bus wrapper.
+ *
+ * Only one should normally be enabled.
+ *
+ * AUTO_PARALLEL
+ * -------------
+ * Starts with the normal individual-output arrangement, but automatically
+ * decides whether parallel output should be used from the configured bus count
+ * and output size.
+ *
+ * When parallel output is selected:
+ *   <= 8 outputs  -> X8 parallel
+ *   <= 16 outputs -> X16 parallel
+ *
+ *
+ * I2S_THEN_RMT
+ * ------------
+ * Use the individual I2S outputs first, followed by RMT outputs.
+ *
+ *
+ * RMT_THEN_I2S
+ * ------------
+ * Use the available RMT outputs first, followed by individual I2S outputs.
+ *
+ *
+ * PARALLEL_X8
+ * -----------
+ * Explicit X8 parallel output method.
+ *
+ *
+ * PARALLEL_X16
+ * ------------
+ * Explicit X16 parallel output method.
+ * ============================================================================
+ */
+
+// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT
+// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S
+// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
+// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X8
+// #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16
+
+
+#if (defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT) + \
+     defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S) + \
+     defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO) + \
+     defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X8) + \
+     defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16)) > 1
+
+  #error "Only one ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__xxx may be selected"
+
+#endif
+
+#if !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT) && \
+    !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S) && \
+    !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO) && \
+    !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X8) && \
+    !defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16)
+
+  // Fallback to default
+  #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT
+
+#endif
+
+
+/**
+ * ============================================================================
+ * SECTION 15
+ * BETA / DEVELOPMENT OVERLAY
+ * ============================================================================
+ *
+ * BETA is explicitly an overlay.
+ *
+ * COMPLETE does NOT automatically compile these features.
+ * ============================================================================
+ */
+
+
+#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+
+  /**
+   * Development task hooks.
+   */
+
+  #define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR
+  #define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
+
+
+  /**
+   * Playlist development.
+   */
+
+  #define ENABLE_FEATURE_LIGHTING__PLAYLISTS__LOAD_BY_NAME
+  #define ENABLE_FEATURE_LIGHTING__PLAYLISTS__AUTOGENERATE_ID_LIST
+
+
+  /**
+   * Preset development.
+   */
+
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__DEBUG
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+
+
+  /**
+   * Settings/persistence development.
+   */
+
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+
+  /**
+   * Async library debugging.
+   */
+
+  #define ENABLE_DEBUG_ASYNC
+
+#endif
+
+
+
+/**
+ * ============================================================================
+ * SECTION 16
+ * OPTIONAL SOLAR LIGHTING SUPPORT
+ * ============================================================================
+ *
+ * Long-term intent:
+ *
+ * Lighting should use a lightweight solar representation rather than depending
+ * on the full complex sun-tracking/rules implementation.
+ *
+ * For example:
+ *
+ *   - calculate/update solar state periodically
+ *   - expose simple current solar position/state to lighting
+ *   - avoid performing expensive full solar calculations inside effects
+ *
+ * ============================================================================
+ */
+
+
 #ifdef FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
 
-
-  // #define USE_MODULE_SENSORS_SUN_TRACKING     
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
-  //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
-  // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
-  //   // #define ENABLE_DEBUGFEATURE_SUNTRACKING__DEBUG_SUN_CALCULATIONS
-
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
-
-  // #define USE_MODULE_SENSORS_SUN_TRACKING
+  // Future:
+  //
+  // #define ENABLE_FEATURE_LIGHTING__SOLAR__PALETTES
+  //
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
 
 #endif
 
 
-#ifdef FIRMWARE_DEFAULT__LIGHTING_CONFIG__AUGUST2025
-  #define FIRMWARE_DEFAULT_DESCRIPTION "LIGHTING_CONFIG__AUGUST2025"
-  #error "Removed"    
-#endif // USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__AUGUST2025__NO_MODULE_GPIO
 
-
-
-
-/**-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
----
-Everything after this will be temporary configs outlining the above converted into defaults/base values future builds should use
-This enables switching to newer firmware versions, but falling back when an issue happens. Each version below shall be given a string name to be known in the build/mqtt
-
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-
-
-
-
-#ifdef ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_AS_DEMO_MODE
 /**
- * @brief This section enables the use of a single button (as default, KEY1) that must be set outside of this
- * When pressed, a few methods will automatically be useful for debugging and testing
- * 
- */
- /**
- * @brief 
- * Button: Multipress
- * ** (1) "Demo: 1 minute"
- * ** (2) "Colour Test": 
- *           Part 1: 20 seconds
- *            Full brightness
- *            First 4 pixels will show R, G, B, white always
- *            Remaining pixels will sweep across with random colours
- *           Part 2: 20 seconds
- *            Rainbow Cycle
- *           Part 3: 20 seconds
- *            Gradient with Rainbow 16
- * ** (3) "Bus Test"
- *            Part 1: 
- *              Busses will show the "hardware test" effect, where the first pixel(s) of each bus is white (based on the bus index, ie bus 2 is 2 white pixels), then the remaining are a gradient of set colours
- * ** (4) ""
- * Button: Hold (Once, even though multiple can happen)
- *        "Toggle Power"
- *           Brightness from max to min
- * 
+ * ============================================================================
+ * SECTION 17
+ * SINGLE-BUTTON DEMO / HARDWARE TEST MODE
+ * ============================================================================
+ *
+ * Optional application/test feature.
+ *
+ * This remains independent from BASIC / COMPLETE / EVERYTHING.
+ * ============================================================================
  */
 
 
-  #define USE_MODULE_SENSORS_INTERFACE  
+#ifdef ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
+
+  #define USE_MODULE_SENSORS_INTERFACE
+
   #define USE_MODULE_SENSORS_BUTTONS
-    
-
-  // #define ENABLE_FEATURE_LIGHTS__KEY_INPUT_CONTROLS
-  // #define ENABLE_FEATURE_LIGHTS__DEMO_MODE
 
 
-#endif // ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_AS_DEMO_MODE
+  /**
+   * Intended controls may include:
+   *
+   * Multipress:
+   *
+   *   1. effect demo
+   *   2. colour/pixel test
+   *   3. bus identification test
+   *
+   * Hold:
+   *
+   *   power / brightness control
+   */
 
-  
+  // #define ENABLE_FEATURE_LIGHTING__INPUT__BUTTON_CONTROLS
+
+  // #define ENABLE_FEATURE_LIGHTING__DEMO_MODE
+
 #endif
+
+
+
+/**
+ * ============================================================================
+ * SECTION 18
+ * INTERNAL FEATURE CONSISTENCY
+ * ============================================================================
+ *
+ * These relationships are consequences of the selected features rather than
+ * user-facing configuration choices.
+ * ============================================================================
+ */
+
+
+/**
+ * Any effect pack requires the effect engine.
+ */
+
+
+#if defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_EXTERNAL_MODULE_CONTROL) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_CHRISTMAS_CONTROLLER) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_BORDER_WALLPAPERS) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_NOTIFICATIONS) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D) || \
+    defined(ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D)
+
+  #define ENABLE_FEATURE_LIGHTING__CORE__EFFECT_ENGINE
+
+#endif
+
+
+
+/**
+ * Presets require persistence/filesystem in normal builds.
+ */
+
+
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PRESETS
+
+  #if defined(DISABLE_FILESYSTEM) || !defined(USE_MODULE_CORE_FILESYSTEM)
+    #error "DEFINE: Presets require filesystem" // lets not silently enable filesystem here
+  #endif
+
+#endif
+
+
+
+/**
+ * Playlists require presets.
+ */
+
+
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
+
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
+
+#endif
+
+
+
+/**
+ * 2D audio effects can only exist when both parent capabilities exist.
+ */
+
+
+#ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+
+  #ifndef FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+    #error "2D audio effects require FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D"
+  #endif
+
+  #ifndef FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+    #error "2D audio effects require FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE"
+  #endif
+
+#endif
+
+
+#endif // _FIRMWARE_DEFAULTS__LIGHTING2_H_

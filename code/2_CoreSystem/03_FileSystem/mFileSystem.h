@@ -25,14 +25,12 @@
 
 #ifdef ESP8266
   #include <LittleFS.h>
-  #include <SPIFFSEditor.h>
 #endif
 
 #ifdef ESP32
   #include <LittleFS.h>
   #include "FFat.h"
   #include "FS.h"
-  #include <SPIFFSEditor.h>
 #endif
 
 #ifdef ESP32
@@ -41,6 +39,7 @@
     #ifdef USE_MODULE_NETWORK_WEBSERVER
       #include <AsyncTCP.h>
       #include <ESPAsyncWebServer.h>
+      #include "3_Network/21_WebServer/FileEditor.h"
     #endif
   #endif
 #elif defined(ESP8266)
@@ -51,28 +50,11 @@
   #endif
 #endif
 
+#include "2_CoreSystem/21_JsonArduino/JsonArduino.h"
 #define ARDUINOJSON_DECODE_UNICODE 0
-#include "3_Network/21_WebServer/AsyncJson-v6.h"
-#include "3_Network/21_WebServer/ArduinoJson-v6.h"
+#include "2_CoreSystem/21_JsonArduino/AsyncJson-v6.h"
+#include "2_CoreSystem/21_JsonArduino/ArduinoJson-v6.h"
 
-#if defined(ARDUINO_ARCH_ESP32)
-struct PSRAM_Allocator {
-  void* allocate(size_t size) {
-    if (1 && psramFound()) return ps_malloc(size);
-    else                   return malloc(size);
-  }
-  void* reallocate(void* ptr, size_t new_size) {
-    if (1 && psramFound()) return ps_realloc(ptr, new_size);
-    else                   return realloc(ptr, new_size);
-  }
-  void deallocate(void* pointer) {
-    free(pointer);
-  }
-};
-using PSRAMDynamicJsonDocument = BasicJsonDocument<PSRAM_Allocator>;
-#else
-#define PSRAMDynamicJsonDocument DynamicJsonDocument
-#endif
 
 #define FILE_EXTENSION_JSON ".json"
 #define FILE_EXTENSION_BIN ".txt"
@@ -91,7 +73,7 @@ class mFileSystem :
     void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    static constexpr const char* PM_MODULE_CORE_FILESYSTEM_CTR = D_MODULE_CORE_FILESYSTEM_CTR;
+    static constexpr const char* PM_MODULE_CORE_FILESYSTEM_CTR = D_MODULE__CORE__FILESYSTEM__CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_FILESYSTEM_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_FILESYSTEM_ID; }
 
@@ -226,14 +208,6 @@ class mFileSystem :
     bool   DeleteFile(const char *fname);
     bool   RenameFile(const char *fname1, const char *fname2);
 
-    #if defined(ARDUINO_ARCH_ESP32)
-    JsonDocument *pDoc = nullptr;
-    SemaphoreHandle_t jsonBufferLockMutex = xSemaphoreCreateRecursiveMutex();
-    #else
-    StaticJsonDocument<JSON_BUFFER_SIZE> gDoc;
-    JsonDocument *pDoc = &gDoc;
-    #endif
-
     bool IsMounted(void) const;
 
     void Handle_FileChanges_WebUIEdits();
@@ -243,7 +217,6 @@ class mFileSystem :
     size_t fsBytesUsed = 0;
     size_t fsBytesTotal = 0;
     unsigned long presetsModifiedTime = 0L;
-    bool psramSafe = true;
 
     void closeFile();
     bool bufferedFind(const char *target, bool fromStart = true);
@@ -253,15 +226,24 @@ class mFileSystem :
     bool appendObjectToFile(const char* key, JsonDocument* content, uint32_t s, uint32_t contentLen = 0);
     bool writeObjectToFileUsingId(const char* file, uint16_t id, JsonDocument* content);
     bool writeObjectToFile(const char* file, const char* key, JsonDocument* content);
-    bool readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest);
-    bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest);
+    bool readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest, const JsonDocument* filter = nullptr);
+    bool readObjectFromFile(const char* file, const char* key, JsonDocument* dest, const JsonDocument* filter = nullptr);
     void updateFSInfo();
+
+    inline bool writeObjectToFileUsingId(const String &file, uint16_t id, const JsonDocument* content) { return writeObjectToFileUsingId(file.c_str(), id, content); };
+    inline bool writeObjectToFile(const String &file, const char* key, const JsonDocument* content) { return writeObjectToFile(file.c_str(), key, content); };
+    inline bool readObjectFromFileUsingId(const String &file, uint16_t id, JsonDocument* dest, const JsonDocument* filter = nullptr) { return readObjectFromFileUsingId(file.c_str(), id, dest); };
+    inline bool readObjectFromFile(const String &file, const char* key, JsonDocument* dest, const JsonDocument* filter = nullptr) { return readObjectFromFile(file.c_str(), key, dest); };
+
 
     String getContentType(AsyncWebServerRequest* request, String filename);
     bool handleFileRead(AsyncWebServerRequest* request, String path);
 
     void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
     void readFile(fs::FS &fs, const char * path);
+
+    void CompiledFile_Init();
+    bool CompiledFile_Load(const char* filename,PGM_P data,bool overwrite = true);
 
     /************************************************************************************************
      * SECTION: Commands
@@ -282,16 +264,16 @@ class mFileSystem :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mFileSystem>*> mqtthandler_list;
+    std::vector<struct telemetry_handler<mFileSystem>*> telemetry_list;
 
-    struct handler<mFileSystem> mqtthandler_settings;
-    struct handler<mFileSystem> mqtthandler_sensor_ifchanged;
-    struct handler<mFileSystem> mqtthandler_sensor_teleperiod;
+    struct telemetry_handler<mFileSystem> telemetry_settings;
+    struct telemetry_handler<mFileSystem> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mFileSystem> telemetry_sensor_teleperiod;
     #endif
 
 };

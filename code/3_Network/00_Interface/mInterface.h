@@ -24,7 +24,7 @@ class mInterfaceNetwork :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage(){};
     
-    static constexpr const char*    PM_MODULE__NETWORK_INTERFACE__CTR = D_MODULE__NETWORK_INTERFACE__CTR;
+    static constexpr const char*    PM_MODULE__NETWORK_INTERFACE__CTR = D_MODULE__NETWORK__INTERFACE__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__NETWORK_INTERFACE__CTR; }
     uint16_t GetModuleUniqueID(){   return D_UNIQUE_MODULE__NETWORK_INTERFACE__ID; }
 
@@ -167,10 +167,10 @@ class mInterfaceNetwork :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mInterfaceNetwork>*> mqtthandler_list;
-    struct handler<mInterfaceNetwork> mqtthandler_settings;
-    struct handler<mInterfaceNetwork> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mInterfaceNetwork>*> telemetry_list;
+    struct telemetry_handler<mInterfaceNetwork> telemetry_settings;
+    struct telemetry_handler<mInterfaceNetwork> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

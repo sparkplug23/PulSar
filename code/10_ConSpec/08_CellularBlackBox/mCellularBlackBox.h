@@ -41,7 +41,7 @@ class mCellularBlackBox :
     
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    static constexpr const char* PM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX_CTR = D_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX_CTR = D_MODULE__CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CUSTOM__CELLULAR_BLACK_BOX_ID; }
     
@@ -75,21 +75,21 @@ class mCellularBlackBox :
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
     
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
 
-    struct handler<mCellularBlackBox> mqtthandler_settings;
-    struct handler<mCellularBlackBox> mqtthandler_state_ifchanged;
+    struct telemetry_handler<mCellularBlackBox> telemetry_settings;
+    struct telemetry_handler<mCellularBlackBox> telemetry_state_ifchanged;
 
     //No extra handlers: ie settings and "state" only
     
       
-    struct handler<mCellularBlackBox>* mqtthandler_list[2] = {
-      &mqtthandler_settings,
-      &mqtthandler_state_ifchanged
+    struct telemetry_handler<mCellularBlackBox>* telemetry_list[2] = {
+      &telemetry_settings,
+      &telemetry_state_ifchanged
     };
 
 };

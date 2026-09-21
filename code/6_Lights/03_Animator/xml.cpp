@@ -2,7 +2,7 @@
 
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
 
-#ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__XML_API
 
 
 /*
@@ -89,12 +89,12 @@ void mAnimatorLight::appendGPIOinfo(Print& settingsScript) {
     settingsScript.printf_P(PSTR(",%d,%d"), spi_mosi, spi_sclk);
   }
   // usermod pin reservations will become unnecessary when settings pages will read cfg.json directly
-  if (JBI->requestJSONBufferLock(6)) {
+  if (tkr_jsona->requestJSONBufferLock(6)) {
     // if we can't allocate JSON buffer ignore usermod pins
-    JsonObject mods = tkr_mfile->pDoc->createNestedObject("um");
+    JsonObject mods = tkr_jsona->pDoc->createNestedObject("um");
     // UsermodManager::addToConfig(mods);
     if (!mods.isNull()) fillUMPins(settingsScript, mods);
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
   }
   settingsScript.print(F("];"));
 
@@ -171,7 +171,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
 
   if (subPage == SUBPAGE_MENU)
   {
-  #ifndef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS // include only if 2D is not compiled in
+  #ifndef ENABLE_FEATURE_LIGHTING__2D_MATRIX // include only if 2D is not compiled in
     settingsScript.print(F("gId('2dbtn').style.display='none';"));
   #endif
   #ifdef ENABLE_FEATURE_LIGHTING__DMX // include only if DMX is enabled
@@ -204,6 +204,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
     printSetFormValue(settingsScript,PSTR("D3"),dnsAddress[3]);
 
     printSetFormValue(settingsScript,PSTR("CM"), tkr_web->cmDNS);
+    #ifndef ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
     printSetFormIndex(settingsScript,PSTR("AB"),apBehavior);
     printSetFormValue(settingsScript,PSTR("AS"),apSSID);
     printSetFormCheckbox(settingsScript,PSTR("AH"),apHide);
@@ -213,6 +214,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
     fapass[l] = 0;
     memset(fapass,'*',l);
     printSetFormValue(settingsScript,PSTR("AP"),0);//fapass);
+    #endif
 
     printSetFormValue(settingsScript,PSTR("AC"),0);//apChannel);
     #ifdef ARDUINO_ARCH_ESP32
@@ -228,7 +230,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
     printSetFormValue(settingsScript,PSTR("RMAC"),0);//,linked_remote);
     #else
     //hide remote settings if not compiled
-    settingsScript.print(F("toggle('ESPNOW');"));  // hide ESP-NOW setting
+    // settingsScript.print(F("toggle('ESPNOW');"));  // hide ESP-NOW setting
     #endif
 
     #ifdef WLED_USE_ETHERNET
@@ -278,7 +280,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
   if (subPage == SUBPAGE_LEDS)
   {
     
-    #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_LEDS
 
     appendGPIOinfo(settingsScript);
 
@@ -303,7 +305,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
     printSetFormValue(settingsScript,PSTR("CB"),cctBlending);
     printSetFormValue(settingsScript,PSTR("FR"),getTargetFps());
     printSetFormValue(settingsScript,PSTR("AW"),Bus::getGlobalAWMode());
-    printSetFormCheckbox(settingsScript,PSTR("LD"),0);//useGlobalLedBuffer);
+    // printSetFormCheckbox(settingsScript,PSTR("LD"),0);//useGlobalLedBuffer);
 
     unsigned sumMa = 0;
     for (int s = 0; s < BusManager::getNumBusses(); s++) {
@@ -364,9 +366,9 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
       printSetFormValue(settingsScript,ma,bus->getMaxCurrent());
       sumMa += bus->getMaxCurrent();
     }
-    printSetFormValue(settingsScript,PSTR("MA"),BusManager::ablMilliampsMax() ? BusManager::ablMilliampsMax() : sumMa);
-    printSetFormCheckbox(settingsScript,PSTR("ABL"),BusManager::ablMilliampsMax() || sumMa > 0);
-    printSetFormCheckbox(settingsScript,PSTR("PPL"),!BusManager::ablMilliampsMax() && sumMa > 0);
+    // printSetFormValue(settingsScript,PSTR("MA"),BusManager::ablMilliampsMax() ? BusManager::ablMilliampsMax() : sumMa);
+    // printSetFormCheckbox(settingsScript,PSTR("ABL"),BusManager::ablMilliampsMax() || sumMa > 0);
+    // printSetFormCheckbox(settingsScript,PSTR("PPL"),!BusManager::ablMilliampsMax() && sumMa > 0);
 
     settingsScript.printf_P(PSTR("resetCOM(%d);"), WLED_MAX_COLOR_ORDER_MAPPINGS);
     const ColorOrderMap& com = BusManager::getColorOrderMap();
@@ -384,10 +386,10 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
     printSetFormCheckbox(settingsScript,PSTR("GB"),gammaCorrectBri);
     printSetFormCheckbox(settingsScript,PSTR("GC"),gammaCorrectCol);
     dtostrf(gammaCorrectVal,3,1,nS); printSetFormValue(settingsScript,PSTR("GV"),nS);
-    printSetFormCheckbox(settingsScript,PSTR("TF"),fadeTransition);
-    printSetFormCheckbox(settingsScript,PSTR("EB"),0);//modeBlending);
+    // printSetFormCheckbox(settingsScript,PSTR("TF"),fadeTransition);
+    // printSetFormCheckbox(settingsScript,PSTR("EB"),0);//modeBlending);
     printSetFormValue(settingsScript,PSTR("TD"),0);//,transitionDelayDefault);
-    printSetFormCheckbox(settingsScript,PSTR("PF"),paletteFade);
+    // printSetFormCheckbox(settingsScript,PSTR("PF"),paletteFade);
     printSetFormValue(settingsScript,PSTR("TP"),randomPaletteChangeTime);
     printSetFormCheckbox(settingsScript,PSTR("TH"),0);//,useHarmonicRandomPalette);
     printSetFormValue(settingsScript,PSTR("BF"),briMultiplier);
@@ -409,7 +411,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
 #endif    
     printSetFormCheckbox(settingsScript,PSTR("MSO"),!irApplyToAllSelected);
 
-    #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
+    #endif // ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_LEDS
   }
 
   if (subPage == SUBPAGE_UI)
@@ -420,17 +422,17 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
 
   if (subPage == SUBPAGE_SYNC)
   {
-    #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_SYNC
 
     printSetFormValue(settingsScript,PSTR("UP"),udpPort);
     printSetFormValue(settingsScript,PSTR("U2"),udpPort2);
-  #ifndef WLED_DISABLE_ESPNOW
-    // if (enableESPNow) printSetFormCheckbox(settingsScript,PSTR("EN"),useESPNowSync);
-    // else              
-    settingsScript.print(F("toggle('ESPNOW');"));  // hide ESP-NOW setting
-  #else
-    settingsScript.print(F("toggle('ESPNOW');"));  // hide ESP-NOW setting
-  #endif
+  // #ifndef WLED_DISABLE_ESPNOW
+  //   // if (enableESPNow) printSetFormCheckbox(settingsScript,PSTR("EN"),useESPNowSync);
+  //   // else              
+  //   settingsScript.print(F("toggle('ESPNOW');"));  // hide ESP-NOW setting
+  // #else
+  //   settingsScript.print(F("toggle('ESPNOW');"));  // hide ESP-NOW setting
+  // #endif
     printSetFormValue(settingsScript,PSTR("GS"),syncGroups);
     printSetFormValue(settingsScript,PSTR("GR"),receiveGroups);
 
@@ -464,48 +466,50 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
     printSetFormCheckbox(settingsScript,PSTR("FB"),arlsForceMaxBri);
     printSetFormCheckbox(settingsScript,PSTR("RG"),arlsDisableGammaCorrection);
     printSetFormValue(settingsScript,PSTR("WO"),arlsOffset);
-    #ifndef WLED_DISABLE_ALEXA
-    printSetFormCheckbox(settingsScript,PSTR("AL"),0);//,alexaEnabled);
-    printSetFormValue(settingsScript,PSTR("AI"),0);//,alexaInvocationName);
-    printSetFormCheckbox(settingsScript,PSTR("SA"),notifyAlexa);
-    printSetFormValue(settingsScript,PSTR("AP"),0);//,alexaNumPresets);
-    #else
-    settingsScript.print(F("toggle('Alexa');"));  // hide Alexa settings
-    #endif
+    // #ifndef WLED_DISABLE_ALEXA
+    // printSetFormCheckbox(settingsScript,PSTR("AL"),0);//,alexaEnabled);
+    // printSetFormValue(settingsScript,PSTR("AI"),0);//,alexaInvocationName);
+    // printSetFormCheckbox(settingsScript,PSTR("SA"),notifyAlexa);
+    // printSetFormValue(settingsScript,PSTR("AP"),0);//,alexaNumPresets);
+    // #else
+    // settingsScript.print(F("toggle('Alexa');"));  // hide Alexa settings
+    // #endif
 
-    #ifndef WLED_DISABLE_MQTT
-    printSetFormCheckbox(settingsScript,PSTR("MQ"),0);//,mqttEnabled);
-    printSetFormValue(settingsScript,PSTR("MS"),0);//,mqttServer);
-    printSetFormValue(settingsScript,PSTR("MQPORT"),0);//,mqttPort);
-    printSetFormValue(settingsScript,PSTR("MQUSER"),0);//,mqttUser);
-    byte l = strlen("mqttPass");
-    char fpass[l+1]; //fill password field with ***
-    fpass[l] = 0;
-    memset(fpass,'*',l);
-    printSetFormValue(settingsScript,PSTR("MQPASS"),"fpass");
-    printSetFormValue(settingsScript,PSTR("MQCID"),"mqttClientID");
-    printSetFormValue(settingsScript,PSTR("MD"),"mqttDeviceTopic");
-    printSetFormValue(settingsScript,PSTR("MG"),"mqttGroupTopic");
-    printSetFormCheckbox(settingsScript,PSTR("BM"),0);//buttonPublishMqtt);
-    printSetFormCheckbox(settingsScript,PSTR("RT"),0);//,retainMqttMsg);
-    // settingsScript.printf_P(PSTR("d.Sf.MD.maxLength=%d;d.Sf.MG.maxLength=%d;d.Sf.MS.maxLength=%d;"),    MQTT_MAX_TOPIC_LEN, MQTT_MAX_TOPIC_LEN, MQTT_MAX_SERVER_LEN);
-    #else
-    settingsScript.print(F("toggle('MQTT');"));    // hide MQTT settings
-    #endif
+    // #ifndef WLED_DISABLE_MQTT
+    // printSetFormCheckbox(settingsScript,PSTR("MQ"),0);//,mqttEnabled);
+    // printSetFormValue(settingsScript,PSTR("MS"),0);//,mqttServer);
+    // printSetFormValue(settingsScript,PSTR("MQPORT"),0);//,mqttPort);
+    // printSetFormValue(settingsScript,PSTR("MQUSER"),0);//,mqttUser);
+    // byte l = strlen("mqttPass");
+    // char fpass[l+1]; //fill password field with ***
+    // fpass[l] = 0;
+    // memset(fpass,'*',l);
+    // printSetFormValue(settingsScript,PSTR("MQPASS"),"fpass");
+    // printSetFormValue(settingsScript,PSTR("MQCID"),"mqttClientID");
+    // printSetFormValue(settingsScript,PSTR("MD"),"mqttDeviceTopic");
+    // printSetFormValue(settingsScript,PSTR("MG"),"mqttGroupTopic");
+    // printSetFormCheckbox(settingsScript,PSTR("BM"),0);//buttonPublishMqtt);
+    // printSetFormCheckbox(settingsScript,PSTR("RT"),0);//,retainMqttMsg);
+    // // settingsScript.printf_P(PSTR("d.Sf.MD.maxLength=%d;d.Sf.MG.maxLength=%d;d.Sf.MS.maxLength=%d;"),    MQTT_MAX_TOPIC_LEN, MQTT_MAX_TOPIC_LEN, MQTT_MAX_SERVER_LEN);
+    // #else
+    // settingsScript.print(F("toggle('MQTT');"));    // hide MQTT settings
+    // #endif
 
     // HUESYNC Removed
-    settingsScript.print(F("toggle('Hue');"));    // hide Hue Sync settings
+    // settingsScript.print(F("toggle('Hue');"));    // hide Hue Sync settings
     
     // printSetFormValue(settingsScript,PSTR("BD"),serialBaud);
     #ifndef WLED_ENABLE_ADALIGHT
-    settingsScript.print(F("toggle('Serial');"));
+    // settingsScript.print(F("toggle('Serial');"));
     #endif
   }
 
   if (subPage == SUBPAGE_TIME)
   {
     // printSetFormCheckbox(settingsScript,PSTR("NT"),ntpEnabled);
+    #ifndef ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
     printSetFormValue(settingsScript,PSTR("NS"),ntpServerName);
+    #endif
     // printSetFormCheckbox(settingsScript,PSTR("CF"),!useAMPM);
     // printSetFormIndex(settingsScript,PSTR("TZ"),currentTimezone);
     // printSetFormValue(settingsScript,PSTR("UO"),utcOffsetSecs);
@@ -562,7 +566,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
       // }
     }
 
-    #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
+    #endif // ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_SYNC
   }
 
   if (subPage == SUBPAGE_SEC)
@@ -647,7 +651,7 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
   if (subPage == SUBPAGE_2D) // 2D matrices
   {
     printSetFormValue(settingsScript,PSTR("SOMP"),isMatrix);
-    #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
     settingsScript.printf_P(PSTR("maxPanels=%d;resetPanels();"),WLED_MAX_PANELS);
     if (isMatrix) {
       if(panels>0){
@@ -680,5 +684,5 @@ void mAnimatorLight::getSettingsJS(byte subPage, Print& settingsScript)
 }
 
 
-#endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS
+#endif // ENABLE_FEATURE_LIGHTING__WEBUI__XML_API
 #endif

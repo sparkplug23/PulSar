@@ -45,7 +45,7 @@ class mEnergyOLED :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void   parse_JSONCommand(JsonParserObject obj);
 
-    static constexpr const char* PM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR = D_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR = D_MODULE__CONTROLLER_CUSTOM__ENERGY_OLED__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CUSTOM__ENERGY_OLED_ID; }    
     
@@ -72,14 +72,14 @@ class mEnergyOLED :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mEnergyOLED>*> mqtthandler_list;
-    struct handler<mEnergyOLED> mqtthandler_settings;
-    struct handler<mEnergyOLED> mqtthandler_state_ifchanged;
+    std::vector<struct telemetry_handler<mEnergyOLED>*> telemetry_list;
+    struct telemetry_handler<mEnergyOLED> telemetry_settings;
+    struct telemetry_handler<mEnergyOLED> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

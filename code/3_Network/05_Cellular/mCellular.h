@@ -110,7 +110,7 @@ class mCellular :
     void Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static constexpr const char* PM_MODULE__NETWORK_CELLULAR__CTR = D_MODULE__NETWORK_CELLULAR__CTR;
+    static constexpr const char* PM_MODULE__NETWORK_CELLULAR__CTR = D_MODULE__NETWORK__CELLULAR__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__NETWORK_CELLULAR__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__NETWORK_CELLULAR__ID; }
 
@@ -163,6 +163,7 @@ class mCellular :
 
     void Cellular_ConnMgr_Reset();
     void Cellular_ConnMgr_Tick_1s(uint32_t now_ms);
+    void Cellular_ConnMgr_LogStatus_30s(void);
 
     bool Cellular_HasExternalConnectivity(void);
     Client* Cellular_GetNetworkClient(void);
@@ -182,10 +183,10 @@ class mCellular :
      * SECITON: MQTT
      ************************************************************************************************/
       
-    void MQTTHandler_Init();
-    std::vector<struct handler<mCellular>*> mqtthandler_list;    
-    struct handler<mCellular> mqtthandler_settings;
-    struct handler<mCellular> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mCellular>*> telemetry_list;    
+    struct telemetry_handler<mCellular> telemetry_settings;
+    struct telemetry_handler<mCellular> telemetry_state_ifchanged;
 
 };
 

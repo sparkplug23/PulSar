@@ -1,24 +1,3 @@
-/*
-  mPZEM004T.h - PZEM004T v3 MODBUS
-
-  Copyright (C) 2021  Michael
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
-  http://innovatorsguru.com/wp-content/uploads/2019/06/PZEM-004T-V3.0-Datasheet-User-Manual.pdf
-
-*/
 #ifndef _MODULE_POWERMETER_H
 #define _MODULE_POWERMETER_H
 
@@ -66,7 +45,7 @@ class mEnergyPZEM004T :
     void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    static constexpr const char* PM_MODULE_ENERGY_PZEM004T_CTR = D_MODULE_ENERGY_PZEM004T_CTR;
+    static constexpr const char* PM_MODULE_ENERGY_PZEM004T_CTR = D_MODULE__ENERGY__PZEM004T__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_ENERGY_PZEM004T_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_PZEM004T_ID; }    
       
@@ -171,11 +150,11 @@ class mEnergyPZEM004T :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mEnergyPZEM004T>*> mqtthandler_list;
-    struct handler<mEnergyPZEM004T> mqtthandler_settings;
-    struct handler<mEnergyPZEM004T> mqtthandler_state_ifchanged;
-    struct handler<mEnergyPZEM004T> mqtthandler_state_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mEnergyPZEM004T>*> telemetry_list;
+    struct telemetry_handler<mEnergyPZEM004T> telemetry_settings;
+    struct telemetry_handler<mEnergyPZEM004T> telemetry_state_ifchanged;
+    struct telemetry_handler<mEnergyPZEM004T> telemetry_state_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

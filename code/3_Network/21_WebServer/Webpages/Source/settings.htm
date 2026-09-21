@@ -1,51 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
-	<title>PulSar Settings2</title>
-	<script src="common.js" async type="text/javascript"></script>
-	<script>
-		function S() {
-			getLoc();
-			loadJS(getURL('/lights/settings/s.js?p=0'), false);	// If we set async false, file is loaded and executed, then next statement is processed
-		}
-	</script>
-	<style>
-		body {
-			text-align: center;
-			background: #222;
-			height: 100px;
-			margin: 0;
-		}
-		html {
-			--h: 9vh;
-		}
-		button {
-			background: #333;
-			color: #fff;
-			font-family: Verdana, Helvetica, sans-serif;
-			display: block;
-			border: 1px solid #333;
-			border-radius: var(--h);
-			font-size: 6vmin;
-			height: var(--h);
-			width: calc(100% - 40px);
-			margin: 2vh auto 0;
-			cursor: pointer;
-		}
-	</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PulSar Settings</title>
+<link rel="stylesheet" href="/pulsar.css">
+<script src="/pulsar.js"></script>
 </head>
-<body onload="S()">
-<button type=submit id="b" onclick="window.location=getURL('/lights')">Back to /lights</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/wifi')">WiFi Setup</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/leds')">LED Preferences</button>
-<button id="2dbtn" type="submit" onclick="window.location=getURL('/lights/settings/2D')">2D Configuration</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/ui')">User Interface</button>
-<button id="dmxbtn" style="display:none;" type="submit" onclick="window.location=getURL('/settings2/dmx')">DMX Output</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/sync')">Sync Interfaces</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/time')">Time & Macros</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/um')">Usermods</button>
-<button type="submit" onclick="window.location=getURL('/lights/settings/sec')">Security & Updates</button>
+<body class="menu-page">
+
+<header class="page-header">
+  <div class="page-title">
+    <h1>PulSar Settings</h1>
+    <div class="page-subtitle">Device configuration</div>
+  </div>
+  <button onclick="go('/')">Back</button>
+</header>
+
+<div id="menu" class="menu-grid"></div>
+
+<script>
+onReady(()=>renderMenu('menu',[
+  ['Network','Interfaces and network services','/settings/network'],
+  ['Hardware','GPIO, buses and serial interfaces','/settings/hardware'],
+  ['System','Identity, time and runtime state','/settings/system'],
+  ['Modules','Installed PulSar modules','/settings/modules'],
+  ['Storage','Filesystem and SD storage','/settings/storage'],
+  ['Logging','Runtime logging and diagnostics','/settings/logging'],
+  ['Security','Protection and administrative actions','/settings/security'],
+  ['Firmware Update','Upload and install firmware','/update']
+]));
+</script>
+
 </body>
 </html>

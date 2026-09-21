@@ -180,7 +180,7 @@ void mAnimatorLight::TestCode_Add16ParallelBus1()
   bus_index++;
 
   ALOG_INF(PSTR("TestCode_Add16ParallelBus1 %d"), bus_index);
-
+ 
   defPin[0] = {19};
   start = 400;
   length = 100;
@@ -573,7 +573,7 @@ bool deserializeConfig(JsonObject doc, bool fromFS) {
   strip.setTargetFps(hw_led["fps"]); //NOP if 0, default 42 FPS
   CJSON(useGlobalLedBuffer, hw_led[F("ld")]);
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   // 2D Matrix Settings
   JsonObject matrix = hw_led[F("matrix")];
   if (!matrix.isNull()) {
@@ -1204,7 +1204,7 @@ void serializeConfig() {
   hw_led[F("rgbwm")] = Bus::getGlobalAWMode(); // global auto white mode override
   hw_led[F("ld")] = useGlobalLedBuffer;
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   // 2D Matrix Settings
   if (strip.isMatrix) {
     JsonObject matrix = hw_led.createNestedObject(F("matrix"));

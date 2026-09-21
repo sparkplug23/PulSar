@@ -32,7 +32,7 @@ class mDriverInterface :
     void Pre_Init(void);
     void Init(void);
     
-    static constexpr const char* PM_MODULE_DRIVERS_INTERFACE_CTR = D_MODULE_DRIVERS_INTERFACE_CTR;;
+    static constexpr const char* PM_MODULE_DRIVERS_INTERFACE_CTR = D_MODULE__DRIVERS__INTERFACE__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_INTERFACE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_INTERFACE_ID; }
 
@@ -112,20 +112,10 @@ typedef union {
 
   
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    
-    void MQTTHandler_Sender();
-    struct handler<mDriverInterface> mqtthandler_settings;
-    // void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
-    struct handler<mDriverInterface> mqtthandler_driver_status_teleperiod;
-    // void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
-
-    struct handler<mDriverInterface>* mqtthandler_list[2] = {
-      &mqtthandler_settings,
-      &mqtthandler_driver_status_teleperiod
-    };
+    void Telemetry_Init();    
+    std::vector<struct telemetry_handler<mDriverInterface>*> telemetry_list;
+    struct telemetry_handler<mDriverInterface> telemetry_settings;
+    struct telemetry_handler<mDriverInterface> telemetry_driver_status_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

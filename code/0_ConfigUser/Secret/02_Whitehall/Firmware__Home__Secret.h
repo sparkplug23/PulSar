@@ -99,7 +99,6 @@ Kitchen/Dining
 // #define DEVICE_RGBSHELF
 // #define DEVICE_RGBCOOKER
 // #define DEVICE_KITCHENSENSOR
-// #define DEVICE_NEXTION_HEATING_KITCHEN_DISPLAY
 // #define DEVICE_RGBFRIDGE
 // #define DEVICE_DEFAULT_SONOFF_BASIC__KITCHEN_EXTRACTOR_FAN
 
@@ -443,7 +442,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "]"
     "}"
@@ -511,7 +510,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "]"
     "}"
@@ -530,7 +529,7 @@ Bathroom
         "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Module\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
         "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," //number, name, or all
         "\"State\":2" // toggle
@@ -545,7 +544,7 @@ Bathroom
         "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Module\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
         "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," //number, name, or all
         "\"State\":2" // toggle
@@ -597,7 +596,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "]"
     "}"
@@ -679,7 +678,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "]"
     "}"
@@ -698,7 +697,7 @@ Bathroom
         "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Module\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
         "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," //number, name, or all
         "\"State\":2" // toggle
@@ -713,7 +712,7 @@ Bathroom
         "\"State\":0" //eg. On, Off, Toggle, Any, LongPress, ShortPress, RisingEdge, FallingEdge, Started, Ended, TimerOnStarted
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Module\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
         "\"Function\":\"SetPower\"," //eg. InputChange (TemperatureThreshold)
         "\"DeviceName\":0," //number, name, or all
         "\"State\":2" // toggle
@@ -786,7 +785,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "]"
     "}"
@@ -861,7 +860,7 @@ Bathroom
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SWITCH2_FRIENDLY_NAME_LONG "\""
       "]"
@@ -936,11 +935,11 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
       "]"
@@ -1034,11 +1033,11 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
       "],"
-        "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+        "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
           "\"" D_DEVICE_SWITCH_0_FRIENDLY_NAME_LONG "\","
           "\"" D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "\""
         "]"
@@ -1055,13 +1054,13 @@ Bathroom
     // Switch0 Toggle = Relay0 Power Toggle
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Module\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
@@ -1070,13 +1069,13 @@ Bathroom
     // Switch1 Toggle = Relay1 Power Toggle
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"      // 2 meaning either low or high, 1 would be high only
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Module\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
@@ -1091,7 +1090,7 @@ Bathroom
         "\"State\":2" // 
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Module\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
@@ -1153,10 +1152,10 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\""
       "],"
     "}"
@@ -1174,7 +1173,7 @@ Bathroom
         "\"State\":2"
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\"," //mqtt function
+        "\"Module\":\"" D_MODULE__DRIVERS__RELAY__CTR "\"," //mqtt function
         "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\"," //mqtt_send
         "\"DeviceName\":0,"
         "\"State\":0,"
@@ -1235,11 +1234,11 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
       "],"
-        "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+        "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
           "\"" D_DEVICE_SWITCH_0_FRIENDLY_NAME_LONG "\","
           "\"" D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "\""
         "]"
@@ -1256,13 +1255,13 @@ Bathroom
     // Switch0 Toggle = Relay0 Power Toggle
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2"
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Module\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
@@ -1271,13 +1270,13 @@ Bathroom
     // Switch1 Toggle = Relay1 Power Toggle
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":2"      // 2 meaning either low or high, 1 would be high only
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Module\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":2" // 3 (or other) means follow, so copy input from trigger
@@ -1292,7 +1291,7 @@ Bathroom
         "\"State\":2" // 
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Module\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
@@ -1305,104 +1304,6 @@ Bathroom
 
 //cct_temp, 100% should be highest colour temp (more white?)
 
-
-/**
- * This will become the final version of a panel, but requires animation fixing first
- * */
-#ifdef DEVICE_NEXTION_HEATING_KITCHEN_DISPLAY
-  #define DEVICENAME_CTR            "kitchenpanel"
-  #define DEVICENAME_FRIENDLY_CTR   "Heating Kitchen Display"
-  #define DEVICENAME_ROOMHINT_CTR   "Kitchen"
-  #define MQTT_HOST   "192.168.1.70"
-
-  #define ENABLE_FEATURE_WATCHDOG_TIMER
-  
-  
-
-  // #define ENABLE_ADVANCED_DEBUGGING
-  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // #define ENABLE_DEBUG_FUNCTION_NAMES
-
-  #define   ENABLE_DEBUG_LINE_HERE
-
-
-  #define ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-   
-
-
-  #ifdef ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-    
-    
-  #endif // ENABLE_DEVFEATURE_NEEXTION_SWITCH_TO_GLOBAL_WEBSERVER
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-
-  // #define USE_MODULE_SENSORS_INTERFACE
-  // #define USE_MODULE_SENSORS_BME
-  // #define USE_MODULE_SENSORS_PIR
-
-  // #define USE_MODULE_DISPLAYS_INTERFACE
-  #define USE_MODULE_DISPLAYS_NEXTION
-
-  
-  #define USE_MODULE_DISPLAYS_NEXTION
-    #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  #define NEXTION_DEFAULT_PAGE_NUMBER 2  
-    
-    //  // change to be code option later
-    #define ENABLE_FEATURE_NEXTION__WEB_OTA_TFT_DISPLAY_UPDATE
-    #define ENABLE_FEATURE_NEXTION__WEB_HTTP_TFT_DISPLAY_UPDATE
-
-  #define ENABLE_DEVFEATURE_NEXTION_DISPLAY
-  
-  #define ENABLE_DEVFEATURE_NEXTION_WEBUI
-
-  // 
-  
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIOC "\":{"
-      "\"17\":\"" D_GPIO_NEXTION_TX_CTR "\","
-      "\"16\":\"" D_GPIO_NEXTION_RX_CTR "\""
-    "},"
-    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
-  
-  DEFINE_PGM_CTR(DISPLAY_TEMPLATE)
-  R"=====(
-  {
-    "ObjectNameID": {
-      "hIconUS": 2,
-      "hTimeUS": 6,
-      "hBoostUS": 11,
-      "hAutoUS": 16,
-      "hIconDS": 3,
-      "hTimeDS": 7,
-      "hBoostDS": 12,
-      "hAutoDS": 17,
-      "hIconIH": 4,
-      "hTimeIH": 8,
-      "hBoostIH": 13,
-      "hAutoIH": 18,
-      "hIconWB": 5,
-      "hTimeWB": 9,
-      "hBoostWB": 14,
-      "hAutoWB": 19,
-      "hIconDryer": 122,
-      "hTimeDryer": 123,
-      "hBoostDryer": 124,
-      "hAutoDryer": 125
-    }
-  }
-  )=====";
-
-#endif
 
 
 #ifdef DEVICE_RGBSHELF
@@ -1482,7 +1383,7 @@ Bathroom
    * Longer term, a mixture of JSON/Binary for space.
    * Options should just be ifdef to switch between methods. 
   */
-  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+  //  // this will require methods to serialise and deserialise all data
 
   /***********************************
    * SECTION: System Configs
@@ -1631,10 +1532,10 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "]"
     "}"
@@ -1649,13 +1550,13 @@ Bathroom
   "{"// for PIR to follow
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_PIR_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -1795,20 +1696,23 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
-    "},"    
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}" 
+    "},"        
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
   "}";
   
   #define USE_RULES_TEMPLATE
@@ -1816,13 +1720,13 @@ Bathroom
   "{"// for PIR to follow
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -2050,19 +1954,19 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["         // so this is probably to be phased out?
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["         // so this is probably to be phased out?
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "],"  
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" "Utility" "\""
       "],"  
       "\"" D_MODULE_SENSORS_DOOR_FRIENDLY_CTR "\":["
         "\"" "Sidedoor" "\""
       "],"
-      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "]"
     "}"
@@ -2074,13 +1978,13 @@ Bathroom
   "{" // MOTION
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -2176,7 +2080,7 @@ Bathroom
   // #define ENABLE_DEBUG_LINE_HERE2
   // #define ENABLE_DEBUG_LINE_HERE3
   // #define ENABLE_DEBUG_LINE_HERE_TRACE
-  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // #define USE_DEBUG_PRINT
   // #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
 
@@ -2192,7 +2096,7 @@ Bathroom
 
   
   
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
   
       
@@ -2462,23 +2366,23 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+      "\"" D_MODULE__SENSORS__BUTTONS__CTR "\":["
         "\"" "WallRed" "\","
         "\"" "WallBlue" "\","
         "\"" "DoorAlert" "\""
       "],"
-      "\"" D_MODULE_DRIVERS_LEDS_CTR "\":["
+      "\"" D_MODULE__DRIVERS__LEDS__CTR "\":["
         "\"" "WallRed" "\","
         "\"" "WallBlue" "\","
         "\"" "StatusLED" "\""
       "],"
-      "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":["
+      "\"" D_MODULE__ENERGY__INTERFACE__CTR "\":["
         "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\","
         "\"" D_DRIVER_ENERGY_1_FRIENDLY_NAME_CTR "\","
         "\"" D_DRIVER_ENERGY_2_FRIENDLY_NAME_CTR "\","
@@ -2492,10 +2396,10 @@ Bathroom
         "\"" D_DRIVER_ENERGY_10_FRIENDLY_NAME_CTR "\","
         "\"" D_DRIVER_ENERGY_11_FRIENDLY_NAME_CTR "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"
-      "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":["
+      "\"" D_MODULE__ENERGY__PZEM004T__CTR "\":["
         "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\","
         "\"" D_SENSOR_PZEM004T_1_FRIENDLY_NAME_CTR "\","
         "\"" D_SENSOR_PZEM004T_2_FRIENDLY_NAME_CTR "\","
@@ -2511,7 +2415,7 @@ Bathroom
       "]"
     "},"
     "\"" D_SENSORADDRESS "\":{"
-      "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":[" 
+      "\"" D_MODULE__ENERGY__INTERFACE__CTR "\":[" 
         D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ","
         D_DEVICE_SENSOR_PZEM004T_1_ADDRESS ","
         D_DEVICE_SENSOR_PZEM004T_2_ADDRESS ","
@@ -2528,9 +2432,12 @@ Bathroom
     "},"
     "\"" D_ENERGY "\":{"
         "\"DeviceCount\":12"    
+    "},"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
-    "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+    "\"MQTT_Interface_Priority\":{\"" D_MODULE__ENERGY__INTERFACE__CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
   "}";
 
 
@@ -2619,7 +2526,7 @@ Bathroom
   // #define ENABLE_DEBUG_LINE_HERE2
   // #define ENABLE_DEBUG_LINE_HERE3
   // #define ENABLE_DEBUG_LINE_HERE_TRACE
-  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
   // #define USE_DEBUG_PRINT
   // #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
 
@@ -2635,7 +2542,7 @@ Bathroom
 
   
   
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
   
       
@@ -2853,29 +2760,29 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      // "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      // "\"" D_MODULE__SENSORS__PIR__CTR "\":["
       //   "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       // "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"  
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
         "\"" "Home" "\""
       "],"  
-      "\"" D_MODULE_SENSORS_SR04_CTR "\":["
+      "\"" D_MODULE__SENSORS__SR04__CTR "\":["
         "\"" D_DEVICE_SENSOR_SR04_FRIENDLY_NAME_LONG "\""
       "]"
     "},"
     "\"" D_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ""
@@ -2937,16 +2844,16 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
     "}"
@@ -2957,13 +2864,13 @@ Bathroom
   "{" // for PIR to follow
    "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -2980,6 +2887,157 @@ Bathroom
 ****** ROOM: Hallway ****************************************************************************************************************************************************
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
+
+
+
+
+/**
+ * @brief Seeed Studio XIAO ESP32S3 (and ESP32S3 Sense) pin map (quick reference)
+ *
+ * Notes:
+ *  - BOOT (GPIO0): hold LOW at reset to enter ROM bootloader (download mode).
+ *  - USER_LED: GPIO21 (on-board user LED).
+ *  - D4/D5 are I2C SDA/SCL (GPIO5/GPIO6).
+ *  - D6/D7 are UART TX/RX (GPIO43/GPIO44).
+ *  - SPI: SCK=GPIO7 (D8), MISO=GPIO8 (D9), MOSI=GPIO10 (D10).
+ *  - For the Sense variant, the digital mic uses GPIO42 (CLK) and GPIO41 (DATA).
+ *
+ * ┌───────────────────────────────────────────────────────────────┐
+ * │  XIAO Pin   | Function(s)        | ESP32-S3 GPIO | Notes       │
+ * ├───────────────────────────────────────────────────────────────┤
+ * │  5V         | VBUS               | —             | USB 5V rail  │
+ * │  GND        | GND                | —             | Ground       │
+ * │  3V3        | 3V3_OUT            | —             | Regulated 3V │
+ * │  D0 (A0)    | ADC, TOUCH1        | GPIO1         | GPIO/ADC     │
+ * │  D1 (A1)    | ADC, TOUCH2        | GPIO2         | GPIO/ADC     │
+ * │  D2 (A2)    | ADC, TOUCH3        | GPIO3         | GPIO/ADC     │
+ * │  D3 (A3)    | ADC, TOUCH4        | GPIO4         | GPIO/ADC     │
+ * │  D4 (A4)    | ADC, SDA, TOUCH5   | GPIO5         | I2C SDA      │
+ * │  D5 (A5)    | ADC, SCL, TOUCH6   | GPIO6         | I2C SCL      │
+ * │  D6         | TX                 | GPIO43        | UART TX      │
+ * │  D7         | RX                 | GPIO44        | UART RX      │
+ * │  D8 (A8)    | ADC, SCK, TOUCH7   | GPIO7         | SPI SCK      │
+ * │  D9 (A9)    | ADC, MISO, TOUCH8  | GPIO8         | SPI MISO     │
+ * │  D10 (A10)  | ADC, MOSI, TOUCH9  | GPIO10        | SPI MOSI     │
+ * │  D11 (A11)  | ADC, TOUCH12       | GPIO42        | GPIO/ADC     │
+ * │  D12 (A12)  | ADC, TOUCH13       | GPIO41        | GPIO/ADC     │
+ * │  RESET      | EN                 | EN            | Chip enable  │
+ * │  BOOT       | Boot strap         | GPIO0         | Bootloader   │
+ * │  USER_LED   | User LED           | GPIO21        | On-board LED │
+ * │  CHARGE_LED | Charge indicator   | —             | Board LED    │
+ * │  U.FL       | Antenna (LNA_IN)   | LNA_IN         | UFL antenna  │
+ * └───────────────────────────────────────────────────────────────┘
+ *
+ * Source: Seeed XIAO ESP32S3 “Pin Map” table (D0..D12, BOOT, USER_LED, etc.).
+ */
+#ifdef DEVICE_WHITEHALL__HALLWAY__PEBBLES
+#ifndef DEVICENAME_CTR
+#define DEVICENAME_CTR          "template"
+#endif
+#ifndef DEVICENAME_FRIENDLY_CTR
+#define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+#endif
+#ifndef DEVICENAME_DESCRIPTION_CTR
+#define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+#endif
+#define DEVICENAME_ROOMHINT_CTR "testgroup"
+#define MQTT_HOST   "192.168.3.70"
+   
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+//  /***********************************
+//   * SECTION: Sensor Configs
+//  ************************************/  
+
+//   #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+//    #define USE_MODULE_SENSORS_INTERFACE
+//    #define USE_MODULE_SENSORS_PIR
+//     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+//  #endif
+
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+  
+  #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S
+
+  // #define CONFIG_IDF_TARGET_ESP32C3
+
+ 
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":2000,
+  //       "Length":1000
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":3000,
+  //       "Length":1000
+  //     }
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[     
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,100],
+        "ColourPalette":"Pastel Dots",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static Palette",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 100
+  }
+  )=====";
+  #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
+  #define MAX_LED_MEMORY 64000*5
+  // #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+    "\"48\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+
+#endif
+
 
 /* 
   * Single Relay controls TWO 12V DC fans to improve heating (1 D_Out)
@@ -3103,26 +3161,26 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "],"  
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_DRIVER_RELAY_NAME_LONG "\""
       "],"  
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
         "\"" D_DEVICE_TEMP_1_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_TEMP_2_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_TEMP_RADIATOR_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_TEMP_3_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_DHT_CTR "\":["
+      "\"" D_MODULE__SENSORS__DHT__CTR "\":["
         "\"" D_DEVICE_TEMP_4_FRIENDLY_NAME_LONG "\""
       "]"
     "},"
     "\"" D_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ""
@@ -3135,13 +3193,13 @@ Bathroom
   "{"     // MOTION
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -3400,17 +3458,17 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
         "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
         "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
         "\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
         "\"" D_DEVICE_DRIVER_RELAY_2_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
         // Downstairs
         "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_07_NAME "\","
@@ -3422,17 +3480,17 @@ Bathroom
         "\"" D_DEVICE_SENSOR_DB18S20_13_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_14_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_DHT_CTR "\":["
+      "\"" D_MODULE__SENSORS__DHT__CTR "\":["
         "\"" D_DEVICE_SENSOR_DHT_0_NAME "\""
       "],"
-      "\"" D_MODULE_CONTROLLER_HVAC_CTR "\":["
+      "\"" D_MODULE__CONTROLLER__HVAC__CTR "\":["
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\","
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE1_NAME "\","
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE2_NAME "\""
       "]"
     "},"
     "\"" D_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":{" 
         // Downstairs
         "\"" D_DEVICE_SENSOR_DB18S20_06_NAME "\":" D_DEVICE_SENSOR_DB18S20_06_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_07_NAME "\":" D_DEVICE_SENSOR_DB18S20_07_ADDRESS ","
@@ -3453,23 +3511,26 @@ Bathroom
       "],"
       "\"" "SetOutput" "\":["
         "{"
-          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+          "\"" "ModuleID" "\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
           "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\","
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
         "},"
         "{"
-          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+          "\"" "ModuleID" "\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
           "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_1_NAME "\","
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
         "},"
         "{"
-          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+          "\"" "ModuleID" "\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
           "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_2_NAME "\","
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
         "}"
       "]"
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
+    "},"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
   "}";
   
 #endif
@@ -3484,7 +3545,7 @@ Bathroom
 /**
  * Device Type: Shelly 1
  * Modules:   
- *  - 2 Mains " D_MODULE_DRIVERS_RELAY_CTR "
+ *  - 2 Mains " D_MODULE__DRIVERS__RELAY__CTR "
  *  - 2 Mains Inputs
  *  - Energy monitoring (Voltage, Current and power)
  *  - Reset button on PCB
@@ -3563,15 +3624,15 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "]"    
@@ -3674,7 +3735,7 @@ Bathroom
    * Longer term, a mixture of JSON/Binary for space.
    * Options should just be ifdef to switch between methods. 
   */
-  // #define ENABLE_DEVFEATURE_STORAGE__ALL_DATA_AS_JSON // this will require methods to serialise and deserialise all data
+  //  // this will require methods to serialise and deserialise all data
 
   /***********************************
    * SECTION: System Configs
@@ -3682,16 +3743,12 @@ Bathroom
 
   #define ENABLE_FEATURE_WATCHDOG_TIMER
   
-  
-
   #define ENABLE_FEATURE_LOGGING__NORMAL_OPERATION_REDUCE_LOGGING_LEVEL_WHEN_NOT_DEBUGGING // reduce logging when not debugging
 
   /***********************************
    * SECTION: Network Configs
   ************************************/    
 
-  
-  
 
   /***********************************
    * SECTION: Sensor Configs
@@ -3715,191 +3772,11 @@ Bathroom
    * SECTION: Lighting Configs
   ************************************/  
 
-  #define FIRMWARE_DEFAULT__LIGHTING__ESP32_OPTIONS_MINIMAL__MAY24
-
-  #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
-
   
-  #define ENABLE_DEBUGFEATURE_LIGHTING__PALETTE_ENCODED_DYNAMIC__TEST_INJECT_RGB_WITH_GRADIENT
+  #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S
   
 
   #define USE_LIGHTING_TEMPLATE
-
-  /**
-   * @brief 
-   * Tree Left:  200
-   * Tree Right: 200
-   * Ceiling Near: 250
-   * Ceiling Further: 250
-   */
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":5,
-  //       "ColourOrder":"GRBCW",
-  //       "BusType":"WS2805_RGBWW",
-  //       "Start":0,
-  //       "Length":250
-  //     },
-  //     {
-  //       "Pin":18,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":250,
-  //       "Length":250
-  //     },
-  //     {
-  //       "Pin":21,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":500,
-  //       "Length":250
-  //     },
-  //     {
-  //       "Pin":18,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":750,
-  //       "Length":250
-  //     }
-  //   ],
-  //   "Segment0": {
-  //     "PixelRange": [
-  //       0,
-  //       500
-  //     ],
-  //     "ColourPalette":"Purple Pink",
-  //     "Effects": {
-  //       "Function":"Slow Glow",
-  //       "Speed":127,
-  //       "Intensity":1,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 0,
-  //       "RateMs": 100
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "Segment1": {
-  //     "PixelRange": [
-  //       500,
-  //       1000
-  //     ],
-  //     "ColourPalette":"Snowy 02",
-  //     "Effects": {
-  //       "Function":"Static",
-  //       "Speed":127,
-  //       "Intensity":127,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 0,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "BrightnessRGB": 100,
-  //   "BrightnessCCT": 0
-  // }
-  // )=====";
-  
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE)  //group A
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":5,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":0,
-  //       "Length":250
-  //     },
-  //     {
-  //       "Pin":18,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":250,
-  //       "Length":250
-  //     },
-  //     {
-  //       "Pin":19,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":500,
-  //       "Length":250
-  //     },
-  //     {
-  //       "Pin":21,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":750,
-  //       "Length":250
-  //     }
-  //   ],
-  //   "Segment0": {
-  //     "PixelRange": [
-  //       0,
-  //       500
-  //     ],
-  //     "ColourPalette":"Sweetpea",
-  //     "Effects": {
-  //       "Function":"Static",
-  //       "Speed":127,
-  //       "Intensity":127,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 0,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "Segment1": {
-  //     "PixelRange": [
-  //       500,
-  //       750
-  //     ],
-  //     "ColourPalette":"IceCream Floats",
-  //     "Effects": {
-  //       "Function":"Static",
-  //       "Speed":127,
-  //       "Intensity":127,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 0,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "Segment2": {
-  //     "PixelRange": [
-  //       750,
-  //       1000
-  //     ],
-  //     "ColourPalette":172,
-  //     "CustomPalette":{"Encoding":"RGB","Index":9,"Data":[255,255,255,255,0,43]},
-  //     "Effects": {
-  //       "Function":"Static",
-  //       "Speed":127,
-  //       "Intensity":127,
-  //       "Grouping":1
-  //     },
-  //     "Transition": {
-  //       "TimeMs": 0,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "BrightnessRGB": 100,
-  //   "BrightnessCCT": 0
-  // }
-  // )=====";
-
-
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)  // side 2
   R"=====(
   {
@@ -3933,22 +3810,23 @@ Bathroom
         "Length":250
       }
     ],
-    "Segment0": {
-      "PixelRange": [
-        0,
-        500
-      ],
-      "ColourPalette":"Sweetpea",
-      "Effects": {
-        "Function":"Static",
-        "Speed":127,
-        "Intensity":127,
-        "Grouping":1,
-        "RateMs": 1000
+    "Segments":[
+      {
+        "PixelRange": [
+          0,
+          500
+        ],
+        "ColourPalette":"Sweetpea",
+        "Effects": {
+          "Function":"Static",
+          "Speed":127,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 100
       },
-      "BrightnessRGB": 100
-    },
-    "Segment1": {
+      {
       "PixelRange": [
         500,
         750
@@ -3962,23 +3840,24 @@ Bathroom
         "RateMs": 1000
       },
       "BrightnessRGB": 100
-    },
-    "Segment2": {
-      "PixelRange": [
-        750,
-        1000
-      ],
-      "ColourPalette":172,
-      "CustomPalette":{"Encoding":"RGB","Index":9,"Data":[255,255,255,255,0,43]},
-      "Effects": {
-        "Function":"Static",
-        "Speed":127,
-        "Intensity":127,
-        "Grouping":1,
-        "RateMs": 1000
       },
-      "BrightnessRGB": 100
-    },
+      {
+        "PixelRange": [
+          750,
+          1000
+        ],
+        "ColourPalette":172,
+        "CustomPalette":{"Encoding":"RGB","Index":9,"Data":[255,255,255,255,0,43]},
+        "Effects": {
+          "Function":"Static",
+          "Speed":127,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "BrightnessRGB": 100
+      }
+    ],
     "BrightnessRGB": 100,
     "BrightnessCCT": 0
   }
@@ -4073,23 +3952,26 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
-      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
-      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "],"  
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
       "]"  
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120}"
+    "},"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
   "}";
 
   /***********************************
@@ -4101,13 +3983,13 @@ Bathroom
   "{"
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -4167,7 +4049,7 @@ Bathroom
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SWITCH_STAIRS_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SWITCH_BATHROOM_FRIENDLY_NAME_LONG "\""
       "]"
@@ -4299,7 +4181,7 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\""
       "],"
@@ -4308,7 +4190,7 @@ Bathroom
       "]"
     "},"
     "\"" D_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ""
       "}"  
@@ -4403,10 +4285,10 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\","
@@ -4415,27 +4297,30 @@ Bathroom
       "\"" D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSORS_ANALOG_1_CTR "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSORS_SWITCH_1_CTR "\","
         "\"" D_DEVICE_SENSORS_SWITCH_2_CTR "\","
         "\"" D_DEVICE_SENSORS_SWITCH_3_CTR "\""
       "],"
-      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
    "},"
     "\"" D_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\":" D_DEVICE_SENSOR_DB18S20_04_ADDRESS ""
       "}"  
-    "}"  
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}"  
+    "}"      
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
   "}";
 
   
@@ -4445,13 +4330,13 @@ Bathroom
     // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":2,"
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":2" // Started
@@ -4518,15 +4403,15 @@ Bathroom
   "{"
     //device_names:{"module_name":["relay1","relay2"]}
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "]"    
@@ -4653,13 +4538,13 @@ Bathroom
     // Switch0 HIGH = Motion0 Event Started, ie report as motion with motion name
     "\"Rule2\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1" // FOLLOW, ie command follows trigger, or follow_inv, ie command is inverted to source
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":1" // Started
@@ -4668,13 +4553,13 @@ Bathroom
     // Switch1 HIGH = Motion1 Event Started, ie report as motion with motion name
     "\"Rule3\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":1" // 
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1,"     // Index of motion to be used for name eg garage, motion, then time from when mqtt is sent
         "\"State\":1" // Started        
@@ -4729,13 +4614,13 @@ Bathroom
     // Motion Event = Switch0
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -4744,13 +4629,13 @@ Bathroom
     // Motion Event = Switch1
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1," 
         "\"State\":\"Follow\""
@@ -4804,7 +4689,7 @@ Bathroom
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SWITCH_STAIRS_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SWITCH_BATHROOM_FRIENDLY_NAME_LONG "\""
       "]"
@@ -4892,7 +4777,7 @@ Bathroom
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SWITCH_2_FRIENDLY_NAME_LONG "\""
       "]"
@@ -4972,7 +4857,7 @@ Bathroom
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SWITCH_2_FRIENDLY_NAME_LONG "\""
       "]"
@@ -5109,20 +4994,23 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
-    "},"    
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "},"        
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
 
   "}";
 
@@ -5133,13 +5021,13 @@ Bathroom
   "{"// for PIR to follow
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -5184,7 +5072,7 @@ Bathroom
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SWITCH_1_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SWITCH_2_FRIENDLY_NAME_LONG "\""
       "]"
@@ -5296,11 +5184,11 @@ Bathroom
   "{"
     //device_names:{"module_name":["relay1","relay2"]}
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_RELAY_1_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_1_FRIENDLY_NAME_LONG "\""
       "]"
@@ -5358,7 +5246,7 @@ Bathroom
 /**
  * Device Type: Shelly 1
  * Modules:   
- *  - 2 Mains " D_MODULE_DRIVERS_RELAY_CTR "
+ *  - 2 Mains " D_MODULE__DRIVERS__RELAY__CTR "
  *  - 2 Mains Inputs
  *  - Energy monitoring (Voltage, Current and power)
  *  - Reset button on PCB
@@ -5410,10 +5298,10 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_OUTPUT1_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SWITCH1_FRIENDLY_NAME_LONG "\""
       "]"
     "}"
@@ -5425,13 +5313,13 @@ Bathroom
     // Switch0 ON = Relay0 Power ON for Timed seconds
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":1"
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Module\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":120}}\""
@@ -5440,13 +5328,13 @@ Bathroom
     // Switch0 OFF = Relay0 Reset to OFF
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":0"      // 2 meaning either low or high, 1 would be high only
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+        "\"Module\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":0" // Started
@@ -5529,11 +5417,11 @@ Bathroom
     
     
     // #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     // 
     /********* Group: Debug options only ************************/
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
@@ -5577,20 +5465,23 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE_FRIENDLY_NAME_LONG "\""
       "]"
-    "},"    
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "},"        
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
 
   "}";
 
@@ -5626,13 +5517,13 @@ Bathroom
   "{"// for PIR to follow
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -5686,7 +5577,7 @@ Bathroom
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SWITCH_STAIRS_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SWITCH_BATHROOM_FRIENDLY_NAME_LONG "\""
       "]"
@@ -6061,22 +5952,22 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_DRIVER_RELAY_01_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_STAIRS_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_LANDING_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_STAIRS_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION_LANDING_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_BME_MASTERBEDROOM_NAME "\"," // 0x76
         "\"" D_DEVICE_SENSOR_BME_LANDING_NAME  "\""       // 0x77
       "],"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
         // Group 1
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
@@ -6095,12 +5986,12 @@ Bathroom
         "\"" D_DEVICE_SENSOR_DB18S20_18_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_19_NAME "\""      
       "],"
-      "\"" D_MODULE_CONTROLLER_HVAC_CTR "\":["
+      "\"" D_MODULE__CONTROLLER__HVAC__CTR "\":["
         "\"" D_DEVICE_CONTROLLER_HVAC_ZONE0_NAME "\""
       "]"
     "},"
     "\"" D_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":{" 
         // Group 1
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
@@ -6126,13 +6017,16 @@ Bathroom
       "],"
       "\"" "SetOutput" "\":["
         "{"
-          "\"" "ModuleID" "\":\"" D_MODULE_DRIVERS_RELAY_CTR "\","
+          "\"" "ModuleID" "\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
           "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_01_NAME "\"," // Also an array to match heating/cooling
           "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
         "}"
       "]"
-    "}"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+    "}"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
   // #ifdef USE_RGB_OUT_LANDING_PANEL
@@ -6201,13 +6095,13 @@ Bathroom
   "{"// for PIR to follow
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -6215,13 +6109,13 @@ Bathroom
     "},"
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1," 
         "\"State\":\"Follow\""
@@ -6306,7 +6200,7 @@ Bathroom
       "\"" D_MODULE_DRIVERS_SHELLY_DIMMER_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_DIMMER_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SWITCH_STAIRS_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SWITCH_BATHROOM_FRIENDLY_NAME_LONG "\""
       "]"
@@ -6445,18 +6339,18 @@ Bathroom
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
-      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
         "\"" D_DEVICE_SENSOR_CLIMATE "\""
       "],"  
-      "\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\":["         // so this is probably to be phased out?
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["         // so this is probably to be phased out?
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION1_FRIENDLY_NAME_LONG "1m\""
         "\"" D_DEVICE_SENSOR_MOTION2_FRIENDLY_NAME_LONG "2m\","
       "],"  
-      "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION1_FRIENDLY_NAME_LONG "\","
         "\"" D_DEVICE_SENSOR_MOTION2_FRIENDLY_NAME_LONG "\""
@@ -6476,13 +6370,13 @@ Bathroom
     // MOTION
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -6490,13 +6384,13 @@ Bathroom
     "},"
     "\"Rule1\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":1,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":1," 
         "\"State\":\"Follow\""
@@ -6504,13 +6398,13 @@ Bathroom
     "},"
     "\"Rule2\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":2,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_MOTION_FRIENDLY_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":2," 
         "\"State\":\"Follow\""
@@ -6620,10 +6514,10 @@ HVAC controllers here
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE) // temp solution, the unedefined relay should be handled by GetDeviceName to add the unique index and not random
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+      "\"" D_MODULE__SENSORS__BUTTONS__CTR "\":["
         "\"Button\""
       "],"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"Relay1\","
         "\"Relay2\","
         "\"Relay3\","
@@ -6782,7 +6676,7 @@ HVAC controllers here
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE) // temp solution, the unedefined relay should be handled by GetDeviceName to add the unique index and not random
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"Relay1\","
         "\"Relay2\","
         "\"Relay3\","
@@ -6831,7 +6725,7 @@ HVAC controllers here
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE) // temp solution, the unedefined relay should be handled by GetDeviceName to add the unique index and not random
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"Relay1\","
         "\"Relay2\","
         "\"Relay3\","

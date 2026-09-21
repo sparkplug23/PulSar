@@ -25,255 +25,255 @@ void mPalette::Init_Palettes()
    ****************/
 
   addStaticPalette(
-    PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID, 
-    PM_PALETTE_COLOURFUL_DEFAULT__DATA, 
-    sizeof(PM_PALETTE_COLOURFUL_DEFAULT__DATA),
+    PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID, 
+    PM_PALETTE__COLOURFUL_DEFAULT__DATA, 
+    sizeof(PM_PALETTE__COLOURFUL_DEFAULT__DATA),
     D_PALETTE_COLOURFUL_DEFAULT_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_HOLLOWEEN_OP__ID, 
-    PM_PALETTE_HOLLOWEEN_OP__DATA, 
-    sizeof(PM_PALETTE_HOLLOWEEN_OP__DATA),
+    PALETTELIST_STATIC__HOLLOWEEN_OP__ID, 
+    PM_PALETTE__HOLLOWEEN_OP__DATA, 
+    sizeof(PM_PALETTE__HOLLOWEEN_OP__DATA),
     D_PALETTE_HOLLOWEEN_OP_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_HOLLOWEEN_OGP__ID, 
-    PM_PALETTE_HOLLOWEEN_OGP__DATA, 
-    sizeof(PM_PALETTE_HOLLOWEEN_OGP__DATA),
+    PALETTELIST_STATIC__HOLLOWEEN_OGP__ID, 
+    PM_PALETTE__HOLLOWEEN_OGP__DATA, 
+    sizeof(PM_PALETTE__HOLLOWEEN_OGP__DATA),
     D_PALETTE_HOLLOWEEN_OGP_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_RAINBOW__ID, 
-    PM_PALETTE_RAINBOW__DATA, 
-    sizeof(PM_PALETTE_RAINBOW__DATA),
+    PALETTELIST_STATIC__RAINBOW__ID, 
+    PM_PALETTE__RAINBOW__DATA, 
+    sizeof(PM_PALETTE__RAINBOW__DATA),
     D_PALETTE_RAINBOW_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_RAINBOW_WARM__ID, 
-    PM_PALETTE_RAINBOW_WARM__DATA, 
-    sizeof(PM_PALETTE_RAINBOW_WARM__DATA),
+    PALETTELIST_STATIC__RAINBOW_WARM__ID, 
+    PM_PALETTE__RAINBOW_WARM__DATA, 
+    sizeof(PM_PALETTE__RAINBOW_WARM__DATA),
     D_PALETTE_RAINBOW_WARM_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_RAINBOW_INVERTED__ID, 
-    PM_PALETTE_RAINBOW_INVERTED__DATA, 
-    sizeof(PM_PALETTE_RAINBOW_INVERTED__DATA),
+    PALETTELIST_STATIC__RAINBOW_INVERTED__ID, 
+    PM_PALETTE__RAINBOW_INVERTED__DATA, 
+    sizeof(PM_PALETTE__RAINBOW_INVERTED__DATA),
     D_PALETTE_RAINBOW_INVERTED_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_PASTEL_01__ID, 
-    PM_PALETTE_PASTEL_01__DATA, 
-    sizeof(PM_PALETTE_PASTEL_01__DATA),
+    PALETTELIST_STATIC__PASTEL_01__ID, 
+    PM_PALETTE__PASTEL_01__DATA, 
+    sizeof(PM_PALETTE__PASTEL_01__DATA),
     D_PALETTE_PASTEL_01_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_PASTEL_02__ID, 
-    PM_PALETTE_PASTEL_02__DATA, 
-    sizeof(PM_PALETTE_PASTEL_02__DATA),
+    PALETTELIST_STATIC__PASTEL_02__ID, 
+    PM_PALETTE__PASTEL_02__DATA, 
+    sizeof(PM_PALETTE__PASTEL_02__DATA),
     D_PALETTE_PASTEL_02_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_PASTEL_03__ID, 
-    PM_PALETTE_PASTEL_03__DATA, 
-    sizeof(PM_PALETTE_PASTEL_03__DATA),
+    PALETTELIST_STATIC__PASTEL_03__ID, 
+    PM_PALETTE__PASTEL_03__DATA, 
+    sizeof(PM_PALETTE__PASTEL_03__DATA),
     D_PALETTE_PASTEL_03_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_PASTEL_04__ID, 
-    PM_PALETTE_PASTEL_04__DATA, 
-    sizeof(PM_PALETTE_PASTEL_04__DATA),
+    PALETTELIST_STATIC__PASTEL_04__ID, 
+    PM_PALETTE__PASTEL_04__DATA, 
+    sizeof(PM_PALETTE__PASTEL_04__DATA),
     D_PALETTE_PASTEL_04_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_PASTEL_05__ID, 
-    PM_PALETTE_PASTEL_05__DATA, 
-    sizeof(PM_PALETTE_PASTEL_05__DATA),
+    PALETTELIST_STATIC__PASTEL_05__ID, 
+    PM_PALETTE__PASTEL_05__DATA, 
+    sizeof(PM_PALETTE__PASTEL_05__DATA),
     D_PALETTE_PASTEL_05_ENCODING
   );
   
   addStaticPalette(
-    PALETTELIST_STATIC_GRADIENT_PASTEL_TONES_PURPLE__ID, 
-    PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE__DATA, 
-    sizeof(PM_PALETTE_GRADIENT_PASTEL_TONES_PURPLE__DATA),
+    PALETTELIST_STATIC__GRADIENT_PASTEL_TONES_PURPLE__ID, 
+    PM_PALETTE__GRADIENT_PASTEL_TONES_PURPLE__DATA, 
+    sizeof(PM_PALETTE__GRADIENT_PASTEL_TONES_PURPLE__DATA),
     D_PALETTE_GRADIENT_PASTEL_TONES_PURPLE_ENCODING
   );
   
   addStaticPalette(
-    PALETTELIST_STATIC_FLOWER_SWEATPEA__ID, 
-    PM_PALETTE_FLOWER_SWEATPEA__DATA, 
-    sizeof(PM_PALETTE_FLOWER_SWEATPEA__DATA),
+    PALETTELIST_STATIC__FLOWER_SWEATPEA__ID, 
+    PM_PALETTE__FLOWER_SWEATPEA__DATA, 
+    sizeof(PM_PALETTE__FLOWER_SWEATPEA__DATA),
     D_PALETTE_FLOWER_SWEATPEA_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_PINK_PURPLE__ID, 
-    PM_PALETTE_PINK_PURPLE__DATA, 
-    sizeof(PM_PALETTE_PINK_PURPLE__DATA),
+    PALETTELIST_STATIC__PINK_PURPLE__ID, 
+    PM_PALETTE__PINK_PURPLE__DATA, 
+    sizeof(PM_PALETTE__PINK_PURPLE__DATA),
     D_PALETTE_PINK_PURPLE_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_PURPLE_PINK__ID, 
-    PM_PALETTE_PURPLE_PINK__DATA, 
-    sizeof(PM_PALETTE_PURPLE_PINK__DATA),
+    PALETTELIST_STATIC__PURPLE_PINK__ID, 
+    PM_PALETTE__PURPLE_PINK__DATA, 
+    sizeof(PM_PALETTE__PURPLE_PINK__DATA),
     D_PALETTE_PURPLE_PINK_ENCODING
   );
   
   addStaticPalette(
-    PALETTELIST_STATIC_HOT_PINK_NEON_WITH_NAVY__ID, 
-    PM_PALETTE_HOT_PINK_NEON_WITH_NAVY__DATA, 
-    sizeof(PM_PALETTE_HOT_PINK_NEON_WITH_NAVY__DATA),
+    PALETTELIST_STATIC__HOT_PINK_NEON_WITH_NAVY__ID, 
+    PM_PALETTE__HOT_PINK_NEON_WITH_NAVY__DATA, 
+    sizeof(PM_PALETTE__HOT_PINK_NEON_WITH_NAVY__DATA),
     D_PALETTE_HOT_PINK_NEON_WITH_NAVY_ENCODING
   );
 
 
   addStaticPalette(
-    PALETTELIST_STATIC_WINTER_01__ID, 
-    PM_PALETTE_WINTER_01__DATA, 
-    sizeof(PM_PALETTE_WINTER_01__DATA),
+    PALETTELIST_STATIC__WINTER_01__ID, 
+    PM_PALETTE__WINTER_01__DATA, 
+    sizeof(PM_PALETTE__WINTER_01__DATA),
     D_PALETTE_WINTER_01_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_WINTER_02__ID, 
-    PM_PALETTE_WINTER_02__DATA, 
-    sizeof(PM_PALETTE_WINTER_02__DATA),
+    PALETTELIST_STATIC__WINTER_02__ID, 
+    PM_PALETTE__WINTER_02__DATA, 
+    sizeof(PM_PALETTE__WINTER_02__DATA),
     D_PALETTE_WINTER_02_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_WINTER_03__ID, 
-    PM_PALETTE_WINTER_03__DATA, 
-    sizeof(PM_PALETTE_WINTER_03__DATA),
+    PALETTELIST_STATIC__WINTER_03__ID, 
+    PM_PALETTE__WINTER_03__DATA, 
+    sizeof(PM_PALETTE__WINTER_03__DATA),
     D_PALETTE_WINTER_03_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_WINTER_04__ID, 
-    PM_PALETTE_WINTER_04__DATA, 
-    sizeof(PM_PALETTE_WINTER_04__DATA),
+    PALETTELIST_STATIC__WINTER_04__ID, 
+    PM_PALETTE__WINTER_04__DATA, 
+    sizeof(PM_PALETTE__WINTER_04__DATA),
     D_PALETTE_WINTER_04_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_AUTUMN_GREEN__ID, 
-    PM_PALETTE_AUTUMN_GREEN__DATA, 
-    sizeof(PM_PALETTE_AUTUMN_GREEN__DATA),
+    PALETTELIST_STATIC__AUTUMN_GREEN__ID, 
+    PM_PALETTE__AUTUMN_GREEN__DATA, 
+    sizeof(PM_PALETTE__AUTUMN_GREEN__DATA),
     D_PALETTE_AUTUMN_GREEN_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_AUTUMN_RED__ID, 
-    PM_PALETTE_AUTUMN_RED__DATA, 
-    sizeof(PM_PALETTE_AUTUMN_RED__DATA),
+    PALETTELIST_STATIC__AUTUMN_RED__ID, 
+    PM_PALETTE__AUTUMN_RED__DATA, 
+    sizeof(PM_PALETTE__AUTUMN_RED__DATA),
     D_PALETTE_AUTUMN_RED_ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGPBO__ID, 
-    PM_PALETTE__CHRISTMAS_TRADITIONAL_RGPBO__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_TRADITIONAL_RGPBO__DATA),
+    PM_PALETTE___CHRISTMAS_TRADITIONAL_RGPBO__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_TRADITIONAL_RGPBO__DATA),
     D_PALETTE__CHRISTMAS_TRADITIONAL_RGPBO__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGPBY__ID, 
-    PM_PALETTE__CHRISTMAS_TRADITIONAL_RGPBY__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_TRADITIONAL_RGPBY__DATA),
+    PM_PALETTE___CHRISTMAS_TRADITIONAL_RGPBY__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_TRADITIONAL_RGPBY__DATA),
     D_PALETTE__CHRISTMAS_TRADITIONAL_RGPBY__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_TRADITIONAL_ROGPBY__ID, 
-    PM_PALETTE__CHRISTMAS_TRADITIONAL_ROGPBY__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_TRADITIONAL_ROGPBY__DATA),
+    PM_PALETTE___CHRISTMAS_TRADITIONAL_ROGPBY__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_TRADITIONAL_ROGPBY__DATA),
     D_PALETTE__CHRISTMAS_TRADITIONAL_ROGPBY__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGBO__ID, 
-    PM_PALETTE__CHRISTMAS_TRADITIONAL_RGBO__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_TRADITIONAL_RGBO__DATA),
+    PM_PALETTE___CHRISTMAS_TRADITIONAL_RGBO__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_TRADITIONAL_RGBO__DATA),
     D_PALETTE__CHRISTMAS_TRADITIONAL_RGBO__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_TRADITIONAL_RGBY__ID, 
-    PM_PALETTE__CHRISTMAS_TRADITIONAL_RGBY__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_TRADITIONAL_RGBY__DATA),
+    PM_PALETTE___CHRISTMAS_TRADITIONAL_RGBY__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_TRADITIONAL_RGBY__DATA),
     D_PALETTE__CHRISTMAS_TRADITIONAL_RGBY__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_VINTAGE_MINIBELLS__ID, 
-    PM_PALETTE__CHRISTMAS_VINTAGE_MINIBELLS__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_VINTAGE_MINIBELLS__DATA),
+    PM_PALETTE___CHRISTMAS_VINTAGE_MINIBELLS__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_VINTAGE_MINIBELLS__DATA),
     D_PALETTE__CHRISTMAS_VINTAGE_MINIBELLS__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_VINTAGE_MERRYLITES__ID, 
-    PM_PALETTE__CHRISTMAS_VINTAGE_MERRYLITES__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_VINTAGE_MERRYLITES__DATA),
+    PM_PALETTE___CHRISTMAS_VINTAGE_MERRYLITES__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_VINTAGE_MERRYLITES__DATA),
     D_PALETTE__CHRISTMAS_VINTAGE_MERRYLITES__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_VINTAGE_AGED_BULBS__ID, 
-    PM_PALETTE__CHRISTMAS_VINTAGE_AGED_BULBS__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_VINTAGE_AGED_BULBS__DATA),
+    PM_PALETTE___CHRISTMAS_VINTAGE_AGED_BULBS__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_VINTAGE_AGED_BULBS__DATA),
     D_PALETTE__CHRISTMAS_VINTAGE_AGED_BULBS__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_01__ID, 
-    PM_PALETTE__CHRISTMAS_SNOWY_COLOURS_01__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_SNOWY_COLOURS_01__DATA),
+    PM_PALETTE___CHRISTMAS_SNOWY_COLOURS_01__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_SNOWY_COLOURS_01__DATA),
     D_PALETTE__CHRISTMAS_SNOWY_COLOURS_01__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_02__ID, 
-    PM_PALETTE__CHRISTMAS_SNOWY_COLOURS_02__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_SNOWY_COLOURS_02__DATA),
+    PM_PALETTE___CHRISTMAS_SNOWY_COLOURS_02__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_SNOWY_COLOURS_02__DATA),
     D_PALETTE__CHRISTMAS_SNOWY_COLOURS_02__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_SNOWY_COLOURS_03__ID, 
-    PM_PALETTE__CHRISTMAS_SNOWY_COLOURS_03__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_SNOWY_COLOURS_03__DATA),
+    PM_PALETTE___CHRISTMAS_SNOWY_COLOURS_03__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_SNOWY_COLOURS_03__DATA),
     D_PALETTE__CHRISTMAS_SNOWY_COLOURS_03__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_BERRY_YELLOW__ID, 
-    PM_PALETTE__CHRISTMAS_BERRY_YELLOW__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_BERRY_YELLOW__DATA),
+    PM_PALETTE___CHRISTMAS_BERRY_YELLOW__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_BERRY_YELLOW__DATA),
     D_PALETTE__CHRISTMAS_BERRY_YELLOW__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_BERRY_ORANGE__ID, 
-    PM_PALETTE__CHRISTMAS_BERRY_ORANGE__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_BERRY_ORANGE__DATA),
+    PM_PALETTE___CHRISTMAS_BERRY_ORANGE__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_BERRY_ORANGE__DATA),
     D_PALETTE__CHRISTMAS_BERRY_ORANGE__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__FESTIVE_BERRY_GREEN__ID, 
-    PM_PALETTE__CHRISTMAS_BERRY_GREEN__DATA, 
-    sizeof(PM_PALETTE__CHRISTMAS_BERRY_GREEN__DATA),
+    PM_PALETTE___CHRISTMAS_BERRY_GREEN__DATA, 
+    sizeof(PM_PALETTE___CHRISTMAS_BERRY_GREEN__DATA),
     D_PALETTE__CHRISTMAS_BERRY_GREEN__ENCODING
   );
 
@@ -282,167 +282,167 @@ void mPalette::Init_Palettes()
 
   addStaticPalette(
     PALETTELIST_STATIC__COLOURFUL_PAIRS_01__ID, 
-    PM_PALETTE__COLOURFUL_PAIRS_01__DATA, 
-    sizeof(PM_PALETTE__COLOURFUL_PAIRS_01__DATA),
+    PM_PALETTE___COLOURFUL_PAIRS_01__DATA, 
+    sizeof(PM_PALETTE___COLOURFUL_PAIRS_01__DATA),
     D_PALETTE__COLOURFUL_PAIRS_01__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__COLOURFUL_COLOUR_WHITE_STRIPE__ID, 
-    PM_PALETTE__COLOURFUL_COLOUR_WHITE_STRIPE__DATA, 
-    sizeof(PM_PALETTE__COLOURFUL_COLOUR_WHITE_STRIPE__DATA),
+    PM_PALETTE___COLOURFUL_COLOUR_WHITE_STRIPE__DATA, 
+    sizeof(PM_PALETTE___COLOURFUL_COLOUR_WHITE_STRIPE__DATA),
     D_PALETTE__COLOURFUL_COLOUR_WHITE_STRIPE__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__COLOURFUL_COLOUR_WARMWHITE_STRIPE__ID, 
-    PM_PALETTE__COLOURFUL_COLOUR_WARMWHITE_STRIPE__DATA, 
-    sizeof(PM_PALETTE__COLOURFUL_COLOUR_WARMWHITE_STRIPE__DATA),
+    PM_PALETTE___COLOURFUL_COLOUR_WARMWHITE_STRIPE__DATA, 
+    sizeof(PM_PALETTE___COLOURFUL_COLOUR_WARMWHITE_STRIPE__DATA),
     D_PALETTE__COLOURFUL_COLOUR_WARMWHITE_STRIPE__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__COLOURFUL_BLUE_WHITE__ID, 
-    PM_PALETTE__COLOURFUL_BLUE_WHITE__DATA, 
-    sizeof(PM_PALETTE__COLOURFUL_BLUE_WHITE__DATA),
+    PM_PALETTE___COLOURFUL_BLUE_WHITE__DATA, 
+    sizeof(PM_PALETTE___COLOURFUL_BLUE_WHITE__DATA),
     D_PALETTE__COLOURFUL_BLUE_WHITE__ENCODING
   );
 
   addStaticPalette(
     PALETTELIST_STATIC__COLOURFUL_WHITE_MIXED__ID, 
-    PM_PALETTE__COLOURFUL_WHITE_MIXED__DATA, 
-    sizeof(PM_PALETTE__COLOURFUL_WHITE_MIXED__DATA),
+    PM_PALETTE___COLOURFUL_WHITE_MIXED__DATA, 
+    sizeof(PM_PALETTE___COLOURFUL_WHITE_MIXED__DATA),
     D_PALETTE__COLOURFUL_WHITE_MIXED__ENCODING
   );
 
 
   addStaticPalette(
     PALETTELIST_STATIC__COLOURFUL_PINK_RED_YELLOW__ID, 
-    PM_PALETTE__COLOURFUL_PINK_RED_YELLOW__DATA, 
-    sizeof(PM_PALETTE__COLOURFUL_PINK_RED_YELLOW__DATA),
+    PM_PALETTE___COLOURFUL_PINK_RED_YELLOW__DATA, 
+    sizeof(PM_PALETTE___COLOURFUL_PINK_RED_YELLOW__DATA),
     D_PALETTE__COLOURFUL_PINK_RED_YELLOW__ENCODING
   );
 
 
   addStaticPalette(
     PALETTELIST_STATIC__COLOURFUL_PEACHY_ORANGE__ID, 
-    PM_PALETTE__COLOURFUL_PEACHY_ORANGE__DATA, 
-    sizeof(PM_PALETTE__COLOURFUL_PEACHY_ORANGE__DATA),
+    PM_PALETTE___COLOURFUL_PEACHY_ORANGE__DATA, 
+    sizeof(PM_PALETTE___COLOURFUL_PEACHY_ORANGE__DATA),
     D_PALETTE__COLOURFUL_PEACHY_ORANGE__ENCODING
   );
 
 
   addStaticPalette(
     PALETTELIST_STATIC__COLOURFUL_PEACHY_YELLOW__ID, 
-    PM_PALETTE__COLOURFUL_PEACHY_YELLOW__DATA, 
-    sizeof(PM_PALETTE__COLOURFUL_PEACHY_YELLOW__DATA),
+    PM_PALETTE___COLOURFUL_PEACHY_YELLOW__DATA, 
+    sizeof(PM_PALETTE___COLOURFUL_PEACHY_YELLOW__DATA),
     D_PALETTE__COLOURFUL_PEACHY_YELLOW__ENCODING
   );
 
 
   addStaticPalette(
     PALETTELIST_STATIC__COLOURFUL_GREENLESS__ID, 
-    PM_PALETTE__COLOURFUL_GREENLESS__DATA, 
-    sizeof(PM_PALETTE__COLOURFUL_GREENLESS__DATA),
+    PM_PALETTE___COLOURFUL_GREENLESS__DATA, 
+    sizeof(PM_PALETTE___COLOURFUL_GREENLESS__DATA),
     D_PALETTE__COLOURFUL_GREENLESS__ENCODING
   );
   
   addStaticPalette(
     PALETTELIST_STATIC__GOLDEN__ID, 
-    PM_PALETTE__GOLDEN__DATA, 
-    sizeof(PM_PALETTE__GOLDEN__DATA),
+    PM_PALETTE___GOLDEN__DATA, 
+    sizeof(PM_PALETTE___GOLDEN__DATA),
     D_PALETTE__GOLDEN__ENCODING
   );
 
 
   addStaticPalette(
-    PALETTELIST_STATIC_SUNRISE_01__ID, 
-    PM_PALETTE_SUNRISE_01__DATA, 
-    sizeof(PM_PALETTE_SUNRISE_01__DATA),
+    PALETTELIST_STATIC__SUNRISE_01__ID, 
+    PM_PALETTE__SUNRISE_01__DATA, 
+    sizeof(PM_PALETTE__SUNRISE_01__DATA),
     D_PALETTE_SUNRISE_01_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_SUNRISE_02__ID, 
-    PM_PALETTE_SUNRISE_02__DATA, 
-    sizeof(PM_PALETTE_SUNRISE_02__DATA),
+    PALETTELIST_STATIC__SUNRISE_02__ID, 
+    PM_PALETTE__SUNRISE_02__DATA, 
+    sizeof(PM_PALETTE__SUNRISE_02__DATA),
     D_PALETTE_SUNRISE_02_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_SUNRISE_03__ID, 
-    PM_PALETTE_SUNRISE_03__DATA, 
-    sizeof(PM_PALETTE_SUNRISE_03__DATA),
+    PALETTELIST_STATIC__SUNRISE_03__ID, 
+    PM_PALETTE__SUNRISE_03__DATA, 
+    sizeof(PM_PALETTE__SUNRISE_03__DATA),
     D_PALETTE_SUNRISE_03_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_SUNRISE_04__ID, 
-    PM_PALETTE_SUNRISE_04__DATA, 
-    sizeof(PM_PALETTE_SUNRISE_04__DATA),
+    PALETTELIST_STATIC__SUNRISE_04__ID, 
+    PM_PALETTE__SUNRISE_04__DATA, 
+    sizeof(PM_PALETTE__SUNRISE_04__DATA),
     D_PALETTE_SUNRISE_04_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_SUNSET_01__ID, 
-    PM_PALETTE_SUNSET_01__DATA, 
-    sizeof(PM_PALETTE_SUNSET_01__DATA),
+    PALETTELIST_STATIC__SUNSET_01__ID, 
+    PM_PALETTE__SUNSET_01__DATA, 
+    sizeof(PM_PALETTE__SUNSET_01__DATA),
     D_PALETTE_SUNSET_01_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_SUNSET_02__ID, 
-    PM_PALETTE_SUNSET_02__DATA, 
-    sizeof(PM_PALETTE_SUNSET_02__DATA),
+    PALETTELIST_STATIC__SUNSET_02__ID, 
+    PM_PALETTE__SUNSET_02__DATA, 
+    sizeof(PM_PALETTE__SUNSET_02__DATA),
     D_PALETTE_SUNSET_02_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_SUNSET_RED__ID, 
-    PM_PALETTE_SUNSET_RED__DATA, 
-    sizeof(PM_PALETTE_SUNSET_RED__DATA),
+    PALETTELIST_STATIC__SUNSET_RED__ID, 
+    PM_PALETTE__SUNSET_RED__DATA, 
+    sizeof(PM_PALETTE__SUNSET_RED__DATA),
     D_PALETTE_SUNSET_RED_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_SUNSET_BEACH__ID, 
-    PM_PALETTE_SUNSET_BEACH__DATA, 
-    sizeof(PM_PALETTE_SUNSET_BEACH__DATA),
+    PALETTELIST_STATIC__SUNSET_BEACH__ID, 
+    PM_PALETTE__SUNSET_BEACH__DATA, 
+    sizeof(PM_PALETTE__SUNSET_BEACH__DATA),
     D_PALETTE_SUNSET_BEACH_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_SKY_GLOW_01__ID, 
-    PM_PALETTE_SKY_GLOW_01__DATA, 
-    sizeof(PM_PALETTE_SKY_GLOW_01__DATA),
+    PALETTELIST_STATIC__SKY_GLOW_01__ID, 
+    PM_PALETTE__SKY_GLOW_01__DATA, 
+    sizeof(PM_PALETTE__SKY_GLOW_01__DATA),
     D_PALETTE_SKY_GLOW_01_ENCODING
   );
   
   addStaticPalette(
     PALETTELIST_STATIC__COLOURFUL_WITH_CCT_01__ID, 
-    PM_PALETTE__COLOURFUL_WITH_CCT_01__DATA, 
-    sizeof(PM_PALETTE__COLOURFUL_WITH_CCT_01__DATA),
+    PM_PALETTE___COLOURFUL_WITH_CCT_01__DATA, 
+    sizeof(PM_PALETTE___COLOURFUL_WITH_CCT_01__DATA),
     D_PALETTE__COLOURFUL_WITH_CCT_01__ENCODING
   );
   
   addStaticPalette(
-    PALETTELIST_STATIC_CANDLE_FLAME_01__ID, 
-    PM_PALETTE_CANDLE_FLAME_01__DATA, 
-    sizeof(PM_PALETTE_CANDLE_FLAME_01__DATA),
+    PALETTELIST_STATIC__CANDLE_FLAME_01__ID, 
+    PM_PALETTE__CANDLE_FLAME_01__DATA, 
+    sizeof(PM_PALETTE__CANDLE_FLAME_01__DATA),
     D_PALETTE_CANDLE_FLAME_01_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_GRADIENT_FIRE_01__ID, 
-    PM_PALETTE_GRADIENT_FIRE_01__DATA, 
-    sizeof(PM_PALETTE_GRADIENT_FIRE_01__DATA),
+    PALETTELIST_STATIC__GRADIENT_FIRE_01__ID, 
+    PM_PALETTE__GRADIENT_FIRE_01__DATA, 
+    sizeof(PM_PALETTE__GRADIENT_FIRE_01__DATA),
     D_PALETTE_GRADIENT_FIRE_01_ENCODING
   );
 
   addStaticPalette(
-    PALETTELIST_STATIC_OCEAN_01__ID, 
-    PM_PALETTE_OCEAN_01__DATA, 
-    sizeof(PM_PALETTE_OCEAN_01__DATA),
+    PALETTELIST_STATIC__OCEAN_01__ID, 
+    PM_PALETTE__OCEAN_01__DATA, 
+    sizeof(PM_PALETTE__OCEAN_01__DATA),
     D_PALETTE_OCEAN_01_ENCODING
   );
 
@@ -528,65 +528,65 @@ void mPalette::Init_Palettes()
 
   addCustomPalette(
     0, 
-    PM_PALETTE_CUSTOM_PALETTE_DEFAULT_01__DATA, 
-    sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_01__DATA), 
+    PM_PALETTE__CUSTOM_PALETTE_DEFAULT_01__DATA, 
+    sizeof(PM_PALETTE__CUSTOM_PALETTE_DEFAULT_01__DATA), 
     D_PALETTE_CUSTOM_PALETTE_DEFAULT_01_ENCODING
   );
     
   
   addCustomPalette(
     1, 
-    PM_PALETTE_CUSTOM_PALETTE_DEFAULT_02__DATA, 
-    sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_02__DATA), 
+    PM_PALETTE__CUSTOM_PALETTE_DEFAULT_02__DATA, 
+    sizeof(PM_PALETTE__CUSTOM_PALETTE_DEFAULT_02__DATA), 
     D_PALETTE_CUSTOM_PALETTE_DEFAULT_02_ENCODING
   );
   
   addCustomPalette(
     2, 
-    PM_PALETTE_CUSTOM_PALETTE_DEFAULT_03__DATA, 
-    sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_03__DATA), 
+    PM_PALETTE__CUSTOM_PALETTE_DEFAULT_03__DATA, 
+    sizeof(PM_PALETTE__CUSTOM_PALETTE_DEFAULT_03__DATA), 
     D_PALETTE_CUSTOM_PALETTE_DEFAULT_03_ENCODING
   );
   
   addCustomPalette(
     3, 
-    PM_PALETTE_CUSTOM_PALETTE_DEFAULT_04__DATA, 
-    sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_04__DATA), 
+    PM_PALETTE__CUSTOM_PALETTE_DEFAULT_04__DATA, 
+    sizeof(PM_PALETTE__CUSTOM_PALETTE_DEFAULT_04__DATA), 
     D_PALETTE_CUSTOM_PALETTE_DEFAULT_04_ENCODING
   );
   
   addCustomPalette(
     4, 
-    PM_PALETTE_CUSTOM_PALETTE_DEFAULT_05__DATA, 
-    sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_05__DATA), 
+    PM_PALETTE__CUSTOM_PALETTE_DEFAULT_05__DATA, 
+    sizeof(PM_PALETTE__CUSTOM_PALETTE_DEFAULT_05__DATA), 
     D_PALETTE_CUSTOM_PALETTE_DEFAULT_05_ENCODING
   );
   
   addCustomPalette(
     5, 
-    PM_PALETTE_CUSTOM_PALETTE_DEFAULT_06__DATA, 
-    sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_06__DATA), 
+    PM_PALETTE__CUSTOM_PALETTE_DEFAULT_06__DATA, 
+    sizeof(PM_PALETTE__CUSTOM_PALETTE_DEFAULT_06__DATA), 
     D_PALETTE_CUSTOM_PALETTE_DEFAULT_06_ENCODING
   );
   
   addCustomPalette(
     6, 
-    PM_PALETTE_CUSTOM_PALETTE_DEFAULT_07__DATA, 
-    sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_07__DATA), 
+    PM_PALETTE__CUSTOM_PALETTE_DEFAULT_07__DATA, 
+    sizeof(PM_PALETTE__CUSTOM_PALETTE_DEFAULT_07__DATA), 
     D_PALETTE_CUSTOM_PALETTE_DEFAULT_07_ENCODING
   );
   
   addCustomPalette(
     7, 
-    PM_PALETTE_CUSTOM_PALETTE_DEFAULT_08__DATA, 
-    sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_08__DATA), 
+    PM_PALETTE__CUSTOM_PALETTE_DEFAULT_08__DATA, 
+    sizeof(PM_PALETTE__CUSTOM_PALETTE_DEFAULT_08__DATA), 
     D_PALETTE_CUSTOM_PALETTE_DEFAULT_08_ENCODING
   );
   
   addCustomPalette(
     8, 
-    PM_PALETTE_CUSTOM_PALETTE_DEFAULT_09__DATA, 
-    sizeof(PM_PALETTE_CUSTOM_PALETTE_DEFAULT_09__DATA), 
+    PM_PALETTE__CUSTOM_PALETTE_DEFAULT_09__DATA, 
+    sizeof(PM_PALETTE__CUSTOM_PALETTE_DEFAULT_09__DATA), 
     D_PALETTE_CUSTOM_PALETTE_DEFAULT_09_ENCODING
   );
   
@@ -624,8 +624,8 @@ void mPalette::Init_Palettes()
   #else
   addCustomPalette(
     9, 
-    PM_PALETTE_RAINBOW_WARM__DATA, 
-    sizeof(PM_PALETTE_RAINBOW_WARM__DATA), 
+    PM_PALETTE__RAINBOW_WARM__DATA, 
+    sizeof(PM_PALETTE__RAINBOW_WARM__DATA), 
     D_PALETTE_RAINBOW_WARM_ENCODING
   );
   #endif
@@ -788,15 +788,7 @@ mPalette::PALETTE_ENCODING_DATA mPalette::findPaletteEncoding(uint16_t id)
  * SECTION: Main requests to get colours from palettes
  *********************************************************************************************************************************************************************************
  *********************************************************************************************************************************************************************************/
-
-/**
- * @brief Thought, maybe make a U8 for just the other white object, it would remove the need for two functions like this. 
- * This optionally could be like ignore, or repeat it across them all, again to speed things up.
- * 
- * Could use flag in segment of "WW enabled", so it can be disabled for processing speed when not needed.
- */
-
-IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuffer_U32
+IRAM_ATTR [[gnu::hot]] uint32_t mPalette::GetColourFromPreloadedPaletteBuffer_U32
 (
   uint16_t id,
   // Pass preloaded palette data buffer. If nullptr, and "id" does not match any preloaded palette, then it will force a reload of the palette data.
@@ -806,22 +798,84 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
   // If the palette is encoded, then this returns encoded value at [desired_index] point. NOTE: Only in discrete mode.
   uint8_t* encoded_index,
   // Providing the index in range 0 to 255, this enabled will internally rescale the index to the segment length, so that the index is always in range 0 to segment_length-1
-  uint8_t  palette_index__format,
+  uint8_t palette_index__format,
   // CRGBPalette defaults gradient (index 240 to 255) wraps to blend with colour as index 0. This rescales to limit to 240, hence, removes wrap around blending.
-  uint8_t  rescale_index_wrap_for_hardedge,
+  uint8_t rescale_index_wrap_for_hardedge,
   // 0 = default, 1 = "Forced Discrete", 2 = "Forced Gradient"
-  uint8_t  force_palette_mode, // flag_crgb_exact_colour = 0, // true: "CRGB exact colour", false: "U32 colour"
+  uint8_t force_palette_mode, // flag_crgb_exact_colour = 0, // true: "CRGB exact colour", false: "U32 colour"
   // Requesting preview: Live palettes must respond with preview for UI
   bool flag_request_is_for_full_visual_output
 ){
 
-  RgbwwColor colourRGBWW;
-  uint32_t      colour32 = 0;
+  uint32_t colour32 = 0;
+
+  /**************************************************************
+   * 
+   * Procedural Palettes
+   * * These palettes do not store colour data in flash or RAM.
+   * * The requested colour is calculated directly from the palette index.
+   * * Colour Wheel uses the full 0-255 input range.
+   * 
+  ***************************************************************/
+  if(
+    id == PALETTELIST_PROCEDURAL__COLOUR_WHEEL__ID
+  ){
+
+    uint16_t pixel_position_adjust = desired_index;
+
+    /**
+     * @brief Convert segment-relative position into the normal 0-255
+     * palette range when the caller requests segment spanning.
+     */
+    if(
+      palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE
+    ){
+      pixel_position_adjust = (pSEGMENT.vLength() <= 1) ? 0 : (desired_index * 255U) / (pSEGMENT.vLength() - 1);
+    }
+
+    uint8_t pos = (uint8_t)pixel_position_adjust;
+
+    /**
+     * @brief Classic WLED/Adafruit colour wheel.
+     *
+     * The wheel transitions:
+     *   Red -> Blue -> Green -> Red
+     *
+     * The subtraction preserves the existing WLED colour_wheel()
+     * direction/orientation.
+     */
+    pos = 255 - pos;
+
+    if(pos < 85)
+    {
+      colour32 = RGBW32(255 - pos * 3, 0, pos * 3, 0);
+    }
+    else
+    if(pos < 170)
+    {
+      pos -= 85;
+      colour32 = RGBW32(0, pos * 3, 255 - pos * 3, 0);
+    }
+    else
+    {
+      pos -= 170;
+      colour32 = RGBW32(pos * 3, 255 - pos * 3, 0, 0);
+    }
+
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+    colour32_white_cold = 0;
+    #endif
+
+  }
 
   /**************************************************************
    * 
    * CRGBPALETTE16 palette
    * * Preloaded into CRGB16Palette16_Palette
+   * * Includes:
+   * * * Static WLED/FastLED/MATLAB palettes
+   * * * Segment-colour generated CRGBPalette16 palettes
+   * * * Dynamic CRGBPalette16 palettes
    * * Default requires getting from pal_index in 0 to 255 range
    * * * If palette_index__format is true, then it will rescale the index to segment length
    * * * If rescale_index_wrap_for_hardedge is true, then it will rescale the index to 240, so that it does not wrap around.
@@ -830,11 +884,10 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
   ***************************************************************/
   if(
     ((id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID)                      && (id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
-    ((id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)                     && (id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))  ||
     ((id >= PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)     && (id < PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)) ||
     ((id >= PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (id < PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID))
   ){
-    
+
     uint16_t pixel_position_adjust = desired_index;
 
     TBlendType blend = (force_palette_mode == PALETTE_MODE__FORCE_DISCRETE) ? NOBLEND : LINEARBLEND;
@@ -844,7 +897,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       if (palette_index__format == PALETTE_INDEX__IS_EXACT_COLOUR) {
         // Classic "encoded discrete"
         uint8_t discrete_index = desired_index % 16;
-        pixel_position_adjust = pSEGMENT.palette->CRGB16Palette16_Palette.encoded_index[discrete_index];
+        pixel_position_adjust = pSEGMENT.palette_loaded->CRGB16Palette16_Palette.encoded_index[discrete_index];
       } else {
         // Treat as exact palette index, map 0–15 → 0–240
         // Why 240 instead of 255?
@@ -859,23 +912,24 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
     // Handle full gradient mode
     else{
       if (palette_index__format) {
-        pixel_position_adjust = (tkr_anim->_virtualSegmentLength == 1) ? 0 : (desired_index * 255) / (tkr_anim->_virtualSegmentLength - 1);
+        pixel_position_adjust = (pSEGMENT.vLength() == 1) ? 0 : (desired_index * 255) / (pSEGMENT.vLength() - 1);
       }
 
-      if (rescale_index_wrap_for_hardedge) {
+      if (rescale_index_wrap_for_hardedge == PALETTE_WRAP_HARDEDGE) {
         pixel_position_adjust = scale8(pixel_position_adjust, 240);  // Avoid wraparound
         // if(pixel_position_adjust > 235)
         // Serial.printf("rescale_index_wrap_for_hardedge %d \n\r", pixel_position_adjust);
       }
     }
 
-    CRGB fastled_col = ColorFromPaletteU32(pSEGMENT.palette->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, blend);
-    colour32 = RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0);
+    // CRGB fastled_col 
+    colour32 = ColorFromPalette16(pSEGMENT.palette_loaded->CRGB16Palette16_Palette.data, pixel_position_adjust, 255, blend);
+    // colour32 = RGBW32(fastled_col.r, fastled_col.g, fastled_col.b, 0);
     #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
     #endif
 
-  } 
+  }
 
 
   /**************************************************************
@@ -887,15 +941,18 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
   else
   if(
     (id >= PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) && (id < PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)
-  ){    
-    uint8_t adjusted_id  = id - PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID;
-    const uint8_t* data  = PM_STATIC_SINGLE_COLOURS__DATA;
-    uint8_t adjust_buf_i =  adjusted_id*3;
-    colour32 = RGBW32(data[adjust_buf_i], data[adjust_buf_i+1], data[adjust_buf_i+2], 0);
+  ){
+    uint8_t adjusted_id = id - PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID;
+    const uint8_t* data = PM_STATIC_SINGLE_COLOURS__DATA;
+    uint8_t adjust_buf_i = adjusted_id * 3;
+    colour32 = RGBW32(data[adjust_buf_i], data[adjust_buf_i + 1], data[adjust_buf_i + 2], 0);
     #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     colour32_white_cold = 0; // No white in PALETTELIST_STATIC_SINGLE_COLOUR
     #endif
-  }  
+    // ALOG_INF(PSTR("static col %d, %d,%d,%d"), id, R(colour32), G(colour32), B(colour32));
+  }
+
+
   /**************************************************************
    * 
    * Segment Colours
@@ -905,47 +962,34 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
   else
   if(
     (id >= PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) && (id < PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID)
-  ){  
+  ){
     uint8_t adjusted_id = id - PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID;
-    colourRGBWW = pSEGMENT.segcol[adjusted_id].colour;
-    colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW);
+    colour32 = pSEGMENT.segcol[adjusted_id].colour;
     #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     colour32_white_cold = 0; // No white in CRGB16Palette16_Palette
     #endif
   }
+
+
   /**************************************************************
    * 
    * Static Palettes
    * * Mixture of RGB and RGBWW encoded palettes, with and without index encoding for discrete and gradient modes
    * 
   ***************************************************************/
-  else if (id >= PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID && 
-           id < PALETTELIST_STATIC_LENGTH__ID) {
+  else if(
+    (id >= PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID) &&
+    (id < PALETTELIST_STATIC__LENGTH__ID)
+  ){
 
-
-    uint16_t palette_adjusted_id = id - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID; 
+    uint16_t palette_adjusted_id = id - PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID;
     data = &static_palettes[palette_adjusted_id].data[0];
 
-    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-    colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW( // should make a U32 version for improved performance when only in RGB mode
-      data,
-      desired_index,
-      pSEGMENT.palette->encoded_colour_width,
-      pSEGMENT.palette->colours_in_palette,
-      static_palettes[palette_adjusted_id].encoding,
-      encoded_index,
-      palette_index__format,
-      rescale_index_wrap_for_hardedge,
-      force_palette_mode,
-      false
-    );
-    colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW); colour32_white_cold = colourRGBWW.CW;
-    #else // Fast RGBW support only
     colour32 = SubGet_Encoded_Palette_Colour_U32( // should make a U32 version for improved performance when only in RGB mode
       data,
       desired_index,
-      pSEGMENT.palette->encoded_colour_width,
-      pSEGMENT.palette->colours_in_palette,
+      pSEGMENT.palette_loaded->encoded_colour_width,
+      pSEGMENT.palette_loaded->colours_in_palette,
       static_palettes[palette_adjusted_id].encoding,
       encoded_index,
       palette_index__format,
@@ -953,42 +997,30 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       force_palette_mode, // DEPRECIATE: was called override_default_encoding
       false               // DEPRECIATE: was called flag_crgb_exact_colour = false (true: "CRGB exact colour", false: "U32 colour")
     );
-    #endif
   }
+
+
   /**************************************************************
    * 
    * Custom Palettes
    * * User defined palettes, stored in flash, and can be modified by the user
    * 
   ***************************************************************/
-  else if (id >= PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED && 
-           id < GetPaletteListLength()) {
+  else if(
+    (id >= PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED) &&
+    (id < GetPaletteListLength())
+  ){
 
     uint16_t palette_adjusted_id = id - PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
     data = &custom_palettes[palette_adjusted_id].data[0];
 
     // Serial.printf("pal %d %d \n\r", id, palette_adjusted_id);
 
-    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-    colourRGBWW = SubGet_Encoded_Palette_Colour_RGBWW(
-      data,
-      desired_index,
-      pSEGMENT.palette->encoded_colour_width,
-      pSEGMENT.palette->colours_in_palette,
-      custom_palettes[palette_adjusted_id].encoding,
-      encoded_index,
-      palette_index__format,
-      rescale_index_wrap_for_hardedge,
-      force_palette_mode,
-      false
-    );
-    colour32 = RGBW32(colourRGBWW.R, colourRGBWW.G, colourRGBWW.B, colourRGBWW.WW); colour32_white_cold = colourRGBWW.CW;
-    #else
     colour32 = SubGet_Encoded_Palette_Colour_U32(
       data,
       desired_index,
-      pSEGMENT.palette->encoded_colour_width,
-      pSEGMENT.palette->colours_in_palette,
+      pSEGMENT.palette_loaded->encoded_colour_width,
+      pSEGMENT.palette_loaded->colours_in_palette,
       custom_palettes[palette_adjusted_id].encoding,
       encoded_index,
       palette_index__format,
@@ -996,22 +1028,24 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
       force_palette_mode,
       false
     );
-    #endif
+
   }
+
+
   /**************************************************************
    * 
    * Dynamic Palettes
    * * Dynamic, or Live palettes, that are generated at runtime (e.g. solar elevation, time of day) .// FIX: the CRGBPalette random needs renamed or moved into this group to make it clear its "Live"
    * 
   ***************************************************************/
-  else 
+  else
   if(
-    ((id >= PALETTELIST_DYNAMIC__COLOUR__ID_START) && (id < PALETTELIST_DYNAMIC__LENGTH__ID))
-  ){  
+    (id >= PALETTELIST_DYNAMIC__COLOUR__ID_START) && (id < PALETTELIST_DYNAMIC__LENGTH__ID)
+  ){
     uint8_t palette_adjusted_id_rel0 = id - PALETTELIST_DYNAMIC__COLOUR__ID_START;
-    data = &dynamic_palettes[palette_adjusted_id_rel0].data[0];;
+    data = &dynamic_palettes[palette_adjusted_id_rel0].data[0];
 
-    switch(id) 
+    switch(id)
     {
       case PALETTELIST_DYNAMIC__TIMEREACTIVE__SEGMENT_COLOUR__MINUTE_BLEND__ID:
       case PALETTELIST_DYNAMIC__TIMEREACTIVE__SEGMENT_COLOUR__HOUR_BLEND__ID:
@@ -1029,28 +1063,29 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
           pSEGMENT.Update_LivePalettes(id, 0, false); // once-per-frame call site should do this instead; keep if you must
         }
 
-        colour32 = pSEGMENT.palette->solid_colour.colourRGBW;
+        colour32 = pSEGMENT.palette_loaded->solid_colour.colourRGBW;
         #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-        colour32_white_cold = pSEGMENT.palette->solid_colour.whiteWW;
+        colour32_white_cold = pSEGMENT.palette_loaded->solid_colour.whiteWW;
         #endif
       }
       break;
+
       case PALETTELIST_DYNAMIC__SOLAR_ELEVATION__GRADIENT_COLOUR_OF_SKY__ID:
       {
         if (flag_request_is_for_full_visual_output) {
           // serializer calls this repeatedly; Update builds palette + emits preview slice into solid_colour
           pSEGMENT.Update_LivePalettes(id, desired_index, true);
 
-          colour32 = pSEGMENT.palette->solid_colour.colourRGBW;
+          colour32 = pSEGMENT.palette_loaded->solid_colour.colourRGBW;
           #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-          colour32_white_cold = pSEGMENT.palette->solid_colour.whiteWW;
+          colour32_white_cold = pSEGMENT.palette_loaded->solid_colour.whiteWW;
           #endif
           break;
         }
 
         // Runtime GET: just read CRGBPalette16 (assumes Update_LivePalettes() was called once-per-frame elsewhere)
-        uint8_t idx255 = (tkr_anim->_virtualSegmentLength <= 1) ? 0 : (uint8_t)((desired_index * 255U) / (uint16_t)(tkr_anim->_virtualSegmentLength - 1));
-        CRGB c = ColorFromPaletteU32(pSEGMENT.palette->CRGB16Palette16_Palette.data, idx255, 255, LINEARBLEND);
+        uint8_t idx255 = (pSEGMENT.vLength() <= 1) ? 0 : (uint8_t)((desired_index * 255U) / (uint16_t)(pSEGMENT.vLength() - 1));
+        CRGB c = ColorFromPalette16(pSEGMENT.palette_loaded->CRGB16Palette16_Palette.data, idx255, 255, LINEARBLEND);
 
         colour32 = RGBW32(c.r, c.g, c.b, 0);
         #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
@@ -1063,14 +1098,14 @@ IRAM_ATTR [[gnu::hot]] uint32_t      mPalette::GetColourFromPreloadedPaletteBuff
   else {
     ALOG_INF(PSTR("Missing %d"), id);
   }
-  
+
   return colour32;
 
 }
 
 
 // 1:1 replacement of fastled function optimized for ESP, slightly faster, more accurate and uses less flash (~ -200bytes)
-uint32_t mPalette::ColorFromPaletteU32(const CRGBPalette16& pal, unsigned index, uint8_t brightness, TBlendType blendType)
+uint32_t mPalette::ColorFromPalette16(const CRGBPalette16& pal, unsigned index, uint8_t brightness, TBlendType blendType)
 {
   if (blendType == LINEARBLEND_NOWRAP) {
     index = (index*240) >> 8; // Blend range is affected by lo4 blend of values, remap to avoid wrapping
@@ -1152,8 +1187,6 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::GetColourFromPreloadedPaletteBu
  * SECTION: Main requests to get/set name/id of palettes
  *********************************************************************************************************************************************************************************
  *********************************************************************************************************************************************************************************/
-
-
 int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
 {
 
@@ -1165,10 +1198,10 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
             ii<(PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID-PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID);
             ii++
   ){    
-    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_SEGMENT__RGBCCT_SOLID_COLOUR__NAMES_CTR ); 
+    ALOG_DBM(PSTR("s> %d %s \"%S\""), ii, c, PM_SEGMENT__RGBCCT_SOLID_COLOUR__NAMES_CTR); 
     if((id=mSupport::GetCommandID16_P(c, PM_SEGMENT__RGBCCT_SOLID_COLOUR__NAMES_CTR))>=0)
     {
-      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
+      ALOG_INF(PSTR("MATCH \"%s\" %d %d"), c, ii, id); 
       return id+PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID;            
     }
   }
@@ -1183,12 +1216,22 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
             ii<(PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID-PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID);
             ii++
   ){    
-    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES_NAMES_CTR ); 
+    ALOG_DBM(PSTR("s> %d %s \"%S\""), ii, c, PM_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES_NAMES_CTR); 
     if((id=mSupport::GetCommandID16_P(c, PM_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES_NAMES_CTR))>=0)
     {
-      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
+      ALOG_INF(PSTR("MATCH \"%s\" %d %d"), c, ii, id); 
       return id+PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID;            
     }
+  }
+
+  /**************************************************************
+   * 
+   * PALETTELIST_PROCEDURAL__IDS
+   * 
+  ***************************************************************/
+  if(strcmp(c, "Colour Wheel") == 0)
+  {
+    return PALETTELIST_PROCEDURAL__COLOUR_WHEEL__ID;
   }
 
   /**************************************************************
@@ -1201,29 +1244,11 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
             ii<(PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID-PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID);
             ii++
   ){    
-    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_STATIC_CRGBPALETTE16_NAMES_CTR ); 
+    ALOG_DBM(PSTR("s> %d %s \"%S\""), ii, c, PM_STATIC_CRGBPALETTE16_NAMES_CTR); 
     if((id=mSupport::GetCommandID16_P(c, PM_STATIC_CRGBPALETTE16_NAMES_CTR))>=0)
     {
-      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
+      ALOG_INF(PSTR("MATCH \"%s\" %d %d"), c, ii, id); 
       return id+PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID;            
-    }
-  }
-
-  /**************************************************************
-   * 
-   * PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID
-   * 
-  ***************************************************************/
-  for(
-    uint8_t ii=0;
-            ii<(PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID-PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID);
-            ii++
-  ){    
-    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_STATIC_CRGBPALETTE16_GRADIENT_NAMES_CTR ); 
-    if((id=mSupport::GetCommandID16_P(c, PM_STATIC_CRGBPALETTE16_GRADIENT_NAMES_CTR))>=0)
-    {
-      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
-      return id+PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;            
     }
   }
 
@@ -1237,10 +1262,10 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
             ii<(PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID-PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID);
             ii++
   ){    
-    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_STATIC_SINGLE_COLOUR_NAMES_CTR ); 
+    ALOG_DBM(PSTR("s> %d %s \"%S\""), ii, c, PM_STATIC_SINGLE_COLOUR_NAMES_CTR); 
     if((id=mSupport::GetCommandID16_P(c, PM_STATIC_SINGLE_COLOUR_NAMES_CTR))>=0)
     {
-      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
+      ALOG_INF(PSTR("MATCH \"%s\" %d %d"), c, ii, id); 
       return id+PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID;            
     }
   }
@@ -1252,14 +1277,14 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
   ***************************************************************/
   for(
     uint8_t ii=0;
-            ii<(PALETTELIST_STATIC_LENGTH__ID - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID);
+            ii<(PALETTELIST_STATIC__LENGTH__ID-PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID);
             ii++
   ){
-    // ALOG_INF( PSTR("s> %d %s \"%S\"\n\r\n\r"), ii, c, PM_STATIC__PALETTES_NAMES_CTR ); 
+    // ALOG_INF(PSTR("s> %d %s \"%S\"\n\r\n\r"), ii, c, PM_STATIC__PALETTES_NAMES_CTR); 
     if((id=mSupport::GetCommandID16_MultipleSubMatches_P(c, PM_STATIC__PALETTES_NAMES_CTR))>=0)
     {
-      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
-      return id+PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;            
+      ALOG_INF(PSTR("MATCH \"%s\" %d %d"), c, ii, id); 
+      return id+PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID;            
     }
   }
 
@@ -1269,15 +1294,15 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
    * PM_DYNAMIC__CRGBPALETTE16_PALETTES_NAMES_CTR
    * 
   ***************************************************************/
- for(
+  for(
     uint8_t ii=0;
             ii<(PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID-PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID);
             ii++
   ){    
-    ALOG_DBM( PSTR("s> %d %s \"%S\""), ii, c, PM_DYNAMIC__CRGBPALETTE16_PALETTES_NAMES_CTR ); 
+    ALOG_DBM(PSTR("s> %d %s \"%S\""), ii, c, PM_DYNAMIC__CRGBPALETTE16_PALETTES_NAMES_CTR); 
     if((id=mSupport::GetCommandID16_P(c, PM_DYNAMIC__CRGBPALETTE16_PALETTES_NAMES_CTR))>=0)
     {
-      ALOG_INF( PSTR("MATCH \"%s\" %d %d"), c, ii, id ); 
+      ALOG_INF(PSTR("MATCH \"%s\" %d %d"), c, ii, id); 
       return id+PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID;            
     }
   }
@@ -1299,14 +1324,14 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
     const char* live_prefix = "Live ";
     size_t live_prefix_len = strlen(live_prefix);
 
-    if (strncmp(c, live_prefix, live_prefix_len) == 0) {
-        adjusted_c = c + live_prefix_len;  // Skip the "Live " prefix
+    if(strncmp(c, live_prefix, live_prefix_len) == 0) {
+      adjusted_c = c + live_prefix_len;  // Skip the "Live " prefix
     }
 
     // Call GetCommandID16_P with the adjusted string
-    if ((id = mSupport::GetCommandID16_P(adjusted_c, PM_DYNAMIC_PALETTES_NAMES_CTR)) >= 0) {
-        ALOG_INF(PSTR("MATCH \"%s\" %d %d"), adjusted_c, ii, id); 
-        return id + PALETTELIST_DYNAMIC__COLOUR__ID_START;            
+    if((id=mSupport::GetCommandID16_P(adjusted_c, PM_DYNAMIC_PALETTES_NAMES_CTR))>=0) {
+      ALOG_INF(PSTR("MATCH \"%s\" %d %d"), adjusted_c, ii, id); 
+      return id+PALETTELIST_DYNAMIC__COLOUR__ID_START;            
     }
   }
 
@@ -1326,7 +1351,7 @@ int16_t mPalette::Get_Static_PaletteIDbyName(const char* c)
     memset(buffer,0,sizeof(buffer));
     sprintf_P(buffer, PSTR(D_DEFAULT_MODIFIABLE_PALETTE_NAMES__USER_CREATED__NAME_CTR), ii + 1);
     
-    ALOG_DBM( PSTR("s> \"%s\""), buffer ); 
+    ALOG_DBM(PSTR("s> \"%s\""), buffer); 
     // Default names
     if(strcmp(c,buffer)==0){
       return ii+PALETTELIST_LENGTH_OF_STATIC_IDS; // new palettes start at the end of the predefined ones
@@ -1368,6 +1393,16 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
 
   /**************************************************************
    * 
+   * PALETTELIST_PROCEDURAL__IDS
+   * 
+  ***************************************************************/
+  if(palette_id == PALETTELIST_PROCEDURAL__COLOUR_WHEEL__ID)
+  {
+    snprintf(buffer, buflen, "Colour Wheel");
+  }
+
+  /**************************************************************
+   * 
    * PALETTELIST_STATIC_CRGBPALETTE16__IDS
    * 
   ***************************************************************/
@@ -1376,20 +1411,7 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
   ){  
     uint16_t palette_id_adj = palette_id - PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID;
     mSupport::GetTextIndexed_P(buffer, buflen, palette_id_adj, PM_STATIC_CRGBPALETTE16_NAMES_CTR);   
-    // ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
-  }
-
-  /**************************************************************
-   * 
-   * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
-   * 
-  ***************************************************************/
-  if(
-    ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))
-  ){  
-    uint16_t adjusted_id = palette_id - PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
-    mSupport::GetTextIndexed_P(buffer, buflen, adjusted_id, PM_STATIC_CRGBPALETTE16_GRADIENT_NAMES_CTR);   
-    // Serial.printf("BName id%d|a%d \"%s\"\n", palette_id,adjusted_id, buffer );
+    // ALOG_DBG(PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer);
   }
 
   /**************************************************************
@@ -1397,14 +1419,15 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
    * PALETTELIST_DYNAMIC_
    * 
   ***************************************************************/
- if(
-  ((palette_id >= PALETTELIST_DYNAMIC__COLOUR__ID_START) && (palette_id < PALETTELIST_DYNAMIC__LENGTH__ID))
+  if(
+    ((palette_id >= PALETTELIST_DYNAMIC__COLOUR__ID_START) && (palette_id < PALETTELIST_DYNAMIC__LENGTH__ID))
   ){           
     uint16_t adjusted_id = palette_id - PALETTELIST_DYNAMIC__COLOUR__ID_START;
     // Prefixing "Live" to these palettes
     sprintf(buffer, "Live ");
     mSupport::GetTextIndexed_P(&buffer[5], buflen-5, adjusted_id, PM_DYNAMIC_PALETTES_NAMES_CTR);
   }
+
   /**************************************************************
    * 
    * PALETTELIST_DYNAMIC_
@@ -1422,7 +1445,7 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
 
   /**************************************************************
    * 
-   * PALETTELIST_STATIC_CRGBPALETTE16__IDS
+   * PALETTELIST_STATIC_SINGLE_COLOUR__IDS
    * 
   ***************************************************************/
   if(
@@ -1430,7 +1453,7 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
   ){  
     uint16_t palette_id_adj = palette_id - PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID;
     mSupport::GetTextIndexed_P(buffer, buflen, palette_id_adj, PM_STATIC_SINGLE_COLOUR_NAMES_CTR);   
-    // ALOG_DBG( PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer );
+    // ALOG_DBG(PSTR("BName id%d|a%d \"%s\""), palette_id,palette_id_adj, buffer);
   }
 
   /**************************************************************
@@ -1439,9 +1462,9 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
    * 
   ***************************************************************/
   if(
-    ((palette_id >= PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID) && (palette_id < PALETTELIST_STATIC_LENGTH__ID))
+    ((palette_id >= PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID) && (palette_id < PALETTELIST_STATIC__LENGTH__ID))
   ){           
-    uint16_t palette_id_adj = palette_id - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;
+    uint16_t palette_id_adj = palette_id - PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID;
     mSupport::GetTextIndexed_P(buffer, buflen, palette_id_adj, PM_STATIC__PALETTES_NAMES_CTR);   
   }
 
@@ -1451,7 +1474,7 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
    * 
   ***************************************************************/
   if(
-    ((palette_id >= PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID)    && (palette_id < PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID))
+    ((palette_id >= PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) && (palette_id < PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID))
   ){  
     uint16_t adjusted_id = palette_id - PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID;
     sprintf_P(buffer, PSTR(D_DEFAULT_DYNAMIC_PALETTE_NAMES__VARIABLE_RGBCCT__NAME_CTR), adjusted_id + 1); // names are 1-10
@@ -1469,49 +1492,84 @@ const char* mPalette::GetPaletteNameByID(uint8_t palette_id, char* buffer, uint8
 }
 
 
-bool mPalette::IsPaletteGradient(uint16_t palette_id) {
+bool mPalette::IsPaletteGradient(uint16_t palette_id)
+{
   PALETTE_ENCODING_DATA encoding = {0};
 
   // Segment colours (discrete, not gradients)
-  if (palette_id >= PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID &&
-      palette_id < PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID) {
+  if(
+    (palette_id >= PALETTELIST_SEGMENT__SEGMENT_COLOUR_01__ID) &&
+    (palette_id < PALETTELIST_SEGMENT__SEGMENT_COLOUR_LENGTH__ID)
+  ){
     return false;
   }
+
+  // Segment-generated CRGBPalette16 palettes
+  else if(
+    (palette_id >= PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) &&
+    (palette_id < PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)
+  ){
+    return true;
+  }
+
+  // Procedural colour wheel
+  else if(
+    palette_id == PALETTELIST_PROCEDURAL__COLOUR_WHEEL__ID
+  ){
+    return true;
+  }
+
+  // Static CRGB palettes
+  else if(
+    (palette_id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) &&
+    (palette_id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)
+  ){
+    return true;
+  }
+
   // Static single colours (discrete, not gradients)
-  else if (palette_id >= PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID &&
-           palette_id < PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID) {
+  else if(
+    (palette_id >= PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) &&
+    (palette_id < PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)
+  ){
     return false;
   }
-  // Static CRGB palettes (for example, rainbow colours)
-  else if (palette_id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID &&
-           palette_id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID) {
-    uint16_t index = palette_id - PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID;
-    return true;
-  }
-  // Static CRGB gradient palettes (e.g., sunset gradients)
-  else if (palette_id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID &&
-           palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID) {
-    uint16_t index = palette_id - PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID;
-    return true;
-  }
+
   // Other static palettes (like colourful defaults)
-  else if (palette_id >= PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID &&
-           palette_id < PALETTELIST_STATIC_LENGTH__ID) {
-    uint16_t index = palette_id - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID;
+  else if(
+    (palette_id >= PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID) &&
+    (palette_id < PALETTELIST_STATIC__LENGTH__ID)
+  ){
+    uint16_t index = palette_id - PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID;
     encoding = static_palettes[index].encoding;
   }
+
+  // Dynamic CRGBPalette16 palettes
+  else if(
+    (palette_id >= PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) &&
+    (palette_id < PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID)
+  ){
+    return true;
+  }
+
   // Dynamic palettes
-  else if (palette_id >= PALETTELIST_DYNAMIC__COLOUR__ID_START &&
-           palette_id < PALETTELIST_DYNAMIC__LENGTH__ID) {
+  else if(
+    (palette_id >= PALETTELIST_DYNAMIC__COLOUR__ID_START) &&
+    (palette_id < PALETTELIST_DYNAMIC__LENGTH__ID)
+  ){
     uint8_t index = palette_id - PALETTELIST_DYNAMIC__COLOUR__ID_START;
     encoding = dynamic_palettes[index].encoding;
   }
+
   // Custom palettes
-  else if (palette_id >= PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED &&
-           palette_id < GetPaletteListLength()) {
+  else if(
+    (palette_id >= PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED) &&
+    (palette_id < GetPaletteListLength())
+  ){
     uint16_t index = palette_id - PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED;
     encoding = custom_palettes[index].encoding;
   }
+
   else {
     // If the palette ID doesn't match any known type, assume it's not a gradient.
     return false;
@@ -1529,7 +1587,7 @@ bool mPalette::IsPaletteGradient(uint16_t palette_id) {
  * @param pixel_width_contrained_limit 
  * @return uint16_t 
  */
-uint8_t mPalette::GetEncodedColourWidth( PALETTE_ENCODING_DATA encoding )
+uint8_t mPalette::GetEncodedColourWidth(PALETTE_ENCODING_DATA encoding)
 {
 
   uint16_t encoded_colour_width = 0;
@@ -1545,7 +1603,6 @@ uint8_t mPalette::GetEncodedColourWidth( PALETTE_ENCODING_DATA encoding )
   // if(encoding.index_exact){ encoded_colour_width++; }
   if(encoding.index_gradient){ encoded_colour_width++; }
   if(encoding.index_is_trigger_value_exact){ encoded_colour_width++; }
-  if(encoding.index_is_trigger_value_scaled100){ encoded_colour_width++; }
   
   // if(encoding.encoded_as_hsb_ids){ encoded_colour_width++; }
   if(encoding.encoded_as_crgb_palette_16){ encoded_colour_width++; }
@@ -1558,9 +1615,9 @@ uint8_t mPalette::GetEncodedColourWidth( PALETTE_ENCODING_DATA encoding )
 
 }
 
+
 uint8_t mPalette::GetColoursInPalette(uint16_t palette_id)
 {
-
 
   // ALOG_INF(PSTR("Bflag_crgb_exact_colour=%d"), flag_crgb_exact_colour);
     
@@ -1569,18 +1626,30 @@ uint8_t mPalette::GetColoursInPalette(uint16_t palette_id)
    * "CRGBPALETTE16"
    * 
    * PALETTELIST_STATIC_CRGBPALETTE16__IDS
-   * PALETTELIST_CRGBPALETTE16_GRADIENT___PALETTES__IDS
+   * PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__IDS
    * PALETTELIST_DYNAMIC_CRGBPALETTE16_PALETTES__IDS
    * 
   ***************************************************************/
   if(
     ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID) && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
-    ((palette_id >= PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)    && (palette_id < PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID))  ||
-    ((palette_id >= PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)    && (palette_id < PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID))  ||
-    ((palette_id >= PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID)    && (palette_id < PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID))
+    ((palette_id >= PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID) && (palette_id < PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)) ||
+    ((palette_id >= PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (palette_id < PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID))
   ){
     return 16;
   } // END of CRGBPalette's
+
+
+  /**************************************************************
+   * 
+   * PALETTELIST_PROCEDURAL__IDS
+   * 
+  ***************************************************************/
+  else
+  if(
+    palette_id == PALETTELIST_PROCEDURAL__COLOUR_WHEEL__ID
+  ){
+    return 256;
+  }
 
 
   /**************************************************************
@@ -1593,8 +1662,8 @@ uint8_t mPalette::GetColoursInPalette(uint16_t palette_id)
     (palette_id >= PALETTELIST_STATIC_SINGLE_COLOUR__RED__ID) && (palette_id < PALETTELIST_STATIC_SINGLE_COLOUR__LENGTH__ID)
   ){  
     return 1;
-
   }
+
 
   /**************************************************************
    * 
@@ -1603,15 +1672,16 @@ uint8_t mPalette::GetColoursInPalette(uint16_t palette_id)
   ***************************************************************/
   else
   if(
-    ((palette_id >= PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID) && (palette_id < PALETTELIST_STATIC_LENGTH__ID))
+    ((palette_id >= PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID) && (palette_id < PALETTELIST_STATIC__LENGTH__ID))
   ){  
-    uint16_t palette_adjusted_id = palette_id - PALETTELIST_STATIC_COLOURFUL_DEFAULT__ID; // adjust back into correct indexing
+    uint16_t palette_adjusted_id = palette_id - PALETTELIST_STATIC__COLOURFUL_DEFAULT__ID; // adjust back into correct indexing
     return static_palettes[palette_adjusted_id].number_of_colours;  
   } // end of my palettes
 
+
   /**************************************************************
    * 
-   * PALETTELIST_STATIC__IDS
+   * PALETTELIST_DYNAMIC__COLOUR__IDS
    * 
   ***************************************************************/
   else
@@ -1645,7 +1715,7 @@ uint8_t mPalette::GetColoursInPalette(uint16_t palette_id)
   ***************************************************************/
   else
   if(
-    ((palette_id >= PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED)  && (palette_id < GetPaletteListLength())) // Custom palettes
+    ((palette_id >= PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED) && (palette_id < GetPaletteListLength())) // Custom palettes
   ){   
 
     uint16_t palette_adjusted_id = palette_id - PALETTELIST_LENGTH_OF_PALETTES_IN_FLASH_THAT_ARE_NOT_USER_DEFINED; // adjust back into correct indexing
@@ -1665,7 +1735,6 @@ uint8_t mPalette::GetColoursInPalette(uint16_t palette_id)
   }
 
   return 1; // error!
-
 
 }
 
@@ -1705,7 +1774,7 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Palette_Colour_R
   if (is_basic_sequence_palette) {
     // Handle non-gradient palette colors, with or without segment spanning
     if (flag_spanned_segment && !is_forced_to_get_discrete) {
-      pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+      pixel_position_adjust = (_pixel_position * 255) / (pSEGMENT.vLength() - 1);
     }
 
     // Map pixel position to color index in the palette
@@ -1724,7 +1793,7 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Palette_Colour_R
   // Handle gradient palettes or forced gradient
   if (encoding.index_gradient || flag_force_gradient) {
     if (flag_spanned_segment) {
-      pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+      pixel_position_adjust = (_pixel_position * 255) / (pSEGMENT.vLength() - 1);
     }
 
     // Set boundaries for gradient mapping
@@ -1806,7 +1875,7 @@ IRAM_ATTR [[gnu::hot]] RgbwwColor      mPalette::SubGet_Encoded_Palette_Colour_R
 
   // Handle simple spanned palettes
   if (flag_spanned_segment) {
-    pixel_position_adjust = (_pixel_position * 255) / (tkr_anim->_virtualSegmentLength - 1);
+    pixel_position_adjust = (_pixel_position * 255) / (pSEGMENT.vLength() - 1);
   }
 
   uint8_t palette_index = scale8(pixel_position_adjust, colours_in_palette - 1);
@@ -1865,8 +1934,8 @@ IRAM_ATTR [[gnu::hot]] uint32_t mPalette::SubGet_Encoded_Palette_Colour_U32(
         && encoding.index_gradient
         && !is_forced_discrete)
     {
-      pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
-        ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
+      pixel_position_adjust = (pSEGMENT.vLength() > 1)
+        ? (uint16_t)((uint32_t)_pixel_position * 255u / (pSEGMENT.vLength() - 1))
         : 0;
     }
 
@@ -1947,8 +2016,8 @@ IRAM_ATTR [[gnu::hot]] uint32_t mPalette::SubGet_Encoded_Palette_Colour_U32(
     uint16_t pixel_position_adjust = _pixel_position;
 
     if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE) {
-      pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
-        ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
+      pixel_position_adjust = (pSEGMENT.vLength() > 1)
+        ? (uint16_t)((uint32_t)_pixel_position * 255u / (pSEGMENT.vLength() - 1))
         : 0;
     } else if (palette_index__format == PALETTE_INDEX__IS_255_RANGE) {
       pixel_position_adjust &= 0xFFu;
@@ -2032,8 +2101,8 @@ IRAM_ATTR [[gnu::hot]] uint32_t mPalette::SubGet_Encoded_Palette_Colour_U32(
     uint16_t pixel_position_adjust = _pixel_position;
 
     if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE) {
-      pixel_position_adjust = (tkr_anim->_virtualSegmentLength > 1)
-        ? (uint16_t)((uint32_t)_pixel_position * 255u / (tkr_anim->_virtualSegmentLength - 1))
+      pixel_position_adjust = (pSEGMENT.vLength() > 1)
+        ? (uint16_t)((uint32_t)_pixel_position * 255u / (pSEGMENT.vLength() - 1))
         : 0;
     } else if (palette_index__format == PALETTE_INDEX__IS_255_RANGE) {
       pixel_position_adjust &= 0xFFu; // already 0..255

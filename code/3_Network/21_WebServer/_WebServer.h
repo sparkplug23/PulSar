@@ -8,46 +8,27 @@
 #ifdef USE_MODULE_NETWORK_WEBSERVER
 
 #include <Arduino.h>
-#include "2_CoreSystem/08_Logging/mLogging.h"
 
-// #include "html_ui.h"
 #include "1_TaskerManager/mTaskerManager.h"
-
 #include "2_CoreSystem/01_Settings/mSettings.h"
-
-#include <SPIFFSEditor.h>
+#include "2_CoreSystem/08_Logging/mLogging.h"
 
 #define Network WiFi
 
+#include "FileEditor.h"
+
 #ifdef ESP32
   #include <WiFi.h>
-  #ifndef DISABLE_NETWORK
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-    #include <AsyncTCP.h>
-    #include <ESPAsyncWebServer.h>
-    #include <SPIFFSEditor.h>
-  #endif // USE_MODULE_NETWORK_WEBSERVER
-  #endif // DISABLE_NETWORK
 #elif defined(ESP8266)
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
   #include <ESP8266WiFi.h>
-  #include <ESPAsyncTCP.h>
-  #include <ESPAsyncWebServer.h>
-  #endif // USE_MODULE_NETWORK_WEBSERVER
 #endif
 
-#ifdef ESP32
-  #include <AsyncTCP.h>
-  #include <ESPAsyncWebServer.h>
-#endif
-#ifdef ESP8266
-  #include <ESPAsyncTCP.h>
-  #include <ESPAsyncWebServer.h>
-#endif
-
-#include <stdint.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 
 #include "mWebUrlTracker.h" // Must be included so #else blanks are inserted
+
+// #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
 
 const char PM_WEB_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html";
 const char PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT[] PROGMEM = "text/javascript";
@@ -65,53 +46,26 @@ static const char s_unlock_cfg [] PROGMEM = "Please unlock settings using PIN co
 #define D_WEB_HANDLE_CONSOLE "/console" // change to animator_settings
 #define D_WEB_HANDLE_CONSOLE_PAGE "/PAGEconsole" // change to animator_settings
 DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
-#define D_BUTTO
+// #define D_BUTTO
 
 #ifndef D_CAPTIVE_PORTAL_URL_REDIRECT_PATH
-#define D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/settings2/welcome"
-// #define D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/settings2/wifi"
+#define D_CAPTIVE_PORTAL_URL_REDIRECT_PATH "/settings/welcome"
 #endif
 
 
 #include "3_Network/21_WebServer/Webpages/Generated/html_settings.h"
-#include "3_Network/21_WebServer/Webpages/Generated/html_settings2.h"
 #include "3_Network/21_WebServer/Webpages/Generated/html_other.h"
-#include "3_Network/21_WebServer/Webpages/Generated/root_basic.h"
-#include "3_Network/21_WebServer/Webpages/Generated/submodule_assets.h"
-#include "3_Network/21_WebServer/Webpages/Generated/submodule_unified_pages.h"
-#ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#include "3_Network/21_WebServer/Webpages/Generated/debug_pages.h"
+#include "3_Network/21_WebServer/Webpages/Generated/root_main.h"
+#ifdef ESP32
+  #include "3_Network/21_WebServer/Webpages/Generated/pages_console_esp32.h"
+#else
+  #include "3_Network/21_WebServer/Webpages/Generated/pages_console_esp8266.h"
+#endif
+#ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 #include "3_Network/21_WebServer/Webpages/Generated/pages_url_debugs.h"
 #endif
 
-
-
-// pages_console_select.h
-#if defined(ESP8266)
-  #include "3_Network/21_WebServer/Webpages/Generated/pages_console_esp8266.h"
-#else
-  #include "3_Network/21_WebServer/Webpages/Generated/pages_console_esp32.h"
-#endif
-
-
-
-// Settings sub page IDs
-// THESE ALL NEED IMMEDIATE RENAMES
-#define SUBPAGE_WEB_MENU              0
-#define SUBPAGE_WEB_WIFI              1
-#define SUBPAGE_WEB_LEDS              2
-#define SUBPAGE_WEB_UI                3
-#define SUBPAGE_WEB_SYNC              4
-#define SUBPAGE_WEB_TIME              5
-#define SUBPAGE_WEB_SEC               6
-#define SUBPAGE_WEB_DMX               7
-#define SUBPAGE_WEB_UM                8
-#define SUBPAGE_WEB_UPDATE            9
-#define SUBPAGE_WEB_2D               10
-#define SUBPAGE_WEB_LOCK            251
-#define SUBPAGE_WEB_PINREQ          252
-#define SUBPAGE_WEB_CSS             253
-#define SUBPAGE_WEB_JS              254
-#define SUBPAGE_WEB_WELCOME         255
 
 #define JSON_PATH_WEB_STATE      1
 #define JSON_PATH_WEB_INFO       2
@@ -122,38 +76,28 @@ DEFINE_PGM_CTR(PM_WEB_HANDLE_CONSOLE) D_WEB_HANDLE_CONSOLE;
 #define JSON_PATH_WEB_NETWORKS   7
 #define JSON_PATH_WEB_EFFECTS    8
 
-
-
-
-static const char HTTP_HEAD_START[] PROGMEM = "<!DOCTYPE html><html lang=\"en\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><title>{v}</title>";
-
-// // URL for auto-update check of "version.json"
-// const char UPDATE_URL[] PROGMEM = "https://raw.githubusercontent.com/HASwitchPlate/HASPone/main/update/version.json";
-// // Additional CSS style to match Hass theme
-static const char HASP_STYLE[] PROGMEM = "<style>button{background-color:#03A9F4;}body{width:60%;margin:auto;}input:invalid{border:1px solid red;}input[type=checkbox]{width:20px;}.wrap{text-align:left;display:inline-block;min-width:260px;max-width:1000px}</style>";
-
-const char HTTP_HEAD3[] PROGMEM            = "<!DOCTYPE html><html lang=\"en\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><title>{v}</title>";
-const char HTTP_STYLE3[] PROGMEM           = "<style>.c{text-align: center;} div,input{padding:5px;font-size:1em;} input{width:95%;} body{text-align: center;font-family:verdana;} button{border:0;border-radius:0.3rem;background-color:#1fa3ec;color:#fff;line-height:2.4rem;font-size:1.2rem;width:100%;} .q{float: right;width: 64px;text-align: right;} .l{background: url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAALVBMVEX///8EBwfBwsLw8PAzNjaCg4NTVVUjJiZDRUUUFxdiZGSho6OSk5Pg4eFydHTCjaf3AAAAZElEQVQ4je2NSw7AIAhEBamKn97/uMXEGBvozkWb9C2Zx4xzWykBhFAeYp9gkLyZE0zIMno9n4g19hmdY39scwqVkOXaxph0ZCXQcqxSpgQpONa59wkRDOL93eAXvimwlbPbwwVAegLS1HGfZAAAAABJRU5ErkJggg==\") no-repeat left center;background-size: 1em;}</style>";
-const char  HTTP_SCRIPT3[] PROGMEM          = "<script>function c(l){document.getElementById('s').value=l.innerText||l.textContent;document.getElementById('p').focus();}</script>";
-const char HTTP_HEAD_END3[] PROGMEM        = "</head><body><div style='text-align:left;display:inline-block;min-width:260px;'>";
-const char HTTP_PORTAL_OPTIONS3[] PROGMEM  = "<form action=\"/wifi\" method=\"get\"><button>Configure WiFi</button></form><br/><form action=\"/0wifi\" method=\"get\"><button>Configure WiFi (No Scan)</button></form><br/>";
-//<form action=\"/i\" method=\"get\"><button>Info</button></form><br/><form action=\"/r\" method=\"post\"><button>Reset</button></form>";
-const char HTTP_ITEM3[] PROGMEM            = "<div><a href='#p' onclick='c(this)'>{v}</a>&nbsp;<span class='q {i}'>{r}%</span></div>";
-const char HTTP_FORM_START3[] PROGMEM      = "<form method='get' action='wifisave'><input id='s' name='s' length=32 placeholder='SSID'><br/><input id='p' name='p' length=64 type='password' placeholder='password'><br/>";
-const char HTTP_FORM_PARAM3[] PROGMEM      = "<br/><input id='{i}' name='{n}' length={l} placeholder='{p}' value='{v}' {c}>";
-const char HTTP_FORM_END3[] PROGMEM        = "<br/><button type='submit'>save</button></form>";
-const char HTTP_SCAN_LINK3[] PROGMEM       = "<br/><div class=\"c\"><a href=\"/wifi\">Scan</a></div>";
-const char HTTP_SAVED3[] PROGMEM           = "<div>Credentials Saved<br />Trying to connect Weread to network.<br />If it fails reconnect to AP to try again</div>";
-const char HTTP_END3[] PROGMEM             = "</div></body></html>";
-
+    enum WebSettingsSubPage : uint8_t
+    {
+      MENU = 0,
+      NETWORK,
+      HARDWARE,
+      SYSTEM,
+      MODULES,
+      STORAGE,
+      LOGGING,
+      SECURITY,
+      PINREQ  = 252,
+      JS      = 254,
+      WELCOME = 255
+    };
 
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
 
 #define ARDUINOJSON_DECODE_UNICODE 0
-#include "3_Network/21_WebServer/AsyncJson-v6.h"
-#include "3_Network/21_WebServer/ArduinoJson-v6.h"
+#include "2_CoreSystem/21_JsonArduino/AsyncJson-v6.h"
+#include "2_CoreSystem/21_JsonArduino/ArduinoJson-v6.h"
 
 
 class mWebServer : 
@@ -166,7 +110,7 @@ public mTaskerInterface{
       
     };
     
-    static constexpr const char* PM_MODULE_NETWORK_WEBSERVER_CTR = D_MODULE_NETWORK_WEBSERVER_CTR;
+    static constexpr const char* PM_MODULE_NETWORK_WEBSERVER_CTR = D_MODULE__NETWORK__WEBSERVER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_NETWORK_WEBSERVER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_NETWORK_WEBSERVER_ID; }
 
@@ -193,8 +137,91 @@ public mTaskerInterface{
       CONTENT_TYPE_TEXT_CSS_ID,
     };
 
+    struct WebApplicationURL
+    {
+      uint16_t module_id = 0;
+      String url;
+      String friendly_name;
+      uint16_t port = 80;
+    };
+    std::vector<WebApplicationURL> application_urls;
+    void AddURLasApplication(uint16_t module_id, const char* url, const char* friendly_name = nullptr, uint16_t port = 80);
+    void AddURLasApplication(uint16_t module_id, const String& url, const char* friendly_name = nullptr, uint16_t port = 80);
+    void HandleAPI_URLApplications(AsyncWebServerRequest* request);
+
+    #ifdef ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
+    enum class WebUIControlType : uint8_t
+    {
+      Toggle = 0,
+      Momentary,
+      TestSwitch,
+      ButtonRow,
+      Value,
+      Indicator
+    };
 
 
+    struct WebUIContext
+    {
+      Print* response = nullptr;
+
+      bool first_module = true;
+      bool first_control = true;
+      bool module_open = false;
+      bool button_row_open = false;
+      bool first_option = true;
+    };
+
+    WebUIContext webui;
+
+
+    void PrintJSONString(Print& out, const char* str);
+
+    /**
+     * Generic WebUI output helpers.
+     */
+    bool WebUI_Begin(Print* response);
+    void WebUI_End();
+
+    void WebUI_Module_Start(uint16_t module_id, const char* module_name);
+    void WebUI_Module_End();
+
+    void WebUI_AddToggle(const char* command, uint8_t device_id, const char* name, bool state);
+    void WebUI_AddMomentary(const char* command, uint8_t device_id, const char* name, bool state);
+    void WebUI_AddTestSwitch(const char* command, uint8_t device_id, const char* name, bool physical_state);
+
+    void WebUI_AddButtonRow_Start(const char* command, uint8_t device_id, const char* name, const char* description = nullptr, int32_t selected_value = -1);
+    void WebUI_AddButtonRow_Option(const char* name, int32_t value);
+    void WebUI_AddButtonRow_End();
+
+    void WebUI_AddValue(uint8_t device_id, const char* name, const char* value, const char* units = nullptr);
+    void WebUI_AddValue(uint8_t device_id, const char* name, int32_t value, const char* units = nullptr);
+    void WebUI_AddValue(uint8_t device_id, const char* name, float value, const char* units = nullptr, uint8_t precision = 2);
+
+    void WebUI_AddIndicator(uint8_t device_id, const char* name, bool state);
+
+    #endif // ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
+
+    AsyncWebSocket* websocket_pages = nullptr;
+
+    void wsEventPages(
+      AsyncWebSocket *server,
+      AsyncWebSocketClient *client,
+      AwsEventType type,
+      void *arg,
+      uint8_t *data,
+      size_t len
+    );
+
+    bool WebSocket_SendText(AsyncWebSocketClient* client, const char* data, size_t len);
+    bool WebSocket_SendWrappedJSON(AsyncWebSocketClient* client, const char* key, const char* json, size_t json_len);
+    bool WebSocket_SendSensors(AsyncWebSocketClient* client);
+    bool WebSocket_SendEnergy(AsyncWebSocketClient* client);
+
+    bool WebSocket_SendControls(AsyncWebSocketClient* client);
+
+    #endif
 
 // server library objects
 AsyncWebServer* server = nullptr;
@@ -202,10 +229,12 @@ AsyncWebServer* server = nullptr;
 
 AsyncWebHandler *editHandler = nullptr;
 
+
   #ifndef ESP8266
-    #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
 
     void HandlePage_Console_WebSocket(AsyncWebServerRequest *request);
+
 
     AsyncWebSocket* websocket_console = nullptr;
     void sendConsoleWs(AsyncWebSocketClient *client = nullptr);
@@ -264,6 +293,104 @@ AsyncWebHandler *editHandler = nullptr;
   #endif
 
 
+  
+
+  /**************************************************************************************************
+   * Generic Telemetry API
+   **************************************************************************************************/
+
+  enum class TelemetryAPIRequestMode : uint8_t
+  {
+    None = 0,
+    Catalogue,
+    Topic
+  };
+
+  struct TelemetryAPIRequest
+  {
+    TelemetryAPIRequestMode mode = TelemetryAPIRequestMode::None;
+    char requested_key[128] = {0};
+    AsyncResponseStream* catalogue_response = nullptr;
+    bool catalogue_first = true;
+    bool found = false;
+    bool buffer_busy = false;
+    uint16_t rate = 0;
+    String packet;
+  };
+
+  TelemetryAPIRequest telemetry_api_request;
+
+  uint32_t telemetry_api_json_last_used_ms = 0;
+  static constexpr uint32_t TELEMETRY_API_JSON_BACKOFF_MS = 350;
+
+  void HandleAPI_Telemetry(AsyncWebServerRequest* request);
+  bool TelemetryAPI_Construct_Begin(const char* full_key, uint16_t rate);
+  void TelemetryAPI_Construct_End();
+
+  template<typename T>
+  void Telemetry_Sender(std::vector<telemetry_handler<T>*>& telemetry_list, T& class_ptr)
+  {
+    if(telemetry_api_request.mode == TelemetryAPIRequestMode::None) return;
+
+    char full_key[160];
+
+    for(auto* handle : telemetry_list)
+    {
+      if(!handle || !handle->key || !handle->ConstructJSON_function) continue;
+
+      snprintf_P(full_key, sizeof(full_key), PSTR("%S/%S"), class_ptr.GetModuleName(), handle->key);
+
+      if(telemetry_api_request.mode == TelemetryAPIRequestMode::Catalogue)
+      {
+        AsyncResponseStream* response = telemetry_api_request.catalogue_response;
+        if(!response) return;
+
+        if(!telemetry_api_request.catalogue_first) response->print(',');
+        telemetry_api_request.catalogue_first = false;
+
+        response->print(F("{\"topic\":\""));
+        PrintJSONString(*response, full_key);
+        response->printf_P(PSTR("\",\"rate\":%u}"), handle->tRateSecs);
+        continue;
+      }
+
+      if(telemetry_api_request.mode == TelemetryAPIRequestMode::Topic)
+      {
+        if(strcmp(full_key, telemetry_api_request.requested_key)) continue;
+        if(!TelemetryAPI_Construct_Begin(full_key, handle->tRateSecs)) return;
+
+        CALL_MEMBER_FUNCTION(class_ptr, handle->ConstructJSON_function)(handle->json_level, false);
+
+        TelemetryAPI_Construct_End();
+        return;
+      }
+    }
+  }
+
+
+  /**************************************************************************************************
+   * Telemetry Debug Page
+   **************************************************************************************************/
+
+  #ifdef ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+  void HandlePage_DebugTelemetry(AsyncWebServerRequest* request);
+  #endif
+
+
+  /**************************************************************************************************
+   * Tasker Metrics Debug Page / API
+   **************************************************************************************************/
+
+  #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  void HandlePage_DebugTaskerMetrics(AsyncWebServerRequest* request);
+  void HandleAPI_DebugTaskerMetrics(AsyncWebServerRequest* request);
+  #endif
+
+
+
+
+
+
 void serveSettingsJS(AsyncWebServerRequest* request);
 void serveJson(AsyncWebServerRequest* request);
 
@@ -280,8 +407,8 @@ size_t printSetFormIndex(Print& settingsScript, const char* key, int index);
 size_t printSetFormValue(Print& settingsScript, const char* key, const char* val);
 size_t printSetClassElementHTML(Print& settingsScript, const char* key, const int index, const char* val);
 size_t printSetFormInput(Print& settingsScript, const char* key, const char* selector, int value) ;
-size_t printSetElementStyle(Print& settingsScript, const char* element_id, const char* css_prop, const char* css_val);
-size_t printToggleElementClass(Print& settingsScript,  const char* element_id,  const char* class_name,  bool enable);
+// size_t printSetElementStyle(Print& settingsScript, const char* element_id, const char* css_prop, const char* css_val);
+// size_t printToggleElementClass(Print& settingsScript,  const char* element_id,  const char* class_name,  bool enable);
 
 
 size_t printTableSetCell(Print& s, const char* table_id, uint16_t row, uint8_t col, const char* val);
@@ -300,39 +427,8 @@ size_t printSetElementHTML(
 
     void SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage);
 
-// ---- System Controls (polling containers) ----
-void HandlePage_SystemControls(AsyncWebServerRequest *request);
-void HandlePage_SystemControls_C1(AsyncWebServerRequest *request);
-void HandlePage_SystemControls_C2(AsyncWebServerRequest *request);
-void HandlePage_SystemControls_C3(AsyncWebServerRequest *request);
 
-// Active append stream context for Tasker-based append (shared within request scope)
-AsyncResponseStream* web_controls_stream = nullptr;
-uint8_t web_controls_container_id = 0;
-
-// Helpers modules may call (via tkr_web pointer) while handling TASK_WEB_APPEND_* events
-inline Print* WebControls_GetPrint() { return (Print*)web_controls_stream; }
-inline uint8_t WebControls_GetContainerId() const { return web_controls_container_id; }
-size_t WebUI_Print_SectionBegin(Print& out, const char* title);
-size_t WebUI_Print_SectionEnd(Print& out);
-
-size_t WebUI_Print_TableBegin(Print& out);
-size_t WebUI_Print_TableEnd(Print& out);
-
-size_t WebUI_Print_KV_Float(Print& out, const char* key, float value, uint8_t decimals, const char* units);
-size_t WebUI_Print_KV_U32(Print& out, const char* key, uint32_t value, const char* units);
-size_t WebUI_Print_KV_Str(Print& out, const char* key, const char* value);
-size_t WebUI_Print_TableHeaderRow_Begin(Print& out);
-size_t WebUI_Print_TableHeaderCell(Print& out, const char* text, bool is_first_blank = false);
-size_t WebUI_Print_TableHeaderRow_End(Print& out);
-
-size_t WebUI_Print_RowBegin(Print& out, const char* key);
-size_t WebUI_Print_CellText(Print& out, const char* text);
-size_t WebUI_Print_CellFloat(Print& out, float value, uint8_t decimals, const char* units);
-size_t WebUI_Print_CellDash(Print& out);
-size_t WebUI_Print_RowEnd(Print& out);
-
-#ifdef ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#ifdef ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 void HandlePage_UrlList(AsyncWebServerRequest *request);
 void HandlePage_UrlList_JSON(AsyncWebServerRequest *request);
 #endif
@@ -370,7 +466,7 @@ bool HttpCheckPriviledgedAccess();
     void WebPage_Root_AddHandlers();
     
     
-    #ifdef ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
+    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
     void HandlePage_Console_Poll(AsyncWebServerRequest *request);
     void HandleConsoleRefresh(AsyncWebServerRequest *request);
     #endif

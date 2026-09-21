@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Telemetry</title>
+
+  <link rel="stylesheet" href="/pulsar.css">
+
+  <script src="/pulsar.js"></script>
+  <script src="/pulsar_data.js"></script>
+</head>
+
+
+<body class="data-page">
+
+  <header class="page-header sticky-header">
+
+    <div class="page-title">
+      <h1>Telemetry</h1>
+      <div class="page-subtitle">Module ConstructJSON inspection</div>
+    </div>
+
+    <div class="page-actions">
+      <button onclick="refreshAll()">Refresh All</button>
+      <button id="auto" onclick="toggleAll()">Auto 10s</button>
+      <span id="status" class="status">Loading…</span>
+      <button onclick="go('/adv')">Back</button>
+    </div>
+
+  </header>
+
+
+  <div id="grid" class="telemetry-grid"></div>
+
+
+  <script>
+    const API = '/api/telemetry';
+
+    const REQUEST_GAP_MS = 400;
+    const REQUEST_TIMEOUT_MS = 1000;
+    const TOPIC_AUTO_MS = 1000;
+    const ALL_AUTO_MS = 10000;
+
+    const topics = new Map();
+    const queue = [];
+
+    let busy = false;
+    let lastRequestFinished = 0;
+
+    let autoAll = false;
+    let autoAllTimer = 0;
+
+
+    /**************************************************************************************************
+     * Queue
+     **************************************************************************************************/
+
+    function queueTopic(topic, priority = false)
+    {
+      if (!topics.has(topic)) return;
+
+      const existing = queue.indexOf(topic);
+
+      if (existing >= 0)
+      {
+        if (priority && existing > 0)
+        {
+          queue.splice(existing, 1);
+          queue.unshift(topic);
+        }
+
+        return;
+      }
+
+      if (priority)
+      {
+        queue.unshift(topic);
+      }
+      else
+      {
+        queue.push(topic);
+      }
+
+      processQueue();
+    }
+
+
+    async function processQueue()
+    {
+      if (busy || !queue.length) return;
+
+      busy = true;
+
+      const elapsed = Date.now() - lastRequestFinished;
+      const wait = REQUEST_GAP_MS - elapsed;
+
+      if (wait > 0)
+      {
+        await sleep(wait);
+      }
+
+      const topic = queue.shift();
+
+      try
+      {
+        const retry = await refreshTopic(topic);
+
+        if (retry)
+        {
+          await sleep(retry);
+          queue.unshift(topic);
+        }
+      }
+      catch (e)
+      {
+        errorTopic(topic, e);
+      }
+
+      lastRequestFinished = Date.now();
+      busy = false;
+
+      processQueue();
+    }
+
+
+    /**************************************************************************************************
+     * Build topic cards
+     **************************************************************************************************/
+
+    function build()
+    {
+      const grid = clearElement('grid');
+
+      for (const item of topics.values())
+      {
+        const card = cE('section');
+        card.className = 'card telemetry-card';
+
+        card.innerHTML =
+          '<div class="telemetry-card-head">' +
+            '<div class="grow">' +
+              '<div class="telemetry-topic"></div>' +
+              '<div class="telemetry-meta">' +
+                'Rate: <span class="rate"></span> · ' +
+                'Updated: <span class="updated">Never</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="telemetry-actions"></div>' +
+          '</div>' +
+          '<pre class="telemetry-packet">Waiting…</pre>';
+
+        setText(
+          card.querySelector('.telemetry-topic'),
+          item.topic
+        );
+
+        setText(
+          card.querySelector('.rate'),
+          item.rate ? item.rate + 's' : 'event'
+        );
+
+        const actions = card.querySelector('.telemetry-actions');
+
+        actions.appendChild(
+          makeButton(
+            'Refresh',
+            () => queueTopic(item.topic, true),
+            'small'
+          )
+        );
+
+        const autoButton = makeButton(
+          'Auto 1s',
+          () => toggleTopic(item),
+          'small auto'
+        );
+
+        actions.appendChild(autoButton);
+
+        grid.appendChild(card);
+
+        item.el = card;
+      }
+    }
+
+
+    /**************************************************************************************************
+     * Fetch one topic
+     **************************************************************************************************/
+
+    async function refreshTopic(topic)
+    {
+      const item = topics.get(topic);
+
+      if (!item || !item.el) return 0;
+
+      const packet = item.el.querySelector('.telemetry-packet');
+
+      item.el.classList.add('loading');
+
+      const controller = new AbortController();
+
+      const timeout = setTimeout(
+        () => controller.abort(),
+        REQUEST_TIMEOUT_MS
+      );
+
+      let response;
+
+      try
+      {
+        response = await fetch(
+          API + '?topic=' + encodeURIComponent(topic),
+          {
+            cache: 'no-store',
+            signal: controller.signal
+          }
+        );
+      }
+      catch (e)
+      {
+        clearTimeout(timeout);
+
+        item.el.classList.remove('loading');
+
+        if (e.name === 'AbortError')
+        {
+          packet.classList.remove('error');
+          packet.textContent = 'No data';
+          return 0;
+        }
+
+        throw e;
+      }
+
+      clearTimeout(timeout);
+
+      let data = null;
+
+      try
+      {
+        data = await response.json();
+      }
+      catch (e)
+      {
+      }
+
+      if (response.status === 429 || response.status === 503)
+      {
+        item.el.classList.remove('loading');
+
+        return data && data.retry_ms
+          ? Number(data.retry_ms) + 50
+          : 500;
+      }
+
+      if (!response.ok)
+      {
+        item.el.classList.remove('loading');
+
+        throw new Error(
+          data && data.error
+            ? data.error
+            : 'HTTP ' + response.status
+        );
+      }
+
+      packet.classList.remove('error');
+      packet.textContent = JSON.stringify(data.packet, null, 2);
+
+      item.rate = Number(data.rate) || item.rate;
+      item.last = Date.now();
+
+      setText(
+        item.el.querySelector('.rate'),
+        item.rate ? item.rate + 's' : 'event'
+      );
+
+      setText(
+        item.el.querySelector('.updated'),
+        formatTime(item.last)
+      );
+
+      item.el.classList.remove('loading');
+
+      return 0;
+    }
+
+
+    function errorTopic(topic, error)
+    {
+      const item = topics.get(topic);
+
+      if (!item || !item.el) return;
+
+      const packet = item.el.querySelector('.telemetry-packet');
+
+      packet.classList.add('error');
+      packet.textContent = String(error);
+
+      item.el.classList.remove('loading');
+    }
+
+
+    /**************************************************************************************************
+     * Refresh controls
+     **************************************************************************************************/
+
+    function refreshAll()
+    {
+      for (const item of topics.values())
+      {
+        queueTopic(item.topic);
+      }
+    }
+
+
+    function toggleTopic(item)
+    {
+      item.auto = !item.auto;
+
+      const button = item.el.querySelector('.auto');
+
+      if (button)
+      {
+        button.classList.toggle('active', item.auto);
+      }
+
+      if (item.auto)
+      {
+        queueTopic(item.topic, true);
+
+        item.timer = setInterval(
+          () => queueTopic(item.topic, true),
+          TOPIC_AUTO_MS
+        );
+      }
+      else
+      {
+        clearInterval(item.timer);
+        item.timer = 0;
+      }
+    }
+
+
+    function toggleAll()
+    {
+      autoAll = !autoAll;
+
+      gId('auto').classList.toggle('active', autoAll);
+
+      clearInterval(autoAllTimer);
+      autoAllTimer = 0;
+
+      if (autoAll)
+      {
+        refreshAll();
+
+        autoAllTimer = setInterval(
+          refreshAll,
+          ALL_AUTO_MS
+        );
+      }
+    }
+
+
+    /**************************************************************************************************
+     * Initialise
+     **************************************************************************************************/
+
+    onReady(async () =>
+    {
+      try
+      {
+        const data = await getJSON(API);
+
+        for (const entry of data.topics || [])
+        {
+          if (!entry || !entry.topic) continue;
+
+          topics.set(
+            entry.topic,
+            {
+              topic: entry.topic,
+              rate: Number(entry.rate) || 0,
+              auto: false,
+              timer: 0,
+              last: 0,
+              el: null
+            }
+          );
+        }
+
+        build();
+
+        setStatus(
+          'status',
+          topics.size + ' topics',
+          'ok'
+        );
+
+        refreshAll();
+      }
+      catch (e)
+      {
+        setStatus(
+          'status',
+          e.message || String(e),
+          'bad'
+        );
+      }
+    });
+
+
+    /**************************************************************************************************
+     * Cleanup
+     **************************************************************************************************/
+
+    addEventListener('pagehide', () =>
+    {
+      clearInterval(autoAllTimer);
+
+      for (const item of topics.values())
+      {
+        clearInterval(item.timer);
+      }
+    });
+
+  </script>
+
+</body>
+</html>

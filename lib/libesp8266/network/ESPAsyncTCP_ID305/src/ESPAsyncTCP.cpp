@@ -231,18 +231,18 @@ size_t AsyncClient::write(const char* data) {
 size_t AsyncClient::write(const char* data, size_t size, uint8_t apiflags) {
   size_t will_send = add(data, size, apiflags);
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.printf("AsyncClient::write will_send=%d\n\r",will_send);
   #endif
   
   if(!will_send || !send()){
     
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
     Serial.printf("if(!will_send || !send()){\n\r");
     #endif
     return 0;
   }else{
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
     Serial.printf("NOT if(!will_send || !send()){\n\r");
     #endif
   }

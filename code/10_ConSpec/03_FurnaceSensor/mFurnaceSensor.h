@@ -14,6 +14,10 @@
 class mFurnaceSensor :
   public mTaskerInterface
 {
+
+  D_MODULE__CONTROLLER_CUSTOM__FURNACE_SENSOR__CTR
+
+  
   public:
     mFurnaceSensor(){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
@@ -135,23 +139,23 @@ class mFurnaceSensor :
   
     #ifdef USE_MODULE_NETWORK_MQTT
 
-      void MQTTHandler_Init();
+      void Telemetry_Init();
       void MQTTHandler_RefreshAll();
       void MQTTHandler_Rate();
       
       void MQTTHandler_Sender();
 
-      struct handler<mFurnaceSensor> mqtthandler_settings;
-      struct handler<mFurnaceSensor> mqtthandler_state_ifchanged;
-      struct handler<mFurnaceSensor> mqtthandler_state_teleperiod;
+      struct telemetry_handler<mFurnaceSensor> telemetry_settings;
+      struct telemetry_handler<mFurnaceSensor> telemetry_state_ifchanged;
+      struct telemetry_handler<mFurnaceSensor> telemetry_state_teleperiod;
 
       // No specialised payload therefore use system default instead of enum
       
       
-      struct handler<mFurnaceSensor>* mqtthandler_list[3] = {
-        &mqtthandler_settings,
-        &mqtthandler_state_ifchanged,
-        &mqtthandler_state_teleperiod
+      struct telemetry_handler<mFurnaceSensor>* telemetry_list[3] = {
+        &telemetry_settings,
+        &telemetry_state_ifchanged,
+        &telemetry_state_teleperiod
       };
 
     #endif // USE_MODULE_NETWORK_MQTT

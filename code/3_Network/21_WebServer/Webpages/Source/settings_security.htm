@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Security Settings</title>
+  <link rel="stylesheet" href="/pulsar.css">
+
+  <script src="/pulsar.js"></script>
+  <script src="/pulsar_data.js"></script>
+</head>
+<body class="settings-page"><form id="form_s" name="Sf" method="post">
+
+<header class="page-header"><div class="page-title"><h1>Security</h1></div><div class="page-actions"><button type="button" onclick="go('/settings')">Back</button><button class="primary">Save</button></div></header>
+
+<section class="settings-section"><h2>Settings Access</h2>
+<label class="setting"><span>Protection</span><input name="SEC_EN" type="checkbox"></label>
+<label class="setting"><span>PIN</span><input name="SEC_PIN" type="password" maxlength="8" inputmode="numeric"></label>
+</section>
+
+<section class="settings-section"><h2>Firmware Update</h2>
+<label class="setting"><span>Lock OTA</span><input name="OTA_LOCK" type="checkbox"></label>
+<label class="setting"><span>OTA password</span><input name="OTA_PASS" type="password" maxlength="64"></label>
+<label class="setting"><span>ArduinoOTA</span><input name="ARDUINO_OTA" type="checkbox"></label>
+</section>
+
+<section class="settings-section"><h2>Administrative Actions</h2><div class="page-actions"><button type="button" onclick="if(confirm('Restart device?'))go('/reboot')">Restart</button><button class="danger" type="button" onclick="if(confirm('Factory reset all settings?'))go('/reset?force=1')">Factory Reset</button></div></section>
+
+</form><div id="toast"></div></body></html>

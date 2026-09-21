@@ -51,7 +51,7 @@ class mServerResetRelays :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void   parse_JSONCommand(JsonParserObject obj);
 
-    static constexpr const char* PM_MODULE_CONTROLLER_CUSTOM__SERVER_RESET_RELAYS_CTR = D_MODULE_CONTROLLER_CUSTOM__SERVER_RESET_RELAYS_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_CUSTOM__SERVER_RESET_RELAYS_CTR = D_MODULE__CONTROLLER_CUSTOM__SERVER_RESET_RELAYS__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CUSTOM__SERVER_RESET_RELAYS_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CUSTOM__SERVER_RESET_RELAYS_ID; }    
     
@@ -100,9 +100,9 @@ class mServerResetRelays :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mServerResetRelays>*> mqtthandler_list;
-    struct handler<mServerResetRelays> mqtthandler_settings;    struct handler<mServerResetRelays> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mServerResetRelays>*> telemetry_list;
+    struct telemetry_handler<mServerResetRelays> telemetry_settings;    struct telemetry_handler<mServerResetRelays> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

@@ -26,34 +26,34 @@ size_t mWebServer::printSetFormValue(Print& settingsScript, const char* key, con
 size_t mWebServer::printSetClassElementHTML(Print& settingsScript, const char* key, const int index, const char* val) {
   return settingsScript.printf_P(PSTR("d.getElementsByClassName(\"%s\")[%d].innerHTML=\"%s\";"), key, index, val);
 }
-size_t mWebServer::printSetElementStyle(
-  Print& settingsScript,
-  const char* element_id,
-  const char* css_prop,
-  const char* css_val
-) {
-  return settingsScript.printf_P(
-    PSTR("var e=d.getElementById(\"%s\");if(e)e.style.%s=\"%s\";"),
-    element_id, css_prop, css_val
-  );
-}
+// size_t mWebServer::printSetElementStyle(
+//   Print& settingsScript,
+//   const char* element_id,
+//   const char* css_prop,
+//   const char* css_val
+// ) {
+//   return settingsScript.printf_P(
+//     PSTR("var e=d.getElementById(\"%s\");if(e)e.style.%s=\"%s\";"),
+//     element_id, css_prop, css_val
+//   );
+// }
 
-size_t mWebServer::printToggleElementClass(
-  Print& settingsScript,
-  const char* element_id,
-  const char* class_name,
-  bool enable
-) {
-  return settingsScript.printf_P(
-    PSTR(
-      "var e=d.getElementById(\"%s\");"
-      "if(e){e.classList.%s(\"%s\");}"
-    ),
-    element_id,
-    enable ? "add" : "remove",
-    class_name
-  );
-}
+// size_t mWebServer::printToggleElementClass(
+//   Print& settingsScript,
+//   const char* element_id,
+//   const char* class_name,
+//   bool enable
+// ) {
+//   return settingsScript.printf_P(
+//     PSTR(
+//       "var e=d.getElementById(\"%s\");"
+//       "if(e){e.classList.%s(\"%s\");}"
+//     ),
+//     element_id,
+//     enable ? "add" : "remove",
+//     class_name
+//   );
+// }
 size_t mWebServer::printSetElementHTML(
   Print& settingsScript,
   const char* element_id,
@@ -63,7 +63,8 @@ size_t mWebServer::printSetElementHTML(
     PSTR("var e=d.getElementById(\"%s\");if(e)e.innerHTML=\"%s\";"),
     element_id, val
   );
-}size_t mWebServer::printTableSetCell(Print& s, const char* table_id, uint16_t row, uint8_t col, const char* val) {
+}
+size_t mWebServer::printTableSetCell(Print& s, const char* table_id, uint16_t row, uint8_t col, const char* val) {
   return s.printf_P(
     PSTR("TSet('%s',%u,%u,\"%s\");"),
     table_id, row, col, val
@@ -96,120 +97,120 @@ size_t mWebServer::printTableSetNotes(Print& s, const char* table_id, uint16_t r
 }
 
 
-// Date Modified: 25Jan26
+// // Date Modified: 25Jan26
 
-size_t mWebServer::WebUI_Print_SectionBegin(Print& out, const char* title)
-{
-  size_t n = 0;
-  n += out.print(F("<div class=\"section\"><div class=\"title\">"));
-  if (title) n += out.print(title);
-  n += out.print(F("</div>"));
-  return n;
-}
+// size_t mWebServer::WebUI_Print_SectionBegin(Print& out, const char* title)
+// {
+//   size_t n = 0;
+//   n += out.print(F("<div class=\"section\"><div class=\"title\">"));
+//   if (title) n += out.print(title);
+//   n += out.print(F("</div>"));
+//   return n;
+// }
 
-size_t mWebServer::WebUI_Print_SectionEnd(Print& out)
-{
-  return out.print(F("</div>"));
-}
+// size_t mWebServer::WebUI_Print_SectionEnd(Print& out)
+// {
+//   return out.print(F("</div>"));
+// }
 
-size_t mWebServer::WebUI_Print_TableBegin(Print& out)
-{
-  return out.print(F("<table class=\"kv\">"));
-}
+// size_t mWebServer::WebUI_Print_TableBegin(Print& out)
+// {
+//   return out.print(F("<table class=\"kv\">"));
+// }
 
-size_t mWebServer::WebUI_Print_TableEnd(Print& out)
-{
-  return out.print(F("</table>"));
-}
+// size_t mWebServer::WebUI_Print_TableEnd(Print& out)
+// {
+//   return out.print(F("</table>"));
+// }
 
-size_t mWebServer::WebUI_Print_KV_Float(Print& out, const char* key, float value, uint8_t decimals, const char* units)
-{
-  size_t n = 0;
-  n += out.print(F("<tr><td class=\"key\">"));
-  if (key) n += out.print(key);
-  n += out.print(F("</td><td class=\"val\">"));
-  n += out.print(value, decimals);
-  if (units) { n += out.print(' '); n += out.print(units); }
-  n += out.print(F("</td></tr>"));
-  return n;
-}
+// size_t mWebServer::WebUI_Print_KV_Float(Print& out, const char* key, float value, uint8_t decimals, const char* units)
+// {
+//   size_t n = 0;
+//   n += out.print(F("<tr><td class=\"key\">"));
+//   if (key) n += out.print(key);
+//   n += out.print(F("</td><td class=\"val\">"));
+//   n += out.print(value, decimals);
+//   if (units) { n += out.print(' '); n += out.print(units); }
+//   n += out.print(F("</td></tr>"));
+//   return n;
+// }
 
-size_t mWebServer::WebUI_Print_KV_U32(Print& out, const char* key, uint32_t value, const char* units)
-{
-  size_t n = 0;
-  n += out.print(F("<tr><td class=\"key\">"));
-  if (key) n += out.print(key);
-  n += out.print(F("</td><td class=\"val\">"));
-  n += out.print(value);
-  if (units) { n += out.print(' '); n += out.print(units); }
-  n += out.print(F("</td></tr>"));
-  return n;
-}
+// size_t mWebServer::WebUI_Print_KV_U32(Print& out, const char* key, uint32_t value, const char* units)
+// {
+//   size_t n = 0;
+//   n += out.print(F("<tr><td class=\"key\">"));
+//   if (key) n += out.print(key);
+//   n += out.print(F("</td><td class=\"val\">"));
+//   n += out.print(value);
+//   if (units) { n += out.print(' '); n += out.print(units); }
+//   n += out.print(F("</td></tr>"));
+//   return n;
+// }
 
-size_t mWebServer::WebUI_Print_KV_Str(Print& out, const char* key, const char* value)
-{
-  size_t n = 0;
-  n += out.print(F("<tr><td class=\"key\">"));
-  if (key) n += out.print(key);
-  n += out.print(F("</td><td class=\"val\">"));
-  if (value) n += out.print(value);
-  n += out.print(F("</td></tr>"));
-  return n;
-}
-// Date Modified: 25Jan26
+// size_t mWebServer::WebUI_Print_KV_Str(Print& out, const char* key, const char* value)
+// {
+//   size_t n = 0;
+//   n += out.print(F("<tr><td class=\"key\">"));
+//   if (key) n += out.print(key);
+//   n += out.print(F("</td><td class=\"val\">"));
+//   if (value) n += out.print(value);
+//   n += out.print(F("</td></tr>"));
+//   return n;
+// }
+// // Date Modified: 25Jan26
 
-size_t mWebServer::WebUI_Print_TableHeaderRow_Begin(Print& out){
-  return out.print(F("<tr>"));
-}
+// size_t mWebServer::WebUI_Print_TableHeaderRow_Begin(Print& out){
+//   return out.print(F("<tr>"));
+// }
 
-size_t mWebServer::WebUI_Print_TableHeaderCell(Print& out, const char* text, bool is_first_blank){
-  size_t n = 0;
-  if (is_first_blank) {
-    n += out.print(F("<th class=\"key\"></th>"));
-    return n;
-  }
-  n += out.print(F("<th class=\"col\">"));
-  if (text) n += out.print(text);
-  n += out.print(F("</th>"));
-  return n;
-}
+// size_t mWebServer::WebUI_Print_TableHeaderCell(Print& out, const char* text, bool is_first_blank){
+//   size_t n = 0;
+//   if (is_first_blank) {
+//     n += out.print(F("<th class=\"key\"></th>"));
+//     return n;
+//   }
+//   n += out.print(F("<th class=\"col\">"));
+//   if (text) n += out.print(text);
+//   n += out.print(F("</th>"));
+//   return n;
+// }
 
-size_t mWebServer::WebUI_Print_TableHeaderRow_End(Print& out){
-  return out.print(F("</tr>"));
-}
+// size_t mWebServer::WebUI_Print_TableHeaderRow_End(Print& out){
+//   return out.print(F("</tr>"));
+// }
 
-size_t mWebServer::WebUI_Print_RowBegin(Print& out, const char* key){
-  size_t n = 0;
-  n += out.print(F("<tr><td class=\"key\">"));
-  if (key) n += out.print(key);
-  n += out.print(F("</td>"));
-  return n;
-}
+// size_t mWebServer::WebUI_Print_RowBegin(Print& out, const char* key){
+//   size_t n = 0;
+//   n += out.print(F("<tr><td class=\"key\">"));
+//   if (key) n += out.print(key);
+//   n += out.print(F("</td>"));
+//   return n;
+// }
 
-size_t mWebServer::WebUI_Print_CellText(Print& out, const char* text){
-  size_t n = 0;
-  n += out.print(F("<td class=\"val\">"));
-  if (text) n += out.print(text);
-  n += out.print(F("</td>"));
-  return n;
-}
+// size_t mWebServer::WebUI_Print_CellText(Print& out, const char* text){
+//   size_t n = 0;
+//   n += out.print(F("<td class=\"val\">"));
+//   if (text) n += out.print(text);
+//   n += out.print(F("</td>"));
+//   return n;
+// }
 
-size_t mWebServer::WebUI_Print_CellFloat(Print& out, float value, uint8_t decimals, const char* units){
-  size_t n = 0;
-  n += out.print(F("<td class=\"val\">"));
-  n += out.print(value, decimals);
-  if (units) { n += out.print(' '); n += out.print(units); }
-  n += out.print(F("</td>"));
-  return n;
-}
+// size_t mWebServer::WebUI_Print_CellFloat(Print& out, float value, uint8_t decimals, const char* units){
+//   size_t n = 0;
+//   n += out.print(F("<td class=\"val\">"));
+//   n += out.print(value, decimals);
+//   if (units) { n += out.print(' '); n += out.print(units); }
+//   n += out.print(F("</td>"));
+//   return n;
+// }
 
-size_t mWebServer::WebUI_Print_CellDash(Print& out){
-  return out.print(F("<td class=\"val\">—</td>"));
-}
+// size_t mWebServer::WebUI_Print_CellDash(Print& out){
+//   return out.print(F("<td class=\"val\">—</td>"));
+// }
 
-size_t mWebServer::WebUI_Print_RowEnd(Print& out){
-  return out.print(F("</tr>"));
-}
+// size_t mWebServer::WebUI_Print_RowEnd(Print& out){
+//   return out.print(F("</tr>"));
+// }
 
 
 
@@ -231,14 +232,14 @@ class LockedJsonResponse2:
     size_t result = AsyncJsonResponse::_fillBuffer(buf, maxLen);
     // Release lock as soon as we're done filling content
     if (((result + _sentLength) >= (_contentLength)) && _holding_lock) {
-      JBI->releaseJSONBufferLock();
+      tkr_jsona->releaseJSONBufferLock();
       _holding_lock = false;
     }
     return result;
   }
 
   // destructor will remove JSON buffer lock when response is destroyed in AsyncWebServer
-  virtual ~LockedJsonResponse2() { if (_holding_lock) JBI->releaseJSONBufferLock(); };
+  virtual ~LockedJsonResponse2() { if (_holding_lock) tkr_jsona->releaseJSONBufferLock(); };
 };
 
 
@@ -329,12 +330,12 @@ void mWebServer::appendGPIOinfo(Print& settingsScript) {
     settingsScript.printf_P(PSTR(",%d,%d"), spi_mosi, spi_sclk);
   }
   // usermod pin reservations will become unnecessary when settings pages will read cfg.json directly
-  if (JBI->requestJSONBufferLock(6)) {
+  if (tkr_jsona->requestJSONBufferLock(6)) {
     // if we can't allocate JSON buffer ignore usermod pins
-    JsonObject mods = tkr_mfile->pDoc->createNestedObject("um");
+    JsonObject mods = tkr_jsona->pDoc->createNestedObject("um");
     // UsermodManager::addToConfig(mods);
     // if (!mods.isNull()) fillUMPins(settingsScript, mods);
-    JBI->releaseJSONBufferLock();
+    tkr_jsona->releaseJSONBufferLock();
   }
   settingsScript.print(F("];"));
 
@@ -409,9 +410,9 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   if (subPage <0 || subPage >10) return;
   char nS[32];
 
-  if (subPage == SUBPAGE_WEB_MENU)
+  if (subPage == WebSettingsSubPage::MENU)
   {
-  #ifndef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS // include only if 2D is not compiled in
+  #ifndef ENABLE_FEATURE_LIGHTING__2D_MATRIX // include only if 2D is not compiled in
     settingsScript.print(F("gId('2dbtn').style.display='none';"));
   #endif
   #ifdef ENABLE_FEATURE_LIGHTING__DMX // include only if DMX is enabled
@@ -419,420 +420,8 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   #endif
   }
 
-  if (subPage == SUBPAGE_WEB_WIFI)
-  {
-    size_t l;
-    settingsScript.printf_P(PSTR("resetWiFi(%d);"), 0);//WLED_MAX_WIFI_COUNT);
-    // for (size_t n = 0; n < multiWiFi.size(); n++) {
-    //   l = strlen(multiWiFi[n].clientPass);
-    //   char fpass[l+1]; //fill password field with ***
-    //   fpass[l] = 0;
-    //   memset(fpass,'*',l);
-    //   settingsScript.printf_P(PSTR("addWiFi(\"%s\",\"%s\",0x%X,0x%X,0x%X);"),
-    //     multiWiFi[n].clientSSID,
-    //     fpass,
-    //     (uint32_t) multiWiFi[n].staticIP, // explicit cast required as this is a struct
-    //     (uint32_t) multiWiFi[n].staticGW,
-    //     (uint32_t) multiWiFi[n].staticSN);
-    // }
 
-    IPAddress dnsAddress = IPAddress(8,8,8,8);
-
-    printSetFormValue(settingsScript,PSTR("D0"),dnsAddress[0]);
-    printSetFormValue(settingsScript,PSTR("D1"),dnsAddress[1]);
-    printSetFormValue(settingsScript,PSTR("D2"),dnsAddress[2]);
-    printSetFormValue(settingsScript,PSTR("D3"),dnsAddress[3]);
-
-#ifdef USE_MODULE_LIGHTS_ANIMATOR
-    printSetFormValue(settingsScript,PSTR("CM"), tkr_web->cmDNS);
-    printSetFormIndex(settingsScript,PSTR("AB"),tkr_anim->apBehavior);
-    printSetFormValue(settingsScript,PSTR("AS"),tkr_anim->apSSID);
-    printSetFormCheckbox(settingsScript,PSTR("AH"),tkr_anim->apHide);
-
-    l = strlen(tkr_anim->apPass);
-    char fapass[l+1]; //fill password field with ***
-    fapass[l] = 0;
-    memset(fapass,'*',l);
-    printSetFormValue(settingsScript,PSTR("AP"),0);//fapass);
-
-    printSetFormValue(settingsScript,PSTR("AC"),1);//apChannel);
-    #ifdef ARDUINO_ARCH_ESP32
-    printSetFormValue(settingsScript,PSTR("TX"),0);//txPower);
-    #else
-    settingsScript.print(F("gId('tx').style.display='none';"));
-    #endif
-    printSetFormCheckbox(settingsScript,PSTR("FG"),0);//force802_3g);
-    printSetFormCheckbox(settingsScript,PSTR("WS"),0);//noWifiSleep);
-
-    #ifndef WLED_DISABLE_ESPNOW
-    // printSetFormCheckbox(settingsScript,PSTR("RE"),0);//,enableESPNow);
-    // printSetFormValue(settingsScript,PSTR("RMAC"),0);//,linked_remote);
-    // #else
-    //hide remote settings if not compiled
-    // settingsScript.print(F("toggle('ESPNOW');"));  // hide ESP-NOW setting
-    #endif
-
-    #ifdef WLED_USE_ETHERNET
-    printSetFormValue(settingsScript,PSTR("ETH"),ethernetType);
-    #else
-    //hide ethernet setting if not compiled in
-    settingsScript.print(F("gId('ethd').style.display='none';"));
-    #endif
-  #endif
-
-    if (Network.isConnected()) //is connected
-    {
-      char s[32];
-      IPAddress localIP = Network.localIP();
-      sprintf(s, "%d.%d.%d.%d", localIP[0], localIP[1], localIP[2], localIP[3]);
-
-      #if defined(ARDUINO_ARCH_ESP32) && defined(WLED_USE_ETHERNET)
-      if (Network.isEthernet()) strcat_P(s ,PSTR(" (Ethernet)"));
-      #endif
-      printSetClassElementHTML(settingsScript,PSTR("sip"),0,s);
-    } else
-    {
-      printSetClassElementHTML(settingsScript,PSTR("sip"),0,(char*)F("Not connected"));
-    }
-
-    if (WiFi.softAPIP()[0] != 0) //is active
-    {
-      char s[16];
-      IPAddress apIP = WiFi.softAPIP();
-      sprintf(s, "%d.%d.%d.%d", apIP[0], apIP[1], apIP[2], apIP[3]);
-      printSetClassElementHTML(settingsScript,PSTR("sip"),1,s);
-    } else
-    {
-      printSetClassElementHTML(settingsScript,PSTR("sip"),1,(char*)F("Not active"));
-    }
-
-    // #ifndef WLED_DISABLE_ESPNOW
-    // if (strlen(tkr_anim->last_signal_src) > 0) { //Have seen an ESP-NOW Remote
-    //   printSetClassElementHTML(settingsScript,PSTR("rlid"),0,tkr_anim->last_signal_src);
-    // } else if (!0){//enableESPNow) {
-    //   printSetClassElementHTML(settingsScript,PSTR("rlid"),0,(char*)F("(Enable ESP-NOW to listen)"));
-    // } else {
-    //   printSetClassElementHTML(settingsScript,PSTR("rlid"),0,(char*)F("None"));
-    // }
-    // #endif
-  }
-
-  if (subPage == SUBPAGE_WEB_LEDS)
-  {
-    
-//     #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_WEB_LEDS
-
-//     appendGPIOinfo(settingsScript);
-
-//     settingsScript.printf_P(PSTR("d.ledTypes=%s;"), BusManager::getLEDTypesJSONString().c_str());
-
-//     // set limits
-//     settingsScript.printf_P(PSTR("bLimits(%d,%d,%d,%d,%d,%d,%d,%d);"),
-//       WLED_MAX_BUSSES,
-//       WLED_MIN_VIRTUAL_BUSSES,
-//       MAX_LEDS_PER_BUS,
-//       MAX_LED_MEMORY,
-//       MAX_LEDS_NEO,
-//       WLED_MAX_COLOR_ORDER_MAPPINGS,
-//       WLED_MAX_DIGITAL_CHANNELS,
-//       WLED_MAX_ANALOG_CHANNELS
-//     );
-
-//     printSetFormCheckbox(settingsScript,PSTR("MS"),tkr_anim->autoSegments);
-//     printSetFormCheckbox(settingsScript,PSTR("CCT"),tkr_anim->correctWB);
-//     printSetFormCheckbox(settingsScript,PSTR("IC"),0);//cctICused);
-//     printSetFormCheckbox(settingsScript,PSTR("CR"),tkr_anim->cctFromRgb);
-//     printSetFormValue(settingsScript,PSTR("CB"),tkr_anim->cctBlending);
-//     printSetFormValue(settingsScript,PSTR("FR"),tkr_anim->getTargetFps());
-//     printSetFormValue(settingsScript,PSTR("AW"),Bus::getGlobalAWMode());
-//     printSetFormCheckbox(settingsScript,PSTR("LD"),0);//useGlobalLedBuffer);
-
-//     unsigned sumMa = 0;
-//     for (int s = 0; s < BusManager::getNumBusses(); s++) {
-//       Bus* bus = BusManager::getBus(s);
-//       if (bus == nullptr) continue;
-//       int offset = s < 10 ? 48 : 55;
-//       char lp[4] = "L0"; lp[2] = offset+s; lp[3] = 0; //ascii 0-9 //strip data pin
-//       char lc[4] = "LC"; lc[2] = offset+s; lc[3] = 0; //strip length
-//       char co[4] = "CO"; co[2] = offset+s; co[3] = 0; //strip color order
-//       char lt[4] = "LT"; lt[2] = offset+s; lt[3] = 0; //strip type
-//       char ls[4] = "LS"; ls[2] = offset+s; ls[3] = 0; //strip start LED
-//       char cv[4] = "CV"; cv[2] = offset+s; cv[3] = 0; //strip reverse
-//       char sl[4] = "SL"; sl[2] = offset+s; sl[3] = 0; //skip 1st LED
-//       char rf[4] = "RF"; rf[2] = offset+s; rf[3] = 0; //off refresh
-//       char aw[4] = "AW"; aw[2] = offset+s; aw[3] = 0; //auto white mode
-//       char wo[4] = "WO"; wo[2] = offset+s; wo[3] = 0; //swap channels
-//       char sp[4] = "SP"; sp[2] = offset+s; sp[3] = 0; //bus clock speed
-//       char la[4] = "LA"; la[2] = offset+s; la[3] = 0; //LED current
-//       char ma[4] = "MA"; ma[2] = offset+s; ma[3] = 0; //max per-port PSU current
-//       settingsScript.print(F("addLEDs(1);"));
-//       uint8_t pins[5];
-//       int nPins = bus->getPins(pins);
-//       for (int i = 0; i < nPins; i++) {
-//         lp[1] = offset+i;
-//         if (1/*PinManager::isPinOk(pins[i])*/ || bus->isVirtual()) printSetFormValue(settingsScript,lp,pins[i]);
-//       }
-//       printSetFormValue(settingsScript,lc,bus->getLength());
-//       printSetFormValue(settingsScript,lt,bus->getType());
-//       printSetFormValue(settingsScript,co,bus->getColorOrder() & 0x0F);
-//       printSetFormValue(settingsScript,ls,bus->getStart());
-//       printSetFormCheckbox(settingsScript,cv,bus->isReversed());
-//       printSetFormValue(settingsScript,sl,bus->skippedLeds());
-//       printSetFormCheckbox(settingsScript,rf,bus->isOffRefreshRequired());
-//       printSetFormValue(settingsScript,aw,bus->getAutoWhiteMode());
-//       printSetFormValue(settingsScript,wo,bus->getColorOrder() >> 4);
-//       unsigned speed = bus->getFrequency();
-//       if (bus->isPWM()) {
-//         switch (speed) {
-//           case WLED_PWM_FREQ/2    : speed = 0; break;
-//           case WLED_PWM_FREQ*2/3  : speed = 1; break;
-//           default:
-//           case WLED_PWM_FREQ      : speed = 2; break;
-//           case WLED_PWM_FREQ*2    : speed = 3; break;
-//           case WLED_PWM_FREQ*10/3 : speed = 4; break; // uint16_t max (19531 * 3.333)
-//         }
-//       } else if (bus->is2Pin()) {
-//         switch (speed) {
-//           case  1000 : speed = 0; break;
-//           case  2000 : speed = 1; break;
-//           default:
-//           case  5000 : speed = 2; break;
-//           case 10000 : speed = 3; break;
-//           case 20000 : speed = 4; break;
-//         }
-//       }
-//       printSetFormValue(settingsScript,sp,speed);
-//       printSetFormValue(settingsScript,la,bus->getLEDCurrent());
-//       printSetFormValue(settingsScript,ma,bus->getMaxCurrent());
-//       sumMa += bus->getMaxCurrent();
-//     }
-//     printSetFormValue(settingsScript,PSTR("MA"),BusManager::ablMilliampsMax() ? BusManager::ablMilliampsMax() : sumMa);
-//     printSetFormCheckbox(settingsScript,PSTR("ABL"),BusManager::ablMilliampsMax() || sumMa > 0);
-//     printSetFormCheckbox(settingsScript,PSTR("PPL"),!BusManager::ablMilliampsMax() && sumMa > 0);
-
-//     settingsScript.printf_P(PSTR("resetCOM(%d);"), WLED_MAX_COLOR_ORDER_MAPPINGS);
-//     const ColorOrderMap& com = BusManager::getColorOrderMap();
-//     for (int s = 0; s < com.count(); s++) {
-//       const ColorOrderMapEntry* entry = com.get(s);
-//       if (entry == nullptr) break;
-//       settingsScript.printf_P(PSTR("addCOM(%d,%d,%d);"), entry->start, entry->len, entry->colorOrder);
-//     }
-
-//     printSetFormValue(settingsScript,PSTR("CA"), 127);//briS);
-
-//     printSetFormCheckbox(settingsScript,PSTR("BO"),turnOnAtBoot);
-//     printSetFormValue(settingsScript,PSTR("BP"),bootPreset);
-
-//     printSetFormCheckbox(settingsScript,PSTR("GB"),gammaCorrectBri);
-//     printSetFormCheckbox(settingsScript,PSTR("GC"),gammaCorrectCol);
-//     dtostrf(gammaCorrectVal,3,1,nS); printSetFormValue(settingsScript,PSTR("GV"),nS);
-//     printSetFormCheckbox(settingsScript,PSTR("TF"),fadeTransition);
-//     printSetFormCheckbox(settingsScript,PSTR("EB"),0);//modeBlending);
-//     printSetFormValue(settingsScript,PSTR("TD"),0);//,transitionDelayDefault);
-//     printSetFormCheckbox(settingsScript,PSTR("PF"),paletteFade);
-//     printSetFormValue(settingsScript,PSTR("TP"),randomPaletteChangeTime);
-//     printSetFormCheckbox(settingsScript,PSTR("TH"),0);//,useHarmonicRandomPalette);
-//     printSetFormValue(settingsScript,PSTR("BF"),briMultiplier);
-//     printSetFormValue(settingsScript,PSTR("TB"),nightlightTargetBri);
-//     printSetFormValue(settingsScript,PSTR("TL"),nightlightDelayMinsDefault);
-//     printSetFormValue(settingsScript,PSTR("TW"),nightlightMode);
-//     printSetFormIndex(settingsScript,PSTR("PB"),paletteBlend);
-//     printSetFormValue(settingsScript,PSTR("RL"),0);//,rlyPin);
-//     printSetFormCheckbox(settingsScript,PSTR("RM"),0);//,rlyMde);
-//     printSetFormCheckbox(settingsScript,PSTR("RO"),0);//,rlyOpenDrain);
-//     for (int i = 0; i < WLED_MAX_BUTTONS; i++) {
-//       settingsScript.printf_P(PSTR("addBtn(%d,%d,%d);"), i, 0,0);//btnPin[i], buttonType[i]);
-//     }
-//     printSetFormCheckbox(settingsScript,PSTR("IP"),disablePullUp);
-//     printSetFormValue(settingsScript,PSTR("TT"),touchThreshold);
-// #ifndef WLED_DISABLE_INFRARED
-//     printSetFormValue(settingsScript,PSTR("IR"),0);//,irPin);
-//     printSetFormValue(settingsScript,PSTR("IT"),irEnabled);
-// #endif    
-//     printSetFormCheckbox(settingsScript,PSTR("MSO"),!irApplyToAllSelected);
-
-//     #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_WEB_LEDS
-  }
-
-  if (subPage == SUBPAGE_WEB_UI)
-  {
-    // printSetFormValue(settingsScript,PSTR("DS"),serverDescription);
-    // printSetFormCheckbox(settingsScript,PSTR("SU"),simplifiedUI);
-  }
-
-  if (subPage == SUBPAGE_WEB_SYNC)
-  {
-  //   #ifdef ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_WEB_SYNC
-
-  //   printSetFormValue(settingsScript,PSTR("UP"),tkr_anim->udpPort);
-  //   printSetFormValue(settingsScript,PSTR("U2"),udpPort2);
-  // #ifndef WLED_DISABLE_ESPNOW
-  //   // if (enableESPNow) printSetFormCheckbox(settingsScript,PSTR("EN"),useESPNowSync);
-  //   // else              
-  //   settingsScript.print(F("toggle('ESPNOW');"));  // hide ESP-NOW setting
-  // #else
-  //   settingsScript.print(F("toggle('ESPNOW');"));  // hide ESP-NOW setting
-  // #endif
-  //   printSetFormValue(settingsScript,PSTR("GS"),syncGroups);
-  //   printSetFormValue(settingsScript,PSTR("GR"),receiveGroups);
-
-  //   printSetFormCheckbox(settingsScript,PSTR("RB"),receiveNotificationBrightness);
-  //   printSetFormCheckbox(settingsScript,PSTR("RC"),receiveNotificationColor);
-  //   printSetFormCheckbox(settingsScript,PSTR("RX"),receiveNotificationEffects);
-  //   printSetFormCheckbox(settingsScript,PSTR("RP"),0);//receiveNotificationPalette);
-  //   printSetFormCheckbox(settingsScript,PSTR("SO"),receiveSegmentOptions);
-  //   printSetFormCheckbox(settingsScript,PSTR("SG"),receiveSegmentBounds);
-  //   printSetFormCheckbox(settingsScript,PSTR("SS"),0);//,sendNotifications);
-  //   printSetFormCheckbox(settingsScript,PSTR("SD"),notifyDirect);
-  //   printSetFormCheckbox(settingsScript,PSTR("SB"),notifyButton);
-  //   printSetFormCheckbox(settingsScript,PSTR("SH"),notifyHue);
-  //   printSetFormValue(settingsScript,PSTR("UR"),udpNumRetries);
-
-  //   printSetFormCheckbox(settingsScript,PSTR("NL"),nodeListEnabled);
-  //   printSetFormCheckbox(settingsScript,PSTR("NB"),nodeBroadcastEnabled);
-
-  //   printSetFormCheckbox(settingsScript,PSTR("RD"),receiveDirect);
-  //   printSetFormCheckbox(settingsScript,PSTR("MO"),useMainSegmentOnly);
-  //   printSetFormCheckbox(settingsScript,PSTR("RLM"),realtimeRespectLedMaps);
-  //   printSetFormValue(settingsScript,PSTR("EP"),e131Port);
-  //   printSetFormCheckbox(settingsScript,PSTR("ES"),e131SkipOutOfSequence);
-  //   printSetFormCheckbox(settingsScript,PSTR("EM"),e131Multicast);
-  //   printSetFormValue(settingsScript,PSTR("EU"),e131Universe);
-  //   printSetFormValue(settingsScript,PSTR("DA"),DMXAddress);
-  //   printSetFormValue(settingsScript,PSTR("XX"),DMXSegmentSpacing);
-  //   printSetFormValue(settingsScript,PSTR("PY"),0);//,e131Priority);
-  //   printSetFormValue(settingsScript,PSTR("DM"),DMXMode);
-  //   printSetFormValue(settingsScript,PSTR("ET"),realtimeTimeoutMs);
-  //   printSetFormCheckbox(settingsScript,PSTR("FB"),arlsForceMaxBri);
-  //   printSetFormCheckbox(settingsScript,PSTR("RG"),arlsDisableGammaCorrection);
-  //   printSetFormValue(settingsScript,PSTR("WO"),arlsOffset);
-  //   #ifndef WLED_DISABLE_ALEXA
-  //   printSetFormCheckbox(settingsScript,PSTR("AL"),0);//,alexaEnabled);
-  //   printSetFormValue(settingsScript,PSTR("AI"),0);//,alexaInvocationName);
-  //   printSetFormCheckbox(settingsScript,PSTR("SA"),notifyAlexa);
-  //   printSetFormValue(settingsScript,PSTR("AP"),0);//,alexaNumPresets);
-  //   #else
-  //   settingsScript.print(F("toggle('Alexa');"));  // hide Alexa settings
-  //   #endif
-
-  //   #ifndef WLED_DISABLE_MQTT
-  //   printSetFormCheckbox(settingsScript,PSTR("MQ"),0);//,mqttEnabled);
-  //   printSetFormValue(settingsScript,PSTR("MS"),0);//,mqttServer);
-  //   printSetFormValue(settingsScript,PSTR("MQPORT"),0);//,mqttPort);
-  //   printSetFormValue(settingsScript,PSTR("MQUSER"),0);//,mqttUser);
-  //   byte l = strlen("mqttPass");
-  //   char fpass[l+1]; //fill password field with ***
-  //   fpass[l] = 0;
-  //   memset(fpass,'*',l);
-  //   printSetFormValue(settingsScript,PSTR("MQPASS"),"fpass");
-  //   printSetFormValue(settingsScript,PSTR("MQCID"),"mqttClientID");
-  //   printSetFormValue(settingsScript,PSTR("MD"),"mqttDeviceTopic");
-  //   printSetFormValue(settingsScript,PSTR("MG"),"mqttGroupTopic");
-  //   printSetFormCheckbox(settingsScript,PSTR("BM"),0);//buttonPublishMqtt);
-  //   printSetFormCheckbox(settingsScript,PSTR("RT"),0);//,retainMqttMsg);
-  //   // settingsScript.printf_P(PSTR("d.Sf.MD.maxLength=%d;d.Sf.MG.maxLength=%d;d.Sf.MS.maxLength=%d;"),    MQTT_MAX_TOPIC_LEN, MQTT_MAX_TOPIC_LEN, MQTT_MAX_SERVER_LEN);
-  //   #else
-  //   settingsScript.print(F("toggle('MQTT');"));    // hide MQTT settings
-  //   #endif
-
-  //   #ifndef WLED_DISABLE_HUESYNC
-  //   printSetFormValue(settingsScript,PSTR("H0"),hueIP[0]);
-  //   printSetFormValue(settingsScript,PSTR("H1"),hueIP[1]);
-  //   printSetFormValue(settingsScript,PSTR("H2"),hueIP[2]);
-  //   printSetFormValue(settingsScript,PSTR("H3"),hueIP[3]);
-  //   printSetFormValue(settingsScript,PSTR("HL"),huePollLightId);
-  //   printSetFormValue(settingsScript,PSTR("HI"),huePollIntervalMs);
-  //   printSetFormCheckbox(settingsScript,PSTR("HP"),huePollingEnabled);
-  //   printSetFormCheckbox(settingsScript,PSTR("HO"),hueApplyOnOff);
-  //   printSetFormCheckbox(settingsScript,PSTR("HB"),hueApplyBri);
-  //   printSetFormCheckbox(settingsScript,PSTR("HC"),hueApplyColor);
-  //   char hueErrorString[25];
-  //   switch (hueError)
-  //   {
-  //     case HUE_ERROR_INACTIVE     : strcpy_P(hueErrorString,PSTR("Inactive"));                break;
-  //     case HUE_ERROR_ACTIVE       : strcpy_P(hueErrorString,PSTR("Active"));                  break;
-  //     case HUE_ERROR_UNAUTHORIZED : strcpy_P(hueErrorString,PSTR("Unauthorized"));            break;
-  //     case HUE_ERROR_LIGHTID      : strcpy_P(hueErrorString,PSTR("Invalid light ID"));        break;
-  //     case HUE_ERROR_PUSHLINK     : strcpy_P(hueErrorString,PSTR("Link button not pressed")); break;
-  //     case HUE_ERROR_JSON_PARSING : strcpy_P(hueErrorString,PSTR("JSON parsing error"));      break;
-  //     case HUE_ERROR_TIMEOUT      : strcpy_P(hueErrorString,PSTR("Timeout"));                 break;
-  //     default: sprintf_P(hueErrorString,PSTR("Bridge Error %i"),hueError);
-  //   }
-
-  //   printSetClassElementHTML(settingsScript,PSTR("sip"),0,hueErrorString);
-  //   #else
-  //   settingsScript.print(F("toggle('Hue');"));    // hide Hue Sync settings
-  //   #endif
-  //   printSetFormValue(settingsScript,PSTR("BD"),serialBaud);
-  //   #ifndef WLED_ENABLE_ADALIGHT
-  //   settingsScript.print(F("toggle('Serial');"));
-  //   #endif
-  }
-
-  if (subPage == SUBPAGE_WEB_TIME)
-  {
-    // printSetFormCheckbox(settingsScript,PSTR("NT"),ntpEnabled);
-    // printSetFormValue(settingsScript,PSTR("NS"),ntpServerName);
-    // printSetFormCheckbox(settingsScript,PSTR("CF"),!useAMPM);
-    // printSetFormIndex(settingsScript,PSTR("TZ"),currentTimezone);
-    // printSetFormValue(settingsScript,PSTR("UO"),utcOffsetSecs);
-    // char tm[32];
-    // dtostrf(longitude,4,2,tm);
-    // printSetFormValue(settingsScript,PSTR("LN"),tm);
-    // dtostrf(latitude,4,2,tm);
-    // printSetFormValue(settingsScript,PSTR("LT"),tm);
-    // // getTimeString(tm);
-    // snprintf(tm, sizeof(tm), "%s", tkr_time->GetDateAndTime(DT_UTC).c_str());
-    // printSetClassElementHTML(settingsScript,PSTR("times"),0,tm);
-    // if ((int)(longitude*10.0f) || (int)(latitude*10.0f)) {
-    //   sprintf_P(tm, PSTR("Sunrise: %02d:%02d Sunset: %02d:%02d"), tkr_time->hour(sunrise), tkr_time->minute(sunrise), tkr_time->hour(sunset), tkr_time->minute(sunset));
-    //   printSetClassElementHTML(settingsScript,PSTR("times"),1,tm);
-    // }
-    // printSetFormCheckbox(settingsScript,PSTR("OL"),overlayCurrent);
-    // printSetFormValue(settingsScript,PSTR("O1"),overlayMin);
-    // printSetFormValue(settingsScript,PSTR("O2"),overlayMax);
-    // printSetFormValue(settingsScript,PSTR("OM"),analogClock12pixel);
-    // printSetFormCheckbox(settingsScript,PSTR("OS"),analogClockSecondsTrail);
-    // printSetFormCheckbox(settingsScript,PSTR("O5"),analogClock5MinuteMarks);
-    // printSetFormCheckbox(settingsScript,PSTR("OB"),analogClockSolidBlack);
-
-    // printSetFormCheckbox(settingsScript,PSTR("CE"),countdownMode);
-    // printSetFormValue(settingsScript,PSTR("CY"),countdownYear);
-    // printSetFormValue(settingsScript,PSTR("CI"),countdownMonth);
-    // printSetFormValue(settingsScript,PSTR("CD"),countdownDay);
-    // printSetFormValue(settingsScript,PSTR("CH"),countdownHour);
-    // printSetFormValue(settingsScript,PSTR("CM"),countdownMin);
-    // printSetFormValue(settingsScript,PSTR("CS"),countdownSec);
-
-    // printSetFormValue(settingsScript,PSTR("A0"),macroAlexaOn);
-    // printSetFormValue(settingsScript,PSTR("A1"),macroAlexaOff);
-    // printSetFormValue(settingsScript,PSTR("MC"),macroCountdown);
-    // printSetFormValue(settingsScript,PSTR("MN"),macroNl);
-    // for (unsigned i=0; i<WLED_MAX_BUTTONS; i++) {
-    //   settingsScript.printf_P(PSTR("addRow(%d,%d,%d,%d);"), i, macroButton[i], macroLongPress[i], macroDoublePress[i]);
-    // }
-
-    // char k[4];
-    // k[2] = 0; //Time macros
-    // for (int i = 0; i<10; i++)
-    // {
-    //   k[1] = 48+i; //ascii 0,1,2,3
-    //   if (i<8) { k[0] = 'H'; printSetFormValue(settingsScript,k,timerHours[i]); }
-    //   k[0] = 'N'; printSetFormValue(settingsScript,k,timerMinutes[i]);
-    //   k[0] = 'T'; printSetFormValue(settingsScript,k,timerMacro[i]);
-    //   k[0] = 'W'; printSetFormValue(settingsScript,k,timerWeekday[i]);
-    //   if (i<8) {
-    //     k[0] = 'M'; printSetFormValue(settingsScript,k,(timerMonth[i] >> 4) & 0x0F);
-		// 		k[0] = 'P'; printSetFormValue(settingsScript,k,timerMonth[i] & 0x0F);
-    //     k[0] = 'D'; printSetFormValue(settingsScript,k,timerDay[i]);
-		// 		k[0] = 'E'; printSetFormValue(settingsScript,k,timerDayEnd[i]);
-    //   }
-    // }
-
-    // #endif // ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_WEB_SYNC
-  }
-
-  if (subPage == SUBPAGE_WEB_SEC)
+  if (subPage == WebSettingsSubPage::SECURITY)
   {
     // byte l = strlen(settingsPIN);
     // char fpass[l+1]; //fill PIN field with 0000
@@ -849,7 +438,7 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   }
 
   #ifdef ENABLE_FEATURE_LIGHTING__DMX // include only if DMX is enabled
-  if (subPage == SUBPAGE_WEB_DMX)
+  if (subPage == WebSettingsSubPage::DMX)
   {
     printSetFormValue(settingsScript,PSTR("PU"),e131ProxyUniverse);
 
@@ -876,74 +465,6 @@ void mWebServer::getSettingsJS(byte subPage, Print& settingsScript)
   }
   #endif
 
-  if (subPage == SUBPAGE_WEB_UM) //usermods
-  {
-    appendGPIOinfo(settingsScript);
-    // settingsScript.printf_P(PSTR("numM=%d;"), UsermodManager::getModCount());
-    // printSetFormValue(settingsScript,PSTR("SDA"),i2c_sda);
-    // printSetFormValue(settingsScript,PSTR("SCL"),i2c_scl);
-    // printSetFormValue(settingsScript,PSTR("MOSI"),spi_mosi);
-    // printSetFormValue(settingsScript,PSTR("MISO"),spi_miso);
-    // printSetFormValue(settingsScript,PSTR("SCLK"),spi_sclk);
-    // settingsScript.printf_P(PSTR("addInfo('SDA','%d');"
-    //              "addInfo('SCL','%d');"
-    //              "addInfo('MOSI','%d');"
-    //              "addInfo('MISO','%d');"
-    //              "addInfo('SCLK','%d');"),
-    //   HW_PIN_SDA, HW_PIN_SCL, HW_PIN_DATASPI, HW_PIN_MISOSPI, HW_PIN_CLOCKSPI
-    // );
-    // UsermodManager::appendConfigData(settingsScript);
-  }
-
-  if (subPage == SUBPAGE_WEB_UPDATE) // update
-  {
-    // char tmp_buf[128];
-    // snprintf_P(tmp_buf,sizeof(tmp_buf),PSTR("WLED %s<br>%s<br>(%s build %d)"),
-    //   versionString,
-    //   releaseString,
-    // #if defined(ARDUINO_ARCH_ESP32)
-    //   ESP.getChipModel(),
-    // #else
-    //   "esp8266",
-    // #endif
-    //   PROJECT_VERSION);
-
-    // printSetClassElementHTML(settingsScript,PSTR("sip"),0,tmp_buf);
-  }
-
-  if (subPage == SUBPAGE_WEB_2D) // 2D matrices
-  {
-    // printSetFormValue(settingsScript,PSTR("SOMP"),isMatrix);
-    // #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
-    // settingsScript.printf_P(PSTR("maxPanels=%d;resetPanels();"),WLED_MAX_PANELS);
-    // if (isMatrix) {
-    //   if(panels>0){
-    //     printSetFormValue(settingsScript,PSTR("PW"),panel[0].width); //Set generator Width and Height to first panel size for convenience
-    //     printSetFormValue(settingsScript,PSTR("PH"),panel[0].height);
-    //   }
-    //   printSetFormValue(settingsScript,PSTR("MPC"),panels);
-    //   // panels
-    //   for (unsigned i=0; i<panels; i++) {
-    //     settingsScript.printf_P(PSTR("addPanel(%d);"), i);
-    //     char pO[8] = { '\0' };
-    //     snprintf_P(pO, 7, PSTR("P%d"), i);       // WLED_MAX_PANELS is 18 so pO will always only be 4 characters or less
-    //     pO[7] = '\0';
-    //     unsigned l = strlen(pO);
-    //     // create P0B, P1B, ..., P63B, etc for other PxxX
-    //     pO[l] = 'B'; printSetFormValue(settingsScript,pO,panel[i].bottomStart);
-    //     pO[l] = 'R'; printSetFormValue(settingsScript,pO,panel[i].rightStart);
-    //     pO[l] = 'V'; printSetFormValue(settingsScript,pO,panel[i].vertical);
-    //     pO[l] = 'S'; printSetFormCheckbox(settingsScript,pO,panel[i].serpentine);
-    //     pO[l] = 'X'; printSetFormValue(settingsScript,pO,panel[i].xOffset);
-    //     pO[l] = 'Y'; printSetFormValue(settingsScript,pO,panel[i].yOffset);
-    //     pO[l] = 'W'; printSetFormValue(settingsScript,pO,panel[i].width);
-    //     pO[l] = 'H'; printSetFormValue(settingsScript,pO,panel[i].height);
-    //   }
-    // }
-    // #else
-    // settingsScript.print(F("gId(\"somp\").remove(1);")); // remove 2D option from dropdown
-    // #endif
-  }
 }
 
 
@@ -983,11 +504,11 @@ void mWebServer::serveJson(AsyncWebServerRequest* request)
     return;
   // }
 
-  // AsyncJsonResponse *response = new AsyncJsonResponse(tkr_mfile->pDoc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
+  // AsyncJsonResponse *response = new AsyncJsonResponse(tkr_jsona->pDoc, subJson==JSON_PATH_FXDATA || subJson==JSON_PATH_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
 
   // releaseJSONBufferLock() will be called when "response" is destroyed (from AsyncWebServer)
   // make sure you delete "response" if no "request->send(response);" is made
-  LockedJsonResponse2 *response = new LockedJsonResponse2(tkr_mfile->pDoc, subJson==JSON_PATH_WEB_FXDATA || subJson==JSON_PATH_WEB_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
+  LockedJsonResponse2 *response = new LockedJsonResponse2(tkr_jsona->pDoc, subJson==JSON_PATH_WEB_FXDATA || subJson==JSON_PATH_WEB_EFFECTS); // will clear and convert JsonDocument into JsonArray if necessary
 
 
 
@@ -1045,8 +566,10 @@ void mWebServer::serveJson(AsyncWebServerRequest* request)
   //     lDoc["m"] = lDoc.memoryUsage(); // JSON buffer usage, for remote debugging
   // }
 
+  #ifdef ENABLE_DEBUG__JSON_BUFFER_LOCKS
   ALOG_DBG(PSTR("JSON buffer size: %u for request: %d\n"), lDoc.memoryUsage(), subJson);
-
+  #endif
+  
   size_t len = response->setLength();
   ALOG_DBG(PSTR("JSON content length: %d"), len);
 
@@ -1060,11 +583,11 @@ void mWebServer::serveSettingsJS(AsyncWebServerRequest* request)
 
   ALOG_INF(PSTR("serveSettingsJS url %s"), request->url().c_str());
 
-  static const char _common_js[] PROGMEM = "/common.js";
-  if (request->url().indexOf(FPSTR(_common_js)) > 0) {
-    handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common_web, JS_common_web_length);
-    return;
-  }
+  // static const char _common_js[] PROGMEM = "/common.js";
+  // if (request->url().indexOf(FPSTR(_common_js)) > 0) {
+  //   handleStaticContent(request, FPSTR(_common_js), 200, FPSTR(CONTENT_TYPE_JAVASCRIPT), JS_common_web, JS_common_web_length);
+  //   return;
+  // }
   
   byte subPage = request->arg(F("p")).toInt();
   if (subPage > 10) {
@@ -1087,37 +610,27 @@ void mWebServer::serveSettingsJS(AsyncWebServerRequest* request)
 
 }
 
-
 /**
- * @brief Resolve settings subpage ID from URL path
+ * @brief Resolve settings subpage from URL path
  */
-static inline uint8_t GetSubPageID_FromURLPath(const String& url)
+static inline WebSettingsSubPage GetSubPageID_FromURLPath(const String& url)
 {
-  if (url.indexOf("sett") >= 0)
+  if (url.indexOf("settings") >= 0)
   {
-    if      (url.indexOf(".js")  > 0) return SUBPAGE_WEB_JS;
-    else if (url.indexOf(".css") > 0) return SUBPAGE_WEB_CSS;
-    else if (url.indexOf("wifi") > 0) return SUBPAGE_WEB_WIFI;
-    else if (url.indexOf("leds") > 0) return SUBPAGE_WEB_LEDS;
-    else if (url.indexOf("ui")   > 0) return SUBPAGE_WEB_UI;
-    else if (url.indexOf("sync") > 0) return SUBPAGE_WEB_SYNC;
-    else if (url.indexOf("time") > 0) return SUBPAGE_WEB_TIME;
-    else if (url.indexOf("sec")  > 0) return SUBPAGE_WEB_SEC;
-    #ifdef ENABLE_FEATURE_LIGHTING__DMX
-    else if (url.indexOf("dmx")  > 0) return SUBPAGE_WEB_DMX;
-    #endif
-    else if (url.indexOf("um")   > 0) return SUBPAGE_WEB_UM;
-    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
-    else if (url.indexOf("2D")   > 0) return SUBPAGE_WEB_2D;
-    #endif
-    else if (url.indexOf("lock") > 0) return SUBPAGE_WEB_LOCK;
-  }
-  else if (url.indexOf("/update") >= 0)
-  {
-    return SUBPAGE_WEB_UPDATE;
+    if      (url.indexOf(".js")      > 0) return WebSettingsSubPage::JS;
+    // else if (url.indexOf(".css")     > 0) return WebSettingsSubPage::CSS;
+    else if (url.indexOf("network")  > 0) return WebSettingsSubPage::NETWORK;
+    else if (url.indexOf("hardware") > 0) return WebSettingsSubPage::HARDWARE;
+    else if (url.indexOf("system")   > 0) return WebSettingsSubPage::SYSTEM;
+    else if (url.indexOf("modules")  > 0) return WebSettingsSubPage::MODULES;
+    else if (url.indexOf("storage")  > 0) return WebSettingsSubPage::STORAGE;
+    else if (url.indexOf("logging")  > 0) return WebSettingsSubPage::LOGGING;
+    else if (url.indexOf("security") > 0) return WebSettingsSubPage::SECURITY;
+    else if (url.indexOf("unlock")   > 0) return WebSettingsSubPage::PINREQ;
+    else if (url.indexOf("welcome")  > 0) return WebSettingsSubPage::WELCOME;
   }
 
-  return SUBPAGE_WEB_WELCOME;
+  return WebSettingsSubPage::MENU;
 }
 
 
@@ -1127,98 +640,99 @@ static inline uint8_t GetSubPageID_FromURLPath(const String& url)
 void mWebServer::SettingsPages_POST(AsyncWebServerRequest* request)
 {
   const String& url = request->url();
-  uint8_t subPage   = GetSubPageID_FromURLPath(url);
-  uint8_t originalSubPage = subPage;
+  WebSettingsSubPage subPage = GetSubPageID_FromURLPath(url);
+  WebSettingsSubPage originalSubPage = subPage;
 
-  #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-  // Determine whether PIN is required for this subpage
-  bool pinRequired = (!correctPIN && (strlen(settingsPIN) > 0) && (subPage > 0 && subPage < 11));
-  if (pinRequired) {
+#ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
+
+  const uint8_t subPageID = static_cast<uint8_t>(subPage);
+
+  bool pinRequired =
+    !correctPIN &&
+    strlen(settingsPIN) > 0 &&
+    subPageID > static_cast<uint8_t>(WebSettingsSubPage::MENU) &&
+    subPageID <= static_cast<uint8_t>(WebSettingsSubPage::SECURITY);
+
+  if (pinRequired)
+  {
     originalSubPage = subPage;
-    subPage = SUBPAGE_WEB_PINREQ;
+    subPage = WebSettingsSubPage::PINREQ;
   }
 
-  // if OTA locked or too frequent PIN entry requests fail hard
-  if ((subPage == SUBPAGE_WEB_WIFI && wifiLock && otaLock) ||
+  if ((subPage == WebSettingsSubPage::NETWORK && wifiLock && otaLock) ||
       (pinRequired && !correctPIN && (millis() - lastEditTime < PIN_RETRY_COOLDOWN)))
   {
     serveMessage(request, 401, FPSTR(s_accessdenied), FPSTR(s_unlock_ota), 254);
     return;
   }
-  #else
-  bool pinRequired = false;
-  #endif
 
-  // Locks removed → always process POST
-  SettingsPages__ParseForm(request, subPage);
+#else
+  bool pinRequired = false;
+#endif
+
+  SettingsPages__ParseForm(request, static_cast<uint8_t>(subPage));
 
   char s[32];
   char s2[45] = "";
 
   switch (subPage)
   {
-    case SUBPAGE_WEB_WIFI: strcpy_P(s, PSTR("WiFi")); strcpy_P(s2, PSTR("Please connect to the new IP (if changed)")); break;
-    case SUBPAGE_WEB_LEDS: strcpy_P(s, PSTR("LED")); break;
-    case SUBPAGE_WEB_UI:   strcpy_P(s, PSTR("UI")); break;
-    case SUBPAGE_WEB_SYNC: strcpy_P(s, PSTR("Sync")); break;
-    case SUBPAGE_WEB_TIME: strcpy_P(s, PSTR("Time")); break;
-    case SUBPAGE_WEB_SEC:
+    case WebSettingsSubPage::NETWORK:
+      strcpy_P(s, PSTR("Network"));
+      strcpy_P(s2, PSTR("Please reconnect if network settings changed"));
+    break;
+
+    case WebSettingsSubPage::HARDWARE: strcpy_P(s, PSTR("Hardware")); break;
+    case WebSettingsSubPage::SYSTEM:   strcpy_P(s, PSTR("System"));   break;
+    case WebSettingsSubPage::MODULES:  strcpy_P(s, PSTR("Modules"));  break;
+    case WebSettingsSubPage::STORAGE:  strcpy_P(s, PSTR("Storage"));  break;
+    case WebSettingsSubPage::LOGGING:  strcpy_P(s, PSTR("Logging"));  break;
+
+    case WebSettingsSubPage::SECURITY:
       strcpy_P(s, PSTR("Security"));
-      if (tkr_sup->ESP_Restart_Scheduled()) strcpy_P(s2, PSTR("Rebooting, please wait ~10 seconds..."));
-      break;
+      if (tkr_sup->ESP_Restart_Scheduled())
+        strcpy_P(s2, PSTR("Rebooting, please wait ~10 seconds..."));
+    break;
 
-    #ifdef ENABLE_FEATURE_LIGHTING__DMX
-    case SUBPAGE_WEB_DMX:  strcpy_P(s, PSTR("DMX")); break;
-    #endif
-
-    case SUBPAGE_WEB_UM:   strcpy_P(s, PSTR("Usermods")); break;
-
-    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
-    case SUBPAGE_WEB_2D:   strcpy_P(s, PSTR("2D")); break;
-    #endif
-
-    #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-    case SUBPAGE_WEB_PINREQ:
+#ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
+    case WebSettingsSubPage::PINREQ:
       strcpy_P(s, correctPIN ? PSTR("PIN accepted") : PSTR("PIN rejected"));
-      break;
-    #endif
+    break;
+#endif
 
     default:
-      // Fallback to avoid uninitialised 's'
       strcpy_P(s, PSTR("Settings"));
-      break;
+    break;
   }
 
-  #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-  if (subPage != SUBPAGE_WEB_PINREQ) strcat_P(s, PSTR(" settings saved."));
-  #endif
+#ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
+  if (subPage != WebSettingsSubPage::PINREQ)
+    strcat_P(s, PSTR(" settings saved."));
 
-  // --- Critical fix: always terminate POST with a response ---
-  #ifdef ENABLE_FEATURE_WEBSERVER__PIN_PROTECTION
-  if (subPage == SUBPAGE_WEB_PINREQ && correctPIN) {
-    // Correct PIN: redirect to the settings page the user originally intended (POST/Redirect/GET)
-    // If your PIN form posts to a different URL than the intended page, replace 'url' with a mapper:
-    // request->redirect(GetURL_FromSubPageID(originalSubPage));
+  if (subPage == WebSettingsSubPage::PINREQ && correctPIN)
+  {
     request->redirect(url);
     return;
   }
-  #endif
+#endif
 
   if (!s2[0]) strcpy_P(s2, s_redirecting);
 
-  bool doReboot = tkr_sup->ESP_Restart_Scheduled(); // keep semantics consistent with your switch text above
-  bool redirectAfter9s = (subPage == SUBPAGE_WEB_WIFI ||
-                          ((subPage == SUBPAGE_WEB_SEC || subPage == SUBPAGE_WEB_UM) && doReboot));
+  const bool doReboot = tkr_sup->ESP_Restart_Scheduled();
 
-  // If PIN was required and not yet satisfied, keep 401 to force the PIN flow.
-  // Otherwise standard 200.
-  serveMessage(request,
-               (!pinRequired ? 200 : 401),
-               s,
-               s2,
-               redirectAfter9s ? 129 : (!pinRequired ? 1 : 3));
-  return;
+  const bool redirectAfter9s =
+    subPage == WebSettingsSubPage::NETWORK ||
+    (subPage == WebSettingsSubPage::SECURITY && doReboot);
+
+  serveMessage(
+    request,
+    !pinRequired ? 200 : 401,
+    s,
+    s2,
+    redirectAfter9s ? 129 : (!pinRequired ? 1 : 3)
+  );
 }
+
 
 
 /**
@@ -1227,34 +741,33 @@ void mWebServer::SettingsPages_POST(AsyncWebServerRequest* request)
 void mWebServer::SettingsPages_GET(AsyncWebServerRequest* request)
 {
   const String& url = request->url();
-  uint8_t subPage   = GetSubPageID_FromURLPath(url);
+  WebSettingsSubPage subPage = GetSubPageID_FromURLPath(url);
+
+  ALOG_INF(
+    PSTR("SettingsPages_GET url %s subPage %u"),
+    url.c_str(),
+    static_cast<uint8_t>(subPage)
+  );
 
   int code = 200;
   String contentType = FPSTR(CONTENT_TYPE_HTML);
-  const uint8_t* content = nullptr;
-  size_t len = 0;
+  const uint8_t* content = PAGE_settings_web;
+  size_t len = PAGE_settings_web_length;
 
   switch (subPage)
   {
-    case SUBPAGE_WEB_WIFI:    content = PAGE_settings_wifi_web; len = PAGE_settings_wifi_web_length; break;
-    case SUBPAGE_WEB_LEDS:    content = PAGE_settings_leds_web;  len = PAGE_settings_leds_web_length;  break;
-    case SUBPAGE_WEB_UI:      content = PAGE_settings_ui_web;    len = PAGE_settings_ui_web_length;    break;
-    case SUBPAGE_WEB_SYNC:    content = PAGE_settings_sync_web;  len = PAGE_settings_sync_web_length;  break;
-    case SUBPAGE_WEB_TIME:    content = PAGE_settings_time_web;  len = PAGE_settings_time_web_length;  break;
-    case SUBPAGE_WEB_SEC:     content = PAGE_settings_sec_web;   len = PAGE_settings_sec_web_length;   break;
-    #ifdef ENABLE_FEATURE_LIGHTING__DMX
-    case SUBPAGE_WEB_DMX:     content = PAGE_settings_dmx;   len = PAGE_settings_dmx_length;   break;
-    #endif
-    case SUBPAGE_WEB_UM:      content = PAGE_settings_um_web;    len = PAGE_settings_um_web_length;    break;
-    // case SUBPAGE_WEB_UPDATE:  content = PAGE_update_web;         len = PAGE_update_web_length;         break;
-    #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
-    case SUBPAGE_WEB_2D:      content = PAGE_settings_2D;    len = PAGE_settings_2D_length;    break;
-    #endif
-    case SUBPAGE_WEB_PINREQ:  content = PAGE_settings_pin_web;   len = PAGE_settings_pin_web_length;   code = 401; break;
-    case SUBPAGE_WEB_CSS:     content = PAGE_settingsCss_web;    len = PAGE_settingsCss_web_length;    contentType = FPSTR(CONTENT_TYPE_CSS); break;
-    case SUBPAGE_WEB_JS:      serveSettingsJS(request); return;
-    case SUBPAGE_WEB_WELCOME: content = PAGE_welcome_web;        len = PAGE_welcome_web_length;        break;
-    default:              content = PAGE_settings_web;       len = PAGE_settings_web_length;       break;
+    case WebSettingsSubPage::NETWORK:  content = PAGE_settings_network_web;  len = PAGE_settings_network_web_length;  break;
+    case WebSettingsSubPage::HARDWARE: content = PAGE_settings_hardware_web; len = PAGE_settings_hardware_web_length; break;
+    case WebSettingsSubPage::SYSTEM:   content = PAGE_settings_system_web;   len = PAGE_settings_system_web_length;   break;
+    case WebSettingsSubPage::MODULES:  content = PAGE_settings_modules_web;  len = PAGE_settings_modules_web_length;  break;
+    case WebSettingsSubPage::STORAGE:  content = PAGE_settings_storage_web;  len = PAGE_settings_storage_web_length;  break;
+    case WebSettingsSubPage::LOGGING:  content = PAGE_settings_logging_web;  len = PAGE_settings_logging_web_length;  break;
+    case WebSettingsSubPage::SECURITY: content = PAGE_settings_security_web; len = PAGE_settings_security_web_length; break;
+    case WebSettingsSubPage::PINREQ:   content = PAGE_settings_unlock_web; len = PAGE_settings_unlock_web_length; code = 401; break;
+    case WebSettingsSubPage::JS:       serveSettingsJS(request); return;
+    case WebSettingsSubPage::WELCOME:  content = PAGE_welcome_web; len = PAGE_welcome_web_length; break;
+    case WebSettingsSubPage::MENU:
+    default: break;
   }
 
   handleStaticContent(request, "", code, contentType, content, len);

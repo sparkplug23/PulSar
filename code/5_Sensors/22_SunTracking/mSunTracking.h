@@ -16,7 +16,7 @@
 #include "1_TaskerManager/mTaskerManager.h"
 
 #ifdef USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE2
-#include "mSunTracking_Fallback.h" // minimal version of below in self contained header
+#include "mSunTracking_FastEstimate.h" // minimal version of below in self contained header
 #endif
 
 #if defined(USE_MODULE_SENSORS_SUN_TRACKING) && !defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
@@ -28,8 +28,8 @@
 #include <cmath>
 #include <ctime>
 #include <chrono>
-#include <iostream>
-#include <iomanip>
+// #include <iostream>
+// #include <iomanip>
 
 #include "1_TaskerManager/mTaskerInterface.h"
 
@@ -47,7 +47,7 @@ class mSunTracking :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage();
 
-    static constexpr const char* PM_MODULE_SENSORS_SUN_TRACKING_CTR = D_MODULE_SENSORS_SUN_TRACKING_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_SUN_TRACKING_CTR = D_MODULE__SENSORS__SUN_TRACKING__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_SUN_TRACKING_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID; }  
 
@@ -405,14 +405,14 @@ class mSunTracking :
      ************************************************************************************************/
   
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    std::vector<struct handler<mSunTracking>*> mqtthandler_list;    
-    struct handler<mSunTracking> mqtthandler_settings;
-    struct handler<mSunTracking> mqtthandler_sensor_ifchanged;
-    struct handler<mSunTracking> mqtthandler_sensor_teleperiod;
+    std::vector<struct telemetry_handler<mSunTracking>*> telemetry_list;    
+    struct telemetry_handler<mSunTracking> telemetry_settings;
+    struct telemetry_handler<mSunTracking> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mSunTracking> telemetry_sensor_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT 
 
   private: 

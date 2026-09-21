@@ -21,7 +21,7 @@ class mSPI :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     // void Pre_Init(void);
         
-    static constexpr const char* PM_MODULE_CORE__SPI__CTR = D_MODULE_CORE__SPI__CTR;
+    static constexpr const char* PM_MODULE_CORE__SPI__CTR = D_MODULE__CORE__SPI__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE__SPI__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE__SPI__ID; }
     
@@ -59,15 +59,15 @@ class mSPI :
      ************************************************************************************************/
     
     // #ifdef USE_MODULE_NETWORK_MQTT
-    // void MQTTHandler_Init();
+    // void Telemetry_Init();
     // void MQTTHandler_RefreshAll();
     // void MQTTHandler_Rate();    
     // void MQTTHandler_Sender();
 
-    // std::vector<struct handler<mSPI>*> mqtthandler_list;    
-    // struct handler<mSPI> mqtthandler_settings;    
-    // struct handler<mSPI> mqtthandler_sensor_ifchanged;
-    // struct handler<mSPI> mqtthandler_sensor_teleperiod;    
+    // std::vector<struct telemetry_handler<mSPI>*> telemetry_list;    
+    // struct telemetry_handler<mSPI> telemetry_settings;    
+    // struct telemetry_handler<mSPI> telemetry_sensor_ifchanged;
+    // struct telemetry_handler<mSPI> telemetry_sensor_teleperiod;    
     // #endif // USE_MODULE_NETWORK_MQTT
 
 };

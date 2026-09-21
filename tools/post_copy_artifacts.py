@@ -1,9 +1,10 @@
 # tools/post_copy_artifacts.py
 # Copies build artifacts into: <project>/saved_compiles/<env_name>/
 #
-# Date Modified: 02Feb26
+# Date Modified: 16Sep26
 
 Import("env")
+
 import os
 import shutil
 import json
@@ -11,13 +12,17 @@ import subprocess
 import time
 from datetime import datetime
 
+
 TAG = "[post_copy_artifacts]"
+
 
 def log(msg: str) -> None:
     print(f"{TAG} {msg}")
 
+
 def _safe_mkdir(path: str) -> None:
     os.makedirs(path, exist_ok=True)
+
 
 def _touch(path: str) -> None:
     try:
@@ -26,26 +31,45 @@ def _touch(path: str) -> None:
     except Exception as e:
         log(f"TOUCH : failed {path} ({e})")
 
-def _copy_if_exists(src: str, dst_dir: str) -> bool:
-    """
-    Copy file if it exists.
-    IMPORTANT: do NOT preserve timestamps (Explorer should show updates).
-    """
-    if not src:
-        return False
-    if os.path.isfile(src):
-        _safe_mkdir(dst_dir)
-        dst = os.path.join(dst_dir, os.path.basename(src))
 
-        # copy content only (no metadata), then force mtime to now
+def _copy_file(src: str, dst: str) -> bool:
+    if not src or not os.path.isfile(src):
+        return False
+
+    try:
+        _safe_mkdir(os.path.dirname(dst))
         shutil.copyfile(src, dst)
         _touch(dst)
-
         log(f"COPIED: {src} -> {dst}")
         return True
-    else:
-        log(f"MISS  : {src}")
+    except Exception as e:
+        log(f"COPY  : failed {src} -> {dst} ({e})")
         return False
+
+
+def _copy_if_exists(src: str, dst_dir: str) -> bool:
+    if not src:
+        return False
+
+    if os.path.isfile(src):
+        dst = os.path.join(dst_dir, os.path.basename(src))
+        return _copy_file(src, dst)
+
+    log(f"MISS  : {src}")
+    return False
+
+
+def _copy_first_existing(candidates: list, dst: str) -> bool:
+    for src in candidates:
+        if src and os.path.isfile(src):
+            return _copy_file(src, dst)
+
+    for src in candidates:
+        if src:
+            log(f"MISS  : {src}")
+
+    return False
+
 
 def _run_git(project_dir: str, args: list) -> str:
     try:
@@ -53,17 +77,19 @@ def _run_git(project_dir: str, args: list) -> str:
             ["git", "-C", project_dir] + args,
             stderr=subprocess.DEVNULL
         ).decode("utf-8", errors="replace").strip()
+
         return out
     except Exception as e:
         log(f"GIT   : failed {' '.join(args)} ({e})")
         return ""
 
+
 def after_build(source, target, env):
-    # Defensive: ensure we print even if something goes wrong
     try:
         project_dir = env.subst("$PROJECT_DIR")
-        build_dir   = env.subst("$BUILD_DIR")   # .pio/build/<env_name>
-        env_name    = env.subst("$PIOENV")
+        build_dir = env.subst("$BUILD_DIR")
+        env_name = env.subst("$PIOENV")
+        progname = env.subst("$PROGNAME")
 
         out_dir = os.path.join(project_dir, "saved_compiles", env_name)
         _safe_mkdir(out_dir)
@@ -74,7 +100,6 @@ def after_build(source, target, env):
         log(f"BUILD : {build_dir}")
         log(f"OUT   : {out_dir}")
 
-        # Helpful: show what PlatformIO thinks the target is
         try:
             tgt = str(target[0]) if target and len(target) else ""
             log(f"TARGET: {tgt}")
@@ -83,17 +108,46 @@ def after_build(source, target, env):
 
         copied = []
 
-        # Common PlatformIO outputs
-        if _copy_if_exists(os.path.join(build_dir, "firmware.bin"), out_dir): copied.append("firmware.bin")
-        if _copy_if_exists(os.path.join(build_dir, "firmware.elf"), out_dir): copied.append("firmware.elf")
-        if _copy_if_exists(os.path.join(build_dir, "firmware.map"), out_dir): copied.append("firmware.map")
+        bin_src = os.path.join(build_dir, f"{progname}.bin")
+        elf_src = os.path.join(build_dir, f"{progname}.elf")
 
-        # ESP32 extras (present depending on platform/framework)
-        if _copy_if_exists(os.path.join(build_dir, "partitions.bin"), out_dir): copied.append("partitions.bin")
-        if _copy_if_exists(os.path.join(build_dir, "bootloader.bin"), out_dir): copied.append("bootloader.bin")
+        if _copy_if_exists(bin_src, out_dir):
+            copied.append("firmware.bin")
 
-        # Optional map you sometimes enable
-        if _copy_if_exists(os.path.join(build_dir, "firmware_inspect.map"), out_dir): copied.append("firmware_inspect.map")
+        if _copy_if_exists(elf_src, out_dir):
+            copied.append("firmware.elf")
+
+        map_candidates = [
+            os.path.join(build_dir, f"{progname}.map"),
+            os.path.join(build_dir, "firmware.map"),
+            os.path.join(project_dir, "firmware.map"),
+            os.path.join(project_dir, "build_output", "map", f"{env_name}.map"),
+        ]
+
+        map_dst = os.path.join(out_dir, "firmware.map")
+
+        if _copy_first_existing(map_candidates, map_dst):
+            copied.append("firmware.map")
+
+        inspect_map_candidates = [
+            os.path.join(build_dir, "firmware_inspect.map"),
+            os.path.join(project_dir, "firmware_inspect.map"),
+            os.path.join(project_dir, "build_output", "map", f"{env_name}_inspect.map"),
+        ]
+
+        inspect_map_dst = os.path.join(out_dir, "firmware_inspect.map")
+
+        if _copy_first_existing(inspect_map_candidates, inspect_map_dst):
+            copied.append("firmware_inspect.map")
+
+        partitions_src = os.path.join(build_dir, "partitions.bin")
+        bootloader_src = os.path.join(build_dir, "bootloader.bin")
+
+        if _copy_if_exists(partitions_src, out_dir):
+            copied.append("partitions.bin")
+
+        if _copy_if_exists(bootloader_src, out_dir):
+            copied.append("bootloader.bin")
 
         meta = {
             "env_name": env_name,
@@ -114,9 +168,11 @@ def after_build(source, target, env):
         }
 
         meta_path = os.path.join(out_dir, "build_meta.json")
+
         with open(meta_path, "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=2)
             f.write("\n")
+
         _touch(meta_path)
 
         log(f"WROTE : {meta_path}")
@@ -129,23 +185,17 @@ def after_build(source, target, env):
         log("------------------------------------------------------------")
 
     except Exception as e:
-        # Make failures visible in the build window
         log(f"ERROR : {e}")
         raise
 
-# Trigger after firmware is produced
-# 
-# # Trigger after the ELF/BIN are produced (robust across build/upload)
+
 elf_tgt = env.subst("$BUILD_DIR/${PROGNAME}.elf")
 bin_tgt = env.subst("$BUILD_DIR/${PROGNAME}.bin")
 
 env.AddPostAction(elf_tgt, after_build)
 env.AddPostAction(bin_tgt, after_build)
-
-# Optional: also run after upload target (handy if you mainly click Upload)
 env.AddPostAction("upload", after_build)
 
 log(f"HOOKS : {elf_tgt}")
 log(f"HOOKS : {bin_tgt}")
 log("HOOKS : upload")
-

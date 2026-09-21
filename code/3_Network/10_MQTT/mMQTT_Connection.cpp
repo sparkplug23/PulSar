@@ -33,7 +33,7 @@ void MQTTConnection::MqttConnected(void)
   #ifndef ENABLE_DEVFEATURE__MQTT_STOP_SENDING_EVERYTHING_ON_RECONNECT
   tkr->Tasker_Interface(TASK_MQTT_CONNECTED);
   tkr->Tasker_Interface(TASK_MQTT_SUBSCRIBE);
-  tkr->Tasker_Interface(TASK_MQTT_STATUS_REFRESH_SEND_ALL);
+  tkr->Tasker_Interface(TASK_TELEMETRY_REFRESH_SEND_ALL);
   #endif
 
 }
@@ -95,10 +95,24 @@ void MQTTConnection::EverySecond()
     tkr_set->runtime.global_state.mqtt_down = 0;
     downtime_counter = 0;
     uptime_seconds++;
-  }  
+  }
 
 }
 
+
+void MQTTConnection::EveryMinute(void)
+{
+
+  if(missed_payload_transmits)
+  {
+    ALOG_ERR(PSTR(D_LOG_MQTT "MQTT %s: missed %d payload transmits"), host_address, missed_payload_transmits);
+    missed_payload_transmits = 0;
+  }
+
+
+
+
+}
 
 void MQTTConnection::MqttReconnect(void)
 {
@@ -284,16 +298,33 @@ boolean MQTTConnection::subscribe_device(const char* topic) {
 }
 
 
-/**
- * @brief 
- * @param client_in 
- */
 void MQTTConnection::SetPubSubClient(Client* client_in)
 {
+  if(!client_in)
+  {
+    ALOG_ERR(PSTR(D_LOG_MQTT "SetPubSubClient failed: client=null"));
+    ClearPubSubClient();
+    return;
+  }
+
+  if(pubsub)
+  {
+    delete pubsub;
+    pubsub = nullptr;
+  }
+
+  network_client = client_in;
   pubsub = new PubSubClient(*client_in);
+
+  if(!pubsub)
+  {
+    ALOG_ERR(PSTR(D_LOG_MQTT "SetPubSubClient allocation failed"));
+    network_client = nullptr;
+    return;
+  }
+
   flag_start_reconnect = true;
 }
-
 
 void MQTTConnection::Send_Prefixed_P(const char* topic, PGM_P formatP, ...)
 {
@@ -339,7 +370,8 @@ bool MQTTConnection::MQTTHandler_Send_Formatted_UniqueID(uint8_t topic_type, uin
   {
     tSaved_LastOutGoingTopic = millis();
   }else{
-    ALOG_ERR(PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted_UniqueID failed"));
+    missed_payload_transmits++;
+    // ALOG_ERR(PSTR(D_LOG_MQTT "MQTTHandler_Send_Formatted_UniqueID failed"));
   }
 
   return sent_status;
@@ -361,8 +393,8 @@ bool MQTTConnection::publish_ft(const char* module_name, uint8_t topic_type_id, 
     switch(topic_type_id){
       default:    
       case MQTT_TOPIC_TYPE_IFCHANGED_ID:  sprintf(topic_type,"ifchanged/"); break;
-      case MQTT_TOPIC_TYPE_ROC1M_ID:      sprintf(topic_type,"roc1m/");     break;
-      case MQTT_TOPIC_TYPE_ROC10M_ID:     sprintf(topic_type,"roc10m/");    break;
+      // case MQTT_TOPIC_TYPE_ROC1M_ID:      sprintf(topic_type,"roc1m/");     break;
+      // case MQTT_TOPIC_TYPE_ROC10M_ID:     sprintf(topic_type,"roc10m/");    break;
       case MQTT_TOPIC_TYPE_TELEPERIOD_ID: sprintf(topic_type,"tele/");      break;
       case MQTT_TOPIC_TYPE__DEBUG__ID:    sprintf(topic_type,"debug/");     break;
       case MQTT_TOPIC_TYPE_SYSTEM_ID:      /*** none ***/                   break;
@@ -370,13 +402,10 @@ bool MQTTConnection::publish_ft(const char* module_name, uint8_t topic_type_id, 
     snprintf_P(topic, sizeof(topic), "%s/%s/%s%S", D_TOPIC_STATUS, module_name, topic_type, topic_postfix); // PSTR around string will crash
   }
 
-  #ifdef ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-  ALOG_DBG( PSTR(D_LOG_MQTT "topic=\"%s\""), topic );
-  #endif
-  #ifdef ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
-  ALOG_DBG( PSTR(D_LOG_MQTT "payload=\"%s\""), payload_ctr );
-  #endif
-  
+  // Dynamic switching of showing outgoing mqtt messages in logs
+  AddLog(tkr_mqtt->show_transmit_topic_to_serial   ? LOG_LEVEL_INFO : LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_MQTT "topic=\"%s\""), topic );
+  AddLog(tkr_mqtt->show_transmit_payload_to_serial ? LOG_LEVEL_INFO : LOG_LEVEL_DEBUG_MORE, PSTR(D_LOG_MQTT "payload=\"%s\""), payload_ctr );
+    
   return publish_device(topic, payload_ctr, retain_flag);
 
 }
@@ -396,29 +425,31 @@ void MQTTConnection::publish_status_module(const char* module_name, const char* 
 
 boolean MQTTConnection::publish_device(const char* topic, const char* payload, boolean retained)
 {
-
   #ifdef ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
   Serial.println("MQTTConnection::publish_device"); Serial.flush();
   #endif
 
-
-  /**
-   * @brief THIS SHOULD BE THE ONLY checks of network.
-   * In reality wifi/cellular should always be checking itself directly
-   * 
-   */
-  #ifdef ENABLE_DEVFEATURE__MQTT_CLEANING_UP_MANY_NETWORK_CHECKS
-  if(network_client->connected())
+  if(!topic || !payload)
   {
-    #ifdef ENABLE_DEVFEATURE__MQTT_SPLASH_CONNECTION_STATUS_BEFORE_SENDING
-    ALOG_ERR(PSTR(D_LOG_PUBSUB "MQTTConnection::ppublish::network->Connected"));
-    #endif
-  }else{
-    ALOG_ERR(PSTR(D_LOG_PUBSUB "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- Unable to publish, No Network connection B"));
+    ALOG_ERR(PSTR(D_LOG_PUBSUB "Unable to publish, null topic/payload"));
+    return false;
+  }
+
+  if(!network_client)
+  {
+    // ALOG_WRN(PSTR(D_LOG_PUBSUB "Unable to publish, network_client=null id=%s"),id);
+    connected = false;
     flag_start_reconnect = true;
     return false;
   }
-  #endif // ENABLE_DEVFEATURE__MQTT_CLEANING_UP_MANY_NETWORK_CHECKS
+
+  if(!pubsub)
+  {
+    ALOG_WRN(PSTR(D_LOG_PUBSUB "Unable to publish, pubsub=null id=%s"),id);
+    connected = false;
+    flag_start_reconnect = true;
+    return false;
+  }
 
   if(!strlen(payload))
   {
@@ -426,16 +457,30 @@ boolean MQTTConnection::publish_device(const char* topic, const char* payload, b
     return false;
   }
 
+  /*
+   * Check the MQTT session before publishing.
+   *
+   * Do not use network_client->connected() here as the sole test. For
+   * TinyGsmClient/WiFiClient that reports transport/socket state, while
+   * PubSubClient also owns MQTT session state.
+   */
+  if(!pubsub->connected())
+  {
+    ALOG_WRN(PSTR(D_LOG_PUBSUB "Unable to publish, MQTT disconnected id=%s net=%p pubsub=%p"),id,network_client,pubsub);
+    connected = false;
+    flag_start_reconnect = true;
+    return false;
+  }
+
   char convctr[100] = {0};
-  snprintf(convctr, sizeof(convctr), PSTR("%s/%S"), prefix_topic, topic);
-  
+  snprintf(convctr,sizeof(convctr),PSTR("%s/%S"),prefix_topic,topic);
+
   #ifdef ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-  ALOG_DBG( PSTR(D_LOG_PUBSUB "-->" D_TOPIC   "%d [%s]"), strlen(convctr), convctr);
-  ALOG_DBG( PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD "%d [%s]"), strlen(payload), payload);
+  ALOG_DBG(PSTR(D_LOG_PUBSUB "-->" D_TOPIC "%d [%s]"),strlen(convctr),convctr);
+  ALOG_DBG(PSTR(D_LOG_PUBSUB "-->" D_PAYLOAD "%d [%s]"),strlen(payload),payload);
   #endif
 
-  return pubsub->publish(convctr, (const uint8_t*)payload, strlen(payload), retained);
-
+  return pubsub->publish(convctr,(const uint8_t*)payload,strlen(payload),retained);
 }
 
 
@@ -453,6 +498,20 @@ boolean MQTTConnection::publish_device_P(const char* topic, const char* payload,
   snprintf(convctr,sizeof(convctr),PSTR("%s/%S"), prefix_topic, topic);
   return pubsub->publish_P(convctr, payload, retained);
     
+}
+
+void MQTTConnection::ClearPubSubClient()
+{
+  if(pubsub)
+  {
+    delete pubsub;
+    pubsub = nullptr;
+  }
+
+  network_client = nullptr;
+  connected = false;
+  flag_start_reconnect = false;
+  retry_counter = 0;
 }
 
 #endif // USE_MODULE_NETWORK_MQTT

@@ -25,7 +25,7 @@ class mDoorSensor :
     void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static constexpr const char* PM_MODULE_SENSORS_DOOR_CTR = D_MODULE_SENSORS_DOOR_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_DOOR_CTR = D_MODULE__SENSORS__DOOR__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_DOOR_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_DOOR_ID; }
    
@@ -103,10 +103,10 @@ class mDoorSensor :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mDoorSensor>*> mqtthandler_list;
-    struct handler<mDoorSensor> mqtthandler_settings;
-    struct handler<mDoorSensor> mqtthandler_sensor_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mDoorSensor>*> telemetry_list;
+    struct telemetry_handler<mDoorSensor> telemetry_settings;
+    struct telemetry_handler<mDoorSensor> telemetry_sensor_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

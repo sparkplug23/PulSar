@@ -27,7 +27,7 @@ class mRadiatorFan :
       float temperature_current = -1;
     }state;
 
-    static constexpr const char* PM_MODULE_CONTROLLER_RADIATORFAN_CTR = D_MODULE_CONTROLLER_RADIATORFAN_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_RADIATORFAN_CTR = D_MODULE__CONTROLLER_CUSTOM__RADIATORFAN__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_RADIATORFAN_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_RADIATORFAN_ID; }
 
@@ -43,23 +43,23 @@ class mRadiatorFan :
   
     #ifdef USE_MODULE_NETWORK_MQTT
 
-      void MQTTHandler_Init();
+      void Telemetry_Init();
       void MQTTHandler_RefreshAll();
       void MQTTHandler_Rate();
       
       void MQTTHandler_Sender();
 
-      struct handler<mRadiatorFan> mqtthandler_settings;
-      struct handler<mRadiatorFan> mqtthandler_state_ifchanged;
-      struct handler<mRadiatorFan> mqtthandler_state_teleperiod;
+      struct telemetry_handler<mRadiatorFan> telemetry_settings;
+      struct telemetry_handler<mRadiatorFan> telemetry_state_ifchanged;
+      struct telemetry_handler<mRadiatorFan> telemetry_state_teleperiod;
 
       // No specialised payload therefore use system default instead of enum
       
       
-      struct handler<mRadiatorFan>* mqtthandler_list[3] = {
-        &mqtthandler_settings,
-        &mqtthandler_state_ifchanged,
-        &mqtthandler_state_teleperiod
+      struct telemetry_handler<mRadiatorFan>* telemetry_list[3] = {
+        &telemetry_settings,
+        &telemetry_state_ifchanged,
+        &telemetry_state_teleperiod
       };
 
     #endif // USE_MODULE_NETWORK_MQTT

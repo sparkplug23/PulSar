@@ -55,7 +55,7 @@ class mSDCard :
     void Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    static constexpr const char* PM_MODULE_DRIVERS_SDCARD_CTR = D_MODULE_DRIVERS_SDCARD_CTR;
+    static constexpr const char* PM_MODULE_DRIVERS_SDCARD_CTR = D_MODULE__DRIVERS__SDCARD__CTR;
     PGM_P GetModuleName(){ return PM_MODULE_DRIVERS_SDCARD_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_SDCARD_ID; }
 
@@ -350,13 +350,13 @@ class mSDCard :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
+    void Telemetry_Init();
 
-    std::vector<struct handler<mSDCard>*> mqtthandler_list;
+    std::vector<struct telemetry_handler<mSDCard>*> telemetry_list;
 
-    struct handler<mSDCard> mqtthandler_settings;
-    struct handler<mSDCard> mqtthandler_state_ifchanged;
-    struct handler<mSDCard> mqtthandler_state_teleperiod;
+    struct telemetry_handler<mSDCard> telemetry_settings;
+    struct telemetry_handler<mSDCard> telemetry_state_ifchanged;
+    struct telemetry_handler<mSDCard> telemetry_state_teleperiod;
     #endif
 
 };

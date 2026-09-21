@@ -117,7 +117,14 @@ DEFINE_PGM_CTR(PM_LEVEL_ALL_CTR)         "All";
 DEFINE_PGM_CTR(PM_LEVEL_DEBUG_CTR)       "Debug";
   
 
+#ifdef ESP32
 const uint32_t settings_text_size = 699;   // Settings->text_pool[size] = Settings->display_model (2D2) - Settings->text_pool (017)
+#else
+const uint32_t settings_text_size = 199;   // Settings->text_pool[size] = Settings->display_model (2D2) - Settings->text_pool (017)
+#warning "To reduce esp8266 ram pressure"
+#endif
+
+
 const uint8_t MAX_TUYA_FUNCTIONS = 16;
 const uint8_t PARAM8_SIZE = 18;            // Number of param bytes (SetOption)
 
@@ -151,7 +158,7 @@ class mSettings :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void parse_JSONCommand(JsonParserObject obj);
 
-    static constexpr const char* PM_MODULE_CORE_SETTINGS_CTR = D_MODULE_CORE_SETTINGS_CTR;
+    static constexpr const char* PM_MODULE_CORE_SETTINGS_CTR = D_MODULE__CORE__SETTINGS__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_SETTINGS_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_SETTINGS_ID; }
     ~mSettings() {          }
@@ -788,7 +795,16 @@ struct SystemOptions__Rules
 #define DEVICENAMEBUFFER_NAME_INDEX_LENGTH 70 
 #endif // DEVICENAMEBUFFER_NAME_INDEX_LENGTH
 #ifndef DEVICENAMEBUFFER_NAME_BUFFER_LENGTH // Memory reduction
-#define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 400 
+
+
+
+  #ifdef ESP32
+  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 400
+  #else
+  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 100
+  #warning "To reduce esp8266 ram pressure"
+  #endif
+
 #endif // DEVICENAMEBUFFER_NAME_BUFFER_LENGTH
 struct DeviceNameBuffer{ // size(230)
   // delimeter name list
@@ -918,10 +934,10 @@ struct SETTINGS {
   uint64_t      rf_protocol_mask;          // FA8
   uint32_t      power_lock;                // F9C
   uint32_t      bootcount_reset_time;      // FD4
-  uint32_t      ipv4_address[5];           // 544
-  uint32_t      ipv4_rgx_address;          // 558
-  uint32_t      ipv4_rgx_subnetmask;       // 55C
-  uint16_t      dns_timeout;               // 4C8
+  // uint32_t      ipv4_address[5];           // 544
+  // uint32_t      ipv4_rgx_address;          // 558
+  // uint32_t      ipv4_rgx_subnetmask;       // 55C
+  // uint16_t      dns_timeout;               // 4C8
   #ifdef ENABLE_FEATURE_SETTINGS__ADD_LOCAL_TIME_AS_ASCII_FOR_SAVE_TIME_DEBUGGING
   char local_time_ascii_debug[20];
   #endif

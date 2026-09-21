@@ -60,7 +60,7 @@ class mDisplaysInterface :
     void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    static constexpr const char* PM_MODULE_DISPLAYS_INTERFACE_CTR = D_MODULE_DISPLAYS_INTERFACE_CTR;
+    static constexpr const char* PM_MODULE_DISPLAYS_INTERFACE_CTR = D_MODULE__DISPLAYS__INTERFACE__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DISPLAYS_INTERFACE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DISPLAYS_INTERFACE_ID; }    
     
@@ -100,7 +100,7 @@ class mDisplaysInterface :
     
 struct DisplaySettings{
   uint8_t       model; 
-  uint8_t       mode;
+  uint8_t       mode = 1;
   uint8_t       refresh;
   uint8_t       rows;
   uint8_t       cols[2];
@@ -323,11 +323,11 @@ struct DisplaySettings{
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mDisplaysInterface>*> mqtthandler_list;
-    struct handler<mDisplaysInterface> mqtthandler_settings;
-    struct handler<mDisplaysInterface> mqtthandler_state_teleperiod;
-    struct handler<mDisplaysInterface> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mDisplaysInterface>*> telemetry_list;
+    struct telemetry_handler<mDisplaysInterface> telemetry_settings;
+    struct telemetry_handler<mDisplaysInterface> telemetry_state_teleperiod;
+    struct telemetry_handler<mDisplaysInterface> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

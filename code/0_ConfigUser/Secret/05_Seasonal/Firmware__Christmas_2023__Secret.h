@@ -107,8 +107,11 @@
       "\"" D_MODULE_SENSORS_ANALOG_FRIENDLY_CTR "\":["
         "\"" D_DEVICE_SENSORS_ANALOG_1_CTR "\""
       "]"
-    "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1}"
+    "},"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
   "}";
 
 #endif
@@ -172,9 +175,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
@@ -308,8 +311,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 
@@ -364,9 +370,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
@@ -529,8 +535,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 
@@ -594,9 +603,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
@@ -717,8 +726,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 
@@ -766,7 +778,7 @@
 
   
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
@@ -783,9 +795,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   
         // effects that enable colour mapping for counting positions and testing hardware/pins
 
@@ -1013,8 +1025,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 
@@ -1084,9 +1099,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
@@ -1094,12 +1109,12 @@
 
   #define ENABLE_DEVFEATURE_LIGHTING__ADD_DEVSTAGE_TO_EFFECT_NAME
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
 
-  // #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE // should only be used when bug finding, then disabled
 
@@ -1215,9 +1230,9 @@
   // /***********************************
   //  * SECTION: Lighting Configs
   // ************************************/    
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
@@ -1366,8 +1381,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 
@@ -1464,9 +1482,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
@@ -1474,12 +1492,12 @@
 
   #define ENABLE_DEVFEATURE_LIGHTING__ADD_DEVSTAGE_TO_EFFECT_NAME
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
 
-  // #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE // should only be used when bug finding, then disabled
 
@@ -1568,8 +1586,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 
@@ -1658,9 +1679,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
@@ -1668,12 +1689,12 @@
 
   #define ENABLE_DEVFEATURE_LIGHTING__ADD_DEVSTAGE_TO_EFFECT_NAME
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
 
-  // #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE // should only be used when bug finding, then disabled
 
@@ -1831,8 +1852,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 
@@ -1913,9 +1937,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
@@ -1923,12 +1947,12 @@
 
   #define ENABLE_DEVFEATURE_LIGHTING__ADD_DEVSTAGE_TO_EFFECT_NAME
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
 
-  // #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE // should only be used when bug finding, then disabled
 
@@ -2021,8 +2045,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 
@@ -2105,9 +2132,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
@@ -2115,12 +2142,12 @@
 
   #define ENABLE_DEVFEATURE_LIGHTING__ADD_DEVSTAGE_TO_EFFECT_NAME
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
 
-  // #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE // should only be used when bug finding, then disabled
 
@@ -2205,8 +2232,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 
@@ -2289,9 +2319,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
@@ -2299,12 +2329,12 @@
 
   #define ENABLE_DEVFEATURE_LIGHTING__ADD_DEVSTAGE_TO_EFFECT_NAME
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
 
-  // #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE // should only be used when bug finding, then disabled
 
@@ -2448,8 +2478,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 
@@ -2539,9 +2572,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
@@ -2549,12 +2582,12 @@
 
   #define ENABLE_DEVFEATURE_LIGHTING__ADD_DEVSTAGE_TO_EFFECT_NAME
 
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
 
   
 
-  // #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
 
   // #define ENABLE_DEBUG_LINE_HERE_TRACE // should only be used when bug finding, then disabled
 
@@ -2739,8 +2772,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 

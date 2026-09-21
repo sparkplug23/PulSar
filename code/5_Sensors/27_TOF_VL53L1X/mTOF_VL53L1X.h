@@ -68,7 +68,7 @@ class mTOF_VL53L1X :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage(){};
 
-    static constexpr const char* PM_MODULE_SENSORS__TOF_VL53L1X__CTR = D_MODULE_SENSORS__TOF_VL53L1X__CTR;
+    static constexpr const char* PM_MODULE_SENSORS__TOF_VL53L1X__CTR = D_MODULE__SENSORS__TOF_VL53L1X__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS__TOF_VL53L1X__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS__TOF_VL53L1X__ID; }
     
@@ -176,10 +176,10 @@ class mTOF_VL53L1X :
      ************************************************************************************************/
    
     #ifdef USE_MODULE_NETWORK_MQTT
-        void MQTTHandler_Init();
-        std::vector<struct handler<mTOF_VL53L1X>*> mqtthandler_list;    
-        struct handler<mTOF_VL53L1X> mqtthandler_settings;
-        struct handler<mTOF_VL53L1X> mqtthandler_sensor_ifchanged;
+        void Telemetry_Init();
+        std::vector<struct telemetry_handler<mTOF_VL53L1X>*> telemetry_list;    
+        struct telemetry_handler<mTOF_VL53L1X> telemetry_settings;
+        struct telemetry_handler<mTOF_VL53L1X> telemetry_sensor_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

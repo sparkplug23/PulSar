@@ -1,40 +1,62 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Nextion Control</title>
 
-  <link rel="stylesheet" href="/submodule_style.css">
+  <title>Nextion</title>
+
+  <link rel="stylesheet" href="/pulsar.css">
+  <script src="/pulsar.js"></script>
 </head>
 
-<body>
-  <div class="wrap">
-    <h1>Nextion Panel</h1>
-    <hr>
 
-    <div class="card">
-      <h2>Firmware</h2>
-      <p>Update or reflash the connected Nextion LCD.</p>
+<body class="page">
 
-      <form method="get" action="/nextion/firmware">
-        <button type="submit" class="primary">
-          Open Firmware Update
-        </button>
-      </form>
+  <header class="page-header">
+
+    <div class="page-title">
+      <h1>Nextion Panel</h1>
+      <div class="page-subtitle">
+        Display control, diagnostics and firmware maintenance
+      </div>
     </div>
 
-    <div class="card">
-      <h2>Commands</h2>
-      <p>Send raw commands directly to the Nextion panel.</p>
-
-      <form method="get" action="/nextion/command">
-        <button type="submit">
-          Open Command Console
-        </button>
-      </form>
+    <div class="page-actions">
+      <button onclick="go('/')">Back</button>
     </div>
 
-  </div>
+  </header>
+
+
+  <section class="section">
+
+    <div class="section-head">
+      <div class="section-title">Control</div>
+    </div>
+
+    <div class="grid">
+
+      <div class="tile clickable" onclick="go('/nextion/command')">
+        <div class="tile-title">Command Console</div>
+        <div class="tile-description">
+          Send raw commands directly to the connected Nextion panel.
+        </div>
+      </div>
+
+
+      <div class="tile clickable" onclick="go('/nextion/firmware')">
+        <div class="tile-title">Firmware Update</div>
+        <div class="tile-description">
+          Upload or download TFT firmware to the connected panel.
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
 </body>
+
 </html>

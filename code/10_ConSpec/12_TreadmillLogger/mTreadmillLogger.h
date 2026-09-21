@@ -44,7 +44,7 @@ class mTreadmillLogger :
     
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    static constexpr const char* PM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR = D_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR = D_MODULE__CONTROLLER_CUSTOM__TREADMILL_LOGGER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CUSTOM__TREADMILL_LOGGER_ID; }
     
@@ -72,27 +72,22 @@ class mTreadmillLogger :
     
     void parse_JSONCommand(JsonParserObject obj);
 
+    /************************************************************************************************
+     * SECTION: Construct Messages
+     ************************************************************************************************/
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
     
-    void MQTTHandler_Init();
-    void MQTTHandler_RefreshAll();
-    void MQTTHandler_Rate();
-    
-    void MQTTHandler_Sender();
+    /************************************************************************************************
+     * SECITON: MQTT
+     ************************************************************************************************/
+    #ifdef USE_MODULE_NETWORK_MQTT
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mTreadmillLogger>*> telemetry_list;
+    struct telemetry_handler<mTreadmillLogger> telemetry_settings;    struct telemetry_handler<mTreadmillLogger> telemetry_state_ifchanged;
+    #endif // USE_MODULE_NETWORK_MQTT
 
-    struct handler<mTreadmillLogger> mqtthandler_settings;
-    struct handler<mTreadmillLogger> mqtthandler_state_ifchanged;
-
-    //No extra handlers: ie settings and "state" only
-    
-      
-    struct handler<mTreadmillLogger>* mqtthandler_list[2] = {
-      &mqtthandler_settings,
-      &mqtthandler_state_ifchanged
-    };
-
-};
+  };
 
 #endif // USE_MODULE_CONTROLLER_CUSTOM__PORTABLE_TEMPSENSOR_OLED
 

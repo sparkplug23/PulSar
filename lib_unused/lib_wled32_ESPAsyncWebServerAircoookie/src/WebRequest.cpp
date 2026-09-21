@@ -703,11 +703,11 @@ void AsyncWebServerRequest::addInterestingHeader(const String& name){
     _interestingHeaders.add(name);
 }
 
-// #define DEBUG_ASYNC
+// #define ENABLE_DEBUG_ASYNC
 
 void AsyncWebServerRequest::send(AsyncWebServerResponse *response){
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.printf("AsyncWebServerRequest::send %d\n\r", ESP.getFreeHeap()); Serial.flush();
   #endif
 
@@ -726,7 +726,7 @@ void AsyncWebServerRequest::send(AsyncWebServerResponse *response){
     _client->setRxTimeout(0);
     _response->_respond(this);
   }
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.printf("AsyncWebServerRequest::send end %d\n\r", ESP.getFreeHeap()); Serial.flush();
   #endif
 }

@@ -118,11 +118,23 @@ class mDevelopmentDebugging :
 
     void Init_DebugPin();
 
-    static constexpr const char* PM_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR = D_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR;
+    static constexpr const char* PM_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR = D_MODULE__CORE__DEVELOPMENT_DEBUGGING__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_DEVELOPMENT_DEBUGGING_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_DEVELOPMENT_DEBUGGING_ID; }
     
     void SubTask_Show_Defines_Ready_To_Phase_Out();
+
+    #ifdef ENABLE_FEATURE_DEVELOPMENT_DEBUGGING__MQTT_UNIT_TEST_ECHO
+    struct MQTT_UNIT_TEST_ECHO
+    {
+      bool pending = false;
+      uint16_t seconds_remaining = 0;
+      char token[64] = {0};
+    } mqtt_unit_test_echo;
+
+    void SubTask_MQTT_UnitTest_Echo();
+    void Send_MQTT_UnitTest_Echo();
+    #endif
 
 };
 #endif

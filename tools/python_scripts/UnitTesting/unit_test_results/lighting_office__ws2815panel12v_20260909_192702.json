@@ -1,0 +1,4848 @@
+{
+  "device": "office__ws2815panel12v",
+  "timestamp": "2026-09-09T19:27:02",
+  "configuration": {
+    "dwell_seconds": 2,
+    "response_timeout_seconds": 120
+  },
+  "summary": {
+    "total": 179,
+    "passed": 179,
+    "failed": 0
+  },
+  "results": [
+    {
+      "test_group": "palettes",
+      "test_name": "palette_0",
+      "command": {
+        "ColourPalette": 0,
+        "EchoAlive": {
+          "Token": "7c653cc3236b4b9f8b8d8d6e562b096e",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "7c653cc3236b4b9f8b8d8d6e562b096e",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:00",
+      "finished": "2026-09-09T19:21:02",
+      "response_seconds": 1.4060000000172295,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "7c653cc3236b4b9f8b8d8d6e562b096e",
+          "Uptime": 1653,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_1",
+      "command": {
+        "ColourPalette": 1,
+        "EchoAlive": {
+          "Token": "d8ea5aa9d973423599b5b5f71691b8e1",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "d8ea5aa9d973423599b5b5f71691b8e1",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:02",
+      "finished": "2026-09-09T19:21:04",
+      "response_seconds": 1.9689999999827705,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "d8ea5aa9d973423599b5b5f71691b8e1",
+          "Uptime": 1655,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_2",
+      "command": {
+        "ColourPalette": 2,
+        "EchoAlive": {
+          "Token": "56a0bdd394024cc98733e967a5bddc7f",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "56a0bdd394024cc98733e967a5bddc7f",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:04",
+      "finished": "2026-09-09T19:21:06",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "56a0bdd394024cc98733e967a5bddc7f",
+          "Uptime": 1657,
+          "FreeHeap": 116200,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_3",
+      "command": {
+        "ColourPalette": 3,
+        "EchoAlive": {
+          "Token": "be9b8a796f2c4ee684e3be1edeeca0ed",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "be9b8a796f2c4ee684e3be1edeeca0ed",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:06",
+      "finished": "2026-09-09T19:21:08",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "be9b8a796f2c4ee684e3be1edeeca0ed",
+          "Uptime": 1659,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_4",
+      "command": {
+        "ColourPalette": 4,
+        "EchoAlive": {
+          "Token": "64568ab22bec40a7acf9115bc0f73955",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "64568ab22bec40a7acf9115bc0f73955",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:08",
+      "finished": "2026-09-09T19:21:10",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "64568ab22bec40a7acf9115bc0f73955",
+          "Uptime": 1661,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_5",
+      "command": {
+        "ColourPalette": 5,
+        "EchoAlive": {
+          "Token": "351ddcbebb87470da0ad3eaec69c8e67",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "351ddcbebb87470da0ad3eaec69c8e67",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:10",
+      "finished": "2026-09-09T19:21:12",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "351ddcbebb87470da0ad3eaec69c8e67",
+          "Uptime": 1663,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_6",
+      "command": {
+        "ColourPalette": 6,
+        "EchoAlive": {
+          "Token": "a4093864c1c346a1afb64e043a2f1d0d",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "a4093864c1c346a1afb64e043a2f1d0d",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:12",
+      "finished": "2026-09-09T19:21:14",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "a4093864c1c346a1afb64e043a2f1d0d",
+          "Uptime": 1665,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_7",
+      "command": {
+        "ColourPalette": 7,
+        "EchoAlive": {
+          "Token": "359026c575ff4e13b13ba637b2ec45a4",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "359026c575ff4e13b13ba637b2ec45a4",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:14",
+      "finished": "2026-09-09T19:21:16",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "359026c575ff4e13b13ba637b2ec45a4",
+          "Uptime": 1667,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_8",
+      "command": {
+        "ColourPalette": 8,
+        "EchoAlive": {
+          "Token": "f6022b67430f413e8780969746108c2d",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "f6022b67430f413e8780969746108c2d",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:16",
+      "finished": "2026-09-09T19:21:18",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "f6022b67430f413e8780969746108c2d",
+          "Uptime": 1669,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_9",
+      "command": {
+        "ColourPalette": 9,
+        "EchoAlive": {
+          "Token": "b60d57a8c23a4bc2a4f19be34c88d573",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "b60d57a8c23a4bc2a4f19be34c88d573",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:18",
+      "finished": "2026-09-09T19:21:20",
+      "response_seconds": 2.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "b60d57a8c23a4bc2a4f19be34c88d573",
+          "Uptime": 1671,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_10",
+      "command": {
+        "ColourPalette": 10,
+        "EchoAlive": {
+          "Token": "7a94080ff85547daa6e5a132c873156c",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "7a94080ff85547daa6e5a132c873156c",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:20",
+      "finished": "2026-09-09T19:21:22",
+      "response_seconds": 2.5630000000237487,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "7a94080ff85547daa6e5a132c873156c",
+          "Uptime": 1673,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_11",
+      "command": {
+        "ColourPalette": 11,
+        "EchoAlive": {
+          "Token": "09b00f796be54fee8c96a392aee0a7bd",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "09b00f796be54fee8c96a392aee0a7bd",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:22",
+      "finished": "2026-09-09T19:21:24",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "09b00f796be54fee8c96a392aee0a7bd",
+          "Uptime": 1675,
+          "FreeHeap": 117744,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_12",
+      "command": {
+        "ColourPalette": 12,
+        "EchoAlive": {
+          "Token": "62aac3d3f0214ff7aff050dcbaec3295",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "62aac3d3f0214ff7aff050dcbaec3295",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:24",
+      "finished": "2026-09-09T19:21:26",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "62aac3d3f0214ff7aff050dcbaec3295",
+          "Uptime": 1677,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_13",
+      "command": {
+        "ColourPalette": 13,
+        "EchoAlive": {
+          "Token": "af2a35f83de24ca894bef9c8606d6ecb",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "af2a35f83de24ca894bef9c8606d6ecb",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:26",
+      "finished": "2026-09-09T19:21:28",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "af2a35f83de24ca894bef9c8606d6ecb",
+          "Uptime": 1679,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_14",
+      "command": {
+        "ColourPalette": 14,
+        "EchoAlive": {
+          "Token": "cf11956a285d4cb6ad474f9c965c4eee",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "cf11956a285d4cb6ad474f9c965c4eee",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:28",
+      "finished": "2026-09-09T19:21:30",
+      "response_seconds": 1.9689999999827705,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "cf11956a285d4cb6ad474f9c965c4eee",
+          "Uptime": 1681,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_15",
+      "command": {
+        "ColourPalette": 15,
+        "EchoAlive": {
+          "Token": "4084ace4a6d24d418e8c976409a770bf",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "4084ace4a6d24d418e8c976409a770bf",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:30",
+      "finished": "2026-09-09T19:21:32",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "4084ace4a6d24d418e8c976409a770bf",
+          "Uptime": 1683,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_16",
+      "command": {
+        "ColourPalette": 16,
+        "EchoAlive": {
+          "Token": "e6484bb0456f4c10a51d0d2183edb878",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "e6484bb0456f4c10a51d0d2183edb878",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:32",
+      "finished": "2026-09-09T19:21:34",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "e6484bb0456f4c10a51d0d2183edb878",
+          "Uptime": 1685,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_17",
+      "command": {
+        "ColourPalette": 17,
+        "EchoAlive": {
+          "Token": "74947b19628d45c6b62060cde8f8e7e6",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "74947b19628d45c6b62060cde8f8e7e6",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:34",
+      "finished": "2026-09-09T19:21:36",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "74947b19628d45c6b62060cde8f8e7e6",
+          "Uptime": 1687,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_18",
+      "command": {
+        "ColourPalette": 18,
+        "EchoAlive": {
+          "Token": "cc7f88bc28d44d0583034c0e03ac6321",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "cc7f88bc28d44d0583034c0e03ac6321",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:36",
+      "finished": "2026-09-09T19:21:38",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "cc7f88bc28d44d0583034c0e03ac6321",
+          "Uptime": 1689,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_19",
+      "command": {
+        "ColourPalette": 19,
+        "EchoAlive": {
+          "Token": "f2c63ad9c3c94f6d946b9f2a60d2d51d",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "f2c63ad9c3c94f6d946b9f2a60d2d51d",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:38",
+      "finished": "2026-09-09T19:21:40",
+      "response_seconds": 2.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "f2c63ad9c3c94f6d946b9f2a60d2d51d",
+          "Uptime": 1691,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_20",
+      "command": {
+        "ColourPalette": 20,
+        "EchoAlive": {
+          "Token": "4531a7f7552b49f4847ff576199507c1",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "4531a7f7552b49f4847ff576199507c1",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:40",
+      "finished": "2026-09-09T19:21:42",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "4531a7f7552b49f4847ff576199507c1",
+          "Uptime": 1693,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_21",
+      "command": {
+        "ColourPalette": 21,
+        "EchoAlive": {
+          "Token": "0b15285aaa7c4fa08a6cf3e7d0840760",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "0b15285aaa7c4fa08a6cf3e7d0840760",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:42",
+      "finished": "2026-09-09T19:21:44",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "0b15285aaa7c4fa08a6cf3e7d0840760",
+          "Uptime": 1695,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_22",
+      "command": {
+        "ColourPalette": 22,
+        "EchoAlive": {
+          "Token": "5c33033b84a04fa585c69f35f91b1243",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "5c33033b84a04fa585c69f35f91b1243",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:44",
+      "finished": "2026-09-09T19:21:46",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "5c33033b84a04fa585c69f35f91b1243",
+          "Uptime": 1697,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_23",
+      "command": {
+        "ColourPalette": 23,
+        "EchoAlive": {
+          "Token": "6283e2c392ac412d9c3331ca89d49bc9",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "6283e2c392ac412d9c3331ca89d49bc9",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:46",
+      "finished": "2026-09-09T19:21:48",
+      "response_seconds": 1.9679999999934807,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "6283e2c392ac412d9c3331ca89d49bc9",
+          "Uptime": 1699,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_24",
+      "command": {
+        "ColourPalette": 24,
+        "EchoAlive": {
+          "Token": "79af068375d14d3d89febf789b39e136",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "79af068375d14d3d89febf789b39e136",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:48",
+      "finished": "2026-09-09T19:21:50",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "79af068375d14d3d89febf789b39e136",
+          "Uptime": 1701,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_25",
+      "command": {
+        "ColourPalette": 25,
+        "EchoAlive": {
+          "Token": "8af1d4a1c4e643ceaa2cce98fde0e959",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "8af1d4a1c4e643ceaa2cce98fde0e959",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:50",
+      "finished": "2026-09-09T19:21:52",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "8af1d4a1c4e643ceaa2cce98fde0e959",
+          "Uptime": 1703,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_26",
+      "command": {
+        "ColourPalette": 26,
+        "EchoAlive": {
+          "Token": "e3a56845f209440e964a9e07577796b6",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "e3a56845f209440e964a9e07577796b6",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:52",
+      "finished": "2026-09-09T19:21:54",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "e3a56845f209440e964a9e07577796b6",
+          "Uptime": 1705,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_27",
+      "command": {
+        "ColourPalette": 27,
+        "EchoAlive": {
+          "Token": "44d9b3ccfa53495e9edd88f6d6a3e975",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "44d9b3ccfa53495e9edd88f6d6a3e975",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:54",
+      "finished": "2026-09-09T19:21:56",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "44d9b3ccfa53495e9edd88f6d6a3e975",
+          "Uptime": 1707,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_28",
+      "command": {
+        "ColourPalette": 28,
+        "EchoAlive": {
+          "Token": "9475fee8fc354899b91b30e406b14d7c",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "9475fee8fc354899b91b30e406b14d7c",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:56",
+      "finished": "2026-09-09T19:21:59",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "9475fee8fc354899b91b30e406b14d7c",
+          "Uptime": 1709,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_29",
+      "command": {
+        "ColourPalette": 29,
+        "EchoAlive": {
+          "Token": "8c59ab24a4a84d75b1d9151d4b4af6f8",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "8c59ab24a4a84d75b1d9151d4b4af6f8",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:21:59",
+      "finished": "2026-09-09T19:22:00",
+      "response_seconds": 1.9689999999827705,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "8c59ab24a4a84d75b1d9151d4b4af6f8",
+          "Uptime": 1711,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_30",
+      "command": {
+        "ColourPalette": 30,
+        "EchoAlive": {
+          "Token": "301bef5853dc4ad1b34aabc72fdd86de",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "301bef5853dc4ad1b34aabc72fdd86de",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:00",
+      "finished": "2026-09-09T19:22:02",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "301bef5853dc4ad1b34aabc72fdd86de",
+          "Uptime": 1713,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_31",
+      "command": {
+        "ColourPalette": 31,
+        "EchoAlive": {
+          "Token": "5596390b11df4252a3ba7b1b8fc11b21",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "5596390b11df4252a3ba7b1b8fc11b21",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:02",
+      "finished": "2026-09-09T19:22:05",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "5596390b11df4252a3ba7b1b8fc11b21",
+          "Uptime": 1715,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_32",
+      "command": {
+        "ColourPalette": 32,
+        "EchoAlive": {
+          "Token": "45642c0e2d6541af96100cd567c37fa4",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "45642c0e2d6541af96100cd567c37fa4",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:05",
+      "finished": "2026-09-09T19:22:07",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "45642c0e2d6541af96100cd567c37fa4",
+          "Uptime": 1717,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_33",
+      "command": {
+        "ColourPalette": 33,
+        "EchoAlive": {
+          "Token": "43fbb03b20e34b4bb2b6032c29b27152",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "43fbb03b20e34b4bb2b6032c29b27152",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:07",
+      "finished": "2026-09-09T19:22:09",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "43fbb03b20e34b4bb2b6032c29b27152",
+          "Uptime": 1719,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_34",
+      "command": {
+        "ColourPalette": 34,
+        "EchoAlive": {
+          "Token": "24b0902135be44ed81856f092f30208b",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "24b0902135be44ed81856f092f30208b",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:09",
+      "finished": "2026-09-09T19:22:10",
+      "response_seconds": 1.952999999979511,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "24b0902135be44ed81856f092f30208b",
+          "Uptime": 1721,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_35",
+      "command": {
+        "ColourPalette": 35,
+        "EchoAlive": {
+          "Token": "d4cbe74afd5c412a806cfc662390b626",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "d4cbe74afd5c412a806cfc662390b626",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:10",
+      "finished": "2026-09-09T19:22:13",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "d4cbe74afd5c412a806cfc662390b626",
+          "Uptime": 1723,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_36",
+      "command": {
+        "ColourPalette": 36,
+        "EchoAlive": {
+          "Token": "501e1db981c0452784e1e2aae71849d4",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "501e1db981c0452784e1e2aae71849d4",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:13",
+      "finished": "2026-09-09T19:22:15",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "501e1db981c0452784e1e2aae71849d4",
+          "Uptime": 1725,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_37",
+      "command": {
+        "ColourPalette": 37,
+        "EchoAlive": {
+          "Token": "0821783961ea40ab967bd73e6d55a6f5",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "0821783961ea40ab967bd73e6d55a6f5",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:15",
+      "finished": "2026-09-09T19:22:17",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "0821783961ea40ab967bd73e6d55a6f5",
+          "Uptime": 1727,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_38",
+      "command": {
+        "ColourPalette": 38,
+        "EchoAlive": {
+          "Token": "3a9e72d3b9044f888ad329ce6b1e2f97",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "3a9e72d3b9044f888ad329ce6b1e2f97",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:17",
+      "finished": "2026-09-09T19:22:19",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "3a9e72d3b9044f888ad329ce6b1e2f97",
+          "Uptime": 1729,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_39",
+      "command": {
+        "ColourPalette": 39,
+        "EchoAlive": {
+          "Token": "92d459a3a17846819cd15ec62edbec76",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "92d459a3a17846819cd15ec62edbec76",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:19",
+      "finished": "2026-09-09T19:22:21",
+      "response_seconds": 2.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "92d459a3a17846819cd15ec62edbec76",
+          "Uptime": 1731,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_40",
+      "command": {
+        "ColourPalette": 40,
+        "EchoAlive": {
+          "Token": "059a62a9471744619d3103ce7a3abfde",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "059a62a9471744619d3103ce7a3abfde",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:21",
+      "finished": "2026-09-09T19:22:23",
+      "response_seconds": 1.9540000000270084,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "059a62a9471744619d3103ce7a3abfde",
+          "Uptime": 1733,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_41",
+      "command": {
+        "ColourPalette": 41,
+        "EchoAlive": {
+          "Token": "68118153aa3c4fa996e25d3ebaa98abb",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "68118153aa3c4fa996e25d3ebaa98abb",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:23",
+      "finished": "2026-09-09T19:22:25",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "68118153aa3c4fa996e25d3ebaa98abb",
+          "Uptime": 1735,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_42",
+      "command": {
+        "ColourPalette": 42,
+        "EchoAlive": {
+          "Token": "94999160725046e6ae9a4bbe3ce1546b",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "94999160725046e6ae9a4bbe3ce1546b",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:25",
+      "finished": "2026-09-09T19:22:27",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "94999160725046e6ae9a4bbe3ce1546b",
+          "Uptime": 1737,
+          "FreeHeap": 118604,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_43",
+      "command": {
+        "ColourPalette": 43,
+        "EchoAlive": {
+          "Token": "013dba24ede1464daddc45d6b462ac37",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "013dba24ede1464daddc45d6b462ac37",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:27",
+      "finished": "2026-09-09T19:22:29",
+      "response_seconds": 2.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "013dba24ede1464daddc45d6b462ac37",
+          "Uptime": 1739,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_44",
+      "command": {
+        "ColourPalette": 44,
+        "EchoAlive": {
+          "Token": "232289837881415fbe5f7807fc085974",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "232289837881415fbe5f7807fc085974",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:29",
+      "finished": "2026-09-09T19:22:31",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "232289837881415fbe5f7807fc085974",
+          "Uptime": 1741,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_45",
+      "command": {
+        "ColourPalette": 45,
+        "EchoAlive": {
+          "Token": "30c0d1f17a154004b7e4800a6765ae7c",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "30c0d1f17a154004b7e4800a6765ae7c",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:31",
+      "finished": "2026-09-09T19:22:33",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "30c0d1f17a154004b7e4800a6765ae7c",
+          "Uptime": 1743,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_46",
+      "command": {
+        "ColourPalette": 46,
+        "EchoAlive": {
+          "Token": "006dc118b3ed49b385dfeafcafb1d5a7",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "006dc118b3ed49b385dfeafcafb1d5a7",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:33",
+      "finished": "2026-09-09T19:22:35",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "006dc118b3ed49b385dfeafcafb1d5a7",
+          "Uptime": 1745,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_47",
+      "command": {
+        "ColourPalette": 47,
+        "EchoAlive": {
+          "Token": "29cf46d71dc9421eb9adb95d5c21eff0",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "29cf46d71dc9421eb9adb95d5c21eff0",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:35",
+      "finished": "2026-09-09T19:22:37",
+      "response_seconds": 1.952999999979511,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "29cf46d71dc9421eb9adb95d5c21eff0",
+          "Uptime": 1747,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_48",
+      "command": {
+        "ColourPalette": 48,
+        "EchoAlive": {
+          "Token": "214d504bc9604f1bb7c6e6313ae74d7b",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "214d504bc9604f1bb7c6e6313ae74d7b",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:37",
+      "finished": "2026-09-09T19:22:39",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "214d504bc9604f1bb7c6e6313ae74d7b",
+          "Uptime": 1749,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_49",
+      "command": {
+        "ColourPalette": 49,
+        "EchoAlive": {
+          "Token": "8aa15c81b4384a659191741e20a3fae8",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "8aa15c81b4384a659191741e20a3fae8",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:39",
+      "finished": "2026-09-09T19:22:41",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "8aa15c81b4384a659191741e20a3fae8",
+          "Uptime": 1751,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_50",
+      "command": {
+        "ColourPalette": 50,
+        "EchoAlive": {
+          "Token": "87303a1cd7f44540b1fe194e553ecae1",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "87303a1cd7f44540b1fe194e553ecae1",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:41",
+      "finished": "2026-09-09T19:22:43",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "87303a1cd7f44540b1fe194e553ecae1",
+          "Uptime": 1753,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_51",
+      "command": {
+        "ColourPalette": 51,
+        "EchoAlive": {
+          "Token": "d0a063496e06438080dd55d7241e1fb2",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "d0a063496e06438080dd55d7241e1fb2",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:43",
+      "finished": "2026-09-09T19:22:45",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "d0a063496e06438080dd55d7241e1fb2",
+          "Uptime": 1755,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_52",
+      "command": {
+        "ColourPalette": 52,
+        "EchoAlive": {
+          "Token": "51cbdd4aaeff4512b9164a2c1b448cee",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "51cbdd4aaeff4512b9164a2c1b448cee",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:45",
+      "finished": "2026-09-09T19:22:47",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "51cbdd4aaeff4512b9164a2c1b448cee",
+          "Uptime": 1757,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_53",
+      "command": {
+        "ColourPalette": 53,
+        "EchoAlive": {
+          "Token": "e03e2bfcd7df417db88ed186ac076c98",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "e03e2bfcd7df417db88ed186ac076c98",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:47",
+      "finished": "2026-09-09T19:22:49",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "e03e2bfcd7df417db88ed186ac076c98",
+          "Uptime": 1759,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_54",
+      "command": {
+        "ColourPalette": 54,
+        "EchoAlive": {
+          "Token": "8dd01ff724f54207a5eff78dcafb8b85",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "8dd01ff724f54207a5eff78dcafb8b85",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:49",
+      "finished": "2026-09-09T19:22:51",
+      "response_seconds": 1.9679999999934807,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "8dd01ff724f54207a5eff78dcafb8b85",
+          "Uptime": 1761,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_55",
+      "command": {
+        "ColourPalette": 55,
+        "EchoAlive": {
+          "Token": "1b89b6f5d6fc4b1da4f5f5623df85ae5",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "1b89b6f5d6fc4b1da4f5f5623df85ae5",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:51",
+      "finished": "2026-09-09T19:22:53",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "1b89b6f5d6fc4b1da4f5f5623df85ae5",
+          "Uptime": 1763,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_56",
+      "command": {
+        "ColourPalette": 56,
+        "EchoAlive": {
+          "Token": "bdac853898c54a8f8f6c1fa230e2a4a2",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "bdac853898c54a8f8f6c1fa230e2a4a2",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:53",
+      "finished": "2026-09-09T19:22:55",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "bdac853898c54a8f8f6c1fa230e2a4a2",
+          "Uptime": 1765,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_57",
+      "command": {
+        "ColourPalette": 57,
+        "EchoAlive": {
+          "Token": "caebd8ebf3154ee8ae76dabacbcd4580",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "caebd8ebf3154ee8ae76dabacbcd4580",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:55",
+      "finished": "2026-09-09T19:22:57",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "caebd8ebf3154ee8ae76dabacbcd4580",
+          "Uptime": 1767,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_58",
+      "command": {
+        "ColourPalette": 58,
+        "EchoAlive": {
+          "Token": "179e5ca45aa54b3b83b97de75a4995f2",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "179e5ca45aa54b3b83b97de75a4995f2",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:57",
+      "finished": "2026-09-09T19:22:59",
+      "response_seconds": 1.9679999999934807,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "179e5ca45aa54b3b83b97de75a4995f2",
+          "Uptime": 1769,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_59",
+      "command": {
+        "ColourPalette": 59,
+        "EchoAlive": {
+          "Token": "ee316ce94ba1414684e7e7668fbd1ad0",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "ee316ce94ba1414684e7e7668fbd1ad0",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:22:59",
+      "finished": "2026-09-09T19:23:01",
+      "response_seconds": 2.0630000000237487,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "ee316ce94ba1414684e7e7668fbd1ad0",
+          "Uptime": 1771,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_60",
+      "command": {
+        "ColourPalette": 60,
+        "EchoAlive": {
+          "Token": "f163d1c79a44405a83a49479f6b03164",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "f163d1c79a44405a83a49479f6b03164",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:01",
+      "finished": "2026-09-09T19:23:03",
+      "response_seconds": 1.9689999999827705,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "f163d1c79a44405a83a49479f6b03164",
+          "Uptime": 1773,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_61",
+      "command": {
+        "ColourPalette": 61,
+        "EchoAlive": {
+          "Token": "24b01b8e4e524042ac77956f35fc6691",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "24b01b8e4e524042ac77956f35fc6691",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:03",
+      "finished": "2026-09-09T19:23:05",
+      "response_seconds": 2.0619999999762513,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "24b01b8e4e524042ac77956f35fc6691",
+          "Uptime": 1775,
+          "FreeHeap": 113728,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_62",
+      "command": {
+        "ColourPalette": 62,
+        "EchoAlive": {
+          "Token": "390fb84779854e4ebf51be763ccfe09b",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "390fb84779854e4ebf51be763ccfe09b",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:05",
+      "finished": "2026-09-09T19:23:07",
+      "response_seconds": 1.9530000000377186,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "390fb84779854e4ebf51be763ccfe09b",
+          "Uptime": 1777,
+          "FreeHeap": 118392,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_63",
+      "command": {
+        "ColourPalette": 63,
+        "EchoAlive": {
+          "Token": "fbcab6f22e5e4d52baab78556499b7b7",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "fbcab6f22e5e4d52baab78556499b7b7",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:07",
+      "finished": "2026-09-09T19:23:09",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "fbcab6f22e5e4d52baab78556499b7b7",
+          "Uptime": 1779,
+          "FreeHeap": 119240,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_64",
+      "command": {
+        "ColourPalette": 64,
+        "EchoAlive": {
+          "Token": "640d622c5f65413da072e86130db904a",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "640d622c5f65413da072e86130db904a",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:09",
+      "finished": "2026-09-09T19:23:11",
+      "response_seconds": 2.0619999999762513,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "640d622c5f65413da072e86130db904a",
+          "Uptime": 1781,
+          "FreeHeap": 119220,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_65",
+      "command": {
+        "ColourPalette": 65,
+        "EchoAlive": {
+          "Token": "c461a1fb378648e0ae9b18fd980ff5f4",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "c461a1fb378648e0ae9b18fd980ff5f4",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:11",
+      "finished": "2026-09-09T19:23:13",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "c461a1fb378648e0ae9b18fd980ff5f4",
+          "Uptime": 1783,
+          "FreeHeap": 118576,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_66",
+      "command": {
+        "ColourPalette": 66,
+        "EchoAlive": {
+          "Token": "b148655eebfe4f5d9bcc5f618dac3853",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "b148655eebfe4f5d9bcc5f618dac3853",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:13",
+      "finished": "2026-09-09T19:23:15",
+      "response_seconds": 1.9689999999827705,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "b148655eebfe4f5d9bcc5f618dac3853",
+          "Uptime": 1785,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_67",
+      "command": {
+        "ColourPalette": 67,
+        "EchoAlive": {
+          "Token": "5ed554731185486dbbe6011c1a4fc71c",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "5ed554731185486dbbe6011c1a4fc71c",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:15",
+      "finished": "2026-09-09T19:23:17",
+      "response_seconds": 2.1089999999967404,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "5ed554731185486dbbe6011c1a4fc71c",
+          "Uptime": 1787,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_68",
+      "command": {
+        "ColourPalette": 68,
+        "EchoAlive": {
+          "Token": "2c959aef4a1247068f2a15d6efff7816",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "2c959aef4a1247068f2a15d6efff7816",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:17",
+      "finished": "2026-09-09T19:23:19",
+      "response_seconds": 1.922000000020489,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "2c959aef4a1247068f2a15d6efff7816",
+          "Uptime": 1789,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_69",
+      "command": {
+        "ColourPalette": 69,
+        "EchoAlive": {
+          "Token": "1ff8c0260c1c4081813d72902b3aa6e9",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "1ff8c0260c1c4081813d72902b3aa6e9",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:19",
+      "finished": "2026-09-09T19:23:21",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "1ff8c0260c1c4081813d72902b3aa6e9",
+          "Uptime": 1791,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_70",
+      "command": {
+        "ColourPalette": 70,
+        "EchoAlive": {
+          "Token": "a14d9d1fa8d94001bece17d48345d5e3",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "a14d9d1fa8d94001bece17d48345d5e3",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:21",
+      "finished": "2026-09-09T19:23:23",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "a14d9d1fa8d94001bece17d48345d5e3",
+          "Uptime": 1793,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_71",
+      "command": {
+        "ColourPalette": 71,
+        "EchoAlive": {
+          "Token": "0d9c5b15f71b4cf19e037c846d1313bd",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "0d9c5b15f71b4cf19e037c846d1313bd",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:23",
+      "finished": "2026-09-09T19:23:25",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "0d9c5b15f71b4cf19e037c846d1313bd",
+          "Uptime": 1795,
+          "FreeHeap": 118576,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_72",
+      "command": {
+        "ColourPalette": 72,
+        "EchoAlive": {
+          "Token": "863a24a668774659a160a800e7fdb57c",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "863a24a668774659a160a800e7fdb57c",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:25",
+      "finished": "2026-09-09T19:23:27",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "863a24a668774659a160a800e7fdb57c",
+          "Uptime": 1797,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_73",
+      "command": {
+        "ColourPalette": 73,
+        "EchoAlive": {
+          "Token": "6521dcc279c3417c915b79ed89e5d850",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "6521dcc279c3417c915b79ed89e5d850",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:27",
+      "finished": "2026-09-09T19:23:29",
+      "response_seconds": 1.9689999999827705,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "6521dcc279c3417c915b79ed89e5d850",
+          "Uptime": 1799,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_74",
+      "command": {
+        "ColourPalette": 74,
+        "EchoAlive": {
+          "Token": "f32cc53644184682b921a17bf35fac63",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "f32cc53644184682b921a17bf35fac63",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:29",
+      "finished": "2026-09-09T19:23:31",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "f32cc53644184682b921a17bf35fac63",
+          "Uptime": 1801,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_75",
+      "command": {
+        "ColourPalette": 75,
+        "EchoAlive": {
+          "Token": "c82c1b82d0b64270824768708f413910",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "c82c1b82d0b64270824768708f413910",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:31",
+      "finished": "2026-09-09T19:23:33",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "c82c1b82d0b64270824768708f413910",
+          "Uptime": 1803,
+          "FreeHeap": 118556,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_76",
+      "command": {
+        "ColourPalette": 76,
+        "EchoAlive": {
+          "Token": "9225ef21815243f2bd21828337fc74f3",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "9225ef21815243f2bd21828337fc74f3",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:33",
+      "finished": "2026-09-09T19:23:35",
+      "response_seconds": 2.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "9225ef21815243f2bd21828337fc74f3",
+          "Uptime": 1805,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_77",
+      "command": {
+        "ColourPalette": 77,
+        "EchoAlive": {
+          "Token": "dea706d908b84ae6be486cbf6ea030e9",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "dea706d908b84ae6be486cbf6ea030e9",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:35",
+      "finished": "2026-09-09T19:23:37",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "dea706d908b84ae6be486cbf6ea030e9",
+          "Uptime": 1807,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_78",
+      "command": {
+        "ColourPalette": 78,
+        "EchoAlive": {
+          "Token": "d4528c622af949b2a62ad628a1bbbf48",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "d4528c622af949b2a62ad628a1bbbf48",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:37",
+      "finished": "2026-09-09T19:23:39",
+      "response_seconds": 1.9530000000377186,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "d4528c622af949b2a62ad628a1bbbf48",
+          "Uptime": 1809,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_79",
+      "command": {
+        "ColourPalette": 79,
+        "EchoAlive": {
+          "Token": "91f01435078b4726878285c1b8db1831",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "91f01435078b4726878285c1b8db1831",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:39",
+      "finished": "2026-09-09T19:23:41",
+      "response_seconds": 2.030999999959022,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "91f01435078b4726878285c1b8db1831",
+          "Uptime": 1811,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_80",
+      "command": {
+        "ColourPalette": 80,
+        "EchoAlive": {
+          "Token": "b81de81cfecf4e6a8c65a7969c614c90",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "b81de81cfecf4e6a8c65a7969c614c90",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:41",
+      "finished": "2026-09-09T19:23:43",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "b81de81cfecf4e6a8c65a7969c614c90",
+          "Uptime": 1813,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_81",
+      "command": {
+        "ColourPalette": 81,
+        "EchoAlive": {
+          "Token": "708070f860c547f583aa9c7d563a5a78",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "708070f860c547f583aa9c7d563a5a78",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:43",
+      "finished": "2026-09-09T19:23:45",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "708070f860c547f583aa9c7d563a5a78",
+          "Uptime": 1815,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_82",
+      "command": {
+        "ColourPalette": 82,
+        "EchoAlive": {
+          "Token": "d0df1b1b272d4dda95497f2aa9822e21",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "d0df1b1b272d4dda95497f2aa9822e21",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:45",
+      "finished": "2026-09-09T19:23:47",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "d0df1b1b272d4dda95497f2aa9822e21",
+          "Uptime": 1817,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_83",
+      "command": {
+        "ColourPalette": 83,
+        "EchoAlive": {
+          "Token": "bff19ee6e2784f8abd788dfe6cc49044",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "bff19ee6e2784f8abd788dfe6cc49044",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:47",
+      "finished": "2026-09-09T19:23:49",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "bff19ee6e2784f8abd788dfe6cc49044",
+          "Uptime": 1819,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_84",
+      "command": {
+        "ColourPalette": 84,
+        "EchoAlive": {
+          "Token": "10435e0edec84ca2b72b46f6f0374a66",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "10435e0edec84ca2b72b46f6f0374a66",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:49",
+      "finished": "2026-09-09T19:23:51",
+      "response_seconds": 1.9689999999827705,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "10435e0edec84ca2b72b46f6f0374a66",
+          "Uptime": 1821,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_85",
+      "command": {
+        "ColourPalette": 85,
+        "EchoAlive": {
+          "Token": "aed5bec9a7a64c1787f1da447056a6bc",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "aed5bec9a7a64c1787f1da447056a6bc",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:51",
+      "finished": "2026-09-09T19:23:53",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "aed5bec9a7a64c1787f1da447056a6bc",
+          "Uptime": 1823,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_86",
+      "command": {
+        "ColourPalette": 86,
+        "EchoAlive": {
+          "Token": "467a786c2bf942ce9bf869708ca8b5ec",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "467a786c2bf942ce9bf869708ca8b5ec",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:53",
+      "finished": "2026-09-09T19:23:55",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "467a786c2bf942ce9bf869708ca8b5ec",
+          "Uptime": 1825,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_87",
+      "command": {
+        "ColourPalette": 87,
+        "EchoAlive": {
+          "Token": "93bfa4ec98fc4cf58bce6e12af3fdfdd",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "93bfa4ec98fc4cf58bce6e12af3fdfdd",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:55",
+      "finished": "2026-09-09T19:23:57",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "93bfa4ec98fc4cf58bce6e12af3fdfdd",
+          "Uptime": 1827,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_88",
+      "command": {
+        "ColourPalette": 88,
+        "EchoAlive": {
+          "Token": "5cf1bf1e3ea84d549a8a4aace5e089cc",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "5cf1bf1e3ea84d549a8a4aace5e089cc",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:57",
+      "finished": "2026-09-09T19:23:59",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "5cf1bf1e3ea84d549a8a4aace5e089cc",
+          "Uptime": 1829,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_89",
+      "command": {
+        "ColourPalette": 89,
+        "EchoAlive": {
+          "Token": "c05ac43a9da741aaaf414d37c647a148",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "c05ac43a9da741aaaf414d37c647a148",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:23:59",
+      "finished": "2026-09-09T19:24:01",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "c05ac43a9da741aaaf414d37c647a148",
+          "Uptime": 1831,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_90",
+      "command": {
+        "ColourPalette": 90,
+        "EchoAlive": {
+          "Token": "929574792fc44ad286e1b0d39d253b02",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "929574792fc44ad286e1b0d39d253b02",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:01",
+      "finished": "2026-09-09T19:24:03",
+      "response_seconds": 1.952999999979511,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "929574792fc44ad286e1b0d39d253b02",
+          "Uptime": 1833,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_91",
+      "command": {
+        "ColourPalette": 91,
+        "EchoAlive": {
+          "Token": "9d5d48f851bf496d91d45b0db90e086e",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "9d5d48f851bf496d91d45b0db90e086e",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:03",
+      "finished": "2026-09-09T19:24:05",
+      "response_seconds": 2.062000000034459,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "9d5d48f851bf496d91d45b0db90e086e",
+          "Uptime": 1835,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_92",
+      "command": {
+        "ColourPalette": 92,
+        "EchoAlive": {
+          "Token": "fbbceb5203f84a708b0ee0393909ee14",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "fbbceb5203f84a708b0ee0393909ee14",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:05",
+      "finished": "2026-09-09T19:24:07",
+      "response_seconds": 1.9689999999827705,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "fbbceb5203f84a708b0ee0393909ee14",
+          "Uptime": 1837,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_93",
+      "command": {
+        "ColourPalette": 93,
+        "EchoAlive": {
+          "Token": "ad3fab06eae546f9ba00094e9c25b42a",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "ad3fab06eae546f9ba00094e9c25b42a",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:07",
+      "finished": "2026-09-09T19:24:09",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "ad3fab06eae546f9ba00094e9c25b42a",
+          "Uptime": 1839,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_94",
+      "command": {
+        "ColourPalette": 94,
+        "EchoAlive": {
+          "Token": "2c59215e0532440098ed1c84b2f63218",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "2c59215e0532440098ed1c84b2f63218",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:09",
+      "finished": "2026-09-09T19:24:11",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "2c59215e0532440098ed1c84b2f63218",
+          "Uptime": 1841,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_95",
+      "command": {
+        "ColourPalette": 95,
+        "EchoAlive": {
+          "Token": "52b134c450a7402ba30d2d8beebd7ca9",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "52b134c450a7402ba30d2d8beebd7ca9",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:11",
+      "finished": "2026-09-09T19:24:13",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "52b134c450a7402ba30d2d8beebd7ca9",
+          "Uptime": 1843,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_96",
+      "command": {
+        "ColourPalette": 96,
+        "EchoAlive": {
+          "Token": "7958364f313f446a8d6f5df157d2f1b7",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "7958364f313f446a8d6f5df157d2f1b7",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:13",
+      "finished": "2026-09-09T19:24:15",
+      "response_seconds": 2.1089999999967404,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "7958364f313f446a8d6f5df157d2f1b7",
+          "Uptime": 1845,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_97",
+      "command": {
+        "ColourPalette": 97,
+        "EchoAlive": {
+          "Token": "05d3c553eca5492f84c81aca6b6c693e",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "05d3c553eca5492f84c81aca6b6c693e",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:15",
+      "finished": "2026-09-09T19:24:17",
+      "response_seconds": 1.8599999999860302,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "05d3c553eca5492f84c81aca6b6c693e",
+          "Uptime": 1847,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_98",
+      "command": {
+        "ColourPalette": 98,
+        "EchoAlive": {
+          "Token": "ab2c2dcefbe74d3f82781b006adffc04",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "ab2c2dcefbe74d3f82781b006adffc04",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:17",
+      "finished": "2026-09-09T19:24:19",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "ab2c2dcefbe74d3f82781b006adffc04",
+          "Uptime": 1849,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_99",
+      "command": {
+        "ColourPalette": 99,
+        "EchoAlive": {
+          "Token": "c0776e7722b14cd3ba50657c58bfbb62",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "c0776e7722b14cd3ba50657c58bfbb62",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:19",
+      "finished": "2026-09-09T19:24:21",
+      "response_seconds": 2.10999999998603,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "c0776e7722b14cd3ba50657c58bfbb62",
+          "Uptime": 1851,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_100",
+      "command": {
+        "ColourPalette": 100,
+        "EchoAlive": {
+          "Token": "7c96bb82590949ed94bc3ab47bc4be7f",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "7c96bb82590949ed94bc3ab47bc4be7f",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:21",
+      "finished": "2026-09-09T19:24:23",
+      "response_seconds": 1.9209999999729916,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "7c96bb82590949ed94bc3ab47bc4be7f",
+          "Uptime": 1853,
+          "FreeHeap": 116228,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_101",
+      "command": {
+        "ColourPalette": 101,
+        "EchoAlive": {
+          "Token": "7a018020dd5c42aca0c33e96cdfc128b",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "7a018020dd5c42aca0c33e96cdfc128b",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:23",
+      "finished": "2026-09-09T19:24:25",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "7a018020dd5c42aca0c33e96cdfc128b",
+          "Uptime": 1855,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_102",
+      "command": {
+        "ColourPalette": 102,
+        "EchoAlive": {
+          "Token": "e81e8babc9054bd3a5f5b3b00c534e35",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "e81e8babc9054bd3a5f5b3b00c534e35",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:25",
+      "finished": "2026-09-09T19:24:27",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "e81e8babc9054bd3a5f5b3b00c534e35",
+          "Uptime": 1857,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_103",
+      "command": {
+        "ColourPalette": 103,
+        "EchoAlive": {
+          "Token": "4d4ead89799a4e6eb314c0710362b45b",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "4d4ead89799a4e6eb314c0710362b45b",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:27",
+      "finished": "2026-09-09T19:24:29",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "4d4ead89799a4e6eb314c0710362b45b",
+          "Uptime": 1859,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_104",
+      "command": {
+        "ColourPalette": 104,
+        "EchoAlive": {
+          "Token": "396e6a3c364c4063a802df7157238db0",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "396e6a3c364c4063a802df7157238db0",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:29",
+      "finished": "2026-09-09T19:24:31",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "396e6a3c364c4063a802df7157238db0",
+          "Uptime": 1861,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_105",
+      "command": {
+        "ColourPalette": 105,
+        "EchoAlive": {
+          "Token": "e839e4cb477843f2b7d5135215b21e27",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "e839e4cb477843f2b7d5135215b21e27",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:31",
+      "finished": "2026-09-09T19:24:33",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "e839e4cb477843f2b7d5135215b21e27",
+          "Uptime": 1863,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_106",
+      "command": {
+        "ColourPalette": 106,
+        "EchoAlive": {
+          "Token": "2e956f31e9d048f7b5381552ce2cf557",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "2e956f31e9d048f7b5381552ce2cf557",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:33",
+      "finished": "2026-09-09T19:24:35",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "2e956f31e9d048f7b5381552ce2cf557",
+          "Uptime": 1865,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_107",
+      "command": {
+        "ColourPalette": 107,
+        "EchoAlive": {
+          "Token": "5b0395aa426b4e4388b0e67e38fb90dc",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "5b0395aa426b4e4388b0e67e38fb90dc",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:35",
+      "finished": "2026-09-09T19:24:37",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "5b0395aa426b4e4388b0e67e38fb90dc",
+          "Uptime": 1867,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_108",
+      "command": {
+        "ColourPalette": 108,
+        "EchoAlive": {
+          "Token": "55642570d5e34c76bda89bcb9a6a4681",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "55642570d5e34c76bda89bcb9a6a4681",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:37",
+      "finished": "2026-09-09T19:24:39",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "55642570d5e34c76bda89bcb9a6a4681",
+          "Uptime": 1869,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_109",
+      "command": {
+        "ColourPalette": 109,
+        "EchoAlive": {
+          "Token": "df1889a7d9624a018ec91fe1f9999e3c",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "df1889a7d9624a018ec91fe1f9999e3c",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:39",
+      "finished": "2026-09-09T19:24:41",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "df1889a7d9624a018ec91fe1f9999e3c",
+          "Uptime": 1871,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_110",
+      "command": {
+        "ColourPalette": 110,
+        "EchoAlive": {
+          "Token": "df95693589564e95bfc46c4da79d853b",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "df95693589564e95bfc46c4da79d853b",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:41",
+      "finished": "2026-09-09T19:24:43",
+      "response_seconds": 2.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "df95693589564e95bfc46c4da79d853b",
+          "Uptime": 1873,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_111",
+      "command": {
+        "ColourPalette": 111,
+        "EchoAlive": {
+          "Token": "b9ba1f2bb4cb4a13a7615cc5caca2ae3",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "b9ba1f2bb4cb4a13a7615cc5caca2ae3",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:43",
+      "finished": "2026-09-09T19:24:45",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "b9ba1f2bb4cb4a13a7615cc5caca2ae3",
+          "Uptime": 1875,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_112",
+      "command": {
+        "ColourPalette": 112,
+        "EchoAlive": {
+          "Token": "1427dbd309244b048fd99b22c8b39bc5",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "1427dbd309244b048fd99b22c8b39bc5",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:45",
+      "finished": "2026-09-09T19:24:47",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "1427dbd309244b048fd99b22c8b39bc5",
+          "Uptime": 1877,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_113",
+      "command": {
+        "ColourPalette": 113,
+        "EchoAlive": {
+          "Token": "9a4430e87f3c47048110e13e7929dce2",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "9a4430e87f3c47048110e13e7929dce2",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:47",
+      "finished": "2026-09-09T19:24:49",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "9a4430e87f3c47048110e13e7929dce2",
+          "Uptime": 1879,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_114",
+      "command": {
+        "ColourPalette": 114,
+        "EchoAlive": {
+          "Token": "ec1385684260496fb3d46d09f44f2321",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "ec1385684260496fb3d46d09f44f2321",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:49",
+      "finished": "2026-09-09T19:24:51",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "ec1385684260496fb3d46d09f44f2321",
+          "Uptime": 1881,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_115",
+      "command": {
+        "ColourPalette": 115,
+        "EchoAlive": {
+          "Token": "ac05d33f743b418b8ff580d3c81140f4",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "ac05d33f743b418b8ff580d3c81140f4",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:51",
+      "finished": "2026-09-09T19:24:53",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "ac05d33f743b418b8ff580d3c81140f4",
+          "Uptime": 1883,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_116",
+      "command": {
+        "ColourPalette": 116,
+        "EchoAlive": {
+          "Token": "9ed12318101b49fb8e933ee039f6f6e5",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "9ed12318101b49fb8e933ee039f6f6e5",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:53",
+      "finished": "2026-09-09T19:24:55",
+      "response_seconds": 2.0619999999762513,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "9ed12318101b49fb8e933ee039f6f6e5",
+          "Uptime": 1885,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_117",
+      "command": {
+        "ColourPalette": 117,
+        "EchoAlive": {
+          "Token": "609bccb3d18b4bb4a252f55c0be6f92d",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "609bccb3d18b4bb4a252f55c0be6f92d",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:55",
+      "finished": "2026-09-09T19:24:57",
+      "response_seconds": 1.9530000000377186,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "609bccb3d18b4bb4a252f55c0be6f92d",
+          "Uptime": 1887,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_118",
+      "command": {
+        "ColourPalette": 118,
+        "EchoAlive": {
+          "Token": "d0549805b9204ca48a9c97c79fae4af6",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "d0549805b9204ca48a9c97c79fae4af6",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:57",
+      "finished": "2026-09-09T19:24:59",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "d0549805b9204ca48a9c97c79fae4af6",
+          "Uptime": 1889,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_119",
+      "command": {
+        "ColourPalette": 119,
+        "EchoAlive": {
+          "Token": "6da4a74c2f3448e0ae80da4d7bd6eede",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "6da4a74c2f3448e0ae80da4d7bd6eede",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:24:59",
+      "finished": "2026-09-09T19:25:03",
+      "response_seconds": 3.530999999959022,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "6da4a74c2f3448e0ae80da4d7bd6eede",
+          "Uptime": 1891,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_120",
+      "command": {
+        "ColourPalette": 120,
+        "EchoAlive": {
+          "Token": "c29ed2f75d534ff4950c06f87d5762cb",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "c29ed2f75d534ff4950c06f87d5762cb",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:03",
+      "finished": "2026-09-09T19:25:05",
+      "response_seconds": 2.469000000040978,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "c29ed2f75d534ff4950c06f87d5762cb",
+          "Uptime": 1895,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_121",
+      "command": {
+        "ColourPalette": 121,
+        "EchoAlive": {
+          "Token": "38e74bf909864f3c82cf25f0d7499c51",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "38e74bf909864f3c82cf25f0d7499c51",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:05",
+      "finished": "2026-09-09T19:25:07",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "38e74bf909864f3c82cf25f0d7499c51",
+          "Uptime": 1897,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_122",
+      "command": {
+        "ColourPalette": 122,
+        "EchoAlive": {
+          "Token": "69d32b104992417a9ffba0c29ed38ed0",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "69d32b104992417a9ffba0c29ed38ed0",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:07",
+      "finished": "2026-09-09T19:25:09",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "69d32b104992417a9ffba0c29ed38ed0",
+          "Uptime": 1899,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_123",
+      "command": {
+        "ColourPalette": 123,
+        "EchoAlive": {
+          "Token": "d54e32afd9634ef08c032466a3a36ab8",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "d54e32afd9634ef08c032466a3a36ab8",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:09",
+      "finished": "2026-09-09T19:25:11",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "d54e32afd9634ef08c032466a3a36ab8",
+          "Uptime": 1901,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_124",
+      "command": {
+        "ColourPalette": 124,
+        "EchoAlive": {
+          "Token": "e269d356c16d45f3a176830a4295cbb2",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "e269d356c16d45f3a176830a4295cbb2",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:11",
+      "finished": "2026-09-09T19:25:13",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "e269d356c16d45f3a176830a4295cbb2",
+          "Uptime": 1903,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_125",
+      "command": {
+        "ColourPalette": 125,
+        "EchoAlive": {
+          "Token": "d146c66c08244f78a4e8f04eecc9a0aa",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "d146c66c08244f78a4e8f04eecc9a0aa",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:13",
+      "finished": "2026-09-09T19:25:15",
+      "response_seconds": 1.9679999999934807,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "d146c66c08244f78a4e8f04eecc9a0aa",
+          "Uptime": 1905,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_126",
+      "command": {
+        "ColourPalette": 126,
+        "EchoAlive": {
+          "Token": "81df51ed573c404aa2c9d15bd73f0190",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "81df51ed573c404aa2c9d15bd73f0190",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:15",
+      "finished": "2026-09-09T19:25:17",
+      "response_seconds": 2.0630000000237487,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "81df51ed573c404aa2c9d15bd73f0190",
+          "Uptime": 1907,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_127",
+      "command": {
+        "ColourPalette": 127,
+        "EchoAlive": {
+          "Token": "22a3dd32314949f1a308f9a311eaa42f",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "22a3dd32314949f1a308f9a311eaa42f",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:17",
+      "finished": "2026-09-09T19:25:19",
+      "response_seconds": 1.952999999979511,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "22a3dd32314949f1a308f9a311eaa42f",
+          "Uptime": 1909,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_128",
+      "command": {
+        "ColourPalette": 128,
+        "EchoAlive": {
+          "Token": "86a0bbd57a954fe1a9e1210d76d5db1f",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "86a0bbd57a954fe1a9e1210d76d5db1f",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:19",
+      "finished": "2026-09-09T19:25:21",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "86a0bbd57a954fe1a9e1210d76d5db1f",
+          "Uptime": 1911,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_129",
+      "command": {
+        "ColourPalette": 129,
+        "EchoAlive": {
+          "Token": "5638775b30974a3eb7a455a9f5e52e89",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "5638775b30974a3eb7a455a9f5e52e89",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:21",
+      "finished": "2026-09-09T19:25:23",
+      "response_seconds": 1.9679999999934807,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "5638775b30974a3eb7a455a9f5e52e89",
+          "Uptime": 1913,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_130",
+      "command": {
+        "ColourPalette": 130,
+        "EchoAlive": {
+          "Token": "29a130e1a5f9441d9f76fd93fd7eab95",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "29a130e1a5f9441d9f76fd93fd7eab95",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:23",
+      "finished": "2026-09-09T19:25:25",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "29a130e1a5f9441d9f76fd93fd7eab95",
+          "Uptime": 1915,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_131",
+      "command": {
+        "ColourPalette": 131,
+        "EchoAlive": {
+          "Token": "968903b143e2474fa01910f541ad6ea8",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "968903b143e2474fa01910f541ad6ea8",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:25",
+      "finished": "2026-09-09T19:25:27",
+      "response_seconds": 2.1089999999967404,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "968903b143e2474fa01910f541ad6ea8",
+          "Uptime": 1917,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_132",
+      "command": {
+        "ColourPalette": 132,
+        "EchoAlive": {
+          "Token": "712c659e97d6403fa9bae80278e40f44",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "712c659e97d6403fa9bae80278e40f44",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:27",
+      "finished": "2026-09-09T19:25:29",
+      "response_seconds": 1.922000000020489,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "712c659e97d6403fa9bae80278e40f44",
+          "Uptime": 1919,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_133",
+      "command": {
+        "ColourPalette": 133,
+        "EchoAlive": {
+          "Token": "96876e3c619447a5bdd3dd2505658416",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "96876e3c619447a5bdd3dd2505658416",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:29",
+      "finished": "2026-09-09T19:25:31",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "96876e3c619447a5bdd3dd2505658416",
+          "Uptime": 1921,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_134",
+      "command": {
+        "ColourPalette": 134,
+        "EchoAlive": {
+          "Token": "34a5587bdb924f6c9394c9004f8f36e7",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "34a5587bdb924f6c9394c9004f8f36e7",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:31",
+      "finished": "2026-09-09T19:25:33",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "34a5587bdb924f6c9394c9004f8f36e7",
+          "Uptime": 1923,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_135",
+      "command": {
+        "ColourPalette": 135,
+        "EchoAlive": {
+          "Token": "648bda380d874fefaaa13abd7bdf9526",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "648bda380d874fefaaa13abd7bdf9526",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:33",
+      "finished": "2026-09-09T19:25:35",
+      "response_seconds": 1.9689999999827705,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "648bda380d874fefaaa13abd7bdf9526",
+          "Uptime": 1925,
+          "FreeHeap": 118584,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_136",
+      "command": {
+        "ColourPalette": 136,
+        "EchoAlive": {
+          "Token": "b72a2528cc304f78a95e3f32833cdc92",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "b72a2528cc304f78a95e3f32833cdc92",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:35",
+      "finished": "2026-09-09T19:25:37",
+      "response_seconds": 2.062000000034459,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "b72a2528cc304f78a95e3f32833cdc92",
+          "Uptime": 1927,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_137",
+      "command": {
+        "ColourPalette": 137,
+        "EchoAlive": {
+          "Token": "ed46ebaa59f142c9b316e44300e41196",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "ed46ebaa59f142c9b316e44300e41196",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:37",
+      "finished": "2026-09-09T19:25:39",
+      "response_seconds": 1.9689999999827705,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "ed46ebaa59f142c9b316e44300e41196",
+          "Uptime": 1929,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_138",
+      "command": {
+        "ColourPalette": 138,
+        "EchoAlive": {
+          "Token": "6c458f8ef66444838ff1a721c33ed2bc",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "6c458f8ef66444838ff1a721c33ed2bc",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:39",
+      "finished": "2026-09-09T19:25:41",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "6c458f8ef66444838ff1a721c33ed2bc",
+          "Uptime": 1931,
+          "FreeHeap": 115420,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_139",
+      "command": {
+        "ColourPalette": 139,
+        "EchoAlive": {
+          "Token": "6d60e68b070e45e1bf9fa3d474638ee4",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "6d60e68b070e45e1bf9fa3d474638ee4",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:41",
+      "finished": "2026-09-09T19:25:43",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "6d60e68b070e45e1bf9fa3d474638ee4",
+          "Uptime": 1933,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_140",
+      "command": {
+        "ColourPalette": 140,
+        "EchoAlive": {
+          "Token": "078997c4ec7249e99b1e7f8a6dccab46",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "078997c4ec7249e99b1e7f8a6dccab46",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:43",
+      "finished": "2026-09-09T19:25:45",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "078997c4ec7249e99b1e7f8a6dccab46",
+          "Uptime": 1935,
+          "FreeHeap": 116252,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_141",
+      "command": {
+        "ColourPalette": 141,
+        "EchoAlive": {
+          "Token": "34ec3a56bd034e5f9d7369a21e56f09b",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "34ec3a56bd034e5f9d7369a21e56f09b",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:45",
+      "finished": "2026-09-09T19:25:47",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "34ec3a56bd034e5f9d7369a21e56f09b",
+          "Uptime": 1937,
+          "FreeHeap": 118576,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_142",
+      "command": {
+        "ColourPalette": 142,
+        "EchoAlive": {
+          "Token": "fe407c73956345799ea3117ed6bdcddb",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "fe407c73956345799ea3117ed6bdcddb",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:47",
+      "finished": "2026-09-09T19:25:49",
+      "response_seconds": 2.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "fe407c73956345799ea3117ed6bdcddb",
+          "Uptime": 1939,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_143",
+      "command": {
+        "ColourPalette": 143,
+        "EchoAlive": {
+          "Token": "45e19fc469944e4fb261f2c4b68a25bd",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "45e19fc469944e4fb261f2c4b68a25bd",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:49",
+      "finished": "2026-09-09T19:25:51",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "45e19fc469944e4fb261f2c4b68a25bd",
+          "Uptime": 1941,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_144",
+      "command": {
+        "ColourPalette": 144,
+        "EchoAlive": {
+          "Token": "687321c2cd6a48cd8cbde610feb47588",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "687321c2cd6a48cd8cbde610feb47588",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:51",
+      "finished": "2026-09-09T19:25:53",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "687321c2cd6a48cd8cbde610feb47588",
+          "Uptime": 1943,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_145",
+      "command": {
+        "ColourPalette": 145,
+        "EchoAlive": {
+          "Token": "76ab16bbf013485fb181522e70cde2b2",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "76ab16bbf013485fb181522e70cde2b2",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:53",
+      "finished": "2026-09-09T19:25:55",
+      "response_seconds": 2.062000000034459,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "76ab16bbf013485fb181522e70cde2b2",
+          "Uptime": 1945,
+          "FreeHeap": 116268,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_146",
+      "command": {
+        "ColourPalette": 146,
+        "EchoAlive": {
+          "Token": "ea4bb0dca08e4f0aab8701ec401ccbcf",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "ea4bb0dca08e4f0aab8701ec401ccbcf",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:55",
+      "finished": "2026-09-09T19:25:57",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "ea4bb0dca08e4f0aab8701ec401ccbcf",
+          "Uptime": 1947,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_147",
+      "command": {
+        "ColourPalette": 147,
+        "EchoAlive": {
+          "Token": "a519fff3388f48b9b36283326b839a54",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "a519fff3388f48b9b36283326b839a54",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:57",
+      "finished": "2026-09-09T19:25:59",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "a519fff3388f48b9b36283326b839a54",
+          "Uptime": 1949,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_148",
+      "command": {
+        "ColourPalette": 148,
+        "EchoAlive": {
+          "Token": "f7bc91e3982943f88cb72179fe1862aa",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "f7bc91e3982943f88cb72179fe1862aa",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:25:59",
+      "finished": "2026-09-09T19:26:02",
+      "response_seconds": 2.125,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "f7bc91e3982943f88cb72179fe1862aa",
+          "Uptime": 1951,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_149",
+      "command": {
+        "ColourPalette": 149,
+        "EchoAlive": {
+          "Token": "1541db94973f4c0dbfd27d9e1eb85f99",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "1541db94973f4c0dbfd27d9e1eb85f99",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:02",
+      "finished": "2026-09-09T19:26:04",
+      "response_seconds": 1.952999999979511,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "1541db94973f4c0dbfd27d9e1eb85f99",
+          "Uptime": 1953,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_150",
+      "command": {
+        "ColourPalette": 150,
+        "EchoAlive": {
+          "Token": "c676a759e84f46e1a369819efb8920c0",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "c676a759e84f46e1a369819efb8920c0",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:04",
+      "finished": "2026-09-09T19:26:06",
+      "response_seconds": 2.172000000020489,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "c676a759e84f46e1a369819efb8920c0",
+          "Uptime": 1955,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_151",
+      "command": {
+        "ColourPalette": 151,
+        "EchoAlive": {
+          "Token": "5391a633b5bd46b388fea0d1ede4fe8f",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "5391a633b5bd46b388fea0d1ede4fe8f",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:06",
+      "finished": "2026-09-09T19:26:08",
+      "response_seconds": 1.9059999999590218,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "5391a633b5bd46b388fea0d1ede4fe8f",
+          "Uptime": 1957,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_152",
+      "command": {
+        "ColourPalette": 152,
+        "EchoAlive": {
+          "Token": "b3994c251d16427ca6f55261e5032946",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "b3994c251d16427ca6f55261e5032946",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:08",
+      "finished": "2026-09-09T19:26:10",
+      "response_seconds": 1.9690000000409782,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "b3994c251d16427ca6f55261e5032946",
+          "Uptime": 1959,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_153",
+      "command": {
+        "ColourPalette": 153,
+        "EchoAlive": {
+          "Token": "4c92473feda541fca1a582aad2a20cbf",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "4c92473feda541fca1a582aad2a20cbf",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:10",
+      "finished": "2026-09-09T19:26:12",
+      "response_seconds": 2.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "4c92473feda541fca1a582aad2a20cbf",
+          "Uptime": 1961,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_154",
+      "command": {
+        "ColourPalette": 154,
+        "EchoAlive": {
+          "Token": "5539932a27f145ba9afb90c85a77eaf0",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "5539932a27f145ba9afb90c85a77eaf0",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:12",
+      "finished": "2026-09-09T19:26:14",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "5539932a27f145ba9afb90c85a77eaf0",
+          "Uptime": 1963,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_155",
+      "command": {
+        "ColourPalette": 155,
+        "EchoAlive": {
+          "Token": "97e2fb23a5d944baaf4e25b54e25bb5b",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "97e2fb23a5d944baaf4e25b54e25bb5b",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:14",
+      "finished": "2026-09-09T19:26:16",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "97e2fb23a5d944baaf4e25b54e25bb5b",
+          "Uptime": 1965,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_156",
+      "command": {
+        "ColourPalette": 156,
+        "EchoAlive": {
+          "Token": "412b883adf554f59934bb4a546b4101e",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "412b883adf554f59934bb4a546b4101e",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:16",
+      "finished": "2026-09-09T19:26:18",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "412b883adf554f59934bb4a546b4101e",
+          "Uptime": 1967,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_157",
+      "command": {
+        "ColourPalette": 157,
+        "EchoAlive": {
+          "Token": "eb11b4d6248b4495963f9c285f582abd",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "eb11b4d6248b4495963f9c285f582abd",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:18",
+      "finished": "2026-09-09T19:26:20",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "eb11b4d6248b4495963f9c285f582abd",
+          "Uptime": 1969,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_158",
+      "command": {
+        "ColourPalette": 158,
+        "EchoAlive": {
+          "Token": "4d07aa0e46c349a3a6d4ae67fbac7aa3",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "4d07aa0e46c349a3a6d4ae67fbac7aa3",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:20",
+      "finished": "2026-09-09T19:26:22",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "4d07aa0e46c349a3a6d4ae67fbac7aa3",
+          "Uptime": 1971,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_159",
+      "command": {
+        "ColourPalette": 159,
+        "EchoAlive": {
+          "Token": "6c15f8e7dd6a4560b57a16aa1bae7e1a",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "6c15f8e7dd6a4560b57a16aa1bae7e1a",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:22",
+      "finished": "2026-09-09T19:26:24",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "6c15f8e7dd6a4560b57a16aa1bae7e1a",
+          "Uptime": 1973,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_160",
+      "command": {
+        "ColourPalette": 160,
+        "EchoAlive": {
+          "Token": "3ce48ee03856413eba9a8b960bbf08db",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "3ce48ee03856413eba9a8b960bbf08db",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:24",
+      "finished": "2026-09-09T19:26:26",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "3ce48ee03856413eba9a8b960bbf08db",
+          "Uptime": 1975,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_161",
+      "command": {
+        "ColourPalette": 161,
+        "EchoAlive": {
+          "Token": "4ea6c80eb3e94fe7a61176a9b934fba9",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "4ea6c80eb3e94fe7a61176a9b934fba9",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:26",
+      "finished": "2026-09-09T19:26:28",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "4ea6c80eb3e94fe7a61176a9b934fba9",
+          "Uptime": 1977,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_162",
+      "command": {
+        "ColourPalette": 162,
+        "EchoAlive": {
+          "Token": "5b5d8d7d631341e0a6abd60c31b23975",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "5b5d8d7d631341e0a6abd60c31b23975",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:28",
+      "finished": "2026-09-09T19:26:30",
+      "response_seconds": 2.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "5b5d8d7d631341e0a6abd60c31b23975",
+          "Uptime": 1979,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_163",
+      "command": {
+        "ColourPalette": 163,
+        "EchoAlive": {
+          "Token": "d12832da2a004fadba19bfe146f45299",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "d12832da2a004fadba19bfe146f45299",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:30",
+      "finished": "2026-09-09T19:26:32",
+      "response_seconds": 1.9540000000270084,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "d12832da2a004fadba19bfe146f45299",
+          "Uptime": 1981,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_164",
+      "command": {
+        "ColourPalette": 164,
+        "EchoAlive": {
+          "Token": "59385dbabd1f4c0a8bdc10f933d03f07",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "59385dbabd1f4c0a8bdc10f933d03f07",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:32",
+      "finished": "2026-09-09T19:26:34",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "59385dbabd1f4c0a8bdc10f933d03f07",
+          "Uptime": 1983,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_165",
+      "command": {
+        "ColourPalette": 165,
+        "EchoAlive": {
+          "Token": "aeace0cb5c644e38bfb15aefa889730f",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "aeace0cb5c644e38bfb15aefa889730f",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:34",
+      "finished": "2026-09-09T19:26:36",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "aeace0cb5c644e38bfb15aefa889730f",
+          "Uptime": 1985,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_166",
+      "command": {
+        "ColourPalette": 166,
+        "EchoAlive": {
+          "Token": "41a0aab17175467eb798977465c7ed6e",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "41a0aab17175467eb798977465c7ed6e",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:36",
+      "finished": "2026-09-09T19:26:38",
+      "response_seconds": 2.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "41a0aab17175467eb798977465c7ed6e",
+          "Uptime": 1987,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_167",
+      "command": {
+        "ColourPalette": 167,
+        "EchoAlive": {
+          "Token": "c2585b379f7b4723aa8b07cc26ec11ff",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "c2585b379f7b4723aa8b07cc26ec11ff",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:38",
+      "finished": "2026-09-09T19:26:40",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "c2585b379f7b4723aa8b07cc26ec11ff",
+          "Uptime": 1989,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_168",
+      "command": {
+        "ColourPalette": 168,
+        "EchoAlive": {
+          "Token": "f12e55d6e1364ae2a938feaccef03b77",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "f12e55d6e1364ae2a938feaccef03b77",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:40",
+      "finished": "2026-09-09T19:26:42",
+      "response_seconds": 2.0,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "f12e55d6e1364ae2a938feaccef03b77",
+          "Uptime": 1991,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_169",
+      "command": {
+        "ColourPalette": 169,
+        "EchoAlive": {
+          "Token": "c0dcfbc0b5a4457bbc4dc7ded2326e80",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "c0dcfbc0b5a4457bbc4dc7ded2326e80",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:42",
+      "finished": "2026-09-09T19:26:44",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "c0dcfbc0b5a4457bbc4dc7ded2326e80",
+          "Uptime": 1993,
+          "FreeHeap": 118592,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_170",
+      "command": {
+        "ColourPalette": 170,
+        "EchoAlive": {
+          "Token": "a14759cae5f34b9eaabff56d021609db",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "a14759cae5f34b9eaabff56d021609db",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:44",
+      "finished": "2026-09-09T19:26:46",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "a14759cae5f34b9eaabff56d021609db",
+          "Uptime": 1995,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_171",
+      "command": {
+        "ColourPalette": 171,
+        "EchoAlive": {
+          "Token": "0c2de55d656e40979d93f4545e0cfc8b",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "0c2de55d656e40979d93f4545e0cfc8b",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:46",
+      "finished": "2026-09-09T19:26:48",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "0c2de55d656e40979d93f4545e0cfc8b",
+          "Uptime": 1997,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_172",
+      "command": {
+        "ColourPalette": 172,
+        "EchoAlive": {
+          "Token": "dd31312c10f542349cb63cb9aa2a7dcc",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "dd31312c10f542349cb63cb9aa2a7dcc",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:48",
+      "finished": "2026-09-09T19:26:50",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "dd31312c10f542349cb63cb9aa2a7dcc",
+          "Uptime": 1999,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_173",
+      "command": {
+        "ColourPalette": 173,
+        "EchoAlive": {
+          "Token": "35b8bde1eff84177a84e194879fa0399",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "35b8bde1eff84177a84e194879fa0399",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:50",
+      "finished": "2026-09-09T19:26:52",
+      "response_seconds": 1.952999999979511,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "35b8bde1eff84177a84e194879fa0399",
+          "Uptime": 2001,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_174",
+      "command": {
+        "ColourPalette": 174,
+        "EchoAlive": {
+          "Token": "a1f8c8c58c2f4ce69ba2ed8a4054c40d",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "a1f8c8c58c2f4ce69ba2ed8a4054c40d",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:52",
+      "finished": "2026-09-09T19:26:54",
+      "response_seconds": 2.125,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "a1f8c8c58c2f4ce69ba2ed8a4054c40d",
+          "Uptime": 2003,
+          "FreeHeap": 118272,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_175",
+      "command": {
+        "ColourPalette": 175,
+        "EchoAlive": {
+          "Token": "b9cf73696d6c4300965b93070157e58c",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "b9cf73696d6c4300965b93070157e58c",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:54",
+      "finished": "2026-09-09T19:26:56",
+      "response_seconds": 1.9060000000172295,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "b9cf73696d6c4300965b93070157e58c",
+          "Uptime": 2005,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_176",
+      "command": {
+        "ColourPalette": 176,
+        "EchoAlive": {
+          "Token": "9b9f6fd3709c4cd49ec6328b518bdaf1",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "9b9f6fd3709c4cd49ec6328b518bdaf1",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:56",
+      "finished": "2026-09-09T19:26:58",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "9b9f6fd3709c4cd49ec6328b518bdaf1",
+          "Uptime": 2007,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_177",
+      "command": {
+        "ColourPalette": 177,
+        "EchoAlive": {
+          "Token": "7d8c49d54fb64f4eb4e1414648af7530",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "7d8c49d54fb64f4eb4e1414648af7530",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:26:58",
+      "finished": "2026-09-09T19:27:00",
+      "response_seconds": 2.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "7d8c49d54fb64f4eb4e1414648af7530",
+          "Uptime": 2009,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_178",
+      "command": {
+        "ColourPalette": 178,
+        "EchoAlive": {
+          "Token": "ceea29d2b95749629f872205beaf8157",
+          "DelaySeconds": 2
+        }
+      },
+      "token": "ceea29d2b95749629f872205beaf8157",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:27:00",
+      "finished": "2026-09-09T19:27:02",
+      "response_seconds": 2.0160000000032596,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "ceea29d2b95749629f872205beaf8157",
+          "Uptime": 2011,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    }
+  ]
+}

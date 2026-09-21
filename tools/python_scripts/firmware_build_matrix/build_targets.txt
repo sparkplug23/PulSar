@@ -1,0 +1,9 @@
+testbed__nodemcu__shelly_dimmer
+testbed__nodemcu__sonoff_basic
+cm_shelly_dimmer_03
+cm_office__ws2815panel12v
+wh_hallway__pebbles
+testbed__sensors_nextion
+testbed__motion_audio
+testbed__switch_button
+testbed__gps_decoder

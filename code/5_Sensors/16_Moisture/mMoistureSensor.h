@@ -23,7 +23,7 @@ class mMoistureSensor :
     void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    static constexpr const char* PM_MODULE_SENSORS_MOISTURE_ADC_CTR = D_MODULE_SENSORS_MOISTURE_ADC_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_MOISTURE_ADC_CTR = D_MODULE__SENSORS__MOISTURE_ADC__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_MOISTURE_ADC_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_MOTION_ID; } 
       
@@ -74,11 +74,11 @@ class mMoistureSensor :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mMoistureSensor>*> mqtthandler_list;
-    struct handler<mMoistureSensor> mqtthandler_settings;
-    struct handler<mMoistureSensor> mqtthandler_state_ifchanged;
-    struct handler<mMoistureSensor> mqtthandler_state_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mMoistureSensor>*> telemetry_list;
+    struct telemetry_handler<mMoistureSensor> telemetry_settings;
+    struct telemetry_handler<mMoistureSensor> telemetry_state_ifchanged;
+    struct telemetry_handler<mMoistureSensor> telemetry_state_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

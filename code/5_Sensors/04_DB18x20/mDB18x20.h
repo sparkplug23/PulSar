@@ -39,7 +39,7 @@ class mDB18x20 :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage();
     
-    static constexpr const char* PM_MODULE_SENSORS_DS18X20__CTR = D_MODULE_SENSORS_DB18S20_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_DS18X20__CTR = D_MODULE__SENSORS__DB18S20__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_DS18X20__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DS18X20__ID; }
     
@@ -131,13 +131,13 @@ class mDB18x20 :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mDB18x20>*> mqtthandler_list;
-    struct handler<mDB18x20> mqtthandler_settings;
-    struct handler<mDB18x20> mqtthandler_sensor_ifchanged;
-    struct handler<mDB18x20> mqtthandler_sensor_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mDB18x20>*> telemetry_list;
+    struct telemetry_handler<mDB18x20> telemetry_settings;
+    struct telemetry_handler<mDB18x20> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mDB18x20> telemetry_sensor_teleperiod;
     #ifdef ENABLE_DEBUG_MQTT_CHANNEL_DB18X20
-    struct handler<mDB18x20> mqtthandler_debug;
+    struct telemetry_handler<mDB18x20> telemetry_debug;
     uint8_t ConstructJSON_Debug(uint8_t json_level = 0, bool json_appending = true);
     #endif    
     #endif // USE_MODULE_NETWORK_MQTT

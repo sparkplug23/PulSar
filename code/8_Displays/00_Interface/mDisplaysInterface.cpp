@@ -43,21 +43,31 @@ int8_t mDisplaysInterface::Tasker(uint8_t function, JsonParserObject obj){
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
-    break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
     #endif
     /************
@@ -86,10 +96,24 @@ int8_t mDisplaysInterface::Tasker(uint8_t function, JsonParserObject obj){
 void mDisplaysInterface::Pre_Init(void)
 {
   module_state.mode = ModuleStatus::Initialising;
- 
-  display.model = 0; // will autodetect based on i2c address
+  
+  
+  // --------------------------------------------------------------------------
+  // 15. Display defaults
+  // --------------------------------------------------------------------------
+  display.model   = 0;
+  display.mode    = 0;
+  display.refresh = 2;
+  display.rows    = 4;
+  display.cols[0] = 16;
+  display.cols[1] = 8;
+  display.dimmer  = 7;
+  display.size    = 2;
+  display.font    = 1;
+  display.rotate  = 0;
 
 
+  
   tkr->Tasker_Interface(TASK_DISPLAY_INIT_DRIVER);
 
   #ifdef USE_MULTI_DISPLAY
@@ -155,20 +179,6 @@ void mDisplaysInterface::Init(void)
 {
 
   
-  // --------------------------------------------------------------------------
-  // 15. Display defaults
-  // --------------------------------------------------------------------------
-  display.model   = 0;
-  display.mode    = 0;
-  display.refresh = 2;
-  display.rows    = 4;
-  display.cols[0] = 16;
-  display.cols[1] = 8;
-  display.dimmer  = 7;
-  display.size    = 2;
-  display.font    = 1;
-  display.rotate  = 0;
-
 
 }
 
@@ -757,7 +767,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
     LogBuffer_Add((char*)jtok.getStr());
 
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());//D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
+    ALOG_INF(PSTR(D_LOG_DISPLAY "DisplayAddLog %s"),jtok.getStr());//D_COMMAND_SVALUE_K(D_COLOUR_PALETTE)), GetPaletteNameByID(animation.palette_id, buffer, sizeof(buffer)));
     #endif
   }
 
@@ -773,7 +783,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
       LogBuffer_AddRow((char*)jtok.getStr(), row_number);
     }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());
+    ALOG_INF(PSTR(D_LOG_DISPLAY "DisplayAddLog %s"),jtok.getStr());
     #endif
   }
 
@@ -794,7 +804,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
       }
     }
     #ifdef ENABLE_LOG_LEVEL_DEBUG
-    ALOG_DBG(PSTR(D_LOG_LIGHT "DisplayAddLog %s"),jtok.getStr());
+    ALOG_INF(PSTR(D_LOG_DISPLAY "DisplayAddLog %s"),jtok.getStr());
     #endif
   }
 
@@ -836,7 +846,7 @@ void mDisplaysInterface::parse_JSONCommand(JsonParserObject obj){
   }
 
 
-  // mqtthandler_debug_teleperiod.flags.SendNow = true;
+  // telemetry_debug_teleperiod.flags.SendNow = true;
 
 }
 
@@ -2088,43 +2098,43 @@ uint8_t mDisplaysInterface::ConstructJSON_State(uint8_t json_level, bool json_ap
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mDisplaysInterface::MQTTHandler_Init()
+void mDisplaysInterface::Telemetry_Init()
 {
 
-  struct handler<mDisplaysInterface>* ptr;
+  struct telemetry_handler<mDisplaysInterface>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mDisplaysInterface::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_state_teleperiod;
+  ptr = &telemetry_state_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mDisplaysInterface::ConstructJSON_State;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_state_ifchanged;
+  ptr = &telemetry_state_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mDisplaysInterface::ConstructJSON_State;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
 } 
 

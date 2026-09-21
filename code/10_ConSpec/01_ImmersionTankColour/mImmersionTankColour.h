@@ -17,7 +17,7 @@ class mImmersionTankColour :
     mImmersionTankColour(){};
 
 
-    static constexpr const char* PM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_CTR = D_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_CTR = D_MODULE__CONTROLLER_CUSTOM__IMMERSION_TANK_COLOUR__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_IMMERSION_TANK_COLOUR_ID; }
 
@@ -76,24 +76,24 @@ class mImmersionTankColour :
   
   //#ifdef USE_CORE_MQTT 
 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
-    struct handler<mImmersionTankColour>* ptr;
+    struct telemetry_handler<mImmersionTankColour>* ptr;
     void MQTTHandler_Sender();
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mImmersionTankColour> mqtthandler_settings;
+    struct telemetry_handler<mImmersionTankColour> telemetry_settings;
     
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "power";
-    struct handler<mImmersionTankColour> mqtthandler_sensor_ifchanged;
-    struct handler<mImmersionTankColour> mqtthandler_sensor_teleperiod;
+    struct telemetry_handler<mImmersionTankColour> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mImmersionTankColour> telemetry_sensor_teleperiod;
     
-  struct handler<mImmersionTankColour>* mqtthandler_list[3] = {
-    &mqtthandler_settings,
-    &mqtthandler_sensor_ifchanged,
-    &mqtthandler_sensor_teleperiod
+  struct telemetry_handler<mImmersionTankColour>* telemetry_list[3] = {
+    &telemetry_settings,
+    &telemetry_sensor_ifchanged,
+    &telemetry_sensor_teleperiod
   };
     
 

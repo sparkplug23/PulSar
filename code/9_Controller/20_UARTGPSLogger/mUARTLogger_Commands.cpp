@@ -113,7 +113,7 @@
 //   // }
 
 
-//   mqtthandler_scheduled_teleperiod.flags.SendNow = true;
+//   telemetry_scheduled_teleperiod.flags.SendNow = true;
 
 // }
 

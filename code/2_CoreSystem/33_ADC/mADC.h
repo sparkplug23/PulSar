@@ -21,7 +21,7 @@ class mADC :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     // void Pre_Init(void);
         
-    static constexpr const char* PM_MODULE_CORE__ADC__CTR = D_MODULE_CORE__ADC__CTR;
+    static constexpr const char* PM_MODULE_CORE__ADC__CTR = D_MODULE__CORE__ADC__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE__ADC__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE__ADC__ID; }
     
@@ -59,15 +59,15 @@ class mADC :
      ************************************************************************************************/
     
     // #ifdef USE_MODULE_NETWORK_MQTT
-    // void MQTTHandler_Init();
+    // void Telemetry_Init();
     // void MQTTHandler_RefreshAll();
     // void MQTTHandler_Rate();    
     // void MQTTHandler_Sender();
 
-    // std::vector<struct handler<mADC>*> mqtthandler_list;    
-    // struct handler<mADC> mqtthandler_settings;    
-    // struct handler<mADC> mqtthandler_sensor_ifchanged;
-    // struct handler<mADC> mqtthandler_sensor_teleperiod;    
+    // std::vector<struct telemetry_handler<mADC>*> telemetry_list;    
+    // struct telemetry_handler<mADC> telemetry_settings;    
+    // struct telemetry_handler<mADC> telemetry_sensor_ifchanged;
+    // struct telemetry_handler<mADC> telemetry_sensor_teleperiod;    
     // #endif // USE_MODULE_NETWORK_MQTT
 
 };

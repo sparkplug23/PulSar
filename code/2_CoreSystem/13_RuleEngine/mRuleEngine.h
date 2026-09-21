@@ -25,7 +25,7 @@ class mRuleEngine :
     #define D_MAX_RULES 20
     #endif 
 
-    static constexpr const char* PM_MODULE_CORE_RULES_CTR = D_MODULE_CORE_RULES_CTR;
+    static constexpr const char* PM_MODULE_CORE_RULES_CTR = D_MODULE__CORE__RULES__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_RULES_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_RULES_FRIENDLY_ID; }
     ~mRuleEngine() {          }
@@ -49,6 +49,10 @@ class mRuleEngine :
 
     void ShowRuleAddLogByIndex(uint8_t show_type = 0); // 0 = basic indexed, 1 = with names
     void ShowRuleEvent_AddLog(uint8_t show_type = 0);
+
+    bool EventPackage_IsExactMatch(const EventPackage* a, const EventPackage* b);
+    bool Rule_IsExactMatch(const EventPackage* trigger_new, const EventPackage* command_new, uint8_t rule_index);
+    bool RuleAlreadyExists(const EventPackage* trigger_new, const EventPackage* command_new);
 
 
     void AddLog_DebugRule(EventPackage* rule);
@@ -159,7 +163,7 @@ uint8_t rule_count2 = 0;
     }rules[D_MAX_RULES];
 
     // This will need to become an array or queue, that way consecutive rules can trigger at the same time
-    EventPackage event_triggered;
+    EventPackage event_triggered;// = {0};
 
 
     uint8_t rules_active_index = 0;
@@ -261,10 +265,10 @@ uint8_t rule_count2 = 0;
 
 
   #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mRuleEngine>*> mqtthandler_list;
-    struct handler<mRuleEngine> mqtthandler_settings;
-    struct handler<mRuleEngine> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mRuleEngine>*> telemetry_list;
+    struct telemetry_handler<mRuleEngine> telemetry_settings;
+    struct telemetry_handler<mRuleEngine> telemetry_state_ifchanged;
   #endif //  USE_MODULE_NETWORK_MQTT
 
 };

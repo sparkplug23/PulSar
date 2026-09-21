@@ -1,0 +1,447 @@
+{
+  "device": "office__ws2815panel12v",
+  "timestamp": "2026-09-09T19:17:49",
+  "configuration": {
+    "dwell_seconds": 10,
+    "response_timeout_seconds": 120
+  },
+  "summary": {
+    "total": 16,
+    "passed": 16,
+    "failed": 0
+  },
+  "results": [
+    {
+      "test_group": "palettes",
+      "test_name": "palette_0",
+      "command": {
+        "ColourPalette": 0,
+        "EchoAlive": {
+          "Token": "151bb2d0c4034c7ba0a3d548ab37d5b6",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "151bb2d0c4034c7ba0a3d548ab37d5b6",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:15:06",
+      "finished": "2026-09-09T19:15:17",
+      "response_seconds": 10.202999999979511,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "151bb2d0c4034c7ba0a3d548ab37d5b6",
+          "Uptime": 1311,
+          "FreeHeap": 118644,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_1",
+      "command": {
+        "ColourPalette": 1,
+        "EchoAlive": {
+          "Token": "dbfbfaf71d274ca9bfb18119f48d71c3",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "dbfbfaf71d274ca9bfb18119f48d71c3",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:15:17",
+      "finished": "2026-09-09T19:15:27",
+      "response_seconds": 10.077999999979511,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "dbfbfaf71d274ca9bfb18119f48d71c3",
+          "Uptime": 1321,
+          "FreeHeap": 118644,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_2",
+      "command": {
+        "ColourPalette": 2,
+        "EchoAlive": {
+          "Token": "9b8180aa99094c3a9732ffb9285832ca",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "9b8180aa99094c3a9732ffb9285832ca",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:15:27",
+      "finished": "2026-09-09T19:15:37",
+      "response_seconds": 9.953000000037719,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "9b8180aa99094c3a9732ffb9285832ca",
+          "Uptime": 1331,
+          "FreeHeap": 118644,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_3",
+      "command": {
+        "ColourPalette": 3,
+        "EchoAlive": {
+          "Token": "9b8fb66f55f641cd97f3299a9dbabea0",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "9b8fb66f55f641cd97f3299a9dbabea0",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:15:37",
+      "finished": "2026-09-09T19:15:47",
+      "response_seconds": 10.01600000000326,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "9b8fb66f55f641cd97f3299a9dbabea0",
+          "Uptime": 1341,
+          "FreeHeap": 118644,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_4",
+      "command": {
+        "ColourPalette": 4,
+        "EchoAlive": {
+          "Token": "152c4b8398a34d249ca1b0a4142ab90d",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "152c4b8398a34d249ca1b0a4142ab90d",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:15:47",
+      "finished": "2026-09-09T19:15:57",
+      "response_seconds": 10.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "152c4b8398a34d249ca1b0a4142ab90d",
+          "Uptime": 1351,
+          "FreeHeap": 118644,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_5",
+      "command": {
+        "ColourPalette": 5,
+        "EchoAlive": {
+          "Token": "1a50842753ac4ed188b3299ea1229895",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "1a50842753ac4ed188b3299ea1229895",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:15:57",
+      "finished": "2026-09-09T19:16:07",
+      "response_seconds": 10.079000000027008,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "1a50842753ac4ed188b3299ea1229895",
+          "Uptime": 1361,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_6",
+      "command": {
+        "ColourPalette": 6,
+        "EchoAlive": {
+          "Token": "ebf0f23609a747418da628bb51c2b8f4",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "ebf0f23609a747418da628bb51c2b8f4",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:16:07",
+      "finished": "2026-09-09T19:16:17",
+      "response_seconds": 10.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "ebf0f23609a747418da628bb51c2b8f4",
+          "Uptime": 1371,
+          "FreeHeap": 118588,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_7",
+      "command": {
+        "ColourPalette": 7,
+        "EchoAlive": {
+          "Token": "66d543161946425c9f17c55d0c431952",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "66d543161946425c9f17c55d0c431952",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:16:17",
+      "finished": "2026-09-09T19:16:27",
+      "response_seconds": 10.01600000000326,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "66d543161946425c9f17c55d0c431952",
+          "Uptime": 1381,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_8",
+      "command": {
+        "ColourPalette": 8,
+        "EchoAlive": {
+          "Token": "4b25c6fcdc044a6b933264ca4338aa68",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "4b25c6fcdc044a6b933264ca4338aa68",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:16:27",
+      "finished": "2026-09-09T19:16:37",
+      "response_seconds": 10.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "4b25c6fcdc044a6b933264ca4338aa68",
+          "Uptime": 1391,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_9",
+      "command": {
+        "ColourPalette": 9,
+        "EchoAlive": {
+          "Token": "804e37c5682f4ab5bd1c510fd947a279",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "804e37c5682f4ab5bd1c510fd947a279",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:16:37",
+      "finished": "2026-09-09T19:16:47",
+      "response_seconds": 10.063000000023749,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "804e37c5682f4ab5bd1c510fd947a279",
+          "Uptime": 1401,
+          "FreeHeap": 118576,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_10",
+      "command": {
+        "ColourPalette": 10,
+        "EchoAlive": {
+          "Token": "1b5f3dfe10ad412cbf998d9a37da86da",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "1b5f3dfe10ad412cbf998d9a37da86da",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:16:47",
+      "finished": "2026-09-09T19:16:59",
+      "response_seconds": 12.23399999999674,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "1b5f3dfe10ad412cbf998d9a37da86da",
+          "Uptime": 1411,
+          "FreeHeap": 118584,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_11",
+      "command": {
+        "ColourPalette": 11,
+        "EchoAlive": {
+          "Token": "c796793ff2bc42d5815558f3e0fed7bf",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "c796793ff2bc42d5815558f3e0fed7bf",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:16:59",
+      "finished": "2026-09-09T19:17:09",
+      "response_seconds": 10.063000000023749,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "c796793ff2bc42d5815558f3e0fed7bf",
+          "Uptime": 1421,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_12",
+      "command": {
+        "ColourPalette": 12,
+        "EchoAlive": {
+          "Token": "2539b2c3c5044370b8ba6c2b97ea0585",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "2539b2c3c5044370b8ba6c2b97ea0585",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:17:09",
+      "finished": "2026-09-09T19:17:19",
+      "response_seconds": 10.014999999955762,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "2539b2c3c5044370b8ba6c2b97ea0585",
+          "Uptime": 1431,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_13",
+      "command": {
+        "ColourPalette": 13,
+        "EchoAlive": {
+          "Token": "6b0b38041cad462f9ce5834163de36e3",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "6b0b38041cad462f9ce5834163de36e3",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:17:19",
+      "finished": "2026-09-09T19:17:29",
+      "response_seconds": 10.01600000000326,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "6b0b38041cad462f9ce5834163de36e3",
+          "Uptime": 1441,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_14",
+      "command": {
+        "ColourPalette": 14,
+        "EchoAlive": {
+          "Token": "de84fb8702fc457e88bc4e219cf44684",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "de84fb8702fc457e88bc4e219cf44684",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:17:29",
+      "finished": "2026-09-09T19:17:39",
+      "response_seconds": 10.063000000023749,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "de84fb8702fc457e88bc4e219cf44684",
+          "Uptime": 1451,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    },
+    {
+      "test_group": "palettes",
+      "test_name": "palette_15",
+      "command": {
+        "ColourPalette": 15,
+        "EchoAlive": {
+          "Token": "9d10b1127ccc4ebab3b6687929be4a6e",
+          "DelaySeconds": 10
+        }
+      },
+      "token": "9d10b1127ccc4ebab3b6687929be4a6e",
+      "passed": true,
+      "failure_reason": null,
+      "started": "2026-09-09T19:17:39",
+      "finished": "2026-09-09T19:17:49",
+      "response_seconds": 10.01500000001397,
+      "lwt_event": null,
+      "response_payload": {
+        "EchoAlive": {
+          "Token": "9d10b1127ccc4ebab3b6687929be4a6e",
+          "Uptime": 1461,
+          "FreeHeap": 118600,
+          "MinFreeHeap": 83928,
+          "FreePSRAM": 0
+        }
+      }
+    }
+  ]
+}

@@ -15,22 +15,20 @@ void mGPS_Serial::WebPage_Root_AddHandlers()
 {
   #ifdef ENABLE_FEATURE_WEBSERVER__GPS_CONFIG_DEVICE
   SPGM_CTR(PM_GPS_CONFIG_DEVICE) "/m/gpsconfig";
-
   tkr_web->server->on(PM_GPS_CONFIG_DEVICE, HTTP_ANY, [this](AsyncWebServerRequest *request){
     this->Serve_Submodule_GPSConfigDevice(request);
   });
-
+  tkr_web->AddURLasApplication(GetModuleUniqueID(), PM_GPS_CONFIG_DEVICE, "Configuration");
   AddURLtoList(PM_GPS_CONFIG_DEVICE, 0 /*HTTP_ANY*/ );
   #endif
 
   #ifdef ENABLE_FEATURE_WEBSERVER__GPS_OVERVIEW
   SPGM_CTR(PM_GPS_OVERVIEW) "/m/gpsoverview";
-
   tkr_web->server->on(PM_GPS_OVERVIEW, HTTP_ANY, [this](AsyncWebServerRequest *request){
     this->Serve_Submodule_GPSOverview(request);
   });
-
-  AddURLtoList(PM_GPS_OVERVIEW, 0 /*HTTP_ANY*/ );
+  tkr_web->AddURLasApplication(GetModuleUniqueID(), PM_GPS_OVERVIEW, "Overview");
+  AddURLtoList(PM_GPS_OVERVIEW, 0 /*HTTP_ANY*/);
   #endif
 }
 

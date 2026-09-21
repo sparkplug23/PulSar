@@ -722,6 +722,16 @@ uint32_t mCamera::Stream_SetEnabled(uint32_t flag)
 
       ALOG_DBG(PSTR(D_LOG_CAMERA "Strm init"));
       rt.CamServer->begin();
+
+      
+  
+      tkr_web->AddURLasApplication(GetModuleUniqueID(), "stream", "Stream", 81);
+      tkr_web->AddURLasApplication(GetModuleUniqueID(), "picture", "Picture", 81);
+
+      #ifdef USE_MODULE_NETWORK_WEBSERVER
+        tkr_web->AddURLasApplication(GetModuleUniqueID(), "sdedit", "SD Card");
+      #endif
+
     }else{
       
       ALOG_DBG(PSTR("=========================CAM: else (!rt.CamServer) {"));
@@ -786,6 +796,7 @@ void mCamera::Init(void)
   FrameTask_Start();
   
   tkr_iDrivers->webcam_config.rtsp = 1;
+
 
   // Configured already
   module_state.mode = ModuleStatus::Running;
@@ -1146,11 +1157,11 @@ void mCamera::parse_JSONCommand(JsonParserObject obj)
   JsonParserToken jtok_sub = 0; 
   int8_t tmp_id = 0;
 
-  if(jtok = obj[D_MODULE_DRIVERS__CAMERA_CTR].getObject()["Init"])
+  if(jtok = obj[D_MODULE__DRIVERS__CAMERA__CTR].getObject()["Init"])
   {
     Init();
   }
-  if(jtok = obj[D_MODULE_DRIVERS__CAMERA_CTR].getObject()["psramInit"])
+  if(jtok = obj[D_MODULE__DRIVERS__CAMERA__CTR].getObject()["psramInit"])
   {
     psramInit();               // initialize PSRAM
         
@@ -1164,7 +1175,7 @@ void mCamera::parse_JSONCommand(JsonParserObject obj)
 
   JsonParserObject jobj = 0; 
   
-  if(!(jobj = obj[D_MODULE_DRIVERS__CAMERA_CTR].getObject()))
+  if(!(jobj = obj[D_MODULE__DRIVERS__CAMERA__CTR].getObject()))
   {
     ALOG_ERR(PSTR(D_LOG_CAMERA "No Cam object found"));
     return;
@@ -1433,32 +1444,32 @@ uint8_t mCamera::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
 }
 
-void mCamera::MQTTHandler_Init()
+void mCamera::Telemetry_Init()
 {
 
-  struct handler<mCamera>* ptr;
+  struct telemetry_handler<mCamera>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetConfigPeriod(); 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mCamera::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_state_ifchanged;
+  ptr = &telemetry_state_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1;//tkr_mqtt->GetIfChangedPeriod(); 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_IFCHANGED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mCamera::ConstructJSON_State;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
 }
 

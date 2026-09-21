@@ -42,7 +42,7 @@
 * SECTION: Network Configs
 ************************************/  
 
-#define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
   
 /***********************************
@@ -103,7 +103,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 // #define USE_FUNCTION_TEMPLATE
 // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // "{"
-//   "\"" D_MODULE_DRIVERS__CAMERA_CTR "\":{"
+//   "\"" D_MODULE__DRIVERS__CAMERA__CTR "\":{"
 //     "\"Mirror\":0,"
 //     "\"Flip\":0,"
 //     "\"AWB\":0,"
@@ -246,7 +246,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 * SECTION: Network Configs
 ************************************/  
 
-#define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
   
 /***********************************
@@ -309,7 +309,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 #define USE_FUNCTION_TEMPLATE
 DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 "{"
-  "\"" D_MODULE_DRIVERS__CAMERA_CTR "\":{"
+  "\"" D_MODULE__DRIVERS__CAMERA__CTR "\":{"
     "\"Mirror\":0,"
       "\"Flip\":0,"
       "\"AWB\":0,"
@@ -334,7 +334,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 * SECTION: Network Configs
 ************************************/  
 
-#define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
+#define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
 #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
   
 /***********************************
@@ -371,7 +371,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 #define USE_FUNCTION_TEMPLATE
 DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 "{"
-  "\"" D_MODULE_DRIVERS__CAMERA_CTR "\":{"
+  "\"" D_MODULE__DRIVERS__CAMERA__CTR "\":{"
     "\"Mirror\":1,"
       "\"Flip\":1,"
       "\"AWB\":0,"
@@ -544,26 +544,29 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 //     "\"" D_ENERGY "\":{"
 //         "\"DeviceCount\":1"    
 //     "},"
-//     "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":{"
+//     "\"" D_MODULE__ENERGY__PZEM004T__CTR "\":{"
 //         "\"DeviceCount\":1"    
 //     "},"
 //     "\"" D_DEVICENAME "\":{"
-//       "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":["
+//       "\"" D_MODULE__ENERGY__INTERFACE__CTR "\":["
 //         "\"" D_DRIVER_ENERGY_0_FRIENDLY_NAME_CTR "\""
 //       "],"
-//       "\"" D_MODULE_ENERGY_PZEM004T_CTR "\":["
+//       "\"" D_MODULE__ENERGY__PZEM004T__CTR "\":["
 //         "\"" D_SENSOR_PZEM004T_0_FRIENDLY_NAME_CTR "\""
 //       "],"
-//       "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+//       "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
 //         "\"" "TrackingActive" "\""
 //       "]"
 //     "},"
 //     "\"" D_SENSORADDRESS "\":{"
-//       "\"" D_MODULE_ENERGY_INTERFACE_CTR "\":[" 
+//       "\"" D_MODULE__ENERGY__INTERFACE__CTR "\":[" 
 //         D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
 //       "]"  
-//     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":60,\"ConfigPeriod\":120}"  
+//     "},"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
   "}";
 
 
@@ -611,7 +614,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // // #define ENABLE_DEBUG_LINE_HERE2
 // // #define ENABLE_DEBUG_LINE_HERE3
 // // #define ENABLE_DEBUG_LINE_HERE_TRACE
-// // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+// // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
 // // #define USE_DEBUG_PRINT
 // // #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
 
@@ -638,7 +641,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 
 // 
 // 
-// #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+// #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
 //  // until devices can reliably be used without compiling per device
 // 
     
@@ -903,39 +906,42 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // "{"
 //   "\"" D_DEVICENAME "\":{"
-//     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+//     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
 //       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\","
 //       "\"" D_DEVICE_SENSOR_MOTION1_FRIENDLY_NAME_LONG "\","
 //       "\"" D_DEVICE_SENSOR_MOTION2_FRIENDLY_NAME_LONG "\""
 //     "],"
-//     "\"" D_MODULE_SENSORS__TOF_VL53L0X__CTR "\":["
+//     "\"" D_MODULE__SENSORS__TOF_VL53L0X__CTR "\":["
 //       "\"" "TOF_VL53L0X" "\""
 //     "],"
-//     "\"" D_MODULE_SENSORS__TOF_VL53L1X__CTR "\":["
+//     "\"" D_MODULE__SENSORS__TOF_VL53L1X__CTR "\":["
 //       "\"" "TOF_VL53L1X" "\""
 //     "],"
-//     "\"" D_MODULE_SENSORS_SR04_CTR "\":["
+//     "\"" D_MODULE__SENSORS__SR04__CTR "\":["
 //       "\"" "SRO4" "\""
 //     "],"
-//     "\"" D_MODULE_SENSORS_SWITCHES_CTR "\":["
+//     "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
 //       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
 //     "],"
-//     "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+//     "\"" D_MODULE__SENSORS__BUTTONS__CTR "\":["
 //       "\"" "WallRed" "\","
 //       "\"" "WallBlue" "\","
 //       "\"" "DoorAlert" "\""
 //     "],"
-//     "\"" D_MODULE_DRIVERS_LEDS_CTR "\":["
+//     "\"" D_MODULE__DRIVERS__LEDS__CTR "\":["
 //       "\"" "WallRed" "\","
 //       "\"" "WallBlue" "\","
 //       "\"" "StatusLED" "\""
 //     "],"
-//     "\"" D_MODULE_SENSORS_BME_CTR "\":["
+//     "\"" D_MODULE__SENSORS__BME__CTR "\":["
 //       "\"" D_DEVICE_SENSOR_CLIMATE "\""
 //     "]"
-//   "},"
-//   "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
-//   "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+//   "},"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
+//   "\"MQTT_Interface_Priority\":{\"" D_MODULE__ENERGY__INTERFACE__CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
 // "}";
 
 
@@ -1011,7 +1017,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 // #define ENABLE_DEBUG_LINE_HERE2
 // #define ENABLE_DEBUG_LINE_HERE3
 // #define ENABLE_DEBUG_LINE_HERE_TRACE
-// #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+// #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
 // #define USE_DEBUG_PRINT
 // #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
 
@@ -1043,7 +1049,7 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 
 // 
 // 
-// #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+// #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
 //  // until devices can reliably be used without compiling per device
 // 
     
@@ -1123,14 +1129,17 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 "{"
   "\"" D_DEVICENAME "\":{"
-    "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+    "\"" D_MODULE__SENSORS__PIR__CTR "\":["
       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
     "],"
-    "\"" D_MODULE_SENSORS_BME_CTR "\":["
+    "\"" D_MODULE__SENSORS__BME__CTR "\":["
       "\"" D_DEVICE_SENSOR_BME_680_NAME "\""
     "]"
-  "},"
-  "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}"
+  "},"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}"
 "}";
 
 

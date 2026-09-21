@@ -194,8 +194,8 @@ void mHVAC::CommandSet_ProgramTimer_TimeOn(uint8_t zone_id, uint8_t value)
   zone[zone_id].program_timer_method->StartTimer_Minutes(value);
   
   functionhandler_programs_timers.flags.run_now = true;
-  mqtthandler_program_timers_ifchanged.flags.SendNow = true;
-  mqtthandler_program_timers_teleperiod.flags.SendNow = true;
+  telemetry_program_timers_ifchanged.flags.SendNow = true;
+  telemetry_program_timers_teleperiod.flags.SendNow = true;
   // isanychanged_timers = true;
   
   #ifdef ENABLE_LOG_LEVEL_COMMANDS

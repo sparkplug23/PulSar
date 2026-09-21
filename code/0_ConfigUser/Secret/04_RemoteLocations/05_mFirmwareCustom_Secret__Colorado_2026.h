@@ -1,0 +1,5278 @@
+#ifndef _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_COLORADO25_H
+#define _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_COLORADO25_H
+
+#include "2_CoreSystem/mGlobalMacros.h"
+#include "2_CoreSystem/11_Languages/mLanguageDefault.h"
+
+/*** Colorado Lighting Overview
+ * Stairs: PIR standby testing (Never got working, would be ideal this year!)
+ * Redboard1: Whitehall playlists (Could test on snow tree?)
+ * Redboard2:
+ * Playlist: Serial debugger of playlist
+ * Santa Hat: 2D Python/Effect Tester (Put on minifridge)
+ * 
+ */
+
+
+// Lets set up a webcamera for my two cones in the office
+// Then, use these while away to test the animation effects on a cone (ie to get the whitehall lights working!)
+
+
+/**************************************************************************************************************************************************
+***************************************************************************************************************************************************
+****** Enable Defines*******************************************************************************************************************************
+****************************************************************************************************************************************************
+*******************************************************************************************************************************************/
+
+/**
+ * String of 100 under TV, bucket? something to hold them.
+ * Use: Nightlight only
+ * Status: On all the time
+ * Will enter standby mode, as red, darkest.
+ * Motion of PIR will turn them on for 1 minutes, then 1 minute fade to standby.
+**/
+// #define DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_01
+
+/**
+ * @brief under the bed? PIR2, use them wrapped around my bed stand as nightlight, or, closest/basement door?
+ * 100 leds, by motion.
+ * Development Notes:
+ * * Button A/B for local control
+ * * Status LED 
+ * *  
+ * 
+ */
+// #define DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_02
+
+
+/**
+ * Laptop testing
+ * * Creating new "Light Standy" and "Light Resume" (leave standy) 
+ * 
+ */
+// #define DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_03
+
+
+/***
+ * Another LED device will be used for button controller
+ */
+// single device, create then test on one bare wire 100leds, then compile in to that set
+
+
+ /**
+  * @brief Isolated radar sensor will be used for lighting, this esp32, will use a controller 
+  * (or else the slave will listen on mqtt) and will take the data, and use this to apply 
+  * saturation changes. Otherwise always on, but RADAR will change saturation.
+  * PART A: ESP32 + RADAR Only
+  * PART B: ESP32 12v ones outside under deck, or, the clear ones just hang across the rocks?
+  */
+//#define RUN ON 200 5V LEDS, OUTSIDE
+
+ /**
+  * Whitehall Tree full playlist (using render_compression)
+  * on Green 12V
+  */
+  // #define DEVICE_COLORADO25__REDBOARD_01
+
+/**
+ * @brief clear 12V
+ * Meadows playlist (and timing)
+ **/
+  // #define DEVICE_COLORADO25__REDBOARD_02
+
+/**
+ * @brief 
+ * Physical connected to laptop just when testing playlist loading, then flash to REDBOARDS
+ */
+//#define DEVICE_COLORADO25__PLAYLIST_TESTBED
+
+
+
+/**
+ * RADAR Sensor
+ * * LED1 : Status LED1 (which must show network, mqtt, other modes in blinks ... other layered mode, is PWM=Distance)
+ * * Currently in the kitchen, proximity should show LED brightness?
+ * part A of the above??
+ */
+// #define DEVICE_COLORADO25__MOTION_SENSOR_RADAR
+
+/**
+ * 4x201 Black 2.5cm Pixels
+ * Santa hat, matrix test
+ * Status: Only used when LED indexes are manually found, another eps32 with WLED is in use
+ * 2D testing
+**/
+// #define DEVICE_COLORADO24__MANUAL_FIND_LEDS_ON_HAT
+
+/**
+ * 4x201 Black 2.5cm Pixels
+ * Santa hat, matrix test
+ * Status: Only used when LED indexes are manually found, another eps32 with WLED is in use
+ * 2D testing
+**/
+// #define DEVICE_COLORADO24__2D_ANIMATE_LEDS_ON_HAT
+
+
+/**
+ * @brief under the bed?
+ * 100 leds, by motion.
+ * Development Notes:
+ * * RADAR will be the amount of pixels active, or at least some distance = effect
+ * 
+ * *  segment0: percent of static motion
+ * *  segment1: percent of moving motion
+ * 
+ * "percent" needs to have overlay enabled, so I can draw over another pixel without background fill
+ * LOCATION: across wall with masking tape, powered from fridge, remove when cleaners come.
+ */
+// #define DEVICE_COLORADO25__LED_STRING__RADAR_REACTIVE_01
+
+
+/**
+ * Tester
+ * Create and test whitehall tree playlist, with 2400 LEDS for timing
+ * 1D wrapped testing, leave running
+**/
+// #define DELETE _____  DEVICE_COLORADO24__STRING_02__SEQUENCER__NOLEDS
+
+/**
+ * @brief 2D whitehall tester, can I use last years test positions for this?
+ * 
+ */
+
+
+/**
+ * Create and show meadows tree?
+**/
+// #define DEVICE_COLORADO24__STRING_03__PLAYLIST_PRESETS__OUTSIDE_TREE_DEMO__250LEDS
+
+/**
+ * WEBCAM 1-3, other page
+ * LOCATION: At fridge, facing stairs
+ * LOCATION: Behind bed outside, facing mountains
+ * LOCATION: ?
+**/
+// #define DEVICE_TESTBED_WEBCAM_ARDUINO
+
+/***
+ * GPS Devices: 
+ * * GPS + 9axis, to nextion panel, just do multiline mode? or full UI.
+ * Have it log to an SD card, which I can open on my computer later with a NDJSON->GPX conversion
+ * LOCATION: Make for car, use my battery back.
+ * 
+ * 
+ * GPS?
+ * - Serial GPS to esp32
+ * -- Create poll method
+ * -- Create interrupt driven method (using uart module)
+ * -- NMEA method
+ * -- UBLOX method
+ * -- TTL UART connectors so GUI can configure and sniff. Where is my GPS sniffer build (used to be in my room) */
+// Yes, lets make a new board "GPS+Motion+SD Logger"
+// Ie get my 2 9-axis DMOF boards, and have them write to an sd card. Make 2? 
+// This would let me get the sd card file to google earth pro pipeline, and python reading working.
+// Test in CO, but should be a new device.
+
+
+
+
+ 
+
+// #define DEVICE_TESTGROUP__PZEM__SOCKET_ENERGY_01_COL25 // find issue in relay code for meadows heater
+
+
+/** ONLY POWERED/USED DAILY BELOW *************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ **************************************************************************************************************************************************************************************************************************************************************************************************************************** 
+ */
+
+
+
+
+#ifdef DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_01
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__string01__wall100leds"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define MQTT_HOST   "192.168.0.155"
+    #define MQTT_PORT     1883
+
+    #define ENABLE_DEVFEATURE_TIME__TIMEZONE_COLORADO
+    #define TIME_STD_OFFSET -360 // 7 hrs in minutes, but from 0 hour, its only 6
+    #define TIME_DST_OFFSET -360 // 7 hrs in minutes
+
+  // /***********************************
+  //  * SECTION: System Debug Options
+  // ************************************/    
+
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // #define ENABLE_FEATURE_DEBUG_POINT_TASKER_INFO_AFTER_UPSECONDS 30
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+  // #define ENABLE_SERIAL_FLUSH
+  // #define DEBUG_FASTBOOT
+  // #define ENABLE_DEBUG_LINE_HERE
+
+
+  // ///////////////////////////////////////////// Enable Logs
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // 
+  // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  // ///////////////////////////////////////////// System Logs
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // 
+  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // // #define ENABLE_DEBUG_LINE_HERE3
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
+  // // #define USE_DEBUG_PRINT
+
+  // ///////////////////////////////////////////// Module Logs
+  // // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  // /***********************************
+  //  * SECTION: System Configs
+  // ************************************/    
+ 
+  // #define SETTINGS_HOLDER 1239
+
+  // 
+  // 
+  // #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+  //  // until devices can reliably be used without compiling per device
+  // 
+      
+  // /***********************************
+  //  * SECTION: Network Configs
+  // ************************************/    
+
+  // 
+  //   
+
+  // /***********************************
+  //  * SECTION: Sensor Configs
+  // ************************************/  
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
+    
+  //   /**
+  //    * @brief 
+  //    * Button 1: Preset iter is press, hold in back to playlist
+  //    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+  //    * 
+  //    */
+
+  // /***********************************
+  //  * SECTION: Lighting Configs
+  // ************************************/  
+
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  // #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       100
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Slow Glow",
+  //       "Speed":10,
+  //       "Intensity":127,
+  //       "Grouping":1,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
+  
+
+  /**
+ * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
+ * Can be used to calibrate power usage of different types of lights
+ * 
+ * Button to be added between ground/GPIO16 to run test sequences. 
+ * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+ * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+ * 
+ */
+
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":1000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+// #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 1
+  }
+  )=====";
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+   #define USE_MODULE_SENSORS_INTERFACE
+   #define USE_MODULE_SENSORS_PIR
+    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+ #endif
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+     "\"15\":\""  D_GPIO_PIR_1_CTR "\","
+     "\"2\":\"" D_GPIO_LED1_CTR  "\""
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
+        "\"" "Roaming" "\""
+      "],"  
+     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "]"
+   "}"
+ "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
+  #define D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND 15
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  R"=====(
+  {
+    "Rules":[
+      {
+        "Name":"Rule Name",
+        "Trigger":{
+          "Module":"motion",
+          "Function":"MotionStarted",
+          "DeviceName":0,
+          "State":1
+        },
+        "Command":{
+          "Module":"pixels",
+          "Function":"SetPower",
+          "DeviceName":0,
+          "State":"Follow",
+          "JsonCommands":"{\"Standby\":{\"Wake\":10,\"fadeMs\":2000}}"
+        }
+      }
+    ]
+  }
+  )=====";
+
+  #define ENABLE_DEVFEATURE_PIR__TRIGGERING_WITH_RULES
+
+
+
+
+#endif // DEVICE_COLORADO24__STRING_01__SLOW_GLOW_ONLY__100LEDS
+
+
+
+
+
+#ifdef DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_02
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__string01__wall100leds"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  /***********************************
+    * SECTION: ENABLE by feature
+  ************************************/  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  /***********************************
+    * SECTION: Sensor Configs
+  ************************************/  
+
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+   #define USE_MODULE_SENSORS_INTERFACE
+   #define USE_MODULE_SENSORS_PIR
+    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+  #endif
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
+    
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/     
+ 
+  /**
+    * @brief 
+    * Button 1: Preset iter is press, hold in back to playlist
+    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+    * 
+    * Create a feature, that uses the button for this.
+    * Create a few versions, ie base debug, or standalone controller of like attiny85.
+    * 
+    * MODE_A
+    * * Single press = palette
+    * * Double press = effect
+    * * 3,4,5 = bus show, count, 5 should be a test sequence.
+    * * Hold (no release) = brightness
+    * 
+    * MODE_B
+    * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+    * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+    * 
+  */
+  // #define ENABLE_FEATURE_LIGHTING__BUTTON_BASIC_ANIMATION_CONTROLLER__A__MINIMAL_CONTROL
+  // #define ENABLE_FEATURE_LIGHTING__BUTTON_BASIC_ANIMATION_CONTROLLER__B__DEBUG_CONTROL
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define ENABLE_EFFECT_DESCRIPTIONS
+
+  /***
+   * Feature: Standby developing
+   */
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+  #define USE_STANDBY_TEMPLATE
+  #define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+  R"=====(
+    {
+      "Segment0": {
+        "ColourPalette":"Warm White",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":0,
+          "Intensity":85,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "Override":{
+          "Animation":{
+            "TimeMs":60000
+          }
+        }
+      },
+      "BrightnessRGB": 10
+    }
+  )=====";
+
+  #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
+  }
+  )=====";
+  
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_SENSORS_PIR
+     "\"15\":\""  D_GPIO_PIR_1_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\"," // Default of esp32 and lighting should be demo/test sequence when pressed.
+      #endif
+     "\"2\":\"" D_GPIO_LED1_CTR  "\"" // as system status
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
+#endif // END Device
+
+
+#ifdef DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_03
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__string01__wall100leds"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  /***********************************
+    * SECTION: ENABLE by feature
+  ************************************/  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  /***********************************
+    * SECTION: Sensor Configs
+  ************************************/  
+
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+   #define USE_MODULE_SENSORS_INTERFACE
+   #define USE_MODULE_SENSORS_PIR
+    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+  #endif
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
+    
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/     
+ 
+  /**
+    * @brief 
+    * Button 1: Preset iter is press, hold in back to playlist
+    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+    * 
+    * Create a feature, that uses the button for this.
+    * Create a few versions, ie base debug, or standalone controller of like attiny85.
+    * 
+    * MODE_A
+    * * Single press = palette
+    * * Double press = effect
+    * * 3,4,5 = bus show, count, 5 should be a test sequence.
+    * * Hold (no release) = brightness
+    * 
+    * MODE_B
+    * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+    * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+    * 
+  */
+  // #define ENABLE_FEATURE_LIGHTING__BUTTON_BASIC_ANIMATION_CONTROLLER__A__MINIMAL_CONTROL
+  // #define ENABLE_FEATURE_LIGHTING__BUTTON_BASIC_ANIMATION_CONTROLLER__B__DEBUG_CONTROL
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define ENABLE_EFFECT_DESCRIPTIONS
+
+  /***
+   * Feature: Standby developing
+   */
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+  #define USE_STANDBY_TEMPLATE
+  #define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+  R"=====(
+    {
+      "Segment0": {
+        "ColourPalette":"Warm White",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":0,
+          "Intensity":85,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "Override":{
+          "Animation":{
+            "TimeMs":60000
+          }
+        }
+      },
+      "BrightnessRGB": 10
+    }
+  )=====";
+
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
+  }
+  )=====";
+  
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_SENSORS_PIR
+     "\"15\":\""  D_GPIO_PIR_1_INV_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\"," // Default of esp32 and lighting should be demo/test sequence when pressed.
+      #endif
+     "\"2\":\"" D_GPIO_LED1_CTR  "\"" // as system status
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * Motion Started -> Light Animation Normal 
+  * Use json command for compound command
+  *  ** leave standby
+  *  ** restart standby_timer
+  * 
+  * 
+  */ 
+  // #define USE_RULES_TEMPLATE
+  // DEFINE_PGM_CTR(RULES_TEMPLATE)
+  // "{"
+  //   "\"Rule0\":{" //switch example
+  //     "\"Trigger\":{"
+  //       "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
+  //       "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
+  //       "\"DeviceName\":0," 
+  //       "\"State\":1"
+  //     "},"
+  //     "\"Command\":{"
+  //       "\"Module\":\"" D_MODULE__LIGHTS__ANIMATOR__CTR "\","
+  //       "\"Function\":\"" D_TASK_EVENT_SET_POWER_CTR "\","
+  //       "\"DeviceName\":0,"
+  //       "\"JsonCommands\":\"{\\\"PowerName\\\":0,\\\"Relay\\\":{\\\"TimeOn\\\":10}}\""
+  //     "}"
+  //   "}"
+  // "}";
+
+  #define USE_RULES_TEMPLATE
+  DEFINE_PGM_CTR(RULES_TEMPLATE)
+  R"=====(
+  {
+    "Rules":[
+      {
+        "Name":"Rule Name",
+        "Trigger":{
+          "Module":"motion",
+          "Function":"MotionStarted",
+          "DeviceName":0,
+          "State":1
+        },
+        "Command":{
+          "Module":"pixels",
+          "Function":"SetPower",
+          "DeviceName":0,
+          "State":"Follow",
+          "JsonCommands":"{\"Standby\":{\"DelayedStart\":20}}"
+        }
+      }
+    ]
+  }
+  )=====";
+
+  #define ENABLE_DEVFEATURE_PIR__TRIGGERING_WITH_RULES
+
+
+
+
+
+#endif // END Device
+
+
+
+
+#ifdef DEVICE_COLORADO25__REDBOARD_01
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define MQTT_HOST   "192.168.0.155"
+    #define MQTT_PORT     1883
+
+    #define ENABLE_DEVFEATURE_TIME__TIMEZONE_COLORADO
+    #define TIME_STD_OFFSET -360 // 7 hrs in minutes, but from 0 hour, its only 6
+    #define TIME_DST_OFFSET -360 // 7 hrs in minutes
+
+
+    #define DISABLE_FEATURE_LIGHTS__DECIMATE
+  // /***********************************
+  //  * SECTION: System Debug Options
+  // ************************************/    
+
+  // ///////////////////////////////////////////// Enable Logs
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // 
+  // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  // ///////////////////////////////////////////// System Logs
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // 
+  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // // #define ENABLE_DEBUG_LINE_HERE3
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
+  // // #define USE_DEBUG_PRINT
+
+  // ///////////////////////////////////////////// Module Logs
+  // // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  // /***********************************
+  //  * SECTION: System Configs
+  // ************************************/    
+ 
+  // #define SETTINGS_HOLDER 1239
+
+  // 
+  // 
+  // #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+  //  // until devices can reliably be used without compiling per device
+  // 
+      
+  // /***********************************
+  //  * SECTION: Network Configs
+  // ************************************/    
+
+  // 
+  //   
+
+  // /***********************************
+  //  * SECTION: Sensor Configs
+  // ************************************/  
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
+    
+  //   /**
+  //    * @brief 
+  //    * Button 1: Preset iter is press, hold in back to playlist
+  //    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+  //    * 
+  //    */
+
+  // /***********************************
+  //  * SECTION: Lighting Configs
+  // ************************************/  
+
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  // #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       100
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Slow Glow",
+  //       "Speed":10,
+  //       "Intensity":127,
+  //       "Grouping":1,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
+  
+
+  /**
+ * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
+ * Can be used to calibrate power usage of different types of lights
+ * 
+ * Button to be added between ground/GPIO16 to run test sequences. 
+ * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+ * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+ * 
+ */
+
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 100
+  }
+)=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
+
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+#define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":250
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          250
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 100
+  }
+  )=====";
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+
+//  /***********************************
+//   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+//  ************************************/  
+//   #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+//  /***********************************
+//   * SECTION: Sensor Configs
+//  ************************************/  
+
+//   #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+//    #define USE_MODULE_SENSORS_INTERFACE
+//    #define USE_MODULE_SENSORS_PIR
+//     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+//  #endif
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+     "\"15\":\""  D_GPIO_PIR_1_CTR "\","
+     "\"2\":\"" D_GPIO_LED1_CTR  "\""
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "]"
+   "}"
+ "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
+#endif // DEVICE_COLORADO24__STRING_01__SLOW_GLOW_ONLY__100LEDS
+
+
+
+
+
+
+#ifdef DEVICE_COLORADO25__REDBOARD_02
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_02"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define MQTT_HOST   "192.168.0.155"
+    #define MQTT_PORT     1883
+
+    #define ENABLE_DEVFEATURE_TIME__TIMEZONE_COLORADO
+    #define TIME_STD_OFFSET -360 // 7 hrs in minutes, but from 0 hour, its only 6
+    #define TIME_DST_OFFSET -360 // 7 hrs in minutes
+
+    // #define DEVICE_COLORADO25__REDBOARD_02 20
+
+    #define     ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+
+  // /***********************************
+  //  * SECTION: System Debug Options
+  // ************************************/    
+
+  // ///////////////////////////////////////////// Enable Logs
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // 
+  // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  // ///////////////////////////////////////////// System Logs
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // 
+  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // // #define ENABLE_DEBUG_LINE_HERE3
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
+  // // #define USE_DEBUG_PRINT
+
+  // ///////////////////////////////////////////// Module Logs
+  // // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  // /***********************************
+  //  * SECTION: System Configs
+  // ************************************/    
+ 
+  // #define SETTINGS_HOLDER 1239
+
+  // 
+  // 
+  // #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+  //  // until devices can reliably be used without compiling per device
+  // 
+      
+  // /***********************************
+  //  * SECTION: Network Configs
+  // ************************************/    
+
+  // 
+  //   
+
+  // /***********************************
+  //  * SECTION: Sensor Configs
+  // ************************************/  
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
+    
+  //   /**
+  //    * @brief 
+  //    * Button 1: Preset iter is press, hold in back to playlist
+  //    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+  //    * 
+  //    */
+
+  // /***********************************
+  //  * SECTION: Lighting Configs
+  // ************************************/  
+
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  // #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       100
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Slow Glow",
+  //       "Speed":10,
+  //       "Intensity":127,
+  //       "Grouping":1,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
+  
+
+  /**
+ * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
+ * Can be used to calibrate power usage of different types of lights
+ * 
+ * Button to be added between ground/GPIO16 to run test sequences. 
+ * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+ * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+ * 
+ */
+
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
+
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+#define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":2400
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          2400
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 1
+  }
+  )=====";
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+
+//  /***********************************
+//   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+//  ************************************/  
+//   #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+//  /***********************************
+//   * SECTION: Sensor Configs
+//  ************************************/  
+
+//   #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+//    #define USE_MODULE_SENSORS_INTERFACE
+//    #define USE_MODULE_SENSORS_PIR
+//     //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+//  #endif
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+     "\"15\":\""  D_GPIO_PIR_1_CTR "\","
+     "\"2\":\"" D_GPIO_LED1_CTR  "\""
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "]"
+   "}"
+ "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
+#endif // end DEVICE
+
+
+
+
+#ifdef DEVICE_COLORADO25__PLAYLIST_TESTBED
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_02"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define MQTT_HOST   "192.168.0.155"
+    #define MQTT_PORT     1883
+
+    #define ENABLE_DEVFEATURE_TIME__TIMEZONE_COLORADO
+    #define TIME_STD_OFFSET -360 // 7 hrs in minutes, but from 0 hour, its only 6
+    #define TIME_DST_OFFSET -360 // 7 hrs in minutes
+
+
+    // #define     ENABLE_FEATURE_LIGHTING__REDUCED_PHYSICAL_OUTPUT_PIXELS_RENDERED
+
+  // /***********************************
+  //  * SECTION: System Debug Options
+  // ************************************/    
+
+  // ///////////////////////////////////////////// Enable Logs
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // 
+  // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  // ///////////////////////////////////////////// System Logs
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // 
+  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // // #define ENABLE_DEBUG_LINE_HERE3
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
+  // // #define USE_DEBUG_PRINT
+
+  // ///////////////////////////////////////////// Module Logs
+  // // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  // /***********************************
+  //  * SECTION: System Configs
+  // ************************************/    
+ 
+  // #define SETTINGS_HOLDER 1239
+
+  // 
+  // 
+  // #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+  //  // until devices can reliably be used without compiling per device
+  // 
+      
+  // /***********************************
+  //  * SECTION: Network Configs
+  // ************************************/    
+
+  // 
+  //   
+
+  // /***********************************
+  //  * SECTION: Sensor Configs
+  // ************************************/  
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
+    
+  //   /**
+  //    * @brief 
+  //    * Button 1: Preset iter is press, hold in back to playlist
+  //    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+  //    * 
+  //    */
+
+  // /***********************************
+  //  * SECTION: Lighting Configs
+  // ************************************/  
+
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  // #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       100
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Slow Glow",
+  //       "Speed":10,
+  //       "Intensity":127,
+  //       "Grouping":1,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
+  
+
+  /**
+ * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
+ * Can be used to calibrate power usage of different types of lights
+ * 
+ * Button to be added between ground/GPIO16 to run test sequences. 
+ * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+ * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+ * 
+ */
+
+
+    #define DISABLE_FEATURE_LIGHTS__DECIMATE
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  // #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+// #define USE_STANDBY_TEMPLATE
+// #define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
+
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+#define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 100
+  }
+  )=====";
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+     "\"15\":\""  D_GPIO_PIR_1_CTR "\","
+     "\"2\":\"" D_GPIO_LED1_CTR  "\""
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "]"
+   "}"
+ "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
+#endif // end DEVICE
+
+
+
+
+#ifdef DEVICE_COLORADO25__LED_STRING__RADAR_REACTIVE_01
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__string01__wall100leds"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  /***********************************
+    * SECTION: ENABLE by feature
+  ************************************/  
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+#define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  /***********************************
+    * SECTION: Sensor Configs
+  ************************************/  
+
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+   #define USE_MODULE_SENSORS_INTERFACE
+  //  #define USE_MODULE_SENSORS_PIR
+    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+  #endif
+
+#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+  #define USE_MODULE_SENSORS__RADAR_HLK_LD2410
+  #define ENABLE_FEATURE_HLK_LD2410__USE_SERIAL_CHUNK_MODE
+#endif
+  
+
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/     
+ 
+  /**
+    * @brief 
+    * Button 1: Preset iter is press, hold in back to playlist
+    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+    * 
+    * Create a feature, that uses the button for this.
+    * Create a few versions, ie base debug, or standalone controller of like attiny85.
+    * 
+    * MODE_A
+    * * Single press = palette
+    * * Double press = effect
+    * * 3,4,5 = bus show, count, 5 should be a test sequence.
+    * * Hold (no release) = brightness
+    * 
+    * MODE_B
+    * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+    * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+    * 
+  */
+  // #define ENABLE_FEATURE_LIGHTING__BUTTON_BASIC_ANIMATION_CONTROLLER__A__MINIMAL_CONTROL
+  // #define ENABLE_FEATURE_LIGHTING__BUTTON_BASIC_ANIMATION_CONTROLLER__B__DEBUG_CONTROL
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define ENABLE_EFFECT_DESCRIPTIONS
+
+  /***
+   * Feature: Standby developing
+   */
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+  #define USE_STANDBY_TEMPLATE
+  #define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+  R"=====(
+    {
+      "Segment0": {
+        "ColourPalette":"Warm White",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":0,
+          "Intensity":85,
+          "Grouping":1,
+          "RateMs": 1000
+        },
+        "Override":{
+          "Animation":{
+            "TimeMs":60000
+          }
+        }
+      },
+      "BrightnessRGB": 10
+    }
+  )=====";
+
+  #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[      
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"GRB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus Base",
+  //       "PixelRange": [
+  //         0,
+  //         100
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Static",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     },
+  //     {
+  //       "Name":"Bus Top",
+  //       "PixelRange": [
+  //         0,
+  //         100
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Percent",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus Base",
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Percent",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "SegColour1": {
+          "RGBWC": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
+  }
+  )=====";
+  
+#define USE_MODULE_CONTROLLER_CUSTOM__LIGHTNEO_RADAR_DISTANCE
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_SENSORS_PIR
+     "\"13\":\""  D_GPIO_PIR_1_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
+      "\"16\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+      "\"17\":\""  D_GPIO__HLK_LD2410_RX__CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\"," // Default of esp32 and lighting should be demo/test sequence when pressed.
+      #endif
+     "\"2\":\"" D_GPIO_LED1_CTR  "\"" // as system status
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+  
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
+#endif // END Device
+
+
+
+
+/***
+ * Created with single LD2410 radar sensor, for testing the code. 
+ * Lets place it in the kitchen, by the toilet.
+ * Make rule (proximity) sets LED1 (status LED on board)
+ * 
+ * Pins>> 
+ * FUNC : GPIO
+ * LED1 : 2
+ * PIR1 : 13
+ * LD2410_TX : 16
+ * LD2410_RX : 17
+ *
+ * 
+ * 
+ */
+#ifdef DEVICE_COLORADO25__MOTION_SENSOR_RADAR
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__string01__wall100leds"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+  #define MQTT_HOST   "192.168.0.155"
+    #define MQTT_PORT     1883
+
+    #define ENABLE_DEVFEATURE_TIME__TIMEZONE_COLORADO
+    #define TIME_STD_OFFSET -360 // 7 hrs in minutes, but from 0 hour, its only 6
+    #define TIME_DST_OFFSET -360 // 7 hrs in minutes
+
+  // /***********************************
+  //  * SECTION: System Debug Options
+  // ************************************/    
+
+  // ///////////////////////////////////////////// Enable Logs
+  // // #define DISABLE_SERIAL
+  // // #define DISABLE_SERIAL0_CORE
+  // 
+  // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  // ///////////////////////////////////////////// System Logs
+  // // #define ENABLE_ADVANCED_DEBUGGING
+  // // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // 
+  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // // #define ENABLE_DEBUG_LINE_HERE3
+  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
+  // // #define USE_DEBUG_PRINT
+
+  // ///////////////////////////////////////////// Module Logs
+  // // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  // /***********************************
+  //  * SECTION: System Configs
+  // ************************************/    
+ 
+  // #define SETTINGS_HOLDER 1239
+
+  // 
+  // 
+  // #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+  //  // until devices can reliably be used without compiling per device
+  // 
+      
+  // /***********************************
+  //  * SECTION: Network Configs
+  // ************************************/    
+
+  // 
+  //   
+
+  // /***********************************
+  //  * SECTION: Sensor Configs
+  // ************************************/  
+
+  // #define USE_MODULE_SENSORS_INTERFACE  
+  // #define USE_MODULE_SENSORS_BUTTONS
+    
+  //   /**
+  //    * @brief 
+  //    * Button 1: Preset iter is press, hold in back to playlist
+  //    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+  //    * 
+  //    */
+
+  // /***********************************
+  //  * SECTION: Lighting Configs
+  // ************************************/  
+
+  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  // #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
+
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":13,
+  //       "ColourOrder":"BGR",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segment0": {
+  //     "PixelRange": [
+  //       0,
+  //       100
+  //     ],
+  //     "ColourPalette":"Snowy 02",
+  //     "Effects": {
+  //       "Function":"Slow Glow",
+  //       "Speed":10,
+  //       "Intensity":127,
+  //       "Grouping":1,
+  //       "RateMs": 1000
+  //     },
+  //     "BrightnessRGB": 100
+  //   },
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
+  
+
+  /**
+ * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
+ * Can be used to calibrate power usage of different types of lights
+ * 
+ * Button to be added between ground/GPIO16 to run test sequences. 
+ * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
+ * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
+ * 
+ */
+
+
+
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
+  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
+
+
+  // #define ENABLE_DEBUG_LINE_HERE_TRACE
+
+  #define ENABLE_EFFECT_DESCRIPTIONS
+
+  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
+
+
+// ======================= Example PROGMEM template =======================
+// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
+#define USE_STANDBY_TEMPLATE
+#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
+// compile-time gate
+// #define LIGHTING_STANDBY_TEMPLATE_ID  5
+
+#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
+
+
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+R"=====(
+  {
+    "Segment0": {
+      "ColourPalette":"Warm White",
+      "ColourType":3,
+      "Effects": {
+        "Function":"Static",
+        "Speed":0,
+        "Intensity":85,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "Override":{
+        "Animation":{
+          "TimeMs":60000
+        }
+      }
+    },
+    "BrightnessRGB": 10
+  }
+)=====";
+// DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
+// R"=====(
+//   {
+//     "Segment0": {
+//       "ColourPalette":"Warm White",
+//       "ColourType":3,
+//       "Effects": {
+//         "Function":"Candles",
+//         "Speed":180,
+//         "Intensity":85,
+//         "Grouping":1,
+//         "RateMs": 20
+//       },
+//       "BrightnessRGB": 100
+//     },
+//     "BrightnessRGB": 100
+//   }
+// )=====";
+
+
+  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
+
+//   #define ENABLE_ADVANCED_DEBUGGING
+//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+//  #define ENABLE_DEBUG_FUNCTION_NAMES
+//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
+//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
+//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
+//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
+//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
+
+#define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[      
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Bus 1",
+        "PixelRange": [
+          0,
+          100
+        ],
+        "ColourPalette":"RGPBY",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Static",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 25
+  }
+  )=====";
+
+
+  
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+#define ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+
+#ifdef ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_24GHZ
+  #define USE_MODULE_SENSORS__RADAR_HLK_LD2410
+  #define ENABLE_FEATURE_HLK_LD2410__USE_SERIAL_CHUNK_MODE
+#endif
+  
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":5
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":100,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":200,
+  //       "Length":100
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":300,
+  //       "Length":100
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "Name":"Bus 1",
+  //       "PixelRange": [
+  //         0,
+  //         400
+  //       ],
+  //       "ColourPalette":"RGPBY",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Solid",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 25
+  // }
+  // )=====";
+
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/  
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+ /***********************************
+  * SECTION: Sensor Configs
+ ************************************/  
+
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+   #define USE_MODULE_SENSORS_INTERFACE
+  //  #define USE_MODULE_SENSORS_PIR
+    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+ #endif
+
+
+ /***********************************
+  * SECTION: Driver Configs
+ ************************************/  
+
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_LEDS
+    //#define ENABLE_DEVFEATURE_DRIVER_LED__FORCED_LED_TOGGLE_LED1
+
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"       
+      #ifdef USE_MODULE_SENSORS_PIR
+      "\"13\":\""  D_GPIO_PIR_1_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS__RADAR_HLK_LD2410
+      "\"16\":\""  D_GPIO__HLK_LD2410_TX__CTR "\","
+      "\"17\":\""  D_GPIO__HLK_LD2410_RX__CTR "\","
+      #endif
+     "\"2\":\"" D_GPIO_LED1_INV_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  
+ #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+
+ #define USE_FUNCTION_TEMPLATE
+ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+ "{"
+   "\"" D_DEVICENAME "\":{"
+     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
+       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+     "]"
+   "}"
+ "}";
+
+ /****
+  * need to make rule
+  * motion started -> leave standby, but rearm
+  * 
+  * 
+  */
+
+
+#endif // DEVICE_COLORADO25__MOTION_SENSOR_RADAR
+
+
+/**
+ * @brief At desk with 100 green leds, but ability to have serial debug
+ * Should be primary tester for colorado as I dev code
+ * ** presets
+ * ** playlists
+ * ** sequencer (test as backup to playlists)
+ */
+#ifdef DEVICE_COLORADO24__STRING_02__SEQUENCER__NOLEDS
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "xmas24__colorado__string_02"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "colorado"
+  #define MQTT_HOST   "192.168.50.206"
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  ///////////////////////////////////////////// Enable Logs
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  
+  #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  ///////////////////////////////////////////// System Logs
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  
+  #define SERIAL_LOG_LEVEL_DURING_BOOT 12
+  // #define ENABLE_DEBUG_LINE_HERE3
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
+  // #define USE_DEBUG_PRINT
+
+  ///////////////////////////////////////////// Module Logs
+  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  #define SETTINGS_HOLDER 1239
+
+
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+   // until devices can reliably be used without compiling per device
+
+  
+  
+    
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  
+    
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_BUTTONS
+    
+    /**
+     * @brief 
+     * Button 1: Preset iter is press, hold in back to playlist
+     * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+     * 
+     */
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+
+  
+
+  
+
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+  
+    
+    /********* Group: Testing ************************/
+      // Phase out
+    #define ENABLE_DEVFEATURE_LIGHT__HYPERION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
+    /********* Group: Debug options only ************************/
+    // #define ENABLE_DEBUG_LINE_HERE
+    #define ENABLE_DEBUG_SERIAL    
+
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+
+    #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
+
+  
+
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
+  
+  // _LINES
+  
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
+  
+  // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
+
+  // #define ENABLE_FEATURE_LIGHTING__SEQUENCER
+  //   #define ENABLE_FEATURE_SEQUENCER__LOAD_DEVICE_LIST
+  //   // #define ENABLE_FEATURE_SEQUENCE__DEVICE_SNOWTREE
+  //   #define ENABLE_FEATURE_SEQUENCE__DEVICE_OUTSIDETREE
+  //   #define ENABBLE_FEATURE_SEQUENCE__PLAYLIST_OUTSIDE_CHRISTMAS_TREE__VERSION_ONE__NO_TIME_RESTRAINTS 
+  //   // #define ENABBLE_FEATURE_SEQUENCE__PLAYLIST_OUTSIDE_CHRISTMAS_TREE__VERSION_TWO__ADDED_FLASHING_EFFECTS
+
+// #define ENABLE_DEBUGFEATURE__LIGHTING__MATCH_FEWER_PHYSICAL_PIXELS 20
+
+  /**
+   * @brief Testing the sequencer
+   * Get this working first, then work on playlists/presets later
+   * Make work on the 
+   * 
+   */
+  #define ENABLE_FEATURE_LIGHTING__SEQUENCER
+     #define ENABLE_FEATURE_SEQUENCER__LOAD_DEVICE_LIST
+    //  #define ENABLE_DEVFEATURE_SEQUENCER__ENABLE_TIME_RESTRAINTS
+     // #define ENABLE_FEATURE_SEQUENCE__DEVICE_SNOWTREE
+     #define ENABLE_FEATURE_SEQUENCE__DEVICE_OUTSIDETREE_2024_100LED
+     #define ENABBLE_FEATURE_SEQUENCE__PLAYLIST_OUTSIDE_CHRISTMAS_TREE__VERSION_ONE__NO_TIME_RESTRAINTS 
+     // #define ENABBLE_FEATURE_SEQUENCE__PLAYLIST_OUTSIDE_CHRISTMAS_TREE__VERSION_TWO__ADDED_FLASHING_EFFECTS
+
+
+        // effects that enable colour mapping for counting positions and testing hardware/pins
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
+
+
+  // #define ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
+
+  #define ENABLE_DEBUG_ASYNC
+
+  
+
+  #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+
+
+  
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":13,
+        "ColourOrder":"BGR",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        100
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Slow Glow",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\"" // Default of esp32 and lighting should be demo/test sequence when pressed.
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
+    "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+  "}";
+
+#endif // DEVICE_COLORADO24__STRING_02__SEQUENCER__NOLEDS
+
+
+#ifdef DEVICE_COLORADO24__STRING_03__PLAYLIST_PRESETS__OUTSIDE_TREE_DEMO__250LEDS
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__string03__outside_demo"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "colorado"
+  // #define MQTT_HOST   "192.168.50.206"  //SLS
+  #define MQTT_HOST   "192.168.50.106" // Billie Left
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  ///////////////////////////////////////////// Enable Logs
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  
+  #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  ///////////////////////////////////////////// System Logs
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  
+  #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // #define ENABLE_DEBUG_LINE_HERE3
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
+  // #define USE_DEBUG_PRINT
+
+  ///////////////////////////////////////////// Module Logs
+  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  #define SETTINGS_HOLDER 1239
+
+  
+  
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+   // until devices can reliably be used without compiling per device
+  
+      
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  
+    
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_BUTTONS
+    
+    /**
+     * @brief 
+     * Button 1: Preset iter is press, hold in back to playlist
+     * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+     * 
+     */
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
+
+  // 4, 16, 17, 18, 19, 21, 22, 23, 2, 13, 14, 27, 26, 25, 33, 32
+  /**
+   * @brief 2023 Snow Tree physical wiring connection 
+   * 35
+   * 34
+   * RX0
+   * TX0
+   * 5
+   * 2
+   * 15
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":250
+      },
+      {
+        "Pin":19,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":250,
+        "Length":250
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        500
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Static",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif // DEVICE_COLORADO24__STRING_03__PLAYLIST_PRESETS__OUTSIDE_TREE_DEMO__250LEDS
+
+
+#ifdef DEVICE_COLORADO24__STRING_04__PLAYLIST_PRESETS__OUTSIDE_TREE_DEMO__VIRTUAL2000LEDS
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__string04__virtual_outside"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "colorado"
+  #define MQTT_HOST   "192.168.50.206"
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  ///////////////////////////////////////////// Enable Logs
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  
+  #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  ///////////////////////////////////////////// System Logs
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  // 
+  #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // #define ENABLE_DEBUG_LINE_HERE3
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
+  // #define USE_DEBUG_PRINT
+
+  ///////////////////////////////////////////// Module Logs
+  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  #define SETTINGS_HOLDER 1239
+
+  
+  
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+   // until devices can reliably be used without compiling per device
+  
+      
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  
+    
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_BUTTONS
+    
+    /**
+     * @brief 
+     * Button 1: Preset iter is press, hold in back to playlist
+     * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+     * 
+     */
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
+
+  /**
+   * @brief Outside Tree as 300*8 LEDs
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":300
+      },
+      {
+        "Pin":16,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":300,
+        "Length":300
+      },
+      {
+        "Pin":17,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":600,
+        "Length":300
+      },
+      {
+        "Pin":18,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":900,
+        "Length":300
+      },
+      {
+        "Pin":19,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":1200,
+        "Length":300
+      },
+      {
+        "Pin":21,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":1500,
+        "Length":300
+      },
+      {
+        "Pin":22,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":1800,
+        "Length":300
+      },
+      {
+        "Pin":23,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":2100,
+        "Length":300
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        2400
+      ],
+      "ColourPalette":"Christmas Snowy 02",
+      "Effects": {
+        "Function":"Static",
+        "Speed":1,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 1000
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 50,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif // DEVICE_COLORADO24__STRING_04__PLAYLIST_PRESETS__OUTSIDE_TREE_DEMO__VIRTUAL2000LEDS
+
+
+#ifdef DEVICE_COLORADO24__STRING_05__PLAYLIST_PRESETS__OUTSIDE_TREE_DEMO__100LEDS
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__string05__outside_demo"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "colorado"
+  // #define MQTT_HOST   "192.168.50.206"  //SLS
+  #define MQTT_HOST   "192.168.50.106" // Billie Left
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  ///////////////////////////////////////////// Enable Logs
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  
+  #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  ///////////////////////////////////////////// System Logs
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  
+  #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // #define ENABLE_DEBUG_LINE_HERE3
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
+  // #define USE_DEBUG_PRINT
+
+  ///////////////////////////////////////////// Module Logs
+  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  #define SETTINGS_HOLDER 1239
+
+  
+  
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+   // until devices can reliably be used without compiling per device
+  
+      
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  
+    
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_BUTTONS
+    
+    /**
+     * @brief 
+     * Button 1: Preset iter is press, hold in back to playlist
+     * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+     * 
+     */
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
+
+  // 4, 16, 17, 18, 19, 21, 22, 23, 2, 13, 14, 27, 26, 25, 33, 32
+  /**
+   * @brief 2023 Snow Tree physical wiring connection 
+   * 35
+   * 34
+   * RX0
+   * TX0
+   * 5
+   * 2
+   * 15
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        100
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Static",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "BrightnessRGB": 100
+    },
+    "BrightnessRGB": 100
+  }
+  )=====";
+  
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif // DEVICE_COLORADO24__STRING_05__PLAYLIST_PRESETS__OUTSIDE_TREE_DEMO__100LEDS
+
+
+
+#ifdef DEVICE_COLORADO24__STRING_06__AP_MODE_TESTING
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__string05__outside_demo"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "colorado"
+  // #define MQTT_HOST   "192.168.50.206"  //SLS
+  #define MQTT_HOST   "192.168.50.106" // Billie Left
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  ///////////////////////////////////////////// Enable Logs
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  
+  #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
+  
+  ///////////////////////////////////////////// System Logs
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+  
+  #define SERIAL_LOG_LEVEL_DURING_BOOT 8
+  // #define ENABLE_DEBUG_LINE_HERE3
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
+  // #define USE_DEBUG_PRINT
+
+  ///////////////////////////////////////////// Module Logs
+  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  #define SETTINGS_HOLDER 1239
+
+  
+  
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+   // until devices can reliably be used without compiling per device
+  
+      
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  
+    
+
+  #define ENABLE_DEVFEATURE_WIFI_CONNECTION_VERSION2_2025 // Use WLED methods instead of Tas, make my own
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_BUTTONS
+    
+    /**
+     * @brief 
+     * Button 1: Preset iter is press, hold in back to playlist
+     * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+     * 
+     */
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
+  #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
+
+  // 4, 16, 17, 18, 19, 21, 22, 23, 2, 13, 14, 27, 26, 25, 33, 32
+  /**
+   * @brief 2023 Snow Tree physical wiring connection 
+   * 35
+   * 34
+   * RX0
+   * TX0
+   * 5
+   * 2
+   * 15
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        100
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Static",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "BrightnessRGB": 100
+    },
+    "BrightnessRGB": 100
+  }
+  )=====";
+  
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif // DEVICE_COLORADO24__STRING_06__AP_MODE_TESTING
+
+/** ONLY RUNNING SOMETIMES BELOW eg fetching LED indexs *************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ **************************************************************************************************************************************************************************************************************************************************************************************************************************** 
+ */
+
+
+
+#ifdef DEVICE_COLORADO24__MANUAL_FIND_LEDS_ON_HAT
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "xmas24__colorado__redboard_02"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "colorado"
+  #define MQTT_HOST   "192.168.50.206"
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  
+
+  #define SERIAL_LOG_LEVEL_DURING_BOOT 12
+
+  // #define ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
+
+  // #define ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS
+  // #define ENABLE_DEBUG_LINE_HERE3
+  
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
+
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  #define SETTINGS_HOLDER 1239
+
+
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+   // until devices can reliably be used without compiling per device
+
+  
+  
+    
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  
+    
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_BUTTONS
+    
+    /**
+     * @brief 
+     * Button 1: Preset iter is press, hold in back to playlist
+     * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+     * 
+     */
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+
+  
+
+  
+
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+  
+    
+    /********* Group: Testing ************************/
+      // Phase out
+    #define ENABLE_DEVFEATURE_LIGHT__HYPERION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
+    /********* Group: Debug options only ************************/
+    // #define ENABLE_DEBUG_LINE_HERE
+    #define ENABLE_DEBUG_SERIAL    
+
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+
+    
+  
+
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
+  
+  // _LINES
+  
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
+  
+  // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
+
+  /**
+   * @brief Testing the sequencer
+   * Get this working first, then work on playlists/presets later
+   * Make work on the 
+   * 
+   */
+  // #define ENABLE_FEATURE_LIGHTING__SEQUENCER
+  //    #define ENABLE_FEATURE_SEQUENCER__LOAD_DEVICE_LIST
+  //   //  #define ENABLE_DEVFEATURE_SEQUENCER__ENABLE_TIME_RESTRAINTS
+  //    // #define ENABLE_FEATURE_SEQUENCE__DEVICE_SNOWTREE
+  //    #define ENABLE_FEATURE_SEQUENCE__DEVICE_OUTSIDETREE_2024_100LED
+  //    #define ENABBLE_FEATURE_SEQUENCE__PLAYLIST_OUTSIDE_CHRISTMAS_TREE__VERSION_ONE__NO_TIME_RESTRAINTS 
+  //    // #define ENABBLE_FEATURE_SEQUENCE__PLAYLIST_OUTSIDE_CHRISTMAS_TREE__VERSION_TWO__ADDED_FLASHING_EFFECTS
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
+    "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+  "}";
+
+        // effects that enable colour mapping for counting positions and testing hardware/pins
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
+
+
+  // #define ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
+
+  #define ENABLE_DEBUG_ASYNC
+  
+  // #define ENABLE_FEATURE_LIGHTING__SEQUENCER
+  //   #define ENABLE_FEATURE_SEQUENCER__LOAD_DEVICE_LIST
+  //   // #define ENABLE_FEATURE_SEQUENCE__DEVICE_SNOWTREE
+  //   #define ENABLE_FEATURE_SEQUENCE__DEVICE_OUTSIDETREE
+  //   #define ENABBLE_FEATURE_SEQUENCE__PLAYLIST_OUTSIDE_CHRISTMAS_TREE__VERSION_ONE__NO_TIME_RESTRAINTS 
+  //   // #define ENABBLE_FEATURE_SEQUENCE__PLAYLIST_OUTSIDE_CHRISTMAS_TREE__VERSION_TWO__ADDED_FLASHING_EFFECTS
+
+
+  
+
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+ #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
+
+  #define ENABLE_BUSCONFIG_OPTION_01
+
+
+  #ifdef ENABLE_BUSCONFIG_16X_3200
+
+  // 4, 16, 17, 18, 19, 21, 22, 23, 2, 13, 14, 27, 26, 25, 33, 32
+  /**
+   * @brief 2023 Snow Tree physical wiring connections
+   * 
+   * 35
+   * 34
+   * RX0
+   * TX0
+   * 5
+   * 2
+   * 15
+   * 
+   * 
+   * 
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":200
+      },
+      {
+        "Pin":18,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":200,
+        "Length":200
+      },
+      {
+        "Pin":19,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":400,
+        "Length":200
+      },
+      {
+        "Pin":21,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":600,
+        "Length":200
+      },
+      {
+        "Pin":16,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":800,
+        "Length":200
+      },
+      {
+        "Pin":17,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1000,
+        "Length":200
+      },
+      {
+        "Pin":22,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1200,
+        "Length":200
+      },
+      {
+        "Pin":23,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1400,
+        "Length":200
+      },
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1600,
+        "Length":200
+      },
+      {
+        "Pin":12,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1800,
+        "Length":200
+      },
+      {
+        "Pin":26,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2000,
+        "Length":200
+      },
+      {
+        "Pin":32,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2200,
+        "Length":200
+      },
+      {
+        "Pin":14,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2400,
+        "Length":200
+      },
+      {
+        "Pin":27,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2600,
+        "Length":200
+      },
+      {
+        "Pin":25,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2800,
+        "Length":100
+      },
+      {
+        "Pin":33,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB", 
+        "Start":3000,
+        "Length":200
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        3200
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Sweep Random",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 10,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  #endif
+
+
+  #ifdef ENABLE_BUSCONFIG_OPTION_01
+
+
+  #define ENABLE_FEATURE_LIGHTING__REALTIME_MODES
+  #define ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
+
+  // 4, 16, 17, 18, 19, 21, 22, 23, 2, 13, 14, 27, 26, 25, 33, 32
+  /**
+   * @brief 2023 Snow Tree physical wiring connections
+   * 
+   * 35
+   * 34
+   * RX0
+   * TX0
+   * 5
+   * 2
+   * 15
+   * 
+   * 
+   * 
+   * 
+   {
+  "BrightnessRGB": 100,
+  "SegColour0": {
+    "RGBWC": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "MQTTPixel": {
+    "OnPixels": [
+      25,65,105,144,180,223,258,291,324,354,383,412,438,463,487,510,532,554,575,594,613,630,646,661,676,691,705,719,732,744,755,765,774,783,791,797
+    ]
+  }
+}{
+  "BrightnessRGB": 100,
+  "SegColour0": {
+    "RGBWC": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "MQTTPixel": {
+    "OnPixels": [
+      25,65,105,143,180,223,258,291,324,354,383,412,438,463,487,510,532,554,575,594,613,630,646,661,676,691,705,719,732,744,755,765,774,783,791,797,803,
+      26,66,106,144,181,224,256,292,325,355,384,413,439,464,488,511,533,555,576,595,614,631,647,662,677,692,706,720,733,745,756,766,775,784,792,798,804
+    ]
+  }
+}
+
+
+
+{
+  "BrightnessRGB": 100,
+  "SegColour0": {
+    "RGBWC": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "MQTTPixel": {
+    "OnPixels": [
+      25,65,105,143,180,223,258,291,324,354,383,412,438,463,487,510,532,554,575,594,613,630,646,661,676,691,705,719,732,744,755,765,774,783,791,797,803,
+      26,66,106,144,181,224,256,292,325,355,384,413,439,464,488,511,533,555,576,595,614,631,647,662,677,692,706,720,733,745,756,766,775,784,792,798,804,
+      3,45,85,124,162,206,241,275,308,340,370,399,426,452,476,500,522,544,565,585,605,623,639,655,670,685,699,713,726,738,749,760,770,779,787,794,800    ]
+  }
+}
+
+   * 
+   * 
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":19,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":201
+      },
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":201,
+        "Length":201
+      },
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":402,
+        "Length":201
+      },
+      {
+        "Pin":18,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":603,
+        "Length":201
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        804
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Sweep Random",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 10,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+  #endif
+
+  
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif // DEVICE_COLORADO24__MANUAL_FIND_LEDS_ON_HAT
+
+
+
+
+/** ONLY NOT BEING USED YET BELOW *************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ ****************************************************************************************************************************************************************************************************************************************************************************************************************************
+ **************************************************************************************************************************************************************************************************************************************************************************************************************************** 
+ */
+
+
+#ifdef DEVICE_COLORADO24__MATRIX_MAPPED_PULSAR
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "xmas24__colorado__redboard_01_matrix"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "colorado"
+  #define MQTT_HOST   "192.168.50.206"
+    #define MQTT_PORT     1883
+
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/    
+
+  
+
+  #define SERIAL_LOG_LEVEL_DURING_BOOT 12
+
+  // #define ENABLE_DEVFEATURE_PINS__GPIO_VIEWER_LIBRARY
+
+  // #define ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
+
+  // #define DISABLE_SERIAL
+  // #define DISABLE_SERIAL0_CORE
+  
+  
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
+  // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
+
+  // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS
+  // #define ENABLE_DEBUG_LINE_HERE3
+  
+  #define ENABLE_FREERAM_APPENDING_SERIAL
+  #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
+
+  #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
+
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/    
+ 
+  #define SETTINGS_HOLDER 1239
+
+
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
+   // until devices can reliably be used without compiling per device
+
+  
+  
+    
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  
+    
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  #define USE_MODULE_SENSORS_INTERFACE  
+  #define USE_MODULE_SENSORS_BUTTONS
+    
+    /**
+     * @brief 
+     * Button 1: Preset iter is press, hold in back to playlist
+     * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
+     * 
+     */
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
+  
+  
+
+  
+
+  
+
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+  
+    
+    /********* Group: Testing ************************/
+      // Phase out
+    #define ENABLE_DEVFEATURE_LIGHT__HYPERION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
+    /********* Group: Debug options only ************************/
+    // #define ENABLE_DEBUG_LINE_HERE
+    #define ENABLE_DEBUG_SERIAL    
+
+
+// #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX  
+    #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+    
+    #define ENABLE_DEVFEATURE_LIGHT__HARDCODE_MATRIX_SETUP  
+    #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+    // #define ENABLE_DEVFEATURE_LIGHT__MATRIX_LOAD_PALETTE_PATCH_IN_WEBUI_PALETTE_CHANGE
+  
+  
+   #define ENABLE_DEVFEATURE_LIGHT__MATRIX_COLORADO_MATRIX_TREE
+    #define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__START_Y 0
+    #define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP_Y 8 // Height
+    #define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__STOP 32 // Width
+    #define ENABLE_DEVFEATURE_LIGHT__MATRIX_HARDCODED_INIT_VALUES__VERTICAL 0 // Vertical
+
+  #endif 
+
+
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S_SINGLE_CHANNELS_THEN_8_RMT_CHANNELS
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S1_PARALLEL_8_CHANNELS_MODE
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+
+    
+  
+
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
+  
+  // _LINES
+  
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
+  
+  // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
+    "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
+  "}";
+
+        // effects that enable colour mapping for counting positions and testing hardware/pins
+
+  #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
+
+
+  // #define ENABLE_DEBUG_SPLASH_SYSTEM_PERFORMANCE_METRICS_TO_SERIAL
+
+  #define ENABLE_DEBUG_ASYNC
+  
+  // #define ENABLE_FEATURE_LIGHTING__SEQUENCER
+  //   #define ENABLE_FEATURE_SEQUENCER__LOAD_DEVICE_LIST
+  //   // #define ENABLE_FEATURE_SEQUENCE__DEVICE_SNOWTREE
+  //   #define ENABLE_FEATURE_SEQUENCE__DEVICE_OUTSIDETREE
+  //   #define ENABBLE_FEATURE_SEQUENCE__PLAYLIST_OUTSIDE_CHRISTMAS_TREE__VERSION_ONE__NO_TIME_RESTRAINTS 
+  //   // #define ENABBLE_FEATURE_SEQUENCE__PLAYLIST_OUTSIDE_CHRISTMAS_TREE__VERSION_TWO__ADDED_FLASHING_EFFECTS
+
+
+  
+
+
+  // #define ENABLE_NEOPIXELBUS_BUSMETHODS__I2S0_PARALLEL_16_CHANNELS_MODE
+
+#define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
+
+  #define ENABLE_BUSCONFIG_OPTION_01
+
+
+  #ifdef ENABLE_BUSCONFIG_16X_3200
+
+  // 4, 16, 17, 18, 19, 21, 22, 23, 2, 13, 14, 27, 26, 25, 33, 32
+  /**
+   * @brief 2023 Snow Tree physical wiring connections
+   * 
+   * 35
+   * 34
+   * RX0
+   * TX0
+   * 5
+   * 2
+   * 15
+   * 
+   * 
+   * 
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":200
+      },
+      {
+        "Pin":18,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":200,
+        "Length":200
+      },
+      {
+        "Pin":19,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":400,
+        "Length":200
+      },
+      {
+        "Pin":21,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":600,
+        "Length":200
+      },
+      {
+        "Pin":16,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":800,
+        "Length":200
+      },
+      {
+        "Pin":17,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1000,
+        "Length":200
+      },
+      {
+        "Pin":22,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1200,
+        "Length":200
+      },
+      {
+        "Pin":23,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1400,
+        "Length":200
+      },
+      {
+        "Pin":13,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1600,
+        "Length":200
+      },
+      {
+        "Pin":12,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1800,
+        "Length":200
+      },
+      {
+        "Pin":26,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2000,
+        "Length":200
+      },
+      {
+        "Pin":32,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2200,
+        "Length":200
+      },
+      {
+        "Pin":14,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2400,
+        "Length":200
+      },
+      {
+        "Pin":27,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2600,
+        "Length":200
+      },
+      {
+        "Pin":25,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2800,
+        "Length":100
+      },
+      {
+        "Pin":33,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB", 
+        "Start":3000,
+        "Length":200
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        3200
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Sweep Random",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 10,
+    "BrightnessCCT": 0
+  }
+  )=====";
+  #endif
+
+
+  #ifdef ENABLE_BUSCONFIG_OPTION_01
+
+  // 4, 16, 17, 18, 19, 21, 22, 23, 2, 13, 14, 27, 26, 25, 33, 32
+  /**
+   * @brief 2023 Snow Tree physical wiring connections
+   * 
+   * 35
+   * 34
+   * RX0
+   * TX0
+   * 5
+   * 2
+   * 15
+   * 
+   * 
+   * 
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":250
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        250
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Sweep Random",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "BrightnessRGB": 100,
+      "BrightnessCCT": 0
+    },
+    "BrightnessRGB": 100,
+    "BrightnessCCT": 0
+  }
+  )=====";
+
+  #endif
+
+  
+  /***********************************
+   * SECTION: Template Configs
+  ************************************/    
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif // DEVICE_COLORADO24__MATRIX_MAPPED_PULSAR
+
+
+
+
+
+#ifdef DEVICE_TESTBED_WEBCAM_ARDUINO   //based on arduino core example : Feb 2023
+  #define DEVICENAME_CTR                            "testbed_camera"
+  #define DEVICENAME_FRIENDLY_CTR                   "testbed_camera"
+  #define DEVICENAME_ROOMHINT_CTR                   "Testbed"
+  #define MQTT_HOST   "192.168.1.70"
+    #define MQTT_PORT 1883
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  
+  
+
+  #define DISABLE_SLEEP
+  #define ENABLE_DEVFEATURE_SETDEBUGOUTPUT
+
+  #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+
+  // #define USE_MODULE_DRIVERS_CAMERA_OV2640
+  #define USE_MODULE_DRIVERS__CAMERA_ARDUINO
+    #define CAMERA_MODEL_WROVER_KIT
+  // #define USE_MODULE_DRIVERS__CAMERA_TASMOTA
+  //   #define ENABLE_DEVFEATURE_CAMERA_TASMOTA_INCLUDE_WEBSERVER
+
+  
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"      
+      "\"2\":\"" D_GPIO_LED1_INV_CTR "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif // DEVICE_TESTBED_WEBCAM_ARDUINO
+
+
+
+
+#ifdef DEVICE_COLORADO__WEBCAM_WROVER_01   //based on arduino core example : Feb 2023
+  #define DEVICENAME_CTR                            "colorado_camera_01"
+  #define DEVICENAME_FRIENDLY_CTR                   "colorado_camera_01"
+  #define DEVICENAME_ROOMHINT_CTR                   "Colorado"
+  #define MQTT_HOST   "192.168.50.206"
+    #define MQTT_PORT 1883
+
+  #define ENABLE_FEATURE_WATCHDOG_TIMER
+  
+  
+
+  #define DISABLE_SLEEP
+  #define ENABLE_DEVFEATURE_SETDEBUGOUTPUT
+
+  #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+
+  // #define USE_MODULE_DRIVERS_CAMERA_OV2640
+    #define CAMERA_MODEL_WROVER_KIT
+  // #define USE_MODULE_DRIVERS__CAMERA_TASMOTA
+  //   #define ENABLE_DEVFEATURE_CAMERA_TASMOTA_INCLUDE_WEBSERVER
+
+  
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"      
+      "\"2\":\"" D_GPIO_LED1_INV_CTR "\""
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif // DEVICE_TESTBED_WEBCAM_ARDUINO
+
+
+
+
+
+
+/**NEEDS SPORTING BELOW************************************************************************************************************************************************
+***************************************************************************************************************************************************
+***************************************************************************************************************************************************
+*************************************************************************************************************************************************
+****** SECTION: Boards for testing ******************************************************************************************************************
+****************************************************************************************************************************************************
+***************************************************************************************************************************************************
+***************************************************************************************************************************************************
+*******************************************************************************************************************************************/
+
+
+
+
+
+
+
+
+
+
+/***
+ * 
+{
+    "0": {},
+    "1": {
+        "n": "Slot 1",
+        "Segment0": {
+            "PixelRange": [
+                0,
+                100
+            ],
+            "ColourPalette": "Snowy 02",
+            "Effects": {
+                "Function": "Slow Glow",
+                "Speed": 127,
+                "Intensity": 127,
+                "Grouping": 1,
+                "RateMs": 1000
+            },
+            "BrightnessRGB": 100
+        },
+        "BrightnessRGB": 100
+    },
+    "2": {
+        "n": "Slot 2",
+        "Segment0": {
+            "PixelRange": [
+                0,
+                100
+            ],
+            "ColourPalette": "Snowy 02",
+            "Effects": {
+                "Function": "Slow Glow",
+                "Speed": 127,
+                "Intensity": 127,
+                "Grouping": 1,
+                "RateMs": 1000
+            },
+            "BrightnessRGB": 100
+        },
+        "BrightnessRGB": 100
+    }
+}
+
+
+{
+  "0": {},
+  "1": {
+    "n": "Static,Snowy02,S127,R4000,G1,D0",
+    "ColourPalette":"Snowy 02",
+    "Effects": {
+      "Function":"Static",
+      "Intensity":127,
+      "Speed":127,
+      "Grouping":1,
+      "Decimate":0,
+      "Reverse":0,
+      "RateMs": 4000
+    },
+    "BrightnessRGB": 100
+  },
+  "2": {
+    "n": "FastPops,Snowy02,S255,R50,G1,D10",
+    "ColourPalette":"Snowy 02",
+    "Effects": {
+      "Function":"Slow Glow",
+      "Intensity":20,
+      "Speed":255,
+      "Grouping":1,
+      "Decimate":10,
+      "RateMs": 50
+    },
+    "BrightnessRGB": 100
+  },
+  "3": {
+    "n": "StepPalette,ColourfulPairs,S200,R2000,G1,D0",
+    "ColourPalette":"Colourful Pairs 01",
+    "Effects": {
+      "Function":"Stepping Palette",
+      "Intensity":20,
+      "Speed":200,
+      "Grouping":1,
+      "Decimate":0,
+      "RateMs": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "4": {
+    "n": "StepPalette,ColourfulPairs,S200,R3000,G10,D0",
+    "ColourPalette":"Colourful Pairs 01",
+    "Effects": {
+      "Function":"Stepping Palette",
+      "Intensity":20,
+      "Speed":200,
+      "Grouping":10,
+      "Decimate":0,
+      "RateMs": 3000
+    },
+    "BrightnessRGB": 100
+  },
+  "5": {
+    "n": "Static,Snowy02,S200,R4000,G10,D0",
+    "ColourPalette":"Snowy 02",
+    "Effects": {
+      "Function":"Static",
+      "Intensity":20,
+      "Speed":200,
+      "Grouping":10,
+      "Decimate":0,
+      "RateMs": 4000
+    },
+    "BrightnessRGB": 100
+  },  
+  "6": {
+    "n":"RotatingPrevious,Snowy02,S255,R20,G1,D0",    
+    "ColourPalette":"Snowy 02",
+    "Effects": {
+      "Function":"Rotating Previous",
+      "Intensity":0,
+      "Speed":255,
+      "Grouping":1,
+      "Decimate":0,
+      "RateMs": 20
+    },
+    "BrightnessRGB": 100
+  },
+  "7": {
+    "n":"SpannedPalette,Random01,S126,R2000,G1,D0",    
+    "ColourPalette":"Random 01",
+    "Effects": {
+      "Function":"Gradient",
+      "Intensity":255,
+      "Speed":126,
+      "Grouping":1,
+      "Decimate":0,
+      "RateMs": 2000
+    },
+    "BrightnessRGB": 100
+  },
+  "8": {
+    "n":"SweepRandom,Snowy02,S255,R25,G1,D0",    
+    "ColourPalette":"Snowy 02",
+    "Effects": {
+      "Function":"Sweep Random",
+      "Intensity":255,
+      "Speed":255,
+      "Grouping":1,
+      "Decimate":0,
+      "RateMs": 25
+    },
+    "BrightnessRGB": 100
+  },
+  "9": {
+    "n":"Twinkle Snowy on White, Snowy 02, 0/100, G1, D0",    
+    "ColourPalette":"Snowy 02",
+    "Effects": {
+      "Function":"Twinkle Palette Two on One",
+      "Intensity":3,
+      "Speed":255,
+      "Grouping":1,
+      "Decimate":0,
+      "Param0":99,
+      "RateMs": 50
+    },
+    "BrightnessRGB": 95
+  },
+  "10": {
+    "n":"Twinkle Snowy on White, Snowy 02, 0/100, G1, D0",    
+    "ColourPalette":"Cold White",
+    "Effects": {
+      "Function":"Twinkle Palette Two on One",
+      "Intensity":20,
+      "Speed":255,
+      "Grouping":1,
+      "Decimate":0,
+      "Param0":125,
+      "RateMs": 100
+    },
+    "BrightnessRGB": 20
+  },
+  "11": {
+    "n":"Shimmer, Snowy 02, 0/25, G1, D0",    
+    "ColourPalette":"Snowy 02",
+    "Effects": {
+      "Function":"Shimmer",
+      "Intensity":255,
+      "Speed":200,
+      "Grouping":1,
+      "Decimate":0,
+      "RateMs": 25
+    },
+    "BrightnessRGB": 100
+  },
+  "12": {
+    "n":"Meteor Smooth, Orange & Teal",    
+    "ColourPalette":"Orange & Teal",
+    "Effects": {
+      "Function":"Meteor Smooth",
+      "Intensity":142,
+      "Speed":70,
+      "Grouping":1,
+      "RateMs": 23
+    },
+    "BrightnessRGB": 100
+  }
+}
+
+
+ */
+
+  
+
+
+
+#ifdef DEVICE_TESTGROUP__PZEM__SOCKET_ENERGY_01_COL25
+  #define DEVICENAME_CTR          "socket_energy_01_col25"
+  #define DEVICENAME_FRIENDLY_CTR "hvac_oil_radiator #1"
+  #define DEVICENAME_ROOMHINT_CTR "Roaming"
+  #define MQTT_HOST   "192.168.0.155"
+  //   #define MQTT_PORT     1883
+
+    #define ENABLE_LOGGING_ADDLOG__MESSAGES_OVER_MQTT
+
+    #define USE_MODULE_CORE_FILESYSTEM
+    
+  /***********************************
+   * SECTION: System Debug Options
+  ************************************/  
+
+ 
+  /***********************************
+   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+  ************************************/  
+
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__BME
+
+  #define ENABLE_TEMPLATE_SECTION__ENERGY
+  #define ENABLE_TEMPLATE_SECTION__ENERGY__PZEM
+
+ 
+  /***********************************
+   * SECTION: Storage Configs
+  ************************************/  
+
+
+  /***********************************
+   * SECTION: System Configs
+  ************************************/     
+
+  #define USE_TEMPLATED_DEFAULT_OTA_RECOVERY_METHODS
+
+  #define DEVICENAMEBUFFER_NAME_BUFFER_LENGTH 800
+
+  /***********************************
+   * SECTION: Network Configs
+  ************************************/    
+
+  
+  
+
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/  
+
+  #ifdef ENABLE_TEMPLATE_SECTION__SENSORS__BME
+    #define USE_MODULE_SENSORS_INTERFACE
+      #define USE_DEVFEATURE_INTERNALISE_UNIFIED_SENSOR_INTERFACE_COLOUR_HEATMAP
+    #define USE_MODULE_SENSORS_BME
+  #endif
+
+  #define USE_MODULE_SENSORS_INTERFACE  
+  //#define USE_MODULE_SENSORS_BUTTONS
+    
+
+  // #define USE_MODULE_SENSORS_DS18X20
+
+  /***********************************
+   * SECTION: Display Configs
+  ************************************/  
+
+  // #define USE_MODULE_DISPLAYS_INTERFACE
+  // #define USE_MODULE_DISPLAYS_OLED_SH1106
+  //   #define SHOW_SPLASH
+ 
+  /***********************************
+   * SECTION: Driver Configs
+  ************************************/  
+ 
+  #define USE_MODULE_DRIVERS_INTERFACE
+  #define USE_MODULE_DRIVERS_RELAY
+
+ 
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/  
+        
+  /***********************************
+   * SECTION: Energy Configs
+  ************************************/  
+
+  // #ifdef ENABLE_TEMPLATE_SECTION__ENERGY
+  //   #define USE_MODULE_ENERGY_INTERFACE
+  // #endif
+  
+  // #ifdef ENABLE_TEMPLATE_SECTION__ENERGY__PZEM
+  //   #define USE_MODULE_ENERGY_PZEM004T_V3
+  //     #define ENABLE_DEVFEATURE_REDUCE_SUBORDINATE_MQTT_REPORTING_ENERGY // If energy_interface is primary reporting, reduce pzem to slower (debug only)
+  //   #define MAX_ENERGY_SENSORS 1
+  //   #define MAX_PZEM004T_DEVICES 17
+  //   #define ENABLE_DEVFEATURE_PZEM004T__AUTOSEARCH
+  // #endif
+
+  /***********************************
+   * SECTION: Controller Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: MQTT Template Test Loading
+  ************************************/  
+
+  /***********************************
+   * SECTION: GPIO Template
+  ************************************/  
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{" 
+      #ifdef USE_MODULE_ENERGY_PZEM004T_V3
+      "\"16\":\""  D_GPIO_PZEM0XX_RX_MODBUS_CTR "\"," 
+      "\"17\":\""  D_GPIO_PZEM0XX_TX_CTR "\","
+      #endif
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_SENSORS_BH1750) || defined(USE_MODULE_ENERGY_INA219) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR   "\","
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR   "\","   
+      #endif
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"27\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      #endif
+      #ifdef USE_MODULE_DRIVERS_RELAY
+      "\"26\":\"" D_GPIO_REL_CTR "1" "\","
+      "\"2\":\"" D_GPIO_REL_CTR "2" "\","" // use LED as temporary relay tester
+      #endif  
+
+    "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/    
+
+
+  /***********************************
+   * SECTION: TEMPLATE: Names
+  ************************************/    
+
+  #define D_DEVICE_UNIQUE_NAME "Socket"
+  #define D_DEVICE_SENSOR_PZEM004T_0_ADDRESS "16"
+  #define D_DEVICE_SENSOR_ZONE_0_NAME "OilRadiator01-BME0"
+  #define D_DEVICE_DRIVER_RELAY_0_NAME "Socket"
+  
+  #define D_DEVICE_SENSOR_DB18S20_0_NAME        "Radiator"
+  #define D_DEVICE_SENSOR_DB18S20_0_ADDRESS     "[40,143,81,7,51,20,1,189]"
+
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
+        "\"" D_DEVICE_DRIVER_RELAY_0_NAME "\""
+      "],"
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "],"
+      "\"" D_MODULE__SENSORS__SWITCHES__CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "],"
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "],"      
+      "\"" D_MODULE__ENERGY__INTERFACE__CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "],"
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "],"
+      "\"" D_MODULE__ENERGY__PZEM004T__CTR "\":["
+        "\"" D_DEVICE_UNIQUE_NAME "\""
+      "]"
+    "},"
+    "\"" D_SENSORADDRESS "\":{"
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":{" 
+        "\"" D_DEVICE_SENSOR_DB18S20_0_NAME "\":" D_DEVICE_SENSOR_DB18S20_0_ADDRESS ","
+      "},"  
+      "\"" D_MODULE__ENERGY__INTERFACE__CTR "\":[" 
+        D_DEVICE_SENSOR_PZEM004T_0_ADDRESS ""
+      "]"  
+    "},"
+    "\"" D_ENERGY "\":{"
+        "\"DeviceCount\":1"    
+    "},"
+    "\"" "HVACZone" "\":{"
+      "\"" "SetSensor" "\":["
+        "\"" D_DEVICE_SENSOR_ZONE_0_NAME "\""
+      "],"
+      "\"" "SetOutput" "\":["
+        "{"
+          "\"" "ModuleID" "\":\"" D_MODULE__DRIVERS__RELAY__CTR "\","
+          "\"" "DriverName" "\":\"" D_DEVICE_DRIVER_RELAY_0_NAME "\"," // Also an array to match heating/cooling
+          "\"" "HVAC_Type" "\":[" "\"Heating\"" "]"
+        "}"
+      "]"
+    "},"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
+    "\"MQTT_Interface_Priority\":{\"" D_MODULE__ENERGY__INTERFACE__CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+  "}";
+
+
+#endif
+
+
+
+
+
+
+
+
+#endif // _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_CHRISTMAS23_H

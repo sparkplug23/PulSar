@@ -1,31 +1,14 @@
-/**
-  mRF433Codes.ino - RF transceiver using RcSwitch library
-
-  Copyright (C) 2022    Michael Doone
-
-  This program is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-**/
-
 #include "mRF433Codes.h"
 
 #ifdef USE_MODULE_DRIVERS_RF433_CODES
 
-int8_t mRF433Codes::Tasker(uint8_t function, JsonParserObject obj){
+int8_t mRF433Codes::Tasker(uint8_t function, JsonParserObject obj)
+{
 
-  switch(function){
+  switch(function)
+  {
     /************
-     * INIT SECTION * 
+     * INIT SECTION
     *******************/
     case TASK_PRE_INIT:
       Pre_Init();
@@ -39,658 +22,75 @@ int8_t mRF433Codes::Tasker(uint8_t function, JsonParserObject obj){
 
   switch(function)
   {
-    
     /************
-     * PERIODIC SECTION * 
+     * PERIODIC SECTION
     *******************/
     case TASK_EVERY_50_MSECOND:
       ReceiveCheck();
     break;
+
     case TASK_UPDATE_OTA_BEFORE_ON_START:
       ALOG_INF(PSTR("disableReceive"));
-      mySwitch->disableReceive();
+      if(mySwitch != nullptr)
+      {
+        mySwitch->disableReceive();
+      }
     break;
-    case TASK_EVERY_FIVE_SECOND:{
-      
-      // AddLog(LOG_LEVEL_INFO,PSTR("tkr_set->Settings.rf_protocol_mask=%d"), tkr_set->Settings.rf_protocol_mask);
 
-      
-    // mySwitch->disableReceive();
+    case TASK_EVERY_FIVE_SECOND:
+    break;
 
-    //   SubTask_SendCommand_Up();
-    //   SubTask_SendCommand_Up();
-    //   SubTask_SendCommand_Up();
-
-      
-// // low, 8 high then low, held high 5000ms... code
-
-
-// uint16_t pre_command_raw[] = {
-
-//   // 2000, //low
-//   400, 600,
-//   400, 600,
-//   400, 600,
-//   400, 600,
-//   400, 600,
-//   400, 600,
-//   400, 600,
-//   400, 600,
-
-
-
-
-// };
-
-
-// digitalWrite(22, LOW); // set low first, header will toggle high again
-// delayMicroseconds(2000);
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(2500);
-
-// digitalWrite(22, LOW); // set low first, header will toggle high again
-// delayMicroseconds(2200);
-
-
-
-// for(uint16_t i=0;i<ARRAY_SIZE(pre_command_raw); i++)
-// {
-//   // if(i%2)
-  
-//   digitalWrite(22, ((i%2)==1)?LOW:HIGH);
-//   delayMicroseconds(pre_command_raw[i]);
-// }
-// digitalWrite(22, LOW);
-
-
-
-
-// /**
-//  * @brief State starts high, toggles ie [0] = high, [1] = low..... finish with assert low
-//  * 
-//  */
-// uint16_t up_command_raw[] = {
-  
-// 4958,655,
-// 550,333,
-// 227,652,
-// 549,331,
-// 228,653, //10
-
-// 547,338,
-// 543,336,
-// 224,656,
-// 225,661,
-// 542,337, //20
-
-// 222,658,
-// 544,339,
-// 222,655,
-// 225,658,
-// 227,653, //30
-
-// 228,651,
-// 225,657,
-// 545,336,
-// 546,334,
-// 547,337, //40
-
-// 544,335,
-// 225,655,
-// 226,655,
-// 548,333,
-// 227,655, //50
-
-// 547,336,
-// 546,336,
-// 543,341,
-// 541,336,
-// 224,658, //60
-
-// 544,337,
-// 545,337,
-// 544,340,
-// 221,660,
-// 220,658, //70
-
-// 544,338,
-// 543,339,
-// 543,335,
-// 546,339,
-// 541,338, //80
-
-// 542,338,      //6of6 fat tops
-// //start of 12 narrow tops
-// 223,655,   // 1/12 up as thin
-// 225,657,
-// 225,656,
-// 225,655, //90
-
-// 226,660,
-// 220,658,
-// 223,656,
-// 226,655,
-// 226,657, //100
-// 224,661, //wrong after this   10/12
-// 224, 661, //short here manually added   11/12
-// 224, 661, //completely added by me
-
-// //
-// // after 12 short top pulses
-
-// 551,334,
-// 223,664,
-// 548,336,
-// 546,337,
-// 554,335,
-
-// 546,335,
-// 226,658,544,335,226,655,226,653,547,338,544,334,545
-
-
-
-
-// // 550,335,
-// // 226,661,
-// // 543,334,
-// // 547,334,
-// // 547,339,
-// // 541,338,
-// // 228,653,
-// // 553,328,
-// // 232,648,
-// // 231,654,
-// // 548,332,
-// // 550,330,
-
-// // 548
-
-// // 653,223,
-// // 657,547, //110
-
-// // 333, //110
-
-// // 227,655,
-// // 226,653,
-// // 548,339,
-// // 543,338,
-// // 542,338, //120
-
-// // 223,655,
-// // 545,338,
-// // 544,334,
-
-
-// // 227,656,224
-
-// };
-
-// uint8_t logic_level = LOW;
-
-// // digitalWrite(22, HIGH); // set low first, header will toggle high again
-// // delayMicroseconds(8000);
-
-
-// // digitalWrite(22, LOW); // set low first, header will toggle high again
-// // delayMicroseconds(10000);
-
-// // digitalWrite(22, HIGH); // set low first, header will toggle high again
-// // delayMicroseconds(10000);
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(5000);
-
-// for(uint8_t j=0;j<11;j++)
-// {
-
-
-
-// for(uint16_t i=0;i<ARRAY_SIZE(up_command_raw); i++)
-// {
-
-// digitalWrite(22, !digitalRead(22));
-// delayMicroseconds(up_command_raw[i]);
-
-
-// }
-// digitalWrite(22, LOW);
-
-// delayMicroseconds(5000);
-
-
-// }
-
-
-    }break;
     /************
-     * COMMANDS SECTION * 
+     * COMMANDS SECTION
     *******************/
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
+
     /************
-     * MQTT SECTION * 
+     * TELEMETRY SECTION
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      #ifdef USE_MODULE_NETWORK_MQTT
+      Telemetry_Init();
+      #endif
+    break;
+
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      #ifdef USE_MODULE_NETWORK_MQTT
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+      #endif
+    break;
+
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      #ifdef USE_MODULE_NETWORK_MQTT
+      tkr_tele->Telemetry_Rate(telemetry_list);
+      #endif
+    break;
+
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    #endif
+
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    #endif
+
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
-    break;
-    #endif // USE_MODULE_NETWORK_MQTT
+    #endif
   }
 
   return TASKER_RESULT__UNKNOWN_ID;
 
-}//end
-
-
-void mRF433Codes::SubTask_SendCommand_Up()
-{
-  SubTask_SendCommand_Up_PreTrain();
-  SubTask_SendCommand_Up_Block2(10);
-  SubTask_SendCommand_Up_Block2(10);
-  SubTask_SendCommand_Up_Block2(11);
-
-
 }
 
-#define PULSE_SHORT 280
-#define PULSE_LONG 600 
-
-void mRF433Codes::SubTask_SendCommand_Up_PreTrain()
-{
-
-      /**
-       * @brief 
-       * Start frame to notidy device of incoming message
-       * 
-       */
-// low, 8 high then low, held high 5000ms... code
-
-uint8_t  pre_command_raw_start_state = HIGH;
-uint16_t pre_command_raw[] = {
-
-  PULSE_SHORT, PULSE_LONG,  // HIGH, LOW
-  PULSE_SHORT, PULSE_LONG,
-  PULSE_SHORT, PULSE_LONG,
-  PULSE_SHORT, PULSE_LONG,
-  PULSE_SHORT, PULSE_LONG,
-  PULSE_SHORT, PULSE_LONG,
-  PULSE_SHORT, PULSE_LONG,
-  PULSE_SHORT, PULSE_LONG,
-
-  // 5000, //5 ms up
-
-  //final 5000ms down should be part of repeating code gaurd period and sent as first bit below
-
-
-
-
-};
-
-
-digitalWrite(22, LOW); // Starting with down state
-delay(27);
-
-for(uint16_t i=0;i<ARRAY_SIZE(pre_command_raw); i++)
-{
-  // if(i%2)
-  
-  // digitalWrite(22, ((i%2)==0)?LOW:HIGH);
-      digitalWrite(22, !digitalRead(22));
-  delayMicroseconds(pre_command_raw[i]);
-}
-
-// digitalWrite(22, HIGH);
-// delayMicroseconds(5000);
-
-// NO DELAY, START PULSE AS HEADER 
-
-
-
-
-}
-
-
-void mRF433Codes::SubTask_SendCommand_Up_Block2(int repeats)
-{
-
-
-
-/**
- * @brief State starts high, toggles ie [0] = high, [1] = low..... finish with assert low
- * 
- */
-uint16_t up_command_raw[] = {
-  
-5000, //header high
-PULSE_LONG, //low, still part of header in 3state
-
-
-PULSE_LONG,PULSE_SHORT, //h,l
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG, //10
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT, //20
-
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG, //30
-
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT, //40
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG, //50
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG, //60
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG, //70
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT, //80
-
-PULSE_LONG,PULSE_SHORT,      //6of6 fat tops
-//start of 12 narrow tops
-PULSE_SHORT,PULSE_LONG,   // 1/12 up as thin
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG, //90
-
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG, //100
-PULSE_SHORT,PULSE_LONG, //wrong after this   10/12
-PULSE_SHORT, PULSE_LONG, //short here manually added   11/12
-PULSE_SHORT, PULSE_LONG, //completely added by me
-
-//
-// after 12 short top pulses
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_SHORT,PULSE_LONG,
-PULSE_SHORT,PULSE_LONG,
-PULSE_LONG,PULSE_SHORT,
-PULSE_LONG,PULSE_SHORT,
-
-PULSE_LONG,
-
-5000//tailer guard of LOW signal
-
-
-// 550,335,
-// 226,661,
-// 543,334,
-// 547,334,
-// 547,339,
-// 541,338,
-// 228,653,
-// 553,328,
-// 232,648,
-// 231,654,
-// 548,332,
-// 550,330,
-
-// 548
-
-// 653,223,
-// 657,547, //110
-
-// 333, //110
-
-// 227,655,
-// 226,653,
-// 548,339,
-// 543,338,
-// 542,338, //120
-
-// 223,655,
-// 545,338,
-// 544,334,
-
-
-// 227,656,224
-
-};
-
-uint8_t logic_level = LOW;
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(8000);
-
-
-// digitalWrite(22, LOW); // set low first, header will toggle high again
-// delayMicroseconds(10000);
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(10000);
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(5000);
-
-  for(uint8_t j=0;j<repeats;j++)
-  {
-
-    digitalWrite(22, LOW);
-    for(uint16_t i=0;i<ARRAY_SIZE(up_command_raw); i++)
-    {
-      digitalWrite(22, !digitalRead(22));
-      // digitalWrite(22, ((i%2)==0)?LOW:HIGH);
-      // ALOG_INF("i=%d,state=%d", i, ((i%2)==0)?LOW:HIGH );
-      delayMicroseconds(up_command_raw[i]);
-    }
-    digitalWrite(22, LOW);
-
-  // delayMicroseconds(5000);
-  }
-
-
-}
-
-
-
-
-void mRF433Codes::SubTask_SendCommand_Up_Block(int repeats)
-{
-
-
-
-/**
- * @brief State starts high, toggles ie [0] = high, [1] = low..... finish with assert low
- * 
- */
-uint16_t up_command_raw[] = {
-  
-4958,655, // header
-550,333,
-227,652,
-549,331,
-228,653, //10
-
-547,338,
-543,336,
-224,656,
-225,661,
-542,337, //20
-
-222,658,
-544,339,
-222,655,
-225,658,
-227,653, //30
-
-228,651,
-225,657,
-545,336,
-546,334,
-547,337, //40
-
-544,335,
-225,655,
-226,655,
-548,333,
-227,655, //50
-
-547,336,
-546,336,
-543,341,
-541,336,
-224,658, //60
-
-544,337,
-545,337,
-544,340,
-221,660,
-220,658, //70
-
-544,338,
-543,339,
-543,335,
-546,339,
-541,338, //80
-
-542,338,      //6of6 fat tops
-//start of 12 narrow tops
-223,655,   // 1/12 up as thin
-225,657,
-225,656,
-225,655, //90
-
-226,660,
-220,658,
-223,656,
-226,655,
-226,657, //100
-224,661, //wrong after this   10/12
-224, 661, //short here manually added   11/12
-224, 661, //completely added by me
-
-//
-// after 12 short top pulses
-
-551,334,
-223,664,
-548,336,
-546,337,
-554,335,
-
-546,335,
-226,658,544,335,226,655,226,653,547,338,544,334,545,
-
-5000//tailer guard of LOW signal
-
-
-// 550,335,
-// 226,661,
-// 543,334,
-// 547,334,
-// 547,339,
-// 541,338,
-// 228,653,
-// 553,328,
-// 232,648,
-// 231,654,
-// 548,332,
-// 550,330,
-
-// 548
-
-// 653,223,
-// 657,547, //110
-
-// 333, //110
-
-// 227,655,
-// 226,653,
-// 548,339,
-// 543,338,
-// 542,338, //120
-
-// 223,655,
-// 545,338,
-// 544,334,
-
-
-// 227,656,224
-
-};
-
-uint8_t logic_level = LOW;
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(8000);
-
-
-// digitalWrite(22, LOW); // set low first, header will toggle high again
-// delayMicroseconds(10000);
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(10000);
-
-// digitalWrite(22, HIGH); // set low first, header will toggle high again
-// delayMicroseconds(5000);
-
-  for(uint8_t j=0;j<repeats;j++)
-  {
-
-    digitalWrite(22, LOW);
-    for(uint16_t i=0;i<ARRAY_SIZE(up_command_raw); i++)
-    {
-      digitalWrite(22, !digitalRead(22));
-      // digitalWrite(22, ((i%2)==0)?LOW:HIGH);
-      // ALOG_INF("i=%d,state=%d", i, ((i%2)==0)?LOW:HIGH );
-      delayMicroseconds(up_command_raw[i]);
-    }
-    digitalWrite(22, LOW);
-
-  // delayMicroseconds(5000);
-  }
-
-
-}
 
 void mRF433Codes::Pre_Init(void)
 {
@@ -701,16 +101,17 @@ void mRF433Codes::Pre_Init(void)
 void mRF433Codes::Init(void)
 {
 
-  if (tkr_pins->PinUsed(GPIO_RF_433MHZ_RX)) 
+  if(tkr_pins->PinUsed(GPIO_RF_433MHZ_RX))
   {
 
-    if (tkr_set->Settings.rf_duplicate_time < 10) {
+    if(tkr_set->Settings.rf_duplicate_time < 10)
+    {
       tkr_set->Settings.rf_duplicate_time = RF_TIME_AVOID_DUPLICATE;
     }
 
-    pinMode( tkr_pins->GetPin(GPIO_RF_433MHZ_RX), INPUT);
+    pinMode(tkr_pins->GetPin(GPIO_RF_433MHZ_RX), INPUT);
 
-    if(mySwitch==nullptr)
+    if(mySwitch == nullptr)
     {
       mySwitch = new RCSwitch();
     }
@@ -718,315 +119,411 @@ void mRF433Codes::Init(void)
     ALOG_INF(PSTR("mRF433Codes RX: %d"), tkr_pins->GetPin(GPIO_RF_433MHZ_RX));
 
     mySwitch->enableReceive(tkr_pins->GetPin(GPIO_RF_433MHZ_RX));
-    // if (!tkr_set->Settings.rf_protocol_mask) {
-      // tkr_set->Settings.rf_protocol_mask = (1ULL << mySwitch->getNumProtos()) -1;
-      // Correctly only permits protocol 1 through
-      tkr_set->Settings.rf_protocol_mask = (1ULL << 1) -1; //only want number 2?
-    // }
+
+    tkr_set->Settings.rf_protocol_mask = (1ULL << 1) - 1;
 
     #ifndef ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
     mySwitch->setReceiveProtocolMask(tkr_set->Settings.rf_protocol_mask);
-    #endif // ENABLE_DEVFETURE_DISABLE_EXTENDED_FEATURES_START
+    #endif
 
     module_state.mode = ModuleStatus::Running;
   }
 
-  if (tkr_pins->PinUsed(GPIO_RF_433MHZ_TX)) 
+  if(tkr_pins->PinUsed(GPIO_RF_433MHZ_TX))
   {
-    
-    if(mySwitch==nullptr)
+
+    if(mySwitch == nullptr)
     {
       mySwitch = new RCSwitch();
     }
 
     mySwitch->enableTransmit(tkr_pins->GetPin(GPIO_RF_433MHZ_TX));
+
+    ALOG_INF(PSTR("mRF433Codes TX: %d"), tkr_pins->GetPin(GPIO_RF_433MHZ_TX));
+
     module_state.mode = ModuleStatus::Running;
   }
 
 }
 
 
-void mRF433Codes::ReceiveCheck(void) 
+void mRF433Codes::ReceiveCheck(void)
 {
 
-  if(tkr_time->uptime_seconds_nonreset < 10)
-  {
-    return;
-  }
+  if(mySwitch == nullptr){ return; }
+  if(tkr_time->uptime_seconds_nonreset < 10){ return; }
 
-  // ALOG_INF(PSTR("RFR: ReceiveCheck() %d"), mySwitch->available());
-
-  if (mySwitch->available())
+  if(mySwitch->available())
   {
 
-    unsigned long data = mySwitch->getReceivedValue();
+    unsigned long long data = mySwitch->getReceivedValue();
     unsigned int bits = mySwitch->getReceivedBitlength();
     int protocol = mySwitch->getReceivedProtocol();
     int delay = mySwitch->getReceivedDelay();
 
-    ALOG_INF(PSTR("RFR: Data 0x%lX (%u), Bits %d, Protocol %d, Delay %d"), data, data, bits, protocol, delay);
+    ALOG_INF(PSTR("RFR: Data 0x%llX, Bits %d, Protocol %d, Delay %d"), data, bits, protocol, delay);
 
     uint32_t now = millis();
-    if ((now - rx_pkt.received_time_millis > tkr_set->Settings.rf_duplicate_time) && (data > 0))
+
+    if((now - rx_pkt.received_time_millis > tkr_set->Settings.rf_duplicate_time) && (data > 0))
     {
       rx_pkt.received_time_millis = now;
 
-      /**
-       * @brief If backoff period has happened, then save to struct
-       **/
-      rx_pkt.data = data;
+      rx_pkt.data = (uint32_t)data;
       rx_pkt.bit_length = bits;
       rx_pkt.protocol = protocol;
       rx_pkt.delay = delay;
       rx_pkt.received_utc_time = tkr_time->UtcTime();
 
-      /**
-       * @brief Share with mqtt
-       **/
-			mqtthandler_state_ifchanged.flags.SendNow = true;
+      #ifdef USE_MODULE_NETWORK_MQTT
+      telemetry_state_ifchanged.flags.SendNow = true;
+      #endif
 
-      /**
-       * @brief TODO: Trigger Event "RF433_RECEIVED"
-       **/
-
-      //char stemp[16];
-      // if (tkr_set->Settings.flag.rf_receive_decimal) {      // SetOption28 - RF receive data format (0 = hexadecimal, 1 = decimal)
-      //   snprintf_P(stemp, sizeof(stemp), PSTR("%u"), (uint32_t)data);
-      // } else {
-      //  snprintf_P(stemp, sizeof(stemp), PSTR("\"0x%lX\""), (uint32_t)data);
-      // }
-
-      // ResponseTime_P(PSTR(",\"" D_RFRECEIVED "\":{\"" D_RF_DATA "\":%s,\"" D_RF_BITS "\":%d,\"" D_RF_PROTOCOL "\":%d,\"" D_RF_PULSE "\":%d}}"),
-      //   stemp, bits, protocol, delay);
-      // MqttPublishPrefixTopicRulesProcess_P(RESULT_OR_TELE, PSTR(D_RFRECEIVED));
-
-        ALOG_TST(PSTR("RFR: Data 0x%lX (%u), Bits %d, Protocol %d, Delay %d"), data, data, bits, protocol, delay);
-      
+      ALOG_TST(PSTR("RFR: Data 0x%llX, Bits %d, Protocol %d, Delay %d"), data, bits, protocol, delay);
     }
+
     mySwitch->resetAvailable();
   }
 }
 
 
-// /*********************************************************************************************\
-//  * Commands
-// \*********************************************************************************************/
-
-// void CmndRfProtocol(void) {
-//   if (!PinUsed(GPIO_RFRECV)) { return; }
-
-// //  ALOG_INF(PSTR("RFR:CmndRfRxProtocol:: index:%d usridx:%d data_len:%d data:\"%s\""),XdrvMailbox.index, XdrvMailbox.usridx, XdrvMailbox.data_len,XdrvMailbox.data);
-
-//   uint64_t thisdat;
-//   if (1 == XdrvMailbox.usridx) {
-//     if (XdrvMailbox.payload >= 0) {
-//       thisdat = (1ULL << (XdrvMailbox.index -1));
-//       if (XdrvMailbox.payload &1) {
-//         tkr_set->Settings.rf_protocol_mask |= thisdat;
-//       } else {
-//         tkr_set->Settings.rf_protocol_mask &= ~thisdat;
-//       }
-//     }
-//     else if (XdrvMailbox.data_len > 0) {
-//       return;  // Not a number
-//     }
-//   } else {
-//     if (XdrvMailbox.data_len > 0) {
-//       if ('A' == toupper(XdrvMailbox.data[0])) {
-//         tkr_set->Settings.rf_protocol_mask = (1ULL << mySwitch->getNumProtos()) -1;
-//       } else {
-//         thisdat = strtoull(XdrvMailbox.data, nullptr, 0);
-//         if ((thisdat > 0) || ('0' == XdrvMailbox.data[0])) {
-//           tkr_set->Settings.rf_protocol_mask = thisdat;
-//         } else {
-//           return;  // Not a number
-//         }
-//       }
-//     }
-//   }
-//   mySwitch->setReceiveProtocolMask(tkr_set->Settings.rf_protocol_mask);
-// //  ALOG_INF(PSTR("RFR: CmndRfProtocol:: Start responce"));
-//   Response_P(PSTR("{\"" D_CMND_RFPROTOCOL "\":\""));
-//   bool gotone = false;
-//   thisdat = 1;
-//   for (uint32_t i = 0; i < mySwitch->getNumProtos(); i++) {
-//     if (tkr_set->Settings.rf_protocol_mask & thisdat) {
-//       ResponseAppend_P(PSTR("%s%d"), (gotone) ? "," : "", i+1);
-//       gotone = true;
-//     }
-//     thisdat <<=1;
-//   }
-//   if (!gotone) { ResponseAppend_P(PSTR(D_NONE_ENABLED)); }
-//   ResponseAppend_P(PSTR("\""));
-//   ResponseJsonEnd();
-// }
-
-// void CmndRfSend(void)
-// {
-//   if (!PinUsed(GPIO_RFSEND)) { return; }
-
-//   bool error = false;
-
-//   if (XdrvMailbox.data_len) {
-//     unsigned long long data = 0;	// unsigned long long  => support payload >32bit
-//     unsigned int bits = 24;
-//     int protocol = 1;
-//     int repeat = 10;
-//     int pulse = 0; // 0 leave the library use the default value depending on protocol
-
-//     JsonParser parser(XdrvMailbox.data);
-//     JsonParserObject root = parser.getRootObject();
-//     if (root) {
-//       // RFsend {"data":0x501014,"bits":24,"protocol":1,"repeat":10,"pulse":350}
-//       char parm_uc[10];
-//       data = root.getULong(PSTR(D_RF_DATA), data);	// read payload data even >32bit
-//       bits = root.getUInt(PSTR(D_RF_BITS), bits);
-//       protocol = root.getInt(PSTR(D_RF_PROTOCOL), protocol);
-//       repeat = root.getInt(PSTR(D_RF_REPEAT), repeat);
-//       pulse = root.getInt(PSTR(D_RF_PULSE), pulse);
-//     } else {
-//       //  RFsend data, bits, protocol, repeat, pulse
-//       char *p;
-//       uint8_t i = 0;
-//       for (char *str = strtok_r(XdrvMailbox.data, ", ", &p); str && i < 5; str = strtok_r(nullptr, ", ", &p)) {
-//         switch (i++) {
-//         case 0:
-//           data = strtoul(str, nullptr, 0);  // Allow decimal (5246996) and hexadecimal (0x501014) input
-//           break;
-//         case 1:
-//           bits = atoi(str);
-//           break;
-//         case 2:
-//           protocol = atoi(str);
-//           break;
-//         case 3:
-//           repeat = atoi(str);
-//           break;
-//         case 4:
-//           pulse = atoi(str);
-//         }
-//       }
-//     }
-
-//     if (!protocol) { protocol = 1; }
-//     mySwitch->setProtocol(protocol);
-//     // if pulse is specified in the command, enforce the provided value (otherwise lib takes default)
-//     if (pulse) { mySwitch->setPulseLength(pulse); }
-//     if (!repeat) { repeat = 10; }     // Default at init
-//     mySwitch->setRepeatTransmit(repeat);
-//     if (!bits) { bits = 24; }         // Default 24 bits
-//     if (data) {
-//       mySwitch->send(data, bits);
-//       ResponseCmndDone();
-//     } else {
-//       error = true;
-//     }
-//   } else {
-//     error = true;
-//   }
-//   if (error) {
-//     Response_P(PSTR("{\"" D_CMND_RFSEND "\":\"" D_NO " " D_RF_DATA ", " D_RF_BITS ", " D_RF_PROTOCOL ", " D_RF_REPEAT " " D_OR " " D_RF_PULSE "\"}"));
-//   }
-// }
-
-// void CmndRfTimeOut(void) {
-//   if (XdrvMailbox.payload >= 10) {
-//     tkr_set->Settings.rf_duplicate_time = XdrvMailbox.payload;
-//   }
-//   ResponseCmndNumber(tkr_set->Settings.rf_duplicate_time);
-// }
-
-/**
- * @brief 
- * 
- *  Raw: holding up button with 6 channels active
-Decimal: 1056974060 (64Bit) Binary: 0000000000000000000000000000000000111111000000000000000011111100 Tri-State: 00000000000000000111000000001110 PulseLength: 225 microseconds Protocol: 2
-Raw data: 4958,655,550,333,227,652,549,331,228,653,547,338,543,336,224,656,225,661,542,337,222,658,544,339,222,655,225,658,227,653,228,651,225,657,545,336,546,334,547,337,544,335,225,655,226,655,548,333,227,655,547,336,546,336,543,341,541,336,224,658,544,337,545,337,544,340,221,660,220,658,544,338,543,339,543,335,546,339,541,338,542,338,223,655,225,657,225,656,225,655,226,660,220,658,223,656,226,655,226,657,224,661,542,336,227,653,223,657,547,333,227,655,226,653,548,339,543,338,542,338,223,655,545,338,544,334,227,656,224,
-
-
-
-Raw data: 
-
-4958,655,   1,0
-
-550,333,    
-227,652,
-549,331,
-228,653,
-547,338,
-543,336,
-224,656,
-225,661,
-542,337,
-222,658,
-544,339,
-222,655,
-225,658,
-227,653,
-228,651,
-225,657,
-545,336,
-546,334,
-547,337,
-544,335,
-225,655,
-226,655,
-548,333,
-227,655,
-547,336,
-546,336,
-543,341,
-541,336,
-224,658,
-544,337,
-545,337,
-544,340,
-221,660,
-220,658,
-544,338,
-543,339,
-543,335,
-546,339,
-541,338,
-542,338,
-223,655,
-225,657,
-225,656,
-225,655,
-226,660,
-220,658,
-223,656,
-226,655,
-226,657,
-224,661,
-542,336,
-227,653,
-223,657,
-547,333,
-227,655,
-226,653,
-548,339,
-543,338,
-542,338,
-223,655,
-545,338,
-544,334,
-227,656,
-224,
-
-
-
- * 
- */
-
-
-
-
 /******************************************************************************************************************
- * 
+ * RF Transmission
 *******************************************************************************************************************/
 
-  
+bool mRF433Codes::ParseTimingData(JsonParserToken data_token, std::vector<uint16_t>& timings)
+{
+
+  timings.clear();
+
+  if(!data_token || !data_token.isArray())
+  {
+    ALOG_ERR(PSTR("RF433: Data must be an array"));
+    return false;
+  }
+
+  JsonParserArray data_array = data_token.getArray();
+
+  if(data_array.size() == 0)
+  {
+    ALOG_ERR(PSTR("RF433: Data array is empty"));
+    return false;
+  }
+
+  timings.reserve(data_array.size());
+
+  for(auto value_token : data_array)
+  {
+    uint32_t value = value_token.getUInt();
+
+    if((value == 0) || (value > UINT16_MAX))
+    {
+      ALOG_ERR(PSTR("RF433: Invalid timing value %u"), value);
+      timings.clear();
+      return false;
+    }
+
+    timings.push_back((uint16_t)value);
+  }
+
+  return true;
+}
+
+
+bool mRF433Codes::SendRawCode(JsonParserObject code_obj, bool use_multiples)
+{
+
+  if(mySwitch == nullptr)
+  {
+    ALOG_ERR(PSTR("RF433: Transmitter is not initialised"));
+    return false;
+  }
+
+  std::vector<uint16_t> timings;
+
+  if(!ParseTimingData(code_obj["Data"], timings)){
+    return false;
+  }
+
+  uint8_t start_level = HIGH;
+  uint8_t repeats = 1;
+  uint32_t pre_frame_low_us = 0;
+
+  JsonParserToken jtok = 0;
+
+  if(jtok = code_obj["StartLevel"])
+  {
+    start_level = jtok.getUInt() ? HIGH : LOW;
+  }
+
+  if(jtok = code_obj["Repeat"])
+  {
+    repeats = jtok.getUInt();
+    if(repeats == 0){ repeats = 1; }
+  }
+
+  if(jtok = code_obj["PreFrameLowUs"])
+  {
+    pre_frame_low_us = jtok.getUInt();
+  }
+
+  mySwitch->setRepeatTransmit(repeats);
+
+  if(use_multiples)
+  {
+    uint16_t base_pulse_us = 0;
+
+    if(jtok = code_obj["BasePulseUs"])
+    {
+      base_pulse_us = jtok.getUInt();
+    }
+
+    if(base_pulse_us == 0)
+    {
+      ALOG_ERR(PSTR("RF433: RawMultiples requires BasePulseUs"));
+      return false;
+    }
+
+    ALOG_INF(
+      PSTR("RF433: Data[17..23]=%u,%u,%u,%u,%u,%u,%u"),      
+      timings[17],
+      timings[18],
+      timings[19],
+      timings[20],
+      timings[21],
+      timings[22],
+      timings[23]
+    );
+
+    mySwitch->sendRawMultiples(timings.data(),timings.size(),base_pulse_us,start_level,pre_frame_low_us);
+  }
+  else
+  {
+    mySwitch->sendRaw(timings.data(),timings.size(),start_level,pre_frame_low_us);
+  }
+
+  return true;
+}
+
+
+bool mRF433Codes::SendProtocolCode(JsonParserObject code_obj)
+{
+
+  if(mySwitch == nullptr)
+  {
+    ALOG_ERR(PSTR("RF433: Transmitter is not initialised"));
+    return false;
+  }
+
+  JsonParserToken jtok = 0;
+
+  uint64_t data = 0;
+  uint16_t bits = 0;
+  uint8_t protocol = 1;
+  uint8_t repeats = 10;
+  uint16_t pulse_us = 0;
+
+  if(jtok = code_obj["Data"])
+  {
+    if(jtok.isStr())
+    {
+      data = strtoull(jtok.getStr(), nullptr, 0);
+    }
+    else
+    {
+      data = jtok.getULong();
+    }
+  }
+  else
+  {
+    ALOG_ERR(PSTR("RF433: Protocol requires Data"));
+    return false;
+  }
+
+  if(jtok = code_obj["Bits"])
+  {
+    bits = jtok.getUInt();
+  }
+
+  if(bits == 0)
+  {
+    ALOG_ERR(PSTR("RF433: Protocol requires Bits"));
+    return false;
+  }
+
+  if(jtok = code_obj["Protocol"])
+  {
+    protocol = jtok.getUInt();
+    if(protocol == 0){ protocol = 1; }
+  }
+
+  if(jtok = code_obj["Repeat"])
+  {
+    repeats = jtok.getUInt();
+    if(repeats == 0){ repeats = 1; }
+  }
+
+  if(jtok = code_obj["PulseUs"])
+  {
+    pulse_us = jtok.getUInt();
+  }
+  else if(jtok = code_obj["Pulse"])
+  {
+    pulse_us = jtok.getUInt();
+  }
+
+  if(pulse_us)
+  {
+    mySwitch->setProtocol(protocol, pulse_us);
+  }
+  else
+  {
+    mySwitch->setProtocol(protocol);
+  }
+
+  mySwitch->setRepeatTransmit(repeats);
+  mySwitch->send(data, bits);
+
+  return true;
+}
+
+
+bool mRF433Codes::SendCodeObject(JsonParserObject code_obj, const char* source_name)
+{
+
+  if(!code_obj)
+  {
+    ALOG_ERR(PSTR("RF433: Invalid code object"));
+    return false;
+  }
+
+  JsonParserToken type_token = code_obj["Type"];
+
+  if(!type_token || !type_token.isStr())
+  {
+    ALOG_ERR(PSTR("RF433: Code has no Type"));
+    return false;
+  }
+
+  const char* type = type_token.getStr();
+  bool result = false;
+
+  if(strcasecmp(type, "RawMultiples") == 0)
+  {
+    result = SendRawCode(code_obj, true);
+  }
+  else if(strcasecmp(type, "Raw") == 0)
+  {
+    result = SendRawCode(code_obj, false);
+  }
+  else if(strcasecmp(type, "Protocol") == 0)
+  {
+    result = SendProtocolCode(code_obj);
+  }
+  else
+  {
+    ALOG_ERR(PSTR("RF433: Unsupported code Type \"%s\""), type);
+    return false;
+  }
+
+  if(result)
+  {
+    if(source_name)
+    {
+      ALOG_INF(PSTR("RF433: Sent \"%s\" using %s"), source_name, type);
+    }
+    else
+    {
+      ALOG_INF(PSTR("RF433: Sent direct code using %s"), type);
+    }
+  }
+
+  return result;
+}
+
+
+bool mRF433Codes::SendCodeByName(const char* code_name)
+{
+
+  if(code_name == nullptr || code_name[0] == '\0')
+  {
+    ALOG_ERR(PSTR("RF433: CodeName is empty"));
+    return false;
+  }
+
+  #ifndef USE_MODULE_CORE_FILESYSTEM
+    ALOG_ERR(PSTR("RF433: CodeName lookup requires filesystem"));
+    return false;
+  #else
+
+  if(tkr_mfile == nullptr || !tkr_mfile->IsMounted())
+  {
+    ALOG_ERR(PSTR("RF433: Filesystem is not mounted"));
+    return false;
+  }
+
+  if(!tkr_mfile->FileExists(RF433_CODES_FILE_PATH))
+  {
+    ALOG_ERR(PSTR("RF433: File not found: %s"), RF433_CODES_FILE_PATH);
+    return false;
+  }
+
+  String json = tkr_mfile->LoadString(RF433_CODES_FILE_PATH);
+
+  if(json.length() == 0)
+  {
+    ALOG_ERR(PSTR("RF433: File is empty: %s"), RF433_CODES_FILE_PATH);
+    return false;
+  }
+
+  char* parsing_buffer = new char[json.length() + 1];
+
+  if(parsing_buffer == nullptr)
+  {
+    ALOG_ERR(PSTR("RF433: Unable to allocate JSON parsing buffer"));
+    return false;
+  }
+
+  memcpy(parsing_buffer, json.c_str(), json.length() + 1);
+
+  JsonParser parser(parsing_buffer);
+  JsonParserObject root_obj = parser.getRootObject();
+
+  if(!root_obj)
+  {
+    ALOG_ERR(PSTR("RF433: Invalid JSON in %s"), RF433_CODES_FILE_PATH);
+    delete[] parsing_buffer;
+    return false;
+  }
+
+  JsonParserObject codes_obj = root_obj["Codes"].getObject();
+
+  if(!codes_obj)
+  {
+    ALOG_ERR(PSTR("RF433: Missing Codes object in %s"), RF433_CODES_FILE_PATH);
+    delete[] parsing_buffer;
+    return false;
+  }
+
+  JsonParserObject code_obj = codes_obj[code_name].getObject();
+
+  if(!code_obj)
+  {
+    ALOG_ERR(PSTR("RF433: CodeName \"%s\" not found"), code_name);
+    delete[] parsing_buffer;
+    return false;
+  }
+
+  bool result = SendCodeObject(code_obj, code_name);
+
+  delete[] parsing_buffer;
+
+  return result;
+
+  #endif
+}
+
+
 /******************************************************************************************************************
  * Commands
 *******************************************************************************************************************/
@@ -1034,95 +531,223 @@ Raw data:
 void mRF433Codes::parse_JSONCommand(JsonParserObject obj)
 {
 
-  JsonParserToken jtok = 0; 
-  int8_t tmp_id = 0;
+  JsonParserToken jtok = 0;
 
-	if(jtok = obj["RfMask"])
-	{
-
-		if(jtok.isNum())
-		{
-			mySwitch->setReceiveProtocolMask(jtok.getUInt());
-			mqtthandler_settings.flags.SendNow = true;
-		}
-
-		// JBI->Start();
-
-		// tkr->Tasker_Interface(TASK_SENSOR_SCAN_REPORT_TO_JSON_BUILDER_ID);
-
-		// bool ready_to_send = JBI->End();
-
-		// if(!ready_to_send)
-		// {
-		// 	// Nothing was found, create new message
-		// 	JBI->Start();
-		// 		JBI->Add("SensorScan", "No Devices Found");
-		// 	ready_to_send = JBI->End();
-		// }
+  #ifdef ENABLE_FEATURE_DRIVERS__RF433_TRANSMIT_BITBANG_TEST
+  if(jtok = obj["TransmitTest"])
+  {
+    TransmitTest();
+  }
+  #endif
 
 
-		// if(ready_to_send)
-		// {			
-    	ALOG_TST(PSTR("RfMask = %d / %d"), jtok.getUInt(), mySwitch->GetReceiveProtolMask());
-		// 	tkr_mqtt->Send_Prefixed_P(PSTR(D_TOPIC_RESPONSE), JBI->GetBufferPtr()); // new thread, set/status/response
-		// }
+  /**
+   * File lookup:
+   * {"rf433":{"CodeName":"UP"}}
+   * {"rf433":{"CodeName":"Bedroom-UP"}}
+   *
+   * Direct RawMultiples:
+   * {"rf433":{"Type":"RawMultiples","BasePulseUs":333,"StartLevel":1,"Repeat":5,"Data":[15,7,5,2]}}
+   *
+   * Direct Raw:
+   * {"rf433":{"Type":"Raw","StartLevel":1,"Repeat":5,"Data":[4995,2331,1665,666]}}
+   *
+   * Direct protocol:
+   * {"rf433":{"Type":"Protocol","Protocol":36,"Bits":64,"Repeat":5,"Data":"0x123456789ABCDEF0"}}
+   */
+  if(jtok = obj[D_MODULE__DRIVERS__RF433_CODES__CTR])
+  {
+    if(jtok.isObject())
+    {
+      JsonParserObject rf_obj = jtok.getObject();
+      JsonParserToken code_name_token = rf_obj["CodeName"];
 
-	}
-	if(jtok = obj["RfSend"])
-	{
+      if(code_name_token && code_name_token.isStr())
+      {
+        if(SendCodeByName(code_name_token.getStr()))
+        {
+          data_buffer.isserviced++;
+        }
+      }
+      else
+      {
+        if(SendCodeObject(rf_obj))
+        {
+          data_buffer.isserviced++;
+        }
+      }
+    }
+  }
 
-		if(jtok.isNum())
-		{
-			mySwitch->send(jtok.getInt(), 24);
-		}
 
-    ALOG_TST(PSTR("RfSend = %d / %d"), jtok.getInt(), 24 );
+  if(jtok = obj["RfMask"])
+  {
+    if(jtok.isNum() && mySwitch != nullptr)
+    {
+      mySwitch->setReceiveProtocolMask(jtok.getULong());
 
-	}
+      #ifdef USE_MODULE_NETWORK_MQTT
+      telemetry_settings.flags.SendNow = true;
+      #endif
+
+      ALOG_TST(PSTR("RfMask = %llu / %llu"), jtok.getULong(), mySwitch->getReceiveProtocolMask());
+    }
+  }
 
 
+  if(jtok = obj["RfSend"])
+  {
+    if(jtok.isNum() && mySwitch != nullptr)
+    {
+      mySwitch->send(jtok.getULong(), 24);
+      ALOG_TST(PSTR("RfSend = %llu / 24"), jtok.getULong());
+    }
+  }
 
-    
 }
 
+
+#ifdef ENABLE_FEATURE_DRIVERS__RF433_TRANSMIT_BITBANG_TEST
+/***
+ * Keeping this scratch area to allow future manual timing tests when creating possible protocols.
+ */
+void mRF433Codes::TransmitTest()
+{
+  // static constexpr uint8_t TX_PIN = 22;
+
+  // /**
+  //  * ComfyShade / ZN-115T
+  //  *
+  //  * One captured DOWN frame, normalized to T = 333 us.
+  //  * Array starts HIGH and alternates HIGH/LOW.
+  //  */
+  // static const uint16_t down_command_raw[] = {
+
+  //   4995,2331,1665,666,333,1332,666,2331,666,333,
+  //   333,1332,333,333,666,666,999,1332,666,333,
+  //   333,2331,333,3663,333,999,333,999,333,1998,
+  //   666,1998,666,333,666,1665,666,1998,666,333,
+  //   333,1332,999,666,333,666,666,333,666,333
+
+  // };
+
+  // pinMode(TX_PIN, OUTPUT);
+
+  // digitalWrite(TX_PIN, LOW);
+  // delayMicroseconds(5000);
+
+  // for(uint8_t repeat = 0; repeat < 5; repeat++)
+  // {
+  //   for(uint16_t i = 0; i < ARRAY_SIZE(down_command_raw); i++)
+  //   {
+  //     digitalWrite(TX_PIN, (i & 1) ? LOW : HIGH);
+  //     delayMicroseconds(down_command_raw[i]);
+  //   }
+
+  //   digitalWrite(TX_PIN, LOW);
+  // }
+
+  // digitalWrite(TX_PIN, LOW);
+
+  /*********************************************
+   * Test 2a: Comfy Blinds UP WORKING
+   *********************************************/
+  // static constexpr uint8_t TX_PIN = 22;
+
+  // static const uint16_t up_command[] = {
+  //     15,7,5,2,1,4,2,7,2,1,
+  // 1,4,1,1,2,2,3,5,2,8,
+  // 1,8,2,5,1,3,1,6,2,6,
+  // 2,1,2,5,2,6,2,1,1,4,
+  // 3,1,1,1,1,2,1,2,1,1
+  // };
+
+  // pinMode(TX_PIN,OUTPUT);
+  // digitalWrite(TX_PIN,LOW);
+  // delayMicroseconds(5000);
+
+  // for(uint8_t repeat=0; repeat<10; repeat++)
+  // {
+  //   for(uint16_t i=0; i<ARRAY_SIZE(up_command); i++)
+  //   {
+  //     digitalWrite(TX_PIN,(i & 1) ? LOW : HIGH);
+  //     delayMicroseconds((uint32_t)up_command[i] * 333);
+  //   }
+  // }
+
+  // digitalWrite(TX_PIN,LOW);
+
   
+  /*********************************************
+   * Test 2b: Comfy Blinds UP WORKING
+   *********************************************/
+  static constexpr uint8_t TX_PIN = 22;
+
+static const uint16_t stop_command[] = {
+  15,7,5,2,1,4,2,7,2,1,
+  1,4,1,1,2,2,3,4,1,1,
+  1,8,1,9,1,1,1,3,1,3,
+  1,6,2,6,2,1,2,5,2,6,
+  2,1,1,4,3,4,1,4,1,1
+};
+
+pinMode(TX_PIN,OUTPUT);
+digitalWrite(TX_PIN,LOW);
+delayMicroseconds(5000);
+
+for(uint8_t repeat=0; repeat<10; repeat++)
+{
+  for(uint16_t i=0; i<ARRAY_SIZE(stop_command); i++)
+  {
+    digitalWrite(TX_PIN,(i & 1) ? LOW : HIGH);
+    delayMicroseconds((uint32_t)stop_command[i] * 333);
+  }
+}
+
+digitalWrite(TX_PIN,LOW);
+}
+#endif
+
+
 /******************************************************************************************************************
  * ConstructJson
 *******************************************************************************************************************/
 
-  
-uint8_t mRF433Codes::ConstructJSON_Settings(uint8_t json_level, bool json_appending){
+uint8_t mRF433Codes::ConstructJSON_Settings(uint8_t json_level, bool json_appending)
+{
 
   JBI->Start();
-    // JBI->Add(D_COUNT, settings.fEnableSensor);
-    JBI->Add("RfMask", mySwitch->GetReceiveProtolMask());
+
+  if(mySwitch != nullptr)
+  {
+    JBI->Add("RfMask", mySwitch->getReceiveProtocolMask());
+  }
+
   return JBI->End();
 
 }
 
-uint8_t mRF433Codes::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
-  char buffer[40];
+uint8_t mRF433Codes::ConstructJSON_State(uint8_t json_level, bool json_appending)
+{
 
   JBI->Start();
 
-    JBI->Object_Start(D_RFRECEIVED);
-  
-      JBI->Add(D_DATA, rx_pkt.data);
-      JBI->Add(D_RF_BITS, rx_pkt.bit_length);
-      JBI->Add(D_RF_PROTOCOL, rx_pkt.protocol);
-      JBI->Add(D_RF_PULSE, rx_pkt.delay);   
-      JBI->Add(D_MILLIS, rx_pkt.received_time_millis);   
-      JBI->Add(D_TIME, tkr_time->GetTime().c_str() );
-      
-    
-    JBI->Object_End();
-  
-  
+  JBI->Object_Start(D_RFRECEIVED);
+
+    JBI->Add(D_DATA, rx_pkt.data);
+    JBI->Add(D_RF_BITS, rx_pkt.bit_length);
+    JBI->Add(D_RF_PROTOCOL, rx_pkt.protocol);
+    JBI->Add(D_RF_PULSE, rx_pkt.delay);
+    JBI->Add(D_MILLIS, rx_pkt.received_time_millis);
+    JBI->Add(D_TIME, tkr_time->GetTime().c_str());
+
+  JBI->Object_End();
 
   return JBI->End();
 
 }
+
 
 /******************************************************************************************************************
  * MQTT
@@ -1130,37 +755,36 @@ uint8_t mRF433Codes::ConstructJSON_State(uint8_t json_level, bool json_appending
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mRF433Codes::MQTTHandler_Init()
+void mRF433Codes::Telemetry_Init()
 {
 
-  struct handler<mRF433Codes>* ptr;
+  struct telemetry_handler<mRF433Codes>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
-  ptr->flags.SendNow = true; // DEBUG CHANGE
-  ptr->tRateSecs = 120; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->flags.SendNow = true;
+  ptr->tRateSecs = 120;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mRF433Codes::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_state_ifchanged;
+  ptr = &telemetry_state_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_IFCHANGED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->tRateSecs = 1;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mRF433Codes::ConstructJSON_State;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-} 
+}
 
 #endif // USE_MODULE_NETWORK_MQTT
-
 
 
 #endif // USE_MODULE_DRIVERS_RF433_CODES

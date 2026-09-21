@@ -42,7 +42,7 @@ class mHLK_LD2410 :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage(){};
 
-    static constexpr const char* PM_MODULE_SENSORS__HLK_LD2410__CTR = D_MODULE_SENSORS__RADAR_HLK_LD2410__CTR;
+    static constexpr const char* PM_MODULE_SENSORS__HLK_LD2410__CTR = D_MODULE__SENSORS__RADAR_HLK_LD2410__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS__HLK_LD2410__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS__HLK_LD2410__ID; }
     
@@ -165,10 +165,10 @@ class mHLK_LD2410 :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-      void MQTTHandler_Init();
-      std::vector<struct handler<mHLK_LD2410>*> mqtthandler_list;    
-      struct handler<mHLK_LD2410> mqtthandler_settings;
-      struct handler<mHLK_LD2410> mqtthandler_sensor_ifchanged;
+      void Telemetry_Init();
+      std::vector<struct telemetry_handler<mHLK_LD2410>*> telemetry_list;    
+      struct telemetry_handler<mHLK_LD2410> telemetry_settings;
+      struct telemetry_handler<mHLK_LD2410> telemetry_sensor_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

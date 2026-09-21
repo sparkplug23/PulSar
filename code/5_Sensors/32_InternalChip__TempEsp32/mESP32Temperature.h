@@ -1,7 +1,7 @@
 #ifndef _mESP32Temperature_H
 #define _mESP32Temperature_H
 
-#define D_UNIQUE_MODULE_SENSORS_ESP32_TEMPERATURE__ID 3032 // [(Folder_Number*100)+ID_File]
+#define D_UNIQUE_MODULE_SENSORS_ESP32_TEMPERATURE__ID 5032 // [(Folder_Number*100)+ID_File]
 
 #include "1_TaskerManager/mTaskerManager.h"
 
@@ -31,7 +31,7 @@ class mESP32Temperature :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage(void);
 
-    static constexpr const char* PM_MODULE_SENSORS_ESP32_TEMPERATURE__CTR = D_MODULE_SENSORS_ESP32_TEMPERATURE_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_ESP32_TEMPERATURE__CTR = D_MODULE__SENSORS__ESP32_TEMPERATURE__CTR;
     PGM_P GetModuleName(){ return PM_MODULE_SENSORS_ESP32_TEMPERATURE__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_ESP32_TEMPERATURE__ID; }
 
@@ -76,12 +76,7 @@ class mESP32Temperature :
 
     void GetSensorReading(sensors_reading_t* value, uint8_t index = 0) override
     {
-      if(index >= module_state.devices)
-      {
-        value->sensor_type.push_back(0);
-        return;
-      }
-
+      if(index >= module_state.devices){ value->sensor_type.push_back(0); return; }
       value->timestamp = sensor.utc_measured_timestamp;
       value->sensor_type.push_back(SENSOR_TYPE_TEMPERATURE_ID);
       value->data_f.push_back(sensor.reading.val);
@@ -104,10 +99,10 @@ class mESP32Temperature :
      * SECTION: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init(void);
-    std::vector<struct handler<mESP32Temperature>*> mqtthandler_list;
-    struct handler<mESP32Temperature> mqtthandler_settings;
-    struct handler<mESP32Temperature> mqtthandler_sensor_teleperiod;
+    void Telemetry_Init(void);
+    std::vector<struct telemetry_handler<mESP32Temperature>*> telemetry_list;
+    struct telemetry_handler<mESP32Temperature> telemetry_settings;
+    struct telemetry_handler<mESP32Temperature> telemetry_sensor_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Network Settings</title>
+  <link rel="stylesheet" href="/pulsar.css">
+
+  <script src="/pulsar.js"></script>
+  <script src="/pulsar_data.js"></script>
+</head>
+<body class="settings-page"><form id="form_s" name="Sf" method="post">
+
+<header class="page-header"><div class="page-title"><h1>Network</h1><div class="page-subtitle">Interfaces and application transports</div></div><div class="page-actions"><button type="button" onclick="go('/settings')">Back</button><button class="primary">Save</button></div></header>
+
+<section class="settings-section"><h2>Network Policy</h2>
+<label class="setting"><span>Primary</span><select name="NP0"><option>Ethernet</option><option>WiFi</option><option>Cellular</option></select></label>
+<label class="setting"><span>Secondary</span><select name="NP1"><option>WiFi</option><option>Ethernet</option><option>Cellular</option></select></label>
+<label class="setting"><span>Tertiary</span><select name="NP2"><option>Cellular</option><option>Ethernet</option><option>WiFi</option></select></label>
+<label class="setting"><span>Allow multiple active</span><input name="NMA" type="checkbox"></label>
+<label class="setting"><span>Prefer local connections</span><input name="NPL" type="checkbox"></label>
+</section>
+
+<section class="settings-section"><h2>Interfaces</h2><div class="page-actions">
+<button type="button" onclick="show('wifi',gId('wifi').classList.contains('hide'))">WiFi</button>
+<button type="button" onclick="show('ethernet',gId('ethernet').classList.contains('hide'))">Ethernet</button>
+<button type="button" onclick="show('cellular',gId('cellular').classList.contains('hide'))">Cellular</button>
+</div></section>
+
+<section id="wifi" class="settings-section hide"><h2>WiFi</h2>
+<label class="setting"><span>Enabled</span><input name="WIFI_EN" type="checkbox"></label>
+<label class="setting"><span>Hostname</span><input name="WIFI_HOST" maxlength="32"></label>
+<div id="wifi_instances" class="empty">WiFi network instances will appear here.</div>
+</section>
+
+<section id="ethernet" class="settings-section hide"><h2>Ethernet</h2>
+<label class="setting"><span>Enabled</span><input name="ETH_EN" type="checkbox"></label>
+<label class="setting"><span>DHCP</span><input name="ETH_DHCP" type="checkbox"></label>
+<label class="setting"><span>IP</span><input name="ETH_IP"></label>
+<label class="setting"><span>Gateway</span><input name="ETH_GW"></label>
+<label class="setting"><span>Subnet</span><input name="ETH_SN"></label>
+<label class="setting"><span>DNS</span><input name="ETH_DNS"></label>
+</section>
+
+<section id="cellular" class="settings-section hide"><h2>Cellular</h2>
+<label class="setting"><span>Enabled</span><input name="CELL_EN" type="checkbox"></label>
+<label class="setting"><span>APN</span><input name="CELL_APN" maxlength="64"></label>
+<label class="setting"><span>Username</span><input name="CELL_USER" maxlength="40"></label>
+<label class="setting"><span>Password</span><input name="CELL_PASS" type="password" maxlength="64"></label>
+<label class="setting"><span>PIN</span><input name="CELL_PIN" type="password" maxlength="8"></label>
+</section>
+
+<section class="settings-section"><h2>MQTT</h2><div id="mqtt_instances"></div><button type="button" onclick="addMQTT()">Add MQTT Connection</button></section>
+
+<section class="settings-section"><h2>Network Services</h2>
+<label class="setting"><span>mDNS</span><input name="MDNS_EN" type="checkbox"></label>
+<label class="setting"><span>mDNS hostname</span><input name="MDNS_NAME" maxlength="32"></label>
+</section>
+
+</form><div id="toast"></div>
+
+<script>
+function addMQTT(){
+ const n=gId('mqtt_instances').children.length,s=cE('section');
+ s.className='settings-section';
+ s.innerHTML='<h2>MQTT '+n+'</h2>'+
+ '<label class="setting"><span>Name</span><input name="MQ'+n+'_NAME"></label>'+
+ '<label class="setting"><span>Enabled</span><input name="MQ'+n+'_EN" type="checkbox"></label>'+
+ '<label class="setting"><span>Broker</span><input name="MQ'+n+'_HOST"></label>'+
+ '<label class="setting"><span>Port</span><input name="MQ'+n+'_PORT" type="number" value="1883"></label>'+
+ '<label class="setting"><span>Username</span><input name="MQ'+n+'_USER"></label>'+
+ '<label class="setting"><span>Password</span><input name="MQ'+n+'_PASS" type="password"></label>'+
+ '<label class="setting"><span>Client ID</span><input name="MQ'+n+'_CID"></label>'+
+ '<label class="setting"><span>Interface</span><select name="MQ'+n+'_IF"><option value="auto">Automatic</option><option value="ethernet">Ethernet</option><option value="wifi">WiFi</option><option value="cellular">Cellular</option></select></label>';
+ gId('mqtt_instances').appendChild(s);
+}
+</script>
+</body></html>

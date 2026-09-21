@@ -26,7 +26,7 @@ class mInternalClock :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     int8_t Tasker_Web(uint8_t function);
 
-    static constexpr const char* PM_MODULE_CONTROLLER_CEILINGFAN_CTR = D_MODULE_CONTROLLER_CEILINGFAN_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_CEILINGFAN_CTR = D_MODULE__CONTROLLER__SONOFF_IFAN__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CEILINGFAN_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CEILINGFAN_ID; }
 
@@ -61,22 +61,22 @@ class mInternalClock :
     uint8_t ConstructJSON_Power(uint8_t json_level = 0, bool json_appending = true);
 
   
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
 
-    struct handler<mInternalClock> mqtthandler_settings;
-    struct handler<mInternalClock> mqtthandler_power_ifchanged;
-    struct handler<mInternalClock> mqtthandler_power_teleperiod;
+    struct telemetry_handler<mInternalClock> telemetry_settings;
+    struct telemetry_handler<mInternalClock> telemetry_power_ifchanged;
+    struct telemetry_handler<mInternalClock> telemetry_power_teleperiod;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 
-    struct handler<mInternalClock>* mqtthandler_list[3] = {
-      &mqtthandler_settings,
-      &mqtthandler_power_ifchanged,
-      &mqtthandler_power_teleperiod
+    struct telemetry_handler<mInternalClock>* telemetry_list[3] = {
+      &telemetry_settings,
+      &telemetry_power_ifchanged,
+      &telemetry_power_teleperiod
     };
 
 };

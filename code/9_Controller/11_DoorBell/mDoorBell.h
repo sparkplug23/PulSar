@@ -33,7 +33,7 @@ class mDoorBell :
     int8_t pin_doorbell_button = -1;
     int8_t pin_relay_chime = -1;
     
-    static constexpr const char* PM_MODULE_CONTROLLER_DOORBELL_CTR = D_MODULE_CONTROLLER_DOORBELL_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_DOORBELL_CTR = D_MODULE__CONTROLLER__DOORBELL__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_DOORBELL_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_DOORBELL_ID; }
 
@@ -125,19 +125,19 @@ class mDoorBell :
   
   //#ifdef USE_CORE_MQTT 
 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
-    struct handler<mDoorBell>* ptr;
+    struct telemetry_handler<mDoorBell>* ptr;
     void MQTTHandler_Sender();
 
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR = "settings";
-    struct handler<mDoorBell> mqtthandler_settings;
+    struct telemetry_handler<mDoorBell> telemetry_settings;
     
     // const char* PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR = "power";
-    struct handler<mDoorBell> mqtthandler_sensor_ifchanged;
-    struct handler<mDoorBell> mqtthandler_sensor_teleperiod;
+    struct telemetry_handler<mDoorBell> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mDoorBell> telemetry_sensor_teleperiod;
     
     const int MQTT_HANDLER_MODULE_LENGTH_ID = MQTT_HANDLER_LENGTH_ID;
 

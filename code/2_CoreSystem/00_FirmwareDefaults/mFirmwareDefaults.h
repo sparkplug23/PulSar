@@ -109,12 +109,6 @@ void WiFi_Wps_StatusCallback(wps_cb_status status);
 #undef USE_MQTT_TLS_CA_CERT
 #endif
 
-#ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-struct RgbwwColor;  // Forward declaration
-typedef RgbwwColor ColourBaseType;
-#else
-typedef uint32_t ColourBaseType;
-#endif
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -169,13 +163,13 @@ typedef uint32_t ColourBaseType;
   "{" // for PIR to follow
     "\"Rule0\":{"
       "\"Trigger\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_SWITCHES_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__SWITCHES__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_INPUT_STATE_CHANGED_CTR "\","
         "\"DeviceName\":0,"
         "\"State\":\"On\""
       "},"
       "\"Command\":{"
-        "\"Module\":\"" D_MODULE_SENSORS_PIR_CTR "\","
+        "\"Module\":\"" D_MODULE__SENSORS__PIR__CTR "\","
         "\"Function\":\"" D_TASK_EVENT_MOTION_STARTED_CTR "\","
         "\"DeviceName\":0," 
         "\"State\":\"Follow\""
@@ -207,12 +201,12 @@ typedef uint32_t ColourBaseType;
  * @brief This method allows the storage to be loaded, but will always then load templates and override anything from settings
  *        to make sure the device starts in a known state. This will make sure SSID etc are loaded 
  */
-#ifdef ENABLE_FEATURE_FIRMWAREDEFAULT__LOAD_WITH_TEMPLATES_OVERRIDE
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__PERSISTENT_CONFIG
 
   #define USE_MODULE_CORE_FILESYSTEM
     
 
-#endif // ENABLE_FEATURE_FIRMWAREDEFAULT__LOAD_WITH_TEMPLATES_OVERRIDE
+#endif // ENABLE_FEATURE_LIGHTING__CORE__PERSISTENT_CONFIG
 
 
 /**

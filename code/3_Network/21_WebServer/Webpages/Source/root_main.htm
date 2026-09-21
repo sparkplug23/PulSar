@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>PulSar</title>
+
+  <link rel="stylesheet" href="/pulsar.css">
+
+  <script src="/pulsar.js"></script>
+  <script src="/pulsar_data.js"></script>
+</head>
+
+
+<body>
+
+<div class="root-shell">
+
+
+  <aside class="rail">
+
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span class="brand-title">PulSar</span>
+    </div>
+
+
+    <div class="railsec">
+
+      <h3>System</h3>
+
+      <button class="railbtn" onclick="go('/settings')">
+        <span class="railbtn-text">
+          <b>Settings</b>
+          <span class="railbtn-desc">Device configuration</span>
+        </span>
+        <span>›</span>
+      </button>
+
+      <button class="railbtn" onclick="go('/console')">
+        <span class="railbtn-text">
+          <b>Console</b>
+          <span class="railbtn-desc">Logs and commands</span>
+        </span>
+        <span>›</span>
+      </button>
+
+      <button class="railbtn" onclick="go('/edit')">
+        <span class="railbtn-text">
+          <b>Files</b>
+          <span class="railbtn-desc">Internal filesystem</span>
+        </span>
+        <span>›</span>
+      </button>
+
+      <button class="railbtn" onclick="go('/sdedit')">
+        <span class="railbtn-text">
+          <b>SD Files</b>
+          <span class="railbtn-desc">SD filesystem</span>
+        </span>
+        <span>›</span>
+      </button>
+
+      <button class="railbtn" onclick="go('/update')">
+        <span class="railbtn-text">
+          <b>Firmware Update</b>
+        </span>
+        <span>›</span>
+      </button>
+
+    </div>
+
+
+    <div class="railsec">
+
+      <h3>Advanced</h3>
+
+      <button class="railbtn" onclick="go('/adv')">
+        <span class="railbtn-text">
+          <b>Advanced</b>
+          <span class="railbtn-desc">Diagnostics</span>
+        </span>
+        <span>›</span>
+      </button>
+
+    </div>
+
+
+    <div class="railsec overview">
+
+      <h3>Overview</h3>
+
+      <div class="overview-row">
+        <span class="overview-key">Device</span>
+        <span id="overview_device" class="overview-value mono">—</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Friendly</span>
+        <span id="overview_friendly" class="overview-value mono">—</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Room</span>
+        <span id="overview_room" class="overview-value mono">—</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Module</span>
+        <span id="overview_module" class="overview-value mono">—</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Host</span>
+        <span id="origin" class="overview-value mono">—</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Version</span>
+        <span class="overview-value mono">##VERSION##</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Firmware</span>
+        <span class="overview-value mono">##FIRMWARE_BRANCH##</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Build</span>
+        <span class="overview-value mono">##BUILD_DATETIME##</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Environment</span>
+        <span class="overview-value mono">##BUILD_ENV##</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Build Host</span>
+        <span class="overview-value mono">##BUILD_HOST##</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Git Branch</span>
+        <span class="overview-value mono">##GIT_BRANCH##</span>
+      </div>
+
+      <div class="overview-row">
+        <span class="overview-key">Git Commit</span>
+        <span class="overview-value mono">##GIT_COMMIT##</span>
+      </div>
+
+    </div>
+
+  </aside>
+
+
+  <main class="root-main">
+
+
+    <section class="card">
+
+      <h2>Applications</h2>
+
+      <div id="apps" class="grid application-grid"></div>
+
+    </section>
+
+
+    <section class="card">
+
+      <h2>System Controls</h2>
+
+      <div class="system-controls">
+
+
+        <div class="control-pane">
+
+          <div class="control-pane-head">
+
+            <b>Live Data</b>
+
+            <div class="control-pane-tools">
+
+              <button class="small" onclick="live()">
+                Refresh
+              </button>
+
+              <label class="fastcheck">
+                <input id="fast" type="checkbox">
+                Fast
+              </label>
+
+            </div>
+
+          </div>
+
+          <div id="sensors">
+            <div class="empty">Loading…</div>
+          </div>
+
+        </div>
+
+
+        <div class="control-pane">
+
+          <div class="control-pane-head">
+            <b>Controls</b>
+          </div>
+
+          <div id="controls">
+            <div class="empty">Loading…</div>
+          </div>
+
+        </div>
+
+
+      </div>
+
+    </section>
+
+
+  </main>
+
+</div>
+
+
+<script>
+
+let ws;
+let livePoll;
+let controlsPoll;
+
+
+/**************************************************************************************************
+ * Common IDs
+ **************************************************************************************************/
+
+function appId(item)
+{
+  return 'app_' + safeId(item.ModuleID ?? item.Module);
+}
+
+
+function ctrlId(moduleId, control)
+{
+  return 'c_' +
+         safeId(moduleId) + '_' +
+         safeId(control.C || 'x') + '_' +
+         safeId(control.D);
+}
+
+
+function sensorId(group, name)
+{
+  return 's_' + safeId(group) + '_' + safeId(name);
+}
+
+
+/**************************************************************************************************
+ * Overview
+ **************************************************************************************************/
+
+function syncOverviewSettings(packet)
+{
+  if(!packet) return;
+
+  const name = packet.Name || {};
+
+  setText(
+    'overview_device',
+    name.Device || '—'
+  );
+
+  setText(
+    'overview_friendly',
+    name.Friendly || '—'
+  );
+
+  setText(
+    'overview_room',
+    name.Room || '—'
+  );
+
+  setText(
+    'overview_module',
+    name.ModuleName || '—'
+  );
+}
+
+
+async function loadOverviewSettings()
+{
+  try
+  {
+    const catalogue = await getJSON('/api/telemetry');
+
+    const topicEntry = (catalogue.topics || []).find(
+      item => item.topic && item.topic.endsWith('/settings')
+    );
+
+    if(!topicEntry)
+    {
+      throw new Error('Settings telemetry topic not found');
+    }
+
+    const response = await getJSON(
+      '/api/telemetry?topic=' + encodeURIComponent(topicEntry.topic)
+    );
+
+    syncOverviewSettings(response.packet);
+  }
+  catch(e)
+  {
+    console.warn('Unable to load Overview settings:', e);
+
+    setText('overview_device', '—');
+    setText('overview_friendly', '—');
+    setText('overview_room', '—');
+    setText('overview_module', '—');
+  }
+}
+
+
+/**************************************************************************************************
+ * Applications
+ **************************************************************************************************/
+
+async function loadApps()
+{
+  try
+  {
+    const data = await getJSON('/url_apps');
+
+    for(const module of data.Applications || [])
+    {
+      if(!module.Links?.length || gId(appId(module))) continue;
+
+      const tile = cE('div');
+
+      tile.className = 'tile application-tile';
+      tile.id = appId(module);
+
+      tile.innerHTML =
+        '<div class="tile-title"></div>' +
+        '<div class="application-links"></div>';
+
+      setText(
+        tile.firstChild,
+        module.Module || 'Module'
+      );
+
+
+      for(const item of module.Links)
+      {
+        if(!item?.[1]) continue;
+
+        const name = item[0] || item[1];
+        const path = item[1][0] === '/' ? item[1] : '/' + item[1];
+        const port = Number(item[2] || 80);
+
+        const target =
+          port === 80
+            ? path
+            : location.protocol + '//' + location.hostname + ':' + port + path;
+
+        const link = cE('div');
+
+        link.className = 'application-link';
+        link.onclick = () => go(target);
+
+        link.innerHTML =
+          '<div class="application-link-text">' +
+            '<div class="application-link-name"></div>' +
+            // '<div class="application-link-url"></div>' +
+          '</div>' +
+          '<span>›</span>';
+
+        setText(
+          link.querySelector('.application-link-name'),
+          name
+        );
+
+        // Keep available if URL display is restored later.
+        // setText(
+        //   link.querySelector('.application-link-url'),
+        //   target
+        // );
+
+        tile.lastChild.appendChild(link);
+      }
+
+      gId('apps').appendChild(tile);
+    }
+  }
+  catch(e)
+  {
+    console.warn('Unable to load Applications:', e);
+  }
+}
+
+
+/**************************************************************************************************
+ * Page WebSocket
+ **************************************************************************************************/
+
+function request(name)
+{
+  ws.send({
+    request: name
+  });
+}
+
+
+function controls()
+{
+  request('controls');
+}
+
+
+function live()
+{
+  request('sensors');
+  request('energy');
+}
+
+
+/**************************************************************************************************
+ * Control helpers
+ **************************************************************************************************/
+
+function indicator()
+{
+  const element = cE('span');
+
+  element.className = 'indicator';
+
+  element.innerHTML =
+    '<span class="indicator-dot"></span>' +
+    '<span class="state"></span>';
+
+  return element;
+}
+
+
+/**************************************************************************************************
+ * Controls
+ **************************************************************************************************/
+
+function syncControls(data)
+{
+  for(const module of data.Modules || [])
+  {
+    let box = gId('cm_' + module.ID);
+
+    if(!box)
+    {
+      box = cE('div');
+
+      box.className = 'control-module';
+      box.id = 'cm_' + module.ID;
+
+      box.innerHTML =
+        '<div class="control-module-title"></div>';
+
+      setText(
+        box.firstChild,
+        module.Name || ('Module ' + module.ID)
+      );
+
+      gId('controls').appendChild(box);
+    }
+
+
+    for(const control of module.Controls || [])
+    {
+      let row = gId(
+        ctrlId(module.ID, control)
+      );
+
+
+      if(!row)
+      {
+        row = cE('div');
+
+        row.className = 'control-row';
+        row.id = ctrlId(module.ID, control);
+
+        row.innerHTML =
+          '<div class="control-name"></div>' +
+          '<div class="control-description"></div>' +
+          '<div class="control-actions"></div>';
+
+        box.appendChild(row);
+      }
+
+
+      setText(
+        row.children[0],
+        control.N || ('Device ' + control.D)
+      );
+
+      setText(
+        row.children[1],
+        control.S || ''
+      );
+
+
+      const actions = row.children[2];
+
+
+      /********************************************************************************************
+       * Create the control only once.
+       ********************************************************************************************/
+
+      if(!actions.children.length)
+      {
+        if(control.T === 'toggle')
+        {
+          actions.appendChild(
+            makeButton(
+              '',
+              () => ws.send({
+                ui: {
+                  [control.C]: [
+                    control.D,
+                    actions.firstChild.dataset.v === '1' ? 0 : 1
+                  ]
+                }
+              }),
+              'small'
+            )
+          );
+        }
+
+
+        else if(control.T === 'momentary')
+        {
+          const button = makeButton(
+            'Press',
+            null,
+            'small'
+          );
+
+          button.onpointerdown = () =>
+            ws.send({
+              ui: {
+                [control.C]: [control.D, 1]
+              }
+            });
+
+          button.onpointerup =
+          button.onpointercancel = () =>
+            ws.send({
+              ui: {
+                [control.C]: [control.D, 0]
+              }
+            });
+
+          actions.appendChild(button);
+        }
+
+
+        else if(control.T === 'testswitch')
+        {
+          actions.append(
+            indicator(),
+            makeButton(
+              'Test',
+              () => ws.send({
+                ui: {
+                  [control.C]: [control.D]
+                }
+              }),
+              'small'
+            )
+          );
+        }
+
+
+        else if(control.T === 'buttons')
+        {
+          for(const option of control.O || [])
+          {
+            const button = makeButton(
+              option[0],
+              () => ws.send({
+                ui: {
+                  [control.C]: [
+                    control.D,
+                    option[1]
+                  ]
+                }
+              }),
+              'small'
+            );
+
+            button.dataset.o = option[1];
+
+            actions.appendChild(button);
+          }
+        }
+
+
+        else if(control.T === 'indicator')
+        {
+          actions.appendChild(
+            indicator()
+          );
+        }
+
+
+        else if(control.T === 'value')
+        {
+          const value = cE('span');
+
+          value.className = 'mono';
+
+          actions.appendChild(value);
+        }
+      }
+
+
+      /********************************************************************************************
+       * Update current state.
+       ********************************************************************************************/
+
+      if(control.T === 'toggle')
+      {
+        const button = actions.firstChild;
+
+        button.dataset.v = control.V ? '1' : '0';
+        button.textContent = control.V ? 'ON' : 'OFF';
+
+        button.classList.toggle(
+          'active',
+          !!control.V
+        );
+      }
+
+
+      else if(
+        control.T === 'indicator' ||
+        control.T === 'testswitch'
+      )
+      {
+        const item = actions.querySelector('.indicator');
+
+        item?.classList.toggle(
+          'on',
+          !!control.V
+        );
+
+        setText(
+          item?.querySelector('.state'),
+          control.V ? 'ON' : 'OFF'
+        );
+      }
+
+
+      else if(control.T === 'buttons')
+      {
+        for(const button of actions.children)
+        {
+          button.classList.toggle(
+            'active',
+            Number(button.dataset.o) === Number(control.V)
+          );
+        }
+      }
+
+
+      else if(control.T === 'value')
+      {
+        setText(
+          actions.firstChild,
+          String(control.V) +
+          (control.U ? ' ' + control.U : '')
+        );
+      }
+    }
+  }
+
+
+  const empty = gId('controls').querySelector('.empty');
+
+  if(empty)
+  {
+    empty.remove();
+  }
+}
+
+
+/**************************************************************************************************
+ * Live sensor / energy data
+ **************************************************************************************************/
+
+function syncSensors(data)
+{
+  for(const [groupName, values] of Object.entries(data || {}))
+  {
+    if(
+      groupName === 'Rate' ||
+      !values ||
+      typeof values !== 'object' ||
+      Array.isArray(values)
+    )
+    {
+      continue;
+    }
+
+
+    let group = gId(
+      'sg_' + safeId(groupName)
+    );
+
+
+    if(!group)
+    {
+      group = cE('div');
+
+      group.className = 'sensor-group';
+      group.id = 'sg_' + safeId(groupName);
+
+      group.innerHTML =
+        '<div class="sensor-title"></div>' +
+        '<table class="compact">' +
+          '<tbody></tbody>' +
+        '</table>';
+
+      setText(
+        group.firstChild,
+        groupName
+      );
+
+      gId('sensors').appendChild(group);
+    }
+
+
+    for(const [name, value] of Object.entries(values))
+    {
+      let cell = gId(
+        sensorId(groupName, name)
+      );
+
+
+      if(!cell)
+      {
+        const row = cE('tr');
+
+        row.append(
+          makeCell(name, 'muted'),
+          makeCell('', 'value right')
+        );
+
+        cell = row.lastChild;
+        cell.id = sensorId(groupName, name);
+
+        group
+          .querySelector('tbody')
+          .appendChild(row);
+      }
+
+
+      cell.textContent =
+        formatDataValue(value);
+    }
+  }
+
+
+  const empty = gId('sensors').querySelector('.empty');
+
+  if(empty)
+  {
+    empty.remove();
+  }
+}
+
+
+/**************************************************************************************************
+ * Initialise
+ **************************************************************************************************/
+
+onReady(() =>
+{
+  setOriginText();
+
+  loadOverviewSettings();
+  loadApps();
+
+
+  /**********************************************************************************************
+   * Live WebSocket data.
+   **********************************************************************************************/
+
+  ws = createWebSocketClient(
+    '/ws/page',
+
+    data =>
+    {
+      if(data.controls)
+      {
+        syncControls(data.controls);
+      }
+
+      if(data.sensors)
+      {
+        syncSensors(data.sensors);
+      }
+
+      if(data.energy)
+      {
+        syncSensors(data.energy);
+      }
+    },
+
+    () =>
+    {
+      controls();
+      live();
+    }
+  );
+
+
+  ws.connect();
+
+
+  /**********************************************************************************************
+   * Control refresh.
+   *
+   * Controls are requested every second while the page is open so changes made by MQTT,
+   * rules, physical switches, timers, or other modules are reflected without user action.
+   **********************************************************************************************/
+
+  controlsPoll = createPoller(
+    controls,
+    1000
+  );
+
+  controlsPoll.start(false);
+
+
+  /**********************************************************************************************
+   * Normal live-data polling.
+   **********************************************************************************************/
+
+  livePoll = createPoller(
+    live,
+    10000
+  );
+
+  livePoll.start(false);
+
+
+  /**********************************************************************************************
+   * Fast live-data mode.
+   **********************************************************************************************/
+
+  gId('fast').onchange = () =>
+  {
+    live();
+
+    livePoll.setInterval(
+      gId('fast').checked
+        ? 1000
+        : 10000
+    );
+  };
+});
+
+
+/**************************************************************************************************
+ * Cleanup
+ **************************************************************************************************/
+
+addEventListener(
+  'pagehide',
+  () =>
+  {
+    ws?.close();
+    controlsPoll?.stop();
+    livePoll?.stop();
+  }
+);
+
+</script>
+
+</body>
+
+</html>

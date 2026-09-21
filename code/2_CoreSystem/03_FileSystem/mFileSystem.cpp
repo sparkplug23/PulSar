@@ -80,27 +80,42 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-
-    /************
-     * MQTT SECTION
-     *******************/
+     /************
+     * TELEMETRY SECTION * 
+    *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
-    break;
-
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
-    break;
-
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
-    break;
-
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    case TASK_TELEMETRY__SENDER_MQTT:
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
     #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
+    break;
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
+    break;
+    #endif
+    /************
+     * WEBUI SECTION * 
+    *******************/   
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_ADD_HANDLER:      
+      // tkr_web->AddURLasApplication(GetModuleUniqueID(), "sdedit", "SD Card");
+    break;
+    #endif
+
   }
 
   return TASKER_RESULT__UNKNOWN_ID;
@@ -110,79 +125,9 @@ int8_t mFileSystem::Tasker(uint8_t function, JsonParserObject obj)
 void mFileSystem::Pre_Init()
 {
   
-  static bool done = false;
-  if(done) { return; }
-  done = true;
-
-  /************************************************************************************************
-   * SECTION: JSON BUFFER / PSRAM INITIALISATION
-   *
-   * SD card mounting is intentionally NOT done here.
-   ************************************************************************************************/
-
-#if defined(ARDUINO_ARCH_ESP32)
-  #if !defined(BOARD_HAS_PSRAM) && !(defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3))
-  if (psramFound() && ESP.getChipRevision() < 3) psramSafe = false;
-  if (!psramSafe) DEBUG_PRINTLN(F("Not using PSRAM."));
-  #endif
-
-  if(!pDoc)
-  {
-    pDoc = new PSRAMDynamicJsonDocument((psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE);
-
-    DEBUG_PRINTF_P(
-      PSTR("JSON buffer allocated: %u\n"),
-      (psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE
-    );
-
-    if (psramFound()) {
-      DEBUG_PRINTF_P(
-        PSTR("PSRAM: %dkB/%dkB\n"),
-        ESP.getFreePsram() / 1024,
-        ESP.getPsramSize() / 1024
-      );
-    }
-  }
-#endif
 }
 
 
-
-// void mFileSystem::Pre_Init()
-// {
-//   /************************************************************************************************
-//    * SECTION: JSON BUFFER / PSRAM INITIALISATION
-//    *
-//    * SD card mounting is intentionally NOT done here.
-//    *
-//    * Reason:
-//    * - Pre_Init should only prepare filesystem module memory/state.
-//    * - SD mount requires the pin manager to be ready.
-//    * - SD is mounted from Init() after flash filesystem state is prepared.
-//    ************************************************************************************************/
-
-// #if defined(ARDUINO_ARCH_ESP32)
-//   #if !defined(BOARD_HAS_PSRAM) && !(defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3))
-//   if (psramFound() && ESP.getChipRevision() < 3) psramSafe = false;
-//   if (!psramSafe) DEBUG_PRINTLN(F("Not using PSRAM."));
-//   #endif
-
-//   pDoc = new PSRAMDynamicJsonDocument((psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE);
-
-//   DEBUG_PRINTF_P(
-//     PSTR("JSON buffer allocated: %u\n"),
-//     (psramSafe && psramFound() ? 2 : 1) * JSON_BUFFER_SIZE
-//   );
-
-//   if (psramFound()) {
-//     DEBUG_PRINTF_P(
-//       PSTR("PSRAM: %dkB/%dkB\n"),
-//       ESP.getFreePsram() / 1024,
-//       ESP.getPsramSize() / 1024
-//     );
-//   }
-// #endif
-// }
 
 #if defined(ESP8266)
 extern "C" {
@@ -321,6 +266,9 @@ void mFileSystem::Init(void)
   dfsp     = ffsp;
 
   module_state.mode = ModuleStatus::Running;
+
+  // Immediately load any provision files that are from compiled-in templates, so that they are available for the rest of the system to use.
+  CompiledFile_Init();
 
   ALOG_DBG(
     PSTR(D_LOG_FILESYSTEM "FlashFS mounted with %d kB free"),
@@ -707,16 +655,16 @@ bool mFileSystem::writeObjectToFile(const char* file, const char* key, JsonDocum
 }
 
 
-bool mFileSystem::readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest)
+bool mFileSystem::readObjectFromFileUsingId(const char* file, uint16_t id, JsonDocument* dest, const JsonDocument* filter)
 {
   char objKey[10];
   sprintf(objKey, "\"%d\":", id);
-  return readObjectFromFile(file, objKey, dest);
+  return readObjectFromFile(file, objKey, dest, filter);
 }
 
 
 //if the key is a nullptr, deserialize entire object
-bool mFileSystem::readObjectFromFile(const char* file, const char* key, JsonDocument* dest)
+bool mFileSystem::readObjectFromFile(const char* file, const char* key, JsonDocument* dest, const JsonDocument* filter)
 {
   if (doCloseFile) closeFile();
   #ifdef WLED_DEBUG_FS2
@@ -736,7 +684,8 @@ bool mFileSystem::readObjectFromFile(const char* file, const char* key, JsonDocu
     return false;
   }
 
-  deserializeJson(*dest, f);
+  if (filter) deserializeJson(*dest, f, DeserializationOption::Filter(*filter));
+  else        deserializeJson(*dest, f);
 
   f.close();
   // Serial.printf("Read, took %d ms\n", millis() - s);
@@ -839,7 +788,7 @@ bool mFileSystem::handleFileRead(AsyncWebServerRequest* request, String path){
   if(path.endsWith("/")) path += "index.htm";
   if(path.indexOf(F("sec")) > -1) return false;
   #ifdef ARDUINO_ARCH_ESP32
-  if (psramSafe && psramFound() && path.endsWith(FPSTR(  tkr_anim->getPresetsFileName() ))) {
+  if (tkr_jsona->psramSafe && psramFound() && path.endsWith(FPSTR(  tkr_anim->getPresetsFileName() ))) {
     size_t psize;
     const uint8_t *presets = getPresetCache(psize);
     if (presets) {
@@ -885,16 +834,16 @@ void mFileSystem::Handle_FileChanges_WebUIEdits()
   String changedFile;
 
   // Check if any file changes have occurred (clears the flag if true)
-  if (!SPIFFSEditor::Check_AnyFilesEdited()) {
+  if (!FileEditor::Check_AnyFilesEdited()) {
     ALOG_DBG(PSTR("No file change detected.")); //debug for now
     return;
   }
 
-  ALOG_DBG(PSTR("File change detected: %s"), SPIFFSEditor::Get_LastEditedFileName().c_str());
+  ALOG_DBG(PSTR("File change detected: %s"), FileEditor::Get_LastEditedFileName().c_str());
 
   tkr->Tasker_Interface(TASK_FILESYSTEM__HANDLE_FILE_CHANGES_FROM_EDIT_URL__ID);
 
-  SPIFFSEditor::Check_ClearFilesEditFlag();
+  FileEditor::Check_ClearFilesEditFlag();
   
   return;
 }
@@ -1157,20 +1106,20 @@ uint8_t mFileSystem::ConstructJSON_Settings(uint8_t json_level, bool json_append
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mFileSystem::MQTTHandler_Init(){
+void mFileSystem::Telemetry_Init(){
 
-  struct handler<mFileSystem>* ptr;
+  struct telemetry_handler<mFileSystem>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
-  ptr->tRateSecs = 1;//tkr_mqtt->dt.configperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->tRateSecs = 600;//tkr_mqtt->dt.configperiod_secs; 
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mFileSystem::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 } 
 
 #endif // USE_MODULE_NETWORK_MQTT
@@ -1606,10 +1555,114 @@ void mFileSystem::JSONFile_Load(char* filename_With_extension, char* buffer, uin
 }
 
 
+void mFileSystem::CompiledFile_Init()
+{
 
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_01
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_01,FILESYSTEM_FILE_PROVISION_DATA_01,true);
+  #endif
 
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_02
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_02,FILESYSTEM_FILE_PROVISION_DATA_02,true);
+  #endif
 
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_03
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_03,FILESYSTEM_FILE_PROVISION_DATA_03,true);
+  #endif
 
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_04
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_04,FILESYSTEM_FILE_PROVISION_DATA_04,true);
+  #endif
+
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_05
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_05,FILESYSTEM_FILE_PROVISION_DATA_05,true);
+  #endif
+
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_06
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_06,FILESYSTEM_FILE_PROVISION_DATA_06,true);
+  #endif
+
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_07
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_07,FILESYSTEM_FILE_PROVISION_DATA_07,true);
+  #endif
+
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_08
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_08,FILESYSTEM_FILE_PROVISION_DATA_08,true);
+  #endif
+
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_09
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_09,FILESYSTEM_FILE_PROVISION_DATA_09,true);
+  #endif
+
+  #ifdef USE_FILESYSTEM_FILE_PROVISION_10
+    CompiledFile_Load(FILESYSTEM_FILE_PROVISION_FILENAME_WITH_EXTENSION_10,FILESYSTEM_FILE_PROVISION_DATA_10,true);
+  #endif
+
+}
+
+bool mFileSystem::CompiledFile_Load(
+  const char* filename,
+  PGM_P data,
+  bool overwrite
+)
+{
+  if(!IsMounted()){ return false; }
+  if(filename == nullptr || data == nullptr){ return false; }
+
+  char filepath[96];
+
+  if(filename[0] == '/')
+  {
+    snprintf(filepath, sizeof(filepath), "%s", filename);
+  }
+  else
+  {
+    snprintf(filepath, sizeof(filepath), "/%s", filename);
+  }
+
+  if(!overwrite && FileExists(filepath))
+  {
+    ALOG_INF(PSTR(D_LOG_FILESYSTEM "Compiled file exists, keeping: %s"), filepath);
+    return true;
+  }
+
+  const uint32_t data_length = strlen_P(data);
+
+  if(data_length == 0)
+  {
+    ALOG_WRN(PSTR(D_LOG_FILESYSTEM "Compiled file data empty: %s"), filepath);
+    return false;
+  }
+
+  uint8_t* buffer = new uint8_t[data_length];
+
+  if(buffer == nullptr)
+  {
+    ALOG_ERR(PSTR(D_LOG_FILESYSTEM "Compiled file allocation failed: %s"), filepath);
+    return false;
+  }
+
+  memcpy_P(buffer, data, data_length);
+
+  const bool result = SaveFile(
+    filepath,
+    buffer,
+    data_length
+  );
+
+  delete[] buffer;
+
+  if(result)
+  {
+    ALOG_INF(PSTR(D_LOG_FILESYSTEM "Compiled file loaded: %s (%u bytes)"), filepath, data_length);
+  }
+  else
+  {
+    ALOG_ERR(PSTR(D_LOG_FILESYSTEM "Compiled file write failed: %s"), filepath);
+  }
+
+  return result;
+}
 
 
 

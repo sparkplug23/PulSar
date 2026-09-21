@@ -39,11 +39,11 @@ class mUpdates :
      * SECTION: Construct Class Base
      ************************************************************************************************/
     mUpdates(){};
-    void Init(void);
-    void Pre_Init(void);
+    void Init(void){};
+    void Pre_Init(void){};
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    static constexpr const char* PM_MODULE_CORE_UPDATES_CTR = D_MODULE_CORE_UPDATES_CTR;    
+    static constexpr const char* PM_MODULE_CORE_UPDATES_CTR = D_MODULE__CORE__UPDATES__CTR;    
     PGM_P GetModuleName(){         return PM_MODULE_CORE_UPDATES_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_UPDATES_ID; }
     

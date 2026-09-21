@@ -116,7 +116,7 @@ class mHVAC :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void   parse_JSONCommand(JsonParserObject obj);
     
-    static constexpr const char* PM_MODULE_CONTROLLER_HVAC_CTR = D_MODULE_CONTROLLER_HVAC_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_HVAC_CTR = D_MODULE__CONTROLLER__HVAC__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_HVAC_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_HVAC_ID; }
     
@@ -349,22 +349,22 @@ class mHVAC :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     
-    std::vector<struct handler<mHVAC>*> mqtthandler_list;
-    struct handler<mHVAC> mqtthandler_settings;
-    struct handler<mHVAC> mqtthandler_program_timers_ifchanged;
-    struct handler<mHVAC> mqtthandler_program_timers_teleperiod;
-    struct handler<mHVAC> mqtthandler_program_temps_ifchanged;
-    struct handler<mHVAC> mqtthandler_program_temps_teleperiod;
-    struct handler<mHVAC> mqtthandler_program_overview_ifchanged;
-    struct handler<mHVAC> mqtthandler_program_overview_teleperiod;
-    struct handler<mHVAC> mqtthandler_sensor_zone_ifchanged;
-    struct handler<mHVAC> mqtthandler_sensor_zone_teleperiod;
-    struct handler<mHVAC> mqtthandler_sensor_zone_roc1m;
-    struct handler<mHVAC> mqtthandler_sensor_zone_roc10m;
-    struct handler<mHVAC> mqtthandler_relays_ifchanged;
-    struct handler<mHVAC> mqtthandler_relays_teleperiod;  
+    std::vector<struct telemetry_handler<mHVAC>*> telemetry_list;
+    struct telemetry_handler<mHVAC> telemetry_settings;
+    struct telemetry_handler<mHVAC> telemetry_program_timers_ifchanged;
+    struct telemetry_handler<mHVAC> telemetry_program_timers_teleperiod;
+    struct telemetry_handler<mHVAC> telemetry_program_temps_ifchanged;
+    struct telemetry_handler<mHVAC> telemetry_program_temps_teleperiod;
+    struct telemetry_handler<mHVAC> telemetry_program_overview_ifchanged;
+    struct telemetry_handler<mHVAC> telemetry_program_overview_teleperiod;
+    struct telemetry_handler<mHVAC> telemetry_sensor_zone_ifchanged;
+    struct telemetry_handler<mHVAC> telemetry_sensor_zone_teleperiod;
+    struct telemetry_handler<mHVAC> telemetry_sensor_zone_roc1m;
+    struct telemetry_handler<mHVAC> telemetry_sensor_zone_roc10m;
+    struct telemetry_handler<mHVAC> telemetry_relays_ifchanged;
+    struct telemetry_handler<mHVAC> telemetry_relays_teleperiod;  
     #endif // USE_MODULE_NETWORK_MQTT
 
 

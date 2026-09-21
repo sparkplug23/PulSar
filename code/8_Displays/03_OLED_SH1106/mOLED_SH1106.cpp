@@ -59,23 +59,33 @@ int8_t mOLED_SH1106::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
-    break;
-    #endif // USE_MODULE_NETWORK_MQTT
+    #endif
   }
   
   return function_result;
@@ -120,6 +130,9 @@ void mOLED_SH1106::RefreshDisplay()
 
   switch (tkr_iDisp->display.mode) {
     default:
+    case EM_DISPLAY_MODE_UTC_TIME_ID:
+      ShowUTCTime();
+    break;
     case EM_DISPLAY_MODE_LOG_SCROLLING_ID:
       ShowScrollingLog();
     break;
@@ -129,9 +142,6 @@ void mOLED_SH1106::RefreshDisplay()
     case EM_DISPLAY_MODE_USER_TEXT_SERIALISED_ID: 
     case EM_DISPLAY_MODE_USER_TEXT_ADVANCED_ID:
       // Refresh not needed, drawn directly on execution
-    break;
-    case EM_DISPLAY_MODE_UTC_TIME_ID:
-      ShowUTCTime();
     break;
   }
 
@@ -161,10 +171,11 @@ void mOLED_SH1106::InitDriver(void)
       ALOG_INF(PSTR(D_LOG_SH1106 "Display not found"));
     }
   }else{
-    ALOG_INF(PSTR("here"));
+    ALOG_INF(PSTR(D_LOG_SH1106 "Model already set %d"), tkr_iDisp->display.model);
   }
 
-  ALOG_INF(PSTR(D_LOG_SH1106 "address[0] %02X"),tkr_iDisp->display.address[0]);
+  ALOG_INF(PSTR("DSP: SH1106 address[0] %d"),tkr_iDisp->display.address[0]);
+  ALOG_INF(PSTR("DSP: model %d"),tkr_iDisp->display.model);
   
   if(tkr_iDisp->display.model == D_GROUP_MODULE_DISPLAYS_OLED_SH1106_ID)
   {
@@ -196,7 +207,7 @@ void mOLED_SH1106::InitDriver(void)
     tkr_iDisp->renderer->setTextFont(0);
     tkr_iDisp->renderer->setTextSize(2);
     tkr_iDisp->renderer->setCursor(20,20);
-    tkr_iDisp->renderer->println(F("SH1106"));
+    tkr_iDisp->renderer->println(F("SH1106a"));
     tkr_iDisp->renderer->Updateframe();
     tkr_iDisp->renderer->DisplayOnff(true);
     #endif
@@ -372,32 +383,32 @@ uint8_t mOLED_SH1106::ConstructJSON_State(uint8_t json_level, bool json_appendin
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mOLED_SH1106::MQTTHandler_Init()
+void mOLED_SH1106::Telemetry_Init()
 {
 
-  struct handler<mOLED_SH1106>* ptr;
+  struct telemetry_handler<mOLED_SH1106>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = 120; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mOLED_SH1106::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_state_ifchanged;
+  ptr = &telemetry_state_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_IFCHANGED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mOLED_SH1106::ConstructJSON_State;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
 } 
 

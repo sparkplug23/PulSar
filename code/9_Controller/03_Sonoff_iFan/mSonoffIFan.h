@@ -19,7 +19,7 @@ class mSonoffIFan :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     int8_t Tasker_Web(uint8_t function);
 
-    static constexpr const char* PM_MODULE_CONTROLLER_CEILINGFAN_CTR = D_MODULE_CONTROLLER_CEILINGFAN_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_CEILINGFAN_CTR = D_MODULE__CONTROLLER__SONOFF_IFAN__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_CEILINGFAN_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_CEILINGFAN_ID; }
     
@@ -60,17 +60,17 @@ class mSonoffIFan :
 
     #ifdef USE_MODULE_NETWORK_MQTT
   
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mSonoffIFan>*> mqtthandler_list;
+    std::vector<struct telemetry_handler<mSonoffIFan>*> telemetry_list;
 
-    struct handler<mSonoffIFan> mqtthandler_settings;
-    struct handler<mSonoffIFan> mqtthandler_power_ifchanged;
-    struct handler<mSonoffIFan> mqtthandler_power_teleperiod;
+    struct telemetry_handler<mSonoffIFan> telemetry_settings;
+    struct telemetry_handler<mSonoffIFan> telemetry_power_ifchanged;
+    struct telemetry_handler<mSonoffIFan> telemetry_power_teleperiod;
 
     #endif // USE_MODULE_NETWORK_MQTT
 

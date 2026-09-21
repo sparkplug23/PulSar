@@ -61,29 +61,42 @@ int8_t mCellular::Tasker(uint8_t function, JsonParserObject obj)
       
     }
     break;
+    case TASK_EVERY_30_SECOND:
+      Cellular_ConnMgr_LogStatus_30s();
+    break;
     /************
      * COMMANDS SECTION * 
     *******************/
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break;
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      // tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
-    break;
-    #endif // USE_MODULE_NETWORK_MQTT    
+    #endif
   }
 
   return TASKER_RESULT__UNKNOWN_ID;
@@ -344,6 +357,57 @@ void mCellular::Cellular_ConnMgr_Tick_1s(uint32_t now_ms)
   }
 }
 
+void mCellular::Cellular_ConnMgr_LogStatus_30s(void)
+{
+  const uint32_t now_ms = millis();
+
+  uint32_t state_age_secs = (now_ms - conn_sm_.t_enter_ms) / 1000UL;
+  uint32_t next_action_secs = 0;
+
+  if(conn_sm_.t_next_action_ms && (int32_t)(conn_sm_.t_next_action_ms - now_ms) > 0)
+  {
+    next_action_secs = (conn_sm_.t_next_action_ms - now_ms + 999UL) / 1000UL;
+  }
+
+  const char* state_name = "UNKNOWN";
+
+  switch(conn_sm_.state)
+  {
+    case cellular_conn_state_t::WAIT_MODEM_READY: state_name = "WAIT_MODEM_READY"; break;
+    case cellular_conn_state_t::INIT_CONFIG:      state_name = "INIT_CONFIG"; break;
+    case cellular_conn_state_t::START_CONNECTION: state_name = "START_CONNECTION"; break;
+    case cellular_conn_state_t::ONLINE:           state_name = "ONLINE"; break;
+    case cellular_conn_state_t::BACKOFF:          state_name = "BACKOFF"; break;
+  }
+
+  if(!tkr_modem)
+  {
+    ALOG_WRN(PSTR(D_LOG_CELLULAR "DIAG30 CELL state=%s age=%lus next=%lus attempts=%u init=%u drops=%u modem=NULL"),
+      state_name,
+      (unsigned long)state_age_secs,
+      (unsigned long)next_action_secs,
+      conn_sm_.attempts,
+      conn_sm_.init_config_done,
+      conn_sm_.gprs_drop_count
+    );
+    return;
+  }
+
+  ALOG_INF(PSTR(D_LOG_CELLULAR "DIAG30 CELL state=%s age=%lus next=%lus attempts=%u init=%u drops=%u ready=%u gprs=%u"),
+    state_name,
+    (unsigned long)state_age_secs,
+    (unsigned long)next_action_secs,
+    conn_sm_.attempts,
+    conn_sm_.init_config_done,
+    conn_sm_.gprs_drop_count,
+    tkr_modem->IsReady(),
+    tkr_modem->DataNetwork_IsConnected()
+  );
+
+  #ifdef USE_MODULE_DRIVERS_MODEM_7000G
+  tkr_modem->DataNetwork_LogDiagnostics();
+  #endif
+}
 
 /******************************************************************************************************************
  * Commands
@@ -410,32 +474,32 @@ uint8_t mCellular::ConstructJSON_State(uint8_t json_level, bool json_appending){
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mCellular::MQTTHandler_Init()
+void mCellular::Telemetry_Init()
 {
 
-  struct handler<mCellular>* ptr;
+  struct telemetry_handler<mCellular>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true; // DEBUG CHANGE
   ptr->tRateSecs = 60; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mCellular::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_state_ifchanged;
+  ptr = &telemetry_state_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_IFCHANGED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_IFCHANGED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_STATE_CTR;
   ptr->ConstructJSON_function = &mCellular::ConstructJSON_State;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
 } 
 

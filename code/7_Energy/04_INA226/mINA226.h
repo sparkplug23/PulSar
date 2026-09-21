@@ -233,11 +233,11 @@ class mEnergyINA226 :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mEnergyINA226>*> mqtthandler_list;
-    struct handler<mEnergyINA226> mqtthandler_settings;
-    struct handler<mEnergyINA226> mqtthandler_sensor_ifchanged;
-    struct handler<mEnergyINA226> mqtthandler_sensor_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mEnergyINA226>*> telemetry_list;
+    struct telemetry_handler<mEnergyINA226> telemetry_settings;
+    struct telemetry_handler<mEnergyINA226> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mEnergyINA226> telemetry_sensor_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 };
 

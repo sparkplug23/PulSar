@@ -350,19 +350,19 @@ void Update_Channel1_ADC_Readings();
   
     #ifdef USE_MODULE_NETWORK_MQTT
 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
     
-    struct handler<mADC_I2S_Sampler> mqtthandler_settings;
-    struct handler<mADC_I2S_Sampler> mqtthandler_sensor_ifchanged;
-    struct handler<mADC_I2S_Sampler> mqtthandler_sensor_teleperiod;
+    struct telemetry_handler<mADC_I2S_Sampler> telemetry_settings;
+    struct telemetry_handler<mADC_I2S_Sampler> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mADC_I2S_Sampler> telemetry_sensor_teleperiod;
  
-    struct handler<mADC_I2S_Sampler>* mqtthandler_list[3] = {
-      &mqtthandler_settings,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
+    struct telemetry_handler<mADC_I2S_Sampler>* telemetry_list[3] = {
+      &telemetry_settings,
+      &telemetry_sensor_ifchanged,
+      &telemetry_sensor_teleperiod
     };
 
     // No specialised payload therefore use system default instead of enum

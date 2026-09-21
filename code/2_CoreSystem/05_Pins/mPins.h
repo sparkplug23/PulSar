@@ -86,7 +86,7 @@ class mPins :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void Pre_Init(void);
         
-    static constexpr const char* PM_MODULE_CORE_HARDWAREPINS_CTR = D_MODULE_CORE_HARDWAREPINS_CTR;
+    static constexpr const char* PM_MODULE_CORE_HARDWAREPINS_CTR = D_MODULE__CORE__HARDWAREPINS__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_HARDWAREPINS_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_HARDWAREPINS_ID; }
     

@@ -25,7 +25,7 @@ class mRelays :
     void Pre_Init(void);
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
 
-    static constexpr const char* PM_MODULE_DRIVERS_RELAY_CTR = D_MODULE_DRIVERS_RELAY_CTR;
+    static constexpr const char* PM_MODULE_DRIVERS_RELAY_CTR = D_MODULE__DRIVERS__RELAY__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_RELAY_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_RELAY_ID; }    
     
@@ -172,6 +172,11 @@ class mRelays :
 
     void CommandSet_PowerCycle_Interval();
     void CommandSet_PowerTimeOnLimit_Until_Reset();
+    
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    void parse_JSONCommand_WebUI(JsonParserObject obj);
+    void WebUI_Append();
+    #endif
 
     /************************************************************************************************
      * SECTION: Construct Messages
@@ -186,12 +191,12 @@ class mRelays :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mRelays>*> mqtthandler_list;
-    struct handler<mRelays> mqtthandler_settings;
-    struct handler<mRelays> mqtthandler_state_ifchanged;
-    struct handler<mRelays> mqtthandler_state_teleperiod;
-    struct handler<mRelays> mqtthandler_scheduled_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mRelays>*> telemetry_list;
+    struct telemetry_handler<mRelays> telemetry_settings;
+    struct telemetry_handler<mRelays> telemetry_state_ifchanged;
+    struct telemetry_handler<mRelays> telemetry_state_teleperiod;
+    struct telemetry_handler<mRelays> telemetry_scheduled_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
     
 };

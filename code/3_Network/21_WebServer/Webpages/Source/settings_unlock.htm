@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PIN Required</title>
+  <link rel="stylesheet" href="/pulsar.css">
+
+  <script src="/pulsar.js"></script>
+  <script src="/pulsar_data.js"></script>
+</head>
+<body class="center-page">
+<form method="post" class="card message-card">
+<h2>Settings PIN</h2>
+<p class="muted">Settings access is protected.</p>
+<p><input autofocus autocomplete="off" inputmode="numeric" pattern="[0-9]*" name="PIN" type="password" minlength="4" maxlength="4"></p>
+<div class="page-actions"><button type="button" onclick="go('/settings')">Back</button><button class="primary">Submit</button></div>
+</form>
+</body></html>

@@ -137,7 +137,7 @@ class mLEDs :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage();
     
-    static constexpr const char* PM_MODULE_DRIVERS_LEDS_CTR = D_MODULE_DRIVERS_LEDS_CTR;
+    static constexpr const char* PM_MODULE_DRIVERS_LEDS_CTR = D_MODULE__DRIVERS__LEDS__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS_LEDS_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_LEDS_ID; }
 
@@ -254,10 +254,10 @@ class mLEDs :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mLEDs>*> mqtthandler_list;    
-    struct handler<mLEDs> mqtthandler_settings;
-    struct handler<mLEDs> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mLEDs>*> telemetry_list;    
+    struct telemetry_handler<mLEDs> telemetry_settings;
+    struct telemetry_handler<mLEDs> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT 
 
 

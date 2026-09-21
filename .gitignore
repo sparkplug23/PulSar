@@ -32,3 +32,8 @@ build_output/
 *.gz
 
 
+.pio/
+
+
+# Generated firmware build-matrix reports
+/tools/python_scripts/firmware_build_matrix/build_reports/

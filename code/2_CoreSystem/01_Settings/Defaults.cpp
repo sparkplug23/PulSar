@@ -145,13 +145,13 @@ void mSettings::SettingsDefault(void)
   runtime.global_state.network_down = 1;
   runtime.global_state.wifi_down    = true;
 
-  tkr_sup->ParseIPv4(&Settings.ipv4_address[0], PSTR(WIFI_IP_ADDRESS));
-  tkr_sup->ParseIPv4(&Settings.ipv4_address[1], PSTR(WIFI_GATEWAY));
-  tkr_sup->ParseIPv4(&Settings.ipv4_address[2], PSTR(WIFI_SUBNETMASK));
-  tkr_sup->ParseIPv4(&Settings.ipv4_address[3], PSTR(WIFI_DNS));
-  tkr_sup->ParseIPv4(&Settings.ipv4_address[4], PSTR(WIFI_DNS2));
-  tkr_sup->ParseIPv4(&Settings.ipv4_rgx_address, PSTR(WIFI_RGX_IP_ADDRESS));
-  tkr_sup->ParseIPv4(&Settings.ipv4_rgx_subnetmask, PSTR(WIFI_RGX_SUBNETMASK));
+  // tkr_sup->ParseIPv4(&Settings.ipv4_address[0], PSTR(WIFI_IP_ADDRESS));
+  // tkr_sup->ParseIPv4(&Settings.ipv4_address[1], PSTR(WIFI_GATEWAY));
+  // tkr_sup->ParseIPv4(&Settings.ipv4_address[2], PSTR(WIFI_SUBNETMASK));
+  // tkr_sup->ParseIPv4(&Settings.ipv4_address[3], PSTR(WIFI_DNS));
+  // tkr_sup->ParseIPv4(&Settings.ipv4_address[4], PSTR(WIFI_DNS2));
+  // tkr_sup->ParseIPv4(&Settings.ipv4_rgx_address, PSTR(WIFI_RGX_IP_ADDRESS));
+  // tkr_sup->ParseIPv4(&Settings.ipv4_rgx_subnetmask, PSTR(WIFI_RGX_SUBNETMASK));
 
   Settings.sysopt_network.bit.network_wifi = 1;
   Settings.sysopt_network.bit.use_wifi_rescan = 1;

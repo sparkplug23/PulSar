@@ -21,7 +21,7 @@
 // #define ENABLE_DEVFEATURE_WIFI__CHECK_CONNECTION_2025
 // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_JANUARY_2025
 
-// #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
+// #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
 
 //    ;;;;;;;;;;;; ESP32 ;;;;;;;;;;;;;;;;  -- 1D Devices
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_RGB
@@ -43,6 +43,7 @@
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__13__ESP32_32BIT_RGBCCT_TIME_OPTIMISE        // Developing ability to compile in either 32bit or rgbcct ColourObject for performance, desk ring
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32C3_1CH_RGB
 
+// #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_PEBBLE_CONE_V_1D
 
 //    ;;;;;;;;;;;; ESP32 ;;;;;;;;;;;;;;;;  -- 2D Devices
 // #define DEVICE_TESTGROUP__LIGHTING_EFFECTS__ESP32_1CH_MATRIX_16W16H                  // ESP32 testing 16x16 matrix
@@ -146,9 +147,9 @@
    * SECTION: Lighting Configs
   ************************************/  
 
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   
   
 
@@ -175,11 +176,11 @@
     /********* Group: Testing ************************/
       // Phase out
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     /********* Group: Debug options only ************************/
     // #define ENABLE_DEBUG_LINE_HERE
     #define ENABLE_DEBUG_SERIAL    
@@ -193,8 +194,8 @@
     
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
@@ -204,8 +205,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
@@ -274,9 +278,9 @@
    * SECTION: Lighting Configs
   ************************************/  
 
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
   
   
 
@@ -304,11 +308,11 @@
     /********* Group: Testing ************************/
       // Phase out
     #define ENABLE_DEVFEATURE_LIGHT__HYPERION
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     /********* Group: Debug options only ************************/
     // #define ENABLE_DEBUG_LINE_HERE
     #define ENABLE_DEBUG_SERIAL    
@@ -322,20 +326,23 @@
     
   
 
-  #define ENABLE_DEVFEATURE_LIGHTING__PRESET_LOAD_FROM_FILE
-  #define ENABLE_FEATURE_LIGHTS__PRESETS
+  #define ENABLE_FEATURE_LIGHTING__PRESETS__LOAD_FROM_FILE
+  #define ENABLE_FEATURE_LIGHTING__CORE__PRESETS
   
   // _LINES
   
-  #define ENABLE_FEATURE_LIGHTS__PLAYLISTS
+  #define ENABLE_FEATURE_LIGHTING__CORE__PLAYLISTS
   
   // #define ENABLE_DEVFEATURE_LIGHTING__SETTINGS
 
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
@@ -1294,7 +1301,7 @@
  
  */
 
-  // #define ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  // #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
 
   #define ENABLE_DEVFEATURE_LIGHT__CUSTOM_PIXEL_DATA
 
@@ -1372,9 +1379,9 @@
 
 // REmove these, should be in defaults
 #define ENABLE_EFFECT_DESCRIPTIONS
-#define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
-#define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
-#define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D
+#define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+#define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+#define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
 #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
 // #define ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
 
@@ -1458,9 +1465,9 @@
 
 // REmove these, should be in defaults
 #define ENABLE_EFFECT_DESCRIPTIONS
-#define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__1D
-#define ENABLE_DEVFEATURE_LIGHT__INCLUDE_AUDIOREACTIVE_USERMOD
-#define ENABLE_FEATURE_LIGHTS__EFFECT__AUDIO_REACTIVE__2D
+#define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+#define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+#define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
 #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
 // #define ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
 
@@ -2227,11 +2234,11 @@
     
     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     #define ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     // 
     /********* Group: Debug options only ************************/
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
@@ -2314,8 +2321,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
@@ -2471,8 +2481,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
@@ -2718,11 +2731,11 @@
     
     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     #define ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     // 
     /********* Group: Debug options only ************************/
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
@@ -2858,11 +2871,11 @@
 //     
 //     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 //     #define ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
-//     // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+//     // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+//     #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+//     #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+//     #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+//     #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 //     // 
 //     /********* Group: Debug options only ************************/
 //     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
@@ -2947,8 +2960,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
@@ -3098,11 +3114,11 @@
     
     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     #define ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     // 
     /********* Group: Debug options only ************************/
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
@@ -3243,11 +3259,11 @@
 //     
 //     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 //     #define ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
-//     // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-//     #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+//     // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+//     #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+//     #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+//     #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+//     #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 //     // 
 //     /********* Group: Debug options only ************************/
 //     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
@@ -3330,8 +3346,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
@@ -3575,11 +3594,11 @@
     
     #define ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
     #define ENABLE_DEVFEATURE__PIXELS_ENABLE_COLOUR_ORDER_CONVERSION_WITHOUT_COPY_OF_EXTERNAL_ORDER
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL0_DEVELOPING            // Development and testing only
-    #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL1_MINIMAL_HOME             // Basic/Static just for home
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-    // #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL0_DEVELOPMENT            // Development and testing only
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL1_MINIMAL_HOME             // Basic/Static just for home
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
     // 
     /********* Group: Debug options only ************************/
     #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_PALETTE
@@ -3644,8 +3663,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
@@ -3836,8 +3858,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "}," 
     "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
@@ -3956,8 +3981,8 @@
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_AUGUST_2023
 
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__LED_SEGMENT_CLOCK
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__SUN_POSITIONS
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
 
   #define USE_LIGHTING_TEMPLATE
   // #define USE_LIGHTING_TEMPLATE__BUSSES_MIXED_TWO_I2S_CHANNELS_WITH_TWO_SEGMENTS
@@ -4030,8 +4055,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":1,\"TelePeriod\":1,\"ConfigPeriod\":1},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
@@ -4080,9 +4108,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_SEPTEMBER_2023
 
@@ -4227,8 +4255,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}"   // if changed needs to be reconfigured so its only sent teleperiod amount, but flag is set when needed (rather than ischanged variables)
   "}";
 
@@ -4280,9 +4311,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
@@ -4473,8 +4504,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 
@@ -4527,9 +4561,9 @@
   /***********************************
    * SECTION: Lighting Configs
   ************************************/    
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_GENERAL__LEVEL4_FLASHING_COMPLETE     // ie all options
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC        // ie shimmering. Used around house all year
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED     // ie christmas. Seasonal, flashing
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE     // ie all options
 
   #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_OCTOBER_2023
 
@@ -4625,8 +4659,11 @@
 
   #define USE_FUNCTION_TEMPLATE
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
-  "{"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60},"  
+  "{"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
+    "},"
     "\"Logging\":{\"SerialLevel\":\"Info\"}" 
   "}";
 
@@ -4689,7 +4726,7 @@
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
 
-  #define ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
+  // #define ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
 
  /***********************************
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
@@ -4711,6 +4748,8 @@
    * SECTION: Lighting Configs
   ************************************/   
 
+ #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+
 
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
@@ -4719,11 +4758,49 @@
   // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
 
   // #define ENABLE_BUSCONFG__NEW_BUSCONFIG_RANGING
-  #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE
+  // #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE
   // #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE_ONE_SEGMENT
+  #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
 
 
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SUN_TRACKING      
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+  //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+
+  #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+
+  #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
   
+  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 500
+
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CORE
+  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__SHOW_BUILD_DATETIME
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
+  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__SHARED_STYLES
+
+  #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+  // #define ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+
+  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
+
+
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
@@ -4753,12 +4830,12 @@
         "BrightnessRGB": 100
       }
     ],
-    "BrightnessRGB": 5
+    "BrightnessRGB": 100
   }
   )=====";
-  #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
-  #define MAX_LED_MEMORY 64000*5
-  #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
+  // #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
+  // #define MAX_LED_MEMORY 64000*5
+  // #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
 
   /***********************************
    * SECTION: Template Configs
@@ -4800,7 +4877,16 @@
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
 
-  #define ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
+  // #define ENABLE_FEATURE_LIGHTS__RUNTIME_BRIGHTNESS_MAXIMUM
+
+  /***
+   * Using as high density pixel tester
+   * USE_LIGHTING_TEMPLATE__1D_1000PIXELS
+   */
+  // #define USE_LIGHTING_TEMPLATE__1D_1000PIXELS
+  #define USE_LIGHTING_TEMPLATE__1D_3000PIXELS
+
+  // #define ENABLE_FEATURE_LIGHTING__REALTIME_MQTT_SETPIXEL
 
  /***********************************
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
@@ -4822,61 +4908,45 @@
    * SECTION: Lighting Configs
   ************************************/   
 
-  #define ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
-  #define ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+  #ifdef USE_LIGHTING_TEMPLATE__1D_1000PIXELS
 
- 
-  //     {
-  //       "Pin":18,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":2000,
-  //       "Length":1000
-  //     },
-  //     {
-  //       "Pin":19,
-  //       "ColourOrder":"RGB",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":3000,
-  //       "Length":1000
-  //     }
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
   R"=====(
   {
     "BusConfig":[     
       {
-        "Pin":2,
+        "Pin":19,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
         "Length":1000
       },
       {
-        "Pin":4,
-        "ColourOrder":"RGB",
-        "BusType":"WS2812_RGB",
-        "Start":1000,
-        "Length":1000
-      },
-      {
         "Pin":18,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":2000,
-        "Length":1000
+        "Start":1000,
+        "Length":1
       },
       {
-        "Pin":19,
+        "Pin":4,
         "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
-        "Start":3000,
-        "Length":1000
+        "Start":1001,
+        "Length":1
+      },
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1002,
+        "Length":1
       }
     ],
     "Segments":[
       {
-        "PixelRange":[0,4000],
+        "PixelRange":[0,1003],
         "ColourPalette":"Rainbow",
         "ColourType":3,
         "Effects": {
@@ -4892,9 +4962,178 @@
     "BrightnessRGB": 100
   }
   )=====";
+
+  #endif
+  
+  #ifdef USE_LIGHTING_TEMPLATE__1D_3000PIXELS
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[     
+      {
+        "Pin":4,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":1000
+      },
+      {
+        "Pin":18,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":1000,
+        "Length":1000
+      },
+      {
+        "Pin":19,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":2000,
+        "Length":1000
+      },
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":3002,
+        "Length":1
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,3003],
+        "ColourPalette":"Rainbow",
+        "ColourType":3,
+        "Effects": {
+          "Function":"Gradient",
+          "Speed":255,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs": 20
+        },
+        "BrightnessRGB": 100
+      }
+    ],
+    "BrightnessRGB": 100
+  }
+  )=====";
+
+  #endif
+
+  
+  #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S
+  // #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16
+
+ 
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[     
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":10
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":10,
+  //       "Length":10
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":20,
+  //       "Length":10
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":30,
+  //       "Length":10
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "PixelRange":[0,40],
+  //       "ColourPalette":"Rainbow",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Gradient",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
+  // #define USE_LIGHTING_TEMPLATE
+  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  // R"=====(
+  // {
+  //   "BusConfig":[     
+  //     {
+  //       "Pin":2,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":0,
+  //       "Length":1000
+  //     },
+  //     {
+  //       "Pin":4,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":1000,
+  //       "Length":1000
+  //     },
+  //     {
+  //       "Pin":18,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":2000,
+  //       "Length":1000
+  //     },
+  //     {
+  //       "Pin":19,
+  //       "ColourOrder":"RGB",
+  //       "BusType":"WS2812_RGB",
+  //       "Start":3000,
+  //       "Length":1000
+  //     }
+  //   ],
+  //   "Segments":[
+  //     {
+  //       "PixelRange":[0,4000],
+  //       "ColourPalette":"Rainbow",
+  //       "ColourType":3,
+  //       "Effects": {
+  //         "Function":"Gradient",
+  //         "Speed":255,
+  //         "Intensity":127,
+  //         "Grouping":1,
+  //         "RateMs": 20
+  //       },
+  //       "BrightnessRGB": 100
+  //     }
+  //   ],
+  //   "BrightnessRGB": 100
+  // }
+  // )=====";
   #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
   #define MAX_LED_MEMORY 64000*5
-  #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
+  // #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
 
   /***********************************
    * SECTION: Template Configs
@@ -5161,8 +5400,8 @@
    * SECTION: Lighting Configs
   ************************************/   
 
-  #define ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
-  #define ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+  
+  #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S
 
   // #define CONFIG_IDF_TARGET_ESP32C3
 
@@ -5301,13 +5540,13 @@
 // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // "{"
 //   "\"" D_DEVICENAME "\":{"
-//     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+//     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
 //       "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
 //     "],"
-//     "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+//     "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
 //       "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
 //     "],"
-//     "\"" D_MODULE_SENSORS_BME_CTR "\":["
+//     "\"" D_MODULE__SENSORS__BME__CTR "\":["
 //       "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
 //     "]"
 //   "}"
@@ -5391,8 +5630,8 @@
    * SECTION: Lighting Configs
   ************************************/   
 
-  #define ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
-  #define ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+  
+  #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S
 
   // #define CONFIG_IDF_TARGET_ESP32C3
 
@@ -5531,13 +5770,13 @@
 // DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
 // "{"
 //   "\"" D_DEVICENAME "\":{"
-//     "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+//     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
 //       "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
 //     "],"
-//     "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+//     "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
 //       "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
 //     "],"
-//     "\"" D_MODULE_SENSORS_BME_CTR "\":["
+//     "\"" D_MODULE__SENSORS__BME__CTR "\":["
 //       "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
 //     "]"
 //   "}"
@@ -5627,8 +5866,8 @@
    * SECTION: Lighting Configs
   ************************************/   
 
-  // #define ENABLE_DEVFEATURE_NEOBUS__RMT_AS_PRIMARY
-  // #define ENABLE_PIXELBUS_BUSMETHODS__RMT_8_CHANNELS_THEN_I2S_DUAL_CHANNELS
+  // 
+  // #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S
 
   // #define CONFIG_IDF_TARGET_ESP32C3
 

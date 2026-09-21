@@ -1,7 +1,26 @@
-@font-face {
-	font-family: "WIcons";
-	src: url(data:font/woff2;charset=utf-8;base64,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) format('woff');
-}
+/**************************************************************************************************
+ * PulSar Lights Web UI
+ *
+ * Main stylesheet for the Lights interface.
+ *
+ * During cleanup:
+ *   - index.css      = cleaned/understood CSS only
+ *   - index_tmp.css  = legacy/current CSS retained temporarily as migration reference
+ *
+ * Rules should only move from index_tmp.css into this file when:
+ *   - their purpose is understood
+ *   - they are confirmed to still be required
+ *   - they are placed in the correct feature/group section
+ *
+ * Once migrated here, the original rule should be removed from index_tmp.css.
+ **************************************************************************************************/
+
+
+/**************************************************************************************************
+ * 01. THEME / ROOT VARIABLES
+ *
+ * Global colour variables, sizing variables and shared UI constants.
+ **************************************************************************************************/
 
 :root {
 	--c-1: #111;
@@ -20,23 +39,33 @@
 	--c-g: #2c1;
 	--c-l: #48a;
 	--c-y: #a90;
+
 	--t-b: .5;
+
 	--c-o: rgba(34, 34, 34, .9);
-	--c-tb : rgba(34, 34, 34, var(--t-b));
+	--c-tb: rgba(34, 34, 34, var(--t-b));
 	--c-tba: rgba(102, 102, 102, var(--t-b));
 	--c-tbh: rgba(51, 51, 51, var(--t-b));
-	/*following are internal*/
+
+	/* Internal layout variables */
 	--th: 70px;
 	--tp: 70px;
 	--bh: 63px;
 	--tbp: 14px 14px 10px 14px;
 	--bbp: 9px 0 7px 0;
 	--bhd: none;
-	--sgp: "block";
+	--sgp: block;
 	--bmt: 0;
 	--sti: 42px;
 	--stp: 42px;
 }
+
+
+/**************************************************************************************************
+ * 02. GLOBAL DOCUMENT BASE
+ *
+ * html, body, links, paragraphs, buttons, images, selection behaviour and scrolling.
+ **************************************************************************************************/
 
 html {
 	touch-action: manipulation;
@@ -82,10 +111,15 @@ body {
 p {
 	margin: 10px 0 2px 0;
 }
-a, p, a:visited {
+
+a,
+p,
+a:visited {
 	color: var(--c-d);
 }
-a, a:visited {
+
+a,
+a:visited {
 	text-decoration: none;
 }
 
@@ -94,33 +128,44 @@ button {
 	cursor: pointer;
 }
 
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
 .labels {
 	margin: 0;
 	padding: 8px 0 2px 0;
 	font-size: 19px;
 }
 
-#namelabel {
-	position: fixed;
-	bottom: calc(var(--bh) + 6px);
-	right: 6px;
-	color: var(--c-8); /* set bright (--c-d) with dark text shadow (see below) to be legible on gray background (in image) */
-	cursor: pointer;
-	writing-mode: vertical-rl;
-	/* transform: rotate(180deg); */
+::-webkit-scrollbar {
+	width: 6px;
 }
 
-.bri {
-	padding: 4px;
+::-webkit-scrollbar-track {
+	background: transparent;
 }
 
-.wrapper {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	background: var(--c-tb);
-	z-index: 1;
+::-webkit-scrollbar-thumb {
+	background: var(--c-sb);
+	opacity: .2;
+	border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--c-sbh);
+}
+
+/**************************************************************************************************
+ * 03. ICONS / FONTS
+ *
+ * WIcons font, icon sizing and shared icon helpers.
+ **************************************************************************************************/
+
+@font-face {
+	font-family: "WIcons";
+	src: url(data:font/woff2;charset=utf-8;base64,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);
 }
 
 .icons {
@@ -131,36 +176,53 @@ button {
 	display: inline-block;
 }
 
-.on {
-	color: var(--c-g) !important;
-}
-
-.off {
-	color: var(--c-6) !important;
-	/* cursor: default !important; */
-}
-
-.top .icons, .bot .icons {
-	margin: -2px 0 4px 0;
+.iconlabel {
+	font-size: 12px;
+	margin-top: 2px;
 }
 
 .huge {
 	font-size: 60px !important;
 }
 
-.segt, .plentry TABLE {
-	table-layout: fixed;
-	width: 100%;
+.slider-icon {
+	position: absolute;
+	left: 8px;
+	bottom: 5px;
 }
 
-.segt TD {
-	padding: 2px 0 !important;
-	text-align: center;
-	/*text-transform: uppercase;*/
+.sel-icon {
+	transform: translateX(3px);
 }
-.segt TD, .plentry TD {
-	font-size: 13px;
-	padding: 0;
+
+.e-icon,
+.g-icon,
+.sel-icon,
+.slider-icon {
+	cursor: pointer;
+	color: var(--c-d);
+}
+
+.g-icon {
+	font-style: normal;
+	position: absolute;
+	top: 8px;
+	right: 8px;
+}
+
+
+/**************************************************************************************************
+ * 04. GENERIC LAYOUT HELPERS
+ *
+ * Reusable layout helpers:
+ *   - inline/block helpers
+ *   - generic alignment
+ *   - sticky positioning
+ *   - utility positioning
+ **************************************************************************************************/
+
+.il {
+	display: inline-block;
 	vertical-align: middle;
 }
 
@@ -176,29 +238,6 @@ button {
 	font-size: small;
 }
 
-.slider-icon {
-	position: absolute;
-	left: 8px;
-	bottom: 5px;
-}
-
-.sel-icon {
-	transform: translateX(3px);
-}
-
-.e-icon, .g-icon, .sel-icon, .slider-icon {
-	cursor: pointer;
-	color: var(--c-d);
-}
-
-.g-icon {
-	font-style: normal;
-	position: absolute;
-	top: 8px;
-	right: 8px;
-}
-
-/* pop-up container */
 .pop {
 	position: absolute;
 	display: inline-block;
@@ -206,7 +245,6 @@ button {
 	right: 0;
 }
 
-/* pop-up content (segment sets) */
 .pop-c {
 	position: absolute;
 	background-color: var(--c-2);
@@ -219,23 +257,60 @@ button {
 	font-size: 24px;
 	line-height: 24px;
 }
+
 .pop-c span {
 	padding: 2px 6px;
 }
 
-.search-icon {
-	position: absolute;
-	top: 8px;
-	left: 12px;
-	width: 24px;
-	height: 24px;
+.staytop,
+.staybot {
+	display: block;
+	position: -webkit-sticky;
+	position: sticky !important;
+	top: 0;
+	z-index: 2;
+	margin: 0 auto auto;
 }
 
-.clear-icon {
-	position: absolute;
-	top: 8px;
-	right: 9px;
-	cursor: pointer;
+.staybot {
+	bottom: 5px;
+}
+
+.rot45 {
+	-webkit-transform: rotate(45deg);
+	-ms-transform: rotate(45deg);
+	transform: rotate(45deg);
+}
+
+.m6 {
+	margin: 6px 0;
+}
+
+.c {
+	text-align: center;
+}
+
+/**************************************************************************************************
+ * 05. GENERIC STATE HELPERS
+ *
+ * Shared state classes:
+ *   - active
+ *   - expanded
+ *   - on/off
+ *   - transition helpers
+ **************************************************************************************************/
+
+.on {
+	color: var(--c-g) !important;
+}
+
+.off {
+	color: var(--c-6) !important;
+}
+
+.active {
+	background-color: var(--c-6) !important;
+	color: var(--c-f);
 }
 
 .flr {
@@ -253,25 +328,42 @@ button {
 	transform: rotate(180deg);
 }
 
-.il {
-	display: inline-block;
-	vertical-align: middle;
+.smooth {
+	transition: transform calc(var(--f, 1) * .5s) ease-out;
 }
 
-#liveview {
-	height: 4px;
-	width: 100%;
-	border: 0;
+.hd {
+	display: var(--bhd);
 }
 
-#liveview2D {
-	height: 90%;
-	width: 90%;
-	border: 0;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%,-50%);
+.simplified #pql .hd {
+	display: var(--bhd) !important;
+}
+
+@media all and (max-width: 639px) {
+	.hd {
+		display: none !important;
+	}
+}
+
+/**************************************************************************************************
+ * 06. TOP / BOTTOM NAVIGATION
+ *
+ * Main toolbar, navigation tabs, toolbar labels and toolbar button behaviour.
+ **************************************************************************************************/
+
+.wrapper {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	background: var(--c-tb);
+	z-index: 1;
+}
+
+.top .icons,
+.bot .icons {
+	margin: -2px 0 4px 0;
 }
 
 .tab {
@@ -318,18 +410,64 @@ button {
 	color: var(--c-f);
 }
 
-.active {
-	background-color: var(--c-6) !important;
-	color: var(--c-f);
+#namelabel {
+	position: fixed;
+	bottom: calc(var(--bh) + 6px);
+	right: 6px;
+	color: var(--c-8);
+	cursor: pointer;
+	writing-mode: vertical-rl;
+	text-shadow:
+		-1px -1px 0 var(--c-1),
+		1px -1px 0 var(--c-1),
+		-1px 1px 0 var(--c-1),
+		1px 1px 0 var(--c-1);
 }
+
+.tab-label {
+	margin: 0 0 -5px 0;
+	padding-bottom: 4px;
+	display: var(--bhd);
+}
+
+@media all and (max-width: 1023px) {
+	.top button {
+		width: 8%;
+		padding: 10px 0 8px 0;
+	}
+
+	#buttonPcm {
+		display: none;
+	}
+}
+
+@media all and (max-width: 639px) {
+	.top button {
+		width: 16.6%;
+		padding: 8px 0 4px 0;
+	}
+}
+
+@media all and (min-width: 420px) and (max-width: 639px) {
+	.top button {
+		width: 14.28%;
+		padding: 8px 0 4px 0;
+	}
+}
+
+/**************************************************************************************************
+ * 07. MAIN PAGE / TAB LAYOUT
+ *
+ * Main wrapper, tab pages and principal page/container sizing.
+ **************************************************************************************************/
 
 .container {
 	--n: 1;
 	width: 100%;
-	width: calc(var(--n)*100%);
+	width: calc(var(--n) * 100%);
 	height: calc(100% - var(--tp) - var(--bh));
 	margin-top: var(--tp);
-	transform: translate(calc(var(--i, 0)/var(--n)*-100%));
+	transform: translate(calc(var(--i, 0) / var(--n) * -100%));
 	overscroll-behavior: none;
 }
 
@@ -337,7 +475,7 @@ button {
 	float: left;
 	position: relative;
 	width: 100%;
-	width: calc(100%/var(--n));
+	width: calc(100% / var(--n));
 	box-sizing: border-box;
 	border: 0;
 	overflow-y: auto;
@@ -348,17 +486,29 @@ button {
 	-webkit-overflow-scrolling: touch;
 }
 
-#Segments, #Presets, #Effects, #Colors {
+#Segments,
+#Presets,
+#Effects,
+#Colors {
 	font-size: 19px;
 	padding: 4px 0 0;
 }
 
-#segutil, #segutil2, #segcont, #putil, #pcont, #pql, #fx, #palw,
+#segutil,
+#segutil2,
+#segcont,
+#putil,
+#pcont,
+#pql,
+#fx,
+#palw,
 .fnd {
 	max-width: 280px;
 }
 
-#putil, #segutil, #segutil2 {
+#putil,
+#segutil,
+#segutil2 {
 	min-height: 42px;
 	margin: 0 auto;
 }
@@ -367,8 +517,21 @@ button {
 	padding-top: 12px;
 }
 
-#fx, #pql, #segcont, #pcont, #sliders, #qcs-w, #hexw, #pall, #ledmap,
-.slider, .filter, .option, .segname, .pname, .fnd {
+#fx,
+#pql,
+#segcont,
+#pcont,
+#sliders,
+#qcs-w,
+#hexw,
+#pall,
+#ledmap,
+.slider,
+.filter,
+.option,
+.segname,
+.pname,
+.fnd {
 	margin: 0 auto;
 }
 
@@ -376,18 +539,818 @@ button {
 	padding: 5px 0 0;
 }
 
-/* Quick load magin for simplified UI */
-.simplified #pql, .simplified #palw, .simplified #fx {
+.simplified #pql,
+.simplified #palw,
+.simplified #fx {
 	margin-bottom: 8px;
 }
 
-.smooth { transition: transform	calc(var(--f, 1)*.5s) ease-out }
 
-.tab-label {
-	margin: 0 0 -5px 0;
-	padding-bottom: 4px;
-	display: var(--bhd);
+/**************************************************************************************************
+ * 08. GENERIC BUTTONS
+ *
+ * Shared button classes and sizes:
+ *   - .btn
+ *   - .btn-s
+ *   - .btn-xs
+ *   - icon buttons
+ **************************************************************************************************/
+
+.btn {
+	padding: 8px;
+	width: 230px;
+	font-size: 19px;
+	color: var(--c-d);
+	cursor: pointer;
+	border-radius: 25px;
+	transition-duration: .3s;
+	-webkit-backface-visibility: hidden;
+	-webkit-transform: translate3d(0, 0, 0);
+	backface-visibility: hidden;
+	transform: translate3d(0, 0, 0);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	border: 1px solid var(--c-3);
+	background-color: var(--c-3);
 }
+
+.btn-s {
+	width: 100%;
+	margin: 0;
+	border: 1px solid var(--c-2);
+	background-color: var(--c-2);
+}
+
+.btn-p {
+	width: 120px;
+	margin: 5px 0;
+}
+
+.btn-icon {
+	margin: -4px 4px -1px 0;
+	vertical-align: middle;
+	display: inline-block;
+}
+
+.btn-xs,
+.btn-pl-del,
+.btn-pl-add {
+	width: 42px !important;
+	height: 42px !important;
+	text-overflow: clip;
+}
+
+.btn-xs {
+	margin: 0;
+}
+
+#btns .btn-xs {
+	margin: 0 4px;
+}
+
+#putil .btn-s {
+	width: 135px;
+}
+
+#segutil .btn-s,
+#segutil2 .btn-s,
+#putil .btn-s {
+	background-color: var(--c-3);
+	border: 1px solid var(--c-3);
+}
+
+.btn-pl-del,
+.btn-pl-add {
+	margin: 0;
+	white-space: nowrap;
+}
+
+a.btn {
+	display: block;
+	white-space: nowrap;
+	text-align: center;
+	padding: 9px 32px 7px 24px;
+	position: relative;
+	box-sizing: border-box;
+	line-height: 24px;
+}
+
+#segutil .btn-s:hover,
+#segutil2 .btn-s:hover,
+#putil .btn-s:hover,
+.btn:hover,
+.modal .btn:hover {
+	border: 1px solid var(--c-5);
+	background-color: var(--c-5);
+}
+
+/**************************************************************************************************
+ * 09. GENERIC FORMS
+ *
+ * Shared inputs:
+ *   - text
+ *   - number
+ *   - select
+ *   - textarea
+ *   - checkbox
+ *   - radio
+ **************************************************************************************************/
+
+select {
+	padding: 4px 8px;
+	margin: 0;
+	font-size: 19px;
+	background-color: var(--c-3);
+	color: var(--c-d);
+	cursor: pointer;
+	border: 0 solid var(--c-2);
+	border-radius: 20px;
+	transition-duration: .5s;
+	-webkit-backface-visibility: hidden;
+	-webkit-transform: translate3d(0, 0, 0);
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	backface-visibility: hidden;
+	transform: translate3d(0, 0, 0);
+	text-overflow: ellipsis;
+}
+
+option {
+	background-color: var(--c-3);
+	color: var(--c-f);
+}
+
+input[type="number"],
+input[type="text"] {
+	background: var(--c-3);
+	color: var(--c-f);
+	border: 0 solid var(--c-2);
+	border-radius: 10px;
+	padding: 8px;
+	font-size: 19px;
+	transition: background-color .2s;
+	outline: 0;
+	-webkit-appearance: textfield;
+	-moz-appearance: textfield;
+	appearance: textfield;
+}
+
+input[type="number"] {
+	text-align: right;
+	width: 50px;
+}
+
+input[type="text"] {
+	text-align: center;
+}
+
+input[type="number"]:focus,
+input[type="text"]:focus {
+	background: var(--c-6);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+}
+
+textarea {
+	background: var(--c-2);
+	color: var(--c-f);
+	width: calc(100% - 14px);
+	height: 90px;
+	border-radius: 5px;
+	border: 2px solid var(--c-5);
+	outline: 0;
+	resize: none;
+	font-size: 19px;
+	padding: 5px;
+}
+
+.apitxt {
+	height: 7em;
+}
+
+::selection {
+	background: var(--c-b);
+}
+
+.stxt {
+	width: 50px !important;
+}
+
+#tt {
+	text-align: center;
+}
+
+select.sel-p,
+select.sel-pl,
+select.sel-ple {
+	margin: 5px 0;
+	width: 100%;
+	height: 40px;
+	padding: 0 20px 0 8px;
+}
+
+div.sel-p {
+	position: relative;
+}
+
+div.sel-p::after {
+	content: "";
+	position: absolute;
+	right: 10px;
+	top: 22px;
+	width: 0;
+	height: 0;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-top: 8px solid var(--c-f);
+}
+
+select.sel-ple {
+	text-align: center;
+}
+
+select.sel-sg {
+	margin: 5px 0;
+	height: 40px;
+}
+
+.check,
+.radio {
+	display: block;
+	position: relative;
+	cursor: pointer;
+}
+
+.revchkl {
+	padding: 4px 0 0 35px;
+	margin-bottom: 0;
+	margin-top: 8px;
+}
+
+td .revchkl {
+	padding: 0 0 0 32px;
+	margin-top: 0;
+}
+
+.check input,
+.radio input {
+	position: absolute;
+	opacity: 0;
+	cursor: pointer;
+	height: 0;
+	width: 0;
+}
+
+.checkmark,
+.radiomark {
+	position: absolute;
+	height: 24px;
+	width: 24px;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	background-color: var(--c-3);
+	border: 1px solid var(--c-2);
+}
+
+.checkmark {
+	border-radius: 10px;
+}
+
+.radiomark {
+	top: 8px;
+	left: 8px;
+	height: 22px;
+	width: 22px;
+	border-radius: 50%;
+	background-color: transparent;
+}
+
+.radio:hover input ~ .radiomark,
+.check:hover input ~ .checkmark {
+	background-color: var(--c-5);
+}
+
+.checkmark::after,
+.radiomark::after {
+	content: "";
+	position: absolute;
+	display: none;
+}
+
+.check .checkmark::after {
+	left: 9px;
+	top: 4px;
+	width: 5px;
+	height: 10px;
+	border: solid var(--c-f);
+	border-width: 0 3px 3px 0;
+	-webkit-transform: rotate(45deg);
+	-ms-transform: rotate(45deg);
+	transform: rotate(45deg);
+}
+
+.radio .radiomark::after {
+	width: 14px;
+	height: 14px;
+	top: 50%;
+	left: 50%;
+	margin: -7px;
+	border-radius: 50%;
+	background: var(--c-f);
+}
+
+.check input:checked ~ .checkmark::after,
+.radio input:checked ~ .radiomark::after {
+	display: inline-block !important;
+}
+
+td .checkmark,
+td .radiomark {
+	top: -6px;
+}
+
+/**************************************************************************************************
+ * 10. SLIDERS
+ *
+ * Shared slider containers and layout.
+ *
+ * Slider track/thumb/bubble rules remain to be migrated.
+ **************************************************************************************************/
+
+#sliders {
+	position: -webkit-sticky;
+	position: sticky;
+	bottom: 0;
+	max-width: 300px;
+	z-index: 2;
+}
+
+#sliders .labels {
+	padding-top: 3px;
+	font-size: small;
+}
+
+.slider {
+	border-radius: 24px;
+	position: relative;
+	padding-bottom: 2px;
+}
+
+.sliderwrap {
+	height: 30px;
+	width: 230px;
+	max-width: 230px;
+	position: relative;
+	z-index: 0;
+}
+
+#sliders .slider {
+	padding-right: 64px;
+}
+
+#sliders .slider,
+#info .slider {
+	background-color: var(--c-2);
+}
+
+#sliders .sliderwrap,
+.sbs .sliderwrap {
+	left: 32px;
+}
+
+.sliderdisplay {
+	content: "";
+	position: absolute;
+	top: 12px;
+	left: 8px;
+	right: 8px;
+	height: 5px;
+	background: var(--c-4);
+	border-radius: 16px;
+	pointer-events: none;
+	z-index: -1;
+	--bg: var(--c-f);
+}
+
+#rwrap .sliderdisplay {
+	--bg: none;
+	background: linear-gradient(90deg, #000 -15%, #f00);
+}
+
+#gwrap .sliderdisplay {
+	--bg: none;
+	background: linear-gradient(90deg, #000 -15%, #0f0);
+}
+
+#bwrap .sliderdisplay {
+	--bg: none;
+	background: linear-gradient(90deg, #000 -15%, #00f);
+}
+
+#wwrap .sliderdisplay {
+	--bg: none;
+	background: linear-gradient(90deg, #000 -15%, #fff);
+}
+
+#kwrap .sliderdisplay,
+#wbal .sliderdisplay {
+	background: linear-gradient(90deg, #ff8f1f 0%, #fff 50%, #cbdbff);
+}
+
+.sliderbubble {
+	width: 24px;
+	position: absolute;
+	display: inline-block;
+	border-radius: 16px;
+	background: var(--c-3);
+	color: var(--c-f);
+	padding: 4px;
+	font-size: 14px;
+	right: 6px;
+	top: 4px;
+	transition: visibility .25s ease, opacity .25s ease;
+	opacity: 0;
+	visibility: hidden;
+}
+
+output.sliderbubbleshow {
+	visibility: visible;
+	opacity: 1;
+}
+
+input[type="range"] {
+	-webkit-appearance: none;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	background-color: transparent;
+	cursor: pointer;
+}
+
+input[type="range"]:focus {
+	outline: 0;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+	width: 100%;
+	height: 30px;
+	cursor: pointer;
+	background: transparent;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+	height: 16px;
+	width: 16px;
+	border-radius: 50%;
+	background: var(--c-f);
+	cursor: pointer;
+	-webkit-appearance: none;
+	margin-top: 7px;
+}
+
+input[type="range"]::-moz-range-track {
+	width: 100%;
+	height: 30px;
+	background-color: rgba(0, 0, 0, 0);
+}
+
+input[type="range"]::-moz-range-thumb {
+	border: 0 solid rgba(0, 0, 0, 0);
+	height: 16px;
+	width: 16px;
+	border-radius: 50%;
+	background: var(--c-f);
+	transform: translateY(5px);
+}
+
+#briwrap {
+	min-width: 300px;
+	float: right;
+	margin-top: var(--bmt);
+}
+
+@media not all and (hover: none) {
+	.sliderwrap:hover + output.sliderbubble {
+		visibility: visible;
+		opacity: 1;
+	}
+}
+
+@media all and (max-width: 335px) {
+	.sliderbubble {
+		display: none;
+	}
+}
+
+@media all and (max-width: 639px) {
+	#briwrap {
+		margin: 0 auto !important;
+		float: none;
+		display: inline-block;
+	}
+}
+
+/**************************************************************************************************
+ * 11. GENERIC LISTS / CARDS
+ *
+ * Shared list/card structures:
+ *   - generic list entries
+ *   - list item containers
+ *   - expanded/collapsed content
+ *   - reusable card internals
+ **************************************************************************************************/
+
+.ptxt {
+	margin: -1px 4px 8px !important;
+}
+
+input[type="text"].ptxt {
+	width: calc(100% - 24px);
+}
+
+.segname,
+.pname {
+	white-space: nowrap;
+	text-align: center;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	line-height: 24px;
+	padding: 8px 24px;
+	max-width: 170px;
+	position: relative;
+}
+
+.segname .flr,
+.pname .flr {
+	transform: rotate(0deg);
+}
+
+.pname {
+	top: 1px;
+}
+
+.plname {
+	top: 0;
+}
+
+.seg,
+.pres {
+	background-color: var(--c-2);
+	border: 0 solid var(--c-f);
+	text-align: left;
+	transition: background-color .5s;
+	border-radius: 21px;
+}
+
+.list {
+	position: relative;
+	transition: background-color .5s;
+	margin: auto auto 10px;
+	line-height: 24px;
+}
+
+.lstI {
+	align-items: center;
+	cursor: pointer;
+	background-color: var(--c-2);
+	overflow: hidden;
+	position: -webkit-sticky;
+	position: sticky;
+	border-radius: 21px;
+	margin: 0 auto 12px;
+	min-height: 40px;
+	border: 1px solid var(--c-2);
+	width: 100%;
+}
+
+.selected {
+	background: var(--c-4);
+}
+
+.lstI:hover:not([class*="expanded"]) {
+	background: var(--c-5);
+}
+
+.selected .checkmark,
+.selected .radiomark,
+.selected input[type="number"],
+.selected input[type="text"] {
+	background-color: var(--c-3);
+}
+
+.lstI.selected {
+	top: 0;
+	bottom: 0;
+	border: 1px solid var(--c-4);
+}
+
+.lstI.sticky,
+.lstI.selected {
+	z-index: 1;
+	box-shadow: 0 0 10px 4px var(--c-1);
+}
+
+.lstI .flr:hover {
+	background: var(--c-6);
+	border-radius: 100%;
+}
+
+.lstIcontent {
+	padding: 9px 0 7px;
+	position: relative;
+}
+
+.lstIname {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	-webkit-filter: grayscale(100%);
+	filter: grayscale(100%);
+}
+
+.lstIprev {
+	width: 100%;
+	height: 6px;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	z-index: -1;
+}
+
+.lbl-l {
+	font-size: 13px;
+	text-align: center;
+	padding: 4px 0;
+}
+
+.lbl-s {
+	display: inline-block;
+	margin-top: 6px;
+	font-size: 13px;
+	width: 48%;
+	text-align: center;
+}
+
+.h {
+	font-size: 13px;
+	text-align: center;
+	color: var(--c-b);
+}
+
+.bp {
+	margin-bottom: 8px;
+}
+
+.pwr {
+	color: var(--c-6);
+	cursor: pointer;
+}
+
+.act {
+	color: var(--c-f);
+}
+
+.del {
+	position: absolute;
+	bottom: 8px;
+	right: 8px;
+}
+
+.segin,
+.presin {
+	padding: 8px;
+	position: relative;
+}
+
+.presin {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.pres .lstIcontent,
+.segin {
+	display: none;
+}
+
+.show,
+.expanded .edit-icon,
+.expanded .segin,
+.expanded .presin,
+.expanded .sbs,
+.expanded {
+	display: inline-block !important;
+}
+
+.hide,
+.expanded .segin.hide,
+.expanded .presin.hide,
+.expanded .sbs.hide,
+.expanded .frz,
+.expanded .g-icon {
+	display: none !important;
+}
+
+/**************************************************************************************************
+ * 12. SEARCH / FILTER CONTROLS
+ *
+ * Search controls, filter panels and option controls.
+ **************************************************************************************************/
+
+.search-icon {
+	position: absolute;
+	top: 8px;
+	left: 12px;
+	width: 24px;
+	height: 24px;
+}
+
+.clear-icon {
+	position: absolute;
+	top: 8px;
+	right: 9px;
+	cursor: pointer;
+}
+
+.filter,
+.option {
+	background-color: var(--c-4);
+	border-radius: 26px;
+	height: 26px;
+	max-width: 300px;
+	padding: 4px 2px;
+	position: relative;
+	opacity: 1;
+	transition: opacity .25s linear, height .2s, transform .2s;
+}
+
+.filter {
+	z-index: 1;
+	border-radius: 0 0 16px 16px;
+	max-width: 220px;
+	height: 54px;
+	line-height: 1.5;
+	padding-bottom: 8px;
+	pointer-events: none;
+}
+
+.filter .fchkl,
+.option .ochkl {
+	display: inline-block;
+	min-width: .7em;
+	padding: 1px 4px 1px 32px;
+	text-align: left;
+	line-height: 24px;
+	vertical-align: middle;
+	-webkit-filter: grayscale(100%);
+	filter: grayscale(100%);
+}
+
+.filter .fchkl {
+	margin: 0 4px;
+	min-width: 20px;
+	pointer-events: auto;
+}
+
+.fnd {
+	position: relative;
+}
+
+.fnd input[type="text"] {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 8px 40px 8px 44px;
+	margin: 4px auto 12px;
+	text-align: left;
+	border-radius: 21px;
+	background: var(--c-2);
+	border: 1px solid var(--c-3);
+	-webkit-filter: grayscale(100%);
+	filter: grayscale(100%);
+}
+
+.fnd input[type="text"]:focus {
+	background-color: var(--c-4);
+}
+
+.fnd input[type="text"]:not(:placeholder-shown),
+.fnd input[type="text"]:hover {
+	background-color: var(--c-3);
+}
+
+/**************************************************************************************************
+ * 13. MODALS / OVERLAYS / TOASTS
+ *
+ * Shared temporary/overlay UI.
+ **************************************************************************************************/
+
+
+/*-------------------------------------------------------------------------------------------------
+ * 13A. LOADING / SCREEN OVERLAYS
+ *------------------------------------------------------------------------------------------------*/
 
 .overlay {
 	position: fixed;
@@ -406,85 +1369,11 @@ button {
 	pointer-events: none;
 }
 
-.staytop, .staybot {
-	display: block;
-	position: -webkit-sticky;
-	position: sticky !important;
-	top: 0;
-	z-index: 2;
-	margin: 0 auto auto;
-}
 
-.staybot {
-	bottom: 5px;
-}
+/*-------------------------------------------------------------------------------------------------
+ * 13B. TOOLTIPS / VISIBILITY TRANSITIONS
+ *------------------------------------------------------------------------------------------------*/
 
-#sliders {
-	position: -webkit-sticky;
-	position: sticky;
-	bottom: 0;
-	max-width: 300px;
-	z-index: 2;
-}
-
-#sliders .labels {
-	padding-top: 3px;
-	font-size: small;
-}
-
-.slider {
-	/*max-width: 300px;*/
-	/* margin: 5px auto; add 5px; if you want some vertical space but looks ugly */
-	border-radius: 24px;
-	position: relative;
-	padding-bottom: 2px;
-}
-
-/* Slider wrapper div */
-.sliderwrap {
-	height: 30px;
-	width: 230px;
-	max-width: 230px;
-	position: relative;
-	z-index: 0;
-}
-
-#sliders .slider {
-	padding-right: 64px; /* offset for bubble */
-}
-
-#sliders .slider, #info .slider {
-	background-color: var(--c-2);
-}
-
-#sliders .sliderwrap, .sbs .sliderwrap {
-	left: 32px; /* offset for icon */
-}
-
-.filter, .option {
-	background-color: var(--c-4);
-	border-radius: 26px;
-	height: 26px;
-	max-width: 300px;
-	/* margin: 0 auto 4px; add 4-8px if you want space at the bottom */
-	padding: 4px 2px;
-	position: relative;
-	opacity: 1;
-	transition: opacity .25s linear, height .2s, transform .2s;
-}
-
-.filter {
-	z-index: 1;
-	/*overflow: visible;*/
-	border-radius: 0 0 16px 16px;
-	max-width: 220px;
-	height: 54px;
-	line-height: 1.5;
-	padding-bottom: 8px;
-	pointer-events: none;
-}
-
-/* New tooltip */
 .tooltip {
 	position: absolute;
 	opacity: 0;
@@ -500,7 +1389,7 @@ button {
 	pointer-events: none;
 }
 
- .tooltip::after {
+.tooltip::after {
 	content: "";
 	position: absolute;
 	border: 8px solid;
@@ -508,7 +1397,7 @@ button {
 	top: 100%;
 	left: calc(50% - 8px);
 	z-index: 0;
- }
+}
 
 .tooltip.visible {
 	opacity: 1;
@@ -516,16 +1405,21 @@ button {
 }
 
 .fade {
-	visibility: hidden; /* hide it */
-	opacity: 0; /* make it transparent */
-	transform: scaleY(0); /* shrink content */
-	height: 0; /* force other elements to move */
-	padding: 0; /* remove empty space */
+	visibility: hidden;
+	opacity: 0;
+	transform: scaleY(0);
+	height: 0;
+	padding: 0;
 }
 
 .first {
 	margin-top: 10px;
 }
+
+
+/*-------------------------------------------------------------------------------------------------
+ * 13C. TOAST MESSAGES
+ *------------------------------------------------------------------------------------------------*/
 
 #toast {
 	opacity: 0;
@@ -556,6 +1450,22 @@ button {
 	animation: fadein .5s;
 }
 
+@keyframes fadein {
+	from {
+		bottom: 0;
+		opacity: 0;
+	}
+
+	to {
+		bottom: calc(var(--bh) + 22px);
+		opacity: 1;
+	}
+}
+
+/*-------------------------------------------------------------------------------------------------
+ * 13D. MODAL BASE / CLOSE CONTROL
+ *------------------------------------------------------------------------------------------------*/
+
 .modal {
 	position: fixed;
 	left: 0;
@@ -577,9 +1487,577 @@ button {
 	float: right;
 }
 
-#info, #nodes {
+/*-------------------------------------------------------------------------------------------------
+ * 13E. DIALOGS
+ *------------------------------------------------------------------------------------------------*/
+
+dialog::backdrop {
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+}
+
+dialog {
+	max-height: 70%;
+	border: 0;
+	border-radius: 10px;
+	background: linear-gradient(rgba(0, 0, 0, .15), rgba(0, 0, 0, .1)), var(--c-3);
+	box-shadow: 4px 4px 10px 4px var(--c-1);
+	color: var(--c-f);
+}
+
+
+/**************************************************************************************************
+ * 14. COLOUR CONTROLS
+ *
+ * Colour-specific UI:
+ *   - colour picker
+ *   - RGB sliders
+ *   - white/CCT controls
+ *   - quick colour buttons
+ *   - colour slots
+ *   - hex input
+ **************************************************************************************************/
+
+#picker {
+	margin: 4px auto 0 !important;
+	max-width: max-content;
+}
+
+#Colors input[type="range"]::-webkit-slider-thumb {
+	height: 18px;
+	width: 18px;
+	border: 2px solid var(--c-1);
+	margin-top: 5px;
+}
+
+#Colors input[type="range"]::-moz-range-thumb {
+	border: 2px solid var(--c-1);
+}
+
+#Colors .sliderwrap {
+	margin: 2px 0 0;
+}
+
+#qcs-w {
+	margin-top: 10px;
+}
+
+.qcs {
+	margin: 2px;
+	border-radius: 14px;
+	display: inline-block;
+	width: 28px;
+	height: 28px;
+	line-height: 28px;
+	text-shadow:
+		-1px -1px 0 var(--c-1),
+		1px -1px 0 var(--c-1),
+		-1px 1px 0 var(--c-1),
+		1px 1px 0 var(--c-1);
+}
+
+.qcsb{
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	border: 1px solid var(--c-f);
+}
+
+#hexw {
+	margin-top: 5px;
+}
+
+#hexw input[type="text"] {
+	width: 6em;
+}
+
+#csl button {
+	width: 44px;
+	height: 44px;
+	margin: 3px;
+	border: 2px solid var(--c-d) !important;
+	background-color: #000;
+}
+
+#csl .sl {
+	margin: 2px;
+	width: 50px;
+	height: 50px;
+	border-width: 5px !important;
+}
+
+/**************************************************************************************************
+ * 15. PALETTES
+ *
+ * Palette browser, palette previews, secondary palette controls and palette-specific controls.
+ **************************************************************************************************/
+
+#secPalToggle {
+	margin-left: 4px;
+	opacity: .75;
+	border-radius: 50%;
+	line-height: 1;
+	padding: 2px 6px;
+}
+
+#secPalToggle.active,
+#secPalToggle[aria-pressed="true"] {
+	opacity: 1;
+	outline: 2px solid var(--c-3, rgb(0, 60, 102));
+}
+
+#pallist .lstI.selected {
+	top: calc(var(--stp) + 42px);
+}
+
+#pallist .lstI.sticky {
+	top: var(--stp);
+}
+
+/**************************************************************************************************
+ * 16. EFFECTS
+ *
+ * Effect browser, effect list, effect-specific controls and parameter controls.
+ **************************************************************************************************/
+
+#fxFind {
+	margin-top: 4px;
+	margin-bottom: 12px;
+}
+
+#fxFind.fnd input[type="text"] {
+	margin-bottom: 0;
+}
+
+#fxlist .lstI.selected {
+	top: calc(var(--sti) + 42px);
+}
+
+#fxlist .lstI.sticky {
+	top: var(--sti);
+}
+
+/**************************************************************************************************
+ * 17. SEGMENTS
+ *
+ * Segment cards, segment controls, segment selection and expanded segment editor.
+ **************************************************************************************************/
+
+.segt {
+	table-layout: fixed;
+	width: 100%;
+}
+
+.segt td {
+	font-size: 13px;
+	padding: 2px 0 !important;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.sbs {
+	display: var(--sgp);
+	width: 100%;
+	position: relative;
+}
+
+.newseg {
+	cursor: default;
+}
+
+.seg {
+	top: auto !important;
+	bottom: auto !important;
+}
+
+.seg .schkl {
+	position: absolute;
+	top: 7px;
+	left: 9px;
+}
+
+.frz {
+	left: 10px;
+	position: absolute;
+	top: 8px;
+	cursor: pointer;
+	z-index: 1;
+}
+
+#segutil {
+	margin-bottom: 12px;
+}
+
+#segcont > div:first-child {
+	margin-top: 4px;
+}
+
+#segcont .seg:hover:not([class*="expanded"]) {
+	background: var(--c-5);
+}
+
+.simplified #segcont .lstI {
+	margin-top: 4px;
+	min-height: unset;
+}
+
+.segin .btn:hover {
+	border: 1px solid var(--c-5);
+	background-color: var(--c-5);
+}
+
+
+/**************************************************************************************************
+ * 18. PRESETS
+ *
+ * Preset cards, preset controls, preset editor and preset-specific layout.
+ **************************************************************************************************/
+
+.pid {
+	position: absolute;
+	top: 8px;
+	left: 12px;
+	font-size: 16px;
+	text-align: center;
+	color: var(--c-b);
+}
+
+.psts {
+	color: var(--c-f);
+	margin: 4px;
+}
+
+.po2 {
+	display: none;
+	margin-top: 8px;
+}
+
+.pwarn {
+	color: red;
+}
+
+#pcont .selected:not([class*="expanded"]) {
+	bottom: 52px;
+	top: 42px;
+}
+
+/**************************************************************************************************
+ * 19. PLAYLISTS
+ *
+ * Playlist entries, playlist controls and playlist editor.
+ **************************************************************************************************/
+
+.plentry table {
+	table-layout: fixed;
+	width: 100%;
+}
+
+.plentry td {
+	font-size: 13px;
+	padding: 0;
+	vertical-align: middle;
+}
+
+.hrz {
+	width: auto;
+	height: 2px;
+	background-color: var(--c-b);
+	margin: 3px 0;
+}
+
+/**************************************************************************************************
+ * 20. INFO MODAL
+ *
+ * Device/light information modal only.
+ **************************************************************************************************/
+
+#info {
 	z-index: 4;
 }
+
+#info .slider {
+	max-width: 200px;
+	min-width: 145px;
+	float: right;
+	margin: 0;
+}
+
+#info .sliderwrap {
+	width: 200px;
+}
+
+#info table {
+	table-layout: fixed;
+	width: 100%;
+}
+
+#info td {
+	padding-bottom: 8px;
+}
+
+#info .ibtn {
+	margin: 5px;
+}
+
+#info > div {
+	max-width: 490px;
+	margin: 0 auto;
+}
+
+#info .btn-xs {
+	border: 1px solid var(--c-4);
+}
+
+@media all and (max-width: 550px) and (min-width: 374px) {
+	#info table .btn {
+		width: 200px;
+	}
+
+	#info .ibtn {
+		width: 145px;
+	}
+
+	#info > div {
+		max-width: 320px;
+	}
+}
+
+
+/**************************************************************************************************
+ * 21. NODES MODAL
+ *
+ * PulSar mDNS node browser only.
+ **************************************************************************************************/
+
+#nodes {
+	z-index: 4;
+	text-align: left;
+}
+
+.nodes-header {
+	margin: 8px auto 12px;
+}
+
+.nodes-title {
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.nodes-subtitle {
+	font-size: 13px;
+	color: var(--c-b);
+	margin-top: 2px;
+}
+
+.nodes-toolbar {
+	margin: 0 auto 12px;
+	text-align: center;
+}
+
+.nodes-toolbar .btn {
+	width: auto;
+	min-width: 100px;
+	padding: 6px 18px;
+	font-size: 16px;
+}
+
+.nodes-list {
+	max-width: 600px !important;
+	margin: 0 auto !important;
+}
+
+.node-card {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto auto;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 8px 10px;
+	margin: 0 !important;
+	border-bottom: 1px solid var(--c-3);
+}
+
+.node-main {
+	min-width: 0;
+	margin: 0 !important;
+}
+
+.node-name {
+	font-size: 16px;
+	font-weight: bold;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin: 0 !important;
+}
+
+.node-ip {
+	font-size: 12px;
+	color: var(--c-b);
+	margin: 1px 0 0 !important;
+}
+
+.node-actions {
+	display: contents;
+}
+
+.node-status {
+	font-size: 12px;
+	color: var(--c-g);
+	white-space: nowrap;
+}
+
+.node-open {
+	width: auto;
+	min-width: 52px;
+	padding: 5px 10px;
+	margin: 0;
+	font-size: 14px;
+	border-radius: 18px;
+}
+
+.nodes-empty {
+	text-align: center;
+	color: var(--c-b);
+	padding: 20px;
+}
+
+@media all and (max-width: 420px) {
+	#buttonNodes {
+		display: none;
+	}
+}
+
+@media all and (min-width: 640px) and (max-width: 767px) {
+	#buttonNodes {
+		display: none;
+	}
+}
+
+
+/**************************************************************************************************
+ * 22. STANDBY MODAL
+ *
+ * Standby status, targets, scheduling and standby controls.
+ **************************************************************************************************/
+
+#standbykv {
+	max-width: 900px;
+	margin: auto;
+	padding: 10px 16px 24px 16px;
+}
+
+.standby-status {
+	display: flex;
+	justify-content: center;
+	gap: 30px;
+	flex-wrap: wrap;
+	margin: 10px 0 16px 0;
+}
+
+.standby-actions {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	margin: 14px 0;
+}
+
+.standby-config-row {
+	display: grid;
+	grid-template-columns: minmax(150px, 1fr) 90px auto;
+	align-items: center;
+	gap: 8px;
+	max-width: 500px;
+	margin: 8px auto;
+}
+
+.standby-config-row input {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.standby-section-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin: 22px 0 8px 0;
+	font-weight: bold;
+}
+
+.standby-table-wrap {
+	width: 100%;
+	overflow-x: auto;
+}
+
+.standby-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.standby-table th,
+.standby-table td {
+	padding: 6px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.standby-table input[type="text"] {
+	width: 72px;
+	text-align: center;
+}
+
+.standby-table input[type="number"] {
+	width: 80px;
+	text-align: center;
+}
+
+.standby-table input[type="checkbox"] {
+	transform: scale(1.2);
+}
+
+@media (max-width: 600px) {
+	.standby-config-row {
+		grid-template-columns: 1fr 80px auto;
+	}
+
+	.standby-table th,
+	.standby-table td {
+		padding: 4px 2px;
+	}
+}
+
+
+/**************************************************************************************************
+ * 23. LIVE VIEW / 2D VIEW
+ *
+ * Live preview, 2D preview and related viewer controls.
+ **************************************************************************************************/
+
+#liveview {
+	height: 4px;
+	width: 100%;
+	border: 0;
+}
+
+#liveview2D {
+	height: 90%;
+	width: 90%;
+	border: 0;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+
+/**************************************************************************************************
+ * 24. ROVER / REALTIME MODE
+ *
+ * Rover/realtime override UI, connection indicator and realtime viewer controls.
+ **************************************************************************************************/
 
 #rover {
 	z-index: 3;
@@ -587,10 +2065,6 @@ button {
 
 #rover .ibtn {
 	margin: 5px;
-}
-
-#ndlt {
-	margin: 12px 0;
 }
 
 #roverstar {
@@ -610,1040 +2084,108 @@ button {
 	z-index: -2;
 }
 
-#info .slider {
-	max-width: 200px;
-	min-width: 145px;
-	float: right;
-	margin: 0;
-}
-#info .sliderwrap {
-	width: 200px;
-}
-
-#info table, #nodes table {
-	table-layout: fixed;
-	width: 100%;
-}
-
-#info td, #nodes td {
-  padding-bottom: 8px;
-}
-
-#info .ibtn {
-	margin: 5px;
-}
-
-#info div, #nodes div {
-	max-width: 490px;
-	margin: 0 auto;
-}
-
-#info #imgw {
-	margin: 8px auto;
-}
-
 #lv {
 	max-width: 600px;
 	display: inline-block;
 }
 
-#heart {
-	transition: color .9s;
-	font-size: 16px;
-	color: #f00;
-}
 
-img {
-	max-width: 100%;
-	max-height: 100%;
-}
+/**************************************************************************************************
+ * 25. LIGHTS-SPECIFIC UTILITIES
+ *
+ * Small helpers that are genuinely Lights-specific and do not belong in the generic sections above.
+ *
+ * Rules not yet migrated from index_tmp.css.
+ **************************************************************************************************/
 
-.wi {
-	image-rendering: pixelated;
-	image-rendering: crisp-edges;
-	width: 210px;
-}
-
-
-/* P+ toggle button now inline with other toolbar buttons */
-#secPalToggle {
-  margin-left: 4px;      /* consistent spacing */
-  opacity: .75;
-  border-radius: 50%;   /* force circle */
-  line-height: 1;
-  padding: 2px 6px;
-}
-/* Active visual state */
-#secPalToggle.active,
-#secPalToggle[aria-pressed="true"] {
-  opacity: 1;
-  outline: 2px solid var(--c-3, #f44);
-}
-
-
-
-@keyframes fadein {
-	from {bottom: 0; opacity: 0;}
-	to {bottom: calc(var(--bh) + 22px); opacity: 1;}
-}
-
-.sliderdisplay {
-	content:'';
-	position: absolute;
-	top: 12px; left: 8px; right: 8px;
-	height: 5px;
-	background: var(--c-4);
-	border-radius: 16px;
-	pointer-events: none;
-	z-index: -1;
-	--bg: var(--c-f);
-}
-
-#rwrap .sliderdisplay { --bg: none; background: linear-gradient(90deg, #000 -15%, #f00); } /* -15% since #000 is too dark */
-#gwrap .sliderdisplay { --bg: none; background: linear-gradient(90deg, #000 -15%, #0f0); } /* -15% since #000 is too dark */
-#bwrap .sliderdisplay { --bg: none; background: linear-gradient(90deg, #000 -15%, #00f); } /* -15% since #000 is too dark */
-#wwrap .sliderdisplay { --bg: none; background: linear-gradient(90deg, #000 -15%, #fff); } /* -15% since #000 is too dark */
-#kwrap .sliderdisplay,
-#wbal  .sliderdisplay { background: linear-gradient(90deg, #ff8f1f 0%, #fff 50%, #cbdbff); }
-
-/* wrapper divs hidden by default */
-#liveview, #liveview2D, #roverstar, #pql
-#rgbwrap, #swrap, #hwrap, #kwrap, #wwrap, #wbal, #qcs-w, #hexw,
-.clear-icon, .edit-icon, .ptxt {
-	display: none;
-}
-
-.sliderbubble {
-	width: 24px;
-	position: absolute;
-	display: inline-block;
-	border-radius: 16px;
-	background: var(--c-3);
-	color: var(--c-f);
-	padding: 4px;
-	font-size: 14px;
-	right: 6px;
-	transition: visibility .25s ease,opacity .25s ease;
-	opacity: 0;
-	visibility: hidden;
-	/* left: 8px; */
-	top: 4px;
-}
-
-output.sliderbubbleshow {
-	visibility: visible;
-	opacity: 1;
-}
-
-input[type=range] {
-	-webkit-appearance: none;
-	width: 100%;
-	padding: 0;
-	margin: 0;
-	background-color: transparent;
-	cursor: pointer;
-}
-
-input[type=range]:focus {
-	outline: 0;
-}
-input[type=range]::-webkit-slider-runnable-track {
-	width: 100%;
-	height: 30px;
-	cursor: pointer;
-	background: transparent;
-}
-input[type=range]::-webkit-slider-thumb {
-	height: 16px;
-	width: 16px;
-	border-radius: 50%;
-	background: var(--c-f);
-	cursor: pointer;
-	-webkit-appearance: none;
-	margin-top: 7px;
-}
-input[type=range]::-moz-range-track {
-	width: 100%;
-	height: 30px;
-	background-color: rgba(0, 0, 0, 0);
-}
-input[type=range]::-moz-range-thumb {
-	border: 0 solid rgba(0, 0, 0, 0);
-	height: 16px;
-	width: 16px;
-	border-radius: 50%;
-	background: var(--c-f);
-	transform: translateY(5px);
-}
-#Colors input[type=range]::-webkit-slider-thumb {
-	height: 18px;
-	width: 18px;
-	border: 2px solid var(--c-1);
-	margin-top: 5px;
-}
-#Colors input[type=range]::-moz-range-thumb {
-	border: 2px solid var(--c-1);
-}
-
-#Colors .sliderwrap {
-	margin: 2px 0 0;
-}
-
-/* Dynamically hide labels */
-.hd {
-	display: var(--bhd);
-}
-/* Do not hide quick load label in simplified mode on small screen widths */
-.simplified #pql .hd {
-	display: var(--bhd) !important;
-}
-
-#briwrap {
-	min-width: 300px;
-	float: right;
-	margin-top: var(--bmt);
-}
-
-#picker {
-	margin: 4px auto 0 !important;
-	max-width: max-content;
-}
-
-/* buttons */
-.btn {
-	padding: 8px;
-	/*margin: 10px 4px;*/
-	width: 230px;
-	font-size: 19px;
-	color: var(--c-d);
-	cursor: pointer;
-	border-radius: 25px;
-	transition-duration: .3s;
-	-webkit-backface-visibility: hidden;
-	-webkit-transform: translate3d(0,0,0);
-	backface-visibility: hidden;
-	transform: translate3d(0,0,0);
-	overflow: hidden;
-	text-overflow: ellipsis;
-	border: 1px solid var(--c-3);
-	background-color: var(--c-3);
-}
-#segutil .btn-s:hover,
-#segutil2 .btn-s:hover,
-#putil .btn-s:hover,
-.btn:hover {
-	border: 1px solid var(--c-5) /*!important*/;
-	background-color: var(--c-5) /*!important*/;
-}
-.btn-s {
-	width: 100%;
-	margin: 0;
-}
-.btn-icon {
-	margin: -4px 4px -1px 0;
-	vertical-align: middle;
-	display: inline-block;
-}
-.btn-n {
-	width: 230px;
-	margin: 0 8px 0 0;
-}
-.btn-p {
-	width: 120px;
-	margin: 5px 0;
-}
-.btn-xs, .btn-pl-del, .btn-pl-add {
-	width: 42px !important;
-	height: 42px !important;
-	text-overflow: clip;
-}
-.btn-xs {
-	margin: 0;
-}
-#info .btn-xs {
-	border: 1px solid var(--c-4);
-}
-#btns .btn-xs {
-	margin: 0 4px;
-}
-
-#putil .btn-s {
-	width: 135px;
-}
-
-#nodes .ibtn {
-	margin: 0;
-}
-
-#segutil .btn-s, #segutil2 .btn-s, #putil .btn-s {
-	background-color: var(--c-3);
-	border: 1px solid var(--c-3);
-}
-
-.btn-pl-del, .btn-pl-add {
-	margin: 0;
-	white-space: nowrap;
-}
-a.btn {
-	display: block;
-	white-space: nowrap;
-	text-align: center;
-	padding: 9px 32px 7px 24px;
-	position: relative;
-	box-sizing: border-box;
-	line-height: 24px;
-}
-
-/* Quick color select wrapper div */
-#qcs-w {
-	margin-top: 10px;
-}
-
-/* Quick color select buttons */
-.qcs {
-	margin: 2px;
-	border-radius: 14px;
-	display: inline-block;
-	width: 28px;
-	height: 28px;
-	line-height: 28px;
-}
-
-/* Quick color select Black and White button (has white/black border, depending on the theme) */
-.qcsb, .qcsw {
-	width: 26px;
-	height: 26px;
-	line-height: 26px;
-	border: 1px solid var(--c-f);
-}
-
-/* Hex color input wrapper div */
-#hexw {
-	margin-top: 5px;
-}
-
-select {
-	padding: 4px 8px;
-	margin: 0;
-	font-size: 19px;
-	background-color: var(--c-3);
-	color: var(--c-d);
-	cursor: pointer;
-	border: 0 solid var(--c-2);
-	border-radius: 20px;
-	transition-duration: .5s;
-	-webkit-backface-visibility: hidden;
-	-webkit-transform: translate3d(0,0,0);
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	backface-visibility: hidden;
-	transform: translate3d(0,0,0);
-	text-overflow: ellipsis;
-}
-#tt {
-	text-align: center;
-}
-select.sel-p, select.sel-pl, select.sel-ple {
-	margin: 5px 0;
-	width: 100%;
-	height: 40px;
-	padding: 0 20px 0 8px;
-}
-div.sel-p {
-	position: relative;
-}
-div.sel-p:after {
-	content: "";
-	position: absolute;
-	right: 10px;
-	top: 22px;
-	width: 0;
-	height: 0;
-	border-left: 8px solid transparent;
-	border-right: 8px solid transparent;
-	border-top: 8px solid var(--c-f);
-}
-select.sel-ple {
-	text-align: center;
-}
-select.sel-sg {
-	margin: 5px 0;
-	height: 40px;
-}
-option {
-	background-color: var(--c-3);
-	color: var(--c-f);
-}
-input[type=number],
-input[type=text] {
-	background: var(--c-3);
-	color: var(--c-f);
-	border: 0 solid var(--c-2);
-	border-radius: 10px;
-	padding: 8px;
-	/*margin: 6px 6px 6px 0;*/
-	font-size: 19px;
-	transition: background-color .2s;
-	outline: 0;
-	-webkit-appearance: textfield;
-	-moz-appearance: textfield;
-	appearance: textfield;
-}
-
-input[type=number] {
-	text-align: right;
-	width: 50px;
-}
-
-input[type=text] {
-	text-align: center;
-}
-
-input[type=number]:focus,
-input[type=text]:focus {
-	background: var(--c-6);
-}
-
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-	-webkit-appearance: none;
-}
-
-#hexw input[type=text] {
-	width: 6em;
-}
-
-input[type=text].ptxt {
-	width: calc(100% - 24px);
-}
-
-textarea {
-	background: var(--c-2);
-	color: var(--c-f);
-	width: calc(100% - 14px); /* +padding=260px */
-	height: 90px;
-	border-radius: 5px;
-	border: 2px solid var(--c-5);
-	outline: 0;
-	resize: none;
-	font-size: 19px;
-	padding: 5px;
-}
-
-.apitxt {
-	height: 7em;
-}
-
-::selection {
-	background: var(--c-b);
-}
-
+ #liveview,
+#liveview2D,
+#roverstar,
+#pql,
+#rgbwrap,
+#swrap,
+#hwrap,
+#kwrap,
+#wwrap,
+#wbal,
+#qcs-w,
+#hexw,
+.clear-icon,
+.edit-icon,
 .ptxt {
-  	margin: -1px 4px 8px !important;
-}
-
-.stxt {
-	width: 50px !important;
-}
-
-.segname, .pname {
-	white-space: nowrap;
-	text-align: center;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	line-height: 24px;
-	padding: 8px 24px;
-	max-width: 170px;
-	position: relative;
-}
-
-.segname .flr, .pname .flr {
-	transform: rotate(0deg);
-	/*right: -6px;*/
-}
-
-/* segment power wrapper */
-.sbs {
-	/*padding: 1px 0 1px 20px;*/
-	display: var(--sgp);
-	width: 100%;
-	position: relative;
-}
-
-.pname {
-	top: 1px;
-}
-.plname {
-	top: 0;
-}
-
-/* preset id number */
-.pid {
-	position: absolute;
-	top: 8px;
-	left: 12px;
-	font-size: 16px;
-	text-align: center;
-	color: var(--c-b);
-}
-
-.newseg {
-	cursor: default;
-}
-/*
-.ic {
-	padding: 6px 0 0 0;
-}
-*/
-/* color selector */
-#csl button {
-	width: 44px;
-	height: 44px;
-	margin: 3px;
-	border: 2px solid var(--c-d) !important;
-	background-color: #000;
-}
-/* selected color selector */
-#csl .sl {
-	margin: 2px;
-	width: 50px;
-	height: 50px;
-	border-width: 5px !important;
-}
-
-.qcs, #namelabel { /* text shadow for name to be legible on grey backround */
-	text-shadow: -1px -1px 0 var(--c-1), 1px -1px 0 var(--c-1), -1px 1px 0 var(--c-1), 1px 1px 0 var(--c-1);
-}
-
-.psts {
-	color: var(--c-f);
-	margin: 4px;
-}
-
-.pwr {
-	color: var(--c-6);
-	cursor: pointer;
-}
-
-.act {
-	color: var(--c-f);
-}
-
-.del {
-	position: absolute;
-	bottom: 8px;
-	right: 8px;
-}
-
-.frz {
-	left: 10px;
-	position: absolute;
-	top: 8px;
-	cursor: pointer;
-	z-index: 1;
-}
-
-/* radiobuttons and checkmarks */
-.check, .radio {
-	display: block;
-	position: relative;
-	cursor: pointer;
-}
-
-.revchkl {
-	padding: 4px 0 0 35px;
-	margin-bottom: 0;
-	margin-top: 8px;
-}
-
-TD .revchkl {
-	padding: 0 0 0 32px;
-	margin-top: 0;
-}
-
-.check input, .radio input {
-	position: absolute;
-	opacity: 0;
-	cursor: pointer;
-	height: 0;
-	width: 0;
-}
-
-.checkmark, .radiomark {
-	position: absolute;
-	height: 24px;
-	width: 24px;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	background-color: var(--c-3);
-	border: 1px solid var(--c-2);
-}
-
-.radiomark {
-	top: 8px;
-	left: 8px;
-	height: 22px;
-	width: 22px;
-	border-radius: 50%;
-	background-color: transparent;
-}
-
-.checkmark {
-	border-radius: 10px;
-}
-
-.radio:hover input ~ .radiomark,
-.check:hover input ~ .checkmark {
-	background-color: var(--c-5);
-}
-
-.checkmark:after, .radiomark:after {
-	content: "";
-	position: absolute;
 	display: none;
 }
 
-.check .checkmark:after {
-	left: 9px;
-	top: 4px;
-	width: 5px;
-	height: 10px;
-	border: solid var(--c-f);
-	border-width: 0 3px 3px 0;
-}
+/**************************************************************************************************
+ * 26. RESPONSIVE LAYOUT
+ *
+ * Screen-width-specific overrides.
+ *
+ * Keep responsive rules grouped with their feature where practical.
+ * Only place truly global responsive behaviour here.
+ **************************************************************************************************/
 
-.rot45,
-.check .checkmark:after {
-	-webkit-transform: rotate(45deg);
-	-ms-transform: rotate(45deg);
-	transform: rotate(45deg);
-}
-
-.radio .radiomark:after {
-	width: 14px;
-	height: 14px;
-	top: 50%;
-	left: 50%;
-	margin: -7px;
-	border-radius: 50%;
-	background: var(--c-f);
-}
-
-TD .checkmark, TD .radiomark {
-	top: -6px;
-}
-
-.h {
-	font-size: 13px;
-	text-align: center;
-	color: var(--c-b);
-}
-
-.bp {
-	margin-bottom: 8px;
-}
-
-/* segment & preset wrapper */
-.seg, .pres {
-	background-color: var(--c-2);
-	/*color: var(--c-f);*/ /* seems to affect only the Add segment button, which should be same color as reset segments */
-	border: 0 solid var(--c-f);
-	text-align: left;
-	transition: background-color .5s;
-	border-radius: 21px;
-}
-
-.seg {
-	top: auto !important;	/* prevent sticky */
-	bottom: auto !important;
-}
-/* checkmark labels */
-.seg .schkl {
-	position: absolute;
-	top: 7px;
-	left: 9px;
-}
-/* checkmark labels */
-.filter .fchkl, .option .ochkl {
-	display: inline-block;
-	min-width: .7em;
-	padding: 1px 4px 1px 32px;
-	text-align: left;
-	line-height: 24px;
-	vertical-align: middle;
-	-webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
-	filter: grayscale(100%);
-}
-.filter .fchkl {
-	margin: 0 4px;
-	min-width: 20px;
-	pointer-events: auto;
-}
-
-.lbl-l {
-	font-size: 13px;
-	text-align: center;
-	padding: 4px 0;
-}
-
-.lbl-s {
-	display: inline-block;
-	margin-top: 6px;
-	font-size: 13px;
-	width: 48%;
-	text-align: center;
-}
-
-/* list wrapper */
-.list {
-	position: relative;
-	transition: background-color .5s;
-	margin: auto auto 10px;
-	line-height: 24px;
-}
-
-/* list item */
-.lstI {
-	align-items: center;
-	cursor: pointer;
-	background-color: var(--c-2);
-	overflow: hidden;
-	position: -webkit-sticky;
-	position: sticky;
-	border-radius: 21px;
-	margin: 0 auto 12px;
-	min-height: 40px;
-	border: 1px solid var(--c-2);
-	width: 100%;
-}
-
-#segutil {
-	margin-bottom: 12px;
-}
-
-#segcont > div:first-child, #fxFind  {
-	margin-top: 4px;
-}
-
-/* Simplify segments */
-.simplified #segcont .lstI {
-	margin-top: 4px;
-	min-height: unset;
-}
-
-/* selected item/element */
-.selected { /* has to be after .lstI since !important is not ok */
-	background: var(--c-4);
-}
-
-#segcont .seg:hover:not([class*="expanded"]),
-.lstI:hover:not([class*="expanded"]) {
-	background: var(--c-5);
-}
-
-.selected .checkmark,
-.selected .radiomark,
-.selected input[type=number],
-.selected input[type=text] {
-	background-color: var(--c-3);
-}
-
-/* selected list item */
-.lstI.selected {
-	top: 0;
-	bottom: 0;
-	border: 1px solid var(--c-4);
-}
-
-.lstI.sticky,
-.lstI.selected {
-	z-index: 1;
-	box-shadow: 0 0 10px 4px var(--c-1);
-}
-
-.lstI .flr:hover {
-    background: var(--c-6);
-    border-radius: 100%;
-}
-
-#pcont .selected:not([class*="expanded"]) {
-	bottom: 52px;
-	top: 42px;
-}
-
-#fxlist .lstI.selected {
-	top: calc(var(--sti) + 42px);
-}
-#pallist .lstI.selected {
-	top: calc(var(--stp) + 42px);
-}
-
-dialog::backdrop {
-	backdrop-filter: blur(10px);
-	-webkit-backdrop-filter: blur(10px);
-}
-dialog {
-	max-height: 70%;
-	border: 0;
-	border-radius: 10px;
-	background: linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.1)), var(--c-3);
-	box-shadow: 4px 4px 10px 4px var(--c-1);
-	color: var(--c-f);
-}
-
-#fxlist .lstI.sticky {
-	top: var(--sti);
-}
-#pallist .lstI.sticky {
-	top: var(--stp);
-}
-
-/* list item content */
-.lstIcontent {
-	padding: 9px 0 7px;
-	position: relative;
-}
-
-/* list item name (for sorting) */
-.lstIname {
-	white-space: nowrap;
-	text-overflow: ellipsis;
-	-webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
-	filter: grayscale(100%);
-}
-
-/* list item palette preview */
-.lstIprev {
-	width: 100%;
-	height: 6px;
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	z-index: -1;
-}
-
-/* find/search element */
-.fnd {
-	position: relative;
-}
-
-.fnd input[type="text"] {
-	display: block;
-	width: 100%;
-	box-sizing: border-box;
-	padding: 8px 40px 8px 44px;
-	margin: 4px auto 12px;
-	text-align: left;
-	border-radius: 21px;
-	background: var(--c-2);
-	border: 1px solid var(--c-3);
-	-webkit-filter: grayscale(100%); /* Safari 6.0 - 9.0 */
-	filter: grayscale(100%);
-}
-
-.fnd input[type="text"]:focus {
-	background-color: var(--c-4);
-}
-
-.fnd input[type="text"]:not(:placeholder-shown),
-.fnd input[type="text"]:hover {
-	background-color: var(--c-3);
-}
-
-#fxFind.fnd input[type="text"] {
-	margin-bottom: 0;
-}
-#fxFind {
-	margin-bottom: 12px;
-}
-
-/* segment & preset inner/expanded content */
-.segin,
-.presin {
-	padding: 8px;
-	position: relative;
-}
-
-.presin {
-	width: 100%; 
-	box-sizing: border-box;
-}
-
-.btn-s,
-.btn-n {
-	border: 1px solid var(--c-2);
-	background-color: var(--c-2);
-}
-.modal .btn:hover,
-.segin .btn:hover {
-	border: 1px solid var(--c-5) /*!important*/;
-	background-color: var(--c-5) /*!important*/;
-}
-
-/* hidden list items, must be after .expanded */
-.pres .lstIcontent, .segin {
-	display: none;
-}
-
-.check input:checked ~ .checkmark:after,
-.radio input:checked ~ .radiomark:after,
-.show,
-.expanded .edit-icon,
-.expanded .segin, .expanded .presin, .expanded .sbs,
-.expanded {
-	display: inline-block !important;
-}
-.hide, .expanded .segin.hide, .expanded .presin.hide, .expanded .sbs.hide, .expanded .frz, .expanded .g-icon {
-	display: none !important;
-}
-
-.m6 {
-	margin: 6px 0;
-}
-
-.c {
-	text-align: center;
-}
-
-.po2 {
-	display: none;
-	margin-top: 8px;
-}
-
-.pwarn {
-	color: red;
-}
-
-/* horizontal divider (playlist entries) */
-.hrz {
-	width: auto;
-	height: 2px;
-	background-color: var(--c-b);
-	margin: 3px 0;
-}
-
-::-webkit-scrollbar {
-	width: 6px;
-}
-::-webkit-scrollbar-track {
-	background: transparent;
-}
-::-webkit-scrollbar-thumb {
-	background: var(--c-sb);
-	opacity: .2;
-	border-radius: 5px;
-}
-::-webkit-scrollbar-thumb:hover {
-	background: var(--c-sbh);
-}
-
-@media not all and (hover: none) {
-	.sliderwrap:hover + output.sliderbubble {
-		visibility: visible;
-		opacity: 1;
-	}
-}
-
-@media all and (max-width: 1023px) {
-	.top button {
-		width: 8%;
-		padding: 10px 0 8px 0;
-	}
-	#buttonPcm {
-		display: none;
-	}
-}
-
-@media all and (max-width: 335px) {
-	.sliderbubble {
-		display: none;
-  	}
-}
-
-@media all and (max-width: 550px) and (min-width: 374px) {
-	#info table .btn, #nodes table .btn {
-		width: 200px;
-	}
-	#info .ibtn, #nodes .ibtn {
-		width: 145px;
-	}
-	#info div, #nodes div, #nodes a.btn {
-		max-width: 320px;
-	}
-}
-
-@media all and (max-width: 420px) {
-	#buttonNodes {
-		display: none;
-	}
-}
-
-@media all and (max-width: 639px) {
-	.top button {
-		width: 16.6%;
-		padding: 8px 0 4px 0;
-	}
-	#briwrap {
-		margin: 0 auto !important;
-		float: none;
-		display: inline-block;
-	}
-	.hd {
-		display: none !important;
-	}
-}
-
-@media all and (min-width: 420px) and (max-width: 639px) {
-	.top button {
-		width: 14.28%;
-		padding: 8px 0 4px 0;
-	}
-}
-
-@media all and (min-width: 640px) and (max-width: 767px) {
-	#buttonNodes {
-		display: none;
-	}
-}
-
-/* small screen & tablet "PC mode" support */
+ /* Small screen / tablet PC mode */
 @media all and (min-width: 1024px) and (max-width: 1249px) {
-	#segutil, #segutil2, #segcont, #putil, #pcont, #pql, #fx, #palw, #psFind, #sliders {
+	#segutil,
+	#segutil2,
+	#segcont,
+	#putil,
+	#pcont,
+	#pql,
+	#fx,
+	#palw,
+	#psFind,
+	#sliders {
 		width: 100%;
 		max-width: 280px;
 		font-size: 18px;
 	}
+
 	#putil .btn-s {
 		width: 114px;
 	}
+
 	#sliders .sliderbubble {
 		display: none;
 	}
-	#sliders .sliderwrap, .sbs .sliderwrap {
+
+	#sliders .sliderwrap,
+	.sbs .sliderwrap {
 		width: calc(100% - 42px);
 	}
+
 	#sliders .slider {
 		padding-right: 0;
 	}
+
 	#sliders .sliderwrap {
 		left: 12px;
 	}
+
 	.segname {
 		max-width: calc(100% - 110px);
 	}
-	.segt TD {
+
+	.segt td {
 		padding: 0 !important;
 	}
-	input[type="number"], input[type=text], select, textarea {
+
+	input[type="number"],
+	input[type="text"],
+	select,
+	textarea {
 		font-size: 18px;
 	}
+
 	input[type="number"] {
 		width: 32px;
 	}
+
 	.lstIcontent {
 		padding-left: 8px;
 	}
+
 	.revchkl {
 		max-width: 183px;
 		text-overflow: ellipsis;
@@ -1651,45 +2193,26 @@ dialog {
 	}
 }
 
-/* standby mode */
-/* Standby card collapse */
-#stbyInner .h { display:flex; justify-content:space-between; align-items:center; }
 
-#stbyCaret { transition: transform .2s ease; }
-#stbyInner.expanded #stbyCaret { transform: rotate(180deg); }
+/**************************************************************************************************
+ * 27. TEMPORARY / DEVELOPMENT
+ *
+ * Temporary development-only UI.
+ *
+ * Anything here should either:
+ *   - eventually move into the correct section above
+ *   - or be deleted once no longer required
+ **************************************************************************************************/
 
-/* Collapsed: same narrow width as preset rows */
-#pcont #stbyCard {
-  /* match the preset row’s max width; fall back if the var isn't present */
-  max-width: 280px;
-  margin: 12px auto 0;
+.top .top-debug {
+	width: 42px;
+	min-width: 42px;
+	padding: 12px 2px 10px;
+	opacity: .55;
+	font-size: 11px;
+	font-weight: bold;
 }
 
-/* Expanded: stretch to the full column width, not beyond the column */
-#pcont #stbyCard.full { max-width: 100%; }
-#stbyCard.full .presin { width: 100%; }
-
-/* Make tabs render narrower in the Standby JSON editor (scoped to Standby card) */
-#stbyCard #stbyJson,
-#stbyCard .apitxt {
-  tab-size: 2;        /* Chrome/Edge/Safari */
-  -moz-tab-size: 2;   /* Firefox */
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+.top .top-debug:hover {
+	opacity: 1;
 }
-
-/* Ensure only the header shows when collapsed */
-#stbyInner:not(.expanded) > :not(.h) { display: none; }
-
-
-/* Standby: collapsed matches preset row width */
-#pcont > #stbyCard.pres {
-  max-width: var(--c2w, 480px);
-  margin: 12px auto 0;
-}
-
-/* Standby: expanded may use wider column width (like playlist cards) */
-#pcont > #stbyCard.full {
-  max-width: var(--c3w, 720px);
-}
-
-

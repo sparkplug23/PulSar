@@ -42,7 +42,7 @@ class mServos :
     void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static constexpr const char* PM_MODULE_DRIVERS__SERVOS_CTR = D_MODULE_DRIVERS_SERVOS_CTR;
+    static constexpr const char* PM_MODULE_DRIVERS__SERVOS_CTR = D_MODULE__DRIVERS__SERVOS__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_DRIVERS__SERVOS_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE__DRIVERS__SERVOS_ID; }
    
@@ -80,10 +80,10 @@ class mServos :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mServos>*> mqtthandler_list;
-    struct handler<mServos> mqtthandler_settings;
-    struct handler<mServos> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mServos>*> telemetry_list;
+    struct telemetry_handler<mServos> telemetry_settings;
+    struct telemetry_handler<mServos> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 

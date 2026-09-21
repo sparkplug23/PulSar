@@ -40,7 +40,7 @@ class mSwitches :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void BootMessage(){};
     
-    static constexpr const char* PM_MODULE_SENSORS_SWITCHES_CTR = D_MODULE_SENSORS_SWITCHES_CTR;
+    static constexpr const char* PM_MODULE_SENSORS_SWITCHES_CTR = D_MODULE__SENSORS__SWITCHES__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_SENSORS_SWITCHES_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_SENSORS_SWITCHES_ID; }
 
@@ -168,10 +168,10 @@ class mSwitches :
     uint8_t ConstructJSON_Sensor(uint8_t json_level = 0, bool json_appending = true);
   
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mSwitches>*> mqtthandler_list;    
-    struct handler<mSwitches> mqtthandler_settings;
-    struct handler<mSwitches> mqtthandler_sensor_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mSwitches>*> telemetry_list;    
+    struct telemetry_handler<mSwitches> telemetry_settings;
+    struct telemetry_handler<mSwitches> telemetry_sensor_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT 
 
 };

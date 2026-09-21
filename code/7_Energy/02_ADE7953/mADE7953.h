@@ -103,11 +103,11 @@ class mEnergyADE7953 :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mEnergyADE7953>*> mqtthandler_list;
-    struct handler<mEnergyADE7953> mqtthandler_settings;
-    struct handler<mEnergyADE7953> mqtthandler_state_teleperiod;
-    struct handler<mEnergyADE7953> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mEnergyADE7953>*> telemetry_list;
+    struct telemetry_handler<mEnergyADE7953> telemetry_settings;
+    struct telemetry_handler<mEnergyADE7953> telemetry_state_teleperiod;
+    struct telemetry_handler<mEnergyADE7953> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
     
 

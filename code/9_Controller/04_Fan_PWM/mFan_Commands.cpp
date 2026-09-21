@@ -50,7 +50,7 @@ void mFan::parse_JSONCommand(JsonParserObject obj){
   //   #endif // ENABLE_LOG_LEVEL_DEBUG
   }
   
-  mqtthandler_sensor_ifchanged.flags.SendNow = true;
+  telemetry_sensor_ifchanged.flags.SendNow = true;
 
 }
 

@@ -1,7 +1,7 @@
 {
   "env_name": "tg_lgt__esp32_matrix_16x16",
-  "created_utc": "2026-06-26T09:04:26Z",
-  "created_epoch": 1782464666,
+  "created_utc": "2026-09-18T09:37:03Z",
+  "created_epoch": 1789724223,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\tg_lgt__esp32_matrix_16x16",
   "platform": "espressif32",
@@ -17,9 +17,9 @@
     "bootloader.bin"
   ],
   "git": {
-    "branch": "dev_mqtt_transport",
-    "commit": "07583f6b6060374604028586ff4d9fe1b1b67836",
-    "describe": "07583f6b-dirty",
-    "status_short": "M .pio/libdeps/cm_lgt__esp32s3_tester/NeoPixelBus\n M code/0_ConfigUser/Secret/00_Developing/Firmware__Testbeds.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/35_PinViewer/Web/Gen/generated_web.h\n M code/2_CoreSystem/mBaseConfig.h\n M code/3_Network/21_WebServer/Webpages/Generated/html_ui.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/6_Lights/03_Animator/webpages_generated/html_pixart.h\n M code/6_Lights/03_Animator/webpages_generated/html_pxmagic.h\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_lgt.ini\n M platformio_override.ini\n M saved_compiles/tg_lgt__esp32_matrix_16x16/build_meta.json\n M saved_compiles/tg_lgt__esp32_matrix_16x16/firmware.elf\n M saved_compiles/tg_lgt__esp32_matrix_16x16_16fx/build_meta.json\n M saved_compiles/tg_lgt__esp32_matrix_16x16_16fx/firmware.elf"
+    "branch": "development",
+    "commit": "e75539df2a08281e06e0662d3c8f8b3c8219e543",
+    "describe": "e75539df-dirty",
+    "status_short": "M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M platformio_lgt.ini\n M saved_compiles/wh_hallway__pebbles/build_meta.json\n M saved_compiles/wh_hallway__pebbles/firmware.elf\n M zplatformio_override.ini\n?? code/2_CoreSystem/00_FirmwareDefaults/03_Lighting/mFirmwareDefaults_Lighting2.h\n?? saved_compiles/tg_lgt__esp32_matrix_16x16/"
   }
 }

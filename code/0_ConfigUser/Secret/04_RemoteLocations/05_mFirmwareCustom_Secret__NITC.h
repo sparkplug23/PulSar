@@ -19,6 +19,10 @@
 // #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__TESTBOARD
 // #define DEVICE_QTQ__SERVER_RESET_CONTROLLER__INSTALLED_BOARD
 // #define DEVICE_NITC__SERVER_ROOM__AMBIENT_SENSOR
+// #define DEVICE_NITC__SERVER_ROOM__ACVENT_SENSOR
+// #define DEVICE_NITC__OFFICE__ELITE4DEXMU_01
+// #define DEVICE_NITC__OFFICE__ELITE4DEXMU_02
+// #define DEVICE_NITC__OFFICE__ELITE4DEXMU_03
 
 
 
@@ -91,7 +95,7 @@
 // #define ENABLE_DEBUG_LINE_HERE3
 // #define ENABLE_DEBUG_LINE_HERE4
 // #define ENABLE_DEBUG_LINE_HERE_TRACE
-// #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+// #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
 // #define USE_DEBUG_PRINT
 // #define ENABLE_DEBUGFEATURE_LOGS__FORCE_FLUSH_ON_TRANSMIT
 
@@ -131,11 +135,9 @@
 
   
   
-  #define ENABLE_FEATURE__DATABUFFER_LOCK
-  
-  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
-  #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-  #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
 
   #define DEBUG_FASTBOOT
 
@@ -312,7 +314,7 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+      "\"" D_MODULE__SENSORS__BUTTONS__CTR "\":["
         "\"" "WallRed" "\","
         "\"" "WallBlue" "\","
         "\"" "DoorAlert" "\""
@@ -321,7 +323,7 @@
         "\"" "BUT6" "\","
         "\"" "ResetGPIO0" "\""
       "],"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_NAME "\","
         "\"" D_DEVICE_RELAY_1_NAME "\","
         "\"" D_DEVICE_RELAY_2_NAME "\","
@@ -331,9 +333,12 @@
         "\"" D_DEVICE_RELAY_6_NAME "\","
         "\"" D_DEVICE_RELAY_7_NAME "\""
       "]"
+    "},"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
-    "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+    "\"MQTT_Interface_Priority\":{\"" D_MODULE__ENERGY__INTERFACE__CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
   "}";
 
 #endif // END DEVICE
@@ -405,14 +410,14 @@
    * SECTION: Network Configs
   ************************************/    
 
-  #define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST  
+  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST  
   
   /************************************************************************
    * FILESYSTEM: 
    ************************************************************************/
   
   
-  #define ENABLE_DEVFEATURE__SAVE_MODULE_DATA
+  #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
    // until devices can reliably be used without compiling per device
   
 
@@ -420,27 +425,25 @@
    * WEBPAGE:
    ************************************************************************/
   
-  #define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_FULL
+  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
     
   
 
-                                #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS
-                                #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_LEDS
-                                #define ENABLE_FEATURE_LIGHTING__XML_REQUESTS__SUBPAGE_SYNC
+                                #define ENABLE_FEATURE_LIGHTING__WEBUI__XML_API
+                                #define ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_LEDS
+                                #define ENABLE_FEATURE_LIGHTING__WEBUI__SETTINGS_SYNC
 
-                                #define ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
+                                #define ENABLE_FEATURE_LIGHTING__WEBUI__URL_QUERY_SETTINGS
 
 
                               // lets wire with relay8 as "PRE_ARM", which means it must also be powered to give the other relays power, to stop restarts causing resets.
 
 
+                                #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
+                                #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+                                #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
 
-                                #define ENABLE_FEATURE__DATABUFFER_LOCK
-                                #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_POLLING
-                                #define ENABLE_DEVFEATURE_NETWORK__CONSOLE_WEBSOCKET
-                                #define ENABLE_DEVFEATURE_NETWORK__CAPTIVE_PORTAL
-
-                                #define ENABLE_DEVFEATURE_WEBSERVER__STYLES_NOW_SHARED
+                                #define ENABLE_FEATURE_LIGHTING__WEBUI__SHARED_STYLES
 
                                 #define DEBUG_FASTBOOT
 
@@ -677,7 +680,7 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_BUTTONS_CTR "\":["
+      "\"" D_MODULE__SENSORS__BUTTONS__CTR "\":["
         "\"" "WallRed" "\","
         "\"" "WallBlue" "\","
         "\"" "DoorAlert" "\""
@@ -686,7 +689,7 @@
         "\"" "BUT6" "\","
         "\"" "ResetGPIO0" "\""
       "],"
-      "\"" D_MODULE_DRIVERS_RELAY_CTR "\":["
+      "\"" D_MODULE__DRIVERS__RELAY__CTR "\":["
         "\"" D_DEVICE_RELAY_0_NAME "\","
         "\"" D_DEVICE_RELAY_1_NAME "\","
         "\"" D_DEVICE_RELAY_2_NAME "\","
@@ -696,9 +699,12 @@
         "\"" D_DEVICE_RELAY_6_NAME "\","
         "\"" D_DEVICE_RELAY_7_NAME "\""
       "]"
+    "},"    
+    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+      "\"" D_REALTIME_SLOWDOWN "\":0"
     "},"
-    "\"MQTTUpdateSeconds\":{\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":60}," 
-    "\"MQTT_Interface_Priority\":{\"" D_MODULE_ENERGY_INTERFACE_CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
+    "\"MQTT_Interface_Priority\":{\"" D_MODULE__ENERGY__INTERFACE__CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
   "}";
 
 #endif // END DEVICE
@@ -850,20 +856,20 @@
   DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   "{"
     "\"" D_DEVICENAME "\":{"
-      "\"" D_MODULE_SENSORS_SUN_TRACKING_CTR "\":["
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
         "\"" "PRINTER" "\""
       "],"
-      "\"" D_MODULE_SENSORS_PIR_CTR "\":["
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
         "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
       "],"
-      "\"" D_MODULE_SENSORS_BH1750_CTR "\":["
+      "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
         "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
       "],"
-      "\"" D_MODULE_SENSORS_BME_CTR "\":["
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
         "\"" D_DEVICE_SENSOR_BME_LONG_WIRE_NAME "\","   // 0x76
         "\"" D_DEVICE_SENSOR_BME_SHORT_WIRE_NAME  "\""  // 0x77
       "],"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":["
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
         // Group 1
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
@@ -873,7 +879,7 @@
       "]"
     "},"
     "\"" D_SENSORADDRESS "\":{"
-      "\"" D_MODULE_SENSORS_DB18S20_CTR "\":{" 
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":{" 
         "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
         "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
@@ -912,19 +918,29 @@
 #define USE_NETWORK_TEMPLATE
   DEFINE_PGM_CTR(NETWORK_TEMPLATE)
   "{"
-    "\"Version\":2,"
-
-    "\"Interface\":{"
-      "\"Policy\":{"
-        "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
-        "\"AllowMultipleActive\":true,"
-        "\"BlockRemoteMqttWhenLocalAvailable\":true"
-      "}"
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIOC "\":{"
+      #if defined(USE_MODULE_SENSORS_BME) || defined(USE_MODULE_DISPLAYS_OLED_SH1106)
+      "\"22\":\"" D_GPIO_I2C_SCL_CTR "1"  "\"," // if no index, assume its 1, only set as 0 when defined (eg serial0). perhaps easier to just understand serial as offset?
+      "\"21\":\"" D_GPIO_I2C_SDA_CTR "1"  "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_DS18X20
+      "\"15\":\"" D_GPIO_DS18X20_1_CTR "\","
+      #endif
+      #ifdef USE_MODULE_SENSORS_PIR
+      "\"4\":\"" D_GPIO_PIR_CTR "1" "\","       // Room
+      #endif 
+      "\"2\":\""  D_GPIO_LED_INV_CTR "1" "\""
     "},"
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
 
-    "\"WiFi\":{"
-      "\"EN\":true,"
-      "\"Backoff\":[5,60,600],"
+  
+  /***********************************
+   * SECTION: Device Configs
+  ************************************/    
 
       "\"Mode\":{"
         "\"STA\":true,"
@@ -958,32 +974,57 @@
     "},"
 
 
-    "\"MQTT\":{"
-      "\"EN\":true,"
+  #define D_DEVICE_SENSOR_DB18S20_02_NAME        "DB3m"
+  #define D_DEVICE_SENSOR_DB18S20_02_ADDRESS     "[40,227,225,191,0,0,0,114]"
 
-      "\"UpdateSeconds\":{"
-        "\"IfChanged\":1,"
-        "\"TelePeriod\":60,"
-        "\"ConfigPeriod\":60"
-      "},"
+  #define D_DEVICE_SENSOR_DB18S20_03_NAME        "FrontRight50"
+  #define D_DEVICE_SENSOR_DB18S20_03_ADDRESS     "[40,38,95,51,0,0,0,32]"
+  #define D_DEVICE_SENSOR_DB18S20_04_NAME        "FrontRight75"
+  #define D_DEVICE_SENSOR_DB18S20_04_ADDRESS     "[40,15,153,47,0,0,0,148]"
+  #define D_DEVICE_SENSOR_DB18S20_05_NAME        "FrontRight100"
+  #define D_DEVICE_SENSOR_DB18S20_05_ADDRESS     "[40,217,113,51,0,0,0,44]"
+  
+  #define D_DEVICE_SENSOR_BME_LONG_WIRE_NAME  "Room"
+  #define D_DEVICE_SENSOR_BME_SHORT_WIRE_NAME "None"
 
-      "\"Brokers\":["
-        "{"
-          "\"Id\":\"home\","
-          "\"EN\":true,"
-          "\"Host\":\"" MQTT_HOST "\","
-          "\"Port\":" STR(MQTT_PORT) ","
-          "\"User\":\"\","
-          "\"Password\":\"\","
-          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
-          "\"ClientName\":\"" DEVICENAME_CTR "\","
-          "\"Backoff\":[5,10,60],"
-          "\"Transport\":[\"Ethernet\",\"WiFi\"],"
-          "\"PrefTransport\":[\"Ethernet\",\"WiFi\"],"
-          "\"OutgoingLevel\":3,"
-          "\"OutgoingLimiterMs\":0"
-        "}"
+  #define D_DEVICE_SENSOR_BH1750_NAME "Room"
+
+  #define D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "NITC Server Room"
+
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
+        "\"" "PRINTER" "\""
+      "],"
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION_FRIENDLY_NAME_LONG "\""
+      "],"
+      "\"" D_MODULE__SENSORS__BH1750__CTR "\":["
+        "\"" D_DEVICE_SENSOR_BH1750_NAME "\""
+      "],"
+      "\"" D_MODULE__SENSORS__BME__CTR "\":["
+        "\"" D_DEVICE_SENSOR_BME_LONG_WIRE_NAME "\","   // 0x76
+        "\"" D_DEVICE_SENSOR_BME_SHORT_WIRE_NAME  "\""  // 0x77
+      "],"
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":["
+        // Group 1
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\","
+        "\"" D_DEVICE_SENSOR_DB18S20_05_NAME "\""    
       "]"
+    "},"
+    "\"" D_SENSORADDRESS "\":{"
+      "\"" D_MODULE__SENSORS__DB18S20__CTR "\":{" 
+        "\"" D_DEVICE_SENSOR_DB18S20_01_NAME "\":" D_DEVICE_SENSOR_DB18S20_01_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_02_NAME "\":" D_DEVICE_SENSOR_DB18S20_02_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_03_NAME "\":" D_DEVICE_SENSOR_DB18S20_03_ADDRESS ","
+        "\"" D_DEVICE_SENSOR_DB18S20_04_NAME "\":" D_DEVICE_SENSOR_DB18S20_04_ADDRESS ","      
+        "\"" D_DEVICE_SENSOR_DB18S20_05_NAME "\":" D_DEVICE_SENSOR_DB18S20_05_ADDRESS ""
+      "}"  
     "}"
   "}";
 
@@ -1074,6 +1115,112 @@
 //     "}"
 //   "}";
 
+//   /**
+//    * @brief Should make the display layout via json, which negates the need of a custom controller each time
+//    * DH %d.%d, 
+//    * 
+//    */
+
+   
+// // [AP] SSID: ServerLink_AP
+// // [AP] Password: 
+// // [AP] IP: 192.168.50.1
+// // [AP] MAC: 5C:01:3B:95:96:25
+
+// #define STA_SSID4 "ServerLink32"
+// #define STA_PASS4 "af4d8bc9ab"
+// #define MQTT_HOST   "192.168.50.2" //ecit01818 wifi via esp32
+// #define MQTT_PORT     1883
+
+
+// #define USE_NETWORK_TEMPLATE__OVERRIDE
+// #define USE_NETWORK_TEMPLATE
+//   DEFINE_PGM_CTR(NETWORK_TEMPLATE)
+//   "{"
+//     "\"Version\":2,"
+
+//     "\"Interface\":{"
+//       "\"Policy\":{"
+//         "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+//         "\"AllowMultipleActive\":true,"
+//         "\"BlockRemoteMqttWhenLocalAvailable\":true"
+//       "}"
+//     "},"
+
+//     "\"WiFi\":{"
+//       "\"EN\":true,"
+//       "\"Backoff\":[5,60,600],"
+
+//       "\"Mode\":{"
+//         "\"STA\":true,"
+//         "\"AP\":true,"
+//         "\"STA_AP\":true,"
+//         "\"APBootMins\":10,"
+//         "\"APOnSTAFail\":true,"
+//         "\"APFailDelayMins\":0,"
+//         "\"APAlwaysOn\":false"
+//       "},"
+
+//       "\"Station\":{"
+//         "\"Profiles\":["
+//           "{"
+//             "\"SSID\":\"" STA_SSID4 "\","
+//             "\"Password\":\"" STA_PASS4 "\""
+//           "},"
+//           "{"
+//             "\"SSID\":\"" STA_SSID1 "\","
+//             "\"Password\":\"" STA_PASS1 "\""
+//           "}"
+//         "],"
+
+//         "\"IPv4\":{"
+//           "\"Static\":true,"
+//           "\"IP\":\"192.168.50.50\","
+//           "\"Subnet\":\"255.255.255.0\","
+//           "\"Gateway\":\"0.0.0.0\","
+//           "\"DNS1\":\"0.0.0.0\","
+//           "\"DNS2\":\"0.0.0.0\""
+//         "}"
+//       "},"
+
+//       "\"SoftAP\":{"
+//         "\"SSID\":\"" SOFTAP_SSID "AmSen" "\","
+//         "\"Password\":\"" SOFTAP_PASSWORD "\","
+//         "\"Channel\":1"
+//       "}"
+//     "},"
+
+
+//     "\"MQTT\":{"
+//       "\"EN\":true,"
+
+//       "\"UpdateSeconds\":{"
+//         "\"IfChanged\":1,"
+//         "\"TelePeriod\":60,"
+//         "\"ConfigPeriod\":60"
+//       "},"
+
+//       "\"Brokers\":["
+//         "{"
+//           "\"Id\":\"home\","
+//           "\"EN\":true,"
+//           "\"Host\":\"" MQTT_HOST "\","
+//           "\"Port\":" STR(MQTT_PORT) ","
+//           "\"User\":\"\","
+//           "\"Password\":\"\","
+//           "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+//           "\"ClientName\":\"" DEVICENAME_CTR "\","
+//           "\"Backoff\":[5,10,60],"
+//           "\"Transport\":[\"Ethernet\",\"WiFi\"],"
+//           "\"PrefTransport\":[\"Ethernet\",\"WiFi\"],"
+//           "\"OutgoingLevel\":3,"
+//           "\"OutgoingLimiterMs\":0"
+//         "}"
+//       "]"
+//     "}"
+//   "}";
+
+
 // 1840 has the only esp32, which is the AP for now
 
 
@@ -1085,4 +1232,1953 @@
 
 
 
+#ifdef DEVICE_NITC__OFFICE__ELITE4DEXMU_01
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+
+  // #define ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
+  // #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__SINGLE_PANEL
+  #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__EIGHT_PANELS
+  
+
+  #ifdef ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
+
+  // #define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+  #define ENABLE_DEBUGFEATURE_LIGHTING__TRANSITION_ENDPOINT_PIXEL0
+
+  #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
+
+  /***********************************
+  * SECTION: Enable Grouped
+  ************************************/  
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/  
+
+  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SUN_TRACKING      
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+  //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+
+  #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+
+  #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
+
+  /**
+   * @brief 
+   * Need to add a new "realtime" system mode, which means ANYTHING not critical to the design in use, should have minimal impact
+   * In this case, if effects are running
+   * ** mqtt unless debugging, should reduce to 1hour at most (except health, make it 10 minutes)
+   * ** filesystem operations that are slow, reduce 
+   * 
+   */
+  
+  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 500
+
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CORE
+  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__SHOW_BUILD_DATETIME
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
+  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__SHARED_STYLES
+
+  #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+  // #define ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+
+  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
+
+  /**
+   * @brief tree physical wiring connections
+   * 16 outputs
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":256
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        256
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Wipe Random",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "Brightness": 100
+    },
+    "Brightness": 1
+  }
+  )=====";
+ 
+      // ,"Preset":{"Load":1}
+      
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      // "\"28\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+      // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","
+      "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "2" "\","
+      "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "3" "\","
+      "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "4" "\","
+      "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "5" "\","
+      "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "6" "\","
+      "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "7" "\","
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
+        "\"" "Desk" "\""
+      "]"
+    "}"
+  "}";
+
+  #endif
+  #ifdef ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__SINGLE_PANEL
+
+
+  #define ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+  
+    // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+    #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+    // at somepoint make "liveoutput" which I want this to trigger sending the complete output (possibly via read neopixelbus)
+    // meant for debugging or virtual view prior to hardware install.
+
+    // REmove these, should be in defaults
+    // #define ENABLE_EFFECT_DESCRIPTIONS
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+    // #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+    // #define ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+
+    #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
+
+    #define ENABLE_FEATURE_LIGHTING__WEBSOCKETS
+    #define WLED_ENABLE_WEBSOCKETS
+
+
+    #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+
+
+    #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+
+    #define ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+    #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
+    #define ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION
+
+    #define USE_LIGHTING_TEMPLATE
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Pin":2,
+          "ColourOrder":"RGB",
+          "BusType":"WS2812_RGB",
+          "Start":0,
+          "Length":256
+        }
+      ],
+      "MatrixConfig":[
+        {
+          "Width":16,
+          "Height":16,
+          "BottomStart":0,
+          "RightStart":0,
+          "Vertical":1,
+          "Serpentine":1,
+          "xOffset":0,
+          "yOffset":0
+        }
+      ],
+      "Segment0": {
+        "PixelRange": [
+          0,16,
+          0,16
+        ],
+        "ColourPalette":"Rainbow",
+        "PaletteMappingValues":[10,15,20],
+        "SegColour0": {
+          "Hue": 0,
+          "Sat":0,
+          "BrightnessRGB":100
+        },
+        "SegColour1": {
+          "Hue": 120,
+          "Sat":0,
+          "BrightnessRGB":100
+        },
+        "SegColour2": {
+          "Hue": 240,
+          "Sat":100,
+          "BrightnessRGB":100
+        },
+        "Effects": {
+            "Function":"Squared Swirl",
+            "Speed":141,
+            "Intensity":203,
+            "Custom1":255,
+            "Custom2":128,
+            "Custom3":128,
+            "Grouping":1,
+            "Decimate":0,
+            "RateMs": 25
+          },
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 0
+      },
+      "BrightnessRGB": 20,
+      "BrightnessCCT": 0
+    }
+    )=====";
+            // "Function":"Black Hole",
+
+
+    /***********************************
+    * SECTION: Enable Grouped
+    ************************************/  
+
+    /***********************************
+    * SECTION: Network Configs
+    ************************************/  
+
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+
+    /***********************************
+     * SECTION: Lighting Configs
+    ************************************/   
+
+    // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+
+
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_MODULE_SENSORS_SUN_TRACKING      
+    #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+    #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+    //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+    // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+    // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+
+    #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+
+  /**
+   * @brief 
+   * Need to add a new "realtime" system mode, which means ANYTHING not critical to the design in use, should have minimal impact
+   * In this case, if effects are running
+   * ** mqtt unless debugging, should reduce to 1hour at most (except health, make it 10 minutes)
+   * ** filesystem operations that are slow, reduce 
+   * 
+   */
+  
+  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 500
+
+
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+    // #define ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+
+    #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
+
+        
+    #define USE_MODULE_TEMPLATE
+    DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+    "{"
+      "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+      "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+      "\"" D_GPIO_NUMBER "\":{"    
+        // "\"28\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+        // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+        "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","
+        "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "2" "\","
+        "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "3" "\","
+        "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "4" "\","
+        "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "5" "\","
+        "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "6" "\","
+        "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "7" "\","
+        #ifdef USE_MODULE_SENSORS_BUTTONS
+        "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+        "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+        "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+        #endif
+      "},"
+      "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+      "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "}";
+
+    
+    #define USE_FUNCTION_TEMPLATE
+    DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+    "{"
+      "\"" D_DEVICENAME "\":{"
+        "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
+          "\"" "Desk" "\""
+        "]"
+      "}"
+    "}";
+
+
+  #endif
+
+
+  
+  #ifdef ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__EIGHT_PANELS
+
+
+  #define ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+  
+    // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+    #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+    // at somepoint make "liveoutput" which I want this to trigger sending the complete output (possibly via read neopixelbus)
+    // meant for debugging or virtual view prior to hardware install.
+
+    // REmove these, should be in defaults
+    // #define ENABLE_EFFECT_DESCRIPTIONS
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+    // #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+    // #define ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+
+    #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
+
+    #define ENABLE_FEATURE_LIGHTING__WEBSOCKETS
+    #define WLED_ENABLE_WEBSOCKETS
+
+
+    #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+
+
+    #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+
+    #define ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+    #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
+    #define ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION
+
+    #define USE_LIGHTING_TEMPLATE
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+R"=====(
+{
+  "BusConfig":[
+    {
+      "Pin":16,
+      "ColourOrder":"GRB",
+      "BusType":"WS2812_RGB",
+      "Start":0,
+      "Length":512
+    },
+    {
+      "Pin":12,
+      "ColourOrder":"GRB",
+      "BusType":"WS2812_RGB",
+      "Start":512,
+      "Length":512
+    },
+    {
+      "Pin":4,
+      "ColourOrder":"GRB",
+      "BusType":"WS2812_RGB",
+      "Start":1024,
+      "Length":512
+    },
+    {
+      "Pin":2,
+      "ColourOrder":"GRB",
+      "BusType":"WS2812_RGB",
+      "Start":1536,
+      "Length":512
+    }
+  ],
+  "MatrixConfig":[
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":0,
+      "yOffset":0
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":16,
+      "yOffset":0
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":32,
+      "yOffset":0
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":48,
+      "yOffset":0
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":0,
+      "yOffset":16
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":16,
+      "yOffset":16
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":32,
+      "yOffset":16
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":48,
+      "yOffset":16
+    }
+  ],
+  "Segment0":{
+    "PixelRange":[
+      0,64,
+      0,32
+    ],
+    "ColourPalette":"Rainbow",
+    "PaletteMappingValues":[10,15,20],
+    "SegColour0":{
+      "Hue":0,
+      "Sat":0,
+      "BrightnessRGB":100
+    },
+    "SegColour1":{
+      "Hue":120,
+      "Sat":0,
+      "BrightnessRGB":100
+    },
+    "SegColour2":{
+      "Hue":240,
+      "Sat":100,
+      "BrightnessRGB":100
+    },
+    "Effects":{
+      "Function":"Squared Swirl",
+      "Speed":141,
+      "Intensity":203,
+      "Custom1":255,
+      "Custom2":128,
+      "Custom3":128,
+      "Grouping":1,
+      "Decimate":0,
+      "RateMs":25
+    },
+    "BrightnessRGB":100,
+    "BrightnessCCT":0
+  },
+  "BrightnessRGB":20,
+  "BrightnessCCT":0
+}
+)=====";
+            // "Function":"Black Hole",
+
+
+    /***********************************
+    * SECTION: Enable Grouped
+    ************************************/  
+
+    /***********************************
+    * SECTION: Network Configs
+    ************************************/  
+
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+
+    /***********************************
+     * SECTION: Lighting Configs
+    ************************************/   
+
+    // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+
+
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_MODULE_SENSORS_SUN_TRACKING      
+    #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+    #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+    //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+    // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+    // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+
+    #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+
+  /**
+   * @brief 
+   * Need to add a new "realtime" system mode, which means ANYTHING not critical to the design in use, should have minimal impact
+   * In this case, if effects are running
+   * ** mqtt unless debugging, should reduce to 1hour at most (except health, make it 10 minutes)
+   * ** filesystem operations that are slow, reduce 
+   * 
+   */
+  
+  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 500
+
+
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+    // #define ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+
+    #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
+
+        
+    #define USE_MODULE_TEMPLATE
+    DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+    "{"
+      "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+      "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+      "\"" D_GPIO_NUMBER "\":{"    
+        // "\"28\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+        // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+        "\"18\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","
+        // "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "2" "\","
+        // "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "3" "\","
+        // "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "4" "\","
+        // "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "5" "\","
+        // "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "6" "\","
+        // "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "7" "\","
+        #ifdef USE_MODULE_SENSORS_BUTTONS
+        "\"17\":\"" D_GPIO_KEY1_INV_CTR  "\","
+        "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+        "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+        #endif
+      "},"
+      "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+      "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "}";
+
+    
+    #define USE_FUNCTION_TEMPLATE
+    DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+    "{"
+      "\"" D_DEVICENAME "\":{"
+        "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
+          "\"" "Desk" "\""
+        "]"
+      "}"
+    "}";
+
+
+  #endif
+
+#endif // END DEVICE
+
+
+
+
+
+
+
+#ifdef DEVICE_NITC__OFFICE__ELITE4DEXMU_02
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+
+  // #define ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
+  // #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__SINGLE_PANEL
+  #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__EIGHT_PANELS
+  
+
+  #ifdef ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
+
+  // #define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+  #define ENABLE_DEBUGFEATURE_LIGHTING__TRANSITION_ENDPOINT_PIXEL0
+
+  #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
+
+  /***********************************
+  * SECTION: Enable Grouped
+  ************************************/  
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/  
+
+  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SUN_TRACKING      
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+  //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+
+  #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+
+  #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
+
+  /**
+   * @brief 
+   * Need to add a new "realtime" system mode, which means ANYTHING not critical to the design in use, should have minimal impact
+   * In this case, if effects are running
+   * ** mqtt unless debugging, should reduce to 1hour at most (except health, make it 10 minutes)
+   * ** filesystem operations that are slow, reduce 
+   * 
+   */
+  
+  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 500
+
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CORE
+  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__SHOW_BUILD_DATETIME
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
+  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__SHARED_STYLES
+
+  #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+  // #define ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+
+  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
+
+  /**
+   * @brief tree physical wiring connections
+   * 16 outputs
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":256
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        256
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Wipe Random",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "Brightness": 100
+    },
+    "Brightness": 1
+  }
+  )=====";
+ 
+      // ,"Preset":{"Load":1}
+      
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      // "\"28\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+      // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","
+      "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "2" "\","
+      "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "3" "\","
+      "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "4" "\","
+      "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "5" "\","
+      "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "6" "\","
+      "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "7" "\","
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
+        "\"" "Desk" "\""
+      "]"
+    "}"
+  "}";
+
+  #endif
+  #ifdef ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__SINGLE_PANEL
+
+
+  #define ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+  
+    // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+    #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+    // at somepoint make "liveoutput" which I want this to trigger sending the complete output (possibly via read neopixelbus)
+    // meant for debugging or virtual view prior to hardware install.
+
+    // REmove these, should be in defaults
+    // #define ENABLE_EFFECT_DESCRIPTIONS
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+    // #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+    // #define ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+
+    #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
+
+    #define ENABLE_FEATURE_LIGHTING__WEBSOCKETS
+    #define WLED_ENABLE_WEBSOCKETS
+
+
+    #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+
+
+    #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+
+    #define ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+    #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
+    #define ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION
+
+    #define USE_LIGHTING_TEMPLATE
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Pin":2,
+          "ColourOrder":"RGB",
+          "BusType":"WS2812_RGB",
+          "Start":0,
+          "Length":256
+        }
+      ],
+      "MatrixConfig":[
+        {
+          "Width":16,
+          "Height":16,
+          "BottomStart":0,
+          "RightStart":0,
+          "Vertical":1,
+          "Serpentine":1,
+          "xOffset":0,
+          "yOffset":0
+        }
+      ],
+      "Segment0": {
+        "PixelRange": [
+          0,16,
+          0,16
+        ],
+        "ColourPalette":"Rainbow",
+        "PaletteMappingValues":[10,15,20],
+        "SegColour0": {
+          "Hue": 0,
+          "Sat":0,
+          "BrightnessRGB":100
+        },
+        "SegColour1": {
+          "Hue": 120,
+          "Sat":0,
+          "BrightnessRGB":100
+        },
+        "SegColour2": {
+          "Hue": 240,
+          "Sat":100,
+          "BrightnessRGB":100
+        },
+        "Effects": {
+            "Function":"Squared Swirl",
+            "Speed":141,
+            "Intensity":203,
+            "Custom1":255,
+            "Custom2":128,
+            "Custom3":128,
+            "Grouping":1,
+            "Decimate":0,
+            "RateMs": 25
+          },
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 0
+      },
+      "BrightnessRGB": 20,
+      "BrightnessCCT": 0
+    }
+    )=====";
+            // "Function":"Black Hole",
+
+
+    /***********************************
+    * SECTION: Enable Grouped
+    ************************************/  
+
+    /***********************************
+    * SECTION: Network Configs
+    ************************************/  
+
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+
+    /***********************************
+     * SECTION: Lighting Configs
+    ************************************/   
+
+    // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+
+
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_MODULE_SENSORS_SUN_TRACKING      
+    #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+    #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+    //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+    // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+    // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+
+    #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+
+  /**
+   * @brief 
+   * Need to add a new "realtime" system mode, which means ANYTHING not critical to the design in use, should have minimal impact
+   * In this case, if effects are running
+   * ** mqtt unless debugging, should reduce to 1hour at most (except health, make it 10 minutes)
+   * ** filesystem operations that are slow, reduce 
+   * 
+   */
+  
+  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 500
+
+
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+    // #define ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+
+    #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
+
+        
+    #define USE_MODULE_TEMPLATE
+    DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+    "{"
+      "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+      "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+      "\"" D_GPIO_NUMBER "\":{"    
+        // "\"28\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+        // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+        "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","
+        "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "2" "\","
+        "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "3" "\","
+        "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "4" "\","
+        "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "5" "\","
+        "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "6" "\","
+        "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "7" "\","
+        #ifdef USE_MODULE_SENSORS_BUTTONS
+        "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+        "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+        "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+        #endif
+      "},"
+      "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+      "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "}";
+
+    
+    #define USE_FUNCTION_TEMPLATE
+    DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+    "{"
+      "\"" D_DEVICENAME "\":{"
+        "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
+          "\"" "Desk" "\""
+        "]"
+      "}"
+    "}";
+
+
+  #endif
+
+
+  
+  #ifdef ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__EIGHT_PANELS
+
+
+  #define ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+  
+    // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+    #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+    // at somepoint make "liveoutput" which I want this to trigger sending the complete output (possibly via read neopixelbus)
+    // meant for debugging or virtual view prior to hardware install.
+
+    // REmove these, should be in defaults
+    // #define ENABLE_EFFECT_DESCRIPTIONS
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+    // #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+    // #define ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+
+    #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
+
+    #define ENABLE_FEATURE_LIGHTING__WEBSOCKETS
+    #define WLED_ENABLE_WEBSOCKETS
+
+
+    #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+
+
+    #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+
+    #define ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+    #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
+    #define ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION
+
+    #define USE_LIGHTING_TEMPLATE
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+R"=====(
+{
+  "BusConfig":[
+    {
+      "Pin":16,
+      "ColourOrder":"GRB",
+      "BusType":"WS2812_RGB",
+      "Start":0,
+      "Length":512
+    },
+    {
+      "Pin":12,
+      "ColourOrder":"GRB",
+      "BusType":"WS2812_RGB",
+      "Start":512,
+      "Length":512
+    },
+    {
+      "Pin":4,
+      "ColourOrder":"GRB",
+      "BusType":"WS2812_RGB",
+      "Start":1024,
+      "Length":512
+    },
+    {
+      "Pin":2,
+      "ColourOrder":"GRB",
+      "BusType":"WS2812_RGB",
+      "Start":1536,
+      "Length":512
+    }
+  ],
+  "MatrixConfig":[
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":0,
+      "yOffset":0
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":16,
+      "yOffset":0
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":32,
+      "yOffset":0
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":48,
+      "yOffset":0
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":0,
+      "yOffset":16
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":16,
+      "yOffset":16
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":32,
+      "yOffset":16
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":48,
+      "yOffset":16
+    }
+  ],
+  "Segment0":{
+    "PixelRange":[
+      0,64,
+      0,32
+    ],
+    "ColourPalette":"Rainbow",
+    "PaletteMappingValues":[10,15,20],
+    "SegColour0":{
+      "Hue":0,
+      "Sat":0,
+      "BrightnessRGB":100
+    },
+    "SegColour1":{
+      "Hue":120,
+      "Sat":0,
+      "BrightnessRGB":100
+    },
+    "SegColour2":{
+      "Hue":240,
+      "Sat":100,
+      "BrightnessRGB":100
+    },
+    "Effects":{
+      "Function":"Squared Swirl",
+      "Speed":141,
+      "Intensity":203,
+      "Custom1":255,
+      "Custom2":128,
+      "Custom3":128,
+      "Grouping":1,
+      "Decimate":0,
+      "RateMs":25
+    },
+    "BrightnessRGB":100,
+    "BrightnessCCT":0
+  },
+  "BrightnessRGB":20,
+  "BrightnessCCT":0
+}
+)=====";
+            // "Function":"Black Hole",
+
+
+    /***********************************
+    * SECTION: Enable Grouped
+    ************************************/  
+
+    /***********************************
+    * SECTION: Network Configs
+    ************************************/  
+
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+
+    /***********************************
+     * SECTION: Lighting Configs
+    ************************************/   
+
+    // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+
+
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_MODULE_SENSORS_SUN_TRACKING      
+    #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+    #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+    //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+    // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+    // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+
+    #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+
+  /**
+   * @brief 
+   * Need to add a new "realtime" system mode, which means ANYTHING not critical to the design in use, should have minimal impact
+   * In this case, if effects are running
+   * ** mqtt unless debugging, should reduce to 1hour at most (except health, make it 10 minutes)
+   * ** filesystem operations that are slow, reduce 
+   * 
+   */
+  
+  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 500
+
+
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+    // #define ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+
+    #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
+
+        
+    #define USE_MODULE_TEMPLATE
+    DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+    "{"
+      "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+      "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+      "\"" D_GPIO_NUMBER "\":{"    
+        // "\"28\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+        // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+        "\"18\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","
+        // "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "2" "\","
+        // "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "3" "\","
+        // "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "4" "\","
+        // "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "5" "\","
+        // "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "6" "\","
+        // "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "7" "\","
+        #ifdef USE_MODULE_SENSORS_BUTTONS
+        "\"17\":\"" D_GPIO_KEY1_INV_CTR  "\","
+        "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+        "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+        #endif
+      "},"
+      "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+      "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "}";
+
+    
+    #define USE_FUNCTION_TEMPLATE
+    DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+    "{"
+      "\"" D_DEVICENAME "\":{"
+        "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
+          "\"" "Desk2" "\""
+        "]"
+      "}"
+    "}";
+
+
+  #endif
+
+#endif // END DEVICE
+
+
+
+
+#ifdef DEVICE_NITC__OFFICE__ELITE4DEXMU_03
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+
+  // #define ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
+  // #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__SINGLE_PANEL
+  #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__EIGHT_PANELS
+  
+
+  #ifdef ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
+
+  // #define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+  #define ENABLE_DEBUGFEATURE_LIGHTING__TRANSITION_ENDPOINT_PIXEL0
+
+  #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
+
+  /***********************************
+  * SECTION: Enable Grouped
+  ************************************/  
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/  
+
+  #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+
+
+  #define USE_MODULE_SENSORS_INTERFACE
+  #define USE_MODULE_SENSORS_SUN_TRACKING      
+  #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+  #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+  //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+  // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+
+  #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+
+  #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
+
+  /**
+   * @brief 
+   * Need to add a new "realtime" system mode, which means ANYTHING not critical to the design in use, should have minimal impact
+   * In this case, if effects are running
+   * ** mqtt unless debugging, should reduce to 1hour at most (except health, make it 10 minutes)
+   * ** filesystem operations that are slow, reduce 
+   * 
+   */
+  
+  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 500
+
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SEGMENT_CLOCK
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+
+  // #define USE_MODULE_NETWORK_WEBSERVER
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CORE
+  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__SHOW_BUILD_DATETIME
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLLING
+  // #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__CAPTIVE_PORTAL
+  // // #define ENABLE_FEATURE_LIGHTING__WEBUI__SHARED_STYLES
+
+  #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+  // #define ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+
+  #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
+
+  /**
+   * @brief tree physical wiring connections
+   * 16 outputs
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":256
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        256
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Wipe Random",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "Brightness": 100
+    },
+    "Brightness": 1
+  }
+  )=====";
+ 
+      // ,"Preset":{"Load":1}
+      
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      // "\"28\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+      // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","
+      "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "2" "\","
+      "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "3" "\","
+      "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "4" "\","
+      "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "5" "\","
+      "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "6" "\","
+      "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "7" "\","
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
+        "\"" "Desk" "\""
+      "]"
+    "}"
+  "}";
+
+  #endif
+  #ifdef ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__SINGLE_PANEL
+
+
+  #define ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+  
+    // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+    #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+    // at somepoint make "liveoutput" which I want this to trigger sending the complete output (possibly via read neopixelbus)
+    // meant for debugging or virtual view prior to hardware install.
+
+    // REmove these, should be in defaults
+    // #define ENABLE_EFFECT_DESCRIPTIONS
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+    // #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+    // #define ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+
+    #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
+
+    #define ENABLE_FEATURE_LIGHTING__WEBSOCKETS
+    #define WLED_ENABLE_WEBSOCKETS
+
+
+    #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+
+
+    #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+
+    #define ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+    #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
+    #define ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION
+
+    #define USE_LIGHTING_TEMPLATE
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Pin":2,
+          "ColourOrder":"RGB",
+          "BusType":"WS2812_RGB",
+          "Start":0,
+          "Length":256
+        }
+      ],
+      "MatrixConfig":[
+        {
+          "Width":16,
+          "Height":16,
+          "BottomStart":0,
+          "RightStart":0,
+          "Vertical":1,
+          "Serpentine":1,
+          "xOffset":0,
+          "yOffset":0
+        }
+      ],
+      "Segment0": {
+        "PixelRange": [
+          0,16,
+          0,16
+        ],
+        "ColourPalette":"Rainbow",
+        "PaletteMappingValues":[10,15,20],
+        "SegColour0": {
+          "Hue": 0,
+          "Sat":0,
+          "BrightnessRGB":100
+        },
+        "SegColour1": {
+          "Hue": 120,
+          "Sat":0,
+          "BrightnessRGB":100
+        },
+        "SegColour2": {
+          "Hue": 240,
+          "Sat":100,
+          "BrightnessRGB":100
+        },
+        "Effects": {
+            "Function":"Squared Swirl",
+            "Speed":141,
+            "Intensity":203,
+            "Custom1":255,
+            "Custom2":128,
+            "Custom3":128,
+            "Grouping":1,
+            "Decimate":0,
+            "RateMs": 25
+          },
+        "BrightnessRGB": 100,
+        "BrightnessCCT": 0
+      },
+      "BrightnessRGB": 20,
+      "BrightnessCCT": 0
+    }
+    )=====";
+            // "Function":"Black Hole",
+
+
+    /***********************************
+    * SECTION: Enable Grouped
+    ************************************/  
+
+    /***********************************
+    * SECTION: Network Configs
+    ************************************/  
+
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+
+    /***********************************
+     * SECTION: Lighting Configs
+    ************************************/   
+
+    // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+
+
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_MODULE_SENSORS_SUN_TRACKING      
+    #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+    #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+    //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+    // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+    // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+
+    #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+
+  /**
+   * @brief 
+   * Need to add a new "realtime" system mode, which means ANYTHING not critical to the design in use, should have minimal impact
+   * In this case, if effects are running
+   * ** mqtt unless debugging, should reduce to 1hour at most (except health, make it 10 minutes)
+   * ** filesystem operations that are slow, reduce 
+   * 
+   */
+  
+  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 500
+
+
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+    // #define ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+
+    #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
+
+        
+    #define USE_MODULE_TEMPLATE
+    DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+    "{"
+      "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+      "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+      "\"" D_GPIO_NUMBER "\":{"    
+        // "\"28\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+        // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+        "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","
+        "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "2" "\","
+        "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "3" "\","
+        "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "4" "\","
+        "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "5" "\","
+        "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "6" "\","
+        "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "7" "\","
+        #ifdef USE_MODULE_SENSORS_BUTTONS
+        "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
+        "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+        "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+        #endif
+      "},"
+      "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+      "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "}";
+
+    
+    #define USE_FUNCTION_TEMPLATE
+    DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+    "{"
+      "\"" D_DEVICENAME "\":{"
+        "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
+          "\"" "Desk" "\""
+        "]"
+      "}"
+    "}";
+
+
+  #endif
+
+
+  
+  #ifdef ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__EIGHT_PANELS
+
+
+  #define ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+  
+    // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+    #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+    // at somepoint make "liveoutput" which I want this to trigger sending the complete output (possibly via read neopixelbus)
+    // meant for debugging or virtual view prior to hardware install.
+
+    // REmove these, should be in defaults
+    // #define ENABLE_EFFECT_DESCRIPTIONS
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+    // #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+    // #define ENABLE_DEBUGFEATURE_TRACE__LIGHT__DETAILED_PIXEL_INDEXING
+
+    #define ENABLE_FEATURE_LIGHTING__CORE__PIXEL_DECIMATION
+
+    #define ENABLE_FEATURE_LIGHTING__WEBSOCKETS
+    #define WLED_ENABLE_WEBSOCKETS
+
+
+    #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+    #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D
+
+
+    #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+
+    #define ENABLE_DEVFEATURE_LIGHTING__MIRROR_BYTE_PACKED_PALETTES_IN_CRGBPALETTE16
+    #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES
+    #define ENABLE_FEATURE_LIGHTING__SKIP_GAMMA_CORRECTION
+
+    #define USE_LIGHTING_TEMPLATE
+DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+R"=====(
+{
+  "BusConfig":[
+    {
+      "Pin":16,
+      "ColourOrder":"GRB",
+      "BusType":"WS2812_RGB",
+      "Start":0,
+      "Length":512
+    },
+    {
+      "Pin":12,
+      "ColourOrder":"GRB",
+      "BusType":"WS2812_RGB",
+      "Start":512,
+      "Length":512
+    },
+    {
+      "Pin":4,
+      "ColourOrder":"GRB",
+      "BusType":"WS2812_RGB",
+      "Start":1024,
+      "Length":512
+    },
+    {
+      "Pin":2,
+      "ColourOrder":"GRB",
+      "BusType":"WS2812_RGB",
+      "Start":1536,
+      "Length":512
+    }
+  ],
+  "MatrixConfig":[
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":0,
+      "yOffset":0
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":16,
+      "yOffset":0
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":32,
+      "yOffset":0
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":48,
+      "yOffset":0
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":0,
+      "yOffset":16
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":16,
+      "yOffset":16
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":32,
+      "yOffset":16
+    },
+    {
+      "Width":16,
+      "Height":16,
+      "BottomStart":0,
+      "RightStart":0,
+      "Vertical":1,
+      "Serpentine":1,
+      "xOffset":48,
+      "yOffset":16
+    }
+  ],
+  "Segment0":{
+    "PixelRange":[
+      0,64,
+      0,32
+    ],
+    "ColourPalette":"Rainbow",
+    "PaletteMappingValues":[10,15,20],
+    "SegColour0":{
+      "Hue":0,
+      "Sat":0,
+      "BrightnessRGB":100
+    },
+    "SegColour1":{
+      "Hue":120,
+      "Sat":0,
+      "BrightnessRGB":100
+    },
+    "SegColour2":{
+      "Hue":240,
+      "Sat":100,
+      "BrightnessRGB":100
+    },
+    "Effects":{
+      "Function":"Squared Swirl",
+      "Speed":141,
+      "Intensity":203,
+      "Custom1":255,
+      "Custom2":128,
+      "Custom3":128,
+      "Grouping":1,
+      "Decimate":0,
+      "RateMs":25
+    },
+    "BrightnessRGB":100,
+    "BrightnessCCT":0
+  },
+  "BrightnessRGB":20,
+  "BrightnessCCT":0
+}
+)=====";
+            // "Function":"Black Hole",
+
+
+    /***********************************
+    * SECTION: Enable Grouped
+    ************************************/  
+
+    /***********************************
+    * SECTION: Network Configs
+    ************************************/  
+
+    #define ENABLE_FEATURE_WEBSERVER__ADVANCED_URL_LIST
+
+    /***********************************
+     * SECTION: Lighting Configs
+    ************************************/   
+
+    // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_SOLAR_POSITION
+
+
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_MODULE_SENSORS_SUN_TRACKING      
+    #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES
+    #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_TODAY
+    //   #define USE_MODULE_SENSORS_SUN_TRACKING__ANGLES__MANUAL_OVERRIDE_FOR_TESTING
+    // #define USE_MODULE_SENSORS_SUN_TRACKING__SOLAR_TIMES_FULL
+    // #define USE_MODULE_SENSORS_SUN_TRACKING__ADVANCED
+
+    #define ENABLE_FEATURE_LIGHTING__AUDIO__USERMOD_IMPLEMENTATION
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_1D
+    // #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
+
+  /**
+   * @brief 
+   * Need to add a new "realtime" system mode, which means ANYTHING not critical to the design in use, should have minimal impact
+   * In this case, if effects are running
+   * ** mqtt unless debugging, should reduce to 1hour at most (except health, make it 10 minutes)
+   * ** filesystem operations that are slow, reduce 
+   * 
+   */
+  
+  #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 500
+
+
+    #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+    // #define ENABLE_DEBUGFEATURE_LIGHT__SEGMENTS
+
+    #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
+
+        
+    #define USE_MODULE_TEMPLATE
+    DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+    "{"
+      "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+      "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+      "\"" D_GPIO_NUMBER "\":{"    
+        // "\"28\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+        // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+        "\"18\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","
+        // "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "2" "\","
+        // "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "3" "\","
+        // "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "4" "\","
+        // "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "5" "\","
+        // "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "6" "\","
+        // "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "7" "\","
+        #ifdef USE_MODULE_SENSORS_BUTTONS
+        "\"17\":\"" D_GPIO_KEY1_INV_CTR  "\","
+        "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
+        "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
+        #endif
+      "},"
+      "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+      "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+    "}";
+
+    
+    #define USE_FUNCTION_TEMPLATE
+    DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+    "{"
+      "\"" D_DEVICENAME "\":{"
+        "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
+          "\"" "Desk2" "\""
+        "]"
+      "}"
+    "}";
+
+
+  #endif
+
+#endif // END DEVICE
 #endif // END GUARD

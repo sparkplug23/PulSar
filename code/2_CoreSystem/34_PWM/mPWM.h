@@ -24,7 +24,7 @@ class mPWM :
     void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static constexpr const char* PM_MODULE_CORE_PWM_CTR = D_MODULE_CORE_PWM_CTR;
+    static constexpr const char* PM_MODULE_CORE_PWM_CTR = D_MODULE__CORE__PWM__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE_PWM_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE__PWM__ID; }
    
@@ -80,10 +80,10 @@ class mPWM :
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mPWM>*> mqtthandler_list;
-    struct handler<mPWM> mqtthandler_settings;
-    struct handler<mPWM> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mPWM>*> telemetry_list;
+    struct telemetry_handler<mPWM> telemetry_settings;
+    struct telemetry_handler<mPWM> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };

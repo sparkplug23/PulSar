@@ -22,7 +22,7 @@ class mRelayStateLEDStrip :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void   parse_JSONCommand(JsonParserObject obj);
 
-    static constexpr const char* PM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR = D_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR;
+    static constexpr const char* PM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR = D_MODULE__CONTROLLER__RELAY_STATE_LEDSTRIP__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLERS__RELAY_STATE_LEDSTRIP__ID; }    
     
@@ -155,15 +155,15 @@ class mRelayStateLEDStrip :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mRelayStateLEDStrip>*> mqtthandler_list;
-    struct handler<mRelayStateLEDStrip> mqtthandler_settings;
-    struct handler<mRelayStateLEDStrip> mqtthandler_state_ifchanged;
-    struct handler<mRelayStateLEDStrip> mqtthandler_state_teleperiod;
+    std::vector<struct telemetry_handler<mRelayStateLEDStrip>*> telemetry_list;
+    struct telemetry_handler<mRelayStateLEDStrip> telemetry_settings;
+    struct telemetry_handler<mRelayStateLEDStrip> telemetry_state_ifchanged;
+    struct telemetry_handler<mRelayStateLEDStrip> telemetry_state_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
     
 };

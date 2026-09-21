@@ -4,9 +4,11 @@
 #include "stdint.h"
 
 #include "6_Lights/02_Palette/mPalette.h"
+#include "6_Lights/03_Animator/fastled_slim/fastled_slim.h"
+
 
 #define FASTLED_INTERNAL // suppress pragma warning messages
-#include "6_Lights/00_Interface/FastLED/FastLED.h"
+// #include "6_Lights/00_Interface/FastLED/FastLED.h"
 
 #include <vector>
 
@@ -57,7 +59,7 @@ class mPaletteLoaded
 
 	struct SolidPalette{
 		uint32_t colourRGBW = 0; // packed RGBW
-		uint8_t  whiteWW = 0;    // white warmth
+		uint8_t  cct = 0;        // 0 = warm, 255 = cold
 	};
 	SolidPalette solid_colour;
 

@@ -52,7 +52,7 @@ class mPinViewer :
     void Pre_Init(void);
     void Init(void);
 
-    static constexpr const char* PM_MODULE_CORE_PINVIEWER_CTR = D_MODULE_CORE_PINVIEWER_CTR;
+    static constexpr const char* PM_MODULE_CORE_PINVIEWER_CTR = D_MODULE__CORE__PINVIEWER__CTR;
     PGM_P GetModuleName(){ return PM_MODULE_CORE_PINVIEWER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE_PINVIEWER_ID; }
 
@@ -221,11 +221,11 @@ class mPinViewer :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
-    std::vector<struct handler<mPinViewer>*> mqtthandler_list;
-    struct handler<mPinViewer> mqtthandler_settings;
-    struct handler<mPinViewer> mqtthandler_state_ifchanged;
-    struct handler<mPinViewer> mqtthandler_state_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mPinViewer>*> telemetry_list;
+    struct telemetry_handler<mPinViewer> telemetry_settings;
+    struct telemetry_handler<mPinViewer> telemetry_state_ifchanged;
+    struct telemetry_handler<mPinViewer> telemetry_state_teleperiod;
     #endif
 };
 

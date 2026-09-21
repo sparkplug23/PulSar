@@ -74,21 +74,31 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj)
     case TASK_JSON_COMMAND_ID:
       parse_JSONCommand(obj);
     break; 
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init();
+    case TASK_TELEMETRY__SENDER_MQTT:
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
-    break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
     #endif
   }
@@ -100,36 +110,88 @@ int8_t mEnergyPZEM004T::Tasker(uint8_t function, JsonParserObject obj)
 
 void mEnergyPZEM004T::Pre_Init(void)
 {
-
-  if (tkr_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS) && tkr_pins->PinUsed(GPIO_PZEM0XX_TX))
+  /*
+   * PZEM uses a TX/RX pin pair in the same style as the serial GPIO options.
+   *
+   * The index is only used to allow selectable GPIO names such as:
+   *
+   *   PZEM Tx0 / PZEM Rx0
+   *   PZEM Tx1 / PZEM Rx1
+   *   PZEM Tx2 / PZEM Rx2
+   *
+   * Internally this driver still creates its own TasmotaModbus instance.
+   * Therefore we only need to find one configured TX/RX pair and pass the
+   * resolved physical pins into TasmotaModbus.
+   */
+  for (uint8_t index = 0; index < 3; index++)
   {
-    module_state.mode = ModuleStatus::Initialising;
+    if (
+      tkr_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS, index) &&
+      tkr_pins->PinUsed(GPIO_PZEM0XX_TX, index)
+    )
+    {
+      module_state.mode = ModuleStatus::Initialising;
+      return;
+    }
   }
-  
+
+  module_state.mode = ModuleStatus::NoGPIOConfigured;
 }
 
 
 void mEnergyPZEM004T::Init(void)
 {
+  int8_t pzem_rx_pin = -1;
+  int8_t pzem_tx_pin = -1;
 
-  modbus = new TasmotaModbus(tkr_pins->GetPin(GPIO_PZEM0XX_RX_MODBUS), tkr_pins->GetPin(GPIO_PZEM0XX_TX));
+  /*
+   * Find the first complete indexed PZEM TX/RX pair.
+   *
+   * Do not assume that index 0 is configured. Templates may expose these as
+   * serial-style selectable options, so any valid pair is acceptable. The
+   * selected physical pins are then passed to TasmotaModbus unchanged.
+   */
+  for (uint8_t index = 0; index < 3; index++)
+  {
+    if (
+      tkr_pins->PinUsed(GPIO_PZEM0XX_RX_MODBUS, index) &&
+      tkr_pins->PinUsed(GPIO_PZEM0XX_TX, index)
+    )
+    {
+      pzem_rx_pin = tkr_pins->GetPin(GPIO_PZEM0XX_RX_MODBUS, index);
+      pzem_tx_pin = tkr_pins->GetPin(GPIO_PZEM0XX_TX, index);
+      break;
+    }
+  }
 
-  uint8_t result = modbus->Begin(9600);
-
-  ALOG_DBG(PSTR("modbus result = %d"),result);
-
-  if (result) {
-    // Change this to another function, that doesnt check pin, it just calls claimserial but internally checks if its being used
-    tkr_sup->ClaimSerial();    
-    module_state.mode = ModuleStatus::Initialising;
-  } else {
+  if ((pzem_rx_pin < 0) || (pzem_tx_pin < 0))
+  {
     module_state.mode = ModuleStatus::NoGPIOConfigured;
     return;
   }
 
-  module_state.mode = ModuleStatus::Running;
+  modbus = new TasmotaModbus(pzem_rx_pin, pzem_tx_pin);
 
+  uint8_t result = modbus->Begin(9600);
+
+  ALOG_DBG(PSTR("modbus result = %d"), result);
+
+  if (result)
+  {
+    /*
+     * TasmotaModbus internally decides whether hardware serial or software
+     * serial is actually used. ClaimSerial() is still called after Begin()
+     * succeeds, preserving the original behaviour.
+     */
+    tkr_sup->ClaimSerial();
+
+    module_state.mode = ModuleStatus::Running;
+    return;
+  }
+
+  module_state.mode = ModuleStatus::NoGPIOConfigured;
 }
+
 
 
 void mEnergyPZEM004T::EveryLoop()
@@ -318,9 +380,9 @@ void mEnergyPZEM004T::parse_JSONCommand(JsonParserObject obj)
 
   JsonParserObject jobj = 0;
 
-  if(!(jobj = obj[D_MODULE_ENERGY_PZEM004T_CTR].getObject()))
+  if(!(jobj = obj[D_MODULE__ENERGY__PZEM004T__CTR].getObject()))
   {
-    ALOG_DBM(PSTR("No valid %s JSON object"), D_MODULE_ENERGY_PZEM004T_CTR);
+    ALOG_DBM(PSTR("No valid %s JSON object"), D_MODULE__ENERGY__PZEM004T__CTR);
     return;
   }
   
@@ -405,42 +467,42 @@ uint8_t mEnergyPZEM004T::ConstructJSON_Sensor(uint8_t json_level, bool json_appe
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mEnergyPZEM004T::MQTTHandler_Init(){
+void mEnergyPZEM004T::Telemetry_Init(){
 
-  struct handler<mEnergyPZEM004T>* ptr;
+  struct telemetry_handler<mEnergyPZEM004T>* ptr;
 
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetConfigPeriod_SubModule(); 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_state_teleperiod;
+  ptr = &telemetry_state_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetTelePeriod_SubModule(); 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Sensor;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_state_ifchanged;
+  ptr = &telemetry_state_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->GetIfChangedPeriod_SubModule();
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SENSORS_CTR;
   ptr->ConstructJSON_function = &mEnergyPZEM004T::ConstructJSON_Sensor;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
 }
 #endif // USE_MODULE_NETWORK_MQTT

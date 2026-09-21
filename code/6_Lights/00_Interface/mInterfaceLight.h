@@ -43,7 +43,7 @@ enum LIGHT_POWER_STATE_IDS{
   LIGHT_POWER_STATE_LENGTH_ID
 };
 
-#ifdef ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
+#ifdef ENABLE_FEATURE_LIGHTING__CORE__GAMMA_CORRECTION
 // New version of Gamma correction compute
 // Instead of a table, we do a multi-linear approximation, which is close enough
 // At low levels, the slope is a bit higher than actual gamma, to make changes smoother
@@ -74,7 +74,7 @@ const gamma_table_t gamma_table_fast[] = {
   {  1023,   1023 },
   { 0xFFFF, 0xFFFF }          // fail-safe if out of range
 };
-#endif // ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
+#endif // ENABLE_FEATURE_LIGHTING__CORE__GAMMA_CORRECTION
 
 
 DEFINE_PGM_CTR(PM_ANIMATION_MODE_NONE_NAME_CTR )   "None"     ;    
@@ -106,7 +106,7 @@ class mInterfaceLight :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void   parse_JSONCommand(JsonParserObject obj);
     
-    static constexpr const char* PM_MODULE_LIGHTS_INTERFACE_CTR = D_MODULE_LIGHTS_INTERFACE_CTR;
+    static constexpr const char* PM_MODULE_LIGHTS_INTERFACE_CTR = D_MODULE__LIGHTS__INTERFACE__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_LIGHTS_INTERFACE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_LIGHTS_INTERFACE_ID; }
     
@@ -153,8 +153,9 @@ class mInterfaceLight :
 
 
     
-    BusManager* bus_manager = nullptr;
-    BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
+    // BusManager* bus_manager = nullptr;
+    // BusConfig* busConfigs[WLED_MAX_BUSSES+WLED_MIN_VIRTUAL_BUSSES] = {nullptr};
+    std::vector<BusConfig> busConfigs;
     
 
     #ifdef USE_MODULE_CORE_RULES
@@ -179,7 +180,7 @@ class mInterfaceLight :
 
     String GetColourOrderString(uint8_t colour_order);
 
-    #ifdef ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
+    #ifdef ENABLE_FEATURE_LIGHTING__CORE__GAMMA_CORRECTION
     uint16_t change8to10(uint8_t v);
     uint8_t change10to8(uint16_t v);
     uint16_t ledGamma_internal(uint16_t v, const struct gamma_table_t *gt_ptr);
@@ -192,10 +193,13 @@ class mInterfaceLight :
     bool isChannelGammaCorrected(uint32_t channel);
     uint16_t fadeGamma(uint32_t channel, uint16_t v);
     uint16_t fadeGammaReverse(uint32_t channel, uint16_t vg);
-    #endif //ENABLE_FEATURE_LIGHTS__GAMMA_CORRECTION
+    #endif //ENABLE_FEATURE_LIGHTING__CORE__GAMMA_CORRECTION
 
     uint8_t  _briRGB_Global = 255;  // in place of WLED "bri" 0..255 // Used for ws28xx
     uint8_t  _briCT_Global = 255;
+    #ifdef ENABLE_FEATURE_LIGHTS__RUNTIME_BRIGHTNESS_MAXIMUM
+    uint8_t brightness_maximum_override = 255;
+    #endif
 
     inline uint8_t getBri_Global(void) { // return the max of _briCT and _briRGB
       return (_briRGB_Global >= _briCT_Global) ? _briRGB_Global : _briCT_Global;
@@ -245,20 +249,20 @@ class mInterfaceLight :
     *******************************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mInterfaceLight> mqtthandler__settings__teleperiod;
-    struct handler<mInterfaceLight> mqtthandler__state__ifchanged;
-    struct handler<mInterfaceLight> mqtthandler__debug_module_config__teleperiod;
-    struct handler<mInterfaceLight> mqtthandler__debug_bus_config__teleperiod;
+    struct telemetry_handler<mInterfaceLight> telemetry__settings__teleperiod;
+    struct telemetry_handler<mInterfaceLight> telemetry__state__ifchanged;
+    struct telemetry_handler<mInterfaceLight> telemetry__debug_module_config__teleperiod;
+    struct telemetry_handler<mInterfaceLight> telemetry__debug_bus_config__teleperiod;
     #ifdef ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
-    struct handler<mInterfaceLight> mqtthandler__debug_power_profiles__teleperiod;
+    struct telemetry_handler<mInterfaceLight> telemetry__debug_power_profiles__teleperiod;
     #endif
                 
-    std::vector<struct handler<mInterfaceLight>*> mqtthandler_list;
+    std::vector<struct telemetry_handler<mInterfaceLight>*> telemetry_list;
 
     #endif
 

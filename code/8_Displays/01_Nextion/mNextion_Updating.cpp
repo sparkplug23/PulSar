@@ -109,7 +109,7 @@ void mNextion::webHandleLcdUpload(AsyncWebServerRequest *request, String filenam
     data2 += FPSTR(HTTP_SCRIPT3);
     data2 += FPSTR(HTTP_STYLE3);
     data2 += FPSTR(HASP_STYLE);
-    data2 += (F("<meta http-equiv='refresh' content='5;url=/firmware' />"));
+    data2 += F("<meta http-equiv='refresh' content='5;url=/nextion/firmware' />");
     data2 += FPSTR(HTTP_HEAD_END3);
 
     data2 += (F("<h1>"));
@@ -293,7 +293,7 @@ void mNextion::webHandleLcdUpload(AsyncWebServerRequest *request, String filenam
       if (nextionOtaResponse())
       {
         ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Success, wrote %d of %d bytes"), lcdOtaTransferred, tftFileSize);
-        request->redirect("/lcdOtaSuccess"); 
+        request->redirect("/nextion/lcdOtaSuccess"); 
         // delay(10);
         // tkr_wifi->EspRestart();
         success = true;
@@ -303,7 +303,7 @@ void mNextion::webHandleLcdUpload(AsyncWebServerRequest *request, String filenam
       else
       {
         ALOG_INF(PSTR("LCDOTA: Failure"));
-        request->redirect("/lcdOtaFailure"); 
+        request->redirect("/nextion/lcdOtaFailure"); 
         // delay(10);
         // tkr_wifi->EspRestart();
       }
@@ -323,13 +323,13 @@ void mNextion::webHandleLcdUpload(AsyncWebServerRequest *request, String filenam
       if (nextionOtaResponse())
       { 
         ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Success, wrote %d of %d bytes"), lcdOtaTransferred, tftFileSize);
-        request->redirect("/lcdOtaSuccess"); 
+        request->redirect("/nextion/lcdOtaSuccess"); 
         ALOG_INF(PSTR(D_LOG_NEXTION "LCDOTA: Delay to allow LCD to update"));
       }
       else
       {
         ALOG_INF(PSTR("LCDOTA: Failure"));
-        request->redirect("/lcdOtaFailure");
+        request->redirect("/nextion/lcdOtaFailure");
       }
       tkr_sup->ESP_Restart_Safe(); // Change later to schedule a restart
     }

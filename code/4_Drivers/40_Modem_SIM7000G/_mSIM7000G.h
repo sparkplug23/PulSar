@@ -116,7 +116,7 @@ class mSIM7000G :
     void Pre_Init();
     void Init(void);
 
-    static constexpr const char* PM_MODULE__DRIVERS_MODEM_7000G__CTR = D_MODULE__DRIVERS_MODEM_7000G__CTR;
+    static constexpr const char* PM_MODULE__DRIVERS_MODEM_7000G__CTR = D_MODULE__DRIVERS__MODEM_7000G__CTR;
     PGM_P GetModuleName(){          return PM_MODULE__DRIVERS_MODEM_7000G__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_DRIVERS_MODEM_7000G_ID; }
         
@@ -213,7 +213,6 @@ void SMS2_Task_Tick(uint32_t now_ms);
 void SMS2_Request_List_Unread();          // AT+CMGL="REC UNREAD" (optional sweep)
 void SMS2_QueueIndexUnique(int idx);
 
-
     struct SMS_STATUS
     {
       timereached_t tReached_Update;
@@ -236,6 +235,7 @@ void SMS2_QueueIndexUnique(int idx);
 #endif
 
 
+void DataNetwork_LogDiagnostics(void);
     sensorset_location_t location;
     // uint8_t GetSensorCount(void) override
     // {
@@ -609,14 +609,14 @@ bool Modem_EnsurePowerOnAndBaud(uint32_t target_baud = MODEM_TARGET_BAUD);
     uint8_t ConstructJSON_Settings(uint8_t json_level = 0, bool json_appending = true);
     uint8_t ConstructJSON_State(uint8_t json_level = 0, bool json_appending = true);
   
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     void MQTTHandler_Sender();
-    std::vector<struct handler<mSIM7000G>*> mqtthandler_list;
+    std::vector<struct telemetry_handler<mSIM7000G>*> telemetry_list;
     
-    struct handler<mSIM7000G> mqtthandler_settings;
-    struct handler<mSIM7000G> mqtthandler_state_ifchanged;
+    struct telemetry_handler<mSIM7000G> telemetry_settings;
+    struct telemetry_handler<mSIM7000G> telemetry_state_ifchanged;
 
     // No specialised payload therefore use system default instead of enum
       

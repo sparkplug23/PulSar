@@ -21,7 +21,7 @@ class mGPS_SD_Logger :
     void Pre_Init(void);
     void Init(void);
     
-    static constexpr const char* PM_MODULE_CONTROLLER_GPS_SD_LOGGER_CTR = D_MODULE_CONTROLLER_GPS_SD_LOGGER_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_GPS_SD_LOGGER_CTR = D_MODULE__CONTROLLER__GPS_SD_LOGGER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_GPS_SD_LOGGER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_GPS_SD_LOGGER_ID; }
 
@@ -106,25 +106,25 @@ class mGPS_SD_Logger :
 
   
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mGPS_SD_Logger> mqtthandler_settings;
-    struct handler<mGPS_SD_Logger> mqtthandler_sensor_ifchanged;
-    struct handler<mGPS_SD_Logger> mqtthandler_sensor_teleperiod;
-    struct handler<mGPS_SD_Logger> mqtthandler_sdcard_superframe;
+    struct telemetry_handler<mGPS_SD_Logger> telemetry_settings;
+    struct telemetry_handler<mGPS_SD_Logger> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mGPS_SD_Logger> telemetry_sensor_teleperiod;
+    struct telemetry_handler<mGPS_SD_Logger> telemetry_sdcard_superframe;
 
     //No extra handlers example
     
     //with extra handlers example
         
-    struct handler<mGPS_SD_Logger>* mqtthandler_list[4] = {
-      &mqtthandler_settings,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod,
-      &mqtthandler_sdcard_superframe
+    struct telemetry_handler<mGPS_SD_Logger>* telemetry_list[4] = {
+      &telemetry_settings,
+      &telemetry_sensor_ifchanged,
+      &telemetry_sensor_teleperiod,
+      &telemetry_sdcard_superframe
     };
     #endif // USE_MODULE_NETWORK_MQTT
 

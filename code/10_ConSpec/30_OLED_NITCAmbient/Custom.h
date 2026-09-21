@@ -61,10 +61,10 @@ class mCustom :
      ************************************************************************************************/
 
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mCustom>*> mqtthandler_list;    
-    struct handler<mCustom> mqtthandler_settings;
-    struct handler<mCustom> mqtthandler_state_ifchanged;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mCustom>*> telemetry_list;    
+    struct telemetry_handler<mCustom> telemetry_settings;
+    struct telemetry_handler<mCustom> telemetry_state_ifchanged;
     #endif // USE_MODULE_NETWORK_MQTT 
 
 };

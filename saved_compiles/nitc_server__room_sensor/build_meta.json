@@ -1,9 +1,9 @@
 {
   "env_name": "nitc_server__room_sensor",
-  "created_utc": "2026-07-17T13:06:03Z",
-  "created_epoch": 1784293563,
-  "project_dir": "C:\\pool_local\\Github\\Personal\\PulSar",
-  "build_dir": "C:\\pool_local\\Github\\Personal\\PulSar\\.pio\\build\\nitc_server__room_sensor",
+  "created_utc": "2026-08-20T12:54:32Z",
+  "created_epoch": 1787230472,
+  "project_dir": "C:\\Users\\3058467\\Github\\PulSar",
+  "build_dir": "C:\\Users\\3058467\\Github\\PulSar\\.pio\\build\\nitc_server__room_sensor",
   "platform": "espressif32",
   "board": "esp32dev",
   "framework": [
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "b5186accef8e50bbda815901ab71a7dcd81b2514",
-    "describe": "b5186acc-dirty",
-    "status_short": "M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/10_ConSpec/13_ServerResetRelays/Web/Gen/generated_web.h\n M code/2_CoreSystem/11_Languages/mLanguageDefault.h\n M code/5_Sensors/50_GPS_Serial/Web/Gen/generated_web.h\n M code/8_Displays/00_Interface/mDisplaysInterface.cpp\n M code/8_Displays/01_Nextion/Web/Gen/generated_web.h\n M code/8_Displays/03_OLED_SH1106/mOLED_SH1106.cpp\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n M platformio_remote.ini\n M saved_compiles/nitc_server__room_sensor/build_meta.json\n M saved_compiles/nitc_server__room_sensor/firmware.elf"
+    "commit": "f210269e0034499203cece958dce170527bee24c",
+    "describe": "f210269e-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/5_Sensors/00_Interface/mSensorsInterface.cpp\n M code/5_Sensors/04_DB18x20/mDB18x20.cpp\n M lib/lib_network_web/ESPAsyncWebServerWLED\n M lib/lib_npb_feb26/NeoPixelBus\n M lib/lib_wled32/LittleFS_esp32\n M platformio_override.ini\n M platformio_remote.ini\n M saved_compiles/nitc_serverroom__acvent_sensor/build_meta.json\n M saved_compiles/nitc_serverroom__acvent_sensor/firmware.elf\n?? saved_compiles/nitc_server__room_sensor/"
   }
 }

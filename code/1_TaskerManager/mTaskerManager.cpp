@@ -3,6 +3,7 @@
 mTaskerManager* mTaskerManager::instance = nullptr;
 
 
+
 int8_t mTaskerManager::Tasker_Interface(uint16_t task)
 {
 
@@ -33,11 +34,40 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
       return TASKER_RESULT__ERROR_ID;
     }
 
+    // for(auto& mod:pModule)
+    // {
+    //   mod->Tasker(task, obj);
+    //   #ifdef ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
+    //   mod->Tasker_DevCode(task, obj);
+    //   #endif
+    // }
+    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+    uint16_t advanced_metrics_module_index = 0;
+    #endif
+
     for(auto& mod:pModule)
     {
+      uint32_t start_us = micros();
+
       mod->Tasker(task, obj);
+
       #ifdef ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS
       mod->Tasker_DevCode(task, obj);
+      #endif
+
+      uint32_t elapsed_us = micros() - start_us;
+
+      #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+      if(metrics.IsEnabled()) metrics.Record(advanced_metrics_module_index, mod->GetModuleUniqueID(), static_cast<TASKER_FUNCTION_TYPES>(task), elapsed_us);
+      #endif
+
+      if(elapsed_us > 20000)
+      {
+        ALOG_ERR(PSTR("TASKER LONG JSON module=%S id=%u time=%luus"), mod->GetModuleName(), mod->GetModuleUniqueID(), elapsed_us);
+      }
+
+      #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+      advanced_metrics_module_index++;
       #endif
     }
     
@@ -53,6 +83,10 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
   #endif
   #ifdef ENABLE_DEBUGFEATURE_LOGGING__RESTRICT_SERIAL_LOGS_TO_MODULE
   module_id_being_serviced = 0;
+  #endif
+
+  #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+  uint16_t advanced_metrics_module_index = 0;
   #endif
 
 
@@ -106,15 +140,19 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
       DEBUG_LINE_HERE_MILLIS
     }
 
-    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
     // Record start time in microseconds
     uint32_t start_time = micros();
+    #endif
+    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+    bool advanced_metrics_enabled = metrics.IsEnabled();
+    uint32_t advanced_metrics_start_us = advanced_metrics_enabled ? micros() : 0;
     #endif
     
     /****************************************************************************************************************
      * Thread: Call each module with the task
      *****************************************************************************************************************/ 
-    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
       // Check if the current task is in the list of tasks to monitor
       bool shouldMonitorAllTasks = (std::find(monitor_task.begin(), monitor_task.end(), TASKER_FUNCTION_TYPES(0)) != monitor_task.end());
 
@@ -212,6 +250,11 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
   #endif
 
 
+#ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+if(advanced_metrics_enabled) metrics.Record(advanced_metrics_module_index, mod->GetModuleUniqueID(), static_cast<TASKER_FUNCTION_TYPES>(task), micros() - advanced_metrics_start_us);
+#endif
+
+
     /****************************************************************************************************************
      * Debug: Stats
      *****************************************************************************************************************/ 
@@ -254,6 +297,9 @@ int8_t mTaskerManager::Tasker_Interface(uint16_t task)
       
     #if defined(ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES) || defined(ENABLE_DEBUGFEATURE_TASKER__DEBUG_MEMORY_PER_MODULE)
     debug_idx++;
+    #endif
+    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+    advanced_metrics_module_index++;
     #endif
  
   } // end for
@@ -518,8 +564,11 @@ void mTaskerManager::Instance_Init()
   #ifdef USE_MODULE_SENSORS_ROTARY_ENCODER
   addTasker(new mRotaryEncoder());
   #endif
-  #if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+  #ifdef USE_MODULE_SENSORS_SUN_TRACKING
   addTasker(new mSunTracking());
+  #endif
+  #ifdef USE_MODULE_SENSORS_SUN_TRACKING_FAST_ESTIMATE
+  addTasker(new mSunTracking_FastEstimate());
   #endif
   #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
   addTasker(new mTOF_VL53L0X());
@@ -535,9 +584,6 @@ void mTaskerManager::Instance_Init()
   #endif
   #ifdef USE_MODULE_SENSORS_ADC_INTERNAL_ESP32
   addTasker(new mADCInternal());
-  #endif
-  #ifdef USE_MODULE_SENSORS__DS18X20_ESP8266_2023
-  addTasker(new mDB18x20());
   #endif
   #ifdef USE_MODULE_SENSORS_DS18X20
   addTasker(new mDB18x20());
@@ -604,9 +650,6 @@ void mTaskerManager::Instance_Init()
   // 3d printer encoder here
   #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
   addTasker(new mTankVolume());
-  #endif
-  #ifdef USE_MODULE_CONTROLLER_BLINDS
-  addTasker(new mBlinds());
   #endif
   #ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
   addTasker(new mBucketWaterLevel());
@@ -784,9 +827,9 @@ const char* mTaskerManager::GetTaskName_Full(uint16_t task)
     case TASK_MQTT_CONNECTED:                         return PM_TASK_MQTT_CONNECTED_CTR;
     case TASK_MQTT_DISCONNECTED:                      return PM_TASK_MQTT_DISCONNECTED_CTR;
     case TASK_MQTT_COMMAND:                           return PM_TASK_MQTT_COMMAND_CTR;
-    case TASK_MQTT_SENDER:                            return PM_TASK_MQTT_SENDER_CTR;
-    case TASK_MQTT_HANDLERS_INIT:                     return PM_TASK_MQTT_HANDLERS_INIT_CTR;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:       return PM_TASK_MQTT_HANDLERS_REFRESH_TELEPERIOD_CTR;
+    case TASK_TELEMETRY__SENDER_MQTT:                            return PM_TASK_TELEMETRY__SENDER_MQTT_CTR;
+    case TASK_TELEMETRY_HANDLERS_INIT:                     return PM_TASK_MQTT_HANDLERS_INIT_CTR;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:       return PM_TASK_MQTT_HANDLERS_REFRESH_TELEPERIOD_CTR;
     case TASK_SET_POWER:                              return PM_TASK_SET_POWER_CTR;
     case TASK_SET_DEVICE_POWER:                       return PM_TASK_SET_DEVICE_POWER_CTR;
     case TASK_SHOW_SENSOR:                            return PM_TASK_SHOW_SENSOR_CTR;

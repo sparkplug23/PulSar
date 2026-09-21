@@ -15,7 +15,7 @@ class mUARTLogger :
     void Pre_Init(void);
     void Init(void);
     
-    static constexpr const char* PM_MODULE_CONTROLLER_SDCARDLOGGER_CTR = D_MODULE_CONTROLLER_SDCARDLOGGER_CTR;
+    static constexpr const char* PM_MODULE_CONTROLLER_SDCARDLOGGER_CTR = D_MODULE__CONTROLLER__SDCARDLOGGER__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CONTROLLER_SDCARDLOGGER_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CONTROLLER_SDCARDLOGGER_ID; }
 
@@ -45,15 +45,15 @@ class mUARTLogger :
 
   
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();
     
     void MQTTHandler_Sender();
-    struct handler<mUARTLogger> mqtthandler_settings;
+    struct telemetry_handler<mUARTLogger> telemetry_settings;
     void MQTTHandler_Settings(uint8_t topic_id=0, uint8_t json_level=0);
-    struct handler<mUARTLogger> mqtthandler_sensor_ifchanged;
-    struct handler<mUARTLogger> mqtthandler_sensor_teleperiod;
+    struct telemetry_handler<mUARTLogger> telemetry_sensor_ifchanged;
+    struct telemetry_handler<mUARTLogger> telemetry_sensor_teleperiod;
     void MQTTHandler_Sensor(uint8_t message_type_id=0, uint8_t json_method=0);
 
     //No extra handlers example
@@ -66,10 +66,10 @@ class mUARTLogger :
       MQTT_HANDLER_SENSOR_TELEPERIOD_ID
     };
     
-    struct handler<mUARTLogger>* list_ptr[3] = {
-      &mqtthandler_settings,
-      &mqtthandler_sensor_ifchanged,
-      &mqtthandler_sensor_teleperiod
+    struct telemetry_handler<mUARTLogger>* list_ptr[3] = {
+      &telemetry_settings,
+      &telemetry_sensor_ifchanged,
+      &telemetry_sensor_teleperiod
     };
     #endif // USE_MODULE_NETWORK_MQTT
 

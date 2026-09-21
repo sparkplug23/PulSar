@@ -81,6 +81,8 @@
 
 #include "2_CoreSystem/mSystemConstants.h"
 
+#include "2_CoreSystem/21_JsonArduino/JsonArduino.h"
+
 // Returns via tasker that report special status
 enum TASKER_RESULT__IDS{
   // Errors
@@ -131,7 +133,14 @@ enum ModuleStatus{
 #include "2_CoreSystem/05_Pins/mPins_Templates.h"                // Hardware configuration
 #include "2_CoreSystem/06_Support/BufferWriter.h"
 
+
+
 #include "1_TaskerManager/mTasks.h"
+
+
+#include "1_TaskerManager/Metrics.h"
+
+
 #include <WiFiClient.h>
 #ifdef ESP8266
   #include <core_version.h>                   // Arduino_Esp8266 version information (ARDUINO_ESP8266_RELEASE and ARDUINO_ESP8266_RELEASE_2_3_0)
@@ -231,6 +240,7 @@ enum ModuleStatus{
 #include "2_CoreSystem/02_RtcMemory/RtcMemory.h"
 
 #include "3_Network/10_MQTT/mMQTT.h"
+
   
 
 template <size_t N>
@@ -308,7 +318,7 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
 #endif 
 #ifdef USE_MODULE_CORE_TELEMETRY
   #include "2_CoreSystem/09_Telemetry/mTelemetry.h"
-  #define   tkr_tel                               static_cast<mTelemetry*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_TELEMETRY_ID))
+  #define   tkr_tele                               static_cast<mTelemetry*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CORE_TELEMETRY_ID))
 #endif 
 #ifdef USE_MODULE_CORE__CRASH_RECORDER
   #include "2_CoreSystem/10_CrashRecorder/CrashRecorder.h"
@@ -362,7 +372,7 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
   #define tkr_interface_network                  static_cast<mInterfaceNetwork*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE__NETWORK_INTERFACE__ID))
 #endif 
 #ifdef USE_MODULE_NETWORK_WIFI
-  #include "3_Network/03_WiFi2/mWiFi.h"
+  #include "3_Network/03_WiFi/mWiFi.h"
   #define tkr_wifi                               static_cast<mWiFi*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_NETWORK_WIFI_ID))
 #endif 
 #ifdef USE_MODULE_NETWORK_ETHERNET
@@ -531,9 +541,13 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
   #include "5_Sensors/21_RotaryEncoder/mRotaryEncoder.h"
   #define tkr_rotary_encoder                     static_cast<mRotaryEncoder*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_ROTARY_ENCODER_ID))
 #endif
-#if defined(USE_MODULE_SENSORS_SUN_TRACKING) || defined(USE_MODULE_SENSORS_SUN_TRACKING__BASIC_ESTIMATE)
+#if defined(USE_MODULE_SENSORS_SUN_TRACKING)
   #include "5_Sensors/22_SunTracking/mSunTracking.h"
   #define   tkr_solar                            static_cast<mSunTracking*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_ID))
+#endif
+#if defined(USE_MODULE_SENSORS_SUN_TRACKING_FAST_ESTIMATE) 
+  #include "5_Sensors/23_SunTracking_FastEstimate/mSunTracking_FastEstimate.h"
+  #define   tkr_solar                            static_cast<mSunTracking_FastEstimate*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_SENSORS_SUN_TRACKING_FAST_ESTIMATE_ID))
 #endif
 #ifdef USE_MODULE_SENSORS__TOF_VL53L0X
   #include "5_Sensors/26_TOF_VL53L0X/mTOF_VL53L0X.h"
@@ -569,7 +583,7 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
 #ifdef USE_MODULE_LIGHTS_ANIMATOR
   #include "6_Lights/03_Animator/_AnimatorLight.h"
   #define tkr_lAni                               static_cast<mAnimatorLight*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_LIGHTS_ANIMATOR_ID))
-  #ifdef ENABLE_FEATURE_LIGHTS__GLOBAL_ANIMATOR_LIGHT_CLASS_ACCESS
+  #ifdef ENABLE_FEATURE_LIGHTING__ANIMATOR__GLOBAL_LIGHT_ACCESS
   #define tkr_anim tkr_extern_lAni // using a more direct access method, with a local pointer in the class header
   #else
   #define tkr_anim tkr_lAni // pointer to the instance of the mAnimatorLight class
@@ -628,10 +642,6 @@ STATIC_ASSERT_JSON_TEMPLATE_FITS(RULES_TEMPLATE);
 #ifdef USE_MODULE_CONTROLLER_TANKVOLUME
   #include "9_Controller/08_TankVolume/mTankVolume.h"
   #define tkr_tankvolume                         static_cast<mTankVolume*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLER_TANKVOLUME_ID))
-#endif
-#ifdef USE_MODULE_CONTROLLER_BLINDS
-  #include "9_Controller/Blinds/mBlinds.h"
-  #define tkr_sbut                               static_cast<mBlinds*>(mTaskerManager::GetInstance()->GetModule(D_UNIQUE_MODULE_CONTROLLER_BLINDS_ID))
 #endif
 #ifdef USE_MODULE_CONTROLLER_BUCKET_WATER_LEVEL
   #include "9_Controller/BucketWaterLevel/mBucketWaterLevel.h"
@@ -846,7 +856,58 @@ class mTaskerManager{
 
         return nullptr; // Return nullptr if the module is not found
     }
-    
+
+    const char* GetModuleNameDisplay(uint16_t uniqueID, char* buffer, size_t buflen) const
+    {
+      const char* name = GetModuleName(uniqueID);
+
+      if(!name || !buflen)
+      {
+        return nullptr;
+      }
+
+      strlcpy(buffer, name, buflen);
+
+      if(buffer[0] >= 'a' && buffer[0] <= 'z')
+      {
+        buffer[0] -= ('a' - 'A');
+      }
+
+      return buffer;
+    }
+
+    const char* GetModuleNameDisplayEachWord(uint16_t uniqueID, char* buffer, size_t buflen) const
+    {
+      const char* name = GetModuleName(uniqueID);
+
+      if(!name || !buflen)
+      {
+        return nullptr;
+      }
+
+      strlcpy(buffer, name, buflen);
+
+      bool upper_next = true;
+
+      for(size_t i = 0; buffer[i]; i++)
+      {
+        if(buffer[i] == ' ' || buffer[i] == '_' || buffer[i] == '-')
+        {
+          upper_next = true;
+          continue;
+        }
+
+        if(upper_next && buffer[i] >= 'a' && buffer[i] <= 'z')
+        {
+          buffer[i] -= ('a' - 'A');
+        }
+
+        upper_next = false;
+      }
+
+      return buffer;
+    }
+        
     
     uint16_t GetModuleID(const char* name, bool caseInsensitive = false) const {
       auto it = std::find_if(pModule.begin(), pModule.end(),
@@ -919,6 +980,10 @@ class mTaskerManager{
       return pModule.size();
     }
 
+    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+    TaskerMetrics metrics;
+    #endif
+
     const char* GetTaskName(uint16_t task);
     const char* GetTaskName_Full(uint16_t task);
         
@@ -964,7 +1029,7 @@ class mTaskerManager{
     std::vector<DEBUG_MODULE_TIME> debug_module_time;
     #endif // ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
 
-    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
     struct TaskMetrics {
       TASKER_FUNCTION_TYPES task_id;   // Task being monitored
       uint16_t unique_id;
@@ -975,7 +1040,7 @@ class mTaskerManager{
       uint32_t avg_time;      // Average time in microseconds
     };
     #endif
-    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+    #ifdef ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
     std::vector<TASKER_FUNCTION_TYPES> monitor_task; // Vector to hold the tasks to monitor
     std::vector<TaskMetrics> task_metrics;
     #endif

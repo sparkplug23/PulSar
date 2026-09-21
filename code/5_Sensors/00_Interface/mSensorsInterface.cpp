@@ -70,11 +70,6 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
       //   pModule[switch_index]->Tasker(function, obj);
 
     }break;
-    case TASK_WEB_APPEND_SENSOR_TABLE_VALUES:
-      WebAppend__Sensor_Table__As_Ragged();
-      // WebAppend__Sensor_Table__As_SensorsRows_Inverted();
-      // WebAppend__Sensor_Table__As_TypesRows();
-    break;
     /************
      * COMMANDS SECTION * 
     *******************/
@@ -96,23 +91,38 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
     //   RulesEvent_Set_Power();
     // break;
     #endif// USE_MODULE_CORE_RULES
-    /************
-     * MQTT SECTION * 
+     /************
+     * TELEMETRY SECTION * 
     *******************/
+    case TASK_TELEMETRY_HANDLERS_INIT:
+      Telemetry_Init();
+    break;
+    case TASK_TELEMETRY_REFRESH_SEND_ALL:
+      tkr_tele->Telemetry_RefreshAll(telemetry_list);
+    break;
+    case TASK_TELEMETRY_SET_DEFAULT_TRANSMIT_PERIOD:
+      tkr_tele->Telemetry_Rate(telemetry_list);
+    break;
     #ifdef USE_MODULE_NETWORK_MQTT
-    case TASK_MQTT_HANDLERS_INIT:
-      MQTTHandler_Init(); 
+    case TASK_TELEMETRY__SENDER_MQTT:
+      tkr_mqtt->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_STATUS_REFRESH_SEND_ALL:
-      // tkr_mqtt->MQTTHandler_RefreshAll(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_SERIAL
+    case TASK_SERIAL_TELEMETRY:
+      tkr_serial->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_HANDLERS_SET_DEFAULT_TRANSMIT_PERIOD:
-      tkr_mqtt->MQTTHandler_Rate(mqtthandler_list);
+    #endif
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+    case TASK_WEB_TELEMETRY:
+      tkr_web->Telemetry_Sender(telemetry_list, *this);
     break;
-    case TASK_MQTT_SENDER:
-      tkr_mqtt->MQTTHandler_Sender(mqtthandler_list, *this);
+    #endif
+    
+    case TASK_WEB_ADD_HANDLER:
+      WebPage_Root_AddHandlers();
     break;
-    #endif //USE_MODULE_NETWORK_MQTT
+
   }
   
   return function_result;
@@ -121,517 +131,9 @@ int8_t mSensorsInterface::Tasker(uint8_t function, JsonParserObject obj){
 
 
 
-/*********************************************************************************************\
- * mWebServer::WebAppend__Sensor_Table__As_TypesRows
- *
- * SUMMARY:
- *   Type = row, Sensor = column (wide table, your original “union” view)
- *
- * ARGUMENTS:
- *   out (Print&) : response stream
- *
- * RETURNS:
- *   void
- *
- * CHANGED:
- *   25Jan26, Initial version (no helpers, member function)
-\*********************************************************************************************/
-void mSensorsInterface::WebAppend__Sensor_Table__As_TypesRows()
+void mSensorsInterface::WebPage_Root_AddHandlers()
 {
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-  Print* out = tkr_web->WebControls_GetPrint();
-  if (!out) return;
-
-  // ---- Discover sensors (columns) ----
-  const uint8_t MAX_SENSORS2 = 16;
-
-  struct SensorCol {
-    uint16_t mod_uid;
-    uint8_t  sensor_idx;     // index for GetSensorReading()
-    char     name[48];
-  };
-
-  SensorCol sensors[MAX_SENSORS2];
-  uint8_t sensor_count = 0;
-  char namebuf[64];
-
-  for (auto& pmod : tkr->pModule)
-  {
-    if (!IS_MODULE_SENSOR_SUBMODULE(pmod->GetModuleUniqueID())) continue;
-
-    const uint8_t cnt = pmod->GetSensorCount();
-    if (!cnt) continue;
-
-    for (uint8_t sid = 0; sid < cnt; sid++)
-    {
-      if (sensor_count >= MAX_SENSORS2) break;
-
-      sensors_reading_t val;
-      pmod->GetSensorReading(&val, sid);
-      if (!val.Valid()) continue;
-
-      // NOTE: matches your naming convention (val.sensor_id)
-      DLI->GetDeviceName_WithModuleUniqueID(
-        pmod->GetModuleUniqueID(),
-        val.sensor_id,
-        namebuf,
-        sizeof(namebuf)
-      );
-
-      sensors[sensor_count].mod_uid    = pmod->GetModuleUniqueID();
-      sensors[sensor_count].sensor_idx = sid;
-
-      strncpy(sensors[sensor_count].name, namebuf, sizeof(sensors[sensor_count].name) - 1);
-      sensors[sensor_count].name[sizeof(sensors[sensor_count].name) - 1] = '\0';
-
-      sensor_count++;
-    }
-
-    if (sensor_count >= MAX_SENSORS2) break;
-  }
-
-  // ---- Table start ----
-  out->print(F("<table class=\"kv kvwide\">"));
-
-  // Header
-  out->print(F("<tr><th>Type</th>"));
-  for (uint8_t c = 0; c < sensor_count; c++)
-  {
-    out->printf_P(PSTR("<th>%s</th>"), sensors[c].name);
-  }
-  out->print(F("</tr>"));
-
-  // Rows by type (skip types with no values anywhere)
-  for (uint16_t type_id = 0; type_id < SENSOR_TYPE_LENGTH_ID; type_id++)
-  {
-    uint16_t type_id_adjusted = type_id;
-    if (type_id == SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID) {
-      type_id_adjusted = SENSOR_TYPE_TEMPERATURE_ID;
-    }
-
-    bool any = false;
-
-    for (uint8_t c = 0; c < sensor_count && !any; c++)
-    {
-      // find module
-      mTaskerInterface* pmod_found = nullptr;
-      for (auto& pmod : tkr->pModule) {
-        if (pmod->GetModuleUniqueID() == sensors[c].mod_uid) { pmod_found = pmod; break; }
-      }
-      if (!pmod_found) continue;
-
-      sensors_reading_t val;
-      pmod_found->GetSensorReading(&val, sensors[c].sensor_idx);
-
-      if (val.Valid() && val.isFloatWaiting_WithSensorType(type_id_adjusted)) any = true;
-    }
-
-    if (!any) continue;
-
-    out->print(F("<tr><td class=\"key\">"));
-    out->print(GetUnifiedSensor_NameByTypeID(type_id));
-    out->print(F("</td>"));
-
-    for (uint8_t c = 0; c < sensor_count; c++)
-    {
-      bool has = false;
-      float v = 0;
-
-      // find module
-      mTaskerInterface* pmod_found = nullptr;
-      for (auto& pmod : tkr->pModule) {
-        if (pmod->GetModuleUniqueID() == sensors[c].mod_uid) { pmod_found = pmod; break; }
-      }
-
-      if (pmod_found)
-      {
-        sensors_reading_t val;
-        pmod_found->GetSensorReading(&val, sensors[c].sensor_idx);
-
-        if (val.Valid() && val.isFloatWaiting_WithSensorType(type_id_adjusted))
-        {
-          has = true;
-          v = val.GetFloat(type_id_adjusted);
-        }
-      }
-
-      out->print(F("<td class=\"val\">"));
-      if (has)
-      {
-        switch (type_id_adjusted)
-        {
-          case SENSOR_TYPE_TEMPERATURE_ID:        out->printf_P(PSTR("%.1f &deg;C"), v); break;
-          case SENSOR_TYPE_RELATIVE_HUMIDITY_ID:  out->printf_P(PSTR("%.1f %%"), v);      break;
-          case SENSOR_TYPE_PRESSURE_ID:           out->printf_P(PSTR("%.0f Pa"), v);      break;
-          case SENSOR_TYPE_ALTITUDE_ID:           out->printf_P(PSTR("%.1f m"), v);       break;
-          case SENSOR_TYPE_GAS_RESISTANCE_ID:     out->printf_P(PSTR("%.0f &Omega;"), v); break;
-          default:                                out->printf_P(PSTR("%.3f"), v);        break;
-        }
-      }
-      else
-      {
-        out->print(F("<span class=\"subtle\">—</span>"));
-      }
-      out->print(F("</td>"));
-    }
-
-    out->print(F("</tr>"));
-  }
-
-  out->print(F("</table>"));
-  #endif // USE_MODULE_NETWORK_WEBSERVER
-}
-
-
-
-
-/*********************************************************************************************\
- * mWebServer::WebAppend__Sensor_Table__As_SensorsRows_Inverted
- *
- * SUMMARY:
- *   Sensor = row, Type = column (short headers)
- *
- * ARGUMENTS:
- *   out (Print&) : response stream
- *
- * RETURNS:
- *   void
- *
- * CHANGED:
- *   25Jan26, Initial version (no helpers, member function)
-\*********************************************************************************************/
-void mSensorsInterface::WebAppend__Sensor_Table__As_SensorsRows_Inverted()
-{
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-  Print* out = tkr_web->WebControls_GetPrint();
-  if (!out) return;
-
-  // ----------------------------
-  // Compile-time switch
-  // ----------------------------
-  // Put this define in a central header later. Keeping here for testing.
-  #ifndef ENABLE_WEB_SENSOR_TABLE_INVERTED
-  #define ENABLE_WEB_SENSOR_TABLE_INVERTED 1
-  #endif
-
-  // ----------------------------
-  // Small helpers
-  // ----------------------------
-  auto tbl_start = [&](){ out->print(F("<table class=\"kv kvwide\">")); };
-  auto tbl_end   = [&](){ out->print(F("</table>")); };
-
-  auto th = [&](const char* s){ out->printf_P(PSTR("<th>%s</th>"), s); };
-
-  auto print_val_with_unit = [&](uint16_t type_id, float v){
-    switch (type_id)
-    {
-      case SENSOR_TYPE_TEMPERATURE_ID:        out->printf_P(PSTR("%.1f &deg;C"), v); break;
-      case SENSOR_TYPE_RELATIVE_HUMIDITY_ID:  out->printf_P(PSTR("%.1f %%"), v);      break;
-      case SENSOR_TYPE_PRESSURE_ID:           out->printf_P(PSTR("%.0f Pa"), v);      break;
-      case SENSOR_TYPE_ALTITUDE_ID:           out->printf_P(PSTR("%.1f m"), v);       break;
-      case SENSOR_TYPE_GAS_RESISTANCE_ID:     out->printf_P(PSTR("%.0f &Omega;"), v); break;
-      default:                                out->printf_P(PSTR("%.3f"), v);        break;
-    }
-  };
-
-  auto type_short = [&](uint16_t type_id) -> const __FlashStringHelper* {
-    switch (type_id)
-    {
-      case SENSOR_TYPE_TEMPERATURE_ID:        return F("Temp");
-      case SENSOR_TYPE_RELATIVE_HUMIDITY_ID:  return F("Hum");
-      case SENSOR_TYPE_PRESSURE_ID:           return F("Press");
-      case SENSOR_TYPE_ALTITUDE_ID:           return F("Alt");
-      case SENSOR_TYPE_GAS_RESISTANCE_ID:     return F("Gas");
-      case SENSOR_TYPE_LIGHT_LEVEL_ID:        return F("Light");
-      case SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID:    return F("Lux");
-      case SENSOR_TYPE_SUN_AZIMUTH_ID:        return F("SunAz");
-      case SENSOR_TYPE_SUN_ELEVATION_ID:      return F("SunEl");
-      // If you want this visible in inverted mode, keep it; otherwise omit it from the type list below.
-      case SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID: return F("HeatRGB");
-      default: return F(" ");
-    }
-  };
-
-  // ----------------------------
-  // Discover sensors once (union)
-  // ----------------------------
-  static const uint8_t MAX_SENSORS2 = 16;
-
-  struct SensorCol {
-    uint16_t mod_uid;
-    uint8_t  sensor_id;   // index for GetSensorReading()
-    char     name[48];
-  };
-
-  SensorCol sensors[MAX_SENSORS2];
-  uint8_t sensor_count = 0;
-
-  char namebuf[64];
-
-  for (auto& pmod : tkr->pModule)
-  {
-    if (!IS_MODULE_SENSOR_SUBMODULE(pmod->GetModuleUniqueID())) continue;
-
-    uint8_t cnt = pmod->GetSensorCount();
-    if (!cnt) continue;
-
-    for (uint8_t sid = 0; sid < cnt; sid++)
-    {
-      if (sensor_count >= MAX_SENSORS2) break;
-
-      sensors_reading_t val;
-      pmod->GetSensorReading(&val, sid);
-      if (!val.Valid()) continue;
-
-      // Use val.sensor_id for naming like you do elsewhere
-      DLI->GetDeviceName_WithModuleUniqueID(pmod->GetModuleUniqueID(), val.sensor_id, namebuf, sizeof(namebuf));
-
-      sensors[sensor_count].mod_uid   = pmod->GetModuleUniqueID();
-      sensors[sensor_count].sensor_id = sid;
-
-      strncpy(sensors[sensor_count].name, namebuf, sizeof(sensors[sensor_count].name) - 1);
-      sensors[sensor_count].name[sizeof(sensors[sensor_count].name) - 1] = '\0';
-
-      sensor_count++;
-    }
-    if (sensor_count >= MAX_SENSORS2) break;
-  }
-
-  // ----------------------------
-  // Type list for inverted mode
-  // (keep it short; columns stay stable)
-  // ----------------------------
-  // #if ENABLE_WEB_SENSOR_TABLE_INVERTED
-
-  static const uint16_t kTypeList[] = {
-    SENSOR_TYPE_TEMPERATURE_ID,
-    SENSOR_TYPE_RELATIVE_HUMIDITY_ID,
-    SENSOR_TYPE_PRESSURE_ID,
-    SENSOR_TYPE_GAS_RESISTANCE_ID,
-    SENSOR_TYPE_ALTITUDE_ID,
-    SENSOR_TYPE_LIGHT_LEVEL_ID,
-    SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID,
-    SENSOR_TYPE_SUN_AZIMUTH_ID,
-    SENSOR_TYPE_SUN_ELEVATION_ID
-    // If you want the heatmap RGB string, you'd need string support in the table.
-    // SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID,
-  };
-  static const uint8_t kTypeCount = sizeof(kTypeList) / sizeof(kTypeList[0]);
-
-  tbl_start();
-
-  // Header: "Sensor" + type short names
-  out->print(F("<tr><th>Sensor</th>"));
-  for (uint8_t i = 0; i < kTypeCount; i++) {
-    out->print(F("<th>"));
-    out->print(type_short(kTypeList[i]));
-    out->print(F("</th>"));
-  }
-  out->print(F("</tr>"));
-
-  // Rows: each sensor
-  for (uint8_t s = 0; s < sensor_count; s++)
-  {
-    out->print(F("<tr><td class=\"key\">"));
-    out->print(sensors[s].name);
-    out->print(F("</td>"));
-
-    // Find module pointer once per sensor row (avoids re-scanning for every cell)
-    mTaskerInterface* pmod_found = nullptr;
-    for (auto& pmod : tkr->pModule) {
-      if (pmod->GetModuleUniqueID() == sensors[s].mod_uid) { pmod_found = pmod; break; }
-    }
-
-    for (uint8_t i = 0; i < kTypeCount; i++)
-    {
-      const uint16_t type_id = kTypeList[i];
-
-      bool has = false;
-      float v  = 0;
-
-      if (pmod_found)
-      {
-        sensors_reading_t val;
-        pmod_found->GetSensorReading(&val, sensors[s].sensor_id);
-
-        // special case adjustment (match your JSON logic)
-        uint16_t type_id_adjusted = type_id;
-        if (type_id == SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID) {
-          type_id_adjusted = SENSOR_TYPE_TEMPERATURE_ID;
-        }
-
-        if (val.Valid() && val.isFloatWaiting_WithSensorType(type_id_adjusted))
-        {
-          has = true;
-          v = val.GetFloat(type_id_adjusted);
-        }
-      }
-
-      out->print(F("<td class=\"val\">"));
-      if (has) print_val_with_unit(type_id, v);
-      else out->print(F("<span class=\"subtle\">—</span>"));
-      out->print(F("</td>"));
-    }
-
-    out->print(F("</tr>"));
-  }
-
-  tbl_end();
-  #endif // USE_MODULE_NETWORK_WEBSERVER
-}
-
-
-
-/*********************************************************************************************\
- * mWebServer::WebAppend__Sensor_Table__As_Ragged
- *
- * SUMMARY:
- *   Sensor = row, only prints values the sensor actually reports.
- *   No type headers, no dashes; row width naturally matches max reported items.
- *
- * ARGUMENTS:
- *   out (Print&) : response stream
- *
- * RETURNS:
- *   void
- *
- * CHANGED:
- *   25Jan26, Initial version (no helpers, member function)
-\*********************************************************************************************/
-void mSensorsInterface::WebAppend__Sensor_Table__As_Ragged()
-{
-  #ifdef USE_MODULE_NETWORK_WEBSERVER
-  Print* out = tkr_web->WebControls_GetPrint();
-  if (!out) return;
-
-  // ---- Discover sensors (rows) ----
-  const uint8_t MAX_SENSORS2 = 16;
-
-  struct SensorRow {
-    uint16_t mod_uid;
-    uint8_t  sensor_idx;
-    char     name[48];
-  };
-
-  SensorRow sensors[MAX_SENSORS2];
-  uint8_t sensor_count = 0;
-  char namebuf[64];
-
-  for (auto& pmod : tkr->pModule)
-  {
-    if (!IS_MODULE_SENSOR_SUBMODULE(pmod->GetModuleUniqueID())) continue;
-
-    const uint8_t cnt = pmod->GetSensorCount();
-    if (!cnt) continue;
-
-    for (uint8_t sid = 0; sid < cnt; sid++)
-    {
-      if (sensor_count >= MAX_SENSORS2) break;
-
-      sensors_reading_t val;
-      pmod->GetSensorReading(&val, sid);
-      if (!val.Valid()) continue;
-
-      DLI->GetDeviceName_WithModuleUniqueID(
-        pmod->GetModuleUniqueID(),
-        val.sensor_id,
-        namebuf,
-        sizeof(namebuf)
-      );
-
-      sensors[sensor_count].mod_uid    = pmod->GetModuleUniqueID();
-      sensors[sensor_count].sensor_idx = sid;
-
-      strncpy(sensors[sensor_count].name, namebuf, sizeof(sensors[sensor_count].name) - 1);
-      sensors[sensor_count].name[sizeof(sensors[sensor_count].name) - 1] = '\0';
-
-      sensor_count++;
-    }
-
-    if (sensor_count >= MAX_SENSORS2) break;
-  }
-
-  // ---- Probe list (ordering defines the “sentence” order) ----
-  const uint16_t type_list[] = {
-    SENSOR_TYPE_TEMPERATURE_ID,
-    SENSOR_TYPE_RELATIVE_HUMIDITY_ID,
-    SENSOR_TYPE_PRESSURE_ID,
-    SENSOR_TYPE_GAS_RESISTANCE_ID,
-    SENSOR_TYPE_ALTITUDE_ID,
-    SENSOR_TYPE_LIGHT_LEVEL_ID,
-    SENSOR_TYPE_LIGHT_LUMINANCE_LUX_ID,
-    SENSOR_TYPE_SUN_AZIMUTH_ID,
-    SENSOR_TYPE_SUN_ELEVATION_ID
-  };
-  const uint8_t type_count = sizeof(type_list) / sizeof(type_list[0]);
-
-  // ---- Table start ----
-  out->print(F("<table class=\"kv kvwide\">"));
-
-  // minimal header for consistent styling; remove if you truly want no header row
-  // out->print(F("<tr><th>Sensor</th><th></th></tr>"));
-
-  // Rows: each sensor
-  for (uint8_t s = 0; s < sensor_count; s++)
-  {
-    // find module once per row
-    mTaskerInterface* pmod_found = nullptr;
-    for (auto& pmod : tkr->pModule) {
-      if (pmod->GetModuleUniqueID() == sensors[s].mod_uid) { pmod_found = pmod; break; }
-    }
-
-    sensors_reading_t val;
-    bool row_valid = false;
-    if (pmod_found)
-    {
-      pmod_found->GetSensorReading(&val, sensors[s].sensor_idx);
-      row_valid = val.Valid();
-    }
-
-    out->print(F("<tr>"));
-
-    // Sensor name
-    out->print(F("<td class=\"key\">"));
-    out->print(sensors[s].name);
-    out->print(F("</td>"));
-
-    if (row_valid)
-    {
-      for (uint8_t i = 0; i < type_count; i++)
-      {
-        const uint16_t type_id = type_list[i];
-        uint16_t type_id_adjusted = type_id;
-
-        if (type_id == SENSOR_TYPE_TEMPERATURE_HEATMAP_RGBSTRING_ID) {
-          type_id_adjusted = SENSOR_TYPE_TEMPERATURE_ID;
-        }
-
-        if (val.isFloatWaiting_WithSensorType(type_id_adjusted))
-        {
-          const float v = val.GetFloat(type_id_adjusted);
-
-          out->print(F("<td class=\"val\">"));
-          switch (type_id_adjusted)
-          {
-            case SENSOR_TYPE_TEMPERATURE_ID:        out->printf_P(PSTR("%.1f &deg;C"), v); break;
-            case SENSOR_TYPE_RELATIVE_HUMIDITY_ID:  out->printf_P(PSTR("%.1f %%"), v);      break;
-            case SENSOR_TYPE_PRESSURE_ID:           out->printf_P(PSTR("%.0f Pa"), v);      break;
-            case SENSOR_TYPE_ALTITUDE_ID:           out->printf_P(PSTR("%.1f m Alt"), v);       break;
-            case SENSOR_TYPE_GAS_RESISTANCE_ID:     out->printf_P(PSTR("%.0f &Omega; Gas"), v); break;
-            case SENSOR_TYPE_SUN_AZIMUTH_ID:        out->printf_P(PSTR("%.1f &deg; Az"), v);    break;
-            case SENSOR_TYPE_SUN_ELEVATION_ID:      out->printf_P(PSTR("%.1f &deg; El"), v);    break;
-            default:                                out->printf_P(PSTR("%.3f"), v);        break;
-          }
-          out->print(F("</td>"));
-        }
-      }
-    }
-
-    out->print(F("</tr>"));
-  }
-
-  out->print(F("</table>"));
-  #endif // USE_MODULE_NETWORK_WEBSERVER
+  
 }
 
 
@@ -711,8 +213,8 @@ void mSensorsInterface::Broadcast_Event_MotionDetected()
 {
 
   #ifdef USE_MODULE_NETWORK_MQTT
-  mqtthandler_motion_event_ifchanged.flags.SendNow = true;
-  Tasker(TASK_MQTT_SENDER);
+  telemetry_motion_event_ifchanged.flags.SendNow = true;
+  Tasker(TASK_TELEMETRY__SENDER_MQTT);
   #endif // USE_MODULE_NETWORK_MQTT
 
 }
@@ -720,8 +222,8 @@ void mSensorsInterface::Broadcast_Event_MotionDetected()
 void mSensorsInterface::Broadcast_Event_UserInput()
 {
   #ifdef USE_MODULE_NETWORK_MQTT
-  mqtthandler_event_input.flags.SendNow = true;
-  Tasker(TASK_MQTT_SENDER);
+  telemetry_event_input.flags.SendNow = true;
+  Tasker(TASK_TELEMETRY__SENDER_MQTT);
   #endif // USE_MODULE_NETWORK_MQTT
 }
 
@@ -1049,7 +551,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
 
   JBI->Start();
 
-    // JBI->Add("Redunction", mqtthandler_sensor_ifchanged.flags.FrequencyRedunctionLevel);
+    // JBI->Add("Redunction", telemetry_sensor_ifchanged.flags.FrequencyRedunctionLevel);
   // return 0;
   
   float sensor_data = -1;
@@ -1105,7 +607,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
                       continue; // skip the result in this loop
                       #else
                       DLI->GetDeviceName_WithModuleUniqueID( pmod->GetModuleUniqueID(), val.sensor_id, buffer, sizeof(buffer));
-                      ALOG_DBM(PSTR("sensor_elapsed_time missing %S %s %d %d"), pmod->GetModuleName(), buffer, sensor_elapsed_time, unified_sensor_reporting_invalid_reading_timeout_seconds);
+                      // ALOG_INF(PSTR("sensor_elapsed_time missing %S %s %d %d"), pmod->GetModuleName(), buffer, sensor_elapsed_time, unified_sensor_reporting_invalid_reading_timeout_seconds);
                       #endif
                     }
                   }
@@ -1248,7 +750,7 @@ uint8_t mSensorsInterface::ConstructJSON_Sensor(uint8_t json_level, bool json_ap
   } // END sensor_type
 
 
-    JBI->Add("Rate", mqtthandler_sensor_ifchanged.tRateSecs);
+    JBI->Add("Rate", telemetry_sensor_ifchanged.tRateSecs);
 
   return JBI->End();
     
@@ -1975,39 +1477,112 @@ uint8_t mSensorsInterface::ConstructJSON_Event_Motion(uint8_t json_level, bool j
 
 
 
-uint8_t mSensorsInterface::ConstructJSON_Event_UserInput(uint8_t json_level, bool json_appending){
+// uint8_t mSensorsInterface::ConstructJSON_Event_UserInput(uint8_t json_level, bool json_appending){
 
-  char buffer[100];
+//   char buffer[100];
 
-  if(!tkr_rules->event_triggered.isvalid) return JBI->End();
+//   if(!tkr_rules->event_triggered.isvalid) return JBI->End();
+
+//   JBI->Start();
+
+//   JBI->Add("Source", tkr->GetModuleName( tkr_rules->event_triggered.module_id ));
+//   JBI->Add("Name", DLI->GetDeviceName_WithModuleUniqueID( tkr_rules->event_triggered.module_id, tkr_rules->event_triggered.device_id, buffer, sizeof(buffer)));
+//   JBI->Add("Value", tkr_rules->event_triggered.value.data[0]);
+
+//   char state[100];
+
+//   #ifdef USE_MODULE_SENSORS_SWITCHES
+//   if(tkr_rules->event_triggered.module_id == tkr_switch->GetModuleUniqueID())
+//   {
+//     tkr_switch->GetStateName(tkr_rules->event_triggered.value.data[0], state, sizeof(state));
+//   }
+//   #endif
+//   #ifdef USE_MODULE_SENSORS_BUTTONS
+//   if(tkr_rules->event_triggered.module_id == tkr_button->GetModuleUniqueID())
+//   {
+//     tkr_button->GetStateName(tkr_rules->event_triggered.value.data[0], tkr_rules->event_triggered.value.data[1], state, sizeof(state)); // data0=type, data1=presses
+//   }
+//   #endif
+
+//   JBI->Add("State", state);
+//   JBI->Add("LocalTime", tkr_time->GetTime().c_str());
+
+
+//   return JBI->End();
+    
+// }
+uint8_t mSensorsInterface::ConstructJSON_Event_UserInput(uint8_t json_level, bool json_appending)
+{
+  if(!tkr_rules->event_triggered.isvalid)
+  {
+    JBI->Start();
+    return JBI->End();
+  }
 
   JBI->Start();
 
-  JBI->Add("Source", tkr->GetModuleName( tkr_rules->event_triggered.module_id ));
-  JBI->Add("Name", DLI->GetDeviceName_WithModuleUniqueID( tkr_rules->event_triggered.module_id, tkr_rules->event_triggered.device_id, buffer, sizeof(buffer)));
+  char buffer[100] = {0};
+  char state[100] = {0};
+
+  const uint16_t module_id = tkr_rules->event_triggered.module_id;
+  const uint16_t device_id = tkr_rules->event_triggered.device_id;
+
+  const char* module_name = tkr->GetModuleName(module_id);
+
+  if(module_name)
+  {
+    JBI->Add("Source", module_name);
+  }
+  else
+  {
+    JBI->Add("SourceID", module_id);
+  }
+
+  const char* device_name = DLI->GetDeviceName_WithModuleUniqueID(module_id, device_id, buffer, sizeof(buffer));
+
+  if(device_name && device_name[0] != '\0')
+  {
+    JBI->Add("Name", device_name);
+  }
+  else
+  {
+    JBI->Add("DeviceID", device_id);
+  }
+
   JBI->Add("Value", tkr_rules->event_triggered.value.data[0]);
 
-  char state[100];
+  bool state_valid = false;
 
   #ifdef USE_MODULE_SENSORS_SWITCHES
-  if(tkr_rules->event_triggered.module_id == tkr_switch->GetModuleUniqueID())
+  if(module_id == tkr_switch->GetModuleUniqueID())
   {
     tkr_switch->GetStateName(tkr_rules->event_triggered.value.data[0], state, sizeof(state));
-  }
-  #endif
-  #ifdef USE_MODULE_SENSORS_BUTTONS
-  if(tkr_rules->event_triggered.module_id == tkr_button->GetModuleUniqueID())
-  {
-    tkr_button->GetStateName(tkr_rules->event_triggered.value.data[0], tkr_rules->event_triggered.value.data[1], state, sizeof(state)); // data0=type, data1=presses
+    state_valid = state[0] != '\0';
   }
   #endif
 
-  JBI->Add("State", state);
+  #ifdef USE_MODULE_SENSORS_BUTTONS
+  if(module_id == tkr_button->GetModuleUniqueID())
+  {
+    tkr_button->GetStateName(
+      tkr_rules->event_triggered.value.data[0],
+      tkr_rules->event_triggered.value.data[1],
+      state,
+      sizeof(state)
+    );
+
+    state_valid = state[0] != '\0';
+  }
+  #endif
+
+  if(state_valid)
+  {
+    JBI->Add("State", state);
+  }
+
   JBI->Add("LocalTime", tkr_time->GetTime().c_str());
 
-
   return JBI->End();
-    
 }
 
 
@@ -2122,103 +1697,103 @@ uint8_t mSensorsInterface::ConstructJSON_System_Location(uint8_t json_level, boo
 
 #ifdef USE_MODULE_NETWORK_MQTT
 
-void mSensorsInterface::MQTTHandler_Init(){
+void mSensorsInterface::Telemetry_Init(){
 
-  struct handler<mSensorsInterface>* ptr;
+  struct telemetry_handler<mSensorsInterface>* ptr;
 
-  ALOG_INF(PSTR("MQTTHandler_Init size %d"), mqtthandler_list.size()  );
+  ALOG_INF(PSTR("Telemetry_Init size %d"), telemetry_list.size()  );
  
-  ptr = &mqtthandler_settings;
+  ptr = &telemetry_settings;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC_SETTINGS_CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Settings;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_teleperiod;
+  ptr = &telemetry_sensor_teleperiod;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->dt.teleperiod_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_TELEPERIOD_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Sensor;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_ifchanged;
+  ptr = &telemetry_sensor_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Sensor;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_sensor_temperature_colours;
+  ptr = &telemetry_sensor_temperature_colours;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_TEMPERATURE_COLOURS__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_SensorTemperatureColours;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   
   #ifdef ENABLE_DEVFEATURE_SENSOR_INTERFACE__UNIFIED_SENSOR_FILTERING
-  ptr = &mqtthandler_sensor_unified_filtered;
+  ptr = &telemetry_sensor_unified_filtered;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = true;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED_FILTERED__CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_UNIFIED_FILTERED__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Unified_Filtered;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
   #endif
 
   //motion events
-  ptr = &mqtthandler_motion_event_ifchanged;
+  ptr = &telemetry_motion_event_ifchanged;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = tkr_mqtt->dt.ifchanged_secs; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_MOTION__CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_MOTION__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_Motion;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
-  ptr = &mqtthandler_event_input;
+  ptr = &telemetry_event_input;
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = false;
   ptr->flags.SendNow = false;
   ptr->tRateSecs = SEC_IN_HOUR; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_USER_INPUT__CTR;
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__EVENT_USER_INPUT__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_Event_UserInput;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
 
-  ptr = &mqtthandler_system_location; 
+  ptr = &telemetry_system_location; 
   ptr->tSavedLastSent = 0;
   ptr->flags.PeriodicEnabled = true;
   ptr->flags.SendNow = false;
-  ptr->tRateSecs = 1; 
-  ptr->topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
-  ptr->json_level = JSON_LEVEL_DETAILED;
-  ptr->postfix_topic = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_SYSTEM_LOCATION__CTR;
+  ptr->tRateSecs = SEC_IN_HOUR; 
+  ptr->flags.topic_type = MQTT_TOPIC_TYPE_IFCHANGED_ID;
+  ptr->flags.json_level = JSON_LEVEL_DETAILED;
+  ptr->key = PM_MQTT_HANDLER_POSTFIX_TOPIC__SENSORS_SYSTEM_LOCATION__CTR;
   ptr->ConstructJSON_function = &mSensorsInterface::ConstructJSON_System_Location;
-  mqtthandler_list.push_back(ptr);
+  telemetry_list.push_back(ptr);
 
 
 } 

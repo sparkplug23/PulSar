@@ -24,7 +24,7 @@
 #include "WebResponseImpl.h"
 #include "cbuf.h"
 
-// #define DEBUG_ASYNC
+// #define ENABLE_DEBUG_ASYNC
 
 // Since ESP8266 does not link memchr by default, here's its implementation.
 void* memchr(void* ptr, int ch, size_t count)
@@ -124,7 +124,7 @@ void AsyncWebServerResponse::setContentType(uint8_t type){
 
 
 void AsyncWebServerResponse::addHeader(const char* name, const char* value){
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
     Serial.printf("addHeader\n\r");
   #endif
   _headers.add(new AsyncWebHeader(String(name), String(value)));
@@ -133,7 +133,7 @@ void AsyncWebServerResponse::addHeader(const char* name, const char* value){
 
 uint16_t AsyncWebServerResponse::_assembleHead(char* buff, uint8_t version, uint16_t buff_size){
   
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println("_assembleHead"); Serial.flush();
   #endif
 
@@ -192,7 +192,7 @@ uint16_t AsyncWebServerResponse::_assembleHead(char* buff, uint8_t version, uint
 
   _headLength += snprintf_P(buff+_headLength, buff_size, PSTR("\r\n"));
 
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println(buff); Serial.flush();
   #endif
 
@@ -216,7 +216,7 @@ AsyncBasicResponse::AsyncBasicResponse(int code, uint8_t contentType, char* cont
   _contentType = contentType;
   _content_len = content_len;
 
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println("AsyncBasicResponse");
   Serial.printf("_code2=%d\n\r",_code);
   Serial.printf("_content_ptr=%s\n\r",_content_ptr);
@@ -225,7 +225,7 @@ AsyncBasicResponse::AsyncBasicResponse(int code, uint8_t contentType, char* cont
 
   // if a value was passed for length, save into _contentLength
   if(content_len){
-    #ifdef DEBUG_ASYNC
+    #ifdef ENABLE_DEBUG_ASYNC
     Serial.printf("_content_len=%d\n\r",_content_len);
     #endif
     _contentLength = _content_len;
@@ -243,7 +243,7 @@ AsyncBasicResponse::AsyncBasicResponse(int code, uint8_t contentType, char* cont
 //     _contentType = contentType;
 //   _content_len = content_len;
 
-//   #ifdef DEBUG_ASYNC
+//   #ifdef ENABLE_DEBUG_ASYNC
 //   Serial.println("AsyncBasicResponse");
 //   Serial.printf("_code2=%d\n\r",_code);
 //   Serial.printf("_content_ptr=%s\n\r",_content_ptr);
@@ -252,7 +252,7 @@ AsyncBasicResponse::AsyncBasicResponse(int code, uint8_t contentType, char* cont
 
 //   // if a value was passed for length, save into _contentLength
 //   if(content_len){
-//     #ifdef DEBUG_ASYNC
+//     #ifdef ENABLE_DEBUG_ASYNC
 //     Serial.printf("_content_len=%d\n\r",_content_len);
 //     #endif
 //     _contentLength = _content_len;
@@ -273,7 +273,7 @@ AsyncBasicResponse::AsyncBasicResponse(int code, uint8_t contentType, char* cont
 //   sprintf(_contentType,"%s",contentType);
 //   _content_len = content_len;
 
-//   #ifdef DEBUG_ASYNC
+//   #ifdef ENABLE_DEBUG_ASYNC
 //   Serial.println("AsyncBasicResponse");
 //   Serial.printf("_code2=%d\n\r",_code);
 //   Serial.printf("_content_ptr=%s\n\r",_content_ptr);
@@ -282,7 +282,7 @@ AsyncBasicResponse::AsyncBasicResponse(int code, uint8_t contentType, char* cont
 
 //   // if a value was passed for length, save into _contentLength
 //   if(content_len){
-//     #ifdef DEBUG_ASYNC
+//     #ifdef ENABLE_DEBUG_ASYNC
 //     Serial.printf("_content_len=%d\n\r",_content_len);
 //     #endif
 //     _contentLength = _content_len;
@@ -298,7 +298,7 @@ AsyncBasicResponse::AsyncBasicResponse(int code, uint8_t contentType, char* cont
  * Called by callback, used to actually transmit response back to client
  * */
 void AsyncBasicResponse::_respond(AsyncWebServerRequest *request){
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println("AsyncBasicResponse::_respond(request) = Primary send mechanism"); Serial.flush();
   #endif
   _state = RESPONSE_HEADERS;
@@ -310,7 +310,7 @@ void AsyncBasicResponse::_respond(AsyncWebServerRequest *request){
   size_t space = request->client()->space();
 
   if(!_contentLength && space >= header_len){ 
-    #ifdef DEBUG_ASYNC
+    #ifdef ENABLE_DEBUG_ASYNC
       Serial.printf("{No Body: Send head}!_contentLength[%d] && space[%d] >= outLen[%d]\n\r",_contentLength,space,header_len);
     #endif
     if(header_ptr != nullptr){
@@ -319,7 +319,7 @@ void AsyncBasicResponse::_respond(AsyncWebServerRequest *request){
     _state = RESPONSE_WAIT_ACK;
   } else 
   if(_contentLength && space >= header_len + _contentLength){ 
-    #ifdef DEBUG_ASYNC
+    #ifdef ENABLE_DEBUG_ASYNC
       Serial.printf("{Header+Body: Send all}_contentLength[%d] && space[%d] >= outLen[%d] + _contentLength[%d]\n\r",_contentLength,space,header_len,_contentLength);
       Serial.printf("out.c_str()=BEFORE\n\r");
       // Serial.println(header_str);
@@ -331,18 +331,18 @@ void AsyncBasicResponse::_respond(AsyncWebServerRequest *request){
     }
     // Transmit body using null terminated array IF it was set
     if(_content_ptr != nullptr){
-      #ifdef DEBUG_ASYNC
+      #ifdef ENABLE_DEBUG_ASYNC
       Serial.printf("_content_ptr != nullptr\n\r");
       #endif
       _writtenLength += request->client()->write(_content_ptr, _content_len);
     }
-    #ifdef DEBUG_ASYNC
+    #ifdef ENABLE_DEBUG_ASYNC
       Serial.printf("_writtenLength=%d\n\r",_writtenLength);
     #endif
     _state = RESPONSE_WAIT_ACK;
   } 
   // else if(space && space < outLen){
-  // #ifdef DEBUG_ASYNC
+  // #ifdef ENABLE_DEBUG_ASYNC
   //   Serial.printf("{Send partial}space[%d] && space[%d] < outLen[%d]\n\r",space,space,outLen);
   //   #endif
   //   String partial = out.substring(0, space);
@@ -351,7 +351,7 @@ void AsyncBasicResponse::_respond(AsyncWebServerRequest *request){
   //   _writtenLength += request->client()->write(partial.c_str(), partial.length());
   //   _state = RESPONSE_CONTENT;
   // } else if(space > outLen && space < (outLen + _contentLength)){ 
-  // #ifdef DEBUG_ASYNC
+  // #ifdef ENABLE_DEBUG_ASYNC
   //   Serial.printf("{Send partial remaining}space[%d] > outLen[%d] && space[%d] < (outLen[%d] + _contentLength[%d])\n\r",
   //     space,outLen,space,outLen,_contentLength);
   //     #endif
@@ -360,17 +360,17 @@ void AsyncBasicResponse::_respond(AsyncWebServerRequest *request){
   //   _sentLength += shift;
   //   out += _content.substring(0, shift);
   //   _content = _content.substring(shift); 
-  // #ifdef DEBUG_ASYNC
+  // #ifdef ENABLE_DEBUG_ASYNC
   //   Serial.printf("request->client()->write(out.ctr(),outlen[%d])  shift[%d] \n\r",outLen,shift);
   //   #endif
   //   _writtenLength += request->client()->write(out.c_str(), outLen); 
-  // #ifdef DEBUG_ASYNC
+  // #ifdef ENABLE_DEBUG_ASYNC
   //   Serial.println("request->client()->write DONE");
   //   #endif
   //   _state = RESPONSE_CONTENT;
   // }
    else { 
-    #ifdef DEBUG_ASYNC
+    #ifdef ENABLE_DEBUG_ASYNC
       Serial.println("{Send nothing}else");
     #endif
     // _content_ptr += _contentLength;    
@@ -379,7 +379,7 @@ void AsyncBasicResponse::_respond(AsyncWebServerRequest *request){
     _state = RESPONSE_CONTENT;
   }
 
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.printf("space=%d\n\r",space);
   Serial.printf("_writtenLength=%d of %d\n\r",_writtenLength, header_len);
   Serial.flush();
@@ -840,13 +840,13 @@ AsyncProgmemResponse::AsyncProgmemResponse(int code, uint8_t contentType_id, con
   _contentLength = len;
   _readLength = 0;
 
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.printf("AsyncProgmemResponse built");
   #endif
 }
 
 size_t AsyncProgmemResponse::_fillBuffer(uint8_t *data, size_t len){
-  #ifdef DEBUG_ASYNC
+  #ifdef ENABLE_DEBUG_ASYNC
   Serial.println("_fillBuffer(uint8_t *data, size_t len)");
   #endif
   size_t left = _contentLength - _readLength;

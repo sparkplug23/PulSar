@@ -21,7 +21,7 @@
 #define ASYNCEVENTSOURCE_H_
 
 
-#define DEBUG_ASYNC
+#define ENABLE_DEBUG_ASYNC
 
 #include <Arduino.h>
 #ifdef ESP32

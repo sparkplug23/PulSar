@@ -109,7 +109,7 @@ class mSerial :
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     void   parse_JSONCommand(JsonParserObject obj);
 
-    static constexpr const char* PM_MODULE_CORE__SERIAL__CTR = D_MODULE_CORE__SERIAL__CTR;
+    static constexpr const char* PM_MODULE_CORE__SERIAL__CTR = D_MODULE__CORE__SERIAL__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_CORE__SERIAL__CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_CORE__SERIAL__ID; }     
 
@@ -151,14 +151,14 @@ class mSerial :
      * SECITON: MQTT
      ************************************************************************************************/
     #ifdef USE_MODULE_NETWORK_MQTT
-    void MQTTHandler_Init();
+    void Telemetry_Init();
     void MQTTHandler_RefreshAll();
     void MQTTHandler_Rate();    
     void MQTTHandler_Sender();
 
-    std::vector<struct handler<mSerial>*> mqtthandler_list;
-    struct handler<mSerial> mqtthandler_settings;
-    struct handler<mSerial> mqtthandler_uartinfo_teleperiod;
+    std::vector<struct telemetry_handler<mSerial>*> telemetry_list;
+    struct telemetry_handler<mSerial> telemetry_settings;
+    struct telemetry_handler<mSerial> telemetry_uartinfo_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
     /************************************************************************************************

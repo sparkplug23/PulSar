@@ -46,6 +46,7 @@
  *********************************************************************************************
  *********************************************************************************************/
 
+ #define USE_MODULE_CORE__JSON_ARDUINO
 
 /*********************************************************************************************
  *********************************************************************************************
@@ -171,6 +172,12 @@
 #define ENABLE_DEVFEATURE_FASTBOOT_OTA_FALLBACK_DEFAULT_SSID
 #endif
 #endif
+
+
+#define USE_MODULE_SENSORS_ESP32_TEMPERATURE
+#define ENABLE_FEATURE_INTERNAL_CHIP_TEMPERATURE__ALLOW_CLASSIC_ESP32
+
+
 
 
 
@@ -650,7 +657,6 @@
  *********************************************************************************************
  *********************************************************************************************/
 
-#define USE_MODULE_CORE_PINVIEWER
 
 /*********************************************************************************************
  *********************************************************************************************
@@ -713,6 +719,9 @@
  *********************************************************************************************
  *********************************************************************************************/
 
+  #define ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+  #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS
+
   /***********************************
    * SECTION: Networking
   ************************************/    
@@ -720,7 +729,7 @@
   #define WIFI_GATEWAY                  "192.168.1.1"     // [IpAddress2] If not using DHCP set Gateway IP address
   #define WIFI_SUBNETMASK               "255.255.255.0"   // [IpAddress3] If not using DHCP set Network mask
   #define WIFI_DNS                      "192.168.1.1"     // [IpAddress4] If not using DHCP set DNS IP address (might be equal to WIFI_GATEWAY)
-  #define WIFI_DNS2              "0.0.0.0"         // [IpAddress5] If not using DHCP set DNS2 IP address (might be equal to WIFI_GATEWAY)
+  #define WIFI_DNS2                     "0.0.0.0"         // [IpAddress5] If not using DHCP set DNS2 IP address (might be equal to WIFI_GATEWAY)
 
   // #define STA_SSID1                     ""                // [Ssid1] Wifi SSID
   // #define STA_PASS1                     ""                // [Password1] Wifi password
@@ -878,6 +887,13 @@
  *********************************************************************************************
  *********************************************************************************************/
 
+// •	no server at all
+// •	Lighting without server
+// •	Lighting with server (full webui running, core +lightweb)
+// •	Only core webserver (so needs to compile when lights do not)
+
+
+
 #define WEB_SERVER             2                 // [WebServer] Web server (0 = Off, 1 = Start as User, 2 = Start as Admin)
 #define WEB_PASSWORD           ""                // [WebPassword] Web server Admin mode Password for WEB_USERNAME (empty string = Disable)
 
@@ -890,8 +906,14 @@
   #define WEB_PORT             80                // Web server Port for User and Admin mode
 
 
-#define ENABLE_DEBUGFEATURE_WEBSERVER_URL_LIST
 
+
+#ifdef FIRMWARE_DEFAULT__WEBSERVER_BASIC_WHEN_NO_LIGHTS_ARE_USED
+
+  #define USE_MODULE_NETWORK_WEBSERVER  
+  #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+
+#endif
 
 
 /*********************************************************************************************

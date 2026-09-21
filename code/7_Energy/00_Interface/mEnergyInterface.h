@@ -25,7 +25,7 @@ class mEnergyInterface :
     void BootMessage();
     int8_t Tasker(uint8_t function, JsonParserObject obj = 0);
     
-    static constexpr const char* PM_MODULE_ENERGY_INTERFACE_CTR = D_MODULE_ENERGY_INTERFACE_CTR;
+    static constexpr const char* PM_MODULE_ENERGY_INTERFACE_CTR = D_MODULE__ENERGY__INTERFACE__CTR;
     PGM_P GetModuleName(){          return PM_MODULE_ENERGY_INTERFACE_CTR; }
     uint16_t GetModuleUniqueID(){ return D_UNIQUE_MODULE_ENERGY_INTERFACE_ID; }
    
@@ -40,42 +40,42 @@ class mEnergyInterface :
      ************************************************************************************************/
 
 
-struct EnergyUsageNew{
-  uint32_t usage1_kWhtotal;
-  uint32_t usage2_kWhtotal;
-  uint32_t return1_kWhtotal;
-  uint32_t return2_kWhtotal;
-  uint32_t last_return_kWhtotal;
-  uint32_t last_usage_kWhtotal;  
-  uint8_t       energy_power_delta;        // 33F
-  unsigned long energy_power_calibration;  // 364
-  unsigned long energy_voltage_calibration;  // 368
-  unsigned long energy_current_calibration;  // 36C
-  unsigned long energy_kWhtoday;           // 370
-  unsigned long energy_kWhyesterday;       // 374
-  uint16_t      energy_kWhdoy;             // 378
-  uint16_t      energy_min_power;          // 37A
-  uint16_t      energy_max_power;          // 37C
-  uint16_t      energy_min_voltage;        // 37E
-  uint16_t      energy_max_voltage;        // 380
-  uint16_t      energy_min_current;        // 382
-  uint16_t      energy_max_current;        // 384
-  uint16_t      energy_max_power_limit;    // 386 MaxPowerLimit
-  uint16_t      energy_max_power_limit_hold;         // 388 MaxPowerLimitHold
-  uint16_t      energy_max_power_limit_window;       // 38A MaxPowerLimitWindow
-  uint16_t      energy_max_power_safe_limit;         // 38C MaxSafePowerLimit
-  uint16_t      energy_max_power_safe_limit_hold;    // 38E MaxSafePowerLimitHold
-  uint16_t      energy_max_power_safe_limit_window;  // 390 MaxSafePowerLimitWindow
-  uint16_t      energy_max_energy;         // 392 MaxEnergy
-  uint16_t      energy_max_energy_start;   // 394 MaxEnergyStart
-  uint32_t      energy_kWhtotal_time;      // 7B4
-  unsigned long energy_frequency_calibration;  // 7C8
-  unsigned long energy_kWhtotal;           // 554
-  uint16_t      tariff[4][2];              // E30
-};// EnergyUsage;
+    struct EnergyUsageNew{
+      uint32_t usage1_kWhtotal;
+      uint32_t usage2_kWhtotal;
+      uint32_t return1_kWhtotal;
+      uint32_t return2_kWhtotal;
+      uint32_t last_return_kWhtotal;
+      uint32_t last_usage_kWhtotal;  
+      uint8_t       energy_power_delta;        // 33F
+      unsigned long energy_power_calibration;  // 364
+      unsigned long energy_voltage_calibration;  // 368
+      unsigned long energy_current_calibration;  // 36C
+      unsigned long energy_kWhtoday;           // 370
+      unsigned long energy_kWhyesterday;       // 374
+      uint16_t      energy_kWhdoy;             // 378
+      uint16_t      energy_min_power;          // 37A
+      uint16_t      energy_max_power;          // 37C
+      uint16_t      energy_min_voltage;        // 37E
+      uint16_t      energy_max_voltage;        // 380
+      uint16_t      energy_min_current;        // 382
+      uint16_t      energy_max_current;        // 384
+      uint16_t      energy_max_power_limit;    // 386 MaxPowerLimit
+      uint16_t      energy_max_power_limit_hold;         // 388 MaxPowerLimitHold
+      uint16_t      energy_max_power_limit_window;       // 38A MaxPowerLimitWindow
+      uint16_t      energy_max_power_safe_limit;         // 38C MaxSafePowerLimit
+      uint16_t      energy_max_power_safe_limit_hold;    // 38E MaxSafePowerLimitHold
+      uint16_t      energy_max_power_safe_limit_window;  // 390 MaxSafePowerLimitWindow
+      uint16_t      energy_max_energy;         // 392 MaxEnergy
+      uint16_t      energy_max_energy_start;   // 394 MaxEnergyStart
+      uint32_t      energy_kWhtotal_time;      // 7B4
+      unsigned long energy_frequency_calibration;  // 7C8
+      unsigned long energy_kWhtotal;           // 554
+      uint16_t      tariff[4][2];              // E30
+    };// EnergyUsage;
 
-
-  EnergyUsageNew   energy_usage;           // 77C 
+    EnergyUsageNew   energy_usage;           // 77C 
+    
     /************************************************************************************************
      * SECTION: Internal Functions
      ************************************************************************************************/
@@ -107,11 +107,11 @@ struct EnergyUsageNew{
      ************************************************************************************************/
     
     #ifdef USE_MODULE_NETWORK_MQTT 
-    void MQTTHandler_Init();
-    std::vector<struct handler<mEnergyInterface>*> mqtthandler_list;
-    struct handler<mEnergyInterface> mqtthandler_settings;
-    struct handler<mEnergyInterface> mqtthandler_state_ifchanged;
-    struct handler<mEnergyInterface> mqtthandler_state_teleperiod;
+    void Telemetry_Init();
+    std::vector<struct telemetry_handler<mEnergyInterface>*> telemetry_list;
+    struct telemetry_handler<mEnergyInterface> telemetry_settings;
+    struct telemetry_handler<mEnergyInterface> telemetry_state_ifchanged;
+    struct telemetry_handler<mEnergyInterface> telemetry_state_teleperiod;
     #endif // USE_MODULE_NETWORK_MQTT
 
 };
@@ -485,19 +485,19 @@ struct EnergyUsageNew{
   
 //   //#ifdef USE_CORE_MQTT 
 
-//     void MQTTHandler_Init();
+//     void Telemetry_Init();
 //     void MQTTHandler_RefreshAll();
 //     void MQTTHandler_Rate();
     
 //     void MQTTHandler_Sender();
 
-//     struct handler<mEnergyInterface> mqtthandler_settings;
-//     struct handler<mEnergyInterface> mqtthandler_sensor_ifchanged;
-//     struct handler<mEnergyInterface> mqtthandler_sensor_teleperiod;
-//     struct handler<mEnergyInterface> mqtthandler_thresholdlimits_ifchanged; //will contain alert status
-//     struct handler<mEnergyInterface> mqtthandler_thresholdlimits_teleperiod;
-//     struct handler<mEnergyInterface> mqtthandler_energystats_ifchanged;
-//     struct handler<mEnergyInterface> mqtthandler_energystats_teleperiod;
+//     struct telemetry_handler<mEnergyInterface> telemetry_settings;
+//     struct telemetry_handler<mEnergyInterface> telemetry_sensor_ifchanged;
+//     struct telemetry_handler<mEnergyInterface> telemetry_sensor_teleperiod;
+//     struct telemetry_handler<mEnergyInterface> telemetry_thresholdlimits_ifchanged; //will contain alert status
+//     struct telemetry_handler<mEnergyInterface> telemetry_thresholdlimits_teleperiod;
+//     struct telemetry_handler<mEnergyInterface> telemetry_energystats_ifchanged;
+//     struct telemetry_handler<mEnergyInterface> telemetry_energystats_teleperiod;
     
 //     // Extra module only handlers
 //     enum MQTT_HANDLER_MODULE_IDS{  // Sensors need ifchanged, drivers do not, just telemetry
@@ -508,16 +508,16 @@ struct EnergyUsageNew{
 //       MQTT_HANDLER_MODULE_LENGTH_ID, // id count
 //     };
     
-//     struct handler<mEnergyInterface>* mqtthandler_list[3] = {
-//       &mqtthandler_settings,
-//       &mqtthandler_sensor_ifchanged,
-//       &mqtthandler_sensor_teleperiod
+//     struct telemetry_handler<mEnergyInterface>* telemetry_list[3] = {
+//       &telemetry_settings,
+//       &telemetry_sensor_ifchanged,
+//       &telemetry_sensor_teleperiod
 //       // ,
-//       // &mqtthandler_energystats_ifchanged,  
-//       // &mqtthandler_energystats_teleperiod
+//       // &telemetry_energystats_ifchanged,  
+//       // &telemetry_energystats_teleperiod
 //       // ,  
-//       // &mqtthandler_thresholdlimits_ifchanged,  
-//       // &mqtthandler_thresholdlimits_teleperiod  
+//       // &telemetry_thresholdlimits_ifchanged,  
+//       // &telemetry_thresholdlimits_teleperiod  
 //     };
 
 

@@ -82,12 +82,12 @@ Summary
     For example: http://IP/?key1=value1&key2=value2 sends key1 and key2 with their respective values to the server.
  * 
  */
-#ifdef ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS
+#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__URL_QUERY_SETTINGS
 /*
  * Receives client input
  */
 
-  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CORE
 //called upon POST settings form submit
 void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, byte subPage)
 {
@@ -329,7 +329,7 @@ void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, by
     if (t <= 250) bootPreset = t;
     gammaCorrectBri = request->hasArg(F("GB"));
     gammaCorrectCol = request->hasArg(F("GC"));
-    gammaCorrectVal = request->arg(F("GV")).toFloat();
+    gammaCorrectVal = tkr_sup->CharToFloat(request->arg(F("GV")).c_str());
     if (gammaCorrectVal <= 1.0f || gammaCorrectVal > 3) {
       gammaCorrectVal = 1.0f; // no gamma correction
       gammaCorrectBri = false;
@@ -496,8 +496,8 @@ void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, by
     if (ntpEnabled && WLED_CONNECTED && !ntpConnected) ntpConnected = ntpUdp.begin(ntpLocalPort);
     ntpLastSyncTime = NTP_NEVER; // force new NTP query
 
-    longitude = request->arg(F("LN")).toFloat();
-    latitude = request->arg(F("LT")).toFloat();
+    longitude = tkr_sup->CharToFloat(request->arg(F("LN")).c_str());
+    latitude  = tkr_sup->CharToFloat(request->arg(F("LT")).c_str());
     // force a sunrise/sunset re-calculation
     calculateSunriseAndSunset();
 
@@ -737,47 +737,62 @@ void mAnimatorLight::SettingsPages__ParseForm(AsyncWebServerRequest *request, by
 
       // check if parameters represent array
       if (name.endsWith("[]")) {
-        name.replace("[]","");
-        value.replace(",",".");      // just in case conversion
+        name.replace("[]", "");
+        value.replace(",", ".");
+
         if (!subObj[name].is<JsonArray>()) {
           JsonArray ar = subObj.createNestedArray(name);
-          if (value.indexOf(".") >= 0) ar.add(value.toFloat());  // we do have a float
-          else                         ar.add(value.toInt());    // we may have an int
-          j=0;
+
+          if (value.indexOf(".") >= 0) ar.add(tkr_sup->CharToFloat(value.c_str()));
+          else                         ar.add(value.toInt());
+
+          j = 0;
         } else {
-          if (value.indexOf(".") >= 0) subObj[name].add(value.toFloat());  // we do have a float
-          else                         subObj[name].add(value.toInt());    // we may have an int
+          if (value.indexOf(".") >= 0) subObj[name].add(tkr_sup->CharToFloat(value.c_str()));
+          else                         subObj[name].add(value.toInt());
+
           j++;
         }
+
         DEBUG_PRINTF_P(PSTR("[%d] = %s\n"), j, value.c_str());
+
       } else {
-        // we are using a hidden field with the same name as our parameter (!before the actual parameter!)
-        // to describe the type of parameter (text,float,int), for boolean parameters the first field contains "off"
-        // so checkboxes have one or two fields (first is always "false", existence of second depends on checkmark and may be "true")
+        // We are using a hidden field with the same name as our parameter
+        // to describe the type of parameter (text, float, int).
+        // For boolean parameters the first field contains "off".
         if (subObj[name].isNull()) {
-          // the first occurrence of the field describes the parameter type (used in next loop)
-          if (value == "false") subObj[name] = false; // checkboxes may have only one field
+          if (value == "false") subObj[name] = false;
           else                  subObj[name] = value;
+
         } else {
-          String type = subObj[name].as<String>();  // get previously stored value as a type
-          if (subObj[name].is<bool>())   subObj[name] = true;   // checkbox/boolean
-          else if (type == "number") {
-            value.replace(",",".");      // just in case conversion
-            if (value.indexOf(".") >= 0) subObj[name] = value.toFloat();  // we do have a float
-            else                         subObj[name] = value.toInt();    // we may have an int
-          } else if (type == "int")      subObj[name] = value.toInt();
-          else                           subObj[name] = value;  // text fields
+          String type = subObj[name].as<String>();
+
+          if (subObj[name].is<bool>()) {
+            subObj[name] = true;
+
+          } else if (type == "number") {
+            value.replace(",", ".");
+
+            if (value.indexOf(".") >= 0) subObj[name] = tkr_sup->CharToFloat(value.c_str());
+            else                         subObj[name] = value.toInt();
+
+          } else if (type == "int") {
+            subObj[name] = value.toInt();
+
+          } else {
+            subObj[name] = value;
+          }
         }
+
         DEBUG_PRINTF_P(PSTR(" = %s\n"), value.c_str());
       }
-    }
     UsermodManager::readFromConfig(um);  // force change of usermod parameters
     DEBUG_PRINTLN(F("Done re-init UsermodManager::"));
     releaseJSONBufferLock();
     #endif // ENABLE_FEATURE_LIGHTING__SETTINGS_URL_QUERY_PARAMETERS__SUBPAGE_UM
   }
 
-  #ifdef ENABLE_FEATURE_LIGHTS__2D_MATRIX_EFFECTS
+  #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   //2D panels
   if (subPage == SUBPAGE_2D)
   {
@@ -944,7 +959,7 @@ bool mAnimatorLight::handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, 
   if (pos > 0) presetCycMax = getNumVal(&req, pos);
 
   //apply preset
-  if (updateVal(req.c_str(), "PL=", &presetCycCurr, presetCycMin, presetCycMax)) {
+  if (updateVal(req.c_str(), "PL=", presetCycCurr, presetCycMin, presetCycMax)) {
     applyPreset(presetCycCurr);
   }
 
@@ -952,19 +967,19 @@ bool mAnimatorLight::handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, 
   if (pos > 0) doAdvancePlaylist = true;
   
   //set brightness
-  updateVal(req.c_str(), "&A=", &tkr_iLight->_briRGB_Global);
+  updateVal(req.c_str(), "&A=", tkr_iLight->_briRGB_Global);
 
   bool col0Changed = false, col1Changed = false, col2Changed = false;
   //set colors
-  col0Changed |= updateVal(req.c_str(), "&R=", &colIn[0]);
-  col0Changed |= updateVal(req.c_str(), "&G=", &colIn[1]);
-  col0Changed |= updateVal(req.c_str(), "&B=", &colIn[2]);
-  col0Changed |= updateVal(req.c_str(), "&W=", &colIn[3]);
+  col0Changed |= updateVal(req.c_str(), "&R=", colIn[0]);
+  col0Changed |= updateVal(req.c_str(), "&G=", colIn[1]);
+  col0Changed |= updateVal(req.c_str(), "&B=", colIn[2]);
+  col0Changed |= updateVal(req.c_str(), "&W=", colIn[3]);
 
-  col1Changed |= updateVal(req.c_str(), "R2=", &colInSec[0]);
-  col1Changed |= updateVal(req.c_str(), "G2=", &colInSec[1]);
-  col1Changed |= updateVal(req.c_str(), "B2=", &colInSec[2]);
-  col1Changed |= updateVal(req.c_str(), "W2=", &colInSec[3]);
+  col1Changed |= updateVal(req.c_str(), "R2=", colInSec[0]);
+  col1Changed |= updateVal(req.c_str(), "G2=", colInSec[1]);
+  col1Changed |= updateVal(req.c_str(), "B2=", colInSec[2]);
+  col1Changed |= updateVal(req.c_str(), "W2=", colInSec[3]);
 
   #ifdef WLED_ENABLE_LOXONE
   //lox parser
@@ -1059,19 +1074,19 @@ bool mAnimatorLight::handle__HTTP__GET_QueryAPI(AsyncWebServerRequest *request, 
   bool fxModeChanged = false, speedChanged = false, intensityChanged = false, paletteChanged = false;
   bool custom1Changed = false, custom2Changed = false, custom3Changed = false, check1Changed = false, check2Changed = false, check3Changed = false;
   // set effect parameters
-  if (updateVal(req.c_str(), "FX=", &effectIn, 0, getModeCount()-1)) {
+  if (updateVal(req.c_str(), "FX=", effectIn, 0, getEffectCount()-1)) {
     if (request != nullptr) unloadPlaylist(); // unload playlist if changing FX using web request
     fxModeChanged = true;
   }
-  speedChanged     = updateVal(req.c_str(), "SX=", &speedIn);
-  intensityChanged = updateVal(req.c_str(), "IX=", &intensityIn);
-  paletteChanged   = updateVal(req.c_str(), "FP=", &paletteIn, 0, getPaletteCount()-1);
-  custom1Changed   = updateVal(req.c_str(), "X1=", &custom1In);
-  custom2Changed   = updateVal(req.c_str(), "X2=", &custom2In);
-  custom3Changed   = updateVal(req.c_str(), "X3=", &custom3In);
-  check1Changed    = updateVal(req.c_str(), "M1=", &check1In);
-  check2Changed    = updateVal(req.c_str(), "M2=", &check2In);
-  check3Changed    = updateVal(req.c_str(), "M3=", &check3In);
+  speedChanged     = updateVal(req.c_str(), "SX=", speedIn);
+  intensityChanged = updateVal(req.c_str(), "IX=", intensityIn);
+  paletteChanged   = updateVal(req.c_str(), "FP=", paletteIn, 0, getPaletteCount()-1);
+  custom1Changed   = updateVal(req.c_str(), "X1=", custom1In);
+  custom2Changed   = updateVal(req.c_str(), "X2=", custom2In);
+  custom3Changed   = updateVal(req.c_str(), "X3=", custom3In);
+  check1Changed    = updateVal(req.c_str(), "M1=", check1In);
+  check2Changed    = updateVal(req.c_str(), "M2=", check2In);
+  check3Changed    = updateVal(req.c_str(), "M3=", check3In);
 
   stateChanged |= (fxModeChanged || speedChanged || intensityChanged || paletteChanged || custom1Changed || custom2Changed || custom3Changed || check1Changed || check2Changed || check3Changed);
 
