@@ -1,9 +1,9 @@
 {
   "env_name": "nitc_office__elite4dexmu_03",
-  "created_utc": "2026-08-21T10:59:43Z",
-  "created_epoch": 1787309983,
-  "project_dir": "U:\\GitHub\\PulSar",
-  "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\nitc_office__elite4dexmu_03",
+  "created_utc": "2026-09-21T14:56:13Z",
+  "created_epoch": 1790002573,
+  "project_dir": "C:\\pool_local\\Github\\Personal\\PulSar",
+  "build_dir": "C:\\pool_local\\Github\\Personal\\PulSar\\.pio\\build\\nitc_office__elite4dexmu_03",
   "platform": "espressif32",
   "board": "esp32dev",
   "framework": [
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "0bd1e2f79237d4f7e49648e8b4adda55ca9fecc4",
-    "describe": "0bd1e2f7-dirty",
-    "status_short": "M build_verbose.txt\n M code/0_ConfigUser/Secret/00_Developing/Firmware__Testbeds.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M lib/lib_custom/AsyncTCP\n M lib/lib_npb_feb26/NeoPixelBus\n M platformio_override.ini\n M saved_compiles/nitc_office__elite4dexmu_03/build_meta.json\n M saved_compiles/nitc_office__elite4dexmu_03/firmware.elf"
+    "commit": "a20db5a8ba2641ff8a859d5bbcbbea15e6998804",
+    "describe": "a20db5a8-dirty",
+    "status_short": "M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M platformio_remote.ini\n M saved_compiles/nitc_office__elite4dexmu_03/build_meta.json\n M saved_compiles/nitc_office__elite4dexmu_03/firmware.elf\n M zplatformio_config/platformio_base.ini\n M zplatformio_override.ini"
   }
 }
