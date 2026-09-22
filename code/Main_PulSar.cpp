@@ -173,7 +173,152 @@ void Serial_PrintFirmwareSplash()
 /********************************************************************************************/
 /********************* ENABLE_FEATURE_FASTBOOT__DETECTION ******************************************************************/
 /********************************************************************************************/
+#ifdef ESP32
+#include "esp_heap_caps.h"
 
+bool Test_PSRAM_Boot()
+{
+  Serial.println();
+  Serial.println("========== PSRAM BOOT TEST ==========");
+
+  Serial.printf("psramFound()        : %s\n", psramFound() ? "YES" : "NO");
+  Serial.printf("PSRAM total         : %u\n", ESP.getPsramSize());
+  Serial.printf("PSRAM free          : %u\n", ESP.getFreePsram());
+  Serial.printf("Internal heap free  : %u\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
+  Serial.printf("Largest PSRAM block : %u\n", heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT));
+  Serial.printf("Largest DRAM block  : %u\n", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
+
+  if(!psramFound())
+  {
+    Serial.println("FAIL: PSRAM not detected");
+    return false;
+  }
+
+  if(!heap_caps_check_integrity_all(true))
+  {
+    Serial.println("FAIL: Heap already corrupt before PSRAM test");
+    return false;
+  }
+
+  const size_t test_size = 32768;
+
+  uint8_t* p = (uint8_t*)heap_caps_malloc(test_size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+
+  Serial.printf("heap_caps_malloc PSRAM %u bytes -> %p\n", test_size, p);
+
+  if(!p)
+  {
+    Serial.println("FAIL: PSRAM allocation failed");
+    return false;
+  }
+
+  for(size_t i = 0; i < test_size; i++)
+  {
+    p[i] = (uint8_t)(i & 0xFF);
+  }
+
+  for(size_t i = 0; i < test_size; i++)
+  {
+    if(p[i] != (uint8_t)(i & 0xFF))
+    {
+      Serial.printf("FAIL: PSRAM verify at %u expected %u got %u\n", i, (uint8_t)(i & 0xFF), p[i]);
+      heap_caps_free(p);
+      return false;
+    }
+  }
+
+  Serial.println("PASS: Direct PSRAM write/read");
+
+  const size_t realloc_size = 65536;
+  uint8_t* p2 = (uint8_t*)heap_caps_realloc(p, realloc_size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+
+  Serial.printf("heap_caps_realloc PSRAM %u -> %u bytes -> %p\n", test_size, realloc_size, p2);
+
+  if(!p2)
+  {
+    Serial.println("FAIL: PSRAM realloc failed");
+    heap_caps_free(p);
+    return false;
+  }
+
+  for(size_t i = 0; i < test_size; i++)
+  {
+    if(p2[i] != (uint8_t)(i & 0xFF))
+    {
+      Serial.printf("FAIL: realloc corrupted existing data at %u\n", i);
+      heap_caps_free(p2);
+      return false;
+    }
+  }
+
+  for(size_t i = test_size; i < realloc_size; i++)
+  {
+    p2[i] = (uint8_t)((i ^ 0xA5) & 0xFF);
+  }
+
+  for(size_t i = test_size; i < realloc_size; i++)
+  {
+    if(p2[i] != (uint8_t)((i ^ 0xA5) & 0xFF))
+    {
+      Serial.printf("FAIL: realloc new region verify at %u\n", i);
+      heap_caps_free(p2);
+      return false;
+    }
+  }
+
+  Serial.println("PASS: PSRAM realloc/write/read");
+
+  heap_caps_free(p2);
+
+  if(!heap_caps_check_integrity_all(true))
+  {
+    Serial.println("FAIL: Heap corrupt after direct PSRAM test");
+    return false;
+  }
+
+  Serial.println("PASS: Heap integrity after PSRAM test");
+
+  void* preferred = heap_caps_malloc_prefer(32768, 2, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+
+  Serial.printf("heap_caps_malloc_prefer 32768 bytes -> %p\n", preferred);
+
+  if(!preferred)
+  {
+    Serial.println("FAIL: heap_caps_malloc_prefer failed");
+    return false;
+  }
+
+  memset(preferred, 0x5A, 32768);
+
+  uint8_t* preferred_bytes = (uint8_t*)preferred;
+
+  for(size_t i = 0; i < 32768; i++)
+  {
+    if(preferred_bytes[i] != 0x5A)
+    {
+      Serial.printf("FAIL: preferred allocation verify at %u\n", i);
+      heap_caps_free(preferred);
+      return false;
+    }
+  }
+
+  heap_caps_free(preferred);
+
+  if(!heap_caps_check_integrity_all(true))
+  {
+    Serial.println("FAIL: Heap corrupt after preferred allocation test");
+    return false;
+  }
+
+  Serial.printf("PSRAM free after    : %u\n", ESP.getFreePsram());
+  Serial.printf("Internal heap after : %u\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
+  Serial.println("PASS: ALL PSRAM TESTS");
+  Serial.println("=====================================");
+  Serial.println();
+
+  return true;
+}
+#endif
 
 #ifdef ENABLE_FEATURE_FASTBOOT__DETECTION
 void Fastboot_RecoveryCheck(void)
@@ -632,6 +777,10 @@ void setup(void)
     #ifdef ENABLE_DEVFEATURE_SETDEBUGOUTPUT
     Serial.setDebugOutput(true);
     #endif
+
+    #ifdef ESP32
+Test_PSRAM_Boot();
+#endif
 
     #ifdef CONFIG_IDF_TARGET_ESP32
     /************************************************************************************************
