@@ -1,9 +1,9 @@
 {
   "env_name": "cm_office__ws2815panel12v",
-  "created_utc": "2026-09-21T16:07:38Z",
-  "created_epoch": 1790006858,
-  "project_dir": "U:\\GitHub\\PulSar",
-  "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
+  "created_utc": "2026-09-21T16:27:39Z",
+  "created_epoch": 1790008059,
+  "project_dir": "C:\\pool_local\\Github\\Personal\\PulSar",
+  "build_dir": "C:\\pool_local\\Github\\Personal\\PulSar\\.pio\\build\\cm_office__ws2815panel12v",
   "platform": "espressif32",
   "board": "esp32dev",
   "framework": [
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "043769640aa9f7096e0c89ded0c4cb19719b81e2",
-    "describe": "04376964-dirty",
-    "status_short": "M code/2_CoreSystem/Version.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M tools/python_scripts/firmware_build_matrix/build_all.py\n D tools/python_scripts/firmware_build_matrix/build_targets.txt\n M zplatformio_override.ini\n?? tools/python_scripts/firmware_build_matrix/build_targets.c"
+    "commit": "7edd15812313b5022d47da0af0d941bb7219a9ac",
+    "describe": "7edd1581-dirty",
+    "status_short": "M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M saved_compiles/testbed__sensors_nextion/build_meta.json\n M tools/python_scripts/firmware_build_matrix/build_targets.c"
   }
 }
