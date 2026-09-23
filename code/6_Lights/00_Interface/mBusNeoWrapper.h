@@ -861,7 +861,18 @@ static void* create(uint8_t busType, uint8_t* pins, uint16_t len, uint8_t channe
       case BUSTYPE__32_I0_4__ID: (static_cast<PIXELBUS_32_I0_4*>(busPtr))->Show(consistent); break;
       case BUSTYPE__32_I0_5__ID: (static_cast<PIXELBUS_32_I0_5*>(busPtr))->Show(consistent); break;
       case BUSTYPE__32_I0_400_3__ID: (static_cast<PIXELBUS_32_I0_400_3*>(busPtr))->Show(consistent); break;
-      case BUSTYPE__32_I0_3P__ID: (static_cast<PIXELBUS_32_I0_3P*>(busPtr))->Show(consistent); break;
+  
+      // case BUSTYPE__32_I0_3P__ID: (static_cast<PIXELBUS_32_I0_3P*>(busPtr))->Show(consistent); break;
+      case BUSTYPE__32_I0_3P__ID:
+      {
+        static uint32_t x16_show_count = 0;
+        if (x16_show_count < 50) Serial.printf("X16 SHOW: ptr=%p consistent=%u\n", busPtr, consistent);
+        (static_cast<PIXELBUS_32_I0_3P*>(busPtr))->Show(consistent);
+        x16_show_count++;
+      }
+      break;
+
+      
       case BUSTYPE__32_I0_4P__ID: (static_cast<PIXELBUS_32_I0_4P*>(busPtr))->Show(consistent); break;
       case BUSTYPE__32_I0_5P__ID: (static_cast<PIXELBUS_32_I0_5P*>(busPtr))->Show(consistent); break;
       #endif
@@ -884,7 +895,7 @@ static void* create(uint8_t busType, uint8_t* pins, uint16_t len, uint8_t channe
   {
     
     #ifdef ENABLE_DEBUGFEATURE__16PIN_PARALLEL_OUTPUT
-    DEBUG_PRINTF("PolyBus::canShow busType %d\n\r", busType);
+    // DEBUG_PRINTF("PolyBus::canShow busType %d\n\r", busType);
     #endif
 
     switch (busType) {
@@ -1010,8 +1021,17 @@ static void* create(uint8_t busType, uint8_t* pins, uint16_t len, uint8_t channe
       case BUSTYPE__32_I0_4__ID:      (static_cast<PIXELBUS_32_I0_4*>(busPtr))->SetPixelColor(pix, col); break;
       case BUSTYPE__32_I0_5__ID:      (static_cast<PIXELBUS_32_I0_5*>(busPtr))->SetPixelColor(pix, RgbwwColor(col)); break;
       case BUSTYPE__32_I0_400_3__ID:  (static_cast<PIXELBUS_32_I0_400_3*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
-      case BUSTYPE__32_I0_3P__ID:     (static_cast<PIXELBUS_32_I0_3P*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
-      case BUSTYPE__32_I0_4P__ID:     (static_cast<PIXELBUS_32_I0_4P*>(busPtr))->SetPixelColor(pix, col); break;
+      // case BUSTYPE__32_I0_3P__ID:     (static_cast<PIXELBUS_32_I0_3P*>(busPtr))->SetPixelColor(pix, RgbColor(col)); break;
+      case BUSTYPE__32_I0_3P__ID:
+  {
+    static uint32_t x16_set_count = 0;
+    if (x16_set_count < 20) Serial.printf("X16 SET: ptr=%p pix=%u rgb=%u,%u,%u\n", busPtr, pix, col.R, col.G, col.B);
+    (static_cast<PIXELBUS_32_I0_3P*>(busPtr))->SetPixelColor(pix, RgbColor(col));
+    x16_set_count++;
+  }
+  break;
+  
+  case BUSTYPE__32_I0_4P__ID:     (static_cast<PIXELBUS_32_I0_4P*>(busPtr))->SetPixelColor(pix, col); break;
       case BUSTYPE__32_I0_5P__ID:     (static_cast<PIXELBUS_32_I0_5P*>(busPtr))->SetPixelColor(pix, RgbwwColor(col)); break;
       #endif
       #ifndef NEOPIXEL_DISABLE_I2S1_PIXELBUS
