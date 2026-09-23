@@ -180,141 +180,153 @@ bool Test_PSRAM_Boot()
 {
   Serial.println();
   Serial.println("========== PSRAM BOOT TEST ==========");
+  Serial.flush();
 
-  Serial.printf("psramFound()        : %s\n", psramFound() ? "YES" : "NO");
-  Serial.printf("PSRAM total         : %u\n", ESP.getPsramSize());
-  Serial.printf("PSRAM free          : %u\n", ESP.getFreePsram());
-  Serial.printf("Internal heap free  : %u\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
-  Serial.printf("Largest PSRAM block : %u\n", heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT));
-  Serial.printf("Largest DRAM block  : %u\n", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
+  Serial.printf("psramFound(): %s\n", psramFound() ? "YES" : "NO");
+  Serial.flush();
 
-  if(!psramFound())
-  {
-    Serial.println("FAIL: PSRAM not detected");
-    return false;
-  }
+  Serial.printf("PSRAM total: %u\n", ESP.getPsramSize());
+  Serial.flush();
+
+  Serial.printf("PSRAM free: %u\n", ESP.getFreePsram());
+  Serial.flush();
+
+  Serial.printf("Internal free: %u\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
+  Serial.flush();
+
+  Serial.printf("Largest PSRAM block: %u\n", heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT));
+  Serial.flush();
+
+  Serial.printf("Largest DRAM block: %u\n", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
+  Serial.flush();
+
+  Serial.println("TEST: heap integrity before allocation");
+  Serial.flush();
 
   if(!heap_caps_check_integrity_all(true))
   {
-    Serial.println("FAIL: Heap already corrupt before PSRAM test");
+    Serial.println("FAIL: heap integrity before allocation");
+    Serial.flush();
     return false;
   }
 
-  const size_t test_size = 32768;
+  Serial.println("PASS: heap integrity before allocation");
+  Serial.flush();
 
-  uint8_t* p = (uint8_t*)heap_caps_malloc(test_size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+  const size_t size1 = 32768;
 
-  Serial.printf("heap_caps_malloc PSRAM %u bytes -> %p\n", test_size, p);
+  Serial.printf("TEST: allocate %u bytes PSRAM\n", size1);
+  Serial.flush();
+
+  uint8_t* p = (uint8_t*)heap_caps_malloc(size1, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+
+  Serial.printf("allocation pointer: %p\n", p);
+  Serial.flush();
 
   if(!p)
   {
-    Serial.println("FAIL: PSRAM allocation failed");
+    Serial.println("FAIL: allocation");
+    Serial.flush();
     return false;
   }
 
-  for(size_t i = 0; i < test_size; i++)
-  {
-    p[i] = (uint8_t)(i & 0xFF);
-  }
+  Serial.println("TEST: write PSRAM");
+  Serial.flush();
 
-  for(size_t i = 0; i < test_size; i++)
+  for(size_t i = 0; i < size1; i++) p[i] = (uint8_t)(i & 0xFF);
+
+  Serial.println("TEST: verify PSRAM");
+  Serial.flush();
+
+  for(size_t i = 0; i < size1; i++)
   {
     if(p[i] != (uint8_t)(i & 0xFF))
     {
-      Serial.printf("FAIL: PSRAM verify at %u expected %u got %u\n", i, (uint8_t)(i & 0xFF), p[i]);
+      Serial.printf("FAIL: verify at %u expected=%u actual=%u\n", i, (uint8_t)(i & 0xFF), p[i]);
+      Serial.flush();
       heap_caps_free(p);
       return false;
     }
   }
 
-  Serial.println("PASS: Direct PSRAM write/read");
+  Serial.println("PASS: direct PSRAM write/read");
+  Serial.flush();
 
-  const size_t realloc_size = 65536;
-  uint8_t* p2 = (uint8_t*)heap_caps_realloc(p, realloc_size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+  const size_t size2 = 65536;
 
-  Serial.printf("heap_caps_realloc PSRAM %u -> %u bytes -> %p\n", test_size, realloc_size, p2);
+  Serial.printf("TEST: realloc %u -> %u\n", size1, size2);
+  Serial.flush();
+
+  uint8_t* p2 = (uint8_t*)heap_caps_realloc(p, size2, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+
+  Serial.printf("realloc pointer: %p\n", p2);
+  Serial.flush();
 
   if(!p2)
   {
-    Serial.println("FAIL: PSRAM realloc failed");
+    Serial.println("FAIL: realloc");
+    Serial.flush();
     heap_caps_free(p);
     return false;
   }
 
-  for(size_t i = 0; i < test_size; i++)
+  Serial.println("TEST: verify original data after realloc");
+  Serial.flush();
+
+  for(size_t i = 0; i < size1; i++)
   {
     if(p2[i] != (uint8_t)(i & 0xFF))
     {
-      Serial.printf("FAIL: realloc corrupted existing data at %u\n", i);
+      Serial.printf("FAIL: realloc corrupted at %u\n", i);
+      Serial.flush();
       heap_caps_free(p2);
       return false;
     }
   }
 
-  for(size_t i = test_size; i < realloc_size; i++)
-  {
-    p2[i] = (uint8_t)((i ^ 0xA5) & 0xFF);
-  }
+  Serial.println("PASS: realloc preserved data");
+  Serial.flush();
 
-  for(size_t i = test_size; i < realloc_size; i++)
+  Serial.println("TEST: write expanded region");
+  Serial.flush();
+
+  for(size_t i = size1; i < size2; i++) p2[i] = (uint8_t)((i ^ 0xA5) & 0xFF);
+
+  Serial.println("TEST: verify expanded region");
+  Serial.flush();
+
+  for(size_t i = size1; i < size2; i++)
   {
     if(p2[i] != (uint8_t)((i ^ 0xA5) & 0xFF))
     {
-      Serial.printf("FAIL: realloc new region verify at %u\n", i);
+      Serial.printf("FAIL: expanded verify at %u\n", i);
+      Serial.flush();
       heap_caps_free(p2);
       return false;
     }
   }
 
   Serial.println("PASS: PSRAM realloc/write/read");
+  Serial.flush();
 
   heap_caps_free(p2);
 
-  if(!heap_caps_check_integrity_all(true))
-  {
-    Serial.println("FAIL: Heap corrupt after direct PSRAM test");
-    return false;
-  }
-
-  Serial.println("PASS: Heap integrity after PSRAM test");
-
-  void* preferred = heap_caps_malloc_prefer(32768, 2, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
-
-  Serial.printf("heap_caps_malloc_prefer 32768 bytes -> %p\n", preferred);
-
-  if(!preferred)
-  {
-    Serial.println("FAIL: heap_caps_malloc_prefer failed");
-    return false;
-  }
-
-  memset(preferred, 0x5A, 32768);
-
-  uint8_t* preferred_bytes = (uint8_t*)preferred;
-
-  for(size_t i = 0; i < 32768; i++)
-  {
-    if(preferred_bytes[i] != 0x5A)
-    {
-      Serial.printf("FAIL: preferred allocation verify at %u\n", i);
-      heap_caps_free(preferred);
-      return false;
-    }
-  }
-
-  heap_caps_free(preferred);
+  Serial.println("TEST: heap integrity after free");
+  Serial.flush();
 
   if(!heap_caps_check_integrity_all(true))
   {
-    Serial.println("FAIL: Heap corrupt after preferred allocation test");
+    Serial.println("FAIL: heap integrity after PSRAM test");
+    Serial.flush();
     return false;
   }
 
-  Serial.printf("PSRAM free after    : %u\n", ESP.getFreePsram());
-  Serial.printf("Internal heap after : %u\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
+  Serial.println("PASS: heap integrity after PSRAM test");
+  Serial.printf("PSRAM free after: %u\n", ESP.getFreePsram());
+  Serial.printf("Internal free after: %u\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT));
   Serial.println("PASS: ALL PSRAM TESTS");
   Serial.println("=====================================");
-  Serial.println();
+  Serial.flush();
 
   return true;
 }

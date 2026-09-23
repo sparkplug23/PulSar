@@ -1,7 +1,7 @@
 {
   "env_name": "xmas26__meadows__front_tree_esp32s3_n16r8",
-  "created_utc": "2026-09-21T21:21:25Z",
-  "created_epoch": 1790025685,
+  "created_utc": "2026-09-22T22:32:37Z",
+  "created_epoch": 1790116357,
   "project_dir": "U:\\GitHub\\PulSar",
   "build_dir": "U:\\GitHub\\PulSar\\.pio\\build\\xmas26__meadows__front_tree_esp32s3_n16r8",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "3b5ea1ea902b7769e9170811943069943ddc86c2",
-    "describe": "3b5ea1ea-dirty",
-    "status_short": "M code/0_ConfigUser/Secret/05_Seasonal/Firmware__Christmas_2026__Secret.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/Main_PulSar.cpp\n M partitions/esp32s3_16mb_50_50_ota.csv\n M platformio_seasonal.ini\n M saved_compiles/xmas26__meadows__front_tree_esp32s3_n16r8/build_meta.json\n M zplatformio_config/platformio_base.ini\n M zplatformio_override.ini"
+    "commit": "359e50ec3045e35826dec88c0a59e5e2d8251532",
+    "describe": "359e50ec-dirty",
+    "status_short": "M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M code/6_Lights/03_Animator/webpages_generated/html_ui.h\n M code/Main_PulSar.cpp\n M platformio_seasonal.ini\n M saved_compiles/xmas26__meadows__front_tree_esp32s3_n16r8/build_meta.json\n M zplatformio_config/platformio_base.ini"
   }
 }
