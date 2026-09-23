@@ -689,7 +689,10 @@ void BusDigital::applyBriLimit(uint8_t newBri) {
 #if defined(CONFIG_IDF_TARGET_ESP32C3)
   #define MAX_LED_CHANNELS 6
 #else
-  #if defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+  #if defined(CONFIG_IDF_TARGET_ESP32S2)
+  #define MAX_LED_CHANNELS 8
+  #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+  #define MAX_LED_CHANNELS 16
     #define MAX_LED_CHANNELS 8
   #else
     #define MAX_LED_CHANNELS 16

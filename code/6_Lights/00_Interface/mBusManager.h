@@ -83,11 +83,10 @@ make_unique(Args&&... args)
       #define WLED_MAX_DIGITAL_CHANNELS 5
       //#define WLED_MAX_ANALOG_CHANNELS 8
       #define WLED_MIN_VIRTUAL_BUSSES 3
-    #elif defined(CONFIG_IDF_TARGET_ESP32S3)  // 4 RMT, 8 LEDC, has 2 I2S but NPB does not support them ATM
-      #define WLED_MAX_BUSSES 6               // will allow 4 digital & 2 analog RGB
-      #define WLED_MAX_DIGITAL_CHANNELS 4
-      //#define WLED_MAX_ANALOG_CHANNELS 8
-      #define WLED_MIN_VIRTUAL_BUSSES 4
+    #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+      #define WLED_MAX_BUSSES 16 // new LCD method
+      #define WLED_MAX_DIGITAL_CHANNELS 16
+      #define WLED_MIN_VIRTUAL_BUSSES 3
     #else
       // the last digital bus (I2S0) will prevent Audioreactive usermod from functioning
       #define WLED_MAX_BUSSES 20              // will allow 17 digital & 3 analog RGB

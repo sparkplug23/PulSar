@@ -14,12 +14,12 @@
  * https://github.com/Makuna/NeoPixelBus/blob/b32f719e95ef3c35c46da5c99538017ef925c026/src/internal/NeoEsp32RmtMethod.h#L857
 **/
 
-#if !defined(NEOPIXEL_DISABLE_I2S0_PIXELBUS) && (defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3))
-#define NEOPIXEL_DISABLE_I2S0_PIXELBUS
-#endif
-#if !defined(NEOPIXEL_DISABLE_I2S1_PIXELBUS) && (defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S2))
-#define NEOPIXEL_DISABLE_I2S1_PIXELBUS
-#endif
+// #if !defined(NEOPIXEL_DISABLE_I2S0_PIXELBUS) && (defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3))
+// #define NEOPIXEL_DISABLE_I2S0_PIXELBUS
+// #endif
+// #if !defined(NEOPIXEL_DISABLE_I2S1_PIXELBUS) && (defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32S2))
+// #define NEOPIXEL_DISABLE_I2S1_PIXELBUS
+// #endif
 
 
 //Hardware SPI Pins
@@ -440,46 +440,38 @@ enum EM_BUS_TYPE
   // ====================================================================
   #elif defined(CONFIG_IDF_TARGET_ESP32S3)
 
-    // Keep WLED HI-selection logic
     #if !defined(__riscv) && !defined(WLED_USE_SHARED_RMT)
-      #include <NeoEsp32RmtHIMethod.h>
-      #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtHIN ## x ## Method
+    #include <NeoEsp32RmtHIMethod.h>
+    #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtHIN ## x ## Method
     #else
-      #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtN ## x ## Method
+    #define NEOPIXELBUS_ESP32_RMT_METHOD(x) NeoEsp32RmtN ## x ## Method
     #endif
 
-    // ---------- RGB / RGBW ----------
     #define PIXELBUS_32_RN_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2812x)>
     #define PIXELBUS_32_RN_4 NeoPixelBus<NeoRgbwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Sk6812)>
-
-    // ---------- 400K ----------
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
-      #define PIXELBUS_32_RN_400_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(400Kbps)>
+    #define PIXELBUS_32_RN_400_3 NeoPixelBus<NeoRgbFeature, NEOPIXELBUS_ESP32_RMT_METHOD(400Kbps)>
     #endif
-
-    // ---------- RGBWW (WS2805) ----------
     #define PIXELBUS_32_RN_5 NeoPixelBus<NeoRgbwwFeature, NEOPIXELBUS_ESP32_RMT_METHOD(Ws2805)>
 
-    // S3 NeoPixelBus LCD methods support up to X8 parallel output.
-    // I0/I1 names are compatibility aliases here, not separate usable I2S parallel engines.
-    #define PIXELBUS_32_I0_3  NeoPixelBus<NeoRgbFeature, X1Ws2812xMethod>
-    #define PIXELBUS_32_I1_3  NeoPixelBus<NeoRgbFeature, X1Ws2812xMethod>
+    #define PIXELBUS_32_I0_3 NeoPixelBus<NeoRgbFeature, X1Ws2812xMethod>
+    #define PIXELBUS_32_I1_3 NeoPixelBus<NeoRgbFeature, X1Ws2812xMethod>
     #define PIXELBUS_32_I1_3P NeoPixelBus<NeoRgbFeature, X8Ws2812xMethod>
-    #define PIXELBUS_32_I0_3P NeoPixelBus<NeoRgbFeature, X8Ws2812xMethod>
+    #define PIXELBUS_32_I0_3P NeoPixelBus<NeoRgbFeature, X16Ws2812xMethod>
 
-    #define PIXELBUS_32_I0_4  NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
-    #define PIXELBUS_32_I1_4  NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+    #define PIXELBUS_32_I0_4 NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
+    #define PIXELBUS_32_I1_4 NeoPixelBus<NeoRgbwFeature, X1Sk6812Method>
     #define PIXELBUS_32_I1_4P NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
-    #define PIXELBUS_32_I0_4P NeoPixelBus<NeoRgbwFeature, X8Sk6812Method>
+    #define PIXELBUS_32_I0_4P NeoPixelBus<NeoRgbwFeature, X16Sk6812Method>
 
-    #define PIXELBUS_32_I0_5  NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
-    #define PIXELBUS_32_I1_5  NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+    #define PIXELBUS_32_I0_5 NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
+    #define PIXELBUS_32_I1_5 NeoPixelBus<NeoRgbwwFeature, X1Ws2805Method>
     #define PIXELBUS_32_I1_5P NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
-    #define PIXELBUS_32_I0_5P NeoPixelBus<NeoRgbwwFeature, X8Ws2805Method>
+    #define PIXELBUS_32_I0_5P NeoPixelBus<NeoRgbwwFeature, X16Ws2805Method>
 
     #ifndef NEOPIXEL_DISABLE_400_PIXELBUS
-      #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
-      #define PIXELBUS_32_I1_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
+    #define PIXELBUS_32_I0_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
+    #define PIXELBUS_32_I1_400_3 NeoPixelBus<NeoRgbFeature, X1400KbpsMethod>
     #endif
 
 
@@ -1312,169 +1304,425 @@ static uint32_t getPixelColor(void* busPtr, uint8_t busType, uint16_t pix, uint8
     return size;
   }
 
-  //gives back the internal type index (I_XX_XXX_X above) for the input 
-static    
-#ifdef USE_DEVFEATURE_IRAM__PIXEL_BUS_INTERFACING
-IRAM_ATTR
-#endif 
-uint8_t getI(uint8_t busType, const uint8_t* pins, uint8_t num = 0) 
-{
-  // DEBUG_PRINTF("PolyBus::getI busType %d\n\r", busType);
+//   //gives back the internal type index (I_XX_XXX_X above) for the input 
+// static    
+// #ifdef USE_DEVFEATURE_IRAM__PIXEL_BUS_INTERFACING
+// IRAM_ATTR
+// #endif 
+// uint8_t getI(uint8_t busType, const uint8_t* pins, uint8_t num = 0) 
+// {
+//   // DEBUG_PRINTF("PolyBus::getI busType %d\n\r", busType);
 
-  if (!IS_BUSTYPE_DIGITAL(busType)) return BUSTYPE__NONE__ID;
+//   if (!IS_BUSTYPE_DIGITAL(busType)) return BUSTYPE__NONE__ID;
 
-  if (IS_BUSTYPE_2PIN(busType)) { //SPI LED chips
-      bool isHSPI = false;
+//   if (IS_BUSTYPE_2PIN(busType)) { //SPI LED chips
+//       bool isHSPI = false;
 
-      #ifdef ESP8266
-          if (pins[0] == P_8266_HS_MOSI && pins[1] == P_8266_HS_CLK) isHSPI = true;
-      #else
-          // temporary hack to limit use of hardware SPI to a single SPI peripheral (HSPI): 
-          // only allow ESP32 hardware serial on segment 0
-          // SPI global variable is normally linked to VSPI on ESP32 (or FSPI C3, S3)
-          if (!num) isHSPI = true;
-      #endif
+//       #ifdef ESP8266
+//           if (pins[0] == P_8266_HS_MOSI && pins[1] == P_8266_HS_CLK) isHSPI = true;
+//       #else
+//           // temporary hack to limit use of hardware SPI to a single SPI peripheral (HSPI): 
+//           // only allow ESP32 hardware serial on segment 0
+//           // SPI global variable is normally linked to VSPI on ESP32 (or FSPI C3, S3)
+//           if (!num) isHSPI = true;
+//       #endif
 
-      uint8_t t = BUSTYPE__NONE__ID;
-      switch (busType) {
-          case BUSTYPE_APA102:  t = BUSTYPE__SS_DOT_3__ID; break;
-          case BUSTYPE_LPD8806: t = BUSTYPE__SS_LPD_3__ID; break;
-          case BUSTYPE_LPD6803: t = BUSTYPE__SS_LPO_3__ID; break;
-          case BUSTYPE_WS2801:  t = BUSTYPE__SS_WS1_3__ID; break;
-          case BUSTYPE_P9813:   t = BUSTYPE__SS_P98_3__ID; break;
-          default: t = BUSTYPE__NONE__ID;
-      }
-      if (t > BUSTYPE__NONE__ID && isHSPI) t--; //hardware SPI has one smaller ID than software
-      return t;
-  } else {
-      #ifdef ESP8266
-          uint8_t offset_method_inside_group = pins[0] - 1; // for driver: 0 = uart0, 1 = uart1, 2 = dma, 3 = bitbang
-          if (offset_method_inside_group > 3) offset_method_inside_group = 3;
+//       uint8_t t = BUSTYPE__NONE__ID;
+//       switch (busType) {
+//           case BUSTYPE_APA102:  t = BUSTYPE__SS_DOT_3__ID; break;
+//           case BUSTYPE_LPD8806: t = BUSTYPE__SS_LPD_3__ID; break;
+//           case BUSTYPE_LPD6803: t = BUSTYPE__SS_LPO_3__ID; break;
+//           case BUSTYPE_WS2801:  t = BUSTYPE__SS_WS1_3__ID; break;
+//           case BUSTYPE_P9813:   t = BUSTYPE__SS_P98_3__ID; break;
+//           default: t = BUSTYPE__NONE__ID;
+//       }
+//       if (t > BUSTYPE__NONE__ID && isHSPI) t--; //hardware SPI has one smaller ID than software
+//       return t;
+//   } else {
+//       #ifdef ESP8266
+//           uint8_t offset_method_inside_group = pins[0] - 1; // for driver: 0 = uart0, 1 = uart1, 2 = dma, 3 = bitbang
+//           if (offset_method_inside_group > 3) offset_method_inside_group = 3;
 
-          switch (busType) {
-              case BUSTYPE_WS2812_RGB:
-              case BUSTYPE_WS2812_WWA:
-                  return BUSTYPE__8266_U0_3__ID + offset_method_inside_group;
-              case BUSTYPE_SK6812_RGBW:
-                  return BUSTYPE__8266_U0_4__ID + offset_method_inside_group;
-          }
-      #else //ESP32
-          uint8_t offset_method_inside_group = 0;
+//           switch (busType) {
+//               case BUSTYPE_WS2812_RGB:
+//               case BUSTYPE_WS2812_WWA:
+//                   return BUSTYPE__8266_U0_3__ID + offset_method_inside_group;
+//               case BUSTYPE_SK6812_RGBW:
+//                   return BUSTYPE__8266_U0_4__ID + offset_method_inside_group;
+//           }
+//       #else //ESP32
+//           uint8_t offset_method_inside_group = 0;
 
-          #if defined(CONFIG_IDF_TARGET_ESP32S2)
-              // ESP32-S2 only has 4 RMT channels
-              if (num > 4) return BUSTYPE__NONE__ID;
-              if (num > 3) offset_method_inside_group = 1;  // only one I2S
+//           #if defined(CONFIG_IDF_TARGET_ESP32S2)
+//               // ESP32-S2 only has 4 RMT channels
+//               if (num > 4) return BUSTYPE__NONE__ID;
+//               if (num > 3) offset_method_inside_group = 1;  // only one I2S
 
-          #elif defined(CONFIG_IDF_TARGET_ESP32C3)
-              // On ESP32-C3 only the first 2 RMT channels are usable for transmitting
-              if (num > 1) return BUSTYPE__NONE__ID;
+//           #elif defined(CONFIG_IDF_TARGET_ESP32C3)
+//               // On ESP32-C3 only the first 2 RMT channels are usable for transmitting
+//               if (num > 1) return BUSTYPE__NONE__ID;
 
-              // need to force RMT on C3, as I2S is not supported for WS2812
-              offset_method_inside_group = 0; // force RMT method
+//               // need to force RMT on C3, as I2S is not supported for WS2812
+//               offset_method_inside_group = 0; // force RMT method
 
-              //if (num > 1) offset_method_inside_group = 1; // I2S not supported yet (only 1 I2S)
+//               //if (num > 1) offset_method_inside_group = 1; // I2S not supported yet (only 1 I2S)
 
-          #elif defined(CONFIG_IDF_TARGET_ESP32S3)
-              // On ESP32-S3 only the first 4 RMT channels are usable for transmitting
-              if (num > 3) return BUSTYPE__NONE__ID;
-              //if (num > 3) offset_method_inside_group = num -4; // I2S not supported yet
+//           #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+//               // On ESP32-S3 only the first 4 RMT channels are usable for transmitting
+//               if (num > 3) return BUSTYPE__NONE__ID;
+//               //if (num > 3) offset_method_inside_group = num -4; // I2S not supported yet
 
-          #else
+//           #else
 
-              #ifdef ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
+//               #ifdef ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
 
-                if(useParallelI2S)
-                {
-                  Serial.println("BUS DETECT: useParallelI2S");
-                  Serial.printf("required_channels %d %d\n\r", required_channels, num);
-                  if(required_channels <= 8 && num < 8)
-                  { 
-                    offset_method_inside_group = 3;  // Handled inside library automatically for I2S1 types
-                  }else
-                  if(required_channels <= 16 && num < 16)
-                  {
-                    offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
-                  }
-                  else {
-                    return BUSTYPE__NONE__ID;
-                  }
-                  Serial.printf("offset_method_inside_group %d\n\r", offset_method_inside_group);
+//                 if(useParallelI2S)
+//                 {
+//                   Serial.println("BUS DETECT: useParallelI2S");
+//                   Serial.printf("required_channels %d %d\n\r", required_channels, num);
+//                   if(required_channels <= 8 && num < 8)
+//                   { 
+//                     offset_method_inside_group = 3;  // Handled inside library automatically for I2S1 types
+//                   }else
+//                   if(required_channels <= 16 && num < 16)
+//                   {
+//                     offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
+//                   }
+//                   else {
+//                     return BUSTYPE__NONE__ID;
+//                   }
+//                   Serial.printf("offset_method_inside_group %d\n\r", offset_method_inside_group);
                   
-                }
-                else // I0, I1, RMT0 to RMT7
-                {
-                  if(num == 0){
-                    offset_method_inside_group = 1; // I2S0 preffered( RMT0, I2S0, I2S1)
-                    Serial.println("BUS DETECT: I2S0 preffered");
-                  }else 
-                  if (num < 2) { // Channel 0 and 1, will be I2S0 and I2S1
-                    offset_method_inside_group = num + 1; // +1 to skip RMT method
-                    Serial.printf("BUS DETECT: RMT num%d, busType%d\n\r", num, offset_method_inside_group);
-                  } else if (num < 9) {
-                    offset_method_inside_group = num; // Use RMT0 to 7
-                    Serial.printf("BUS DETECT: I2S num%d, busType%d\n\r", num, offset_method_inside_group);
-                  } else {
-                    return BUSTYPE__NONE__ID;
+//                 }
+//                 else // I0, I1, RMT0 to RMT7
+//                 {
+//                   if(num == 0){
+//                     offset_method_inside_group = 1; // I2S0 preffered( RMT0, I2S0, I2S1)
+//                     Serial.println("BUS DETECT: I2S0 preffered");
+//                   }else 
+//                   if (num < 2) { // Channel 0 and 1, will be I2S0 and I2S1
+//                     offset_method_inside_group = num + 1; // +1 to skip RMT method
+//                     Serial.printf("BUS DETECT: RMT num%d, busType%d\n\r", num, offset_method_inside_group);
+//                   } else if (num < 9) {
+//                     offset_method_inside_group = num; // Use RMT0 to 7
+//                     Serial.printf("BUS DETECT: I2S num%d, busType%d\n\r", num, offset_method_inside_group);
+//                   } else {
+//                     return BUSTYPE__NONE__ID;
+//                   }
+//                   Serial.printf("BUS DETECT: No Parallel num%d, busType%d\n\r^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\r", num, offset_method_inside_group);
+//                 }
+
+//               #else
+//                   #if defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT)
+//                       if (num == 0) {
+//                           offset_method_inside_group = 1; // I2S0
+//                       } else if (num == 1) {
+//                           offset_method_inside_group = 2; // I2S1
+//                       } else if (num < 10) {
+//                           offset_method_inside_group = 0; // RMT
+//                       } else {
+//                           return BUSTYPE__NONE__ID;
+//                       }
+//                   #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X8)
+//                       if (num < 8) {
+//                           offset_method_inside_group = 3;  // Handled inside library automatically for I2S1 types
+//                       } else {
+//                           return BUSTYPE__NONE__ID;
+//                       }
+//                   #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16)
+//                       if (num < 16) {
+//                           offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
+//                       } else {
+//                           return BUSTYPE__NONE__ID;
+//                       }
+//                   #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S)
+//                       if (num > 9) {
+//                           return BUSTYPE__NONE__ID;
+//                       }
+//                       if (num > 7) {
+//                           offset_method_inside_group = num - 7;
+//                       }
+//                       #warning "RMT methods cause flickering on ESP32, use I2S methods instead -- needs debugging"
+//                   #else
+//                   #error "2024: No method defined"
+//                   #endif
+//               #endif // ENABLE_PIXELBUS_BUSMETHODS__I2S_AUTO_CHANNEL_SWITCHING
+
+//           #endif
+
+//           switch (busType) {
+//               case BUSTYPE_WS2812_RGB:
+//               case BUSTYPE_WS2812_WWA:
+//                   return BUSTYPE__32_RN_3__ID + offset_method_inside_group;
+//               case BUSTYPE_SK6812_RGBW:
+//                   return BUSTYPE__32_RN_4__ID + offset_method_inside_group;
+//               case BUSTYPE_WS2805_RGBWW:
+//                   return BUSTYPE__32_RN_5__ID + offset_method_inside_group;
+//               case BUSTYPE_WS2811_400KHZ:
+//                   return BUSTYPE__32_RN_400_3__ID + offset_method_inside_group;
+//           }
+
+//       #endif
+//   }
+
+//   return BUSTYPE__NONE__ID;
+// }
+
+  //gives back the internal type index (I_XX_XXX_X above) for the input 
+  static    
+  #ifdef USE_DEVFEATURE_IRAM__PIXEL_BUS_INTERFACING
+  IRAM_ATTR
+  #endif 
+  uint8_t getI(uint8_t busType, const uint8_t* pins, uint8_t num = 0) 
+  {
+    // DEBUG_PRINTF("PolyBus::getI busType %d\n\r", busType);
+
+    if (!IS_BUSTYPE_DIGITAL(busType)) return BUSTYPE__NONE__ID;
+
+    if (IS_BUSTYPE_2PIN(busType)) { //SPI LED chips
+        bool isHSPI = false;
+
+        #ifdef ESP8266
+            if (pins[0] == P_8266_HS_MOSI && pins[1] == P_8266_HS_CLK) isHSPI = true;
+        #else
+            // temporary hack to limit use of hardware SPI to a single SPI peripheral (HSPI): 
+            // only allow ESP32 hardware serial on segment 0
+            // SPI global variable is normally linked to VSPI on ESP32 (or FSPI C3, S3)
+            if (!num) isHSPI = true;
+        #endif
+
+        uint8_t t = BUSTYPE__NONE__ID;
+        switch (busType) {
+            case BUSTYPE_APA102:  t = BUSTYPE__SS_DOT_3__ID; break;
+            case BUSTYPE_LPD8806: t = BUSTYPE__SS_LPD_3__ID; break;
+            case BUSTYPE_LPD6803: t = BUSTYPE__SS_LPO_3__ID; break;
+            case BUSTYPE_WS2801:  t = BUSTYPE__SS_WS1_3__ID; break;
+            case BUSTYPE_P9813:   t = BUSTYPE__SS_P98_3__ID; break;
+            default: t = BUSTYPE__NONE__ID;
+        }
+        if (t > BUSTYPE__NONE__ID && isHSPI) t--; //hardware SPI has one smaller ID than software
+        return t;
+    } else {
+        #ifdef ESP8266
+            uint8_t offset_method_inside_group = pins[0] - 1; // for driver: 0 = uart0, 1 = uart1, 2 = dma, 3 = bitbang
+            if (offset_method_inside_group > 3) offset_method_inside_group = 3;
+
+            switch (busType) {
+                case BUSTYPE_WS2812_RGB:
+                case BUSTYPE_WS2812_WWA:
+                    return BUSTYPE__8266_U0_3__ID + offset_method_inside_group;
+                case BUSTYPE_SK6812_RGBW:
+                    return BUSTYPE__8266_U0_4__ID + offset_method_inside_group;
+            }
+        #else //ESP32
+            uint8_t offset_method_inside_group = 0;
+
+            #if defined(CONFIG_IDF_TARGET_ESP32S2)
+                // ESP32-S2 only has 4 RMT channels
+                if (num > 4) return BUSTYPE__NONE__ID;
+                if (num > 3) offset_method_inside_group = 1;  // only one I2S
+
+            #elif defined(CONFIG_IDF_TARGET_ESP32C3)
+                // On ESP32-C3 only the first 2 RMT channels are usable for transmitting
+                if (num > 1) return BUSTYPE__NONE__ID;
+
+                // need to force RMT on C3, as I2S is not supported for WS2812
+                offset_method_inside_group = 0; // force RMT method
+
+                //if (num > 1) offset_method_inside_group = 1; // I2S not supported yet (only 1 I2S)
+
+            #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+
+                /**
+                 * ESP32-S3
+                 *
+                 * RMT:
+                 *   4 usable TX channels
+                 *
+                 * Parallel output:
+                 *   NeoPixelBus uses the LCD peripheral on S3
+                 *   offset 3 = X8 parallel
+                 *   offset 4 = X16 parallel
+                 *
+                 * Legacy I0/I1 enum names are retained for compatibility,
+                 * but on S3 the parallel methods resolve to LCD methods.
+                 */
+
+                #ifdef ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
+
+                  if(useParallelI2S)
+                  {
+                    Serial.println("BUS DETECT S3: useParallelI2S");
+                    Serial.printf("required_channels %d %d\n\r", required_channels, num);
+
+                    if(required_channels <= 8 && num < 8) {
+                      offset_method_inside_group = 3; // S3 LCD X8
+                    } else if(required_channels <= 16 && num < 16) {
+                      offset_method_inside_group = 4; // S3 LCD X16
+                    } else {
+                      return BUSTYPE__NONE__ID;
+                    }
+
+                    Serial.printf("offset_method_inside_group %d\n\r", offset_method_inside_group);
                   }
-                  Serial.printf("BUS DETECT: No Parallel num%d, busType%d\n\r^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\r", num, offset_method_inside_group);
-                }
+                  else
+                  {
+                    // Non-parallel S3 output uses the four available RMT TX channels
+                    if(num < 4) {
+                      offset_method_inside_group = 0;
+                    } else {
+                      return BUSTYPE__NONE__ID;
+                    }
+                  }
 
-              #else
-                  #if defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT)
-                      if (num == 0) {
-                          offset_method_inside_group = 1; // I2S0
-                      } else if (num == 1) {
-                          offset_method_inside_group = 2; // I2S1
-                      } else if (num < 10) {
-                          offset_method_inside_group = 0; // RMT
-                      } else {
-                          return BUSTYPE__NONE__ID;
-                      }
-                  #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X8)
-                      if (num < 8) {
-                          offset_method_inside_group = 3;  // Handled inside library automatically for I2S1 types
-                      } else {
-                          return BUSTYPE__NONE__ID;
-                      }
-                  #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16)
-                      if (num < 16) {
-                          offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
-                      } else {
-                          return BUSTYPE__NONE__ID;
-                      }
-                  #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S)
-                      if (num > 9) {
-                          return BUSTYPE__NONE__ID;
-                      }
-                      if (num > 7) {
-                          offset_method_inside_group = num - 7;
-                      }
-                      #warning "RMT methods cause flickering on ESP32, use I2S methods instead -- needs debugging"
-                  #else
-                  #error "2024: No method defined"
-                  #endif
-              #endif // ENABLE_PIXELBUS_BUSMETHODS__I2S_AUTO_CHANNEL_SWITCHING
+                #else
 
-          #endif
+                    #if defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X8)
 
-          switch (busType) {
-              case BUSTYPE_WS2812_RGB:
-              case BUSTYPE_WS2812_WWA:
-                  return BUSTYPE__32_RN_3__ID + offset_method_inside_group;
-              case BUSTYPE_SK6812_RGBW:
-                  return BUSTYPE__32_RN_4__ID + offset_method_inside_group;
-              case BUSTYPE_WS2805_RGBWW:
-                  return BUSTYPE__32_RN_5__ID + offset_method_inside_group;
-              case BUSTYPE_WS2811_400KHZ:
-                  return BUSTYPE__32_RN_400_3__ID + offset_method_inside_group;
-          }
+                        if (num < 8) {
+                            offset_method_inside_group = 3; // S3 LCD X8
+                        } else {
+                            return BUSTYPE__NONE__ID;
+                        }
 
-      #endif
+                    #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16)
+
+                        if (num < 16) {
+                            offset_method_inside_group = 4; // S3 LCD X16
+                        } else {
+                            return BUSTYPE__NONE__ID;
+                        }
+
+                    #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT)
+
+                        // S3 does not use the old ESP32 I2S peripheral methods here.
+                        // Keep non-parallel mode on the four available RMT TX channels.
+                        if (num < 4) {
+                            offset_method_inside_group = 0;
+                        } else {
+                            return BUSTYPE__NONE__ID;
+                        }
+
+                    #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S)
+
+                        // S3 does not use the old ESP32 I2S peripheral methods here.
+                        // Keep non-parallel mode on the four available RMT TX channels.
+                        if (num < 4) {
+                            offset_method_inside_group = 0;
+                        } else {
+                            return BUSTYPE__NONE__ID;
+                        }
+
+                    #else
+
+                        // Default S3 behaviour without an explicit parallel mode:
+                        // use the four available RMT TX channels.
+                        if (num < 4) {
+                            offset_method_inside_group = 0;
+                        } else {
+                            return BUSTYPE__NONE__ID;
+                        }
+
+                    #endif
+
+                #endif
+
+            #else
+
+                #ifdef ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
+
+                  if(useParallelI2S)
+                  {
+                    Serial.println("BUS DETECT: useParallelI2S");
+                    Serial.printf("required_channels %d %d\n\r", required_channels, num);
+                    if(required_channels <= 8 && num < 8)
+                    { 
+                      offset_method_inside_group = 3;  // Handled inside library automatically for I2S1 types
+                    }else
+                    if(required_channels <= 16 && num < 16)
+                    {
+                      offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
+                    }
+                    else {
+                      return BUSTYPE__NONE__ID;
+                    }
+                    Serial.printf("offset_method_inside_group %d\n\r", offset_method_inside_group);
+                    
+                  }
+                  else // I0, I1, RMT0 to RMT7
+                  {
+                    if(num == 0){
+                      offset_method_inside_group = 1; // I2S0 preffered( RMT0, I2S0, I2S1)
+                      Serial.println("BUS DETECT: I2S0 preffered");
+                    }else 
+                    if (num < 2) { // Channel 0 and 1, will be I2S0 and I2S1
+                      offset_method_inside_group = num + 1; // +1 to skip RMT method
+                      Serial.printf("BUS DETECT: RMT num%d, busType%d\n\r", num, offset_method_inside_group);
+                    } else if (num < 9) {
+                      offset_method_inside_group = num; // Use RMT0 to 7
+                      Serial.printf("BUS DETECT: I2S num%d, busType%d\n\r", num, offset_method_inside_group);
+                    } else {
+                      return BUSTYPE__NONE__ID;
+                    }
+                    Serial.printf("BUS DETECT: No Parallel num%d, busType%d\n\r^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\r", num, offset_method_inside_group);
+                  }
+
+                #else
+                    #if defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__I2S_THEN_RMT)
+                        if (num == 0) {
+                            offset_method_inside_group = 1; // I2S0
+                        } else if (num == 1) {
+                            offset_method_inside_group = 2; // I2S1
+                        } else if (num < 10) {
+                            offset_method_inside_group = 0; // RMT
+                        } else {
+                            return BUSTYPE__NONE__ID;
+                        }
+                    #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X8)
+                        if (num < 8) {
+                            offset_method_inside_group = 3;  // Handled inside library automatically for I2S1 types
+                        } else {
+                            return BUSTYPE__NONE__ID;
+                        }
+                    #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16)
+                        if (num < 16) {
+                            offset_method_inside_group = 4;  // Handled inside library automatically for I2S1 types
+                        } else {
+                            return BUSTYPE__NONE__ID;
+                        }
+                    #elif defined(ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__RMT_THEN_I2S)
+                        if (num > 9) {
+                            return BUSTYPE__NONE__ID;
+                        }
+                        if (num > 7) {
+                            offset_method_inside_group = num - 7;
+                        }
+                        #warning "RMT methods cause flickering on ESP32, use I2S methods instead -- needs debugging"
+                    #else
+                    #error "2024: No method defined"
+                    #endif
+                #endif // ENABLE_PIXELBUS_BUSMETHODS__I2S_AUTO_CHANNEL_SWITCHING
+
+            #endif
+
+            switch (busType) {
+                case BUSTYPE_WS2812_RGB:
+                case BUSTYPE_WS2812_WWA:
+                    return BUSTYPE__32_RN_3__ID + offset_method_inside_group;
+                case BUSTYPE_SK6812_RGBW:
+                    return BUSTYPE__32_RN_4__ID + offset_method_inside_group;
+                case BUSTYPE_WS2805_RGBWW:
+                    return BUSTYPE__32_RN_5__ID + offset_method_inside_group;
+                case BUSTYPE_WS2811_400KHZ:
+                    return BUSTYPE__32_RN_400_3__ID + offset_method_inside_group;
+            }
+
+        #endif
+    }
+
+    return BUSTYPE__NONE__ID;
   }
 
-  return BUSTYPE__NONE__ID;
-}
 
 
 
