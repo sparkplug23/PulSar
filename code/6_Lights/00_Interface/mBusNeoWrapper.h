@@ -436,7 +436,7 @@ enum EM_BUS_TYPE
 
 
   // ====================================================================
-  // ESP32-S3 (Xtensa) - LCD/X8 parallel output
+  // ESP32-S3 (Xtensa) - LCD parallel output
   // ====================================================================
   #elif defined(CONFIG_IDF_TARGET_ESP32S3)
 
@@ -986,7 +986,7 @@ static void* create(uint8_t busType, uint8_t* pins, uint16_t len, uint8_t channe
     #endif
 
     // if(pix==52)
-    //   col = RgbwColor(0,255,0,0);
+      col = RgbwColor(0,255,0,0);
     
     switch (busType) {
       case BUSTYPE__NONE__ID: break;
