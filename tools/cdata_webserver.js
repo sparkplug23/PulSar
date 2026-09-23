@@ -1,6 +1,11 @@
 /**
  * Writes compressed C arrays of data files (web interface)
  *
+ * winget install OpenJS.NodeJS.LTS ; NOT NEEDED
+ * 
+ * pip install intelHex
+ * 
+ * 
  * 1) Install Node 11+ and npm
  * 2) npm install
  * 3) npm run build:webserver
