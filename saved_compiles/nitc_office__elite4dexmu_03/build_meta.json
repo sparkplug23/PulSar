@@ -1,7 +1,7 @@
 {
   "env_name": "nitc_office__elite4dexmu_03",
-  "created_utc": "2026-09-21T15:39:18Z",
-  "created_epoch": 1790005158,
+  "created_utc": "2026-09-21T16:56:06Z",
+  "created_epoch": 1790009766,
   "project_dir": "C:\\pool_local\\Github\\Personal\\PulSar",
   "build_dir": "C:\\pool_local\\Github\\Personal\\PulSar\\.pio\\build\\nitc_office__elite4dexmu_03",
   "platform": "espressif32",
@@ -18,8 +18,8 @@
   ],
   "git": {
     "branch": "development",
-    "commit": "db07452d520db7f54ca18edf5217080eef92794e",
-    "describe": "db07452d-dirty",
-    "status_short": "M code/0_ConfigUser/Secret/04_RemoteLocations/05_mFirmwareCustom_Secret__NITC.h\n M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M saved_compiles/nitc_office__elite4dexmu_03/build_meta.json\n M saved_compiles/nitc_office__elite4dexmu_03/firmware.elf"
+    "commit": "7edd15812313b5022d47da0af0d941bb7219a9ac",
+    "describe": "7edd1581-dirty",
+    "status_short": "M code/3_Network/21_WebServer/Webpages/Generated/root_main.h\n M saved_compiles/cm_garage__furnace/build_meta.json\n M saved_compiles/cm_garage__furnace/firmware.elf\n M saved_compiles/cm_hallway__consumer_unit/build_meta.json\n M saved_compiles/cm_hallway__consumer_unit/firmware.elf\n M saved_compiles/cm_hallway__heating/build_meta.json\n M saved_compiles/cm_hallway__heating/firmware.elf\n M saved_compiles/cm_kitchen__glass_box/build_meta.json\n M saved_compiles/cm_kitchen__glass_box/firmware.elf\n M saved_compiles/cm_livingroom__pebbles/build_meta.json\n M saved_compiles/cm_livingroom__pebbles/firmware.elf\n M saved_compiles/cm_livingroom__tv/build_meta.json\n M saved_compiles/cm_livingroom__tv/firmware.elf\n M saved_compiles/cm_office__ws2815panel12v/build_meta.json\n M saved_compiles/cm_office__ws2815panel12v/firmware.elf\n M saved_compiles/cm_outside__fence_lights/build_meta.json\n M saved_compiles/cm_outside__fence_lights/firmware.elf\n M saved_compiles/cm_outside__garage_tree/build_meta.json\n M saved_compiles/cm_outside__garage_tree/firmware.elf\n M saved_compiles/cm_treadmill_power/build_meta.json\n M saved_compiles/cm_treadmill_power/firmware.elf\n M saved_compiles/cm_utility__clearvase_light/build_meta.json\n M saved_compiles/cm_utility__clearvase_light/firmware.elf\n M saved_compiles/nitc_office__elite4dexmu_01/build_meta.json\n M saved_compiles/nitc_office__elite4dexmu_01/firmware.elf\n M saved_compiles/nitc_office__elite4dexmu_03/build_meta.json\n M saved_compiles/nitc_office__elite4dexmu_03/firmware.elf\n M saved_compiles/testbed__gps_decoder/build_meta.json\n M saved_compiles/testbed__gps_decoder/firmware.elf\n M saved_compiles/testbed__motion_audio/build_meta.json\n M saved_compiles/testbed__motion_audio/firmware.elf\n M saved_compiles/testbed__sensors_nextion/build_meta.json\n M saved_compiles/testbed__switch_button/build_meta.json\n M saved_compiles/testbed__switch_button/firmware.elf\n M tools/python_scripts/firmware_build_matrix/build_targets.c"
   }
 }
