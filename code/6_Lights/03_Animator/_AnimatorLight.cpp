@@ -862,7 +862,13 @@ void mAnimatorLight::EveryLoop()
       
     // allocate frame buffer after matrix has been set up (gaps!)
     updatePixelBuffer();
-
+    
+    Serial.printf(
+      "_pixels=%p, PSRAM=%s, bytes=%u\n",
+      _pixels,
+      esp_ptr_external_ram(_pixels) ? "YES" : "NO",
+      _pixels_length * sizeof(uint32_t)
+    );
 
     ALOG_INF(PSTR("Segment count: %d"), getSegmentsNum());
     doSerializeConfig = true;
