@@ -384,6 +384,36 @@ void mUpdates::ArduinoOTAInit(void)
 
     ALOG_IMP(PSTR(D_LOG_OTA "OTA %s"),error_str);
 
+    if(error == OTA_BEGIN_ERROR)
+    {
+      #if defined(ESP32)
+      const uint32_t ota_space = ESP.getFreeSketchSpace();
+      const uint8_t update_error = Update.getError();
+
+      ALOG_IMP(
+        PSTR(D_LOG_OTA "BEGIN failed: UpdateError=%u, OTA partition=%u bytes (%.2f KB / %.2f MB), current sketch=%u bytes"),
+        update_error,
+        ota_space,
+        ota_space / 1024.0f,
+        ota_space / (1024.0f * 1024.0f),
+        ESP.getSketchSize()
+      );
+
+      if(update_error == UPDATE_ERROR_SIZE)
+      {
+        ALOG_IMP(PSTR(D_LOG_OTA "BEGIN reason: firmware image is larger than OTA partition"));
+      }
+      else if(update_error == UPDATE_ERROR_SPACE)
+      {
+        ALOG_IMP(PSTR(D_LOG_OTA "BEGIN reason: insufficient OTA space"));
+      }
+      else
+      {
+        ALOG_IMP(PSTR(D_LOG_OTA "BEGIN reason: %s"),Update.errorString());
+      }
+      #endif
+    }
+
     #ifdef ENABLE_DEVFEATURE_OTA__ENABLE_RECORD_BOOTREASON_IS_OTA
     RtcMemory__RuntimeState.boot_was_completed_ota_event = false;
     #endif
