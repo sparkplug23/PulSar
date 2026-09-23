@@ -20,6 +20,15 @@ code/0_ConfigUser/G1_mUserConfig_Secret.h
 code/0_ConfigUser/G0_mFirmwareCustom_Secret.h
 
 saved_compiles/**/*.elf
+# Generated webpage headers
+/code/3_Network/21_WebServer/Webpages/Generated/
+/code/6_Lights/03_Animator/webpages_generated/
+
+# Generated build metadata
+**/build_meta.json
+
+# Build matrix reports
+/tools/python_scripts/firmware_build_matrix/build_reports/
 
 ## Visual Studio Code specific ######
 .vscode
@@ -38,4 +47,4 @@ build_output/
 
 
 # Generated firmware build-matrix reports
-/tools/python_scripts/firmware_build_matrix/build_reports/
+/tools/python_scripts/firmware_build_matrix/build_reports/code/3_Network/21_WebServer/Webpages/Generated/

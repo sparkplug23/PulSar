@@ -23,6 +23,7 @@
 // #define DEVICE_NITC__OFFICE__ELITE4DEXMU_01
 // #define DEVICE_NITC__OFFICE__ELITE4DEXMU_02
 // #define DEVICE_NITC__OFFICE__ELITE4DEXMU_03
+#define DEVICE_NITC__OFFICE__ELITE4DEXMU_04
 
 
 
@@ -3186,4 +3187,101 @@ R"=====(
   #endif
 
 #endif // END DEVICE
+
+
+
+
+
+
+
+#ifdef DEVICE_NITC__OFFICE__ELITE4DEXMU_04
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+
+  #define ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_DEFAULT
+  
+
+  #ifdef ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
+
+  /**
+   * @brief tree physical wiring connections
+   * 16 outputs
+   */
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":16,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":400
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        400
+      ],
+      "ColourPalette":"Cold White",
+      "Effects": {
+        "Function":"Solid",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "Brightness": 100
+    },
+    "Brightness": 100
+  }
+  )=====";
+
+  /***
+   * ELITE4DEXMU
+   * Switch: GPIO17
+   * Relay MOSFET: GPIO18 Inverted
+   */
+ 
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      "\"18\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","// Force power on
+      "\"17\":\"" D_GPIO_KEY1_INV_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
+        "\"" "Desk" "\""
+      "]"
+    "}"
+  "}";
+
+  #endif
+
+#endif // END DEVICE
+
+
+
 #endif // END GUARD
