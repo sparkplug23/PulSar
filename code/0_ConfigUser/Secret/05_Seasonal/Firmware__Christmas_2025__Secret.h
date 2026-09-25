@@ -2653,7 +2653,7 @@
    * [L2 + L3 ] Level  2: 100 LEDS + 100 LEDS
    * [L1      ] Level  1: 200 LEDS + power injection
     
-   
+   15 amps? 1900/100 so 19m long
    {
       "Effects": {
         "Function":"Debug Pixel Range",
