@@ -113,7 +113,7 @@
  *    Filesystem-dependent implementation code should still retain compile
  *    guards as good defensive practice.
  *
- *    Explicit filesystem-less builds remain possible using DISABLE_FILESYSTEM.
+ *    Explicit filesystem-less builds remain possible using DISABLE_MODULE_CORE_FILESYSTEM.
  *
  *
  * 8. WEBUI HAS FOUR EXPLICIT LEVELS
@@ -368,14 +368,6 @@
   #define ENABLE_FEATURE_LIGHTING__CORE__EFFECT_ENGINE
 
 
-  /**
-   * Filesystem is considered part of normal lighting firmware.
-   */
-  #ifndef DISABLE_FILESYSTEM
-
-    #define USE_MODULE_CORE_FILESYSTEM
-
-  #endif
 
 
   /**
@@ -915,7 +907,7 @@
 
 #ifdef ENABLE_FEATURE_LIGHTING__CORE__PRESETS
 
-  #if defined(DISABLE_FILESYSTEM) || !defined(USE_MODULE_CORE_FILESYSTEM)
+  #if defined(DISABLE_MODULE_CORE_FILESYSTEM) || !defined(USE_MODULE_CORE_FILESYSTEM)
     #error "DEFINE: Presets require filesystem" // lets not silently enable filesystem here
   #endif
 

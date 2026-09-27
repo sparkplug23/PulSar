@@ -484,3 +484,6 @@ Add sunelevation palette that is actually left on overnight, and is black when i
 
 #FI25DEC30#1
     Future idea, will be coded YYMMMDD#? so they are day stamped and multiples from the day. This whole list needs redone, properly make a new file and slowly copy these over.
+
+#FI#27SEP26#1
+    Make sequene to ADDLOG to SDCARD (use buffering method, write out every X seconds)

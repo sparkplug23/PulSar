@@ -11,13 +11,9 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
   switch(function)
   {
     case TASK_INIT:
-
-      sprintf(cmDNS, MDNS_NAME);                // mDNS address (*.local, replaced by wledXXXXXX if default is used)
-
-     
+    
       server = new AsyncWebServer(80);
 
-      #ifndef ESP8266
       #ifdef ENABLE_FEATURE_WEBSERVER__CONSOLE_WEBSOCKET
       websocket_console = new AsyncWebSocket("/ws/console");
       websocket_console->onEvent(
@@ -33,7 +29,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
       );
       AddURLtoList("/ws/console", HTTP_GET);
       #endif
-      #endif
+      
       #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
       websocket_pages = new AsyncWebSocket("/ws/page");
       websocket_pages->onEvent(
@@ -50,14 +46,15 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
       AddURLtoList("/ws/page", HTTP_GET);
       #endif
 
+
+      sprintf(cmDNS, MDNS_NAME);                // mDNS address (*.local, replaced by pulsarXXXXXX if default is used)
+
       // generate module IDs must be done before AP setup
       String escapedMac;
       escapedMac = WiFi.macAddress();
       escapedMac.replace(":", "");
       escapedMac.toLowerCase();
       if (strcmp(cmDNS, "pulsar") == 0) sprintf_P(cmDNS, PSTR("pulsar-%*s"), 6, escapedMac.c_str() + 6);
-
-
       
     break;
   }
@@ -70,13 +67,6 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
     /************
      * PERIODIC SECTION * 
     *******************/
-
-    case TASK_INIT:
-      // init();
-
-
-
-    break;
     case TASK_LOOP:
     {
       // PollDnsWebserver();
@@ -111,12 +101,9 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 
       #endif
 
-      #ifndef ESP8266
       #ifdef ENABLE_FEATURE_WEBSERVER__CONSOLE_WEBSOCKET
       handleConsoleWs();
       #endif
-      #endif
-
 
     }
     break; 
@@ -124,9 +111,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 
 
       #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
-      if(websocket_pages){
-        websocket_pages->cleanupClients();
-      }
+      if(websocket_pages) websocket_pages->cleanupClients();
       #endif
 
     break;
@@ -142,7 +127,6 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
 
   return TASKER_RESULT__UNKNOWN_ID;
 
-// DEBUG_LINE_HERE;
 }
 
 

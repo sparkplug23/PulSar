@@ -16,7 +16,7 @@
  ************************************************************************************************/
 
 #if defined(ESP8266)
-  #if defined(DISABLE_FILESYSTEM) || (defined(PULSAR_HAS_FILESYSTEM) && (PULSAR_HAS_FILESYSTEM == 0))
+  #if defined(DISABLE_MODULE_CORE_FILESYSTEM) || (defined(PULSAR_HAS_FILESYSTEM) && (PULSAR_HAS_FILESYSTEM == 0))
     #ifndef ENABLE_FEATURE_PFS__MINIMAL_SECTOR_FALLBACK
       #define ENABLE_FEATURE_PFS__MINIMAL_SECTOR_FALLBACK
     #endif

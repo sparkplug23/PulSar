@@ -4,12 +4,35 @@
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 
+/***************
+ * ToBuild : Make and test before flying
+ * 
+ * Make some esp32s3mini 
+ * - with PIR built in
+ * - with single switch
+ * - 12v versions with switch, and 12/5v buck (for others, 250 leds out)
+ * 
+ * 
+ */
+
+ /*****************
+  * ToBring : What needs packed
+  * 
+  * 
+  * 
+  * 
+  * 
+  */
+
+
 /*** Colorado Lighting Overview
  * Stairs: PIR standby testing (Never got working, would be ideal this year!)
  * Redboard1: Whitehall playlists (Could test on snow tree?)
  * Redboard2:
  * Playlist: Serial debugger of playlist
  * Santa Hat: 2D Python/Effect Tester (Put on minifridge)
+ * 
+ * RPI, bring my pi over, and eventually program it on the sdcard so it can become a mobile OH/influx/grafana/mqtt host
  * 
  */
 

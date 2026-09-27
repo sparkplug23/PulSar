@@ -88,6 +88,7 @@
 #define D_MODULE__DRIVERS__MODEM_800L__CTR            "modem_800l"
 #define D_MODULE__DRIVERS__CAMERA__CTR                "camera"
 #define D_MODULE__DRIVERS__MAVLINK_DECODER__CTR       "mavlink"
+#define D_MODULE__DRIVERS_MAVLINK_TELEMETRY_WIFI__CTR "mavlink_wifi"
 
 /**************************************************************************************************
  * Sensors
@@ -1240,7 +1241,7 @@
 #define D_LOG_HTTP "HTP: "         // HTTP webserver
 #define D_LOG_I2C "I2C: "          // I2C
 #define D_LOG_INA219 "INA: "
-// #define D_LOG_IRR "IRR: "          // Infra Red Received
+#define D_LOG_IRR "IRR: "          // Infra Red Received
 #define D_LOG_LED "LED: "
 #define D_LOG_LIGHT "LGT: "         // Light interface
 // #define D_LOG_LOG "LOG: "          // Logging

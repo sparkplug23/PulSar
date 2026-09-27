@@ -15,7 +15,7 @@
 //--------------------------------[Enable Device]-------------------------------------
 
 //    ;;;;;;;;;;;; ESP32 ;;;;;;;;;;;;;;;;
-#define DEVICE_TESTGROUP__PZEM__SOCKET_ENERGY_01 // for use with outdoor christmas lights
+// #define DEVICE_TESTGROUP__PZEM__SOCKET_ENERGY_01 // for use with outdoor christmas lights
 
 
 

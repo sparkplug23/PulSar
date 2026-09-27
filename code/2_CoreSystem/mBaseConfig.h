@@ -120,14 +120,12 @@
   #define USE_MODULE_CORE_I2C
   #define USE_MODULE_CORE_PWM
 
-  // #ifdef ESP32
-  #ifndef DISABLE_FILESYSTEM
+
+  #ifdef DISABLE_MODULE_CORE_FILESYSTEM
+  #pragma message ("Filesystem is normally included by default, it will be disabled on this build")
+  #else
   #define USE_MODULE_CORE_FILESYSTEM
-  // #pragma message "Filesystem enabled by default, make sure to define DISABLE_FILESYSTEM if you do not want this"
   #endif
-  // #endif
-
-
 
   #define ENABLE_FEATURE_JSON__ASYNCJSON_V6
 

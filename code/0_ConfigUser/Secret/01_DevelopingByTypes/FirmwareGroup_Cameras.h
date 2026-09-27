@@ -15,7 +15,7 @@
 //--------------------------------[Enable Device]-------------------------------------
 
 //    ;;;;;;;;;;;; ESP32 ;;;;;;;;;;;;;;;;
-// #define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_01
+#define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_01
 // #define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_02
 // #define DEVICE_TESTGROUP__CAMERAS__WROOVER_E_LARGE_ESP32_BOARD_03
 // #define DEVICE_GROUP__CAMERAS__ESP32_CAM_EYE_SENSOR_01
@@ -43,7 +43,7 @@
 ************************************/  
 
 
-#define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_BASIC
+#define FIRMWARE_DEFAULT__INCLUDE_WEBSERVER_NORMAL
   
 /***********************************
 * SECTION: Driver Configs

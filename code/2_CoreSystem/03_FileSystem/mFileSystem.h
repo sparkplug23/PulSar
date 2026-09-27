@@ -236,8 +236,10 @@ class mFileSystem :
     inline bool readObjectFromFile(const String &file, const char* key, JsonDocument* dest, const JsonDocument* filter = nullptr) { return readObjectFromFile(file.c_str(), key, dest); };
 
 
-    String getContentType(AsyncWebServerRequest* request, String filename);
-    bool handleFileRead(AsyncWebServerRequest* request, String path);
+    #ifdef USE_MODULE_NETWORK_WEBSERVER
+        String getContentType(AsyncWebServerRequest* request, String filename);
+        bool handleFileRead(AsyncWebServerRequest* request, String path);
+    #endif
 
     void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
     void readFile(fs::FS &fs, const char * path);
