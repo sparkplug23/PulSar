@@ -25,7 +25,7 @@
 // -----------------------------------------------------------------------------
 // WebSocket Console (ESP32)
 // -----------------------------------------------------------------------------
-#ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+#ifdef ENABLE_FEATURE_WEBSERVER__CONSOLE_WEBSOCKET
 
 void mWebServer::HandlePage_Console_WebSocket(AsyncWebServerRequest *request)
 {
@@ -408,7 +408,7 @@ void mWebServer::handleConsoleWs()
 }
 
 
-#endif // ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+#endif // ENABLE_FEATURE_WEBSERVER__CONSOLE_WEBSOCKET
 
 
 

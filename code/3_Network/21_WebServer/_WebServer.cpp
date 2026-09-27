@@ -18,7 +18,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
       server = new AsyncWebServer(80);
 
       #ifndef ESP8266
-      #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+      #ifdef ENABLE_FEATURE_WEBSERVER__CONSOLE_WEBSOCKET
       websocket_console = new AsyncWebSocket("/ws/console");
       websocket_console->onEvent(
         [this](AsyncWebSocket *server,
@@ -112,7 +112,7 @@ int8_t mWebServer::Tasker(uint8_t function, JsonParserObject obj)
       #endif
 
       #ifndef ESP8266
-      #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+      #ifdef ENABLE_FEATURE_WEBSERVER__CONSOLE_WEBSOCKET
       handleConsoleWs();
       #endif
       #endif
@@ -194,7 +194,7 @@ void mWebServer::Server_Start()
   createEditHandler(true);
   
   #ifndef ESP8266
-  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+  #ifdef ENABLE_FEATURE_WEBSERVER__CONSOLE_WEBSOCKET
   server->addHandler(websocket_console);
   #endif
   #endif
@@ -375,25 +375,18 @@ void mWebServer::WebPage_Root_AddHandlers()
    * Console
    **************************************************************************************************/
 
-  #ifdef ESP8266
-
-  SPGM_CTR(PM_URL_CONSOLE) "/console";
-  server->on(PM_URL_CONSOLE, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_Console_Poll(request); });
-  AddURLtoList(PM_URL_CONSOLE, HTTP_GET);
-
-  #else
+  #ifdef ENABLE_FEATURE_WEBSERVER__CONSOLE_WEBSOCKET
 
   SPGM_CTR(PM_URL_CONSOLE) "/console";
   server->on(PM_URL_CONSOLE, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_Console_WebSocket(request); });
   AddURLtoList(PM_URL_CONSOLE, HTTP_GET);
 
-    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__ADVANCED_PAGES
+  #endif
+  #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_POLL
 
-    SPGM_CTR(PM_URL_CONSOLE_POLL) "/console_poll";
-    server->on(PM_URL_CONSOLE_POLL, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_Console_Poll(request); });
-    AddURLtoList(PM_URL_CONSOLE_POLL, HTTP_GET);
-
-    #endif
+  SPGM_CTR(PM_URL_CONSOLE_POLL) "/console_poll";
+  server->on(PM_URL_CONSOLE_POLL, HTTP_GET, [this](AsyncWebServerRequest* request){ HandlePage_Console_Poll(request); });
+  AddURLtoList(PM_URL_CONSOLE_POLL, HTTP_GET);
 
   #endif
 

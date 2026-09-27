@@ -28,7 +28,7 @@
 
 #include "mWebUrlTracker.h" // Must be included so #else blanks are inserted
 
-// #define ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+// #define ENABLE_FEATURE_WEBSERVER__CONSOLE_WEBSOCKET
 
 const char PM_WEB_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html";
 const char PM_WEB_CONTENT_TYPE_TEXT_JAVASCRIPT[] PROGMEM = "text/javascript";
@@ -229,9 +229,7 @@ AsyncWebServer* server = nullptr;
 
 AsyncWebHandler *editHandler = nullptr;
 
-
-  #ifndef ESP8266
-    #ifdef ENABLE_FEATURE_LIGHTING__WEBUI__CONSOLE_WEBSOCKET
+    #ifdef ENABLE_FEATURE_WEBSERVER__CONSOLE_WEBSOCKET
 
     void HandlePage_Console_WebSocket(AsyncWebServerRequest *request);
 
@@ -290,8 +288,6 @@ AsyncWebHandler *editHandler = nullptr;
     #define WS_CONSOLE_INTERVAL 50
 
     #endif
-  #endif
-
 
   
 
