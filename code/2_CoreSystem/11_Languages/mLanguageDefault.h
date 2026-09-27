@@ -338,7 +338,7 @@
 // #define D_CO2                   "Carbon dioxide"
 // #define D_COLDLIGHT             "Cold"
 // #define D_COMMAND               "Command"
-// #define D_CONNECTED             "Connected"
+#define D_CONNECTED             "Connected"
 #define D_COUNT                 "Count"
 #define D_COUNTER               "Counter"
 #define D_CURRENT               "Current"          
@@ -1287,7 +1287,7 @@
 // #define D_LOG_UPNP "UPP: "         // UPnP
 // #define D_LOG_UPTIME "UPT: "         
 #define D_LOG_WIFI "WIF: "         // Wifi
-// #define D_LOG_ETHERNET "ETH: "
+#define D_LOG_ETHERNET "ETH: "
 
 #define D_LOG_SH1106 "SH1: "
 #define D_LOG_DISPLAY "DSP: "

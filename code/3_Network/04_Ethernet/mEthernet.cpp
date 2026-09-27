@@ -252,7 +252,6 @@ void mEthernet::EthernetConfigChange(void) {
 // -----------------------------------------------------------------------------
 // ETH bring-up + events
 // -----------------------------------------------------------------------------
-#ifdef ESP32
 
 void mEthernet::Ethernet_Begin()
 {
@@ -520,7 +519,6 @@ void mEthernet::parse_JSONCommand(JsonParserObject obj)
 
 
 
-#endif // ESP32
 
 #endif // USE_MODULE_NETWORK_ETHERNET
 

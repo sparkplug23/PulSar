@@ -974,7 +974,6 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
     #endif
 
     #ifdef USE_MODULE_NETWORK_ETHERNET
-    #ifdef ESP32
     {
       IPAddress eth_ip  = ETH.localIP();
       IPAddress eth_gw  = ETH.gatewayIP();
@@ -995,7 +994,6 @@ uint8_t mTelemetry::ConstructJSON_Network(uint8_t json_level, bool json_appendin
         JBI->Add_FV("DNS",     PSTR("\"%d.%d.%d.%d\""), eth_dns[0], eth_dns[1], eth_dns[2], eth_dns[3]);
       JBI->Object_End();
     }
-    #endif
     #endif
 
   return JBI->End();

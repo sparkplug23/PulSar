@@ -52,8 +52,7 @@ public:
   // Optional: reuse your existing naming if other code expects it
   bool Link_IsIpRoutable() const { return Ethernet_IsRoutable(); }
 
-private:
-#ifdef ESP32
+
   // ---- Board / PHY config (override with -D in build flags as needed) ----
   #ifndef PULSAR_ETH_PHY_TYPE
     #define PULSAR_ETH_PHY_TYPE   ETH_PHY_LAN8720
@@ -115,7 +114,7 @@ IPAddress EthernetLocalIP(void);
     
   void    parse_JSONCommand(JsonParserObject obj);
 
-#endif
+  
 };
 
 #endif // USE_MODULE_NETWORK_ETHERNET
