@@ -149,6 +149,8 @@ public mTaskerInterface{
     void AddURLasApplication(uint16_t module_id, const String& url, const char* friendly_name = nullptr, uint16_t port = 80);
     void HandleAPI_URLApplications(AsyncWebServerRequest* request);
 
+    void PrintJSONString(Print& out, const char* str);
+
     #ifdef ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS
     enum class WebUIControlType : uint8_t
     {
@@ -174,8 +176,6 @@ public mTaskerInterface{
 
     WebUIContext webui;
 
-
-    void PrintJSONString(Print& out, const char* str);
 
     /**
      * Generic WebUI output helpers.

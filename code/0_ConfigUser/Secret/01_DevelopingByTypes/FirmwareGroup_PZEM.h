@@ -76,7 +76,7 @@
    * SECTION: Network Configs
   ************************************/    
 
-  
+  #define ENABLE_FEATURE_WEBSERVER__SYSTEM_CONTROLS 
   
 
   /***********************************
