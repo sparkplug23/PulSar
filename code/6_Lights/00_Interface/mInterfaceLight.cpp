@@ -1371,60 +1371,60 @@ void mInterfaceLight::ClearBusConfigs(void)
 
 uint8_t mInterfaceLight::GetColourOrder_FromName(const char* c)
 {
+    if (!c) {
+        ALOG_ERR(PSTR("INVALID ColourOrder nullptr"));
+        return COL_ORDER_RGB;
+    }
 
-    uint8_t colour_order = 0;  // Initialize as 0 (default to RGB with no whites)
-
-    // Validate length (must be 3 to 5 characters)
     size_t len = strlen(c);
-    Serial.println("len");
-    Serial.println(len);
-    if (!c || len < 3 || len > 5) {
-        ALOG_ERR(PSTR("INVALID Length"));
-        return colour_order;
+
+    if (len < 3 || len > 5) {
+        ALOG_ERR(PSTR("INVALID ColourOrder Length %d"), len);
+        return COL_ORDER_RGB;
     }
 
-    // Convert all characters to uppercase to simplify checks
-    char chars[5] = {0};  // Array to hold converted characters
+    char chars[6] = {0};
+
     for (size_t i = 0; i < len; i++) {
-        chars[i] = toupper(c[i]);
+        chars[i] = toupper((unsigned char)c[i]);
     }
 
-    // Check RGB order from the first three characters
-    if (chars[0] == 'R' && chars[1] == 'G' && chars[2] == 'B') {
-        colour_order = 0x00; // RGB
-    } else if (chars[0] == 'G' && chars[1] == 'R' && chars[2] == 'B') {
-        colour_order = 0x01; // GRB
-    } else if (chars[0] == 'B' && chars[1] == 'R' && chars[2] == 'G') {
-        colour_order = 0x02; // BRG
-    } else if (chars[0] == 'B' && chars[1] == 'G' && chars[2] == 'R') {
-        colour_order = 0x03; // BGR
-    } else if (chars[0] == 'G' && chars[1] == 'B' && chars[2] == 'R') {
-        colour_order = 0x04; // GBR
-    } else if (chars[0] == 'R' && chars[1] == 'B' && chars[2] == 'G') {
-        colour_order = 0x05; // RBG
-    } else {
-        ALOG_ERR(PSTR("INVALID RGB Order"));
-        return colour_order;  // Invalid RGB order
+    uint8_t colour_order = COL_ORDER_RGB;
+
+    if      (chars[0] == 'R' && chars[1] == 'G' && chars[2] == 'B') colour_order = COL_ORDER_RGB;
+    else if (chars[0] == 'G' && chars[1] == 'R' && chars[2] == 'B') colour_order = COL_ORDER_GRB;
+    else if (chars[0] == 'B' && chars[1] == 'R' && chars[2] == 'G') colour_order = COL_ORDER_BRG;
+    else if (chars[0] == 'R' && chars[1] == 'B' && chars[2] == 'G') colour_order = COL_ORDER_RBG;
+    else if (chars[0] == 'B' && chars[1] == 'G' && chars[2] == 'R') colour_order = COL_ORDER_BGR;
+    else if (chars[0] == 'G' && chars[1] == 'B' && chars[2] == 'R') colour_order = COL_ORDER_GBR;
+    else {
+        ALOG_ERR(PSTR("INVALID RGB ColourOrder \"%s\""), c);
+        return COL_ORDER_RGB;
     }
 
-    // Check for optional white channel settings (4th and 5th characters)
     if (len >= 4) {
         if (chars[3] == 'W') {
             if (len == 4) {
-                colour_order |= 0x20;  // Only WW (Warm White)
+                colour_order |= 0x20;
             } else if (chars[4] == 'C') {
-                colour_order |= 0x40;  // Both WW and CW
+                colour_order |= 0x40;
+            } else {
+                ALOG_ERR(PSTR("INVALID White ColourOrder \"%s\""), c);
             }
         } else if (chars[3] == 'C') {
             if (len == 4) {
-                colour_order |= 0x10;  // Only CW (Cold White)
+                colour_order |= 0x10;
+            } else {
+                ALOG_ERR(PSTR("INVALID White ColourOrder \"%s\""), c);
             }
+        } else {
+            ALOG_ERR(PSTR("INVALID White ColourOrder \"%s\""), c);
         }
     }
 
     #ifdef ENABLE_LOG_LEVEL_COMMANDS
-    ALOG_COM(PSTR("colour_order %X"), colour_order);
-    #endif  
+    ALOG_COM(PSTR("ColourOrder \"%s\" => 0x%02X"), c, colour_order);
+    #endif
 
     return colour_order;
 }

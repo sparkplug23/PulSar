@@ -15,7 +15,7 @@
 //--------------------------------[Enable Device]-------------------------------------
 
 //    ;;;;;;;;;;;; ESP32 ;;;;;;;;;;;;;;;;
-// #define DEVICE_TESTGROUP__PZEM__SOCKET_ENERGY_01 // for use with outdoor christmas lights
+#define DEVICE_TESTGROUP__PZEM__SOCKET_ENERGY_01 // for use with outdoor christmas lights
 
 
 
@@ -164,9 +164,8 @@
       #endif
       #ifdef USE_MODULE_DRIVERS_RELAY
       "\"26\":\"" D_GPIO_REL_CTR "1" "\","
-      "\"2\":\"" D_GPIO_REL_CTR "2" "\","" // use LED as temporary relay tester
+      "\"2\":\"" D_GPIO_REL_CTR "2" "\"," // use LED as temporary relay tester
       #endif  
-
     "},"
     "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""

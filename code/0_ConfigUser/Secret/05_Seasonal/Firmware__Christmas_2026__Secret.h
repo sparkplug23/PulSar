@@ -1771,4 +1771,423 @@
 
 
 
+/**
+ * @brief
+ *
+ * Xmas 2026 Meadows Front Tree
+ * ESP32-S3 N16R8
+ *
+ * 16 lighting outputs via 2x SN74HCT245
+ *
+ *          fH     -> Boot/config may fail if pin is pulled HIGH at reset
+ *          fL     -> Boot/config may fail if pin is pulled LOW at reset
+ *          STRAP  -> Boot/configuration strapping pin
+ *          BIL    -> Built-in LED / RGB LED
+ *          USB    -> Native USB D-/D+
+ *          UART0  -> Default UART0 TX/RX
+ *          JTAG   -> Default JTAG-capable pins
+ *          MEM    -> Flash / Octal PSRAM internal/module connections
+ *
+ *          USB-C "USB"
+ *            PC <-> ESP32-S3 native USB
+ *            uses GPIO19/20
+ *            supports native USB CDC/JTAG/device modes
+ *
+ *          USB-C "COM"
+ *            PC <-> USB-UART bridge <-> ESP32-S3 UART0
+ *            uses GPIO43/44
+ *            traditional serial flashing / serial monitor
+ *
+ *          OUT01 -> OUT16 = dedicated lighting data outputs
+ *
+ *
+ *                              ESP32-S3 N16R8
+ *
+ *                          _______________________
+ *                    3V3  |3V3                GND | GND
+ *                    3V3  |3V3              GPIO43| UART0 TX
+ *                    RST  |RST              GPIO44| UART0 RX
+ *             OUT01 GPIO4 |4                 GPIO1| spare
+ *             OUT02 GPIO5 |5                 GPIO2| spare
+ *             OUT03 GPIO6 |6                GPIO42| JTAG / spare
+ *             OUT04 GPIO7 |7                GPIO41| JTAG / spare
+ *             OUT05 GPIO15|15               GPIO40| JTAG / spare
+ *             OUT06 GPIO16|16               GPIO39| JTAG / spare
+ *             OUT07 GPIO17|17               GPIO38| spare
+ *             OUT08 GPIO18|18               GPIO37| MEM / unavailable
+ *             OUT09 GPIO8 |8                GPIO36| MEM / unavailable
+ *             OUT10 GPIO3 |3                GPIO35| MEM / unavailable
+ *          STRAP fH GPIO46|46                GPIO0| STRAP fL / BOOT
+ *             OUT11 GPIO9 |9                GPIO45| STRAP fH
+ *             OUT12 GPIO10|10               GPIO48| spare
+ *             OUT13 GPIO11|11               GPIO47| BIL RGB LED / spare
+ *             OUT14 GPIO12|12               GPIO21| spare
+ *             OUT15 GPIO13|13               GPIO20| USB D+
+ *             OUT16 GPIO14|14               GPIO19| USB D-
+ *         5V INPUT ONLY   |5V0          ^     GND | GND
+ *                    GND  |GND  |USB| |COM|   GND | GND
+ *                          _______________________
+ *
+ *
+ * Lighting output allocation
+ *
+ * SN74HCT245 #1
+ *
+ *   OUT01 -> GPIO4
+ *   OUT02 -> GPIO5
+ *   OUT03 -> GPIO6
+ *   OUT04 -> GPIO7
+ *   OUT05 -> GPIO15
+ *   OUT06 -> GPIO16
+ *   OUT07 -> GPIO17
+ *   OUT08 -> GPIO18
+ *
+ * SN74HCT245 #2
+ *
+ *   OUT09 -> GPIO8
+ *   OUT10 -> GPIO3
+ *   OUT11 -> GPIO9
+ *   OUT12 -> GPIO10
+ *   OUT13 -> GPIO11
+ *   OUT14 -> GPIO12
+ *   OUT15 -> GPIO13
+ *   OUT16 -> GPIO14
+ *
+ *
+ * Reserved / deliberately avoided
+ *
+ *   GPIO0  -> STRAP fL / BOOT
+ *   GPIO45 -> STRAP fH
+ *   GPIO46 -> STRAP fH
+ *
+ *   GPIO19, GPIO20 -> Native USB
+ *   GPIO35, GPIO36, GPIO37 -> Octal PSRAM / unavailable on N16R8
+ *   GPIO39..GPIO42 -> Leave available for JTAG/debug
+ *   GPIO43, GPIO44 -> UART0
+ *
+ * GPIO3 note
+ *
+ *   GPIO3 -> STRAP / JTAG configuration
+ *            deliberately used as OUT10
+ *            do not externally bias during reset
+ *
+ *
+ * Octal PSRAM pins exposed on this header
+ *
+ *   GPIO35 -> MEM / unavailable
+ *   GPIO36 -> MEM / unavailable
+ *   GPIO37 -> MEM / unavailable
+ *
+ *   GPIO38 -> usable
+ *   GPIO39 -> usable
+ *   GPIO40 -> usable
+ *   GPIO41 -> usable
+ *   GPIO42 -> usable
+ *
+ *
+ * Useful spare GPIO
+ *
+ *   GPIO1
+ *   GPIO2
+ *   GPIO21
+ *   GPIO38
+ *   GPIO48
+ *
+ *   GPIO39..GPIO42 -> usable, but deliberately kept free for JTAG/debug
+ *   GPIO47 -> Built-in RGB LED; usable if onboard LED is not required
+ *
+ *
+ * Power
+ *
+ *   3V3 -> 3.3 V rail
+ *   5V0 -> 5 V INPUT ONLY
+ *   GND -> Ground
+ *
+ */
+
+
+#ifdef DEVICE_XMAS26__MEADOWS__FRONT_TREE_ESP32S3_N16R8_03 // 5v protoboard
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+
+ /***********************************
+  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
+ ************************************/
+  // #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+//  /***********************************
+//   * SECTION: Sensor Configs
+//  ************************************/
+
+//   #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
+//   #define USE_MODULE_SENSORS_INTERFACE
+//   #define USE_MODULE_SENSORS_PIR
+//   // #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
+//   #endif
+
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/
+
+
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
+  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
+
+  // #define ENABLE_BUSCONFIG_8X_TEST_OUTPUTS
+  // #define ENABLE_BUSCONFIG_16X_1800_200
+  // #define ENABLE_BUSCONFIG_16X_TESTING
+  // #define ENABLE_BUSCONFIG_16X_BUS_EACH_A_SEGMENT
+  // #define ENABLE_BUSCONFIG_16X_TEST_MANUAL_BUS_PINS
+  // #define ENABLE_BUSCONFG__OUTPUTS_INSTALLED_ON_TREE
+  #define ENABLE_BUSCONFG__OUTPUTS_TESTING_FOR_S3_BUILD
+
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
+  // #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_FORCED_X16
+
+  #ifdef ENABLE_BUSCONFG__OUTPUTS_TESTING_FOR_S3_BUILD
+
+  /**
+   * @brief tree physical wiring connections
+   *
+   * 16-port PCB:
+   *
+   *   OUT01 GPIO4
+   *   OUT02 GPIO5
+   *   OUT03 GPIO6
+   *   OUT04 GPIO7
+   *   OUT05 GPIO15
+   *   OUT06 GPIO16
+   *   OUT07 GPIO17
+   *   OUT08 GPIO18
+   *
+   *   OUT09 GPIO8
+   *   OUT10 GPIO3
+   *   GPIO46 UNUSED
+   *   OUT11 GPIO9
+   *   OUT12 GPIO10
+   *   OUT13 GPIO11
+   *   OUT14 GPIO12
+   *   OUT15 GPIO13
+   *   OUT16 GPIO14
+   *
+   * All 16 lighting outputs are on the left-side GPIO header block.
+   *
+   * GPIO3 is a strapping pin and is deliberately used as OUT10.
+   * Do not externally bias GPIO3 during reset.
+   *
+   * GPIO46 is deliberately skipped.
+   *
+   * Spare GPIO:
+   *   GPIO1
+   *   GPIO2
+   *   GPIO21
+   *   GPIO38
+   *   GPIO48
+   *
+   * GPIO47 is used by the onboard RGB LED.
+   * 
+   * 5V Green Pebbles 1.3A
+   * 100 LEDS / 1.3A 
+   * So lets say = 16x100 = 16*1.3 = 20.8A
+   * also add wire gauge/amount to calculator
+   */
+
+  #define ENABLE_FEATURE_LIGHTING__BUS_OUTPUT_METHODS__PARALLEL_AUTO
+
+  // #define ENABLE_DEVFEATURE_LIGHTS__SEGMENT_MATCHBUS
+  #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000
+  #define MAX_LED_MEMORY 64000*5
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "n":"L1",
+        "Pin":4,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":250
+      },
+      {
+        "n":"L2",
+        "Pin":5,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":250,
+        "Length":250
+      },
+      {
+        "n":"L3",
+        "Pin":6,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":500,
+        "Length":250
+      },
+      {
+        "n":"L4",
+        "Pin":7,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":750,
+        "Length":250
+      },
+      {
+        "n":"L5",
+        "Pin":15,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":1000,
+        "Length":200
+      },
+      {
+        "n":"L6",
+        "Pin":16,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":1200,
+        "Length":200
+      },
+      {
+        "n":"L7",
+        "Pin":17,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":1400,
+        "Length":200
+      },
+      {
+        "n":"L8",
+        "Pin":18,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":1600,
+        "Length":200
+      },
+      {
+        "n":"L9",
+        "Pin":8,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":1800,
+        "Length":200
+      },
+      {
+        "n":"L10",
+        "Pin":3,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":2000,
+        "Length":200
+      },
+      {
+        "n":"L11",
+        "Pin":9,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":2200,
+        "Length":200
+      },
+      {
+        "n":"L12",
+        "Pin":10,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":2400,
+        "Length":200
+      },
+      {
+        "n":"L13",
+        "Pin":11,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":2600,
+        "Length":200
+      },
+      {
+        "n":"L14",
+        "Pin":12,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":2800,
+        "Length":200
+      },
+      {
+        "n":"L15",
+        "Pin":13,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":3000,
+        "Length":200
+      },
+      {
+        "n":"L16",
+        "Pin":14,
+        "ColourOrder":"GBR",
+        "BusType":"WS2812_RGB",
+        "Start":3200,
+        "Length":200
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[
+          0,
+          3400
+        ],
+        "ColourPalette":"Snowy 02",
+        "Palette2":"Cold White",
+        "Effects":{
+          "Function":"Colour Waves",
+          "Intensity":200,
+          "Speed":200,
+          "Grouping":1,
+          "Decimate":1,
+          "Custom1":255,
+          "Custom2":220,
+          "RateMs":1000
+        },
+        "BrightnessRGB":100
+      }
+    ],
+    "BrightnessRGB":100
+  }
+  )=====";
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE)
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      #ifdef USE_MODULE_SENSORS_BUTTONS
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR "\""
+      #endif
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+  #endif // ENABLE_BUSCONFG__OUTPUTS_TESTING_FOR_S3_BUILD
+
+#endif // DEVICE_XMAS26__MEADOWS__FRONT_TREE_ESP32S3_N16R8
+
+
 #endif
