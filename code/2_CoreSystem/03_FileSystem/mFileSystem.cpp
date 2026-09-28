@@ -833,6 +833,7 @@ void mFileSystem::Handle_FileChanges_WebUIEdits()
 {
   String changedFile;
 
+  #ifdef USE_MODULE_NETWORK_WEBSERVER
   // Check if any file changes have occurred (clears the flag if true)
   if (!FileEditor::Check_AnyFilesEdited()) {
     ALOG_DBG(PSTR("No file change detected.")); //debug for now
@@ -844,6 +845,7 @@ void mFileSystem::Handle_FileChanges_WebUIEdits()
   tkr->Tasker_Interface(TASK_FILESYSTEM__HANDLE_FILE_CHANGES_FROM_EDIT_URL__ID);
 
   FileEditor::Check_ClearFilesEditFlag();
+  #endif
   
   return;
 }

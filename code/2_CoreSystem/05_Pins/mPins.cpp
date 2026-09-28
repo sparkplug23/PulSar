@@ -658,59 +658,59 @@ const mytmplt8285 mPins::module_template__gpio_map_ESP8285[3] PROGMEM = {
       GPIO_USER,               // 48      IO                  SPICLK_N_DIFF, GPIO48, SUBSPICLK_N_DIFF
       0                            // Flag
     },
-    #ifdef USE_MODULE_TEMPLATE__CAMERA_XIAO_ESP32S3_SENSE
-    {
-      0,                            // GPIO0   — Not exposed  
-      0,                            // GPIO1   — Not exposed  
-      GPIO_USER,                    // GPIO2   — Exposed (D0)  
-      GPIO_USER,                    // GPIO3   — Exposed (D1)  
-      GPIO_USER,                    // GPIO4   — Exposed (D2)  
-      GPIO_USER,                    // GPIO5   — Exposed (D3)  
-      GPIO_USER,                    // GPIO6   — Exposed (D4 / SDA)  
-      GPIO_USER,                    // GPIO7   — Exposed (D5 / SCL)  
-      0,                            // GPIO8   — Not exposed  
-      0,                            // GPIO9   — Not exposed  
-      GPIO_WEBCAM_XCLK,             // GPIO10  — CAM_XCLK  
-      GPIO_WEBCAM_DATA7,            // GPIO11  — CAM_Y8  
-      GPIO_WEBCAM_DATA6,            // GPIO12  — CAM_Y7  
-      GPIO_WEBCAM_PCLK,             // GPIO13  — CAM_PCLK  
-      GPIO_WEBCAM_DATA5,            // GPIO14  — CAM_Y6  
-      GPIO_WEBCAM_DATA1,            // GPIO15  — CAM_Y2  
-      GPIO_WEBCAM_DATA4,            // GPIO16  — CAM_Y5  
-      GPIO_WEBCAM_DATA2,            // GPIO17  — CAM_Y3  
-      GPIO_WEBCAM_DATA3,            // GPIO18  — CAM_Y4  
-      0,                            // GPIO19  — Not exposed  
-      GPIO_USER,                    // GPIO20  — Exposed (RX)  
-      GPIO_USER,                    // GPIO21  — Exposed (TX)  
-                                    // GPIO22  — Not exposed  
-                                    // GPIO23  — Not exposed  
-                                    // GPIO24  — Not exposed  
-                                    // GPIO25  — Not exposed  
-                                    // GPIO26  — Not exposed  
-                                    // GPIO27  — Not exposed  
-                                    // GPIO28  — Not exposed  
-                                    // GPIO29  — Not exposed  
-                                    // GPIO30  — Not exposed  
-                                    // GPIO31  — Not exposed  
-                                    // GPIO32  — Not exposed  
-      0,                            // GPIO33  — Not exposed  
-      0,                            // GPIO34  — Not exposed  
-      0,                            // GPIO35  — Not exposed  
-      0,                            // GPIO36  — Not exposed  
-      0,                            // GPIO37  — Not exposed  
-      GPIO_WEBCAM_VSYNC,            // GPIO38  — CAM_VSYNC  
-      GPIO_WEBCAM_SIOC,             // GPIO39  — CAM_SIOC  
-      GPIO_WEBCAM_SIOD,             // GPIO40  — CAM_SIOD  
-      0,                            // GPIO41  — Not exposed  
-      0,                            // GPIO42  — Not exposed  
-      0,                            // GPIO43  — Not exposed  
-      0,                            // GPIO44  — Not exposed  
-      0,                            // GPIO45  — Not exposed  
-      0,                            // GPIO46  — Not exposed  
-      GPIO_WEBCAM_HREF,             // GPIO47  — CAM_HREF  
-      GPIO_WEBCAM_DATA8,            // GPIO48  — CAM_Y9  
-      0                             // FLAG  — Not exposed
-    },
+    #ifdef USE_MODULE_TEMPLATE__CAMERA_XIAO_ESP32S3_SENSE 
+    { 
+      0,                            // GPIO0   — Not exposed
+      0,                            // GPIO1   — Not exposed
+      GPIO_USER,                    // GPIO2   — Exposed (D0)
+      GPIO_USER,                    // GPIO3   — Exposed (D1)
+      GPIO_USER,                    // GPIO4   — Exposed (D2)
+      GPIO_USER,                    // GPIO5   — Exposed (D3)
+      GPIO_USER,                    // GPIO6   — Exposed (D4 / SDA)
+      GPIO_USER,                    // GPIO7   — Exposed (D5 / SCL)
+      0,                            // GPIO8   — Not exposed
+      0,                            // GPIO9   — Not exposed
+      GPIO_WEBCAM_XCLK,             // GPIO10  — CAM_XCLK
+      GPIO_WEBCAM_DATA + 6,         // GPIO11  — CAM_Y8 / D6
+      GPIO_WEBCAM_DATA + 5,         // GPIO12  — CAM_Y7 / D5
+      GPIO_WEBCAM_PCLK,             // GPIO13  — CAM_PCLK
+      GPIO_WEBCAM_DATA + 4,         // GPIO14  — CAM_Y6 / D4
+      GPIO_WEBCAM_DATA + 0,         // GPIO15  — CAM_Y2 / D0
+      GPIO_WEBCAM_DATA + 3,         // GPIO16  — CAM_Y5 / D3
+      GPIO_WEBCAM_DATA + 1,         // GPIO17  — CAM_Y3 / D1
+      GPIO_WEBCAM_DATA + 2,         // GPIO18  — CAM_Y4 / D2
+      0,                            // GPIO19  — Not exposed
+      GPIO_USER,                    // GPIO20  — Exposed (RX)
+      GPIO_USER,                    // GPIO21  — Exposed (TX)
+                                    // GPIO22  — Not exposed
+                                    // GPIO23  — Not exposed
+                                    // GPIO24  — Not exposed
+                                    // GPIO25  — Not exposed
+                                    // GPIO26  — Not exposed
+                                    // GPIO27  — Not exposed
+                                    // GPIO28  — Not exposed
+                                    // GPIO29  — Not exposed
+                                    // GPIO30  — Not exposed
+                                    // GPIO31  — Not exposed
+                                    // GPIO32  — Not exposed
+      0,                            // GPIO33  — Not exposed
+      0,                            // GPIO34  — Not exposed
+      0,                            // GPIO35  — Not exposed
+      0,                            // GPIO36  — Not exposed
+      0,                            // GPIO37  — Not exposed
+      GPIO_WEBCAM_VSYNC,            // GPIO38  — CAM_VSYNC
+      GPIO_WEBCAM_SIOC,             // GPIO39  — CAM_SIOC
+      GPIO_WEBCAM_SIOD,             // GPIO40  — CAM_SIOD
+      0,                            // GPIO41  — Not exposed
+      0,                            // GPIO42  — Not exposed
+      0,                            // GPIO43  — Not exposed
+      0,                            // GPIO44  — Not exposed
+      0,                            // GPIO45  — Not exposed
+      0,                            // GPIO46  — Not exposed
+      GPIO_WEBCAM_HREF,             // GPIO47  — CAM_HREF
+      GPIO_WEBCAM_DATA + 7,         // GPIO48  — CAM_Y9 / D7
+      0                             // FLAG
+    }, 
     #endif  // USE_MODULE_TEMPLATE__CAMERA_XIAO_ESP32S3_SENSE
   };
 
