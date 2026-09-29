@@ -1461,7 +1461,7 @@
 // #define D_OR "or"
 #define D_OTAURL "OTAURL"
 // #define D_OPEN "Open"
-// #define D_OPENED "Opened"
+#define D_OPENED "Opened"
 // #define D_OUTSIDE "Outside"
 // #define D_PERIOD "Period"
 // #define D_PERCENTAGE "Percentage"
@@ -1584,7 +1584,7 @@
 // #define D_BRIGHTNESS_PERCENTAGE "brightness_percentage"
 // #define D_CLIMATE "climate"
 #define D_CLASSID "ClassID"
-// #define D_CLOSED "Closed"
+#define D_CLOSED "Closed"
 
 // #define D_CURRENT "Current"
 #define D_CRASHDUMP "CrashDump"

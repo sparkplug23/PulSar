@@ -22,6 +22,8 @@
 
 #include <ESP8266WebServer.h>
 
+#define ENABLE_RTSPSERVER
+
 #ifdef ENABLE_RTSPSERVER
   #include <OV2640.h>
   #include <SimStreamer.h>

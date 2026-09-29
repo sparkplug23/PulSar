@@ -17,7 +17,7 @@
  * DEVICE_TYPE CORE: Any testbeds related to core system
  * */
 // #define DEVICE_TESTBED__SETTINGS_STORING
-#define DEVICE_VALIDATION__ESP8266__MINIMAL__NODEMCU
+// #define DEVICE_VALIDATION__ESP8266__MINIMAL__NODEMCU
 
 // #define DEVICE_VALIDATION__ESP32S3__MINIMAL_SEEDSTUDIO_XIAO_CAMERA
 
@@ -27,7 +27,6 @@
 
 
 // #define DEVICE_VALIDATION__ESP32__LIGHTING__1D_SINGLE_BUS
-
 // #define DEVICE_VALIDATION__ESP32__SENSORS_ALL
 // #define DEVICE_VALIDATION__ESP32__DRIVERS_ALL
 // #define DEVICE_VALIDATION__ESP32__MODULES_ALL
@@ -189,51 +188,95 @@
   ************************************/  
 
   /***********************************
+  * SECTION: Network Configs
+  ************************************/  
+
+  /***********************************
    * SECTION: Lighting Configs
   ************************************/   
 
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+
+    /**************************************************************
+     * Normal/Debug Running Options (defines that are permenant)
+     **************************************************************/
+
+      // Normal
+
+        #define ENABLE_LIGHTING__GROUP_ENABLE_1D_TESTING
+        // #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__SINGLE_PANEL
+        // #define ENABLE_LIGHTING__GROUP_ENABLE_2D_TESTING__EIGHT_PANELS
+
+      // Debug   
+
+        #define ENABLE_DEBUG_FEATURE_MQTT_ANIMATOR_DEBUG_CUSTOM_MAPPING_TABLE
+        #define SETTINGS_SENSORS_MQTT_IFCHANGED_PERIOD_SECONDS 120
+
+    /**************************************************************
+     * Dev Options (defines that should be phased in, or erased)
+     **************************************************************/
+      // #define ENABLE_DEBUGFEATURE_LIGHT__PALETTE_RELOAD_LOGGING
+      #define ENABLE_DEBUGFEATURE_LIGHTING__TRANSITION_ENDPOINT_PIXEL0
+      #define ENABLE_FEATURE_LIGHTING__GAMMA__SKIP_PULSAR_NATIVE_PALETTES            
+      #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
+      #define ENABLE_DEVFEATURE_LIGHTING__PHASEOUT_WIFI_SETTINGS_IN_LIGHTING
+      #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_DEFAULT
+      #define ENABLE_FEATURE_DEVELOPMENT_DEBUGGING__MQTT_UNIT_TEST_ECHO
+      #define ENABLE_FEATURE_LIGHTING__STANDBY_NEW    
+      #define   ENABLE_DEBUGFEATURE_WEB__TELEMETRY
+      // #define ENABLE_DEBUGFEATURE_TELEMETRY__MQTT_SEND_HEALTH_EVERY_SECOND
+      // #define ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES
+      // #define ENABLE_FEATURE_WIFI__SSID_QUICK_CONNECT_AFTER_OTA      
+
 
   #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
-  "{"
-    "\"BusConfig\":[{"
-      "\"Pin\":2,"
-      "\"ColourOrder\":\"RGB\","
-      "\"BusType\":\"WS2812_RGB\","
-      "\"Start\":0,"
-      "\"Length\":" STR(STRIP_DEFAULT_LENGTH)
-    "}],"
-    "\"Segment0\":{"
-      "\"PixelRange\":[0," STR(STRIP_DEFAULT_LENGTH) "],"
-      "\"ColourPalette\":\"Snowy 02\","
-      "\"Effects\":{"
-        "\"Function\":\"Static\","
-        "\"Speed\":127,"
-        "\"Intensity\":127,"
-        "\"Grouping\":1,"
-        "\"RateMs\":25"
-      "},"
-      "\"BrightnessRGB\":100,"
-      "\"Preset\":{\"Load\":1}"
-    "},"
-    "\"BrightnessRGB\":100"
-  "}";
-  
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":2,
+        "ColourOrder":"RGB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":256
+      }
+    ],
+    "Segment0": {
+      "PixelRange": [
+        0,
+        256
+      ],
+      "ColourPalette":"Snowy 02",
+      "Effects": {
+        "Function":"Wipe Random",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs": 25
+      },
+      "Brightness": 100
+    },
+    "Brightness": 1
+  }
+  )=====";
+ 
+      // ,"Preset":{"Load":1}
       
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
     "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIO_NUMBER "\":{"   
-      "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
-      "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+    "\"" D_GPIO_NUMBER "\":{"    
+      // "\"28\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\"," // Bus8
+      // "\"13\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR   "\","
+      "\"12\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "1" "\","
+      "\"26\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "2" "\","
+      "\"32\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "3" "\","
+      "\"14\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "4" "\","
+      "\"27\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "5" "\","
+      "\"25\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "6" "\","
+      "\"33\":\"" D_GPIO_UNUSED_FORCED_HIGH_CTR  "7" "\","
       #ifdef USE_MODULE_SENSORS_BUTTONS
       "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
       "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
@@ -243,7 +286,20 @@
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
-  #endif 
+
+  
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
+      "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
+        "\"" "Desk" "\""
+      "]"
+    "}"
+  "}";
+
+  
+#endif 
 
   
 /**
@@ -1296,7 +1352,7 @@ DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
   #define USE_MODULE_SENSORS_PIR
   #define USE_MODULE_SENSORS_DOOR
   #define USE_MODULE_SENSORS_L3G
-  #define USE_MODULE_SENSORS_LDR_BASIC
+  // #define USE_MODULE_SENSORS_LDR_BASIC
   #define USE_MODULE_SENSORS_LSM303D
   #define USE_MODULE_SENSORS_MOISTURE
   #define USE_MODULE_SENSORS_SR04

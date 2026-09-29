@@ -9,7 +9,7 @@
 
 #ifdef USE_MODULE__DRIVERS_BUZZER_BASIC
 
-this and tones need rolled into one module
+// this and tones need rolled into one module
 
 
 class mBuzzerBasic :
