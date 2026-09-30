@@ -149,6 +149,7 @@ DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_1CH_X3__CTR) "WS2812_1CH_X3";
 DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_2CH_X3__CTR) "WS2812_2CH_X3";
 DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_WWA__CTR) "WS2812_WWA";
 DEFINE_PGM_CTR(PM_BUSTYPE__WS2812_RGB__CTR) "WS2812_RGB";
+DEFINE_PGM_CTR(PM_BUSTYPE__HUB75E__CTR) "HUB75E";
 DEFINE_PGM_CTR(PM_BUSTYPE__GS8608__CTR) "GS8608";
 DEFINE_PGM_CTR(PM_BUSTYPE__WS2811_400KHZ__CTR) "WS2811_400KHZ";
 DEFINE_PGM_CTR(PM_BUSTYPE__TM1829__CTR) "TM1829";
@@ -272,7 +273,6 @@ class Bus {
     inline  bool     isOnOff() const                           { return isOnOff(_type); }
     inline  bool     isPWM() const                             { return isPWM(_type); }
     inline  bool     isVirtual() const                         { return isVirtual(_type); }
-    inline  bool  isHub75(uint8_t type)      { return (type >= TYPE_HUB75MATRIX_MIN && type <= TYPE_HUB75MATRIX_MAX); }
     inline  bool     is16bit() const                           { return is16bit(_type); }
     virtual bool     isPlaceholder() const                      { return false; }
     inline  bool     mustRefresh() const                       { return mustRefresh(_type); }
@@ -289,7 +289,7 @@ class Bus {
     inline  bool     containsPixel(uint16_t pix) const         { return pix >= _start && pix < _start + _len; }
 
     static inline std::vector<LEDType> getLEDTypes()           { return {{BUSTYPE_NONE, "", PSTR("None")}}; } // not used. just for reference for derived classes
-    static constexpr size_t   getNumberOfPins(uint8_t type)     { return isVirtual(type) ? 4 : isPWM(type) ? numPWMPins(type) : isHub75(type) ? 5 : is2Pin(type) + 1; } // credit @PaoloTK; for HUB75 the 5 slots store config params (panelW, panelH, chain, rows, cols), not GPIO pins
+    static constexpr size_t getNumberOfPins(uint8_t type) { return isVirtual(type) ? 4 : isPWM(type) ? numPWMPins(type) : isHub75(type) ? 14 : is2Pin(type) + 1; }
     static constexpr uint8_t getNumberOfChannels(uint8_t type) { return hasWhite(type) + 3*hasRGB(type) + hasCCT(type); }
     static constexpr bool hasRGB(uint8_t type) {
       return !((type >= BUSTYPE_WS2812_1CH && type <= BUSTYPE_WS2812_WWA) || type == BUSTYPE_ANALOG_1CH || type == BUSTYPE_ANALOG_2CH || type == BUSTYPE_ONOFF);

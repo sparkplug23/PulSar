@@ -397,7 +397,7 @@ void mInterfaceLight::Save_Module()
 
         Bus *bus = BusManager::getBus(i);
 
-        uint8_t pins[5] = {0};
+        uint8_t pins[BUSCONFIG_MAX_PINS] = {0};
         uint8_t pin_count = bus->getPins(pins);
         JBI->Array_Start("Pin");
           for(uint8_t ii=0;ii<pin_count;ii++){ JBI->Add(pins[ii]); }
@@ -1096,6 +1096,260 @@ void mInterfaceLight::BusManager_Create_DefaultSinglePWM_5CH()
 //   ALOG_INF(PSTR("BusConfig: cleared existing bus config array"));
 // }
 
+// void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t bus_index_override)
+// {
+//   JsonParserToken jtok = 0;
+//   JsonParserToken jtok2 = 0;
+
+//   const size_t max_busses = WLED_MAX_BUSSES + WLED_MIN_VIRTUAL_BUSSES;
+
+//   /********************************************************************************************
+//    ** Determine target bus index **************************************************************
+//   ********************************************************************************************/
+
+//   int16_t bus_index = bus_index_override;
+
+//   if (bus_index < 0)
+//   {
+//     if (jtok = obj["Index"])
+//     {
+//       bus_index = jtok.getInt();
+//     }
+//     else if (jtok = obj["BusIndex"])
+//     {
+//       bus_index = jtok.getInt();
+//     }
+//   }
+
+//   // No explicit index: append to the end of the vector.
+//   if (bus_index < 0)
+//   {
+//     bus_index = busConfigs.size();
+//   }
+
+//   if ((bus_index < 0) || (static_cast<size_t>(bus_index) >= max_busses))
+//   {
+//     ALOG_ERR(
+//       PSTR("BusConfig invalid index %d, max=%u"),
+//       bus_index,
+//       static_cast<unsigned>(max_busses)
+//     );
+//     return;
+//   }
+
+//   // Vectors are contiguous. Do not create empty index gaps.
+//   if (static_cast<size_t>(bus_index) > busConfigs.size())
+//   {
+//     ALOG_ERR(
+//       PSTR("BusConfig index gap index=%d size=%u"),
+//       bus_index,
+//       static_cast<unsigned>(busConfigs.size())
+//     );
+//     return;
+//   }
+
+//   ALOG_INF(
+//     PSTR("BusConfig target index %d current_size=%u"),
+//     bus_index,
+//     static_cast<unsigned>(busConfigs.size())
+//   );
+
+
+//   /********************************************************************************************
+//    ** Defaults ********************************************************************************
+//   ********************************************************************************************/
+
+//   uint16_t start = 0;
+//   uint16_t count = 10;
+//   int8_t bus_type = BUSTYPE_NONE;
+//   uint8_t reversed = 0;
+//   uint8_t ColourOrder = 0;
+//   uint8_t pins[BUSCONFIG_MAX_PINS];   memset(pins, 255, sizeof(pins));
+//   uint8_t skip_pixels = 0;
+
+
+//   /********************************************************************************************
+//    ** Pin *************************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok2 = obj["Pin"])
+//   {
+//     if (jtok2.isNum())
+//     {
+//       pins[0] = jtok2.getInt();
+//     }
+//     else if (jtok2.isArray())
+//     {
+//       uint8_t pin_i = 0;
+//       JsonParserArray arrobj = jtok2;
+
+//       for (auto value : arrobj)
+//       {
+//         if (pin_i >= 5)
+//         {
+//           ALOG_WRN(PSTR("BusConfig Pin array too long, extra pins ignored"));
+//           break;
+//         }
+
+//         pins[pin_i++] = value.getInt();
+//       }
+//     }
+
+//     AddLog_Array(LOG_LEVEL_INFO, PSTR("pins"), pins, 5);
+//   }
+
+
+//   /********************************************************************************************
+//    ** Start ***********************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok = obj["Start"])
+//   {
+//     start = jtok.getInt();
+//     ALOG_INF(PSTR("start %u"), static_cast<unsigned>(start));
+//   }
+
+
+//   /********************************************************************************************
+//    ** Length **********************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok = obj["Length"])
+//   {
+//     count = jtok.getInt();
+//     ALOG_INF(PSTR("count %u"), static_cast<unsigned>(count));
+//   }
+
+
+//   /********************************************************************************************
+//    ** BusType *********************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok = obj["BusType"])
+//   {
+//     if (jtok.isInt())
+//     {
+//       bus_type = jtok.getInt();
+//     }
+//     else if (jtok.isStr())
+//     {
+//       bus_type = Bus::getTypeIDbyName(jtok.getStr());
+//     }
+
+//     ALOG_INF(PSTR("bus_type %d"), bus_type);
+//   }
+
+
+//   /********************************************************************************************
+//    ** Colour order ****************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok = obj[PM_RGB_COLOUR_ORDER])
+//   {
+//     if (jtok.isStr())
+//     {
+//       ColourOrder = GetColourOrder_FromName(jtok.getStr());
+//     }
+//   }
+
+
+//   /********************************************************************************************
+//    ** Reversed ********************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok = obj["Reversed"])
+//   {
+//     reversed = jtok.getInt();
+//     ALOG_INF(PSTR("reversed %u"), static_cast<unsigned>(reversed));
+//   }
+
+
+//   /********************************************************************************************
+//    ** Skip ************************************************************************************
+//   ********************************************************************************************/
+
+//   if (jtok = obj["Skip"])
+//   {
+//     skip_pixels = jtok.getInt();
+//     ALOG_INF(PSTR("Skip %u"), static_cast<unsigned>(skip_pixels));
+//   }
+
+
+//   /********************************************************************************************
+//    ** Construct BusConfig *********************************************************************
+//   ********************************************************************************************/
+
+//   ALOG_INF(
+//     PSTR("BusConfig[%d](type%d,pin0=%u,start%u,len%u,CO%u)"),
+//     bus_index,
+//     bus_type,
+//     static_cast<unsigned>(pins[0]),
+//     static_cast<unsigned>(start),
+//     static_cast<unsigned>(count),
+//     static_cast<unsigned>(ColourOrder)
+//   );
+
+// #ifdef ENABLE_DEVFEATURE_LIGHTING__DOUBLE_BUFFER
+
+//   BusConfig new_config(
+//     bus_type,
+//     pins,
+//     start,
+//     count,
+//     ColourOrder,
+//     reversed,
+//     skip_pixels,
+//     RGBW_MODE_MANUAL_ONLY,
+//     0,    // clock
+//     true  // double buffer
+//   );
+
+// #else
+
+//   BusConfig new_config(
+//     bus_type,
+//     pins,
+//     start,
+//     count,
+//     ColourOrder,
+//     reversed,
+//     skip_pixels,
+//     RGBW_MODE_MANUAL_ONLY
+//   );
+
+// #endif
+
+
+//   /********************************************************************************************
+//    ** Replace or append ***********************************************************************
+//   ********************************************************************************************/
+
+//   if (static_cast<size_t>(bus_index) < busConfigs.size())
+//   {
+//     busConfigs[bus_index] = std::move(new_config);
+
+//     ALOG_INF(
+//       PSTR("BusConfig replaced index=%d size=%u"),
+//       bus_index,
+//       static_cast<unsigned>(busConfigs.size())
+//     );
+//   }
+//   else
+//   {
+//     busConfigs.emplace_back(std::move(new_config));
+
+//     ALOG_INF(
+//       PSTR("BusConfig appended index=%d size=%u"),
+//       bus_index,
+//       static_cast<unsigned>(busConfigs.size())
+//     );
+//   }
+
+//   tkr_anim->doInitBusses = true;
+
+//   ALOG_INF(PSTR("mInterfaceLight::parseJSONObject__BusConfig Finished"));
+// }
+
 void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t bus_index_override)
 {
   JsonParserToken jtok = 0;
@@ -1103,70 +1357,56 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t b
 
   const size_t max_busses = WLED_MAX_BUSSES + WLED_MIN_VIRTUAL_BUSSES;
 
-  /********************************************************************************************
-   ** Determine target bus index **************************************************************
-  ********************************************************************************************/
-
   int16_t bus_index = bus_index_override;
 
   if (bus_index < 0)
   {
-    if (jtok = obj["Index"])
-    {
-      bus_index = jtok.getInt();
-    }
-    else if (jtok = obj["BusIndex"])
-    {
-      bus_index = jtok.getInt();
-    }
+    if (jtok = obj["Index"]) bus_index = jtok.getInt();
+    else if (jtok = obj["BusIndex"]) bus_index = jtok.getInt();
   }
 
-  // No explicit index: append to the end of the vector.
-  if (bus_index < 0)
-  {
-    bus_index = busConfigs.size();
-  }
+  if (bus_index < 0) bus_index = busConfigs.size();
 
   if ((bus_index < 0) || (static_cast<size_t>(bus_index) >= max_busses))
   {
-    ALOG_ERR(
-      PSTR("BusConfig invalid index %d, max=%u"),
-      bus_index,
-      static_cast<unsigned>(max_busses)
-    );
+    ALOG_ERR(PSTR("BusConfig invalid index %d, max=%u"), bus_index, static_cast<unsigned>(max_busses));
     return;
   }
 
-  // Vectors are contiguous. Do not create empty index gaps.
   if (static_cast<size_t>(bus_index) > busConfigs.size())
   {
-    ALOG_ERR(
-      PSTR("BusConfig index gap index=%d size=%u"),
-      bus_index,
-      static_cast<unsigned>(busConfigs.size())
-    );
+    ALOG_ERR(PSTR("BusConfig index gap index=%d size=%u"), bus_index, static_cast<unsigned>(busConfigs.size()));
     return;
   }
-
-  ALOG_INF(
-    PSTR("BusConfig target index %d current_size=%u"),
-    bus_index,
-    static_cast<unsigned>(busConfigs.size())
-  );
-
-
-  /********************************************************************************************
-   ** Defaults ********************************************************************************
-  ********************************************************************************************/
 
   uint16_t start = 0;
   uint16_t count = 10;
   int8_t bus_type = BUSTYPE_NONE;
   uint8_t reversed = 0;
-  uint8_t ColourOrder = 0;
-  uint8_t pins[5] = {255, 255, 255, 255, 255};
+  uint8_t ColourOrder = COL_ORDER_RGB;
+  uint8_t pins[BUSCONFIG_MAX_PINS];
+  uint8_t pin_count = 0;
   uint8_t skip_pixels = 0;
 
+  memset(pins, 255, sizeof(pins));
+
+  /********************************************************************************************
+   ** BusType *********************************************************************************
+  ********************************************************************************************/
+
+  if (jtok = obj["BusType"])
+  {
+    if (jtok.isInt()) bus_type = jtok.getInt();
+    else if (jtok.isStr()) bus_type = Bus::getTypeIDbyName(jtok.getStr());
+  }
+
+  if (bus_type == BUSTYPE_NONE)
+  {
+    ALOG_ERR(PSTR("BusConfig[%d] invalid BusType"), bus_index);
+    return;
+  }
+
+  ALOG_INF(PSTR("BusConfig[%d] bus_type=%d"), bus_index, bus_type);
 
   /********************************************************************************************
    ** Pin *************************************************************************************
@@ -1177,68 +1417,57 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t b
     if (jtok2.isNum())
     {
       pins[0] = jtok2.getInt();
+      pin_count = 1;
     }
     else if (jtok2.isArray())
     {
-      uint8_t pin_i = 0;
       JsonParserArray arrobj = jtok2;
 
       for (auto value : arrobj)
       {
-        if (pin_i >= 5)
+        if (pin_count >= BUSCONFIG_MAX_PINS)
         {
-          ALOG_WRN(PSTR("BusConfig Pin array too long, extra pins ignored"));
+          ALOG_WRN(PSTR("BusConfig[%d] Pin array too long, maximum=%u"), bus_index, BUSCONFIG_MAX_PINS);
           break;
         }
 
-        pins[pin_i++] = value.getInt();
+        pins[pin_count++] = value.getInt();
       }
     }
-
-    AddLog_Array(LOG_LEVEL_INFO, PSTR("pins"), pins, 5);
   }
 
+  const size_t required_pin_count = Bus::getNumberOfPins(bus_type);
+
+  if (Bus::isHub75(bus_type) && pin_count != required_pin_count)
+  {
+    ALOG_ERR(
+      PSTR("BusConfig[%d] HUB75 requires %u pins, received %u"),
+      bus_index,
+      static_cast<unsigned>(required_pin_count),
+      static_cast<unsigned>(pin_count)
+    );
+    return;
+  }
+
+  AddLog_Array(LOG_LEVEL_INFO, PSTR("pins"), pins, pin_count);
 
   /********************************************************************************************
    ** Start ***********************************************************************************
   ********************************************************************************************/
 
-  if (jtok = obj["Start"])
-  {
-    start = jtok.getInt();
-    ALOG_INF(PSTR("start %u"), static_cast<unsigned>(start));
-  }
-
+  if (jtok = obj["Start"]) start = jtok.getInt();
 
   /********************************************************************************************
    ** Length **********************************************************************************
   ********************************************************************************************/
 
-  if (jtok = obj["Length"])
+  if (jtok = obj["Length"]) count = jtok.getInt();
+
+  if (count == 0)
   {
-    count = jtok.getInt();
-    ALOG_INF(PSTR("count %u"), static_cast<unsigned>(count));
+    ALOG_ERR(PSTR("BusConfig[%d] Length cannot be zero"), bus_index);
+    return;
   }
-
-
-  /********************************************************************************************
-   ** BusType *********************************************************************************
-  ********************************************************************************************/
-
-  if (jtok = obj["BusType"])
-  {
-    if (jtok.isInt())
-    {
-      bus_type = jtok.getInt();
-    }
-    else if (jtok.isStr())
-    {
-      bus_type = Bus::getTypeIDbyName(jtok.getStr());
-    }
-
-    ALOG_INF(PSTR("bus_type %d"), bus_type);
-  }
-
 
   /********************************************************************************************
    ** Colour order ****************************************************************************
@@ -1246,44 +1475,30 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t b
 
   if (jtok = obj[PM_RGB_COLOUR_ORDER])
   {
-    if (jtok.isStr())
-    {
-      ColourOrder = GetColourOrder_FromName(jtok.getStr());
-    }
+    if (jtok.isStr()) ColourOrder = GetColourOrder_FromName(jtok.getStr());
   }
-
 
   /********************************************************************************************
    ** Reversed ********************************************************************************
   ********************************************************************************************/
 
-  if (jtok = obj["Reversed"])
-  {
-    reversed = jtok.getInt();
-    ALOG_INF(PSTR("reversed %u"), static_cast<unsigned>(reversed));
-  }
-
+  if (jtok = obj["Reversed"]) reversed = jtok.getInt();
 
   /********************************************************************************************
    ** Skip ************************************************************************************
   ********************************************************************************************/
 
-  if (jtok = obj["Skip"])
-  {
-    skip_pixels = jtok.getInt();
-    ALOG_INF(PSTR("Skip %u"), static_cast<unsigned>(skip_pixels));
-  }
-
+  if (jtok = obj["Skip"]) skip_pixels = jtok.getInt();
 
   /********************************************************************************************
    ** Construct BusConfig *********************************************************************
   ********************************************************************************************/
 
   ALOG_INF(
-    PSTR("BusConfig[%d](type%d,pin0=%u,start%u,len%u,CO%u)"),
+    PSTR("BusConfig[%d](type=%d,pins=%u,start=%u,len=%u,CO=%u)"),
     bus_index,
     bus_type,
-    static_cast<unsigned>(pins[0]),
+    static_cast<unsigned>(pin_count),
     static_cast<unsigned>(start),
     static_cast<unsigned>(count),
     static_cast<unsigned>(ColourOrder)
@@ -1300,8 +1515,8 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t b
     reversed,
     skip_pixels,
     RGBW_MODE_MANUAL_ONLY,
-    0,    // clock
-    true  // double buffer
+    0,
+    true
   );
 
 #else
@@ -1319,30 +1534,15 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t b
 
 #endif
 
-
-  /********************************************************************************************
-   ** Replace or append ***********************************************************************
-  ********************************************************************************************/
-
   if (static_cast<size_t>(bus_index) < busConfigs.size())
   {
     busConfigs[bus_index] = std::move(new_config);
-
-    ALOG_INF(
-      PSTR("BusConfig replaced index=%d size=%u"),
-      bus_index,
-      static_cast<unsigned>(busConfigs.size())
-    );
+    ALOG_INF(PSTR("BusConfig replaced index=%d size=%u"), bus_index, static_cast<unsigned>(busConfigs.size()));
   }
   else
   {
     busConfigs.emplace_back(std::move(new_config));
-
-    ALOG_INF(
-      PSTR("BusConfig appended index=%d size=%u"),
-      bus_index,
-      static_cast<unsigned>(busConfigs.size())
-    );
+    ALOG_INF(PSTR("BusConfig appended index=%d size=%u"), bus_index, static_cast<unsigned>(busConfigs.size()));
   }
 
   tkr_anim->doInitBusses = true;

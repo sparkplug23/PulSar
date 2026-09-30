@@ -51,7 +51,7 @@ const char* Bus::getTypeName()
 
 const char* Bus::getTypeName(uint8_t id)
 {
-  switch(getType()){
+  switch(id){
     default:
     //Digital types (data pin only) (16-31)
     case BUSTYPE_WS2812_1CH:        return PM_BUSTYPE__WS2812_1CH__CTR;
@@ -59,6 +59,7 @@ const char* Bus::getTypeName(uint8_t id)
     case BUSTYPE_WS2812_2CH_X3:     return PM_BUSTYPE__WS2812_2CH_X3__CTR;
     case BUSTYPE_WS2812_WWA:        return PM_BUSTYPE__WS2812_WWA__CTR;
     case BUSTYPE_WS2812_RGB:        return PM_BUSTYPE__WS2812_RGB__CTR;
+    case BUSTYPE_HUB75MATRIX_HS: return PM_BUSTYPE__HUB75E__CTR;
     case BUSTYPE_GS8608:            return PM_BUSTYPE__GS8608__CTR;
     case BUSTYPE_WS2811_400KHZ:     return PM_BUSTYPE__WS2811_400KHZ__CTR;
     case BUSTYPE_TM1829:            return PM_BUSTYPE__TM1829__CTR;
@@ -96,6 +97,7 @@ uint8_t Bus::getTypeIDbyName(const char* c)
   else if(strcmp_P(c,PM_BUSTYPE__WS2812_2CH_X3__CTR)==0){ return BUSTYPE_WS2812_2CH_X3; }
   else if(strcmp_P(c,PM_BUSTYPE__WS2812_WWA__CTR)==0){ return BUSTYPE_WS2812_WWA; }
   else if(strcmp_P(c,PM_BUSTYPE__WS2812_RGB__CTR)==0){ return BUSTYPE_WS2812_RGB; }
+  else if(strcmp_P(c, PM_BUSTYPE__HUB75E__CTR) == 0){ return TYPE_HUB75MATRIX_HS; }
   else if(strcmp_P(c,PM_BUSTYPE__GS8608__CTR)==0){ return BUSTYPE_GS8608; }
   else if(strcmp_P(c,PM_BUSTYPE__WS2811_400KHZ__CTR)==0){ return BUSTYPE_WS2811_400KHZ; }
   else if(strcmp_P(c,PM_BUSTYPE__TM1829__CTR)==0){ return BUSTYPE_TM1829; }
