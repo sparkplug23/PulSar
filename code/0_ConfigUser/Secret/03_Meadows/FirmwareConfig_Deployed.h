@@ -69,6 +69,8 @@
 // #define DEVICE_MEADOWS__OFFICE__PEBBLE_ESP32C3_TESTBED
 // #define DEVICE_MEADOWS__ROAMING__ADDRESSABLE_HARDWARE_TESTER
 
+#define DEVICE_MEADOWS__OFFICE__HUB75E_ESP32S3_N16R8
+
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -8618,6 +8620,78 @@ R"=====(
 
 
 
+
+#ifdef DEVICE_MEADOWS__OFFICE__HUB75E_ESP32S3_N16R8
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+
+  /***********************************
+  * SECTION: Enable Grouped
+  ************************************/  
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":[13,12,11,10,9,8,17,16,15,7,6,5,4,18],
+        "BusType":"HUB75E",
+        "Start":0,
+        "Length":4096,
+        "Width":128,
+        "Height":64
+      }
+    ],
+    "Segment0":{
+      "PixelRange":[0,4096],
+      "ColourPalette":"Rainbow",
+      "ColourType":3,
+      "Effects":{
+        "Function":"Static",
+        "Speed":127,
+        "Intensity":127,
+        "Grouping":1,
+        "RateMs":20
+      },
+      "BrightnessRGB":100,
+      "BrightnessCCT":0
+    },
+    "BrightnessRGB":100,
+    "BrightnessCCT":0
+  }
+  )=====";
+      
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif // END DEVICE
 
 
 
