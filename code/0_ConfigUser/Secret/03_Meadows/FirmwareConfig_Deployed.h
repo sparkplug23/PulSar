@@ -8662,25 +8662,39 @@ R"=====(
         "Pin":[13,12,11,10,9,8,17,16,15,7,6,5,4,18],
         "BusType":"HUB75E",
         "Start":0,
-        "Length":4096,
+        "Length":8192,
         "Width":128,
         "Height":64
       }
     ],
-    "Segment0":{
-      "PixelRange":[0,4096],
-      "ColourPalette":"Rainbow",
-      "ColourType":3,
-      "Effects":{
-        "Function":"Static",
-        "Speed":127,
-        "Intensity":127,
-        "Grouping":1,
-        "RateMs":20
-      },
-      "BrightnessRGB":100,
-      "BrightnessCCT":0
-    },
+    "MatrixConfig":[
+      {
+        "Width":128,
+        "Height":64,
+        "BottomStart":0,
+        "RightStart":0,
+        "Vertical":0,
+        "Serpentine":0,
+        "xOffset":0,
+        "yOffset":0
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,8192],
+        "ColourPalette":"Rainbow",
+        "ColourType":3,
+        "Effects":{
+          "Function":"Static",
+          "Speed":127,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs":20
+        },
+        "BrightnessRGB":100,
+        "BrightnessCCT":0
+      }
+    ],
     "BrightnessRGB":100,
     "BrightnessCCT":0
   }
