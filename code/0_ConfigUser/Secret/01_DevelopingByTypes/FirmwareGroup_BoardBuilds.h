@@ -1606,10 +1606,10 @@ DEFINE_PGM_CTR(MODULE_TEMPLATE)
 //       "\"" D_DEVICE_SENSOR_CLIMATE "\""
 //     "]"
 //   "},"    
-    "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
-      "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
-      "\"" D_REALTIME_SLOWDOWN "\":0"
-    "}"
+    // "\"" D_MODULE__NETWORK__MQTT__CTR "\":{"
+    //   "\"IfChanged\":10,\"TelePeriod\":60,\"ConfigPeriod\":120,"
+    //   "\"" D_REALTIME_SLOWDOWN "\":0"
+    // "}"
 //   "\"MQTT_Interface_Priority\":{\"" D_MODULE__ENERGY__INTERFACE__CTR "\":1}" // Each interface will have ability to reduce its subclass mqtt "ifchanged" rate
 // "}";
 
