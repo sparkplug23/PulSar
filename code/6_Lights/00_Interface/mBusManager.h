@@ -24,6 +24,15 @@
 #include <memory>
 
 
+
+#ifdef USE_MODULE_LIGHTS_HUB75
+
+#include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
+#include <ESP32-VirtualMatrixPanel-I2S-DMA.h>
+// #include "src/dependencies/fastled_slim/fastled_slim.h"
+
+#endif
+
 #if __cplusplus >= 201402L
 using std::make_unique;
 #else
@@ -122,8 +131,11 @@ make_unique(Args&&... args)
 #endif
 
 // Maximum number of pins per output. 5 for RGBCCT analog LEDs.
+#ifdef USE_MODULE_LIGHTS_HUB75
+#define OUTPUT_MAX_PINS_WLED 14
+#else
 #define OUTPUT_MAX_PINS_WLED 5
-
+#endif
 
 #ifdef ESP8266
 #define WLED_MAX_COLOR_ORDER_MAPPINGS 5
@@ -260,6 +272,7 @@ class Bus {
     inline  bool     isOnOff() const                           { return isOnOff(_type); }
     inline  bool     isPWM() const                             { return isPWM(_type); }
     inline  bool     isVirtual() const                         { return isVirtual(_type); }
+    inline  bool  isHub75(uint8_t type)      { return (type >= TYPE_HUB75MATRIX_MIN && type <= TYPE_HUB75MATRIX_MAX); }
     inline  bool     is16bit() const                           { return is16bit(_type); }
     virtual bool     isPlaceholder() const                      { return false; }
     inline  bool     mustRefresh() const                       { return mustRefresh(_type); }
@@ -276,7 +289,7 @@ class Bus {
     inline  bool     containsPixel(uint16_t pix) const         { return pix >= _start && pix < _start + _len; }
 
     static inline std::vector<LEDType> getLEDTypes()           { return {{BUSTYPE_NONE, "", PSTR("None")}}; } // not used. just for reference for derived classes
-    static constexpr uint8_t getNumberOfPins(uint8_t type)     { return isVirtual(type) ? 4 : isPWM(type) ? numPWMPins(type) : is2Pin(type) + 1; } // credit @PaoloTK
+    static constexpr size_t   getNumberOfPins(uint8_t type)     { return isVirtual(type) ? 4 : isPWM(type) ? numPWMPins(type) : isHub75(type) ? 5 : is2Pin(type) + 1; } // credit @PaoloTK; for HUB75 the 5 slots store config params (panelW, panelH, chain, rows, cols), not GPIO pins
     static constexpr uint8_t getNumberOfChannels(uint8_t type) { return hasWhite(type) + 3*hasRGB(type) + hasCCT(type); }
     static constexpr bool hasRGB(uint8_t type) {
       return !((type >= BUSTYPE_WS2812_1CH && type <= BUSTYPE_WS2812_WWA) || type == BUSTYPE_ANALOG_1CH || type == BUSTYPE_ANALOG_2CH || type == BUSTYPE_ONOFF);
@@ -300,6 +313,7 @@ class Bus {
     static constexpr bool  isOnOff(uint8_t type)      { return (type == BUSTYPE_ONOFF); }
     static constexpr bool  isPWM(uint8_t type)        { return (type >= BUSTYPE_ANALOG__MIN && type <= BUSTYPE_ANALOG__MAX); }
     static constexpr bool  isVirtual(uint8_t type)    { return (type >= BUSTYPE_VIRTUAL_MIN && type <= BUSTYPE_VIRTUAL_MAX); }
+    static constexpr bool  isHub75(uint8_t type)      { return (type >= TYPE_HUB75MATRIX_MIN && type <= TYPE_HUB75MATRIX_MAX); }
     static constexpr bool  is16bit(uint8_t type)      { return type == BUSTYPE_UCS8903 || type == BUSTYPE_UCS8904 || type == BUSTYPE_SM16825; }
     static constexpr bool  mustRefresh(uint8_t type)  { return type == BUSTYPE_TM1814; }
     static constexpr int   numPWMPins(uint8_t type)   { return (type - 40); }
@@ -371,7 +385,15 @@ struct BusConfig
   uint8_t skipAmount;
   bool refreshReq;
   uint8_t autoWhite;
-  uint8_t pins[5] = {LEDPIN, 255, 255, 255, 255};
+  #ifdef USE_MODULE_LIGHTS_HUB75
+  uint8_t pins[BUSCONFIG_MAX_PINS] = {
+    LEDPIN,
+    255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255
+  };
+  #else
+  uint8_t pins[BUSCONFIG_MAX_PINS] = {LEDPIN, 255, 255, 255, 255};
+  #endif
   uint16_t frequency;
   bool doubleBuffer;
   uint8_t milliAmpsPerLed;
@@ -635,6 +657,42 @@ class BusPlaceholder : public Bus {
     String _text;
 };
 
+
+#ifdef USE_MODULE_LIGHTS_HUB75
+class BusHub75Matrix : public Bus {
+  public:
+    BusHub75Matrix(const BusConfig &bc);
+    [[gnu::hot]] void setPixelColor(unsigned pix, uint32_t c) override;
+    [[gnu::hot]] uint32_t getPixelColor(unsigned pix) const override;
+    void show() override;
+    void setBrightness(uint8_t b) override;
+    size_t getPins(uint8_t* pinArray = nullptr) const override;
+    void deallocatePins();
+    void cleanup();
+
+    ~BusHub75Matrix() {
+      cleanup();
+    }
+
+    static std::vector<LEDType> getLEDTypes(void);
+
+  private:
+    MatrixPanel_I2S_DMA *display = nullptr;
+    VirtualMatrixPanel  *virtualDisp = nullptr;
+    HUB75_I2S_CFG mxconfig;
+    unsigned _panelWidth = 0;
+    uint8_t _rows = 1; // panels per row
+    uint8_t _cols = 1; // panels per column
+    bool _isVirtual = false; // note: this is not strictly needed but there are padding bytes here anyway
+    bool _isQuadScan = false;
+    CRGB *_ledBuffer = nullptr; // note: using uint32_t buffer is only 2% faster and not worth the extra RAM
+    byte *_ledsDirty = nullptr;
+    // workaround for missing constants on include path for non-MM
+    static constexpr uint32_t IS_BLACK = 0x000000u;
+    static constexpr uint32_t IS_DARKGREY = 0x333333u;
+    static constexpr int PIN_COUNT = 14;
+};
+#endif
 
 /*****************************************************************************************************************************************************************
  ***************************************************************************************************************************************************************** 

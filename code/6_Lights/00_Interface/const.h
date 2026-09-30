@@ -186,6 +186,12 @@
 #define BUSTYPE_P9813               53
 #define BUSTYPE_LPD6803             54
 #define BUSTYPE_2PIN_MAX            63
+
+#define BUSTYPE_HUB75MATRIX_MIN     64
+#define BUSTYPE_HUB75MATRIX_HS      65
+#define BUSTYPE_HUB75MATRIX_QS      66
+#define BUSTYPE_HUB75MATRIX_MAX     71
+
 //Network types (master broadcast) (80-95)
 #define BUSTYPE_VIRTUAL_MIN         80
 #define BUSTYPE_NET_DDP_RGB         80            //network DDP RGB bus (master broadcast bus)
@@ -238,6 +244,12 @@
 #define TYPE_P9813                BUSTYPE_P9813
 #define TYPE_LPD6803              BUSTYPE_LPD6803
 #define TYPE_2PIN_MAX             BUSTYPE_2PIN_MAX
+
+
+#define TYPE_HUB75MATRIX_MIN     BUSTYPE_HUB75MATRIX_MIN
+#define TYPE_HUB75MATRIX_HS      BUSTYPE_HUB75MATRIX_HS
+#define TYPE_HUB75MATRIX_QS      BUSTYPE_HUB75MATRIX_QS
+#define TYPE_HUB75MATRIX_MAX     BUSTYPE_HUB75MATRIX_MAX
 
 #define TYPE_VIRTUAL_MIN          BUSTYPE_VIRTUAL_MIN
 #define TYPE_NET_DDP_RGB          BUSTYPE_NET_DDP_RGB
