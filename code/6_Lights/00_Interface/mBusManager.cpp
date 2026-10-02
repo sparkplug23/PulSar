@@ -1223,7 +1223,7 @@ void BusNetwork::cleanup()
 #error ESP8266 does not support HUB75
 #endif
 
-BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite) {
+BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite, bc.count) {
   size_t lastHeap = ESP.getFreeHeap();
   _valid = false;
   _hasRgb = true;
@@ -1231,14 +1231,29 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
   virtualDisp = nullptr; // todo: this should be solved properly, can cause memory leak (if omitted here, nothing seems to work)
   _isVirtual = false;
   _isQuadScan = false;
-  // aliases for easier reading
-  unsigned panelWidth  = bc.pins[0];
-  unsigned panelHeight = bc.pins[1];
-  unsigned chainLength = bc.pins[2];
-  _rows = bc.pins[3];
-  _cols = bc.pins[4];
-  unsigned physicalPanelWidth =  max(16U, min(128U, panelWidth)); // keep a copy because QS panels require modified width/height
-  unsigned physicalPanelHeight = max(16U, min(64U, panelHeight));
+
+
+  // // aliases for easier reading
+  // unsigned panelWidth  = bc.pins[0];
+  // unsigned panelHeight = bc.pins[1];
+  // unsigned chainLength = bc.pins[2];
+  // _rows = bc.pins[3];
+  // _cols = bc.pins[4];
+  // unsigned physicalPanelWidth =  max(16U, min(128U, panelWidth)); // keep a copy because QS panels require modified width/height
+  // unsigned physicalPanelHeight = max(16U, min(64U, panelHeight));
+
+
+  unsigned panelWidth = 128;
+  unsigned panelHeight = 64;
+  unsigned chainLength = 1;
+
+  _rows = 1;
+  _cols = 1;
+
+  unsigned physicalPanelWidth = panelWidth;
+  unsigned physicalPanelHeight = panelHeight;
+
+
 
   mxconfig.double_buff = false; // Use our own memory-optimised buffer rather than the driver's own double-buffer
 
@@ -1295,122 +1310,145 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
 
 //  HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
 
-#if defined(ARDUINO_ADAFRUIT_MATRIXPORTAL_ESP32S3) || defined(MATRIXPORTAL_S3_PINOUT) // MatrixPortal ESP32-S3
-  // https://www.adafruit.com/product/5778
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Matrix Portal S3 config");
-  mxconfig.gpio = { 42, 41, 40, 38, 39, 37,  45, 36, 48, 35, 21, 47, 14, 2 };
+// #if defined(ARDUINO_ADAFRUIT_MATRIXPORTAL_ESP32S3) || defined(MATRIXPORTAL_S3_PINOUT) // MatrixPortal ESP32-S3
+//   // https://www.adafruit.com/product/5778
+//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Matrix Portal S3 config");
+//   mxconfig.gpio = { 42, 41, 40, 38, 39, 37,  45, 36, 48, 35, 21, 47, 14, 2 };
 
-#elif defined(HD_WF2_PINOUT) || defined(HD_WF2_S3_PINOUT) // Huidu HD-WF2 ESP32-S3 (no PSRAM)
-  // https://www.aliexpress.com/item/1005002258734810.html
-  // https://github.com/mrcodetastic/ESP32-HUB75-MatrixPanel-DMA/issues/433
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - HD-WF2 S3 config");
-  // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
-  mxconfig.gpio = { 2, 6, 10, 3, 7, 11, 39, 38, 37, 36, 21, 33, 35, 34 };
+// #elif defined(HD_WF2_PINOUT) || defined(HD_WF2_S3_PINOUT) // Huidu HD-WF2 ESP32-S3 (no PSRAM)
+//   // https://www.aliexpress.com/item/1005002258734810.html
+//   // https://github.com/mrcodetastic/ESP32-HUB75-MatrixPanel-DMA/issues/433
+//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - HD-WF2 S3 config");
+//   // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+//   mxconfig.gpio = { 2, 6, 10, 3, 7, 11, 39, 38, 37, 36, 21, 33, 35, 34 };
 
-#elif defined(HD_WF1_PINOUT) || defined(HD_WF1_S2_PINOUT) || defined(CONFIG_IDF_TARGET_ESP32S2)
-  #warning "using HUB75 on esp32-s2 in not recommended due to stability problems and low RAM"
-  // Huidu HD-WF1 ESP32-S2 - not recommended !
-  // https://github.com/mrcodetastic/ESP32-HUB75-MatrixPanel-DMA/issues/433
-  USER_PRINTLN("MatrixPanel_I2S_DMA - HD-WF1 S2 config");
-  mxconfig.gpio = {2, 6, 3, 4, 8, 5, 33, 35, 34, 39, 38, 37, 36, 12};
+// #elif defined(HD_WF1_PINOUT) || defined(HD_WF1_S2_PINOUT) || defined(CONFIG_IDF_TARGET_ESP32S2)
+//   #warning "using HUB75 on esp32-s2 in not recommended due to stability problems and low RAM"
+//   // Huidu HD-WF1 ESP32-S2 - not recommended !
+//   // https://github.com/mrcodetastic/ESP32-HUB75-MatrixPanel-DMA/issues/433
+//   USER_PRINTLN("MatrixPanel_I2S_DMA - HD-WF1 S2 config");
+//   mxconfig.gpio = {2, 6, 3, 4, 8, 5, 33, 35, 34, 39, 38, 37, 36, 12};
 
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) 
-  // specific ESP32-S3 pinouts
+// #elif defined(CONFIG_IDF_TARGET_ESP32S3) 
+//   // specific ESP32-S3 pinouts
 
-  #if defined(MOONHUB_S3_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - T7 S3, MOONHUB pinout");
-  // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
-  mxconfig.gpio = { 1, 5, 6, 7, 13, 9, 16, 48, 47, 21, 38, 8, 4, 18 };
+//   #if defined(MOONHUB_S3_PINOUT)
+//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - T7 S3, MOONHUB pinout");
+//   // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+//   mxconfig.gpio = { 1, 5, 6, 7, 13, 9, 16, 48, 47, 21, 38, 8, 4, 18 };
 
-  #elif defined(WAVESHARE_S3_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Waveshare S3, Waveshare pinout");
-  // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
-  mxconfig.gpio = {4, 5, 6, 7, 15, 16, 18, 8, 3, 42, 9, 40, 2, 41};
+//   #elif defined(WAVESHARE_S3_PINOUT)
+//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Waveshare S3, Waveshare pinout");
+//   // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+//   mxconfig.gpio = {4, 5, 6, 7, 15, 16, 18, 8, 3, 42, 9, 40, 2, 41};
   
-  #elif defined(SEENGREAT_V1_S3_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 devKit-C, SEENGREAT_V1 pinout");
-  // https://seengreat.com/wiki/186
-  mxconfig.gpio = { 37, 6, 36,         // R1_PIN, G1_PIN, B1_PIN,
-                    35, 5,  0,         // R2_PIN, G2_PIN, B2_PIN,
-                    45, 1, 48,  2, 4,  //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-                    38, 21, 47 };      // LAT_PIN, OE_PIN,CLK_PIN
+//   #elif defined(SEENGREAT_V1_S3_PINOUT)
+//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 devKit-C, SEENGREAT_V1 pinout");
+//   // https://seengreat.com/wiki/186
+//   mxconfig.gpio = { 37, 6, 36,         // R1_PIN, G1_PIN, B1_PIN,
+//                     35, 5,  0,         // R2_PIN, G2_PIN, B2_PIN,
+//                     45, 1, 48,  2, 4,  //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+//                     38, 21, 47 };      // LAT_PIN, OE_PIN,CLK_PIN
 
-  #elif defined(SEENGREAT_V2_S3_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 devKit-C, SEENGREAT_V2 pinout");
-  // https://seengreat.com/wiki/186
-  mxconfig.gpio = { 18, 8, 17,         // R1_PIN, G1_PIN, B1_PIN,
-                    16, 1, 15,         // R2_PIN, G2_PIN, B2_PIN,
-                    7, 48, 6, 47, 2,   //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-                    21, 4, 5 };        // LAT_PIN, OE_PIN,CLK_PIN
+//   #elif defined(SEENGREAT_V2_S3_PINOUT)
+//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 devKit-C, SEENGREAT_V2 pinout");
+//   // https://seengreat.com/wiki/186
+//   mxconfig.gpio = { 18, 8, 17,         // R1_PIN, G1_PIN, B1_PIN,
+//                     16, 1, 15,         // R2_PIN, G2_PIN, B2_PIN,
+//                     7, 48, 6, 47, 2,   //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+//                     21, 4, 5 };        // LAT_PIN, OE_PIN,CLK_PIN
 
-  #elif defined(SEENGREAT_MATRIX_S3_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Seengreat RGB Matrix HUB75 S3 pinout");
-  // https://seengreat.com/wiki/214 (dedicated HUB75 board, SKU 260612 - NOT the same board/pinout as SEENGREAT_V1/V2_S3_PINOUT above)
-  mxconfig.gpio = {  5,  4,  6,        // R1_PIN, G1_PIN, B1_PIN,
-                    15,  7, 17,        // R2_PIN, G2_PIN, B2_PIN,
-                     8, 18, 10,  9, 16,//  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-                    11, 13, 12 };      // LAT_PIN, OE_PIN,CLK_PIN
+//   #elif defined(SEENGREAT_MATRIX_S3_PINOUT)
+//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Seengreat RGB Matrix HUB75 S3 pinout");
+//   // https://seengreat.com/wiki/214 (dedicated HUB75 board, SKU 260612 - NOT the same board/pinout as SEENGREAT_V1/V2_S3_PINOUT above)
+//   mxconfig.gpio = {  5,  4,  6,        // R1_PIN, G1_PIN, B1_PIN,
+//                     15,  7, 17,        // R2_PIN, G2_PIN, B2_PIN,
+//                      8, 18, 10,  9, 16,//  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+//                     11, 13, 12 };      // LAT_PIN, OE_PIN,CLK_PIN
 
-  #else
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 generic pinout");
-  // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
-  mxconfig.gpio = {1, 2, 42, 41, 40, 39, 45, 48, 47, 21, 38, 8, 3, 18};
-  #endif // CONFIG_IDF_TARGET_ESP32S3
+//   #else
+//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 generic pinout");
+//   // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+//   mxconfig.gpio = {1, 2, 42, 41, 40, 39, 45, 48, 47, 21, 38, 8, 3, 18};
+//   #endif // CONFIG_IDF_TARGET_ESP32S3
 
-#elif defined(CONFIG_IDF_TARGET_ESP32)
-  // generic ESP32 pinouts
-  #if defined(BOARD_HAS_PSRAM) // all ESP32 pinouts require gpio 16 or 17, which are controlling PSRAM
-    #warning "ESP32 HUB75 pinout is not compatible with PSRAM boards."
-  #endif
-  #if defined(ESP32_FORUM_PINOUT) || defined(FORUM_ESP32_PINOUT) // Common format for boards designed for SmartMatrix
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - ESP32_FORUM_PINOUT");
-/*
-    ESP32 with SmartMatrix's default pinout - ESP32_FORUM_PINOUT
-    https://github.com/pixelmatix/SmartMatrix/blob/teensylc/src/MatrixHardware_ESP32_V0.h
-    Can use a board like https://github.com/rorosaurus/esp32-hub75-driver
-*/
- mxconfig.gpio = { 2, 15, 4, 16, 27, 17, 5, 18, 19, 21, 12, 26, 25, 22 };
+// #elif defined(CONFIG_IDF_TARGET_ESP32)
+//   // generic ESP32 pinouts
+//   #if defined(BOARD_HAS_PSRAM) // all ESP32 pinouts require gpio 16 or 17, which are controlling PSRAM
+//     #warning "ESP32 HUB75 pinout is not compatible with PSRAM boards."
+//   #endif
+//   #if defined(ESP32_FORUM_PINOUT) || defined(FORUM_ESP32_PINOUT) // Common format for boards designed for SmartMatrix
+//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - ESP32_FORUM_PINOUT");
+// /*
+//     ESP32 with SmartMatrix's default pinout - ESP32_FORUM_PINOUT
+//     https://github.com/pixelmatix/SmartMatrix/blob/teensylc/src/MatrixHardware_ESP32_V0.h
+//     Can use a board like https://github.com/rorosaurus/esp32-hub75-driver
+// */
+//  mxconfig.gpio = { 2, 15, 4, 16, 27, 17, 5, 18, 19, 21, 12, 26, 25, 22 };
 
-  #elif defined(SEENGREAT_V1_ESP32_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - EP32-DevKitC V4, SEENGREAT_V1 pinout");
-  // https://seengreat.com/wiki/186
-  mxconfig.gpio = { 18, 25, 5,         // R1_PIN, G1_PIN, B1_PIN,
-                    17, 33, 16,        // R2_PIN, G2_PIN, B2_PIN,
-                     4,  3, 0, 21, 32, //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-                    19, 15, 2};        // LAT_PIN, OE_PIN,CLK_PIN
+//   #elif defined(SEENGREAT_V1_ESP32_PINOUT)
+//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - EP32-DevKitC V4, SEENGREAT_V1 pinout");
+//   // https://seengreat.com/wiki/186
+//   mxconfig.gpio = { 18, 25, 5,         // R1_PIN, G1_PIN, B1_PIN,
+//                     17, 33, 16,        // R2_PIN, G2_PIN, B2_PIN,
+//                      4,  3, 0, 21, 32, //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+//                     19, 15, 2};        // LAT_PIN, OE_PIN,CLK_PIN
 
-  #elif defined(SEENGREAT_V2_ESP32_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - EP32-DevKitC V4, SEENGREAT_V2 pinout, Latch pin IO2");
-  // https://seengreat.com/wiki/186
-  mxconfig.gpio = { 18, 17, 19,        // R1_PIN, G1_PIN, B1_PIN,
-                    21, 23, 27,        // R2_PIN, G2_PIN, B2_PIN,
-                    26, 16, 25, 4, 22, //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-                     2, 32, 33};       // LAT_PIN, OE_PIN,CLK_PIN
+//   #elif defined(SEENGREAT_V2_ESP32_PINOUT)
+//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - EP32-DevKitC V4, SEENGREAT_V2 pinout, Latch pin IO2");
+//   // https://seengreat.com/wiki/186
+//   mxconfig.gpio = { 18, 17, 19,        // R1_PIN, G1_PIN, B1_PIN,
+//                     21, 23, 27,        // R2_PIN, G2_PIN, B2_PIN,
+//                     26, 16, 25, 4, 22, //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+//                      2, 32, 33};       // LAT_PIN, OE_PIN,CLK_PIN
 
-  #else
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - ESP32 Default pins");
-  /*
-   https://github.com/mrfaptastic/ESP32-HUB75-MatrixPanel-DMA?tab=readme-ov-file
+//   #else
+//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - ESP32 Default pins");
+//   /*
+//    https://github.com/mrfaptastic/ESP32-HUB75-MatrixPanel-DMA?tab=readme-ov-file
 
-   Boards
+//    Boards
 
-   https://esp32trinity.com/
-   https://www.electrodragon.com/product/rgb-matrix-panel-drive-interface-board-for-esp32-dma/
+//    https://esp32trinity.com/
+//    https://www.electrodragon.com/product/rgb-matrix-panel-drive-interface-board-for-esp32-dma/
 
-  */
-  mxconfig.gpio = { 25, 26, 27, 14, 12, 13, 23, 19, 5, 17, 18, 4, 15, 16 };
-  #endif // CONFIG_IDF_TARGET_ESP32
+//   */
+//   mxconfig.gpio = { 25, 26, 27, 14, 12, 13, 23, 19, 5, 17, 18, 4, 15, 16 };
+//   #endif // CONFIG_IDF_TARGET_ESP32
 
-  #else
-    #error "unknown or unsupported HUB75 board."
+//   #else
+//     #error "unknown or unsupported HUB75 board."
+// #endif
+
+#ifdef HUB75_PINOUT__ESP32S3_OFFICE_TEST
+
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - PulSar ESP32-S3 Office HUB75E test pinout");
+
+  // HUB75_I2S_CFG::i2s_pins order:
+  // R1, G1, B1,
+  // R2, G2, B2,
+  // A, B, C, D, E,
+  // LAT, OE, CLK
+
+  mxconfig.gpio = {
+    13, 12, 11,
+    10,  9,  8,
+    17, 16, 15, 7, 18,
+     5,  4,  6
+  };
+
+#else
+
+  #error "HUB75 pinout not configured for this PulSar build"
+
 #endif
 
-  int8_t pins[PIN_COUNT];
-  memcpy(pins, &mxconfig.gpio, sizeof(mxconfig.gpio));
-  if (!PinManager::allocateMultiplePins(pins, PIN_COUNT, PinOwner::HUB75, true)) {
-    DEBUGBUS_PRINTLN("Failed to allocate pins for HUB75");
-    return;
-  }
+  // int8_t pins[PIN_COUNT];
+  // memcpy(pins, &mxconfig.gpio, sizeof(mxconfig.gpio));
+  // if (!PinManager::allocateMultiplePins(pins, PIN_COUNT, PinOwner::HUB75, true)) {
+  //   DEBUGBUS_PRINTLN("Failed to allocate pins for HUB75");
+  //   return;
+  // }
 
   if (bc.colorOrder == COL_ORDER_RGB) {
     DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = Default color order (RGB)");
@@ -1441,13 +1479,34 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
       return;
   }
 
-  this->_len = (display->width() * display->height()); // note: this returns correct number of pixels but incorrect dimensions if using virtual display (updated below)
+  // this->_len = (display->width() * display->height()); // note: this returns correct number of pixels but incorrect dimensions if using virtual display (updated below)
 
-  DEBUGBUS_PRINTF("Length: %u\n", _len);
-  if (this->_len > MAX_LEDS) {
-    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA Too many LEDS - playing safe");
-    return;
-  }
+  // DEBUGBUS_PRINTF("Length: %u\n", _len);
+  // if (this->_len > MAX_LEDS) {
+  //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA Too many LEDS - playing safe");
+  //   return;
+  // }
+
+const uint32_t driverLength = display->width() * display->height();
+
+DEBUGBUS_PRINTF(
+  "HUB75 length: BusConfig=%u driver=%u\n",
+  _len,
+  driverLength
+);
+
+if (driverLength != _len)
+{
+  DEBUGBUS_PRINTF(
+    "HUB75 ERROR: configured Length=%u but physical matrix is %u pixels\n",
+    _len,
+    driverLength
+  );
+
+  cleanup();
+  return;
+}
+
 
   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA created");
 
