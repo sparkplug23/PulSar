@@ -381,7 +381,7 @@ void mInterfaceLight::Save_Module()
 
   if(!JBI->RequestLock(GetModuleUniqueID())){
     return;
-  }
+  } 
  
   JBI->Start();
 
@@ -938,7 +938,7 @@ void mInterfaceLight::BusManager_Create_DefaultSinglePWM_5CH()
 //       }
 //     }
 
-//     AddLog_Array(LOG_LEVEL_INFO, PSTR("pins"), pins, 5);
+//     AddLog_Array(LOG_LEVEL_INFO, PSTR("pins"), pins, pin_i);
 //   }
 
 
@@ -1195,7 +1195,7 @@ void mInterfaceLight::BusManager_Create_DefaultSinglePWM_5CH()
 //       }
 //     }
 
-//     AddLog_Array(LOG_LEVEL_INFO, PSTR("pins"), pins, 5);
+//     AddLog_Array(LOG_LEVEL_INFO, PSTR("pins"), pins, pin_i);
 //   }
 
 

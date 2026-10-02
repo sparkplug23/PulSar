@@ -29,7 +29,7 @@
 
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #include <ESP32-VirtualMatrixPanel-I2S-DMA.h>
-// #include "src/dependencies/fastled_slim/fastled_slim.h"
+#include "6_Lights/03_Animator/fastled_slim/fastled_slim.h"
 
 #endif
 
@@ -132,9 +132,9 @@ make_unique(Args&&... args)
 
 // Maximum number of pins per output. 5 for RGBCCT analog LEDs.
 #ifdef USE_MODULE_LIGHTS_HUB75
-#define OUTPUT_MAX_PINS_WLED 14
+#define BUSCONFIG_MAX_PINS 14
 #else
-#define OUTPUT_MAX_PINS_WLED 5
+#define BUSCONFIG_MAX_PINS 5
 #endif
 
 #ifdef ESP8266
@@ -289,7 +289,7 @@ class Bus {
     inline  bool     containsPixel(uint16_t pix) const         { return pix >= _start && pix < _start + _len; }
 
     static inline std::vector<LEDType> getLEDTypes()           { return {{BUSTYPE_NONE, "", PSTR("None")}}; } // not used. just for reference for derived classes
-    static constexpr size_t getNumberOfPins(uint8_t type) { return isVirtual(type) ? 4 : isPWM(type) ? numPWMPins(type) : isHub75(type) ? 14 : is2Pin(type) + 1; }
+    static constexpr size_t getNumberOfPins(uint8_t type) { return isVirtual(type) ? 4 : isPWM(type) ? numPWMPins(type) : isHub75(type) ? BUSCONFIG_MAX_PINS : is2Pin(type) + 1; }
     static constexpr uint8_t getNumberOfChannels(uint8_t type) { return hasWhite(type) + 3*hasRGB(type) + hasCCT(type); }
     static constexpr bool hasRGB(uint8_t type) {
       return !((type >= BUSTYPE_WS2812_1CH && type <= BUSTYPE_WS2812_WWA) || type == BUSTYPE_ANALOG_1CH || type == BUSTYPE_ANALOG_2CH || type == BUSTYPE_ONOFF);
@@ -666,7 +666,7 @@ class BusHub75Matrix : public Bus {
     [[gnu::hot]] uint32_t getPixelColor(unsigned pix) const override;
     void show() override;
     void setBrightness(uint8_t b) override;
-    size_t getPins(uint8_t* pinArray = nullptr) const override;
+    uint8_t getPins(uint8_t* pinArray = nullptr) const override;
     void deallocatePins();
     void cleanup();
 

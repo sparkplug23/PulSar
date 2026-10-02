@@ -14,6 +14,37 @@ uint16_t PolyBus::total_virtual_length = 0;
 #endif
 
 
+// functions to get/set bits in an array - based on functions created by Brandon for GOL
+//  toDo : make this a class that's completely defined in a header file
+// note: these functions are automatically inline by the compiler
+static inline bool getBitFromArray(const uint8_t* byteArray, size_t position) { // get bit value
+  size_t byteIndex = position >> 3;    // divide by 8
+  unsigned bitIndex = position & 0x07; // modulo 8
+  uint8_t byteValue = byteArray[byteIndex];
+  return (byteValue >> bitIndex) & 1;
+}
+
+static inline void setBitInArray(uint8_t* byteArray, size_t position, bool value) {  // set bit - with error handling for nullptr
+    //if (byteArray == nullptr) return;
+    size_t byteIndex = position >> 3;    // divide by 8
+    unsigned bitIndex = position & 0x07; // modulo 8
+    if (value)
+        byteArray[byteIndex] |= (1 << bitIndex);
+    else
+        byteArray[byteIndex] &= ~(1 << bitIndex);
+}
+
+static inline size_t getBitArrayBytes(size_t num_bits) { // number of bytes needed for an array with num_bits bits
+  return (num_bits + 7) >> 3;
+}
+
+static inline void setBitArray(uint8_t* byteArray, size_t numBits, bool value) {  // set all bits to same value
+  if (byteArray == nullptr) return;
+  size_t len =  getBitArrayBytes(numBits);
+  if (value) memset(byteArray, 0xFF, len);
+  else memset(byteArray, 0x00, len);
+}
+
 /***************************************************************************************************************************************************************** 
  ** ColorOrderMap *************************************************************************************************************************************************** 
  *****************************************************************************************************************************************************************/
