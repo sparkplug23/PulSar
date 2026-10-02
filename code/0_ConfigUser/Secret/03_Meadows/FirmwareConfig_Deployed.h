@@ -8640,6 +8640,7 @@ R"=====(
 #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
 #define BOARD_HAS_PSRAM
 
+#define HUB75_PINOUT__ESP32S3_OFFICE_TEST
 
   /***********************************
   * SECTION: Enable Grouped
@@ -8653,18 +8654,22 @@ R"=====(
    * SECTION: Lighting Configs
   ************************************/   
 
+        // "Pin":[13,12,11,10,9,8,17,16,15,7,6,5,4,18],
+        // "BusType":"HUB75E",
+        // "Start":0,
+        // "Length":8192,
+        // "Width":128,
+        // "Height":64
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
   {
     "BusConfig":[
       {
-        "Pin":[13,12,11,10,9,8,17,16,15,7,6,5,4,18],
+        "Pin":[128,64,1,1,1],
         "BusType":"HUB75E",
         "Start":0,
-        "Length":8192,
-        "Width":128,
-        "Height":64
+        "Length":8192
       }
     ],
     "MatrixConfig":[

@@ -1233,25 +1233,15 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
   _isQuadScan = false;
 
 
-  // // aliases for easier reading
-  // unsigned panelWidth  = bc.pins[0];
-  // unsigned panelHeight = bc.pins[1];
-  // unsigned chainLength = bc.pins[2];
-  // _rows = bc.pins[3];
-  // _cols = bc.pins[4];
-  // unsigned physicalPanelWidth =  max(16U, min(128U, panelWidth)); // keep a copy because QS panels require modified width/height
-  // unsigned physicalPanelHeight = max(16U, min(64U, panelHeight));
+  // aliases for easier reading
+  unsigned panelWidth  = bc.pins[0];
+  unsigned panelHeight = bc.pins[1];
+  unsigned chainLength = bc.pins[2];
+  _rows = bc.pins[3];
+  _cols = bc.pins[4];
+  unsigned physicalPanelWidth =  max(16U, min(128U, panelWidth)); // keep a copy because QS panels require modified width/height
+  unsigned physicalPanelHeight = max(16U, min(64U, panelHeight));
 
-
-  unsigned panelWidth = 128;
-  unsigned panelHeight = 64;
-  unsigned chainLength = 1;
-
-  _rows = 1;
-  _cols = 1;
-
-  unsigned physicalPanelWidth = panelWidth;
-  unsigned physicalPanelHeight = panelHeight;
 
 
 
@@ -1687,16 +1677,16 @@ void BusHub75Matrix::cleanup() {
   display = nullptr;
   virtualDisp = nullptr; // note: when not using "NO_GFX" this causes a memory leak
   #else  // runtime reconfiguration is not working on -S3, request reboot from user instead
-    errorFlag = ERR_REBOOT_NEEDED;
+    // errorFlag = ERR_REBOOT_NEEDED;
   #endif
   if (_ledBuffer != nullptr) d_free(_ledBuffer); _ledBuffer = nullptr;
   if (_ledsDirty != nullptr) d_free(_ledsDirty); _ledsDirty = nullptr;
 }
 
 void BusHub75Matrix::deallocatePins() {
-  uint8_t pins[PIN_COUNT];
-  memcpy(pins, &mxconfig.gpio, sizeof(mxconfig.gpio));
-  PinManager::deallocateMultiplePins(pins, PIN_COUNT, PinOwner::HUB75);
+  // uint8_t pins[PIN_COUNT];
+  // memcpy(pins, &mxconfig.gpio, sizeof(mxconfig.gpio));
+  // PinManager::deallocateMultiplePins(pins, PIN_COUNT, PinOwner::HUB75);
 }
 
 std::vector<LEDType> BusHub75Matrix::getLEDTypes() {
@@ -1706,14 +1696,17 @@ std::vector<LEDType> BusHub75Matrix::getLEDTypes() {
   };
 }
 
-size_t BusHub75Matrix::getPins(uint8_t* pinArray) const {
-  if (pinArray) {
-    pinArray[0] = _isQuadScan ? mxconfig.mx_width  /2 : mxconfig.mx_width;
-    pinArray[1] = _isQuadScan ? mxconfig.mx_height *2 : mxconfig.mx_height;
+uint8_t BusHub75Matrix::getPins(uint8_t* pinArray) const
+{
+  if (pinArray)
+  {
+    pinArray[0] = _isQuadScan ? mxconfig.mx_width / 2 : mxconfig.mx_width;
+    pinArray[1] = _isQuadScan ? mxconfig.mx_height * 2 : mxconfig.mx_height;
     pinArray[2] = mxconfig.chain_length;
     pinArray[3] = _rows;
     pinArray[4] = _cols;
   }
+
   return 5;
 }
 
