@@ -131,11 +131,11 @@ make_unique(Args&&... args)
 #endif
 
 // Maximum number of pins per output. 5 for RGBCCT analog LEDs.
-#ifdef USE_MODULE_LIGHTS_HUB75
-#define BUSCONFIG_MAX_PINS 14
-#else
+// #ifdef USE_MODULE_LIGHTS_HUB75
+// #define BUSCONFIG_MAX_PINS 14
+// #else
 #define BUSCONFIG_MAX_PINS 5
-#endif
+// #endif
 
 #ifdef ESP8266
 #define WLED_MAX_COLOR_ORDER_MAPPINGS 5
@@ -289,7 +289,7 @@ class Bus {
     inline  bool     containsPixel(uint16_t pix) const         { return pix >= _start && pix < _start + _len; }
 
     static inline std::vector<LEDType> getLEDTypes()           { return {{BUSTYPE_NONE, "", PSTR("None")}}; } // not used. just for reference for derived classes
-    static constexpr size_t getNumberOfPins(uint8_t type) { return isVirtual(type) ? 4 : isPWM(type) ? numPWMPins(type) : isHub75(type) ? BUSCONFIG_MAX_PINS : is2Pin(type) + 1; }
+    static constexpr size_t getNumberOfPins(uint8_t type) { return isVirtual(type) ? 4 : isPWM(type) ? numPWMPins(type) : isHub75(type) ? 5 : is2Pin(type) + 1; }
     static constexpr uint8_t getNumberOfChannels(uint8_t type) { return hasWhite(type) + 3*hasRGB(type) + hasCCT(type); }
     static constexpr bool hasRGB(uint8_t type) {
       return !((type >= BUSTYPE_WS2812_1CH && type <= BUSTYPE_WS2812_WWA) || type == BUSTYPE_ANALOG_1CH || type == BUSTYPE_ANALOG_2CH || type == BUSTYPE_ONOFF);
@@ -384,16 +384,8 @@ struct BusConfig
   bool reversed;
   uint8_t skipAmount;
   bool refreshReq;
-  uint8_t autoWhite;
-  #ifdef USE_MODULE_LIGHTS_HUB75
-  uint8_t pins[BUSCONFIG_MAX_PINS] = {
-    LEDPIN,
-    255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255
-  };
-  #else
+  uint8_t autoWhite;  
   uint8_t pins[BUSCONFIG_MAX_PINS] = {LEDPIN, 255, 255, 255, 255};
-  #endif
   uint16_t frequency;
   bool doubleBuffer;
   uint8_t milliAmpsPerLed;
