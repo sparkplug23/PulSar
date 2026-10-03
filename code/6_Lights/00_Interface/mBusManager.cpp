@@ -1284,7 +1284,7 @@ DEBUGBUS_PRINTF(
   // mxconfig.min_refresh_rate = 90;
   // mxconfig.min_refresh_rate = 120;
 
-  mxconfig.clkphase = bc.reversed;
+  mxconfig.clkphase = true; //reversed;
   // allow chain length up to 4, limit to prevent bad data from preventing boot due to low memory
   mxconfig.chain_length = max(1U, min(chainLength, 4U));
 
@@ -1526,7 +1526,11 @@ if (driverLength != _len)
   return;
 }
 
-
+DEBUGBUS_PRINTF(
+  "HUB75 HW CONFIG: clkphase=%u double_buff=%u\n",
+  mxconfig.clkphase,
+  mxconfig.double_buff
+);
   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA created");
 
   // as noted in HUB75_I2S_DMA library, some panels can show ghosting if set higher than 239, so let users override at compile time
