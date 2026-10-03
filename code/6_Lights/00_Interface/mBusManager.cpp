@@ -1634,16 +1634,19 @@ void BusNetwork::cleanup()
 //     DEBUGBUS_PRINTLN(F(" bytes."));
 //   }
 // }
-
 BusHub75Matrix::BusHub75Matrix(const BusConfig &bc)
   : Bus(bc.type, bc.start, bc.autoWhite, bc.count)
 {
   _valid = false;
   _hasRgb = true;
   _hasWhite = false;
+
+  virtualDisp = nullptr;
   _isVirtual = false;
   _isQuadScan = false;
-  virtualDisp = nullptr;
+
+  _rows = 1;
+  _cols = 1;
 
   DEBUGBUS_PRINTLN("HUB75 MINIMAL TEST START");
 
@@ -1658,12 +1661,21 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc)
   mxconfig.mx_height = 64;
   mxconfig.chain_length = 1;
 
+  // mxconfig.gpio = {
+  //   11, 12, 10,       // R1, G1, B1
+  //    9, 13,  8,       // R2, G2, B2
+  //   18,  5, 17, 6, 4, // A, B, C, D, E
+  //    7, 15, 16        // LAT, OE, CLK
+  // };
+  
   mxconfig.gpio = {
-    11, 12, 10,      // R1, G1, B1
-     9, 13,  8,      // R2, G2, B2
-    18,  5, 17, 6, 4,// A, B, C, D, E
-     7, 15, 16       // LAT, OE, CLK
-  };
+  11, 10, 12,       // R1, G1, B1
+   9,  8, 13,       // R2, G2, B2
+  18,  5, 17, 6, 4, // A, B, C, D, E
+   7, 15, 16        // LAT, OE, CLK
+};
+
+
 
   mxconfig.driver = HUB75_I2S_CFG::FM6126A;
   mxconfig.clkphase = false;
@@ -1702,24 +1714,151 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc)
   if (!display->begin())
   {
     DEBUGBUS_PRINTLN("HUB75: begin FAILED");
+
     delete display;
     display = nullptr;
+
     return;
   }
 
   DEBUGBUS_PRINTLN("HUB75: begin OK");
 
+  _panelWidth = display->width();
+  _len = display->width() * display->height();
+
+  DEBUGBUS_PRINTF(
+    "HUB75: width=%u height=%u len=%u\n",
+    display->width(),
+    display->height(),
+    _len
+  );
+
   display->setBrightness8(128);
   display->clearScreen();
 
-  DEBUGBUS_PRINTLN("HUB75: setting test pixels");
+  // ------------------------------------------------------------
+  // Allocate the normal PulSar HUB75 buffers.
+  //
+  // show() can still return immediately for now, but the rest of
+  // PulSar can safely use setPixelColor() / getPixelColor().
+  // ------------------------------------------------------------
 
-  display->drawPixelRGB888(0, 0, 255, 0, 0);
-  display->drawPixelRGB888(1, 0, 0, 255, 0);
-  display->drawPixelRGB888(2, 0, 0, 0, 255);
+  DEBUGBUS_PRINTLN("HUB75: allocating dirty buffer");
 
-  _panelWidth = 128;
-  _len = 8192;
+  _ledsDirty = static_cast<byte*>(
+    d_malloc(
+      getBitArrayBytes(_len)
+    )
+  );
+
+  if (_ledsDirty == nullptr)
+  {
+    DEBUGBUS_PRINTLN("HUB75: dirty buffer allocation FAILED");
+
+    display->stopDMAoutput();
+    delete display;
+    display = nullptr;
+
+    return;
+  }
+
+  setBitArray(_ledsDirty, _len, false);
+
+  DEBUGBUS_PRINTLN("HUB75: allocating LED buffer");
+
+  _ledBuffer = static_cast<CRGB*>(
+    allocate_buffer(
+      _len * sizeof(CRGB),
+      BFRALLOC_PREFER_DRAM | BFRALLOC_CLEAR
+    )
+  );
+
+  if (_ledBuffer == nullptr)
+  {
+    DEBUGBUS_PRINTLN("HUB75: LED buffer allocation FAILED");
+
+    d_free(_ledsDirty);
+    _ledsDirty = nullptr;
+
+    display->stopDMAoutput();
+    delete display;
+    display = nullptr;
+
+    return;
+  }
+
+  DEBUGBUS_PRINTF(
+    "HUB75: buffers OK ledBuffer=%p dirty=%p ledBytes=%u dirtyBytes=%u\n",
+    (void*)_ledBuffer,
+    (void*)_ledsDirty,
+    _len * sizeof(CRGB),
+    getBitArrayBytes(_len)
+  );
+
+  // ------------------------------------------------------------
+  // Direct hardware test
+  //
+  // Pixels 0,1,2:
+  //   RED
+  //   GREEN
+  //   BLUE
+  //
+  // Pixels 10..100:
+  //   full rainbow across the first row
+  // ------------------------------------------------------------
+
+for (int x = 0; x < 8000; x++)
+{
+  display->drawPixelRGB888(x, 0, 0, 0, 0);       // RED
+}
+
+
+display->clearScreen();
+
+for (int x = 0; x < 10; x++)
+{
+  display->drawPixelRGB888(x, 0, 255, 0, 0);
+}
+
+for (int x = 10; x < 20; x++)
+{
+  display->drawPixelRGB888(x, 0, 0, 255, 0);
+}
+
+for (int x = 20; x < 30; x++)
+{
+  display->drawPixelRGB888(x, 0, 0, 0, 255);
+}
+
+for (int x = 40; x <= 127; x++)
+{
+  uint16_t wheel = ((x - 40) * 255U) / 87U;
+
+  uint8_t r = 0;
+  uint8_t g = 0;
+  uint8_t b = 0;
+
+  if (wheel < 85)
+  {
+    r = 255 - wheel * 3;
+    g = wheel * 3;
+  }
+  else if (wheel < 170)
+  {
+    wheel -= 85;
+    g = 255 - wheel * 3;
+    b = wheel * 3;
+  }
+  else
+  {
+    wheel -= 170;
+    r = wheel * 3;
+    b = 255 - wheel * 3;
+  }
+
+  display->drawPixelRGB888(x, 0, r, g, b);
+}
+
   _valid = true;
 
   DEBUGBUS_PRINTLN("HUB75 MINIMAL TEST READY");
@@ -1795,7 +1934,7 @@ void BusHub75Matrix::setBrightness(uint8_t b) {
 void BusHub75Matrix::show(void)
 {
   return;
-  
+
   static uint32_t showCount = 0;
   showCount++;
 
