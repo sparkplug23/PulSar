@@ -1242,7 +1242,35 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
   unsigned physicalPanelWidth =  max(16U, min(128U, panelWidth)); // keep a copy because QS panels require modified width/height
   unsigned physicalPanelHeight = max(16U, min(64U, panelHeight));
 
+DEBUGBUS_PRINTLN("HUB75: constructor entered");
 
+DEBUGBUS_PRINTF(
+  "HUB75: config %ux%u chain=%u rows=%u cols=%u len=%u\n",
+  panelWidth,
+  panelHeight,
+  chainLength,
+  _rows,
+  _cols,
+  _len
+);
+
+DEBUGBUS_PRINTF(
+  "HUB75: GPIO R1=%d G1=%d B1=%d R2=%d G2=%d B2=%d A=%d B=%d C=%d D=%d E=%d LAT=%d OE=%d CLK=%d\n",
+  mxconfig.gpio.r1,
+  mxconfig.gpio.g1,
+  mxconfig.gpio.b1,
+  mxconfig.gpio.r2,
+  mxconfig.gpio.g2,
+  mxconfig.gpio.b2,
+  mxconfig.gpio.a,
+  mxconfig.gpio.b,
+  mxconfig.gpio.c,
+  mxconfig.gpio.d,
+  mxconfig.gpio.e,
+  mxconfig.gpio.lat,
+  mxconfig.gpio.oe,
+  mxconfig.gpio.clk
+);
 
 
   mxconfig.double_buff = false; // Use our own memory-optimised buffer rather than the driver's own double-buffer
@@ -1419,7 +1447,7 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
   // R2, G2, B2,
   // A, B, C, D, E,
   // LAT, OE, CLK
-  
+
 mxconfig.gpio = {
   11, 12, 10,   // R1, G1, B1
    9, 13,  8,   // R2, G2, B2
@@ -1461,6 +1489,7 @@ mxconfig.gpio = {
                 mxconfig.gpio.r1, mxconfig.gpio.g1, mxconfig.gpio.b1, mxconfig.gpio.r2, mxconfig.gpio.g2, mxconfig.gpio.b2,
                 mxconfig.gpio.a, mxconfig.gpio.b, mxconfig.gpio.c, mxconfig.gpio.d, mxconfig.gpio.e, mxconfig.gpio.lat, mxconfig.gpio.oe, mxconfig.gpio.clk);
 
+                DEBUGBUS_PRINTLN("HUB75: creating MatrixPanel_I2S_DMA");
   // OK, now we can create our matrix object
   display = new(std::nothrow) MatrixPanel_I2S_DMA(mxconfig);
   if (display == nullptr) {
@@ -1468,8 +1497,8 @@ mxconfig.gpio = {
       DEBUGBUS_PRINT(F("heap usage: ")); DEBUGBUS_PRINTLN(lastHeap - ESP.getFreeHeap());
       return;
   }
-
-  // this->_len = (display->width() * display->height()); // note: this returns correct number of pixels but incorrect dimensions if using virtual display (updated below)
+DEBUGBUS_PRINTF("HUB75: display=%p\n", (void*)display);
+  this->_len = (display->width() * display->height()); // note: this returns correct number of pixels but incorrect dimensions if using virtual display (updated below)
 
   // DEBUGBUS_PRINTF("Length: %u\n", _len);
   // if (this->_len > MAX_LEDS) {
@@ -1506,6 +1535,8 @@ if (driverLength != _len)
   #endif
   // let's adjust default brightness (128), brightness scaling is handled by WLED
   //display->setBrightness8(WLED_HUB75_MAX_BRIGHTNESS); // range is 0-255, 0 - 0%, 255 - 100%
+
+DEBUGBUS_PRINTLN("HUB75: calling display->begin()");
 
   delay(24); // experimental
   DEBUGBUS_PRINT(F("heap usage: ")); DEBUGBUS_PRINTLN(lastHeap - ESP.getFreeHeap());
@@ -1642,26 +1673,131 @@ void BusHub75Matrix::setBrightness(uint8_t b) {
   display->setBrightness(_bri); 
 }
 
-void BusHub75Matrix::show(void) {
-  if (!_valid) return;
-  if (_ledBuffer) {
-    // write out buffered LEDs
-    unsigned height = _isVirtual ? virtualDisp->height() : display->height();
-    unsigned width = _panelWidth;
+// void BusHub75Matrix::show(void) {
+//   if (!_valid) return;
+//   if (_ledBuffer) {
+//     // write out buffered LEDs
+//     unsigned height = _isVirtual ? virtualDisp->height() : display->height();
+//     unsigned width = _panelWidth;
 
-    //while(!previousBufferFree) delay(1);   // experimental - Wait before we allow any writing to the buffer. Stop flicker.
-    size_t pix = 0; // running pixel index
-    for (int y=0; y<height; y++) for (int x=0; x<width; x++) {
-      if (getBitFromArray(_ledsDirty, pix) == true) {        // only repaint the "dirty"  pixels
-        CRGB c = _ledBuffer[pix];
-        //c.nscale8_video(_bri); // apply brightness
-        if (_isVirtual) virtualDisp->drawPixelRGB888(int16_t(x), int16_t(y), c.r, c.g, c.b);
-        else                display->drawPixelRGB888(int16_t(x), int16_t(y), c.r, c.g, c.b);
-      }
-      pix++;
-    }
-    setBitArray(_ledsDirty, _len, false);  // buffer shown - reset all dirty bits
+//     //while(!previousBufferFree) delay(1);   // experimental - Wait before we allow any writing to the buffer. Stop flicker.
+//     size_t pix = 0; // running pixel index
+//     for (int y=0; y<height; y++) for (int x=0; x<width; x++) {
+//       if (getBitFromArray(_ledsDirty, pix) == true) {        // only repaint the "dirty"  pixels
+//         CRGB c = _ledBuffer[pix];
+//         //c.nscale8_video(_bri); // apply brightness
+//         if (_isVirtual) virtualDisp->drawPixelRGB888(int16_t(x), int16_t(y), c.r, c.g, c.b);
+//         else                display->drawPixelRGB888(int16_t(x), int16_t(y), c.r, c.g, c.b);
+//       }
+//       pix++;
+//     }
+//     setBitArray(_ledsDirty, _len, false);  // buffer shown - reset all dirty bits
+//   }
+// }
+
+void BusHub75Matrix::show(void)
+{
+  static uint32_t showCount = 0;
+  showCount++;
+
+  if (showCount <= 20 || (showCount % 1000) == 0)
+  {
+    DEBUGBUS_PRINTF(
+      "HUB75 SHOW #%u valid=%u display=%p virtual=%p ledBuffer=%p dirty=%p len=%u width=%u bri=%u\n",
+      showCount,
+      _valid,
+      (void*)display,
+      (void*)virtualDisp,
+      (void*)_ledBuffer,
+      (void*)_ledsDirty,
+      _len,
+      _panelWidth,
+      _bri
+    );
   }
+
+  if (!_valid)
+  {
+    if (showCount <= 20)
+    {
+      DEBUGBUS_PRINTLN("HUB75 SHOW: INVALID - returning");
+    }
+    return;
+  }
+
+  if (display == nullptr)
+  {
+    DEBUGBUS_PRINTLN("HUB75 SHOW: display == nullptr");
+    return;
+  }
+
+  // if (_ledBuffer)
+  // {
+  //   unsigned height = _isVirtual ? virtualDisp->height() : display->height();
+  //   unsigned width = _panelWidth;
+
+  //   size_t pix = 0;
+
+  //   for (int y = 0; y < height; y++)
+  //   {
+  //     for (int x = 0; x < width; x++)
+  //     {
+  //       if (getBitFromArray(_ledsDirty, pix))
+  //       {
+  //         CRGB c = _ledBuffer[pix];
+
+  //         if (_isVirtual)
+  //         {
+  //           virtualDisp->drawPixelRGB888(
+  //             int16_t(x),
+  //             int16_t(y),
+  //             c.r,
+  //             c.g,
+  //             c.b
+  //           );
+  //         }
+  //         else
+  //         {
+  //           display->drawPixelRGB888(
+  //             int16_t(x),
+  //             int16_t(y),
+  //             c.r,
+  //             c.g,
+  //             c.b
+  //           );
+  //         }
+  //       }
+
+  //       pix++;
+  //     }
+  //   }
+
+  //   setBitArray(_ledsDirty, _len, false);
+  // }
+
+  // ------------------------------------------------------------------
+  // HARDWARE TEST:
+  // Always force first three physical pixels to R, G, B.
+  // This bypasses effects, segment data and _ledBuffer contents.
+  // ------------------------------------------------------------------
+
+  if (_isVirtual && virtualDisp)
+  {
+    virtualDisp->drawPixelRGB888(0, 0, 255,   0,   0);
+    virtualDisp->drawPixelRGB888(1, 0,   0, 255,   0);
+    virtualDisp->drawPixelRGB888(2, 0,   0,   0, 255);
+  }
+  else
+  {
+    display->drawPixelRGB888(0, 0, 255,   0,   0);
+    display->drawPixelRGB888(1, 0,   0, 255,   0);
+    display->drawPixelRGB888(2, 0,   0,   0, 255);
+  }
+
+  // if (showCount <= 20)
+  // {
+    DEBUGBUS_PRINTLN("HUB75 SHOW: forced pixels 0=RED 1=GREEN 2=BLUE");
+  // }
 }
 
 void BusHub75Matrix::cleanup() {

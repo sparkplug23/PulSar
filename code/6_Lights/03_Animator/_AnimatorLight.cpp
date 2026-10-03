@@ -556,7 +556,9 @@ void mAnimatorLight::LightingBusConfig_AllocatePins(
       continue;
     }
 
-    if (pin >= MAX_GPIO_PIN)
+    if (
+      (pin >= MAX_GPIO_PIN) && (!Bus::isHub75(bus_config.type))
+    )
     {
       ALOG_ERR(PSTR("LGT: AllocatePins pin OOR bus=%u pin_i=%u pin=%d"), bus_i, pin_i, pin);
       continue;
