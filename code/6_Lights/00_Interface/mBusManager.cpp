@@ -1419,13 +1419,13 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
   // R2, G2, B2,
   // A, B, C, D, E,
   // LAT, OE, CLK
-
-  mxconfig.gpio = {
-    13, 12, 11,
-    10,  9,  8,
-    17, 16, 15, 7, 18,
-     5,  4,  6
-  };
+  
+mxconfig.gpio = {
+  11, 12, 10,   // R1, G1, B1
+   9, 13,  8,   // R2, G2, B2
+  18,  5, 17, 6, 4, // A, B, C, D, E
+   7, 15, 16    // LAT, OE, CLK
+};
 
 #else
 

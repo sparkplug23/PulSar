@@ -444,8 +444,9 @@ bool mAnimatorLight::LightingBusConfig_CheckPinsAvailable(
       return false;
     }
 
-    if (pin >= MAX_GPIO_PIN)
-    {
+    if (
+      (pin >= MAX_GPIO_PIN) && (!Bus::isHub75(bus_config.type))
+    ){
       ALOG_ERR(PSTR("LGT: CheckPins pin OOR bus=%u pin_i=%u pin=%d"), bus_i, pin_i, pin);
       return false;
     }
