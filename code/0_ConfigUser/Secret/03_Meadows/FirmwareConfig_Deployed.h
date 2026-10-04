@@ -8843,6 +8843,7 @@ R"=====(
     "BusConfig":[
       {
         "BusType":"HUB75E",
+        "ColourOrder":"BGR",
         "Start":0,
         "Length":8192
       }

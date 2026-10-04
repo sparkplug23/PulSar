@@ -1223,898 +1223,344 @@ void BusNetwork::cleanup()
 #error ESP8266 does not support HUB75
 #endif
 
-// BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite, bc.count) {
-//   size_t lastHeap = ESP.getFreeHeap();
-//   _valid = false;
-//   _hasRgb = true;
-//   _hasWhite = false;
-// _hasCCT = hasCCT(bc.type);
-//   virtualDisp = nullptr; // todo: this should be solved properly, can cause memory leak (if omitted here, nothing seems to work)
-//   _isVirtual = false;
-//   _isQuadScan = false;
+BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.autoWhite, bc.count) {
 
+  size_t lastHeap = ESP.getFreeHeap();
 
-//   // aliases for easier reading
-//   unsigned panelWidth  = bc.pins[0];
-//   unsigned panelHeight = bc.pins[1];
-//   unsigned chainLength = bc.pins[2];
-//   _rows = bc.pins[3];
-//   _cols = bc.pins[4];
-//   unsigned physicalPanelWidth =  max(16U, min(128U, panelWidth)); // keep a copy because QS panels require modified width/height
-//   unsigned physicalPanelHeight = max(16U, min(64U, panelHeight));
-
-// DEBUGBUS_PRINTLN("HUB75: constructor entered");
-
-// DEBUGBUS_PRINTF(
-//   "HUB75: config %ux%u chain=%u rows=%u cols=%u len=%u\n",
-//   panelWidth,
-//   panelHeight,
-//   chainLength,
-//   _rows,
-//   _cols,
-//   _len
-// );
-
-// DEBUGBUS_PRINTF(
-//   "HUB75: GPIO R1=%d G1=%d B1=%d R2=%d G2=%d B2=%d A=%d B=%d C=%d D=%d E=%d LAT=%d OE=%d CLK=%d\n",
-//   mxconfig.gpio.r1,
-//   mxconfig.gpio.g1,
-//   mxconfig.gpio.b1,
-//   mxconfig.gpio.r2,
-//   mxconfig.gpio.g2,
-//   mxconfig.gpio.b2,
-//   mxconfig.gpio.a,
-//   mxconfig.gpio.b,
-//   mxconfig.gpio.c,
-//   mxconfig.gpio.d,
-//   mxconfig.gpio.e,
-//   mxconfig.gpio.lat,
-//   mxconfig.gpio.oe,
-//   mxconfig.gpio.clk
-// );
-
-
-//   mxconfig.double_buff = false; // Use our own memory-optimised buffer rather than the driver's own double-buffer
-
-//   // mxconfig.driver = HUB75_I2S_CFG::ICN2038S;  // experimental - use specific shift register driver
-//   // mxconfig.driver = HUB75_I2S_CFG::FM6124;    // try this driver in case you panel stays dark, or when colors look too pastel
-//   // Other possible shiftreg drivers: HUB75_I2S_CFG::FM6126A, HUB75_I2S_CFG::ICN2038S, HUB75_I2S_CFG::MBI5124, HUB75_I2S_CFG::DP3246
-
-//   // mxconfig.latch_blanking = 3;
-//   // mxconfig.i2sspeed = HUB75_I2S_CFG::HZ_10M;  // experimental - 5MHZ should be enugh, but colours looks slightly better at 10MHz
-//   // mxconfig.min_refresh_rate = 90;
-//   // mxconfig.min_refresh_rate = 120;
-
-//   mxconfig.clkphase = true; //reversed;
-//   // allow chain length up to 4, limit to prevent bad data from preventing boot due to low memory
-//   mxconfig.chain_length = max(1U, min(chainLength, 4U));
-
-//   if (panelHeight >= 64 && (mxconfig.chain_length > 1)) { // need to check panelHeight; mxconfig.mx_height not assigned yet
-//   #if defined(BOARD_HAS_PSRAM)                    // limitation to one panel only applies to boards without PSRAM
-//     if (!psramFound() || ESP.getPsramSize() == 0) // PSRAM sanity check
-//   #endif
-//     {
-//       DEBUGBUS_PRINTLN(F("WARNING, only single panel can be used of 64 pixel boards due to memory"));
-//       mxconfig.chain_length = 1;
-//     }
-//   }
-
-//   if (bc.type == TYPE_HUB75MATRIX_HS) {
-//       mxconfig.mx_width = min(128U, panelWidth); // UI limit is 128
-//       mxconfig.mx_height = min(64U, panelHeight);
-//   } else if (bc.type == TYPE_HUB75MATRIX_QS) {
-//       _isVirtual = true;
-//       mxconfig.mx_width = min(128U, panelWidth) * 2;
-//       mxconfig.mx_height = min(64U, panelHeight) / 2;
-//       mxconfig.driver = HUB75_I2S_CFG::FM6124;  // use FM6124 for "outdoor" 4-scan panels - workaround until we can make the driver user-configurable
-//   } else {
-//     DEBUGBUS_PRINTLN("Unknown type");
-//     return;
-//   }
-//   _isQuadScan = (bc.type == TYPE_HUB75MATRIX_QS);
-
-// #if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2)// classic esp32, or esp32-s2: reduce bitdepth for large panels
-//   if (mxconfig.mx_height >= 64) {
-//     if (mxconfig.chain_length * mxconfig.mx_width > 192) mxconfig.setPixelColorDepthBits(3);
-//     else if (mxconfig.chain_length * mxconfig.mx_width > 64)  mxconfig.setPixelColorDepthBits(4);
-//     else mxconfig.setPixelColorDepthBits(8);
-//   } else mxconfig.setPixelColorDepthBits(8);
-// #else
-//   if (physicalPanelWidth * physicalPanelHeight * mxconfig.chain_length > 192*64)
-//     mxconfig.setPixelColorDepthBits(6); // reduce RAM usage for large panels, for the price of reduced color quality (18bit)
-//   else
-//     mxconfig.setPixelColorDepthBits(8); // default color resolution = 24bit
-// #endif
-
-
-// //  HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
-
-// // #if defined(ARDUINO_ADAFRUIT_MATRIXPORTAL_ESP32S3) || defined(MATRIXPORTAL_S3_PINOUT) // MatrixPortal ESP32-S3
-// //   // https://www.adafruit.com/product/5778
-// //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Matrix Portal S3 config");
-// //   mxconfig.gpio = { 42, 41, 40, 38, 39, 37,  45, 36, 48, 35, 21, 47, 14, 2 };
-
-// // #elif defined(HD_WF2_PINOUT) || defined(HD_WF2_S3_PINOUT) // Huidu HD-WF2 ESP32-S3 (no PSRAM)
-// //   // https://www.aliexpress.com/item/1005002258734810.html
-// //   // https://github.com/mrcodetastic/ESP32-HUB75-MatrixPanel-DMA/issues/433
-// //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - HD-WF2 S3 config");
-// //   // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
-// //   mxconfig.gpio = { 2, 6, 10, 3, 7, 11, 39, 38, 37, 36, 21, 33, 35, 34 };
-
-// // #elif defined(HD_WF1_PINOUT) || defined(HD_WF1_S2_PINOUT) || defined(CONFIG_IDF_TARGET_ESP32S2)
-// //   #warning "using HUB75 on esp32-s2 in not recommended due to stability problems and low RAM"
-// //   // Huidu HD-WF1 ESP32-S2 - not recommended !
-// //   // https://github.com/mrcodetastic/ESP32-HUB75-MatrixPanel-DMA/issues/433
-// //   USER_PRINTLN("MatrixPanel_I2S_DMA - HD-WF1 S2 config");
-// //   mxconfig.gpio = {2, 6, 3, 4, 8, 5, 33, 35, 34, 39, 38, 37, 36, 12};
-
-// // #elif defined(CONFIG_IDF_TARGET_ESP32S3) 
-// //   // specific ESP32-S3 pinouts
-
-// //   #if defined(MOONHUB_S3_PINOUT)
-// //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - T7 S3, MOONHUB pinout");
-// //   // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
-// //   mxconfig.gpio = { 1, 5, 6, 7, 13, 9, 16, 48, 47, 21, 38, 8, 4, 18 };
-
-// //   #elif defined(WAVESHARE_S3_PINOUT)
-// //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Waveshare S3, Waveshare pinout");
-// //   // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
-// //   mxconfig.gpio = {4, 5, 6, 7, 15, 16, 18, 8, 3, 42, 9, 40, 2, 41};
-  
-// //   #elif defined(SEENGREAT_V1_S3_PINOUT)
-// //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 devKit-C, SEENGREAT_V1 pinout");
-// //   // https://seengreat.com/wiki/186
-// //   mxconfig.gpio = { 37, 6, 36,         // R1_PIN, G1_PIN, B1_PIN,
-// //                     35, 5,  0,         // R2_PIN, G2_PIN, B2_PIN,
-// //                     45, 1, 48,  2, 4,  //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-// //                     38, 21, 47 };      // LAT_PIN, OE_PIN,CLK_PIN
-
-// //   #elif defined(SEENGREAT_V2_S3_PINOUT)
-// //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 devKit-C, SEENGREAT_V2 pinout");
-// //   // https://seengreat.com/wiki/186
-// //   mxconfig.gpio = { 18, 8, 17,         // R1_PIN, G1_PIN, B1_PIN,
-// //                     16, 1, 15,         // R2_PIN, G2_PIN, B2_PIN,
-// //                     7, 48, 6, 47, 2,   //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-// //                     21, 4, 5 };        // LAT_PIN, OE_PIN,CLK_PIN
-
-// //   #elif defined(SEENGREAT_MATRIX_S3_PINOUT)
-// //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Seengreat RGB Matrix HUB75 S3 pinout");
-// //   // https://seengreat.com/wiki/214 (dedicated HUB75 board, SKU 260612 - NOT the same board/pinout as SEENGREAT_V1/V2_S3_PINOUT above)
-// //   mxconfig.gpio = {  5,  4,  6,        // R1_PIN, G1_PIN, B1_PIN,
-// //                     15,  7, 17,        // R2_PIN, G2_PIN, B2_PIN,
-// //                      8, 18, 10,  9, 16,//  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-// //                     11, 13, 12 };      // LAT_PIN, OE_PIN,CLK_PIN
-
-// //   #else
-// //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 generic pinout");
-// //   // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
-// //   mxconfig.gpio = {1, 2, 42, 41, 40, 39, 45, 48, 47, 21, 38, 8, 3, 18};
-// //   #endif // CONFIG_IDF_TARGET_ESP32S3
-
-// // #elif defined(CONFIG_IDF_TARGET_ESP32)
-// //   // generic ESP32 pinouts
-// //   #if defined(BOARD_HAS_PSRAM) // all ESP32 pinouts require gpio 16 or 17, which are controlling PSRAM
-// //     #warning "ESP32 HUB75 pinout is not compatible with PSRAM boards."
-// //   #endif
-// //   #if defined(ESP32_FORUM_PINOUT) || defined(FORUM_ESP32_PINOUT) // Common format for boards designed for SmartMatrix
-// //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - ESP32_FORUM_PINOUT");
-// // /*
-// //     ESP32 with SmartMatrix's default pinout - ESP32_FORUM_PINOUT
-// //     https://github.com/pixelmatix/SmartMatrix/blob/teensylc/src/MatrixHardware_ESP32_V0.h
-// //     Can use a board like https://github.com/rorosaurus/esp32-hub75-driver
-// // */
-// //  mxconfig.gpio = { 2, 15, 4, 16, 27, 17, 5, 18, 19, 21, 12, 26, 25, 22 };
-
-// //   #elif defined(SEENGREAT_V1_ESP32_PINOUT)
-// //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - EP32-DevKitC V4, SEENGREAT_V1 pinout");
-// //   // https://seengreat.com/wiki/186
-// //   mxconfig.gpio = { 18, 25, 5,         // R1_PIN, G1_PIN, B1_PIN,
-// //                     17, 33, 16,        // R2_PIN, G2_PIN, B2_PIN,
-// //                      4,  3, 0, 21, 32, //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-// //                     19, 15, 2};        // LAT_PIN, OE_PIN,CLK_PIN
-
-// //   #elif defined(SEENGREAT_V2_ESP32_PINOUT)
-// //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - EP32-DevKitC V4, SEENGREAT_V2 pinout, Latch pin IO2");
-// //   // https://seengreat.com/wiki/186
-// //   mxconfig.gpio = { 18, 17, 19,        // R1_PIN, G1_PIN, B1_PIN,
-// //                     21, 23, 27,        // R2_PIN, G2_PIN, B2_PIN,
-// //                     26, 16, 25, 4, 22, //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-// //                      2, 32, 33};       // LAT_PIN, OE_PIN,CLK_PIN
-
-// //   #else
-// //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - ESP32 Default pins");
-// //   /*
-// //    https://github.com/mrfaptastic/ESP32-HUB75-MatrixPanel-DMA?tab=readme-ov-file
-
-// //    Boards
-
-// //    https://esp32trinity.com/
-// //    https://www.electrodragon.com/product/rgb-matrix-panel-drive-interface-board-for-esp32-dma/
-
-// //   */
-// //   mxconfig.gpio = { 25, 26, 27, 14, 12, 13, 23, 19, 5, 17, 18, 4, 15, 16 };
-// //   #endif // CONFIG_IDF_TARGET_ESP32
-
-// //   #else
-// //     #error "unknown or unsupported HUB75 board."
-// // #endif
-
-// #ifdef HUB75_PINOUT__ESP32S3_OFFICE_TEST
-
-//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - PulSar ESP32-S3 Office HUB75E test pinout");
-
-//   // HUB75_I2S_CFG::i2s_pins order:
-//   // R1, G1, B1,
-//   // R2, G2, B2,
-//   // A, B, C, D, E,
-//   // LAT, OE, CLK
-
-// mxconfig.gpio = {
-//   11, 12, 10,   // R1, G1, B1
-//    9, 13,  8,   // R2, G2, B2
-//   18,  5, 17, 6, 4, // A, B, C, D, E
-//    7, 15, 16    // LAT, OE, CLK
-// };
-
-// mxconfig.driver = HUB75_I2S_CFG::FM6126A;
-
-// #else
-
-//   #error "HUB75 pinout not configured for this PulSar build"
-
-// #endif
-
-//   // int8_t pins[PIN_COUNT];
-//   // memcpy(pins, &mxconfig.gpio, sizeof(mxconfig.gpio));
-//   // if (!PinManager::allocateMultiplePins(pins, PIN_COUNT, PinOwner::HUB75, true)) {
-//   //   DEBUGBUS_PRINTLN("Failed to allocate pins for HUB75");
-//   //   return;
-//   // }
-
-//   if (bc.colorOrder == COL_ORDER_RGB) {
-//     DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = Default color order (RGB)");
-//   } else if (bc.colorOrder == COL_ORDER_BGR) {
-//     DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = color order BGR");
-//     int8_t tmpPin;
-//     tmpPin = mxconfig.gpio.r1;
-//     mxconfig.gpio.r1 = mxconfig.gpio.b1;
-//     mxconfig.gpio.b1 = tmpPin;
-//     tmpPin = mxconfig.gpio.r2;
-//     mxconfig.gpio.r2 = mxconfig.gpio.b2;
-//     mxconfig.gpio.b2 = tmpPin;
-//   }
-//   else {
-//     DEBUGBUS_PRINTF("MatrixPanel_I2S_DMA = unsupported color order %u\n", bc.colorOrder);
-//   }
-
-//   DEBUGBUS_PRINTF("MatrixPanel_I2S_DMA config - %ux%u length: %u, %d bits per pixel.\n", mxconfig.mx_width, mxconfig.mx_height, mxconfig.chain_length, 3 * mxconfig.getPixelColorDepthBits());
-//   DEBUGBUS_PRINTF("R1_PIN=%u, G1_PIN=%u, B1_PIN=%u, R2_PIN=%u, G2_PIN=%u, B2_PIN=%u, A_PIN=%u, B_PIN=%u, C_PIN=%u, D_PIN=%u, E_PIN=%u, LAT_PIN=%u, OE_PIN=%u, CLK_PIN=%u\n",
-//                 mxconfig.gpio.r1, mxconfig.gpio.g1, mxconfig.gpio.b1, mxconfig.gpio.r2, mxconfig.gpio.g2, mxconfig.gpio.b2,
-//                 mxconfig.gpio.a, mxconfig.gpio.b, mxconfig.gpio.c, mxconfig.gpio.d, mxconfig.gpio.e, mxconfig.gpio.lat, mxconfig.gpio.oe, mxconfig.gpio.clk);
-
-//                 DEBUGBUS_PRINTLN("HUB75: creating MatrixPanel_I2S_DMA");
-//   // OK, now we can create our matrix object
-//   display = new(std::nothrow) MatrixPanel_I2S_DMA(mxconfig);
-//   if (display == nullptr) {
-//       DEBUGBUS_PRINTLN("****** MatrixPanel_I2S_DMA !KABOOM! driver allocation failed ***********");
-//       DEBUGBUS_PRINT(F("heap usage: ")); DEBUGBUS_PRINTLN(lastHeap - ESP.getFreeHeap());
-//       return;
-//   }
-// DEBUGBUS_PRINTF("HUB75: display=%p\n", (void*)display);
-//   this->_len = (display->width() * display->height()); // note: this returns correct number of pixels but incorrect dimensions if using virtual display (updated below)
-
-//   // DEBUGBUS_PRINTF("Length: %u\n", _len);
-//   // if (this->_len > MAX_LEDS) {
-//   //   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA Too many LEDS - playing safe");
-//   //   return;
-//   // }
-
-// const uint32_t driverLength = display->width() * display->height();
-
-// DEBUGBUS_PRINTF(
-//   "HUB75 length: BusConfig=%u driver=%u\n",
-//   _len,
-//   driverLength
-// );
-
-// if (driverLength != _len)
-// {
-//   DEBUGBUS_PRINTF(
-//     "HUB75 ERROR: configured Length=%u but physical matrix is %u pixels\n",
-//     _len,
-//     driverLength
-//   );
-
-//   cleanup();
-//   return;
-// }
-
-// DEBUGBUS_PRINTF(
-//   "HUB75 HW CONFIG: clkphase=%u double_buff=%u driver=%u\n",
-//   mxconfig.clkphase,
-//   mxconfig.double_buff,
-//   mxconfig.driver
-// );
-//   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA created");
-
-//   // as noted in HUB75_I2S_DMA library, some panels can show ghosting if set higher than 239, so let users override at compile time
-//   #ifndef WLED_HUB75_MAX_BRIGHTNESS
-//   #define WLED_HUB75_MAX_BRIGHTNESS 255
-//   #endif
-//   // let's adjust default brightness (128), brightness scaling is handled by WLED
-//   //display->setBrightness8(WLED_HUB75_MAX_BRIGHTNESS); // range is 0-255, 0 - 0%, 255 - 100%
-
-// DEBUGBUS_PRINTLN("HUB75: calling display->begin()");
-
-//   delay(24); // experimental
-//   DEBUGBUS_PRINT(F("heap usage: ")); DEBUGBUS_PRINTLN(lastHeap - ESP.getFreeHeap());
-//   // Allocate memory and start DMA display
-//   if (!display->begin() ) {
-//       DEBUGBUS_PRINTLN("****** MatrixPanel_I2S_DMA !KABOOM! I2S memory allocation failed ***********");
-//       DEBUGBUS_PRINT(F("heap usage: ")); DEBUGBUS_PRINTLN(lastHeap - ESP.getFreeHeap());
-//       return;
-//   }
-//   else {
-//     DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA begin ok");
-//     DEBUGBUS_PRINT(F("heap usage: ")); DEBUGBUS_PRINTLN(lastHeap - ESP.getFreeHeap());
-//     delay(18);   // experiment - give the driver a moment (~ one full frame @ 60hz) to settle
-//     _valid = true;
-//     display->clearScreen();   // initially clear the screen buffer
-//     DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA clear ok");
-
-//     if (_ledBuffer) d_free(_ledBuffer);                 // should not happen
-//     if (_ledsDirty) d_free(_ledsDirty);                 // should not happen
-//     DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA allocate memory");
-//     _ledsDirty = (byte*) d_malloc(getBitArrayBytes(_len));  // create LEDs dirty bits
-//     DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA allocate memory ok");
-
-//     if (_ledsDirty == nullptr) {
-//       display->stopDMAoutput();
-//       delete display; display = nullptr;
-//       _valid = false;
-//       DEBUGBUS_PRINTLN(F("MatrixPanel_I2S_DMA not started - not enough memory for dirty bits!"));
-//       DEBUGBUS_PRINT(F("heap usage: ")); DEBUGBUS_PRINTLN(lastHeap - ESP.getFreeHeap());
-//       return;  //  fail is we cannot get memory for the buffer
-//     }
-//     setBitArray(_ledsDirty, _len, false);             // reset dirty bits
-
-//     // create LEDs buffer (initialized to BLACK), prefer DRAM if enough heap is available (faster in case global _pixels buffer is in PSRAM as not both will fit the cache)
-//     _ledBuffer = static_cast<CRGB*>(allocate_buffer(_len * sizeof(CRGB), BFRALLOC_PREFER_DRAM | BFRALLOC_CLEAR));
-//   }
-
-//   PANEL_CHAIN_TYPE chainType = CHAIN_NONE; // default for quarter-scan panels that do not use chaining
-//   if (mxconfig.chain_length > 1 && (_rows > 1 || _cols > 1)) chainType = CHAIN_TOP_RIGHT_DOWN; // we need to use a _DOWN chainType, otherwise the first panel is upside-down
-//   // chained panels with cols and rows define need the virtual display driver, so do quarter-scan panels
-//   if (chainType != CHAIN_NONE || bc.type == TYPE_HUB75MATRIX_QS) {
-//     _isVirtual = true;
-//     DEBUGBUS_PRINTF_P(PSTR("Using virtual matrix: %ux%u panels of %ux%u pixels\n"), _cols, _rows, physicalPanelWidth, physicalPanelHeight);
-//   }
-//   else {
-//     _isVirtual = false;
-//   }
-
-//   if (_isVirtual) {
-//     virtualDisp = new(std::nothrow) VirtualMatrixPanel((*display), _rows, _cols, physicalPanelWidth, physicalPanelHeight, chainType);
-//     if (!virtualDisp) { // catch alloc error
-//       _isVirtual = false;
-//       DEBUGBUS_PRINTLN(F("HUB75 virtual matrix: alloc failed, falling back to non-virtual driver"));
-//     } else {
-//       virtualDisp->setRotation(0);
-//       if (bc.type == TYPE_HUB75MATRIX_QS) {
-//         switch(panelHeight) {
-//         case 16:
-//           virtualDisp->setPhysicalPanelScanRate(FOUR_SCAN_16PX_HIGH);
-//           break;
-//         case 32:
-//           virtualDisp->setPhysicalPanelScanRate(FOUR_SCAN_32PX_HIGH);
-//           break;
-//         case 64:
-//           virtualDisp->setPhysicalPanelScanRate(FOUR_SCAN_64PX_HIGH);
-//           break;
-//         default:
-//           DEBUGBUS_PRINTLN("Unsupported height");
-//           cleanup();
-//           return;
-//         }
-//       }
-//     }
-//   }
-
-//   if (_valid) {
-//     _panelWidth = virtualDisp ? virtualDisp->width() : display->width();  // cache width - it will never change
-//   }
-
-//   DEBUGBUS_PRINT(F("MatrixPanel_I2S_DMA "));
-//   DEBUGBUS_PRINTF_P(PSTR("%sstarted, width=%u, %u pixels.\n"), _valid? "":"not ", _panelWidth, _len);
-
-//   if (_ledBuffer != nullptr) DEBUGBUS_PRINTLN(F("MatrixPanel_I2S_DMA LEDS buffer enabled."));
-//   if (_ledsDirty != nullptr) DEBUGBUS_PRINTLN(F("MatrixPanel_I2S_DMA LEDS dirty bit optimization enabled."));
-//   if ((_ledBuffer != nullptr) || (_ledsDirty != nullptr)) {
-//     DEBUGBUS_PRINT(F("MatrixPanel_I2S_DMA LEDS buffer uses "));
-//     DEBUGBUS_PRINT((_ledBuffer? _len*sizeof(CRGB) :0) + (_ledsDirty? getBitArrayBytes(_len) :0));
-//     DEBUGBUS_PRINTLN(F(" bytes."));
-//   }
-// }
-
-
-
-BusHub75Matrix::BusHub75Matrix(const BusConfig &bc)
-  : Bus(bc.type, bc.start, bc.autoWhite, bc.count)
-{
   _valid = false;
   _hasRgb = true;
   _hasWhite = false;
-
-  virtualDisp = nullptr;
+  _hasCCT = false;
+  virtualDisp = nullptr; // todo: this should be solved properly, can cause memory leak (if omitted here, nothing seems to work)
   _isVirtual = false;
   _isQuadScan = false;
 
+  // aliases for easier reading
+#ifdef ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
+  unsigned panelWidth  = 128;
+  unsigned panelHeight = 64;
+  unsigned chainLength = 1;
   _rows = 1;
   _cols = 1;
+#else
+  unsigned panelWidth  = bc.pins[0];
+  unsigned panelHeight = bc.pins[1];
+  unsigned chainLength = bc.pins[2];
+  _rows = bc.pins[3];
+  _cols = bc.pins[4];
+#endif
+  unsigned physicalPanelWidth =  max(16U, min(128U, panelWidth)); // keep a copy because QS panels require modified width/height
+  unsigned physicalPanelHeight = max(16U, min(64U, panelHeight));
 
-  DEBUGBUS_PRINTLN("HUB75 MINIMAL TEST START");
+  mxconfig.double_buff = false; // Use our own memory-optimised buffer rather than the driver's own double-buffer
 
-  // ------------------------------------------------------------
-  // Physical panel
-  // 128 x 64
-  // 1/32 scan
-  // FM6126A
-  // ------------------------------------------------------------
+  // mxconfig.driver = HUB75_I2S_CFG::ICN2038S;  // experimental - use specific shift register driver
+  // mxconfig.driver = HUB75_I2S_CFG::FM6124;    // try this driver in case you panel stays dark, or when colors look too pastel
+  // Other possible shiftreg drivers: HUB75_I2S_CFG::FM6126A, HUB75_I2S_CFG::ICN2038S, HUB75_I2S_CFG::MBI5124, HUB75_I2S_CFG::DP3246
 
-  mxconfig.mx_width = 128;
-  mxconfig.mx_height = 64;
-  mxconfig.chain_length = 1;
+  // mxconfig.latch_blanking = 3;
+  // mxconfig.i2sspeed = HUB75_I2S_CFG::HZ_10M;  // experimental - 5MHZ should be enugh, but colours looks slightly better at 10MHz
+  // mxconfig.min_refresh_rate = 90;
+  // mxconfig.min_refresh_rate = 120;
 
-  mxconfig.gpio = {
-    11, 12, 10,       // R1, G1, B1
-     9, 13,  8,       // R2, G2, B2
-    18,  5, 17, 6, 4, // A, B, C, D, E
-     7, 15, 16        // LAT, OE, CLK
-  };
+  mxconfig.clkphase = bc.reversed;
+  // allow chain length up to 4, limit to prevent bad data from preventing boot due to low memory
+  mxconfig.chain_length = max(1U, min(chainLength, 4U));
 
+  if (panelHeight >= 64 && (mxconfig.chain_length > 1)) { // need to check panelHeight; mxconfig.mx_height not assigned yet
+  #if defined(BOARD_HAS_PSRAM)                    // limitation to one panel only applies to boards without PSRAM
+    if (!psramFound() || ESP.getPsramSize() == 0) // PSRAM sanity check
+  #endif
+    {
+      DEBUGBUS_PRINTLN(F("WARNING, only single panel can be used of 64 pixel boards due to memory"));
+      mxconfig.chain_length = 1;
+    }
+  }
+
+  if (bc.type == TYPE_HUB75MATRIX_HS) {
+      mxconfig.mx_width = min(128U, panelWidth); // UI limit is 128
+      mxconfig.mx_height = min(64U, panelHeight);
+  } else if (bc.type == TYPE_HUB75MATRIX_QS) {
+      _isVirtual = true;
+      mxconfig.mx_width = min(128U, panelWidth) * 2;
+      mxconfig.mx_height = min(64U, panelHeight) / 2;
+      mxconfig.driver = HUB75_I2S_CFG::FM6124;  // use FM6124 for "outdoor" 4-scan panels - workaround until we can make the driver user-configurable
+  } else {
+    DEBUGBUS_PRINTLN("Unknown type");
+    return;
+  }
+  _isQuadScan = (bc.type == TYPE_HUB75MATRIX_QS);
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2)// classic esp32, or esp32-s2: reduce bitdepth for large panels
+  if (mxconfig.mx_height >= 64) {
+    if (mxconfig.chain_length * mxconfig.mx_width > 192) mxconfig.setPixelColorDepthBits(3);
+    else if (mxconfig.chain_length * mxconfig.mx_width > 64)  mxconfig.setPixelColorDepthBits(4);
+    else mxconfig.setPixelColorDepthBits(8);
+  } else mxconfig.setPixelColorDepthBits(8);
+#else
+  if (physicalPanelWidth * physicalPanelHeight * mxconfig.chain_length > 192*64)
+    mxconfig.setPixelColorDepthBits(6); // reduce RAM usage for large panels, for the price of reduced color quality (18bit)
+  else
+    mxconfig.setPixelColorDepthBits(8); // default color resolution = 24bit
+#endif
+
+
+//  HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+
+#if defined(ARDUINO_ADAFRUIT_MATRIXPORTAL_ESP32S3) || defined(MATRIXPORTAL_S3_PINOUT) // MatrixPortal ESP32-S3
+  // https://www.adafruit.com/product/5778
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Matrix Portal S3 config");
+  mxconfig.gpio = { 42, 41, 40, 38, 39, 37,  45, 36, 48, 35, 21, 47, 14, 2 };
+
+#elif defined(HD_WF2_PINOUT) || defined(HD_WF2_S3_PINOUT) // Huidu HD-WF2 ESP32-S3 (no PSRAM)
+  // https://www.aliexpress.com/item/1005002258734810.html
+  // https://github.com/mrcodetastic/ESP32-HUB75-MatrixPanel-DMA/issues/433
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - HD-WF2 S3 config");
+  // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+  mxconfig.gpio = { 2, 6, 10, 3, 7, 11, 39, 38, 37, 36, 21, 33, 35, 34 };
+
+#elif defined(HD_WF1_PINOUT) || defined(HD_WF1_S2_PINOUT) || defined(CONFIG_IDF_TARGET_ESP32S2)
+  #warning "using HUB75 on esp32-s2 in not recommended due to stability problems and low RAM"
+  // Huidu HD-WF1 ESP32-S2 - not recommended !
+  // https://github.com/mrcodetastic/ESP32-HUB75-MatrixPanel-DMA/issues/433
+  USER_PRINTLN("MatrixPanel_I2S_DMA - HD-WF1 S2 config");
+  mxconfig.gpio = {2, 6, 3, 4, 8, 5, 33, 35, 34, 39, 38, 37, 36, 12};
+
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+  // specific ESP32-S3 pinouts
+
+  #if defined(ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG)
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - PulSar ESP32-S3 HUB75 dev config");
+  // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+  mxconfig.gpio = {11, 12, 10, 9, 13, 8, 18, 5, 17, 6, 4, 7, 15, 16};
   mxconfig.driver = HUB75_I2S_CFG::FM6126A;
-  mxconfig.clkphase = false;
-  mxconfig.double_buff = false;
 
-  DEBUGBUS_PRINTF(
-    "HUB75 GPIO: R1=%d G1=%d B1=%d R2=%d G2=%d B2=%d A=%d B=%d C=%d D=%d E=%d LAT=%d OE=%d CLK=%d\n",
-    mxconfig.gpio.r1,
-    mxconfig.gpio.g1,
-    mxconfig.gpio.b1,
-    mxconfig.gpio.r2,
-    mxconfig.gpio.g2,
-    mxconfig.gpio.b2,
-    mxconfig.gpio.a,
-    mxconfig.gpio.b,
-    mxconfig.gpio.c,
-    mxconfig.gpio.d,
-    mxconfig.gpio.e,
-    mxconfig.gpio.lat,
-    mxconfig.gpio.oe,
-    mxconfig.gpio.clk
-  );
+  #elif defined(MOONHUB_S3_PINOUT)
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - T7 S3, MOONHUB pinout");
+  // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+  mxconfig.gpio = { 1, 5, 6, 7, 13, 9, 16, 48, 47, 21, 38, 8, 4, 18 };
 
-  DEBUGBUS_PRINTLN("HUB75: creating display");
+  #elif defined(WAVESHARE_S3_PINOUT)
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Waveshare S3, Waveshare pinout");
+  // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+  mxconfig.gpio = {4, 5, 6, 7, 15, 16, 18, 8, 3, 42, 9, 40, 2, 41};
 
+  #elif defined(SEENGREAT_V1_S3_PINOUT)
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 devKit-C, SEENGREAT_V1 pinout");
+  // https://seengreat.com/wiki/186
+  mxconfig.gpio = { 37, 6, 36,         // R1_PIN, G1_PIN, B1_PIN,
+                    35, 5,  0,         // R2_PIN, G2_PIN, B2_PIN,
+                    45, 1, 48,  2, 4,  //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+                    38, 21, 47 };      // LAT_PIN, OE_PIN,CLK_PIN
+
+  #elif defined(SEENGREAT_V2_S3_PINOUT)
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 devKit-C, SEENGREAT_V2 pinout");
+  // https://seengreat.com/wiki/186
+  mxconfig.gpio = { 18, 8, 17,         // R1_PIN, G1_PIN, B1_PIN,
+                    16, 1, 15,         // R2_PIN, G2_PIN, B2_PIN,
+                    7, 48, 6, 47, 2,   //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+                    21, 4, 5 };        // LAT_PIN, OE_PIN,CLK_PIN
+
+  #elif defined(SEENGREAT_MATRIX_S3_PINOUT)
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Seengreat RGB Matrix HUB75 S3 pinout");
+  // https://seengreat.com/wiki/214 (dedicated HUB75 board, SKU 260612 - NOT the same board/pinout as SEENGREAT_V1/V2_S3_PINOUT above)
+  mxconfig.gpio = {  5,  4,  6,        // R1_PIN, G1_PIN, B1_PIN,
+                    15,  7, 17,        // R2_PIN, G2_PIN, B2_PIN,
+                     8, 18, 10,  9, 16,//  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+                    11, 13, 12 };      // LAT_PIN, OE_PIN,CLK_PIN
+
+  #else
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 generic pinout");
+  // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+  mxconfig.gpio = {1, 2, 42, 41, 40, 39, 45, 48, 47, 21, 38, 8, 3, 18};
+  #endif // CONFIG_IDF_TARGET_ESP32S3
+
+#elif defined(CONFIG_IDF_TARGET_ESP32)
+  // generic ESP32 pinouts
+  #if defined(BOARD_HAS_PSRAM) // all ESP32 pinouts require gpio 16 or 17, which are controlling PSRAM
+    #warning "ESP32 HUB75 pinout is not compatible with PSRAM boards."
+  #endif
+  #if defined(ESP32_FORUM_PINOUT) || defined(FORUM_ESP32_PINOUT) // Common format for boards designed for SmartMatrix
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - ESP32_FORUM_PINOUT");
+  /*
+     ESP32 with SmartMatrix's default pinout - ESP32_FORUM_PINOUT
+     https://github.com/pixelmatix/SmartMatrix/blob/teensylc/src/MatrixHardware_ESP32_V0.h
+     Can use a board like https://github.com/rorosaurus/esp32-hub75-driver
+  */
+  mxconfig.gpio = { 2, 15, 4, 16, 27, 17, 5, 18, 19, 21, 12, 26, 25, 22 };
+
+  #elif defined(SEENGREAT_V1_ESP32_PINOUT)
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - EP32-DevKitC V4, SEENGREAT_V1 pinout");
+  // https://seengreat.com/wiki/186
+  mxconfig.gpio = { 18, 25, 5,         // R1_PIN, G1_PIN, B1_PIN,
+                    17, 33, 16,        // R2_PIN, G2_PIN, B2_PIN,
+                     4,  3, 0, 21, 32, //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+                    19, 15, 2};        // LAT_PIN, OE_PIN,CLK_PIN
+
+  #elif defined(SEENGREAT_V2_ESP32_PINOUT)
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - EP32-DevKitC V4, SEENGREAT_V2 pinout, Latch pin IO2");
+  // https://seengreat.com/wiki/186
+  mxconfig.gpio = { 18, 17, 19,        // R1_PIN, G1_PIN, B1_PIN,
+                    21, 23, 27,        // R2_PIN, G2_PIN, B2_PIN,
+                    26, 16, 25, 4, 22, //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+                     2, 32, 33};       // LAT_PIN, OE_PIN,CLK_PIN
+
+  #else
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - ESP32 Default pins");
+  /*
+     https://github.com/mrfaptastic/ESP32-HUB75-MatrixPanel-DMA?tab=readme-ov-file
+
+     Boards
+
+     https://esp32trinity.com/
+     https://www.electrodragon.com/product/rgb-matrix-panel-drive-interface-board-for-esp32-dma/
+  */
+  mxconfig.gpio = { 25, 26, 27, 14, 12, 13, 23, 19, 5, 17, 18, 4, 15, 16 };
+  #endif // CONFIG_IDF_TARGET_ESP32
+
+#else
+  #error "unknown or unsupported HUB75 board."
+#endif
+
+  // PulSar currently handles HUB75 pin ownership separately from WLED PinManager.
+
+  if (bc.colorOrder == COL_ORDER_RGB) {
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = Default color order (RGB)");
+  } else if (bc.colorOrder == COL_ORDER_BGR) {
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = color order BGR");
+    int8_t tmpPin;
+    tmpPin = mxconfig.gpio.r1;
+    mxconfig.gpio.r1 = mxconfig.gpio.b1;
+    mxconfig.gpio.b1 = tmpPin;
+    tmpPin = mxconfig.gpio.r2;
+    mxconfig.gpio.r2 = mxconfig.gpio.b2;
+    mxconfig.gpio.b2 = tmpPin;
+  }
+  else {
+    DEBUGBUS_PRINTF("MatrixPanel_I2S_DMA = unsupported color order %u\n", bc.colorOrder);
+  }
+
+  DEBUGBUS_PRINTF("MatrixPanel_I2S_DMA config - %ux%u length: %u, %d bits per pixel.\n", mxconfig.mx_width, mxconfig.mx_height, mxconfig.chain_length, 3 * mxconfig.getPixelColorDepthBits());
+  DEBUGBUS_PRINTF("R1_PIN=%u, G1_PIN=%u, B1_PIN=%u, R2_PIN=%u, G2_PIN=%u, B2_PIN=%u, A_PIN=%u, B_PIN=%u, C_PIN=%u, D_PIN=%u, E_PIN=%u, LAT_PIN=%u, OE_PIN=%u, CLK_PIN=%u\n",
+                mxconfig.gpio.r1, mxconfig.gpio.g1, mxconfig.gpio.b1, mxconfig.gpio.r2, mxconfig.gpio.g2, mxconfig.gpio.b2,
+                mxconfig.gpio.a, mxconfig.gpio.b, mxconfig.gpio.c, mxconfig.gpio.d, mxconfig.gpio.e, mxconfig.gpio.lat, mxconfig.gpio.oe, mxconfig.gpio.clk);
+
+  // OK, now we can create our matrix object
   display = new(std::nothrow) MatrixPanel_I2S_DMA(mxconfig);
+  if (display == nullptr) {
+      DEBUGBUS_PRINTLN("****** MatrixPanel_I2S_DMA !KABOOM! driver allocation failed ***********");
+      DEBUGBUS_PRINT(F("heap usage: ")); DEBUGBUS_PRINTLN(lastHeap - ESP.getFreeHeap());
+      return;
+  }
 
-  if (display == nullptr)
-  {
-    DEBUGBUS_PRINTLN("HUB75: display allocation FAILED");
+  this->_len = (display->width() * display->height()); // note: this returns correct number of pixels but incorrect dimensions if using virtual display (updated below)
+
+  DEBUGBUS_PRINTF("Length: %u\n", _len);
+  if (this->_len > MAX_LEDS_NEO) {
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA Too many LEDS - playing safe");
     return;
   }
 
-  DEBUGBUS_PRINTLN("HUB75: calling begin");
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA created");
 
-  if (!display->begin())
-  {
-    DEBUGBUS_PRINTLN("HUB75: begin FAILED");
+  // as noted in HUB75_I2S_DMA library, some panels can show ghosting if set higher than 239, so let users override at compile time
+  #ifndef WLED_HUB75_MAX_BRIGHTNESS
+  #define WLED_HUB75_MAX_BRIGHTNESS 255
+  #endif
+  // let's adjust default brightness (128), brightness scaling is handled by WLED
+  //display->setBrightness8(WLED_HUB75_MAX_BRIGHTNESS); // range is 0-255, 0 - 0%, 255 - 100%
 
-    delete display;
-    display = nullptr;
-
-    return;
+  delay(24); // experimental
+  DEBUGBUS_PRINT(F("heap usage: ")); DEBUGBUS_PRINTLN(lastHeap - ESP.getFreeHeap());
+  // Allocate memory and start DMA display
+  if (!display->begin() ) {
+      DEBUGBUS_PRINTLN("****** MatrixPanel_I2S_DMA !KABOOM! I2S memory allocation failed ***********");
+      DEBUGBUS_PRINT(F("heap usage: ")); DEBUGBUS_PRINTLN(lastHeap - ESP.getFreeHeap());
+      return;
   }
+  else {
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA begin ok");
+    DEBUGBUS_PRINT(F("heap usage: ")); DEBUGBUS_PRINTLN(lastHeap - ESP.getFreeHeap());
+    delay(18);   // experiment - give the driver a moment (~ one full frame @ 60hz) to settle
+    _valid = true;
+    display->clearScreen();   // initially clear the screen buffer
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA clear ok");
 
-  DEBUGBUS_PRINTLN("HUB75: begin OK");
+    if (_ledBuffer) d_free(_ledBuffer);                 // should not happen
+    if (_ledsDirty) d_free(_ledsDirty);                 // should not happen
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA allocate memory");
+    _ledsDirty = (byte*) d_malloc(getBitArrayBytes(_len));  // create LEDs dirty bits
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA allocate memory ok");
 
-  _panelWidth = display->width();
-  _len = display->width() * display->height();
-
-  DEBUGBUS_PRINTF(
-    "HUB75: width=%u height=%u len=%u\n",
-    display->width(),
-    display->height(),
-    _len
-  );
-
-  display->setBrightness8(128);
-  display->clearScreen();
-
-  // ------------------------------------------------------------
-  // Allocate the normal PulSar HUB75 buffers.
-  //
-  // show() can still return immediately for now, but the rest of
-  // PulSar can safely use setPixelColor() / getPixelColor().
-  // ------------------------------------------------------------
-
-  DEBUGBUS_PRINTLN("HUB75: allocating dirty buffer");
-
-  _ledsDirty = static_cast<byte*>(
-    d_malloc(
-      getBitArrayBytes(_len)
-    )
-  );
-
-  if (_ledsDirty == nullptr)
-  {
-    DEBUGBUS_PRINTLN("HUB75: dirty buffer allocation FAILED");
-
-    display->stopDMAoutput();
-    delete display;
-    display = nullptr;
-
-    return;
-  }
-
-  setBitArray(_ledsDirty, _len, false);
-
-  DEBUGBUS_PRINTLN("HUB75: allocating LED buffer");
-
-  _ledBuffer = static_cast<CRGB*>(
-    allocate_buffer(
-      _len * sizeof(CRGB),
-      BFRALLOC_PREFER_DRAM | BFRALLOC_CLEAR
-    )
-  );
-
-  if (_ledBuffer == nullptr)
-  {
-    DEBUGBUS_PRINTLN("HUB75: LED buffer allocation FAILED");
-
-    d_free(_ledsDirty);
-    _ledsDirty = nullptr;
-
-    display->stopDMAoutput();
-    delete display;
-    display = nullptr;
-
-    return;
-  }
-
-  DEBUGBUS_PRINTF(
-    "HUB75: buffers OK ledBuffer=%p dirty=%p ledBytes=%u dirtyBytes=%u\n",
-    (void*)_ledBuffer,
-    (void*)_ledsDirty,
-    _len * sizeof(CRGB),
-    getBitArrayBytes(_len)
-  );
-
-  // ------------------------------------------------------------
-  // Direct hardware test
-  //
-  // Pixels 0,1,2:
-  //   RED
-  //   GREEN
-  //   BLUE
-  //
-  // Pixels 10..100:
-  //   full rainbow across the first row
-  // ------------------------------------------------------------
-
-  DEBUGBUS_PRINTLN("HUB75: drawing direct test pattern");
-
-  display->drawPixelRGB888(0, 0, 255,   0,   0);
-  display->drawPixelRGB888(1, 0,   0, 255,   0);
-  display->drawPixelRGB888(2, 0,   0,   0, 255);
-
-  for (uint16_t pix = 10; pix <= 100; pix++)
-  {
-    uint16_t wheel = ((pix - 10) * 255U) / 90U;
-
-    uint8_t r = 0;
-    uint8_t g = 0;
-    uint8_t b = 0;
-
-    if (wheel < 85)
-    {
-      r = 255 - wheel * 3;
-      g = wheel * 3;
-      b = 0;
+    if (_ledsDirty == nullptr) {
+      display->stopDMAoutput();
+      delete display; display = nullptr;
+      _valid = false;
+      DEBUGBUS_PRINTLN(F("MatrixPanel_I2S_DMA not started - not enough memory for dirty bits!"));
+      DEBUGBUS_PRINT(F("heap usage: ")); DEBUGBUS_PRINTLN(lastHeap - ESP.getFreeHeap());
+      return;  //  fail is we cannot get memory for the buffer
     }
-    else if (wheel < 170)
-    {
-      wheel -= 85;
+    setBitArray(_ledsDirty, _len, false);             // reset dirty bits
 
-      r = 0;
-      g = 255 - wheel * 3;
-      b = wheel * 3;
-    }
-    else
-    {
-      wheel -= 170;
-
-      r = wheel * 3;
-      g = 0;
-      b = 255 - wheel * 3;
-    }
-
-    display->drawPixelRGB888(
-      pix,
-      0,
-      r,
-      g,
-      b
-    );
+    // create LEDs buffer (initialized to BLACK), prefer DRAM if enough heap is available (faster in case global _pixels buffer is in PSRAM as not both will fit the cache)
+    _ledBuffer = static_cast<CRGB*>(allocate_buffer(_len * sizeof(CRGB), BFRALLOC_PREFER_DRAM | BFRALLOC_CLEAR));
   }
 
-  _valid = true;
+  PANEL_CHAIN_TYPE chainType = CHAIN_NONE; // default for quarter-scan panels that do not use chaining
+  if (mxconfig.chain_length > 1 && (_rows > 1 || _cols > 1)) chainType = CHAIN_TOP_RIGHT_DOWN; // we need to use a _DOWN chainType, otherwise the first panel is upside-down
+  // chained panels with cols and rows define need the virtual display driver, so do quarter-scan panels
+  if (chainType != CHAIN_NONE || bc.type == TYPE_HUB75MATRIX_QS) {
+    _isVirtual = true;
+    DEBUGBUS_PRINTF_P(PSTR("Using virtual matrix: %ux%u panels of %ux%u pixels\n"), _cols, _rows, physicalPanelWidth, physicalPanelHeight);
+  }
+  else {
+    _isVirtual = false;
+  }
 
-  DEBUGBUS_PRINTLN("HUB75 MINIMAL TEST READY");
+  if (_isVirtual) {
+    virtualDisp = new(std::nothrow) VirtualMatrixPanel((*display), _rows, _cols, physicalPanelWidth, physicalPanelHeight, chainType);
+    if (!virtualDisp) { // catch alloc error
+      _isVirtual = false;
+      DEBUGBUS_PRINTLN(F("HUB75 virtual matrix: alloc failed, falling back to non-virtual driver"));
+    } else {
+      virtualDisp->setRotation(0);
+      if (bc.type == TYPE_HUB75MATRIX_QS) {
+        switch(panelHeight) {
+        case 16:
+          virtualDisp->setPhysicalPanelScanRate(FOUR_SCAN_16PX_HIGH);
+          break;
+        case 32:
+          virtualDisp->setPhysicalPanelScanRate(FOUR_SCAN_32PX_HIGH);
+          break;
+        case 64:
+          virtualDisp->setPhysicalPanelScanRate(FOUR_SCAN_64PX_HIGH);
+          break;
+        default:
+          DEBUGBUS_PRINTLN("Unsupported height");
+          cleanup();
+          return;
+        }
+      }
+    }
+  }
+
+  if (_valid) {
+    _panelWidth = virtualDisp ? virtualDisp->width() : display->width();  // cache width - it will never change
+  }
+
+  DEBUGBUS_PRINT(F("MatrixPanel_I2S_DMA "));
+  DEBUGBUS_PRINTF_P(PSTR("%sstarted, width=%u, %u pixels.\n"), _valid? "":"not ", _panelWidth, _len);
+
+  if (_ledBuffer != nullptr) DEBUGBUS_PRINTLN(F("MatrixPanel_I2S_DMA LEDS buffer enabled."));
+  if (_ledsDirty != nullptr) DEBUGBUS_PRINTLN(F("MatrixPanel_I2S_DMA LEDS dirty bit optimization enabled."));
+  if ((_ledBuffer != nullptr) || (_ledsDirty != nullptr)) {
+    DEBUGBUS_PRINT(F("MatrixPanel_I2S_DMA LEDS buffer uses "));
+    DEBUGBUS_PRINT((_ledBuffer? _len*sizeof(CRGB) :0) + (_ledsDirty? getBitArrayBytes(_len) :0));
+    DEBUGBUS_PRINTLN(F(" bytes."));
+  }
 }
 
 
-// BusHub75Matrix::BusHub75Matrix(const BusConfig &bc)
-//   : Bus(bc.type, bc.start, bc.autoWhite, bc.count)
-// {
-//   _valid = false;
-//   _hasRgb = true;
-//   _hasWhite = false;
-//   _hasCCT = false;
-
-//   virtualDisp = nullptr;
-//   _isVirtual = false;
-//   _isQuadScan = false;
-
-//   _rows = 1;
-//   _cols = 1;
-
-//   DEBUGBUS_PRINTLN("HUB75 MINIMAL TEST START");
-
-//   // ------------------------------------------------------------
-//   // Physical panel
-//   // 128 x 64
-//   // 1/32 scan
-//   // FM6126A
-//   // ------------------------------------------------------------
-
-//   mxconfig.mx_width = 128;
-//   mxconfig.mx_height = 64;
-//   mxconfig.chain_length = 1;
-
-//   // Physical continuity mapping:
-//   //
-//   // mxconfig.gpio = {
-//   //   11, 12, 10,       // R1, G1, B1
-//   //    9, 13,  8,       // R2, G2, B2
-//   //   18,  5, 17, 6, 4, // A, B, C, D, E
-//   //    7, 15, 16        // LAT, OE, CLK
-//   // };
-
-//   // Temporary manual G/B swap for this panel.
-//   mxconfig.gpio = {
-//     11, 10, 12,       // R1, G1, B1
-//      9,  8, 13,       // R2, G2, B2
-//     18,  5, 17, 6, 4, // A, B, C, D, E
-//      7, 15, 16        // LAT, OE, CLK
-//   };
-
-//   mxconfig.driver = HUB75_I2S_CFG::FM6126A;
-//   mxconfig.clkphase = false;
-//   mxconfig.double_buff = false;
-
-//   DEBUGBUS_PRINTF(
-//     "HUB75 GPIO: R1=%d G1=%d B1=%d R2=%d G2=%d B2=%d A=%d B=%d C=%d D=%d E=%d LAT=%d OE=%d CLK=%d\n",
-//     mxconfig.gpio.r1,
-//     mxconfig.gpio.g1,
-//     mxconfig.gpio.b1,
-//     mxconfig.gpio.r2,
-//     mxconfig.gpio.g2,
-//     mxconfig.gpio.b2,
-//     mxconfig.gpio.a,
-//     mxconfig.gpio.b,
-//     mxconfig.gpio.c,
-//     mxconfig.gpio.d,
-//     mxconfig.gpio.e,
-//     mxconfig.gpio.lat,
-//     mxconfig.gpio.oe,
-//     mxconfig.gpio.clk
-//   );
-
-//   DEBUGBUS_PRINTLN("HUB75: creating display");
-
-//   display = new(std::nothrow) MatrixPanel_I2S_DMA(mxconfig);
-
-//   if (display == nullptr)
-//   {
-//     DEBUGBUS_PRINTLN("HUB75: display allocation FAILED");
-//     return;
-//   }
-
-//   DEBUGBUS_PRINTLN("HUB75: calling begin");
-
-//   if (!display->begin())
-//   {
-//     DEBUGBUS_PRINTLN("HUB75: begin FAILED");
-
-//     delete display;
-//     display = nullptr;
-
-//     return;
-//   }
-
-//   DEBUGBUS_PRINTLN("HUB75: begin OK");
-
-//   _panelWidth = display->width();
-//   _len = display->width() * display->height();
-
-//   DEBUGBUS_PRINTF(
-//     "HUB75: width=%u height=%u len=%u\n",
-//     display->width(),
-//     display->height(),
-//     _len
-//   );
-
-//   display->setBrightness8(128);
-//   display->clearScreen();
-
-//   // ------------------------------------------------------------
-//   // Allocate normal PulSar HUB75 buffers.
-//   // ------------------------------------------------------------
-
-//   DEBUGBUS_PRINTLN("HUB75: allocating dirty buffer");
-
-//   _ledsDirty = static_cast<byte*>(
-//     d_malloc(
-//       getBitArrayBytes(_len)
-//     )
-//   );
-
-//   if (_ledsDirty == nullptr)
-//   {
-//     DEBUGBUS_PRINTLN("HUB75: dirty buffer allocation FAILED");
-
-//     display->stopDMAoutput();
-//     delete display;
-//     display = nullptr;
-
-//     return;
-//   }
-
-//   setBitArray(_ledsDirty, _len, false);
-
-//   DEBUGBUS_PRINTLN("HUB75: allocating LED buffer");
-
-//   _ledBuffer = static_cast<CRGB*>(
-//     allocate_buffer(
-//       _len * sizeof(CRGB),
-//       BFRALLOC_PREFER_DRAM | BFRALLOC_CLEAR
-//     )
-//   );
-
-//   if (_ledBuffer == nullptr)
-//   {
-//     DEBUGBUS_PRINTLN("HUB75: LED buffer allocation FAILED");
-
-//     d_free(_ledsDirty);
-//     _ledsDirty = nullptr;
-
-//     display->stopDMAoutput();
-//     delete display;
-//     display = nullptr;
-
-//     return;
-//   }
-
-//   DEBUGBUS_PRINTF(
-//     "HUB75: buffers OK ledBuffer=%p dirty=%p ledBytes=%u dirtyBytes=%u\n",
-//     (void*)_ledBuffer,
-//     (void*)_ledsDirty,
-//     _len * sizeof(CRGB),
-//     getBitArrayBytes(_len)
-//   );
-
-//   // ------------------------------------------------------------
-//   // One-time init diagnostic pattern
-//   //
-//   // 0..9       RED
-//   // 10..19     GREEN
-//   // 20..29     BLUE
-//   // 30..39     BLACK
-//   // 40..8000   one continuous rainbow
-//   // 8001..8191 BLACK
-//   // ------------------------------------------------------------
-
-//   DEBUGBUS_PRINTLN("HUB75: drawing init diagnostic pattern");
-
-//   display->clearScreen();
-
-//   for (uint16_t pix = 0; pix < 10; pix++)
-//   {
-//     int x = pix % 128;
-//     int y = pix / 128;
-
-//     display->drawPixelRGB888(
-//       x,
-//       y,
-//       255,
-//       0,
-//       0
-//     );
-//   }
-
-//   for (uint16_t pix = 10; pix < 20; pix++)
-//   {
-//     int x = pix % 128;
-//     int y = pix / 128;
-
-//     display->drawPixelRGB888(
-//       x,
-//       y,
-//       0,
-//       255,
-//       0
-//     );
-//   }
-
-//   for (uint16_t pix = 20; pix < 30; pix++)
-//   {
-//     int x = pix % 128;
-//     int y = pix / 128;
-
-//     display->drawPixelRGB888(
-//       x,
-//       y,
-//       0,
-//       0,
-//       255
-//     );
-//   }
-
-//   for (uint16_t pix = 40; pix <= 8000; pix++)
-//   {
-//     uint16_t wheel = ((uint32_t)(pix - 40) * 255U) / (8000U - 40U);
-
-//     uint8_t r = 0;
-//     uint8_t g = 0;
-//     uint8_t b = 0;
-
-//     if (wheel < 85)
-//     {
-//       r = 255 - wheel * 3;
-//       g = wheel * 3;
-//     }
-//     else if (wheel < 170)
-//     {
-//       wheel -= 85;
-
-//       g = 255 - wheel * 3;
-//       b = wheel * 3;
-//     }
-//     else
-//     {
-//       wheel -= 170;
-
-//       r = wheel * 3;
-//       b = 255 - wheel * 3;
-//     }
-
-//     int x = pix % 128;
-//     int y = pix / 128;
-
-//     display->drawPixelRGB888(
-//       x,
-//       y,
-//       r,
-//       g,
-//       b
-//     );
-//   }
-
-//   _valid = true;
-
-//   DEBUGBUS_PRINTLN("HUB75 MINIMAL TEST READY");
-// }
 
 void IRAM_ATTR BusHub75Matrix::setPixelColor(unsigned pix, uint32_t c) {
   if (!_valid) return; // note: no need to check pix >= _len as that is checked in containsPixel()
@@ -2160,199 +1606,28 @@ void BusHub75Matrix::setBrightness(uint8_t b) {
   if (!_valid || !display) return;
   display->setBrightness(_bri); 
 }
+void BusHub75Matrix::show(void) {
+  if (!_valid) return;
+  if (_ledBuffer) {
+    // write out buffered LEDs
+    unsigned height = _isVirtual ? virtualDisp->height() : display->height();
+    unsigned width = _panelWidth;
 
-// void BusHub75Matrix::show(void) {
-//   if (!_valid) return;
-//   if (_ledBuffer) {
-//     // write out buffered LEDs
-//     unsigned height = _isVirtual ? virtualDisp->height() : display->height();
-//     unsigned width = _panelWidth;
-
-//     //while(!previousBufferFree) delay(1);   // experimental - Wait before we allow any writing to the buffer. Stop flicker.
-//     size_t pix = 0; // running pixel index
-//     for (int y=0; y<height; y++) for (int x=0; x<width; x++) {
-//       if (getBitFromArray(_ledsDirty, pix) == true) {        // only repaint the "dirty"  pixels
-//         CRGB c = _ledBuffer[pix];
-//         //c.nscale8_video(_bri); // apply brightness
-//         if (_isVirtual) virtualDisp->drawPixelRGB888(int16_t(x), int16_t(y), c.r, c.g, c.b);
-//         else                display->drawPixelRGB888(int16_t(x), int16_t(y), c.r, c.g, c.b);
-//       }
-//       pix++;
-//     }
-//     setBitArray(_ledsDirty, _len, false);  // buffer shown - reset all dirty bits
-//   }
-// }
-void BusHub75Matrix::show(void)
-{
-  if (!_valid || !display) return;
-
-  static uint32_t lastPrint = 0;
-
-  uint32_t now = millis();
-
-  if (now - lastPrint >= 1000)
-  {
-    lastPrint = now;
-
-    DEBUGBUS_PRINTF(
-      "HUB75 SHOW running millis=%u bri=%u\n",
-      now,
-      _bri
-    );
-  }
-
-  // Force visible brightness every frame for this hardware test.
-  display->setBrightness8(128);
-
-  // 60 second RGB colour wheel across the ENTIRE panel.
-  uint16_t wheel = ((now % 60000UL) * 255UL) / 60000UL;
-
-  uint8_t r = 0;
-  uint8_t g = 0;
-  uint8_t b = 0;
-
-  if (wheel < 85)
-  {
-    r = 255 - wheel * 3;
-    g = wheel * 3;
-  }
-  else if (wheel < 170)
-  {
-    wheel -= 85;
-
-    g = 255 - wheel * 3;
-    b = wheel * 3;
-  }
-  else
-  {
-    wheel -= 170;
-
-    r = wheel * 3;
-    b = 255 - wheel * 3;
-  }
-
-  for (uint16_t y = 0; y < 64; y++)
-  {
-    for (uint16_t x = 0; x < 128; x++)
-    {
-      display->drawPixelRGB888(
-        x,
-        y,
-        r,
-        g,
-        b
-      );
+    //while(!previousBufferFree) delay(1);   // experimental - Wait before we allow any writing to the buffer. Stop flicker.
+    size_t pix = 0; // running pixel index
+    for (int y=0; y<height; y++) for (int x=0; x<width; x++) {
+      if (getBitFromArray(_ledsDirty, pix) == true) {        // only repaint the "dirty"  pixels
+        CRGB c = _ledBuffer[pix];
+        //c.nscale8_video(_bri); // apply brightness
+        if (_isVirtual) virtualDisp->drawPixelRGB888(int16_t(x), int16_t(y), c.r, c.g, c.b);
+        else                display->drawPixelRGB888(int16_t(x), int16_t(y), c.r, c.g, c.b);
+      }
+      pix++;
     }
+    setBitArray(_ledsDirty, _len, false);  // buffer shown - reset all dirty bits
   }
 }
 
-
-// void BusHub75Matrix::show(void)
-// {
-//   return;
-
-//   static uint32_t showCount = 0;
-//   showCount++;
-
-//   if (showCount <= 20 || (showCount % 1000) == 0)
-//   {
-//     DEBUGBUS_PRINTF(
-//       "HUB75 SHOW #%u valid=%u display=%p virtual=%p ledBuffer=%p dirty=%p len=%u width=%u bri=%u\n",
-//       showCount,
-//       _valid,
-//       (void*)display,
-//       (void*)virtualDisp,
-//       (void*)_ledBuffer,
-//       (void*)_ledsDirty,
-//       _len,
-//       _panelWidth,
-//       _bri
-//     );
-//   }
-
-//   if (!_valid)
-//   {
-//     if (showCount <= 20)
-//     {
-//       DEBUGBUS_PRINTLN("HUB75 SHOW: INVALID - returning");
-//     }
-//     return;
-//   }
-
-//   if (display == nullptr)
-//   {
-//     DEBUGBUS_PRINTLN("HUB75 SHOW: display == nullptr");
-//     return;
-//   }
-
-//   // if (_ledBuffer)
-//   // {
-//   //   unsigned height = _isVirtual ? virtualDisp->height() : display->height();
-//   //   unsigned width = _panelWidth;
-
-//   //   size_t pix = 0;
-
-//   //   for (int y = 0; y < height; y++)
-//   //   {
-//   //     for (int x = 0; x < width; x++)
-//   //     {
-//   //       if (getBitFromArray(_ledsDirty, pix))
-//   //       {
-//   //         CRGB c = _ledBuffer[pix];
-
-//   //         if (_isVirtual)
-//   //         {
-//   //           virtualDisp->drawPixelRGB888(
-//   //             int16_t(x),
-//   //             int16_t(y),
-//   //             c.r,
-//   //             c.g,
-//   //             c.b
-//   //           );
-//   //         }
-//   //         else
-//   //         {
-//   //           display->drawPixelRGB888(
-//   //             int16_t(x),
-//   //             int16_t(y),
-//   //             c.r,
-//   //             c.g,
-//   //             c.b
-//   //           );
-//   //         }
-//   //       }
-
-//   //       pix++;
-//   //     }
-//   //   }
-
-//   //   setBitArray(_ledsDirty, _len, false);
-//   // }
-
-//   // ------------------------------------------------------------------
-//   // HARDWARE TEST:
-//   // Always force first three physical pixels to R, G, B.
-//   // This bypasses effects, segment data and _ledBuffer contents.
-//   // ------------------------------------------------------------------
-
-//   if (_isVirtual && virtualDisp)
-//   {
-//     virtualDisp->drawPixelRGB888(0, 0, 255,   0,   0);
-//     virtualDisp->drawPixelRGB888(1, 0,   0, 255,   0);
-//     virtualDisp->drawPixelRGB888(2, 0,   0,   0, 255);
-//   }
-//   else
-//   {
-//     display->drawPixelRGB888(0, 0, 255,   0,   0);
-//     display->drawPixelRGB888(1, 0,   0, 255,   0);
-//     display->drawPixelRGB888(2, 0,   0,   0, 255);
-//   }
-
-//   // if (showCount <= 20)
-//   // {
-//     DEBUGBUS_PRINTLN("HUB75 SHOW: forced pixels 0=RED 1=GREEN 2=BLUE");
-//   // }
-// }
 
 void BusHub75Matrix::cleanup() {
   if (display && _valid) display->stopDMAoutput();  // terminate DMA driver (display goes black)
