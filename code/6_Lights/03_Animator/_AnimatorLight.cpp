@@ -539,6 +539,14 @@ void mAnimatorLight::LightingBusConfig_AllocatePins(
   bool override_existing
 )
 {
+  #ifdef ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
+if (Bus::isHub75(bus_config.type))
+{
+  ALOG_INF(PSTR("LGT: HUB75 dev config - physical GPIO allocation handled by BusHub75Matrix"));
+  return;
+}
+#endif
+
   uint8_t pin_count = Bus::getNumberOfPins(bus_config.type);
 
   if (pin_count == 0)

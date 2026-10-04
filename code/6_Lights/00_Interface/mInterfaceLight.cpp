@@ -1436,21 +1436,31 @@ void mInterfaceLight::parseJSONObject__BusConfig(JsonParserObject obj, int16_t b
     }
   }
 
-  const size_t required_pin_count = Bus::getNumberOfPins(bus_type);
+const size_t required_pin_count = Bus::getNumberOfPins(bus_type);
 
-  if (Bus::isHub75(bus_type) && pin_count != required_pin_count)
-  {
-    ALOG_ERR(
-      PSTR("BusConfig[%d] HUB75 requires %u pins, received %u"),
-      bus_index,
-      static_cast<unsigned>(required_pin_count),
-      static_cast<unsigned>(pin_count)
-    );
-    return;
-  }
+#ifdef ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
 
-  AddLog_Array(LOG_LEVEL_INFO, PSTR("pins"), pins, pin_count);
+if (Bus::isHub75(bus_type))
+{
+  ALOG_INF(
+    PSTR("BusConfig[%d] HUB75 dev config: command pins ignored, constructor provides GPIO configuration"),
+    bus_index
+  );
+}
+else
+#endif
+if (pin_count != required_pin_count)
+{
+  ALOG_ERR(
+    PSTR("BusConfig[%d] requires %u pins, received %u"),
+    bus_index,
+    static_cast<unsigned>(required_pin_count),
+    static_cast<unsigned>(pin_count)
+  );
+  return;
+}
 
+AddLog_Array(LOG_LEVEL_INFO, PSTR("pins"), pins, pin_count);
   /********************************************************************************************
    ** Start ***********************************************************************************
   ********************************************************************************************/
