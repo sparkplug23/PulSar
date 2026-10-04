@@ -1661,21 +1661,22 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc)
   mxconfig.mx_height = 64;
   mxconfig.chain_length = 1;
 
+  // Physical continuity mapping:
+  //
   // mxconfig.gpio = {
   //   11, 12, 10,       // R1, G1, B1
   //    9, 13,  8,       // R2, G2, B2
   //   18,  5, 17, 6, 4, // A, B, C, D, E
   //    7, 15, 16        // LAT, OE, CLK
   // };
-  
+
+  // Temporary manual G/B swap for this panel.
   mxconfig.gpio = {
-  11, 10, 12,       // R1, G1, B1
-   9,  8, 13,       // R2, G2, B2
-  18,  5, 17, 6, 4, // A, B, C, D, E
-   7, 15, 16        // LAT, OE, CLK
-};
-
-
+    11, 10, 12,       // R1, G1, B1
+     9,  8, 13,       // R2, G2, B2
+    18,  5, 17, 6, 4, // A, B, C, D, E
+     7, 15, 16        // LAT, OE, CLK
+  };
 
   mxconfig.driver = HUB75_I2S_CFG::FM6126A;
   mxconfig.clkphase = false;
@@ -1737,10 +1738,8 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc)
   display->clearScreen();
 
   // ------------------------------------------------------------
-  // Allocate the normal PulSar HUB75 buffers.
-  //
-  // show() can still return immediately for now, but the rest of
-  // PulSar can safely use setPixelColor() / getPixelColor().
+  // Allocate normal PulSar HUB75 buffers.
+  // show() remains blocked separately for this test.
   // ------------------------------------------------------------
 
   DEBUGBUS_PRINTLN("HUB75: allocating dirty buffer");
@@ -1798,66 +1797,99 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc)
   // ------------------------------------------------------------
   // Direct hardware test
   //
-  // Pixels 0,1,2:
-  //   RED
-  //   GREEN
-  //   BLUE
-  //
-  // Pixels 10..100:
-  //   full rainbow across the first row
+  // 0..9       RED
+  // 10..19     GREEN
+  // 20..29     BLUE
+  // 30..39     BLACK
+  // 40..8000   one continuous rainbow
+  // 8001..8191 BLACK
   // ------------------------------------------------------------
 
-for (int x = 0; x < 8000; x++)
-{
-  display->drawPixelRGB888(x, 0, 0, 0, 0);       // RED
-}
+  DEBUGBUS_PRINTLN("HUB75: drawing full-panel diagnostic pattern");
 
+  display->clearScreen();
 
-display->clearScreen();
-
-for (int x = 0; x < 10; x++)
-{
-  display->drawPixelRGB888(x, 0, 255, 0, 0);
-}
-
-for (int x = 10; x < 20; x++)
-{
-  display->drawPixelRGB888(x, 0, 0, 255, 0);
-}
-
-for (int x = 20; x < 30; x++)
-{
-  display->drawPixelRGB888(x, 0, 0, 0, 255);
-}
-
-for (int x = 40; x <= 127; x++)
-{
-  uint16_t wheel = ((x - 40) * 255U) / 87U;
-
-  uint8_t r = 0;
-  uint8_t g = 0;
-  uint8_t b = 0;
-
-  if (wheel < 85)
+  for (uint16_t pix = 0; pix < 10; pix++)
   {
-    r = 255 - wheel * 3;
-    g = wheel * 3;
-  }
-  else if (wheel < 170)
-  {
-    wheel -= 85;
-    g = 255 - wheel * 3;
-    b = wheel * 3;
-  }
-  else
-  {
-    wheel -= 170;
-    r = wheel * 3;
-    b = 255 - wheel * 3;
+    int x = pix % 128;
+    int y = pix / 128;
+
+    display->drawPixelRGB888(
+      x,
+      y,
+      255,
+      0,
+      0
+    );
   }
 
-  display->drawPixelRGB888(x, 0, r, g, b);
-}
+  for (uint16_t pix = 10; pix < 20; pix++)
+  {
+    int x = pix % 128;
+    int y = pix / 128;
+
+    display->drawPixelRGB888(
+      x,
+      y,
+      0,
+      255,
+      0
+    );
+  }
+
+  for (uint16_t pix = 20; pix < 30; pix++)
+  {
+    int x = pix % 128;
+    int y = pix / 128;
+
+    display->drawPixelRGB888(
+      x,
+      y,
+      0,
+      0,
+      255
+    );
+  }
+
+  for (uint16_t pix = 40; pix <= 8000; pix++)
+  {
+    uint16_t wheel = ((uint32_t)(pix - 40) * 255U) / (8000U - 40U);
+
+    uint8_t r = 0;
+    uint8_t g = 0;
+    uint8_t b = 0;
+
+    if (wheel < 85)
+    {
+      r = 255 - wheel * 3;
+      g = wheel * 3;
+    }
+    else if (wheel < 170)
+    {
+      wheel -= 85;
+
+      g = 255 - wheel * 3;
+      b = wheel * 3;
+    }
+    else
+    {
+      wheel -= 170;
+
+      r = wheel * 3;
+      b = 255 - wheel * 3;
+    }
+
+    int x = pix % 128;
+    int y = pix / 128;
+
+    display->drawPixelRGB888(
+      x,
+      y,
+      r,
+      g,
+      b
+    );
+  }
 
   _valid = true;
 

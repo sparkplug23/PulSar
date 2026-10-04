@@ -8832,13 +8832,16 @@ R"=====(
         // "Length":8192,
         // "Width":128,
         // "Height":64
+        // "Pin":[128,64,1,1,1],
+
+#define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
+
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
   {
     "BusConfig":[
       {
-        "Pin":[128,64,1,1,1],
         "BusType":"HUB75E",
         "Start":0,
         "Length":8192
