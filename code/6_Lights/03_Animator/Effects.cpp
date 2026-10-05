@@ -6252,7 +6252,7 @@ static const char PM_EFFECT_DESCRI__DYNAMIC[] PROGMEM =
  *                Algorithm
  *                  1) Compute head ‘a’ from time and SX; derive ‘b’ and ‘c’ by adding ‘size’ twice (with wrap).
  *                  2) Paint background:
- *                       - palette path: color_from_palette(i, …, index=1)
+ *                       - palette path: color_from_palette_wled(i, …, index=1)
  *                       - solid path : color1
  *                     If chase_random: repaint [a .. end) with previous wheel hue (aux1) to smooth the swap.
  *                  3) Paint band #1 over [a .. b) with color2 (wrapping if needed).
@@ -6294,7 +6294,7 @@ void mAnimatorLight::EffectAnim__Base_Chase(uint32_t color1, uint32_t color2, ui
   if (do_palette)
   {
     for (unsigned i = 0; i < SEGLEN; i++) {
-      SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+      SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 1));
     }
   } else SEGMENT.fill(color1);
 
@@ -6429,7 +6429,7 @@ void mAnimatorLight::EffectAnim__Chase_Flash(){
   unsigned flash_step = SEGMENT.call % ((FLASH_COUNT * 2) + 1);
 
   for (unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0));
   }
 
   unsigned delay = 10 + ((30 * (uint16_t)(255 - SEGMENT.speed)) / SEGLEN);
@@ -6727,7 +6727,7 @@ void mAnimatorLight::EffectAnim__Base_Chase_TriColour(uint32_t color1, uint32_t 
     if (index > (width*3)-1) index = 0;
 
     uint32_t color = color1;
-    if (index > (width<<1)-1) color = SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1);
+    if (index > (width<<1)-1) color = SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 1);
     else if (index > width-1) color = color2;
 
     SEGMENT.setPixelColor(SEGLEN - i -1, color);
@@ -6971,7 +6971,7 @@ void mAnimatorLight::EffectAnim__Fireworks()
       uint16_t index = hw_random16(width*height);
       x = index % width;
       y = index / width;
-      uint32_t col = SEGMENT.color_from_palette(hw_random8(), false, false, 0);
+      uint32_t col = SEGMENT.color_from_palette_wled(hw_random8(), false, false, 0);
       if (SEGMENT.is2D()) SEGMENT.setPixelColorXY(x, y, col);
       else                SEGMENT.setPixelColor(index, col);
       SEGMENT.aux1 = SEGMENT.aux0;  // old spark
@@ -7700,7 +7700,7 @@ void mAnimatorLight::EffectAnim__Tetrix(void) {
           drop->pos -= drop->speed;       // may add gravity as: speed += gravity
           if (int(drop->pos) < int(drop->stack)) drop->pos = drop->stack;
           for (unsigned i = unsigned(drop->pos); i < pSEGLEN; i++) {
-            uint32_t col = i < unsigned(drop->pos)+drop->brick ? pSEGMENT.color_from_palette(drop->col, false, false, 0) : pSEGCOLOR(1);
+            uint32_t col = i < unsigned(drop->pos)+drop->brick ? pSEGMENT.color_from_palette_wled(drop->col, false, false, 0) : pSEGCOLOR(1);
             pSEGMENT.setPixelColor(indexToVStrip(i, stripNr), col);
           }
         } else {                          // we hit bottom
@@ -7806,7 +7806,7 @@ void mAnimatorLight::EffectAnim__Fire_Flicker(void)
       SEGMENT.setPixelColor((int)i, nr, ng, nb, nw);
     } else {
       SEGMENT.setPixelColor((int)i,
-        SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, 255 - flicker));
+        SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0, 255 - flicker));
     }
   }
 
@@ -7852,7 +7852,7 @@ static const char PM_EFFECT_DESCRI__FIRE_FLICKER[] PROGMEM =
 void mAnimatorLight::EffectAnim__Sparkle()
 {
   if (!SEGMENT.check2) for(unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 1));
   }
   uint32_t cycleTime = 10 + (255 - SEGMENT.speed)*2;
   uint32_t it = effect_start_time / cycleTime;
@@ -7897,7 +7897,7 @@ void mAnimatorLight::EffectAnim__Sparkle_Flash() // Firework_Rain
 {
   // Blocking this, would allow "overlay" on a previously drawn effect
   if (!SEGMENT.check2) for (unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0));
   }
 
   if (effect_start_time - SEGMENT.aux0 > SEGMENT.step) {
@@ -7940,7 +7940,7 @@ static const char PM_EFFECT_DESCRI__FLASH_SPARKLE[] PROGMEM =
 void mAnimatorLight::EffectAnim__Sparkle_Hyper() // Firework_Rain
 {
   if (!SEGMENT.check2) for (unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0));
   }
 
   if (effect_start_time - SEGMENT.aux0 > SEGMENT.step) {
@@ -8091,7 +8091,7 @@ static const char PM_EFFECT_DESCRI__RAINBOW_CYCLE[] PROGMEM =
  *                Controls (via SEGMENT)
  *                  • SX (speed)      : phase advance rate (counter = t * SX >> 9)
  *                  • IX (wave width) : horizontal scale; larger IX shrinks wavelength (x_scale = IX >> 2)
- *                  • Palette         : color_from_palette(i, ... , slot=0) for wave A, slot=2 for wave B; Color 1 is the base
+ *                  • Palette         : color_from_palette_wled(i, ... , slot=0) for wave A, slot=2 for wave B; Color 1 is the base
  *                Rendering
  *                  1) For each i, compute phase a = i*x_scale - counter (optionally shape if saw=true).
  *                  2) s = sin8_t(a) or sin_gap(a); ca = blend(Color1, Palette(i, slot=0), s).
@@ -8121,11 +8121,11 @@ void mAnimatorLight::EffectAnim__Base_RunningWaves(bool saw, bool dual)
       a = 255 - a;
     }
     uint8_t s = dual ? sin_gap(a) : sin8_t(a);
-    uint32_t ca = color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), s);
+    uint32_t ca = color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0), s);
     if (dual) {
       unsigned b = (SEGLEN-1-i)*x_scale - counter;
       uint8_t t = sin_gap(b);
-      uint32_t cb = color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 2), t);
+      uint32_t cb = color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 2), t);
       ca = color_blend(ca, cb, uint8_t(127));
     }
     SEGMENT.setPixelColor(i, ca);
@@ -8279,7 +8279,7 @@ void mAnimatorLight::EffectAnim__Twinkle()
     PRNG16 = (uint16_t)(PRNG16 * 2053) + 13849; // next 'random' number
     uint32_t p = (uint32_t)SEGLEN * (uint32_t)PRNG16;
     unsigned j = p >> 16;
-    SEGMENT.setPixelColor(j, SEGMENT.color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.setPixelColor(j, SEGMENT.color_from_palette_wled(j, true, PALETTE_SOLID_WRAP, 0));
   }
 
   
@@ -8345,7 +8345,7 @@ void mAnimatorLight::EffectAnim__Base_Dissolve(uint32_t color)
         if (SEGMENT.aux0) { //dissolve to primary/palette
           if (fadeUp) {
             if (color == SEGCOLOR(0)) {
-              SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+              SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0));
             } else {
               SEGMENT.setPixelColor(i, color);
             }
@@ -8468,7 +8468,7 @@ static const char PM_EFFECT_DESCRI__DISSOLVE_RANDOM[] PROGMEM =
 void mAnimatorLight::EffectAnim__Android()
 {
   for (unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 1));
   }
 
   if (SEGMENT.aux1 > (SEGMENT.intensity*SEGLEN)/255)
@@ -8560,7 +8560,7 @@ void mAnimatorLight::EffectAnim__TriPops()
 {
   if (SEGLEN == 1) return EFFECT_DEFAULT();
   for (unsigned i=0; i < SEGLEN; i++)
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 1));
   uint32_t mdelay = 500;
   for (unsigned i = 0; i < SEGLEN-2 ; i+=3)
   {
@@ -8710,7 +8710,7 @@ void mAnimatorLight::EffectAnim__Base_Gradient(bool loading)
       val = min(abs(pp-i),min(abs(p1-i),abs(p2-i)));
     }
     val = (brd > val) ? (val * 255) / brd : 255;
-    SEGMENT.setPixelColor(i, color_blend(SEGCOLOR(0), SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1), uint8_t(val)));
+    SEGMENT.setPixelColor(i, color_blend(SEGCOLOR(0), SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 1), uint8_t(val)));
   }
 
   
@@ -8917,7 +8917,7 @@ void mAnimatorLight::EffectAnim__Fairy(void) {
   uint16_t PRNG16 = 5100 + getCurrSegmentId();
   for (unsigned i = 0; i < SEGLEN; i++) {
     PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; //next 'random' number
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(PRNG16 >> 8, false, false, 0));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(PRNG16 >> 8, false, false, 0));
   }
 
   //amount of flasher pixels depending on intensity (0: none, 255: every LED)
@@ -8974,10 +8974,10 @@ void mAnimatorLight::EffectAnim__Fairy(void) {
       uint8_t bri = (flasherBri[f - firstFlasher] * globalPeakBri) / 255;
       PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; //next 'random' number
       unsigned flasherPos = f*flasherDistance;
-      SEGMENT.setPixelColor(flasherPos, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(PRNG16 >> 8, false, false, 0), bri));
+      SEGMENT.setPixelColor(flasherPos, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(PRNG16 >> 8, false, false, 0), bri));
       for (unsigned i = flasherPos+1; i < flasherPos+flasherDistance && i < SEGLEN; i++) {
         PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; //next 'random' number
-        SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(PRNG16 >> 8, false, false, 0, globalPeakBri));
+        SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(PRNG16 >> 8, false, false, 0, globalPeakBri));
       }
     }
   }
@@ -9060,7 +9060,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Fairy(void) {
       PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384; //next 'random' number
       diff = (PRNG16 > lastR) ? PRNG16 - lastR : lastR - PRNG16;
     }
-    SEGMENT.setPixelColor(f, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(PRNG16 >> 8, false, false, 0), flasherBri));
+    SEGMENT.setPixelColor(f, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(PRNG16 >> 8, false, false, 0), flasherBri));
   }
   
 }
@@ -9109,7 +9109,7 @@ void mAnimatorLight::EffectAnim__TriColour_Wipe()
 
   for (unsigned i = 0; i < SEGLEN; i++)
   {
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 2));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 2));
   }
 
   if(ledIndex < SEGLEN) { //wipe from 0 to 1
@@ -9193,9 +9193,9 @@ void mAnimatorLight::EffectAnim__Fade_TriColour()
   for (unsigned i = 0; i < SEGLEN; i++) {
     uint32_t color;
     if (stage == 2) {
-      color = color_blend(SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 2), color2, stp);
+      color = color_blend(SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 2), color2, stp);
     } else if (stage == 1) {
-      color = color_blend(color1, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 2), stp);
+      color = color_blend(color1, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 2), stp);
     } else {
       color = color_blend(color1, color2, stp);
     }
@@ -9256,10 +9256,10 @@ void mAnimatorLight::EffectAnim__Multi_Comet()
       unsigned index = comets[i];
       if (SEGCOLOR(2) != 0)
       {
-        SEGMENT.setPixelColor(index, i % 2 ? SEGMENT.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(2));
+        SEGMENT.setPixelColor(index, i % 2 ? SEGMENT.color_from_palette_wled(index, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(2));
       } else
       {
-        SEGMENT.setPixelColor(index, SEGMENT.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
+        SEGMENT.setPixelColor(index, SEGMENT.color_from_palette_wled(index, true, PALETTE_SOLID_WRAP, 0));
       }
       comets[i]++;
     } else {
@@ -9751,7 +9751,7 @@ void mAnimatorLight::EffectAnim__ColourWaves()
     uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;
     bri8 += (255 - brightdepth);
 
-    SEGMENT.blendPixelColor(i, SEGMENT.color_from_palette(hue8, false, PALETTE_SOLID_WRAP, 0, bri8), 128); // 50/50 mix
+    SEGMENT.blendPixelColor(i, SEGMENT.color_from_palette_wled(hue8, false, PALETTE_SOLID_WRAP, 0, bri8), 128); // 50/50 mix
   }
   SEGMENT.step = sPseudotime;
   SEGMENT.aux0 = sHue16;
@@ -9809,7 +9809,7 @@ void mAnimatorLight::EffectAnim__BPM()
   for (unsigned i = 0; i < SEGLEN; i++) {
     SEGMENT.setPixelColor(
       i,
-      SEGMENT.color_from_palette(
+      SEGMENT.color_from_palette_wled(
         stp + (i * 2),
         false,
         PALETTE_SOLID_WRAP,
@@ -10051,7 +10051,7 @@ void mAnimatorLight::EffectAnim__Lake()
   {
     int index = cos8_t((i*15)+ wave1)/2 + cubicwave8((i*23)+ wave2)/2;
     uint8_t lum = (index > wave3) ? index - wave3 : 0;
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, false, 0, lum));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(index, false, false, 0, lum));
   }
 
   
@@ -10119,15 +10119,15 @@ static const char PM_EFFECT_DESCRI__LAKE[] PROGMEM =
 //         int change = trail[i] + 4 - hw_random8(24);     // -20..+4
 //         trail[i] = constrain(change, 0, max);
 //         col = SEGMENT.check1
-//           ? SEGMENT.color_from_palette(i, true, false, 0,  trail[i])
-//           : SEGMENT.color_from_palette(trail[i], false, true, 255);
+//           ? SEGMENT.color_from_palette_wled(i, true, false, 0,  trail[i])
+//           : SEGMENT.color_from_palette_wled(trail[i], false, true, 255);
 //       } else {
 //         trail[i] = scale8(trail[i], 128 + hw_random8(127));
 //         int index = trail[i];
 //         int idx = 255;
 //         int bri = (SEGMENT.palette_id==35 || SEGMENT.palette_id==36) ? 255 : trail[i];
 //         if (!SEGMENT.check1) { idx = 0; index = map(i,0,SEGLEN,0,max); bri = trail[i]; }
-//         col = SEGMENT.color_from_palette(index, false, false, idx, bri);
+//         col = SEGMENT.color_from_palette_wled(index, false, false, idx, bri);
 //       }
 //       SEGMENT.setPixelColor(i, col);
 //     }
@@ -10139,14 +10139,14 @@ static const char PM_EFFECT_DESCRI__LAKE[] PROGMEM =
 //     if (meteorSmooth) {
 //       trail[index] = max;
 //       uint32_t col = SEGMENT.check1
-//         ? SEGMENT.color_from_palette(index, true, false, 0, trail[index])
-//         : SEGMENT.color_from_palette(trail[index], false, true, 255);
+//         ? SEGMENT.color_from_palette_wled(index, true, false, 0, trail[index])
+//         : SEGMENT.color_from_palette_wled(trail[index], false, true, 255);
 //       SEGMENT.setPixelColor(index, col);
 //     } else {
 //       int idx = 255;
 //       int i = trail[index] = max;
 //       if (!SEGMENT.check1) { i = map(index,0,SEGLEN,0,max); idx = 0; }
-//       uint32_t col = SEGMENT.color_from_palette(i, false, false, idx, 255);
+//       uint32_t col = SEGMENT.color_from_palette_wled(i, false, false, idx, 255);
 //       SEGMENT.setPixelColor(index, col);
 //     }
 //   }
@@ -10188,10 +10188,10 @@ void mAnimatorLight::EffectAnim__Meteor()
 
         if (SEGMENT.check1) {
           // Gradient mode: position → palette index, trail → brightness
-          col = SEGMENT.color_from_palette(i, true, wrap, 0, trail[i]);
+          col = SEGMENT.color_from_palette_wled(i, true, wrap, 0, trail[i]);
         } else {
           // Trail-driven colour mode (legacy WLED behaviour)
-          col = SEGMENT.color_from_palette(trail[i], false, wrap, 255);
+          col = SEGMENT.color_from_palette_wled(trail[i], false, wrap, 255);
         }
 
       } else {
@@ -10207,7 +10207,7 @@ void mAnimatorLight::EffectAnim__Meteor()
           bri   = trail[i];
         }
 
-        col = SEGMENT.color_from_palette(index, false, wrap, idx, bri);
+        col = SEGMENT.color_from_palette_wled(index, false, wrap, idx, bri);
       }
 
       SEGMENT.setPixelColor(i, col);
@@ -10224,10 +10224,10 @@ void mAnimatorLight::EffectAnim__Meteor()
       uint32_t col;
       if (SEGMENT.check1) {
         // Gradient mode: head colour from position, brightness from trail
-        col = SEGMENT.color_from_palette(index, true, wrap, 0, trail[index]);
+        col = SEGMENT.color_from_palette_wled(index, true, wrap, 0, trail[index]);
       } else {
         // Trail-driven colour for head
-        col = SEGMENT.color_from_palette(trail[index], false, wrap, 255);
+        col = SEGMENT.color_from_palette_wled(trail[index], false, wrap, 255);
       }
 
       SEGMENT.setPixelColor(index, col);
@@ -10241,7 +10241,7 @@ void mAnimatorLight::EffectAnim__Meteor()
         idx = 0;
       }
 
-      uint32_t col = SEGMENT.color_from_palette(i, false, wrap, idx, 255);
+      uint32_t col = SEGMENT.color_from_palette_wled(i, false, wrap, idx, 255);
       SEGMENT.setPixelColor(index, col);
     }
   }
@@ -10471,7 +10471,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Rise() // Firework_Rain
     if (hw_random8() > SEGMENT.intensity) pixBri = 0; // density control
     SEGMENT.setPixelColor(i,
       color_blend(SEGCOLOR(1),
-                  SEGMENT.color_from_palette(hw_random8()+effect_start_time/100,
+                  SEGMENT.color_from_palette_wled(hw_random8()+effect_start_time/100,
                                              false,
                                              PALETTE_SOLID_WRAP,
                                              0),
@@ -10575,7 +10575,7 @@ void mAnimatorLight::EffectAnim__Halloween_Eyes()
       constexpr uint32_t minimumOnTimeEnd = 1024u;
       const uint32_t fadeInAnimationState = elapsedTime * uint32_t{256u * 8u} / duration;
       const uint32_t backgroundColor = SEGCOLOR(1);
-      const uint32_t eyeColor = SEGMENT.color_from_palette(data.color, false, false, 0);
+      const uint32_t eyeColor = SEGMENT.color_from_palette_wled(data.color, false, false, 0);
       uint32_t c = eyeColor;
       if (fadeInAnimationState < 256u) {
         c = color_blend(backgroundColor, eyeColor, uint8_t(fadeInAnimationState));
@@ -10714,7 +10714,7 @@ void mAnimatorLight::EffectAnim__Base_Spots(uint16_t threshold)
       if (wave > threshold) {
         unsigned index = 0 + pos + i;
         unsigned s = (wave - threshold)*255 / (0xFFFF - threshold);
-        SEGMENT.setPixelColor(index, color_blend(SEGMENT.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), uint8_t(255-s)));
+        SEGMENT.setPixelColor(index, color_blend(SEGMENT.color_from_palette_wled(index, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), uint8_t(255-s)));
       }
     }
   }
@@ -10831,7 +10831,7 @@ void mAnimatorLight::EffectAnim__Glitter()
     for (unsigned i = 0; i < SEGLEN; i++) {
       unsigned colorIndex = (i * 255 / SEGLEN) - counter;
       if (noWrap) colorIndex = map(colorIndex, 0, 255, 0, 240); //cut off blend at palette "end"
-      SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(colorIndex, false, true, 255));
+      SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(colorIndex, false, true, 255));
     }
   }
   EffectAnim__Glitter_Base(SEGMENT.intensity, SEGCOLOR(2) ? SEGCOLOR(2) : ULTRAWHITE);
@@ -11242,7 +11242,7 @@ static const char PM_EFFECT_DESCRI__GLOW_SPOTS[] PROGMEM =
  *                  • On first call, aux0 randomizes the phase set so multiple segments don’t sync.
  *                  • colorIndex = cubicwave8( k1*i + thisPhase )/2 + cos8_t( k2*i + thatPhase )/2, with k1/k2 derived from SX.
  *                  • thisBright = qsub8(colorIndex, beatsin8_t(7, 0, 128-IX/2)).
- *                  • color_from_palette(index, …, bri=thisBright) paints each pixel; repeats every frame.
+ *                  • color_from_palette_wled(index, …, bri=thisBright) paints each pixel; repeats every frame.
  *
  * @note        : Converted from WLED Effects "mode_plasma".
  *******************************************************************************************************************************************************************************************************************/
@@ -11259,7 +11259,7 @@ void mAnimatorLight::EffectAnim__Plasma()
     unsigned colorIndex = cubicwave8((i*(2+ 3*(SEGMENT.speed >> 5))+thisPhase) & 0xFF)/2   // factor=23 // Create a wave and add a phase change and add another wave with its own phase change.
                               + cos8_t((i*(1+ 2*(SEGMENT.speed >> 5))+thatPhase) & 0xFF)/2;  // factor=15 // Hey, you can even change the frequencies if you wish.
     unsigned thisBright = qsub8(colorIndex, beatsin8_t(7,0, (128 - (SEGMENT.intensity>>1))));
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(colorIndex, false, PALETTE_SOLID_WRAP, 0, thisBright));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(colorIndex, false, PALETTE_SOLID_WRAP, 0, thisBright));
   }
 
     
@@ -11301,7 +11301,7 @@ static const char PM_EFFECT_DESCRI__PLASMA[] PROGMEM =
  *                Implementation
  *                  • active_leds is computed from IX; aux1 is eased toward it by ‘size’, which is a function of SX (or clamps to 255 if SX=255).
  *                  • Two passes handle <=100 and >100 logic so lit vs. background halves are symmetric.
- *                  • When C1 is set, lit pixels use color_from_palette(mappedPercent, …); else they use color_from_palette(i, …).
+ *                  • When C1 is set, lit pixels use color_from_palette_wled(mappedPercent, …); else they use color_from_palette_wled(i, …).
  *
  * @note        : Converted from WLED Effects "mode_percent".
  *******************************************************************************************************************************************************************************************************************/
@@ -11319,9 +11319,9 @@ static const char PM_EFFECT_DESCRI__PLASMA[] PROGMEM =
 //     for (unsigned i = 0; i < SEGLEN; i++) {
 //     	if (i < SEGMENT.aux1) {
 //         if (SEGMENT.check1)
-//           SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(map(percent,0,100,0,255), false, false, 0));
+//           SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(map(percent,0,100,0,255), false, false, 0));
 //         else
-//           SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//           SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0));
 //     	}
 //     	else {
 //         SEGMENT.setPixelColor(i, SEGCOLOR(1));
@@ -11334,9 +11334,9 @@ static const char PM_EFFECT_DESCRI__PLASMA[] PROGMEM =
 //     	}
 //     	else {
 //         if (SEGMENT.check1)
-//           SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(map(percent,100,200,255,0), false, false, 0));
+//           SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(map(percent,100,200,255,0), false, false, 0));
 //         else
-//           SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+//           SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0));
 //     	}
 //     }
 //   }
@@ -11414,9 +11414,9 @@ void mAnimatorLight::EffectAnim__Percent()
   for (uint16_t i = 0; i < SEGLEN; i++) {
     if (i < SEGMENT.aux1) {
       if (one_color)
-        SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(one_idx, false, false, 0));
+        SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(one_idx, false, false, 0));
       else
-        SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+        SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0));
     } else {
       if (!overlay) SEGMENT.setPixelColor(i, SEGCOLOR(1));
     }
@@ -11649,9 +11649,9 @@ void mAnimatorLight::EffectAnim__Sunrise()
     wave = (wave >> 8) + ((wave * SEGMENT.intensity) >> 15);
     uint32_t c;
     if (wave > 240) { //clipped, full white sun
-      c = SEGMENT.color_from_palette( 240, false, true, 255);
+      c = SEGMENT.color_from_palette_wled( 240, false, true, 255);
     } else { //transition
-      c = SEGMENT.color_from_palette(wave, false, true, 255);
+      c = SEGMENT.color_from_palette_wled(wave, false, true, 255);
     }
     SEGMENT.setPixelColor(i, c);
     SEGMENT.setPixelColor(SEGLEN - i - 1, c);
@@ -11702,7 +11702,7 @@ void mAnimatorLight::EffectAnim__Sinewave()
   for (unsigned i = 0; i < SEGLEN; i++) {                 // For each of the LED's in the strand, set a brightness based on a wave as follows:
     uint8_t pixBri = cubicwave8((i*freq)+SEGMENT.step);//qsuba(cubicwave8((i*freq)+SEGMENT.step), (255-SEGMENT.intensity)); // qsub sets a minimum value called thiscutoff. If < thiscutoff, then bright = 0. Otherwise, bright = 128 (as defined in qsub)..
     //setPixCol(i, i*colorIndex/255, pixBri);
-    SEGMENT.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(i*colorIndex/255, false, PALETTE_SOLID_WRAP, 0), pixBri));
+    SEGMENT.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(i*colorIndex/255, false, PALETTE_SOLID_WRAP, 0), pixBri));
   }
 
   
@@ -11755,7 +11755,7 @@ void mAnimatorLight::EffectAnim__Flow()
   unsigned zoneLen = SEGLEN / zones;
   unsigned offset = (SEGLEN - zones * zoneLen) >> 1;
 
-  SEGMENT.fill(SEGMENT.color_from_palette(-counter, false, true, 255));
+  SEGMENT.fill(SEGMENT.color_from_palette_wled(-counter, false, true, 255));
 
   for (unsigned z = 0; z < zones; z++)
   {
@@ -11765,7 +11765,7 @@ void mAnimatorLight::EffectAnim__Flow()
       unsigned colorIndex = (i * 255 / zoneLen) - counter;
       unsigned led = (z & 0x01) ? i : (zoneLen -1) -i;
       if (SEGMENT.reverse) led = (zoneLen -1) -led;
-      SEGMENT.setPixelColor(pos + led, SEGMENT.color_from_palette(colorIndex, false, true, 255));
+      SEGMENT.setPixelColor(pos + led, SEGMENT.color_from_palette_wled(colorIndex, false, true, 255));
     }
   }
 
@@ -11808,7 +11808,7 @@ void mAnimatorLight::EffectAnim__Palette_Lit_Pattern()
   unsigned cnt = 0;
 
   for (unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, (drawingLit) ? SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(1));
+    SEGMENT.setPixelColor(i, (drawingLit) ? SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0) : SEGCOLOR(1));
     cnt++;
     if (cnt >= ((drawingLit) ? lit : unlit)) {
       cnt = 0;
@@ -12243,7 +12243,7 @@ static const char PM_EFFECT_DESCRI__STROBE[] PROGMEM =
 void mAnimatorLight::EffectAnim__Strobe_Multi()
 {
   for (unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 1));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 1));
   }
 
   SEGMENT.aux0 = 50 + 20*(uint16_t)(255-SEGMENT.speed);
@@ -12388,7 +12388,7 @@ void mAnimatorLight::EffectAnim__Lightning()
   if (SEGMENT.aux1 > 3 && !(SEGMENT.aux1 & 0x01)) { //flash on even number >2
     for (unsigned i = ledstart; i < ledstart + ledlen; i++)
     {
-      SEGMENT.setPixelColor(i,SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0, bri));
+      SEGMENT.setPixelColor(i,SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0, bri));
     }
     SEGMENT.aux1--;
 
@@ -12561,10 +12561,10 @@ void mAnimatorLight::EffectAnim__Railway()
   if (SEGMENT.aux0) pos = 255 - pos;
   for (unsigned i = 0; i < SEGLEN; i += 2)
   {
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(255 - pos, false, false, 255)); // do not use color 1 or 2, always use palette
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(255 - pos, false, false, 255)); // do not use color 1 or 2, always use palette
     if (i < SEGLEN -1)
     {
-      SEGMENT.setPixelColor(i + 1, SEGMENT.color_from_palette(pos, false, false, 255)); // do not use color 1 or 2, always use palette
+      SEGMENT.setPixelColor(i + 1, SEGMENT.color_from_palette_wled(pos, false, false, 255)); // do not use color 1 or 2, always use palette
     }
   }
   SEGMENT.step += FRAMETIME;
@@ -12623,7 +12623,7 @@ void mAnimatorLight::EffectAnim__Heartbeat()
   }
 
   for (unsigned i = 0; i < SEGLEN; i++) {
-    SEGMENT.setPixelColor(i, color_blend(SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), uint8_t(255 - (SEGMENT.aux1 >> 8))));
+    SEGMENT.setPixelColor(i, color_blend(SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0), SEGCOLOR(1), uint8_t(255 - (SEGMENT.aux1 >> 8))));
   }
 
     
@@ -12665,7 +12665,7 @@ void mAnimatorLight::EffectAnim__FillNoise8()
   if (SEGMENT.call == 0) SEGMENT.step = hw_random();
   for (unsigned i = 0; i < SEGLEN; i++) {
     unsigned index = perlin8(i * SEGLEN, SEGMENT.step + i * SEGLEN);
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0));
   }
   SEGMENT.step += beatsin8_t(SEGMENT.speed, 1, 6); //10,1,4
 
@@ -12715,7 +12715,7 @@ void mAnimatorLight::EffectAnim__Noise16_1()
     unsigned noise = inoise16(real_x, real_y, real_z) >> 8;   // get the noise data and scale it down
     unsigned index = sin8_t(noise * 3);                         // map LED color based on noise data
 
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0));
   }
 
     
@@ -12758,7 +12758,7 @@ void mAnimatorLight::EffectAnim__Noise16_2()
     unsigned noise = inoise16(real_x, 0, 4223) >> 8;            // get the noise data and scale it down
     unsigned index = sin8_t(noise * 3);                           // map led color based on noise data
 
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0, noise));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0, noise));
   }
 
     
@@ -12804,7 +12804,7 @@ void mAnimatorLight::EffectAnim__Noise16_3()
     unsigned noise = inoise16(real_x, real_y, real_z) >> 8;   // get the noise data and scale it down
     unsigned index = sin8_t(noise * 3);                         // map led color based on noise data
 
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0, noise));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0, noise));
   }
 
     
@@ -12840,7 +12840,7 @@ void mAnimatorLight::EffectAnim__Noise16_4()
   uint32_t stp = (effect_start_time * SEGMENT.speed) >> 7;
   for (unsigned i = 0; i < SEGLEN; i++) {
     int index = inoise16(uint32_t(i) << 12, stp);
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0));
   }
     
 }
@@ -12962,7 +12962,7 @@ void mAnimatorLight::EffectAnim__Base_Phased(uint8_t moder)
     val += *phase * (i % modVal +1) /2;                          // This sets the varying phase change of the waves. By Andrew Tuline.
     unsigned b = cubicwave8(val);                                 // Now we make an 8 bit sinewave.
     b = (b > cutOff) ? (b - cutOff) : 0;                         // A ternary operator to cutoff the light.
-    SEGMENT.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, false, 0), uint8_t(b)));
+    SEGMENT.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(index, false, false, 0), uint8_t(b)));
     index += 256 / SEGLEN;
     if (SEGLEN > 256) index ++;                                  // Correction for segments longer than 256 LEDs
   }
@@ -13057,12 +13057,12 @@ void mAnimatorLight::EffectAnim__Base_Scan(bool dual)
   if (dual) {
     for (int j = led_offset; j < led_offset + size; j++) {
       unsigned i2 = SEGLEN -1 -j;
-      SEGMENT.setPixelColor(i2, SEGMENT.color_from_palette(i2, true, PALETTE_SOLID_WRAP, (SEGCOLOR(2))? 2:0));
+      SEGMENT.setPixelColor(i2, SEGMENT.color_from_palette_wled(i2, true, PALETTE_SOLID_WRAP, (SEGCOLOR(2))? 2:0));
     }
   }
 
   for (int j = led_offset; j < led_offset + size; j++) {
-    SEGMENT.setPixelColor(j, SEGMENT.color_from_palette(j, true, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.setPixelColor(j, SEGMENT.color_from_palette_wled(j, true, PALETTE_SOLID_WRAP, 0));
   }
 
     
@@ -13174,7 +13174,7 @@ void mAnimatorLight::EffectAnim__Larson_Scanner()
     // paint as many pixels as needed
     for (unsigned i = SEGMENT.aux1; i < index; i++) {
       unsigned j = (SEGMENT.aux0) ? i : SEGLEN - 1 - i;
-      uint32_t c = SEGMENT.color_from_palette(j, true, PALETTE_SOLID_WRAP, 0);
+      uint32_t c = SEGMENT.color_from_palette_wled(j, true, PALETTE_SOLID_WRAP, 0);
       SEGMENT.setPixelColor(j, c);
       if (SEGMENT.check1) {
         SEGMENT.setPixelColor(SEGLEN - 1 - j, SEGCOLOR(2) ? SEGCOLOR(2) : c);
@@ -13270,7 +13270,7 @@ void mAnimatorLight::EffectAnim__ICU()
   uint16_t nextUpdate = SEGMENT.step & 0xFFFF; // lower bytes store time for next update
 
   byte pindex = map(dest, 0, SEGLEN-SEGLEN/space, 0, 255);
-  uint32_t col = SEGMENT.color_from_palette(pindex, false, false, 0);
+  uint32_t col = SEGMENT.color_from_palette_wled(pindex, false, false, 0);
   uint32_t bgcol = SEGMENT.check2 ? BLACK : SEGCOLOR(1);
   SEGMENT.fill(bgcol); // apply background color or clear
   // draw eyes if not blinking
@@ -13389,7 +13389,7 @@ void mAnimatorLight::EffectAnim__Base_Ripple(uint8_t blurAmount)
     if (ripplestate) {
       unsigned rippledecay = (SEGMENT.speed >> 4) +1; //faster decay if faster propagation
       unsigned rippleorigin = ripples[i].pos;
-      uint32_t col = SEGMENT.color_from_palette(ripples[i].color, false, false, 255);
+      uint32_t col = SEGMENT.color_from_palette_wled(ripples[i].color, false, false, 255);
       unsigned propagation = ((ripplestate/rippledecay - 1) * (SEGMENT.speed + 1));
       int propI = propagation >> 8;
       unsigned propF = propagation & 0xFF;
@@ -13540,14 +13540,14 @@ void mAnimatorLight::EffectAnim__Comet()
 
   SEGMENT.fade_out(SEGMENT.intensity);
 
-  SEGMENT.setPixelColor( index, SEGMENT.color_from_palette(index, true, PALETTE_SOLID_WRAP, 0));
+  SEGMENT.setPixelColor( index, SEGMENT.color_from_palette_wled(index, true, PALETTE_SOLID_WRAP, 0));
   if (index > SEGMENT.aux0) {
     for (unsigned i = SEGMENT.aux0; i < index ; i++) {
-       SEGMENT.setPixelColor( i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+       SEGMENT.setPixelColor( i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0));
     }
   } else if (index < SEGMENT.aux0 && index < 10) {
     for (unsigned i = 0; i < index ; i++) {
-       SEGMENT.setPixelColor( i, SEGMENT.color_from_palette(i, true, PALETTE_SOLID_WRAP, 0));
+       SEGMENT.setPixelColor( i, SEGMENT.color_from_palette_wled(i, true, PALETTE_SOLID_WRAP, 0));
     }
   }
   SEGMENT.aux0 = index++;
@@ -13599,7 +13599,7 @@ void mAnimatorLight::EffectAnim__Chunchun()
     unsigned megumin = sin16_t(counter) + 0x8000;
     unsigned bird = uint32_t(megumin * SEGLEN) >> 16;
     bird = constrain(bird, 0U, SEGLEN-1U);
-    SEGMENT.setPixelColor(bird, SEGMENT.color_from_palette((i * 255)/ numBirds, false, false, 0)); // no palette wrapping
+    SEGMENT.setPixelColor(bird, SEGMENT.color_from_palette_wled((i * 255)/ numBirds, false, false, 0)); // no palette wrapping
   }
   
 }
@@ -13718,7 +13718,7 @@ void mAnimatorLight::EffectAnim__Dancing_Shadows()
       spotlights[i].type = hw_random8(SPOT_TYPES_COUNT);
     }
 
-    uint32_t color = SEGMENT.color_from_palette(spotlights[i].colorIdx, false, false, 255);
+    uint32_t color = SEGMENT.color_from_palette_wled(spotlights[i].colorIdx, false, false, 255);
     int start = spotlights[i].position;
 
     if (spotlights[i].width <= 1) {
@@ -13821,7 +13821,7 @@ void mAnimatorLight::EffectAnim__Washing_Machine()
 
   for (unsigned i = 0; i < SEGLEN; i++) {
     uint8_t col = sin8_t(((SEGMENT.intensity / 25 + 1) * 255 * i / SEGLEN) + (SEGMENT.step >> 7));
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(col, false, PALETTE_SOLID_WRAP, 3));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(col, false, PALETTE_SOLID_WRAP, 3));
   }
 
   
@@ -13870,7 +13870,7 @@ void mAnimatorLight::EffectAnim__Blends()
   unsigned shift = (effect_start_time * ((SEGMENT.speed >> 3) +1)) >> 8;
 
   for (unsigned i = 0; i < pixelLen; i++) {
-    pixels[i] = color_blend(pixels[i], SEGMENT.color_from_palette(shift + quadwave8((i + 1) * 16), false, PALETTE_SOLID_WRAP, 255), blendSpeed);
+    pixels[i] = color_blend(pixels[i], SEGMENT.color_from_palette_wled(shift + quadwave8((i + 1) * 16), false, PALETTE_SOLID_WRAP, 255), blendSpeed);
     shift += 3;
   }
 
@@ -14317,7 +14317,7 @@ void mAnimatorLight::EffectAnim__Rolling_Balls(void) {
       }
     }
 
-    uint32_t color = SEGMENT.color_from_palette(i*255/numBalls, false, PALETTE_SOLID_WRAP, 0);
+    uint32_t color = SEGMENT.color_from_palette_wled(i*255/numBalls, false, PALETTE_SOLID_WRAP, 0);
       
     if (thisHeight < 0.0f) thisHeight = 0.0f;
     if (thisHeight > 1.0f) thisHeight = 1.0f;
@@ -14400,7 +14400,7 @@ void mAnimatorLight::EffectAnim__Base_Sinelon(bool dual, bool rainbow)
   if (SEGMENT.call == 0) SEGMENT.aux0 = pos;
 
   // Head colors
-  uint32_t color1 = SEGMENT.color_from_palette(pos, true, false, 0);
+  uint32_t color1 = SEGMENT.color_from_palette_wled(pos, true, false, 0);
   uint32_t color2 = SEGCOLOR(2);
 
   if (rainbow) {
@@ -14411,7 +14411,7 @@ void mAnimatorLight::EffectAnim__Base_Sinelon(bool dual, bool rainbow)
   SEGMENT.setPixelColor(pos, color1);
 
   if (dual) {
-    if (!color2) color2 = SEGMENT.color_from_palette(pos, true, false, 0);
+    if (!color2) color2 = SEGMENT.color_from_palette_wled(pos, true, false, 0);
     if (rainbow) color2 = color1; // keep both heads in lockstep rainbow
     SEGMENT.setPixelColor(SEGLEN-1-pos, color2);
   }
@@ -14673,7 +14673,7 @@ void mAnimatorLight::EffectAnim__FlowStripe()
     c = sin8_t(c);
     c = sin8_t(c / 2 + t);
     byte b = sin8_t(c + t/8);
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(b + hue, false, true, 3));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(b + hue, false, true, 3));
   }
     
 }
@@ -14711,7 +14711,7 @@ void mAnimatorLight::EffectAnim__WaveSins()
   for (unsigned i = 0; i < SEGLEN; i++) {
     uint8_t bri = sin8_t(effect_start_time/4 + i * SEGMENT.intensity);
     uint8_t index = beatsin8_t(SEGMENT.speed, SEGMENT.custom1, SEGMENT.custom1+SEGMENT.custom2, 0, i * (SEGMENT.custom3<<3)); // custom3 is reduced resolution slider
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0, bri));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0, bri));
   }
 
   
@@ -21163,7 +21163,7 @@ static const char PM_EFFECT_DESCRI__CHRISTMAS_SEQUENTIAL_PLUS_01[] PROGMEM =
  *   • CB3: blur
  *
  *   Notes
- *   • Palette-driven (color_from_palette) for both star groups.
+ *   • Palette-driven (color_from_palette_wled) for both star groups.
  *   • Requires a 2D segment; returns EFFECT_DEFAULT if not 2D.
  *   • Uses addPixelColorXY for additive star hits and fadeToBlackBy for trails.
  *
@@ -21185,13 +21185,13 @@ void mAnimatorLight::EffectAnim__2D__Blackhole()
   for (size_t i = 0; i < 8; i++) {
     x = beatsin8_t(SEGMENT.custom1>>3,   0, cols - 1, 0, ((i % 2) ? 128 : 0) + t * i);
     y = beatsin8_t(SEGMENT.intensity>>3, 0, rows - 1, 0, ((i % 2) ? 192 : 64) + t * i);
-    SEGMENT.addPixelColorXY(x, y, SEGMENT.color_from_palette(i*32, false, PALETTE_SOLID_WRAP, SEGMENT.check1?0:255));
+    SEGMENT.addPixelColorXY(x, y, SEGMENT.color_from_palette_wled(i*32, false, PALETTE_SOLID_WRAP, SEGMENT.check1?0:255));
   }
   // inner stars
   for (size_t i = 0; i < 4; i++) {
     x = beatsin8_t(SEGMENT.custom2>>3, cols/4, cols - 1 - cols/4, 0, ((i % 2) ? 128 : 0) + t * i);
     y = beatsin8_t(SEGMENT.custom3   , rows/4, rows - 1 - rows/4, 0, ((i % 2) ? 192 : 64) + t * i);
-    SEGMENT.addPixelColorXY(x, y, SEGMENT.color_from_palette(255-i*64, false, PALETTE_SOLID_WRAP, SEGMENT.check1?0:255));
+    SEGMENT.addPixelColorXY(x, y, SEGMENT.color_from_palette_wled(255-i*64, false, PALETTE_SOLID_WRAP, SEGMENT.check1?0:255));
   }
   // central white dot
   SEGMENT.setPixelColorXY(cols/2, rows/2, WHITE);
@@ -21749,7 +21749,7 @@ void mAnimatorLight::EffectAnim__2D__GameOfLife()
       if (state == 0)
         SEGMENT.setPixelColorXY(x,y, backgroundColor);
       else
-        SEGMENT.setPixelColorXY(x,y, SEGMENT.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 255));
+        SEGMENT.setPixelColorXY(x,y, SEGMENT.color_from_palette_wled(hw_random8(), false, PALETTE_SOLID_WRAP, 255));
     }
 
     for (int y = 0; y < rows; y++) for (int x = 0; x < cols; x++) prevLeds[XY(x,y)] = CRGB::Black;
@@ -21806,7 +21806,7 @@ void mAnimatorLight::EffectAnim__2D__GameOfLife()
       // assign the dominant color w/ a bit of randomness to avoid "gliders"
       if (dominantColorCount.count > 0 && hw_random8(128)) SEGMENT.setPixelColorXY(x,y, dominantColorCount.color);
     } else if ((col == bgc) && (neighbors == 2) && !hw_random8(128)) {               // Mutation
-      SEGMENT.setPixelColorXY(x,y, SEGMENT.color_from_palette(hw_random8(), false, PALETTE_SOLID_WRAP, 255));
+      SEGMENT.setPixelColorXY(x,y, SEGMENT.color_from_palette_wled(hw_random8(), false, PALETTE_SOLID_WRAP, 255));
     }
     // else do nothing!
   } //x,y
@@ -21864,7 +21864,7 @@ static const char PM_EFFECT_DESCRI__2D__GAME_OF_LIFE[] PROGMEM =
  *     • SX (Speed)     : X-axis spatial scale (larger → tighter stripes horizontally).
  *     • IX (Intensity) : Y-axis spatial scale (larger → tighter stripes vertically).
  *     • C3 (custom3)   : Time divisor (animation pace). Effective t = now / ((C3>>1)+1).
- *     • Palette        : Used via color_from_palette(..., PALETTE_SOLID_WRAP).
+ *     • Palette        : Used via color_from_palette_wled(..., PALETTE_SOLID_WRAP).
  *
  *   Notes:
  *     • Purely integer math in the inner loop; inexpensive and smooth on ESP32.
@@ -21885,7 +21885,7 @@ void mAnimatorLight::EffectAnim__2D__Hipnotic()
 
   for (int x = 0; x < cols; x++) {
     for (int y = 0; y < rows; y++) {
-      SEGMENT.setPixelColorXY(x, y, SEGMENT.color_from_palette(sin8_t(cos8_t(x * SEGMENT.speed/16 + a / 3) + sin8_t(y * SEGMENT.intensity/16 + a / 4) + a), false, PALETTE_SOLID_WRAP, 0));
+      SEGMENT.setPixelColorXY(x, y, SEGMENT.color_from_palette_wled(sin8_t(cos8_t(x * SEGMENT.speed/16 + a / 3) + sin8_t(y * SEGMENT.intensity/16 + a / 4) + a), false, PALETTE_SOLID_WRAP, 0));
     }
   }
 
@@ -21950,7 +21950,7 @@ static const char PM_EFFECT_DESCRI__2D__HIPNOTIC[] PROGMEM =
  *
  *   Performance notes:
  *     • Computation is float-heavy; tightening the window (C3) and/or reducing IX helps frame rate.
- *     • Palette mapping uses existing segment palette through color_from_palette().
+ *     • Palette mapping uses existing segment palette through color_from_palette_wled().
  *     • Runs only on 2D segments; returns EFFECT_DEFAULT() otherwise.
  *
  * @return      : FRAMETIME to keep the regular frame cadence.
@@ -22052,7 +22052,7 @@ void mAnimatorLight::EffectAnim__2D__Julia()
       if (iter == maxIterations) {
         SEGMENT.setPixelColorXY(i, j, 0);
       } else {
-        SEGMENT.setPixelColorXY(i, j, SEGMENT.color_from_palette(iter*255/maxIterations, false, PALETTE_SOLID_WRAP, 0));
+        SEGMENT.setPixelColorXY(i, j, SEGMENT.color_from_palette_wled(iter*255/maxIterations, false, PALETTE_SOLID_WRAP, 0));
       }
       x += dx;
     }
@@ -22139,7 +22139,7 @@ void mAnimatorLight::EffectAnim__2D__Lissajous()
     uint_fast8_t ylocn = cos8_t(phase/2 + i*2);
     xlocn = (cols < 2) ? 1 : (map(2*xlocn, 0,511, 0,2*(cols-1)) +1) /2;    // softhack007: "(2* ..... +1) /2" for proper rounding
     ylocn = (rows < 2) ? 1 : (map(2*ylocn, 0,511, 0,2*(rows-1)) +1) /2;    // "rows > 1" is needed to avoid div/0 in map()
-    SEGMENT.setPixelColorXY((uint8_t)xlocn, (uint8_t)ylocn, SEGMENT.color_from_palette(effect_start_time/100+i, false, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.setPixelColorXY((uint8_t)xlocn, (uint8_t)ylocn, SEGMENT.color_from_palette_wled(effect_start_time/100+i, false, PALETTE_SOLID_WRAP, 0));
   }
   SEGMENT.blur(SEGMENT.custom1 >> (1 + SEGMENT.check1 * 3), SEGMENT.check1);
   
@@ -22350,9 +22350,9 @@ void mAnimatorLight::EffectAnim__2D__Metaballs()
 
       // map color between thresholds
       if (color > 0 and color < 60) {
-        SEGMENT.setPixelColorXY(x, y, SEGMENT.color_from_palette(map(color * 9, 9, 531, 0, 255), false, PALETTE_SOLID_WRAP, 0));
+        SEGMENT.setPixelColorXY(x, y, SEGMENT.color_from_palette_wled(map(color * 9, 9, 531, 0, 255), false, PALETTE_SOLID_WRAP, 0));
       } else {
-        SEGMENT.setPixelColorXY(x, y, SEGMENT.color_from_palette(0, false, PALETTE_SOLID_WRAP, 0));
+        SEGMENT.setPixelColorXY(x, y, SEGMENT.color_from_palette_wled(0, false, PALETTE_SOLID_WRAP, 0));
       }
       // show the 3 points, too
       SEGMENT.setPixelColorXY(x1, y1, WHITE);
@@ -22571,7 +22571,7 @@ void mAnimatorLight::EffectAnim__2D__PolarLights()
       uint8_t palindex = qsub8(perlin8((SEGMENT.step%2) + x * _scale, y * 16 + SEGMENT.step % 16, SEGMENT.step / _speed), fabsf((float)rows / 2.0f - (float)y) * adjustHeight);
       uint8_t palbrightness = palindex;
       if(SEGMENT.check1) palindex = 255 - palindex; //flip palette
-      SEGMENT.setPixelColorXY(x, y, SEGMENT.color_from_palette(palindex, false, false, 255, palbrightness));
+      SEGMENT.setPixelColorXY(x, y, SEGMENT.color_from_palette_wled(palindex, false, false, 255, palbrightness));
     }
   }
 
@@ -23129,7 +23129,7 @@ void mAnimatorLight::EffectAnim__2D__CrazyBees()
     SEGMENT.fadeToBlackBy(32 + ((SEGMENT.check1*SEGMENT.intensity) / 25));
     SEGMENT.blur(SEGMENT.intensity / (2 + SEGMENT.check1 * 9), SEGMENT.check1);
     for (size_t i = 0; i < n; i++) {
-      uint32_t flowerCcolor = SEGMENT.color_from_palette(bee[i].hue, false, true, 255);
+      uint32_t flowerCcolor = SEGMENT.color_from_palette_wled(bee[i].hue, false, true, 255);
       SEGMENT.addPixelColorXY(bee[i].aimX + 1, bee[i].aimY, flowerCcolor);
       SEGMENT.addPixelColorXY(bee[i].aimX, bee[i].aimY + 1, flowerCcolor);
       SEGMENT.addPixelColorXY(bee[i].aimX - 1, bee[i].aimY, flowerCcolor);
@@ -23400,7 +23400,7 @@ void mAnimatorLight::EffectAnim__2D__FloatingBlobs()
         blob->grow[i] = true;
       }
     }
-    uint32_t c = SEGMENT.color_from_palette(blob->color[i], false, false, 0);
+    uint32_t c = SEGMENT.color_from_palette_wled(blob->color[i], false, false, 0);
     if (blob->r[i] > 1.f) SEGMENT.fillCircle(roundf(blob->x[i]), roundf(blob->y[i]), roundf(blob->r[i]), c);
     else                  SEGMENT.setPixelColorXY((int)roundf(blob->x[i]), (int)roundf(blob->y[i]), c);
     // move x
@@ -23485,7 +23485,7 @@ void mAnimatorLight::EffectAnim__2D__FloatingBlobs()
   //       blob->grow[i] = true;
   //     }
   //   }
-  //   uint32_t c = SEGMENT.color_from_palette(blob->color[i], false, false, 0);
+  //   uint32_t c = SEGMENT.color_from_palette_wled(blob->color[i], false, false, 0);
   //   if (blob->r[i] > 1.f) SEGMENT.fillCircle(roundf(blob->x[i]), roundf(blob->y[i]), roundf(blob->r[i]), c);
   //   else                  SEGMENT.setPixelColorXY((int)roundf(blob->x[i]), (int)roundf(blob->y[i]), c);
   //   // move x
@@ -23630,7 +23630,7 @@ void mAnimatorLight::EffectAnim__2D__ScrollingText()
 
   if (!SEGMENT.check2) SEGMENT.fade_out(255 - (SEGMENT.custom1>>4));  // trail
   bool usePaletteGradient = false;
-  uint32_t col1 = SEGMENT.color_from_palette(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
+  uint32_t col1 = SEGMENT.color_from_palette_wled(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
   uint32_t col2 = BLACK;
   if (SEGMENT.check1) { // use gradient
     if(SEGMENT.palette_id == 0) { // use colors for gradient
@@ -23776,7 +23776,7 @@ void mAnimatorLight::EffectAnim__2D__ScrollingText()
   for (int i = 0; i < numberOfLetters; i++) {
     int xoffset = int(cols) - int(SEGMENT.aux0) + rotLW*i;
     if (xoffset + rotLW < 0) continue; // don't draw characters off-screen
-    uint32_t col1 = SEGMENT.GetPaletteColour(SEGMENT.aux1, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT); //SEGMENT.color_from_palette(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
+    uint32_t col1 = SEGMENT.GetPaletteColour(SEGMENT.aux1, PALETTE_INDEX__IS_SEGLEN_RANGE, PALETTE_WRAP_SMOOTH, PALETTE_MODE__DEFAULT); //SEGMENT.color_from_palette_wled(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
     uint32_t col2 = BLACK;
     if (SEGMENT.check1 && SEGMENT.palette_id == 0) {
       col1 = SEGCOLOR_U32(0); //SEGCOLOR_U32(0);
@@ -23883,7 +23883,7 @@ void mAnimatorLight::EffectAnim__2D__ScrollingText_With_Baseline()
 
   if (!SEGMENT.check2) SEGMENT.fade_out(255 - (SEGMENT.custom1>>4));  // trail
   bool usePaletteGradient = false;
-  uint32_t col1 = SEGMENT.color_from_palette(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
+  uint32_t col1 = SEGMENT.color_from_palette_wled(SEGMENT.aux1, false, PALETTE_SOLID_WRAP, 0);
   uint32_t col2 = BLACK;
   if (SEGMENT.check1) { // use gradient
     if(SEGMENT.palette_id == 0) { // use colors for gradient
@@ -24139,7 +24139,7 @@ static const char PM_EFFECT_DESCRI__2D__DIGITAL_CLOCK[] PROGMEM = "Cycle Between
  *        • For each output pixel (i,j), compute (u,v) by applying the matrix, wrap to [0..cols-1],[0..rows-1],
  *          then sample plasma[v*cols + u] as palette index.
  *     3) Colorize:
- *        • color_from_palette(plasmaIndex, …) with the active palette.
+ *        • color_from_palette_wled(plasmaIndex, …) with the active palette.
  *
  * @controls
  *   • SX (Speed)     : Rotation speed (also slightly affects zoom progression).
@@ -24192,7 +24192,7 @@ void mAnimatorLight::EffectAnim__2D__PlasmaRotoZoom()
     for (int j = 0; j < rows; j++) {
         byte u = abs8(u1 - j * sinus) % cols;
         byte v = abs8(v1 + j * kosinus) % rows;
-        SEGMENT.setPixelColorXY(i, j, SEGMENT.color_from_palette(plasma[v*cols+u], false, PALETTE_SOLID_WRAP, 255));
+        SEGMENT.setPixelColorXY(i, j, SEGMENT.color_from_palette_wled(plasma[v*cols+u], false, PALETTE_SOLID_WRAP, 255));
     }
   }
   *a -= 0.03f + float(SEGMENT.speed-128)*0.0002f;  // rotation speed
@@ -24933,7 +24933,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Aurora()
     waves = reinterpret_cast<AuroraWave*>(SEGMENT.data);
 
     for (int i = 0; i < SEGMENT.aux1; i++) {
-      waves[i].init(SEGLEN, CRGB(SEGMENT.color_from_palette(hw_random8(), false, false, hw_random8(0, 3))));
+      waves[i].init(SEGLEN, CRGB(SEGMENT.color_from_palette_wled(hw_random8(), false, false, hw_random8(0, 3))));
     }
   } else {
     waves = reinterpret_cast<AuroraWave*>(SEGMENT.data);
@@ -24945,7 +24945,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Aurora()
 
     if(!(waves[i].stillAlive())) {
       //If a wave dies, reinitialize it starts over.
-      waves[i].init(SEGLEN, CRGB(SEGMENT.color_from_palette(hw_random8(), false, false, hw_random8(0, 3))));
+      waves[i].init(SEGLEN, CRGB(SEGMENT.color_from_palette_wled(hw_random8(), false, false, hw_random8(0, 3))));
     }
   }
 
@@ -25053,7 +25053,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Ripple_Peak()
         break;
 
       case 0:
-        SEGMENT.setPixelColor(ripples[i].pos, SEGMENT.color_from_palette(ripples[i].color, false, PALETTE_SOLID_WRAP, 0));
+        SEGMENT.setPixelColor(ripples[i].pos, SEGMENT.color_from_palette_wled(ripples[i].color, false, PALETTE_SOLID_WRAP, 0));
         ripples[i].state++;
         break;
 
@@ -25062,8 +25062,8 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Ripple_Peak()
         break;
 
       default:                                            // Middle of the ripples.
-        SEGMENT.setPixelColor((ripples[i].pos + ripples[i].state + SEGLEN) % SEGLEN, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(ripples[i].color, false, PALETTE_SOLID_WRAP, 0), uint8_t(2*255/ripples[i].state)));
-        SEGMENT.setPixelColor((ripples[i].pos - ripples[i].state + SEGLEN) % SEGLEN, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(ripples[i].color, false, PALETTE_SOLID_WRAP, 0), uint8_t(2*255/ripples[i].state)));
+        SEGMENT.setPixelColor((ripples[i].pos + ripples[i].state + SEGLEN) % SEGLEN, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(ripples[i].color, false, PALETTE_SOLID_WRAP, 0), uint8_t(2*255/ripples[i].state)));
+        SEGMENT.setPixelColor((ripples[i].pos - ripples[i].state + SEGLEN) % SEGLEN, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(ripples[i].color, false, PALETTE_SOLID_WRAP, 0), uint8_t(2*255/ripples[i].state)));
         ripples[i].state++;                               // Next step.
         break;
     } // switch step
@@ -25110,7 +25110,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Perline_Move()
                                effect_start_time*128/(260-SEGMENT.speed));
     // Map the stable center band of noise (≈[50..192]×256) to [0..SEGLEN-1]
     unsigned pixloc = map(locn, 50*256, 192*256, 0, SEGLEN-1);
-    SEGMENT.setPixelColor(pixloc, SEGMENT.color_from_palette(pixloc % 255, false, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.setPixelColor(pixloc, SEGMENT.color_from_palette_wled(pixloc % 255, false, PALETTE_SOLID_WRAP, 0));
   }
 
   
@@ -25222,8 +25222,8 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Grav__Base(unsigned mode
   if(mode == 1) {  //Gravcentric
     for (int i=0; i<tempsamp; i++) {
       uint8_t index = segmentSampleAvg*24+effect_start_time/200;
-      SEGMENT.setPixelColor(i+SEGLEN/2, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
-      SEGMENT.setPixelColor(SEGLEN/2-1-i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+      SEGMENT.setPixelColor(i+SEGLEN/2, SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0));
+      SEGMENT.setPixelColor(SEGLEN/2-1-i, SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0));
     }
     if (gravcen->topLED >= 0) {
       SEGMENT.setPixelColor(gravcen->topLED+SEGLEN/2, HTMLColorCode::Gray);
@@ -25233,10 +25233,10 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Grav__Base(unsigned mode
   else if(mode == 2) { //Gravimeter
     for (int i=0; i<tempsamp; i++) {
       uint8_t index = perlin8(i*segmentSampleAvg+effect_start_time, 5000+i*segmentSampleAvg);
-      SEGMENT.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
+      SEGMENT.setPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
     }
     if (gravcen->topLED > 0) {
-      SEGMENT.setPixelColor(gravcen->topLED, SEGMENT.color_from_palette(effect_start_time, false, PALETTE_SOLID_WRAP, 0));
+      SEGMENT.setPixelColor(gravcen->topLED, SEGMENT.color_from_palette_wled(effect_start_time, false, PALETTE_SOLID_WRAP, 0));
     }
   }
   else if(mode == 3) { //Gravfreq
@@ -25244,8 +25244,8 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Grav__Base(unsigned mode
       float   FFT_MajorPeak = *(float*)um_data->u_data[4]; // used in mode 3: Gravfreq
       if (FFT_MajorPeak < 1) FFT_MajorPeak = 1;
       uint8_t index = (log10f(FFT_MajorPeak) - (MAX_FREQ_LOG10 - 1.78f)) * 255;
-      SEGMENT.setPixelColor(i+SEGLEN/2, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
-      SEGMENT.setPixelColor(SEGLEN/2-i-1, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+      SEGMENT.setPixelColor(i+SEGLEN/2, SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0));
+      SEGMENT.setPixelColor(SEGLEN/2-i-1, SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0));
     }
     if (gravcen->topLED >= 0) {
       SEGMENT.setPixelColor(gravcen->topLED+SEGLEN/2, HTMLColorCode::Gray);
@@ -25255,12 +25255,12 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Grav__Base(unsigned mode
   else { //Gravcenter
     for (int i=0; i<tempsamp; i++) {
       uint8_t index = perlin8(i*segmentSampleAvg+effect_start_time, 5000+i*segmentSampleAvg);
-      SEGMENT.setPixelColor(i+SEGLEN/2, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
-      SEGMENT.setPixelColor(SEGLEN/2-i-1, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
+      SEGMENT.setPixelColor(i+SEGLEN/2, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
+      SEGMENT.setPixelColor(SEGLEN/2-i-1, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0), uint8_t(segmentSampleAvg*8)));
     }
     if (gravcen->topLED >= 0) {
-      SEGMENT.setPixelColor(gravcen->topLED+SEGLEN/2, SEGMENT.color_from_palette(effect_start_time, false, PALETTE_SOLID_WRAP, 0));
-      SEGMENT.setPixelColor(SEGLEN/2-1-gravcen->topLED, SEGMENT.color_from_palette(effect_start_time, false, PALETTE_SOLID_WRAP, 0));
+      SEGMENT.setPixelColor(gravcen->topLED+SEGLEN/2, SEGMENT.color_from_palette_wled(effect_start_time, false, PALETTE_SOLID_WRAP, 0));
+      SEGMENT.setPixelColor(SEGLEN/2-1-gravcen->topLED, SEGMENT.color_from_palette_wled(effect_start_time, false, PALETTE_SOLID_WRAP, 0));
     }
   } 
   gravcen->gravityCounter = (gravcen->gravityCounter + 1) % gravity;
@@ -25420,7 +25420,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Juggles()
 
   for (size_t i=0; i<SEGMENT.intensity/32+1U; i++) {
     // if SEGLEN equals 1, we will always set color to the first and only pixel, but the effect is still good looking
-    SEGMENT.setPixelColor(beatsin16_t(SEGMENT.speed/4+i*2,0,SEGLEN-1), color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(effect_start_time/4+i*2, false, PALETTE_SOLID_WRAP, 0), my_sampleAgc));
+    SEGMENT.setPixelColor(beatsin16_t(SEGMENT.speed/4+i*2,0,SEGLEN-1), color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(effect_start_time/4+i*2, false, PALETTE_SOLID_WRAP, 0), my_sampleAgc));
   }
 
   
@@ -25460,7 +25460,7 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_JUGGLES[] PROGMEM =
  *
  *   Notes:
  *     • Safe-guarded for SEGLEN==1 (returns EFFECT_DEFAULT).
- *     • Color is palette-driven via SEGMENT.color_from_palette(effect_start_time,…).
+ *     • Color is palette-driven via SEGMENT.color_from_palette_wled(effect_start_time,…).
  *
  * @returns : FRAMETIME
  * @note : Converted from WLED Effects "mode_matripix"
@@ -25483,7 +25483,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Matripix()
 
     uint8_t pixBri = volumeRaw * SEGMENT.intensity / 64;
     for (unsigned i = 0; i < SEGLEN-1; i++) SEGMENT.setPixelColor(i, SEGMENT.getPixelColor(i+1)); // shift left
-    SEGMENT.setPixelColor(SEGLEN-1, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(effect_start_time, false, PALETTE_SOLID_WRAP, 0), pixBri));
+    SEGMENT.setPixelColor(SEGLEN-1, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(effect_start_time, false, PALETTE_SOLID_WRAP, 0), pixBri));
   }
 
   
@@ -25527,7 +25527,7 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_MATRIPIX[] PROGMEM =
  *
  *   Notes:
  *     • The effect is symmetric about the strip center and safe for SEGLEN ≥ 2 (returns EFFECT_DEFAULT for SEGLEN==1).
- *     • Color is palette-driven via SEGMENT.color_from_palette(noiseIndex,…).
+ *     • Color is palette-driven via SEGMENT.color_from_palette_wled(noiseIndex,…).
  *   @note : Converted from WLED Effects "mode_midnoise"
  ********************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_MidNoise()
@@ -25549,7 +25549,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_MidNoise()
 
   for (unsigned i=(SEGLEN/2-maxLen); i<(SEGLEN/2+maxLen); i++) {
     uint8_t index = perlin8(i*volumeSmth+SEGMENT.aux0, SEGMENT.aux1+i*volumeSmth);  // Get a value from the noise function. I'm using both x and y axis.
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0));
   }
 
   SEGMENT.aux0=SEGMENT.aux0+beatsin8_t(5,0,10);
@@ -25658,7 +25658,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_NoiseMeter()
 
   for (unsigned i=0; i<maxLen; i++) {                                    // The louder the sound, the wider the soundbar. By Andrew Tuline.
     uint8_t index = perlin8(i*volumeSmth+SEGMENT.aux0, SEGMENT.aux1+i*volumeSmth);  // Get a value from the noise function. I'm using both x and y axis.
-    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette(index, false, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.setPixelColor(i, SEGMENT.color_from_palette_wled(index, false, PALETTE_SOLID_WRAP, 0));
   }
 
   SEGMENT.aux0+=beatsin8_t(5,0,10);
@@ -25715,7 +25715,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_PixelWave()
 
     uint8_t pixBri = volumeRaw * SEGMENT.intensity / 64;
 
-    SEGMENT.setPixelColor(SEGLEN/2, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(effect_start_time, false, PALETTE_SOLID_WRAP, 0), pixBri));
+    SEGMENT.setPixelColor(SEGLEN/2, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(effect_start_time, false, PALETTE_SOLID_WRAP, 0), pixBri));
     for (unsigned i = SEGLEN - 1; i > SEGLEN/2; i--) SEGMENT.setPixelColor(i, SEGMENT.getPixelColor(i-1)); //move to the left
     for (unsigned i = 0; i < SEGLEN/2; i++)          SEGMENT.setPixelColor(i, SEGMENT.getPixelColor(i+1)); // move to the right
   }
@@ -25794,7 +25794,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Plasmoid()
     uint8_t colorIndex=thisbright;
     if (volumeSmth * SEGMENT.intensity / 64 < thisbright) {thisbright = 0;}
 
-    SEGMENT.addPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(colorIndex, false, PALETTE_SOLID_WRAP, 0), thisbright));
+    SEGMENT.addPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(colorIndex, false, PALETTE_SOLID_WRAP, 0), thisbright));
   }
 
   
@@ -25879,7 +25879,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Puddle__Base(bool peakde
   }
   
   for (unsigned i=0; i<size; i++) {                          // Flash the LED's.
-    SEGMENT.setPixelColor(pos+i, SEGMENT.color_from_palette(effect_start_time, false, PALETTE_SOLID_WRAP, 0));
+    SEGMENT.setPixelColor(pos+i, SEGMENT.color_from_palette_wled(effect_start_time, false, PALETTE_SOLID_WRAP, 0));
   }
 
   
@@ -25990,7 +25990,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Pixels()
 
   for (int i=0; i <SEGMENT.intensity/8; i++) {
     unsigned segLoc = hw_random16(SEGLEN);                    // 16 bit for larger strands of LED's.
-    SEGMENT.setPixelColor(segLoc, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(myVals[i%32]+i*4, false, PALETTE_SOLID_WRAP, 0), uint8_t(volumeSmth)));
+    SEGMENT.setPixelColor(segLoc, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(myVals[i%32]+i*4, false, PALETTE_SOLID_WRAP, 0), uint8_t(volumeSmth)));
   }
 
   
@@ -26051,7 +26051,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Blurz()
   SEGMENT.step += FRAMETIME;
   if (SEGMENT.step > SPEED_FORMULA_L) {
     unsigned segLoc = hw_random16(SEGLEN);
-    SEGMENT.setPixelColor(segLoc, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(2*fftResult[SEGMENT.aux0%16]*240/max(1, (int)SEGLEN-1), false, PALETTE_SOLID_WRAP, 0), uint8_t(2*fftResult[SEGMENT.aux0%16])));
+    SEGMENT.setPixelColor(segLoc, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(2*fftResult[SEGMENT.aux0%16]*240/max(1, (int)SEGLEN-1), false, PALETTE_SOLID_WRAP, 0), uint8_t(2*fftResult[SEGMENT.aux0%16])));
     ++(SEGMENT.aux0) %= 16; // make sure it doesn't cross 16
 
     SEGMENT.step = 1;
@@ -26178,7 +26178,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_FreqMap()
 
   uint8_t bright = (uint8_t)my_magnitude;
 
-  SEGMENT.setPixelColor(locn, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(SEGMENT.intensity+pixCol, false, PALETTE_SOLID_WRAP, 0), bright));
+  SEGMENT.setPixelColor(locn, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(SEGMENT.intensity+pixCol, false, PALETTE_SOLID_WRAP, 0), bright));
 
   
 }
@@ -26332,7 +26332,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_FreqPixels()
   if (FFT_MajorPeak < 61.0f) pixCol = 0;                                               // handle underflow
   for (int i=0; i < SEGMENT.intensity/32+1; i++) {
     unsigned locn = hw_random16(0,SEGLEN);
-    SEGMENT.setPixelColor(locn, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(SEGMENT.intensity+pixCol, false, PALETTE_SOLID_WRAP, 0), (uint8_t)my_magnitude));
+    SEGMENT.setPixelColor(locn, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(SEGMENT.intensity+pixCol, false, PALETTE_SOLID_WRAP, 0), (uint8_t)my_magnitude));
   }
 
   
@@ -26479,7 +26479,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_NoiseMove()
     unsigned locn = inoise16(effect_start_time*SEGMENT.speed+i*50000, effect_start_time*SEGMENT.speed);   // Get a new pixel location from moving noise.
     // if SEGLEN equals 1 locn will be always 0, hence we set the first pixel only
     locn = map(locn, 7500, 58000, 0, SEGLEN-1);           // Map that to the length of the strand, and ensure we don't go over.
-    SEGMENT.setPixelColor(locn, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(i*64, false, PALETTE_SOLID_WRAP, 0), uint8_t(fftResult[i % 16]*4)));
+    SEGMENT.setPixelColor(locn, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(i*64, false, PALETTE_SOLID_WRAP, 0), uint8_t(fftResult[i % 16]*4)));
   }
 
   
@@ -26549,7 +26549,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_RockTaves()
 
   unsigned i = map(beatsin8_t(8+octCount*4, 0, 255, 0, octCount*8), 0, 255, 0, SEGLEN-1);
   i = constrain(i, 0U, SEGLEN-1U);
-  SEGMENT.addPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette((uint8_t)frTemp, false, PALETTE_SOLID_WRAP, 0), volTemp));
+  SEGMENT.addPixelColor(i, color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled((uint8_t)frTemp, false, PALETTE_SOLID_WRAP, 0), volTemp));
 
   
 }
@@ -26635,7 +26635,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__1D__FFT_Waterfall()
       CRGB crgb = CRGB(CHSV(92,92,92));
       pixels[k] = RGBW32fromCRGB(crgb);
     } else {
-      pixels[k] = color_blend(SEGCOLOR(1), SEGMENT.color_from_palette(pixCol+SEGMENT.intensity, false, PALETTE_SOLID_WRAP, 0), (uint8_t)my_magnitude);
+      pixels[k] = color_blend(SEGCOLOR(1), SEGMENT.color_from_palette_wled(pixCol+SEGMENT.intensity, false, PALETTE_SOLID_WRAP, 0), (uint8_t)my_magnitude);
     }
     SEGMENT.setPixelColor(k, pixels[k]);
     // loop will not execute if SEGLEN equals 1
@@ -26908,7 +26908,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__2D__FFT_GED()
       if (SEGMENT.check1) //color_vertical / color bars toggle
         colorIndex = map(y, 0, rows-1, 0, 255);
 
-      ledColor = SEGMENT.color_from_palette(colorIndex, false, PALETTE_SOLID_WRAP, 0);
+      ledColor = SEGMENT.color_from_palette_wled(colorIndex, false, PALETTE_SOLID_WRAP, 0);
       SEGMENT.setPixelColorXY(x, rows-1 - y, ledColor);
     }
     if (previousBarHeight[x] > 0)
@@ -27173,7 +27173,7 @@ void mAnimatorLight::EffectAnim__AudioReactive__2D__FFT_Akemi()
       unsigned band = map(x, 0, max(xMax,4), 0, 15);  // map 0..cols/8 to 16 GEQ bands
       band = constrain(band, 0, 15);
       int barHeight = map(fftResult[band], 0, 255, 0, 17*rows/32);
-      uint32_t color = SEGMENT.color_from_palette((band * 35), false, PALETTE_SOLID_WRAP, 0);
+      uint32_t color = SEGMENT.color_from_palette_wled((band * 35), false, PALETTE_SOLID_WRAP, 0);
 
       for (int y=0; y < barHeight; y++) {
         SEGMENT.setPixelColorXY(x, rows/2-y, color);

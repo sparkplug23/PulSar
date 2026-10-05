@@ -137,7 +137,7 @@
 //   stop at the end (255 is the end, no blend back to 0).
 //
 // Legacy (WLED):
-//   WLED’s color_from_palette(..., wrap=true/false) used a boolean “wrap”.
+//   WLED’s color_from_palette_wled(..., wrap=true/false) used a boolean “wrap”.
 //     - wrap=true  → indices wrap around; the gradient is circular
 //     - wrap=false → indices clamp at ends; no circular blend
 //
@@ -247,7 +247,7 @@
 //  stricter ‘exact colour’ semantics you documented.)
 
 // OLD: WLED_PALETTE_MAPPING_ARG_FALSE
-// WLED’s color_from_palette(i, mapping=bool, ...) used `mapping=false` to say:
+// WLED’s color_from_palette_wled(i, mapping=bool, ...) used `mapping=false` to say:
 // “index is already 0..255; don’t scale i by SEGLEN.”
 // → That’s our 0..255 raw path.
 #define WLED_PALETTE_MAPPING_ARG_FALSE  PALETTE_INDEX__IS_255_RANGE
@@ -3817,7 +3817,7 @@ class Segment
     static unsigned      _vLength;            // 1D dimension used for current effect
     static unsigned      _vWidth, _vHeight;   // 2D dimensions used for current effect
     static uint32_t      _currentColors[NUM_COLORS]; // colors used for current effect (faster access from effect functions)
-    static CRGBPalette16 _currentPalette;     // palette used for current effect (includes transition, used in color_from_palette())
+    static CRGBPalette16 _currentPalette;     // palette used for current effect (includes transition, used in color_from_palette_wled())
     static CRGBPalette16 _randomPalette;      // actual random palette
     static CRGBPalette16 _newRandomPalette;   // target random palette
     static uint16_t      _lastPaletteChange;  // last random palette change time (in seconds)
@@ -4991,7 +4991,7 @@ name = nullptr;
      * uint32_t c = GetPaletteColour_Legacy(i, mapping, wrap, /*crgb exact skip arg* false, /*encoded value skip arg* nullptr, /*apply brightness skip arg: fix: must apply pix brightness by effect after this function* false, pbri, mcol);
      * color_from_palette_forced_gradient is really teh default, all WLED acts on CRGBPalette16 and assumes never discrete/exact colour sampling so we should default mine to that too.
     */
-    inline uint32_t color_from_palette(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255) {
+    inline uint32_t color_from_palette_wled(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255) {
       
 
       // Error here, I believe this mode between WLED/CRGBPalette16 and my descrite to be converted is opposing each other 
@@ -6373,7 +6373,7 @@ extern mAnimatorLight* tkr_extern_lAni;  // global instance of the mAnimatorLigh
  *   enums for index encoding, wrap mode, and palette mode.
  *
  * Original WLED function:
- *     CRGB color_from_palette(i, mapping, wrap, mcol, pbri=255)
+ *     CRGB color_from_palette_wled(i, mapping, wrap, mcol, pbri=255)
  *
  * Parameters:
  *   i       → Palette index (0..255, or scaled by segment length if mapping=true)
@@ -6387,7 +6387,7 @@ extern mAnimatorLight* tkr_extern_lAni;  // global instance of the mAnimatorLigh
  *
  * Example mapping:
  *   WLED:
- *     SEGMENT.color_from_palette(band*35, false, PALETTE_SOLID_WRAP, 0);
+ *     SEGMENT.color_from_palette_wled(band*35, false, PALETTE_SOLID_WRAP, 0);
  *
  *   PulSar:
  *     SEGMENT.GetPaletteColour_Legacy(
@@ -6404,12 +6404,12 @@ extern mAnimatorLight* tkr_extern_lAni;  // global instance of the mAnimatorLigh
  *   SEGENV                   SEGMENT
  *   isMatrix                 SEGMENT.isMatrix
  *   SEGCOLOR                 SEGCOLOR_U32
- *   color_from_palette()     GetPaletteColour_Legacy().getU32()
+ *   color_from_palette_wled()     GetPaletteColour_Legacy().getU32()
  *   aux1                     SEGMENT.params_internal.aux1
  *
  * Legacy aliases (for compatibility only):
  *
- * #define color_from_palette(i,mapping,wrap,mcol) \
+ * #define color_from_palette_wled(i,mapping,wrap,mcol) \
  *  GetPaletteColour_Legacy(i, mapping, wrap, PALETTE_MODE__DEFAULT, NO_ENCODED_VALUE).getU32()
  */
 

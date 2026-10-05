@@ -404,7 +404,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     mPalette::PALETTE_DATA* ptr = &mPaletteI->dynamic_palettes[palette_id_adj];
     setPackedPtrAndMeta(ptr);
     mirrorPackedIntoCRGB16();
-    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__PROCEDURAL;
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__ENCODED;
   }
 
 
@@ -418,7 +418,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
     _palette_container->encoded_colour_width = 3;
     _palette_container->colours_in_palette = 16;
-    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__PROCEDURAL;
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__CRGB16;
 
     // Seed once via the single source of truth (no periodic timing here).
     Update_LivePalettes(palette_id);
