@@ -924,7 +924,7 @@ class mAnimatorLight :
       uint8_t brightness = 255,
       TBlendType blendType = NOBLEND
     ){
-      if (SEGMENT.palette_loaded->runtime_type == PALETTE_RUNTIME__CRGB16)
+      if (SEGMENT.palette_loaded->runtime_type == mPaletteLoaded::PALETTE_RUNTIME__CRGB16)
       {
         const CRGBPalette16& pal =
           SEGMENT.palette_loaded->CRGB16Palette16_Palette.data;
@@ -4975,53 +4975,56 @@ name = nullptr;
     );
 
     
-    /**
-     * WLED Palette Conversion
-     * 
-     * Gets a single color from the currently selected palette.
-     * @param i Palette Index (if mapping is true, the full palette will be _virtualSegmentLength long, if false, 255). Will wrap around automatically.
-     * @param mapping if true, LED position in segment is considered for color
-     * @param wrap FastLED palettes will usually wrap back to the start smoothly. Set false to get a hard edge
-     * @param mcol If the default palette 0 is selected, return the standard color 0, 1 or 2 instead. If >2, Party palette is used instead
-     * @param pbri Value to scale the brightness of the returned color by. Default is 255. (no scaling)
-     * @returns Single color from palette
-     * Since inline functions are expanded at compile time and do not incur runtime overhead, you can use an inline function in a header file
-     * alternatively could seak DEFINE remaps
-     * return GetPaletteColour_Legacy(i, mapping, wrap, /*crgb exact skip arg* false, /*encoded value skip arg* nullptr, /*apply brightness skip arg* true, pbri, mcol); August2025, pbri not applied correctly this way, needs fixed later
-     * uint32_t c = GetPaletteColour_Legacy(i, mapping, wrap, /*crgb exact skip arg* false, /*encoded value skip arg* nullptr, /*apply brightness skip arg: fix: must apply pix brightness by effect after this function* false, pbri, mcol);
-     * color_from_palette_forced_gradient is really teh default, all WLED acts on CRGBPalette16 and assumes never discrete/exact colour sampling so we should default mine to that too.
+    /*
+    * Gets a single colour from the currently selected segment palette using WLED-compatible semantics.
+    *
+    * @param i Palette index. If mapping is true, i is treated as a position within the current
+    *          virtual segment and mapped onto the full 0..255 palette range.
+    *
+    * @param mapping If true, map i from the current virtual segment length onto 0..255.
+    *                If false, i is already treated as a palette index.
+    *
+    * @param moving Controls wrapping when paletteBlend is in automatic mode.
+    *               true  = LINEARBLEND, allowing the palette to wrap smoothly back to the start.
+    *               false = LINEARBLEND_NOWRAP, keeping the final palette colour as an endpoint.
+    *
+    * @param mcol Segment colour index used when palette_id == 0.
+    *             For palette lookups, its white channel is retained in the returned RGBW colour.
+    *
+    * @param pbri Brightness scaling applied to the returned colour.
+    *             255 means full brightness / no scaling.
+    *
+    * paletteBlend:
+    *   0 = automatic: LINEARBLEND when moving, LINEARBLEND_NOWRAP otherwise
+    *   1 = LINEARBLEND
+    *   2 = LINEARBLEND_NOWRAP
+    *   3 = NOBLEND
+    *
+    * Palette sampling is passed through ColorFromPalette_wled(), which keeps the normal
+    * WLED-compatible ColorFromPalette() argument layout while resolving the active PulSar
+    * segment palette internally.
+    *
+    * @returns Packed RGBW colour.
     */
-    inline uint32_t color_from_palette_wled(uint16_t i, bool mapping, bool wrap, uint8_t mcol, uint8_t pbri = 255) {
-      
+    inline uint32_t color_from_palette_wled(uint16_t i, bool mapping, bool moving, uint8_t mcol, uint8_t pbri = 255)
+    {
+      uint32_t color = getCurrentColor(mcol);
+      if ((palette_id == 0 && mcol < NUM_COLORS) || !_isRGB) return color_fade(color, pbri, true);
 
-      // Error here, I believe this mode between WLED/CRGBPalette16 and my descrite to be converted is opposing each other 
-      const uint8_t idxMode   = mapping ? PALETTE_INDEX__IS_SEGLEN_RANGE : PALETTE_INDEX__IS_EXACT_COLOUR;
-      const uint8_t wrapMode  = wrap    ? PALETTE_WRAP_SMOOTH           : PALETTE_WRAP_HARDEDGE;
-      const uint8_t discrete  = PALETTE_MODE__FORCE_GRADIENT; // ← force gradient interpolation
+      uint16_t palette_index = i;
+      if (mapping) palette_index = min((i * 255U) / vLength(), 255U);
 
-      uint32_t c = GetPaletteColour(
-          i,
-          idxMode,
-          discrete,
-          wrapMode,
-          nullptr,
-          /*apply brightness*/ false,
-          255, // to be removed, handled below
-          mcol
-      );
+      TBlendType blend = NOBLEND;
+      if (paletteBlend == 0) blend = moving ? LINEARBLEND : LINEARBLEND_NOWRAP;
+      if (paletteBlend == 1) blend = LINEARBLEND;
+      if (paletteBlend == 2) blend = LINEARBLEND_NOWRAP;
 
+      uint32_t palcol = ColorFromPalette_wled(SEGPALETTE, palette_index, pbri, blend);
 
-      if(pbri != 255) { // apply brightness if not already done
-        byte r = R(c), g = G(c), b = B(c), w = W(c);
-        r = (uint16_t(r) * pbri) >> 8;
-        g = (uint16_t(g) * pbri) >> 8;
-        b = (uint16_t(b) * pbri) >> 8;
-        w = (uint16_t(w) * pbri) >> 8;
-        c = RGBW32(r, g, b, w);
-      }
-
-      return c;
+      return RGBW32(R(palcol), G(palcol), B(palcol), W(color));
     }
+
+
 
     #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
     class ParticleSystem1D;
