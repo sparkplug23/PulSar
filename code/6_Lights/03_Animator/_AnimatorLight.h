@@ -4974,56 +4974,7 @@ name = nullptr;
       uint8_t mcol = 0
     );
 
-    
-    /*
-    * Gets a single colour from the currently selected segment palette using WLED-compatible semantics.
-    *
-    * @param i Palette index. If mapping is true, i is treated as a position within the current
-    *          virtual segment and mapped onto the full 0..255 palette range.
-    *
-    * @param mapping If true, map i from the current virtual segment length onto 0..255.
-    *                If false, i is already treated as a palette index.
-    *
-    * @param moving Controls wrapping when paletteBlend is in automatic mode.
-    *               true  = LINEARBLEND, allowing the palette to wrap smoothly back to the start.
-    *               false = LINEARBLEND_NOWRAP, keeping the final palette colour as an endpoint.
-    *
-    * @param mcol Segment colour index used when palette_id == 0.
-    *             For palette lookups, its white channel is retained in the returned RGBW colour.
-    *
-    * @param pbri Brightness scaling applied to the returned colour.
-    *             255 means full brightness / no scaling.
-    *
-    * paletteBlend:
-    *   0 = automatic: LINEARBLEND when moving, LINEARBLEND_NOWRAP otherwise
-    *   1 = LINEARBLEND
-    *   2 = LINEARBLEND_NOWRAP
-    *   3 = NOBLEND
-    *
-    * Palette sampling is passed through ColorFromPalette_wled(), which keeps the normal
-    * WLED-compatible ColorFromPalette() argument layout while resolving the active PulSar
-    * segment palette internally.
-    *
-    * @returns Packed RGBW colour.
-    */
-    inline uint32_t color_from_palette_wled(uint16_t i, bool mapping, bool moving, uint8_t mcol, uint8_t pbri = 255)
-    {
-      uint32_t color = getCurrentColor(mcol);
-      if ((palette_id == 0 && mcol < NUM_COLORS) || !_isRGB) return color_fade(color, pbri, true);
-
-      uint16_t palette_index = i;
-      if (mapping) palette_index = min((i * 255U) / vLength(), 255U);
-
-      TBlendType blend = NOBLEND;
-      if (paletteBlend == 0) blend = moving ? LINEARBLEND : LINEARBLEND_NOWRAP;
-      if (paletteBlend == 1) blend = LINEARBLEND;
-      if (paletteBlend == 2) blend = LINEARBLEND_NOWRAP;
-
-      uint32_t palcol = ColorFromPalette_wled(SEGPALETTE, palette_index, pbri, blend);
-
-      return RGBW32(R(palcol), G(palcol), B(palcol), W(color));
-    }
-
+    uint32_t color_from_palette_wled(uint16_t i, bool mapping, bool moving, uint8_t mcol, uint8_t pbri = 255);
 
 
     #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
