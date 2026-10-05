@@ -1171,36 +1171,6 @@ void mAnimatorLight::SubTask_RealTime_SetPixel()
 
 
 
-// void mAnimatorLight::EverySecond_AutoOff()
-// {
-
-//   for (Segment &seg : segments) 
-//   {
-  
-//     if(seg.auto_timeoff.UpdateTick())
-//     {
-//       ALOG_INF( PSTR(D_LOG_LED D_COMMAND_NVALUE_K("Running Value")), seg.auto_timeoff.Value());
-//     }
-
-//     if(seg.auto_timeoff.IsLastTick())
-//     {
-//       ALOG_INF(PSTR("Segment Turn OFF"));
-//       // Set intensity to make all LEDs refresh
-//       seg.intensity = 255;
-//       seg.single_animation_override.time_ms = seg.single_animation_override_turning_off.time_ms;// 1000; // slow and smooth turn off
-//       seg.cycle_time__rate_ms = seg.single_animation_override.time_ms+10; // exceed the time to turn off to let it cycle through
-
-//       ALOG_INF(PSTR("Setting override for off %d"), seg.single_animation_override.time_ms);
-
-//       tkr_anim->force_update();
-
-//       // seg.setBrightnessRGB(0);
-//       // seg.setBrightnessCCT(0);    
-//     }
-
-//   }
-
-// } // END EverySecond_AutoOff
 void mAnimatorLight::EverySecond_AutoOff()
 {
   for (Segment &seg : segments)
@@ -1380,33 +1350,6 @@ void mAnimatorLight::Init_Segments()
 }
 
 
-// void mAnimatorLight::Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel, uint8_t seg_index)
-// {
-
-//   ALOG_DBG(PSTR("Segment_AppendNew:: getSegmentsNum() new index %d of count:%d"), seg_index, getSegmentsNum());
-
-//   if (seg_index >= getSegmentsNum()) 
-//   {
-
-//     ALOG_DBG(PSTR("Segment_AppendNew::new seg_index %d > %d getSegmentsNum(): Creating new segment "), seg_index, getSegmentsNum());
-    
-
-//     char buffer[100];
-//     sprintf(buffer, "Segment %d", seg_index);
-
-//     Segment seg = Segment(start_pixel, stop_pixel, buffer);
-
-//     appendSegment(seg);
-//     seg_index = getSegmentsNum()-1; // segments are added at the end of list, -1 for index of LENGTH minus 1
-//     ALOG_DBG(PSTR("Segment_AppendNew::new seg_index %d"), seg_index);
-      
-//   }
-//   else
-//   {  
-//     ALOG_DBG(PSTR("ELSEEEEEEEEEEEEEEEEEEEE Segment_AppendNew::new seg_index %d > %d getSegmentsNum(): Creating new segment "), seg_index, getSegmentsNum());
-//   }
-
-// }
 void mAnimatorLight::Segment_AppendNew(
   uint16_t start_pixel,
   uint16_t stop_pixel,
@@ -1447,101 +1390,6 @@ void mAnimatorLight::Segment_AppendNew(
   }
 }
 
-/**
- * @brief Disables animator neopixel and configures so effect function will be called again
- * 
- * @param seg_i 
- */
-void mAnimatorLight::SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg_i)
-{
-  // SEGMENT_I(seg_i).anim_function_callback = nullptr; // disabled
-  // SEGMENT_I(seg_i).transitional = true;              // Set that basic manual animator will be called
-  // SEGMENT_I(seg_i).cycle_time__rate_ms = FRAMETIME;
-}
-
-
-/***
-  Uses std::find: This ensures we search effects.id to see if id already exists before modifying an entry.
-  Ensures id aligns with index: By locating the existing index via std::distance, we can update only the correct entry.
-  Correctly increments effects.count: Now, effects.count reflects the actual number of effects stored, preventing inconsistencies due to sparse enums.
-
-  This ensures that id is only used as an identifier, and the true vector index is correctly managed.
- */
-// #ifdef ENABLE_EFFECT_DESCRIPTIONS
-// void mAnimatorLight::addEffect(uint8_t id, EffectFunction function, const char* effect_config, const char* effect_description, uint8_t development_stage)
-// #else
-// void mAnimatorLight::addEffect(uint8_t id, EffectFunction function, const char* effect_config, uint8_t development_stage)
-// #endif
-// {
-//   // Find the index in effects.id where the given id exists
-//   auto it = std::find(effects.id.begin(), effects.id.end(), id);
-
-//   if (it != effects.id.end()) {
-//     // If found, update the existing entry
-//     size_t index = std::distance(effects.id.begin(), it);
-//     effects.function[index] = function;
-//     effects.config[index] = effect_config;
-//     effects.development_stage[index] = development_stage;
-//     #ifdef ENABLE_EFFECT_DESCRIPTIONS
-//     effects.description[index] = effect_description;
-//     #endif
-//   } else {
-//     // If not found, append a new entry
-//     effects.function.push_back(function);
-//     effects.config.push_back(effect_config);
-//     effects.development_stage.push_back(development_stage);
-//     #ifdef ENABLE_EFFECT_DESCRIPTIONS
-//     effects.description.push_back(effect_description);
-//     #endif
-//     effects.id.push_back(id);
-//     effects.count = effects.id.size();
-//   }
-//   ALOG_INF(PSTR())
-// }
-
-// #ifdef ENABLE_EFFECT_DESCRIPTIONS
-// void mAnimatorLight::addEffect(uint8_t id, EffectFunction function, const char* effect_config, const char* effect_description, uint8_t development_stage)
-// #else
-// void mAnimatorLight::addEffect(uint8_t id, EffectFunction function, const char* effect_config, uint8_t development_stage)
-// #endif
-// {
-//   char function_pointer_hex[(sizeof(EffectFunction) * 2u) + 1u];
-//   const uint8_t* function_pointer_bytes = reinterpret_cast<const uint8_t*>(&function);
-//   for (size_t byte_index = 0; byte_index < sizeof(EffectFunction); byte_index++) {
-//     snprintf(&function_pointer_hex[byte_index * 2u], 3u, "%02X", function_pointer_bytes[byte_index]);
-//   }
-//   function_pointer_hex[sizeof(EffectFunction) * 2u] = '\0';
-
-//   // Find the index in effects.id where the given id exists
-//   auto it = std::find(effects.id.begin(), effects.id.end(), id);
-
-//   if (it != effects.id.end()) {
-//     // If found, update the existing entry
-//     size_t index = std::distance(effects.id.begin(), it);
-//     effects.function[index] = function;
-//     effects.config[index] = effect_config;
-//     effects.development_stage[index] = development_stage;
-//     // #ifdef ENABLE_EFFECT_DESCRIPTIONS
-//     // effects.description[index] = nullptr;//effect_description;
-//     // #endif
-
-//     ALOG_INF(PSTR("FX REG UPDATE: id=%u index=%u stage=%u fn_size=%u fn_raw=%s config=%p count=%u"), id, static_cast<unsigned>(index), development_stage, static_cast<unsigned>(sizeof(EffectFunction)), function_pointer_hex, static_cast<const void*>(effect_config), static_cast<unsigned>(effects.id.size()));
-//   } else {
-//     // If not found, append a new entry
-//     effects.function.push_back(function);
-//     effects.config.push_back(effect_config);
-//     effects.development_stage.push_back(development_stage);
-//     // #ifdef ENABLE_EFFECT_DESCRIPTIONS
-//     // effects.description.push_back(nullptr);//effect_description);
-//     // #endif
-//     effects.id.push_back(id);
-//     // effects.count = effects.id.size();
-
-//     const size_t index = effects.id.size() - 1u;
-
-//     ALOG_INF(PSTR("FX REG ADD: id=%u index=%u stage=%u fn_size=%u fn_raw=%s config=%p count=%u"), id, static_cast<unsigned>(index), development_stage, static_cast<unsigned>(sizeof(EffectFunction)), function_pointer_hex, static_cast<const void*>(effect_config), static_cast<unsigned>(effects.id.size()));
-//   }
-// }
 
 #ifdef ENABLE_EFFECT_DESCRIPTIONS
 void mAnimatorLight::addEffect(uint16_t id, EffectFunction function, const char* effect_config, const char* effect_description, uint8_t development_stage)

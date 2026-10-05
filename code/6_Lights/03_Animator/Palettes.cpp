@@ -1210,117 +1210,306 @@ void mAnimatorLight::loadCustomPalettes()
   //     break;
   //   }
   // }
-}
-/*WrapEdge and Discrete should be flipped, will rename into original when full conversion is done*/
-uint32_t mAnimatorLight::Segment::GetPaletteColour(
-  /**
-   * @brief _pixel_position
-   * ** [0-SEGLEN]
-   * ** [0-255]   
-   */
-  uint16_t pixel_position,
-  /**
-   * @brief flag_spanned_segment
-   * ** [1] : If spanned segment, then indexing (0-255) is expanded into the SEGLEN 
-   * ** [0]: Unchanged, index coming in will be 0-SEGLEN but never scaled into 255. Or should it be?
-   * ** [2]: preffered
-   */
-  uint8_t     palette_index__format, 
-  /**
-   * @brief force_palette_mode flag_crgb_exact_colour
-   * ** [true] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
-   * ** [false]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
-   */
-  uint8_t     force_palette_mode,
-  /**
-   * @brief flag_wrap_hard_edge
-   * ** [PALETTE_MODE__DEFAULT]
-   * ** [PALETTE_MODE__FORCE_GRADIENT] : 16 palette gradients will not blend from 15 back to 0. ie 0-255 does not become 0-240 (where 0,15,31,47,63,79,95,111,127,143,159,175,191,207,223,239)
-   * ** [PALETTE_MODE__FORCE_DISCRETE]: Palette16 with 16 elements, as 0-255 pixel_position, will blend around smoothly using built-in CRGBPalette16
-   */
-  uint8_t     flag_wrap_hard_edge,
-  /**
-   * @brief encoded_value
-   * ** [uint32_t*] : encoded value from palette
-   */
-  uint8_t* encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-  /**
-   * @brief apply_brightness
-   * ** [false] : Apply brightness to the colour
-   * ** [true]  : Get the "full" 255 range colour object
-   */
-  bool apply_brightness, // as a flag, should maybe be removed and combined with the pbri below  
-  uint8_t pbri, // since 255 means not, otherwise apply
+}/*WrapEdge and Discrete should be flipped, will rename into original when full conversion is done*/
 
+
+
+
+
+
+
+
+/**
+ * @brief Return a colour from the segment's currently selected palette.
+ *
+ * This is the main PulSar palette lookup entry point used by effects and other
+ * segment-level rendering code.
+ *
+ * The function first ensures that the segment's selected palette is loaded into
+ * `palette_loaded`. `LoadPalette()` is responsible for converting the source
+ * palette into its runtime representation and assigning `runtime_type`.
+ *
+ * Runtime dispatch is then based on that loaded representation:
+ *
+ *   PALETTE_RUNTIME__CRGB16
+ *     Uses the direct CRGBPalette16 fast path contained in this function.
+ *     The lookup, interpolation, wrapping and brightness scaling are performed
+ *     directly without calling the generic encoded-palette engine.
+ *
+ *     This is intentionally optimized for high pixel-count effects where palette
+ *     lookup occurs once or more per pixel. The CRGB16 arithmetic is duplicated
+ *     locally to avoid additional function-call overhead in the hot path.
+ *
+ *   PALETTE_RUNTIME__ENCODED
+ *   PALETTE_RUNTIME__PROCEDURAL
+ *   PALETTE_RUNTIME__SOLID
+ *   PALETTE_RUNTIME__UNKNOWN
+ *     Fall through to the general PulSar palette implementation:
+ *
+ *       mPalette::GetColourFromPreloadedPaletteBuffer_U32()
+ *
+ *     This retains support for encoded palettes, custom palettes, RGBW/RGBWW
+ *     data, procedural palettes, segment colours and other non-CRGB16 formats.
+ *
+ *
+ * Palette index formats
+ * ---------------------
+ *
+ * `palette_index__format` describes the meaning of `pixel_position`:
+ *
+ *   PALETTE_INDEX__IS_255_RANGE
+ *     `pixel_position` already represents the normal palette domain 0..255.
+ *     No segment-length scaling is required.
+ *
+ *   PALETTE_INDEX__IS_SEGLEN_RANGE
+ *     `pixel_position` represents a position within the current virtual segment.
+ *     It is mapped from:
+ *
+ *       0 .. vLength()-1
+ *
+ *     onto:
+ *
+ *       0 .. 255
+ *
+ *     before palette sampling.
+ *
+ *   PALETTE_INDEX__IS_EXACT_COLOUR
+ *     Requests a specific discrete palette entry rather than a position within
+ *     a continuous 0..255 gradient.
+ *
+ *     For CRGBPalette16 runtime palettes this uses the loaded palette's
+ *     `encoded_index[]` table so the requested colour maps onto the appropriate
+ *     16-entry CRGB palette position.
+ *
+ *
+ * Palette interpolation mode
+ * --------------------------
+ *
+ * `force_palette_mode` determines whether the palette is treated as discrete or
+ * interpolated:
+ *
+ *   PALETTE_MODE__DEFAULT
+ *     Use the normal palette behaviour.
+ *
+ *   PALETTE_MODE__FORCE_DISCRETE
+ *     Use NOBLEND. The selected CRGB16 entry is returned directly without
+ *     interpolation to the neighbouring entry.
+ *
+ *   PALETTE_MODE__FORCE_GRADIENT
+ *     Force interpolated gradient behaviour.
+ *
+ *
+ * Palette wrapping
+ * ----------------
+ *
+ * `flag_wrap_hard_edge` controls interpolation at the end of a CRGB16 palette:
+ *
+ *   PALETTE_WRAP_SMOOTH
+ *     Uses LINEARBLEND. The final palette entry can interpolate back to the
+ *     first entry, producing a continuous/circular gradient.
+ *
+ *   PALETTE_WRAP_HARDEDGE
+ *     Uses LINEARBLEND_NOWRAP. The input range is remapped from 0..255 to
+ *     approximately 0..240 so interpolation never crosses from palette entry
+ *     15 back to entry 0.
+ *
+ *
+ * Brightness
+ * ----------
+ *
+ * `pbri` is an independent per-lookup brightness multiplier:
+ *
+ *   255 = full brightness / no scaling
+ *   0..254 = scale the returned colour
+ *
+ * Brightness is only applied when `apply_brightness` is true.
+ *
+ * This brightness parameter is independent of the segment/global output
+ * brightness system. It exists primarily for palette APIs, including
+ * WLED-compatible callers, that pass brightness as part of the palette lookup.
+ *
+ *
+ * Encoded value output
+ * --------------------
+ *
+ * If `encoded_value` is non-null, the function may return the corresponding
+ * encoded/index value associated with the selected palette position.
+ *
+ * For CRGB16 runtime palettes this is the resolved 0..255 palette position.
+ * For generic palettes the value is populated by the underlying encoded palette
+ * implementation where applicable.
+ *
+ *
+ * RGBWW handling
+ * --------------
+ *
+ * When ENABLE_FEATURE_PALETTE__RGBWW_COLOURS is enabled, the second white
+ * component is returned through `white_warm_GetPaletteColour`.
+ *
+ * CRGB16 palettes contain RGB only, so their secondary white value is zero.
+ * Generic encoded palettes retain their existing RGBWW behaviour.
+ *
+ *
+ * Dynamic palettes
+ * ----------------
+ *
+ * Dynamic CRGBPalette16 palettes may currently be refreshed before lookup.
+ * This preserves their live behaviour, although periodic dynamic-palette
+ * updating should ultimately be handled outside the per-pixel lookup path so
+ * that large displays do not repeatedly regenerate the palette for every pixel.
+ *
+ *
+ * @param pixel_position
+ *        Input palette position or exact colour index. Its interpretation is
+ *        determined by `palette_index__format`.
+ *
+ * @param palette_index__format
+ *        Input-index format:
+ *          PALETTE_INDEX__IS_255_RANGE
+ *          PALETTE_INDEX__IS_SEGLEN_RANGE
+ *          PALETTE_INDEX__IS_EXACT_COLOUR
+ *
+ * @param force_palette_mode
+ *        Palette interpolation mode:
+ *          PALETTE_MODE__DEFAULT
+ *          PALETTE_MODE__FORCE_DISCRETE
+ *          PALETTE_MODE__FORCE_GRADIENT
+ *
+ * @param flag_wrap_hard_edge
+ *        Controls whether an interpolated palette wraps smoothly from the last
+ *        entry back to the first or terminates at a hard edge.
+ *
+ * @param encoded_value
+ *        Optional pointer receiving an encoded/index value associated with the
+ *        selected palette colour. May be nullptr when not required.
+ *
+ * @param apply_brightness
+ *        If true, apply `pbri` to the returned colour.
+ *
+ * @param pbri
+ *        Per-lookup brightness multiplier. 255 means no reduction.
+ *
+ * @param mcol
+ *        Segment colour selector retained for palette APIs that require segment
+ *        colour fallback/compatibility semantics.
+ *
+ * @return Packed RGBW colour in RGBW32 format.
+ */
+uint32_t mAnimatorLight::Segment::GetPaletteColour(
+  uint16_t pixel_position,
+  uint8_t palette_index__format,
+  uint8_t force_palette_mode,
+  uint8_t flag_wrap_hard_edge,
+  uint8_t* encoded_value,
+  bool apply_brightness,
+  uint8_t pbri,
   uint8_t mcol
 ){
-  
+
   DEBUG_LINE_HERE_TRACE
-  if(palette_id != palette_loaded->loaded_palette_id)
-  {
-    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods
-  }
 
+  if (palette_id != palette_loaded->loaded_palette_id) LoadPalette(palette_id);
 
-  // uint32_t color = SEGCOLOR(mcol < NUMBER_SEGMENT_COLOURS ? mcol : 0);
-  // // default palette or no RGB support on segment
-  // if ((palette == 0 && mcol < NUMBER_SEGMENT_COLOURS) || !_isRGB) {
-  //   return color_fade(color, pbri, true);
-  // }
-  
-  /**
-   * @brief These functions always need called as they are dynamic
-   * I should make this a check here, if palette is dynamic, then load everytime
-   * 
-   * perhaps also add a timer here, so it has a backoff and is only called the minimum amount needed
-   * ie have a new tSaved_DynamicUpdate 
-   * 
-   * This needs moved into its own function and called outside this.
-   * SEGMENT.UpdatePalette(); and only called when palette is dynamic/live
-   */
-  // else // else so it only tries this if the above "if" did not occur to stop double loads
-  if(
-    (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && 
+  if (
+    (palette_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) &&
     (palette_id <= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_05__ID)
-  ){
-    LoadPalette(palette_id);  //loadPalette perhaps needs to be a segment instance instead. Though this will block unloaded methods    
-  }
+  ) LoadPalette(palette_id);
+
   DEBUG_LINE_HERE_TRACE
+
+  /*
+   * Fast runtime path for palettes already loaded as CRGBPalette16.
+   *
+   * All source classification/conversion has already happened in LoadPalette().
+   * At this point runtime_type is authoritative, so there is no need to test
+   * palette-ID ranges or enter the generic encoded palette machinery.
+   */
+  if (palette_loaded->runtime_type == mPaletteLoaded::PALETTE_RUNTIME__CRGB16)
+  {
+    uint16_t index = pixel_position;
+
+    if (palette_index__format == PALETTE_INDEX__IS_SEGLEN_RANGE) index = (vLength() > 1) ? (uint16_t)((uint32_t)pixel_position * 255U / (vLength() - 1)) : 0;
+    if (palette_index__format == PALETTE_INDEX__IS_255_RANGE) index &= 0xFFU;
+    if (palette_index__format == PALETTE_INDEX__IS_EXACT_COLOUR) index = palette_loaded->CRGB16Palette16_Palette.encoded_index[pixel_position % 16];
+
+    if (encoded_value != nullptr) *encoded_value = (uint8_t)index;
+
+    TBlendType blend = LINEARBLEND;
+    if (force_palette_mode == PALETTE_MODE__FORCE_DISCRETE) blend = NOBLEND;
+    if (force_palette_mode != PALETTE_MODE__FORCE_DISCRETE && flag_wrap_hard_edge == PALETTE_WRAP_HARDEDGE) blend = LINEARBLEND_NOWRAP;
+
+    if (blend == LINEARBLEND_NOWRAP) index = (index * 0xF0U) >> 8;
+
+    uint8_t hi4 = (uint8_t)index >> 4;
+    uint8_t lo4 = (uint8_t)index & 0x0F;
+
+    const CRGB* entry = &palette_loaded->CRGB16Palette16_Palette.data[0] + hi4;
+
+    uint16_t red1 = entry->r;
+    uint16_t green1 = entry->g;
+    uint16_t blue1 = entry->b;
+
+    if (lo4 && blend != NOBLEND)
+    {
+      if (hi4 == 15) entry = &palette_loaded->CRGB16Palette16_Palette.data[0];
+      else ++entry;
+
+      uint16_t f2 = lo4 << 4;
+      uint16_t f1 = 256 - f2;
+
+      red1 = (red1 * f1 + (uint16_t)entry->r * f2) >> 8;
+      green1 = (green1 * f1 + (uint16_t)entry->g * f2) >> 8;
+      blue1 = (blue1 * f1 + (uint16_t)entry->b * f2) >> 8;
+    }
+
+    if (apply_brightness && pbri < 255)
+    {
+      uint16_t scale = (uint16_t)pbri + 1;
+      red1 = (red1 * scale) >> 8;
+      green1 = (green1 * scale) >> 8;
+      blue1 = (blue1 * scale) >> 8;
+    }
+
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+    white_warm_GetPaletteColour = 0;
+    #endif
+
+    return RGBW32(red1, green1, blue1, 0);
+  }
 
   uint32_t colour = mPaletteI->GetColourFromPreloadedPaletteBuffer_U32(
     palette_id,
     (uint8_t*)palette_loaded->pData.data(),
     pixel_position,
-    encoded_value,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-    palette_index__format, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-    flag_wrap_hard_edge,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
+    encoded_value,
+    palette_index__format,
+    flag_wrap_hard_edge,
     force_palette_mode
   );
+
   #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-  white_warm_GetPaletteColour = mPaletteI->colour32_white_cold; // Bypass W2, as this is not used in RGBWW
+  white_warm_GetPaletteColour = mPaletteI->colour32_white_cold;
   #endif
 
-  // Apply brightness if needed
-  // if (apply_brightness) {
-  //   uint8_t brightness = scale8(_brightness_rgb, tkr_iLight->getBriRGB_Global());
-  //   // ALOG_INF(PSTR("brightness getpal %d"),brightness);
-  //   uint16_t scale = brightness + 1;  // Avoid division by zero and maintain full range
+  if (apply_brightness && pbri < 255)
+  {
+    uint16_t scale = (uint16_t)pbri + 1;
 
-  //   // Extract, scale, and repack in one step
-  //   colour = RGBW32(
-  //     (R(colour) * scale) >> 8,  // Red
-  //     (G(colour) * scale) >> 8,  // Green
-  //     (B(colour) * scale) >> 8,  // Blue
-  //     (W(colour) * scale) >> 8   // White
-  //   );
-  //   #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
-  //   white_warm_GetPaletteColour = (mPaletteI->colour32_white_cold * scale) >> 8; // Rescale bypass W2
-  //   #endif
-  // }
+    colour = RGBW32(
+      (R(colour) * scale) >> 8,
+      (G(colour) * scale) >> 8,
+      (B(colour) * scale) >> 8,
+      (W(colour) * scale) >> 8
+    );
+
+    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
+    white_warm_GetPaletteColour = (white_warm_GetPaletteColour * scale) >> 8;
+    #endif
+  }
 
   return colour;
-
 }
+
 
 /*******************************************************************************************************************************************************************************************************************
  * @description : Ensures that the requested secondary palette is loaded into
@@ -1486,39 +1675,6 @@ uint32_t IRAM_ATTR mAnimatorLight::GetPaletteColour_WithTemporaryLoad(
     flag_request_is_for_full_visual_output
   );
 }
-
-
-
-//  uint32_t mAnimatorLight::ColorFromPalette_wled(const CRGBPalette16& /*pal_ignored*/, uint8_t index, uint8_t brightness, TBlendType blendType)
-//     {
-//       const uint16_t pal_id = SEGMENT.palette_id;
-
-//       // Immediately jump to low level colour return if possible
-      
-//       const bool isCRGB16 =
-//         ((pal_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16__RAINBOW_COLOUR__ID)                      && (pal_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16__LENGTH__ID)) ||
-//         ((pal_id >= mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT__SUNSET__ID)                     && (pal_id < mPalette::PALETTELIST_STATIC_CRGBPALETTE16_GRADIENT_LENGTH__ID)) ||
-//         ((pal_id >= mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_TWO_12__ID)     && (pal_id < mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__LENGTH__ID)) ||
-//         ((pal_id >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE_COLOURS_01__ID) && (pal_id < mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__LENGTH__ID));
-
-//       if (isCRGB16 && SEGMENT.palette_loaded && (SEGMENT.palette_loaded->loaded_palette_id == pal_id)) {
-//         return mPalette::ColorFromPalette16(SEGMENT.palette_loaded->CRGB16Palette16_Palette.data, index, brightness, blendType);
-//       }
-
-//       // Otherwise, proceed with the general palette colour retrieval
-
-//       const uint8_t force_mode = (blendType == NOBLEND) ? PALETTE_MODE__FORCE_DISCRETE : PALETTE_MODE__FORCE_GRADIENT;
-//       const uint8_t wrap_mode = (blendType == LINEARBLEND) ? PALETTE_WRAP_SMOOTH : PALETTE_WRAP_HARDEDGE;
-
-//       uint32_t c = SEGMENT.GetPaletteColour(index, PALETTE_INDEX__IS_255_RANGE, force_mode, wrap_mode, NO_ENCODED_VALUE, false, 255, 0);
-
-//       if (brightness < 255) {
-//         const uint16_t scale = uint16_t(brightness) + 1;
-//         c = RGBW32((R(c) * scale) >> 8, (G(c) * scale) >> 8, (B(c) * scale) >> 8, (W(c) * scale) >> 8);
-//       }
-
-//       return c;
-//     }
 
 
 #endif

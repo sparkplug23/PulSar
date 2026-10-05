@@ -2984,8 +2984,6 @@ uint8_t perlin8(uint16_t x, uint16_t y, uint16_t z) {
 
   void Segment_AppendNew(uint16_t start_pixel, uint16_t stop_pixel, uint8_t seg_index = 0);
 
-  void SetSegment_AnimFunctionCallback_WithoutAnimator(uint8_t seg_i = 0);
-
   int16_t extractModeDefaults(uint16_t mode, const char *segVar);
   bool extractModeDefaults(uint16_t mode, const char *segVar, char *outBuffer, size_t bufferSize);
 
