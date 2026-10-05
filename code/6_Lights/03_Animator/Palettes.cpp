@@ -141,6 +141,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
 
   // Record the ID only in the container being loaded.
   _palette_container->loaded_palette_id = palette_id;
+  _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__UNKNOWN;
 
   // ---- Helpers (local, no ABI impact) ----
   auto setPackedPtrAndMeta = [&](mPalette::PALETTE_DATA* ptr) {
@@ -210,6 +211,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
 
     // Build the common 16-entry runtime palette from the stored gradient.
     _palette_container->CRGB16Palette16_Palette.data.loadDynamicGradientPalette(tcp);
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__CRGB16;
 
     /**
      * IMPORTANT:
@@ -241,6 +243,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
   {
     _palette_container->encoded_colour_width = 0;
     _palette_container->colours_in_palette = 0;
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__PROCEDURAL;
   }
 
 
@@ -259,6 +262,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     mPalette::PALETTE_DATA* ptr = &mPaletteI->static_palettes[palette_id_adj];
     setPackedPtrAndMeta(ptr);
     mirrorPackedIntoCRGB16();
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__ENCODED;
   }
 
 
@@ -273,6 +277,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     mPalette::PALETTE_DATA* ptr = &mPaletteI->custom_palettes[palette_id_adj];
     setPackedPtrAndMeta(ptr);
     mirrorPackedIntoCRGB16();
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__ENCODED;
   }
 
 
@@ -286,6 +291,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
   {
     _palette_container->encoded_colour_width = 0;
     _palette_container->colours_in_palette = 1;
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__SOLID;
   }
 
 
@@ -300,6 +306,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
   {
     _palette_container->encoded_colour_width = 3;
     _palette_container->colours_in_palette = 1;
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__SOLID;
   }
 
 
@@ -316,6 +323,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     const CRGB sec = segcol[1].getU32();
 
     _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim, prim, sec, sec);
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__CRGB16;
   }
 
   else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_THREE_123__ID)
@@ -329,6 +337,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     const CRGB ter = segcol[2].getU32();
 
     _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim, sec, ter);
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__CRGB16;
   }
 
   else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FOUR_1234__ID)
@@ -343,6 +352,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     const CRGB four = segcol[3].getU32();
 
     _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim, sec, ter, four);
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__CRGB16;
   }
 
   else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_FIVE_12345__ID)
@@ -358,6 +368,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     const CRGB five = segcol[4].getU32();
 
     _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim, prim, prim, sec, sec, sec, ter, ter, ter, four, four, four, five, five, five, five);
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__CRGB16;
   }
 
   else if (palette_id == mPalette::PALETTELIST_SEGMENT__RGBCCT_CRGBPALETTE16_PALETTES__PAIRED_REPEATED_ACTIVE__ID)
@@ -373,6 +384,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     const CRGB five = segcol[4].getU32();
 
     _palette_container->CRGB16Palette16_Palette.data = CRGBPalette16(prim, sec, ter, four, five, prim, sec, ter, four, five, prim, sec, ter, four, five, five);
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__CRGB16;
   }
 
 
@@ -392,6 +404,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     mPalette::PALETTE_DATA* ptr = &mPaletteI->dynamic_palettes[palette_id_adj];
     setPackedPtrAndMeta(ptr);
     mirrorPackedIntoCRGB16();
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__PROCEDURAL;
   }
 
 
@@ -405,6 +418,7 @@ void IRAM_ATTR mAnimatorLight::Segment::LoadPalette(uint8_t palette_id, mPalette
     _palette_container->CRGB16Palette16_Palette.SetDefaultIndexing();
     _palette_container->encoded_colour_width = 3;
     _palette_container->colours_in_palette = 16;
+    _palette_container->runtime_type = mPaletteLoaded::PALETTE_RUNTIME__PROCEDURAL;
 
     // Seed once via the single source of truth (no periodic timing here).
     Update_LivePalettes(palette_id);

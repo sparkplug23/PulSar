@@ -22,6 +22,16 @@ class mPaletteLoaded
 		deallocateData();
 	};
 
+    enum PaletteRuntimeType : uint8_t {
+      PALETTE_RUNTIME__UNKNOWN = 0,
+      PALETTE_RUNTIME__CRGB16,
+      PALETTE_RUNTIME__ENCODED,
+      PALETTE_RUNTIME__PROCEDURAL,
+      PALETTE_RUNTIME__SOLID
+    };
+
+    PaletteRuntimeType runtime_type = PALETTE_RUNTIME__UNKNOWN;
+
 	uint8_t loaded_palette_id = 0;
 
 	/**
