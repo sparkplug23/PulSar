@@ -3215,6 +3215,9 @@ static const char PM_EFFECT_DESCRI__TWINKLE_GLOW[] PROGMEM =
 #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
 
 
+
+
+
 /**********************************************************************************************************************************************************************************
  * EFFECT: Hour Progress
  *
@@ -3235,16 +3238,21 @@ static const char PM_EFFECT_DESCRI__TWINKLE_GLOW[] PROGMEM =
  *
  *
  * PROGRESS
- *   Seconds into the current hour are calculated as:
- *
- *       seconds_into_hour = minute * 60 + second
+ *   Milliseconds into the current hour are calculated from the RTC minute and second values, with the current millisecond
+ *   position added so that progress is not limited to one-second resolution.
  *
  *   Progress is mapped from:
  *
- *       0 seconds    -> 1 filled pixel
- *       3550 seconds -> complete segment filled
+ *       0 ms          -> 1 filled pixel
+ *       3550000 ms    -> complete segment filled
  *
  *   The bar therefore remains fully filled during the final 50 seconds of the hour.
+ *
+ *   Using millisecond resolution is important for long segments. For example, an 8192-pixel segment requires approximately:
+ *
+ *       3550000 / 8191 = 433 ms per pixel
+ *
+ *   Therefore the progress value can advance one pixel at a time instead of changing by two or three pixels once per second.
  *
  *
  * PRIMARY PALETTE
@@ -3268,29 +3276,43 @@ static const char PM_EFFECT_DESCRI__TWINKLE_GLOW[] PROGMEM =
  *
  *
  * EFFECT PERIOD
- *   SEGMENT.get_effect_period() defines the complete target-update cycle.
+ *   SEGMENT.get_effect_period() defines the maximum target-update period.
  *
- *   A new target frame is generated once per effect period, unless the effect is running for the first time or the hour rolls
- *   over and the progress value decreases.
+ *   For short segments this is used directly. For long segments the actual update period is automatically reduced so that
+ *   the effect is refreshed at least once for every possible progress-pixel increment.
+ *
+ *   The required pixel period is calculated from:
+ *
+ *       pixel_period_ms = 3550000 / (segment_length - 1)
+ *
+ *   and the actual update period becomes:
+ *
+ *       effect_period_ms = min(configured_effect_period_ms, pixel_period_ms)
+ *
+ *   For example, with an 8192-pixel segment:
+ *
+ *       pixel_period_ms = ~433 ms
+ *
+ *   Therefore an EP of 1000 ms automatically becomes approximately 433 ms.
  *
  *
  * TRANSITION
- *   SEGMENT.speed controls what proportion of the effect period is used for blending:
+ *   SEGMENT.speed controls what proportion of the actual effect period is used for blending:
  *
  *       Speed = 0     -> transition occupies the complete effect period
  *       Speed = 255   -> target changes immediately
  *
- *   Intermediate values produce a partial-period blend followed by a hold until the next effect-period update.
+ *   Intermediate values produce a partial-period blend followed by a hold until the next target update.
  *
- *   Example:
+ *   Example for an 8192-pixel segment:
  *
- *       EP = 1000 ms
+ *       calculated period = 433 ms
  *       SX = 127
  *
  *   gives approximately:
  *
- *       transition = 502 ms
- *       hold       = 498 ms
+ *       transition = 217 ms
+ *       hold       = 216 ms
  *
  *   SEGMENT.startTransition() captures the current segment state before the new target frame is written.
  *
@@ -3299,7 +3321,7 @@ static const char PM_EFFECT_DESCRI__TWINKLE_GLOW[] PROGMEM =
  *   A new target frame is produced when:
  *
  *       • the effect runs for the first time;
- *       • the configured effect period has elapsed; or
+ *       • the calculated effect period has elapsed; or
  *       • the hour rolls over and the calculated progress becomes lower than the previous progress.
  *
  *
@@ -3313,13 +3335,13 @@ static const char PM_EFFECT_DESCRI__TWINKLE_GLOW[] PROGMEM =
  *
  * CONTROLS
  *   SX
- *       Percentage of the effect period used for blending.
+ *       Percentage of the actual effect period used for blending.
  *
  *   Custom1
  *       Secondary-palette background brightness.
  *
  *   EP
- *       Complete target-update period.
+ *       Maximum target-update period. Long segments automatically use a shorter update period when required.
  *
  *   Palette
  *       Primary palette used for the filled progress bar.
@@ -3333,41 +3355,60 @@ void mAnimatorLight::EffectAnim__TimeBased__HourProgress()
   if (segment_length == 0 || SEGMENT.palette_loaded == nullptr || tkr_time == nullptr) return;
   if (!SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id)) return;
 
-  constexpr uint16_t HOUR_SECONDS = 3600;
-  constexpr uint16_t FULL_AT_SECONDS = 3550;
+  constexpr uint32_t FULL_AT_MILLISECONDS = 3550000UL;
 
-  uint16_t seconds_into_hour = static_cast<uint16_t>((tkr_time->RtcTime.minute * 60u) + tkr_time->RtcTime.second);
-  if (seconds_into_hour > HOUR_SECONDS) seconds_into_hour = HOUR_SECONDS;
+  uint16_t& previous_progress = SEGMENT.aux0;
+  uint16_t& previous_second = SEGMENT.aux1;
+  uint32_t& second_start_time = SEGMENT.aux3;
 
-  const uint16_t mapped_seconds = min<uint16_t>(seconds_into_hour, FULL_AT_SECONDS);
+  const uint16_t current_second = static_cast<uint16_t>(tkr_time->RtcTime.second);
 
-  uint16_t progress = static_cast<uint16_t>(
-    map(mapped_seconds, 0, FULL_AT_SECONDS, 1, segment_length)
-  );
+  if (SEGMENT.call == 0 || current_second != previous_second) {
+    previous_second = current_second;
+    second_start_time = effect_start_time;
+  }
+
+  uint32_t millisecond_fraction = effect_start_time - second_start_time;
+  if (millisecond_fraction > 999UL) millisecond_fraction = 999UL;
+
+  uint32_t milliseconds_into_hour = static_cast<uint32_t>(tkr_time->RtcTime.minute) * 60000UL;
+  milliseconds_into_hour += static_cast<uint32_t>(tkr_time->RtcTime.second) * 1000UL;
+  milliseconds_into_hour += millisecond_fraction;
+
+  const uint32_t mapped_milliseconds = min<uint32_t>(milliseconds_into_hour, FULL_AT_MILLISECONDS);
+
+  uint16_t progress = 1;
+
+  if (segment_length > 1) {
+    progress += static_cast<uint16_t>(
+      (static_cast<uint64_t>(mapped_milliseconds) * static_cast<uint64_t>(segment_length - 1)) /
+      static_cast<uint64_t>(FULL_AT_MILLISECONDS)
+    );
+  }
 
   if (progress > segment_length) progress = segment_length;
 
-  uint16_t& previous_progress = SEGMENT.aux0;
-  uint32_t& last_update_time  = SEGMENT.aux3;
+  const uint32_t configured_effect_period_ms = SEGMENT.get_effect_period();
 
-  const uint32_t effect_period_ms = SEGMENT.get_effect_period();
+  uint32_t pixel_period_ms = configured_effect_period_ms;
 
-  const uint32_t transition_duration_long =
-    (effect_period_ms * static_cast<uint32_t>(255u - SEGMENT.speed)) / 255u;
+  if (segment_length > 1) {
+    pixel_period_ms = FULL_AT_MILLISECONDS / static_cast<uint32_t>(segment_length - 1);
+    pixel_period_ms = max<uint32_t>(1UL, pixel_period_ms);
+  }
 
-  const uint16_t transition_duration_ms =
-    static_cast<uint16_t>(min<uint32_t>(transition_duration_long, 65535u));
+  const uint32_t effect_period_ms = min<uint32_t>(configured_effect_period_ms, pixel_period_ms);
+  const uint32_t transition_duration_long = (effect_period_ms * static_cast<uint32_t>(255u - SEGMENT.speed)) / 255u;
+  const uint16_t transition_duration_ms = static_cast<uint16_t>(min<uint32_t>(transition_duration_long, 65535u));
 
   const bool first_effect_call = SEGMENT.call == 0;
-  const bool hour_rolled_over  = progress < previous_progress;
-  const bool update_due        = (effect_start_time - last_update_time) >= effect_period_ms;
+  const bool progress_changed = progress != previous_progress;
 
-  if (!first_effect_call && !hour_rolled_over && !update_due) return;
+  if (!first_effect_call && !progress_changed) return;
   if (SEGMENT.isInTransition()) return;
 
   SEGMENT.startTransition(transition_duration_ms, true);
 
-  last_update_time  = effect_start_time;
   previous_progress = progress;
 
   const uint8_t background_brightness = static_cast<uint8_t>(SEGMENT.custom1);
@@ -3404,6 +3445,7 @@ void mAnimatorLight::EffectAnim__TimeBased__HourProgress()
     SEGMENT.setPixelColor(pixel, colour);
   }
 }
+
 static const char PM_EFFECT_CONFIG__TIMEBASED__HOUR_PROGRESS[] PROGMEM =
 "Hour Progress@"
 "!,,Background Brightness,,,,,,!,"
@@ -3420,13 +3462,16 @@ static const char PM_EFFECT_CONFIG__TIMEBASED__HOUR_PROGRESS[] PROGMEM =
 "s1=0,"
 "ep=1000"
 ;
+
 static const char PM_EFFECT_DESCRI__TIMEBASED__HOUR_PROGRESS[] PROGMEM =
 "Hour progress bar using primary and secondary palettes.\n\r"
-"SX: Portion of EP used for blending\n\r"
+"SX: Portion of actual update period used for blending\n\r"
 "C1: Secondary-palette background brightness\n\r"
-"EP: Complete target-update period\n\r"
+"EP: Maximum target-update period; reduced automatically for long segments\n\r"
 "Palette: Filled progress-bar source\n\r"
 "Palette2: Unfilled background source";
+
+
 
 
 #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL2_FLASHING_BASIC  SECITON END ////////////////////////////////////////////////////////
@@ -9466,7 +9511,7 @@ void mAnimatorLight::EffectAnim__Juggle()
     fastled_col = CRGB(SEGMENT.getPixelColor(index));
     fastled_col |= (SEGMENT.check1 == 0)
       ? CHSV(dothue, 220, 255)
-      : CRGB(ColorFromPaletteRedirect(SEGPALETTE, dothue, 255));
+      : CRGB(ColorFromPalette_wled(SEGPALETTE, dothue, 255));
     SEGMENT.setPixelColor(index, fastled_col);
     dothue += 32;
   }
@@ -9812,7 +9857,7 @@ static const char PM_EFFECT_DESCRI__BPM[] PROGMEM =
  * Implementation
  *   • Allocates (SEGLEN+7)/8 bytes for the per-LED bitfield; returns fallback if allocation fails.
  *   • Fade amounts use fract8 and scale with global brightness for consistent look at low brightness.
- *   • Color selection uses ColorFromPaletteRedirect(SEGPALETTE, hw_random8(), 64, NOBLEND) at spawn time and then intensity is managed by fade math.
+ *   • Color selection uses ColorFromPalette_wled(SEGPALETTE, hw_random8(), 64, NOBLEND) at spawn time and then intensity is managed by fade math.
  *
  * Notes & Limits
  *   • 1D effect; works on linearized order for 2D segments.
@@ -9863,7 +9908,7 @@ static const char PM_EFFECT_DESCRI__BPM[] PROGMEM =
 //           unsigned index = i >> 3;
 //           unsigned  bitNum = i & 0x07;
 //           bitWrite(SEGMENT.data[index], bitNum, true);
-//           SEGMENT.setPixelColor(i, ColorFromPaletteRedirect(SEGPALETTE, hw_random8(), 64, NOBLEND));         
+//           SEGMENT.setPixelColor(i, ColorFromPalette_wled(SEGPALETTE, hw_random8(), 64, NOBLEND));         
 //           break; //only spawn 1 new pixel per frame per 50 LEDs
 //         }
 //       }
@@ -9941,7 +9986,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Colour()
             unsigned index = i >> 3;
             unsigned bitNum = i & 0x07;
             bitWrite(SEGMENT.data[index], bitNum, true);
-            SEGMENT.setPixelColor(i, ColorFromPaletteRedirect(SEGPALETTE, hw_random8(), 64, NOBLEND));
+            SEGMENT.setPixelColor(i, ColorFromPalette_wled(SEGPALETTE, hw_random8(), 64, NOBLEND));
             break;
           }
         } else {
@@ -9953,7 +9998,7 @@ void mAnimatorLight::EffectAnim__Twinkle_Colour()
             unsigned index = i >> 3;
             unsigned bitNum = i & 0x07;
             bitWrite(SEGMENT.data[index], bitNum, true);
-            SEGMENT.setPixelColor(i, ColorFromPaletteRedirect(SEGPALETTE, hw_random8(), 64, NOBLEND));
+            SEGMENT.setPixelColor(i, ColorFromPalette_wled(SEGPALETTE, hw_random8(), 64, NOBLEND));
             break;
           }
         }
@@ -10272,7 +10317,7 @@ CRGB mAnimatorLight::EffectAnim__Base_Twinkle_Smooth_One_Twinkle(uint32_t ms, ui
   unsigned hue = slowcycle8 - salt;
   CRGB c;
   if (bright > 0) {
-    c = ColorFromPaletteRedirect(SEGPALETTE, hue, bright, NOBLEND);
+    c = ColorFromPalette_wled(SEGPALETTE, hue, bright, NOBLEND);
     if (!SEGMENT.check1) {
       // This code takes a pixel, and if its in the 'fading down'
       // part of the cycle, it adjusts the color a little bit like the
@@ -11548,7 +11593,7 @@ CRGB mAnimatorLight::EffectAnim__Pacifica_Base_OneLayer(uint16_t i, CRGBPalette1
   ci += (cs * i);
   unsigned sindex16 = sin16_t(ci) + 32768;
   unsigned sindex8 = scale16(sindex16, 240);
-  return CRGB(ColorFromPaletteRedirect(p, sindex8, bri, LINEARBLEND));
+  return CRGB(ColorFromPalette_wled(p, sindex8, bri, LINEARBLEND));
 }
 
 
@@ -12857,7 +12902,7 @@ void mAnimatorLight::EffectAnim__Noise_Pal()
 
   for (unsigned i = 0; i < SEGLEN; i++) {
     unsigned index = perlin8(i*scale, SEGMENT.aux0+i*scale);                // Get a value from the noise function. I'm using both x and y axis.
-    SEGMENT.setPixelColor((int)i,  ColorFromPaletteRedirect(palettes[0], index, 255, LINEARBLEND));  // Use my own palette.
+    SEGMENT.setPixelColor((int)i,  ColorFromPalette_wled(palettes[0], index, 255, LINEARBLEND));  // Use my own palette.
   }
 
   SEGMENT.aux0 += beatsin8_t(10,1,4);                                        // Moving along the distance. Vary it a bit with a sine wave.
@@ -21200,7 +21245,7 @@ static const char PM_EFFECT_DESCRI__2D__BLACK_HOLE[] PROGMEM =
  *
  *   Notes
  *   • Requires a 2D segment; returns EFFECT_DEFAULT if not 2D.
- *   • Palette-driven via ColorFromPaletteRedirect(..., LINEARBLEND); hue scrolls in aux0.
+ *   • Palette-driven via ColorFromPalette_wled(..., LINEARBLEND); hue scrolls in aux0.
  *   • Uses addPixelColorXY + fadePixelColorXY to build lines for a richer, additive look.
  *
  * @return      : FRAMETIME
@@ -21281,7 +21326,7 @@ static const char PM_EFFECT_DESCRI__2D__COLOURED_BURSTS[] PROGMEM =
  *
  *   How it works
  *   • For each column x, two y-positions are computed with `beatsin8_t(...)` that are 180° out of phase (phase offset +128).
- *   • Each strand is colored from the active CRGBPalette16 (ColorFromPaletteRedirect, LINEARBLEND). Hue drifts with x and time.
+ *   • Each strand is colored from the active CRGBPalette16 (ColorFromPalette_wled, LINEARBLEND). Hue drifts with x and time.
  *   • A global fade (`fadeToBlackBy(64)`) creates motion trails; optional blur/smear smooths the path further.
  *
  *   Controls
@@ -21291,7 +21336,7 @@ static const char PM_EFFECT_DESCRI__2D__COLOURED_BURSTS[] PROGMEM =
  *
  *   Notes
  *   • Requires a 2D segment; returns EFFECT_DEFAULT if not a matrix.
- *   • Palette-driven; bright/alpha are handled by ColorFromPaletteRedirect with LINEARBLEND for smooth gradients.
+ *   • Palette-driven; bright/alpha are handled by ColorFromPalette_wled with LINEARBLEND for smooth gradients.
  *   • Uses only integer timing math; lightweight and suitable for small ESP targets.
  *
  * @return      : FRAMETIME
@@ -21307,8 +21352,8 @@ void mAnimatorLight::EffectAnim__2D__DNA()
 
   SEGMENT.fadeToBlackBy(64);
   for (int i = 0; i < cols; i++) {
-    SEGMENT.setPixelColorXY(i, beatsin8_t(SEGMENT.speed/8, 0, rows-1, 0, i*4    ), ColorFromPaletteRedirect(SEGPALETTE, i*5+effect_start_time/17, beatsin8_t(5, 55, 255, 0, i*10), LINEARBLEND));
-    SEGMENT.setPixelColorXY(i, beatsin8_t(SEGMENT.speed/8, 0, rows-1, 0, i*4+128), ColorFromPaletteRedirect(SEGPALETTE, i*5+128+effect_start_time/17, beatsin8_t(5, 55, 255, 0, i*10+128), LINEARBLEND));
+    SEGMENT.setPixelColorXY(i, beatsin8_t(SEGMENT.speed/8, 0, rows-1, 0, i*4    ), ColorFromPalette_wled(SEGPALETTE, i*5+effect_start_time/17, beatsin8_t(5, 55, 255, 0, i*10), LINEARBLEND));
+    SEGMENT.setPixelColorXY(i, beatsin8_t(SEGMENT.speed/8, 0, rows-1, 0, i*4+128), ColorFromPalette_wled(SEGPALETTE, i*5+128+effect_start_time/17, beatsin8_t(5, 55, 255, 0, i*10+128), LINEARBLEND));
   }
   SEGMENT.blur(SEGMENT.intensity / (8 - (SEGMENT.check1 * 2)), SEGMENT.check1); 
 }
@@ -21390,8 +21435,8 @@ void mAnimatorLight::EffectAnim__2D__DNASpiral()
         unsigned rate = k * 255 / steps;
         //unsigned dx = lerp8by8(x, x1, rate);
         unsigned dx = positive? (x + k-1) : (x - k+1);   // behaves the same as "lerp8by8" but does not create holes
-        //SEGMENT.setPixelColorXY(dx, i, ColorFromPaletteRedirect(SEGPALETTE, hue, 255, LINEARBLEND).nscale8_video(rate));
-        SEGMENT.addPixelColorXY(dx, i, ColorFromPaletteRedirect(SEGPALETTE, hue, 255, LINEARBLEND)); // use setPixelColorXY for different look
+        //SEGMENT.setPixelColorXY(dx, i, ColorFromPalette_wled(SEGPALETTE, hue, 255, LINEARBLEND).nscale8_video(rate));
+        SEGMENT.addPixelColorXY(dx, i, ColorFromPalette_wled(SEGPALETTE, hue, 255, LINEARBLEND)); // use setPixelColorXY for different look
         SEGMENT.fadePixelColorXY(dx, i, rate);
       }
       SEGMENT.setPixelColorXY(x, i, DARKSLATEGRAY);
@@ -21467,8 +21512,8 @@ void mAnimatorLight::EffectAnim__2D__Drift()
     float angle = radians(t * (maxDim - i));
     int mySin = sin_t(angle) * i;
     int myCos = cos_t(angle) * i;
-    SEGMENT.setPixelColorXY(colsCenter + mySin, rowsCenter + myCos, ColorFromPaletteRedirect(SEGPALETTE, (i * 20) + t_20, 255, LINEARBLEND));
-    if (SEGMENT.check1) SEGMENT.setPixelColorXY(colsCenter + myCos, rowsCenter + mySin, ColorFromPaletteRedirect(SEGPALETTE, (i * 20) + t_20, 255, LINEARBLEND));
+    SEGMENT.setPixelColorXY(colsCenter + mySin, rowsCenter + myCos, ColorFromPalette_wled(SEGPALETTE, (i * 20) + t_20, 255, LINEARBLEND));
+    if (SEGMENT.check1) SEGMENT.setPixelColorXY(colsCenter + myCos, rowsCenter + mySin, ColorFromPalette_wled(SEGPALETTE, (i * 20) + t_20, 255, LINEARBLEND));
   }
   SEGMENT.blur(SEGMENT.intensity>>(3 - SEGMENT.check2), SEGMENT.check2);
 
@@ -21513,7 +21558,7 @@ static const char PM_EFFECT_DESCRI__2D__DRIFT[] PROGMEM =
  *   Notes
  *   • Initializes to black on first call.
  *   • Requires a 2D matrix segment (returns EFFECT_DEFAULT if not 2D).
- *   • Uses mPalette::ColorFromPalette16-compatible ColorFromPaletteRedirect helper.
+ *   • Uses mPalette::ColorFromPalette16-compatible ColorFromPalette_wled helper.
  *
  * @return      : FRAMETIME
  * @description : firenoise2d. By Andrew Tuline. Yet another short routine.
@@ -21542,7 +21587,7 @@ void mAnimatorLight::EffectAnim__2D__FireNoise()
   for (int j=0; j < cols; j++) {
     for (int i=0; i < rows; i++) {
       indexx = perlin8(j*yscale*rows/255, i*xscale+effect_start_time/4);                                               // We're moving along our Perlin map.
-      SEGMENT.setPixelColorXY(j, i, ColorFromPaletteRedirect(pal, min(i*indexx/11, 225U), i*255/rows, LINEARBLEND));   // With that value, look up the 8 bit colour palette value and assign it to the current LED.    
+      SEGMENT.setPixelColorXY(j, i, ColorFromPalette_wled(pal, min(i*indexx/11, 225U), i*255/rows, LINEARBLEND));   // With that value, look up the 8 bit colour palette value and assign it to the current LED.    
     } // for i
   } // for j
 
@@ -21601,7 +21646,7 @@ void mAnimatorLight::EffectAnim__2D__Frizzles()
   for (size_t i = 8; i > 0; i--) {
     SEGMENT.addPixelColorXY(beatsin8_t(SEGMENT.speed/8 + i, 0, cols - 1),
                             beatsin8_t(SEGMENT.intensity/8 - i, 0, rows - 1),
-                            ColorFromPaletteRedirect(SEGPALETTE, beatsin8_t(12, 0, 255), 255, LINEARBLEND));
+                            ColorFromPalette_wled(SEGPALETTE, beatsin8_t(12, 0, 255), 255, LINEARBLEND));
   }
   SEGMENT.blur(SEGMENT.custom1 >> (3 + SEGMENT.check1), SEGMENT.check1);
   
@@ -22369,7 +22414,7 @@ void mAnimatorLight::EffectAnim__2D__Noise()
   for (int y = 0; y < rows; y++) {
     for (int x = 0; x < cols; x++) {
       uint8_t pixelHue8 = perlin8(x * scale, y * scale, effect_start_time / (16 - SEGMENT.speed/16));
-      SEGMENT.setPixelColorXY(x, y, ColorFromPaletteRedirect(SEGPALETTE, pixelHue8));
+      SEGMENT.setPixelColorXY(x, y, ColorFromPalette_wled(SEGPALETTE, pixelHue8));
     }
   }
 
@@ -22447,7 +22492,7 @@ void mAnimatorLight::EffectAnim__2D__PlasmaBall()
                                     (cols - cx == 0) ||
                                     (cols - 1 - cx == 0) ||
                                     ((rows - cy == 0) ||
-                                    (rows - 1 - cy == 0)) ? ColorFromPaletteRedirect(SEGPALETTE, beat8(5), thisVal, LINEARBLEND) : CRGB::Black);
+                                    (rows - 1 - cy == 0)) ? ColorFromPalette_wled(SEGPALETTE, beat8(5), thisVal, LINEARBLEND) : CRGB::Black);
     }
   }
   SEGMENT.blur(SEGMENT.custom2>>5);
@@ -22591,7 +22636,7 @@ void mAnimatorLight::EffectAnim__2D__Pulser()
   uint32_t a = effect_start_time / (18 - SEGMENT.speed / 16);
   int x = (a / 14) % cols;
   int y = map((sin8_t(a * 5) + sin8_t(a * 4) + sin8_t(a * 2)), 0, 765, rows-1, 0);
-  SEGMENT.setPixelColorXY(x, y, ColorFromPaletteRedirect(SEGPALETTE, map(y, 0, rows-1, 0, 255), 255, LINEARBLEND));
+  SEGMENT.setPixelColorXY(x, y, ColorFromPalette_wled(SEGPALETTE, map(y, 0, rows-1, 0, 255), 255, LINEARBLEND));
 
   SEGMENT.blur(SEGMENT.intensity>>4);
 
@@ -22671,7 +22716,7 @@ void mAnimatorLight::EffectAnim__2D__SinDots()
   for (int i = 0; i < 13; i++) {
     int x = sin8_t(t1 + i * SEGMENT.intensity/8)*(cols-1)/255;  // max index now 255x15/255=15!
     int y = sin8_t(t2 + i * SEGMENT.intensity/8)*(rows-1)/255;  // max index now 255x15/255=15!
-    SEGMENT.setPixelColorXY(x, y, ColorFromPaletteRedirect(SEGPALETTE, i * 255 / 13, 255, LINEARBLEND));
+    SEGMENT.setPixelColorXY(x, y, ColorFromPalette_wled(SEGPALETTE, i * 255 / 13, 255, LINEARBLEND));
   }
   SEGMENT.blur(SEGMENT.custom2 >> (3 + SEGMENT.check1), SEGMENT.check1);
 
@@ -22715,7 +22760,7 @@ static const char PM_EFFECT_DESCRI__2D__SIN_DOTS[] PROGMEM =
  *   • C3: blur amount
  *
  *   Notes
- *   • Palette-driven (ColorFromPaletteRedirect), additive rendering for brighter crossings.
+ *   • Palette-driven (ColorFromPalette_wled), additive rendering for brighter crossings.
  *   • Border logic clamps swarm movement inward (kBorderWidth) to avoid edge clipping.
  *   • Requires a 2D segment; returns EFFECT_DEFAULT if not 2D.
  * @description : By: Mark Kriegsman. https://gist.github.com/kriegsman/368b316c55221134b160. Modifed by: Andrew Tuline
@@ -22741,9 +22786,9 @@ void mAnimatorLight::EffectAnim__2D__SqauredSwirl()
   int n = beatsin8_t(15, kBorderWidth, rows-kBorderWidth);
   int p = beatsin8_t(20, kBorderWidth, rows-kBorderWidth);
 
-  SEGMENT.addPixelColorXY(i, m, ColorFromPaletteRedirect(SEGPALETTE, effect_start_time/29, 255, LINEARBLEND));
-  SEGMENT.addPixelColorXY(j, n, ColorFromPaletteRedirect(SEGPALETTE, effect_start_time/41, 255, LINEARBLEND));
-  SEGMENT.addPixelColorXY(k, p, ColorFromPaletteRedirect(SEGPALETTE, effect_start_time/73, 255, LINEARBLEND));
+  SEGMENT.addPixelColorXY(i, m, ColorFromPalette_wled(SEGPALETTE, effect_start_time/29, 255, LINEARBLEND));
+  SEGMENT.addPixelColorXY(j, n, ColorFromPalette_wled(SEGPALETTE, effect_start_time/41, 255, LINEARBLEND));
+  SEGMENT.addPixelColorXY(k, p, ColorFromPalette_wled(SEGPALETTE, effect_start_time/73, 255, LINEARBLEND));
 
   
 }
@@ -22863,7 +22908,7 @@ static const char PM_EFFECT_DESCRI__2D__SUN_RADIATION[] PROGMEM =
  *   • C3: Sharpness (0–3): narrows banding by exponentiating brightness
  *
  *   Notes
- *   • Palette-driven via ColorFromPaletteRedirect (SEGPALETTE).
+ *   • Palette-driven via ColorFromPalette_wled (SEGPALETTE).
  *   • Safe on any 2D matrix; returns EFFECT_DEFAULT if not 2D.
  * @description : By: Elliott Kember  https://editor.soulmatelights.com/gallery/3-tartan , Modified by: Andrew Tuline
  * @note : Converted from WLED Effects "mode_2Dtartan"
@@ -22891,12 +22936,12 @@ void mAnimatorLight::EffectAnim__2D__Tartan()
       intensity = bri = sin8_t(x * SEGMENT.speed/2 + offsetX);
       for (int i=0; i<sharpness; i++) intensity *= bri;
       intensity >>= 8*sharpness;
-      SEGMENT.setPixelColorXY(x, y, ColorFromPaletteRedirect(SEGPALETTE, hue, intensity, LINEARBLEND));
+      SEGMENT.setPixelColorXY(x, y, ColorFromPalette_wled(SEGPALETTE, hue, intensity, LINEARBLEND));
       hue = y * 3 + offsetX;
       intensity = bri = sin8_t(y * SEGMENT.intensity/2 + offsetY);
       for (int i=0; i<sharpness; i++) intensity *= bri;
       intensity >>= 8*sharpness;
-      SEGMENT.addPixelColorXY(x, y, ColorFromPaletteRedirect(SEGPALETTE, hue, intensity, LINEARBLEND));
+      SEGMENT.addPixelColorXY(x, y, ColorFromPalette_wled(SEGPALETTE, hue, intensity, LINEARBLEND));
     }
   }
 
@@ -22938,7 +22983,7 @@ static const char PM_EFFECT_DESCRI__2D__TARTAN[] PROGMEM =
  *   • CB1: smear (enable spatial blur with stronger effect on small matrices)
  *
  *   Notes
- *   • Palette-driven via ColorFromPaletteRedirect (SEGPALETTE).
+ *   • Palette-driven via ColorFromPalette_wled (SEGPALETTE).
  *   • Uses SEGMENT.move() to scroll the entire buffer, then re-plots ships on top.
  *   • Requires a 2D matrix; returns EFFECT_DEFAULT if not 2D.
  * @description : Space ships by stepko (c)05.02.21 [https://editor.soulmatelights.com/gallery/639-space-ships], adapted by Blaz Kristan (AKA blazoncek)
@@ -23145,7 +23190,7 @@ static const char PM_EFFECT_DESCRI__2D__CRAZYBEES[] PROGMEM =
  *       • If a lighter’s lifetime expires or it exits bounds, it is “reseeded” at the head with a
  *         small angle offset and time=0.
  *       • Else it advances along its angle, and we draw it with sub-pixel blending:
- *           SEGMENT.wu_pixel(x*256/10, y*256/10, ColorFromPaletteRedirect(...))
+ *           SEGMENT.wu_pixel(x*256/10, y*256/10, ColorFromPalette_wled(...))
  *   - The head position wraps around edges.
  *   - Scene is faded each frame (fadeToBlackBy), then trails are drawn, then a small blur can be
  *     applied (controlled by IX) to soften the look.
@@ -23241,7 +23286,7 @@ void mAnimatorLight::EffectAnim__2D__GhostRider()
         lighter->lightersPosX[i] += -7 * sin_t(radians(lighter->Angle[i]));
         lighter->lightersPosY[i] += -7 * cos_t(radians(lighter->Angle[i]));
       }
-      SEGMENT.wu_pixel(lighter->lightersPosX[i] * 256 / 10, lighter->lightersPosY[i] * 256 / 10, ColorFromPaletteRedirect(SEGPALETTE, (256 - lighter->time[i])));
+      SEGMENT.wu_pixel(lighter->lightersPosX[i] * 256 / 10, lighter->lightersPosY[i] * 256 / 10, ColorFromPalette_wled(SEGPALETTE, (256 - lighter->time[i])));
     }
     SEGMENT.blur(SEGMENT.intensity>>3);
   }
@@ -25546,7 +25591,7 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_MID_NOISE[] PROGMEM =
  *     • volumeSmth directly scales pixel brightness (louder = brighter fire). No FFT binning is used here.
  *
  *   Implementation notes:
- *     • Uses ColorFromPaletteRedirect with LINEARBLEND on a fixed fire palette (not the global SEGPALETTE).
+ *     • Uses ColorFromPalette_wled with LINEARBLEND on a fixed fire palette (not the global SEGPALETTE).
  *     • Initialize to BLACK on first call; per-frame compute per-pixel noise, taper, then palette lookup with volume-based brightness.
  *
  * @note : Converted from WLED Effects "mode_noisefire"
@@ -26639,7 +26684,7 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__1D__FFT_WATERFALL[] PROGMEM =
  *      Derive mirrored companions (ni = cols-1-i, nj = rows-1-j) and cross-pairs (j,i) / (nj,ni).
  *   4) Audio drive: Read smoothed volume (volumeSmth) and raw amplitude (volumeRaw). Use volumeSmth to offset palette index for
  *      subtle hue breathing; scale brightness by (volumeRaw * IX / 64) so louder sound produces brighter strokes.
- *   5) Paint: Add six pixels per frame at the computed coordinates with ColorFromPaletteRedirect(SEGPALETTE, time+audioOffset, brightness, LINEARBLEND).
+ *   5) Paint: Add six pixels per frame at the computed coordinates with ColorFromPalette_wled(SEGPALETTE, time+audioOffset, brightness, LINEARBLEND).
  *
  * @controls    :
  *   SX (Speed)     : Orbit rate; higher values quicken the swirl motion.
@@ -26678,12 +26723,12 @@ void mAnimatorLight::EffectAnim__AudioReactive__2D__Swirl()
   float volumeSmth  = *(float*)   um_data->u_data[0]; //ewowi: use instead of sampleAvg???
   int   volumeRaw   = *(int16_t*) um_data->u_data[1];
 
-  SEGMENT.addPixelColorXY( i, j, ColorFromPaletteRedirect(SEGPALETTE, (effect_start_time / 11 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 11, 200, 255);
-  SEGMENT.addPixelColorXY( j, i, ColorFromPaletteRedirect(SEGPALETTE, (effect_start_time / 13 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 13, 200, 255);
-  SEGMENT.addPixelColorXY(ni,nj, ColorFromPaletteRedirect(SEGPALETTE, (effect_start_time / 17 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 17, 200, 255);
-  SEGMENT.addPixelColorXY(nj,ni, ColorFromPaletteRedirect(SEGPALETTE, (effect_start_time / 29 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 29, 200, 255);
-  SEGMENT.addPixelColorXY( i,nj, ColorFromPaletteRedirect(SEGPALETTE, (effect_start_time / 37 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 37, 200, 255);
-  SEGMENT.addPixelColorXY(ni, j, ColorFromPaletteRedirect(SEGPALETTE, (effect_start_time / 41 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 41, 200, 255);
+  SEGMENT.addPixelColorXY( i, j, ColorFromPalette_wled(SEGPALETTE, (effect_start_time / 11 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 11, 200, 255);
+  SEGMENT.addPixelColorXY( j, i, ColorFromPalette_wled(SEGPALETTE, (effect_start_time / 13 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 13, 200, 255);
+  SEGMENT.addPixelColorXY(ni,nj, ColorFromPalette_wled(SEGPALETTE, (effect_start_time / 17 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 17, 200, 255);
+  SEGMENT.addPixelColorXY(nj,ni, ColorFromPalette_wled(SEGPALETTE, (effect_start_time / 29 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 29, 200, 255);
+  SEGMENT.addPixelColorXY( i,nj, ColorFromPalette_wled(SEGPALETTE, (effect_start_time / 37 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 37, 200, 255);
+  SEGMENT.addPixelColorXY(ni, j, ColorFromPalette_wled(SEGPALETTE, (effect_start_time / 41 + volumeSmth*4), volumeRaw * SEGMENT.intensity / 64, LINEARBLEND)); //CHSV( ms / 41, 200, 255);
 
   
 }
@@ -26756,8 +26801,8 @@ void mAnimatorLight::EffectAnim__AudioReactive__2D__Waverly()
     int thisMax = map(thisVal, 0, 512, 0, rows);
 
     for (int j = 0; j < thisMax; j++) {
-      SEGMENT.addPixelColorXY(i, j, ColorFromPaletteRedirect(SEGPALETTE, map(j, 0, thisMax, 250, 0), 255, LINEARBLEND));
-      SEGMENT.addPixelColorXY((cols - 1) - i, (rows - 1) - j, ColorFromPaletteRedirect(SEGPALETTE, map(j, 0, thisMax, 250, 0), 255, LINEARBLEND));
+      SEGMENT.addPixelColorXY(i, j, ColorFromPalette_wled(SEGPALETTE, map(j, 0, thisMax, 250, 0), 255, LINEARBLEND));
+      SEGMENT.addPixelColorXY((cols - 1) - i, (rows - 1) - j, ColorFromPalette_wled(SEGPALETTE, map(j, 0, thisMax, 250, 0), 255, LINEARBLEND));
     }
   }
   if (SEGMENT.check3) SEGMENT.blur(16, cols*rows < 100);

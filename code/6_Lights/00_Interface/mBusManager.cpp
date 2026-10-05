@@ -1258,7 +1258,7 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
   // mxconfig.driver = HUB75_I2S_CFG::FM6124;    // try this driver in case you panel stays dark, or when colors look too pastel
   // Other possible shiftreg drivers: HUB75_I2S_CFG::FM6126A, HUB75_I2S_CFG::ICN2038S, HUB75_I2S_CFG::MBI5124, HUB75_I2S_CFG::DP3246
 
-  // mxconfig.latch_blanking = 3;
+  mxconfig.latch_blanking = 4;
   // mxconfig.i2sspeed = HUB75_I2S_CFG::HZ_10M;  // experimental - 5MHZ should be enugh, but colours looks slightly better at 10MHz
   // mxconfig.min_refresh_rate = 90;
   // mxconfig.min_refresh_rate = 120;
@@ -1330,10 +1330,13 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
   // specific ESP32-S3 pinouts
 
   #if defined(ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - PulSar ESP32-S3 HUB75 dev config");
-  // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
-  mxconfig.gpio = {11, 12, 10, 9, 13, 8, 18, 5, 17, 6, 4, 7, 15, 16};
-  mxconfig.driver = HUB75_I2S_CFG::FM6126A;
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - PulSar ESP32-S3 HUB75 dev config");
+    // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+    mxconfig.gpio = {11, 12, 10, 9, 13, 8, 18, 5, 17, 6, 4, 7, 15, 16};
+    mxconfig.driver = HUB75_I2S_CFG::ICN2038S;
+    mxconfig.clkphase = false;
+    mxconfig.latch_blanking = 1;
+    mxconfig.i2sspeed = HUB75_I2S_CFG::HZ_16M;
 
   #elif defined(MOONHUB_S3_PINOUT)
   DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - T7 S3, MOONHUB pinout");
@@ -1440,7 +1443,7 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
     DEBUGBUS_PRINTF("MatrixPanel_I2S_DMA = unsupported color order %u\n", bc.colorOrder);
   }
 
-  DEBUGBUS_PRINTF("MatrixPanel_I2S_DMA config - %ux%u length: %u, %d bits per pixel.\n", mxconfig.mx_width, mxconfig.mx_height, mxconfig.chain_length, 3 * mxconfig.getPixelColorDepthBits());
+  DEBUGBUS_PRINTF("MatrixPanel_I2S_DMA config - %ux%u length: %u, %d bits per pixel, driver %d\n", mxconfig.mx_width, mxconfig.mx_height, mxconfig.chain_length, 3 * mxconfig.getPixelColorDepthBits(), mxconfig.driver);
   DEBUGBUS_PRINTF("R1_PIN=%u, G1_PIN=%u, B1_PIN=%u, R2_PIN=%u, G2_PIN=%u, B2_PIN=%u, A_PIN=%u, B_PIN=%u, C_PIN=%u, D_PIN=%u, E_PIN=%u, LAT_PIN=%u, OE_PIN=%u, CLK_PIN=%u\n",
                 mxconfig.gpio.r1, mxconfig.gpio.g1, mxconfig.gpio.b1, mxconfig.gpio.r2, mxconfig.gpio.g2, mxconfig.gpio.b2,
                 mxconfig.gpio.a, mxconfig.gpio.b, mxconfig.gpio.c, mxconfig.gpio.d, mxconfig.gpio.e, mxconfig.gpio.lat, mxconfig.gpio.oe, mxconfig.gpio.clk);
@@ -1626,6 +1629,30 @@ void BusHub75Matrix::show(void) {
     }
     setBitArray(_ledsDirty, _len, false);  // buffer shown - reset all dirty bits
   }
+
+  static uint32_t lastDebug = 0;
+
+if (millis() - lastDebug >= 1000) {
+  lastDebug = millis();
+
+  uint32_t blackCount = 0;
+  uint32_t nonBlackCount = 0;
+
+  for (uint16_t i = 0; i < _len; i++) {
+    if (_ledBuffer[i].r == 0 && _ledBuffer[i].g == 0 && _ledBuffer[i].b == 0) blackCount++;
+    else nonBlackCount++;
+  }
+
+  DEBUGBUS_PRINTF("HUB75 BUFFER: black=%u nonblack=%u sample[%u]=%u,%u,%u\n",
+    blackCount,
+    nonBlackCount,
+    _len - 1,
+    _ledBuffer[_len - 1].r,
+    _ledBuffer[_len - 1].g,
+    _ledBuffer[_len - 1].b);
+}
+
+
 }
 
 

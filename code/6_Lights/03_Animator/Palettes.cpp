@@ -1475,7 +1475,7 @@ uint32_t IRAM_ATTR mAnimatorLight::GetPaletteColour_WithTemporaryLoad(
 
 
 
-//  uint32_t mAnimatorLight::ColorFromPaletteRedirect(const CRGBPalette16& /*pal_ignored*/, uint8_t index, uint8_t brightness, TBlendType blendType)
+//  uint32_t mAnimatorLight::ColorFromPalette_wled(const CRGBPalette16& /*pal_ignored*/, uint8_t index, uint8_t brightness, TBlendType blendType)
 //     {
 //       const uint16_t pal_id = SEGMENT.palette_id;
 
