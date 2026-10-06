@@ -507,86 +507,7 @@ class mPalette
 
      [[gnu::hot]] static uint32_t ColorFromPalette16(const CRGBPalette16 &pal, unsigned index, uint8_t brightness = (uint8_t)255U, TBlendType blendType = LINEARBLEND);
 
-    #ifdef ENABLE_FEATURE_PALETTE__RGBWW_COLOURS
     
-    uint8_t colour32_white_cold = 0; // R,G,B, W1, then W2 is temp per function call below, to allow one function does both
-    IRAM_ATTR [[gnu::hot]] RgbwwColor     GetColourFromPreloadedPaletteBuffer_RGBWW
-    (
-      uint16_t id = 0,
-      // Pass preloaded palette data buffer. If nullptr, and "id" does not match any preloaded palette, then it will force a reload of the palette data.
-      uint8_t* data = nullptr,
-      // In discrete mode, this index will automatically modulo and repeat the palette over infinite length (MAXU16). In Gradient mode, must be scaled in 0 to 255 range.
-      uint16_t desired_index = 0,
-      // If the palette is encoded, then this returns encoded value at [desired_index] point. NOTE: Only in discrete mode.
-      uint8_t* encoded_index = nullptr,
-      // Providing the index in range 0 to 255, this enabled will internally rescale the index to the segment length, so that the index is always in range 0 to segment_length-1
-      uint8_t  palette_index__format = 1,
-      // CRGBPalette defaults gradient (index 240 to 255) wraps to blend with colour as index 0. This rescales to limit to 240, hence, removes wrap around blending.
-      uint8_t  rescale_index_wrap_for_hardedge = 1,
-      // 0 = default, 1 = "Forced Discrete", 2 = "Forced Gradient"
-      uint8_t  force_palette_mode = 0, // flag_crgb_exact_colour = 0, // true: "CRGB exact colour", false: "U32 colour"
-      // Requesting preview: Live palettes must respond with preview for UI
-      bool flag_request_is_for_full_visual_output = false
-    );
-
-    // includes the same args are main function, so should not really exist? is this a subfunction, if so needs named that way
-    IRAM_ATTR [[gnu::hot]] RgbwwColor      SubGet_Encoded_Palette_Colour_RGBWW
-    (
-      uint8_t* palette_elements = nullptr,
-      uint16_t desired_index_from_palette = 0,
-      uint8_t encoded_colour_width = 0,
-      uint8_t colours_in_palette = 0,
-      PALETTE_ENCODING_DATA encoding = {0},
-      uint8_t* encoded_index = nullptr,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
-      bool     palette_index__format = 1, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
-      bool     flag_wrap_hard_edge = false,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      uint8_t  force_palette_mode = false,
-      bool     flag_forced_gradient = false
-    );
-    
-    /**
-     * HOT PATH – FORCE INLINE
-     *
-     * This function is intentionally defined `static inline` in the header and
-     * marked `always_inline` so the compiler can:
-     *   - Inline it at the call site (no call/return overhead)
-     *   - Eliminate repeated parameter passing in tight inner loops
-     *   - Enable constant-propagation of encoding flags
-     *
-     * This sits on the deepest palette read path and may be executed
-     * per-pixel, per-frame. Do NOT move to a .cpp unless performance
-     * has been re-verified.
-     */
-    static inline __attribute__((always_inline)) IRAM_ATTR
-    RgbwwColor mPalette::SubGet_Encoded_Colour_ReadBuffer_RGBWW(
-      const uint8_t* __restrict palette_buffer,
-      uint16_t pixel_position,
-      uint8_t* __restrict return_encoded_value,
-      const PALETTE_ENCODING_DATA encoding,
-      uint8_t encoded_colour_width
-    ) {
-      // Base byte index into packed palette
-      uint16_t idx = (uint16_t)(pixel_position * encoded_colour_width);
-
-      // Optional gradient byte at start of entry
-      if (encoding.index_gradient) {
-        if (return_encoded_value) {
-          *return_encoded_value = palette_buffer[idx];
-        }
-        ++idx;
-      }
-
-      // Read components (only touch bytes that exist for this encoding)
-      const uint8_t r  = encoding.red_enabled        ? palette_buffer[idx + 0] : 0;
-      const uint8_t g  = encoding.green_enabled      ? palette_buffer[idx + 1] : 0;
-      const uint8_t b  = encoding.blue_enabled       ? palette_buffer[idx + 2] : 0;
-      const uint8_t wc = encoding.white_cold_enabled ? palette_buffer[idx + 3] : 0;
-      const uint8_t ww = encoding.white_warm_enabled ? palette_buffer[idx + 4] : 0;
-
-      return RgbwwColor(r, g, b, wc, ww);
-    }
-
-    #else
     IRAM_ATTR [[gnu::hot]] uint32_t      SubGet_Encoded_Palette_Colour_U32
     (
       uint8_t* palette_elements = nullptr,
@@ -602,7 +523,7 @@ class mPalette
     );
 
     /**
-     * HOT PATH – FORCE INLINE
+     * HOT PATH – FORCE INLINE (ie replicates itself at the call site) to avoid call/return overhead and enable constant propagation of encoding flags.
      *
      * This function is intentionally defined `static inline` in the header and
      * marked `always_inline` so the compiler can:
@@ -636,7 +557,6 @@ class mPalette
 
       return RGBW32(r, g, b, wc);
     }
-    #endif
     
     // A wrapper can be used to the calls below work as is. The internals of both of these will use ifdefs to block them when not needed.
     IRAM_ATTR [[gnu::hot]] uint32_t       GetColourFromPreloadedPaletteBuffer_U32
