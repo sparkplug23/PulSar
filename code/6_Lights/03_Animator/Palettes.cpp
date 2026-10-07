@@ -748,8 +748,8 @@ if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE
     const uint16_t palette_adjusted_id_rel0 = pid - mPalette::PALETTELIST_DYNAMIC__COLOUR__ID_START;
     uint8_t* data_local = &mPaletteI->dynamic_palettes[palette_adjusted_id_rel0].data[0];
 
-    bool force_palette_mode = false;
-
+    uint8_t force_palette_mode = PALETTE_MODE__DEFAULT;
+    
     const uint32_t c32 = mPaletteI->SubGet_Encoded_Palette_Colour_U32(
       data_local,
       pal_index,
@@ -759,8 +759,7 @@ if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE
       nullptr,
       false,
       0,
-      force_palette_mode,
-      false
+      force_palette_mode
     );
 
     palette_loaded->solid_colour.colourRGBW = c32;
@@ -817,8 +816,7 @@ if ((pid >= mPalette::PALETTELIST_DYNAMIC__ELASPEDTIME__CRGBPALETTE16__RANDOMISE
         &dummy_enc,
         false,
         0,
-        PALETTE_MODE__FORCE_GRADIENT,
-        false
+        PALETTE_MODE__FORCE_GRADIENT
       );
 
       palette_loaded->CRGB16Palette16_Palette.data[i] = CRGB(R(c32), G(c32), B(c32));

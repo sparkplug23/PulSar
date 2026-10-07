@@ -518,8 +518,7 @@ class mPalette
       uint8_t* encoded_index = nullptr,  // Must be passed in as something other than 0, or else nullptr will not be checked inside properly
       uint8_t  palette_index__format = 1, // true(default):"desired_index_from_palette is exact pixel index", false:"desired_index_from_palette is scaled between 0 to 255, where (127/155 would be the center pixel)"
       bool     flag_wrap_hard_edge = false,        // true(default):"hard edge for wrapping wround, so last to first pixel (wrap) is blended", false: "hard edge, palette resets without blend on last/first pixels"
-      uint8_t  force_palette_mode = false,
-      bool     flag_forced_gradient = false
+      uint8_t  force_palette_mode = 0
     );
 
     /**

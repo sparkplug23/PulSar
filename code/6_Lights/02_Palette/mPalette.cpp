@@ -981,8 +981,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t mPalette::GetColourFromPreloadedPaletteBuffer_U3
       encoded_index,
       palette_index__format,
       rescale_index_wrap_for_hardedge,
-      force_palette_mode, // DEPRECIATE: was called override_default_encoding
-      false               // DEPRECIATE: was called flag_crgb_exact_colour = false (true: "CRGB exact colour", false: "U32 colour")
+      force_palette_mode
     );
   }
 
@@ -1012,8 +1011,7 @@ IRAM_ATTR [[gnu::hot]] uint32_t mPalette::GetColourFromPreloadedPaletteBuffer_U3
       encoded_index,
       palette_index__format,
       rescale_index_wrap_for_hardedge,
-      force_palette_mode,
-      false
+      force_palette_mode
     );
 
   }
@@ -1688,14 +1686,9 @@ IRAM_ATTR [[gnu::hot]] uint32_t mPalette::SubGet_Encoded_Palette_Colour_U32(
   uint8_t* encoded_value,              // Must be a valid address if you want encoded out; nullptr ok if not needed
   uint8_t  palette_index__format,      // PALETTE_INDEX__IS_255_RANGE / __IS_SEGLEN_RANGE / __IS_EXACT_COLOUR
   bool     flag_wrap_hard_edge,
-  uint8_t  force_palette_mode,         // PALETTE_MODE__FORCE_DEFAULT / __FORCE_DISCRETE / __FORCE_GRADIENT
-  bool     depreciated
+  uint8_t  force_palette_mode         // PALETTE_MODE__FORCE_DEFAULT / __FORCE_DISCRETE / __FORCE_GRADIENT
 ) {
   uint32_t colour;
-
-  if (depreciated) {
-    Serial.println("flag_force_gradient"); // legacy hook
-  }
 
   const bool is_forced_discrete = (force_palette_mode == PALETTE_MODE__FORCE_DISCRETE);
   const bool is_forced_gradient = (force_palette_mode == PALETTE_MODE__FORCE_GRADIENT);
