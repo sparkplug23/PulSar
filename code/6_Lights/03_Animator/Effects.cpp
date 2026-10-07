@@ -34081,6 +34081,10 @@ static const char PM_EFFECT_DESCRI__RAY_TRACING__COVERAGE[] PROGMEM =
 
 #endif  // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
 
+
+
+
+
 #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
 
 
@@ -34165,7 +34169,7 @@ struct RayTracingMobileRXState
   uint8_t object_count;
   uint8_t trail_head;
   uint8_t trail_count;
-  uint8_t movement_axis; // 0:none, 1:horizontal, 2:vertical
+  uint8_t movement_axis;
 
   RayTracingMobileRXRay rays[16];
   RayTracingMobileRXObject objects[12];
@@ -34184,25 +34188,37 @@ struct RayTracingMobileRXState
  * SUMMARY
  * ================================================================================================================================================================================================================
  *
- * Displays a fixed transmitter and a continuously moving receiver.
+ * Displays a fixed transmitter and continuously moving receiver in a simplified
+ * two-dimensional ray-tracing environment.
  *
- * The receiver moves between distant valid waypoints while a simplified two-dimensional ray tracer continuously determines
- * the shortest currently valid direct and reflected propagation paths between TX and RX.
+ * RX moves between valid waypoints while direct and reflected propagation paths
+ * between TX and RX are continuously recalculated.
  *
- * Reflected paths use the rectangular image method. Each image-space tile represents one persistent propagation-path identity.
+ * Reflections use the rectangular image method.
  *
- * The visual path system includes temporal stabilisation intended specifically to prevent rapid path appearance/disappearance
- * from producing flashes or strobing:
+ * The visual path system is deliberately stabilised to prevent rapid changes in
+ * path availability from appearing as colour flashes or strobing.
  *
- *   - each physical/image path has a deterministic palette colour;
- *   - path colour does not depend on current distance rank;
- *   - newly appearing paths fade in;
- *   - disappearing paths fade out;
- *   - a fading path which becomes valid again reverses its fade from its current brightness;
- *   - reappearing paths are never immediately reset to full brightness.
+ * Stabilisation uses two mechanisms:
  *
- * This means rapid path changes near object edges, reflection boundaries, TX or RX should produce smooth changes rather than
- * rapid full-brightness colour changes.
+ *   1. Temporal attack/release:
+ *
+ *        - newly appearing paths fade in;
+ *        - disappearing paths fade out;
+ *        - a path which reappears while fading resumes from its existing
+ *          brightness rather than immediately jumping back to full brightness.
+ *
+ *   2. Angular colour neighbourhoods:
+ *
+ *        - colour is based on departure direction from TX;
+ *        - nearby ray directions therefore use the same or neighbouring
+ *          palette colours;
+ *        - path rank does not determine colour;
+ *        - image-tile identity does not arbitrarily scramble colours.
+ *
+ * This means several rays which appear/disappear while travelling through a
+ * narrow angular region around TX should remain visually related rather than
+ * rapidly switching between unrelated colours.
  *
  *
  * ================================================================================================================================================================================================================
@@ -34213,180 +34229,163 @@ struct RayTracingMobileRXState
  *
  * Waypoints normally alternate between horizontal and vertical movement legs.
  *
- * The complete route from RX to a proposed waypoint is checked against the occupancy bitmap before the waypoint is accepted.
+ * The complete route from the current RX position to a proposed waypoint is
+ * checked against the object occupancy bitmap.
  *
- * If the preferred movement axis is unavailable, the alternate axis is attempted.
+ * If the preferred axis cannot find a valid route, the alternate axis is tried.
  *
- * If neither normal route can be found, an immediate one-pixel escape movement is attempted in the four cardinal directions.
+ * If both normal searches fail, a one-pixel cardinal escape movement is tried.
  *
- * RX is therefore permitted to remain stationary only when every available local route is blocked.
+ * SX controls receiver speed.
  *
- * SX controls receiver velocity.
+ * EP acts as the minimum target-update interval.
  *
- * Target updates occur approximately once per physical-pixel movement interval, subject to EP acting as the minimum update
- * interval.
- *
- * A segment transition occupies approximately 90 percent of the target-update interval to visually interpolate movement.
+ * A segment transition occupies approximately 90 percent of the update interval
+ * to smooth the visible RX and ray movement between calculated target positions.
  *
  *
  * ================================================================================================================================================================================================================
  * PROPAGATION PATHS
  * ================================================================================================================================================================================================================
  *
- * Propagation paths use the rectangular image method.
+ * Candidate paths are generated using the rectangular image method.
  *
- * Candidate image tiles are generated up to MAX_REFLECTION_ORDER.
+ * Reflection order:
  *
- * Reflection order is:
+ *   reflection_order = abs(tile_x) + abs(tile_y)
  *
- *   abs(tile_x) + abs(tile_y)
- *
- * The direct LOS path is:
+ * Direct LOS:
  *
  *   {0,0}
  *
- * Reflected paths use all other valid image tiles.
+ * Other image tiles represent reflected paths.
  *
- * Every candidate ray is sampled along its complete unfolded path. Each sample is folded back into the physical environment
- * and checked against the object occupancy bitmap.
+ * Each candidate path is sampled along its complete unfolded length.
  *
- * A candidate is rejected if any sampled position intersects an object.
+ * Every sample is folded back into the physical matrix environment and checked
+ * against the object occupancy bitmap.
  *
- * Valid candidates are sorted according to total geometric path distance.
+ * A path is rejected if any sample intersects an object.
  *
- * IX selects how many of the shortest valid paths are displayed, from 1 to MAX_ACTIVE_PATHS.
+ * Valid paths are sorted by total geometric path length.
  *
- *
- * ================================================================================================================================================================================================================
- * PATH IDENTITY AND COLOUR STABILITY
- * ================================================================================================================================================================================================================
- *
- * Path identity is defined by:
- *
- *   {image_tile_x, image_tile_y}
- *
- * rather than by:
- *
- *   - ray slot;
- *   - current path rank;
- *   - current path distance;
- *   - order in which candidates were discovered.
- *
- * A deterministic palette index is derived from the image-tile identity.
- *
- * Therefore the same propagation path always uses the same colour.
- *
- * Example:
- *
- *   { 0, 0 } -> one fixed colour
- *   { 1, 0 } -> one fixed colour
- *   {-1, 1 } -> one fixed colour
- *
- * If path {-1,1} changes from rank 3 to rank 5, disappears briefly, and later returns as rank 2, its colour remains unchanged.
- *
- * This prevents palette-colour recycling from producing large instantaneous colour flashes.
+ * IX selects the shortest 1..8 valid paths.
  *
  *
  * ================================================================================================================================================================================================================
- * PATH ATTACK / RELEASE FILTERING
+ * ANGULAR COLOUR MAPPING
  * ================================================================================================================================================================================================================
  *
- * Each ray has persistent brightness state.
+ * Ray colour is based on departure angle from TX.
  *
- * RAY_ATTACK_FADE_MS controls the fade-in time for a newly appearing path.
+ * This replaces the previous path-rank and image-tile colour assignment.
  *
- * RAY_DEATH_FADE_MS controls the fade-out time for a disappearing path.
+ * RAY_COLOUR_ANGLE_BIN_DEGREES defines the angular width which shares a colour.
  *
- * Selected paths move toward brightness 255.
+ * Example using 15 degree bins:
  *
- * Deselected paths move toward brightness 0.
+ *    0..14.999 degrees  -> one palette index
+ *   15..29.999 degrees  -> next palette index
+ *   30..44.999 degrees  -> next palette index
  *
- * Critically, a reappearing path retains its current brightness.
+ * Therefore rays separated by only a few degrees will normally have identical
+ * colours.
+ *
+ * This is important when moving RX by one pixel causes several closely spaced
+ * valid reflection paths to exchange selection order.
+ *
+ * Ray orientation is folded into 0..180 degrees so parallel/opposite image
+ * directions remain visually related and there is no discontinuity between
+ * 359 degrees and 0 degrees.
+ *
+ *
+ * ================================================================================================================================================================================================================
+ * PATH ATTACK / RELEASE
+ * ================================================================================================================================================================================================================
+ *
+ * Each ray stores persistent brightness.
+ *
+ * RAY_ATTACK_FADE_MS:
+ *
+ *   time for a selected path to move toward full brightness.
+ *
+ * RAY_DEATH_FADE_MS:
+ *
+ *   time for a deselected path to move toward zero brightness.
  *
  * Example:
  *
  *   path appears:
  *
- *       0 -> 50 -> 100 -> 150 -> 200 -> 255
+ *     0 -> 40 -> 80 -> 120 -> ... -> 255
  *
  *   path disappears:
  *
- *       255 -> 220 -> 185 -> 150 ...
+ *     255 -> 220 -> 180 -> 140 -> ...
  *
- *   path becomes valid again while currently at 150:
+ *   path becomes valid again while at 140:
  *
- *       150 -> 190 -> 230 -> 255
+ *     140 -> 180 -> 220 -> 255
  *
- * It does NOT perform:
+ * rather than:
  *
- *       150 -> 255
- *
- * This removes the previous attack-side brightness discontinuity which could cause strobing when path validity changed rapidly.
+ *     140 -> 255
  *
  *
  * ================================================================================================================================================================================================================
  * PATH SLOTS
  * ================================================================================================================================================================================================================
  *
- * Existing paths retain their ray slot whenever their image-tile identity still exists.
+ * Path slot identity remains based on image tile:
  *
- * New paths first use an unused/dead slot.
+ *   {image_tile_x,image_tile_y}
  *
- * If all slots are occupied, the dimmest currently dying path may be replaced.
+ * This allows a temporarily disappearing path to retain its brightness state
+ * while it fades.
  *
- * MAX_RAY_SLOTS is deliberately larger than MAX_ACTIVE_PATHS so fading old paths can coexist with newly selected paths.
+ * MAX_RAY_SLOTS is larger than MAX_ACTIVE_PATHS so dying paths can coexist with
+ * newly selected paths.
+ *
+ * If every slot is occupied, the dimmest non-selected path may be recycled.
  *
  *
  * ================================================================================================================================================================================================================
  * PATH LENGTH ROLL-OFF
  * ================================================================================================================================================================================================================
  *
- * O2 optionally reduces brightness along excess propagation distance.
+ * O2 optionally reduces ray brightness along excess propagation distance.
  *
- * The shortest selected path establishes rolloff_start_distance.
+ * The shortest selected path defines rolloff_start_distance.
  *
- * Longer paths retain full brightness until that distance and then progressively reduce toward
- * RAY_LENGTH_ROLLOFF_END_BRIGHTNESS.
- *
- * This is independent of the temporal attack/release fade.
+ * Longer paths remain at normal brightness until this distance, after which
+ * brightness progressively falls toward RAY_LENGTH_ROLLOFF_END_BRIGHTNESS.
  *
  *
  * ================================================================================================================================================================================================================
  * OBJECTS
  * ================================================================================================================================================================================================================
  *
- * O1 enables generated solid objects.
+ * O1 enables solid objects.
  *
- * O3 regenerates the complete object map every MAP_REGENERATION_INTERVAL_MS.
+ * O3 regenerates the complete object map every 60 seconds.
  *
- * Object shapes:
+ * Generated object shapes:
  *
  *   - square;
  *   - 2:3 rectangle;
  *   - thick L shape in four rotations.
  *
- * Object geometry scales from the smaller matrix dimension.
- *
- * Examples:
- *
- *   16-pixel minimum dimension -> base unit 2 pixels
- *   32-pixel minimum dimension -> base unit 4 pixels
- *
- * Object geometry is stored both:
- *
- *   - as object records for rendering;
- *   - as one packed occupancy bit per matrix pixel for collision testing.
+ * Objects are represented both as geometry records for rendering and as a
+ * packed one-bit-per-pixel occupancy map for collision tests.
  *
  *
  * ================================================================================================================================================================================================================
  * RX TRAIL
  * ================================================================================================================================================================================================================
  *
- * C2 controls the number of stored/displayed receiver trail points.
+ * C2 controls the number of receiver trail points.
  *
- * Trail samples are added only after RX moves a minimum distance so multiple nearly identical points are not continually stored.
- *
- * Older trail positions progressively reduce in brightness.
+ * Old trail positions progressively reduce in brightness.
  *
  *
  * ================================================================================================================================================================================================================
@@ -34395,9 +34394,10 @@ struct RayTracingMobileRXState
  *
  * C3 controls additional ray width.
  *
- * Width 0 uses a single sampled pixel.
+ * Width 0 uses single-pixel ray samples.
  *
- * Wider rays use bilinear/anti-aliased pixel drawing plus additional samples perpendicular to the propagation direction.
+ * Wider rays use anti-aliased centre samples plus additional samples
+ * perpendicular to the ray direction.
  *
  *
  * ================================================================================================================================================================================================================
@@ -34423,6 +34423,7 @@ struct RayTracingMobileRXState
  *   Red   : receiver and receiver trail.
  *
  ******************************************************************************************************************************************************************************************************************/
+
 void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 {
   constexpr uint8_t MAX_REFLECTION_ORDER = 4;
@@ -34914,20 +34915,18 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   };
 
   /*
-   * Ray colour is based on departure angle from TX.
+   * Ray colour follows the departure angle from TX.
    *
-   * Nearby angular paths therefore use identical or neighbouring palette
-   * colours instead of unrelated colours based on image-tile identity.
+   * Nearby ray directions therefore use the same or adjacent palette colours.
    *
-   * Orientation is folded into 0..180 degrees so opposite/parallel image
-   * directions are visually related and there is no 359/0 palette seam.
+   * Arduino already defines RAD_TO_DEG as a macro, so deliberately use a
+   * different local constant name here.
    */
   const auto path_palette_index = [&](const RayTracingMobileRXCandidate& candidate) -> uint8_t
   {
-    constexpr float PI_F = 3.14159265358979323846f;
-    constexpr float RAD_TO_DEG = 180.0f / PI_F;
+    constexpr float RADIANS_TO_DEGREES_F = 57.29577951308232f;
 
-    float angle_degrees = atan2f(candidate.direction_y, candidate.direction_x) * RAD_TO_DEG;
+    float angle_degrees = atan2f(candidate.direction_y, candidate.direction_x) * RADIANS_TO_DEGREES_F;
 
     if (angle_degrees < 0.0f) angle_degrees += 360.0f;
     if (angle_degrees >= 180.0f) angle_degrees -= 180.0f;
@@ -35001,7 +35000,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     }
 
     /*
-     * Sort by geometric path length.
+     * Sort valid paths by geometric path length.
      */
     for (uint8_t i = 0u; i < candidate_count; i++)
     {
@@ -35039,13 +35038,6 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
       ray.selected = true;
       ray.death_started_ms = 0u;
       ray.rolloff_start_distance = shortest_selected_distance;
-
-      /*
-       * Colour follows current TX departure-angle neighbourhood.
-       *
-       * This intentionally allows a persistent image-tile path's colour to
-       * drift gradually as its angle moves between angular colour sectors.
-       */
       ray.palette_index = path_palette_index(candidate);
 
       if (ray_is_new) ray.brightness = 0u;
@@ -35053,6 +35045,11 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 
     /*
      * Persistent attack/release.
+     *
+     * A selected path attacks toward 255.
+     * A deselected path releases toward 0.
+     *
+     * If a fading path is selected again it reverses from its present level.
      */
     for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
     {
@@ -35234,10 +35231,6 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     select_new_waypoint();
     add_trail_point();
 
-    /*
-     * Initialise paths using a nominal elapsed time so first-frame attack does
-     * not remain at exactly zero brightness.
-     */
     update_channel_paths(max<uint32_t>(effect_period_ms, 1u));
   }
   else if (object_enable_changed)
@@ -35363,7 +35356,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   }
 
   /*
-   * Fading/deselected paths are drawn first.
+   * Dying paths first.
    */
   for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
   {
@@ -35387,7 +35380,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   }
 
   /*
-   * Selected paths are drawn over fading paths.
+   * Selected paths over dying paths.
    */
   for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
   {
@@ -35411,15 +35404,62 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   }
 
   /*
-   * TX and RX are always drawn last and at full brightness.
+   * TX and RX remain full brightness and are drawn last.
    */
   SEGMENT.setPixelColorXY(tx_x_pixel, tx_y_pixel, RGBW32(0, 255, 0, 0));
   SEGMENT.setPixelColorXY(static_cast<int16_t>(roundf(state->receiver_x)), static_cast<int16_t>(roundf(state->receiver_y)), RGBW32(255, 0, 0, 0));
 }
-#endif  // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+
+
+static const char PM_EFFECT_CONFIG__RAY_TRACING__MOBILE_RX[] PROGMEM =
+"RT Mobile RX@"
+"RX Speed,Paths,Ray Brightness,RX Trail,Ray Width,Objects,Path Roll-off,New Map,,,"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=96,"
+"ix=96,"
+"c1=30,"
+"c2=0,"
+"c3=0,"
+"o1=1,"
+"o2=1,"
+"o3=1,"
+"paln=IceCream Floats+,"
+"pal2=1,"
+"s1=222222,"
+"ep=20"
+;
+
+
+static const char PM_EFFECT_DESCRI__RAY_TRACING__MOBILE_RX[] PROGMEM =
+"Moving receiver with shortest viable propagation paths.\n\r"
+"SX: Receiver movement speed\n\r"
+"IX: Number of shortest valid paths, 1 to 8\n\r"
+"C1: Ray brightness\n\r"
+"C2: Receiver trail length\n\r"
+"C3: Additional ray width\n\r"
+"O1: Enable solid Tetris-style objects\n\r"
+"O2: Enable excess-path brightness roll-off from 255 to 30\n\r"
+"O3: Regenerate the complete object map every 60 seconds\n\r"
+"Ray colours are grouped by TX departure-angle neighbourhood\n\r"
+"Nearby ray directions therefore use identical or neighbouring palette colours\n\r"
+"New paths fade in and disappearing paths fade out\n\r"
+"Reappearing paths resume from their current brightness rather than jumping to full brightness\n\r"
+"Frame transitions are always enabled and speed-derived\n\r"
+"Palette: Ray colours\n\r"
+"Palette2: Object colours\n\r"
+"Green: Transmitter\n\r"
+"Red: Moving receiver";
 
 
 #endif  // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+
+
 
 
 
