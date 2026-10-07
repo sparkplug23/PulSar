@@ -30578,7 +30578,6 @@ static const char PM_EFFECT_DESCRI__PARTICLE__1D__SPRINGY[] PROGMEM =
 #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
 
 
-#ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
 
 
 /**********************************************************************************************************************************************************************************
@@ -31618,297 +31617,421 @@ static const char PM_EFFECT_DESCRI__PARTICLE__1D__SPRINGY[] PROGMEM =
 
 
 // #endif  // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
-
 #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
 
 
-struct RayTracingLOSRay
+enum : uint8_t
+{
+  RT_MOBILE_OBJECT_SQUARE = 0,
+  RT_MOBILE_OBJECT_RECTANGLE,
+  RT_MOBILE_OBJECT_L
+};
+
+
+struct RayTracingMobileRXRay
 {
   float image_rx;
   float image_ry;
   float direction_x;
   float direction_y;
   float total_distance;
+  float rolloff_start_distance;
+
+  uint32_t death_started_ms;
+
   uint8_t palette_index;
+  uint8_t brightness;
+
   int8_t image_tile_x;
   int8_t image_tile_y;
+
+  bool alive;
+  bool selected;
 };
 
 
-struct RayTracingLOSCandidate
+struct RayTracingMobileRXCandidate
 {
+  float image_rx;
+  float image_ry;
+  float direction_x;
+  float direction_y;
+  float total_distance;
+
   int8_t image_tile_x;
   int8_t image_tile_y;
-  float total_distance;
 };
 
 
-struct RayTracingLOSState
+struct RayTracingMobileRXTrailPoint
+{
+  float x;
+  float y;
+};
+
+
+struct RayTracingMobileRXObject
+{
+  uint16_t origin_x;
+  uint16_t origin_y;
+
+  uint8_t shape;
+  uint8_t rotation;
+  uint8_t unit_size;
+  uint8_t square_size;
+  uint8_t palette_index;
+};
+
+
+struct RayTracingMobileRXState
 {
   uint16_t width;
   uint16_t height;
-  uint16_t receiver_y;
+  uint16_t occupancy_word_count;
 
-  uint8_t requested_ray_count;
-  uint8_t ray_count;
-  uint8_t random_paths;
-  uint8_t random_receiver_y;
-  uint8_t smooth_motion;
+  float receiver_x;
+  float receiver_y;
+  float waypoint_x;
+  float waypoint_y;
 
-  uint32_t previous_update_time_ms;
+  uint32_t previous_target_update_ms;
+  uint32_t map_created_time_ms;
 
-  float propagation_distance;
-  float longest_path_distance;
+  uint8_t object_enabled;
+  uint8_t object_count;
+  uint8_t trail_head;
+  uint8_t trail_count;
+  uint8_t movement_axis;
 
-  RayTracingLOSRay rays[8];
+  RayTracingMobileRXRay rays[16];
+  RayTracingMobileRXObject objects[12];
+  RayTracingMobileRXTrailPoint trail[48];
+
+  /*
+   * Packed occupancy words immediately follow this structure in SEGMENT.data.
+   */
 };
 
 
-void mAnimatorLight::EffectAnim__RayTracing__Shooting_And_Bouncing()
+/******************************************************************************************************************************************************************************************************************
+ * EFFECT: RT MOBILE RX
+ *
+ * SUMMARY
+ *
+ * Displays a fixed transmitter and continuously moving receiver in a simplified
+ * two-dimensional ray-tracing environment.
+ *
+ * RX moves between valid waypoints while direct and reflected propagation paths
+ * between TX and RX are continuously recalculated.
+ *
+ * Reflections use the rectangular image method.
+ *
+ *
+ * PATH COLOUR STABILITY
+ *
+ * Ray colour is deliberately persistent.
+ *
+ * A ray does NOT receive a new colour every time it becomes selected.
+ *
+ * Exact image-path identity:
+ *
+ *     {image_tile_x, image_tile_y}
+ *
+ * is retained for RAY_IDENTITY_HOLD_MS after a path disappears.
+ *
+ * During this period:
+ *
+ *   - the path may fade completely to black;
+ *   - its ray slot remains reserved;
+ *   - its palette index remains unchanged;
+ *   - if the exact path returns, the same slot and colour are reused.
+ *
+ * This separates:
+ *
+ *     visual brightness lifetime
+ *
+ * from:
+ *
+ *     path colour/identity lifetime.
+ *
+ *
+ * NEIGHBOUR COLOUR INHERITANCE
+ *
+ * A genuinely new path does not automatically receive an unrelated colour.
+ *
+ * Its departure angle from TX is compared with every currently retained ray,
+ * including:
+ *
+ *   - selected rays;
+ *   - fading rays;
+ *   - completely dark rays whose identity is still being held.
+ *
+ * If the new path is within RAY_COLOUR_NEIGHBOUR_DEGREES of an existing path,
+ * it inherits that path's exact palette index.
+ *
+ * Therefore closely spaced rays around TX form colour neighbourhoods.
+ *
+ * For example:
+ *
+ *     42 degrees -> colour A
+ *     44 degrees -> colour A
+ *     47 degrees -> colour A
+ *
+ * rather than unrelated colours.
+ *
+ *
+ * NEW COLOUR CREATION
+ *
+ * A new colour is created only when:
+ *
+ *   - the image path has no retained identity;
+ *   - no retained ray lies within the neighbour-angle threshold.
+ *
+ * The initial palette position is derived from departure angle.
+ *
+ * Once assigned, the colour is stored in the ray and is NOT recalculated as
+ * the RX subsequently moves.
+ *
+ *
+ * PATH SELECTION HYSTERESIS
+ *
+ * Candidate paths are still sorted by total geometric distance.
+ *
+ * However, paths selected on the preceding update receive retention preference
+ * when they remain within PATH_SELECTION_HYSTERESIS of the normal selection
+ * cutoff.
+ *
+ * With the default 5 percent hysteresis:
+ *
+ *   - a currently selected ray is not discarded merely because another path
+ *     becomes fractionally shorter;
+ *   - the competing path must be meaningfully better before it replaces the
+ *     retained path.
+ *
+ * This reduces rapid rank swapping near geometric boundaries.
+ *
+ *
+ * PATH ATTACK / RELEASE
+ *
+ * Selected paths attack toward brightness 255.
+ *
+ * Deselected paths release toward brightness 0.
+ *
+ * A path which reappears while fading reverses direction from its CURRENT
+ * brightness.
+ *
+ * It is never reset immediately to brightness 255.
+ *
+ *
+ * PATH IDENTITY HOLD
+ *
+ * RAY_DEATH_FADE_MS controls how quickly a disappearing ray becomes dark.
+ *
+ * RAY_IDENTITY_HOLD_MS controls how long its colour/path identity remains
+ * reserved.
+ *
+ * Example:
+ *
+ *     0 ms     path disappears
+ *     600 ms   ray has faded to black
+ *     3000 ms  identity may finally be released/recycled
+ *
+ * If the ray returns at 2200 ms, it resumes using its original slot and colour.
+ *
+ *
+ * SLOT EXHAUSTION
+ *
+ * MAX_RAY_SLOTS is larger than MAX_ACTIVE_PATHS so selected rays and retained
+ * historical rays can coexist.
+ *
+ * A slot whose identity is still within the hold period is NOT recycled merely
+ * because brightness has reached zero.
+ *
+ * If every slot is occupied by retained identities, a new path is temporarily
+ * omitted rather than forcibly recycling a colour and producing a visual flash.
+ *
+ *
+ * PROPAGATION
+ *
+ * Candidate image tiles are generated up to MAX_REFLECTION_ORDER.
+ *
+ * Reflection order:
+ *
+ *     abs(tile_x) + abs(tile_y)
+ *
+ * Direct LOS:
+ *
+ *     {0,0}
+ *
+ * Candidate paths are sampled through the folded physical environment.
+ *
+ * A candidate is rejected if any path sample intersects the occupancy bitmap.
+ *
+ *
+ * OBJECTS
+ *
+ * O1 enables generated solid objects.
+ *
+ * O3 regenerates the complete object map every 60 seconds.
+ *
+ * Object types:
+ *
+ *   - square;
+ *   - 2:3 rectangle;
+ *   - thick L shape.
+ *
+ *
+ * CONTROLS
+ *
+ *   SX : RX movement speed.
+ *   IX : number of shortest valid paths, 1 to 8.
+ *   C1 : ray brightness.
+ *   C2 : RX trail length.
+ *   C3 : additional ray width.
+ *
+ *   O1 : enable objects.
+ *   O2 : excess-path brightness roll-off.
+ *   O3 : regenerate object map every 60 seconds.
+ *
+ *   EP : minimum RX update interval.
+ *
+ *   Palette  : ray colours.
+ *   Palette2 : object colours.
+ *
+ *   Green : transmitter.
+ *   Red   : receiver.
+ *
+ ******************************************************************************************************************************************************************************************************************/
+
+void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 {
-  constexpr uint8_t MAX_REFLECTION_ORDER = 5;
-  constexpr uint16_t MAX_REFLECTION_CANDIDATES = ((MAX_REFLECTION_ORDER * 2u + 1u) * (MAX_REFLECTION_ORDER * 2u + 1u)) - 1u;
+  constexpr uint8_t MAX_REFLECTION_ORDER = 4;
+  constexpr uint8_t MAX_ACTIVE_PATHS = 8;
+  constexpr uint8_t MAX_RAY_SLOTS = 16;
+  constexpr uint8_t MAX_OBJECTS = 5;
+  constexpr uint8_t MAX_TRAIL_POINTS = 48;
+  constexpr uint8_t MAX_OBJECT_PLACEMENT_ATTEMPTS = 48;
+  constexpr uint8_t MAX_WAYPOINT_ATTEMPTS = 64;
+
+  constexpr uint8_t RX_MOVEMENT_AXIS_NONE = 0u;
+  constexpr uint8_t RX_MOVEMENT_AXIS_HORIZONTAL = 1u;
+  constexpr uint8_t RX_MOVEMENT_AXIS_VERTICAL = 2u;
+
+  constexpr uint16_t RAY_ATTACK_FADE_MS = 350u;
+  constexpr uint16_t RAY_DEATH_FADE_MS = 600u;
+  constexpr uint32_t RAY_IDENTITY_HOLD_MS = 3000u;
+
+  constexpr float RAY_COLOUR_NEIGHBOUR_DEGREES = 15.0f;
+  constexpr float PATH_SELECTION_HYSTERESIS = 0.05f;
+
+  constexpr uint32_t MAP_REGENERATION_INTERVAL_MS = 60000u;
+
+  constexpr uint8_t RAY_LENGTH_ROLLOFF_START_BRIGHTNESS = 255u;
+  constexpr uint8_t RAY_LENGTH_ROLLOFF_END_BRIGHTNESS = 30u;
+  constexpr float RAY_LENGTH_ROLLOFF_MINIMUM_EXCESS_DISTANCE = 0.50f;
+
+  constexpr float PATH_SAMPLE_SPACING = 0.25f;
+  constexpr float RX_ROUTE_SAMPLE_SPACING = 0.25f;
+
+  constexpr float RADIANS_TO_DEGREES_F = 57.29577951308232f;
+
+  constexpr uint16_t MAX_REFLECTION_CANDIDATES = 2u * MAX_REFLECTION_ORDER * (MAX_REFLECTION_ORDER + 1u);
 
   const uint16_t width = SEGMENT.virtualWidth();
   const uint16_t height = SEGMENT.virtualHeight();
 
   if (width == 0u || height == 0u || SEGMENT.palette_loaded == nullptr) return;
-  if (!SEGMENT.allocateData(sizeof(RayTracingLOSState))) return;
 
-  RayTracingLOSState* state = reinterpret_cast<RayTracingLOSState*>(SEGMENT.data);
+  const bool objects_enabled = SEGMENT.check1;
+  const bool ray_length_rolloff_enabled = SEGMENT.check2;
 
-  const uint8_t requested_ray_count = static_cast<uint8_t>(1u + (static_cast<uint16_t>(SEGMENT.intensity) * 7u) / 255u);
-  const uint8_t ray_brightness = SEGMENT.custom1;
-  const bool random_paths = SEGMENT.check1;
-  const bool random_receiver_y = SEGMENT.check2;
-  const bool smooth_motion = SEGMENT.check3;
+  if (objects_enabled && !SEGMENT.EnsurePalette2Loaded(SEGMENT.palette2_id)) return;
+
+  const uint32_t pixel_count = static_cast<uint32_t>(width) * static_cast<uint32_t>(height);
+  const uint16_t occupancy_word_count = static_cast<uint16_t>((pixel_count + 31u) / 32u);
+  const size_t required_data_size = sizeof(RayTracingMobileRXState) + static_cast<size_t>(occupancy_word_count) * sizeof(uint32_t);
+
+  if (!SEGMENT.allocateData(required_data_size)) return;
+
+  RayTracingMobileRXState* state = reinterpret_cast<RayTracingMobileRXState*>(SEGMENT.data);
+  uint32_t* occupancy = reinterpret_cast<uint32_t*>(reinterpret_cast<uint8_t*>(state) + sizeof(RayTracingMobileRXState));
+
+  const bool dimensions_changed = state->width != width || state->height != height || state->occupancy_word_count != occupancy_word_count;
+  const bool object_enable_changed = state->object_enabled != static_cast<uint8_t>(objects_enabled);
+  const bool initialise = SEGMENT.call == 0 || dimensions_changed;
+
+  if (initialise)
+  {
+    memset(state, 0, required_data_size);
+
+    state->width = width;
+    state->height = height;
+    state->occupancy_word_count = occupancy_word_count;
+    state->object_enabled = static_cast<uint8_t>(objects_enabled);
+  }
 
   const float environment_width = width > 1u ? static_cast<float>(width - 1u) : 1.0f;
   const float environment_height = height > 1u ? static_cast<float>(height - 1u) : 1.0f;
-  const float matrix_diagonal = sqrtf(environment_width * environment_width + environment_height * environment_height);
+  const uint16_t minimum_dimension = min<uint16_t>(width, height);
 
-  const uint16_t tx_x_pixel = static_cast<uint16_t>(roundf(environment_width * 0.20f));
+  const uint16_t tx_x_pixel = static_cast<uint16_t>(roundf(environment_width * 0.15f));
   const uint16_t tx_y_pixel = static_cast<uint16_t>(roundf(environment_height * 0.50f));
-  const uint16_t rx_x_pixel = static_cast<uint16_t>(roundf(environment_width * 0.80f));
 
   const float tx_x = static_cast<float>(tx_x_pixel);
   const float tx_y = static_cast<float>(tx_y_pixel);
-  const float rx_x = static_cast<float>(rx_x_pixel);
+
+  const uint8_t requested_path_count = static_cast<uint8_t>(1u + (static_cast<uint16_t>(SEGMENT.intensity) * (MAX_ACTIVE_PATHS - 1u)) / 255u);
+  const uint8_t ray_brightness = SEGMENT.custom1;
+  const uint8_t requested_trail_points = static_cast<uint8_t>((static_cast<uint16_t>(SEGMENT.custom2) * MAX_TRAIL_POINTS) / 255u);
+  const uint8_t width_control = min<uint8_t>(SEGMENT.custom3, 31u);
+
+  const uint8_t object_unit = constrain(static_cast<uint8_t>(minimum_dimension / 8u), 2u, 8u);
+  const float minimum_waypoint_distance = max<float>(5.0f, static_cast<float>(minimum_dimension) * 0.25f);
+
+  const float receiver_speed_pixels_per_second = 0.5f + (static_cast<float>(SEGMENT.speed) / 255.0f) * max<float>(4.0f, static_cast<float>(minimum_dimension) * 0.60f);
+
+  const uint32_t effect_period_ms = max<uint32_t>(SEGMENT.get_effect_period(), 1u);
+  uint32_t target_update_interval_ms = static_cast<uint32_t>(roundf(1000.0f / receiver_speed_pixels_per_second));
+
+  target_update_interval_ms = max<uint32_t>(target_update_interval_ms, effect_period_ms);
+
+  const uint32_t transition_duration_long = (target_update_interval_ms * 9u) / 10u;
+  const uint16_t transition_duration_ms = static_cast<uint16_t>(min<uint32_t>(transition_duration_long, 65535u));
+
+  const auto occupancy_pixel_index = [&](uint16_t x, uint16_t y) -> uint32_t
+  {
+    return static_cast<uint32_t>(y) * static_cast<uint32_t>(width) + static_cast<uint32_t>(x);
+  };
+
+  const auto occupancy_get = [&](int16_t x, int16_t y) -> bool
+  {
+    if (x < 0 || y < 0 || x >= static_cast<int16_t>(width) || y >= static_cast<int16_t>(height)) return true;
+
+    const uint32_t pixel_index = occupancy_pixel_index(static_cast<uint16_t>(x), static_cast<uint16_t>(y));
+
+    return (occupancy[pixel_index >> 5] & (1UL << (pixel_index & 31u))) != 0u;
+  };
+
+  const auto occupancy_set = [&](uint16_t x, uint16_t y)
+  {
+    if (x >= width || y >= height) return;
+
+    const uint32_t pixel_index = occupancy_pixel_index(x, y);
+
+    occupancy[pixel_index >> 5] |= 1UL << (pixel_index & 31u);
+  };
+
+  const auto occupancy_clear_all = [&]()
+  {
+    memset(occupancy, 0, static_cast<size_t>(occupancy_word_count) * sizeof(uint32_t));
+  };
 
   const auto receiver_image_coordinate = [](float receiver_coordinate, float environment_size, int8_t tile) -> float
   {
     const bool odd_tile = (abs(tile) & 0x01) != 0;
+
     return static_cast<float>(tile) * environment_size + (odd_tile ? environment_size - receiver_coordinate : receiver_coordinate);
   };
-
-  const auto initialise_ray = [&](RayTracingLOSRay& ray, float receiver_y, int8_t tile_x, int8_t tile_y, uint8_t palette_index)
-  {
-    ray.image_tile_x = tile_x;
-    ray.image_tile_y = tile_y;
-    ray.image_rx = receiver_image_coordinate(rx_x, environment_width, tile_x);
-    ray.image_ry = receiver_image_coordinate(receiver_y, environment_height, tile_y);
-
-    const float delta_x = ray.image_rx - tx_x;
-    const float delta_y = ray.image_ry - tx_y;
-
-    ray.total_distance = sqrtf(delta_x * delta_x + delta_y * delta_y);
-
-    if (ray.total_distance < 0.001f)
-    {
-      ray.direction_x = 1.0f;
-      ray.direction_y = 0.0f;
-      ray.total_distance = 0.001f;
-    }
-    else
-    {
-      ray.direction_x = delta_x / ray.total_distance;
-      ray.direction_y = delta_y / ray.total_distance;
-    }
-
-    ray.palette_index = palette_index;
-  };
-
-  const auto calculate_candidate = [&](float receiver_y, int8_t tile_x, int8_t tile_y) -> RayTracingLOSCandidate
-  {
-    RayTracingLOSCandidate candidate;
-
-    candidate.image_tile_x = tile_x;
-    candidate.image_tile_y = tile_y;
-
-    const float image_rx = receiver_image_coordinate(rx_x, environment_width, tile_x);
-    const float image_ry = receiver_image_coordinate(receiver_y, environment_height, tile_y);
-    const float delta_x = image_rx - tx_x;
-    const float delta_y = image_ry - tx_y;
-
-    candidate.total_distance = sqrtf(delta_x * delta_x + delta_y * delta_y);
-
-    return candidate;
-  };
-
-  const auto build_ray_set = [&](bool choose_random_paths, bool choose_random_receiver_y)
-  {
-    if (choose_random_receiver_y)
-    {
-      state->receiver_y = height > 2u ? static_cast<uint16_t>(1u + hw_random16(height - 2u)) : hw_random16(height);
-    }
-    else
-    {
-      state->receiver_y = tx_y_pixel;
-    }
-
-    const float receiver_y = static_cast<float>(state->receiver_y);
-
-    /*
-     * Ray 0 is always recalculated as the direct LOS path.
-     */
-    initialise_ray(state->rays[0], receiver_y, 0, 0, 0);
-
-    state->ray_count = 1u;
-    state->longest_path_distance = state->rays[0].total_distance;
-
-    RayTracingLOSCandidate candidates[MAX_REFLECTION_CANDIDATES];
-    uint16_t candidate_count = 0u;
-
-    /*
-     * Generate all receiver-image paths up to the hardcoded reflection order.
-     */
-    for (int8_t tile_y = -static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_y <= static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_y++)
-    {
-      for (int8_t tile_x = -static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_x <= static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_x++)
-      {
-        const uint8_t reflection_order = static_cast<uint8_t>(abs(tile_x) + abs(tile_y));
-
-        if (reflection_order == 0u || reflection_order > MAX_REFLECTION_ORDER) continue;
-
-        candidates[candidate_count++] = calculate_candidate(receiver_y, tile_x, tile_y);
-      }
-    }
-
-    if (choose_random_paths)
-    {
-      /*
-       * Random mode shuffles candidates for every new emission.
-       */
-      for (int16_t i = static_cast<int16_t>(candidate_count) - 1; i > 0; i--)
-      {
-        const uint16_t random_index = hw_random16(static_cast<uint16_t>(i + 1));
-        const RayTracingLOSCandidate temporary = candidates[i];
-
-        candidates[i] = candidates[random_index];
-        candidates[random_index] = temporary;
-      }
-    }
-    else
-    {
-      /*
-       * Fixed mode selects the shortest reflected paths.
-       */
-      for (uint16_t i = 0u; i < candidate_count; i++)
-      {
-        for (uint16_t j = i + 1u; j < candidate_count; j++)
-        {
-          if (candidates[j].total_distance >= candidates[i].total_distance) continue;
-
-          const RayTracingLOSCandidate temporary = candidates[i];
-
-          candidates[i] = candidates[j];
-          candidates[j] = temporary;
-        }
-      }
-    }
-
-    const uint8_t additional_paths_requested = requested_ray_count > 0u ? static_cast<uint8_t>(requested_ray_count - 1u) : 0u;
-    const uint8_t additional_paths_available = static_cast<uint8_t>(min<uint16_t>(additional_paths_requested, candidate_count));
-
-    for (uint8_t candidate_index = 0u; candidate_index < additional_paths_available; candidate_index++)
-    {
-      const uint8_t ray_index = static_cast<uint8_t>(candidate_index + 1u);
-      const uint8_t palette_index = requested_ray_count > 1u ? static_cast<uint8_t>((static_cast<uint16_t>(ray_index) * 255u) / static_cast<uint16_t>(requested_ray_count - 1u)) : 0u;
-
-      initialise_ray(state->rays[ray_index], receiver_y, candidates[candidate_index].image_tile_x, candidates[candidate_index].image_tile_y, palette_index);
-
-      state->ray_count++;
-
-      if (state->rays[ray_index].total_distance > state->longest_path_distance) state->longest_path_distance = state->rays[ray_index].total_distance;
-    }
-
-    for (uint8_t ray_index = state->ray_count; ray_index < 8u; ray_index++) state->rays[ray_index] = {};
-  };
-
-  const bool configuration_changed =
-    SEGMENT.call == 0 ||
-    state->width != width ||
-    state->height != height ||
-    state->requested_ray_count != requested_ray_count ||
-    state->random_paths != static_cast<uint8_t>(random_paths) ||
-    state->random_receiver_y != static_cast<uint8_t>(random_receiver_y) ||
-    state->smooth_motion != static_cast<uint8_t>(smooth_motion);
-
-  if (configuration_changed)
-  {
-    state->width = width;
-    state->height = height;
-    state->requested_ray_count = requested_ray_count;
-    state->random_paths = static_cast<uint8_t>(random_paths);
-    state->random_receiver_y = static_cast<uint8_t>(random_receiver_y);
-    state->smooth_motion = static_cast<uint8_t>(smooth_motion);
-    state->previous_update_time_ms = effect_start_time;
-    state->propagation_distance = 0.0f;
-
-    build_ray_set(random_paths, random_receiver_y);
-  }
-
-  /*
-   * SX defines physical propagation speed.
-   *
-   * SX=0 gives one pixel per second. Higher values increase the speed relative
-   * to the matrix diagonal.
-   */
-  const float ray_speed_pixels_per_second = 1.0f + (static_cast<float>(SEGMENT.speed) / 255.0f) * max<float>(8.0f, matrix_diagonal * 3.0f);
-
-  const uint32_t effect_period_ms = max<uint32_t>(SEGMENT.get_effect_period(), 1u);
-  uint32_t target_update_interval_ms = effect_period_ms;
-
-  if (smooth_motion)
-  {
-    /*
-     * One target frame represents one physical pixel of propagation.
-     */
-    target_update_interval_ms = static_cast<uint32_t>(roundf(1000.0f / ray_speed_pixels_per_second));
-    target_update_interval_ms = max<uint32_t>(target_update_interval_ms, effect_period_ms);
-  }
-
-  const uint32_t elapsed_ms = effect_start_time - state->previous_update_time_ms;
-
-  if (!configuration_changed && smooth_motion && elapsed_ms < target_update_interval_ms) return;
-
-  if (!configuration_changed)
-  {
-    if (smooth_motion)
-    {
-      state->propagation_distance += 1.0f;
-    }
-    else
-    {
-      state->propagation_distance += ray_speed_pixels_per_second * (static_cast<float>(elapsed_ms) / 1000.0f);
-    }
-  }
-
-  state->previous_update_time_ms = effect_start_time;
-
-  if (state->propagation_distance > state->longest_path_distance)
-  {
-    state->propagation_distance = 0.0f;
-
-    if (random_paths || random_receiver_y) build_ray_set(random_paths, random_receiver_y);
-  }
-
-  const bool retain_complete_path = SEGMENT.custom2 == 255u;
-  const float tail_length = retain_complete_path ? state->longest_path_distance : 0.75f + (static_cast<float>(SEGMENT.custom2) / 254.0f) * max<float>(1.0f, matrix_diagonal);
-
-  const uint8_t width_control = min<uint8_t>(SEGMENT.custom3, 31u);
-  const float ray_half_width = (static_cast<float>(width_control) / 31.0f) * 2.5f;
-  const uint8_t width_sample_count = width_control == 0u ? 0u : static_cast<uint8_t>(1u + (static_cast<uint16_t>(width_control) * 3u) / 31u);
 
   const auto fold_coordinate = [](float unfolded_coordinate, float environment_size) -> float
   {
@@ -31922,6 +32045,703 @@ void mAnimatorLight::EffectAnim__RayTracing__Shooting_And_Bouncing()
     return folded <= environment_size ? folded : period - folded;
   };
 
+  const auto ray_angle_degrees = [&](float direction_x, float direction_y) -> float
+  {
+    float angle_degrees = atan2f(direction_y, direction_x) * RADIANS_TO_DEGREES_F;
+
+    if (angle_degrees < 0.0f) angle_degrees += 360.0f;
+
+    return angle_degrees;
+  };
+
+  const auto angular_distance_degrees = [&](float angle_a, float angle_b) -> float
+  {
+    float difference = fabsf(angle_a - angle_b);
+
+    if (difference > 180.0f) difference = 360.0f - difference;
+
+    return difference;
+  };
+
+  const auto initial_palette_index_from_angle = [&](float angle_degrees) -> uint8_t
+  {
+    if (angle_degrees < 0.0f) angle_degrees += 360.0f;
+    if (angle_degrees >= 360.0f) angle_degrees = fmodf(angle_degrees, 360.0f);
+
+    return static_cast<uint8_t>(roundf((angle_degrees / 360.0f) * 255.0f));
+  };
+
+  const auto get_object_bounds = [](const RayTracingMobileRXObject& object, uint16_t& object_width, uint16_t& object_height)
+  {
+    switch (object.shape)
+    {
+      case RT_MOBILE_OBJECT_SQUARE:
+        object_width = object.square_size;
+        object_height = object.square_size;
+        break;
+
+      case RT_MOBILE_OBJECT_RECTANGLE:
+        object_width = object.unit_size;
+        object_height = static_cast<uint16_t>(object.unit_size + (object.unit_size + 1u) / 2u);
+
+        if ((object.rotation & 0x01u) != 0u)
+        {
+          const uint16_t temporary = object_width;
+          object_width = object_height;
+          object_height = temporary;
+        }
+
+        break;
+
+      default:
+        object_width = static_cast<uint16_t>(object.unit_size * 2u);
+        object_height = static_cast<uint16_t>(object.unit_size * 3u);
+
+        if ((object.rotation & 0x01u) != 0u)
+        {
+          const uint16_t temporary = object_width;
+          object_width = object_height;
+          object_height = temporary;
+        }
+
+        break;
+    }
+  };
+
+  const auto object_contains_local_pixel = [](const RayTracingMobileRXObject& object, uint16_t local_x, uint16_t local_y) -> bool
+  {
+    if (object.shape == RT_MOBILE_OBJECT_SQUARE) return local_x < object.square_size && local_y < object.square_size;
+
+    if (object.shape == RT_MOBILE_OBJECT_RECTANGLE)
+    {
+      const uint16_t narrow_side = object.unit_size;
+      const uint16_t long_side = static_cast<uint16_t>(object.unit_size + (object.unit_size + 1u) / 2u);
+
+      if ((object.rotation & 0x01u) == 0u) return local_x < narrow_side && local_y < long_side;
+
+      return local_x < long_side && local_y < narrow_side;
+    }
+
+    const uint16_t unit = object.unit_size;
+    const uint16_t short_side = static_cast<uint16_t>(unit * 2u);
+    const uint16_t long_side = static_cast<uint16_t>(unit * 3u);
+
+    switch (object.rotation & 0x03u)
+    {
+      case 0: return (local_x < unit && local_y < long_side) || (local_x < short_side && local_y >= long_side - unit);
+      case 1: return (local_y < unit && local_x < long_side) || (local_y < short_side && local_x >= long_side - unit);
+      case 2: return (local_x >= short_side - unit && local_y < long_side) || (local_x < short_side && local_y < unit);
+      default: return (local_y >= short_side - unit && local_x < long_side) || (local_y < short_side && local_x < unit);
+    }
+  };
+
+  const auto route_intersects_tx = [&](float start_x, float start_y, float end_x, float end_y) -> bool
+  {
+    constexpr float AXIS_EPSILON = 0.001f;
+
+    const bool horizontal_route = fabsf(end_y - start_y) <= AXIS_EPSILON;
+    const bool vertical_route = fabsf(end_x - start_x) <= AXIS_EPSILON;
+
+    if (horizontal_route && fabsf(start_y - tx_y) <= AXIS_EPSILON)
+    {
+      const float minimum_x = min<float>(start_x, end_x);
+      const float maximum_x = max<float>(start_x, end_x);
+
+      if (tx_x >= minimum_x && tx_x <= maximum_x) return true;
+    }
+
+    if (vertical_route && fabsf(start_x - tx_x) <= AXIS_EPSILON)
+    {
+      const float minimum_y = min<float>(start_y, end_y);
+      const float maximum_y = max<float>(start_y, end_y);
+
+      if (tx_y >= minimum_y && tx_y <= maximum_y) return true;
+    }
+
+    return false;
+  };
+
+  const auto route_is_clear = [&](float start_x, float start_y, float end_x, float end_y, float sample_spacing) -> bool
+  {
+    if (route_intersects_tx(start_x, start_y, end_x, end_y)) return false;
+
+    const float delta_x = end_x - start_x;
+    const float delta_y = end_y - start_y;
+    const float distance = sqrtf(delta_x * delta_x + delta_y * delta_y);
+
+    if (distance < 0.001f) return !occupancy_get(static_cast<int16_t>(roundf(end_x)), static_cast<int16_t>(roundf(end_y)));
+
+    const float direction_x = delta_x / distance;
+    const float direction_y = delta_y / distance;
+
+    for (float sample_distance = sample_spacing; sample_distance < distance; sample_distance += sample_spacing)
+    {
+      const int16_t sample_x = static_cast<int16_t>(roundf(start_x + direction_x * sample_distance));
+      const int16_t sample_y = static_cast<int16_t>(roundf(start_y + direction_y * sample_distance));
+
+      if (occupancy_get(sample_x, sample_y)) return false;
+    }
+
+    return !occupancy_get(static_cast<int16_t>(roundf(end_x)), static_cast<int16_t>(roundf(end_y)));
+  };
+
+  const auto create_object = [&](RayTracingMobileRXObject& object, uint8_t palette_index) -> bool
+  {
+    for (uint8_t attempt = 0u; attempt < MAX_OBJECT_PLACEMENT_ATTEMPTS; attempt++)
+    {
+      object.shape = static_cast<uint8_t>(hw_random16(3u));
+      object.rotation = static_cast<uint8_t>(hw_random16(4u));
+      object.unit_size = object_unit;
+      object.square_size = static_cast<uint8_t>(object_unit + hw_random16(static_cast<uint16_t>(object_unit + 1u)));
+      object.palette_index = palette_index;
+
+      uint16_t object_width = 0u;
+      uint16_t object_height = 0u;
+
+      get_object_bounds(object, object_width, object_height);
+
+      if (object_width == 0u || object_height == 0u || object_width >= width || object_height >= height) continue;
+
+      object.origin_x = hw_random16(static_cast<uint16_t>(width - object_width + 1u));
+      object.origin_y = hw_random16(static_cast<uint16_t>(height - object_height + 1u));
+
+      bool placement_valid = true;
+
+      const float clearance_distance = static_cast<float>(object_unit + 1u);
+      const float clearance_distance_squared = clearance_distance * clearance_distance;
+
+      for (uint16_t local_y = 0u; local_y < object_height && placement_valid; local_y++)
+      {
+        for (uint16_t local_x = 0u; local_x < object_width; local_x++)
+        {
+          if (!object_contains_local_pixel(object, local_x, local_y)) continue;
+
+          const uint16_t physical_x = static_cast<uint16_t>(object.origin_x + local_x);
+          const uint16_t physical_y = static_cast<uint16_t>(object.origin_y + local_y);
+
+          if (occupancy_get(physical_x, physical_y))
+          {
+            placement_valid = false;
+            break;
+          }
+
+          const float tx_delta_x = static_cast<float>(physical_x) - tx_x;
+          const float tx_delta_y = static_cast<float>(physical_y) - tx_y;
+          const float rx_delta_x = static_cast<float>(physical_x) - state->receiver_x;
+          const float rx_delta_y = static_cast<float>(physical_y) - state->receiver_y;
+
+          if (tx_delta_x * tx_delta_x + tx_delta_y * tx_delta_y <= clearance_distance_squared || rx_delta_x * rx_delta_x + rx_delta_y * rx_delta_y <= clearance_distance_squared)
+          {
+            placement_valid = false;
+            break;
+          }
+        }
+      }
+
+      if (!placement_valid) continue;
+
+      for (uint16_t local_y = 0u; local_y < object_height; local_y++)
+      {
+        for (uint16_t local_x = 0u; local_x < object_width; local_x++)
+        {
+          if (!object_contains_local_pixel(object, local_x, local_y)) continue;
+
+          occupancy_set(static_cast<uint16_t>(object.origin_x + local_x), static_cast<uint16_t>(object.origin_y + local_y));
+        }
+      }
+
+      return true;
+    }
+
+    return false;
+  };
+
+  const auto create_object_map = [&]()
+  {
+    occupancy_clear_all();
+
+    state->object_count = 0u;
+    state->object_enabled = static_cast<uint8_t>(objects_enabled);
+
+    if (!objects_enabled)
+    {
+      state->map_created_time_ms = effect_start_time;
+      return;
+    }
+
+    const uint8_t desired_object_count = constrain(static_cast<uint8_t>(pixel_count / 64u), 1u, MAX_OBJECTS);
+
+    for (uint8_t object_index = 0u; object_index < desired_object_count; object_index++)
+    {
+      RayTracingMobileRXObject candidate;
+
+      const uint8_t palette_index = desired_object_count > 1u ? static_cast<uint8_t>((static_cast<uint16_t>(object_index) * 255u) / static_cast<uint16_t>(desired_object_count - 1u)) : 0u;
+
+      if (!create_object(candidate, palette_index)) continue;
+
+      state->objects[state->object_count++] = candidate;
+
+      if (state->object_count >= MAX_OBJECTS) break;
+    }
+
+    state->map_created_time_ms = effect_start_time;
+  };
+
+  const auto select_new_waypoint = [&]() -> bool
+  {
+    const int16_t current_x = static_cast<int16_t>(roundf(state->receiver_x));
+    const int16_t current_y = static_cast<int16_t>(roundf(state->receiver_y));
+    const uint16_t minimum_leg_distance = static_cast<uint16_t>(ceilf(minimum_waypoint_distance));
+
+    const uint8_t preferred_axis = state->movement_axis == RX_MOVEMENT_AXIS_HORIZONTAL ? RX_MOVEMENT_AXIS_VERTICAL : state->movement_axis == RX_MOVEMENT_AXIS_VERTICAL ? RX_MOVEMENT_AXIS_HORIZONTAL : (hw_random16(2u) == 0u ? RX_MOVEMENT_AXIS_HORIZONTAL : RX_MOVEMENT_AXIS_VERTICAL);
+
+    const auto try_axis = [&](uint8_t axis, uint16_t required_distance, uint8_t attempts) -> bool
+    {
+      for (uint8_t attempt = 0u; attempt < attempts; attempt++)
+      {
+        int16_t candidate_x = current_x;
+        int16_t candidate_y = current_y;
+
+        if (axis == RX_MOVEMENT_AXIS_HORIZONTAL)
+        {
+          candidate_x = static_cast<int16_t>(hw_random16(width));
+
+          if (abs(candidate_x - current_x) < static_cast<int16_t>(required_distance)) continue;
+        }
+        else
+        {
+          candidate_y = static_cast<int16_t>(hw_random16(height));
+
+          if (abs(candidate_y - current_y) < static_cast<int16_t>(required_distance)) continue;
+        }
+
+        if (occupancy_get(candidate_x, candidate_y)) continue;
+
+        const float candidate_x_float = static_cast<float>(candidate_x);
+        const float candidate_y_float = static_cast<float>(candidate_y);
+
+        if (route_intersects_tx(state->receiver_x, state->receiver_y, candidate_x_float, candidate_y_float)) continue;
+        if (!route_is_clear(state->receiver_x, state->receiver_y, candidate_x_float, candidate_y_float, RX_ROUTE_SAMPLE_SPACING)) continue;
+
+        state->waypoint_x = candidate_x_float;
+        state->waypoint_y = candidate_y_float;
+        state->movement_axis = axis;
+
+        return true;
+      }
+
+      return false;
+    };
+
+    if (try_axis(preferred_axis, minimum_leg_distance, MAX_WAYPOINT_ATTEMPTS)) return true;
+
+    const uint8_t fallback_axis = preferred_axis == RX_MOVEMENT_AXIS_HORIZONTAL ? RX_MOVEMENT_AXIS_VERTICAL : RX_MOVEMENT_AXIS_HORIZONTAL;
+
+    if (try_axis(fallback_axis, minimum_leg_distance, MAX_WAYPOINT_ATTEMPTS)) return true;
+
+    const int8_t direction_x[4] = {1, 0, -1, 0};
+    const int8_t direction_y[4] = {0, 1, 0, -1};
+    const uint8_t first_direction = static_cast<uint8_t>(hw_random16(4u));
+
+    for (uint8_t offset = 0u; offset < 4u; offset++)
+    {
+      const uint8_t direction = static_cast<uint8_t>((first_direction + offset) & 0x03u);
+      const int16_t candidate_x = static_cast<int16_t>(current_x + direction_x[direction]);
+      const int16_t candidate_y = static_cast<int16_t>(current_y + direction_y[direction]);
+
+      if (candidate_x < 0 || candidate_y < 0 || candidate_x >= static_cast<int16_t>(width) || candidate_y >= static_cast<int16_t>(height)) continue;
+      if (occupancy_get(candidate_x, candidate_y)) continue;
+
+      const float candidate_x_float = static_cast<float>(candidate_x);
+      const float candidate_y_float = static_cast<float>(candidate_y);
+
+      if (route_intersects_tx(state->receiver_x, state->receiver_y, candidate_x_float, candidate_y_float)) continue;
+      if (!route_is_clear(state->receiver_x, state->receiver_y, candidate_x_float, candidate_y_float, RX_ROUTE_SAMPLE_SPACING)) continue;
+
+      state->waypoint_x = candidate_x_float;
+      state->waypoint_y = candidate_y_float;
+      state->movement_axis = direction_x[direction] != 0 ? RX_MOVEMENT_AXIS_HORIZONTAL : RX_MOVEMENT_AXIS_VERTICAL;
+
+      return true;
+    }
+
+    state->waypoint_x = state->receiver_x;
+    state->waypoint_y = state->receiver_y;
+
+    return false;
+  };
+
+  const auto initialise_candidate = [&](RayTracingMobileRXCandidate& candidate, int8_t tile_x, int8_t tile_y)
+  {
+    candidate.image_tile_x = tile_x;
+    candidate.image_tile_y = tile_y;
+
+    candidate.image_rx = receiver_image_coordinate(state->receiver_x, environment_width, tile_x);
+    candidate.image_ry = receiver_image_coordinate(state->receiver_y, environment_height, tile_y);
+
+    const float delta_x = candidate.image_rx - tx_x;
+    const float delta_y = candidate.image_ry - tx_y;
+
+    candidate.total_distance = sqrtf(delta_x * delta_x + delta_y * delta_y);
+
+    if (candidate.total_distance < 0.001f)
+    {
+      candidate.direction_x = 1.0f;
+      candidate.direction_y = 0.0f;
+      candidate.total_distance = 0.001f;
+    }
+    else
+    {
+      candidate.direction_x = delta_x / candidate.total_distance;
+      candidate.direction_y = delta_y / candidate.total_distance;
+    }
+  };
+
+  const auto candidate_is_clear = [&](const RayTracingMobileRXCandidate& candidate) -> bool
+  {
+    for (float distance = PATH_SAMPLE_SPACING; distance < candidate.total_distance - PATH_SAMPLE_SPACING; distance += PATH_SAMPLE_SPACING)
+    {
+      const float unfolded_x = tx_x + candidate.direction_x * distance;
+      const float unfolded_y = tx_y + candidate.direction_y * distance;
+
+      const int16_t physical_x = static_cast<int16_t>(roundf(fold_coordinate(unfolded_x, environment_width)));
+      const int16_t physical_y = static_cast<int16_t>(roundf(fold_coordinate(unfolded_y, environment_height)));
+
+      if (occupancy_get(physical_x, physical_y)) return false;
+    }
+
+    return true;
+  };
+
+  const auto copy_candidate_to_ray = [](RayTracingMobileRXRay& ray, const RayTracingMobileRXCandidate& candidate)
+  {
+    ray.image_rx = candidate.image_rx;
+    ray.image_ry = candidate.image_ry;
+    ray.direction_x = candidate.direction_x;
+    ray.direction_y = candidate.direction_y;
+    ray.total_distance = candidate.total_distance;
+    ray.image_tile_x = candidate.image_tile_x;
+    ray.image_tile_y = candidate.image_tile_y;
+  };
+
+  const auto find_ray_slot = [&](int8_t tile_x, int8_t tile_y) -> int8_t
+  {
+    for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
+    {
+      if (!state->rays[slot].alive) continue;
+      if (state->rays[slot].image_tile_x == tile_x && state->rays[slot].image_tile_y == tile_y) return static_cast<int8_t>(slot);
+    }
+
+    return -1;
+  };
+
+  const auto find_free_ray_slot = [&]() -> int8_t
+  {
+    for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
+    {
+      if (!state->rays[slot].alive) return static_cast<int8_t>(slot);
+    }
+
+    return -1;
+  };
+
+  const auto find_neighbour_palette_index = [&](const RayTracingMobileRXCandidate& candidate, uint8_t& palette_index) -> bool
+  {
+    const float candidate_angle = ray_angle_degrees(candidate.direction_x, candidate.direction_y);
+
+    float nearest_angle_difference = 361.0f;
+    int8_t nearest_slot = -1;
+
+    for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
+    {
+      const RayTracingMobileRXRay& ray = state->rays[slot];
+
+      if (!ray.alive) continue;
+
+      const float ray_angle = ray_angle_degrees(ray.direction_x, ray.direction_y);
+      const float angle_difference = angular_distance_degrees(candidate_angle, ray_angle);
+
+      if (angle_difference >= nearest_angle_difference) continue;
+
+      nearest_angle_difference = angle_difference;
+      nearest_slot = static_cast<int8_t>(slot);
+    }
+
+    if (nearest_slot < 0) return false;
+    if (nearest_angle_difference > RAY_COLOUR_NEIGHBOUR_DEGREES) return false;
+
+    palette_index = state->rays[nearest_slot].palette_index;
+
+    return true;
+  };
+
+  const auto update_channel_paths = [&](uint32_t elapsed_ms)
+  {
+    RayTracingMobileRXCandidate candidates[MAX_REFLECTION_CANDIDATES + 1u];
+    bool candidate_previously_selected[MAX_REFLECTION_CANDIDATES + 1u];
+    bool candidate_chosen[MAX_REFLECTION_CANDIDATES + 1u];
+
+    uint8_t selected_candidate_indices[MAX_ACTIVE_PATHS];
+
+    uint8_t candidate_count = 0u;
+    uint8_t final_selected_count = 0u;
+
+    /*
+     * Release path identities whose complete hold period has expired.
+     *
+     * Brightness reaching zero does NOT by itself release the slot.
+     */
+    for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
+    {
+      RayTracingMobileRXRay& ray = state->rays[slot];
+
+      if (!ray.alive) continue;
+      if (ray.death_started_ms == 0u) continue;
+
+      const uint32_t identity_elapsed_ms = effect_start_time - ray.death_started_ms;
+
+      if (identity_elapsed_ms < RAY_IDENTITY_HOLD_MS) continue;
+
+      ray.alive = false;
+      ray.selected = false;
+      ray.brightness = 0u;
+      ray.death_started_ms = 0u;
+    }
+
+    /*
+     * Generate all valid image candidates.
+     */
+    for (int8_t tile_y = -static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_y <= static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_y++)
+    {
+      for (int8_t tile_x = -static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_x <= static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_x++)
+      {
+        const uint8_t reflection_order = static_cast<uint8_t>(abs(tile_x) + abs(tile_y));
+
+        if (reflection_order > MAX_REFLECTION_ORDER) continue;
+
+        RayTracingMobileRXCandidate candidate;
+
+        initialise_candidate(candidate, tile_x, tile_y);
+
+        if (!candidate_is_clear(candidate)) continue;
+
+        candidates[candidate_count] = candidate;
+
+        const int8_t existing_slot = find_ray_slot(candidate.image_tile_x, candidate.image_tile_y);
+
+        candidate_previously_selected[candidate_count] = existing_slot >= 0 && state->rays[existing_slot].selected;
+        candidate_chosen[candidate_count] = false;
+
+        candidate_count++;
+
+        if (candidate_count >= MAX_REFLECTION_CANDIDATES + 1u) break;
+      }
+
+      if (candidate_count >= MAX_REFLECTION_CANDIDATES + 1u) break;
+    }
+
+    /*
+     * Sort candidates by total geometric path distance.
+     */
+    for (uint8_t i = 0u; i < candidate_count; i++)
+    {
+      for (uint8_t j = static_cast<uint8_t>(i + 1u); j < candidate_count; j++)
+      {
+        if (candidates[j].total_distance >= candidates[i].total_distance) continue;
+
+        const RayTracingMobileRXCandidate candidate_temporary = candidates[i];
+        candidates[i] = candidates[j];
+        candidates[j] = candidate_temporary;
+
+        const bool selected_temporary = candidate_previously_selected[i];
+        candidate_previously_selected[i] = candidate_previously_selected[j];
+        candidate_previously_selected[j] = selected_temporary;
+
+        const bool chosen_temporary = candidate_chosen[i];
+        candidate_chosen[i] = candidate_chosen[j];
+        candidate_chosen[j] = chosen_temporary;
+      }
+    }
+
+    const uint8_t requested_selected_count = min<uint8_t>(requested_path_count, candidate_count);
+
+    /*
+     * Determine the normal distance cutoff for the requested number of paths.
+     */
+    const float normal_cutoff_distance = requested_selected_count > 0u ? candidates[requested_selected_count - 1u].total_distance : 0.0f;
+    const float retained_cutoff_distance = normal_cutoff_distance * (1.0f + PATH_SELECTION_HYSTERESIS);
+
+    /*
+     * First retain previously selected candidates which remain within the
+     * hysteresis envelope.
+     */
+    for (uint8_t candidate_index = 0u; candidate_index < candidate_count && final_selected_count < requested_selected_count; candidate_index++)
+    {
+      if (!candidate_previously_selected[candidate_index]) continue;
+      if (candidates[candidate_index].total_distance > retained_cutoff_distance) continue;
+
+      selected_candidate_indices[final_selected_count++] = candidate_index;
+      candidate_chosen[candidate_index] = true;
+    }
+
+    /*
+     * Fill remaining places with the shortest candidates.
+     */
+    for (uint8_t candidate_index = 0u; candidate_index < candidate_count && final_selected_count < requested_selected_count; candidate_index++)
+    {
+      if (candidate_chosen[candidate_index]) continue;
+
+      selected_candidate_indices[final_selected_count++] = candidate_index;
+      candidate_chosen[candidate_index] = true;
+    }
+
+    /*
+     * Selection has now been decided. Clear selected state before writing the
+     * new selected set.
+     */
+    for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++) state->rays[slot].selected = false;
+
+    float shortest_selected_distance = 0.0f;
+
+    if (final_selected_count > 0u)
+    {
+      shortest_selected_distance = candidates[selected_candidate_indices[0]].total_distance;
+
+      for (uint8_t selected_index = 1u; selected_index < final_selected_count; selected_index++)
+      {
+        shortest_selected_distance = min<float>(shortest_selected_distance, candidates[selected_candidate_indices[selected_index]].total_distance);
+      }
+    }
+
+    /*
+     * Activate selected candidates.
+     */
+    for (uint8_t selected_index = 0u; selected_index < final_selected_count; selected_index++)
+    {
+      const RayTracingMobileRXCandidate& candidate = candidates[selected_candidate_indices[selected_index]];
+
+      int8_t slot = find_ray_slot(candidate.image_tile_x, candidate.image_tile_y);
+      const bool ray_is_new = slot < 0;
+
+      if (ray_is_new) slot = find_free_ray_slot();
+
+      /*
+       * Do not recycle a retained identity just to display a new candidate.
+       *
+       * Omitting this ray temporarily is visually safer than changing a held
+       * colour identity.
+       */
+      if (slot < 0) continue;
+
+      RayTracingMobileRXRay& ray = state->rays[slot];
+
+      uint8_t new_palette_index = ray.palette_index;
+
+      /*
+       * Palette assignment occurs ONLY when creating a genuinely new path.
+       *
+       * Existing rays never have their colour recalculated.
+       */
+      if (ray_is_new)
+      {
+        if (!find_neighbour_palette_index(candidate, new_palette_index))
+        {
+          const float candidate_angle = ray_angle_degrees(candidate.direction_x, candidate.direction_y);
+
+          new_palette_index = initial_palette_index_from_angle(candidate_angle);
+        }
+
+        ray.palette_index = new_palette_index;
+        ray.brightness = 0u;
+      }
+
+      copy_candidate_to_ray(ray, candidate);
+
+      ray.alive = true;
+      ray.selected = true;
+      ray.death_started_ms = 0u;
+      ray.rolloff_start_distance = shortest_selected_distance;
+    }
+
+    /*
+     * Attack selected rays and release deselected rays.
+     *
+     * A released ray remains alive after reaching brightness zero so its slot
+     * and colour identity can still be recovered during RAY_IDENTITY_HOLD_MS.
+     */
+    for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
+    {
+      RayTracingMobileRXRay& ray = state->rays[slot];
+
+      if (!ray.alive) continue;
+
+      if (ray.selected)
+      {
+        const uint32_t attack_amount = max<uint32_t>(1u, (elapsed_ms * 255u) / RAY_ATTACK_FADE_MS);
+        const uint32_t new_brightness = static_cast<uint32_t>(ray.brightness) + attack_amount;
+
+        ray.brightness = static_cast<uint8_t>(min<uint32_t>(new_brightness, 255u));
+
+        continue;
+      }
+
+      if (ray.death_started_ms == 0u) ray.death_started_ms = effect_start_time;
+
+      const uint32_t death_elapsed_ms = effect_start_time - ray.death_started_ms;
+
+      if (death_elapsed_ms >= RAY_DEATH_FADE_MS)
+      {
+        ray.brightness = 0u;
+      }
+      else
+      {
+        const uint32_t release_amount = max<uint32_t>(1u, (elapsed_ms * 255u) / RAY_DEATH_FADE_MS);
+
+        if (release_amount >= ray.brightness)
+        {
+          ray.brightness = 0u;
+        }
+        else
+        {
+          ray.brightness = static_cast<uint8_t>(static_cast<uint32_t>(ray.brightness) - release_amount);
+        }
+      }
+
+      if (death_elapsed_ms >= RAY_IDENTITY_HOLD_MS)
+      {
+        ray.alive = false;
+        ray.selected = false;
+        ray.brightness = 0u;
+        ray.death_started_ms = 0u;
+      }
+    }
+  };
+
+  const auto add_trail_point = [&]()
+  {
+    if (requested_trail_points == 0u)
+    {
+      state->trail_count = 0u;
+      return;
+    }
+
+    if (state->trail_count > 0u)
+    {
+      const uint8_t previous_index = static_cast<uint8_t>((state->trail_head + MAX_TRAIL_POINTS - 1u) % MAX_TRAIL_POINTS);
+
+      const float delta_x = state->receiver_x - state->trail[previous_index].x;
+      const float delta_y = state->receiver_y - state->trail[previous_index].y;
+
+      if (delta_x * delta_x + delta_y * delta_y < 0.20f) return;
+    }
+
+    state->trail[state->trail_head].x = state->receiver_x;
+    state->trail[state->trail_head].y = state->receiver_y;
+    state->trail_head = static_cast<uint8_t>((state->trail_head + 1u) % MAX_TRAIL_POINTS);
+
+    if (state->trail_count < MAX_TRAIL_POINTS) state->trail_count++;
+  };
+
   const auto draw_single_pixel = [&](float x, float y, uint32_t colour, uint8_t opacity)
   {
     if (opacity == 0u) return;
@@ -31932,6 +32752,7 @@ void mAnimatorLight::EffectAnim__RayTracing__Shooting_And_Bouncing()
     if (pixel_x < 0 || pixel_y < 0 || pixel_x >= static_cast<int16_t>(width) || pixel_y >= static_cast<int16_t>(height)) return;
 
     const uint32_t existing_colour = SEGMENT.getPixelColorXY(pixel_x, pixel_y);
+
     SEGMENT.setPixelColorXY(pixel_x, pixel_y, ColourBlend(existing_colour, colour, opacity));
   };
 
@@ -31953,8 +32774,21 @@ void mAnimatorLight::EffectAnim__RayTracing__Shooting_And_Bouncing()
       fraction_x * fraction_y
     };
 
-    const int16_t pixel_x[4] = {x0, static_cast<int16_t>(x0 + 1), x0, static_cast<int16_t>(x0 + 1)};
-    const int16_t pixel_y[4] = {y0, y0, static_cast<int16_t>(y0 + 1), static_cast<int16_t>(y0 + 1)};
+    const int16_t pixel_x[4] =
+    {
+      x0,
+      static_cast<int16_t>(x0 + 1),
+      x0,
+      static_cast<int16_t>(x0 + 1)
+    };
+
+    const int16_t pixel_y[4] =
+    {
+      y0,
+      y0,
+      static_cast<int16_t>(y0 + 1),
+      static_cast<int16_t>(y0 + 1)
+    };
 
     for (uint8_t sample = 0u; sample < 4u; sample++)
     {
@@ -31965,38 +32799,25 @@ void mAnimatorLight::EffectAnim__RayTracing__Shooting_And_Bouncing()
       if (sample_opacity == 0u) continue;
 
       const uint32_t existing_colour = SEGMENT.getPixelColorXY(pixel_x[sample], pixel_y[sample]);
+
       SEGMENT.setPixelColorXY(pixel_x[sample], pixel_y[sample], ColourBlend(existing_colour, colour, sample_opacity));
     }
   };
 
-  if (smooth_motion)
+  const auto draw_ray_path = [&](const RayTracingMobileRXRay& ray, uint32_t colour, uint8_t brightness)
   {
-    const uint32_t transition_duration_long = (target_update_interval_ms * 9u) / 10u;
-    const uint16_t transition_duration_ms = static_cast<uint16_t>(min<uint32_t>(transition_duration_long, 65535u));
+    if (!ray.alive || brightness == 0u) return;
 
-    SEGMENT.startTransition(transition_duration_ms, true);
-  }
+    const float excess_path_distance = ray.total_distance - ray.rolloff_start_distance;
+    const bool apply_length_rolloff = ray_length_rolloff_enabled && excess_path_distance >= RAY_LENGTH_ROLLOFF_MINIMUM_EXCESS_DISTANCE;
 
-  SEGMENT.fill(BLACK);
-
-  for (uint8_t ray_index = 0u; ray_index < state->ray_count; ray_index++)
-  {
-    const RayTracingLOSRay& ray = state->rays[ray_index];
-    const float visible_head = min<float>(state->propagation_distance, ray.total_distance);
-
-    if (visible_head <= 0.0f) continue;
-
-    const float visible_tail = retain_complete_path ? 0.0f : max<float>(0.0f, visible_head - tail_length);
-
-    const uint32_t palette_colour = SEGMENT.GetPaletteColour(ray.palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE);
-    const uint32_t ray_colour = ColourBlend(BLACK, palette_colour, ray_brightness);
-
-    constexpr float sample_spacing = 0.25f;
+    const float ray_half_width = (static_cast<float>(width_control) / 31.0f) * 2.5f;
+    const uint8_t width_sample_count = width_control == 0u ? 0u : static_cast<uint8_t>(1u + (static_cast<uint16_t>(width_control) * 3u) / 31u);
 
     const float perpendicular_x = -ray.direction_y;
     const float perpendicular_y = ray.direction_x;
 
-    for (float distance = visible_tail; distance <= visible_head; distance += sample_spacing)
+    for (float distance = 0.0f; distance <= ray.total_distance; distance += PATH_SAMPLE_SPACING)
     {
       const float unfolded_x = tx_x + ray.direction_x * distance;
       const float unfolded_y = tx_y + ray.direction_y * distance;
@@ -32004,51 +32825,245 @@ void mAnimatorLight::EffectAnim__RayTracing__Shooting_And_Bouncing()
       const float physical_x = fold_coordinate(unfolded_x, environment_width);
       const float physical_y = fold_coordinate(unfolded_y, environment_height);
 
-      uint8_t centre_brightness = 255u;
+      uint8_t distance_brightness = RAY_LENGTH_ROLLOFF_START_BRIGHTNESS;
 
-      if (!retain_complete_path)
+      if (apply_length_rolloff && distance > ray.rolloff_start_distance)
       {
-        const float tail_position = tail_length > 0.0f ? constrain((distance - visible_tail) / tail_length, 0.0f, 1.0f) : 1.0f;
-        centre_brightness = static_cast<uint8_t>(255.0f * tail_position * tail_position);
+        const float excess_progress = constrain((distance - ray.rolloff_start_distance) / excess_path_distance, 0.0f, 1.0f);
+
+        distance_brightness = static_cast<uint8_t>(
+          static_cast<float>(RAY_LENGTH_ROLLOFF_START_BRIGHTNESS) -
+          excess_progress *
+          static_cast<float>(RAY_LENGTH_ROLLOFF_START_BRIGHTNESS - RAY_LENGTH_ROLLOFF_END_BRIGHTNESS)
+        );
       }
+
+      const uint8_t sample_brightness = scale8(brightness, distance_brightness);
 
       if (width_control == 0u)
       {
-        draw_single_pixel(physical_x, physical_y, ray_colour, centre_brightness);
+        draw_single_pixel(physical_x, physical_y, colour, sample_brightness);
         continue;
       }
 
-      draw_anti_aliased_pixel(physical_x, physical_y, ray_colour, centre_brightness);
+      draw_anti_aliased_pixel(physical_x, physical_y, colour, sample_brightness);
 
       for (uint8_t width_sample = 1u; width_sample <= width_sample_count; width_sample++)
       {
         const float width_fraction = static_cast<float>(width_sample) / static_cast<float>(width_sample_count);
         const float side_offset = ray_half_width * width_fraction;
-        const float edge_envelope = 1.0f - width_fraction * 0.75f;
-        const uint8_t side_brightness = static_cast<uint8_t>(static_cast<float>(centre_brightness) * edge_envelope);
+        const uint8_t side_brightness = static_cast<uint8_t>(static_cast<float>(sample_brightness) * (1.0f - width_fraction * 0.75f));
 
         const float positive_x = fold_coordinate(unfolded_x + perpendicular_x * side_offset, environment_width);
         const float positive_y = fold_coordinate(unfolded_y + perpendicular_y * side_offset, environment_height);
+
         const float negative_x = fold_coordinate(unfolded_x - perpendicular_x * side_offset, environment_width);
         const float negative_y = fold_coordinate(unfolded_y - perpendicular_y * side_offset, environment_height);
 
-        draw_anti_aliased_pixel(positive_x, positive_y, ray_colour, side_brightness);
-        draw_anti_aliased_pixel(negative_x, negative_y, ray_colour, side_brightness);
+        draw_anti_aliased_pixel(positive_x, positive_y, colour, side_brightness);
+        draw_anti_aliased_pixel(negative_x, negative_y, colour, side_brightness);
+      }
+    }
+  };
+
+  if (initialise)
+  {
+    state->receiver_x = environment_width * 0.80f;
+    state->receiver_y = environment_height * 0.50f;
+
+    state->waypoint_x = state->receiver_x;
+    state->waypoint_y = state->receiver_y;
+
+    state->movement_axis = RX_MOVEMENT_AXIS_NONE;
+    state->previous_target_update_ms = effect_start_time;
+
+    create_object_map();
+    select_new_waypoint();
+    add_trail_point();
+
+    update_channel_paths(max<uint32_t>(effect_period_ms, 1u));
+  }
+  else if (object_enable_changed)
+  {
+    create_object_map();
+
+    if (!route_is_clear(state->receiver_x, state->receiver_y, state->waypoint_x, state->waypoint_y, RX_ROUTE_SAMPLE_SPACING)) select_new_waypoint();
+  }
+
+  const bool periodic_map_regeneration = objects_enabled && SEGMENT.check3 && effect_start_time - state->map_created_time_ms >= MAP_REGENERATION_INTERVAL_MS;
+
+  if (periodic_map_regeneration)
+  {
+    create_object_map();
+
+    if (!route_is_clear(state->receiver_x, state->receiver_y, state->waypoint_x, state->waypoint_y, RX_ROUTE_SAMPLE_SPACING)) select_new_waypoint();
+  }
+
+  const uint32_t elapsed_target_ms = effect_start_time - state->previous_target_update_ms;
+
+  if (!initialise && elapsed_target_ms < target_update_interval_ms) return;
+
+  if (!initialise)
+  {
+    const float waypoint_delta_x = state->waypoint_x - state->receiver_x;
+    const float waypoint_delta_y = state->waypoint_y - state->receiver_y;
+
+    const bool horizontal_leg = fabsf(waypoint_delta_x) > 0.001f;
+    const float waypoint_distance = horizontal_leg ? fabsf(waypoint_delta_x) : fabsf(waypoint_delta_y);
+    const float movement_distance = receiver_speed_pixels_per_second * (static_cast<float>(elapsed_target_ms) / 1000.0f);
+
+    if (waypoint_distance <= max<float>(movement_distance, 0.25f))
+    {
+      state->receiver_x = state->waypoint_x;
+      state->receiver_y = state->waypoint_y;
+
+      select_new_waypoint();
+    }
+    else
+    {
+      float proposed_x = state->receiver_x;
+      float proposed_y = state->receiver_y;
+
+      if (horizontal_leg)
+      {
+        proposed_x += waypoint_delta_x > 0.0f ? movement_distance : -movement_distance;
+        proposed_y = state->waypoint_y;
+      }
+      else
+      {
+        proposed_x = state->waypoint_x;
+        proposed_y += waypoint_delta_y > 0.0f ? movement_distance : -movement_distance;
+      }
+
+      if (route_is_clear(state->receiver_x, state->receiver_y, proposed_x, proposed_y, RX_ROUTE_SAMPLE_SPACING))
+      {
+        state->receiver_x = proposed_x;
+        state->receiver_y = proposed_y;
+      }
+      else
+      {
+        select_new_waypoint();
+      }
+    }
+
+    add_trail_point();
+    update_channel_paths(elapsed_target_ms);
+  }
+
+  state->previous_target_update_ms = effect_start_time;
+
+  SEGMENT.startTransition(transition_duration_ms, true);
+  SEGMENT.fill(BLACK);
+
+  /*
+   * RX trail.
+   */
+  const uint8_t visible_trail_count = min<uint8_t>(requested_trail_points, state->trail_count);
+
+  for (uint8_t trail_offset = 0u; trail_offset < visible_trail_count; trail_offset++)
+  {
+    const uint8_t trail_index = static_cast<uint8_t>((state->trail_head + MAX_TRAIL_POINTS - 1u - trail_offset) % MAX_TRAIL_POINTS);
+    const uint8_t trail_brightness = visible_trail_count > 1u ? static_cast<uint8_t>(255u - (static_cast<uint16_t>(trail_offset) * 230u) / static_cast<uint16_t>(visible_trail_count - 1u)) : 255u;
+    const uint32_t trail_colour = ColourBlend(BLACK, RGBW32(255, 0, 0, 0), trail_brightness);
+
+    draw_single_pixel(state->trail[trail_index].x, state->trail[trail_index].y, trail_colour, 255u);
+  }
+
+  /*
+   * Objects.
+   */
+  for (uint8_t object_index = 0u; object_index < state->object_count; object_index++)
+  {
+    const RayTracingMobileRXObject& object = state->objects[object_index];
+
+    const uint32_t object_colour = SEGMENT.GetPalette2Colour(
+      object.palette_index,
+      PALETTE_INDEX__IS_255_RANGE,
+      PALETTE_MODE__DEFAULT,
+      PALETTE_WRAP_HARDEDGE,
+      NO_ENCODED_VALUE,
+      PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
+    );
+
+    uint16_t object_width = 0u;
+    uint16_t object_height = 0u;
+
+    get_object_bounds(object, object_width, object_height);
+
+    for (uint16_t local_y = 0u; local_y < object_height; local_y++)
+    {
+      for (uint16_t local_x = 0u; local_x < object_width; local_x++)
+      {
+        if (!object_contains_local_pixel(object, local_x, local_y)) continue;
+
+        SEGMENT.setPixelColorXY(
+          static_cast<uint16_t>(object.origin_x + local_x),
+          static_cast<uint16_t>(object.origin_y + local_y),
+          object_colour
+        );
       }
     }
   }
 
   /*
-   * TX and RX remain at full brightness, independent of C1.
+   * Deselected/fading retained rays first.
+   */
+  for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
+  {
+    const RayTracingMobileRXRay& ray = state->rays[slot];
+
+    if (!ray.alive || ray.selected || ray.brightness == 0u) continue;
+
+    const uint32_t palette_colour = SEGMENT.GetPaletteColour(
+      ray.palette_index,
+      PALETTE_INDEX__IS_255_RANGE,
+      PALETTE_MODE__DEFAULT,
+      PALETTE_WRAP_HARDEDGE,
+      NO_ENCODED_VALUE,
+      PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
+    );
+
+    const uint32_t ray_colour = ColourBlend(BLACK, palette_colour, ray_brightness);
+    const uint8_t final_brightness = scale8(ray.brightness, ray_brightness);
+
+    draw_ray_path(ray, ray_colour, final_brightness);
+  }
+
+  /*
+   * Selected rays.
+   */
+  for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
+  {
+    const RayTracingMobileRXRay& ray = state->rays[slot];
+
+    if (!ray.alive || !ray.selected || ray.brightness == 0u) continue;
+
+    const uint32_t palette_colour = SEGMENT.GetPaletteColour(
+      ray.palette_index,
+      PALETTE_INDEX__IS_255_RANGE,
+      PALETTE_MODE__DEFAULT,
+      PALETTE_WRAP_HARDEDGE,
+      NO_ENCODED_VALUE,
+      PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
+    );
+
+    const uint32_t ray_colour = ColourBlend(BLACK, palette_colour, ray_brightness);
+    const uint8_t final_brightness = scale8(ray.brightness, ray_brightness);
+
+    draw_ray_path(ray, ray_colour, final_brightness);
+  }
+
+  /*
+   * TX and RX last.
    */
   SEGMENT.setPixelColorXY(tx_x_pixel, tx_y_pixel, RGBW32(0, 255, 0, 0));
-  SEGMENT.setPixelColorXY(rx_x_pixel, state->receiver_y, RGBW32(255, 0, 0, 0));
+  SEGMENT.setPixelColorXY(static_cast<int16_t>(roundf(state->receiver_x)), static_cast<int16_t>(roundf(state->receiver_y)), RGBW32(255, 0, 0, 0));
 }
 
 
-static const char PM_EFFECT_CONFIG__RAY_TRACING__SHOOTING_AND_BOUNCING[] PROGMEM =
-"RT Emitted Rays@"
-"Ray Speed,Rays,Ray Brightness,Tail Length,Ray Width,Random Paths,Random RX Y,Smooth Motion,!,,"
+static const char PM_EFFECT_CONFIG__RAY_TRACING__MOBILE_RX[] PROGMEM =
+"RT Mobile RX@"
+"RX Speed,Paths,Ray Brightness,RX Trail,Ray Width,Objects,Path Roll-off,New Map,,,"
 ";"
 ""
 ";"
@@ -32056,38 +33071,44 @@ static const char PM_EFFECT_CONFIG__RAY_TRACING__SHOOTING_AND_BOUNCING[] PROGMEM
 ";"
 "2"
 ";"
-"sx=128,"
+"sx=96,"
 "ix=96,"
-"c1=128,"
-"c2=128,"
+"c1=30,"
+"c2=0,"
 "c3=0,"
 "o1=1,"
 "o2=1,"
 "o3=1,"
 "paln=IceCream Floats+,"
+"pal2=1,"
+"s1=222222,"
 "ep=20"
 ;
 
 
-static const char PM_EFFECT_DESCRI__RAY_TRACING__SHOOTING_AND_BOUNCING[] PROGMEM =
-"Synchronised LOS and reflected 2D ray propagation.\n\r"
-"SX: Ray propagation speed\n\r"
-"IX: Ray count, 1 to 8\n\r"
-"C1: Ray brightness; TX and RX remain full brightness\n\r"
-"C2: Trail length; 255 retains the complete path\n\r"
-"C3: Additional width; 0 gives strict one-pixel rays\n\r"
-"O1 OFF: LOS plus shortest reflected paths\n\r"
-"O1 ON: LOS plus new random reflected paths each cycle\n\r"
-"O2 OFF: Fixed centred receiver\n\r"
-"O2 ON: New random receiver Y position each cycle\n\r"
-"O3: Speed-derived smooth transitions\n\r"
-"Maximum reflection order is hardcoded to 5\n\r"
+static const char PM_EFFECT_DESCRI__RAY_TRACING__MOBILE_RX[] PROGMEM =
+"Moving receiver with stabilised viable propagation paths.\n\r"
+"SX: Receiver movement speed\n\r"
+"IX: Number of shortest valid paths, 1 to 8\n\r"
+"C1: Ray brightness\n\r"
+"C2: Receiver trail length\n\r"
+"C3: Additional ray width\n\r"
+"O1: Enable solid Tetris-style objects\n\r"
+"O2: Enable excess-path brightness roll-off from 255 to 30\n\r"
+"O3: Regenerate the complete object map every 60 seconds\n\r"
+"Ray colour is persistent and is not recalculated while a path survives\n\r"
+"Exact path identity and colour are retained after disappearance\n\r"
+"Nearby new ray directions inherit an existing neighbour colour\n\r"
+"Path selection uses hysteresis to reduce rapid rank swapping\n\r"
+"New paths fade in and disappearing paths fade out\n\r"
+"Reappearing paths resume their retained identity and colour\n\r"
+"Palette: Ray colours\n\r"
+"Palette2: Object colours\n\r"
 "Green: Transmitter\n\r"
-"Red: Receiver";
+"Red: Moving receiver";
 
 
 #endif  // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
-
 
 #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
 
