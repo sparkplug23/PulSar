@@ -347,125 +347,6 @@ uint8_t BusDigital::estimateCurrentAndLimitBri() {
 }
 
 
-// void BusDigital::show() {
-
-//   // #ifdef ENABLE_DEVFEATURE_LIGHTING__SHOW_FALLBACK_MINIMAL_2024
-
-//   PolyBus::show(_busPtr, _iType);
-
-// //   #else
-  
-// //   _milliAmpsTotal = 0;
-// //   if (!_valid) return;
-  
-// //       DEBUG_LINE_HERE
-
-// //   uint8_t cctWW = 0, cctCW = 0;
-// //   unsigned newBri = estimateCurrentAndLimitBri();  // will fill _milliAmpsTotal
-// //   if (newBri < _bri) PolyBus::setBrightness(_busPtr, _iType, newBri); // limit brightness to stay within current limits
-
-// //   /**
-// //    * @brief Method: Buffer
-// //    * A internal buffer is used to store the pixel data before it is sent to the bus.
-// //    * This uses more memory, but enables transitions.
-// //    * 
-// //    */
-// //   if (_data) 
-// //   {
-// //     ALOG_INF(PSTR("buffer method active %d %d %d\t %d %d %d"), _len, getNumberOfChannels(), _colorOrder, _data[0], _data[1], _data[2]);
-// //     size_t channels = getNumberOfChannels();
-// //     int16_t oldCCT = Bus::_cct; // temporarily save bus CCT
-// //     for (size_t i=0; i<_len; i++) {
-// //       size_t offset = i * channels;
-// //       unsigned co = _colorOrderMap.getPixelColorOrder(i+_start, _colorOrder);
-// //       uint32_t c;
-// //       if (_type == BUSTYPE_WS2812_1CH_X3) { // map to correct IC, each controls 3 LEDs (_len is always a multiple of 3)
-// //         switch (i%3) {
-// //           case 0: c = RGBW32(_data[offset]  , _data[offset+1], _data[offset+2], 0); break;
-// //           case 1: c = RGBW32(_data[offset-1], _data[offset]  , _data[offset+1], 0); break;
-// //           case 2: c = RGBW32(_data[offset-2], _data[offset-1], _data[offset]  , 0); break;
-// //         }
-// //       } else {
-// //         if (hasRGB()) c = RGBW32(_data[offset], _data[offset+1], _data[offset+2], hasWhite() ? _data[offset+3] : 0);
-// //         else          c = RGBW32(0, 0, 0, _data[offset]);
-// //       }
-// //       if (hasCCT()) {
-// //         // unfortunately as a segment may span multiple buses or a bus may contain multiple segments and each segment may have different CCT
-// //         // we need to extract and appy CCT value for each pixel individually even though all buses share the same _cct variable
-// //         // TODO: there is an issue if CCT is calculated from RGB value (_cct==-1), we cannot do that with double buffer
-// //         Bus::_cct = _data[offset+channels-1];
-// //         Bus::calculateCCT(c, cctWW, cctCW);
-// //       }
-// //       unsigned pix = i;
-// //       if (_reversed) pix = _len - pix -1;
-// //       pix += _skip;
-// //       Serial.printf("Setting pixel %d to %d %d %d %d\n", pix, c, co, (cctCW<<8) | cctWW);
-// //       PolyBus::setPixelColor(_busPtr, _iType, pix, c, co, (cctCW<<8) | cctWW);
-// //     }
-// //     #if !defined(STATUSLED) || STATUSLED>=0
-// //     if (_skip) PolyBus::setPixelColor(_busPtr, _iType, 0, 0, _colorOrderMap.getPixelColorOrder(_start, _colorOrder)); // paint skipped pixels black
-// //     #endif
-// //     for (int i=1; i<_skip; i++) PolyBus::setPixelColor(_busPtr, _iType, i, 0, _colorOrderMap.getPixelColorOrder(_start, _colorOrder)); // paint skipped pixels black
-// //     Bus::_cct = oldCCT;
-// //   }
-// //   /**
-// //    * @brief Method: Direct
-// //    * Pixels are set directly on the bus, no buffer is used.
-// //    * This section sole purpose is to fix colour inaccuracies that may occur when using the buffer method.
-// //    * It reads what has already been set on the bus, but not yet transmitted. 
-// //    */
-// //   else 
-// //   {
-// //     #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE_DEBUG
-// //     ALOG_INF(PSTR("direct method active %d %d %d"), _len, getNumberOfChannels(), _colorOrder);
-// //     #endif
-// //     if (newBri < _bri) {
-// //       Serial.println("I dont want this");
-// //       unsigned hwLen = _len;
-// //       if (_type == BUSTYPE_WS2812_1CH_X3) hwLen = NUM_ICS_WS2812_1CH_3X(_len); // only needs a third of "RGB" LEDs for NeoPixelBus
-// //       for (unsigned i = 0; i < hwLen; i++) {
-// //         // use 0 as color order, actual order does not matter here as we just update the channel values as-is
-// //         #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-// //         uint32_t c = PolyBus::getPixelColor(_busPtr, _iType, i, 0); // tmp fix for RGBWW
-// //         ALOG_INF(PSTR("direct method active lossy %d %d %d\t %d %d %d"), i, c.R, c.G, c.B, c.WW, c.CW);
-// //         #else
-// //         uint32_t c = restoreColorLossy(PolyBus::getPixelColor(_busPtr, _iType, i, 0), _bri);
-// //         #endif
-// //         #ifdef ENABLE_FEATURE_LIGHTING__RGBWW_GENERATE
-// //         // if (hasCCT()) Bus::calculateCCT(c, cctWW, cctCW); // this will unfortunately corrupt (segment) CCT data on every bus
-// //         PolyBus::setPixelColor(_busPtr, _iType, i, c, 0);//, 0, (cctCW<<8) | cctWW); // repaint all pixels with new brightness
-// //         #else
-// //         if (hasCCT()) Bus::calculateCCT(c, cctWW, cctCW); // this will unfortunately corrupt (segment) CCT data on every bus
-// //         PolyBus::setPixelColor(_busPtr, _iType, i, c, 0, (cctCW<<8) | cctWW); // repaint all pixels with new brightness
-// //         #endif
-// //       }
-// //     }
-// //   }
-
-
-// //   /**
-// //    * @brief To account for effects that require direct control, the brightness of the bus should be overridden
-// //    * 
-// //    * OR, most likely, what I should be doing is instead writing the "full brightness" output, and hence, it should
-// //    * actually be the "under palette" that is set to a lower brightness. 
-// //    * 
-// //    */
-
-// //   // PolyBus::setPixelColor(_busPtr, _iType, 0, RgbColor(255, 0, 0), 0);
-
-
-
-// //   PolyBus::show(_busPtr, _iType, !_data); // faster if buffer consistency is not important (use !_buffering this causes 20% FPS drop)
-// //   // restore bus brightness to its original value
-// //   // this is done right after show, so this is only OK if LED updates are completed before show() returns
-// //   // or async show has a separate buffer (ESP32 RMT and I2S are ok)
-// //   if (newBri < _bri) PolyBus::setBrightness(_busPtr, _iType, _bri);
-  
-// //   DEBUG_LINE_HERE
-// // #endif
-
-// }
-
 void BusDigital::show() {
   if (!_valid) return;
   _NPBbri = (_NPBbri * _bri) / 255;      // total applied brightness for use in restoreColorLossy (see applyBriLimit())
@@ -1249,6 +1130,7 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
   _rows = bc.pins[3];
   _cols = bc.pins[4];
 #endif
+
   unsigned physicalPanelWidth =  max(16U, min(128U, panelWidth)); // keep a copy because QS panels require modified width/height
   unsigned physicalPanelHeight = max(16U, min(64U, panelHeight));
 
@@ -1257,8 +1139,7 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
   // mxconfig.driver = HUB75_I2S_CFG::ICN2038S;  // experimental - use specific shift register driver
   // mxconfig.driver = HUB75_I2S_CFG::FM6124;    // try this driver in case you panel stays dark, or when colors look too pastel
   // Other possible shiftreg drivers: HUB75_I2S_CFG::FM6126A, HUB75_I2S_CFG::ICN2038S, HUB75_I2S_CFG::MBI5124, HUB75_I2S_CFG::DP3246
-
-  mxconfig.latch_blanking = 4;
+  mxconfig.latch_blanking = 1;
   // mxconfig.i2sspeed = HUB75_I2S_CFG::HZ_10M;  // experimental - 5MHZ should be enugh, but colours looks slightly better at 10MHz
   // mxconfig.min_refresh_rate = 90;
   // mxconfig.min_refresh_rate = 120;
@@ -1268,9 +1149,9 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
   mxconfig.chain_length = max(1U, min(chainLength, 4U));
 
   if (panelHeight >= 64 && (mxconfig.chain_length > 1)) { // need to check panelHeight; mxconfig.mx_height not assigned yet
-  #if defined(BOARD_HAS_PSRAM)                    // limitation to one panel only applies to boards without PSRAM
+    #if defined(BOARD_HAS_PSRAM)                    // limitation to one panel only applies to boards without PSRAM
     if (!psramFound() || ESP.getPsramSize() == 0) // PSRAM sanity check
-  #endif
+    #endif
     {
       DEBUGBUS_PRINTLN(F("WARNING, only single panel can be used of 64 pixel boards due to memory"));
       mxconfig.chain_length = 1;
@@ -1278,31 +1159,31 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
   }
 
   if (bc.type == TYPE_HUB75MATRIX_HS) {
-      mxconfig.mx_width = min(128U, panelWidth); // UI limit is 128
-      mxconfig.mx_height = min(64U, panelHeight);
+    mxconfig.mx_width = min(128U, panelWidth); // UI limit is 128
+    mxconfig.mx_height = min(64U, panelHeight);
   } else if (bc.type == TYPE_HUB75MATRIX_QS) {
-      _isVirtual = true;
-      mxconfig.mx_width = min(128U, panelWidth) * 2;
-      mxconfig.mx_height = min(64U, panelHeight) / 2;
-      mxconfig.driver = HUB75_I2S_CFG::FM6124;  // use FM6124 for "outdoor" 4-scan panels - workaround until we can make the driver user-configurable
+    _isVirtual = true;
+    mxconfig.mx_width = min(128U, panelWidth) * 2;
+    mxconfig.mx_height = min(64U, panelHeight) / 2;
+    mxconfig.driver = HUB75_I2S_CFG::FM6124;  // use FM6124 for "outdoor" 4-scan panels - workaround until we can make the driver user-configurable
   } else {
     DEBUGBUS_PRINTLN("Unknown type");
     return;
   }
   _isQuadScan = (bc.type == TYPE_HUB75MATRIX_QS);
 
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2)// classic esp32, or esp32-s2: reduce bitdepth for large panels
+  #if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2)// classic esp32, or esp32-s2: reduce bitdepth for large panels
   if (mxconfig.mx_height >= 64) {
     if (mxconfig.chain_length * mxconfig.mx_width > 192) mxconfig.setPixelColorDepthBits(3);
     else if (mxconfig.chain_length * mxconfig.mx_width > 64)  mxconfig.setPixelColorDepthBits(4);
     else mxconfig.setPixelColorDepthBits(8);
   } else mxconfig.setPixelColorDepthBits(8);
-#else
+  #else
   if (physicalPanelWidth * physicalPanelHeight * mxconfig.chain_length > 192*64)
     mxconfig.setPixelColorDepthBits(6); // reduce RAM usage for large panels, for the price of reduced color quality (18bit)
   else
     mxconfig.setPixelColorDepthBits(8); // default color resolution = 24bit
-#endif
+  #endif
 
 
 //  HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
@@ -1327,6 +1208,7 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
   mxconfig.gpio = {2, 6, 3, 4, 8, 5, 33, 35, 34, 39, 38, 37, 36, 12};
 
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
+
   // specific ESP32-S3 pinouts
 
   #if defined(ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG)
@@ -1339,86 +1221,87 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
     mxconfig.i2sspeed = HUB75_I2S_CFG::HZ_16M;
 
   #elif defined(MOONHUB_S3_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - T7 S3, MOONHUB pinout");
-  // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
-  mxconfig.gpio = { 1, 5, 6, 7, 13, 9, 16, 48, 47, 21, 38, 8, 4, 18 };
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - T7 S3, MOONHUB pinout");
+    // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+    mxconfig.gpio = { 1, 5, 6, 7, 13, 9, 16, 48, 47, 21, 38, 8, 4, 18 };
 
   #elif defined(WAVESHARE_S3_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Waveshare S3, Waveshare pinout");
-  // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
-  mxconfig.gpio = {4, 5, 6, 7, 15, 16, 18, 8, 3, 42, 9, 40, 2, 41};
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Waveshare S3, Waveshare pinout");
+    // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+    mxconfig.gpio = {4, 5, 6, 7, 15, 16, 18, 8, 3, 42, 9, 40, 2, 41};
 
   #elif defined(SEENGREAT_V1_S3_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 devKit-C, SEENGREAT_V1 pinout");
-  // https://seengreat.com/wiki/186
-  mxconfig.gpio = { 37, 6, 36,         // R1_PIN, G1_PIN, B1_PIN,
-                    35, 5,  0,         // R2_PIN, G2_PIN, B2_PIN,
-                    45, 1, 48,  2, 4,  //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-                    38, 21, 47 };      // LAT_PIN, OE_PIN,CLK_PIN
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 devKit-C, SEENGREAT_V1 pinout");
+    // https://seengreat.com/wiki/186
+    mxconfig.gpio = { 37, 6, 36,         // R1_PIN, G1_PIN, B1_PIN,
+                      35, 5,  0,         // R2_PIN, G2_PIN, B2_PIN,
+                      45, 1, 48,  2, 4,  //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+                      38, 21, 47 };      // LAT_PIN, OE_PIN,CLK_PIN
 
   #elif defined(SEENGREAT_V2_S3_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 devKit-C, SEENGREAT_V2 pinout");
-  // https://seengreat.com/wiki/186
-  mxconfig.gpio = { 18, 8, 17,         // R1_PIN, G1_PIN, B1_PIN,
-                    16, 1, 15,         // R2_PIN, G2_PIN, B2_PIN,
-                    7, 48, 6, 47, 2,   //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-                    21, 4, 5 };        // LAT_PIN, OE_PIN,CLK_PIN
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 devKit-C, SEENGREAT_V2 pinout");
+    // https://seengreat.com/wiki/186
+    mxconfig.gpio = { 18, 8, 17,         // R1_PIN, G1_PIN, B1_PIN,
+                      16, 1, 15,         // R2_PIN, G2_PIN, B2_PIN,
+                      7, 48, 6, 47, 2,   //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+                      21, 4, 5 };        // LAT_PIN, OE_PIN,CLK_PIN
 
   #elif defined(SEENGREAT_MATRIX_S3_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Seengreat RGB Matrix HUB75 S3 pinout");
-  // https://seengreat.com/wiki/214 (dedicated HUB75 board, SKU 260612 - NOT the same board/pinout as SEENGREAT_V1/V2_S3_PINOUT above)
-  mxconfig.gpio = {  5,  4,  6,        // R1_PIN, G1_PIN, B1_PIN,
-                    15,  7, 17,        // R2_PIN, G2_PIN, B2_PIN,
-                     8, 18, 10,  9, 16,//  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-                    11, 13, 12 };      // LAT_PIN, OE_PIN,CLK_PIN
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - Seengreat RGB Matrix HUB75 S3 pinout");
+    // https://seengreat.com/wiki/214 (dedicated HUB75 board, SKU 260612 - NOT the same board/pinout as SEENGREAT_V1/V2_S3_PINOUT above)
+    mxconfig.gpio = {  5,  4,  6,        // R1_PIN, G1_PIN, B1_PIN,
+                      15,  7, 17,        // R2_PIN, G2_PIN, B2_PIN,
+                      8, 18, 10,  9, 16,//  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+                      11, 13, 12 };      // LAT_PIN, OE_PIN,CLK_PIN
 
   #else
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 generic pinout");
-  // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
-  mxconfig.gpio = {1, 2, 42, 41, 40, 39, 45, 48, 47, 21, 38, 8, 3, 18};
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - S3 generic pinout");
+    // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+    mxconfig.gpio = {1, 2, 42, 41, 40, 39, 45, 48, 47, 21, 38, 8, 3, 18};
   #endif // CONFIG_IDF_TARGET_ESP32S3
 
 #elif defined(CONFIG_IDF_TARGET_ESP32)
+
   // generic ESP32 pinouts
   #if defined(BOARD_HAS_PSRAM) // all ESP32 pinouts require gpio 16 or 17, which are controlling PSRAM
     #warning "ESP32 HUB75 pinout is not compatible with PSRAM boards."
   #endif
   #if defined(ESP32_FORUM_PINOUT) || defined(FORUM_ESP32_PINOUT) // Common format for boards designed for SmartMatrix
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - ESP32_FORUM_PINOUT");
-  /*
-     ESP32 with SmartMatrix's default pinout - ESP32_FORUM_PINOUT
-     https://github.com/pixelmatix/SmartMatrix/blob/teensylc/src/MatrixHardware_ESP32_V0.h
-     Can use a board like https://github.com/rorosaurus/esp32-hub75-driver
-  */
-  mxconfig.gpio = { 2, 15, 4, 16, 27, 17, 5, 18, 19, 21, 12, 26, 25, 22 };
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - ESP32_FORUM_PINOUT");
+    /*
+      ESP32 with SmartMatrix's default pinout - ESP32_FORUM_PINOUT
+      https://github.com/pixelmatix/SmartMatrix/blob/teensylc/src/MatrixHardware_ESP32_V0.h
+      Can use a board like https://github.com/rorosaurus/esp32-hub75-driver
+    */
+    mxconfig.gpio = { 2, 15, 4, 16, 27, 17, 5, 18, 19, 21, 12, 26, 25, 22 };
 
   #elif defined(SEENGREAT_V1_ESP32_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - EP32-DevKitC V4, SEENGREAT_V1 pinout");
-  // https://seengreat.com/wiki/186
-  mxconfig.gpio = { 18, 25, 5,         // R1_PIN, G1_PIN, B1_PIN,
-                    17, 33, 16,        // R2_PIN, G2_PIN, B2_PIN,
-                     4,  3, 0, 21, 32, //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-                    19, 15, 2};        // LAT_PIN, OE_PIN,CLK_PIN
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - EP32-DevKitC V4, SEENGREAT_V1 pinout");
+    // https://seengreat.com/wiki/186
+    mxconfig.gpio = { 18, 25, 5,         // R1_PIN, G1_PIN, B1_PIN,
+                      17, 33, 16,        // R2_PIN, G2_PIN, B2_PIN,
+                      4,  3, 0, 21, 32, //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+                      19, 15, 2};        // LAT_PIN, OE_PIN,CLK_PIN
 
   #elif defined(SEENGREAT_V2_ESP32_PINOUT)
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - EP32-DevKitC V4, SEENGREAT_V2 pinout, Latch pin IO2");
-  // https://seengreat.com/wiki/186
-  mxconfig.gpio = { 18, 17, 19,        // R1_PIN, G1_PIN, B1_PIN,
-                    21, 23, 27,        // R2_PIN, G2_PIN, B2_PIN,
-                    26, 16, 25, 4, 22, //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
-                     2, 32, 33};       // LAT_PIN, OE_PIN,CLK_PIN
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - EP32-DevKitC V4, SEENGREAT_V2 pinout, Latch pin IO2");
+    // https://seengreat.com/wiki/186
+    mxconfig.gpio = { 18, 17, 19,        // R1_PIN, G1_PIN, B1_PIN,
+                      21, 23, 27,        // R2_PIN, G2_PIN, B2_PIN,
+                      26, 16, 25, 4, 22, //  A_PIN,  B_PIN,  C_PIN,  D_PIN,  E_PIN,
+                      2, 32, 33};       // LAT_PIN, OE_PIN,CLK_PIN
 
   #else
-  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - ESP32 Default pins");
-  /*
-     https://github.com/mrfaptastic/ESP32-HUB75-MatrixPanel-DMA?tab=readme-ov-file
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - ESP32 Default pins");
+    /*
+      https://github.com/mrfaptastic/ESP32-HUB75-MatrixPanel-DMA?tab=readme-ov-file
 
-     Boards
+      Boards
 
-     https://esp32trinity.com/
-     https://www.electrodragon.com/product/rgb-matrix-panel-drive-interface-board-for-esp32-dma/
-  */
-  mxconfig.gpio = { 25, 26, 27, 14, 12, 13, 23, 19, 5, 17, 18, 4, 15, 16 };
+      https://esp32trinity.com/
+      https://www.electrodragon.com/product/rgb-matrix-panel-drive-interface-board-for-esp32-dma/
+    */
+    mxconfig.gpio = { 25, 26, 27, 14, 12, 13, 23, 19, 5, 17, 18, 4, 15, 16 };
   #endif // CONFIG_IDF_TARGET_ESP32
 
 #else
@@ -1432,10 +1315,10 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
   } else if (bc.colorOrder == COL_ORDER_BGR) {
     DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = color order BGR");
     int8_t tmpPin;
-    tmpPin = mxconfig.gpio.r1;
+    tmpPin           = mxconfig.gpio.r1;
     mxconfig.gpio.r1 = mxconfig.gpio.b1;
     mxconfig.gpio.b1 = tmpPin;
-    tmpPin = mxconfig.gpio.r2;
+    tmpPin           = mxconfig.gpio.r2;
     mxconfig.gpio.r2 = mxconfig.gpio.b2;
     mxconfig.gpio.b2 = tmpPin;
   }
@@ -1609,6 +1492,7 @@ void BusHub75Matrix::setBrightness(uint8_t b) {
   if (!_valid || !display) return;
   display->setBrightness(_bri); 
 }
+
 void BusHub75Matrix::show(void) {
   if (!_valid) return;
   if (_ledBuffer) {
@@ -1630,28 +1514,26 @@ void BusHub75Matrix::show(void) {
     setBitArray(_ledsDirty, _len, false);  // buffer shown - reset all dirty bits
   }
 
-  static uint32_t lastDebug = 0;
+  // static uint32_t lastDebug = 0;
+  // if (millis() - lastDebug >= 1000) {
+  //   lastDebug = millis();
 
-if (millis() - lastDebug >= 1000) {
-  lastDebug = millis();
+  //   uint32_t blackCount = 0;
+  //   uint32_t nonBlackCount = 0;
 
-  uint32_t blackCount = 0;
-  uint32_t nonBlackCount = 0;
+  //   for (uint16_t i = 0; i < _len; i++) {
+  //     if (_ledBuffer[i].r == 0 && _ledBuffer[i].g == 0 && _ledBuffer[i].b == 0) blackCount++;
+  //     else nonBlackCount++;
+  //   }
 
-  for (uint16_t i = 0; i < _len; i++) {
-    if (_ledBuffer[i].r == 0 && _ledBuffer[i].g == 0 && _ledBuffer[i].b == 0) blackCount++;
-    else nonBlackCount++;
-  }
-
-  DEBUGBUS_PRINTF("HUB75 BUFFER: black=%u nonblack=%u sample[%u]=%u,%u,%u\n",
-    blackCount,
-    nonBlackCount,
-    _len - 1,
-    _ledBuffer[_len - 1].r,
-    _ledBuffer[_len - 1].g,
-    _ledBuffer[_len - 1].b);
-}
-
+  //   DEBUGBUS_PRINTF("HUB75 BUFFER: black=%u nonblack=%u sample[%u]=%u,%u,%u\n",
+  //     blackCount,
+  //     nonBlackCount,
+  //     _len - 1,
+  //     _ledBuffer[_len - 1].r,
+  //     _ledBuffer[_len - 1].g,
+  //     _ledBuffer[_len - 1].b);
+  // }
 
 }
 
@@ -1703,8 +1585,9 @@ uint8_t BusHub75Matrix::getPins(uint8_t* pinArray) const
 }
 
 #endif
-// ***************************************************************************
 
+
+// ***************************************************************************
 
 
 // credit @willmmiles & @netmindz https://github.com/Aircoookie/WLED/pull/4056
@@ -1773,43 +1656,6 @@ size_t BusConfig::memUsage() const {
   return mem;
 }
 
-
-// int BusManager::add(BusConfig &bc) 
-// {
-
-//   DEBUG_LINE_HERE;
-
-//   uint8_t bus_count = getNumBusses() - getNumVirtualBusses();
-//   if (bus_count >= WLED_MAX_BUSSES) 
-//   {
-//     Serial.printf("if (bus_count >= WLED_MAX_BUSSES) %d\n\r", bus_count);
-//     return -1;
-//   }
-
-//   DEBUG_LINE_HERE;
-//   if (Bus::isVirtual(bc.type)) {
-//     ALOG_INF(PSTR("BusManager::add::Type BusNetwork"));
-//     busses[numBusses] = new BusNetwork(bc); // IP
-//   } 
-//    else if (Bus::isDigital(bc.type)) {
-//     ALOG_INF(PSTR("BusManager::add::Type BusDigital"));
-//     busses[numBusses] = new BusDigital(bc, numBusses, colorOrderMap); // Neopixel
-   
-//   } else if (Bus::isOnOff(bc.type)) {
-//     ALOG_INF(PSTR("BusManager::add::Type BUSTYPE_ONOFF"));
-//     busses[numBusses] = new BusOnOff(bc); // Relays
-//   } 
-//   else 
-//   {
-//     ALOG_INF(PSTR("BusManager::add::Type ELSE BusPwm"));
-//     busses[numBusses] = new BusPwm(bc); // H801
-//   }
-
-//   numBusses++;
-  
-//   return numBusses;
-
-// }
 
 uint8_t BusManager::getI(uint8_t busType, const uint8_t* pins, uint8_t driverPreference) {
   return PolyBus::getI(busType, pins, driverPreference);
@@ -1948,16 +1794,6 @@ void BusManager::removeAll()
 }
 
 
-// void BusManager::show() 
-// {
-//   _milliAmpsUsed = 0;
-//   for (uint8_t i = 0; i < numBusses; i++) 
-//   {
-//     busses[i]->show();
-//     _milliAmpsUsed += busses[i]->getUsedCurrent();
-//   }
-// }
-
 void BusManager::show() {
   applyABL(); // apply brightness limit, updates _gMilliAmpsUsed
   for (auto &bus : busses) {
@@ -1965,21 +1801,11 @@ void BusManager::show() {
   }
 }
 
-// bool BusManager::canAllShow() {
-//   // #ifdef ENABLE_DEVFEATURE_LIGHTING__CANSHOW_BACKOFF
-//   for (unsigned i = 0; i < numBusses; i++) {
-//     if (!busses[i]->canShow()) return false;
-//   }
-//   // #endif
-//   return true;
-// }
 
 bool BusManager::canAllShow() {
   for (const auto &bus : busses) if (!bus->canShow()) return false;
   return true;
 }
-
-
 
 
 void BusManager::initializeABL() {

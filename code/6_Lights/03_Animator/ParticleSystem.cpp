@@ -603,11 +603,13 @@ void ParticleSystem2D::render() {
     if (fireIntesity) { // fire mode
       brightness = (uint32_t)particles[i].ttl * (3 + (fireIntesity >> 5)) + 5;
       brightness = min(brightness, (uint32_t)255);
-      baseRGB = ColorFromPalette(pSEGPALETTE, brightness, 255, LINEARBLEND_NOWRAP);
+      // baseRGB = ColorFromPalette(pSEGPALETTE, brightness, 255, LINEARBLEND_NOWRAP); // original, direct palette method that only used CRGBPalettes
+      baseRGB = tkr_anim->ColorFromPalette_wled(pSEGPALETTE, brightness, 255, LINEARBLEND_NOWRAP);
     }
     else {
       brightness = min((particles[i].ttl << 1), (int)255);
-      baseRGB = ColorFromPalette(pSEGPALETTE, particles[i].hue, 255, blend);
+      // baseRGB = ColorFromPalette(pSEGPALETTE, particles[i].hue, 255, blend);  // original, direct palette method that only used CRGBPalettes
+      baseRGB = tkr_anim->ColorFromPalette_wled(pSEGPALETTE, particles[i].hue, 255, blend);
       if (particles[i].sat < 255) {
         CHSV32 baseHSV = baseRGB;
         baseHSV.s = min(baseHSV.s, particles[i].sat); // set the saturation but don't increase it
@@ -1467,7 +1469,9 @@ void ParticleSystem1D::render() {
 
     // pSEGPALETTE = *fastledPalettes[0];
 
-    baseRGB = ColorFromPalette(pSEGPALETTE, particles[i].hue, 255, blend);
+    // baseRGB = ColorFromPalette(pSEGPALETTE, particles[i].hue, 255, blend); // original, direct palette method that only used CRGBPalettes
+    baseRGB = tkr_anim->ColorFromPalette_wled(pSEGPALETTE, particles[i].hue, 255, blend); // to utilise any palettes
+
     if (advPartProps != nullptr) { //saturation is advanced property in 1D system
       if (advPartProps[i].sat < 255) {
         CHSV32 baseHSV = baseRGB;

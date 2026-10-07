@@ -8842,6 +8842,8 @@ R"=====(
         // "Height":64
         // "Pin":[128,64,1,1,1],
 
+#define RT_COVERAGE_DEBUG
+
 #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
 
   #define USE_LIGHTING_TEMPLATE

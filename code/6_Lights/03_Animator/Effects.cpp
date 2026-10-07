@@ -32175,56 +32175,1155 @@ struct RayTracingCoverageState
 constexpr float LARGE_PATH_DISTANCE = 1.0e30f;
 
 
-/**********************************************************************************************************************************************************************************
+// /**********************************************************************************************************************************************************************************
+//  * EFFECT: RT COVERAGE
+//  *
+//  * PHASES
+//  *   1. Fade previous completed map to black.
+//  *   2. Generate a new object map.
+//  *   3. Fade the new objects in from black.
+//  *   4. Calculate all shortest paths in staged batches.
+//  *   5. Draw the coverage map radially without using the transition system.
+//  *   6. Fade no-signal pixels from black to Segment Colour 3.
+//  *   7. Hold the completed map until EP starts the next cycle.
+//  *
+//  *
+//  * CONTROLS
+//  *   SX : radial draw duration as a proportion of EP.
+//  *   IX : object density.
+//  *   C1 : heatmap and no-signal brightness.
+//  *   C2 : object brightness.
+//  *   C3 : reserved.
+//  *   O1 : enable objects.
+//  *   O2 : reserved.
+//  *   O3 : enable radial heatmap draw animation.
+//  *   EP : complete coverage cycle period.
+//  *
+//  *   Segment Colour 1 : object colour.
+//  *   Segment Colour 2 : transmitter colour.
+//  *   Segment Colour 3 : no signal or no valid path.
+//  *   Palette          : heatmap gradient.
+//  *   Palette2         : unused.
+//  **********************************************************************************************************************************************************************************/
+// void mAnimatorLight::EffectAnim__RayTracing__Coverage()
+// {
+//   constexpr uint8_t COVERAGE_DISTANCE_MODE = RT_COVERAGE_DISTANCE_LOGARITHMIC;
+
+//   constexpr uint8_t MAX_REFLECTION_ORDER = 4;
+//   constexpr uint8_t MAX_OBJECTS = 12;
+//   constexpr uint8_t MAX_OBJECT_PLACEMENT_ATTEMPTS = 48;
+//   constexpr uint8_t COVERAGE_PIXELS_PER_CALL = 2;
+//   constexpr uint8_t OBJECT_BORDER_MARGIN = 1;
+
+//   constexpr uint8_t COVERAGE_PALETTE_MIN_INDEX = 16u;
+//   constexpr uint8_t COVERAGE_PALETTE_MAX_INDEX = 224u;
+
+//   constexpr uint16_t OLD_MAP_FADE_OUT_MS = 2500u;
+//   constexpr uint16_t OBJECT_FADE_IN_MS = 3000u;
+//   constexpr uint16_t NO_SIGNAL_FADE_IN_MS = 2500u;
+
+//   constexpr float PATH_COLLISION_SAMPLE_SPACING = 0.25f;
+//   constexpr float PATH_LOSS_REFERENCE_DISTANCE = 1.0f;
+//   constexpr float NO_VALID_PATH = -1.0f;
+
+//   const uint16_t width = SEGMENT.virtualWidth();
+//   const uint16_t height = SEGMENT.virtualHeight();
+
+//   if (width == 0u || height == 0u || SEGMENT.palette_loaded == nullptr) return;
+
+//   const bool objects_enabled = SEGMENT.check1;
+//   const bool distance_rolloff_enabled = SEGMENT.check2;
+//   const bool draw_animation_enabled = SEGMENT.check3;
+
+//   const uint32_t pixel_count = static_cast<uint32_t>(width) * static_cast<uint32_t>(height);
+//   const uint16_t occupancy_word_count = static_cast<uint16_t>((pixel_count + 31u) / 32u);
+
+//   const size_t occupancy_bytes = static_cast<size_t>(occupancy_word_count) * sizeof(uint32_t);
+//   const size_t distance_bytes = static_cast<size_t>(pixel_count) * sizeof(float);
+//   const size_t required_data_size = sizeof(RayTracingCoverageState) + occupancy_bytes + distance_bytes;
+
+//   if (!SEGMENT.allocateData(required_data_size)) return;
+
+//   RayTracingCoverageState* state = reinterpret_cast<RayTracingCoverageState*>(SEGMENT.data);
+
+//   uint8_t* dynamic_data = reinterpret_cast<uint8_t*>(state) + sizeof(RayTracingCoverageState);
+//   uint32_t* occupancy = reinterpret_cast<uint32_t*>(dynamic_data);
+//   float* path_distances = reinterpret_cast<float*>(dynamic_data + occupancy_bytes);
+
+//   const bool dimensions_changed = state->width != width || state->height != height || state->occupancy_word_count != occupancy_word_count || state->pixel_count != pixel_count;
+//   const bool object_enable_changed = state->object_enabled != static_cast<uint8_t>(objects_enabled);
+//   const bool draw_animation_option_changed = state->draw_animation_enabled != static_cast<uint8_t>(draw_animation_enabled);
+//   const bool initialise = SEGMENT.call == 0 || dimensions_changed;
+
+//   if (initialise)
+//   {
+//     memset(state, 0, required_data_size);
+
+//     state->width = width;
+//     state->height = height;
+//     state->pixel_count = pixel_count;
+//     state->occupancy_word_count = occupancy_word_count;
+//     state->object_enabled = static_cast<uint8_t>(objects_enabled);
+//     state->draw_animation_enabled = static_cast<uint8_t>(draw_animation_enabled);
+//     state->first_cycle = 1u;
+//     state->phase = RT_COVERAGE_PHASE_INITIALISE;
+//   }
+
+//   const float environment_width = width > 1u ? static_cast<float>(width - 1u) : 1.0f;
+//   const float environment_height = height > 1u ? static_cast<float>(height - 1u) : 1.0f;
+//   const uint16_t minimum_dimension = min<uint16_t>(width, height);
+
+//   const uint16_t tx_x_pixel = static_cast<uint16_t>(roundf(environment_width * 0.15f));
+//   const uint16_t tx_y_pixel = static_cast<uint16_t>(roundf(environment_height * 0.50f));
+
+//   const float tx_x = static_cast<float>(tx_x_pixel);
+//   const float tx_y = static_cast<float>(tx_y_pixel);
+
+//   const float corner_distance_0 = sqrtf(tx_x * tx_x + tx_y * tx_y);
+//   const float corner_distance_1 = sqrtf((environment_width - tx_x) * (environment_width - tx_x) + tx_y * tx_y);
+//   const float corner_distance_2 = sqrtf(tx_x * tx_x + (environment_height - tx_y) * (environment_height - tx_y));
+//   const float corner_distance_3 = sqrtf((environment_width - tx_x) * (environment_width - tx_x) + (environment_height - tx_y) * (environment_height - tx_y));
+//   const float maximum_radial_distance = max<float>(max<float>(corner_distance_0, corner_distance_1), max<float>(corner_distance_2, corner_distance_3));
+
+//   const uint8_t object_unit = constrain(static_cast<uint8_t>(minimum_dimension / 8u), 2u, 8u);
+//   const uint8_t desired_object_count = objects_enabled ? static_cast<uint8_t>(2u + (static_cast<uint16_t>(SEGMENT.intensity) * (MAX_OBJECTS - 2u)) / 255u) : 0u;
+
+//   const uint8_t coverage_brightness = SEGMENT.custom1;
+//   const uint8_t object_brightness = SEGMENT.custom2;
+//   const uint8_t no_signal_brightness = static_cast<uint8_t>((static_cast<uint16_t>(SEGMENT.custom3) * 255u + 15u) / 31u);
+
+//   const uint32_t coverage_cycle_period_ms = max<uint32_t>(SEGMENT.get_effect_period(), 1u);
+
+//   const uint32_t radial_draw_duration_ms = draw_animation_enabled
+//     ? static_cast<uint32_t>((static_cast<uint64_t>(coverage_cycle_period_ms) * static_cast<uint32_t>(SEGMENT.speed)) / 255u)
+//     : 0u;
+
+//   const auto occupancy_pixel_index = [&](uint16_t x, uint16_t y) -> uint32_t
+//   {
+//     return static_cast<uint32_t>(y) * static_cast<uint32_t>(width) + static_cast<uint32_t>(x);
+//   };
+
+//   const auto occupancy_get = [&](int16_t x, int16_t y) -> bool
+//   {
+//     if (x < 0 || y < 0 || x >= static_cast<int16_t>(width) || y >= static_cast<int16_t>(height)) return true;
+
+//     const uint32_t pixel_index = occupancy_pixel_index(static_cast<uint16_t>(x), static_cast<uint16_t>(y));
+//     return (occupancy[pixel_index >> 5] & (1UL << (pixel_index & 31u))) != 0u;
+//   };
+
+//   const auto occupancy_set = [&](uint16_t x, uint16_t y)
+//   {
+//     if (x >= width || y >= height) return;
+
+//     const uint32_t pixel_index = occupancy_pixel_index(x, y);
+//     occupancy[pixel_index >> 5] |= 1UL << (pixel_index & 31u);
+//   };
+
+//   const auto occupancy_clear_all = [&]()
+//   {
+//     memset(occupancy, 0, occupancy_bytes);
+//   };
+
+//   const auto receiver_image_coordinate = [](float receiver_coordinate, float environment_size, int8_t tile) -> float
+//   {
+//     const bool odd_tile = (abs(tile) & 0x01) != 0;
+
+//     return static_cast<float>(tile) * environment_size + (odd_tile ? environment_size - receiver_coordinate : receiver_coordinate);
+//   };
+
+//   const auto fold_coordinate = [](float unfolded_coordinate, float environment_size) -> float
+//   {
+//     if (environment_size <= 0.0f) return 0.0f;
+
+//     const float period = environment_size * 2.0f;
+//     float folded = fmodf(unfolded_coordinate, period);
+
+//     if (folded < 0.0f) folded += period;
+
+//     return folded <= environment_size ? folded : period - folded;
+//   };
+
+//   const auto get_object_bounds = [](const RayTracingCoverageObject& object, uint16_t& object_width, uint16_t& object_height)
+//   {
+//     switch (object.shape)
+//     {
+//       case RT_COVERAGE_OBJECT_SQUARE:
+//         object_width = object.square_size;
+//         object_height = object.square_size;
+//         break;
+
+//       case RT_COVERAGE_OBJECT_RECTANGLE:
+//         object_width = object.unit_size;
+//         object_height = static_cast<uint16_t>(object.unit_size + (object.unit_size + 1u) / 2u);
+
+//         if ((object.rotation & 0x01u) != 0u)
+//         {
+//           const uint16_t temporary = object_width;
+//           object_width = object_height;
+//           object_height = temporary;
+//         }
+//         break;
+
+//       default:
+//         object_width = static_cast<uint16_t>(object.unit_size * 2u);
+//         object_height = static_cast<uint16_t>(object.unit_size * 3u);
+
+//         if ((object.rotation & 0x01u) != 0u)
+//         {
+//           const uint16_t temporary = object_width;
+//           object_width = object_height;
+//           object_height = temporary;
+//         }
+//         break;
+//     }
+//   };
+
+//   const auto object_contains_local_pixel = [](const RayTracingCoverageObject& object, uint16_t local_x, uint16_t local_y) -> bool
+//   {
+//     if (object.shape == RT_COVERAGE_OBJECT_SQUARE) return local_x < object.square_size && local_y < object.square_size;
+
+//     if (object.shape == RT_COVERAGE_OBJECT_RECTANGLE)
+//     {
+//       const uint16_t narrow_side = object.unit_size;
+//       const uint16_t long_side = static_cast<uint16_t>(object.unit_size + (object.unit_size + 1u) / 2u);
+
+//       if ((object.rotation & 0x01u) == 0u) return local_x < narrow_side && local_y < long_side;
+
+//       return local_x < long_side && local_y < narrow_side;
+//     }
+
+//     const uint16_t unit = object.unit_size;
+//     const uint16_t short_side = static_cast<uint16_t>(unit * 2u);
+//     const uint16_t long_side = static_cast<uint16_t>(unit * 3u);
+
+//     switch (object.rotation & 0x03u)
+//     {
+//       case 0:
+//         return (local_x < unit && local_y < long_side) || (local_x < short_side && local_y >= long_side - unit);
+
+//       case 1:
+//         return (local_y < unit && local_x < long_side) || (local_y < short_side && local_x >= long_side - unit);
+
+//       case 2:
+//         return (local_x >= short_side - unit && local_y < long_side) || (local_x < short_side && local_y < unit);
+
+//       default:
+//         return (local_y >= short_side - unit && local_x < long_side) || (local_y < short_side && local_x < unit);
+//     }
+//   };
+
+//   const auto create_object = [&](RayTracingCoverageObject& object) -> bool
+//   {
+//     for (uint8_t attempt = 0u; attempt < MAX_OBJECT_PLACEMENT_ATTEMPTS; attempt++)
+//     {
+//       object.shape = static_cast<uint8_t>(hw_random16(3u));
+//       object.rotation = static_cast<uint8_t>(hw_random16(4u));
+//       object.unit_size = object_unit;
+//       object.square_size = static_cast<uint8_t>(object_unit + hw_random16(static_cast<uint16_t>(object_unit + 1u)));
+
+//       uint16_t object_width = 0u;
+//       uint16_t object_height = 0u;
+
+//       get_object_bounds(object, object_width, object_height);
+
+//       const uint16_t horizontal_margin = static_cast<uint16_t>(OBJECT_BORDER_MARGIN * 2u);
+//       const uint16_t vertical_margin = static_cast<uint16_t>(OBJECT_BORDER_MARGIN * 2u);
+
+//       if (width <= horizontal_margin || height <= vertical_margin) continue;
+//       if (object_width == 0u || object_height == 0u) continue;
+//       if (object_width > width - horizontal_margin || object_height > height - vertical_margin) continue;
+
+//       const uint16_t origin_x_count = static_cast<uint16_t>(width - object_width - horizontal_margin + 1u);
+//       const uint16_t origin_y_count = static_cast<uint16_t>(height - object_height - vertical_margin + 1u);
+
+//       object.origin_x = static_cast<uint16_t>(OBJECT_BORDER_MARGIN + hw_random16(origin_x_count));
+//       object.origin_y = static_cast<uint16_t>(OBJECT_BORDER_MARGIN + hw_random16(origin_y_count));
+
+//       bool placement_valid = true;
+
+//       const float tx_clearance = static_cast<float>(object_unit + 1u);
+//       const float tx_clearance_squared = tx_clearance * tx_clearance;
+
+//       for (uint16_t local_y = 0u; local_y < object_height && placement_valid; local_y++)
+//       {
+//         for (uint16_t local_x = 0u; local_x < object_width; local_x++)
+//         {
+//           if (!object_contains_local_pixel(object, local_x, local_y)) continue;
+
+//           const uint16_t physical_x = static_cast<uint16_t>(object.origin_x + local_x);
+//           const uint16_t physical_y = static_cast<uint16_t>(object.origin_y + local_y);
+
+//           if (occupancy_get(physical_x, physical_y))
+//           {
+//             placement_valid = false;
+//             break;
+//           }
+
+//           const float tx_delta_x = static_cast<float>(physical_x) - tx_x;
+//           const float tx_delta_y = static_cast<float>(physical_y) - tx_y;
+
+//           if (tx_delta_x * tx_delta_x + tx_delta_y * tx_delta_y <= tx_clearance_squared)
+//           {
+//             placement_valid = false;
+//             break;
+//           }
+//         }
+//       }
+
+//       if (!placement_valid) continue;
+
+//       for (uint16_t local_y = 0u; local_y < object_height; local_y++)
+//       {
+//         for (uint16_t local_x = 0u; local_x < object_width; local_x++)
+//         {
+//           if (!object_contains_local_pixel(object, local_x, local_y)) continue;
+
+//           occupancy_set(
+//             static_cast<uint16_t>(object.origin_x + local_x),
+//             static_cast<uint16_t>(object.origin_y + local_y)
+//           );
+//         }
+//       }
+
+//       return true;
+//     }
+
+//     return false;
+//   };
+
+//   const auto create_object_map = [&]()
+//   {
+//     occupancy_clear_all();
+
+//     state->object_count = 0u;
+//     state->object_enabled = static_cast<uint8_t>(objects_enabled);
+//     state->draw_animation_enabled = static_cast<uint8_t>(draw_animation_enabled);
+
+//     if (!objects_enabled) return;
+
+//     for (uint8_t object_index = 0u; object_index < desired_object_count; object_index++)
+//     {
+//       RayTracingCoverageObject candidate;
+
+//       if (!create_object(candidate)) continue;
+
+//       state->objects[state->object_count++] = candidate;
+
+//       if (state->object_count >= MAX_OBJECTS) break;
+//     }
+//   };
+
+//   const auto initialise_candidate = [&](RayTracingCoverageCandidate& candidate, float receiver_x, float receiver_y, int8_t tile_x, int8_t tile_y)
+//   {
+//     candidate.image_tile_x = tile_x;
+//     candidate.image_tile_y = tile_y;
+
+//     const float image_rx = receiver_image_coordinate(receiver_x, environment_width, tile_x);
+//     const float image_ry = receiver_image_coordinate(receiver_y, environment_height, tile_y);
+//     const float delta_x = image_rx - tx_x;
+//     const float delta_y = image_ry - tx_y;
+
+//     candidate.total_distance = sqrtf(delta_x * delta_x + delta_y * delta_y);
+
+//     if (candidate.total_distance < 0.001f)
+//     {
+//       candidate.direction_x = 1.0f;
+//       candidate.direction_y = 0.0f;
+//       candidate.total_distance = 0.001f;
+//     }
+//     else
+//     {
+//       candidate.direction_x = delta_x / candidate.total_distance;
+//       candidate.direction_y = delta_y / candidate.total_distance;
+//     }
+//   };
+
+//   const auto candidate_is_clear = [&](const RayTracingCoverageCandidate& candidate, float receiver_x, float receiver_y) -> bool
+//   {
+//     if (occupancy_get(static_cast<int16_t>(roundf(receiver_x)), static_cast<int16_t>(roundf(receiver_y)))) return false;
+
+//     for (float distance = PATH_COLLISION_SAMPLE_SPACING; distance < candidate.total_distance - PATH_COLLISION_SAMPLE_SPACING; distance += PATH_COLLISION_SAMPLE_SPACING)
+//     {
+//       const float unfolded_x = tx_x + candidate.direction_x * distance;
+//       const float unfolded_y = tx_y + candidate.direction_y * distance;
+
+//       const int16_t physical_x = static_cast<int16_t>(roundf(fold_coordinate(unfolded_x, environment_width)));
+//       const int16_t physical_y = static_cast<int16_t>(roundf(fold_coordinate(unfolded_y, environment_height)));
+
+//       if (occupancy_get(physical_x, physical_y)) return false;
+//     }
+
+//     return true;
+//   };
+
+//   const auto calculate_shortest_path = [&](float receiver_x, float receiver_y) -> float
+//   {
+//     if (occupancy_get(static_cast<int16_t>(roundf(receiver_x)), static_cast<int16_t>(roundf(receiver_y)))) return NO_VALID_PATH;
+
+//     float shortest_distance = LARGE_PATH_DISTANCE;
+
+//     for (int8_t tile_y = -static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_y <= static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_y++)
+//     {
+//       for (int8_t tile_x = -static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_x <= static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_x++)
+//       {
+//         const uint8_t reflection_order = static_cast<uint8_t>(abs(tile_x) + abs(tile_y));
+
+//         if (reflection_order > MAX_REFLECTION_ORDER) continue;
+
+//         RayTracingCoverageCandidate candidate;
+
+//         initialise_candidate(candidate, receiver_x, receiver_y, tile_x, tile_y);
+
+//         if (candidate.total_distance >= shortest_distance) continue;
+//         if (!candidate_is_clear(candidate, receiver_x, receiver_y)) continue;
+
+//         shortest_distance = candidate.total_distance;
+//       }
+//     }
+
+//     return shortest_distance < LARGE_PATH_DISTANCE ? shortest_distance : NO_VALID_PATH;
+//   };
+
+//   const auto draw_objects = [&]()
+//   {
+//     const uint32_t object_colour = ColourBlend(BLACK, SEGMENT.segcol[0].colour, object_brightness);
+
+//     for (uint8_t object_index = 0u; object_index < state->object_count; object_index++)
+//     {
+//       const RayTracingCoverageObject& object = state->objects[object_index];
+
+//       uint16_t object_width = 0u;
+//       uint16_t object_height = 0u;
+
+//       get_object_bounds(object, object_width, object_height);
+
+//       for (uint16_t local_y = 0u; local_y < object_height; local_y++)
+//       {
+//         for (uint16_t local_x = 0u; local_x < object_width; local_x++)
+//         {
+//           if (!object_contains_local_pixel(object, local_x, local_y)) continue;
+
+//           SEGMENT.setPixelColorXY(
+//             static_cast<uint16_t>(object.origin_x + local_x),
+//             static_cast<uint16_t>(object.origin_y + local_y),
+//             object_colour
+//           );
+//         }
+//       }
+//     }
+//   };
+
+//   const auto draw_tx = [&]()
+//   {
+//     SEGMENT.setPixelColorXY(tx_x_pixel, tx_y_pixel, SEGMENT.segcol[1].colour);
+//   };
+
+//   const auto draw_object_frame = [&]()
+//   {
+//     SEGMENT.fill(BLACK);
+//     draw_objects();
+//     draw_tx();
+//   };
+
+//   const auto reset_path_calculation = [&]()
+//   {
+//     state->calculation_pixel_index = 0u;
+//     state->minimum_path_distance = LARGE_PATH_DISTANCE;
+//     state->maximum_path_distance = 0.0f;
+
+//     for (uint32_t pixel_index = 0u; pixel_index < pixel_count; pixel_index++) path_distances[pixel_index] = NO_VALID_PATH;
+//   };
+
+//   const auto draw_coverage_frame = [&](float radial_limit, bool radial_limit_enabled, bool include_no_signal)
+//   {
+//     const float linear_minimum = max<float>(state->minimum_path_distance, PATH_LOSS_REFERENCE_DISTANCE);
+//     const float linear_maximum = max<float>(state->maximum_path_distance, linear_minimum);
+
+//     const float mapped_minimum = COVERAGE_DISTANCE_MODE == RT_COVERAGE_DISTANCE_LOGARITHMIC ? log10f(linear_minimum) : linear_minimum;
+//     const float mapped_maximum = COVERAGE_DISTANCE_MODE == RT_COVERAGE_DISTANCE_LOGARITHMIC ? log10f(linear_maximum) : linear_maximum;
+//     const float mapped_range = mapped_maximum - mapped_minimum;
+
+//     const bool valid_distance_range = state->minimum_path_distance < LARGE_PATH_DISTANCE && mapped_range > 0.0001f;
+
+//     /*
+//      * Segment Colour 3 represents no signal.
+//      *
+//      * If your local structure exposes this as SEGMENT.colors[2], replace
+//      * SEGMENT.segcol[2].colour with SEGMENT.colors[2].
+//      */
+//     const uint32_t no_signal_colour = ColourBlend(BLACK, SEGMENT.segcol[2].colour, no_signal_brightness);
+
+//     SEGMENT.fill(BLACK);
+
+//     for (uint32_t pixel_index = 0u; pixel_index < pixel_count; pixel_index++)
+//     {
+//       const uint16_t x = static_cast<uint16_t>(pixel_index % width);
+//       const uint16_t y = static_cast<uint16_t>(pixel_index / width);
+
+//       if (occupancy_get(x, y)) continue;
+
+//       if (radial_limit_enabled)
+//       {
+//         const float radial_delta_x = static_cast<float>(x) - tx_x;
+//         const float radial_delta_y = static_cast<float>(y) - tx_y;
+//         const float radial_distance_squared = radial_delta_x * radial_delta_x + radial_delta_y * radial_delta_y;
+
+//         if (radial_distance_squared > radial_limit * radial_limit) continue;
+//       }
+
+//       const float path_distance = path_distances[pixel_index];
+
+//       if (path_distance < 0.0f)
+//       {
+//         if (include_no_signal) SEGMENT.setPixelColorXY(x, y, no_signal_colour);
+
+//         continue;
+//       }
+
+//       const float clamped_distance = max<float>(path_distance, PATH_LOSS_REFERENCE_DISTANCE);
+//       const float mapped_distance = COVERAGE_DISTANCE_MODE == RT_COVERAGE_DISTANCE_LOGARITHMIC ? log10f(clamped_distance) : clamped_distance;
+
+//       float normalised_distance = 0.0f;
+
+//       if (valid_distance_range)
+//       {
+//         normalised_distance = constrain(
+//           (mapped_distance - mapped_minimum) / mapped_range,
+//           0.0f,
+//           1.0f
+//         );
+//       }
+
+//       const float inverted_palette_position = constrain(1.0f - normalised_distance, 0.0f, 1.0f);
+
+//       const uint8_t palette_index = static_cast<uint8_t>(
+//         COVERAGE_PALETTE_MIN_INDEX +
+//         roundf(
+//           inverted_palette_position *
+//           static_cast<float>(COVERAGE_PALETTE_MAX_INDEX - COVERAGE_PALETTE_MIN_INDEX)
+//         )
+//       );
+
+//       const uint32_t palette_colour = SEGMENT.GetPaletteColour(
+//         palette_index,
+//         PALETTE_INDEX__IS_255_RANGE,
+//         PALETTE_MODE__DEFAULT,
+//         PALETTE_WRAP_HARDEDGE,
+//         NO_ENCODED_VALUE,
+//         PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
+//       );
+
+//       uint8_t distance_brightness = 255u;
+//       if (distance_rolloff_enabled)
+//       {
+//         constexpr uint8_t MINIMUM_COVERAGE_BRIGHTNESS = 80u;
+//         distance_brightness = static_cast<uint8_t>(
+//           255.0f -
+//           normalised_distance *
+//           static_cast<float>(255u - MINIMUM_COVERAGE_BRIGHTNESS)
+//         );
+//       }
+//       const uint8_t effective_coverage_brightness = scale8(coverage_brightness, distance_brightness);
+//       const uint32_t coverage_colour = ColourBlend(BLACK, palette_colour, effective_coverage_brightness);
+
+//       SEGMENT.setPixelColorXY(x, y, coverage_colour);
+//     }
+
+//     draw_objects();
+//     draw_tx();
+//   };
+
+//   /*
+//    * Runtime control changes restart the cycle cleanly.
+//    */
+//   if (!initialise && (object_enable_changed || draw_animation_option_changed))
+//   {
+//     state->object_enabled = static_cast<uint8_t>(objects_enabled);
+//     state->draw_animation_enabled = static_cast<uint8_t>(draw_animation_enabled);
+//     state->transition_started = 0u;
+//     state->first_cycle = 0u;
+//     state->cycle_started_time_ms = effect_start_time;
+//     state->phase_started_time_ms = effect_start_time;
+//     state->phase = RT_COVERAGE_PHASE_FADE_OUT_OLD_MAP;
+//   }
+
+//   switch (state->phase)
+//   {
+//     case RT_COVERAGE_PHASE_INITIALISE:
+//     {
+//       state->transition_started = 0u;
+//       state->cycle_started_time_ms = effect_start_time;
+//       state->phase_started_time_ms = effect_start_time;
+//       state->phase = RT_COVERAGE_PHASE_CREATE_OBJECTS;
+//       return;
+//     }
+
+//     case RT_COVERAGE_PHASE_FADE_OUT_OLD_MAP:
+//     {
+//       if (!state->transition_started)
+//       {
+//         state->transition_started = 1u;
+//         state->phase_started_time_ms = effect_start_time;
+
+//         SEGMENT.startTransition(OLD_MAP_FADE_OUT_MS, true);
+//         SEGMENT.fill(BLACK);
+//       }
+
+//       if (effect_start_time - state->phase_started_time_ms < OLD_MAP_FADE_OUT_MS) return;
+
+//       state->transition_started = 0u;
+//       state->phase_started_time_ms = effect_start_time;
+//       state->phase = RT_COVERAGE_PHASE_CREATE_OBJECTS;
+//       return;
+//     }
+
+//     case RT_COVERAGE_PHASE_CREATE_OBJECTS:
+//     {
+//       create_object_map();
+//       reset_path_calculation();
+
+//       state->transition_started = 0u;
+//       state->phase_started_time_ms = effect_start_time;
+//       state->phase = RT_COVERAGE_PHASE_FADE_IN_OBJECTS;
+//       return;
+//     }
+
+//     case RT_COVERAGE_PHASE_FADE_IN_OBJECTS:
+//     {
+//       if (!state->transition_started)
+//       {
+//         state->transition_started = 1u;
+//         state->phase_started_time_ms = effect_start_time;
+
+//         SEGMENT.startTransition(OBJECT_FADE_IN_MS, true);
+//         draw_object_frame();
+//       }
+
+//       if (effect_start_time - state->phase_started_time_ms < OBJECT_FADE_IN_MS) return;
+
+//       state->transition_started = 0u;
+//       state->phase_started_time_ms = effect_start_time;
+//       state->phase = RT_COVERAGE_PHASE_CALCULATING;
+//       return;
+//     }
+
+//     case RT_COVERAGE_PHASE_CALCULATING:
+//     {
+//       uint8_t processed_pixels = 0u;
+
+//       while (state->calculation_pixel_index < pixel_count && processed_pixels < COVERAGE_PIXELS_PER_CALL)
+//       {
+//         const uint32_t pixel_index = state->calculation_pixel_index++;
+//         const uint16_t receiver_x = static_cast<uint16_t>(pixel_index % width);
+//         const uint16_t receiver_y = static_cast<uint16_t>(pixel_index / width);
+
+//         const float shortest_distance = calculate_shortest_path(
+//           static_cast<float>(receiver_x),
+//           static_cast<float>(receiver_y)
+//         );
+
+//         path_distances[pixel_index] = shortest_distance;
+
+//         if (shortest_distance >= 0.0f)
+//         {
+//           const bool transmitter_pixel = receiver_x == tx_x_pixel && receiver_y == tx_y_pixel;
+
+//           if (!transmitter_pixel)
+//           {
+//             if (shortest_distance < state->minimum_path_distance) state->minimum_path_distance = shortest_distance;
+//             if (shortest_distance > state->maximum_path_distance) state->maximum_path_distance = shortest_distance;
+//           }
+//         }
+
+//         processed_pixels++;
+//       }
+
+//       if (state->calculation_pixel_index < pixel_count) return;
+
+//       state->phase_started_time_ms = effect_start_time;
+
+//       if (draw_animation_enabled && radial_draw_duration_ms > 0u)
+//       {
+//         state->phase = RT_COVERAGE_PHASE_RADIAL_DRAW;
+//       }
+//       else
+//       {
+//         /*
+//          * Draw all valid coverage immediately, but keep no-signal pixels black
+//          * until the dedicated final transition.
+//          */
+//         draw_coverage_frame(maximum_radial_distance, false, false);
+
+//         state->transition_started = 0u;
+//         state->phase = RT_COVERAGE_PHASE_FINALISE_NO_SIGNAL;
+//       }
+
+//       return;
+//     }
+
+//     case RT_COVERAGE_PHASE_RADIAL_DRAW:
+//     {
+//       const uint32_t radial_elapsed_ms = effect_start_time - state->phase_started_time_ms;
+
+//       if (radial_elapsed_ms >= radial_draw_duration_ms)
+//       {
+//         /*
+//          * Complete all valid heatmap pixels first. No-signal pixels remain
+//          * black and are introduced by the next transition state.
+//          */
+//         draw_coverage_frame(maximum_radial_distance, false, false);
+
+//         state->transition_started = 0u;
+//         state->phase_started_time_ms = effect_start_time;
+//         state->phase = RT_COVERAGE_PHASE_FINALISE_NO_SIGNAL;
+//         return;
+//       }
+
+//       const float radial_progress = constrain(
+//         static_cast<float>(radial_elapsed_ms) /
+//         static_cast<float>(radial_draw_duration_ms),
+//         0.0f,
+//         1.0f
+//       );
+
+//       const float radial_limit = radial_progress * maximum_radial_distance;
+
+//       /*
+//        * The radial phase is a direct time-based animation. It deliberately
+//        * does not use startTransition().
+//        */
+//       draw_coverage_frame(radial_limit, true, false);
+//       return;
+//     }
+
+//     case RT_COVERAGE_PHASE_FINALISE_NO_SIGNAL:
+//     {
+//       if (!state->transition_started)
+//       {
+//         state->transition_started = 1u;
+//         state->phase_started_time_ms = effect_start_time;
+
+//         /*
+//          * Start one transition from the completed valid-path map to the final
+//          * map containing Segment Colour 3 in every unreachable pixel.
+//          */
+//         SEGMENT.startTransition(NO_SIGNAL_FADE_IN_MS, true);
+//         draw_coverage_frame(maximum_radial_distance, false, true);
+//       }
+
+//       if (effect_start_time - state->phase_started_time_ms < NO_SIGNAL_FADE_IN_MS) return;
+
+//       state->transition_started = 0u;
+//       state->phase_started_time_ms = effect_start_time;
+//       state->first_cycle = 0u;
+//       state->phase = RT_COVERAGE_PHASE_HOLD;
+//       return;
+//     }
+
+//     case RT_COVERAGE_PHASE_HOLD:
+//     {
+//       if (effect_start_time - state->cycle_started_time_ms < coverage_cycle_period_ms) return;
+
+//       state->transition_started = 0u;
+//       state->cycle_started_time_ms = effect_start_time;
+//       state->phase_started_time_ms = effect_start_time;
+//       state->phase = RT_COVERAGE_PHASE_FADE_OUT_OLD_MAP;
+//       return;
+//     }
+
+//     default:
+//     {
+//       state->transition_started = 0u;
+//       state->cycle_started_time_ms = effect_start_time;
+//       state->phase_started_time_ms = effect_start_time;
+//       state->phase = RT_COVERAGE_PHASE_INITIALISE;
+//       return;
+//     }
+//   }
+// }
+
+// static const char PM_EFFECT_CONFIG__RAY_TRACING__COVERAGE[] PROGMEM =
+// "RT Coverage@"
+// "Draw Time,Object Density,Heatmap Brightness,Object Brightness,No Signal Brightness,Objects,Distance Roll-off,Draw Animation,Update Period,"
+// ";"
+// ",Tx,NS,,"
+// ";"
+// "!"
+// ";"
+// "2"
+// ";"
+// "sx=127,"
+// "ix=50,"
+// "c1=170,"
+// "c2=80,"
+// "c3=31,"
+// "o1=1,"
+// "o2=1,"
+// "o3=1,"
+// "s0=FFFFFF," // Objects
+// "s1=00FF00," // Transmitter
+// "s2=FF00FF," // No signal
+// "paln=Jet,"
+// "ep=10000"
+// ;
+
+
+// static const char PM_EFFECT_DESCRI__RAY_TRACING__COVERAGE[] PROGMEM =
+// "First-arrival ray-tracing coverage heatmap.\n\r"
+// "SX: Radial draw duration as a proportion of EP\n\r"
+// "IX: Object density\n\r"
+// "C1: Heatmap brightness\n\r"
+// "C2: Object brightness\n\r"
+// "C3: No-signal brightness, internally 0-31 and scaled to 0-255\n\r"
+// "O1: Enable solid scaled objects\n\r"
+// "O2: Enable distance brightness roll-off from 255 to 80\n\r"
+// "O3: Enable radial heatmap draw animation\n\r"
+// "EP: Complete coverage cycle period\n\r"
+// "Old maps fade to black before a new object map is generated\n\r"
+// "New objects fade in over three seconds\n\r"
+// "Radial coverage is drawn directly without transition restarts\n\r"
+// "No-signal pixels fade in using Segment Colour 3\n\r"
+// "Objects remain one pixel away from every matrix border\n\r"
+// "Shortest valid paths use the high end of the heatmap palette\n\r"
+// "Longest valid paths use the low end of the heatmap palette\n\r"
+// "Palette: Coverage gradient\n\r"
+// "Segment Colour 1: Objects\n\r"
+// "Segment Colour 2: Transmitter\n\r"
+// "Segment Colour 3: No signal or no valid path";
+
+
+
+
+/******************************************************************************************************************************************************************************************************************
  * EFFECT: RT COVERAGE
  *
- * PHASES
- *   1. Fade previous completed map to black.
- *   2. Generate a new object map.
- *   3. Fade the new objects in from black.
- *   4. Calculate all shortest paths in staged batches.
- *   5. Draw the coverage map radially without using the transition system.
- *   6. Fade no-signal pixels from black to Segment Colour 3.
- *   7. Hold the completed map until EP starts the next cycle.
+ * ================================================================================================================================================================================================================
+ * SUMMARY
+ * ================================================================================================================================================================================================================
+ *
+ * RT Coverage generates a simplified two-dimensional RF coverage heatmap.
+ *
+ * The LED matrix represents a physical rectangular environment whose WIDTH is
+ * defined in metres. The height is derived automatically from the matrix aspect
+ * ratio so each LED pixel represents the same physical distance in X and Y.
+ *
+ * The default physical model is:
+ *
+ *   Environment width : 100 metres
+ *   TX power          : 0 dBm
+ *   Frequency         : 5.8 GHz
+ *   Noise floor       : -100 dBm
+ *
+ * Propagation paths are generated using an image-space reflection model.
+ * Each receiver pixel searches valid paths up to MAX_REFLECTION_ORDER.
+ *
+ * For every valid candidate path:
+ *
+ *   1. Geometrical path length is calculated in PIXELS.
+ *   2. Pixel length is converted to METRES.
+ *   3. Free-space path loss is calculated at 5.8 GHz.
+ *   4. Optional reflection loss is added.
+ *   5. Received power is calculated in dBm.
+ *
+ * The valid path producing the STRONGEST received power is selected.
+ *
+ * Received power is mapped directly to the heatmap:
+ *
+ *   >= -50 dBm  -> strongest / hot end of palette
+ *      -75 dBm  -> approximately middle of palette
+ *   <= -100 dBm -> noise floor / no signal
+ *
+ * This deliberately clips very strong signals so that the useful colour range
+ * is concentrated on the weaker RF region where coverage variation, shadowing
+ * and reflection losses are visually interesting.
  *
  *
+ * ================================================================================================================================================================================================================
+ * PHYSICAL SCALE
+ * ================================================================================================================================================================================================================
+ *
+ * ENVIRONMENT_WIDTH_M defines the physical width represented by the matrix.
+ *
+ * Example:
+ *
+ *   64 pixel matrix width
+ *   ENVIRONMENT_WIDTH_M = 100
+ *
+ * gives:
+ *
+ *   metres_per_pixel = 100 / (64 - 1)
+ *                    = 1.587 m/pixel
+ *
+ * A geometrical ray having a total length of 30 pixels therefore represents:
+ *
+ *   30 * 1.587
+ *   = 47.6 metres
+ *
+ * The matrix height uses the same metres-per-pixel value.
+ *
+ * A 64 x 32 matrix therefore represents approximately:
+ *
+ *   100 m x 49.2 m
+ *
+ *
+ * ================================================================================================================================================================================================================
+ * RF PROPAGATION MODEL
+ * ================================================================================================================================================================================================================
+ *
+ * TX power:
+ *
+ *   TX_POWER_DBM = 0 dBm
+ *
+ * Frequency:
+ *
+ *   FREQUENCY_GHZ = 5.8 GHz
+ *
+ * Free-space path loss:
+ *
+ *   FSPL(dB) = 32.44
+ *              + 20 log10(f_MHz)
+ *              + 20 log10(d_km)
+ *
+ * At 5.8 GHz this is approximately:
+ *
+ *   1 m   -> 47.7 dB loss
+ *   10 m  -> 67.7 dB loss
+ *   50 m  -> 81.7 dB loss
+ *   100 m -> 87.7 dB loss
+ *
+ * With a 0 dBm transmitter:
+ *
+ *   1 m   -> -47.7 dBm
+ *   10 m  -> -67.7 dBm
+ *   50 m  -> -81.7 dBm
+ *   100 m -> -87.7 dBm
+ *
+ *
+ * ================================================================================================================================================================================================================
+ * REFLECTION LOSS
+ * ================================================================================================================================================================================================================
+ *
+ * ENABLE_REFLECTION_LOSS enables an additional fixed loss for every reflection.
+ *
+ *   Prx(dBm) = TX_POWER_DBM
+ *              - FSPL
+ *              - reflection_order * REFLECTION_LOSS_DB
+ *
+ * With REFLECTION_LOSS_DB = 8 dB:
+ *
+ *   50 m LOS              -> approximately -81.7 dBm
+ *   50 m + 1 reflection   -> approximately -89.7 dBm
+ *   50 m + 2 reflections  -> approximately -97.7 dBm
+ *
+ * This makes coverage behind an obstruction substantially weaker even when the
+ * reflected geometrical path is only slightly longer than the direct path.
+ *
+ *
+ * ================================================================================================================================================================================================================
+ * PATH SEARCH
+ * ================================================================================================================================================================================================================
+ *
+ * The transmitter is positioned approximately:
+ *
+ *   X = 15% of environment width
+ *   Y = 50% of environment height
+ *
+ * Random solid objects are written into a one-bit occupancy map.
+ *
+ * Image-space receiver locations are generated for reflection orders up to
+ * MAX_REFLECTION_ORDER.
+ *
+ * Each candidate ray is folded back into the physical environment and sampled
+ * against the occupancy bitmap.
+ *
+ * If any physical sample intersects an object, that candidate path is rejected.
+ *
+ * PATH_COLLISION_SAMPLE_SPACING controls ray collision sampling resolution in
+ * matrix-pixel units.
+ *
+ *
+ * ================================================================================================================================================================================================================
+ * PATH SELECTION
+ * ================================================================================================================================================================================================================
+ *
+ * Paths are NOT selected according to shortest geometrical distance.
+ *
+ * Each valid path is converted to received power in dBm and the path with the
+ * HIGHEST received power is retained.
+ *
+ * Therefore:
+ *
+ *   short reflected path
+ *
+ * may lose against:
+ *
+ *   slightly longer direct path
+ *
+ * because the reflection introduces additional attenuation.
+ *
+ *
+ * ================================================================================================================================================================================================================
+ * HEATMAP SCALE
+ * ================================================================================================================================================================================================================
+ *
+ * The heatmap uses a fixed RF received-power display range:
+ *
+ *   HEATMAP_STRONG_DBM = -50 dBm
+ *   NOISE_FLOOR_DBM    = -100 dBm
+ *
+ * Anything stronger than HEATMAP_STRONG_DBM is clipped to the strongest palette
+ * colour.
+ *
+ * Anything below NOISE_FLOOR_DBM is treated as no usable signal.
+ *
+ * Values between them use the entire palette range:
+ *
+ *   -50 dBm ------------------------------ -100 dBm
+ *      |                                      |
+ *      strongest                        weakest/noise
+ *      high palette                         low palette
+ *
+ * This behaves much more like a conventional Wireless InSite received-power
+ * coverage plot than automatically normalising each scene to its own minimum
+ * and maximum.
+ *
+ *
+ * ================================================================================================================================================================================================================
+ * BACKGROUND FRAME CALCULATION
+ * ================================================================================================================================================================================================================
+ *
+ * Expensive path calculation is hidden behind the currently displayed map.
+ *
+ * Runtime sequence:
+ *
+ *   DISPLAY CURRENT FRAME
+ *          |
+ *          v
+ *   PREPARE NEXT SCENE
+ *          |
+ *          v
+ *   CALCULATE NEXT FRAME
+ *          |
+ *          | current frame remains visible
+ *          |
+ *          v
+ *   NEXT FRAME READY
+ *          |
+ *          | wait until EP visible time has also expired
+ *          |
+ *          v
+ *   FADE CURRENT FRAME TO BLACK
+ *          |
+ *          v
+ *   BLACK HOLD
+ *          |
+ *          v
+ *   DRAW ALREADY-CALCULATED FRAME
+ *          |
+ *          v
+ *   BEGIN CALCULATING FOLLOWING FRAME
+ *
+ * Therefore calculation latency normally appears as additional useful display
+ * time rather than as an off/black period.
+ *
+ *
+ * ================================================================================================================================================================================================================
+ * RADIAL REVEAL
+ * ================================================================================================================================================================================================================
+ *
+ * If O3 is enabled, an already-calculated coverage map is revealed radially from
+ * the transmitter.
+ *
+ * The radial animation does NOT calculate propagation paths. All path values
+ * already exist before the reveal starts.
+ *
+ * SX controls reveal duration as:
+ *
+ *   reveal_duration = EP * SX / 255
+ *
+ * The next background calculation begins only once the new frame has been fully
+ * revealed.
+ *
+ *
+ * ================================================================================================================================================================================================================
  * CONTROLS
- *   SX : radial draw duration as a proportion of EP.
- *   IX : object density.
- *   C1 : heatmap and no-signal brightness.
+ * ================================================================================================================================================================================================================
+ *
+ *   SX : radial reveal duration as a proportion of EP.
+ *   IX : generated object density.
+ *   C1 : coverage heatmap brightness.
  *   C2 : object brightness.
- *   C3 : reserved.
- *   O1 : enable objects.
- *   O2 : reserved.
- *   O3 : enable radial heatmap draw animation.
- *   EP : complete coverage cycle period.
+ *   C3 : no-signal brightness.
+ *
+ *   O1 : enable generated objects.
+ *   O2 : enable additional received-power brightness roll-off.
+ *   O3 : enable radial reveal of prepared coverage map.
+ *
+ *   EP : minimum completed-map visible period.
  *
  *   Segment Colour 1 : object colour.
  *   Segment Colour 2 : transmitter colour.
- *   Segment Colour 3 : no signal or no valid path.
- *   Palette          : heatmap gradient.
- *   Palette2         : unused.
- **********************************************************************************************************************************************************************************/
+ *   Segment Colour 3 : below-noise / no-valid-path colour.
+ *
+ *   Palette : received-power heatmap.
+ *
+ *
+ * ================================================================================================================================================================================================================
+ * DEBUG
+ * ================================================================================================================================================================================================================
+ *
+ * Define RT_COVERAGE_DEBUG to print:
+ *
+ *   - scene preparation
+ *   - calculation start
+ *   - calculation completion time
+ *   - strongest and weakest calculated received power
+ *   - frame-ready state
+ *   - fade start
+ *   - black hold
+ *   - radial reveal
+ *   - next-cycle start
+ *
+ ******************************************************************************************************************************************************************************************************************/
+
 void mAnimatorLight::EffectAnim__RayTracing__Coverage()
 {
-  constexpr uint8_t COVERAGE_DISTANCE_MODE = RT_COVERAGE_DISTANCE_LOGARITHMIC;
+  constexpr bool ENABLE_REFLECTION_LOSS = true;
+
+  constexpr float ENVIRONMENT_WIDTH_M = 100.0f;
+  constexpr float TX_POWER_DBM = 0.0f;
+  constexpr float FREQUENCY_GHZ = 5.8f;
+  constexpr float FSPL_1M_DB = 47.71f;
+  constexpr float NOISE_FLOOR_DBM = -100.0f;
+  constexpr float HEATMAP_STRONG_DBM = -50.0f;
+  constexpr float REFLECTION_LOSS_DB = 8.0f;
 
   constexpr uint8_t MAX_REFLECTION_ORDER = 4;
   constexpr uint8_t MAX_OBJECTS = 12;
   constexpr uint8_t MAX_OBJECT_PLACEMENT_ATTEMPTS = 48;
-  constexpr uint8_t COVERAGE_PIXELS_PER_CALL = 2;
+  constexpr uint8_t COVERAGE_PIXELS_PER_CALL = 32;
   constexpr uint8_t OBJECT_BORDER_MARGIN = 1;
 
   constexpr uint8_t COVERAGE_PALETTE_MIN_INDEX = 16u;
   constexpr uint8_t COVERAGE_PALETTE_MAX_INDEX = 224u;
 
   constexpr uint16_t OLD_MAP_FADE_OUT_MS = 2500u;
-  constexpr uint16_t OBJECT_FADE_IN_MS = 3000u;
-  constexpr uint16_t NO_SIGNAL_FADE_IN_MS = 2500u;
+  constexpr uint16_t BLACK_HOLD_MS = 1000u;
 
-  constexpr float PATH_COLLISION_SAMPLE_SPACING = 0.25f;
-  constexpr float PATH_LOSS_REFERENCE_DISTANCE = 1.0f;
-  constexpr float NO_VALID_PATH = -1.0f;
+  constexpr float PATH_COLLISION_SAMPLE_SPACING = 1.0f;
+  constexpr float MINIMUM_RF_DISTANCE_M = 1.0f;
+  constexpr float NO_VALID_SIGNAL = -1000.0f;
+
+  constexpr uint8_t RT_PHASE_INITIALISE = 0u;
+  constexpr uint8_t RT_PHASE_PREPARE_NEXT = 1u;
+  constexpr uint8_t RT_PHASE_CALCULATE_NEXT = 2u;
+  constexpr uint8_t RT_PHASE_WAIT_READY = 3u;
+  constexpr uint8_t RT_PHASE_FADE_OUT_CURRENT = 4u;
+  constexpr uint8_t RT_PHASE_BLACK_HOLD = 5u;
+  constexpr uint8_t RT_PHASE_DRAW_READY = 6u;
+  constexpr uint8_t RT_PHASE_RADIAL_DRAW_READY = 7u;
+
+  static uint32_t debug_calc_started_ms = 0u;
 
   const uint16_t width = SEGMENT.virtualWidth();
   const uint16_t height = SEGMENT.virtualHeight();
@@ -32232,23 +33331,25 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
   if (width == 0u || height == 0u || SEGMENT.palette_loaded == nullptr) return;
 
   const bool objects_enabled = SEGMENT.check1;
-  const bool distance_rolloff_enabled = SEGMENT.check2;
+  const bool power_rolloff_enabled = SEGMENT.check2;
   const bool draw_animation_enabled = SEGMENT.check3;
+
+  const float metres_per_pixel = width > 1u ? ENVIRONMENT_WIDTH_M / static_cast<float>(width - 1u) : ENVIRONMENT_WIDTH_M;
+  const float environment_width_m = ENVIRONMENT_WIDTH_M;
+  const float environment_height_m = height > 1u ? static_cast<float>(height - 1u) * metres_per_pixel : metres_per_pixel;
 
   const uint32_t pixel_count = static_cast<uint32_t>(width) * static_cast<uint32_t>(height);
   const uint16_t occupancy_word_count = static_cast<uint16_t>((pixel_count + 31u) / 32u);
-
   const size_t occupancy_bytes = static_cast<size_t>(occupancy_word_count) * sizeof(uint32_t);
-  const size_t distance_bytes = static_cast<size_t>(pixel_count) * sizeof(float);
-  const size_t required_data_size = sizeof(RayTracingCoverageState) + occupancy_bytes + distance_bytes;
+  const size_t received_power_bytes = static_cast<size_t>(pixel_count) * sizeof(float);
+  const size_t required_data_size = sizeof(RayTracingCoverageState) + occupancy_bytes + received_power_bytes;
 
   if (!SEGMENT.allocateData(required_data_size)) return;
 
   RayTracingCoverageState* state = reinterpret_cast<RayTracingCoverageState*>(SEGMENT.data);
-
   uint8_t* dynamic_data = reinterpret_cast<uint8_t*>(state) + sizeof(RayTracingCoverageState);
   uint32_t* occupancy = reinterpret_cast<uint32_t*>(dynamic_data);
-  float* path_distances = reinterpret_cast<float*>(dynamic_data + occupancy_bytes);
+  float* received_power_dbm = reinterpret_cast<float*>(dynamic_data + occupancy_bytes);
 
   const bool dimensions_changed = state->width != width || state->height != height || state->occupancy_word_count != occupancy_word_count || state->pixel_count != pixel_count;
   const bool object_enable_changed = state->object_enabled != static_cast<uint8_t>(objects_enabled);
@@ -32266,23 +33367,22 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
     state->object_enabled = static_cast<uint8_t>(objects_enabled);
     state->draw_animation_enabled = static_cast<uint8_t>(draw_animation_enabled);
     state->first_cycle = 1u;
-    state->phase = RT_COVERAGE_PHASE_INITIALISE;
+    state->phase = RT_PHASE_INITIALISE;
   }
 
-  const float environment_width = width > 1u ? static_cast<float>(width - 1u) : 1.0f;
-  const float environment_height = height > 1u ? static_cast<float>(height - 1u) : 1.0f;
+  const float environment_width_pixels = width > 1u ? static_cast<float>(width - 1u) : 1.0f;
+  const float environment_height_pixels = height > 1u ? static_cast<float>(height - 1u) : 1.0f;
   const uint16_t minimum_dimension = min<uint16_t>(width, height);
 
-  const uint16_t tx_x_pixel = static_cast<uint16_t>(roundf(environment_width * 0.15f));
-  const uint16_t tx_y_pixel = static_cast<uint16_t>(roundf(environment_height * 0.50f));
-
+  const uint16_t tx_x_pixel = static_cast<uint16_t>(roundf(environment_width_pixels * 0.15f));
+  const uint16_t tx_y_pixel = static_cast<uint16_t>(roundf(environment_height_pixels * 0.50f));
   const float tx_x = static_cast<float>(tx_x_pixel);
   const float tx_y = static_cast<float>(tx_y_pixel);
 
   const float corner_distance_0 = sqrtf(tx_x * tx_x + tx_y * tx_y);
-  const float corner_distance_1 = sqrtf((environment_width - tx_x) * (environment_width - tx_x) + tx_y * tx_y);
-  const float corner_distance_2 = sqrtf(tx_x * tx_x + (environment_height - tx_y) * (environment_height - tx_y));
-  const float corner_distance_3 = sqrtf((environment_width - tx_x) * (environment_width - tx_x) + (environment_height - tx_y) * (environment_height - tx_y));
+  const float corner_distance_1 = sqrtf((environment_width_pixels - tx_x) * (environment_width_pixels - tx_x) + tx_y * tx_y);
+  const float corner_distance_2 = sqrtf(tx_x * tx_x + (environment_height_pixels - tx_y) * (environment_height_pixels - tx_y));
+  const float corner_distance_3 = sqrtf((environment_width_pixels - tx_x) * (environment_width_pixels - tx_x) + (environment_height_pixels - tx_y) * (environment_height_pixels - tx_y));
   const float maximum_radial_distance = max<float>(max<float>(corner_distance_0, corner_distance_1), max<float>(corner_distance_2, corner_distance_3));
 
   const uint8_t object_unit = constrain(static_cast<uint8_t>(minimum_dimension / 8u), 2u, 8u);
@@ -32292,11 +33392,8 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
   const uint8_t object_brightness = SEGMENT.custom2;
   const uint8_t no_signal_brightness = static_cast<uint8_t>((static_cast<uint16_t>(SEGMENT.custom3) * 255u + 15u) / 31u);
 
-  const uint32_t coverage_cycle_period_ms = max<uint32_t>(SEGMENT.get_effect_period(), 1u);
-
-  const uint32_t radial_draw_duration_ms = draw_animation_enabled
-    ? static_cast<uint32_t>((static_cast<uint64_t>(coverage_cycle_period_ms) * static_cast<uint32_t>(SEGMENT.speed)) / 255u)
-    : 0u;
+  const uint32_t coverage_visible_period_ms = max<uint32_t>(SEGMENT.get_effect_period(), 1u);
+  const uint32_t radial_draw_duration_ms = draw_animation_enabled ? static_cast<uint32_t>((static_cast<uint64_t>(coverage_visible_period_ms) * static_cast<uint32_t>(SEGMENT.speed)) / 255u) : 0u;
 
   const auto occupancy_pixel_index = [&](uint16_t x, uint16_t y) -> uint32_t
   {
@@ -32327,7 +33424,6 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
   const auto receiver_image_coordinate = [](float receiver_coordinate, float environment_size, int8_t tile) -> float
   {
     const bool odd_tile = (abs(tile) & 0x01) != 0;
-
     return static_cast<float>(tile) * environment_size + (odd_tile ? environment_size - receiver_coordinate : receiver_coordinate);
   };
 
@@ -32362,6 +33458,7 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
           object_width = object_height;
           object_height = temporary;
         }
+
         break;
 
       default:
@@ -32374,6 +33471,7 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
           object_width = object_height;
           object_height = temporary;
         }
+
         break;
     }
   };
@@ -32398,17 +33496,10 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
 
     switch (object.rotation & 0x03u)
     {
-      case 0:
-        return (local_x < unit && local_y < long_side) || (local_x < short_side && local_y >= long_side - unit);
-
-      case 1:
-        return (local_y < unit && local_x < long_side) || (local_y < short_side && local_x >= long_side - unit);
-
-      case 2:
-        return (local_x >= short_side - unit && local_y < long_side) || (local_x < short_side && local_y < unit);
-
-      default:
-        return (local_y >= short_side - unit && local_x < long_side) || (local_y < short_side && local_x < unit);
+      case 0: return (local_x < unit && local_y < long_side) || (local_x < short_side && local_y >= long_side - unit);
+      case 1: return (local_y < unit && local_x < long_side) || (local_y < short_side && local_x >= long_side - unit);
+      case 2: return (local_x >= short_side - unit && local_y < long_side) || (local_x < short_side && local_y < unit);
+      default: return (local_y >= short_side - unit && local_x < long_side) || (local_y < short_side && local_x < unit);
     }
   };
 
@@ -32478,10 +33569,7 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
         {
           if (!object_contains_local_pixel(object, local_x, local_y)) continue;
 
-          occupancy_set(
-            static_cast<uint16_t>(object.origin_x + local_x),
-            static_cast<uint16_t>(object.origin_y + local_y)
-          );
+          occupancy_set(static_cast<uint16_t>(object.origin_x + local_x), static_cast<uint16_t>(object.origin_y + local_y));
         }
       }
 
@@ -32518,8 +33606,8 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
     candidate.image_tile_x = tile_x;
     candidate.image_tile_y = tile_y;
 
-    const float image_rx = receiver_image_coordinate(receiver_x, environment_width, tile_x);
-    const float image_ry = receiver_image_coordinate(receiver_y, environment_height, tile_y);
+    const float image_rx = receiver_image_coordinate(receiver_x, environment_width_pixels, tile_x);
+    const float image_ry = receiver_image_coordinate(receiver_y, environment_height_pixels, tile_y);
     const float delta_x = image_rx - tx_x;
     const float delta_y = image_ry - tx_y;
 
@@ -32546,9 +33634,8 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
     {
       const float unfolded_x = tx_x + candidate.direction_x * distance;
       const float unfolded_y = tx_y + candidate.direction_y * distance;
-
-      const int16_t physical_x = static_cast<int16_t>(roundf(fold_coordinate(unfolded_x, environment_width)));
-      const int16_t physical_y = static_cast<int16_t>(roundf(fold_coordinate(unfolded_y, environment_height)));
+      const int16_t physical_x = static_cast<int16_t>(roundf(fold_coordinate(unfolded_x, environment_width_pixels)));
+      const int16_t physical_y = static_cast<int16_t>(roundf(fold_coordinate(unfolded_y, environment_height_pixels)));
 
       if (occupancy_get(physical_x, physical_y)) return false;
     }
@@ -32556,11 +33643,23 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
     return true;
   };
 
-  const auto calculate_shortest_path = [&](float receiver_x, float receiver_y) -> float
+  const auto calculate_received_power_dbm = [&](float distance_pixels, uint8_t reflection_order) -> float
   {
-    if (occupancy_get(static_cast<int16_t>(roundf(receiver_x)), static_cast<int16_t>(roundf(receiver_y)))) return NO_VALID_PATH;
+    const float distance_m = max<float>(distance_pixels * metres_per_pixel, MINIMUM_RF_DISTANCE_M);
+    const float fspl_db = FSPL_1M_DB + 20.0f * log10f(distance_m);
 
-    float shortest_distance = LARGE_PATH_DISTANCE;
+    float power_dbm = TX_POWER_DBM - fspl_db;
+
+    if (ENABLE_REFLECTION_LOSS) power_dbm -= static_cast<float>(reflection_order) * REFLECTION_LOSS_DB;
+
+    return power_dbm;
+  };
+
+  const auto calculate_strongest_received_power = [&](float receiver_x, float receiver_y) -> float
+  {
+    if (occupancy_get(static_cast<int16_t>(roundf(receiver_x)), static_cast<int16_t>(roundf(receiver_y)))) return NO_VALID_SIGNAL;
+
+    float strongest_power_dbm = NO_VALID_SIGNAL;
 
     for (int8_t tile_y = -static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_y <= static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_y++)
     {
@@ -32574,14 +33673,16 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
 
         initialise_candidate(candidate, receiver_x, receiver_y, tile_x, tile_y);
 
-        if (candidate.total_distance >= shortest_distance) continue;
+        const float candidate_power_dbm = calculate_received_power_dbm(candidate.total_distance, reflection_order);
+
+        if (candidate_power_dbm <= strongest_power_dbm) continue;
         if (!candidate_is_clear(candidate, receiver_x, receiver_y)) continue;
 
-        shortest_distance = candidate.total_distance;
+        strongest_power_dbm = candidate_power_dbm;
       }
     }
 
-    return shortest_distance < LARGE_PATH_DISTANCE ? shortest_distance : NO_VALID_PATH;
+    return strongest_power_dbm;
   };
 
   const auto draw_objects = [&]()
@@ -32603,11 +33704,7 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
         {
           if (!object_contains_local_pixel(object, local_x, local_y)) continue;
 
-          SEGMENT.setPixelColorXY(
-            static_cast<uint16_t>(object.origin_x + local_x),
-            static_cast<uint16_t>(object.origin_y + local_y),
-            object_colour
-          );
+          SEGMENT.setPixelColorXY(static_cast<uint16_t>(object.origin_x + local_x), static_cast<uint16_t>(object.origin_y + local_y), object_colour);
         }
       }
     }
@@ -32618,39 +33715,22 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
     SEGMENT.setPixelColorXY(tx_x_pixel, tx_y_pixel, SEGMENT.segcol[1].colour);
   };
 
-  const auto draw_object_frame = [&]()
-  {
-    SEGMENT.fill(BLACK);
-    draw_objects();
-    draw_tx();
-  };
-
   const auto reset_path_calculation = [&]()
   {
     state->calculation_pixel_index = 0u;
-    state->minimum_path_distance = LARGE_PATH_DISTANCE;
-    state->maximum_path_distance = 0.0f;
 
-    for (uint32_t pixel_index = 0u; pixel_index < pixel_count; pixel_index++) path_distances[pixel_index] = NO_VALID_PATH;
+    // Existing state fields are reused for debug extrema:
+    // minimum_path_distance = weakest received power
+    // maximum_path_distance = strongest received power
+    state->minimum_path_distance = 1000.0f;
+    state->maximum_path_distance = NO_VALID_SIGNAL;
+
+    for (uint32_t pixel_index = 0u; pixel_index < pixel_count; pixel_index++) received_power_dbm[pixel_index] = NO_VALID_SIGNAL;
   };
 
-  const auto draw_coverage_frame = [&](float radial_limit, bool radial_limit_enabled, bool include_no_signal)
+  const auto draw_coverage_frame = [&](float radial_limit, bool radial_limit_enabled)
   {
-    const float linear_minimum = max<float>(state->minimum_path_distance, PATH_LOSS_REFERENCE_DISTANCE);
-    const float linear_maximum = max<float>(state->maximum_path_distance, linear_minimum);
-
-    const float mapped_minimum = COVERAGE_DISTANCE_MODE == RT_COVERAGE_DISTANCE_LOGARITHMIC ? log10f(linear_minimum) : linear_minimum;
-    const float mapped_maximum = COVERAGE_DISTANCE_MODE == RT_COVERAGE_DISTANCE_LOGARITHMIC ? log10f(linear_maximum) : linear_maximum;
-    const float mapped_range = mapped_maximum - mapped_minimum;
-
-    const bool valid_distance_range = state->minimum_path_distance < LARGE_PATH_DISTANCE && mapped_range > 0.0001f;
-
-    /*
-     * Segment Colour 3 represents no signal.
-     *
-     * If your local structure exposes this as SEGMENT.colors[2], replace
-     * SEGMENT.segcol[2].colour with SEGMENT.colors[2].
-     */
+    const float heatmap_range_db = HEATMAP_STRONG_DBM - NOISE_FLOOR_DBM;
     const uint32_t no_signal_colour = ColourBlend(BLACK, SEGMENT.segcol[2].colour, no_signal_brightness);
 
     SEGMENT.fill(BLACK);
@@ -32671,38 +33751,35 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
         if (radial_distance_squared > radial_limit * radial_limit) continue;
       }
 
-      const float path_distance = path_distances[pixel_index];
+      const float power_dbm = received_power_dbm[pixel_index];
 
-      if (path_distance < 0.0f)
+      if (power_dbm <= NO_VALID_SIGNAL)
       {
-        if (include_no_signal) SEGMENT.setPixelColorXY(x, y, no_signal_colour);
-
+        SEGMENT.setPixelColorXY(x, y, no_signal_colour);
         continue;
       }
 
-      const float clamped_distance = max<float>(path_distance, PATH_LOSS_REFERENCE_DISTANCE);
-      const float mapped_distance = COVERAGE_DISTANCE_MODE == RT_COVERAGE_DISTANCE_LOGARITHMIC ? log10f(clamped_distance) : clamped_distance;
-
-      float normalised_distance = 0.0f;
-
-      if (valid_distance_range)
+      // If below noise floor, lets set them to be brightness visually darker than the end of palette.
+      if (power_dbm <= NOISE_FLOOR_DBM)
       {
-        normalised_distance = constrain(
-          (mapped_distance - mapped_minimum) / mapped_range,
-          0.0f,
-          1.0f
+        const uint32_t below_noise_colour_raw = SEGMENT.GetPaletteColour(
+          COVERAGE_PALETTE_MIN_INDEX,
+          PALETTE_INDEX__IS_255_RANGE,
+          PALETTE_MODE__DEFAULT,
+          PALETTE_WRAP_HARDEDGE,
+          NO_ENCODED_VALUE,
+          PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
         );
+
+        const uint8_t below_noise_brightness = scale8(coverage_brightness, 26u);
+        const uint32_t below_noise_colour = ColourBlend(BLACK, below_noise_colour_raw, below_noise_brightness);
+
+        SEGMENT.setPixelColorXY(x, y, below_noise_colour);
+        continue;
       }
 
-      const float inverted_palette_position = constrain(1.0f - normalised_distance, 0.0f, 1.0f);
-
-      const uint8_t palette_index = static_cast<uint8_t>(
-        COVERAGE_PALETTE_MIN_INDEX +
-        roundf(
-          inverted_palette_position *
-          static_cast<float>(COVERAGE_PALETTE_MAX_INDEX - COVERAGE_PALETTE_MIN_INDEX)
-        )
-      );
+      const float normalised_signal = constrain((power_dbm - NOISE_FLOOR_DBM) / heatmap_range_db, 0.0f, 1.0f);
+      const uint8_t palette_index = static_cast<uint8_t>(COVERAGE_PALETTE_MIN_INDEX + roundf(normalised_signal * static_cast<float>(COVERAGE_PALETTE_MAX_INDEX - COVERAGE_PALETTE_MIN_INDEX)));
 
       const uint32_t palette_colour = SEGMENT.GetPaletteColour(
         palette_index,
@@ -32713,17 +33790,15 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
         PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
       );
 
-      uint8_t distance_brightness = 255u;
-      if (distance_rolloff_enabled)
+      uint8_t signal_brightness = 255u;
+
+      if (power_rolloff_enabled)
       {
         constexpr uint8_t MINIMUM_COVERAGE_BRIGHTNESS = 80u;
-        distance_brightness = static_cast<uint8_t>(
-          255.0f -
-          normalised_distance *
-          static_cast<float>(255u - MINIMUM_COVERAGE_BRIGHTNESS)
-        );
+        signal_brightness = static_cast<uint8_t>(MINIMUM_COVERAGE_BRIGHTNESS + normalised_signal * static_cast<float>(255u - MINIMUM_COVERAGE_BRIGHTNESS));
       }
-      const uint8_t effective_coverage_brightness = scale8(coverage_brightness, distance_brightness);
+
+      const uint8_t effective_coverage_brightness = scale8(coverage_brightness, signal_brightness);
       const uint32_t coverage_colour = ColourBlend(BLACK, palette_colour, effective_coverage_brightness);
 
       SEGMENT.setPixelColorXY(x, y, coverage_colour);
@@ -32733,35 +33808,120 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
     draw_tx();
   };
 
-  /*
-   * Runtime control changes restart the cycle cleanly.
-   */
   if (!initialise && (object_enable_changed || draw_animation_option_changed))
   {
+    #ifdef RT_COVERAGE_DEBUG
+    Serial.println("RT Coverage: option changed, restarting next-frame calculation");
+    #endif
+
     state->object_enabled = static_cast<uint8_t>(objects_enabled);
     state->draw_animation_enabled = static_cast<uint8_t>(draw_animation_enabled);
     state->transition_started = 0u;
-    state->first_cycle = 0u;
-    state->cycle_started_time_ms = effect_start_time;
-    state->phase_started_time_ms = effect_start_time;
-    state->phase = RT_COVERAGE_PHASE_FADE_OUT_OLD_MAP;
+    state->phase = RT_PHASE_PREPARE_NEXT;
   }
 
   switch (state->phase)
   {
-    case RT_COVERAGE_PHASE_INITIALISE:
+    case RT_PHASE_INITIALISE:
     {
+      #ifdef RT_COVERAGE_DEBUG
+      Serial.printf("RT Coverage: initialise, scene %.1f m x %.1f m, %.3f m/pixel\n", environment_width_m, environment_height_m, metres_per_pixel);
+      #endif
+
+      SEGMENT.fill(BLACK);
+
+      state->first_cycle = 1u;
       state->transition_started = 0u;
       state->cycle_started_time_ms = effect_start_time;
       state->phase_started_time_ms = effect_start_time;
-      state->phase = RT_COVERAGE_PHASE_CREATE_OBJECTS;
+      state->phase = RT_PHASE_PREPARE_NEXT;
       return;
     }
 
-    case RT_COVERAGE_PHASE_FADE_OUT_OLD_MAP:
+    case RT_PHASE_PREPARE_NEXT:
+    {
+      #ifdef RT_COVERAGE_DEBUG
+      Serial.println("RT Coverage: prepare next frame");
+      #endif
+
+      create_object_map();
+      reset_path_calculation();
+
+      debug_calc_started_ms = millis();
+
+      #ifdef RT_COVERAGE_DEBUG
+      Serial.printf("RT Coverage: starting calc, pixels=%lu, TX=%.1f dBm, f=%.1f GHz, noise=%.1f dBm, reflection loss=%s\n", (unsigned long)pixel_count, TX_POWER_DBM, FREQUENCY_GHZ, NOISE_FLOOR_DBM, ENABLE_REFLECTION_LOSS ? "ON" : "OFF");
+      #endif
+
+      state->phase = RT_PHASE_CALCULATE_NEXT;
+      return;
+    }
+
+    case RT_PHASE_CALCULATE_NEXT:
+    {
+      uint8_t processed_pixels = 0u;
+
+      while (state->calculation_pixel_index < pixel_count && processed_pixels < COVERAGE_PIXELS_PER_CALL)
+      {
+        const uint32_t pixel_index = state->calculation_pixel_index++;
+        const uint16_t receiver_x = static_cast<uint16_t>(pixel_index % width);
+        const uint16_t receiver_y = static_cast<uint16_t>(pixel_index / width);
+        const float power_dbm = calculate_strongest_received_power(static_cast<float>(receiver_x), static_cast<float>(receiver_y));
+
+        received_power_dbm[pixel_index] = power_dbm;
+
+        if (power_dbm > NO_VALID_SIGNAL)
+        {
+          if (power_dbm < state->minimum_path_distance) state->minimum_path_distance = power_dbm;
+          if (power_dbm > state->maximum_path_distance) state->maximum_path_distance = power_dbm;
+        }
+
+        processed_pixels++;
+      }
+
+      if (state->calculation_pixel_index < pixel_count) return;
+
+      #ifdef RT_COVERAGE_DEBUG
+      Serial.printf("RT Coverage: next frame ready in %lu ms, strongest=%.1f dBm, weakest=%.1f dBm\n", (unsigned long)(millis() - debug_calc_started_ms), state->maximum_path_distance, state->minimum_path_distance);
+      #endif
+
+      if (state->first_cycle)
+      {
+        state->phase_started_time_ms = effect_start_time;
+        state->phase = RT_PHASE_DRAW_READY;
+        return;
+      }
+
+      state->phase = RT_PHASE_WAIT_READY;
+
+      #ifdef RT_COVERAGE_DEBUG
+      Serial.println("RT Coverage: next frame ready, current frame remains visible");
+      #endif
+
+      return;
+    }
+
+    case RT_PHASE_WAIT_READY:
+    {
+      if (effect_start_time - state->cycle_started_time_ms < coverage_visible_period_ms) return;
+
+      #ifdef RT_COVERAGE_DEBUG
+      Serial.println("RT Coverage: visible period complete, fading current frame");
+      #endif
+
+      state->transition_started = 0u;
+      state->phase = RT_PHASE_FADE_OUT_CURRENT;
+      return;
+    }
+
+    case RT_PHASE_FADE_OUT_CURRENT:
     {
       if (!state->transition_started)
       {
+        #ifdef RT_COVERAGE_DEBUG
+        Serial.printf("RT Coverage: starting fade out, duration=%u ms\n", OLD_MAP_FADE_OUT_MS);
+        #endif
+
         state->transition_started = 1u;
         state->phase_started_time_ms = effect_start_time;
 
@@ -32771,172 +33931,90 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
 
       if (effect_start_time - state->phase_started_time_ms < OLD_MAP_FADE_OUT_MS) return;
 
-      state->transition_started = 0u;
-      state->phase_started_time_ms = effect_start_time;
-      state->phase = RT_COVERAGE_PHASE_CREATE_OBJECTS;
-      return;
-    }
-
-    case RT_COVERAGE_PHASE_CREATE_OBJECTS:
-    {
-      create_object_map();
-      reset_path_calculation();
+      #ifdef RT_COVERAGE_DEBUG
+      Serial.printf("RT Coverage: fade complete, black hold=%u ms\n", BLACK_HOLD_MS);
+      #endif
 
       state->transition_started = 0u;
       state->phase_started_time_ms = effect_start_time;
-      state->phase = RT_COVERAGE_PHASE_FADE_IN_OBJECTS;
+      state->phase = RT_PHASE_BLACK_HOLD;
       return;
     }
 
-    case RT_COVERAGE_PHASE_FADE_IN_OBJECTS:
+    case RT_PHASE_BLACK_HOLD:
     {
-      if (!state->transition_started)
-      {
-        state->transition_started = 1u;
-        state->phase_started_time_ms = effect_start_time;
+      if (effect_start_time - state->phase_started_time_ms < BLACK_HOLD_MS) return;
 
-        SEGMENT.startTransition(OBJECT_FADE_IN_MS, true);
-        draw_object_frame();
-      }
+      #ifdef RT_COVERAGE_DEBUG
+      Serial.println("RT Coverage: black hold complete, drawing prepared frame");
+      #endif
 
-      if (effect_start_time - state->phase_started_time_ms < OBJECT_FADE_IN_MS) return;
-
-      state->transition_started = 0u;
       state->phase_started_time_ms = effect_start_time;
-      state->phase = RT_COVERAGE_PHASE_CALCULATING;
+      state->phase = RT_PHASE_DRAW_READY;
       return;
     }
 
-    case RT_COVERAGE_PHASE_CALCULATING:
+    case RT_PHASE_DRAW_READY:
     {
-      uint8_t processed_pixels = 0u;
-
-      while (state->calculation_pixel_index < pixel_count && processed_pixels < COVERAGE_PIXELS_PER_CALL)
-      {
-        const uint32_t pixel_index = state->calculation_pixel_index++;
-        const uint16_t receiver_x = static_cast<uint16_t>(pixel_index % width);
-        const uint16_t receiver_y = static_cast<uint16_t>(pixel_index / width);
-
-        const float shortest_distance = calculate_shortest_path(
-          static_cast<float>(receiver_x),
-          static_cast<float>(receiver_y)
-        );
-
-        path_distances[pixel_index] = shortest_distance;
-
-        if (shortest_distance >= 0.0f)
-        {
-          const bool transmitter_pixel = receiver_x == tx_x_pixel && receiver_y == tx_y_pixel;
-
-          if (!transmitter_pixel)
-          {
-            if (shortest_distance < state->minimum_path_distance) state->minimum_path_distance = shortest_distance;
-            if (shortest_distance > state->maximum_path_distance) state->maximum_path_distance = shortest_distance;
-          }
-        }
-
-        processed_pixels++;
-      }
-
-      if (state->calculation_pixel_index < pixel_count) return;
-
-      state->phase_started_time_ms = effect_start_time;
-
       if (draw_animation_enabled && radial_draw_duration_ms > 0u)
       {
-        state->phase = RT_COVERAGE_PHASE_RADIAL_DRAW;
-      }
-      else
-      {
-        /*
-         * Draw all valid coverage immediately, but keep no-signal pixels black
-         * until the dedicated final transition.
-         */
-        draw_coverage_frame(maximum_radial_distance, false, false);
+        #ifdef RT_COVERAGE_DEBUG
+        Serial.printf("RT Coverage: starting radial reveal, duration=%lu ms\n", (unsigned long)radial_draw_duration_ms);
+        #endif
 
-        state->transition_started = 0u;
-        state->phase = RT_COVERAGE_PHASE_FINALISE_NO_SIGNAL;
+        state->phase_started_time_ms = effect_start_time;
+        state->phase = RT_PHASE_RADIAL_DRAW_READY;
+        return;
       }
 
+      #ifdef RT_COVERAGE_DEBUG
+      Serial.println("RT Coverage: drawing complete prepared frame");
+      #endif
+
+      draw_coverage_frame(maximum_radial_distance, false);
+
+      state->first_cycle = 0u;
+      state->transition_started = 0u;
+      state->cycle_started_time_ms = effect_start_time;
+      state->phase_started_time_ms = effect_start_time;
+      state->phase = RT_PHASE_PREPARE_NEXT;
       return;
     }
 
-    case RT_COVERAGE_PHASE_RADIAL_DRAW:
+    case RT_PHASE_RADIAL_DRAW_READY:
     {
       const uint32_t radial_elapsed_ms = effect_start_time - state->phase_started_time_ms;
 
       if (radial_elapsed_ms >= radial_draw_duration_ms)
       {
-        /*
-         * Complete all valid heatmap pixels first. No-signal pixels remain
-         * black and are introduced by the next transition state.
-         */
-        draw_coverage_frame(maximum_radial_distance, false, false);
+        draw_coverage_frame(maximum_radial_distance, false);
 
+        #ifdef RT_COVERAGE_DEBUG
+        Serial.println("RT Coverage: radial reveal complete, calculating following frame");
+        #endif
+
+        state->first_cycle = 0u;
         state->transition_started = 0u;
+        state->cycle_started_time_ms = effect_start_time;
         state->phase_started_time_ms = effect_start_time;
-        state->phase = RT_COVERAGE_PHASE_FINALISE_NO_SIGNAL;
+        state->phase = RT_PHASE_PREPARE_NEXT;
         return;
       }
 
-      const float radial_progress = constrain(
-        static_cast<float>(radial_elapsed_ms) /
-        static_cast<float>(radial_draw_duration_ms),
-        0.0f,
-        1.0f
-      );
-
+      const float radial_progress = constrain(static_cast<float>(radial_elapsed_ms) / static_cast<float>(radial_draw_duration_ms), 0.0f, 1.0f);
       const float radial_limit = radial_progress * maximum_radial_distance;
 
-      /*
-       * The radial phase is a direct time-based animation. It deliberately
-       * does not use startTransition().
-       */
-      draw_coverage_frame(radial_limit, true, false);
-      return;
-    }
-
-    case RT_COVERAGE_PHASE_FINALISE_NO_SIGNAL:
-    {
-      if (!state->transition_started)
-      {
-        state->transition_started = 1u;
-        state->phase_started_time_ms = effect_start_time;
-
-        /*
-         * Start one transition from the completed valid-path map to the final
-         * map containing Segment Colour 3 in every unreachable pixel.
-         */
-        SEGMENT.startTransition(NO_SIGNAL_FADE_IN_MS, true);
-        draw_coverage_frame(maximum_radial_distance, false, true);
-      }
-
-      if (effect_start_time - state->phase_started_time_ms < NO_SIGNAL_FADE_IN_MS) return;
-
-      state->transition_started = 0u;
-      state->phase_started_time_ms = effect_start_time;
-      state->first_cycle = 0u;
-      state->phase = RT_COVERAGE_PHASE_HOLD;
-      return;
-    }
-
-    case RT_COVERAGE_PHASE_HOLD:
-    {
-      if (effect_start_time - state->cycle_started_time_ms < coverage_cycle_period_ms) return;
-
-      state->transition_started = 0u;
-      state->cycle_started_time_ms = effect_start_time;
-      state->phase_started_time_ms = effect_start_time;
-      state->phase = RT_COVERAGE_PHASE_FADE_OUT_OLD_MAP;
+      draw_coverage_frame(radial_limit, true);
       return;
     }
 
     default:
     {
+      state->first_cycle = 1u;
       state->transition_started = 0u;
       state->cycle_started_time_ms = effect_start_time;
       state->phase_started_time_ms = effect_start_time;
-      state->phase = RT_COVERAGE_PHASE_INITIALISE;
+      state->phase = RT_PHASE_INITIALISE;
       return;
     }
   }
@@ -32944,7 +34022,7 @@ void mAnimatorLight::EffectAnim__RayTracing__Coverage()
 
 static const char PM_EFFECT_CONFIG__RAY_TRACING__COVERAGE[] PROGMEM =
 "RT Coverage@"
-"Draw Time,Object Density,Heatmap Brightness,Object Brightness,No Signal Brightness,Objects,Distance Roll-off,Draw Animation,Update Period,"
+"Draw Time,Object Density,Heatmap Brightness,Object Brightness,No Signal Brightness,Objects,Path Loss Brightness,Radial Reveal,Visible Period,"
 ";"
 ",Tx,NS,,"
 ";"
@@ -32955,45 +34033,57 @@ static const char PM_EFFECT_CONFIG__RAY_TRACING__COVERAGE[] PROGMEM =
 "sx=127,"
 "ix=50,"
 "c1=170,"
-"c2=80,"
+"c2=7,"
 "c3=31,"
 "o1=1,"
 "o2=1,"
 "o3=1,"
-"s0=FFFFFF," // Objects
-"s1=00FF00," // Transmitter
-"s2=FF00FF," // No signal
+"s0=FFFFFF,"
+"s1=00FF00,"
+"s2=FF00FF,"
 "paln=Jet,"
-"ep=10000"
-;
+"ep=10000";
 
 
 static const char PM_EFFECT_DESCRI__RAY_TRACING__COVERAGE[] PROGMEM =
-"First-arrival ray-tracing coverage heatmap.\n\r"
-"SX: Radial draw duration as a proportion of EP\n\r"
-"IX: Object density\n\r"
-"C1: Heatmap brightness\n\r"
-"C2: Object brightness\n\r"
-"C3: No-signal brightness, internally 0-31 and scaled to 0-255\n\r"
-"O1: Enable solid scaled objects\n\r"
-"O2: Enable distance brightness roll-off from 255 to 80\n\r"
-"O3: Enable radial heatmap draw animation\n\r"
-"EP: Complete coverage cycle period\n\r"
-"Old maps fade to black before a new object map is generated\n\r"
-"New objects fade in over three seconds\n\r"
-"Radial coverage is drawn directly without transition restarts\n\r"
-"No-signal pixels fade in using Segment Colour 3\n\r"
-"Objects remain one pixel away from every matrix border\n\r"
-"Shortest valid paths use the high end of the heatmap palette\n\r"
-"Longest valid paths use the low end of the heatmap palette\n\r"
-"Palette: Coverage gradient\n\r"
-"Segment Colour 1: Objects\n\r"
-"Segment Colour 2: Transmitter\n\r"
-"Segment Colour 3: No signal or no valid path";
+"Background-calculated RF ray-tracing coverage heatmap.\n\r"
+"Completed coverage remains visible while the next scene is calculated.\n\r"
+"EP: minimum time a completed map remains visible after its reveal completes.\n\r"
+"SX: radial reveal duration as a proportion of EP.\n\r"
+"IX: object density.\n\r"
+"C1: heatmap brightness.\n\r"
+"C2: object brightness.\n\r"
+"C3: no-signal brightness, internally 0-31 and scaled to 0-255.\n\r"
+"O1: enable generated solid objects.\n\r"
+"O2: enable additional path-loss brightness roll-off.\n\r"
+"O3: enable radial reveal of an already-calculated map.\n\r"
+"Distance loss uses 10*n*log10(d/d0).\n\r"
+"Optional reflection loss is added per reflection order.\n\r"
+"The valid path having the lowest total path loss is selected.\n\r"
+"Heatmap colour spans the nominal direct-path dB range to the farthest matrix corner.\n\r"
+"Next-map calculation is hidden behind display time whenever possible.\n\r"
+"After the next map is ready and EP expires, the current map fades to black.\n\r"
+"Black is held briefly before the already-calculated map is displayed.\n\r"
+"Palette: RF coverage gradient.\n\r"
+"Segment Colour 1: objects.\n\r"
+"Segment Colour 2: transmitter.\n\r"
+"Segment Colour 3: no signal or no valid path.";
+
+
+
+
+
+
+
+
+
+
 
 #endif  // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
 
 #ifdef ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+
+
 enum : uint8_t
 {
   RT_MOBILE_OBJECT_SQUARE = 0,
@@ -33087,75 +34177,252 @@ struct RayTracingMobileRXState
 };
 
 
-/**********************************************************************************************************************************************************************************
+/******************************************************************************************************************************************************************************************************************
  * EFFECT: RT MOBILE RX
  *
+ * ================================================================================================================================================================================================================
  * SUMMARY
- *   Displays a fixed transmitter and a continuously moving receiver.
+ * ================================================================================================================================================================================================================
  *
- *   The receiver selects distant waypoints and travels between them. At every target update, the shortest currently valid
- *   propagation paths are recalculated and connected directly between TX and RX.
+ * Displays a fixed transmitter and a continuously moving receiver.
  *
- *   Paths blocked by an object die and fade. Newly available shorter paths appear immediately.
+ * The receiver moves between distant valid waypoints while a simplified two-dimensional ray tracer continuously determines
+ * the shortest currently valid direct and reflected propagation paths between TX and RX.
+ *
+ * Reflected paths use the rectangular image method. Each image-space tile represents one persistent propagation-path identity.
+ *
+ * The visual path system includes temporal stabilisation intended specifically to prevent rapid path appearance/disappearance
+ * from producing flashes or strobing:
+ *
+ *   - each physical/image path has a deterministic palette colour;
+ *   - path colour does not depend on current distance rank;
+ *   - newly appearing paths fade in;
+ *   - disappearing paths fade out;
+ *   - a fading path which becomes valid again reverses its fade from its current brightness;
+ *   - reappearing paths are never immediately reset to full brightness.
+ *
+ * This means rapid path changes near object edges, reflection boundaries, TX or RX should produce smooth changes rather than
+ * rapid full-brightness colour changes.
  *
  *
+ * ================================================================================================================================================================================================================
  * RX MOVEMENT
- *   RX selects a waypoint at least a hardcoded minimum distance away.
+ * ================================================================================================================================================================================================================
  *
- *   The complete route from the current position to the proposed waypoint is tested against the object occupancy bitmap.
- *   A waypoint is accepted only when RX can reach it without crossing an object.
+ * RX selects a distant waypoint and travels toward it.
  *
- *   Movement target updates are separated by the time required to travel approximately one physical pixel. A segment transition
- *   occupies 90 percent of that interval, providing smooth movement without requiring a user option.
+ * Waypoints normally alternate between horizontal and vertical movement legs.
+ *
+ * The complete route from RX to a proposed waypoint is checked against the occupancy bitmap before the waypoint is accepted.
+ *
+ * If the preferred movement axis is unavailable, the alternate axis is attempted.
+ *
+ * If neither normal route can be found, an immediate one-pixel escape movement is attempted in the four cardinal directions.
+ *
+ * RX is therefore permitted to remain stationary only when every available local route is blocked.
+ *
+ * SX controls receiver velocity.
+ *
+ * Target updates occur approximately once per physical-pixel movement interval, subject to EP acting as the minimum update
+ * interval.
+ *
+ * A segment transition occupies approximately 90 percent of the target-update interval to visually interpolate movement.
  *
  *
+ * ================================================================================================================================================================================================================
  * PROPAGATION PATHS
- *   Reflected paths use the rectangular image method.
+ * ================================================================================================================================================================================================================
  *
- *   All candidate paths are tested against the object occupancy map. Valid paths are sorted by geometric distance and the
- *   shortest IX-controlled number are selected.
+ * Propagation paths use the rectangular image method.
  *
- *   A path identity is its receiver-image tile:
+ * Candidate image tiles are generated up to MAX_REFLECTION_ORDER.
  *
- *       {0,0} = direct LOS
- *       other tiles = reflected paths
+ * Reflection order is:
  *
- *   Paths retained from the preceding update keep their slot. Newly selected paths appear immediately. Paths no longer selected
- *   fade over a hardcoded death interval.
+ *   abs(tile_x) + abs(tile_y)
+ *
+ * The direct LOS path is:
+ *
+ *   {0,0}
+ *
+ * Reflected paths use all other valid image tiles.
+ *
+ * Every candidate ray is sampled along its complete unfolded path. Each sample is folded back into the physical environment
+ * and checked against the object occupancy bitmap.
+ *
+ * A candidate is rejected if any sampled position intersects an object.
+ *
+ * Valid candidates are sorted according to total geometric path distance.
+ *
+ * IX selects how many of the shortest valid paths are displayed, from 1 to MAX_ACTIVE_PATHS.
  *
  *
+ * ================================================================================================================================================================================================================
+ * PATH IDENTITY AND COLOUR STABILITY
+ * ================================================================================================================================================================================================================
+ *
+ * Path identity is defined by:
+ *
+ *   {image_tile_x, image_tile_y}
+ *
+ * rather than by:
+ *
+ *   - ray slot;
+ *   - current path rank;
+ *   - current path distance;
+ *   - order in which candidates were discovered.
+ *
+ * A deterministic palette index is derived from the image-tile identity.
+ *
+ * Therefore the same propagation path always uses the same colour.
+ *
+ * Example:
+ *
+ *   { 0, 0 } -> one fixed colour
+ *   { 1, 0 } -> one fixed colour
+ *   {-1, 1 } -> one fixed colour
+ *
+ * If path {-1,1} changes from rank 3 to rank 5, disappears briefly, and later returns as rank 2, its colour remains unchanged.
+ *
+ * This prevents palette-colour recycling from producing large instantaneous colour flashes.
+ *
+ *
+ * ================================================================================================================================================================================================================
+ * PATH ATTACK / RELEASE FILTERING
+ * ================================================================================================================================================================================================================
+ *
+ * Each ray has persistent brightness state.
+ *
+ * RAY_ATTACK_FADE_MS controls the fade-in time for a newly appearing path.
+ *
+ * RAY_DEATH_FADE_MS controls the fade-out time for a disappearing path.
+ *
+ * Selected paths move toward brightness 255.
+ *
+ * Deselected paths move toward brightness 0.
+ *
+ * Critically, a reappearing path retains its current brightness.
+ *
+ * Example:
+ *
+ *   path appears:
+ *
+ *       0 -> 50 -> 100 -> 150 -> 200 -> 255
+ *
+ *   path disappears:
+ *
+ *       255 -> 220 -> 185 -> 150 ...
+ *
+ *   path becomes valid again while currently at 150:
+ *
+ *       150 -> 190 -> 230 -> 255
+ *
+ * It does NOT perform:
+ *
+ *       150 -> 255
+ *
+ * This removes the previous attack-side brightness discontinuity which could cause strobing when path validity changed rapidly.
+ *
+ *
+ * ================================================================================================================================================================================================================
+ * PATH SLOTS
+ * ================================================================================================================================================================================================================
+ *
+ * Existing paths retain their ray slot whenever their image-tile identity still exists.
+ *
+ * New paths first use an unused/dead slot.
+ *
+ * If all slots are occupied, the dimmest currently dying path may be replaced.
+ *
+ * MAX_RAY_SLOTS is deliberately larger than MAX_ACTIVE_PATHS so fading old paths can coexist with newly selected paths.
+ *
+ *
+ * ================================================================================================================================================================================================================
+ * PATH LENGTH ROLL-OFF
+ * ================================================================================================================================================================================================================
+ *
+ * O2 optionally reduces brightness along excess propagation distance.
+ *
+ * The shortest selected path establishes rolloff_start_distance.
+ *
+ * Longer paths retain full brightness until that distance and then progressively reduce toward
+ * RAY_LENGTH_ROLLOFF_END_BRIGHTNESS.
+ *
+ * This is independent of the temporal attack/release fade.
+ *
+ *
+ * ================================================================================================================================================================================================================
  * OBJECTS
- *   O1 enables solid objects.
+ * ================================================================================================================================================================================================================
  *
- *   O3 regenerates the entire object map every 60 seconds.
+ * O1 enables generated solid objects.
  *
- *   Object shapes:
+ * O3 regenerates the complete object map every MAP_REGENERATION_INTERVAL_MS.
  *
- *       • square;
- *       • 2:3 rectangle;
- *       • thick L shape in four rotations.
+ * Object shapes:
  *
- *   Object geometry scales using the smaller matrix dimension:
+ *   - square;
+ *   - 2:3 rectangle;
+ *   - thick L shape in four rotations.
  *
- *       16x16 -> base unit 2 pixels
- *       32x64 -> base unit 4 pixels
+ * Object geometry scales from the smaller matrix dimension.
  *
- *   Objects are stored as geometry records for rendering and as one packed occupancy bit per matrix pixel for collision tests.
+ * Examples:
+ *
+ *   16-pixel minimum dimension -> base unit 2 pixels
+ *   32-pixel minimum dimension -> base unit 4 pixels
+ *
+ * Object geometry is stored both:
+ *
+ *   - as object records for rendering;
+ *   - as one packed occupancy bit per matrix pixel for collision testing.
  *
  *
+ * ================================================================================================================================================================================================================
+ * RX TRAIL
+ * ================================================================================================================================================================================================================
+ *
+ * C2 controls the number of stored/displayed receiver trail points.
+ *
+ * Trail samples are added only after RX moves a minimum distance so multiple nearly identical points are not continually stored.
+ *
+ * Older trail positions progressively reduce in brightness.
+ *
+ *
+ * ================================================================================================================================================================================================================
+ * RAY WIDTH
+ * ================================================================================================================================================================================================================
+ *
+ * C3 controls additional ray width.
+ *
+ * Width 0 uses a single sampled pixel.
+ *
+ * Wider rays use bilinear/anti-aliased pixel drawing plus additional samples perpendicular to the propagation direction.
+ *
+ *
+ * ================================================================================================================================================================================================================
  * CONTROLS
+ * ================================================================================================================================================================================================================
+ *
  *   SX : RX movement speed.
  *   IX : number of shortest valid paths, 1 to 8.
  *   C1 : ray brightness.
  *   C2 : RX trail length.
  *   C3 : additional ray width.
- *   O1 : enable solid objects.
+ *
+ *   O1 : enable generated solid objects.
  *   O2 : enable excess-path brightness roll-off.
- *   O3 : regenerate the complete object map every 60 seconds.
+ *   O3 : regenerate complete object map every 60 seconds.
+ *
+ *   EP : minimum RX target-update interval.
  *
  *   Palette  : ray colours.
  *   Palette2 : object colours.
- **********************************************************************************************************************************************************************************/
+ *
+ *   Green : transmitter.
+ *   Red   : receiver and receiver trail.
+ *
+ ******************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 {
   constexpr uint8_t MAX_REFLECTION_ORDER = 4;
@@ -33170,7 +34437,8 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   constexpr uint8_t RX_MOVEMENT_AXIS_HORIZONTAL = 1u;
   constexpr uint8_t RX_MOVEMENT_AXIS_VERTICAL = 2u;
 
-  constexpr uint16_t RAY_DEATH_FADE_MS = 600;
+  constexpr uint16_t RAY_ATTACK_FADE_MS = 350u;
+  constexpr uint16_t RAY_DEATH_FADE_MS = 600u;
   constexpr uint32_t MAP_REGENERATION_INTERVAL_MS = 60000u;
 
   constexpr uint8_t RAY_LENGTH_ROLLOFF_START_BRIGHTNESS = 255u;
@@ -33179,6 +34447,8 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 
   constexpr float PATH_SAMPLE_SPACING = 0.25f;
   constexpr float RX_ROUTE_SAMPLE_SPACING = 0.25f;
+
+  constexpr float RAY_COLOUR_ANGLE_BIN_DEGREES = 15.0f;
 
   constexpr uint16_t MAX_REFLECTION_CANDIDATES = 2u * MAX_REFLECTION_ORDER * (MAX_REFLECTION_ORDER + 1u);
 
@@ -33217,7 +34487,6 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 
   const float environment_width = width > 1u ? static_cast<float>(width - 1u) : 1.0f;
   const float environment_height = height > 1u ? static_cast<float>(height - 1u) : 1.0f;
-  const float matrix_diagonal = sqrtf(environment_width * environment_width + environment_height * environment_height);
   const uint16_t minimum_dimension = min<uint16_t>(width, height);
 
   const uint16_t tx_x_pixel = static_cast<uint16_t>(roundf(environment_width * 0.15f));
@@ -33231,20 +34500,9 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   const uint8_t requested_trail_points = static_cast<uint8_t>((static_cast<uint16_t>(SEGMENT.custom2) * MAX_TRAIL_POINTS) / 255u);
   const uint8_t width_control = min<uint8_t>(SEGMENT.custom3, 31u);
 
-  /*
-   * Base object unit:
-   *
-   * 16-pixel minimum dimension -> 2 pixels
-   * 32-pixel minimum dimension -> 4 pixels
-   */
   const uint8_t object_unit = constrain(static_cast<uint8_t>(minimum_dimension / 8u), 2u, 8u);
-
   const float minimum_waypoint_distance = max<float>(5.0f, static_cast<float>(minimum_dimension) * 0.25f);
 
-  /*
-   * SX maps to physical receiver velocity. The maximum remains below the usual
-   * target-frame service limit on the intended matrix sizes.
-   */
   const float receiver_speed_pixels_per_second = 0.5f + (static_cast<float>(SEGMENT.speed) / 255.0f) * max<float>(4.0f, static_cast<float>(minimum_dimension) * 0.60f);
 
   const uint32_t effect_period_ms = max<uint32_t>(SEGMENT.get_effect_period(), 1u);
@@ -33265,6 +34523,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     if (x < 0 || y < 0 || x >= static_cast<int16_t>(width) || y >= static_cast<int16_t>(height)) return true;
 
     const uint32_t pixel_index = occupancy_pixel_index(static_cast<uint16_t>(x), static_cast<uint16_t>(y));
+
     return (occupancy[pixel_index >> 5] & (1UL << (pixel_index & 31u))) != 0u;
   };
 
@@ -33273,6 +34532,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     if (x >= width || y >= height) return;
 
     const uint32_t pixel_index = occupancy_pixel_index(x, y);
+
     occupancy[pixel_index >> 5] |= 1UL << (pixel_index & 31u);
   };
 
@@ -33284,6 +34544,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   const auto receiver_image_coordinate = [](float receiver_coordinate, float environment_size, int8_t tile) -> float
   {
     const bool odd_tile = (abs(tile) & 0x01) != 0;
+
     return static_cast<float>(tile) * environment_size + (odd_tile ? environment_size - receiver_coordinate : receiver_coordinate);
   };
 
@@ -33318,6 +34579,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
           object_width = object_height;
           object_height = temporary;
         }
+
         break;
 
       default:
@@ -33330,6 +34592,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
           object_width = object_height;
           object_height = temporary;
         }
+
         break;
     }
   };
@@ -33344,6 +34607,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
       const uint16_t long_side = static_cast<uint16_t>(object.unit_size + (object.unit_size + 1u) / 2u);
 
       if ((object.rotation & 0x01u) == 0u) return local_x < narrow_side && local_y < long_side;
+
       return local_x < long_side && local_y < narrow_side;
     }
 
@@ -33353,17 +34617,10 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 
     switch (object.rotation & 0x03u)
     {
-      case 0:
-        return (local_x < unit && local_y < long_side) || (local_x < short_side && local_y >= long_side - unit);
-
-      case 1:
-        return (local_y < unit && local_x < long_side) || (local_y < short_side && local_x >= long_side - unit);
-
-      case 2:
-        return (local_x >= short_side - unit && local_y < long_side) || (local_x < short_side && local_y < unit);
-
-      default:
-        return (local_y >= short_side - unit && local_x < long_side) || (local_y < short_side && local_x < unit);
+      case 0: return (local_x < unit && local_y < long_side) || (local_x < short_side && local_y >= long_side - unit);
+      case 1: return (local_y < unit && local_x < long_side) || (local_y < short_side && local_x >= long_side - unit);
+      case 2: return (local_x >= short_side - unit && local_y < long_side) || (local_x < short_side && local_y < unit);
+      default: return (local_y >= short_side - unit && local_x < long_side) || (local_y < short_side && local_x < unit);
     }
   };
 
@@ -33378,6 +34635,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     {
       const float minimum_x = min<float>(start_x, end_x);
       const float maximum_x = max<float>(start_x, end_x);
+
       if (tx_x >= minimum_x && tx_x <= maximum_x) return true;
     }
 
@@ -33385,6 +34643,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     {
       const float minimum_y = min<float>(start_y, end_y);
       const float maximum_y = max<float>(start_y, end_y);
+
       if (tx_y >= minimum_y && tx_y <= maximum_y) return true;
     }
 
@@ -33394,6 +34653,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   const auto route_is_clear = [&](float start_x, float start_y, float end_x, float end_y, float sample_spacing) -> bool
   {
     if (route_intersects_tx(start_x, start_y, end_x, end_y)) return false;
+
     const float delta_x = end_x - start_x;
     const float delta_y = end_y - start_y;
     const float distance = sqrtf(delta_x * delta_x + delta_y * delta_y);
@@ -33435,6 +34695,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
       object.origin_y = hw_random16(static_cast<uint16_t>(height - object_height + 1u));
 
       bool placement_valid = true;
+
       const float clearance_distance = static_cast<float>(object_unit + 1u);
       const float clearance_distance_squared = clearance_distance * clearance_distance;
 
@@ -33458,8 +34719,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
           const float rx_delta_x = static_cast<float>(physical_x) - state->receiver_x;
           const float rx_delta_y = static_cast<float>(physical_y) - state->receiver_y;
 
-          if (tx_delta_x * tx_delta_x + tx_delta_y * tx_delta_y <= clearance_distance_squared ||
-              rx_delta_x * rx_delta_x + rx_delta_y * rx_delta_y <= clearance_distance_squared)
+          if (tx_delta_x * tx_delta_x + tx_delta_y * tx_delta_y <= clearance_distance_squared || rx_delta_x * rx_delta_x + rx_delta_y * rx_delta_y <= clearance_distance_squared)
           {
             placement_valid = false;
             break;
@@ -33474,6 +34734,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
         for (uint16_t local_x = 0u; local_x < object_width; local_x++)
         {
           if (!object_contains_local_pixel(object, local_x, local_y)) continue;
+
           occupancy_set(static_cast<uint16_t>(object.origin_x + local_x), static_cast<uint16_t>(object.origin_y + local_y));
         }
       }
@@ -33487,6 +34748,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   const auto create_object_map = [&]()
   {
     occupancy_clear_all();
+
     state->object_count = 0u;
     state->object_enabled = static_cast<uint8_t>(objects_enabled);
 
@@ -33501,6 +34763,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     for (uint8_t object_index = 0u; object_index < desired_object_count; object_index++)
     {
       RayTracingMobileRXObject candidate;
+
       const uint8_t palette_index = desired_object_count > 1u ? static_cast<uint8_t>((static_cast<uint16_t>(object_index) * 255u) / static_cast<uint16_t>(desired_object_count - 1u)) : 0u;
 
       if (!create_object(candidate, palette_index)) continue;
@@ -33519,10 +34782,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     const int16_t current_y = static_cast<int16_t>(roundf(state->receiver_y));
     const uint16_t minimum_leg_distance = static_cast<uint16_t>(ceilf(minimum_waypoint_distance));
 
-    const uint8_t preferred_axis =
-      state->movement_axis == RX_MOVEMENT_AXIS_HORIZONTAL ? RX_MOVEMENT_AXIS_VERTICAL :
-      state->movement_axis == RX_MOVEMENT_AXIS_VERTICAL ? RX_MOVEMENT_AXIS_HORIZONTAL :
-      (hw_random16(2u) == 0u ? RX_MOVEMENT_AXIS_HORIZONTAL : RX_MOVEMENT_AXIS_VERTICAL);
+    const uint8_t preferred_axis = state->movement_axis == RX_MOVEMENT_AXIS_HORIZONTAL ? RX_MOVEMENT_AXIS_VERTICAL : state->movement_axis == RX_MOVEMENT_AXIS_VERTICAL ? RX_MOVEMENT_AXIS_HORIZONTAL : (hw_random16(2u) == 0u ? RX_MOVEMENT_AXIS_HORIZONTAL : RX_MOVEMENT_AXIS_VERTICAL);
 
     const auto try_axis = [&](uint8_t axis, uint16_t required_distance, uint8_t attempts) -> bool
     {
@@ -33562,31 +34822,14 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
       return false;
     };
 
-    /*
-     * First preserve the preferred alternating-axis behaviour using the normal
-     * minimum leg distance.
-     */
     if (try_axis(preferred_axis, minimum_leg_distance, MAX_WAYPOINT_ATTEMPTS)) return true;
 
-    /*
-     * If that axis is blocked, permit a normal-length leg on the other axis.
-     * This prevents the receiver becoming permanently trapped at edges or
-     * behind newly generated objects.
-     */
-    const uint8_t fallback_axis =
-      preferred_axis == RX_MOVEMENT_AXIS_HORIZONTAL
-        ? RX_MOVEMENT_AXIS_VERTICAL
-        : RX_MOVEMENT_AXIS_HORIZONTAL;
+    const uint8_t fallback_axis = preferred_axis == RX_MOVEMENT_AXIS_HORIZONTAL ? RX_MOVEMENT_AXIS_VERTICAL : RX_MOVEMENT_AXIS_HORIZONTAL;
 
     if (try_axis(fallback_axis, minimum_leg_distance, MAX_WAYPOINT_ATTEMPTS)) return true;
 
-    /*
-     * Final escape behaviour: attempt an immediate one-pixel movement in any
-     * valid cardinal direction. The starting direction is randomised so a
-     * constrained receiver does not repeatedly favour the same escape route.
-     */
-    const int8_t direction_x[4] = { 1, 0, -1, 0 };
-    const int8_t direction_y[4] = { 0, 1, 0, -1 };
+    const int8_t direction_x[4] = {1, 0, -1, 0};
+    const int8_t direction_y[4] = {0, 1, 0, -1};
     const uint8_t first_direction = static_cast<uint8_t>(hw_random16(4u));
 
     for (uint8_t offset = 0u; offset < 4u; offset++)
@@ -33606,17 +34849,11 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 
       state->waypoint_x = candidate_x_float;
       state->waypoint_y = candidate_y_float;
-      state->movement_axis = direction_x[direction] != 0
-        ? RX_MOVEMENT_AXIS_HORIZONTAL
-        : RX_MOVEMENT_AXIS_VERTICAL;
+      state->movement_axis = direction_x[direction] != 0 ? RX_MOVEMENT_AXIS_HORIZONTAL : RX_MOVEMENT_AXIS_VERTICAL;
 
       return true;
     }
 
-    /*
-     * The receiver can remain stationary only when all four neighbouring
-     * pixels are blocked, outside the matrix, or would intersect the TX.
-     */
     state->waypoint_x = state->receiver_x;
     state->waypoint_y = state->receiver_y;
 
@@ -33627,6 +34864,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   {
     candidate.image_tile_x = tile_x;
     candidate.image_tile_y = tile_y;
+
     candidate.image_rx = receiver_image_coordinate(state->receiver_x, environment_width, tile_x);
     candidate.image_ry = receiver_image_coordinate(state->receiver_y, environment_height, tile_y);
 
@@ -33675,6 +34913,31 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     ray.image_tile_y = candidate.image_tile_y;
   };
 
+  /*
+   * Ray colour is based on departure angle from TX.
+   *
+   * Nearby angular paths therefore use identical or neighbouring palette
+   * colours instead of unrelated colours based on image-tile identity.
+   *
+   * Orientation is folded into 0..180 degrees so opposite/parallel image
+   * directions are visually related and there is no 359/0 palette seam.
+   */
+  const auto path_palette_index = [&](const RayTracingMobileRXCandidate& candidate) -> uint8_t
+  {
+    constexpr float PI_F = 3.14159265358979323846f;
+    constexpr float RAD_TO_DEG = 180.0f / PI_F;
+
+    float angle_degrees = atan2f(candidate.direction_y, candidate.direction_x) * RAD_TO_DEG;
+
+    if (angle_degrees < 0.0f) angle_degrees += 360.0f;
+    if (angle_degrees >= 180.0f) angle_degrees -= 180.0f;
+
+    const uint16_t bin_count = static_cast<uint16_t>(ceilf(180.0f / RAY_COLOUR_ANGLE_BIN_DEGREES));
+    const uint16_t angle_bin = min<uint16_t>(static_cast<uint16_t>(angle_degrees / RAY_COLOUR_ANGLE_BIN_DEGREES), static_cast<uint16_t>(bin_count - 1u));
+
+    return static_cast<uint8_t>((static_cast<uint32_t>(angle_bin) * 255u) / max<uint16_t>(static_cast<uint16_t>(bin_count - 1u), 1u));
+  };
+
   const auto find_ray_slot = [&](int8_t tile_x, int8_t tile_y) -> int8_t
   {
     for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
@@ -33693,9 +34956,6 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
       if (!state->rays[slot].alive || state->rays[slot].brightness == 0u) return static_cast<int8_t>(slot);
     }
 
-    /*
-     * When all slots are occupied, reuse the dimmest dying path.
-     */
     int8_t dimmest_slot = -1;
     uint8_t dimmest_brightness = 255u;
 
@@ -33727,6 +34987,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
         if (reflection_order > MAX_REFLECTION_ORDER) continue;
 
         RayTracingMobileRXCandidate candidate;
+
         initialise_candidate(candidate, tile_x, tile_y);
 
         if (!candidate_is_clear(candidate)) continue;
@@ -33740,7 +35001,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     }
 
     /*
-     * Sort valid candidates by total geometric path distance.
+     * Sort by geometric path length.
      */
     for (uint8_t i = 0u; i < candidate_count; i++)
     {
@@ -33749,6 +35010,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
         if (candidates[j].total_distance >= candidates[i].total_distance) continue;
 
         const RayTracingMobileRXCandidate temporary = candidates[i];
+
         candidates[i] = candidates[j];
         candidates[j] = temporary;
       }
@@ -33776,41 +35038,49 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
       ray.alive = true;
       ray.selected = true;
       ray.death_started_ms = 0u;
-      ray.brightness = 255u;
       ray.rolloff_start_distance = shortest_selected_distance;
 
-      if (ray_is_new)
-      {
-        ray.palette_index = selected_count > 1u
-          ? static_cast<uint8_t>((static_cast<uint16_t>(rank) * 255u) / static_cast<uint16_t>(selected_count - 1u))
-          : 0u;
-      }
+      /*
+       * Colour follows current TX departure-angle neighbourhood.
+       *
+       * This intentionally allows a persistent image-tile path's colour to
+       * drift gradually as its angle moves between angular colour sectors.
+       */
+      ray.palette_index = path_palette_index(candidate);
+
+      if (ray_is_new) ray.brightness = 0u;
     }
 
     /*
-     * Paths that were not retained begin or continue their death fade.
+     * Persistent attack/release.
      */
     for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
     {
       RayTracingMobileRXRay& ray = state->rays[slot];
 
-      if (!ray.alive || ray.selected) continue;
+      if (!ray.alive) continue;
 
-      if (ray.death_started_ms == 0u) ray.death_started_ms = effect_start_time;
-
-      const uint32_t death_elapsed_ms = effect_start_time - ray.death_started_ms;
-
-      if (death_elapsed_ms >= RAY_DEATH_FADE_MS)
+      if (ray.selected)
       {
-        ray.alive = false;
-        ray.brightness = 0u;
+        const uint32_t attack_amount = max<uint32_t>(1u, (elapsed_ms * 255u) / RAY_ATTACK_FADE_MS);
+        const uint32_t new_brightness = static_cast<uint32_t>(ray.brightness) + attack_amount;
+
+        ray.brightness = static_cast<uint8_t>(min<uint32_t>(new_brightness, 255u));
         continue;
       }
 
-      ray.brightness = static_cast<uint8_t>(255u - (death_elapsed_ms * 255u) / RAY_DEATH_FADE_MS);
-    }
+      const uint32_t release_amount = max<uint32_t>(1u, (elapsed_ms * 255u) / RAY_DEATH_FADE_MS);
 
-    (void)elapsed_ms;
+      if (release_amount >= ray.brightness)
+      {
+        ray.brightness = 0u;
+        ray.alive = false;
+        ray.death_started_ms = 0u;
+        continue;
+      }
+
+      ray.brightness = static_cast<uint8_t>(static_cast<uint32_t>(ray.brightness) - release_amount);
+    }
   };
 
   const auto add_trail_point = [&]()
@@ -33824,6 +35094,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     if (state->trail_count > 0u)
     {
       const uint8_t previous_index = static_cast<uint8_t>((state->trail_head + MAX_TRAIL_POINTS - 1u) % MAX_TRAIL_POINTS);
+
       const float delta_x = state->receiver_x - state->trail[previous_index].x;
       const float delta_y = state->receiver_y - state->trail[previous_index].y;
 
@@ -33847,6 +35118,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     if (pixel_x < 0 || pixel_y < 0 || pixel_x >= static_cast<int16_t>(width) || pixel_y >= static_cast<int16_t>(height)) return;
 
     const uint32_t existing_colour = SEGMENT.getPixelColorXY(pixel_x, pixel_y);
+
     SEGMENT.setPixelColorXY(pixel_x, pixel_y, ColourBlend(existing_colour, colour, opacity));
   };
 
@@ -33876,9 +35148,11 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
       if (pixel_x[sample] < 0 || pixel_y[sample] < 0 || pixel_x[sample] >= static_cast<int16_t>(width) || pixel_y[sample] >= static_cast<int16_t>(height)) continue;
 
       const uint8_t sample_opacity = static_cast<uint8_t>(constrain(weights[sample] * static_cast<float>(opacity), 0.0f, 255.0f));
+
       if (sample_opacity == 0u) continue;
 
       const uint32_t existing_colour = SEGMENT.getPixelColorXY(pixel_x[sample], pixel_y[sample]);
+
       SEGMENT.setPixelColorXY(pixel_x[sample], pixel_y[sample], ColourBlend(existing_colour, colour, sample_opacity));
     }
   };
@@ -33888,9 +35162,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     if (!ray.alive || brightness == 0u) return;
 
     const float excess_path_distance = ray.total_distance - ray.rolloff_start_distance;
-    const bool apply_length_rolloff =
-      ray_length_rolloff_enabled &&
-      excess_path_distance >= RAY_LENGTH_ROLLOFF_MINIMUM_EXCESS_DISTANCE;
+    const bool apply_length_rolloff = ray_length_rolloff_enabled && excess_path_distance >= RAY_LENGTH_ROLLOFF_MINIMUM_EXCESS_DISTANCE;
 
     const float ray_half_width = (static_cast<float>(width_control) / 31.0f) * 2.5f;
     const uint8_t width_sample_count = width_control == 0u ? 0u : static_cast<uint8_t>(1u + (static_cast<uint16_t>(width_control) * 3u) / 31u);
@@ -33910,11 +35182,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 
       if (apply_length_rolloff && distance > ray.rolloff_start_distance)
       {
-        const float excess_progress = constrain(
-          (distance - ray.rolloff_start_distance) / excess_path_distance,
-          0.0f,
-          1.0f
-        );
+        const float excess_progress = constrain((distance - ray.rolloff_start_distance) / excess_path_distance, 0.0f, 1.0f);
 
         distance_brightness = static_cast<uint8_t>(
           static_cast<float>(RAY_LENGTH_ROLLOFF_START_BRIGHTNESS) -
@@ -33941,6 +35209,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 
         const float positive_x = fold_coordinate(unfolded_x + perpendicular_x * side_offset, environment_width);
         const float positive_y = fold_coordinate(unfolded_y + perpendicular_y * side_offset, environment_height);
+
         const float negative_x = fold_coordinate(unfolded_x - perpendicular_x * side_offset, environment_width);
         const float negative_y = fold_coordinate(unfolded_y - perpendicular_y * side_offset, environment_height);
 
@@ -33954,15 +35223,22 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   {
     state->receiver_x = environment_width * 0.80f;
     state->receiver_y = environment_height * 0.50f;
+
     state->waypoint_x = state->receiver_x;
     state->waypoint_y = state->receiver_y;
+
     state->movement_axis = RX_MOVEMENT_AXIS_NONE;
     state->previous_target_update_ms = effect_start_time;
 
     create_object_map();
     select_new_waypoint();
     add_trail_point();
-    update_channel_paths(0u);
+
+    /*
+     * Initialise paths using a nominal elapsed time so first-frame attack does
+     * not remain at exactly zero brightness.
+     */
+    update_channel_paths(max<uint32_t>(effect_period_ms, 1u));
   }
   else if (object_enable_changed)
   {
@@ -33988,6 +35264,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   {
     const float waypoint_delta_x = state->waypoint_x - state->receiver_x;
     const float waypoint_delta_y = state->waypoint_y - state->receiver_y;
+
     const bool horizontal_leg = fabsf(waypoint_delta_x) > 0.001f;
     const float waypoint_distance = horizontal_leg ? fabsf(waypoint_delta_x) : fabsf(waypoint_delta_y);
     const float movement_distance = receiver_speed_pixels_per_second * (static_cast<float>(elapsed_target_ms) / 1000.0f);
@@ -33996,6 +35273,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     {
       state->receiver_x = state->waypoint_x;
       state->receiver_y = state->waypoint_y;
+
       select_new_waypoint();
     }
     else
@@ -34054,7 +35332,15 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   for (uint8_t object_index = 0u; object_index < state->object_count; object_index++)
   {
     const RayTracingMobileRXObject& object = state->objects[object_index];
-    const uint32_t object_colour = SEGMENT.GetPalette2Colour(object.palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE);
+
+    const uint32_t object_colour = SEGMENT.GetPalette2Colour(
+      object.palette_index,
+      PALETTE_INDEX__IS_255_RANGE,
+      PALETTE_MODE__DEFAULT,
+      PALETTE_WRAP_HARDEDGE,
+      NO_ENCODED_VALUE,
+      PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
+    );
 
     uint16_t object_width = 0u;
     uint16_t object_height = 0u;
@@ -34066,13 +35352,18 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
       for (uint16_t local_x = 0u; local_x < object_width; local_x++)
       {
         if (!object_contains_local_pixel(object, local_x, local_y)) continue;
-        SEGMENT.setPixelColorXY(static_cast<uint16_t>(object.origin_x + local_x), static_cast<uint16_t>(object.origin_y + local_y), object_colour);
+
+        SEGMENT.setPixelColorXY(
+          static_cast<uint16_t>(object.origin_x + local_x),
+          static_cast<uint16_t>(object.origin_y + local_y),
+          object_colour
+        );
       }
     }
   }
 
   /*
-   * Dying paths are drawn first. Active selected paths are drawn over them.
+   * Fading/deselected paths are drawn first.
    */
   for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
   {
@@ -34080,73 +35371,51 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 
     if (!ray.alive || ray.selected) continue;
 
-    const uint32_t palette_colour = SEGMENT.GetPaletteColour(ray.palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE);
+    const uint32_t palette_colour = SEGMENT.GetPaletteColour(
+      ray.palette_index,
+      PALETTE_INDEX__IS_255_RANGE,
+      PALETTE_MODE__DEFAULT,
+      PALETTE_WRAP_HARDEDGE,
+      NO_ENCODED_VALUE,
+      PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
+    );
+
     const uint32_t ray_colour = ColourBlend(BLACK, palette_colour, ray_brightness);
     const uint8_t final_brightness = scale8(ray.brightness, ray_brightness);
 
     draw_ray_path(ray, ray_colour, final_brightness);
   }
 
+  /*
+   * Selected paths are drawn over fading paths.
+   */
   for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
   {
     const RayTracingMobileRXRay& ray = state->rays[slot];
 
     if (!ray.alive || !ray.selected) continue;
 
-    const uint32_t palette_colour = SEGMENT.GetPaletteColour(ray.palette_index, PALETTE_INDEX__IS_255_RANGE, PALETTE_MODE__DEFAULT, PALETTE_WRAP_HARDEDGE, NO_ENCODED_VALUE, PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE);
-    const uint32_t ray_colour = ColourBlend(BLACK, palette_colour, ray_brightness);
+    const uint32_t palette_colour = SEGMENT.GetPaletteColour(
+      ray.palette_index,
+      PALETTE_INDEX__IS_255_RANGE,
+      PALETTE_MODE__DEFAULT,
+      PALETTE_WRAP_HARDEDGE,
+      NO_ENCODED_VALUE,
+      PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
+    );
 
-    draw_ray_path(ray, ray_colour, 255u);
+    const uint32_t ray_colour = ColourBlend(BLACK, palette_colour, ray_brightness);
+    const uint8_t final_brightness = scale8(ray.brightness, ray_brightness);
+
+    draw_ray_path(ray, ray_colour, final_brightness);
   }
 
   /*
-   * TX and RX remain full brightness and are drawn last.
+   * TX and RX are always drawn last and at full brightness.
    */
   SEGMENT.setPixelColorXY(tx_x_pixel, tx_y_pixel, RGBW32(0, 255, 0, 0));
   SEGMENT.setPixelColorXY(static_cast<int16_t>(roundf(state->receiver_x)), static_cast<int16_t>(roundf(state->receiver_y)), RGBW32(255, 0, 0, 0));
 }
-
-static const char PM_EFFECT_CONFIG__RAY_TRACING__MOBILE_RX[] PROGMEM =
-"RT Mobile RX@"
-"RX Speed,Paths,Ray Brightness,RX Trail,Ray Width,Objects,Path Roll-off,New Map,,,"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=96,"
-"ix=96,"
-"c1=30,"
-"c2=0,"
-"c3=0,"
-"o1=1,"
-"o2=1,"
-"o3=1,"
-"paln=IceCream Floats+,"
-"pal2=1,"
-"s1=222222," // Objects
-"ep=20"
-;
-
-
-static const char PM_EFFECT_DESCRI__RAY_TRACING__MOBILE_RX[] PROGMEM =
-"Moving receiver with shortest viable propagation paths.\n\r"
-"SX: Receiver movement speed\n\r"
-"IX: Number of shortest valid paths, 1 to 8\n\r"
-"C1: Ray brightness\n\r"
-"C2: Receiver trail length\n\r"
-"C3: Additional ray width\n\r"
-"O1: Enable solid Tetris-style objects\n\r"
-"O2: Enable excess-path brightness roll-off from 255 to 30\n\r"
-"O3: Regenerate the complete object map every 60 seconds\n\r"
-"Frame transitions are always enabled and speed-derived\n\r"
-"Palette: Ray colours\n\r"
-"Palette2: Object colours\n\r"
-"Green: Transmitter\n\r"
-"Red: Moving receiver";
-
 #endif  // ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
 
 
