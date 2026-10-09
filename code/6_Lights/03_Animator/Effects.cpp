@@ -34368,7 +34368,6 @@ struct RayTracingMobileRXState
  *   Red   : receiver.
  *
  ******************************************************************************************************************************************************************************************************************/
-
 void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 {
   constexpr uint8_t MAX_REFLECTION_ORDER = 4;
@@ -34387,7 +34386,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   constexpr uint16_t RAY_DEATH_FADE_MS = 600u;
   constexpr uint32_t RAY_IDENTITY_HOLD_MS = 3000u;
 
-  constexpr float RAY_COLOUR_NEIGHBOUR_DEGREES = 15.0f;
+  constexpr uint8_t RAY_COLOUR_FAMILY_COUNT = 8u;
   constexpr float PATH_SELECTION_HYSTERESIS = 0.05f;
 
   constexpr uint32_t MAP_REGENERATION_INTERVAL_MS = 60000u;
@@ -34461,9 +34460,6 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 
   target_update_interval_ms = max<uint32_t>(target_update_interval_ms, effect_period_ms);
 
-  const uint32_t transition_duration_long = (target_update_interval_ms * 9u) / 10u;
-  const uint16_t transition_duration_ms = static_cast<uint16_t>(min<uint32_t>(transition_duration_long, 65535u));
-
   const auto occupancy_pixel_index = [&](uint16_t x, uint16_t y) -> uint32_t
   {
     return static_cast<uint32_t>(y) * static_cast<uint32_t>(width) + static_cast<uint32_t>(x);
@@ -34511,30 +34507,34 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     return folded <= environment_size ? folded : period - folded;
   };
 
-  const auto ray_angle_degrees = [&](float direction_x, float direction_y) -> float
+  /*
+   * Permanent spatial colour families.
+   *
+   * Colour is determined only when a genuinely new ray identity is created.
+   *
+   * 360 degrees is divided into RAY_COLOUR_FAMILY_COUNT sectors.
+   *
+   * All rays originating in the same angular sector therefore have exactly
+   * the same palette index.
+   *
+   * Critically, an existing ray NEVER has its palette index recalculated as
+   * the receiver moves.
+   */
+  const auto palette_index_from_direction = [&](float direction_x, float direction_y) -> uint8_t
   {
     float angle_degrees = atan2f(direction_y, direction_x) * RADIANS_TO_DEGREES_F;
 
     if (angle_degrees < 0.0f) angle_degrees += 360.0f;
-
-    return angle_degrees;
-  };
-
-  const auto angular_distance_degrees = [&](float angle_a, float angle_b) -> float
-  {
-    float difference = fabsf(angle_a - angle_b);
-
-    if (difference > 180.0f) difference = 360.0f - difference;
-
-    return difference;
-  };
-
-  const auto initial_palette_index_from_angle = [&](float angle_degrees) -> uint8_t
-  {
-    if (angle_degrees < 0.0f) angle_degrees += 360.0f;
     if (angle_degrees >= 360.0f) angle_degrees = fmodf(angle_degrees, 360.0f);
 
-    return static_cast<uint8_t>(roundf((angle_degrees / 360.0f) * 255.0f));
+    uint8_t family = static_cast<uint8_t>((angle_degrees * static_cast<float>(RAY_COLOUR_FAMILY_COUNT)) / 360.0f);
+
+    if (family >= RAY_COLOUR_FAMILY_COUNT) family = RAY_COLOUR_FAMILY_COUNT - 1u;
+
+    return static_cast<uint8_t>(
+      (static_cast<uint16_t>(family) * 255u) /
+      static_cast<uint16_t>(RAY_COLOUR_FAMILY_COUNT - 1u)
+    );
   };
 
   const auto get_object_bounds = [](const RayTracingMobileRXObject& object, uint16_t& object_width, uint16_t& object_height)
@@ -34895,6 +34895,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
     {
       if (!state->rays[slot].alive) continue;
+
       if (state->rays[slot].image_tile_x == tile_x && state->rays[slot].image_tile_y == tile_y) return static_cast<int8_t>(slot);
     }
 
@@ -34911,36 +34912,6 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     return -1;
   };
 
-  const auto find_neighbour_palette_index = [&](const RayTracingMobileRXCandidate& candidate, uint8_t& palette_index) -> bool
-  {
-    const float candidate_angle = ray_angle_degrees(candidate.direction_x, candidate.direction_y);
-
-    float nearest_angle_difference = 361.0f;
-    int8_t nearest_slot = -1;
-
-    for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
-    {
-      const RayTracingMobileRXRay& ray = state->rays[slot];
-
-      if (!ray.alive) continue;
-
-      const float ray_angle = ray_angle_degrees(ray.direction_x, ray.direction_y);
-      const float angle_difference = angular_distance_degrees(candidate_angle, ray_angle);
-
-      if (angle_difference >= nearest_angle_difference) continue;
-
-      nearest_angle_difference = angle_difference;
-      nearest_slot = static_cast<int8_t>(slot);
-    }
-
-    if (nearest_slot < 0) return false;
-    if (nearest_angle_difference > RAY_COLOUR_NEIGHBOUR_DEGREES) return false;
-
-    palette_index = state->rays[nearest_slot].palette_index;
-
-    return true;
-  };
-
   const auto update_channel_paths = [&](uint32_t elapsed_ms)
   {
     RayTracingMobileRXCandidate candidates[MAX_REFLECTION_CANDIDATES + 1u];
@@ -34953,9 +34924,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     uint8_t final_selected_count = 0u;
 
     /*
-     * Release path identities whose complete hold period has expired.
-     *
-     * Brightness reaching zero does NOT by itself release the slot.
+     * Expire old retained path identities.
      */
     for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
     {
@@ -34975,7 +34944,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     }
 
     /*
-     * Generate all valid image candidates.
+     * Generate every valid image-method candidate.
      */
     for (int8_t tile_y = -static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_y <= static_cast<int8_t>(MAX_REFLECTION_ORDER); tile_y++)
     {
@@ -35007,7 +34976,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     }
 
     /*
-     * Sort candidates by total geometric path distance.
+     * Sort valid candidates by geometric path length.
      */
     for (uint8_t i = 0u; i < candidate_count; i++)
     {
@@ -35031,15 +35000,12 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 
     const uint8_t requested_selected_count = min<uint8_t>(requested_path_count, candidate_count);
 
-    /*
-     * Determine the normal distance cutoff for the requested number of paths.
-     */
     const float normal_cutoff_distance = requested_selected_count > 0u ? candidates[requested_selected_count - 1u].total_distance : 0.0f;
     const float retained_cutoff_distance = normal_cutoff_distance * (1.0f + PATH_SELECTION_HYSTERESIS);
 
     /*
-     * First retain previously selected candidates which remain within the
-     * hysteresis envelope.
+     * Retain previously selected paths while still reasonably close to the
+     * normal distance cutoff.
      */
     for (uint8_t candidate_index = 0u; candidate_index < candidate_count && final_selected_count < requested_selected_count; candidate_index++)
     {
@@ -35051,7 +35017,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     }
 
     /*
-     * Fill remaining places with the shortest candidates.
+     * Fill remaining positions from the shortest candidates.
      */
     for (uint8_t candidate_index = 0u; candidate_index < candidate_count && final_selected_count < requested_selected_count; candidate_index++)
     {
@@ -35061,10 +35027,6 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
       candidate_chosen[candidate_index] = true;
     }
 
-    /*
-     * Selection has now been decided. Clear selected state before writing the
-     * new selected set.
-     */
     for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++) state->rays[slot].selected = false;
 
     float shortest_selected_distance = 0.0f;
@@ -35080,7 +35042,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     }
 
     /*
-     * Activate selected candidates.
+     * Activate selected paths.
      */
     for (uint8_t selected_index = 0u; selected_index < final_selected_count; selected_index++)
     {
@@ -35092,32 +35054,23 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
       if (ray_is_new) slot = find_free_ray_slot();
 
       /*
-       * Do not recycle a retained identity just to display a new candidate.
-       *
-       * Omitting this ray temporarily is visually safer than changing a held
-       * colour identity.
+       * Do not destroy retained identities merely to create another path.
        */
       if (slot < 0) continue;
 
       RayTracingMobileRXRay& ray = state->rays[slot];
 
-      uint8_t new_palette_index = ray.palette_index;
-
       /*
-       * Palette assignment occurs ONLY when creating a genuinely new path.
+       * This is the ONLY location where palette_index is assigned.
        *
-       * Existing rays never have their colour recalculated.
+       * A ray which already exists keeps its colour forever.
+       *
+       * A newly created ray gets the permanent colour family corresponding to
+       * its departure direction from TX.
        */
       if (ray_is_new)
       {
-        if (!find_neighbour_palette_index(candidate, new_palette_index))
-        {
-          const float candidate_angle = ray_angle_degrees(candidate.direction_x, candidate.direction_y);
-
-          new_palette_index = initial_palette_index_from_angle(candidate_angle);
-        }
-
-        ray.palette_index = new_palette_index;
+        ray.palette_index = palette_index_from_direction(candidate.direction_x, candidate.direction_y);
         ray.brightness = 0u;
       }
 
@@ -35130,10 +35083,9 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     }
 
     /*
-     * Attack selected rays and release deselected rays.
+     * Explicit per-ray brightness attack/release.
      *
-     * A released ray remains alive after reaching brightness zero so its slot
-     * and colour identity can still be recovered during RAY_IDENTITY_HOLD_MS.
+     * There is deliberately NO Segment transition in this effect.
      */
     for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
     {
@@ -35347,7 +35299,11 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     select_new_waypoint();
     add_trail_point();
 
-    update_channel_paths(max<uint32_t>(effect_period_ms, 1u));
+    /*
+     * Initialise the first path set fully rather than beginning the entire
+     * effect at near-zero ray brightness.
+     */
+    update_channel_paths(RAY_ATTACK_FADE_MS);
   }
   else if (object_enable_changed)
   {
@@ -35418,12 +35374,17 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
 
   state->previous_target_update_ms = effect_start_time;
 
-  SEGMENT.startTransition(transition_duration_ms, true);
+  /*
+   * IMPORTANT:
+   *
+   * No SEGMENT.startTransition() here.
+   *
+   * The effect owns its own temporal ray fades. Cross-fading the complete
+   * previous matrix against the newly calculated matrix causes old and new
+   * ray geometries/colours to coexist and was producing the severe flashing.
+   */
   SEGMENT.fill(BLACK);
 
-  /*
-   * RX trail.
-   */
   const uint8_t visible_trail_count = min<uint8_t>(requested_trail_points, state->trail_count);
 
   for (uint8_t trail_offset = 0u; trail_offset < visible_trail_count; trail_offset++)
@@ -35435,9 +35396,6 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     draw_single_pixel(state->trail[trail_index].x, state->trail[trail_index].y, trail_colour, 255u);
   }
 
-  /*
-   * Objects.
-   */
   for (uint8_t object_index = 0u; object_index < state->object_count; object_index++)
   {
     const RayTracingMobileRXObject& object = state->objects[object_index];
@@ -35472,7 +35430,7 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
   }
 
   /*
-   * Deselected/fading retained rays first.
+   * Dying rays first.
    */
   for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
   {
@@ -35489,14 +35447,18 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
       PHASEIN_ANIM_BRIGHTNESS_REQUIRED_AS_TRUE
     );
 
+    /*
+     * C1 is applied exactly once here.
+     *
+     * ray.brightness is then applied exactly once by draw_ray_path().
+     */
     const uint32_t ray_colour = ColourBlend(BLACK, palette_colour, ray_brightness);
-    const uint8_t final_brightness = scale8(ray.brightness, ray_brightness);
 
-    draw_ray_path(ray, ray_colour, final_brightness);
+    draw_ray_path(ray, ray_colour, ray.brightness);
   }
 
   /*
-   * Selected rays.
+   * Selected rays second.
    */
   for (uint8_t slot = 0u; slot < MAX_RAY_SLOTS; slot++)
   {
@@ -35514,9 +35476,8 @@ void mAnimatorLight::EffectAnim__RayTracing__MobileRX()
     );
 
     const uint32_t ray_colour = ColourBlend(BLACK, palette_colour, ray_brightness);
-    const uint8_t final_brightness = scale8(ray.brightness, ray_brightness);
 
-    draw_ray_path(ray, ray_colour, final_brightness);
+    draw_ray_path(ray, ray_colour, ray.brightness);
   }
 
   /*

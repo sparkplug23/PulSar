@@ -1309,22 +1309,81 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
 #endif
 
   // PulSar currently handles HUB75 pin ownership separately from WLED PinManager.
+if (bc.colorOrder == COL_ORDER_RGB) {
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = color order RGB");
+}
+else if (bc.colorOrder == COL_ORDER_RBG) {
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = color order RBG");
 
-  if (bc.colorOrder == COL_ORDER_RGB) {
-    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = Default color order (RGB)");
-  } else if (bc.colorOrder == COL_ORDER_BGR) {
-    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = color order BGR");
-    int8_t tmpPin;
-    tmpPin           = mxconfig.gpio.r1;
-    mxconfig.gpio.r1 = mxconfig.gpio.b1;
-    mxconfig.gpio.b1 = tmpPin;
-    tmpPin           = mxconfig.gpio.r2;
-    mxconfig.gpio.r2 = mxconfig.gpio.b2;
-    mxconfig.gpio.b2 = tmpPin;
-  }
-  else {
-    DEBUGBUS_PRINTF("MatrixPanel_I2S_DMA = unsupported color order %u\n", bc.colorOrder);
-  }
+  int8_t tmpPin;
+
+  tmpPin = mxconfig.gpio.g1;
+  mxconfig.gpio.g1 = mxconfig.gpio.b1;
+  mxconfig.gpio.b1 = tmpPin;
+
+  tmpPin = mxconfig.gpio.g2;
+  mxconfig.gpio.g2 = mxconfig.gpio.b2;
+  mxconfig.gpio.b2 = tmpPin;
+}
+else if (bc.colorOrder == COL_ORDER_GRB) {
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = color order GRB");
+
+  int8_t tmpPin;
+
+  tmpPin = mxconfig.gpio.r1;
+  mxconfig.gpio.r1 = mxconfig.gpio.g1;
+  mxconfig.gpio.g1 = tmpPin;
+
+  tmpPin = mxconfig.gpio.r2;
+  mxconfig.gpio.r2 = mxconfig.gpio.g2;
+  mxconfig.gpio.g2 = tmpPin;
+}
+else if (bc.colorOrder == COL_ORDER_GBR) {
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = color order GBR");
+
+  int8_t tmpPin;
+
+  tmpPin = mxconfig.gpio.r1;
+  mxconfig.gpio.r1 = mxconfig.gpio.g1;
+  mxconfig.gpio.g1 = mxconfig.gpio.b1;
+  mxconfig.gpio.b1 = tmpPin;
+
+  tmpPin = mxconfig.gpio.r2;
+  mxconfig.gpio.r2 = mxconfig.gpio.g2;
+  mxconfig.gpio.g2 = mxconfig.gpio.b2;
+  mxconfig.gpio.b2 = tmpPin;
+}
+else if (bc.colorOrder == COL_ORDER_BRG) {
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = color order BRG");
+
+  int8_t tmpPin;
+
+  tmpPin = mxconfig.gpio.r1;
+  mxconfig.gpio.r1 = mxconfig.gpio.b1;
+  mxconfig.gpio.b1 = mxconfig.gpio.g1;
+  mxconfig.gpio.g1 = tmpPin;
+
+  tmpPin = mxconfig.gpio.r2;
+  mxconfig.gpio.r2 = mxconfig.gpio.b2;
+  mxconfig.gpio.b2 = mxconfig.gpio.g2;
+  mxconfig.gpio.g2 = tmpPin;
+}
+else if (bc.colorOrder == COL_ORDER_BGR) {
+  DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA = color order BGR");
+
+  int8_t tmpPin;
+
+  tmpPin = mxconfig.gpio.r1;
+  mxconfig.gpio.r1 = mxconfig.gpio.b1;
+  mxconfig.gpio.b1 = tmpPin;
+
+  tmpPin = mxconfig.gpio.r2;
+  mxconfig.gpio.r2 = mxconfig.gpio.b2;
+  mxconfig.gpio.b2 = tmpPin;
+}
+else {
+  DEBUGBUS_PRINTF("MatrixPanel_I2S_DMA = unsupported color order %u\n", bc.colorOrder);
+}
 
   DEBUGBUS_PRINTF("MatrixPanel_I2S_DMA config - %ux%u length: %u, %d bits per pixel, driver %d\n", mxconfig.mx_width, mxconfig.mx_height, mxconfig.chain_length, 3 * mxconfig.getPixelColorDepthBits(), mxconfig.driver);
   DEBUGBUS_PRINTF("R1_PIN=%u, G1_PIN=%u, B1_PIN=%u, R2_PIN=%u, G2_PIN=%u, B2_PIN=%u, A_PIN=%u, B_PIN=%u, C_PIN=%u, D_PIN=%u, E_PIN=%u, LAT_PIN=%u, OE_PIN=%u, CLK_PIN=%u\n",

@@ -69,7 +69,7 @@
 // #define DEVICE_MEADOWS__OFFICE__PEBBLE_ESP32C3_TESTBED
 // #define DEVICE_MEADOWS__ROAMING__ADDRESSABLE_HARDWARE_TESTER
 
-#define DEVICE_MEADOWS__OFFICE__HUB75E_ESP32S3_N16R8
+// #define DEVICE_MEADOWS__OFFICE__HUB75E_ESP32S3_N16R8
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -8805,22 +8805,25 @@ R"=====(
   #endif
   #define DEVICENAME_ROOMHINT_CTR "testgroup"
 
-#define USE_MODULE_LIGHTS_HUB75
-#define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
-#define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
-#define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
-#define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
-#define BOARD_HAS_PSRAM
+  #define USE_MODULE_LIGHTS_HUB75
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
+  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
+  #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
+  #define BOARD_HAS_PSRAM
 
-#define HUB75_PINOUT__ESP32S3_OFFICE_TEST
+  #define HUB75_PINOUT__ESP32S3_OFFICE_TEST
 
-#define ENABLE_FEATURE_LIGHTING__2D_MATRIX
-#define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+  #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
 
-#define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
-#define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
 
-#define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
 
   /***********************************
   * SECTION: Enable Grouped
@@ -8845,6 +8848,10 @@ R"=====(
 #define RT_COVERAGE_DEBUG
 
 #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
+
+#define ENABLE_FEATURE_LIGHTS__TEMPLATE__P2_PANEL3
+
+#ifdef ENABLE_FEATURE_LIGHTS__TEMPLATE__P2P5
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
@@ -8890,6 +8897,54 @@ R"=====(
     "BrightnessCCT":0
   }
   )=====";
+  #endif
+
+  #ifdef ENABLE_FEATURE_LIGHTS__TEMPLATE__P2_PANEL3
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "BusType":"HUB75E",
+        "ColourOrder":"GBR",
+        "Start":0,
+        "Length":8192
+      }
+    ],
+    "MatrixConfig":[
+      {
+        "Width":128,
+        "Height":64,
+        "BottomStart":0,
+        "RightStart":0,
+        "Vertical":0,
+        "Serpentine":0,
+        "xOffset":0,
+        "yOffset":0
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,8192],
+        "ColourPalette":"Rainbow",
+        "ColourType":3,
+        "Effects":{
+          "Function":"Static",
+          "Speed":127,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs":20
+        },
+        "BrightnessRGB":100,
+        "BrightnessCCT":0
+      }
+    ],
+    "BrightnessRGB":100,
+    "BrightnessCCT":0
+  }
+  )=====";
+  #endif
       
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 

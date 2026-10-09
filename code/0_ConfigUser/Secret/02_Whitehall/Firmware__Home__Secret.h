@@ -2941,7 +2941,7 @@ Bathroom
 #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
 #endif
 #define DEVICENAME_ROOMHINT_CTR "testgroup"
-#define MQTT_HOST   "192.168.3.70"
+#define MQTT_HOST   "192.168.1.70"
    
  /***********************************
   * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
@@ -2999,7 +2999,7 @@ Bathroom
     "Segments":[
       {
         "PixelRange":[0,100],
-        "ColourPalette":"Pastel Dots",
+        "ColourPalette":"Cold White",
         "ColourType":3,
         "Effects": {
           "Function":"Static Palette",
@@ -3011,7 +3011,7 @@ Bathroom
         "BrightnessRGB": 100
       }
     ],
-    "BrightnessRGB": 100
+    "BrightnessRGB": 40
   }
   )=====";
   #define BUSCONFIG_MAX_PINS_FOR_PARALLEL_I2S 1000

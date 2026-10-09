@@ -57,7 +57,7 @@ enum FIRMWARE_VERSION_BRANCH_TYPE_IDS{
 /**@@@@@ Core Changes
  * #00 : 
  */
-#define FIRMWARE_VERSION_CORE     2
+#define FIRMWARE_VERSION_CORE     3
 
 /**@@@@@ Module changes
  * #00 : 
