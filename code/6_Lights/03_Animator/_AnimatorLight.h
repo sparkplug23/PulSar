@@ -1622,7 +1622,6 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void EffectAnim__Christmas_InWaves__02();
     void EffectAnim__Christmas_ChasingFlash__02();
     void EffectAnim__Christmas_TwinkleFlash__02();
-    void EffectAnim__Christmas_Slo_Glo__02();    
     void EffectAnim__Christmas_Sequential_And_Slo_Glo_Plus__Base(bool is_slo_glo);
     void EffectAnim__Christmas_Slo_Glo_Plus__01();
     void EffectAnim__Christmas_Sequential_Plus__01();
@@ -2205,7 +2204,6 @@ static const uint8_t kPresetMetaParserVersion = 2;
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__INWAVES_02_ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__CHASING_FLASH_02_ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__TWINKLE_FLASH_02_ID,
-      EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_02_ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SLO_GLO_PLUS__ID,
       EFFECTS_FUNCTION__CHRISTMAS_MULTIFUNCTION_CONTROLLER__SEQUENTIAL_PLUS__ID,
       #endif
