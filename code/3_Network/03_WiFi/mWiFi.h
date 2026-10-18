@@ -116,6 +116,8 @@ class mWiFi :
       char pass[65] = {0};
       uint8_t channel = 1;
       bool hidden = false;
+      bool on_sta_fail = true;
+      uint16_t fail_delay_mins = 0;
     };
 
     struct WiFiModuleConfig

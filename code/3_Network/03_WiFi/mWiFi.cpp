@@ -181,44 +181,263 @@ static void ParseIPv4Config(JsonParserObject obj_ipv4, mWiFi::IPv4Config& ipv4)
 }
 
 
+// void mWiFi::parse_JSONCommand(JsonParserObject obj)
+// {
+//   JsonParserToken jtok = 0;
+
+//   JsonParserObject obj_wifi = obj["WiFi"];
+//   if(!obj_wifi)
+//   {
+//     return;
+//   }
+
+//   // -------------------------------------------------------------------------
+//   // WiFi Mode
+//   // -------------------------------------------------------------------------
+//   JsonParserObject obj_mode = obj_wifi["Mode"];
+//   if(obj_mode)
+//   {
+//     if(jtok = obj_mode["APAlwaysOn"])
+//     {
+//       config.softap.always_on = jtok.getBool();
+//       ALOG_INF(PSTR(D_LOG_WIFI "APAlwaysOn=%u"),config.softap.always_on);
+//     }
+//   }
+
+//   // -------------------------------------------------------------------------
+//   // Station
+//   // -------------------------------------------------------------------------
+//   JsonParserObject obj_station = obj_wifi["Station"];
+//   if(obj_station)
+//   {
+//     JsonParserObject obj_ipv4 = obj_station["IPv4"];
+//     if(obj_ipv4)
+//     {
+//       ParseIPv4Config(obj_ipv4,config.station.ipv4);
+//     }
+//   }
+// }
+//   // 
 void mWiFi::parse_JSONCommand(JsonParserObject obj)
 {
   JsonParserToken jtok = 0;
 
   JsonParserObject obj_wifi = obj["WiFi"];
+
   if(!obj_wifi)
   {
     return;
   }
 
-  // -------------------------------------------------------------------------
+  ALOG_INF(PSTR(D_LOG_WIFI "Parsing WiFi JSON configuration"));
+
+  // =========================================================
   // WiFi Mode
-  // -------------------------------------------------------------------------
+  // =========================================================
+
+  if(jtok = obj_wifi["EN"])
+  {
+    const bool enabled = jtok.getBool();
+    config.station.enabled = enabled;
+    config.softap.enabled = enabled;
+  }
+
   JsonParserObject obj_mode = obj_wifi["Mode"];
+
   if(obj_mode)
   {
+    if(jtok = obj_mode["STA"])
+    {
+      config.station.enabled = jtok.getBool();
+    }
+
+    if(jtok = obj_mode["AP"])
+    {
+      config.softap.enabled = jtok.getBool();
+    }
+
     if(jtok = obj_mode["APAlwaysOn"])
     {
       config.softap.always_on = jtok.getBool();
-      ALOG_INF(PSTR(D_LOG_WIFI "APAlwaysOn=%u"),config.softap.always_on);
+    }
+
+    if(jtok = obj_mode["APOnSTAFail"])
+    {
+      config.softap.on_sta_fail = jtok.getBool();
+    }
+
+    if(jtok = obj_mode["APFailDelayMins"])
+    {
+      const int32_t minutes = jtok.getInt();
+      config.softap.fail_delay_mins = (uint16_t)constrain(minutes,0,1440);
     }
   }
 
-  // -------------------------------------------------------------------------
-  // Station
-  // -------------------------------------------------------------------------
+  // =========================================================
+  // Station configuration
+  // =========================================================
+
   JsonParserObject obj_station = obj_wifi["Station"];
+
   if(obj_station)
   {
+    // A supplied array is authoritative.
+    // It replaces the legacy compiled STA profiles.
+
+    JsonParserToken profiles_token = obj_station["Profiles"];
+
+    if(profiles_token && profiles_token.isArray())
+    {
+      memset(config.station.profiles,0,sizeof(config.station.profiles));
+
+      config.station.profile_count = 0;
+      config.station.active_profile = 0;
+
+      JsonParserArray profiles = profiles_token.getArray();
+
+      for(auto item : profiles)
+      {
+        if(config.station.profile_count >= WIFI_MAXIMUM_CONNECTIONS)
+        {
+          ALOG_WRN(PSTR(D_LOG_WIFI "WiFi JSON: maximum profile count reached"));
+          break;
+        }
+
+        JsonParserObject profile = item.getObject();
+
+        if(!profile)
+        {
+          continue;
+        }
+
+        JsonParserToken ssid_token = profile["SSID"];
+
+        if(!ssid_token || !ssid_token.isStr())
+        {
+          continue;
+        }
+
+        const char* ssid = ssid_token.getStr();
+
+        if(!ssid || !ssid[0])
+        {
+          continue;
+        }
+
+        const uint8_t index = config.station.profile_count;
+        WiFiProfile& target = config.station.profiles[index];
+
+        snprintf(target.ssid,sizeof(target.ssid),"%s",ssid);
+
+        if(jtok = profile["Password"])
+        {
+          snprintf(target.pass,sizeof(target.pass),"%s",jtok.getStr());
+        }
+
+        if(jtok = profile["Id"])
+        {
+          snprintf(target.id,sizeof(target.id),"%s",jtok.getStr());
+        }
+        else
+        {
+          snprintf(target.id,sizeof(target.id),"profile_%u",index);
+        }
+
+        if(jtok = profile["Priority"])
+        {
+          target.priority = (uint8_t)constrain(jtok.getInt(),0,255);
+        }
+        else
+        {
+          target.priority = (uint8_t)((index + 1) * 10);
+        }
+
+        if(jtok = profile["Hidden"])
+        {
+          target.ssid_hidden = jtok.getBool();
+        }
+
+        config.station.profile_count++;
+
+        ALOG_INF(
+          PSTR(D_LOG_WIFI "WiFi JSON profile %u: %s"),
+          index,
+          target.ssid
+        );
+      }
+
+      ALOG_INF(
+        PSTR(D_LOG_WIFI "WiFi JSON: %u STA profiles configured"),
+        config.station.profile_count
+      );
+
+      #ifdef ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES
+        WiFi_Sta_CandidateList_Clear();
+      #endif
+    }
+
     JsonParserObject obj_ipv4 = obj_station["IPv4"];
+
     if(obj_ipv4)
     {
       ParseIPv4Config(obj_ipv4,config.station.ipv4);
     }
   }
-}
-  
 
+  // =========================================================
+  // SoftAP configuration
+  // =========================================================
+
+  JsonParserObject obj_softap = obj_wifi["SoftAP"];
+
+  if(obj_softap)
+  {
+    if(jtok = obj_softap["SSID"])
+    {
+      snprintf(
+        config.softap.ssid,
+        sizeof(config.softap.ssid),
+        "%s",
+        jtok.getStr()
+      );
+    }
+
+    if(jtok = obj_softap["Password"])
+    {
+      snprintf(
+        config.softap.pass,
+        sizeof(config.softap.pass),
+        "%s",
+        jtok.getStr()
+      );
+    }
+
+    if(jtok = obj_softap["Channel"])
+    {
+      config.softap.channel = (uint8_t)constrain(jtok.getInt(),1,11);
+    }
+
+    if(jtok = obj_softap["Hidden"])
+    {
+      config.softap.hidden = jtok.getBool();
+    }
+  }
+
+  // =========================================================
+  // Summary
+  // =========================================================
+
+  ALOG_INF(
+    PSTR(D_LOG_WIFI "WiFi JSON applied | STA=%u | Profiles=%u | AP=%u | APAlwaysOn=%u | APOnSTAFail=%u | APDelayMins=%u | APSSID=%s"),
+    config.station.enabled,
+    config.station.profile_count,
+    config.softap.enabled,
+    config.softap.always_on,
+    config.softap.on_sta_fail,
+    config.softap.fail_delay_mins,
+    config.softap.ssid
+  );
+}
 
 void mWiFi::Task_EverySecond()
 {
@@ -284,6 +503,20 @@ void mWiFi::Task_EverySecond()
   if(!ap_only_now)
   {
     WiFi_Sta_Maintain_Periodic();
+  }
+
+    // -------------------------------------------------------------------------
+  // AP fallback if STA remains disconnected
+  // -------------------------------------------------------------------------
+  if(config.softap.enabled &&
+     config.softap.on_sta_fail &&
+     !config.softap.always_on &&
+     config.station.enabled &&
+     WiFi2_HasAnyStaProfileConfigured() &&
+     (WiFi.status() != WL_CONNECTED || !WiFi_Link_IsIpRoutable()) &&
+     connection.downtime >= ((uint32_t)config.softap.fail_delay_mins * 60UL))
+  {
+    WiFi2_Ap_EnsureStarted();
   }
 }
 
@@ -373,6 +606,9 @@ void mWiFi::WiFi_Config_LoadLegacyDefaults(void)
       config.station.profile_count++;
     }
   }
+
+  config.softap.on_sta_fail = true;
+config.softap.fail_delay_mins = 0;
 
 #endif
 
