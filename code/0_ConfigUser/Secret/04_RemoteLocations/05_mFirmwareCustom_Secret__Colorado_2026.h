@@ -4,6 +4,10 @@
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 
+
+#define DEVICE_COLORADO26__LIGHT01__HALLOWEEN_OPTIONAL_SOFTAP_ONLY
+
+
 /***************
  * ToBuild : Make and test before flying
  * 
@@ -196,7 +200,152 @@
 // This would let me get the sd card file to google earth pro pipeline, and python reading working.
 // Test in CO, but should be a new device.
 
+#ifdef DEVICE_COLORADO26__LIGHT01__HALLOWEEN_OPTIONAL_SOFTAP_ONLY
 
+  #ifndef DEVICENAME_CTR
+    #define DEVICENAME_CTR "col26__light01__halloween"
+  #endif
+
+  #ifndef DEVICENAME_FRIENDLY_CTR
+    #define DEVICENAME_FRIENDLY_CTR "Colorado Halloween 100 LEDs#Outside"
+  #endif
+
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+    #define DEVICENAME_DESCRIPTION_CTR "Colorado Halloween;Optional SoftAP"
+  #endif
+
+  #define DEVICENAME_ROOMHINT_CTR "Colorado"
+
+  // =========================================================
+  // Network
+  // =========================================================
+
+  #define USE_NETWORK_TEMPLATE
+  #define USE_NETWORK_TEMPLATE__OVERRIDE
+
+  DEFINE_PGM_CTR(NETWORK_TEMPLATE)
+  "{"
+    "\"Version\":1,"
+
+    "\"Interface\":{"
+      "\"Policy\":{"
+        "\"PreferOrder\":[\"Ethernet\",\"WiFi\",\"Cellular\"],"
+        "\"AllowMultipleActive\":true,"
+        "\"BlockRemoteMqttWhenLocalAvailable\":true"
+      "}"
+    "},"
+
+    "\"WiFi\":{"
+      "\"EN\":true,"
+      "\"Backoff\":[5,60,600],"
+
+      "\"Mode\":{"
+        "\"STA\":true,"
+        "\"AP\":true,"
+        "\"STA_AP\":true,"
+        "\"APBootMins\":10,"
+        "\"APOnSTAFail\":true,"
+        "\"APFailDelayMins\":0,"
+        "\"APAlwaysOn\":true"
+      "},"
+
+      "\"Station\":{"
+        "\"Profiles\":["
+          "{"
+            "\"SSID\":\"" STA_SSID1 "\","
+            "\"Password\":\"" STA_PASS1 "\""
+          "}"
+        "],"
+
+        "\"IPv4\":{"
+          "\"Static\":false,"
+          "\"IP\":\"0.0.0.0\","
+          "\"Gateway\":\"0.0.0.0\","
+          "\"Subnet\":\"0.0.0.0\","
+          "\"DNS1\":\"0.0.0.0\","
+          "\"DNS2\":\"0.0.0.0\""
+        "}"
+      "},"
+
+      "\"SoftAP\":{"
+        "\"SSID\":\"" DEVICENAME_CTR "\","
+        "\"Password\":\"\","
+        "\"Channel\":1"
+      "}"
+    "},"
+
+    "\"Ethernet\":{"
+      "\"EN\":false"
+    "},"
+
+    "\"MQTT\":{"
+      "\"EN\":true,"
+
+      "\"UpdateSeconds\":{"
+        "\"IfChanged\":1,"
+        "\"TelePeriod\":60,"
+        "\"ConfigPeriod\":60"
+      "},"
+
+      "\"Brokers\":["
+        "{"
+          "\"Id\":\"home\","
+          "\"EN\":true,"
+          "\"Host\":\"" MQTT_HOST "\","
+          "\"Port\":" STR(MQTT_PORT) ","
+          "\"User\":\"\","
+          "\"Password\":\"\","
+          "\"TopicPrefix\":\"" DEVICENAME_CTR "\","
+          "\"ClientName\":\"" DEVICENAME_CTR "\","
+          "\"Backoff\":[5,10,60],"
+          "\"Transport\":[\"WiFi\"],"
+          "\"PrefTransport\":[\"WiFi\"],"
+          "\"OutgoingLevel\":3,"
+          "\"OutgoingLimiterMs\":0"
+        "}"
+      "]"
+    "}"
+  "}";
+
+  // =========================================================
+  // Lighting: 100 WS2812 LEDs, GPIO13
+  // =========================================================
+
+  #define USE_LIGHTING_TEMPLATE
+
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "Pin":13,
+        "ColourOrder":"GRB",
+        "BusType":"WS2812_RGB",
+        "Start":0,
+        "Length":100
+      }
+    ],
+    "Segments":[
+      {
+        "Name":"Halloween",
+        "PixelRange":[0,100],
+        "ColourPalette":"Orange & Teal",
+        "ColourType":3,
+        "Effects":{
+          "Function":"Static",
+          "Speed":127,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs":1000
+        },
+        "BrightnessRGB":100
+      }
+    ],
+    "BrightnessRGB":50
+  }
+  )=====";
+
+#endif
 
 
 

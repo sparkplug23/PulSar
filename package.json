@@ -8,13 +8,11 @@
     "test": "test"
   },
   "scripts": {
-    "build:webserver":  "node tools/cdata_webserver.js",
+    "build:webserver": "node tools/cdata_webserver.js",
     "build:submodules": "node tools/cdata_submodules.js",
-    "build:lights":     "node tools/cdata_lights.js",
-
-    "build:webpages":   "npm run build:webserver && npm run build:submodules && npm run build:lights",
-
-    "build":            "npm run build:webserver"
+    "build:lights": "node tools/cdata_lights.js",
+    "build:webpages": "npm run build:webserver && npm run build:submodules && npm run build:lights",
+    "build": "npm run build:webserver"
   },
   "repository": {
     "type": "git",
@@ -32,5 +30,8 @@
     "inliner": "^1.13.1",
     "nodemon": "^2.0.20",
     "zlib": "^1.0.5"
+  },
+  "allowScripts": {
+    "zlib@1.0.5": true
   }
 }
