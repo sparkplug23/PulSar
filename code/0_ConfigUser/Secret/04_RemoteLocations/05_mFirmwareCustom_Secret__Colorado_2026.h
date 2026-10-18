@@ -5,7 +5,7 @@
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
 
 
-#define DEVICE_COLORADO26__LIGHT01__HALLOWEEN_OPTIONAL_SOFTAP_ONLY
+// #define DEVICE_COLORADO26__LIGHT01__HALLOWEEN_OPTIONAL_SOFTAP_ONLY
 
 
 /***************
@@ -269,7 +269,7 @@
 
       "\"SoftAP\":{"
         "\"SSID\":\"" DEVICENAME_CTR "\","
-        "\"Password\":\"Michael\","
+        "\"Password\":\"Michael26\","
         "\"Channel\":1"
       "}"
     "},"
@@ -319,7 +319,7 @@
     "BusConfig":[
       {
         "Pin":13,
-        "ColourOrder":"RGB",
+        "ColourOrder":"GBR",
         "BusType":"WS2812_RGB",
         "Start":0,
         "Length":100
@@ -346,6 +346,692 @@
   )=====";
 
 #endif
+
+
+
+/**
+ * @brief
+ *
+ * Office HUB75E Test Panel
+ * ESP32-S3 N16R8
+ *
+ * HUB75E 128x64 panel
+ * 1/32 scan
+ * 8192 logical pixels
+ *
+ * Physical HUB75 signals are hard-coded in BusHub75Matrix.
+ * The lighting BusConfig "Pin" array is NOT GPIO numbering for HUB75.
+ *
+ * BusConfig Pin[] semantics:
+ *
+ *   Pin[0] -> Panel width
+ *   Pin[1] -> Panel height
+ *   Pin[2] -> Chain length
+ *   Pin[3] -> Panel rows
+ *   Pin[4] -> Panel columns
+ *
+ * For this panel:
+ *
+ *   "Pin":[128,64,1,1,1]
+ *
+ *
+ * HUB75_I2S_CFG::i2s_pins order
+ *
+ *   R1, G1, B1,
+ *   R2, G2, B2,
+ *   A, B, C, D, E,
+ *   LAT, OE, CLK
+ *
+ *
+ *                              ESP32-S3 N16R8
+ *
+ *                          _______________________
+ *                    3V3  |3V3                GND | GND
+ *                    3V3  |3V3              GPIO43| UART0 TX
+ *                    RST  |RST              GPIO44| UART0 RX
+ *                      E  GPIO4             GPIO1 | spare
+ *                      B  GPIO5             GPIO2 | spare
+ *                      D  GPIO6            GPIO42 | JTAG / spare
+ *                    LAT  GPIO7            GPIO41 | JTAG / spare
+ *                     B2  GPIO8            GPIO40 | JTAG / spare
+ *                     R2  GPIO9            GPIO39 | JTAG / spare
+ *                     B1 GPIO10            GPIO38 | spare
+ *                     R1 GPIO11            GPIO37 | MEM / unavailable
+ *                     G1 GPIO12            GPIO36 | MEM / unavailable
+ *                     G2 GPIO13            GPIO35 | MEM / unavailable
+ *                  spare GPIO14             GPIO0 | STRAP fL / BOOT
+ *                     OE GPIO15            GPIO45 | STRAP fH
+ *                    CLK GPIO16            GPIO48 | spare
+ *                      C GPIO17            GPIO47 | BIL RGB LED / spare
+ *                      A GPIO18            GPIO21 | spare
+ *         5V INPUT ONLY   |5V0          ^     GND | GND
+ *                    GND  |GND  |USB| |COM|   GND | GND
+ *                          _______________________
+ *
+ *
+ * HUB75 signal allocation
+ *
+ * Colour data
+ *
+ *   R1  -> GPIO11
+ *   G1  -> GPIO12
+ *   B1  -> GPIO10
+ *
+ *   R2  -> GPIO9
+ *   G2  -> GPIO13
+ *   B2  -> GPIO8
+ *
+ * Row address
+ *
+ *   A   -> GPIO18
+ *   B   -> GPIO5
+ *   C   -> GPIO17
+ *   D   -> GPIO6
+ *   E   -> GPIO4
+ *
+ * Control
+ *
+ *   LAT -> GPIO7
+ *   OE  -> GPIO15
+ *   CLK -> GPIO16
+ *
+ *
+ * Driver GPIO order
+ *
+ *   mxconfig.gpio = {
+ *     11, 12, 10,       // R1, G1, B1
+ *      9, 13,  8,       // R2, G2, B2
+ *     18,  5, 17, 6, 4, // A, B, C, D, E
+ *      7, 15, 16        // LAT, OE, CLK
+ *   };
+ *
+ *
+ * HUB75 connector mapping
+ *
+ *   R1  -> GPIO11
+ *   G1  -> GPIO12
+ *   B1  -> GPIO10
+ *   GND -> GND
+ *
+ *   R2  -> GPIO9
+ *   G2  -> GPIO13
+ *   B2  -> GPIO8
+ *   E   -> GPIO4
+ *
+ *   A   -> GPIO18
+ *   B   -> GPIO5
+ *   C   -> GPIO17
+ *   D   -> GPIO6
+ *
+ *   CLK -> GPIO16
+ *   LAT -> GPIO7
+ *   OE  -> GPIO15
+ *   GND -> GND
+ *
+ *
+ * Reserved / deliberately avoided
+ *
+ *   GPIO0  -> STRAP fL / BOOT
+ *   GPIO45 -> STRAP fH
+ *   GPIO46 -> STRAP fH
+ *
+ *   GPIO19, GPIO20 -> Native USB
+ *   GPIO35, GPIO36, GPIO37 -> Octal PSRAM / unavailable on N16R8
+ *   GPIO39..GPIO42 -> Leave available for JTAG/debug
+ *   GPIO43, GPIO44 -> UART0
+ *
+ *
+ * Octal PSRAM pins exposed on this header
+ *
+ *   GPIO35 -> MEM / unavailable
+ *   GPIO36 -> MEM / unavailable
+ *   GPIO37 -> MEM / unavailable
+ *
+ *   GPIO38 -> usable
+ *   GPIO39 -> usable
+ *   GPIO40 -> usable
+ *   GPIO41 -> usable
+ *   GPIO42 -> usable
+ *
+ *
+ * Useful spare GPIO
+ *
+ *   GPIO1
+ *   GPIO2
+ *   GPIO14
+ *   GPIO21
+ *   GPIO38
+ *   GPIO48
+ *
+ *   GPIO39..GPIO42 -> usable, but deliberately kept free for JTAG/debug
+ *   GPIO47 -> Built-in RGB LED; usable if onboard LED is not required
+ *
+ *
+ * Power
+ *
+ *   Panel power is supplied separately at 5 V.
+ *   ESP32 and panel grounds MUST be common.
+ *
+ *   Do not power the HUB75 panel through the ESP32 board 5 V pin.
+ *
+ *
+ * Panel configuration
+ *
+ *   Resolution     -> 128 x 64
+ *   Logical pixels -> 8192
+ *   Scan rate      -> 1/32
+ *   Interface      -> HUB75E
+ *
+ */
+#ifdef DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_01
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+  #define USE_MODULE_LIGHTS_HUB75
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
+  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
+  #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
+  #define BOARD_HAS_PSRAM
+
+  #define HUB75_PINOUT__ESP32S3_OFFICE_TEST
+
+  #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+
+
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+
+  /***********************************
+  * SECTION: Enable Grouped
+  ************************************/  
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+        // "Pin":[13,12,11,10,9,8,17,16,15,7,6,5,4,18],
+        // "BusType":"HUB75E",
+        // "Start":0,
+        // "Length":8192,
+        // "Width":128,
+        // "Height":64
+        // "Pin":[128,64,1,1,1],
+
+#define RT_COVERAGE_DEBUG
+
+#define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
+
+#define ENABLE_FEATURE_LIGHTS__TEMPLATE__P2_PANEL3
+
+#ifdef ENABLE_FEATURE_LIGHTS__TEMPLATE__P2P5
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "BusType":"HUB75E",
+        "ColourOrder":"BGR",
+        "Start":0,
+        "Length":8192
+      }
+    ],
+    "MatrixConfig":[
+      {
+        "Width":128,
+        "Height":64,
+        "BottomStart":0,
+        "RightStart":0,
+        "Vertical":0,
+        "Serpentine":0,
+        "xOffset":0,
+        "yOffset":0
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,8192],
+        "ColourPalette":"Rainbow",
+        "ColourType":3,
+        "Effects":{
+          "Function":"Static",
+          "Speed":127,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs":20
+        },
+        "BrightnessRGB":100,
+        "BrightnessCCT":0
+      }
+    ],
+    "BrightnessRGB":100,
+    "BrightnessCCT":0
+  }
+  )=====";
+  #endif
+
+  #ifdef ENABLE_FEATURE_LIGHTS__TEMPLATE__P2_PANEL3
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "BusType":"HUB75E",
+        "ColourOrder":"GBR",
+        "Start":0,
+        "Length":8192
+      }
+    ],
+    "MatrixConfig":[
+      {
+        "Width":128,
+        "Height":64,
+        "BottomStart":0,
+        "RightStart":0,
+        "Vertical":0,
+        "Serpentine":0,
+        "xOffset":0,
+        "yOffset":0
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,8192],
+        "ColourPalette":"Rainbow",
+        "ColourType":3,
+        "Effects":{
+          "Function":"Static",
+          "Speed":127,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs":20
+        },
+        "BrightnessRGB":100,
+        "BrightnessCCT":0
+      }
+    ],
+    "BrightnessRGB":100,
+    "BrightnessCCT":0
+  }
+  )=====";
+  #endif
+      
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif // END DEVICE
+
+
+
+/**
+ * @brief
+ *
+ * Office HUB75E Test Panel
+ * ESP32-S3 N16R8
+ *
+ * HUB75E 128x64 panel
+ * 1/32 scan
+ * 8192 logical pixels
+ *
+ * Physical HUB75 signals are hard-coded in BusHub75Matrix.
+ * The lighting BusConfig "Pin" array is NOT GPIO numbering for HUB75.
+ *
+ * BusConfig Pin[] semantics:
+ *
+ *   Pin[0] -> Panel width
+ *   Pin[1] -> Panel height
+ *   Pin[2] -> Chain length
+ *   Pin[3] -> Panel rows
+ *   Pin[4] -> Panel columns
+ *
+ * For this panel:
+ *
+ *   "Pin":[128,64,1,1,1]
+ *
+ *
+ * HUB75_I2S_CFG::i2s_pins order
+ *
+ *   R1, G1, B1,
+ *   R2, G2, B2,
+ *   A, B, C, D, E,
+ *   LAT, OE, CLK
+ *
+ *
+ *                              ESP32-S3 N16R8
+ *
+ *                          _______________________
+ *                    3V3  |3V3                GND | GND
+ *                    3V3  |3V3              GPIO43| UART0 TX
+ *                    RST  |RST              GPIO44| UART0 RX
+ *                      E  GPIO4             GPIO1 | spare
+ *                      B  GPIO5             GPIO2 | spare
+ *                      D  GPIO6            GPIO42 | JTAG / spare
+ *                    LAT  GPIO7            GPIO41 | JTAG / spare
+ *                     B2  GPIO8            GPIO40 | JTAG / spare
+ *                     R2  GPIO9            GPIO39 | JTAG / spare
+ *                     B1 GPIO10            GPIO38 | spare
+ *                     R1 GPIO11            GPIO37 | MEM / unavailable
+ *                     G1 GPIO12            GPIO36 | MEM / unavailable
+ *                     G2 GPIO13            GPIO35 | MEM / unavailable
+ *                  spare GPIO14             GPIO0 | STRAP fL / BOOT
+ *                     OE GPIO15            GPIO45 | STRAP fH
+ *                    CLK GPIO16            GPIO48 | spare
+ *                      C GPIO17            GPIO47 | BIL RGB LED / spare
+ *                      A GPIO18            GPIO21 | spare
+ *         5V INPUT ONLY   |5V0          ^     GND | GND
+ *                    GND  |GND  |USB| |COM|   GND | GND
+ *                          _______________________
+ *
+ *
+ * HUB75 signal allocation
+ *
+ * Colour data
+ *
+ *   R1  -> GPIO11
+ *   G1  -> GPIO12
+ *   B1  -> GPIO10
+ *
+ *   R2  -> GPIO9
+ *   G2  -> GPIO13
+ *   B2  -> GPIO8
+ *
+ * Row address
+ *
+ *   A   -> GPIO18
+ *   B   -> GPIO5
+ *   C   -> GPIO17
+ *   D   -> GPIO6
+ *   E   -> GPIO4
+ *
+ * Control
+ *
+ *   LAT -> GPIO7
+ *   OE  -> GPIO15
+ *   CLK -> GPIO16
+ *
+ *
+ * Driver GPIO order
+ *
+ *   mxconfig.gpio = {
+ *     11, 12, 10,       // R1, G1, B1
+ *      9, 13,  8,       // R2, G2, B2
+ *     18,  5, 17, 6, 4, // A, B, C, D, E
+ *      7, 15, 16        // LAT, OE, CLK
+ *   };
+ *
+ *
+ * HUB75 connector mapping
+ *
+ *   R1  -> GPIO11
+ *   G1  -> GPIO12
+ *   B1  -> GPIO10
+ *   GND -> GND
+ *
+ *   R2  -> GPIO9
+ *   G2  -> GPIO13
+ *   B2  -> GPIO8
+ *   E   -> GPIO4
+ *
+ *   A   -> GPIO18
+ *   B   -> GPIO5
+ *   C   -> GPIO17
+ *   D   -> GPIO6
+ *
+ *   CLK -> GPIO16
+ *   LAT -> GPIO7
+ *   OE  -> GPIO15
+ *   GND -> GND
+ *
+ *
+ * Reserved / deliberately avoided
+ *
+ *   GPIO0  -> STRAP fL / BOOT
+ *   GPIO45 -> STRAP fH
+ *   GPIO46 -> STRAP fH
+ *
+ *   GPIO19, GPIO20 -> Native USB
+ *   GPIO35, GPIO36, GPIO37 -> Octal PSRAM / unavailable on N16R8
+ *   GPIO39..GPIO42 -> Leave available for JTAG/debug
+ *   GPIO43, GPIO44 -> UART0
+ *
+ *
+ * Octal PSRAM pins exposed on this header
+ *
+ *   GPIO35 -> MEM / unavailable
+ *   GPIO36 -> MEM / unavailable
+ *   GPIO37 -> MEM / unavailable
+ *
+ *   GPIO38 -> usable
+ *   GPIO39 -> usable
+ *   GPIO40 -> usable
+ *   GPIO41 -> usable
+ *   GPIO42 -> usable
+ *
+ *
+ * Useful spare GPIO
+ *
+ *   GPIO1
+ *   GPIO2
+ *   GPIO14
+ *   GPIO21
+ *   GPIO38
+ *   GPIO48
+ *
+ *   GPIO39..GPIO42 -> usable, but deliberately kept free for JTAG/debug
+ *   GPIO47 -> Built-in RGB LED; usable if onboard LED is not required
+ *
+ *
+ * Power
+ *
+ *   Panel power is supplied separately at 5 V.
+ *   ESP32 and panel grounds MUST be common.
+ *
+ *   Do not power the HUB75 panel through the ESP32 board 5 V pin.
+ *
+ *
+ * Panel configuration
+ *
+ *   Resolution     -> 128 x 64
+ *   Logical pixels -> 8192
+ *   Scan rate      -> 1/32
+ *   Interface      -> HUB75E
+ *
+ */
+#ifdef DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_02
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR          "coxmas24__redboard_01"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "testgroup"
+
+  #define USE_MODULE_LIGHTS_HUB75
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
+  #define FIRMWARE_DEFAULT__LIGHTING_WEBUI__ADVANCED
+  #define FIRMWARE_DEFAULT__WEBSERVER__ADVANCED
+  #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
+  #define BOARD_HAS_PSRAM
+
+  #define HUB75_PINOUT__ESP32S3_OFFICE_TEST
+
+  #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
+  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
+
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL3_FLASHING_EXTENDED
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+
+
+  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
+  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+
+  /***********************************
+  * SECTION: Enable Grouped
+  ************************************/  
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/  
+
+  /***********************************
+   * SECTION: Lighting Configs
+  ************************************/   
+
+        // "Pin":[13,12,11,10,9,8,17,16,15,7,6,5,4,18],
+        // "BusType":"HUB75E",
+        // "Start":0,
+        // "Length":8192,
+        // "Width":128,
+        // "Height":64
+        // "Pin":[128,64,1,1,1],
+
+#define RT_COVERAGE_DEBUG
+
+#define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
+
+#define ENABLE_FEATURE_LIGHTS__TEMPLATE__P2_PANEL3
+
+#ifdef ENABLE_FEATURE_LIGHTS__TEMPLATE__P2P5
+
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "BusType":"HUB75E",
+        "ColourOrder":"BGR",
+        "Start":0,
+        "Length":8192
+      }
+    ],
+    "MatrixConfig":[
+      {
+        "Width":128,
+        "Height":64,
+        "BottomStart":0,
+        "RightStart":0,
+        "Vertical":0,
+        "Serpentine":0,
+        "xOffset":0,
+        "yOffset":0
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,8192],
+        "ColourPalette":"Rainbow",
+        "ColourType":3,
+        "Effects":{
+          "Function":"Static",
+          "Speed":127,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs":20
+        },
+        "BrightnessRGB":100,
+        "BrightnessCCT":0
+      }
+    ],
+    "BrightnessRGB":100,
+    "BrightnessCCT":0
+  }
+  )=====";
+  #endif
+
+  #ifdef ENABLE_FEATURE_LIGHTS__TEMPLATE__P2_PANEL3
+  #define USE_LIGHTING_TEMPLATE
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+  R"=====(
+  {
+    "BusConfig":[
+      {
+        "BusType":"HUB75E",
+        "ColourOrder":"GBR",
+        "Start":0,
+        "Length":8192
+      }
+    ],
+    "MatrixConfig":[
+      {
+        "Width":128,
+        "Height":64,
+        "BottomStart":0,
+        "RightStart":0,
+        "Vertical":0,
+        "Serpentine":0,
+        "xOffset":0,
+        "yOffset":0
+      }
+    ],
+    "Segments":[
+      {
+        "PixelRange":[0,8192],
+        "ColourPalette":"Rainbow",
+        "ColourType":3,
+        "Effects":{
+          "Function":"Static",
+          "Speed":127,
+          "Intensity":127,
+          "Grouping":1,
+          "RateMs":20
+        },
+        "BrightnessRGB":100,
+        "BrightnessCCT":0
+      }
+    ],
+    "BrightnessRGB":100,
+    "BrightnessCCT":0
+  }
+  )=====";
+  #endif
+      
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
+#endif // END DEVICE
 
 
 
