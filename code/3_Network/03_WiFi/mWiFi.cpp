@@ -450,6 +450,22 @@ void mWiFi::Task_EverySecond()
   }
 
   // -------------------------------------------------------------------------
+  // AP fallback if STA remains disconnected
+  //
+  // Must run before the connection-state early returns.
+  // -------------------------------------------------------------------------
+  if(config.softap.enabled &&
+     config.softap.on_sta_fail &&
+     !config.softap.always_on &&
+     config.station.enabled &&
+     WiFi2_HasAnyStaProfileConfigured() &&
+     (WiFi.status() != WL_CONNECTED || !WiFi_Link_IsIpRoutable()) &&
+     connection.downtime >= ((uint32_t)config.softap.fail_delay_mins * 60UL))
+  {
+    WiFi2_Ap_EnsureStarted();
+  }
+
+  // -------------------------------------------------------------------------
   // Initial connection/startup phase completed
   // -------------------------------------------------------------------------
   if(connection.seconds_to_wait_for_fresh_connection_attempt == -1)
@@ -503,20 +519,6 @@ void mWiFi::Task_EverySecond()
   if(!ap_only_now)
   {
     WiFi_Sta_Maintain_Periodic();
-  }
-
-    // -------------------------------------------------------------------------
-  // AP fallback if STA remains disconnected
-  // -------------------------------------------------------------------------
-  if(config.softap.enabled &&
-     config.softap.on_sta_fail &&
-     !config.softap.always_on &&
-     config.station.enabled &&
-     WiFi2_HasAnyStaProfileConfigured() &&
-     (WiFi.status() != WL_CONNECTED || !WiFi_Link_IsIpRoutable()) &&
-     connection.downtime >= ((uint32_t)config.softap.fail_delay_mins * 60UL))
-  {
-    WiFi2_Ap_EnsureStarted();
   }
 }
 
@@ -657,7 +659,6 @@ void mWiFi::WiFi_Config_LoadLegacyDefaults(void)
     config.softap.on_sta_fail,
     config.softap.ssid
   );
-}
 }
 
 #endif
