@@ -1,5 +1,5 @@
-#ifndef _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_COLORADO25_H
-#define _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_COLORADO25_H
+#ifndef _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_COLORADO26_H
+#define _CONFIG_USER_FIRMWARE_CUSTOM_SECRET_COLORADO26_H
 
 #include "2_CoreSystem/mGlobalMacros.h"
 #include "2_CoreSystem/11_Languages/mLanguageDefault.h"
@@ -269,7 +269,7 @@
 
       "\"SoftAP\":{"
         "\"SSID\":\"" DEVICENAME_CTR "\","
-        "\"Password\":\"\","
+        "\"Password\":\"Michael\","
         "\"Channel\":1"
       "}"
     "},"
@@ -319,7 +319,7 @@
     "BusConfig":[
       {
         "Pin":13,
-        "ColourOrder":"GRB",
+        "ColourOrder":"RGB",
         "BusType":"WS2812_RGB",
         "Start":0,
         "Length":100
@@ -332,7 +332,7 @@
         "ColourPalette":"Orange & Teal",
         "ColourType":3,
         "Effects":{
-          "Function":"Static",
+          "Function":"Static Palette",
           "Speed":127,
           "Intensity":127,
           "Grouping":1,
