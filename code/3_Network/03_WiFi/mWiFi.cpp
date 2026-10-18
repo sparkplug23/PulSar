@@ -575,6 +575,9 @@ void mWiFi::WiFi_Config_Clear(void)
   config.softap.always_on = 0;
   config.softap.channel = 1;
   config.softap.hidden = 0;
+
+  config.softap.on_sta_fail = true;
+  config.softap.fail_delay_mins = 0;
 }
 
 
@@ -607,22 +610,54 @@ void mWiFi::WiFi_Config_LoadLegacyDefaults(void)
     }
   }
 
-  config.softap.on_sta_fail = true;
-config.softap.fail_delay_mins = 0;
-
 #endif
 
-#ifdef SOFTAP_SSID
-  snprintf(config.softap.ssid,sizeof(config.softap.ssid),"%s",SOFTAP_SSID);
-#else
-  snprintf(config.softap.ssid,sizeof(config.softap.ssid),"%s","PulSar-Setup");
-#endif
 
-#ifdef SOFTAP_PASSWORD
-  snprintf(config.softap.pass,sizeof(config.softap.pass),"%s",SOFTAP_PASSWORD);
-#else
-  config.softap.pass[0] = '\0';
-#endif
+  // -------------------------------------------------------------------------
+  // SoftAP compile-time configuration
+  // These are defaults, overridden by JSON if supplied later.
+  // -------------------------------------------------------------------------
+
+  #ifdef ENABLE_FEATURE_WIFI__SOFTAP_ALWAYS_ON
+    config.softap.enabled = true;
+    config.softap.always_on = true;
+  #endif
+
+  #ifdef ENABLE_FEATURE_WIFI__SOFTAP_ON_STA_FAIL
+    config.softap.enabled = true;
+    config.softap.on_sta_fail = true;
+  #endif
+
+  #ifdef WIFI_SOFTAP_FAIL_DELAY_MINS
+    config.softap.fail_delay_mins = WIFI_SOFTAP_FAIL_DELAY_MINS;
+  #endif
+
+  #ifdef WIFI_SOFTAP_CHANNEL
+    config.softap.channel = WIFI_SOFTAP_CHANNEL;
+  #endif
+
+  #ifdef SOFTAP_SSID
+    snprintf(config.softap.ssid,sizeof(config.softap.ssid),"%s",SOFTAP_SSID);
+  #else
+    snprintf(config.softap.ssid,sizeof(config.softap.ssid),"%s","PulSar-Setup");
+  #endif
+
+  #ifdef SOFTAP_PASSWORD
+    snprintf(config.softap.pass,sizeof(config.softap.pass),"%s",SOFTAP_PASSWORD);
+  #else
+    config.softap.pass[0] = '\0';
+  #endif
+
+  ALOG_INF(
+    PSTR(D_LOG_WIFI "WiFi compile defaults | STA=%u | Profiles=%u | AP=%u | APAlwaysOn=%u | APOnSTAFail=%u | APSSID=%s"),
+    config.station.enabled,
+    config.station.profile_count,
+    config.softap.enabled,
+    config.softap.always_on,
+    config.softap.on_sta_fail,
+    config.softap.ssid
+  );
+}
 }
 
 #endif
