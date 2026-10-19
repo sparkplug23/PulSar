@@ -5,8 +5,12 @@
 
 void mWiFi::WiFi_Sta_Maintain_Periodic(void)
 {
-  const bool connected = (WiFi.status() == WL_CONNECTED);
+  const wl_status_t status_now = WiFi.status();
+  const bool connected = (status_now == WL_CONNECTED);
 
+  // -------------------------------------------------------------------------
+  // Connected and IP address available
+  // -------------------------------------------------------------------------
   if(connected && WiFi_Link_IsIpRoutable())
   {
     if(!connection.fConnected)
@@ -14,18 +18,21 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
       WiFi2_Sta_Connected_Enter();
     }
 
-#ifdef ENABLE_FEATURE_WIFI__SSID_QUICK_CONNECT_AFTER_OTA
+    #ifdef ENABLE_FEATURE_WIFI__SSID_QUICK_CONNECT_AFTER_OTA
     connection.quick_connect_active = false;
-#endif
+    #endif
 
-#if defined(ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES) && !defined(ESP8266)
+    #if defined(ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES) && !defined(ESP8266)
     WiFi_Sta_CandidateList_Clear();
-#endif
+    #endif
 
     WiFi_Sta_OnConnected_ResetOutageScanFlags();
     return;
   }
 
+  // -------------------------------------------------------------------------
+  // Connection lost
+  // -------------------------------------------------------------------------
   if(connection.fConnected)
   {
     WiFi2_Sta_Disconnected_Enter();
@@ -41,31 +48,57 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
     return;
   }
 
+  // -------------------------------------------------------------------------
+  // Wait for current connection attempt
+  //
+  // Do not abandon the profile immediately when WiFi.status() returns
+  // WL_NO_SSID_AVAIL or WL_CONNECT_FAILED.
+  //
+  // Give each profile its full retry interval.
+  // -------------------------------------------------------------------------
   if(connection.counter > 0)
   {
-    const wl_status_t status_now = WiFi.status();
+    connection.counter--;
 
-    if(status_now == WL_NO_SSID_AVAIL || status_now == WL_CONNECT_FAILED)
+    ALOG_DBG(
+      PSTR(D_LOG_WIFI "STA waiting | profile=%u | status=%d | remaining=%u"),
+      config.station.active_profile,
+      (int)status_now,
+      connection.counter
+    );
+
+    if(connection.counter > 0)
     {
-      connection.counter = 0;
-    }
-    else
-    {
-      ALOG_DBG(PSTR(D_LOG_WIFI "Connection attempt remaining %u seconds"),connection.counter);
-      connection.counter--;
       return;
     }
+
+    ALOG_WRN(
+      PSTR(D_LOG_WIFI "STA attempt expired | profile=%u | SSID=%s | status=%d | timeout=%u"),
+      config.station.active_profile,
+      config.station.profiles[config.station.active_profile].ssid,
+      (int)status_now,
+      WIFI_CHECK_SEC
+    );
   }
 
-#ifdef ENABLE_FEATURE_WIFI__SSID_QUICK_CONNECT_AFTER_OTA
+  // -------------------------------------------------------------------------
+  // OTA quick-connect fallback
+  // -------------------------------------------------------------------------
+  #ifdef ENABLE_FEATURE_WIFI__SSID_QUICK_CONNECT_AFTER_OTA
   if(connection.quick_connect_active)
   {
     connection.quick_connect_active = false;
-    ALOG_INF(PSTR(D_LOG_WIFI "OTA quick-connect failed, falling back to normal selection"));
-  }
-#endif
 
-#if defined(ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES) && !defined(ESP8266)
+    ALOG_INF(
+      PSTR(D_LOG_WIFI "OTA quick-connect failed, falling back to normal selection")
+    );
+  }
+  #endif
+
+  // -------------------------------------------------------------------------
+  // Optional scan/ranked candidates
+  // -------------------------------------------------------------------------
+  #if defined(ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES) && !defined(ESP8266)
 
   if(wifi_candidate_index < wifi_candidate_count)
   {
@@ -78,6 +111,7 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
   if(wifi_candidate_count > 0 && wifi_candidate_index >= wifi_candidate_count)
   {
     ALOG_INF(PSTR(D_LOG_WIFI "Visible candidate list exhausted"));
+
     WiFi_Sta_CandidateList_Clear();
     connection.counter = WIFI_CHECK_SEC;
     return;
@@ -97,22 +131,29 @@ void mWiFi::WiFi_Sta_Maintain_Periodic(void)
 
     const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured();
 
-    ALOG_INF(PSTR(D_LOG_WIFI "No configured SSID visible; fallback profile %u: %s"),profile_i,config.station.profiles[profile_i].ssid);
+    ALOG_INF(
+      PSTR(D_LOG_WIFI "No configured SSID visible; fallback profile %u: %s"),
+      profile_i,
+      config.station.profiles[profile_i].ssid
+    );
 
     WiFi_Sta_ProfileIndex_Connect(profile_i);
     connection.counter = WIFI_CHECK_SEC;
     return;
   }
 
+  #endif
+
+  // -------------------------------------------------------------------------
+  // Select next configured profile
+  // -------------------------------------------------------------------------
   const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_WithScanPreference(false);
 
-#else
-
-  const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_WithScanPreference(false);
-
-#endif
-
-  ALOG_INF(PSTR(D_LOG_WIFI "Trying WiFi profile %u: %s"),profile_i,config.station.profiles[profile_i].ssid);
+  ALOG_INF(
+    PSTR(D_LOG_WIFI "Trying WiFi profile %u: %s"),
+    profile_i,
+    config.station.profiles[profile_i].ssid
+  );
 
   WiFi_Sta_ProfileIndex_Connect(profile_i);
   connection.counter = WIFI_CHECK_SEC;
@@ -633,7 +674,10 @@ void mWiFi::WiFi_Sta_Connect_Start(void)
     return;
   }
 
-#if defined(ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES) && !defined(ESP8266)
+  // -------------------------------------------------------------------------
+  // Optional scan and ranked connection
+  // -------------------------------------------------------------------------
+  #if defined(ENABLE_FEATURE_WIFI__SCAN_AND_RANK_PROFILES) && !defined(ESP8266)
 
   const bool do_scan = WiFi_Sta_ShouldScanNow_OnBootOrOutage();
 
@@ -649,22 +693,40 @@ void mWiFi::WiFi_Sta_Connect_Start(void)
 
     const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured();
 
-    ALOG_INF(PSTR(D_LOG_WIFI "No configured SSID visible; fallback profile %u: %s"),profile_i,config.station.profiles[profile_i].ssid);
+    ALOG_INF(
+      PSTR(D_LOG_WIFI "No configured SSID visible; fallback profile %u: %s"),
+      profile_i,
+      config.station.profiles[profile_i].ssid
+    );
 
     WiFi_Sta_ProfileIndex_Connect(profile_i);
     connection.counter = WIFI_CHECK_SEC;
     return;
   }
 
-  const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_WithScanPreference(false);
+  #endif
 
-#else
+  // -------------------------------------------------------------------------
+  // First normal boot attempt uses first configured profile.
+  //
+  // Later attempts retain existing round-robin behaviour.
+  // -------------------------------------------------------------------------
+  uint8_t profile_i = 0;
 
-  const uint8_t profile_i = WiFi_Sta_SelectProfileIndex_WithScanPreference(false);
+  if(connection.last_event == 0)
+  {
+    profile_i = WiFi_Sta_SelectProfileIndex_OrderedFirstConfigured();
+  }
+  else
+  {
+    profile_i = WiFi_Sta_SelectProfileIndex_WithScanPreference(false);
+  }
 
-#endif
-
-  ALOG_INF(PSTR(D_LOG_WIFI "Starting WiFi using profile %u: %s"),profile_i,config.station.profiles[profile_i].ssid);
+  ALOG_INF(
+    PSTR(D_LOG_WIFI "Starting WiFi using profile %u: %s"),
+    profile_i,
+    config.station.profiles[profile_i].ssid
+  );
 
   WiFi_Sta_ProfileIndex_Connect(profile_i);
   connection.counter = WIFI_CHECK_SEC;
@@ -689,7 +751,15 @@ void mWiFi::WiFi_Sta_ProfileIndex_Connect(uint8_t profile_i, uint8_t runtime_cha
 
   WiFi.persistent(false);
 
-  if(config.softap.enabled && config.softap.always_on)
+  // -------------------------------------------------------------------------
+  // Maintain SoftAP while connecting STA
+  // -------------------------------------------------------------------------
+  const auto mode_now = WiFi.getMode();
+
+  if(config.softap.enabled &&
+     (config.softap.always_on ||
+      mode_now == WIFI_AP ||
+      mode_now == WIFI_AP_STA))
   {
     WiFi.mode(WIFI_AP_STA);
   }
@@ -723,32 +793,47 @@ void mWiFi::WiFi_Sta_ProfileIndex_Connect(uint8_t profile_i, uint8_t runtime_cha
   }
   else
   {
-    WiFi.config(IPAddress((uint32_t)0),IPAddress((uint32_t)0),IPAddress((uint32_t)0));
+    WiFi.config(
+      IPAddress((uint32_t)0),
+      IPAddress((uint32_t)0),
+      IPAddress((uint32_t)0)
+    );
   }
 
   // -------------------------------------------------------------------------
-  // Start STA connection.
+  // Begin STA connection
   //
-  // Priority:
-  //   1. Runtime BSSID/channel from scan or OTA RTC quick-connect.
-  //   2. Statically configured BSSID.
-  //   3. Ordinary SSID/password association.
-  //
-  // This remains the ONLY normal mWiFi location that calls WiFi.begin().
+  // Capture the immediate driver status for debugging.
+  // This is not necessarily the final association result.
   // -------------------------------------------------------------------------
+  wl_status_t begin_status = WL_IDLE_STATUS;
+
   if(runtime_bssid)
   {
-    WiFi.begin(p.ssid,p.pass,runtime_channel,runtime_bssid);
+    begin_status = WiFi.begin(
+      p.ssid,
+      p.pass,
+      runtime_channel,
+      runtime_bssid
+    );
+
     memcpy(connection.bssid,runtime_bssid,6);
   }
   else if(p.has_bssid)
   {
-    WiFi.begin(p.ssid,p.pass,0,p.bssid);
+    begin_status = WiFi.begin(
+      p.ssid,
+      p.pass,
+      0,
+      p.bssid
+    );
+
     memcpy(connection.bssid,p.bssid,6);
   }
   else
   {
-    WiFi.begin(p.ssid,p.pass);
+    begin_status = WiFi.begin(p.ssid,p.pass);
+
     memset(connection.bssid,0,6);
   }
 
@@ -760,12 +845,14 @@ void mWiFi::WiFi_Sta_ProfileIndex_Connect(uint8_t profile_i, uint8_t runtime_cha
   connection.last_event = millis();
 
   ALOG_INF(
-    PSTR(D_LOG_WIFI "STA connect started | profile=%u | SSID=%s | channel=%u | directBSSID=%u | APAlwaysOn=%u"),
+    PSTR(D_LOG_WIFI "STA connect started | profile=%u | SSID=%s | channel=%u | directBSSID=%u | APAlwaysOn=%u | begin_status=%d | mode=%u"),
     profile_i,
     p.ssid,
     runtime_channel,
     runtime_bssid ? 1 : 0,
-    config.softap.always_on
+    config.softap.always_on,
+    (int)begin_status,
+    (unsigned)WiFi.getMode()
   );
 
   SET_SYSTEM_LED__NO_NETWORK(true);
