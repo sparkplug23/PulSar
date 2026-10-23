@@ -845,8 +845,8 @@
  *   Scan rate      -> 1/32
  *   Interface      -> HUB75E
  * 
- * 02 is denser panel, so should use for 2d effects
- * 01 is on fridge, use for xmas26 testing. Both should use playlists for multiple testing
+ * 01 is denser panel, so should use for 2d effects
+ * 02 is on fridge, use for xmas26 testing. Both should use playlists for multiple testing
  *
  */
 #ifdef DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_01
@@ -868,7 +868,6 @@
   #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
   #define BOARD_HAS_PSRAM
 
-  #define HUB75_PINOUT__ESP32S3_OFFICE_TEST
 
   #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
@@ -893,75 +892,17 @@
    * SECTION: Lighting Configs
   ************************************/   
 
-        // "Pin":[13,12,11,10,9,8,17,16,15,7,6,5,4,18],
-        // "BusType":"HUB75E",
-        // "Start":0,
-        // "Length":8192,
-        // "Width":128,
-        // "Height":64
-        // "Pin":[128,64,1,1,1],
-
 #define RT_COVERAGE_DEBUG
 
 #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
 
-#define ENABLE_FEATURE_LIGHTS__TEMPLATE__P2_PANEL3
-
-#ifdef ENABLE_FEATURE_LIGHTS__TEMPLATE__P2P5
-
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
   {
     "BusConfig":[
       {
-        "BusType":"HUB75E",
-        "ColourOrder":"BGR",
-        "Start":0,
-        "Length":8192
-      }
-    ],
-    "MatrixConfig":[
-      {
-        "Width":128,
-        "Height":64,
-        "BottomStart":0,
-        "RightStart":0,
-        "Vertical":0,
-        "Serpentine":0,
-        "xOffset":0,
-        "yOffset":0
-      }
-    ],
-    "Segments":[
-      {
-        "PixelRange":[0,8192],
-        "ColourPalette":"Rainbow",
-        "ColourType":3,
-        "Effects":{
-          "Function":"Static",
-          "Speed":127,
-          "Intensity":127,
-          "Grouping":1,
-          "RateMs":20
-        },
-        "BrightnessRGB":100,
-        "BrightnessCCT":0
-      }
-    ],
-    "BrightnessRGB":1,
-    "BrightnessCCT":0
-  }
-  )=====";
-  #endif
-
-  #ifdef ENABLE_FEATURE_LIGHTS__TEMPLATE__P2_PANEL3
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
-  R"=====(
-  {
-    "BusConfig":[
-      {
+        "Name":"HUB75E P2.5 CHIP",
         "BusType":"HUB75E",
         "ColourOrder":"GBR",
         "Start":0,
@@ -986,21 +927,18 @@
         "ColourPalette":"Rainbow",
         "ColourType":3,
         "Effects":{
-          "Function":"Static",
+          "Function":"Spaceships",
           "Speed":127,
           "Intensity":127,
           "Grouping":1,
           "RateMs":20
         },
-        "BrightnessRGB":100,
-        "BrightnessCCT":0
+        "BrightnessRGB":100
       }
     ],
-    "BrightnessRGB":100,
-    "BrightnessCCT":0
+    "BrightnessRGB":100
   }
   )=====";
-  #endif
       
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
@@ -1211,7 +1149,6 @@
   #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
   #define BOARD_HAS_PSRAM
 
-  #define HUB75_PINOUT__ESP32S3_OFFICE_TEST
 
   #define ENABLE_FEATURE_LIGHTING__2D_MATRIX
   #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
@@ -1248,9 +1185,6 @@
 
 #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
 
-#define ENABLE_FEATURE_LIGHTS__TEMPLATE__P2_PANEL3
-
-#ifdef ENABLE_FEATURE_LIGHTS__TEMPLATE__P2P5
 
   #define USE_LIGHTING_TEMPLATE
   DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
@@ -1258,8 +1192,9 @@
   {
     "BusConfig":[
       {
+        "Name":"HUB75E P2 CHIP",
         "BusType":"HUB75E",
-        "ColourOrder":"RGB",
+        "ColourOrder":"BGR",
         "Start":0,
         "Length":8192
       }
@@ -1296,54 +1231,6 @@
     "BrightnessCCT":0
   }
   )=====";
-  #endif
-
-  #ifdef ENABLE_FEATURE_LIGHTS__TEMPLATE__P2_PANEL3
-  #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
-  R"=====(
-  {
-    "BusConfig":[
-      {
-        "BusType":"HUB75E",
-        "ColourOrder":"GBR",
-        "Start":0,
-        "Length":8192
-      }
-    ],
-    "MatrixConfig":[
-      {
-        "Width":128,
-        "Height":64,
-        "BottomStart":0,
-        "RightStart":0,
-        "Vertical":0,
-        "Serpentine":0,
-        "xOffset":0,
-        "yOffset":0
-      }
-    ],
-    "Segments":[
-      {
-        "PixelRange":[0,8192],
-        "ColourPalette":"Rainbow",
-        "ColourType":3,
-        "Effects":{
-          "Function":"Static",
-          "Speed":127,
-          "Intensity":127,
-          "Grouping":1,
-          "RateMs":20
-        },
-        "BrightnessRGB":100,
-        "BrightnessCCT":0
-      }
-    ],
-    "BrightnessRGB":1,
-    "BrightnessCCT":0
-  }
-  )=====";
-  #endif
       
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
