@@ -844,6 +844,9 @@
  *   Logical pixels -> 8192
  *   Scan rate      -> 1/32
  *   Interface      -> HUB75E
+ * 
+ * 02 is denser panel, so should use for 2d effects
+ * 01 is on fridge, use for xmas26 testing. Both should use playlists for multiple testing
  *
  */
 #ifdef DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_01
@@ -875,8 +878,8 @@
 
 
   // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
-  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
-  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
+  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
 
   /***********************************
   * SECTION: Enable Grouped
@@ -913,7 +916,7 @@
     "BusConfig":[
       {
         "BusType":"HUB75E",
-        "ColourOrder":"RGB",
+        "ColourOrder":"BGR",
         "Start":0,
         "Length":8192
       }
@@ -946,7 +949,7 @@
         "BrightnessCCT":0
       }
     ],
-    "BrightnessRGB":100,
+    "BrightnessRGB":1,
     "BrightnessCCT":0
   }
   )=====";
@@ -999,18 +1002,6 @@
   )=====";
   #endif
       
-  #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
-  "{"
-    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
-    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIO_NUMBER "\":{"
-      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
-    "},"
-    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
-    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
-  "}";
-
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
@@ -1230,8 +1221,8 @@
 
 
   // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__CHRISTMAS_MULTIFUNCTION_CONTROLLER_DEV
-  // #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
-  // #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
+  #define ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_HARDWARE_TESTING
+  #define ENABLE_FEATURE_LIGHTS__EFFECT_SPECIALISED__RAY_TRACING
 
   /***********************************
   * SECTION: Enable Grouped
@@ -1268,7 +1259,7 @@
     "BusConfig":[
       {
         "BusType":"HUB75E",
-        "ColourOrder":"BGR",
+        "ColourOrder":"RGB",
         "Start":0,
         "Length":8192
       }
@@ -1301,7 +1292,7 @@
         "BrightnessCCT":0
       }
     ],
-    "BrightnessRGB":100,
+    "BrightnessRGB":1,
     "BrightnessCCT":0
   }
   )=====";
@@ -1348,7 +1339,7 @@
         "BrightnessCCT":0
       }
     ],
-    "BrightnessRGB":100,
+    "BrightnessRGB":1,
     "BrightnessCCT":0
   }
   )=====";
@@ -1365,6 +1356,7 @@
     "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
+
 
 #endif // END DEVICE
 
