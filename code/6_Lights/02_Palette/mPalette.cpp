@@ -46,6 +46,13 @@ void mPalette::Init_Palettes()
   );
 
   addStaticPalette(
+    PALETTELIST_STATIC__HOLLOWEEN_OPY__ID, 
+    PM_PALETTE__HOLLOWEEN_OPY__DATA, 
+    sizeof(PM_PALETTE__HOLLOWEEN_OPY__DATA),
+    D_PALETTE_HOLLOWEEN_OPY_ENCODING
+  );
+
+  addStaticPalette(
     PALETTELIST_STATIC__RAINBOW__ID, 
     PM_PALETTE__RAINBOW__DATA, 
     sizeof(PM_PALETTE__RAINBOW__DATA),

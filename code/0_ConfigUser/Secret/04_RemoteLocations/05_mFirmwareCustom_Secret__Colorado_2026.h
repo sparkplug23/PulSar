@@ -7,9 +7,24 @@
 
 // #define DEVICE_COLORADO26__LIGHT01__HALLOWEEN
 // #define DEVICE_COLORADO26__LIGHT02__HALLOWEEN
-#define DEVICE_COLORADO26__LIGHT03__HALLOWEEN
+// #define DEVICE_COLORADO26__LIGHT03__HALLOWEEN
 // #define DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_01
 // #define DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_02
+
+/**
+ * String of 100 under TV, bucket? something to hold them.
+ * Use: Nightlight only
+ * Status: On all the time
+ * Will enter standby mode, as red, darkest.
+ * Motion of PIR will turn them on for 1 minutes, then 1 minute fade to standby.
+**/
+// esp32 doit, standby near door, under tv stand. 100 leds.
+
+
+
+
+
+// use playlists on both matrix panels, so they run over tests. Which at midnight to 7am should be using the black/solid
 
 /***************
  * ToBuild : Make and test before flying
@@ -22,31 +37,6 @@
  * 
  */
 
- /*****************
-  * ToBring : What needs packed
-  * 
-  * 
-  * 
-  * 
-  * 
-  */
-
-
-/*** Colorado Lighting Overview
- * Stairs: PIR standby testing (Never got working, would be ideal this year!)
- * Redboard1: Whitehall playlists (Could test on snow tree?)
- * Redboard2:
- * Playlist: Serial debugger of playlist
- * Santa Hat: 2D Python/Effect Tester (Put on minifridge)
- * 
- * RPI, bring my pi over, and eventually program it on the sdcard so it can become a mobile OH/influx/grafana/mqtt host
- * 
- */
-
-
-// Lets set up a webcamera for my two cones in the office
-// Then, use these while away to test the animation effects on a cone (ie to get the whitehall lights working!)
-
 
 /**************************************************************************************************************************************************
 ***************************************************************************************************************************************************
@@ -54,13 +44,6 @@
 ****************************************************************************************************************************************************
 *******************************************************************************************************************************************/
 
-/**
- * String of 100 under TV, bucket? something to hold them.
- * Use: Nightlight only
- * Status: On all the time
- * Will enter standby mode, as red, darkest.
- * Motion of PIR will turn them on for 1 minutes, then 1 minute fade to standby.
-**/
 // #define DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_01
 
 /**
@@ -332,21 +315,33 @@
       {
         "Name":"Halloween",
         "PixelRange":[0,100],
-        "ColourPalette":"Orange & Teal",
+        "ColourPalette":"Holloween OPY",
         "ColourType":3,
         "Effects":{
-          "Function":"Static Palette",
-          "Speed":127,
-          "Intensity":127,
+          "Function":"Candles",
+          "Speed":88,
+          "Intensity":255,
           "Grouping":1,
-          "RateMs":1000
+          "RateMs":20
         },
         "BrightnessRGB":100
       }
     ],
-    "BrightnessRGB":50
+    "BrightnessRGB":100
   }
   )=====";
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
 
 #endif
 
@@ -480,21 +475,34 @@
       {
         "Name":"Halloween",
         "PixelRange":[0,100],
-        "ColourPalette":"Orange & Teal",
+        "ColourPalette":"Holloween OP",
         "ColourType":3,
         "Effects":{
-          "Function":"Static Palette",
-          "Speed":127,
-          "Intensity":127,
+          "Function":"Candles",
+          "Speed":88,
+          "Intensity":255,
           "Grouping":1,
-          "RateMs":1000
+          "RateMs":20
         },
         "BrightnessRGB":100
       }
     ],
-    "BrightnessRGB":50
+    "BrightnessRGB":100
   }
   )=====";
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
 
 #endif
 
@@ -630,21 +638,34 @@
       {
         "Name":"Halloween",
         "PixelRange":[0,100],
-        "ColourPalette":"Orange & Teal",
+        "ColourPalette":"Holloween OPY",
         "ColourType":3,
         "Effects":{
-          "Function":"Static Palette",
-          "Speed":127,
-          "Intensity":127,
+          "Function":"Candles",
+          "Speed":88,
+          "Intensity":255,
           "Grouping":1,
-          "RateMs":1000
+          "RateMs":20
         },
         "BrightnessRGB":100
       }
     ],
-    "BrightnessRGB":50
+    "BrightnessRGB":100
   }
   )=====";
+
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
 
 #endif
 
@@ -978,6 +999,18 @@
   )=====";
   #endif
       
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR  "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+
   #define USE_MODULE_TEMPLATE
   DEFINE_PGM_CTR(MODULE_TEMPLATE) 
   "{"
