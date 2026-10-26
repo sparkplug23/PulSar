@@ -2935,18 +2935,25 @@ function standbyReadTargetsFromUI()
 }
 
 
+
 function standbyApplyConfig()
 {
-	const targets = standbyReadTargetsFromUI();
+    const targets = standbyReadTargetsFromUI();
 
-	standbyTargets = targets;
+    standbyTargets = targets;
 
-	standbySend({
-		WakeTransitionSecs:parseInt(gId('standbyWakeTransitionSecs').value) || 0,
-		StandbyTransitionSecs:parseInt(gId('standbyStandbyTransitionSecs').value) || 0,
-		Targets:targets
-	});
+    standbySend({
+        Arm:gId('standbyArm').checked,
+        AwakeSecs:parseInt(gId('standbyAwakeSecs').value) || 0,
+        StandbySecs:parseInt(gId('standbyStandbySecs').value) || 0,
+        WakeTransitionSecs:parseInt(gId('standbyWakeTransitionSecs').value) || 0,
+        StandbyTransitionSecs:parseInt(gId('standbyStandbyTransitionSecs').value) || 0,
+        LeaveMode:gId('standbyLeaveMode').value,
+        LeaveTargetID:parseInt(gId('standbyLeaveTargetID').value) || 0,
+        Targets:targets
+    });
 }
+
 
 
 function standbyUpdateFromState(state)
@@ -2986,6 +2993,31 @@ function standbyUpdateFromState(state)
 	{
 		gId('standbyStandbyTransitionSecs').value = state.StandbyTransitionSecs;
 	}
+
+	
+    if (gId('standbyArm') && state.Arm != null)
+        gId('standbyArm').checked = state.Arm;
+
+    if (gId('standbyAwakeSecs') && state.AwakeSecs != null)
+        gId('standbyAwakeSecs').value = state.AwakeSecs;
+
+    if (gId('standbyStandbySecs') && state.StandbySecs != null)
+        gId('standbyStandbySecs').value = state.StandbySecs;
+
+    if (gId('standbyLeaveMode') && state.LeaveMode != null)
+        gId('standbyLeaveMode').value = state.LeaveMode;
+
+    if (gId('standbyLeaveTargetID') && state.LeaveTargetID != null)
+        gId('standbyLeaveTargetID').value = state.LeaveTargetID;
+
+    if (gId('standbyAwakeRemaining'))
+        gId('standbyAwakeRemaining').innerText =
+            state.AwakeTimerRunning ? state.AwakeRemainingSecs + ' s' : 'Stopped';
+
+    if (gId('standbyStandbyRemaining'))
+        gId('standbyStandbyRemaining').innerText =
+            state.StandbyTimerRunning ? state.StandbyRemainingSecs + ' s' : 'Stopped';
+
 
 	if (Array.isArray(state.Targets))
 	{

@@ -2249,6 +2249,10 @@ if (jtok = obj["Standby"])
 }
 
 #endif
+
+
+
+
 #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_NEW
 
 if (jtok = obj["Standby"])
@@ -2256,135 +2260,184 @@ if (jtok = obj["Standby"])
   JsonParserObject jobj_standby = jtok.getObject();
   JsonParserToken jtok_standby = 0;
 
+  bool config_changed = false;
 
-  if (jtok_standby = jobj_standby["Enabled"])
+  // Persistent configuration: arm/disarm
+  if (jtok_standby = jobj_standby["Arm"])
   {
-    if (jtok_standby.getBool())
-    {
-      Standby_Enter(CALL_MODE_NO_NOTIFY);
-    }
-    else
-    {
-      Standby_Leave(CALL_MODE_NO_NOTIFY);
-    }
-
+    Standby_SetArm(jtok_standby.getBool() || jtok_standby.getInt() != 0);
+    config_changed = true;
     data_buffer.isserviced++;
   }
 
+  if (jtok_standby = jobj_standby["AwakeSecs"])
+  {
+    standby.awake_secs = (uint32_t)jtok_standby.getInt();
+    if (standby.armed && !standby.enabled) Standby_StartAwakeTimer();
+    config_changed = true;
+    data_buffer.isserviced++;
+  }
+
+  if (jtok_standby = jobj_standby["StandbySecs"])
+  {
+    standby.standby_secs = (uint32_t)jtok_standby.getInt();
+    if (standby.armed && standby.enabled) Standby_StartStandbyTimer();
+    config_changed = true;
+    data_buffer.isserviced++;
+  }
 
   if (jtok_standby = jobj_standby["WakeTransitionSecs"])
   {
-    standby.wake_transition_secs = jtok_standby.getInt();
-
+    standby.wake_transition_secs = (uint16_t)jtok_standby.getInt();
+    config_changed = true;
     data_buffer.isserviced++;
   }
-
 
   if (jtok_standby = jobj_standby["StandbyTransitionSecs"])
   {
-    standby.standby_transition_secs = jtok_standby.getInt();
+    standby.standby_transition_secs = (uint16_t)jtok_standby.getInt();
+    config_changed = true;
+    data_buffer.isserviced++;
+  }
+
+  if (jtok_standby = jobj_standby["LeaveMode"])
+  {
+    const char* mode = jtok_standby.getStr();
+
+    if (mode && !strcmp(mode, "Snapshot"))
+    {
+      standby.leave_mode = STANDBY_LEAVE_MODE_SNAPSHOT;
+      config_changed = true;
+    }
+    else if (mode && !strcmp(mode, "Target"))
+    {
+      standby.leave_mode = STANDBY_LEAVE_MODE_TARGET;
+      config_changed = true;
+    }
+    else
+    {
+      ALOG_ERR(PSTR("Standby: invalid LeaveMode"));
+    }
 
     data_buffer.isserviced++;
   }
 
+  if (jtok_standby = jobj_standby["LeaveTargetID"])
+  {
+    standby.leave_target_id = (uint16_t)jtok_standby.getInt();
+    standby.wake_target_started = false;
+    config_changed = true;
+    data_buffer.isserviced++;
+  }
 
+  // Replace the complete scheduled target list.
   if (jtok_standby = jobj_standby["Targets"])
   {
     if (jtok_standby.isArray())
     {
       JsonParserArray targets_array = jtok_standby;
-
       std::vector<STANDBY_TARGET> new_targets;
+      bool targets_valid = true;
 
       for (auto target_token : targets_array)
       {
         JsonParserObject target_obj = target_token.getObject();
-
         STANDBY_TARGET target;
+        JsonParserToken value = 0;
 
-        JsonParserToken target_value = 0;
+        if (value = target_obj["Enabled"])
+          target.enabled = value.getBool();
 
+        if (value = target_obj["TargetID"])
+          target.target_id = (uint16_t)value.getInt();
 
-        if (target_value = target_obj["Enabled"])
+        if (value = target_obj["Start"])
         {
-          target.enabled = target_value.getBool();
-        }
-
-
-        if (target_value = target_obj["TargetID"])
-        {
-          target.target_id = target_value.getInt();
-        }
-
-
-        if (target_value = target_obj["Start"])
-        {
-          if (target_value.isStr())
+          if (!value.isStr() || strlen(value.getStr()) != 5)
           {
-            strlcpy(
-              target.start,
-              target_value.getStr(),
-              sizeof(target.start)
-            );
+            targets_valid = false;
+            break;
           }
+          strlcpy(target.start, value.getStr(), sizeof(target.start));
         }
 
-
-        if (target_value = target_obj["End"])
+        if (value = target_obj["End"])
         {
-          if (target_value.isStr())
+          if (!value.isStr() || strlen(value.getStr()) != 5)
           {
-            strlcpy(
-              target.end,
-              target_value.getStr(),
-              sizeof(target.end)
-            );
+            targets_valid = false;
+            break;
           }
+          strlcpy(target.end, value.getStr(), sizeof(target.end));
         }
 
-
-        if (!Standby_CompileTargetSchedule(target))
+        if (!Standby_CompileTargetSchedule(target) ||
+            (target.enabled && !target.target_id))
         {
-          ALOG_WRN(
-            PSTR(
-              "Standby: rejected target "
-              "Enabled=%u Start=%s End=%s TargetID=%u"
-            ),
-            target.enabled,
-            target.start,
-            target.end,
-            target.target_id
-          );
-
-          continue;
+          targets_valid = false;
+          break;
         }
-
 
         new_targets.push_back(target);
       }
 
-
-      standby.targets = std::move(new_targets);
-
-      standby.active_target_index = -1;
-      standby.active_target_id = 0;
+      if (targets_valid)
+      {
+        standby.targets = std::move(new_targets);
+        standby.active_target_index = -1;
+        standby.active_target_id = 0;
+        config_changed = true;
+      }
+      else
+      {
+        ALOG_ERR(PSTR("Standby: rejected invalid target list"));
+      }
 
       data_buffer.isserviced++;
     }
   }
 
-
-  Standby_SaveConfig();
-
-
-  if (standby.enabled)
+  // Persist only configuration changes, not every Wake/Sleep event.
+  if (config_changed)
   {
-    Standby_Update(CALL_MODE_NO_NOTIFY);
+    Standby_SaveConfig();
+
+    if (standby.enabled)
+    {
+      Standby_Update(CALL_MODE_NO_NOTIFY);
+    }
+  }
+
+  // Existing WebUI runtime command compatibility.
+  if (jtok_standby = jobj_standby["Enabled"])
+  {
+    if (jtok_standby.getBool())
+      Standby_Enter(CALL_MODE_NO_NOTIFY);
+    else
+      Standby_Leave(CALL_MODE_NO_NOTIFY);
+
+    data_buffer.isserviced++;
+  }
+
+  // PIR / OpenHAB / rules commands.
+  if (jtok_standby = jobj_standby["Wake"])
+  {
+    if (jtok_standby.getBool() || jtok_standby.getInt() != 0)
+      Standby_Wake(CALL_MODE_NO_NOTIFY);
+
+    data_buffer.isserviced++;
+  }
+
+  if (jtok_standby = jobj_standby["Sleep"])
+  {
+    if (jtok_standby.getBool() || jtok_standby.getInt() != 0)
+      Standby_Sleep(CALL_MODE_NO_NOTIFY);
+
+    data_buffer.isserviced++;
   }
 }
 
-#endif
-
+#endif // ENABLE_FEATURE_LIGHTING__STANDBY_NEW
 
 
 

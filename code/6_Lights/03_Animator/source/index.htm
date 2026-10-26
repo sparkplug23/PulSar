@@ -472,6 +472,43 @@
 			<span>seconds</span>
 		</div>
 
+		
+<div class="standby-config-row">
+  <label for="standbyArm">Automatic standby armed</label>
+  <input id="standbyArm" type="checkbox">
+</div>
+
+<div class="standby-config-row">
+  <label for="standbyAwakeSecs">Awake duration</label>
+  <input id="standbyAwakeSecs" type="number" min="0" value="60">
+  <span>seconds</span>
+</div>
+
+<div class="standby-config-row">
+  <label for="standbyStandbySecs">Standby duration</label>
+  <input id="standbyStandbySecs" type="number" min="0" value="0">
+  <span>seconds (0 = unlimited)</span>
+</div>
+
+<div class="standby-config-row">
+  <label for="standbyLeaveMode">Leave standby mode</label>
+  <select id="standbyLeaveMode">
+    <option value="Snapshot">Restore snapshot</option>
+    <option value="Target">Preset / Playlist target</option>
+  </select>
+</div>
+
+<div class="standby-config-row">
+  <label for="standbyLeaveTargetID">Leave target ID</label>
+  <input id="standbyLeaveTargetID" type="number" min="0" max="65534" value="10">
+</div>
+
+<div class="standby-status">
+  <div>Awake timer: <b id="standbyAwakeRemaining">--</b></div>
+  <div>Standby timer: <b id="standbyStandbyRemaining">--</b></div>
+</div>
+
+
 		<div class="standby-section-head">
 			<span>Standby Targets</span>
 			<button class="btn btn-xs" onclick="standbyAddTarget()">+ Add Target</button>

@@ -163,23 +163,43 @@ void mAnimatorLight::serializeState(JsonObject root, bool forPreset, bool includ
 
   #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_NEW
 
+  
   if (!forPreset)
   {
     JsonObject standby_obj = root.createNestedObject("standby");
 
+    standby_obj["Version"] = standby.version;
+    standby_obj["TemplateID"] = standby.template_id;
+    standby_obj["Arm"] = standby.armed;
     standby_obj["Enabled"] = standby.enabled;
-    standby_obj["ActiveTargetIndex"] = standby.active_target_index;
-    standby_obj["ActiveTargetID"] = standby.active_target_id;
+
+    standby_obj["AwakeSecs"] = standby.awake_secs;
+    standby_obj["StandbySecs"] = standby.standby_secs;
 
     standby_obj["WakeTransitionSecs"] = standby.wake_transition_secs;
     standby_obj["StandbyTransitionSecs"] = standby.standby_transition_secs;
 
+    standby_obj["LeaveMode"] =
+      standby.leave_mode == STANDBY_LEAVE_MODE_TARGET ? "Target" : "Snapshot";
+
+    standby_obj["LeaveTargetID"] = standby.leave_target_id;
+
+    standby_obj["ActiveTargetIndex"] = standby.active_target_index;
+    standby_obj["ActiveTargetID"] = standby.active_target_id;
+
+    standby_obj["AwakeTimerRunning"] = standby.tick__awake.IsRunning();
+    standby_obj["StandbyTimerRunning"] = standby.tick__standby.IsRunning();
+
+    standby_obj["AwakeRemainingSecs"] =
+      standby.tick__awake.IsRunning() ? standby.tick__awake.Value() : 0;
+
+    standby_obj["StandbyRemainingSecs"] =
+      standby.tick__standby.IsRunning() ? standby.tick__standby.Value() : 0;
+
     JsonArray targets = standby_obj.createNestedArray("Targets");
 
-    for (uint16_t i = 0; i < standby.targets.size(); i++)
+    for (const STANDBY_TARGET& target : standby.targets)
     {
-      const STANDBY_TARGET& target = standby.targets[i];
-
       JsonObject target_obj = targets.createNestedObject();
 
       target_obj["Enabled"] = target.enabled;
@@ -188,6 +208,7 @@ void mAnimatorLight::serializeState(JsonObject root, bool forPreset, bool includ
       target_obj["TargetID"] = target.target_id;
     }
   }
+
 
   #endif
 
