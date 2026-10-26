@@ -20,17 +20,9 @@
  * - Without garage tree/fence lights, I should use the 5cm lights or similar to add the others needed. 
  * - Plan on 3000 lights again, perhaps test up to 4000 for FPS but expect not going to work. This is where more 20cm spaced lights would be ideal.
  * 
- * 
- * hub75 over
- * esp32s3
- * make 3 esp32s3 little boards, with the 5v green pebbles leds
- * ideally figure out the proper "decimate hardware" where I can view 4000 pixels, but only seeing the 100.
- * I will want to compare normal esp32 running and esp32s3 running same playlists, ideally get python to log FPS (poll state mid preset run) and save to a json file on computer, just do with mqtt commands (ie make a get, save response). This will let me test lots of types of hardware for xmas26
- * 
- * 
- * before going
- * need to make X16 esp32s3 boards, probably aim for 3 (all outdoor trees)
- * 
+ * x [Meadows] Icicle lights in 2d view, use another computer to liveview (virtualview) the 2d effects
+ *  
+ *  * 
  * https://github.com/sparkplug23/WLED-3D-Locator
  * bring pixel 4xl for this task
  * bring glasses sock + smarttag!

@@ -1211,8 +1211,25 @@ BusHub75Matrix::BusHub75Matrix(const BusConfig &bc) : Bus(bc.type, bc.start, bc.
 
   // specific ESP32-S3 pinouts
 
-  #if defined(ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG)
-    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - PulSar ESP32-S3 HUB75 dev config");
+  #if defined(ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_SM16208S)
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - PulSar ESP32-S3 HUB75 SM16208S - p2");
+    // Board 01 - P2.5 - SM16208S
+    // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
+    // mxconfig.gpio = {11, 12, 10, 9, 13, 8, 18, 5, 17, 6, 4, 7, 15, 16};
+    // mxconfig.driver = HUB75_I2S_CFG::SHIFTREG;
+    // mxconfig.clkphase = false;
+    // mxconfig.latch_blanking = 1;
+    // mxconfig.i2sspeed = HUB75_I2S_CFG::HZ_16M;
+
+    mxconfig.gpio = {11, 12, 10, 9, 13, 8, 18, 5, 17, 6, 4, 7, 15, 16};
+    mxconfig.driver = HUB75_I2S_CFG::ICN2038S;
+    mxconfig.clkphase = false;
+    mxconfig.latch_blanking = 1;
+    mxconfig.i2sspeed = HUB75_I2S_CFG::HZ_16M;
+
+  #elif defined(ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_ICN2038S)
+    DEBUGBUS_PRINTLN("MatrixPanel_I2S_DMA - PulSar ESP32-S3 HUB75 ICN2038S - p2.5");
+    // Board 02 - P2 - ICND2038S / ICND2012
     // HUB75_I2S_CFG::i2s_pins _pins={R1_PIN, G1_PIN, B1_PIN, R2_PIN, G2_PIN, B2_PIN, A_PIN, B_PIN, C_PIN, D_PIN, E_PIN, LAT_PIN, OE_PIN, CLK_PIN};
     mxconfig.gpio = {11, 12, 10, 9, 13, 8, 18, 5, 17, 6, 4, 7, 15, 16};
     mxconfig.driver = HUB75_I2S_CFG::ICN2038S;
@@ -1549,7 +1566,11 @@ uint32_t BusHub75Matrix::getPixelColor(unsigned pix) const {
 void BusHub75Matrix::setBrightness(uint8_t b) {
   _bri = b;
   if (!_valid || !display) return;
+  #ifdef ENABLE_DEVFEATURE_LIGHTS__HUB75_BRIGHTNESS_ALTERNATE
+  display->setBrightness8(_bri); 
+  #else
   display->setBrightness(_bri); 
+  #endif  
 }
 
 void BusHub75Matrix::show(void) {
