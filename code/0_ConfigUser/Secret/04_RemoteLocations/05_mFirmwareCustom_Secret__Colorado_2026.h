@@ -1179,210 +1179,38 @@
 
 #ifdef DEVICE_COLORADO26__MOTION_STANDBY_LED_STRING_01
   #ifndef DEVICENAME_CTR
-  #define DEVICENAME_CTR          "coxmas24__string01__wall100leds"
+    #define DEVICENAME_CTR "col26__motion_standby_01"
   #endif
   #ifndef DEVICENAME_FRIENDLY_CTR
-  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+    #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
   #endif
   #ifndef DEVICENAME_DESCRIPTION_CTR
-  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+    #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
   #endif
-  #define DEVICENAME_ROOMHINT_CTR "testgroup"
-  #define MQTT_HOST   "192.168.0.155"
-    #define MQTT_PORT     1883
-
-  #define ENABLE_DEVFEATURE_TIME__TIMEZONE_COLORADO
-  #define TIME_STD_OFFSET -360 // 7 hrs in minutes, but from 0 hour, its only 6
-  #define TIME_DST_OFFSET -360 // 7 hrs in minutes
+  #define DEVICENAME_ROOMHINT_CTR "Colorado"
 
   /***********************************
    * SECTION: System Debug Options
-  ************************************/    
-
-  // ///////////////////////////////////////////// Enable Logs
-  // // #define DISABLE_SERIAL
-  // // #define DISABLE_SERIAL0_CORE
-  // 
-  // #define ENABLE_DEBUG_MANUAL_DELAYS // permits blocking delays
-  
-  // ///////////////////////////////////////////// System Logs
-  // // #define ENABLE_ADVANCED_DEBUGGING
-  // // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-  // // #define ENABLE_FEATURE_DEBUG_TASKER_INTERFACE_LOOP_TIMES
-  // // #define ENABLE_DEBUG_FEATURE__TASKER_INTERFACE_SPLASH_LONG_LOOPS_WITH_MS 50
-  // // #define ENABLE_DEBUG_FUNCTION_NAMES
-  // 
-  // #define SERIAL_LOG_LEVEL_DURING_BOOT 8
-  // // #define ENABLE_DEBUG_LINE_HERE3
-  // // #define ENABLE_DEBUGFEATURE_TASKERMANAGER__ADVANCED_METRICS_OLD
-  // // #define USE_DEBUG_PRINT
-
-  // ///////////////////////////////////////////// Module Logs
-  // // #define ENABLE_DEVFEATURE__PIXEL_COLOUR_VALUE_IN_MULTIPIN_SHOW_LOGS  
-  // #define ENABLE_FREERAM_APPENDING_SERIAL
-  // // #define ENABLE_DEBUGFEATURE_LIGHTING__TIME_CRITICAL_RECORDING
-
-  // /***********************************
-  //  * SECTION: System Configs
-  // ************************************/    
- 
-  // #define SETTINGS_HOLDER 1239
-
-  // 
-  // 
-  // #define ENABLE_FEATURE_LIGHTING__SETTINGS__SAVE_MODULE_DATA
-  //  // until devices can reliably be used without compiling per device
-  // 
-      
-  // /***********************************
-  //  * SECTION: Network Configs
-  // ************************************/    
-
-  // 
-  //   
-
-  // /***********************************
-  //  * SECTION: Sensor Configs
-  // ************************************/  
-
-  // #define USE_MODULE_SENSORS_INTERFACE  
-  // #define USE_MODULE_SENSORS_BUTTONS
-    
-  //   /**
-  //    * @brief 
-  //    * Button 1: Preset iter is press, hold in back to playlist
-  //    * Button 2: Demo/Test mode (Do rainbow moving), or bus show, bus count,
-  //    * 
-  //    */
-
-  // /***********************************
-  //  * SECTION: Lighting Configs
-  // ************************************/  
-
-  // #define USE_TEMPLATED_DEFAULT_LIGHTING_DEFINES__LATEST_LIGHTING_NOVEMBER_2024
-  // #define ENABLE_FEATURE_LIGHTING__SINGLE_BUTTON_DEMO_MODE
-
-  // #define USE_LIGHTING_TEMPLATE
-  // DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
-  // R"=====(
-  // {
-  //   "BusConfig":[
-  //     {
-  //       "Pin":13,
-  //       "ColourOrder":"BGR",
-  //       "BusType":"WS2812_RGB",
-  //       "Start":0,
-  //       "Length":100
-  //     }
-  //   ],
-  //   "Segment0": {
-  //     "PixelRange": [
-  //       0,
-  //       100
-  //     ],
-  //     "ColourPalette":"Snowy 02",
-  //     "Effects": {
-  //       "Function":"Slow Glow",
-  //       "Speed":10,
-  //       "Intensity":127,
-  //       "Grouping":1,
-  //       "RateMs": 1000
-  //     },
-  //     "BrightnessRGB": 100
-  //   },
-  //   "BrightnessRGB": 100
-  // }
-  // )=====";
-  
-
-  /**
- * @brief Device with all physical connectors, to allow testing of all the different types of lights and sensors
- * Can be used to calibrate power usage of different types of lights
- * 
- * Button to be added between ground/GPIO16 to run test sequences. 
- * * SINGLE press: All Red, G, B, Orange, Cyan, Purple, White, Warm white. Each for 1 second. 
- * * Long press: cycle through static, with grouping of 1,10,25,100 of RGBO (r with P for 25) for easy identifying. Or, what about counter effect? (or another)
- * 
- */
-
-
-
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__BETA
-  #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__COMPLETE
-  // #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__SOUND_REACTIVE
-
-  // #define FIRMWARE_DEFAULT__ENABLE_SOLAR_PALETTES
-
-  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
-  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
-
-  #define ENABLE_FEATURE_LIGHTING__STANDBY_MODE
-  #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
-
-
+  ************************************/
+  // #define ENABLE_ADVANCED_DEBUGGING
+  // #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
+  // #define ENABLE_DEBUG_FUNCTION_NAMES
   // #define ENABLE_DEBUG_LINE_HERE_TRACE
+  // #define ENABLE_FREERAM_APPENDING_SERIAL
+  // #define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR
+  // #define ENABLE_DEBUGFEATURE_LIGHTING__STANDBY_STATE_SNAPSHOT_MIRROR_FILESYSTEM
 
-  #define ENABLE_EFFECT_DESCRIPTIONS
-
-  #define ENABLE_DEBUG_FEATURE_MQTT__LIGHTS_INTERFACE__POWER_PROFILES
-
-
-// ======================= Example PROGMEM template =======================
-// Put this in your config header (mirrors your DEFINE_PGM_CTR style)
-#define USE_STANDBY_TEMPLATE
-#define LIGHTING_TEMPLATE__PRESET_STANDBY_MODE_VERSION 2
-// compile-time gate
-// #define LIGHTING_STANDBY_TEMPLATE_ID  5
-
-#define ENABLE_DEBUGFEATURE_TASKER__DEVELOPMENT_TASKS__ANIMATOR  // the sub module enable
-
-
-DEFINE_PGM_CTR(LIGHTING_TEMPLATE__PRESET_STANDBY_MODE)
-R"=====(
-  {
-    "Segment0": {
-      "ColourPalette":"Warm White",
-      "ColourType":3,
-      "Effects": {
-        "Function":"Static",
-        "Speed":0,
-        "Intensity":85,
-        "Grouping":1,
-        "RateMs": 1000
-      },
-      "Override":{
-        "Animation":{
-          "TimeMs":1000
-        }
-      }
-    },
-    "BrightnessRGB": 10
-  }
-)=====";
-
-  // #define ENABLE_DEBUG_FEATURE__SORTING_EFFECTS_PROMOTE_ALPHA
-
-//   #define ENABLE_ADVANCED_DEBUGGING
-//   #define ENABLE_FEATURE_EVERY_SECOND_SPLASH_UPTIME
-//  #define ENABLE_DEBUG_FUNCTION_NAMES
-//   #define ENABLE_DEBUGFEATURE_TASKER_INTERFACE__LONG_LOOPS 600
-//   #define ENABLE_DEBUG_TRACE__SERIAL_PRINT_MQTT_MESSAGE_OUT_BEFORE_FORMING
-//   #define ENABLE_DEBUG_TRACE__MQTT_TOPIC_AS_TRASNMITTED
-//   #define ENABLE_DEBUG_TRACE__MQTT_PAYLOAD_AS_TRANSMITTED
-//   #define ENABLE_DEBUGFEATURE__LOGGING_MQTT__CHECK_CONNECTION
-
-// #define ENABLE_DEBUGFEATURE_LIGHTING__SPLASH_FPS
-// #define ENABLE_DEBUGFEATURE_LIGHTING__EFFECT_LOOP_TIME_SERIAL
-
-  
+  /***********************************
+   * SECTION: Lighting Template
+  ************************************/
   #define USE_LIGHTING_TEMPLATE
-  DEFINE_PGM_CTR(LIGHTING_TEMPLATE) 
+  DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
   R"=====(
   {
-    "BusConfig":[      
+    "BusConfig":[
       {
         "Pin":13,
-        "ColourOrder":"GRB",
+        "ColourOrder":"GBR",
         "BusType":"WS2812_RGB",
         "Start":0,
         "Length":100
@@ -1391,89 +1219,101 @@ R"=====(
     "Segments":[
       {
         "Name":"Bus 1",
-        "PixelRange": [
-          0,
-          100
-        ],
-        "ColourPalette":"RGPBY",
+        "PixelRange":[0,100],
+        "ColourPalette":"Warm White",
         "ColourType":3,
-        "Effects": {
+        "Effects":{
           "Function":"Static",
-          "Speed":255,
-          "Intensity":127,
+          "Speed":0,
+          "Intensity":85,
           "Grouping":1,
-          "RateMs": 20
+          "RateMs":1000
         },
-        "BrightnessRGB": 100
+        "BrightnessRGB":100
       }
     ],
-    "BrightnessRGB": 1
+    "BrightnessRGB":1
   }
   )=====";
-  
-
- /***********************************
-  * SECTION: Enable with one line (to make it easier to switch on and off for debugging)
- ************************************/  
-  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
-
- /***********************************
-  * SECTION: Sensor Configs
- ************************************/  
-
-  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION) || defined(ENABLE_TEMPLATE_SECTION__SENSORS__RADAR_3p18GHZ)
-   #define USE_MODULE_SENSORS_INTERFACE
-   #define USE_MODULE_SENSORS_PIR
-    //  #define USE_TEMPLATED_DEFAULT_MOTION_RULE_TEMPLATE_FIRST_SWITCH_IS_MOTION_SENSOR_EVENT
- #endif
 
   /***********************************
-   * SECTION: Template Configs
-  ************************************/    
+   * SECTION: Standby Template
+  ************************************/
+  #define USE_STANDBY_TEMPLATE
+  #define LIGHTING_STANDBY_TEMPLATE_ID 1
+  DEFINE_PGM_CTR(STANDBY_TEMPLATE)
+  R"=====(
+  {
+    "Version":3,
+    "TemplateID":1,
+    "Arm":true,
+    "AwakeSecs":60,
+    "StandbySecs":0,
+    "WakeTransitionSecs":1,
+    "StandbyTransitionSecs":2,
+    "LeaveMode":"Target",
+    "LeaveTargetID":10,
+    "Targets":[
+      {
+        "Enabled":true,
+        "Start":"00:00",
+        "End":"00:00",
+        "TargetID":5
+      }
+    ]
+  }
+  )=====";
 
+  /***********************************
+   * SECTION: Sensor Configs
+  ************************************/
+  #define ENABLE_TEMPLATE_SECTION__SENSORS__MOTION
+
+  #if defined(ENABLE_TEMPLATE_SECTION__SENSORS__MOTION)
+    #define USE_MODULE_SENSORS_INTERFACE
+    #define USE_MODULE_SENSORS_PIR
+  #endif
+
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_PIN 16
+  #define PIXEL_LIGHT_SENSOR__DIGITAL_ACTIVE_LOW
+
+  /***********************************
+   * SECTION: Module Template
+  ************************************/
   #define USE_MODULE_TEMPLATE
-  DEFINE_PGM_CTR(MODULE_TEMPLATE) 
+  DEFINE_PGM_CTR(MODULE_TEMPLATE)
   "{"
-    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_NAME "\":\"" DEVICENAME_CTR "\","
     "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
-    "\"" D_GPIO_NUMBER "\":{"    
-     "\"15\":\""  D_GPIO_PIR_1_CTR "\","
-     "\"2\":\"" D_GPIO_LED1_CTR  "\""
-      #ifdef USE_MODULE_SENSORS_BUTTONS
-      "\"35\":\"" D_GPIO_KEY1_INV_CTR  "\","
-      "\"34\":\"" D_GPIO_KEY2_INV_CTR  "\","
-      "\"0\":\"" D_GPIO_KEY3_INV_CTR  "\""
-      #endif
+    "\"" D_GPIO_NUMBER "\":{"
+      "\"15\":\"" D_GPIO_PIR_1_CTR "\","
+      "\"2\":\"" D_GPIO_LED1_CTR "\""
     "},"
-    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_BASE "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
     "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
   "}";
 
-  
-  
- #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
+  /***********************************
+   * SECTION: Function Template
+  ************************************/
+  #define D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "Hallway"
 
- #define USE_FUNCTION_TEMPLATE
- DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
- "{"
-   "\"" D_DEVICENAME "\":{"
+  #define USE_FUNCTION_TEMPLATE
+  DEFINE_PGM_CTR(FUNCTION_TEMPLATE)
+  "{"
+    "\"" D_DEVICENAME "\":{"
       "\"" D_MODULE__SENSORS__SUN_TRACKING__CTR "\":["
-        "\"" "Roaming" "\""
-      "],"  
-     "\"" D_MODULE__SENSORS__PIR__CTR "\":["
-       "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
-     "]"
-   "}"
- "}";
+        "\"Roaming\""
+      "],"
+      "\"" D_MODULE__SENSORS__PIR__CTR "\":["
+        "\"" D_DEVICE_SENSOR_MOTION0_FRIENDLY_NAME_LONG "\""
+      "]"
+    "}"
+  "}";
 
- /****
-  * need to make rule
-  * motion started -> leave standby, but rearm
-  * 
-  * 
-  */
-
-
+  /***********************************
+   * SECTION: Rules Template
+  ************************************/
   #define D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND 15
   #define USE_RULES_TEMPLATE
   DEFINE_PGM_CTR(RULES_TEMPLATE)
@@ -1481,7 +1321,7 @@ R"=====(
   {
     "Rules":[
       {
-        "Name":"Rule Name",
+        "Name":"PIR Wake Standby",
         "Trigger":{
           "Module":"motion",
           "Function":"MotionStarted",
@@ -1493,7 +1333,7 @@ R"=====(
           "Function":"SetPower",
           "DeviceName":0,
           "State":"Follow",
-          "JsonCommands":"{\"Standby\":{\"Wake\":10,\"fadeMs\":2000}}"
+          "JsonCommands":"{\"Standby\":{\"Wake\":1}}"
         }
       }
     ]
@@ -1502,11 +1342,7 @@ R"=====(
 
   #define ENABLE_DEVFEATURE_PIR__TRIGGERING_WITH_RULES
 
-
-
-
-#endif // DEVICE_COLORADO24__STRING_01__SLOW_GLOW_ONLY__100LEDS
-
+#endif // DEVICE_COLORADO26__MOTION_STANDBY_LED_STRING_01
 
 
 
