@@ -1090,7 +1090,7 @@
           "ColourPalette":"Rainbow",
           "ColourType":3,
           "Effects":{
-            "Function":"Static",
+            "Function":"PS Ballbit",
             "Speed":127,
             "Intensity":127,
             "Grouping":1,
@@ -1100,7 +1100,7 @@
           "BrightnessCCT":0
         }
       ],
-      "BrightnessRGB":100,
+      "BrightnessRGB":30,
       "BrightnessCCT":0
     }
     )=====";
@@ -1142,7 +1142,7 @@
           "ColourPalette":"Rainbow",
           "ColourType":3,
           "Effects":{
-            "Function":"Static",
+            "Function":"PS Ballbit",
             "Speed":127,
             "Intensity":127,
             "Grouping":1,
@@ -1152,7 +1152,7 @@
           "BrightnessCCT":0
         }
       ],
-      "BrightnessRGB":1,
+      "BrightnessRGB":30,
       "BrightnessCCT":0
     }
     )=====";
@@ -1315,30 +1315,30 @@
    * SECTION: Rules Template
   ************************************/
   #define D_RULES_DELAY_LOAD_FROM_BOOT_TIME_SECOND 15
-  #define USE_RULES_TEMPLATE
-  DEFINE_PGM_CTR(RULES_TEMPLATE)
-  R"=====(
-  {
-    "Rules":[
-      {
-        "Name":"PIR Wake Standby",
-        "Trigger":{
-          "Module":"motion",
-          "Function":"MotionStarted",
-          "DeviceName":0,
-          "State":1
-        },
-        "Command":{
-          "Module":"pixels",
-          "Function":"SetPower",
-          "DeviceName":0,
-          "State":"Follow",
-          "JsonCommands":"{\"Standby\":{\"Wake\":1}}"
-        }
-      }
-    ]
-  }
-  )=====";
+  // #define USE_RULES_TEMPLATE
+  // DEFINE_PGM_CTR(RULES_TEMPLATE)
+  // R"=====(
+  // {
+  //   "Rules":[
+  //     {
+  //       "Name":"PIR Wake Standby",
+  //       "Trigger":{
+  //         "Module":"motion",
+  //         "Function":"MotionStarted",
+  //         "DeviceName":0,
+  //         "State":1
+  //       },
+  //       "Command":{
+  //         "Module":"pixels",
+  //         "Function":"SetPower",
+  //         "DeviceName":0,
+  //         "State":"Follow",
+  //         "JsonCommands":"{\"Standby\":{\"Wake\":1}}"
+  //       }
+  //     }
+  //   ]
+  // }
+  // )=====";
 
   #define ENABLE_DEVFEATURE_PIR__TRIGGERING_WITH_RULES
 
