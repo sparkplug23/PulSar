@@ -1181,6 +1181,118 @@
 #endif // END DEVICE
 
 
+/**
+ * @brief Colorado 2026 - Meadows Icicle HUB75 Development
+ *
+ * ESP32-S3 N16R8 with HUB75E 128x64 panel.
+ *
+ * Icicle layout:
+ *   5 strings
+ *   20 drops per string
+ *   10 pixels per drop
+ *   100 columns x 10 rows = 1000 pixels
+ *
+ * HUB75 is used as a development display for the final
+ * WS2812 icicle installation, using 5 parallel outputs.
+ *
+ * Physical HUB75 matrix: 128x64
+ * Logical icicle segment: 100x10
+ */
+#ifdef DEVICE_COLORADO26__MEADOWS__ICICLE_HUB75
+  #ifndef DEVICENAME_CTR
+  #define DEVICENAME_CTR "co26_meadows_icicle_hub75"
+  #endif
+  #ifndef DEVICENAME_FRIENDLY_CTR
+  #define DEVICENAME_FRIENDLY_CTR DEVICENAME_CTR
+  #endif
+  #ifndef DEVICENAME_DESCRIPTION_CTR
+  #define DEVICENAME_DESCRIPTION_CTR DEVICENAME_FRIENDLY_CTR
+  #endif
+  #define DEVICENAME_ROOMHINT_CTR "Meadows"
+
+  /***********************************
+  * SECTION: Enable Grouped
+  ************************************/
+  #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D
+  // #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_1D
+
+  /***********************************
+  * SECTION: Network Configs
+  ************************************/
+
+  /***********************************
+  * SECTION: Lighting Configs
+  ************************************/
+  #ifdef ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D
+
+    #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+    #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
+    #define BOARD_HAS_PSRAM
+
+    #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
+    #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_ICN2038S
+
+    #define USE_LIGHTING_TEMPLATE
+    DEFINE_PGM_CTR(LIGHTING_TEMPLATE)
+    R"=====(
+    {
+      "BusConfig":[
+        {
+          "Name":"HUB75E Icicle Development",
+          "BusType":"HUB75E",
+          "ColourOrder":"BGR",
+          "Start":0,
+          "Length":8192
+        }
+      ],
+      "MatrixConfig":[
+        {
+          "Width":128,
+          "Height":64,
+          "BottomStart":0,
+          "RightStart":0,
+          "Vertical":0,
+          "Serpentine":0,
+          "xOffset":0,
+          "yOffset":0
+        }
+      ],
+      "Segments":[
+        {
+          "Name":"Icicles 100x10",
+          "PixelRange":[0,100,0,10],
+          "ColourPalette":"Rainbow",
+          "ColourType":3,
+          "Effects":{
+            "Function":"PS Ballbit",
+            "Speed":127,
+            "Intensity":127,
+            "Grouping":1,
+            "RateMs":20
+          },
+          "BrightnessRGB":100,
+          "BrightnessCCT":0
+        }
+      ],
+      "BrightnessRGB":30,
+      "BrightnessCCT":0
+    }
+    )=====";
+  #endif // ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D
+
+  #define USE_MODULE_TEMPLATE
+  DEFINE_PGM_CTR(MODULE_TEMPLATE)
+  "{"
+    "\"" D_NAME         "\":\"" DEVICENAME_CTR "\","
+    "\"" D_FRIENDLYNAME "\":\"" DEVICENAME_FRIENDLY_CTR "\","
+    "\"" D_GPIO_NUMBER "\":{"
+      "\"0\":\"" D_GPIO_KEY1_INV_CTR "\""
+    "},"
+    "\"" D_BASE     "\":\"" D_MODULE_NAME_USERMODULE_CTR "\","
+    "\"" D_ROOMHINT "\":\"" DEVICENAME_ROOMHINT_CTR "\""
+  "}";
+#endif // END DEVICE
+
 
 
 

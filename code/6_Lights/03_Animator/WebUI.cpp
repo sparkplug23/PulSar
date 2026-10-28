@@ -4950,6 +4950,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
 
 
   #ifdef ENABLE_FEATURE_LIGHTING__WEBSOCKETS
+  #error "this"
   #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
   SPGM_CTR(PM_URL_LIVEVIEW2D) "/liveview2D";
   tkr_web->server->on(PM_URL_LIVEVIEW2D, HTTP_GET, [](AsyncWebServerRequest *request){
@@ -4967,18 +4968,9 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   
   #ifdef ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
   SPGM_CTR(PM_URL_VIRTUALVIEW) "/lights/virtualview";
-
   tkr_web->server->on(PM_URL_VIRTUALVIEW, HTTP_GET, [](AsyncWebServerRequest *request){
-    tkr_web->handleStaticContent(
-      request,
-      "",
-      200,
-      FPSTR(CONTENT_TYPE_HTML),
-      PAGE_virtualview,
-      PAGE_virtualview_length
-    );
+    tkr_web->handleStaticContent(request, "", 200, FPSTR(CONTENT_TYPE_HTML), PAGE_virtualview, PAGE_virtualview_length);
   });
-
   AddURLtoList(PM_URL_VIRTUALVIEW, HTTP_GET);
   #endif
 

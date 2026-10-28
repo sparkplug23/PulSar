@@ -128,6 +128,8 @@
 #endif // ENABLE_DEVFEATURE_CREATE_MINIMAL_BUSSES_SINGLE_OUTPUT
 
 
+#define ENABLE_DEBUGFEATURE_LIGHTING__VIRTUALVIEW
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Palette wrap behaviour flag (used by *_ModeWrap APIs)
 //
@@ -2250,6 +2252,8 @@ static const uint8_t kPresetMetaParserVersion = 2;
       EFFECTS_FUNCTION__2D__DIGITAL_CLOCK__ID,    
       // NEw effect idea, lava lamp, both 1D and matrix. Have lgihting "gravity" then also "heating" for uplifting of random colours.
 
+      EFFECTS_FUNCTION__2D__ICICLE__SNOWFALL,
+      others here
       #endif
       
 
