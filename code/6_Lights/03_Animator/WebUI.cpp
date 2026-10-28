@@ -4948,10 +4948,9 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   AddURLtoList(PM_URL_PLAYLIST_VIEWER, HTTP_GET);
 
 
-
   #ifdef ENABLE_FEATURE_LIGHTING__WEBSOCKETS
-  #error "this"
   #ifdef ENABLE_FEATURE_LIGHTING__2D_MATRIX
+  #error "stop here"
   SPGM_CTR(PM_URL_LIVEVIEW2D) "/liveview2D";
   tkr_web->server->on(PM_URL_LIVEVIEW2D, HTTP_GET, [](AsyncWebServerRequest *request){
     tkr_web->handleStaticContent(request, "", 200, FPSTR(CONTENT_TYPE_HTML), PAGE_liveviewws2D, PAGE_liveviewws2D_length);
@@ -4959,6 +4958,7 @@ void mAnimatorLight::WebPage_Root_AddHandlers()
   AddURLtoList(PM_URL_LIVEVIEW2D, HTTP_GET);
   #endif
   #endif
+
 
   SPGM_CTR(PM_URL_LIVEVIEW) "/liveview";
   tkr_web->server->on(PM_URL_LIVEVIEW, HTTP_GET, [](AsyncWebServerRequest *request){

@@ -27206,6 +27206,329 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__2D__FFT_AKEMI[] PROGMEM =
 #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__AUDIO_2D END SECTION /////////////////////////////////////////////////////////////////////////////
 
 
+
+
+/*******************************************************************************************************************************************************************************************************************
+ * ICICLE 2D EFFECTS
+ *
+ * Designed for vertical icicle strings represented as a 2D matrix.
+ *
+ * Example installation:
+ *   100 columns x 10 rows = 1000 LEDs
+ *   5 physical strings, each containing 20 drops of 10 LEDs
+ *
+ * Each effect will be implemented independently using the existing
+ * PulSar segment, palette, speed, intensity and frame timing systems.
+ *
+ * All functions initially fall back to Static Palette to verify
+ * registration, selection and device stability before implementation.
+ *******************************************************************************************************************************************************************************************************************/
+#if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE)
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleSnowfall
+ * @description : Independent falling snowflakes with randomized positions,
+ *                velocities, density and optional fading trails.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleSnowfall()
+{
+  EffectAnim__Static_Palette();
+}
+static const char PM_EFFECT_CONFIG__2D__ICICLE_SNOWFALL[] PROGMEM =
+"Icicle Snowfall@"
+"Speed,Density,Trail,Variation,Fade,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_SNOWFALL[] PROGMEM =
+"Independent falling snowflakes across the icicle matrix.\n\r"
+"SX: Falling speed\n\r"
+"IX: Snowflake density\n\r"
+"C1: Trail length\n\r"
+"C2: Movement variation\n\r"
+"C3: Fade strength";
+#endif
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleRandomDrips
+ * @description : Each icicle generates independent falling droplets with
+ *                randomized intervals, lengths and fading tails.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleRandomDrips()
+{
+  EffectAnim__Static_Palette();
+}
+static const char PM_EFFECT_CONFIG__2D__ICICLE_RANDOM_DRIPS[] PROGMEM =
+"Icicle Random Drips@"
+"Speed,Density,Length,Smoothing,Variation,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_RANDOM_DRIPS[] PROGMEM =
+"Independent randomly triggered droplets falling down each icicle.\n\r"
+"SX: Falling speed\n\r"
+"IX: Droplet generation frequency\n\r"
+"C1: Droplet length\n\r"
+"C2: Tail smoothing\n\r"
+"C3: Speed and timing variation";
+#endif
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleWaveDrips
+ * @description : A horizontal wave triggers falling droplets progressively
+ *                across the icicle columns.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleWaveDrips()
+{
+  EffectAnim__Static_Palette();
+}
+static const char PM_EFFECT_CONFIG__2D__ICICLE_WAVE_DRIPS[] PROGMEM =
+"Icicle Wave Drips@"
+"Speed,Density,Length,Spacing,Wave mode,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_WAVE_DRIPS[] PROGMEM =
+"Horizontal waves progressively trigger vertical droplets.\n\r"
+"SX: Wave propagation speed\n\r"
+"IX: Number of active waves\n\r"
+"C1: Droplet length\n\r"
+"C2: Wave spacing\n\r"
+"C3: Wave direction or pattern";
+#endif
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleMeteorRain
+ * @description : Bright falling meteor heads with longer fading tails
+ *                and independently varying motion.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleMeteorRain()
+{
+  EffectAnim__Static_Palette();
+}
+static const char PM_EFFECT_CONFIG__2D__ICICLE_METEOR_RAIN[] PROGMEM =
+"Icicle Meteor Rain@"
+"Speed,Density,Tail,Fade,Variation,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_METEOR_RAIN[] PROGMEM =
+"Bright falling meteors with long fading trails.\n\r"
+"SX: Meteor velocity\n\r"
+"IX: Meteor density\n\r"
+"C1: Tail length\n\r"
+"C2: Fade strength\n\r"
+"C3: Velocity variation";
+#endif
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleFrozenSparkle
+ * @description : Static icy background with independently animated
+ *                sparkle points and localized brightness changes.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleFrozenSparkle()
+{
+  EffectAnim__Static_Palette();
+}
+static const char PM_EFFECT_CONFIG__2D__ICICLE_FROZEN_SPARKLE[] PROGMEM =
+"Icicle Frozen Sparkle@"
+"Speed,Density,Background,Glow,Variation,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_FROZEN_SPARKLE[] PROGMEM =
+"Icy background with randomly twinkling highlights.\n\r"
+"SX: Sparkle animation speed\n\r"
+"IX: Sparkle density\n\r"
+"C1: Background level\n\r"
+"C2: Sparkle glow duration\n\r"
+"C3: Brightness variation";
+#endif
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleCascade
+ * @description : Consecutive icicles illuminate horizontally, with each
+ *                column filling or fading vertically.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleCascade()
+{
+  EffectAnim__Static_Palette();
+}
+static const char PM_EFFECT_CONFIG__2D__ICICLE_CASCADE[] PROGMEM =
+"Icicle Cascade@"
+"Speed,Width,Fill,Fade,Direction,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_CASCADE[] PROGMEM =
+"Sequentially illuminated icicles with vertical filling.\n\r"
+"SX: Cascade speed\n\r"
+"IX: Number of simultaneously active icicles\n\r"
+"C1: Vertical fill behaviour\n\r"
+"C2: Fade strength\n\r"
+"C3: Cascade direction";
+#endif
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleRipple
+ * @description : Circular or elliptical ripples expand across the
+ *                2D installation from one or more origins.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleRipple()
+{
+  EffectAnim__Static_Palette();
+}
+static const char PM_EFFECT_CONFIG__2D__ICICLE_RIPPLE[] PROGMEM =
+"Icicle Ripple@"
+"Speed,Density,Width,Fade,Shape,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_RIPPLE[] PROGMEM =
+"Expanding circular and elliptical ripples across the icicle matrix.\n\r"
+"SX: Ripple propagation speed\n\r"
+"IX: Number of active ripples\n\r"
+"C1: Ripple thickness\n\r"
+"C2: Fade strength\n\r"
+"C3: Ripple shape";
+#endif
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleAurora
+ * @description : Smooth colour fields and vertical gradients moving
+ *                continuously across the icicle curtain.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleAurora()
+{
+  EffectAnim__Static_Palette();
+}
+static const char PM_EFFECT_CONFIG__2D__ICICLE_AURORA[] PROGMEM =
+"Icicle Aurora@"
+"Speed,Variation,Scale,Blend,Vertical,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_AURORA[] PROGMEM =
+"Slowly moving colour curtains with smooth vertical gradients.\n\r"
+"SX: Movement speed\n\r"
+"IX: Colour variation\n\r"
+"C1: Pattern scale\n\r"
+"C2: Colour blending\n\r"
+"C3: Vertical variation";
+#endif
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleFallingComets
+ * @description : Diagonal comets move between adjacent icicles while
+ *                descending, leaving fading multi-pixel trails.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleFallingComets()
+{
+  EffectAnim__Static_Palette();
+}
+static const char PM_EFFECT_CONFIG__2D__ICICLE_FALLING_COMETS[] PROGMEM =
+"Icicle Falling Comets@"
+"Speed,Density,Tail,Angle,Fade,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_FALLING_COMETS[] PROGMEM =
+"Diagonal comets travelling across adjacent icicles.\n\r"
+"SX: Comet velocity\n\r"
+"IX: Number of active comets\n\r"
+"C1: Tail length\n\r"
+"C2: Movement angle\n\r"
+"C3: Trail fading";
+#endif
+
+/*******************************************************************************************************************************************************************************************************************
+ * @function    : EffectAnim__2D__IcicleLightning
+ * @description : Irregular lightning flashes and branching streaks
+ *                across groups of icicles.
+ *******************************************************************************************************************************************************************************************************************/
+void mAnimatorLight::EffectAnim__2D__IcicleLightning()
+{
+  EffectAnim__Static_Palette();
+}
+static const char PM_EFFECT_CONFIG__2D__ICICLE_LIGHTNING[] PROGMEM =
+"Icicle Lightning@"
+"Speed,Frequency,Branching,Glow,Coverage,,,,!,!"
+";"
+""
+";"
+"!"
+";"
+"2"
+";"
+"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
+#ifdef ENABLE_EFFECT_DESCRIPTIONS
+static const char PM_EFFECT_DESCRI__2D__ICICLE_LIGHTNING[] PROGMEM =
+"Random lightning flashes across groups of icicles.\n\r"
+"SX: Flash animation speed\n\r"
+"IX: Flash frequency\n\r"
+"C1: Branching amount\n\r"
+"C2: Afterglow duration\n\r"
+"C3: Horizontal coverage";
+#endif
+
+#endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX && ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE
+
+
+
 #ifdef ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
 
 /*
@@ -37638,6 +37961,97 @@ void mAnimatorLight::LoadEffects()
             Effect_DevStage::Release);  
   #endif
 
+  
+  /*******************************************************************************************************************************************************************************************************************
+   * Icicle 2D Effects
+   * Dedicated effects for vertical icicle strings arranged as a 2D matrix.
+   * Initially implemented using the static palette fallback.
+   *******************************************************************************************************************************************************************************************************************/
+  #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE)
+
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_SNOWFALL,
+            &mAnimatorLight::EffectAnim__2D__IcicleSnowfall,
+            PM_EFFECT_CONFIG__2D__ICICLE_SNOWFALL,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__ICICLE_SNOWFALL,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_RANDOM_DRIPS,
+            &mAnimatorLight::EffectAnim__2D__IcicleRandomDrips,
+            PM_EFFECT_CONFIG__2D__ICICLE_RANDOM_DRIPS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__ICICLE_RANDOM_DRIPS,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_WAVE_DRIPS,
+            &mAnimatorLight::EffectAnim__2D__IcicleWaveDrips,
+            PM_EFFECT_CONFIG__2D__ICICLE_WAVE_DRIPS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__ICICLE_WAVE_DRIPS,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_METEOR_RAIN,
+            &mAnimatorLight::EffectAnim__2D__IcicleMeteorRain,
+            PM_EFFECT_CONFIG__2D__ICICLE_METEOR_RAIN,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__ICICLE_METEOR_RAIN,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_FROZEN_SPARKLE,
+            &mAnimatorLight::EffectAnim__2D__IcicleFrozenSparkle,
+            PM_EFFECT_CONFIG__2D__ICICLE_FROZEN_SPARKLE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__ICICLE_FROZEN_SPARKLE,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_CASCADE,
+            &mAnimatorLight::EffectAnim__2D__IcicleCascade,
+            PM_EFFECT_CONFIG__2D__ICICLE_CASCADE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__ICICLE_CASCADE,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_RIPPLE,
+            &mAnimatorLight::EffectAnim__2D__IcicleRipple,
+            PM_EFFECT_CONFIG__2D__ICICLE_RIPPLE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__ICICLE_RIPPLE,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_AURORA,
+            &mAnimatorLight::EffectAnim__2D__IcicleAurora,
+            PM_EFFECT_CONFIG__2D__ICICLE_AURORA,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__ICICLE_AURORA,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_FALLING_COMETS,
+            &mAnimatorLight::EffectAnim__2D__IcicleFallingComets,
+            PM_EFFECT_CONFIG__2D__ICICLE_FALLING_COMETS,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__ICICLE_FALLING_COMETS,
+            #endif
+            Effect_DevStage::Dev);
+
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_LIGHTNING,
+            &mAnimatorLight::EffectAnim__2D__IcicleLightning,
+            PM_EFFECT_CONFIG__2D__ICICLE_LIGHTNING,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__ICICLE_LIGHTNING,
+            #endif
+            Effect_DevStage::Dev);
+
+  #endif // 2D_MATRIX && GENERAL_LEVEL4_FLASHING_COMPLETE
+
+
   /**
    * Hardware Installation Helpers
    **/
@@ -37964,6 +38378,8 @@ void mAnimatorLight::LoadEffects()
             Effect_DevStage::Alpha);
 
   #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX
+
+
 
   #endif // ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL5_PARTICLE_SYSTEM
 

@@ -1686,6 +1686,21 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void EffectAnim__2D__DigitalClock();
     void EffectAnim__2D__PlasmaRotoZoom();
     #endif
+    
+    #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE)
+    void EffectAnim__2D__IcicleSnowfall();
+    void EffectAnim__2D__IcicleRandomDrips();
+    void EffectAnim__2D__IcicleWaveDrips();
+    void EffectAnim__2D__IcicleMeteorRain();
+    void EffectAnim__2D__IcicleFrozenSparkle();
+    void EffectAnim__2D__IcicleCascade();
+    void EffectAnim__2D__IcicleRipple();
+    void EffectAnim__2D__IcicleAurora();
+    void EffectAnim__2D__IcicleFallingComets();
+    void EffectAnim__2D__IcicleLightning();
+    #endif
+
+
     /****************************************************************************************************************************************************************************
     *** Specialised: 1D (Audio Reactive) ****************************************************************************************************************************************
     **  Requires:     ***********************************************************************************************************************************************************

@@ -43,6 +43,7 @@
 // #define DEVICE_COLORADO26__LIGHT03__HALLOWEEN
 // #define DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_01
 // #define DEVICE_COLORADO26__BEDROOM__HUB75E_ESP32S3_N16R8_02
+#define DEVICE_COLORADO26__MEADOWS__ICICLE_HUB75
 
 /**
  * String of 100 behind TV
@@ -1149,9 +1150,13 @@
           "ColourPalette":"Rainbow",
           "ColourType":3,
           "Effects":{
-            "Function":"PS Ballbit",
-            "Speed":127,
-            "Intensity":127,
+            "Function":"PS Ballpit",
+            "Speed":100,
+            "Intensity":220,
+            "Custom1":70,
+            "Custom2":180,
+            "Custom3":31,
+            "Check3":1,
             "Grouping":1,
             "RateMs":20
           },
@@ -1228,6 +1233,8 @@
     #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
     #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
     #define BOARD_HAS_PSRAM
+
+    #define ENABLE_FEATURE_LIGHTING__WEBSOCKETS
 
     #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
     #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_ICN2038S
