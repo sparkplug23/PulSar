@@ -37,6 +37,17 @@ void mSupport::parse_JSONCommand(JsonParserObject obj)
     data_buffer.isserviced++;
   }
 
+  if(jtok = obj["Logging"].getObject()["ConsoleLevel"])
+  {
+    char buffer[100];
+    // const char* name = jtok.getStr();  //["loglevel"];
+    ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"web_level\":\"%s\""), jtok.getStr());
+    tkr_set->Settings.logging.web_level = tkr_log->GetLogLevelIDbyName(jtok.getStr());
+    ALOG_INF(PSTR(D_LOG_MQTT D_PARSING_MATCHED "\"web_level\":\"%S\""), tkr_log->GetLogLevelNamebyID(tkr_set->Settings.logging.web_level));
+    // Add save log here
+    data_buffer.isserviced++;
+  }
+
 
 
   #ifdef ENABLE_DEVFEATURE_DEVICELIST_DEBUG_WITH_COMMANDS

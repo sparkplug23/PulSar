@@ -9,7 +9,8 @@
  * hollow1 -> xmas1  [100 leds as start of xmas whitehall]
  * hollow2 -> xmas2  [meadows front]
  * hollow3 -> xmas3  [meadows side]
- * meadows_icicle_2d (create as a 2d matrix, with 10 pixel drops)
+ * meadows_icicle_2d (create as a 2d matrix, with 10 pixel drops) - virtual
+ * meadows_icicle_hub75 (do matrix of 10 pixel drops, 20*5 = 1000 pixel total. ie emulate with top of matrix)
  * 100leds+pir: TV backlight (standby mode)
  * living radar
  * cam1: south facing top
@@ -50,19 +51,7 @@
  * Will enter standby mode, as red, darkest.
  * Motion of PIR will turn them on for 1 minutes, then 1 minute fade to standby.
 **/
-#define DEVICE_COLORADO26__MOTION_STANDBY_LED_STRING_01
-
-/**
- * @brief under the bed? PIR2, use them wrapped around my bed stand as nightlight, or, closest/basement door?
- * 100 leds, by motion.
- * Development Notes:
- * * Button A/B for local control
- * * Status LED 
- * *  
- * 
- */
-// #define DEVICE_COLORADO25__MOTION_STANDBY_LED_STRING_02
-
+// #define DEVICE_COLORADO26__MOTION_STANDBY_LED_STRING_01
 
 /**
  * WEBCAM 1-3, other page
@@ -90,6 +79,18 @@
 // Ie get my 2 9-axis DMOF boards, and have them write to an sd card. Make 2? 
 // This would let me get the sd card file to google earth pro pipeline, and python reading working.
 // Test in CO, but should be a new device.
+
+
+
+
+
+/**************************************************************************************************************************************************
+***************************************************************************************************************************************************
+****** DEVICE Defines*******************************************************************************************************************************
+****************************************************************************************************************************************************
+*******************************************************************************************************************************************/
+
+
 
 #ifdef DEVICE_COLORADO26__LIGHT01__HALLOWEEN
 
@@ -1054,8 +1055,8 @@
   * SECTION: Enable Grouped
   ************************************/  
 
-  // #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D
-  #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_1D
+  #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D
+  // #define ENABLE_LIGHTING_TEMPLATE__HUB75_AS_1D
 
   /***********************************
   * SECTION: Network Configs
@@ -1107,6 +1108,12 @@
   #endif // ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D
 
   #ifdef ENABLE_LIGHTING_TEMPLATE__HUB75_AS_2D
+
+    #define FIRMWARE_DEFAULT__LIGHTING_CONFIG__2D
+
+    
+    #define FIRMWARE_DEFAULT__LIGHTING_EFFECTS__ALL
+    #define BOARD_HAS_PSRAM
 
     #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG
     #define ENABLE_DEVFEATURE_LIGHTS__HUB75_CONFIG__CHIP_ICN2038S

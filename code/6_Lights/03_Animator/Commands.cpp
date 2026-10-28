@@ -2252,11 +2252,158 @@ if (jtok = obj["Standby"])
 
 
 
-
 #ifdef ENABLE_FEATURE_LIGHTING__STANDBY_NEW
 
 if (jtok = obj["Standby"])
 {
+  /********************************************************************
+   * Standby Commands
+   *
+   * MQTT Topic: <DeviceName>/set
+   * Configuration: /standby.json
+   *
+   * RUNTIME COMMANDS
+   * These commands do not modify the saved configuration.
+   *
+   * {"Standby":{"Enabled":true}}
+   * Enter standby immediately. Select the first eligible standby preset
+   * or playlist according to the configured time windows.
+   * If already active, re-evaluate the current standby target.
+   *
+   * {"Standby":{"Enabled":false}}
+   * Leave standby immediately using the configured LeaveMode.
+   * Starts the awake timer when automatic standby is armed.
+   *
+   * {"Standby":{"Sleep":1}}
+   * Enter standby immediately. Equivalent to Enabled:true.
+   * Does not require automatic standby to be armed.
+   *
+   * {"Standby":{"Wake":1}}
+   * Leave standby using the configured LeaveMode.
+   * If already awake, refresh the awake timer without restarting an
+   * existing wake target. On first target-mode wake after boot,
+   * apply LeaveTargetID.
+   *
+   * PERSISTENT CONFIGURATION COMMANDS
+   * These commands update RAM configuration and save /standby.json.
+   *
+   * {"Standby":{"Arm":1}}
+   * Arm automatic standby operation.
+   * Starts the appropriate awake or standby timer.
+   *
+   * {"Standby":{"Arm":0}}
+   * Disarm automatic standby operation and stop both timers.
+   * If standby is active, attempt to leave using LeaveMode.
+   *
+   * {"Standby":{"AwakeSecs":60}}
+   * Set the awake duration to 60 seconds.
+   * After expiry, automatically enter standby when armed.
+   * Also restarts the awake countdown if currently awake and armed.
+   *
+   * {"Standby":{"AwakeSecs":10}}
+   * Set the awake duration to 10 seconds for testing.
+   * Automatically enter standby after the countdown expires.
+   *
+   * {"Standby":{"AwakeSecs":0}}
+   * Disable automatic entry into standby based on awake timeout.
+   * Explicit Sleep and Enabled:true commands remain available.
+   *
+   * {"Standby":{"StandbySecs":120}}
+   * Set the active standby duration to 120 seconds.
+   * After expiry, automatically leave standby when armed.
+   * Restarts the standby countdown if currently active and armed.
+   *
+   * {"Standby":{"StandbySecs":0}}
+   * Disable automatic standby expiry.
+   * Standby remains active until explicitly left, while scheduled
+   * standby targets may continue switching according to time windows.
+   *
+   * {"Standby":{"WakeTransitionSecs":2}}
+   * Set the transition duration when leaving standby to 2 seconds.
+   * Applies when loading the leave target or restoring a snapshot.
+   *
+   * {"Standby":{"StandbyTransitionSecs":5}}
+   * Set the transition duration when entering standby to 5 seconds.
+   * Also applies when switching between scheduled standby targets.
+   *
+   * {"Standby":{"LeaveMode":"Snapshot"}}
+   * Restore the RAM snapshot captured immediately before entering
+   * standby. The snapshot is runtime-only and is not saved to flash.
+   *
+   * {"Standby":{"LeaveMode":"Target"}}
+   * Leave standby by applying the configured LeaveTargetID.
+   * Target may reference either a preset or a playlist.
+   *
+   * {"Standby":{"LeaveTargetID":10}}
+   * Set preset 10 as the target to apply when leaving standby.
+   * Used when LeaveMode is Target.
+   *
+   * {"Standby":{"LeaveTargetID":20}}
+   * Set playlist 20 as the target to apply when leaving standby.
+   * Presets and playlists share the same target ID space.
+   *
+   * STANDBY TARGET SCHEDULE COMMANDS
+   * Targets replaces the COMPLETE existing target list.
+   * These commands are persistent and overwrite the previous schedule.
+   * First enabled matching target wins.
+   *
+   * {"Standby":{"Targets":[{"Enabled":true,"Start":"00:00","End":"00:00","TargetID":1}]}}
+   * Set preset 1 as the standby target throughout the entire day.
+   * Identical Start and End expressions mean unrestricted time.
+   *
+   * {"Standby":{"Targets":[{"Enabled":true,"Start":"**:00","End":"**:10","TargetID":1}]}}
+   * Enable preset 1 during minutes 00-10 of every hour.
+   * Wildcard * matches any digit in the HH:MM expression.
+   *
+   * {"Standby":{"Targets":[{"Enabled":true,"Start":"**:10","End":"**:20","TargetID":20}]}}
+   * Enable playlist 20 during minutes 10-20 of every hour.
+   * Playlist entry durations and transitions are defined separately
+   * inside /presets.json.
+   *
+   * {"Standby":{"Targets":[{"Enabled":true,"Start":"**:00","End":"**:10","TargetID":1},{"Enabled":true,"Start":"**:10","End":"**:20","TargetID":2}]}}
+   * Configure two repeating hourly windows.
+   * Preset 1 is selected during minutes 00-10.
+   * Preset 2 is selected during minutes 10-20.
+   * No standby target is eligible during minutes 20-60.
+   *
+   * {"Standby":{"Targets":[{"Enabled":false,"Start":"00:00","End":"00:00","TargetID":1}]}}
+   * Replace the schedule with one disabled target.
+   * Does not disarm standby; it removes all eligible active targets.
+   *
+   * {"Standby":{"Targets":[]}}
+   * Remove all configured standby targets.
+   * Entering standby will fail until eligible targets are configured.
+   *
+   * COMBINED CONFIGURATION COMMANDS
+   * Multiple configuration fields can be updated in one MQTT message.
+   *
+   * {"Standby":{"Arm":true,"AwakeSecs":60,"StandbySecs":0}}
+   * Enable automatic standby with a 60-second awake timeout.
+   * Remain in standby indefinitely until a wake event.
+   *
+   * {"Standby":{"LeaveMode":"Target","LeaveTargetID":10,"WakeTransitionSecs":1}}
+   * Select preset 10 as the wake target with a 1-second transition.
+   *
+   * {"Standby":{"LeaveMode":"Snapshot","AwakeSecs":30,"StandbyTransitionSecs":2}}
+   * Restore the previous animation on leaving standby.
+   * Return to standby after 30 seconds with a 2-second transition.
+   *
+   * NOTES
+   * - All duration fields are seconds.
+   * - Runtime Enabled is not the same as persistent Arm.
+   * - Arm enables/disables automatic timer operation.
+   * - Enabled, Wake and Sleep control immediate runtime transitions.
+   * - Runtime commands do not write /standby.json.
+   * - Configuration changes are persisted automatically.
+   * - Targets always replaces the complete schedule, never appends.
+   * - Standby time windows support digit wildcards in HH:MM.
+   * - Standby target selection is evaluated while standby is active.
+   * - Target IDs must exist in /presets.json.
+   * - Presets and playlists use the same numeric ID namespace.
+   * - TemplateID and Version are loaded/saved via /standby.json;
+   *   they are not directly exposed as MQTT configuration commands.
+   ********************************************************************/
+
   JsonParserObject jobj_standby = jtok.getObject();
   JsonParserToken jtok_standby = 0;
 

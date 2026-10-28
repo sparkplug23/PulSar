@@ -491,9 +491,57 @@ void mAnimatorLight::SubTask_Presets()
     #ifdef ENABLE_DEVFEATURE_SHOW_INCOMING_MQTT_COMMANDS
     level = LOG_LEVEL_DEV_TEST;
     #endif
+    
     #ifdef ENABLE_LOG_LEVEL_INFO
     AddLog(level, PSTR(D_LOG_LIGHT "My parser payload [len:%d] %s"), data_buffer.payload.length_used,data_buffer.payload.ctr);
     #endif// ENABLE_LOG_LEVEL_INFO
+
+    /**
+     * @brief Capture the previous segment state for a one-shot preset transition.
+     *
+     * Playlist entries and standby transitions can explicitly override the normal
+     * transition duration using setTransition() and jsonTransitionOnce.
+     *
+     * Previously, setting the transition duration did not guarantee that a
+     * transition would actually occur. In particular, loading consecutive presets
+     * with the same effect ID, palette ID and brightness could instantly replace
+     * the segment colours without capturing the previous rendered state.
+     *
+     * When an explicit transition override is pending, capture every active
+     * segment BEFORE the incoming preset is parsed and applied.
+     *
+     * segmentCopy=true is required to preserve the previous effect, palette and
+     * colour configuration, allowing transitions between completely different
+     * presets rather than relying on individual property-change detection.
+     *
+     * This also supports transitions where:
+     *   - Only the segment colours change.
+     *   - The palette ID changes or remains the same.
+     *   - The effect changes or remains the same.
+     *   - Brightness changes or remains the same.
+     *
+     * Do not apply this forced capture to playlist-container presets, which only
+     * define scheduling and do not themselves represent a lighting state.
+     *
+     * The existing transition engine is responsible for completing the transition,
+     * restoring the default duration and clearing jsonTransitionOnce.
+     */
+    if (jsonTransitionOnce && tkr_anim->getTransition() > 0 && tkr_mfile->errorFlag == ERR_NONE && fdo["playlist"].isNull())
+    {
+      uint16_t transition_ms = tkr_anim->getTransition();
+      uint8_t segments_captured = 0;
+
+      for (Segment &seg : segments)
+      {
+        if (!seg.isActive()) continue;
+
+        seg.startTransition(transition_ms, true);
+        segments_captured++;
+      }
+
+      ALOG_INF(PSTR("Preset Transition: preset=%u duration=%u ms segments=%u"),
+              tmpPreset, transition_ms, segments_captured);
+    }
 
     tkr->Tasker_Interface(TASK_JSON_COMMAND_ID);
 

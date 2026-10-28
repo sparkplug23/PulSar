@@ -819,13 +819,22 @@ void mAnimatorLight::SubTask_Playlist()
 
   playlistEntryDur = entry.dur;
 
-  jsonTransitionOnce = true;
-
-  // Transition value is now uint32_t.
-  // Your transition engine can be updated separately.
-  if (entry.tr)
+  /**
+   * @brief Apply the playlist entry's one-shot transition override.
+   *
+   * A non-zero transition value requests a forced preset transition.
+   * The preset loader captures the previous segment states before applying
+   * the incoming preset, irrespective of which properties have changed.
+   *
+   * Zero means no explicit override; retain the normal transition duration.
+   */
+  if (entry.tr > 0)
   {
     tkr_anim->setTransition(entry.tr);
+    jsonTransitionOnce = true;
+
+    ALOG_INF(PSTR("Playlist Transition: preset=%u override=%lu ms"),
+            entry.preset, (unsigned long)entry.tr);
   }
 
   ALOG_INF(PSTR("Playlist%d index=%d/%u preset=%u dur=%lu transition=%lu"), currentPlaylist, playlistIndex, playlistLen, entry.preset, (unsigned long)entry.dur, (unsigned long)entry.tr);
