@@ -2252,8 +2252,22 @@ static const uint8_t kPresetMetaParserVersion = 2;
       EFFECTS_FUNCTION__2D__DIGITAL_CLOCK__ID,    
       // NEw effect idea, lava lamp, both 1D and matrix. Have lgihting "gravity" then also "heating" for uplifting of random colours.
 
-      EFFECTS_FUNCTION__2D__ICICLE__SNOWFALL,
-      others here
+      
+
+      #endif
+
+      
+      #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE)
+      EFFECTS_FUNCTION__2D__ICICLE_SNOWFALL,
+      EFFECTS_FUNCTION__2D__ICICLE_RANDOM_DRIPS,
+      EFFECTS_FUNCTION__2D__ICICLE_WAVE_DRIPS,
+      EFFECTS_FUNCTION__2D__ICICLE_METEOR_RAIN,
+      EFFECTS_FUNCTION__2D__ICICLE_FROZEN_SPARKLE,
+      EFFECTS_FUNCTION__2D__ICICLE_CASCADE,
+      EFFECTS_FUNCTION__2D__ICICLE_RIPPLE,
+      EFFECTS_FUNCTION__2D__ICICLE_AURORA,
+      EFFECTS_FUNCTION__2D__ICICLE_FALLING_COMETS,
+      EFFECTS_FUNCTION__2D__ICICLE_LIGHTNING,
       #endif
       
 
