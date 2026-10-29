@@ -1267,7 +1267,7 @@
       "Segments":[
         {
           "Name":"Icicles 100x10",
-          "PixelRange":[0,100,0,10],
+          "PixelRange":[0,8192],
           "ColourPalette":"Rainbow",
           "ColourType":3,
           "Effects":{
