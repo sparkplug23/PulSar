@@ -1092,7 +1092,7 @@
           "ColourPalette":"Rainbow",
           "ColourType":3,
           "Effects":{
-            "Function":"PS Ballbit",
+            "Function":"PS Ballpit",
             "Speed":127,
             "Intensity":127,
             "Grouping":1,
@@ -1264,20 +1264,49 @@
           "yOffset":0
         }
       ],
+      
       "Segments":[
         {
           "Name":"Icicles 100x10",
-          "PixelRange":[0,8192],
+          "PixelRange":[0,100,0,10],
           "ColourPalette":"Rainbow",
           "ColourType":3,
           "Effects":{
-            "Function":"PS Ballbit",
+            "Function":"PS Ballpit",
             "Speed":127,
             "Intensity":127,
             "Grouping":1,
             "RateMs":20
           },
           "BrightnessRGB":100,
+          "BrightnessCCT":0
+        },
+        {
+          "Name":"Unused Right",
+          "PixelRange":[100,128,0,10],
+          "ColourPalette":"Black",
+          "Effects":{
+            "Function":"Static",
+            "Speed":127,
+            "Intensity":0,
+            "Grouping":1,
+            "RateMs":10000
+          },
+          "BrightnessRGB":0,
+          "BrightnessCCT":0
+        },
+        {
+          "Name":"Unused Bottom",
+          "PixelRange":[0,128,10,64],
+          "ColourPalette":"Rainbow",
+          "Effects":{
+            "Function":"Static",
+            "Speed":127,
+            "Intensity":0,
+            "Grouping":1,
+            "RateMs":10000
+          },
+          "BrightnessRGB":0,
           "BrightnessCCT":0
         }
       ],

@@ -27225,34 +27225,182 @@ static const char PM_EFFECT_DESCRI__AUDIOREACTIVE__2D__FFT_AKEMI[] PROGMEM =
  *******************************************************************************************************************************************************************************************************************/
 #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE)
 
+
 /*******************************************************************************************************************************************************************************************************************
  * @function    : EffectAnim__2D__IcicleSnowfall
- * @description : Independent falling snowflakes with randomized positions,
- *                velocities, density and optional fading trails.
+ * @description : Independent falling snowflakes across a 2D icicle matrix.
+ *
+ * Each snowflake has:
+ *   - An independently selected column.
+ *   - A fractional vertical position (1/16 pixel).
+ *   - A randomized falling velocity.
+ *   - A palette colour.
+ *
+ * The effect uses PulSar's existing animation frame scheduler.
+ * No additional timers or ParticleSystem2D dependencies are required.
+ *
+ * Controls:
+ *   Speed     : Falling velocity
+ *   Intensity : Snowflake generation density
+ *   Custom1   : Tail length
+ *   Custom2   : Velocity variation
+ *   Custom3   : Background/trail fade rate
+ *
+ * Notes:
+ *   - Coordinates are relative to the current 2D segment.
+ *   - Subpixel brightness interpolation smooths vertical movement.
+ *   - Each effect invocation advances the animation by one frame.
+ *   - State is allocated using SEGENV.allocateData().
  *******************************************************************************************************************************************************************************************************************/
 void mAnimatorLight::EffectAnim__2D__IcicleSnowfall()
 {
-  EffectAnim__Static_Palette();
+  if (!isMatrix || !SEGMENT.is2D()) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  const uint16_t cols = SEG_W;
+  const uint16_t rows = SEG_H;
+
+  if (!cols || !rows) return;
+
+  struct Snowflake {
+    int16_t y;          // Vertical position, 1/16 pixel precision
+    uint8_t x;          // Column
+    uint8_t velocity;   // Velocity multiplier
+    uint8_t palette;    // Palette index
+    uint8_t active;     // 0 = inactive, 1 = active
+  };
+
+  // Allow up to two overlapping snowflakes per column.
+  const uint16_t max_flakes = cols * 2;
+  const size_t data_size = max_flakes * sizeof(Snowflake);
+
+  if (!SEGENV.allocateData(data_size)) {
+    EffectAnim__Static_Palette();
+    return;
+  }
+
+  Snowflake* flakes = reinterpret_cast<Snowflake*>(SEGENV.data);
+
+  // Initialize effect-owned state when a new effect starts.
+  if (SEGENV.call == 0) {
+    memset(flakes, 0, data_size);
+    SEGMENT.fill(BLACK);
+  }
+
+  // Speed controls motion per animation frame.
+  // The existing effect scheduler determines the frame interval.
+  const uint8_t base_speed = 1 + (SEGMENT.speed >> 5);
+
+  // Intensity controls the probability that each inactive slot spawns.
+  const uint8_t spawn_chance = 1 + (SEGMENT.intensity >> 5);
+
+  // Custom1 sets the maximum number of trailing pixels.
+  const uint8_t trail_length = (SEGMENT.custom1 * 4U) >> 8;
+
+  // Custom2 adds variation to individual snowflake velocities.
+  const uint8_t variation = SEGMENT.custom2;
+
+  // Custom3 is stored as a 5-bit value in the segment.
+  // Higher values remove old illumination more rapidly.
+  const uint8_t fade_amount = 35 + (SEGMENT.custom3 * 220U / 31U);
+
+  // Fade the existing segment image, retaining a short afterglow.
+  SEGMENT.fadeToBlackBy(fade_amount);
+
+  for (uint16_t i = 0; i < max_flakes; i++)
+  {
+    Snowflake& flake = flakes[i];
+
+    if (!flake.active)
+    {
+      if (hw_random8() >= spawn_chance) continue;
+
+      flake.active = 1;
+      flake.x = hw_random16(cols);
+      flake.y = -16 * (1 + hw_random8(3));
+      flake.velocity = hw_random8();
+      flake.palette = hw_random8();
+
+      continue;
+    }
+
+    // Randomized velocity, scaled using the existing Speed control.
+    const uint8_t velocity_variation =
+      ((uint16_t)flake.velocity * variation) >> 8;
+
+    const uint8_t step =
+      base_speed + ((uint16_t)base_speed * velocity_variation >> 8);
+
+    flake.y += step;
+
+    // Remove flakes after they have completely passed the last row.
+    if (flake.y >= (int16_t)(rows * 16 + trail_length * 16))
+    {
+      flake.active = 0;
+      continue;
+    }
+
+    // Convert subpixel position to pixel position and fractional part.
+    const int16_t y = flake.y >> 4;
+    const uint8_t fraction = flake.y & 0x0F;
+
+    // Resolve colour from the current segment palette.
+    // Scaling to SEGLEN gives the full 0..255 palette distribution.
+    const uint16_t palette_position =
+      ((uint32_t)flake.palette * (SEGLEN - 1)) / 255U;
+
+    const uint32_t colour = SEGMENT.GetPaletteColour(
+      palette_position,
+      PALETTE_INDEX__IS_SEGLEN_RANGE,
+      PALETTE_MODE__DEFAULT,
+      PALETTE_WRAP_HARDEDGE
+    );
+
+    // Interpolate head brightness between adjacent vertical pixels.
+    // This makes falling motion smoother on short 10-pixel icicles.
+    const uint8_t head_brightness = 255 - fraction * 16;
+    const uint8_t next_brightness = fraction * 16;
+
+    if (y >= 0 && y < rows)
+    {
+      SEGMENT.addPixelColorXY(
+        flake.x,
+        y,
+        color_blend(BLACK, colour, head_brightness)
+      );
+    }
+
+    if (y + 1 >= 0 && y + 1 < rows)
+    {
+      SEGMENT.addPixelColorXY(
+        flake.x,
+        y + 1,
+        color_blend(BLACK, colour, next_brightness)
+      );
+    }
+
+    // Render a short fading tail above the falling snowflake.
+    for (uint8_t t = 1; t <= trail_length; t++)
+    {
+      const int16_t tail_y = y - t;
+
+      if (tail_y < 0 || tail_y >= rows) continue;
+
+      const uint8_t tail_brightness =
+        180U / (t + 1U);
+
+      SEGMENT.addPixelColorXY(
+        flake.x,
+        tail_y,
+        color_blend(BLACK, colour, tail_brightness)
+      );
+    }
+  }
 }
-static const char PM_EFFECT_CONFIG__2D__ICICLE_SNOWFALL[] PROGMEM =
-"Icicle Snowfall@"
-"Speed,Density,Trail,Variation,Fade,,,,!,!"
-";"
-""
-";"
-"!"
-";"
-"2"
-";"
-"sx=127,ix=127,c1=127,c2=127,c3=127,ep=20";
-#ifdef ENABLE_EFFECT_DESCRIPTIONS
-static const char PM_EFFECT_DESCRI__2D__ICICLE_SNOWFALL[] PROGMEM =
-"Independent falling snowflakes across the icicle matrix.\n\r"
-"SX: Falling speed\n\r"
-"IX: Snowflake density\n\r"
-"C1: Trail length\n\r"
-"C2: Movement variation\n\r"
-"C3: Fade strength";
+
+
 #endif
 
 /*******************************************************************************************************************************************************************************************************************
