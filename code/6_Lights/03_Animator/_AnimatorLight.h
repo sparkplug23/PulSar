@@ -1687,18 +1687,39 @@ static const uint8_t kPresetMetaParserVersion = 2;
     void EffectAnim__2D__PlasmaRotoZoom();
     #endif
     
-    #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE)
-    void EffectAnim__2D__IcicleDrips();
-    void EffectAnim__2D__IcicleDroplets();
-    void EffectAnim__2D__IcicleWaveDrips();
-    void EffectAnim__2D__IcicleMeteorRain();
-    void EffectAnim__2D__IcicleFrozenSparkle();
-    void EffectAnim__2D__IcicleCascade();
-    void EffectAnim__2D__IcicleRipple();
-    void EffectAnim__2D__IcicleAurora();
-    void EffectAnim__2D__IcicleFallingComets();
-    void EffectAnim__2D__IcicleLightning();
-    #endif
+    
+    #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW)
+
+      // Icicle Melting - Independent vertical movement within each column
+      void EffectAnim__2D__IcicleMeltingDrips();
+      void EffectAnim__2D__IcicleMeltingDroplets();
+
+      // Icicle Sequenced - Coordinated activation across neighbouring columns
+      void EffectAnim__2D__IcicleSequencedWaveDrips();
+      void EffectAnim__2D__IcicleSequencedCascade();
+
+      // Icicle Atmospheric - Meteor, sparkle, flowing light and waterfall effects
+      void EffectAnim__2D__IcicleAtmosphericMeteorRain();
+      void EffectAnim__2D__IcicleAtmosphericFrozenSparkle();
+      void EffectAnim__2D__IcicleAtmosphericAurora();
+      void EffectAnim__2D__IcicleAtmosphericFallingComets();
+      void EffectAnim__2D__IcicleAtmosphericLightning();
+      void EffectAnim__2D__IcicleAtmosphericWaterfall();
+
+      // Icicle Spatial - Waves propagating through the 2D layout
+      void EffectAnim__2D__IcicleSpatialRipple();
+
+      // Snow - Falling snowflakes with optional wind and varying flake shapes
+      void EffectAnim__2D__SnowFall();
+
+      // Snow - Moving snowflakes with bouncing, collisions and interactions
+      void EffectAnim__2D__SnowFlakes();
+
+      // Snow - Stationary glowing flakes with optional Palette2 twinkles
+      void EffectAnim__2D__SnowGlow();
+
+    #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX && ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
+
 
 
     /****************************************************************************************************************************************************************************

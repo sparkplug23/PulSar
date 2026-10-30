@@ -38273,95 +38273,130 @@ void mAnimatorLight::LoadEffects()
 
   
   /*******************************************************************************************************************************************************************************************************************
-   * Icicle 2D Effects
-   * Dedicated effects for vertical icicle strings arranged as a 2D matrix.
-   * Initially implemented using the static palette fallback.
+   * Ice and Snow - Specialised 2D Effects
    *******************************************************************************************************************************************************************************************************************/
-  #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__GENERAL_LEVEL4_FLASHING_COMPLETE)
+  #if defined(ENABLE_FEATURE_LIGHTING__2D_MATRIX) && defined(ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW)
 
-  
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_DRIPS,
-            &mAnimatorLight::EffectAnim__2D__IcicleDrips,
-            PM_EFFECT_CONFIG__2D__ICICLE_DRIPS,
+  // Icicle Melting - Independent vertical movement within each column
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_MELTING_DRIPS,
+            &mAnimatorLight::EffectAnim__2D__IcicleMeltingDrips,
+            PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DRIPS,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_DRIPS,
+            PM_EFFECT_DESCRI__2D__ICICLE_MELTING_DRIPS,
             #endif
             Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_DROPLETS,
-            &mAnimatorLight::EffectAnim__2D__IcicleDroplets,
-            PM_EFFECT_CONFIG__2D__ICICLE_DROPLETS,
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_MELTING_DROPLETS,
+            &mAnimatorLight::EffectAnim__2D__IcicleMeltingDroplets,
+            PM_EFFECT_CONFIG__2D__ICICLE_MELTING_DROPLETS,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_DROPLETS,
+            PM_EFFECT_DESCRI__2D__ICICLE_MELTING_DROPLETS,
             #endif
             Effect_DevStage::Dev);
 
-
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_WAVE_DRIPS,
-            &mAnimatorLight::EffectAnim__2D__IcicleWaveDrips,
-            PM_EFFECT_CONFIG__2D__ICICLE_WAVE_DRIPS,
+  // Icicle Sequenced - Coordinated activation across neighbouring columns
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_SEQUENCED_WAVE_DRIPS,
+            &mAnimatorLight::EffectAnim__2D__IcicleSequencedWaveDrips,
+            PM_EFFECT_CONFIG__2D__ICICLE_SEQUENCED_WAVE_DRIPS,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_WAVE_DRIPS,
+            PM_EFFECT_DESCRI__2D__ICICLE_SEQUENCED_WAVE_DRIPS,
             #endif
             Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_METEOR_RAIN,
-            &mAnimatorLight::EffectAnim__2D__IcicleMeteorRain,
-            PM_EFFECT_CONFIG__2D__ICICLE_METEOR_RAIN,
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_SEQUENCED_CASCADE,
+            &mAnimatorLight::EffectAnim__2D__IcicleSequencedCascade,
+            PM_EFFECT_CONFIG__2D__ICICLE_SEQUENCED_CASCADE,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_METEOR_RAIN,
+            PM_EFFECT_DESCRI__2D__ICICLE_SEQUENCED_CASCADE,
             #endif
             Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_FROZEN_SPARKLE,
-            &mAnimatorLight::EffectAnim__2D__IcicleFrozenSparkle,
-            PM_EFFECT_CONFIG__2D__ICICLE_FROZEN_SPARKLE,
+  // Icicle Atmospheric - Meteor, sparkle, flowing light and waterfall effects
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN,
+            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericMeteorRain,
+            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_FROZEN_SPARKLE,
+            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_METEOR_RAIN,
             #endif
             Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_CASCADE,
-            &mAnimatorLight::EffectAnim__2D__IcicleCascade,
-            PM_EFFECT_CONFIG__2D__ICICLE_CASCADE,
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_FROZEN_SPARKLE,
+            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericFrozenSparkle,
+            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_FROZEN_SPARKLE,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_CASCADE,
+            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_FROZEN_SPARKLE,
             #endif
             Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_RIPPLE,
-            &mAnimatorLight::EffectAnim__2D__IcicleRipple,
-            PM_EFFECT_CONFIG__2D__ICICLE_RIPPLE,
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_AURORA,
+            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericAurora,
+            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_AURORA,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_RIPPLE,
+            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_AURORA,
             #endif
             Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_AURORA,
-            &mAnimatorLight::EffectAnim__2D__IcicleAurora,
-            PM_EFFECT_CONFIG__2D__ICICLE_AURORA,
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS,
+            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericFallingComets,
+            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_AURORA,
+            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_FALLING_COMETS,
             #endif
             Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_FALLING_COMETS,
-            &mAnimatorLight::EffectAnim__2D__IcicleFallingComets,
-            PM_EFFECT_CONFIG__2D__ICICLE_FALLING_COMETS,
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
+            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericLightning,
+            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_FALLING_COMETS,
+            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_LIGHTNING,
             #endif
             Effect_DevStage::Dev);
 
-  addEffect(EFFECTS_FUNCTION__2D__ICICLE_LIGHTNING,
-            &mAnimatorLight::EffectAnim__2D__IcicleLightning,
-            PM_EFFECT_CONFIG__2D__ICICLE_LIGHTNING,
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_ATMOSPHERIC_WATERFALL,
+            &mAnimatorLight::EffectAnim__2D__IcicleAtmosphericWaterfall,
+            PM_EFFECT_CONFIG__2D__ICICLE_ATMOSPHERIC_WATERFALL,
             #ifdef ENABLE_EFFECT_DESCRIPTIONS
-            PM_EFFECT_DESCRI__2D__ICICLE_LIGHTNING,
+            PM_EFFECT_DESCRI__2D__ICICLE_ATMOSPHERIC_WATERFALL,
             #endif
             Effect_DevStage::Dev);
 
-  #endif // 2D_MATRIX && GENERAL_LEVEL4_FLASHING_COMPLETE
+  // Icicle Spatial - Waves propagating through the 2D layout
+  addEffect(EFFECTS_FUNCTION__2D__ICICLE_SPATIAL_RIPPLE,
+            &mAnimatorLight::EffectAnim__2D__IcicleSpatialRipple,
+            PM_EFFECT_CONFIG__2D__ICICLE_SPATIAL_RIPPLE,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__ICICLE_SPATIAL_RIPPLE,
+            #endif
+            Effect_DevStage::Dev);
+
+  // Snow - Falling snowflakes with optional wind and varying flake shapes
+  addEffect(EFFECTS_FUNCTION__2D__SNOW_FALL,
+            &mAnimatorLight::EffectAnim__2D__SnowFall,
+            PM_EFFECT_CONFIG__2D__SNOW_FALL,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__SNOW_FALL,
+            #endif
+            Effect_DevStage::Dev);
+
+  // Snow - Moving snowflakes with bouncing, collisions and interactions
+  addEffect(EFFECTS_FUNCTION__2D__SNOW_FLAKES,
+            &mAnimatorLight::EffectAnim__2D__SnowFlakes,
+            PM_EFFECT_CONFIG__2D__SNOW_FLAKES,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__SNOW_FLAKES,
+            #endif
+            Effect_DevStage::Dev);
+
+  // Snow - Stationary glowing flakes with optional Palette2 twinkles
+  addEffect(EFFECTS_FUNCTION__2D__SNOW_GLOW,
+            &mAnimatorLight::EffectAnim__2D__SnowGlow,
+            PM_EFFECT_CONFIG__2D__SNOW_GLOW,
+            #ifdef ENABLE_EFFECT_DESCRIPTIONS
+            PM_EFFECT_DESCRI__2D__SNOW_GLOW,
+            #endif
+            Effect_DevStage::Dev);
+
+  #endif // ENABLE_FEATURE_LIGHTING__2D_MATRIX && ENABLE_FEATURE_LIGHTING__EFFECTS__SPECIAL_ICE_AND_SNOW
 
 
   /**
